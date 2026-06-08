@@ -1,0 +1,6 @@
+{
+  "name": "ScriptAlly",
+  "description": "ScriptAlly is a literary querying companion app designed for fiction writers to manage manuscripts, trace agent submittals, map submission packages, and organize follow-up tasks on a warm stationery desk theme.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

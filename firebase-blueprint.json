@@ -1,0 +1,294 @@
+{
+  "entities": {
+    "user": {
+      "title": "User",
+      "description": "User profile containing plan and preferences.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "The unique user UID from Firebase Auth." },
+        "name": { "type": "string", "description": "Display name of the user." },
+        "email": { "type": "string", "format": "email", "description": "Verified email of the user." },
+        "plan": { "type": "string", "enum": ["Free", "Pro"], "description": "Account plan level." },
+        "trialStartDate": { "type": "string", "description": "ISO String of the trial origin." },
+        "subscriptionStatus": { "type": "string", "enum": ["active", "trialing", "canceled", "none"], "description": "Current payment status." }
+      },
+      "required": ["id", "name", "email", "plan", "trialStartDate", "subscriptionStatus"]
+    },
+    "manuscript": {
+      "title": "Manuscript",
+      "description": "Narrative project track details.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique manuscript record ID." },
+        "userId": { "type": "string", "description": "Owner user's UID." },
+        "title": { "type": "string", "description": "Working draft title." },
+        "genre": { "type": "string", "description": "Literary classification." },
+        "ageCategory": { "type": "string", "description": "Target demographic group." },
+        "wordCount": { "type": "integer", "description": "Exact count of words." },
+        "logline": { "type": "string", "description": "Primary high-concept tag." },
+        "comparableTitles": { "type": "string", "description": "Comp books references." },
+        "status": { "type": "string", "enum": ["Drafting", "Revising", "Ready to Query", "Querying", "Shelved", "On Submission"], "description": "Project workflow placement." },
+        "shelvedReason": { "type": "string", "description": "Context if project shelved." },
+        "statusChangedDate": { "type": "string", "description": "ISO String." },
+        "notes": { "type": "string", "description": "Extended narrative synopsis." }
+      },
+      "required": ["id", "userId", "title", "genre", "ageCategory", "wordCount", "logline", "comparableTitles", "status", "statusChangedDate"]
+    },
+    "manuscriptVersion": {
+      "title": "ManuscriptVersion",
+      "description": "Specific draft segment tracks.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Segment track ID." },
+        "manuscriptId": { "type": "string", "description": "Associated manuscript ID." },
+        "userId": { "type": "string", "description": "Owner user's UID." },
+        "componentType": { "type": "string", "enum": ["Query Letter", "Synopsis", "Sample Pages", "Full Manuscript"], "description": "Type classification." },
+        "versionName": { "type": "string", "description": "Simple tag name." },
+        "fileAttached": { "type": "boolean", "description": "Whether a file binary represents local upload." },
+        "fileName": { "type": "string", "description": "Original file name." },
+        "createdDate": { "type": "string", "description": "ISO String." },
+        "contentDraft": { "type": "string", "description": "Optional core draft segment buffer." }
+      },
+      "required": ["id", "manuscriptId", "userId", "componentType", "versionName", "fileAttached", "createdDate"]
+    },
+    "submissionPackage": {
+      "title": "SubmissionPackage",
+      "description": "Consolidated assets dispatched to agents.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique package key ID." },
+        "manuscriptId": { "type": "string", "description": "Associated manuscript ID." },
+        "userId": { "type": "string", "description": "Owner user's UID." },
+        "packageName": { "type": "string", "description": "Name given to combination context." },
+        "queryLetterVersionId": { "type": "string", "description": "Version ID pointer." },
+        "synopsisVersionId": { "type": "string", "description": "Version ID pointer." },
+        "samplePagesVersionId": { "type": "string", "description": "Version ID pointer." },
+        "status": { "type": "string", "enum": ["Active", "Retired"], "description": "Current eligibility." },
+        "createdDate": { "type": "string", "description": "ISO String." }
+      },
+      "required": ["id", "manuscriptId", "userId", "packageName", "queryLetterVersionId", "synopsisVersionId", "samplePagesVersionId", "status", "createdDate"]
+    },
+    "agent": {
+      "title": "Agent",
+      "description": "Track details of targeted literary rep candidate.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Agent record key ID." },
+        "userId": { "type": "string", "description": "Owner user's UID." },
+        "name": { "type": "string", "description": "Name of industry professional." },
+        "agency": { "type": "string", "description": "Host literary agency." },
+        "email": { "type": "string", "format": "email", "description": "Contact gateway mail." },
+        "website": { "type": "string", "description": "Professional hub link." },
+        "twitter": { "type": "string", "description": "Optional handles info." },
+        "bluesky": { "type": "string", "description": "Optional handles info." },
+        "instagram": { "type": "string", "description": "Optional handles info." },
+        "genres": { "type": "array", "description": "Represented interests categories." },
+        "mswlNotes": { "type": "string", "description": "Manuscript Wish List segments guidance list." },
+        "starRating": { "type": "integer", "enum": [1, 2, 3, 4, 5], "description": "User affinity score." },
+        "submissionStatus": { "type": "string", "enum": ["Open", "Closed", "Unknown"], "description": "Submission gateway eligibility." },
+        "responseTimeWeeks": { "type": "integer", "description": "Typical wait bounds." },
+        "noResponseMeansNo": { "type": "boolean", "description": "Archival policy indicator." },
+        "submissionMethod": { "type": "string", "description": "Contact gateway mode." },
+        "materialsWanted": { "type": "object", "description": "Required materials combinations requested (can be array or map)." },
+        "dateAdded": { "type": "string", "description": "ISO String." },
+        "lastCheckedDate": { "type": "string", "description": "ISO String." },
+        "notes": { "type": "string", "description": "Private feedback lines." },
+        "agentNotes": { "type": "string", "description": "Additional custom policy or notes." }
+      },
+      "required": ["id", "userId", "name", "agency", "email", "website", "genres", "mswlNotes", "starRating", "submissionStatus", "responseTimeWeeks", "noResponseMeansNo", "submissionMethod", "materialsWanted", "dateAdded", "lastCheckedDate", "notes"]
+    },
+    "communityAgent": {
+      "title": "CommunityAgent",
+      "description": "A literary agent whose profile data has been contributed to the shared pool.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Agent record key ID." },
+        "name": { "type": "string", "description": "Name of industry professional." },
+        "agency": { "type": "string", "description": "Host literary agency." },
+        "email": { "type": "string", "format": "email", "description": "Contact gateway mail." },
+        "website": { "type": "string", "description": "Professional hub link." },
+        "twitter": { "type": "string", "description": "Optional handles info." },
+        "bluesky": { "type": "string", "description": "Optional handles info." },
+        "instagram": { "type": "string", "description": "Optional handles info." },
+        "genres": { "type": "array", "description": "Represented interests categories." },
+        "mswlNotes": { "type": "string", "description": "Manuscript Wish List segments guidance list." },
+        "starRating": { "type": "integer", "enum": [1, 2, 3, 4, 5], "description": "User affinity score." },
+        "submissionStatus": { "type": "string", "enum": ["Open", "Closed", "Unknown"], "description": "Submission gateway eligibility." },
+        "responseTimeWeeks": { "type": "integer", "description": "Typical wait bounds." },
+        "noResponseMeansNo": { "type": "boolean", "description": "Archival policy indicator." },
+        "submissionMethod": { "type": "string", "description": "Contact gateway mode." },
+        "materialsWanted": { "type": "object", "description": "Required materials combinations requested (can be array or map)." },
+        "dateAdded": { "type": "string", "description": "ISO String." },
+        "lastCheckedDate": { "type": "string", "description": "ISO String." },
+        "notes": { "type": "string", "description": "Private feedback lines." },
+        "agentNotes": { "type": "string", "description": "Additional custom policy or notes." },
+        "contributedByCount": { "type": "integer", "description": "Number of users tracking this agent." },
+        "lastVerifiedDate": { "type": "string", "description": "ISO String of last validation check." },
+        "dataSource": { "type": "string", "enum": ["seed", "community"], "description": "How the entry was created/seeded." },
+        "communityQueryCount": { "type": "integer", "description": "Count of queries launched to this agent." }
+      },
+      "required": ["id", "name", "agency", "email", "website", "genres", "mswlNotes", "starRating", "submissionStatus", "responseTimeWeeks", "noResponseMeansNo", "submissionMethod", "materialsWanted", "dateAdded", "lastCheckedDate", "notes", "contributedByCount", "lastVerifiedDate", "dataSource", "communityQueryCount"]
+    },
+    "query": {
+      "title": "Query",
+      "description": "Active dispatch request record.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique submission query key ID." },
+        "userId": { "type": "string", "description": "Owner user's UID." },
+        "manuscriptId": { "type": "string", "description": "Underlying MS ID." },
+        "agentId": { "type": "string", "description": "Receiving agent ID." },
+        "packageId": { "type": "string", "description": "Dispatched materials bundle." },
+        "status": { "type": "string", "enum": ["Queried", "Partial Requested", "Partial Sent", "Full Requested", "Full Sent", "Revise & Resubmit", "Offer", "Rejected", "Withdrawn", "No Response"], "description": "Workflow phase placement." },
+        "dateSent": { "type": "string", "description": "ISO String date of dispatch." },
+        "personalisationNotes": { "type": "string", "description": "Ad-hoc details." },
+        "sendMethod": { "type": "string", "enum": ["Email", "Online Form"], "description": "Gateway selector." },
+        "nudgeDate": { "type": "string", "description": "Optional scheduler nudge limit. ISO String." },
+        "lastNudgeSentDate": { "type": "string", "description": "Optional ISO String." },
+        "responseDeadline": { "type": "string", "description": "Optional response soft closure target. ISO String." },
+        "partialRequestedDate": { "type": "string" },
+        "partialSentDate": { "type": "string" },
+        "fullRequestedDate": { "type": "string" },
+        "fullSentDate": { "type": "string" },
+        "lastStatusChange": { "type": "string", "description": "ISO String when the status was last changed." },
+        "responseReceivedAt": { "type": "string", "description": "ISO String when the response was received." },
+        "materialsRequestedType": { "type": "string", "description": "Materials requested type." },
+        "materialsRequestedQuantity": { "type": "string", "description": "Materials requested quantity description." },
+        "expectedSendDate": { "type": "string", "description": "Expected dispatch date." },
+        "sendReminderDate": { "type": "string", "description": "Optional reminder date." },
+        "rejectionFeedbackType": { "type": "string", "description": "Type of feedback received." },
+        "rejectionFeedbackText": { "type": "string", "description": "Rejection feedback text." },
+        "rejectionReflection": { "type": "string", "description": "Reflection on the feedback." },
+        "offerDate": { "type": "string", "description": "Offer date." },
+        "offerResponseDeadline": { "type": "string", "description": "Response deadline." },
+        "offerNotes": { "type": "string", "description": "Notes regarding the offer." },
+        "closingReason": { "type": "string", "description": "The closure reason." },
+        "closingNotes": { "type": "string", "description": "Closure notes details." }
+      },
+      "required": ["id", "userId", "manuscriptId", "agentId", "packageId", "status", "dateSent", "personalisationNotes", "sendMethod"]
+    },
+    "activity": {
+      "title": "Activity",
+      "description": "Historic update milestone tracking segments.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Activity timeline entry ID." },
+        "userId": { "type": "string", "description": "Owner user's UID." },
+        "queryId": { "type": "string", "description": "Context query." },
+        "manuscriptId": { "type": "string", "description": "Target MS info reference." },
+        "activityType": { "type": "string", "enum": ["Status Changed", "Nudge Sent", "Query Sent", "Materials Sent"] },
+        "description": { "type": "string", "description": "Brief description segment." },
+        "date": { "type": "string", "description": "ISO String." },
+        "details": { "type": "string" }
+      },
+      "required": ["id", "userId", "queryId", "manuscriptId", "activityType", "description", "date", "details"]
+    },
+    "journalEntry": {
+      "title": "JournalEntry",
+      "description": "Detailed notes on user-agent interactions.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Journal entry track ID." },
+        "userId": { "type": "string", "description": "Owner user's UID." },
+        "queryId": { "type": "string", "description": "Context query." },
+        "entryText": { "type": "string", "description": "Freeform journaling thoughts." },
+        "createdAt": { "type": "string", "description": "ISO String." }
+      },
+      "required": ["id", "userId", "queryId", "entryText", "createdAt"]
+    },
+    "dismissedTask": {
+      "title": "DismissedTask",
+      "description": "Local user task suppression context.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "taskType": { "type": "string" },
+        "relatedRecordId": { "type": "string" },
+        "dismissedDate": { "type": "string" },
+        "resurfaceDate": { "type": "string" },
+        "dismissType": { "type": "string", "enum": ["permanent", "fixed snooze", "custom date"] }
+      },
+      "required": ["id", "userId", "taskType", "relatedRecordId", "dismissedDate", "dismissType"]
+    },
+    "agentNote": {
+      "title": "AgentNote",
+      "description": "Short micro-journal records or jottings stored for literary agents.",
+      "type": "object",
+      "properties": {
+        "text": { "type": "string", "description": "The jotting text." },
+        "createdAt": { "type": "string", "description": "ISO String date of creation." }
+      },
+      "required": ["text", "createdAt"]
+    },
+    "nestedActivity": {
+      "title": "NestedActivity",
+      "description": "Activity nested under a query for logging response changes.",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "description": "The activity type." },
+        "createdAt": { "type": "string", "description": "Activity creation time." },
+        "note": { "type": "string", "description": "Details or notes." }
+      },
+      "required": ["type", "createdAt", "note"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "user",
+      "description": "Root user directory records."
+    },
+    "/users/{userId}/manuscripts/{manuscriptId}": {
+      "schema": "manuscript",
+      "description": "Manuscripts belonging to a user."
+    },
+    "/users/{userId}/manuscripts/{manuscriptId}/notes/{noteId}": {
+      "schema": "agentNote",
+      "description": "Subcollection for manuscript-specific private notes."
+    },
+    "/users/{userId}/versions/{versionId}": {
+      "schema": "manuscriptVersion",
+      "description": "Draft segments versions tracking."
+    },
+    "/users/{userId}/packages/{packageId}": {
+      "schema": "submissionPackage",
+      "description": "Dispatched material assemblies."
+    },
+    "/users/{userId}/agents/{agentId}": {
+      "schema": "agent",
+      "description": "Repository for literary agency research profiles."
+    },
+    "/users/{userId}/agents/{agentId}/notes/{noteId}": {
+      "schema": "agentNote",
+      "description": "Subcollection for agent-specific private jottings."
+    },
+    "/users/{userId}/queries/{queryId}": {
+      "schema": "query",
+      "description": "Active submission tracks and deadline updates."
+    },
+    "/users/{userId}/queries/{queryId}/activity/{activityId}": {
+      "schema": "nestedActivity",
+      "description": "Logging responses under a query."
+    },
+    "/users/{userId}/activities/{activityId}": {
+      "schema": "activity",
+      "description": "History logs of pipeline steps."
+    },
+    "/users/{userId}/activity/{activityId}": {
+      "schema": "nestedActivity",
+      "description": "Top-level activity sync logs."
+    },
+    "/users/{userId}/journalEntries/{entryId}": {
+      "schema": "journalEntry",
+      "description": "Detailed journal records."
+    },
+    "/users/{userId}/dismissedTasks/{dismissedId}": {
+      "schema": "dismissedTask",
+      "description": "Task suppression tags."
+    },
+    "/communityAgents/{agentId}": {
+      "schema": "communityAgent",
+      "description": "Shared community literary agents collection."
+    }
+  }
+}

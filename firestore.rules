@@ -1,0 +1,421 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. Global safety net (Default-Deny Catch-All)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Health-check / connection test document match
+    match /test/connection {
+      allow read: if true;
+    }
+
+    // ----------------------------------------------------
+    // GLOBAL REUSABLE HELPER FUNCTIONS
+    // ----------------------------------------------------
+
+    // ID validation ensuring alphanumeric IDs
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_-]+$');
+    }
+
+    // Checking if the incoming payload exists and is valid
+    function incoming() {
+      return request.resource.data;
+    }
+
+    // Checking if existing document data exists
+    function existing() {
+      return resource.data;
+    }
+
+    // Authentication guard ensuring signed in
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Validates that the active user matches the referenced owner ID path
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // ----------------------------------------------------
+    // COMPONENT VALIDATORS (TYPE & SIZE CHECKS)
+    // ----------------------------------------------------
+
+    function isValidUser(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 256
+        && data.email is string && data.email.size() <= 256
+        && data.plan is string && (data.plan == 'Free' || data.plan == 'Pro')
+        && data.trialStartDate is string && data.trialStartDate.size() <= 64
+        && data.subscriptionStatus is string && (
+          data.subscriptionStatus == 'active' ||
+          data.subscriptionStatus == 'trialing' ||
+          data.subscriptionStatus == 'canceled' ||
+          data.subscriptionStatus == 'none'
+        );
+    }
+
+    function isValidManuscript(data, userId) {
+      return data.id is string && data.id.size() <= 128
+        && data.userId == userId
+        && data.title is string && data.title.size() >= 1 && data.title.size() <= 512
+        && data.genre is string && data.genre.size() <= 256
+        && data.ageCategory is string && data.ageCategory.size() <= 128
+        && data.wordCount is int && data.wordCount >= 0
+        && data.logline is string && data.logline.size() <= 2048
+        && data.comparableTitles is string && data.comparableTitles.size() <= 1024
+        && data.status is string && (
+          data.status == 'Drafting' ||
+          data.status == 'Revising' ||
+          data.status == 'Ready to Query' ||
+          data.status == 'Querying' ||
+          data.status == 'Shelved' ||
+          data.status == 'On Submission'
+        )
+        && data.statusChangedDate is string && data.statusChangedDate.size() <= 64
+        && (!data.keys().hasAll(['shelvedReason']) || (data.shelvedReason is string && data.shelvedReason.size() <= 2048))
+        && (!data.keys().hasAll(['notes']) || (data.notes is string && data.notes.size() <= 16384));
+    }
+
+    function isValidVersion(data, userId) {
+      return data.id is string && data.id.size() <= 128
+        && data.manuscriptId is string && data.manuscriptId.size() <= 128
+        && data.userId == userId
+        && data.componentType is string && (
+          data.componentType == 'Query Letter' ||
+          data.componentType == 'Synopsis' ||
+          data.componentType == 'Sample Pages' ||
+          data.componentType == 'Full Manuscript'
+        )
+        && data.versionName is string && data.versionName.size() >= 1 && data.versionName.size() <= 256
+        && data.fileAttached is bool
+        && data.createdDate is string && data.createdDate.size() <= 64
+        && (!data.keys().hasAll(['fileName']) || (data.fileName is string && data.fileName.size() <= 512))
+        && (!data.keys().hasAll(['contentDraft']) || (data.contentDraft is string && data.contentDraft.size() <= 262144));
+    }
+
+    function isValidPackage(data, userId) {
+      return data.id is string && data.id.size() <= 128
+        && data.manuscriptId is string && data.manuscriptId.size() <= 128
+        && data.userId == userId
+        && data.packageName is string && data.packageName.size() >= 1 && data.packageName.size() <= 256
+        && data.queryLetterVersionId is string && data.queryLetterVersionId.size() <= 128
+        && data.synopsisVersionId is string && data.synopsisVersionId.size() <= 128
+        && data.samplePagesVersionId is string && data.samplePagesVersionId.size() <= 128
+        && data.status is string && (data.status == 'Active' || data.status == 'Retired')
+        && data.createdDate is string && data.createdDate.size() <= 64;
+    }
+
+    function isValidAgent(data, userId) {
+      return data.id is string && data.id.size() <= 128
+        && data.userId == userId
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 256
+        && data.agency is string && data.agency.size() <= 256
+        && data.email is string && data.email.size() <= 256
+        && data.website is string && data.website.size() <= 512
+        && data.genres is list && data.genres.size() <= 50
+        && data.mswlNotes is string && data.mswlNotes.size() <= 4096
+        && data.starRating is int && data.starRating >= 1 && data.starRating <= 5
+        && data.submissionStatus is string && (
+          data.submissionStatus == 'Open' ||
+          data.submissionStatus == 'Closed' ||
+          data.submissionStatus == 'Unknown'
+        )
+        && data.responseTimeWeeks is int && data.responseTimeWeeks >= 0
+        && data.noResponseMeansNo is bool
+        && data.submissionMethod is string && data.submissionMethod.size() <= 128
+        && (data.materialsWanted is list || data.materialsWanted is map) && data.materialsWanted.size() <= 20
+        && data.dateAdded is string && data.dateAdded.size() <= 64
+        && data.lastCheckedDate is string && data.lastCheckedDate.size() <= 64
+        && data.notes is string && data.notes.size() <= 16384
+        && (!data.keys().hasAll(['twitter']) || (data.twitter is string && data.twitter.size() <= 128))
+        && (!data.keys().hasAll(['bluesky']) || (data.bluesky is string && data.bluesky.size() <= 128))
+        && (!data.keys().hasAll(['instagram']) || (data.instagram is string && data.instagram.size() <= 128))
+        && (!data.keys().hasAll(['agentNotes']) || (data.agentNotes is string && data.agentNotes.size() <= 4096));
+    }
+
+    function isValidCommunityAgent(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 256
+        && data.agency is string && data.agency.size() <= 256
+        && data.email is string && data.email.size() <= 256
+        && data.website is string && data.website.size() <= 512
+        && data.genres is list && data.genres.size() <= 50
+        && data.mswlNotes is string && data.mswlNotes.size() <= 4096
+        && data.starRating is int && data.starRating >= 1 && data.starRating <= 5
+        && data.submissionStatus is string && (
+          data.submissionStatus == 'Open' ||
+          data.submissionStatus == 'Closed' ||
+          data.submissionStatus == 'Unknown'
+        )
+        && data.responseTimeWeeks is int && data.responseTimeWeeks >= 0
+        && data.noResponseMeansNo is bool
+        && data.submissionMethod is string && data.submissionMethod.size() <= 128
+        && (data.materialsWanted is list || data.materialsWanted is map) && data.materialsWanted.size() <= 20
+        && data.dateAdded is string && data.dateAdded.size() <= 64
+        && data.lastCheckedDate is string && data.lastCheckedDate.size() <= 64
+        && data.notes is string && data.notes.size() <= 16384
+        && data.contributedByCount is int && data.contributedByCount >= 0
+        && data.lastVerifiedDate is string && data.lastVerifiedDate.size() <= 64
+        && data.dataSource is string && (data.dataSource == 'seed' || data.dataSource == 'community')
+        && data.communityQueryCount is int && data.communityQueryCount >= 0
+        && (!data.keys().hasAll(['twitter']) || (data.twitter is string && data.twitter.size() <= 128))
+        && (!data.keys().hasAll(['bluesky']) || (data.bluesky is string && data.bluesky.size() <= 128))
+        && (!data.keys().hasAll(['instagram']) || (data.instagram is string && data.instagram.size() <= 128))
+        && (!data.keys().hasAll(['agentNotes']) || (data.agentNotes is string && data.agentNotes.size() <= 4096));
+    }
+
+    function isValidQuery(data, userId) {
+      return data.id is string && data.id.size() <= 128
+        && data.userId == userId
+        && data.manuscriptId is string && data.manuscriptId.size() <= 128
+        && data.agentId is string && data.agentId.size() <= 128
+        && data.packageId is string && data.packageId.size() <= 128
+        && data.status is string && (
+          data.status == 'Queried' ||
+          data.status == 'Partial Requested' ||
+          data.status == 'Partial Sent' ||
+          data.status == 'Full Requested' ||
+          data.status == 'Full Sent' ||
+          data.status == 'Revise & Resubmit' ||
+          data.status == 'Offer' ||
+          data.status == 'Rejected' ||
+          data.status == 'Withdrawn' ||
+          data.status == 'No Response' ||
+          data.status == 'partialRequested' ||
+          data.status == 'fullRequested' ||
+          data.status == 'reviseAndResubmit' ||
+          data.status == 'rejected' ||
+          data.status == 'offer' ||
+          data.status == 'noResponse'
+        )
+        && data.dateSent is string && data.dateSent.size() <= 64
+        && (data.get('personalisationNotes', null) == null || (data.personalisationNotes is string && data.personalisationNotes.size() <= 16384))
+        && data.sendMethod is string && (
+          data.sendMethod == 'Email' ||
+          data.sendMethod == 'Online Form'
+        )
+        && (data.get('nudgeDate', null) == null || (data.nudgeDate is string && data.nudgeDate.size() <= 64))
+        && (data.get('lastNudgeSentDate', null) == null || (data.lastNudgeSentDate is string && data.lastNudgeSentDate.size() <= 64))
+        && (data.get('responseDeadline', null) == null || (data.responseDeadline is string && data.responseDeadline.size() <= 64))
+        && (data.get('partialRequestedDate', null) == null || (data.partialRequestedDate is string && data.partialRequestedDate.size() <= 64))
+        && (data.get('partialSentDate', null) == null || (data.partialSentDate is string && data.partialSentDate.size() <= 64))
+        && (data.get('fullRequestedDate', null) == null || (data.fullRequestedDate is string && data.fullRequestedDate.size() <= 64))
+        && (data.get('fullSentDate', null) == null || (data.fullSentDate is string && data.fullSentDate.size() <= 64))
+        && (data.get('lastStatusChange', null) == null || (data.lastStatusChange is timestamp || data.lastStatusChange is string))
+        && (data.get('responseReceivedAt', null) == null || (data.responseReceivedAt is timestamp || data.responseReceivedAt is string))
+        && (data.get('materialsRequestedType', null) == null || (data.materialsRequestedType is string && data.materialsRequestedType.size() <= 256))
+        && (data.get('materialsRequestedQuantity', null) == null || (data.materialsRequestedQuantity is string || data.materialsRequestedQuantity is int || data.materialsRequestedQuantity is float || data.materialsRequestedQuantity is number))
+        && (data.get('expectedSendDate', null) == null || (data.expectedSendDate is timestamp || data.expectedSendDate is string))
+        && (data.get('sendReminderDate', null) == null || (data.sendReminderDate is timestamp || data.sendReminderDate is string))
+        && (data.get('rejectionFeedbackType', null) == null || (data.rejectionFeedbackType is string && data.rejectionFeedbackType.size() <= 256))
+        && (data.get('rejectionFeedbackText', null) == null || (data.rejectionFeedbackText is string && data.rejectionFeedbackText.size() <= 16384))
+        && (data.get('rejectionReflection', null) == null || (data.rejectionReflection is string && data.rejectionReflection.size() <= 16384))
+        && (data.get('offerDate', null) == null || (data.offerDate is timestamp || data.offerDate is string))
+        && (data.get('offerResponseDeadline', null) == null || (data.offerResponseDeadline is timestamp || data.offerResponseDeadline is string))
+        && (data.get('offerNotes', null) == null || (data.offerNotes is string && data.offerNotes.size() <= 16384))
+        && (data.get('closingReason', null) == null || (data.closingReason is string && data.closingReason.size() <= 256))
+        && (data.get('closingNotes', null) == null || (data.closingNotes is string && data.closingNotes.size() <= 16384));
+    }
+
+    function isValidActivityNested(data) {
+      return data.type is string && data.type.size() <= 128
+        && (data.createdAt is timestamp || data.createdAt is string)
+        && data.note is string && data.note.size() <= 16384;
+    }
+
+    function isValidTopLevelActivity(data) {
+      return data.type is string && data.type.size() <= 128
+        && (data.createdAt is timestamp || data.createdAt is string)
+        && data.note is string && data.note.size() <= 16384
+        && (data.get('queryId', null) == null || (data.queryId is string && data.queryId.size() <= 128))
+        && (data.get('agentName', null) == null || (data.agentName is string && data.agentName.size() <= 256))
+        && (data.get('manuscriptTitle', null) == null || (data.manuscriptTitle is string && data.manuscriptTitle.size() <= 512));
+    }
+
+    function isValidManuscriptNote(data) {
+      return data.text is string && data.text.size() >= 1 && data.text.size() <= 16384
+        && data.createdAt is string && data.createdAt.size() <= 64;
+    }
+
+    function isValidActivity(data, userId) {
+      return data.id is string && data.id.size() <= 128
+        && data.userId == userId
+        && data.queryId is string && data.queryId.size() <= 128
+        && data.manuscriptId is string && data.manuscriptId.size() <= 128
+        && data.activityType is string && (
+          data.activityType == 'Status Changed' ||
+          data.activityType == 'Nudge Sent' ||
+          data.activityType == 'Query Sent' ||
+          data.activityType == 'Materials Sent' ||
+          data.activityType == 'Agent Added' ||
+          data.activityType == 'Agent Updated' ||
+          data.activityType == 'Manuscript Added' ||
+          data.activityType == 'Manuscript Updated'
+        )
+        && data.description is string && data.description.size() <= 512
+        && data.date is string && data.date.size() <= 64
+        && data.details is string && data.details.size() <= 4096;
+    }
+
+    function isValidJournalEntry(data, userId) {
+      return data.id is string && data.id.size() <= 128
+        && data.userId == userId
+        && data.queryId is string && data.queryId.size() <= 128
+        && data.entryText is string && data.entryText.size() >= 1 && data.entryText.size() <= 16384
+        && data.createdAt is string && data.createdAt.size() <= 64;
+    }
+
+    // ----------------------------------------------------
+    // FIRESTORE ENDPOINTS INTEGRATIONS
+    // ----------------------------------------------------
+
+    // ROUTE: Users
+    match /users/{userId} {
+      allow read, delete: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(incoming());
+      allow update: if isOwner(userId) && isValidUser(incoming()) && (
+        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus'])
+      );
+
+      // ROUTE: Manuscripts
+      match /manuscripts/{manuscriptId} {
+        allow get, delete: if isOwner(userId) && isValidId(manuscriptId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(manuscriptId) && isValidManuscript(incoming(), userId);
+        allow update: if isOwner(userId) && isValidId(manuscriptId) && isValidManuscript(incoming(), userId) && (
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'title', 'genre', 'ageCategory', 'wordCount', 'logline', 'comparableTitles', 'status', 'shelvedReason', 'statusChangedDate', 'notes'
+          ])
+        );
+
+        match /notes/{noteId} {
+          allow get, delete: if isOwner(userId) && isValidId(noteId);
+          allow list: if isOwner(userId);
+          allow create, update: if isOwner(userId) && isValidId(noteId) && isValidManuscriptNote(incoming());
+        }
+      }
+
+      // ROUTE: ManuscriptVersions
+      match /versions/{versionId} {
+        allow get, delete: if isOwner(userId) && isValidId(versionId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(versionId) && isValidVersion(incoming(), userId);
+        allow update: if isOwner(userId) && isValidId(versionId) && isValidVersion(incoming(), userId) && (
+          incoming().diff(existing()).affectedKeys().hasOnly(['versionName', 'fileAttached', 'fileName', 'contentDraft'])
+        );
+      }
+
+      // ROUTE: SubmissionPackages
+      match /packages/{packageId} {
+        allow get, delete: if isOwner(userId) && isValidId(packageId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(packageId) && isValidPackage(incoming(), userId);
+        allow update: if isOwner(userId) && isValidId(packageId) && isValidPackage(incoming(), userId) && (
+          incoming().diff(existing()).affectedKeys().hasOnly(['packageName', 'queryLetterVersionId', 'synopsisVersionId', 'samplePagesVersionId', 'status'])
+        );
+      }
+
+      // ROUTE: Agents
+      match /agents/{agentId} {
+        allow get, delete: if isOwner(userId) && isValidId(agentId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(agentId) && isValidAgent(incoming(), userId);
+        allow update: if isOwner(userId) && isValidId(agentId) && isValidAgent(incoming(), userId) && (
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'name', 'agency', 'email', 'website', 'twitter', 'bluesky', 'instagram', 'genres', 'mswlNotes',
+            'starRating', 'submissionStatus', 'responseTimeWeeks', 'noResponseMeansNo', 'submissionMethod',
+            'materialsWanted', 'lastCheckedDate', 'notes', 'agentNotes'
+          ])
+        );
+
+        match /notes/{noteId} {
+          allow get, delete: if isOwner(userId) && isValidId(noteId);
+          allow list: if isOwner(userId);
+          allow create: if isOwner(userId) && isValidId(noteId) && isValidAgentNote(incoming());
+          allow update: if isOwner(userId) && isValidId(noteId) && isValidAgentNote(incoming()) && (
+            incoming().diff(existing()).affectedKeys().hasOnly(['text'])
+          );
+        }
+      }
+
+      // ROUTE: Queries
+      match /queries/{queryId} {
+        allow get, delete: if isOwner(userId) && isValidId(queryId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(queryId) && isValidQuery(incoming(), userId);
+        allow update: if isOwner(userId) && isValidId(queryId) && isValidQuery(incoming(), userId) && (
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'status', 'personalisationNotes', 'sendMethod', 'nudgeDate', 'lastNudgeSentDate', 'responseDeadline',
+            'partialRequestedDate', 'partialSentDate', 'fullRequestedDate', 'fullSentDate',
+            'lastStatusChange', 'responseReceivedAt', 'materialsRequestedType', 'materialsRequestedQuantity',
+            'expectedSendDate', 'sendReminderDate', 'rejectionFeedbackType', 'rejectionFeedbackText',
+            'rejectionReflection', 'offerDate', 'offerResponseDeadline', 'offerNotes', 'closingReason', 'closingNotes'
+          ])
+        );
+
+        match /activity/{activityId} {
+          allow get, delete: if isOwner(userId) && isValidId(activityId);
+          allow list: if isOwner(userId);
+          allow create, update: if isOwner(userId) && isValidId(activityId) && isValidActivityNested(incoming());
+        }
+      }
+
+      // ROUTE: Activities
+      match /activities/{activityId} {
+        allow get, delete: if isOwner(userId) && isValidId(activityId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(activityId) && isValidActivity(incoming(), userId);
+        allow update: if isOwner(userId) && isValidId(activityId) && isValidActivity(incoming(), userId) && (
+          incoming().diff(existing()).affectedKeys().hasOnly(['activityType', 'description', 'date', 'details'])
+        );
+      }
+
+      // ROUTE: Top-level activity sync logs (Fix for permission errors)
+      match /activity/{activityId} {
+        allow get, delete: if isOwner(userId) && isValidId(activityId);
+        allow list: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidId(activityId) && isValidTopLevelActivity(incoming());
+      }
+
+      // ROUTE: JournalEntries
+      match /journalEntries/{entryId} {
+        allow get, delete: if isOwner(userId) && isValidId(entryId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(entryId) && isValidJournalEntry(incoming(), userId);
+        allow update: if isOwner(userId) && isValidId(entryId) && isValidJournalEntry(incoming(), userId) && (
+          incoming().diff(existing()).affectedKeys().hasOnly(['entryText'])
+        );
+      }
+
+      // ROUTE: DismissedTasks
+      match /dismissedTasks/{dismissedId} {
+        allow get, delete: if isOwner(userId) && isValidId(dismissedId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(dismissedId) && isValidDismissedTask(incoming(), userId);
+        allow update: if isOwner(userId) && isValidId(dismissedId) && isValidDismissedTask(incoming(), userId) && (
+          incoming().diff(existing()).affectedKeys().hasOnly(['snoozeDays', 'dismissType', 'resurfaceDate'])
+        );
+      }
+    }
+
+    // ROUTE: communityAgents
+    match /communityAgents/{agentId} {
+      allow get, list: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(agentId) && isValidCommunityAgent(incoming());
+      allow update: if isSignedIn() && isValidId(agentId) && isValidCommunityAgent(incoming()) && (
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'name', 'agency', 'email', 'website', 'twitter', 'bluesky', 'instagram', 'genres', 'mswlNotes',
+          'starRating', 'submissionStatus', 'responseTimeWeeks', 'noResponseMeansNo', 'submissionMethod',
+          'materialsWanted', 'lastCheckedDate', 'notes', 'agentNotes', 'contributedByCount', 'lastVerifiedDate',
+          'dataSource', 'communityQueryCount'
+        ])
+      );
+      allow delete: if false;
+    }
+  }
+}

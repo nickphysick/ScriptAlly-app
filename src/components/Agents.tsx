@@ -1,0 +1,931 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React, { useState, useEffect } from "react";
+import { useScriptAllyDb } from "../lib/db";
+import { Agent, SubmissionStatus, SubmissionMethod, QueryStatus } from "../types";
+import { StatusPill } from "./StatusPill";
+import { db, handleFirestoreError, OperationType } from "../lib/firebase"; // Required for setting doc in online Mode
+import { collection, setDoc, doc, onSnapshot } from "firebase/firestore";
+import {
+  Search,
+  Clock,
+  Star,
+  ChevronRight,
+  ChevronLeft,
+  Check,
+  Plus,
+  Pencil,
+  SlidersHorizontal,
+  FolderLock,
+  Send,
+  AlertTriangle,
+  GitCommit,
+  MessageSquare,
+  X,
+  Trash2,
+  Book,
+  Notebook
+} from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+
+interface AgentsProps {
+  searchQuery?: string;
+  onNavigate?: (tab: string, subPageName?: string) => void;
+}
+
+function formatWhatsAppDate(dateString: string): string {
+  const d = new Date(dateString);
+  const day = d.getDate();
+  const month = d.toLocaleString("en-GB", { month: "short" });
+  const time = d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
+  return `${day} ${month}, ${time}`;
+}
+
+export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
+  const {
+    currentUser,
+    agents,
+    queries,
+    manuscripts,
+    updateAgent,
+    deleteAgent,
+    isOfflineMode
+  } = useScriptAllyDb();
+
+  // Applet Selection and Filter States
+  const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
+  const [listSearch, setListSearch] = useState("");
+  const [tabFilter, setTabFilter] = useState<"All" | "Open" | "Closed">("All");
+  const [queryFilter, setQueryFilter] = useState<"All" | "Queried" | "Not queried">("All");
+  const [sortOption, setSortOption] = useState<"Star rating" | "Response time" | "Date added">("Star rating");
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Form Editing State
+  const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
+
+  // Agent Notes State (Card 3 Jottings)
+  const [agentNotesList, setAgentNotesList] = useState<{ id: string; text: string; createdAt: string }[]>([]);
+  const [noteInput, setNoteInput] = useState("");
+
+  if (!currentUser) return null;
+
+  // Real-time snapshot notes lookup
+  useEffect(() => {
+    if (!selectedAgentId) {
+      setAgentNotesList([]);
+      return;
+    }
+
+    if (isOfflineMode || !currentUser) {
+      // Offline mode: load from LocalStorage
+      const cached = localStorage.getItem(`scriptally_agent_notes_${currentUser?.id || "seed"}_${selectedAgentId}`);
+      if (cached) {
+        setAgentNotesList(JSON.parse(cached));
+      } else {
+        // Seed default notes for UI friendliness
+        let defaultNotes: any[] = [];
+        if (selectedAgentId === "agent-1") {
+          defaultNotes = [
+            { id: "note-1", text: "Met at NYC pitch festival. Expressed strong interest in voice-driven YA thrillers.", createdAt: new Date(Date.now() - 3600000 * 24 * 5).toISOString() },
+            { id: "note-2", text: "Note: prefers QueryManager submissions over direct emails.", createdAt: new Date(Date.now() - 3600000 * 2).toISOString() }
+          ];
+        } else if (selectedAgentId === "agent-2") {
+          defaultNotes = [
+            { id: "note-3", text: "MSWL check: loves layered queer speculative contemporary stories.", createdAt: new Date(Date.now() - 3600000 * 24 * 10).toISOString() }
+          ];
+        } else if (selectedAgentId === "agent-3") {
+          defaultNotes = [
+            { id: "note-4", text: "Spoke via twitter, wants standard 3-layer query pitch package.", createdAt: new Date(Date.now() - 3600000 * 24 * 15).toISOString() }
+          ];
+        }
+        localStorage.setItem(`scriptally_agent_notes_${currentUser?.id || "seed"}_${selectedAgentId}`, JSON.stringify(defaultNotes));
+        setAgentNotesList(defaultNotes);
+      }
+      return;
+    }
+
+    // Online mode: real-time snapshot listener on /users/{userId}/agents/{agentId}/notes
+    const notesColRef = collection(db, "users", currentUser.id, "agents", selectedAgentId, "notes");
+    const unsub = onSnapshot(notesColRef, (snapshot) => {
+      const list: any[] = [];
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        list.push({
+          id: docSnap.id,
+          text: data.text,
+          createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt
+        });
+      });
+      // Sort in reverse chronological order (newest first)
+      list.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      setAgentNotesList(list);
+    }, (error) => {
+      handleFirestoreError(error, OperationType.LIST, `users/${currentUser.id}/agents/${selectedAgentId}/notes`);
+    });
+
+    return () => unsub();
+  }, [selectedAgentId, isOfflineMode, currentUser?.id]);
+
+  // Handle post agent note
+  const handleAddAgentNote = async (text: string) => {
+    if (!text.trim() || !selectedAgentId || !currentUser) return;
+    const cleanText = text.trim();
+    const now = new Date();
+
+    if (isOfflineMode) {
+      const newNote = {
+        id: "note-" + Math.random().toString(36).substr(2, 9),
+        text: cleanText,
+        createdAt: now.toISOString()
+      };
+      const updated = [newNote, ...agentNotesList];
+      setAgentNotesList(updated);
+      localStorage.setItem(`scriptally_agent_notes_${currentUser.id}_${selectedAgentId}`, JSON.stringify(updated));
+    } else {
+      const noteId = "note-" + Math.random().toString(36).substr(2, 9);
+      try {
+        await setDoc(doc(db, "users", currentUser.id, "agents", selectedAgentId, "notes", noteId), {
+          text: cleanText,
+          createdAt: now.toISOString()
+        });
+      } catch (err) {
+        handleFirestoreError(err, OperationType.WRITE, `users/${currentUser.id}/agents/${selectedAgentId}/notes/${noteId}`);
+      }
+    }
+    setNoteInput("");
+  };
+
+  // Profile modal edit triggers
+  const startEditAgent = (agent: Agent) => {
+    setEditingAgent(JSON.parse(JSON.stringify(agent)));
+  };
+
+  const handleUpdateAgentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingAgent) return;
+    await updateAgent(editingAgent.id, {
+      name: editingAgent.name,
+      agency: editingAgent.agency,
+      email: editingAgent.email,
+      website: editingAgent.website,
+      starRating: editingAgent.starRating,
+      submissionStatus: editingAgent.submissionStatus,
+      mswlNotes: editingAgent.mswlNotes,
+      submissionMethod: editingAgent.submissionMethod,
+      responseTimeWeeks: editingAgent.responseTimeWeeks,
+      noResponseMeansNo: editingAgent.noResponseMeansNo,
+      genres: editingAgent.genres,
+      notes: editingAgent.notes
+    });
+    setEditingAgent(null);
+    setToastMessage("Agent profile updated safely");
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  // Filter & Sort Logic for middle panel
+  let filteredAndSorted = [...agents];
+
+  // 1. Search Query Box & Top Nav Query
+  const term = (listSearch || searchQuery || "").toLowerCase().trim();
+  if (term) {
+    filteredAndSorted = filteredAndSorted.filter(ag =>
+      ag.name.toLowerCase().includes(term) ||
+      ag.agency.toLowerCase().includes(term)
+    );
+  }
+
+  // 2. Submission Status filter (Sidebar)
+  if (tabFilter !== "All") {
+    filteredAndSorted = filteredAndSorted.filter(ag => ag.submissionStatus === tabFilter);
+  }
+
+  // 3. Query Status filter (Sidebar)
+  if (queryFilter === "Queried") {
+    filteredAndSorted = filteredAndSorted.filter(ag => queries.some(q => q.agentId === ag.id));
+  } else if (queryFilter === "Not queried") {
+    filteredAndSorted = filteredAndSorted.filter(ag => !queries.some(q => q.agentId === ag.id));
+  }
+
+  // 4. Sort Ordering
+  filteredAndSorted.sort((a, b) => {
+    if (sortOption === "Star rating") {
+      return (b.starRating || 0) - (a.starRating || 0);
+    } else if (sortOption === "Response time") {
+      return (a.responseTimeWeeks || 0) - (b.responseTimeWeeks || 0);
+    } else if (sortOption === "Date added") {
+      return new Date(b.dateAdded || 0).getTime() - new Date(a.dateAdded || 0).getTime();
+    }
+    return 0;
+  });
+
+  // Safe fallback list auto selection
+  useEffect(() => {
+    if (filteredAndSorted.length > 0) {
+      const isStillInList = filteredAndSorted.some(ag => ag.id === selectedAgentId);
+      if (!isStillInList) {
+        setSelectedAgentId(filteredAndSorted[0].id);
+      }
+    } else {
+      setSelectedAgentId(null);
+    }
+  }, [tabFilter, queryFilter, term, agents.length]);
+
+  const activeAgent = selectedAgentId ? agents.find(ag => ag.id === selectedAgentId) : null;
+  const activeAgentQueries = activeAgent ? queries.filter(q => q.agentId === selectedAgentId) : [];
+
+  return (
+    <div
+      className="flex-grow bg-[#dce0d9] min-h-0 overflow-hidden w-full flex flex-row p-[8px] gap-[8px]"
+      style={{ minHeight: "calc(100vh - 64px)", maxHeight: "calc(100vh - 64px)" }}
+    >
+      {/* ---------------- panel 1: left sidebar controls ---------------- */}
+      <div
+        className="bg-white border border-[#e8e0d8] rounded-xl p-[12px] flex flex-col h-full overflow-hidden shrink-0 select-none"
+        style={{ width: "15%", minWidth: "15%", maxWidth: "15%", flexShrink: 0 }}
+      >
+        {/* Add Agent button */}
+        <button
+          onClick={() => onNavigate?.("agents", "Add an agent")}
+          className="w-full h-[36px] bg-[#7c3a2a] hover:bg-[#6c3224] text-white flex items-center justify-center gap-2 rounded-lg text-xs font-semibold cursor-pointer transition-colors mb-3 border-0"
+        >
+          <Plus className="w-4 h-4 shrink-0" />
+          <span>Add agent</span>
+        </button>
+
+        {/* Filters and sorting dividers wrapper */}
+        <div className="flex-grow overflow-y-auto space-y-4 pt-1">
+          {/* Submission Gate filter */}
+          <div className="space-y-1">
+            <span className="block text-[10px] font-mono uppercase tracking-wider text-stone-400 font-bold border-b border-[#e8e0d8]/50 pb-0.5 mb-1.5">
+              Submission status
+            </span>
+            <div className="space-y-0.5">
+              {[
+                { id: "All", label: "All agents", count: agents.length },
+                { id: "Open", label: "Open Only", count: agents.filter(a => a.submissionStatus === SubmissionStatus.OPEN).length },
+                { id: "Closed", label: "Closed Only", count: agents.filter(a => a.submissionStatus === SubmissionStatus.CLOSED).length }
+              ].map(item => {
+                const isActive = tabFilter === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setTabFilter(item.id as any)}
+                    className={`w-full text-left py-1 px-1.5 text-[11px] rounded transition-all cursor-pointer flex justify-between items-center ${
+                      isActive ? "bg-[#FAF1EF] text-[#7c3a2a] font-bold border-l-2 border-[#7c3a2a]" : "text-stone-600 hover:bg-stone-50"
+                    }`}
+                  >
+                    <span>{item.label}</span>
+                    <span className="text-[9px] text-stone-400 font-mono">({item.count})</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Query Status linked filter */}
+          <div className="space-y-1">
+            <span className="block text-[10px] font-mono uppercase tracking-wider text-stone-400 font-bold border-b border-[#e8e0d8]/50 pb-0.5 mb-1.5">
+              Query status
+            </span>
+            <div className="space-y-0.5">
+              {[
+                { id: "All", label: "All queried/not", count: agents.length },
+                { id: "Queried", label: "Queried", count: agents.filter(ag => queries.some(q => q.agentId === ag.id)).length },
+                { id: "Not queried", label: "Not queried", count: agents.filter(ag => !queries.some(q => q.agentId === ag.id)).length }
+              ].map(item => {
+                const isActive = queryFilter === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setQueryFilter(item.id as any)}
+                    className={`w-full text-left py-1 px-1.5 text-[11px] rounded transition-all cursor-pointer flex justify-between items-center ${
+                      isActive ? "bg-[#FAF1EF] text-[#7c3a2a] font-bold border-l-2 border-[#7c3a2a]" : "text-stone-600 hover:bg-stone-50"
+                    }`}
+                  >
+                    <span>{item.label}</span>
+                    <span className="text-[9px] text-stone-400 font-mono">({item.count})</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Sort selection indicators */}
+          <div className="space-y-1">
+            <span className="block text-[10px] font-mono uppercase tracking-wider text-stone-400 font-bold border-b border-[#e8e0d8]/50 pb-0.5 mb-1.5">
+              Sort Options
+            </span>
+            <div className="space-y-0.5">
+              {[
+                { id: "Star rating", label: "Star rating" },
+                { id: "Response time", label: "Response time" },
+                { id: "Date added", label: "Date added" }
+              ].map(item => {
+                const isActive = sortOption === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setSortOption(item.id as any)}
+                    className={`w-full text-left py-1 px-1.5 text-[11px] rounded transition-all cursor-pointer flex justify-between items-center ${
+                      isActive ? "bg-[#FAF1EF] text-[#7c3a2a] font-bold border-l-2 border-[#7c3a2a]" : "text-stone-600 hover:bg-stone-50"
+                    }`}
+                  >
+                    <span>{item.label}</span>
+                    {isActive && <Check className="w-3.5 h-3.5 text-[#7c3a2a]" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ---------------- panel 2: middle list panel ---------------- */}
+      <div
+        className="bg-white border border-[#e8e0d8] rounded-xl flex flex-col h-full overflow-hidden shrink-0"
+        style={{ width: "calc(20% + 50px)", minWidth: "calc(20% + 50px)", maxWidth: "calc(20% + 50px)", flexShrink: 0 }}
+      >
+        <div className="p-3 border-b border-[#e8e0d8]/60 space-y-1.5 bg-[#fafafa]">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400" />
+            <input
+              type="text"
+              value={listSearch}
+              onChange={(e) => setListSearch(e.target.value)}
+              placeholder="Search agent name / agency..."
+              className="w-full pl-8 pr-3 py-1.5 bg-stone-50 rounded-md border border-[#e8e0d8] text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#7c3a2a]"
+            />
+          </div>
+          <span className="block text-[11px] text-stone-400 pl-0.5 font-medium">
+            Showing {filteredAndSorted.length} matching agents
+          </span>
+        </div>
+
+        {/* Vertical Stack List */}
+        <div className="flex-grow overflow-y-auto divide-y divide-[#e8e0d8]/40 custom-query-list-scrollbar">
+          {filteredAndSorted.length === 0 ? (
+            <div className="p-8 text-center text-stone-400 text-xs select-none">
+              No matching agents found.
+            </div>
+          ) : (
+            filteredAndSorted.map(agent => {
+              const isSelected = selectedAgentId === agent.id;
+
+              return (
+                <div
+                  key={agent.id}
+                  onClick={() => setSelectedAgentId(agent.id)}
+                  className={`p-3 relative cursor-pointer flex flex-col gap-1 transition-all select-none ${
+                    isSelected ? "bg-[#FDF8F6]" : "hover:bg-stone-50 bg-white"
+                  }`}
+                  style={{
+                    borderLeft: isSelected ? "3.5px solid #7c3a2a" : "3.5px solid transparent"
+                  }}
+                >
+                  <div className="flex justify-between items-start gap-2">
+                    <span className="font-serif text-[14px] font-bold text-[#3a1c14] truncate leading-tight flex-1">
+                      {agent.name}
+                    </span>
+                    <span className={`text-[9px] font-bold font-sans uppercase tracking-[0.03em] px-1.5 py-0.5 rounded border shrink-0 ${
+                      agent.submissionStatus === SubmissionStatus.OPEN
+                        ? "bg-[#FAF1EF] border-[#EBDCD3]/40 text-[#7c3a2a]"
+                        : "bg-stone-50 border-stone-200 text-stone-400"
+                    }`}>
+                      {agent.submissionStatus}
+                    </span>
+                  </div>
+
+                  <span className="text-[11px] text-stone-400 font-sans leading-none truncate pr-2">
+                    {agent.agency || "Independent"}
+                  </span>
+
+                  {/* Little matched genres pills */}
+                  {agent.genres && agent.genres.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1 max-w-full">
+                      {agent.genres.slice(0, 3).map((g, gi) => (
+                        <span key={gi} className="bg-stone-50 text-stone-500 text-[8.5px] font-bold px-1.5 py-0.5 rounded border border-stone-200/50 truncate">
+                          {g}
+                        </span>
+                      ))}
+                      {agent.genres.length > 3 && (
+                        <span className="text-[8.5px] font-bold text-stone-400 pl-0.5">+{agent.genres.length - 3}</span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
+
+      {/* ---------------- panel 3: reading pane ---------------- */}
+      {!activeAgent ? (
+        <div className="bg-white border border-[#e8e0d8] rounded-xl flex-grow flex-1 min-w-0 h-full flex flex-col items-center justify-center p-8 select-none">
+          <SlidersHorizontal className="w-8 h-8 text-[#a0a89e]/30 mb-2" />
+          <span className="text-stone-500 text-sm font-serif">No Agent Selected</span>
+          <span className="text-stone-400 text-xs mt-1 text-center max-w-[280px]">
+            Select an agent from the address book list to view their full MSWL, profiling, history, and notes.
+          </span>
+        </div>
+      ) : (
+        <div className="bg-white border border-[#e8e0d8] rounded-xl flex-grow flex-1 min-w-0 h-full flex flex-col overflow-hidden">
+          {/* 1. TOP CONTROL BAR (Height 44px) */}
+          <div className="h-[44px] border-b border-[#e8e0d8] flex items-center px-4 justify-between bg-[#fafafa] shrink-0 select-none">
+            {/* Left group controls */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => onNavigate?.("queries", "Log a query")}
+                className="h-[28px] bg-[#7c3a2a] hover:bg-[#6c3224] text-white flex items-center gap-1.5 px-3.5 rounded-full text-xs font-bold cursor-pointer transition-colors border-0"
+              >
+                <Plus className="w-3.5 h-3.5 text-white stroke-[2.5]" />
+                <span>Send query</span>
+              </button>
+
+              <button
+                onClick={() => startEditAgent(activeAgent)}
+                className="h-[28px] border border-[#e8e0d8] hover:bg-stone-100 bg-white flex items-center gap-1 px-3 rounded-full text-xs text-stone-700 font-medium cursor-pointer transition-colors"
+              >
+                <Pencil className="w-3 h-3 text-stone-500" />
+                <span>Edit profile</span>
+              </button>
+            </div>
+
+            {/* Center controls: filtered listing previous / next slider */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  const idx = filteredAndSorted.findIndex(a => a.id === selectedAgentId);
+                  if (idx > 0) {
+                    setSelectedAgentId(filteredAndSorted[idx - 1].id);
+                  }
+                }}
+                disabled={filteredAndSorted.findIndex(a => a.id === selectedAgentId) <= 0}
+                className="w-7 h-7 hover:bg-stone-100 text-stone-600 rounded flex items-center justify-center cursor-pointer disabled:opacity-30 disabled:hover:bg-transparent"
+                title="Previous Agent"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <span className="text-[11px] font-mono font-bold text-stone-500">
+                {filteredAndSorted.findIndex(a => a.id === selectedAgentId) + 1} / {filteredAndSorted.length}
+              </span>
+              <button
+                onClick={() => {
+                  const idx = filteredAndSorted.findIndex(a => a.id === selectedAgentId);
+                  if (idx >= 0 && idx < filteredAndSorted.length - 1) {
+                    setSelectedAgentId(filteredAndSorted[idx + 1].id);
+                  }
+                }}
+                disabled={filteredAndSorted.findIndex(a => a.id === selectedAgentId) >= filteredAndSorted.length - 1}
+                className="w-7 h-7 hover:bg-stone-100 text-stone-600 rounded flex items-center justify-center cursor-pointer disabled:opacity-30 disabled:hover:bg-transparent"
+                title="Next Agent"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Right group: Custom stylized Delete button */}
+            <button
+              onClick={async () => {
+                if (window.confirm(`Are you sure you want to permanently delete agent ${activeAgent.name}?`)) {
+                  const idx = filteredAndSorted.findIndex(a => a.id === selectedAgentId);
+                  await deleteAgent(activeAgent.id);
+                  setToastMessage(`Deleted agent ${activeAgent.name}`);
+                  setTimeout(() => setToastMessage(null), 3000);
+
+                  if (filteredAndSorted.length > 1) {
+                    if (idx >= filteredAndSorted.length - 1) {
+                      setSelectedAgentId(filteredAndSorted[idx - 1].id);
+                    } else {
+                      setSelectedAgentId(filteredAndSorted[idx + 1].id);
+                    }
+                  } else {
+                    setSelectedAgentId(null);
+                  }
+                }
+              }}
+              className="text-[#a04030] bg-[#fdf8f6] border border-[#e8e0d8] rounded-[6px] py-[6px] px-[10px] flex items-center gap-1.5 cursor-pointer hover:bg-[#fcf3f0] hover:border-[#ebd2cc] active:scale-95 transition-all text-[11px] font-semibold"
+            >
+              <Trash2 className="w-3.5 h-3.5 shrink-0" />
+              <span>Delete</span>
+            </button>
+          </div>
+
+          {/* INNER SCROLL COLUMN WRAP */}
+          <div className="flex-grow overflow-y-auto p-4 space-y-4 bg-stone-50 custom-query-list-scrollbar">
+            
+            {/* 2. AGENT HEADER CARD (Card 1) */}
+            <div className="bg-white border border-[#e8e0d8] rounded-xl p-4 flex flex-col justify-between relative min-h-[135px] shadow-sm select-none">
+              {/* Submission status absolute pill in top-right with 10px gap from border */}
+              <span className={`absolute top-[10px] right-[10px] text-[10px] font-bold uppercase tracking-[0.05em] px-2.5 py-1 border rounded-full ${
+                activeAgent.submissionStatus === SubmissionStatus.OPEN
+                  ? "bg-[#FAF1EF] text-[#7c3a2a] border-[#EBDCD3]"
+                  : "bg-stone-50 text-stone-500 border-stone-200"
+              }`}>
+                ● {activeAgent.submissionStatus === SubmissionStatus.OPEN ? "Open to subs" : "Closed to subs"}
+              </span>
+
+              <div className="flex flex-col justify-center pr-[120px]">
+                <h2 className="font-serif text-[32px] font-bold text-[#3a1c14] leading-[38px] tracking-tight">
+                  {activeAgent.name}
+                </h2>
+                {activeAgent.agency && (
+                  <p className="text-[12.5px] text-[#7c3a2a] leading-snug mt-1 font-medium">
+                    {activeAgent.agency} &middot; {activeAgent.email || "No email address logged"}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between mt-3 font-mono text-[11px] text-stone-500 leading-none pb-0.5">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center text-[#BA7517] gap-0.5">
+                    {Array.from({ length: 5 }).map((_, idx) => (
+                      <Star key={idx} className={`w-3.5 h-3.5 ${idx < activeAgent.starRating ? "fill-[#BA7517] text-[#BA7517]" : "text-stone-250"}`} />
+                    ))}
+                  </div>
+                  <span className="text-stone-300">|</span>
+                  <span className="flex items-center gap-1 font-sans text-stone-500">
+                    Method: <span className="text-stone-700 font-bold">{activeAgent.submissionMethod || "Email"}</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. BENTO THREE COLUMN GRID STRETCH WRAP */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 items-stretch min-h-[460px]">
+              
+              {/* Card A: Agent Profile */}
+              <div className="relative bg-white border border-[#e8e0d8] rounded-xl flex flex-col p-4 pt-8 shadow-sm h-full">
+                <span className="absolute top-[-14px] left-1/2 -translate-x-1/2 bg-white border border-[#e8e0d8] py-1 px-4 rounded-full flex items-center gap-1.5 shadow-sm whitespace-nowrap z-10 select-none text-[12px] text-stone-700 font-medium font-sans">
+                  <SlidersHorizontal className="w-3.5 h-3.5 text-[#7c3a2a]" />
+                  <span>Agent Profile</span>
+                </span>
+
+                <div className="space-y-4 text-xs text-stone-600 mt-2 flex-grow overflow-y-auto max-h-[400px] custom-query-list-scrollbar pr-0.5">
+                  {activeAgent.website && (
+                    <div>
+                      <span className="block text-[9px] font-mono text-stone-400 font-bold uppercase select-none mb-0.5">Website hub</span>
+                      <a href={activeAgent.website} referrerPolicy="no-referrer" target="_blank" rel="noreferrer" className="text-[#7c3a2a] hover:underline font-bold break-all">
+                        {activeAgent.website}
+                      </a>
+                    </div>
+                  )}
+
+                  <div>
+                    <span className="block text-[9px] font-mono text-stone-400 font-bold uppercase select-none mb-0.5">Response time</span>
+                    <span className="text-stone-700 font-semibold font-sans">
+                      {activeAgent.responseTimeWeeks || 6} weeks 
+                      {activeAgent.noResponseMeansNo && <span className="text-stone-400 font-normal"> (Silence means pass)</span>}
+                    </span>
+                  </div>
+
+                  {activeAgent.genres && activeAgent.genres.length > 0 && (
+                    <div>
+                      <span className="block text-[9px] font-mono text-stone-400 font-bold uppercase select-none mb-0.5">Matched Genres</span>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {activeAgent.genres.map((g, gi) => (
+                          <span key={gi} className="bg-stone-50 border border-stone-200 text-stone-650 text-[9.5px] font-semibold px-2 py-0.5 rounded-full select-none">
+                            {g}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {activeAgent.materialsWanted && (
+                    <div>
+                      <span className="block text-[9px] font-mono text-stone-400 font-bold uppercase select-none mb-0.5">Wanted Materials</span>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {(Array.isArray(activeAgent.materialsWanted)
+                          ? activeAgent.materialsWanted
+                          : Object.keys(activeAgent.materialsWanted || {}).filter(k => (activeAgent.materialsWanted as any)[k] === true)
+                        ).map((mat, mi) => (
+                          <span key={mi} className="bg-[#FAF1EF] text-[#7c3a2a] border border-[#EBDCD3]/30 text-[9.5px] font-semibold px-2 py-0.5 rounded-full select-none">
+                            {mat}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {activeAgent.mswlNotes && (
+                    <div className="border-t border-stone-100 pt-3">
+                      <span className="block text-[9px] font-mono text-stone-400 font-bold uppercase select-none mb-1">MSWL Wishlist / Notes</span>
+                      <p className="text-stone-600 leading-relaxed font-sans text-[11.5px] whitespace-pre-wrap max-h-[170px] overflow-y-auto custom-query-list-scrollbar">
+                        "{activeAgent.mswlNotes}"
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Card B: Query History */}
+              <div className="relative bg-white border border-[#e8e0d8] rounded-xl flex flex-col p-4 pt-8 shadow-sm h-full">
+                <span className="absolute top-[-14px] left-1/2 -translate-x-1/2 bg-white border border-[#e8e0d8] py-1 px-4 rounded-full flex items-center gap-1.5 shadow-sm whitespace-nowrap z-10 select-none text-[12px] text-stone-700 font-medium font-sans">
+                  <Clock className="w-3.5 h-3.5 text-[#7c3a2a]" />
+                  <span>Query History</span>
+                </span>
+
+                <div className="space-y-3.5 mt-2 flex-grow overflow-y-auto max-h-[400px] custom-query-list-scrollbar pr-0.5">
+                  {activeAgentQueries.length === 0 ? (
+                    <div className="h-full flex flex-col items-center justify-center text-center p-6 text-stone-400 text-xs select-none">
+                      <Send className="w-6 h-6 text-stone-300 mb-1.5" />
+                      <span>No active queries sent yet.</span>
+                      <p className="text-[10px] text-stone-400/80 mt-1 leading-normal">
+                        Ready to query {activeAgent.name}? Tap Send Query above!
+                      </p>
+                    </div>
+                  ) : (
+                    [...activeAgentQueries]
+                      .sort((a,b)=> new Date(b.dateSent).getTime() - new Date(a.dateSent).getTime())
+                      .map(query => {
+                        const ms = manuscripts.find(m => m.id === query.manuscriptId);
+                        return (
+                          <div key={query.id} className="p-3 bg-stone-50 border border-stone-100 rounded-lg flex flex-col gap-1.5 hover:border-[#EBDCD3]/40 transition-all select-none">
+                            <div className="flex justify-between items-start gap-1">
+                              <span className="font-serif font-bold text-stone-850 text-[12.5px] leading-tight break-words flex-1 pr-1">
+                                {ms?.title || "Untitled draft"}
+                              </span>
+                              <div className="scale-75 origin-right shrink-0">
+                                <StatusPill status={query.status} />
+                              </div>
+                            </div>
+                            <div className="flex justify-between items-center text-[10px] text-stone-400 font-mono mt-0.5">
+                              <span>Sent: {new Date(query.dateSent).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</span>
+                              <span>{query.sendMethod || "Email"}</span>
+                            </div>
+                          </div>
+                        );
+                      })
+                  )}
+                </div>
+              </div>
+
+              {/* Card C: Notes */}
+              <div className="relative bg-white border border-[#e8e0d8] rounded-xl flex flex-col pt-[30px] pr-[14px] pb-[14px] pl-[14px] shadow-sm h-full min-h-[350px]">
+                {/* Overlapping Pill Header - Notes */}
+                <span className="absolute top-[-14px] left-1/2 -translate-x-1/2 bg-[#fdf8f6] border border-[#d1d5db] py-[5px] px-[16px] rounded-full flex items-center gap-1.5 shadow-sm whitespace-nowrap z-10 select-none text-[12px] text-black shrink-0">
+                  <Notebook className="w-3.5 h-3.5 text-black" />
+                  <span className="text-black text-[13px] font-normal">Notes</span>
+                </span>
+
+                {/* WhatsApp-style messaging box with specific background */}
+                <div className="flex-grow flex flex-col justify-between p-3.5 h-full bg-[#FAF8F5] rounded-xl border border-[#ebd8c5]/40 mt-3.5">
+                  {/* Chat Messages scroll area with custom scrollbars */}
+                  <div
+                    className="flex-grow overflow-y-auto max-h-[250px] pr-1 space-y-2 flex flex-col custom-query-list-scrollbar"
+                    style={{ backgroundColor: "transparent" }}
+                  >
+                    {agentNotesList.length === 0 ? (
+                      <div className="flex-grow flex flex-col items-center justify-center text-center py-8 px-4 h-full my-auto select-none">
+                        <div className="w-10 h-10 rounded-full bg-white/85 flex items-center justify-center mb-2 shadow-xs">
+                          <Send className="w-4 h-4 text-stone-400 rotate-45 -translate-x-[1px]" />
+                        </div>
+                        <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider font-mono">Notes Journal</span>
+                        <p className="text-[11px] text-stone-400 mt-1 max-w-[180px] leading-snug font-sans">
+                          Send notes on phone calls, meeting updates, or private research details here.
+                        </p>
+                      </div>
+                    ) : (
+                      agentNotesList.map((note) => (
+                        <div
+                          key={note.id}
+                          className="relative group max-w-[85%] bg-white text-[#3a1c14] rounded-[15px] pl-[15px] pr-[15px] py-2 shadow-sm text-[11.5px] leading-relaxed text-left self-start animate-fade-in"
+                          style={{ borderStyle: "none", borderWidth: "0px" }}
+                        >
+                          <p className="break-words font-sans text-[#3a1c14] whitespace-pre-wrap text-left pr-1 font-medium leading-normal">{note.text}</p>
+                          <div className="text-[9px] text-[#8c706d] text-left mt-1 select-none font-mono flex items-center justify-start gap-1 font-light leading-none">
+                            <span>{note.createdAt ? formatWhatsAppDate(note.createdAt) : "Just now"}</span>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  {/* Notes Input Field row */}
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleAddAgentNote(noteInput);
+                    }}
+                    className="p-1 px-2 border rounded-lg bg-white flex items-center justify-between gap-1 shrink-0 mt-3"
+                    style={{ borderColor: "#ebd8c5" }}
+                  >
+                    <input
+                      type="text"
+                      value={noteInput}
+                      onChange={(e) => setNoteInput(e.target.value)}
+                      placeholder="Send a note..."
+                      className="flex-grow bg-transparent text-xs p-1 outline-none text-stone-750 focus:ring-0 placeholder-stone-400"
+                    />
+                    <button
+                      type="submit"
+                      disabled={!noteInput.trim()}
+                      className="w-[22px] h-[22px] rounded-full bg-[#7c3d3d] hover:bg-[#6c3224] flex items-center justify-center text-white cursor-pointer active:scale-95 transition-all shrink-0 p-0 disabled:bg-stone-200 disabled:cursor-not-allowed border-0"
+                    >
+                      <Send className="w-3 h-3 rotate-[330deg] text-white shrink-0 mr-[1px] mb-[1px]" />
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* ---------------- TOAST hud ---------------- */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="fixed bottom-6 right-6 z-[999] bg-stone-900 text-white rounded-lg py-3 px-5 text-xs font-bold shadow-lg flex items-center gap-2"
+          >
+            <Check className="w-4 h-4 text-emerald-500 stroke-[3]" />
+            <span>{toastMessage}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ---------------- COMPREHENSIVE DIALOGUE MODAL EDIT PROFILE ---------------- */}
+      <AnimatePresence>
+        {editingAgent && (
+          <div className="fixed inset-0 bg-stone-950/40 backdrop-blur-sm flex items-center justify-center p-4 z-[999]" id="edit-agent-modal-overlay">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-2xl shadow-xl w-full max-w-xl max-h-[85vh] overflow-y-auto border border-[#FAF1EF]"
+            >
+              {/* Modal header */}
+              <div className="p-4 border-b border-[#FAF1EF] flex justify-between items-center bg-[#FAF8F5]">
+                <h4 style={{ fontFamily: "var(--font-serif, Georgia, serif)" }} className="text-base font-bold text-[#3a1c14]">
+                  Edit Agent Details
+                </h4>
+                <button
+                  onClick={() => setEditingAgent(null)}
+                  className="text-stone-400 hover:text-stone-700 cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Edit forms */}
+              <form onSubmit={handleUpdateAgentSubmit} className="p-5 space-y-4 text-xs text-left">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-500 mb-1">Agent Name</label>
+                    <input
+                      required
+                      type="text"
+                      value={editingAgent.name}
+                      onChange={(e) => setEditingAgent({ ...editingAgent, name: e.target.value })}
+                      className="w-full text-xs p-2 bg-white rounded border border-[#e8d5cc] focus:ring-1 focus:ring-[#7c3a2a] outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-500 mb-1">Agency Name</label>
+                    <input
+                      required
+                      type="text"
+                      value={editingAgent.agency}
+                      onChange={(e) => setEditingAgent({ ...editingAgent, agency: e.target.value })}
+                      className="w-full text-xs p-2 bg-white rounded border border-[#e8d5cc] focus:ring-1 focus:ring-[#7c3a2a] outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-500 mb-1">Email address</label>
+                    <input
+                      type="email"
+                      value={editingAgent.email || ""}
+                      onChange={(e) => setEditingAgent({ ...editingAgent, email: e.target.value })}
+                      className="w-full text-xs p-2 bg-white rounded border border-[#e8d5cc] focus:ring-1 focus:ring-[#7c3a2a] outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-500 mb-1">Website URL</label>
+                    <input
+                      type="url"
+                      value={editingAgent.website || ""}
+                      onChange={(e) => setEditingAgent({ ...editingAgent, website: e.target.value })}
+                      className="w-full text-xs p-2 bg-white rounded border border-[#e8d5cc] focus:ring-1 focus:ring-[#7c3a2a] outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-500 mb-1">Status</label>
+                    <select
+                      value={editingAgent.submissionStatus}
+                      onChange={(e) => setEditingAgent({ ...editingAgent, submissionStatus: e.target.value as SubmissionStatus })}
+                      className="w-full text-xs p-2 bg-white rounded border border-[#e8d5cc] outline-none focus:ring-1 focus:ring-[#7c3a2a]"
+                    >
+                      <option value={SubmissionStatus.OPEN}>Open</option>
+                      <option value={SubmissionStatus.CLOSED}>Closed</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-500 mb-1">Rating</label>
+                    <select
+                      value={editingAgent.starRating}
+                      onChange={(e) => setEditingAgent({ ...editingAgent, starRating: parseInt(e.target.value) as any })}
+                      className="w-full text-xs p-2 bg-white rounded border border-[#e8d5cc] outline-none focus:ring-1 focus:ring-[#7c3a2a]"
+                    >
+                      <option value="5">Dream Agent (5★)</option>
+                      <option value="4">Strong match (4★)</option>
+                      <option value="3">Decent fit (3★)</option>
+                      <option value="2">Average fit (2★)</option>
+                      <option value="1">Reserve list (1★)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-500 mb-1">Genres Looked For (Comma-separated)</label>
+                  <input
+                    type="text"
+                    value={editingAgent.genres ? editingAgent.genres.join(", ") : ""}
+                    onChange={(e) => setEditingAgent({ ...editingAgent, genres: e.target.value.split(",").map(val => val.trim()).filter(val => val !== "") })}
+                    placeholder="e.g. Literary Fiction, Fantasy, YA"
+                    className="w-full text-xs p-2 bg-white rounded border border-[#e8d5cc] outline-none focus:ring-1 focus:ring-[#7c3a2a]"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-500 mb-1">Submission Method</label>
+                    <select
+                      value={editingAgent.submissionMethod || "Email"}
+                      onChange={(e) => setEditingAgent({ ...editingAgent, submissionMethod: e.target.value as SubmissionMethod })}
+                      className="w-full text-xs p-2 bg-white rounded border border-[#e8d5cc] outline-none focus:ring-1 focus:ring-[#7c3a2a]"
+                    >
+                      <option value={SubmissionMethod.EMAIL}>Email</option>
+                      <option value={SubmissionMethod.ONLINE_FORM}>Online Form / QueryManager</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-500 mb-1">Response Time (weeks)</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={editingAgent.responseTimeWeeks || 6}
+                      onChange={(e) => setEditingAgent({ ...editingAgent, responseTimeWeeks: parseInt(e.target.value) || 6 })}
+                      className="w-full text-xs p-2 bg-white rounded border border-[#e8d5cc] outline-none focus:ring-1 focus:ring-[#7c3a2a]"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 py-1 cursor-pointer select-none font-semibold">
+                  <input
+                    id="no-response-toggle"
+                    type="checkbox"
+                    checked={editingAgent.noResponseMeansNo}
+                    onChange={(e) => setEditingAgent({ ...editingAgent, noResponseMeansNo: e.target.checked })}
+                    className="rounded text-[#7c3a2a]"
+                  />
+                  <label htmlFor="no-response-toggle">Silence policy means pass ("no response means no")</label>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-500 mb-1">Manuscript wishlist text / MSWL</label>
+                  <textarea
+                    value={editingAgent.mswlNotes || ""}
+                    onChange={(e) => setEditingAgent({ ...editingAgent, mswlNotes: e.target.value })}
+                    placeholder="Look up their wishlist for specific queries cues..."
+                    className="w-full text-xs p-2 bg-white rounded border border-[#e8d5cc] outline-none focus:ring-1 focus:ring-[#7c3a2a] min-h-[60px]"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2.5 pt-4 border-t border-[#FAF1EF]">
+                  <button
+                    type="button"
+                    onClick={() => setEditingAgent(null)}
+                    className="bg-stone-200 text-stone-700 text-[10px] font-bold uppercase tracking-wider px-4 py-2 rounded-full cursor-pointer leading-normal border-0"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-[#7c3a2a] text-[#F8F5F0] text-[10px] font-bold uppercase tracking-wider px-4 py-2 rounded-full cursor-pointer leading-normal border-0"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
