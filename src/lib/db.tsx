@@ -248,14 +248,14 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         let userDoc = await getDoc(userDocRef);
 
         if (!userDoc.exists()) {
-          const isFree = firebaseUser.email === "novice@writer.com";
+          const emailPrefix = (firebaseUser.email || "").split("@")[0] || "Writer";
           const freshUser: User = {
             id: uid,
-            name: signupTempNameRef.current || firebaseUser.displayName || (isFree ? "Aspiring Novice" : "Lucy Sterling"),
-            email: firebaseUser.email || "nick.physick@gmail.com",
-            plan: isFree ? UserPlan.FREE : UserPlan.PRO,
+            name: signupTempNameRef.current || firebaseUser.displayName || emailPrefix,
+            email: firebaseUser.email || "",
+            plan: UserPlan.FREE,
             trialStartDate: new Date().toISOString(),
-            subscriptionStatus: isFree ? "none" : "active",
+            subscriptionStatus: "trialing",
           };
           await setDoc(userDocRef, freshUser);
           signupTempNameRef.current = null;
