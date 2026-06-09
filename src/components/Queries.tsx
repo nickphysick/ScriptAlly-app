@@ -3020,7 +3020,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     {(() => {
                       const validEnumValues = Object.values(QueryStatus);
                       // Skip any activity documents with a type that does not match a QueryStatus enum value
-                      const activityEvents = trackingEvents.filter(evt => {
+                      const activityEventsRaw = trackingEvents.filter(evt => {
                         return validEnumValues.includes(evt.type as QueryStatus);
                       });
 
@@ -3031,6 +3031,22 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                         if (val.seconds) return val.seconds * 1000;
                         return new Date(val).getTime();
                       };
+
+                      // Deduplicate by grouping by 'type' and keeping only the one with the earliest 'createdAt'
+                      const deduplicatedMap: { [key: string]: any } = {};
+                      activityEventsRaw.forEach(evt => {
+                        const typeVal = evt.type as string;
+                        if (!deduplicatedMap[typeVal]) {
+                          deduplicatedMap[typeVal] = evt;
+                        } else {
+                          const existingTime = getTime(deduplicatedMap[typeVal].createdAt);
+                          const incomingTime = getTime(evt.createdAt);
+                          if (incomingTime < existingTime) {
+                            deduplicatedMap[typeVal] = evt;
+                          }
+                        }
+                      });
+                      const activityEvents = Object.values(deduplicatedMap);
 
                       // Sort events chronologically ascending (oldest first)
                       activityEvents.sort((a, b) => getTime(a.createdAt) - getTime(b.createdAt));
@@ -3147,17 +3163,21 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           if (item.type === QueryStatus.QUERIED) {
                             displaySubDetail = `via ${activeQuery.sendMethod || "Email"}`;
                           } else if (item.type === QueryStatus.PARTIAL_REQUESTED || item.type === QueryStatus.FULL_REQUESTED) {
-                            if (item.note) {
+                            const qty = item.materialsQuantity || activeQuery.materialsRequestedQuantity;
+                            const mType = item.materialsType || activeQuery.materialsRequestedType;
+                            
+                            if (qty && mType) {
+                              const formattedType = mType.toLowerCase() === "other" ? "" : mType;
+                              displaySubDetail = `Requested: ${qty} ${formattedType}`.trim();
+                            } else if (item.note) {
                               const parts = item.note.split("—");
                               if (parts.length > 1) {
-                                displaySubDetail = parts[1].trim();
+                                displaySubDetail = `Requested: ${parts[1].trim()}`;
                               } else {
-                                displaySubDetail = item.materialsQuantity && item.materialsType
-                                  ? `${item.materialsQuantity} ${item.materialsType}`
-                                  : item.note;
+                                displaySubDetail = item.note;
                               }
-                            } else if (item.materialsQuantity && item.materialsType) {
-                              displaySubDetail = `${item.materialsQuantity} ${item.materialsType}`;
+                            } else {
+                              displaySubDetail = "Requested materials details";
                             }
                           } else if (item.type === QueryStatus.REJECTED) {
                             const feedbackType = item.feedbackType || activeQuery.rejectionFeedbackType;
@@ -3824,6 +3844,12 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             lastStatusChange: serverTimestamp(),
             responseReceivedAt: serverTimestamp()
           };
+
+          if (newStatus === QueryStatus.PARTIAL_REQUESTED) {
+            updates.partialRequestedDate = new Date().toISOString();
+          } else if (newStatus === QueryStatus.FULL_REQUESTED) {
+            updates.fullRequestedDate = new Date().toISOString();
+          }
 
           // Explicitly overwrite or clear fields on update to avoid leftover data
           updates.materialsRequestedType = materialsRequestedType !== undefined ? materialsRequestedType : deleteField();

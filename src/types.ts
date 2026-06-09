@@ -164,9 +164,6 @@ export interface Query {
   partialSentDate?: string;
   fullRequestedDate?: string;
   fullSentDate?: string;
-  rejectedDate?: string;
-  rejectionType?: string;
-  rejectionDetails?: string;
 }
 
 export enum ActivityType {

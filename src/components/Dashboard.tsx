@@ -21,7 +21,7 @@ import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { ActivityCopyCustomizer } from "./ActivityCopyCustomizer";
 import { QuerySlideInPanel } from "./QuerySlideInPanel";
 import { CalendarView } from "./CalendarView";
-import { StatusPill } from "./StatusPill";
+import { StatusPill, StatusCircle } from "./StatusPill";
 import { getDynamicActivityText, replacePlaceholders, extractAgentFromText, boldAgentAndAgencyInText } from "../lib/activityUtils";
 import {
   Sparkles,
@@ -1641,6 +1641,14 @@ export const Dashboard: React.FC<{
     const responseEvents: ResponseEvent[] = [];
     const dynamicResponsesPerWeek = [0, 0, 0, 0, 0, 0, 0, 0];
 
+    const getSafeDate = (val: any) => {
+      if (!val) return null;
+      if (typeof val === "string") return new Date(val);
+      if (val.toDate) return val.toDate();
+      if (val.seconds) return new Date(val.seconds * 1000);
+      return new Date(val);
+    };
+
     queries.forEach(q => {
       // Capture response events
       const agent = agents.find(a => a.id === q.agentId);
@@ -1649,25 +1657,29 @@ export const Dashboard: React.FC<{
       const msTitle = ms?.title || "Manuscript";
 
       // 1. Partial Request Check (using query record only, no activity lagging dependencies)
-      if (q.partialRequestedDate !== null && q.partialRequestedDate !== undefined && q.partialRequestedDate !== "") {
+      const partDate = getSafeDate(q.partialRequestedDate) || 
+        (q.status === QueryStatus.PARTIAL_REQUESTED ? (getSafeDate(q.responseReceivedAt) || getSafeDate(q.lastStatusChange)) : null);
+      if (partDate) {
         responseEvents.push({
           queryId: q.id,
           agentName,
           msTitle,
           type: "Partial Requested",
-          date: new Date(q.partialRequestedDate),
+          date: partDate,
           isPositive: true
         });
       }
 
       // 2. Full Request Check
-      if (q.fullRequestedDate !== null && q.fullRequestedDate !== undefined && q.fullRequestedDate !== "") {
+      const fullDate = getSafeDate(q.fullRequestedDate) || 
+        (q.status === QueryStatus.FULL_REQUESTED ? (getSafeDate(q.responseReceivedAt) || getSafeDate(q.lastStatusChange)) : null);
+      if (fullDate) {
         responseEvents.push({
           queryId: q.id,
           agentName,
           msTitle,
           type: "Full Requested",
-          date: new Date(q.fullRequestedDate),
+          date: fullDate,
           isPositive: true
         });
       }
@@ -1675,6 +1687,8 @@ export const Dashboard: React.FC<{
       // 3. Offer of Representation (OFFER)
       if (q.status === QueryStatus.OFFER) {
         const oDate = (() => {
+          const base = getSafeDate(q.offerDate) || getSafeDate(q.responseReceivedAt) || getSafeDate(q.lastStatusChange);
+          if (base) return base;
           const d = new Date(q.fullSentDate || q.partialSentDate || q.dateSent);
           d.setDate(d.getDate() + 21);
           return d;
@@ -1692,6 +1706,8 @@ export const Dashboard: React.FC<{
       // 4. Revise & Resubmit (R&R)
       if (q.status === QueryStatus.REVISE_RESUBMIT) {
         const rrDate = (() => {
+          const base = getSafeDate(q.responseReceivedAt) || getSafeDate(q.lastStatusChange);
+          if (base) return base;
           const d = new Date(q.fullSentDate || q.partialSentDate || q.dateSent);
           d.setDate(d.getDate() + 14);
           return d;
@@ -1708,11 +1724,11 @@ export const Dashboard: React.FC<{
 
       // 5. Rejected
       if (q.status === QueryStatus.REJECTED) {
-        const rejDate = q.responseDeadline ? new Date(q.responseDeadline) : (() => {
+        const rejDate = getSafeDate(q.responseReceivedAt) || getSafeDate(q.lastStatusChange) || (q.responseDeadline ? new Date(q.responseDeadline) : (() => {
           const d = new Date(q.dateSent);
           d.setDate(d.getDate() + 28);
           return d;
-        })();
+        })());
         responseEvents.push({
           queryId: q.id,
           agentName,
@@ -1725,11 +1741,11 @@ export const Dashboard: React.FC<{
 
       // 6. No Response
       if (q.status === QueryStatus.NO_RESPONSE) {
-        const nrDate = q.responseDeadline ? new Date(q.responseDeadline) : (() => {
+        const nrDate = getSafeDate(q.responseReceivedAt) || getSafeDate(q.lastStatusChange) || (q.responseDeadline ? new Date(q.responseDeadline) : (() => {
           const d = new Date(q.dateSent);
           d.setDate(d.getDate() + 30);
           return d;
-        })();
+        })());
         responseEvents.push({
           queryId: q.id,
           agentName,
@@ -1759,21 +1775,20 @@ export const Dashboard: React.FC<{
       return queries.length === 0 ? mockVals[idx] : val;
     });
 
+    const RESPONSE_RECEIVED_STATUSES = [
+      QueryStatus.PARTIAL_REQUESTED,
+      QueryStatus.PARTIAL_SENT,
+      QueryStatus.FULL_REQUESTED,
+      QueryStatus.FULL_SENT,
+      QueryStatus.REVISE_RESUBMIT,
+      QueryStatus.OFFER,
+      QueryStatus.REJECTED,
+      QueryStatus.NO_RESPONSE,
+    ];
+
     const totalResponsesCalc = queries.length === 0
-      ? [0, 1, 0, 2, 4, 1, 0, 1].reduce((sum, curr) => sum + curr, 0)
-      : queries.reduce((total, q) => {
-          let count = 0;
-          if (q.partialRequestedDate !== null && q.partialRequestedDate !== undefined && q.partialRequestedDate !== "") {
-            count++;
-          }
-          if (q.fullRequestedDate !== null && q.fullRequestedDate !== undefined && q.fullRequestedDate !== "") {
-            count++;
-          }
-          if ([QueryStatus.OFFER, QueryStatus.REVISE_RESUBMIT, QueryStatus.REJECTED, QueryStatus.NO_RESPONSE].includes(q.status)) {
-            count++;
-          }
-          return total + count;
-        }, 0);
+      ? 9
+      : queries.filter(q => RESPONSE_RECEIVED_STATUSES.includes(q.status)).length;
 
     return {
       responseEvents,
@@ -1856,28 +1871,12 @@ export const Dashboard: React.FC<{
     ? [1, 2, 0, 1, 3, 1, 0, 2].reduce((sum, curr) => sum + curr, 0)
     : totalQueriesSent;
   
-  const RESPONSE_RECEIVED_STATUSES = [
-    QueryStatus.PARTIAL_REQUESTED,
-    QueryStatus.PARTIAL_SENT,
-    QueryStatus.FULL_REQUESTED,
-    QueryStatus.FULL_SENT,
-    QueryStatus.REVISE_RESUBMIT,
-    QueryStatus.OFFER,
-    QueryStatus.REJECTED,
-    QueryStatus.WITHDRAWN,
-    QueryStatus.NO_RESPONSE,
-  ];
-
-  const responsesReceived = queries.length === 0
-    ? [0, 1, 0, 2, 4, 1, 0, 1].reduce((sum, curr) => sum + curr, 0)
-    : queries.filter(q =>
-        RESPONSE_RECEIVED_STATUSES.includes(q.status as QueryStatus)
-      ).length;
+  const responsesReceived = totalResponsesCalc;
 
   const totalQueries = queries.length;
 
   const responseRatePercent = queries.length === 0
-    ? (totalSentCalc > 0 ? Math.round(([0, 1, 0, 2, 4, 1, 0, 1].reduce((sum, curr) => sum + curr, 0) / totalSentCalc) * 100) : 0)
+    ? (totalSentCalc > 0 ? Math.round((totalResponsesCalc / totalSentCalc) * 100) : 0)
     : (totalQueries > 0
         ? Math.round((responsesReceived / totalQueries) * 100)
         : 0);
@@ -4722,16 +4721,16 @@ export const Dashboard: React.FC<{
               id: string;
               queryId: string;
               query: Query;
-              type:
-                | 'sent'
-                | 'pages_requested_no_response'
+              type: 
+                | 'sent' 
+                | 'pages_requested_no_response' 
                 | 'pages_requested_deadline'
-                | 'partial_sent'
-                | 'full_sent'
-                | 'expected_upcoming'
-                | 'expected_overdue'
-                | 'nudge'
-                | 'rejected';
+                | 'pages_requested_overdue'
+                | 'partial_sent' 
+                | 'full_sent' 
+                | 'expected_upcoming' 
+                | 'expected_overdue' 
+                | 'nudge';
               date: Date;
               dateStr: string;
             }
@@ -4795,9 +4794,9 @@ export const Dashboard: React.FC<{
 
               // 3. Pages requested by agent — writer has not yet responded
               const isPagesRequestedButNotSent = 
-                q.status === QueryStatus.PARTIAL_REQUESTED || 
-                q.status === QueryStatus.FULL_REQUESTED || 
-                q.status === QueryStatus.REVISE_RESUBMIT;
+                (q.status === QueryStatus.PARTIAL_REQUESTED && !q.partialSentDate) || 
+                (q.status === QueryStatus.FULL_REQUESTED && !q.fullSentDate) || 
+                (q.status === QueryStatus.REVISE_RESUBMIT && !q.partialSentDate && !q.fullSentDate);
 
               if (isPagesRequestedButNotSent) {
                 const reqDateStr = 
@@ -4805,8 +4804,8 @@ export const Dashboard: React.FC<{
                   : q.status === QueryStatus.FULL_REQUESTED ? (q.fullRequestedDate || q.dateSent)
                   : (q.fullRequestedDate || q.partialRequestedDate || q.dateSent);
                 
-                // Show the date that the response was due by (responseDeadline), falling back to request date
-                const eventDateStr = q.responseDeadline || reqDateStr;
+                // Show the date that the request was made on
+                const eventDateStr = reqDateStr;
                 const eventDate = new Date(eventDateStr);
                 
                 allEvents.push({
@@ -4818,9 +4817,21 @@ export const Dashboard: React.FC<{
                   dateStr: eventDateStr,
                 });
 
-                // Expected send deadline in coming up panel (future)
-                if (q.responseDeadline) {
-                  const deadlineDate = new Date(q.responseDeadline);
+                // Expected send deadline in coming up panel (future) or overdue (past)
+                const getSafeEventDate = (val: any) => {
+                  if (!val) return null;
+                  if (typeof val === "string") return new Date(val);
+                  if (val.toDate && typeof val.toDate === "function") return val.toDate();
+                  if (typeof val.seconds === "number") return new Date(val.seconds * 1000);
+                  const parsed = new Date(val);
+                  if (!isNaN(parsed.getTime())) return parsed;
+                  return null;
+                };
+
+                const rawDeadline = q.expectedSendDate || q.responseDeadline;
+                const deadlineDate = getSafeEventDate(rawDeadline);
+
+                if (deadlineDate) {
                   const diffFuture = getDayDiff(deadlineDate, today);
                   if (diffFuture >= 1 && diffFuture <= 7) {
                     allEvents.push({
@@ -4829,7 +4840,16 @@ export const Dashboard: React.FC<{
                       query: q,
                       type: 'pages_requested_deadline',
                       date: deadlineDate,
-                      dateStr: q.responseDeadline,
+                      dateStr: deadlineDate.toISOString(),
+                    });
+                  } else if (diffFuture < 0) {
+                    allEvents.push({
+                      id: `${q.id}-pages-requested-overdue`,
+                      queryId: q.id,
+                      query: q,
+                      type: 'pages_requested_overdue',
+                      date: deadlineDate,
+                      dateStr: deadlineDate.toISOString(),
                     });
                   }
                 }
@@ -4872,23 +4892,7 @@ export const Dashboard: React.FC<{
                 }
               }
 
-              // 5. Rejection received — show in past panel if rejectedDate falls in last 7 days
-              if (q.status === QueryStatus.REJECTED && q.rejectedDate) {
-                const rejDate = new Date(q.rejectedDate);
-                const diffRej = getDayDiff(today, rejDate);
-                if (diffRej >= 0 && diffRej <= 6) {
-                  allEvents.push({
-                    id: `${q.id}-rejected`,
-                    queryId: q.id,
-                    query: q,
-                    type: 'rejected',
-                    date: rejDate,
-                    dateStr: q.rejectedDate,
-                  });
-                }
-              }
-
-              // 6. Nudge reminder — today or upcoming
+              // 5. Nudge reminder — today or upcoming
               if (q.nudgeDate) {
                 const nudgeDate = new Date(q.nudgeDate);
                 const diffNudge = getDayDiff(nudgeDate, today);
@@ -4907,16 +4911,13 @@ export const Dashboard: React.FC<{
 
             // Past events: any events (including past deadlines or nudges) that fall in the last 7 days (today is diff = 0, past 6 days is diff = 1 to 6)
             const leftEvents = allEvents.filter(ev => {
-              if (ev.type === 'pages_requested_no_response') {
+              if (ev.type === 'pages_requested_overdue') {
                 return true;
               }
               if (ev.type === 'expected_overdue') {
                 return true;
               }
-              if (ev.type === 'rejected') {
-                return true;
-              }
-              if (['sent', 'partial_sent', 'full_sent'].includes(ev.type)) {
+              if (['sent', 'partial_sent', 'full_sent', 'pages_requested_no_response'].includes(ev.type)) {
                 const diff = getDayDiff(today, ev.date);
                 return (diff >= 0 && diff <= 6);
               }
@@ -4953,6 +4954,9 @@ export const Dashboard: React.FC<{
               if (type === 'pages_requested_no_response') {
                 return 'pages_requested_no_response';
               }
+              if (type === 'pages_requested_overdue') {
+                return 'pages_requested_overdue';
+              }
               if (type === 'expected_overdue') {
                 return 'expected_overdue';
               }
@@ -4968,15 +4972,15 @@ export const Dashboard: React.FC<{
               if (type === 'sent') {
                 return 'sent';
               }
-              if (type === 'rejected') {
-                return 'rejected';
-              }
               return null;
             };
 
             const renderTimelineIcon = (t: string, isHovered: boolean) => {
               const scaleStyle = { transform: isHovered ? "scale(1.2)" : "scale(1)", transition: "transform 200ms" };
               if (t === 'pages_requested_no_response') {
+                return <div key={t} className="w-[6px] h-[6px] rounded-full border border-[#7c3d3d] bg-transparent transition-transform" style={scaleStyle} />;
+              }
+              if (t === 'pages_requested_overdue') {
                 return <span key={t} className="text-[10px] font-black text-[#7c3d3d] leading-none select-none transition-transform" style={scaleStyle}>!</span>;
               }
               if (t === 'expected_overdue') {
@@ -4993,9 +4997,6 @@ export const Dashboard: React.FC<{
               }
               if (t === 'sent') {
                 return <div key={t} className="w-[6px] h-[6px] rounded-full border border-[#7c3d3d] bg-transparent transition-transform" style={scaleStyle} />;
-              }
-              if (t === 'rejected') {
-                return <div key={t} className="w-[6px] h-[6px] rounded-full bg-[#c9a89e] transition-transform" style={scaleStyle} />;
               }
               return null;
             };
@@ -5105,22 +5106,17 @@ export const Dashboard: React.FC<{
               } else if (['partial_sent', 'full_sent'].includes(ev.type)) {
                 cardBgAndBorder = "border-l-2 border-r-0 border-y-0 border-[#5a6858] bg-[#F7FBF6]";
               } else if (ev.type === 'pages_requested_no_response') {
-                cardBgAndBorder = "border-[1.5px] border-[#f5c8c8] bg-[#FFF0F0]/40";
+                cardBgAndBorder = "border-l-2 border-r-0 border-y-0 border-[#7c3d3d] bg-[#FFFAF8]";
               } else if (ev.type === 'pages_requested_deadline') {
                 cardBgAndBorder = "border-[1.5px] border-dashed border-[#c9a89e] bg-[#FDFAF8]";
+              } else if (ev.type === 'pages_requested_overdue') {
+                cardBgAndBorder = "border-l-2 border-r-0 border-y-0 border-[#7c3d3d] bg-[#FFFAF8]";
               } else if (ev.type === 'expected_upcoming') {
-                const daysLeft = getDayDiff(ev.date, today);
-                if (daysLeft >= 0 && daysLeft <= 3) {
-                  cardBgAndBorder = "border-[1.5px] border-[#f5c8c8] bg-[#FFF0F0]/40";
-                } else {
-                  cardBgAndBorder = "border-[1.5px] border-dashed border-[#c9a89e] bg-[#FDFAF8]";
-                }
+                cardBgAndBorder = "border-[1.5px] border-dashed border-[#c9a89e] bg-[#FDFAF8]";
               } else if (ev.type === 'expected_overdue') {
-                cardBgAndBorder = "border-[1.5px] border-[#dce0d9] bg-[#f0e8e0]/20";
+                cardBgAndBorder = "border-l-2 border-r-0 border-y-0 border-[#7c3d3d] bg-[#FFFAF8]";
               } else if (ev.type === 'nudge') {
                 cardBgAndBorder = "border-[1.5px] border-dashed border-[#dbbdb5] bg-[#FDFAF8]";
-              } else if (ev.type === 'rejected') {
-                cardBgAndBorder = "border-l-2 border-r-0 border-y-0 border-[#c9a89e] bg-[#FAF4F2]";
               }
 
               let dateLabel: React.ReactNode = (
@@ -5150,20 +5146,38 @@ export const Dashboard: React.FC<{
                 eventTypeLabel = "Full sent";
                 typeColorClass = "text-[#5a6858] font-medium";
               } else if (ev.type === 'pages_requested_no_response') {
-                const nDays = Math.max(0, getDayDiff(today, ev.date));
-                const nDaysText = nDays === 1 ? "1 day" : `${nDays} days`;
-                pillElement = renderPill("#FFF0F0", "#7c3d3d", "#f5c8c8", `agent awaiting your response - ${nDaysText} overdue`);
+                eventTypeLabel = ev.query.status === QueryStatus.PARTIAL_REQUESTED 
+                  ? "Partial manuscript requested" 
+                  : ev.query.status === QueryStatus.FULL_REQUESTED 
+                    ? "Full manuscript requested" 
+                    : "Manuscript requested";
+                typeColorClass = "text-[#7c3d3d] font-semibold";
               } else if (ev.type === 'pages_requested_deadline') {
                 let reqTypeLabel = "manuscript";
-                if (ev.query.status === QueryStatus.PARTIAL_REQUESTED) reqTypeLabel = "partial manuscript";
-                else if (ev.query.status === QueryStatus.FULL_REQUESTED) reqTypeLabel = "full manuscript";
-                else if (ev.query.status === QueryStatus.REVISE_RESUBMIT) reqTypeLabel = "revised & resubmitted manuscript";
+                if (ev.query.status === QueryStatus.PARTIAL_REQUESTED || ev.query.status === QueryStatus.PARTIAL_SENT || ev.query.partialRequestedDate) {
+                  reqTypeLabel = "partial manuscript";
+                } else if (ev.query.status === QueryStatus.FULL_REQUESTED || ev.query.status === QueryStatus.FULL_SENT || ev.query.fullRequestedDate) {
+                  reqTypeLabel = "full manuscript";
+                } else if (ev.query.status === QueryStatus.REVISE_RESUBMIT) {
+                  reqTypeLabel = "revised & resubmitted manuscript";
+                }
                 eventTypeLabel = `Agent expecting your ${reqTypeLabel} by this date`;
                 typeColorClass = "text-[#7c4a3a] italic";
+              } else if (ev.type === 'pages_requested_overdue') {
+                const reqTypeLabel = (ev.query.status === QueryStatus.PARTIAL_REQUESTED || ev.query.status === QueryStatus.PARTIAL_SENT || ev.query.partialRequestedDate) 
+                  ? "partial manuscript" 
+                  : (ev.query.status === QueryStatus.FULL_REQUESTED || ev.query.status === QueryStatus.FULL_SENT || ev.query.fullRequestedDate) 
+                    ? "full manuscript" 
+                    : "manuscript";
+                eventTypeLabel = `A ${reqTypeLabel} was due to be sent`;
+                typeColorClass = "text-[#7c3d3d] font-semibold";
+                pillElement = null;
               } else if (ev.type === 'expected_upcoming') {
                 const daysLeft = getDayDiff(ev.date, today);
                 if (daysLeft >= 0 && daysLeft <= 3) {
-                  pillElement = renderPill("#FFF0F0", "#7c3d3d", "#f5c8c8", "Final day of response window — consider nudging");
+                  eventTypeLabel = "Final day of response window — consider nudging";
+                  typeColorClass = "text-[#7c3d3d] font-semibold";
+                  pillElement = null;
                 } else {
                   const evDateFormatted = `${ev.date.getDate()} ${monthsArr[ev.date.getMonth()]}`;
                   eventTypeLabel = `Response expected ${evDateFormatted}`;
@@ -5176,9 +5190,6 @@ export const Dashboard: React.FC<{
               } else if (ev.type === 'nudge') {
                 eventTypeLabel = "Nudge reminder";
                 typeColorClass = "text-[#9a6858]";
-              } else if (ev.type === 'rejected') {
-                eventTypeLabel = "Rejection received";
-                typeColorClass = "text-[#9a7060]";
               }
 
               let tooltipHeaderBg = "#3a1c14";
@@ -5186,59 +5197,88 @@ export const Dashboard: React.FC<{
                 tooltipHeaderBg = "#7c4838";
               } else if (['partial_sent', 'full_sent'].includes(ev.type)) {
                 tooltipHeaderBg = "#5a6858";
-              } else if (ev.type === 'pages_requested_no_response' || ev.type === 'pages_requested_deadline') {
+              } else if (ev.type === 'pages_requested_no_response' || ev.type === 'pages_requested_overdue' || ev.type === 'pages_requested_deadline') {
                 tooltipHeaderBg = "#7c3d3d";
               } else if (ev.type === 'expected_overdue') {
                 tooltipHeaderBg = "#5c4033";
-              } else if (ev.type === 'rejected') {
-                tooltipHeaderBg = "#7c5a52";
               }
 
               const materials = agent?.materialsWanted && agent.materialsWanted.length > 0 
                 ? agent.materialsWanted.join(", ") 
                 : "Partial Manuscript, Synopsis";
 
-              // Clean above-cursor tooltip with high z-index and wide container so no labels cut off (w-[280px])
-              const tooltipClass = "invisible opacity-0 group-hover:visible group-hover:opacity-100 absolute z-[100] bottom-full left-1/2 -translate-x-1/2 mb-3 w-[280px] bg-white border border-[#e8d5cc] rounded-xl shadow-xl flex flex-col pointer-events-auto transition-all duration-200 origin-bottom scale-95 group-hover:scale-100";
+              // Clean above-cursor tooltip with high z-index and compact width (w-[260px]) so no text is cut off, now glassy with a 0.75 second hover delay.
+              const tooltipClass = "invisible opacity-0 group-hover:visible group-hover:opacity-100 absolute z-[100] bottom-full left-1/2 -translate-x-1/2 mb-3 w-[260px] bg-white/85 backdrop-blur-md border border-[#e8d5cc]/80 rounded-xl overflow-hidden shadow-xl flex flex-col pointer-events-auto transition-all duration-200 delay-0 group-hover:delay-[750ms] origin-bottom scale-[0.97] group-hover:scale-100";
 
-              const getQueryStatusProgress = (status: QueryStatus) => {
-                switch (status) {
-                  case QueryStatus.QUERIED:
-                    return 20;
-                  case QueryStatus.PARTIAL_REQUESTED:
-                    return 40;
-                  case QueryStatus.PARTIAL_SENT:
-                    return 60;
-                  case QueryStatus.FULL_REQUESTED:
-                    return 80;
-                  case QueryStatus.FULL_SENT:
-                    return 100;
-                  case QueryStatus.REVISE_RESUBMIT:
-                    return 75;
-                  case QueryStatus.OFFER:
-                    return 100;
-                  case QueryStatus.REJECTED:
-                  case QueryStatus.WITHDRAWN:
-                  case QueryStatus.NO_RESPONSE:
-                    return 100;
-                  default:
-                    return 0;
+              const getRecordedRequestMaterials = (q: any) => {
+                const qty = q.materialsRequestedQuantity;
+                const mType = q.materialsRequestedType;
+                
+                if (qty && mType) {
+                  if (mType.toLowerCase() === "other") {
+                    return qty;
+                  }
+                  const typeLabel = mType.charAt(0).toUpperCase() + mType.slice(1).toLowerCase();
+                  return `${qty} ${typeLabel}`;
                 }
+                if (qty) return String(qty);
+                if (mType) {
+                  if (mType.toLowerCase() === "other") return "Custom materials";
+                  return mType.charAt(0).toUpperCase() + mType.slice(1).toLowerCase();
+                }
+                
+                // Fallbacks if not specifically input
+                if (q.status === QueryStatus.PARTIAL_REQUESTED || q.status === QueryStatus.PARTIAL_SENT) {
+                  return "Partial manuscript";
+                }
+                if (q.status === QueryStatus.FULL_REQUESTED || q.status === QueryStatus.FULL_SENT) {
+                  return "Full manuscript";
+                }
+                if (q.status === QueryStatus.REVISE_RESUBMIT) {
+                  return "Revised manuscript";
+                }
+                return "Manuscript materials";
               };
 
+              const recordedMaterials = getRecordedRequestMaterials(ev.query) || "Manuscript materials";
+
+              let eventStatus = ev.query.status;
+              if (ev.type === 'sent') {
+                eventStatus = QueryStatus.QUERIED;
+              } else if (ev.type === 'partial_sent') {
+                eventStatus = QueryStatus.PARTIAL_SENT;
+              } else if (ev.type === 'full_sent') {
+                eventStatus = QueryStatus.FULL_SENT;
+              } else if (ev.type === 'pages_requested_no_response' || ev.type === 'pages_requested_overdue' || ev.type === 'pages_requested_deadline') {
+                if (ev.query.status === QueryStatus.PARTIAL_REQUESTED || ev.query.status === QueryStatus.PARTIAL_SENT) {
+                  eventStatus = QueryStatus.PARTIAL_REQUESTED;
+                } else if (ev.query.status === QueryStatus.FULL_REQUESTED || ev.query.status === QueryStatus.FULL_SENT) {
+                  eventStatus = QueryStatus.FULL_REQUESTED;
+                } else if (ev.query.status === QueryStatus.REVISE_RESUBMIT) {
+                  eventStatus = QueryStatus.REVISE_RESUBMIT;
+                } else {
+                  eventStatus = ev.query.fullRequestedDate ? QueryStatus.FULL_REQUESTED : QueryStatus.PARTIAL_REQUESTED;
+                }
+              } else if (ev.type === 'expected_upcoming' || ev.type === 'expected_overdue') {
+                eventStatus = QueryStatus.QUERIED;
+              }
+
               let dotIndicator: React.ReactNode = null;
-              if (ev.type === 'pages_requested_no_response' || ev.type === 'expected_overdue') {
-                dotIndicator = renderProgressCircle(getQueryStatusProgress(ev.query.status));
-              } else if (isNudge) {
+              const isMaryShelleyUrgent = ev.type === 'expected_upcoming' && (() => {
+                const daysLeft = getDayDiff(ev.date, today);
+                return daysLeft >= 0 && daysLeft <= 3;
+              })();
+
+              if (isNudge) {
                 dotIndicator = <span className="text-[13px] font-bold text-[#c9a89e] select-none leading-none">!</span>;
+              } else if (ev.type === 'pages_requested_overdue' || isMaryShelleyUrgent) {
+                dotIndicator = <span className="text-[13px] font-extrabold text-[#7c3d3d] select-none leading-none">!</span>;
               } else {
-                dotIndicator = renderProgressCircle(
-                  (ev.type === 'expected_upcoming' || ev.type === 'pages_requested_deadline') ? getResponseWindowProgress(ev.query) : 100
-                );
+                dotIndicator = <StatusCircle status={eventStatus} className="w-3.5 h-3.5" />;
               }
 
               let ctaText = "View query";
-              if (ev.type === 'pages_requested_no_response' || ev.type === 'pages_requested_deadline') {
+              if (ev.type === 'pages_requested_no_response' || ev.type === 'pages_requested_overdue' || ev.type === 'pages_requested_deadline') {
                 ctaText = "Send pages";
               } else if (ev.type === 'expected_upcoming') {
                 const daysLeft = getDayDiff(ev.date, today);
@@ -5285,28 +5325,28 @@ export const Dashboard: React.FC<{
                   {/* Infographic Hover Tooltip */}
                   <div className={tooltipClass} onClick={(e) => e.stopPropagation()}>
                     {/* Tooltip Header */}
-                    <div className="p-[8px_12px] flex flex-col text-left rounded-t-xl" style={{ backgroundColor: tooltipHeaderBg }}>
-                      <span className="text-[12px] font-semibold text-[#F8F5F0] leading-snug truncate">
-                        {agentName}
-                      </span>
-                      <span className="text-[10px] text-[rgba(248,245,240,0.5)] truncate">
-                        {agent?.agency || "Agency"}
-                      </span>
+                    <div className="p-[10px_12px] flex items-start justify-between gap-2 rounded-t-xl" style={{ backgroundColor: `${tooltipHeaderBg}CC` }}>
+                      <div className="flex flex-col text-left truncate flex-1 min-w-0">
+                        <span className="text-[12px] font-semibold text-[#F8F5F0] leading-snug truncate">
+                          {agentName}
+                        </span>
+                        <span className="text-[10px] text-[rgba(248,245,240,0.5)] mt-0.5 truncate animate-none">
+                          {agent?.agency || "Agency"}
+                        </span>
+                      </div>
+                      <div className="shrink-0 scale-90 origin-top-right">
+                        <StatusPill status={eventStatus} size="sm" />
+                      </div>
                     </div>
 
                     {/* Tooltip Body */}
-                    <div className="p-[10px_12px] flex flex-col gap-[8px] relative bg-white text-left text-neutral-800">
-                      {/* Top Row with Manuscript and Pill */}
-                      <div className="flex items-start justify-between gap-2 text-left">
-                        <div className="flex flex-col truncate">
-                          <span className="text-[8px] uppercase tracking-wider text-[#c9a89e] font-semibold">Manuscript</span>
-                          <span className="text-[11px] text-[#3a1c14] font-medium leading-tight truncate">
-                            {manuscripts.find(m => m.id === ev.query.manuscriptId)?.title || "Untitled"}
-                          </span>
-                        </div>
-                        <div className="shrink-0 scale-90 origin-top-right">
-                          <StatusPill status={ev.query.status} />
-                        </div>
+                    <div className="p-[10px_12px] flex flex-col gap-[8px] relative bg-transparent text-left text-neutral-800">
+                      {/* Top Row with Manuscript */}
+                      <div className="flex flex-col text-left">
+                        <span className="text-[8px] uppercase tracking-wider text-[#c9a89e] font-semibold">Manuscript</span>
+                        <span className="text-[11px] text-[#3a1c14] font-medium leading-normal break-words whitespace-normal">
+                          {manuscripts.find(m => m.id === ev.query.manuscriptId)?.title || "Untitled"}
+                        </span>
                       </div>
 
                       {/* Custom status layouts based on event type */}
@@ -5322,6 +5362,36 @@ export const Dashboard: React.FC<{
                                {new Date(ev.query.dateSent).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                              </span>
                            </div>
+                           {ev.query.status !== QueryStatus.QUERIED && (
+                             <div className="mt-2 p-2 bg-[#fdf8f6] border-l-2 border-[#ebdcd3] rounded text-left">
+                               <p className="text-[10px] text-[#6a5045] font-medium leading-normal">
+                                 {(() => {
+                                   switch (ev.query.status) {
+                                     case QueryStatus.PARTIAL_REQUESTED:
+                                       return "A partial manuscript has since been requested.";
+                                     case QueryStatus.PARTIAL_SENT:
+                                       return "A partial manuscript has since been sent.";
+                                     case QueryStatus.FULL_REQUESTED:
+                                       return "A full manuscript has since been requested.";
+                                     case QueryStatus.FULL_SENT:
+                                       return "A full manuscript has since been sent.";
+                                     case QueryStatus.REVISE_RESUBMIT:
+                                       return "A revised manuscript has since been requested.";
+                                     case QueryStatus.OFFER:
+                                       return "An offer has since been received.";
+                                     case QueryStatus.REJECTED:
+                                       return "This query has since received a rejection.";
+                                     case QueryStatus.WITHDRAWN:
+                                       return "This query has since been withdrawn.";
+                                     case QueryStatus.NO_RESPONSE:
+                                       return "This query has since been closed as no response.";
+                                     default:
+                                       return "";
+                                   }
+                                 })()}
+                               </p>
+                             </div>
+                           )}
                         </div>
                       )}
 
@@ -5330,7 +5400,7 @@ export const Dashboard: React.FC<{
                           <div className="flex justify-between items-center">
                             <span className="text-stone-400">Date requested</span>
                             <span className="font-medium text-[#3a1c14]">
-                              {ev.date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                              {new Date(ev.query.partialRequestedDate || ev.query.fullRequestedDate || ev.query.dateSent).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                             </span>
                           </div>
                           <div className="flex justify-between items-center">
@@ -5341,7 +5411,34 @@ export const Dashboard: React.FC<{
                           </div>
                           <div className="border-t border-[#f0e8e0]/40 pt-1.5 flex flex-col mt-0.5">
                             <span className="text-stone-400 text-[8px] uppercase font-semibold">What was requested</span>
-                            <span className="font-medium text-[#3a1c14] leading-tight mt-0.5">{materials}</span>
+                            <span className="font-medium text-[#3a1c14] leading-tight mt-0.5">{recordedMaterials}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {ev.type === 'pages_requested_overdue' && (
+                        <div className="flex flex-col gap-1.5 border-t border-[#f0e8e0]/60 pt-2 text-[10px]">
+                          <div className="flex justify-between items-center">
+                            <span className="text-stone-400">Date requested</span>
+                            <span className="font-medium text-[#3a1c14]">
+                              {new Date(ev.query.partialRequestedDate || ev.query.fullRequestedDate || ev.query.dateSent).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-stone-400">Your response expected by</span>
+                            <span className="font-semibold text-[#3a1c14]">
+                              {ev.date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-stone-400">Days overdue</span>
+                            <span className="font-semibold text-[#7c3d3d]">
+                              {Math.max(1, getDayDiff(today, ev.date))} {Math.max(1, getDayDiff(today, ev.date)) === 1 ? "day" : "days"}
+                            </span>
+                          </div>
+                          <div className="border-t border-[#f0e8e0]/40 pt-1.5 flex flex-col mt-0.5">
+                            <span className="text-stone-400 text-[8px] uppercase font-semibold">What was requested</span>
+                            <span className="font-medium text-[#3a1c14] leading-tight mt-0.5">{recordedMaterials}</span>
                           </div>
                         </div>
                       )}
@@ -5358,11 +5455,15 @@ export const Dashboard: React.FC<{
                             <span className="text-stone-400">Request type</span>
                             <span className="font-medium text-[#3a1c14]">{ev.query.status}</span>
                           </div>
-                          <div className="flex justify-between items-center pb-1">
+                          <div className="flex justify-between items-center">
                             <span className="text-stone-400">Deadline</span>
                             <span className="font-semibold text-[#7c3d3d]">
                               {ev.date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                             </span>
+                          </div>
+                          <div className="border-t border-[#f0e8e0]/40 pt-1.5 flex flex-col mt-0.5">
+                            <span className="text-stone-400 text-[8px] uppercase font-semibold">What was requested</span>
+                            <span className="font-medium text-[#3a1c14] leading-tight mt-0.5">{recordedMaterials}</span>
                           </div>
                         </div>
                       )}
@@ -5489,7 +5590,7 @@ export const Dashboard: React.FC<{
                       {/* Optional tinted quote block */}
                       {(() => {
                         const relatedAct = mergedActivities.find(act => act.queryId === ev.queryId && act.activityType === ActivityType.STATUS_CHANGED && act.details && !act.details.startsWith("Respond by") && !act.details.startsWith("Expected a response"));
-                        if (relatedAct && !['expected_overdue', 'expected_upcoming'].includes(ev.type)) {
+                        if (relatedAct && !['sent', 'expected_overdue', 'expected_upcoming', 'pages_requested_no_response', 'pages_requested_deadline', 'pages_requested_overdue'].includes(ev.type)) {
                           return (
                             <div className="bg-[#fdf8f6] p-2 mt-2 rounded border-l border-[#ebdcd3] text-left">
                               <p className="text-[10px] italic text-[#6a5045] leading-snug">

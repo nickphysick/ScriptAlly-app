@@ -194,6 +194,31 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onNavigate, isDashbo
         }
       }
 
+      // 3b. Materials send deadline (defined by expectedSendDate)
+      const expectedSendDateStr = q.expectedSendDate;
+      if (expectedSendDateStr) {
+        const d = (expectedSendDateStr.toDate && typeof expectedSendDateStr.toDate === "function") 
+          ? expectedSendDateStr.toDate() 
+          : (expectedSendDateStr.seconds ? new Date(expectedSendDateStr.seconds * 1000) : new Date(expectedSendDateStr));
+        if (!isNaN(d.getTime()) && getDayMidnight(d) > sysMidnight) {
+          eventsList.push({
+            id: `${q.id}-expected-send-deadline`,
+            queryId: q.id,
+            date: d,
+            type: "Material send deadline",
+            filterType: "Pages requested",
+            agentName,
+            agentAgency,
+            agentEmail,
+            manuscriptTitle,
+            msGenre,
+            msWordCount,
+            subLabel: "Material send deadline",
+            description: "Target date to submit the requested manuscript materials to the agent."
+          });
+        }
+      }
+
       // 4. Partial requested → appears on partialRequestedDate if set and in past/today
       if (q.partialRequestedDate) {
         const d = new Date(q.partialRequestedDate);

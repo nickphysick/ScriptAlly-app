@@ -820,28 +820,12 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           const matchingMs = manuscripts.find(ms => ms.id === q.manuscriptId);
           const manuscriptTitle = matchingMs ? matchingMs.title : "";
 
-          // Check if we have an activity matching this status for this query.
-          // We check the deterministic backfill ID first, then fall back to pattern matching
-          // against the natural-language descriptions that updateQueryStatus produces.
-          const deterministicId = `act-status-${q.status.replace(/\s+/g, '-').toLowerCase()}-${q.id}`;
-          const naturalLanguagePatterns: Partial<Record<QueryStatus, string[]>> = {
-            [QueryStatus.PARTIAL_REQUESTED]: ["requested a partial"],
-            [QueryStatus.PARTIAL_SENT]:      ["partial manuscript sent"],
-            [QueryStatus.FULL_REQUESTED]:    ["requested a full manuscript"],
-            [QueryStatus.FULL_SENT]:         ["full manuscript sent"],
-            [QueryStatus.REJECTED]:          ["rejection received", "rejected"],
-            [QueryStatus.WITHDRAWN]:         ["withdrew query", "withdrawn"],
-          };
-          const patterns = naturalLanguagePatterns[q.status] ?? [];
-          const hasStatusActivity = activities.some(act => {
-            if (act.id === deterministicId) return true;
-            if (act.queryId !== q.id) return false;
-            const desc = act.description?.toLowerCase() ?? "";
-            const details = act.details?.toLowerCase() ?? "";
-            if (desc.includes("status") || details.includes("status")) return true;
-            if (desc.includes(q.status.toLowerCase())) return true;
-            return patterns.some(p => desc.includes(p));
-          });
+          // Check if we have an activity matching this status for this query
+          const hasStatusActivity = activities.some(act => 
+            act.queryId === q.id && 
+            (act.details?.toLowerCase().includes("status") || act.description?.toLowerCase().includes("status") || 
+             act.description?.toLowerCase().includes(q.status.toLowerCase()))
+          );
 
           if (!hasStatusActivity) {
             let expectedNote = `Status updated to ${q.status}`;
@@ -1736,7 +1720,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         detailsLine = `Respond by ${formattedDeadStr}`;
       } else if (newStatus === QueryStatus.REJECTED) {
         desc = `Rejection received from ${agent?.name || "the agent"} at ${agent?.agency || "agency"}`;
-        detailsLine = systemNotes || "Query closed. Don't worry - it's all part of the journey.";
+        detailsLine = "Query closed. Don't worry - it's all part of the journey.";
       } else if (newStatus === QueryStatus.WITHDRAWN) {
         desc = `Withdrew query from ${agent?.name || "the agent"} at ${agent?.agency || "agency"}.`;
         detailsLine = "Query closed";
@@ -1761,16 +1745,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     if (newStatus === QueryStatus.PARTIAL_SENT) qUpdates.partialSentDate = dateStr;
     if (newStatus === QueryStatus.FULL_REQUESTED) qUpdates.fullRequestedDate = dateStr;
     if (newStatus === QueryStatus.FULL_SENT) qUpdates.fullSentDate = dateStr;
-    if (newStatus === QueryStatus.REJECTED) {
-      qUpdates.rejectedDate = dateStr;
-      if (systemNotes) {
-        // Parse rejectionType / rejectionDetails out of the notesCaptured string from QuerySlideInPanel
-        const typeMatch = systemNotes.match(/^Rejection Type: ([^.]+)\./);
-        const commentsMatch = systemNotes.match(/Comments: (.+)$/);
-        if (typeMatch) qUpdates.rejectionType = typeMatch[1].trim();
-        if (commentsMatch) qUpdates.rejectionDetails = commentsMatch[1].trim();
-      }
-    }
 
     if (isOfflineMode) {
       const updatedQueries = queries.map(q => (q.id === queryId ? { ...q, ...qUpdates } : q));
@@ -1846,10 +1820,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       fieldsToClear.push("fullRequestedDate", "fullSentDate");
     } else if (previousStatus === QueryStatus.FULL_REQUESTED) {
       fieldsToClear.push("fullSentDate");
-    }
-    // If undoing a rejection, clear the rejection fields
-    if (newStatus === QueryStatus.REJECTED) {
-      fieldsToClear.push("rejectedDate", "rejectionType", "rejectionDetails");
     }
 
     fieldsToClear.forEach(field => {
