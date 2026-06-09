@@ -260,6 +260,12 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           };
           await setDoc(userDocRef, freshUser);
           signupTempNameRef.current = null;
+        } else if (signupTempNameRef.current && userDoc.data()?.onboardingComplete === undefined) {
+          // Doc pre-dates the onboardingComplete field — this is a genuine new signup, stamp it
+          await updateDoc(userDocRef, { onboardingComplete: false });
+          signupTempNameRef.current = null;
+        } else {
+          signupTempNameRef.current = null;
         }
 
         // Active listener bindings for user document
@@ -1007,6 +1013,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const signup = async (name: string, email: string, password?: string): Promise<boolean> => {
     try {
       signupTempNameRef.current = name;
+      sessionStorage.setItem("scriptally_new_signup", "true");
       const pass = password || "writerpassword123";
       await createUserWithEmailAndPassword(auth, email, pass);
       setIsOfflineMode(false);

@@ -83,10 +83,12 @@ function AppContent() {
     return <Auth />;
   }
 
-  if (currentUser.onboardingComplete === false) {
+  const freshSignupFlag = sessionStorage.getItem("scriptally_new_signup") === "true";
+  if (currentUser.onboardingComplete === false || freshSignupFlag) {
     return (
       <Onboarding
         onComplete={async () => {
+          sessionStorage.removeItem("scriptally_new_signup");
           await updateUserProfile({ onboardingComplete: true });
         }}
       />
