@@ -256,6 +256,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
             plan: UserPlan.FREE,
             trialStartDate: new Date().toISOString(),
             subscriptionStatus: "trialing",
+            onboardingComplete: false,
           };
           await setDoc(userDocRef, freshUser);
           signupTempNameRef.current = null;

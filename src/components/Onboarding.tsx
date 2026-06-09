@@ -1,0 +1,1410 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React, { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { useScriptAllyDb } from "../lib/db";
+import { ManuscriptStatus, SubmissionStatus, SubmissionMethod } from "../types";
+import {
+  BookOpen,
+  Users,
+  Send,
+  Pencil,
+  Table,
+  LayoutGrid,
+  UserPlus,
+  ArrowRight,
+  Check,
+  ChevronLeft,
+  Upload,
+  Download,
+} from "lucide-react";
+
+// ─── Design tokens ────────────────────────────────────────────────────────────
+const C = {
+  bg:            "#F5F0EA",
+  sageBg:        "#DCE0D9",
+  card:          "#FFFDF9",
+  card2:         "#fdf5f0",
+  card3:         "#faf8f5",
+  ink:           "#3a1c14",
+  burgundy:      "#7c3a2a",
+  burgundyDeep:  "#5a2a1e",
+  dusty:         "#c9a89e",
+  dustyBorder:   "#e0ccc0",
+  sandy:         "#EBDCD3",
+  sandyBg:       "#FAF1EF",
+  sandyBorder2:  "#F2DDD5",
+  muted:         "#a08070",
+  mutedDark:     "#7a5848",
+  amber:         "#c97c5a",
+  green:         "#c0dd97",
+  greenDark:     "#3B6D11",
+  border:        "#EBDCD3",
+};
+
+const FONT_SERIF  = "'Playfair Display', Georgia, serif";
+const FONT_SANS   = "'Inter', system-ui, sans-serif";
+const FONT_MONO   = "'JetBrains Mono', 'Fira Mono', monospace";
+
+const ACCENT_COLORS: Record<number, string> = {
+  2: C.dusty,
+  3: C.burgundy,
+  4: C.burgundy,
+  5: C.burgundy,
+  6: C.green,
+};
+
+const TOTAL_MODAL_STEPS = 5; // steps 2–6
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+interface OnboardingProps {
+  onComplete: () => void;
+}
+
+type OnboardingPath = "guided" | "import" | "skip" | null;
+
+interface ProgressData {
+  step: number;
+  manuscriptTitle: string;
+  manuscriptGenre: string;
+  agentName: string;
+  agentAgency: string;
+  selectedPath: OnboardingPath;
+}
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+const Eyebrow: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <span style={{
+    fontFamily: FONT_MONO,
+    fontSize: 10,
+    textTransform: "uppercase",
+    letterSpacing: "0.1em",
+    color: C.dusty,
+    display: "block",
+    marginBottom: 8,
+  }}>
+    {children}
+  </span>
+);
+
+const ModalTitle: React.FC<{ children: React.ReactNode; style?: React.CSSProperties }> = ({ children, style }) => (
+  <h2 style={{
+    fontFamily: FONT_SERIF,
+    fontSize: 26,
+    fontWeight: 500,
+    letterSpacing: "-0.02em",
+    color: C.ink,
+    margin: "0 0 8px",
+    lineHeight: 1.25,
+    ...style,
+  }}>
+    {children}
+  </h2>
+);
+
+const Subtitle: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <p style={{
+    fontFamily: FONT_SANS,
+    fontSize: 13,
+    fontWeight: 300,
+    color: C.muted,
+    margin: "0 0 24px",
+    lineHeight: 1.6,
+  }}>
+    {children}
+  </p>
+);
+
+const SkipButton: React.FC<{ onSkip: () => void }> = ({ onSkip }) => (
+  <button
+    onClick={onSkip}
+    style={{
+      position: "absolute",
+      top: 20,
+      right: 20,
+      fontFamily: FONT_MONO,
+      fontSize: 10,
+      letterSpacing: "0.06em",
+      color: C.muted,
+      background: "none",
+      border: "none",
+      cursor: "pointer",
+      padding: "4px 8px",
+      borderRadius: 6,
+      transition: "color 0.15s",
+    }}
+    onMouseEnter={e => (e.currentTarget.style.color = C.ink)}
+    onMouseLeave={e => (e.currentTarget.style.color = C.muted)}
+  >
+    Skip setup
+  </button>
+);
+
+const ProgressDots: React.FC<{ currentStep: number }> = ({ currentStep }) => {
+  const dotStep = currentStep - 1; // 1-indexed into 1..5
+  return (
+    <div style={{ display: "flex", gap: 5, marginBottom: 28 }}>
+      {Array.from({ length: TOTAL_MODAL_STEPS }, (_, i) => {
+        const idx = i + 1;
+        const isActive = idx === dotStep;
+        const isDone = idx < dotStep;
+        return (
+          <div key={i} style={{
+            height: 5,
+            width: isActive ? 16 : 5,
+            borderRadius: 3,
+            background: isDone ? C.dusty : isActive ? C.burgundy : C.border,
+            transition: "width 0.3s ease, background 0.3s ease",
+          }} />
+        );
+      })}
+    </div>
+  );
+};
+
+const PrimaryButton: React.FC<{
+  onClick: () => void;
+  children: React.ReactNode;
+  disabled?: boolean;
+  fullWidth?: boolean;
+}> = ({ onClick, children, disabled, fullWidth }) => {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        fontFamily: FONT_MONO,
+        fontSize: 11,
+        letterSpacing: "0.06em",
+        background: disabled ? C.dustyBorder : hovered ? C.burgundyDeep : C.burgundy,
+        color: "#f5ede8",
+        border: "none",
+        borderRadius: 10,
+        padding: "10px 20px",
+        cursor: disabled ? "not-allowed" : "pointer",
+        transition: "background 0.15s, transform 0.15s",
+        transform: hovered && !disabled ? "translateY(-1px)" : "none",
+        width: fullWidth ? "100%" : undefined,
+      }}
+    >
+      {children}
+    </button>
+  );
+};
+
+const BackButton: React.FC<{ onClick: () => void }> = ({ onClick }) => {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        fontFamily: FONT_MONO,
+        fontSize: 11,
+        letterSpacing: "0.06em",
+        color: hovered ? C.ink : C.dusty,
+        background: "none",
+        border: "none",
+        cursor: "pointer",
+        padding: "10px 12px",
+        display: "flex",
+        alignItems: "center",
+        gap: 4,
+        transition: "color 0.15s",
+      }}
+    >
+      <ChevronLeft size={13} />
+      Back
+    </button>
+  );
+};
+
+const ModalFooter: React.FC<{
+  onBack?: () => void;
+  onContinue: () => void;
+  continueLabel?: string;
+  continueDisabled?: boolean;
+}> = ({ onBack, onContinue, continueLabel = "Continue →", continueDisabled }) => (
+  <div style={{
+    background: C.card3,
+    borderTop: `0.5px solid rgba(235,220,211,0.5)`,
+    borderRadius: "0 0 20px 20px",
+    padding: "16px 24px",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  }}>
+    {onBack ? <BackButton onClick={onBack} /> : <div />}
+    <PrimaryButton onClick={onContinue} disabled={continueDisabled}>
+      {continueLabel}
+    </PrimaryButton>
+  </div>
+);
+
+interface SelectableCardProps {
+  selected: boolean;
+  onSelect: () => void;
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  tag: string;
+}
+
+const SelectableCard: React.FC<SelectableCardProps> = ({ selected, onSelect, icon, title, description, tag }) => {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <button
+      onClick={onSelect}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 12,
+        width: "100%",
+        textAlign: "left",
+        background: selected ? "#fff0eb" : hovered ? C.card2 : C.card,
+        border: `${selected ? "1px" : "1px"} solid ${selected ? C.burgundy : hovered ? C.dusty : C.border}`,
+        borderRadius: 14,
+        padding: "13px 16px",
+        cursor: "pointer",
+        transition: "all 0.15s ease",
+        marginBottom: 8,
+      }}
+    >
+      <div style={{
+        width: 36,
+        height: 36,
+        borderRadius: 10,
+        background: selected ? C.burgundy : C.card2,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexShrink: 0,
+        transition: "background 0.15s",
+        color: selected ? "#f5ede8" : C.dusty,
+      }}>
+        {icon}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
+          <span style={{ fontFamily: FONT_SANS, fontSize: 13, fontWeight: 500, color: C.ink }}>
+            {title}
+          </span>
+          <span style={{
+            fontFamily: FONT_MONO,
+            fontSize: 9,
+            letterSpacing: "0.06em",
+            background: C.sandyBg,
+            border: `0.5px solid ${C.sandyBorder2}`,
+            color: C.muted,
+            borderRadius: 6,
+            padding: "2px 6px",
+            whiteSpace: "nowrap",
+          }}>
+            {tag}
+          </span>
+        </div>
+        <p style={{ fontFamily: FONT_SANS, fontSize: 12, fontWeight: 300, color: C.muted, margin: 0, lineHeight: 1.5 }}>
+          {description}
+        </p>
+      </div>
+    </button>
+  );
+};
+
+const FormField: React.FC<{
+  label: string;
+  required?: boolean;
+  children: React.ReactNode;
+}> = ({ label, required, children }) => (
+  <div style={{ marginBottom: 14 }}>
+    <label style={{
+      fontFamily: FONT_MONO,
+      fontSize: 9,
+      textTransform: "uppercase",
+      letterSpacing: "0.1em",
+      color: C.muted,
+      display: "block",
+      marginBottom: 5,
+    }}>
+      {label}{required && <span style={{ color: C.burgundy, marginLeft: 3 }}>*</span>}
+    </label>
+    {children}
+  </div>
+);
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  background: C.card2,
+  border: `0.5px solid ${C.dustyBorder}`,
+  borderRadius: 10,
+  padding: "11px 14px",
+  fontFamily: FONT_SANS,
+  fontSize: 13,
+  color: C.ink,
+  outline: "none",
+  boxSizing: "border-box",
+  transition: "border-color 0.15s, box-shadow 0.15s",
+};
+
+const InputField: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = (props) => {
+  const [focused, setFocused] = useState(false);
+  return (
+    <input
+      {...props}
+      style={{
+        ...inputStyle,
+        border: `0.5px solid ${focused ? C.dusty : C.dustyBorder}`,
+        boxShadow: focused ? "0 0 0 3px rgba(201,168,158,0.15)" : "none",
+        ...props.style,
+      }}
+      onFocus={e => { setFocused(true); props.onFocus?.(e); }}
+      onBlur={e => { setFocused(false); props.onBlur?.(e); }}
+    />
+  );
+};
+
+const SelectField: React.FC<React.SelectHTMLAttributes<HTMLSelectElement>> = (props) => {
+  const [focused, setFocused] = useState(false);
+  return (
+    <select
+      {...props}
+      style={{
+        ...inputStyle,
+        appearance: "none",
+        WebkitAppearance: "none",
+        cursor: "pointer",
+        border: `0.5px solid ${focused ? C.dusty : C.dustyBorder}`,
+        boxShadow: focused ? "0 0 0 3px rgba(201,168,158,0.15)" : "none",
+        ...props.style,
+      }}
+      onFocus={e => { setFocused(true); props.onFocus?.(e); }}
+      onBlur={e => { setFocused(false); props.onBlur?.(e); }}
+    />
+  );
+};
+
+// ─── Screen wrappers ──────────────────────────────────────────────────────────
+
+const ScreenTransition: React.FC<{ stepKey: number; children: React.ReactNode }> = ({ stepKey, children }) => (
+  <AnimatePresence mode="wait">
+    <motion.div
+      key={stepKey}
+      initial={{ opacity: 0, x: 10 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -10 }}
+      transition={{ duration: 0.28, ease: "easeOut" }}
+      style={{ width: "100%" }}
+    >
+      {children}
+    </motion.div>
+  </AnimatePresence>
+);
+
+const ModalCard: React.FC<{ step: number; children: React.ReactNode }> = ({ step, children }) => (
+  <div style={{
+    background: C.card,
+    border: `0.5px solid ${C.border}`,
+    borderRadius: 20,
+    width: "100%",
+    maxWidth: 500,
+    overflow: "hidden",
+    boxShadow: "0 8px 40px rgba(58,28,20,0.12)",
+  }}>
+    {/* Accent bar */}
+    <div style={{ height: 3, background: ACCENT_COLORS[step] || C.dusty }} />
+    {children}
+  </div>
+);
+
+// ─── Screen 1: Welcome ────────────────────────────────────────────────────────
+
+const Screen1Welcome: React.FC<{ onStart: () => void; onAlreadyHaveAccount: () => void }> = ({ onStart, onAlreadyHaveAccount }) => {
+  const [startHovered, setStartHovered] = useState(false);
+  const [acctHovered, setAcctHovered] = useState(false);
+
+  const fakeQueries = [
+    { status: "Queried",    agent: "Sarah Latham",    agency: "Curtis Brown" },
+    { status: "Full Sent",  agent: "Marcus Osei",     agency: "Peters Fraser" },
+    { status: "Rejected",   agent: "Julia Beckett",   agency: "Janklow Nesbit" },
+  ];
+
+  const statusDotColor: Record<string, string> = {
+    "Queried":   "#7c9dbf",
+    "Full Sent": "#7c3a2a",
+    "Rejected":  "#c97c5a",
+  };
+
+  return (
+    <div style={{
+      minHeight: "100vh",
+      background: "radial-gradient(ellipse at 70% 30%, #5a2a1e 0%, #3a1c14 70%)",
+      display: "flex",
+      flexDirection: "column",
+    }}>
+      {/* Main content */}
+      <div style={{
+        flex: 1,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "40px 24px",
+      }}>
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 64,
+          maxWidth: 960,
+          width: "100%",
+          alignItems: "center",
+        }}>
+          {/* Left: Copy */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            {/* Logo mark */}
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 32 }}>
+              <div style={{
+                width: 36,
+                height: 36,
+                background: C.burgundy,
+                borderRadius: 8,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontFamily: FONT_SERIF,
+                fontWeight: 700,
+                fontSize: 18,
+                color: "#f5ede8",
+              }}>
+                S
+              </div>
+              <span style={{ fontFamily: FONT_SERIF, fontSize: 20, fontWeight: 600, color: "#F8F5F0", letterSpacing: "-0.01em" }}>
+                ScriptAlly
+              </span>
+            </div>
+
+            <span style={{
+              fontFamily: FONT_MONO,
+              fontSize: 10,
+              textTransform: "uppercase",
+              letterSpacing: "0.1em",
+              color: C.dusty,
+              display: "block",
+              marginBottom: 16,
+            }}>
+              For fiction writers who query
+            </span>
+
+            <h1 style={{
+              fontFamily: FONT_SERIF,
+              fontSize: 38,
+              fontWeight: 500,
+              letterSpacing: "-0.02em",
+              color: "#F5F0EA",
+              margin: "0 0 20px",
+              lineHeight: 1.2,
+            }}>
+              Query with{" "}
+              <em style={{ fontStyle: "italic" }}>confidence</em>
+              ,<br />not chaos.
+            </h1>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 36 }}>
+              {[
+                "Every query in one place — agent, status, deadline, response.",
+                "Never miss a deadline — response windows, nudge reminders, follow-ups.",
+                "Agent intelligence — MSWL, preferences, and wishlist before you send.",
+              ].map((text, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: C.dusty, marginTop: 5, flexShrink: 0 }} />
+                  <span style={{ fontFamily: FONT_SANS, fontSize: 13, fontWeight: 300, color: "rgba(245,240,234,0.8)", lineHeight: 1.55 }}>
+                    {text}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <button
+                onClick={onStart}
+                onMouseEnter={() => setStartHovered(true)}
+                onMouseLeave={() => setStartHovered(false)}
+                style={{
+                  fontFamily: FONT_MONO,
+                  fontSize: 12,
+                  letterSpacing: "0.06em",
+                  background: startHovered ? C.burgundyDeep : C.burgundy,
+                  color: "#f5ede8",
+                  border: "none",
+                  borderRadius: 10,
+                  padding: "12px 24px",
+                  cursor: "pointer",
+                  transition: "all 0.15s",
+                  transform: startHovered ? "translateY(-1px)" : "none",
+                  alignSelf: "flex-start",
+                }}
+              >
+                Start for free →
+              </button>
+              <button
+                onClick={onAlreadyHaveAccount}
+                onMouseEnter={() => setAcctHovered(true)}
+                onMouseLeave={() => setAcctHovered(false)}
+                style={{
+                  fontFamily: FONT_MONO,
+                  fontSize: 11,
+                  letterSpacing: "0.06em",
+                  background: "none",
+                  color: acctHovered ? "#F5F0EA" : "rgba(245,240,234,0.6)",
+                  border: `0.5px solid ${acctHovered ? "rgba(245,240,234,0.5)" : "rgba(245,240,234,0.2)"}`,
+                  borderRadius: 10,
+                  padding: "10px 18px",
+                  cursor: "pointer",
+                  transition: "all 0.15s",
+                  alignSelf: "flex-start",
+                }}
+              >
+                I already have an account
+              </button>
+            </div>
+          </motion.div>
+
+          {/* Right: Mini dashboard preview */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.25 }}
+          >
+            <div style={{
+              background: "rgba(255,253,249,0.07)",
+              border: "0.5px solid rgba(255,255,255,0.1)",
+              borderRadius: 16,
+              padding: 20,
+              backdropFilter: "blur(4px)",
+            }}>
+              {/* Stat row */}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 16 }}>
+                {[
+                  { label: "Queries sent", value: "24" },
+                  { label: "Active", value: "8" },
+                  { label: "Response rate", value: "38%" },
+                ].map(s => (
+                  <div key={s.label} style={{
+                    background: "rgba(220,224,217,0.12)",
+                    borderRadius: 10,
+                    padding: "10px 12px",
+                  }}>
+                    <div style={{ fontFamily: FONT_SERIF, fontSize: 20, fontWeight: 500, color: "#F8F5F0" }}>{s.value}</div>
+                    <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.06em", color: C.dusty, marginTop: 2 }}>{s.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Fake query rows */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {fakeQueries.map((q, i) => (
+                  <div key={i} style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    background: "rgba(255,255,255,0.05)",
+                    borderRadius: 8,
+                    padding: "8px 10px",
+                  }}>
+                    <div style={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: "50%",
+                      background: statusDotColor[q.status] || C.dusty,
+                      flexShrink: 0,
+                    }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontFamily: FONT_SANS, fontSize: 12, fontWeight: 500, color: "#F8F5F0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                        {q.agent}
+                      </div>
+                      <div style={{ fontFamily: FONT_MONO, fontSize: 9, color: C.dusty }}>{q.agency}</div>
+                    </div>
+                    <span style={{
+                      fontFamily: FONT_MONO,
+                      fontSize: 9,
+                      color: statusDotColor[q.status] || C.dusty,
+                      background: "rgba(255,255,255,0.07)",
+                      borderRadius: 5,
+                      padding: "2px 6px",
+                    }}>
+                      {q.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Literary quote strip */}
+      <div style={{
+        borderTop: "0.5px solid rgba(255,255,255,0.08)",
+        padding: "16px 40px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}>
+        <p style={{
+          fontFamily: FONT_SERIF,
+          fontStyle: "italic",
+          fontSize: 12,
+          color: "rgba(245,240,234,0.4)",
+          margin: 0,
+          textAlign: "center",
+        }}>
+          "There is no greater agony than bearing an untold story inside you." — Maya Angelou
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// ─── Screen 2: Warm intro ─────────────────────────────────────────────────────
+
+const Screen2Intro: React.FC<{ onBack: () => void; onContinue: () => void; onSkip: () => void }> = ({ onBack, onContinue, onSkip }) => (
+  <ModalCard step={2}>
+    <div style={{ padding: "28px 28px 0", position: "relative" }}>
+      <SkipButton onSkip={onSkip} />
+      <ProgressDots currentStep={2} />
+      <Eyebrow>Welcome to ScriptAlly</Eyebrow>
+      <ModalTitle>Here's what we'll do together.</ModalTitle>
+      <Subtitle>Three things — takes about two minutes.</Subtitle>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 20 }}>
+        {[
+          { Icon: BookOpen, title: "Tell us about your manuscript", desc: "Just the title and genre to start. Everything else can come later." },
+          { Icon: Users,    title: "Add the agents you have in mind", desc: "One by one, or import your existing spreadsheet in one go." },
+          { Icon: Send,     title: "Log your first query", desc: "From that point, ScriptAlly tracks everything — so you don't have to." },
+        ].map(({ Icon, title, desc }, i) => (
+          <div key={i} style={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: 12,
+            background: C.card2,
+            border: `0.5px solid ${C.border}`,
+            borderRadius: 12,
+            padding: "12px 14px",
+          }}>
+            <div style={{
+              width: 34,
+              height: 34,
+              borderRadius: 9,
+              background: C.card3,
+              border: `0.5px solid ${C.dustyBorder}`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+              color: C.dusty,
+            }}>
+              <Icon size={15} />
+            </div>
+            <div>
+              <div style={{ fontFamily: FONT_SANS, fontSize: 13, fontWeight: 500, color: C.ink, marginBottom: 2 }}>{title}</div>
+              <div style={{ fontFamily: FONT_SANS, fontSize: 12, fontWeight: 300, color: C.muted, lineHeight: 1.5 }}>{desc}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Quote block */}
+      <div style={{
+        background: C.card2,
+        borderLeft: `2px solid ${C.dusty}`,
+        borderRadius: "0 10px 10px 0",
+        padding: "12px 16px",
+        marginBottom: 8,
+      }}>
+        <p style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 13, color: C.mutedDark, margin: 0, lineHeight: 1.6 }}>
+          "Querying is hard enough without the admin. We built ScriptAlly so you can spend your energy on the writing."
+        </p>
+      </div>
+    </div>
+    <ModalFooter onBack={onBack} onContinue={onContinue} continueLabel="Let's go →" />
+  </ModalCard>
+);
+
+// ─── Screen 3: Path chooser ───────────────────────────────────────────────────
+
+const Screen3Path: React.FC<{
+  onBack: () => void;
+  onContinue: () => void;
+  onSkip: () => void;
+  selectedPath: OnboardingPath;
+  onSelectPath: (p: OnboardingPath) => void;
+}> = ({ onBack, onContinue, onSkip, selectedPath, onSelectPath }) => (
+  <ModalCard step={3}>
+    <div style={{ padding: "28px 28px 0", position: "relative" }}>
+      <SkipButton onSkip={onSkip} />
+      <ProgressDots currentStep={3} />
+      <Eyebrow>One quick question</Eyebrow>
+      <ModalTitle>Where are you in your querying journey?</ModalTitle>
+      <Subtitle>This shapes how we set things up for you.</Subtitle>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+        <SelectableCard
+          selected={selectedPath === "guided"}
+          onSelect={() => onSelectPath("guided")}
+          icon={<Pencil size={16} />}
+          title="I'm just starting out"
+          description="I haven't sent any queries yet. I want to set up properly before I begin."
+          tag="Guided setup"
+        />
+        <SelectableCard
+          selected={selectedPath === "import"}
+          onSelect={() => onSelectPath("import")}
+          icon={<Table size={16} />}
+          title="I'm already querying"
+          description="I have agents and queries in a spreadsheet. I want to bring them across."
+          tag="Import from spreadsheet"
+        />
+        <SelectableCard
+          selected={selectedPath === "skip"}
+          onSelect={() => onSelectPath("skip")}
+          icon={<LayoutGrid size={16} />}
+          title="I'll figure it out as I go"
+          description="Take me to the dashboard — I'll add things when I need to."
+          tag="Skip setup"
+        />
+      </div>
+    </div>
+    <ModalFooter onBack={onBack} onContinue={onContinue} continueDisabled={!selectedPath} />
+  </ModalCard>
+);
+
+// ─── Screen 4: Manuscript ─────────────────────────────────────────────────────
+
+const GENRES = [
+  "Literary Fiction", "Historical Fiction", "Fantasy", "Science Fiction",
+  "Romance", "Thriller / Mystery", "Young Adult", "Middle Grade",
+  "Upmarket Fiction", "Other",
+];
+
+const Screen4Manuscript: React.FC<{
+  onBack: () => void;
+  onContinue: (title: string, genre: string, wordCount: string, logline: string) => void;
+  onSkip: () => void;
+  initialTitle?: string;
+  initialGenre?: string;
+}> = ({ onBack, onContinue, onSkip, initialTitle = "", initialGenre = "" }) => {
+  const [title, setTitle] = useState(initialTitle);
+  const [genre, setGenre] = useState(initialGenre);
+  const [wordCount, setWordCount] = useState("");
+  const [logline, setLogline] = useState("");
+  const [fieldError, setFieldError] = useState(false);
+
+  const handleContinue = () => {
+    if (!title.trim() || !genre) {
+      setFieldError(true);
+      return;
+    }
+    setFieldError(false);
+    onContinue(title.trim(), genre, wordCount, logline);
+  };
+
+  return (
+    <ModalCard step={4}>
+      <div style={{ padding: "28px 28px 0", position: "relative" }}>
+        <SkipButton onSkip={onSkip} />
+        <ProgressDots currentStep={4} />
+        <Eyebrow>Step 1 of 2</Eyebrow>
+        <ModalTitle>Tell us about your manuscript.</ModalTitle>
+        <Subtitle>Just the basics — you can add more detail any time.</Subtitle>
+
+        <FormField label="Title" required>
+          <InputField
+            type="text"
+            value={title}
+            onChange={e => { setTitle(e.target.value); setFieldError(false); }}
+            placeholder="e.g. The Book of Lost Clockworks"
+          />
+        </FormField>
+
+        <FormField label="Genre" required>
+          <SelectField value={genre} onChange={e => { setGenre(e.target.value); setFieldError(false); }}>
+            <option value="">Select a genre…</option>
+            {GENRES.map(g => <option key={g} value={g}>{g}</option>)}
+          </SelectField>
+        </FormField>
+
+        <FormField label="Word count (optional)">
+          <InputField
+            type="text"
+            value={wordCount}
+            onChange={e => setWordCount(e.target.value)}
+            placeholder="e.g. 92,000"
+          />
+        </FormField>
+
+        <FormField label="One-line summary (optional)">
+          <InputField
+            type="text"
+            value={logline}
+            onChange={e => setLogline(e.target.value)}
+            placeholder="e.g. A Victorian clockmaker discovers her inventions are being used against her…"
+          />
+        </FormField>
+
+        {fieldError && (
+          <p style={{
+            fontFamily: FONT_SANS,
+            fontSize: 12,
+            color: C.amber,
+            marginBottom: 12,
+            fontStyle: "italic",
+          }}>
+            Just a title and genre is all we need — takes 10 seconds.
+          </p>
+        )}
+
+        <p style={{
+          fontFamily: FONT_SANS,
+          fontSize: 11,
+          fontStyle: "italic",
+          color: C.dusty,
+          textAlign: "center",
+          marginBottom: 4,
+          fontWeight: 300,
+        }}>
+          That's all we need to get started. Everything else can come later.
+        </p>
+      </div>
+      <ModalFooter onBack={onBack} onContinue={handleContinue} />
+    </ModalCard>
+  );
+};
+
+// ─── Screen 5: Agents ─────────────────────────────────────────────────────────
+
+type AgentOption = "add" | "import" | "skip" | null;
+
+const Screen5Agents: React.FC<{
+  onBack: () => void;
+  onContinue: (agentName: string, agentAgency: string, option: AgentOption) => void;
+  onSkip: () => void;
+  initialAgentName?: string;
+  initialAgentAgency?: string;
+}> = ({ onBack, onContinue, onSkip, initialAgentName = "", initialAgentAgency = "" }) => {
+  const [option, setOption] = useState<AgentOption>(null);
+  const [agentName, setAgentName] = useState(initialAgentName);
+  const [agentAgency, setAgentAgency] = useState(initialAgentAgency);
+  const [agentEmail, setAgentEmail] = useState("");
+  const [agentGenres, setAgentGenres] = useState("");
+
+  const handleContinue = () => {
+    onContinue(agentName, agentAgency, option);
+  };
+
+  return (
+    <ModalCard step={5}>
+      <div style={{ padding: "28px 28px 0", position: "relative" }}>
+        <SkipButton onSkip={onSkip} />
+        <ProgressDots currentStep={5} />
+        <Eyebrow>Step 2 of 2</Eyebrow>
+        <ModalTitle>Now let's add your agents.</ModalTitle>
+        <Subtitle>Choose whichever works best for you.</Subtitle>
+
+        <SelectableCard
+          selected={option === "add"}
+          onSelect={() => setOption("add")}
+          icon={<UserPlus size={16} />}
+          title="Add an agent now"
+          description="Enter one or two agents you have in mind — takes 60 seconds each."
+          tag="Guided form"
+        />
+
+        {/* Reveal: agent add form */}
+        <motion.div
+          initial={false}
+          animate={{ maxHeight: option === "add" ? 300 : 0, opacity: option === "add" ? 1 : 0 }}
+          transition={{ duration: 0.35, ease: "easeInOut" }}
+          style={{ overflow: "hidden" }}
+        >
+          <div style={{ padding: "12px 4px 4px" }}>
+            <FormField label="Agent name">
+              <InputField
+                type="text"
+                value={agentName}
+                onChange={e => setAgentName(e.target.value)}
+                placeholder="e.g. Sarah Latham"
+              />
+            </FormField>
+            <FormField label="Agency">
+              <InputField
+                type="text"
+                value={agentAgency}
+                onChange={e => setAgentAgency(e.target.value)}
+                placeholder="e.g. Curtis Brown"
+              />
+            </FormField>
+            <FormField label="Email (optional)">
+              <InputField
+                type="email"
+                value={agentEmail}
+                onChange={e => setAgentEmail(e.target.value)}
+                placeholder="e.g. sarah@curtisbrown.co.uk"
+              />
+            </FormField>
+            <FormField label="Genres (optional)">
+              <InputField
+                type="text"
+                value={agentGenres}
+                onChange={e => setAgentGenres(e.target.value)}
+                placeholder="e.g. Literary Fiction, Historical Fiction"
+              />
+            </FormField>
+          </div>
+        </motion.div>
+
+        <SelectableCard
+          selected={option === "import"}
+          onSelect={() => setOption("import")}
+          icon={<Upload size={16} />}
+          title="Bring my existing list"
+          description="I have agents in a spreadsheet. Download our template, fill it in, upload it."
+          tag="CSV import · recommended for migrators"
+        />
+
+        {/* Reveal: CSV import box */}
+        <motion.div
+          initial={false}
+          animate={{ maxHeight: option === "import" ? 160 : 0, opacity: option === "import" ? 1 : 0 }}
+          transition={{ duration: 0.35, ease: "easeInOut" }}
+          style={{ overflow: "hidden" }}
+        >
+          <div style={{
+            border: `1.5px dashed ${C.dustyBorder}`,
+            borderRadius: 12,
+            padding: "16px",
+            margin: "8px 4px 4px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+            alignItems: "center",
+          }}>
+            <p style={{ fontFamily: FONT_SANS, fontSize: 12, fontWeight: 300, color: C.muted, margin: 0, textAlign: "center" }}>
+              Download our CSV template, fill it in with your agents, then upload it to import everything at once.
+            </p>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button onClick={onSkip} style={{
+                fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.06em",
+                background: "none", border: `0.5px solid ${C.dustyBorder}`, color: C.muted,
+                borderRadius: 8, padding: "7px 14px", cursor: "pointer",
+                display: "flex", alignItems: "center", gap: 5,
+              }}>
+                <Download size={12} /> Download template
+              </button>
+              <button onClick={onSkip} style={{
+                fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.06em",
+                background: C.burgundy, border: "none", color: "#f5ede8",
+                borderRadius: 8, padding: "7px 14px", cursor: "pointer",
+                display: "flex", alignItems: "center", gap: 5,
+              }}>
+                <Upload size={12} /> Upload my spreadsheet
+              </button>
+            </div>
+          </div>
+        </motion.div>
+
+        <SelectableCard
+          selected={option === "skip"}
+          onSelect={() => setOption("skip")}
+          icon={<ArrowRight size={16} />}
+          title="I'll add agents as I go"
+          description="Take me to the dashboard — I'll add them when I'm ready to send a query."
+          tag="Skip this step"
+        />
+      </div>
+      <ModalFooter
+        onBack={onBack}
+        onContinue={handleContinue}
+        continueLabel="Go to my dashboard →"
+        continueDisabled={!option}
+      />
+    </ModalCard>
+  );
+};
+
+// ─── Screen 6: Complete ───────────────────────────────────────────────────────
+
+const Screen6Complete: React.FC<{
+  manuscriptTitle: string;
+  agentCount: number;
+  onDone: () => void;
+}> = ({ manuscriptTitle, agentCount, onDone }) => {
+  const [hovered, setHovered] = useState(false);
+
+  const summaryRows = [
+    { label: "Manuscript", value: manuscriptTitle || undefined },
+    { label: "Agents added", value: agentCount > 0 ? String(agentCount) : undefined },
+    { label: "First query", value: undefined, placeholder: "Waiting for you →" },
+  ];
+
+  const nextSteps = [
+    "Send your first query from the dashboard",
+    "Explore the agent database and add MSWL",
+    "Set response windows so you never miss a deadline",
+  ];
+
+  return (
+    <ModalCard step={6}>
+      {/* Accent bar already rendered in ModalCard — override top bar to green */}
+      <div style={{ padding: "32px 28px 0", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+        {/* Check circle */}
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 300, damping: 18, delay: 0.15 }}
+          style={{
+            width: 64,
+            height: 64,
+            borderRadius: "50%",
+            background: C.card2,
+            border: `1px solid ${C.dustyBorder}`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            marginBottom: 16,
+          }}
+        >
+          <Check size={26} color={C.greenDark} strokeWidth={2.5} />
+        </motion.div>
+
+        <Eyebrow>Setup complete</Eyebrow>
+        <ModalTitle style={{ textAlign: "center" }}>You're all set, let's do this.</ModalTitle>
+        <p style={{ fontFamily: FONT_SANS, fontSize: 13, fontWeight: 300, color: C.muted, lineHeight: 1.6, marginBottom: 8 }}>
+          Your manuscript is ready and your agents are on file.<br />
+          <em style={{ fontFamily: FONT_SERIF, fontStyle: "italic", color: C.mutedDark }}>One step closer to yes.</em>
+        </p>
+
+        {/* Summary block */}
+        <div style={{
+          background: C.card2,
+          border: `0.5px solid ${C.border}`,
+          borderRadius: 12,
+          padding: "14px 16px",
+          width: "100%",
+          marginBottom: 20,
+          textAlign: "left",
+        }}>
+          {summaryRows.map((row, i) => (
+            <div key={i} style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              paddingTop: i > 0 ? 10 : 0,
+              paddingBottom: i < summaryRows.length - 1 ? 10 : 0,
+              borderBottom: i < summaryRows.length - 1 ? `0.5px solid ${C.border}` : "none",
+            }}>
+              <span style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em", color: C.muted }}>
+                {row.label}
+              </span>
+              {row.value ? (
+                <span style={{ fontFamily: FONT_SANS, fontSize: 12, fontWeight: 500, color: C.ink }}>{row.value}</span>
+              ) : (
+                <span style={{ fontFamily: FONT_SERIF, fontSize: 12, fontStyle: "italic", color: C.dusty }}>
+                  {row.placeholder || "Not added"}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Next steps */}
+        <div style={{ width: "100%", marginBottom: 8 }}>
+          {nextSteps.map((step, i) => (
+            <div key={i} style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              background: C.card,
+              border: `0.5px solid ${C.border}`,
+              borderRadius: 10,
+              padding: "10px 14px",
+              marginBottom: 6,
+            }}>
+              <span style={{
+                fontFamily: FONT_MONO,
+                fontSize: 9,
+                color: C.dusty,
+                background: C.card2,
+                borderRadius: 6,
+                padding: "3px 7px",
+                flexShrink: 0,
+              }}>
+                {i + 1}
+              </span>
+              <span style={{ fontFamily: FONT_SANS, fontSize: 12, fontWeight: 300, color: C.mutedDark, flex: 1, lineHeight: 1.4 }}>
+                {step}
+              </span>
+              <ArrowRight size={12} color={C.dusty} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ padding: "16px 28px 28px" }}>
+        <button
+          onClick={onDone}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          style={{
+            width: "100%",
+            fontFamily: FONT_MONO,
+            fontSize: 12,
+            letterSpacing: "0.06em",
+            background: hovered ? C.burgundyDeep : C.burgundy,
+            color: "#f5ede8",
+            border: "none",
+            borderRadius: 10,
+            padding: "13px",
+            cursor: "pointer",
+            transition: "all 0.15s",
+            transform: hovered ? "translateY(-1px)" : "none",
+          }}
+        >
+          Open my dashboard →
+        </button>
+      </div>
+    </ModalCard>
+  );
+};
+
+// ─── Main Onboarding component ────────────────────────────────────────────────
+
+export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
+  const { currentUser, addManuscript, addAgent, updateUserProfile } = useScriptAllyDb();
+
+  const STORAGE_KEY = `scriptally_onboarding_progress_${currentUser?.id || "anon"}`;
+
+  // Restore saved progress
+  const loadProgress = (): Partial<ProgressData> => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch {}
+    return {};
+  };
+
+  const saved = loadProgress();
+
+  const [step, setStep] = useState(saved.step ?? 1);
+  const [selectedPath, setSelectedPath] = useState<OnboardingPath>(saved.selectedPath ?? null);
+  const [manuscriptTitle, setManuscriptTitle] = useState(saved.manuscriptTitle ?? "");
+  const [manuscriptGenre, setManuscriptGenre] = useState(saved.manuscriptGenre ?? "");
+  const [agentName, setAgentName] = useState(saved.agentName ?? "");
+  const [agentAgency, setAgentAgency] = useState(saved.agentAgency ?? "");
+  const [agentCount, setAgentCount] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const saveProgress = (updates: Partial<ProgressData>) => {
+    const current: ProgressData = {
+      step,
+      selectedPath,
+      manuscriptTitle,
+      manuscriptGenre,
+      agentName,
+      agentAgency,
+      ...updates,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
+  };
+
+  const goTo = (s: number) => {
+    setStep(s);
+    saveProgress({ step: s });
+  };
+
+  const handleSkip = async () => {
+    localStorage.removeItem(STORAGE_KEY);
+    await updateUserProfile({ onboardingComplete: true });
+    onComplete();
+  };
+
+  const handleScreen2Continue = () => goTo(3);
+
+  const handleScreen3Continue = () => {
+    if (selectedPath === "skip") {
+      handleSkip();
+    } else if (selectedPath === "import") {
+      handleSkip(); // send to dashboard; they'll use import nav
+    } else {
+      goTo(4);
+    }
+  };
+
+  const handleScreen4Continue = async (title: string, genre: string, wordCount: string, logline: string) => {
+    setManuscriptTitle(title);
+    setManuscriptGenre(genre);
+    saveProgress({ manuscriptTitle: title, manuscriptGenre: genre, step: 5 });
+
+    if (title && genre) {
+      setIsSubmitting(true);
+      try {
+        const wc = parseInt(wordCount.replace(/\D/g, "")) || 0;
+        await addManuscript({
+          title,
+          genre,
+          ageCategory: "Adult",
+          wordCount: wc,
+          logline,
+          comparableTitles: "",
+          status: ManuscriptStatus.READY_TO_QUERY,
+        });
+      } catch (e) {
+        console.error("Onboarding addManuscript error:", e);
+      } finally {
+        setIsSubmitting(false);
+      }
+    }
+    goTo(5);
+  };
+
+  const handleScreen5Continue = async (name: string, agency: string, agentOption: AgentOption) => {
+    setAgentName(name);
+    setAgentAgency(agency);
+    saveProgress({ agentName: name, agentAgency: agency });
+
+    let addedCount = 0;
+    if (agentOption === "add" && name.trim()) {
+      setIsSubmitting(true);
+      try {
+        await addAgent({
+          name: name.trim(),
+          agency: agency.trim(),
+          email: "",
+          website: "",
+          genres: [],
+          mswlNotes: "",
+          starRating: 3,
+          submissionStatus: SubmissionStatus.OPEN,
+          responseTimeWeeks: 12,
+          noResponseMeansNo: false,
+          submissionMethod: SubmissionMethod.EMAIL,
+          materialsWanted: ["Query Letter"],
+          notes: "",
+        });
+        addedCount = 1;
+      } catch (e) {
+        console.error("Onboarding addAgent error:", e);
+      } finally {
+        setIsSubmitting(false);
+      }
+    }
+    setAgentCount(addedCount);
+    localStorage.removeItem(STORAGE_KEY);
+    goTo(6);
+  };
+
+  // Overlay wrapper
+  return (
+    <div style={{
+      position: "fixed",
+      inset: 0,
+      background: C.bg,
+      zIndex: 9999,
+      display: "flex",
+      alignItems: step === 1 ? "stretch" : "center",
+      justifyContent: "center",
+      overflowY: "auto",
+    }}>
+      <ScreenTransition stepKey={step}>
+        {step === 1 && (
+          <Screen1Welcome
+            onStart={() => goTo(2)}
+            onAlreadyHaveAccount={handleSkip}
+          />
+        )}
+
+        {step >= 2 && step <= 6 && (
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "100%",
+            minHeight: "100%",
+            padding: "32px 16px",
+            boxSizing: "border-box",
+          }}>
+            {step === 2 && (
+              <Screen2Intro
+                onBack={() => goTo(1)}
+                onContinue={handleScreen2Continue}
+                onSkip={handleSkip}
+              />
+            )}
+            {step === 3 && (
+              <Screen3Path
+                onBack={() => goTo(2)}
+                onContinue={handleScreen3Continue}
+                onSkip={handleSkip}
+                selectedPath={selectedPath}
+                onSelectPath={(p) => { setSelectedPath(p); saveProgress({ selectedPath: p }); }}
+              />
+            )}
+            {step === 4 && (
+              <Screen4Manuscript
+                onBack={() => goTo(3)}
+                onContinue={handleScreen4Continue}
+                onSkip={() => { goTo(5); }}
+                initialTitle={manuscriptTitle}
+                initialGenre={manuscriptGenre}
+              />
+            )}
+            {step === 5 && (
+              <Screen5Agents
+                onBack={() => goTo(4)}
+                onContinue={handleScreen5Continue}
+                onSkip={handleSkip}
+                initialAgentName={agentName}
+                initialAgentAgency={agentAgency}
+              />
+            )}
+            {step === 6 && (
+              <Screen6Complete
+                manuscriptTitle={manuscriptTitle}
+                agentCount={agentCount}
+                onDone={handleSkip}
+              />
+            )}
+          </div>
+        )}
+      </ScreenTransition>
+
+      {/* Submitting overlay */}
+      {isSubmitting && (
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(245,240,234,0.6)",
+          zIndex: 10000,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}>
+          <span style={{ fontFamily: FONT_MONO, fontSize: 11, color: C.muted, letterSpacing: "0.08em" }}>
+            Saving…
+          </span>
+        </div>
+      )}
+    </div>
+  );
+};

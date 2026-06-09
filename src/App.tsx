@@ -22,11 +22,12 @@ import { LogQueryFocusForm } from "./components/LogQueryFocusForm";
 import { AddAgentFocusForm } from "./components/AddAgentFocusForm";
 import { AddManuscriptFocusForm } from "./components/AddManuscriptFocusForm";
 import { HelpCentre } from "./components/HelpCentre";
+import { Onboarding } from "./components/Onboarding";
 import { Palette, X, Check } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 function AppContent() {
-  const { currentUser } = useScriptAllyDb();
+  const { currentUser, updateUserProfile } = useScriptAllyDb();
   
   // Page routing context state
   const [activeTab, setActiveTab] = useState<string>("dashboard");
@@ -80,6 +81,16 @@ function AppContent() {
 
   if (!currentUser) {
     return <Auth />;
+  }
+
+  if (currentUser.onboardingComplete === false) {
+    return (
+      <Onboarding
+        onComplete={async () => {
+          await updateUserProfile({ onboardingComplete: true });
+        }}
+      />
+    );
   }
 
   return (

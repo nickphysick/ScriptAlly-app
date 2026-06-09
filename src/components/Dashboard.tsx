@@ -2540,6 +2540,99 @@ export const Dashboard: React.FC<{
         Switch layout
       </button>
 
+      {/* ── Guided empty state for brand-new users ── */}
+      {manuscripts.length === 0 && queries.length === 0 && agents.length === 0 && (
+        <div style={{ maxWidth: 720, margin: "0 auto", padding: "48px 24px" }}>
+          {/* Welcome card */}
+          <div style={{
+            background: "#FFFDF9",
+            border: "0.5px solid #EBDCD3",
+            borderLeft: "4px solid #7c3a2a",
+            borderRadius: 14,
+            padding: "24px 28px",
+            marginBottom: 24,
+          }}>
+            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: "#c9a89e", marginBottom: 8 }}>
+              Welcome to ScriptAlly
+            </div>
+            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 500, letterSpacing: "-0.02em", color: "#3a1c14", margin: "0 0 10px", lineHeight: 1.3 }}>
+              Your querying journey starts here.
+            </h2>
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 300, color: "#a08070", margin: 0, lineHeight: 1.65 }}>
+              You'll need a manuscript and at least one agent before you can log your first query. We'll guide you through it — no rush.
+            </p>
+          </div>
+
+          {/* Onboarding task card */}
+          <div style={{
+            background: "#FFFDF9",
+            border: "0.5px solid #EBDCD3",
+            borderRadius: 14,
+            padding: "18px 22px",
+            marginBottom: 20,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 16,
+          }}>
+            <div>
+              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, textTransform: "uppercase", letterSpacing: "0.1em", color: "#7c3a2a", marginBottom: 5 }}>
+                Urgent · Next step
+              </div>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, fontWeight: 500, color: "#3a1c14", marginBottom: 3 }}>
+                Add your manuscript
+              </div>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 300, color: "#a08070" }}>
+                Everything in ScriptAlly starts here — just a title and genre to begin.
+              </div>
+            </div>
+            <button
+              onClick={() => onNavigate("manuscripts", "Add a manuscript")}
+              style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: 11,
+                letterSpacing: "0.06em",
+                background: "#7c3a2a",
+                color: "#f5ede8",
+                border: "none",
+                borderRadius: 10,
+                padding: "9px 18px",
+                cursor: "pointer",
+                flexShrink: 0,
+                whiteSpace: "nowrap",
+              }}
+            >
+              Add now
+            </button>
+          </div>
+
+          {/* Ghost placeholder cards */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+            {[
+              { label: "No agents yet", sub: "Add agents or import your spreadsheet", icon: "👥" },
+              { label: "No queries logged", sub: "Your pipeline will appear here", icon: "✉️" },
+            ].map((card, i) => (
+              <div key={i} style={{
+                background: "#fffdf9",
+                border: "0.5px dashed #EBDCD3",
+                borderRadius: 12,
+                padding: "24px 20px",
+                opacity: 0.6,
+                textAlign: "center",
+              }}>
+                <div style={{ fontSize: 22, marginBottom: 8 }}>{card.icon}</div>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 500, color: "#3a1c14", marginBottom: 4 }}>
+                  {card.label}
+                </div>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 300, color: "#a08070" }}>
+                  {card.sub}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {isMagazineLayout ? (
         /* ==================== MAGAZINE EDITORIAL HEADER + STRIP ==================== */
         <div className="w-full flex flex-col">

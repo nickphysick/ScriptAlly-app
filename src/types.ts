@@ -15,6 +15,7 @@ export interface User {
   plan: UserPlan;
   trialStartDate: string; // ISO String
   subscriptionStatus: "active" | "trialing" | "canceled" | "none";
+  onboardingComplete?: boolean;
 }
 
 export enum ManuscriptStatus {
