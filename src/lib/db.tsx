@@ -258,19 +258,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
             subscriptionStatus: isFree ? "none" : "active",
           };
           await setDoc(userDocRef, freshUser);
-          await seedUserDatabase(uid);
           signupTempNameRef.current = null;
-        } else {
-          // Self-heal: If user has a document, but manuscripts or queries subcollections are empty
-          try {
-            const msCheckDoc = await getDoc(doc(db, "users", uid, "manuscripts", "ms-1"));
-            if (!msCheckDoc.exists()) {
-              console.log("Empty Live Firebase Collections detected for user. Populating data template...");
-              await seedUserDatabase(uid);
-            }
-          } catch (seedErr) {
-            console.error("Self-healing database seeding failed:", seedErr);
-          }
         }
 
         // Active listener bindings for user document
