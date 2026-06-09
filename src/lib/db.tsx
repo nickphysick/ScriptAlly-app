@@ -229,24 +229,12 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
     const unsubAuth = onAuthStateChanged(auth, async (firebaseUser) => {
       if (!firebaseUser) {
-        // Safe preview: Always default to logged-in Offline Sandbox (seedUser) so user goes straight to dashboard!
-        let userToUse = seedUser;
-        const localUserStr = localStorage.getItem("scriptally_user");
-        if (localUserStr) {
-          try {
-            userToUse = JSON.parse(localUserStr);
-          } catch (e) {
-            console.error("Failed to parse cached offline user", e);
-          }
-        } else {
-          localStorage.setItem("scriptally_user", JSON.stringify(seedUser));
-        }
+        // No authenticated user — show the Auth screen
+        setCurrentUser(null);
+        setIsOfflineMode(false);
+        localStorage.removeItem("scriptally_offline");
 
-        setCurrentUser(userToUse);
-        setIsOfflineMode(true);
-        localStorage.setItem("scriptally_offline", "true");
-
-        // Clean up listeners immediately since we are in offline sandbox
+        // Clean up any active listeners
         unsubUser();
         unsubManuscripts();
         unsubVersions();
@@ -1074,11 +1062,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const logout = async () => {
     try {
       if (isOfflineMode) {
-        // Instead of logging out, reset local storage back to seedUser & reset database
-        localStorage.setItem("scriptally_offline", "true");
-        localStorage.setItem("scriptally_user", JSON.stringify(seedUser));
-        setCurrentUser(seedUser);
-        await wipeAndResetDatabase();
+        localStorage.removeItem("scriptally_offline");
+        localStorage.removeItem("scriptally_user");
+        setIsOfflineMode(false);
+        setCurrentUser(null);
         return;
       }
       await signOut(auth);

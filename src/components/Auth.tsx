@@ -10,9 +10,9 @@ import { BookOpen, MapPin, Feather, Sparkles, Key, Mail, CheckCircle } from "luc
 export const Auth: React.FC = () => {
   const { login, signup } = useScriptAllyDb();
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("nick.physick@gmail.com");
-  const [name, setName] = useState("Lucy Sterling");
-  const [password, setPassword] = useState("writerpassword123");
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
