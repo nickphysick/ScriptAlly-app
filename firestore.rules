@@ -270,6 +270,25 @@ service cloud.firestore {
         && data.createdAt is string && data.createdAt.size() <= 64;
     }
 
+    function isValidAgentNote(data) {
+      return data.text is string && data.text.size() >= 1 && data.text.size() <= 16384
+        && data.createdAt is string && data.createdAt.size() <= 64;
+    }
+
+    function isValidDismissedTask(data, userId) {
+      return data.id is string && data.id.size() <= 128
+        && data.userId == userId
+        && data.taskType is string && data.taskType.size() >= 1 && data.taskType.size() <= 128
+        && data.relatedRecordId is string && data.relatedRecordId.size() <= 128
+        && data.dismissedDate is string && data.dismissedDate.size() <= 64
+        && data.dismissType is string && (
+          data.dismissType == 'permanent' ||
+          data.dismissType == 'fixed snooze' ||
+          data.dismissType == 'custom date'
+        )
+        && (data.get('resurfaceDate', null) == null || (data.resurfaceDate is string && data.resurfaceDate.size() <= 64));
+    }
+
     // ----------------------------------------------------
     // FIRESTORE ENDPOINTS INTEGRATIONS
     // ----------------------------------------------------
