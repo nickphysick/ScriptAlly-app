@@ -150,18 +150,7 @@ interface DbContextType {
 const DbContext = createContext<DbContextType | undefined>(undefined);
 
 export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<User | null>(() => {
-    const localUserStr = localStorage.getItem("scriptally_user");
-    if (localUserStr) {
-      try {
-        return JSON.parse(localUserStr);
-      } catch (e) {
-        console.error("Failed to parse cached offline user", e);
-      }
-    }
-    // Set seedUser as default preview/sandbox user
-    return seedUser;
-  });
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [manuscripts, setManuscripts] = useState<Manuscript[]>([]);
   const [versions, setVersions] = useState<ManuscriptVersion[]>([]);
   const [packages, setPackages] = useState<SubmissionPackage[]>([]);
@@ -172,9 +161,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]);
   const [dismissedTasks, setDismissedTasks] = useState<DismissedTask[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [isOfflineMode, setIsOfflineMode] = useState<boolean>(() => {
-    return localStorage.getItem("scriptally_offline") !== "false";
-  });
+  const [isOfflineMode, setIsOfflineMode] = useState<boolean>(false);
 
   // Temporary buffer to retain signup pen names
   const signupTempNameRef = useRef<string | null>(null);
