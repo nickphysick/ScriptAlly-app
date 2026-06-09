@@ -820,12 +820,28 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           const matchingMs = manuscripts.find(ms => ms.id === q.manuscriptId);
           const manuscriptTitle = matchingMs ? matchingMs.title : "";
 
-          // Check if we have an activity matching this status for this query
-          const hasStatusActivity = activities.some(act => 
-            act.queryId === q.id && 
-            (act.details?.toLowerCase().includes("status") || act.description?.toLowerCase().includes("status") || 
-             act.description?.toLowerCase().includes(q.status.toLowerCase()))
-          );
+          // Check if we have an activity matching this status for this query.
+          // We check the deterministic backfill ID first, then fall back to pattern matching
+          // against the natural-language descriptions that updateQueryStatus produces.
+          const deterministicId = `act-status-${q.status.replace(/\s+/g, '-').toLowerCase()}-${q.id}`;
+          const naturalLanguagePatterns: Partial<Record<QueryStatus, string[]>> = {
+            [QueryStatus.PARTIAL_REQUESTED]: ["requested a partial"],
+            [QueryStatus.PARTIAL_SENT]:      ["partial manuscript sent"],
+            [QueryStatus.FULL_REQUESTED]:    ["requested a full manuscript"],
+            [QueryStatus.FULL_SENT]:         ["full manuscript sent"],
+            [QueryStatus.REJECTED]:          ["rejection received", "rejected"],
+            [QueryStatus.WITHDRAWN]:         ["withdrew query", "withdrawn"],
+          };
+          const patterns = naturalLanguagePatterns[q.status] ?? [];
+          const hasStatusActivity = activities.some(act => {
+            if (act.id === deterministicId) return true;
+            if (act.queryId !== q.id) return false;
+            const desc = act.description?.toLowerCase() ?? "";
+            const details = act.details?.toLowerCase() ?? "";
+            if (desc.includes("status") || details.includes("status")) return true;
+            if (desc.includes(q.status.toLowerCase())) return true;
+            return patterns.some(p => desc.includes(p));
+          });
 
           if (!hasStatusActivity) {
             let expectedNote = `Status updated to ${q.status}`;

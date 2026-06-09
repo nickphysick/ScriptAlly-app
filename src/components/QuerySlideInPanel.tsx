@@ -248,10 +248,28 @@ export const QuerySlideInPanel: React.FC<QuerySlideInPanelProps> = ({
   const manuscript = manuscripts.find(ms => ms.id === query.manuscriptId);
   const matchedPackage = packages.find(pkg => pkg.id === query.packageId);
 
-  // Filter current query's activities
+  // Filter current query's activities, then deduplicate STATUS_CHANGED / MATERIALS_SENT
+  // entries that fall within a 3-minute window of each other — these are caused by the
+  // backfill effect writing a second activity when updateQueryStatus already wrote one.
+  const MS_3MIN = 3 * 60 * 1000;
   const sortedActivities = [...activities]
     .filter(act => act.queryId === query.id)
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .filter((act, _, arr) => {
+      if (
+        act.activityType !== ActivityType.STATUS_CHANGED &&
+        act.activityType !== ActivityType.MATERIALS_SENT
+      ) return true;
+      const actTime = new Date(act.date).getTime();
+      // Drop this entry if an earlier entry of the same type exists within the window
+      return !arr.some(
+        other =>
+          other.id !== act.id &&
+          other.activityType === act.activityType &&
+          actTime - new Date(other.date).getTime() >= 0 &&
+          actTime - new Date(other.date).getTime() < MS_3MIN
+      );
+    });
 
   // Filter journal entries
   const sortedJournalEntries = [...journalEntries]
