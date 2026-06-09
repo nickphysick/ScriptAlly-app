@@ -261,14 +261,15 @@ export const QuerySlideInPanel: React.FC<QuerySlideInPanelProps> = ({
         act.activityType !== ActivityType.MATERIALS_SENT
       ) return true;
       const actTime = new Date(act.date).getTime();
-      // Drop this entry if an earlier entry of the same type exists within the window
-      return !arr.some(
-        other =>
-          other.id !== act.id &&
-          other.activityType === act.activityType &&
-          actTime - new Date(other.date).getTime() >= 0 &&
-          actTime - new Date(other.date).getTime() < MS_3MIN
-      );
+      // Drop this entry if a strictly earlier entry of the same type exists within the window,
+      // or if a same-timestamp entry exists with a smaller id (stable tiebreaker).
+      return !arr.some(other => {
+        if (other.id === act.id || other.activityType !== act.activityType) return false;
+        const diff = actTime - new Date(other.date).getTime();
+        if (diff > 0 && diff < MS_3MIN) return true;
+        if (diff === 0 && other.id < act.id) return true;
+        return false;
+      });
     });
 
   // Filter journal entries
