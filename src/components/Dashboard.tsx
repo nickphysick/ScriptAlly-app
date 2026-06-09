@@ -1770,10 +1770,7 @@ export const Dashboard: React.FC<{
       }
     });
 
-    const finalResponsesPerWeek = dynamicResponsesPerWeek.map((val, idx) => {
-      const mockVals = [0, 1, 0, 2, 4, 1, 0, 1];
-      return queries.length === 0 ? mockVals[idx] : val;
-    });
+    const finalResponsesPerWeek = dynamicResponsesPerWeek;
 
     const RESPONSE_RECEIVED_STATUSES = [
       QueryStatus.PARTIAL_REQUESTED,
@@ -1786,9 +1783,7 @@ export const Dashboard: React.FC<{
       QueryStatus.NO_RESPONSE,
     ];
 
-    const totalResponsesCalc = queries.length === 0
-      ? 9
-      : queries.filter(q => RESPONSE_RECEIVED_STATUSES.includes(q.status)).length;
+    const totalResponsesCalc = queries.filter(q => RESPONSE_RECEIVED_STATUSES.includes(q.status)).length;
 
     return {
       responseEvents,
@@ -1806,10 +1801,7 @@ export const Dashboard: React.FC<{
   } = responseData;
 
   // Fallback to visually appealing mock values if database queries are sparse
-  const finalQueriesSentPerWeek = dynamicQueriesSentPerWeek.map((val, idx) => {
-    const mockVals = [1, 2, 0, 1, 3, 1, 0, 2];
-    return queries.length === 0 ? mockVals[idx] : val;
-  });
+  const finalQueriesSentPerWeek = dynamicQueriesSentPerWeek;
 
   const dynamicActiveQueriesPerWeek = Array.from({ length: 8 }, (_, idx) => {
     const weekEndTime = nowTime - (7 - idx) * ONE_WEEK_MS;
@@ -1827,10 +1819,7 @@ export const Dashboard: React.FC<{
     }).length;
   });
 
-  const finalActiveQueriesPerWeek = dynamicActiveQueriesPerWeek.map((val, idx) => {
-    const mockActiveVals = [10, 12, 11, 13, 15, 14, 16, 18];
-    return queries.length === 0 ? mockActiveVals[idx] : val;
-  });
+  const finalActiveQueriesPerWeek = dynamicActiveQueriesPerWeek;
 
   const currentWeekActive = finalActiveQueriesPerWeek[7] ?? 0;
   const lastWeekActive = finalActiveQueriesPerWeek[6] ?? 0;
@@ -1867,19 +1856,15 @@ export const Dashboard: React.FC<{
     "#7C3D3D"
   ];
 
-  const totalSentCalc = queries.length === 0
-    ? [1, 2, 0, 1, 3, 1, 0, 2].reduce((sum, curr) => sum + curr, 0)
-    : totalQueriesSent;
+  const totalSentCalc = totalQueriesSent;
   
   const responsesReceived = totalResponsesCalc;
 
   const totalQueries = queries.length;
 
-  const responseRatePercent = queries.length === 0
-    ? (totalSentCalc > 0 ? Math.round((totalResponsesCalc / totalSentCalc) * 100) : 0)
-    : (totalQueries > 0
-        ? Math.round((responsesReceived / totalQueries) * 100)
-        : 0);
+  const responseRatePercent = totalQueries > 0
+    ? Math.round((responsesReceived / totalQueries) * 100)
+    : 0;
 
   // Helper to calculate the Monday range label of a given week offset from today (0-7 index)
   const getWeekMondayLabel = (idx: number) => {
@@ -1894,9 +1879,6 @@ export const Dashboard: React.FC<{
 
   // Helper to calculate cumulative queries sent up to the end of week index
   const getCard1TotalToDate = (idx: number) => {
-    if (queries.length === 0) {
-      return finalQueriesSentPerWeek.slice(0, idx + 1).reduce((sum, curr) => sum + curr, 0);
-    }
     const weekEndTime = nowTime - (7 - idx) * ONE_WEEK_MS;
     return queries.filter(q => new Date(q.dateSent).getTime() <= weekEndTime).length;
   };
@@ -1915,28 +1897,6 @@ export const Dashboard: React.FC<{
         };
       });
     }
-    // Fallback based on index matching the mock queries [1, 2, 0, 1, 3, 1, 0, 2]
-    if (queries.length === 0) {
-      const mockQueriesPerWeek: Record<number, { agentName: string; msTitle: string; status: QueryStatus }[]> = {
-        0: [{ agentName: "Charles Dickens", msTitle: "Frankenstein", status: QueryStatus.REJECTED }],
-        1: [
-          { agentName: "Johnathan Reed", msTitle: "The Thornwood Letters", status: QueryStatus.QUERIED },
-          { agentName: "Claire Beaumont", msTitle: "Salt and Starlight", status: QueryStatus.QUERIED }
-        ],
-        3: [{ agentName: "Amelia Chen", msTitle: "The Last Garden", status: QueryStatus.QUERIED }],
-        4: [
-          { agentName: "Jane Miller", msTitle: "The Thornwood Letters", status: QueryStatus.QUERIED },
-          { agentName: "Theresa Rogers", msTitle: "Beneath the Amber Sky", status: QueryStatus.QUERIED },
-          { agentName: "Marcus Vance", msTitle: "The Last Garden", status: QueryStatus.QUERIED }
-        ],
-        5: [{ agentName: "Sophia Tran", msTitle: "Salt and Starlight", status: QueryStatus.QUERIED }],
-        7: [
-          { agentName: "Mary Shelley", msTitle: "The Last Man", status: QueryStatus.QUERIED },
-          { agentName: "Charlotte Bronte", msTitle: "Frankenstein", status: QueryStatus.FULL_SENT }
-        ]
-      };
-      return mockQueriesPerWeek[idx] || [];
-    }
     return [];
   };
 
@@ -1952,31 +1912,10 @@ export const Dashboard: React.FC<{
       }));
     }
     
-    if (queries.length === 0) {
-      const mockResponsesPerWeekIdx: Record<number, { agentName: string; msTitle: string; type: string; isPositive: boolean }[]> = {
-        1: [{ agentName: "Charles Dickens", msTitle: "Frankenstein", type: "Rejection Pass", isPositive: false }],
-        3: [
-          { agentName: "Charlotte Bronte", msTitle: "Frankenstein", type: "Partial Requested", isPositive: true },
-          { agentName: "Mary Shelley", msTitle: "The Last Man", type: "Rejection Pass", isPositive: false }
-        ],
-        4: [
-          { agentName: "Virginia Woolf", msTitle: "Mrs. Dalloway", type: "Offer of Representation", isPositive: true },
-          { agentName: "Arthur Doyle", msTitle: "Sherlock Holmes", type: "Full Requested", isPositive: true },
-          { agentName: "Jane Austen", msTitle: "Pride and Prejudice", type: "Rejection Pass", isPositive: false },
-          { agentName: "George Orwell", msTitle: "Animal Farm", type: "Revise & Resubmit Request", isPositive: true }
-        ],
-        5: [{ agentName: "Leo Tolstoy", msTitle: "War and Peace", type: "Partial Requested", isPositive: true }],
-        7: [{ agentName: "Charlotte Bronte", msTitle: "Frankenstein", type: "Full Requested", isPositive: true }]
-      };
-      return mockResponsesPerWeekIdx[idx] || [];
-    }
     return [];
   };
 
   const getCard4TotalToDate = (idx: number) => {
-    if (queries.length === 0) {
-      return finalResponsesPerWeek.slice(0, idx + 1).reduce((sum, curr) => sum + curr, 0);
-    }
     const weekEndTime = nowTime - (7 - idx) * ONE_WEEK_MS;
     return responseEvents.filter(ev => ev.date.getTime() <= weekEndTime).length;
   };
@@ -1984,29 +1923,6 @@ export const Dashboard: React.FC<{
   // Helper to fetch Card 2 (Active Queries) hover details
   const getCard2StatusMetrics = (idx: number) => {
     const weekEndTime = nowTime - (7 - idx) * ONE_WEEK_MS;
-
-    if (queries.length === 0) {
-      // Deterministic breakdown for the mocks to ensure perfectly aligned numbers with finalActiveQueriesPerWeek
-      // finalActiveQueriesPerWeek of mocks: [10, 12, 11, 13, 15, 14, 16, 18]
-      const total = finalActiveQueriesPerWeek[idx] ?? 18;
-      
-      // Create a shifting beautiful breakdown proportion
-      const ratioQueried = 0.70 - (idx * 0.02);
-      const queried = Math.max(1, Math.floor(total * ratioQueried));
-      const partialReq = Math.max(0, Math.floor(total * 0.10));
-      const partialSent = Math.max(0, Math.floor(total * 0.05));
-      const fullReq = Math.max(0, Math.floor(total * 0.05));
-      const rr = Math.max(0, total - (queried + partialReq + partialSent + fullReq));
-
-      return {
-        queried,
-        partialReq,
-        partialSent,
-        fullReq,
-        rr,
-        total
-      };
-    }
 
     // Process real user queries active status at that specific weekEndTime
     let queried = 0;
