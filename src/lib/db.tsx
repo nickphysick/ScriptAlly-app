@@ -1736,7 +1736,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         detailsLine = `Respond by ${formattedDeadStr}`;
       } else if (newStatus === QueryStatus.REJECTED) {
         desc = `Rejection received from ${agent?.name || "the agent"} at ${agent?.agency || "agency"}`;
-        detailsLine = "Query closed. Don't worry - it's all part of the journey.";
+        detailsLine = systemNotes || "Query closed. Don't worry - it's all part of the journey.";
       } else if (newStatus === QueryStatus.WITHDRAWN) {
         desc = `Withdrew query from ${agent?.name || "the agent"} at ${agent?.agency || "agency"}.`;
         detailsLine = "Query closed";
@@ -1761,6 +1761,16 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     if (newStatus === QueryStatus.PARTIAL_SENT) qUpdates.partialSentDate = dateStr;
     if (newStatus === QueryStatus.FULL_REQUESTED) qUpdates.fullRequestedDate = dateStr;
     if (newStatus === QueryStatus.FULL_SENT) qUpdates.fullSentDate = dateStr;
+    if (newStatus === QueryStatus.REJECTED) {
+      qUpdates.rejectedDate = dateStr;
+      if (systemNotes) {
+        // Parse rejectionType / rejectionDetails out of the notesCaptured string from QuerySlideInPanel
+        const typeMatch = systemNotes.match(/^Rejection Type: ([^.]+)\./);
+        const commentsMatch = systemNotes.match(/Comments: (.+)$/);
+        if (typeMatch) qUpdates.rejectionType = typeMatch[1].trim();
+        if (commentsMatch) qUpdates.rejectionDetails = commentsMatch[1].trim();
+      }
+    }
 
     if (isOfflineMode) {
       const updatedQueries = queries.map(q => (q.id === queryId ? { ...q, ...qUpdates } : q));
@@ -1836,6 +1846,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       fieldsToClear.push("fullRequestedDate", "fullSentDate");
     } else if (previousStatus === QueryStatus.FULL_REQUESTED) {
       fieldsToClear.push("fullSentDate");
+    }
+    // If undoing a rejection, clear the rejection fields
+    if (newStatus === QueryStatus.REJECTED) {
+      fieldsToClear.push("rejectedDate", "rejectionType", "rejectionDetails");
     }
 
     fieldsToClear.forEach(field => {

@@ -4722,15 +4722,16 @@ export const Dashboard: React.FC<{
               id: string;
               queryId: string;
               query: Query;
-              type: 
-                | 'sent' 
-                | 'pages_requested_no_response' 
+              type:
+                | 'sent'
+                | 'pages_requested_no_response'
                 | 'pages_requested_deadline'
-                | 'partial_sent' 
-                | 'full_sent' 
-                | 'expected_upcoming' 
-                | 'expected_overdue' 
-                | 'nudge';
+                | 'partial_sent'
+                | 'full_sent'
+                | 'expected_upcoming'
+                | 'expected_overdue'
+                | 'nudge'
+                | 'rejected';
               date: Date;
               dateStr: string;
             }
@@ -4871,7 +4872,23 @@ export const Dashboard: React.FC<{
                 }
               }
 
-              // 5. Nudge reminder — today or upcoming
+              // 5. Rejection received — show in past panel if rejectedDate falls in last 7 days
+              if (q.status === QueryStatus.REJECTED && q.rejectedDate) {
+                const rejDate = new Date(q.rejectedDate);
+                const diffRej = getDayDiff(today, rejDate);
+                if (diffRej >= 0 && diffRej <= 6) {
+                  allEvents.push({
+                    id: `${q.id}-rejected`,
+                    queryId: q.id,
+                    query: q,
+                    type: 'rejected',
+                    date: rejDate,
+                    dateStr: q.rejectedDate,
+                  });
+                }
+              }
+
+              // 6. Nudge reminder — today or upcoming
               if (q.nudgeDate) {
                 const nudgeDate = new Date(q.nudgeDate);
                 const diffNudge = getDayDiff(nudgeDate, today);
@@ -4894,6 +4911,9 @@ export const Dashboard: React.FC<{
                 return true;
               }
               if (ev.type === 'expected_overdue') {
+                return true;
+              }
+              if (ev.type === 'rejected') {
                 return true;
               }
               if (['sent', 'partial_sent', 'full_sent'].includes(ev.type)) {
@@ -4948,6 +4968,9 @@ export const Dashboard: React.FC<{
               if (type === 'sent') {
                 return 'sent';
               }
+              if (type === 'rejected') {
+                return 'rejected';
+              }
               return null;
             };
 
@@ -4970,6 +4993,9 @@ export const Dashboard: React.FC<{
               }
               if (t === 'sent') {
                 return <div key={t} className="w-[6px] h-[6px] rounded-full border border-[#7c3d3d] bg-transparent transition-transform" style={scaleStyle} />;
+              }
+              if (t === 'rejected') {
+                return <div key={t} className="w-[6px] h-[6px] rounded-full bg-[#c9a89e] transition-transform" style={scaleStyle} />;
               }
               return null;
             };
@@ -5093,6 +5119,8 @@ export const Dashboard: React.FC<{
                 cardBgAndBorder = "border-[1.5px] border-[#dce0d9] bg-[#f0e8e0]/20";
               } else if (ev.type === 'nudge') {
                 cardBgAndBorder = "border-[1.5px] border-dashed border-[#dbbdb5] bg-[#FDFAF8]";
+              } else if (ev.type === 'rejected') {
+                cardBgAndBorder = "border-l-2 border-r-0 border-y-0 border-[#c9a89e] bg-[#FAF4F2]";
               }
 
               let dateLabel: React.ReactNode = (
@@ -5148,6 +5176,9 @@ export const Dashboard: React.FC<{
               } else if (ev.type === 'nudge') {
                 eventTypeLabel = "Nudge reminder";
                 typeColorClass = "text-[#9a6858]";
+              } else if (ev.type === 'rejected') {
+                eventTypeLabel = "Rejection received";
+                typeColorClass = "text-[#9a7060]";
               }
 
               let tooltipHeaderBg = "#3a1c14";
@@ -5159,6 +5190,8 @@ export const Dashboard: React.FC<{
                 tooltipHeaderBg = "#7c3d3d";
               } else if (ev.type === 'expected_overdue') {
                 tooltipHeaderBg = "#5c4033";
+              } else if (ev.type === 'rejected') {
+                tooltipHeaderBg = "#7c5a52";
               }
 
               const materials = agent?.materialsWanted && agent.materialsWanted.length > 0 
