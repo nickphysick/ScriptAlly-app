@@ -57,7 +57,8 @@ import {
   onSnapshot,
   getDocs,
   deleteField,
-  Timestamp
+  Timestamp,
+  serverTimestamp
 } from "firebase/firestore";
 
 import { db, auth, handleFirestoreError, OperationType } from "./firebase";
@@ -1842,6 +1843,59 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/queries/${queryId}`);
     }
   };
+
+  // Auto-close: when the writer chose "Mark as no response automatically" at log time, close the
+  // query once its response deadline has passed with no reply. Reuses updateQueryStatus for the
+  // status change + "No response received…" timeline activity, then stamps the response date so it
+  // surfaces in Fortnight in Focus as the response event it conceptually is. Idempotent — once a
+  // query leaves QUERIED it no longer matches, so this never re-fires or loops.
+  //
+  // TODO (future unification pass): the three close paths — this auto-close, manual
+  // updateQueryStatus, and RecordResponseModal/recordQueryResponse — now stamp responseReceivedAt
+  // inconsistently (updateQueryStatus alone never sets it). Consolidate them onto one path so a
+  // "close" always records the response date the same way, regardless of how it was triggered.
+  useEffect(() => {
+    if (!currentUser || queries.length === 0) return;
+    const cu = currentUser;
+    const timer = setTimeout(() => {
+      const now = Date.now();
+      const toClose = queries.filter(q =>
+        q.status === QueryStatus.QUERIED &&
+        q.ifNoResponse === "Mark as no response automatically" &&
+        q.responseDeadline &&
+        new Date(q.responseDeadline).getTime() < now
+      );
+      toClose.forEach(async (q) => {
+        try {
+          await updateQueryStatus(
+            q.id,
+            QueryStatus.NO_RESPONSE,
+            "Automatically closed — no response by the deadline you set."
+          );
+          // updateQueryStatus doesn't stamp the response date — do it here so the auto-close shows
+          // up in Fortnight in Focus (which derives its response event from responseReceivedAt).
+          if (isOfflineMode) {
+            const stampedAt = new Date().toISOString();
+            setQueries(prev => {
+              const updated = prev.map(item =>
+                item.id === q.id ? { ...item, responseReceivedAt: stampedAt, lastStatusChange: stampedAt } : item
+              );
+              localStorage.setItem(`scriptally_queries_${cu.id}`, JSON.stringify(updated));
+              return updated;
+            });
+          } else {
+            await updateDoc(doc(db, "users", cu.id, "queries", q.id), {
+              responseReceivedAt: serverTimestamp(),
+              lastStatusChange: serverTimestamp(),
+            });
+          }
+        } catch (err) {
+          console.error("[ScriptAlly] Auto-close failed:", err);
+        }
+      });
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, [currentUser, queries]);
 
   const undoQueryStatus = async (queryId: string, previousStatus: QueryStatus, newStatus: QueryStatus) => {
     if (!currentUser) return;

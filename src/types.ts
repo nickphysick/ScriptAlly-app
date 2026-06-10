@@ -163,6 +163,8 @@ export interface Query {
   nudgeDate?: string; // ISO String or date (when they plan to nudge)
   lastNudgeSentDate?: string; // ISO String when they actually nudged
   responseDeadline?: string; // Computed or explicit response expectation date (ISO String)
+  materialsWanted?: string[]; // Materials sent with the query, e.g. ["Query Letter", "Synopsis", "Sample Pages"]
+  ifNoResponse?: string; // Preference if no response by deadline: "Remind me to nudge" | "Mark as no response automatically" | "Do nothing"
   partialRequestedDate?: string;
   partialSentDate?: string;
   fullRequestedDate?: string;

@@ -322,11 +322,23 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
       nudgeDate = d.toISOString();
     }
 
-    // Combine materials details list for logging/activities tracking
-    const materials = [];
+    // Combine materials list for the query record. Values use the app's canonical vocabulary
+    // ("Query Letter" / "Synopsis" / "Sample Pages") so the screens that read materialsWanted
+    // (RecordResponseModal, the query detail, etc.) display and filter them consistently.
+    const materials: string[] = [];
     if (queryLetterChecked) materials.push("Query Letter");
     if (synopsisChecked) materials.push("Synopsis");
-    if (samplePagesChecked) materials.push("Manuscript Sample");
+    if (samplePagesChecked) materials.push("Sample Pages");
+
+    // Persist the "if no response" choice in the existing ifNoResponse field/vocabulary used by
+    // the query edit form, so both forms read/write the same field and the auto-close mechanism
+    // (db.tsx) can key off "Mark as no response automatically".
+    const ifNoResponseValue =
+      ifNoResponseAction === "nudge"
+        ? "Remind me to nudge"
+        : ifNoResponseAction === "close"
+        ? "Mark as no response automatically"
+        : "Do nothing";
 
     try {
       const newQueryPayload = {
@@ -338,6 +350,8 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
         dateSent: new Date(dateSent).toISOString(),
         responseDeadline: new Date(responseDeadlineDate).toISOString(),
         nudgeDate,
+        materialsWanted: materials,
+        ifNoResponse: ifNoResponseValue,
         status: QueryStatus.QUERIED
       };
 
