@@ -1998,34 +1998,18 @@ export const Dashboard: React.FC<{
 
   // Group activities/events for Timeline
   const mergedActivities = useMemo(() => {
-    const arr = [...activities];
-    timelineItems.forEach(item => {
-      if (arr.some(a => a.id === item.id)) return;
-      
-      const dateStr = item.createdAt 
-        ? (item.createdAt.toDate ? item.createdAt.toDate().toISOString() : new Date(item.createdAt.seconds * 1000).toISOString())
-        : new Date().toISOString();
-
-      arr.push({
-        id: item.id,
-        userId: currentUser?.id || "",
-        queryId: item.queryId,
-        manuscriptId: queries.find(q => q.id === item.queryId)?.manuscriptId,
-        activityType: ActivityType.STATUS_CHANGED,
-        description: item.note || `Status updated to ${item.type}`,
-        date: dateStr,
-        details: item.note,
-      });
-    });
-    
-    // Final defensive de-duplication pass to prevent duplicate key errors (e.g. from race conditions during backfill sync/write cycles)
+    // Single source of truth: the global `activities` collection. We deliberately no longer merge
+    // the legacy top-level `activity` feed (timelineItems). recordQueryResponse no longer writes
+    // that feed, and merging the two collections — which were de-duped only by document id —
+    // produced two rows for a single recorded response (e.g. "Query rejected…" + "Rejection
+    // received from …"). Reading one store keeps every recorded event on the dashboard exactly once.
     const seen = new Set<string>();
-    return arr.filter(item => {
+    return [...activities].filter(item => {
       if (!item.id || seen.has(item.id)) return false;
       seen.add(item.id);
       return true;
     });
-  }, [activities, timelineItems, queries, currentUser?.id]);
+  }, [activities]);
 
   const groupedEventsByDate: Record<string, typeof activities> = {};
   mergedActivities.forEach(act => {

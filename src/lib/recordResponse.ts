@@ -241,7 +241,6 @@ export async function recordQueryResponse(
   //    so undo can delete exactly what we wrote.
   const preSnapshot = JSON.parse(JSON.stringify(query));
   const activityDocRef = doc(collection(db, `users/${userId}/queries/${queryId}/activity`));
-  const topLevelActivityDocRef = doc(collection(db, `users/${userId}/activity`));
 
   // 4. Human-readable timeline note.
   const activityNote = buildActivityNote(newStatus, {
@@ -277,18 +276,12 @@ export async function recordQueryResponse(
     throw err;
   }
 
-  // 6. SECONDARY writes — best-effort. Failures here must never block undo.
-  let topLevelWritten = true;
-  try {
-    await setDoc(topLevelActivityDocRef, activityPayload);
-  } catch (err) {
-    console.error("Top-level activity sync write failed (non-fatal):", err);
-    topLevelWritten = false;
-  }
-
-  // Legacy global `activities` doc — the store the slide-in panel timeline and stats read from.
-  // Writing it here keeps every timeline (Queries subcollection, dashboard feed, slide-in panel)
-  // in step from a single code path. Best-effort.
+  // 6. SECONDARY write — best-effort. Failures here must never block undo.
+  //
+  // The global `activities` collection is the ONE store the dashboard feed (mergedActivities)
+  // and the slide-in panel timeline both read. We write the event here exactly once. We must NOT
+  // also write the top-level `users/{uid}/activity` feed — the dashboard merges both collections
+  // and de-dupes only on document id, so writing both produced two rows for one event.
   const legacyActivityRef = doc(collection(db, `users/${userId}/activities`));
   let legacyWritten = true;
   try {
@@ -348,7 +341,6 @@ export async function recordQueryResponse(
     await Promise.all([
       updateDoc(queryRef, revertData),
       deleteDoc(activityDocRef),
-      topLevelWritten ? deleteDoc(topLevelActivityDocRef) : Promise.resolve(),
       legacyWritten ? deleteDoc(legacyActivityRef) : Promise.resolve(),
       agentRequeryUndo
         ? updateDoc(doc(db, `users/${userId}/agents/${agentRequeryUndo.agentId}`), {

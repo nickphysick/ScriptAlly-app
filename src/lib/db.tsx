@@ -151,6 +151,23 @@ interface DbContextType {
 
 const DbContext = createContext<DbContextType | undefined>(undefined);
 
+// Keywords matching the activity wording that recordQueryResponse / updateQueryStatus actually
+// produce per status. Used by the self-healing backfill (to avoid duplicating a properly-recorded
+// response) and by the cleanup (to remove stale backfill duplicates). The old backfill matched the
+// literal status string ("rejected"), but a recorded rejection reads "Rejection received from…"
+// — which contains "rejection", not "rejected" — so every recorded rejection got a duplicate row.
+const RESPONSE_STATUS_KEYWORDS: Record<string, string[]> = {
+  [QueryStatus.PARTIAL_REQUESTED]: ["partial manuscript requested", "requested a partial", "partial requested"],
+  [QueryStatus.PARTIAL_SENT]: ["partial manuscript sent", "partial sent"],
+  [QueryStatus.FULL_REQUESTED]: ["full manuscript requested", "requested a full", "full requested"],
+  [QueryStatus.FULL_SENT]: ["full manuscript sent", "full sent"],
+  [QueryStatus.REVISE_RESUBMIT]: ["revise", "resubmit", "r&r"],
+  [QueryStatus.OFFER]: ["offer"],
+  [QueryStatus.REJECTED]: ["reject", "declined", "passed"],
+  [QueryStatus.WITHDRAWN]: ["withdraw"],
+  [QueryStatus.NO_RESPONSE]: ["no response", "closed"],
+};
+
 export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [manuscripts, setManuscripts] = useState<Manuscript[]>([]);
@@ -791,17 +808,34 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       // 3. Backfill Query Status Changed activities
       for (const q of queries) {
         if (q.status !== QueryStatus.QUERIED) {
+          // Skip queries whose status changed recently. Those are recorded in real time by
+          // recordQueryResponse / updateQueryStatus; the backfill runs on a timer and would
+          // otherwise race the recorded activity — firing before it has propagated into local
+          // state — and create a duplicate (e.g. a "Query rejected" row alongside the real
+          // "Rejection received from …"). The backfill is only meant to heal old, orphaned data.
+          const lastChangeRaw: any = (q as any).lastStatusChange || (q as any).responseReceivedAt;
+          let lastChangeMs = 0;
+          if (lastChangeRaw) {
+            if (typeof lastChangeRaw === "string") lastChangeMs = new Date(lastChangeRaw).getTime();
+            else if (typeof lastChangeRaw.seconds === "number") lastChangeMs = lastChangeRaw.seconds * 1000;
+            else if (typeof lastChangeRaw.toDate === "function") lastChangeMs = lastChangeRaw.toDate().getTime();
+            else if (lastChangeRaw instanceof Date) lastChangeMs = lastChangeRaw.getTime();
+          }
+          if (lastChangeMs && Date.now() - lastChangeMs < 24 * 60 * 60 * 1000) continue;
+
           const matchingAgent = agents.find(ag => ag.id === q.agentId);
           const agentName = matchingAgent ? matchingAgent.name : "The agent";
           const matchingMs = manuscripts.find(ms => ms.id === q.manuscriptId);
           const manuscriptTitle = matchingMs ? matchingMs.title : "";
 
           // Check if we have an activity matching this status for this query
-          const hasStatusActivity = activities.some(act => 
-            act.queryId === q.id && 
-            (act.details?.toLowerCase().includes("status") || act.description?.toLowerCase().includes("status") || 
-             act.description?.toLowerCase().includes(q.status.toLowerCase()))
-          );
+          const statusKeywords = RESPONSE_STATUS_KEYWORDS[q.status] || [q.status.toLowerCase()];
+          const hasStatusActivity = activities.some(act => {
+            if (act.queryId !== q.id) return false;
+            const desc = (act.description || "").toLowerCase();
+            const det = (act.details || "").toLowerCase();
+            return desc.includes("status") || det.includes("status") || statusKeywords.some(kw => desc.includes(kw) || det.includes(kw));
+          });
 
           if (!hasStatusActivity) {
             let expectedNote = `Status updated to ${q.status}`;
@@ -924,11 +958,27 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
            act.description?.includes("Status change undone") || act.details?.includes("Status change undone"));
 
         // 2. Partial requested activities for any queries that are currently in QUERIED status (indicating they were undone/reverted)
-        const isLeftoverPartialRequested = 
+        const isLeftoverPartialRequested =
           act.description?.toLowerCase().includes("requested a partial manuscript") &&
           queries.some(q => q.id === act.queryId && q.status === QueryStatus.QUERIED);
 
-        return isUndoQueriedActivity || isLeftoverPartialRequested;
+        // 3. Stale backfill duplicate: a generic backfill activity (id "act-status-…") for a query
+        //    that ALSO has a properly-recorded, non-backfill activity describing the same status.
+        //    Only removed when a real activity exists, so genuinely-missing ones are never deleted.
+        const isRedundantBackfill = (() => {
+          if (!String(act.id || "").startsWith("act-status-")) return false;
+          const q = queries.find(x => x.id === act.queryId);
+          if (!q) return false;
+          const kws = RESPONSE_STATUS_KEYWORDS[q.status] || [];
+          return activities.some(other =>
+            other.id !== act.id &&
+            other.queryId === act.queryId &&
+            !String(other.id || "").startsWith("act-status-") &&
+            kws.some(kw => (other.description || "").toLowerCase().includes(kw))
+          );
+        })();
+
+        return isUndoQueriedActivity || isLeftoverPartialRequested || isRedundantBackfill;
       });
 
       if (activitiesToDelete.length > 0) {
