@@ -189,12 +189,17 @@ interface QuerySlideInPanelProps {
   queryId: string | null;
   onNavigate: (tab: string, subPageName?: string) => void;
   onSaveStatusChange: (
-    queryId: string, 
-    newStatus: QueryStatus, 
-    previousStatus: QueryStatus, 
+    queryId: string,
+    newStatus: QueryStatus,
+    previousStatus: QueryStatus,
     notesText: string
   ) => void;
   onActivityDeleted?: () => void;
+  /**
+   * When provided, the panel's status control becomes a single "Record response" button that
+   * opens the unified RecordResponseModal in the parent (instead of the legacy inline form).
+   */
+  onRecordResponse?: (queryId: string) => void;
 }
 
 export const QuerySlideInPanel: React.FC<QuerySlideInPanelProps> = ({
@@ -203,7 +208,8 @@ export const QuerySlideInPanel: React.FC<QuerySlideInPanelProps> = ({
   queryId,
   onNavigate,
   onSaveStatusChange,
-  onActivityDeleted
+  onActivityDeleted,
+  onRecordResponse
 }) => {
   const { 
     queries, agents, manuscripts, packages, activities, journalEntries, 
@@ -413,6 +419,20 @@ export const QuerySlideInPanel: React.FC<QuerySlideInPanelProps> = ({
 
         {/* Quick Transition update row */}
         <div className="bg-[#3a1c14]/98 border-t border-white/10 px-6 py-3.5 flex flex-col gap-2 relative">
+          {onRecordResponse ? (
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-[11px] font-mono text-stone-300 uppercase font-bold tracking-wider select-none shrink-0">
+                Update status
+              </span>
+              <button
+                onClick={() => { onRecordResponse(query.id); onClose(); }}
+                className="px-3.5 py-1.5 text-xs font-bold rounded-lg bg-[#FAC775] text-[#412402] hover:bg-[#ebd0a3] cursor-pointer whitespace-nowrap inline-flex items-center gap-1.5"
+              >
+                Record response →
+              </button>
+            </div>
+          ) : (
+          <>
           <div className="flex items-center justify-between gap-3">
             <span className="text-[11px] font-mono text-stone-300 uppercase font-bold tracking-wider select-none shrink-0">
               Update status
@@ -571,6 +591,8 @@ export const QuerySlideInPanel: React.FC<QuerySlideInPanelProps> = ({
               </motion.div>
             )}
           </AnimatePresence>
+          </>
+          )}
         </div>
 
         {/* Tab Selection Area */}

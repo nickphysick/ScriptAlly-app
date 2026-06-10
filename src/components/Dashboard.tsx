@@ -20,6 +20,8 @@ import {
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { ActivityCopyCustomizer } from "./ActivityCopyCustomizer";
 import { QuerySlideInPanel } from "./QuerySlideInPanel";
+import { RecordResponseModal } from "./RecordResponseModal";
+import { recordQueryResponse } from "../lib/recordResponse";
 import { CalendarView } from "./CalendarView";
 import { StatusPill, StatusCircle } from "./StatusPill";
 import { getDynamicActivityText, replacePlaceholders, extractAgentFromText, boldAgentAndAgencyInText } from "../lib/activityUtils";
@@ -653,8 +655,13 @@ export const Dashboard: React.FC<{
     newStatus: QueryStatus;
     agentName: string;
     notes?: string;
+    /** Unified revert from recordQueryResponse(); when present, the Undo button uses this. */
+    undoFn?: () => Promise<void>;
   } | null>(null);
   const [undoToastTimer, setUndoToastTimer] = useState<number>(10);
+
+  // Drives the unified RecordResponseModal launched from the query slide-in panel.
+  const [recordResponseQueryId, setRecordResponseQueryId] = useState<string | null>(null);
 
   // Timer effect for Status Change Undo window
   useEffect(() => {
@@ -6289,10 +6296,49 @@ export const Dashboard: React.FC<{
         queryId={selectedQueryIdForPanel}
         onNavigate={onNavigate}
         onSaveStatusChange={handleSaveStatusChange}
+        onRecordResponse={(qid) => setRecordResponseQueryId(qid)}
         onActivityDeleted={() => {
           console.log("Timeline activity record successfully deleted.");
         }}
       />
+
+      {/* Unified Record-response modal (shared with the Queries page) */}
+      {recordResponseQueryId && (() => {
+        const q = queries.find(item => item.id === recordResponseQueryId);
+        if (!q) return null;
+        const ag = agents.find(a => a.id === q.agentId);
+        const ms = manuscripts.find(m => m.id === q.manuscriptId);
+        return (
+          <RecordResponseModal
+            isOpen={true}
+            onClose={() => setRecordResponseQueryId(null)}
+            query={q}
+            agent={{
+              name: ag?.name || "the agent",
+              agency: ag?.agency || "Agency",
+              responseTimeWeeks: ag?.responseTimeWeeks || 6,
+              submissionMethod: (ag as any)?.submissionMethod || "Email"
+            }}
+            manuscript={{ title: ms?.title || "" }}
+            materialsOriginallySent={(q as any)?.materialsWanted || []}
+            onNavigate={onNavigate}
+            onSave={async (data) => {
+              if (!currentUser) throw new Error("No user session active.");
+              const result = await recordQueryResponse(
+                { userId: currentUser.id, query: q, agent: ag || null, manuscript: ms || null },
+                data
+              );
+              setUndoToastInfo({
+                queryId: q.id,
+                previousStatus: q.status,
+                newStatus: result.newStatus,
+                agentName: ag?.name || "the agent",
+                undoFn: result.undo,
+              });
+            }}
+          />
+        );
+      })()}
 
       {/* Undo Success Status Toast overlay */}
       <AnimatePresence>
@@ -6345,11 +6391,17 @@ export const Dashboard: React.FC<{
               <button
                 onClick={async () => {
                   try {
-                    await undoQueryStatus(
-                      undoToastInfo.queryId, 
-                      undoToastInfo.previousStatus, 
-                      undoToastInfo.newStatus
-                    );
+                    if (undoToastInfo.undoFn) {
+                      // Unified revert (recorded via RecordResponseModal).
+                      await undoToastInfo.undoFn();
+                    } else {
+                      // Legacy path (inline status form).
+                      await undoQueryStatus(
+                        undoToastInfo.queryId,
+                        undoToastInfo.previousStatus,
+                        undoToastInfo.newStatus
+                      );
+                    }
                     setUndoToastInfo(null);
                   } catch (e) {
                     console.error("Undo status change failed:", e);

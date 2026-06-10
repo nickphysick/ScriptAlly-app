@@ -28,6 +28,7 @@ import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { QueryStatus, Agent, Manuscript, Query, SubmissionMethod, ActivityType } from "../types";
 import { StatusPill, getStatusStyle, getStatusLabel, StatusCircle } from "./StatusPill";
 import { RecordResponseModal } from "./RecordResponseModal";
+import { recordQueryResponse } from "../lib/recordResponse";
 
 const normalizeStatus = (status: string | QueryStatus): QueryStatus => {
   if (!status) return QueryStatus.QUERIED;
@@ -113,47 +114,6 @@ function formatWhatsAppDate(dateString: string): string {
   return `${day} ${month}, ${time}`;
 }
 
-const getTransitionOptions = (status: QueryStatus) => {
-  switch (status) {
-    case QueryStatus.QUERIED:
-      return [
-        { label: "Mark as Partial Requested", targetStatus: QueryStatus.PARTIAL_REQUESTED },
-        { label: "Mark as Rejected", targetStatus: QueryStatus.REJECTED },
-        { label: "Mark as Withdrawn", targetStatus: QueryStatus.WITHDRAWN }
-      ];
-    case QueryStatus.PARTIAL_REQUESTED:
-      return [
-        { label: "Mark as Partial Sent", targetStatus: QueryStatus.PARTIAL_SENT },
-        { label: "Mark as Rejected", targetStatus: QueryStatus.REJECTED }
-      ];
-    case QueryStatus.PARTIAL_SENT:
-      return [
-        { label: "Mark as Full Requested", targetStatus: QueryStatus.FULL_REQUESTED },
-        { label: "Mark as Rejected", targetStatus: QueryStatus.REJECTED },
-        { label: "Mark as Withdrawn", targetStatus: QueryStatus.WITHDRAWN }
-      ];
-    case QueryStatus.FULL_REQUESTED:
-      return [
-        { label: "Mark as Full Sent", targetStatus: QueryStatus.FULL_SENT },
-        { label: "Mark as Rejected", targetStatus: QueryStatus.REJECTED }
-      ];
-    case QueryStatus.FULL_SENT:
-      return [
-        { label: "Offer of Representation! ✨", targetStatus: QueryStatus.OFFER },
-        { label: "Mark as Rejected", targetStatus: QueryStatus.REJECTED },
-        { label: "Revise & Resubmit", targetStatus: QueryStatus.REVISE_RESUBMIT },
-        { label: "Mark as Withdrawn", targetStatus: QueryStatus.WITHDRAWN }
-      ];
-    default:
-      return [
-        { label: "Move to Sent / Queried", targetStatus: QueryStatus.QUERIED },
-        { label: "Revise & Resubmit", targetStatus: QueryStatus.REVISE_RESUBMIT },
-        { label: "Offer of Representation! ✨", targetStatus: QueryStatus.OFFER },
-        { label: "Mark as Rejected", targetStatus: QueryStatus.REJECTED }
-      ];
-  }
-};
-
 export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string, subPageName?: string) => void; activeSubPage?: string }> = ({ searchQuery, onNavigate, activeSubPage }) => {
   const {
     currentUser,
@@ -165,7 +125,6 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     journalEntries,
     tasks,
     isOfflineMode,
-    updateQueryStatus,
     addJournalEntry,
     addQuery,
     updateQuery,
@@ -180,9 +139,10 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   
   // Refs for State and Listener Management
   const unsubscribeRef = useRef<any>(null);
+  // Snapshot of the query before the last recorded response, for an instant optimistic revert on Undo.
   const preSubmissionSnapshotRef = useRef<any>(null);
-  const activityDocRefForUndoRef = useRef<any>(null);
-  const topLevelActivityDocRefForUndoRef = useRef<any>(null);
+  // Reverts the most recent recorded response (status, activity docs, agent pref). Set by recordQueryResponse().
+  const undoFnRef = useRef<(() => Promise<void>) | null>(null);
   const [trackingEvents, setTrackingEvents] = useState<any[]>([]);
 
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
@@ -397,6 +357,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     if (!undoToast || !currentUser) return;
 
     const { queryId, agentName } = undoToast;
+    const undoFn = undoFnRef.current;
 
     // Immediately dismiss toast
     setUndoToast(null);
@@ -408,118 +369,47 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
       return next;
     });
 
-    // 1. Unsubscribe from listener (Fix 3)
+    // Pause the live listener and optimistically restore the pre-change snapshot so the
+    // revert feels instant; we resubscribe once the revert write lands.
     if (unsubscribeRef.current) {
       unsubscribeRef.current();
     }
+    if (preSubmissionSnapshotRef.current) {
+      setSelectedQuery(preSubmissionSnapshotRef.current);
+    }
 
-    // 2. Optimistically update local state immediately (Fix 3)
-    setSelectedQuery(preSubmissionSnapshotRef.current);
-
-    // 3. Build the revert data — delete fields that didn't exist before (Fix 3)
-    const snapshot = preSubmissionSnapshotRef.current;
-    
-    const convertToTimestampOrDate = (val: any) => {
-      if (!val) return undefined;
-      if (typeof val === "object") {
-        if (typeof val.seconds === "number") {
-          return new Timestamp(val.seconds, val.nanoseconds || 0);
+    const resubscribe = () => {
+      const unsub = onSnapshot(
+        doc(db, `users/${currentUser.id}/queries/${queryId}`),
+        (snap) => {
+          setSelectedQuery(snap.exists() ? { id: snap.id, ...snap.data() } : null);
+        },
+        (error) => {
+          handleFirestoreError(error, OperationType.GET, `users/${currentUser.id}/queries/${queryId}`);
         }
-        if (typeof val._seconds === "number") {
-          return new Timestamp(val._seconds, val._nanoseconds || 0);
-        }
-      }
-      if (typeof val === "string") {
-        return Timestamp.fromDate(new Date(val));
-      }
-      return val;
-    };
-
-    const revertData = {
-      status: snapshot.status,
-      lastStatusChange: convertToTimestampOrDate(snapshot.lastStatusChange) ?? deleteField(),
-      responseReceivedAt: convertToTimestampOrDate(snapshot.responseReceivedAt) ?? deleteField(),
-      materialsRequestedType: snapshot.materialsRequestedType ?? deleteField(),
-      materialsRequestedQuantity: snapshot.materialsRequestedQuantity ?? deleteField(),
-      expectedSendDate: convertToTimestampOrDate(snapshot.expectedSendDate) ?? deleteField(),
-      sendReminderDate: convertToTimestampOrDate(snapshot.sendReminderDate) ?? deleteField(),
-      rejectionFeedbackType: snapshot.rejectionFeedbackType ?? deleteField(),
-      rejectionFeedbackText: snapshot.rejectionFeedbackText ?? deleteField(),
-      rejectionReflection: snapshot.rejectionReflection ?? deleteField(),
-      offerDate: convertToTimestampOrDate(snapshot.offerDate) ?? deleteField(),
-      offerResponseDeadline: convertToTimestampOrDate(snapshot.offerResponseDeadline) ?? deleteField(),
-      offerNotes: snapshot.offerNotes ?? deleteField(),
-      closingReason: snapshot.closingReason ?? deleteField(),
-      closingNotes: snapshot.closingNotes ?? deleteField(),
+      );
+      unsubscribeRef.current = unsub;
     };
 
     try {
-      // 4. Write revert and delete activity doc in parallel (Fix 3)
-      await Promise.all([
-        updateDoc(doc(db, `users/${currentUser.id}/queries/${queryId}`), revertData),
-        deleteDoc(activityDocRefForUndoRef.current),
-        topLevelActivityDocRefForUndoRef.current ? deleteDoc(topLevelActivityDocRefForUndoRef.current) : Promise.resolve(),
-      ]);
+      // Single shared revert: undoes status, the activity docs and any agent-pref write.
+      if (undoFn) {
+        await undoFn();
+      }
+      undoFnRef.current = null;
+      resubscribe();
 
-      // 5. Resubscribe to listener (Fix 3)
-      const unsub = onSnapshot(
-        doc(db, `users/${currentUser.id}/queries/${queryId}`),
-        (snap) => {
-          if (snap.exists()) {
-            setSelectedQuery({ id: snap.id, ...snap.data() });
-          } else {
-            setSelectedQuery(null);
-          }
-        },
-        (error) => {
-          handleFirestoreError(error, OperationType.GET, `users/${currentUser.id}/queries/${queryId}`);
-        }
-      );
-      unsubscribeRef.current = unsub;
-
-      // Show second toast: Changes undone
-      setFeedbackToast({
-        message: "Changes undone",
-        subMessage: agentName
-      });
-
-      // Auto-dismiss feedback toast after 3 seconds
-      setTimeout(() => {
-        setFeedbackToast(null);
-      }, 3000);
-
+      setFeedbackToast({ message: "Changes undone", subMessage: agentName });
+      setTimeout(() => setFeedbackToast(null), 3000);
     } catch (err) {
       console.error("Failed to undo Firestore write", err);
-      
-      // Resubscribe even on failure (Fix 3)
-      const unsub = onSnapshot(
-        doc(db, `users/${currentUser.id}/queries/${queryId}`),
-        (snap) => {
-          if (snap.exists()) {
-            setSelectedQuery({ id: snap.id, ...snap.data() });
-          } else {
-            setSelectedQuery(null);
-          }
-        },
-        (error) => {
-          handleFirestoreError(error, OperationType.GET, `users/${currentUser.id}/queries/${queryId}`);
-        }
-      );
-      unsubscribeRef.current = unsub;
+      resubscribe();
 
-      // Show failure toast: Couldn't undo — please refresh
-      setFeedbackToast({
-        message: "Couldn't undo — please refresh",
-        subMessage: ""
-      });
-
-      setTimeout(() => {
-        setFeedbackToast(null);
-      }, 3000);
+      setFeedbackToast({ message: "Couldn't undo — please refresh", subMessage: "" });
+      setTimeout(() => setFeedbackToast(null), 3000);
 
       handleFirestoreError(err, OperationType.WRITE, `users/${currentUser.id}/queries/${queryId}`);
     } finally {
-      // Hide loading state on the query card
       setUndoingQueryIds(prev => {
         const next = new Set(prev);
         next.delete(queryId);
@@ -3521,15 +3411,48 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                       </div>
 
                       {/* Rejection Details Read Mode */}
-                      {[QueryStatus.REJECTED, QueryStatus.WITHDRAWN].includes(activeQuery.status) && (activeQuery as any).rejectionType && (
+                      {[QueryStatus.REJECTED, QueryStatus.WITHDRAWN].includes(activeQuery.status) &&
+                        (activeQuery.rejectionFeedbackType || activeQuery.rejectionFeedbackText || activeQuery.rejectionLesson || (activeQuery as any).rejectionType) && (
                         <div className="bg-[#FAF1EF] border border-[#e8d5cc]/60 p-3 rounded-lg space-y-1.5 mt-2">
                           <span className="text-[10px] font-mono text-[#7c3a2a] font-bold uppercase block">Archived Rejection Details</span>
-                          <div className="text-[11px]">
-                            <span className="font-semibold text-stone-600 block">Type: <span className="text-stone-800">{(activeQuery as any).rejectionType}</span></span>
-                            {(activeQuery as any).agentComments && (
+                          <div className="text-[11px] space-y-1">
+                            {(() => {
+                              const typeLabel = activeQuery.rejectionFeedbackType === "detailed"
+                                ? "Personalised — they left a note"
+                                : activeQuery.rejectionFeedbackType === "standard"
+                                ? "Standard pass"
+                                : activeQuery.rejectionFeedbackType === "form"
+                                ? "Form rejection"
+                                : (activeQuery as any).rejectionType;
+                              const stageLabel = activeQuery.rejectedFromStatus && activeQuery.rejectedFromStatus !== QueryStatus.QUERIED
+                                ? `After: ${activeQuery.rejectedFromStatus}`
+                                : null;
+                              return (
+                                <>
+                                  {typeLabel && (
+                                    <span className="font-semibold text-stone-600 block">Type: <span className="text-stone-800">{typeLabel}</span></span>
+                                  )}
+                                  {stageLabel && (
+                                    <span className="font-semibold text-stone-600 block">{stageLabel}</span>
+                                  )}
+                                </>
+                              );
+                            })()}
+                            {(activeQuery.rejectionFeedbackText || (activeQuery as any).agentComments) && (
                               <p className="italic text-stone-600 bg-white p-2 border border-stone-200/55 rounded-md mt-1 leading-snug">
-                                "{(activeQuery as any).agentComments}"
+                                "{activeQuery.rejectionFeedbackText || (activeQuery as any).agentComments}"
                               </p>
+                            )}
+                            {activeQuery.rejectionLesson && (
+                              <div className="mt-1">
+                                <span className="font-semibold text-stone-600 block">Note to self:</span>
+                                <p className="italic text-stone-600 leading-snug">{activeQuery.rejectionLesson}</p>
+                              </div>
+                            )}
+                            {activeAgent?.requeryPreference && (
+                              <span className="font-semibold text-stone-600 block mt-1">
+                                Query this agent again? <span className="text-stone-800 capitalize">{activeAgent.requeryPreference}</span>
+                              </span>
                             )}
                           </div>
                         </div>
@@ -3733,232 +3656,29 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         onNavigate={onNavigate}
         onSave={async (data) => {
           if (!currentUser) throw new Error("No user session active.");
-          const queryId = activeQuery.id;
-          const queryRef = doc(db, "users", currentUser.id, "queries", queryId);
 
-          const STATUS_MAP: Record<string, QueryStatus> = {
-            partialRequested: QueryStatus.PARTIAL_REQUESTED,   // "Partial Requested"
-            fullRequested:    QueryStatus.FULL_REQUESTED,       // "Full Requested"
-            reviseAndResubmit: QueryStatus.REVISE_RESUBMIT,    // "Revise & Resubmit"
-            offer:            QueryStatus.OFFER,                // "Offer"
-            rejected:         QueryStatus.REJECTED,             // "Rejected"
-            noResponse:       QueryStatus.NO_RESPONSE,          // "No Response"
-          };
-
-          // 1. Determine status string & map fields
-          let selectedResponseType = "";
-          let materialsRequestedType: string | undefined;
-          let materialsRequestedQuantity: any = undefined;
-          let expectedSendDate: any = undefined;
-          let sendReminderDate: any = undefined;
-
-          let rejectionFeedbackType: string | undefined;
-          let rejectionFeedbackText: string | undefined;
-          let rejectionReflection: string | undefined;
-
-          let offerDate: any = undefined;
-          let offerResponseDeadline: any = undefined;
-          let offerNotes: string | undefined;
-
-          let closingReason: string | undefined;
-          let closingNotes: string | undefined;
-
-          const getTimestamp = (val: string) => {
-            if (!val || val.trim() === "") return undefined;
-            return Timestamp.fromDate(new Date(val));
-          };
-
-          const formatTextDateLocal = (dateStr: string) => {
-            if (!dateStr) return "Not specified";
-            const date = new Date(dateStr);
-            return date.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-          };
-
-          if (data.responseType === "partial" || data.responseType === "full" || data.responseType === "rr") {
-            selectedResponseType = data.responseType === "partial" ? "partialRequested" 
-                        : data.responseType === "full" ? "fullRequested" 
-                        : "reviseAndResubmit";
-
-            materialsRequestedType = data.materialsType.toLowerCase();
-            // Ensure quantity is just the number/text, never a date string
-            materialsRequestedQuantity = data.materialsType === "Other" 
-              ? data.materialsOtherText?.trim() 
-              : String(data.materialsQuantity ?? "").trim();
-
-            // Strip any date-like content that may have leaked in
-            if (materialsRequestedQuantity?.toLowerCase().includes("expected") ||
-                materialsRequestedQuantity?.toLowerCase().includes("jun") ||
-                materialsRequestedQuantity?.toLowerCase().includes("jul")) {
-              materialsRequestedQuantity = "";
-            }
-            expectedSendDate = getTimestamp(data.expectedBy);
-            sendReminderDate = getTimestamp(data.sendReminderDate);
-          } else if (data.responseType === "rejected") {
-            selectedResponseType = "rejected";
-            if (data.feedbackType === "Yes") rejectionFeedbackType = "detailed";
-            else if (data.feedbackType === "No") rejectionFeedbackType = "standard";
-            else rejectionFeedbackType = "form";
-
-            if (data.feedbackType === "Yes" && data.feedbackText && data.feedbackText.trim() !== "") {
-              rejectionFeedbackText = data.feedbackText;
-            }
-            if (data.privateReflection && data.privateReflection.trim() !== "") {
-              rejectionReflection = data.privateReflection;
-            }
-          } else if (data.responseType === "offer") {
-            selectedResponseType = "offer";
-            offerDate = getTimestamp(data.offerDate) || Timestamp.now();
-            offerResponseDeadline = getTimestamp(data.offerDeadline);
-            if (data.offerNotes && data.offerNotes.trim() !== "") {
-              offerNotes = data.offerNotes;
-            }
-          } else if (data.responseType === "close") {
-            selectedResponseType = "noResponse";
-            if (data.closingReason === "No response after expected window") {
-              closingReason = "noResponseAfterWindow";
-            } else if (data.closingReason === "Withdrew my submission") {
-              closingReason = "withdrew";
-            } else if (data.closingReason === "Agent no longer accepting queries") {
-              closingReason = "agentClosedSubmissions";
-            } else {
-              closingReason = "other";
-            }
-            if (data.closingNotes && data.closingNotes.trim() !== "") {
-              closingNotes = data.closingNotes;
-            }
-          }
-
-          let newStatus = STATUS_MAP[selectedResponseType];
-          if (selectedResponseType === "noResponse" && closingReason === "withdrew") {
-            newStatus = QueryStatus.WITHDRAWN;
-          }
-
-          if (!newStatus) {
-            console.error('Unknown response type:', selectedResponseType);
-            return;
-          }
-
-          // Build fields to update
-          const updates: Record<string, any> = {
-            status: newStatus,
-            lastStatusChange: serverTimestamp(),
-            responseReceivedAt: serverTimestamp()
-          };
-
-          if (newStatus === QueryStatus.PARTIAL_REQUESTED) {
-            updates.partialRequestedDate = new Date().toISOString();
-          } else if (newStatus === QueryStatus.FULL_REQUESTED) {
-            updates.fullRequestedDate = new Date().toISOString();
-          }
-
-          // Explicitly overwrite or clear fields on update to avoid leftover data
-          updates.materialsRequestedType = materialsRequestedType !== undefined ? materialsRequestedType : deleteField();
-          updates.materialsRequestedQuantity = materialsRequestedQuantity !== undefined ? materialsRequestedQuantity : deleteField();
-          updates.expectedSendDate = expectedSendDate !== undefined ? expectedSendDate : deleteField();
-          updates.sendReminderDate = sendReminderDate !== undefined ? sendReminderDate : deleteField();
-
-          updates.rejectionFeedbackType = rejectionFeedbackType !== undefined ? rejectionFeedbackType : deleteField();
-          updates.rejectionFeedbackText = rejectionFeedbackText !== undefined ? rejectionFeedbackText : deleteField();
-          updates.rejectionReflection = rejectionReflection !== undefined ? rejectionReflection : deleteField();
-
-          updates.offerDate = offerDate !== undefined ? offerDate : deleteField();
-          updates.offerResponseDeadline = offerResponseDeadline !== undefined ? offerResponseDeadline : deleteField();
-          updates.offerNotes = offerNotes !== undefined ? offerNotes : deleteField();
-
-          updates.closingReason = closingReason !== undefined ? closingReason : deleteField();
-          updates.closingNotes = closingNotes !== undefined ? closingNotes : deleteField();
-
-          // 2. Capture preSubmissionSnapshot for rollback (Fix 1)
+          // Snapshot pre-change state so Undo can optimistically restore it before the write reverts.
           preSubmissionSnapshotRef.current = JSON.parse(JSON.stringify(activeQuery));
 
-          // 3. Prepare activity document reference (Fix 2)
-          const activityDocRef = doc(collection(db, `users/${currentUser.id}/queries/${queryId}/activity`));
-          activityDocRefForUndoRef.current = activityDocRef;
+          // Single canonical write path shared with the Dashboard and Queries landing page.
+          // Throws only if the primary write fails (RecordResponseModal surfaces the error);
+          // the returned undo() reverts everything and gates the toast below.
+          const result = await recordQueryResponse(
+            {
+              userId: currentUser.id,
+              query: activeQuery,
+              agent: activeAgent,
+              manuscript: activeMs,
+            },
+            data
+          );
 
-          const topLevelActivityDocRef = doc(collection(db, `users/${currentUser.id}/activity`));
-          topLevelActivityDocRefForUndoRef.current = topLevelActivityDocRef;
+          // Optimistic local status so the page behind the modal reflects the change immediately;
+          // the query listener reconciles a moment later.
+          setSelectedQuery((prev: any) => (prev ? { ...prev, status: result.newStatus } : prev));
 
-          // Compute activity note
-          let activityNote = "";
-          if (newStatus === QueryStatus.QUERIED) {
-            activityNote = `Query sent via ${activeQuery.sendMethod || "Email"}`;
-          } else if (newStatus === QueryStatus.PARTIAL_REQUESTED) {
-            if (materialsRequestedQuantity) {
-              activityNote = `Partial manuscript requested — ${materialsRequestedQuantity} ${materialsRequestedType || "pages"}`;
-            } else {
-              activityNote = "Partial manuscript requested";
-            }
-          } else if (newStatus === QueryStatus.PARTIAL_SENT) {
-            activityNote = "Partial manuscript sent";
-          } else if (newStatus === QueryStatus.FULL_REQUESTED) {
-            if (materialsRequestedQuantity) {
-              activityNote = `Full manuscript requested — ${materialsRequestedQuantity} ${materialsRequestedType || "pages"}`;
-            } else {
-              activityNote = "Full manuscript requested";
-            }
-          } else if (newStatus === QueryStatus.FULL_SENT) {
-            activityNote = "Full manuscript sent";
-          } else if (newStatus === QueryStatus.REVISE_RESUBMIT) {
-            activityNote = "Revise & resubmit requested";
-          } else if (newStatus === QueryStatus.OFFER) {
-            activityNote = "Offer of representation received";
-          } else if (newStatus === QueryStatus.REJECTED) {
-            let feedbackStr = "";
-            if (rejectionFeedbackType === "detailed") feedbackStr = " — detailed feedback recorded";
-            else if (rejectionFeedbackType === "standard") feedbackStr = " — standard rejection";
-            else if (rejectionFeedbackType === "form") feedbackStr = " — form rejection";
-            activityNote = `Query rejected${feedbackStr}`;
-          } else if (newStatus === QueryStatus.WITHDRAWN) {
-            activityNote = "Query withdrawn";
-          } else if (newStatus === QueryStatus.NO_RESPONSE) {
-            activityNote = "Query closed — no response";
-          }
-
-          // 4. Optimistically update local state immediately (Fix 4)
-          setSelectedQuery((prev: any) => {
-            if (!prev) return prev;
-            return {
-              ...prev,
-              status: newStatus
-            };
-          });
-
-          // Write completion updates to Firestore
-          try {
-            await updateDoc(queryRef, updates);
-
-            const activityPayload: any = {
-              type: newStatus,
-              createdAt: serverTimestamp(),
-              note: activityNote,
-              queryId,
-              agentName: activeAgent?.name || "The agent",
-              manuscriptTitle: activeMs?.title || ""
-            };
-
-            if (newStatus === QueryStatus.PARTIAL_REQUESTED || newStatus === QueryStatus.FULL_REQUESTED) {
-              if (materialsRequestedType) activityPayload.materialsType = materialsRequestedType;
-              if (materialsRequestedQuantity) activityPayload.materialsQuantity = String(materialsRequestedQuantity);
-            }
-            if (newStatus === QueryStatus.REJECTED && rejectionFeedbackType) {
-              activityPayload.feedbackType = rejectionFeedbackType;
-            }
-
-            await setDoc(activityDocRef, activityPayload);
-            await setDoc(topLevelActivityDocRef, activityPayload);
-
-            // Trigger Toast config on parent
-            triggerToast({
-              queryId,
-              agentName: activeAgent?.name || "The agent",
-              manuscriptTitle: activeMs?.title || "",
-              responseStyle: data.responseType
-            });
-
-          } catch (err) {
-            console.error("Firestore completion write error", err);
-            handleFirestoreError(err, OperationType.WRITE, `users/${currentUser.id}/queries/${queryId}`);
-          }
+          undoFnRef.current = result.undo;
+          triggerToast(result.toastConfig);
         }}
       />
     )}

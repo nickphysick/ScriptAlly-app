@@ -35,6 +35,8 @@ export interface RecordResponseModalProps {
     feedbackType: "Yes" | "No" | "Form";
     feedbackText: string;
     privateReflection: string;
+    rejectionLesson: string;
+    requeryPreference: "yes" | "maybe" | "no" | "";
     offerDate: string;
     offerDeadline: string;
     offerNotes: string;
@@ -83,6 +85,8 @@ export const RecordResponseModal: React.FC<RecordResponseModalProps> = ({
   const [feedbackType, setFeedbackType] = useState<"Yes" | "No" | "Form">("Form");
   const [feedbackText, setFeedbackText] = useState<string>("");
   const [privateReflection, setPrivateReflection] = useState<string>("");
+  const [rejectionLesson, setRejectionLesson] = useState<string>("");
+  const [requeryPreference, setRequeryPreference] = useState<"yes" | "maybe" | "no" | "">("");
 
   // Step 3c: Offer states
   const [offerDate, setOfferDate] = useState<string>(() => {
@@ -152,6 +156,8 @@ export const RecordResponseModal: React.FC<RecordResponseModalProps> = ({
         feedbackType,
         feedbackText,
         privateReflection,
+        rejectionLesson,
+        requeryPreference,
         offerDate,
         offerDeadline,
         offerNotes,
@@ -650,6 +656,55 @@ export const RecordResponseModal: React.FC<RecordResponseModalProps> = ({
                     This never affects your stats — it's a private note to yourself.
                   </span>
                 </div>
+
+                {/* Lesson — note to future self */}
+                <div className="flex flex-col mb-3.5 mt-2">
+                  <label className="text-[11px] font-bold text-[#3a1c14] mb-1">
+                    Anything you'd do differently? (optional)
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={rejectionLesson}
+                    onChange={(e) => setRejectionLesson(e.target.value)}
+                    placeholder="A note to your future self before the next send — e.g. 'Check their MSWL, tailor the comps.'"
+                    className="bg-white border border-[#e8d5cc] rounded-md p-2 text-xs text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-[#7c3d3d]/40"
+                  />
+                </div>
+
+                {/* Re-query disposition (stored on the agent) */}
+                <div className="flex flex-col">
+                  <label className="text-[11px] font-bold text-[#3a1c14] mb-1.5">
+                    Query {agent.name} again in future? (optional)
+                  </label>
+                  <div className="flex gap-2 font-sans">
+                    {([
+                      { val: "yes", label: "Yes — different book" },
+                      { val: "maybe", label: "Maybe — keep watching" },
+                      { val: "no", label: "No — not a fit" },
+                    ] as const).map((opt) => {
+                      const isSelected = requeryPreference === opt.val;
+                      return (
+                        <button
+                          key={opt.val}
+                          type="button"
+                          aria-pressed={isSelected}
+                          onClick={() => setRequeryPreference(isSelected ? "" : opt.val)}
+                          style={{
+                            borderColor: isSelected ? "#7c3d3d" : "#e8d5cc",
+                            backgroundColor: isSelected ? "#FFF0F0" : "#ffffff",
+                            fontWeight: isSelected ? 600 : 400,
+                          }}
+                          className="flex-1 py-2 px-1 text-center border rounded-lg text-[11px] text-[#6a5045] tracking-tight cursor-pointer transition-all hover:border-[#c9a89e]"
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <span className="text-[10px] text-[#a08070] mt-1 italic">
+                    Saved to the agent — we'll remind you next time you query them.
+                  </span>
+                </div>
               </div>
             )}
 
@@ -862,9 +917,19 @@ export const RecordResponseModal: React.FC<RecordResponseModalProps> = ({
                           {feedbackType === "Yes" ? "Yes — they left a note" : feedbackType === "No" ? "No — standard pass" : "Form rejection"}
                         </span>
                       </div>
-                      <div className="flex justify-between items-center py-0.5">
+                      <div className="flex justify-between items-center py-0.5 border-b border-[#e8d5cc]/30">
                         <span className="text-[#c9a89e] font-medium font-mono">Reflection saved</span>
                         <span className="text-[#3a1c14] font-semibold">{privateReflection ? "Yes" : "No"}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-0.5 border-b border-[#e8d5cc]/30">
+                        <span className="text-[#c9a89e] font-medium font-mono">Note to self</span>
+                        <span className="text-[#3a1c14] font-semibold">{rejectionLesson.trim() ? "Saved" : "—"}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-0.5">
+                        <span className="text-[#c9a89e] font-medium font-mono">Query again?</span>
+                        <span className="text-[#3a1c14] font-semibold">
+                          {requeryPreference === "yes" ? "Yes" : requeryPreference === "maybe" ? "Maybe" : requeryPreference === "no" ? "No" : "—"}
+                        </span>
                       </div>
                     </>
                   )}

@@ -106,6 +106,8 @@ export interface Agent {
   lastCheckedDate: string; // ISO String
   notes: string;
   agentNotes?: string;
+  // Standing disposition set when logging a rejection: would you query this agent again (different MS)?
+  requeryPreference?: "yes" | "maybe" | "no";
 }
 
 export interface CommunityAgent {
@@ -168,6 +170,12 @@ export interface Query {
   rejectedDate?: string;
   rejectionType?: string;
   rejectionDetails?: string;
+  // Written by RecordResponseModal when logging a rejection
+  rejectionFeedbackType?: "form" | "standard" | "detailed";
+  rejectionFeedbackText?: string;
+  rejectionReflection?: string; // private — never shown in stats
+  rejectionLesson?: string; // "anything you'd do differently?" — private note to future self
+  rejectedFromStatus?: QueryStatus; // the status held immediately before rejection (e.g. Full Sent → "full declined")
 }
 
 export enum ActivityType {

@@ -14,14 +14,16 @@ import { useScriptAllyDb } from "../lib/db";
 import { QueryStatus, Manuscript } from "../types";
 import { seedFacts } from "../lib/seeds";
 import { QuerySlideInPanel } from "./QuerySlideInPanel";
+import { RecordResponseModal } from "./RecordResponseModal";
+import { recordQueryResponse } from "../lib/recordResponse";
 
 interface QueriesLandingProps {
   onNavigate: (tab: string, subPageName?: string) => void;
 }
 
 export const QueriesLanding: React.FC<QueriesLandingProps> = ({ onNavigate }) => {
-  const { 
-    queries, agents, manuscripts, tasks, updateQueryStatus, undoQueryStatus, activities 
+  const {
+    currentUser, queries, agents, manuscripts, tasks, updateQueryStatus, undoQueryStatus, activities
   } = useScriptAllyDb();
 
   // State for Query Detail Slide-in Panel
@@ -35,8 +37,13 @@ export const QueriesLanding: React.FC<QueriesLandingProps> = ({ onNavigate }) =>
     newStatus: QueryStatus;
     agentName: string;
     notes?: string;
+    /** Unified revert from recordQueryResponse(); when present, Undo uses this. */
+    undoFn?: () => Promise<void>;
   } | null>(null);
   const [undoToastTimer, setUndoToastTimer] = useState<number>(10);
+
+  // Drives the unified RecordResponseModal launched from the query slide-in panel.
+  const [recordResponseQueryId, setRecordResponseQueryId] = useState<string | null>(null);
 
   // Random Tip Selected on Mount
   const [selectedTip, setSelectedTip] = useState<{ title: string; fact: string } | null>(null);
@@ -194,7 +201,13 @@ export const QueriesLanding: React.FC<QueriesLandingProps> = ({ onNavigate }) =>
   const handleUndoStatusChange = async () => {
     if (!undoToastInfo) return;
     try {
-      await undoQueryStatus(undoToastInfo.queryId, undoToastInfo.previousStatus, undoToastInfo.newStatus);
+      if (undoToastInfo.undoFn) {
+        // Unified revert (recorded via RecordResponseModal).
+        await undoToastInfo.undoFn();
+      } else {
+        // Legacy path (inline status form).
+        await undoQueryStatus(undoToastInfo.queryId, undoToastInfo.previousStatus, undoToastInfo.newStatus);
+      }
       setUndoToastInfo(null);
     } catch (e) {
       console.error("Undo failed:", e);
@@ -949,7 +962,46 @@ export const QueriesLanding: React.FC<QueriesLandingProps> = ({ onNavigate }) =>
         }}
         onNavigate={onNavigate}
         onSaveStatusChange={handleSaveStatusChange}
+        onRecordResponse={(qid) => setRecordResponseQueryId(qid)}
       />
+
+      {/* Unified Record-response modal (shared with the Queries page) */}
+      {recordResponseQueryId && (() => {
+        const q = queries.find(item => item.id === recordResponseQueryId);
+        if (!q) return null;
+        const ag = agents.find(a => a.id === q.agentId);
+        const ms = manuscripts.find(m => m.id === q.manuscriptId);
+        return (
+          <RecordResponseModal
+            isOpen={true}
+            onClose={() => setRecordResponseQueryId(null)}
+            query={q}
+            agent={{
+              name: ag?.name || "the agent",
+              agency: ag?.agency || "Agency",
+              responseTimeWeeks: ag?.responseTimeWeeks || 6,
+              submissionMethod: (ag as any)?.submissionMethod || "Email"
+            }}
+            manuscript={{ title: ms?.title || "" }}
+            materialsOriginallySent={(q as any)?.materialsWanted || []}
+            onNavigate={onNavigate}
+            onSave={async (data) => {
+              if (!currentUser) throw new Error("No user session active.");
+              const result = await recordQueryResponse(
+                { userId: currentUser.id, query: q, agent: ag || null, manuscript: ms || null },
+                data
+              );
+              setUndoToastInfo({
+                queryId: q.id,
+                previousStatus: q.status,
+                newStatus: result.newStatus,
+                agentName: ag?.name || "the agent",
+                undoFn: result.undo,
+              });
+            }}
+          />
+        );
+      })()}
 
     </div>
   );

@@ -619,6 +619,28 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
                       </p>
                     </div>
                   )}
+
+                  {activeAgent.requeryPreference && (
+                    <div className="border-t border-stone-100 pt-3">
+                      <span className="block text-[9px] font-mono text-stone-400 font-bold uppercase select-none mb-1">Query again?</span>
+                      <span
+                        className="inline-flex items-center gap-1.5 py-[3px] px-[10px] rounded-full text-[11px] font-medium font-sans border"
+                        style={
+                          activeAgent.requeryPreference === "no"
+                            ? { background: "#FAF1EF", color: "#7c3a2a", borderColor: "#e8d5cc" }
+                            : activeAgent.requeryPreference === "yes"
+                            ? { background: "#EEF3EC", color: "#4a6741", borderColor: "#d2e0cc" }
+                            : { background: "#FBF6EC", color: "#8a6d2f", borderColor: "#ece0c6" }
+                        }
+                      >
+                        {activeAgent.requeryPreference === "yes"
+                          ? "Yes — open to querying again"
+                          : activeAgent.requeryPreference === "maybe"
+                          ? "Maybe — keep watching"
+                          : "No — not the right fit"}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
 
