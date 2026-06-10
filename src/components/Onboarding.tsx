@@ -1235,7 +1235,13 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
   const handleSkip = async () => {
     localStorage.removeItem(STORAGE_KEY);
-    await updateUserProfile({ onboardingComplete: true });
+    try {
+      await updateUserProfile({ onboardingComplete: true });
+    } catch (e) {
+      // Never trap the user in onboarding if the profile write fails — the
+      // optimistic local update already advanced the gate; just log and exit.
+      console.error("Onboarding completion write failed:", e);
+    }
     onComplete();
   };
 
