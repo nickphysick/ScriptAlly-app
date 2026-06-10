@@ -8,15 +8,17 @@ import { useScriptAllyDb } from "../lib/db";
 import { BookOpen, MapPin, Feather, Sparkles, Key, Mail, CheckCircle } from "lucide-react";
 
 export const Auth: React.FC = () => {
-  const { login, signup } = useScriptAllyDb();
+  const { login, signup, resetPassword } = useScriptAllyDb();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [infoMsg, setInfoMsg] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setInfoMsg("");
     if (!email) {
       setErrorMsg("Please provide an email address.");
       return;
@@ -26,7 +28,7 @@ export const Auth: React.FC = () => {
       if (isLogin) {
         const ok = await login(email, password);
         if (!ok) {
-          setErrorMsg("Authentication failed. Use any valid address.");
+          setErrorMsg("Authentication failed. Please try again.");
         }
       } else {
         if (!name) {
@@ -40,6 +42,17 @@ export const Auth: React.FC = () => {
       }
     } catch (err: any) {
       setErrorMsg(err?.message || "An authentication error occurred.");
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    setErrorMsg("");
+    setInfoMsg("");
+    try {
+      await resetPassword(email);
+      setInfoMsg(`Password reset link sent to ${email}. Check your inbox.`);
+    } catch (err: any) {
+      setErrorMsg(err?.message || "Could not send a reset link. Please try again.");
     }
   };
 
@@ -130,6 +143,12 @@ export const Auth: React.FC = () => {
             </div>
           )}
 
+          {infoMsg && (
+            <div className="p-3 mb-6 rounded bg-[#3B6D11]/10 border border-[#3B6D11]/20 text-xs text-[#3B6D11] font-medium">
+              {infoMsg}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <div>
@@ -166,7 +185,7 @@ export const Auth: React.FC = () => {
               <div className="flex justify-between items-center mb-1">
                 <label className="text-xs font-semibold text-[#3a1c14]/70">PASSWORD</label>
                 {isLogin && (
-                  <button type="button" className="text-[10px] text-[#7c3a2a]/70 hover:underline">
+                  <button type="button" onClick={handleForgotPassword} className="text-[10px] text-[#7c3a2a]/70 hover:underline">
                     Forgot secret?
                   </button>
                 )}

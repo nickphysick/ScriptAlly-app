@@ -41,6 +41,7 @@ import { seedCommunityAgentsIfEmpty, localSeedCommunityAgents } from "./seedComm
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
   signOut,
   onAuthStateChanged
 } from "firebase/auth";
@@ -100,6 +101,7 @@ interface DbContextType {
   isOfflineMode: boolean;
   login: (email: string, password?: string) => Promise<boolean>;
   signup: (name: string, email: string, password?: string) => Promise<boolean>;
+  resetPassword: (email: string) => Promise<void>;
   logout: () => Promise<void>;
   upgradeToPro: () => Promise<void>;
   downgradeToFree: () => Promise<void>;
@@ -258,20 +260,24 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
             subscriptionStatus: "trialing",
             onboardingComplete: false,
           };
+          console.log("[SA] New user doc — writing onboardingComplete: false", uid);
           await setDoc(userDocRef, freshUser);
           signupTempNameRef.current = null;
         } else if (signupTempNameRef.current && userDoc.data()?.onboardingComplete === undefined) {
-          // Doc pre-dates the onboardingComplete field — this is a genuine new signup, stamp it
+          console.log("[SA] Existing doc missing onboardingComplete + signupRef set — patching to false", uid);
           await updateDoc(userDocRef, { onboardingComplete: false });
           signupTempNameRef.current = null;
         } else {
+          console.log("[SA] Existing doc — onboardingComplete =", userDoc.data()?.onboardingComplete, "signupRef =", signupTempNameRef.current);
           signupTempNameRef.current = null;
         }
 
         // Active listener bindings for user document
         unsubUser = onSnapshot(userDocRef, (snap) => {
           if (snap.exists()) {
-            setCurrentUser(snap.data() as User);
+            const data = snap.data() as User;
+            console.log("[SA] onSnapshot user doc — onboardingComplete:", data.onboardingComplete);
+            setCurrentUser(data);
           }
         }, (error) => {
           handleFirestoreError(error, OperationType.GET, `users/${uid}`);
@@ -952,61 +958,101 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     return () => clearTimeout(timer);
   }, [currentUser, queries, activities, isOfflineMode]);
 
+  // Drop into local offline demo mode when the Firebase Email/Password provider
+  // is unavailable (disabled in console). Keeps the sandbox usable without a backend.
+  const enterOfflineDemo = (email: string) => {
+    console.warn("Email/Password Auth unavailable in Firebase Console. Falling back to Local Offline Mode!");
+    setIsOfflineMode(true);
+    localStorage.setItem("scriptally_offline", "true");
+
+    const dummy: User = {
+      id: "local-user-pro",
+      name: email === "novice@writer.com" ? "Aspiring Novice" : "Lucy Sterling",
+      email: email,
+      plan: email === "novice@writer.com" ? UserPlan.FREE : UserPlan.PRO,
+      trialStartDate: new Date().toISOString(),
+      subscriptionStatus: email === "novice@writer.com" ? "none" : "active",
+    };
+    setCurrentUser(dummy);
+    localStorage.setItem("scriptally_user", JSON.stringify(dummy));
+  };
+
+  // Translate raw Firebase auth error codes into clear, actionable messages.
+  const friendlyAuthError = (code?: string): string => {
+    switch (code) {
+      case "auth/invalid-email":
+        return "That email address doesn't look valid. Please check and try again.";
+      case "auth/invalid-credential":
+      case "auth/wrong-password":
+        return "Incorrect email or password. Try again, or reset your password using “Forgot secret?”.";
+      case "auth/user-not-found":
+        return "No account found with that email. Switch to “Sign up” to create one.";
+      case "auth/email-already-in-use":
+        return "An account with this email already exists. Try logging in instead.";
+      case "auth/weak-password":
+        return "Please choose a password of at least 6 characters.";
+      case "auth/too-many-requests":
+        return "Too many attempts. Please wait a moment and try again.";
+      case "auth/network-request-failed":
+        return "Network error. Check your connection and try again.";
+      default:
+        return "Something went wrong while signing you in. Please try again.";
+    }
+  };
+
   const login = async (email: string, password?: string): Promise<boolean> => {
+    const pass = password || "writerpassword123";
     try {
-      const pass = password || "writerpassword123";
       await signInWithEmailAndPassword(auth, email, pass);
       setIsOfflineMode(false);
       localStorage.removeItem("scriptally_offline");
       return true;
     } catch (error: any) {
+      // Provider disabled → keep the local demo experience working.
       if (error && error.code === "auth/operation-not-allowed") {
-        console.warn("Email/Password Auth is disabled in Firebase Console. Falling back to Local Offline Mode!");
-        setIsOfflineMode(true);
-        localStorage.setItem("scriptally_offline", "true");
-        
-        const dummy: User = {
-          id: "local-user-pro",
-          name: email === "novice@writer.com" ? "Aspiring Novice" : "Lucy Sterling",
-          email: email,
-          plan: email === "novice@writer.com" ? UserPlan.FREE : UserPlan.PRO,
-          trialStartDate: new Date().toISOString(),
-          subscriptionStatus: email === "novice@writer.com" ? "none" : "active",
-        };
-        setCurrentUser(dummy);
-        localStorage.setItem("scriptally_user", JSON.stringify(dummy));
+        enterOfflineDemo(email);
         return true;
       }
 
+      // For a brand-new email, transparently create the account using the
+      // password the user actually typed so they can sign back in with it.
       if (error && (error.code === "auth/user-not-found" || error.code === "auth/invalid-credential")) {
-        // Fallback auto-registration for sandbox friendliness of first runs
         try {
-          await createUserWithEmailAndPassword(auth, email, "writerpassword123");
+          await createUserWithEmailAndPassword(auth, email, pass);
           setIsOfflineMode(false);
           localStorage.removeItem("scriptally_offline");
           return true;
         } catch (subErr: any) {
           if (subErr && subErr.code === "auth/operation-not-allowed") {
-            setIsOfflineMode(true);
-            localStorage.setItem("scriptally_offline", "true");
-            
-            const dummy: User = {
-              id: "local-user-pro",
-              name: email === "novice@writer.com" ? "Aspiring Novice" : "Lucy Sterling",
-              email: email,
-              plan: email === "novice@writer.com" ? UserPlan.FREE : UserPlan.PRO,
-              trialStartDate: new Date().toISOString(),
-              subscriptionStatus: email === "novice@writer.com" ? "none" : "active",
-            };
-            setCurrentUser(dummy);
-            localStorage.setItem("scriptally_user", JSON.stringify(dummy));
+            enterOfflineDemo(email);
             return true;
           }
+          // The account already exists, so the sign-in simply had the wrong
+          // password. Surface a clear message instead of leaving the user stuck.
+          if (subErr && subErr.code === "auth/email-already-in-use") {
+            throw new Error(friendlyAuthError("auth/invalid-credential"));
+          }
           console.error("Auto creation error:", subErr);
+          throw new Error(friendlyAuthError(subErr?.code));
         }
       }
+
       console.error("Authentication login failures:", error);
-      return false;
+      throw new Error(friendlyAuthError(error?.code));
+    }
+  };
+
+  const resetPassword = async (email: string): Promise<void> => {
+    if (!email) {
+      throw new Error("Enter your email address first, then tap “Forgot secret?”.");
+    }
+    try {
+      await sendPasswordResetEmail(auth, email);
+    } catch (error: any) {
+      if (error && error.code === "auth/operation-not-allowed") {
+        throw new Error("Password reset isn't available in offline demo mode.");
+      }
+      throw new Error(friendlyAuthError(error?.code));
     }
   };
 
@@ -1038,7 +1084,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         return true;
       }
       console.error("Sign up failure:", error);
-      return false;
+      throw new Error(friendlyAuthError(error?.code));
     }
   };
 
@@ -1931,12 +1977,18 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const updateUserProfile = async (fields: Partial<User>) => {
     if (!currentUser) return;
     const updated = { ...currentUser, ...fields };
-    
+
     if (isOfflineMode) {
       setCurrentUser(updated);
       localStorage.setItem("scriptally_user", JSON.stringify(updated));
       return;
     }
+
+    // Optimistically reflect the change locally so UI gates (e.g. the onboarding
+    // gate keyed on onboardingComplete) advance immediately and never get stuck
+    // waiting on the Firestore round-trip. The onSnapshot listener reconciles
+    // with the server copy once the write lands.
+    setCurrentUser(updated);
 
     try {
       await updateDoc(doc(db, "users", currentUser.id), fields);
@@ -2270,6 +2322,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         isOfflineMode,
         login,
         signup,
+        resetPassword,
         logout,
         upgradeToPro,
         downgradeToFree,

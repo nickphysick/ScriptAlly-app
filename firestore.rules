@@ -56,7 +56,8 @@ service cloud.firestore {
           data.subscriptionStatus == 'trialing' ||
           data.subscriptionStatus == 'canceled' ||
           data.subscriptionStatus == 'none'
-        );
+        )
+        && (!data.keys().hasAny(['onboardingComplete']) || data.onboardingComplete is bool);
     }
 
     function isValidManuscript(data, userId) {
@@ -135,7 +136,8 @@ service cloud.firestore {
         && (!data.keys().hasAll(['twitter']) || (data.twitter is string && data.twitter.size() <= 128))
         && (!data.keys().hasAll(['bluesky']) || (data.bluesky is string && data.bluesky.size() <= 128))
         && (!data.keys().hasAll(['instagram']) || (data.instagram is string && data.instagram.size() <= 128))
-        && (!data.keys().hasAll(['agentNotes']) || (data.agentNotes is string && data.agentNotes.size() <= 4096));
+        && (!data.keys().hasAll(['agentNotes']) || (data.agentNotes is string && data.agentNotes.size() <= 4096))
+        && (!data.keys().hasAll(['requeryPreference']) || (data.requeryPreference is string && (data.requeryPreference == 'yes' || data.requeryPreference == 'maybe' || data.requeryPreference == 'no')));
     }
 
     function isValidCommunityAgent(data) {
@@ -215,6 +217,8 @@ service cloud.firestore {
         && (data.get('rejectionFeedbackType', null) == null || (data.rejectionFeedbackType is string && data.rejectionFeedbackType.size() <= 256))
         && (data.get('rejectionFeedbackText', null) == null || (data.rejectionFeedbackText is string && data.rejectionFeedbackText.size() <= 16384))
         && (data.get('rejectionReflection', null) == null || (data.rejectionReflection is string && data.rejectionReflection.size() <= 16384))
+        && (data.get('rejectionLesson', null) == null || (data.rejectionLesson is string && data.rejectionLesson.size() <= 16384))
+        && (data.get('rejectedFromStatus', null) == null || (data.rejectedFromStatus is string && data.rejectedFromStatus.size() <= 64))
         && (data.get('offerDate', null) == null || (data.offerDate is timestamp || data.offerDate is string))
         && (data.get('offerResponseDeadline', null) == null || (data.offerResponseDeadline is timestamp || data.offerResponseDeadline is string))
         && (data.get('offerNotes', null) == null || (data.offerNotes is string && data.offerNotes.size() <= 16384))
@@ -279,7 +283,7 @@ service cloud.firestore {
       allow read, delete: if isOwner(userId);
       allow create: if isOwner(userId) && isValidUser(incoming());
       allow update: if isOwner(userId) && isValidUser(incoming()) && (
-        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus'])
+        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus', 'onboardingComplete'])
       );
 
       // ROUTE: Manuscripts
@@ -329,7 +333,7 @@ service cloud.firestore {
           incoming().diff(existing()).affectedKeys().hasOnly([
             'name', 'agency', 'email', 'website', 'twitter', 'bluesky', 'instagram', 'genres', 'mswlNotes',
             'starRating', 'submissionStatus', 'responseTimeWeeks', 'noResponseMeansNo', 'submissionMethod',
-            'materialsWanted', 'lastCheckedDate', 'notes', 'agentNotes'
+            'materialsWanted', 'lastCheckedDate', 'notes', 'agentNotes', 'requeryPreference'
           ])
         );
 
@@ -354,7 +358,7 @@ service cloud.firestore {
             'partialRequestedDate', 'partialSentDate', 'fullRequestedDate', 'fullSentDate',
             'lastStatusChange', 'responseReceivedAt', 'materialsRequestedType', 'materialsRequestedQuantity',
             'expectedSendDate', 'sendReminderDate', 'rejectionFeedbackType', 'rejectionFeedbackText',
-            'rejectionReflection', 'offerDate', 'offerResponseDeadline', 'offerNotes', 'closingReason', 'closingNotes'
+            'rejectionReflection', 'rejectionLesson', 'rejectedFromStatus', 'offerDate', 'offerResponseDeadline', 'offerNotes', 'closingReason', 'closingNotes'
           ])
         );
 
