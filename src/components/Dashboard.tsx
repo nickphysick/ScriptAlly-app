@@ -1953,20 +1953,12 @@ export const Dashboard: React.FC<{
         QueryStatus.REVISE_RESUBMIT
       ].includes(q.status);
 
-      let isActiveInWeek = isCurrentlyActive;
-
-      // If inactive now, let's see if it was active back then
-      if (!isCurrentlyActive) {
-        let closedTime = qTime + 21 * 24 * 60 * 60 * 1000; // 3 weeks fallback closure
-        if (q.fullSentDate) {
-          closedTime = new Date(q.fullSentDate).getTime() + 14 * 24 * 60 * 60 * 1000;
-        } else if (q.partialSentDate) {
-          closedTime = new Date(q.partialSentDate).getTime() + 14 * 24 * 60 * 60 * 1000;
-        }
-        if (weekEndTime < closedTime) {
-          isActiveInWeek = true;
-        }
-      }
+      // A query counts as active in a week only if it is currently active and had been sent by
+      // then — the SAME definition the sparkline bars and the card's headline number use, so the
+      // hover total always matches the card. (The previous "was it active back then" guess counted
+      // recently-closed queries as still active, inflating the total and mislabeling rejected
+      // queries as "Queried".)
+      const isActiveInWeek = isCurrentlyActive;
 
       if (isActiveInWeek) {
         total++;
@@ -4728,9 +4720,10 @@ export const Dashboard: React.FC<{
                 | 'pages_requested_overdue'
                 | 'partial_sent' 
                 | 'full_sent' 
-                | 'expected_upcoming' 
-                | 'expected_overdue' 
-                | 'nudge';
+                | 'expected_upcoming'
+                | 'expected_overdue'
+                | 'nudge'
+                | 'response_received';
               date: Date;
               dateStr: string;
             }
@@ -4907,6 +4900,38 @@ export const Dashboard: React.FC<{
                   });
                 }
               }
+
+              // 6. Response received (rejection / offer / withdrawal / closed) — a past event,
+              //    shown in the last-7-days panel, dated when the response was recorded.
+              const isClosedResponse = [
+                QueryStatus.REJECTED,
+                QueryStatus.OFFER,
+                QueryStatus.WITHDRAWN,
+                QueryStatus.NO_RESPONSE,
+              ].includes(q.status);
+              if (isClosedResponse) {
+                const respRaw: any = (q as any).responseReceivedAt || (q as any).lastStatusChange;
+                let respDate: Date | null = null;
+                if (respRaw) {
+                  if (typeof respRaw === "string") respDate = new Date(respRaw);
+                  else if (typeof respRaw.seconds === "number") respDate = new Date(respRaw.seconds * 1000);
+                  else if (typeof respRaw.toDate === "function") respDate = respRaw.toDate();
+                  else if (respRaw instanceof Date) respDate = respRaw;
+                }
+                if (respDate && !isNaN(respDate.getTime())) {
+                  const diff = getDayDiff(today, respDate);
+                  if (diff >= 0 && diff <= 6) {
+                    allEvents.push({
+                      id: `${q.id}-response`,
+                      queryId: q.id,
+                      query: q,
+                      type: 'response_received',
+                      date: respDate,
+                      dateStr: respDate.toISOString(),
+                    });
+                  }
+                }
+              }
             });
 
             // Past events: any events (including past deadlines or nudges) that fall in the last 7 days (today is diff = 0, past 6 days is diff = 1 to 6)
@@ -4917,7 +4942,7 @@ export const Dashboard: React.FC<{
               if (ev.type === 'expected_overdue') {
                 return true;
               }
-              if (['sent', 'partial_sent', 'full_sent', 'pages_requested_no_response'].includes(ev.type)) {
+              if (['sent', 'partial_sent', 'full_sent', 'pages_requested_no_response', 'response_received'].includes(ev.type)) {
                 const diff = getDayDiff(today, ev.date);
                 return (diff >= 0 && diff <= 6);
               }
@@ -4972,6 +4997,9 @@ export const Dashboard: React.FC<{
               if (type === 'sent') {
                 return 'sent';
               }
+              if (type === 'response_received') {
+                return 'response_received';
+              }
               return null;
             };
 
@@ -4997,6 +5025,9 @@ export const Dashboard: React.FC<{
               }
               if (t === 'sent') {
                 return <div key={t} className="w-[6px] h-[6px] rounded-full border border-[#7c3d3d] bg-transparent transition-transform" style={scaleStyle} />;
+              }
+              if (t === 'response_received') {
+                return <div key={t} className="w-[6px] h-[6px] rounded-full bg-[#8a7268] transition-transform" style={scaleStyle} />;
               }
               return null;
             };
@@ -5117,6 +5148,10 @@ export const Dashboard: React.FC<{
                 cardBgAndBorder = "border-l-2 border-r-0 border-y-0 border-[#7c3d3d] bg-[#FFFAF8]";
               } else if (ev.type === 'nudge') {
                 cardBgAndBorder = "border-[1.5px] border-dashed border-[#dbbdb5] bg-[#FDFAF8]";
+              } else if (ev.type === 'response_received') {
+                cardBgAndBorder = ev.query.status === QueryStatus.OFFER
+                  ? "border-l-2 border-r-0 border-y-0 border-[#b8860b] bg-[#FFFCF3]"
+                  : "border-l-2 border-r-0 border-y-0 border-[#b0a59c] bg-[#FAF8F6]";
               }
 
               let dateLabel: React.ReactNode = (
@@ -5190,6 +5225,20 @@ export const Dashboard: React.FC<{
               } else if (ev.type === 'nudge') {
                 eventTypeLabel = "Nudge reminder";
                 typeColorClass = "text-[#9a6858]";
+              } else if (ev.type === 'response_received') {
+                if (ev.query.status === QueryStatus.OFFER) {
+                  eventTypeLabel = "Offer of representation!";
+                  typeColorClass = "text-[#9a6a0b] font-bold";
+                } else if (ev.query.status === QueryStatus.WITHDRAWN) {
+                  eventTypeLabel = "Query withdrawn";
+                  typeColorClass = "text-[#8a7268] font-medium";
+                } else if (ev.query.status === QueryStatus.NO_RESPONSE) {
+                  eventTypeLabel = "Closed — no response";
+                  typeColorClass = "text-[#8a7268] font-medium";
+                } else {
+                  eventTypeLabel = "Rejection received";
+                  typeColorClass = "text-[#8a7268] font-medium";
+                }
               }
 
               let tooltipHeaderBg = "#3a1c14";
