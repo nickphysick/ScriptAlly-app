@@ -31,6 +31,8 @@ import { RecordResponseModal } from "./RecordResponseModal";
 import { RecordResponseFocusForm } from "./RecordResponseFocusForm";
 import { recordQueryResponse } from "../lib/recordResponse";
 import { formatQueryMaterial, materialLabel } from "../lib/materials";
+import { MarkSentPopover, MarkSentKind } from "./MarkSentPopover";
+import { useFixedMenu } from "./forms/useFixedMenu";
 import { MaterialsEditor } from "./MaterialsEditor";
 
 const normalizeStatus = (status: string | QueryStatus): QueryStatus => {
@@ -44,6 +46,44 @@ const normalizeStatus = (status: string | QueryStatus): QueryStatus => {
   }
   return status as QueryStatus;
 };
+
+// ── Contextual primary CTA ──────────────────────────────────────────────────
+// Whose turn is it? The agent's-turn states record a response; the writer's-turn states
+// (the agent asked, the writer owes materials) open the Mark-Sent popover instead. Terminal
+// states keep the existing "Record response" behaviour untouched.
+type BallHolder = "writer" | "agent";
+type PrimaryAction =
+  | { kind: "record"; label: string; ballHolder: BallHolder | null }
+  | { kind: "mark-sent"; markKind: MarkSentKind; target: QueryStatus; label: string; ballHolder: "writer" };
+
+const getPrimaryAction = (status: QueryStatus): PrimaryAction => {
+  switch (status) {
+    case QueryStatus.PARTIAL_REQUESTED:
+      return { kind: "mark-sent", markKind: "partial", target: QueryStatus.PARTIAL_SENT, label: "Mark partial as sent", ballHolder: "writer" };
+    case QueryStatus.FULL_REQUESTED:
+      return { kind: "mark-sent", markKind: "full", target: QueryStatus.FULL_SENT, label: "Mark full as sent", ballHolder: "writer" };
+    case QueryStatus.REVISE_RESUBMIT:
+      return { kind: "mark-sent", markKind: "resubmit", target: QueryStatus.FULL_SENT, label: "Record your resubmission", ballHolder: "writer" };
+    case QueryStatus.QUERIED:
+    case QueryStatus.PARTIAL_SENT:
+    case QueryStatus.FULL_SENT:
+      return { kind: "record", label: "Record their response →", ballHolder: "agent" };
+    default:
+      // OFFER / REJECTED / WITHDRAWN / NO_RESPONSE — unchanged, no ball-holder chip.
+      return { kind: "record", label: "Record response", ballHolder: null };
+  }
+};
+
+// Display-only label: appends a revision marker once a query has been resubmitted as a full (v2+).
+// Renders from revisionRound and never enters `status`, so every status === comparison is safe.
+const statusDisplayLabel = (q: { status: QueryStatus; revisionRound?: number }): string => {
+  const base = getStatusLabel(q.status);
+  if (q.status === QueryStatus.FULL_SENT && (q.revisionRound ?? 1) >= 2) {
+    return `${base} (v${q.revisionRound})`;
+  }
+  return base;
+};
+
 import {
   Search,
   CheckCircle,
@@ -96,6 +136,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     addJournalEntry,
     addQuery,
     updateQuery,
+    recordMaterialsSent,
     deleteJournalEntry,
     updateJournalEntry,
     deleteActivity,
@@ -116,6 +157,12 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [isRecordResponseModalOpen, setIsRecordResponseModalOpen] = useState(false);
   const [isRecordResponseFocusFormOpen, setIsRecordResponseFocusFormOpen] = useState(false);
+  // Mark-Sent popover — anchored to the contextual CTA via useFixedMenu so the reading panel's
+  // overflow-hidden can't clip it.
+  const [isMarkSentOpen, setIsMarkSentOpen] = useState(false);
+  const { triggerRef: markSentTriggerRef, menuStyle: markSentMenuStyle } = useFixedMenu<HTMLButtonElement>(isMarkSentOpen);
+  // Close the popover whenever the reader moves to a different query.
+  useEffect(() => { setIsMarkSentOpen(false); }, [selectedQueryId]);
 
   // Toast state for Undo
   const [undoToast, setUndoToast] = useState<{
@@ -2019,17 +2066,59 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             <div 
               className="w-full h-[44px] min-h-[44px] bg-[#fafafa] border-b border-[#e8e0d8] px-4 flex items-center select-none shrink-0 relative"
             >
-              <div className="relative w-full h-full flex items-center justify-between">
-                {/* Left group */}
-                <div className="flex items-center gap-1.5 flex-1 justify-start">
-                  {/* Record response button */}
-                  <button
-                    onClick={() => setIsRecordResponseFocusFormOpen(true)}
-                    className="h-[28px] bg-[#7c3a2a] hover:bg-[#6c3224] text-[#fffffd] flex items-center gap-1.5 px-3.5 rounded-full text-xs font-bold cursor-pointer transition-colors border-0 shrink-0 select-none"
-                  >
-                    <Check className="w-3.5 h-3.5 text-[#fffffd] stroke-[2.5]" />
-                    <span>Record response</span>
-                  </button>
+              <div className="relative w-full h-full flex items-center justify-between gap-2">
+                {/* Left group — sizes to its content; the centre nav yields instead. */}
+                <div className="flex items-center gap-1.5 shrink-0 justify-start">
+                  {/* Contextual primary CTA — label + action depend on whose turn it is. */}
+                  {(() => {
+                    const action = getPrimaryAction(currentStatus as QueryStatus);
+                    const agentFirstName = activeAgent.name.split(" ")[0];
+
+                    // Ball-holder chip — "directly above" the CTA isn't possible in this 44px
+                    // horizontal bar, so it sits inline immediately before the button (same intent:
+                    // make the button change self-explanatory).
+                    const chip = action.ballHolder && (
+                      <span
+                        className="h-[22px] inline-flex items-center px-2 rounded-full text-[10px] font-bold tracking-wide shrink-0 select-none"
+                        style={
+                          action.ballHolder === "writer"
+                            ? { backgroundColor: "rgba(124,58,42,0.10)", color: "#7c3a2a" }
+                            : { backgroundColor: "#efe7e0", color: "#9a8579" }
+                        }
+                      >
+                        {action.ballHolder === "writer" ? "Your move" : `Waiting on ${agentFirstName}`}
+                      </span>
+                    );
+
+                    if (action.kind === "mark-sent") {
+                      return (
+                        <>
+                          {chip}
+                          <button
+                            ref={markSentTriggerRef}
+                            onClick={() => setIsMarkSentOpen(o => !o)}
+                            className="h-[28px] bg-[#7c3a2a] hover:bg-[#6c3224] text-[#fffffd] flex items-center gap-1.5 px-3.5 rounded-full text-xs font-bold cursor-pointer transition-colors border-0 shrink-0 select-none"
+                          >
+                            <Send className="w-3.5 h-3.5 text-[#fffffd] stroke-[2.5]" />
+                            <span>{action.label}</span>
+                          </button>
+                        </>
+                      );
+                    }
+
+                    return (
+                      <>
+                        {chip}
+                        <button
+                          onClick={() => setIsRecordResponseFocusFormOpen(true)}
+                          className="h-[28px] bg-[#7c3a2a] hover:bg-[#6c3224] text-[#fffffd] flex items-center gap-1.5 px-3.5 rounded-full text-xs font-bold cursor-pointer transition-colors border-0 shrink-0 select-none"
+                        >
+                          <Check className="w-3.5 h-3.5 text-[#fffffd] stroke-[2.5]" />
+                          <span>{action.label}</span>
+                        </button>
+                      </>
+                    );
+                  })()}
 
                   {/* Edit query button */}
                   <button
@@ -2039,6 +2128,39 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     <Pencil className="w-3 h-3 text-stone-500" />
                     <span>Edit query</span>
                   </button>
+
+                  {/* Mark-Sent popover — fixed-positioned, anchored to the CTA. */}
+                  <AnimatePresence>
+                    {isMarkSentOpen && (() => {
+                      const action = getPrimaryAction(currentStatus as QueryStatus);
+                      if (action.kind !== "mark-sent") return null;
+                      return (
+                        <MarkSentPopover
+                          key="mark-sent"
+                          style={markSentMenuStyle}
+                          kind={action.markKind}
+                          query={activeQuery}
+                          agent={activeAgent}
+                          triggerRef={markSentTriggerRef}
+                          onClose={() => setIsMarkSentOpen(false)}
+                          onRecordResponseInstead={() => {
+                            setIsMarkSentOpen(false);
+                            setIsRecordResponseFocusFormOpen(true);
+                          }}
+                          onSave={async ({ sentDate, responseDeadline, nudgeDate }) => {
+                            await recordMaterialsSent({
+                              queryId: activeQuery.id,
+                              targetStatus: action.target as QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT,
+                              sentDate,
+                              isResubmit: action.markKind === "resubmit",
+                              responseDeadline,
+                              nudgeDate,
+                            });
+                          }}
+                        />
+                      );
+                    })()}
+                  </AnimatePresence>
                 </div>
 
                 {/* Centre group */}
@@ -2059,8 +2181,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   };
 
                   return (
-                    <div 
-                      className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center gap-[8px] select-none shrink-0"
+                    <div
+                      className="flex items-center justify-center gap-[8px] select-none flex-1 min-w-0 px-2"
                     >
                       <button
                         type="button"
@@ -2095,7 +2217,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 })()}
 
                 {/* Right group */}
-                <div className="flex items-center gap-1.5 flex-1 justify-end">
+                <div className="flex items-center gap-1.5 shrink-0 justify-end">
                   <button
                     type="button"
                     disabled={isGeneratingPDF}
@@ -2595,7 +2717,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
                   {/* Status Pill in front (z-10) - scaled to 1.0 */}
                   <div className="relative z-10 pointer-events-auto">
-                    <StatusPill status={activeQuery.status} size="lg" className="mr-0 mt-0 [&>span]:!text-[14px]" />
+                    <StatusPill status={activeQuery.status} customLabel={statusDisplayLabel(activeQuery)} size="lg" className="mr-0 mt-0 [&>span]:!text-[14px]" />
                   </div>
                 </div>
 
@@ -2729,7 +2851,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
                     {/* Status Pill in front (z-10) - scaled to 1.0 */}
                     <div className="relative z-10 pointer-events-auto">
-                      <StatusPill status={activeQuery.status} size="lg" />
+                      <StatusPill status={activeQuery.status} customLabel={statusDisplayLabel(activeQuery)} size="lg" />
                     </div>
                   </div>
 
@@ -3013,10 +3135,14 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           }
                         }
 
-                        // Title derivation
-                        const titleText = item.type === 'waiting' 
-                          ? 'Waiting to hear back' 
+                        // Title derivation — a Full-sent entry on a resubmitted query reads "(v2)".
+                        const baseTitle = item.type === 'waiting'
+                          ? 'Waiting to hear back'
                           : (TIMELINE_TITLES[item.type as QueryStatus] || item.type);
+                        const titleText =
+                          item.type === QueryStatus.FULL_SENT && (activeQuery.revisionRound ?? 1) >= 2
+                            ? `${baseTitle} (v${activeQuery.revisionRound})`
+                            : baseTitle;
 
                         // Date formatting
                         const dateText = item.type === 'waiting'

@@ -230,7 +230,10 @@ service cloud.firestore {
         && (data.get('materialsWanted', null) == null || ((data.materialsWanted is list || data.materialsWanted is map) && data.materialsWanted.size() <= 20))
         && (data.get('ifNoResponse', null) == null || (data.ifNoResponse is string && data.ifNoResponse.size() <= 256))
         && (data.get('rejectionType', null) == null || (data.rejectionType is string && data.rejectionType.size() <= 256))
-        && (data.get('agentComments', null) == null || (data.agentComments is string && data.agentComments.size() <= 16384));
+        && (data.get('agentComments', null) == null || (data.agentComments is string && data.agentComments.size() <= 16384))
+        && (data.get('fullVersionSent', null) == null || (data.fullVersionSent is string && data.fullVersionSent.size() <= 512))
+        && (data.get('revisionRound', null) == null || (data.revisionRound is int && data.revisionRound >= 1 && data.revisionRound <= 100))
+        && (data.get('hasAgentResponded', null) == null || data.hasAgentResponded is bool);
     }
 
     function isValidActivityNested(data) {
@@ -367,7 +370,8 @@ service cloud.firestore {
             'lastStatusChange', 'responseReceivedAt', 'materialsRequestedType', 'materialsRequestedQuantity',
             'expectedSendDate', 'sendReminderDate', 'rrNotes', 'rejectionFeedbackType', 'rejectionFeedbackText',
             'rejectionReflection', 'rejectionLesson', 'rejectedFromStatus', 'offerDate', 'offerResponseDeadline', 'offerNotes', 'closingReason', 'closingNotes',
-            'materialsWanted', 'ifNoResponse', 'agentId', 'rejectionType', 'agentComments'
+            'materialsWanted', 'ifNoResponse', 'agentId', 'rejectionType', 'agentComments',
+            'fullVersionSent', 'revisionRound', 'hasAgentResponded'
           ])
         );
 
@@ -384,7 +388,7 @@ service cloud.firestore {
         allow list: if isOwner(userId);
         allow create: if isOwner(userId) && isValidId(activityId) && isValidActivity(incoming(), userId);
         allow update: if isOwner(userId) && isValidId(activityId) && isValidActivity(incoming(), userId) && (
-          incoming().diff(existing()).affectedKeys().hasOnly(['activityType', 'description', 'date', 'details'])
+          incoming().diff(existing()).affectedKeys().hasOnly(['activityType', 'description', 'date', 'details', 'resultingStatus'])
         );
       }
 

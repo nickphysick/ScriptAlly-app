@@ -62,6 +62,8 @@ import {
 } from "firebase/firestore";
 
 import { db, auth, handleFirestoreError, OperationType } from "./firebase";
+import { deriveQueryFields, getActivityTime, normalizeResultingStatus } from "./queryDerivation";
+import { recomputeQuery as recomputeQueryOnline, subcollectionDocToDerivable, monotonicEventTime } from "./recomputeQuery";
 
 // Connection validation test on boot as requested by skill
 async function testConnection() {
@@ -74,6 +76,48 @@ async function testConnection() {
   }
 }
 testConnection();
+
+/**
+ * Single source of truth for the MATERIALS_SENT activity description. Used by both
+ * updateQueryStatus (sequence skips + direct change) and recordMaterialsSent so the timeline
+ * wording can never diverge. A resubmission reads "Revised manuscript (v2) resubmitted to …".
+ */
+function materialsSentDescription(
+  targetStatus: QueryStatus,
+  agent: { name?: string; agency?: string } | undefined,
+  opts?: { resubmit?: boolean; round?: number }
+): string {
+  const name = agent?.name || "the agent";
+  const agency = agent?.agency || "agency";
+  if (opts?.resubmit) {
+    return `Revised manuscript (v${opts.round ?? 2}) resubmitted to ${name} at ${agency}`;
+  }
+  if (targetStatus === QueryStatus.PARTIAL_SENT) {
+    return `Partial manuscript sent to ${name} at ${agency}`;
+  }
+  return `Full manuscript sent to ${name} at ${agency}`;
+}
+
+/**
+ * Human-readable note for a status-reconstruction log entry — used when seeding the per-query
+ * log for an advanced-status import (addQuery) and when healing a query with an empty
+ * authoritative log (backfill). The note is display text only; derivation reads the stamped
+ * `resultingStatus`, never this string.
+ */
+function statusReconstructionNote(status: QueryStatus): string {
+  switch (status) {
+    case QueryStatus.PARTIAL_REQUESTED: return "Partial manuscript requested";
+    case QueryStatus.PARTIAL_SENT:      return "Partial manuscript sent";
+    case QueryStatus.FULL_REQUESTED:    return "Full manuscript requested";
+    case QueryStatus.FULL_SENT:         return "Full manuscript sent";
+    case QueryStatus.REVISE_RESUBMIT:   return "Revise & resubmit requested";
+    case QueryStatus.OFFER:             return "Offer of representation received";
+    case QueryStatus.REJECTED:          return "Rejection received";
+    case QueryStatus.WITHDRAWN:         return "Query withdrawn";
+    case QueryStatus.NO_RESPONSE:       return "Query closed — no response";
+    default:                            return "Query sent";
+  }
+}
 
 function formatHumanDate(dateInput: string | Date | undefined): string {
   if (!dateInput) return "unknown date";
@@ -127,6 +171,20 @@ interface DbContextType {
   // Query Actions
   addQuery: (q: Omit<Query, "id" | "userId" | "status" | "dateSent" | "responseDeadline" | "nudgeDate"> & { status?: QueryStatus; dateSent?: string; id?: string }, bypassLimits?: boolean) => Promise<{ success: boolean; error?: string; id?: string }>;
   updateQueryStatus: (id: string, newStatus: QueryStatus, systemNotes?: string) => Promise<void>;
+  /**
+   * Writer-side "I've sent the materials" action (Partial Sent / Full Sent). Distinct from
+   * recording an agent response: it never stamps responseReceivedAt and never counts as a
+   * response. One MATERIALS_SENT activity is appended, reusing the same descriptions as
+   * updateQueryStatus. A Revise & Resubmit → Full Sent bumps the display-only revisionRound.
+   */
+  recordMaterialsSent: (args: {
+    queryId: string;
+    targetStatus: QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT;
+    sentDate: string; // ISO
+    isResubmit?: boolean;
+    responseDeadline?: string; // ISO — optional, set when the writer opts into a reminder
+    nudgeDate?: string; // ISO — optional, set when a nudge reminder is chosen
+  }) => Promise<void>;
   undoQueryStatus: (id: string, previousStatus: QueryStatus, newStatus: QueryStatus) => Promise<void>;
   updateQuery: (id: string, fields: Partial<Query>) => Promise<void>;
   
@@ -138,6 +196,12 @@ interface DbContextType {
   // Activity Actions
   addActivity: (act: Omit<Activity, "id" | "userId"> & { id?: string }) => Promise<{ success: boolean; error?: string }>;
   deleteActivity: (id: string) => Promise<void>;
+  /** Correction primitive: patch an entry in a query's activity log, then recompute its derived fields. */
+  editActivity: (
+    queryId: string,
+    activityId: string,
+    patch: Partial<Pick<Activity, "description" | "details" | "date" | "resultingStatus">>
+  ) => Promise<void>;
 
   // User Actions
   updateUserProfile: (fields: Partial<User>) => Promise<void>;
@@ -151,23 +215,6 @@ interface DbContextType {
 }
 
 const DbContext = createContext<DbContextType | undefined>(undefined);
-
-// Keywords matching the activity wording that recordQueryResponse / updateQueryStatus actually
-// produce per status. Used by the self-healing backfill (to avoid duplicating a properly-recorded
-// response) and by the cleanup (to remove stale backfill duplicates). The old backfill matched the
-// literal status string ("rejected"), but a recorded rejection reads "Rejection received from…"
-// — which contains "rejection", not "rejected" — so every recorded rejection got a duplicate row.
-const RESPONSE_STATUS_KEYWORDS: Record<string, string[]> = {
-  [QueryStatus.PARTIAL_REQUESTED]: ["partial manuscript requested", "requested a partial", "partial requested"],
-  [QueryStatus.PARTIAL_SENT]: ["partial manuscript sent", "partial sent"],
-  [QueryStatus.FULL_REQUESTED]: ["full manuscript requested", "requested a full", "full requested"],
-  [QueryStatus.FULL_SENT]: ["full manuscript sent", "full sent"],
-  [QueryStatus.REVISE_RESUBMIT]: ["revise", "resubmit", "r&r"],
-  [QueryStatus.OFFER]: ["offer"],
-  [QueryStatus.REJECTED]: ["reject", "declined", "passed"],
-  [QueryStatus.WITHDRAWN]: ["withdraw"],
-  [QueryStatus.NO_RESPONSE]: ["no response", "closed"],
-};
 
 export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -806,94 +853,112 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         }
       }
 
-      // 3. Backfill Query Status Changed activities
+      // 3. Heal queries whose AUTHORITATIVE per-query activity log is empty.
+      //    "Authoritative" = the per-query `activity` subcollection online (the store derivation
+      //    reads), and the in-memory `activities` mirror offline. The old check judged against the
+      //    global feed, so a query with a global-feed row but an empty subcollection was skipped —
+      //    leaving derivation to fall back to Queried. We now judge and seed the SAME store, and
+      //    only stamp activities (never write status; recomputeQuery derives it).
+      const offlineHeals: Activity[] = [];
       for (const q of queries) {
-        if (q.status !== QueryStatus.QUERIED) {
-          // Skip queries whose status changed recently. Those are recorded in real time by
-          // recordQueryResponse / updateQueryStatus; the backfill runs on a timer and would
-          // otherwise race the recorded activity — firing before it has propagated into local
-          // state — and create a duplicate (e.g. a "Query rejected" row alongside the real
-          // "Rejection received from …"). The backfill is only meant to heal old, orphaned data.
-          const lastChangeRaw: any = (q as any).lastStatusChange || (q as any).responseReceivedAt;
-          let lastChangeMs = 0;
-          if (lastChangeRaw) {
-            if (typeof lastChangeRaw === "string") lastChangeMs = new Date(lastChangeRaw).getTime();
-            else if (typeof lastChangeRaw.seconds === "number") lastChangeMs = lastChangeRaw.seconds * 1000;
-            else if (typeof lastChangeRaw.toDate === "function") lastChangeMs = lastChangeRaw.toDate().getTime();
-            else if (lastChangeRaw instanceof Date) lastChangeMs = lastChangeRaw.getTime();
-          }
-          if (lastChangeMs && Date.now() - lastChangeMs < 24 * 60 * 60 * 1000) continue;
+        if (q.status === QueryStatus.QUERIED) continue;
 
-          const matchingAgent = agents.find(ag => ag.id === q.agentId);
-          const agentName = matchingAgent ? matchingAgent.name : "The agent";
-          const matchingMs = manuscripts.find(ms => ms.id === q.manuscriptId);
-          const manuscriptTitle = matchingMs ? matchingMs.title : "";
+        // Skip very-recently-changed queries — their own writers just logged in real time; the
+        // timer could otherwise race that write and duplicate it.
+        const lastChangeRaw: any = (q as any).lastStatusChange || (q as any).responseReceivedAt;
+        let lastChangeMs = 0;
+        if (lastChangeRaw) {
+          if (typeof lastChangeRaw === "string") lastChangeMs = new Date(lastChangeRaw).getTime();
+          else if (typeof lastChangeRaw.seconds === "number") lastChangeMs = lastChangeRaw.seconds * 1000;
+          else if (typeof lastChangeRaw.toDate === "function") lastChangeMs = lastChangeRaw.toDate().getTime();
+          else if (lastChangeRaw instanceof Date) lastChangeMs = lastChangeRaw.getTime();
+        }
+        if (lastChangeMs && Date.now() - lastChangeMs < 24 * 60 * 60 * 1000) continue;
 
-          // Check if we have an activity matching this status for this query
-          const statusKeywords = RESPONSE_STATUS_KEYWORDS[q.status] || [q.status.toLowerCase()];
-          const hasStatusActivity = activities.some(act => {
-            if (act.queryId !== q.id) return false;
-            const desc = (act.description || "").toLowerCase();
-            const det = (act.details || "").toLowerCase();
-            return desc.includes("status") || det.includes("status") || statusKeywords.some(kw => desc.includes(kw) || det.includes(kw));
-          });
-
-          if (!hasStatusActivity) {
-            let expectedNote = `Status updated to ${q.status}`;
-            if (q.status === QueryStatus.PARTIAL_REQUESTED) expectedNote = "Partial manuscript requested";
-            else if (q.status === QueryStatus.FULL_REQUESTED) expectedNote = "Full manuscript requested";
-            else if (q.status === QueryStatus.REVISE_RESUBMIT) expectedNote = "Revise & resubmit requested";
-            else if (q.status === QueryStatus.OFFER) expectedNote = "Offer of representation received";
-            else if (q.status === QueryStatus.REJECTED) expectedNote = "Query rejected";
-            else if (q.status === QueryStatus.NO_RESPONSE) expectedNote = "Query closed — noResponseAfterWindow";
-
-            let dateVal = Date.now();
-            const rawDate = q.lastStatusChange || q.responseReceivedAt || q.dateSent;
-            if (rawDate) {
-              if (typeof rawDate === "string") {
-                dateVal = new Date(rawDate).getTime();
-              } else if ((rawDate as any).seconds) {
-                dateVal = (rawDate as any).seconds * 1000;
-              } else if (typeof (rawDate as any).toDate === "function") {
-                dateVal = (rawDate as any).toDate().getTime();
-              } else if (rawDate instanceof Date) {
-                dateVal = rawDate.getTime();
-              }
-            }
-
-            missingActivities.push({
-              id: `act-status-${q.status.replace(/\s+/g, '-').toLowerCase()}-${q.id}`,
-              activityType: ActivityType.STATUS_CHANGED,
-              description: expectedNote,
-              manuscriptId: q.manuscriptId,
-              queryId: q.id,
-              date: new Date(dateVal).toISOString(),
-              details: expectedNote
+        // Already has a status-bearing entry in the authoritative store? Leave it untouched (no dup).
+        let hasStatusBearing: boolean;
+        if (isOfflineMode) {
+          hasStatusBearing = activities.some(
+            a => a.queryId === q.id && normalizeResultingStatus(a.resultingStatus) !== null
+          );
+        } else {
+          try {
+            const sub = await getDocs(collection(db, "users", currentUser.id, "queries", q.id, "activity"));
+            hasStatusBearing = sub.docs.some(d => {
+              const data = d.data();
+              return (
+                normalizeResultingStatus(data.resultingStatus) !== null ||
+                normalizeResultingStatus(data.type) !== null
+              );
             });
-
-            if (!isOfflineMode) {
-              try {
-                const topLevelActivityDocRef = doc(db, `users/${currentUser.id}/activity`, `act-status-${q.status.replace(/\s+/g, '-').toLowerCase()}-${q.id}`);
-                await setDoc(topLevelActivityDocRef, {
-                  type: q.status,
-                  createdAt: Timestamp.fromMillis(dateVal),
-                  note: expectedNote,
-                  queryId: q.id,
-                  agentName,
-                  manuscriptTitle
-                }, { merge: true });
-
-                const queryActivityDocRef = doc(db, `users/${currentUser.id}/queries/${q.id}/activity`, `act-status-${q.status.replace(/\s+/g, '-').toLowerCase()}-${q.id}`);
-                await setDoc(queryActivityDocRef, {
-                  type: q.status,
-                  createdAt: Timestamp.fromMillis(dateVal),
-                  note: expectedNote
-                }, { merge: true });
-              } catch (err) {
-                console.error("[ScriptAlly Backfill] Online backfill failed for query activity:", err);
-              }
-            }
+          } catch (err) {
+            // Never heal blind on a read error — that could create a duplicate.
+            console.error("[ScriptAlly Backfill] Could not read per-query log; skipping heal:", err);
+            continue;
           }
+        }
+        if (hasStatusBearing) continue;
+
+        // Seed one entry stamped with the CURRENT stored status, dated from the best available
+        // signal, so derivation reproduces exactly what the user already sees.
+        let dateVal = Date.now();
+        const rawDate = q.lastStatusChange || q.responseReceivedAt || q.dateSent;
+        if (rawDate) {
+          if (typeof rawDate === "string") dateVal = new Date(rawDate).getTime();
+          else if ((rawDate as any).seconds) dateVal = (rawDate as any).seconds * 1000;
+          else if (typeof (rawDate as any).toDate === "function") dateVal = (rawDate as any).toDate().getTime();
+          else if (rawDate instanceof Date) dateVal = rawDate.getTime();
+        }
+        const note = statusReconstructionNote(q.status);
+        const healId = `act-status-${q.status.replace(/\s+/g, "-").toLowerCase()}-${q.id}`;
+
+        if (isOfflineMode) {
+          offlineHeals.push({
+            id: healId,
+            userId: currentUser.id,
+            activityType: ActivityType.STATUS_CHANGED,
+            description: note,
+            manuscriptId: q.manuscriptId,
+            queryId: q.id,
+            date: new Date(dateVal).toISOString(),
+            details: note,
+            resultingStatus: q.status,
+          });
+        } else {
+          try {
+            const manuscriptTitle = manuscripts.find(ms => ms.id === q.manuscriptId)?.title || "";
+            const agentName = agents.find(ag => ag.id === q.agentId)?.name || "The agent";
+            await setDoc(
+              doc(db, "users", currentUser.id, "queries", q.id, "activity", healId),
+              {
+                type: q.status,
+                resultingStatus: q.status,
+                createdAt: Timestamp.fromMillis(dateVal),
+                note,
+                queryId: q.id,
+                agentName,
+                manuscriptTitle,
+              },
+              { merge: true }
+            );
+            // Log changed → derive status/dates/flags from it. Stored status is unchanged.
+            await recomputeQueryOnline(currentUser.id, q.id);
+            console.log(`[ScriptAlly Backfill] Healed missing per-query log for ${q.id} (${q.status}).`);
+          } catch (err) {
+            console.error("[ScriptAlly Backfill] Online heal failed for query:", q.id, err);
+          }
+        }
+      }
+
+      // Offline: the in-memory mirror IS the authoritative store — append the heals once, then
+      // recompute each healed query over the updated mirror so its derived status matches.
+      if (offlineHeals.length > 0) {
+        const updated = [...activities, ...offlineHeals];
+        setActivities(updated);
+        saveToLocalStorage("activities", updated);
+        for (const heal of offlineHeals) {
+          recomputeQueryOffline(heal.queryId, updated);
+          console.log(`[ScriptAlly Backfill] Healed missing offline log for ${heal.queryId}.`);
         }
       }
 
@@ -912,102 +977,11 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     return () => clearTimeout(timer);
   }, [currentUser, agents, activities, manuscripts, queries]);
 
-  // Self-healing database cleanup script to fix corrupted data left over from incomplete undo flows
-  useEffect(() => {
-    if (!currentUser || queries.length === 0 || activities.length === 0) return;
-
-    const cleanupCorruptedData = async () => {
-      // Find the query currently showing status Queried that previously had a partialRequestedDate set
-      const affectedQueries = queries.filter(q => 
-        q.status === QueryStatus.QUERIED && 
-        q.partialRequestedDate !== null && 
-        q.partialRequestedDate !== undefined &&
-        q.partialRequestedDate !== ""
-      );
-
-      if (affectedQueries.length > 0) {
-        console.log(`[ScriptAlly Cleanup] Resetting ${affectedQueries.length} affected queries.`);
-        for (const q of affectedQueries) {
-          if (isOfflineMode) {
-            const qUpdates = {
-              partialRequestedDate: null,
-              status: QueryStatus.QUERIED
-            };
-            setQueries(prev => prev.map(item => item.id === q.id ? { ...item, ...qUpdates } : item));
-            const updated = queries.map(item => item.id === q.id ? { ...item, ...qUpdates } : item);
-            localStorage.setItem(`scriptally_queries_${currentUser.id}`, JSON.stringify(updated));
-          } else {
-            try {
-              const qUpdates = {
-                partialRequestedDate: deleteField(),
-                status: QueryStatus.QUERIED
-              };
-              await updateDoc(doc(db, "users", currentUser.id, "queries", q.id), qUpdates);
-            } catch (err) {
-              console.error("[ScriptAlly Cleanup] Failed to update query status / clear date fields:", err);
-            }
-          }
-        }
-      }
-
-      // Find activities to delete
-      const activitiesToDelete = activities.filter(act => {
-        // 1. "Status updated to Queried" and "Undo status change requested by user"
-        const isUndoQueriedActivity = 
-          (act.description?.includes("Status updated to Queried") || act.details?.includes("Status updated to Queried")) &&
-          (act.description?.includes("Undo status change requested by user") || act.details?.includes("Undo status change requested by user") ||
-           act.description?.includes("Status change undone") || act.details?.includes("Status change undone"));
-
-        // 2. Partial requested activities for any queries that are currently in QUERIED status (indicating they were undone/reverted)
-        const isLeftoverPartialRequested =
-          act.description?.toLowerCase().includes("requested a partial manuscript") &&
-          queries.some(q => q.id === act.queryId && q.status === QueryStatus.QUERIED);
-
-        // 3. Stale backfill duplicate: a generic backfill activity (id "act-status-…") for a query
-        //    that ALSO has a properly-recorded, non-backfill activity describing the same status.
-        //    Only removed when a real activity exists, so genuinely-missing ones are never deleted.
-        const isRedundantBackfill = (() => {
-          if (!String(act.id || "").startsWith("act-status-")) return false;
-          const q = queries.find(x => x.id === act.queryId);
-          if (!q) return false;
-          const kws = RESPONSE_STATUS_KEYWORDS[q.status] || [];
-          return activities.some(other =>
-            other.id !== act.id &&
-            other.queryId === act.queryId &&
-            !String(other.id || "").startsWith("act-status-") &&
-            kws.some(kw => (other.description || "").toLowerCase().includes(kw))
-          );
-        })();
-
-        return isUndoQueriedActivity || isLeftoverPartialRequested || isRedundantBackfill;
-      });
-
-      if (activitiesToDelete.length > 0) {
-        console.log(`[ScriptAlly Cleanup] Deleting ${activitiesToDelete.length} corrupted activity records.`);
-        if (isOfflineMode) {
-          setActivities(prev => {
-            const updated = prev.filter(act => !activitiesToDelete.some(ad => ad.id === act.id));
-            localStorage.setItem(`scriptally_activities_${currentUser.id}`, JSON.stringify(updated));
-            return updated;
-          });
-        } else {
-          for (const act of activitiesToDelete) {
-            try {
-              await deleteDoc(doc(db, "users", currentUser.id, "activities", act.id));
-            } catch (err) {
-              console.error("[ScriptAlly Cleanup] Failed to delete activity record:", err);
-            }
-          }
-        }
-      }
-    };
-
-    const timer = setTimeout(() => {
-      cleanupCorruptedData().catch(err => console.error("Error executing database cleanup script", err));
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, [currentUser, queries, activities, isOfflineMode]);
+  // The timer-based "cleanupCorruptedData" self-healing script that used to live here is
+  // retired. Status, the pipeline dates, revisionRound, and hasAgentResponded are now DERIVED
+  // from the activity log by recomputeQuery — the only writer of those fields — so the
+  // status-vs-log desyncs it patched (leftover dates after undo, duplicate timeline rows,
+  // contradictory entries) are structurally impossible rather than reactively repaired.
 
   // Drop into local offline demo mode when the Firebase Email/Password provider
   // is unavailable (disabled in console). Keeps the sandbox usable without a backend.
@@ -1610,14 +1584,55 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
 
     const id = q.id || "q-" + Math.random().toString(36).substr(2, 9);
-    const newQ: Query = {
+    const newQ: any = {
       ...q,
       id,
       userId: currentUser.id,
       status: q.status || QueryStatus.QUERIED,
       dateSent: q.dateSent || new Date().toISOString(),
       responseDeadline: q.status === QueryStatus.QUERIED ? (q as any).responseDeadline || dead : undefined
-    } as any;
+    };
+    // Firestore (no ignoreUndefinedProperties) rejects undefined fields. An advanced-status
+    // import sets responseDeadline: undefined above; strip every undefined so the write — and
+    // therefore the per-query log seed below — actually lands.
+    for (const k of Object.keys(newQ)) {
+      if (newQ[k] === undefined) delete newQ[k];
+    }
+
+    // Query-sent log entry, always present. When the query is created at an ADVANCED status
+    // (CSV import can pass one), append a second entry stamped with that status so derivation
+    // reproduces the seeded status immediately — without depending on the backfill timer.
+    const nowMs = Date.now();
+    const seedActivities = (): Activity[] => {
+      const out: Activity[] = [
+        {
+          id: "act-" + Math.random().toString(36).substr(2, 9),
+          userId: currentUser.id,
+          queryId: id,
+          manuscriptId: q.manuscriptId,
+          activityType: ActivityType.QUERY_SENT,
+          description: `Query sent to ${agent?.name || "agent"} at ${agent?.agency || "agency"}`,
+          date: new Date(nowMs).toISOString(),
+          details: `Sent via ${q.sendMethod || agent?.submissionMethod || "Email"}`,
+          resultingStatus: QueryStatus.QUERIED,
+        },
+      ];
+      if (newQ.status && newQ.status !== QueryStatus.QUERIED) {
+        out.push({
+          id: "act-" + Math.random().toString(36).substr(2, 9),
+          userId: currentUser.id,
+          queryId: id,
+          manuscriptId: q.manuscriptId,
+          activityType: ActivityType.STATUS_CHANGED,
+          description: statusReconstructionNote(newQ.status),
+          // 1ms after the query-sent entry so it derives as the latest status.
+          date: new Date(nowMs + 1).toISOString(),
+          details: "",
+          resultingStatus: newQ.status,
+        });
+      }
+      return out;
+    };
 
     if (isOfflineMode) {
       setQueries(prev => {
@@ -1626,26 +1641,12 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         return updated;
       });
 
-      const pkg = packages.find(p => p.id === q.packageId);
-      const materialsSummary = pkg ? `${pkg.packageName}` : "Standard pitch materials";
-
-      const actId = "act-" + Math.random().toString(36).substr(2, 9);
-      const initialActivity: Activity = {
-        id: actId,
-        userId: currentUser.id,
-        queryId: id,
-        manuscriptId: q.manuscriptId,
-        activityType: ActivityType.QUERY_SENT,
-        description: `Query sent to ${agent?.name || "agent"} at ${agent?.agency || "agency"}`,
-        date: new Date().toISOString(),
-        details: `Sent via ${q.sendMethod || agent?.submissionMethod || "Email"}`
-      };
-
-      setActivities(prevAct => {
-        const updated = [...prevAct, initialActivity];
-        localStorage.setItem(`scriptally_activities_${currentUser.id}`, JSON.stringify(updated));
-        return updated;
-      });
+      const seeded = seedActivities();
+      const updatedActivities = [...activities, ...seeded];
+      setActivities(updatedActivities);
+      saveToLocalStorage("activities", updatedActivities);
+      // Derive from the seeded log so an advanced import's derived status matches its seed.
+      recomputeQueryOffline(id, updatedActivities);
 
       return { success: true, id };
     }
@@ -1653,26 +1654,75 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     try {
       await setDoc(doc(db, "users", currentUser.id, "queries", id), newQ);
 
-      const pkg = packages.find(p => p.id === q.packageId);
-      const materialsSummary = pkg ? `${pkg.packageName}` : "Standard pitch materials";
-
-      const actId = "act-" + Math.random().toString(36).substr(2, 9);
-      const initialActivity: Activity = {
-        id: actId,
-        userId: currentUser.id,
-        queryId: id,
-        manuscriptId: q.manuscriptId,
-        activityType: ActivityType.QUERY_SENT,
-        description: `Query sent to ${agent?.name || "agent"} at ${agent?.agency || "agency"}`,
-        date: new Date().toISOString(),
-        details: `Sent via ${q.sendMethod || agent?.submissionMethod || "Email"}`
-      };
-
-      await setDoc(doc(db, "users", currentUser.id, "activities", actId), initialActivity);
+      const seeded = seedActivities();
+      // Global feed projection for every seeded entry.
+      for (const act of seeded) {
+        await setDoc(doc(db, "users", currentUser.id, "activities", act.id), act);
+      }
+      // Advanced-status seed goes into the AUTHORITATIVE per-query subcollection too, so the
+      // imported query's derived status matches its seed without waiting on the backfill.
+      const advanced = seeded.find(a => a.resultingStatus && a.resultingStatus !== QueryStatus.QUERIED);
+      if (advanced) {
+        const manuscriptTitle = manuscripts.find(m => m.id === q.manuscriptId)?.title || "";
+        await setDoc(doc(db, "users", currentUser.id, "queries", id, "activity", advanced.id), {
+          type: advanced.resultingStatus,
+          resultingStatus: advanced.resultingStatus,
+          createdAt: Timestamp.fromDate(new Date(advanced.date)),
+          note: advanced.description,
+          queryId: id,
+          agentName: agent?.name || "The agent",
+          manuscriptTitle,
+        });
+        await recomputeQueryOnline(currentUser.id, id);
+      }
       return { success: true, id };
     } catch (e) {
       handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/queries/${id}`);
       return { success: false, error: "Failed to dispatch Query." };
+    }
+  };
+
+  // ── Derived status: the ONLY writers of status / pipeline dates / revisionRound /
+  //    hasAgentResponded. Every mutation appends to the activity log, then recomputes. ──
+
+  /**
+   * Offline twin of lib/recomputeQuery.ts: runs the same pure derivation over the in-memory
+   * activity mirror and writes the same fields to local state + localStorage. Callers pass the
+   * post-mutation activities array explicitly so derivation never races React state updates.
+   */
+  const recomputeQueryOffline = (queryId: string, activitiesNow: Activity[]) => {
+    const fields = deriveQueryFields(
+      activitiesNow
+        .filter(a => a.queryId === queryId)
+        .map(a => ({ id: a.id, resultingStatus: a.resultingStatus, date: a.date }))
+    );
+    setQueries(prev => {
+      const updated = prev.map(q =>
+        q.id === queryId
+          ? {
+              ...q,
+              status: fields.status,
+              partialRequestedDate: fields.partialRequestedDate ?? undefined,
+              partialSentDate: fields.partialSentDate ?? undefined,
+              fullRequestedDate: fields.fullRequestedDate ?? undefined,
+              fullSentDate: fields.fullSentDate ?? undefined,
+              revisionRound: fields.revisionRound,
+              hasAgentResponded: fields.hasAgentResponded,
+            }
+          : q
+      );
+      saveToLocalStorage("queries", updated);
+      return updated;
+    });
+  };
+
+  /** Mode dispatcher: change the activity log first, then call this. */
+  const recompute = async (queryId: string, offlineActivitiesNow?: Activity[]) => {
+    if (!currentUser) return;
+    if (isOfflineMode) {
+      recomputeQueryOffline(queryId, offlineActivitiesNow ?? activities);
+    } else {
+      await recomputeQueryOnline(currentUser.id, queryId);
     }
   };
 
@@ -1723,7 +1773,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
             activityType: ActivityType.STATUS_CHANGED,
             description: `${agent?.name || "The agent"} at ${agent?.agency || "agency"} requested a partial manuscript`,
             date: dateStr,
-            details: `Respond by ${formattedDeadStr}`
+            details: `Respond by ${formattedDeadStr}`,
+            resultingStatus: QueryStatus.PARTIAL_REQUESTED
           });
         } else if (skippedState === QueryStatus.PARTIAL_SENT) {
           missedActivities.push({
@@ -1731,9 +1782,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
             queryId,
             manuscriptId: targetQ.manuscriptId,
             activityType: ActivityType.MATERIALS_SENT,
-            description: `Partial manuscript sent to ${agent?.name || "the agent"} at ${agent?.agency || "agency"}`,
+            description: materialsSentDescription(QueryStatus.PARTIAL_SENT, agent),
             date: dateStr,
-            details: `Expected a response by ${formattedDeadStr}`
+            details: `Expected a response by ${formattedDeadStr}`,
+            resultingStatus: QueryStatus.PARTIAL_SENT
           });
         } else if (skippedState === QueryStatus.FULL_REQUESTED) {
           missedActivities.push({
@@ -1743,7 +1795,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
             activityType: ActivityType.STATUS_CHANGED,
             description: `${agent?.name || "The agent"} at ${agent?.agency || "agency"} requested a full manuscript`,
             date: dateStr,
-            details: `Respond by ${formattedDeadStr}`
+            details: `Respond by ${formattedDeadStr}`,
+            resultingStatus: QueryStatus.FULL_REQUESTED
           });
         } else if (skippedState === QueryStatus.FULL_SENT) {
           missedActivities.push({
@@ -1751,9 +1804,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
             queryId,
             manuscriptId: targetQ.manuscriptId,
             activityType: ActivityType.MATERIALS_SENT,
-            description: `Full manuscript sent to ${agent?.name || "the agent"} at ${agent?.agency || "agency"}`,
+            description: materialsSentDescription(QueryStatus.FULL_SENT, agent),
             date: dateStr,
-            details: `Expected a response by ${formattedDeadStr}`
+            details: `Expected a response by ${formattedDeadStr}`,
+            resultingStatus: QueryStatus.FULL_SENT
           });
         }
       }
@@ -1770,14 +1824,14 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         detailsLine = `Respond by ${formattedDeadStr}`;
       } else if (newStatus === QueryStatus.PARTIAL_SENT) {
         activityType = ActivityType.MATERIALS_SENT;
-        desc = `Partial manuscript sent to ${agent?.name || "the agent"} at ${agent?.agency || "agency"}`;
+        desc = materialsSentDescription(QueryStatus.PARTIAL_SENT, agent);
         detailsLine = `Expected a response by ${formattedDeadStr}`;
       } else if (newStatus === QueryStatus.FULL_REQUESTED) {
         desc = `${agent?.name || "The agent"} at ${agent?.agency || "agency"} requested a full manuscript`;
         detailsLine = `Respond by ${formattedDeadStr}`;
       } else if (newStatus === QueryStatus.FULL_SENT) {
         activityType = ActivityType.MATERIALS_SENT;
-        desc = `Full manuscript sent to ${agent?.name || "the agent"} at ${agent?.agency || "agency"}`;
+        desc = materialsSentDescription(QueryStatus.FULL_SENT, agent);
         detailsLine = `Expected a response by ${formattedDeadStr}`;
       } else if (newStatus === QueryStatus.REVISE_RESUBMIT) {
         desc = `Revise & Resubmit request received from ${agent?.name || "the agent"} at ${agent?.agency || "agency"}`;
@@ -1803,21 +1857,20 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         activityType,
         description: desc,
         date: dateStr,
-        details: detailsLine
+        details: detailsLine,
+        resultingStatus: newStatus
       });
     }
 
-    const qUpdates: Record<string, any> = { status: newStatus };
-    if (newStatus === QueryStatus.PARTIAL_REQUESTED) qUpdates.partialRequestedDate = dateStr;
-    if (newStatus === QueryStatus.PARTIAL_SENT) qUpdates.partialSentDate = dateStr;
-    if (newStatus === QueryStatus.FULL_REQUESTED) qUpdates.fullRequestedDate = dateStr;
-    if (newStatus === QueryStatus.FULL_SENT) qUpdates.fullSentDate = dateStr;
+    // Stagger same-batch timestamps by 1ms so the derived "latest" entry is the last in the
+    // sequence deterministically, not whichever random id happens to tiebreak highest.
+    const baseTime = new Date(dateStr).getTime();
+    missedActivities.forEach((act, i) => {
+      act.date = new Date(baseTime + i).toISOString();
+    });
 
+    // Status / pipeline dates are NOT written here — the log changes, then recompute derives them.
     if (isOfflineMode) {
-      const updatedQueries = queries.map(q => (q.id === queryId ? { ...q, ...qUpdates } : q));
-      setQueries(updatedQueries);
-      saveToLocalStorage("queries", updatedQueries);
-
       const generatedActivities: Activity[] = missedActivities.map(act => ({
         ...act,
         id: "act-" + Math.random().toString(36).substr(2, 9)
@@ -1826,19 +1879,126 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const finalActivities = [...activities, ...generatedActivities];
       setActivities(finalActivities);
       saveToLocalStorage("activities", finalActivities);
+      await recompute(queryId, finalActivities);
       return;
     }
 
     try {
-      await updateDoc(doc(db, "users", currentUser.id, "queries", queryId), qUpdates);
-
+      const manuscriptTitle = manuscripts.find(m => m.id === targetQ.manuscriptId)?.title || "";
       for (const act of missedActivities) {
          const actId = "act-" + Math.random().toString(36).substr(2, 9);
          await setDoc(doc(db, "users", currentUser.id, "activities", actId), {
            ...act,
            id: actId
          });
+         // Authoritative per-query log entry — this is what recompute derives from (and what
+         // the reading-pane timeline renders). The global feed write above is its projection.
+         await setDoc(doc(db, "users", currentUser.id, "queries", queryId, "activity", actId), {
+           type: act.resultingStatus,
+           resultingStatus: act.resultingStatus,
+           createdAt: Timestamp.fromDate(new Date(act.date)),
+           note: act.description,
+           queryId,
+           agentName: agent?.name || "The agent",
+           manuscriptTitle
+         });
       }
+      await recompute(queryId);
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/queries/${queryId}`);
+    }
+  };
+
+  // Writer marks materials as sent (Partial/Full Sent). One atomic-ish write: status + the
+  // matching *SentDate + optional responseDeadline/nudgeDate + one MATERIALS_SENT activity.
+  // NOT a response: never touches responseReceivedAt and never increments the response count.
+  const recordMaterialsSent = async (args: {
+    queryId: string;
+    targetStatus: QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT;
+    sentDate: string;
+    isResubmit?: boolean;
+    responseDeadline?: string;
+    nudgeDate?: string;
+  }) => {
+    if (!currentUser) return;
+    const { queryId, targetStatus, sentDate, isResubmit, responseDeadline, nudgeDate } = args;
+    const targetQ = queries.find(q => q.id === queryId);
+    if (!targetQ) return;
+
+    const agent = agents.find(a => a.id === targetQ.agentId);
+    // Chosen date, clamped monotonic with the log: a date-only pick lands at midnight, which
+    // would sort BEFORE a same-day "requested" entry — and under derivation, ordering IS status.
+    const desiredMillis = new Date(sentDate).getTime();
+    const eventMillis = isOfflineMode
+      ? Math.max(
+          desiredMillis,
+          1 + Math.max(0, ...activities.filter(a => a.queryId === queryId).map(a => getActivityTime(a.date)))
+        )
+      : await monotonicEventTime(currentUser.id, queryId, desiredMillis);
+    const sentISO = new Date(eventMillis).toISOString();
+
+    // Round used only for the description text ("Revised manuscript (v2) resubmitted…").
+    // The STORED revisionRound is derived from the log by recompute, never written here.
+    const descriptionRound = isResubmit ? (targetQ.revisionRound ?? 1) + 1 : undefined;
+
+    // Only the writer-supplied inputs are written directly; status/dates/round are derived.
+    const qUpdates: Record<string, any> = {};
+    if (responseDeadline) qUpdates.responseDeadline = new Date(responseDeadline).toISOString();
+    if (nudgeDate) qUpdates.nudgeDate = new Date(nudgeDate).toISOString();
+
+    const description = materialsSentDescription(targetStatus, agent, {
+      resubmit: isResubmit,
+      round: descriptionRound,
+    });
+    const details = responseDeadline ? `Expected a response by ${formatHumanDate(responseDeadline)}` : "";
+
+    const activity: Omit<Activity, "id"> = {
+      userId: currentUser.id,
+      queryId,
+      manuscriptId: targetQ.manuscriptId,
+      activityType: ActivityType.MATERIALS_SENT,
+      description,
+      date: sentISO,
+      details,
+      resultingStatus: targetStatus,
+    };
+
+    if (isOfflineMode) {
+      if (Object.keys(qUpdates).length > 0) {
+        const updatedQueries = queries.map(q => (q.id === queryId ? { ...q, ...qUpdates } : q));
+        setQueries(updatedQueries);
+        saveToLocalStorage("queries", updatedQueries);
+      }
+      const newAct: Activity = { ...activity, id: "act-" + Math.random().toString(36).substr(2, 9) };
+      const finalActivities = [...activities, newAct];
+      setActivities(finalActivities);
+      saveToLocalStorage("activities", finalActivities);
+      await recompute(queryId, finalActivities);
+      return;
+    }
+
+    try {
+      if (Object.keys(qUpdates).length > 0) {
+        await updateDoc(doc(db, "users", currentUser.id, "queries", queryId), qUpdates);
+      }
+      // Two stores, two surfaces (same split recordQueryResponse uses):
+      //  - the per-query `activity` subcollection is the AUTHORITATIVE log — recompute derives
+      //    from it, and the reading-pane timeline renders it.
+      //  - the global `activities` feed is its projection for the Dashboard.
+      const manuscriptTitle = manuscripts.find(m => m.id === targetQ.manuscriptId)?.title || "";
+      const subRef = doc(collection(db, "users", currentUser.id, "queries", queryId, "activity"));
+      await setDoc(subRef, {
+        type: targetStatus,
+        resultingStatus: targetStatus,
+        createdAt: Timestamp.fromDate(new Date(sentISO)),
+        note: description,
+        queryId,
+        agentName: agent?.name || "The agent",
+        manuscriptTitle,
+      });
+      const actId = "act-" + Math.random().toString(36).substr(2, 9);
+      await setDoc(doc(db, "users", currentUser.id, "activities", actId), { ...activity, id: actId });
+      await recompute(queryId);
     } catch (e) {
       handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/queries/${queryId}`);
     }
@@ -1897,66 +2057,66 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     return () => clearTimeout(timer);
   }, [currentUser, queries]);
 
-  const undoQueryStatus = async (queryId: string, previousStatus: QueryStatus, newStatus: QueryStatus) => {
+  /**
+   * Undo a status change: delete the most recent status-bearing activity from the log, then
+   * recompute — the status, dates, round, and response flag all follow from the trimmed log.
+   * Replaces the old 60-second-window heuristic and the manual fieldsToClear table, both of
+   * which recompute supersedes. `previousStatus` is unused (derivation produces it);
+   * `newStatus` is used only to prefer deleting the exact entry the undone change created.
+   */
+  const undoQueryStatus = async (queryId: string, _previousStatus: QueryStatus, newStatus: QueryStatus) => {
     if (!currentUser) return;
-    const nowTime = Date.now();
-
-    // First, find all activity records that were created as part of the status change being undone.
-    // These will be the activity records with a date timestamp within a few seconds of the status change, associated with the same queryId.
-    const activitiesToDelete = activities.filter(act => {
-      if (act.queryId !== queryId) return false;
-      try {
-        const actTime = new Date(act.date).getTime();
-        return Math.abs(nowTime - actTime) < 60000; // within 60 seconds of status change
-      } catch (e) {
-        return false;
-      }
-    });
 
     if (isOfflineMode) {
-      const updatedAc = activities.filter(act => !activitiesToDelete.some(da => da.id === act.id));
+      // Most recent status-bearing activity for this query — prefer the one matching newStatus.
+      const candidates = activities
+        .filter(act => act.queryId === queryId && normalizeResultingStatus(act.resultingStatus) !== null)
+        .sort((a, b) => getActivityTime(a.date) - getActivityTime(b.date));
+      const target =
+        [...candidates].reverse().find(act => act.resultingStatus === newStatus) ??
+        candidates[candidates.length - 1];
+      if (!target) return;
+
+      const updatedAc = activities.filter(act => act.id !== target.id);
       setActivities(updatedAc);
       saveToLocalStorage("activities", updatedAc);
-    } else {
-      for (const act of activitiesToDelete) {
-        try {
-          await deleteDoc(doc(db, "users", currentUser.id, "activities", act.id));
-        } catch (e) {
-          handleFirestoreError(e, OperationType.DELETE, `users/${currentUser.id}/activities/${act.id}`);
+      await recompute(queryId, updatedAc);
+      return;
+    }
+
+    try {
+      // Authoritative log: the per-query subcollection.
+      const snap = await getDocs(collection(db, "users", currentUser.id, "queries", queryId, "activity"));
+      const docs = snap.docs
+        .map(d => ({ ref: d.ref, derivable: subcollectionDocToDerivable(d.id, d.data()) }))
+        .filter(d => d.derivable.resultingStatus !== null && d.derivable.resultingStatus !== undefined)
+        .sort((a, b) => getActivityTime(a.derivable.date) - getActivityTime(b.derivable.date));
+      const target =
+        [...docs].reverse().find(d => d.derivable.resultingStatus === newStatus) ??
+        docs[docs.length - 1];
+
+      if (target) {
+        await deleteDoc(target.ref);
+
+        // Best-effort: remove the matching global-feed projection row (same query, same
+        // resultingStatus, latest). Legacy rows without resultingStatus can't be matched — the
+        // feed is a projection, so an orphan row there can no longer corrupt status.
+        const projection = activities
+          .filter(act => act.queryId === queryId && act.resultingStatus === target.derivable.resultingStatus)
+          .sort((a, b) => getActivityTime(a.date) - getActivityTime(b.date))
+          .pop();
+        if (projection) {
+          try {
+            await deleteDoc(doc(db, "users", currentUser.id, "activities", projection.id));
+          } catch (e) {
+            console.error("Undo: global-feed projection delete failed (non-fatal):", e);
+          }
         }
       }
-    }
 
-    // Second, update the query document directly — set the status field back to previousStatus, and clear any date fields that were set as part of the status change being undone.
-    const qUpdatesLocalStorage: Record<string, any> = { status: previousStatus };
-    const qUpdatesFirestore: Record<string, any> = { status: previousStatus };
-
-    const fieldsToClear: string[] = [];
-    if (previousStatus === QueryStatus.QUERIED) {
-      fieldsToClear.push("partialRequestedDate", "partialSentDate", "fullRequestedDate", "fullSentDate");
-    } else if (previousStatus === QueryStatus.PARTIAL_REQUESTED) {
-      fieldsToClear.push("partialSentDate", "fullRequestedDate", "fullSentDate");
-    } else if (previousStatus === QueryStatus.PARTIAL_SENT) {
-      fieldsToClear.push("fullRequestedDate", "fullSentDate");
-    } else if (previousStatus === QueryStatus.FULL_REQUESTED) {
-      fieldsToClear.push("fullSentDate");
-    }
-
-    fieldsToClear.forEach(field => {
-      qUpdatesLocalStorage[field] = null;
-      qUpdatesFirestore[field] = deleteField();
-    });
-
-    if (isOfflineMode) {
-      const updatedQueries = queries.map(q => (q.id === queryId ? { ...q, ...qUpdatesLocalStorage } : q));
-      setQueries(updatedQueries);
-      saveToLocalStorage("queries", updatedQueries);
-    } else {
-      try {
-        await updateDoc(doc(db, "users", currentUser.id, "queries", queryId), qUpdatesFirestore);
-      } catch (e) {
-        handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/queries/${queryId}`);
-      }
+      await recompute(queryId);
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/queries/${queryId}`);
     }
   };
 
@@ -2060,20 +2220,79 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
+  /**
+   * Correction primitive: delete an activity, then recompute — the query's status, dates,
+   * round, and response flag follow the corrected log. Online it also removes the same-id
+   * per-query log entry when one exists (updateQueryStatus and the backfill write the two
+   * stores under one id; response/mark-sent projections have independent ids and are cosmetic).
+   */
   const deleteActivity = async (id: string) => {
     if (!currentUser) return;
+    const target = activities.find(act => act.id === id);
+
     if (isOfflineMode) {
-      setActivities(prevAct => {
-        const updated = prevAct.filter(act => act.id !== id);
-        localStorage.setItem(`scriptally_activities_${currentUser.id}`, JSON.stringify(updated));
-        return updated;
-      });
+      const updated = activities.filter(act => act.id !== id);
+      setActivities(updated);
+      saveToLocalStorage("activities", updated);
+      if (target?.queryId) await recompute(target.queryId, updated);
       return;
     }
     try {
       await deleteDoc(doc(db, "users", currentUser.id, "activities", id));
+      if (target?.queryId) {
+        try {
+          await deleteDoc(doc(db, "users", currentUser.id, "queries", target.queryId, "activity", id));
+        } catch {
+          // No same-id twin in the authoritative log — nothing status-bearing to remove.
+        }
+        await recompute(target.queryId);
+      }
     } catch (e) {
       handleFirestoreError(e, OperationType.DELETE, `users/${currentUser.id}/activities/${id}`);
+    }
+  };
+
+  /**
+   * Correction primitive: patch one entry in a query's AUTHORITATIVE activity log (the
+   * per-query subcollection online, the in-memory mirror offline), then recompute. Fixing a
+   * mis-recorded event — its date, wording, or the status it produced — mutates the log and
+   * the derived fields follow. The correction UI (next task) calls this.
+   */
+  const editActivity = async (
+    queryId: string,
+    activityId: string,
+    patch: Partial<Pick<Activity, "description" | "details" | "date" | "resultingStatus">>
+  ) => {
+    if (!currentUser) return;
+
+    if (isOfflineMode) {
+      const updated = activities.map(act => (act.id === activityId ? { ...act, ...patch } : act));
+      setActivities(updated);
+      saveToLocalStorage("activities", updated);
+      await recompute(queryId, updated);
+      return;
+    }
+    try {
+      // Map the Activity-shaped patch onto the subcollection doc's field names.
+      const subPatch: Record<string, any> = {};
+      if (patch.description !== undefined) subPatch.note = patch.description;
+      if (patch.date !== undefined) subPatch.createdAt = Timestamp.fromDate(new Date(patch.date));
+      if (patch.resultingStatus !== undefined) {
+        subPatch.type = patch.resultingStatus;
+        subPatch.resultingStatus = patch.resultingStatus;
+      }
+      if (Object.keys(subPatch).length > 0) {
+        await updateDoc(doc(db, "users", currentUser.id, "queries", queryId, "activity", activityId), subPatch);
+      }
+      // Best-effort same-id projection patch in the global feed.
+      try {
+        await updateDoc(doc(db, "users", currentUser.id, "activities", activityId), patch as Record<string, any>);
+      } catch {
+        // Projection row has an independent id — cosmetic only, recompute doesn't read it.
+      }
+      await recompute(queryId);
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/queries/${queryId}/activity/${activityId}`);
     }
   };
 
@@ -2441,6 +2660,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         deleteAgent,
         addQuery,
         updateQueryStatus,
+        recordMaterialsSent,
         undoQueryStatus,
         updateQuery,
         addJournalEntry,
@@ -2448,6 +2668,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         updateJournalEntry,
         addActivity,
         deleteActivity,
+        editActivity,
         updateUserProfile,
         dismissTask,
         cleanDuplicates,

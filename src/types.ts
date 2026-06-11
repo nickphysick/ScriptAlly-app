@@ -197,6 +197,17 @@ export interface Query {
   rejectionReflection?: string; // private — never shown in stats
   rejectionLesson?: string; // "anything you'd do differently?" — private note to future self
   rejectedFromStatus?: QueryStatus; // the status held immediately before rejection (e.g. Full Sent → "full declined")
+
+  // Display-only revision counter — derived from the activity log by recomputeQuery (1 + count
+  // of R&R → Full Sent resubmissions). DELIBERATELY separate from `status`: the "(v2)" marker is
+  // rendered from this, never folded into the status string, so every `status === FULL_SENT`
+  // comparison keeps working. Absent or 1 means the first/only send; >= 2 renders "(v2)" etc.
+  revisionRound?: number;
+
+  // Derived by recomputeQuery: true once any agent-acting activity (partial/full/R&R/offer/
+  // rejected received) exists in the log. THE source for "Responses Received" — boolean, so each
+  // query counts at most once regardless of pipeline stage. Absent on un-migrated docs.
+  hasAgentResponded?: boolean;
 }
 
 export enum ActivityType {
@@ -219,6 +230,11 @@ export interface Activity {
   description: string;
   date: string; // ISO String
   details: string; // details about selection ("QL v2 + Syn v4", agent quote, etc.)
+  // The QueryStatus this event produced, stamped at append time by every status-bearing write
+  // (query sent, response recorded, materials sent). Query status/dates/flags are DERIVED from
+  // these by recomputeQuery — never from parsing description strings. Absent on non-status
+  // events (agent added, nudge, …) and on pre-migration records.
+  resultingStatus?: QueryStatus;
 }
 
 export interface JournalEntry {
