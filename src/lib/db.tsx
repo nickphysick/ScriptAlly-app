@@ -98,6 +98,27 @@ function materialsSentDescription(
   return `Full manuscript sent to ${name} at ${agency}`;
 }
 
+/**
+ * Human-readable note for a status-reconstruction log entry — used when seeding the per-query
+ * log for an advanced-status import (addQuery) and when healing a query with an empty
+ * authoritative log (backfill). The note is display text only; derivation reads the stamped
+ * `resultingStatus`, never this string.
+ */
+function statusReconstructionNote(status: QueryStatus): string {
+  switch (status) {
+    case QueryStatus.PARTIAL_REQUESTED: return "Partial manuscript requested";
+    case QueryStatus.PARTIAL_SENT:      return "Partial manuscript sent";
+    case QueryStatus.FULL_REQUESTED:    return "Full manuscript requested";
+    case QueryStatus.FULL_SENT:         return "Full manuscript sent";
+    case QueryStatus.REVISE_RESUBMIT:   return "Revise & resubmit requested";
+    case QueryStatus.OFFER:             return "Offer of representation received";
+    case QueryStatus.REJECTED:          return "Rejection received";
+    case QueryStatus.WITHDRAWN:         return "Query withdrawn";
+    case QueryStatus.NO_RESPONSE:       return "Query closed — no response";
+    default:                            return "Query sent";
+  }
+}
+
 function formatHumanDate(dateInput: string | Date | undefined): string {
   if (!dateInput) return "unknown date";
   const d = new Date(dateInput);
@@ -194,22 +215,6 @@ interface DbContextType {
 }
 
 const DbContext = createContext<DbContextType | undefined>(undefined);
-
-// Keywords matching the activity wording that recordQueryResponse / updateQueryStatus actually
-// produce per status. Used ONLY by the historical backfill to detect whether a query already has
-// a recorded activity for its status before healing a missing one. Detection only — derivation
-// itself never parses descriptions; it reads the stamped `resultingStatus`.
-const RESPONSE_STATUS_KEYWORDS: Record<string, string[]> = {
-  [QueryStatus.PARTIAL_REQUESTED]: ["partial manuscript requested", "requested a partial", "partial requested"],
-  [QueryStatus.PARTIAL_SENT]: ["partial manuscript sent", "partial sent"],
-  [QueryStatus.FULL_REQUESTED]: ["full manuscript requested", "requested a full", "full requested"],
-  [QueryStatus.FULL_SENT]: ["full manuscript sent", "full sent"],
-  [QueryStatus.REVISE_RESUBMIT]: ["revise", "resubmit", "r&r"],
-  [QueryStatus.OFFER]: ["offer"],
-  [QueryStatus.REJECTED]: ["reject", "declined", "passed"],
-  [QueryStatus.WITHDRAWN]: ["withdraw"],
-  [QueryStatus.NO_RESPONSE]: ["no response", "closed"],
-};
 
 export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -848,98 +853,112 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         }
       }
 
-      // 3. Backfill Query Status Changed activities
+      // 3. Heal queries whose AUTHORITATIVE per-query activity log is empty.
+      //    "Authoritative" = the per-query `activity` subcollection online (the store derivation
+      //    reads), and the in-memory `activities` mirror offline. The old check judged against the
+      //    global feed, so a query with a global-feed row but an empty subcollection was skipped —
+      //    leaving derivation to fall back to Queried. We now judge and seed the SAME store, and
+      //    only stamp activities (never write status; recomputeQuery derives it).
+      const offlineHeals: Activity[] = [];
       for (const q of queries) {
-        if (q.status !== QueryStatus.QUERIED) {
-          // Skip queries whose status changed recently. Those are recorded in real time by
-          // recordQueryResponse / updateQueryStatus; the backfill runs on a timer and would
-          // otherwise race the recorded activity — firing before it has propagated into local
-          // state — and create a duplicate (e.g. a "Query rejected" row alongside the real
-          // "Rejection received from …"). The backfill is only meant to heal old, orphaned data.
-          const lastChangeRaw: any = (q as any).lastStatusChange || (q as any).responseReceivedAt;
-          let lastChangeMs = 0;
-          if (lastChangeRaw) {
-            if (typeof lastChangeRaw === "string") lastChangeMs = new Date(lastChangeRaw).getTime();
-            else if (typeof lastChangeRaw.seconds === "number") lastChangeMs = lastChangeRaw.seconds * 1000;
-            else if (typeof lastChangeRaw.toDate === "function") lastChangeMs = lastChangeRaw.toDate().getTime();
-            else if (lastChangeRaw instanceof Date) lastChangeMs = lastChangeRaw.getTime();
-          }
-          if (lastChangeMs && Date.now() - lastChangeMs < 24 * 60 * 60 * 1000) continue;
+        if (q.status === QueryStatus.QUERIED) continue;
 
-          const matchingAgent = agents.find(ag => ag.id === q.agentId);
-          const agentName = matchingAgent ? matchingAgent.name : "The agent";
-          const matchingMs = manuscripts.find(ms => ms.id === q.manuscriptId);
-          const manuscriptTitle = matchingMs ? matchingMs.title : "";
+        // Skip very-recently-changed queries — their own writers just logged in real time; the
+        // timer could otherwise race that write and duplicate it.
+        const lastChangeRaw: any = (q as any).lastStatusChange || (q as any).responseReceivedAt;
+        let lastChangeMs = 0;
+        if (lastChangeRaw) {
+          if (typeof lastChangeRaw === "string") lastChangeMs = new Date(lastChangeRaw).getTime();
+          else if (typeof lastChangeRaw.seconds === "number") lastChangeMs = lastChangeRaw.seconds * 1000;
+          else if (typeof lastChangeRaw.toDate === "function") lastChangeMs = lastChangeRaw.toDate().getTime();
+          else if (lastChangeRaw instanceof Date) lastChangeMs = lastChangeRaw.getTime();
+        }
+        if (lastChangeMs && Date.now() - lastChangeMs < 24 * 60 * 60 * 1000) continue;
 
-          // Check if we have an activity matching this status for this query
-          const statusKeywords = RESPONSE_STATUS_KEYWORDS[q.status] || [q.status.toLowerCase()];
-          const hasStatusActivity = activities.some(act => {
-            if (act.queryId !== q.id) return false;
-            const desc = (act.description || "").toLowerCase();
-            const det = (act.details || "").toLowerCase();
-            return desc.includes("status") || det.includes("status") || statusKeywords.some(kw => desc.includes(kw) || det.includes(kw));
-          });
-
-          if (!hasStatusActivity) {
-            let expectedNote = `Status updated to ${q.status}`;
-            if (q.status === QueryStatus.PARTIAL_REQUESTED) expectedNote = "Partial manuscript requested";
-            else if (q.status === QueryStatus.FULL_REQUESTED) expectedNote = "Full manuscript requested";
-            else if (q.status === QueryStatus.REVISE_RESUBMIT) expectedNote = "Revise & resubmit requested";
-            else if (q.status === QueryStatus.OFFER) expectedNote = "Offer of representation received";
-            else if (q.status === QueryStatus.REJECTED) expectedNote = "Query rejected";
-            else if (q.status === QueryStatus.NO_RESPONSE) expectedNote = "Query closed — noResponseAfterWindow";
-
-            let dateVal = Date.now();
-            const rawDate = q.lastStatusChange || q.responseReceivedAt || q.dateSent;
-            if (rawDate) {
-              if (typeof rawDate === "string") {
-                dateVal = new Date(rawDate).getTime();
-              } else if ((rawDate as any).seconds) {
-                dateVal = (rawDate as any).seconds * 1000;
-              } else if (typeof (rawDate as any).toDate === "function") {
-                dateVal = (rawDate as any).toDate().getTime();
-              } else if (rawDate instanceof Date) {
-                dateVal = rawDate.getTime();
-              }
-            }
-
-            missingActivities.push({
-              id: `act-status-${q.status.replace(/\s+/g, '-').toLowerCase()}-${q.id}`,
-              activityType: ActivityType.STATUS_CHANGED,
-              description: expectedNote,
-              manuscriptId: q.manuscriptId,
-              queryId: q.id,
-              date: new Date(dateVal).toISOString(),
-              details: expectedNote,
-              // Stamped with the query's CURRENT stored status so derivation reproduces it —
-              // healing a missing historical entry must never change what the user sees.
-              resultingStatus: q.status
+        // Already has a status-bearing entry in the authoritative store? Leave it untouched (no dup).
+        let hasStatusBearing: boolean;
+        if (isOfflineMode) {
+          hasStatusBearing = activities.some(
+            a => a.queryId === q.id && normalizeResultingStatus(a.resultingStatus) !== null
+          );
+        } else {
+          try {
+            const sub = await getDocs(collection(db, "users", currentUser.id, "queries", q.id, "activity"));
+            hasStatusBearing = sub.docs.some(d => {
+              const data = d.data();
+              return (
+                normalizeResultingStatus(data.resultingStatus) !== null ||
+                normalizeResultingStatus(data.type) !== null
+              );
             });
-
-            if (!isOfflineMode) {
-              try {
-                const topLevelActivityDocRef = doc(db, `users/${currentUser.id}/activity`, `act-status-${q.status.replace(/\s+/g, '-').toLowerCase()}-${q.id}`);
-                await setDoc(topLevelActivityDocRef, {
-                  type: q.status,
-                  createdAt: Timestamp.fromMillis(dateVal),
-                  note: expectedNote,
-                  queryId: q.id,
-                  agentName,
-                  manuscriptTitle
-                }, { merge: true });
-
-                const queryActivityDocRef = doc(db, `users/${currentUser.id}/queries/${q.id}/activity`, `act-status-${q.status.replace(/\s+/g, '-').toLowerCase()}-${q.id}`);
-                await setDoc(queryActivityDocRef, {
-                  type: q.status,
-                  resultingStatus: q.status,
-                  createdAt: Timestamp.fromMillis(dateVal),
-                  note: expectedNote
-                }, { merge: true });
-              } catch (err) {
-                console.error("[ScriptAlly Backfill] Online backfill failed for query activity:", err);
-              }
-            }
+          } catch (err) {
+            // Never heal blind on a read error — that could create a duplicate.
+            console.error("[ScriptAlly Backfill] Could not read per-query log; skipping heal:", err);
+            continue;
           }
+        }
+        if (hasStatusBearing) continue;
+
+        // Seed one entry stamped with the CURRENT stored status, dated from the best available
+        // signal, so derivation reproduces exactly what the user already sees.
+        let dateVal = Date.now();
+        const rawDate = q.lastStatusChange || q.responseReceivedAt || q.dateSent;
+        if (rawDate) {
+          if (typeof rawDate === "string") dateVal = new Date(rawDate).getTime();
+          else if ((rawDate as any).seconds) dateVal = (rawDate as any).seconds * 1000;
+          else if (typeof (rawDate as any).toDate === "function") dateVal = (rawDate as any).toDate().getTime();
+          else if (rawDate instanceof Date) dateVal = rawDate.getTime();
+        }
+        const note = statusReconstructionNote(q.status);
+        const healId = `act-status-${q.status.replace(/\s+/g, "-").toLowerCase()}-${q.id}`;
+
+        if (isOfflineMode) {
+          offlineHeals.push({
+            id: healId,
+            userId: currentUser.id,
+            activityType: ActivityType.STATUS_CHANGED,
+            description: note,
+            manuscriptId: q.manuscriptId,
+            queryId: q.id,
+            date: new Date(dateVal).toISOString(),
+            details: note,
+            resultingStatus: q.status,
+          });
+        } else {
+          try {
+            const manuscriptTitle = manuscripts.find(ms => ms.id === q.manuscriptId)?.title || "";
+            const agentName = agents.find(ag => ag.id === q.agentId)?.name || "The agent";
+            await setDoc(
+              doc(db, "users", currentUser.id, "queries", q.id, "activity", healId),
+              {
+                type: q.status,
+                resultingStatus: q.status,
+                createdAt: Timestamp.fromMillis(dateVal),
+                note,
+                queryId: q.id,
+                agentName,
+                manuscriptTitle,
+              },
+              { merge: true }
+            );
+            // Log changed → derive status/dates/flags from it. Stored status is unchanged.
+            await recomputeQueryOnline(currentUser.id, q.id);
+            console.log(`[ScriptAlly Backfill] Healed missing per-query log for ${q.id} (${q.status}).`);
+          } catch (err) {
+            console.error("[ScriptAlly Backfill] Online heal failed for query:", q.id, err);
+          }
+        }
+      }
+
+      // Offline: the in-memory mirror IS the authoritative store — append the heals once, then
+      // recompute each healed query over the updated mirror so its derived status matches.
+      if (offlineHeals.length > 0) {
+        const updated = [...activities, ...offlineHeals];
+        setActivities(updated);
+        saveToLocalStorage("activities", updated);
+        for (const heal of offlineHeals) {
+          recomputeQueryOffline(heal.queryId, updated);
+          console.log(`[ScriptAlly Backfill] Healed missing offline log for ${heal.queryId}.`);
         }
       }
 
@@ -1565,14 +1584,55 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
 
     const id = q.id || "q-" + Math.random().toString(36).substr(2, 9);
-    const newQ: Query = {
+    const newQ: any = {
       ...q,
       id,
       userId: currentUser.id,
       status: q.status || QueryStatus.QUERIED,
       dateSent: q.dateSent || new Date().toISOString(),
       responseDeadline: q.status === QueryStatus.QUERIED ? (q as any).responseDeadline || dead : undefined
-    } as any;
+    };
+    // Firestore (no ignoreUndefinedProperties) rejects undefined fields. An advanced-status
+    // import sets responseDeadline: undefined above; strip every undefined so the write — and
+    // therefore the per-query log seed below — actually lands.
+    for (const k of Object.keys(newQ)) {
+      if (newQ[k] === undefined) delete newQ[k];
+    }
+
+    // Query-sent log entry, always present. When the query is created at an ADVANCED status
+    // (CSV import can pass one), append a second entry stamped with that status so derivation
+    // reproduces the seeded status immediately — without depending on the backfill timer.
+    const nowMs = Date.now();
+    const seedActivities = (): Activity[] => {
+      const out: Activity[] = [
+        {
+          id: "act-" + Math.random().toString(36).substr(2, 9),
+          userId: currentUser.id,
+          queryId: id,
+          manuscriptId: q.manuscriptId,
+          activityType: ActivityType.QUERY_SENT,
+          description: `Query sent to ${agent?.name || "agent"} at ${agent?.agency || "agency"}`,
+          date: new Date(nowMs).toISOString(),
+          details: `Sent via ${q.sendMethod || agent?.submissionMethod || "Email"}`,
+          resultingStatus: QueryStatus.QUERIED,
+        },
+      ];
+      if (newQ.status && newQ.status !== QueryStatus.QUERIED) {
+        out.push({
+          id: "act-" + Math.random().toString(36).substr(2, 9),
+          userId: currentUser.id,
+          queryId: id,
+          manuscriptId: q.manuscriptId,
+          activityType: ActivityType.STATUS_CHANGED,
+          description: statusReconstructionNote(newQ.status),
+          // 1ms after the query-sent entry so it derives as the latest status.
+          date: new Date(nowMs + 1).toISOString(),
+          details: "",
+          resultingStatus: newQ.status,
+        });
+      }
+      return out;
+    };
 
     if (isOfflineMode) {
       setQueries(prev => {
@@ -1581,27 +1641,12 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         return updated;
       });
 
-      const pkg = packages.find(p => p.id === q.packageId);
-      const materialsSummary = pkg ? `${pkg.packageName}` : "Standard pitch materials";
-
-      const actId = "act-" + Math.random().toString(36).substr(2, 9);
-      const initialActivity: Activity = {
-        id: actId,
-        userId: currentUser.id,
-        queryId: id,
-        manuscriptId: q.manuscriptId,
-        activityType: ActivityType.QUERY_SENT,
-        description: `Query sent to ${agent?.name || "agent"} at ${agent?.agency || "agency"}`,
-        date: new Date().toISOString(),
-        details: `Sent via ${q.sendMethod || agent?.submissionMethod || "Email"}`,
-        resultingStatus: QueryStatus.QUERIED
-      };
-
-      setActivities(prevAct => {
-        const updated = [...prevAct, initialActivity];
-        localStorage.setItem(`scriptally_activities_${currentUser.id}`, JSON.stringify(updated));
-        return updated;
-      });
+      const seeded = seedActivities();
+      const updatedActivities = [...activities, ...seeded];
+      setActivities(updatedActivities);
+      saveToLocalStorage("activities", updatedActivities);
+      // Derive from the seeded log so an advanced import's derived status matches its seed.
+      recomputeQueryOffline(id, updatedActivities);
 
       return { success: true, id };
     }
@@ -1609,23 +1654,27 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     try {
       await setDoc(doc(db, "users", currentUser.id, "queries", id), newQ);
 
-      const pkg = packages.find(p => p.id === q.packageId);
-      const materialsSummary = pkg ? `${pkg.packageName}` : "Standard pitch materials";
-
-      const actId = "act-" + Math.random().toString(36).substr(2, 9);
-      const initialActivity: Activity = {
-        id: actId,
-        userId: currentUser.id,
-        queryId: id,
-        manuscriptId: q.manuscriptId,
-        activityType: ActivityType.QUERY_SENT,
-        description: `Query sent to ${agent?.name || "agent"} at ${agent?.agency || "agency"}`,
-        date: new Date().toISOString(),
-        details: `Sent via ${q.sendMethod || agent?.submissionMethod || "Email"}`,
-        resultingStatus: QueryStatus.QUERIED
-      };
-
-      await setDoc(doc(db, "users", currentUser.id, "activities", actId), initialActivity);
+      const seeded = seedActivities();
+      // Global feed projection for every seeded entry.
+      for (const act of seeded) {
+        await setDoc(doc(db, "users", currentUser.id, "activities", act.id), act);
+      }
+      // Advanced-status seed goes into the AUTHORITATIVE per-query subcollection too, so the
+      // imported query's derived status matches its seed without waiting on the backfill.
+      const advanced = seeded.find(a => a.resultingStatus && a.resultingStatus !== QueryStatus.QUERIED);
+      if (advanced) {
+        const manuscriptTitle = manuscripts.find(m => m.id === q.manuscriptId)?.title || "";
+        await setDoc(doc(db, "users", currentUser.id, "queries", id, "activity", advanced.id), {
+          type: advanced.resultingStatus,
+          resultingStatus: advanced.resultingStatus,
+          createdAt: Timestamp.fromDate(new Date(advanced.date)),
+          note: advanced.description,
+          queryId: id,
+          agentName: agent?.name || "The agent",
+          manuscriptTitle,
+        });
+        await recomputeQueryOnline(currentUser.id, id);
+      }
       return { success: true, id };
     } catch (e) {
       handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/queries/${id}`);
