@@ -1779,7 +1779,11 @@ export const Dashboard: React.FC<{
 
     const finalResponsesPerWeek = dynamicResponsesPerWeek;
 
-    const RESPONSE_RECEIVED_STATUSES = [
+    // "Responses Received" = queries where the agent has actually acted, via the derived
+    // hasAgentResponded flag (written by recomputeQuery from the activity log). Boolean per
+    // query, so each query counts at most once regardless of pipeline stage. Un-migrated docs
+    // (flag not yet computed) fall back to the old status-set check until their first recompute.
+    const LEGACY_RESPONSE_STATUSES = [
       QueryStatus.PARTIAL_REQUESTED,
       QueryStatus.PARTIAL_SENT,
       QueryStatus.FULL_REQUESTED,
@@ -1787,10 +1791,13 @@ export const Dashboard: React.FC<{
       QueryStatus.REVISE_RESUBMIT,
       QueryStatus.OFFER,
       QueryStatus.REJECTED,
-      QueryStatus.NO_RESPONSE,
     ];
 
-    const totalResponsesCalc = queries.filter(q => RESPONSE_RECEIVED_STATUSES.includes(q.status)).length;
+    const totalResponsesCalc = queries.filter(q =>
+      q.hasAgentResponded !== undefined
+        ? q.hasAgentResponded
+        : LEGACY_RESPONSE_STATUSES.includes(q.status)
+    ).length;
 
     return {
       responseEvents,

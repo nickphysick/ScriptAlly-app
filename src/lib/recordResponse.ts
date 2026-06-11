@@ -28,6 +28,7 @@ import {
 } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "./firebase";
 import { QueryStatus, ActivityType } from "../types";
+import { recomputeQuery, monotonicEventTime } from "./recomputeQuery";
 
 /** Shape of the payload produced by RecordResponseModal.onSave. */
 export interface RecordResponseData {
@@ -226,10 +227,10 @@ export async function recordQueryResponse(
     throw new Error(`Unknown response type: ${selectedResponseType}`);
   }
 
-  // 2. Build the query document update. These date fields are what the Dashboard's
-  //    Fortnight-in-Focus derives from, so writing them here is what keeps it in sync.
+  // 2. Build the query document update — the response DETAILS only. `status` and the pipeline
+  //    stage dates are no longer written here: they are derived from the activity log by
+  //    recomputeQuery (the single writer) after the log is updated below.
   const updates: Record<string, any> = {
-    status: newStatus,
     // lastStatusChange = when you recorded it (audit). responseReceivedAt = when the response
     // actually arrived — user-editable via dateReceived (partial/full/rejected), defaulting today;
     // falls back to now for branches that don't capture it (offer uses offerDate; close has none).
@@ -237,16 +238,6 @@ export async function recordQueryResponse(
     lastStatusChange: serverTimestamp(),
     responseReceivedAt: getTimestamp(data.dateReceived) || serverTimestamp(),
   };
-
-  if (newStatus === QueryStatus.PARTIAL_REQUESTED) {
-    updates.partialRequestedDate = new Date().toISOString();
-  } else if (newStatus === QueryStatus.FULL_REQUESTED) {
-    updates.fullRequestedDate = new Date().toISOString();
-  } else if (newStatus === QueryStatus.QUERIED) {
-    // Reversion to Queried clears the stage-entry dates left by any later response.
-    updates.partialRequestedDate = deleteField();
-    updates.fullRequestedDate = deleteField();
-  }
 
   updates.materialsRequestedType = materialsRequestedType !== undefined ? materialsRequestedType : deleteField();
   updates.materialsRequestedQuantity = materialsRequestedQuantity !== undefined ? materialsRequestedQuantity : deleteField();
@@ -283,9 +274,17 @@ export async function recordQueryResponse(
     rejectedFromStatus,
   });
 
+  // Concrete event time rather than serverTimestamp() (an unresolved server timestamp would
+  // sort as time-0 in the immediate recompute), clamped monotonic with the existing log so a
+  // date-only "received" date can't sort before a same-day earlier entry.
+  const desiredMillis = (getTimestamp(data.dateReceived) || Timestamp.now()).toMillis();
+  const eventTime = Timestamp.fromMillis(await monotonicEventTime(userId, queryId, desiredMillis));
+
   const activityPayload: any = {
     type: newStatus,
-    createdAt: serverTimestamp(),
+    // The status this event produced — what recomputeQuery derives from. Exact enum member.
+    resultingStatus: newStatus,
+    createdAt: eventTime,
     note: activityNote,
     queryId,
     agentName: agent?.name || "The agent",
@@ -306,10 +305,12 @@ export async function recordQueryResponse(
   // it writes no per-query or global timeline entry (the caller pre-deletes the advanced ones).
   const appendsActivity = data.responseType !== "queried";
 
-  // 5. PRIMARY write — must succeed. Status + (for real responses) the per-query timeline entry.
+  // 5. PRIMARY write — must succeed. Response details + (for real responses) the per-query
+  //    timeline entry, then the recompute that derives status/dates/flags from the updated log.
   try {
     await updateDoc(queryRef, updates);
     if (appendsActivity) await setDoc(activityDocRef, activityPayload);
+    await recomputeQuery(userId, queryId);
   } catch (err) {
     handleFirestoreError(err, OperationType.WRITE, `users/${userId}/queries/${queryId}`);
     throw err;
@@ -335,6 +336,7 @@ export async function recordQueryResponse(
         description,
         date: new Date().toISOString(),
         details,
+        resultingStatus: newStatus,
       });
       legacyWritten = true;
     } catch (err) {
@@ -356,14 +358,13 @@ export async function recordQueryResponse(
     }
   }
 
-  // 7. Build the undo closure that reverts exactly what was written.
+  // 7. Build the undo closure that reverts exactly what was written. Status and the pipeline
+  //    dates are NOT restored here — undo deletes the activity entries this call created and
+  //    recomputes, so the derived fields follow the restored log.
   const undo = async () => {
     const revertData = {
-      status: preSnapshot.status,
       lastStatusChange: convertToTimestampOrDate(preSnapshot.lastStatusChange) ?? deleteField(),
       responseReceivedAt: convertToTimestampOrDate(preSnapshot.responseReceivedAt) ?? deleteField(),
-      partialRequestedDate: preSnapshot.partialRequestedDate ?? deleteField(),
-      fullRequestedDate: preSnapshot.fullRequestedDate ?? deleteField(),
       materialsRequestedType: preSnapshot.materialsRequestedType ?? deleteField(),
       materialsRequestedQuantity: preSnapshot.materialsRequestedQuantity ?? deleteField(),
       fullVersionSent: preSnapshot.fullVersionSent ?? deleteField(),
@@ -384,7 +385,7 @@ export async function recordQueryResponse(
 
     await Promise.all([
       updateDoc(queryRef, revertData),
-      deleteDoc(activityDocRef),
+      appendsActivity ? deleteDoc(activityDocRef) : Promise.resolve(),
       legacyWritten ? deleteDoc(legacyActivityRef) : Promise.resolve(),
       agentRequeryUndo
         ? updateDoc(doc(db, `users/${userId}/agents/${agentRequeryUndo.agentId}`), {
@@ -392,6 +393,8 @@ export async function recordQueryResponse(
           })
         : Promise.resolve(),
     ]);
+    // The log is back to its pre-action shape — derive status/dates/flags from it.
+    await recomputeQuery(userId, queryId);
   };
 
   return {
