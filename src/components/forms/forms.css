@@ -191,6 +191,10 @@
   resize: vertical;
 }
 
+/* two-up paired field row (short fields side by side) */
+.sa-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.sa-row2 > * { min-width: 0; }
+
 /* selection chips — a multi-select field (e.g. materials). Selected = the soft-pink token. */
 .sa-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
 .sa-chip {

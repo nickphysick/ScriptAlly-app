@@ -234,6 +234,18 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
     { value: "custom", label: "Set custom date" },
   ];
 
+  // Defined once so it can render full-width on its own (close/nothing) or paired with the nudge
+  // timing (nudge) without duplicating the control.
+  const ifNoResponseField = (
+    <FormField label="If no response">
+      <BrandDropdown
+        value={ifNoResponseAction}
+        options={ifNoResponseOptions}
+        onChange={(v) => setIfNoResponseAction(v as "nudge" | "close" | "nothing")}
+      />
+    </FormField>
+  );
+
   return (
     <FormShell
       preLabel="Logging a query to"
@@ -273,21 +285,24 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
             />
           </FormField>
 
-          <FormField label="Date sent">
-            <BrandDatePicker value={dateSent} onChange={setDateSent} />
-          </FormField>
+          {/* Paired row: Date sent | Send method */}
+          <div className="sa-row2">
+            <FormField label="Date sent">
+              <BrandDatePicker value={dateSent} onChange={setDateSent} />
+            </FormField>
+            <FormField label="Send method">
+              <BrandDropdown
+                value={sendMethod}
+                options={methodOptions}
+                onChange={(v) => setSendMethod(v as SubmissionMethod)}
+              />
+            </FormField>
+          </div>
 
-          <FormField label="Send method">
-            <BrandDropdown
-              value={sendMethod}
-              options={methodOptions}
-              onChange={(v) => setSendMethod(v as SubmissionMethod)}
-            />
-          </FormField>
-
-          {/* Surfaces the SAME responseDeadlineDate the nudge presets count back from (single
-              source). Recomputes via the deadline effect when the agent OR date sent changes.
-              When the agent has no response time on record, say so rather than show the ||6 guess. */}
+          {/* "Response expected by" — stays BETWEEN the two paired rows. Surfaces the same
+              responseDeadlineDate the nudge presets count back from (single source); recomputes via
+              the deadline effect when the agent OR date sent changes. When the agent has no response
+              time on record, say so rather than show the ||6 guess. */}
           {selectedAgent && (
             <div className="sa-expect">
               {selectedAgent.responseTimeWeeks ? (
@@ -298,27 +313,26 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
             </div>
           )}
 
-          <FormField label="If no response">
-            <BrandDropdown
-              value={ifNoResponseAction}
-              options={ifNoResponseOptions}
-              onChange={(v) => setIfNoResponseAction(v as "nudge" | "close" | "nothing")}
-            />
-          </FormField>
-
-          {ifNoResponseAction === "nudge" && (
-            <FormField label="When should we remind you?">
-              <BrandDropdown
-                value={nudgeReminderWhen}
-                options={nudgeWhenOptions}
-                onChange={(v) => {
-                  const next = v as "week_before" | "day_before" | "on_deadline" | "custom";
-                  setNudgeReminderWhen(next);
-                  // Seed the custom picker with the response deadline as a sensible starting point.
-                  if (next === "custom" && !customNudgeDate) setCustomNudgeDate(responseDeadlineDate);
-                }}
-              />
-            </FormField>
+          {/* Paired row: If no response | When should we remind you? — paired only when a nudge is
+              wanted; otherwise "If no response" stays full-width (no half-empty row). */}
+          {ifNoResponseAction === "nudge" ? (
+            <div className="sa-row2">
+              {ifNoResponseField}
+              <FormField label="When to remind">
+                <BrandDropdown
+                  value={nudgeReminderWhen}
+                  options={nudgeWhenOptions}
+                  onChange={(v) => {
+                    const next = v as "week_before" | "day_before" | "on_deadline" | "custom";
+                    setNudgeReminderWhen(next);
+                    // Seed the custom picker with the response deadline as a sensible starting point.
+                    if (next === "custom" && !customNudgeDate) setCustomNudgeDate(responseDeadlineDate);
+                  }}
+                />
+              </FormField>
+            </div>
+          ) : (
+            ifNoResponseField
           )}
 
           {ifNoResponseAction === "nudge" && nudgeReminderWhen === "custom" && (
