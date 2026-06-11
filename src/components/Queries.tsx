@@ -706,8 +706,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
       ])) as string[];
       setAllAvailableMaterials(initialAvailable);
 
-      setEditRejectionType((activeQuery as any).rejectionType || "Form rejection");
-      setEditAgentComments((activeQuery as any).agentComments || "");
+      setEditRejectionType(activeQuery.rejectionType || "Form rejection");
+      setEditAgentComments(activeQuery.agentComments || "");
     }
     setShowActionDropdown(false);
   }, [selectedQueryId, isEditMode, activeQuery?.id, activeAgent?.id]);
@@ -875,12 +875,12 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
       responseDeadline: editResponseDeadline ? new Date(editResponseDeadline).toISOString() : activeQuery.responseDeadline,
     };
     
-    (updates as any).ifNoResponse = editIfNoResponse;
-    (updates as any).materialsWanted = editMaterials;
-    
+    updates.ifNoResponse = editIfNoResponse;
+    updates.materialsWanted = editMaterials;
+
     if ([QueryStatus.REJECTED, QueryStatus.WITHDRAWN].includes(activeQuery.status)) {
-      (updates as any).rejectionType = editRejectionType;
-      (updates as any).agentComments = editAgentComments;
+      updates.rejectionType = editRejectionType;
+      updates.agentComments = editAgentComments;
     }
 
     await updateQuery(activeQuery.id, updates);
@@ -3412,7 +3412,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
                       {/* Rejection Details Read Mode */}
                       {[QueryStatus.REJECTED, QueryStatus.WITHDRAWN].includes(activeQuery.status) &&
-                        (activeQuery.rejectionFeedbackType || activeQuery.rejectionFeedbackText || activeQuery.rejectionLesson || (activeQuery as any).rejectionType) && (
+                        (activeQuery.rejectionFeedbackType || activeQuery.rejectionFeedbackText || activeQuery.rejectionLesson || activeQuery.rejectionType) && (
                         <div className="bg-[#FAF1EF] border border-[#e8d5cc]/60 p-3 rounded-lg space-y-1.5 mt-2">
                           <span className="text-[10px] font-mono text-[#7c3a2a] font-bold uppercase block">Archived Rejection Details</span>
                           <div className="text-[11px] space-y-1">
@@ -3423,7 +3423,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                                 ? "Standard pass"
                                 : activeQuery.rejectionFeedbackType === "form"
                                 ? "Form rejection"
-                                : (activeQuery as any).rejectionType;
+                                : activeQuery.rejectionType;
                               const stageLabel = activeQuery.rejectedFromStatus && activeQuery.rejectedFromStatus !== QueryStatus.QUERIED
                                 ? `After: ${activeQuery.rejectedFromStatus}`
                                 : null;
@@ -3438,9 +3438,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                                 </>
                               );
                             })()}
-                            {(activeQuery.rejectionFeedbackText || (activeQuery as any).agentComments) && (
+                            {(activeQuery.rejectionFeedbackText || activeQuery.agentComments) && (
                               <p className="italic text-stone-600 bg-white p-2 border border-stone-200/55 rounded-md mt-1 leading-snug">
-                                "{activeQuery.rejectionFeedbackText || (activeQuery as any).agentComments}"
+                                "{activeQuery.rejectionFeedbackText || activeQuery.agentComments}"
                               </p>
                             )}
                             {activeQuery.rejectionLesson && (

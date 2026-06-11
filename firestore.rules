@@ -225,7 +225,9 @@ service cloud.firestore {
         && (data.get('closingReason', null) == null || (data.closingReason is string && data.closingReason.size() <= 256))
         && (data.get('closingNotes', null) == null || (data.closingNotes is string && data.closingNotes.size() <= 16384))
         && (data.get('materialsWanted', null) == null || ((data.materialsWanted is list || data.materialsWanted is map) && data.materialsWanted.size() <= 20))
-        && (data.get('ifNoResponse', null) == null || (data.ifNoResponse is string && data.ifNoResponse.size() <= 256));
+        && (data.get('ifNoResponse', null) == null || (data.ifNoResponse is string && data.ifNoResponse.size() <= 256))
+        && (data.get('rejectionType', null) == null || (data.rejectionType is string && data.rejectionType.size() <= 256))
+        && (data.get('agentComments', null) == null || (data.agentComments is string && data.agentComments.size() <= 16384));
     }
 
     function isValidActivityNested(data) {
@@ -362,7 +364,7 @@ service cloud.firestore {
             'lastStatusChange', 'responseReceivedAt', 'materialsRequestedType', 'materialsRequestedQuantity',
             'expectedSendDate', 'sendReminderDate', 'rejectionFeedbackType', 'rejectionFeedbackText',
             'rejectionReflection', 'rejectionLesson', 'rejectedFromStatus', 'offerDate', 'offerResponseDeadline', 'offerNotes', 'closingReason', 'closingNotes',
-            'materialsWanted', 'ifNoResponse'
+            'materialsWanted', 'ifNoResponse', 'agentId', 'rejectionType', 'agentComments'
           ])
         );
 

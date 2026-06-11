@@ -170,8 +170,10 @@ export interface Query {
   fullRequestedDate?: string;
   fullSentDate?: string;
   rejectedDate?: string;
-  rejectionType?: string;
+  rejectionType?: string; // Edit-form rejection category, e.g. "Form rejection"
   rejectionDetails?: string;
+  agentComments?: string; // Edit-form free-text notes about the agent's response
+
   // Written by RecordResponseModal when logging a rejection
   rejectionFeedbackType?: "form" | "standard" | "detailed";
   rejectionFeedbackText?: string;
