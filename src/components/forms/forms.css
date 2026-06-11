@@ -1,0 +1,293 @@
+/**
+ * ScriptAlly — Standard Form Pattern ("Form 11")
+ * LOCKED design system. Ported verbatim from design-reference/scriptally-form11-plane.html
+ * and design-reference/scriptally-form-spec.md. Colours, type, spacing here never change —
+ * only a form's header text, corner motif, fields, and button label vary.
+ *
+ * Classes are namespaced `sa-` to avoid collisions with the app's Tailwind utilities.
+ * Fonts (Playfair Display / Inter / JetBrains Mono) are referenced explicitly so the shell
+ * is faithful regardless of the surrounding app's font config (links live in index.html).
+ */
+
+/* ── Focused-modal presentation (a form shown over a dimmed backdrop) ───── */
+.sa-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 24px 80px;
+  overflow-y: auto;
+  background: rgba(40, 20, 14, 0.45);
+  backdrop-filter: blur(2px);
+}
+.sa-overlay-inner { width: 100%; max-width: 440px; }
+
+/* ── Shell ─────────────────────────────────────────────────────────────── */
+.sa-form {
+  position: relative;
+  border-radius: 14px;
+  background: #fdfaf5;
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.06), 0 6px 24px rgba(58, 28, 20, 0.1);
+  /* faint paper grain */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.03'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+/* inset burgundy mount */
+.sa-form::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(124, 58, 42, 0.28);
+  border-radius: 10px;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* ── Sage header band ──────────────────────────────────────────────────── */
+.sa-band {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #dce0d9 0%, #d0d6cc 100%);
+  border-radius: 8px 8px 0 0;
+  padding: 18px 24px 16px;
+  margin: 6px 6px 0;
+  min-height: 78px;
+}
+.sa-band::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+  background: rgba(90, 110, 88, 0.2);
+}
+
+/* corner motif slot (Lottie / image / SVG) — varies per form */
+.sa-motif {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 84px;
+  height: 84px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* avatar chip + name block */
+.sa-id {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  position: relative;
+  z-index: 2;
+}
+.sa-avatar {
+  flex-shrink: 0;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: #fdfaf5;
+  border: 1px solid rgba(124, 58, 42, 0.25);
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.05);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 14px; font-weight: 500;
+  color: #7c3a2a;
+}
+.sa-prelabel {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: #5a6e58;
+  margin-bottom: 1px;
+}
+.sa-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px; font-weight: 500; line-height: 1.1;
+  color: #2e3a2c;
+}
+.sa-subline {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px; font-weight: 300;
+  color: #6a7e68;
+  margin-top: 1px;
+}
+
+/* ── Body ──────────────────────────────────────────────────────────────── */
+.sa-body {
+  position: relative;
+  padding: 20px 22px 22px;
+  margin: 0 6px 6px;
+}
+.sa-label {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em;
+  color: #9c8878;
+  margin-bottom: 5px;
+}
+
+/* shared field look: text input + dropdown/datepicker triggers */
+.sa-input,
+.sa-field {
+  width: 100%;
+  background: #ffffff;
+  border: 0.5px solid #e0d5c8;
+  border-radius: 9px;
+  padding: 10px 13px;
+  margin-bottom: 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  color: #3a1c14;
+  box-shadow: inset 0 1px 2px rgba(58, 28, 20, 0.03);
+  transition: all 0.2s;
+  outline: none;
+}
+.sa-input::placeholder,
+.sa-placeholder { color: #c8b8a8; }
+
+.sa-field {
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.sa-input:focus { border-color: #8a9e88; box-shadow: 0 0 0 3px rgba(138, 158, 136, 0.12), inset 0 1px 2px rgba(58, 28, 20, 0.03); }
+.sa-field:hover { border-color: #c9a89e; }
+.sa-dd.open > .sa-field,
+.sa-dp.open > .sa-field { border-color: #8a9e88; box-shadow: 0 0 0 3px rgba(138, 158, 136, 0.12), inset 0 1px 2px rgba(58, 28, 20, 0.03); }
+
+.sa-field-icon { color: #7c3a2a; flex-shrink: 0; transition: transform 0.2s; }
+.sa-dd.open .sa-chevron { transform: rotate(180deg); }
+
+/* multi-line text field */
+.sa-textarea {
+  min-height: 72px;
+  line-height: 1.45;
+  resize: vertical;
+}
+
+/* selection chips — a multi-select field (e.g. materials). Selected = the soft-pink token. */
+.sa-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.sa-chip {
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 12.5px;
+  color: #6a5045;
+  background: #ffffff;
+  border: 0.5px solid #e0d5c8;
+  border-radius: 9px;
+  padding: 8px 13px;
+  transition: all 0.15s;
+  user-select: none;
+}
+.sa-chip:hover { border-color: #c9a89e; }
+.sa-chip.sel { background: #f5e2da; border-color: #e8c8bc; color: #7c3a2a; font-weight: 500; }
+
+/* inline form error */
+.sa-error {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: #a0392a;
+  margin: -4px 0 12px;
+}
+
+/* per-field text treatments (item 4) — apply to a label or a value span */
+.sa-strong { font-weight: 600; }
+.sa-em { font-style: italic; font-family: 'Playfair Display', serif; color: #7c3a2a; }
+
+/* ── Custom dropdown ───────────────────────────────────────────────────── */
+.sa-dd { position: relative; }
+.sa-dd-menu {
+  position: absolute;
+  top: calc(100% - 4px); left: 0; right: 0;
+  background: #fdfaf5;
+  border: 0.5px solid #e0d5c8;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(58, 28, 20, 0.14);
+  padding: 5px;
+  z-index: 30;
+  display: none;
+  animation: sa-popIn 0.15s ease;
+}
+.sa-dd.open .sa-dd-menu { display: block; }
+.sa-dd-opt {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 12px;
+  border-radius: 7px;
+  font-size: 13px; color: #3a1c14;
+  cursor: pointer;
+  transition: background 0.14s, color 0.14s;
+}
+.sa-dd-opt:hover { background: #fff; color: #7c3a2a; }
+.sa-dd-opt.sel { background: #f5e2da; color: #7c3a2a; font-weight: 500; }
+.sa-tick { opacity: 0; color: #7c3a2a; }
+.sa-dd-opt.sel .sa-tick { opacity: 1; }
+
+/* ── Custom date picker ────────────────────────────────────────────────── */
+.sa-dp { position: relative; }
+.sa-dp-pop {
+  position: absolute;
+  top: calc(100% - 4px); left: 0;
+  width: 280px;
+  background: #fdfaf5;
+  border: 0.5px solid #e0d5c8;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(58, 28, 20, 0.16);
+  padding: 14px;
+  z-index: 30;
+  display: none;
+  animation: sa-popIn 0.15s ease;
+}
+.sa-dp.open .sa-dp-pop { display: block; }
+.sa-dp-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.sa-dp-month { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 500; color: #3a1c14; }
+.sa-dp-nav { display: flex; gap: 4px; }
+.sa-dp-navbtn {
+  width: 26px; height: 26px;
+  border-radius: 7px;
+  border: 0.5px solid #e0d5c8;
+  background: #fff;
+  color: #7c3a2a;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.sa-dp-navbtn:hover { background: #f5e2da; border-color: #d8a89a; }
+.sa-dp-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.sa-dp-dow { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #9c8878; text-align: center; padding: 4px 0; letter-spacing: 0.03em; }
+.sa-dp-day {
+  aspect-ratio: 1;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Inter', sans-serif; font-size: 12px;
+  color: #3a1c14;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.13s;
+}
+.sa-dp-day:hover { background: #f5e2da; color: #7c3a2a; }
+.sa-dp-day.muted { color: #cbbcae; cursor: default; }
+.sa-dp-day.muted:hover { background: transparent; color: #cbbcae; }
+.sa-dp-day.today { font-weight: 600; color: #5a6e58; box-shadow: inset 0 0 0 1px #b8c8b0; }
+.sa-dp-day.sel { background: #7c3a2a; color: #f5ede8; font-weight: 500; }
+.sa-dp-day.sel:hover { background: #5a2a1e; color: #f5ede8; }
+
+/* ── Centred soft-pink button ──────────────────────────────────────────── */
+.sa-btn-row { display: flex; justify-content: center; margin-top: 4px; }
+.sa-btn {
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 500; letter-spacing: 0.07em;
+  background: #f5e2da;
+  color: #7c3a2a;
+  border: 0.5px solid #e8c8bc;
+  border-radius: 10px;
+  padding: 11px 28px;
+  transition: all 0.2s;
+}
+.sa-btn:hover { background: #efd5ca; border-color: #d8a89a; }
+.sa-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+@keyframes sa-popIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
