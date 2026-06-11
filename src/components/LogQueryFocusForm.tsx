@@ -84,17 +84,18 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
     }
   }, [selectedAgent, dateSent]);
 
-  // Escape to close
-  useEffect(() => {
-    if (!isOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [isOpen, onClose]);
-
   if (!isOpen) return null;
+
+  // The form holds real work once the user has picked an agent, ticked materials, written notes,
+  // or moved any field off its reset default — gates FormShell's discard confirm on close.
+  const isDirty =
+    selectedAgent !== null ||
+    materialsSent.length > 0 ||
+    personalizationNotes.trim() !== "" ||
+    sendMethod !== SubmissionMethod.EMAIL ||
+    ifNoResponseAction !== "nudge" ||
+    nudgeReminderWhen !== "week_before" ||
+    customNudgeDate !== "";
 
   const handleAgentChange = (agentId: string) => {
     const agent = agents.find((a) => a.id === agentId) || null;
@@ -214,24 +215,19 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
   ];
 
   return (
-    <div
-      className="sa-overlay"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
+    <FormShell
+      preLabel="Logging a query to"
+      name={selectedAgent ? selectedAgent.name : "Select an agent"}
+      subLine={selectedAgent ? selectedAgent.agency : "Choose who you're querying"}
+      avatarInitials={selectedAgent ? getInitials(selectedAgent.name) : undefined}
+      avatarIcon={selectedAgent ? undefined : <Send size={16} strokeWidth={2} />}
+      cornerMotif={<Lottie animationData={planeAnimation} loop autoplay style={{ width: 84, height: 84 }} />}
+      buttonLabel="Log this query"
+      onSubmit={() => void handleFormSubmit({ preventDefault() {} } as React.FormEvent)}
+      submitting={isSubmitting}
+      onClose={onClose}
+      dirty={isDirty}
     >
-      <div className="sa-overlay-inner">
-        <FormShell
-          preLabel="Logging a query to"
-          name={selectedAgent ? selectedAgent.name : "Select an agent"}
-          subLine={selectedAgent ? selectedAgent.agency : "Choose who you're querying"}
-          avatarInitials={selectedAgent ? getInitials(selectedAgent.name) : undefined}
-          avatarIcon={selectedAgent ? undefined : <Send size={16} strokeWidth={2} />}
-          cornerMotif={<Lottie animationData={planeAnimation} loop autoplay style={{ width: 84, height: 84 }} />}
-          buttonLabel="Log this query"
-          onSubmit={() => void handleFormSubmit({ preventDefault() {} } as React.FormEvent)}
-          submitting={isSubmitting}
-        >
           <FormField label="Agent">
             <BrandDropdown
               value={selectedAgent?.id || ""}
@@ -313,8 +309,6 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
           </FormField>
 
           {formError && <div className="sa-error">{formError}</div>}
-        </FormShell>
-      </div>
-    </div>
+    </FormShell>
   );
 };

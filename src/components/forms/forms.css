@@ -307,6 +307,38 @@
 .sa-btn:hover { background: #efd5ca; border-color: #d8a89a; }
 .sa-btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
+/* ── Cancel / discard exit (foundation-level — every form inherits it) ──── */
+.sa-cancel-row { display: flex; justify-content: center; margin-top: 9px; }
+.sa-cancel {
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase;
+  color: #9c8878;
+  background: none; border: 0; padding: 4px 8px;
+  transition: color 0.15s;
+}
+.sa-cancel:hover { color: #7c3a2a; }
+
+.sa-discard { margin-top: 10px; text-align: center; animation: sa-popIn 0.15s ease; }
+.sa-discard-msg {
+  display: block;
+  font-family: 'Inter', sans-serif; font-size: 12.5px; color: #6a5045;
+  margin-bottom: 10px;
+}
+.sa-discard-actions { display: flex; justify-content: center; gap: 8px; }
+.sa-discard-keep,
+.sa-discard-go {
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 500; letter-spacing: 0.05em;
+  border-radius: 9px; padding: 9px 18px;
+  border: 0.5px solid; transition: all 0.18s;
+}
+.sa-discard-keep { background: #ffffff; border-color: #e0d5c8; color: #6a5045; }
+.sa-discard-keep:hover { border-color: #c9a89e; }
+.sa-discard-go { background: #f3dcd5; border-color: #e0b3a6; color: #9a3320; }
+.sa-discard-go:hover { background: #ecccc1; border-color: #d8a89a; }
+
 @keyframes sa-popIn {
   from { opacity: 0; transform: translateY(-4px); }
   to   { opacity: 1; transform: translateY(0); }
