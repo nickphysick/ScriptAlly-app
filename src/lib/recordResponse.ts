@@ -37,6 +37,10 @@ export interface RecordResponseData {
   materialsOtherText: string;
   expectedBy: string;
   sendReminderDate: string;
+  /** #4 — when the response actually arrived (defaults today, user-editable). Drives responseReceivedAt. */
+  dateReceived: string;
+  /** #2 — Revise & Resubmit: the agent's revision guidance. */
+  rrNotes: string;
   feedbackType: "Yes" | "No" | "Form";
   feedbackText: string;
   privateReflection: string;
@@ -129,6 +133,7 @@ export async function recordQueryResponse(
   let materialsRequestedQuantity: any = undefined;
   let expectedSendDate: any = undefined;
   let sendReminderDate: any = undefined;
+  let rrNotes: string | undefined;
 
   let rejectionFeedbackType: string | undefined;
   let rejectionFeedbackText: string | undefined;
@@ -143,23 +148,20 @@ export async function recordQueryResponse(
   let closingReason: string | undefined;
   let closingNotes: string | undefined;
 
-  if (data.responseType === "partial" || data.responseType === "full" || data.responseType === "rr") {
-    selectedResponseType =
-      data.responseType === "partial" ? "partialRequested" : data.responseType === "full" ? "fullRequested" : "reviseAndResubmit";
+  if (data.responseType === "partial" || data.responseType === "full") {
+    selectedResponseType = data.responseType === "partial" ? "partialRequested" : "fullRequested";
 
     materialsRequestedType = data.materialsType.toLowerCase();
     materialsRequestedQuantity =
       data.materialsType === "Other" ? data.materialsOtherText?.trim() : String(data.materialsQuantity ?? "").trim();
 
-    // Strip any date-like content that may have leaked in.
-    if (
-      materialsRequestedQuantity?.toLowerCase().includes("expected") ||
-      materialsRequestedQuantity?.toLowerCase().includes("jun") ||
-      materialsRequestedQuantity?.toLowerCase().includes("jul")
-    ) {
-      materialsRequestedQuantity = "";
-    }
     expectedSendDate = getTimestamp(data.expectedBy);
+    sendReminderDate = getTimestamp(data.sendReminderDate);
+  } else if (data.responseType === "rr") {
+    // Revise & Resubmit captures the agent's revision guidance + a self-reminder to resubmit —
+    // not a page count, so it writes none of the materialsRequested*/expectedSendDate fields.
+    selectedResponseType = "reviseAndResubmit";
+    if (data.rrNotes && data.rrNotes.trim() !== "") rrNotes = data.rrNotes.trim();
     sendReminderDate = getTimestamp(data.sendReminderDate);
   } else if (data.responseType === "rejected") {
     selectedResponseType = "rejected";
@@ -209,8 +211,12 @@ export async function recordQueryResponse(
   //    Fortnight-in-Focus derives from, so writing them here is what keeps it in sync.
   const updates: Record<string, any> = {
     status: newStatus,
+    // lastStatusChange = when you recorded it (audit). responseReceivedAt = when the response
+    // actually arrived — user-editable via dateReceived (partial/full/rejected), defaulting today;
+    // falls back to now for branches that don't capture it (offer uses offerDate; close has none).
+    // Either way responseReceivedAt is ALWAYS stamped — only its value source changes.
     lastStatusChange: serverTimestamp(),
-    responseReceivedAt: serverTimestamp(),
+    responseReceivedAt: getTimestamp(data.dateReceived) || serverTimestamp(),
   };
 
   if (newStatus === QueryStatus.PARTIAL_REQUESTED) {
@@ -223,6 +229,8 @@ export async function recordQueryResponse(
   updates.materialsRequestedQuantity = materialsRequestedQuantity !== undefined ? materialsRequestedQuantity : deleteField();
   updates.expectedSendDate = expectedSendDate !== undefined ? expectedSendDate : deleteField();
   updates.sendReminderDate = sendReminderDate !== undefined ? sendReminderDate : deleteField();
+
+  updates.rrNotes = rrNotes !== undefined ? rrNotes : deleteField();
 
   updates.rejectionFeedbackType = rejectionFeedbackType !== undefined ? rejectionFeedbackType : deleteField();
   updates.rejectionFeedbackText = rejectionFeedbackText !== undefined ? rejectionFeedbackText : deleteField();
@@ -326,6 +334,7 @@ export async function recordQueryResponse(
       materialsRequestedQuantity: preSnapshot.materialsRequestedQuantity ?? deleteField(),
       expectedSendDate: convertToTimestampOrDate(preSnapshot.expectedSendDate) ?? deleteField(),
       sendReminderDate: convertToTimestampOrDate(preSnapshot.sendReminderDate) ?? deleteField(),
+      rrNotes: preSnapshot.rrNotes ?? deleteField(),
       rejectionFeedbackType: preSnapshot.rejectionFeedbackType ?? deleteField(),
       rejectionFeedbackText: preSnapshot.rejectionFeedbackText ?? deleteField(),
       rejectionReflection: preSnapshot.rejectionReflection ?? deleteField(),

@@ -188,6 +188,9 @@ export interface Query {
   rejectionDetails?: string;
   agentComments?: string; // Edit-form free-text notes about the agent's response
 
+  // Written by RecordResponseModal on a Revise & Resubmit — the agent's revision guidance.
+  rrNotes?: string;
+
   // Written by RecordResponseModal when logging a rejection
   rejectionFeedbackType?: "form" | "standard" | "detailed";
   rejectionFeedbackText?: string;

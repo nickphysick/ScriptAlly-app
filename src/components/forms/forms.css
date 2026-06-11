@@ -307,6 +307,23 @@
 .sa-btn:hover { background: #efd5ca; border-color: #d8a89a; }
 .sa-btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
+/* back link for stepped forms (top of body) */
+.sa-back {
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.04em;
+  color: #c9a89e; background: none; border: 0; padding: 0;
+  margin-bottom: 10px; transition: color 0.15s;
+}
+.sa-back:hover { color: #7c3a2a; }
+
+/* compact step caption (mono, above a step's heading) */
+.sa-step-cap {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: #c9a89e; margin-bottom: 6px;
+}
+
 /* ── Cancel / discard exit (foundation-level — every form inherits it) ──── */
 .sa-cancel-row { display: flex; justify-content: center; margin-top: 9px; }
 .sa-cancel {

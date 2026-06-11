@@ -216,6 +216,7 @@ service cloud.firestore {
         && (data.get('materialsRequestedQuantity', null) == null || (data.materialsRequestedQuantity is string || data.materialsRequestedQuantity is int || data.materialsRequestedQuantity is float || data.materialsRequestedQuantity is number))
         && (data.get('expectedSendDate', null) == null || (data.expectedSendDate is timestamp || data.expectedSendDate is string))
         && (data.get('sendReminderDate', null) == null || (data.sendReminderDate is timestamp || data.sendReminderDate is string))
+        && (data.get('rrNotes', null) == null || (data.rrNotes is string && data.rrNotes.size() <= 16384))
         && (data.get('rejectionFeedbackType', null) == null || (data.rejectionFeedbackType is string && data.rejectionFeedbackType.size() <= 256))
         && (data.get('rejectionFeedbackText', null) == null || (data.rejectionFeedbackText is string && data.rejectionFeedbackText.size() <= 16384))
         && (data.get('rejectionReflection', null) == null || (data.rejectionReflection is string && data.rejectionReflection.size() <= 16384))
@@ -364,7 +365,7 @@ service cloud.firestore {
             'status', 'personalisationNotes', 'sendMethod', 'nudgeDate', 'lastNudgeSentDate', 'responseDeadline',
             'partialRequestedDate', 'partialSentDate', 'fullRequestedDate', 'fullSentDate',
             'lastStatusChange', 'responseReceivedAt', 'materialsRequestedType', 'materialsRequestedQuantity',
-            'expectedSendDate', 'sendReminderDate', 'rejectionFeedbackType', 'rejectionFeedbackText',
+            'expectedSendDate', 'sendReminderDate', 'rrNotes', 'rejectionFeedbackType', 'rejectionFeedbackText',
             'rejectionReflection', 'rejectionLesson', 'rejectedFromStatus', 'offerDate', 'offerResponseDeadline', 'offerNotes', 'closingReason', 'closingNotes',
             'materialsWanted', 'ifNoResponse', 'agentId', 'rejectionType', 'agentComments'
           ])
