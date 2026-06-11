@@ -27,6 +27,13 @@ const getInitials = (name: string) =>
     .slice(0, 2)
     .toUpperCase();
 
+// Parse a "YYYY-MM-DD" as a LOCAL date (avoids the UTC-midnight off-by-one) and format it long.
+const formatExpectedDate = (d: string): string => {
+  if (!d) return "";
+  const [y, m, day] = d.split("-").map(Number);
+  return new Date(y, m - 1, day).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+};
+
 export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
   isOpen,
   onClose,
@@ -277,6 +284,19 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
               onChange={(v) => setSendMethod(v as SubmissionMethod)}
             />
           </FormField>
+
+          {/* Surfaces the SAME responseDeadlineDate the nudge presets count back from (single
+              source). Recomputes via the deadline effect when the agent OR date sent changes.
+              When the agent has no response time on record, say so rather than show the ||6 guess. */}
+          {selectedAgent && (
+            <div className="sa-expect">
+              {selectedAgent.responseTimeWeeks ? (
+                <>Response expected by <strong>{formatExpectedDate(responseDeadlineDate)}</strong></>
+              ) : (
+                "No response time on record for this agent yet."
+              )}
+            </div>
+          )}
 
           <FormField label="If no response">
             <BrandDropdown
