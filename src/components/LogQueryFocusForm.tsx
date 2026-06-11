@@ -47,8 +47,10 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
   const [responseDeadlineDate, setResponseDeadlineDate] = useState<string>("");
   const [ifNoResponseAction, setIfNoResponseAction] = useState<"nudge" | "close" | "nothing">("nudge");
   // Nudge timing — shown when "If no response" = nudge. Drives the nudgeDate calc in
-  // handleFormSubmit (week_before → −7d, day_before → −1d, on_deadline → the deadline itself).
-  const [nudgeReminderWhen, setNudgeReminderWhen] = useState<"week_before" | "day_before" | "on_deadline">("week_before");
+  // handleFormSubmit (week_before → −7d, day_before → −1d, on_deadline → the deadline itself,
+  // custom → the date the user picks in customNudgeDate).
+  const [nudgeReminderWhen, setNudgeReminderWhen] = useState<"week_before" | "day_before" | "on_deadline" | "custom">("week_before");
+  const [customNudgeDate, setCustomNudgeDate] = useState<string>("");
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
@@ -66,6 +68,7 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
       setResponseDeadlineDate("");
       setIfNoResponseAction("nudge");
       setNudgeReminderWhen("week_before");
+      setCustomNudgeDate("");
       setFormError(null);
       setIsSubmitting(false);
     }
@@ -125,16 +128,22 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
     setIsSubmitting(true);
     setFormError(null);
 
-    // Calc custom nudgeDate if selected
+    // Calc nudgeDate when a reminder is wanted. Presets are relative to the response deadline
+    // (week_before −7d / day_before −1d / on_deadline = the deadline); "custom" uses the exact
+    // date the user picked in the BrandDatePicker — fed into the same nudgeDate value.
     let nudgeDate: string | undefined = undefined;
-    if (ifNoResponseAction === "nudge" && responseDeadlineDate) {
-      const d = new Date(responseDeadlineDate);
-      if (nudgeReminderWhen === "week_before") {
-        d.setDate(d.getDate() - 7);
-      } else if (nudgeReminderWhen === "day_before") {
-        d.setDate(d.getDate() - 1);
+    if (ifNoResponseAction === "nudge") {
+      if (nudgeReminderWhen === "custom") {
+        if (customNudgeDate) nudgeDate = new Date(customNudgeDate).toISOString();
+      } else if (responseDeadlineDate) {
+        const d = new Date(responseDeadlineDate);
+        if (nudgeReminderWhen === "week_before") {
+          d.setDate(d.getDate() - 7);
+        } else if (nudgeReminderWhen === "day_before") {
+          d.setDate(d.getDate() - 1);
+        }
+        nudgeDate = d.toISOString();
       }
-      nudgeDate = d.toISOString();
     }
 
     // Combine materials list for the query record. Values use the app's canonical vocabulary
@@ -191,8 +200,9 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
   const manuscriptOptions = manuscripts.map((m) => ({ value: m.id, label: m.title }));
   const methodOptions = [
     { value: SubmissionMethod.EMAIL, label: "Email" },
-    { value: "Query Manager", label: "Query Manager" },
     { value: SubmissionMethod.ONLINE_FORM, label: "Online form" },
+    { value: SubmissionMethod.QUERY_MANAGER, label: "Query Manager" },
+    { value: SubmissionMethod.POST, label: "Post" },
   ];
   const ifNoResponseOptions = [
     { value: "nudge", label: "Remind me to send a nudge" },
@@ -203,6 +213,7 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
     { value: "week_before", label: "One week before the deadline" },
     { value: "day_before", label: "The day before the deadline" },
     { value: "on_deadline", label: "On the deadline" },
+    { value: "custom", label: "Set custom date" },
   ];
 
   return (
@@ -287,7 +298,22 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
               <BrandDropdown
                 value={nudgeReminderWhen}
                 options={nudgeWhenOptions}
-                onChange={(v) => setNudgeReminderWhen(v as "week_before" | "day_before" | "on_deadline")}
+                onChange={(v) => {
+                  const next = v as "week_before" | "day_before" | "on_deadline" | "custom";
+                  setNudgeReminderWhen(next);
+                  // Seed the custom picker with the response deadline as a sensible starting point.
+                  if (next === "custom" && !customNudgeDate) setCustomNudgeDate(responseDeadlineDate);
+                }}
+              />
+            </FormField>
+          )}
+
+          {ifNoResponseAction === "nudge" && nudgeReminderWhen === "custom" && (
+            <FormField label="Reminder date">
+              <BrandDatePicker
+                value={customNudgeDate}
+                onChange={setCustomNudgeDate}
+                placeholder="Pick a reminder date"
               />
             </FormField>
           )}

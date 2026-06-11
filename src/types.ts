@@ -82,6 +82,8 @@ export enum SubmissionStatus {
 export enum SubmissionMethod {
   EMAIL = "Email",
   ONLINE_FORM = "Online Form",
+  QUERY_MANAGER = "Query Manager",
+  POST = "Post",
 }
 
 export interface Agent {
