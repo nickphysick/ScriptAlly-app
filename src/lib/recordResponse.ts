@@ -31,10 +31,13 @@ import { QueryStatus, ActivityType } from "../types";
 
 /** Shape of the payload produced by RecordResponseModal.onSave. */
 export interface RecordResponseData {
-  responseType: "partial" | "full" | "rr" | "offer" | "rejected" | "close";
+  /** "queried" rolls a query back to Queried (a reversion) — clears response fields, appends no event. */
+  responseType: "queried" | "partial" | "full" | "rr" | "offer" | "rejected" | "close";
   materialsType: "Pages" | "Words" | "Chapters" | "Other";
   materialsQuantity: number;
   materialsOtherText: string;
+  /** Full Requested — which draft/version of the full the writer is sending (free text). */
+  fullVersionSent?: string;
   expectedBy: string;
   sendReminderDate: string;
   /** #4 — when the response actually arrived (defaults today, user-editable). Drives responseReceivedAt. */
@@ -79,6 +82,7 @@ export interface RecordResponseResult {
 }
 
 const STATUS_MAP: Record<string, QueryStatus> = {
+  queried: QueryStatus.QUERIED,
   partialRequested: QueryStatus.PARTIAL_REQUESTED,
   fullRequested: QueryStatus.FULL_REQUESTED,
   reviseAndResubmit: QueryStatus.REVISE_RESUBMIT,
@@ -148,12 +152,27 @@ export async function recordQueryResponse(
   let closingReason: string | undefined;
   let closingNotes: string | undefined;
 
-  if (data.responseType === "partial" || data.responseType === "full") {
-    selectedResponseType = data.responseType === "partial" ? "partialRequested" : "fullRequested";
+  let fullVersionSent: string | undefined;
+
+  if (data.responseType === "queried") {
+    // Reversion to Queried — clears every response field (all locals stay undefined → deleteField()).
+    selectedResponseType = "queried";
+  } else if (data.responseType === "partial") {
+    selectedResponseType = "partialRequested";
 
     materialsRequestedType = data.materialsType.toLowerCase();
     materialsRequestedQuantity =
       data.materialsType === "Other" ? data.materialsOtherText?.trim() : String(data.materialsQuantity ?? "").trim();
+
+    expectedSendDate = getTimestamp(data.expectedBy);
+    sendReminderDate = getTimestamp(data.sendReminderDate);
+  } else if (data.responseType === "full") {
+    // Full has no page count — it records which draft/version of the full is going out.
+    selectedResponseType = "fullRequested";
+
+    if (data.fullVersionSent && data.fullVersionSent.trim() !== "") {
+      fullVersionSent = data.fullVersionSent.trim();
+    }
 
     expectedSendDate = getTimestamp(data.expectedBy);
     sendReminderDate = getTimestamp(data.sendReminderDate);
@@ -223,10 +242,15 @@ export async function recordQueryResponse(
     updates.partialRequestedDate = new Date().toISOString();
   } else if (newStatus === QueryStatus.FULL_REQUESTED) {
     updates.fullRequestedDate = new Date().toISOString();
+  } else if (newStatus === QueryStatus.QUERIED) {
+    // Reversion to Queried clears the stage-entry dates left by any later response.
+    updates.partialRequestedDate = deleteField();
+    updates.fullRequestedDate = deleteField();
   }
 
   updates.materialsRequestedType = materialsRequestedType !== undefined ? materialsRequestedType : deleteField();
   updates.materialsRequestedQuantity = materialsRequestedQuantity !== undefined ? materialsRequestedQuantity : deleteField();
+  updates.fullVersionSent = fullVersionSent !== undefined ? fullVersionSent : deleteField();
   updates.expectedSendDate = expectedSendDate !== undefined ? expectedSendDate : deleteField();
   updates.sendReminderDate = sendReminderDate !== undefined ? sendReminderDate : deleteField();
 
@@ -271,14 +295,21 @@ export async function recordQueryResponse(
     if (materialsRequestedType) activityPayload.materialsType = materialsRequestedType;
     if (materialsRequestedQuantity) activityPayload.materialsQuantity = String(materialsRequestedQuantity);
   }
+  if (newStatus === QueryStatus.FULL_REQUESTED && fullVersionSent) {
+    activityPayload.fullVersionSent = fullVersionSent;
+  }
   if (newStatus === QueryStatus.REJECTED && rejectionFeedbackType) {
     activityPayload.feedbackType = rejectionFeedbackType;
   }
 
-  // 5. PRIMARY write — must succeed. Status + per-query timeline entry.
+  // A reversion to Queried removes the later response rather than recording a new event —
+  // it writes no per-query or global timeline entry (the caller pre-deletes the advanced ones).
+  const appendsActivity = data.responseType !== "queried";
+
+  // 5. PRIMARY write — must succeed. Status + (for real responses) the per-query timeline entry.
   try {
     await updateDoc(queryRef, updates);
-    await setDoc(activityDocRef, activityPayload);
+    if (appendsActivity) await setDoc(activityDocRef, activityPayload);
   } catch (err) {
     handleFirestoreError(err, OperationType.WRITE, `users/${userId}/queries/${queryId}`);
     throw err;
@@ -291,22 +322,25 @@ export async function recordQueryResponse(
   // also write the top-level `users/{uid}/activity` feed — the dashboard merges both collections
   // and de-dupes only on document id, so writing both produced two rows for one event.
   const legacyActivityRef = doc(collection(db, `users/${userId}/activities`));
-  let legacyWritten = true;
-  try {
-    const { description, details } = buildLegacyActivity(newStatus, agent);
-    await setDoc(legacyActivityRef, {
-      id: legacyActivityRef.id,
-      userId,
-      queryId,
-      manuscriptId: query.manuscriptId || "",
-      activityType: ActivityType.STATUS_CHANGED,
-      description,
-      date: new Date().toISOString(),
-      details,
-    });
-  } catch (err) {
-    console.error("Legacy activity write failed (non-fatal):", err);
-    legacyWritten = false;
+  let legacyWritten = false;
+  if (appendsActivity) {
+    try {
+      const { description, details } = buildLegacyActivity(newStatus, agent);
+      await setDoc(legacyActivityRef, {
+        id: legacyActivityRef.id,
+        userId,
+        queryId,
+        manuscriptId: query.manuscriptId || "",
+        activityType: ActivityType.STATUS_CHANGED,
+        description,
+        date: new Date().toISOString(),
+        details,
+      });
+      legacyWritten = true;
+    } catch (err) {
+      console.error("Legacy activity write failed (non-fatal):", err);
+      legacyWritten = false;
+    }
   }
 
   let agentRequeryUndo: { agentId: string; previous: any } | null = null;
@@ -332,6 +366,7 @@ export async function recordQueryResponse(
       fullRequestedDate: preSnapshot.fullRequestedDate ?? deleteField(),
       materialsRequestedType: preSnapshot.materialsRequestedType ?? deleteField(),
       materialsRequestedQuantity: preSnapshot.materialsRequestedQuantity ?? deleteField(),
+      fullVersionSent: preSnapshot.fullVersionSent ?? deleteField(),
       expectedSendDate: convertToTimestampOrDate(preSnapshot.expectedSendDate) ?? deleteField(),
       sendReminderDate: convertToTimestampOrDate(preSnapshot.sendReminderDate) ?? deleteField(),
       rrNotes: preSnapshot.rrNotes ?? deleteField(),

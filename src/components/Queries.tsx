@@ -28,6 +28,7 @@ import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { QueryStatus, Agent, Manuscript, Query, SubmissionMethod, ActivityType, QueryMaterial } from "../types";
 import { StatusPill, getStatusStyle, getStatusLabel, StatusCircle } from "./StatusPill";
 import { RecordResponseModal } from "./RecordResponseModal";
+import { RecordResponseFocusForm } from "./RecordResponseFocusForm";
 import { recordQueryResponse } from "../lib/recordResponse";
 import { formatQueryMaterial, materialLabel } from "../lib/materials";
 import { MaterialsEditor } from "./MaterialsEditor";
@@ -114,6 +115,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [isRecordResponseModalOpen, setIsRecordResponseModalOpen] = useState(false);
+  const [isRecordResponseFocusFormOpen, setIsRecordResponseFocusFormOpen] = useState(false);
 
   // Toast state for Undo
   const [undoToast, setUndoToast] = useState<{
@@ -2022,7 +2024,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 <div className="flex items-center gap-1.5 flex-1 justify-start">
                   {/* Record response button */}
                   <button
-                    onClick={() => setIsRecordResponseModalOpen(true)}
+                    onClick={() => setIsRecordResponseFocusFormOpen(true)}
                     className="h-[28px] bg-[#7c3a2a] hover:bg-[#6c3224] text-[#fffffd] flex items-center gap-1.5 px-3.5 rounded-full text-xs font-bold cursor-pointer transition-colors border-0 shrink-0 select-none"
                   >
                     <Check className="w-3.5 h-3.5 text-[#fffffd] stroke-[2.5]" />
@@ -3599,6 +3601,20 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
           undoFnRef.current = result.undo;
           triggerToast(result.toastConfig);
+        }}
+      />
+    )}
+
+    {activeQuery && activeAgent && (
+      <RecordResponseFocusForm
+        key={activeQuery.id}
+        isOpen={isRecordResponseFocusFormOpen}
+        onClose={() => setIsRecordResponseFocusFormOpen(false)}
+        query={activeQuery}
+        agent={activeAgent}
+        manuscript={{ title: activeMs?.title || "" }}
+        onSuccessToast={(msg) => {
+          triggerToast({ queryId: activeQuery.id, agentName: activeAgent.name, manuscriptTitle: activeMs?.title || "", responseStyle: msg });
         }}
       />
     )}

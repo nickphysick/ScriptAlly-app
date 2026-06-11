@@ -39,6 +39,8 @@ export interface FormShellProps {
   onSecondary?: () => void;
   /** When this changes, the scrollable field region resets to the top (e.g. on a step change). */
   scrollResetKey?: string | number;
+  /** Override the inner container's default max-width (440px) — e.g. for a two-column wide form. */
+  containerStyle?: React.CSSProperties;
 }
 
 const initialsFrom = (name: string): string =>
@@ -73,6 +75,7 @@ export const FormShell: React.FC<FormShellProps> = ({
   secondaryLabel,
   onSecondary,
   scrollResetKey,
+  containerStyle,
 }) => {
   const [confirmingDiscard, setConfirmingDiscard] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -113,7 +116,7 @@ export const FormShell: React.FC<FormShellProps> = ({
         if (e.target === e.currentTarget) requestClose();
       }}
     >
-      <div className="sa-overlay-inner">
+      <div className="sa-overlay-inner" style={{ transition: "max-width 0.28s ease", ...containerStyle }}>
         <div className="sa-form">
           <div className="sa-band">
             {cornerMotif && (

@@ -5,6 +5,8 @@ import "./forms.css";
 export interface BrandDropdownOption {
   value: string;
   label: string;
+  /** Optional icon rendered before the label in both the trigger and the menu. */
+  icon?: React.ReactNode;
 }
 
 export interface BrandDropdownProps {
@@ -68,7 +70,8 @@ export const BrandDropdown: React.FC<BrandDropdownProps> = ({
           }
         }}
       >
-        <span className={selected ? valueClassName : "sa-placeholder"}>
+        <span className={`flex items-center gap-1.5 ${selected ? valueClassName ?? "" : "sa-placeholder"}`}>
+          {selected?.icon}
           {selected ? selected.label : placeholder}
         </span>
         <svg
@@ -98,7 +101,7 @@ export const BrandDropdown: React.FC<BrandDropdownProps> = ({
               setOpen(false);
             }}
           >
-            <span>{o.label}</span>
+            <span className="flex items-center gap-1.5">{o.icon}{o.label}</span>
             <span className="sa-tick">✓</span>
           </div>
         ))}

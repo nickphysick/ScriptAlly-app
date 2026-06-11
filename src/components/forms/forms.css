@@ -519,3 +519,101 @@
   from { opacity: 0; transform: translateY(-4px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* ── Two-column form body (Record a Response wide mode) ─────────────────── */
+.sa-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 560px) {
+  .sa-two-col { grid-template-columns: 1fr; gap: 0; }
+}
+.sa-col2-head {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: #5a6e58;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 0.5px solid rgba(90, 110, 88, 0.2);
+}
+.sa-notspec-link {
+  display: block;
+  width: 100%;
+  text-align: right;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px; color: #9c8878;
+  text-decoration: underline; text-underline-offset: 2px;
+  cursor: pointer;
+  /* pull up close beneath the picker (its field carries 14px), leaving a few px gap */
+  margin-top: -10px; margin-bottom: 14px;
+  background: none; border: 0;
+  transition: color 0.14s;
+}
+.sa-notspec-link:hover { color: #7c3a2a; }
+.sa-notspec-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: 'Inter', sans-serif; font-size: 11.5px; color: #9c8878;
+  margin-bottom: 6px;
+}
+.sa-notspec-badge button {
+  background: none; border: none; cursor: pointer;
+  font-size: 13px; color: #c9a89e; line-height: 1;
+  padding: 0 2px; transition: color 0.14s;
+}
+.sa-notspec-badge button:hover { color: #7c3a2a; }
+.sa-chip-row { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+.sa-chip {
+  cursor: pointer; padding: 7px 12px;
+  font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 500;
+  border-radius: 20px;
+  border: 0.5px solid #e0d5c8;
+  background: #fff; color: #6a5045;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.sa-chip:hover { border-color: #c9a89e; }
+.sa-chip.active { background: #7c3a2a; border-color: #7c3a2a; color: #f5ede8; }
+.sa-chip.active:hover { background: #5a2a1e; }
+.sa-muted-note {
+  font-family: 'Inter', sans-serif; font-size: 11.5px;
+  color: #a08070; font-style: italic; margin-bottom: 14px; line-height: 1.4;
+}
+.sa-yn-row { display: flex; gap: 8px; margin-bottom: 14px; }
+.sa-yn-btn {
+  flex: 1; padding: 9px; text-align: center;
+  font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500;
+  border: 0.5px solid #e0d5c8; border-radius: 10px;
+  background: #fff; color: #6a5045; cursor: pointer; transition: all 0.15s;
+}
+.sa-yn-btn:hover { border-color: #c9a89e; }
+.sa-yn-btn.yes.active { background: #5a6e58; border-color: #5a6e58; color: #fff; }
+.sa-yn-btn.no.active  { background: #e8e8e8; border-color: #b0b0b0; color: #444; }
+.sa-quiet-note {
+  font-family: 'Inter', sans-serif; font-size: 11px;
+  color: #a08070; margin-bottom: 14px; line-height: 1.45;
+}
+.sa-backward-confirm {
+  background: #fff8f0; border: 0.5px solid #e8c8a0; border-radius: 10px;
+  padding: 12px 14px; margin-bottom: 14px;
+}
+.sa-backward-confirm p {
+  font-family: 'Inter', sans-serif; font-size: 12.5px; color: #5a3010;
+  line-height: 1.45; margin-bottom: 10px;
+}
+.sa-backward-confirm-actions { display: flex; gap: 8px; }
+.sa-backward-yes {
+  cursor: pointer; padding: 7px 16px; border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 500;
+  background: #f5ddc0; border: 0.5px solid #e0b878; color: #7c4010;
+  transition: all 0.15s;
+}
+.sa-backward-yes:hover { background: #f0d0a0; }
+.sa-backward-no {
+  cursor: pointer; padding: 7px 12px; border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  background: none; border: 0.5px solid #e0d5c8; color: #9c8878;
+  transition: all 0.15s;
+}
+.sa-backward-no:hover { border-color: #c9a89e; color: #5a3010; }
