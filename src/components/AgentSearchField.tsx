@@ -34,6 +34,17 @@ interface AgentSearchFieldProps {
   onSelect: (agent: Agent) => void;
   /** Title of the manuscript the queried tags reflect — only passed when >1 manuscript exists. */
   manuscriptLabel?: string;
+  /**
+   * Creates a schema-compatible agent from the quick-add panel and returns it for selection.
+   * The caller fills the defaults for every omitted required field. When absent, quick-add is hidden.
+   */
+  onCreateAgent?: (draft: {
+    name: string;
+    agency: string;
+    email: string;
+    responseTimeWeeks?: number;
+    starRating?: number;
+  }) => Promise<{ ok: boolean; error?: string; agent?: Agent }>;
 }
 
 type AgentGroup = { header: string | null; dim?: boolean; rows: Agent[] };
@@ -44,11 +55,21 @@ export const AgentSearchField: React.FC<AgentSearchFieldProps> = ({
   queriedAgentIds,
   onSelect,
   manuscriptLabel,
+  onCreateAgent,
 }) => {
   const [open, setOpen] = useState(false);
   const [queryText, setQueryText] = useState("");
   const [groupByRating, setGroupByRating] = useState(false);
   const [hl, setHl] = useState(0); // highlighted result index (keyboard nav)
+  // ── Inline quick-add ──
+  const [showQuickAdd, setShowQuickAdd] = useState(false);
+  const [qaName, setQaName] = useState("");
+  const [qaAgency, setQaAgency] = useState("");
+  const [qaEmail, setQaEmail] = useState("");
+  const [qaWeeks, setQaWeeks] = useState("");
+  const [qaRating, setQaRating] = useState(3);
+  const [qaSaving, setQaSaving] = useState(false);
+  const [qaError, setQaError] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   // Anchor the results menu with position:fixed (escapes FormShell's scroll-region clip).
@@ -119,6 +140,48 @@ export const AgentSearchField: React.FC<AgentSearchFieldProps> = ({
     setQueryText("");
   };
 
+  const openQuickAdd = (prefillName: string) => {
+    setQaName(prefillName.trim());
+    setQaAgency("");
+    setQaEmail("");
+    setQaWeeks("");
+    setQaRating(3);
+    setQaError(null);
+    setOpen(false);
+    setShowQuickAdd(true);
+  };
+
+  const submitQuickAdd = async () => {
+    if (!onCreateAgent) return;
+    if (!qaName.trim()) {
+      setQaError("Please enter the agent's name.");
+      return;
+    }
+    setQaError(null);
+    setQaSaving(true);
+    try {
+      const weeks = qaWeeks.trim() === "" ? undefined : parseInt(qaWeeks, 10);
+      const res = await onCreateAgent({
+        name: qaName,
+        agency: qaAgency,
+        email: qaEmail,
+        responseTimeWeeks: Number.isFinite(weeks as number) ? (weeks as number) : undefined,
+        starRating: qaRating,
+      });
+      if (res.ok && res.agent) {
+        onSelect(res.agent); // auto-select; deadline line + send method update off the new agent
+        setShowQuickAdd(false);
+        setQueryText("");
+      } else {
+        setQaError(res.error || "Couldn't add the agent — please try again.");
+      }
+    } catch (e: any) {
+      setQaError(e?.message || "Couldn't add the agent — please try again.");
+    } finally {
+      setQaSaving(false);
+    }
+  };
+
   const onKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown") {
       e.preventDefault();
@@ -148,52 +211,126 @@ export const AgentSearchField: React.FC<AgentSearchFieldProps> = ({
     <div className="sa-ag" ref={ref}>
       <div className="sa-ag-labelrow">
         <span className="sa-label sa-ag-label">Agent</span>
-        <button
-          type="button"
-          className={`sa-ag-toggle${groupByRating ? " on" : ""}`}
-          aria-pressed={groupByRating}
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={() => setGroupByRating((v) => !v)}
-        >
-          <span className="sa-ag-tick">✓</span> group by rating
-        </button>
+        {!showQuickAdd && (
+          <button
+            type="button"
+            className={`sa-ag-toggle${groupByRating ? " on" : ""}`}
+            aria-pressed={groupByRating}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => setGroupByRating((v) => !v)}
+          >
+            <span className="sa-ag-tick">✓</span> group by rating
+          </button>
+        )}
       </div>
 
-      <input
-        ref={triggerRef}
-        className="sa-input"
-        style={{ marginBottom: open ? 0 : 14 }}
-        placeholder="Search by name or agency…"
-        role="combobox"
-        aria-expanded={open}
-        aria-autocomplete="list"
-        value={open ? queryText : selectedAgent ? selectedAgent.name : ""}
-        onFocus={() => {
-          setOpen(true);
-          setQueryText("");
-        }}
-        onChange={(e) => {
-          setQueryText(e.target.value);
-          setOpen(true);
-        }}
-        onKeyDown={onKeyDown}
-        // Closes on blur (e.g. Tab away). Result rows preventDefault on mousedown so a click on a
-        // result keeps focus and isn't swallowed by this blur.
-        onBlur={() => setOpen(false)}
-      />
-
-      {open && (
-        <div className="sa-ag-menu" ref={menuRef} style={menuStyle} onMouseDown={(e) => e.preventDefault()}>
-          {manuscriptLabel && (
-            <div className="sa-ag-readout">
-              Query history shown for: <strong>{manuscriptLabel}</strong>
+      {showQuickAdd ? (
+        <div className="sa-qa">
+          <div className="sa-qa-head">Add a new agent</div>
+          <input
+            className="sa-input"
+            autoFocus
+            placeholder="Agent name"
+            value={qaName}
+            onChange={(e) => setQaName(e.target.value)}
+          />
+          <input className="sa-input" placeholder="Agency" value={qaAgency} onChange={(e) => setQaAgency(e.target.value)} />
+          <input
+            className="sa-input"
+            placeholder="Email (optional)"
+            value={qaEmail}
+            onChange={(e) => setQaEmail(e.target.value)}
+          />
+          <div className="sa-row2">
+            <input
+              className="sa-input"
+              inputMode="numeric"
+              placeholder="Response wks (optional)"
+              value={qaWeeks}
+              onChange={(e) => setQaWeeks(e.target.value.replace(/[^0-9]/g, ""))}
+            />
+            <div className="sa-qa-rating" role="radiogroup" aria-label="Star rating">
+              {[1, 2, 3, 4, 5].map((s) => (
+                <span
+                  key={s}
+                  role="radio"
+                  aria-checked={qaRating === s}
+                  className={`sa-qa-star${qaRating >= s ? " on" : ""}`}
+                  onClick={() => setQaRating(s)}
+                >
+                  ★
+                </span>
+              ))}
             </div>
+          </div>
+          {qaError && <div className="sa-error">{qaError}</div>}
+          <div className="sa-qa-actions">
+            <button type="button" className="sa-qa-cancel" onClick={() => setShowQuickAdd(false)}>
+              Cancel
+            </button>
+            <button type="button" className="sa-qa-add" disabled={qaSaving} onClick={submitQuickAdd}>
+              {qaSaving ? "Adding…" : "Add & select"}
+            </button>
+          </div>
+          <div className="sa-qa-note">
+            Just the basics — add genres, MSWL, and submission details later from the agent's page.
+          </div>
+        </div>
+      ) : (
+        <>
+          <input
+            ref={triggerRef}
+            className="sa-input"
+            style={{ marginBottom: 8 }}
+            placeholder="Search by name or agency…"
+            role="combobox"
+            aria-expanded={open}
+            aria-autocomplete="list"
+            value={open ? queryText : selectedAgent ? selectedAgent.name : ""}
+            onFocus={() => {
+              setOpen(true);
+              setQueryText("");
+            }}
+            onChange={(e) => {
+              setQueryText(e.target.value);
+              setOpen(true);
+            }}
+            onKeyDown={onKeyDown}
+            // Closes on blur (e.g. Tab away). Result rows preventDefault on mousedown so a click on a
+            // result keeps focus and isn't swallowed by this blur.
+            onBlur={() => setOpen(false)}
+          />
+
+          {onCreateAgent && (
+            <button
+              type="button"
+              className="sa-ag-addlink"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => openQuickAdd(queryText)}
+            >
+              Agent not listed? <span>Add a new agent now</span>
+            </button>
           )}
 
-          {groups.length === 0 ? (
-            <div className="sa-ag-empty">No agents match{queryText ? ` "${queryText}"` : ""}.</div>
-          ) : (
-            groups.map((g, gi) => (
+          {open && (
+            <div className="sa-ag-menu" ref={menuRef} style={menuStyle} onMouseDown={(e) => e.preventDefault()}>
+              {manuscriptLabel && (
+                <div className="sa-ag-readout">
+                  Query history shown for: <strong>{manuscriptLabel}</strong>
+                </div>
+              )}
+
+              {groups.length === 0 ? (
+                <div className="sa-ag-empty">
+                  No agents match{queryText ? ` "${queryText}"` : ""}.
+                  {onCreateAgent && (
+                    <button type="button" className="sa-ag-empty-add" onClick={() => openQuickAdd(queryText)}>
+                      + Add {queryText ? `"${queryText}"` : "a new agent"}
+                    </button>
+                  )}
+                </div>
+              ) : (
+                groups.map((g, gi) => (
               <div key={gi} className={g.dim ? "sa-ag-group-dim" : undefined}>
                 {g.header && <div className="sa-ag-grouphead">{g.header}</div>}
                 {g.rows.map((a) => {
@@ -221,7 +358,9 @@ export const AgentSearchField: React.FC<AgentSearchFieldProps> = ({
               </div>
             ))
           )}
-        </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

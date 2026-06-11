@@ -307,6 +307,52 @@
   font-family: 'Inter', sans-serif; font-size: 12.5px; color: #a08070; font-style: italic;
   padding: 12px 10px; text-align: center;
 }
+.sa-ag-empty-add {
+  display: inline-block; margin-top: 9px; cursor: pointer; font-style: normal;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.03em;
+  background: #f5e2da; color: #7c3a2a; border: 0.5px solid #e8c8bc; border-radius: 8px;
+  padding: 7px 12px; transition: all 0.15s;
+}
+.sa-ag-empty-add:hover { background: #efd5ca; border-color: #d8a89a; }
+
+/* persistent "Agent not listed?" link beneath the field */
+.sa-ag-addlink {
+  cursor: pointer; display: block; text-align: left;
+  background: none; border: 0; padding: 0; margin: 0 0 14px;
+  font-family: 'Inter', sans-serif; font-size: 11.5px; color: #a08070;
+}
+.sa-ag-addlink span { color: #7c3a2a; font-weight: 500; text-decoration: underline; }
+.sa-ag-addlink:hover span { color: #5a2a1e; }
+
+/* inline quick-add agent panel */
+.sa-qa { border: 0.5px solid #ece0d4; border-radius: 10px; background: #fbf6f0; padding: 12px; margin-bottom: 14px; }
+.sa-qa-head {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em;
+  color: #9c8878; margin-bottom: 9px;
+}
+.sa-qa .sa-input { margin-bottom: 9px; }
+.sa-qa .sa-row2 { margin-bottom: 9px; }
+.sa-qa-rating { display: flex; align-items: center; gap: 3px; }
+.sa-qa-star { cursor: pointer; font-size: 18px; color: #e0d5c8; transition: color 0.12s; line-height: 1; }
+.sa-qa-star.on { color: #c99a4e; }
+.sa-qa-actions { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 2px; }
+.sa-qa-cancel {
+  cursor: pointer; background: none; border: 0; padding: 8px 10px;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em;
+  color: #9c8878;
+}
+.sa-qa-cancel:hover { color: #7c3a2a; }
+.sa-qa-add {
+  cursor: pointer; padding: 9px 16px; border-radius: 9px;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 500; letter-spacing: 0.05em;
+  background: #f5e2da; color: #7c3a2a; border: 0.5px solid #e8c8bc; transition: all 0.18s;
+}
+.sa-qa-add:hover { background: #efd5ca; border-color: #d8a89a; }
+.sa-qa-add:disabled { opacity: 0.55; cursor: not-allowed; }
+.sa-qa-note {
+  font-family: 'Inter', sans-serif; font-size: 10.5px; font-style: italic; color: #a08070;
+  margin-top: 9px; line-height: 1.35;
+}
 
 /* "Response expected by" readout (Log a Query) — surfaces the single deadline calc */
 .sa-expect {

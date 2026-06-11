@@ -7,7 +7,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import Lottie from "lottie-react";
 import { Send } from "lucide-react";
 import { useScriptAllyDb } from "../lib/db";
-import { QueryStatus, Agent, SubmissionMethod, QueryMaterial } from "../types";
+import { QueryStatus, Agent, SubmissionMethod, SubmissionStatus, QueryMaterial } from "../types";
 import { FormShell, BrandDropdown, BrandDatePicker, FormField } from "./forms";
 import { MaterialsEditor } from "./MaterialsEditor";
 import { AgentSearchField } from "./AgentSearchField";
@@ -39,7 +39,7 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
   onClose,
   onSuccessToast,
 }) => {
-  const { manuscripts, agents, queries, addQuery } = useScriptAllyDb();
+  const { manuscripts, agents, queries, addQuery, addAgent, currentUser } = useScriptAllyDb();
 
   // ── Save-path state — read verbatim by handleFormSubmit (unchanged) ──
   const [selectedManuscriptId, setSelectedManuscriptId] = useState<string>("");
@@ -115,16 +115,57 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
     nudgeReminderWhen !== "week_before" ||
     customNudgeDate !== "";
 
-  const handleAgentChange = (agentId: string) => {
-    const agent = agents.find((a) => a.id === agentId) || null;
+  // Select an agent OBJECT directly (works for both the search list and a just-quick-added agent
+  // whose row may not be in `agents` state yet). Auto-populates the agent's default delivery method.
+  const handleAgentSelect = (agent: Agent | null) => {
     setSelectedAgent(agent);
     setFormError(null);
-    // Auto-populate the agent's default delivery method.
     if (agent) {
       setSendMethod(
         agent.submissionMethod === "Online Form" ? SubmissionMethod.ONLINE_FORM : SubmissionMethod.EMAIL
       );
     }
+  };
+
+  // Quick-add: build a SCHEMA-COMPATIBLE agent (full isValidAgent payload with sensible defaults for
+  // every omitted required field) so the agents database + its filters don't break. Returns the new
+  // agent for immediate selection. A blank response time → 0, which the "Response expected by" line
+  // surfaces as the "no response time yet" fallback. The Free-tier cap error bubbles up verbatim.
+  const handleCreateAgent = async (draft: {
+    name: string;
+    agency: string;
+    email: string;
+    responseTimeWeeks?: number;
+    starRating?: number;
+  }): Promise<{ ok: boolean; error?: string; agent?: Agent }> => {
+    const weeks = draft.responseTimeWeeks ?? 0;
+    const rating = (draft.starRating ?? 3) as 1 | 2 | 3 | 4 | 5;
+    const payload = {
+      name: draft.name.trim(),
+      agency: draft.agency.trim(),
+      email: draft.email.trim(),
+      website: "",
+      genres: [] as string[],
+      mswlNotes: "",
+      starRating: rating,
+      submissionStatus: SubmissionStatus.OPEN,
+      responseTimeWeeks: weeks,
+      noResponseMeansNo: false,
+      submissionMethod: SubmissionMethod.EMAIL,
+      materialsWanted: ["Query Letter"],
+      notes: "",
+      agentNotes: "",
+    };
+    const result = await addAgent(payload);
+    if (!result.success || !result.id) return { ok: false, error: result.error };
+    const agent: Agent = {
+      ...payload,
+      id: result.id,
+      userId: currentUser?.id || "",
+      dateAdded: new Date().toISOString(),
+      lastCheckedDate: new Date().toISOString(),
+    };
+    return { ok: true, agent };
   };
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -264,8 +305,9 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
             agents={agents}
             value={selectedAgent?.id || ""}
             queriedAgentIds={queriedAgentIds}
-            onSelect={(a) => handleAgentChange(a.id)}
+            onSelect={handleAgentSelect}
             manuscriptLabel={manuscriptLabel}
+            onCreateAgent={handleCreateAgent}
           />
 
           <FormField label="Manuscript">
