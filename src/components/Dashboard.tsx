@@ -6353,7 +6353,7 @@ export const Dashboard: React.FC<{
               submissionMethod: (ag as any)?.submissionMethod || "Email"
             }}
             manuscript={{ title: ms?.title || "" }}
-            materialsOriginallySent={(q as any)?.materialsWanted || []}
+            materialsOriginallySent={q?.materialsWanted || []}
             onNavigate={onNavigate}
             onSave={async (data) => {
               if (!currentUser) throw new Error("No user session active.");

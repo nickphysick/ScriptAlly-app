@@ -15,8 +15,9 @@ import {
   ArrowRight,
   ChevronLeft
 } from "lucide-react";
-import { Query, QueryStatus, SubmissionMethod } from "../types";
+import { Query, QueryStatus, SubmissionMethod, QueryMaterial } from "../types";
 import { StatusPill } from "./StatusPill";
+import { formatQueryMaterial } from "../lib/materials";
 
 export interface RecordResponseModalProps {
   isOpen: boolean;
@@ -24,7 +25,7 @@ export interface RecordResponseModalProps {
   query: Query;
   agent: { name: string; agency: string; responseTimeWeeks: number; submissionMethod: string };
   manuscript: { title: string };
-  materialsOriginallySent: string[];
+  materialsOriginallySent: (string | QueryMaterial)[];
   onSave: (data: {
     responseType: "partial" | "full" | "rr" | "offer" | "rejected" | "close";
     materialsType: "Pages" | "Words" | "Chapters" | "Other";
@@ -200,8 +201,8 @@ export const RecordResponseModal: React.FC<RecordResponseModalProps> = ({
   };
 
   // Helper rendering materials checklist helper display
-  const materialsString = materialsOriginallySent && materialsOriginallySent.length > 0 
-    ? materialsOriginallySent.join(", ")
+  const materialsString = materialsOriginallySent && materialsOriginallySent.length > 0
+    ? materialsOriginallySent.map(formatQueryMaterial).join(", ")
     : "Query Letter";
 
   // Dynamic Border Accent based on Screens

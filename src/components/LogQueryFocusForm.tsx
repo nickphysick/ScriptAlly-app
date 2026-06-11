@@ -7,8 +7,9 @@ import React, { useState, useEffect } from "react";
 import Lottie from "lottie-react";
 import { Send } from "lucide-react";
 import { useScriptAllyDb } from "../lib/db";
-import { QueryStatus, Agent, SubmissionMethod } from "../types";
+import { QueryStatus, Agent, SubmissionMethod, QueryMaterial } from "../types";
 import { FormShell, BrandDropdown, BrandDatePicker, FormField } from "./forms";
+import { MaterialsEditor } from "./MaterialsEditor";
 import planeAnimation from "../assets/query-plane-animation.json";
 
 interface LogQueryFocusFormProps {
@@ -38,9 +39,10 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
   const [dateSent, setDateSent] = useState<string>("");
   const [sendMethod, setSendMethod] = useState<SubmissionMethod>(SubmissionMethod.EMAIL);
   const [personalizationNotes, setPersonalizationNotes] = useState<string>("");
-  const [queryLetterChecked, setQueryLetterChecked] = useState<boolean>(false);
-  const [synopsisChecked, setSynopsisChecked] = useState<boolean>(false);
-  const [samplePagesChecked, setSamplePagesChecked] = useState<boolean>(false);
+  // Materials actually sent — structured (type + quantity per material), written verbatim to
+  // materialsWanted. Each entry is a plain label when unquantified, or a QueryMaterial when it
+  // carries a type/quantity ("50 pages").
+  const [materialsSent, setMaterialsSent] = useState<(string | QueryMaterial)[]>([]);
   // Saved as packageId. The package browser is deferred; the field keeps its default so the
   // payload is unchanged (a query logged without a package saves packageId: "").
   const [selectedPackageId] = useState<string>("");
@@ -62,9 +64,7 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
       setDateSent(new Date().toISOString().split("T")[0]);
       setSendMethod(SubmissionMethod.EMAIL);
       setPersonalizationNotes("");
-      setQueryLetterChecked(false);
-      setSynopsisChecked(false);
-      setSamplePagesChecked(false);
+      setMaterialsSent([]);
       setResponseDeadlineDate("");
       setIfNoResponseAction("nudge");
       setNudgeReminderWhen("week_before");
@@ -146,13 +146,10 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
       }
     }
 
-    // Combine materials list for the query record. Values use the app's canonical vocabulary
-    // ("Query Letter" / "Synopsis" / "Sample Pages") so the screens that read materialsWanted
-    // (RecordResponseModal, the query detail, etc.) display and filter them consistently.
-    const materials: string[] = [];
-    if (queryLetterChecked) materials.push("Query Letter");
-    if (synopsisChecked) materials.push("Synopsis");
-    if (samplePagesChecked) materials.push("Sample Pages");
+    // Materials for the query record. Written verbatim from the structured editor: each entry is
+    // a canonical label ("Query Letter") or a QueryMaterial carrying type+quantity ("50 pages").
+    // Screens that read materialsWanted route every item through formatQueryMaterial.
+    const materials = materialsSent;
 
     // Persist the "if no response" choice in the existing ifNoResponse field/vocabulary used by
     // the query edit form, so both forms read/write the same field and the auto-close mechanism
@@ -254,23 +251,11 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
           </FormField>
 
           <FormField label="Materials sent">
-            <div className="sa-chips">
-              {[
-                { label: "Query Letter", on: queryLetterChecked, toggle: () => setQueryLetterChecked((v) => !v) },
-                { label: "Synopsis", on: synopsisChecked, toggle: () => setSynopsisChecked((v) => !v) },
-                { label: "Sample Pages", on: samplePagesChecked, toggle: () => setSamplePagesChecked((v) => !v) },
-              ].map((chip) => (
-                <div
-                  key={chip.label}
-                  className={`sa-chip${chip.on ? " sel" : ""}`}
-                  role="button"
-                  aria-pressed={chip.on}
-                  onClick={chip.toggle}
-                >
-                  {chip.label}
-                </div>
-              ))}
-            </div>
+            <MaterialsEditor
+              value={materialsSent}
+              onChange={setMaterialsSent}
+              palette={["Query Letter", "Synopsis", "Sample Pages"]}
+            />
           </FormField>
 
           <FormField label="Date sent">

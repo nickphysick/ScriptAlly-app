@@ -25,10 +25,12 @@ import {
   addDoc
 } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
-import { QueryStatus, Agent, Manuscript, Query, SubmissionMethod, ActivityType } from "../types";
+import { QueryStatus, Agent, Manuscript, Query, SubmissionMethod, ActivityType, QueryMaterial } from "../types";
 import { StatusPill, getStatusStyle, getStatusLabel, StatusCircle } from "./StatusPill";
 import { RecordResponseModal } from "./RecordResponseModal";
 import { recordQueryResponse } from "../lib/recordResponse";
+import { formatQueryMaterial, materialLabel } from "../lib/materials";
+import { MaterialsEditor } from "./MaterialsEditor";
 
 const normalizeStatus = (status: string | QueryStatus): QueryStatus => {
   if (!status) return QueryStatus.QUERIED;
@@ -68,43 +70,8 @@ import {
   Image as ImageIcon
 } from "lucide-react";
 
-function formatSubmissionMaterial(mat: string): string {
-  const norm = mat.toLowerCase().trim();
-  
-  if (norm === "query letter" || norm === "query" || norm.includes("query letter")) {
-    return "Query letter";
-  }
-  if (norm === "synopsis" || norm.includes("synopsis")) {
-    return "Synopsis";
-  }
-  
-  // Extract number from string, e.g. "First 50 pages" or "50 pages" or "3 chapters"
-  const numMatch = mat.match(/\d+[\d,.]*/);
-  const numStr = numMatch ? numMatch[0] : "";
-  
-  if (norm.includes("page")) {
-    return `First ${numStr || "50"} pages`;
-  }
-  if (norm.includes("chapter")) {
-    return `First ${numStr || "3"} chapters`;
-  }
-  if (norm.includes("word")) {
-    let formattedNum = numStr;
-    if (numStr && !numStr.includes(",")) {
-      const parsedNum = parseInt(numStr.replace(/[^0-9]/g, ""), 10);
-      if (!isNaN(parsedNum)) {
-        formattedNum = parsedNum.toLocaleString("en-GB");
-      }
-    }
-    return `First ${formattedNum || "3,000"} words`;
-  }
-  
-  // Truncate other text at 30 characters
-  if (mat.length > 30) {
-    return mat.substring(0, 30) + "...";
-  }
-  return mat;
-}
+// Materials are rendered through the single formatQueryMaterial helper (src/lib/materials.ts) —
+// the one place a material (legacy string or structured QueryMaterial) becomes display text.
 
 function formatWhatsAppDate(dateString: string): string {
   const d = new Date(dateString);
@@ -634,12 +601,14 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   const [editPersonalisationNotes, setEditPersonalisationNotes] = useState("");
   const [editResponseDeadline, setEditResponseDeadline] = useState("");
   const [editIfNoResponse, setEditIfNoResponse] = useState("Remind me to nudge");
-  const [editMaterials, setEditMaterials] = useState<string[]>([]);
+  const [editMaterials, setEditMaterials] = useState<(string | QueryMaterial)[]>([]);
+  // True once the user touches materials in this edit session. When false, handleSaveChanges
+  // omits materialsWanted entirely so an unrelated edit (or saving a legacy query) preserves the
+  // stored value verbatim — never downgrading structured quantities or "upgrading" legacy strings.
+  const [materialsTouched, setMaterialsTouched] = useState(false);
   const [editRejectionType, setEditRejectionType] = useState("Form rejection");
   const [editAgentComments, setEditAgentComments] = useState("");
   
-  const [showAddMaterialInput, setShowAddMaterialInput] = useState(false);
-  const [customMaterialText, setCustomMaterialText] = useState("");
   const [allAvailableMaterials, setAllAvailableMaterials] = useState<string[]>([
     "Query Letter", "Synopsis", "Sample Pages", "Full Manuscript"
   ]);
@@ -690,20 +659,22 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
       setEditResponseDeadline(activeQuery.responseDeadline ? activeQuery.responseDeadline.split("T")[0] : "");
       setEditIfNoResponse((activeQuery as any).ifNoResponse || "Remind me to nudge");
       
-      const queryMats = (activeQuery as any).materialsWanted || [];
-      const agentMats = activeAgent ? (
-        Array.isArray(activeAgent.materialsWanted) 
-          ? activeAgent.materialsWanted 
-          : []
-      ) : [];
-      
-      const combinedMats = Array.from(new Set([...queryMats, ...agentMats])) as string[];
-      setEditMaterials(queryMats.length > 0 ? queryMats : combinedMats);
-      
+      // Seed the editor from the query's own record (structured — preserves type/quantity) when
+      // it has one; otherwise fall back to the agent's requested materials as plain labels.
+      // materialsTouched starts false so an untouched save preserves the stored value verbatim.
+      const queryMats: (string | QueryMaterial)[] = activeQuery.materialsWanted || [];
+      const agentMats: string[] = activeAgent && Array.isArray(activeAgent.materialsWanted)
+        ? (activeAgent.materialsWanted as string[])
+        : [];
+      setEditMaterials(queryMats.length > 0 ? queryMats : agentMats);
+      setMaterialsTouched(false);
+
+      // Chip palette: the standard set plus any custom labels already present on the query/agent.
+      const presentLabels = [...queryMats.map(materialLabel), ...agentMats];
       const initialAvailable = Array.from(new Set([
         "Query Letter", "Synopsis", "Sample Pages", "Full Manuscript",
-        ...combinedMats
-      ])) as string[];
+        ...presentLabels
+      ]));
       setAllAvailableMaterials(initialAvailable);
 
       setEditRejectionType(activeQuery.rejectionType || "Form rejection");
@@ -876,7 +847,10 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     };
     
     updates.ifNoResponse = editIfNoResponse;
-    updates.materialsWanted = editMaterials;
+    // Only write materials if the user actually touched them this session. Otherwise omit the
+    // field — updateQuery merges, so the stored value (structured quantities, or a legacy
+    // string[]) is preserved verbatim rather than silently overwritten with bare labels.
+    if (materialsTouched) updates.materialsWanted = editMaterials;
 
     if ([QueryStatus.REJECTED, QueryStatus.WITHDRAWN].includes(activeQuery.status)) {
       updates.rejectionType = editRejectionType;
@@ -1127,7 +1101,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           : Array.isArray(ag?.materialsWanted)
             ? ag.materialsWanted
             : [];
-      const cleanMats = matsRaw.map((v: string) => formatSubmissionMaterial(v)).filter((v: string) => !!v);
+      const cleanMats = matsRaw.map((v: string | QueryMaterial) => formatQueryMaterial(v)).filter((v: string) => !!v);
       const materialsIncluded = cleanMats.join(", ");
 
       const personalisationNote = q.personalisationNotes || "";
@@ -2167,7 +2141,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                             year: "numeric"
                           }),
                           detail: `via ${sendMethodLabel}`,
-                          materials: queryMaterialsList.length > 0 ? queryMaterialsList.join(", ") : null,
+                          materials: queryMaterialsList.length > 0 ? queryMaterialsList.map(formatQueryMaterial).join(", ") : null,
                           expectedDate: null,
                           nudgeDate: null
                         });
@@ -3251,70 +3225,16 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                         </select>
                       </div>
 
-                      {/* Materials checklist Sent */}
+                      {/* Materials Sent — same structured editor as Log a Query, so editing never
+                          downgrades the recorded quantities. */}
                       <div>
                         <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1.5">Materials Sent</label>
-                        <div className="flex flex-wrap gap-1.5 mb-2">
-                          {allAvailableMaterials.map((mat) => {
-                            const isSelected = editMaterials.includes(mat);
-                            return (
-                              <button
-                                type="button"
-                                key={mat}
-                                onClick={() => {
-                                  if (isSelected) {
-                                    setEditMaterials(prev => prev.filter(m => m !== mat));
-                                  } else {
-                                    setEditMaterials(prev => [...prev, mat]);
-                                  }
-                                }}
-                                className={`py-1 px-2.5 rounded text-[10px] font-semibold flex items-center gap-1 transition-colors border cursor-pointer select-none leading-none ${
-                                  isSelected
-                                    ? "bg-[#FAF1EF] text-[#7c3a2a] border-emerald-200"
-                                    : "bg-stone-100 text-stone-400 border-stone-200"
-                                }`}
-                              >
-                                {isSelected && <CheckCircle className="w-2.5 h-2.5 text-[#7c3a2a]" />}
-                                <span>{mat}</span>
-                              </button>
-                            );
-                          })}
-                          <button
-                            type="button"
-                            onClick={() => setShowAddMaterialInput(true)}
-                            className="py-1 px-2 border border-dashed border-[#7c3a2a]/40 text-[#7c3a2a]/80 hover:text-[#7c3a2a] rounded text-[10px] font-semibold cursor-pointer"
-                          >
-                            + Add material
-                          </button>
-                        </div>
-
-                        {showAddMaterialInput && (
-                          <div className="flex gap-1.5 mt-1.5">
-                            <input
-                              type="text"
-                              value={customMaterialText}
-                              onChange={(e) => setCustomMaterialText(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                  e.preventDefault();
-                                  if (customMaterialText.trim()) {
-                                    const trimmed = customMaterialText.trim();
-                                    if (!allAvailableMaterials.includes(trimmed)) {
-                                      setAllAvailableMaterials(prev => [...prev, trimmed]);
-                                    }
-                                    if (!editMaterials.includes(trimmed)) {
-                                      setEditMaterials(prev => [...prev, trimmed]);
-                                    }
-                                    setCustomMaterialText("");
-                                    setShowAddMaterialInput(false);
-                                  }
-                                }
-                              }}
-                              className="flex-grow p-1.5 bg-white border border-[#EBDCD3] rounded text-[10px] focus:outline-[#7c3a2a]"
-                              placeholder="Type & hit Enter to add"
-                            />
-                          </div>
-                        )}
+                        <MaterialsEditor
+                          value={editMaterials}
+                          onChange={(next) => { setEditMaterials(next); setMaterialsTouched(true); }}
+                          palette={allAvailableMaterials}
+                          allowCustom
+                        />
                       </div>
 
                       {/* Rejection Details */}
@@ -3385,9 +3305,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                                 ? activeAgent.materialsWanted 
                                 : [];
                             if (mats && mats.length > 0) {
-                              return mats.map((mat: string, mIdx: number) => (
+                              return mats.map((mat: string | QueryMaterial, mIdx: number) => (
                                 <span key={mIdx} className="py-[3px] px-[10px] bg-[#FAF1EF] text-[#7c3a2a] rounded-full text-[11px] font-medium leading-none whitespace-nowrap shadow-3xs select-none">
-                                  {formatSubmissionMaterial(mat)}
+                                  {formatQueryMaterial(mat)}
                                 </span>
                               ));
                             }
@@ -3652,7 +3572,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         manuscript={{
           title: activeMs?.title || ""
         }}
-        materialsOriginallySent={(activeQuery as any)?.materialsWanted || []}
+        materialsOriginallySent={activeQuery?.materialsWanted || []}
         onNavigate={onNavigate}
         onSave={async (data) => {
           if (!currentUser) throw new Error("No user session active.");

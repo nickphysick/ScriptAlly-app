@@ -183,6 +183,26 @@
 .sa-chip:hover { border-color: #c9a89e; }
 .sa-chip.sel { background: #f5e2da; border-color: #e8c8bc; color: #7c3a2a; font-weight: 500; }
 
+/* materials editor — chips (above) plus a per-selected-material type + quantity row.
+   Additive to the locked system: a new field type, no existing rule changed. */
+.sa-chip-add { border-style: dashed; color: #7c3a2a; }
+.sa-mat-custom { width: 150px; margin-bottom: 0; padding: 7px 11px; }
+.sa-mat-rows { display: flex; flex-direction: column; gap: 8px; margin: -4px 0 14px; }
+.sa-mat-row {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 11px;
+  background: #fbf6f0;
+  border: 0.5px solid #ece0d4;
+  border-radius: 9px;
+}
+.sa-mat-row-label {
+  flex: 0 0 84px;
+  font-family: 'Inter', sans-serif; font-size: 12px; color: #7c3a2a; font-weight: 500;
+}
+.sa-mat-row .sa-dd { flex: 1; min-width: 0; }
+.sa-mat-row .sa-field { margin-bottom: 0; padding: 8px 11px; }
+.sa-mat-qty { width: 84px; flex-shrink: 0; margin-bottom: 0; padding: 8px 11px; text-align: right; }
+
 /* inline form error */
 .sa-error {
   font-family: 'Inter', sans-serif;

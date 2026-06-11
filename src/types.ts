@@ -139,6 +139,18 @@ export interface CommunityAgent {
   communityQueryCount: number;
 }
 
+/**
+ * A material sent with a query, recording WHAT was sent — not just a label.
+ * `type` + `quantity` turn "Sample Pages" into "50 pages" / "3 chapters" / "10,000 words".
+ * Stored alongside legacy plain-string entries in the same array (backward-compatible union);
+ * a structured item with no type/quantity is equivalent to its bare label.
+ */
+export interface QueryMaterial {
+  material: string; // canonical name, e.g. "Query Letter" | "Synopsis" | "Sample Pages"
+  type?: "pages" | "words" | "chapters" | "other";
+  quantity?: number | string; // number for pages/words/chapters; free text when type === "other"
+}
+
 export enum QueryStatus {
   QUERIED = "Queried",
   PARTIAL_REQUESTED = "Partial Requested",
@@ -165,7 +177,7 @@ export interface Query {
   nudgeDate?: string; // ISO String or date (when they plan to nudge)
   lastNudgeSentDate?: string; // ISO String when they actually nudged
   responseDeadline?: string; // Computed or explicit response expectation date (ISO String)
-  materialsWanted?: string[]; // Materials sent with the query, e.g. ["Query Letter", "Synopsis", "Sample Pages"]
+  materialsWanted?: (string | QueryMaterial)[]; // Materials sent with the query. Legacy entries are plain strings ("Sample Pages"); new entries are structured QueryMaterial ("50 pages"). Backward-compatible union — readers must route every item through formatQueryMaterial().
   ifNoResponse?: string; // Preference if no response by deadline: "Remind me to nudge" | "Mark as no response automatically" | "Do nothing"
   partialRequestedDate?: string;
   partialSentDate?: string;
