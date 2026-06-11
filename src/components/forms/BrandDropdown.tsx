@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useFixedMenu } from "./useFixedMenu";
 import "./forms.css";
 
 export interface BrandDropdownOption {
@@ -29,6 +30,8 @@ export const BrandDropdown: React.FC<BrandDropdownProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  // Anchor the menu with position:fixed so FormShell's scroll region can't clip it.
+  const { triggerRef, menuStyle } = useFixedMenu<HTMLDivElement>(open);
 
   useEffect(() => {
     if (!open) return;
@@ -52,6 +55,7 @@ export const BrandDropdown: React.FC<BrandDropdownProps> = ({
     <div className={`sa-dd${open ? " open" : ""}`} ref={ref}>
       <div
         className="sa-field"
+        ref={triggerRef}
         role="button"
         tabIndex={0}
         aria-haspopup="listbox"
@@ -82,7 +86,7 @@ export const BrandDropdown: React.FC<BrandDropdownProps> = ({
         </svg>
       </div>
 
-      <div className="sa-dd-menu" role="listbox">
+      <div className="sa-dd-menu" role="listbox" style={menuStyle}>
         {options.map((o) => (
           <div
             key={o.value}

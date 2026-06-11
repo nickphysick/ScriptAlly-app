@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./forms.css";
 
 export interface FormShellProps {
@@ -34,6 +34,11 @@ export interface FormShellProps {
    * exit without per-form wiring.
    */
   dirty?: boolean;
+  /** Optional left-aligned secondary footer action (e.g. "← Back" for a stepped form). */
+  secondaryLabel?: string;
+  onSecondary?: () => void;
+  /** When this changes, the scrollable field region resets to the top (e.g. on a step change). */
+  scrollResetKey?: string | number;
 }
 
 const initialsFrom = (name: string): string =>
@@ -65,8 +70,18 @@ export const FormShell: React.FC<FormShellProps> = ({
   submitting,
   onClose,
   dirty,
+  secondaryLabel,
+  onSecondary,
+  scrollResetKey,
 }) => {
   const [confirmingDiscard, setConfirmingDiscard] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Reset the field region to the top when the caller signals a phase change (e.g. a wizard step),
+  // so the next step never opens mid-scroll.
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: 0 });
+  }, [scrollResetKey]);
 
   // The single guarded exit shared by the Cancel action, Escape, and the backdrop: confirm first
   // when there's unsaved input, close silently when there isn't.
@@ -116,9 +131,11 @@ export const FormShell: React.FC<FormShellProps> = ({
             </div>
           </div>
 
-          <div className="sa-body">
+          <div className="sa-body" ref={scrollRef}>
             {children}
+          </div>
 
+          <div className="sa-footer">
             {confirmingDiscard ? (
               <div className="sa-discard" role="alertdialog" aria-label="Discard changes?">
                 <span className="sa-discard-msg">Discard your changes?</span>
@@ -141,6 +158,11 @@ export const FormShell: React.FC<FormShellProps> = ({
             ) : (
               <>
                 <div className="sa-btn-row">
+                  {onSecondary && (
+                    <button type="button" className="sa-footer-secondary" onClick={onSecondary}>
+                      {secondaryLabel}
+                    </button>
+                  )}
                   <button
                     type="button"
                     className="sa-btn"

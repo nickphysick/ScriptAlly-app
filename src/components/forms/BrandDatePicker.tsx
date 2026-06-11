@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useFixedMenu } from "./useFixedMenu";
 import "./forms.css";
 
 export interface BrandDatePickerProps {
@@ -37,6 +38,8 @@ const sameDay = (a: Date, b: Date) =>
 export const BrandDatePicker: React.FC<BrandDatePickerProps> = ({ value, onChange, placeholder = "Select a date" }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  // Anchor the calendar popover with position:fixed so FormShell's scroll region can't clip it.
+  const { triggerRef, menuStyle } = useFixedMenu<HTMLDivElement>(open);
 
   const selected = useMemo(() => fromISO(value), [value]);
   const today = useMemo(() => new Date(), []);
@@ -85,6 +88,7 @@ export const BrandDatePicker: React.FC<BrandDatePickerProps> = ({ value, onChang
     <div className={`sa-dp${open ? " open" : ""}`} ref={ref}>
       <div
         className="sa-field"
+        ref={triggerRef}
         role="button"
         tabIndex={0}
         aria-haspopup="dialog"
@@ -116,7 +120,7 @@ export const BrandDatePicker: React.FC<BrandDatePickerProps> = ({ value, onChang
         </svg>
       </div>
 
-      <div className="sa-dp-pop" role="dialog">
+      <div className="sa-dp-pop" role="dialog" style={{ ...menuStyle, minWidth: undefined }}>
         <div className="sa-dp-head">
           <div className="sa-dp-month">{MONTHS[view.getMonth()]} {view.getFullYear()}</div>
           <div className="sa-dp-nav">

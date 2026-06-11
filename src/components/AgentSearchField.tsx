@@ -13,6 +13,7 @@
  * Form-specific (not a Form 11 foundation primitive); styled with the shared sa- tokens.
  */
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useFixedMenu } from "./forms/useFixedMenu";
 import type { Agent } from "../types";
 
 const initialsOf = (name: string): string =>
@@ -50,6 +51,8 @@ export const AgentSearchField: React.FC<AgentSearchFieldProps> = ({
   const [hl, setHl] = useState(0); // highlighted result index (keyboard nav)
   const ref = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  // Anchor the results menu with position:fixed (escapes FormShell's scroll-region clip).
+  const { triggerRef, menuStyle } = useFixedMenu<HTMLInputElement>(open);
 
   const selectedAgent = agents.find((a) => a.id === value) || null;
   const isQueried = (a: Agent) => queriedAgentIds.has(a.id);
@@ -157,6 +160,7 @@ export const AgentSearchField: React.FC<AgentSearchFieldProps> = ({
       </div>
 
       <input
+        ref={triggerRef}
         className="sa-input"
         style={{ marginBottom: open ? 0 : 14 }}
         placeholder="Search by name or agency…"
@@ -179,7 +183,7 @@ export const AgentSearchField: React.FC<AgentSearchFieldProps> = ({
       />
 
       {open && (
-        <div className="sa-ag-menu" ref={menuRef} onMouseDown={(e) => e.preventDefault()}>
+        <div className="sa-ag-menu" ref={menuRef} style={menuStyle} onMouseDown={(e) => e.preventDefault()}>
           {manuscriptLabel && (
             <div className="sa-ag-readout">
               Query history shown for: <strong>{manuscriptLabel}</strong>

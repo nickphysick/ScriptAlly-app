@@ -17,7 +17,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 48px 24px 80px;
+  padding: 32px 24px;
   overflow-y: auto;
   background: rgba(40, 20, 14, 0.45);
   backdrop-filter: blur(2px);
@@ -27,6 +27,9 @@
 /* ── Shell ─────────────────────────────────────────────────────────────── */
 .sa-form {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  max-height: 85vh; /* cap: header + footer pin, only the field region scrolls */
   border-radius: 14px;
   background: #fdfaf5;
   box-shadow: 0 1px 2px rgba(58, 28, 20, 0.06), 0 6px 24px rgba(58, 28, 20, 0.1);
@@ -49,6 +52,7 @@
 /* ── Sage header band ──────────────────────────────────────────────────── */
 .sa-band {
   position: relative;
+  flex-shrink: 0; /* pinned header */
   overflow: hidden;
   background: linear-gradient(135deg, #dce0d9 0%, #d0d6cc 100%);
   border-radius: 8px 8px 0 0;
@@ -114,12 +118,33 @@
   margin-top: 1px;
 }
 
-/* ── Body ──────────────────────────────────────────────────────────────── */
+/* ── Body — the scroll region (header + footer pinned around it) ────────── */
 .sa-body {
   position: relative;
-  padding: 20px 22px 22px;
-  margin: 0 6px 6px;
+  flex: 1 1 auto;
+  min-height: 0; /* essential: lets the flex child shrink so overflow-y can scroll */
+  overflow-y: auto;
+  padding: 20px 22px 18px;
+  margin: 0 6px;
 }
+
+/* ── Footer — pinned actions (primary + optional secondary/back + cancel) ─ */
+.sa-footer {
+  flex-shrink: 0;
+  margin: 0 6px 6px;
+  padding: 12px 22px 14px;
+  border-top: 0.5px solid #efe5da;
+}
+.sa-footer-secondary {
+  position: absolute;
+  left: 0; top: 50%; transform: translateY(-50%);
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.05em;
+  color: #c9a89e; background: none; border: 0; padding: 4px 6px;
+  transition: color 0.15s;
+}
+.sa-footer-secondary:hover { color: #7c3a2a; }
 .sa-label {
   display: block;
   font-family: 'JetBrains Mono', monospace;
@@ -376,7 +401,7 @@
 .sa-dp-day.sel:hover { background: #5a2a1e; color: #f5ede8; }
 
 /* ── Centred soft-pink button ──────────────────────────────────────────── */
-.sa-btn-row { display: flex; justify-content: center; margin-top: 4px; }
+.sa-btn-row { position: relative; display: flex; justify-content: center; align-items: center; margin-top: 0; }
 .sa-btn {
   cursor: pointer;
   font-family: 'JetBrains Mono', monospace;

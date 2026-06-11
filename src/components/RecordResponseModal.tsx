@@ -211,13 +211,10 @@ export const RecordResponseModal: React.FC<RecordResponseModalProps> = ({
       submitting={step === 4 && isSaving}
       onClose={onClose}
       dirty={dirty}
+      secondaryLabel={step > 1 ? "← Back" : undefined}
+      onSecondary={step > 1 ? () => setStep(step - 1) : undefined}
+      scrollResetKey={step}
     >
-      {step > 1 && (
-        <button type="button" className="sa-back" onClick={() => setStep(step - 1)}>
-          ← Back
-        </button>
-      )}
-
       {/* STEP 1 — CONTEXT */}
       {step === 1 && (
         <div>
