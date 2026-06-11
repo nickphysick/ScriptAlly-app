@@ -75,6 +75,27 @@ async function testConnection() {
 }
 testConnection();
 
+/**
+ * Single source of truth for the MATERIALS_SENT activity description. Used by both
+ * updateQueryStatus (sequence skips + direct change) and recordMaterialsSent so the timeline
+ * wording can never diverge. A resubmission reads "Revised manuscript (v2) resubmitted to …".
+ */
+function materialsSentDescription(
+  targetStatus: QueryStatus,
+  agent: { name?: string; agency?: string } | undefined,
+  opts?: { resubmit?: boolean; round?: number }
+): string {
+  const name = agent?.name || "the agent";
+  const agency = agent?.agency || "agency";
+  if (opts?.resubmit) {
+    return `Revised manuscript (v${opts.round ?? 2}) resubmitted to ${name} at ${agency}`;
+  }
+  if (targetStatus === QueryStatus.PARTIAL_SENT) {
+    return `Partial manuscript sent to ${name} at ${agency}`;
+  }
+  return `Full manuscript sent to ${name} at ${agency}`;
+}
+
 function formatHumanDate(dateInput: string | Date | undefined): string {
   if (!dateInput) return "unknown date";
   const d = new Date(dateInput);
@@ -127,6 +148,20 @@ interface DbContextType {
   // Query Actions
   addQuery: (q: Omit<Query, "id" | "userId" | "status" | "dateSent" | "responseDeadline" | "nudgeDate"> & { status?: QueryStatus; dateSent?: string; id?: string }, bypassLimits?: boolean) => Promise<{ success: boolean; error?: string; id?: string }>;
   updateQueryStatus: (id: string, newStatus: QueryStatus, systemNotes?: string) => Promise<void>;
+  /**
+   * Writer-side "I've sent the materials" action (Partial Sent / Full Sent). Distinct from
+   * recording an agent response: it never stamps responseReceivedAt and never counts as a
+   * response. One MATERIALS_SENT activity is appended, reusing the same descriptions as
+   * updateQueryStatus. A Revise & Resubmit → Full Sent bumps the display-only revisionRound.
+   */
+  recordMaterialsSent: (args: {
+    queryId: string;
+    targetStatus: QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT;
+    sentDate: string; // ISO
+    isResubmit?: boolean;
+    responseDeadline?: string; // ISO — optional, set when the writer opts into a reminder
+    nudgeDate?: string; // ISO — optional, set when a nudge reminder is chosen
+  }) => Promise<void>;
   undoQueryStatus: (id: string, previousStatus: QueryStatus, newStatus: QueryStatus) => Promise<void>;
   updateQuery: (id: string, fields: Partial<Query>) => Promise<void>;
   
@@ -1731,7 +1766,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
             queryId,
             manuscriptId: targetQ.manuscriptId,
             activityType: ActivityType.MATERIALS_SENT,
-            description: `Partial manuscript sent to ${agent?.name || "the agent"} at ${agent?.agency || "agency"}`,
+            description: materialsSentDescription(QueryStatus.PARTIAL_SENT, agent),
             date: dateStr,
             details: `Expected a response by ${formattedDeadStr}`
           });
@@ -1751,7 +1786,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
             queryId,
             manuscriptId: targetQ.manuscriptId,
             activityType: ActivityType.MATERIALS_SENT,
-            description: `Full manuscript sent to ${agent?.name || "the agent"} at ${agent?.agency || "agency"}`,
+            description: materialsSentDescription(QueryStatus.FULL_SENT, agent),
             date: dateStr,
             details: `Expected a response by ${formattedDeadStr}`
           });
@@ -1770,14 +1805,14 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         detailsLine = `Respond by ${formattedDeadStr}`;
       } else if (newStatus === QueryStatus.PARTIAL_SENT) {
         activityType = ActivityType.MATERIALS_SENT;
-        desc = `Partial manuscript sent to ${agent?.name || "the agent"} at ${agent?.agency || "agency"}`;
+        desc = materialsSentDescription(QueryStatus.PARTIAL_SENT, agent);
         detailsLine = `Expected a response by ${formattedDeadStr}`;
       } else if (newStatus === QueryStatus.FULL_REQUESTED) {
         desc = `${agent?.name || "The agent"} at ${agent?.agency || "agency"} requested a full manuscript`;
         detailsLine = `Respond by ${formattedDeadStr}`;
       } else if (newStatus === QueryStatus.FULL_SENT) {
         activityType = ActivityType.MATERIALS_SENT;
-        desc = `Full manuscript sent to ${agent?.name || "the agent"} at ${agent?.agency || "agency"}`;
+        desc = materialsSentDescription(QueryStatus.FULL_SENT, agent);
         detailsLine = `Expected a response by ${formattedDeadStr}`;
       } else if (newStatus === QueryStatus.REVISE_RESUBMIT) {
         desc = `Revise & Resubmit request received from ${agent?.name || "the agent"} at ${agent?.agency || "agency"}`;
@@ -1839,6 +1874,85 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
            id: actId
          });
       }
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/queries/${queryId}`);
+    }
+  };
+
+  // Writer marks materials as sent (Partial/Full Sent). One atomic-ish write: status + the
+  // matching *SentDate + optional responseDeadline/nudgeDate + one MATERIALS_SENT activity.
+  // NOT a response: never touches responseReceivedAt and never increments the response count.
+  const recordMaterialsSent = async (args: {
+    queryId: string;
+    targetStatus: QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT;
+    sentDate: string;
+    isResubmit?: boolean;
+    responseDeadline?: string;
+    nudgeDate?: string;
+  }) => {
+    if (!currentUser) return;
+    const { queryId, targetStatus, sentDate, isResubmit, responseDeadline, nudgeDate } = args;
+    const targetQ = queries.find(q => q.id === queryId);
+    if (!targetQ) return;
+
+    const agent = agents.find(a => a.id === targetQ.agentId);
+    const sentISO = new Date(sentDate).toISOString();
+
+    // Display-only revision bump — only on a Revise & Resubmit being sent back as a full.
+    const newRound = isResubmit ? ((targetQ.revisionRound ?? 1) + 1) : undefined;
+
+    const qUpdates: Record<string, any> = { status: targetStatus };
+    if (targetStatus === QueryStatus.PARTIAL_SENT) qUpdates.partialSentDate = sentISO;
+    if (targetStatus === QueryStatus.FULL_SENT) qUpdates.fullSentDate = sentISO;
+    if (responseDeadline) qUpdates.responseDeadline = new Date(responseDeadline).toISOString();
+    if (nudgeDate) qUpdates.nudgeDate = new Date(nudgeDate).toISOString();
+    if (newRound !== undefined) qUpdates.revisionRound = newRound;
+
+    const description = materialsSentDescription(targetStatus, agent, {
+      resubmit: isResubmit,
+      round: newRound,
+    });
+    const details = responseDeadline ? `Expected a response by ${formatHumanDate(responseDeadline)}` : "";
+
+    const activity: Omit<Activity, "id"> = {
+      userId: currentUser.id,
+      queryId,
+      manuscriptId: targetQ.manuscriptId,
+      activityType: ActivityType.MATERIALS_SENT,
+      description,
+      date: sentISO,
+      details,
+    };
+
+    if (isOfflineMode) {
+      const updatedQueries = queries.map(q => (q.id === queryId ? { ...q, ...qUpdates } : q));
+      setQueries(updatedQueries);
+      saveToLocalStorage("queries", updatedQueries);
+      const newAct: Activity = { ...activity, id: "act-" + Math.random().toString(36).substr(2, 9) };
+      const finalActivities = [...activities, newAct];
+      setActivities(finalActivities);
+      saveToLocalStorage("activities", finalActivities);
+      return;
+    }
+
+    try {
+      await updateDoc(doc(db, "users", currentUser.id, "queries", queryId), qUpdates);
+      // Two stores, two surfaces (same split recordQueryResponse uses):
+      //  - the per-query `activity` subcollection feeds the reading-pane timeline (keyed on `type`)
+      //  - the global `activities` feed feeds the Dashboard.
+      // One logical event, one row on each surface — not a duplicate within a single timeline.
+      const manuscriptTitle = manuscripts.find(m => m.id === targetQ.manuscriptId)?.title || "";
+      const subRef = doc(collection(db, "users", currentUser.id, "queries", queryId, "activity"));
+      await setDoc(subRef, {
+        type: targetStatus,
+        createdAt: Timestamp.fromDate(new Date(sentISO)),
+        note: description,
+        queryId,
+        agentName: agent?.name || "The agent",
+        manuscriptTitle,
+      });
+      const actId = "act-" + Math.random().toString(36).substr(2, 9);
+      await setDoc(doc(db, "users", currentUser.id, "activities", actId), { ...activity, id: actId });
     } catch (e) {
       handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/queries/${queryId}`);
     }
@@ -2441,6 +2555,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         deleteAgent,
         addQuery,
         updateQueryStatus,
+        recordMaterialsSent,
         undoQueryStatus,
         updateQuery,
         addJournalEntry,

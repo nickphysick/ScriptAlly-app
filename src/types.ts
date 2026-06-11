@@ -197,6 +197,12 @@ export interface Query {
   rejectionReflection?: string; // private — never shown in stats
   rejectionLesson?: string; // "anything you'd do differently?" — private note to future self
   rejectedFromStatus?: QueryStatus; // the status held immediately before rejection (e.g. Full Sent → "full declined")
+
+  // Display-only revision counter, bumped when a Revise & Resubmit is sent back as a Full.
+  // DELIBERATELY separate from `status`: the "(v2)" marker is rendered from this, never folded
+  // into the status string, so every `status === FULL_SENT` comparison keeps working. Absent or
+  // 1 means the first/only send; >= 2 renders "Full sent (v2)" etc.
+  revisionRound?: number;
 }
 
 export enum ActivityType {
