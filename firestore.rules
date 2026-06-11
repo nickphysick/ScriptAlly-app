@@ -199,7 +199,9 @@ service cloud.firestore {
         && (data.get('personalisationNotes', null) == null || (data.personalisationNotes is string && data.personalisationNotes.size() <= 16384))
         && data.sendMethod is string && (
           data.sendMethod == 'Email' ||
-          data.sendMethod == 'Online Form'
+          data.sendMethod == 'Online Form' ||
+          data.sendMethod == 'Query Manager' ||
+          data.sendMethod == 'Post'
         )
         && (data.get('nudgeDate', null) == null || (data.nudgeDate is string && data.nudgeDate.size() <= 64))
         && (data.get('lastNudgeSentDate', null) == null || (data.lastNudgeSentDate is string && data.lastNudgeSentDate.size() <= 64))
