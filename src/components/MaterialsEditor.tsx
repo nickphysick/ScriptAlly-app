@@ -32,6 +32,12 @@ interface MaterialsEditorProps {
   palette?: string[];
   /** Allow adding an arbitrary custom material name. */
   allowCustom?: boolean;
+  /**
+   * Materials that take a type + quantity ("50 pages"). Only these get the quantity row —
+   * a synopsis or query letter is a whole document, so a quantity is meaningless for them.
+   * (Attaching the actual letter/synopsis file is a separate, future capability.)
+   */
+  quantifiable?: string[];
 }
 
 export const MaterialsEditor: React.FC<MaterialsEditorProps> = ({
@@ -39,7 +45,10 @@ export const MaterialsEditor: React.FC<MaterialsEditorProps> = ({
   onChange,
   palette = ["Query Letter", "Synopsis", "Sample Pages"],
   allowCustom = false,
+  quantifiable = ["Sample Pages"],
 }) => {
+  const isQuantifiable = (label: string) =>
+    quantifiable.some((q) => q.toLowerCase() === label.toLowerCase());
   const [showCustom, setShowCustom] = useState(false);
   const [customText, setCustomText] = useState("");
 
@@ -92,7 +101,9 @@ export const MaterialsEditor: React.FC<MaterialsEditorProps> = ({
     .map(materialLabel)
     .filter((l) => !palette.some((p) => p.toLowerCase() === l.toLowerCase()));
   const allChips = [...palette, ...extras];
-  const selectedChips = allChips.filter(isSelected);
+  // Only quantifiable materials (Sample Pages) get a type+quantity row; the others are
+  // whole documents and have no meaningful quantity.
+  const quantifiableSelected = allChips.filter((l) => isSelected(l) && isQuantifiable(l));
 
   return (
     <div>
@@ -140,9 +151,9 @@ export const MaterialsEditor: React.FC<MaterialsEditorProps> = ({
           ))}
       </div>
 
-      {selectedChips.length > 0 && (
+      {quantifiableSelected.length > 0 && (
         <div className="sa-mat-rows">
-          {selectedChips.map((label) => {
+          {quantifiableSelected.map((label) => {
             const { type, quantity } = detailOf(label);
             return (
               <div key={label} className="sa-mat-row">
