@@ -3,13 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Lottie from "lottie-react";
 import { Send } from "lucide-react";
 import { useScriptAllyDb } from "../lib/db";
 import { QueryStatus, Agent, SubmissionMethod, QueryMaterial } from "../types";
 import { FormShell, BrandDropdown, BrandDatePicker, FormField } from "./forms";
 import { MaterialsEditor } from "./MaterialsEditor";
+import { AgentSearchField } from "./AgentSearchField";
 import planeAnimation from "../assets/query-plane-animation.json";
 
 interface LogQueryFocusFormProps {
@@ -31,7 +32,7 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
   onClose,
   onSuccessToast,
 }) => {
-  const { manuscripts, agents, addQuery } = useScriptAllyDb();
+  const { manuscripts, agents, queries, addQuery } = useScriptAllyDb();
 
   // ── Save-path state — read verbatim by handleFormSubmit (unchanged) ──
   const [selectedManuscriptId, setSelectedManuscriptId] = useState<string>("");
@@ -83,6 +84,16 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
       setResponseDeadlineDate(targetDate.toISOString().split("T")[0]);
     }
   }, [selectedAgent, dateSent]);
+
+  // Agents already queried — scoped to the selected manuscript (per-manuscript "already queried");
+  // falls back to global only when no manuscript exists. Recomputes when the manuscript changes.
+  const queriedAgentIds = useMemo(() => {
+    const ids = new Set<string>();
+    queries.forEach((qq) => {
+      if (!selectedManuscriptId || qq.manuscriptId === selectedManuscriptId) ids.add(qq.agentId);
+    });
+    return ids;
+  }, [queries, selectedManuscriptId]);
 
   if (!isOpen) return null;
 
@@ -194,7 +205,9 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
   };
 
   // ── Presentation (Form 11 shell + foundation components) ──
-  const agentOptions = agents.map((a) => ({ value: a.id, label: a.name }));
+  // Manuscript the queried/not-queried tags reflect — only surfaced when there's more than one.
+  const manuscriptLabel =
+    manuscripts.length > 1 ? manuscripts.find((m) => m.id === selectedManuscriptId)?.title : undefined;
   const manuscriptOptions = manuscripts.map((m) => ({ value: m.id, label: m.title }));
   const methodOptions = [
     { value: SubmissionMethod.EMAIL, label: "Email" },
@@ -228,14 +241,13 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
       onClose={onClose}
       dirty={isDirty}
     >
-          <FormField label="Agent">
-            <BrandDropdown
-              value={selectedAgent?.id || ""}
-              options={agentOptions}
-              onChange={handleAgentChange}
-              placeholder="Search literary agents…"
-            />
-          </FormField>
+          <AgentSearchField
+            agents={agents}
+            value={selectedAgent?.id || ""}
+            queriedAgentIds={queriedAgentIds}
+            onSelect={(a) => handleAgentChange(a.id)}
+            manuscriptLabel={manuscriptLabel}
+          />
 
           <FormField label="Manuscript">
             <BrandDropdown
