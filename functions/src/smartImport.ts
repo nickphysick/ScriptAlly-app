@@ -40,6 +40,8 @@ export const smartImportMap = onCall(
         messages: [{ role: "user", content: sheetText }],
       });
     } catch (e) {
+      // Log the underlying cause (status, message) — the client only ever sees the generic error.
+      console.error("Anthropic mapping call failed:", e);
       throw new HttpsError("unavailable", "Couldn't read the file right now.");
     }
 
