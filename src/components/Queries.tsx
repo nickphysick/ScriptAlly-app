@@ -192,16 +192,6 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
       return;
     }
 
-    if (currentUser.id === "writer-pro-lucy") {
-      const q = queries.find(u => u.id === selectedQueryId);
-      setSelectedQuery(q || null);
-      if (unsubscribeRef.current) {
-        unsubscribeRef.current();
-        unsubscribeRef.current = null;
-      }
-      return;
-    }
-
     // Unsubscribe from previous listener if any
     if (unsubscribeRef.current) {
       unsubscribeRef.current();
@@ -227,11 +217,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         unsubscribeRef.current = null;
       }
     };
-  }, [currentUser?.id, selectedQueryId, queries]);
+  }, [currentUser?.id, selectedQueryId]);
 
   // Setup real-time listener for the query's activity subcollection (Fix 3)
   useEffect(() => {
-    if (!currentUser || !selectedQueryId || currentUser.id === "writer-pro-lucy") {
+    if (!currentUser || !selectedQueryId) {
       setTrackingEvents([]);
       return;
     }
@@ -255,7 +245,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
   // Run Part 1 & Part 6 cleanup/retrospective logic once on app load
   useEffect(() => {
-    if (!currentUser?.id || currentUser.id === "writer-pro-lucy") return;
+    if (!currentUser?.id) return;
 
     const runTimelineCleanup = async () => {
       try {

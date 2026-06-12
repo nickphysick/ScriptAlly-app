@@ -622,7 +622,7 @@ export const Dashboard: React.FC<{
   const [timelineItems, setTimelineItems] = useState<any[]>([]);
 
   useEffect(() => {
-    if (!currentUser?.id || currentUser.id === "writer-pro-lucy") {
+    if (!currentUser?.id) {
       setTimelineItems([]);
       return;
     }
