@@ -1702,6 +1702,14 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
               onSkip={handleSkip}
               onExit={() => { setBranchError(null); setFlow(null); }}
               onSaveBook={handleBranchBSaveBook}
+              manuscriptId={b2ManuscriptId}
+              defaultImport={queryingStage === "early" ? "byhand" : "smart"}
+              onAddByHand={() => { setFlow(null); goTo(5); }}
+              onOpenImportDesk={() => {
+                sessionStorage.setItem("scriptally_post_onboarding_tab", "import");
+                void finishOnboarding();
+              }}
+              onImportComplete={() => void finishOnboarding()}
               error={branchError}
             />
           </CenterWrap>
