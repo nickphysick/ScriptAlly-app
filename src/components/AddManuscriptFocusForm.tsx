@@ -24,7 +24,6 @@ interface AddManuscriptFocusFormProps {
   onSuccessToast: (message: string) => void;
 }
 
-// Predefined genre list from Add agent form
 export const AddManuscriptFocusForm: React.FC<AddManuscriptFocusFormProps> = ({
   isOpen,
   onClose,

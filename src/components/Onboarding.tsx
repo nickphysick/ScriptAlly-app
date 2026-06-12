@@ -8,6 +8,8 @@ import { motion, AnimatePresence } from "motion/react";
 import { useScriptAllyDb } from "../lib/db";
 import { ManuscriptStatus, SubmissionStatus, SubmissionMethod } from "../types";
 import { CreamUnderstood, Form11Card, BookMotif } from "./onboarding/chrome";
+import { BranchA, BranchAResult } from "./onboarding/BranchA";
+import { buildManuscriptPayload, manuscriptLimitError } from "../lib/manuscripts";
 import {
   BookOpen,
   Users,
@@ -114,7 +116,9 @@ const STAGE_TO_JOURNEY: Record<QueryingStage, "starting" | "querying" | "explori
   deep: "querying",
   interest: "querying",
 };
-// Distinct ScreenTransition keys per flow phase so the cross-fade fires on every branch step.
+// Distinct ScreenTransition keys per flow phase. Deliberately one key per BRANCH, not per branch
+// step — the key remounts ScreenTransition's child, so a per-step key would wipe the branch
+// component's internal state on every internal navigation.
 const FLOW_KEY: Record<"understood" | "A" | "B", number> = { understood: -2, A: 100, B: 200 };
 
 // Centres a screen in the full-height onboarding overlay.
@@ -444,19 +448,15 @@ const SelectField: React.FC<React.SelectHTMLAttributes<HTMLSelectElement>> = (pr
 
 // ─── Screen wrappers ──────────────────────────────────────────────────────────
 
+// Keyed enter-only fade between screens. Deliberately NO framer-motion here: exit-completion
+// callbacks don't reliably fire in this app (React 19 + motion), which either wedges the flow
+// (mode="wait"), stacks invisible exited screens over the live one (default mode), or fails to
+// swap the keyed child at all. A keyed plain div + CSS enter animation is fully robust.
 const ScreenTransition: React.FC<{ stepKey: number; children: React.ReactNode }> = ({ stepKey, children }) => (
-  <AnimatePresence mode="wait">
-    <motion.div
-      key={stepKey}
-      initial={{ opacity: 0, x: 10 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -10 }}
-      transition={{ duration: 0.28, ease: "easeOut" }}
-      style={{ width: "100%" }}
-    >
-      {children}
-    </motion.div>
-  </AnimatePresence>
+  <div key={stepKey} style={{ width: "100%", animation: "sa-screen-in 0.28s ease-out" }}>
+    <style>{`@keyframes sa-screen-in { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: none; } }`}</style>
+    {children}
+  </div>
 );
 
 const ModalCard: React.FC<{ step: number; children: React.ReactNode }> = ({ step, children }) => (
@@ -1426,7 +1426,7 @@ const Screen6Complete: React.FC<{
 // ─── Main Onboarding component ────────────────────────────────────────────────
 
 export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
-  const { currentUser, addManuscript, addAgent, updateUserProfile } = useScriptAllyDb();
+  const { currentUser, manuscripts, addManuscript, addAgent, updateUserProfile } = useScriptAllyDb();
 
   const STORAGE_KEY = `scriptally_onboarding_progress_${currentUser?.id || "anon"}`;
 
@@ -1450,8 +1450,6 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   // The post-welcome flow: null = on the welcome step (or the legacy resume), "understood" = the
   // cream transition beat, "A"/"B" = inside a branch. Branch C (exploring) exits immediately.
   const [flow, setFlow] = useState<"understood" | Branch | null>(null);
-  // Which screen within the active branch (set in the branch stages).
-  const [branchStep, setBranchStep] = useState(0);
   const [manuscriptTitle, setManuscriptTitle] = useState(saved.manuscriptTitle ?? "");
   const [manuscriptGenre, setManuscriptGenre] = useState(saved.manuscriptGenre ?? "");
   const [agentName, setAgentName] = useState(saved.agentName ?? "");
@@ -1478,18 +1476,23 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     saveProgress({ step: s });
   };
 
-  // Welcome step → cream "Understood" beat → the branch the chosen stage maps to. Continue persists
-  // both the granular stage and the collapsed journeyStage via the same updateUserProfile path that
-  // writes onboardingComplete.
-  const handleStageContinue = async () => {
+  // Fire-and-forget profile write. Onboarding must never await Firestore: a field missing from
+  // the rules' update allowlist is silently denied WITHOUT rejecting (see the affectedKeys
+  // gotcha), so an awaited write can hang the flow forever. Each field goes in its own write so
+  // one denied field can't take an allowed one down with it.
+  const persistProfile = (fields: Partial<Parameters<typeof updateUserProfile>[0]>) => {
+    Promise.resolve(updateUserProfile(fields)).catch((e) =>
+      console.error("Onboarding profile write failed:", fields, e)
+    );
+  };
+
+  // Welcome step → cream "Understood" beat → the branch the chosen stage maps to. Continue
+  // persists the granular stage and the collapsed journeyStage (separate writes, non-blocking).
+  const handleStageContinue = () => {
     if (!queryingStage) return;
     saveProgress({ queryingStage });
-    try {
-      await updateUserProfile({ queryingStage, journeyStage: STAGE_TO_JOURNEY[queryingStage] });
-    } catch (e) {
-      console.error("Failed to persist journey stage:", e);
-    }
-    setBranchStep(0);
+    persistProfile({ queryingStage });
+    persistProfile({ journeyStage: STAGE_TO_JOURNEY[queryingStage] });
     setFlow("understood");
   };
 
@@ -1505,17 +1508,71 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     return () => clearTimeout(t);
   }, [flow, queryingStage]);
 
+  // Save/limit error surfaced inside the active branch screen.
+  const [branchError, setBranchError] = useState<string | null>(null);
+
+  // The one manuscript writer for every onboarding branch (A3a, A3b, B2): shared payload shape +
+  // shared Free-tier limit check, then the same addManuscript the rest of the app uses.
+  const saveBranchManuscript = async (r: BranchAResult): Promise<boolean> => {
+    const limitErr = manuscriptLimitError(currentUser?.plan, manuscripts.length);
+    if (limitErr) {
+      setBranchError(limitErr);
+      return false;
+    }
+    setIsSubmitting(true);
+    try {
+      const res = await addManuscript(
+        buildManuscriptPayload({
+          title: r.fields.title.trim() || "Untitled manuscript",
+          genre: r.fields.genre,
+          subGenres: r.fields.subGenres,
+          ageCategory: r.fields.ageCategory,
+          wordCount: parseInt(r.fields.wordCount.replace(/\D/g, ""), 10) || 0,
+          logline: r.fields.strapline, // the strapline IS the logline
+          status: r.status,
+        })
+      );
+      if (!res.success) {
+        setBranchError(res.error || "Couldn't save the manuscript — try again.");
+        return false;
+      }
+      setBranchError(null);
+      setManuscriptTitle(r.fields.title);
+      saveProgress({ manuscriptTitle: r.fields.title, manuscriptGenre: r.fields.genre });
+      return true;
+    } catch (e) {
+      console.error("Onboarding manuscript save failed:", e);
+      setBranchError("Couldn't save the manuscript — try again.");
+      return false;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // A3a (Ready to Query / Revising): save, then continue to the existing agents step.
+  const handleBranchASaveReady = async (r: BranchAResult) => {
+    if (await saveBranchManuscript(r)) {
+      setFlow(null);
+      goTo(5);
+    }
+  };
+
+  // A3b (Still writing): save as Drafting, then finish onboarding straight into the agent
+  // database — research-first, no query pipeline yet.
+  const handleBranchAStillWriting = async (r: BranchAResult) => {
+    if (await saveBranchManuscript(r)) {
+      sessionStorage.setItem("scriptally_post_onboarding_tab", "agents");
+      await finishOnboarding();
+    }
+  };
+
   // The single completion path: mark onboardingComplete (+ optional journeyStage) and exit to the
-  // dashboard. Every "Skip setup" and every branch finish routes through here.
+  // dashboard. Every "Skip setup" and every branch finish routes through here. Writes are
+  // non-blocking (see persistProfile) so a denied field can never trap the exit.
   const finishOnboarding = async (extra?: { journeyStage?: "starting" | "querying" | "exploring" }) => {
     localStorage.removeItem(STORAGE_KEY);
-    try {
-      await updateUserProfile({ onboardingComplete: true, ...(extra || {}) });
-    } catch (e) {
-      // Never trap the user in onboarding if the profile write fails — the
-      // optimistic local update already advanced the gate; just log and exit.
-      console.error("Onboarding completion write failed:", e);
-    }
+    if (extra?.journeyStage) persistProfile({ journeyStage: extra.journeyStage });
+    persistProfile({ onboardingComplete: true });
     onComplete();
   };
 
@@ -1608,27 +1665,21 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       justifyContent: "center",
       overflowY: "auto",
     }}>
-      <ScreenTransition stepKey={flow ? FLOW_KEY[flow] + branchStep : step}>
+      <ScreenTransition stepKey={flow ? FLOW_KEY[flow] : step}>
         {flow === "understood" && (
           <CenterWrap><CreamUnderstood /></CenterWrap>
         )}
 
-        {/* Branch A — manuscript-led setup. Screens land in Stage 3. */}
+        {/* Branch A — manuscript-led setup: A2 readiness → A3a details / A3b still-writing. */}
         {flow === "A" && (
           <CenterWrap>
-            <Form11Card
-              dotIndex={1}
+            <BranchA
               onSkip={handleSkip}
-              pre="Your manuscript"
-              name="Where are you with it?"
-              sub="No wrong answer — it points us the right way"
-              motif={<BookMotif />}
-              onBack={() => setFlow(null)}
-              primaryLabel="Continue →"
-              onPrimary={() => {}}
-            >
-              <p style={{ fontFamily: FONT_SANS, fontSize: 13, color: C.muted }}>Branch A screens arrive next.</p>
-            </Form11Card>
+              onExit={() => { setBranchError(null); setFlow(null); }}
+              onSaveReady={(r) => void handleBranchASaveReady(r)}
+              onSaveStillWriting={(r) => void handleBranchAStillWriting(r)}
+              error={branchError}
+            />
           </CenterWrap>
         )}
 

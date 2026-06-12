@@ -95,6 +95,13 @@ function AppContent() {
           } catch (e) {
             console.error("Failed to persist onboardingComplete:", e);
           }
+          // Some branch exits land somewhere specific (e.g. A3b "Save & explore agents" → the
+          // agent database) rather than the default dashboard.
+          const dest = sessionStorage.getItem("scriptally_post_onboarding_tab");
+          if (dest) {
+            sessionStorage.removeItem("scriptally_post_onboarding_tab");
+            handleNavigate(dest);
+          }
         }}
       />
     );
