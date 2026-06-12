@@ -23,12 +23,24 @@ import { AddAgentFocusForm } from "./components/AddAgentFocusForm";
 import { AddManuscriptFocusForm } from "./components/AddManuscriptFocusForm";
 import { HelpCentre } from "./components/HelpCentre";
 import { Onboarding } from "./components/Onboarding";
+import { StatusDotDemo } from "./components/StatusDotDemo";
 import { Palette, X, Check } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
+/** Dev review surface for the canonical StatusDot (no router — reached via #/status-dots). */
+const useStatusDotDemoRoute = () => {
+  const [isDemo, setIsDemo] = useState(() => window.location.hash === "#/status-dots");
+  useEffect(() => {
+    const onHashChange = () => setIsDemo(window.location.hash === "#/status-dots");
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
+  return isDemo;
+};
+
 function AppContent() {
   const { currentUser, updateUserProfile } = useScriptAllyDb();
-  
+
   // Page routing context state
   const [activeTab, setActiveTab] = useState<string>("dashboard");
   const [activeSubPage, setActiveSubPage] = useState<string>("Dashboard");
@@ -78,6 +90,11 @@ function AppContent() {
   };
 
   const paddingTopClass = "pt-[64px]";
+
+  const isStatusDotDemo = useStatusDotDemoRoute();
+  if (isStatusDotDemo) {
+    return <StatusDotDemo />;
+  }
 
   if (!currentUser) {
     return <Auth />;
