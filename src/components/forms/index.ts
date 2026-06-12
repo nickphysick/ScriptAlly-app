@@ -26,3 +26,6 @@ export type { WeekSliderProps } from "./WeekSlider";
 
 export { GenreCombobox } from "./GenreCombobox";
 export type { GenreComboboxProps } from "./GenreCombobox";
+
+export { FitStars, FIT_MEANING } from "./FitStars";
+export type { FitStarsProps } from "./FitStars";

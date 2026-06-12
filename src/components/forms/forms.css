@@ -658,6 +658,9 @@
 .sa-aa-star:hover { transform: scale(1.14); }
 .sa-aa-star svg { width: 23px; height: 23px; fill: #ece0d2; stroke: #e2d2c2; stroke-width: 1; transition: fill 0.12s, stroke 0.12s; }
 .sa-aa-star.on svg { fill: #7c3a2a; stroke: #7c3a2a; }
+/* read-only display variant: no pointer affordance */
+.sa-aa-star.ro { cursor: default; }
+.sa-aa-star.ro:hover { transform: none; }
 .sa-aa-fit-meaning {
   font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.04em;
   color: #7c3a2a; background: #f5e2da; border: 0.5px solid #e8c8bc;

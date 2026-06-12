@@ -15,6 +15,7 @@ import {
   SegmentedToggle,
   WeekSlider,
   GenreCombobox,
+  FitStars,
   Em,
 } from "./forms";
 import profileAnimation from "../assets/agent-profile-animation.json";
@@ -44,9 +45,6 @@ const METHOD_OPTIONS = ["Email", "QueryManager", "Agency form", "Post", "Other"]
 const POLICY_OPTIONS = ["Responds to all", "Only responds if interested", "No response means pass"].map(
   (p) => ({ value: p, label: p })
 );
-
-// Agent-fit meanings, indexed 1–5 (bound to the existing starRating field).
-const FIT_MEANING = ["Poor fit", "Average fit", "Good fit", "Great fit", "Perfect match"];
 
 interface MaterialsState {
   queryLetter: boolean;
@@ -95,7 +93,6 @@ export const AddAgentFocusForm: React.FC<AddAgentFocusFormProps> = ({
 
   // Your take
   const [starRating, setStarRating] = useState<1 | 2 | 3 | 4 | 5>(4);
-  const [hoverStar, setHoverStar] = useState<number | null>(null);
   const [notes, setNotes] = useState("");
 
   const [formError, setFormError] = useState<string | null>(null);
@@ -117,7 +114,6 @@ export const AddAgentFocusForm: React.FC<AddAgentFocusFormProps> = ({
     setMaterials(initialMaterials());
     setResponsePolicy("Only responds if interested");
     setStarRating(4);
-    setHoverStar(null);
     setNotes("");
     setFormError(null);
     setIsSubmitting(false);
@@ -237,8 +233,6 @@ export const AddAgentFocusForm: React.FC<AddAgentFocusFormProps> = ({
       setIsSubmitting(false);
     }
   };
-
-  const fitShown = hoverStar ?? starRating;
 
   return (
     <FormShell
@@ -444,27 +438,7 @@ export const AddAgentFocusForm: React.FC<AddAgentFocusFormProps> = ({
 
       <FormField label="Agent fit">
         <div className="sa-aa-fit-q">How good a match are they for you?</div>
-        <div className="sa-aa-fit-rate">
-          <div className="sa-aa-stars" onMouseLeave={() => setHoverStar(null)} role="radiogroup" aria-label="Agent fit">
-            {[1, 2, 3, 4, 5].map((v) => (
-              <button
-                key={v}
-                type="button"
-                role="radio"
-                aria-checked={starRating === v}
-                aria-label={`${v} — ${FIT_MEANING[v - 1]}`}
-                className={`sa-aa-star${fitShown >= v ? " on" : ""}`}
-                onMouseEnter={() => setHoverStar(v)}
-                onClick={() => setStarRating(v as 1 | 2 | 3 | 4 | 5)}
-              >
-                <svg viewBox="0 0 24 24">
-                  <path d="M12 2.2l2.95 6.32 6.85.86-5.05 4.74 1.32 6.78L12 18.4l-6.07 3.3 1.32-6.78L2.2 9.38l6.85-.86z" />
-                </svg>
-              </button>
-            ))}
-          </div>
-          <span className="sa-aa-fit-meaning">{FIT_MEANING[fitShown - 1]}</span>
-        </div>
+        <FitStars value={starRating} onChange={setStarRating} />
         <div className="sa-aa-fit-note">
           This field is subjective, but can be a useful metric as you build your contact list.
         </div>

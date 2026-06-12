@@ -5,14 +5,14 @@
 
 import React, { useState, useEffect } from "react";
 import { useScriptAllyDb } from "../lib/db";
-import { Agent, SubmissionStatus, SubmissionMethod, QueryStatus } from "../types";
+import { Agent, AgentSocial, SubmissionStatus, SubmissionMethod, QueryStatus } from "../types";
 import { StatusPill } from "./StatusPill";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase"; // Required for setting doc in online Mode
 import { collection, setDoc, doc, onSnapshot } from "firebase/firestore";
+import { FitStars } from "./forms";
 import {
   Search,
   Clock,
-  Star,
   ChevronRight,
   ChevronLeft,
   Check,
@@ -34,6 +34,30 @@ import { motion, AnimatePresence } from "motion/react";
 interface AgentsProps {
   searchQuery?: string;
   onNavigate?: (tab: string, subPageName?: string) => void;
+}
+
+/** A handle is treated as a clickable link only when it's an explicit URL or a bare domain. */
+function socialHref(handle: string): string | null {
+  const h = handle.trim();
+  if (/^https?:\/\//i.test(h)) return h;
+  // bare domain like "querytracker.net/..." — no @, no spaces, has a dotted segment
+  if (!h.includes("@") && !/\s/.test(h) && /[a-z0-9-]+\.[a-z]{2,}/i.test(h)) return `https://${h}`;
+  return null;
+}
+
+/**
+ * Socials to display for an agent. Prefers the v3 socials[] array; falls back to the legacy
+ * discrete twitter/bluesky/instagram fields so older agents still show. Empty handles dropped.
+ */
+function displaySocials(agent: Agent): AgentSocial[] {
+  if (agent.socials && agent.socials.length) {
+    return agent.socials.filter((s) => s.handle && s.handle.trim() && s.platform);
+  }
+  const legacy: AgentSocial[] = [];
+  if (agent.twitter?.trim()) legacy.push({ platform: "X / Twitter", handle: agent.twitter.trim() });
+  if (agent.bluesky?.trim()) legacy.push({ platform: "Bluesky", handle: agent.bluesky.trim() });
+  if (agent.instagram?.trim()) legacy.push({ platform: "Instagram", handle: agent.instagram.trim() });
+  return legacy;
 }
 
 function formatWhatsAppDate(dateString: string): string {
@@ -529,11 +553,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
 
               <div className="flex items-center justify-between mt-3 font-mono text-[11px] text-stone-500 leading-none pb-0.5">
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center text-[#BA7517] gap-0.5">
-                    {Array.from({ length: 5 }).map((_, idx) => (
-                      <Star key={idx} className={`w-3.5 h-3.5 ${idx < activeAgent.starRating ? "fill-[#BA7517] text-[#BA7517]" : "text-stone-250"}`} />
-                    ))}
-                  </div>
+                  <FitStars value={activeAgent.starRating || 0} size={15} />
                   <span className="text-stone-300">|</span>
                   <span className="flex items-center gap-1 font-sans text-stone-500">
                     Method: <span className="text-stone-700 font-bold">{activeAgent.submissionMethod || "Email"}</span>
@@ -562,13 +582,42 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
                     </div>
                   )}
 
+                  {(() => {
+                    const socials = displaySocials(activeAgent);
+                    if (!socials.length) return null;
+                    return (
+                      <div>
+                        <span className="block text-[9px] font-mono text-stone-400 font-bold uppercase select-none mb-0.5">Socials</span>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {socials.map((s, si) => {
+                            const href = socialHref(s.handle);
+                            const cls = "inline-flex items-center gap-1 bg-[#FAF1EF] text-[#7c3a2a] border border-[#EBDCD3] text-[10px] font-semibold px-2 py-0.5 rounded-full max-w-full";
+                            const inner = <><span className="font-bold">{s.platform}</span><span className="text-stone-400">·</span><span className="truncate">{s.handle}</span></>;
+                            return href ? (
+                              <a key={si} href={href} referrerPolicy="no-referrer" target="_blank" rel="noreferrer" className={`${cls} hover:bg-[#f5e2da]`}>{inner}</a>
+                            ) : (
+                              <span key={si} className={cls}>{inner}</span>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
                   <div>
                     <span className="block text-[9px] font-mono text-stone-400 font-bold uppercase select-none mb-0.5">Response time</span>
                     <span className="text-stone-700 font-semibold font-sans">
-                      {activeAgent.responseTimeWeeks || 6} weeks 
+                      within {activeAgent.responseTimeWeeks || 6} weeks
                       {activeAgent.noResponseMeansNo && <span className="text-stone-400 font-normal"> (Silence means pass)</span>}
                     </span>
                   </div>
+
+                  {activeAgent.agentNotes && activeAgent.agentNotes.trim() && (
+                    <div>
+                      <span className="block text-[9px] font-mono text-stone-400 font-bold uppercase select-none mb-0.5">Response policy</span>
+                      <span className="text-stone-700 font-semibold font-sans">{activeAgent.agentNotes}</span>
+                    </div>
+                  )}
 
                   {activeAgent.genres && activeAgent.genres.length > 0 && (
                     <div>
