@@ -27,6 +27,8 @@ import { CalendarView } from "./CalendarView";
 import { StatusPill } from "./StatusPill";
 import { StatusDot } from "./StatusDot";
 import { pageGround, bodyInk, PAGE_GRAIN } from "../lib/designTokens";
+import { HeroCard } from "./dashboard/HeroCard";
+import { OverToYou } from "./dashboard/OverToYou";
 import { getDynamicActivityText, replacePlaceholders, extractAgentFromText, boldAgentAndAgencyInText } from "../lib/activityUtils";
 import {
   Sparkles,
@@ -699,10 +701,6 @@ export const Dashboard: React.FC<{
     return localStorage.getItem("scriptally_is_magazine_layout") === "true";
   });
 
-  // Customized Radical Designs States
-  const [headerStyle, setHeaderStyle] = useState<"bento" | "editorial" | "academic">(() => {
-    return (localStorage.getItem("scriptally_header_style") as any) || "bento";
-  });
   const [timelineStyle, setTimelineStyle] = useState<"journal" | "bento" | "ribbon">(() => {
     return (localStorage.getItem("scriptally_timeline_style") as any) || "journal";
   });
@@ -715,12 +713,6 @@ export const Dashboard: React.FC<{
   const [radarToast, setRadarToast] = useState<string | null>(null);
   const [selectedManuscriptId, setSelectedManuscriptId] = useState<string | null>(null);
   const [lowerDeckStyle, setLowerDeckStyle] = useState<"radar" | "minimalist" | "funnel" | "wall" | "studio">("radar");
-  const [useSvgWatermark, setUseSvgWatermark] = useState(false);
-  const [currentTipIndex, setCurrentTipIndex] = useState(0);
-
-  const [dashboardImage, setDashboardImage] = useState<string | null>(() => {
-    return localStorage.getItem("dashboard_welcome_image") || null;
-  });
 
   const [card1Image, setCard1Image] = useState<string | null>(() => {
     return localStorage.getItem("stat_card_image_1") || null;
@@ -1026,126 +1018,6 @@ export const Dashboard: React.FC<{
       handleResetCardPosition(4);
     }
   };
-
-  const [dashboardImageScale, setDashboardImageScale] = useState<number>(() => {
-    const saved = localStorage.getItem("dashboard_welcome_image_scale");
-    return saved ? parseInt(saved, 10) : 100;
-  });
-
-  const [dashboardImageX, setDashboardImageX] = useState<number>(() => {
-    const saved = localStorage.getItem("dashboard_welcome_image_x");
-    return saved ? parseInt(saved, 10) : 0;
-  });
-
-  const [dashboardImageY, setDashboardImageY] = useState<number>(() => {
-    const saved = localStorage.getItem("dashboard_welcome_image_y");
-    return saved ? parseInt(saved, 10) : 0;
-  });
-
-  const handleIncreaseScale = () => {
-    setDashboardImageScale(prev => {
-      const next = Math.min(300, prev + 10);
-      localStorage.setItem("dashboard_welcome_image_scale", next.toString());
-      return next;
-    });
-  };
-
-  const handleDecreaseScale = () => {
-    setDashboardImageScale(prev => {
-      const next = Math.max(30, prev - 10);
-      localStorage.setItem("dashboard_welcome_image_scale", next.toString());
-      return next;
-    });
-  };
-
-  const handleMoveLeft = () => {
-    setDashboardImageX(prev => {
-      const next = prev - 5;
-      localStorage.setItem("dashboard_welcome_image_x", next.toString());
-      return next;
-    });
-  };
-
-  const handleMoveRight = () => {
-    setDashboardImageX(prev => {
-      const next = prev + 5;
-      localStorage.setItem("dashboard_welcome_image_x", next.toString());
-      return next;
-    });
-  };
-
-  const handleMoveUp = () => {
-    setDashboardImageY(prev => {
-      const next = prev - 5;
-      localStorage.setItem("dashboard_welcome_image_y", next.toString());
-      return next;
-    });
-  };
-
-  const handleMoveDown = () => {
-    setDashboardImageY(prev => {
-      const next = prev + 5;
-      localStorage.setItem("dashboard_welcome_image_y", next.toString());
-      return next;
-    });
-  };
-
-  const handleResetPosition = () => {
-    setDashboardImageX(0);
-    setDashboardImageY(0);
-    setDashboardImageScale(100);
-    localStorage.setItem("dashboard_welcome_image_x", "0");
-    localStorage.setItem("dashboard_welcome_image_y", "0");
-    localStorage.setItem("dashboard_welcome_image_scale", "100");
-  };
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result as string;
-        setDashboardImage(base64String);
-        localStorage.setItem("dashboard_welcome_image", base64String);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleRemoveImage = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-    setDashboardImage(null);
-    localStorage.removeItem("dashboard_welcome_image");
-    handleResetPosition();
-  };
-
-  const scriptallyTips = [
-    {
-      title: "Wishlist Radar Match",
-      description: "Match your manuscript themes with literary agent requirements live using the Radar visualizer down below.",
-      tag: "Pro Tip",
-      icon: <Sparkles className="w-4 h-4 text-[#BA7517]" />
-    },
-    {
-      title: "Double-Entry Logging",
-      description: "When creating a pitch query, select the relevant manuscript to update status counters and create interactive vertical timelines.",
-      tag: "Efficiency",
-      icon: <BookOpen className="w-4 h-4 text-[#CD4E46]" />
-    },
-    {
-      title: "Aesthetic Layout Matrix",
-      description: "Cycle the deck styles (Radar, Funnel, Minimalist) or change Header Style at the bottom of the page to match your working mood.",
-      tag: "Aesthetics",
-      icon: <Compass className="w-4 h-4 text-emerald-700" />
-    },
-    {
-      title: "Sync With Cloud Auth",
-      description: "Click 'Go Live' to persist your local sandbox entries securely to Firestore, enabling cloud synchronization.",
-      tag: "Database",
-      icon: <Database className="w-4 h-4 text-[#7c3a2a]" />
-    }
-  ];
 
   const timelineScrollRef = React.useRef<HTMLDivElement>(null);
   const [timelineScrollState, setTimelineScrollState] = useState({ isAtTop: true, isAtBottom: true });
@@ -2001,6 +1873,26 @@ export const Dashboard: React.FC<{
     }
   }, [chronologicalKeys.join(','), timelineStyle]);
 
+  // Day N of the journey: days since the earliest query activity (falls back to the
+  // earliest query sent date). Null when the user has no query history yet.
+  const journeyDay = (() => {
+    const stamps: number[] = [];
+    activities.forEach((a) => {
+      if (a.queryId) {
+        const t = new Date(a.date).getTime();
+        if (!isNaN(t)) stamps.push(t);
+      }
+    });
+    queries.forEach((q) => {
+      if (q.dateSent) {
+        const t = new Date(q.dateSent).getTime();
+        if (!isNaN(t)) stamps.push(t);
+      }
+    });
+    if (stamps.length === 0) return null;
+    return Math.max(1, Math.floor((Date.now() - Math.min(...stamps)) / 86400000) + 1);
+  })();
+
   // Helper to extract the user's first name, defaulting to "Writer"
   const getUserFirstName = () => {
     if (currentUser?.name) {
@@ -2578,600 +2470,32 @@ export const Dashboard: React.FC<{
           </div>
         </div>
       ) : (
-        /* ==================== ORIGINAL BENTO HEADER ==================== */
-        <div className="w-full max-w-none px-4 md:px-10 lg:px-14 xl:px-16 pt-6 space-y-6">
-          {/* CONDITIONALLY RENDERED HEADER SKETCHES */}
-          <div className="transition-all duration-300">
-          {headerStyle === "bento" && (
-            /* ==================== HEADER OPTION 1: MODERN BENTO GRAPHICS GRID ==================== */
-            <div className="grid grid-cols-1 md:grid-cols-[1fr_26.67%] gap-8 items-stretch animate-fade-in" id="header-sketch-bento">
-              {/* Box 1: Greeting & Literary Quote & Quick Actions Row */}
-              <div 
-                className="bg-white rounded-2xl p-6 shadow-sm flex flex-col justify-between relative overflow-hidden group"
-                style={{ 
-                  borderLeft: '10px solid #7c3d3d', 
-                  borderTop: '1px solid #EBDCD3', 
-                  borderRight: '1px solid #EBDCD3', 
-                  borderBottom: '1px solid #EBDCD3', 
-                  height: '280px' 
-                }}
-              >
-                {/* STYLISH PAPER PLANE ILLUSTRATION ON THE RIGHT SIDE (INTERACTIVE WITH CUSTOM UPLOAD) */}
-                <div className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 w-32 h-32 md:w-44 md:h-44 flex flex-col items-center justify-center z-20 group/img transition-all duration-300 ease-out transform">
-                  <input
-                    type="file"
-                    id="dashboard-image-input"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleImageUpload}
-                  />
-                  
-                  <label htmlFor="dashboard-image-input" className="relative w-full h-full block cursor-pointer select-none">
-                    {dashboardImage ? (
-                      <div className="relative w-full h-full flex items-center justify-center">
-                        <img
-                          src={dashboardImage}
-                          alt="Custom welcome graphic"
-                          style={{ transform: `translate(${dashboardImageX}px, ${dashboardImageY}px) scale(${dashboardImageScale / 100})`, transformOrigin: 'center center' }}
-                          className="object-contain w-full h-full rounded-xl drop-shadow-[0_4px_10px_rgba(124,58,42,0.12)] transition-all duration-300"
-                          referrerPolicy="no-referrer"
-                        />
-                      </div>
-                    ) : (
-                      <div className="relative w-full h-full flex items-center justify-center">
-                        <img
-                          src="/input_file_0.png"
-                          alt="Paper plane watercolor sketch"
-                          style={{ transform: `translate(${dashboardImageX}px, ${dashboardImageY}px) scale(${dashboardImageScale / 100})`, transformOrigin: 'center center' }}
-                          className="object-contain w-full h-full opacity-80 group-hover/img:opacity-100 drop-shadow-[0_4px_10px_rgba(124,58,42,0.12)] transition-all duration-300 font-mono text-xs text-stone-400"
-                          referrerPolicy="no-referrer"
-                        />
-                        {/* Hover Overlay indicator to prompt upload */}
-                        <div className="absolute inset-0 bg-[#7c3a2a]/5 rounded-xl flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity">
-                          <span className="bg-[#FCFAF7]/95 text-[#7c3a2a] text-[10px] font-semibold px-2.5 py-1.5 rounded-lg shadow-sm border border-[#EBDCD3] flex items-center gap-1.5 hover:bg-[#FAF1EF] transition-colors">
-                            <Camera className="w-3.5 h-3.5 text-[#CD4E46]" /> Choose Image
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                  </label>
-
-                  {/* Elegant builder floating bar - ONLY visible on hover */}
-                  <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 bg-white/95 border border-[#EBDCD3] rounded-full px-3 py-1.5 shadow-md flex items-center gap-2.5 z-30 opacity-0 group-hover/img:opacity-100 transition-opacity pointer-events-auto whitespace-nowrap">
-                    {/* Positioning Section */}
-                    <div className="flex items-center gap-0.5">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleMoveLeft(); }}
-                        className="p-1 hover:bg-[#FAF1EF] text-stone-600 hover:text-[#7c3a2a] rounded transition-colors cursor-pointer"
-                        title="Move Left (X - 5px)"
-                        type="button"
-                      >
-                        <ArrowLeft className="w-3.5 h-3.5" />
-                      </button>
-                      <span className="text-[9px] font-mono font-bold text-stone-500 min-w-[28px] text-center" title="Horizontal position offset">
-                        X:{dashboardImageX}
-                      </span>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleMoveRight(); }}
-                        className="p-1 hover:bg-[#FAF1EF] text-stone-600 hover:text-[#7c3a2a] rounded transition-colors cursor-pointer"
-                        title="Move Right (X + 5px)"
-                        type="button"
-                      >
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-
-                    <div className="w-px h-3 bg-[#EBDCD3]" />
-
-                    <div className="flex items-center gap-0.5">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleMoveUp(); }}
-                        className="p-1 hover:bg-[#FAF1EF] text-stone-600 hover:text-[#7c3a2a] rounded transition-colors cursor-pointer"
-                        title="Move Up (Y - 5px)"
-                        type="button"
-                      >
-                        <ArrowUp className="w-3.5 h-3.5" />
-                      </button>
-                      <span className="text-[9px] font-mono font-bold text-stone-500 min-w-[28px] text-center" title="Vertical position offset">
-                        Y:{dashboardImageY}
-                      </span>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleMoveDown(); }}
-                        className="p-1 hover:bg-[#FAF1EF] text-stone-600 hover:text-[#7c3a2a] rounded transition-colors cursor-pointer"
-                        title="Move Down (Y + 5px)"
-                        type="button"
-                      >
-                        <ArrowDown className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-
-                    <div className="w-px h-3 bg-[#EBDCD3]" />
-
-                    {/* Scale Section */}
-                    <div className="flex items-center gap-0.5">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleDecreaseScale(); }}
-                        className="p-1 hover:bg-[#FAF1EF] text-stone-600 hover:text-[#7c3a2a] rounded transition-colors cursor-pointer"
-                        title="Decrease size (Scale Down)"
-                        type="button"
-                      >
-                        <ZoomOut className="w-3.5 h-3.5" />
-                      </button>
-                      <span className="text-[9px] font-mono font-bold text-stone-700 min-w-[32px] text-center">
-                        {dashboardImageScale}%
-                      </span>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleIncreaseScale(); }}
-                        className="p-1 hover:bg-[#FAF1EF] text-stone-600 hover:text-[#7c3a2a] rounded transition-colors cursor-pointer"
-                        title="Increase size (Scale Up)"
-                        type="button"
-                      >
-                        <ZoomIn className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-
-                    <div className="w-px h-3 bg-[#EBDCD3]" />
-
-                    <button
-                      onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleResetPosition(); }}
-                      className="px-1.5 py-1 hover:bg-[#FAF1EF] text-stone-500 hover:text-stone-700 rounded text-[9px] font-bold tracking-tight transition-colors cursor-pointer"
-                      title="Reset position and size scale"
-                      type="button"
-                    >
-                      Reset Pos
-                    </button>
-
-                    {dashboardImage && (
-                      <>
-                        <div className="w-px h-3 bg-[#EBDCD3]" />
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            handleRemoveImage(e);
-                          }}
-                          className="p-1 hover:bg-red-50 text-red-500 hover:text-red-700 rounded transition-colors cursor-pointer"
-                          title="Reset to default artwork"
-                          type="button"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-3 md:pr-36 ml-4 md:ml-6">
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      <span className="text-[10px] font-mono tracking-wider font-bold text-stone-400 uppercase">
-                        {new Date().toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).toUpperCase()}
-                      </span>
-                    </div>
-                    <h1 className="font-serif text-[#3a1c14] tracking-tight" style={{ fontSize: '45px' }}>
-                      Welcome back, <span className="font-bold text-[#7c3a2a]">{getUserFirstName()}</span>
-                    </h1>
-                  </div>
-                </div>
-
-                <div className="mt-4 md:pr-36 ml-4 md:ml-6">
-                  {quote.text ? (
-                    <p className="text-xs text-stone-600 font-light italic leading-relaxed">
-                      "{quote.text}"
-                      {quote.author && (
-                        <span className="block text-[10px] font-bold text-[#7c3a2a] not-italic mt-1.5 font-mono">
-                          &mdash; {quote.author}
-                        </span>
-                      )}
-                    </p>
-                  ) : (
-                    <p className="text-xs text-stone-400 italic">Reading the inkwells...</p>
-                  )}
-                </div>
-
-                <div className="mt-5 flex flex-wrap gap-2.5 z-10 md:pr-36 ml-4 md:ml-6">
-                  <button
-                    onClick={() => onNavigate("queries", "Send a query")}
-                    className="flex items-center gap-1.5 bg-[#7c3a2a] hover:bg-[#632e22] text-white font-semibold py-1.5 px-3.5 rounded-xl text-xs transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 duration-150 cursor-pointer"
-                  >
-                    <PlusCircle className="w-3.5 h-3.5" />
-                    <span>Send query</span>
-                  </button>
-                  
-                  <button
-                    onClick={() => onNavigate("agents", "Add an agent")}
-                    className="flex items-center gap-1.5 bg-[#FCFAF7] border border-[#EBDCD3] text-[#3a1c14] hover:bg-[#FAF1EF] font-semibold py-1.5 px-3.5 rounded-xl text-xs transition-all cursor-pointer hover:shadow-xs hover:-translate-y-0.5 duration-150"
-                  >
-                    <Plus className="w-3.5 h-3.5 text-[#BA7517]" />
-                    <span>Add agent</span>
-                  </button>
-                  
-                  <button
-                    onClick={() => onNavigate("manuscripts", "Add a manuscript")}
-                    className="flex items-center gap-1.5 bg-[#FCFAF7] border border-[#EBDCD3] text-[#3a1c14] hover:bg-[#FAF1EF] font-semibold py-1.5 px-3.5 rounded-xl text-xs transition-all cursor-pointer hover:shadow-xs hover:-translate-y-0.5 duration-150"
-                  >
-                    <BookOpen className="w-3.5 h-3.5 text-[#CD4E46]" />
-                    <span>Add manuscript</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Box 2 Col Container: Updated To-do checklist (and Tips of the day when empty to fill the dead space) */}
-              <div className="flex flex-col gap-4 justify-center h-full">
-                {/* To-Do Checklist Card container */}
-                {(() => {
-                  const sortedTasks = [...tasks].sort((a, b) => getPriorityRank(a) - getPriorityRank(b));
-                  const currentIdx = spotlightTaskIndex >= sortedTasks.length ? 0 : spotlightTaskIndex;
-                  const activeTask = sortedTasks[currentIdx];
-                  const isBentoActiveUrgent = activeTask && (activeTask.priority === "urgent" || ["offer_received", "partial_requested", "full_requested", "revise_resubmit"].includes(activeTask.taskType));
-
-                  return (
-                    <div
-                      className={`transition-all duration-300 relative rounded-2xl flex flex-col animate-fade-in p-5 select-none border-x-[0.5px] border-b-[0.5px] border-x-[#e8d5cc] border-b-[#e8d5cc] border-t-[3px] border-t-[#7c3a2a] ${
-                        isBentoActiveUrgent ? "bg-[#fff0f0]" : "bg-[#FDF6F0]"
-                      }`}
-                      style={{ 
-                        boxShadow: '0 4px 22px rgba(58,28,20,0.07)'
-                      }}
-                      id="header-bento-todo-list"
-                    >
-                      {isBentoActiveUrgent && (
-                        <div 
-                          className="absolute bg-red-600 text-white text-[12px] font-extrabold rounded-full flex items-center justify-center select-none shadow-3xs" 
-                          style={{ width: "20px", height: "20px", top: "12px", right: "12px", zIndex: 10 }}
-                          title="Urgent"
-                        >
-                          !
-                        </div>
-                      )}
-                      {(() => {
-
-                    // Swipe states
-                    let touchStartX = 0;
-                    let touchEndX = 0;
-
-                    const handleTouchStart = (e: React.TouchEvent) => {
-                      touchStartX = e.changedTouches[0].screenX;
-                    };
-
-                    const handleTouchEnd = (e: React.TouchEvent) => {
-                      touchEndX = e.changedTouches[0].screenX;
-                      const diff = touchStartX - touchEndX;
-                      if (Math.abs(diff) > 50) {
-                        if (diff > 0) {
-                          setSpotlightTaskIndex((prev) => (sortedTasks.length > 0 ? (prev + 1) % sortedTasks.length : 0));
-                        } else {
-                          setSpotlightTaskIndex((prev) => (sortedTasks.length > 0 ? (prev - 1 + sortedTasks.length) % sortedTasks.length : 0));
-                        }
-                      }
-                    };
-
-                    const handleCycleNext = (e?: React.MouseEvent) => {
-                      if (e) {
-                        e.stopPropagation();
-                      }
-                      if (sortedTasks.length > 0) {
-                        setSpotlightTaskIndex((prev) => (prev + 1) % sortedTasks.length);
-                      }
-                    };
-
-                    const handleDotClick = (idx: number, e: React.MouseEvent) => {
-                      e.stopPropagation();
-                      setSpotlightTaskIndex(idx);
-                    };
-
-                    if (sortedTasks.length > 0 && activeTask) {
-                      const { agentName, agency, manuscriptTitle } = getTaskContextInfo(activeTask, queries, agents, manuscripts);
-                      let subText = "";
-                      if (agentName && agency && manuscriptTitle) {
-                        subText = `${manuscriptTitle} • ${agentName} (${agency})`;
-                      } else if (agentName && agency) {
-                        subText = `${agentName} (${agency})`;
-                      } else if (agentName && manuscriptTitle) {
-                        subText = `${manuscriptTitle} • ${agentName}`;
-                      } else {
-                        subText = activeTask.manuscriptTitle ? `${activeTask.manuscriptTitle} • ${activeTask.context}` : activeTask.context;
-                      }
-
-                      return (
-                        <div 
-                          className="flex flex-col h-full justify-between"
-                          onTouchStart={handleTouchStart}
-                          onTouchEnd={handleTouchEnd}
-                        >
-                          {/* Task Content Area (clickable to cycle) */}
-                          <div 
-                            className="cursor-pointer group text-left flex-1 flex flex-col justify-center min-h-[75px]" 
-                            onClick={() => handleCycleNext()}
-                            title="Click or swipe to cycle tasks"
-                          >
-                            <span className="text-[#c9a89e] text-[10px] uppercase font-mono tracking-[0.08em] font-bold">
-                              Next up
-                            </span>
-                            <h3 className="font-serif text-[16px] text-[#3a1c14] leading-snug mt-1.5 font-medium pr-4">
-                              {activeTask.title}
-                            </h3>
-                            <p className="text-[#a08070] text-[11px] font-sans mt-1.5 truncate">
-                              {subText}
-                            </p>
-                          </div>
-
-                          {/* Buttons Row */}
-                          <div className="flex items-center gap-3 mt-3 flex-wrap" onClick={(e) => e.stopPropagation()}>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onNavigate(activeTask.actionPath, activeTask.title);
-                              }}
-                              className="px-3.5 py-1 text-[11px] leading-none font-medium bg-[#7c3a2a] text-[#F8F5F0] rounded-full hover:bg-[#602d20] transition-colors cursor-pointer shadow-3xs"
-                            >
-                              {getTaskActionLabel(activeTask)}
-                            </button>
-                            
-                            <button
-                              onClick={async (e) => {
-                                e.stopPropagation();
-                                await dismissTask(activeTask.taskType, activeTask.relatedRecordId, "fixed snooze", 3);
-                              }}
-                              className="text-[#c9a89e] hover:text-[#7c3a2a] text-[11px] leading-none font-medium transition-colors cursor-pointer bg-transparent border-none p-1 flex items-center gap-1"
-                            >
-                              <span>Snooze</span>
-                              <Clock className="w-3.5 h-3.5" />
-                            </button>
-
-                            <button
-                              onClick={async (e) => {
-                                e.stopPropagation();
-                                await dismissTask(activeTask.taskType, activeTask.relatedRecordId, "permanent");
-                              }}
-                              className="text-[#c9a89e] hover:text-[#7c3a2a] text-[11px] leading-none font-medium transition-colors cursor-pointer bg-transparent border-none p-1"
-                            >
-                              Dismiss ×
-                            </button>
-                          </div>
-
-                          <div className="h-[0.5px] bg-[#e8d5cc] my-3.5" />
-
-                          {/* Footer */}
-                          <div className="flex items-center justify-between text-xs select-none">
-                            <span className="text-[#b09080] text-[12px] font-medium">
-                              {sortedTasks.length > 1 ? `+ ${sortedTasks.length - 1} more` : "No other tasks"}
-                            </span>
-
-                            {/* Dot navigation with Chevrons */}
-                            <div className="flex items-center gap-1">
-                              {sortedTasks.length > 1 && (
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSpotlightTaskIndex((prev) => (sortedTasks.length > 0 ? (prev - 1 + sortedTasks.length) % sortedTasks.length : 0));
-                                  }}
-                                  className="text-[#c9a89e] hover:text-[#7c3a2a] p-1 cursor-pointer transition-colors flex items-center justify-center bg-transparent border-0"
-                                  title="Previous task"
-                                >
-                                  <ChevronLeft className="w-4 h-4 stroke-[2.5]" />
-                                </button>
-                              )}
-
-                              <div className="flex items-center gap-1">
-                                {sortedTasks.map((_, idx) => (
-                                  <button
-                                    key={idx}
-                                    onClick={(e) => handleDotClick(idx, e)}
-                                    className={`transition-all cursor-pointer rounded-full w-[5px] h-[5px] ${
-                                      idx === currentIdx ? 'bg-[#7c3a2a]' : 'bg-[#e8d5cc]'
-                                    }`}
-                                    title={`Go to task ${idx + 1}`}
-                                  />
-                                ))}
-                              </div>
-
-                              {sortedTasks.length > 1 && (
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSpotlightTaskIndex((prev) => (sortedTasks.length > 0 ? (prev + 1) % sortedTasks.length : 0));
-                                  }}
-                                  className="text-[#c9a89e] hover:text-[#7c3a2a] p-1 cursor-pointer transition-colors flex items-center justify-center bg-transparent border-0"
-                                  title="Next task"
-                                >
-                                  <ChevronRight className="w-4 h-4 stroke-[2.5]" />
-                                </button>
-                              )}
-                            </div>
-
-                            {/* View all link */}
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setIsTasksPanelOpen(true);
-                              }}
-                              className="text-[#7c3a2a] hover:text-[#5e2b1e] text-[12px] font-medium flex items-center gap-1 transition-all cursor-pointer hover:underline bg-transparent border-0"
-                            >
-                              <span>View all</span>
-                              <ArrowRight className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    } else {
-                      // Elegant fallback when 0 tasks are outstanding, keeping the beautiful warm parchment card block
-                      return (
-                        <div className="flex flex-col h-full justify-between min-h-[140px]">
-                          <div className="text-left flex-1 flex flex-col justify-center">
-                            <span className="text-[#c9a89e] text-[10px] uppercase font-mono tracking-[0.08em] font-bold">
-                              Next up
-                            </span>
-                            <h3 className="font-serif text-[16px] text-[#3a1c14] leading-snug mt-1.5 font-medium">
-                              You're all caught up!
-                            </h3>
-                            <p className="text-[#a08070] text-[11px] font-sans mt-1.5">
-                              No outstanding tasks require your attention.
-                            </p>
-                          </div>
-
-                          <div className="h-[0.5px] bg-[#e8d5cc] my-3.5" />
-
-                          <div className="flex items-center justify-between text-xs select-none">
-                            <span className="text-[#b09080] text-[12px] font-medium">
-                              0 tasks remaining
-                            </span>
-                            
-                            <div className="flex items-center gap-1.5">
-                              <span 
-                                className="rounded-full w-[5px] h-[5px] bg-[#7c3a2a]"
-                              />
-                            </div>
-
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setIsTasksPanelOpen(true);
-                              }}
-                              className="text-[#7c3a2a] hover:text-[#5e2b1e] text-[12px] font-medium flex items-center gap-1 transition-all cursor-pointer hover:underline bg-transparent border-0"
-                            >
-                              <span>View history</span>
-                              <ArrowRight className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    }
-                  })()}
-                    </div>
-                  );
-                })()}
-
-                {/* ScriptAlly Top Tip Feature (Fills the exact vertical dead space when tasks are all completed) */}
-                {tasks.length === 0 && (
-                  <div className="bg-white border border-[#EBDCD3] border-t-[3.5px] border-t-[#7c3a2a] rounded-2xl p-5 shadow-sm relative flex flex-col justify-between flex-1 min-h-[195px] animate-fade-in group select-none" id="scriptally-top-tips">
-
-                    <div>
-                      <div className="flex justify-between items-center text-[10px] font-mono text-stone-400 font-bold uppercase tracking-wider mb-2">
-                        <span className="flex items-center gap-1">
-                          <Lightbulb className="w-3.5 h-3.5 text-[#BA7517]" />
-                          ScriptAlly Top Tip
-                        </span>
-                        <span className="bg-stone-100 text-stone-500 px-1.5 py-0.5 rounded border border-stone-200 text-[9px] font-bold">
-                          {currentTipIndex + 1}/{scriptallyTips.length}
-                        </span>
-                      </div>
-                      <div className="flex-1 flex flex-col justify-center my-1.5">
-                        <h4 className="font-serif text-[13.5px] font-semibold text-[#3a1c14] tracking-tight leading-snug mb-1">
-                          {scriptallyTips[currentTipIndex].title}
-                        </h4>
-                        <p className="text-[11.5px] text-stone-600 leading-normal font-sans">
-                          {scriptallyTips[currentTipIndex].description}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-between items-center pt-2.5 border-t border-dashed border-stone-200/60 mt-2 z-10">
-                      <span className="text-[9px] font-mono font-bold text-emerald-800 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded uppercase">
-                        {scriptallyTips[currentTipIndex].tag}
-                      </span>
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={() => setCurrentTipIndex(prev => (prev - 1 + scriptallyTips.length) % scriptallyTips.length)}
-                          className="p-1 rounded-md hover:bg-stone-100 border border-transparent hover:border-stone-200 transition-colors cursor-pointer"
-                          title="Previous Tip"
-                        >
-                          <ChevronLeft className="w-3.5 h-3.5 text-stone-600" />
-                        </button>
-                        <button
-                          onClick={() => setCurrentTipIndex(prev => (prev + 1) % scriptallyTips.length)}
-                          className="p-1 rounded-md hover:bg-stone-100 border border-transparent hover:border-stone-200 transition-colors cursor-pointer"
-                          title="Next Tip"
-                        >
-                          <ChevronRight className="w-3.5 h-3.5 text-stone-600" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {headerStyle === "editorial" && (
-            /* ==================== HEADER OPTION 2: DOUBLE-RULED EDITORIAL MASTHEAD ==================== */
-            <div className="bg-white border-y-4 border-double border-[#7c3a2a]/30 py-8 px-4 text-center space-y-5 animate-fade-in" id="header-sketch-editorial">
-              <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#7c3a2a] font-bold block">
-                The Literary Dispatch &amp; Manuscript Chronicle
-              </span>
-              
-              <h1 className="text-4xl md:text-6xl font-serif font-semibold text-[#3a1c14] tracking-tight leading-none uppercase">
-                THE SCRIPTALLY LEDGER
-              </h1>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[#7c3a2a]/10 pt-4 border-t border-[#7c3a2a]/10 max-w-4xl mx-auto">
-                <div className="py-2.5 md:py-0 text-center">
-                  <span className="text-[9px] font-mono uppercase text-[#3a1c14]/40 block tracking-wider">Date of Issue</span>
-                  <span className="font-serif text-[13px] font-semibold text-[#3a1c14] mt-0.5 block">
-                    {new Date().toLocaleDateString("en-GB", { day: 'numeric', month: 'long', year: 'numeric' })}
-                  </span>
-                </div>
-                <div className="py-2.5 md:py-0 text-center">
-                  <span className="text-[9px] font-mono uppercase text-[#3a1c14]/40 block tracking-wider">Aesthetic Matrix Status</span>
-                  <span className="font-serif text-[13px] font-semibold text-[#7c3a2a] mt-0.5 block">
-                    ACTIVE OUTREACH: {responseRatePercent}% RESPONSE RATE
-                  </span>
-                </div>
-                <div className="py-2.5 md:py-0 text-center">
-                  <span className="text-[9px] font-mono uppercase text-[#3a1c14]/40 block tracking-wider">Attention Alert Counts</span>
-                  <span className="font-serif text-[13px] font-semibold text-rose-700 mt-0.5 block cursor-pointer hover:underline" onClick={() => onNavigate("queries")}>
-                    {tasks.length} MATTERS REQUIRE ATTENTION
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {headerStyle === "academic" && (
-            /* ==================== HEADER OPTION 3: ACADEMIC SPEC COVER PAGE ==================== */
-            <div className="bg-stone-50 border border-stone-200 rounded-2xl p-8 md:p-12 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] max-w-4xl mx-auto space-y-6 text-left relative overflow-hidden animate-fade-in" id="header-sketch-academic">
-              {/* Top accent page layout elements */}
-              <div className="absolute top-0 right-0 p-4 font-mono text-[9px] text-[#3a1c14]/30 select-none">
-                FORM // SA-D9
-              </div>
-
-              {/* Title group */}
-              <div className="space-y-2">
-                <h1 className="text-3xl md:text-4xl font-mono text-[#3a1c14] tracking-wider uppercase font-bold">
-                  S C R I P T A L L Y   //   P R O D U C T I O N   L O G
-                </h1>
-                <div className="h-[2px] bg-[#7c3a2a] w-24" />
-                <p className="text-[11px] font-mono text-stone-500 max-w-lg leading-relaxed pt-1">
-                  OFFICIAL SUBMISSION SPECIFICATION DIRECTORY. INDEXED ACCOUNT LOGS CONFIGURED FOR WRITING PORTFOLIOS. DO NOT ACCUMULATE BACKLOGS.
-                </p>
-              </div>
-
-              {/* Monospace Metadata fields */}
-              <div className="pt-6 border-t border-stone-200/60 grid grid-cols-2 md:grid-cols-4 gap-6 font-mono text-xs leading-none text-stone-600">
-                <div className="space-y-1.5">
-                  <span className="text-[10px] text-stone-400 font-bold tracking-wider block">TRACKED PROJECTS</span>
-                  <span className="text-sm font-semibold text-[#3a1c14] block">{manuscripts.length} MANUSCRIPTS</span>
-                </div>
-                <div className="space-y-1.5">
-                  <span className="text-[10px] text-stone-400 font-bold tracking-wider block">OUTREACH DESPATCHES</span>
-                  <span className="text-sm font-semibold text-[#3a1c14] block">{queries.length} RECORDED PITCHES</span>
-                </div>
-                <div className="space-y-1.5">
-                  <span className="text-[10px] text-stone-400 font-bold tracking-wider block">ALERT CODES ACTIVE</span>
-                  <span className={`text-sm font-semibold block ${tasks.length > 0 ? "text-rose-600" : "text-emerald-600"}`}>
-                    {tasks.length} LEVEL-1 ALERTS
-                  </span>
-                </div>
-                <div className="space-y-1.5">
-                  <span className="text-[10px] text-stone-400 font-bold tracking-wider block">PORTFOLIO USER STATUS</span>
-                  <span className="text-sm font-semibold text-[#7c3a2a] block">Pen: ONLINE SANBOX</span>
-                </div>
-              </div>
-            </div>
-          )}
+        /* ==================== HERO + OVER TO YOU ==================== */
+        <div className="w-full max-w-none px-4 md:px-10 lg:px-14 xl:px-16 pt-2">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-[14px] items-stretch">
+            <HeroCard
+              firstName={getUserFirstName()}
+              quote={quote}
+              journeyDay={journeyDay}
+              onSendQuery={() => onNavigate("queries", "Send a query")}
+              onAddAgent={() => onNavigate("agents", "Add an agent")}
+              onAddManuscript={() => onNavigate("manuscripts", "Add a manuscript")}
+            />
+            <OverToYou
+              tasks={tasks}
+              queries={queries}
+              agents={agents}
+              onAction={(task) => onNavigate(task.actionPath, task.title)}
+              onSnooze={(task) => dismissTask(task.taskType, task.relatedRecordId, "fixed snooze", 3)}
+              onDismiss={(task) => dismissTask(task.taskType, task.relatedRecordId, "permanent")}
+              onAllTasks={() => setIsTasksPanelOpen(true)}
+              onOpenQuery={(qid) => {
+                setSelectedQueryIdForPanel(qid);
+                setIsQueryPanelOpen(true);
+              }}
+            />
+          </div>
         </div>
-      </div>
       )}
 
       {/* TWO-COLUMN MAIN WORKSPACE */}
