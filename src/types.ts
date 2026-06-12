@@ -89,6 +89,12 @@ export enum SubmissionMethod {
   POST = "Post",
 }
 
+/** One repeatable social handle on an agent — platform label + handle/URL. */
+export interface AgentSocial {
+  platform: string; // e.g. "X / Twitter", "Bluesky", "QueryTracker", "TikTok", "Other"
+  handle: string; // handle or profile URL
+}
+
 export interface Agent {
   id: string;
   userId: string;
@@ -99,6 +105,10 @@ export interface Agent {
   twitter?: string;
   bluesky?: string;
   instagram?: string;
+  // Arbitrary, repeatable social handles from the Add-Agent form. The four known platforms
+  // (X / Twitter, Bluesky, Instagram) are ALSO mirrored into the discrete fields above for
+  // back-compat with the agent-database display; QueryTracker / TikTok / Other live here only.
+  socials?: AgentSocial[];
   genres: string[]; // multi-select genres
   mswlNotes: string;
   starRating: 1 | 2 | 3 | 4 | 5;
@@ -106,7 +116,7 @@ export interface Agent {
   responseTimeWeeks: number;
   noResponseMeansNo: boolean; // True: no response means rejection/close
   submissionMethod: SubmissionMethod;
-  materialsWanted: string[]; // e.g. ["Query Letter", "Synopsis", "Sample Pages"]
+  materialsWanted: string[]; // e.g. ["Query Letter", "Synopsis", "First 10 pages"]
   dateAdded: string; // ISO String
   lastCheckedDate: string; // ISO String
   notes: string;

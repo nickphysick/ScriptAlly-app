@@ -4,8 +4,9 @@ import "./forms.css";
 export interface FormShellProps {
   /** Small mono caption above the name, e.g. "Logging a query to". */
   preLabel: string;
-  /** Header name — agent name, or a form title for non-agent forms. */
-  name: string;
+  /** Header name — agent name, or a form title for non-agent forms. Accepts markup (e.g. an
+   *  italic burgundy emphasis) as well as a plain string. */
+  name: React.ReactNode;
   /** Secondary line — agency or context. Optional. */
   subLine?: string;
   /** Avatar initials. If omitted, derived from `name`. Ignored when `avatarIcon` is given. */
@@ -43,8 +44,8 @@ export interface FormShellProps {
   containerStyle?: React.CSSProperties;
 }
 
-const initialsFrom = (name: string): string =>
-  name
+const initialsFrom = (name: React.ReactNode): string =>
+  (typeof name === "string" ? name : "")
     .split(/\s+/)
     .filter(Boolean)
     .map((w) => w[0])

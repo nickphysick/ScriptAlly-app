@@ -17,3 +17,12 @@ export type { BrandInputProps } from "./BrandInput";
 
 export { FormField, Strong, Em } from "./FormField";
 export type { FormFieldProps } from "./FormField";
+
+export { SegmentedToggle } from "./SegmentedToggle";
+export type { SegmentedToggleProps, SegmentedToggleOption } from "./SegmentedToggle";
+
+export { WeekSlider } from "./WeekSlider";
+export type { WeekSliderProps } from "./WeekSlider";
+
+export { GenreCombobox } from "./GenreCombobox";
+export type { GenreComboboxProps } from "./GenreCombobox";
