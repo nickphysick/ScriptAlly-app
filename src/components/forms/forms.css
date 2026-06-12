@@ -520,6 +520,177 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* ──────────────────────────────────────────────────────────────────────────
+   Add an Agent form — single scrolling sectioned layout.
+   Ported verbatim from design-reference scriptally-add-agent-full-v3.html.
+   Namespaced `sa-aa-` so these never collide with the shared chip/field rules.
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* header-band avatar: profile Lottie disc + overlapping plus badge */
+.sa-aa-avatar { position: relative; width: 34px; height: 34px; }
+.sa-aa-avatar .sa-aa-disc {
+  width: 34px; height: 34px; border-radius: 50%; overflow: hidden;
+  display: flex; align-items: center; justify-content: center; background: #f5e2da;
+}
+.sa-aa-avatar .sa-aa-plus {
+  position: absolute; right: -5px; bottom: -3px;
+  width: 15px; height: 15px; border-radius: 50%;
+  background: #fdfaf5; border: 1px solid rgba(124, 58, 42, 0.2);
+  display: flex; align-items: center; justify-content: center;
+  color: #7c3a2a; box-shadow: 0 1px 2px rgba(58, 28, 20, 0.12);
+}
+
+/* labelled section divider (mono burgundy-rose, hairline rule trailing) */
+.sa-section {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em;
+  color: #b58d7a;
+  margin: 18px 0 11px;
+}
+.sa-section::after { content: ''; flex: 1; height: 1px; background: #efe3d6; }
+.sa-section.first { margin-top: 2px; }
+
+/* "optional" / helper suffix on a label */
+.sa-label .sa-opt {
+  font-family: 'Inter', sans-serif; font-style: italic;
+  text-transform: none; letter-spacing: 0; color: #c9a89e; font-size: 11px;
+}
+
+/* segmented two-state toggle (submission status) */
+.sa-seg { display: inline-flex; background: #f1ece4; border: 0.5px solid #e0d5c8; border-radius: 9px; padding: 3px; gap: 3px; }
+.sa-seg-b {
+  border: none; background: transparent; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.04em;
+  color: #9c8878; padding: 8px 22px; border-radius: 7px; transition: all 0.15s;
+}
+.sa-seg-b.on { background: #f5e2da; color: #7c3a2a; font-weight: 500; box-shadow: 0 1px 2px rgba(58, 28, 20, 0.08); }
+
+/* response-window slider (1–26 weeks) */
+.sa-wk-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 11px; }
+.sa-wk-read { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500; color: #7c3a2a; }
+.sa-wk-slider {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 6px; border-radius: 4px; background: #e7ddd0;
+  outline: none; cursor: pointer;
+}
+.sa-wk-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: #7c3a2a; border: 3px solid #fdfaf5;
+  box-shadow: 0 1px 4px rgba(58, 28, 20, 0.32); cursor: grab;
+}
+.sa-wk-slider::-webkit-slider-thumb:active { cursor: grabbing; }
+.sa-wk-slider::-moz-range-thumb {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #7c3a2a; border: 3px solid #fdfaf5;
+  box-shadow: 0 1px 4px rgba(58, 28, 20, 0.32); cursor: grab;
+}
+.sa-wk-slider:focus-visible { box-shadow: 0 0 0 3px rgba(138, 158, 136, 0.25); }
+.sa-wk-ends {
+  display: flex; justify-content: space-between; margin-top: 7px;
+  font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.04em; color: #bcae9e;
+}
+
+/* materials wanted — pill toggle chips + revealed detail inputs */
+.sa-aa-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.sa-aa-chip {
+  font-size: 11px; color: #9c8878;
+  border: 0.5px solid #e0d5c8; border-radius: 20px;
+  padding: 6px 12px; background: #fff; cursor: pointer; user-select: none;
+  transition: all 0.15s;
+}
+.sa-aa-chip:hover { border-color: #c9a89e; }
+.sa-aa-chip.on { background: #f5e2da; border-color: #e8c8bc; color: #7c3a2a; font-weight: 500; }
+.sa-aa-mat-details { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 9px; }
+.sa-aa-mat-d { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #9c8878; }
+.sa-aa-mat-d input {
+  width: 54px; text-align: center; background: #fff;
+  border: 0.5px solid #e0d5c8; border-radius: 7px; padding: 5px;
+  font-size: 12px; color: #3a1c14; outline: none;
+}
+.sa-aa-mat-d input::placeholder { color: #c8b8a8; }
+.sa-aa-mat-d input.wide { width: 92px; text-align: left; }
+.sa-aa-mat-d input.other-in { width: 248px; max-width: 100%; text-align: left; }
+.sa-aa-mat-d input:focus { border-color: #8a9e88; }
+
+/* genre combobox — chips inside the control + filtering menu */
+.sa-aa-combo { position: relative; }
+.sa-aa-combo-control {
+  display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  background: #fff; border: 0.5px solid #e0d5c8; border-radius: 9px;
+  padding: 7px 9px; min-height: 42px; cursor: text;
+  box-shadow: inset 0 1px 2px rgba(58, 28, 20, 0.03); transition: all 0.2s;
+}
+.sa-aa-combo.open .sa-aa-combo-control { border-color: #8a9e88; box-shadow: 0 0 0 3px rgba(138, 158, 136, 0.12); }
+.sa-aa-gchip {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: #f5e2da; border: 0.5px solid #e8c8bc; color: #7c3a2a;
+  border-radius: 16px; padding: 4px 5px 4px 11px; font-size: 11.5px; font-weight: 500;
+}
+.sa-aa-gchip button {
+  cursor: pointer; font-weight: 400; font-size: 15px; line-height: 1;
+  color: #c19a8b; padding: 0 2px; background: none; border: 0;
+}
+.sa-aa-gchip button:hover { color: #7c3a2a; }
+.sa-aa-combo-in {
+  flex: 1; min-width: 96px; border: none; outline: none; background: transparent;
+  font-family: 'Inter', sans-serif; font-size: 13px; color: #3a1c14; padding: 4px;
+}
+.sa-aa-combo-in::placeholder { color: #c8b8a8; }
+.sa-aa-combo-menu {
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+  background: #fdfaf5; border: 0.5px solid #e0d5c8; border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(58, 28, 20, 0.14); padding: 5px;
+  z-index: 40; max-height: 200px; overflow-y: auto;
+  animation: sa-popIn 0.15s ease;
+}
+.sa-aa-combo-o { padding: 8px 11px; border-radius: 7px; font-size: 12.5px; color: #3a1c14; cursor: pointer; }
+.sa-aa-combo-o:hover, .sa-aa-combo-o.hl { background: #fff; color: #7c3a2a; }
+.sa-aa-combo-empty { padding: 8px 11px; font-size: 12px; color: #bcae9e; font-style: italic; }
+
+/* agent fit — 5 stars + meaning badge */
+.sa-aa-fit-q { font-size: 12.5px; color: #6a5c50; margin-bottom: 9px; }
+.sa-aa-fit-note { font-size: 11px; font-style: italic; color: #b0a090; margin-top: 9px; line-height: 1.45; }
+.sa-aa-fit-rate { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.sa-aa-stars { display: flex; gap: 4px; }
+.sa-aa-star { cursor: pointer; line-height: 0; display: inline-flex; transition: transform 0.12s; background: none; border: 0; padding: 0; }
+.sa-aa-star:hover { transform: scale(1.14); }
+.sa-aa-star svg { width: 23px; height: 23px; fill: #ece0d2; stroke: #e2d2c2; stroke-width: 1; transition: fill 0.12s, stroke 0.12s; }
+.sa-aa-star.on svg { fill: #7c3a2a; stroke: #7c3a2a; }
+/* read-only display variant: no pointer affordance */
+.sa-aa-star.ro { cursor: default; }
+.sa-aa-star.ro:hover { transform: none; }
+.sa-aa-fit-meaning {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.04em;
+  color: #7c3a2a; background: #f5e2da; border: 0.5px solid #e8c8bc;
+  border-radius: 14px; padding: 5px 12px; white-space: nowrap;
+}
+.sa-aa-fit-meaning.empty { background: transparent; border-color: transparent; color: #bcae9e; }
+
+/* socials repeater */
+.sa-aa-soc-row { display: flex; gap: 7px; align-items: center; margin-bottom: 7px; }
+.sa-aa-soc-row .sa-dd { width: 132px; flex-shrink: 0; }
+.sa-aa-soc-row .sa-dd .sa-field { margin-bottom: 0; }
+.sa-aa-soc-url { flex: 1; margin-bottom: 0 !important; }
+.sa-aa-soc-x {
+  flex-shrink: 0; width: 32px; height: 32px; border-radius: 7px;
+  border: 0.5px solid #e8d6cc; background: #fff; color: #b58d7a;
+  cursor: pointer; font-size: 16px; line-height: 1;
+}
+.sa-aa-soc-x:hover { background: #f7ebe5; color: #7c3a2a; }
+.sa-aa-add-soc {
+  width: 100%; border: 1px dashed #d8c5b6; background: transparent; border-radius: 9px;
+  padding: 10px; cursor: pointer; margin-top: 2px;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.05em; color: #9c8878;
+  transition: all 0.15s;
+}
+.sa-aa-add-soc:hover { border-color: #7c3a2a; color: #7c3a2a; background: #fbf2ec; }
+
+/* a field block with no trailing margin collapse when stacked in a section */
+.sa-fld { margin-bottom: 13px; }
+
 /* ── Two-column form body (Record a Response wide mode) ─────────────────── */
 .sa-two-col {
   display: grid;

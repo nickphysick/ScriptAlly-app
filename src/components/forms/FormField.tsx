@@ -2,8 +2,8 @@ import React from "react";
 import "./forms.css";
 
 export interface FormFieldProps {
-  /** Mono uppercase field label. */
-  label: string;
+  /** Mono uppercase field label. Accepts markup (e.g. an italic "optional" suffix). */
+  label: React.ReactNode;
   /** The control — BrandDropdown / BrandDatePicker / BrandInput / etc. */
   children: React.ReactNode;
   /** Optional extra class on the label (e.g. one of the treatment classes below). */
