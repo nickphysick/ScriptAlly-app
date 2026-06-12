@@ -16,9 +16,6 @@
  * states are structurally impossible, and undo is just "delete the activity, recompute".
  *
  * Idempotent: recomputing an unchanged log writes the same values.
- *
- * Offline mode has a twin in db.tsx (recomputeQueryOffline) that runs the SAME derivation over
- * the in-memory activity mirror — identical inputs, identical outputs.
  */
 import { collection, doc, getDocs, updateDoc, deleteField } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "./firebase";

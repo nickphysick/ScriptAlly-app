@@ -52,7 +52,6 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
     manuscripts,
     updateAgent,
     deleteAgent,
-    isOfflineMode
   } = useScriptAllyDb();
 
   // Applet Selection and Filter States
@@ -79,8 +78,8 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
       return;
     }
 
-    if (isOfflineMode || !currentUser) {
-      // Offline mode: load from LocalStorage
+    if (!currentUser) {
+      // No authenticated user (seed/preview): load demo notes from LocalStorage.
       const cached = localStorage.getItem(`scriptally_agent_notes_${currentUser?.id || "seed"}_${selectedAgentId}`);
       if (cached) {
         setAgentNotesList(JSON.parse(cached));
@@ -127,7 +126,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
     });
 
     return () => unsub();
-  }, [selectedAgentId, isOfflineMode, currentUser?.id]);
+  }, [selectedAgentId, currentUser?.id]);
 
   // Handle post agent note
   const handleAddAgentNote = async (text: string) => {
@@ -135,25 +134,14 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
     const cleanText = text.trim();
     const now = new Date();
 
-    if (isOfflineMode) {
-      const newNote = {
-        id: "note-" + Math.random().toString(36).substr(2, 9),
+    const noteId = "note-" + Math.random().toString(36).substr(2, 9);
+    try {
+      await setDoc(doc(db, "users", currentUser.id, "agents", selectedAgentId, "notes", noteId), {
         text: cleanText,
         createdAt: now.toISOString()
-      };
-      const updated = [newNote, ...agentNotesList];
-      setAgentNotesList(updated);
-      localStorage.setItem(`scriptally_agent_notes_${currentUser.id}_${selectedAgentId}`, JSON.stringify(updated));
-    } else {
-      const noteId = "note-" + Math.random().toString(36).substr(2, 9);
-      try {
-        await setDoc(doc(db, "users", currentUser.id, "agents", selectedAgentId, "notes", noteId), {
-          text: cleanText,
-          createdAt: now.toISOString()
-        });
-      } catch (err) {
-        handleFirestoreError(err, OperationType.WRITE, `users/${currentUser.id}/agents/${selectedAgentId}/notes/${noteId}`);
-      }
+      });
+    } catch (err) {
+      handleFirestoreError(err, OperationType.WRITE, `users/${currentUser.id}/agents/${selectedAgentId}/notes/${noteId}`);
     }
     setNoteInput("");
   };

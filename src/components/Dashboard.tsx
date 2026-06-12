@@ -605,7 +605,6 @@ export const Dashboard: React.FC<{
     queries,
     activities,
     tasks,
-    isOfflineMode,
     logout,
     dismissTask,
     addAgent,
@@ -623,7 +622,7 @@ export const Dashboard: React.FC<{
   const [timelineItems, setTimelineItems] = useState<any[]>([]);
 
   useEffect(() => {
-    if (!currentUser?.id || isOfflineMode || currentUser.id === "writer-pro-lucy") {
+    if (!currentUser?.id || currentUser.id === "writer-pro-lucy") {
       setTimelineItems([]);
       return;
     }
@@ -1265,16 +1264,14 @@ export const Dashboard: React.FC<{
 
       if (result.success) {
         // Trigger Firestore update count to increment contributions by count
-        if (!isOfflineMode) {
-          try {
-            await updateDoc(doc(db, "communityAgents", match.agent.id), {
-              contributedByCount: increment(1)
-            });
-          } catch (countErr) {
-            console.error("Failed to increment contributedByCount in Firestore:", countErr);
-          }
+        try {
+          await updateDoc(doc(db, "communityAgents", match.agent.id), {
+            contributedByCount: increment(1)
+          });
+        } catch (countErr) {
+          console.error("Failed to increment contributedByCount in Firestore:", countErr);
         }
-        
+
         setRadarToast(`Successfully added "${match.agent.name}" to your agent list!`);
         setTimeout(() => setRadarToast(null), 4000);
       } else {
@@ -3327,42 +3324,6 @@ export const Dashboard: React.FC<{
             </div>
           )}
         </div>
-
-        {/* FIREBASE AUTH SETUP EXPLANATION BANNER */}
-        {isOfflineMode && (
-          <div className="bg-[#FAF1EF] border border-[#7c3a2a]/20 rounded-2xl p-5 md:p-6 shadow-sm flex flex-col md:flex-row gap-4 md:gap-5 items-start">
-            <div className="p-2.5 bg-[#7c3a2a]/10 rounded-xl text-[#7c3a2a] shrink-0">
-              <Sparkles className="w-5.5 h-5.5 text-[#7c3a2a]" />
-            </div>
-            <div className="space-y-2.5 w-full">
-              <div>
-                <h4 className="font-serif text-base font-bold text-[#3a1c14] tracking-tight flex items-baseline gap-2">
-                  <span>Activate Live Firebase Cloud Syncing</span>
-                  <span className="bg-[#BA7517]/15 text-[#BA7517] border border-[#BA7517]/20 rounded px-1.5 py-0.5 text-[9px] font-mono font-bold uppercase">Ready</span>
-                </h4>
-                <p className="text-xs text-[#3a1c14]/75 leading-relaxed mt-1">
-                  Since you have enabled <strong>Email/Password Sign-In</strong> in your Firebase Console, your project is now ready to authorize live accounts! Disconnect your offline pen to register or sign in with your permanent Google Cloud synchronized account. 
-                </p>
-              </div>
-              
-              <div className="flex flex-wrap gap-3 pt-1">
-                <button
-                  onClick={() => logout()}
-                  className="bg-[#7c3a2a] hover:bg-[#5e2b1e] text-white text-[11px] font-bold py-2 px-4 rounded-lg shadow-sm transition-all"
-                >
-                  Disconnect Sandbox &amp; Go Live &rarr;
-                </button>
-                
-                <button
-                  onClick={() => onNavigate("import")}
-                  className="border border-[#7c3a2a] text-[#7c3a2a] hover:bg-[#7c3a2a]/5 text-[11px] font-bold py-2 px-4 rounded-lg transition-all"
-                >
-                  Migrate Zite CSV Data
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
       )}
 

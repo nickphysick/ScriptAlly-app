@@ -47,7 +47,6 @@ export const Discover: React.FC<DiscoverProps> = ({ onNavigate }) => {
     manuscripts,
     communityAgents,
     addAgent,
-    isOfflineMode,
   } = useScriptAllyDb();
 
   const [selectedManuscriptId, setSelectedManuscriptId] = useState<string | null>(null);
@@ -316,16 +315,14 @@ export const Discover: React.FC<DiscoverProps> = ({ onNavigate }) => {
       });
 
       if (result.success) {
-        if (!isOfflineMode) {
-          try {
-            await updateDoc(doc(db, "communityAgents", match.agent.id), {
-              contributedByCount: increment(1)
-            });
-          } catch (countErr) {
-            console.error("Failed to increment contributedByCount in Firestore:", countErr);
-          }
+        try {
+          await updateDoc(doc(db, "communityAgents", match.agent.id), {
+            contributedByCount: increment(1)
+          });
+        } catch (countErr) {
+          console.error("Failed to increment contributedByCount in Firestore:", countErr);
         }
-        
+
         setRadarToast(`Successfully added "${match.agent.name}" to your agent list!`);
         setTimeout(() => setRadarToast(null), 4000);
       } else {

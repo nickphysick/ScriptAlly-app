@@ -54,7 +54,6 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ searchQuery, onN
     agents,
     updateManuscript,
     deleteManuscript,
-    isOfflineMode
   } = useScriptAllyDb();
 
   // Selection and Filter States
@@ -81,8 +80,8 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ searchQuery, onN
       return;
     }
 
-    if (isOfflineMode || !currentUser) {
-      // Offline mode: load from LocalStorage
+    if (!currentUser) {
+      // No authenticated user (seed/preview): load demo notes from LocalStorage.
       const cached = localStorage.getItem(`scriptally_ms_notes_${currentUser?.id || "seed"}_${selectedMsId}`);
       if (cached) {
         setMsNotesList(JSON.parse(cached));
@@ -121,7 +120,7 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ searchQuery, onN
     });
 
     return () => unsub();
-  }, [selectedMsId, isOfflineMode, currentUser?.id]);
+  }, [selectedMsId, currentUser?.id]);
 
   // Handle post note
   const handleAddMsNote = async (text: string) => {
@@ -129,25 +128,14 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ searchQuery, onN
     const cleanText = text.trim();
     const now = new Date();
 
-    if (isOfflineMode) {
-      const newNote = {
-        id: "note-" + Math.random().toString(36).substr(2, 9),
+    const noteId = "note-" + Math.random().toString(36).substr(2, 9);
+    try {
+      await setDoc(doc(db, "users", currentUser.id, "manuscripts", selectedMsId, "notes", noteId), {
         text: cleanText,
         createdAt: now.toISOString()
-      };
-      const updated = [newNote, ...msNotesList];
-      setMsNotesList(updated);
-      localStorage.setItem(`scriptally_ms_notes_${currentUser.id}_${selectedMsId}`, JSON.stringify(updated));
-    } else {
-      const noteId = "note-" + Math.random().toString(36).substr(2, 9);
-      try {
-        await setDoc(doc(db, "users", currentUser.id, "manuscripts", selectedMsId, "notes", noteId), {
-          text: cleanText,
-          createdAt: now.toISOString()
-        });
-      } catch (err) {
-        handleFirestoreError(err, OperationType.WRITE, `users/${currentUser.id}/manuscripts/${selectedMsId}/notes/${noteId}`);
-      }
+      });
+    } catch (err) {
+      handleFirestoreError(err, OperationType.WRITE, `users/${currentUser.id}/manuscripts/${selectedMsId}/notes/${noteId}`);
     }
     setNoteInput("");
   };
