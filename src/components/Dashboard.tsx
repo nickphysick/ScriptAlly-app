@@ -7,6 +7,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useScriptAllyDb } from "../lib/db";
 import { UserPlan, QueryStatus, ManuscriptStatus, ActivityType, Query, Task, CommunityAgent, Manuscript } from "../types";
+import { manuscriptGenres } from "../lib/manuscripts";
 import { 
   doc, 
   updateDoc, 
@@ -1419,41 +1420,30 @@ export const Dashboard: React.FC<{
     const mswlScore = Math.min(overlapping.length * 8, 40);
 
     // B. Genre match (20 points)
-    const msGenreRaw = (ms.genre || "").trim();
-    const msGenreLower = msGenreRaw.toLowerCase();
     const genresClean = (commAgent.genres || []).map(g => g.trim().toLowerCase());
-    
-    let genreScore = 0;
-    
-    // Split the manuscript genre into its component words
-    const msGenreComponents = msGenreRaw.split(/\s+/).filter(w => w.length > 0);
-    const isCompound = msGenreComponents.length > 1;
-    
-    if (isCompound) {
-      // If the agent's genres array contains an exact match for the full compound genre string (case insensitive) - award 20 points
-      if (genresClean.includes(msGenreLower)) {
-        genreScore = 20;
-      } else {
-        // Check how many of those components appear in the agent's genres array
-        const matchingComponents = msGenreComponents.filter(c => {
+
+    // Score one manuscript genre string against the agent's genres: exact compound match = 20,
+    // partial compound = 15 (≥2 components) / 8 (1 component), single-word exact = 20, else 0.
+    const scoreOneGenre = (raw: string): number => {
+      const gRaw = (raw || "").trim();
+      if (!gRaw) return 0;
+      const gLower = gRaw.toLowerCase();
+      const components = gRaw.split(/\s+/).filter(w => w.length > 0);
+      if (components.length > 1) {
+        if (genresClean.includes(gLower)) return 20;
+        const matchCount = components.filter(c => {
           const cLower = c.toLowerCase();
           return genresClean.some(g => g === cLower || g.includes(cLower));
-        });
-        const matchCount = matchingComponents.length;
-        if (matchCount >= 2) {
-          genreScore = 15;
-        } else if (matchCount === 1) {
-          genreScore = 8;
-        } else {
-          genreScore = 0;
-        }
+        }).length;
+        if (matchCount >= 2) return 15;
+        if (matchCount === 1) return 8;
+        return 0;
       }
-    } else {
-      // For single-word genres (e.g. 'Fantasy', 'Thriller', 'Romance') — keep the existing exact match logic awarding 20 points if found, 0 if not
-      const hasExactMatch = genresClean.includes(msGenreLower);
-      genreScore = hasExactMatch ? 20 : 0;
-    }
-    
+      return genresClean.includes(gLower) ? 20 : 0;
+    };
+
+    // Read the manuscript's primary genre PLUS any sub-genres; take the best-scoring match.
+    const genreScore = Math.max(0, ...manuscriptGenres(ms).map(scoreOneGenre));
     const isGenreMatch = genreScore > 0;
 
     // C. Age category match (15 points): award 15 points only if the specific community agent's genres array contains the manuscript's ageCategory — case insensitive

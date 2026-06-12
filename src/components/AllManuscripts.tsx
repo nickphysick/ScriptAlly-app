@@ -6,6 +6,7 @@
 import React, { useState, useEffect } from "react";
 import { useScriptAllyDb } from "../lib/db";
 import { Manuscript, ManuscriptStatus, ManuscriptVersion, Query, UserPlan } from "../types";
+import { manuscriptGenres } from "../lib/manuscripts";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { collection, setDoc, doc, onSnapshot } from "firebase/firestore";
 import {
@@ -414,7 +415,7 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ searchQuery, onN
                   </div>
 
                   <div className="flex items-center justify-between text-[11px] font-medium text-[#c9a89e]">
-                    <span>{ms.genre} &bull; {ms.ageCategory}</span>
+                    <span>{manuscriptGenres(ms).join(", ")} &bull; {ms.ageCategory}</span>
                     <span className="font-mono text-[10px] text-stone-400 font-semibold">{ms.wordCount?.toLocaleString() || 0} words</span>
                   </div>
 
@@ -524,7 +525,7 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ searchQuery, onN
                   {activeMs.title}
                 </h1>
                 <p className="text-[12px] text-stone-500 font-medium mt-1">
-                  {activeMs.genre} &middot; <span className="font-mono font-bold">{activeMs.wordCount?.toLocaleString() || 0}</span> Words in profile
+                  {manuscriptGenres(activeMs).join(", ")} &middot; <span className="font-mono font-bold">{activeMs.wordCount?.toLocaleString() || 0}</span> Words in profile
                 </p>
                 {activeMs.comparableTitles && (
                   <p className="text-[11px] text-[#7c3a2a] mt-1.5 font-medium italic">

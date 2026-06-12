@@ -416,6 +416,7 @@ export const ImportCsv: React.FC<{
           const msData = {
             title,
             genre,
+            subGenres: [],
             wordCount,
             logline,
             comparableTitles,
@@ -465,6 +466,7 @@ export const ImportCsv: React.FC<{
             const mockMs = {
               title: msTitleInput,
               genre: "Uncategorized Fiction",
+              subGenres: [],
               wordCount: 80000,
               logline: "Imported automatically to preserve Query relationships.",
               comparableTitles: "",

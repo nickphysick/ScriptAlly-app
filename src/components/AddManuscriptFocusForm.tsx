@@ -6,6 +6,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
 import { ManuscriptStatus, UserPlan } from "../types";
+import { PREDEFINED_GENRES, AGE_CATEGORIES, genreWordCountRange } from "../lib/manuscripts";
 import { 
   X, 
   Check, 
@@ -24,34 +25,6 @@ interface AddManuscriptFocusFormProps {
 }
 
 // Predefined genre list from Add agent form
-const PREDEFINED_GENRES = [
-  "Literary Fiction", 
-  "Commercial Fiction", 
-  "Historical Fiction", 
-  "Fantasy", 
-  "Science Fiction", 
-  "Horror", 
-  "Romance", 
-  "Thriller", 
-  "Mystery", 
-  "Crime", 
-  "Young Adult", 
-  "Middle Grade", 
-  "Memoir", 
-  "Non-fiction", 
-  "Narrative Non-fiction", 
-  "Children's"
-];
-
-// Predefined age categories
-const AGE_CATEGORIES = [
-  "Picture Book",
-  "Early Reader",
-  "Middle Grade",
-  "Young Adult",
-  "Adult"
-];
-
 export const AddManuscriptFocusForm: React.FC<AddManuscriptFocusFormProps> = ({
   isOpen,
   onClose,
@@ -570,7 +543,7 @@ export const AddManuscriptFocusForm: React.FC<AddManuscriptFocusFormProps> = ({
                   <div className="relative">
                     <input
                       type="number"
-                      placeholder="80,000"
+                      placeholder={genreWordCountRange(ageCategory, genreInput || genre) ?? "80,000"}
                       value={wordCount === 0 ? "" : wordCount}
                       onChange={(e) => {
                         const val = parseInt(e.target.value);

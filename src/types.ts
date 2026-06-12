@@ -17,8 +17,12 @@ export interface User {
   subscriptionStatus: "active" | "trialing" | "canceled" | "none";
   onboardingComplete?: boolean;
   // Where the writer is in their querying journey, captured on the onboarding welcome step.
-  // Display/personalisation only for now — it does not branch the onboarding flow.
+  // The granular answer — Branch B reads this for its import default (early → add by hand;
+  // deep/interest → Smart Import).
   queryingStage?: "starting" | "early" | "deep" | "interest";
+  // The collapsed 3-way that drives the onboarding branch: starting → Branch A,
+  // querying → Branch B, exploring → Branch C (skip). Derived from queryingStage at the welcome step.
+  journeyStage?: "starting" | "querying" | "exploring";
 }
 
 export enum ManuscriptStatus {
@@ -34,7 +38,8 @@ export interface Manuscript {
   id: string;
   userId: string;
   title: string;
-  genre: string;
+  genre: string; // primary genre
+  subGenres?: string[]; // additional genres beyond the primary; existing records read as []
   ageCategory: string;
   wordCount: number;
   logline: string;
@@ -123,6 +128,8 @@ export interface Agent {
   agentNotes?: string;
   // Standing disposition set when logging a rejection: would you query this agent again (different MS)?
   requeryPreference?: "yes" | "maybe" | "no";
+  // Set on agents created via Smart Import; surfaces them in the agent database for completion.
+  importedNeedsReview?: boolean;
 }
 
 export interface CommunityAgent {
