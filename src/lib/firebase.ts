@@ -6,16 +6,36 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import firebaseConfig from "../../firebase-applet-config.json";
+
+// Firebase config is environment-driven (.env.production / .env.development), so dev builds
+// can target a separate Firebase project without ever touching production data. The production
+// values mirror firebase-applet-config.json exactly — that file remains on disk as reference
+// but is no longer imported.
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID ?? "",
+};
 
 // Initialize the Firebase app
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firestore specifying our database ID (CRITICAL to avoid default breaks)
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+// Firestore database id. Production uses a NAMED database (ai-studio-…, CRITICAL — the default
+// database would be a different, empty store). A dev project typically uses the default
+// database: leave VITE_FIREBASE_DATABASE_ID empty or "(default)" and getFirestore is called
+// without an id.
+const databaseId = import.meta.env.VITE_FIREBASE_DATABASE_ID;
+export const db =
+  !databaseId || databaseId === "(default)"
+    ? getFirestore(app)
+    : getFirestore(app, databaseId);
 
-// Initialize Firebase Authentication
-export const auth = getAuth();
+// Initialize Firebase Authentication (bound to this app instance explicitly)
+export const auth = getAuth(app);
 
 // Error Handling Infrastructure as per Skill Requirements
 export enum OperationType {

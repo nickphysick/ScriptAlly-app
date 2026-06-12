@@ -5,7 +5,7 @@
 
 import React, { useState } from "react";
 import { useScriptAllyDb } from "../lib/db";
-import { BookOpen, MapPin, Feather, Sparkles, Key, Mail, CheckCircle } from "lucide-react";
+import { MapPin, Feather, Key, Mail, CheckCircle } from "lucide-react";
 
 export const Auth: React.FC = () => {
   const { login, signup, resetPassword } = useScriptAllyDb();
@@ -56,17 +56,6 @@ export const Auth: React.FC = () => {
     }
   };
 
-  const handleDemoMode = async (plan: "free" | "pro") => {
-    try {
-      if (plan === "pro") {
-        await login("nick.physick@gmail.com", "writerpassword123"); // Seeds pro user
-      } else {
-        await signup("Aspiring Novice", "novice@writer.com", "writerpassword123"); // Seeds free trialist
-      }
-    } catch (err: any) {
-      setErrorMsg(err?.message || "Failed to initialize fast sandbox demo account.");
-    }
-  };
 
   return (
     <div className="min-h-screen bg-[#F5F0EA] flex items-center justify-center p-4 md:p-8 font-sans relative overflow-hidden">
@@ -209,33 +198,6 @@ export const Auth: React.FC = () => {
               {isLogin ? "Authenticate Account" : "Init ScriptAlly Portfolio"}
             </button>
           </form>
-
-          {/* Quick Sandbox Demolinks */}
-          <div className="mt-8 pt-6 border-t border-[#7c3a2a]/10 text-center">
-            <span className="block text-[10px] font-mono uppercase tracking-wider text-[#3a1c14]/50 mb-3 block">
-              ⚡ Sandbox quick-test drives (no registration needed)
-            </span>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => handleDemoMode("pro")}
-                className="flex items-center justify-center gap-1.5 py-1.5 px-3 bg-[#7c3a2a]/5 hover:bg-[#7c3a2a]/10 text-xs font-medium text-[#7c3a2a] rounded border border-[#7c3a2a]/10 transition-all hover:scale-[1.02]"
-              >
-                <Sparkles className="w-3 h-3" />
-                <span>Launch Pro Sandbox</span>
-              </button>
-              
-              <button
-                onClick={() => handleDemoMode("free")}
-                className="flex items-center justify-center gap-1.5 py-1.5 px-3 bg-[#3a1c14]/5 hover:bg-[#3a1c14]/10 text-xs font-medium text-[#3a1c14] rounded border border-[#3a1c14]/10 transition-all hover:scale-[1.02]"
-              >
-                <BookOpen className="w-3 h-3" />
-                <span>Launch Free limits</span>
-              </button>
-            </div>
-            <p className="mt-4 text-[11px] text-[#3a1c14]/50 leading-relaxed italic">
-              Pre-seeded with Lucy Sterling's query log covering "The Book of Lost Clockworks".
-            </p>
-          </div>
 
         </div>
 

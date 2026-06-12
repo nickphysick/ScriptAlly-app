@@ -4,7 +4,11 @@ dist/
 coverage/
 .DS_Store
 *.log
-.env*
-!.env.example
+# Plain .env may hold real secrets (e.g. GEMINI_API_KEY) — never commit it.
+# Per-machine overrides (.env*.local) stay local too. The named Firebase env files
+# (.env.production / .env.development / .env.example) ARE committed: the Firebase
+# web config is not a secret (it ships to every browser).
+.env
+.env*.local
 .firebase/
 .claude/

@@ -4,8 +4,6 @@
  */
 
 import {
-  User,
-  UserPlan,
   Manuscript,
   ManuscriptStatus,
   ManuscriptVersion,
@@ -22,15 +20,6 @@ import {
 } from "../types";
 
 export const SEED_USER_ID = "writer-pro-lucy";
-
-export const seedUser: User = {
-  id: SEED_USER_ID,
-  name: "Lucy Sterling",
-  email: "nick.physick@gmail.com",
-  plan: UserPlan.PRO, // Let's default to PRO so they can see all package features, and let themtoggle on Pricing!
-  trialStartDate: "2026-05-18T10:00:00Z",
-  subscriptionStatus: "active",
-};
 
 export const seedManuscripts: Manuscript[] = [
   {

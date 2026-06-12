@@ -47,7 +47,6 @@ export const Nav: React.FC<NavProps> = ({
     tasks,
     dismissTask,
     logout,
-    isOfflineMode,
   } = useScriptAllyDb();
 
   const [openDropdown, setOpenDropdown] = useState<"queries" | "agents" | "manuscripts" | null>(null);
@@ -568,13 +567,6 @@ export const Nav: React.FC<NavProps> = ({
             </div>
           </div>
         </nav>
-
-        {isOfflineMode && (
-          <span className="hidden lg:flex bg-[#BA7517]/15 text-[#BA7517] border border-[#BA7517]/20 rounded-full px-2 py-0.5 text-[8px] font-mono font-bold items-center gap-1 ml-4 shrink-0">
-            <span className="w-1 h-1 rounded-full bg-[#BA7517] animate-pulse" />
-            <span>OFFLINE</span>
-          </span>
-        )}
 
         {/* Right side utilities (margin-left auto, gap 10px, all vertically centered) */}
         <div className="ml-auto flex items-center gap-[10px] shrink-0 h-full">

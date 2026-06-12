@@ -26,7 +26,6 @@ import {
 } from "../types";
 
 import {
-  seedUser,
   seedManuscripts,
   seedVersions,
   seedPackages,
@@ -143,7 +142,6 @@ interface DbContextType {
   journalEntries: JournalEntry[];
   dismissedTasks: DismissedTask[];
   tasks: Task[];
-  isOfflineMode: boolean;
   login: (email: string, password?: string) => Promise<boolean>;
   signup: (name: string, email: string, password?: string) => Promise<boolean>;
   resetPassword: (email: string) => Promise<void>;
@@ -228,7 +226,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]);
   const [dismissedTasks, setDismissedTasks] = useState<DismissedTask[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [isOfflineMode, setIsOfflineMode] = useState<boolean>(false);
 
   // Temporary buffer to retain signup pen names
   const signupTempNameRef = useRef<string | null>(null);
@@ -285,8 +282,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       if (!firebaseUser) {
         // No authenticated user — show the Auth screen
         setCurrentUser(null);
-        setIsOfflineMode(false);
-        localStorage.removeItem("scriptally_offline");
 
         // Clean up any active listeners
         unsubUser();
@@ -302,8 +297,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       }
 
       const uid = firebaseUser.uid;
-      setIsOfflineMode(false);
-      localStorage.removeItem("scriptally_offline");
 
       // Seed community agents once after authenticated session is established
       seedCommunityAgentsIfEmpty().catch(err => {
@@ -463,143 +456,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     };
   }, []);
 
-  // Save to space helper
-  const saveToLocalStorage = (key: string, data: any) => {
-    if (!currentUser) return;
-    localStorage.setItem(`scriptally_${key}_${currentUser.id}`, JSON.stringify(data));
-  };
-
-  // Load and subscribe from localStorage when in offline mode
+  // Load/fetch community agents from Firestore (fallback to local seeds on error / no user)
   useEffect(() => {
-    if (!isOfflineMode || !currentUser) return;
-
-    const uid = currentUser.id;
-
-    // Load manuscripts
-    const cachedManuscripts = localStorage.getItem(`scriptally_manuscripts_${uid}`);
-    if (cachedManuscripts) {
-      setManuscripts(JSON.parse(cachedManuscripts));
-    } else {
-      const seeded = seedManuscripts.map(m => ({ ...m, userId: uid }));
-      localStorage.setItem(`scriptally_manuscripts_${uid}`, JSON.stringify(seeded));
-      setManuscripts(seeded);
-    }
-
-    // Load versions
-    const cachedVersions = localStorage.getItem(`scriptally_versions_${uid}`);
-    if (cachedVersions) {
-      setVersions(JSON.parse(cachedVersions));
-    } else {
-      const seeded = seedVersions.map(v => ({ ...v, userId: uid }));
-      localStorage.setItem(`scriptally_versions_${uid}`, JSON.stringify(seeded));
-      setVersions(seeded);
-    }
-
-    // Load packages
-    const cachedPackages = localStorage.getItem(`scriptally_packages_${uid}`);
-    if (cachedPackages) {
-      setPackages(JSON.parse(cachedPackages));
-    } else {
-      const seeded = seedPackages.map(p => ({ ...p, userId: uid }));
-      localStorage.setItem(`scriptally_packages_${uid}`, JSON.stringify(seeded));
-      setPackages(seeded);
-    }
-
-    // Load agents
-    const cachedAgents = localStorage.getItem(`scriptally_agents_${uid}`);
-    if (cachedAgents) {
-      setAgents(JSON.parse(cachedAgents));
-    } else {
-      const seeded = seedAgents.map(a => ({ ...a, userId: uid }));
-      localStorage.setItem(`scriptally_agents_${uid}`, JSON.stringify(seeded));
-      setAgents(seeded);
-    }
-
-    // Load queries
-    const cachedQueries = localStorage.getItem(`scriptally_queries_${uid}`);
-    if (cachedQueries) {
-      setQueries(JSON.parse(cachedQueries));
-    } else {
-      const seeded = seedQueries.map(q => ({ ...q, userId: uid }));
-      localStorage.setItem(`scriptally_queries_${uid}`, JSON.stringify(seeded));
-      setQueries(seeded);
-    }
-
-    // Load activities
-    const cachedActivities = localStorage.getItem(`scriptally_activities_${uid}`);
-    if (cachedActivities) {
-      try {
-        const parsed = JSON.parse(cachedActivities) as Activity[];
-        let hasUpdates = false;
-        const migrated = parsed.map(p => {
-          const match = seedActivities.find(sa => sa.id === p.id);
-          let cleanedDesc = p.description || "";
-          if (cleanedDesc && (cleanedDesc.toLowerCase().includes("initial query packet dispatched") || cleanedDesc.toLowerCase().includes("dispatched to"))) {
-            cleanedDesc = cleanedDesc
-              .replace(/Initial Query packet dispatched to /gi, "Query sent to ")
-              .replace(/Initial Query packet sent to /gi, "Query sent to ")
-              .replace(/dispatched to /gi, "sent to ");
-            hasUpdates = true;
-          }
-          if (match) {
-            if (p.description !== match.description || p.details !== match.details || cleanedDesc !== p.description) {
-              hasUpdates = true;
-              return {
-                ...p,
-                description: match.description,
-                details: match.details
-              };
-            }
-          }
-          if (cleanedDesc !== p.description) {
-            hasUpdates = true;
-            return {
-              ...p,
-              description: cleanedDesc
-            };
-          }
-          return p;
-        });
-        if (hasUpdates) {
-          localStorage.setItem(`scriptally_activities_${uid}`, JSON.stringify(migrated));
-          setActivities(migrated);
-        } else {
-          setActivities(parsed);
-        }
-      } catch (e) {
-        console.error("Failed to parse cached activities", e);
-        const seeded = seedActivities.map(a => ({ ...a, userId: uid }));
-        localStorage.setItem(`scriptally_activities_${uid}`, JSON.stringify(seeded));
-        setActivities(seeded);
-      }
-    } else {
-      const seeded = seedActivities.map(a => ({ ...a, userId: uid }));
-      localStorage.setItem(`scriptally_activities_${uid}`, JSON.stringify(seeded));
-      setActivities(seeded);
-    }
-
-    // Load journal entries
-    const cachedJournal = localStorage.getItem(`scriptally_journal_${uid}`);
-    if (cachedJournal) {
-      setJournalEntries(JSON.parse(cachedJournal));
-    } else {
-      const seeded = seedJournalEntries.map(j => ({ ...j, userId: uid }));
-      localStorage.setItem(`scriptally_journal_${uid}`, JSON.stringify(seeded));
-      setJournalEntries(seeded);
-    }
-
-    // Load dismissed tasks
-    const cachedDismissed = localStorage.getItem(`scriptally_dismissed_${uid}`);
-    if (cachedDismissed) {
-      setDismissedTasks(JSON.parse(cachedDismissed));
-    } else {
-      setDismissedTasks([]);
-    }
-  }, [isOfflineMode, currentUser]);
-
-  // Load/fetch community agents depending on online/offline state
-  useEffect(() => {
-    if (isOfflineMode || !currentUser) {
+    if (!currentUser) {
       setCommunityAgents(localSeedCommunityAgents);
       return;
     }
@@ -620,7 +479,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     };
 
     fetchCommunityAgents();
-  }, [currentUser, isOfflineMode]);
+  }, [currentUser]);
 
   // Compute Tasks periodically based on records
   useEffect(() => {
@@ -854,12 +713,11 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       }
 
       // 3. Heal queries whose AUTHORITATIVE per-query activity log is empty.
-      //    "Authoritative" = the per-query `activity` subcollection online (the store derivation
-      //    reads), and the in-memory `activities` mirror offline. The old check judged against the
-      //    global feed, so a query with a global-feed row but an empty subcollection was skipped —
-      //    leaving derivation to fall back to Queried. We now judge and seed the SAME store, and
-      //    only stamp activities (never write status; recomputeQuery derives it).
-      const offlineHeals: Activity[] = [];
+      //    "Authoritative" = the per-query `activity` subcollection (the store derivation reads).
+      //    The old check judged against the global feed, so a query with a global-feed row but an
+      //    empty subcollection was skipped — leaving derivation to fall back to Queried. We now
+      //    judge and seed the SAME store, and only stamp activities (never write status;
+      //    recomputeQuery derives it).
       for (const q of queries) {
         if (q.status === QueryStatus.QUERIED) continue;
 
@@ -877,25 +735,19 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
         // Already has a status-bearing entry in the authoritative store? Leave it untouched (no dup).
         let hasStatusBearing: boolean;
-        if (isOfflineMode) {
-          hasStatusBearing = activities.some(
-            a => a.queryId === q.id && normalizeResultingStatus(a.resultingStatus) !== null
-          );
-        } else {
-          try {
-            const sub = await getDocs(collection(db, "users", currentUser.id, "queries", q.id, "activity"));
-            hasStatusBearing = sub.docs.some(d => {
-              const data = d.data();
-              return (
-                normalizeResultingStatus(data.resultingStatus) !== null ||
-                normalizeResultingStatus(data.type) !== null
-              );
-            });
-          } catch (err) {
-            // Never heal blind on a read error — that could create a duplicate.
-            console.error("[ScriptAlly Backfill] Could not read per-query log; skipping heal:", err);
-            continue;
-          }
+        try {
+          const sub = await getDocs(collection(db, "users", currentUser.id, "queries", q.id, "activity"));
+          hasStatusBearing = sub.docs.some(d => {
+            const data = d.data();
+            return (
+              normalizeResultingStatus(data.resultingStatus) !== null ||
+              normalizeResultingStatus(data.type) !== null
+            );
+          });
+        } catch (err) {
+          // Never heal blind on a read error — that could create a duplicate.
+          console.error("[ScriptAlly Backfill] Could not read per-query log; skipping heal:", err);
+          continue;
         }
         if (hasStatusBearing) continue;
 
@@ -912,53 +764,27 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         const note = statusReconstructionNote(q.status);
         const healId = `act-status-${q.status.replace(/\s+/g, "-").toLowerCase()}-${q.id}`;
 
-        if (isOfflineMode) {
-          offlineHeals.push({
-            id: healId,
-            userId: currentUser.id,
-            activityType: ActivityType.STATUS_CHANGED,
-            description: note,
-            manuscriptId: q.manuscriptId,
-            queryId: q.id,
-            date: new Date(dateVal).toISOString(),
-            details: note,
-            resultingStatus: q.status,
-          });
-        } else {
-          try {
-            const manuscriptTitle = manuscripts.find(ms => ms.id === q.manuscriptId)?.title || "";
-            const agentName = agents.find(ag => ag.id === q.agentId)?.name || "The agent";
-            await setDoc(
-              doc(db, "users", currentUser.id, "queries", q.id, "activity", healId),
-              {
-                type: q.status,
-                resultingStatus: q.status,
-                createdAt: Timestamp.fromMillis(dateVal),
-                note,
-                queryId: q.id,
-                agentName,
-                manuscriptTitle,
-              },
-              { merge: true }
-            );
-            // Log changed → derive status/dates/flags from it. Stored status is unchanged.
-            await recomputeQueryOnline(currentUser.id, q.id);
-            console.log(`[ScriptAlly Backfill] Healed missing per-query log for ${q.id} (${q.status}).`);
-          } catch (err) {
-            console.error("[ScriptAlly Backfill] Online heal failed for query:", q.id, err);
-          }
-        }
-      }
-
-      // Offline: the in-memory mirror IS the authoritative store — append the heals once, then
-      // recompute each healed query over the updated mirror so its derived status matches.
-      if (offlineHeals.length > 0) {
-        const updated = [...activities, ...offlineHeals];
-        setActivities(updated);
-        saveToLocalStorage("activities", updated);
-        for (const heal of offlineHeals) {
-          recomputeQueryOffline(heal.queryId, updated);
-          console.log(`[ScriptAlly Backfill] Healed missing offline log for ${heal.queryId}.`);
+        try {
+          const manuscriptTitle = manuscripts.find(ms => ms.id === q.manuscriptId)?.title || "";
+          const agentName = agents.find(ag => ag.id === q.agentId)?.name || "The agent";
+          await setDoc(
+            doc(db, "users", currentUser.id, "queries", q.id, "activity", healId),
+            {
+              type: q.status,
+              resultingStatus: q.status,
+              createdAt: Timestamp.fromMillis(dateVal),
+              note,
+              queryId: q.id,
+              agentName,
+              manuscriptTitle,
+            },
+            { merge: true }
+          );
+          // Log changed → derive status/dates/flags from it. Stored status is unchanged.
+          await recomputeQueryOnline(currentUser.id, q.id);
+          console.log(`[ScriptAlly Backfill] Healed missing per-query log for ${q.id} (${q.status}).`);
+        } catch (err) {
+          console.error("[ScriptAlly Backfill] Online heal failed for query:", q.id, err);
         }
       }
 
@@ -982,25 +808,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   // from the activity log by recomputeQuery — the only writer of those fields — so the
   // status-vs-log desyncs it patched (leftover dates after undo, duplicate timeline rows,
   // contradictory entries) are structurally impossible rather than reactively repaired.
-
-  // Drop into local offline demo mode when the Firebase Email/Password provider
-  // is unavailable (disabled in console). Keeps the sandbox usable without a backend.
-  const enterOfflineDemo = (email: string) => {
-    console.warn("Email/Password Auth unavailable in Firebase Console. Falling back to Local Offline Mode!");
-    setIsOfflineMode(true);
-    localStorage.setItem("scriptally_offline", "true");
-
-    const dummy: User = {
-      id: "local-user-pro",
-      name: email === "novice@writer.com" ? "Aspiring Novice" : "Lucy Sterling",
-      email: email,
-      plan: email === "novice@writer.com" ? UserPlan.FREE : UserPlan.PRO,
-      trialStartDate: new Date().toISOString(),
-      subscriptionStatus: email === "novice@writer.com" ? "none" : "active",
-    };
-    setCurrentUser(dummy);
-    localStorage.setItem("scriptally_user", JSON.stringify(dummy));
-  };
 
   // Translate raw Firebase auth error codes into clear, actionable messages.
   const friendlyAuthError = (code?: string): string => {
@@ -1026,42 +833,13 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   };
 
   const login = async (email: string, password?: string): Promise<boolean> => {
-    const pass = password || "writerpassword123";
+    const pass = password || "";
     try {
       await signInWithEmailAndPassword(auth, email, pass);
-      setIsOfflineMode(false);
-      localStorage.removeItem("scriptally_offline");
       return true;
     } catch (error: any) {
-      // Provider disabled → keep the local demo experience working.
-      if (error && error.code === "auth/operation-not-allowed") {
-        enterOfflineDemo(email);
-        return true;
-      }
-
-      // For a brand-new email, transparently create the account using the
-      // password the user actually typed so they can sign back in with it.
-      if (error && (error.code === "auth/user-not-found" || error.code === "auth/invalid-credential")) {
-        try {
-          await createUserWithEmailAndPassword(auth, email, pass);
-          setIsOfflineMode(false);
-          localStorage.removeItem("scriptally_offline");
-          return true;
-        } catch (subErr: any) {
-          if (subErr && subErr.code === "auth/operation-not-allowed") {
-            enterOfflineDemo(email);
-            return true;
-          }
-          // The account already exists, so the sign-in simply had the wrong
-          // password. Surface a clear message instead of leaving the user stuck.
-          if (subErr && subErr.code === "auth/email-already-in-use") {
-            throw new Error(friendlyAuthError("auth/invalid-credential"));
-          }
-          console.error("Auto creation error:", subErr);
-          throw new Error(friendlyAuthError(subErr?.code));
-        }
-      }
-
+      // A failed sign-in is just a failed sign-in — surface a clear message and create nothing.
+      // (Account creation lives only in signup().)
       console.error("Authentication login failures:", error);
       throw new Error(friendlyAuthError(error?.code));
     }
@@ -1074,9 +852,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     try {
       await sendPasswordResetEmail(auth, email);
     } catch (error: any) {
-      if (error && error.code === "auth/operation-not-allowed") {
-        throw new Error("Password reset isn't available in offline demo mode.");
-      }
       throw new Error(friendlyAuthError(error?.code));
     }
   };
@@ -1085,29 +860,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     try {
       signupTempNameRef.current = name;
       sessionStorage.setItem("scriptally_new_signup", "true");
-      const pass = password || "writerpassword123";
+      const pass = password || "";
       await createUserWithEmailAndPassword(auth, email, pass);
-      setIsOfflineMode(false);
-      localStorage.removeItem("scriptally_offline");
       return true;
     } catch (error: any) {
-      if (error && error.code === "auth/operation-not-allowed") {
-        console.warn("Email/Password Auth is disabled in Firebase Console. Falling back to Local Offline Mode!");
-        setIsOfflineMode(true);
-        localStorage.setItem("scriptally_offline", "true");
-        
-        const freshUser: User = {
-          id: "local-user-" + Math.random().toString(36).substr(2, 9),
-          name: name,
-          email: email,
-          plan: email === "novice@writer.com" ? UserPlan.FREE : UserPlan.PRO,
-          trialStartDate: new Date().toISOString(),
-          subscriptionStatus: email === "novice@writer.com" ? "none" : "active",
-        };
-        setCurrentUser(freshUser);
-        localStorage.setItem("scriptally_user", JSON.stringify(freshUser));
-        return true;
-      }
       console.error("Sign up failure:", error);
       throw new Error(friendlyAuthError(error?.code));
     }
@@ -1115,13 +871,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
   const logout = async () => {
     try {
-      if (isOfflineMode) {
-        localStorage.removeItem("scriptally_offline");
-        localStorage.removeItem("scriptally_user");
-        setIsOfflineMode(false);
-        setCurrentUser(null);
-        return;
-      }
       await signOut(auth);
     } catch (e) {
       console.error("Sign out process error:", e);
@@ -1130,16 +879,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
   const upgradeToPro = async () => {
     if (!currentUser) return;
-    if (isOfflineMode) {
-      const upd: User = {
-        ...currentUser,
-        plan: UserPlan.PRO,
-        subscriptionStatus: "active"
-      };
-      setCurrentUser(upd);
-      localStorage.setItem("scriptally_user", JSON.stringify(upd));
-      return;
-    }
     try {
       await updateDoc(doc(db, "users", currentUser.id), {
         plan: UserPlan.PRO,
@@ -1152,16 +891,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
   const downgradeToFree = async () => {
     if (!currentUser) return;
-    if (isOfflineMode) {
-      const downd: User = {
-        ...currentUser,
-        plan: UserPlan.FREE,
-        subscriptionStatus: "none"
-      };
-      setCurrentUser(downd);
-      localStorage.setItem("scriptally_user", JSON.stringify(downd));
-      return;
-    }
     try {
       await updateDoc(doc(db, "users", currentUser.id), {
         plan: UserPlan.FREE,
@@ -1195,21 +924,12 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     } as any;
 
     let writeSuccess = false;
-    if (isOfflineMode) {
-      setManuscripts(prev => {
-        const updated = [...prev, newMs];
-        localStorage.setItem(`scriptally_manuscripts_${currentUser.id}`, JSON.stringify(updated));
-        return updated;
-      });
+    try {
+      await setDoc(doc(db, "users", currentUser.id, "manuscripts", id), newMs);
       writeSuccess = true;
-    } else {
-      try {
-        await setDoc(doc(db, "users", currentUser.id, "manuscripts", id), newMs);
-        writeSuccess = true;
-      } catch (e) {
-        handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/manuscripts/${id}`);
-        return { success: false, error: "Database exception occurred." };
-      }
+    } catch (e) {
+      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/manuscripts/${id}`);
+      return { success: false, error: "Database exception occurred." };
     }
 
     if (writeSuccess) {
@@ -1233,33 +953,16 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     const msTitle = existingMs.title;
 
     let writeSuccess = false;
-    if (isOfflineMode) {
-      const updated = manuscripts.map(m => {
-        if (m.id === id) {
-          const hasStatusChanged = fields.status && fields.status !== m.status;
-          return {
-            ...m,
-            ...fields,
-            statusChangedDate: hasStatusChanged ? new Date().toISOString() : m.statusChangedDate
-          };
-        }
-        return m;
-      });
-      setManuscripts(updated);
-      saveToLocalStorage("manuscripts", updated);
+    try {
+      const hasStatusChanged = fields.status && fields.status !== existingMs?.status;
+      const updates = {
+        ...fields,
+        ...(hasStatusChanged ? { statusChangedDate: new Date().toISOString() } : {})
+      };
+      await updateDoc(doc(db, "users", currentUser.id, "manuscripts", id), updates);
       writeSuccess = true;
-    } else {
-      try {
-        const hasStatusChanged = fields.status && fields.status !== existingMs?.status;
-        const updates = {
-          ...fields,
-          ...(hasStatusChanged ? { statusChangedDate: new Date().toISOString() } : {})
-        };
-        await updateDoc(doc(db, "users", currentUser.id, "manuscripts", id), updates);
-        writeSuccess = true;
-      } catch (e) {
-        handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/manuscripts/${id}`);
-      }
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/manuscripts/${id}`);
     }
 
     if (writeSuccess) {
@@ -1285,12 +988,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       userId: currentUser.id,
       createdDate: new Date().toISOString()
     };
-    if (isOfflineMode) {
-      const updated = [...versions, newVer];
-      setVersions(updated);
-      saveToLocalStorage("versions", updated);
-      return;
-    }
     try {
       await setDoc(doc(db, "users", currentUser.id, "versions", id), newVer);
     } catch (e) {
@@ -1303,12 +1000,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     const isLocked = packages.some(p => p.queryLetterVersionId === id || p.synopsisVersionId === id || p.samplePagesVersionId === id);
     if (isLocked) {
       alert("This version is locked in one of your packages. Modify or retire the package before deleting.");
-      return;
-    }
-    if (isOfflineMode) {
-      const updated = versions.filter(v => v.id !== id);
-      setVersions(updated);
-      saveToLocalStorage("versions", updated);
       return;
     }
     try {
@@ -1338,13 +1029,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       createdDate: new Date().toISOString()
     };
 
-    if (isOfflineMode) {
-      const updated = [...packages, newPkg];
-      setPackages(updated);
-      saveToLocalStorage("packages", updated);
-      return { success: true };
-    }
-
     try {
       await setDoc(doc(db, "users", currentUser.id, "packages", id), newPkg);
       return { success: true };
@@ -1356,17 +1040,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
   const retirePackage = async (id: string) => {
     if (!currentUser) return;
-    if (isOfflineMode) {
-      const updated = packages.map(p => {
-        if (p.id === id) {
-          return { ...p, status: "Retired" as const };
-        }
-        return p;
-      });
-      setPackages(updated);
-      saveToLocalStorage("packages", updated);
-      return;
-    }
     try {
       await updateDoc(doc(db, "users", currentUser.id, "packages", id), { status: "Retired" });
     } catch (e) {
@@ -1406,21 +1079,12 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     });
 
     let writeSuccess = false;
-    if (isOfflineMode) {
-      setAgents(prev => {
-        const updated = [...prev, newAg];
-        localStorage.setItem(`scriptally_agents_${currentUser.id}`, JSON.stringify(updated));
-        return updated;
-      });
+    try {
+      await setDoc(doc(db, "users", currentUser.id, "agents", id), newAg);
       writeSuccess = true;
-    } else {
-      try {
-        await setDoc(doc(db, "users", currentUser.id, "agents", id), newAg);
-        writeSuccess = true;
-      } catch (e) {
-        handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/agents/${id}`);
-        return { success: false, error: "Database storage failed." };
-      }
+    } catch (e) {
+      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/agents/${id}`);
+      return { success: false, error: "Database storage failed." };
     }
 
     if (writeSuccess) {
@@ -1446,30 +1110,14 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     const agencyName = existingAgent.agency;
 
     let writeSuccess = false;
-    if (isOfflineMode) {
-      const updated = agents.map(a => {
-        if (a.id === id) {
-          return {
-            ...a,
-            ...fields,
-            lastCheckedDate: new Date().toISOString()
-          };
-        }
-        return a;
+    try {
+      await updateDoc(doc(db, "users", currentUser.id, "agents", id), {
+        ...fields,
+        lastCheckedDate: new Date().toISOString()
       });
-      setAgents(updated);
-      saveToLocalStorage("agents", updated);
       writeSuccess = true;
-    } else {
-      try {
-        await updateDoc(doc(db, "users", currentUser.id, "agents", id), {
-          ...fields,
-          lastCheckedDate: new Date().toISOString()
-        });
-        writeSuccess = true;
-      } catch (e) {
-        handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/agents/${id}`);
-      }
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/agents/${id}`);
     }
 
     if (writeSuccess) {
@@ -1548,12 +1196,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
   const deleteAgent = async (id: string) => {
     if (!currentUser) return;
-    if (isOfflineMode) {
-      const updated = agents.filter(a => a.id !== id);
-      setAgents(updated);
-      saveToLocalStorage("agents", updated);
-      return;
-    }
     try {
       await deleteDoc(doc(db, "users", currentUser.id, "agents", id));
     } catch (e) {
@@ -1634,23 +1276,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       return out;
     };
 
-    if (isOfflineMode) {
-      setQueries(prev => {
-        const updated = [...prev, newQ];
-        localStorage.setItem(`scriptally_queries_${currentUser.id}`, JSON.stringify(updated));
-        return updated;
-      });
-
-      const seeded = seedActivities();
-      const updatedActivities = [...activities, ...seeded];
-      setActivities(updatedActivities);
-      saveToLocalStorage("activities", updatedActivities);
-      // Derive from the seeded log so an advanced import's derived status matches its seed.
-      recomputeQueryOffline(id, updatedActivities);
-
-      return { success: true, id };
-    }
-
     try {
       await setDoc(doc(db, "users", currentUser.id, "queries", id), newQ);
 
@@ -1682,48 +1307,13 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
-  // ── Derived status: the ONLY writers of status / pipeline dates / revisionRound /
+  // ── Derived status: the ONLY writer of status / pipeline dates / revisionRound /
   //    hasAgentResponded. Every mutation appends to the activity log, then recomputes. ──
 
-  /**
-   * Offline twin of lib/recomputeQuery.ts: runs the same pure derivation over the in-memory
-   * activity mirror and writes the same fields to local state + localStorage. Callers pass the
-   * post-mutation activities array explicitly so derivation never races React state updates.
-   */
-  const recomputeQueryOffline = (queryId: string, activitiesNow: Activity[]) => {
-    const fields = deriveQueryFields(
-      activitiesNow
-        .filter(a => a.queryId === queryId)
-        .map(a => ({ id: a.id, resultingStatus: a.resultingStatus, date: a.date }))
-    );
-    setQueries(prev => {
-      const updated = prev.map(q =>
-        q.id === queryId
-          ? {
-              ...q,
-              status: fields.status,
-              partialRequestedDate: fields.partialRequestedDate ?? undefined,
-              partialSentDate: fields.partialSentDate ?? undefined,
-              fullRequestedDate: fields.fullRequestedDate ?? undefined,
-              fullSentDate: fields.fullSentDate ?? undefined,
-              revisionRound: fields.revisionRound,
-              hasAgentResponded: fields.hasAgentResponded,
-            }
-          : q
-      );
-      saveToLocalStorage("queries", updated);
-      return updated;
-    });
-  };
-
-  /** Mode dispatcher: change the activity log first, then call this. */
-  const recompute = async (queryId: string, offlineActivitiesNow?: Activity[]) => {
+  /** Change the activity log first, then call this to derive the query's fields from it. */
+  const recompute = async (queryId: string) => {
     if (!currentUser) return;
-    if (isOfflineMode) {
-      recomputeQueryOffline(queryId, offlineActivitiesNow ?? activities);
-    } else {
-      await recomputeQueryOnline(currentUser.id, queryId);
-    }
+    await recomputeQueryOnline(currentUser.id, queryId);
   };
 
   // Status logs with multiple events mapping
@@ -1870,19 +1460,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     });
 
     // Status / pipeline dates are NOT written here — the log changes, then recompute derives them.
-    if (isOfflineMode) {
-      const generatedActivities: Activity[] = missedActivities.map(act => ({
-        ...act,
-        id: "act-" + Math.random().toString(36).substr(2, 9)
-      }));
-
-      const finalActivities = [...activities, ...generatedActivities];
-      setActivities(finalActivities);
-      saveToLocalStorage("activities", finalActivities);
-      await recompute(queryId, finalActivities);
-      return;
-    }
-
     try {
       const manuscriptTitle = manuscripts.find(m => m.id === targetQ.manuscriptId)?.title || "";
       for (const act of missedActivities) {
@@ -1929,12 +1506,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     // Chosen date, clamped monotonic with the log: a date-only pick lands at midnight, which
     // would sort BEFORE a same-day "requested" entry — and under derivation, ordering IS status.
     const desiredMillis = new Date(sentDate).getTime();
-    const eventMillis = isOfflineMode
-      ? Math.max(
-          desiredMillis,
-          1 + Math.max(0, ...activities.filter(a => a.queryId === queryId).map(a => getActivityTime(a.date)))
-        )
-      : await monotonicEventTime(currentUser.id, queryId, desiredMillis);
+    const eventMillis = await monotonicEventTime(currentUser.id, queryId, desiredMillis);
     const sentISO = new Date(eventMillis).toISOString();
 
     // Round used only for the description text ("Revised manuscript (v2) resubmitted…").
@@ -1962,20 +1534,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       details,
       resultingStatus: targetStatus,
     };
-
-    if (isOfflineMode) {
-      if (Object.keys(qUpdates).length > 0) {
-        const updatedQueries = queries.map(q => (q.id === queryId ? { ...q, ...qUpdates } : q));
-        setQueries(updatedQueries);
-        saveToLocalStorage("queries", updatedQueries);
-      }
-      const newAct: Activity = { ...activity, id: "act-" + Math.random().toString(36).substr(2, 9) };
-      const finalActivities = [...activities, newAct];
-      setActivities(finalActivities);
-      saveToLocalStorage("activities", finalActivities);
-      await recompute(queryId, finalActivities);
-      return;
-    }
 
     try {
       if (Object.keys(qUpdates).length > 0) {
@@ -2034,21 +1592,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           );
           // updateQueryStatus doesn't stamp the response date — do it here so the auto-close shows
           // up in Fortnight in Focus (which derives its response event from responseReceivedAt).
-          if (isOfflineMode) {
-            const stampedAt = new Date().toISOString();
-            setQueries(prev => {
-              const updated = prev.map(item =>
-                item.id === q.id ? { ...item, responseReceivedAt: stampedAt, lastStatusChange: stampedAt } : item
-              );
-              localStorage.setItem(`scriptally_queries_${cu.id}`, JSON.stringify(updated));
-              return updated;
-            });
-          } else {
-            await updateDoc(doc(db, "users", cu.id, "queries", q.id), {
-              responseReceivedAt: serverTimestamp(),
-              lastStatusChange: serverTimestamp(),
-            });
-          }
+          await updateDoc(doc(db, "users", cu.id, "queries", q.id), {
+            responseReceivedAt: serverTimestamp(),
+            lastStatusChange: serverTimestamp(),
+          });
         } catch (err) {
           console.error("[ScriptAlly] Auto-close failed:", err);
         }
@@ -2066,23 +1613,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
    */
   const undoQueryStatus = async (queryId: string, _previousStatus: QueryStatus, newStatus: QueryStatus) => {
     if (!currentUser) return;
-
-    if (isOfflineMode) {
-      // Most recent status-bearing activity for this query — prefer the one matching newStatus.
-      const candidates = activities
-        .filter(act => act.queryId === queryId && normalizeResultingStatus(act.resultingStatus) !== null)
-        .sort((a, b) => getActivityTime(a.date) - getActivityTime(b.date));
-      const target =
-        [...candidates].reverse().find(act => act.resultingStatus === newStatus) ??
-        candidates[candidates.length - 1];
-      if (!target) return;
-
-      const updatedAc = activities.filter(act => act.id !== target.id);
-      setActivities(updatedAc);
-      saveToLocalStorage("activities", updatedAc);
-      await recompute(queryId, updatedAc);
-      return;
-    }
 
     try {
       // Authoritative log: the per-query subcollection.
@@ -2131,12 +1661,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       entryText,
       createdAt: new Date().toISOString()
     };
-    if (isOfflineMode) {
-      const updated = [newEntry, ...journalEntries];
-      setJournalEntries(updated);
-      saveToLocalStorage("journal", updated);
-      return;
-    }
     try {
       await setDoc(doc(db, "users", currentUser.id, "journalEntries", id), newEntry);
     } catch (e) {
@@ -2146,12 +1670,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
   const deleteJournalEntry = async (id: string) => {
     if (!currentUser) return;
-    if (isOfflineMode) {
-      const updated = journalEntries.filter(j => j.id !== id);
-      setJournalEntries(updated);
-      saveToLocalStorage("journal", updated);
-      return;
-    }
     try {
       await deleteDoc(doc(db, "users", currentUser.id, "journalEntries", id));
     } catch (e) {
@@ -2161,12 +1679,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
   const updateJournalEntry = async (id: string, entryText: string) => {
     if (!currentUser) return;
-    if (isOfflineMode) {
-      const updated = journalEntries.map(j => (j.id === id ? { ...j, entryText } : j));
-      setJournalEntries(updated);
-      saveToLocalStorage("journal", updated);
-      return;
-    }
     try {
       await updateDoc(doc(db, "users", currentUser.id, "journalEntries", id), { entryText });
     } catch (e) {
@@ -2179,16 +1691,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     const targetQ = queries.find(q => q.id === queryId);
     if (!targetQ) return;
 
-    if (isOfflineMode) {
-      const updatedQueries = queries.map(q => (q.id === queryId ? { ...q, ...fields } : q));
-      setQueries(updatedQueries);
-      saveToLocalStorage("queries", updatedQueries);
-    } else {
-      try {
-        await updateDoc(doc(db, "users", currentUser.id, "queries", queryId), fields);
-      } catch (e) {
-        handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/queries/${queryId}`);
-      }
+    try {
+      await updateDoc(doc(db, "users", currentUser.id, "queries", queryId), fields);
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/queries/${queryId}`);
     }
   };
 
@@ -2201,15 +1707,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       id,
       userId: currentUser.id
     };
-
-    if (isOfflineMode) {
-      setActivities(prevAct => {
-        const updated = [...prevAct, newAct];
-        localStorage.setItem(`scriptally_activities_${currentUser.id}`, JSON.stringify(updated));
-        return updated;
-      });
-      return { success: true };
-    }
 
     try {
       await setDoc(doc(db, "users", currentUser.id, "activities", id), newAct);
@@ -2230,13 +1727,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     if (!currentUser) return;
     const target = activities.find(act => act.id === id);
 
-    if (isOfflineMode) {
-      const updated = activities.filter(act => act.id !== id);
-      setActivities(updated);
-      saveToLocalStorage("activities", updated);
-      if (target?.queryId) await recompute(target.queryId, updated);
-      return;
-    }
     try {
       await deleteDoc(doc(db, "users", currentUser.id, "activities", id));
       if (target?.queryId) {
@@ -2253,10 +1743,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   };
 
   /**
-   * Correction primitive: patch one entry in a query's AUTHORITATIVE activity log (the
-   * per-query subcollection online, the in-memory mirror offline), then recompute. Fixing a
-   * mis-recorded event — its date, wording, or the status it produced — mutates the log and
-   * the derived fields follow. The correction UI (next task) calls this.
+   * Correction primitive: patch one entry in a query's AUTHORITATIVE activity log (the per-query
+   * subcollection), then recompute. Fixing a mis-recorded event — its date, wording, or the
+   * status it produced — mutates the log and the derived fields follow. The correction UI (next
+   * task) calls this.
    */
   const editActivity = async (
     queryId: string,
@@ -2265,13 +1755,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   ) => {
     if (!currentUser) return;
 
-    if (isOfflineMode) {
-      const updated = activities.map(act => (act.id === activityId ? { ...act, ...patch } : act));
-      setActivities(updated);
-      saveToLocalStorage("activities", updated);
-      await recompute(queryId, updated);
-      return;
-    }
     try {
       // Map the Activity-shaped patch onto the subcollection doc's field names.
       const subPatch: Record<string, any> = {};
@@ -2300,12 +1783,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const updateUserProfile = async (fields: Partial<User>) => {
     if (!currentUser) return;
     const updated = { ...currentUser, ...fields };
-
-    if (isOfflineMode) {
-      setCurrentUser(updated);
-      localStorage.setItem("scriptally_user", JSON.stringify(updated));
-      return;
-    }
 
     // Optimistically reflect the change locally so UI gates (e.g. the onboarding
     // gate keyed on onboardingComplete) advance immediately and never get stuck
@@ -2352,17 +1829,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           details: `They've had your query for ${daysDiff} days`
         };
 
-        if (isOfflineMode) {
-          setActivities(prevAct => {
-            const updated = [...prevAct, nudgeActivity];
-            localStorage.setItem(`scriptally_activities_${currentUser.id}`, JSON.stringify(updated));
-            return updated;
-          });
-        } else {
-          setDoc(doc(db, "users", currentUser.id, "activities", actId), nudgeActivity).catch(err => {
-            console.error("Failed to write nudge activity into firestore", err);
-          });
-        }
+        setDoc(doc(db, "users", currentUser.id, "activities", actId), nudgeActivity).catch(err => {
+          console.error("Failed to write nudge activity into firestore", err);
+        });
       }
     }
 
@@ -2383,13 +1852,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       ...(resurfaceDate !== undefined ? { resurfaceDate } : {}),
       dismissType
     };
-
-    if (isOfflineMode) {
-      const updated = [...dismissedTasks, newDismiss];
-      setDismissedTasks(updated);
-      saveToLocalStorage("dismissed", updated);
-      return;
-    }
 
     try {
       await setDoc(doc(db, "users", currentUser.id, "dismissedTasks", id), newDismiss);
@@ -2498,62 +1960,51 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
 
     // Save outputs
-    if (isOfflineMode) {
-      setManuscripts(mKeep);
-      saveToLocalStorage("manuscripts", mKeep);
-
-      setAgents(aKeep);
-      saveToLocalStorage("agents", aKeep);
-
-      setQueries(qKeep);
-      saveToLocalStorage("queries", qKeep);
-    } else {
-      // Online DB updates - delete duplicate manuscripts
-      for (const dId of mDeleteIds) {
-        try {
-          await deleteDoc(doc(db, "users", currentUser.id, "manuscripts", dId));
-        } catch (e) {
-          console.error("Error deleting duplicate manuscript", dId, e);
-        }
+    // Online DB updates - delete duplicate manuscripts
+    for (const dId of mDeleteIds) {
+      try {
+        await deleteDoc(doc(db, "users", currentUser.id, "manuscripts", dId));
+      } catch (e) {
+        console.error("Error deleting duplicate manuscript", dId, e);
       }
-
-      // Delete duplicate agents
-      for (const aId of aDeleteIds) {
-        try {
-          await deleteDoc(doc(db, "users", currentUser.id, "agents", aId));
-        } catch (e) {
-          console.error("Error deleting duplicate agent", aId, e);
-        }
-      }
-
-      // Delete duplicate queries
-      for (const qId of qDeleteIds) {
-        try {
-          await deleteDoc(doc(db, "users", currentUser.id, "queries", qId));
-        } catch (e) {
-          console.error("Error deleting duplicate query", qId, e);
-        }
-      }
-
-      // Update mapped remaining queries in Firestore
-      for (const q of qKeep) {
-        if (msIdMap[q.manuscriptId] || agIdMap[q.agentId]) {
-          try {
-            await updateDoc(doc(db, "users", currentUser.id, "queries", q.id), {
-              manuscriptId: q.manuscriptId,
-              agentId: q.agentId
-            });
-          } catch (e) {
-            console.error("Error updating query mapping", q.id, e);
-          }
-        }
-      }
-
-      // Trigger local React state refreshes so the UI automatically re-reflects correct totals instantly!
-      setManuscripts(mKeep);
-      setAgents(aKeep);
-      setQueries(qKeep);
     }
+
+    // Delete duplicate agents
+    for (const aId of aDeleteIds) {
+      try {
+        await deleteDoc(doc(db, "users", currentUser.id, "agents", aId));
+      } catch (e) {
+        console.error("Error deleting duplicate agent", aId, e);
+      }
+    }
+
+    // Delete duplicate queries
+    for (const qId of qDeleteIds) {
+      try {
+        await deleteDoc(doc(db, "users", currentUser.id, "queries", qId));
+      } catch (e) {
+        console.error("Error deleting duplicate query", qId, e);
+      }
+    }
+
+    // Update mapped remaining queries in Firestore
+    for (const q of qKeep) {
+      if (msIdMap[q.manuscriptId] || agIdMap[q.agentId]) {
+        try {
+          await updateDoc(doc(db, "users", currentUser.id, "queries", q.id), {
+            manuscriptId: q.manuscriptId,
+            agentId: q.agentId
+          });
+        } catch (e) {
+          console.error("Error updating query mapping", q.id, e);
+        }
+      }
+    }
+
+    // Trigger local React state refreshes so the UI automatically re-reflects correct totals instantly!
+    setManuscripts(mKeep);
+    setAgents(aKeep);
+    setQueries(qKeep);
 
     return {
       manuscriptsRemoved: mDeleteIds.length,
@@ -2567,65 +2018,29 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     if (!currentUser) return;
     const uid = currentUser.id;
 
-    if (isOfflineMode) {
-      localStorage.removeItem(`scriptally_manuscripts_${uid}`);
-      localStorage.removeItem(`scriptally_versions_${uid}`);
-      localStorage.removeItem(`scriptally_packages_${uid}`);
-      localStorage.removeItem(`scriptally_agents_${uid}`);
-      localStorage.removeItem(`scriptally_queries_${uid}`);
-      localStorage.removeItem(`scriptally_activities_${uid}`);
-      localStorage.removeItem(`scriptally_journal_${uid}`);
-      localStorage.removeItem(`scriptally_dismissed_${uid}`);
+    const subcollections = [
+      "manuscripts",
+      "versions",
+      "packages",
+      "agents",
+      "queries",
+      "activities",
+      "journalEntries",
+      "dismissedTasks"
+    ];
 
-      const freshMs = seedManuscripts.map(m => ({ ...m, userId: uid }));
-      const freshVer = seedVersions.map(v => ({ ...v, userId: uid }));
-      const freshPkg = seedPackages.map(p => ({ ...p, userId: uid }));
-      const freshAg = seedAgents.map(a => ({ ...a, userId: uid }));
-      const freshQ = seedQueries.map(q => ({ ...q, userId: uid }));
-      const freshAct = seedActivities.map(a => ({ ...a, userId: uid }));
-      const freshJournal = seedJournalEntries.map(j => ({ ...j, userId: uid }));
-
-      localStorage.setItem(`scriptally_manuscripts_${uid}`, JSON.stringify(freshMs));
-      localStorage.setItem(`scriptally_versions_${uid}`, JSON.stringify(freshVer));
-      localStorage.setItem(`scriptally_packages_${uid}`, JSON.stringify(freshPkg));
-      localStorage.setItem(`scriptally_agents_${uid}`, JSON.stringify(freshAg));
-      localStorage.setItem(`scriptally_queries_${uid}`, JSON.stringify(freshQ));
-      localStorage.setItem(`scriptally_activities_${uid}`, JSON.stringify(freshAct));
-      localStorage.setItem(`scriptally_journal_${uid}`, JSON.stringify(freshJournal));
-
-      setManuscripts(freshMs);
-      setVersions(freshVer);
-      setPackages(freshPkg);
-      setAgents(freshAg);
-      setQueries(freshQ);
-      setActivities(freshAct);
-      setJournalEntries(freshJournal);
-      setDismissedTasks([]);
-    } else {
-      const subcollections = [
-        "manuscripts",
-        "versions",
-        "packages",
-        "agents",
-        "queries",
-        "activities",
-        "journalEntries",
-        "dismissedTasks"
-      ];
-
-      for (const subcol of subcollections) {
-        try {
-          const snapshot = await getDocs(collection(db, "users", uid, subcol));
-          for (const docSnap of snapshot.docs) {
-            await deleteDoc(doc(db, "users", uid, subcol, docSnap.id));
-          }
-        } catch (e) {
-          console.error(`Error deleting subcollection ${subcol}:`, e);
+    for (const subcol of subcollections) {
+      try {
+        const snapshot = await getDocs(collection(db, "users", uid, subcol));
+        for (const docSnap of snapshot.docs) {
+          await deleteDoc(doc(db, "users", uid, subcol, docSnap.id));
         }
+      } catch (e) {
+        console.error(`Error deleting subcollection ${subcol}:`, e);
       }
-
-      await seedUserDatabase(uid);
     }
+
+    await seedUserDatabase(uid);
   };
 
   return (
@@ -2642,7 +2057,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         journalEntries,
         dismissedTasks,
         tasks,
-        isOfflineMode,
         login,
         signup,
         resetPassword,

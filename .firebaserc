@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "gen-lang-client-0801391782"
+    "default": "gen-lang-client-0801391782",
+    "prod": "gen-lang-client-0801391782",
+    "dev": "scriptally-dev"
   }
 }

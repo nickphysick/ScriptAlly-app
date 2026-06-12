@@ -132,7 +132,6 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     activities,
     journalEntries,
     tasks,
-    isOfflineMode,
     addJournalEntry,
     addQuery,
     updateQuery,
@@ -193,16 +192,6 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
       return;
     }
 
-    if (isOfflineMode || currentUser.id === "writer-pro-lucy") {
-      const q = queries.find(u => u.id === selectedQueryId);
-      setSelectedQuery(q || null);
-      if (unsubscribeRef.current) {
-        unsubscribeRef.current();
-        unsubscribeRef.current = null;
-      }
-      return;
-    }
-
     // Unsubscribe from previous listener if any
     if (unsubscribeRef.current) {
       unsubscribeRef.current();
@@ -228,11 +217,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         unsubscribeRef.current = null;
       }
     };
-  }, [currentUser?.id, selectedQueryId, queries, isOfflineMode]);
+  }, [currentUser?.id, selectedQueryId]);
 
   // Setup real-time listener for the query's activity subcollection (Fix 3)
   useEffect(() => {
-    if (!currentUser || !selectedQueryId || isOfflineMode || currentUser.id === "writer-pro-lucy") {
+    if (!currentUser || !selectedQueryId) {
       setTrackingEvents([]);
       return;
     }
@@ -252,11 +241,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     );
 
     return () => unsubscribe();
-  }, [selectedQueryId, currentUser?.id, isOfflineMode]);
+  }, [selectedQueryId, currentUser?.id]);
 
   // Run Part 1 & Part 6 cleanup/retrospective logic once on app load
   useEffect(() => {
-    if (!currentUser?.id || isOfflineMode || currentUser.id === "writer-pro-lucy") return;
+    if (!currentUser?.id) return;
 
     const runTimelineCleanup = async () => {
       try {
@@ -343,7 +332,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     };
 
     runTimelineCleanup();
-  }, [currentUser?.id, isOfflineMode]);
+  }, [currentUser?.id]);
 
   const triggerToast = (config: {
     queryId: string;

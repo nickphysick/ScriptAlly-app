@@ -32,7 +32,6 @@ import {
   BookOpen,
   FileSpreadsheet,
   HelpCircle,
-  Info,
   User as UserIcon,
   Activity as ActivityIcon,
   Trash2
@@ -179,7 +178,6 @@ export const ImportCsv: React.FC<{
     addQuery,
     addActivity,
     updateUserProfile,
-    isOfflineMode,
     cleanDuplicates,
     wipeAndResetDatabase
   } = useScriptAllyDb();
@@ -250,7 +248,7 @@ export const ImportCsv: React.FC<{
 "Feedback follow up","Shadows on the Moors","Status Changed","Agent Jonathan Vance requested partial sample chapters!","2026-05-15","Requested 3 chapters."`;
     } else if (importType === "user") {
       demoString = `"Pen Name","Registered Email","Plan Tier","Sign up Date","Subscription State"
-"Nicholas Physick","nick.physick@gmail.com","Pro","2026-06-01","active"`;
+"Jane Doe","jane.doe@example.com","Pro","2026-06-01","active"`;
     }
     setRawText(demoString);
   };
@@ -843,17 +841,6 @@ export const ImportCsv: React.FC<{
           </div>
         </div>
 
-        {/* SANDBOX NOTICE ALERT */}
-        {isOfflineMode && (
-          <div className="mb-8 p-4 bg-amber-50/70 border border-amber-200/80 rounded-2xl flex items-start gap-3">
-            <Info className="w-5 h-5 text-[#BA7517] shrink-0 mt-0.5" />
-            <div className="text-xs space-y-1 text-[#3a1c14]/85">
-              <span className="font-bold text-[#3a1c14]">Offline sandbox import target active</span>
-              <p>You are current using offline mode. Legacy rows will store inside your local browser. If you transition to live cloud (via the Dashboard banner), logs will persist globally.</p>
-            </div>
-          </div>
-        )}
-
         {/* STEP 1: INPUT AND TYPE CHOOSE */}
         {step === 1 && (
           <div className="bg-white rounded-2xl border border-[#EBDCD3] p-6 shadow-sm space-y-6">
@@ -1172,7 +1159,7 @@ export const ImportCsv: React.FC<{
               <div className="pt-4 border-t border-stone-100 flex flex-col sm:flex-row justify-between items-center gap-4">
                 <div className="space-y-1">
                   <p className="text-xs text-[#3a1c14]/80">
-                    Your records are now locked into {isOfflineMode ? "offline storage" : "live cloud synchronization"}.
+                    Your records are now locked into live cloud synchronization.
                   </p>
                 </div>
                 
@@ -1499,12 +1486,8 @@ export const ImportCsv: React.FC<{
 
                     <div className="bg-[#FCFAF7] p-4 rounded-xl border border-stone-200">
                       <span className="text-[10px] uppercase font-mono text-stone-400 font-bold block mb-1">Firebase Syncing Link Status</span>
-                      <span className={`inline-block mt-1 text-xs font-bold font-mono px-2 py-0.5 rounded uppercase ${
-                        isOfflineMode 
-                          ? "bg-amber-100/50 text-[#BA7517] border border-amber-200/50" 
-                          : "bg-green-150 text-[#3B6D11] border border-green-250"
-                      }`}>
-                        {isOfflineMode ? "Sandbox Offline Mode" : "Cloud Real-Time Synchronization Enabled"}
+                      <span className="inline-block mt-1 text-xs font-bold font-mono px-2 py-0.5 rounded uppercase bg-green-150 text-[#3B6D11] border border-green-250">
+                        Cloud Real-Time Synchronization Enabled
                       </span>
                     </div>
                   </div>
