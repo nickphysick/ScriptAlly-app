@@ -26,7 +26,31 @@ import { recordQueryResponse } from "../lib/recordResponse";
 import { CalendarView } from "./CalendarView";
 import { StatusPill } from "./StatusPill";
 import { StatusDot } from "./StatusDot";
-import { pageGround, bodyInk, PAGE_GRAIN } from "../lib/designTokens";
+import {
+  pageGround,
+  bodyInk,
+  PAGE_GRAIN,
+  sageBandGradient,
+  sageBandRule,
+  sageText,
+  headingInk,
+  labelStyle,
+  labelColor,
+  burgundy,
+  parchment,
+  hairline,
+  mutedInk,
+  FONT_SERIF,
+  FONT_MONO,
+  FONT_SANS,
+  buttonPinkBg,
+  buttonPinkBorder,
+  ghostButtonText,
+  PAPER_TEXTURE,
+  mountShadow,
+  insetBorder,
+} from "../lib/designTokens";
+import { MountCard } from "./MountCard";
 import { HeroCard } from "./dashboard/HeroCard";
 import { OverToYou } from "./dashboard/OverToYou";
 import { StatCards } from "./dashboard/StatCards";
@@ -75,7 +99,7 @@ const formatRichText = (str: string): React.ReactNode => {
       {tokens.map((token, i) => {
         if ((token.startsWith("**") && token.endsWith("**")) || (token.startsWith("__") && token.endsWith("__"))) {
           const content = token.slice(2, -2);
-          return <strong key={i} className="font-bold text-[#7c3a2a]">{content}</strong>;
+          return <strong key={i} style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 500, color: "#7c3a2a" }}>{content}</strong>;
         }
         if ((token.startsWith("*") && token.endsWith("*")) || (token.startsWith("_") && token.endsWith("_"))) {
           const content = token.slice(1, -1);
@@ -360,8 +384,8 @@ const TaskPanelCard: React.FC<{
   }
 
   const getDotColor = (priority: string) => {
-    if (priority === "urgent") return "#3a1c14";
-    if (priority === "overdue") return "#C4706A";
+    if (priority === "urgent") return "#7c3a2a";
+    if (priority === "overdue") return "#a86a52";
     return "#C4A882";
   };
 
@@ -409,18 +433,9 @@ const TaskPanelCard: React.FC<{
         }
       }}
       className={`border rounded-2xl p-4 shadow-2xs relative flex flex-col font-sans w-full group/panelcard cursor-pointer transition-all duration-200 ${
-        isUrgent ? "bg-[#fff0f0] border-red-200" : "bg-white border-[#EBDCD3]"
+        isUrgent ? "bg-[#fff3ed] border-[#eed6c8]" : "bg-white border-[#EBDCD3]"
       }`}
     >
-      {isUrgent && (
-        <div 
-          className="absolute bg-red-600 text-white text-[11px] font-extrabold rounded-full flex items-center justify-center select-none shadow-3xs" 
-          style={{ width: '18px', height: '18px', top: '10px', right: '10px', zIndex: 10 }}
-          title="Urgent"
-        >
-          !
-        </div>
-      )}
       <div className="flex gap-2.5 items-start">
         <span 
           className="w-2 h-2 rounded-full shrink-0 mt-1.5" 
@@ -702,9 +717,6 @@ export const Dashboard: React.FC<{
     return localStorage.getItem("scriptally_is_magazine_layout") === "true";
   });
 
-  const [timelineStyle, setTimelineStyle] = useState<"journal" | "bento" | "ribbon">(() => {
-    return (localStorage.getItem("scriptally_timeline_style") as any) || "journal";
-  });
 
   const [hoveredAgentId, setHoveredAgentId] = useState<string | null>(null);
   const [radarToast, setRadarToast] = useState<string | null>(null);
@@ -1430,7 +1442,7 @@ export const Dashboard: React.FC<{
         resizeObserver.disconnect();
       };
     }
-  }, [chronologicalKeys.join(','), timelineStyle]);
+  }, [chronologicalKeys.join(',')]);
 
   // Day N of the journey: days since the earliest query activity (falls back to the
   // earliest query sent date). Null when the user has no query history yet.
@@ -1811,16 +1823,19 @@ export const Dashboard: React.FC<{
           bottom: '16px',
           left: '16px',
           zIndex: 9999,
-          background: '#3a1c14',
-          color: '#F8F5F0',
-          border: 'none',
-          borderRadius: '6px',
+          background: '#ffffff',
+          color: '#6a5a50',
+          border: '0.5px solid #e0d5c8',
+          borderRadius: 9,
           padding: '6px 12px',
-          fontSize: '11px',
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: 10,
+          letterSpacing: '0.05em',
           cursor: 'pointer',
-          opacity: 0.7
+          opacity: 0.75,
+          boxShadow: '0 1px 3px rgba(58,28,20,0.08)'
         }}
-        className="hover:opacity-100 transition-opacity font-mono select-none shadow-md"
+        className="hover:opacity-100 transition-opacity select-none"
       >
         Switch layout
       </button>
@@ -1830,10 +1845,11 @@ export const Dashboard: React.FC<{
         <div style={{ maxWidth: 720, margin: "0 auto", padding: "48px 24px" }}>
           {/* Welcome card */}
           <div style={{
-            background: "#FFFDF9",
-            border: "0.5px solid #EBDCD3",
+            background: parchment,
+            backgroundImage: PAPER_TEXTURE,
             borderLeft: "4px solid #7c3a2a",
             borderRadius: 14,
+            boxShadow: mountShadow,
             padding: "24px 28px",
             marginBottom: 24,
           }}>
@@ -1850,9 +1866,10 @@ export const Dashboard: React.FC<{
 
           {/* Onboarding task card */}
           <div style={{
-            background: "#FFFDF9",
-            border: "0.5px solid #EBDCD3",
+            background: parchment,
+            backgroundImage: PAPER_TEXTURE,
             borderRadius: 14,
+            boxShadow: mountShadow,
             padding: "18px 22px",
             marginBottom: 20,
             display: "flex",
@@ -1898,8 +1915,8 @@ export const Dashboard: React.FC<{
               { label: "No queries logged", sub: "Your pipeline will appear here", icon: "✉️" },
             ].map((card, i) => (
               <div key={i} style={{
-                background: "#fffdf9",
-                border: "0.5px dashed #EBDCD3",
+                background: "rgba(253,250,245,0.6)",
+                border: "1px dashed rgba(124,58,42,0.25)",
                 borderRadius: 12,
                 padding: "24px 20px",
                 opacity: 0.6,
@@ -2079,11 +2096,11 @@ export const Dashboard: React.FC<{
       {/* TWO-COLUMN MAIN WORKSPACE */}
       <div className={isMagazineLayout
         ? "grid grid-cols-1 lg:grid-cols-[1.8fr_1.1fr] xl:grid-cols-[2fr_1fr] gap-0 bg-[#FAF8F5] border-t border-[#e8e0d8] items-stretch"
-        : "w-full max-w-none px-4 md:px-10 lg:px-14 xl:px-16 pt-8 grid grid-cols-1 md:grid-cols-[1fr_26.67%] gap-8 items-stretch"
+        : "w-full max-w-none px-4 md:px-10 lg:px-14 xl:px-16 pt-[14px] grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-[14px] items-start"
       }>
         
         {/* LEFT COLUMN: Stat Cards & Pipeline Matrix */}
-        <div ref={leftColumnRef} className={isMagazineLayout ? "flex flex-col gap-0" : "flex flex-col gap-8"}>
+        <div ref={leftColumnRef} className={isMagazineLayout ? "flex flex-col gap-0" : "flex flex-col gap-[14px]"}>
           
           {isMagazineLayout && (
             /* Magazine Urgent Action card */
@@ -2145,225 +2162,213 @@ export const Dashboard: React.FC<{
           )}
 
           {/* QUERY STATUS BREAKDOWN */}
-          <div 
-            className={isMagazineLayout
-              ? "bg-white border-b border-[#e8e0d8] p-[20px_24px] relative transition-all duration-300"
-              : "bg-[#FAF8F5] rounded-2xl border border-[#e8d5cc] shadow-sm relative transition-all duration-300"
-            } 
-            id="query-status-breakdown-card"
-            style={isMagazineLayout ? { borderBottomWidth: '0.5px' } : {}}
-          >
-            
-            {isMagazineLayout ? (
-              <div className="flex flex-col w-full">
-                {/* Clean Section Header */}
-                <div className="flex items-center justify-between mb-[14px]">
-                  <span style={{ fontSize: '11px', fontWeight: 600, color: '#3a1c14' }} className="font-serif uppercase tracking-wider">
-                    Your querying pipeline
-                  </span>
-                  <span style={{ fontSize: '10px', color: '#c9a89e' }} className="font-sans font-medium">
-                    {manuscripts.filter(m => queries.some(q => q.manuscriptId === m.id)).length} manuscripts · {queries.length} queries
-                  </span>
-                </div>
+          {(() => {
+            // One hoverable canonical dot per query (StatusDot is the only glyph source)
+            const renderIndividualQueryDot = (
+              q: Query,
+              stage: 'queried' | 'part_req' | 'part_sent' | 'full_req' | 'full_sent' | 'offer' | 'closed'
+            ) => {
+              const agent = agents.find(a => a.id === q.agentId);
+              const formattedDate = q.dateSent ? new Date(q.dateSent).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
 
-                {/* Horizontal row of stage buckets from design brief */}
-                {renderMagazinePipelineBuckets()}
-
-                {/* Flat table header columns */}
-                <div className="border-b border-[#e8e0d8] pb-2 mb-2 flex items-center text-[10px] uppercase font-semibold text-[#c9a89e] tracking-wider select-none mt-4">
-                  <div className="w-[240px] shrink-0 text-left">Manuscript</div>
-                  <div className="flex-grow grid grid-cols-7 gap-2 text-center text-[9px] font-sans">
-                    <div>Queried</div>
-                    <div>Part Req</div>
-                    <div>Part Sent</div>
-                    <div>Full Req</div>
-                    <div>Full Sent</div>
-                    <div>Offer</div>
-                    <div>Closed</div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              /* Unified Header with Title and Columns */
-              <div className="bg-[#F2EAE4] border-b-[0.5px] border-[#e8d5cc] px-[18px] py-[10px] flex items-center rounded-t-2xl">
-                <span className="text-[12px] font-semibold text-[#3a1c14] font-sans w-[240px] shrink-0">
-                  Your querying pipeline
-                </span>
-                <div className="flex-grow grid grid-cols-7 gap-2 text-center items-center">
-                  <div className="flex flex-col items-center justify-center">
-                    <span className="text-[10px] font-normal text-[#3a1c14]/75">
-                      Queried
-                    </span>
-                  </div>
-                  <div className="flex flex-col items-center justify-center">
-                    <span className="text-[10px] font-normal text-[#3a1c14]/75">
-                      Partial Requested
-                    </span>
-                  </div>
-                  <div className="flex flex-col items-center justify-center">
-                    <span className="text-[10px] font-normal text-[#3a1c14]/75">
-                      Partial Sent
-                    </span>
-                  </div>
-                  <div className="flex flex-col items-center justify-center">
-                    <span className="text-[10px] font-normal text-[#3a1c14]/75">
-                      Full Requested
-                    </span>
-                  </div>
-                  <div className="flex flex-col items-center justify-center">
-                    <span className="text-[10px] font-normal text-[#3a1c14]/75">
-                      Full Sent
-                    </span>
-                  </div>
-                  <div className="flex flex-col items-center justify-center">
-                    <span className="text-[10px] font-normal text-[#3a1c14]/75">
-                      Offer
-                    </span>
-                  </div>
-                  <div className="flex flex-col items-center justify-center">
-                    <span className="text-[10px] font-normal text-[#3a1c14]/75">
-                      Closed
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {(() => {
-              const renderIndividualQueryDot = (
-                q: Query,
-                stage: 'queried' | 'part_req' | 'part_sent' | 'full_req' | 'full_sent' | 'offer' | 'closed',
-                size: number
-              ) => {
-                const agent = agents.find(a => a.id === q.agentId);
-                const formattedDate = q.dateSent ? new Date(q.dateSent).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
-
-                let dateLabel = "Sent";
-                let displayDate = formattedDate;
-                if (stage === 'part_req' && q.partialRequestedDate) {
-                  dateLabel = "Requested";
-                  displayDate = new Date(q.partialRequestedDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-                } else if (stage === 'part_sent' && q.partialSentDate) {
-                  dateLabel = "Sent";
-                  displayDate = new Date(q.partialSentDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-                } else if (stage === 'full_req' && q.fullRequestedDate) {
-                  dateLabel = "Requested";
-                  displayDate = new Date(q.fullRequestedDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-                } else if (stage === 'full_sent' && q.fullSentDate) {
-                  dateLabel = "Sent";
-                  displayDate = new Date(q.fullSentDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-                }
-
-                return (
-                  <div
-                    key={q.id}
-                    className="relative group/dot inline-flex items-center justify-center select-none transition-all duration-300 hover:scale-130 hover:z-10 cursor-pointer"
-                    style={{ width: `${size}px`, height: `${size}px` }}
-                  >
-                    <StatusDot status={q.status} size={size} />
-
-                    {/* Pure CSS Hover Tooltip */}
-                    <div className="invisible group-hover/dot:visible opacity-0 group-hover/dot:opacity-100 absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 p-3 bg-stone-900 text-stone-100 rounded-xl text-[11px] font-sans shadow-lg text-left pointer-events-none transition-all duration-200">
-                      <div className="font-bold text-white truncate">{agent?.name || "Unknown Agent"}</div>
-                      <div className="text-stone-400 text-[10px] truncate">{agent?.agency || "Independent"}</div>
-                      <div className="h-[1px] bg-stone-800 my-1.5" />
-                      <div className="flex justify-between gap-2 text-stone-300 text-[10px]">
-                        <span>Status:</span>
-                        <span className="font-semibold text-rose-400">{q.status}</span>
-                      </div>
-                      <div className="flex justify-between gap-2 text-stone-300 text-[10px] mt-0.5">
-                        <span>{dateLabel}:</span>
-                        <span className="font-mono text-stone-400">{displayDate}</span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              };
-
-              const renderStageColumn = (list: Query[], stageKey: 'queried' | 'part_req' | 'part_sent' | 'full_req' | 'full_sent' | 'offer' | 'closed') => {
-                const dotsCount = list.length;
-                if (dotsCount === 0) {
-                  return (
-                    <div className="flex items-center justify-center min-h-[26px]">
-                      <span className="text-stone-300 font-medium select-none font-sans">-</span>
-                    </div>
-                  );
-                }
-
-                // StatusDot never renders below 12px; clusters wrap instead of shrinking away.
-                const size = dotsCount <= 1 ? 16 : dotsCount <= 4 ? 13 : 12;
-
-                return (
-                  <div className="flex flex-col items-center justify-center min-h-[26px]">
-                    <div className="flex flex-row flex-wrap gap-[2px] items-center justify-center max-w-full">
-                      {list.map((q) => renderIndividualQueryDot(q, stageKey, size))}
-                    </div>
-                  </div>
-                );
-              };
+              let dateLabel = "Sent";
+              let displayDate = formattedDate;
+              if (stage === 'part_req' && q.partialRequestedDate) {
+                dateLabel = "Requested";
+                displayDate = new Date(q.partialRequestedDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+              } else if (stage === 'part_sent' && q.partialSentDate) {
+                dateLabel = "Sent";
+                displayDate = new Date(q.partialSentDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+              } else if (stage === 'full_req' && q.fullRequestedDate) {
+                dateLabel = "Requested";
+                displayDate = new Date(q.fullRequestedDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+              } else if (stage === 'full_sent' && q.fullSentDate) {
+                dateLabel = "Sent";
+                displayDate = new Date(q.fullSentDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+              }
 
               return (
-                <div id="breakdown-ledger-theme" className="w-full">
-                  {/* Manuscript Rows */}
-                  <div className="divide-y-0">
-                    {manuscripts.map((m, index) => {
-                      const mQueries = queries.filter(q => q.manuscriptId === m.id);
-                      
-                      const qQueried = mQueries.filter(q => q.status === QueryStatus.QUERIED);
-                      const qPartReq = mQueries.filter(q => q.status === QueryStatus.PARTIAL_REQUESTED);
-                      const qPartSent = mQueries.filter(q => q.status === QueryStatus.PARTIAL_SENT);
-                      const qFullReq = mQueries.filter(q => q.status === QueryStatus.FULL_REQUESTED);
-                      const qFullSent = mQueries.filter(q => q.status === QueryStatus.FULL_SENT);
-                      const qOffer = mQueries.filter(q => q.status === QueryStatus.OFFER);
-                      const qClosed = mQueries.filter(q => 
-                        [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE, QueryStatus.REVISE_RESUBMIT].includes(q.status)
-                      );
+                <div
+                  key={q.id}
+                  className="relative group/dot inline-flex items-center justify-center select-none transition-all duration-300 hover:scale-130 hover:z-10 cursor-pointer"
+                  style={{ width: 13, height: 13 }}
+                >
+                  <StatusDot status={q.status} size={13} />
 
-                      const bgClass = isMagazineLayout ? "bg-white" : (index % 2 === 0 ? "bg-[#FFFDF9]" : "bg-[#FAF8F5]");
-                      const borderBottomClass = isMagazineLayout ? "border-b border-[#e8e0d8]/50" : (index === manuscripts.length - 1 ? "" : "border-b-[0.5px] border-[#f0e6e0]");
-                      const isLast = index === manuscripts.length - 1;
-                      const roundedBottomClass = isMagazineLayout ? "" : (isLast ? "rounded-b-2xl" : "");
-                      const rowPaddingClass = isMagazineLayout ? "px-0 py-3" : "px-[18px] py-[14px]";
-
-                      return (
-                        <div 
-                          key={m.id} 
-                          className={`flex items-center ${rowPaddingClass} ${bgClass} ${borderBottomClass} ${roundedBottomClass} transition-colors duration-200 group`}
-                        >
-                          {/* Left area: title & genre, exactly 240px width to avoid truncate / cut-off */}
-                          <div className="w-[240px] shrink-0 text-left pr-4">
-                            <p className="font-serif text-[13px] font-semibold text-[#3a1c14] leading-tight truncate" title={m.title}>
-                              {m.title}
-                            </p>
-                            <p className="text-[10px] text-[#c9a89e] font-sans truncate mt-0.5">
-                              {m.genre} &middot; {m.wordCount?.toLocaleString() || 0} words
-                            </p>
-                          </div>
-
-                          {/* 7 Grid columns for the stages */}
-                          <div className="flex-grow grid grid-cols-7 gap-2 text-center items-center">
-                            {renderStageColumn(qQueried, 'queried')}
-                            {renderStageColumn(qPartReq, 'part_req')}
-                            {renderStageColumn(qPartSent, 'part_sent')}
-                            {renderStageColumn(qFullReq, 'full_req')}
-                            {renderStageColumn(qFullSent, 'full_sent')}
-                            {renderStageColumn(qOffer, 'offer')}
-                            {renderStageColumn(qClosed, 'closed')}
-                          </div>
-                        </div>
-                      );
-                    })}
+                  {/* Hover tooltip — parchment, token system */}
+                  <div
+                    className="invisible group-hover/dot:visible opacity-0 group-hover/dot:opacity-100 absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 p-3 text-left pointer-events-none transition-all duration-200"
+                    style={{
+                      background: "#fdfaf5",
+                      border: "0.5px solid #e0d5c8",
+                      borderRadius: 10,
+                      boxShadow: "0 6px 20px rgba(58,28,20,0.14)",
+                      fontSize: 11,
+                    }}
+                  >
+                    <div className="truncate" style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 500, color: "#3a1c14" }}>{agent?.name || "Unknown Agent"}</div>
+                    <div className="truncate" style={{ fontSize: 10, color: "#8a7a6c" }}>{agent?.agency || "Independent"}</div>
+                    <div style={{ height: 0.5, background: "#ece0d2", margin: "6px 0" }} />
+                    <div className="flex justify-between gap-2" style={{ fontSize: 10, color: "#6a5a50" }}>
+                      <span>Status:</span>
+                      <span style={{ fontWeight: 500, color: "#7c3a2a" }}>{q.status}</span>
+                    </div>
+                    <div className="flex justify-between gap-2 mt-0.5" style={{ fontSize: 10, color: "#6a5a50" }}>
+                      <span>{dateLabel}:</span>
+                      <span style={{ fontFamily: "'JetBrains Mono', monospace", color: "#9c8878" }}>{displayDate}</span>
+                    </div>
                   </div>
                 </div>
               );
-            })()}
+            };
 
-            {manuscripts.length === 0 && (
-              <div className="p-8 text-center text-[#3a1c14]/40 text-xs italic">
-                Get started by creating your very first manuscript structure!
-              </div>
-            )}
-          </div>
+            const renderStageColumn = (list: Query[], stageKey: 'queried' | 'part_req' | 'part_sent' | 'full_req' | 'full_sent' | 'offer' | 'closed') => {
+              if (list.length === 0) {
+                return (
+                  <div className="flex items-center justify-center" style={{ minHeight: 26 }}>
+                    <span className="select-none" style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#b8a898" }}>–</span>
+                  </div>
+                );
+              }
+              return (
+                <div className="flex items-center justify-center" style={{ minHeight: 26 }}>
+                  <div className="flex flex-row flex-wrap items-center justify-center max-w-full" style={{ gap: 4 }}>
+                    {list.map((q) => renderIndividualQueryDot(q, stageKey))}
+                  </div>
+                </div>
+              );
+            };
+
+            const splitByStage = (m: Manuscript) => {
+              const mQueries = queries.filter(q => q.manuscriptId === m.id);
+              return {
+                qQueried: mQueries.filter(q => q.status === QueryStatus.QUERIED),
+                qPartReq: mQueries.filter(q => q.status === QueryStatus.PARTIAL_REQUESTED),
+                qPartSent: mQueries.filter(q => q.status === QueryStatus.PARTIAL_SENT),
+                qFullReq: mQueries.filter(q => q.status === QueryStatus.FULL_REQUESTED),
+                qFullSent: mQueries.filter(q => q.status === QueryStatus.FULL_SENT),
+                qOffer: mQueries.filter(q => q.status === QueryStatus.OFFER),
+                qClosed: mQueries.filter(q =>
+                  [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE, QueryStatus.REVISE_RESUBMIT].includes(q.status)
+                ),
+              };
+            };
+
+            if (isMagazineLayout) {
+              return (
+                <div className="bg-white border-b border-[#e8e0d8] p-[20px_24px] relative transition-all duration-300" id="query-status-breakdown-card" style={{ borderBottomWidth: '0.5px' }}>
+                  <div className="flex flex-col w-full">
+                    <div className="flex items-center justify-between mb-[14px]">
+                      <span style={{ fontSize: '11px', fontWeight: 600, color: '#3a1c14' }} className="font-serif uppercase tracking-wider">
+                        Your querying pipeline
+                      </span>
+                      <span style={{ fontSize: '10px', color: '#c9a89e' }} className="font-sans font-medium">
+                        {manuscripts.filter(m => queries.some(q => q.manuscriptId === m.id)).length} manuscripts · {queries.length} queries
+                      </span>
+                    </div>
+                    {renderMagazinePipelineBuckets()}
+                    <div className="border-b border-[#e8e0d8] pb-2 mb-2 flex items-center text-[10px] uppercase font-semibold text-[#c9a89e] tracking-wider select-none mt-4">
+                      <div className="w-[240px] shrink-0 text-left">Manuscript</div>
+                      <div className="flex-grow grid grid-cols-7 gap-2 text-center text-[9px] font-sans">
+                        <div>Queried</div><div>Part Req</div><div>Part Sent</div><div>Full Req</div><div>Full Sent</div><div>Offer</div><div>Closed</div>
+                      </div>
+                    </div>
+                  </div>
+                  {manuscripts.map((m) => {
+                    const st = splitByStage(m);
+                    return (
+                      <div key={m.id} className="flex items-center px-0 py-3 bg-white border-b border-[#e8e0d8]/50 transition-colors duration-200">
+                        <div className="w-[240px] shrink-0 text-left pr-4">
+                          <p className="font-serif text-[13px] font-semibold text-[#3a1c14] leading-tight truncate" title={m.title}>{m.title}</p>
+                          <p className="text-[10px] text-[#c9a89e] font-sans truncate mt-0.5">{m.genre} &middot; {m.wordCount?.toLocaleString() || 0} words</p>
+                        </div>
+                        <div className="flex-grow grid grid-cols-7 gap-2 text-center items-center">
+                          {renderStageColumn(st.qQueried, 'queried')}
+                          {renderStageColumn(st.qPartReq, 'part_req')}
+                          {renderStageColumn(st.qPartSent, 'part_sent')}
+                          {renderStageColumn(st.qFullReq, 'full_req')}
+                          {renderStageColumn(st.qFullSent, 'full_sent')}
+                          {renderStageColumn(st.qOffer, 'offer')}
+                          {renderStageColumn(st.qClosed, 'closed')}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {manuscripts.length === 0 && (
+                    <div className="p-8 text-center text-[#3a1c14]/40 text-xs italic">
+                      Get started by creating your very first manuscript structure!
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
+            const COLUMN_GRID = "230px repeat(7, 1fr)";
+            return (
+              <MountCard id="query-status-breakdown-card" style={{ overflow: "hidden" }}>
+                {/* Edge-to-edge sage band header */}
+                <div
+                  style={{
+                    position: "relative",
+                    zIndex: 2,
+                    margin: "6px 6px 0",
+                    borderRadius: "8px 8px 0 0",
+                    padding: "14px 22px 12px",
+                    background: sageBandGradient,
+                    borderBottom: `1px solid ${sageBandRule}`,
+                  }}
+                >
+                  <div style={{ display: "grid", gridTemplateColumns: COLUMN_GRID, alignItems: "center" }}>
+                    <span style={{ fontFamily: FONT_SERIF, fontSize: 15, fontWeight: 500, color: headingInk }}>
+                      Your querying pipeline
+                    </span>
+                    {["Queried", "Part. req", "Part. sent", "Full req", "Full sent", "Offer", "Closed"].map((label) => (
+                      <span key={label} style={{ ...labelStyle, textAlign: "center", color: sageText }}>{label}</span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Rows */}
+                <div style={{ position: "relative", zIndex: 2, margin: "0 6px 6px", padding: "6px 16px 14px" }}>
+                  {manuscripts.map((m, index) => {
+                    const st = splitByStage(m);
+                    return (
+                      <div
+                        key={m.id}
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: COLUMN_GRID,
+                          alignItems: "center",
+                          borderBottom: index === manuscripts.length - 1 ? undefined : "0.5px solid #ece0d2",
+                        }}
+                      >
+                        <div style={{ padding: "13px 6px" }}>
+                          <p className="truncate" style={{ fontFamily: FONT_SERIF, fontSize: 14.5, color: headingInk, lineHeight: 1.3 }} title={m.title}>
+                            {m.title}
+                          </p>
+                          <p className="truncate" style={{ ...labelStyle, marginTop: 2 }}>
+                            {m.genre} · {m.wordCount?.toLocaleString() || 0}
+                          </p>
+                        </div>
+                        <div style={{ textAlign: "center", padding: "13px 8px" }}>{renderStageColumn(st.qQueried, 'queried')}</div>
+                        <div style={{ textAlign: "center", padding: "13px 8px" }}>{renderStageColumn(st.qPartReq, 'part_req')}</div>
+                        <div style={{ textAlign: "center", padding: "13px 8px" }}>{renderStageColumn(st.qPartSent, 'part_sent')}</div>
+                        <div style={{ textAlign: "center", padding: "13px 8px" }}>{renderStageColumn(st.qFullReq, 'full_req')}</div>
+                        <div style={{ textAlign: "center", padding: "13px 8px" }}>{renderStageColumn(st.qFullSent, 'full_sent')}</div>
+                        <div style={{ textAlign: "center", padding: "13px 8px" }}>{renderStageColumn(st.qOffer, 'offer')}</div>
+                        <div style={{ textAlign: "center", padding: "13px 8px" }}>{renderStageColumn(st.qClosed, 'closed')}</div>
+                      </div>
+                    );
+                  })}
+                  {manuscripts.length === 0 && (
+                    <div className="p-8 text-center text-xs italic" style={{ color: "rgba(58,28,20,0.4)" }}>
+                      Get started by creating your very first manuscript structure!
+                    </div>
+                  )}
+                </div>
+              </MountCard>
+            );
+          })()}
 
           {/* ==================== FORTNIGHT IN FOCUS ==================== */}
           {(() => {
@@ -2784,7 +2789,7 @@ export const Dashboard: React.FC<{
                     ));
 
                     const hoverBgClass = isHovered 
-                      ? "ring-2 ring-rose-300 bg-rose-50/70 scale-[1.08] shadow-sm" 
+                      ? "ring-2 ring-[#d8a89a] bg-[#f5e2da]/70 scale-[1.08] shadow-sm" 
                       : isToday 
                         ? "bg-[#FFF0F0]" 
                         : "hover:bg-[#FAF1EF]/70 hover:scale-[1.05]";
@@ -2803,7 +2808,7 @@ export const Dashboard: React.FC<{
                           isToday 
                             ? "bg-[#7c3d3d] text-white" 
                             : isHovered 
-                              ? "bg-rose-100 text-[#7c3d3d]" 
+                              ? "bg-[#f5e2da] text-[#7c3a2a]" 
                               : "text-[#3a1c14]"
                         }`}>
                           {dateNum}
@@ -3217,7 +3222,7 @@ export const Dashboard: React.FC<{
                         if (daysLeft >= 0 && daysLeft <= 3) {
                           return (
                             <div className="flex flex-col gap-1 border-t border-[#f0e8e0]/60 pt-2 text-left">
-                              <div className="flex flex-col items-center justify-center py-2 text-center bg-rose-50/50 rounded-lg">
+                              <div className="flex flex-col items-center justify-center py-2 text-center bg-[#f7ede7] rounded-lg">
                                 <span className="text-[28px] font-extrabold text-[#7c3d3d] leading-none" style={{ fontFamily: "Georgia, serif" }}>
                                   {daysLeft}
                                 </span>
@@ -3368,16 +3373,32 @@ export const Dashboard: React.FC<{
               <div 
                 className={isMagazineLayout
                   ? "bg-[#FFFDF9] border-b border-[#e8e0d8] flex flex-col w-full relative"
-                  : "bg-[#FFFDF9] border border-[#e8d5cc] rounded-[16px] shadow-[0_8px_30px_rgba(58,28,20,0.06)] flex flex-col w-full relative"
+                  : "flex flex-col w-full relative"
                 }
-                style={isMagazineLayout ? { borderBottomWidth: '0.5px' } : {}}
+                style={isMagazineLayout
+                  ? { borderBottomWidth: '0.5px' }
+                  : { background: parchment, backgroundImage: PAPER_TEXTURE, borderRadius: 14, boxShadow: mountShadow }}
                 id="fortnight-in-focus-container"
               >
+                {!isMagazineLayout && (
+                  <div aria-hidden="true" style={{ position: "absolute", inset: 6, border: insetBorder, borderRadius: 10, pointerEvents: "none", zIndex: 3 }} />
+                )}
                 {/* Header */}
-                <div className={isMagazineLayout
-                  ? "p-[14px_24px] pb-1.5 flex items-center justify-between border-b border-[#e8d5cc]/30"
-                  : "bg-[#dce0d9] rounded-t-[16px] p-[11px_18px] flex items-center justify-between border-b border-[#e8d5cc]/60"
-                }>
+                <div
+                  className={isMagazineLayout
+                    ? "p-[14px_24px] pb-1.5 flex items-center justify-between border-b border-[#e8d5cc]/30"
+                    : "flex items-center justify-between"
+                  }
+                  style={isMagazineLayout ? {} : {
+                    position: "relative",
+                    zIndex: 2,
+                    margin: "6px 6px 0",
+                    borderRadius: "8px 8px 0 0",
+                    padding: "12px 18px 10px",
+                    background: sageBandGradient,
+                    borderBottom: `1px solid ${sageBandRule}`,
+                  }}
+                >
                   <div className="flex items-center gap-2">
                     <Calendar className="w-3.5 h-3.5 text-[#3a1c14]" />
                     <div className="flex flex-col text-left">
@@ -3398,10 +3419,10 @@ export const Dashboard: React.FC<{
                 </div>
 
                 {/* Two-panel layout */}
-                <div className={isMagazineLayout
-                  ? "grid grid-cols-[1fr_1px_1fr] bg-[#FFFDF9]"
-                  : "grid grid-cols-[1fr_1px_1fr] bg-[#FFFDF9] rounded-b-[16px]"
-                }>
+                <div
+                  className="grid grid-cols-[1fr_1px_1fr]"
+                  style={isMagazineLayout ? { background: "#FFFDF9" } : { position: "relative", zIndex: 2, margin: "0 6px 6px" }}
+                >
                   {/* LEFT PANEL */}
                   <div className={isMagazineLayout
                     ? "p-[16px_24px] flex flex-col"
@@ -3482,7 +3503,7 @@ export const Dashboard: React.FC<{
         </div>
 
         {/* RIGHT COLUMN: Chronological Timeline Sidebar */}
-        <div 
+        <div
           className={isMagazineLayout
             ? "flex flex-col bg-[#FAF8F5] border-l border-[#e8e0d8] h-full"
             : "flex flex-col"
@@ -3503,109 +3524,54 @@ export const Dashboard: React.FC<{
             </div>
           )}
 
-          {/* Chronological Timeline Sidebar section */}
-          <div 
-            className={isMagazineLayout
-              ? "p-[20px] text-left flex-1 flex flex-col justify-between min-h-0 relative"
-              : "relative border border-[#EBDCD3] border-t-[3.5px] border-t-[#7c3a2a] rounded-2xl p-5 pt-8 bg-white shadow-[0_4px_12px_rgba(58,28,20,0.03)] flex-1 flex flex-col justify-between transition-all duration-300 min-h-0 relative"
-            }
-          >
-            {isMagazineLayout ? (
-              <div className="flex items-center justify-between mb-4 w-full">
-                <span className="font-serif text-[11px] font-semibold uppercase tracking-wider text-[#3a1c14]">
-                  Timeline
-                </span>
-                <button
-                  onClick={() => setIsCustomizerOpen(true)}
-                  className="bg-white hover:bg-stone-50 text-[#7c3a2a] hover:text-[#5c2a1e] border border-[#e8e0d8] rounded-full px-2.5 py-1 shadow-3xs transition-all cursor-pointer flex items-center justify-center gap-1 text-[9px] font-mono font-bold uppercase select-none"
-                  title="Customize ledger copy style rules"
-                >
-                  <Sparkles className="w-2.5 h-2.5 text-amber-500 animate-pulse" />
-                  <span>AI Style</span>
-                </button>
-              </div>
-            ) : (
-              <>
-                {/* Centered Overlap Pill Icon - brought to front with elevated z-30 */}
-                <div className={`absolute -top-3.5 left-1/2 -translate-x-1/2 text-[10px] font-bold font-mono px-4 py-1.5 rounded-full uppercase shadow-sm tracking-widest z-30 transition-colors duration-300 border ${
-                  timelineStyle === "journal" 
-                    ? "bg-[#7c3a2a] text-white border-[#7c3a2a]/20" 
-                    : timelineStyle === "bento" 
-                      ? "bg-[#BA7517] text-[#FAF8F5] border-[#BA7517]/20" 
-                      : "bg-stone-800 text-stone-200 border-stone-800"
-                }`}>
-                  Timeline
-                </div>
-
-                {/* AI Copy customizer trigger button */}
-                <button
-                  onClick={() => setIsCustomizerOpen(true)}
-                  className="absolute -top-3.5 right-4 bg-white hover:bg-stone-50 text-[#7c3a2a] hover:text-[#5c2a1e] border border-[#EBDCD3] rounded-full px-3.5 py-1.5 shadow-xs transition-all cursor-pointer z-30 flex items-center justify-center gap-1.5 text-[9px] font-mono font-bold uppercase select-none active:scale-95 hover:shadow-sm"
-                  title="Customize ledger copy style rules"
-                >
-                  <Sparkles className="w-3 h-3 text-amber-500 animate-pulse" />
-                  <span>AI Style</span>
-                </button>
-              </>
-            )}
-
-            {/* Chronological Vertical Feed Container */}
-            <div 
-              ref={timelineScrollRef}
-              onScroll={handleTimelineScroll}
-              className="flex-1 overflow-y-auto pr-1 scrollbar-thin space-y-6 pt-2 min-h-0"
-              style={{
-                maskImage: `linear-gradient(to bottom, ${
-                  timelineScrollState.isAtTop ? "black 0%" : "transparent 0%, black 8%"
-                }, ${
-                  timelineScrollState.isAtBottom ? "black 100%" : "black 92%, transparent 100%"
-                })`,
-                WebkitMaskImage: `linear-gradient(to bottom, ${
-                  timelineScrollState.isAtTop ? "black 0%" : "transparent 0%, black 8%"
-                }, ${
-                  timelineScrollState.isAtBottom ? "black 100%" : "black 92%, transparent 100%"
-                })`
-              }}
-            >
-              {chronologicalKeys.length === 0 ? (
-                <div className="flex-1 flex flex-col items-center justify-center text-center py-16 px-4 space-y-4 animate-fade-in">
-                  <div className="w-12 h-12 bg-[#FAF1EF] border border-[#F2DDD5] text-[#9C6152] rounded-full flex items-center justify-center shadow-sm">
-                    <Send className="w-5 h-5" />
+          {/* "The story so far" — activity timeline */}
+          {(() => {
+            const timelineBody = (
+              <div
+                ref={timelineScrollRef}
+                onScroll={handleTimelineScroll}
+                className="flex-1 overflow-y-auto pr-1 scrollbar-thin min-h-0"
+                style={{
+                  maskImage: `linear-gradient(to bottom, ${
+                    timelineScrollState.isAtTop ? "black 0%" : "transparent 0%, black 8%"
+                  }, ${
+                    timelineScrollState.isAtBottom ? "black 100%" : "black 92%, transparent 100%"
+                  })`,
+                  WebkitMaskImage: `linear-gradient(to bottom, ${
+                    timelineScrollState.isAtTop ? "black 0%" : "transparent 0%, black 8%"
+                  }, ${
+                    timelineScrollState.isAtBottom ? "black 100%" : "black 92%, transparent 100%"
+                  })`
+                }}
+              >
+                {chronologicalKeys.length === 0 ? (
+                  <div className="flex-1 flex flex-col items-center justify-center text-center py-16 px-4 animate-fade-in">
+                    <Send className="w-[22px] h-[22px]" style={{ color: "#aab8a4", marginBottom: 10 }} strokeWidth={1.6} />
+                    <div style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 13.5, color: "#5a6258", lineHeight: 1.65 }}>
+                      The story starts with your first query.
+                    </div>
+                    <div style={{ ...labelStyle, marginTop: 13 }}>No activity logged yet</div>
                   </div>
+                ) : (
                   <div>
-                    <h4 className="font-serif text-sm font-semibold text-[#3a1c14]">Quiet Desk</h4>
-                    <p className="text-[11px] text-[#3a1c14]/60 leading-relaxed mt-1">
-                      No recent transmissions, requests, or agent replies logged in your ledger yet.
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-5">
-                  {chronologicalKeys.map((dateKey) => {
-                    const formattedDateHeader = getDisplayDateHeader(dateKey);
-                    const events = [...groupedEventsByDate[dateKey]].sort((a, b) => {
-                      return new Date(b.date).getTime() - new Date(a.date).getTime();
-                    });
-                    
-                    return (
-                      <div key={dateKey} className="space-y-3.5">
-                        {/* Chronological Date Header Group */}
-                        <div className="flex items-center gap-2">
-                          <span className="text-[9px] font-mono font-bold tracking-widest text-[#7c3a2a] uppercase select-none">
-                            {formattedDateHeader}
-                          </span>
-                          <div className="h-[1px] bg-[#EBDCD3]/70 flex-1" />
-                        </div>
+                    {chronologicalKeys.map((dateKey) => {
+                      const formattedDateHeader = getDisplayDateHeader(dateKey);
+                      const events = [...groupedEventsByDate[dateKey]].sort((a, b) => {
+                        return new Date(b.date).getTime() - new Date(a.date).getTime();
+                      });
 
-                        {/* List of elements for this group */}
-                        <div className="space-y-3">
-                          {events.map((act) => {
+                      return (
+                        <div key={dateKey} style={{ marginBottom: 4 }}>
+                          {/* Day group caption */}
+                          <div style={{ ...labelStyle, marginBottom: 12 }}>{formattedDateHeader}</div>
+
+                          {events.map((act, evIdx) => {
                             const q = queries.find(item => item.id === act.queryId);
                             const agent = q ? agents.find(ag => ag.id === q.agentId) : null;
                             const ms = manuscripts.find(m => m.id === act.manuscriptId) || manuscripts[0];
                             const msTitle = ms ? ms.title : "";
                             const formattedTime = getFormattedTime(act.date);
-                            
+
                             const pillData = getPillLabelAndDot(act.description, act.activityType, act.resultingStatus);
                             const showManuscriptPill = (() => {
                               const isAgentAct = act.activityType === ActivityType.AGENT_ADDED || act.activityType === ActivityType.AGENT_UPDATED;
@@ -3623,15 +3589,15 @@ export const Dashboard: React.FC<{
                             const manuscriptPillContent = (() => {
                               if (!showManuscriptPill) return null;
                               const customLabel = pillData.key ? localStorage.getItem(`sc_custom_ms_label_${pillData.key}`) : null;
-                              
+
                               let defaultTemplate = "{Manuscript Title}";
                               if (act.activityType === ActivityType.AGENT_ADDED || act.activityType === ActivityType.AGENT_UPDATED) {
                                 defaultTemplate = "[agent full name] at [agency name]";
                               }
-                              
+
                               const templateText = (customLabel && customLabel.trim()) ? customLabel : defaultTemplate;
                               const resolvedAgent = agent || extractAgentFromText(act.description);
-                              
+
                               return replacePlaceholders(
                                 templateText,
                                 msTitle,
@@ -3664,85 +3630,72 @@ export const Dashboard: React.FC<{
                               act.details
                             );
 
-                            // Muted "desktop workspace" background colors (#FCFAF7 is actual desk background)
+                            // Label caption beneath the sentence: respond-by date + manuscript
+                            const respondBy = q?.responseDeadline
+                              ? `Respond by ${new Date(q.responseDeadline).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}`
+                              : "";
+                            const isLastInGroup = evIdx === events.length - 1;
+
                             return (
-                              <div 
-                                key={act.id} 
-                                onClick={() => {
-                                  if (act.queryId) {
-                                    setSelectedQueryIdForPanel(act.queryId);
-                                    setIsQueryPanelOpen(true);
-                                  } else {
-                                    onNavigate("queries", act.description);
-                                  }
-                                }}
-                                className="bg-[#FCFAF7] border border-[#EBDCD3]/70 rounded-xl p-3.5 hover:shadow-xs hover:border-[#7c3a2a]/30 transition-all cursor-pointer flex flex-col gap-1.5 animate-fade-in group font-sans"
-                              >
-                                {/* Top Line: Activity Type & Time stamp */}
-                                <div className="flex items-center justify-between text-[9px] font-mono select-none">
-                                  {pillData.show ? (
-                                    pillData.key && {
-                                      "queried": QueryStatus.QUERIED,
-                                      "partial_req": QueryStatus.PARTIAL_REQUESTED,
-                                      "partial_sent": QueryStatus.PARTIAL_SENT,
-                                      "full_req": QueryStatus.FULL_REQUESTED,
-                                      "full_sent": QueryStatus.FULL_SENT,
-                                      "offer": QueryStatus.OFFER,
-                                      "rr": QueryStatus.REVISE_RESUBMIT,
-                                      "rejected": QueryStatus.REJECTED,
-                                      "withdrawn": QueryStatus.WITHDRAWN,
-                                      "no_response": QueryStatus.NO_RESPONSE
-                                    }[pillData.key] ? (
-                                      <StatusPill 
-                                        status={{
-                                          "queried": QueryStatus.QUERIED,
-                                          "partial_req": QueryStatus.PARTIAL_REQUESTED,
-                                          "partial_sent": QueryStatus.PARTIAL_SENT,
-                                          "full_req": QueryStatus.FULL_REQUESTED,
-                                          "full_sent": QueryStatus.FULL_SENT,
-                                          "offer": QueryStatus.OFFER,
-                                          "rr": QueryStatus.REVISE_RESUBMIT,
-                                          "rejected": QueryStatus.REJECTED,
-                                          "withdrawn": QueryStatus.WITHDRAWN,
-                                          "no_response": QueryStatus.NO_RESPONSE
-                                        }[pillData.key]!} 
-                                        customLabel={displayPillLabel} 
-                                        size="sm" 
-                                      />
-                                    ) : (
-                                      <span 
-                                        className="font-bold uppercase tracking-wider border rounded-md px-2 py-0.5 inline-flex items-center gap-1.5"
-                                        style={{
-                                          backgroundColor: 'var(--color-background-secondary, rgb(245 245 244))',
-                                          color: 'var(--color-text-secondary, rgb(120 113 108))',
-                                          borderColor: 'rgba(120, 113, 108, 0.15)'
-                                        }}
-                                      >
-                                        {pillData.dot}
-                                        {formatRichText(displayPillLabel)}
-                                      </span>
-                                    )
-                                  ) : <span />}
-                                  <span className="text-stone-400 font-medium">
-                                    {formattedTime}
-                                  </span>
+                              <div key={act.id} className="flex animate-fade-in" style={{ gap: 12, marginBottom: isLastInGroup ? 18 : 14 }}>
+                                {/* Dot on the connector thread */}
+                                <div className="flex flex-col items-center shrink-0">
+                                  <span style={{ marginTop: 3 }}>{pillData.dot}</span>
+                                  {!isLastInGroup && <span style={{ width: 1.5, flex: 1, background: "#e8dcd0", marginTop: 4 }} />}
                                 </div>
 
-                                {/* Second Line: Description */}
-                                <div className="min-w-0 flex flex-col gap-1">
-                                  <h4 className="font-serif text-[13px] text-[#3a1c14] font-normal tracking-tight leading-snug group-hover:text-[#7c3a2a] transition-all">
+                                {/* Event sub-card */}
+                                <div
+                                  onClick={() => {
+                                    if (act.queryId) {
+                                      setSelectedQueryIdForPanel(act.queryId);
+                                      setIsQueryPanelOpen(true);
+                                    } else {
+                                      onNavigate("queries", act.description);
+                                    }
+                                  }}
+                                  className="cursor-pointer transition-all group"
+                                  style={{
+                                    flex: 1,
+                                    minWidth: 0,
+                                    background: "#fffdf9",
+                                    border: "0.5px solid #ece0d2",
+                                    borderRadius: 9,
+                                    padding: "12px 14px",
+                                  }}
+                                >
+                                  <div className="flex justify-between items-center" style={{ marginBottom: 5 }}>
+                                    {pillData.show ? (
+                                      <span
+                                        style={{
+                                          fontFamily: FONT_MONO,
+                                          fontSize: 9,
+                                          background: buttonPinkBg,
+                                          color: burgundy,
+                                          borderRadius: 20,
+                                          padding: "4px 9px",
+                                          fontWeight: 500,
+                                        }}
+                                      >
+                                        {formatRichText(displayPillLabel)}
+                                      </span>
+                                    ) : <span />}
+                                    <span style={{ ...labelStyle, letterSpacing: "0.08em" }}>{formattedTime}</span>
+                                  </div>
+
+                                  <div style={{ fontSize: 12.5, lineHeight: 1.5, color: "#4a3a30" }}>
                                     {formatRichText(boldedDesc)}
-                                  </h4>
+                                  </div>
                                   {displayDetails && (
-                                    <p className="text-[11px] text-stone-500 font-sans leading-relaxed">
+                                    <p style={{ fontSize: 11, color: mutedInk, lineHeight: 1.5, marginTop: 4 }}>
                                       {formatRichText(displayDetails)}
                                     </p>
                                   )}
-                                  {manuscriptPillContent && (
-                                    <div className="flex mt-1">
-                                      <span className="inline-block text-[10px] text-[#7c3a2a] bg-[#FAF1EF] font-semibold px-2 py-0.5 rounded-full border border-[#F2DDD5]/40 shadow-2xs">
-                                        {formatRichText(manuscriptPillContent)}
-                                      </span>
+                                  {(respondBy || manuscriptPillContent) && (
+                                    <div style={{ ...labelStyle, marginTop: 6, letterSpacing: "0.1em" }}>
+                                      {respondBy}
+                                      {respondBy && manuscriptPillContent ? " · " : ""}
+                                      {manuscriptPillContent ? formatRichText(manuscriptPillContent) : null}
                                     </div>
                                   )}
                                 </div>
@@ -3750,128 +3703,148 @@ export const Dashboard: React.FC<{
                             );
                           })}
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
 
-            {/* Smart ledger footer display */}
-            <div className="p-3 bg-[#FAF1EF]/30 border-t border-[#EBDCD3]/60 text-[10.5px] font-serif italic text-stone-500 text-center select-none mt-4 rounded-b-xl">
-              "Every great voice was once a stack of letters."
-            </div>
-          </div>
+            const aiStyleButton = (
+              <button
+                onClick={() => setIsCustomizerOpen(true)}
+                className="cursor-pointer"
+                title="Customize ledger copy style rules"
+                style={{
+                  fontFamily: FONT_MONO,
+                  fontSize: 9,
+                  fontWeight: 500,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  background: "#ffffff",
+                  color: ghostButtonText,
+                  border: "0.5px solid #e0d5c8",
+                  borderRadius: 9,
+                  padding: "5px 10px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 5,
+                  transition: "all 0.2s",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = burgundy; e.currentTarget.style.background = buttonPinkBg; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = ghostButtonText; e.currentTarget.style.background = "#ffffff"; }}
+              >
+                <Sparkles className="w-[11px] h-[11px]" />
+                AI style
+              </button>
+            );
+
+            if (isMagazineLayout) {
+              return (
+                <div className="p-[20px] text-left flex-1 flex flex-col justify-between min-h-0 relative">
+                  <div className="flex items-center justify-between mb-4 w-full">
+                    <span className="font-serif text-[11px] font-semibold uppercase tracking-wider text-[#3a1c14]">
+                      Timeline
+                    </span>
+                    {aiStyleButton}
+                  </div>
+                  {timelineBody}
+                </div>
+              );
+            }
+
+            return (
+              <MountCard className="flex-1 flex flex-col" style={{ minHeight: 0, overflow: "hidden" }}>
+                {/* Edge-to-edge sage band header */}
+                <div
+                  className="flex items-center justify-between"
+                  style={{
+                    position: "relative",
+                    zIndex: 2,
+                    margin: "6px 6px 0",
+                    borderRadius: "8px 8px 0 0",
+                    padding: "14px 20px 12px",
+                    background: sageBandGradient,
+                    borderBottom: `1px solid ${sageBandRule}`,
+                  }}
+                >
+                  <span style={{ fontFamily: FONT_SERIF, fontSize: 15, fontWeight: 500, color: headingInk }}>
+                    The story so far
+                  </span>
+                  <span className="flex items-center" style={{ gap: 10 }}>
+                    <span style={{ ...labelStyle, color: sageText }}>Timeline</span>
+                    {aiStyleButton}
+                  </span>
+                </div>
+
+                <div
+                  className="flex-1 flex flex-col min-h-0"
+                  style={{ position: "relative", zIndex: 2, margin: "0 6px 6px", padding: "16px 20px 12px" }}
+                >
+                  {timelineBody}
+
+                  {/* Ledger footer line */}
+                  <div
+                    className="text-center select-none"
+                    style={{
+                      marginTop: 12,
+                      paddingTop: 10,
+                      borderTop: hairline,
+                      fontFamily: FONT_SERIF,
+                      fontStyle: "italic",
+                      fontSize: 10.5,
+                      color: mutedInk,
+                    }}
+                  >
+                    "Every great voice was once a stack of letters."
+                  </div>
+                </div>
+              </MountCard>
+            );
+          })()}
         </div>
 
       </div>
 
-      {/* ======================================================== */}
-      {/* FULL-WIDTH PRO UPGRADE DESIGN CHOOSE ARENA */}
-      {/* ======================================================== */}
-      <div className="w-full max-w-none px-4 md:px-10 lg:px-14 xl:px-16 mt-12 space-y-6 pb-12">
-        <div className="relative border-t border-[#7c3a2a]/15 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3">
-            <div>
-              <span className="text-[10px] font-mono tracking-widest font-bold text-[#BA7517] uppercase bg-amber-50 border border-amber-200/50 rounded-full px-2.5 py-0.5 select-none animate-pulse">
-                Design Palette Options
-              </span>
-              <h3 className="text-xl font-serif font-bold text-[#3a1c14] tracking-tight mt-1.5">
-                "Upgrade to Pro" Banner Layout Formats
-              </h3>
-              <p className="text-xs text-stone-600 leading-relaxed font-light font-sans">
-                Review three highly customized style options prepared below. Each option spans the full width of the container, completing your workspace deck.
-              </p>
-            </div>
-            
-            {/* Design system badge */}
-            <span className="text-[10px] font-mono text-stone-400 uppercase tracking-wider select-none font-bold">
-              SYSTEM CHANNELS V1.2 // PERSISTENT
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 gap-6">
-            {/* FORMAT 1: CLASSIC EDITORIAL LITERARY BANNER */}
-            <div className="bg-white border-y-4 border-double border-[#7c3a2a]/30 p-8 flex flex-col md:flex-row justify-between items-center gap-6 shadow-xs relative overflow-hidden text-left" id="pro-banner-editorial">
-              <div className="space-y-2 max-w-3xl">
-                <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#7c3a2a]" />
-                  <span className="text-[9px] font-mono font-bold tracking-widest text-[#7c3a2a] uppercase">FORMAT #1 // CLASSIC LITERARY MASTHEAD</span>
+      {/* Quiet Pro upsell (replaces the old three-format banner review arena) */}
+      {!isMagazineLayout && currentUser.plan !== UserPlan.PRO && (
+        <div className="w-full max-w-none px-4 md:px-10 lg:px-14 xl:px-16 mt-[14px]">
+          <MountCard>
+            <div
+              className="flex flex-col md:flex-row md:items-center justify-between gap-4"
+              style={{ position: "relative", zIndex: 4, padding: "18px 22px" }}
+            >
+              <div>
+                <div style={{ ...labelStyle, marginBottom: 6 }}>ScriptAlly Pro</div>
+                <div style={{ fontFamily: FONT_SERIF, fontSize: 17, fontWeight: 500, color: headingInk }}>
+                  More room for the journey
                 </div>
-                <h4 className="text-xl md:text-2xl font-serif text-[#3a1c14] tracking-tight uppercase leading-none">
-                  Acquire Professional Representation with <span className="font-bold text-[#7c3a2a]">ScriptAlly Pro</span>
-                </h4>
-                <p className="text-xs text-stone-600 font-light leading-relaxed max-w-2xl font-serif italic">
-                  Gain access to unlimited dispatches, track multiple agency branches in tandem, store nested manuscript revisions, and unlock live editor response forecasting metrics.
+                <p style={{ fontFamily: FONT_SANS, fontSize: 12, color: mutedInk, marginTop: 4, maxWidth: 560, lineHeight: 1.55 }}>
+                  Unlimited manuscripts, deeper querying analytics and live wishlist matching — when you're ready for them.
                 </p>
               </div>
-
-              <div className="shrink-0 flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
-                <button className="w-full md:w-auto bg-[#7c3a2a] hover:bg-[#632e22] text-white font-serif font-semibold py-3 px-6 rounded-lg text-xs transition-colors tracking-tight shadow-xs cursor-pointer text-center">
-                  Unlock Representative Suite &rarr;
-                </button>
-                <span className="text-[10px] font-mono font-bold text-[#7c3a2a]/60 tracking-wider">£12 / MONTH</span>
-              </div>
+              <button
+                onClick={() => onNavigate("pricing")}
+                className="cursor-pointer shrink-0"
+                style={{
+                  fontFamily: FONT_MONO,
+                  fontSize: 10.5,
+                  fontWeight: 500,
+                  letterSpacing: "0.07em",
+                  background: buttonPinkBg,
+                  color: burgundy,
+                  border: `0.5px solid ${buttonPinkBorder}`,
+                  borderRadius: 10,
+                  padding: "10px 20px",
+                  transition: "all 0.2s",
+                }}
+              >
+                See Pro plans →
+              </button>
             </div>
-
-            {/* FORMAT 2: COSMIC GOLDEN GLIMMER (LUXURY GRADIENT) */}
-            <div className="bg-gradient-to-r from-stone-900 via-stone-950 to-[#2A1C16] border border-amber-500/20 rounded-2xl p-8 flex flex-col md:flex-row justify-between items-center gap-6 shadow-md relative overflow-hidden text-left" id="pro-banner-glimmer">
-              {/* Absolutes for elegant styling background hints */}
-              <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
-              <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none" />
-              
-              <div className="space-y-3 max-w-3xl relative z-10">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
-                  <span className="text-[9.5px] font-mono font-bold tracking-widest text-amber-400 uppercase">FORMAT #2 // PREMIUM COSMIC GLIMMER</span>
-                </div>
-                <h4 className="text-2xl font-serif text-white tracking-tight">
-                  Elevate your draft into a <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-300 to-amber-500 font-bold">masterpiece</span>
-                </h4>
-                <p className="text-xs text-stone-300 font-light leading-relaxed max-w-2xl">
-                  ScriptAlly Pro translates agent feedback matching into actionable revisions automatically. Enjoy our smart query generator, daily submission alerts, and real-time wish list scanning.
-                </p>
-              </div>
-
-              <div className="shrink-0 relative z-10 w-full md:w-auto">
-                <button className="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-stone-950 font-bold rounded-xl text-xs transition-colors shadow-md transform hover:-translate-y-0.5 cursor-pointer text-center">
-                  Go Pro for £12/mo
-                </button>
-              </div>
-            </div>
-
-            {/* FORMAT 3: MINIMALIST MONOSPACE TECH RAIL */}
-            <div className="bg-[#FAF1EF]/30 border border-[#EBDCD3] rounded-xl p-6 grid grid-cols-1 md:grid-cols-12 gap-6 items-center text-left" id="pro-banner-tech">
-              <div className="md:col-span-8 space-y-3 font-mono">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-stone-300" />
-                  <span className="text-[9px] font-bold tracking-widest text-[#3a1c14] uppercase">FORMAT #3 // MONOSPACE TECH RAIL</span>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-y-3 gap-x-6 pt-1 text-[10.5px] text-stone-500 font-mono">
-                  <div className="space-y-1">
-                    <span className="text-[8px] font-bold text-stone-400 uppercase block">MULTIPLE MANUSCRIPTS</span>
-                    <span className="text-[#3a1c14]/90 font-bold block">UNLIMITED ACTIVE [PRO_TIER]</span>
-                  </div>
-                  <div className="space-y-1">
-                    <span className="text-[8px] font-bold text-stone-400 uppercase block">MSWL SCANS RADAR</span>
-                    <span className="text-[#BA7517] font-bold block bg-[#BA7517]/5 border border-[#BA7517]/10 px-1 py-0.5 rounded text-center inline-block">REAL-TIME [BETA_MATCHED]</span>
-                  </div>
-                  <div className="space-y-1 col-span-2 sm:col-span-1">
-                    <span className="text-[8px] font-bold text-stone-400 uppercase block">API INTEGRATIONS</span>
-                    <span className="text-[#3a1c14]/90 font-bold block">FULL-SYNC OUTBOX [READY]</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="md:col-span-4 flex justify-end w-full col-span-1">
-                <button className="w-full bg-[#3a1c14] hover:bg-[#200f0a] text-stone-150 font-mono font-bold py-3 px-6 rounded-lg text-xs tracking-wider transition-all cursor-pointer text-center border border-stone-800">
-                  UPGRADE_SYS_TO_PRO // £12_MO
-                </button>
-              </div>
-            </div>
-          </div>
+          </MountCard>
         </div>
-      </div>
+      )}
 
       {/* Slide-In Tasks Panel (Part 3) */}
       <AnimatePresence>
@@ -3895,19 +3868,20 @@ export const Dashboard: React.FC<{
               className="fixed top-0 right-0 h-full w-full sm:max-w-[420px] sm:w-[420px] bg-[#F5F0EA] shadow-2xl flex flex-col text-left border-l border-[#EBDCD3]/40"
             >
               {/* Header */}
-              <div className="bg-[#3a1c14] p-5 relative text-left select-none shrink-0">
-                <span className="text-[10px] font-mono tracking-widest uppercase font-bold text-white/50 block mb-1">
+              <div className="p-5 relative text-left select-none shrink-0" style={{ background: sageBandGradient, borderBottom: `1px solid ${sageBandRule}` }}>
+                <span style={{ ...labelStyle, color: sageText, display: "block", marginBottom: 4 }}>
                   Dashboard
                 </span>
-                <h2 className="text-xl font-serif font-bold text-[#F8F5F0]">
+                <h2 style={{ fontFamily: FONT_SERIF, fontSize: 20, fontWeight: 500, color: headingInk }}>
                   Your tasks
                 </h2>
-                <p className="text-xs text-white/55 font-sans mt-0.5">
+                <p style={{ fontFamily: FONT_SANS, fontSize: 12, color: sageText, marginTop: 2 }}>
                   {tasks.length} {tasks.length === 1 ? 'item needs' : 'items need'} attention
                 </p>
                 <button 
                   onClick={() => setIsTasksPanelOpen(false)}
-                  className="absolute top-5 right-5 p-1 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                  className="absolute top-5 right-5 p-1 rounded-full transition-colors cursor-pointer"
+                  style={{ color: sageText }}
                   title="Close panel"
                 >
                   <X className="w-5 h-5" />
@@ -3952,8 +3926,8 @@ export const Dashboard: React.FC<{
                         {/* Overdue section */}
                         {overdueList.length > 0 && (
                           <div className="space-y-3">
-                            <div className="flex items-center gap-1.5 text-[#C4706A] font-bold text-[10px] uppercase tracking-wider mb-2 select-none">
-                              <Clock className="w-4 h-4 text-[#C4706A]" />
+                            <div className="flex items-center gap-1.5 text-[#a86a52] font-bold text-[10px] uppercase tracking-wider mb-2 select-none">
+                              <Clock className="w-4 h-4 text-[#a86a52]" />
                               <span>Overdue</span>
                             </div>
                             <div className="flex flex-col gap-3">
@@ -4075,7 +4049,8 @@ export const Dashboard: React.FC<{
             initial={{ opacity: 0, y: 30, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 15, scale: 0.95 }}
-            className="fixed bottom-6 right-6 z-100 bg-white border border-[#EBDCD3] rounded-2xl p-4 shadow-xl flex items-center gap-4 max-w-sm select-none font-sans"
+            className="fixed bottom-6 right-6 z-100 rounded-2xl p-4 flex items-center gap-4 max-w-sm select-none font-sans"
+            style={{ background: parchment, border: "0.5px solid #e0d5c8", boxShadow: "0 8px 24px rgba(58,28,20,0.18)" }}
           >
             <div className="flex-1 min-w-0 text-left">
               <h5 className="text-xs font-bold text-[#3a1c14] leading-snug">
@@ -4102,7 +4077,7 @@ export const Dashboard: React.FC<{
                     cx="14"
                     cy="14"
                     r="11"
-                    stroke="#D97706"
+                    stroke="#7c3a2a"
                     strokeWidth="2.5"
                     fill="transparent"
                     strokeDasharray="69.1"
@@ -4110,7 +4085,7 @@ export const Dashboard: React.FC<{
                     className="transition-all duration-1000 ease-linear"
                   />
                 </svg>
-                <span className="absolute text-[10px] font-bold text-amber-700 font-mono">
+                <span className="absolute text-[10px] font-bold font-mono" style={{ color: "#7c3a2a" }}>
                   {undoToastTimer}
                 </span>
               </div>
