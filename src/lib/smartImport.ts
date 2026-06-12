@@ -55,7 +55,7 @@ export interface ValidatedImport {
  * drop-and-report rather than silently write.
  */
 export function validateSmartImport(result: SmartImportResult): ValidatedImport {
-  const agentRefs = new Set((result.agents || []).map((a) => a.ref));
+  const agentByRef = new Map((result.agents || []).map((a) => [a.ref, a]));
   const importable: ParsedQuery[] = [];
   const skipped: { query: ParsedQuery; reason: string }[] = [];
   const dateWarnings: string[] = [];
@@ -73,8 +73,15 @@ export function validateSmartImport(result: SmartImportResult): ValidatedImport 
       skipped.push({ query: q, reason: "No query date" });
       continue;
     }
-    if (!agentRefs.has(q.agentRef)) {
+    const agent = agentByRef.get(q.agentRef);
+    if (!agent) {
       skipped.push({ query: q, reason: "Row didn't match an agent" });
+      continue;
+    }
+    // An agent with no name can never be written (rules require name.size() >= 1) — skip the
+    // row up-front with an honest reason instead of letting the write fail downstream.
+    if (!agent.name?.trim()) {
+      skipped.push({ query: q, reason: "Row has no agent name" });
       continue;
     }
 

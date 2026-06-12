@@ -38,7 +38,7 @@ export interface BranchBProps {
   error?: string | null;
 }
 
-type B3Screen = "book" | "pipeline" | "reading" | "review" | "fallback" | "importing";
+type B3Screen = "book" | "pipeline" | "reading" | "review" | "fallback" | "importing" | "done";
 
 const UploadIcon = (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
@@ -113,6 +113,7 @@ export const BranchB: React.FC<BranchBProps> = ({
   const [importOption, setImportOption] = useState<"smart" | "byhand">(defaultImport);
   const [fileName, setFileName] = useState("");
   const [validated, setValidated] = useState<ValidatedImport | null>(null);
+  const [outcome, setOutcome] = useState<CommitOutcome | null>(null);
   const [dismissedFlags, setDismissedFlags] = useState<Set<number>>(new Set());
   const [commitError, setCommitError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -137,7 +138,7 @@ export const BranchB: React.FC<BranchBProps> = ({
     if (!validated || !currentUser || !manuscriptId) return;
     setScreen("importing");
     try {
-      const outcome = await commitSmartImport(
+      const result = await commitSmartImport(
         {
           userId: currentUser.id,
           existingAgents: agents,
@@ -148,7 +149,10 @@ export const BranchB: React.FC<BranchBProps> = ({
         validated.result,
         manuscriptId
       );
-      onImportComplete(outcome);
+      // Always show what actually happened — the commit must never finish silently,
+      // least of all when it produced zero queries.
+      setOutcome(result);
+      setScreen("done");
     } catch (e) {
       console.error("Smart Import commit failed:", e);
       setCommitError("Something went wrong bringing your pipeline in — nothing is lost. Try again, or use the Import desk.");
@@ -359,6 +363,49 @@ export const BranchB: React.FC<BranchBProps> = ({
         <p style={{ textAlign: "center", fontSize: 11, color: "#a8968a", marginTop: 14, fontStyle: "italic", fontFamily: FONT_SANS }}>
           Nothing's saved yet. Confirm and we'll bring it all in.
         </p>
+      </Form11Card>
+    );
+  }
+
+  // ── Outcome — what the commit actually did. Never silent, never auto-skipped past. ─
+  if (screen === "done" && outcome) {
+    const skippedReasons = [...new Set((validated?.skipped || []).map((s) => s.reason))];
+    const ok = outcome.queriesImported > 0;
+    return (
+      <Form11Card
+        dotIndex={2}
+        onSkip={onSkip}
+        pre="Your pipeline"
+        name={ok ? "Brought across" : "That didn't work"}
+        sub={ok ? "Here's what landed in ScriptAlly" : "Nothing was imported — here's why"}
+        motif={<InboxMotif />}
+        onBack={() => setScreen("review")}
+        primaryLabel={ok ? "Continue →" : "Back to the review →"}
+        onPrimary={() => (ok ? onImportComplete(outcome) : setScreen("review"))}
+      >
+        <div style={{ fontFamily: FONT_SANS, fontSize: 13, color: "#3a1c14", lineHeight: 1.7 }}>
+          <p style={{ margin: "0 0 10px" }}>
+            <strong>{outcome.queriesImported}</strong> {outcome.queriesImported === 1 ? "query" : "queries"} imported ·{" "}
+            <strong>{outcome.agentsCreated}</strong> {outcome.agentsCreated === 1 ? "agent" : "agents"} added
+            {outcome.agentsMerged > 0 && <> · <strong>{outcome.agentsMerged}</strong> merged with existing</>}
+          </p>
+          {(outcome.queriesSkipped > 0 || skippedReasons.length > 0) && (
+            <p style={{ margin: "0 0 10px", fontSize: 12, color: "#9c8878" }}>
+              {outcome.queriesSkipped} {outcome.queriesSkipped === 1 ? "row was" : "rows were"} skipped
+              {skippedReasons.length > 0 && <>: {skippedReasons.join("; ").toLowerCase()}</>}.
+            </p>
+          )}
+          {outcome.errors.length > 0 && (
+            <div style={{ background: "#FAEEDA", border: "0.5px solid #ead2a0", borderRadius: 9, padding: "10px 13px", marginTop: 4 }}>
+              {outcome.errors.slice(0, 4).map((err, i) => (
+                <p key={i} style={{ margin: i ? "6px 0 0" : 0, fontSize: 12, color: "#6b4a08", lineHeight: 1.5 }}>{err}</p>
+              ))}
+              {outcome.errors.length > 4 && (
+                <p style={{ margin: "6px 0 0", fontSize: 12, color: "#9a7a30" }}>…and {outcome.errors.length - 4} more.</p>
+              )}
+            </div>
+          )}
+        </div>
       </Form11Card>
     );
   }

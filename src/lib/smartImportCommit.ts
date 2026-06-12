@@ -80,42 +80,55 @@ export async function commitSmartImport(
   const { importable, skipped } = validateSmartImport(result);
   outcome.queriesSkipped = skipped.length;
 
+
   // 1. Agents — dedupe against existing, merge rather than duplicate. Import bypasses the
   //    Free-tier cap (same as the Import desk) so a real pipeline can land whole.
+  //    Every row is isolated: one bad agent (e.g. a no-name row the rules reject — the cause of
+  //    the agents-but-zero-queries bug) must never abort the batch. handleFirestoreError THROWS,
+  //    so addAgent/addQuery can raise as well as return failure.
   const refToAgent: Record<string, { id: string; name: string }> = {};
   for (const a of result.agents || []) {
-    const match = existingAgents.find(
-      (ex) => norm(ex.name) === norm(a.name) && (!a.agency || !ex.agency || norm(ex.agency) === norm(a.agency))
-    );
-    if (match) {
-      refToAgent[a.ref] = { id: match.id, name: match.name };
-      outcome.agentsMerged++;
+    if (!a.name?.trim()) {
+      // Unwritable (rules require a name) — its queries are already skipped by validation.
       continue;
     }
-    const res = await addAgent(
-      {
-        name: a.name,
-        agency: a.agency ?? "",
-        email: a.email ?? "",
-        website: a.website ?? "",
-        genres: a.genres ?? [],
-        mswlNotes: a.mswlNotes ?? "",
-        starRating: 3,
-        submissionStatus: "Open" as any,
-        responseTimeWeeks: a.responseTimeWeeks ?? 0,
-        noResponseMeansNo: a.noResponseMeansNo ?? false,
-        submissionMethod: mapMethod(a.submissionMethod),
-        materialsWanted: [],
-        notes: "",
-        importedNeedsReview: true,
-      },
-      true
-    );
-    if (res.success && res.id) {
-      refToAgent[a.ref] = { id: res.id, name: a.name };
-      outcome.agentsCreated++;
-    } else {
-      outcome.errors.push(`Couldn't save agent ${a.name}: ${res.error || "unknown error"}`);
+    try {
+      const match = existingAgents.find(
+        (ex) => norm(ex.name) === norm(a.name) && (!a.agency || !ex.agency || norm(ex.agency) === norm(a.agency))
+      );
+      if (match) {
+        refToAgent[a.ref] = { id: match.id, name: match.name };
+        outcome.agentsMerged++;
+        continue;
+      }
+      const res = await addAgent(
+        {
+          name: a.name,
+          agency: a.agency ?? "",
+          email: a.email ?? "",
+          website: a.website ?? "",
+          genres: a.genres ?? [],
+          mswlNotes: a.mswlNotes ?? "",
+          starRating: 3,
+          submissionStatus: "Open" as any,
+          responseTimeWeeks: a.responseTimeWeeks ?? 0,
+          noResponseMeansNo: a.noResponseMeansNo ?? false,
+          submissionMethod: mapMethod(a.submissionMethod),
+          materialsWanted: [],
+          notes: "",
+          importedNeedsReview: true,
+        },
+        true
+      );
+      if (res.success && res.id) {
+        refToAgent[a.ref] = { id: res.id, name: a.name };
+        outcome.agentsCreated++;
+      } else {
+        outcome.errors.push(`Couldn't save agent ${a.name}: ${res.error || "unknown error"}`);
+      }
+    } catch (e) {
+      console.error("Smart Import: agent write failed:", a.name, e);
+      outcome.errors.push(`Couldn't save agent ${a.name || "(no name)"}.`);
     }
   }
 
@@ -126,39 +139,65 @@ export async function commitSmartImport(
     const agent = refToAgent[q.agentRef];
     if (!agent) {
       outcome.queriesSkipped++;
+      outcome.errors.push(`Skipped a ${q.status} query — its agent couldn't be saved.`);
       continue;
     }
 
-    const res = await addQuery(
-      {
-        manuscriptId,
-        agentId: agent.id,
-        packageId: "",
-        personalisationNotes: q.notes ?? "",
-        sendMethod: SubmissionMethod.EMAIL,
-        status: q.status!,
-        dateSent: q.dateQueried!,
-      },
-      true
-    );
-    if (!res.success || !res.id) {
-      outcome.errors.push(`Couldn't import the query to ${agent.name}: ${res.error || "unknown error"}`);
+    let queryId: string;
+    try {
+      const res = await addQuery(
+        {
+          manuscriptId,
+          agentId: agent.id,
+          packageId: "",
+          personalisationNotes: q.notes ?? "",
+          sendMethod: SubmissionMethod.EMAIL,
+          status: q.status!,
+          dateSent: q.dateQueried!,
+        },
+        true
+      );
+      if (!res.success || !res.id) {
+        outcome.errors.push(`Couldn't import the query to ${agent.name}: ${res.error || "unknown error"}`);
+        continue;
+      }
+      queryId = res.id;
+    } catch (e) {
+      console.error("Smart Import: query write failed:", agent.name, e);
+      outcome.errors.push(`Couldn't import the query to ${agent.name}.`);
       continue;
     }
-    const queryId = res.id;
 
-    // Intermediate rungs strictly below the final status, only where the sheet gave a date.
+    // Intermediate rungs strictly below the final status. Dated rungs come from the sheet; a
+    // SENT status additionally implies the matching REQUEST happened (an agent action — what
+    // "Responses Received" derives from), so seed it even without a date, falling back to the
+    // sent/queried date per the import spec's "?? dateQueried" rule.
     const finalPos = finalPosition(q.status!);
-    let appended = false;
+    const rungsToSeed: { status: QueryStatus; date: string; note: string }[] = [];
     for (const rung of RUNGS) {
       const date = q[rung.field] as string | null | undefined;
       if (!date || (LADDER[rung.status] ?? 0) >= finalPos) continue;
+      rungsToSeed.push({ status: rung.status, date, note: rung.note });
+    }
+    const ensureImpliedRequest = (requestStatus: QueryStatus, fallbackDate: string | null | undefined) => {
+      if (rungsToSeed.some((r) => r.status === requestStatus)) return;
+      rungsToSeed.push({
+        status: requestStatus,
+        date: fallbackDate || q.dateQueried!,
+        note: `${requestStatus} (implied by the imported status)`,
+      });
+    };
+    if (q.status === QueryStatus.FULL_SENT) ensureImpliedRequest(QueryStatus.FULL_REQUESTED, q.fullSentDate ?? q.fullRequestedDate);
+    if (q.status === QueryStatus.PARTIAL_SENT) ensureImpliedRequest(QueryStatus.PARTIAL_REQUESTED, q.partialSentDate ?? q.partialRequestedDate);
+
+    let appended = false;
+    for (const rung of rungsToSeed) {
       try {
         const id = "imp-" + Math.random().toString(36).substr(2, 9);
         await setDoc(doc(db, "users", userId, "queries", queryId, "activity", id), {
           type: rung.status,
           resultingStatus: rung.status,
-          createdAt: Timestamp.fromDate(new Date(date)),
+          createdAt: Timestamp.fromDate(new Date(rung.date)),
           note: rung.note,
           queryId,
           agentName: agent.name,
