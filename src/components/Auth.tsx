@@ -23,6 +23,12 @@ export const Auth: React.FC = () => {
       setErrorMsg("Please provide an email address.");
       return;
     }
+    // The user's own password is required — there is no default. An empty submit must be caught
+    // here (and by the input's `required`) rather than reaching Firebase as auth/missing-password.
+    if (!password) {
+      setErrorMsg("Please enter your password.");
+      return;
+    }
 
     try {
       if (isLogin) {
@@ -186,6 +192,7 @@ export const Auth: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
+                  required
                   className="w-full pl-9 pr-3 py-2 text-sm bg-white rounded border border-[#7c3a2a]/10 focus:outline-none focus:border-[#7c3a2a] focus:ring-1 focus:ring-[#7c3a2a]/20 text-[#3a1c14]"
                 />
               </div>
