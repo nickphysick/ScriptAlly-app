@@ -7,6 +7,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useScriptAllyDb } from "../lib/db";
 import { ManuscriptStatus, SubmissionStatus, SubmissionMethod } from "../types";
+import { CreamUnderstood, Form11Card, BookMotif } from "./onboarding/chrome";
 import {
   BookOpen,
   Users,
@@ -95,6 +96,33 @@ const STAGE_SUBLINE: Record<QueryingStage, string> = {
   deep:     "We'll set you up to import what you've already sent and see it all in one place.",
   interest: "We'll make sure requests and offers stay front and centre.",
 };
+
+// The branch a chosen stage routes into after the "Understood" beat:
+//   starting → Branch A (manuscript-led setup); early/deep/interest → Branch B (capture + import).
+// "Skip setup" is the only route to Branch C (exploring) and is handled separately.
+type Branch = "A" | "B";
+const STAGE_TO_BRANCH: Record<QueryingStage, Branch> = {
+  starting: "A",
+  early: "B",
+  deep: "B",
+  interest: "B",
+};
+// The collapsed 3-way persisted to the profile (User.journeyStage) for later personalisation.
+const STAGE_TO_JOURNEY: Record<QueryingStage, "starting" | "querying" | "exploring"> = {
+  starting: "starting",
+  early: "querying",
+  deep: "querying",
+  interest: "querying",
+};
+// Distinct ScreenTransition keys per flow phase so the cross-fade fires on every branch step.
+const FLOW_KEY: Record<"understood" | "A" | "B", number> = { understood: -2, A: 100, B: 200 };
+
+// Centres a screen in the full-height onboarding overlay.
+const CenterWrap: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", minHeight: "100%", padding: "32px 16px", boxSizing: "border-box" }}>
+    {children}
+  </div>
+);
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -1419,9 +1447,11 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   const [step, setStep] = useState(saved.step ?? 0);
   const [selectedPath, setSelectedPath] = useState<OnboardingPath>(saved.selectedPath ?? null);
   const [queryingStage, setQueryingStage] = useState<QueryingStage | null>(saved.queryingStage ?? null);
-  // The transient "Understood…" beat between the welcome step and the existing flow. `null` when
-  // not showing; otherwise carries the sub-line (Continue) or null sub-line (Skip).
-  const [beat, setBeat] = useState<{ subline: string | null } | null>(null);
+  // The post-welcome flow: null = on the welcome step (or the legacy resume), "understood" = the
+  // cream transition beat, "A"/"B" = inside a branch. Branch C (exploring) exits immediately.
+  const [flow, setFlow] = useState<"understood" | Branch | null>(null);
+  // Which screen within the active branch (set in the branch stages).
+  const [branchStep, setBranchStep] = useState(0);
   const [manuscriptTitle, setManuscriptTitle] = useState(saved.manuscriptTitle ?? "");
   const [manuscriptGenre, setManuscriptGenre] = useState(saved.manuscriptGenre ?? "");
   const [agentName, setAgentName] = useState(saved.agentName ?? "");
@@ -1448,38 +1478,39 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     saveProgress({ step: s });
   };
 
-  // Welcome step → "Understood…" beat → existing onboarding flow (step 2). Continue persists the
-  // chosen stage to the profile via the same updateUserProfile path that writes onboardingComplete;
-  // Skip saves nothing. The captured stage does not branch the flow.
+  // Welcome step → cream "Understood" beat → the branch the chosen stage maps to. Continue persists
+  // both the granular stage and the collapsed journeyStage via the same updateUserProfile path that
+  // writes onboardingComplete.
   const handleStageContinue = async () => {
     if (!queryingStage) return;
     saveProgress({ queryingStage });
     try {
-      await updateUserProfile({ queryingStage });
+      await updateUserProfile({ queryingStage, journeyStage: STAGE_TO_JOURNEY[queryingStage] });
     } catch (e) {
-      console.error("Failed to persist queryingStage:", e);
+      console.error("Failed to persist journey stage:", e);
     }
-    setBeat({ subline: STAGE_SUBLINE[queryingStage] });
+    setBranchStep(0);
+    setFlow("understood");
   };
 
+  // "Skip setup" from the welcome step → Branch C (exploring): mark complete and go to the dashboard.
   const handleStageSkip = () => {
-    setBeat({ subline: null });
+    void finishOnboarding({ journeyStage: "exploring" });
   };
 
-  // After the beat shows, advance into the existing first onboarding step (Screen2Intro).
+  // After the cream beat shows (~1.2s), enter the branch the chosen stage maps to.
   useEffect(() => {
-    if (!beat) return;
-    const t = setTimeout(() => {
-      setBeat(null);
-      goTo(2);
-    }, 1800);
+    if (flow !== "understood" || !queryingStage) return;
+    const t = setTimeout(() => setFlow(STAGE_TO_BRANCH[queryingStage]), 1200);
     return () => clearTimeout(t);
-  }, [beat]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [flow, queryingStage]);
 
-  const handleSkip = async () => {
+  // The single completion path: mark onboardingComplete (+ optional journeyStage) and exit to the
+  // dashboard. Every "Skip setup" and every branch finish routes through here.
+  const finishOnboarding = async (extra?: { journeyStage?: "starting" | "querying" | "exploring" }) => {
     localStorage.removeItem(STORAGE_KEY);
     try {
-      await updateUserProfile({ onboardingComplete: true });
+      await updateUserProfile({ onboardingComplete: true, ...(extra || {}) });
     } catch (e) {
       // Never trap the user in onboarding if the profile write fails — the
       // optimistic local update already advanced the gate; just log and exit.
@@ -1487,6 +1518,8 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     }
     onComplete();
   };
+
+  const handleSkip = () => { void finishOnboarding(); };
 
   const handleScreen2Continue = () => goTo(3);
 
@@ -1575,22 +1608,50 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       justifyContent: "center",
       overflowY: "auto",
     }}>
-      <ScreenTransition stepKey={beat ? -2 : step}>
-        {beat && (
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "100%",
-            minHeight: "100%",
-            padding: "32px 16px",
-            boxSizing: "border-box",
-          }}>
-            <ConfirmBeat subline={beat.subline} />
-          </div>
+      <ScreenTransition stepKey={flow ? FLOW_KEY[flow] + branchStep : step}>
+        {flow === "understood" && (
+          <CenterWrap><CreamUnderstood /></CenterWrap>
         )}
 
-        {!beat && step === 0 && (
+        {/* Branch A — manuscript-led setup. Screens land in Stage 3. */}
+        {flow === "A" && (
+          <CenterWrap>
+            <Form11Card
+              dotIndex={1}
+              onSkip={handleSkip}
+              pre="Your manuscript"
+              name="Where are you with it?"
+              sub="No wrong answer — it points us the right way"
+              motif={<BookMotif />}
+              onBack={() => setFlow(null)}
+              primaryLabel="Continue →"
+              onPrimary={() => {}}
+            >
+              <p style={{ fontFamily: FONT_SANS, fontSize: 13, color: C.muted }}>Branch A screens arrive next.</p>
+            </Form11Card>
+          </CenterWrap>
+        )}
+
+        {/* Branch B — capture book + import pipeline. Screens land in Stages 4–5. */}
+        {flow === "B" && (
+          <CenterWrap>
+            <Form11Card
+              dotIndex={1}
+              onSkip={handleSkip}
+              pre="Your manuscript"
+              name="The book you're querying"
+              sub="We'll attach your pipeline to this"
+              motif={<BookMotif />}
+              onBack={() => setFlow(null)}
+              primaryLabel="Continue →"
+              onPrimary={() => {}}
+            >
+              <p style={{ fontFamily: FONT_SANS, fontSize: 13, color: C.muted }}>Branch B screens arrive next.</p>
+            </Form11Card>
+          </CenterWrap>
+        )}
+
+        {!flow && step === 0 && (
           <div style={{
             display: "flex",
             alignItems: "center",
@@ -1609,14 +1670,14 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
           </div>
         )}
 
-        {!beat && step === 1 && (
+        {!flow && step === 1 && (
           <Screen1Welcome
             onStart={() => goTo(2)}
             onAlreadyHaveAccount={handleSkip}
           />
         )}
 
-        {!beat && step >= 2 && step <= 6 && (
+        {!flow && step >= 2 && step <= 6 && (
           <div style={{
             display: "flex",
             alignItems: "center",
