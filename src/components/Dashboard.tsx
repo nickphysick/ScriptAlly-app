@@ -26,6 +26,7 @@ import { recordQueryResponse } from "../lib/recordResponse";
 import { CalendarView } from "./CalendarView";
 import { StatusPill } from "./StatusPill";
 import { StatusDot } from "./StatusDot";
+import { pageGround, bodyInk, PAGE_GRAIN } from "../lib/designTokens";
 import { getDynamicActivityText, replacePlaceholders, extractAgentFromText, boldAgentAndAgencyInText } from "../lib/activityUtils";
 import {
   Sparkles,
@@ -2337,7 +2338,15 @@ export const Dashboard: React.FC<{
   };
 
   return (
-    <div className="min-h-screen bg-[#FCFAF7] pb-16 font-sans text-[#3a1c14]">
+    <div
+      className="min-h-screen pb-16 font-sans"
+      style={{ background: pageGround, color: bodyInk }}
+    >
+      {/* Fixed page grain - sits over the kraft ground, under the positioned cards */}
+      <div
+        aria-hidden="true"
+        style={{ position: "fixed", inset: 0, opacity: 0.25, pointerEvents: "none", zIndex: 0, backgroundImage: PAGE_GRAIN }}
+      />
       
       {/* Developer-only floating layout toggle */}
       <button

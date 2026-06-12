@@ -89,7 +89,8 @@ function AppContent() {
     setSearchQuery("");
   };
 
-  const paddingTopClass = "pt-[64px]";
+  // Clears the floating MountCard nav (10px top inset + ~58px bar + breathing room)
+  const paddingTopClass = "pt-[84px]";
 
   const isStatusDotDemo = useStatusDotDemoRoute();
   if (isStatusDotDemo) {

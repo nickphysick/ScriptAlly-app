@@ -10,6 +10,65 @@
  * inline-critical styles in this codebase before. Tailwind stays fine for layout/spacing.
  */
 
+/* ── Core surfaces & inks ─────────────────────────────────────────────── */
+export const parchment = "#fdfaf5"; // card surface
+export const kraft = "#E0D4C4"; // page ground
+/** Radial glow layered over the kraft ground at top centre. */
+export const kraftGlow = "radial-gradient(ellipse at 50% 0%, rgba(255,250,242,0.45) 0%, transparent 55%)";
+/** Full page-ground background shorthand: glow over kraft. */
+export const pageGround = `${kraftGlow}, ${kraft}`;
+export const insetBorder = "1px solid rgba(124,58,42,0.28)"; // the signature mount frame
+export const burgundy = "#7c3a2a"; // primary
+export const deepBurgundy = "#6b3023"; // hover / darker
+export const bodyInk = "#3a1c14";
+export const headingInk = "#2e3a2c";
+export const mutedInk = "#8a7a6c";
+export const labelColor = "#9c8878";
+export const hairline = "0.5px solid #ece0d2";
+
+/* ── Bands ────────────────────────────────────────────────────────────── */
+export const sageBandGradient = "linear-gradient(135deg, #dce0d9 0%, #d0d6cc 100%)";
+export const sageBandRule = "rgba(90,110,88,0.2)"; // 1px rule under a sage band
+export const sageAccent = "#8a9e88";
+export const sageText = "#5a6e58";
+export const pinkBandGradient = "linear-gradient(135deg, #f5e2da 0%, #efd5ca 100%)";
+export const pinkBandRule = "rgba(124,58,42,0.15)"; // 1px rule under a pink band
+
+/* ── Buttons ──────────────────────────────────────────────────────────── */
+export const buttonPinkBg = "#f5e2da";
+export const buttonPinkBorder = "#e8c8bc";
+export const buttonPinkHoverBg = "#efd5ca";
+export const buttonPinkHoverBorder = "#d8a89a";
+export const ghostButtonBg = "#ffffff";
+export const ghostButtonBorder = "#e0d5c8";
+export const ghostButtonText = "#6a5a50";
+
+/* ── Typography (the app's existing font stack — never add or change fonts) ── */
+export const FONT_SERIF = "'Playfair Display', Georgia, serif";
+export const FONT_SANS = "'Inter', system-ui, sans-serif";
+export const FONT_MONO = "'JetBrains Mono', 'Fira Mono', monospace";
+
+/** The label style: mono, 9px, uppercase, wide tracking. Spread into a style object. */
+export const labelStyle = {
+  fontFamily: FONT_MONO,
+  fontSize: 9,
+  letterSpacing: "0.17em",
+  textTransform: "uppercase" as const,
+  fontWeight: 500,
+  color: labelColor,
+};
+
+/* ── Grain textures (SVG noise data-URIs shared with the Form 11 system) ── */
+/** Card grain — the forms' paper-texture (soft, low-frequency). */
+export const PAPER_TEXTURE =
+  "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.03'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E\")";
+/** Fixed page grain — overlay the whole page at 0.25 opacity, pointer-events none. */
+export const PAGE_GRAIN =
+  "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.04'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")";
+
+/** Mount card shadow, tuned for the dark kraft ground. */
+export const mountShadow = "0 1px 3px rgba(58,28,20,0.08), 0 8px 26px rgba(58,28,20,0.13)";
+
 /* ── Status glyph colours (StatusDot) ─────────────────────────────────── */
 export const statusBurgundy = "#7c3a2a"; // outgoing ring sweep + outgoing marks; offer disc
 export const statusPinkFill = "#f8e7dc"; // outgoing centre fill
