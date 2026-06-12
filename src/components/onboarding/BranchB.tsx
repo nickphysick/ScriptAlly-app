@@ -15,7 +15,8 @@ import { QueryStatus } from "../../types";
 import { SmartImportResult } from "../../types/smartImport";
 import { runSmartImport, validateSmartImport, ValidatedImport } from "../../lib/smartImport";
 import { commitSmartImport, CommitOutcome } from "../../lib/smartImportCommit";
-import { StatusCircle, getStatusDescription } from "../StatusPill";
+import { getStatusDescription } from "../StatusPill";
+import { StatusDot } from "../StatusDot";
 import { Form11Card, SelectRow, BookMotif, InboxMotif, FONT_SANS, FONT_MONO } from "./chrome";
 import { ManuscriptFields, ManuscriptFieldsState, emptyManuscriptFields } from "./ManuscriptFields";
 import { BrandDropdown } from "../forms";
@@ -462,7 +463,7 @@ export const BranchB: React.FC<BranchBProps> = ({
               </div>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, flexShrink: 0, maxWidth: "52%" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                  <StatusCircle status={status} />
+                  <StatusDot status={status} size={13} />
                   <span style={{ fontSize: 11.5, fontWeight: 500, whiteSpace: "nowrap", color: closed ? "#9b8d80" : "#5a4e44", fontFamily: FONT_SANS }}>{status}</span>
                 </div>
                 <div style={{ fontSize: 10, color: "#b3a596", fontWeight: 300, textAlign: "right", lineHeight: 1.3, fontFamily: FONT_SANS }}>

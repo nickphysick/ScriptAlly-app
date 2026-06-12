@@ -1,5 +1,6 @@
 import React from 'react';
 import { QueryStatus } from '../types';
+import { StatusDot } from './StatusDot';
 
 export const normalizeStatus = (status: string | QueryStatus): QueryStatus => {
   if (!status) return QueryStatus.QUERIED;
@@ -71,71 +72,6 @@ export const getStatusStyle = (status: QueryStatus | string): StatusStyle => {
   }
 };
 
-export const StatusCircle: React.FC<{ status: QueryStatus | string; className?: string }> = ({ status, className }) => {
-  const norm = normalizeStatus(status);
-
-  switch (norm) {
-    case QueryStatus.QUERIED:
-      return (
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`shrink-0 ${className || ''}`} xmlns="http://www.w3.org/2000/svg">
-          <circle cx="6" cy="6" r="5" fill="none" stroke="#7c3d3d" strokeWidth="1.5"/>
-        </svg>
-      );
-
-    case QueryStatus.PARTIAL_REQUESTED:
-      return (
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`shrink-0 ${className || ''}`} xmlns="http://www.w3.org/2000/svg">
-          <circle cx="6" cy="6" r="5" fill="none" stroke="#7c3d3d" strokeWidth="1.5"/><path d="M6 1 A5 5 0 0 1 9.76 3.5 L6 6 Z" fill="#7c3d3d"/>
-        </svg>
-      );
-
-    case QueryStatus.PARTIAL_SENT:
-      return (
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`shrink-0 ${className || ''}`} xmlns="http://www.w3.org/2000/svg">
-          <circle cx="6" cy="6" r="5" fill="none" stroke="#7c3d3d" strokeWidth="1.5"/><path d="M6 1 A5 5 0 0 1 11 6 L6 6 Z" fill="#7c3d3d"/>
-        </svg>
-      );
-
-    case QueryStatus.FULL_REQUESTED:
-      return (
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`shrink-0 ${className || ''}`} xmlns="http://www.w3.org/2000/svg">
-          <circle cx="6" cy="6" r="5" fill="none" stroke="#7c3d3d" strokeWidth="1.5"/><path d="M6 1 A5 5 0 0 1 11 6 A5 5 0 0 1 6 11 L6 6 Z" fill="#7c3d3d"/>
-        </svg>
-      );
-
-    case QueryStatus.FULL_SENT:
-      return (
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`shrink-0 ${className || ''}`} xmlns="http://www.w3.org/2000/svg">
-          <circle cx="6" cy="6" r="5" fill="none" stroke="#7c3d3d" strokeWidth="1.5"/><path d="M6 1 A5 5 0 0 1 11 6 A5 5 0 0 1 2.24 8.5 L6 6 Z" fill="#7c3d3d"/>
-        </svg>
-      );
-
-    case QueryStatus.REVISE_RESUBMIT:
-      return (
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`shrink-0 ${className || ''}`} xmlns="http://www.w3.org/2000/svg">
-          <circle cx="6" cy="6" r="5" fill="none" stroke="#7c3d3d" strokeWidth="1.5"/><path d="M6 1 A5 5 0 0 1 11 6 A5 5 0 0 1 1 6 A5 5 0 0 1 4.5 1.67 L6 6 Z" fill="#7c3d3d"/>
-        </svg>
-      );
-
-    case QueryStatus.OFFER:
-      return (
-        <svg width="12" height="12" viewBox="0 0 12 12" className={`shrink-0 ${className || ''}`} xmlns="http://www.w3.org/2000/svg">
-          <circle cx="6" cy="6" r="5" fill="#7c3d3d" stroke="#7c3d3d" strokeWidth="1.5"/>
-        </svg>
-      );
-
-    case QueryStatus.REJECTED:
-    case QueryStatus.WITHDRAWN:
-    case QueryStatus.NO_RESPONSE:
-    default:
-      return (
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className={`shrink-0 ${className || ''}`} xmlns="http://www.w3.org/2000/svg">
-          <circle cx="6" cy="6" r="5" fill="#888888" stroke="#888888" strokeWidth="1.5"/><line x1="4" y1="4" x2="8" y2="8" stroke="#ffffff" strokeWidth="1.5"/><line x1="8" y1="4" x2="4" y2="8" stroke="#ffffff" strokeWidth="1.5"/>
-        </svg>
-      );
-  }
-};
-
 export const StatusPill: React.FC<{
   status: QueryStatus | string;
   className?: string;
@@ -161,7 +97,7 @@ export const StatusPill: React.FC<{
         border: border,
       }}
     >
-      <StatusCircle status={norm} />
+      <StatusDot status={norm} size={size === 'lg' ? 16 : 12} />
       <span>{label}</span>
     </div>
   );

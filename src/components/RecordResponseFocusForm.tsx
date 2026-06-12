@@ -14,7 +14,7 @@ import { useScriptAllyDb } from "../lib/db";
 import { Agent, Query, QueryStatus } from "../types";
 import { recordQueryResponse } from "../lib/recordResponse";
 import { BrandDatePicker, BrandDropdown, FormShell } from "./forms";
-import { StatusCircle } from "./StatusPill";
+import { StatusDot } from "./StatusDot";
 
 // ── Date helpers (local-date-safe, no UTC off-by-one) ────────────────────
 
@@ -108,7 +108,7 @@ const RESPONSE_OPTIONS = [
   { value: QueryStatus.REJECTED,          label: "Rejected" },
 ].map((o) => ({
   ...o,
-  icon: <StatusCircle status={o.value} className="shrink-0" />,
+  icon: <StatusDot status={o.value} size={13} className="shrink-0" />,
 }));
 
 // ── Reminder offset options ───────────────────────────────────────────────

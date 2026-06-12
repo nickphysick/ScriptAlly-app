@@ -26,7 +26,8 @@ import {
 } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { QueryStatus, Agent, Manuscript, Query, SubmissionMethod, ActivityType, QueryMaterial } from "../types";
-import { StatusPill, getStatusStyle, getStatusLabel, StatusCircle } from "./StatusPill";
+import { StatusPill, getStatusLabel } from "./StatusPill";
+import { StatusDot } from "./StatusDot";
 import { RecordResponseModal } from "./RecordResponseModal";
 import { RecordResponseFocusForm } from "./RecordResponseFocusForm";
 import { recordQueryResponse } from "../lib/recordResponse";
@@ -86,7 +87,6 @@ const statusDisplayLabel = (q: { status: QueryStatus; revisionRound?: number }):
 
 import {
   Search,
-  CheckCircle,
   Clock,
   Star,
   ChevronRight,
@@ -935,49 +935,6 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     }
   };
 
-  // Custom status circle indicator
-  const renderStatusCircle = (status: QueryStatus) => {
-    if (status === QueryStatus.QUERIED) {
-      return (
-        <svg className="w-5 h-5 text-[#7c3a2a] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-          <circle cx="12" cy="12" r="10" />
-        </svg>
-      );
-    }
-    
-    if ([QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT, QueryStatus.REVISE_RESUBMIT].includes(status)) {
-      return (
-        <svg className="w-5 h-5 text-[#BA7517] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-          <circle cx="12" cy="12" r="10" />
-          <path d="M12 2 a10 10 0 0 1 10 10 L12 12 Z" fill="currentColor" stroke="none" />
-        </svg>
-      );
-    }
-
-    if ([QueryStatus.FULL_REQUESTED, QueryStatus.FULL_SENT].includes(status)) {
-      return (
-        <svg className="w-5 h-5 text-[#7c3a2a] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-          <circle cx="12" cy="12" r="10" />
-          <path d="M12 2 a10 10 0 0 1 10 10 a10 10 0 0 1 -10 10 L12 12 Z" fill="currentColor" stroke="none" />
-        </svg>
-      );
-    }
-
-    if (status === QueryStatus.OFFER) {
-      return (
-        <div className="w-5 h-5 rounded-full bg-[#3B6D11] text-white flex items-center justify-center shrink-0">
-          <CheckCircle className="w-3.5 h-3.5 stroke-[3px]" />
-        </div>
-      );
-    }
-
-    return (
-      <svg className="w-5 h-5 text-gray-400 opacity-50 shrink-0" fill="currentColor" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="10" />
-      </svg>
-    );
-  };
-
   const getListStatusPill = (status: QueryStatus) => {
     return <StatusPill status={status} size="sm" />;
   };
@@ -1533,7 +1490,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                          >
                            <span className="flex items-center gap-1.5 min-w-0" style={{ color: isActive ? "#7c3a2a" : "#3a1c14" }}>
                              {item.type === "filter" && item.id !== "All" && (
-                               <StatusCircle status={item.id as QueryStatus} />
+                               <StatusDot status={item.id as QueryStatus} size={13} />
                              )}
                              <span className={`truncate ${isActive ? "font-bold" : ""}`}>{item.label}</span>
                            </span>
@@ -1664,7 +1621,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                        >
                          <span className="flex items-center gap-1.5 min-w-0">
                            {item.id !== "All" && (
-                             <StatusCircle status={item.id as QueryStatus} />
+                             <StatusDot status={item.id as QueryStatus} size={13} />
                            )}
                            <span className="truncate">{item.label}</span>
                          </span>

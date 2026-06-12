@@ -24,7 +24,8 @@ import { QuerySlideInPanel } from "./QuerySlideInPanel";
 import { RecordResponseModal } from "./RecordResponseModal";
 import { recordQueryResponse } from "../lib/recordResponse";
 import { CalendarView } from "./CalendarView";
-import { StatusPill, StatusCircle } from "./StatusPill";
+import { StatusPill } from "./StatusPill";
+import { StatusDot } from "./StatusDot";
 import { getDynamicActivityText, replacePlaceholders, extractAgentFromText, boldAgentAndAgencyInText } from "../lib/activityUtils";
 import {
   Sparkles,
@@ -82,95 +83,63 @@ const formatRichText = (str: string): React.ReactNode => {
   );
 };
 
-const renderTimelineDot = (label: string) => {
-  const radius = 17;
-  const center = 20;
+/**
+ * Activity-feed mark for a timeline row. Status-bearing events render the canonical
+ * StatusDot; non-status events (nudges, agent/manuscript updates) keep small neutral marks.
+ */
+const renderTimelineDot = (label: string, resultingStatus?: QueryStatus) => {
+  if (resultingStatus) {
+    return <StatusDot status={resultingStatus} size={13} />;
+  }
 
-  const getPiePath = (pct: number) => {
-    if (pct <= 0 || pct >= 100) return "";
-    const startAngle = -Math.PI / 2; // 12 o'clock
-    const angleDiff = (pct / 100) * 2 * Math.PI;
-    const endAngle = startAngle + angleDiff;
-    
-    const startX = center + radius * Math.cos(startAngle);
-    const startY = center + radius * Math.sin(startAngle);
-    const endX = center + radius * Math.cos(endAngle);
-    const endY = center + radius * Math.sin(endAngle);
-    
-    const largeArcFlag = pct > 50 ? 1 : 0;
-    return `M ${center} ${center} L ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY} Z`;
+  const LABEL_TO_STATUS: Record<string, QueryStatus> = {
+    "Query sent": QueryStatus.QUERIED,
+    "Partial requested": QueryStatus.PARTIAL_REQUESTED,
+    "Partial sent": QueryStatus.PARTIAL_SENT,
+    "Full requested": QueryStatus.FULL_REQUESTED,
+    "Full sent": QueryStatus.FULL_SENT,
+    "Materials sent": QueryStatus.PARTIAL_SENT,
+    "Offer received": QueryStatus.OFFER,
+    "Revise & resubmit": QueryStatus.REVISE_RESUBMIT,
+    "Rejection": QueryStatus.REJECTED,
+    "Withdrawn": QueryStatus.WITHDRAWN,
   };
+  const mapped = LABEL_TO_STATUS[label];
+  if (mapped) {
+    return <StatusDot status={mapped} size={13} />;
+  }
 
-  if (label === "Query sent") {
-    return (
-      <svg width="13" height="13" viewBox="0 0 40 40" className="shrink-0 text-[#7c3a2a]">
-        <circle cx={center} cy={center} r={radius} stroke="currentColor" strokeWidth="3.5" fill="#ffffff" />
-      </svg>
-    );
-  }
-  if (label === "Partial requested" || label === "Partial sent") {
-    return (
-      <svg width="13" height="13" viewBox="0 0 40 40" className="shrink-0 text-[#7c3a2a]">
-        <circle cx={center} cy={center} r={radius} stroke="currentColor" strokeWidth="3.5" fill="#ffffff" />
-        <path d={getPiePath(50)} fill="currentColor" stroke="none" />
-      </svg>
-    );
-  }
-  if (label === "Full requested" || label === "Full sent" || label === "Materials sent") {
-    return (
-      <svg width="13" height="13" viewBox="0 0 40 40" className="shrink-0 text-[#7c3a2a]">
-        <circle cx={center} cy={center} r={radius} stroke="currentColor" strokeWidth="3.5" fill="#ffffff" />
-        <path d={getPiePath(75)} fill="currentColor" stroke="none" />
-      </svg>
-    );
-  }
-  if (label === "Offer received") {
-    return (
-      <svg width="13" height="13" viewBox="0 0 40 40" className="shrink-0 text-emerald-600">
-        <circle cx={center} cy={center} r={radius} fill="currentColor" stroke="none" />
-        <path d="M 14,20 L 18,24 L 26,16" stroke="#ffffff" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      </svg>
-    );
-  }
-  if (label === "Revise & resubmit") {
-    return (
-      <svg width="13" height="13" viewBox="0 0 40 40" className="shrink-0 text-amber-500">
-        <circle cx={center} cy={center} r={radius} stroke="currentColor" strokeWidth="3.5" fill="#ffffff" />
-        <path d={getPiePath(50)} fill="currentColor" stroke="none" />
-      </svg>
-    );
-  }
-  if (label === "Rejection" || label === "Withdrawn" || label === "Now closed" || label === "Shelved") {
-    return (
-      <svg width="13" height="13" viewBox="0 0 40 40" className="shrink-0 text-stone-500 opacity-60">
-        <circle cx={center} cy={center} r={radius} fill="currentColor" stroke="none" />
-      </svg>
-    );
-  }
   if (label === "Nudge sent") {
     return (
       <svg width="13" height="13" viewBox="0 0 40 40" className="shrink-0 text-[#7c3a2a]">
-        <circle cx={center} cy={center} r={radius} stroke="currentColor" strokeWidth="3.5" fill="#ffffff" />
+        <circle cx="20" cy="20" r="17" stroke="currentColor" strokeWidth="3.5" fill="#ffffff" />
         <path d="M 20,11 L 20,20 L 26,20" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
       </svg>
     );
   }
   if (label === "Now open" || label === "Ready to query") {
     return (
-      <svg width="13" height="13" viewBox="0 0 40 40" className="shrink-0 text-emerald-600">
-        <circle cx={center} cy={center} r={radius} fill="currentColor" stroke="none" />
+      <svg width="13" height="13" viewBox="0 0 40 40" className="shrink-0 text-[#8a9e88]">
+        <circle cx="20" cy="20" r="17" fill="currentColor" stroke="none" />
       </svg>
     );
   }
-  // fallback "Status changed"
+  if (label === "Now closed" || label === "Shelved") {
+    return (
+      <svg width="13" height="13" viewBox="0 0 40 40" className="shrink-0 text-[#cfc6bb]">
+        <circle cx="20" cy="20" r="17" fill="currentColor" stroke="none" />
+      </svg>
+    );
+  }
+  // fallback neutral mark ("Status changed", agent/manuscript events)
   return (
     <svg width="13" height="13" viewBox="0 0 40 40" className="shrink-0 text-[#7c3a2a]">
-      <circle cx={center} cy={center} r={radius} stroke="currentColor" strokeWidth="3.5" fill="#ffffff" />
+      <circle cx="20" cy="20" r="17" stroke="currentColor" strokeWidth="3.5" fill="#ffffff" />
     </svg>
   );
 };
 
-const getPillLabelAndDot = (desc: string, activityType?: ActivityType) => {
+const getPillLabelAndDot = (desc: string, activityType?: ActivityType, resultingStatus?: QueryStatus) => {
   const normalized = (desc || "").toLowerCase();
   
   let key: string | null = null;
@@ -260,7 +229,7 @@ const getPillLabelAndDot = (desc: string, activityType?: ActivityType) => {
   }
 
   const label = customLabel || defaultLabel;
-  const dot = renderTimelineDot(label);
+  const dot = renderTimelineDot(defaultLabel, resultingStatus);
 
   return { label, dot, show, key };
 };
@@ -2060,129 +2029,6 @@ export const Dashboard: React.FC<{
     return "";
   };
 
-  const renderIndividualQueryDotShared = (
-    q: Query,
-    stage: 'queried' | 'part_req' | 'part_sent' | 'full_req' | 'full_sent' | 'offer' | 'closed',
-    size: number
-  ) => {
-    const agent = agents.find(a => a.id === q.agentId);
-    const formattedDate = q.dateSent ? new Date(q.dateSent).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
-    
-    let dateLabel = "Sent";
-    let displayDate = formattedDate;
-    if (stage === 'part_req' && q.partialRequestedDate) {
-      dateLabel = "Requested";
-      displayDate = new Date(q.partialRequestedDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-    } else if (stage === 'part_sent' && q.partialSentDate) {
-      dateLabel = "Sent";
-      displayDate = new Date(q.partialSentDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-    } else if (stage === 'full_req' && q.fullRequestedDate) {
-      dateLabel = "Requested";
-      displayDate = new Date(q.fullRequestedDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-    } else if (stage === 'full_sent' && q.fullSentDate) {
-      dateLabel = "Sent";
-      displayDate = new Date(q.fullSentDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-    }
-
-    const center = size / 2;
-    const radius = Math.max(2.5, (size / 2) - 1);
-    const strokeWidth = size <= 10 ? 1 : 1.5;
-
-    const getPiePath = (pct: number) => {
-      if (pct <= 0 || pct >= 100) return "";
-      const startAngle = -Math.PI / 2; // 12 o'clock
-      const angleDiff = (pct / 100) * 2 * Math.PI;
-      const endAngle = startAngle + angleDiff;
-      
-      const startX = center + radius * Math.cos(startAngle);
-      const startY = center + radius * Math.sin(startAngle);
-      const endX = center + radius * Math.cos(endAngle);
-      const endY = center + radius * Math.sin(endAngle);
-      
-      const largeArcFlag = pct > 50 ? 1 : 0;
-      return `M ${center} ${center} L ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY} Z`;
-    };
-
-    let percentage = 0;
-    if (stage === 'queried') percentage = 0;
-    else if (stage === 'part_req') percentage = 20;
-    else if (stage === 'part_sent') percentage = 40;
-    else if (stage === 'full_req') percentage = 60;
-    else if (stage === 'full_sent') percentage = 80;
-    else if (stage === 'offer') percentage = 100;
-
-    return (
-      <div 
-        key={q.id}
-        className="relative group/dot inline-flex items-center justify-center select-none transition-all duration-300 hover:scale-130 hover:z-10 cursor-pointer"
-        style={{ width: `${size}px`, height: `${size}px` }}
-      >
-        <svg 
-          width={size} 
-          height={size} 
-          viewBox={`0 0 ${size} ${size}`} 
-          className="w-full h-full drop-shadow-[0_1px_1px_rgba(124,58,42,0.06)]"
-        >
-          {stage === 'closed' ? (
-            <>
-              <circle cx={center} cy={center} r={radius} fill="#888888" stroke="#888888" strokeWidth={strokeWidth} />
-              <line x1={center - (radius * 0.4)} y1={center - (radius * 0.4)} x2={center + (radius * 0.4)} y2={center + (radius * 0.4)} stroke="#ffffff" strokeWidth={strokeWidth} />
-              <line x1={center + (radius * 0.4)} y1={center - (radius * 0.4)} x2={center - (radius * 0.4)} y2={center + (radius * 0.4)} stroke="#ffffff" strokeWidth={strokeWidth} />
-            </>
-          ) : percentage === 0 ? (
-            <circle cx={center} cy={center} r={radius} fill="none" stroke="#7c3d3d" strokeWidth={strokeWidth} />
-          ) : percentage === 100 ? (
-            <circle cx={center} cy={center} r={radius} fill="#7c3d3d" stroke="#7c3d3d" strokeWidth={strokeWidth} />
-          ) : (
-            <>
-              <circle cx={center} cy={center} r={radius} fill="none" stroke="#7c3d3d" strokeWidth={strokeWidth} />
-              <path d={getPiePath(percentage)} fill="#7c3d3d" stroke="none" />
-            </>
-          )}
-        </svg>
-
-        {/* Pure CSS Hover Tooltip */}
-        <div className="invisible group-hover/dot:visible opacity-0 group-hover/dot:opacity-100 absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 p-3 bg-stone-900 text-stone-100 rounded-xl text-[11px] font-sans shadow-lg text-left pointer-events-none transition-all duration-200">
-          <div className="font-bold text-white truncate">{agent?.name || "Unknown Agent"}</div>
-          <div className="text-stone-400 text-[10px] truncate">{agent?.agency || "Independent"}</div>
-          <div className="h-[1px] bg-stone-800 my-1.5" />
-          <div className="flex justify-between gap-2 text-stone-300 text-[10px]">
-            <span>Status:</span>
-            <span className="font-semibold text-rose-400">{q.status}</span>
-          </div>
-          <div className="flex justify-between gap-2 text-stone-300 text-[10px] mt-0.5">
-            <span>{dateLabel}:</span>
-            <span className="font-mono text-stone-400">{displayDate}</span>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const renderStageColumnShared = (list: Query[], stageKey: 'queried' | 'part_req' | 'part_sent' | 'full_req' | 'full_sent' | 'offer' | 'closed') => {
-    const dotsCount = list.length;
-    if (dotsCount === 0) {
-      return (
-        <div className="flex items-center justify-center min-h-[26px]">
-          <span className="text-stone-300 font-medium select-none font-sans">-</span>
-        </div>
-      );
-    }
-
-    let size = 16;
-    if (dotsCount > 10) size = 8;
-    else if (dotsCount > 6) size = 11;
-    else if (dotsCount > 3) size = 13;
-
-    return (
-      <div className="flex items-center justify-center min-h-[26px]">
-        <div className="flex flex-row flex-wrap gap-[2px] items-center justify-center max-w-full">
-          {list.map((q) => renderIndividualQueryDotShared(q, stageKey, size))}
-        </div>
-      </div>
-    );
-  };
-
   const renderMagazinePipelineBuckets = () => {
     const queriedCount = queries.filter(q => q.status === QueryStatus.QUERIED).length;
     const partReqCount = queries.filter(q => q.status === QueryStatus.PARTIAL_REQUESTED).length;
@@ -2193,13 +2039,13 @@ export const Dashboard: React.FC<{
     const closedCount = queries.filter(q => [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE].includes(q.status)).length;
 
     const stagesData = [
-      { name: "Queried", count: queriedCount, color: "#FFF0F0" },
-      { name: "Partial requested", count: partReqCount, color: "#dce0d9" },
-      { name: "Partial sent", count: partSentCount, color: "#dce0d9" },
-      { name: "Full requested", count: fullReqCount, color: "#D1E3FF" },
-      { name: "Full sent", count: fullSentCount, color: "#D1E3FF" },
-      { name: "Offer", count: offerCount, color: "#6b0f1a" },
-      { name: "Closed", count: closedCount, color: "#e8e8e8" }
+      { name: "Queried", count: queriedCount, status: QueryStatus.QUERIED },
+      { name: "Partial requested", count: partReqCount, status: QueryStatus.PARTIAL_REQUESTED },
+      { name: "Partial sent", count: partSentCount, status: QueryStatus.PARTIAL_SENT },
+      { name: "Full requested", count: fullReqCount, status: QueryStatus.FULL_REQUESTED },
+      { name: "Full sent", count: fullSentCount, status: QueryStatus.FULL_SENT },
+      { name: "Offer", count: offerCount, status: QueryStatus.OFFER },
+      { name: "Closed", count: closedCount, status: QueryStatus.REJECTED }
     ];
 
     return (
@@ -2224,8 +2070,10 @@ export const Dashboard: React.FC<{
                   {st.count}
                 </div>
               </div>
-              {/* 3px color bar at the bottom */}
-              <div className="absolute bottom-0 left-0 right-0 h-[3px]" style={{ backgroundColor: st.color }} />
+              {/* canonical status glyph anchoring the bucket */}
+              <div className="absolute bottom-2 right-2.5">
+                <StatusDot status={st.status} size={13} />
+              </div>
             </div>
           );
         })}
@@ -4451,7 +4299,7 @@ export const Dashboard: React.FC<{
               ) => {
                 const agent = agents.find(a => a.id === q.agentId);
                 const formattedDate = q.dateSent ? new Date(q.dateSent).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
-                
+
                 let dateLabel = "Sent";
                 let displayDate = formattedDate;
                 if (stage === 'part_req' && q.partialRequestedDate) {
@@ -4468,62 +4316,13 @@ export const Dashboard: React.FC<{
                   displayDate = new Date(q.fullSentDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
                 }
 
-                const center = size / 2;
-                const radius = Math.max(2.5, (size / 2) - 1);
-                const strokeWidth = size <= 10 ? 1 : 1.5;
-
-                const getPiePath = (pct: number) => {
-                  if (pct <= 0 || pct >= 100) return "";
-                  const startAngle = -Math.PI / 2; // 12 o'clock
-                  const angleDiff = (pct / 100) * 2 * Math.PI;
-                  const endAngle = startAngle + angleDiff;
-                  
-                  const startX = center + radius * Math.cos(startAngle);
-                  const startY = center + radius * Math.sin(startAngle);
-                  const endX = center + radius * Math.cos(endAngle);
-                  const endY = center + radius * Math.sin(endAngle);
-                  
-                  const largeArcFlag = pct > 50 ? 1 : 0;
-                  return `M ${center} ${center} L ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY} Z`;
-                };
-
-                let percentage = 0;
-                if (stage === 'queried') percentage = 0;
-                else if (stage === 'part_req') percentage = 20;
-                else if (stage === 'part_sent') percentage = 40;
-                else if (stage === 'full_req') percentage = 60;
-                else if (stage === 'full_sent') percentage = 80;
-                else if (stage === 'offer') percentage = 100;
-
                 return (
-                  <div 
+                  <div
                     key={q.id}
                     className="relative group/dot inline-flex items-center justify-center select-none transition-all duration-300 hover:scale-130 hover:z-10 cursor-pointer"
                     style={{ width: `${size}px`, height: `${size}px` }}
                   >
-                    <svg 
-                      width={size} 
-                      height={size} 
-                      viewBox={`0 0 ${size} ${size}`} 
-                      className="w-full h-full drop-shadow-[0_1px_1px_rgba(124,58,42,0.06)]"
-                    >
-                      {stage === 'closed' ? (
-                        <>
-                          <circle cx={center} cy={center} r={radius} fill="#888888" stroke="#888888" strokeWidth={strokeWidth} />
-                          <line x1={center - (radius * 0.4)} y1={center - (radius * 0.4)} x2={center + (radius * 0.4)} y2={center + (radius * 0.4)} stroke="#ffffff" strokeWidth={strokeWidth} />
-                          <line x1={center + (radius * 0.4)} y1={center - (radius * 0.4)} x2={center - (radius * 0.4)} y2={center + (radius * 0.4)} stroke="#ffffff" strokeWidth={strokeWidth} />
-                        </>
-                      ) : percentage === 0 ? (
-                        <circle cx={center} cy={center} r={radius} fill="none" stroke="#7c3d3d" strokeWidth={strokeWidth} />
-                      ) : percentage === 100 ? (
-                        <circle cx={center} cy={center} r={radius} fill="#7c3d3d" stroke="#7c3d3d" strokeWidth={strokeWidth} />
-                      ) : (
-                        <>
-                          <circle cx={center} cy={center} r={radius} fill="none" stroke="#7c3d3d" strokeWidth={strokeWidth} />
-                          <path d={getPiePath(percentage)} fill="#7c3d3d" stroke="none" />
-                        </>
-                      )}
-                    </svg>
+                    <StatusDot status={q.status} size={size} />
 
                     {/* Pure CSS Hover Tooltip */}
                     <div className="invisible group-hover/dot:visible opacity-0 group-hover/dot:opacity-100 absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 p-3 bg-stone-900 text-stone-100 rounded-xl text-[11px] font-sans shadow-lg text-left pointer-events-none transition-all duration-200">
@@ -4553,8 +4352,8 @@ export const Dashboard: React.FC<{
                   );
                 }
 
-                // select a size based on count, making sure they never exceed the row height constraint.
-                const size = dotsCount <= 1 ? 16 : dotsCount <= 4 ? 12 : dotsCount <= 8 ? 9 : 7;
+                // StatusDot never renders below 12px; clusters wrap instead of shrinking away.
+                const size = dotsCount <= 1 ? 16 : dotsCount <= 4 ? 13 : 12;
 
                 return (
                   <div className="flex flex-col items-center justify-center min-h-[26px]">
@@ -5281,7 +5080,7 @@ export const Dashboard: React.FC<{
               } else if (ev.type === 'pages_requested_overdue' || isMaryShelleyUrgent) {
                 dotIndicator = <span className="text-[13px] font-extrabold text-[#7c3d3d] select-none leading-none">!</span>;
               } else {
-                dotIndicator = <StatusCircle status={eventStatus} className="w-3.5 h-3.5" />;
+                dotIndicator = <StatusDot status={eventStatus} size={13} />;
               }
 
               let ctaText = "View query";
@@ -5869,7 +5668,7 @@ export const Dashboard: React.FC<{
                             const msTitle = ms ? ms.title : "";
                             const formattedTime = getFormattedTime(act.date);
                             
-                            const pillData = getPillLabelAndDot(act.description, act.activityType);
+                            const pillData = getPillLabelAndDot(act.description, act.activityType, act.resultingStatus);
                             const showManuscriptPill = (() => {
                               const isAgentAct = act.activityType === ActivityType.AGENT_ADDED || act.activityType === ActivityType.AGENT_UPDATED;
                               if (isAgentAct) {

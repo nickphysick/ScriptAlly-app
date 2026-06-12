@@ -11,91 +11,60 @@ import {
 import { useScriptAllyDb } from "../lib/db";
 import { Query, QueryStatus, Activity, ActivityType, JournalEntry, Manuscript } from "../types";
 import { getActivityKeyAndDefaults, getDynamicActivityText, replacePlaceholders, extractAgentFromText, boldAgentAndAgencyInText } from "../lib/activityUtils";
+import { StatusDot } from "./StatusDot";
 
-// Helper to render timeline dots matching Dashboard layout
-const renderTimelineDot = (label: string) => {
-  const radius = 17;
-  const center = 20;
+/**
+ * Tracking-timeline mark. Status-bearing events render the canonical StatusDot;
+ * non-status events (nudges, open/close updates) keep small neutral marks.
+ */
+const renderTimelineDot = (label: string, resultingStatus?: QueryStatus) => {
+  if (resultingStatus) {
+    return <StatusDot status={resultingStatus} size={13} />;
+  }
 
-  const getPiePath = (pct: number) => {
-    if (pct <= 0 || pct >= 100) return "";
-    const startAngle = -Math.PI / 2; // 12 o'clock
-    const angleDiff = (pct / 100) * 2 * Math.PI;
-    const endAngle = startAngle + angleDiff;
-    
-    const startX = center + radius * Math.cos(startAngle);
-    const startY = center + radius * Math.sin(startAngle);
-    const endX = center + radius * Math.cos(endAngle);
-    const endY = center + radius * Math.sin(endAngle);
-    
-    const largeArcFlag = pct > 50 ? 1 : 0;
-    return `M ${center} ${center} L ${startX} ${startY} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY} Z`;
+  const LABEL_TO_STATUS: Record<string, QueryStatus> = {
+    "Query sent": QueryStatus.QUERIED,
+    "Query letter": QueryStatus.QUERIED,
+    "Partial requested": QueryStatus.PARTIAL_REQUESTED,
+    "Partial sent": QueryStatus.PARTIAL_SENT,
+    "Full requested": QueryStatus.FULL_REQUESTED,
+    "Full sent": QueryStatus.FULL_SENT,
+    "Materials sent": QueryStatus.PARTIAL_SENT,
+    "Offer received": QueryStatus.OFFER,
+    "Revise & resubmit": QueryStatus.REVISE_RESUBMIT,
+    "Rejection": QueryStatus.REJECTED,
+    "Withdrawn": QueryStatus.WITHDRAWN,
   };
+  const mapped = LABEL_TO_STATUS[label];
+  if (mapped) {
+    return <StatusDot status={mapped} size={13} />;
+  }
 
-  if (label === "Query sent" || label === "Query letter" || label === "Status changed") {
-    return (
-      <svg width="13" height="13" viewBox="0 0 40 40" className="shrink-0 text-[#7c3a2a]">
-        <circle cx={center} cy={center} r={radius} stroke="currentColor" strokeWidth="3.5" fill="#ffffff" />
-      </svg>
-    );
-  }
-  if (label === "Partial requested" || label === "Partial sent") {
-    return (
-      <svg width="13" height="13" viewBox="0 0 40 40" className="shrink-0 text-[#7c3a2a]">
-        <circle cx={center} cy={center} r={radius} stroke="currentColor" strokeWidth="3.5" fill="#ffffff" />
-        <path d={getPiePath(50)} fill="currentColor" stroke="none" />
-      </svg>
-    );
-  }
-  if (label === "Full requested" || label === "Full sent" || label === "Materials sent") {
-    return (
-      <svg width="13" height="13" viewBox="0 0 40 40" className="shrink-0 text-[#7c3a2a]">
-        <circle cx={center} cy={center} r={radius} stroke="currentColor" strokeWidth="3.5" fill="#ffffff" />
-        <path d={getPiePath(75)} fill="currentColor" stroke="none" />
-      </svg>
-    );
-  }
-  if (label === "Offer received") {
-    return (
-      <svg width="13" height="13" viewBox="0 0 40 40" className="shrink-0 text-emerald-600">
-        <circle cx={center} cy={center} r={radius} fill="currentColor" stroke="none" />
-        <path d="M 14,20 L 18,24 L 26,16" stroke="#ffffff" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      </svg>
-    );
-  }
-  if (label === "Revise & resubmit") {
-    return (
-      <svg width="13" height="13" viewBox="0 0 40 40" className="shrink-0 text-amber-500">
-        <circle cx={center} cy={center} r={radius} stroke="currentColor" strokeWidth="3.5" fill="#ffffff" />
-        <path d={getPiePath(50)} fill="currentColor" stroke="none" />
-      </svg>
-    );
-  }
-  if (label === "Rejection" || label === "Withdrawn" || label === "Now closed" || label === "Shelved") {
-    return (
-      <svg width="13" height="13" viewBox="0 0 40 40" className="shrink-0 text-stone-500 opacity-60">
-        <circle cx={center} cy={center} r={radius} fill="currentColor" stroke="none" />
-      </svg>
-    );
-  }
   if (label === "Nudge sent") {
     return (
       <svg width="13" height="13" viewBox="0 0 40 40" className="shrink-0 text-[#7c3a2a]">
-        <circle cx={center} cy={center} r={radius} stroke="currentColor" strokeWidth="3.5" fill="#ffffff" />
+        <circle cx="20" cy="20" r="17" stroke="currentColor" strokeWidth="3.5" fill="#ffffff" />
         <path d="M 20,11 L 20,20 L 26,20" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
       </svg>
     );
   }
   if (label === "Now open" || label === "Ready to query") {
     return (
-      <svg width="13" height="13" viewBox="0 0 40 40" className="shrink-0 text-emerald-600">
-        <circle cx={center} cy={center} r={radius} fill="currentColor" stroke="none" />
+      <svg width="13" height="13" viewBox="0 0 40 40" className="shrink-0 text-[#8a9e88]">
+        <circle cx="20" cy="20" r="17" fill="currentColor" stroke="none" />
+      </svg>
+    );
+  }
+  if (label === "Now closed" || label === "Shelved") {
+    return (
+      <svg width="13" height="13" viewBox="0 0 40 40" className="shrink-0 text-[#cfc6bb]">
+        <circle cx="20" cy="20" r="17" fill="currentColor" stroke="none" />
       </svg>
     );
   }
   return (
     <svg width="13" height="13" viewBox="0 0 40 40" className="shrink-0 text-[#7c3a2a]">
-      <circle cx={center} cy={center} r={radius} stroke="currentColor" strokeWidth="3.5" fill="#ffffff" />
+      <circle cx="20" cy="20" r="17" stroke="currentColor" strokeWidth="3.5" fill="#ffffff" />
     </svg>
   );
 };
@@ -120,7 +89,7 @@ const formatRichText = (str: string): React.ReactNode => {
   );
 };
 
-const getPillLabelAndDot = (desc: string, activityType?: ActivityType) => {
+const getPillLabelAndDot = (desc: string, activityType?: ActivityType, resultingStatus?: QueryStatus) => {
   const { key, defaultLabel } = getActivityKeyAndDefaults(desc, activityType);
 
   let show = true;
@@ -135,7 +104,7 @@ const getPillLabelAndDot = (desc: string, activityType?: ActivityType) => {
   }
 
   const label = customLabel || defaultLabel;
-  const dot = renderTimelineDot(label);
+  const dot = renderTimelineDot(defaultLabel, resultingStatus);
 
   return { label, dot, show, key };
 };
@@ -701,7 +670,7 @@ export const QuerySlideInPanel: React.FC<QuerySlideInPanelProps> = ({
                     {sortedActivities.map((act, index) => {
                       const isFirst = index === 0;
                       const isLast = index === sortedActivities.length - 1;
-                      const { label, dot, show, key } = getPillLabelAndDot(act.description, act.activityType);
+                      const { label, dot, show, key } = getPillLabelAndDot(act.description, act.activityType, act.resultingStatus);
                       const formattedTime = new Date(act.date).toLocaleDateString("en-US", {
                         day: "numeric",
                         month: "short",
