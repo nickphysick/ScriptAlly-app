@@ -248,7 +248,7 @@ export const ImportCsv: React.FC<{
 "Feedback follow up","Shadows on the Moors","Status Changed","Agent Jonathan Vance requested partial sample chapters!","2026-05-15","Requested 3 chapters."`;
     } else if (importType === "user") {
       demoString = `"Pen Name","Registered Email","Plan Tier","Sign up Date","Subscription State"
-"Nicholas Physick","nick.physick@gmail.com","Pro","2026-06-01","active"`;
+"Jane Doe","jane.doe@example.com","Pro","2026-06-01","active"`;
     }
     setRawText(demoString);
   };

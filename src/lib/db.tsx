@@ -26,7 +26,6 @@ import {
 } from "../types";
 
 import {
-  seedUser,
   seedManuscripts,
   seedVersions,
   seedPackages,
@@ -834,28 +833,13 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   };
 
   const login = async (email: string, password?: string): Promise<boolean> => {
-    const pass = password || "writerpassword123";
+    const pass = password || "";
     try {
       await signInWithEmailAndPassword(auth, email, pass);
       return true;
     } catch (error: any) {
-      // For a brand-new email, transparently create the account using the
-      // password the user actually typed so they can sign back in with it.
-      if (error && (error.code === "auth/user-not-found" || error.code === "auth/invalid-credential")) {
-        try {
-          await createUserWithEmailAndPassword(auth, email, pass);
-          return true;
-        } catch (subErr: any) {
-          // The account already exists, so the sign-in simply had the wrong
-          // password. Surface a clear message instead of leaving the user stuck.
-          if (subErr && subErr.code === "auth/email-already-in-use") {
-            throw new Error(friendlyAuthError("auth/invalid-credential"));
-          }
-          console.error("Auto creation error:", subErr);
-          throw new Error(friendlyAuthError(subErr?.code));
-        }
-      }
-
+      // A failed sign-in is just a failed sign-in — surface a clear message and create nothing.
+      // (Account creation lives only in signup().)
       console.error("Authentication login failures:", error);
       throw new Error(friendlyAuthError(error?.code));
     }
@@ -876,7 +860,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     try {
       signupTempNameRef.current = name;
       sessionStorage.setItem("scriptally_new_signup", "true");
-      const pass = password || "writerpassword123";
+      const pass = password || "";
       await createUserWithEmailAndPassword(auth, email, pass);
       return true;
     } catch (error: any) {
