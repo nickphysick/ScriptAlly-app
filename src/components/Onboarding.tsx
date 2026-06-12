@@ -7,8 +7,10 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useScriptAllyDb } from "../lib/db";
 import { ManuscriptStatus, SubmissionStatus, SubmissionMethod } from "../types";
-import { CreamUnderstood, Form11Card, BookMotif } from "./onboarding/chrome";
+import { CreamUnderstood } from "./onboarding/chrome";
 import { BranchA, BranchAResult } from "./onboarding/BranchA";
+import { BranchB } from "./onboarding/BranchB";
+import { ManuscriptFieldsState } from "./onboarding/ManuscriptFields";
 import { buildManuscriptPayload, manuscriptLimitError } from "../lib/manuscripts";
 import {
   BookOpen,
@@ -1513,37 +1515,38 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
   // The one manuscript writer for every onboarding branch (A3a, A3b, B2): shared payload shape +
   // shared Free-tier limit check, then the same addManuscript the rest of the app uses.
-  const saveBranchManuscript = async (r: BranchAResult): Promise<boolean> => {
+  // Returns the new manuscript id, or null when the save didn't land.
+  const saveBranchManuscript = async (fields: ManuscriptFieldsState, status: ManuscriptStatus): Promise<string | null> => {
     const limitErr = manuscriptLimitError(currentUser?.plan, manuscripts.length);
     if (limitErr) {
       setBranchError(limitErr);
-      return false;
+      return null;
     }
     setIsSubmitting(true);
     try {
       const res = await addManuscript(
         buildManuscriptPayload({
-          title: r.fields.title.trim() || "Untitled manuscript",
-          genre: r.fields.genre,
-          subGenres: r.fields.subGenres,
-          ageCategory: r.fields.ageCategory,
-          wordCount: parseInt(r.fields.wordCount.replace(/\D/g, ""), 10) || 0,
-          logline: r.fields.strapline, // the strapline IS the logline
-          status: r.status,
+          title: fields.title.trim() || "Untitled manuscript",
+          genre: fields.genre,
+          subGenres: fields.subGenres,
+          ageCategory: fields.ageCategory,
+          wordCount: parseInt(fields.wordCount.replace(/\D/g, ""), 10) || 0,
+          logline: fields.strapline, // the strapline IS the logline
+          status,
         })
       );
-      if (!res.success) {
+      if (!res.success || !res.id) {
         setBranchError(res.error || "Couldn't save the manuscript — try again.");
-        return false;
+        return null;
       }
       setBranchError(null);
-      setManuscriptTitle(r.fields.title);
-      saveProgress({ manuscriptTitle: r.fields.title, manuscriptGenre: r.fields.genre });
-      return true;
+      setManuscriptTitle(fields.title);
+      saveProgress({ manuscriptTitle: fields.title, manuscriptGenre: fields.genre });
+      return res.id;
     } catch (e) {
       console.error("Onboarding manuscript save failed:", e);
       setBranchError("Couldn't save the manuscript — try again.");
-      return false;
+      return null;
     } finally {
       setIsSubmitting(false);
     }
@@ -1551,7 +1554,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
   // A3a (Ready to Query / Revising): save, then continue to the existing agents step.
   const handleBranchASaveReady = async (r: BranchAResult) => {
-    if (await saveBranchManuscript(r)) {
+    if (await saveBranchManuscript(r.fields, r.status)) {
       setFlow(null);
       goTo(5);
     }
@@ -1560,10 +1563,19 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   // A3b (Still writing): save as Drafting, then finish onboarding straight into the agent
   // database — research-first, no query pipeline yet.
   const handleBranchAStillWriting = async (r: BranchAResult) => {
-    if (await saveBranchManuscript(r)) {
+    if (await saveBranchManuscript(r.fields, r.status)) {
       sessionStorage.setItem("scriptally_post_onboarding_tab", "agents");
       await finishOnboarding();
     }
+  };
+
+  // B2: the book the pipeline attaches to — saved as Querying (no readiness question). The id is
+  // kept so B3's import can attach every query to it.
+  const [b2ManuscriptId, setB2ManuscriptId] = useState<string | null>(null);
+  const handleBranchBSaveBook = async (fields: ManuscriptFieldsState): Promise<boolean> => {
+    const id = await saveBranchManuscript(fields, ManuscriptStatus.QUERYING);
+    if (id) setB2ManuscriptId(id);
+    return !!id;
   };
 
   // The single completion path: mark onboardingComplete (+ optional journeyStage) and exit to the
@@ -1683,22 +1695,15 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
           </CenterWrap>
         )}
 
-        {/* Branch B — capture book + import pipeline. Screens land in Stages 4–5. */}
+        {/* Branch B — capture the book (B2), then bring the pipeline across (B3). */}
         {flow === "B" && (
           <CenterWrap>
-            <Form11Card
-              dotIndex={1}
+            <BranchB
               onSkip={handleSkip}
-              pre="Your manuscript"
-              name="The book you're querying"
-              sub="We'll attach your pipeline to this"
-              motif={<BookMotif />}
-              onBack={() => setFlow(null)}
-              primaryLabel="Continue →"
-              onPrimary={() => {}}
-            >
-              <p style={{ fontFamily: FONT_SANS, fontSize: 13, color: C.muted }}>Branch B screens arrive next.</p>
-            </Form11Card>
+              onExit={() => { setBranchError(null); setFlow(null); }}
+              onSaveBook={handleBranchBSaveBook}
+              error={branchError}
+            />
           </CenterWrap>
         )}
 
