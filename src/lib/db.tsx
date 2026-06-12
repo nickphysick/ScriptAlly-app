@@ -821,6 +821,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         return "No account found with that email. Switch to “Sign up” to create one.";
       case "auth/email-already-in-use":
         return "An account with this email already exists. Try logging in instead.";
+      case "auth/missing-password":
+        return "Please enter your password.";
       case "auth/weak-password":
         return "Please choose a password of at least 6 characters.";
       case "auth/too-many-requests":
