@@ -21,6 +21,27 @@ export const getStatusLabel = (status: QueryStatus | string): string => {
   return norm;
 };
 
+/**
+ * Canonical one-line description for each QueryStatus — the user-facing teaching copy for
+ * ScriptAlly's vocabulary (first used on the Smart Import review, reusable anywhere a status
+ * needs explaining). Single source: never hardcode these per screen.
+ */
+export const STATUS_DESCRIPTIONS: Record<QueryStatus, string> = {
+  [QueryStatus.QUERIED]: "Sent — waiting to hear back",
+  [QueryStatus.PARTIAL_REQUESTED]: "Agent asked to see a partial",
+  [QueryStatus.PARTIAL_SENT]: "You've sent the partial",
+  [QueryStatus.FULL_REQUESTED]: "Agent asked for the full",
+  [QueryStatus.FULL_SENT]: "You've sent the full manuscript",
+  [QueryStatus.REVISE_RESUBMIT]: "Invited to revise & resubmit",
+  [QueryStatus.OFFER]: "The agent offered representation",
+  [QueryStatus.REJECTED]: "A pass",
+  [QueryStatus.WITHDRAWN]: "You withdrew this query",
+  [QueryStatus.NO_RESPONSE]: "Closed with no reply",
+};
+
+export const getStatusDescription = (status: QueryStatus | string): string =>
+  STATUS_DESCRIPTIONS[normalizeStatus(status)] ?? "";
+
 export interface StatusStyle {
   bg: string;
   text: string;
