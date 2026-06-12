@@ -13,12 +13,7 @@ import { BranchB } from "./onboarding/BranchB";
 import { ManuscriptFieldsState } from "./onboarding/ManuscriptFields";
 import { buildManuscriptPayload, manuscriptLimitError } from "../lib/manuscripts";
 import {
-  BookOpen,
-  Users,
   Send,
-  Pencil,
-  Table,
-  LayoutGrid,
   UserPlus,
   ArrowRight,
   Check,
@@ -69,15 +64,12 @@ interface OnboardingProps {
   onComplete: () => void;
 }
 
-type OnboardingPath = "guided" | "import" | "skip" | null;
-
 interface ProgressData {
   step: number;
   manuscriptTitle: string;
   manuscriptGenre: string;
   agentName: string;
   agentAgency: string;
-  selectedPath: OnboardingPath;
   queryingStage: QueryingStage | null;
 }
 
@@ -91,15 +83,6 @@ const STAGE_OPTIONS: { id: QueryingStage; title: string; descriptor: string }[] 
   { id: "deep",     title: "Deep in it",           descriptor: "Lots of queries in flight" },
   { id: "interest", title: "Had some interest",    descriptor: "Requests or an offer on the table" },
 ];
-
-// Sub-line shown under the "Understood…" beat after Continue (matched to the chosen stage).
-// Skip shows the heading only — no sub-line.
-const STAGE_SUBLINE: Record<QueryingStage, string> = {
-  starting: "We'll start you with a clean desk and walk you through logging your very first query.",
-  early:    "We'll help you get those first few queries logged so nothing slips.",
-  deep:     "We'll set you up to import what you've already sent and see it all in one place.",
-  interest: "We'll make sure requests and offers stay front and centre.",
-};
 
 // The branch a chosen stage routes into after the "Understood" beat:
 //   starting → Branch A (manuscript-led setup); early/deep/interest → Branch B (capture + import).
@@ -641,494 +624,6 @@ const WelcomeStageScreen: React.FC<{
   );
 };
 
-// Brief confirmation beat shown after Continue / Skip, then auto-advances into the existing flow.
-const ConfirmBeat: React.FC<{ subline: string | null }> = ({ subline }) => (
-  <div style={{ width: "100%", maxWidth: 500, textAlign: "center", padding: "0 24px" }}>
-    <ModalTitle style={{ fontSize: 28, margin: 0 }}>
-      Understood. <em style={{ fontStyle: "italic", color: C.burgundy }}>Let's dive straight in…</em>
-    </ModalTitle>
-    {subline && (
-      <p style={{
-        fontFamily: FONT_SANS,
-        fontSize: 14,
-        fontWeight: 300,
-        color: C.muted,
-        margin: "14px auto 0",
-        maxWidth: 420,
-        lineHeight: 1.6,
-      }}>
-        {subline}
-      </p>
-    )}
-  </div>
-);
-
-// ─── Screen 1: Welcome ────────────────────────────────────────────────────────
-
-const Screen1Welcome: React.FC<{ onStart: () => void; onAlreadyHaveAccount: () => void }> = ({ onStart, onAlreadyHaveAccount }) => {
-  const [startHovered, setStartHovered] = useState(false);
-  const [acctHovered, setAcctHovered] = useState(false);
-
-  const fakeQueries = [
-    { status: "Queried",    agent: "Sarah Latham",    agency: "Curtis Brown" },
-    { status: "Full Sent",  agent: "Marcus Osei",     agency: "Peters Fraser" },
-    { status: "Rejected",   agent: "Julia Beckett",   agency: "Janklow Nesbit" },
-  ];
-
-  const statusDotColor: Record<string, string> = {
-    "Queried":   "#7c9dbf",
-    "Full Sent": "#7c3a2a",
-    "Rejected":  "#c97c5a",
-  };
-
-  return (
-    <div style={{
-      minHeight: "100vh",
-      background: "radial-gradient(ellipse at 70% 30%, #5a2a1e 0%, #3a1c14 70%)",
-      display: "flex",
-      flexDirection: "column",
-    }}>
-      {/* Main content */}
-      <div style={{
-        flex: 1,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "40px 24px",
-      }}>
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 64,
-          maxWidth: 960,
-          width: "100%",
-          alignItems: "center",
-        }}>
-          {/* Left: Copy */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            {/* Logo mark */}
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 32 }}>
-              <div style={{
-                width: 36,
-                height: 36,
-                background: C.burgundy,
-                borderRadius: 8,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontFamily: FONT_SERIF,
-                fontWeight: 700,
-                fontSize: 18,
-                color: "#f5ede8",
-              }}>
-                S
-              </div>
-              <span style={{ fontFamily: FONT_SERIF, fontSize: 20, fontWeight: 600, color: "#F8F5F0", letterSpacing: "-0.01em" }}>
-                ScriptAlly
-              </span>
-            </div>
-
-            <span style={{
-              fontFamily: FONT_MONO,
-              fontSize: 10,
-              textTransform: "uppercase",
-              letterSpacing: "0.1em",
-              color: C.dusty,
-              display: "block",
-              marginBottom: 16,
-            }}>
-              For fiction writers who query
-            </span>
-
-            <h1 style={{
-              fontFamily: FONT_SERIF,
-              fontSize: 38,
-              fontWeight: 500,
-              letterSpacing: "-0.02em",
-              color: "#F5F0EA",
-              margin: "0 0 20px",
-              lineHeight: 1.2,
-            }}>
-              Query with{" "}
-              <em style={{ fontStyle: "italic" }}>confidence</em>
-              ,<br />not chaos.
-            </h1>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 36 }}>
-              {[
-                "Every query in one place — agent, status, deadline, response.",
-                "Never miss a deadline — response windows, nudge reminders, follow-ups.",
-                "Agent intelligence — MSWL, preferences, and wishlist before you send.",
-              ].map((text, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: C.dusty, marginTop: 5, flexShrink: 0 }} />
-                  <span style={{ fontFamily: FONT_SANS, fontSize: 13, fontWeight: 300, color: "rgba(245,240,234,0.8)", lineHeight: 1.55 }}>
-                    {text}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <button
-                onClick={onStart}
-                onMouseEnter={() => setStartHovered(true)}
-                onMouseLeave={() => setStartHovered(false)}
-                style={{
-                  fontFamily: FONT_MONO,
-                  fontSize: 12,
-                  letterSpacing: "0.06em",
-                  background: startHovered ? C.burgundyDeep : C.burgundy,
-                  color: "#f5ede8",
-                  border: "none",
-                  borderRadius: 10,
-                  padding: "12px 24px",
-                  cursor: "pointer",
-                  transition: "all 0.15s",
-                  transform: startHovered ? "translateY(-1px)" : "none",
-                  alignSelf: "flex-start",
-                }}
-              >
-                Start for free →
-              </button>
-              <button
-                onClick={onAlreadyHaveAccount}
-                onMouseEnter={() => setAcctHovered(true)}
-                onMouseLeave={() => setAcctHovered(false)}
-                style={{
-                  fontFamily: FONT_MONO,
-                  fontSize: 11,
-                  letterSpacing: "0.06em",
-                  background: "none",
-                  color: acctHovered ? "#F5F0EA" : "rgba(245,240,234,0.6)",
-                  border: `0.5px solid ${acctHovered ? "rgba(245,240,234,0.5)" : "rgba(245,240,234,0.2)"}`,
-                  borderRadius: 10,
-                  padding: "10px 18px",
-                  cursor: "pointer",
-                  transition: "all 0.15s",
-                  alignSelf: "flex-start",
-                }}
-              >
-                I already have an account
-              </button>
-            </div>
-          </motion.div>
-
-          {/* Right: Mini dashboard preview */}
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.25 }}
-          >
-            <div style={{
-              background: "rgba(255,253,249,0.07)",
-              border: "0.5px solid rgba(255,255,255,0.1)",
-              borderRadius: 16,
-              padding: 20,
-              backdropFilter: "blur(4px)",
-            }}>
-              {/* Stat row */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 16 }}>
-                {[
-                  { label: "Queries sent", value: "24" },
-                  { label: "Active", value: "8" },
-                  { label: "Response rate", value: "38%" },
-                ].map(s => (
-                  <div key={s.label} style={{
-                    background: "rgba(220,224,217,0.12)",
-                    borderRadius: 10,
-                    padding: "10px 12px",
-                  }}>
-                    <div style={{ fontFamily: FONT_SERIF, fontSize: 20, fontWeight: 500, color: "#F8F5F0" }}>{s.value}</div>
-                    <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.06em", color: C.dusty, marginTop: 2 }}>{s.label}</div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Fake query rows */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                {fakeQueries.map((q, i) => (
-                  <div key={i} style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                    background: "rgba(255,255,255,0.05)",
-                    borderRadius: 8,
-                    padding: "8px 10px",
-                  }}>
-                    <div style={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: "50%",
-                      background: statusDotColor[q.status] || C.dusty,
-                      flexShrink: 0,
-                    }} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontFamily: FONT_SANS, fontSize: 12, fontWeight: 500, color: "#F8F5F0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                        {q.agent}
-                      </div>
-                      <div style={{ fontFamily: FONT_MONO, fontSize: 9, color: C.dusty }}>{q.agency}</div>
-                    </div>
-                    <span style={{
-                      fontFamily: FONT_MONO,
-                      fontSize: 9,
-                      color: statusDotColor[q.status] || C.dusty,
-                      background: "rgba(255,255,255,0.07)",
-                      borderRadius: 5,
-                      padding: "2px 6px",
-                    }}>
-                      {q.status}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </div>
-
-      {/* Literary quote strip */}
-      <div style={{
-        borderTop: "0.5px solid rgba(255,255,255,0.08)",
-        padding: "16px 40px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}>
-        <p style={{
-          fontFamily: FONT_SERIF,
-          fontStyle: "italic",
-          fontSize: 12,
-          color: "rgba(245,240,234,0.4)",
-          margin: 0,
-          textAlign: "center",
-        }}>
-          "There is no greater agony than bearing an untold story inside you." — Maya Angelou
-        </p>
-      </div>
-    </div>
-  );
-};
-
-// ─── Screen 2: Warm intro ─────────────────────────────────────────────────────
-
-const Screen2Intro: React.FC<{ onBack: () => void; onContinue: () => void; onSkip: () => void }> = ({ onBack, onContinue, onSkip }) => (
-  <ModalCard step={2}>
-    <div style={{ padding: "28px 28px 0", position: "relative" }}>
-      <SkipButton onSkip={onSkip} />
-      <ProgressDots currentStep={2} />
-      <Eyebrow>Welcome to ScriptAlly</Eyebrow>
-      <ModalTitle>Here's what we'll do together.</ModalTitle>
-      <Subtitle>Three things — takes about two minutes.</Subtitle>
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 20 }}>
-        {[
-          { Icon: BookOpen, title: "Tell us about your manuscript", desc: "Just the title and genre to start. Everything else can come later." },
-          { Icon: Users,    title: "Add the agents you have in mind", desc: "One by one, or import your existing spreadsheet in one go." },
-          { Icon: Send,     title: "Log your first query", desc: "From that point, ScriptAlly tracks everything — so you don't have to." },
-        ].map(({ Icon, title, desc }, i) => (
-          <div key={i} style={{
-            display: "flex",
-            alignItems: "flex-start",
-            gap: 12,
-            background: C.card2,
-            border: `0.5px solid ${C.border}`,
-            borderRadius: 12,
-            padding: "12px 14px",
-          }}>
-            <div style={{
-              width: 34,
-              height: 34,
-              borderRadius: 9,
-              background: C.card3,
-              border: `0.5px solid ${C.dustyBorder}`,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-              color: C.dusty,
-            }}>
-              <Icon size={15} />
-            </div>
-            <div>
-              <div style={{ fontFamily: FONT_SANS, fontSize: 13, fontWeight: 500, color: C.ink, marginBottom: 2 }}>{title}</div>
-              <div style={{ fontFamily: FONT_SANS, fontSize: 12, fontWeight: 300, color: C.muted, lineHeight: 1.5 }}>{desc}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Quote block */}
-      <div style={{
-        background: C.card2,
-        borderLeft: `2px solid ${C.dusty}`,
-        borderRadius: "0 10px 10px 0",
-        padding: "12px 16px",
-        marginBottom: 8,
-      }}>
-        <p style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 13, color: C.mutedDark, margin: 0, lineHeight: 1.6 }}>
-          "Querying is hard enough without the admin. We built ScriptAlly so you can spend your energy on the writing."
-        </p>
-      </div>
-    </div>
-    <ModalFooter onBack={onBack} onContinue={onContinue} continueLabel="Let's go →" />
-  </ModalCard>
-);
-
-// ─── Screen 3: Path chooser ───────────────────────────────────────────────────
-
-const Screen3Path: React.FC<{
-  onBack: () => void;
-  onContinue: () => void;
-  onSkip: () => void;
-  selectedPath: OnboardingPath;
-  onSelectPath: (p: OnboardingPath) => void;
-}> = ({ onBack, onContinue, onSkip, selectedPath, onSelectPath }) => (
-  <ModalCard step={3}>
-    <div style={{ padding: "28px 28px 0", position: "relative" }}>
-      <SkipButton onSkip={onSkip} />
-      <ProgressDots currentStep={3} />
-      <Eyebrow>One quick question</Eyebrow>
-      <ModalTitle>Where are you in your querying journey?</ModalTitle>
-      <Subtitle>This shapes how we set things up for you.</Subtitle>
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
-        <SelectableCard
-          selected={selectedPath === "guided"}
-          onSelect={() => onSelectPath("guided")}
-          icon={<Pencil size={16} />}
-          title="I'm just starting out"
-          description="I haven't sent any queries yet. I want to set up properly before I begin."
-          tag="Guided setup"
-        />
-        <SelectableCard
-          selected={selectedPath === "import"}
-          onSelect={() => onSelectPath("import")}
-          icon={<Table size={16} />}
-          title="I'm already querying"
-          description="I have agents and queries in a spreadsheet. I want to bring them across."
-          tag="Import from spreadsheet"
-        />
-        <SelectableCard
-          selected={selectedPath === "skip"}
-          onSelect={() => onSelectPath("skip")}
-          icon={<LayoutGrid size={16} />}
-          title="I'll figure it out as I go"
-          description="Take me to the dashboard — I'll add things when I need to."
-          tag="Skip setup"
-        />
-      </div>
-    </div>
-    <ModalFooter onBack={onBack} onContinue={onContinue} continueDisabled={!selectedPath} />
-  </ModalCard>
-);
-
-// ─── Screen 4: Manuscript ─────────────────────────────────────────────────────
-
-const GENRES = [
-  "Literary Fiction", "Historical Fiction", "Fantasy", "Science Fiction",
-  "Romance", "Thriller / Mystery", "Young Adult", "Middle Grade",
-  "Upmarket Fiction", "Other",
-];
-
-const Screen4Manuscript: React.FC<{
-  onBack: () => void;
-  onContinue: (title: string, genre: string, wordCount: string, logline: string) => void;
-  onSkip: () => void;
-  initialTitle?: string;
-  initialGenre?: string;
-}> = ({ onBack, onContinue, onSkip, initialTitle = "", initialGenre = "" }) => {
-  const [title, setTitle] = useState(initialTitle);
-  const [genre, setGenre] = useState(initialGenre);
-  const [wordCount, setWordCount] = useState("");
-  const [logline, setLogline] = useState("");
-  const [fieldError, setFieldError] = useState(false);
-
-  const handleContinue = () => {
-    if (!title.trim() || !genre) {
-      setFieldError(true);
-      return;
-    }
-    setFieldError(false);
-    onContinue(title.trim(), genre, wordCount, logline);
-  };
-
-  return (
-    <ModalCard step={4}>
-      <div style={{ padding: "28px 28px 0", position: "relative" }}>
-        <SkipButton onSkip={onSkip} />
-        <ProgressDots currentStep={4} />
-        <Eyebrow>Step 1 of 2</Eyebrow>
-        <ModalTitle>Tell us about your manuscript.</ModalTitle>
-        <Subtitle>Just the basics — you can add more detail any time.</Subtitle>
-
-        <FormField label="Title" required>
-          <InputField
-            type="text"
-            value={title}
-            onChange={e => { setTitle(e.target.value); setFieldError(false); }}
-            placeholder="e.g. The Book of Lost Clockworks"
-          />
-        </FormField>
-
-        <FormField label="Genre" required>
-          <SelectField value={genre} onChange={e => { setGenre(e.target.value); setFieldError(false); }}>
-            <option value="">Select a genre…</option>
-            {GENRES.map(g => <option key={g} value={g}>{g}</option>)}
-          </SelectField>
-        </FormField>
-
-        <FormField label="Word count (optional)">
-          <InputField
-            type="text"
-            value={wordCount}
-            onChange={e => setWordCount(e.target.value)}
-            placeholder="e.g. 92,000"
-          />
-        </FormField>
-
-        <FormField label="One-line summary (optional)">
-          <InputField
-            type="text"
-            value={logline}
-            onChange={e => setLogline(e.target.value)}
-            placeholder="e.g. A Victorian clockmaker discovers her inventions are being used against her…"
-          />
-        </FormField>
-
-        {fieldError && (
-          <p style={{
-            fontFamily: FONT_SANS,
-            fontSize: 12,
-            color: C.amber,
-            marginBottom: 12,
-            fontStyle: "italic",
-          }}>
-            Just a title and genre is all we need — takes 10 seconds.
-          </p>
-        )}
-
-        <p style={{
-          fontFamily: FONT_SANS,
-          fontSize: 11,
-          fontStyle: "italic",
-          color: C.dusty,
-          textAlign: "center",
-          marginBottom: 4,
-          fontWeight: 300,
-        }}>
-          That's all we need to get started. Everything else can come later.
-        </p>
-      </div>
-      <ModalFooter onBack={onBack} onContinue={handleContinue} />
-    </ModalCard>
-  );
-};
-
 // ─── Screen 5: Agents ─────────────────────────────────────────────────────────
 
 type AgentOption = "add" | "import" | "skip" | null;
@@ -1443,11 +938,11 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
   const saved = loadProgress();
 
-  // Step 0 = the new welcome / querying-stage step (the entry for a fresh signup). Existing
-  // in-progress sessions resume at their saved step, so the splash (step 1) and steps 2–6 are
-  // untouched.
-  const [step, setStep] = useState(saved.step ?? 0);
-  const [selectedPath, setSelectedPath] = useState<OnboardingPath>(saved.selectedPath ?? null);
+  // Step 0 = the welcome / querying-stage step. Only the agents step (5) and completion (6)
+  // survive from the legacy flow — a saved step pointing at a deleted screen (the old splash 1
+  // or intro/path/manuscript 2–4, now covered by the branches) resumes at the welcome instead.
+  const normalizeStep = (s: number | undefined): number => (s === 5 || s === 6 ? s : 0);
+  const [step, setStep] = useState(normalizeStep(saved.step));
   const [queryingStage, setQueryingStage] = useState<QueryingStage | null>(saved.queryingStage ?? null);
   // The post-welcome flow: null = on the welcome step (or the legacy resume), "understood" = the
   // cream transition beat, "A"/"B" = inside a branch. Branch C (exploring) exits immediately.
@@ -1462,7 +957,6 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   const saveProgress = (updates: Partial<ProgressData>) => {
     const current: ProgressData = {
       step,
-      selectedPath,
       queryingStage,
       manuscriptTitle,
       manuscriptGenre,
@@ -1590,45 +1084,6 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
   const handleSkip = () => { void finishOnboarding(); };
 
-  const handleScreen2Continue = () => goTo(3);
-
-  const handleScreen3Continue = () => {
-    if (selectedPath === "skip") {
-      handleSkip();
-    } else if (selectedPath === "import") {
-      handleSkip(); // send to dashboard; they'll use import nav
-    } else {
-      goTo(4);
-    }
-  };
-
-  const handleScreen4Continue = async (title: string, genre: string, wordCount: string, logline: string) => {
-    setManuscriptTitle(title);
-    setManuscriptGenre(genre);
-    saveProgress({ manuscriptTitle: title, manuscriptGenre: genre, step: 5 });
-
-    if (title && genre) {
-      setIsSubmitting(true);
-      try {
-        const wc = parseInt(wordCount.replace(/\D/g, "")) || 0;
-        await addManuscript({
-          title,
-          genre,
-          ageCategory: "Adult",
-          wordCount: wc,
-          logline,
-          comparableTitles: "",
-          status: ManuscriptStatus.READY_TO_QUERY,
-        });
-      } catch (e) {
-        console.error("Onboarding addManuscript error:", e);
-      } finally {
-        setIsSubmitting(false);
-      }
-    }
-    goTo(5);
-  };
-
   const handleScreen5Continue = async (name: string, agency: string, agentOption: AgentOption) => {
     setAgentName(name);
     setAgentAgency(agency);
@@ -1734,14 +1189,9 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
           </div>
         )}
 
-        {!flow && step === 1 && (
-          <Screen1Welcome
-            onStart={() => goTo(2)}
-            onAlreadyHaveAccount={handleSkip}
-          />
-        )}
-
-        {!flow && step >= 2 && step <= 6 && (
+        {/* Steps 5 (agents) and 6 (complete) are the only legacy steps left — the branches replaced
+            the old intro/path/manuscript screens (2–4) and the old splash (1). */}
+        {!flow && (step === 5 || step === 6) && (
           <div style={{
             display: "flex",
             alignItems: "center",
@@ -1751,34 +1201,9 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             padding: "32px 16px",
             boxSizing: "border-box",
           }}>
-            {step === 2 && (
-              <Screen2Intro
-                onBack={() => goTo(0)}
-                onContinue={handleScreen2Continue}
-                onSkip={handleSkip}
-              />
-            )}
-            {step === 3 && (
-              <Screen3Path
-                onBack={() => goTo(2)}
-                onContinue={handleScreen3Continue}
-                onSkip={handleSkip}
-                selectedPath={selectedPath}
-                onSelectPath={(p) => { setSelectedPath(p); saveProgress({ selectedPath: p }); }}
-              />
-            )}
-            {step === 4 && (
-              <Screen4Manuscript
-                onBack={() => goTo(3)}
-                onContinue={handleScreen4Continue}
-                onSkip={() => { goTo(5); }}
-                initialTitle={manuscriptTitle}
-                initialGenre={manuscriptGenre}
-              />
-            )}
             {step === 5 && (
               <Screen5Agents
-                onBack={() => goTo(4)}
+                onBack={() => goTo(0)}
                 onContinue={handleScreen5Continue}
                 onSkip={handleSkip}
                 initialAgentName={agentName}
