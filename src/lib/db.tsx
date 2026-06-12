@@ -152,6 +152,7 @@ interface DbContextType {
   // Manuscript Actions
   addManuscript: (m: Omit<Manuscript, "id" | "userId" | "statusChangedDate"> & { id?: string }, bypassLimits?: boolean) => Promise<{ success: boolean; error?: string; id?: string }>;
   updateManuscript: (id: string, fields: Partial<Manuscript>) => Promise<void>;
+  deleteManuscript: (id: string) => Promise<void>;
   
   // Version Actions
   addVersion: (v: Omit<ManuscriptVersion, "id" | "userId" | "createdDate">) => Promise<void>;
@@ -977,6 +978,33 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         date: dateStr,
         details: ""
       });
+    }
+  };
+
+  const deleteManuscript = async (id: string) => {
+    if (!currentUser) return;
+    const uid = currentUser.id;
+    try {
+      // Cascade the records that are meaningless without the manuscript: its versions,
+      // submission packages, and notes subcollection. Queries deliberately stay (same
+      // orphaning semantics as deleteAgent) — they carry their own denormalised history.
+      for (const v of versions.filter(ver => ver.manuscriptId === id)) {
+        await deleteDoc(doc(db, "users", uid, "versions", v.id));
+      }
+      for (const p of packages.filter(pkg => pkg.manuscriptId === id)) {
+        await deleteDoc(doc(db, "users", uid, "packages", p.id));
+      }
+      try {
+        const notesSnap = await getDocs(collection(db, "users", uid, "manuscripts", id, "notes"));
+        for (const n of notesSnap.docs) {
+          await deleteDoc(doc(db, "users", uid, "manuscripts", id, "notes", n.id));
+        }
+      } catch {
+        // Best-effort: an unreadable notes subcollection must not block the delete itself.
+      }
+      await deleteDoc(doc(db, "users", uid, "manuscripts", id));
+    } catch (e) {
+      handleFirestoreError(e, OperationType.DELETE, `users/${uid}/manuscripts/${id}`);
     }
   };
 
@@ -2067,6 +2095,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         downgradeToFree,
         addManuscript,
         updateManuscript,
+        deleteManuscript,
         addVersion,
         deleteVersion,
         addPackage,
