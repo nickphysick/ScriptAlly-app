@@ -73,7 +73,28 @@ interface ProgressData {
   agentName: string;
   agentAgency: string;
   selectedPath: OnboardingPath;
+  queryingStage: QueryingStage | null;
 }
+
+// Where the writer is in their querying journey — captured on the welcome step (step 0).
+// Persisted to the user profile; does not branch the flow (everyone continues the same steps).
+type QueryingStage = "starting" | "early" | "deep" | "interest";
+
+const STAGE_OPTIONS: { id: QueryingStage; title: string; descriptor: string }[] = [
+  { id: "starting", title: "Just getting started", descriptor: "Haven't sent any queries yet" },
+  { id: "early",    title: "A few queries out",    descriptor: "Early days, waiting to hear back" },
+  { id: "deep",     title: "Deep in it",           descriptor: "Lots of queries in flight" },
+  { id: "interest", title: "Had some interest",    descriptor: "Requests or an offer on the table" },
+];
+
+// Sub-line shown under the "Understood…" beat after Continue (matched to the chosen stage).
+// Skip shows the heading only — no sub-line.
+const STAGE_SUBLINE: Record<QueryingStage, string> = {
+  starting: "We'll start you with a clean desk and walk you through logging your very first query.",
+  early:    "We'll help you get those first few queries logged so nothing slips.",
+  deep:     "We'll set you up to import what you've already sent and see it all in one place.",
+  interest: "We'll make sure requests and offers stay front and centre.",
+};
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -423,6 +444,192 @@ const ModalCard: React.FC<{ step: number; children: React.ReactNode }> = ({ step
     {/* Accent bar */}
     <div style={{ height: 3, background: ACCENT_COLORS[step] || C.dusty }} />
     {children}
+  </div>
+);
+
+// ─── Step 0: Welcome / querying-stage capture ─────────────────────────────────
+
+// Single-select option card: title + descriptor + soft-burgundy selected state + tick.
+// Mirrors SelectableCard's selection treatment using the shared C tokens (kept separate so the
+// existing SelectableCard / Screen3Path is untouched).
+const StageCard: React.FC<{
+  selected: boolean;
+  onSelect: () => void;
+  title: string;
+  descriptor: string;
+}> = ({ selected, onSelect, title, descriptor }) => {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <button
+      onClick={onSelect}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        width: "100%",
+        textAlign: "left",
+        background: selected ? "#fff0eb" : hovered ? C.card2 : C.card,
+        border: `1px solid ${selected ? C.burgundy : hovered ? C.dusty : C.border}`,
+        borderRadius: 14,
+        padding: "13px 16px",
+        cursor: "pointer",
+        transition: "all 0.15s ease",
+        marginBottom: 8,
+      }}
+    >
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontFamily: FONT_SANS, fontSize: 13, fontWeight: 500, color: C.ink, marginBottom: 2 }}>
+          {title}
+        </div>
+        <p style={{ fontFamily: FONT_SANS, fontSize: 12, fontWeight: 300, color: C.muted, margin: 0, lineHeight: 1.5 }}>
+          {descriptor}
+        </p>
+      </div>
+      <div style={{
+        width: 22,
+        height: 22,
+        borderRadius: "50%",
+        flexShrink: 0,
+        background: selected ? C.burgundy : "transparent",
+        border: `1px solid ${selected ? C.burgundy : C.dustyBorder}`,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: "#f5ede8",
+        transition: "all 0.15s",
+      }}>
+        {selected && <Check size={13} strokeWidth={2.5} />}
+      </div>
+    </button>
+  );
+};
+
+const WelcomeStageScreen: React.FC<{
+  selected: QueryingStage | null;
+  onSelect: (s: QueryingStage) => void;
+  onContinue: () => void;
+  onSkip: () => void;
+}> = ({ selected, onSelect, onContinue, onSkip }) => {
+  const [skipHovered, setSkipHovered] = useState(false);
+  return (
+    <ModalCard step={1}>
+      {/* Sage header band: brand mark · mono eyebrow · Playfair wordmark */}
+      <div style={{
+        background: "linear-gradient(135deg, #dce0d9 0%, #d0d6cc 100%)",
+        borderBottom: "1px solid rgba(90,110,88,0.2)",
+        padding: "18px 28px",
+        display: "flex",
+        alignItems: "center",
+        gap: 11,
+      }}>
+        <div style={{
+          width: 38,
+          height: 38,
+          background: C.burgundy,
+          borderRadius: 9,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontFamily: FONT_SERIF,
+          fontWeight: 700,
+          fontSize: 17,
+          color: "#f5ede8",
+          flexShrink: 0,
+        }}>
+          S
+        </div>
+        <div>
+          <span style={{
+            fontFamily: FONT_MONO,
+            fontSize: 9,
+            textTransform: "uppercase",
+            letterSpacing: "0.1em",
+            color: "#5a6e58",
+            display: "block",
+            marginBottom: 1,
+          }}>
+            Welcome to
+          </span>
+          <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 600, color: "#2e3a2c", letterSpacing: "-0.01em" }}>
+            ScriptAlly
+          </span>
+        </div>
+      </div>
+
+      <div style={{ padding: "26px 28px 24px" }}>
+        <ModalTitle>
+          Let's set things up around your{" "}
+          <em style={{ fontStyle: "italic", color: C.burgundy }}>journey.</em>
+        </ModalTitle>
+        <Subtitle>
+          A calm home for every query, agent, and deadline. No wrong answer here — it just helps us
+          shape what you see first.
+        </Subtitle>
+
+        <Eyebrow>Where are you in your querying journey?</Eyebrow>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 0, marginBottom: 20 }}>
+          {STAGE_OPTIONS.map(opt => (
+            <StageCard
+              key={opt.id}
+              selected={selected === opt.id}
+              onSelect={() => onSelect(opt.id)}
+              title={opt.title}
+              descriptor={opt.descriptor}
+            />
+          ))}
+        </div>
+
+        <PrimaryButton onClick={onContinue} disabled={!selected} fullWidth>
+          Continue →
+        </PrimaryButton>
+
+        <div style={{ textAlign: "center", marginTop: 12 }}>
+          <button
+            onClick={onSkip}
+            onMouseEnter={() => setSkipHovered(true)}
+            onMouseLeave={() => setSkipHovered(false)}
+            style={{
+              fontFamily: FONT_MONO,
+              fontSize: 10,
+              letterSpacing: "0.06em",
+              color: skipHovered ? C.ink : C.muted,
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: "4px 8px",
+              transition: "color 0.15s",
+            }}
+          >
+            Skip this step
+          </button>
+        </div>
+      </div>
+    </ModalCard>
+  );
+};
+
+// Brief confirmation beat shown after Continue / Skip, then auto-advances into the existing flow.
+const ConfirmBeat: React.FC<{ subline: string | null }> = ({ subline }) => (
+  <div style={{ width: "100%", maxWidth: 500, textAlign: "center", padding: "0 24px" }}>
+    <ModalTitle style={{ fontSize: 28, margin: 0 }}>
+      Understood. <em style={{ fontStyle: "italic", color: C.burgundy }}>Let's dive straight in…</em>
+    </ModalTitle>
+    {subline && (
+      <p style={{
+        fontFamily: FONT_SANS,
+        fontSize: 14,
+        fontWeight: 300,
+        color: C.muted,
+        margin: "14px auto 0",
+        maxWidth: 420,
+        lineHeight: 1.6,
+      }}>
+        {subline}
+      </p>
+    )}
   </div>
 );
 
@@ -1206,8 +1413,15 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
   const saved = loadProgress();
 
-  const [step, setStep] = useState(saved.step ?? 1);
+  // Step 0 = the new welcome / querying-stage step (the entry for a fresh signup). Existing
+  // in-progress sessions resume at their saved step, so the splash (step 1) and steps 2–6 are
+  // untouched.
+  const [step, setStep] = useState(saved.step ?? 0);
   const [selectedPath, setSelectedPath] = useState<OnboardingPath>(saved.selectedPath ?? null);
+  const [queryingStage, setQueryingStage] = useState<QueryingStage | null>(saved.queryingStage ?? null);
+  // The transient "Understood…" beat between the welcome step and the existing flow. `null` when
+  // not showing; otherwise carries the sub-line (Continue) or null sub-line (Skip).
+  const [beat, setBeat] = useState<{ subline: string | null } | null>(null);
   const [manuscriptTitle, setManuscriptTitle] = useState(saved.manuscriptTitle ?? "");
   const [manuscriptGenre, setManuscriptGenre] = useState(saved.manuscriptGenre ?? "");
   const [agentName, setAgentName] = useState(saved.agentName ?? "");
@@ -1219,6 +1433,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     const current: ProgressData = {
       step,
       selectedPath,
+      queryingStage,
       manuscriptTitle,
       manuscriptGenre,
       agentName,
@@ -1232,6 +1447,34 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     setStep(s);
     saveProgress({ step: s });
   };
+
+  // Welcome step → "Understood…" beat → existing onboarding flow (step 2). Continue persists the
+  // chosen stage to the profile via the same updateUserProfile path that writes onboardingComplete;
+  // Skip saves nothing. The captured stage does not branch the flow.
+  const handleStageContinue = async () => {
+    if (!queryingStage) return;
+    saveProgress({ queryingStage });
+    try {
+      await updateUserProfile({ queryingStage });
+    } catch (e) {
+      console.error("Failed to persist queryingStage:", e);
+    }
+    setBeat({ subline: STAGE_SUBLINE[queryingStage] });
+  };
+
+  const handleStageSkip = () => {
+    setBeat({ subline: null });
+  };
+
+  // After the beat shows, advance into the existing first onboarding step (Screen2Intro).
+  useEffect(() => {
+    if (!beat) return;
+    const t = setTimeout(() => {
+      setBeat(null);
+      goTo(2);
+    }, 1800);
+    return () => clearTimeout(t);
+  }, [beat]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSkip = async () => {
     localStorage.removeItem(STORAGE_KEY);
@@ -1332,15 +1575,48 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       justifyContent: "center",
       overflowY: "auto",
     }}>
-      <ScreenTransition stepKey={step}>
-        {step === 1 && (
+      <ScreenTransition stepKey={beat ? -2 : step}>
+        {beat && (
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "100%",
+            minHeight: "100%",
+            padding: "32px 16px",
+            boxSizing: "border-box",
+          }}>
+            <ConfirmBeat subline={beat.subline} />
+          </div>
+        )}
+
+        {!beat && step === 0 && (
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "100%",
+            minHeight: "100%",
+            padding: "32px 16px",
+            boxSizing: "border-box",
+          }}>
+            <WelcomeStageScreen
+              selected={queryingStage}
+              onSelect={(s) => { setQueryingStage(s); saveProgress({ queryingStage: s }); }}
+              onContinue={handleStageContinue}
+              onSkip={handleStageSkip}
+            />
+          </div>
+        )}
+
+        {!beat && step === 1 && (
           <Screen1Welcome
             onStart={() => goTo(2)}
             onAlreadyHaveAccount={handleSkip}
           />
         )}
 
-        {step >= 2 && step <= 6 && (
+        {!beat && step >= 2 && step <= 6 && (
           <div style={{
             display: "flex",
             alignItems: "center",
@@ -1352,7 +1628,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
           }}>
             {step === 2 && (
               <Screen2Intro
-                onBack={() => goTo(1)}
+                onBack={() => goTo(0)}
                 onContinue={handleScreen2Continue}
                 onSkip={handleSkip}
               />

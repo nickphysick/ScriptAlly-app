@@ -16,6 +16,9 @@ export interface User {
   trialStartDate: string; // ISO String
   subscriptionStatus: "active" | "trialing" | "canceled" | "none";
   onboardingComplete?: boolean;
+  // Where the writer is in their querying journey, captured on the onboarding welcome step.
+  // Display/personalisation only for now — it does not branch the onboarding flow.
+  queryingStage?: "starting" | "early" | "deep" | "interest";
 }
 
 export enum ManuscriptStatus {
