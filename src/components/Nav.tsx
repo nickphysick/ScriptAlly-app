@@ -492,7 +492,7 @@ export const Nav: React.FC<NavProps> = ({
                     </div>
 
                     <div className="py-1">
-                      <MenuItem onClick={() => { onNavigate("pricing"); setShowUserDropdown(false); }}>
+                      <MenuItem onClick={() => { onNavigate("account"); setShowUserDropdown(false); }}>
                         <span className="flex items-center gap-1.5"><User className="w-3.5 h-3.5" style={{ color: burgundy }} /> My Account</span>
                       </MenuItem>
                       <MenuItem onClick={() => { onNavigate("pricing"); setShowUserDropdown(false); }}>

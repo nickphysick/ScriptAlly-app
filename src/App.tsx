@@ -22,6 +22,7 @@ import { LogQueryFocusForm } from "./components/LogQueryFocusForm";
 import { AddAgentFocusForm } from "./components/AddAgentFocusForm";
 import { AddManuscriptFocusForm } from "./components/AddManuscriptFocusForm";
 import { HelpCentre } from "./components/HelpCentre";
+import { AccountSettings } from "./components/AccountSettings";
 import { Onboarding } from "./components/Onboarding";
 import { StatusDotDemo } from "./components/StatusDotDemo";
 import { LandingPage } from "./features/landing/LandingPage";
@@ -199,6 +200,9 @@ function AppContent() {
         )}
         {activeTab === "help" && (
           <HelpCentre />
+        )}
+        {activeTab === "account" && (
+          <AccountSettings onNavigate={handleNavigate} />
         )}
       </main>
 
