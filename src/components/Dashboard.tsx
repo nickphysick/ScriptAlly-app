@@ -487,10 +487,11 @@ const TaskPanelCard: React.FC<{
                     e.stopPropagation();
                     setShowSnoozeDropdown(!showSnoozeDropdown);
                   }}
-                  className="text-stone-500 hover:text-[#7c3a2a] text-[11px] font-semibold transition-colors cursor-pointer flex items-center gap-1 hover:bg-[#FAF1EF] px-2.5 py-1 rounded-lg shrink-0"
+                  title="Snooze"
+                  aria-label="Snooze"
+                  className="text-stone-500 hover:text-[#7c3a2a] transition-colors cursor-pointer flex items-center justify-center hover:bg-[#FAF1EF] w-7 h-7 rounded-lg shrink-0"
                 >
                   <Clock className="w-3.5 h-3.5" />
-                  <span>Snooze</span>
                 </button>
 
                 {showSnoozeDropdown && (
@@ -528,10 +529,11 @@ const TaskPanelCard: React.FC<{
 
               <button
                 onClick={handleDismiss}
-                className="text-stone-500 hover:text-[#7c3a2a] text-[11px] font-semibold transition-colors cursor-pointer flex items-center gap-1 hover:bg-[#FAF1EF] px-2.5 py-1 rounded-lg shrink-0"
+                title="Dismiss"
+                aria-label="Dismiss"
+                className="text-stone-500 hover:text-[#7c3a2a] transition-colors cursor-pointer flex items-center justify-center hover:bg-[#FAF1EF] w-7 h-7 rounded-lg shrink-0"
               >
                 <X className="w-3.5 h-3.5" />
-                <span>Dismiss</span>
               </button>
             </div>
           </div>
@@ -548,10 +550,11 @@ const TaskPanelCard: React.FC<{
             <div className="flex-grow" />
             <button
               onClick={handleDismiss}
-              className="text-stone-500 hover:text-[#7c3a2a] text-[11px] font-semibold transition-colors cursor-pointer flex items-center gap-1 hover:bg-[#FAF1EF] px-2.5 py-1 rounded-lg shrink-0"
+              title="Dismiss"
+              aria-label="Dismiss"
+              className="text-stone-500 hover:text-[#7c3a2a] transition-colors cursor-pointer flex items-center justify-center hover:bg-[#FAF1EF] w-7 h-7 rounded-lg shrink-0"
             >
               <X className="w-3.5 h-3.5" />
-              <span>Dismiss</span>
             </button>
           </div>
         )}
@@ -567,10 +570,11 @@ const TaskPanelCard: React.FC<{
             <div className="flex-grow" />
             <button
               onClick={handleDismiss}
-              className="text-stone-500 hover:text-[#7c3a2a] text-[11px] font-semibold transition-colors cursor-pointer flex items-center gap-1 hover:bg-[#FAF1EF] px-2.5 py-1 rounded-lg shrink-0"
+              title="Dismiss"
+              aria-label="Dismiss"
+              className="text-stone-500 hover:text-[#7c3a2a] transition-colors cursor-pointer flex items-center justify-center hover:bg-[#FAF1EF] w-7 h-7 rounded-lg shrink-0"
             >
               <X className="w-3.5 h-3.5" />
-              <span>Dismiss</span>
             </button>
           </div>
         )}
