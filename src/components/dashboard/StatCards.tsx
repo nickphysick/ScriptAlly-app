@@ -6,7 +6,7 @@
  * received) — MountCards with bespoke parchment-toned inline-SVG visuals. No chart
  * library. Geometry follows the approved dashboard reference (160×34 strips).
  */
-import React from "react";
+import React, { useRef, useState, useLayoutEffect } from "react";
 import { Send, Hourglass, Users, MailOpen } from "lucide-react";
 import { MountCard } from "../MountCard";
 import {
@@ -51,7 +51,10 @@ const CardShell: React.FC<{
   value: number | string;
   pill: React.ReactNode;
   children: React.ReactNode;
-}> = ({ icon, caption, value, pill, children }) => (
+  /** Let the visual fill (and centre within) the space beneath the figure row,
+   *  rather than pinning it to the bottom edge. Used by the Agents card. */
+  fillChildren?: boolean;
+}> = ({ icon, caption, value, pill, children, fillChildren }) => (
   // ~25% taller than the original 18px-padded card; the extra room is flexed in
   // between the figure row and the visual strip (chart pinned toward the bottom),
   // rather than padded onto the bottom edge.
@@ -69,7 +72,7 @@ const CardShell: React.FC<{
           {pill}
         </div>
       </div>
-      <div style={{ marginTop: "auto" }}>{children}</div>
+      <div style={fillChildren ? { flex: 1, display: "flex", minHeight: 0 } : { marginTop: "auto" }}>{children}</div>
     </div>
   </MountCard>
 );
@@ -158,8 +161,8 @@ const ActiveQueriesCard: React.FC<{ count: number; perWeek: number[]; diff: numb
 /* ── 3. Agents: person glyph per agent (solid = queried, outline = idle) ── */
 
 /** Small person glyph — geometry from the approved reference (head disc + shoulder arc). */
-const PersonGlyph: React.FC<{ queried: boolean }> = ({ queried }) => (
-  <svg width="19" height="19" viewBox="0 0 24 24" style={{ verticalAlign: "bottom", flexShrink: 0 }}>
+const PersonGlyph: React.FC<{ queried: boolean; size: number }> = ({ queried, size }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" style={{ display: "block", flexShrink: 0 }}>
     {queried ? (
       <>
         <circle cx="12" cy="7.2" r="4.4" fill={burgundy} />
@@ -180,35 +183,97 @@ const PersonGlyph: React.FC<{ queried: boolean }> = ({ queried }) => (
   </svg>
 );
 
-const MAX_AGENT_GLYPHS = 12;
+// Auto-scale bounds for the person-icon row.
+const GLYPH_MIN = 12;
+const GLYPH_MAX = 22;
+const GLYPH_GAP_RATIO = 0.4; // inter-icon gap ≈ 40% of icon size
+const GLYPH_SIDE_PAD = 16; // breathing room each side, inside the card's content padding
+const OVERFLOW_LABEL_W = 28; // reserved width for the trailing "+K" mono label
+
+/**
+ * The person-icon row, auto-scaled to fit one line within the card. Measures the
+ * available inner width with a ResizeObserver (the card resizes with its column) and
+ * picks an icon size in [12, 22]: larger for few agents, smaller as the count grows.
+ * If even 12px icons can't fit, it shows as many as fit plus a mono "+K" overflow label.
+ */
+const AgentGlyphRow: React.FC<{ queriedFlags: boolean[] }> = ({ queriedFlags }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [avail, setAvail] = useState(0);
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const update = () => setAvail(el.clientWidth - 2 * GLYPH_SIDE_PAD);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const n = queriedFlags.length;
+
+  let size = GLYPH_MAX;
+  let gap = Math.round(GLYPH_MAX * GLYPH_GAP_RATIO);
+  let shown = queriedFlags;
+  let overflow = 0;
+
+  if (avail > 0 && n > 0) {
+    // Conservative fit: counts a trailing gap too, so the row always lands inside `avail`.
+    const raw = Math.floor(avail / (n * (1 + GLYPH_GAP_RATIO)));
+    if (raw >= GLYPH_MIN) {
+      size = Math.min(GLYPH_MAX, raw);
+      gap = Math.round(size * GLYPH_GAP_RATIO);
+    } else {
+      // Too many to fit even at the minimum — show as many 12px icons as fit + "+K".
+      size = GLYPH_MIN;
+      gap = Math.round(GLYPH_MIN * GLYPH_GAP_RATIO);
+      const k = Math.max(0, Math.floor((avail - OVERFLOW_LABEL_W) / (size + gap)));
+      shown = queriedFlags.slice(0, k);
+      overflow = n - k;
+    }
+  }
+
+  return (
+    <div
+      ref={ref}
+      style={{
+        flex: 1,
+        minWidth: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        paddingInline: GLYPH_SIDE_PAD,
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap }}>
+        {shown.map((isQueried, i) => (
+          <PersonGlyph key={i} queried={isQueried} size={size} />
+        ))}
+        {overflow > 0 && (
+          <span style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#8a7a6c", whiteSpace: "nowrap" }}>
+            +{overflow}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const AgentsCard: React.FC<{ total: number; idle: number; queriedFlags: boolean[] }> = ({
   total,
   idle,
   queriedFlags,
-}) => {
-  const shown = queriedFlags.slice(0, MAX_AGENT_GLYPHS);
-  const overflow = queriedFlags.length - shown.length;
-  return (
-    <CardShell
-      icon={<Users className="w-[13px] h-[13px] shrink-0" style={{ color: burgundy }} strokeWidth={2} />}
-      caption="Agents"
-      value={total}
-      pill={<span style={pillMuted}>{idle} idle</span>}
-    >
-      <div className="flex items-end" style={{ gap: 8, marginTop: 14, minHeight: 20 }}>
-        {shown.map((isQueried, i) => (
-          <PersonGlyph key={i} queried={isQueried} />
-        ))}
-        {overflow > 0 && (
-          <span style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#8a7a6c", lineHeight: "19px" }}>
-            +{overflow}
-          </span>
-        )}
-      </div>
-    </CardShell>
-  );
-};
+}) => (
+  <CardShell
+    icon={<Users className="w-[13px] h-[13px] shrink-0" style={{ color: burgundy }} strokeWidth={2} />}
+    caption="Agents"
+    value={total}
+    pill={<span style={pillMuted}>{idle} idle</span>}
+    fillChildren
+  >
+    <AgentGlyphRow queriedFlags={queriedFlags} />
+  </CardShell>
+);
 
 /* ── 4. Responses received: slim progress inlay ──────────────────────── */
 
