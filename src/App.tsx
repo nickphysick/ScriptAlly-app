@@ -107,7 +107,9 @@ function AppContent() {
 
   const isStatusDotDemo = useStatusDotDemoRoute();
   const hash = useHash();
-  if (isStatusDotDemo) {
+  // Dev-only review surface — never reachable in the production build (import.meta.env.DEV is
+  // false there). In prod the #/status-dots hash simply falls through to the normal app/landing.
+  if (isStatusDotDemo && import.meta.env.DEV) {
     return <StatusDotDemo />;
   }
 
@@ -236,18 +238,21 @@ function AppContent() {
         )}
       </AnimatePresence>
 
-      {/* Floating Theme Builder toggle option (Visible only to the builder/project owner) */}
-      <button
-        onClick={() => setIsBrandStudioOpen(true)}
-        className="fixed bottom-6 right-6 z-45 w-12 h-12 rounded-full bg-[#7c3a2a] text-white hover:scale-110 active:scale-95 shadow-[0_4px_16px_rgba(124,58,42,0.3)] hover:shadow-[0_8px_24px_rgba(124,58,42,0.45)] transition-all flex items-center justify-center group"
-        title="Builder Branding Room"
-        id="builder-brand-floater"
-      >
-        <Palette className="w-5.5 h-5.5 group-hover:rotate-12 transition-transform" />
-      </button>
+      {/* Floating Theme Builder — DEV-only builder tool (localStorage theme tweaking). Hidden in
+          the production build so normal users can't reach it; use `npm run dev` to access it. */}
+      {import.meta.env.DEV && (
+        <button
+          onClick={() => setIsBrandStudioOpen(true)}
+          className="fixed bottom-6 right-6 z-45 w-12 h-12 rounded-full bg-[#7c3a2a] text-white hover:scale-110 active:scale-95 shadow-[0_4px_16px_rgba(124,58,42,0.3)] hover:shadow-[0_8px_24px_rgba(124,58,42,0.45)] transition-all flex items-center justify-center group"
+          title="Builder Branding Room"
+          id="builder-brand-floater"
+        >
+          <Palette className="w-5.5 h-5.5 group-hover:rotate-12 transition-transform" />
+        </button>
+      )}
 
-      {/* Designer Studio Overlay Modal */}
-      {isBrandStudioOpen && (
+      {/* Designer Studio Overlay Modal — DEV-only (the trigger above is dev-gated too). */}
+      {import.meta.env.DEV && isBrandStudioOpen && (
         <div className="fixed inset-0 z-50 bg-stone-950/40 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-fade-in" id="brand-studio-modal">
           <div className="bg-white rounded-3xl shadow-2xl border border-stone-200/50 w-full max-w-5xl max-h-[90vh] overflow-y-auto relative animate-fade-in-scale p-1">
             {/* Close trigger button */}
