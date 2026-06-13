@@ -82,7 +82,8 @@ service cloud.firestore {
         && data.statusChangedDate is string && data.statusChangedDate.size() <= 64
         && (!data.keys().hasAll(['shelvedReason']) || (data.shelvedReason is string && data.shelvedReason.size() <= 2048))
         && (!data.keys().hasAll(['notes']) || (data.notes is string && data.notes.size() <= 16384))
-        && (!data.keys().hasAll(['subGenres']) || (data.subGenres is list && data.subGenres.size() <= 20));
+        && (!data.keys().hasAll(['subGenres']) || (data.subGenres is list && data.subGenres.size() <= 20))
+        && (!data.keys().hasAll(['shelved']) || data.shelved is bool);
     }
 
     function isValidVersion(data, userId) {
@@ -142,7 +143,8 @@ service cloud.firestore {
         && (!data.keys().hasAll(['agentNotes']) || (data.agentNotes is string && data.agentNotes.size() <= 4096))
         && (!data.keys().hasAll(['requeryPreference']) || (data.requeryPreference is string && (data.requeryPreference == 'yes' || data.requeryPreference == 'maybe' || data.requeryPreference == 'no')))
         && (!data.keys().hasAll(['socials']) || (data.socials is list && data.socials.size() <= 30))
-        && (!data.keys().hasAll(['importedNeedsReview']) || data.importedNeedsReview is bool);
+        && (!data.keys().hasAll(['importedNeedsReview']) || data.importedNeedsReview is bool)
+        && (!data.keys().hasAll(['setAside']) || data.setAside is bool);
     }
 
     function isValidCommunityAgent(data) {
@@ -323,7 +325,7 @@ service cloud.firestore {
         allow create: if isOwner(userId) && isValidId(manuscriptId) && isValidManuscript(incoming(), userId);
         allow update: if isOwner(userId) && isValidId(manuscriptId) && isValidManuscript(incoming(), userId) && (
           incoming().diff(existing()).affectedKeys().hasOnly([
-            'title', 'genre', 'subGenres', 'ageCategory', 'wordCount', 'logline', 'comparableTitles', 'status', 'shelvedReason', 'statusChangedDate', 'notes'
+            'title', 'genre', 'subGenres', 'ageCategory', 'wordCount', 'logline', 'comparableTitles', 'status', 'shelvedReason', 'statusChangedDate', 'notes', 'shelved'
           ])
         );
 
@@ -363,7 +365,7 @@ service cloud.firestore {
           incoming().diff(existing()).affectedKeys().hasOnly([
             'name', 'agency', 'email', 'website', 'twitter', 'bluesky', 'instagram', 'socials', 'genres', 'mswlNotes',
             'starRating', 'submissionStatus', 'responseTimeWeeks', 'noResponseMeansNo', 'submissionMethod',
-            'materialsWanted', 'lastCheckedDate', 'notes', 'agentNotes', 'requeryPreference', 'importedNeedsReview'
+            'materialsWanted', 'lastCheckedDate', 'notes', 'agentNotes', 'requeryPreference', 'importedNeedsReview', 'setAside'
           ])
         );
 

@@ -156,6 +156,8 @@ interface DbContextType {
   addManuscript: (m: Omit<Manuscript, "id" | "userId" | "statusChangedDate"> & { id?: string }, bypassLimits?: boolean) => Promise<{ success: boolean; error?: string; id?: string }>;
   updateManuscript: (id: string, fields: Partial<Manuscript>) => Promise<void>;
   deleteManuscript: (id: string) => Promise<void>;
+  /** Shelve/reactivate — a reversible lifecycle overlay (hides from picker/suggestions; keeps everything). */
+  setManuscriptShelved: (id: string, shelved: boolean) => Promise<void>;
   
   // Version Actions
   addVersion: (v: Omit<ManuscriptVersion, "id" | "userId" | "createdDate">) => Promise<void>;
@@ -169,6 +171,8 @@ interface DbContextType {
   addAgent: (a: Omit<Agent, "id" | "userId" | "dateAdded" | "lastCheckedDate"> & { id?: string }, bypassLimits?: boolean) => Promise<{ success: boolean; error?: string; id?: string }>;
   updateAgent: (id: string, fields: Partial<Agent>) => Promise<void>;
   deleteAgent: (id: string) => Promise<void>;
+  /** Set aside / bring back — reversible: drops from suggestions + idle bucket, keeps queries/history. */
+  setAgentSetAside: (id: string, setAside: boolean) => Promise<void>;
   
   // Query Actions
   addQuery: (q: Omit<Query, "id" | "userId" | "status" | "dateSent" | "responseDeadline" | "nudgeDate"> & { status?: QueryStatus; dateSent?: string; id?: string }, bypassLimits?: boolean) => Promise<{ success: boolean; error?: string; id?: string }>;
@@ -612,7 +616,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     });
 
     agents.forEach(a => {
-      if (a.starRating === 5 && a.submissionStatus === SubmissionStatus.OPEN) {
+      // Dream-agent nudge: 5★, not closed (Unknown counts as suggestable), and not set aside.
+      if (a.starRating === 5 && a.submissionStatus !== SubmissionStatus.CLOSED && !a.setAside) {
         const hasQuery = queries.some(q => q.agentId === a.id);
         if (!hasQuery) {
           calculatedTasks.push({
@@ -1024,6 +1029,17 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
+  // Shelve / reactivate — writes the single `shelved` overlay flag (reversible). No cascade, no
+  // activity-log noise: queries, stats, and history are all kept; only the picker/suggestions hide it.
+  const setManuscriptShelved = async (id: string, shelved: boolean) => {
+    if (!currentUser) return;
+    try {
+      await updateDoc(doc(db, "users", currentUser.id, "manuscripts", id), { shelved });
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/manuscripts/${id}`);
+    }
+  };
+
   // Version Actions
   const addVersion = async (v: Omit<ManuscriptVersion, "id" | "userId" | "createdDate">) => {
     if (!currentUser) return;
@@ -1266,6 +1282,17 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       await commitDeletesInBatches(refs);
     } catch (e) {
       handleFirestoreError(e, OperationType.DELETE, `users/${uid}/agents/${id}`);
+    }
+  };
+
+  // Set aside / bring back — writes the single `setAside` overlay flag (reversible). Queries + history
+  // kept; the agent just drops out of "who to query next" and the idle bucket / Agents stat card.
+  const setAgentSetAside = async (id: string, setAside: boolean) => {
+    if (!currentUser) return;
+    try {
+      await updateDoc(doc(db, "users", currentUser.id, "agents", id), { setAside });
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/agents/${id}`);
     }
   };
 
@@ -2132,6 +2159,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         addManuscript,
         updateManuscript,
         deleteManuscript,
+        setManuscriptShelved,
         addVersion,
         deleteVersion,
         addPackage,
@@ -2139,6 +2167,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         addAgent,
         updateAgent,
         deleteAgent,
+        setAgentSetAside,
         addQuery,
         updateQueryStatus,
         recordMaterialsSent,

@@ -6,8 +6,9 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useScriptAllyDb } from "../lib/db";
-import { UserPlan, QueryStatus, ManuscriptStatus, ActivityType, Query, Task, CommunityAgent, Manuscript } from "../types";
+import { UserPlan, QueryStatus, ManuscriptStatus, ActivityType, Query, Task, CommunityAgent, Manuscript, Agent } from "../types";
 import { manuscriptGenres } from "../lib/manuscripts";
+import { agentBuckets } from "../lib/lifecycle";
 import { 
   doc, 
   updateDoc, 
@@ -1127,24 +1128,16 @@ export const Dashboard: React.FC<{
     ].includes(q.status)
   );
 
-  const totalAgentsCount = agents.length;
-  const queriedAgentsCount = agents.filter(a =>
-    queries.some(q => q.agentId === a.id)
-  ).length;
-  const notQueriedAgentsCount = totalAgentsCount - queriedAgentsCount;
-
-  // Sorting display agents for Dashboard Card 3: 
-  // 1. Queried agents first, then unqueried agents.
-  // 2. Sorted alphabetically by name inside each group.
-  const sortedDisplayAgents = [...agents].sort((a, b) => {
-    const aQueried = queries.some(q => q.agentId === a.id);
-    const bQueried = queries.some(q => q.agentId === b.id);
-    
-    if (aQueried && !bQueried) return -1;
-    if (!aQueried && bQueried) return 1;
-    
-    return a.name.localeCompare(b.name);
-  });
+  // Agents stat card / idle bucket (lifecycle.ts). Agents I've queried always count as queried;
+  // agents I HAVEN'T queried that are closed or set aside drop out entirely (they're not
+  // "idle/suggestable"), so the card shows only the in-play agents.
+  const { queried: queriedAgents, idle: idleAgents } = agentBuckets<Agent>(agents, queries);
+  const byName = (a: Agent, b: Agent) => a.name.localeCompare(b.name);
+  // Queried first (solid glyphs), then idle (outline); alphabetical within each group.
+  const sortedDisplayAgents = [...[...queriedAgents].sort(byName), ...[...idleAgents].sort(byName)];
+  const totalAgentsCount = sortedDisplayAgents.length; // queried + idle (excludes parked/closed-unqueried)
+  const queriedAgentsCount = queriedAgents.length;
+  const notQueriedAgentsCount = idleAgents.length;
 
   const nowTime = new Date().getTime();
   const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;

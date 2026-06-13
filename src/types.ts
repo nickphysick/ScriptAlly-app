@@ -48,6 +48,10 @@ export interface Manuscript {
   shelvedReason?: string;
   statusChangedDate: string; // ISO String
   notes?: string;
+  // Lifecycle overlay (independent of `status`): a shelved manuscript is hidden from the Log-a-Query
+  // picker and new-query suggestions, but keeps all queries/stats/history. Reversible (Reactivate).
+  // Absent === not shelved. Deliberately NOT folded into `status` so the workflow status is preserved.
+  shelved?: boolean;
 }
 
 export enum ComponentType {
@@ -130,6 +134,10 @@ export interface Agent {
   requeryPreference?: "yes" | "maybe" | "no";
   // Set on agents created via Smart Import; surfaces them in the agent database for completion.
   importedNeedsReview?: boolean;
+  // Lifecycle overlay, separate from `submissionStatus` (the agent's own open/closed availability):
+  // a set-aside agent is one YOU'RE not pursuing — dropped from "who to query next" and the idle
+  // bucket/Agents stat card, but all queries + history kept. Reversible (Bring back). Absent === active.
+  setAside?: boolean;
 }
 
 export interface CommunityAgent {

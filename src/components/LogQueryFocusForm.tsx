@@ -7,6 +7,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import Lottie from "lottie-react";
 import { Send } from "lucide-react";
 import { useScriptAllyDb } from "../lib/db";
+import { pickableManuscripts } from "../lib/lifecycle";
 import { QueryStatus, Agent, SubmissionMethod, SubmissionStatus, QueryMaterial } from "../types";
 import { FormShell, BrandDropdown, BrandDatePicker, FormField } from "./forms";
 import { MaterialsEditor } from "./MaterialsEditor";
@@ -64,10 +65,14 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
+  // Manuscripts offered for a NEW query — shelved books are hidden (their queries/stats are kept,
+  // they're just not query-able targets). lifecycle.ts.
+  const pickable = useMemo(() => pickableManuscripts(manuscripts), [manuscripts]);
+
   // Reset on open
   useEffect(() => {
     if (isOpen) {
-      setSelectedManuscriptId(manuscripts.length > 0 ? manuscripts[0].id : "");
+      setSelectedManuscriptId(pickable.length > 0 ? pickable[0].id : "");
       setSelectedAgent(null);
       setDateSent(new Date().toISOString().split("T")[0]);
       setSendMethod(SubmissionMethod.EMAIL);
@@ -80,7 +85,7 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
       setFormError(null);
       setIsSubmitting(false);
     }
-  }, [isOpen, manuscripts]);
+  }, [isOpen, pickable]);
 
   // Auto-calculate the expected response deadline from the agent + date sent (unchanged)
   useEffect(() => {
@@ -255,8 +260,8 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
   // ── Presentation (Form 11 shell + foundation components) ──
   // Manuscript the queried/not-queried tags reflect — only surfaced when there's more than one.
   const manuscriptLabel =
-    manuscripts.length > 1 ? manuscripts.find((m) => m.id === selectedManuscriptId)?.title : undefined;
-  const manuscriptOptions = manuscripts.map((m) => ({ value: m.id, label: m.title }));
+    pickable.length > 1 ? pickable.find((m) => m.id === selectedManuscriptId)?.title : undefined;
+  const manuscriptOptions = pickable.map((m) => ({ value: m.id, label: m.title }));
   const methodOptions = [
     { value: SubmissionMethod.EMAIL, label: "Email" },
     { value: SubmissionMethod.ONLINE_FORM, label: "Online form" },
