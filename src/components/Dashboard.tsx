@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { useScriptAllyDb } from "../lib/db";
 import { UserPlan, QueryStatus, ManuscriptStatus, ActivityType, Query, Task, CommunityAgent, Manuscript, Agent } from "../types";
 import { manuscriptGenres } from "../lib/manuscripts";
-import { agentBuckets } from "../lib/lifecycle";
+import { agentBuckets, pickableManuscripts } from "../lib/lifecycle";
 import { 
   doc, 
   updateDoc, 
@@ -1069,7 +1069,9 @@ export const Dashboard: React.FC<{
     };
   };
 
-  const activeRadarManuscript = manuscripts.find(m => m.id === selectedManuscriptId) || manuscripts[0];
+  // Radar matches against active books only (shelved ones aren't query targets).
+  const radarPickableMs = pickableManuscripts(manuscripts);
+  const activeRadarManuscript = radarPickableMs.find(m => m.id === selectedManuscriptId) || radarPickableMs[0];
 
   // Live computed matching Radar outcomes
   const radarMatches: AgentMatch[] = (communityAgents || [])

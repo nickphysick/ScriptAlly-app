@@ -74,7 +74,7 @@ export function agentBuckets<A extends AgentLike>(agents: A[], queries: QueryLik
   return { queried, idle, excludedFromIdle };
 }
 
-/** Manuscripts offered in the Log-a-Query picker / as suggestion targets — shelved ones hidden. */
-export function pickableManuscripts<M extends Pick<Manuscript, "shelved">>(manuscripts: M[]): M[] {
+/** Manuscripts offered in the Log-a-Query picker / radar / as suggestion targets — shelved ones hidden. */
+export function pickableManuscripts(manuscripts: Manuscript[]): Manuscript[] {
   return manuscripts.filter((m) => !m.shelved);
 }

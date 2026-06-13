@@ -6,6 +6,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useScriptAllyDb } from "../lib/db";
+import { pickableManuscripts } from "../lib/lifecycle";
 import { CommunityAgent, Manuscript, Agent } from "../types";
 import { doc, updateDoc, increment } from "firebase/firestore";
 import { db } from "../lib/firebase";
@@ -243,7 +244,9 @@ export const Discover: React.FC<DiscoverProps> = ({ onNavigate }) => {
     };
   };
 
-  const activeRadarManuscript = manuscripts.find(m => m.id === selectedManuscriptId) || manuscripts[0];
+  // Shelved books aren't query targets, so the radar only matches against active manuscripts.
+  const pickableMs = pickableManuscripts(manuscripts);
+  const activeRadarManuscript = pickableMs.find(m => m.id === selectedManuscriptId) || pickableMs[0];
 
   const radarMatches: AgentMatch[] = (communityAgents || [])
     .filter(commAgent => {
@@ -375,7 +378,7 @@ export const Discover: React.FC<DiscoverProps> = ({ onNavigate }) => {
               Active Manuscript Scanning Anchor
             </span>
             <div className="flex flex-wrap gap-2">
-              {manuscripts.map((ms) => {
+              {pickableMs.map((ms) => {
                 const isSelected = activeRadarManuscript?.id === ms.id;
                 const displayTitle = ms.title.length > 35 ? ms.title.substring(0, 32) + "..." : ms.title;
                 return (
