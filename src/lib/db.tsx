@@ -56,12 +56,15 @@ import {
   onSnapshot,
   getDocs,
   deleteField,
+  writeBatch,
   Timestamp,
-  serverTimestamp
+  serverTimestamp,
+  type DocumentReference
 } from "firebase/firestore";
 
 import { db, auth, handleFirestoreError, OperationType } from "./firebase";
 import { deriveQueryFields, getActivityTime, normalizeResultingStatus } from "./queryDerivation";
+import { queriesForManuscript, queriesForAgent, activityIdsForQueries } from "./cascade";
 import { recomputeQuery as recomputeQueryOnline, subcollectionDocToDerivable, monotonicEventTime } from "./recomputeQuery";
 
 // Connection validation test on boot as requested by skill
@@ -977,28 +980,45 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
+  // Delete a list of doc refs, batched (Firestore caps a batch at 500 writes, so larger cascades
+  // split). Callers order the PARENT ref LAST so a mid-way failure leaves the parent — and a clean
+  // retry — intact rather than half-deleting it (D2: no un-batched sequential half-deletes).
+  const commitDeletesInBatches = async (refs: DocumentReference[]) => {
+    const CHUNK = 450;
+    for (let i = 0; i < refs.length; i += CHUNK) {
+      const batch = writeBatch(db);
+      for (const ref of refs.slice(i, i + CHUNK)) batch.delete(ref);
+      await batch.commit();
+    }
+  };
+
   const deleteManuscript = async (id: string) => {
     if (!currentUser) return;
     const uid = currentUser.id;
     try {
-      // Cascade the records that are meaningless without the manuscript: its versions,
-      // submission packages, and notes subcollection. Queries deliberately stay (same
-      // orphaning semantics as deleteAgent) — they carry their own denormalised history.
-      for (const v of versions.filter(ver => ver.manuscriptId === id)) {
-        await deleteDoc(doc(db, "users", uid, "versions", v.id));
-      }
-      for (const p of packages.filter(pkg => pkg.manuscriptId === id)) {
-        await deleteDoc(doc(db, "users", uid, "packages", p.id));
-      }
+      const refs: DocumentReference[] = [];
+      // Records meaningless without the manuscript: versions, submission packages, notes.
+      for (const v of versions.filter(ver => ver.manuscriptId === id)) refs.push(doc(db, "users", uid, "versions", v.id));
+      for (const p of packages.filter(pkg => pkg.manuscriptId === id)) refs.push(doc(db, "users", uid, "packages", p.id));
       try {
         const notesSnap = await getDocs(collection(db, "users", uid, "manuscripts", id, "notes"));
-        for (const n of notesSnap.docs) {
-          await deleteDoc(doc(db, "users", uid, "manuscripts", id, "notes", n.id));
-        }
+        notesSnap.forEach(n => refs.push(n.ref));
       } catch {
         // Best-effort: an unreadable notes subcollection must not block the delete itself.
       }
-      await deleteDoc(doc(db, "users", uid, "manuscripts", id));
+      // Cascade the dependent queries + their per-query activity log + global-feed projections.
+      // (Previously ORPHANED — invisible in the UI yet still counting toward the free-tier limit
+      // and unrecoverable. D1/D2.)
+      const qIds = queriesForManuscript(queries, id);
+      for (const qid of qIds) {
+        const actSnap = await getDocs(collection(db, "users", uid, "queries", qid, "activity"));
+        actSnap.forEach(a => refs.push(a.ref));
+        refs.push(doc(db, "users", uid, "queries", qid));
+      }
+      for (const aid of activityIdsForQueries(activities, qIds)) refs.push(doc(db, "users", uid, "activities", aid));
+      // The manuscript itself — last, so a mid-way failure leaves it (and a retry) intact.
+      refs.push(doc(db, "users", uid, "manuscripts", id));
+      await commitDeletesInBatches(refs);
     } catch (e) {
       handleFirestoreError(e, OperationType.DELETE, `users/${uid}/manuscripts/${id}`);
     }
@@ -1222,10 +1242,30 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
   const deleteAgent = async (id: string) => {
     if (!currentUser) return;
+    const uid = currentUser.id;
     try {
-      await deleteDoc(doc(db, "users", currentUser.id, "agents", id));
+      const refs: DocumentReference[] = [];
+      // Agent notes subcollection.
+      try {
+        const notesSnap = await getDocs(collection(db, "users", uid, "agents", id, "notes"));
+        notesSnap.forEach(n => refs.push(n.ref));
+      } catch {
+        // Best-effort: an unreadable notes subcollection must not block the delete.
+      }
+      // Cascade the dependent queries + their per-query activity log + global-feed projections
+      // (previously ORPHANED — invisible yet quota-consuming and unrecoverable. D1/D2).
+      const qIds = queriesForAgent(queries, id);
+      for (const qid of qIds) {
+        const actSnap = await getDocs(collection(db, "users", uid, "queries", qid, "activity"));
+        actSnap.forEach(a => refs.push(a.ref));
+        refs.push(doc(db, "users", uid, "queries", qid));
+      }
+      for (const aid of activityIdsForQueries(activities, qIds)) refs.push(doc(db, "users", uid, "activities", aid));
+      // The agent itself — last, so a mid-way failure leaves it (and a retry) intact.
+      refs.push(doc(db, "users", uid, "agents", id));
+      await commitDeletesInBatches(refs);
     } catch (e) {
-      handleFirestoreError(e, OperationType.DELETE, `users/${currentUser.id}/agents/${id}`);
+      handleFirestoreError(e, OperationType.DELETE, `users/${uid}/agents/${id}`);
     }
   };
 

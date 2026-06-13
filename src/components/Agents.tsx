@@ -502,7 +502,11 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
             {/* Right group: Custom stylized Delete button */}
             <button
               onClick={async () => {
-                if (window.confirm(`Are you sure you want to permanently delete agent ${activeAgent.name}?`)) {
+                const relatedQ = queries.filter(q => q.agentId === activeAgent.id).length;
+                const consequence = relatedQ > 0
+                  ? ` This also permanently deletes ${relatedQ} ${relatedQ === 1 ? "query" : "queries"} to this agent and their history.`
+                  : "";
+                if (window.confirm(`Permanently delete agent ${activeAgent.name}?${consequence} This cannot be undone.`)) {
                   const idx = filteredAndSorted.findIndex(a => a.id === selectedAgentId);
                   await deleteAgent(activeAgent.id);
                   setToastMessage(`Deleted agent ${activeAgent.name}`);

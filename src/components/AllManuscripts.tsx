@@ -489,7 +489,11 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ searchQuery, onN
             {/* Right group: Custom stylized Delete button */}
             <button
               onClick={async () => {
-                if (window.confirm(`Are you sure you want to permanently delete manuscript "${activeMs.title}"? This cannot be undone.`)) {
+                const relatedQ = queries.filter(q => q.manuscriptId === activeMs.id).length;
+                const consequence = relatedQ > 0
+                  ? ` This also permanently deletes ${relatedQ} ${relatedQ === 1 ? "query" : "queries"} for it and their history.`
+                  : "";
+                if (window.confirm(`Permanently delete manuscript "${activeMs.title}"?${consequence} This cannot be undone.`)) {
                   const idx = filteredAndSorted.findIndex(m => m.id === selectedMsId);
                   await deleteManuscript(activeMs.id);
                   setToastMessage(`Deleted manuscript: ${activeMs.title}`);
