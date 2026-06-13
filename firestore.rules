@@ -440,18 +440,23 @@ service cloud.firestore {
       }
     }
 
-    // ROUTE: communityAgents
+    // ROUTE: communityAgents (shared across all users)
+    // HARDENED (audit S1). Previously any signed-in user could update ANY community agent across
+    // the whole allowlist (name/email/rating/counts/…), i.e. deface or poison the shared database.
+    // The app's ONLY write to an existing community agent is a +1 bump of contributedByCount when a
+    // user imports that agent (Discover.tsx / Dashboard.tsx, both best-effort/try-caught), so the
+    // update surface is narrowed to exactly that. Editing the agents' own fields is an admin/seed
+    // concern, never a client write.
+    // FOLLOW-UP (not done here — needs a server path, don't build unattended): client `create` is
+    // still open because seeding runs client-side (seedCommunityAgentsIfEmpty). Move seeding to an
+    // admin script / Cloud Function, then change `create` below to `if false`.
     match /communityAgents/{agentId} {
       allow get, list: if isSignedIn();
       allow create: if isSignedIn() && isValidId(agentId) && isValidCommunityAgent(incoming());
-      allow update: if isSignedIn() && isValidId(agentId) && isValidCommunityAgent(incoming()) && (
-        incoming().diff(existing()).affectedKeys().hasOnly([
-          'name', 'agency', 'email', 'website', 'twitter', 'bluesky', 'instagram', 'genres', 'mswlNotes',
-          'starRating', 'submissionStatus', 'responseTimeWeeks', 'noResponseMeansNo', 'submissionMethod',
-          'materialsWanted', 'lastCheckedDate', 'notes', 'agentNotes', 'contributedByCount', 'lastVerifiedDate',
-          'dataSource', 'communityQueryCount'
-        ])
-      );
+      allow update: if isSignedIn() && isValidId(agentId)
+        && incoming().diff(existing()).affectedKeys().hasOnly(['contributedByCount'])
+        && incoming().contributedByCount is int
+        && incoming().contributedByCount == existing().contributedByCount + 1;
       allow delete: if false;
     }
   }
