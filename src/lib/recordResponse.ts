@@ -11,8 +11,10 @@
  * drift between screens again.
  *
  * It writes to two activity stores intentionally:
- *   - users/{uid}/queries/{queryId}/activity  → the per-query timeline (Queries page)
- *   - users/{uid}/activity                     → the global feed (Dashboard timeline)
+ *   - users/{uid}/queries/{queryId}/activity  → the per-query timeline (Queries page); AUTHORITATIVE
+ *   - users/{uid}/activities                   → the global feed (Dashboard timeline); a projection
+ * (Do NOT also write the singular users/{uid}/activity feed — the dashboard merges and de-dupes on
+ * doc id only, so writing both produced two rows for one event. See the secondary-write note below.)
  * Only the per-query write is fatal; the global feed and the agent-preference write
  * are best-effort and never block the undo toast.
  */

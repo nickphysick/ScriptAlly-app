@@ -121,7 +121,6 @@ function AppContent() {
   }
 
   const freshSignupFlag = sessionStorage.getItem("scriptally_new_signup") === "true";
-  console.log("[SA] AppContent gate — onboardingComplete:", currentUser.onboardingComplete, "freshSignupFlag:", freshSignupFlag);
   if (currentUser.onboardingComplete === false || freshSignupFlag) {
     return (
       <Onboarding
