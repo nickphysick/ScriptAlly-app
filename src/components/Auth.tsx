@@ -7,9 +7,11 @@ import React, { useState } from "react";
 import { useScriptAllyDb } from "../lib/db";
 import { MapPin, Feather, Key, Mail, CheckCircle } from "lucide-react";
 
-export const Auth: React.FC = () => {
+export const Auth: React.FC<{ initialMode?: "login" | "signup" }> = ({ initialMode }) => {
   const { login, signup, resetPassword } = useScriptAllyDb();
-  const [isLogin, setIsLogin] = useState(true);
+  // `initialMode` only seeds the initial state; omitting it preserves today's default
+  // (sign-in). The in-screen "need an account?" toggle below remains the live switch.
+  const [isLogin, setIsLogin] = useState(initialMode ? initialMode === "login" : true);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");

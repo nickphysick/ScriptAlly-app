@@ -24,6 +24,7 @@ import { AddManuscriptFocusForm } from "./components/AddManuscriptFocusForm";
 import { HelpCentre } from "./components/HelpCentre";
 import { Onboarding } from "./components/Onboarding";
 import { StatusDotDemo } from "./components/StatusDotDemo";
+import { LandingPage } from "./features/landing/LandingPage";
 import { Palette, X, Check } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -36,6 +37,18 @@ const useStatusDotDemoRoute = () => {
     return () => window.removeEventListener("hashchange", onHashChange);
   }, []);
   return isDemo;
+};
+
+/** Current location hash, re-rendering on change (no router — same pattern as above).
+ *  Used only to choose the logged-out front door (landing vs. the auth deep-links). */
+const useHash = () => {
+  const [hash, setHash] = useState(() => window.location.hash);
+  useEffect(() => {
+    const onHashChange = () => setHash(window.location.hash);
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
+  return hash;
 };
 
 function AppContent() {
@@ -93,12 +106,18 @@ function AppContent() {
   const paddingTopClass = "pt-[84px]";
 
   const isStatusDotDemo = useStatusDotDemoRoute();
+  const hash = useHash();
   if (isStatusDotDemo) {
     return <StatusDotDemo />;
   }
 
+  // Logged-out front door (no router). Landing by default; the landing's CTAs deep-link
+  // into the existing Auth screen via hash. Every branch here lives inside `!currentUser`,
+  // so a logged-in visitor never sees the landing and the app path below is untouched.
   if (!currentUser) {
-    return <Auth />;
+    if (hash === "#/signin") return <Auth initialMode="login" />;
+    if (hash === "#/signup" || hash === "#/start") return <Auth initialMode="signup" />;
+    return <LandingPage />;
   }
 
   const freshSignupFlag = sessionStorage.getItem("scriptally_new_signup") === "true";
