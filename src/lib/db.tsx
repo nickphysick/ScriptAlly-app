@@ -319,15 +319,12 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
             subscriptionStatus: "trialing",
             onboardingComplete: false,
           };
-          console.log("[SA] New user doc — writing onboardingComplete: false", uid);
           await setDoc(userDocRef, freshUser);
           signupTempNameRef.current = null;
         } else if (signupTempNameRef.current && userDoc.data()?.onboardingComplete === undefined) {
-          console.log("[SA] Existing doc missing onboardingComplete + signupRef set — patching to false", uid);
           await updateDoc(userDocRef, { onboardingComplete: false });
           signupTempNameRef.current = null;
         } else {
-          console.log("[SA] Existing doc — onboardingComplete =", userDoc.data()?.onboardingComplete, "signupRef =", signupTempNameRef.current);
           signupTempNameRef.current = null;
         }
 
@@ -335,7 +332,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         unsubUser = onSnapshot(userDocRef, (snap) => {
           if (snap.exists()) {
             const data = snap.data() as User;
-            console.log("[SA] onSnapshot user doc — onboardingComplete:", data.onboardingComplete);
             setCurrentUser(data);
           }
         }, (error) => {
