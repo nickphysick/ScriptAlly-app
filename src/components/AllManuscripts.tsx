@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.5
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
 import { Manuscript, ManuscriptStatus, ManuscriptVersion, Query, UserPlan } from "../types";
 import { manuscriptGenres } from "../lib/manuscripts";
@@ -29,7 +29,9 @@ import {
   FileText,
   Bookmark,
   Sparkles,
-  Notebook
+  Notebook,
+  MoreHorizontal,
+  Archive
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -55,6 +57,7 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ searchQuery, onN
     agents,
     updateManuscript,
     deleteManuscript,
+    setManuscriptShelved,
   } = useScriptAllyDb();
 
   // Selection and Filter States
@@ -64,6 +67,14 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ searchQuery, onN
   const [ageGroupFilter, setAgeGroupFilter] = useState<"All" | "Adult" | "Young Adult" | "Middle Grade">("All");
   const [sortOption, setSortOption] = useState<"Highest words" | "Lowest words" | "Alphabetical">("Highest words");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  // Lifecycle UI: delete modal target, detail ⋯ menu, undo toast (shelve/reactivate), and the
+  // deferred-delete handle (mirrors the agent flow).
+  const [deleteModalMs, setDeleteModalMs] = useState<Manuscript | null>(null);
+  const [detailMenuOpen, setDetailMenuOpen] = useState(false);
+  const [undoToast, setUndoToast] = useState<{ msg: string; undo: () => void } | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<{ ms: Manuscript } | null>(null);
+  const deleteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingDeleteRef = useRef<Manuscript | null>(null);
 
   // Form Editing State
   const [editingMs, setEditingMs] = useState<Manuscript | null>(null);
@@ -123,6 +134,18 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ searchQuery, onN
     return () => unsub();
   }, [selectedMsId, currentUser?.id]);
 
+  // Commit a still-pending delete if the user navigates away (page unmounts) — never leave it dangling.
+  useEffect(() => {
+    return () => {
+      if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current);
+      const p = pendingDeleteRef.current;
+      if (p) {
+        pendingDeleteRef.current = null;
+        void deleteManuscript(p.id);
+      }
+    };
+  }, []);
+
   // Handle post note
   const handleAddMsNote = async (text: string) => {
     if (!text.trim() || !selectedMsId || !currentUser) return;
@@ -177,6 +200,8 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ searchQuery, onN
       return m.ageCategory === ageGroupFilter;
     })
     .sort((a, b) => {
+      // Shelved books always sink to their own group at the bottom of the list.
+      if (!!a.shelved !== !!b.shelved) return a.shelved ? 1 : -1;
       if (sortOption === "Highest words") {
         return b.wordCount - a.wordCount;
       }
@@ -187,7 +212,9 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ searchQuery, onN
         return a.title.localeCompare(b.title);
       }
       return 0;
-    });
+    })
+    // Optimistically hide a book that's mid-deferred-delete so the list reflects the pending removal.
+    .filter((m) => !(pendingDelete && m.id === pendingDelete.ms.id));
 
   // Keep selection synchronized with filtered list of items
   useEffect(() => {
@@ -202,6 +229,55 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ searchQuery, onN
 
   const activeMs = selectedMsId ? manuscripts.find(m => m.id === selectedMsId) : null;
   const activeMsVersions = activeMs ? versions.filter(v => v.manuscriptId === selectedMsId) : [];
+
+  // ── Lifecycle handlers (chunk 3) ──
+  // Shelve / reactivate — reversible flag-flip, with Undo on the shelve direction. No activity log.
+  const toggleShelved = async (ms: Manuscript) => {
+    setDetailMenuOpen(false);
+    const next = !ms.shelved;
+    await setManuscriptShelved(ms.id, next);
+    if (next) {
+      setUndoToast({
+        msg: `“${ms.title}” shelved — kept, just not suggested`,
+        undo: () => { void setManuscriptShelved(ms.id, false); setUndoToast(null); },
+      });
+      setTimeout(() => setUndoToast((t) => (t && t.msg.startsWith(`“${ms.title}”`) ? null : t)), 6000);
+    } else {
+      setToastMessage(`“${ms.title}” back in play`);
+      setTimeout(() => setToastMessage(null), 3000);
+    }
+  };
+
+  // Deferred delete (undo window). The cascade lives in db.deleteManuscript and runs only at commit.
+  const commitPendingDelete = async () => {
+    const p = pendingDeleteRef.current;
+    if (!p) return;
+    pendingDeleteRef.current = null;
+    if (deleteTimerRef.current) { clearTimeout(deleteTimerRef.current); deleteTimerRef.current = null; }
+    setPendingDelete(null);
+    await deleteManuscript(p.id);
+  };
+
+  // Confirm pressed ("Delete everything"): defer — optimistically hide the book + reselect, open window.
+  const requestDeleteMs = (ms: Manuscript) => {
+    setDeleteModalMs(null);
+    setDetailMenuOpen(false);
+    const idx = filteredAndSorted.findIndex((m) => m.id === ms.id);
+    const remaining = filteredAndSorted.filter((m) => m.id !== ms.id);
+    setSelectedMsId(remaining.length ? (remaining[Math.min(idx, remaining.length - 1)]?.id ?? remaining[0].id) : null);
+    pendingDeleteRef.current = ms;
+    setPendingDelete({ ms });
+    if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current);
+    deleteTimerRef.current = setTimeout(() => { void commitPendingDelete(); }, 7000);
+  };
+
+  const undoPendingDelete = () => {
+    if (deleteTimerRef.current) { clearTimeout(deleteTimerRef.current); deleteTimerRef.current = null; }
+    const p = pendingDeleteRef.current;
+    pendingDeleteRef.current = null;
+    setPendingDelete(null);
+    if (p) setSelectedMsId(p.id);
+  };
   const activeMsQueries = activeMs ? queries.filter(q => q.manuscriptId === selectedMsId) : [];
 
   // Edit Submission handlers
@@ -390,17 +466,23 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ searchQuery, onN
               No matching novels found.
             </div>
           ) : (
-            filteredAndSorted.map(ms => {
+            filteredAndSorted.map((ms, i) => {
               const isSelected = selectedMsId === ms.id;
               const badge = getStatusBadge(ms.status);
+              const isFirstShelved = !!ms.shelved && (i === 0 || !filteredAndSorted[i - 1].shelved);
 
               return (
+                <React.Fragment key={ms.id}>
+                  {isFirstShelved && (
+                    <div className="px-3 pt-3 pb-1 text-[9px] font-mono uppercase tracking-[0.11em] text-stone-400 select-none">
+                      Shelved · not suggested for new queries
+                    </div>
+                  )}
                 <div
-                  key={ms.id}
                   onClick={() => setSelectedMsId(ms.id)}
                   className={`p-3 relative cursor-pointer flex flex-col gap-1 transition-all select-none ${
                     isSelected ? "bg-[#FDF8F6]" : "hover:bg-stone-50 bg-white"
-                  }`}
+                  } ${ms.shelved ? "opacity-60" : ""}`}
                   style={{
                     borderLeft: isSelected ? "3.5px solid #7c3a2a" : "3.5px solid transparent"
                   }}
@@ -409,9 +491,13 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ searchQuery, onN
                     <span className="font-serif text-[14px] font-bold text-[#3a1c14] truncate leading-tight flex-1 font-serif text-left">
                       {ms.title}
                     </span>
-                    <span className={`text-[9.5px] font-semibold tracking-tight px-1.5 rounded border shrink-0 ${badge.bg}`}>
-                      {badge.label}
-                    </span>
+                    {ms.shelved ? (
+                      <span className="text-[8px] font-bold font-mono uppercase tracking-[0.04em] px-1.5 py-0.5 rounded-full border shrink-0 bg-stone-100 border-stone-200 text-stone-500">Shelved</span>
+                    ) : (
+                      <span className={`text-[9.5px] font-semibold tracking-tight px-1.5 rounded border shrink-0 ${badge.bg}`}>
+                        {badge.label}
+                      </span>
+                    )}
                   </div>
 
                   <div className="flex items-center justify-between text-[11px] font-medium text-[#c9a89e]">
@@ -423,6 +509,7 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ searchQuery, onN
                     "{ms.logline || "No logline outlined yet."}"
                   </p>
                 </div>
+                </React.Fragment>
               );
             })
           )}
@@ -486,35 +573,39 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ searchQuery, onN
               </button>
             </div>
 
-            {/* Right group: Custom stylized Delete button */}
-            <button
-              onClick={async () => {
-                const relatedQ = queries.filter(q => q.manuscriptId === activeMs.id).length;
-                const consequence = relatedQ > 0
-                  ? ` This also permanently deletes ${relatedQ} ${relatedQ === 1 ? "query" : "queries"} for it and their history.`
-                  : "";
-                if (window.confirm(`Permanently delete manuscript "${activeMs.title}"?${consequence} This cannot be undone.`)) {
-                  const idx = filteredAndSorted.findIndex(m => m.id === selectedMsId);
-                  await deleteManuscript(activeMs.id);
-                  setToastMessage(`Deleted manuscript: ${activeMs.title}`);
-                  setTimeout(() => setToastMessage(null), 3000);
-
-                  if (filteredAndSorted.length > 1) {
-                    if (idx >= filteredAndSorted.length - 1) {
-                      setSelectedMsId(filteredAndSorted[idx - 1].id);
-                    } else {
-                      setSelectedMsId(filteredAndSorted[idx + 1].id);
-                    }
-                  } else {
-                    setSelectedMsId(null);
-                  }
-                }
-              }}
-              className="h-[28px] border border-red-200 hover:bg-red-50 hover:text-red-700 bg-white flex items-center gap-1 px-3 rounded-full text-xs text-red-650 font-medium cursor-pointer transition-colors"
-            >
-              <Trash2 className="w-3 h-3 text-red-500" />
-              <span>Delete manuscript</span>
-            </button>
+            {/* Right group: ⋯ lifecycle menu — Shelve / Reactivate · Delete… */}
+            <div className="relative">
+              <button
+                onClick={(e) => { e.stopPropagation(); setDetailMenuOpen((o) => !o); }}
+                title="More actions"
+                aria-label="More actions"
+                className="w-[30px] h-[30px] border border-[#e8e0d8] bg-white hover:bg-stone-100 rounded-[6px] flex items-center justify-center cursor-pointer text-stone-500 transition-colors"
+              >
+                <MoreHorizontal className="w-4 h-4" />
+              </button>
+              {detailMenuOpen && (
+                <>
+                  <div className="fixed inset-0 z-30" onClick={() => setDetailMenuOpen(false)} />
+                  <div className="absolute right-0 top-[36px] z-40 bg-white border border-[#e8e0d8] rounded-[11px] shadow-[0_12px_30px_rgba(58,28,20,0.16)] p-1.5 min-w-[186px]">
+                    <button
+                      onClick={() => toggleShelved(activeMs)}
+                      className="flex items-center gap-2.5 w-full text-left px-2.5 py-2 rounded-[7px] text-[13px] text-[#3a1c14] hover:bg-[rgba(138,158,136,0.14)] cursor-pointer"
+                    >
+                      <Archive className="w-3.5 h-3.5 text-stone-500 shrink-0" />
+                      {activeMs.shelved ? "Reactivate" : "Shelve"}
+                    </button>
+                    <div className="h-px bg-[#f0eae2] my-1 mx-1" />
+                    <button
+                      onClick={() => { setDetailMenuOpen(false); setDeleteModalMs(activeMs); }}
+                      className="flex items-center gap-2.5 w-full text-left px-2.5 py-2 rounded-[7px] text-[13px] text-[#a8442f] hover:bg-[rgba(168,68,47,0.08)] cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5 shrink-0" />
+                      Delete…
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
 
           {/* 2. MAIN SCROLL CONTAINER */}
@@ -912,6 +1003,72 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ searchQuery, onN
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Undo toast (shelve / reactivate — instant flag-flip) */}
+      <AnimatePresence>
+        {undoToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[56] bg-stone-900 text-white rounded-lg py-3 px-5 text-xs font-medium shadow-lg flex items-center gap-3"
+          >
+            <span>{undoToast.msg}</span>
+            <button onClick={undoToast.undo} className="text-[#e8c89a] underline font-mono text-[11px] cursor-pointer">Undo</button>
+            <button onClick={() => setUndoToast(null)} title="Dismiss" aria-label="Dismiss" className="text-stone-400 hover:text-white cursor-pointer shrink-0"><X className="w-3.5 h-3.5" /></button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Deferred-delete toast (Manuscript deleted · Undo · ✕) */}
+      <AnimatePresence>
+        {pendingDelete && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] bg-stone-900 text-white rounded-lg py-3 px-5 text-xs font-medium shadow-lg flex items-center gap-3"
+          >
+            <span>Manuscript deleted</span>
+            <button onClick={undoPendingDelete} className="text-[#e8c89a] underline font-mono text-[11px] cursor-pointer">Undo</button>
+            <button onClick={() => { void commitPendingDelete(); }} title="Dismiss now" aria-label="Dismiss now" className="text-stone-400 hover:text-white cursor-pointer shrink-0"><X className="w-3.5 h-3.5" /></button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete modal — names the consequence, offers Shelve instead */}
+      {deleteModalMs && (() => {
+        const m = deleteModalMs;
+        const relatedQ = queries.filter((q) => q.manuscriptId === m.id);
+        const qn = relatedQ.length;
+        const agentCount = new Set(relatedQ.map((q) => q.agentId)).size;
+        return (
+          <div className="fixed inset-0 bg-stone-950/40 backdrop-blur-sm flex items-center justify-center p-5 z-[60]" onClick={() => setDeleteModalMs(null)}>
+            <motion.div
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#fdfaf5] rounded-[15px] w-[min(460px,94vw)] shadow-2xl overflow-hidden relative"
+            >
+              <div className="p-6">
+                <div className="w-[42px] h-[42px] rounded-[11px] bg-[rgba(168,68,47,0.12)] text-[#a8442f] flex items-center justify-center mb-3.5">
+                  <Trash2 className="w-5 h-5" />
+                </div>
+                <h3 className="font-serif text-[19px] leading-tight mb-2.5 text-[#3a1c14]">Delete “{m.title}”?</h3>
+                <p className="text-[13.5px] font-light leading-relaxed text-[rgba(58,28,20,0.72)]">
+                  {qn > 0 ? (
+                    <>This permanently removes the manuscript and its <b className="text-[#7c3a2a] font-medium">{qn} quer{qn > 1 ? "ies" : "y"}</b>{agentCount > 0 ? <> — and clears those from <b className="text-[#7c3a2a] font-medium">{agentCount} agent{agentCount > 1 ? "s’" : "’s"} histor{agentCount > 1 ? "ies" : "y"}</b></> : null}. Can’t be undone. To keep the record, shelve it instead.</>
+                  ) : (
+                    <>This permanently removes the manuscript. It has no queries, so nothing else is affected. To keep it, shelve it instead.</>
+                  )}
+                </p>
+                <div className="flex items-center gap-2.5 mt-5 flex-wrap">
+                  <button onClick={() => requestDeleteMs(m)} className="font-mono text-[11px] rounded-[9px] py-2.5 px-4 bg-[#a8442f] text-white hover:brightness-110 cursor-pointer">Delete everything</button>
+                  <button onClick={() => setDeleteModalMs(null)} className="font-mono text-[11px] rounded-[9px] py-2.5 px-4 text-stone-500 hover:text-[#3a1c14] cursor-pointer">Cancel</button>
+                  {!m.shelved && (
+                    <button onClick={() => { setDeleteModalMs(null); toggleShelved(m); }} className="ml-auto font-mono text-[10.5px] text-[#7c3a2a] opacity-80 hover:opacity-100 hover:underline cursor-pointer p-2">Shelve instead</button>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        );
+      })()}
 
     </div>
   );
