@@ -98,8 +98,6 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
   const [pendingDelete, setPendingDelete] = useState<{ agent: Agent; qn: number } | null>(null);
   const deleteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingDeleteRef = useRef<{ agent: Agent; qn: number } | null>(null);
-  // "Who to query next" — which manuscript the suggestion panel is scoped to (chunk 2).
-  const [suggestMsId, setSuggestMsId] = useState<string>("");
 
   // Form Editing State
   const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
