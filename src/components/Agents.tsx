@@ -27,7 +27,10 @@ import {
   X,
   Trash2,
   Book,
-  Notebook
+  Notebook,
+  MoreHorizontal,
+  Archive,
+  PauseCircle
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -76,6 +79,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
     manuscripts,
     updateAgent,
     deleteAgent,
+    setAgentSetAside,
   } = useScriptAllyDb();
 
   // Applet Selection and Filter States
@@ -85,6 +89,12 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
   const [queryFilter, setQueryFilter] = useState<"All" | "Queried" | "Not queried">("All");
   const [sortOption, setSortOption] = useState<"Star rating" | "Response time" | "Date added">("Star rating");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  // Lifecycle UI state: guarded-delete modal target, the detail ⋯ menu, and an undo-able toast.
+  const [deleteModalAgent, setDeleteModalAgent] = useState<Agent | null>(null);
+  const [detailMenuOpen, setDetailMenuOpen] = useState(false);
+  const [undoToast, setUndoToast] = useState<{ msg: string; undo: () => void } | null>(null);
+  // "Who to query next" — which manuscript the suggestion panel is scoped to (chunk 2).
+  const [suggestMsId, setSuggestMsId] = useState<string>("");
 
   // Form Editing State
   const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
@@ -223,6 +233,8 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
 
   // 4. Sort Ordering
   filteredAndSorted.sort((a, b) => {
+    // Set-aside agents always sink to their own group at the bottom of the list.
+    if (!!a.setAside !== !!b.setAside) return a.setAside ? 1 : -1;
     if (sortOption === "Star rating") {
       return (b.starRating || 0) - (a.starRating || 0);
     } else if (sortOption === "Response time") {
@@ -247,6 +259,49 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
 
   const activeAgent = selectedAgentId ? agents.find(ag => ag.id === selectedAgentId) : null;
   const activeAgentQueries = activeAgent ? queries.filter(q => q.agentId === selectedAgentId) : [];
+
+  // ── Lifecycle handlers (chunk 1) ──
+  const firstName = (n: string) => n.split(" ")[0];
+
+  // Flip the agent's OWN availability (Open ⇄ Closed). Unknown becomes Open on first flip.
+  const flipAvailability = async (agent: Agent) => {
+    const next = agent.submissionStatus === SubmissionStatus.OPEN ? SubmissionStatus.CLOSED : SubmissionStatus.OPEN;
+    await updateAgent(agent.id, { submissionStatus: next });
+    setToastMessage(`${firstName(agent.name)} marked ${next === SubmissionStatus.OPEN ? "open" : "closed"} to queries`);
+    setTimeout(() => setToastMessage(null), 2500);
+  };
+
+  // Set aside / bring back — reversible, with an Undo on the set-aside direction.
+  const toggleSetAside = async (agent: Agent) => {
+    setDetailMenuOpen(false);
+    const next = !agent.setAside;
+    await setAgentSetAside(agent.id, next);
+    if (next) {
+      setUndoToast({
+        msg: `${firstName(agent.name)} set aside — history kept, hidden from suggestions`,
+        undo: () => { void setAgentSetAside(agent.id, false); setUndoToast(null); },
+      });
+      setTimeout(() => setUndoToast((t) => (t && t.msg.startsWith(firstName(agent.name)) ? null : t)), 6000);
+    } else {
+      setToastMessage(`${firstName(agent.name)} back in your active list`);
+      setTimeout(() => setToastMessage(null), 3000);
+    }
+  };
+
+  // Guarded delete: runs the full cascade (queries + activity + projections) and reselects a neighbour.
+  const performDeleteAgent = async (agent: Agent) => {
+    const idx = filteredAndSorted.findIndex((a) => a.id === agent.id);
+    await deleteAgent(agent.id);
+    setDeleteModalAgent(null);
+    setToastMessage(`Deleted agent ${agent.name}`);
+    setTimeout(() => setToastMessage(null), 3000);
+    if (filteredAndSorted.length > 1) {
+      const neighbour = idx >= filteredAndSorted.length - 1 ? filteredAndSorted[idx - 1] : filteredAndSorted[idx + 1];
+      setSelectedAgentId(neighbour?.id ?? null);
+    } else {
+      setSelectedAgentId(null);
+    }
+  };
 
   return (
     <div
@@ -383,16 +438,22 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
               No matching agents found.
             </div>
           ) : (
-            filteredAndSorted.map(agent => {
+            filteredAndSorted.map((agent, i) => {
               const isSelected = selectedAgentId === agent.id;
+              const isFirstSetAside = !!agent.setAside && (i === 0 || !filteredAndSorted[i - 1].setAside);
 
               return (
+                <React.Fragment key={agent.id}>
+                  {isFirstSetAside && (
+                    <div className="px-3 pt-3 pb-1 text-[9px] font-mono uppercase tracking-[0.11em] text-stone-400 select-none">
+                      Set aside · hidden from suggestions
+                    </div>
+                  )}
                 <div
-                  key={agent.id}
                   onClick={() => setSelectedAgentId(agent.id)}
                   className={`p-3 relative cursor-pointer flex flex-col gap-1 transition-all select-none ${
                     isSelected ? "bg-[#FDF8F6]" : "hover:bg-stone-50 bg-white"
-                  }`}
+                  } ${agent.setAside ? "opacity-60" : ""}`}
                   style={{
                     borderLeft: isSelected ? "3.5px solid #7c3a2a" : "3.5px solid transparent"
                   }}
@@ -401,13 +462,17 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
                     <span className="font-serif text-[14px] font-bold text-[#3a1c14] truncate leading-tight flex-1">
                       {agent.name}
                     </span>
-                    <span className={`text-[9px] font-bold font-sans uppercase tracking-[0.03em] px-1.5 py-0.5 rounded border shrink-0 ${
-                      agent.submissionStatus === SubmissionStatus.OPEN
-                        ? "bg-[#FAF1EF] border-[#EBDCD3]/40 text-[#7c3a2a]"
-                        : "bg-stone-50 border-stone-200 text-stone-400"
-                    }`}>
-                      {agent.submissionStatus}
-                    </span>
+                    {agent.setAside ? (
+                      <span className="text-[8px] font-bold font-mono uppercase tracking-[0.04em] px-1.5 py-0.5 rounded-full border shrink-0 bg-stone-100 border-stone-200 text-stone-500">Set aside</span>
+                    ) : (
+                      <span className={`text-[9px] font-bold font-sans uppercase tracking-[0.03em] px-1.5 py-0.5 rounded border shrink-0 ${
+                        agent.submissionStatus === SubmissionStatus.OPEN
+                          ? "bg-[#FAF1EF] border-[#EBDCD3]/40 text-[#7c3a2a]"
+                          : "bg-stone-50 border-stone-200 text-stone-400"
+                      }`}>
+                        {agent.submissionStatus}
+                      </span>
+                    )}
                   </div>
 
                   <span className="text-[11px] text-stone-400 font-sans leading-none truncate pr-2">
@@ -428,6 +493,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
                     </div>
                   )}
                 </div>
+                </React.Fragment>
               );
             })
           )}
@@ -499,35 +565,39 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
               </button>
             </div>
 
-            {/* Right group: Custom stylized Delete button */}
-            <button
-              onClick={async () => {
-                const relatedQ = queries.filter(q => q.agentId === activeAgent.id).length;
-                const consequence = relatedQ > 0
-                  ? ` This also permanently deletes ${relatedQ} ${relatedQ === 1 ? "query" : "queries"} to this agent and their history.`
-                  : "";
-                if (window.confirm(`Permanently delete agent ${activeAgent.name}?${consequence} This cannot be undone.`)) {
-                  const idx = filteredAndSorted.findIndex(a => a.id === selectedAgentId);
-                  await deleteAgent(activeAgent.id);
-                  setToastMessage(`Deleted agent ${activeAgent.name}`);
-                  setTimeout(() => setToastMessage(null), 3000);
-
-                  if (filteredAndSorted.length > 1) {
-                    if (idx >= filteredAndSorted.length - 1) {
-                      setSelectedAgentId(filteredAndSorted[idx - 1].id);
-                    } else {
-                      setSelectedAgentId(filteredAndSorted[idx + 1].id);
-                    }
-                  } else {
-                    setSelectedAgentId(null);
-                  }
-                }
-              }}
-              className="text-[#a04030] bg-[#fdf8f6] border border-[#e8e0d8] rounded-[6px] py-[6px] px-[10px] flex items-center gap-1.5 cursor-pointer hover:bg-[#fcf3f0] hover:border-[#ebd2cc] active:scale-95 transition-all text-[11px] font-semibold"
-            >
-              <Trash2 className="w-3.5 h-3.5 shrink-0" />
-              <span>Delete</span>
-            </button>
+            {/* Right group: ⋯ lifecycle menu — Set aside / Bring back · Delete… */}
+            <div className="relative">
+              <button
+                onClick={(e) => { e.stopPropagation(); setDetailMenuOpen((o) => !o); }}
+                title="More actions"
+                aria-label="More actions"
+                className="w-[30px] h-[30px] border border-[#e8e0d8] bg-white hover:bg-stone-100 rounded-[6px] flex items-center justify-center cursor-pointer text-stone-500 transition-colors"
+              >
+                <MoreHorizontal className="w-4 h-4" />
+              </button>
+              {detailMenuOpen && (
+                <>
+                  <div className="fixed inset-0 z-30" onClick={() => setDetailMenuOpen(false)} />
+                  <div className="absolute right-0 top-[36px] z-40 bg-white border border-[#e8e0d8] rounded-[11px] shadow-[0_12px_30px_rgba(58,28,20,0.16)] p-1.5 min-w-[186px]">
+                    <button
+                      onClick={() => toggleSetAside(activeAgent)}
+                      className="flex items-center gap-2.5 w-full text-left px-2.5 py-2 rounded-[7px] text-[13px] text-[#3a1c14] hover:bg-[rgba(138,158,136,0.14)] cursor-pointer"
+                    >
+                      <Archive className="w-3.5 h-3.5 text-stone-500 shrink-0" />
+                      {activeAgent.setAside ? "Bring back" : "Set aside"}
+                    </button>
+                    <div className="h-px bg-[#f0eae2] my-1 mx-1" />
+                    <button
+                      onClick={() => { setDetailMenuOpen(false); setDeleteModalAgent(activeAgent); }}
+                      className="flex items-center gap-2.5 w-full text-left px-2.5 py-2 rounded-[7px] text-[13px] text-[#a8442f] hover:bg-[rgba(168,68,47,0.08)] cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5 shrink-0" />
+                      Delete…
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
 
           {/* INNER SCROLL COLUMN WRAP */}
@@ -536,13 +606,25 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
             {/* 2. AGENT HEADER CARD (Card 1) */}
             <div className="bg-white border border-[#e8e0d8] rounded-xl p-4 flex flex-col justify-between relative min-h-[135px] shadow-sm select-none">
               {/* Submission status absolute pill in top-right with 10px gap from border */}
-              <span className={`absolute top-[10px] right-[10px] text-[10px] font-bold uppercase tracking-[0.05em] px-2.5 py-1 border rounded-full ${
-                activeAgent.submissionStatus === SubmissionStatus.OPEN
-                  ? "bg-[#FAF1EF] text-[#7c3a2a] border-[#EBDCD3]"
-                  : "bg-stone-50 text-stone-500 border-stone-200"
-              }`}>
-                ● {activeAgent.submissionStatus === SubmissionStatus.OPEN ? "Open to subs" : "Closed to subs"}
-              </span>
+              {/* Availability — the agent's OWN status. Clickable to flip (Unknown → Open). */}
+              <button
+                onClick={() => flipAvailability(activeAgent)}
+                title="Click to flip — this is the agent's own availability to queries"
+                className={`absolute top-[10px] right-[10px] text-[10px] font-bold uppercase tracking-[0.05em] px-2.5 py-1 border rounded-full cursor-pointer transition-all hover:brightness-95 flex items-center gap-1.5 ${
+                  activeAgent.submissionStatus === SubmissionStatus.OPEN
+                    ? "bg-[#FAF1EF] text-[#7c3a2a] border-[#EBDCD3]"
+                    : activeAgent.submissionStatus === SubmissionStatus.CLOSED
+                    ? "bg-[rgba(186,117,23,0.12)] text-[#BA7517] border-[rgba(186,117,23,0.28)]"
+                    : "bg-stone-50 text-stone-400 border-stone-200"
+                }`}
+              >
+                <span className="w-[5px] h-[5px] rounded-full" style={{ background: "currentColor" }} />
+                {activeAgent.submissionStatus === SubmissionStatus.OPEN
+                  ? "Open to queries"
+                  : activeAgent.submissionStatus === SubmissionStatus.CLOSED
+                  ? "Closed to queries"
+                  : "Availability unknown"}
+              </button>
 
               <div className="flex flex-col justify-center pr-[120px]">
                 <h2 className="font-serif text-[32px] font-bold text-[#3a1c14] leading-[38px] tracking-tight">
@@ -815,6 +897,72 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ---------------- UNDO TOAST (set aside / bring back) ---------------- */}
+      <AnimatePresence>
+        {undoToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[999] bg-stone-900 text-white rounded-lg py-3 px-5 text-xs font-medium shadow-lg flex items-center gap-3"
+          >
+            <span>{undoToast.msg}</span>
+            <button onClick={undoToast.undo} className="text-[#e8c89a] underline font-mono text-[11px] cursor-pointer">Undo</button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ---------------- GUARDED DELETE MODAL ---------------- */}
+      {deleteModalAgent && (() => {
+        const a = deleteModalAgent;
+        const qn = queries.filter((q) => q.agentId === a.id).length;
+        const guarded = qn > 0;
+        return (
+          <div className="fixed inset-0 bg-stone-950/40 backdrop-blur-sm flex items-center justify-center p-5 z-[999]" onClick={() => setDeleteModalAgent(null)}>
+            <motion.div
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#fdfaf5] rounded-[15px] w-[min(440px,94vw)] shadow-2xl overflow-hidden relative"
+            >
+              <div className="p-6">
+                {guarded ? (
+                  <>
+                    <div className="w-[42px] h-[42px] rounded-[11px] bg-[rgba(186,117,23,0.12)] text-[#BA7517] flex items-center justify-center mb-3.5">
+                      <PauseCircle className="w-5 h-5" />
+                    </div>
+                    <h3 className="font-serif text-[19px] leading-tight mb-2.5 text-[#3a1c14]">
+                      {a.name} has {qn} quer{qn > 1 ? "ies" : "y"} in your pipeline
+                    </h3>
+                    <p className="text-[13.5px] font-light leading-relaxed text-[rgba(58,28,20,0.72)]">
+                      Deleting {firstName(a.name)} would also erase those <b className="text-[#7c3a2a] font-medium">{qn} quer{qn > 1 ? "ies" : "y"}</b> from the manuscripts they belong to — losing that part of your record. <b className="text-[#7c3a2a] font-medium">Set them aside</b> instead: they vanish from suggestions but the history stays, and you can bring them back.
+                    </p>
+                    <div className="flex items-center gap-2.5 mt-5 flex-wrap">
+                      <button onClick={() => { setDeleteModalAgent(null); toggleSetAside(a); }} className="font-mono text-[11px] rounded-[9px] py-2.5 px-4 bg-[#f5e2da] text-[#7c3a2a] border-[0.5px] border-[#e8c8bc] hover:bg-[#efd5ca] cursor-pointer">Set aside</button>
+                      <button onClick={() => setDeleteModalAgent(null)} className="font-mono text-[11px] rounded-[9px] py-2.5 px-4 text-stone-500 hover:text-[#3a1c14] cursor-pointer">Cancel</button>
+                      <button onClick={() => performDeleteAgent(a)} className="ml-auto font-mono text-[10.5px] text-[#a8442f] opacity-80 hover:opacity-100 hover:underline cursor-pointer p-2">Delete anyway</button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-[42px] h-[42px] rounded-[11px] bg-[rgba(168,68,47,0.12)] text-[#a8442f] flex items-center justify-center mb-3.5">
+                      <Trash2 className="w-5 h-5" />
+                    </div>
+                    <h3 className="font-serif text-[19px] leading-tight mb-2.5 text-[#3a1c14]">Delete {a.name}?</h3>
+                    <p className="text-[13.5px] font-light leading-relaxed text-[rgba(58,28,20,0.72)]">
+                      They have <b className="text-[#7c3a2a] font-medium">no queries</b>, so nothing else is affected — this just removes them from your agent database.
+                    </p>
+                    <div className="flex items-center gap-2.5 mt-5">
+                      <button onClick={() => performDeleteAgent(a)} className="font-mono text-[11px] rounded-[9px] py-2.5 px-4 bg-[#a8442f] text-white hover:brightness-110 cursor-pointer">Delete</button>
+                      <button onClick={() => setDeleteModalAgent(null)} className="font-mono text-[11px] rounded-[9px] py-2.5 px-4 text-stone-500 hover:text-[#3a1c14] cursor-pointer">Cancel</button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        );
+      })()}
 
       {/* ---------------- COMPREHENSIVE DIALOGUE MODAL EDIT PROFILE ---------------- */}
       <AnimatePresence>
