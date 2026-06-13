@@ -245,6 +245,7 @@ export enum ActivityType {
   MATERIALS_SENT = "Materials Sent",
   AGENT_ADDED = "Agent Added",
   AGENT_UPDATED = "Agent Updated",
+  AGENT_DELETED = "Agent Deleted",
   MANUSCRIPT_ADDED = "Manuscript Added",
   MANUSCRIPT_UPDATED = "Manuscript Updated",
 }

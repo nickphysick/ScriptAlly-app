@@ -1259,6 +1259,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const deleteAgent = async (id: string) => {
     if (!currentUser) return;
     const uid = currentUser.id;
+    // Capture name + query count BEFORE the cascade removes them — for the durable delete record.
+    const agentName = agents.find(a => a.id === id)?.name || "an agent";
+    const qIds = queriesForAgent(queries, id);
     try {
       const refs: DocumentReference[] = [];
       // Agent notes subcollection.
@@ -1270,7 +1273,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       }
       // Cascade the dependent queries + their per-query activity log + global-feed projections
       // (previously ORPHANED — invisible yet quota-consuming and unrecoverable. D1/D2).
-      const qIds = queriesForAgent(queries, id);
       for (const qid of qIds) {
         const actSnap = await getDocs(collection(db, "users", uid, "queries", qid, "activity"));
         actSnap.forEach(a => refs.push(a.ref));
@@ -1280,6 +1282,20 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       // The agent itself — last, so a mid-way failure leaves it (and a retry) intact.
       refs.push(doc(db, "users", uid, "agents", id));
       await commitDeletesInBatches(refs);
+
+      // Durable record of the permanent delete: lives in the global activities feed with NO queryId,
+      // so the cascade above can never purge it and it outlives the agent + its queries. Best-effort —
+      // a failed log must never surface as a failed delete (the delete already committed).
+      const qn = qIds.length;
+      const detail = qn > 0 ? ` (and ${qn} quer${qn > 1 ? "ies" : "y"} removed)` : "";
+      await addActivity({
+        activityType: ActivityType.AGENT_DELETED,
+        description: `You deleted ${agentName}${detail}`,
+        manuscriptId: "",
+        queryId: "",
+        date: new Date().toISOString(),
+        details: "",
+      }).catch(() => { /* best-effort: the delete itself succeeded */ });
     } catch (e) {
       handleFirestoreError(e, OperationType.DELETE, `users/${uid}/agents/${id}`);
     }
