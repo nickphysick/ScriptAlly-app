@@ -248,6 +248,7 @@ export enum ActivityType {
   AGENT_DELETED = "Agent Deleted",
   MANUSCRIPT_ADDED = "Manuscript Added",
   MANUSCRIPT_UPDATED = "Manuscript Updated",
+  MANUSCRIPT_DELETED = "Manuscript Deleted",
 }
 
 export interface Activity {

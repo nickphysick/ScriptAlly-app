@@ -1000,6 +1000,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const deleteManuscript = async (id: string) => {
     if (!currentUser) return;
     const uid = currentUser.id;
+    // Capture title + query count BEFORE the cascade removes them — for the durable delete record.
+    const msTitle = manuscripts.find(m => m.id === id)?.title || "a manuscript";
+    const qIds = queriesForManuscript(queries, id);
     try {
       const refs: DocumentReference[] = [];
       // Records meaningless without the manuscript: versions, submission packages, notes.
@@ -1014,7 +1017,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       // Cascade the dependent queries + their per-query activity log + global-feed projections.
       // (Previously ORPHANED — invisible in the UI yet still counting toward the free-tier limit
       // and unrecoverable. D1/D2.)
-      const qIds = queriesForManuscript(queries, id);
       for (const qid of qIds) {
         const actSnap = await getDocs(collection(db, "users", uid, "queries", qid, "activity"));
         actSnap.forEach(a => refs.push(a.ref));
@@ -1024,6 +1026,20 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       // The manuscript itself — last, so a mid-way failure leaves it (and a retry) intact.
       refs.push(doc(db, "users", uid, "manuscripts", id));
       await commitDeletesInBatches(refs);
+
+      // Durable record of the permanent delete (parity with deleteAgent): global activities feed with
+      // NO queryId, so the cascade can't purge it and it outlives the manuscript + its queries.
+      // Best-effort — a failed log must never surface as a failed delete (the delete already committed).
+      const qn = qIds.length;
+      const detail = qn > 0 ? ` (and ${qn} quer${qn > 1 ? "ies" : "y"} removed)` : "";
+      await addActivity({
+        activityType: ActivityType.MANUSCRIPT_DELETED,
+        description: `You deleted “${msTitle}”${detail}`,
+        manuscriptId: "",
+        queryId: "",
+        date: new Date().toISOString(),
+        details: "",
+      }).catch(() => { /* best-effort: the delete itself succeeded */ });
     } catch (e) {
       handleFirestoreError(e, OperationType.DELETE, `users/${uid}/manuscripts/${id}`);
     }

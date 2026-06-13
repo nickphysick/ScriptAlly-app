@@ -277,7 +277,8 @@ service cloud.firestore {
           data.activityType == 'Agent Updated' ||
           data.activityType == 'Agent Deleted' ||
           data.activityType == 'Manuscript Added' ||
-          data.activityType == 'Manuscript Updated'
+          data.activityType == 'Manuscript Updated' ||
+          data.activityType == 'Manuscript Deleted'
         )
         && data.description is string && data.description.size() <= 512
         && data.date is string && data.date.size() <= 64
