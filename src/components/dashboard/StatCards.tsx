@@ -52,19 +52,24 @@ const CardShell: React.FC<{
   pill: React.ReactNode;
   children: React.ReactNode;
 }> = ({ icon, caption, value, pill, children }) => (
-  <MountCard style={{ padding: "18px 20px" }}>
-    <div style={{ position: "relative", zIndex: 4 }}>
-      <div style={{ ...labelStyle, display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
-        {icon}
-        {caption}
+  // ~25% taller than the original 18px-padded card; the extra room is flexed in
+  // between the figure row and the visual strip (chart pinned toward the bottom),
+  // rather than padded onto the bottom edge.
+  <MountCard style={{ padding: "20px 20px 18px", minHeight: 170, display: "flex", flexDirection: "column" }}>
+    <div style={{ position: "relative", zIndex: 4, flex: 1, display: "flex", flexDirection: "column" }}>
+      <div>
+        <div style={{ ...labelStyle, display: "flex", alignItems: "center", gap: 6, marginBottom: 11 }}>
+          {icon}
+          {caption}
+        </div>
+        <div className="flex items-baseline gap-[10px]">
+          <span style={{ fontFamily: FONT_SERIF, fontSize: 34, fontWeight: 500, color: bodyInk, lineHeight: 1 }}>
+            {value}
+          </span>
+          {pill}
+        </div>
       </div>
-      <div className="flex items-baseline gap-[10px]">
-        <span style={{ fontFamily: FONT_SERIF, fontSize: 34, fontWeight: 500, color: bodyInk, lineHeight: 1 }}>
-          {value}
-        </span>
-        {pill}
-      </div>
-      {children}
+      <div style={{ marginTop: "auto" }}>{children}</div>
     </div>
   </MountCard>
 );
@@ -87,12 +92,24 @@ const QueriesSentCard: React.FC<{ total: number; perWeek: number[]; thisWeek: nu
     >
       <svg width="100%" height="34" viewBox="0 0 160 34" preserveAspectRatio="none" style={{ marginTop: 10, display: "block" }}>
         {perWeek.map((count, i) => {
-          // 4px stub for quiet weeks, up to 28px for the busiest
+          // Height binds to the week's real sent-count, scaled to the busiest week:
+          // 4px stub for empty/quiet weeks, up to 28px for the tallest.
           const h = count <= 0 ? 4 : 4 + Math.round((count / max) * 24);
           const y = 30 - h;
           const x = 4 + i * 22;
+          // Empty weeks always take the pale track colour so a no-data chart reads as a
+          // uniform faint baseline (not two stray dark stubs). Non-empty weeks get the
+          // recent-weeks emphasis: latest two burgundy/clay, older peaks a shade deeper.
           const fill =
-            i === 6 ? "#7c3a2a" : i === 5 ? "#a86a52" : count > 0 && count >= olderMax ? "#d8b8aa" : "#e8d8ca";
+            count <= 0
+              ? "#e8d8ca"
+              : i === 6
+                ? "#7c3a2a"
+                : i === 5
+                  ? "#a86a52"
+                  : count >= olderMax
+                    ? "#d8b8aa"
+                    : "#e8d8ca";
           return <rect key={i} x={x} y={y} width="14" height={h} rx="2" fill={fill} />;
         })}
       </svg>
@@ -232,7 +249,9 @@ export interface StatCardsProps {
 }
 
 export const StatCards: React.FC<StatCardsProps> = (p) => (
-  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-[14px]">
+  // Single row of four on desktop (they now share the left column's width). Falls back to
+  // 2-up on tablets and below so they never crush; the 14px gap is preserved throughout.
+  <div className="grid grid-cols-2 lg:grid-cols-4 gap-[14px] items-stretch">
     <QueriesSentCard total={p.queriesSentTotal} perWeek={p.sentPerWeek} thisWeek={p.sentThisWeek} />
     <ActiveQueriesCard count={p.activeCount} perWeek={p.activePerWeek} diff={p.activeDiff} />
     <AgentsCard total={p.agentsTotal} idle={p.agentsIdle} queriedFlags={p.agentQueriedFlags} />

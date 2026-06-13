@@ -2,16 +2,14 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Dashboard hero — parchment MountCard with the floating sage lozenge band (this card
- * only; not the edge-to-edge band), serif greeting, rotating quote, action buttons and
- * the line-SVG paper-plane corner motif.
+ * Dashboard hero — parchment MountCard with the serif greeting, rotating quote, action
+ * buttons and the line-SVG paper-plane corner motif. (The date / day-of-journey caption
+ * was dropped in the June 2026 refinement.)
  */
 import React, { useState } from "react";
-import { Send, UserPlus, BookOpen, Feather } from "lucide-react";
+import { Send, UserPlus, BookOpen } from "lucide-react";
 import { MountCard } from "../MountCard";
 import {
-  sageBandGradient,
-  sageText,
   headingInk,
   burgundy,
   labelStyle,
@@ -120,8 +118,6 @@ const PlaneMotif: React.FC = () => (
 export interface HeroCardProps {
   firstName: string;
   quote: { text: string; author: string };
-  /** Day count since the earliest query activity; null hides the caption (no queries yet). */
-  journeyDay: number | null;
   onSendQuery: () => void;
   onAddAgent: () => void;
   onAddManuscript: () => void;
@@ -130,43 +126,14 @@ export interface HeroCardProps {
 export const HeroCard: React.FC<HeroCardProps> = ({
   firstName,
   quote,
-  journeyDay,
   onSendQuery,
   onAddAgent,
   onAddManuscript,
 }) => {
-  const now = new Date();
-  const dateLine = `${now.toLocaleDateString("en-GB", { weekday: "long" })} · ${now.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  })} · your writing desk`;
-
   return (
     <MountCard className="flex flex-col">
-      {/* Floating sage lozenge band — fully rounded, this card only */}
-      <div
-        className="flex items-center justify-between"
-        style={{
-          position: "relative",
-          zIndex: 4,
-          margin: "14px 14px 0",
-          borderRadius: 9,
-          background: sageBandGradient,
-          padding: "11px 18px",
-        }}
-      >
-        <span style={{ ...labelStyle, color: sageText }}>{dateLine}</span>
-        {journeyDay !== null && (
-          <span style={{ ...labelStyle, color: sageText, display: "flex", alignItems: "center", gap: 6 }}>
-            <Feather className="w-[13px] h-[13px] shrink-0" strokeWidth={1.8} />
-            Day {journeyDay} of the journey
-          </span>
-        )}
-      </div>
-
       {/* Body */}
-      <div style={{ padding: "22px 28px 24px", margin: "0 6px 6px", position: "relative", flex: 1 }}>
+      <div style={{ padding: "30px 28px 28px", margin: "6px 6px 6px", position: "relative", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
         <div style={{ position: "relative", zIndex: 4, maxWidth: 520 }}>
           <div style={{ fontFamily: FONT_SERIF, fontSize: 38, fontWeight: 500, color: headingInk, lineHeight: 1.1 }}>
             Welcome back, <em style={{ color: burgundy, fontStyle: "italic" }}>{firstName}</em>

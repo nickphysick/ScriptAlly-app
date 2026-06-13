@@ -1444,26 +1444,6 @@ export const Dashboard: React.FC<{
     }
   }, [chronologicalKeys.join(',')]);
 
-  // Day N of the journey: days since the earliest query activity (falls back to the
-  // earliest query sent date). Null when the user has no query history yet.
-  const journeyDay = (() => {
-    const stamps: number[] = [];
-    activities.forEach((a) => {
-      if (a.queryId) {
-        const t = new Date(a.date).getTime();
-        if (!isNaN(t)) stamps.push(t);
-      }
-    });
-    queries.forEach((q) => {
-      if (q.dateSent) {
-        const t = new Date(q.dateSent).getTime();
-        if (!isNaN(t)) stamps.push(t);
-      }
-    });
-    if (stamps.length === 0) return null;
-    return Math.max(1, Math.floor((Date.now() - Math.min(...stamps)) / 86400000) + 1);
-  })();
-
   // Helper to extract the user's first name, defaulting to "Writer"
   const getUserFirstName = () => {
     if (currentUser?.name) {
@@ -2046,17 +2026,33 @@ export const Dashboard: React.FC<{
           </div>
         </div>
       ) : (
-        /* ==================== HERO + OVER TO YOU ==================== */
+        /* ============ TOP ROW: hero + stat cards (left) · Over to you (right) ============ */
         <div className="w-full max-w-none px-4 md:px-10 lg:px-14 xl:px-16 pt-2">
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-[14px] items-stretch">
-            <HeroCard
-              firstName={getUserFirstName()}
-              quote={quote}
-              journeyDay={journeyDay}
-              onSendQuery={() => onNavigate("queries", "Send a query")}
-              onAddAgent={() => onNavigate("agents", "Add an agent")}
-              onAddManuscript={() => onNavigate("manuscripts", "Add a manuscript")}
-            />
+            {/* Left: hero stacked above the four stat cards (shares the pipeline's width) */}
+            <div className="flex flex-col gap-[14px]">
+              <HeroCard
+                firstName={getUserFirstName()}
+                quote={quote}
+                onSendQuery={() => onNavigate("queries", "Send a query")}
+                onAddAgent={() => onNavigate("agents", "Add an agent")}
+                onAddManuscript={() => onNavigate("manuscripts", "Add a manuscript")}
+              />
+              <StatCards
+                queriesSentTotal={totalQueriesSent}
+                sentPerWeek={finalQueriesSentPerWeek.slice(1)}
+                sentThisWeek={finalQueriesSentPerWeek[7] ?? 0}
+                activeCount={activeQueries.length}
+                activePerWeek={finalActiveQueriesPerWeek.slice(1)}
+                activeDiff={activeDiff}
+                agentsTotal={totalAgentsCount}
+                agentsIdle={notQueriedAgentsCount}
+                agentQueriedFlags={sortedDisplayAgents.map((a) => queries.some((q) => q.agentId === a.id))}
+                responsesTotal={responsesReceived}
+                responseRatePct={responseRatePercent}
+              />
+            </div>
+            {/* Right: Over to you — stretches to fill the hero + stat-cards height */}
             <OverToYou
               tasks={tasks}
               queries={queries}
@@ -2074,26 +2070,7 @@ export const Dashboard: React.FC<{
         </div>
       )}
 
-      {/* ==================== STAT CARDS ==================== */}
-      {!isMagazineLayout && (
-        <div className="w-full max-w-none px-4 md:px-10 lg:px-14 xl:px-16 pt-[14px]">
-          <StatCards
-            queriesSentTotal={totalQueriesSent}
-            sentPerWeek={finalQueriesSentPerWeek.slice(1)}
-            sentThisWeek={finalQueriesSentPerWeek[7] ?? 0}
-            activeCount={activeQueries.length}
-            activePerWeek={finalActiveQueriesPerWeek.slice(1)}
-            activeDiff={activeDiff}
-            agentsTotal={totalAgentsCount}
-            agentsIdle={notQueriedAgentsCount}
-            agentQueriedFlags={sortedDisplayAgents.map((a) => queries.some((q) => q.agentId === a.id))}
-            responsesTotal={responsesReceived}
-            responseRatePct={responseRatePercent}
-          />
-        </div>
-      )}
-
-      {/* TWO-COLUMN MAIN WORKSPACE */}
+      {/* ============ LOWER ROW: pipeline (left) · timeline (right) ============ */}
       <div className={isMagazineLayout
         ? "grid grid-cols-1 lg:grid-cols-[1.8fr_1.1fr] xl:grid-cols-[2fr_1fr] gap-0 bg-[#FAF8F5] border-t border-[#e8e0d8] items-stretch"
         : "w-full max-w-none px-4 md:px-10 lg:px-14 xl:px-16 pt-[14px] grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-[14px] items-start"

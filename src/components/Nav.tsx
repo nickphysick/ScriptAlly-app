@@ -178,7 +178,12 @@ export const Nav: React.FC<NavProps> = ({
 
       {/* Floating parchment mount, pinned above the page */}
       <div className="fixed z-50" style={{ top: 10, left: 14, right: 14 }}>
-        <MountCard className="flex items-center" style={{ padding: "13px 22px" }}>
+        {/* MountCard still spans the page width; its inner content is inset up to 300px
+            each side (clamped so it never crushes the two clusters on narrow viewports). */}
+        <MountCard
+          className="flex items-center"
+          style={{ paddingBlock: 13, paddingInline: "clamp(22px, calc((100% - 1100px) / 2 + 22px), 300px)" }}
+        >
           {/* Wordmark */}
           <button
             onClick={() => { onNavigate("dashboard"); closeAll(); }}
