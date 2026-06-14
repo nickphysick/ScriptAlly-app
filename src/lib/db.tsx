@@ -66,6 +66,7 @@ import { db, auth, handleFirestoreError, OperationType } from "./firebase";
 import { deriveQueryFields, getActivityTime, normalizeResultingStatus } from "./queryDerivation";
 import { queriesForManuscript, queriesForAgent, activityIdsForQueries } from "./cascade";
 import { recomputeQuery as recomputeQueryOnline, subcollectionDocToDerivable, monotonicEventTime } from "./recomputeQuery";
+import { buildNudgeWrites } from "./logNudge";
 
 // Connection validation test on boot as requested by skill
 async function testConnection() {
@@ -214,6 +215,12 @@ interface DbContextType {
   
   // Task Actions
   dismissTask: (taskType: string, relatedRecordId: string, dismissType: "permanent" | "fixed snooze" | "custom date", snoozeDays?: number) => Promise<void>;
+  /**
+   * Log a nudge: writes a non-status NUDGE_SENT activity, sets nudgeDate (+ lastNudgeSentDate),
+   * and hides-and-resurfaces the nudge_overdue task on the chosen check-back date. Never touches
+   * status or responseDeadline and never counts as a response. (Distinct from dismissTask.)
+   */
+  logNudge: (queryId: string, args: { checkBackDate: string; note?: string }) => Promise<{ success: boolean; error?: string }>;
 
   // Clean Utilities
   cleanDuplicates: () => Promise<{ manuscriptsRemoved: number; agentsRemoved: number; queriesMapped: number; queriesRemoved?: number }>;
@@ -1985,6 +1992,50 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
+  // Log a nudge — the smallest-blast-radius write set (see lib/logNudge.ts). Does NOT piggyback on
+  // dismissTask, does NOT touch status/responseDeadline, and is not a response.
+  const logNudge = async (
+    queryId: string,
+    args: { checkBackDate: string; note?: string }
+  ): Promise<{ success: boolean; error?: string }> => {
+    if (!currentUser) return { success: false, error: "Session required." };
+    const q = queries.find(item => item.id === queryId);
+    if (!q) return { success: false, error: "Query not found." };
+    const agent = agents.find(a => a.id === q.agentId) || null;
+
+    const writes = buildNudgeWrites(q, agent, args, new Date());
+
+    // 1) Non-status NUDGE_SENT activity → top-level feed (where the timeline reads nudges from).
+    const actRes = await addActivity(writes.activity);
+    if (!actRes.success) return actRes;
+
+    try {
+      // 2) Set the next-nudge field + bookkeeping. updateQuery never touches status/responseDeadline.
+      await updateQuery(queryId, writes.queryUpdates);
+
+      // 3) Hide-and-resurface the nudge_overdue task on the check-back date. Upsert the dismissal so a
+      //    repeat nudge updates the existing one instead of stacking duplicates (the Tasks filter
+      //    finds the first match by key, so one canonical doc per task keeps resurfacing deterministic).
+      const existing = dismissedTasks.find(
+        d => d.taskType === "nudge_overdue" && d.relatedRecordId === queryId
+      );
+      if (existing) {
+        await updateDoc(doc(db, "users", currentUser.id, "dismissedTasks", existing.id), {
+          dismissType: writes.dismissal.dismissType,
+          resurfaceDate: writes.dismissal.resurfaceDate,
+        });
+      } else {
+        const dismissId = "dsm-" + Math.random().toString(36).substr(2, 9);
+        const newDismiss: DismissedTask = { id: dismissId, userId: currentUser.id, ...writes.dismissal };
+        await setDoc(doc(db, "users", currentUser.id, "dismissedTasks", dismissId), newDismiss);
+      }
+      return { success: true };
+    } catch (e) {
+      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/queries/${queryId} [logNudge]`);
+      return { success: false, error: "Failed to log nudge." };
+    }
+  };
+
   const cleanDuplicates = async (): Promise<{ manuscriptsRemoved: number; agentsRemoved: number; queriesMapped: number; queriesRemoved?: number }> => {
     if (!currentUser) return { manuscriptsRemoved: 0, agentsRemoved: 0, queriesMapped: 0, queriesRemoved: 0 };
 
@@ -2213,6 +2264,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         editActivity,
         updateUserProfile,
         dismissTask,
+        logNudge,
         cleanDuplicates,
         wipeAndResetDatabase
       }}

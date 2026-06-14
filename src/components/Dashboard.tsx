@@ -23,6 +23,7 @@ import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { ActivityCopyCustomizer } from "./ActivityCopyCustomizer";
 import { QuerySlideInPanel } from "./QuerySlideInPanel";
 import { RecordResponseModal } from "./RecordResponseModal";
+import { NudgeModal } from "./NudgeModal";
 import { recordQueryResponse } from "../lib/recordResponse";
 import { CalendarView } from "./CalendarView";
 import { StatusPill } from "./StatusPill";
@@ -601,6 +602,7 @@ export const Dashboard: React.FC<{
     tasks,
     logout,
     dismissTask,
+    logNudge,
     addAgent,
     updateQueryStatus,
     undoQueryStatus
@@ -655,6 +657,9 @@ export const Dashboard: React.FC<{
 
   // Drives the unified RecordResponseModal launched from the query slide-in panel.
   const [recordResponseQueryId, setRecordResponseQueryId] = useState<string | null>(null);
+
+  // Drives the Nudge modal (opened from a nudge_overdue row's "Nudge" button).
+  const [nudgeTask, setNudgeTask] = useState<Task | null>(null);
 
   // Timer effect for Status Change Undo window
   useEffect(() => {
@@ -2057,6 +2062,7 @@ export const Dashboard: React.FC<{
               queries={queries}
               agents={agents}
               onAction={(task) => onNavigate(task.actionPath, task.title)}
+              onNudge={(task) => setNudgeTask(task)}
               onSnooze={(task) => dismissTask(task.taskType, task.relatedRecordId, "fixed snooze", 3)}
               onDismiss={(task) => dismissTask(task.taskType, task.relatedRecordId, "permanent")}
               onAllTasks={() => setIsTasksPanelOpen(true)}
@@ -3667,7 +3673,9 @@ export const Dashboard: React.FC<{
                                       {formatRichText(displayDetails)}
                                     </p>
                                   )}
-                                  {(respondBy || manuscriptPillContent) && (
+                                  {/* Respond-by + manuscript caption: meaningful for status events,
+                                      but noise on a nudge you've sent — suppress it for NUDGE_SENT. */}
+                                  {act.activityType !== ActivityType.NUDGE_SENT && (respondBy || manuscriptPillContent) && (
                                     <div style={{ ...labelStyle, marginTop: 6, letterSpacing: "0.1em" }}>
                                       {respondBy}
                                       {respondBy && manuscriptPillContent ? " · " : ""}
@@ -4013,6 +4021,30 @@ export const Dashboard: React.FC<{
                 agentName: ag?.name || "the agent",
                 undoFn: result.undo,
               });
+            }}
+          />
+        );
+      })()}
+
+      {/* Nudge modal (opened from a nudge_overdue To-do row) */}
+      {nudgeTask && (() => {
+        const q = queries.find(item => item.id === nudgeTask.relatedRecordId);
+        if (!q) return null;
+        const ag = agents.find(a => a.id === q.agentId);
+        return (
+          <NudgeModal
+            agentName={ag?.name || null}
+            agency={ag?.agency || ""}
+            dateSent={q.dateSent}
+            responseDeadline={q.responseDeadline}
+            onClose={() => setNudgeTask(null)}
+            onConfirm={async ({ checkBackDate, note }) => {
+              await logNudge(q.id, { checkBackDate, note });
+              setNudgeTask(null);
+            }}
+            onCloseInstead={() => {
+              setNudgeTask(null);
+              setRecordResponseQueryId(q.id);
             }}
           />
         );

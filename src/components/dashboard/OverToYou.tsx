@@ -312,13 +312,14 @@ export interface OverToYouProps {
   queries: Query[];
   agents: Agent[];
   onAction: (task: Task) => void;
+  onNudge: (task: Task) => void; // nudge_overdue rows open the Nudge modal instead of navigating
   onSnooze: (task: Task) => void; // kept for call-site compatibility; not rendered this prompt
   onDismiss: (task: Task) => void; // kept for call-site compatibility; not rendered this prompt
   onAllTasks: () => void; // kept for call-site compatibility; superseded by the scroll hint
   onOpenQuery: (queryId: string) => void;
 }
 
-export const OverToYou: React.FC<OverToYouProps> = ({ tasks, queries, agents, onAction, onOpenQuery }) => {
+export const OverToYou: React.FC<OverToYouProps> = ({ tasks, queries, agents, onAction, onNudge, onOpenQuery }) => {
   const urgentRows = buildOverToYouRows(tasks, queries, agents);
   const recommendedRows = buildRecommendedRows(tasks, queries, agents);
   const recommendedTotal = recommendedRows.reduce((sum, r) => sum + r.count, 0);
@@ -435,7 +436,7 @@ export const OverToYou: React.FC<OverToYouProps> = ({ tasks, queries, agents, on
               <button
                 className="oty-action cursor-pointer shrink-0"
                 style={{ ...actionBtnStyle, animationDelay: `${i * 0.18}s` }}
-                onClick={() => onAction(row.task)}
+                onClick={() => (row.type === "nudge_overdue" ? onNudge(row.task) : onAction(row.task))}
               >
                 {row.actionLabel}
               </button>

@@ -805,29 +805,64 @@ export const QuerySlideInPanel: React.FC<QuerySlideInPanelProps> = ({
                       );
                     })}
 
-                    {/* Pending next stage expectation marker if response deadline exists */}
-                    {query.responseDeadline && (
-                      <div className="relative flex items-start gap-3 animate-fade-in">
-                        <div className="absolute -left-[32px] pt-1 z-10 shrink-0 select-none">
-                          <span className="w-5 h-5 flex items-center justify-center rounded-full bg-white border-2 border-dashed border-amber-500">
-                            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                          </span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="inline-flex items-center gap-1.5 py-0.5 px-2 bg-amber-50 border border-amber-200 text-[#412402] rounded-md text-[10px] font-mono tracking-wide font-bold uppercase select-none">
-                            <Clock className="w-3 h-3 text-amber-500" />
-                            <span>Response Expected</span>
+                    {/* Derived future-projection nodes (NON-stored — never enter the log, recompute,
+                        the response count, or the deletable list). Only dates still in the future
+                        render; ordered by date so they read chronologically at the bottom of the
+                        oldest-first feed. */}
+                    {(() => {
+                      const nowMs = Date.now();
+                      const derived: { kind: "response" | "followup"; date: Date }[] = [];
+                      if (query.responseDeadline) {
+                        const d = new Date(query.responseDeadline);
+                        if (!isNaN(d.getTime()) && d.getTime() > nowMs) derived.push({ kind: "response", date: d });
+                      }
+                      if (query.nudgeDate) {
+                        const d = new Date(query.nudgeDate);
+                        if (!isNaN(d.getTime()) && d.getTime() > nowMs) derived.push({ kind: "followup", date: d });
+                      }
+                      derived.sort((a, b) => a.date.getTime() - b.date.getTime());
+                      return derived.map((node) => {
+                        const dateStr = node.date.toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" });
+                        if (node.kind === "followup") {
+                          return (
+                            <div key="derived-followup" className="relative flex items-start gap-3 animate-fade-in">
+                              <div className="absolute -left-[32px] pt-1 z-10 shrink-0 select-none">
+                                <span className="w-5 h-5 flex items-center justify-center rounded-full bg-white border-2 border-dashed border-[#7c3a2a]/45">
+                                  {renderTimelineDot("Nudge sent")}
+                                </span>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="inline-flex items-center gap-1.5 py-0.5 px-2 bg-[#FAF1EF] border border-[#f2ddd5] text-[#7c3a2a] rounded-md text-[10px] font-mono tracking-wide font-bold uppercase select-none">
+                                  <Clock className="w-3 h-3 text-[#7c3a2a]" />
+                                  <span>Follow-up reminder</span>
+                                </div>
+                                <p className="text-xs font-medium mt-1 leading-normal text-stone-500">
+                                  Next nudge planned for {dateStr}
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        }
+                        return (
+                          <div key="derived-response" className="relative flex items-start gap-3 animate-fade-in">
+                            <div className="absolute -left-[32px] pt-1 z-10 shrink-0 select-none">
+                              <span className="w-5 h-5 flex items-center justify-center rounded-full bg-white border-2 border-dashed border-amber-500">
+                                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                              </span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="inline-flex items-center gap-1.5 py-0.5 px-2 bg-amber-50 border border-amber-200 text-[#412402] rounded-md text-[10px] font-mono tracking-wide font-bold uppercase select-none">
+                                <Clock className="w-3 h-3 text-amber-500" />
+                                <span>Response Expected</span>
+                              </div>
+                              <p className="text-xs font-medium mt-1 leading-normal text-stone-500">
+                                Deadline expected on {dateStr}
+                              </p>
+                            </div>
                           </div>
-                          <p className="text-xs text-[#7c-muted] font-medium mt-1 leading-normal text-stone-500">
-                            Deadline expected on {new Date(query.responseDeadline).toLocaleDateString("en-US", {
-                              day: 'numeric',
-                              month: 'short',
-                              year: 'numeric'
-                            })}
-                          </p>
-                        </div>
-                      </div>
-                    )}
+                        );
+                      });
+                    })()}
                   </div>
                 )}
               </motion.div>
