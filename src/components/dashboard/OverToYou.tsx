@@ -2,89 +2,174 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * "Over to you" — the dashboard's high-priority action box (replaces the Next Up card).
- * Shows only writer's-turn sends (Partial/Full Requested) plus nudge-eligible items from
- * the existing Next Up logic, sorted by deadline. Snooze/dismiss wire to the existing
- * dismissTask handlers. No red anywhere; the count pill replaces carousel dots.
+ * "Over to you" — the dashboard's high-priority action container (hero-right slot).
+ * One height-capped, internally-scrolling MountCard with two zones:
+ *   Zone A "To-do list"  — a PINNED sage header (serif title + pulsing dot + burgundy count
+ *                          pill) above the urgent/overdue task rows.
+ *   Zone B "When you have a moment" — a sage header STRIP (rows below sit on parchment) with one
+ *                          EXPANDABLE summary row per recommended task type; expanding lists the
+ *                          underlying agents/records/queries inline.
+ * The Zone A rows + Zone B scroll together; a thin footer hint ("Scroll to see N recommended
+ * actions") is pinned at the bottom and shown ONLY while the Zone B header is scrolled out of
+ * view (IntersectionObserver, root = the scroll container).
+ *
+ * SURFACE ONLY: every action keeps its CURRENT behaviour — navigate via onAction
+ * (Dashboard wires this to onNavigate(actionPath)); query-related items open via onOpenQuery.
+ * No nudge modal / logging / timeline here; snooze/dismiss are intentionally not rendered.
  */
-import React from "react";
-import { Flag, Clock, X, Send, Feather } from "lucide-react";
-import { Task, Query, Agent, QueryStatus } from "../../types";
+import React, { useEffect, useRef, useState } from "react";
+import { Feather, Star, ClipboardList, Archive, ChevronDown } from "lucide-react";
+import { Task, Query, Agent } from "../../types";
 import { MountCard } from "../MountCard";
 import {
-  pinkBandGradient,
-  pinkBandRule,
+  sageBandGradient,
+  sageBandRule,
+  sageText,
   parchment,
   burgundy,
+  bodyInk,
+  mutedInk,
   labelStyle,
-  labelColor,
-  sageText,
+  buttonPinkBg,
   FONT_SERIF,
   FONT_MONO,
-  bodyInk,
-  buttonPinkBg,
-  buttonPinkBorder,
-  buttonPinkHoverBg,
-  buttonPinkHoverBorder,
 } from "../../lib/designTokens";
-
-/** The Over-to-you task types, in spec: writer's-turn sends + nudge-eligible items. */
-const OVER_TO_YOU_TYPES = new Set(["partial_requested", "full_requested", "nudge_overdue"]);
-
-export interface OverToYouRow {
-  task: Task;
-  agentName: string;
-  verbPhrase: string; // "Send your partial" | "Send your full" | "Nudge"
-  actionLabel: string; // "Send" | "Nudge"
-  deadline: Date | null;
-  caption: string; // "14 DAYS LEFT · DUE 26 JUN"
-  overdue: boolean;
-}
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-const fmtShortDate = (d: Date) => d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+/* ── Zone A — urgent/overdue task types (broadened beyond the old OVER_TO_YOU_TYPES) ─────── */
+const URGENT_TYPES = [
+  "offer_received",
+  "partial_requested",
+  "full_requested",
+  "revise_resubmit",
+  "nudge_overdue",
+] as const;
+type UrgentType = (typeof URGENT_TYPES)[number];
 
-/** Build the sorted Over-to-you rows from the live Next Up tasks. */
+const URGENT_CHIP: Record<UrgentType, string> = {
+  offer_received: "OFFER",
+  full_requested: "PAGES",
+  partial_requested: "PAGES",
+  revise_resubmit: "REVISE",
+  nudge_overdue: "CHASE",
+};
+
+const URGENT_ACTION: Record<UrgentType, string> = {
+  offer_received: "Review",
+  full_requested: "Mark sent",
+  partial_requested: "Mark sent",
+  revise_resubmit: "Record",
+  nudge_overdue: "Nudge",
+};
+
+/* ── Zone B — recommended types, in display order. NOTE: querying_unstarted lives HERE, not in
+      Zone A, despite its "overdue" priority (special-cased per the brief). ─────────────────── */
+const RECOMMENDED_TYPES = [
+  "dream_agent_unqueried",
+  "querying_unstarted",
+  "data_quality_poor",
+  "no_response_close",
+] as const;
+type RecommendedType = (typeof RECOMMENDED_TYPES)[number];
+
+const RECOMMENDED_ICON: Record<RecommendedType, React.ComponentType<any>> = {
+  dream_agent_unqueried: Star,
+  querying_unstarted: Feather,
+  data_quality_poor: ClipboardList,
+  no_response_close: Archive,
+};
+
+const recommendedLabel = (type: RecommendedType, n: number): string => {
+  switch (type) {
+    case "dream_agent_unqueried":
+      return `${n} agent${n === 1 ? "" : "s"} ready to query`;
+    case "querying_unstarted":
+      return `${n} manuscript${n === 1 ? "" : "s"} ready to start querying`;
+    case "data_quality_poor":
+      return `${n} record${n === 1 ? "" : "s"} missing key details`;
+    case "no_response_close":
+      return `${n} to consider closing`;
+  }
+};
+
+/** Whole-unit overdue gap: weeks once the gap reaches 7 days, else days. e.g. "3 weeks", "5 days". */
+const fmtGap = (deadline: Date, now: Date): string => {
+  const days = Math.max(0, Math.floor((now.getTime() - deadline.getTime()) / DAY_MS));
+  if (days >= 7) {
+    const weeks = Math.floor(days / 7);
+    return `${weeks} week${weeks === 1 ? "" : "s"}`;
+  }
+  return `${days} day${days === 1 ? "" : "s"}`;
+};
+
+export interface OverToYouRow {
+  task: Task;
+  type: UrgentType;
+  chip: string;
+  agentName: string;
+  description: React.ReactNode;
+  actionLabel: string;
+  deadline: Date | null;
+}
+
+/** Build the Zone-A rows from the live tasks, sorted deadline-asc (ordering kept isolated). */
 export const buildOverToYouRows = (tasks: Task[], queries: Query[], agents: Agent[]): OverToYouRow[] => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const now = new Date();
 
-  const rows = tasks
-    .filter((t) => OVER_TO_YOU_TYPES.has(t.taskType))
+  const rows: OverToYouRow[] = tasks
+    .filter((t) => (URGENT_TYPES as readonly string[]).includes(t.taskType))
     .map((task) => {
+      const type = task.taskType as UrgentType;
       const q = queries.find((item) => item.id === task.relatedRecordId);
       const agent = q ? agents.find((a) => a.id === q.agentId) : undefined;
       const agentName = agent?.name || "the agent";
+      const title = task.manuscriptTitle || "your manuscript";
 
-      const verbPhrase =
-        task.taskType === "partial_requested"
-          ? "Send your partial"
-          : task.taskType === "full_requested"
-            ? "Send your full"
-            : "Nudge";
-      const actionLabel = task.taskType === "nudge_overdue" ? "Nudge" : "Send";
+      const rawDeadline = q?.responseDeadline ? new Date(q.responseDeadline) : null;
+      const deadline = rawDeadline && !isNaN(rawDeadline.getTime()) ? rawDeadline : null;
 
-      const deadline = q?.responseDeadline ? new Date(q.responseDeadline) : null;
-      let caption = "No deadline set";
-      let overdue = false;
-      if (deadline && !isNaN(deadline.getTime())) {
-        const dl = new Date(deadline);
-        dl.setHours(0, 0, 0, 0);
-        const diffDays = Math.round((dl.getTime() - today.getTime()) / DAY_MS);
-        if (diffDays > 0) {
-          caption = `${diffDays} day${diffDays === 1 ? "" : "s"} left · due ${fmtShortDate(deadline)}`;
-        } else if (diffDays === 0) {
-          caption = `Due today · ${fmtShortDate(deadline)}`;
-        } else {
-          overdue = true;
-          caption = `${Math.abs(diffDays)} day${Math.abs(diffDays) === 1 ? "" : "s"} overdue · was due ${fmtShortDate(deadline)}`;
-        }
+      let description: React.ReactNode = "";
+      switch (type) {
+        case "offer_received":
+          description = `An offer to weigh — ${agentName}`;
+          break;
+        case "full_requested":
+          description = (
+            <>
+              Time to send your <strong style={{ fontWeight: 700, color: bodyInk }}>full manuscript</strong>
+            </>
+          );
+          break;
+        case "partial_requested":
+          description = (
+            <>
+              Time to send your <strong style={{ fontWeight: 700, color: bodyInk }}>partial manuscript</strong>
+            </>
+          );
+          break;
+        case "revise_resubmit":
+          description = `Time to revise and resubmit · ${title}`;
+          break;
+        case "nudge_overdue":
+          description = deadline
+            ? `Agent response overdue · ${fmtGap(deadline, now)} past window`
+            : "Agent response overdue";
+          break;
       }
 
-      return { task, agentName, verbPhrase, actionLabel, deadline, caption, overdue };
+      return {
+        task,
+        type,
+        chip: URGENT_CHIP[type],
+        agentName,
+        description,
+        actionLabel: URGENT_ACTION[type],
+        deadline,
+      };
     });
 
+  // Deadline-asc, nulls last (unchanged ordering policy — kept isolated so it's easy to swap later).
   return rows.sort((a, b) => {
     if (a.deadline && b.deadline) return a.deadline.getTime() - b.deadline.getTime();
     if (a.deadline) return -1;
@@ -93,270 +178,395 @@ export const buildOverToYouRows = (tasks: Task[], queries: Query[], agents: Agen
   });
 };
 
-/** 30px square icon button (snooze / dismiss): white, muted icon warming to burgundy. */
-const IconBtn: React.FC<{ title: string; onClick: () => void; children: React.ReactNode }> = ({
-  title,
-  onClick,
-  children,
-}) => (
-  <button
-    title={title}
-    aria-label={title}
-    onClick={onClick}
-    className="flex items-center justify-center shrink-0 cursor-pointer"
-    style={{
-      width: 30,
-      height: 30,
-      borderRadius: 9,
-      background: "#ffffff",
-      border: "0.5px solid #e0d0c4",
-      color: "#a08a78",
-      transition: "all 0.2s",
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.background = buttonPinkBg;
-      e.currentTarget.style.borderColor = buttonPinkHoverBorder;
-      e.currentTarget.style.color = burgundy;
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.background = "#ffffff";
-      e.currentTarget.style.borderColor = "#e0d0c4";
-      e.currentTarget.style.color = "#a08a78";
-    }}
-  >
-    {children}
-  </button>
-);
+interface RecommendedItem {
+  task: Task;
+  subject: React.ReactNode; // agent name (bold) or manuscript title — the row's subject
+}
 
-/** Compact send button: filled pink for the hot task, quiet white otherwise. */
-const SendBtn: React.FC<{ label: string; quiet?: boolean; onClick: () => void }> = ({ label, quiet, onClick }) => (
-  <button
-    onClick={onClick}
-    className="cursor-pointer shrink-0"
-    style={{
-      fontFamily: FONT_MONO,
-      fontSize: 9.5,
-      fontWeight: 500,
-      letterSpacing: "0.06em",
-      background: quiet ? "#ffffff" : buttonPinkBg,
-      color: burgundy,
-      border: `0.5px solid ${quiet ? "#e0d0c4" : buttonPinkBorder}`,
-      borderRadius: 9,
-      padding: "8px 15px",
-      display: "inline-flex",
-      alignItems: "center",
-      gap: 6,
-      whiteSpace: "nowrap",
-      transition: "all 0.2s",
-    }}
-    onMouseEnter={(e) => {
-      e.currentTarget.style.background = quiet ? buttonPinkBg : buttonPinkHoverBg;
-      e.currentTarget.style.borderColor = quiet ? buttonPinkBorder : buttonPinkHoverBorder;
-    }}
-    onMouseLeave={(e) => {
-      e.currentTarget.style.background = quiet ? "#ffffff" : buttonPinkBg;
-      e.currentTarget.style.borderColor = quiet ? "#e0d0c4" : buttonPinkBorder;
-    }}
-  >
-    <Send className="w-[11px] h-[11px] shrink-0" />
-    {label}
-  </button>
-);
+interface RecommendedRow {
+  type: RecommendedType;
+  count: number;
+  label: string;
+  Icon: React.ComponentType<any>;
+  items: RecommendedItem[];
+}
 
-/** Task line: bold verb phrase + serif burgundy agent name. */
-const TaskText: React.FC<{ row: OverToYouRow; onClick?: () => void }> = ({ row, onClick }) => (
-  <div
-    onClick={onClick}
-    style={{ fontSize: 13, lineHeight: 1.45, color: bodyInk, cursor: onClick ? "pointer" : undefined }}
-  >
-    <b style={{ fontWeight: 500 }}>{row.verbPhrase}</b>{" "}
-    {row.verbPhrase === "Nudge" ? "" : "to "}
-    <span style={{ fontFamily: FONT_SERIF, color: burgundy }}>{row.agentName}</span>
-  </div>
-);
+/** The subject shown for one expanded item: agent name (bold) or manuscript title. */
+const itemSubject = (type: RecommendedType, task: Task, queries: Query[], agents: Agent[]): React.ReactNode => {
+  const boldAgent = (name: string) => (
+    <span style={{ fontFamily: FONT_SERIF, fontWeight: 700, color: bodyInk }}>{name}</span>
+  );
+  if (type === "querying_unstarted") {
+    return <span style={{ fontFamily: FONT_SERIF, color: bodyInk }}>{task.manuscriptTitle || "Untitled manuscript"}</span>;
+  }
+  if (type === "no_response_close") {
+    const q = queries.find((x) => x.id === task.relatedRecordId);
+    const ag = q ? agents.find((a) => a.id === q.agentId) : undefined;
+    return boldAgent(ag?.name || "the agent");
+  }
+  // dream_agent_unqueried / data_quality_poor → relatedRecordId is an agent id.
+  const ag = agents.find((a) => a.id === task.relatedRecordId);
+  return boldAgent(ag?.name || "the agent");
+};
+
+/** One summarised, expandable row per recommended type that has >= 1 task (data-driven). */
+const buildRecommendedRows = (tasks: Task[], queries: Query[], agents: Agent[]): RecommendedRow[] =>
+  RECOMMENDED_TYPES.map((type): RecommendedRow | null => {
+    const matched = tasks.filter((t) => t.taskType === type);
+    if (matched.length === 0) return null;
+    return {
+      type,
+      count: matched.length,
+      label: recommendedLabel(type, matched.length),
+      Icon: RECOMMENDED_ICON[type],
+      items: matched.map((task) => ({ task, subject: itemSubject(type, task, queries, agents) })),
+    };
+  }).filter((r): r is RecommendedRow => r !== null);
+
+/* ── Scoped animation/hover CSS (keyframes + prefers-reduced-motion can't be expressed inline) ── */
+const OTY_CSS = `
+@keyframes oty-pulse-ring {
+  0%   { transform: scale(0.6); opacity: 0.5; }
+  70%  { transform: scale(2.6); opacity: 0; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+@keyframes oty-wiggle {
+  0%, 90%, 100% { transform: rotate(0deg); }
+  92% { transform: rotate(-7deg); }
+  95% { transform: rotate(6deg); }
+  97% { transform: rotate(-3deg); }
+}
+.oty-pulse-ring { animation: oty-pulse-ring 2.4s ease-out infinite; }
+.oty-action {
+  animation: oty-wiggle 3.6s ease-in-out infinite;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.oty-action:hover {
+  animation: none;
+  box-shadow: 0 0 0 3px rgba(124, 58, 42, 0.12), 0 2px 9px rgba(124, 58, 42, 0.2);
+  border-color: #d8a89a;
+}
+.oty-rec-row { transition: background 0.18s ease; }
+.oty-rec-row:hover { background: #faf5ef; }
+.oty-rec-item { transition: background 0.15s ease; }
+.oty-rec-item:hover { background: #f3ece2; }
+.oty-hint { transition: opacity 0.25s ease; }
+@media (prefers-reduced-motion: reduce) {
+  .oty-pulse-ring, .oty-action { animation: none !important; }
+}
+`;
+
+const chipStyle: React.CSSProperties = {
+  fontFamily: FONT_MONO,
+  fontSize: 8,
+  fontWeight: 600,
+  letterSpacing: "0.1em",
+  textTransform: "uppercase",
+  color: burgundy,
+  background: "#faf1ef",
+  border: "0.5px solid #f2ddd5",
+  borderRadius: 5,
+  padding: "2px 6px",
+  lineHeight: 1,
+  flexShrink: 0,
+};
+
+const actionBtnStyle: React.CSSProperties = {
+  fontFamily: FONT_MONO,
+  fontSize: 9.5,
+  fontWeight: 500,
+  letterSpacing: "0.06em",
+  background: "#ffffff",
+  color: burgundy,
+  border: "1px solid rgba(124,58,42,0.4)",
+  borderRadius: 9,
+  padding: "8px 14px",
+  whiteSpace: "nowrap",
+};
+
+/* Shared count-pill shape; the two variants differ only in fill/number colour. */
+const countPillBase: React.CSSProperties = {
+  fontFamily: FONT_MONO,
+  fontSize: 10,
+  fontWeight: 600,
+  minWidth: 20,
+  height: 20,
+  borderRadius: 999,
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: "0 6px",
+  lineHeight: 1,
+};
+
+const urgentPillStyle: React.CSSProperties = { ...countPillBase, color: "#ffffff", background: burgundy };
+const recommendedPillStyle: React.CSSProperties = {
+  ...countPillBase,
+  color: burgundy,
+  background: buttonPinkBg,
+  border: "0.5px solid rgba(124,58,42,0.22)",
+};
 
 export interface OverToYouProps {
   tasks: Task[];
   queries: Query[];
   agents: Agent[];
   onAction: (task: Task) => void;
-  onSnooze: (task: Task) => void;
-  onDismiss: (task: Task) => void;
-  onAllTasks: () => void;
+  onSnooze: (task: Task) => void; // kept for call-site compatibility; not rendered this prompt
+  onDismiss: (task: Task) => void; // kept for call-site compatibility; not rendered this prompt
+  onAllTasks: () => void; // kept for call-site compatibility; superseded by the scroll hint
   onOpenQuery: (queryId: string) => void;
 }
 
-export const OverToYou: React.FC<OverToYouProps> = ({
-  tasks,
-  queries,
-  agents,
-  onAction,
-  onSnooze,
-  onDismiss,
-  onAllTasks,
-  onOpenQuery,
-}) => {
-  const rows = buildOverToYouRows(tasks, queries, agents);
-  const [hot, ...rest] = rows;
-  const restShown = rest.slice(0, 2);
+export const OverToYou: React.FC<OverToYouProps> = ({ tasks, queries, agents, onAction, onOpenQuery }) => {
+  const urgentRows = buildOverToYouRows(tasks, queries, agents);
+  const recommendedRows = buildRecommendedRows(tasks, queries, agents);
+  const recommendedTotal = recommendedRows.reduce((sum, r) => sum + r.count, 0);
 
-  // Empty-state fact line: how many queries currently sit with agents
-  const withAgents = queries.filter((q) =>
-    [QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT].includes(q.status)
-  );
-  const upcomingDeadlines = withAgents
-    .map((q) => (q.responseDeadline ? new Date(q.responseDeadline) : null))
-    .filter((d): d is Date => !!d && !isNaN(d.getTime()) && d.getTime() >= Date.now())
-    .sort((a, b) => a.getTime() - b.getTime());
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const zoneBHeaderRef = useRef<HTMLDivElement>(null);
+  const [hintVisible, setHintVisible] = useState(false);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const toggle = (type: string) => setExpanded((prev) => ({ ...prev, [type]: !prev[type] }));
+
+  // A recommended item routes via its query (relatedRecordId) when query-related, else via actionPath.
+  const routeItem = (task: Task) => {
+    if (task.taskType === "no_response_close") onOpenQuery(task.relatedRecordId);
+    else onAction(task);
+  };
+
+  // Footer hint shows only while the Zone B header is out of the scroll viewport.
+  useEffect(() => {
+    const root = scrollRef.current;
+    const target = zoneBHeaderRef.current;
+    if (!root || !target || typeof IntersectionObserver === "undefined") {
+      setHintVisible(false);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => setHintVisible(!entries[0].isIntersecting),
+      { root, threshold: 0 }
+    );
+    io.observe(target);
+    return () => io.disconnect();
+  }, [urgentRows.length, recommendedRows.length]);
 
   return (
-    <MountCard className="flex flex-col">
-      {/* Edge-to-edge pink band */}
+    // minHeight:0 lets this grid item cap to the hero block's height (items-stretch) so the
+    // body scrolls internally instead of growing the row.
+    <MountCard className="flex flex-col" style={{ minHeight: 0 }}>
+      <style>{OTY_CSS}</style>
+
+      {/* ── Zone A header — pinned sage band ─────────────────────────────── */}
       <div
-        className="flex items-center justify-between"
+        className="flex items-center justify-between shrink-0"
         style={{
           position: "relative",
           zIndex: 2,
           margin: "6px 6px 0",
           borderRadius: "8px 8px 0 0",
           padding: "13px 18px 12px",
-          background: pinkBandGradient,
-          borderBottom: `1px solid ${pinkBandRule}`,
+          background: sageBandGradient,
+          borderBottom: `1px solid ${sageBandRule}`,
         }}
       >
-        <span style={{ ...labelStyle, color: burgundy, display: "flex", alignItems: "center", gap: 6 }}>
-          <Flag className="w-[13px] h-[13px] shrink-0" strokeWidth={2} />
-          Over to you
+        <span style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+          <span style={{ position: "relative", display: "inline-flex", width: 7, height: 7 }} aria-hidden="true">
+            <span
+              className="oty-pulse-ring"
+              style={{ position: "absolute", inset: 0, borderRadius: "50%", background: burgundy }}
+            />
+            <span style={{ position: "absolute", inset: 0, borderRadius: "50%", background: burgundy }} />
+          </span>
+          <span style={{ fontFamily: FONT_SERIF, fontSize: 16, fontWeight: 600, color: bodyInk, lineHeight: 1 }}>
+            To-do list
+          </span>
         </span>
-        <span
-          style={{
-            fontFamily: FONT_MONO,
-            fontSize: 9,
-            fontWeight: 500,
-            background: parchment,
-            color: rows.length > 0 ? burgundy : sageText,
-            border: `0.5px solid ${rows.length > 0 ? "rgba(124,58,42,0.2)" : "rgba(90,110,88,0.25)"}`,
-            borderRadius: 14,
-            padding: "3px 9px",
-            textTransform: "uppercase",
-            letterSpacing: "0.08em",
-          }}
-        >
-          {rows.length > 0 ? `${rows.length} action${rows.length === 1 ? "" : "s"}` : "All clear"}
-        </span>
+        {urgentRows.length > 0 && (
+          <span aria-label={`${urgentRows.length} urgent`} style={urgentPillStyle}>
+            {urgentRows.length}
+          </span>
+        )}
       </div>
 
-      {/* Body */}
-      {rows.length === 0 ? (
-        <div
-          className="flex flex-col items-center justify-center text-center flex-1"
-          style={{ position: "relative", zIndex: 2, margin: "0 6px 6px", padding: "28px 24px 26px" }}
-        >
-          <Feather className="w-[26px] h-[26px]" style={{ color: "#aab8a4", marginBottom: 10 }} strokeWidth={1.6} />
-          <div
-            style={{
-              fontFamily: FONT_SERIF,
-              fontStyle: "italic",
-              fontSize: 13.5,
-              color: "#5a6258",
-              lineHeight: 1.65,
-              maxWidth: 250,
-            }}
-          >
-            You're all caught up.
-          </div>
-          <div style={{ ...labelStyle, marginTop: 13 }}>
-            {withAgents.length} {withAgents.length === 1 ? "query" : "queries"} with agents
-            {upcomingDeadlines.length > 0 && ` · next reply window ${fmtShortDate(upcomingDeadlines[0])}`}
-          </div>
-        </div>
-      ) : (
-        <div
-          className="flex flex-col flex-1"
-          style={{ position: "relative", zIndex: 2, margin: "0 6px 6px", padding: "14px 16px 16px" }}
-        >
-          {/* Hot tray — the single most urgent task */}
-          {hot && (
-            <div
-              className="flex items-center justify-between gap-3"
-              style={{
-                background: "#fff3ed",
-                border: "0.5px solid #eed6c8",
-                borderRadius: 10,
-                padding: "12px 14px",
-                marginBottom: 12,
-              }}
-            >
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <TaskText row={hot} onClick={() => onOpenQuery(hot.task.relatedRecordId)} />
-                <div
-                  style={{
-                    ...labelStyle,
-                    letterSpacing: "0.06em",
-                    marginTop: 3,
-                    color: burgundy,
-                    fontWeight: 500,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 5,
-                  }}
-                >
-                  <Clock className="w-[11px] h-[11px] shrink-0" />
-                  {hot.caption}
-                </div>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <SendBtn label={hot.actionLabel} onClick={() => onAction(hot.task)} />
-                <IconBtn title="Snooze" onClick={() => onSnooze(hot.task)}>
-                  <Clock className="w-[13px] h-[13px]" />
-                </IconBtn>
-                <IconBtn title="Dismiss" onClick={() => onDismiss(hot.task)}>
-                  <X className="w-3 h-3" />
-                </IconBtn>
-              </div>
+      {/* ── Scroll region: Zone A rows + Zone B ──────────────────────────── */}
+      <div
+        ref={scrollRef}
+        className="flex-1 min-h-0 overflow-y-auto"
+        style={{ position: "relative", zIndex: 2, margin: "0 6px", padding: "10px 12px 8px 14px" }}
+      >
+        {/* Zone A rows */}
+        {urgentRows.length === 0 ? (
+          <div className="flex flex-col items-center justify-center text-center" style={{ height: "100%", padding: "26px 16px 20px" }}>
+            <Feather className="w-[22px] h-[22px]" style={{ color: "#aab8a4", marginBottom: 9 }} strokeWidth={1.6} />
+            <div style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 13, color: "#5a6258" }}>
+              You're all caught up.
             </div>
-          )}
-
-          {/* Remaining rows */}
-          {restShown.map((row, i) => (
+          </div>
+        ) : (
+          urgentRows.map((row, i) => (
             <div
               key={row.task.id}
               className="flex items-center justify-between gap-3"
+              style={{ padding: "10px 2px", borderTop: i > 0 ? "0.5px solid #f0e6d8" : undefined }}
+            >
+              <div
+                style={{ flex: 1, minWidth: 0, cursor: "pointer" }}
+                onClick={() => onOpenQuery(row.task.relatedRecordId)}
+              >
+                <div className="flex items-center gap-2" style={{ minWidth: 0 }}>
+                  <span style={chipStyle}>{row.chip}</span>
+                  <span
+                    style={{
+                      fontFamily: FONT_SERIF,
+                      color: burgundy,
+                      fontSize: 13,
+                      fontWeight: 700,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {row.agentName}
+                  </span>
+                </div>
+                <div style={{ fontSize: 11, color: mutedInk, marginTop: 3, lineHeight: 1.4 }}>{row.description}</div>
+              </div>
+              <button
+                className="oty-action cursor-pointer shrink-0"
+                style={{ ...actionBtnStyle, animationDelay: `${i * 0.18}s` }}
+                onClick={() => onAction(row.task)}
+              >
+                {row.actionLabel}
+              </button>
+            </div>
+          ))
+        )}
+
+        {/* Zone B */}
+        {recommendedRows.length > 0 && (
+          <>
+            <div
+              ref={zoneBHeaderRef}
+              className="flex items-center justify-between"
               style={{
-                padding: "10px 4px",
-                borderTop: i > 0 ? "0.5px solid #f0e6d8" : undefined,
+                background: sageBandGradient,
+                border: `1px solid ${sageBandRule}`,
+                borderRadius: 8,
+                padding: "8px 12px",
+                margin: "8px 0",
+                gap: 10,
               }}
             >
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <TaskText row={row} onClick={() => onOpenQuery(row.task.relatedRecordId)} />
-                <div style={{ ...labelStyle, letterSpacing: "0.06em", marginTop: 3 }}>{row.caption}</div>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <SendBtn quiet label={row.actionLabel} onClick={() => onAction(row.task)} />
-                <IconBtn title="Snooze" onClick={() => onSnooze(row.task)}>
-                  <Clock className="w-[13px] h-[13px]" />
-                </IconBtn>
-                <IconBtn title="Dismiss" onClick={() => onDismiss(row.task)}>
-                  <X className="w-3 h-3" />
-                </IconBtn>
-              </div>
+              <span
+                style={{
+                  ...labelStyle,
+                  color: sageText,
+                  letterSpacing: "0.1em",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  minWidth: 0,
+                }}
+              >
+                When you have a moment
+              </span>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 7, flexShrink: 0 }}>
+                <span style={{ ...labelStyle, color: sageText, letterSpacing: "0.1em", opacity: 0.85 }}>Recommended</span>
+                <span aria-label={`${recommendedTotal} recommended`} style={recommendedPillStyle}>
+                  {recommendedTotal}
+                </span>
+              </span>
             </div>
-          ))}
 
-          {/* Footer */}
-          <div
-            className="flex items-center justify-between"
-            style={{ marginTop: "auto", paddingTop: 11, borderTop: "0.5px solid #ece0d2" }}
+            {recommendedRows.map((row) => {
+              const Icon = row.Icon;
+              const isOpen = !!expanded[row.type];
+              return (
+                <div key={row.type}>
+                  <button
+                    type="button"
+                    aria-expanded={isOpen}
+                    onClick={() => toggle(row.type)}
+                    className="oty-rec-row flex items-center gap-3 cursor-pointer"
+                    style={{ width: "100%", textAlign: "left", padding: "9px 8px", borderRadius: 8, background: "transparent", border: "none" }}
+                  >
+                    <span
+                      style={{
+                        width: 28,
+                        height: 28,
+                        borderRadius: 8,
+                        background: "#eef1ec",
+                        border: `0.5px solid ${sageBandRule}`,
+                        color: sageText,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <Icon className="w-[14px] h-[14px]" />
+                    </span>
+                    <span
+                      style={{
+                        flex: 1,
+                        minWidth: 0,
+                        fontSize: 12,
+                        color: bodyInk,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      {row.label}
+                    </span>
+                    <ChevronDown
+                      className="w-[15px] h-[15px] shrink-0"
+                      style={{ color: sageText, transition: "transform 0.18s ease", transform: isOpen ? "rotate(0deg)" : "rotate(-90deg)" }}
+                    />
+                  </button>
+
+                  {isOpen && (
+                    <div role="region" style={{ marginBottom: 2 }}>
+                      {row.items.map((it) => (
+                        <div
+                          key={it.task.id}
+                          className="oty-rec-item cursor-pointer"
+                          style={{ padding: "6px 8px 6px 44px", borderRadius: 6, fontSize: 12, color: bodyInk, lineHeight: 1.4 }}
+                          onClick={() => routeItem(it.task)}
+                        >
+                          {it.subject}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </>
+        )}
+      </div>
+
+      {/* ── Footer hint — pinned; visible only while the Zone B header is off-screen ──────── */}
+      {recommendedRows.length > 0 && (
+        <div
+          className="shrink-0"
+          style={{
+            position: "relative",
+            zIndex: 2,
+            margin: "0 6px 6px",
+            padding: "8px 14px",
+            borderTop: "0.5px solid #ece0d2",
+            background: parchment,
+          }}
+        >
+          <span
+            className="oty-hint"
+            aria-hidden={!hintVisible}
+            style={{ ...labelStyle, color: burgundy, opacity: hintVisible ? 1 : 0 }}
           >
-            <span style={labelStyle}>Everything else is with the agents</span>
-            <button
-              onClick={onAllTasks}
-              className="cursor-pointer"
-              style={{ ...labelStyle, color: burgundy, background: "transparent", border: "none", padding: 0 }}
-            >
-              All tasks →
-            </button>
-          </div>
+            ↓ Scroll to see {recommendedTotal} recommended action{recommendedTotal === 1 ? "" : "s"}
+          </span>
         </div>
       )}
     </MountCard>
