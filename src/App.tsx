@@ -24,6 +24,7 @@ import { AddManuscriptFocusForm } from "./components/AddManuscriptFocusForm";
 import { HelpCentre } from "./components/HelpCentre";
 import { AccountSettings } from "./components/AccountSettings";
 import { Onboarding } from "./components/Onboarding";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { StatusDotDemo } from "./components/StatusDotDemo";
 import { LandingPage } from "./features/landing/LandingPage";
 import { Palette, X, Check } from "lucide-react";
@@ -304,10 +305,12 @@ function AppContent() {
 
 export default function App() {
   return (
-    <DbProvider>
-      <BrandProvider>
-        <AppContent />
-      </BrandProvider>
-    </DbProvider>
+    <ErrorBoundary>
+      <DbProvider>
+        <BrandProvider>
+          <AppContent />
+        </BrandProvider>
+      </DbProvider>
+    </ErrorBoundary>
   );
 }
