@@ -228,7 +228,7 @@ const CardShell: React.FC<{
   children: React.ReactNode;
   fillChildren?: boolean;
 }> = ({ icon, watermark, caption, value, pill, children, fillChildren }) => (
-  <MountCard className="stat-card" style={{ padding: "20px 20px 18px", minHeight: 170, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+  <MountCard className="stat-card" style={{ padding: "23px 23px 21px", minHeight: 170, display: "flex", flexDirection: "column", overflow: "hidden" }}>
     {/* Ghost watermark — the card's own icon, fully contained in the upper-right (non-negative
         offsets clear the inset mount frame by ~10px), a calm element behind the numeral. It stays
         inside without relying on overflow:hidden (which remains only as a safety net). */}
@@ -584,7 +584,7 @@ export const StatCards: React.FC<StatCardsProps> = (p) => {
   return (
     <>
       <style>{SC_CSS}</style>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-[14px] items-stretch">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-[16px] items-stretch">
         <QueriesSentCard total={p.queriesSentTotal} thisWeek={p.sentThisWeek} weeks={p.sentWeeks} pop={api} />
         <ActiveQueriesCard count={p.activeCount} diff={p.activeDiff} weeks={p.activeWeeks} pop={api} />
         <AgentsCard total={p.agentsTotal} idle={p.agentsIdle} agents={p.agents} pop={api} />

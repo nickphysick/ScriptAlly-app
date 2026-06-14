@@ -2088,9 +2088,9 @@ export const Dashboard: React.FC<{
       ) : (
         /* ============ TOP ROW: hero + stat cards (left) · Over to you (right) ============ */
         <div className="w-full max-w-none px-4 md:px-10 lg:px-14 xl:px-16 pt-2">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-[14px] items-stretch">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-[16px] items-stretch">
             {/* Left: hero stacked above the four stat cards (shares the pipeline's width) */}
-            <div className="flex flex-col gap-[14px]">
+            <div className="flex flex-col gap-[16px]">
               <HeroCard
                 firstName={getUserFirstName()}
                 quote={quote}
@@ -2139,11 +2139,11 @@ export const Dashboard: React.FC<{
       {/* ============ LOWER ROW: pipeline (left) · timeline (right) ============ */}
       <div className={isMagazineLayout
         ? "grid grid-cols-1 lg:grid-cols-[1.8fr_1.1fr] xl:grid-cols-[2fr_1fr] gap-0 bg-[#FAF8F5] border-t border-[#e8e0d8] items-stretch"
-        : "w-full max-w-none px-4 md:px-10 lg:px-14 xl:px-16 pt-[14px] grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-[14px] items-start"
+        : "w-full max-w-none px-4 md:px-10 lg:px-14 xl:px-16 pt-[14px] grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-[16px] items-start"
       }>
         
         {/* LEFT COLUMN: Stat Cards & Pipeline Matrix */}
-        <div ref={leftColumnRef} className={isMagazineLayout ? "flex flex-col gap-0" : "flex flex-col gap-[14px]"}>
+        <div ref={leftColumnRef} className={isMagazineLayout ? "flex flex-col gap-0" : "flex flex-col gap-[16px]"}>
           
           {isMagazineLayout && (
             /* Magazine Urgent Action card */

@@ -145,7 +145,7 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F5F0EA] text-[#3a1c14] selection:bg-[#7c3a2a]/20 selection:text-[#3a1c14] selection:font-bold">
+    <div className="min-h-screen bg-[#D3D9CE] text-[#3a1c14] selection:bg-[#7c3a2a]/20 selection:text-[#3a1c14] selection:font-bold">
       {/* Shared app shell: full-width top bar + left nav rail; routed pages render inside. */}
       <AppShell
         activeTab={activeTab}

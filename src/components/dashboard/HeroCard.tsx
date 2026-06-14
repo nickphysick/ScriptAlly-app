@@ -133,7 +133,7 @@ export const HeroCard: React.FC<HeroCardProps> = ({
   return (
     <MountCard className="flex flex-col">
       {/* Body */}
-      <div style={{ padding: "30px 28px 28px", margin: "6px 6px 6px", position: "relative", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+      <div style={{ padding: "33px 31px 31px", margin: "6px 6px 6px", position: "relative", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
         <div style={{ position: "relative", zIndex: 4, maxWidth: 520 }}>
           <div style={{ fontFamily: FONT_SERIF, fontSize: 38, fontWeight: 500, color: headingInk, lineHeight: 1.1 }}>
             Welcome back, <em style={{ color: burgundy, fontStyle: "italic" }}>{firstName}</em>
