@@ -229,8 +229,10 @@ const CardShell: React.FC<{
   fillChildren?: boolean;
 }> = ({ icon, watermark, caption, value, pill, children, fillChildren }) => (
   <MountCard className="stat-card" style={{ padding: "20px 20px 18px", minHeight: 170, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-    {/* Ghost watermark — the card's own icon, bleeding off the top-right corner, behind content. */}
-    <div aria-hidden="true" style={{ position: "absolute", right: -16, top: 2, color: burgundy, opacity: 0.07, zIndex: 0, pointerEvents: "none", lineHeight: 0 }}>
+    {/* Ghost watermark — the card's own icon, fully contained in the upper-right (non-negative
+        offsets clear the inset mount frame by ~10px), a calm element behind the numeral. It stays
+        inside without relying on overflow:hidden (which remains only as a safety net). */}
+    <div aria-hidden="true" style={{ position: "absolute", right: 16, top: 16, color: burgundy, opacity: 0.07, zIndex: 0, pointerEvents: "none", lineHeight: 0 }}>
       {watermark}
     </div>
     <div style={{ position: "relative", zIndex: 4, flex: 1, display: "flex", flexDirection: "column" }}>
@@ -281,7 +283,7 @@ const QueriesSentCard: React.FC<{ total: number; thisWeek: number; weeks: SentWe
   return (
     <CardShell
       icon={<Send className="w-[13px] h-[13px] shrink-0" style={{ color: burgundy }} strokeWidth={2} />}
-      watermark={<Send size={92} strokeWidth={1.5} />}
+      watermark={<Send size={72} strokeWidth={1.5} />}
       caption="Queries sent"
       value={total}
       pill={<span style={pillBurgundy}>{thisWeek} this week</span>}
@@ -361,7 +363,7 @@ const ActiveQueriesCard: React.FC<{ count: number; diff: number; weeks: ActiveWe
   return (
     <CardShell
       icon={<Hourglass className="w-[13px] h-[13px] shrink-0" style={{ color: burgundy }} strokeWidth={2} />}
-      watermark={<Hourglass size={92} strokeWidth={1.5} />}
+      watermark={<Hourglass size={70} strokeWidth={1.5} />}
       caption="Active queries"
       value={count}
       pill={pill}
@@ -498,7 +500,7 @@ const AgentGlyphRow: React.FC<{ agents: AgentDatum[]; pop: PopApi }> = ({ agents
 const AgentsCard: React.FC<{ total: number; idle: number; agents: AgentDatum[]; pop: PopApi }> = ({ total, idle, agents, pop }) => (
   <CardShell
     icon={<Users className="w-[13px] h-[13px] shrink-0" style={{ color: burgundy }} strokeWidth={2} />}
-    watermark={<Users size={92} strokeWidth={1.5} />}
+    watermark={<Users size={64} strokeWidth={1.5} />}
     caption="Agents"
     value={total}
     pill={<span style={pillMuted}>{idle} idle</span>}
@@ -527,7 +529,7 @@ const ResponsesCard: React.FC<{ responses: ResponsesDatum; pop: PopApi }> = ({ r
   return (
     <CardShell
       icon={<MailOpen className="w-[13px] h-[13px] shrink-0" style={{ color: burgundy }} strokeWidth={2} />}
-      watermark={<MailOpen size={92} strokeWidth={1.5} />}
+      watermark={<MailOpen size={66} strokeWidth={1.5} />}
       caption="Responses received"
       value={replied}
       pill={<span style={pillBurgundy}>{ratePct}% rate</span>}
