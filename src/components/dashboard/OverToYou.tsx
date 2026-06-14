@@ -353,9 +353,9 @@ export const OverToYou: React.FC<OverToYouProps> = ({ tasks, queries, agents, on
   }, [urgentRows.length, recommendedRows.length]);
 
   return (
-    // minHeight:0 lets this grid item cap to the hero block's height (items-stretch) so the
-    // body scrolls internally instead of growing the row.
-    <MountCard className="flex flex-col" style={{ minHeight: 0 }}>
+    // lg:h-full fills the absolutely-positioned hero cell (Dashboard caps it to the stat-cards
+    // row height); minHeight:0 lets the flex body scroll internally instead of growing the card.
+    <MountCard className="flex flex-col lg:h-full" style={{ minHeight: 0 }}>
       <style>{OTY_CSS}</style>
 
       {/* ── Zone A header — pinned sage band ─────────────────────────────── */}

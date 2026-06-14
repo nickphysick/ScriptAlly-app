@@ -2056,21 +2056,27 @@ export const Dashboard: React.FC<{
                 responseRatePct={responseRatePercent}
               />
             </div>
-            {/* Right: Over to you — stretches to fill the hero + stat-cards height */}
-            <OverToYou
-              tasks={tasks}
-              queries={queries}
-              agents={agents}
-              onAction={(task) => onNavigate(task.actionPath, task.title)}
-              onNudge={(task) => setNudgeTask(task)}
-              onSnooze={(task) => dismissTask(task.taskType, task.relatedRecordId, "fixed snooze", 3)}
-              onDismiss={(task) => dismissTask(task.taskType, task.relatedRecordId, "permanent")}
-              onAllTasks={() => setIsTasksPanelOpen(true)}
-              onOpenQuery={(qid) => {
-                setSelectedQueryIdForPanel(qid);
-                setIsQueryPanelOpen(true);
-              }}
-            />
+            {/* Right: Over to you. On lg+ the card absolutely fills this cell, so the row height
+                is driven by the LEFT column (hero + stat cards) rather than the To-do content —
+                overflow scrolls inside the card. When stacked (narrow), it flows at natural height. */}
+            <div className="relative">
+              <div className="lg:absolute lg:inset-0">
+                <OverToYou
+                  tasks={tasks}
+                  queries={queries}
+                  agents={agents}
+                  onAction={(task) => onNavigate(task.actionPath, task.title)}
+                  onNudge={(task) => setNudgeTask(task)}
+                  onSnooze={(task) => dismissTask(task.taskType, task.relatedRecordId, "fixed snooze", 3)}
+                  onDismiss={(task) => dismissTask(task.taskType, task.relatedRecordId, "permanent")}
+                  onAllTasks={() => setIsTasksPanelOpen(true)}
+                  onOpenQuery={(qid) => {
+                    setSelectedQueryIdForPanel(qid);
+                    setIsQueryPanelOpen(true);
+                  }}
+                />
+              </div>
+            </div>
           </div>
         </div>
       )}
