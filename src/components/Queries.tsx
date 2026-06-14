@@ -912,13 +912,16 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   };
 
   // Quick submission logger handler
-  const handleLogQuerySubmit = (e: React.FormEvent) => {
+  // NOTE: this inline "Log query" modal is DEAD — showLogModal is never set true (the live path is
+  // LogQueryFocusForm). Left in place but made type-correct (async + await) for the migration; flagged
+  // for removal. The await is a no-op on live behaviour because this handler is never reached.
+  const handleLogQuerySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!logMsId || !logAgId) {
       setLogError("Please select a valid manuscript and target agent.");
       return;
     }
-    const res = addQuery({
+    const res = await addQuery({
       manuscriptId: logMsId,
       agentId: logAgId,
       packageId: logPkgId,

@@ -135,7 +135,7 @@ export const AddAgentFocusForm: React.FC<AddAgentFocusFormProps> = ({
     setMaterials((prev) => {
       const cur = prev[key];
       if (typeof cur === "boolean") return { ...prev, [key]: !cur };
-      return { ...prev, [key]: { ...cur, on: !(cur as { on: boolean }).on } } as MaterialsState;
+      return { ...prev, [key]: { ...(cur as { on: boolean }), on: !(cur as { on: boolean }).on } } as MaterialsState;
     });
 
   const updateSocial = (i: number, patch: Partial<AgentSocial>) =>

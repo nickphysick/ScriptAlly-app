@@ -308,7 +308,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onNavigate, isDashbo
       }
 
       // 8. Rejected / Withdrawn / No response → appears on state changed date if in past/today
-      if (q.status === "Rejected" || q.status === "Withdrawn" || q.status === "No Response" || q.status === "Passed") {
+      if (q.status === "Rejected" || q.status === "Withdrawn" || q.status === "No Response") {
         const qActs = activities.filter(
           (act) => act.queryId === q.id && act.activityType === "Status Changed"
         );

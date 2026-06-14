@@ -48,6 +48,9 @@ export interface Manuscript {
   shelvedReason?: string;
   statusChangedDate: string; // ISO String
   notes?: string;
+  // Optional/legacy — read defensively by the activity backfill (`ms.createdDate || now`); not written
+  // by the current create path, so it's effectively always absent today.
+  createdDate?: string;
   // Lifecycle overlay (independent of `status`): a shelved manuscript is hidden from the Log-a-Query
   // picker and new-query suggestions, but keeps all queries/stats/history. Reversible (Reactivate).
   // Absent === not shelved. Deliberately NOT folded into `status` so the workflow status is preserved.
@@ -225,6 +228,22 @@ export interface Query {
   rejectionReflection?: string; // private — never shown in stats
   rejectionLesson?: string; // "anything you'd do differently?" — private note to future self
   rejectedFromStatus?: QueryStatus; // the status held immediately before rejection (e.g. Full Sent → "full declined")
+
+  // Written by recordResponse (the single response path) and validated by the Firestore rules, but
+  // previously undeclared here. The date-like fields hold Firestore Timestamps at runtime and are
+  // read through date-coercion helpers, so they're typed loosely; the rest are strings.
+  responseReceivedAt?: any; // Timestamp | string — when the response actually arrived
+  lastStatusChange?: any; // Timestamp — audit: when the status change was recorded
+  expectedSendDate?: any; // Timestamp | string — partial/full: when the materials are due out
+  sendReminderDate?: any; // Timestamp | string — self-reminder to send materials / resubmit
+  offerDate?: any; // Timestamp | string
+  offerResponseDeadline?: any; // Timestamp | string
+  offerNotes?: string;
+  closingReason?: string; // internal token: noResponseAfterWindow | withdrew | agentClosedSubmissions | other
+  closingNotes?: string;
+  materialsRequestedType?: string; // pages | words | chapters | other
+  materialsRequestedQuantity?: string | number;
+  fullVersionSent?: string; // Full Requested — which draft of the full is going out
 
   // Display-only revision counter — derived from the activity log by recomputeQuery (1 + count
   // of R&R → Full Sent resubmissions). DELIBERATELY separate from `status`: the "(v2)" marker is
