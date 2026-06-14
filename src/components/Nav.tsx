@@ -18,6 +18,7 @@ import {
   Sparkles,
   Plus,
   User,
+  Menu as MenuIcon,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { MountCard } from "./MountCard";
@@ -26,7 +27,6 @@ import {
   bodyInk,
   parchment,
   ghostButtonText,
-  sageAccent,
   labelStyle,
   FONT_SERIF,
   FONT_SANS,
@@ -44,61 +44,9 @@ interface NavProps {
   onNavigate: (tab: string, subPageName?: string) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+  /** Toggle the left rail's off-canvas drawer (shown only below lg). */
+  onToggleRail?: () => void;
 }
-
-/** A top-level nav link; active state = burgundy, medium weight, sage underline. */
-const NavLink: React.FC<{
-  label: string;
-  active: boolean;
-  onClick: () => void;
-  hasChevron?: boolean;
-  chevronOpen?: boolean;
-}> = ({ label, active, onClick, hasChevron, chevronOpen }) => (
-  <button
-    onClick={onClick}
-    className="flex items-center gap-[5px] cursor-pointer bg-transparent"
-    style={{
-      fontFamily: FONT_SANS,
-      fontSize: 13,
-      border: "none",
-      padding: "0 0 4px",
-      color: active ? burgundy : ghostButtonText,
-      fontWeight: active ? 500 : 400,
-      borderBottom: active ? `2px solid ${sageAccent}` : "2px solid transparent",
-      transition: "color 0.15s",
-    }}
-    onMouseEnter={(e) => { if (!active) e.currentTarget.style.color = bodyInk; }}
-    onMouseLeave={(e) => { if (!active) e.currentTarget.style.color = ghostButtonText; }}
-  >
-    {label}
-    {hasChevron && (
-      <ChevronDown
-        className="w-[10px] h-[10px] opacity-70"
-        style={{ transform: chevronOpen ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.15s" }}
-      />
-    )}
-  </button>
-);
-
-/** Parchment dropdown menu shell under a nav link. */
-const Menu: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 4 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: 4 }}
-    transition={{ duration: 0.12 }}
-    className="absolute left-0 top-[calc(100%+14px)] min-w-[190px] p-[5px] flex flex-col gap-0.5"
-    style={{
-      background: parchment,
-      border: "0.5px solid #e0d5c8",
-      borderRadius: 10,
-      boxShadow: "0 6px 20px rgba(58,28,20,0.14)",
-      zIndex: 60,
-    }}
-  >
-    {children}
-  </motion.div>
-);
 
 const MenuItem: React.FC<{ onClick: () => void; children: React.ReactNode; withPlus?: boolean }> = ({
   onClick,
@@ -133,10 +81,10 @@ export const Nav: React.FC<NavProps> = ({
   onNavigate,
   searchQuery,
   setSearchQuery,
+  onToggleRail,
 }) => {
   const { currentUser, tasks, dismissTask, logout } = useScriptAllyDb();
 
-  const [openDropdown, setOpenDropdown] = useState<"queries" | "agents" | "manuscripts" | null>(null);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showBellDropdown, setShowBellDropdown] = useState(false);
   const [successAnimationTaskId, setSuccessAnimationTaskId] = useState<string | null>(null);
@@ -147,7 +95,6 @@ export const Nav: React.FC<NavProps> = ({
   const badgeText = activeTasksCount > 9 ? "9+" : activeTasksCount.toString();
 
   const closeAll = () => {
-    setOpenDropdown(null);
     setShowUserDropdown(false);
     setShowBellDropdown(false);
   };
@@ -172,7 +119,7 @@ export const Nav: React.FC<NavProps> = ({
   return (
     <>
       {/* Invisible backdrop to dismiss any open dropdown when clicking outside */}
-      {(openDropdown || showUserDropdown || showBellDropdown) && (
+      {(showUserDropdown || showBellDropdown) && (
         <div className="fixed inset-0 z-40 bg-transparent" onClick={closeAll} />
       )}
 
@@ -182,8 +129,19 @@ export const Nav: React.FC<NavProps> = ({
             each side (clamped so it never crushes the two clusters on narrow viewports). */}
         <MountCard
           className="flex items-center"
-          style={{ paddingBlock: 13, paddingInline: "clamp(22px, calc((100% - 1100px) / 2 + 22px), 300px)" }}
+          style={{ paddingBlock: 13, paddingInline: 22 }}
         >
+          {/* Hamburger — opens the left-rail drawer below lg (the rail holds the primary links). */}
+          {onToggleRail && (
+            <button
+              onClick={() => { onToggleRail(); closeAll(); }}
+              className="lg:hidden cursor-pointer flex items-center justify-center mr-3"
+              style={{ position: "relative", zIndex: 4, background: "transparent", border: "none", padding: 4, color: burgundy }}
+              aria-label="Open navigation"
+            >
+              <MenuIcon className="w-[20px] h-[20px]" />
+            </button>
+          )}
           {/* Wordmark */}
           <button
             onClick={() => { onNavigate("dashboard"); closeAll(); }}
@@ -202,76 +160,6 @@ export const Nav: React.FC<NavProps> = ({
           >
             ScriptAlly
           </button>
-
-          {/* Links */}
-          <nav className="flex items-center gap-[26px] ml-10" style={{ position: "relative", zIndex: 4 }}>
-            <NavLink
-              label="Dashboard"
-              active={activeTab === "dashboard"}
-              onClick={() => { onNavigate("dashboard"); closeAll(); }}
-            />
-
-            <div className="relative">
-              <NavLink
-                label="Queries"
-                active={activeTab === "queries"}
-                hasChevron
-                chevronOpen={openDropdown === "queries"}
-                onClick={() => { setOpenDropdown(openDropdown === "queries" ? null : "queries"); setShowUserDropdown(false); setShowBellDropdown(false); }}
-              />
-              <AnimatePresence>
-                {openDropdown === "queries" && (
-                  <Menu>
-                    <MenuItem onClick={() => { onNavigate("queries", "All queries"); setOpenDropdown(null); }}>All queries</MenuItem>
-                    <MenuItem onClick={() => { onNavigate("queries", "Queries database"); setOpenDropdown(null); }}>Query board</MenuItem>
-                    <MenuItem onClick={() => { onNavigate("queries", "Querying analytics"); setOpenDropdown(null); }}>Analytics</MenuItem>
-                    <MenuDivider />
-                    <MenuItem withPlus onClick={() => { onNavigate("queries", "Send a query"); setOpenDropdown(null); }}>Send a query</MenuItem>
-                  </Menu>
-                )}
-              </AnimatePresence>
-            </div>
-
-            <div className="relative">
-              <NavLink
-                label="Agents"
-                active={activeTab === "agents"}
-                hasChevron
-                chevronOpen={openDropdown === "agents"}
-                onClick={() => { setOpenDropdown(openDropdown === "agents" ? null : "agents"); setShowUserDropdown(false); setShowBellDropdown(false); }}
-              />
-              <AnimatePresence>
-                {openDropdown === "agents" && (
-                  <Menu>
-                    <MenuItem onClick={() => { onNavigate("agents", "Agents database"); setOpenDropdown(null); }}>All agents</MenuItem>
-                    <MenuItem onClick={() => { onNavigate("agents", "Discover"); setOpenDropdown(null); }}>Discover</MenuItem>
-                    <MenuDivider />
-                    <MenuItem withPlus onClick={() => { onNavigate("agents", "Add an agent"); setOpenDropdown(null); }}>Add agent</MenuItem>
-                  </Menu>
-                )}
-              </AnimatePresence>
-            </div>
-
-            <div className="relative">
-              <NavLink
-                label="Manuscripts"
-                active={activeTab === "manuscripts"}
-                hasChevron
-                chevronOpen={openDropdown === "manuscripts"}
-                onClick={() => { setOpenDropdown(openDropdown === "manuscripts" ? null : "manuscripts"); setShowUserDropdown(false); setShowBellDropdown(false); }}
-              />
-              <AnimatePresence>
-                {openDropdown === "manuscripts" && (
-                  <Menu>
-                    <MenuItem onClick={() => { onNavigate("manuscripts", "All manuscripts"); setOpenDropdown(null); }}>All manuscripts</MenuItem>
-                    <MenuItem onClick={() => { onNavigate("manuscripts", "Submission packages"); setOpenDropdown(null); }}>Submission packages</MenuItem>
-                    <MenuDivider />
-                    <MenuItem withPlus onClick={() => { onNavigate("manuscripts", "Add a manuscript"); setOpenDropdown(null); }}>Add manuscript</MenuItem>
-                  </Menu>
-                )}
-              </AnimatePresence>
-            </div>
-          </nav>
 
           {/* Right-side utilities */}
           <div className="ml-auto flex items-center gap-4" style={{ position: "relative", zIndex: 4 }}>
@@ -300,7 +188,7 @@ export const Nav: React.FC<NavProps> = ({
             {/* Bell */}
             <div className="relative flex items-center">
               <button
-                onClick={() => { setShowBellDropdown(!showBellDropdown); setOpenDropdown(null); setShowUserDropdown(false); }}
+                onClick={() => { setShowBellDropdown(!showBellDropdown); setShowUserDropdown(false); }}
                 className="relative flex items-center justify-center cursor-pointer"
                 style={{ background: "transparent", border: "none", padding: 4, color: burgundy }}
                 title="Notifications"
@@ -443,7 +331,7 @@ export const Nav: React.FC<NavProps> = ({
             {/* User chip */}
             <div className="relative flex items-center">
               <button
-                onClick={() => { setShowUserDropdown(!showUserDropdown); setOpenDropdown(null); setShowBellDropdown(false); }}
+                onClick={() => { setShowUserDropdown(!showUserDropdown); setShowBellDropdown(false); }}
                 className="flex items-center gap-2 cursor-pointer"
                 style={{ background: "transparent", border: "none", padding: 2 }}
               >

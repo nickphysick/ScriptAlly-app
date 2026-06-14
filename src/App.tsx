@@ -7,7 +7,7 @@ import React, { useState, useEffect } from "react";
 import { DbProvider, useScriptAllyDb } from "./lib/db";
 import { BrandProvider } from "./lib/brand";
 import { Auth } from "./components/Auth";
-import { Nav } from "./components/Nav";
+import { AppShell } from "./components/AppShell";
 import { Dashboard } from "./components/Dashboard";
 import { Queries } from "./components/Queries";
 import { QueriesLanding } from "./components/QueriesLanding";
@@ -104,9 +104,6 @@ function AppContent() {
     setSearchQuery("");
   };
 
-  // Clears the floating MountCard nav (10px top inset + ~58px bar + breathing room)
-  const paddingTopClass = "pt-[84px]";
-
   const isStatusDotDemo = useStatusDotDemoRoute();
   const hash = useHash();
   // Dev-only review surface — never reachable in the production build (import.meta.env.DEV is
@@ -149,17 +146,14 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-[#F5F0EA] text-[#3a1c14] selection:bg-[#7c3a2a]/20 selection:text-[#3a1c14] selection:font-bold">
-      {/* Dynamic Nav component with built-in notification bell */}
-      <Nav
+      {/* Shared app shell: full-width top bar + left nav rail; routed pages render inside. */}
+      <AppShell
         activeTab={activeTab}
         activeSubPage={activeSubPage}
         onNavigate={handleNavigate}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
-      />
-
-      {/* Primary Page rendering area with subtle sliding content triggers */}
-      <main className={`transition-all duration-300 ${paddingTopClass}`}>
+      >
         {activeTab === "dashboard" && (
           <Dashboard 
             onNavigate={handleNavigate} 
@@ -205,7 +199,7 @@ function AppContent() {
         {activeTab === "account" && (
           <AccountSettings onNavigate={handleNavigate} />
         )}
-      </main>
+      </AppShell>
 
       {/* Focus Mode Overlay Dialog Form */}
       <LogQueryFocusForm
