@@ -12,6 +12,7 @@ import { useScriptAllyDb } from "../lib/db";
 import { Query, QueryStatus, Activity, ActivityType, JournalEntry, Manuscript } from "../types";
 import { getActivityKeyAndDefaults, getDynamicActivityText, replacePlaceholders, extractAgentFromText, boldAgentAndAgencyInText } from "../lib/activityUtils";
 import { StatusDot } from "./StatusDot";
+import { STATUS_ORDER as chronologicalQueryStatuses } from "../lib/statusOrder";
 
 /**
  * Tracking-timeline mark. Status-bearing events render the canonical StatusDot;
@@ -108,16 +109,6 @@ const getPillLabelAndDot = (desc: string, activityType?: ActivityType, resulting
 
   return { label, dot, show, key };
 };
-
-const chronologicalQueryStatuses = [
-  QueryStatus.QUERIED,
-  QueryStatus.PARTIAL_REQUESTED,
-  QueryStatus.PARTIAL_SENT,
-  QueryStatus.FULL_REQUESTED,
-  QueryStatus.FULL_SENT,
-  QueryStatus.REVISE_RESUBMIT,
-  QueryStatus.OFFER
-];
 
 // Helper to map final activity description back to QueryStatus on deletion
 const mapActivityToQueryStatus = (description: string, activityType: ActivityType): QueryStatus => {

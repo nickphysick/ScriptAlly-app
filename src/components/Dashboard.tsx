@@ -7,6 +7,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useScriptAllyDb } from "../lib/db";
 import { UserPlan, QueryStatus, ManuscriptStatus, ActivityType, Query, Task, CommunityAgent, Manuscript, Agent } from "../types";
+import { STATUS_ORDER } from "../lib/statusOrder";
 import { manuscriptGenres } from "../lib/manuscripts";
 import { agentBuckets, pickableManuscripts } from "../lib/lifecycle";
 import { 
@@ -1399,6 +1400,61 @@ export const Dashboard: React.FC<{
     ? Math.round((responsesReceived / totalQueries) * 100)
     : 0;
 
+  // ── Stat-card popup data (enriched; kept consistent with the visuals computed above) ──────
+  const STAT_ACTIVE_STATUSES = [
+    QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT,
+    QueryStatus.FULL_REQUESTED, QueryStatus.FULL_SENT, QueryStatus.REVISE_RESUBMIT,
+  ];
+  // Bars: the agents/agencies queried each week (bins 1..7 = the last 7 weeks shown by sentPerWeek).
+  const sentWeekItems: { agentName: string; agency: string }[][] = Array.from({ length: 8 }, () => []);
+  queries.forEach(q => {
+    const binIndex = 7 - Math.floor((nowTime - new Date(q.dateSent).getTime()) / ONE_WEEK_MS);
+    if (binIndex >= 0 && binIndex < 8) {
+      const ag = agents.find(a => a.id === q.agentId);
+      sentWeekItems[binIndex].push({ agentName: ag?.name || "Unknown agent", agency: ag?.agency || "" });
+    }
+  });
+  const fmtWeekCommencing = (binIdx: number) =>
+    new Date(nowTime - (8 - binIdx) * ONE_WEEK_MS).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  const statSentWeeks = [1, 2, 3, 4, 5, 6, 7].map(idx => ({
+    weekLabel: fmtWeekCommencing(idx),
+    count: dynamicQueriesSentPerWeek[idx],
+    queries: sentWeekItems[idx],
+  }));
+
+  // Line: per-week active total + status composition. Mirrors dynamicActiveQueriesPerWeek's filter
+  // (queries sent by week-end whose CURRENT status is active), so each composition sums exactly to
+  // the line point. NB: historical composition therefore reflects current status, not a full log replay.
+  const statActiveWeeks = [1, 2, 3, 4, 5, 6, 7].map(idx => {
+    const weekEndTime = nowTime - (7 - idx) * ONE_WEEK_MS;
+    const atWeek = queries.filter(q =>
+      new Date(q.dateSent).getTime() <= weekEndTime && STAT_ACTIVE_STATUSES.includes(q.status));
+    const counts = new Map<QueryStatus, number>();
+    atWeek.forEach(q => counts.set(q.status, (counts.get(q.status) || 0) + 1));
+    const composition = STATUS_ORDER
+      .filter(s => (counts.get(s) || 0) > 0)
+      .map(s => ({ status: s, count: counts.get(s) as number }));
+    const weeksAgo = 7 - idx;
+    return {
+      label: weeksAgo === 0 ? "Now" : `${weeksAgo} week${weeksAgo === 1 ? "" : "s"} ago`,
+      count: atWeek.length,
+      composition,
+    };
+  });
+
+  // Agents: per-icon popup data, in the icon-row display order (queried first, then idle).
+  const statAgents = sortedDisplayAgents.map(a => ({
+    name: a.name,
+    agency: a.agency,
+    queried: queries.some(q => q.agentId === a.id),
+    genres: a.genres || [],
+    fit: a.starRating || 0,
+    mswl: a.mswlNotes || "",
+  }));
+
+  // Responses: replied of total, for the progress popup.
+  const statResponses = { replied: responsesReceived, total: totalQueries, ratePct: responseRatePercent };
+
   // Group activities/events for Timeline
   const mergedActivities = useMemo(() => {
     // Single source of truth: the global `activities` collection. We deliberately no longer merge
@@ -2044,16 +2100,15 @@ export const Dashboard: React.FC<{
               />
               <StatCards
                 queriesSentTotal={totalQueriesSent}
-                sentPerWeek={finalQueriesSentPerWeek.slice(1)}
                 sentThisWeek={finalQueriesSentPerWeek[7] ?? 0}
+                sentWeeks={statSentWeeks}
                 activeCount={activeQueries.length}
-                activePerWeek={finalActiveQueriesPerWeek.slice(1)}
                 activeDiff={activeDiff}
+                activeWeeks={statActiveWeeks}
                 agentsTotal={totalAgentsCount}
                 agentsIdle={notQueriedAgentsCount}
-                agentQueriedFlags={sortedDisplayAgents.map((a) => queries.some((q) => q.agentId === a.id))}
-                responsesTotal={responsesReceived}
-                responseRatePct={responseRatePercent}
+                agents={statAgents}
+                responses={statResponses}
               />
             </div>
             {/* Right: Over to you. On lg+ the card absolutely fills this cell, so the row height
