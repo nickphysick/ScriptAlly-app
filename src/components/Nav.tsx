@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Top navigation — a full-width parchment MountCard, the topmost object on every page.
+ * Top navigation — a full-width white MountCard, the topmost object on every page.
  * Critical colours/borders are inline styles (Tailwind has silently overridden them
  * before); Tailwind is used for layout/spacing only.
  */
@@ -129,7 +129,7 @@ export const Nav: React.FC<NavProps> = ({
             each side (clamped so it never crushes the two clusters on narrow viewports). */}
         <MountCard
           className="flex items-center"
-          style={{ paddingBlock: 13, paddingInline: 22 }}
+          style={{ paddingBlock: 13, paddingInline: 22, background: "#ffffff", backgroundImage: "none" }}
         >
           {/* Hamburger — opens the left-rail drawer below lg (the rail holds the primary links). */}
           {onToggleRail && (

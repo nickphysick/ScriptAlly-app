@@ -299,7 +299,8 @@ const countPillBase: React.CSSProperties = {
   lineHeight: 1,
 };
 
-const urgentPillStyle: React.CSSProperties = { ...countPillBase, color: "#ffffff", background: burgundy };
+// White chip so the count reads cleanly on the pink To-do band.
+const urgentPillStyle: React.CSSProperties = { ...countPillBase, color: burgundy, background: "#ffffff", border: "0.5px solid rgba(124,58,42,0.2)" };
 const recommendedPillStyle: React.CSSProperties = {
   ...countPillBase,
   color: burgundy,
@@ -358,7 +359,8 @@ export const OverToYou: React.FC<OverToYouProps> = ({ tasks, queries, agents, on
     <MountCard className="flex flex-col lg:h-full" style={{ minHeight: 0 }}>
       <style>{OTY_CSS}</style>
 
-      {/* ── Zone A header — pinned sage band ─────────────────────────────── */}
+      {/* ── Zone A header — pinned PINK band (the To-do list is singled out as the urgent panel,
+            the lone pink header among the dashboard's sage container headers) ───────────────── */}
       <div
         className="flex items-center justify-between shrink-0"
         style={{
@@ -367,8 +369,8 @@ export const OverToYou: React.FC<OverToYouProps> = ({ tasks, queries, agents, on
           margin: "6px 6px 0",
           borderRadius: "8px 8px 0 0",
           padding: "13px 18px 12px",
-          background: sageBandGradient,
-          borderBottom: `1px solid ${sageBandRule}`,
+          background: "linear-gradient(135deg, #f5e2da 0%, #efd5ca 100%)",
+          borderBottom: "1px solid rgba(124,58,42,0.15)",
         }}
       >
         <span style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>

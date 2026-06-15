@@ -12,11 +12,11 @@
 import React from "react";
 import { LayoutDashboard, Send, Users, Library, Settings } from "lucide-react";
 import { MountCard } from "./MountCard";
-import { burgundy, ghostButtonText, FONT_SANS, hairline } from "../lib/designTokens";
+import { burgundy, FONT_SANS, hairline } from "../lib/designTokens";
 
-/** Fits the longest label ("Manuscripts") at the app font with a little breathing room either side.
+/** Sidebar nav column width. Comfortably wider than the longest label ("Manuscripts").
  *  Content clears the rail by RAIL_LEFT + RAIL_WIDTH + RAIL_GAP (see AppShell). */
-export const RAIL_WIDTH = 160;
+export const RAIL_WIDTH = 210;
 export const RAIL_LEFT = 14;
 export const RAIL_GAP = 12;
 
@@ -58,17 +58,18 @@ export const LeftRail: React.FC<LeftRailProps> = ({ activeTab, onNavigate, open,
           textAlign: "left",
           fontFamily: FONT_SANS,
           fontSize: 12.5,
-          fontWeight: 500,
+          fontWeight: active ? 500 : 400,
           whiteSpace: "nowrap", // labels never wrap or truncate
           padding: "9px 11px",
           borderRadius: 9,
           border: "none",
+          // Idle = muted ink on white card; hover + active = soft-pink fill with burgundy text.
           background: active ? "#f8e7dc" : "transparent",
-          color: active ? burgundy : ghostButtonText,
+          color: active ? burgundy : "#5a4a3e",
           transition: "background 0.13s, color 0.13s",
         }}
-        onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = "#ffffff"; }}
-        onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = "transparent"; }}
+        onMouseEnter={(e) => { if (!active) { e.currentTarget.style.background = "#f8e7dc"; e.currentTarget.style.color = burgundy; } }}
+        onMouseLeave={(e) => { if (!active) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#5a4a3e"; } }}
       >
         <Icon size={18} strokeWidth={2} style={{ flexShrink: 0 }} />
         <span>{label}</span>
@@ -92,7 +93,7 @@ export const LeftRail: React.FC<LeftRailProps> = ({ activeTab, onNavigate, open,
         style={{ top: 84, left: RAIL_LEFT, bottom: 14, width: RAIL_WIDTH }}
         aria-label="Primary navigation"
       >
-        <MountCard className="flex flex-col" style={{ height: "100%", padding: "12px 9px" }}>
+        <MountCard className="flex flex-col" style={{ height: "100%", padding: "12px 9px", background: "#ffffff", backgroundImage: "none" }}>
           <div style={{ position: "relative", zIndex: 4, display: "flex", flexDirection: "column", height: "100%", minHeight: 0 }}>
             <nav className="flex flex-col gap-1" style={{ overflowY: "auto" }}>
               {PRIMARY.map((it) => (
