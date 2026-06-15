@@ -2545,10 +2545,10 @@ export const Dashboard: React.FC<{
                 >
                   {/* Ascending hero words (full readable text preserved) + climbing shoe-print trail */}
                   <span style={{ fontFamily: FONT_SERIF, fontWeight: 500, lineHeight: 1 }}>
-                    <span style={{ fontSize: 15, color: headingInk, verticalAlign: "baseline" }}>The </span>
-                    <span style={{ fontSize: 18, color: headingInk, verticalAlign: "baseline" }}>story </span>
-                    <span style={{ fontSize: 22, fontStyle: "italic", color: "#9a4a37", verticalAlign: "baseline" }}>so </span>
-                    <span style={{ fontSize: 28, fontStyle: "italic", color: burgundy, verticalAlign: "baseline" }}>far</span>
+                    <span style={{ fontFamily: FONT_SERIF, fontSize: 15, color: headingInk, verticalAlign: "baseline" }}>The </span>
+                    <span style={{ fontFamily: FONT_SERIF, fontSize: 18, color: headingInk, verticalAlign: "baseline" }}>story </span>
+                    <span style={{ fontFamily: FONT_SERIF, fontSize: 22, fontStyle: "italic", color: "#9a4a37", verticalAlign: "baseline" }}>so </span>
+                    <span style={{ fontFamily: FONT_SERIF, fontSize: 28, fontStyle: "italic", color: burgundy, verticalAlign: "baseline" }}>far</span>
                     <span aria-hidden="true" className="hidden sm:inline-block" style={{ color: burgundy, verticalAlign: "middle", marginLeft: 8 }}>
                       <svg width="111" height="40" viewBox="0 0 111 40" fill="none">
                         {[0, 1, 2, 3, 4].map((i) => {
