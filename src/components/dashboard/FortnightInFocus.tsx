@@ -20,7 +20,7 @@ import { Query, Agent, Manuscript, Activity, QueryStatus, ActivityType } from ".
 import { StatusDot } from "../StatusDot";
 import { extractAgentFromText } from "../../lib/activityUtils";
 import { fitIconSize } from "../../lib/iconAutoFit";
-import { Calendar, UserRound, Send, BookOpen, ArrowRight } from "lucide-react";
+import { Search, UserRound, Send, BookOpen, ArrowRight } from "lucide-react";
 import {
   parchment,
   PAPER_TEXTURE,
@@ -28,7 +28,6 @@ import {
   insetBorder,
   sageBandGradient,
   sageBandRule,
-  sageText,
   headingInk,
   bodyInk,
   mutedInk,
@@ -545,7 +544,10 @@ export const FortnightInFocus: React.FC<FortnightInFocusProps> = ({
   }, [preview]);
 
   // ── Render helpers ───────────────────────────────────────────────────────────
-  const dRangeLabel = `${fmtDayMonth(days[0])} – ${fmtDayMonth(days[13])}`;
+  // Compact within-month range ("9–22 Jun"); falls back to the long form across a month boundary.
+  const dRangeLabel = days[0].getMonth() === days[13].getMonth()
+    ? `${days[0].getDate()}–${days[13].getDate()} ${MONTHS[days[13].getMonth()]}`
+    : `${fmtDayMonth(days[0])} – ${fmtDayMonth(days[13])}`;
 
   // Measure the calendar width once so each cell can auto-fit its icon cluster (shared helper).
   const COL_GAP = 4;
@@ -671,12 +673,17 @@ export const FortnightInFocus: React.FC<FortnightInFocusProps> = ({
   );
 
   // Header band ----------------------------------------------------------------
-  const countPill = (label: string) => (
-    <span style={{ fontFamily: FONT_MONO, fontSize: 9, fontWeight: 500, color: sageText, background: "rgba(255,255,255,0.6)",
-      border: `0.5px solid ${sageBandRule}`, borderRadius: 999, padding: "2px 8px", whiteSpace: "nowrap" }}>
-      {label}
+  // One mono metadata language: muted micro-label with a burgundy numeral, dot-separated.
+  const metaLabel = (text: string) => (
+    <span style={{ fontFamily: FONT_MONO, fontSize: 8.5, textTransform: "uppercase", letterSpacing: "0.06em", color: mutedInk }}>{text}</span>
+  );
+  const metaCount = (n: number, label: string) => (
+    <span className="inline-flex items-baseline" style={{ gap: 3 }}>
+      <span style={{ fontFamily: FONT_MONO, fontSize: 10, fontWeight: 600, color: burgundy }}>{n}</span>
+      {metaLabel(label)}
     </span>
   );
+  const metaSep = <span aria-hidden="true" style={{ color: burgundy, opacity: 0.35, margin: "0 7px", fontSize: 9 }}>·</span>;
 
   const header = (
     <div
@@ -686,30 +693,22 @@ export const FortnightInFocus: React.FC<FortnightInFocusProps> = ({
         padding: "12px 18px 10px", background: sageBandGradient, borderBottom: `1px solid ${sageBandRule}`, gap: 10,
       }}
     >
-      <div className="flex items-center" style={{ gap: 9 }}>
-        <Calendar style={{ width: 15, height: 15, color: headingInk }} strokeWidth={2} aria-hidden="true" />
-        {/* Title + date range on its own line beneath (sub-heading slot) */}
-        <div className="flex flex-col">
-          <span style={{ fontFamily: FONT_SERIF, fontSize: 20, fontWeight: 600, color: headingInk, lineHeight: 1.1 }}>
-            Fortnight in{" "}
-            <span style={{ fontSize: "1.18em", fontStyle: "italic", fontWeight: 600, color: burgundy, verticalAlign: "middle" }}>focus</span>
-            {/* glint glass (no dashed trail) — burgundy ring + handle, white glint */}
-            <span aria-hidden="true" className="hidden sm:inline-block" style={{ color: burgundy, verticalAlign: "middle", marginLeft: 3 }}>
-              <svg width="26" height="24" viewBox="0 0 26 24" fill="none">
-                <circle cx="11" cy="10" r="7" stroke="currentColor" strokeWidth="1.8" fill="rgba(124,58,42,0.05)" />
-                <path d="M6.6 8.4 A 4.6 4.6 0 0 1 10 5.7" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" opacity="0.95" />
-                <circle cx="6.4" cy="10.4" r="0.85" fill="#ffffff" opacity="0.9" />
-                <path d="M16.2 15.2 L22.5 21.5" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
-              </svg>
-            </span>
-          </span>
-          <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, fontWeight: 600, color: sageText, marginTop: 2, whiteSpace: "nowrap" }}>{dRangeLabel}</span>
-        </div>
-      </div>
-      <div className="flex items-center" style={{ gap: 7 }}>
-        {countPill(`${lastWeekCount} event${lastWeekCount === 1 ? "" : "s"} last week`)}
-        {countPill(`${comingUpCount} coming up`)}
-      </div>
+      {/* Uniform header: marker + plain title */}
+      <span className="flex items-center">
+        <span aria-hidden="true" style={{ width: 3, height: 18, borderRadius: 2, background: burgundy, marginRight: 12, flexShrink: 0, display: "inline-block" }} />
+        <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 500, color: headingInk, lineHeight: 1.1 }}>Fortnight in focus</span>
+      </span>
+      {/* Right metadata (one mono language) + far-right emblem */}
+      <span className="flex items-center" style={{ gap: 12 }}>
+        <span className="hidden sm:flex items-center">
+          {metaCount(lastWeekCount, `event${lastWeekCount === 1 ? "" : "s"} last week`)}
+          {metaSep}
+          {metaCount(comingUpCount, "coming up")}
+          {metaSep}
+          {metaLabel(dRangeLabel)}
+        </span>
+        <Search style={{ width: 20, height: 20, color: burgundy, flexShrink: 0 }} strokeWidth={1.8} aria-hidden="true" />
+      </span>
     </div>
   );
 

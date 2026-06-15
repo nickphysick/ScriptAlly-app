@@ -73,6 +73,8 @@ import {
   ChevronLeft,
   Bookmark,
   Calendar,
+  Footprints,
+  Hourglass,
   AlertCircle,
   HelpCircle,
   Clock,
@@ -2077,6 +2079,17 @@ export const Dashboard: React.FC<{
             })()
           )}
 
+          {/* ==================== FORTNIGHT IN FOCUS ==================== */}
+          <FortnightInFocus
+            queries={queries}
+            agents={agents}
+            manuscripts={manuscripts}
+            activities={mergedActivities}
+            isMagazineLayout={isMagazineLayout}
+            onOpenQuery={(qid) => { setSelectedQueryIdForPanel(qid); setIsQueryPanelOpen(true); }}
+            onOpenFullCalendar={() => setIsFullCalendarOpen(true)}
+          />
+
           {/* QUERY STATUS BREAKDOWN */}
           {(() => {
             // One hoverable canonical dot per query (StatusDot is the only glyph source)
@@ -2235,14 +2248,18 @@ export const Dashboard: React.FC<{
                   }}
                 >
                   <div style={{ display: "grid", gridTemplateColumns: COLUMN_GRID, alignItems: "center" }}>
-                    <span style={{ fontFamily: FONT_SERIF, fontSize: 15, fontWeight: 500, color: headingInk }}>
-                      Your querying{" "}
-                      <span style={{ fontSize: "1.16em", fontStyle: "italic", fontWeight: 600, color: burgundy, verticalAlign: "baseline" }}>pipeline</span>
+                    {/* Uniform header: marker + plain title (stage labels below stay column-aligned) */}
+                    <span className="flex items-center">
+                      <span aria-hidden="true" style={{ width: 3, height: 18, borderRadius: 2, background: burgundy, marginRight: 12, flexShrink: 0, display: "inline-block" }} />
+                      <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 500, color: headingInk, lineHeight: 1.1, whiteSpace: "nowrap" }}>Your querying pipeline</span>
                     </span>
                     {["Queried", "Part. req", "Part. sent", "Full req", "Full sent", "Offer", "Closed"].map((label) => (
                       <span key={label} style={{ ...labelStyle, textAlign: "center", color: sageText }}>{label}</span>
                     ))}
                   </div>
+                  {/* Far-right emblem — absolutely placed in the band's right padding so the
+                      stage-column grid above stays aligned to the rows below */}
+                  <Hourglass aria-hidden="true" strokeWidth={1.8} style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", width: 20, height: 20, color: burgundy }} />
                 </div>
 
                 {/* Rows */}
@@ -2286,17 +2303,6 @@ export const Dashboard: React.FC<{
               </MountCard>
             );
           })()}
-
-          {/* ==================== FORTNIGHT IN FOCUS ==================== */}
-          <FortnightInFocus
-            queries={queries}
-            agents={agents}
-            manuscripts={manuscripts}
-            activities={mergedActivities}
-            isMagazineLayout={isMagazineLayout}
-            onOpenQuery={(qid) => { setSelectedQueryIdForPanel(qid); setIsQueryPanelOpen(true); }}
-            onOpenFullCalendar={() => setIsFullCalendarOpen(true)}
-          />
         </div>
 
         {/* RIGHT COLUMN: Chronological Timeline Sidebar */}
@@ -2533,7 +2539,7 @@ export const Dashboard: React.FC<{
               <MountCard className="flex-1 flex flex-col" style={{ minHeight: 0, overflow: "hidden" }}>
                 {/* Edge-to-edge sage band header */}
                 <div
-                  className="flex items-center justify-center"
+                  className="flex items-center justify-between"
                   style={{
                     position: "relative",
                     zIndex: 2,
@@ -2544,39 +2550,13 @@ export const Dashboard: React.FC<{
                     borderBottom: `1px solid ${sageBandRule}`,
                   }}
                 >
-                  {/* Centred title group: shoe-print trail · ascending hero words (full readable text) · trail */}
-                  <span className="flex items-center" style={{ gap: 10 }}>
-                    {/* Left trail — fading in toward the words */}
-                    <span aria-hidden="true" className="hidden sm:inline-flex" style={{ color: burgundy }}>
-                      <svg width={3 * 19 + 16} height="30" viewBox={`0 0 ${3 * 19 + 16} 30`} fill="none">
-                        {[0.22, 0.45, 0.80].map((op, i) => (
-                          <g key={i} transform={`translate(${10 + i * 19} ${16 + (i % 2 ? 5 : -4)}) rotate(${i % 2 ? -7 : 7})`} fill="currentColor" opacity={op}>
-                            <ellipse cx="4.2" cy="0" rx="4.6" ry="3.6" />
-                            <ellipse cx="-0.2" cy="0.15" rx="3.7" ry="3.0" />
-                            <ellipse cx="-4.6" cy="0.4" rx="3.3" ry="2.6" />
-                          </g>
-                        ))}
-                      </svg>
-                    </span>
-                    <span style={{ fontFamily: FONT_SERIF, fontWeight: 500, lineHeight: 1 }}>
-                      <span style={{ fontFamily: FONT_SERIF, fontSize: 15, color: headingInk, verticalAlign: "baseline" }}>The </span>
-                      <span style={{ fontFamily: FONT_SERIF, fontSize: 18, color: headingInk, verticalAlign: "baseline" }}>story </span>
-                      <span style={{ fontFamily: FONT_SERIF, fontSize: 22, fontStyle: "italic", color: "#9a4a37", verticalAlign: "baseline" }}>so </span>
-                      <span style={{ fontFamily: FONT_SERIF, fontSize: 28, fontStyle: "italic", color: burgundy, verticalAlign: "baseline" }}>far</span>
-                    </span>
-                    {/* Right trail — fading out away from the words */}
-                    <span aria-hidden="true" className="hidden sm:inline-flex" style={{ color: burgundy }}>
-                      <svg width={3 * 19 + 16} height="30" viewBox={`0 0 ${3 * 19 + 16} 30`} fill="none">
-                        {[0.80, 0.50, 0.22].map((op, i) => (
-                          <g key={i} transform={`translate(${10 + i * 19} ${16 + (i % 2 ? 5 : -4)}) rotate(${i % 2 ? -7 : 7})`} fill="currentColor" opacity={op}>
-                            <ellipse cx="4.2" cy="0" rx="4.6" ry="3.6" />
-                            <ellipse cx="-0.2" cy="0.15" rx="3.7" ry="3.0" />
-                            <ellipse cx="-4.6" cy="0.4" rx="3.3" ry="2.6" />
-                          </g>
-                        ))}
-                      </svg>
-                    </span>
+                  {/* Uniform header: marker + plain title */}
+                  <span className="flex items-center">
+                    <span aria-hidden="true" style={{ width: 3, height: 18, borderRadius: 2, background: burgundy, marginRight: 12, flexShrink: 0, display: "inline-block" }} />
+                    <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 500, color: headingInk, lineHeight: 1.1 }}>The story so far</span>
                   </span>
+                  {/* Far-right emblem */}
+                  <Footprints style={{ width: 20, height: 20, color: burgundy, flexShrink: 0 }} strokeWidth={1.8} aria-hidden="true" />
                 </div>
 
                 <div
