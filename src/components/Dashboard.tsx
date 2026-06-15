@@ -2236,7 +2236,8 @@ export const Dashboard: React.FC<{
                 >
                   <div style={{ display: "grid", gridTemplateColumns: COLUMN_GRID, alignItems: "center" }}>
                     <span style={{ fontFamily: FONT_SERIF, fontSize: 15, fontWeight: 500, color: headingInk }}>
-                      Your querying pipeline
+                      Your querying{" "}
+                      <span style={{ fontSize: "1.16em", fontStyle: "italic", fontWeight: 600, color: burgundy, verticalAlign: "baseline" }}>pipeline</span>
                     </span>
                     {["Queried", "Part. req", "Part. sent", "Full req", "Full sent", "Offer", "Closed"].map((label) => (
                       <span key={label} style={{ ...labelStyle, textAlign: "center", color: sageText }}>{label}</span>
@@ -2532,7 +2533,7 @@ export const Dashboard: React.FC<{
               <MountCard className="flex-1 flex flex-col" style={{ minHeight: 0, overflow: "hidden" }}>
                 {/* Edge-to-edge sage band header */}
                 <div
-                  className="flex items-center justify-between"
+                  className="flex items-center justify-center"
                   style={{
                     position: "relative",
                     zIndex: 2,
@@ -2543,27 +2544,36 @@ export const Dashboard: React.FC<{
                     borderBottom: `1px solid ${sageBandRule}`,
                   }}
                 >
-                  {/* Ascending hero words (full readable text preserved) + climbing shoe-print trail */}
-                  <span style={{ fontFamily: FONT_SERIF, fontWeight: 500, lineHeight: 1 }}>
-                    <span style={{ fontFamily: FONT_SERIF, fontSize: 15, color: headingInk, verticalAlign: "baseline" }}>The </span>
-                    <span style={{ fontFamily: FONT_SERIF, fontSize: 18, color: headingInk, verticalAlign: "baseline" }}>story </span>
-                    <span style={{ fontFamily: FONT_SERIF, fontSize: 22, fontStyle: "italic", color: "#9a4a37", verticalAlign: "baseline" }}>so </span>
-                    <span style={{ fontFamily: FONT_SERIF, fontSize: 28, fontStyle: "italic", color: burgundy, verticalAlign: "baseline" }}>far</span>
-                    <span aria-hidden="true" className="hidden sm:inline-block" style={{ color: burgundy, verticalAlign: "middle", marginLeft: 8 }}>
-                      <svg width="111" height="40" viewBox="0 0 111 40" fill="none">
-                        {[0, 1, 2, 3, 4].map((i) => {
-                          const x = 10 + i * 19;
-                          const y = 30 - 4.2 * i + (i % 2 ? 5 : -4);
-                          const rot = i % 2 ? -7 : 7;
-                          const op = 0.40 + 0.55 * (i / 4);
-                          return (
-                            <g key={i} transform={`translate(${x} ${y}) rotate(${rot})`} fill="currentColor" opacity={op}>
-                              <ellipse cx="4.2" cy="0" rx="4.6" ry="3.6" />
-                              <ellipse cx="-0.2" cy="0.15" rx="3.7" ry="3.0" />
-                              <ellipse cx="-4.6" cy="0.4" rx="3.3" ry="2.6" />
-                            </g>
-                          );
-                        })}
+                  {/* Centred title group: shoe-print trail · ascending hero words (full readable text) · trail */}
+                  <span className="flex items-center" style={{ gap: 10 }}>
+                    {/* Left trail — fading in toward the words */}
+                    <span aria-hidden="true" className="hidden sm:inline-flex" style={{ color: burgundy }}>
+                      <svg width={3 * 19 + 16} height="30" viewBox={`0 0 ${3 * 19 + 16} 30`} fill="none">
+                        {[0.22, 0.45, 0.80].map((op, i) => (
+                          <g key={i} transform={`translate(${10 + i * 19} ${16 + (i % 2 ? 5 : -4)}) rotate(${i % 2 ? -7 : 7})`} fill="currentColor" opacity={op}>
+                            <ellipse cx="4.2" cy="0" rx="4.6" ry="3.6" />
+                            <ellipse cx="-0.2" cy="0.15" rx="3.7" ry="3.0" />
+                            <ellipse cx="-4.6" cy="0.4" rx="3.3" ry="2.6" />
+                          </g>
+                        ))}
+                      </svg>
+                    </span>
+                    <span style={{ fontFamily: FONT_SERIF, fontWeight: 500, lineHeight: 1 }}>
+                      <span style={{ fontFamily: FONT_SERIF, fontSize: 15, color: headingInk, verticalAlign: "baseline" }}>The </span>
+                      <span style={{ fontFamily: FONT_SERIF, fontSize: 18, color: headingInk, verticalAlign: "baseline" }}>story </span>
+                      <span style={{ fontFamily: FONT_SERIF, fontSize: 22, fontStyle: "italic", color: "#9a4a37", verticalAlign: "baseline" }}>so </span>
+                      <span style={{ fontFamily: FONT_SERIF, fontSize: 28, fontStyle: "italic", color: burgundy, verticalAlign: "baseline" }}>far</span>
+                    </span>
+                    {/* Right trail — fading out away from the words */}
+                    <span aria-hidden="true" className="hidden sm:inline-flex" style={{ color: burgundy }}>
+                      <svg width={3 * 19 + 16} height="30" viewBox={`0 0 ${3 * 19 + 16} 30`} fill="none">
+                        {[0.80, 0.50, 0.22].map((op, i) => (
+                          <g key={i} transform={`translate(${10 + i * 19} ${16 + (i % 2 ? 5 : -4)}) rotate(${i % 2 ? -7 : 7})`} fill="currentColor" opacity={op}>
+                            <ellipse cx="4.2" cy="0" rx="4.6" ry="3.6" />
+                            <ellipse cx="-0.2" cy="0.15" rx="3.7" ry="3.0" />
+                            <ellipse cx="-4.6" cy="0.4" rx="3.3" ry="2.6" />
+                          </g>
+                        ))}
                       </svg>
                     </span>
                   </span>
