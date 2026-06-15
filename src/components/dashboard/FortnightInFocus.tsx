@@ -19,6 +19,7 @@ import { createPortal } from "react-dom";
 import { Query, Agent, Manuscript, Activity, QueryStatus, ActivityType } from "../../types";
 import { StatusDot } from "../StatusDot";
 import { extractAgentFromText } from "../../lib/activityUtils";
+import { fitIconSize } from "../../lib/iconAutoFit";
 import { Calendar, UserRound, Send, BookOpen, ArrowRight } from "lucide-react";
 import {
   parchment,
@@ -40,13 +41,23 @@ import {
 const AMBER = "#b8860b"; // upcoming-deadline badge (outlined ring) — distinct hue + shape from the burgundy elapsed disc
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const WEEKDAY_LETTERS = ["S", "M", "T", "W", "T", "F", "S"];
+const WD_SHORT = ["Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat"];
 
 const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 const dayDiff = (a: Date, b: Date) => Math.round((startOfDay(a).getTime() - startOfDay(b).getTime()) / 86400000);
 const dayKey = (d: Date) => startOfDay(d).getTime();
 const isWeekend = (d: Date) => d.getDay() === 0 || d.getDay() === 6;
 const fmtDayMonth = (d: Date) => `${d.getDate()} ${MONTHS[d.getMonth()]}`;
+const ordinal = (n: number) => { const s = ["th", "st", "nd", "rd"], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
+/** "Tues 9th Jun" — abbreviated weekday + ordinal day + month. */
+const fmtTileDate = (d: Date) => `${WD_SHORT[d.getDay()]} ${ordinal(d.getDate())} ${MONTHS[d.getMonth()]}`;
+/** "today" / "in N days" / "overdue N days" relative to a reference day. */
+const relDays = (target: Date, ref: Date) => {
+  const n = dayDiff(target, ref);
+  if (n === 0) return "today";
+  if (n > 0) return `in ${n} day${n === 1 ? "" : "s"}`;
+  return `overdue ${-n} day${-n === 1 ? "" : "s"}`;
+};
 
 /** Firestore Timestamp | ISO string | Date → Date | null. */
 const coerceDate = (v: any): Date | null => {
@@ -84,7 +95,8 @@ interface FEvent {
   title: string;        // headline — agent name or manuscript title
   agency?: string;
   manuscript?: string;
-  line: string;         // the activity line
+  line: string;         // the activity (line 1)
+  detail?: string;      // muted-italic timing that trails the activity ("overdue 5 days")
   marker: Marker;
   urgency: Urgency;
   cta?: { label: string; urgent: boolean };
@@ -134,6 +146,139 @@ const renderMarker = (m: Marker, size: number) => {
   if (m.kind === "status") return <StatusDot status={m.status} size={size} />;
   const Icon = m.icon === "agent" ? UserRound : m.icon === "query" ? Send : BookOpen;
   return <Icon style={{ width: size, height: size, color: burgundy, flexShrink: 0 }} strokeWidth={2} aria-hidden="true" />;
+};
+
+/** The "!" urgency badge: burgundy filled disc = elapsed, white/amber outlined ring = upcoming
+ *  (colour + shape, so it survives colour-blindness). Sized in px so it can scale with its icon. */
+const renderBadge = (u: Exclude<Urgency, "neutral">, px: number) => {
+  const common: React.CSSProperties = {
+    width: px, height: px, borderRadius: "50%", display: "inline-flex", alignItems: "center",
+    justifyContent: "center", fontFamily: FONT_MONO, fontSize: Math.max(7, Math.round(px * 0.66)), fontWeight: 700, lineHeight: 1,
+  };
+  return u === "elapsed"
+    ? <span aria-hidden="true" style={{ ...common, background: burgundy, color: "#fff" }}>!</span>
+    : <span aria-hidden="true" style={{ ...common, background: "#fff", color: AMBER, border: `1.5px solid ${AMBER}` }}>!</span>;
+};
+
+/** One event marker (StatusDot or entity icon) with its urgency "!" badge overlapped on the icon
+ *  itself (not the day) — so it flags exactly which event needs attention; neutral icons stay clean. */
+const IconWithBadge: React.FC<{ marker: Marker; urgency: Urgency; size: number }> = ({ marker, urgency, size }) => {
+  const badgePx = Math.max(8, Math.min(14, Math.round(size * 0.5)));
+  const off = Math.round(badgePx * 0.42);
+  return (
+    <span style={{ position: "relative", display: "inline-flex", flexShrink: 0 }}>
+      {renderMarker(marker, size)}
+      {urgency !== "neutral" && (
+        <span style={{ position: "absolute", top: -off, right: -off, zIndex: 1 }}>{renderBadge(urgency, badgePx)}</span>
+      )}
+    </span>
+  );
+};
+
+// ── Day cell (module scope so it isn't redefined each render → keyboard focus + detail scroll survive) ──
+interface DayCellProps {
+  d: Date;
+  idx: number;
+  events: FEvent[];
+  isToday: boolean;
+  selected: boolean;
+  weekend: boolean;
+  iconSize: number;
+  iconGap: number;
+  reduce: boolean;
+  cellRef: (el: HTMLButtonElement | null) => void;
+  onSelect: (idx: number) => void;
+  onKeyDown: (e: React.KeyboardEvent, idx: number) => void;
+  onEnter: (idx: number) => void;
+  onLeave: (idx: number) => void;
+  onFocus: (idx: number) => void;
+  onBlur: (idx: number) => void;
+}
+
+const DayCell: React.FC<DayCellProps> = ({ d, idx, events, isToday, selected, weekend, iconSize, iconGap, reduce, cellRef, onSelect, onKeyDown, onEnter, onLeave, onFocus, onBlur }) => {
+  const count = events.length;
+  const quiet = count === 0;
+  const aria = `${d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}${isToday ? ", today" : ""} — ${count === 0 ? "no events" : `${count} event${count === 1 ? "" : "s"}`}`;
+  return (
+    <button
+      ref={cellRef}
+      role="gridcell"
+      aria-label={aria}
+      aria-current={isToday ? "date" : undefined}
+      aria-selected={selected}
+      tabIndex={selected ? 0 : -1}
+      onClick={() => onSelect(idx)}
+      onKeyDown={(e) => onKeyDown(e, idx)}
+      onMouseEnter={() => onEnter(idx)}
+      onMouseLeave={() => onLeave(idx)}
+      onFocus={() => onFocus(idx)}
+      onBlur={() => onBlur(idx)}
+      className="relative flex flex-col items-center cursor-pointer focus:outline-none"
+      style={{
+        height: 96, // fixed so a busy day's cluster clips here rather than stretching the whole row
+        padding: "6px 3px 5px",
+        borderRadius: 9,
+        background: selected ? "#fff" : weekend ? "rgba(124,58,42,0.035)" : "#fff",
+        opacity: quiet && !selected && !isToday ? 0.5 : 1,
+        border: selected ? `1.5px solid ${burgundy}` : isToday ? "1.5px solid transparent" : "1px solid #efe7dd",
+        boxShadow: isToday && !selected ? `inset 0 0 0 1.5px ${burgundy}` : "none",
+        transition: reduce ? "none" : "background 0.15s, box-shadow 0.15s, opacity 0.15s",
+        overflow: "hidden",
+      }}
+    >
+      <span style={{ fontFamily: FONT_SANS, fontSize: 9, fontWeight: isToday ? 700 : 500, color: isToday ? burgundy : mutedInk, textAlign: "center", lineHeight: 1.15 }}>
+        {fmtTileDate(d)}
+      </span>
+      {/* one icon per event, centred both axes, auto-scaled; clusters past the floor wrap and clip */}
+      <div style={{ flex: 1, width: "100%", display: "flex", flexWrap: "wrap", alignItems: "center", alignContent: "center", justifyContent: "center", gap: iconGap, overflow: "hidden", marginTop: 5 }}>
+        {events.map((ev) => <IconWithBadge key={ev.id} marker={ev.marker} urgency={ev.urgency} size={iconSize} />)}
+      </div>
+    </button>
+  );
+};
+
+// ── Detail / agenda row (module scope) — three lines: activity / agent · agency / manuscript ──
+interface EventRowProps {
+  ev: FEvent;
+  onOpenQuery: (queryId: string) => void;
+}
+
+const EventRow: React.FC<EventRowProps> = ({ ev, onOpenQuery }) => {
+  const activityColor = ev.urgency === "elapsed" ? burgundy : ev.urgency === "upcoming" ? AMBER : "#6a5a50";
+  return (
+    <div style={{ display: "flex", gap: 10, padding: "9px 0", alignItems: "flex-start" }}>
+      <span style={{ marginTop: 1 }}><IconWithBadge marker={ev.marker} urgency={ev.urgency} size={18} /></span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        {/* Line 1 — activity, with any timing detail trailing as muted italic */}
+        <div style={{ fontFamily: FONT_SANS, fontSize: 12, fontWeight: 500, color: activityColor, lineHeight: 1.3, overflowWrap: "anywhere" }}>
+          {ev.line}
+          {ev.detail && <span style={{ fontStyle: "italic", fontWeight: 400, color: mutedInk }}> · {ev.detail}</span>}
+        </div>
+        {/* Line 2 — Agent · Agency */}
+        <div style={{ marginTop: 2, lineHeight: 1.3, overflowWrap: "anywhere" }}>
+          <span style={{ fontFamily: FONT_SERIF, fontWeight: 500, fontSize: 13.5, color: bodyInk }}>{ev.title}</span>
+          {ev.agency && <span style={{ fontFamily: FONT_SANS, fontSize: 11, color: mutedInk }}> · {ev.agency}</span>}
+        </div>
+        {/* Line 3 — manuscript title, full and wrapping (omitted for entity events with no manuscript) */}
+        {ev.manuscript && (
+          <div style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 11.5, color: mutedInk, marginTop: 2, lineHeight: 1.3, overflowWrap: "anywhere" }}>
+            {ev.manuscript}
+          </div>
+        )}
+      </div>
+      {ev.cta && ev.queryId && (
+        <button
+          onClick={() => onOpenQuery(ev.queryId!)}
+          className="cursor-pointer shrink-0"
+          style={ev.cta.urgent
+            ? { fontFamily: FONT_MONO, fontSize: 9.5, fontWeight: 500, letterSpacing: "0.05em", background: "#f8e7dc", color: burgundy, border: "0.5px solid rgba(124,58,42,0.3)", borderRadius: 8, padding: "5px 10px" }
+            : { fontFamily: FONT_MONO, fontSize: 9.5, fontWeight: 500, letterSpacing: "0.05em", background: "#fff", color: mutedInk, border: "0.5px solid #e0d5c8", borderRadius: 8, padding: "5px 10px" }}
+        >
+          {ev.cta.label}
+        </button>
+      )}
+    </div>
+  );
 };
 
 const usePrefersReducedMotion = () => {
@@ -208,7 +353,7 @@ export const FortnightInFocus: React.FC<FortnightInFocusProps> = ({
       }
     };
 
-    const pushQuery = (q: Query, type: FType, date: Date, line: string) => {
+    const pushQuery = (q: Query, type: FType, date: Date, line: string, detail?: string) => {
       if (!inWindow(date)) return;
       const urgency = URGENCY_BY_TYPE[type];
       out.push({
@@ -220,6 +365,7 @@ export const FortnightInFocus: React.FC<FortnightInFocusProps> = ({
         agency: agentAgency(q),
         manuscript: msTitle(q),
         line,
+        detail,
         marker: markerFor(type, q),
         urgency,
         cta: ctaFor(type, urgency !== "neutral"),
@@ -247,6 +393,7 @@ export const FortnightInFocus: React.FC<FortnightInFocusProps> = ({
         const reqStatus = requestStatus(q);
         const reqLabel = reqStatus === QueryStatus.FULL_REQUESTED ? "Full requested" : reqStatus === QueryStatus.REVISE_RESUBMIT ? "Revise & resubmit" : "Partial requested";
         const sendLabel = reqStatus === QueryStatus.FULL_REQUESTED ? "full" : reqStatus === QueryStatus.REVISE_RESUBMIT ? "revision" : "partial";
+        const capSend = sendLabel.charAt(0).toUpperCase() + sendLabel.slice(1);
         const reqDate = coerceDate(
           q.status === QueryStatus.PARTIAL_REQUESTED ? (q.partialRequestedDate || q.dateSent)
           : q.status === QueryStatus.FULL_REQUESTED ? (q.fullRequestedDate || q.dateSent)
@@ -257,8 +404,8 @@ export const FortnightInFocus: React.FC<FortnightInFocusProps> = ({
         const due = coerceDate(q.expectedSendDate || q.responseDeadline);
         if (due) {
           const diff = dayDiff(due, today);
-          if (diff >= 1) pushQuery(q, "pages_due", due, `Send the ${sendLabel} by ${fmtDayMonth(due)}`);
-          else if (diff < 0) pushQuery(q, "pages_overdue", due, `The ${sendLabel} was due ${fmtDayMonth(due)}`);
+          if (diff >= 1) pushQuery(q, "pages_due", due, `Send the ${sendLabel}`, `due ${fmtDayMonth(due)} · ${relDays(due, today)}`);
+          else if (diff < 0) pushQuery(q, "pages_overdue", due, `${capSend} not yet sent`, `due ${fmtDayMonth(due)} · ${relDays(due, today)}`);
         }
       }
 
@@ -270,14 +417,17 @@ export const FortnightInFocus: React.FC<FortnightInFocusProps> = ({
         const deadline = coerceDate(q.responseDeadline);
         if (deadline) {
           const diff = dayDiff(deadline, today);
-          if (diff >= 0) pushQuery(q, "expected_upcoming", deadline, diff === 0 ? "Response expected today" : `Response expected ${fmtDayMonth(deadline)}`);
-          else pushQuery(q, "expected_overdue", deadline, `Response was expected ${fmtDayMonth(deadline)}`);
+          if (diff >= 0) pushQuery(q, "expected_upcoming", deadline, "Response expected", diff === 0 ? "today" : `${fmtDayMonth(deadline)} · ${relDays(deadline, today)}`);
+          else pushQuery(q, "expected_overdue", deadline, "Response window passed", relDays(deadline, today));
         }
       }
 
       // Follow-up reminder
       const nudge = coerceDate(q.nudgeDate);
-      if (nudge && dayDiff(nudge, today) >= 0) pushQuery(q, "nudge", nudge, "Follow-up reminder");
+      if (nudge && dayDiff(nudge, today) >= 0) {
+        const nd = relDays(nudge, today);
+        pushQuery(q, "nudge", nudge, "Follow-up reminder", nd === "today" ? "today" : `${fmtDayMonth(nudge)} · ${nd}`);
+      }
 
       // Response recorded (offer / rejection / withdrawn / no-response)
       const isClosed = [QueryStatus.OFFER, QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE].includes(q.status);
@@ -341,12 +491,6 @@ export const FortnightInFocus: React.FC<FortnightInFocusProps> = ({
   }, [events, today]);
 
   const eventsOn = useCallback((d: Date) => byDay.get(dayKey(d)) ?? [], [byDay]);
-  const badgeFor = useCallback((d: Date): Urgency | null => {
-    const evs = eventsOn(d);
-    if (evs.some((e) => e.urgency === "elapsed")) return "elapsed"; // elapsed wins
-    if (evs.some((e) => e.urgency === "upcoming")) return "upcoming";
-    return null;
-  }, [eventsOn]);
 
   // ── Selection + keyboard roving focus ───────────────────────────────────────
   const [selectedIdx, setSelectedIdx] = useState(TODAY_IDX);
@@ -401,165 +545,99 @@ export const FortnightInFocus: React.FC<FortnightInFocusProps> = ({
   }, [preview]);
 
   // ── Render helpers ───────────────────────────────────────────────────────────
-  const renderBadge = (u: Urgency, scale = 1) => {
-    const s = 14 * scale;
-    if (u === "elapsed") {
-      return (
-        <span aria-hidden="true" style={{ width: s, height: s, borderRadius: "50%", background: burgundy, color: "#fff",
-          display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_MONO, fontSize: 9 * scale, fontWeight: 700, lineHeight: 1 }}>!</span>
-      );
-    }
-    return (
-      <span aria-hidden="true" style={{ width: s, height: s, borderRadius: "50%", background: "#fff", color: AMBER,
-        border: `1.5px solid ${AMBER}`, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_MONO, fontSize: 9 * scale, fontWeight: 700, lineHeight: 1 }}>!</span>
-    );
-  };
-
   const dRangeLabel = `${fmtDayMonth(days[0])} – ${fmtDayMonth(days[13])}`;
 
-  // Day cell -------------------------------------------------------------------
-  const DayCell: React.FC<{ d: Date; idx: number }> = ({ d, idx }) => {
-    const evs = eventsOn(d);
-    const isToday = dayDiff(d, today) === 0;
-    const selected = idx === selectedIdx;
-    const quiet = evs.length === 0;
-    const weekend = isWeekend(d);
-    const badge = badgeFor(d);
-    const shown = evs.slice(0, 3);
-    const overflow = evs.length - shown.length;
-    const label = `${d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}${isToday ? ", today" : ""} — ${evs.length === 0 ? "no events" : `${evs.length} event${evs.length === 1 ? "" : "s"}`}`;
-
-    return (
-      <button
-        ref={(el) => { cellRefs.current[idx] = el; }}
-        role="gridcell"
-        aria-label={label}
-        aria-current={isToday ? "date" : undefined}
-        aria-selected={selected}
-        tabIndex={selected ? 0 : -1}
-        onClick={() => setSelectedIdx(idx)}
-        onKeyDown={(e) => onCellKeyDown(e, idx)}
-        onMouseEnter={() => schedulePreview(idx)}
-        onMouseLeave={() => cancelPreview(idx)}
-        onFocus={() => showPreviewNow(idx)}
-        onBlur={() => cancelPreview(idx)}
-        className="relative flex flex-col items-center cursor-pointer focus:outline-none"
-        style={{
-          minHeight: 56,
-          padding: "5px 2px 4px",
-          borderRadius: 8,
-          background: selected ? "#fff" : weekend ? "rgba(124,58,42,0.035)" : "#fff",
-          opacity: quiet && !selected && !isToday ? 0.55 : 1,
-          border: selected ? `1.5px solid ${burgundy}` : isToday ? "1.5px solid transparent" : "1px solid #efe7dd",
-          boxShadow: isToday && !selected ? `inset 0 0 0 1.5px ${burgundy}` : "none",
-          transition: reduce ? "none" : "background 0.15s, box-shadow 0.15s, opacity 0.15s",
-        }}
-      >
-        {/* urgency badge — top-right corner; renders even on today (ring/tag must not suppress it) */}
-        {badge && <span style={{ position: "absolute", top: -5, right: -4, zIndex: 2 }}>{renderBadge(badge)}</span>}
-
-        {isToday && (
-          <span style={{ position: "absolute", top: -7, left: "50%", transform: "translateX(-50%)", background: burgundy, color: "#fff",
-            fontFamily: FONT_MONO, fontSize: 6.5, fontWeight: 700, letterSpacing: "0.08em", padding: "1px 4px", borderRadius: 4, lineHeight: 1 }}>
-            TODAY
-          </span>
-        )}
-
-        <span style={{ fontFamily: FONT_SANS, fontSize: 12, fontWeight: isToday ? 700 : 500, color: isToday ? burgundy : bodyInk, marginTop: isToday ? 4 : 1 }}>
-          {d.getDate()}
-        </span>
-
-        <span className="flex items-center justify-center" style={{ gap: 2, marginTop: "auto", minHeight: 15 }}>
-          {shown.map((ev) => <span key={ev.id} style={{ display: "inline-flex" }}>{renderMarker(ev.marker, 13)}</span>)}
-          {overflow > 0 && (
-            <span style={{ fontFamily: FONT_MONO, fontSize: 8.5, fontWeight: 600, color: mutedInk }}>+{overflow}</span>
-          )}
-        </span>
-      </button>
-    );
-  };
-
-  // Detail / agenda row --------------------------------------------------------
-  const EventRow: React.FC<{ ev: FEvent }> = ({ ev }) => (
-    <div className="flex items-start" style={{ gap: 10, padding: "8px 2px" }}>
-      <span style={{ marginTop: 1, display: "inline-flex" }}>{renderMarker(ev.marker, 18)}</span>
-      <div className="flex-1 min-w-0">
-        <div style={{ fontFamily: FONT_SERIF, fontWeight: 500, fontSize: 14, color: bodyInk, lineHeight: 1.25 }} className="truncate">
-          {ev.title}
-        </div>
-        <div style={{ fontFamily: FONT_SANS, fontSize: 11.5, color: ev.urgency === "elapsed" ? burgundy : ev.urgency === "upcoming" ? AMBER : sageText, marginTop: 1 }}>
-          {ev.line}
-        </div>
-        {(ev.manuscript || ev.agency) && (
-          <div style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.05em", color: mutedInk, marginTop: 3 }} className="truncate">
-            {[ev.manuscript, ev.agency].filter(Boolean).join(" · ")}
-          </div>
-        )}
-      </div>
-      {ev.cta && ev.queryId && (
-        <button
-          onClick={() => onOpenQuery(ev.queryId!)}
-          className="cursor-pointer shrink-0"
-          style={ev.cta.urgent
-            ? { fontFamily: FONT_MONO, fontSize: 9.5, fontWeight: 500, letterSpacing: "0.05em", background: "#f8e7dc", color: burgundy, border: "0.5px solid rgba(124,58,42,0.3)", borderRadius: 8, padding: "5px 10px" }
-            : { fontFamily: FONT_MONO, fontSize: 9.5, fontWeight: 500, letterSpacing: "0.05em", background: "#fff", color: mutedInk, border: "0.5px solid #e0d5c8", borderRadius: 8, padding: "5px 10px" }}
-        >
-          {ev.cta.label}
-        </button>
-      )}
-    </div>
-  );
+  // Measure the calendar width once so each cell can auto-fit its icon cluster (shared helper).
+  const COL_GAP = 4;
+  const gridRef = useRef<HTMLDivElement>(null);
+  const [gridW, setGridW] = useState(0);
+  useLayoutEffect(() => {
+    const el = gridRef.current;
+    if (!el) return;
+    const update = () => setGridW(el.clientWidth);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const cellInnerW = gridW > 0 ? Math.max(20, (gridW - 6 * COL_GAP) / 7 - 10) : 44;
 
   // Detail pane ----------------------------------------------------------------
   const selDay = days[selectedIdx];
   const selEvents = eventsOn(selDay);
   const selIsToday = dayDiff(selDay, today) === 0;
 
+  // Capped, internally-scrolling frame: the calendar drives the card height; a busy day scrolls
+  // here instead of stretching the row. Sticky day-header + soft bottom fade.
   const detailPane = (
-    <div key={selectedIdx} className={reduce ? "" : "animate-fade-in"}>
-      <div style={{ borderBottom: `1px solid ${sageBandRule}`, paddingBottom: 8, marginBottom: 4 }}>
-        <div style={{ fontFamily: FONT_SERIF, fontSize: 15, fontWeight: 500, color: headingInk }}>
-          {selIsToday ? "Today · " : ""}{fmtDayMonth(selDay)}
+    <div style={{ position: "relative", flex: 1, minHeight: 0, overflow: "hidden" }}>
+      <div className="scrollbar-thin" style={{ position: "absolute", inset: 0, overflowY: "auto", paddingRight: 4 }}>
+        <div style={{ position: "sticky", top: 0, zIndex: 1, background: parchment, paddingBottom: 8, marginBottom: 2, borderBottom: `1px solid ${sageBandRule}` }}>
+          <div style={{ fontFamily: FONT_SERIF, fontSize: 14.5, fontWeight: 500, color: headingInk }}>
+            {selIsToday ? "Today · " : ""}{fmtTileDate(selDay)}
+          </div>
+          <div style={{ fontFamily: FONT_MONO, fontSize: 9, color: mutedInk, marginTop: 2 }}>
+            {selEvents.length} event{selEvents.length === 1 ? "" : "s"}
+          </div>
         </div>
-        <div style={{ fontFamily: FONT_SANS, fontSize: 11, color: mutedInk, marginTop: 1 }}>
-          {selDay.toLocaleDateString("en-GB", { weekday: "long" })}
+        <div key={selectedIdx} className={reduce ? "" : "animate-fade-in"}>
+          {selEvents.length === 0 ? (
+            <div style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 12.5, color: mutedInk, padding: "16px 0" }}>
+              Nothing on this day.
+            </div>
+          ) : (
+            selEvents.map((ev, i) => (
+              <div key={ev.id} style={{ borderTop: i === 0 ? "none" : "0.5px solid #f0e8e0" }}>
+                <EventRow ev={ev} onOpenQuery={onOpenQuery} />
+              </div>
+            ))
+          )}
         </div>
       </div>
-      {selEvents.length === 0 ? (
-        <div style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 12.5, color: mutedInk, padding: "18px 2px" }}>
-          Nothing on this day.
-        </div>
-      ) : (
-        <div className="flex flex-col">
-          {selEvents.map((ev, i) => (
-            <div key={ev.id} style={{ borderTop: i === 0 ? "none" : "0.5px solid #f0e8e0" }}>
-              <EventRow ev={ev} />
-            </div>
-          ))}
-        </div>
-      )}
+      {/* soft bottom fade — signals more content below */}
+      <div aria-hidden="true" style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 22, background: `linear-gradient(to bottom, rgba(253,250,245,0), ${parchment})`, pointerEvents: "none" }} />
     </div>
   );
 
-  // Calendar grid (one row of 7) ----------------------------------------------
+  // Calendar grid (two rows of 7; no separate weekday header — each tile carries its full date) ----
   const weekRow = (slice: Date[], offset: number, caption: string) => (
     <div>
       <div style={{ fontFamily: FONT_MONO, fontSize: 8.5, textTransform: "uppercase", letterSpacing: "0.08em", color: mutedInk, marginBottom: 5 }}>
         {caption}
       </div>
-      <div className="grid grid-cols-7" style={{ gap: 4 }}>
-        {slice.map((d, i) => <DayCell key={dayKey(d)} d={d} idx={offset + i} />)}
+      <div className="grid grid-cols-7" style={{ gap: COL_GAP }}>
+        {slice.map((d, i) => {
+          const idx = offset + i;
+          const evs = eventsOn(d);
+          const { size, gap } = fitIconSize(cellInnerW, evs.length, { max: 30, min: 12 });
+          return (
+            <DayCell
+              key={dayKey(d)}
+              d={d}
+              idx={idx}
+              events={evs}
+              isToday={dayDiff(d, today) === 0}
+              selected={idx === selectedIdx}
+              weekend={isWeekend(d)}
+              iconSize={size}
+              iconGap={gap}
+              reduce={reduce}
+              cellRef={(el) => { cellRefs.current[idx] = el; }}
+              onSelect={setSelectedIdx}
+              onKeyDown={onCellKeyDown}
+              onEnter={schedulePreview}
+              onLeave={cancelPreview}
+              onFocus={showPreviewNow}
+              onBlur={cancelPreview}
+            />
+          );
+        })}
       </div>
     </div>
   );
 
   const calendarGrid = (
-    <div role="grid" aria-label="Fortnight calendar" className="flex flex-col" style={{ gap: 10 }}>
-      <div className="grid grid-cols-7" style={{ gap: 4 }}>
-        {WEEKDAY_LETTERS.map((w, i) => (
-          <div key={i} style={{ textAlign: "center", fontFamily: FONT_MONO, fontSize: 8.5, fontWeight: 600, color: mutedInk }}>{w}</div>
-        ))}
-      </div>
+    <div ref={gridRef} role="grid" aria-label="Fortnight calendar" className="flex flex-col" style={{ gap: 12 }}>
       {weekRow(days.slice(0, 7), 0, `Last week · ${fmtDayMonth(days[0])} – ${fmtDayMonth(days[6])}`)}
       {weekRow(days.slice(7, 14), 7, `Coming up · ${fmtDayMonth(days[7])} – ${fmtDayMonth(days[13])}`)}
     </div>
@@ -582,7 +660,7 @@ export const FortnightInFocus: React.FC<FortnightInFocusProps> = ({
             <div className="flex flex-col">
               {eventsOn(d).map((ev, i) => (
                 <div key={ev.id} style={{ borderTop: i === 0 ? "none" : "0.5px solid #f0e8e0" }}>
-                  <EventRow ev={ev} />
+                  <EventRow ev={ev} onOpenQuery={onOpenQuery} />
                 </div>
               ))}
             </div>
@@ -626,15 +704,16 @@ export const FortnightInFocus: React.FC<FortnightInFocusProps> = ({
   // Body: grid + detail (sm+) / stacked agenda (below sm) ----------------------
   const body = (
     <div style={isMagazineLayout ? { padding: "14px 20px" } : { position: "relative", zIndex: 2, margin: "0 6px 6px", padding: "14px 16px" }}>
-      {/* Desktop / tablet: grid + detail pane */}
-      <div className="hidden sm:grid" style={{ gridTemplateColumns: "minmax(0, 1.35fr) 1px minmax(0, 1fr)", gap: 14 }}>
+      {/* Desktop / tablet: grid + detail pane. The calendar column drives row height; the detail
+          column is stretched to it and scrolls internally (so a busy day never moves the grid). */}
+      <div className="hidden sm:grid" style={{ gridTemplateColumns: "minmax(0, 1.15fr) 1px minmax(0, 1fr)", gap: 14, alignItems: "stretch" }}>
         <div className="min-w-0">{calendarGrid}</div>
         <div style={{ background: "#f0e8e0" }} />
-        <div className="min-w-0 flex flex-col">
-          <div className="flex-1">{detailPane}</div>
+        <div className="min-w-0 flex flex-col" style={{ minHeight: 0 }}>
+          {detailPane}
           <button
             onClick={onOpenFullCalendar}
-            className="flex items-center justify-end cursor-pointer hover:underline self-end"
+            className="flex items-center justify-end cursor-pointer hover:underline self-end shrink-0"
             style={{ gap: 4, marginTop: 10, fontFamily: FONT_SANS, fontSize: 10, fontWeight: 500, color: burgundy, background: "transparent", border: "none" }}
           >
             <span>Open full calendar</span>
