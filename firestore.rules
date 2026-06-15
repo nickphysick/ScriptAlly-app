@@ -118,8 +118,11 @@ service cloud.firestore {
     function isValidAgent(data, userId) {
       return data.id is string && data.id.size() <= 128
         && data.userId == userId
-        && data.name is string && data.name.size() >= 1 && data.name.size() <= 256
-        && data.agency is string && data.agency.size() <= 256
+        // Agency is the required identity; name is optional (agency-only agents are valid). The
+        // manual Add-Agent form still requires a name client-side, so this only admits the
+        // agency-only agents Smart Import creates — it doesn't loosen the normal add flow.
+        && data.name is string && data.name.size() <= 256
+        && data.agency is string && data.agency.size() >= 1 && data.agency.size() <= 256
         && data.email is string && data.email.size() <= 256
         && data.website is string && data.website.size() <= 512
         && data.genres is list && data.genres.size() <= 50

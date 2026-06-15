@@ -33,21 +33,33 @@ QueryStatus must be EXACTLY one of:
 "Revise & Resubmit", "Offer", "Rejected", "Withdrawn", "No Response".
 
 Normalisation rules:
-- Map the writer's status vocabulary to the enum. Examples: "no reply / ghosted / CNR / timed out" -> "No Response";
+- Map the writer's status vocabulary to the enum. Examples: "ghosted / CNR / timed out / no response" -> "No Response";
   "R&R" -> "Revise & Resubmit"; "full out / sent full" -> "Full Sent"; "requested full" -> "Full Requested";
   "partial out" -> "Partial Sent"; "pass / declined / rejected" -> "Rejected"; "withdrew" -> "Withdrawn";
   "offer / rep offer" -> "Offer".
-- Vague or colloquial statuses map to the CLOSEST enum value with confidence "low" and a flag — never null.
-  Examples: "sent, waiting" / "just sent" / "out" / "awaiting reply" / "submitted" / "in their inbox" -> "Queried";
-  "they're reading it" -> the latest stage the row supports (else "Queried"). Reserve null for a truly empty or
-  unmappable status cell, and flag it.
-- Include EVERY data row in "queries" — never omit a row. If a row is unclear, return your best guess with
-  confidence "low" and a flag. Even a row with no agent name must still appear (code decides what to do with it).
-- Parse all dates to ISO YYYY-MM-DD. Ambiguous numeric dates (e.g. 03/04/26) are UK format DD/MM/YYYY.
-  Written dates ("2 Nov 2025") parse too.
-- One object in "queries" per query row. Group distinct agents into "agents", deduped by name within the file,
-  and link each query via "agentRef".
+- A query that has been SENT and is still WAITING (no agent action yet) is "Queried" — it has not stalled into a
+  non-response. Map "sent, waiting" / "just sent" / "out" / "awaiting reply" / "no reply yet" / "nudged" /
+  "submitted" / "in their inbox" / "chased" -> "Queried" with confidence "low" and a flag. Only map to "No Response"
+  when the writer has clearly given up on it (ghosted / closed / timed out).
+- Vague or colloquial statuses map to the CLOSEST enum value with confidence "low" and a flag — never null and never
+  a status outside the enum above. "they're reading it" -> the latest stage the row supports (else "Queried").
+  Reserve null for a truly empty status cell, and flag it.
+- Include EVERY data row in "queries" — NEVER omit or drop a row, whatever is missing. A row with no date, no status,
+  or no agent name STILL becomes a query object with your best-guess mapping; mark it confidence "low" with a flag.
+  Code decides what to do with edge rows — your job is to map every row.
+- Dates: a date is OPTIONAL. Parse to ISO YYYY-MM-DD only the dates the sheet genuinely contains; where a date is
+  absent or unreadable, return null — do NOT guess, interpolate, or invent one. Ambiguous numeric dates
+  (e.g. 03/04/26) are UK format DD/MM/YYYY; written dates ("2 Nov 2025") parse too.
+- Flags and issues are FULL, FRIENDLY SENTENCES written to the writer (they are shown verbatim as review notes),
+  not terse codes. E.g. "We weren't sure of the status here, so we've marked it as Queried — change it if that's
+  wrong." or "This row didn't have a query date, so you can add one later." Never output a bare code like "NO_DATE".
+- Agents: group distinct agents into "agents" and link each query via "agentRef". Dedupe on the NORMALISED
+  name + agency together (trim, case-insensitive) — two rows are the same agent only when both match. The AGENCY is
+  the identity: an agent with no name is still a distinct agent, represented with name "" and its agency. Never merge
+  two different agencies, and never split one agent across refs.
+- One object in "queries" per query row.
 - "statusTranslations" must summarise every distinct original status value, what you mapped it to, and how many rows.
-- Never invent data. If a field is absent, use null or omit it. Mark anything uncertain with confidence "low" and a flag.
+- Never invent data. If a field is absent, use null or omit it. Mark anything uncertain with confidence "low" and a
+  full-sentence flag.
 - Do NOT attempt to match against the user's existing ScriptAlly database; that happens later in code.
 `.trim();

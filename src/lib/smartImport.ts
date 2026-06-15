@@ -44,7 +44,8 @@ export interface ValidatedImport {
   result: SmartImportResult;
   /** Queries that will actually be written. */
   importable: ParsedQuery[];
-  /** Queries dropped before commit (null status / null date / unknown agentRef / bad enum). */
+  /** Queries dropped before commit (null/bad status, unknown agentRef, or an unwritable no-name
+   *  agent). A missing date never drops a row — it imports provisionally. */
   skipped: { query: ParsedQuery; reason: string }[];
   /** Date-order violations, flagged for the user — never auto-fixed. */
   dateWarnings: string[];
@@ -69,19 +70,18 @@ export function validateSmartImport(result: SmartImportResult): ValidatedImport 
       skipped.push({ query: q, reason: `Unrecognised status "${q.status}"` });
       continue;
     }
-    if (!q.dateQueried) {
-      skipped.push({ query: q, reason: "No query date" });
-      continue;
-    }
+    // A missing query date NEVER drops the row — the query imports with a provisional (date-needed)
+    // queried rung, and the user can fill the date later. Status/responses derive from rung type,
+    // not dates, so the row reports correctly even undated.
     const agent = agentByRef.get(q.agentRef);
     if (!agent) {
       skipped.push({ query: q, reason: "Row didn't match an agent" });
       continue;
     }
-    // An agent with no name can never be written (rules require name.size() >= 1) — skip the
-    // row up-front with an honest reason instead of letting the write fail downstream.
-    if (!agent.name?.trim()) {
-      skipped.push({ query: q, reason: "Row has no agent name" });
+    // Agency is the identity: an agency-only (no-name) agent is writable. Only a row with NEITHER
+    // a name nor an agency is unidentifiable — skip it up-front with an honest reason.
+    if (!agent.name?.trim() && !agent.agency?.trim()) {
+      skipped.push({ query: q, reason: "Row has no agent name or agency to identify it" });
       continue;
     }
 

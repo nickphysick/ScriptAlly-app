@@ -19,6 +19,7 @@
  */
 import { collection, doc, getDocs, updateDoc, deleteField } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "./firebase";
+import { QueryStatus } from "../types";
 import { deriveQueryFields, getActivityTime, normalizeResultingStatus, DerivableActivity } from "./queryDerivation";
 
 /**
@@ -55,12 +56,34 @@ export async function recomputeQuery(userId: string, queryId: string): Promise<v
     const activities = snap.docs.map((d) => subcollectionDocToDerivable(d.id, d.data()));
     const fields = deriveQueryFields(activities);
 
+    // A pipeline-stage date whose latest rung is PROVISIONAL (an imported, date-unknown rung) must
+    // never be written — its createdAt is only an ordering key, not a real date. Status/responses/
+    // revisionRound still derive from rung existence, so they stay correct; the date is simply
+    // left unset ("date needed"). Non-imported queries carry no provisional rungs, so this is inert.
+    const stageProvisional = (status: QueryStatus): boolean => {
+      let bestTime = -Infinity;
+      let provisional = false;
+      for (const d of snap.docs) {
+        const data = d.data();
+        const s = normalizeResultingStatus(data.resultingStatus) ?? normalizeResultingStatus(data.type);
+        if (s !== status) continue;
+        const t = getActivityTime(data.createdAt);
+        if (t >= bestTime) {
+          bestTime = t;
+          provisional = data.dateProvisional === true;
+        }
+      }
+      return provisional;
+    };
+    const stageDate = (status: QueryStatus, derived: string | null) =>
+      stageProvisional(status) || !derived ? deleteField() : derived;
+
     await updateDoc(queryRef, {
       status: fields.status,
-      partialRequestedDate: fields.partialRequestedDate ?? deleteField(),
-      partialSentDate: fields.partialSentDate ?? deleteField(),
-      fullRequestedDate: fields.fullRequestedDate ?? deleteField(),
-      fullSentDate: fields.fullSentDate ?? deleteField(),
+      partialRequestedDate: stageDate(QueryStatus.PARTIAL_REQUESTED, fields.partialRequestedDate),
+      partialSentDate: stageDate(QueryStatus.PARTIAL_SENT, fields.partialSentDate),
+      fullRequestedDate: stageDate(QueryStatus.FULL_REQUESTED, fields.fullRequestedDate),
+      fullSentDate: stageDate(QueryStatus.FULL_SENT, fields.fullSentDate),
       revisionRound: fields.revisionRound,
       hasAgentResponded: fields.hasAgentResponded,
     });

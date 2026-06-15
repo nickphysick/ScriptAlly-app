@@ -29,9 +29,10 @@ describe('validateSmartImport — drop-and-report (never silently write a bad ro
     expect(r.skipped[0].reason).toMatch(/Unrecognised status/);
   });
 
-  it('drops a row with no query date', () => {
+  it('IMPORTS a row with no query date (provisional) — never drops it for a missing date', () => {
     const r = validateSmartImport(result([agent()], [query({ dateQueried: null })]));
-    expect(r.skipped[0].reason).toMatch(/No query date/);
+    expect(r.importable).toHaveLength(1);
+    expect(r.skipped).toHaveLength(0);
   });
 
   it('drops a row whose agentRef matches no agent', () => {
@@ -39,9 +40,15 @@ describe('validateSmartImport — drop-and-report (never silently write a bad ro
     expect(r.skipped[0].reason).toMatch(/didn't match an agent/);
   });
 
-  it("drops a row whose matched agent has no name (rules require name >= 1 char)", () => {
-    const r = validateSmartImport(result([agent({ ref: 'a1', name: '   ' })], [query({ agentRef: 'a1' })]));
-    expect(r.skipped[0].reason).toMatch(/no agent name/);
+  it("IMPORTS an agency-only (no-name) agent's query — agency is the identity", () => {
+    const r = validateSmartImport(result([agent({ ref: 'a1', name: '   ', agency: 'Curtis Brown' })], [query({ agentRef: 'a1' })]));
+    expect(r.importable).toHaveLength(1);
+    expect(r.skipped).toHaveLength(0);
+  });
+
+  it("drops a row whose agent has neither a name nor an agency", () => {
+    const r = validateSmartImport(result([agent({ ref: 'a1', name: '  ', agency: '' })], [query({ agentRef: 'a1' })]));
+    expect(r.skipped[0].reason).toMatch(/no agent name or agency/);
   });
 
   it('flags out-of-order dates as a warning but STILL imports the row (never auto-fixed)', () => {
