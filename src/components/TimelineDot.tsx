@@ -72,26 +72,14 @@ export const renderTimelineDot = (label: string, resultingStatus?: QueryStatus):
 };
 
 /**
- * Resolve an activity's display label (honouring the AI-style custom-label localStorage overrides)
- * + its glyph + whether the pill shows + its copy-customizer key. Identical behaviour to the two
- * copies it replaces.
+ * Resolve an activity's default display label + its glyph + its copy key. The AI-style
+ * copy-customizer (the only writer of the sc_custom_pill_* overrides) has been removed, so
+ * resolution always uses the defaults: the pill always shows and the label is the default.
+ * `show` is kept in the returned shape for the callers that still destructure it.
  */
 export const getPillLabelAndDot = (desc: string, activityType?: ActivityType, resultingStatus?: QueryStatus) => {
   const { key, defaultLabel } = getActivityKeyAndDefaults(desc, activityType);
-
-  let show = true;
-  let customLabel = "";
-
-  if (key) {
-    const showVal = localStorage.getItem(`sc_custom_pill_show_${key}`);
-    if (showVal === "false") {
-      show = false;
-    }
-    customLabel = localStorage.getItem(`sc_custom_pill_label_${key}`) || "";
-  }
-
-  const label = customLabel || defaultLabel;
   const dot = renderTimelineDot(defaultLabel, resultingStatus);
 
-  return { label, dot, show, key };
+  return { label: defaultLabel, dot, show: true, key };
 };

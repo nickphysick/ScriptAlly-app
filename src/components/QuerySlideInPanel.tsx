@@ -596,32 +596,25 @@ export const QuerySlideInPanel: React.FC<QuerySlideInPanelProps> = ({
 
                       const ms = manuscript || manuscripts[0];
                       const msTitle = ms ? ms.title : "";
+                      // The AI-style copy-customizer (the only writer of the sc_custom_ms_* overrides)
+                      // has been removed, so the manuscript pill always shows for the cases below and
+                      // uses the default template.
                       const showManuscriptPill = (() => {
                         const isAgentAct = act.activityType === ActivityType.AGENT_ADDED || act.activityType === ActivityType.AGENT_UPDATED;
-                        if (isAgentAct) {
-                          if (!key) return true;
-                          const msShowVal = localStorage.getItem(`sc_custom_ms_show_${key}`);
-                          return msShowVal !== "false";
-                        }
-                        if (!msTitle) return false;
-                        if (!key) return true;
-                        const msShowVal = localStorage.getItem(`sc_custom_ms_show_${key}`);
-                        return msShowVal !== "false";
+                        if (isAgentAct) return true;
+                        return !!msTitle;
                       })();
 
                       const resolvedAgent = agent || extractAgentFromText(act.description);
 
                       const manuscriptPillContent = (() => {
                         if (!showManuscriptPill) return null;
-                        const customLabel = key ? localStorage.getItem(`sc_custom_ms_label_${key}`) : null;
-                        
-                        let defaultTemplate = "{Manuscript Title}";
+
+                        let templateText = "{Manuscript Title}";
                         if (act.activityType === ActivityType.AGENT_ADDED || act.activityType === ActivityType.AGENT_UPDATED) {
-                          defaultTemplate = "[agent full name] at [agency name]";
+                          templateText = "[agent full name] at [agency name]";
                         }
-                        
-                        const templateText = (customLabel && customLabel.trim()) ? customLabel : defaultTemplate;
-                        
+
                         return replacePlaceholders(
                           templateText,
                           msTitle,

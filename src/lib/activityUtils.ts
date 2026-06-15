@@ -265,20 +265,7 @@ export const getDynamicActivityText = (
   agent: { name: string; agency: string } | null,
   q?: { responseDeadline?: string | null } | null
 ) => {
-  let description = act.description;
-  let details = act.details || "";
-
-  if (key) {
-    const customDesc = localStorage.getItem(`sc_custom_desc_${key}`);
-    const customDetails = localStorage.getItem(`sc_custom_details_${key}`);
-
-    if (customDesc && customDesc.trim()) {
-      description = replacePlaceholders(customDesc, msTitle, agent, q, act.details || "");
-    }
-    if (customDetails && customDetails.trim()) {
-      details = replacePlaceholders(customDetails, msTitle, agent, q, act.details || "");
-    }
-  }
-
-  return { description, details };
+  // The AI-style copy-customizer (the only writer of sc_custom_desc_/sc_custom_details_) has been
+  // removed, so the timeline text is always the stored activity copy.
+  return { description: act.description, details: act.details || "" };
 };
