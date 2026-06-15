@@ -1961,8 +1961,8 @@ export const Dashboard: React.FC<{
         </div>
       ) : (
         /* ============ TOP ROW: hero + stat cards (left) · Over to you (right) ============ */
-        <div className="w-full max-w-none px-4 md:px-10 lg:px-14 xl:px-16 pt-2">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-[16px] items-stretch">
+        <div className="w-full max-w-none px-4 md:px-10 lg:px-8 xl:px-8 pt-2">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-[16px] items-stretch">
             {/* Left: hero stacked above the four stat cards (shares the pipeline's width) */}
             <div className="flex flex-col gap-[16px]">
               <HeroCard
@@ -2013,7 +2013,7 @@ export const Dashboard: React.FC<{
       {/* ============ LOWER ROW: pipeline (left) · timeline (right) ============ */}
       <div className={isMagazineLayout
         ? "grid grid-cols-1 lg:grid-cols-[1.8fr_1.1fr] xl:grid-cols-[2fr_1fr] gap-0 bg-[#FAF8F5] border-t border-[#e8e0d8] items-stretch"
-        : "w-full max-w-none px-4 md:px-10 lg:px-14 xl:px-16 pt-[14px] grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-[16px] items-start"
+        : "w-full max-w-none px-4 md:px-10 lg:px-8 xl:px-8 pt-[14px] grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-[16px] items-start"
       }>
         
         {/* LEFT COLUMN: Stat Cards & Pipeline Matrix */}
@@ -3700,7 +3700,7 @@ export const Dashboard: React.FC<{
 
       {/* Quiet Pro upsell (replaces the old three-format banner review arena) */}
       {!isMagazineLayout && currentUser.plan !== UserPlan.PRO && (
-        <div className="w-full max-w-none px-4 md:px-10 lg:px-14 xl:px-16 mt-[14px]">
+        <div className="w-full max-w-none px-4 md:px-10 lg:px-8 xl:px-8 mt-[14px]">
           <MountCard>
             <div
               className="flex flex-col md:flex-row md:items-center justify-between gap-4"

@@ -14,9 +14,9 @@ import { LayoutDashboard, Send, Users, Library, Settings } from "lucide-react";
 import { MountCard } from "./MountCard";
 import { burgundy, ghostButtonText, FONT_SANS, hairline } from "../lib/designTokens";
 
-/** Tightest width that fits the longest label ("Manuscripts") at the app font, plus a few px.
+/** Fits the longest label ("Manuscripts") at the app font with a little breathing room either side.
  *  Content clears the rail by RAIL_LEFT + RAIL_WIDTH + RAIL_GAP (see AppShell). */
-export const RAIL_WIDTH = 146;
+export const RAIL_WIDTH = 160;
 export const RAIL_LEFT = 14;
 export const RAIL_GAP = 12;
 
