@@ -21,7 +21,6 @@ import {
   limit 
 } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
-import { ActivityCopyCustomizer } from "./ActivityCopyCustomizer";
 import { QuerySlideInPanel } from "./QuerySlideInPanel";
 import { RecordResponseModal } from "./RecordResponseModal";
 import { NudgeModal } from "./NudgeModal";
@@ -50,7 +49,6 @@ import {
   FONT_SANS,
   buttonPinkBg,
   buttonPinkBorder,
-  ghostButtonText,
   PAPER_TEXTURE,
   mountShadow,
   insetBorder,
@@ -484,7 +482,6 @@ export const Dashboard: React.FC<{
 
   const [isTasksPanelOpen, setIsTasksPanelOpen] = useState(false);
   const [spotlightTaskIndex, setSpotlightTaskIndex] = useState(0);
-  const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
   const [activeSnoozeTaskId, setActiveSnoozeTaskId] = useState<string | null>(null);
   const [activeTouchTaskId, setActiveTouchTaskId] = useState<string | null>(null);
   const [isTouch, setIsTouch] = useState(false);
@@ -3510,7 +3507,6 @@ export const Dashboard: React.FC<{
                               q,
                               act.details
                             );
-                            const meta = [agency, msTitle].filter(Boolean).join(" · ");
 
                             // Every respond-by/check-back date derives from the live query fields only
                             // (responseDeadline / nudgeDate) — never the stale stamped activity.details.
@@ -3605,10 +3601,19 @@ export const Dashboard: React.FC<{
                                     {agentName}
                                   </div>
 
-                                  {/* Meta: AGENCY · MANUSCRIPT */}
-                                  {meta && (
-                                    <div style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9c8878", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginTop: 3 }}>
-                                      {meta}
+                                  {/* Meta: agency (line 1, may ellipsis) over the full manuscript title (line 2, wraps) */}
+                                  {(agency || msTitle) && (
+                                    <div style={{ marginTop: 3 }}>
+                                      {agency && (
+                                        <div style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9c8878", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                          {agency}
+                                        </div>
+                                      )}
+                                      {msTitle && (
+                                        <div style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9c8878", lineHeight: 1.4, marginTop: agency ? 2 : 0, overflowWrap: "break-word" }}>
+                                          {msTitle}
+                                        </div>
+                                      )}
                                     </div>
                                   )}
 
@@ -3631,43 +3636,13 @@ export const Dashboard: React.FC<{
               </div>
             );
 
-            const aiStyleButton = (
-              <button
-                onClick={() => setIsCustomizerOpen(true)}
-                className="cursor-pointer"
-                title="Customize ledger copy style rules"
-                style={{
-                  fontFamily: FONT_MONO,
-                  fontSize: 9,
-                  fontWeight: 500,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  background: "#ffffff",
-                  color: ghostButtonText,
-                  border: "0.5px solid #e0d5c8",
-                  borderRadius: 9,
-                  padding: "5px 10px",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 5,
-                  transition: "all 0.2s",
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = burgundy; e.currentTarget.style.background = buttonPinkBg; }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = ghostButtonText; e.currentTarget.style.background = "#ffffff"; }}
-              >
-                <Sparkles className="w-[11px] h-[11px]" />
-                AI style
-              </button>
-            );
-
             if (isMagazineLayout) {
               return (
                 <div className="p-[20px] text-left flex-1 flex flex-col justify-between min-h-0 relative">
-                  <div className="flex items-center justify-between mb-4 w-full">
+                  <div className="flex items-center mb-4 w-full">
                     <span className="font-serif text-[11px] font-semibold uppercase tracking-wider text-[#3a1c14]">
                       Timeline
                     </span>
-                    {aiStyleButton}
                   </div>
                   {timelineBody}
                 </div>
@@ -3691,10 +3666,6 @@ export const Dashboard: React.FC<{
                 >
                   <span style={{ fontFamily: FONT_SERIF, fontSize: 15, fontWeight: 500, color: headingInk }}>
                     The story so far
-                  </span>
-                  <span className="flex items-center" style={{ gap: 10 }}>
-                    <span style={{ ...labelStyle, color: sageText }}>Timeline</span>
-                    {aiStyleButton}
                   </span>
                 </div>
 
@@ -3902,12 +3873,6 @@ export const Dashboard: React.FC<{
           </div>
         )}
       </AnimatePresence>
-
-      {/* AI Activity Copy Customizer Modal */}
-      <ActivityCopyCustomizer 
-        isOpen={isCustomizerOpen} 
-        onClose={() => setIsCustomizerOpen(false)} 
-      />
 
       {/* Query Slide-in panel */}
       <QuerySlideInPanel
