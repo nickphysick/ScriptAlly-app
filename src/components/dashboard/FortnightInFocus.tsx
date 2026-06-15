@@ -15,6 +15,7 @@
  * added). The urgency badge is a separate attention layer derived from the event's semantics.
  */
 import React, { useMemo, useState, useRef, useEffect, useLayoutEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { Query, Agent, Manuscript, Activity, QueryStatus, ActivityType } from "../../types";
 import { StatusDot } from "../StatusDot";
 import { extractAgentFromText } from "../../lib/activityUtils";
@@ -367,11 +368,10 @@ export const FortnightInFocus: React.FC<FortnightInFocusProps> = ({
   };
 
   // ── Hover/focus preview popover ──────────────────────────────────────────────
-  const cardRef = useRef<HTMLDivElement>(null);
   const popRef = useRef<HTMLDivElement>(null);
   const hoverTimer = useRef<number | undefined>(undefined);
   const [preview, setPreview] = useState<number | null>(null);
-  const [popStyle, setPopStyle] = useState<React.CSSProperties>({ visibility: "hidden" });
+  const [popStyle, setPopStyle] = useState<React.CSSProperties>({ position: "fixed", top: -9999, left: -9999, visibility: "hidden" });
 
   const showPreviewNow = (idx: number) => setPreview(idx);
   const schedulePreview = (idx: number) => {
@@ -385,19 +385,18 @@ export const FortnightInFocus: React.FC<FortnightInFocusProps> = ({
   useEffect(() => () => window.clearTimeout(hoverTimer.current), []);
 
   useLayoutEffect(() => {
-    if (preview == null) { setPopStyle({ visibility: "hidden" }); return; }
+    if (preview == null) { setPopStyle({ position: "fixed", top: -9999, left: -9999, visibility: "hidden" }); return; }
     const cell = cellRefs.current[preview];
     const pop = popRef.current;
-    const card = cardRef.current;
-    if (!cell || !pop || !card) return;
+    if (!cell || !pop) return;
+    // Measure the popover at its real (content-wrapped) size, then place from the cell's viewport rect.
     const cr = cell.getBoundingClientRect();
     const pr = pop.getBoundingClientRect();
-    const br = card.getBoundingClientRect();
     const gap = 8;
     let top = cr.top - gap - pr.height;          // prefer above the cell (never covers the cursor)
-    if (top < 8) top = cr.bottom + gap;           // flip below only when there's no room
+    if (top < 8) top = cr.bottom + gap;           // flip below only when there's no room above
     let left = cr.left + cr.width / 2 - pr.width / 2;
-    left = Math.max(br.left + 6, Math.min(left, br.right - pr.width - 6)); // clamp within the card
+    left = Math.max(8, Math.min(left, window.innerWidth - pr.width - 8)); // clamp within the viewport
     setPopStyle({ position: "fixed", top, left, visibility: "visible" });
   }, [preview]);
 
@@ -650,7 +649,6 @@ export const FortnightInFocus: React.FC<FortnightInFocusProps> = ({
 
   return (
     <div
-      ref={cardRef}
       id="fortnight-in-focus-container"
       className="flex flex-col w-full relative"
       style={isMagazineLayout
@@ -663,8 +661,10 @@ export const FortnightInFocus: React.FC<FortnightInFocusProps> = ({
       {header}
       {body}
 
-      {/* Hover/focus preview popover — branded parchment mini-card, never intercepts clicks */}
-      {preview != null && (() => {
+      {/* Hover/focus preview popover — branded parchment mini-card, portalled to <body> so no
+          ancestor (MountCard / transformed wrapper) can clip it; sizes to content, never intercepts
+          clicks. */}
+      {preview != null && typeof document !== "undefined" && createPortal((() => {
         const d = days[preview];
         const evs = eventsOn(d);
         return (
@@ -675,7 +675,8 @@ export const FortnightInFocus: React.FC<FortnightInFocusProps> = ({
               ...popStyle,
               zIndex: 80,
               pointerEvents: "none",
-              width: 220,
+              minWidth: 220,
+              maxWidth: 300,
               background: parchment,
               backgroundImage: PAPER_TEXTURE,
               borderRadius: 10,
@@ -695,9 +696,9 @@ export const FortnightInFocus: React.FC<FortnightInFocusProps> = ({
               ) : (
                 <div className="flex flex-col" style={{ gap: 6 }}>
                   {evs.map((ev) => (
-                    <div key={ev.id} className="flex items-center" style={{ gap: 7 }}>
-                      <span style={{ display: "inline-flex" }}>{renderMarker(ev.marker, 14)}</span>
-                      <span style={{ fontFamily: FONT_SANS, fontSize: 11, color: bodyInk, minWidth: 0 }} className="truncate">
+                    <div key={ev.id} className="flex items-start" style={{ gap: 7 }}>
+                      <span style={{ display: "inline-flex", marginTop: 1 }}>{renderMarker(ev.marker, 14)}</span>
+                      <span style={{ fontFamily: FONT_SANS, fontSize: 11, color: bodyInk, lineHeight: 1.35, overflowWrap: "anywhere", wordBreak: "break-word" }}>
                         <span style={{ fontWeight: 500 }}>{ev.title}</span>
                         <span style={{ color: mutedInk }}> — {ev.line}</span>
                       </span>
@@ -708,7 +709,7 @@ export const FortnightInFocus: React.FC<FortnightInFocusProps> = ({
             </div>
           </div>
         );
-      })()}
+      })(), document.body)}
     </div>
   );
 };
