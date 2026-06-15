@@ -29,6 +29,8 @@ import { recordQueryResponse } from "../lib/recordResponse";
 import { CalendarView } from "./CalendarView";
 import { StatusPill } from "./StatusPill";
 import { StatusDot } from "./StatusDot";
+import { getPillLabelAndDot } from "./TimelineDot";
+import { getTimelineFamily, FAMILY_CARD_STYLE } from "../lib/timelineEvent";
 import {
   pageGround,
   bodyInk,
@@ -57,9 +59,11 @@ import { MountCard } from "./MountCard";
 import { HeroCard } from "./dashboard/HeroCard";
 import { OverToYou } from "./dashboard/OverToYou";
 import { StatCards } from "./dashboard/StatCards";
-import { getDynamicActivityText, replacePlaceholders, extractAgentFromText, boldAgentAndAgencyInText } from "../lib/activityUtils";
+import { replacePlaceholders, extractAgentFromText } from "../lib/activityUtils";
 import {
   Sparkles,
+  CalendarClock,
+  RefreshCw,
   BookOpen,
   ArrowRight,
   ArrowLeft,
@@ -114,155 +118,24 @@ const formatRichText = (str: string): React.ReactNode => {
   );
 };
 
-/**
- * Activity-feed mark for a timeline row. Status-bearing events render the canonical
- * StatusDot; non-status events (nudges, agent/manuscript updates) keep small neutral marks.
- */
-const renderTimelineDot = (label: string, resultingStatus?: QueryStatus) => {
-  if (resultingStatus) {
-    return <StatusDot status={resultingStatus} size={13} />;
-  }
+// Timeline dot/label resolution + the family classifier now live in the shared primitives
+// (./TimelineDot, ../lib/timelineEvent) — imported above and consumed by the story-so-far feed.
 
-  const LABEL_TO_STATUS: Record<string, QueryStatus> = {
-    "Query sent": QueryStatus.QUERIED,
-    "Partial requested": QueryStatus.PARTIAL_REQUESTED,
-    "Partial sent": QueryStatus.PARTIAL_SENT,
-    "Full requested": QueryStatus.FULL_REQUESTED,
-    "Full sent": QueryStatus.FULL_SENT,
-    "Materials sent": QueryStatus.PARTIAL_SENT,
-    "Offer received": QueryStatus.OFFER,
-    "Revise & resubmit": QueryStatus.REVISE_RESUBMIT,
-    "Rejection": QueryStatus.REJECTED,
-    "Withdrawn": QueryStatus.WITHDRAWN,
-  };
-  const mapped = LABEL_TO_STATUS[label];
-  if (mapped) {
-    return <StatusDot status={mapped} size={13} />;
-  }
-
-  if (label === "Nudge sent") {
-    return (
-      <svg width="13" height="13" viewBox="0 0 40 40" className="shrink-0 text-[#7c3a2a]">
-        <circle cx="20" cy="20" r="17" stroke="currentColor" strokeWidth="3.5" fill="#ffffff" />
-        <path d="M 20,11 L 20,20 L 26,20" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      </svg>
-    );
-  }
-  if (label === "Now open" || label === "Ready to query") {
-    return (
-      <svg width="13" height="13" viewBox="0 0 40 40" className="shrink-0 text-[#8a9e88]">
-        <circle cx="20" cy="20" r="17" fill="currentColor" stroke="none" />
-      </svg>
-    );
-  }
-  if (label === "Now closed" || label === "Shelved") {
-    return (
-      <svg width="13" height="13" viewBox="0 0 40 40" className="shrink-0 text-[#cfc6bb]">
-        <circle cx="20" cy="20" r="17" fill="currentColor" stroke="none" />
-      </svg>
-    );
-  }
-  // fallback neutral mark ("Status changed", agent/manuscript events)
-  return (
-    <svg width="13" height="13" viewBox="0 0 40 40" className="shrink-0 text-[#7c3a2a]">
-      <circle cx="20" cy="20" r="17" stroke="currentColor" strokeWidth="3.5" fill="#ffffff" />
-    </svg>
-  );
+/** A single consequence tag on a story-so-far card (in-colour lucide icon, never emoji). */
+const STORY_TAG_TONE: Record<"sage" | "gold" | "burgundy" | "muted", { bg: string; color: string; border: string }> = {
+  sage: { bg: "#e9ede6", color: "#5a6e58", border: "transparent" },
+  gold: { bg: "#fbf3e2", color: "#9a6a12", border: "rgba(186,117,23,0.35)" },
+  burgundy: { bg: "#f8e7dc", color: "#7c3a2a", border: "transparent" },
+  muted: { bg: "#f1ede7", color: "#8a7a6c", border: "transparent" },
 };
-
-const getPillLabelAndDot = (desc: string, activityType?: ActivityType, resultingStatus?: QueryStatus) => {
-  const normalized = (desc || "").toLowerCase();
-  
-  let key: string | null = null;
-  let defaultLabel = "Status changed";
-
-  if (activityType !== undefined) {
-    if (activityType === ActivityType.AGENT_ADDED) {
-      key = "agent_added";
-      defaultLabel = "Agent added";
-    }
-    else if (activityType === ActivityType.AGENT_UPDATED) {
-      key = "agent_updated";
-      defaultLabel = "Agent updated";
-      if (normalized.includes("open to submissions")) {
-        defaultLabel = "Now open";
-      } else if (normalized.includes("closed to submissions")) {
-        defaultLabel = "Now closed";
-      } else if (normalized.includes("rating")) {
-        defaultLabel = "Rating updated";
-      } else if (normalized.includes("wishlist")) {
-        defaultLabel = "MSWL updated";
-      }
-    }
-    else if (activityType === ActivityType.MANUSCRIPT_ADDED) {
-      key = "ms_added";
-      defaultLabel = "Manuscript added";
-    }
-    else if (activityType === ActivityType.MANUSCRIPT_UPDATED) {
-      key = "ms_updated";
-      defaultLabel = "Manuscript updated";
-      if (normalized.includes("ready to query")) {
-        defaultLabel = "Ready to query";
-      } else if (normalized.includes("shelved")) {
-        defaultLabel = "Shelved";
-      }
-    }
-  }
-
-  if (!key) {
-    if (normalized.includes("query sent") || normalized.includes("dispatched")) {
-      key = "queried";
-      defaultLabel = "Query sent";
-    } else if (normalized.includes("partial") && normalized.includes("requested")) {
-      key = "partial_req";
-      defaultLabel = "Partial requested";
-    } else if (normalized.includes("partial") && normalized.includes("sent")) {
-      key = "partial_sent";
-      defaultLabel = "Partial sent";
-    } else if (normalized.includes("full manuscript") && normalized.includes("requested")) {
-      key = "full_req";
-      defaultLabel = "Full requested";
-    } else if (normalized.includes("full manuscript") && normalized.includes("sent")) {
-      key = "full_sent";
-      defaultLabel = "Full sent";
-    } else if (normalized.includes("offer of representation") || normalized.includes("congratulations")) {
-      key = "offer";
-      defaultLabel = "Offer received";
-    } else if (normalized.includes("revise and resubmit") || normalized.includes("r&r")) {
-      key = "rr";
-      defaultLabel = "Revise & resubmit";
-    } else if (normalized.includes("rejected") || normalized.includes("rejection")) {
-      key = "rejected";
-      defaultLabel = "Rejection";
-    } else if (normalized.includes("withdrew") || normalized.includes("withdrawn")) {
-      key = "withdrawn";
-      defaultLabel = "Withdrawn";
-    } else if (normalized.includes("nudge")) {
-      key = "nudge_sent";
-      defaultLabel = "Nudge sent";
-    } else if (normalized.includes("no response") || normalized.includes("timeout")) {
-      key = "no_response";
-      defaultLabel = "Status changed";
-    } else if (normalized.includes("materials sent") || normalized.includes("transmitted")) {
-      defaultLabel = "Materials sent";
-    }
-  }
-
-  let show = true;
-  let customLabel = "";
-
-  if (key) {
-    const showVal = localStorage.getItem(`sc_custom_pill_show_${key}`);
-    if (showVal === "false") {
-      show = false;
-    }
-    customLabel = localStorage.getItem(`sc_custom_pill_label_${key}`) || "";
-  }
-
-  const label = customLabel || defaultLabel;
-  const dot = renderTimelineDot(defaultLabel, resultingStatus);
-
-  return { label, dot, show, key };
+const StoryTag: React.FC<{ tone: "sage" | "gold" | "burgundy" | "muted"; Icon?: React.ComponentType<{ className?: string }>; children: React.ReactNode }> = ({ tone, Icon, children }) => {
+  const t = STORY_TAG_TONE[tone];
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, marginTop: 7, maxWidth: "100%", fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.03em", padding: "4px 9px", borderRadius: 8, background: t.bg, color: t.color, border: `0.5px solid ${t.border}` }}>
+      {Icon && <Icon className="w-[11px] h-[11px] shrink-0" />}
+      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{children}</span>
+    </span>
+  );
 };
 
 const getPriorityRank = (task: Task) => {
@@ -1471,7 +1344,11 @@ export const Dashboard: React.FC<{
   }, [activities]);
 
   const groupedEventsByDate: Record<string, typeof activities> = {};
-  mergedActivities.forEach(act => {
+  // Story-so-far feed cuts the housekeeping family (agent/manuscript add/update/delete) at the
+  // render-grouping level only — mergedActivities itself stays intact for Fortnight in Focus's
+  // related-activity lookup. A day left with only housekeeping yields no group key, so no empty
+  // day-separator renders, and an emptied feed falls through to the existing empty-state.
+  mergedActivities.filter(act => getTimelineFamily(act) !== "housekeeping").forEach(act => {
     const dStr = new Date(act.date).toLocaleDateString("en-GB", {
       day: "numeric",
       month: "short",
@@ -3611,136 +3488,135 @@ export const Dashboard: React.FC<{
                           {events.map((act, evIdx) => {
                             const q = queries.find(item => item.id === act.queryId);
                             const agent = q ? agents.find(ag => ag.id === q.agentId) : null;
-                            const ms = manuscripts.find(m => m.id === act.manuscriptId) || manuscripts[0];
+                            const resolvedAgent = agent || extractAgentFromText(act.description);
+                            const ms = (q && manuscripts.find(m => m.id === q.manuscriptId)) || manuscripts.find(m => m.id === act.manuscriptId) || null;
                             const msTitle = ms ? ms.title : "";
+                            const agency = resolvedAgent?.agency || "";
+                            const agentName = resolvedAgent?.name || "The agent";
                             const formattedTime = getFormattedTime(act.date);
 
                             const pillData = getPillLabelAndDot(act.description, act.activityType, act.resultingStatus);
-                            const showManuscriptPill = (() => {
-                              const isAgentAct = act.activityType === ActivityType.AGENT_ADDED || act.activityType === ActivityType.AGENT_UPDATED;
-                              if (isAgentAct) {
-                                if (!pillData.key) return true;
-                                const msShowVal = localStorage.getItem(`sc_custom_ms_show_${pillData.key}`);
-                                return msShowVal !== "false";
-                              }
-                              if (!msTitle) return false;
-                              if (!pillData.key) return true;
-                              const msShowVal = localStorage.getItem(`sc_custom_ms_show_${pillData.key}`);
-                              return msShowVal !== "false";
-                            })();
-
-                            const manuscriptPillContent = (() => {
-                              if (!showManuscriptPill) return null;
-                              const customLabel = pillData.key ? localStorage.getItem(`sc_custom_ms_label_${pillData.key}`) : null;
-
-                              let defaultTemplate = "{Manuscript Title}";
-                              if (act.activityType === ActivityType.AGENT_ADDED || act.activityType === ActivityType.AGENT_UPDATED) {
-                                defaultTemplate = "[agent full name] at [agency name]";
-                              }
-
-                              const templateText = (customLabel && customLabel.trim()) ? customLabel : defaultTemplate;
-                              const resolvedAgent = agent || extractAgentFromText(act.description);
-
-                              return replacePlaceholders(
-                                templateText,
-                                msTitle,
-                                resolvedAgent ? { name: resolvedAgent.name, agency: resolvedAgent.agency } : null,
-                                q,
-                                act.details
-                              );
-                            })();
-
-                            const { description: displayDesc, details: displayDetails } = getDynamicActivityText(
-                              act,
-                              pillData.key,
-                              msTitle,
-                              agent ? { name: agent.name, agency: agent.agency } : null,
-                              q
-                            );
-
-                            const resolvedAgentForBold = agent || extractAgentFromText(act.description);
-                            const boldedDesc = boldAgentAndAgencyInText(
-                              displayDesc,
-                              resolvedAgentForBold?.name,
-                              resolvedAgentForBold?.agency
-                            );
+                            const family = getTimelineFamily(act);
+                            const isOffer = family === "offer";
+                            const cardKey: "incoming" | "outgoing" | "closed" =
+                              family === "incoming" || family === "closed" ? family : "outgoing"; // nudge → outgoing palette
+                            const cardStyle = FAMILY_CARD_STYLE[cardKey];
+                            const isLastInGroup = evIdx === events.length - 1;
 
                             const displayPillLabel = replacePlaceholders(
                               pillData.label,
                               msTitle,
-                              agent ? { name: agent.name, agency: agent.agency } : null,
+                              resolvedAgent ? { name: resolvedAgent.name, agency: resolvedAgent.agency } : null,
                               q,
                               act.details
                             );
+                            const meta = [agency, msTitle].filter(Boolean).join(" · ");
 
-                            // Label caption beneath the sentence: respond-by date + manuscript
-                            const respondBy = q?.responseDeadline
-                              ? `Respond by ${new Date(q.responseDeadline).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}`
-                              : "";
-                            const isLastInGroup = evIdx === events.length - 1;
+                            // Every respond-by/check-back date derives from the live query fields only
+                            // (responseDeadline / nudgeDate) — never the stale stamped activity.details.
+                            const fmtDate = (d?: string | null) =>
+                              d ? new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : null;
+                            const respondBy = fmtDate(q?.responseDeadline);
+                            const coerceDate = (v: any): Date | null => {
+                              if (!v) return null;
+                              if (typeof v === "string") { const d = new Date(v); return isNaN(d.getTime()) ? null : d; }
+                              if (typeof v.seconds === "number") return new Date(v.seconds * 1000);
+                              if (typeof v.toDate === "function") return v.toDate();
+                              if (v instanceof Date) return v;
+                              return null;
+                            };
+                            // A logged nudge's optional note (the bit after the check-back in details).
+                            const nudgeNote = (() => {
+                              const m = (act.details || "").match(/·\s*"([^"]+)"/);
+                              return m ? m[1] : null;
+                            })();
+
+                            // Consequence tag — at most one fact per card.
+                            let tag: React.ReactNode = null;
+                            if (pillData.key === "partial_req" || pillData.key === "full_req") {
+                              if (respondBy) tag = <StoryTag tone="sage" Icon={CalendarClock}>Respond by {respondBy}</StoryTag>;
+                            } else if (pillData.key === "rr") {
+                              const v = q?.revisionRound;
+                              tag = <StoryTag tone="sage" Icon={RefreshCw}>{`Revision${v ? ` v${v}` : ""}${respondBy ? ` · respond by ${respondBy}` : ""}`}</StoryTag>;
+                            } else if (pillData.key === "nudge_sent") {
+                              const nd = fmtDate(q?.nudgeDate);
+                              tag = <StoryTag tone="burgundy" Icon={Clock}>{`Follow-up reminder${nd ? ` · ${nd}` : ""}`}</StoryTag>;
+                            } else if (family === "closed") {
+                              const reason = (act.details || "").trim();
+                              if (reason) tag = <StoryTag tone="muted">{reason}</StoryTag>;
+                            }
+
+                            // Offer hero gold tag — reply-by from the offer response deadline.
+                            let offerTag: React.ReactNode = null;
+                            if (isOffer) {
+                              const replyBy = coerceDate(q?.offerResponseDeadline);
+                              if (replyBy) {
+                                const days = Math.max(0, Math.round((replyBy.getTime() - Date.now()) / 86400000));
+                                offerTag = <StoryTag tone="gold" Icon={Sparkles}>{`Reply by ${replyBy.toLocaleDateString("en-GB", { day: "numeric", month: "short" })} · ${days} day${days === 1 ? "" : "s"}`}</StoryTag>;
+                              }
+                            }
+
+                            const openEvent = () => {
+                              if (act.queryId) { setSelectedQueryIdForPanel(act.queryId); setIsQueryPanelOpen(true); }
+                              else { onNavigate("queries", act.description); }
+                            };
 
                             return (
                               <div key={act.id} className="flex animate-fade-in" style={{ gap: 12, marginBottom: isLastInGroup ? 18 : 14 }}>
-                                {/* Dot on the connector thread */}
-                                <div className="flex flex-col items-center shrink-0">
-                                  <span style={{ marginTop: 3 }}>{pillData.dot}</span>
-                                  {!isLastInGroup && <span style={{ width: 1.5, flex: 1, background: "#e8dcd0", marginTop: 4 }} />}
+                                {/* StatusDot on a 22px rail, top-aligned */}
+                                <div className="flex flex-col items-center shrink-0" style={{ width: 22 }}>
+                                  <span style={{ marginTop: 13 }}>{pillData.dot}</span>
+                                  {!isLastInGroup && <span style={{ width: 1.5, flex: 1, background: "#e8dcd0", marginTop: 5 }} />}
                                 </div>
 
-                                {/* Event sub-card */}
+                                {/* Event card */}
                                 <div
-                                  onClick={() => {
-                                    if (act.queryId) {
-                                      setSelectedQueryIdForPanel(act.queryId);
-                                      setIsQueryPanelOpen(true);
-                                    } else {
-                                      onNavigate("queries", act.description);
-                                    }
-                                  }}
-                                  className="cursor-pointer transition-all group"
+                                  onClick={openEvent}
+                                  className="cursor-pointer transition-all"
                                   style={{
                                     flex: 1,
                                     minWidth: 0,
-                                    background: "#fffdf9",
-                                    border: "0.5px solid #ece0d2",
-                                    borderRadius: 9,
-                                    padding: "12px 14px",
+                                    position: "relative",
+                                    overflow: "hidden",
+                                    borderRadius: 11,
+                                    padding: "11px 14px 12px",
+                                    background: isOffer ? "linear-gradient(135deg, #fffaf0 0%, #fffdfa 100%)" : "#fffdfa",
+                                    border: isOffer ? "0.5px solid rgba(186,117,23,0.35)" : "0.5px solid #f0eae2",
                                   }}
                                 >
-                                  <div className="flex justify-between items-center" style={{ marginBottom: 5 }}>
-                                    {pillData.show ? (
-                                      <span
-                                        style={{
-                                          fontFamily: FONT_MONO,
-                                          fontSize: 9,
-                                          background: buttonPinkBg,
-                                          color: burgundy,
-                                          borderRadius: 20,
-                                          padding: "4px 9px",
-                                          fontWeight: 500,
-                                        }}
-                                      >
+                                  {!isOffer && <span style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 3, background: cardStyle.accent }} />}
+
+                                  {/* Eyebrow row */}
+                                  <div className="flex justify-between items-center" style={{ gap: 8 }}>
+                                    {isOffer ? (
+                                      <span style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9a6a12", fontWeight: 500 }}>
+                                        An offer of representation
+                                      </span>
+                                    ) : pillData.show ? (
+                                      <span style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 500, padding: "3px 8px", borderRadius: 20, background: cardStyle.chipBg, color: cardStyle.chipText, whiteSpace: "nowrap" }}>
                                         {formatRichText(displayPillLabel)}
                                       </span>
                                     ) : <span />}
-                                    <span style={{ ...labelStyle, letterSpacing: "0.08em" }}>{formattedTime}</span>
+                                    <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, color: "#bcaa9c", whiteSpace: "nowrap" }}>{formattedTime}</span>
                                   </div>
 
-                                  <div style={{ fontSize: 12.5, lineHeight: 1.5, color: "#4a3a30" }}>
-                                    {formatRichText(boldedDesc)}
+                                  {/* Headline: agent name */}
+                                  <div style={{ fontFamily: FONT_SERIF, fontWeight: 500, fontSize: isOffer ? 18 : 16, color: isOffer ? "#7c3d3d" : (family === "closed" ? "#8a7a6e" : "#7c3a2a"), lineHeight: 1.2, marginTop: 3 }}>
+                                    {agentName}
                                   </div>
-                                  {displayDetails && (
-                                    <p style={{ fontSize: 11, color: mutedInk, lineHeight: 1.5, marginTop: 4 }}>
-                                      {formatRichText(displayDetails)}
-                                    </p>
+
+                                  {/* Meta: AGENCY · MANUSCRIPT */}
+                                  {meta && (
+                                    <div style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9c8878", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginTop: 3 }}>
+                                      {meta}
+                                    </div>
                                   )}
-                                  {/* Respond-by + manuscript caption: meaningful for status events,
-                                      but noise on a nudge you've sent — suppress it for NUDGE_SENT. */}
-                                  {act.activityType !== ActivityType.NUDGE_SENT && (respondBy || manuscriptPillContent) && (
-                                    <div style={{ ...labelStyle, marginTop: 6, letterSpacing: "0.1em" }}>
-                                      {respondBy}
-                                      {respondBy && manuscriptPillContent ? " · " : ""}
-                                      {manuscriptPillContent ? formatRichText(manuscriptPillContent) : null}
+
+                                  {/* Consequence tag (0 or 1) */}
+                                  {isOffer ? offerTag : tag}
+                                  {pillData.key === "nudge_sent" && nudgeNote && (
+                                    <div style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 11.5, color: "#6a5a50", marginTop: 6, lineHeight: 1.45 }}>
+                                      “{nudgeNote}”
                                     </div>
                                   )}
                                 </div>
