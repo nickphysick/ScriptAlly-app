@@ -689,7 +689,18 @@ export const FortnightInFocus: React.FC<FortnightInFocusProps> = ({
       <div className="flex items-center" style={{ gap: 8 }}>
         <Calendar style={{ width: 15, height: 15, color: headingInk }} strokeWidth={2} aria-hidden="true" />
         <div className="flex flex-col text-left">
-          <span style={{ fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 600, color: headingInk, lineHeight: 1.1 }}>Fortnight in focus</span>
+          <span style={{ fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 600, color: headingInk, lineHeight: 1.1 }}>
+            Fortnight in{" "}
+            <span style={{ fontSize: "1.18em", fontStyle: "italic", fontWeight: 600, color: burgundy, verticalAlign: "middle" }}>focus</span>
+            {/* loupe + dashed flight-path trail (decorative) */}
+            <span aria-hidden="true" className="hidden sm:inline-block" style={{ color: burgundy, verticalAlign: "middle", marginLeft: 2 }}>
+              <svg width="34" height="22" viewBox="0 0 34 22" fill="none">
+                <path d="M2 18 C 8 16, 11 10, 15 8" stroke="currentColor" strokeWidth="1.2" strokeDasharray="3 4" opacity="0.5" strokeLinecap="round" />
+                <circle cx="20" cy="9" r="6.2" stroke="currentColor" strokeWidth="1.7" fill="rgba(124,58,42,0.05)" />
+                <path d="M24.6 13.6 L30 19" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+              </svg>
+            </span>
+          </span>
           <span style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 10.5, color: mutedInk, marginTop: 1 }}>What happened, and what's next.</span>
         </div>
       </div>

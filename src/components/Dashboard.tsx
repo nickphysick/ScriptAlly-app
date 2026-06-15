@@ -2543,8 +2543,29 @@ export const Dashboard: React.FC<{
                     borderBottom: `1px solid ${sageBandRule}`,
                   }}
                 >
-                  <span style={{ fontFamily: FONT_SERIF, fontSize: 15, fontWeight: 500, color: headingInk }}>
-                    The story so far
+                  {/* Ascending hero words (full readable text preserved) + climbing shoe-print trail */}
+                  <span style={{ fontFamily: FONT_SERIF, fontWeight: 500, lineHeight: 1 }}>
+                    <span style={{ fontSize: 15, color: headingInk, verticalAlign: "baseline" }}>The </span>
+                    <span style={{ fontSize: 18, color: headingInk, verticalAlign: "baseline" }}>story </span>
+                    <span style={{ fontSize: 22, fontStyle: "italic", color: "#9a4a37", verticalAlign: "baseline" }}>so </span>
+                    <span style={{ fontSize: 28, fontStyle: "italic", color: burgundy, verticalAlign: "baseline" }}>far</span>
+                    <span aria-hidden="true" className="hidden sm:inline-block" style={{ color: burgundy, verticalAlign: "middle", marginLeft: 8 }}>
+                      <svg width="111" height="40" viewBox="0 0 111 40" fill="none">
+                        {[0, 1, 2, 3, 4].map((i) => {
+                          const x = 10 + i * 19;
+                          const y = 30 - 4.2 * i + (i % 2 ? 5 : -4);
+                          const rot = i % 2 ? -7 : 7;
+                          const op = 0.40 + 0.55 * (i / 4);
+                          return (
+                            <g key={i} transform={`translate(${x} ${y}) rotate(${rot})`} fill="currentColor" opacity={op}>
+                              <ellipse cx="4.2" cy="0" rx="4.6" ry="3.6" />
+                              <ellipse cx="-0.2" cy="0.15" rx="3.7" ry="3.0" />
+                              <ellipse cx="-4.6" cy="0.4" rx="3.3" ry="2.6" />
+                            </g>
+                          );
+                        })}
+                      </svg>
+                    </span>
                   </span>
                 </div>
 
