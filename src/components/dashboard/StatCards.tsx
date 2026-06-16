@@ -9,7 +9,7 @@
  *  - branded hover/focus/tap popups on the marks inside each card (a single shared popup,
  *    portaled to <body> so the cards' hover-scale never breaks its fixed positioning).
  */
-import React, { useRef, useState, useLayoutEffect, useEffect, useCallback } from "react";
+import React, { useRef, useState, useLayoutEffect, useEffect, useCallback, useId } from "react";
 import { createPortal } from "react-dom";
 import { Send, Hourglass, Users, MailOpen } from "lucide-react";
 import { MountCard } from "../MountCard";
@@ -335,6 +335,11 @@ const ActiveQueriesCard: React.FC<{ count: number; diff: number; weeks: ActiveWe
     return { x, y };
   });
   const d = points.map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(" ");
+  // This line's specific burgundy (slightly redder than the brand #7c3a2a — intentional).
+  const lineBurgundy = "#7c3d3d";
+  // Closed area: trace the same line, then down to the chart baseline (y=34) and back.
+  const fillD = `${d} L ${points[points.length - 1].x.toFixed(1)} 34 L ${points[0].x.toFixed(1)} 34 Z`;
+  const fillId = useId(); // unique per render so multiple cards never collide
   const pill =
     diff > 0 ? <span style={pillSage}>+{diff} on last week</span> : diff < 0 ? <span style={pillBurgundy}>{diff} on last week</span> : <span style={pillBurgundy}>No change on last week</span>;
 
@@ -369,11 +374,20 @@ const ActiveQueriesCard: React.FC<{ count: number; diff: number; weeks: ActiveWe
       pill={pill}
     >
       <svg width="100%" height="34" viewBox="0 0 160 34" preserveAspectRatio="none" style={{ marginTop: 10, display: "block", overflow: "visible" }}>
-        <path d={d} fill="none" stroke={sageAccent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <defs>
+          {/* faint burgundy at the line → fully transparent at the baseline */}
+          <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={lineBurgundy} stopOpacity="0.28" />
+            <stop offset="100%" stopColor={lineBurgundy} stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        {/* gradient area fill — drawn first, behind the stroked line */}
+        <path d={fillD} fill={`url(#${fillId})`} stroke="none" />
+        <path d={d} fill="none" stroke={lineBurgundy} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         {points.map((pt, i) => (
           <g key={i}>
-            {/* visible dot — revealed on card hover/focus (CSS) */}
-            <circle className="sc-active-dot" cx={pt.x} cy={pt.y} r={i === points.length - 1 ? 3 : 2.5} fill={i === points.length - 1 ? burgundy : sageAccent} style={{ pointerEvents: "none" }} />
+            {/* visible dot — revealed on card hover/focus (CSS); matches the burgundy line */}
+            <circle className="sc-active-dot" cx={pt.x} cy={pt.y} r={i === points.length - 1 ? 3 : 2.5} fill={lineBurgundy} style={{ pointerEvents: "none" }} />
             {/* generous invisible hit target */}
             <circle
               cx={pt.x}
