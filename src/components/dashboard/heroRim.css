@@ -1,0 +1,51 @@
+/*
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Ambient "rim wave" for the dashboard hero card only (scriptally-hero-rim-pulse-v3, variant C).
+ * A wide, soft, upright band of sage light crosses the whole card at constant opacity, lit only
+ * within the ~6px rim between the card edge (radius 14px) and its inset frame. The mask-composite
+ * ring confines the glow to that band, following the card's rounded shape; the band enters fully
+ * off the left and exits fully off the right, so there is no start/stop point on the card.
+ *
+ * Sits at z-index 1 — above the card background, below the inset frame (z3) and content (z4).
+ * Purely decorative, GPU-friendly (animates `left` on a blurred, masked layer), hero card only.
+ */
+.hero-rim {
+  position: absolute;
+  inset: 0;
+  border-radius: 14px; /* matches MountCard's radius */
+  padding: 6px; /* rim width = MountCard's inset-frame inset */
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+  /* confine the glow to the 6px ring (border-box minus content-box), keeping the card's corners */
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+
+.hero-rim .hero-band {
+  position: absolute;
+  top: -10%;
+  bottom: -10%;
+  width: 60%;
+  filter: blur(4px);
+  background: linear-gradient(
+    95deg,
+    rgba(138, 158, 136, 0) 0%,
+    rgba(138, 158, 136, 0.5) 50%,
+    rgba(138, 158, 136, 0) 100%
+  );
+  animation: heroRimCross 16s linear infinite;
+}
+
+@keyframes heroRimCross {
+  0% { left: -60%; }
+  100% { left: 114%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-rim .hero-band { animation: none; opacity: 0; }
+}

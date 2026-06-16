@@ -9,6 +9,7 @@
 import React, { useState } from "react";
 import { Send, UserPlus, BookOpen } from "lucide-react";
 import { MountCard } from "../MountCard";
+import "./heroRim.css";
 import {
   headingInk,
   burgundy,
@@ -132,6 +133,9 @@ export const HeroCard: React.FC<HeroCardProps> = ({
 }) => {
   return (
     <MountCard className="flex flex-col">
+      {/* Ambient sage rim wave (decorative; z1 — above card bg, below frame z3 and content z4) */}
+      <div className="hero-rim" aria-hidden="true"><div className="hero-band" /></div>
+
       {/* Body */}
       <div style={{ padding: "33px 31px 31px", margin: "6px 6px 6px", position: "relative", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
         <div style={{ position: "relative", zIndex: 4, maxWidth: 520 }}>
