@@ -16,6 +16,7 @@ import { QueryStatus } from "../../types";
 import { SegmentedToggle, WeekSlider, GenreCombobox, FitStars } from "../forms";
 import { PREDEFINED_GENRES } from "../../lib/manuscripts";
 import { StatusDot } from "../StatusDot";
+import { statusBurgundy, statusSageRing, statusSageMark } from "../../lib/designTokens";
 import { PinkButton } from "../dashboard/HeroCard";
 import {
   ReviewAgent, ReviewQuery, ReasonItem, CheckReason, AgentStatus,
@@ -356,6 +357,72 @@ const AgentCard: React.FC<AgentCardProps> = ({
 };
 
 // ── Query card ───────────────────────────────────────────────────────────────────────────────────
+// ── Queries: status as a mini pipeline track (Option C) ───────────────────────────────────────────
+// Four forward stages — Queried → Partial → Full → Offer. Depth (how far) and direction (whose court:
+// burgundy = your material went out, sage = the agent moved) mirror the StatusDot grammar exactly, and
+// the CURRENT stage renders the real <StatusDot> (canonical glyph reused, never a redrawn copy). Closed
+// statuses get no forward-progress track — the import can't say how far they reached — so they read as
+// a muted, ended journey led by the StatusDot's closed × marker.
+const PIPELINE_CLOSED = new Set<QueryStatus>([QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE]);
+const pipelineStage = (s: QueryStatus): number => {
+  switch (s) {
+    case QueryStatus.QUERIED: return 1;
+    case QueryStatus.PARTIAL_REQUESTED:
+    case QueryStatus.PARTIAL_SENT: return 2;
+    case QueryStatus.FULL_REQUESTED:
+    case QueryStatus.FULL_SENT:
+    case QueryStatus.REVISE_RESUBMIT: return 3;
+    case QueryStatus.OFFER: return 4;
+    default: return 1;
+  }
+};
+// Outgoing (your serve → burgundy) vs incoming (agent's serve → sage) — the same split StatusDot draws.
+const isOutgoingStatus = (s: QueryStatus): boolean =>
+  s === QueryStatus.QUERIED || s === QueryStatus.PARTIAL_SENT || s === QueryStatus.FULL_SENT || s === QueryStatus.OFFER;
+
+const TRACK_EMPTY = "#dcd5cb";        // unreached pip / connector
+const TRACK_CLOSED_LABEL = "#9a9082"; // the "— closed" word
+const trackPip = (colour: string): React.CSSProperties => ({ width: 9, height: 9, borderRadius: "50%", background: colour, flexShrink: 0 });
+const trackConn = (colour: string): React.CSSProperties => ({ flex: "1 1 6px", minWidth: 6, maxWidth: 26, height: 2, background: colour });
+const trackLabel: React.CSSProperties = { fontFamily: MONO, fontSize: 11, fontWeight: 500, marginLeft: 10, whiteSpace: "nowrap", flexShrink: 0 };
+
+const PipelineTrack: React.FC<{ status: QueryStatus }> = ({ status }) => {
+  const STAGES = 4;
+  const DOT = 16;
+  const wrap: React.CSSProperties = { display: "flex", alignItems: "center", gap: 0, marginTop: 7, minWidth: 0 };
+
+  if (PIPELINE_CLOSED.has(status)) {
+    return (
+      <div style={wrap}>
+        <StatusDot status={status} size={DOT} />
+        {Array.from({ length: STAGES - 1 }).map((_, i) => (
+          <React.Fragment key={i}>
+            <span style={trackConn(TRACK_EMPTY)} />
+            <span style={trackPip(TRACK_EMPTY)} />
+          </React.Fragment>
+        ))}
+        <span style={{ ...trackLabel, color: TRACK_CLOSED_LABEL }}>{status} — closed</span>
+      </div>
+    );
+  }
+
+  const stage = pipelineStage(status);
+  const fill = isOutgoingStatus(status) ? statusBurgundy : statusSageRing;
+  const labelColour = isOutgoingStatus(status) ? statusBurgundy : statusSageMark;
+  const parts: React.ReactNode[] = [];
+  for (let i = 1; i <= STAGES; i++) {
+    if (i > 1) parts.push(<span key={`c${i}`} style={trackConn(i <= stage ? fill : TRACK_EMPTY)} />); // connector before stage i fills once reached
+    if (i === stage) parts.push(<StatusDot key={`p${i}`} status={status} size={DOT} />);              // current stage = the canonical glyph
+    else parts.push(<span key={`p${i}`} style={trackPip(i < stage ? fill : TRACK_EMPTY)} />);         // earlier = filled pip, later = empty
+  }
+  return (
+    <div style={wrap}>
+      {parts}
+      <span style={{ ...trackLabel, color: labelColour }}>{status}</span>
+    </div>
+  );
+};
+
 interface QueryCardProps {
   query: ReviewQuery;
   agentName: string;
@@ -404,18 +471,19 @@ const QueryCard: React.FC<QueryCardProps> = ({
         <BinIcon />
       </span>
 
-      {/* row */}
+      {/* row — name + date on top, the status as a mini pipeline track beneath (no separate left dot;
+          the canonical glyph lives at the track's current stage) */}
       <div data-arow style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", gap: 11 }}>
-        <span style={{ width: 30, height: 30, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <StatusDot status={query.status} size={26} />
-        </span>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontFamily: SERIF, fontSize: 15, color: "#2e2018", lineHeight: 1.1 }}>{agentName}</div>
-          <div style={{ fontFamily: MONO, fontSize: 9, letterSpacing: "0.02em", color: C.meta, marginTop: 3 }}>
-            {query.status} · {currentDate(query)
-              ? fmtDate(currentDate(query))
-              : <span style={{ color: C.muted, fontStyle: "italic" }}>add a date for full tracking</span>}
+          <div style={{ fontFamily: SERIF, fontSize: 15, color: "#2e2018", lineHeight: 1.15, display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
+            <span>{agentName}</span>
+            <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.02em", color: C.meta }}>
+              {currentDate(query)
+                ? `· ${fmtDate(currentDate(query))}`
+                : <span style={{ color: C.muted, fontStyle: "italic" }}>add a date for full tracking</span>}
+            </span>
           </div>
+          <PipelineTrack status={query.status} />
         </div>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0, marginRight: 18 }}>
           <StateChip status={status} />
