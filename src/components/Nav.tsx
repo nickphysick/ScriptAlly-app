@@ -14,7 +14,6 @@ import React, { useState, useEffect } from "react";
 import { useScriptAllyDb } from "../lib/db";
 import {
   Bell,
-  Search,
   BookOpen,
   ChevronDown,
   LogOut,
@@ -24,6 +23,7 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { ScriptAllyLogo } from "./ScriptAllyLogo";
+import { NavSearch } from "./NavSearch";
 import {
   burgundy,
   bodyInk,
@@ -182,20 +182,9 @@ export const Nav: React.FC<NavProps> = ({ activeTab, onNavigate, searchQuery, se
             ))}
           </nav>
 
-          {/* Search — immediately after the links */}
-          <div
-            className="flex items-center gap-2 ml-1 max-sm:hidden"
-            style={{ background: "#ffffff", border: "0.5px solid #e0d5c8", borderRadius: 9, padding: "8px 12px", width: 200 }}
-          >
-            <Search className="w-[13px] h-[13px] shrink-0" style={{ color: labelColor }} />
-            <input
-              type="text"
-              placeholder="Search…"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-transparent border-none outline-none w-full min-w-0 placeholder-[#c8b8a8]"
-              style={{ fontFamily: FONT_SANS, fontSize: 12, color: bodyInk }}
-            />
+          {/* Search — live typeahead, immediately after the links */}
+          <div className="ml-1">
+            <NavSearch searchQuery={searchQuery} setSearchQuery={setSearchQuery} onNavigate={onNavigate} />
           </div>
 
           {/* Right cluster — bell, settings, user */}
