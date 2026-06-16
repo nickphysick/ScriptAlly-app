@@ -436,12 +436,16 @@ export const SubmissionPackages: React.FC = () => {
     const rated = rows.map((v) => ({
       v,
       usedBy: packagesUsingVersion(v.id, msPackages).length,
-      rate: componentMetrics(v.id, msPackages, msQueries).requestRate,
+      cm: componentMetrics(v.id, msPackages, msQueries),
     }));
+    // best = highest request rate among QUALIFIED versions (≥ MIN_SENDS_FOR_CLAIM); a lucky 1-of-1 isn't crowned
     let bestId: string | null = null;
     let bestRate = -1;
     for (const r of rated) {
-      if (r.rate !== null && r.rate > bestRate) { bestRate = r.rate; bestId = r.v.id; }
+      if (meetsSampleThreshold(r.cm.sent) && r.cm.requestRate !== null && r.cm.requestRate > bestRate) {
+        bestRate = r.cm.requestRate;
+        bestId = r.v.id;
+      }
     }
 
     return (
@@ -471,7 +475,7 @@ export const SubmissionPackages: React.FC = () => {
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {rated.map(({ v, usedBy, rate }) => {
+            {rated.map(({ v, usedBy, cm }) => {
               const snippet = versionSnippet(v);
               const meta2 = versionMeta(v);
               return (
@@ -488,7 +492,16 @@ export const SubmissionPackages: React.FC = () => {
                   <div style={{ textAlign: "right", flexShrink: 0, fontFamily: FONT_MONO, fontSize: 9.5, color: mutedInk, letterSpacing: "0.03em" }}>
                     {snippet && meta2 ? <span>{meta2}</span> : null}
                     <div>
-                      in {usedBy} package{usedBy === 1 ? "" : "s"} · <span style={{ color: burgundy, fontWeight: 500 }}>{formatRate(rate)} req</span>
+                      in {usedBy} package{usedBy === 1 ? "" : "s"} ·{" "}
+                      {cm.sent === 0 ? (
+                        <span>— req</span>
+                      ) : (
+                        <span>
+                          {/* below the sample threshold → muted, not the confident burgundy; count always shown */}
+                          <span style={{ color: meetsSampleThreshold(cm.sent) ? burgundy : mutedInk, fontWeight: 500 }}>{formatRate(cm.requestRate)} req</span>
+                          <span style={{ color: "#b3a99a", fontWeight: 400 }}> {cm.requests}/{cm.sent}</span>
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="sp-row-actions" style={{ display: "flex", gap: 4, flexShrink: 0 }}>
@@ -511,8 +524,9 @@ export const SubmissionPackages: React.FC = () => {
   // ── Packages tab: builder + your-packages list ──────────────────────────────
   const renderPackages = () => {
     const rateLabelFor = (v: ManuscriptVersion) => {
-      const r = componentMetrics(v.id, msPackages, msQueries).requestRate;
-      return r === null ? "— req" : `${formatRate(r)} req`;
+      const cm = componentMetrics(v.id, msPackages, msQueries);
+      // always show the count so a 1-of-1 reads as "100% req · 1/1", never a bare "100% req"
+      return cm.sent === 0 ? "no sends yet" : `${formatRate(cm.requestRate)} req · ${cm.requests}/${cm.sent}`;
     };
     const ql = sel[ComponentType.QUERY_LETTER];
     const sy = sel[ComponentType.SYNOPSIS];
