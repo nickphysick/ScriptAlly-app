@@ -33,6 +33,8 @@ export const sageAccent = "#8a9e88";
 export const sageText = "#5a6e58";
 export const pinkBandGradient = "linear-gradient(135deg, #f5e2da 0%, #efd5ca 100%)";
 export const pinkBandRule = "rgba(124,58,42,0.15)"; // 1px rule under a pink band
+export const amberBandGradient = "linear-gradient(135deg, #efe3d2 0%, #e8d6bd 100%)";
+export const amberBandRule = "rgba(185,138,78,0.25)"; // 1px rule under an amber band
 
 /* ── Buttons ──────────────────────────────────────────────────────────── */
 export const buttonPinkBg = "#f5e2da";

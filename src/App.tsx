@@ -13,7 +13,7 @@ import { Queries } from "./components/Queries";
 import { QueriesLanding } from "./components/QueriesLanding";
 import { Agents } from "./components/Agents";
 import { Discover } from "./components/Discover";
-import { Manuscripts } from "./components/Manuscripts";
+import { SubmissionPackages } from "./components/SubmissionPackages";
 import { AllManuscripts } from "./components/AllManuscripts";
 import { Pricing } from "./components/Pricing";
 import { ImportCsv } from "./components/ImportCsv";
@@ -183,10 +183,7 @@ function AppContent() {
         )}
         {activeTab === "manuscripts" && (
           activeSubPage === "Submission packages" ? (
-            <Manuscripts 
-              searchQuery={searchQuery} 
-              onAddManuscript={() => setIsAddManuscriptOpen(true)}
-            />
+            <SubmissionPackages />
           ) : (
             <AllManuscripts 
               searchQuery={searchQuery} 
