@@ -167,12 +167,56 @@ const crossMark = (S: number, color: string): React.ReactNode => {
   );
 };
 
-const glyphFor = (status: QueryStatus, S: number): React.ReactNode => {
+/** The colour set a glyph draws with. Swapped wholesale for the muted `ghost` treatment. */
+interface DotPalette {
+  burgundy: string;
+  pinkFill: string;
+  sageRing: string;
+  sageFill: string;
+  sageMark: string;
+  track: string;
+  closedRing: string;
+  closedTrack: string;
+  closedFill: string;
+  closedMark: string;
+  parchment: string;
+}
+
+const REAL_PALETTE: DotPalette = {
+  burgundy: statusBurgundy,
+  pinkFill: statusPinkFill,
+  sageRing: statusSageRing,
+  sageFill: statusSageFill,
+  sageMark: statusSageMark,
+  track: statusTrack,
+  closedRing: statusClosedRing,
+  closedTrack: statusClosedTrack,
+  closedFill: statusClosedFill,
+  closedMark: statusClosedMark,
+  parchment: statusParchment,
+};
+
+/** Greyed "would-be" treatment — same glyph geometry, drained of colour (the pipeline ghost). */
+const GHOST_PALETTE: DotPalette = {
+  burgundy: "#b0a698",
+  pinkFill: "#efe9e1",
+  sageRing: "#c7bfb4",
+  sageFill: "#efe9e1",
+  sageMark: "#b0a698",
+  track: "#e4ddd2",
+  closedRing: "#c7bfb4",
+  closedTrack: "#e4ddd2",
+  closedFill: "#efe9e1",
+  closedMark: "#b0a698",
+  parchment: "#efe9e1",
+};
+
+const glyphFor = (status: QueryStatus, S: number, p: DotPalette): React.ReactNode => {
   if (CLOSED_FAMILY.has(status)) {
     return (
       <>
-        {ringLayers(S, 1, statusClosedRing, statusClosedTrack, statusClosedFill)}
-        {crossMark(S, statusClosedMark)}
+        {ringLayers(S, 1, p.closedRing, p.closedTrack, p.closedFill)}
+        {crossMark(S, p.closedMark)}
       </>
     );
   }
@@ -180,50 +224,50 @@ const glyphFor = (status: QueryStatus, S: number): React.ReactNode => {
     case QueryStatus.QUERIED:
       return (
         <>
-          {ringLayers(S, 0, statusBurgundy, statusTrack, statusPinkFill)}
-          {arrowMark(S, true, statusBurgundy)}
+          {ringLayers(S, 0, p.burgundy, p.track, p.pinkFill)}
+          {arrowMark(S, true, p.burgundy)}
         </>
       );
     case QueryStatus.PARTIAL_REQUESTED:
       return (
         <>
-          {ringLayers(S, 0.5, statusSageRing, statusTrack, statusSageFill)}
-          {arrowMark(S, false, statusSageMark)}
+          {ringLayers(S, 0.5, p.sageRing, p.track, p.sageFill)}
+          {arrowMark(S, false, p.sageMark)}
         </>
       );
     case QueryStatus.PARTIAL_SENT:
       return (
         <>
-          {ringLayers(S, 0.5, statusBurgundy, statusTrack, statusPinkFill)}
-          {arrowMark(S, true, statusBurgundy)}
+          {ringLayers(S, 0.5, p.burgundy, p.track, p.pinkFill)}
+          {arrowMark(S, true, p.burgundy)}
         </>
       );
     case QueryStatus.FULL_REQUESTED:
       return (
         <>
-          {ringLayers(S, 1, statusSageRing, statusTrack, statusSageFill)}
-          {arrowMark(S, false, statusSageMark)}
+          {ringLayers(S, 1, p.sageRing, p.track, p.sageFill)}
+          {arrowMark(S, false, p.sageMark)}
         </>
       );
     case QueryStatus.FULL_SENT:
       return (
         <>
-          {ringLayers(S, 1, statusBurgundy, statusTrack, statusPinkFill)}
-          {arrowMark(S, true, statusBurgundy)}
+          {ringLayers(S, 1, p.burgundy, p.track, p.pinkFill)}
+          {arrowMark(S, true, p.burgundy)}
         </>
       );
     case QueryStatus.REVISE_RESUBMIT:
       return (
         <>
-          {ringLayers(S, 1, statusSageRing, statusTrack, statusSageFill)}
-          {pencilMark(S, statusSageMark)}
+          {ringLayers(S, 1, p.sageRing, p.track, p.sageFill)}
+          {pencilMark(S, p.sageMark)}
         </>
       );
     case QueryStatus.OFFER:
       return (
         <>
-          {solidDisc(S, statusBurgundy)}
-          {tickMark(S, statusParchment)}
+          {solidDisc(S, p.burgundy)}
+          {tickMark(S, p.parchment)}
         </>
       );
     default:
@@ -237,12 +281,15 @@ export interface StatusDotProps {
   /** Pixel size. Default 13, hard minimum 12 — never rendered below 12px. */
   size?: number;
   className?: string;
+  /** Muted "would-be" treatment — same glyph, drained of colour. Default false (full colour). */
+  ghost?: boolean;
 }
 
-export const StatusDot: React.FC<StatusDotProps> = ({ status, size = 13, className }) => {
+export const StatusDot: React.FC<StatusDotProps> = ({ status, size = 13, className, ghost = false }) => {
   const S = Math.max(12, size);
   const norm = normalizeStatus(status);
   const known = Object.values(QueryStatus).includes(norm);
+  const palette = ghost ? GHOST_PALETTE : REAL_PALETTE;
 
   if (!known && !warnedUnknownStatuses.has(String(status))) {
     warnedUnknownStatuses.add(String(status));
@@ -266,9 +313,9 @@ export const StatusDot: React.FC<StatusDotProps> = ({ status, size = 13, classNa
     >
       <title>{label}</title>
       {known ? (
-        glyphFor(norm, S)
+        glyphFor(norm, S, palette)
       ) : (
-        <circle cx={c} cy={c} r={r} fill="none" stroke={statusTrack} strokeWidth={sw} />
+        <circle cx={c} cy={c} r={r} fill="none" stroke={palette.track} strokeWidth={sw} />
       )}
     </svg>
   );

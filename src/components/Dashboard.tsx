@@ -56,6 +56,7 @@ import { MountCard } from "./MountCard";
 import { HeroCard } from "./dashboard/HeroCard";
 import { OverToYou } from "./dashboard/OverToYou";
 import { StatCards } from "./dashboard/StatCards";
+import { PipelinePanel } from "./dashboard/PipelinePanel";
 import { FortnightInFocus } from "./dashboard/FortnightInFocus";
 import { replacePlaceholders, extractAgentFromText } from "../lib/activityUtils";
 import {
@@ -74,7 +75,6 @@ import {
   Bookmark,
   Calendar,
   Footprints,
-  Hourglass,
   AlertCircle,
   HelpCircle,
   Clock,
@@ -2232,76 +2232,8 @@ export const Dashboard: React.FC<{
               );
             }
 
-            const COLUMN_GRID = "230px repeat(7, 1fr)";
-            return (
-              <MountCard id="query-status-breakdown-card" style={{ overflow: "hidden" }}>
-                {/* Edge-to-edge sage band header */}
-                <div
-                  style={{
-                    position: "relative",
-                    zIndex: 2,
-                    margin: "6px 6px 0",
-                    borderRadius: "8px 8px 0 0",
-                    padding: "14px 22px 12px",
-                    background: sageBandGradient,
-                    borderBottom: `1px solid ${sageBandRule}`,
-                  }}
-                >
-                  <div style={{ display: "grid", gridTemplateColumns: COLUMN_GRID, alignItems: "center" }}>
-                    {/* Uniform header: marker + plain title (stage labels below stay column-aligned) */}
-                    <span className="flex items-center">
-                      <span aria-hidden="true" style={{ width: 3, height: 18, borderRadius: 2, background: burgundy, marginRight: 12, flexShrink: 0, display: "inline-block" }} />
-                      <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 500, color: headingInk, lineHeight: 1.1, whiteSpace: "nowrap" }}>Your querying pipeline</span>
-                    </span>
-                    {["Queried", "Part. req", "Part. sent", "Full req", "Full sent", "Offer", "Closed"].map((label) => (
-                      <span key={label} style={{ ...labelStyle, textAlign: "center", color: sageText }}>{label}</span>
-                    ))}
-                  </div>
-                  {/* Far-right emblem — absolutely placed in the band's right padding so the
-                      stage-column grid above stays aligned to the rows below */}
-                  <Hourglass aria-hidden="true" strokeWidth={1.8} style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", width: 20, height: 20, color: burgundy }} />
-                </div>
-
-                {/* Rows */}
-                <div style={{ position: "relative", zIndex: 2, margin: "0 6px 6px", padding: "6px 16px 14px" }}>
-                  {manuscripts.map((m, index) => {
-                    const st = splitByStage(m);
-                    return (
-                      <div
-                        key={m.id}
-                        style={{
-                          display: "grid",
-                          gridTemplateColumns: COLUMN_GRID,
-                          alignItems: "center",
-                          borderBottom: index === manuscripts.length - 1 ? undefined : "0.5px solid #ece0d2",
-                        }}
-                      >
-                        <div style={{ padding: "13px 6px" }}>
-                          <p className="truncate" style={{ fontFamily: FONT_SERIF, fontSize: 14.5, color: headingInk, lineHeight: 1.3 }} title={m.title}>
-                            {m.title}
-                          </p>
-                          <p className="truncate" style={{ ...labelStyle, marginTop: 2 }}>
-                            {m.genre} · {m.wordCount?.toLocaleString() || 0}
-                          </p>
-                        </div>
-                        <div style={{ textAlign: "center", padding: "13px 8px" }}>{renderStageColumn(st.qQueried, 'queried')}</div>
-                        <div style={{ textAlign: "center", padding: "13px 8px" }}>{renderStageColumn(st.qPartReq, 'part_req')}</div>
-                        <div style={{ textAlign: "center", padding: "13px 8px" }}>{renderStageColumn(st.qPartSent, 'part_sent')}</div>
-                        <div style={{ textAlign: "center", padding: "13px 8px" }}>{renderStageColumn(st.qFullReq, 'full_req')}</div>
-                        <div style={{ textAlign: "center", padding: "13px 8px" }}>{renderStageColumn(st.qFullSent, 'full_sent')}</div>
-                        <div style={{ textAlign: "center", padding: "13px 8px" }}>{renderStageColumn(st.qOffer, 'offer')}</div>
-                        <div style={{ textAlign: "center", padding: "13px 8px" }}>{renderStageColumn(st.qClosed, 'closed')}</div>
-                      </div>
-                    );
-                  })}
-                  {manuscripts.length === 0 && (
-                    <div className="p-8 text-center text-xs italic" style={{ color: "rgba(58,28,20,0.4)" }}>
-                      Get started by creating your very first manuscript structure!
-                    </div>
-                  )}
-                </div>
-              </MountCard>
-            );
+            // Standard layout: the animated "Query pipeline" panel (see PipelinePanel).
+            return <PipelinePanel manuscripts={manuscripts} queries={queries} />;
           })()}
         </div>
 
