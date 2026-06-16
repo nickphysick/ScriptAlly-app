@@ -6,14 +6,11 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useScriptAllyDb } from "../lib/db";
-import { UserPlan, QueryStatus, ManuscriptStatus, ActivityType, Query, Task, CommunityAgent, Manuscript, Agent } from "../types";
+import { UserPlan, QueryStatus, ManuscriptStatus, ActivityType, Query, Task, Manuscript, Agent } from "../types";
 import { STATUS_ORDER } from "../lib/statusOrder";
 import { manuscriptGenres } from "../lib/manuscripts";
-import { agentBuckets, pickableManuscripts } from "../lib/lifecycle";
+import { agentBuckets } from "../lib/lifecycle";
 import { 
-  doc, 
-  updateDoc, 
-  increment, 
   onSnapshot, 
   collection, 
   query, 
@@ -470,14 +467,12 @@ export const Dashboard: React.FC<{
     currentUser,
     manuscripts,
     agents,
-    communityAgents,
     queries,
     activities,
     tasks,
     logout,
     dismissTask,
     logNudge,
-    addAgent,
     updateQueryStatus,
     undoQueryStatus
   } = useScriptAllyDb();
@@ -600,11 +595,6 @@ export const Dashboard: React.FC<{
   });
 
 
-  const [hoveredAgentId, setHoveredAgentId] = useState<string | null>(null);
-  const [radarToast, setRadarToast] = useState<string | null>(null);
-  const [selectedManuscriptId, setSelectedManuscriptId] = useState<string | null>(null);
-  const [lowerDeckStyle, setLowerDeckStyle] = useState<"radar" | "minimalist" | "funnel" | "wall" | "studio">("radar");
-
   const timelineScrollRef = React.useRef<HTMLDivElement>(null);
   const [timelineScrollState, setTimelineScrollState] = useState({ isAtTop: true, isAtBottom: true });
 
@@ -670,47 +660,6 @@ export const Dashboard: React.FC<{
     };
   }, [isTasksPanelOpen]);
 
-  const handleOptInAgent = async (match: AgentMatch) => {
-    try {
-      const result = await addAgent({
-        name: match.agent.name,
-        agency: match.agent.agency,
-        email: match.agent.email,
-        website: match.agent.website,
-        twitter: match.agent.twitter,
-        bluesky: match.agent.bluesky,
-        instagram: match.agent.instagram,
-        genres: match.agent.genres,
-        mswlNotes: match.agent.mswlNotes,
-        starRating: match.agent.starRating,
-        submissionStatus: match.agent.submissionStatus,
-        responseTimeWeeks: match.agent.responseTimeWeeks,
-        noResponseMeansNo: match.agent.noResponseMeansNo,
-        submissionMethod: match.agent.submissionMethod,
-        materialsWanted: match.agent.materialsWanted,
-        notes: `Selected and imported as a top MSWL match from ScriptAlly Community Agents collection for manuscript: "${match.manuscript.title}".`
-      });
-
-      if (result.success) {
-        // Trigger Firestore update count to increment contributions by count
-        try {
-          await updateDoc(doc(db, "communityAgents", match.agent.id), {
-            contributedByCount: increment(1)
-          });
-        } catch (countErr) {
-          console.error("Failed to increment contributedByCount in Firestore:", countErr);
-        }
-
-        setRadarToast(`Successfully added "${match.agent.name}" to your agent list!`);
-        setTimeout(() => setRadarToast(null), 4000);
-      } else {
-        alert(result.error || "Failed to add agent.");
-      }
-    } catch (error) {
-      console.error("Error opting in community agent:", error);
-    }
-  };
-
   if (!currentUser) return null;
 
   // Filter manuscripts and queries by search box query or display all
@@ -724,273 +673,6 @@ export const Dashboard: React.FC<{
       ms?.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
   });
-
-  // Structural types for matches breakdown
-  interface MatchBreakdown {
-    mswlScore: number;
-    genreScore: number;
-    ageScore: number;
-    wordCountScore: number;
-    overlappingWords: string[];
-    ageMatchedCategory: string;
-    preferredWcRange: { min: number; max: number };
-  }
-
-  interface AgentMatch {
-    agent: CommunityAgent;
-    score: number;
-    manuscript: Manuscript;
-    breakdown: MatchBreakdown;
-  }
-
-  // Helper to calculate match score for a specific community agent against a manuscript
-  const calculateCommunityAgentMatch = (commAgent: CommunityAgent, ms: Manuscript): MatchBreakdown => {
-    // Check if agent.mswlNotes is actually accessible inside the scoring function for the first agent only
-    if (communityAgents && communityAgents.length > 0 && commAgent.id === communityAgents[0].id) {
-      console.log(`[MSWL Notes Accessibility Check] Name: ${commAgent.name}, MSWL Notes:`, commAgent.mswlNotes);
-    }
-
-    const stopWords = new Set([
-      'the', 'a', 'and', 'or', 'of', 'in', 'to', 'for', 'with', 'on', 'at', 'by', 'an', 'is', 'it', 'its', 'that', 
-      'from', 'this', 'as', 'are', 'was', 'were', 'be', 'has', 'have', 'had', 'scouting', 'looking', 'seeks', 
-      'seeking', 'wanting', 'wants', 'about', 'some', 'any', 'all', 'into', 'out', 'up', 'down', 'no', 'not', 'but',
-      'which', 'who', 'whom', 'their', 'they', 'our', 'what', 'where', 'when', 'how', 'why', 'can', 'will', 'just',
-      'drawn', 'particularly', 'interested'
-    ]);
-
-    // Pull manuscript values directly
-    const msLogline = ms.logline;
-    const msComparable = ms.comparableTitles;
-
-    // Null checks for empty strings
-    const loglineVal = msLogline ? msLogline.trim() : "";
-    const comparableVal = msComparable ? msComparable.trim() : "";
-
-    let overlapping: string[] = [];
-
-    const getTokens = (text: string): string[] => {
-      if (!text) return [];
-      const cleaned = text.toLowerCase().replace(/[^a-z0-9\s]/g, " ");
-      const words = cleaned.split(/\s+/);
-      const tokens: string[] = [];
-      words.forEach(w => {
-        const trimmed = w.trim().toLowerCase();
-        if (trimmed.length > 2 && !stopWords.has(trimmed)) {
-          tokens.push(trimmed);
-        }
-      });
-      return tokens;
-    };
-
-    if (loglineVal || comparableVal) {
-      const agentTokens = getTokens(commAgent.mswlNotes || "");
-      const manuscriptTokens = getTokens(`${loglineVal} ${comparableVal}`);
-
-      // Genre-based keyword injection
-      const msGenreLower = (ms.genre || "").trim().toLowerCase();
-      if (msGenreLower === 'historical fantasy') {
-        ['historical', 'fantasy', 'period', 'alternate', 'history'].forEach(token => manuscriptTokens.push(token));
-      } else if (msGenreLower === 'literary fiction') {
-        ['literary', 'fiction', 'voice', 'character'].forEach(token => manuscriptTokens.push(token));
-      } else if (msGenreLower === 'fantasy') {
-        ['fantasy', 'magic', 'world', 'building'].forEach(token => manuscriptTokens.push(token));
-      } else if (msGenreLower === 'science fiction') {
-        ['science', 'fiction', 'speculative', 'future'].forEach(token => manuscriptTokens.push(token));
-      }
-
-      const agentSet = new Set(agentTokens.map(t => t.toLowerCase().trim()));
-      const msSet = new Set(manuscriptTokens.map(t => t.toLowerCase().trim()));
-
-      const synonymMap: Record<string, string[]> = {
-        'clockmaker': ['steampunk', 'clockpunk', 'victorian', 'historical'],
-        'clockwork': ['steampunk', 'clockpunk', 'victorian', 'historical'],
-        'mechanical': ['steampunk', 'clockpunk', 'victorian', 'historical'],
-        'pocket': ['steampunk', 'clockpunk', 'victorian', 'historical'],
-        'watch': ['steampunk', 'clockpunk', 'victorian', 'historical'],
-        '1880': ['victorian', 'british', 'historical', 'period'],
-        'london': ['victorian', 'british', 'historical', 'period'],
-        'apprentice': ['coming of age', 'debut', 'protagonist'],
-        'discovers': ['coming of age', 'debut', 'protagonist'],
-        'memories': ['atmospheric', 'literary', 'gothic'],
-        'library': ['atmospheric', 'literary', 'gothic']
-      };
-
-      msSet.forEach(token => {
-        // Direct match
-        if (agentSet.has(token)) {
-          if (!overlapping.includes(token)) {
-            overlapping.push(token);
-          }
-        }
-        // Synonyms / Related terms match
-        const syns = synonymMap[token];
-        if (syns) {
-          syns.forEach(syn => {
-            if (agentSet.has(syn)) {
-              if (!overlapping.includes(syn)) {
-                overlapping.push(syn);
-              }
-            } else {
-              // Also support multi-word synonyms like 'coming of age' in raw lowercased text
-              const msNotesLower = (commAgent.mswlNotes || "").toLowerCase();
-              if (msNotesLower.includes(syn.toLowerCase())) {
-                if (!overlapping.includes(syn)) {
-                  overlapping.push(syn);
-                }
-              }
-            }
-          });
-        }
-      });
-    }
-
-    // Fourth, increase the points per matching token from 5 to 8, but cap at 40 points maximum
-    const mswlScore = Math.min(overlapping.length * 8, 40);
-
-    // B. Genre match (20 points)
-    const genresClean = (commAgent.genres || []).map(g => g.trim().toLowerCase());
-
-    // Score one manuscript genre string against the agent's genres: exact compound match = 20,
-    // partial compound = 15 (≥2 components) / 8 (1 component), single-word exact = 20, else 0.
-    const scoreOneGenre = (raw: string): number => {
-      const gRaw = (raw || "").trim();
-      if (!gRaw) return 0;
-      const gLower = gRaw.toLowerCase();
-      const components = gRaw.split(/\s+/).filter(w => w.length > 0);
-      if (components.length > 1) {
-        if (genresClean.includes(gLower)) return 20;
-        const matchCount = components.filter(c => {
-          const cLower = c.toLowerCase();
-          return genresClean.some(g => g === cLower || g.includes(cLower));
-        }).length;
-        if (matchCount >= 2) return 15;
-        if (matchCount === 1) return 8;
-        return 0;
-      }
-      return genresClean.includes(gLower) ? 20 : 0;
-    };
-
-    // Read the manuscript's primary genre PLUS any sub-genres; take the best-scoring match.
-    const genreScore = Math.max(0, ...manuscriptGenres(ms).map(scoreOneGenre));
-    const isGenreMatch = genreScore > 0;
-
-    // C. Age category match (15 points): award 15 points only if the specific community agent's genres array contains the manuscript's ageCategory — case insensitive
-    const msAge = (ms.ageCategory || "").trim().toLowerCase();
-    const isAgeMatch = genresClean.some(g => g === msAge);
-    const ageScore = isAgeMatch ? 15 : 0;
-    const matchedAgeCat = isAgeMatch ? ms.ageCategory : "";
-
-    // D. Word count range match (15 points)
-    // Evaluate manuscript wordCount against a typical range appropriate to the combination of the manuscript's genre and the agent's represented genres
-    // If the agent does not typically represent the manuscript's genre at all, the word count check should contribute 0 points
-    let wordCountScore = 0;
-    let minWc = 80000;
-    let maxWc = 100000;
-
-    if (isGenreMatch) {
-      const msAgeCategoryLower = (ms.ageCategory || "").toLowerCase();
-      const msGenreLower = (ms.genre || "").toLowerCase();
-
-      // Base range by age category and genre
-      if (msAgeCategoryLower.includes("middle") || msAgeCategoryLower.includes("mg")) {
-        minWc = 40000;
-        maxWc = 65000;
-        if (msGenreLower.includes("fantasy") || msGenreLower.includes("science") || msGenreLower.includes("sci-fi")) {
-          minWc = 50000;
-          maxWc = 80000;
-        }
-      } else if (msAgeCategoryLower.includes("young") || msAgeCategoryLower.includes("ya")) {
-        minWc = 60000;
-        maxWc = 85000;
-        if (msGenreLower.includes("fantasy") || msGenreLower.includes("science") || msGenreLower.includes("sci-fi")) {
-          minWc = 70000;
-          maxWc = 95000;
-        }
-      } else {
-        // Adult
-        if (msGenreLower.includes("fantasy") || msGenreLower.includes("science") || msGenreLower.includes("sci-fi")) {
-          minWc = 90000;
-          maxWc = 120000;
-        } else if (msGenreLower.includes("thriller") || msGenreLower.includes("mystery") || msGenreLower.includes("crime")) {
-          minWc = 75000;
-          maxWc = 95000;
-        } else {
-          minWc = 80000;
-          maxWc = 100000;
-        }
-      }
-
-      // Adjust dynamically based on agent's represented genres to make them appropriate to the combination
-      if (genresClean.includes("fantasy") || genresClean.includes("science fiction")) {
-        maxWc += 5000;
-      }
-      if (genresClean.includes("literary fiction") || genresClean.includes("memoir")) {
-        maxWc -= 2000;
-        minWc -= 2000;
-      }
-
-      const wc = ms.wordCount || 0;
-      if (wc >= minWc && wc <= maxWc) {
-        wordCountScore = 15;
-      }
-    }
-
-    return {
-      mswlScore,
-      genreScore,
-      ageScore,
-      wordCountScore,
-      overlappingWords: overlapping,
-      ageMatchedCategory: matchedAgeCat,
-      preferredWcRange: { min: minWc, max: maxWc }
-    };
-  };
-
-  // Radar matches against active books only (shelved ones aren't query targets).
-  const radarPickableMs = pickableManuscripts(manuscripts);
-  const activeRadarManuscript = radarPickableMs.find(m => m.id === selectedManuscriptId) || radarPickableMs[0];
-
-  // Live computed matching Radar outcomes
-  const radarMatches: AgentMatch[] = (communityAgents || [])
-    .filter(commAgent => {
-      // Filter out any community agents that the current user already has in their own agents list
-      // (match by agent name and agency, case-insensitive)
-      const alreadyHas = agents.some(userAgent => 
-        userAgent.name.trim().toLowerCase() === commAgent.name.trim().toLowerCase() &&
-        userAgent.agency.trim().toLowerCase() === commAgent.agency.trim().toLowerCase()
-      );
-      return !alreadyHas;
-    })
-    .map(commAgent => {
-      if (!activeRadarManuscript) {
-        return {
-          agent: commAgent,
-          score: -1,
-          manuscript: null as any,
-          breakdown: {
-            mswlScore: 0,
-            genreScore: 0,
-            ageScore: 0,
-            wordCountScore: 0,
-            overlappingWords: [],
-            ageMatchedCategory: "",
-            preferredWcRange: { min: 80000, max: 100000 }
-          }
-        };
-      }
-      const breakdown = calculateCommunityAgentMatch(commAgent, activeRadarManuscript);
-      const score = breakdown.mswlScore + breakdown.genreScore + breakdown.ageScore + breakdown.wordCountScore;
-
-      return {
-        agent: commAgent,
-        score: score,
-        manuscript: activeRadarManuscript,
-        breakdown: breakdown
-      };
-    })
-    .filter(match => match.score >= 50 && match.manuscript !== null)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 5);
 
   // Calculate Stat Counts - total queries created of ALL types as requested
   const totalQueriesSent = queries.length;

@@ -112,9 +112,9 @@ export function HelpCentre() {
     {
       id: "agents-1",
       category: "agents",
-      question: "How does the 'Discover' engine compile agent preferences?",
-      answer: "ScriptAlly features an integrated Agent Match database covering dozens of leading literary agencies. Discover aggregates agent wishlist details (MSWL), preferred word counts, active submission status (open vs. closed to queries), and lists their historical response times logged by other ScriptAlly community members.",
-      tags: ["discover", "database", "mswl", "agencies"],
+      question: "How does ScriptAlly suggest agents who might suit a manuscript?",
+      answer: "Open any manuscript from the Manuscripts tab and look for 'Agents who might suit this manuscript'. ScriptAlly scores verified agents from the community catalogue against that manuscript's genre and wish-list (MSWL) fit, shows the closest few ranked by fit, and lets you add any of them to your own agent list in one click. Matching uses genre and wish list for now — response-time data will follow.",
+      tags: ["suggestions", "agents", "mswl", "match"],
     },
     {
       id: "agents-2",

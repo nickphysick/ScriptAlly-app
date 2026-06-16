@@ -7,6 +7,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
 import { Manuscript, ManuscriptStatus, ManuscriptVersion, Query, UserPlan } from "../types";
 import { manuscriptGenres } from "../lib/manuscripts";
+import { ManuscriptAgentSuggestions } from "./ManuscriptAgentSuggestions";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { collection, setDoc, doc, onSnapshot } from "firebase/firestore";
 import {
@@ -826,6 +827,9 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ searchQuery, onN
               </div>
 
             </div>
+
+            {/* Manuscript-scoped community-agent suggestions (genre + wish-list fit) */}
+            <ManuscriptAgentSuggestions manuscript={activeMs} />
 
           </div>
         </div>
