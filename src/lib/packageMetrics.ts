@@ -86,6 +86,13 @@ export function componentMetrics(versionId: string, packages: SubmissionPackage[
   return statsFor(queries.filter((q) => !!q.packageId && pkgIds.has(q.packageId)));
 }
 
+/** Minimum sends before a package/version earns a "best" / "Top performer" crown or a directional
+ *  insight. Below this a lucky 1-of-1 reads as 100% and would crown itself — worse than silence for a
+ *  feature whose pitch is trustworthy strategy. Below the threshold: still show the rate, withhold the
+ *  crown/recommendation (label it "early"). Used by the Performance tab; the raw rates are unaffected. */
+export const MIN_SENDS_FOR_CLAIM = 4;
+export const meetsSampleThreshold = (sent: number): boolean => sent >= MIN_SENDS_FOR_CLAIM;
+
 /** "—" when there's no data, else a whole-percent string. */
 export const formatRate = (r: number | null): string => (r === null ? "—" : `${Math.round(r * 100)}%`);
 

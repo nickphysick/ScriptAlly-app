@@ -26,6 +26,9 @@ import {
   componentMetrics,
   packageMetrics,
   formatRate,
+  barWidth,
+  meetsSampleThreshold,
+  MIN_SENDS_FOR_CLAIM,
 } from "../lib/packageMetrics";
 import {
   pageGround,
@@ -65,6 +68,9 @@ import {
   Check,
   X,
   AlertTriangle,
+  Trophy,
+  Sun,
+  PieChart,
 } from "lucide-react";
 
 const AMBER = "#b98a4e";
@@ -130,6 +136,22 @@ const Chip: React.FC<{ kind: ComponentType; label: string }> = ({ kind, label })
     </span>
   );
 };
+
+/* ── A labelled metric bar (Requests = burgundy, Responses = sage). ── */
+const MetricBar: React.FC<{ label: string; rate: number | null; n: number; total: number; variant: "req" | "resp" }> = ({ label, rate, n, total, variant }) => (
+  <div style={{ marginBottom: 9 }}>
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
+      <span style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.05em", textTransform: "uppercase", color: mutedInk }}>{label}</span>
+      <span style={{ fontSize: 12, color: bodyInk, fontWeight: 500 }}>
+        {formatRate(rate)}
+        <small style={{ fontFamily: FONT_MONO, fontSize: 9.5, color: "#b3a99a", fontWeight: 400, marginLeft: 3 }}>{n} of {total}</small>
+      </span>
+    </div>
+    <div style={{ height: 7, background: "#ece4da", borderRadius: 4, overflow: "hidden" }}>
+      <div style={{ height: "100%", borderRadius: 4, width: barWidth(rate), background: variant === "req" ? burgundy : "#8a9e88" }} />
+    </div>
+  </div>
+);
 
 /* ── Builder slot dropdown. The menu is portalled to <body> so MountPanel's overflow:hidden frame
  *    can't clip it (a long version list or the bottom slot would otherwise be cut off). ── */
@@ -300,7 +322,7 @@ export const SubmissionPackages: React.FC = () => {
   const [activeMsId, setActiveMsId] = useState<string | null>(() =>
     typeof window !== "undefined" ? localStorage.getItem("scriptally_active_manuscript_id") : null,
   );
-  const [tab, setTab] = useState<TabKey>("lib"); // Library is the built tab this checkpoint
+  const [tab, setTab] = useState<TabKey>("perf"); // Performance is the hero / default tab
   const [msMenuOpen, setMsMenuOpen] = useState(false);
   const [form, setForm] = useState<FormState | null>(null);
   const [confirmDel, setConfirmDel] = useState<ManuscriptVersion | null>(null);
@@ -571,6 +593,185 @@ export const SubmissionPackages: React.FC = () => {
     );
   };
 
+  // ── Performance tab: what's working + leaderboard + component attribution ────
+  // Every "best"/crown/insight is gated behind meetsSampleThreshold (≥ MIN_SENDS_FOR_CLAIM sends)
+  // so a lucky 1-of-1 can't read as 100% and crown itself; rates always show, the crown is withheld.
+  const renderPerformance = () => {
+    const LAG_NOUN: Record<string, string> = {
+      [ComponentType.QUERY_LETTER]: "letter",
+      [ComponentType.SYNOPSIS]: "synopsis",
+      [ComponentType.SAMPLE_PAGES]: "sample pages",
+    };
+
+    const ranked = msPackages.map((p) => ({ p, m: packageMetrics(p.id, msQueries) }));
+    const totalSent = ranked.reduce((s, r) => s + r.m.sent, 0);
+
+    // Qualified packages first (request rate desc, then sends), sub-threshold packages held back.
+    const sorted = [...ranked].sort((a, b) => {
+      const qa = meetsSampleThreshold(a.m.sent), qb = meetsSampleThreshold(b.m.sent);
+      if (qa !== qb) return qa ? -1 : 1;
+      const ra = a.m.requestRate ?? -1, rb = b.m.requestRate ?? -1;
+      if (rb !== ra) return rb - ra;
+      return b.m.sent - a.m.sent;
+    });
+    const topQualified = sorted.find((r) => meetsSampleThreshold(r.m.sent) && r.m.requestRate !== null) || null;
+
+    // Component attribution: versions that have been sent, per kind; best = highest-rate QUALIFIED one.
+    const attribution = LIB_KINDS.map((kind) => {
+      const items = msVersions
+        .filter((v) => v.componentType === kind)
+        .map((v) => ({ v, m: componentMetrics(v.id, msPackages, msQueries) }))
+        .filter((x) => x.m.sent > 0)
+        .sort((a, b) => {
+          // qualified versions first (so a lucky 1-send 100% never sits above a trustworthy rate), then rate desc
+          const qa = meetsSampleThreshold(a.m.sent), qb = meetsSampleThreshold(b.m.sent);
+          if (qa !== qb) return qa ? -1 : 1;
+          return (b.m.requestRate ?? -1) - (a.m.requestRate ?? -1);
+        });
+      const best = items.find((x) => meetsSampleThreshold(x.m.sent) && x.m.requestRate !== null) || null;
+      return { kind, items, bestId: best ? best.v.id : null };
+    });
+    const bestName = (kind: ComponentType) => {
+      const col = attribution.find((a) => a.kind === kind);
+      return col && col.bestId ? col.items.find((i) => i.v.id === col.bestId)?.v.versionName ?? null : null;
+    };
+    const qualComponents = attribution.flatMap((a) =>
+      a.items.filter((i) => meetsSampleThreshold(i.m.sent) && i.m.requestRate !== null).map((i) => ({ ...i, kind: a.kind })),
+    );
+    const laggard = qualComponents.length >= 2 ? [...qualComponents].sort((x, y) => x.m.requestRate! - y.m.requestRate!)[0] : null;
+
+    const whatsWorkingHead = <BandHeader title="What's working" meta="your querying strategy, derived from real outcomes" Icon={Sun} variant="amber" />;
+    const bld = (t: string) => <b style={{ color: burgundy, fontWeight: 500 }}>{t}</b>;
+
+    let whatsWorking: React.ReactNode;
+    if (msPackages.length === 0 || totalSent === 0) {
+      whatsWorking = (
+        <MountPanel>
+          {whatsWorkingHead}
+          <div style={{ padding: 22, fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 14, color: mutedInk, lineHeight: 1.5 }}>
+            Attach packages to your queries to start learning what works — once outcomes come in, your sharpest combination surfaces here.
+          </div>
+        </MountPanel>
+      );
+    } else if (!topQualified) {
+      whatsWorking = (
+        <MountPanel>
+          {whatsWorkingHead}
+          <div style={{ padding: 22, fontFamily: FONT_SANS, fontSize: 13.5, color: bodyInk, lineHeight: 1.55 }}>
+            You've linked {totalSent} quer{totalSent === 1 ? "y" : "ies"} to packages so far. Once a package reaches {MIN_SENDS_FOR_CLAIM} sends, the strongest combination — and the letter or synopsis doing the work — will surface here. Too early to crown a winner yet.
+          </div>
+        </MountPanel>
+      );
+    } else {
+      const top = topQualified;
+      const bestQL = bestName(ComponentType.QUERY_LETTER);
+      const bestSy = bestName(ComponentType.SYNOPSIS);
+      whatsWorking = (
+        <MountPanel>
+          {whatsWorkingHead}
+          <div style={{ padding: "20px 22px 22px" }}>
+            <div className="sp-strat" style={{ display: "flex", gap: 20, alignItems: "center" }}>
+              <div style={{ fontFamily: "'Caveat', cursive", fontSize: 27, lineHeight: 1.12, color: burgundy, flexShrink: 0, maxWidth: 215 }}>
+                Lead with <b style={{ color: sageText, fontWeight: 600 }}>{top.p.packageName}</b> — it's your sharpest package.
+              </div>
+              <div className="sp-strat-div" style={{ width: 1, alignSelf: "stretch", background: "rgba(124,58,42,0.14)" }} aria-hidden="true" />
+              <div style={{ fontFamily: FONT_SANS, fontSize: 13.5, color: "#4a3e34", lineHeight: 1.55 }}>
+                {bld(top.p.packageName)} earns a request from {bld(formatRate(top.m.requestRate))} of agents, across {top.m.sent} sends.
+                {bestQL && bestSy && <> The lift is coming from your {bld(bestQL)} letter and {bld(bestSy)} synopsis — both ahead of the alternatives.</>}
+                {laggard && laggard.m.requestRate! < top.m.requestRate! && <> Your {bld(laggard.v.versionName)} {LAG_NOUN[laggard.kind]} is lagging at {bld(formatRate(laggard.m.requestRate))}; worth a rethink.</>}{" "}
+                None of this shows up in a notes field — it's here because every send is tied to the exact materials behind it.
+              </div>
+            </div>
+          </div>
+        </MountPanel>
+      );
+    }
+
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+        {whatsWorking}
+
+        {/* Package leaderboard */}
+        <MountPanel>
+          <BandHeader title="Package leaderboard" meta={`${msPackages.length} package${msPackages.length === 1 ? "" : "s"} · ${totalSent} quer${totalSent === 1 ? "y" : "ies"} sent · sorted by request rate`} Icon={Trophy} />
+          <div style={{ padding: "8px 22px 18px" }}>
+            {msPackages.length === 0 ? (
+              <div style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 13.5, color: mutedInk, padding: "12px 0" }}>No packages yet — build one to start tracking what wins requests.</div>
+            ) : (
+              sorted.map(({ p, m }, i) => {
+                const early = !meetsSampleThreshold(m.sent);
+                const isTop = !!topQualified && p.id === topQualified.p.id && sorted.length >= 2;
+                return (
+                  <div key={p.id} className="sp-pkg-row" style={{ display: "grid", gridTemplateColumns: "1fr 230px", gap: 18, alignItems: "center", padding: "16px 2px", borderTop: i === 0 ? "none" : "1px solid rgba(124,58,42,0.1)" }}>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 8, flexWrap: "wrap" }}>
+                        <span style={{ fontFamily: FONT_SERIF, fontSize: 17, fontWeight: 500, color: headingInk }}>{p.packageName}</span>
+                        {isTop && <span style={{ fontFamily: FONT_MONO, fontSize: 8.5, fontWeight: 500, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a6a2e", background: "#f3e6cf", border: "0.5px solid #e3cda0", borderRadius: 20, padding: "3px 8px" }}>Top performer</span>}
+                        {early && <span style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: "0.06em", textTransform: "uppercase", color: "#9c8878", background: "#f1ece3", borderRadius: 20, padding: "3px 8px" }}>early</span>}
+                      </div>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                        <Chip kind={ComponentType.QUERY_LETTER} label={msVersions.find((v) => v.id === p.queryLetterVersionId)?.versionName ?? "—"} />
+                        <Chip kind={ComponentType.SYNOPSIS} label={msVersions.find((v) => v.id === p.synopsisVersionId)?.versionName ?? "—"} />
+                        <Chip kind={ComponentType.SAMPLE_PAGES} label={msVersions.find((v) => v.id === p.samplePagesVersionId)?.versionName ?? "—"} />
+                      </div>
+                      <div style={{ fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.04em", textTransform: "uppercase", color: mutedInk, marginTop: 9 }}>
+                        {m.sent === 0 ? "Not sent yet" : `Sent ${m.sent} time${m.sent === 1 ? "" : "s"}`}
+                      </div>
+                    </div>
+                    <div>
+                      <MetricBar label="Requests" rate={m.requestRate} n={m.requests} total={m.sent} variant="req" />
+                      <MetricBar label="Responses" rate={m.responseRate} n={m.responses} total={m.sent} variant="resp" />
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </MountPanel>
+
+        {/* Component attribution */}
+        <MountPanel>
+          <BandHeader title="Component attribution" meta="request rate by individual version — where the credit really sits" Icon={PieChart} />
+          <div style={{ padding: "20px 22px 22px" }}>
+            <div className="sp-attr-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+              {attribution.map(({ kind, items, bestId }) => {
+                const m = COMP[kind];
+                return (
+                  <div key={kind} style={{ minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.08em", textTransform: "uppercase", color: sageText, marginBottom: 11 }}>
+                      <m.Icon style={{ width: 13, height: 13, color: m.color }} strokeWidth={2} aria-hidden="true" />
+                      {m.label}
+                    </div>
+                    {items.length === 0 ? (
+                      <div style={{ fontFamily: FONT_SANS, fontSize: 11.5, fontStyle: "italic", color: mutedInk }}>No sends yet.</div>
+                    ) : (
+                      items.map(({ v, m: vm }) => {
+                        const best = v.id === bestId;
+                        return (
+                          <div key={v.id} style={{ marginBottom: 13 }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8, marginBottom: 4 }}>
+                              <span style={{ fontSize: 12.5, lineHeight: 1.2, color: best ? burgundy : bodyInk, fontWeight: best ? 500 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{v.versionName}</span>
+                              <span style={{ fontFamily: FONT_MONO, fontSize: 11, color: burgundy, fontWeight: 500, flexShrink: 0 }}>
+                                {formatRate(vm.requestRate)}<small style={{ color: "#b3a99a", fontWeight: 400, fontSize: 9, marginLeft: 2 }}>{vm.requests}/{vm.sent}</small>
+                              </span>
+                            </div>
+                            <div style={{ height: 6, background: "#ece4da", borderRadius: 3, overflow: "hidden" }}>
+                              <div style={{ height: "100%", borderRadius: 3, width: barWidth(vm.requestRate), background: best ? burgundy : "#cdb6ad" }} />
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </MountPanel>
+      </div>
+    );
+  };
+
   const placeholder = (label: string) => (
     <MountPanel>
       <BandHeader title={label} Icon={TABS.find((t) => t.label === label)?.Icon ?? Layers} />
@@ -590,6 +791,12 @@ export const SubmissionPackages: React.FC = () => {
         .sp-icon-btn:hover { color: ${burgundy}; background: rgba(124,58,42,0.06); }
         .sp-ver:hover { border-color: #ddcdba; }
         .sp-dd-opt:hover { background: #f5e2da; color: ${burgundy}; }
+        @media (max-width: 760px) {
+          .sp-pkg-row { grid-template-columns: 1fr !important; gap: 12px !important; }
+          .sp-attr-grid { grid-template-columns: 1fr !important; }
+          .sp-strat { flex-direction: column !important; align-items: flex-start !important; }
+          .sp-strat-div { display: none !important; }
+        }
       `}</style>
 
       <div className="relative" style={{ zIndex: 1, maxWidth: 1000, margin: "0 auto", padding: "40px 20px 0" }}>
@@ -673,10 +880,10 @@ export const SubmissionPackages: React.FC = () => {
             <BandHeader title="Materials library" meta="every version of every component — the building blocks for packages" Icon={Layers} />
             <div style={{ padding: "20px 22px 22px" }}>{LIB_KINDS.map(renderSection)}</div>
           </MountPanel>
+        ) : tab === "perf" ? (
+          renderPerformance()
         ) : tab === "pkgs" ? (
           renderPackages()
-        ) : tab === "perf" ? (
-          placeholder("Performance")
         ) : (
           placeholder("In the query log")
         )}

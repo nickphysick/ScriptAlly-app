@@ -13,6 +13,8 @@ import {
   barWidth,
   versionSnippet,
   versionMeta,
+  meetsSampleThreshold,
+  MIN_SENDS_FOR_CLAIM,
 } from "./packageMetrics";
 import { Query, QueryStatus, SubmissionMethod, SubmissionPackage, ManuscriptVersion, ComponentType } from "../types";
 
@@ -154,6 +156,16 @@ describe("packagesUsingVersion", () => {
       pkg({ id: "d" }),
     ];
     expect(packagesUsingVersion("V", packages).map((p) => p.id)).toEqual(["a", "b", "c"]);
+  });
+});
+
+describe("meetsSampleThreshold", () => {
+  it("requires at least MIN_SENDS_FOR_CLAIM sends before a claim is allowed", () => {
+    expect(meetsSampleThreshold(MIN_SENDS_FOR_CLAIM)).toBe(true);
+    expect(meetsSampleThreshold(MIN_SENDS_FOR_CLAIM + 5)).toBe(true);
+    expect(meetsSampleThreshold(MIN_SENDS_FOR_CLAIM - 1)).toBe(false);
+    expect(meetsSampleThreshold(1)).toBe(false);
+    expect(meetsSampleThreshold(0)).toBe(false);
   });
 });
 
