@@ -32,7 +32,8 @@ import {
   Sparkles,
   Notebook,
   MoreHorizontal,
-  Archive
+  Archive,
+  Package
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -539,6 +540,17 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ searchQuery, onN
                 <Pencil className="w-3 h-3 text-stone-500" />
                 <span>Edit profile</span>
               </button>
+              {/* Open the Submission Packages page for THIS manuscript (carries the active id the page reads). */}
+              <button
+                onClick={() => {
+                  localStorage.setItem("scriptally_active_manuscript_id", activeMs.id);
+                  onNavigate?.("manuscripts", "Submission packages");
+                }}
+                className="h-[28px] border border-[#7c3a2a]/20 hover:bg-[#7c3a2a]/[0.07] bg-[#7c3a2a]/[0.04] flex items-center gap-1.5 px-3 rounded-full text-xs text-[#7c3a2a] font-medium cursor-pointer transition-colors"
+              >
+                <Package className="w-3 h-3" />
+                <span>Submission Packages</span>
+              </button>
             </div>
 
             {/* Center controls: filtered listing previous / next slider */}
@@ -752,10 +764,13 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ searchQuery, onN
                       Active Draft Versions ({activeMsVersions.length})
                     </span>
                     <button
-                      onClick={() => onNavigate?.("manuscripts", "Submission packages")}
+                      onClick={() => {
+                        localStorage.setItem("scriptally_active_manuscript_id", activeMs.id);
+                        onNavigate?.("manuscripts", "Submission packages");
+                      }}
                       className="text-[9px] font-mono text-[#7c3a2a] font-bold hover:underline"
                     >
-                      Drafts Center &rarr;
+                      Submission packages &rarr;
                     </button>
                   </div>
 
