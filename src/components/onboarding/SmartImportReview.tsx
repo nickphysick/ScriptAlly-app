@@ -536,12 +536,13 @@ const GuidanceBanner: React.FC<{ step: "duplicates" | "agents" | "queries"; comp
   const [active, setActive] = useState(0);
   useEffect(() => { setActive(0); }, [step]); // keep the open chip relevant to the current step
   const rootRef = useRef<HTMLDivElement>(null);
-  // Report the pinned banner's height so the scroll content can reserve matching bottom space —
-  // panel, footer and notes never hide behind it (and it re-measures on expand/collapse/resize).
+  // Report only the COLLAPSED banner height so the composition reserves just that (plus a margin) —
+  // when the FAQs expand we deliberately don't grow the reserve; the taller banner is allowed to
+  // overlap the content transiently. Skipping the report while open keeps the last collapsed value.
   useLayoutEffect(() => {
     const el = rootRef.current;
     if (!el || !onHeight) return;
-    const report = () => onHeight(el.offsetHeight);
+    const report = () => { if (!open) onHeight(el.offsetHeight); };
     report();
     const ro = new ResizeObserver(report);
     ro.observe(el);
@@ -1111,7 +1112,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   ));
 
   return (
-    <div style={{ background: C.band, minHeight: "100%", paddingBottom: bannerH + 12, overflowX: "hidden" }}>
+    <div style={{ background: C.band, minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center", paddingBottom: bannerH + 12, overflowX: "hidden" }}>
       <style>{`@keyframes saImpPulse{0%{box-shadow:0 0 0 0 rgba(176,74,58,0.55)}70%{box-shadow:0 0 0 7px rgba(176,74,58,0)}100%{box-shadow:0 0 0 0 rgba(176,74,58,0)}}`}</style>
       {/* Navigation runs entirely through the panel footer (Continue / Back / "Review all agents →")
           and the duplicates flow — no top tab switcher (it was a dev-only browsing aid). */}
@@ -1194,7 +1195,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
             {/* scrolling cards */}
             {/* Cap the scroll area to whatever's left above the pinned banner, so the panel's footer
                 (Continue / Import) is visible at load without scrolling under the banner. */}
-            <div ref={midRef} style={{ maxHeight: `min(520px, calc(100vh - ${bannerH + 250}px))`, overflowY: "auto", overflowX: "hidden", padding: "12px 12px 6px" }}>
+            <div ref={midRef} style={{ maxHeight: `min(520px, calc(100vh - ${bannerH + 350}px))`, overflowY: "auto", overflowX: "hidden", padding: "12px 12px 6px" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 10, position: "relative" }}>
                 {screen === "duplicates"
                   ? allClusters.map((c) => (c.resolved && c.type !== "open"
