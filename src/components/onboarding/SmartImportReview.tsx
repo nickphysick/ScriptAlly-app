@@ -534,11 +534,6 @@ const DUP_FAQS: BannerFAQ[] = [
 const GuidanceBanner: React.FC<{ step: "duplicates" | "agents" | "queries"; compact: boolean; dupCount?: number; onHeight?: (h: number) => void }> = ({ step, compact, dupCount = 0, onHeight }) => {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
-  const [hovered, setHovered] = useState(false);
-  // Hover-capable devices get the dim-at-rest treatment; touch / no-hover keep it readable (no hover
-  // to bring it back). Rest ≈ 30%; full on hover and whenever the FAQs are open.
-  const [canHover] = useState(() => typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(hover: hover)").matches);
-  const lit = open || hovered || !canHover;
   useEffect(() => { setActive(0); }, [step]); // keep the open chip relevant to the current step
   const rootRef = useRef<HTMLDivElement>(null);
   // Report the pinned banner's height so the scroll content can reserve matching bottom space —
@@ -570,8 +565,7 @@ const GuidanceBanner: React.FC<{ step: "duplicates" | "agents" | "queries"; comp
   const stepColor = (i: number) => (i === cur ? C.burgundy : i < cur ? "#5a6e58" : "#b3a89a");
 
   return (
-    <div ref={rootRef} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
-      style={{ position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 50, opacity: lit ? 1 : 0.3, transition: "opacity 240ms ease" }}>
+    <div ref={rootRef} style={{ position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 50 }}>
       <div style={{ position: "relative", background: C.panel, clipPath: TORN_TOP, WebkitClipPath: TORN_TOP, boxShadow: "0 -2px 14px rgba(80,60,40,0.07)", padding: compact ? "26px 18px 18px" : "28px 26px 22px" }}>
         <span aria-hidden style={{ position: "absolute", top: -7, left: "50%", transform: "translateX(-50%) rotate(-1.5deg)", width: 120, height: 20, background: "rgba(214,198,170,0.45)", borderLeft: "1px dashed rgba(150,130,90,0.25)", borderRight: "1px dashed rgba(150,130,90,0.25)", zIndex: 2 }} />
         <div style={{ maxWidth: 1000, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20 }}>
@@ -1119,20 +1113,9 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   return (
     <div style={{ background: C.band, minHeight: "100%", paddingBottom: bannerH + 12, overflowX: "hidden" }}>
       <style>{`@keyframes saImpPulse{0%{box-shadow:0 0 0 0 rgba(176,74,58,0.55)}70%{box-shadow:0 0 0 7px rgba(176,74,58,0)}100%{box-shadow:0 0 0 0 rgba(176,74,58,0)}}`}</style>
-      {/* tabs — switch between the two screens (edits persist; shared model) */}
-      <div style={{ display: "flex", justifyContent: "center", gap: 6, margin: "18px auto 0" }}>
-        {(["agents", "queries"] as const).map((name) => {
-          // The duplicates stage is part of step 1, so the Agents tab is lit during it.
-          const on = name === "agents" ? screen !== "queries" : screen === name;
-          return (
-            <button key={name} onClick={() => screen !== name && switchScreen(name)}
-              style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.05em", padding: "6px 18px", borderRadius: 20, cursor: "pointer", background: on ? C.burgundy : "#fff", color: on ? "#fff" : C.muted, border: `1px solid ${on ? C.burgundy : "#e2d6c8"}` }}>
-              {name === "agents" ? "Agents" : "Queries"}
-            </button>
-          );
-        })}
-      </div>
-      {topcap && <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#A89A90", textAlign: "center", padding: "10px 0 6px" }}>{topcap}</div>}
+      {/* Navigation runs entirely through the panel footer (Continue / Back / "Review all agents →")
+          and the duplicates flow — no top tab switcher (it was a dev-only browsing aid). */}
+      {topcap && <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#A89A90", textAlign: "center", padding: "16px 0 6px" }}>{topcap}</div>}
 
       {/* compact-only hint banner (the rotated corner sticky can't fit the margins) — not on the dup stage */}
       {compact && screen !== "duplicates" && (
@@ -1209,7 +1192,9 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
             </div>
 
             {/* scrolling cards */}
-            <div ref={midRef} style={{ maxHeight: "min(520px, 62vh)", overflowY: "auto", overflowX: "hidden", padding: "12px 12px 6px" }}>
+            {/* Cap the scroll area to whatever's left above the pinned banner, so the panel's footer
+                (Continue / Import) is visible at load without scrolling under the banner. */}
+            <div ref={midRef} style={{ maxHeight: `min(520px, calc(100vh - ${bannerH + 250}px))`, overflowY: "auto", overflowX: "hidden", padding: "12px 12px 6px" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 10, position: "relative" }}>
                 {screen === "duplicates"
                   ? allClusters.map((c) => (c.resolved && c.type !== "open"
