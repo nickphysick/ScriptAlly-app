@@ -340,6 +340,8 @@ const ActiveQueriesCard: React.FC<{ count: number; diff: number; weeks: ActiveWe
   // Closed area: trace the same line, then down to the chart baseline (y=34) and back.
   const fillD = `${d} L ${points[points.length - 1].x.toFixed(1)} 34 L ${points[0].x.toFixed(1)} 34 Z`;
   const fillId = useId(); // unique per render so multiple cards never collide
+  const maskGradId = `${fillId}mg`; // horizontal left→right fade-in (drives the mask)
+  const maskId = `${fillId}mk`;
   const pill =
     diff > 0 ? <span style={pillSage}>+{diff} on last week</span> : diff < 0 ? <span style={pillBurgundy}>{diff} on last week</span> : <span style={pillBurgundy}>No change on last week</span>;
 
@@ -375,14 +377,23 @@ const ActiveQueriesCard: React.FC<{ count: number; diff: number; weeks: ActiveWe
     >
       <svg width="100%" height="34" viewBox="0 0 160 34" preserveAspectRatio="none" style={{ marginTop: 10, display: "block", overflow: "visible" }}>
         <defs>
-          {/* faint burgundy at the line → fully transparent at the baseline */}
+          {/* fill colour: faint burgundy at the line → fully transparent at the baseline */}
           <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={lineBurgundy} stopOpacity="0.28" />
             <stop offset="100%" stopColor={lineBurgundy} stopOpacity="0" />
           </linearGradient>
+          {/* horizontal left→right fade-in, used as a mask so the fill's weight sits on the recent (right) end */}
+          <linearGradient id={maskGradId} x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#fff" stopOpacity="0" />
+            <stop offset="55%" stopColor="#fff" stopOpacity="0.5" />
+            <stop offset="100%" stopColor="#fff" stopOpacity="1" />
+          </linearGradient>
+          <mask id={maskId}>
+            <rect x="0" y="0" width="160" height="34" fill={`url(#${maskGradId})`} />
+          </mask>
         </defs>
-        {/* gradient area fill — drawn first, behind the stroked line */}
-        <path d={fillD} fill={`url(#${fillId})`} stroke="none" />
+        {/* gradient area fill — drawn first, behind the stroked line; vertical gradient + horizontal mask */}
+        <path d={fillD} fill={`url(#${fillId})`} stroke="none" mask={`url(#${maskId})`} />
         <path d={d} fill="none" stroke={lineBurgundy} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         {points.map((pt, i) => (
           <g key={i}>
