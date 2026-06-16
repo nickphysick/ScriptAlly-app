@@ -31,6 +31,8 @@ export interface ParsedQuery {
   partialSentDate?: string | null;
   fullRequestedDate?: string | null;
   fullSentDate?: string | null;
+  offerDate?: string | null;   // when an offer came in (the Offer rung's own date)
+  reviseDate?: string | null;  // when an R&R was received (the Revise & Resubmit rung's own date)
   closedDate?: string | null;
   notes?: string;
   confidence: "high" | "low";

@@ -111,8 +111,13 @@ export function impliedRungs(q: ParsedQuery): SeedRung[] {
     }
   }
   if (finalIdx < 0) {
-    // Terminal / R&R final rung — terminals can carry a closed date; R&R has none in the contract.
-    rungs.push({ status: final, date: TERMINAL.has(final) ? (q.closedDate ?? null) : null });
+    // Off-ladder final rung — each carries its own date field: terminals → closedDate, Offer →
+    // offerDate, Revise & Resubmit → reviseDate. A user-set date lands on its own rung, not queried.
+    const finalDate = TERMINAL.has(final) ? (q.closedDate ?? null)
+      : final === QueryStatus.OFFER ? (q.offerDate ?? null)
+      : final === QueryStatus.REVISE_RESUBMIT ? (q.reviseDate ?? null)
+      : null;
+    rungs.push({ status: final, date: finalDate });
   }
   return rungs;
 }

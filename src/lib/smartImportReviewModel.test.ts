@@ -20,9 +20,9 @@ describe('dateFieldForStatus — which rung a status date seeds', () => {
     expect(dateFieldForStatus(QueryStatus.WITHDRAWN)).toBe('closedDate');
     expect(dateFieldForStatus(QueryStatus.NO_RESPONSE)).toBe('closedDate');
   });
-  it('Offer & Revise & Resubmit fall back to dateQueried (no rung-date field in the contract)', () => {
-    expect(dateFieldForStatus(QueryStatus.OFFER)).toBe('dateQueried');
-    expect(dateFieldForStatus(QueryStatus.REVISE_RESUBMIT)).toBe('dateQueried');
+  it('Offer & Revise & Resubmit map to their own rung fields', () => {
+    expect(dateFieldForStatus(QueryStatus.OFFER)).toBe('offerDate');
+    expect(dateFieldForStatus(QueryStatus.REVISE_RESUBMIT)).toBe('reviseDate');
   });
 });
 
@@ -65,10 +65,20 @@ describe('modelToResult — a date attaches to the rung matching the current sta
     const out = modelToResult(r, m.agents, m.queries);
     expect(out.queries[0].dateQueried).toBe('2026-03-03');
   });
-  it('Offer falls back to the queried anchor (its own-rung date is not representable)', () => {
+  it('THE FIX: a date set on an Offer query seeds offerDate, NOT dateQueried', () => {
     const r = result([agent()], [query({ status: QueryStatus.OFFER, dateQueried: '2025-11-05' })]);
     const m = parseModel(r);
+    m.queries[0].date = '2026-01-10'; // when the offer came in
     const out = modelToResult(r, m.agents, m.queries);
+    expect(out.queries[0].offerDate).toBe('2026-01-10');   // seeds the offer rung
+    expect(out.queries[0].dateQueried).toBe('2025-11-05');  // queried anchor preserved
+  });
+  it('THE FIX: a date set on a Revise & Resubmit query seeds reviseDate, NOT dateQueried', () => {
+    const r = result([agent()], [query({ status: QueryStatus.REVISE_RESUBMIT, dateQueried: '2025-11-05' })]);
+    const m = parseModel(r);
+    m.queries[0].date = '2026-02-15';
+    const out = modelToResult(r, m.agents, m.queries);
+    expect(out.queries[0].reviseDate).toBe('2026-02-15');
     expect(out.queries[0].dateQueried).toBe('2025-11-05');
   });
   it('a still-needed date stays null — never fabricated', () => {

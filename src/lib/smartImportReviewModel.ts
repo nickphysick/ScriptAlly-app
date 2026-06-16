@@ -90,10 +90,9 @@ export const queryStatusOf = (q: ReviewQuery): "needs-check" | "captured" =>
 
 /** Which ParsedQuery field carries the date for a status's RUNG — i.e. which rung a known or
  *  user-set date should seed. This is what keeps the timeline honest: a Full Sent date seeds the
- *  full-sent rung, a Partial Sent date the partial-sent rung, etc. (commitSmartImport's impliedRungs
- *  reads exactly these per-rung fields). The contract has NO rung-date field for Offer or
- *  Revise & Resubmit (impliedRungs gives them a null date), so those fall back to the queried anchor
- *  — their own-rung date is not representable, and is never bodged onto a different rung. */
+ *  full-sent rung, an Offer date the offer rung, etc. (commitSmartImport's impliedRungs reads exactly
+ *  these per-rung fields). Every status maps to its own field — Offer → offerDate, Revise & Resubmit
+ *  → reviseDate — so a date is never bodged onto the queried rung by default. */
 export const dateFieldForStatus = (status: QueryStatus): keyof ParsedQuery => {
   switch (status) {
     case QueryStatus.QUERIED: return "dateQueried";
@@ -101,10 +100,12 @@ export const dateFieldForStatus = (status: QueryStatus): keyof ParsedQuery => {
     case QueryStatus.PARTIAL_SENT: return "partialSentDate";
     case QueryStatus.FULL_REQUESTED: return "fullRequestedDate";
     case QueryStatus.FULL_SENT: return "fullSentDate";
+    case QueryStatus.OFFER: return "offerDate";
+    case QueryStatus.REVISE_RESUBMIT: return "reviseDate";
     case QueryStatus.REJECTED:
     case QueryStatus.WITHDRAWN:
     case QueryStatus.NO_RESPONSE: return "closedDate";
-    default: return "dateQueried"; // Offer / Revise & Resubmit — no rung-date field in the contract
+    default: return "dateQueried";
   }
 };
 

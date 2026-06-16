@@ -64,6 +64,19 @@ describe('impliedRungs — the history shape a final status implies', () => {
     expect(rungs.find((r) => r.status === QueryStatus.REJECTED)?.date).toBe('2026-03-03');
   });
 
+  it('Offer → queried + offer rung, carrying its OWN offer date (not the queried rung)', () => {
+    const rungs = impliedRungs(q({ status: QueryStatus.OFFER, dateQueried: '2025-11-05', offerDate: '2026-04-01' }));
+    expect(rungs.map((r) => r.status)).toEqual([QueryStatus.QUERIED, QueryStatus.OFFER]);
+    expect(rungs.find((r) => r.status === QueryStatus.QUERIED)?.date).toBe('2025-11-05');
+    expect(rungs.find((r) => r.status === QueryStatus.OFFER)?.date).toBe('2026-04-01');
+  });
+
+  it('Revise & Resubmit → carries its OWN revise date on the R&R rung (a full was read)', () => {
+    const rungs = impliedRungs(q({ status: QueryStatus.REVISE_RESUBMIT, reviseDate: '2026-05-05' }));
+    expect(rungs.map((r) => r.status)).toContain(QueryStatus.FULL_SENT); // R&R implies a full was read
+    expect(rungs.find((r) => r.status === QueryStatus.REVISE_RESUBMIT)?.date).toBe('2026-05-05');
+  });
+
   it('carries the real date onto each dated rung and null onto the rest', () => {
     const rungs = impliedRungs(q({ status: QueryStatus.PARTIAL_SENT, dateQueried: '2026-01-01', partialSentDate: '2026-02-02' }));
     const byStatus = Object.fromEntries(rungs.map((r) => [r.status, r.date]));
