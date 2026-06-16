@@ -4,10 +4,12 @@
  *
  * Account settings — rebuilt onto the Form 11 / dashboard design system:
  * the dashboard ground (pageGround + fixed page grain), a sticky left section rail,
- * and parchment MountCards carrying the sage-band uniform header (3px burgundy rule +
- * Playfair title + far-right lucide emblem). The sage band is a z-2 child inset by 6px
- * so the canonical MountCard's z-3 inset frame CLIPS it — no overlay-border frame is
- * hand-rolled (reusing MountCard is what guarantees the band never spills at the corners).
+ * and parchment cards carrying the sage-band uniform header (3px burgundy rule + Playfair
+ * title + far-right lucide emblem). Section/danger cards use CardShell — the same three-layer
+ * clipping structure the app already uses correctly (the onboarding "Database populated" card):
+ * an outer parchment panel whose even padding is the rim, an inner 1px frame with overflow:hidden
+ * as the clipping context, and a header with no radius/margin so its fill stops at the frame border
+ * and is clipped to the rounded corners (never an overlay border, which can't contain a fill → spill).
  *
  * Wiring rule: a control is wired only when its end-to-end behaviour already exists (or is
  * trivially self-contained this pass). Everything else is rendered on-brand but clearly inert
@@ -29,6 +31,10 @@ import { MountCard } from "./MountCard";
 import {
   pageGround,
   PAGE_GRAIN,
+  parchment,
+  PAPER_TEXTURE,
+  mountShadow,
+  insetBorder,
   sageBandGradient,
   sageBandRule,
   sageAccent,
@@ -230,10 +236,26 @@ const InertNotice: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 /**
- * SectionCard — reuses the canonical MountCard, then lays the sage-band uniform header
- * (or a danger-tinted header) as a z-2 child inset by 6px so MountCard's z-3 frame clips it.
- * Body sits at z-4 (above the frame) so its inputs/buttons stay interactive.
+ * CardShell — the three-layer clipping card the app already uses correctly elsewhere (the
+ * onboarding "Database populated" card; mirrors scriptally-header-fill-target.html):
+ *   1. panel — the Form 11 parchment surface (+ paper grain), outer radius + shadow, and an even
+ *              `padding` on all four sides → that padding IS the uniform rim.
+ *   2. frame — a 1px burgundy border with its own (smaller) radius + `overflow:hidden`; this is the
+ *              clipping context. Its transparent interior lets the panel's grain show through the body.
+ *   3. header/body — laid INSIDE the frame; a header fill stops at the frame border and is clipped to
+ *              the frame's rounded corners by overflow:hidden, so it never reaches the card's outer edge.
+ * This replaces the old overlay-border frame (a border drawn over the fill can't contain it → spill).
  */
+const CardShell: React.FC<{ children: React.ReactNode; style?: React.CSSProperties; className?: string }> = ({ children, style, className }) => (
+  <div
+    className={className}
+    style={{ background: parchment, backgroundImage: PAPER_TEXTURE, borderRadius: 14, boxShadow: mountShadow, padding: 6, border: "1px solid rgba(124,58,42,0.10)", ...style }}
+  >
+    <div style={{ border: insetBorder, borderRadius: 9, overflow: "hidden" }}>{children}</div>
+  </div>
+);
+
+/** A section card: the sage-band (or danger-tinted) uniform header + body, inside the clipping frame. */
 const SectionCard: React.FC<{
   title: string;
   Icon: React.ComponentType<any>;
@@ -241,13 +263,11 @@ const SectionCard: React.FC<{
   headingId?: string;
   children: React.ReactNode;
 }> = ({ title, Icon, danger, headingId, children }) => (
-  <MountCard style={{ marginBottom: 20 }}>
+  <CardShell style={{ marginBottom: 20 }}>
+    {/* header — NO radius and NO margin of its own; the frame's overflow:hidden clips it to the
+        rounded top corners and the fill stops at the frame border (never the card's outer edge). */}
     <div
       style={{
-        position: "relative",
-        zIndex: 2,
-        margin: "6px 6px 0",
-        borderRadius: "8px 8px 0 0",
         padding: "13px 18px 11px",
         background: danger ? DANGER_BAND : sageBandGradient,
         borderBottom: `1px solid ${danger ? DANGER_RULE : sageBandRule}`,
@@ -281,8 +301,8 @@ const SectionCard: React.FC<{
       </span>
       <Icon style={{ width: 19, height: 19, color: danger ? DANGER_INK : burgundy, flexShrink: 0 }} strokeWidth={1.8} aria-hidden="true" />
     </div>
-    <div style={{ position: "relative", zIndex: 4, margin: "0 6px 6px", padding: "18px" }}>{children}</div>
-  </MountCard>
+    <div style={{ padding: 18 }}>{children}</div>
+  </CardShell>
 );
 
 /* ── The left section rail — a lighter/secondary MountCard, keyboard-navigable (tablist) ── */
@@ -408,13 +428,9 @@ const DeleteAccountModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         onMouseDown={(e) => e.stopPropagation()}
         style={{ width: "100%", maxWidth: 460 }}
       >
-        <MountCard>
+        <CardShell>
           <div
             style={{
-              position: "relative",
-              zIndex: 2,
-              margin: "6px 6px 0",
-              borderRadius: "8px 8px 0 0",
               padding: "13px 18px 11px",
               background: DANGER_BAND,
               borderBottom: `1px solid ${DANGER_RULE}`,
@@ -434,7 +450,7 @@ const DeleteAccountModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               <X style={{ width: 18, height: 18 }} strokeWidth={2} aria-hidden="true" />
             </button>
           </div>
-          <div style={{ position: "relative", zIndex: 4, margin: "0 6px 6px", padding: 18 }}>
+          <div style={{ padding: 18 }}>
             <p style={{ ...helpText, color: bodyInk, marginBottom: 14 }}>
               This permanently removes your account and every manuscript, agent and query you've tracked.
               This <strong>cannot be undone</strong>.
@@ -483,7 +499,7 @@ const DeleteAccountModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               Account deletion isn't available yet — it's coming soon. Nothing has been deleted.
             </p>
           </div>
-        </MountCard>
+        </CardShell>
       </div>
     </div>,
     document.body,
