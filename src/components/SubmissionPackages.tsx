@@ -17,13 +17,14 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useScriptAllyDb } from "../lib/db";
-import { ManuscriptVersion, ComponentType, UserPlan } from "../types";
+import { ManuscriptVersion, SubmissionPackage, ComponentType, UserPlan } from "../types";
 import { MountPanel } from "./MountPanel";
 import {
   versionSnippet,
   versionMeta,
   packagesUsingVersion,
   componentMetrics,
+  packageMetrics,
   formatRate,
 } from "../lib/packageMetrics";
 import {
@@ -60,6 +61,8 @@ import {
   Trash2,
   Lock,
   ChevronDown,
+  GripVertical,
+  Check,
   X,
   AlertTriangle,
 } from "lucide-react";
@@ -68,10 +71,10 @@ const AMBER = "#b98a4e";
 const GREY_DOT = "#c4b4aa";
 
 /** Per-component-kind presentation (the three material kinds this page manages). */
-const COMP: Record<string, { label: string; noun: string; Icon: React.ComponentType<any>; color: string; tile: string }> = {
-  [ComponentType.QUERY_LETTER]: { label: "Query letters", noun: "version", Icon: Mail, color: burgundy, tile: "#f5e2da" },
-  [ComponentType.SYNOPSIS]: { label: "Synopses", noun: "version", Icon: FileText, color: sageText, tile: "#e9ede6" },
-  [ComponentType.SAMPLE_PAGES]: { label: "Sample pages", noun: "selection", Icon: BookOpen, color: AMBER, tile: "#f3e6cf" },
+const COMP: Record<string, { label: string; slotLabel: string; noun: string; Icon: React.ComponentType<any>; color: string; tile: string }> = {
+  [ComponentType.QUERY_LETTER]: { label: "Query letters", slotLabel: "Query letter", noun: "version", Icon: Mail, color: burgundy, tile: "#f5e2da" },
+  [ComponentType.SYNOPSIS]: { label: "Synopses", slotLabel: "Synopsis", noun: "version", Icon: FileText, color: sageText, tile: "#e9ede6" },
+  [ComponentType.SAMPLE_PAGES]: { label: "Sample pages", slotLabel: "Sample pages", noun: "selection", Icon: BookOpen, color: AMBER, tile: "#f3e6cf" },
 };
 const LIB_KINDS: ComponentType[] = [ComponentType.QUERY_LETTER, ComponentType.SYNOPSIS, ComponentType.SAMPLE_PAGES];
 
@@ -114,6 +117,103 @@ const BandHeader: React.FC<{ title: string; meta?: string; Icon: React.Component
         <Icon style={{ width: 20, height: 20 }} strokeWidth={1.6} aria-hidden="true" />
       </span>
     </div>
+  );
+};
+
+/* ── Component chip (icon + version name), used in package cards. ── */
+const Chip: React.FC<{ kind: ComponentType; label: string }> = ({ kind, label }) => {
+  const meta = COMP[kind];
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, maxWidth: "100%", fontFamily: FONT_SANS, fontSize: 11, color: "#5a4a40", background: "#f3ece2", border: "1px solid #e4d8ca", borderRadius: 7, padding: "4px 9px" }}>
+      <meta.Icon style={{ width: 11, height: 11, color: meta.color, flexShrink: 0 }} strokeWidth={2} aria-hidden="true" />
+      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</span>
+    </span>
+  );
+};
+
+/* ── Builder slot dropdown. The menu is portalled to <body> so MountPanel's overflow:hidden frame
+ *    can't clip it (a long version list or the bottom slot would otherwise be cut off). ── */
+const SlotDropdown: React.FC<{
+  versions: ManuscriptVersion[];
+  selectedId?: string;
+  rateLabel: (v: ManuscriptVersion) => string;
+  newLabel: string;
+  onSelect: (id: string) => void;
+  onNew: () => void;
+}> = ({ versions, selectedId, rateLabel, newLabel, onSelect, onNew }) => {
+  const [open, setOpen] = useState(false);
+  const trigRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [rect, setRect] = useState<{ top: number; left: number; width: number } | null>(null);
+
+  const place = () => {
+    const el = trigRef.current;
+    if (el) { const r = el.getBoundingClientRect(); setRect({ top: r.bottom + 6, left: r.left, width: r.width }); }
+  };
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      if (trigRef.current?.contains(e.target as Node) || menuRef.current?.contains(e.target as Node)) return;
+      setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    const reflow = () => place();
+    document.addEventListener("mousedown", onDoc);
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("scroll", reflow, true);
+    window.addEventListener("resize", reflow);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("scroll", reflow, true);
+      window.removeEventListener("resize", reflow);
+    };
+  }, [open]);
+
+  const selected = versions.find((v) => v.id === selectedId);
+  return (
+    <>
+      <button
+        ref={trigRef}
+        type="button"
+        onClick={() => { if (!open) place(); setOpen((o) => !o); }}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, width: "100%", cursor: "pointer", background: "transparent", border: "none", padding: 0, fontFamily: FONT_SANS, fontSize: 13.5, color: selected ? bodyInk : "#c8b8a8", textAlign: "left" }}
+      >
+        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{selected ? selected.versionName : "Choose a version…"}</span>
+        <ChevronDown style={{ width: 13, height: 13, color: burgundy, flexShrink: 0, transform: open ? "rotate(180deg)" : "none", transition: "transform .2s" }} strokeWidth={2.2} aria-hidden="true" />
+      </button>
+      {open && rect && createPortal(
+        <div ref={menuRef} role="listbox" style={{ position: "fixed", top: rect.top, left: rect.left, minWidth: Math.max(rect.width, 220), background: parchment, border: `1px solid ${ghostButtonBorder}`, borderRadius: 10, boxShadow: "0 8px 24px rgba(58,28,20,0.16)", padding: 5, zIndex: 130, maxHeight: 280, overflowY: "auto" }}>
+          {versions.length === 0 && (
+            <div style={{ padding: "9px 11px", fontFamily: FONT_SANS, fontSize: 12.5, fontStyle: "italic", color: mutedInk }}>No versions yet.</div>
+          )}
+          {versions.map((v) => (
+            <div
+              key={v.id}
+              role="option"
+              aria-selected={v.id === selectedId}
+              onClick={() => { onSelect(v.id); setOpen(false); }}
+              className="sp-dd-opt"
+              style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, padding: "9px 11px", borderRadius: 7, fontFamily: FONT_SANS, fontSize: 13, color: v.id === selectedId ? burgundy : bodyInk, background: v.id === selectedId ? "#f5e2da" : "transparent", cursor: "pointer" }}
+            >
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{v.versionName}</span>
+              <small style={{ fontFamily: FONT_MONO, fontSize: 9, color: mutedInk, flexShrink: 0 }}>{rateLabel(v)}</small>
+            </div>
+          ))}
+          <div
+            role="option"
+            onClick={() => { onNew(); setOpen(false); }}
+            className="sp-dd-opt"
+            style={{ padding: "10px 11px", marginTop: 3, borderTop: "1px solid rgba(124,58,42,0.1)", fontFamily: FONT_SANS, fontSize: 13, fontWeight: 500, color: burgundy, cursor: "pointer" }}
+          >
+            {newLabel}
+          </div>
+        </div>,
+        document.body,
+      )}
+    </>
   );
 };
 
@@ -194,7 +294,7 @@ interface FormState {
 }
 
 export const SubmissionPackages: React.FC = () => {
-  const { currentUser, manuscripts, versions, packages, queries, addVersion, updateVersion, deleteVersion } = useScriptAllyDb();
+  const { currentUser, manuscripts, versions, packages, queries, addVersion, updateVersion, deleteVersion, addPackage, updatePackage } = useScriptAllyDb();
   const isPro = currentUser?.plan === UserPlan.PRO;
 
   const [activeMsId, setActiveMsId] = useState<string | null>(() =>
@@ -205,6 +305,12 @@ export const SubmissionPackages: React.FC = () => {
   const [form, setForm] = useState<FormState | null>(null);
   const [confirmDel, setConfirmDel] = useState<ManuscriptVersion | null>(null);
   const msMenuRef = useRef<HTMLDivElement>(null);
+
+  // Package builder state
+  const [pkgName, setPkgName] = useState("");
+  const [sel, setSel] = useState<Record<string, string>>({}); // keyed by ComponentType → versionId
+  const [editingPkgId, setEditingPkgId] = useState<string | null>(null);
+  const [pkgError, setPkgError] = useState<string | null>(null);
 
   // Default to the first manuscript when none is selected / the saved one is gone.
   useEffect(() => {
@@ -262,6 +368,34 @@ export const SubmissionPackages: React.FC = () => {
     if (!confirmDel) return;
     await deleteVersion(confirmDel.id);
     setConfirmDel(null);
+  };
+
+  const resetBuilder = () => { setPkgName(""); setSel({}); setEditingPkgId(null); setPkgError(null); };
+  const editPkg = (p: SubmissionPackage) => {
+    setEditingPkgId(p.id);
+    setPkgName(p.packageName);
+    setSel({
+      [ComponentType.QUERY_LETTER]: p.queryLetterVersionId,
+      [ComponentType.SYNOPSIS]: p.synopsisVersionId,
+      [ComponentType.SAMPLE_PAGES]: p.samplePagesVersionId,
+    });
+    setPkgError(null);
+    setTab("pkgs");
+  };
+  const createOrSave = async () => {
+    const ql = sel[ComponentType.QUERY_LETTER];
+    const sy = sel[ComponentType.SYNOPSIS];
+    const pg = sel[ComponentType.SAMPLE_PAGES];
+    if (!msId || !pkgName.trim() || !ql || !sy || !pg) return;
+    const fields = { packageName: pkgName.trim(), queryLetterVersionId: ql, synopsisVersionId: sy, samplePagesVersionId: pg };
+    if (editingPkgId) {
+      await updatePackage(editingPkgId, fields);
+      resetBuilder();
+    } else {
+      const r = await addPackage({ manuscriptId: msId, ...fields });
+      if (!r.success) { setPkgError(r.error ?? "Couldn't create the package. Please try again."); return; }
+      resetBuilder();
+    }
   };
 
   // ── Library section for one component kind ──────────────────────────────────
@@ -345,6 +479,98 @@ export const SubmissionPackages: React.FC = () => {
     );
   };
 
+  // ── Packages tab: builder + your-packages list ──────────────────────────────
+  const renderPackages = () => {
+    const rateLabelFor = (v: ManuscriptVersion) => {
+      const r = componentMetrics(v.id, msPackages, msQueries).requestRate;
+      return r === null ? "— req" : `${formatRate(r)} req`;
+    };
+    const ql = sel[ComponentType.QUERY_LETTER];
+    const sy = sel[ComponentType.SYNOPSIS];
+    const pg = sel[ComponentType.SAMPLE_PAGES];
+    const canSave = !!(pkgName.trim() && ql && sy && pg);
+    const verName = (id: string) => msVersions.find((v) => v.id === id)?.versionName ?? "—";
+
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+        {/* Builder */}
+        <MountPanel>
+          <BandHeader title={editingPkgId ? "Edit package" : "Build a package"} meta="name it, pick one of each — reuse across as many queries as you like" Icon={Plus} />
+          <div style={{ padding: "20px 22px 22px", display: "flex", flexDirection: "column", gap: 12 }}>
+            <input value={pkgName} maxLength={120} onChange={(e) => setPkgName(e.target.value)} placeholder={'Package name — e.g. "Comp-heavy", "Standard sub"'} style={inputStyle} />
+            {LIB_KINDS.map((kind) => {
+              const m = COMP[kind];
+              const kindVersions = msVersions.filter((v) => v.componentType === kind);
+              return (
+                <div key={kind} style={{ display: "flex", alignItems: "center", gap: 11, background: "#fbf6ef", border: "1px solid #e8ddcf", borderRadius: 10, padding: "11px 12px" }}>
+                  <span title="Drag to reorder (coming soon)" style={{ color: "#cbbcae", display: "inline-flex", cursor: "grab", flexShrink: 0 }}>
+                    <GripVertical style={{ width: 14, height: 14 }} aria-hidden="true" />
+                  </span>
+                  <span style={{ width: 30, height: 30, borderRadius: 8, background: m.tile, color: m.color, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <m.Icon style={{ width: 15, height: 15 }} strokeWidth={2} aria-hidden="true" />
+                  </span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.06em", textTransform: "uppercase", color: mutedInk, marginBottom: 2 }}>{m.slotLabel}</div>
+                    <SlotDropdown
+                      versions={kindVersions}
+                      selectedId={sel[kind]}
+                      rateLabel={rateLabelFor}
+                      newLabel={`+ New ${m.noun}`}
+                      onSelect={(id) => setSel((s) => ({ ...s, [kind]: id }))}
+                      onNew={() => openNew(kind)}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+            {pkgError && <div style={{ fontFamily: FONT_SANS, fontSize: 12.5, color: "#A32D2D" }}>{pkgError}</div>}
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 9, marginTop: 4 }}>
+              {editingPkgId && <button style={ghostBtn} onClick={resetBuilder}>Cancel edit</button>}
+              <button style={{ ...addBtn, padding: "11px 22px", opacity: canSave ? 1 : 0.45, cursor: canSave ? "pointer" : "not-allowed" }} disabled={!canSave} onClick={createOrSave}>
+                <Check style={{ width: 12, height: 12 }} strokeWidth={2.4} aria-hidden="true" /> {editingPkgId ? "Save changes" : "Create package"}
+              </button>
+            </div>
+          </div>
+        </MountPanel>
+
+        {/* Your packages */}
+        <MountPanel>
+          <BandHeader title="Your packages" meta={`${msPackages.length} package${msPackages.length === 1 ? "" : "s"} on this manuscript`} Icon={Package} />
+          <div style={{ padding: "20px 22px 22px" }}>
+            {msPackages.length === 0 ? (
+              <div style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 13.5, color: mutedInk }}>No packages yet — build one above to reuse across your queries.</div>
+            ) : (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 14 }}>
+                {msPackages.map((p) => {
+                  const m = packageMetrics(p.id, msQueries);
+                  return (
+                    <div key={p.id} style={{ background: "#fbf6ef", border: "1px solid #e8ddcf", borderRadius: 11, padding: "14px 15px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, gap: 8 }}>
+                        <span style={{ fontFamily: FONT_SERIF, fontSize: 16, fontWeight: 500, color: headingInk, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.packageName}</span>
+                        <button onClick={() => editPkg(p)} className="sp-icon-btn" style={{ display: "inline-flex", alignItems: "center", gap: 4, fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.05em", textTransform: "uppercase", color: mutedInk, background: "transparent", border: "none", cursor: "pointer", padding: "3px 5px", borderRadius: 6, flexShrink: 0 }}>
+                          <Pencil style={{ width: 11, height: 11 }} strokeWidth={2} aria-hidden="true" /> Edit
+                        </button>
+                      </div>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                        <Chip kind={ComponentType.QUERY_LETTER} label={verName(p.queryLetterVersionId)} />
+                        <Chip kind={ComponentType.SYNOPSIS} label={verName(p.synopsisVersionId)} />
+                        <Chip kind={ComponentType.SAMPLE_PAGES} label={verName(p.samplePagesVersionId)} />
+                      </div>
+                      <div style={{ marginTop: 11, display: "flex", gap: 16 }}>
+                        <span style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#6a5e54" }}>Sent <b style={{ color: burgundy, fontWeight: 500 }}>{m.sent}×</b></span>
+                        <span style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#6a5e54" }}>Requests <b style={{ color: burgundy, fontWeight: 500 }}>{formatRate(m.requestRate)}</b></span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </MountPanel>
+      </div>
+    );
+  };
+
   const placeholder = (label: string) => (
     <MountPanel>
       <BandHeader title={label} Icon={TABS.find((t) => t.label === label)?.Icon ?? Layers} />
@@ -363,6 +589,7 @@ export const SubmissionPackages: React.FC = () => {
         .sp-tab:hover { color: ${burgundy}; }
         .sp-icon-btn:hover { color: ${burgundy}; background: rgba(124,58,42,0.06); }
         .sp-ver:hover { border-color: #ddcdba; }
+        .sp-dd-opt:hover { background: #f5e2da; color: ${burgundy}; }
       `}</style>
 
       <div className="relative" style={{ zIndex: 1, maxWidth: 1000, margin: "0 auto", padding: "40px 20px 0" }}>
@@ -446,10 +673,10 @@ export const SubmissionPackages: React.FC = () => {
             <BandHeader title="Materials library" meta="every version of every component — the building blocks for packages" Icon={Layers} />
             <div style={{ padding: "20px 22px 22px" }}>{LIB_KINDS.map(renderSection)}</div>
           </MountPanel>
+        ) : tab === "pkgs" ? (
+          renderPackages()
         ) : tab === "perf" ? (
           placeholder("Performance")
-        ) : tab === "pkgs" ? (
-          placeholder("Packages")
         ) : (
           placeholder("In the query log")
         )}
@@ -458,7 +685,7 @@ export const SubmissionPackages: React.FC = () => {
       {/* ── New / edit version form ── */}
       {form && (
         <Modal onClose={() => setForm(null)} labelledBy="sp-form-title">
-          <BandHeader title={`${form.editing ? "Edit" : "New"} ${COMP[form.kind].label.replace(/s$/, "").toLowerCase()} ${COMP[form.kind].noun}`} Icon={COMP[form.kind].Icon} />
+          <BandHeader title={`${form.editing ? "Edit" : "New"} ${COMP[form.kind].slotLabel.toLowerCase()}`} Icon={COMP[form.kind].Icon} />
           <div style={{ padding: 20 }}>
             <span id="sp-form-title" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>
               {form.editing ? "Edit" : "New"} {COMP[form.kind].noun}
