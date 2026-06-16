@@ -162,10 +162,12 @@ interface DbContextType {
   
   // Version Actions
   addVersion: (v: Omit<ManuscriptVersion, "id" | "userId" | "createdDate">) => Promise<void>;
+  updateVersion: (id: string, fields: Partial<Pick<ManuscriptVersion, "versionName" | "contentDraft" | "fileAttached" | "fileName">>) => Promise<void>;
   deleteVersion: (id: string) => Promise<void>;
-  
+
   // Package Actions
   addPackage: (p: Omit<SubmissionPackage, "id" | "userId" | "status" | "createdDate">) => Promise<{ success: boolean; error?: string }>;
+  updatePackage: (id: string, fields: Partial<Pick<SubmissionPackage, "packageName" | "queryLetterVersionId" | "synopsisVersionId" | "samplePagesVersionId">>) => Promise<void>;
   retirePackage: (id: string) => Promise<void>;
   
   // Agent Actions
@@ -1080,6 +1082,18 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
+  const updateVersion = async (
+    id: string,
+    fields: Partial<Pick<ManuscriptVersion, "versionName" | "contentDraft" | "fileAttached" | "fileName">>,
+  ) => {
+    if (!currentUser) return;
+    try {
+      await updateDoc(doc(db, "users", currentUser.id, "versions", id), fields);
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/versions/${id}`);
+    }
+  };
+
   const deleteVersion = async (id: string) => {
     if (!currentUser) return;
     const isLocked = packages.some(p => p.queryLetterVersionId === id || p.synopsisVersionId === id || p.samplePagesVersionId === id);
@@ -1120,6 +1134,18 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     } catch (e) {
       handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/packages/${id}`);
       return { success: false, error: "Database transaction error." };
+    }
+  };
+
+  const updatePackage = async (
+    id: string,
+    fields: Partial<Pick<SubmissionPackage, "packageName" | "queryLetterVersionId" | "synopsisVersionId" | "samplePagesVersionId">>,
+  ) => {
+    if (!currentUser) return;
+    try {
+      await updateDoc(doc(db, "users", currentUser.id, "packages", id), fields);
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/packages/${id}`);
     }
   };
 
@@ -2244,8 +2270,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         deleteManuscript,
         setManuscriptShelved,
         addVersion,
+        updateVersion,
         deleteVersion,
         addPackage,
+        updatePackage,
         retirePackage,
         addAgent,
         updateAgent,
