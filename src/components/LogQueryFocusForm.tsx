@@ -19,6 +19,8 @@ interface LogQueryFocusFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccessToast: (message: string) => void;
+  /** Routing for the MaterialsField "Upgrade to Pro" / empty-state links (closes the form first). */
+  onNavigate?: (tab: string, subPageName?: string) => void;
 }
 
 const getInitials = (name: string) =>
@@ -40,6 +42,7 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
   isOpen,
   onClose,
   onSuccessToast,
+  onNavigate,
 }) => {
   const { manuscripts, agents, queries, addQuery, addAgent, currentUser } = useScriptAllyDb();
 
@@ -340,6 +343,7 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
               onPackageChange={setSelectedPackageId}
               manuscriptId={selectedManuscriptId}
               palette={["Query Letter", "Synopsis", "Sample Pages"]}
+              onNavigate={onNavigate ? (tab, sub) => { onClose(); onNavigate(tab, sub); } : undefined}
             />
           </FormField>
 

@@ -208,6 +208,7 @@ function AppContent() {
         isOpen={isLogQueryOpen}
         onClose={() => setIsLogQueryOpen(false)}
         onSuccessToast={(msg) => setSuccessToast(msg)}
+        onNavigate={handleNavigate}
       />
 
       <AddAgentFocusForm
