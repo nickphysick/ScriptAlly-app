@@ -9,6 +9,7 @@
  */
 import { QueryStatus } from "../types";
 import { ParsedAgent, ParsedQuery, SmartImportResult } from "../types/smartImport";
+import { normaliseGenres } from "./manuscripts";
 
 // ── Working model ───────────────────────────────────────────────────────────────────────────────
 export interface ReviewAgent {
@@ -59,18 +60,47 @@ export interface ReviewQuery {
   id: string;
   agentRef: string;
   status: QueryStatus;
-  /** The date of this query's current status, or null → shown as "date needed" (never fabricated).
-   *  A missing date is NOT a check reason and never blocks import. */
-  date: string | null;
-  /** Same reason/resolve machinery as agents — a low-confidence status mapping carries one. */
+  /** The queried-rung date (the anchor). When status is "Queried" this is the query's only date. */
+  dateQueried: string | null;
+  /** The current-status rung's date (e.g. the full-sent date), kept separate from the queried anchor
+   *  so both can be edited beyond Queried. Unused while status is Queried. Carries across status
+   *  changes (relabelled, never discarded). All dates optional — never a check reason, never gating. */
+  statusDate: string | null;
+  /** Quiet, informational hint about an unparseable date cell — shown by the date field, never a reason. */
+  dateNote: string | null;
+  /** Reason/resolve machinery — a query only ever carries a STATUS-interpretation reason (never date). */
   reasons: ReasonItem[];
   removed: boolean;
   removedReason?: "Agent removed" | "Removed by you";
 }
 
-const normalise = (s = "") => s.trim().toLowerCase();
 const friendly = (issues?: string[]): string | null =>
   issues && issues.length ? issues.join(" ") : null;
+
+// ── Duplicate matching ────────────────────────────────────────────────────────────────────────────
+// Normalise an agency for comparison: lowercase, drop "& co" and common trade words/suffixes so
+// near-identical agencies match ("Pryce Lit" ≈ "Pryce Literary", "Okonkwo Lit" ≈ "Okonkwo Literary").
+const AGENCY_NOISE = /\b(literary|lit|agency|agencies|associates|management|mgmt|books|media|group|company|ltd|llc|inc|the)\b/g;
+export const agencyKey = (agency = ""): string =>
+  agency.toLowerCase().replace(/&\s*co\b/g, " ").replace(AGENCY_NOISE, " ").replace(/[^a-z0-9]+/g, " ").trim();
+const surnameOf = (name = "") => { const p = name.trim().toLowerCase().split(/\s+/).filter(Boolean); return p[p.length - 1] || ""; };
+const firstOf = (name = "") => { const p = name.trim().toLowerCase().split(/\s+/).filter(Boolean); return p[0] || ""; };
+// First names are compatible when equal, or one is an initial/abbreviation of the other ("j"/"jon"
+// ≈ "jonathan", "m." ≈ "maria"). Trailing dots are ignored.
+const firstNameCompatible = (a: string, b: string): boolean => {
+  const x = a.replace(/\.$/, ""), y = b.replace(/\.$/, "");
+  if (!x || !y) return false;
+  if (x === y) return true;
+  if (x.length === 1 || y.length === 1) return x[0] === y[0];
+  return x.startsWith(y) || y.startsWith(x);
+};
+// Two NAMED agents are likely the same person when their surname matches and first names are
+// compatible. (Agency-only agents have no name and never match this — agency-only stays its own.)
+export const nameCompatible = (n1 = "", n2 = ""): boolean => {
+  const s1 = surnameOf(n1), s2 = surnameOf(n2);
+  if (!s1 || !s2 || s1 !== s2) return false;
+  return firstNameCompatible(firstOf(n1), firstOf(n2));
+};
 
 // ── Query dates & status options ─────────────────────────────────────────────────────────────────
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -87,6 +117,33 @@ export const QUERY_STATUS_OPTIONS: QueryStatus[] = [
 ];
 export const queryStatusOf = (q: ReviewQuery): "needs-check" | "captured" =>
   q.reasons.some((r) => !r.resolved) ? "needs-check" : "captured";
+
+/** The date shown on the card for a query: the queried anchor while Queried, else the status-rung date. */
+export const currentDate = (q: ReviewQuery): string | null =>
+  q.status === QueryStatus.QUERIED ? q.dateQueried : q.statusDate;
+
+/** Editor label for a query's current-status date field (distinct from "Date queried"). */
+const STATUS_DATE_LABEL: Partial<Record<QueryStatus, string>> = {
+  [QueryStatus.PARTIAL_REQUESTED]: "Date partial requested",
+  [QueryStatus.PARTIAL_SENT]: "Date partial sent",
+  [QueryStatus.FULL_REQUESTED]: "Date full requested",
+  [QueryStatus.FULL_SENT]: "Date full sent",
+  [QueryStatus.OFFER]: "Date of offer",
+  [QueryStatus.REVISE_RESUBMIT]: "Date R&R received",
+  [QueryStatus.REJECTED]: "Date rejected",
+  [QueryStatus.WITHDRAWN]: "Date withdrawn",
+  [QueryStatus.NO_RESPONSE]: "Date closed",
+};
+export const statusDateLabel = (status: QueryStatus): string => STATUS_DATE_LABEL[status] ?? "Date of this status";
+
+/** Presentation only: render any QueryStatus named in prose lowercase + single-quoted (e.g. "mapped
+ *  to Queried" → "mapped to 'queried'"). The enum stays exact for logic — this is just for note text. */
+const STATUS_PROSE_RE = new RegExp(
+  "['‘’\"]?(" + QUERY_STATUS_OPTIONS.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).sort((a, b) => b.length - a.length).join("|") + ")['‘’\"]?",
+  "gi",
+);
+export const quoteStatuses = (text: string): string =>
+  text.replace(STATUS_PROSE_RE, (_m, s: string) => `'${s.toLowerCase()}'`);
 
 /** Which ParsedQuery field carries the date for a status's RUNG — i.e. which rung a known or
  *  user-set date should seed. This is what keeps the timeline honest: a Full Sent date seeds the
@@ -109,20 +166,23 @@ export const dateFieldForStatus = (status: QueryStatus): keyof ParsedQuery => {
   }
 };
 
-/** Parse the AI result into the editable working model. Duplicate detection: non-deleted agents
- *  that share a normalised (non-empty) agency are flagged as merge siblings. */
+/** Parse the AI result into the editable working model. Duplicate detection: named agents at a
+ *  near-identical agency (agencyKey) with compatible names are clustered as likely the same person. */
 export function parseModel(result: SmartImportResult): { agents: ReviewAgent[]; queries: ReviewQuery[] } {
   const agents: ReviewAgent[] = (result.agents || []).map((a) => ({
     id: a.ref,
     name: (a.name || "").trim(),
     agency: (a.agency || "").trim(),
     agencyOnly: !((a.name || "").trim()) && !!(a.agency || "").trim(),
-    genres: a.genres ?? [],
+    genres: normaliseGenres(a.genres), // validate raw import genres against the allow-list; drop unknowns
+
     website: a.website ?? "",
     submissionsOpen: a.submissionMethod !== null ? true : true,
     weeks: a.responseTimeWeeks && a.responseTimeWeeks > 0 ? Math.min(26, a.responseTimeWeeks) : 6,
     rating: 0,
-    reasons: (a.confidence === "low" || !!(a.issues && a.issues.length)
+    // A named agent flags only for a GENUINE detail issue from the mapper — never for an abbreviated
+    // or missing name. An agency-only agent (no name) is valid and carries no reason → Captured.
+    reasons: ((a.name || "").trim() && a.issues && a.issues.length
       ? [{ kind: "mapping", note: friendly(a.issues) || MAPPING_NOTE, resolved: false, undoable: true } as ReasonItem]
       : []),
     mergeWith: [],
@@ -130,20 +190,30 @@ export function parseModel(result: SmartImportResult): { agents: ReviewAgent[]; 
     deleted: false,
   }));
 
-  // Flag same-agency siblings as merge candidates. The LEADER carries the shared dedupe control and
-  // the single `duplicate` reason (one post-it for the whole cluster) — members get neither.
+  // Duplicate clusters: named agents at a near-identical agency (agencyKey: suffix/noise stripped)
+  // whose names are compatible (surname match + initial/abbrev-compatible first name) are likely the
+  // same person — "j pryce"/"Jonathan Pryce" at "Pryce Lit"/"Pryce Literary". The LEADER carries the
+  // shared dedupe control + the single `duplicate` reason. Agency-only agents never cluster.
   const byAgency = new Map<string, ReviewAgent[]>();
   for (const a of agents) {
-    if (!a.agency) continue;
-    const k = normalise(a.agency);
-    (byAgency.get(k) ?? byAgency.set(k, []).get(k)!).push(a);
+    const key = agencyKey(a.agency);
+    if (!key || !a.name.trim()) continue;
+    (byAgency.get(key) ?? byAgency.set(key, []).get(key)!).push(a);
   }
-  for (const group of byAgency.values()) {
-    if (group.length < 2) continue;
-    const [leader, ...rest] = group;
-    leader.mergeWith = rest.map((r) => r.id);
-    if (!leader.reasons.some((r) => r.kind === "duplicate")) {
-      leader.reasons.unshift({ kind: "duplicate", note: dupNoteOpen(leader.agency), resolved: false, undoable: true });
+  for (const sameAgency of byAgency.values()) {
+    // Sub-cluster by name compatibility (transitive: j ↔ jon ↔ jonathan all merge).
+    const clusters: ReviewAgent[][] = [];
+    for (const a of sameAgency) {
+      const hit = clusters.find((c) => c.some((m) => nameCompatible(m.name, a.name)));
+      if (hit) hit.push(a); else clusters.push([a]);
+    }
+    for (const cluster of clusters) {
+      if (cluster.length < 2) continue;
+      const [leader, ...rest] = cluster;
+      leader.mergeWith = rest.map((r) => r.id);
+      if (!leader.reasons.some((r) => r.kind === "duplicate")) {
+        leader.reasons.unshift({ kind: "duplicate", note: dupNoteOpen(leader.agency), resolved: false, undoable: true });
+      }
     }
   }
 
@@ -153,8 +223,11 @@ export function parseModel(result: SmartImportResult): { agents: ReviewAgent[]; 
       id: `q${i}`,
       agentRef: q.agentRef,
       status,
-      // The date of THIS query's current-status rung (honest attribution) — null → "date needed".
-      date: (q[dateFieldForStatus(status)] as string | null | undefined) ?? null,
+      dateQueried: q.dateQueried ?? null, // the queried-rung anchor
+      // The current-status rung's own date (e.g. fullSentDate) — only beyond Queried, else it IS the anchor.
+      statusDate: status === QueryStatus.QUERIED ? null : ((q[dateFieldForStatus(status)] as string | null | undefined) ?? null),
+      dateNote: q.dateNote ?? null, // informational only — never a reason
+      // A query reason is ONLY ever a genuine STATUS-interpretation ambiguity (never a date).
       reasons: (q.confidence === "low" || !!(q.flags && q.flags.length)
         ? [{ kind: "mapping", note: friendly(q.flags) || QUERY_CHECK_NOTE, resolved: false, undoable: true } as ReasonItem]
         : []),
@@ -179,7 +252,9 @@ export function modelToResult(result: SmartImportResult, agents: ReviewAgent[], 
   const queriesOut: ParsedQuery[] = queries.filter((q) => !q.removed).map((q) => {
     const o = (result.queries || [])[Number(q.id.slice(1))];
     const base: ParsedQuery = { ...(o ?? { agentRef: q.agentRef, confidence: "high" as const, status: q.status, dateQueried: null }), agentRef: q.agentRef, status: q.status };
-    (base as unknown as Record<string, string | null>)[dateFieldForStatus(q.status)] = q.date; // date → its status rung's field
+    base.dateQueried = q.dateQueried; // the queried-rung anchor (edited or carried)
+    // Beyond Queried, the current-status rung gets its own date; for Queried the rung IS dateQueried.
+    if (q.status !== QueryStatus.QUERIED) (base as unknown as Record<string, string | null>)[dateFieldForStatus(q.status)] = q.statusDate;
     return base;
   });
   return { columnMapping: {}, statusTranslations: [], agents: agentsOut, queries: queriesOut, warnings: [] };

@@ -21,6 +21,7 @@ import {
   ReviewAgent, ReviewQuery, ReasonItem, CheckReason, AgentStatus,
   agentStatus, resolveReason, queryStatusOf, fmtDate, QUERY_STATUS_OPTIONS,
   dupNoteOpen, dupNoteKept, dupNoteMerged, parseModel, modelToResult,
+  currentDate, statusDateLabel, quoteStatuses,
 } from "../../lib/smartImportReviewModel";
 
 // ── Palette (from the sketch; critical colours inline per house style) ──────────────────────────
@@ -50,8 +51,8 @@ const CAVEAT = "'Caveat',cursive";
 // Composition widths. The whole thing widens together: a wider panel for un-squashed text, wider
 // notes that wrap shorter, and a wider band so both margins still clear the panel at desktop width.
 const PANEL_W = 520;  // a touch wider again
-const BAND_W = 1040;  // panel + ~260px margin each side for the notes
-const NOTE_W = 210;
+const BAND_W = 1280;  // panel + wide gutters so notes spread across the full width without crowding
+const NOTE_W = 172;   // smaller post-its (less busy; more fit the gutters without overlap)
 // Below this viewport width the side margins can't hold post-its, so notes collapse inline beneath
 // their card and the corner hint moves to a static banner.
 const COMPACT_BP = 1000;
@@ -110,15 +111,17 @@ const StateChip: React.FC<{ status: AgentStatus }> = ({ status }) => {
         <span style={{ width: 6, height: 6, borderRadius: "50%", background: C.burgundy }} />Needs checking
       </span>
     );
-  return <span style={{ ...chipBase, background: "#e7ece1", color: "#44563a" }}>✓ Captured</span>;
+  return <span style={{ ...chipBase, background: "#e7ece1", color: "#44563a" }}>✓ Ready to import</span>;
 };
 
 // ── Note content (shared by the margin post-its and the inline-on-mobile fallback) ───────────────
 const noteColors = (resolved: boolean) => ({ fill: resolved ? C.doneFill : C.noteFill, ink: resolved ? C.doneInk : C.noteInk });
+// Action buttons sit on their OWN line, centred, at the bottom of the note (not sharing the text line).
+const actionLine: React.CSSProperties = { display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 9 };
 const NoteActions: React.FC<{ resolved: boolean; undoable: boolean; kind: CheckReason; agencyBlocked: boolean; onResolve: () => void; onReopen: () => void }> = ({ resolved, undoable, kind, agencyBlocked, onResolve, onReopen }) => {
   if (resolved)
     return (
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
+      <div style={actionLine}>
         <span style={{ fontFamily: MONO, fontSize: 8, letterSpacing: "0.04em", color: "#5a6e58", textTransform: "uppercase" }}>✓ Checked</span>
         {undoable && (
           <button onClick={onReopen}
@@ -131,9 +134,11 @@ const NoteActions: React.FC<{ resolved: boolean; undoable: boolean; kind: CheckR
   // ticking a note — so suppress "Mark as checked" while that's the card's outstanding state.
   if (kind !== "duplicate" && !agencyBlocked)
     return (
-      <button onClick={onResolve}
-        style={{ fontFamily: MONO, fontSize: 8, letterSpacing: "0.04em", textTransform: "uppercase", color: "#7c3a2a", background: "rgba(255,255,255,0.6)", border: "1px solid rgba(124,58,42,0.25)", borderRadius: 7, padding: "3px 8px", marginTop: 8, cursor: "pointer" }}
-      >Mark as checked</button>
+      <div style={actionLine}>
+        <button onClick={onResolve}
+          style={{ fontFamily: MONO, fontSize: 8, letterSpacing: "0.04em", textTransform: "uppercase", color: "#7c3a2a", background: "rgba(255,255,255,0.6)", border: "1px solid rgba(124,58,42,0.25)", borderRadius: 7, padding: "3px 8px", cursor: "pointer" }}
+        >Mark as checked</button>
+      </div>
     );
   return null;
 };
@@ -142,8 +147,8 @@ const NoteActions: React.FC<{ resolved: boolean; undoable: boolean; kind: CheckR
 const InlineNote: React.FC<{ text: string; resolved: boolean; kind: CheckReason; undoable: boolean; agencyBlocked: boolean; onResolve: () => void; onReopen: () => void }> = ({ text, resolved, kind, undoable, agencyBlocked, onResolve, onReopen }) => {
   const { fill, ink } = noteColors(resolved);
   return (
-    <div style={{ background: fill, border: `1px solid ${resolved ? "#cdd8c7" : "#f1d3cf"}`, borderRadius: 8, padding: "9px 11px", fontFamily: CAVEAT, fontWeight: 500, fontSize: 15, lineHeight: 1.2, color: ink }}>
-      <span style={{ textDecoration: resolved ? "line-through" : "none", opacity: resolved ? 0.85 : 1 }}>{text}</span>
+    <div style={{ background: fill, border: `1px solid ${resolved ? "#cdd8c7" : "#f1d3cf"}`, borderRadius: 8, padding: "8px 10px", fontFamily: CAVEAT, fontWeight: 500, fontSize: 13.5, lineHeight: 1.2, color: ink }}>
+      <span style={{ textDecoration: resolved ? "line-through" : "none", opacity: resolved ? 0.85 : 1 }}>{quoteStatuses(text)}</span>
       <NoteActions resolved={resolved} undoable={undoable} kind={kind} agencyBlocked={agencyBlocked} onResolve={onResolve} onReopen={onReopen} />
     </div>
   );
@@ -406,8 +411,10 @@ const QueryCard: React.FC<QueryCardProps> = ({
         </span>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontFamily: SERIF, fontSize: 15, color: "#2e2018", lineHeight: 1.1 }}>{agentName}</div>
-          <div style={{ fontFamily: MONO, fontSize: 9, letterSpacing: "0.02em", color: query.date ? C.meta : C.invalid, marginTop: 3 }}>
-            {query.status} · {fmtDate(query.date)}
+          <div style={{ fontFamily: MONO, fontSize: 9, letterSpacing: "0.02em", color: C.meta, marginTop: 3 }}>
+            {query.status} · {currentDate(query)
+              ? fmtDate(currentDate(query))
+              : <span style={{ color: C.muted, fontStyle: "italic" }}>add a date for full tracking</span>}
           </div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0, marginRight: 18 }}>
@@ -418,26 +425,41 @@ const QueryCard: React.FC<QueryCardProps> = ({
         </div>
       </div>
 
-      {/* editor — status + the date of that status */}
-      {open && (
-        <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", gap: 11, marginTop: 12, paddingTop: 12, borderTop: "0.5px solid #e8ddce" }}>
-          <div style={{ display: "flex", gap: 10 }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <span style={flab}>Status</span>
-              <select value={query.status} onChange={(e) => onPatch({ status: e.target.value as QueryStatus })}
-                style={{ ...finBase, cursor: "pointer" }}>
-                {QUERY_STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
-              </select>
+      {/* editor — status, the queried date, and (beyond Queried) the current-status date */}
+      {open && (() => {
+        const beyondQueried = query.status !== QueryStatus.QUERIED;
+        const addDateHint = <div style={{ fontSize: 9.5, color: C.muted, fontStyle: "italic", lineHeight: 1.3, marginTop: 4 }}>add a date for full tracking</div>;
+        return (
+          <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", gap: 11, marginTop: 12, paddingTop: 12, borderTop: "0.5px solid #e8ddce" }}>
+            <div style={{ display: "flex", gap: 10 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <span style={flab}>Status</span>
+                <select value={query.status} onChange={(e) => onPatch({ status: e.target.value as QueryStatus })}
+                  style={{ ...finBase, cursor: "pointer" }}>
+                  {QUERY_STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <span style={flab}>Date queried</span>
+                <input type="date" value={query.dateQueried ?? ""} onChange={(e) => onPatch({ dateQueried: e.target.value || null })} style={finBase} />
+                {!query.dateQueried && addDateHint}
+                {query.dateNote && <div style={{ fontSize: 9.5, color: C.meta, fontStyle: "italic", lineHeight: 1.3, marginTop: 4 }}>{query.dateNote}</div>}
+              </div>
             </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <span style={flab}>When did this happen?</span>
-              <input type="date" value={query.date ?? ""} onChange={(e) => onPatch({ date: e.target.value || null })}
-                style={{ ...finBase, ...(query.date ? {} : { border: "1px solid #e0b6a8", background: "#fdf5f2" }) }} />
-            </div>
+            {beyondQueried && (
+              <div style={{ display: "flex", gap: 10 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <span style={flab}>{statusDateLabel(query.status)}</span>
+                  <input type="date" value={query.statusDate ?? ""} onChange={(e) => onPatch({ statusDate: e.target.value || null })} style={finBase} />
+                  {!query.statusDate && addDateHint}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }} />
+              </div>
+            )}
+            <div style={{ fontSize: 10, color: C.muted, lineHeight: 1.35 }}>Dates are optional — add what you remember and your timeline stays accurate.</div>
           </div>
-          <div style={{ fontSize: 10, color: C.muted, lineHeight: 1.35 }}>Change the status and I'll log the date so your timeline stays accurate.</div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* inline notes (mobile fallback) */}
       {compact && query.reasons.length > 0 && (
@@ -469,11 +491,119 @@ const DeadBox: React.FC<{ query: ReviewQuery; agentName: string }> = ({ query, a
     <span style={{ flexShrink: 0, display: "flex", alignItems: "center" }}><StatusDot status={query.status} size={18} ghost /></span>
     <div style={{ flex: 1, minWidth: 0 }}>
       <div style={{ fontFamily: SERIF, fontSize: 13.5, color: "#8a8076" }}>{agentName}</div>
-      <div style={{ fontFamily: MONO, fontSize: 8, letterSpacing: "0.03em", color: "#ada093", marginTop: 2 }}>{query.status} · {fmtDate(query.date)}</div>
+      <div style={{ fontFamily: MONO, fontSize: 8, letterSpacing: "0.03em", color: "#ada093", marginTop: 2 }}>{query.status}{currentDate(query) ? ` · ${fmtDate(currentDate(query))}` : ""}</div>
     </div>
     <span style={{ fontFamily: MONO, fontSize: 8, color: "#9a8c7e", background: "#e0d9cf", padding: "4px 8px", borderRadius: 10, whiteSpace: "nowrap" }}>{query.removedReason}</span>
   </div>
 );
+
+// ── Bottom guidance banner — step-aware torn-paper slip (Agents → Queries → Import) ──────────────
+// Frame from scriptally-import-banner-concepts.html Option A; the "?" folds in Option B's FAQs.
+const TORN_TOP = "polygon(0% 13px,4% 5px,8% 12px,12% 4px,16% 11px,20% 6px,24% 14px,28% 5px,32% 12px,36% 7px,40% 13px,44% 4px,48% 11px,52% 6px,56% 13px,60% 5px,64% 12px,68% 7px,72% 14px,76% 5px,80% 11px,84% 6px,88% 13px,92% 5px,96% 12px,100% 8px,100% 100%,0% 100%)";
+interface BannerFAQ { q: string; a: string; }
+const BANNER: Record<"agents" | "queries", { line: React.ReactNode; faqs: BannerFAQ[] }> = {
+  agents: {
+    line: <>Here are the agents we found. Anything in <span style={{ textDecoration: "underline", textDecorationColor: "rgba(124,58,42,0.35)" }}>pink</span> needs a quick look — a missing agency, or a possible duplicate. Sort those, then carry on to your queries.</>,
+    faqs: [
+      { q: "Why does an agent need an agency?", a: "We file agents under their agency, so each record needs one — the name's optional. Add it via Make changes, or remove the record." },
+      { q: "What if I don't know the name?", a: "That's fine — we'll reference them by agency. Just fill the agency in." },
+      { q: "What's a duplicate?", a: "When the same agent looks like it came in twice, we group them so you can keep one (their queries combine) or keep both." },
+      { q: "Can I change this later?", a: "Yes — everything's editable in your agent database after import." },
+    ],
+  },
+  queries: {
+    line: <>Here are your queries, matched to your agents. Check the statuses, add any dates you remember, then import.</>,
+    faqs: [
+      { q: "Do I have to add dates?", a: "No — dates are optional. Anything missing just says ‘add a date for full tracking’, and you can fill it any time." },
+      { q: "What does ‘to check’ mean?", a: "We weren't fully sure how to read something — give it a glance and mark it checked." },
+      { q: "What happens when I import?", a: "Your agents and their queries are added to ScriptAlly with their statuses and any dates you've set." },
+      { q: "Why are some queries not included?", a: "Queries for agents you removed aren't imported — they're listed at the bottom for reference." },
+    ],
+  },
+};
+
+// The duplicates stage keeps "Agents" lit on the tracker but carries its own copy — its line and
+// FAQs are about merging doubles, not the general agent review.
+const DUP_FAQS: BannerFAQ[] = [
+  { q: "What's a duplicate?", a: "The same agent looks like it came in twice. Keep one (their queries combine) or keep both." },
+  { q: "What if they're actually different people?", a: "Choose “keep both” and we'll leave them as two separate agents." },
+  { q: "What happens when I merge?", a: "You keep one and its queries move onto it — nothing's lost." },
+  { q: "Can I fix this later?", a: "Yes — you can come back to this step from the agents screen." },
+];
+
+const GuidanceBanner: React.FC<{ step: "duplicates" | "agents" | "queries"; compact: boolean; dupCount?: number; onHeight?: (h: number) => void }> = ({ step, compact, dupCount = 0, onHeight }) => {
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState(0);
+  useEffect(() => { setActive(0); }, [step]); // keep the open chip relevant to the current step
+  const rootRef = useRef<HTMLDivElement>(null);
+  // Report the pinned banner's height so the scroll content can reserve matching bottom space —
+  // panel, footer and notes never hide behind it (and it re-measures on expand/collapse/resize).
+  useLayoutEffect(() => {
+    const el = rootRef.current;
+    if (!el || !onHeight) return;
+    const report = () => onHeight(el.offsetHeight);
+    report();
+    const ro = new ResizeObserver(report);
+    ro.observe(el);
+    window.addEventListener("resize", report);
+    return () => { ro.disconnect(); window.removeEventListener("resize", report); };
+  }, [onHeight, open, step, compact]);
+  // The duplicates stage is the opening beat of step 1 (Agents) — same tracker, its own line + FAQs.
+  const dupLine: React.ReactNode = dupCount === 0
+    ? <>These are sorted — review everyone whenever you're ready.</>
+    : dupCount === 1
+    ? <>First, let's clear a possible double — then you'll review everyone.</>
+    : <>First, let's clear a couple of possible doubles — then you'll review everyone.</>;
+  const content = step === "duplicates" ? { line: dupLine, faqs: DUP_FAQS } : BANNER[step];
+  const { line, faqs } = content;
+  const cur = step === "queries" ? 1 : 0; // Import (index 2) is the upcoming action — never "now" here
+  const labels = ["Agents", "Queries", "Import"];
+  const pipStyle = (i: number): React.CSSProperties =>
+    i < cur ? { width: 11, height: 11, borderRadius: "50%", background: C.sageEdge, flexShrink: 0 }
+      : i === cur ? { width: 13, height: 13, borderRadius: "50%", background: C.burgundy, boxShadow: "0 0 0 3px rgba(124,58,42,0.13)", flexShrink: 0 }
+        : { width: 11, height: 11, borderRadius: "50%", background: "transparent", border: "1.5px solid #cdbfb0", flexShrink: 0 };
+  const stepColor = (i: number) => (i === cur ? C.burgundy : i < cur ? "#5a6e58" : "#b3a89a");
+
+  return (
+    <div ref={rootRef} style={{ position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 50 }}>
+      <div style={{ position: "relative", background: C.panel, clipPath: TORN_TOP, WebkitClipPath: TORN_TOP, boxShadow: "0 -2px 14px rgba(80,60,40,0.07)", padding: compact ? "26px 18px 18px" : "28px 26px 22px" }}>
+        <span aria-hidden style={{ position: "absolute", top: -7, left: "50%", transform: "translateX(-50%) rotate(-1.5deg)", width: 120, height: 20, background: "rgba(214,198,170,0.45)", borderLeft: "1px dashed rgba(150,130,90,0.25)", borderRight: "1px dashed rgba(150,130,90,0.25)", zIndex: 2 }} />
+        <div style={{ maxWidth: 1000, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: compact ? 7 : 9, marginBottom: 11, flexWrap: "wrap" }}>
+              {labels.map((lab, i) => (
+                <React.Fragment key={lab}>
+                  <span style={{ display: "flex", alignItems: "center", gap: 7, fontFamily: MONO, fontSize: 11, letterSpacing: "0.04em", color: stepColor(i), fontWeight: i === cur ? 500 : 400 }}>
+                    <span style={pipStyle(i)} />{compact ? "" : `${i < 2 ? `${i + 1} · ` : ""}${lab}`}
+                  </span>
+                  {i < labels.length - 1 && <span style={{ color: "#cdbfb0", fontSize: 12 }}>→</span>}
+                </React.Fragment>
+              ))}
+            </div>
+            <div style={{ fontFamily: CAVEAT, fontSize: compact ? 17 : 20, color: C.burgundy, lineHeight: 1.25 }}>{line}</div>
+            {open && (
+              <>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
+                  {faqs.map((f, i) => (
+                    <button key={f.q} onClick={() => setActive(i)}
+                      style={{ fontFamily: MONO, fontSize: 10.5, padding: "6px 12px", borderRadius: 16, cursor: "pointer", whiteSpace: "nowrap", background: i === active ? C.burgundy : "#f5e2da", border: `1px solid ${i === active ? C.burgundy : "#e8c8bc"}`, color: i === active ? "#fff" : C.burgundy }}>
+                      {f.q}
+                    </button>
+                  ))}
+                </div>
+                <div style={{ marginTop: 12, background: "#fdfaf5", border: "1px solid rgba(124,58,42,0.12)", borderRadius: 8, padding: "11px 14px", fontFamily: CAVEAT, fontSize: 18, color: "#3a322b", maxWidth: 640 }}>{faqs[active].a}</div>
+              </>
+            )}
+          </div>
+          <button onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-label={open ? "Hide help" : "Show help"}
+            style={{ width: 30, height: 30, borderRadius: "50%", border: "1.5px solid #e8c8bc", background: open ? C.burgundy : "#f5e2da", color: open ? "#fff" : C.burgundy, fontFamily: MONO, fontSize: 14, flexShrink: 0, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", alignSelf: "flex-start" }}>
+            {open ? "×" : "?"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // ── Post-it notes layer — full-page (no clip): notes track their card's live position and clamp to
 //    the band (the page region), so they may sit above the panel's top edge and out in the margins. ─
@@ -496,30 +626,53 @@ const NotesLayer: React.FC<{
     const band = bandRef.current, notesEl = notesRef.current;
     if (!band || !notesEl) return;
     const bandRect = band.getBoundingClientRect();
-    const bandH = bandRect.height;
+    const bandW = bandRect.width, bandH = bandRect.height;
     notesEl.style.height = bandH + "px";
-    // Desired top per note (aligned to its card's live row, so it scroll-couples), then a per-side
-    // collision-avoidance pass so multiple notes never overlap. Clamp to the band, not a sub-box.
-    const bySide: Record<"l" | "r", { el: HTMLDivElement; desired: number }[]> = { l: [], r: [] };
-    for (const n of notes) {
-      const card = cardEls.current[n.cardId];
-      const noteEl = noteEls.current[n.noteId];
-      if (!card || !noteEl) continue;
-      const arow = (card.querySelector("[data-arow]") as HTMLElement | null) ?? card;
-      const ar = arow.getBoundingClientRect();
-      const desired = (ar.top - bandRect.top) + ar.height / 2 - noteEl.offsetHeight / 2;
-      bySide[n.side].push({ el: noteEl, desired });
+
+    // Columns across BOTH gutters (the full width left & right of the centred panel), each NOTE_W
+    // wide and spaced so columns can't overlap horizontally.
+    const GAP = 12, COL = NOTE_W + GAP, EDGE = 6;
+    const panelW = Math.min(PANEL_W, bandW - 28);
+    const gutter = Math.max(0, (bandW - panelW) / 2);
+    const perSide = Math.max(1, Math.floor((gutter - EDGE) / COL));
+    const colsL: number[] = [], colsR: number[] = [];
+    for (let i = 0; i < perSide; i++) {
+      colsL.push(EDGE + i * COL);                  // left gutter, outer → inner
+      colsR.push(bandW - EDGE - NOTE_W - i * COL); // right gutter, outer → inner
     }
-    for (const side of ["l", "r"] as const) {
-      const list = bySide[side].sort((a, b) => a.desired - b.desired);
-      let prevBottom = -Infinity;
+
+    // Each note anchors vertically to its card's live row (scroll-coupled), then takes the column on
+    // its side that lets it sit closest to that anchor without overlapping — guaranteeing no
+    // collisions at any count, spread across the full width.
+    const place = (side: "l" | "r") => {
+      const cols = side === "l" ? colsL : colsR;
+      const bottoms = cols.map(() => -Infinity);
+      const list = notes
+        .filter((n) => n.side === side)
+        .map((n) => ({ el: noteEls.current[n.noteId], card: cardEls.current[n.cardId] }))
+        .filter((x): x is { el: HTMLDivElement; card: HTMLDivElement } => !!x.el && !!x.card)
+        .map((x) => {
+          const arow = (x.card.querySelector("[data-arow]") as HTMLElement | null) ?? x.card;
+          const ar = arow.getBoundingClientRect();
+          return { el: x.el, desired: (ar.top - bandRect.top) + ar.height / 2 - x.el.offsetHeight / 2 };
+        })
+        .sort((a, b) => a.desired - b.desired);
       for (const item of list) {
-        let top = Math.max(item.desired, prevBottom + 8);
-        top = Math.max(4, Math.min(top, bandH - item.el.offsetHeight - 4));
+        const h = item.el.offsetHeight;
+        let best = 0, bestTop = Infinity;
+        for (let c = 0; c < cols.length; c++) {
+          const top = Math.max(item.desired, bottoms[c] + GAP);
+          if (top < bestTop) { bestTop = top; best = c; }
+        }
+        // Reserve space at the bottom so the lowest note never reaches the guidance banner below the band.
+        const top = Math.max(4, Math.min(bestTop, bandH - h - 24));
+        item.el.style.left = cols[best] + "px";
         item.el.style.top = top + "px";
-        prevBottom = top + item.el.offsetHeight;
+        bottoms[best] = top + h;
       }
-    }
+    };
+    place("l");
+    place("r");
   }, [notes, bandRef, cardEls]);
 
   useLayoutEffect(() => { layout(); }, [layout, tick]);
@@ -551,16 +704,16 @@ const NotesLayer: React.FC<{
             onMouseEnter={() => onHover(n.noteId)}
             onMouseLeave={() => onHover(null)}
             style={{
-              position: "absolute", [n.side === "l" ? "left" : "right"]: n.side === "l" ? 2 : 4,
-              width: NOTE_W, fontFamily: CAVEAT, fontWeight: 500, fontSize: 16, lineHeight: 1.18, color: ink,
-              background: fill, padding: "10px 12px 11px", borderRadius: 2, pointerEvents: "auto", textAlign: "left",
+              position: "absolute",
+              width: NOTE_W, fontFamily: CAVEAT, fontWeight: 500, fontSize: 13.5, lineHeight: 1.18, color: ink,
+              background: fill, padding: "8px 10px 9px", borderRadius: 2, pointerEvents: "auto", textAlign: "left",
               boxShadow: hl ? "0 9px 22px rgba(58,28,20,0.22)" : "0 5px 14px rgba(58,28,20,0.16)",
               transform: `rotate(${rot}deg)${hl ? " scale(1.07)" : ""}`,
               transition: "transform .18s ease, box-shadow .18s ease",
             } as React.CSSProperties}
           >
             <span style={{ position: "absolute", top: -6, left: "50%", width: 36, height: 12, background: "rgba(205,185,178,0.5)", borderRadius: 1, transform: "translateX(-50%) rotate(-3deg)" }} />
-            <span style={{ textDecoration: n.resolved ? "line-through" : "none", opacity: n.resolved ? 0.85 : 1 }}>{n.text}</span>
+            <span style={{ textDecoration: n.resolved ? "line-through" : "none", opacity: n.resolved ? 0.85 : 1 }}>{quoteStatuses(n.text)}</span>
             <NoteActions resolved={n.resolved} undoable={n.undoable} kind={n.kind} agencyBlocked={n.agencyBlocked} onResolve={() => onResolveMapping(n.cardId)} onReopen={() => onReopen(n.cardId, n.kind)} />
           </div>
         );
@@ -588,7 +741,15 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   const initial = useMemo(() => parseModel(result), [result]);
   const [agents, setAgents] = useState<ReviewAgent[]>(initial.agents);
   const [queries, setQueries] = useState<ReviewQuery[]>(initial.queries);
-  const [screen, setScreen] = useState<"agents" | "queries">("agents");
+  // Open with the focused duplicates stage only when the import actually has clusters (never empty).
+  // `hadDuplicates` is fixed for the session: it keeps the stage reachable again via Agents' Back even
+  // after every cluster is resolved (so a mistaken merge can be undone).
+  const hadDuplicates = useMemo(() => initial.agents.some((a) => a.mergeWith.length > 0 && !a.mergeResolved), [initial]);
+  const [screen, setScreen] = useState<"duplicates" | "agents" | "queries">(hadDuplicates ? "duplicates" : "agents");
+  const [bannerH, setBannerH] = useState(120); // measured height of the pinned banner (reserve space)
+  // Per-cluster pre-resolution snapshot (keyed by leader id) — restored verbatim on Undo, so a merge or
+  // keep-both can be cleanly reversed (un-delete the removed agent, revert repointed queries).
+  const snapRef = useRef<Record<string, { agents: ReviewAgent[]; queries: { id: string; agentRef: string }[] }>>({});
   const [openId, setOpenId] = useState<string | null>(null);
   const [hoverTarget, setHoverTarget] = useState<{ type: "card" | "note"; id: string } | null>(null);
   const [tick, setTick] = useState(0);              // nudges the notes layout after edits
@@ -641,15 +802,43 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
     setTick((t) => t + 1);
   };
 
+  // Snapshot a cluster's pre-resolution state (members + their queries' agentRefs) so the decision can
+  // be undone verbatim later. Keyed by the cluster's leader id; first write wins (kept until undone).
+  const snapshotCluster = (leaderId: string) => {
+    if (snapRef.current[leaderId]) return;
+    const leader = agents.find((a) => a.id === leaderId);
+    if (!leader) return;
+    const ids = new Set([leader.id, ...leader.mergeWith]);
+    snapRef.current[leaderId] = {
+      agents: agents.filter((a) => ids.has(a.id)).map((a) => JSON.parse(JSON.stringify(a)) as ReviewAgent),
+      queries: queries.filter((q) => ids.has(q.agentRef)).map((q) => ({ id: q.id, agentRef: q.agentRef })),
+    };
+  };
+
+  // Undo a resolved cluster: restore its members and their queries' agentRefs from the snapshot,
+  // re-flagging the pair (keep-both) or un-deleting + re-pointing the removed agent (merge).
+  const undoCluster = (leaderId: string) => {
+    const snap = snapRef.current[leaderId];
+    if (!snap) return;
+    const aMap = new Map(snap.agents.map((a) => [a.id, a]));
+    const qMap = new Map(snap.queries.map((q) => [q.id, q.agentRef]));
+    setAgents((xs) => xs.map((a) => aMap.get(a.id) ?? a));
+    setQueries((xs) => xs.map((q) => (qMap.has(q.id) ? { ...q, agentRef: qMap.get(q.id)! } : q)));
+    delete snapRef.current[leaderId];
+    setTopcap(null);
+    setTick((t) => t + 1);
+  };
+
   // Duplicate removal (NOT the bin): merge by explicit survivor choice. The removed record's queries
   // are repointed to the survivor — never dropped. The survivor's `duplicate` reason resolves with a
-  // "merged" note (not undoable; "Reset all changes" reverts it).
+  // "merged" note; the merge is reversible via the duplicates stage (snapshot Undo).
   const removeDuplicate = (removedId: string) => {
     const leader = agents.find((a) => !a.deleted && a.mergeWith.length > 0 && (a.id === removedId || a.mergeWith.includes(removedId)));
     if (!leader) return;
     const group = [leader.id, ...leader.mergeWith];
     const survivorId = group.find((id) => id !== removedId && !(agents.find((x) => x.id === id)?.deleted));
     if (!survivorId) return;
+    snapshotCluster(leader.id);
     setQueries((qs) => qs.map((q) => (q.agentRef === removedId ? { ...q, agentRef: survivorId } : q)));
     setAgents((xs) => xs.map((a) => {
       if (a.id === removedId) return { ...a, deleted: true };
@@ -671,6 +860,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   const keepBoth = (leaderId: string) => {
     const leader = agents.find((a) => a.id === leaderId);
     if (!leader) return;
+    snapshotCluster(leader.id);
     const group = new Set([leader.id, ...leader.mergeWith]);
     setAgents((xs) => xs.map((a) => {
       if (a.id === leaderId) return { ...a, mergeResolved: true, reasons: a.reasons.map((r) => (r.kind === "duplicate" ? { ...r, resolved: true, undoable: true, note: dupNoteKept(a.agency) } : r)) };
@@ -685,6 +875,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
 
   // Undo a checked note: re-open that reason (un-strike, back to pink, re-derive status + tally).
   const reopenReason = (cardId: string, kind: CheckReason) => {
+    if (kind === "duplicate") delete snapRef.current[cardId]; // keep-both re-opened here too — drop its snapshot
     setAgents((xs) => {
       const a0 = xs.find((a) => a.id === cardId);
       if (!a0) return xs;
@@ -707,7 +898,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   };
 
   // Move between the two screens; edits live in shared state, so they persist both ways.
-  const switchScreen = (name: "agents" | "queries") => {
+  const switchScreen = (name: "duplicates" | "agents" | "queries") => {
     setScreen(name); setOpenId(null); setHoverTarget(null); setPulseIds([]); setTick((t) => t + 1);
     requestAnimationFrame(() => window.scrollTo({ top: 0 }));
   };
@@ -720,7 +911,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
       : active.filter((a) => statusOf(a) !== "captured").map((a) => a.id));
   };
 
-  const reset = () => { const m = parseModel(result); setAgents(m.agents); setQueries(m.queries); setOpenId(null); setTopcap(null); setPulseIds([]); setTick((t) => t + 1); };
+  const reset = () => { const m = parseModel(result); snapRef.current = {}; setAgents(m.agents); setQueries(m.queries); setOpenId(null); setTopcap(null); setPulseIds([]); setTick((t) => t + 1); };
 
   // ── Queries side ────────────────────────────────────────────────────────────────────────────────
   const qActive = queries.filter((q) => !q.removed);
@@ -743,14 +934,17 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   };
 
   // One post-it per reason for the CURRENT screen (open = pink; resolved = struck sage). Sides
-  // alternate per card; the layout pass de-collides each side. Same NoteSpec shape on both screens.
+  // alternate by note order so they split evenly left/right (full width); the layout pass then
+  // distributes across each gutter's columns with no overlap. Same NoteSpec shape on both screens.
   const notes: NoteSpec[] = [];
   const notePairCards = new Map<string, Set<string>>();
-  if (screen === "agents") {
-    active.forEach((a, p) => {
-      a.reasons.forEach((r, j) => {
+  if (screen !== "queries") {
+    // Agents screen → every agent's notes; duplicates stage → only the clustered agents' notes.
+    const noteAgents = screen === "duplicates" ? active.filter((a) => openDupIds.has(a.id)) : active;
+    noteAgents.forEach((a) => {
+      a.reasons.forEach((r) => {
         const noteId = `${a.id}:${r.kind}`;
-        notes.push({ noteId, cardId: a.id, side: (p + j) % 2 === 0 ? "l" : "r", text: r.note, resolved: r.resolved, kind: r.kind, undoable: r.undoable, agencyBlocked: !a.agency.trim() });
+        notes.push({ noteId, cardId: a.id, side: notes.length % 2 === 0 ? "l" : "r", text: r.note, resolved: r.resolved, kind: r.kind, undoable: r.undoable, agencyBlocked: !a.agency.trim() });
         // A mapping note pairs to its own card; a duplicate note to the whole cluster (every member).
         notePairCards.set(noteId, r.kind === "duplicate" && a.mergeWith.length > 0
           ? new Set([a.id, ...a.mergeWith].filter((id) => active.some((x) => x.id === id)))
@@ -758,10 +952,10 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
       });
     });
   } else {
-    qActive.forEach((q, p) => {
-      q.reasons.forEach((r, j) => {
+    qActive.forEach((q) => {
+      q.reasons.forEach((r) => {
         const noteId = `${q.id}:${r.kind}`;
-        notes.push({ noteId, cardId: q.id, side: (p + j) % 2 === 0 ? "l" : "r", text: r.note, resolved: r.resolved, kind: r.kind, undoable: r.undoable, agencyBlocked: false });
+        notes.push({ noteId, cardId: q.id, side: notes.length % 2 === 0 ? "l" : "r", text: r.note, resolved: r.resolved, kind: r.kind, undoable: r.undoable, agencyBlocked: false });
         notePairCards.set(noteId, new Set([q.id]));
       });
     });
@@ -821,7 +1015,62 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
     </div>
   );
 
-  // Compose the cards column into render units (singles + duplicate clusters), preserving order.
+  // A resolved cluster on the (revisited) duplicates stage: a settled sage card stating the decision
+  // ("Merged into …" / "Kept both") with an Undo that restores the pre-resolution snapshot.
+  const renderResolvedCluster = (c: { leaderId: string; members: ReviewAgent[]; type: "merge" | "keepboth"; survivor?: ReviewAgent }) => {
+    const survivorName = c.survivor ? (c.survivor.name || c.survivor.agency || "this agent") : "this agent";
+    const label = c.type === "merge" ? `Merged into ${survivorName}` : "Kept both";
+    return (
+      <div key={`resclu-${c.leaderId}`} style={{ background: C.doneFill, border: "1px solid rgba(90,110,88,0.3)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: "0.05em", textTransform: "uppercase", color: "#5a6e58", display: "flex", alignItems: "center", gap: 6 }}><span>✓</span>{label}</div>
+          <div style={{ fontFamily: SERIF, fontSize: 13, color: C.doneInk, marginTop: 3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {c.members.map((m, i) => (
+              <span key={m.id}>
+                <span style={{ textDecoration: m.deleted ? "line-through" : "none", opacity: m.deleted ? 0.55 : 1 }}>{m.name || m.agency || "—"}</span>
+                {i < c.members.length - 1 ? <span style={{ color: "#9aa899", margin: "0 6px" }}>·</span> : null}
+              </span>
+            ))}
+          </div>
+        </div>
+        <button onClick={() => undoCluster(c.leaderId)}
+          style={{ flexShrink: 0, fontFamily: MONO, fontSize: 8.5, letterSpacing: "0.04em", textTransform: "uppercase", color: "#5a6e58", background: "rgba(255,255,255,0.6)", border: "1px solid rgba(90,110,88,0.4)", borderRadius: 7, padding: "4px 10px", cursor: "pointer" }}
+        >Undo</button>
+      </div>
+    );
+  };
+
+  // The open duplicate clusters (leader + members) — drives the chip/title + the Agents-screen clusters.
+  const clusters: { leader: ReviewAgent; members: ReviewAgent[] }[] = [];
+  {
+    const seen = new Set<string>();
+    for (const a of active) {
+      if (seen.has(a.id) || !(a.mergeWith.length > 0 && !a.mergeResolved)) continue;
+      const members = [a, ...a.mergeWith.map((id) => active.find((x) => x.id === id)).filter((x): x is ReviewAgent => !!x)];
+      members.forEach((m) => seen.add(m.id));
+      clusters.push({ leader: a, members });
+    }
+  }
+
+  // Every detected cluster, resolved or not — the duplicates stage renders open ones in the active
+  // resolve UI and resolved ones in their settled state, so a decision stays revisitable via Back.
+  type DupCluster = { leaderId: string; members: ReviewAgent[]; openMembers: ReviewAgent[]; resolved: boolean; type: "open" | "merge" | "keepboth"; survivor?: ReviewAgent };
+  const allClusters: DupCluster[] = [];
+  {
+    const seen = new Set<string>();
+    for (const a of agents) {
+      if (seen.has(a.id) || a.mergeWith.length === 0) continue;
+      const members = [a, ...a.mergeWith.map((id) => agents.find((x) => x.id === id)).filter((x): x is ReviewAgent => !!x)];
+      members.forEach((m) => seen.add(m.id));
+      const removed = members.find((m) => m.deleted);
+      const resolved = !!removed || members.some((m) => m.mergeResolved);
+      const type: DupCluster["type"] = removed ? "merge" : resolved ? "keepboth" : "open";
+      const survivor = type === "merge" ? members.find((m) => !m.deleted) : a;
+      allClusters.push({ leaderId: a.id, members, openMembers: members.filter((m) => !m.deleted), resolved, type, survivor });
+    }
+  }
+
+  // Compose the cards column (Agents screen) into render units (singles + duplicate clusters), in order.
   const units: React.ReactNode[] = [];
   const consumed = new Set<string>();
   for (const a of active) {
@@ -857,12 +1106,13 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   ));
 
   return (
-    <div style={{ background: C.band, minHeight: "100%", paddingBottom: 8, overflowX: "hidden" }}>
+    <div style={{ background: C.band, minHeight: "100%", paddingBottom: bannerH + 12, overflowX: "hidden" }}>
       <style>{`@keyframes saImpPulse{0%{box-shadow:0 0 0 0 rgba(176,74,58,0.55)}70%{box-shadow:0 0 0 7px rgba(176,74,58,0)}100%{box-shadow:0 0 0 0 rgba(176,74,58,0)}}`}</style>
       {/* tabs — switch between the two screens (edits persist; shared model) */}
       <div style={{ display: "flex", justifyContent: "center", gap: 6, margin: "18px auto 0" }}>
         {(["agents", "queries"] as const).map((name) => {
-          const on = screen === name;
+          // The duplicates stage is part of step 1, so the Agents tab is lit during it.
+          const on = name === "agents" ? screen !== "queries" : screen === name;
           return (
             <button key={name} onClick={() => screen !== name && switchScreen(name)}
               style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.05em", padding: "6px 18px", borderRadius: 20, cursor: "pointer", background: on ? C.burgundy : "#fff", color: on ? "#fff" : C.muted, border: `1px solid ${on ? C.burgundy : "#e2d6c8"}` }}>
@@ -873,8 +1123,8 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
       </div>
       {topcap && <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#A89A90", textAlign: "center", padding: "10px 0 6px" }}>{topcap}</div>}
 
-      {/* compact-only hint banner (the rotated corner sticky can't fit the margins) */}
-      {compact && (
+      {/* compact-only hint banner (the rotated corner sticky can't fit the margins) — not on the dup stage */}
+      {compact && screen !== "duplicates" && (
         <div style={{ width: panelWidth, margin: "12px auto 0", background: C.sticky, padding: "10px 13px", fontFamily: CAVEAT, fontWeight: 600, fontSize: 15, lineHeight: 1.2, color: C.stickyInk, borderRadius: 4, boxShadow: "0 4px 12px rgba(58,28,20,0.12)" }}>
           {screen === "agents"
             ? <>Don't know the agent's name? Tap the <span style={{ display: "inline-flex", width: 15, height: 15, borderRadius: "50%", border: `1.4px solid ${C.burgundy}`, color: C.burgundy, alignItems: "center", justifyContent: "center", fontFamily: MONO, fontSize: 9, transform: "translateY(2px)" }}>?</span> in that field &amp; we'll reference them by agency only.</>
@@ -892,8 +1142,8 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
 
       <div ref={bandRef} style={{ position: "relative", width: BAND_W, maxWidth: "100%", margin: "0 auto", paddingTop: 14, paddingBottom: 30 }}>
         {/* ruled-paper + margin line (decorative) */}
-        <div aria-hidden style={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none", background: "repeating-linear-gradient(transparent,transparent 28px,rgba(110,130,140,0.15) 28px,rgba(110,130,140,0.15) 29px)", WebkitMaskImage: "radial-gradient(ellipse 64% 78% at 50% 42%,#000 46%,transparent 100%)", maskImage: "radial-gradient(ellipse 64% 78% at 50% 42%,#000 46%,transparent 100%)" }} />
-        <div aria-hidden style={{ position: "absolute", top: 0, bottom: 0, left: 64, width: 1, zIndex: 0, pointerEvents: "none", background: "#e6a99c", opacity: 0.35, WebkitMaskImage: "linear-gradient(#000 10%,#000 78%,transparent 100%)", maskImage: "linear-gradient(#000 10%,#000 78%,transparent 100%)" }} />
+        <div aria-hidden style={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none", background: "repeating-linear-gradient(transparent,transparent 28px,rgba(110,130,140,0.15) 28px,rgba(110,130,140,0.15) 29px)", WebkitMaskImage: "radial-gradient(ellipse 72% 82% at 50% 44%,#000 18%,rgba(0,0,0,0.5) 55%,transparent 82%)", maskImage: "radial-gradient(ellipse 72% 82% at 50% 44%,#000 18%,rgba(0,0,0,0.5) 55%,transparent 82%)" }} />
+        <div aria-hidden style={{ position: "absolute", top: 0, bottom: 0, left: 64, width: 1, zIndex: 0, pointerEvents: "none", background: "#e6a99c", opacity: 0.35, WebkitMaskImage: "linear-gradient(transparent 0%,#000 16%,#000 70%,transparent 100%)", maskImage: "linear-gradient(transparent 0%,#000 16%,#000 70%,transparent 100%)" }} />
 
         {/* chrome */}
         <div style={{ position: "relative", zIndex: 3, display: "flex", alignItems: "center", justifyContent: "space-between", width: panelWidth, margin: "0 auto 10px" }}>
@@ -903,8 +1153,8 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
           <span onClick={onSkip} style={{ fontFamily: MONO, fontSize: 10, color: C.muted, cursor: onSkip ? "pointer" : "default" }}>Skip setup</span>
         </div>
 
-        {/* corner sticky hint — higher and further right, clear of the panel and the other notes */}
-        {!compact && (
+        {/* corner sticky hint — higher and further right, clear of the panel and the other notes (not on dup) */}
+        {!compact && screen !== "duplicates" && (
           <div style={{ position: "absolute", zIndex: 6, top: -10, right: -20, width: 158, background: C.sticky, padding: "13px 14px 15px", fontFamily: CAVEAT, fontWeight: 600, fontSize: 15, lineHeight: 1.2, color: C.stickyInk, boxShadow: "0 7px 18px rgba(58,28,20,0.18)", transform: "rotate(2.6deg)", borderRadius: 2 }}>
             <span style={{ position: "absolute", top: -7, left: "50%", transform: "translateX(-50%)", width: 13, height: 13, borderRadius: "50%", background: "#b04a3a", boxShadow: "0 2px 3px rgba(0,0,0,.3)" }} />
             {screen === "agents"
@@ -925,31 +1175,41 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
             <div style={{ background: C.sage, padding: "14px 16px 13px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
                 <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#fdfaf5", border: "1px solid rgba(124,58,42,0.25)", display: "flex", alignItems: "center", justifyContent: "center", color: C.burgundy, flexShrink: 0 }}>
-                  {screen === "agents"
-                    ? <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /></svg>
-                    : <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M13 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" /></svg>}
+                  {screen === "duplicates"
+                    ? <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="8" y="8" width="12" height="12" rx="2" /><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" /></svg>
+                    : screen === "agents"
+                      ? <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /></svg>
+                      : <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M13 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" /></svg>}
                 </div>
                 <div>
-                  <div style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "#5a6e58" }}>{screen === "agents" ? "Data captured" : "Queries allocated to agents"}</div>
-                  <div style={{ fontFamily: SERIF, fontSize: 17, fontWeight: 500, color: C.head, lineHeight: 1.12 }}>{screen === "agents" ? "Populating your agent database" : "Database populated"}</div>
-                  <div style={{ fontSize: 9.5, color: "#6a7e68", fontWeight: 300, fontStyle: "italic", marginTop: 2 }}>{screen === "agents" ? "Amend if you like, or continue on to queries…" : "Check and continue…"}</div>
+                  <div style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "#5a6e58" }}>{screen === "duplicates" ? "Before you review" : screen === "agents" ? "Data captured" : "Queries allocated to agents"}</div>
+                  <div style={{ fontFamily: SERIF, fontSize: 17, fontWeight: 500, color: C.head, lineHeight: 1.12 }}>{screen === "duplicates" ? (clusters.length === 0 ? "All doubles sorted" : clusters.length === 1 ? "One looks like the same agent" : clusters.length === 2 ? "A couple look like the same agent" : "A few look like the same agent") : screen === "agents" ? "Populating your agent database" : "Database populated"}</div>
+                  <div style={{ fontSize: 9.5, color: "#6a7e68", fontWeight: 300, fontStyle: "italic", marginTop: 2 }}>{screen === "duplicates" ? "Sort these doubles first and the rest of your list stays tidy" : screen === "agents" ? "Amend if you like, or continue on to queries…" : "Check and continue…"}</div>
                 </div>
               </div>
               <div style={{ display: "flex", gap: 6, marginTop: 9 }}>
-                <span style={{ fontFamily: MONO, fontSize: 8.5, padding: "3px 8px", borderRadius: 14, background: "#fff", color: "#44563a" }}>{screen === "agents" ? okCount : qOk} captured</span>
-                <span style={{ fontFamily: MONO, fontSize: 8.5, padding: "3px 8px", borderRadius: 14, background: C.noteFill, color: C.burgundy }}>{screen === "agents" ? needCount : qNeed} to check</span>
+                {screen === "duplicates"
+                  ? <span style={{ fontFamily: MONO, fontSize: 8.5, padding: "3px 8px", borderRadius: 14, background: clusters.length ? C.noteFill : "#e7ece1", color: clusters.length ? C.burgundy : "#44563a" }}>{clusters.length ? `${clusters.length} possible double${clusters.length === 1 ? "" : "s"}` : "All sorted"}</span>
+                  : <>
+                    <span style={{ fontFamily: MONO, fontSize: 8.5, padding: "3px 8px", borderRadius: 14, background: "#fff", color: "#44563a" }}>{screen === "agents" ? okCount : qOk} ready to import</span>
+                    <span style={{ fontFamily: MONO, fontSize: 8.5, padding: "3px 8px", borderRadius: 14, background: C.noteFill, color: C.burgundy }}>{screen === "agents" ? needCount : qNeed} to check</span>
+                  </>}
               </div>
             </div>
 
             {/* scrolling cards */}
             <div ref={midRef} style={{ maxHeight: "min(520px, 62vh)", overflowY: "auto", overflowX: "hidden", padding: "12px 12px 6px" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 10, position: "relative" }}>
-                {screen === "agents" ? units : queryCards}
+                {screen === "duplicates"
+                  ? allClusters.map((c) => (c.resolved && c.type !== "open"
+                    ? renderResolvedCluster({ leaderId: c.leaderId, members: c.members, type: c.type as "merge" | "keepboth", survivor: c.survivor })
+                    : renderCluster(c.members[0], c.openMembers)))
+                  : screen === "agents" ? units : queryCards}
               </div>
             </div>
 
-            {/* gatebar — reflects the current screen's blocker */}
-            {screen === "agents" ? (!allCaptured && (
+            {/* gatebar — reflects the current screen's blocker (the duplicates stage is non-gated) */}
+            {screen === "duplicates" ? null : screen === "agents" ? (!allCaptured && (
               <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", fontFamily: MONO, fontSize: 8.5, letterSpacing: "0.02em", color: C.invalid, background: "#fff4f1", borderTop: "0.5px solid #f0d8cc" }}>
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={C.invalid} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 8v4M12 16h.01" /></svg>
                 {invalidCount > 0
@@ -966,9 +1226,19 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
             ))}
 
             {/* footer */}
-            {screen === "agents" ? (
+            {screen === "duplicates" ? (
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 16px", borderTop: "0.5px solid rgba(124,58,42,0.16)" }}>
                 <span onClick={onBack} style={{ fontFamily: MONO, fontSize: 10, color: "#9a8a72", cursor: "pointer" }}>‹ Back</span>
+                <span onClick={reset} style={{ fontFamily: MONO, fontSize: 9, color: "#b6a89a", cursor: "pointer", letterSpacing: "0.03em" }}>Reset all changes</span>
+                {/* always available — proceeding is the deliberate "don't trap people" skip; unresolved clusters carry through */}
+                <button onClick={() => switchScreen("agents")}
+                  style={{ background: "#f5e2da", border: "1px solid #e8c8bc", color: C.burgundy, fontFamily: MONO, fontSize: 10.5, fontWeight: 500, letterSpacing: "0.07em", borderRadius: 10, padding: "10px 20px", cursor: "pointer" }}
+                >Review all agents →</button>
+              </div>
+            ) : screen === "agents" ? (
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 16px", borderTop: "0.5px solid rgba(124,58,42,0.16)" }}>
+                {/* if the session opened on the duplicates stage, Back returns there (decisions stay fixable) */}
+                <span onClick={() => (hadDuplicates ? switchScreen("duplicates") : onBack())} style={{ fontFamily: MONO, fontSize: 10, color: "#9a8a72", cursor: "pointer" }}>‹ Back{hadDuplicates ? " to duplicates" : ""}</span>
                 <span onClick={reset} style={{ fontFamily: MONO, fontSize: 9, color: "#b6a89a", cursor: "pointer", letterSpacing: "0.03em" }}>Reset all changes</span>
                 <button
                   onClick={onContinueClick}
@@ -994,8 +1264,8 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
             notes={notes} midRef={midRef} bandRef={bandRef} cardEls={cardEls}
             highlightedNotes={hl.noteIds}
             onHover={(id) => setHoverTarget(id ? { type: "note", id } : null)}
-            onResolveMapping={screen === "agents" ? resolveMapping : resolveQueryMapping}
-            onReopen={screen === "agents" ? reopenReason : reopenQueryReason}
+            onResolveMapping={screen === "queries" ? resolveQueryMapping : resolveMapping}
+            onReopen={screen === "queries" ? reopenQueryReason : reopenReason}
             tick={tick}
           />
         )}
@@ -1013,6 +1283,9 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
           </div>
         )}
       </div>
+
+      {/* step-aware guidance banner, docked full-width below the panel */}
+      <GuidanceBanner step={screen} compact={compact} dupCount={clusters.length} onHeight={setBannerH} />
     </div>
   );
 };

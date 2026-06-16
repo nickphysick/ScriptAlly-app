@@ -30,6 +30,52 @@ export const PREDEFINED_GENRES = [
 
 export const AGE_CATEGORIES = ["Picture Book", "Early Reader", "Middle Grade", "Young Adult", "Adult"];
 
+/** Common shorthand → canonical PREDEFINED_GENRES. The allow-list above stays authoritative; this
+ *  just maps the messy ways writers' spreadsheets spell genres onto it. Unknown → dropped. */
+const GENRE_ALIASES: Record<string, string> = {
+  "litfic": "Literary Fiction", "lit fic": "Literary Fiction", "literary": "Literary Fiction",
+  "commercial": "Commercial Fiction", "upmarket": "Commercial Fiction", "book club": "Commercial Fiction",
+  "historical": "Historical Fiction", "histfic": "Historical Fiction", "hist fic": "Historical Fiction",
+  "fantasy": "Fantasy", "epic fantasy": "Fantasy", "romantasy": "Fantasy", "high fantasy": "Fantasy",
+  "scifi": "Science Fiction", "sci-fi": "Science Fiction", "sci fi": "Science Fiction", "sf": "Science Fiction", "speculative": "Science Fiction", "spec fic": "Science Fiction",
+  "horror": "Horror",
+  "romance": "Romance", "rom": "Romance", "romcom": "Romance", "rom-com": "Romance",
+  "thriller": "Thriller", "psychological thriller": "Thriller",
+  "mystery": "Mystery", "cosy mystery": "Mystery", "cozy mystery": "Mystery",
+  "crime": "Crime", "noir": "Crime",
+  "ya": "Young Adult", "young adult": "Young Adult",
+  "mg": "Middle Grade", "middle grade": "Middle Grade",
+  "memoir": "Memoir",
+  "nonfiction": "Non-fiction", "non fiction": "Non-fiction", "non-fiction": "Non-fiction", "nf": "Non-fiction",
+  "narrative nonfiction": "Narrative Non-fiction", "narrative non-fiction": "Narrative Non-fiction",
+  "children": "Children's", "childrens": "Children's", "children's": "Children's", "kidlit": "Children's", "picture book": "Children's",
+};
+const GENRE_SPLIT = /[,/;|]+|\s+&\s+|\s+and\s+/i;
+const GENERIC = new Set(["fiction", "book", "books", "genre", "genres", "novel", "novels", "general"]);
+
+/** Validate/normalise raw genre text (from a Smart Import sheet) against PREDEFINED_GENRES: exact
+ *  match, then alias, then a meaningful-word contains. Unrecognised tokens are dropped (never
+ *  invented); the result is de-duplicated in allow-list order. */
+export function normaliseGenres(raw?: string | string[] | null): string[] {
+  if (!raw) return [];
+  const tokens = (Array.isArray(raw) ? raw : [raw])
+    .flatMap((s) => String(s).split(GENRE_SPLIT))
+    .map((t) => t.trim().replace(/[.]+$/, "").toLowerCase())
+    .filter(Boolean);
+  const lower = PREDEFINED_GENRES.map((g) => g.toLowerCase());
+  const matched = new Set<string>();
+  for (const t of tokens) {
+    const exact = lower.indexOf(t);
+    if (exact >= 0) { matched.add(PREDEFINED_GENRES[exact]); continue; }
+    if (GENRE_ALIASES[t]) { matched.add(GENRE_ALIASES[t]); continue; }
+    if (t.length >= 4 && !GENERIC.has(t)) {
+      const ci = lower.findIndex((g) => g.split(/\W+/).includes(t) || g.startsWith(t));
+      if (ci >= 0) matched.add(PREDEFINED_GENRES[ci]);
+    }
+  }
+  return PREDEFINED_GENRES.filter((g) => matched.has(g)); // de-duped, allow-list order
+}
+
 /** FREE plan allows a single active manuscript profile. */
 export const FREE_MANUSCRIPT_LIMIT = 1;
 

@@ -34,6 +34,9 @@ export interface ParsedQuery {
   offerDate?: string | null;   // when an offer came in (the Offer rung's own date)
   reviseDate?: string | null;  // when an R&R was received (the Revise & Resubmit rung's own date)
   closedDate?: string | null;
+  /** Quiet, informational note about an unparseable date cell (e.g. "you wrote 'ages ago'") — shown
+   *  as a hint by the date field, NEVER a check reason. A missing/uncertain date never flags or gates. */
+  dateNote?: string | null;
   notes?: string;
   confidence: "high" | "low";
   flags?: string[];

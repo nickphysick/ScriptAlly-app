@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseModel, modelToResult, dateFieldForStatus } from './smartImportReviewModel';
+import { parseModel, modelToResult, dateFieldForStatus, quoteStatuses } from './smartImportReviewModel';
 import { QueryStatus } from '../types';
 import { ParsedAgent, ParsedQuery, SmartImportResult } from '../types/smartImport';
 
@@ -26,57 +26,61 @@ describe('dateFieldForStatus — which rung a status date seeds', () => {
   });
 });
 
-describe('parseModel — the single date is the current-status rung date (honest)', () => {
-  it('a Full Sent query reads its date from fullSentDate', () => {
+describe('parseModel — queried anchor and current-status date kept separate', () => {
+  it('a Full Sent query reads its status date from fullSentDate, anchor from dateQueried', () => {
     const { queries } = parseModel(result([agent()], [query({ status: QueryStatus.FULL_SENT, dateQueried: '2026-01-01', fullSentDate: '2026-02-02' })]));
-    expect(queries[0].date).toBe('2026-02-02');
+    expect(queries[0].statusDate).toBe('2026-02-02');
+    expect(queries[0].dateQueried).toBe('2026-01-01');
   });
-  it('a Full Sent query with only a queried date shows "date needed" for the full-sent rung (null)', () => {
+  it('a Full Sent query with only a queried date has no status date (shows "add a date")', () => {
     const { queries } = parseModel(result([agent()], [query({ status: QueryStatus.FULL_SENT, dateQueried: '2026-01-01' })]));
-    expect(queries[0].date).toBeNull(); // not mis-shown as the full-sent date
+    expect(queries[0].statusDate).toBeNull(); // not mis-shown as the full-sent date
+    expect(queries[0].dateQueried).toBe('2026-01-01');
   });
-  it('a Queried query reads dateQueried', () => {
+  it('a Queried query keeps its date as the queried anchor, no separate status date', () => {
     const { queries } = parseModel(result([agent()], [query({ status: QueryStatus.QUERIED, dateQueried: '2026-01-01' })]));
-    expect(queries[0].date).toBe('2026-01-01');
+    expect(queries[0].dateQueried).toBe('2026-01-01');
+    expect(queries[0].statusDate).toBeNull();
   });
 });
 
-describe('modelToResult — a date attaches to the rung matching the current status', () => {
-  it('THE FIX: a date set on a Full Sent query seeds fullSentDate, NOT dateQueried', () => {
+describe('modelToResult — a status date attaches to the rung matching the current status', () => {
+  it('THE FIX: a status date on a Full Sent query seeds fullSentDate, NOT dateQueried', () => {
     const r = result([agent()], [query({ status: QueryStatus.FULL_SENT, dateQueried: null })]);
     const m = parseModel(r);
-    m.queries[0].date = '2026-02-20'; // user fills the "date needed"
+    m.queries[0].statusDate = '2026-02-20'; // user fills the full-sent date
     const out = modelToResult(r, m.agents, m.queries);
     expect(out.queries[0].fullSentDate).toBe('2026-02-20'); // seeds the full-sent rung
     expect(out.queries[0].dateQueried).toBeNull();           // NOT the queried rung
   });
-  it('preserves the original queried anchor while setting the full-sent date', () => {
-    const r = result([agent()], [query({ status: QueryStatus.FULL_SENT, dateQueried: '2026-01-01' })]);
+  it('beyond Queried, both the queried anchor and the status date round-trip independently', () => {
+    const r = result([agent()], [query({ status: QueryStatus.FULL_SENT })]);
     const m = parseModel(r);
-    m.queries[0].date = '2026-02-20';
+    m.queries[0].dateQueried = '2026-01-01';
+    m.queries[0].statusDate = '2026-02-20';
     const out = modelToResult(r, m.agents, m.queries);
-    expect(out.queries[0].dateQueried).toBe('2026-01-01'); // queried rung preserved
-    expect(out.queries[0].fullSentDate).toBe('2026-02-20'); // full-sent rung dated
+    expect(out.queries[0].dateQueried).toBe('2026-01-01'); // queried rung
+    expect(out.queries[0].fullSentDate).toBe('2026-02-20'); // full-sent rung
   });
   it('a Queried query round-trips its date to dateQueried', () => {
     const r = result([agent()], [query({ status: QueryStatus.QUERIED })]);
     const m = parseModel(r);
-    m.queries[0].date = '2026-03-03';
+    m.queries[0].dateQueried = '2026-03-03';
     const out = modelToResult(r, m.agents, m.queries);
     expect(out.queries[0].dateQueried).toBe('2026-03-03');
   });
-  it('THE FIX: a date set on an Offer query seeds offerDate, NOT dateQueried', () => {
+  it('THE FIX: a status date on an Offer query seeds offerDate, NOT dateQueried', () => {
     const r = result([agent()], [query({ status: QueryStatus.OFFER, dateQueried: '2025-11-05' })]);
     const m = parseModel(r);
-    m.queries[0].date = '2026-01-10'; // when the offer came in
+    m.queries[0].statusDate = '2026-01-10'; // when the offer came in
     const out = modelToResult(r, m.agents, m.queries);
     expect(out.queries[0].offerDate).toBe('2026-01-10');   // seeds the offer rung
     expect(out.queries[0].dateQueried).toBe('2025-11-05');  // queried anchor preserved
   });
-  it('THE FIX: a date set on a Revise & Resubmit query seeds reviseDate, NOT dateQueried', () => {
+  it('THE FIX: a status date on a Revise & Resubmit query seeds reviseDate, NOT dateQueried', () => {
     const r = result([agent()], [query({ status: QueryStatus.REVISE_RESUBMIT, dateQueried: '2025-11-05' })]);
     const m = parseModel(r);
-    m.queries[0].date = '2026-02-15';
+    m.queries[0].statusDate = '2026-02-15';
     const out = modelToResult(r, m.agents, m.queries);
     expect(out.queries[0].reviseDate).toBe('2026-02-15');
     expect(out.queries[0].dateQueried).toBe('2025-11-05');
@@ -86,6 +90,16 @@ describe('modelToResult — a date attaches to the rung matching the current sta
     const m = parseModel(r);
     const out = modelToResult(r, m.agents, m.queries);
     expect(out.queries[0].fullSentDate ?? null).toBeNull();
+  });
+});
+
+describe('quoteStatuses — statuses in prose render lowercase, single-quoted', () => {
+  it('lowercases and single-quotes a status named in note prose', () => {
+    expect(quoteStatuses("we mapped this to Queried — change it")).toBe("we mapped this to 'queried' — change it");
+  });
+  it('handles multi-word and already-quoted statuses', () => {
+    expect(quoteStatuses("read as Full Sent")).toBe("read as 'full sent'");
+    expect(quoteStatuses('"Rejected" by the agent')).toBe("'rejected' by the agent");
   });
 });
 

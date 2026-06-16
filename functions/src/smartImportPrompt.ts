@@ -22,8 +22,9 @@ Return ONLY a single valid JSON object — no prose, no markdown fences. Shape:
   "queries": [ {
     "agentRef": "a1", "dateQueried": "YYYY-MM-DD"|null, "status": "<QueryStatus>"|null,
     "partialRequestedDate": null, "partialSentDate": null,
-    "fullRequestedDate": null, "fullSentDate": null, "closedDate": null,
-    "notes": "", "confidence": "high"|"low", "flags": []
+    "fullRequestedDate": null, "fullSentDate": null,
+    "offerDate": null, "reviseDate": null, "closedDate": null,
+    "dateNote": "", "notes": "", "confidence": "high"|"low", "flags": []
   } ],
   "warnings": [ "..." ]
 }
@@ -45,21 +46,37 @@ Normalisation rules:
   a status outside the enum above. "they're reading it" -> the latest stage the row supports (else "Queried").
   Reserve null for a truly empty status cell, and flag it.
 - Include EVERY data row in "queries" — NEVER omit or drop a row, whatever is missing. A row with no date, no status,
-  or no agent name STILL becomes a query object with your best-guess mapping; mark it confidence "low" with a flag.
-  Code decides what to do with edge rows — your job is to map every row.
-- Dates: a date is OPTIONAL. Parse to ISO YYYY-MM-DD only the dates the sheet genuinely contains; where a date is
-  absent or unreadable, return null — do NOT guess, interpolate, or invent one. Ambiguous numeric dates
-  (e.g. 03/04/26) are UK format DD/MM/YYYY; written dates ("2 Nov 2025") parse too.
-- Flags and issues are FULL, FRIENDLY SENTENCES written to the writer (they are shown verbatim as review notes),
-  not terse codes. E.g. "We weren't sure of the status here, so we've marked it as Queried — change it if that's
-  wrong." or "This row didn't have a query date, so you can add one later." Never output a bare code like "NO_DATE".
+  or no agent name STILL becomes a query object with your best-guess mapping. Set a query's confidence "low" with a
+  flag ONLY when its STATUS is genuinely ambiguous — NEVER for a missing date or a missing agent name (both are
+  expected, fine, and handled later). Code decides what to do with edge rows — your job is to map every row.
+- Dates: a date is OPTIONAL and is NEVER a problem. Parse to ISO YYYY-MM-DD only the dates the sheet genuinely
+  contains; where a date is absent or unreadable, return null — do NOT guess, interpolate, or invent one. Never lower
+  confidence and never add a flag for a missing or unparseable date. If the cell held vague date text you couldn't
+  parse (e.g. "ages ago", "last spring"), put a short friendly note in "dateNote" for context — never a flag. Ambiguous
+  numeric dates (e.g. 03/04/26) are UK format DD/MM/YYYY; written dates ("2 Nov 2025") parse too.
+- Two date columns: if the sheet has BOTH a query-sent date AND a separate latest-activity column ("last heard",
+  "last updated", "date sent", "last contact", "updated"), set "dateQueried" from the query-sent date and ALSO set the
+  date field that matches the row's STATUS from the latest-activity date — partialRequestedDate / partialSentDate /
+  fullRequestedDate / fullSentDate for those stages; offerDate for Offer; reviseDate for Revise & Resubmit; closedDate
+  for Rejected / Withdrawn / No Response. This gives two real timeline anchors. With only ONE date column, set
+  "dateQueried" only. Infer the columns' roles from their headers; never fabricate a date for a stage with no source.
+- Genres: extract any genre / wishlist / "what they want" / MSWL text for an agent into "genres" as the RAW words you
+  found in the sheet (e.g. ["litfic","sci-fi","YA"]). Do NOT normalise, expand, or invent genres — the app maps your
+  raw words onto its own fixed list. If there's no genre text, leave "genres" empty.
+- Flags (queries) and issues (agents) are FULL, FRIENDLY SENTENCES written to the writer (shown verbatim as review
+  notes), not terse codes. A query FLAG is ONLY for a genuinely ambiguous STATUS interpretation, e.g. "We weren't sure
+  of the status here, so we've marked it as 'queried' — change it if that's wrong." Never flag a date. When a flag
+  names a status in its prose, write it lowercase and in single quotes ('queried', 'full sent', 'no response') — this
+  is the "status" VALUE you set that stays exactly as the enum; only the prose mention is lowercased. Agent ISSUES are
+  for a genuine concern about the agent's details and are rarely needed — NEVER add an issue for a missing or
+  abbreviated agent name (agency-only and shortened names are perfectly valid).
 - Agents: group distinct agents into "agents" and link each query via "agentRef". Dedupe on the NORMALISED
   name + agency together (trim, case-insensitive) — two rows are the same agent only when both match. The AGENCY is
-  the identity: an agent with no name is still a distinct agent, represented with name "" and its agency. Never merge
-  two different agencies, and never split one agent across refs.
+  the identity: an agent with no name is still a distinct agent, represented with name "" and its agency — this is
+  valid and needs no flag. Never merge two different agencies, and never split one agent across refs.
 - One object in "queries" per query row.
 - "statusTranslations" must summarise every distinct original status value, what you mapped it to, and how many rows.
-- Never invent data. If a field is absent, use null or omit it. Mark anything uncertain with confidence "low" and a
-  full-sentence flag.
+- Never invent data. If a field is absent, use null or omit it. Mark a genuinely ambiguous STATUS with confidence
+  "low" and a full-sentence flag — do not lower confidence for missing dates or names.
 - Do NOT attempt to match against the user's existing ScriptAlly database; that happens later in code.
 `.trim();
