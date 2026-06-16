@@ -12,6 +12,7 @@ import { Dashboard } from "./components/Dashboard";
 import { Queries } from "./components/Queries";
 import { QueriesLanding } from "./components/QueriesLanding";
 import { Agents } from "./components/Agents";
+import { DiscoverNewAgents } from "./components/DiscoverNewAgents";
 import { SubmissionPackages } from "./components/SubmissionPackages";
 import { AllManuscripts } from "./components/AllManuscripts";
 import { Pricing } from "./components/Pricing";
@@ -174,7 +175,11 @@ function AppContent() {
           )
         )}
         {activeTab === "agents" && (
-          <Agents searchQuery={searchQuery} onNavigate={handleNavigate} />
+          activeSubPage === "Discover new agents" ? (
+            <DiscoverNewAgents onNavigate={handleNavigate} />
+          ) : (
+            <Agents searchQuery={searchQuery} onNavigate={handleNavigate} />
+          )
         )}
         {activeTab === "manuscripts" && (
           activeSubPage === "Submission packages" ? (

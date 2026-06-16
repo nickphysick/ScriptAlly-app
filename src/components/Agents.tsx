@@ -346,7 +346,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
   return (
     <div
       className="flex-grow bg-[#dce0d9] min-h-0 overflow-hidden w-full flex flex-row p-[8px] gap-[8px]"
-      style={{ minHeight: "calc(100vh - 64px)", maxHeight: "calc(100vh - 64px)" }}
+      style={{ minHeight: "calc(100vh - 108px)", maxHeight: "calc(100vh - 108px)" }}
     >
       {/* ---------------- panel 1: left sidebar controls ---------------- */}
       <div

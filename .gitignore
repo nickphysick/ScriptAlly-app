@@ -12,3 +12,4 @@ coverage/
 .env*.local
 .firebase/
 .claude/
+COMMUNITY_AGENTS_RECON.md
