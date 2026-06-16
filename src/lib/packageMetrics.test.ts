@@ -15,8 +15,10 @@ import {
   versionMeta,
   meetsSampleThreshold,
   MIN_SENDS_FOR_CLAIM,
+  materialsLinkWrites,
+  editMaterialsUpdate,
 } from "./packageMetrics";
-import { Query, QueryStatus, SubmissionMethod, SubmissionPackage, ManuscriptVersion, ComponentType } from "../types";
+import { Query, QueryStatus, SubmissionMethod, SubmissionPackage, ManuscriptVersion, ComponentType, QueryMaterial } from "../types";
 
 const q = (over: Partial<Query>): Query =>
   ({
@@ -156,6 +158,41 @@ describe("packagesUsingVersion", () => {
       pkg({ id: "d" }),
     ];
     expect(packagesUsingVersion("V", packages).map((p) => p.id)).toEqual(["a", "b", "c"]);
+  });
+});
+
+describe("materialsLinkWrites (guard #1 — exactly one source of truth)", () => {
+  it("package attached → writes packageId and clears materialsWanted", () => {
+    expect(materialsLinkWrites({ packageId: "pkg-1", materials: ["Query Letter", { material: "Sample Pages", type: "pages", quantity: 10 }] }))
+      .toEqual({ packageId: "pkg-1", materialsWanted: [] });
+  });
+  it("clears even an agent-seeded materials list when a package is attached (never persisted)", () => {
+    expect(materialsLinkWrites({ packageId: "pkg-1", materials: ["Query Letter", "Synopsis", "First 10 pages"] }))
+      .toEqual({ packageId: "pkg-1", materialsWanted: [] });
+  });
+  it("free text (no package) → writes materialsWanted and clears packageId", () => {
+    const mats: (string | QueryMaterial)[] = ["Query Letter", { material: "Sample Pages", type: "pages", quantity: 10 }];
+    expect(materialsLinkWrites({ packageId: "", materials: mats })).toEqual({ packageId: "", materialsWanted: mats });
+  });
+  it("detach (packageId cleared) → writes the free-text materials, packageId empty", () => {
+    expect(materialsLinkWrites({ packageId: "", materials: ["Query Letter"] })).toEqual({ packageId: "", materialsWanted: ["Query Letter"] });
+  });
+});
+
+describe("editMaterialsUpdate (edit-save omit-when-untouched gating)", () => {
+  it("touched + package → { packageId, materialsWanted: [] }", () => {
+    expect(editMaterialsUpdate({ touched: true, packageId: "pkg-1", materials: ["Query Letter", "Synopsis"] }))
+      .toEqual({ packageId: "pkg-1", materialsWanted: [] });
+  });
+  it("touched + free → { packageId: \"\", materialsWanted }", () => {
+    expect(editMaterialsUpdate({ touched: true, packageId: "", materials: ["Query Letter"] }))
+      .toEqual({ packageId: "", materialsWanted: ["Query Letter"] });
+  });
+  it("untouched → {} — both keys OMITTED (status-only edit of a packaged query keeps its packageId; touch-nothing keeps both)", () => {
+    const r = editMaterialsUpdate({ touched: false, packageId: "pkg-1", materials: ["Query Letter"] });
+    expect(r).toEqual({});
+    expect("packageId" in r).toBe(false);
+    expect("materialsWanted" in r).toBe(false);
   });
 });
 

@@ -21,7 +21,7 @@
  *   requestRate  = requests / sent   (null when sent === 0 → rendered as "—")
  *   responseRate = responses / sent  (null when sent === 0 → rendered as "—")
  */
-import { ManuscriptVersion, SubmissionPackage, Query, QueryStatus } from "../types";
+import { ManuscriptVersion, SubmissionPackage, Query, QueryStatus, QueryMaterial } from "../types";
 
 /** Request-or-beyond statuses: the agent asked for materials (or went further). Exact enum strings. */
 const REQUEST_OR_BEYOND: ReadonlySet<QueryStatus> = new Set<QueryStatus>([
@@ -120,4 +120,33 @@ export function versionMeta(v: ManuscriptVersion): string | null {
   }
   if (v.fileAttached && v.fileName) return v.fileName;
   return null;
+}
+
+/**
+ * Guard #1 — persist exactly ONE source of truth for a query's materials. An attached package and
+ * free-text materials are mutually exclusive: write the package link OR the free-text materials,
+ * never both, and always clear the other. Every query-log save path runs through this so an
+ * agent-seeded materialsWanted can never sit stale behind a packageId.
+ */
+export function materialsLinkWrites(args: { packageId: string; materials: (string | QueryMaterial)[] }): {
+  packageId: string;
+  materialsWanted: (string | QueryMaterial)[];
+} {
+  return args.packageId
+    ? { packageId: args.packageId, materialsWanted: [] } // package attached → clear free text
+    : { packageId: "", materialsWanted: args.materials }; // free text → clear the package link
+}
+
+/**
+ * Edit-save gating. When the user touched the materials OR the package link this session, persist
+ * guard #1 (materialsLinkWrites — write one, clear the other). When UNtouched, return {} so the edit
+ * omits both keys entirely and the stored values are preserved verbatim (updateQuery merges) — this
+ * is what makes a status-only / notes-only edit of a packaged query keep its packageId, and a
+ * touch-nothing edit keep both.
+ */
+export function editMaterialsUpdate(args: { touched: boolean; packageId: string; materials: (string | QueryMaterial)[] }): Partial<{
+  packageId: string;
+  materialsWanted: (string | QueryMaterial)[];
+}> {
+  return args.touched ? materialsLinkWrites({ packageId: args.packageId, materials: args.materials }) : {};
 }

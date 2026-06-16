@@ -155,8 +155,9 @@ export const MaterialsField: React.FC<MaterialsFieldProps> = ({
   const [picking, setPicking] = useState(false);
 
   const msPackages = packages.filter((p) => p.manuscriptId === manuscriptId && p.status !== "Retired");
-  // Resolve across ALL packages (retired included) so an attached-then-retired package still shows.
-  const attached: SubmissionPackage | undefined = packageId ? packages.find((p) => p.id === packageId) : undefined;
+  // Resolve across this manuscript's packages (retired included, so an attached-then-retired package
+  // still shows); a stale id from a different manuscript won't resolve → graceful degrade.
+  const attached: SubmissionPackage | undefined = packageId ? packages.find((p) => p.id === packageId && p.manuscriptId === manuscriptId) : undefined;
   const verName = (id: string) => versions.find((v) => v.id === id)?.versionName ?? null;
 
   // ── Attached state: chip summary + free-text escape ──────────────────────────
@@ -203,10 +204,14 @@ export const MaterialsField: React.FC<MaterialsFieldProps> = ({
         ) : picking ? (
           msPackages.length === 0 ? (
             <div style={{ marginTop: 9, fontFamily: FONT_SANS, fontSize: 12.5, color: mutedInk }}>
-              No packages on this manuscript yet.{" "}
-              <button onClick={() => onNavigate?.("manuscripts", "Submission packages")} style={{ ...linkBase, marginTop: 0, color: burgundy, display: "inline", fontFamily: FONT_SANS, fontSize: 12.5, letterSpacing: 0, textDecoration: "underline" }}>
-                Create one in Submission Packages
-              </button>.
+              No packages on this manuscript yet.{onNavigate ? (
+                <>
+                  {" "}
+                  <button onClick={() => onNavigate("manuscripts", "Submission packages")} style={{ ...linkBase, marginTop: 0, color: burgundy, display: "inline", fontFamily: FONT_SANS, fontSize: 12.5, letterSpacing: 0, textDecoration: "underline" }}>
+                    Create one in Submission Packages
+                  </button>.
+                </>
+              ) : " Create one on the Submission Packages page."}
             </div>
           ) : (
             <div style={{ marginTop: 9, display: "flex", alignItems: "center", gap: 10 }}>

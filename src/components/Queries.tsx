@@ -34,7 +34,8 @@ import { recordQueryResponse } from "../lib/recordResponse";
 import { formatQueryMaterial, materialLabel } from "../lib/materials";
 import { MarkSentPopover, MarkSentKind } from "./MarkSentPopover";
 import { useFixedMenu } from "./forms/useFixedMenu";
-import { MaterialsEditor } from "./MaterialsEditor";
+import { MaterialsField } from "./MaterialsField";
+import { editMaterialsUpdate } from "../lib/packageMetrics";
 
 const normalizeStatus = (status: string | QueryStatus): QueryStatus => {
   if (!status) return QueryStatus.QUERIED;
@@ -640,9 +641,12 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   const [editResponseDeadline, setEditResponseDeadline] = useState("");
   const [editIfNoResponse, setEditIfNoResponse] = useState("Remind me to nudge");
   const [editMaterials, setEditMaterials] = useState<(string | QueryMaterial)[]>([]);
-  // True once the user touches materials in this edit session. When false, handleSaveChanges
-  // omits materialsWanted entirely so an unrelated edit (or saving a legacy query) preserves the
-  // stored value verbatim — never downgrading structured quantities or "upgrading" legacy strings.
+  // The attached submission package (mutually exclusive with editMaterials — see the
+  // materialsLinkWrites guard in handleSaveChanges). "" === free text.
+  const [editPackageId, setEditPackageId] = useState<string>("");
+  // True once the user touches materials OR the package link in this edit session. When false,
+  // handleSaveChanges omits both fields so an unrelated edit (or saving a legacy query) preserves
+  // the stored values verbatim — never downgrading structured quantities or clobbering the link.
   const [materialsTouched, setMaterialsTouched] = useState(false);
   const [editRejectionType, setEditRejectionType] = useState("Form rejection");
   const [editAgentComments, setEditAgentComments] = useState("");
@@ -705,6 +709,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         ? (activeAgent.materialsWanted as string[])
         : [];
       setEditMaterials(queryMats.length > 0 ? queryMats : agentMats);
+      setEditPackageId(activeQuery.packageId || "");
       setMaterialsTouched(false);
 
       // Chip palette: the standard set plus any custom labels already present on the query/agent.
@@ -885,10 +890,12 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     };
     
     updates.ifNoResponse = editIfNoResponse;
-    // Only write materials if the user actually touched them this session. Otherwise omit the
-    // field — updateQuery merges, so the stored value (structured quantities, or a legacy
-    // string[]) is preserved verbatim rather than silently overwritten with bare labels.
-    if (materialsTouched) updates.materialsWanted = editMaterials;
+    // Guard #1 + omit-when-untouched: when the user touched materials OR the package link this
+    // session, persist exactly one source of truth (package → clear materialsWanted; free text →
+    // clear packageId). Untouched → editMaterialsUpdate returns {} so BOTH keys are omitted and the
+    // stored values are preserved verbatim (updateQuery merges) — an agent-seeded list never lands
+    // behind a packageId, and a status/notes-only edit keeps the existing packageId.
+    Object.assign(updates, editMaterialsUpdate({ touched: materialsTouched, packageId: editPackageId, materials: editMaterials }));
 
     if ([QueryStatus.REJECTED, QueryStatus.WITHDRAWN].includes(activeQuery.status)) {
       updates.rejectionType = editRejectionType;
@@ -3306,11 +3313,15 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           downgrades the recorded quantities. */}
                       <div>
                         <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1.5">Materials Sent</label>
-                        <MaterialsEditor
-                          value={editMaterials}
-                          onChange={(next) => { setEditMaterials(next); setMaterialsTouched(true); }}
+                        <MaterialsField
+                          materials={editMaterials}
+                          onMaterialsChange={(next) => { setEditMaterials(next); setMaterialsTouched(true); }}
+                          packageId={editPackageId}
+                          onPackageChange={(id) => { setEditPackageId(id); setMaterialsTouched(true); }}
+                          manuscriptId={activeQuery.manuscriptId}
                           palette={allAvailableMaterials}
                           allowCustom
+                          onNavigate={onNavigate}
                         />
                       </div>
 

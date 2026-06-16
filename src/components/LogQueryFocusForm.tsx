@@ -10,7 +10,8 @@ import { useScriptAllyDb } from "../lib/db";
 import { pickableManuscripts } from "../lib/lifecycle";
 import { QueryStatus, Agent, SubmissionMethod, SubmissionStatus, QueryMaterial } from "../types";
 import { FormShell, BrandDropdown, BrandDatePicker, FormField } from "./forms";
-import { MaterialsEditor } from "./MaterialsEditor";
+import { MaterialsField } from "./MaterialsField";
+import { materialsLinkWrites } from "../lib/packageMetrics";
 import { AgentSearchField } from "./AgentSearchField";
 import planeAnimation from "../assets/query-plane-animation.json";
 
@@ -52,9 +53,9 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
   // materialsWanted. Each entry is a plain label when unquantified, or a QueryMaterial when it
   // carries a type/quantity ("50 pages").
   const [materialsSent, setMaterialsSent] = useState<(string | QueryMaterial)[]>([]);
-  // Saved as packageId. The package browser is deferred; the field keeps its default so the
-  // payload is unchanged (a query logged without a package saves packageId: "").
-  const [selectedPackageId] = useState<string>("");
+  // The attached submission package, saved as packageId (mutually exclusive with free-text
+  // materialsWanted — see the materialsLinkWrites guard on save). "" === free text.
+  const [selectedPackageId, setSelectedPackageId] = useState<string>("");
   const [responseDeadlineDate, setResponseDeadlineDate] = useState<string>("");
   const [ifNoResponseAction, setIfNoResponseAction] = useState<"nudge" | "close" | "nothing">("nudge");
   // Nudge timing — shown when "If no response" = nudge. Drives the nudgeDate calc in
@@ -78,6 +79,7 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
       setSendMethod(SubmissionMethod.EMAIL);
       setPersonalizationNotes("");
       setMaterialsSent([]);
+      setSelectedPackageId("");
       setResponseDeadlineDate("");
       setIfNoResponseAction("nudge");
       setNudgeReminderWhen("week_before");
@@ -86,6 +88,12 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
       setIsSubmitting(false);
     }
   }, [isOpen, pickable]);
+
+  // Packages are per-manuscript — switching the target manuscript drops any attached package so a
+  // query can't link a package that belongs to a different manuscript.
+  useEffect(() => {
+    setSelectedPackageId("");
+  }, [selectedManuscriptId]);
 
   // Auto-calculate the expected response deadline from the agent + date sent (unchanged)
   useEffect(() => {
@@ -230,13 +238,13 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
       const newQueryPayload = {
         manuscriptId: selectedManuscriptId,
         agentId: selectedAgent.id,
-        packageId: selectedPackageId,
+        // Guard #1: write the package link OR the free-text materials, never both.
+        ...materialsLinkWrites({ packageId: selectedPackageId, materials }),
         personalisationNotes: personalizationNotes,
         sendMethod,
         dateSent: new Date(dateSent).toISOString(),
         responseDeadline: new Date(responseDeadlineDate).toISOString(),
         nudgeDate,
-        materialsWanted: materials,
         ifNoResponse: ifNoResponseValue,
         status: QueryStatus.QUERIED
       };
@@ -325,9 +333,12 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
           </FormField>
 
           <FormField label="Materials sent">
-            <MaterialsEditor
-              value={materialsSent}
-              onChange={setMaterialsSent}
+            <MaterialsField
+              materials={materialsSent}
+              onMaterialsChange={setMaterialsSent}
+              packageId={selectedPackageId}
+              onPackageChange={setSelectedPackageId}
+              manuscriptId={selectedManuscriptId}
               palette={["Query Letter", "Synopsis", "Sample Pages"]}
             />
           </FormField>
