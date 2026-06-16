@@ -573,13 +573,18 @@ const NotesLayer: React.FC<{
 export interface SmartImportReviewProps {
   result: SmartImportResult;
   onBack?: () => void;
+  /** "Skip setup" — leave the import flow (same as the rest of onboarding). */
+  onSkip?: () => void;
+  /** A commit error from the host (e.g. commitSmartImport threw) — surfaced as a banner so a failed
+   *  import is never silent. The host owns the message; this component just shows it. */
+  error?: string | null;
   /** Import the final working model. The component converts it (modelToResult) to a SmartImportResult
    *  ready for Prompt 1's commitSmartImport(deps, result, manuscriptId) — agents → queries →
    *  activities → recompute. The host owns the commit deps; this component owns the conversion. */
   onImport?: (result: SmartImportResult) => void | Promise<void>;
 }
 
-export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, onBack, onImport }) => {
+export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, onBack, onSkip, error, onImport }) => {
   const initial = useMemo(() => parseModel(result), [result]);
   const [agents, setAgents] = useState<ReviewAgent[]>(initial.agents);
   const [queries, setQueries] = useState<ReviewQuery[]>(initial.queries);
@@ -877,6 +882,14 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
         </div>
       )}
 
+      {/* commit-error banner — a failed import is never silent */}
+      {error && (
+        <div style={{ width: panelWidth, margin: "12px auto 0", display: "flex", alignItems: "center", gap: 8, background: "#fdecea", border: "1px solid #e6b6a8", borderRadius: 9, padding: "10px 13px", fontFamily: "Inter", fontSize: 12, color: C.invalid }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.invalid} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><circle cx="12" cy="12" r="9" /><path d="M12 8v4M12 16h.01" /></svg>
+          {error}
+        </div>
+      )}
+
       <div ref={bandRef} style={{ position: "relative", width: BAND_W, maxWidth: "100%", margin: "0 auto", paddingTop: 14, paddingBottom: 30 }}>
         {/* ruled-paper + margin line (decorative) */}
         <div aria-hidden style={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none", background: "repeating-linear-gradient(transparent,transparent 28px,rgba(110,130,140,0.15) 28px,rgba(110,130,140,0.15) 29px)", WebkitMaskImage: "radial-gradient(ellipse 64% 78% at 50% 42%,#000 46%,transparent 100%)", maskImage: "radial-gradient(ellipse 64% 78% at 50% 42%,#000 46%,transparent 100%)" }} />
@@ -887,7 +900,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
           <span style={{ display: "flex", gap: 5 }}>
             {[0, 1, 2, 3, 4].map((i) => <span key={i} style={{ width: i === 3 ? 18 : 5, height: 5, borderRadius: i === 3 ? 3 : "50%", background: i === 3 ? C.burgundy : "#cabfae" }} />)}
           </span>
-          <span style={{ fontFamily: MONO, fontSize: 10, color: C.muted }}>Skip setup</span>
+          <span onClick={onSkip} style={{ fontFamily: MONO, fontSize: 10, color: C.muted, cursor: onSkip ? "pointer" : "default" }}>Skip setup</span>
         </div>
 
         {/* corner sticky hint — higher and further right, clear of the panel and the other notes */}
