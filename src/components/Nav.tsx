@@ -2,12 +2,15 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Top navigation — a full-width white MountCard, the topmost object on every page.
- * Critical colours/borders are inline styles (Tailwind has silently overridden them
- * before); Tailwind is used for layout/spacing only.
+ * Top navigation — a single horizontal bar across the top of every page (no card, no sidebar).
+ * Laid out left→right: logo · primary links · search · (ml-auto) bell · settings · user.
+ * The bar is sticky and flush on the page ground (sand fill, no frame/shadow); a neutral-grey
+ * divider fades in along its bottom edge only once the page is scrolled. Active link = soft-pink
+ * pill. Critical fill/text colours are inline (Tailwind has silently overridden inline-critical
+ * colours before); Tailwind is used for layout/spacing only.
  */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useScriptAllyDb } from "../lib/db";
 import {
   Bell,
@@ -16,16 +19,16 @@ import {
   ChevronDown,
   LogOut,
   Sparkles,
-  Plus,
   User,
-  Menu as MenuIcon,
+  Settings,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { MountCard } from "./MountCard";
+import { ScriptAllyLogo } from "./ScriptAllyLogo";
 import {
   burgundy,
   bodyInk,
   parchment,
+  kraft,
   ghostButtonText,
   labelStyle,
   FONT_SERIF,
@@ -40,19 +43,21 @@ import {
 
 interface NavProps {
   activeTab: string;
-  activeSubPage: string;
   onNavigate: (tab: string, subPageName?: string) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  /** Toggle the left rail's off-canvas drawer (shown only below lg). */
-  onToggleRail?: () => void;
 }
 
-const MenuItem: React.FC<{ onClick: () => void; children: React.ReactNode; withPlus?: boolean }> = ({
-  onClick,
-  children,
-  withPlus,
-}) => (
+const PINK = "#f8e7dc"; // soft-pink pill fill (inline — Tailwind has overridden this before)
+
+const PRIMARY: { tab: string; label: string }[] = [
+  { tab: "dashboard", label: "Dashboard" },
+  { tab: "queries", label: "Queries" },
+  { tab: "agents", label: "Agents" },
+  { tab: "manuscripts", label: "Manuscripts" },
+];
+
+const MenuItem: React.FC<{ onClick: () => void; children: React.ReactNode }> = ({ onClick, children }) => (
   <button
     onClick={onClick}
     className="w-full text-left cursor-pointer flex items-center gap-1.5"
@@ -69,25 +74,52 @@ const MenuItem: React.FC<{ onClick: () => void; children: React.ReactNode; withP
     onMouseEnter={(e) => { e.currentTarget.style.background = "#ffffff"; e.currentTarget.style.color = burgundy; }}
     onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#6a5045"; }}
   >
-    {withPlus && <Plus className="w-3 h-3 shrink-0" style={{ color: "#c9a89e" }} />}
-    <span>{children}</span>
+    {children}
   </button>
 );
 
 const MenuDivider: React.FC = () => <div style={{ height: 0.5, background: "#f0e6e0", margin: "4px 2px" }} />;
 
-export const Nav: React.FC<NavProps> = ({
-  activeTab,
-  onNavigate,
-  searchQuery,
-  setSearchQuery,
-  onToggleRail,
-}) => {
+/** Primary nav link — active gets a soft-pink pill; idle highlights the same pink on hover. */
+const NavLink: React.FC<{ label: string; active: boolean; onClick: () => void }> = ({ label, active, onClick }) => (
+  <button
+    onClick={onClick}
+    aria-current={active ? "page" : undefined}
+    className="cursor-pointer"
+    style={{
+      fontFamily: FONT_SANS,
+      fontSize: 13,
+      fontWeight: active ? 500 : 400,
+      whiteSpace: "nowrap",
+      padding: "7px 14px",
+      borderRadius: 20,
+      border: "none",
+      background: active ? PINK : "transparent",
+      color: active ? burgundy : ghostButtonText,
+      transition: "background 0.15s, color 0.15s",
+    }}
+    onMouseEnter={(e) => { if (!active) { e.currentTarget.style.background = PINK; e.currentTarget.style.color = burgundy; } }}
+    onMouseLeave={(e) => { if (!active) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = ghostButtonText; } }}
+  >
+    {label}
+  </button>
+);
+
+export const Nav: React.FC<NavProps> = ({ activeTab, onNavigate, searchQuery, setSearchQuery }) => {
   const { currentUser, tasks, dismissTask, logout } = useScriptAllyDb();
 
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showBellDropdown, setShowBellDropdown] = useState(false);
   const [successAnimationTaskId, setSuccessAnimationTaskId] = useState<string | null>(null);
+  const [scrolled, setScrolled] = useState(false);
+
+  // Divider fades in once the page leaves the very top; clean at rest.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 4);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   if (!currentUser) return null;
 
@@ -123,68 +155,51 @@ export const Nav: React.FC<NavProps> = ({
         <div className="fixed inset-0 z-40 bg-transparent" onClick={closeAll} />
       )}
 
-      {/* Floating parchment mount, pinned above the page */}
-      <div className="fixed z-50" style={{ top: 10, left: 14, right: 14 }}>
-        {/* MountCard still spans the page width; its inner content is inset up to 300px
-            each side (clamped so it never crushes the two clusters on narrow viewports). */}
-        <MountCard
-          className="flex items-center"
-          style={{ paddingBlock: 13, paddingInline: 22, background: "#ffffff", backgroundImage: "none" }}
-        >
-          {/* Hamburger — opens the left-rail drawer below lg (the rail holds the primary links). */}
-          {onToggleRail && (
-            <button
-              onClick={() => { onToggleRail(); closeAll(); }}
-              className="lg:hidden cursor-pointer flex items-center justify-center mr-3"
-              style={{ position: "relative", zIndex: 4, background: "transparent", border: "none", padding: 4, color: burgundy }}
-              aria-label="Open navigation"
-            >
-              <MenuIcon className="w-[20px] h-[20px]" />
-            </button>
-          )}
-          {/* Wordmark */}
+      {/* Single flush sticky bar — sits on the sand ground; grey divider appears on scroll. */}
+      <header
+        className="sticky top-0 z-50"
+        style={{
+          background: kraft,
+          borderBottom: `1.5px solid ${scrolled ? "#b8b2a8" : "transparent"}`,
+          transition: "border-color 0.25s ease",
+        }}
+      >
+        <div className="flex items-center gap-4 px-4 md:px-10 lg:px-14 xl:px-16" style={{ height: 64 }}>
+          {/* Logo — a touch larger and nudged down so it sits on the baseline */}
           <button
             onClick={() => { onNavigate("dashboard"); closeAll(); }}
-            className="cursor-pointer select-none"
-            style={{
-              position: "relative",
-              zIndex: 4,
-              fontFamily: FONT_SERIF,
-              fontSize: 19,
-              fontWeight: 500,
-              color: burgundy,
-              background: "transparent",
-              border: "none",
-              padding: 0,
-            }}
+            className="cursor-pointer select-none shrink-0"
+            style={{ background: "transparent", border: "none", padding: 0, marginTop: 3, lineHeight: 0 }}
+            aria-label="ScriptAlly — go to dashboard"
           >
-            ScriptAlly
+            <ScriptAllyLogo size="md" className="!h-[46px] [&>svg]:!h-[46px]" textColor={burgundy} iconColor={burgundy} />
           </button>
 
-          {/* Right-side utilities */}
-          <div className="ml-auto flex items-center gap-4" style={{ position: "relative", zIndex: 4 }}>
-            {/* Search */}
-            <div
-              className="flex items-center gap-2"
-              style={{
-                background: "#ffffff",
-                border: "0.5px solid #e0d5c8",
-                borderRadius: 9,
-                padding: "8px 12px",
-                width: 190,
-              }}
-            >
-              <Search className="w-[13px] h-[13px] shrink-0" style={{ color: labelColor }} />
-              <input
-                type="text"
-                placeholder="Search…"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-transparent border-none outline-none w-full min-w-0 placeholder-[#c8b8a8]"
-                style={{ fontFamily: FONT_SANS, fontSize: 12, color: bodyInk }}
-              />
-            </div>
+          {/* Primary links */}
+          <nav className="flex items-center gap-1 ml-2 max-md:hidden">
+            {PRIMARY.map((l) => (
+              <NavLink key={l.tab} label={l.label} active={activeTab === l.tab} onClick={() => { onNavigate(l.tab); closeAll(); }} />
+            ))}
+          </nav>
 
+          {/* Search — immediately after the links */}
+          <div
+            className="flex items-center gap-2 ml-1 max-sm:hidden"
+            style={{ background: "#ffffff", border: "0.5px solid #e0d5c8", borderRadius: 9, padding: "8px 12px", width: 200 }}
+          >
+            <Search className="w-[13px] h-[13px] shrink-0" style={{ color: labelColor }} />
+            <input
+              type="text"
+              placeholder="Search…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="bg-transparent border-none outline-none w-full min-w-0 placeholder-[#c8b8a8]"
+              style={{ fontFamily: FONT_SANS, fontSize: 12, color: bodyInk }}
+            />
+          </div>
+
+          {/* Right cluster — bell, settings, user */}
+          <div className="ml-auto flex items-center gap-3 shrink-0">
             {/* Bell */}
             <div className="relative flex items-center">
               <button
@@ -222,7 +237,7 @@ export const Nav: React.FC<NavProps> = ({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 4 }}
                     transition={{ duration: 0.12 }}
-                    className="absolute right-0 top-[calc(100%+16px)] w-80 p-1 text-left"
+                    className="absolute right-0 top-[calc(100%+12px)] w-80 p-1 text-left"
                     style={{
                       background: parchment,
                       border: "0.5px solid #e0d5c8",
@@ -328,6 +343,17 @@ export const Nav: React.FC<NavProps> = ({
               </AnimatePresence>
             </div>
 
+            {/* Settings gear — moved here from the old sidebar bottom */}
+            <button
+              onClick={() => { onNavigate("account"); closeAll(); }}
+              className="flex items-center justify-center cursor-pointer"
+              style={{ background: "transparent", border: "none", padding: 4, color: burgundy }}
+              title="Settings"
+              aria-label="Settings"
+            >
+              <Settings className="w-[18px] h-[18px]" />
+            </button>
+
             {/* User chip */}
             <div className="relative flex items-center">
               <button
@@ -351,7 +377,7 @@ export const Nav: React.FC<NavProps> = ({
                 >
                   {currentUser.name[0]?.toUpperCase()}
                 </span>
-                <span style={{ fontFamily: FONT_SANS, fontSize: 13, color: bodyInk }} className="shrink-0">
+                <span style={{ fontFamily: FONT_SANS, fontSize: 13, color: bodyInk }} className="shrink-0 max-sm:hidden">
                   {currentUser.name}
                 </span>
                 <ChevronDown className="w-3.5 h-3.5 shrink-0" style={{ color: labelColor }} />
@@ -364,7 +390,7 @@ export const Nav: React.FC<NavProps> = ({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 4 }}
                     transition={{ duration: 0.12 }}
-                    className="absolute right-0 top-[calc(100%+16px)] w-52 p-1 text-left"
+                    className="absolute right-0 top-[calc(100%+12px)] w-52 p-1 text-left"
                     style={{
                       background: parchment,
                       border: "0.5px solid #e0d5c8",
@@ -399,8 +425,8 @@ export const Nav: React.FC<NavProps> = ({
               </AnimatePresence>
             </div>
           </div>
-        </MountCard>
-      </div>
+        </div>
+      </header>
     </>
   );
 };

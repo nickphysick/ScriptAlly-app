@@ -12,10 +12,10 @@
 
 /* ── Core surfaces & inks ─────────────────────────────────────────────── */
 export const parchment = "#fdfaf5"; // card surface
-export const kraft = "#D3D9CE"; // page ground — cool muted sage (parchment cards lift off it)
-/** Radial glow layered over the ground at top centre — cool near-white so it reads calm. */
-export const kraftGlow = "radial-gradient(ellipse at 50% 0%, rgba(250,251,247,0.5) 0%, transparent 55%)";
-/** Full page-ground background shorthand: glow over the sage base. */
+export const kraft = "#F5F0EA"; // page ground — light sand; matches the Queries/Manuscripts page ground
+/** Radial glow layered over the ground at top centre — warm near-white so it reads calm. */
+export const kraftGlow = "radial-gradient(ellipse at 50% 0%, rgba(253,250,245,0.6) 0%, transparent 55%)";
+/** Full page-ground background shorthand: glow over the sand base. */
 export const pageGround = `${kraftGlow}, ${kraft}`;
 export const insetBorder = "1px solid rgba(124,58,42,0.28)"; // the signature mount frame
 export const burgundy = "#7c3a2a"; // primary
