@@ -26,6 +26,7 @@ import { AccountSettings } from "./components/AccountSettings";
 import { Onboarding } from "./components/Onboarding";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { StatusDotDemo } from "./components/StatusDotDemo";
+import { PlansPage } from "./components/PlansPage";
 import { LandingPage } from "./features/landing/LandingPage";
 import { Palette, X, Check } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -111,6 +112,12 @@ function AppContent() {
   if (isStatusDotDemo && import.meta.env.DEV) {
     return <StatusDotDemo />;
   }
+  // Dev-only review surface for the presentational plans page (same pattern as #/status-dots).
+  // It's also registered in the activeTab switch below; this hash hatch lets it be reviewed
+  // without signing in. In prod the hash simply falls through to the normal app/landing.
+  if (hash === "#/plans" && import.meta.env.DEV) {
+    return <PlansPage />;
+  }
 
   // Logged-out front door (no router). Landing by default; the landing's CTAs deep-link
   // into the existing Auth screen via hash. Every branch here lives inside `!currentUser`,
@@ -189,6 +196,9 @@ function AppContent() {
         )}
         {activeTab === "pricing" && (
           <Pricing />
+        )}
+        {activeTab === "plans" && (
+          <PlansPage />
         )}
         {activeTab === "import" && (
           <ImportCsv onNavigate={handleNavigate} />
