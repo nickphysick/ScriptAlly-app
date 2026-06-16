@@ -38,6 +38,8 @@ import {
   sageBandRule,
   amberBandGradient,
   amberBandRule,
+  pinkBandGradient,
+  pinkBandRule,
   burgundy,
   headingInk,
   bodyInk,
@@ -93,13 +95,14 @@ const TABS: { key: TabKey; label: string; Icon: React.ComponentType<any> }[] = [
 ];
 
 /* ── Reusable band header (sage or amber); sits inside MountPanel's clipping frame, no radius. ── */
-const BandHeader: React.FC<{ title: string; meta?: string; Icon: React.ComponentType<any>; variant?: "sage" | "amber" }> = ({
+const BandHeader: React.FC<{ title: string; meta?: string; Icon: React.ComponentType<any>; variant?: "sage" | "amber" | "pink" }> = ({
   title,
   meta,
   Icon,
   variant = "sage",
 }) => {
-  const amber = variant === "amber";
+  const bg = variant === "amber" ? amberBandGradient : variant === "pink" ? pinkBandGradient : sageBandGradient;
+  const rule = variant === "amber" ? amberBandRule : variant === "pink" ? pinkBandRule : sageBandRule;
   return (
     <div
       style={{
@@ -108,8 +111,8 @@ const BandHeader: React.FC<{ title: string; meta?: string; Icon: React.Component
         gap: 11,
         padding: "14px 20px",
         minHeight: 54,
-        background: amber ? amberBandGradient : sageBandGradient,
-        borderBottom: `1px solid ${amber ? amberBandRule : sageBandRule}`,
+        background: bg,
+        borderBottom: `1px solid ${rule}`,
       }}
     >
       <span aria-hidden="true" style={{ width: 3, height: 26, borderRadius: 2, background: burgundy, flexShrink: 0, display: "inline-block" }} />
@@ -333,6 +336,10 @@ export const SubmissionPackages: React.FC = () => {
   const [sel, setSel] = useState<Record<string, string>>({}); // keyed by ComponentType → versionId
   const [editingPkgId, setEditingPkgId] = useState<string | null>(null);
   const [pkgError, setPkgError] = useState<string | null>(null);
+
+  // "In the query log" tab — static illustration only (not wired to the real log form; that's Prompt 2)
+  const [logTier, setLogTier] = useState<"free" | "pro">("free");
+  const [logPopOpen, setLogPopOpen] = useState(false);
 
   // Default to the first manuscript when none is selected / the saved one is gone.
   useEffect(() => {
@@ -772,6 +779,72 @@ export const SubmissionPackages: React.FC = () => {
     );
   };
 
+  // ── "In the query log" tab — a STATIC illustration of how the materials field will look once
+  //    Prompt 2 lands. Nothing here writes to the real log form; the toggle + popover are demo-only.
+  const renderLog = () => {
+    const fld: React.CSSProperties = { ...inputStyle, cursor: "default" };
+    const demoNote = (text: string) => (
+      <div style={{ fontFamily: FONT_MONO, fontSize: 9.5, color: mutedInk, letterSpacing: "0.03em", marginTop: 14, paddingTop: 13, borderTop: "1px dashed rgba(124,58,42,0.18)", lineHeight: 1.5 }}>{text}</div>
+    );
+    return (
+      <MountPanel>
+        <BandHeader title="How it appears when logging a query" meta="the materials field — free path stays untouched" Icon={Send} />
+        <div style={{ padding: "20px 22px 22px" }}>
+          <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.07em", textTransform: "uppercase", color: "#9c8878", background: "rgba(124,58,42,0.045)", border: "0.5px solid rgba(124,58,42,0.14)", borderRadius: 8, padding: "7px 11px", marginBottom: 18 }}>
+            Preview only — illustration of the log form; not wired here (Prompt 2 wires the real form)
+          </div>
+
+          {/* Free / Pro toggle */}
+          <div style={{ display: "inline-flex", background: "#ece4da", borderRadius: 9, padding: 3, gap: 3, marginBottom: 20 }}>
+            {(["free", "pro"] as const).map((t) => (
+              <button key={t} onClick={() => setLogTier(t)} style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", border: "none", padding: "8px 16px", borderRadius: 7, cursor: "pointer", fontWeight: logTier === t ? 500 : 400, background: logTier === t ? parchment : "transparent", color: logTier === t ? burgundy : "#9c8878", boxShadow: logTier === t ? "0 1px 3px rgba(58,28,20,0.08)" : "none" }}>
+                {t === "free" ? "Free user" : "Pro user"}
+              </button>
+            ))}
+          </div>
+
+          {logTier === "free" ? (
+            <div>
+              <label style={labelStyle}>Materials sent</label>
+              <input readOnly value="Query letter + first 10 pages" style={fld} aria-label="Materials sent (preview)" />
+              <div>
+                <button onClick={() => setLogPopOpen(true)} style={{ marginTop: 9, display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FONT_MONO, fontSize: 10.5, letterSpacing: "0.03em", color: "#9c8878", background: "transparent", border: "none", padding: "2px 0", cursor: "pointer" }}>
+                  <Lock style={{ width: 12, height: 12, color: AMBER }} strokeWidth={2.2} aria-hidden="true" /> Attach a package · Pro
+                </button>
+              </div>
+              {demoNote("The text field is the whole free experience — primary, never disabled. The package link is quiet scenery; tapping it explains the feature rather than blocking anything.")}
+            </div>
+          ) : (
+            <div>
+              <label style={labelStyle}>Materials sent</label>
+              <input readOnly value="" placeholder="Type what you sent, or attach a package below" style={fld} aria-label="Materials sent (preview)" />
+              <div>
+                <span style={{ marginTop: 9, display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FONT_MONO, fontSize: 10.5, letterSpacing: "0.03em", color: burgundy }}>
+                  <Package style={{ width: 12, height: 12, color: burgundy }} strokeWidth={2.2} aria-hidden="true" /> Attach a package
+                </span>
+              </div>
+              <div style={{ marginTop: 11, background: "#fbf6ef", border: `1px solid ${ghostButtonBorder}`, borderRadius: 11, padding: "12px 13px" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 9 }}>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: FONT_SERIF, fontSize: 15, fontWeight: 500, color: headingInk }}>
+                    Comp-heavy
+                    <span style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8a6a2e", background: "#f3e6cf", borderRadius: 20, padding: "2px 7px" }}>attached</span>
+                  </span>
+                  <span style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.04em", textTransform: "uppercase", color: "#9c8878", cursor: "default" }}>Use free text instead</span>
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                  <Chip kind={ComponentType.QUERY_LETTER} label="Comp-led" />
+                  <Chip kind={ComponentType.SYNOPSIS} label="Two-page synopsis" />
+                  <Chip kind={ComponentType.SAMPLE_PAGES} label="First 3 chapters" />
+                </div>
+              </div>
+              {demoNote("Same field, same flow. Attaching a package records the exact components — so this query's outcome feeds the performance view automatically. Free text is still one tap away for ad-hoc sends.")}
+            </div>
+          )}
+        </div>
+      </MountPanel>
+    );
+  };
+
   const placeholder = (label: string) => (
     <MountPanel>
       <BandHeader title={label} Icon={TABS.find((t) => t.label === label)?.Icon ?? Layers} />
@@ -885,7 +958,7 @@ export const SubmissionPackages: React.FC = () => {
         ) : tab === "pkgs" ? (
           renderPackages()
         ) : (
-          placeholder("In the query log")
+          renderLog()
         )}
       </div>
 
@@ -967,6 +1040,33 @@ export const SubmissionPackages: React.FC = () => {
           </Modal>
         );
       })()}
+
+      {/* "In the query log" explainer popover (Free) — illustrative; pink-band MountPanel via Modal. */}
+      {logPopOpen && (
+        <Modal onClose={() => setLogPopOpen(false)} labelledBy="sp-pop-title">
+          <BandHeader title="Submission packages" Icon={Package} variant="pink" />
+          <div style={{ padding: "18px 22px 22px" }}>
+            <span id="sp-pop-title" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>Submission packages</span>
+            <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, color: "#4a3e34", lineHeight: 1.55, margin: "0 0 13px" }}>
+              Instead of typing what you sent, attach a <b style={{ color: burgundy, fontWeight: 500 }}>package</b> — a reusable combination of a query letter, synopsis and sample pages.
+            </p>
+            <ul style={{ listStyle: "none", margin: "0 0 18px", padding: 0, display: "flex", flexDirection: "column", gap: 7 }}>
+              {["See which combination wins the most requests", "Learn which letter or synopsis is doing the work", "Let the analytics build themselves from your queries"].map((b) => (
+                <li key={b} style={{ display: "flex", gap: 9, fontFamily: FONT_SANS, fontSize: 12.5, color: "#4a3e34", lineHeight: 1.4 }}>
+                  <Check style={{ width: 14, height: 14, color: "#8a9e88", flexShrink: 0, marginTop: 2 }} strokeWidth={2.4} aria-hidden="true" /> {b}
+                </li>
+              ))}
+            </ul>
+            <div style={{ display: "flex", gap: 9 }}>
+              <button onClick={() => setLogPopOpen(false)} style={{ ...addBtn, flex: 1, justifyContent: "center", padding: 12 }}>
+                {/* TODO(Prompt 2 / plans): route to the plans page when wired from the real form */}
+                Upgrade to Pro
+              </button>
+              <button onClick={() => setLogPopOpen(false)} style={{ ...ghostBtn, padding: "12px 16px" }}>Not now</button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };
