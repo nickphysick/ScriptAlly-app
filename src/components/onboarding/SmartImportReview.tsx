@@ -534,6 +534,11 @@ const DUP_FAQS: BannerFAQ[] = [
 const GuidanceBanner: React.FC<{ step: "duplicates" | "agents" | "queries"; compact: boolean; dupCount?: number; onHeight?: (h: number) => void }> = ({ step, compact, dupCount = 0, onHeight }) => {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
+  const [hovered, setHovered] = useState(false);
+  // Hover-capable devices get the dim-at-rest treatment; touch / no-hover keep it readable (no hover
+  // to bring it back). Rest ≈ 30%; full on hover and whenever the FAQs are open.
+  const [canHover] = useState(() => typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(hover: hover)").matches);
+  const lit = open || hovered || !canHover;
   useEffect(() => { setActive(0); }, [step]); // keep the open chip relevant to the current step
   const rootRef = useRef<HTMLDivElement>(null);
   // Report the pinned banner's height so the scroll content can reserve matching bottom space —
@@ -565,7 +570,8 @@ const GuidanceBanner: React.FC<{ step: "duplicates" | "agents" | "queries"; comp
   const stepColor = (i: number) => (i === cur ? C.burgundy : i < cur ? "#5a6e58" : "#b3a89a");
 
   return (
-    <div ref={rootRef} style={{ position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 50 }}>
+    <div ref={rootRef} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
+      style={{ position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 50, opacity: lit ? 1 : 0.3, transition: "opacity 240ms ease" }}>
       <div style={{ position: "relative", background: C.panel, clipPath: TORN_TOP, WebkitClipPath: TORN_TOP, boxShadow: "0 -2px 14px rgba(80,60,40,0.07)", padding: compact ? "26px 18px 18px" : "28px 26px 22px" }}>
         <span aria-hidden style={{ position: "absolute", top: -7, left: "50%", transform: "translateX(-50%) rotate(-1.5deg)", width: 120, height: 20, background: "rgba(214,198,170,0.45)", borderLeft: "1px dashed rgba(150,130,90,0.25)", borderRight: "1px dashed rgba(150,130,90,0.25)", zIndex: 2 }} />
         <div style={{ maxWidth: 1000, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20 }}>
@@ -938,9 +944,10 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   // distributes across each gutter's columns with no overlap. Same NoteSpec shape on both screens.
   const notes: NoteSpec[] = [];
   const notePairCards = new Map<string, Set<string>>();
-  if (screen !== "queries") {
-    // Agents screen → every agent's notes; duplicates stage → only the clustered agents' notes.
-    const noteAgents = screen === "duplicates" ? active.filter((a) => openDupIds.has(a.id)) : active;
+  if (screen === "agents") {
+    // Agents screen → every agent's margin notes. The duplicates stage shows only the resolve boxes
+    // (no cards to anchor to), so it carries no post-its — the box's header + consequence line say it.
+    const noteAgents = active;
     noteAgents.forEach((a) => {
       a.reasons.forEach((r) => {
         const noteId = `${a.id}:${r.kind}`;
@@ -951,7 +958,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
           : new Set([a.id]));
       });
     });
-  } else {
+  } else if (screen === "queries") {
     qActive.forEach((q) => {
       q.reasons.forEach((r) => {
         const noteId = `${q.id}:${r.kind}`;
@@ -999,18 +1006,22 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   // A duplicate cluster: members rendered as a gentle overlapping stack of papers (no pill) — the
   // upper card sits over the next with a small offset + soft shadow, both fully legible. One shared
   // dedupe control below; each member's other reasons (e.g. a mapping note) stay per-card.
-  const renderCluster = (leader: ReviewAgent, members: ReviewAgent[]) => (
+  // `resolveOnly` (the duplicates stage) drops the stacked cards + "Make changes" — editing details
+  // is premature there; the candidate rows already name each agent, and editing lives on Agents.
+  const renderCluster = (leader: ReviewAgent, members: ReviewAgent[], resolveOnly = false) => (
     <div key={`clu-${leader.id}`} style={{ position: "relative", background: "#fdf2ec", border: "1px solid #f0d6c9", borderRadius: 12, padding: "10px 9px 11px" }}>
       <div style={{ position: "relative", zIndex: 1, fontFamily: MONO, fontSize: 8, letterSpacing: "0.06em", textTransform: "uppercase", color: "#b07a64", display: "flex", alignItems: "center", gap: 6, margin: "0 2px 8px" }}>
         <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#d8a08c" }} />Looks like the same agent, imported more than once
       </div>
-      <div style={{ position: "relative" }}>
-        {members.map((m, i) => (
-          <div key={m.id} style={{ position: "relative", zIndex: hl.cards.has(m.id) ? 20 : members.length - i, marginTop: i === 0 ? 0 : -9, marginLeft: i * 6, marginRight: i * 6 }}>
-            {renderCard(m, true)}
-          </div>
-        ))}
-      </div>
+      {!resolveOnly && (
+        <div style={{ position: "relative" }}>
+          {members.map((m, i) => (
+            <div key={m.id} style={{ position: "relative", zIndex: hl.cards.has(m.id) ? 20 : members.length - i, marginTop: i === 0 ? 0 : -9, marginLeft: i * 6, marginRight: i * 6 }}>
+              {renderCard(m, true)}
+            </div>
+          ))}
+        </div>
+      )}
       <DupControl members={members} queryCount={queryCount} onRemove={removeDuplicate} onKeepBoth={() => keepBoth(leader.id)} />
     </div>
   );
@@ -1203,7 +1214,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
                 {screen === "duplicates"
                   ? allClusters.map((c) => (c.resolved && c.type !== "open"
                     ? renderResolvedCluster({ leaderId: c.leaderId, members: c.members, type: c.type as "merge" | "keepboth", survivor: c.survivor })
-                    : renderCluster(c.members[0], c.openMembers)))
+                    : renderCluster(c.members[0], c.openMembers, true)))
                   : screen === "agents" ? units : queryCards}
               </div>
             </div>
