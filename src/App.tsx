@@ -27,6 +27,8 @@ import { Onboarding } from "./components/Onboarding";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { StatusDotDemo } from "./components/StatusDotDemo";
 import { PlansPage } from "./components/PlansPage";
+// TEMP (Prompt 2): email-import dev preview route — remove with the Nav dropdown item next prompt.
+import { EmailImportDevPage } from "./components/emailImport/EmailImportDevPage";
 import { LandingPage } from "./features/landing/LandingPage";
 import { Palette, X, Check } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -196,6 +198,10 @@ function AppContent() {
         )}
         {activeTab === "plans" && (
           <PlansPage />
+        )}
+        {/* TEMP (Prompt 2): email-import UI dev preview — relocate the entry button to Record-a-response next prompt, then delete this route. */}
+        {activeTab === "email-import-dev" && (
+          <EmailImportDevPage onNavigate={handleNavigate} />
         )}
         {activeTab === "import" && (
           <ImportCsv onNavigate={handleNavigate} />

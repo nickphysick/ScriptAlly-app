@@ -406,6 +406,10 @@ export const Nav: React.FC<NavProps> = ({ activeTab, onNavigate, searchQuery, se
                       <MenuItem onClick={() => { onNavigate("import"); setShowUserDropdown(false); }}>
                         <span className="flex items-center gap-1.5"><BookOpen className="w-3.5 h-3.5" style={{ color: burgundy }} /> Import CSV Data</span>
                       </MenuItem>
+                      {/* TEMP (Prompt 2): reach the email-import dev preview. Remove with the route in App.tsx next prompt. */}
+                      <MenuItem onClick={() => { onNavigate("email-import-dev"); setShowUserDropdown(false); }}>
+                        <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5" style={{ color: burgundy }} /> Email import (dev)</span>
+                      </MenuItem>
                       <MenuDivider />
                       <MenuItem onClick={() => { logout(); setShowUserDropdown(false); }}>
                         <span className="flex items-center gap-1.5"><LogOut className="w-3.5 h-3.5" /> Log Out</span>
