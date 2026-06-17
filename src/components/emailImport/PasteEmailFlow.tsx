@@ -15,7 +15,8 @@ import "../forms/forms.css";
 import { useScriptAllyDb } from "../../lib/db";
 import { pickableManuscripts } from "../../lib/lifecycle";
 import { runEmailImport, EmailImportError } from "../../lib/emailImport";
-import type { EmailDirection, EmailProposal } from "../../lib/emailImport";
+import type { EmailDirection, EmailProposal, ProposalRecord } from "../../lib/emailImport";
+import { commitEmailImport } from "../../lib/emailImportCommit";
 import { PasteScreen } from "./PasteScreen";
 import { EmailImportReview } from "./EmailImportReview";
 import { UpsellExplainer } from "./parts";
@@ -48,12 +49,14 @@ interface PasteEmailFlowProps {
   onClose: () => void;
   /** Default manuscript for the selector (falls back to the first pickable manuscript). */
   initialManuscriptId?: string;
-  /** Routing for the upsell's actions (e.g. → the plans page). */
+  /** Routing for the upsell's actions and the post-add jump to the query (→ the queries page). */
   onNavigate?: (tab: string, subPageName?: string) => void;
+  /** App-level toast after a successful add. */
+  onSuccessToast?: (msg: string) => void;
 }
 
-export const PasteEmailFlow: React.FC<PasteEmailFlowProps> = ({ isOpen, onClose, initialManuscriptId, onNavigate }) => {
-  const { manuscripts } = useScriptAllyDb();
+export const PasteEmailFlow: React.FC<PasteEmailFlowProps> = ({ isOpen, onClose, initialManuscriptId, onNavigate, onSuccessToast }) => {
+  const { manuscripts, currentUser, addAgent, addQuery } = useScriptAllyDb();
   const pickable = useMemo(() => pickableManuscripts(manuscripts), [manuscripts]);
   const msOptions = useMemo(() => pickable.map((m) => ({ id: m.id, title: m.title })), [pickable]);
 
@@ -64,6 +67,8 @@ export const PasteEmailFlow: React.FC<PasteEmailFlowProps> = ({ isOpen, onClose,
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [proposal, setProposal] = useState<EmailProposal | null>(null);
+  const [committing, setCommitting] = useState(false);
+  const [commitError, setCommitError] = useState<string | null>(null);
 
   // Reset to a clean paste screen each time the flow opens.
   useEffect(() => {
@@ -75,6 +80,8 @@ export const PasteEmailFlow: React.FC<PasteEmailFlowProps> = ({ isOpen, onClose,
     setBusy(false);
     setError(null);
     setProposal(null);
+    setCommitting(false);
+    setCommitError(null);
   }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!isOpen) return null;
@@ -109,6 +116,31 @@ export const PasteEmailFlow: React.FC<PasteEmailFlowProps> = ({ isOpen, onClose,
 
   const manuscriptTitle = pickable.find((m) => m.id === manuscriptId)?.title;
 
+  // Persist the accepted (date-resolved) records via the canonical primitives, then jump to the query.
+  const handleAdd = async (accepted: ProposalRecord[]) => {
+    if (!currentUser || !proposal) return;
+    setCommitting(true);
+    setCommitError(null);
+    try {
+      const res = await commitEmailImport(
+        { userId: currentUser.id, addAgent, addQuery, manuscriptTitle: manuscriptTitle || "" },
+        proposal.subject,
+        manuscriptId,
+        accepted
+      );
+      const n = res.recordCount;
+      const lead = res.created ? `Added ${res.agentName} · ` : "Added ";
+      onSuccessToast?.(`${lead}${n} record${n === 1 ? "" : "s"}`);
+      onClose();
+      // No deep-link to a single query exists; land on the queries database where it appears.
+      onNavigate?.("queries", "Queries database");
+    } catch (e: any) {
+      setCommitError(e?.message || "Couldn't save those records — please try again.");
+    } finally {
+      setCommitting(false);
+    }
+  };
+
   return (
     <EmailOverlay onClose={onClose} maxWidth={step === "review" ? 580 : 540}>
       {step === "paste" && (
@@ -130,7 +162,14 @@ export const PasteEmailFlow: React.FC<PasteEmailFlowProps> = ({ isOpen, onClose,
         />
       )}
       {step === "review" && proposal && (
-        <EmailImportReview proposal={proposal} manuscriptTitle={manuscriptTitle} onDiscard={() => setStep("paste")} />
+        <EmailImportReview
+          proposal={proposal}
+          manuscriptTitle={manuscriptTitle}
+          onDiscard={() => setStep("paste")}
+          onAdd={handleAdd}
+          busy={committing}
+          error={commitError}
+        />
       )}
       {step === "upsell" && (
         <UpsellExplainer

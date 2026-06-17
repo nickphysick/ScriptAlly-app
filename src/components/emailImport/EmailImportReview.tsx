@@ -2,18 +2,24 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Email-import REVIEW — a pure component that renders an EmailProposal. No db, no callable, no
- * writes: it shows the subject, the proposed records (each with the real StatusDot, the date or an
- * amber provisional chip, the Caveat source quote, and an Add/Skip toggle), and an honest "didn't
- * place" section. The footer's "Add N records" CTA is PRESENT BUT DISABLED — the commit/write step
- * is the next prompt. Accept/skip state is local; `N` counts the accepted (non-skipped) records.
+ * Email-import REVIEW. Renders an EmailProposal: the subject, the proposed records (real StatusDot,
+ * the date or an amber "date provisional · confirm" chip, the Caveat source quote, an Add/Skip
+ * toggle), and an honest "didn't place" section.
+ *
+ * Provisional records carry an inline date affordance — tapping the chip reveals the app's date
+ * picker; a user-supplied date (never a guess, never the future) makes the record dated, with a way
+ * to clear it back to provisional.
+ *
+ * When `onAdd` is supplied the footer CTA is live (calls onAdd with the accepted records, each
+ * carrying its resolved date state); without it (the canned dev preview) the CTA stays disabled.
  */
 import React, { useState } from "react";
-import { ShieldCheck, Check, CalendarClock, Plus } from "lucide-react";
+import { ShieldCheck, Check, CalendarClock, Plus, X } from "lucide-react";
 import { MountPanel } from "../MountPanel";
 import { StatusDot } from "../StatusDot";
+import { BrandDatePicker } from "../forms";
 import { EmailBandHeader } from "./parts";
-import type { EmailProposal } from "../../lib/emailImport";
+import type { EmailProposal, ProposalRecord } from "../../lib/emailImport";
 import {
   burgundy,
   headingInk,
@@ -27,6 +33,12 @@ import {
   FONT_MONO,
 } from "../../lib/designTokens";
 
+const pad = (n: number) => String(n).padStart(2, "0");
+const todayISO = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
+
 const initialsFrom = (s: string): string =>
   s.split(/\s+/).filter(Boolean).map((w) => w[0]).slice(0, 2).join("").toUpperCase() || "?";
 
@@ -37,30 +49,84 @@ const formatDate = (iso: string): string => {
   return new Date(y, m - 1, d).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 };
 
+const dateChip: React.CSSProperties = {
+  fontFamily: FONT_MONO,
+  fontSize: 10,
+  letterSpacing: "0.04em",
+  color: "#7a6a5a",
+  background: "#f1ece4",
+  borderRadius: 5,
+  padding: "2px 7px",
+};
+
 export interface EmailImportReviewProps {
   proposal: EmailProposal;
   /** Resolved title for proposal.subject.manuscriptId (the proposal carries only the id). */
   manuscriptTitle?: string;
   onDiscard?: () => void;
+  /** When provided, the footer CTA is live and calls this with the accepted, date-resolved records. */
+  onAdd?: (records: ProposalRecord[]) => void | Promise<void>;
+  busy?: boolean;
+  error?: string | null;
 }
 
-export const EmailImportReview: React.FC<EmailImportReviewProps> = ({ proposal, manuscriptTitle, onDiscard }) => {
+export const EmailImportReview: React.FC<EmailImportReviewProps> = ({ proposal, manuscriptTitle, onDiscard, onAdd, busy, error }) => {
   const { subject, records, unplaced } = proposal;
   const isNew = subject.kind === "new_agent";
+  const today = todayISO();
 
   // Accept/skip — every record starts accepted; skipping fades + strikes it and drops it from N.
   const [skipped, setSkipped] = useState<Set<number>>(() => new Set());
-  const toggle = (i: number) =>
+  // Per-record date override: a string sets a real date; null clears back to provisional; absent = use proposal default.
+  const [overrides, setOverrides] = useState<Record<number, string | null>>({});
+  const [pickerOpen, setPickerOpen] = useState<number | null>(null);
+  const [dateErr, setDateErr] = useState<Record<number, string>>({});
+
+  const toggleSkip = (i: number) =>
     setSkipped((prev) => {
       const next = new Set(prev);
       next.has(i) ? next.delete(i) : next.add(i);
       return next;
     });
-  const acceptedCount = records.length - skipped.size;
+
+  // Effective date state for a record (proposal default, unless the user overrode it).
+  const effective = (i: number): { date: string | null; provisional: boolean } => {
+    if (i in overrides) {
+      const ov = overrides[i];
+      return ov === null ? { date: null, provisional: true } : { date: ov, provisional: false };
+    }
+    return { date: records[i].date, provisional: records[i].dateProvisional };
+  };
+
+  const setDate = (i: number, date: string) => {
+    if (date > today) {
+      setDateErr((p) => ({ ...p, [i]: "That date is in the future." }));
+      return;
+    }
+    setDateErr((p) => { const n = { ...p }; delete n[i]; return n; });
+    setOverrides((p) => ({ ...p, [i]: date }));
+    setPickerOpen(null);
+  };
+  const clearDate = (i: number) => {
+    setOverrides((p) => ({ ...p, [i]: null }));
+    setDateErr((p) => { const n = { ...p }; delete n[i]; return n; });
+  };
+
+  const acceptedCount = records.filter((_, i) => !skipped.has(i)).length;
+  const canAdd = !!onAdd && acceptedCount > 0 && !busy;
+
+  const resolvedAccepted = (): ProposalRecord[] =>
+    records
+      .map((r, i) => {
+        if (skipped.has(i)) return null;
+        const e = effective(i); // {date, provisional} → map onto the record's date/dateProvisional
+        return { ...r, date: e.date, dateProvisional: e.provisional } as ProposalRecord;
+      })
+      .filter((r): r is ProposalRecord => r !== null);
 
   const displayName = subject.agentName || subject.agency;
   const subLine = [
-    subject.agentName ? subject.agency : null, // when a name heads the row, show the agency beneath
+    subject.agentName ? subject.agency : null,
     manuscriptTitle ? (isNew ? `New query: ${manuscriptTitle}` : manuscriptTitle) : null,
   ]
     .filter(Boolean)
@@ -124,6 +190,8 @@ export const EmailImportReview: React.FC<EmailImportReviewProps> = ({ proposal, 
         </div>
         {records.map((r, i) => {
           const isSkipped = skipped.has(i);
+          const eff = effective(i);
+          const editable = r.dateProvisional; // only originally-provisional records get the inline picker
           return (
             <div
               key={i}
@@ -148,24 +216,49 @@ export const EmailImportReview: React.FC<EmailImportReviewProps> = ({ proposal, 
                   <span style={{ fontFamily: FONT_SERIF, fontSize: 15.5, fontWeight: 500, color: headingInk, textDecoration: isSkipped ? "line-through" : "none", textDecorationColor: "rgba(58,28,20,0.4)" }}>
                     {r.resultingStatus}
                   </span>
-                  {r.dateProvisional ? (
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.05em", color: "#8a5a1e", background: "#f7eddb", border: "0.5px solid #e2c98f", borderRadius: 5, padding: "2px 7px" }}>
-                      <CalendarClock size={11} strokeWidth={2} aria-hidden="true" /> date provisional · confirm
-                    </span>
-                  ) : (
-                    r.date && (
-                      <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.04em", color: "#7a6a5a", background: "#f1ece4", borderRadius: 5, padding: "2px 7px", textDecoration: isSkipped ? "line-through" : "none" }}>
-                        {formatDate(r.date)}
+
+                  {/* date area: provisional chip (tap to set) / chosen date (with clear) / read-only date */}
+                  {eff.provisional ? (
+                    editable ? (
+                      <button
+                        type="button"
+                        onClick={() => setPickerOpen(pickerOpen === i ? null : i)}
+                        className="cursor-pointer"
+                        style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.05em", color: "#8a5a1e", background: "#f7eddb", border: "0.5px solid #e2c98f", borderRadius: 5, padding: "2px 7px" }}
+                      >
+                        <CalendarClock size={11} strokeWidth={2} aria-hidden="true" /> date provisional · confirm
+                      </button>
+                    ) : (
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.05em", color: "#8a5a1e", background: "#f7eddb", border: "0.5px solid #e2c98f", borderRadius: 5, padding: "2px 7px" }}>
+                        <CalendarClock size={11} strokeWidth={2} aria-hidden="true" /> date provisional
                       </span>
                     )
+                  ) : (
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                      <span style={{ ...dateChip, textDecoration: isSkipped ? "line-through" : "none" }}>{eff.date ? formatDate(eff.date) : ""}</span>
+                      {editable && (
+                        <button type="button" onClick={() => clearDate(i)} aria-label="Clear date" className="cursor-pointer" title="Clear — back to provisional" style={{ display: "inline-flex", color: mutedInk, background: "transparent", border: "none", padding: 0 }}>
+                          <X size={12} strokeWidth={2.2} aria-hidden="true" />
+                        </button>
+                      )}
+                    </span>
                   )}
                 </div>
+
+                {/* inline date picker for a provisional record */}
+                {editable && eff.provisional && pickerOpen === i && (
+                  <div style={{ marginTop: 8, maxWidth: 240 }}>
+                    <BrandDatePicker value="" onChange={(d) => setDate(i, d)} placeholder="Pick the date you know" />
+                  </div>
+                )}
+                {dateErr[i] && <div style={{ fontFamily: FONT_SANS, fontSize: 11, color: "#a14434", marginTop: 5 }}>{dateErr[i]}</div>}
+
                 {r.note && <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: sageText, marginTop: 4, lineHeight: 1.45 }}>{r.note}</div>}
                 {r.sourceQuote && <div style={{ fontFamily: "'Caveat', cursive", fontSize: 15, color: mutedInk, marginTop: 5, lineHeight: 1.2 }}>“{r.sourceQuote}”</div>}
               </div>
               <button
                 type="button"
-                onClick={() => toggle(i)}
+                onClick={() => toggleSkip(i)}
                 className="cursor-pointer"
                 style={{
                   flexShrink: 0,
@@ -205,16 +298,20 @@ export const EmailImportReview: React.FC<EmailImportReviewProps> = ({ proposal, 
           </div>
         )}
 
+        {error && <div style={{ fontFamily: FONT_SANS, fontSize: 12.5, color: "#a14434", margin: "14px 2px 0" }}>{error}</div>}
+
         {/* ── Footer ── */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginTop: 20, paddingTop: 16, borderTop: "1px solid #ece3d6" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginTop: 18, paddingTop: 16, borderTop: "1px solid #ece3d6" }}>
           <button type="button" onClick={onDiscard} className="cursor-pointer" style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.06em", color: "#a07868", background: "transparent", border: "none" }}>
             Discard
           </button>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
             <button
               type="button"
-              disabled
-              title="Saving is wired in the next step"
+              disabled={!canAdd}
+              onClick={() => { if (canAdd && onAdd) void onAdd(resolvedAccepted()); }}
+              title={onAdd ? undefined : "Saving is wired in the next step"}
+              className={canAdd ? "cursor-pointer" : undefined}
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -229,14 +326,14 @@ export const EmailImportReview: React.FC<EmailImportReviewProps> = ({ proposal, 
                 border: `0.5px solid ${buttonPinkBorder}`,
                 borderRadius: 10,
                 padding: "11px 20px",
-                opacity: 0.55,
-                cursor: "not-allowed",
+                opacity: canAdd ? 1 : 0.55,
+                cursor: canAdd ? "pointer" : "not-allowed",
               }}
             >
               <Plus size={14} strokeWidth={2.2} aria-hidden="true" />
-              {acceptedCount === 0 ? "Nothing selected" : `Add ${acceptedCount} record${acceptedCount === 1 ? "" : "s"}`}
+              {busy ? "Adding…" : acceptedCount === 0 ? "Nothing selected" : `Add ${acceptedCount} record${acceptedCount === 1 ? "" : "s"}`}
             </button>
-            <span style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: "0.06em", color: "#b3a99a" }}>saving comes next</span>
+            {!onAdd && <span style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: "0.06em", color: "#b3a99a" }}>saving comes next</span>}
           </div>
         </div>
       </div>

@@ -27,7 +27,10 @@ const sectionLabel: React.CSSProperties = {
   margin: "0 0 12px",
 };
 
-export const EmailImportDevPage: React.FC<{ onNavigate?: (tab: string, subPageName?: string) => void }> = ({ onNavigate }) => (
+export const EmailImportDevPage: React.FC<{
+  onNavigate?: (tab: string, subPageName?: string) => void;
+  onSuccessToast?: (msg: string) => void;
+}> = ({ onNavigate, onSuccessToast }) => (
   <div className="min-h-screen pb-16" style={{ background: pageGround }}>
     <div aria-hidden="true" style={{ position: "fixed", inset: 0, opacity: 0.25, pointerEvents: "none", zIndex: 0, backgroundImage: PAGE_GRAIN }} />
     <div className="relative" style={{ zIndex: 1, maxWidth: 620, margin: "0 auto", padding: "40px 16px 0", display: "flex", flexDirection: "column", gap: 30 }}>
@@ -40,7 +43,7 @@ export const EmailImportDevPage: React.FC<{ onNavigate?: (tab: string, subPageNa
 
       <section>
         <p style={sectionLabel}>Entry button — live (your plan)</p>
-        <PasteEmailButton onNavigate={onNavigate} />
+        <PasteEmailButton onNavigate={onNavigate} onSuccessToast={onSuccessToast} />
       </section>
 
       <section>

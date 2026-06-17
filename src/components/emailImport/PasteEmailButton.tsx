@@ -19,12 +19,14 @@ import { PasteEmailFlow, EmailOverlay } from "./PasteEmailFlow";
 interface PasteEmailButtonProps {
   /** Default manuscript for the paste screen's selector. */
   manuscriptId?: string;
-  /** Routing for the upsell actions (→ the plans page). */
+  /** Routing for the upsell actions (→ the plans page) and the post-add jump to the query. */
   onNavigate?: (tab: string, subPageName?: string) => void;
+  /** App-level toast after a successful add. */
+  onSuccessToast?: (msg: string) => void;
   style?: React.CSSProperties;
 }
 
-export const PasteEmailButton: React.FC<PasteEmailButtonProps> = ({ manuscriptId, onNavigate, style }) => {
+export const PasteEmailButton: React.FC<PasteEmailButtonProps> = ({ manuscriptId, onNavigate, onSuccessToast, style }) => {
   const { currentUser } = useScriptAllyDb();
   const isPro = currentUser?.plan === UserPlan.PRO;
 
@@ -45,6 +47,7 @@ export const PasteEmailButton: React.FC<PasteEmailButtonProps> = ({ manuscriptId
           onClose={() => setFlowOpen(false)}
           initialManuscriptId={manuscriptId}
           onNavigate={onNavigate}
+          onSuccessToast={onSuccessToast}
         />
       )}
 

@@ -201,7 +201,7 @@ function AppContent() {
         )}
         {/* TEMP (Prompt 2): email-import UI dev preview — relocate the entry button to Record-a-response next prompt, then delete this route. */}
         {activeTab === "email-import-dev" && (
-          <EmailImportDevPage onNavigate={handleNavigate} />
+          <EmailImportDevPage onNavigate={handleNavigate} onSuccessToast={(msg) => setSuccessToast(msg)} />
         )}
         {activeTab === "import" && (
           <ImportCsv onNavigate={handleNavigate} />
