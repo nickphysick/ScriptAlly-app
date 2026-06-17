@@ -191,4 +191,19 @@ describe('commitSmartImport — orchestration', () => {
     expect((deps.addAgent as any).mock.calls[0][0].agency).toBe('Curtis Brown');
     expect(out.queriesImported).toBe(1);
   });
+
+  it('collapses the dashboard feed into ONE "Smart import ·" summary (existing activity type)', async () => {
+    const { deps } = makeDeps();
+    const r = result(
+      [agent({ ref: 'a1' }), agent({ ref: 'a2', name: 'Bob Lee', agency: 'Beta' })],
+      [q({ agentRef: 'a1', status: QueryStatus.QUERIED }), q({ agentRef: 'a2', status: QueryStatus.FULL_SENT })]
+    );
+    await commitSmartImport(deps as any, r, 'ms1');
+    const summaries = mockSetDoc.mock.calls.filter(
+      (c) => typeof (c[1] as any)?.description === 'string' && (c[1] as any).description.startsWith('Smart import ·')
+    );
+    expect(summaries.length).toBe(1);
+    expect((summaries[0][1] as any).description).toBe('Smart import · 2 agents added, 2 queries logged');
+    expect((summaries[0][1] as any).activityType).toBe('Status Changed'); // allowlisted type → passes rules, shows in feed
+  });
 });

@@ -328,7 +328,7 @@ export const FortnightInFocus: React.FC<FortnightInFocusProps> = ({
   }, [today]);
   const TODAY_IDX = 6;
 
-  const agentName = useCallback((q: Query) => agents.find((a) => a.id === q.agentId)?.name || "The agent", [agents]);
+  const agentName = useCallback((q: Query) => { const a = agents.find((x) => x.id === q.agentId); return a?.name || a?.agency || "the agent"; }, [agents]);
   const agentAgency = useCallback((q: Query) => agents.find((a) => a.id === q.agentId)?.agency || "", [agents]);
   const msTitle = useCallback((q: Query) => manuscripts.find((m) => m.id === q.manuscriptId)?.title || "", [manuscripts]);
 
@@ -452,7 +452,7 @@ export const FortnightInFocus: React.FC<FortnightInFocusProps> = ({
           id: `agentadd-${act.id}`,
           type: "agent_added",
           date: d,
-          title: parsed?.name || "New agent",
+          title: parsed?.name || parsed?.agency || "New agent",
           agency: parsed?.agency || "",
           line: "Agent added",
           marker: markerFor("agent_added"),

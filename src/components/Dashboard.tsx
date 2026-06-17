@@ -1983,13 +1983,23 @@ export const Dashboard: React.FC<{
                           <div style={{ ...labelStyle, marginBottom: 12 }}>{formattedDateHeader}</div>
 
                           {events.map((act, evIdx) => {
+                            // Smart Import collapses its per-row feed entries into one summary line —
+                            // it has no agent/query, so render it plainly (no agent name or pill).
+                            if (typeof act.description === "string" && act.description.startsWith("Smart import ·")) {
+                              return (
+                                <div key={act.id} style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10, padding: "9px 12px", marginBottom: 8, background: "#f8f4ee", borderLeft: "3px solid #b3a896", borderRadius: 6 }}>
+                                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11.5, color: "#5f5346" }}>{act.description}</span>
+                                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: "#a89a8c", flexShrink: 0 }}>{getFormattedTime(act.date)}</span>
+                                </div>
+                              );
+                            }
                             const q = queries.find(item => item.id === act.queryId);
                             const agent = q ? agents.find(ag => ag.id === q.agentId) : null;
                             const resolvedAgent = agent || extractAgentFromText(act.description);
                             const ms = (q && manuscripts.find(m => m.id === q.manuscriptId)) || manuscripts.find(m => m.id === act.manuscriptId) || null;
                             const msTitle = ms ? ms.title : "";
                             const agency = resolvedAgent?.agency || "";
-                            const agentName = resolvedAgent?.name || "The agent";
+                            const agentName = resolvedAgent?.name || resolvedAgent?.agency || "the agent";
                             const formattedTime = getFormattedTime(act.date);
 
                             const pillData = getPillLabelAndDot(act.description, act.activityType, act.resultingStatus);

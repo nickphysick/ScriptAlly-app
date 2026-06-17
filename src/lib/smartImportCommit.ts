@@ -12,7 +12,7 @@
 import { doc, setDoc, getDocs, deleteDoc, collection, Timestamp } from "firebase/firestore";
 import { db } from "./firebase";
 import { recomputeQuery } from "./recomputeQuery";
-import { Agent, QueryStatus, SubmissionMethod } from "../types";
+import { Agent, ActivityType, QueryStatus, SubmissionMethod } from "../types";
 import { SmartImportResult, ParsedAgent, ParsedQuery } from "../types/smartImport";
 import { validateSmartImport } from "./smartImport";
 
@@ -169,6 +169,17 @@ export async function commitSmartImport(
   const { importable, skipped } = validateSmartImport(result);
   outcome.queriesSkipped = skipped.length;
 
+  // Snapshot the global activity-FEED ids before we write anything. addAgent emits an "Agent Added"
+  // feed entry per agent and addQuery a "Query Sent"/"Status Changed" entry per query; after the
+  // import we collapse all of those into ONE summary line so the dashboard feeds don't flood. The
+  // authoritative per-query activity RUNGS (the status source) are written separately and untouched.
+  const feedCol = collection(db, "users", userId, "activities");
+  let preFeedIds = new Set<string>();
+  try {
+    preFeedIds = new Set((await getDocs(feedCol)).docs.map((d) => d.id));
+  } catch { /* non-fatal: worst case we just don't collapse the feed */ }
+  const importedQueryIds = new Set<string>();
+
 
   // 1. Agents — dedupe against existing, merge rather than duplicate. Import bypasses the
   //    Free-tier cap (same as the Import desk) so a real pipeline can land whole.
@@ -258,6 +269,7 @@ export async function commitSmartImport(
         continue;
       }
       queryId = res.id;
+      importedQueryIds.add(queryId);
     } catch (e) {
       console.error("Smart Import: query write failed:", agent.name, e);
       outcome.errors.push(`Couldn't import the query to ${agent.name}.`);
@@ -290,6 +302,39 @@ export async function commitSmartImport(
       // The query doc exists; count it so the user is never falsely told zero were imported.
       outcome.queriesImported++;
     }
+  }
+
+  // Collapse the per-row dashboard-feed projections into ONE summary line. Delete the feed entries
+  // this import created — every new "Agent Added", and every "Query Sent"/"Status Changed" for an
+  // imported query — then write a single "Smart import · …" event. Per-query activity rungs (the
+  // status source of truth) and provisional rungs are untouched. Non-fatal: a feed left un-collapsed
+  // is cosmetic, never a failed import.
+  try {
+    const post = await getDocs(feedCol);
+    await Promise.all(
+      post.docs
+        .filter((d) => {
+          if (preFeedIds.has(d.id)) return false;
+          const data = d.data() as { activityType?: string; queryId?: string };
+          return data.activityType === ActivityType.AGENT_ADDED
+            || (typeof data.queryId === "string" && importedQueryIds.has(data.queryId));
+        })
+        .map((d) => deleteDoc(d.ref))
+    );
+
+    const summaryId = "imp-sum-" + Math.random().toString(36).substr(2, 9);
+    await setDoc(doc(feedCol, summaryId), {
+      id: summaryId,
+      userId,
+      queryId: "",
+      manuscriptId: "",
+      activityType: ActivityType.STATUS_CHANGED, // non-housekeeping so it shows in "The story so far"
+      description: `Smart import · ${outcome.agentsCreated} agents added, ${outcome.queriesImported} queries logged`,
+      date: new Date(importBaseMs).toISOString(),
+      details: "",
+    });
+  } catch (e) {
+    console.error("Smart Import: feed-summary collapse failed:", e);
   }
 
   return outcome;
