@@ -46,6 +46,26 @@ export interface EmailCommitResult {
 const tsMillis = (v: any): number => (v && typeof v.toMillis === "function" ? v.toMillis() : 0);
 
 /**
+ * Ordering keys for the rungs. A rung with a real date is DATED — its createdAt is derived from
+ * that date and is NEVER overridden (assignTimes' monotonic clamp must not touch it, or a user-set
+ * date would be silently shifted to an import-time/sequential value). assignTimes governs ordering
+ * for the provisional (date-less) rungs only, relative to the dated anchors and importBaseMs.
+ *
+ * Dated-ness is decided by the presence of a real date, not by the dateProvisional flag — so a
+ * user-supplied date always lands even if an upstream flag is momentarily inconsistent.
+ */
+export function timeRungs(
+  rungs: { status: QueryStatus; date: string | null }[],
+  importBaseMs: number
+): { status: QueryStatus; ms: number; provisional: boolean }[] {
+  return assignTimes(rungs, importBaseMs).map((t, i) =>
+    rungs[i].date != null
+      ? { status: t.status, ms: new Date(rungs[i].date as string).getTime(), provisional: false }
+      : { status: t.status, ms: t.ms, provisional: true }
+  );
+}
+
+/**
  * Persist the accepted records. `accepted` must already carry the user's resolved date state
  * (a real `date` with `dateProvisional:false`, or `dateProvisional:true` with `date:null`).
  */
@@ -134,11 +154,14 @@ export async function commitEmailImport(
     baseMs = Math.max(Date.now(), latest + 1);
   }
 
+  // Dated-ness is the presence of a real date (user-set or stated), NOT the flag — so a date the
+  // user supplied always lands. Provisional rungs (no date) get ordering keys; dated rungs keep
+  // their real createdAt (timeRungs never lets assignTimes override it).
   const seedRungs = accepted.map((r) => ({
     status: r.resultingStatus as QueryStatus,
-    date: r.dateProvisional ? null : r.date, // provisional → no real date (ordering key only)
+    date: r.date ?? null,
   }));
-  const timed = assignTimes(seedRungs, baseMs);
+  const timed = timeRungs(seedRungs, baseMs);
 
   const batch = writeBatch(db);
   for (let i = 0; i < timed.length; i++) {
