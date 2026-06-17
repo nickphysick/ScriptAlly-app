@@ -19,11 +19,11 @@
  * (agent persists with importedNeedsReview; the error is thrown, never a silent partial). The rung
  * set itself is one writeBatch.
  */
-import { collection, doc, getDocs, deleteDoc, writeBatch, Timestamp } from "firebase/firestore";
+import { collection, doc, getDocs, deleteDoc, writeBatch, query, where, Timestamp } from "firebase/firestore";
 import { db } from "./firebase";
 import { recomputeQuery } from "./recomputeQuery";
 import { assignTimes } from "./smartImportCommit";
-import { QueryStatus, SubmissionMethod, SubmissionStatus, Agent } from "../types";
+import { QueryStatus, SubmissionMethod, SubmissionStatus, ActivityType, Agent } from "../types";
 import type { ProposalRecord, ProposalSubject } from "./emailImport";
 
 export interface EmailCommitDeps {
@@ -63,6 +63,28 @@ export function timeRungs(
       ? { status: t.status, ms: new Date(rungs[i].date as string).getTime(), provisional: false }
       : { status: t.status, ms: t.ms, provisional: true }
   );
+}
+
+/**
+ * Global-feed (timeline) projection for a pipeline status — phrasings the timeline grammar
+ * (getActivityKeyAndDefaults / extractAgentFromText) recognises; the glyph/family comes from
+ * resultingStatus, set alongside.
+ */
+function feedEntryFor(status: QueryStatus, agentName: string, agency: string): { type: ActivityType; desc: string } {
+  const at = `${agentName} at ${agency}`;
+  switch (status) {
+    case QueryStatus.QUERIED: return { type: ActivityType.QUERY_SENT, desc: `Query sent to ${at}` };
+    case QueryStatus.PARTIAL_REQUESTED: return { type: ActivityType.STATUS_CHANGED, desc: `${at} requested a partial manuscript` };
+    case QueryStatus.PARTIAL_SENT: return { type: ActivityType.MATERIALS_SENT, desc: `Partial manuscript sent to ${at}` };
+    case QueryStatus.FULL_REQUESTED: return { type: ActivityType.STATUS_CHANGED, desc: `${at} requested the full manuscript` };
+    case QueryStatus.FULL_SENT: return { type: ActivityType.MATERIALS_SENT, desc: `Full manuscript sent to ${at}` };
+    case QueryStatus.REVISE_RESUBMIT: return { type: ActivityType.STATUS_CHANGED, desc: `Revise & Resubmit request received from ${at}` };
+    case QueryStatus.OFFER: return { type: ActivityType.STATUS_CHANGED, desc: `Offer of representation from ${at}` };
+    case QueryStatus.REJECTED: return { type: ActivityType.STATUS_CHANGED, desc: `Rejection received from ${at}` };
+    case QueryStatus.WITHDRAWN: return { type: ActivityType.STATUS_CHANGED, desc: `Withdrew query from ${at}` };
+    case QueryStatus.NO_RESPONSE: return { type: ActivityType.STATUS_CHANGED, desc: `No response received from ${at}` };
+    default: return { type: ActivityType.STATUS_CHANGED, desc: `${status} — ${at}` };
+  }
 }
 
 /**
@@ -179,6 +201,36 @@ export async function commitEmailImport(
     });
   }
   await batch.commit();
+
+  // 2b. Global activities feed — the source the Dashboard "Story so far" timeline reads (FortnightInFocus
+  //     derives pipeline dates from the query doc, which recomputeQuery sets, so it's already correct).
+  //     addQuery stamped its seed events at the import time; imported pipeline events must instead carry
+  //     each rung's REAL date. Provisional rungs get no feed event (never assert a date the user didn't give).
+  const feedCol = collection(db, "users", deps.userId, "activities");
+  if (created) {
+    // Replace addQuery's now-dated pipeline seeds for THIS query. The agent-added meta-event carries
+    // queryId:"" (it legitimately happened now), so it is never matched here and stays put.
+    const seeded = await getDocs(query(feedCol, where("queryId", "==", queryId)));
+    await Promise.all(seeded.docs.map((d) => deleteDoc(d.ref)));
+  }
+  const feedBatch = writeBatch(db);
+  for (const rung of timed) {
+    if (rung.provisional) continue;
+    const ref = doc(feedCol);
+    const { type, desc } = feedEntryFor(rung.status, agentName, subject.agency);
+    feedBatch.set(ref, {
+      id: ref.id,
+      userId: deps.userId,
+      queryId,
+      manuscriptId,
+      activityType: type,
+      description: desc,
+      date: new Date(rung.ms).toISOString(), // the rung's real date — not the import time
+      details: "",
+      resultingStatus: rung.status,
+    });
+  }
+  await feedBatch.commit();
 
   // 3. Single writer of derived state — status, pipeline dates (provisional dates left unset),
   //    responses, revisionRound — all from the rungs. Never write status directly.

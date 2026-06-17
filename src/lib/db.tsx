@@ -697,7 +697,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           missingActivities.push({
             id: `act-added-agent-${ag.id}`,
             activityType: ActivityType.AGENT_ADDED,
-            description: `Added new agent ${ag.name} at ${ag.agency} to your agent list`,
+            description: ag.name?.trim()
+              ? `Added ${ag.name} at ${ag.agency}`
+              : `Added ${ag.agency}`,
             manuscriptId: "",
             queryId: "",
             date: ag.dateAdded || new Date().toISOString(),
@@ -1201,7 +1203,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     if (writeSuccess) {
       await addActivity({
         activityType: ActivityType.AGENT_ADDED,
-        description: `You added a new agent ${newAg.name} at ${newAg.agency} to your contact list`,
+        description: newAg.name?.trim()
+          ? `Added ${newAg.name} at ${newAg.agency}`
+          : `Added ${newAg.agency}`,
         manuscriptId: "",
         queryId: "",
         date: new Date().toISOString(),
