@@ -328,9 +328,14 @@ const AgentCard: React.FC<AgentCardProps> = ({
         </div>
       )}
 
-      {/* inline notes (mobile fallback): the margin post-its can't fit, so each reason renders here */}
-      {compact && agent.reasons.length > 0 && (
+      {/* inline notes (mobile fallback): the margin post-its can't fit, so each reason renders here.
+          The derived needs-agency note shows here too (no manual tick; clears when an agency is typed). */}
+      {compact && (invalid || agent.reasons.length > 0) && (
         <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", gap: 8, marginTop: 11 }}>
+          {invalid && (
+            <InlineNote key="agency" text={agencyNoteText(agent.name)} resolved={false} kind="mapping" undoable={false} agencyBlocked={true}
+              onResolve={() => {}} onReopen={() => {}} />
+          )}
           {agent.reasons.map((r) => (
             <InlineNote key={r.kind} text={r.note} resolved={r.resolved} kind={r.kind} undoable={r.undoable} agencyBlocked={invalid}
               onResolve={() => onResolveReason(r.kind)} onReopen={() => onReopenReason(r.kind)} />
@@ -676,6 +681,10 @@ const GuidanceBanner: React.FC<{ step: "duplicates" | "agents" | "queries"; comp
 
 // ── Post-it notes layer — full-page (no clip): notes track their card's live position and clamp to
 //    the band (the page region), so they may sit above the panel's top edge and out in the margins. ─
+// Derived (not stored) post-it for the needs-agency gate. Auto-clears when an agency is typed (the
+// note simply isn't generated), so it carries no manual "mark as checked" affordance.
+const agencyNoteText = (name: string) => `${name.trim() || "This agent"} has no agency yet — add one to import.`;
+
 interface NoteSpec { noteId: string; cardId: string; side: "l" | "r"; text: string; resolved: boolean; kind: CheckReason; undoable: boolean; agencyBlocked: boolean; }
 const NotesLayer: React.FC<{
   notes: NoteSpec[];
@@ -697,6 +706,8 @@ const NotesLayer: React.FC<{
     const bandRect = band.getBoundingClientRect();
     const bandW = bandRect.width, bandH = bandRect.height;
     notesEl.style.height = bandH + "px";
+    // The scroll viewport — a note fades as its card is clipped at this box's top/bottom edges.
+    const midRect = midRef.current ? midRef.current.getBoundingClientRect() : null;
 
     // Columns across BOTH gutters (the full width left & right of the centred panel), each NOTE_W
     // wide and spaced so columns can't overlap horizontally.
@@ -723,7 +734,16 @@ const NotesLayer: React.FC<{
         .map((x) => {
           const arow = (x.card.querySelector("[data-arow]") as HTMLElement | null) ?? x.card;
           const ar = arow.getBoundingClientRect();
-          return { el: x.el, desired: (ar.top - bandRect.top) + ar.height / 2 - x.el.offsetHeight / 2 };
+          // Opacity = fraction of the card still inside the scroll viewport (1 = fully visible, 0 = fully
+          // clipped). Fully-visible cards (incl. the top/bottom rows at the scroll extremes) stay solid;
+          // a note never lingers visible once its card has scrolled out of the clipped list.
+          const cr = x.card.getBoundingClientRect();
+          let opacity = 1;
+          if (midRect && cr.height > 0) {
+            const vis = Math.min(cr.bottom, midRect.bottom) - Math.max(cr.top, midRect.top);
+            opacity = Math.max(0, Math.min(1, vis / cr.height));
+          }
+          return { el: x.el, opacity, desired: (ar.top - bandRect.top) + ar.height / 2 - x.el.offsetHeight / 2 };
         })
         .sort((a, b) => a.desired - b.desired);
       for (const item of list) {
@@ -737,12 +757,13 @@ const NotesLayer: React.FC<{
         const top = Math.max(4, Math.min(bestTop, bandH - h - 24));
         item.el.style.left = cols[best] + "px";
         item.el.style.top = top + "px";
+        item.el.style.opacity = String(item.opacity);
         bottoms[best] = top + h;
       }
     };
     place("l");
     place("r");
-  }, [notes, bandRef, cardEls]);
+  }, [notes, bandRef, cardEls, midRef]);
 
   useLayoutEffect(() => { layout(); }, [layout, tick]);
   useEffect(() => {
@@ -819,6 +840,12 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   // Per-cluster pre-resolution snapshot (keyed by leader id) — restored verbatim on Undo, so a merge or
   // keep-both can be cleanly reversed (un-delete the removed agent, revert repointed queries).
   const snapRef = useRef<Record<string, { agents: ReviewAgent[]; queries: { id: string; agentRef: string }[] }>>({});
+  // "Reset all changes" baseline. Starts as the pristine parse, but is RE-CAPTURED the moment the user
+  // leaves the locked duplicates stage — so resetting on the Agents screen reverts only Agents-screen
+  // edits and keeps the merge / keep-both decisions intact. (Per-cluster Undo / Back-to-duplicates
+  // remain the ways to revisit a merge.)
+  const baselineRef = useRef<{ agents: ReviewAgent[]; queries: ReviewQuery[] } | null>(null);
+  if (baselineRef.current === null) baselineRef.current = { agents: JSON.parse(JSON.stringify(initial.agents)), queries: JSON.parse(JSON.stringify(initial.queries)) };
   const [openId, setOpenId] = useState<string | null>(null);
   const [hoverTarget, setHoverTarget] = useState<{ type: "card" | "note"; id: string } | null>(null);
   const [tick, setTick] = useState(0);              // nudges the notes layout after edits
@@ -968,6 +995,10 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
 
   // Move between the two screens; edits live in shared state, so they persist both ways.
   const switchScreen = (name: "duplicates" | "agents" | "queries") => {
+    // Leaving the duplicates stage locks in its decisions: snapshot them as the new reset baseline.
+    if (screen === "duplicates" && name === "agents") {
+      baselineRef.current = { agents: JSON.parse(JSON.stringify(agents)), queries: JSON.parse(JSON.stringify(queries)) };
+    }
     setScreen(name); setOpenId(null); setHoverTarget(null); setPulseIds([]); setTick((t) => t + 1);
     requestAnimationFrame(() => window.scrollTo({ top: 0 }));
   };
@@ -980,7 +1011,14 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
       : active.filter((a) => statusOf(a) !== "captured").map((a) => a.id));
   };
 
-  const reset = () => { const m = parseModel(result); snapRef.current = {}; setAgents(m.agents); setQueries(m.queries); setOpenId(null); setTopcap(null); setPulseIds([]); setTick((t) => t + 1); };
+  // Reset to the post-duplicates baseline (NOT the pristine parse): reverts Agents-screen edits while
+  // preserving the locked duplicate decisions. snapRef is kept so those merges stay individually undoable.
+  const reset = () => {
+    const b = baselineRef.current!;
+    setAgents(b.agents.map((a) => JSON.parse(JSON.stringify(a)) as ReviewAgent));
+    setQueries(b.queries.map((q) => JSON.parse(JSON.stringify(q)) as ReviewQuery));
+    setOpenId(null); setTopcap(null); setPulseIds([]); setTick((t) => t + 1);
+  };
 
   // ── Queries side ────────────────────────────────────────────────────────────────────────────────
   const qActive = queries.filter((q) => !q.removed);
@@ -1012,6 +1050,12 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
     // (no cards to anchor to), so it carries no post-its — the box's header + consequence line say it.
     const noteAgents = active;
     noteAgents.forEach((a) => {
+      // Derived needs-agency post-it (auto-clears when an agency is typed; no manual tick — agencyBlocked).
+      if (!a.agency.trim()) {
+        const noteId = `${a.id}:agency`;
+        notes.push({ noteId, cardId: a.id, side: notes.length % 2 === 0 ? "l" : "r", text: agencyNoteText(a.name), resolved: false, kind: "mapping", undoable: false, agencyBlocked: true });
+        notePairCards.set(noteId, new Set([a.id]));
+      }
       a.reasons.forEach((r) => {
         const noteId = `${a.id}:${r.kind}`;
         notes.push({ noteId, cardId: a.id, side: notes.length % 2 === 0 ? "l" : "r", text: r.note, resolved: r.resolved, kind: r.kind, undoable: r.undoable, agencyBlocked: !a.agency.trim() });
@@ -1022,8 +1066,10 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
       });
     });
   } else if (screen === "queries") {
+    // Queries carry only status-interpretation notes. Duplicate detection is settled by now, so guard
+    // against any non-mapping reason ever surfacing here (parseModel only makes query `mapping` notes).
     qActive.forEach((q) => {
-      q.reasons.forEach((r) => {
+      q.reasons.filter((r) => r.kind === "mapping").forEach((r) => {
         const noteId = `${q.id}:${r.kind}`;
         notes.push({ noteId, cardId: q.id, side: notes.length % 2 === 0 ? "l" : "r", text: r.note, resolved: r.resolved, kind: r.kind, undoable: r.undoable, agencyBlocked: false });
         notePairCards.set(noteId, new Set([q.id]));
