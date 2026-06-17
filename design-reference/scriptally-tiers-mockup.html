@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Plans</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Inter',sans-serif;
+  background:radial-gradient(ellipse at 50% 18%, rgba(255,253,249,0.5) 0%, transparent 60%),#E6E2DC;
+  padding:52px 24px 120px;
+  display:flex;flex-direction:column;align-items:center;gap:30px;
+  color:#3a1c14;
+}
+body::before{content:'';position:fixed;inset:0;opacity:0.22;pointer-events:none;z-index:1;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.04'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+body>*{position:relative;z-index:2;}
+
+/* ---- header ---- */
+.page-head{text-align:center;display:flex;flex-direction:column;gap:7px;margin-bottom:2px;}
+.page-title{font-family:'Playfair Display',serif;font-size:27px;font-weight:500;color:#3a1c14;}
+.page-title em{font-style:italic;color:#7c3a2a;}
+.page-sub{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.12em;text-transform:uppercase;color:#5a6e58;}
+
+.wrap{width:100%;max-width:880px;display:flex;flex-direction:column;gap:22px;}
+
+/* ---- MountCard ---- */
+.paper-texture{background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.03'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");}
+.mount{border-radius:14px;background:#fdfaf5;position:relative;box-shadow:0 1px 2px rgba(58,28,20,0.06),0 6px 24px rgba(58,28,20,0.1);}
+.mount::before{content:'';position:absolute;inset:6px;border:1px solid rgba(124,58,42,0.28);border-radius:10px;pointer-events:none;z-index:3;}
+.band{background:linear-gradient(135deg,#dce0d9 0%,#d0d6cc 100%);padding:14px 20px;margin:6px 6px 0;border-radius:8px 8px 0 0;position:relative;display:flex;align-items:center;gap:11px;min-height:54px;}
+.band::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:rgba(90,110,88,0.2);}
+.band.pink{background:linear-gradient(135deg,#f6e1d8 0%,#efd0c4 100%);}
+.band.pink::after{background:rgba(124,58,42,0.18);}
+.rule{width:3px;height:26px;border-radius:2px;background:#7c3a2a;flex-shrink:0;}
+.band-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;color:#2e2018;line-height:1.05;}
+.band-meta{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.07em;text-transform:uppercase;color:#5a6e58;margin-top:2px;}
+.plan .band-meta{font-family:'Playfair Display',serif;font-style:italic;font-size:14.5px;letter-spacing:0;text-transform:none;color:#7c3a2a;margin-top:3px;}
+.plan .band-meta b{font-weight:700;}
+.band-emblem{margin-left:auto;color:#7c3a2a;opacity:0.7;flex-shrink:0;}
+.body{padding:20px 22px 22px;margin:0 6px 6px;position:relative;}
+
+/* ---- plan cards ---- */
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.plan .band-title{font-size:19px;}
+.price{display:flex;align-items:center;gap:7px;margin:2px 0 20px;}
+.price-main{display:flex;align-items:baseline;gap:7px;}
+.price .amt{font-family:'Playfair Display',serif;font-size:34px;font-weight:500;color:#7c3a2a;line-height:1;}
+.price .per{font-family:'JetBrains Mono',monospace;font-size:11px;color:#9c8878;letter-spacing:0.04em;}
+.price-alt{font-family:'JetBrains Mono',monospace;font-size:10px;color:#8a9e88;letter-spacing:0.03em;margin-bottom:2px;}
+.price-pill{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.03em;color:#5a6e58;background:#e9ede6;border:0.5px solid #cfdac9;border-radius:20px;padding:4px 10px;white-space:nowrap;align-self:center;margin-left:6px;}
+.draft-note{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.04em;color:#b98a4e;margin-bottom:16px;}
+.tagline{font-family:'Playfair Display',serif;font-style:italic;font-size:17px;color:#7c3a2a;font-weight:400;line-height:1.3;margin-bottom:16px;min-height:36px;}
+.tagline b{font-weight:700;}
+.hl{list-style:none;display:flex;flex-direction:column;gap:9px;margin-bottom:20px;}
+.hl li{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:#3a1c14;line-height:1.35;}
+.hl li .ico{flex-shrink:0;margin-top:1px;}
+.hl li .txt{display:flex;flex-direction:column;}
+.hl li small{font-size:10.5px;color:#9c8878;font-weight:300;margin-top:3px;line-height:1.35;}
+.cta{cursor:pointer;width:100%;text-align:center;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;border-radius:10px;padding:12px 0;transition:all 0.2s;border:0.5px solid;}
+.cta.free{background:#fff;color:#7c3a2a;border-color:#e0d5c8;}
+.cta.free:hover{border-color:#c9a89e;background:#fdf6f2;}
+.cta.pro{background:#f5e2da;color:#7c3a2a;border-color:#e8c8bc;}
+.cta.pro:hover{background:#efd5ca;border-color:#d8a89a;}
+
+/* ---- status dots (echoing app StatusDot) ---- */
+.dot{width:17px;height:17px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}
+.dot.yes{background:#7c3a2a;}
+.dot.yes svg{stroke:#fdfaf5;}
+.dot.no{border:1.5px solid #c4bcae;background:transparent;}
+.dot.no svg{stroke:#b3a99a;}
+
+/* ---- feature matrix ---- */
+.matrix{width:100%;border-collapse:collapse;}
+.matrix th,.matrix td{text-align:left;padding:11px 14px;border-bottom:1px solid rgba(124,58,42,0.1);}
+.matrix thead th{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:#9c8878;font-weight:500;border-bottom:1px solid rgba(124,58,42,0.18);}
+.matrix thead th.col{text-align:center;width:130px;}
+.matrix thead th.col.pro{color:#7c3a2a;}
+.matrix tbody td.col{text-align:center;width:130px;}
+.matrix .feat{font-size:13px;color:#3a1c14;font-weight:400;}
+.matrix .feat small{display:block;font-size:10.5px;color:#9c8878;font-weight:300;margin-top:2px;line-height:1.3;font-family:'Inter',sans-serif;}
+.matrix .qty{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.03em;}
+.matrix .qty.free{color:#6a5e54;}
+.matrix .qty.pro{color:#7c3a2a;font-weight:500;}
+.matrix tbody tr:last-child td{border-bottom:none;}
+.matrix tbody tr.section td{padding-top:18px;}
+.matrix .grp{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:#8a9e88;padding:16px 14px 4px;border-bottom:none;}
+
+.dotcell{display:inline-flex;align-items:center;justify-content:center;}
+
+/* ---- footnotes ---- */
+.notes{padding:2px 22px 4px;margin:0 6px;display:flex;flex-direction:column;gap:7px;}
+.note{display:flex;gap:8px;font-size:11.5px;color:#6a5e54;line-height:1.4;}
+.note .mk{font-family:'JetBrains Mono',monospace;color:#b98a4e;flex-shrink:0;font-size:10px;margin-top:1px;}
+
+/* ---- founder offer ---- */
+.founder .body{padding:18px 24px 22px;}
+.founder-row{display:flex;align-items:center;gap:22px;}
+.founder-hand{font-family:'Caveat',cursive;font-size:25px;color:#7c3a2a;line-height:1.15;flex-shrink:0;max-width:230px;}
+.founder-hand span{color:#5a6e58;}
+.founder-detail{font-size:13px;color:#4a3e34;line-height:1.5;}
+.founder-detail strong{color:#7c3a2a;font-weight:500;}
+.founder-detail ul{list-style:none;margin-top:8px;display:flex;flex-direction:column;gap:5px;}
+.founder-detail li{display:flex;gap:8px;}
+.founder-detail li::before{content:'→';color:#b98a4e;flex-shrink:0;}
+.divider-v{width:1px;align-self:stretch;background:rgba(124,58,42,0.14);flex-shrink:0;}
+
+@media(max-width:640px){
+  .plans{grid-template-columns:1fr;}
+  .founder-row{flex-direction:column;align-items:flex-start;gap:14px;}
+  .divider-v{display:none;}
+  .matrix th.col,.matrix td.col{width:auto;}
+}
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <div class="page-title">Choose your <em>plan</em></div>
+  <div class="page-sub">ScriptAlly · two tiers</div>
+</div>
+
+<div class="wrap">
+
+  <!-- PLAN CARDS -->
+  <div class="plans">
+
+    <!-- FREE -->
+    <div class="mount paper-texture plan">
+      <div class="band">
+        <div class="rule"></div>
+        <div>
+          <div class="band-title">Free</div>
+          <div class="band-meta">Query with confidence</div>
+        </div>
+        <div class="band-emblem">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        </div>
+      </div>
+      <div class="body">
+        <div class="price"><span class="price-main"><span class="amt">£0</span><span class="per">forever</span></span></div>
+        <ul class="hl">
+          <li><span class="ico dot yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Unlimited queries &amp; agents</li>
+          <li><span class="ico dot yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Full analytics &amp; pipeline</li>
+          <li><span class="ico dot yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Reminders &amp; follow-up nudges</li>
+          <li><span class="ico dot yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Smart Import on setup</li>
+        </ul>
+        <div class="cta free">Get started</div>
+      </div>
+    </div>
+
+    <!-- PRO -->
+    <div class="mount paper-texture plan founder">
+      <div class="band">
+        <div class="rule"></div>
+        <div>
+          <div class="band-title">Pro</div>
+          <div class="band-meta">Query with downright aplomb</div>
+        </div>
+        <div class="band-emblem">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.1 5.2L19.5 9l-4 3.7 1 5.6L12 15.6 7.5 18.3l1-5.6-4-3.7 5.4-.8z"/></svg>
+        </div>
+      </div>
+      <div class="body">
+        <div class="price"><span class="price-main"><span class="amt">£3.99</span><span class="per">/ month</span></span><span class="price-pill">or £35/year · save ~27%</span></div>
+        <ul class="hl">
+          <li><span class="ico dot yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Multiple manuscripts</li>
+          <li><span class="ico dot yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Submission package A/B testing</li>
+          <li><span class="ico dot yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Community-backed agent discovery</li>
+          <li><span class="ico dot yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Smart email drop</li>
+        </ul>
+        <div class="cta pro">Go Pro</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOUNDER OFFER -->
+  <div class="mount paper-texture founder">
+    <div class="band pink">
+      <div class="rule"></div>
+      <div>
+        <div class="band-title">Founding members</div>
+      </div>
+      <div class="band-emblem">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </div>
+    </div>
+    <div class="body">
+      <div class="founder-row">
+        <div class="founder-hand">Free Pro through beta —<br>then <span>locked at half price for life.</span></div>
+        <div class="divider-v"></div>
+        <div class="founder-detail">
+          The first 50 sign-ups get full Pro free during the beta in exchange for occasional light feedback. When pricing goes live, founders keep Pro permanently discounted — a soft landing, not a billing cliff.
+          <ul>
+            <li>Full Pro, no card required, throughout beta</li>
+            <li>A couple of feedback questions now and then + a direct channel</li>
+            <li>Permanent founder rate once Pro launches (e.g. 50% for life)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURE MATRIX -->
+  <div class="mount paper-texture">
+    <div class="band">
+      <div class="rule"></div>
+      <div>
+        <div class="band-title">Compare plans</div>
+        <div class="band-meta">feature by feature</div>
+      </div>
+      <div class="band-emblem">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      </div>
+    </div>
+    <div class="body" style="padding:8px 16px 14px;">
+      <table class="matrix">
+        <thead>
+          <tr><th>Feature</th><th class="col">Free</th><th class="col pro">Pro</th></tr>
+        </thead>
+        <tbody>
+          <tr><td colspan="3" class="grp">Tracking</td></tr>
+          <tr>
+            <td class="feat">Manuscripts</td>
+            <td class="col"><span class="qty free">1</span></td>
+            <td class="col"><span class="qty pro">Unlimited</span></td>
+          </tr>
+          <tr>
+            <td class="feat">Queries logged</td>
+            <td class="col"><span class="qty free">Unlimited</span></td>
+            <td class="col"><span class="qty pro">Unlimited</span></td>
+          </tr>
+          <tr>
+            <td class="feat">Agents tracked</td>
+            <td class="col"><span class="qty free">Unlimited</span></td>
+            <td class="col"><span class="qty pro">Unlimited</span></td>
+          </tr>
+          <tr>
+            <td class="feat">Analytics &amp; query pipeline</td>
+            <td class="col"><span class="dotcell dot yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+            <td class="col"><span class="dotcell dot yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+          </tr>
+          <tr>
+            <td class="feat">Reminders &amp; follow-up nudges</td>
+            <td class="col"><span class="dotcell dot yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+            <td class="col"><span class="dotcell dot yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+          </tr>
+
+          <tr><td colspan="3" class="grp">Documents</td></tr>
+          <tr>
+            <td class="feat">Submission package builder<small>Pair your best query letter, synopsis and pages into bespoke submission packages — then see at a glance which combination charms the most agents.</small></td>
+            <td class="col"><span class="dotcell dot no"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></span></td>
+            <td class="col"><span class="dotcell dot yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+          </tr>
+
+          <tr><td colspan="3" class="grp">Advanced time savers</td></tr>
+          <tr>
+            <td class="feat">Smart Import (onboarding)<small>Bring the spreadsheet you've been wrangling and we'll spin it into a living database in moments.</small></td>
+            <td class="col"><span class="dotcell dot yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+            <td class="col"><span class="dotcell dot yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+          </tr>
+          <tr>
+            <td class="feat">Smart email-paste<small>Drop your email straight into ScriptAlly and we'll log the details in your database, completely hassle-free.</small></td>
+            <td class="col"><span class="dotcell dot no"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></span></td>
+            <td class="col"><span class="dotcell dot yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+          </tr>
+
+          <tr><td colspan="3" class="grp">Community</td></tr>
+          <tr>
+            <td class="feat">Contributes to community data<small>Share your agent intel and response times to sharpen everyone's odds — your manuscripts and synopses always stay yours alone, never shared.</small></td>
+            <td class="col"><span class="dotcell dot yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+            <td class="col"><span class="dotcell dot yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+          </tr>
+          <tr>
+            <td class="feat">Agent matching &amp; community access</td>
+            <td class="col"><span class="dotcell dot no"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></span></td>
+            <td class="col"><span class="dotcell dot yes"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes">
+      <div class="note"><span class="mk">①</span><span><strong>Smart Import</strong> stays free — it's the front door. A free user importing several books triggers a gentle "we found 3 manuscripts — Pro unlocks the rest" moment rather than failing.</span></div>
+      <div class="note"><span class="mk">②</span><span><strong>Submission package builder</strong> is the Pro tool for combining query/synopsis/manuscript versions and tracking which performs best. Free users still record what they sent on each query in the normal log flow.</span></div>
+      <div class="note"><span class="mk">③</span><span><strong>Community</strong> — every user feeds the shared pool that powers matching, but only agent details and response analytics. Manuscripts and synopses are <strong>never</strong> shared. Pro unlocks the matching insights and community access.</span></div>
+      <div style="height:6px"></div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

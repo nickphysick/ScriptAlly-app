@@ -118,7 +118,7 @@ const PlanCard: React.FC<PlanProps> = ({ title, strapline, Emblem, amount, per, 
       {/* price block: amount + per baseline-aligned in an inner wrapper, pill a centred sibling */}
       <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", rowGap: 6, marginBottom: 20 }}>
         <span style={{ display: "inline-flex", alignItems: "baseline" }}>
-          <span style={{ fontFamily: FONT_SERIF, fontSize: 42, fontWeight: 500, color: bodyInk, lineHeight: 1 }}>{amount}</span>
+          <span style={{ fontFamily: FONT_SERIF, fontSize: 34, fontWeight: 500, color: burgundy, lineHeight: 1 }}>{amount}</span>
           <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: mutedInk, marginLeft: 6 }}>{per}</span>
         </span>
         {pill && (
@@ -340,7 +340,7 @@ export const PlansPage: React.FC = () => (
     <div className="relative" style={{ zIndex: 1, maxWidth: 880, margin: "0 auto", padding: "48px 16px 0" }}>
       {/* page header (not a card) */}
       <header style={{ textAlign: "center", marginBottom: 32 }}>
-        <h1 style={{ fontFamily: FONT_SERIF, fontSize: 34, fontWeight: 500, color: headingInk, lineHeight: 1.15, margin: 0 }}>
+        <h1 style={{ fontFamily: FONT_SERIF, fontSize: 27, fontWeight: 500, color: headingInk, lineHeight: 1.15, margin: 0 }}>
           Choose your <span style={{ fontStyle: "italic", color: burgundy }}>plan</span>
         </h1>
         <p style={{ fontFamily: FONT_MONO, fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: sageText, marginTop: 10 }}>

@@ -12,6 +12,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useScriptAllyDb } from "../lib/db";
+import { UserPlan } from "../types";
 import {
   Bell,
   BookOpen,
@@ -398,8 +399,9 @@ export const Nav: React.FC<NavProps> = ({ activeTab, onNavigate, searchQuery, se
                       <MenuItem onClick={() => { onNavigate("account"); setShowUserDropdown(false); }}>
                         <span className="flex items-center gap-1.5"><User className="w-3.5 h-3.5" style={{ color: burgundy }} /> My Account</span>
                       </MenuItem>
-                      <MenuItem onClick={() => { onNavigate("pricing"); setShowUserDropdown(false); }}>
-                        <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5" style={{ color: burgundy }} /> Upgrade to Pro</span>
+                      {/* Single entitlement source: Free users get nudged to upgrade; Pro users see a neutral "Plans". Both route to the presentational PlansPage. */}
+                      <MenuItem onClick={() => { onNavigate("plans"); setShowUserDropdown(false); }}>
+                        <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5" style={{ color: burgundy }} /> {currentUser.plan === UserPlan.PRO ? "Plans" : "Upgrade to Pro"}</span>
                       </MenuItem>
                       <MenuItem onClick={() => { onNavigate("import"); setShowUserDropdown(false); }}>
                         <span className="flex items-center gap-1.5"><BookOpen className="w-3.5 h-3.5" style={{ color: burgundy }} /> Import CSV Data</span>
