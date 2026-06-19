@@ -40,7 +40,7 @@ import { MountCard } from "./MountCard";
 import { ScriptAllyLogo } from "./ScriptAllyLogo";
 import {
   kraft, parchment, PAPER_TEXTURE, sageBandGradient, sageBandRule,
-  burgundy, FONT_SERIF, FONT_MONO, mountShadow,
+  burgundy, FONT_SERIF, FONT_MONO, mountShadow, labelColor,
 } from "../lib/designTokens";
 
 const normalizeStatus = (status: string | QueryStatus): QueryStatus => {
@@ -1188,10 +1188,297 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   const countOffer = queries.filter(q => q.status === QueryStatus.OFFER).length;
   const countClosed = closedCount;
 
+  const handleDownloadPDF = async () => {
+    if (!activeQuery || !activeAgent || !activeMs) return;
+    setIsGeneratingPDF(true);
+    try {
+      const agentName = activeAgent.name;
+      const agencyName = activeAgent.agency;
+      const status = getStatusLabel(activeQuery.status);
+      const sendMethod = activeQuery.sendMethod;
+      const starCount = activeAgent.starRating;
+      const manuscriptTitle = activeMs.title;
+      const genre = activeMs.genre;
+      const wordCount = activeMs.wordCount;
+      const synopsis = activeMs.logline || "";
+
+      const timelineEvents: {
+        title: string;
+        date: string;
+        formattedDate: string;
+        detail: string | null;
+        materials: string | null;
+        expectedDate: string | null;
+        nudgeDate: string | null;
+      }[] = [];
+
+      const sendMethodLabel = activeQuery.sendMethod || "Email";
+      const queryMaterialsList = (() => {
+        const list = Array.isArray((activeQuery as any).materialsWanted)
+          ? (activeQuery as any).materialsWanted
+          : Array.isArray(activeAgent.materialsWanted)
+            ? activeAgent.materialsWanted
+            : [];
+        return list;
+      })();
+      timelineEvents.push({
+        title: "Query sent",
+        date: activeQuery.dateSent,
+        formattedDate: new Date(activeQuery.dateSent).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+        detail: `via ${sendMethodLabel}`,
+        materials: queryMaterialsList.length > 0 ? queryMaterialsList.map(formatQueryMaterial).join(", ") : null,
+        expectedDate: null,
+        nudgeDate: null
+      });
+
+      const mapActivityToEvent = (act: any): string | null => {
+        const desc = act.description || "";
+        const lower = desc.toLowerCase();
+        if (act.activityType === ActivityType.QUERY_SENT || lower.includes("dispatched query") || lower.includes("logged query")) return null;
+        if (lower.includes("nudge sent") || act.activityType === ActivityType.NUDGE_SENT || lower.includes("nudged")) return "Nudge sent";
+        if (lower.includes("requested a partial") || lower.includes("partial manuscript requested") || lower.includes("partial requested")) return "Partial requested";
+        if (lower.includes("sent partial") || lower.includes("partial sent") || lower.includes("partial manuscript sent")) return "Partial sent";
+        if (lower.includes("requested a full") || lower.includes("full manuscript requested") || lower.includes("full requested")) return "Full requested";
+        if (lower.includes("full manuscript sent") || lower.includes("full sent")) return "Full sent";
+        if (lower.includes("revise") || lower.includes("r&r") || lower.includes("revise and resubmit")) return "Revise & resubmit";
+        if (lower.includes("offer of representation") || lower.includes("received an offer") || lower.includes("offer received")) return "Offer received";
+        if (lower.includes("rejected") || lower.includes("passed") || lower.includes("has rejected")) return "Rejected";
+        if (lower.includes("withdrew") || lower.includes("withdrawn")) return "Withdrawn";
+        if (lower.includes("no response") || lower.includes("archived as no response")) return "No response";
+        return null;
+      };
+
+      const otherActs = activeActivities
+        .filter(act => mapActivityToEvent(act) !== null)
+        .map(act => ({ type: mapActivityToEvent(act)!, date: act.date, details: act.details || null }));
+      otherActs.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+      otherActs.forEach(act => {
+        let materialsSent: string | null = null;
+        if (act.type === "Partial sent") materialsSent = "Partial Manuscript";
+        else if (act.type === "Full sent") materialsSent = "Full Manuscript";
+        let displayedDetail = act.details;
+        if (displayedDetail && displayedDetail.toLowerCase().includes("heard back")) {
+          const isQuerySentStatus = activeQuery.status === QueryStatus.QUERIED;
+          const isPartialSentStatus = activeQuery.status === QueryStatus.PARTIAL_SENT;
+          const isFullSentStatus = activeQuery.status === QueryStatus.FULL_SENT;
+          if (!isQuerySentStatus && !isPartialSentStatus && !isFullSentStatus) displayedDetail = null;
+        }
+        timelineEvents.push({
+          title: act.type,
+          date: act.date,
+          formattedDate: new Date(act.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+          detail: displayedDetail,
+          materials: materialsSent,
+          expectedDate: null,
+          nudgeDate: null
+        });
+      });
+
+      const isQueryActive = [
+        QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT,
+        QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT
+      ].includes(activeQuery.status);
+
+      if (isQueryActive) {
+        const deadlineDate = activeQuery.responseDeadline || activeQuery.dateSent;
+        timelineEvents.push({
+          title: "Waiting to hear back",
+          date: deadlineDate,
+          formattedDate: new Date(deadlineDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+          detail: null,
+          materials: null,
+          expectedDate: activeQuery.responseDeadline ? new Date(activeQuery.responseDeadline).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "None set",
+          nudgeDate: activeQuery.nudgeDate ? new Date(activeQuery.nudgeDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : null
+        });
+      } else {
+        let finalLabel = "Final Decision Outcome Marker Logged";
+        if (activeQuery.status === QueryStatus.REJECTED) finalLabel = "Rejected";
+        if (activeQuery.status === QueryStatus.WITHDRAWN) finalLabel = "Withdrawn Pipeline";
+        if (activeQuery.status === QueryStatus.NO_RESPONSE) finalLabel = "Archived as No Response";
+        if (activeQuery.status === QueryStatus.OFFER) finalLabel = "Offer of Representation! 🏆";
+        const lastActivityDate = activeActivities.length > 0 ? activeActivities[activeActivities.length - 1].date : activeQuery.dateSent;
+        timelineEvents.push({
+          title: finalLabel,
+          date: lastActivityDate,
+          formattedDate: new Date(lastActivityDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
+          detail: activeQuery.status === QueryStatus.REJECTED ? "Pipeline archived. We keep tracking performance metrics on packages." : null,
+          materials: null,
+          expectedDate: null,
+          nudgeDate: null
+        });
+      }
+
+      const notes = journalEntries
+        .filter(entry => entry.queryId === activeQuery.id)
+        .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+        .map(entry => ({
+          text: entry.entryText,
+          formattedDate: new Date(entry.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })
+        }));
+
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const pageWidth = 210;
+      const margin = 20;
+      const contentWidth = pageWidth - (margin * 2);
+
+      doc.setFillColor(124, 61, 61);
+      doc.rect(0, 0, 210, 4, 'F');
+      let y = 14;
+
+      const checkPageBreak = (neededSpace = 10) => {
+        if (y + neededSpace > 277) {
+          doc.addPage();
+          doc.setFillColor(124, 61, 61);
+          doc.rect(0, 0, 210, 4, 'F');
+          y = 20;
+        }
+      };
+
+      const addLine = (yPos: number) => {
+        doc.setDrawColor(232, 224, 216);
+        doc.setLineWidth(0.2);
+        doc.line(margin, yPos, pageWidth - margin, yPos);
+      };
+
+      const logoImg = document.querySelector('nav img, header img, .logo img, img[alt*="ScriptAlly"], img[alt*="Script"]') as HTMLImageElement | null;
+      if (logoImg && logoImg.naturalWidth && logoImg.naturalHeight) {
+        const logoCanvas = document.createElement('canvas');
+        logoCanvas.width = logoImg.naturalWidth;
+        logoCanvas.height = logoImg.naturalHeight;
+        const ctx = logoCanvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(logoImg, 0, 0);
+          const logoData = logoCanvas.toDataURL('image/png');
+          const logoW = 36;
+          const logoH = (logoImg.naturalHeight / logoImg.naturalWidth) * logoW;
+          doc.addImage(logoData, 'PNG', (210 - logoW) / 2, y, logoW, logoH);
+          y += logoH + 4;
+        } else {
+          doc.setFontSize(16); doc.setFont('helvetica', 'bold'); doc.setTextColor(124, 61, 61);
+          doc.text('ScriptAlly', 105, y, { align: 'center' }); y += 8;
+        }
+      } else {
+        doc.setFontSize(16); doc.setFont('helvetica', 'bold'); doc.setTextColor(124, 61, 61);
+        doc.text('ScriptAlly', 105, y, { align: 'center' }); y += 8;
+      }
+
+      doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(201, 168, 158);
+      doc.text('EXPORTED QUERY RECORD', 105, y, { align: 'center' }); y += 5;
+      doc.setDrawColor(232, 224, 216); doc.setLineWidth(0.2);
+      doc.line(margin, y, pageWidth - margin, y); y += 8;
+
+      const statusLabel = status;
+      const exportedDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      const headerStartY = y;
+
+      doc.setFontSize(18); doc.setFont('helvetica', 'bold'); doc.setTextColor(58, 28, 20);
+      doc.text(agentName, margin, y); y += 7;
+      doc.setFontSize(11); doc.setFont('helvetica', 'normal'); doc.setTextColor(160, 128, 112);
+      doc.text(agencyName, margin, y); y += 8;
+
+      const metaRows = [['Status', statusLabel], ['Sent via', sendMethod], ['Rating', `${starCount} stars`], ['Exported', exportedDate]];
+      metaRows.forEach(([label, value]) => {
+        doc.setFontSize(10); doc.setTextColor(160, 128, 112);
+        doc.text(label, margin, y);
+        doc.setTextColor(58, 28, 20);
+        doc.text(String(value || '—'), margin + 30, y); y += 5.5;
+      });
+
+      const agentBlockBottomY = y;
+      doc.setFontSize(18); doc.setTextColor(232, 224, 216);
+      doc.text('→', 105, agentBlockBottomY - 16, { align: 'center' });
+
+      const msX = 113;
+      const msW = pageWidth - margin - msX;
+      const msBoxH = 52;
+      doc.setFillColor(253, 248, 246); doc.setDrawColor(232, 224, 216); doc.setLineWidth(0.3);
+      doc.roundedRect(msX, headerStartY - 5, msW, msBoxH, 3, 3, 'FD');
+      let msY = headerStartY + 1;
+      doc.setFontSize(7); doc.setTextColor(201, 168, 158); doc.setFont('helvetica', 'normal');
+      doc.text('MANUSCRIPT', msX + 5, msY); msY += 5;
+      doc.setFontSize(12); doc.setTextColor(58, 28, 20); doc.setFont('helvetica', 'bold');
+      const msTitleLines = doc.splitTextToSize(manuscriptTitle, msW - 10);
+      doc.text(msTitleLines, msX + 5, msY); msY += msTitleLines.length * 5 + 2;
+      doc.setFontSize(9); doc.setTextColor(160, 128, 112); doc.setFont('helvetica', 'normal');
+      doc.text(genre || '—', msX + 5, msY); msY += 5;
+      doc.setDrawColor(232, 224, 216); doc.line(msX + 5, msY, msX + msW - 5, msY); msY += 4;
+      doc.setFontSize(9); doc.setTextColor(106, 80, 69); doc.setFont('helvetica', 'italic');
+      const blurbLines = doc.splitTextToSize(`"${synopsis || ''}"`, msW - 10);
+      doc.text(blurbLines, msX + 5, msY);
+
+      const msBottomY = headerStartY - 5 + msBoxH + 4;
+      y = Math.max(agentBlockBottomY, msBottomY) + 6;
+      doc.setDrawColor(232, 224, 216); doc.setLineWidth(0.2);
+      doc.line(margin, y, pageWidth - margin, y); y += 8;
+
+      checkPageBreak(10);
+      doc.setFontSize(8); doc.setTextColor(201, 168, 158); doc.setFont('helvetica', 'normal');
+      doc.text('TRACKING', margin, y); y += 2;
+      doc.setDrawColor(232, 224, 216); doc.line(margin + 22, y - 1, pageWidth - margin, y - 1); y += 8;
+
+      (timelineEvents || []).forEach((event, i) => {
+        checkPageBreak(20);
+        const isFuture = new Date(event.date) > new Date();
+        if (!isFuture) { doc.setFillColor(124, 61, 61); doc.circle(margin + 2, y - 1, 2, 'F'); }
+        else { doc.setDrawColor(201, 168, 158); doc.setLineWidth(0.5); doc.circle(margin + 2, y - 1, 2, 'S'); }
+        if (i < (timelineEvents.length - 1)) { doc.setDrawColor(232, 224, 216); doc.setLineWidth(0.3); doc.line(margin + 2, y + 1, margin + 2, y + 16); }
+        doc.setFontSize(11); doc.setTextColor(58, 28, 20); doc.setFont('helvetica', 'bold');
+        doc.text(event.title, margin + 8, y);
+        doc.setFontSize(10); doc.setTextColor(201, 168, 158); doc.setFont('helvetica', 'normal');
+        doc.text(event.formattedDate || '', pageWidth - margin, y, { align: 'right' }); y += 5;
+        if (event.detail) { doc.setFontSize(10); doc.setTextColor(160, 128, 112); doc.text(event.detail, margin + 8, y); y += 5; }
+        if (event.materials) { doc.setFontSize(10); doc.setTextColor(160, 128, 112); doc.text('Sent: ', margin + 8, y); doc.setTextColor(58, 28, 20); doc.text(event.materials, margin + 18, y); y += 5; }
+        if (isFuture && event.expectedDate) {
+          doc.setFillColor(255, 240, 240); doc.setDrawColor(245, 200, 200); doc.roundedRect(margin + 8, y - 3, contentWidth - 8, 10, 2, 2, 'FD');
+          doc.setFontSize(10); doc.setTextColor(124, 61, 61);
+          const hasNudgeStr = (event.nudgeDate && event.nudgeDate !== '!') ? ` · Nudge: ${event.nudgeDate}` : '';
+          doc.text(`Response expected: ${event.expectedDate}${hasNudgeStr}`, margin + 11, y + 3); y += 12;
+        }
+        y += 6;
+      });
+
+      y += 4; checkPageBreak(10); addLine(y); y += 8;
+
+      doc.setFontSize(8); doc.setTextColor(201, 168, 158); doc.setFont('helvetica', 'normal');
+      doc.text('NOTES', margin, y); y += 2;
+      doc.setDrawColor(232, 224, 216); doc.line(margin + 14, y - 1, pageWidth - margin, y - 1); y += 8;
+
+      if (!notes || notes.length === 0) {
+        checkPageBreak(10);
+        doc.setFontSize(11); doc.setTextColor(201, 168, 158); doc.setFont('helvetica', 'italic');
+        doc.text('No notes recorded.', margin, y); y += 8;
+      } else {
+        notes.forEach((note) => {
+          checkPageBreak(15);
+          doc.setFontSize(9); doc.setTextColor(201, 168, 158); doc.setFont('helvetica', 'normal');
+          doc.text(note.formattedDate || '', margin, y); y += 5;
+          doc.setFontSize(11); doc.setTextColor(58, 28, 20);
+          const noteLines = doc.splitTextToSize(note.text, contentWidth);
+          doc.text(noteLines, margin, y); y += noteLines.length * 5 + 4;
+          doc.setDrawColor(240, 232, 224); doc.line(margin, y, pageWidth - margin, y); y += 5;
+        });
+      }
+
+      checkPageBreak(10); y += 4; addLine(y); y += 6;
+      doc.setFontSize(10); doc.setTextColor(201, 168, 158); doc.setFont('helvetica', 'normal');
+      doc.text('ScriptAlly', margin, y);
+      doc.text(`Generated ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`, pageWidth - margin, y, { align: 'right' });
+
+      const pdfFilename = `${(agentName || 'agent').toLowerCase().replace(/\s+/g, '-')}-${(manuscriptTitle || 'manuscript').toLowerCase().replace(/\s+/g, '-')}-query.pdf`;
+      doc.save(pdfFilename);
+    } catch (error: any) {
+      console.error('PDF generation failed:', error?.message || error);
+      alert("Failed to generate PDF. Please try again.");
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
+
   return (
     <div 
       className="w-full flex flex-col overflow-hidden text-[#3a1c14] font-sans relative queries-container-theme"
-      style={{ height: "calc(100vh - 64px)", backgroundColor: curTheme.outerBg }}
+      style={{ height: "calc(100vh - 36px)", backgroundColor: curTheme.outerBg }}
     >
       <style>{`
         .custom-query-list-scrollbar::-webkit-scrollbar {
@@ -1440,13 +1727,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         {/* Back to dashboard */}
         <div style={{ padding: "10px 14px 0", flexShrink: 0 }}>
           <button
-            onClick={() => {
-              if (typeof (window as any).__scriptAllyNavigate === "function") {
-                (window as any).__scriptAllyNavigate("dashboard");
-              } else {
-                window.location.hash = "#/dashboard";
-              }
-            }}
+            onClick={() => onNavigate?.("dashboard")}
             style={{
               display: "flex", alignItems: "center", gap: 6,
               width: "100%", padding: "7px 10px", borderRadius: 8,
@@ -1720,7 +2001,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
       {/* TWO-PANEL LAYOUT CONTAINER — offset by sidebar width */}
       <div
         className="flex-grow bg-[#dce0d9] min-h-0 overflow-hidden w-full flex flex-row p-[8px] gap-[8px]"
-        style={{ minHeight: "calc(100vh - 64px)", maxHeight: "calc(100vh - 64px)", paddingLeft: 260 }}
+        style={{ minHeight: "calc(100vh - 36px)", maxHeight: "calc(100vh - 36px)", paddingLeft: 260 }}
         id="queries-main-panel-container"
       >
 
@@ -2176,14 +2457,14 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                         overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                         flex: 1, minWidth: 0,
                       }}>
-                        {agent.name}
+                        {agent.name?.trim() || agent.agency}
                       </h4>
                       {statusChip}
                     </div>
 
-                    {/* Agency in mono-muted */}
+                    {/* Agency in mono-muted (or fallback kicker for agency-only agents) */}
                     <p style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#9a8579", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {agent.agency}
+                      {agent.name?.trim() ? agent.agency : "Agency · no named agent"}
                     </p>
 
                     {/* Bottom: manuscript in burgundy, time in mono */}
@@ -2344,1544 +2625,602 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
         </MountCard>
 
-        {/* READING PANEL COLUMN WRAPPER with dynamic height matching user selection */}
-        <MountCard style={{ flexGrow: 1, flex: 1, minWidth: 0, maxHeight: "100%", display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }}>
+        {/* ATELIER READING PANEL */}
+        <div style={{ flexGrow: 1, flex: 1, minWidth: 0, maxHeight: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
 
-          {/* SLIM CONTROL BAR */}
-          {activeQuery && activeAgent && activeMs && (
-            <div 
-              className="w-full h-[44px] min-h-[44px] bg-[#fafafa] border-b border-[#e8e0d8] px-4 flex items-center select-none shrink-0 relative"
-            >
-              <div className="relative w-full h-full flex items-center justify-between gap-2">
-                {/* Left group — sizes to its content; the centre nav yields instead. */}
-                <div className="flex items-center gap-1.5 shrink-0 justify-start">
-                  {/* Contextual primary CTA — label + action depend on whose turn it is. */}
-                  {(() => {
-                    const action = getPrimaryAction(currentStatus as QueryStatus);
-                    const agentFirstName = activeAgent.name.split(" ")[0];
-
-                    // Ball-holder chip — "directly above" the CTA isn't possible in this 44px
-                    // horizontal bar, so it sits inline immediately before the button (same intent:
-                    // make the button change self-explanatory).
-                    const chip = action.ballHolder && (
-                      <span
-                        className="h-[22px] inline-flex items-center px-2 rounded-full text-[10px] font-bold tracking-wide shrink-0 select-none"
-                        style={
-                          action.ballHolder === "writer"
-                            ? { backgroundColor: "rgba(124,58,42,0.10)", color: "#7c3a2a" }
-                            : { backgroundColor: "#efe7e0", color: "#9a8579" }
-                        }
-                      >
-                        {action.ballHolder === "writer" ? "Your move" : `Waiting on ${agentFirstName}`}
-                      </span>
-                    );
-
-                    const ctaBtnStyle: React.CSSProperties = {
-                      height: 28, background: "linear-gradient(180deg, #f5e2da, #efd5ca)",
-                      color: burgundy, border: "1px solid rgba(124,58,42,0.22)",
-                      display: "flex", alignItems: "center", gap: 6, padding: "0 14px",
-                      borderRadius: 20, fontSize: 12, fontWeight: 700, cursor: "pointer",
-                      flexShrink: 0, userSelect: "none",
-                    };
-
-                    if (action.kind === "mark-sent") {
-                      return (
-                        <>
-                          {chip}
-                          <button
-                            ref={markSentTriggerRef}
-                            onClick={() => setIsMarkSentOpen(o => !o)}
-                            style={ctaBtnStyle}
-                          >
-                            <Send className="w-3.5 h-3.5 stroke-[2.5]" style={{ color: burgundy }} />
-                            <span>{action.label}</span>
-                          </button>
-                        </>
-                      );
-                    }
-
-                    return (
-                      <>
-                        {chip}
-                        <button
-                          onClick={() => setIsRecordResponseFocusFormOpen(true)}
-                          style={ctaBtnStyle}
-                        >
-                          <Check className="w-3.5 h-3.5 stroke-[2.5]" style={{ color: burgundy }} />
-                          <span>{action.label}</span>
-                        </button>
-                      </>
-                    );
-                  })()}
-
-                  {/* Edit query button */}
-                  <button
-                    onClick={() => setIsEditMode(prev => !prev)}
-                    className="h-[28px] border border-[#e8e0d8] hover:bg-stone-100 bg-white flex items-center gap-1 px-3 rounded-full text-xs text-stone-700 font-medium cursor-pointer transition-colors shrink-0"
-                  >
-                    <Pencil className="w-3 h-3 text-stone-500" />
-                    <span>Edit query</span>
-                  </button>
-
-                  {/* Mark-Sent popover — fixed-positioned, anchored to the CTA. */}
-                  <AnimatePresence>
-                    {isMarkSentOpen && (() => {
-                      const action = getPrimaryAction(currentStatus as QueryStatus);
-                      if (action.kind !== "mark-sent") return null;
-                      return (
-                        <MarkSentPopover
-                          key="mark-sent"
-                          style={markSentMenuStyle}
-                          kind={action.markKind}
-                          query={activeQuery}
-                          agent={activeAgent}
-                          triggerRef={markSentTriggerRef}
-                          onClose={() => setIsMarkSentOpen(false)}
-                          onRecordResponseInstead={() => {
-                            setIsMarkSentOpen(false);
-                            setIsRecordResponseFocusFormOpen(true);
-                          }}
-                          onSave={async ({ sentDate, responseDeadline, nudgeDate }) => {
-                            await recordMaterialsSent({
-                              queryId: activeQuery.id,
-                              targetStatus: action.target as QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT,
-                              sentDate,
-                              isResubmit: action.markKind === "resubmit",
-                              responseDeadline,
-                              nudgeDate,
-                            });
-                          }}
-                        />
-                      );
-                    })()}
-                  </AnimatePresence>
+          {/* 4a — Centred nav row ABOVE the MountCard pane */}
+          {activeQuery && activeAgent && activeMs && (() => {
+            const currentIndex = sortedList.findIndex(q => q.id === activeQuery.id);
+            const isNavDisabled = sortedList.length <= 1;
+            const handlePrevQuery = () => {
+              if (isNavDisabled) return;
+              const prevIdx = currentIndex <= 0 ? sortedList.length - 1 : currentIndex - 1;
+              setSelectedQueryId(sortedList[prevIdx].id);
+            };
+            const handleNextQuery = () => {
+              if (isNavDisabled) return;
+              const nextIdx = currentIndex === sortedList.length - 1 || currentIndex === -1 ? 0 : currentIndex + 1;
+              setSelectedQueryId(sortedList[nextIdx].id);
+            };
+            return (
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, padding: "4px 8px", flexShrink: 0, userSelect: "none" }}>
+                <button
+                  type="button"
+                  onClick={handlePrevQuery}
+                  disabled={isNavDisabled}
+                  style={{ width: 28, height: 28, borderRadius: 6, border: "0.5px solid rgba(124,58,42,.25)", background: parchment, color: "#6a5045", display: "flex", alignItems: "center", justifyContent: "center", cursor: isNavDisabled ? "not-allowed" : "pointer", opacity: isNavDisabled ? 0.4 : 1, flexShrink: 0 }}
+                  title="Previous Query"
+                >
+                  <ChevronLeft style={{ width: 13, height: 13 }} />
+                </button>
+                <div style={{ textAlign: "center", lineHeight: 1.3 }}>
+                  <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#a08070", letterSpacing: ".04em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 200 }}>{activeMs.title}</div>
+                  <div style={{ fontFamily: FONT_SERIF, fontSize: 15, fontWeight: 600, color: "#3a1c14", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 200 }}>{activeAgent.name || activeAgent.agency}</div>
                 </div>
-
-                {/* Centre group */}
-                {(() => {
-                  const currentIndex = sortedList.findIndex(q => q.id === activeQuery.id);
-                  const isNavigationDisabled = sortedList.length <= 1;
-
-                  const handlePrevQuery = () => {
-                    if (isNavigationDisabled) return;
-                    const prevIdx = currentIndex <= 0 ? sortedList.length - 1 : currentIndex - 1;
-                    setSelectedQueryId(sortedList[prevIdx].id);
-                  };
-
-                  const handleNextQuery = () => {
-                    if (isNavigationDisabled) return;
-                    const nextIdx = currentIndex === sortedList.length - 1 || currentIndex === -1 ? 0 : currentIndex + 1;
-                    setSelectedQueryId(sortedList[nextIdx].id);
-                  };
-
-                  return (
-                    <div
-                      className="flex items-center justify-center gap-[8px] select-none flex-1 min-w-0 px-2"
-                    >
-                      <button
-                        type="button"
-                        onClick={handlePrevQuery}
-                        disabled={isNavigationDisabled}
-                        className={`w-[28px] h-[28px] rounded-[6px] border-[0.5px] border-[#e8e0d8] bg-[#ffffff] text-[#6a5045] flex items-center justify-center transition-colors hover:bg-[#fdf8f6] ${isNavigationDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
-                        title="Previous Query"
-                      >
-                        <ChevronLeft className="w-[13px] h-[13px]" />
-                      </button>
-
-                      <div className="text-center font-sans select-text" style={{ lineHeight: "1.3" }}>
-                        <div className="text-[10px] text-[#a08070] font-normal tracking-tight truncate max-w-[185px]">
-                          {activeMs.title}
-                        </div>
-                        <div className="text-[12px] font-medium text-[#3a1c14] tracking-tight truncate max-w-[185px]">
-                          {activeAgent.name}
-                        </div>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={handleNextQuery}
-                        disabled={isNavigationDisabled}
-                        className={`w-[28px] h-[28px] rounded-[6px] border-[0.5px] border-[#e8e0d8] bg-[#ffffff] text-[#6a5045] flex items-center justify-center transition-colors hover:bg-[#fdf8f6] ${isNavigationDisabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
-                        title="Next Query"
-                      >
-                        <ChevronRight className="w-[13px] h-[13px]" />
-                      </button>
-                    </div>
-                  );
-                })()}
-
-                {/* Right group */}
-                <div className="flex items-center gap-1.5 shrink-0 justify-end">
-                  <button
-                    type="button"
-                    disabled={isGeneratingPDF}
-                    onClick={async () => {
-                      if (!activeQuery || !activeAgent || !activeMs) return;
-
-                      setIsGeneratingPDF(true);
-                      try {
-                        const agentName = activeAgent.name;
-                        const agencyName = activeAgent.agency;
-                        const status = getStatusLabel(activeQuery.status);
-                        const sendMethod = activeQuery.sendMethod;
-                        const starCount = activeAgent.starRating;
-                        const manuscriptTitle = activeMs.title;
-                        const genre = activeMs.genre;
-                        const wordCount = activeMs.wordCount;
-                        const synopsis = activeMs.logline || "";
-
-                        const timelineEvents: {
-                          title: string;
-                          date: string;
-                          formattedDate: string;
-                          detail: string | null;
-                          materials: string | null;
-                          expectedDate: string | null;
-                          nudgeDate: string | null;
-                        }[] = [];
-
-                        // 1. Always start with Query sent
-                        const sendMethodLabel = activeQuery.sendMethod || "Email";
-                        const queryMaterialsList = (() => {
-                          const list = Array.isArray((activeQuery as any).materialsWanted) 
-                            ? (activeQuery as any).materialsWanted 
-                            : Array.isArray(activeAgent.materialsWanted) 
-                              ? activeAgent.materialsWanted 
-                              : [];
-                          return list;
-                        })();
-                        timelineEvents.push({
-                          title: "Query sent",
-                          date: activeQuery.dateSent,
-                          formattedDate: new Date(activeQuery.dateSent).toLocaleDateString("en-GB", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric"
-                          }),
-                          detail: `via ${sendMethodLabel}`,
-                          materials: queryMaterialsList.length > 0 ? queryMaterialsList.map(formatQueryMaterial).join(", ") : null,
-                          expectedDate: null,
-                          nudgeDate: null
-                        });
-
-                        // Helper to map DB activity to standard event names
-                        const mapActivityToEvent = (act: any): string | null => {
-                          const desc = act.description || "";
-                          const lower = desc.toLowerCase();
-                          if (act.activityType === ActivityType.QUERY_SENT || lower.includes("dispatched query") || lower.includes("logged query")) {
-                            return null; // Query sent is handled explicitly first
-                          }
-                          if (lower.includes("nudge sent") || act.activityType === ActivityType.NUDGE_SENT || lower.includes("nudged")) {
-                            return "Nudge sent";
-                          }
-                          if (lower.includes("requested a partial") || lower.includes("partial manuscript requested") || lower.includes("partial requested")) {
-                            return "Partial requested";
-                          }
-                          if (lower.includes("sent partial") || lower.includes("partial sent") || lower.includes("partial manuscript sent")) {
-                            return "Partial sent";
-                          }
-                          if (lower.includes("requested a full") || lower.includes("full manuscript requested") || lower.includes("full requested")) {
-                            return "Full requested";
-                          }
-                          if (lower.includes("full manuscript sent") || lower.includes("full sent")) {
-                            return "Full sent";
-                          }
-                          if (lower.includes("revise") || lower.includes("r&r") || lower.includes("revise and resubmit")) {
-                            return "Revise & resubmit";
-                          }
-                          if (lower.includes("offer of representation") || lower.includes("received an offer") || lower.includes("offer received")) {
-                            return "Offer received";
-                          }
-                          if (lower.includes("rejected") || lower.includes("passed") || lower.includes("has rejected")) {
-                            return "Rejected";
-                          }
-                          if (lower.includes("withdrew") || lower.includes("withdrawn")) {
-                            return "Withdrawn";
-                          }
-                          if (lower.includes("no response") || lower.includes("archived as no response")) {
-                            return "No response";
-                          }
-                          return null;
-                        };
-
-                        // Get other historical activities
-                        const otherActs = activeActivities
-                          .filter(act => mapActivityToEvent(act) !== null)
-                          .map(act => {
-                            const mappedType = mapActivityToEvent(act)!;
-                            return {
-                              type: mappedType,
-                              date: act.date,
-                              details: act.details || null
-                            };
-                          });
-
-                        otherActs.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-                        otherActs.forEach(act => {
-                          let materialsSent: string | null = null;
-                          if (act.type === "Partial sent") {
-                            materialsSent = "Partial Manuscript";
-                          } else if (act.type === "Full sent") {
-                            materialsSent = "Full Manuscript";
-                          }
-
-                          let displayedDetail = act.details;
-                          if (displayedDetail && displayedDetail.toLowerCase().includes("heard back")) {
-                            const isQuerySentStatus = activeQuery.status === QueryStatus.QUERIED;
-                            const isPartialSentStatus = activeQuery.status === QueryStatus.PARTIAL_SENT;
-                            const isFullSentStatus = activeQuery.status === QueryStatus.FULL_SENT;
-                            if (!isQuerySentStatus && !isPartialSentStatus && !isFullSentStatus) {
-                              displayedDetail = null;
-                            }
-                          }
-
-                          timelineEvents.push({
-                            title: act.type,
-                            date: act.date,
-                            formattedDate: new Date(act.date).toLocaleDateString("en-GB", {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric"
-                            }),
-                            detail: displayedDetail,
-                            materials: materialsSent,
-                            expectedDate: null,
-                            nudgeDate: null
-                          });
-                        });
-
-                        // Append Awaiting or terminal state
-                        const isQueryActive = [
-                          QueryStatus.QUERIED, 
-                          QueryStatus.PARTIAL_SENT, 
-                          QueryStatus.FULL_SENT,
-                          QueryStatus.PARTIAL_REQUESTED,
-                          QueryStatus.FULL_REQUESTED,
-                          QueryStatus.REVISE_RESUBMIT
-                        ].includes(activeQuery.status);
-
-                        if (isQueryActive) {
-                          const deadlineDate = activeQuery.responseDeadline || activeQuery.dateSent;
-                          timelineEvents.push({
-                            title: "Waiting to hear back",
-                            date: deadlineDate,
-                            formattedDate: new Date(deadlineDate).toLocaleDateString("en-GB", {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric"
-                            }),
-                            detail: null,
-                            materials: null,
-                            expectedDate: activeQuery.responseDeadline 
-                              ? new Date(activeQuery.responseDeadline).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) 
-                              : "None set",
-                            nudgeDate: activeQuery.nudgeDate 
-                              ? new Date(activeQuery.nudgeDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) 
-                              : null
-                          });
-                        } else {
-                          let finalLabel = "Final Decision Outcome Marker Logged";
-                          if (activeQuery.status === QueryStatus.REJECTED) finalLabel = "Rejected";
-                          if (activeQuery.status === QueryStatus.WITHDRAWN) finalLabel = "Withdrawn Pipeline";
-                          if (activeQuery.status === QueryStatus.NO_RESPONSE) finalLabel = "Archived as No Response";
-                          if (activeQuery.status === QueryStatus.OFFER) finalLabel = "Offer of Representation! 🏆";
-
-                          const lastActivityDate = activeActivities.length > 0 
-                            ? activeActivities[activeActivities.length - 1].date 
-                            : activeQuery.dateSent;
-
-                          timelineEvents.push({
-                            title: finalLabel,
-                            date: lastActivityDate,
-                            formattedDate: new Date(lastActivityDate).toLocaleDateString("en-GB", {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric"
-                            }),
-                            detail: activeQuery.status === QueryStatus.REJECTED 
-                              ? "Pipeline archived. We keep tracking performance metrics on packages."
-                              : null,
-                            materials: null,
-                            expectedDate: null,
-                            nudgeDate: null
-                          });
-                        }
-
-                        const notes = journalEntries
-                          .filter(entry => entry.queryId === activeQuery.id)
-                          .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-                          .map(entry => ({
-                            text: entry.entryText,
-                            formattedDate: new Date(entry.createdAt).toLocaleDateString("en-GB", {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric"
-                            })
-                          }));
-
-                        const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-                        
-                        const pageWidth = 210;
-                        const margin = 20;
-                        const contentWidth = pageWidth - (margin * 2);
-
-                        // Burgundy bar at the very top of page 1
-                        doc.setFillColor(124, 61, 61);
-                        doc.rect(0, 0, 210, 4, 'F');
-                        let y = 14;
-
-                        const checkPageBreak = (neededSpace = 10) => {
-                          if (y + neededSpace > 277) {
-                            doc.addPage();
-                            doc.setFillColor(124, 61, 61);
-                            doc.rect(0, 0, 210, 4, 'F');
-                            y = 20;
-                          }
-                        };
-
-                        const addText = (text: string | number, x: number, fontSize: number, color: [number, number, number], style: string = 'normal') => {
-                          doc.setFontSize(fontSize);
-                          doc.setTextColor(color[0], color[1], color[2]);
-                          doc.setFont('helvetica', style);
-                          doc.text(String(text || ''), x, y);
-                        };
-
-                        const addLine = (yPos: number) => {
-                          doc.setDrawColor(232, 224, 216);
-                          doc.setLineWidth(0.2);
-                          doc.line(margin, yPos, pageWidth - margin, yPos);
-                        };
-
-                        const addWrappedText = (text: string | number, x: number, maxWidth: number, fontSize: number, color: [number, number, number], style: string = 'normal') => {
-                          doc.setFontSize(fontSize);
-                          doc.setTextColor(color[0], color[1], color[2]);
-                          doc.setFont('helvetica', style);
-                          const lines = doc.splitTextToSize(String(text || ''), maxWidth);
-                          doc.text(lines, x, y);
-                          y += (lines.length * fontSize * 0.4);
-                        };
-
-                        // Draw logo image centred
-                        const logoImg = document.querySelector('nav img, header img, .logo img, img[alt*="ScriptAlly"], img[alt*="Script"]') as HTMLImageElement | null;
-                        if (logoImg && logoImg.naturalWidth && logoImg.naturalHeight) {
-                          const logoCanvas = document.createElement('canvas');
-                          logoCanvas.width = logoImg.naturalWidth;
-                          logoCanvas.height = logoImg.naturalHeight;
-                          const ctx = logoCanvas.getContext('2d');
-                          if (ctx) {
-                            ctx.drawImage(logoImg, 0, 0);
-                            const logoData = logoCanvas.toDataURL('image/png');
-                            const logoW = 36;
-                            const logoH = (logoImg.naturalHeight / logoImg.naturalWidth) * logoW;
-                            doc.addImage(logoData, 'PNG', (210 - logoW) / 2, y, logoW, logoH);
-                            y += logoH + 4;
-                          } else {
-                            doc.setFontSize(16); doc.setFont('helvetica', 'bold'); doc.setTextColor(124, 61, 61);
-                            doc.text('ScriptAlly', 105, y, { align: 'center' });
-                            y += 8;
-                          }
-                        } else {
-                          doc.setFontSize(16); doc.setFont('helvetica', 'bold'); doc.setTextColor(124, 61, 61);
-                          doc.text('ScriptAlly', 105, y, { align: 'center' });
-                          y += 8;
-                        }
-
-                        doc.setFontSize(8); doc.setFont('helvetica', 'normal'); doc.setTextColor(201, 168, 158);
-                        doc.text('EXPORTED QUERY RECORD', 105, y, { align: 'center' });
-                        y += 5;
-                        doc.setDrawColor(232, 224, 216); doc.setLineWidth(0.2);
-                        doc.line(margin, y, pageWidth - margin, y);
-                        y += 8;
-
-                        const statusLabel = status;
-                        const exportedDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-
-                        // Store before agent block renders:
-                        const headerStartY = y; // set this before the agent name line
-
-                        doc.setFontSize(18); doc.setFont('helvetica', 'bold'); doc.setTextColor(58, 28, 20);
-                        doc.text(agentName, margin, y);
-                        y += 7;
-                        doc.setFontSize(11); doc.setFont('helvetica', 'normal'); doc.setTextColor(160, 128, 112);
-                        doc.text(agencyName, margin, y);
-                        y += 8;
-
-                        const metaRows = [
-                          ['Status', statusLabel],
-                          ['Sent via', sendMethod],
-                          ['Rating', `${starCount} stars`],
-                          ['Exported', exportedDate],
-                        ];
-                        metaRows.forEach(([label, value]) => {
-                          doc.setFontSize(10); doc.setTextColor(160, 128, 112);
-                          doc.text(label, margin, y);
-                          doc.setTextColor(58, 28, 20);
-                          doc.text(String(value || '—'), margin + 30, y);
-                          y += 5.5;
-                        });
-
-                        const agentBlockBottomY = y;
-
-                        doc.setFontSize(18); doc.setTextColor(232, 224, 216);
-                        doc.text('\u2192', 105, agentBlockBottomY - 16, { align: 'center' });
-
-                        // After agent block, draw manuscript box:
-                        const msX = 113;
-                        const msW = pageWidth - margin - msX;
-                        const msBoxH = 52;
-                        doc.setFillColor(253, 248, 246);
-                        doc.setDrawColor(232, 224, 216);
-                        doc.setLineWidth(0.3);
-                        doc.roundedRect(msX, headerStartY - 5, msW, msBoxH, 3, 3, 'FD');
-
-                        let msY = headerStartY + 1;
-                        doc.setFontSize(7); doc.setTextColor(201, 168, 158); doc.setFont('helvetica', 'normal');
-                        doc.text('MANUSCRIPT', msX + 5, msY); msY += 5;
-
-                        doc.setFontSize(12); doc.setTextColor(58, 28, 20); doc.setFont('helvetica', 'bold');
-                        const msTitleLines = doc.splitTextToSize(manuscriptTitle, msW - 10);
-                        doc.text(msTitleLines, msX + 5, msY); msY += msTitleLines.length * 5 + 2;
-
-                        doc.setFontSize(9); doc.setTextColor(160, 128, 112); doc.setFont('helvetica', 'normal');
-                        doc.text(genre || '—', msX + 5, msY); msY += 5;
-
-                        doc.setDrawColor(232, 224, 216); doc.line(msX + 5, msY, msX + msW - 5, msY); msY += 4;
-
-                        doc.setFontSize(9); doc.setTextColor(106, 80, 69); doc.setFont('helvetica', 'italic');
-                        const blurbLines = doc.splitTextToSize(`"${synopsis || ''}"`, msW - 10);
-                        doc.text(blurbLines, msX + 5, msY);
-
-                        const msBottomY = headerStartY - 5 + msBoxH + 4;
-                        y = Math.max(agentBlockBottomY, msBottomY) + 6;
-
-                        doc.setDrawColor(232, 224, 216); doc.setLineWidth(0.2);
-                        doc.line(margin, y, pageWidth - margin, y);
-                        y += 8;
-
-                        // Tracking section
-                        checkPageBreak(10);
-                        doc.setFontSize(8); doc.setTextColor(201, 168, 158); doc.setFont('helvetica', 'normal');
-                        doc.text('TRACKING', margin, y); y += 2;
-                        doc.setDrawColor(232, 224, 216); doc.line(margin + 22, y - 1, pageWidth - margin, y - 1);
-                        y += 8;
-
-                        (timelineEvents || []).forEach((event, i) => {
-                          checkPageBreak(20);
-                          const isFuture = new Date(event.date) > new Date();
-                          
-                          // Dot
-                          if (!isFuture) {
-                            doc.setFillColor(124, 61, 61);
-                            doc.circle(margin + 2, y - 1, 2, 'F');
-                          } else {
-                            doc.setDrawColor(201, 168, 158);
-                            doc.setLineWidth(0.5);
-                            doc.circle(margin + 2, y - 1, 2, 'S');
-                          }
-                          
-                          // Vertical line to next event
-                          if (i < (timelineEvents.length - 1)) {
-                            doc.setDrawColor(232, 224, 216);
-                            doc.setLineWidth(0.3);
-                            doc.line(margin + 2, y + 1, margin + 2, y + 16);
-                          }
-
-                          // Event content
-                          doc.setFontSize(11); doc.setTextColor(58, 28, 20); doc.setFont('helvetica', 'bold');
-                          doc.text(event.title, margin + 8, y);
-                          doc.setFontSize(10); doc.setTextColor(201, 168, 158); doc.setFont('helvetica', 'normal');
-                          doc.text(event.formattedDate || '', pageWidth - margin, y, { align: 'right' });
-                          y += 5;
-
-                          if (event.detail) {
-                            doc.setFontSize(10); doc.setTextColor(160, 128, 112);
-                            doc.text(event.detail, margin + 8, y); y += 5;
-                          }
-
-                          if (event.materials) {
-                            doc.setFontSize(10); doc.setTextColor(160, 128, 112);
-                            doc.text('Sent: ', margin + 8, y);
-                            doc.setTextColor(58, 28, 20);
-                            doc.text(event.materials, margin + 18, y); y += 5;
-                          }
-
-                          if (isFuture && event.expectedDate) {
-                            doc.setFillColor(255, 240, 240);
-                            doc.setDrawColor(245, 200, 200);
-                            doc.roundedRect(margin + 8, y - 3, contentWidth - 8, 10, 2, 2, 'FD');
-                            doc.setFontSize(10); doc.setTextColor(124, 61, 61);
-                            const hasNudgeStr = (event.nudgeDate && event.nudgeDate !== '!') ? ` · Nudge: ${event.nudgeDate}` : '';
-                            doc.text(`Response expected: ${event.expectedDate}${hasNudgeStr}`, margin + 11, y + 3);
-                            y += 12;
-                          }
-                          y += 6;
-                        });
-
-                        y += 4;
-                        checkPageBreak(10);
-                        addLine(y); y += 8;
-
-                        // Notes section
-                        doc.setFontSize(8); doc.setTextColor(201, 168, 158); doc.setFont('helvetica', 'normal');
-                        doc.text('NOTES', margin, y); y += 2;
-                        doc.setDrawColor(232, 224, 216); doc.line(margin + 14, y - 1, pageWidth - margin, y - 1);
-                        y += 8;
-
-                        if (!notes || notes.length === 0) {
-                          checkPageBreak(10);
-                          doc.setFontSize(11); doc.setTextColor(201, 168, 158); doc.setFont('helvetica', 'italic');
-                          doc.text('No notes recorded.', margin, y); y += 8;
-                        } else {
-                          notes.forEach((note) => {
-                            checkPageBreak(15);
-                            doc.setFontSize(9); doc.setTextColor(201, 168, 158); doc.setFont('helvetica', 'normal');
-                            doc.text(note.formattedDate || '', margin, y); y += 5;
-                            doc.setFontSize(11); doc.setTextColor(58, 28, 20);
-                            const noteLines = doc.splitTextToSize(note.text, contentWidth);
-                            doc.text(noteLines, margin, y); y += noteLines.length * 5 + 4;
-                            doc.setDrawColor(240, 232, 224); doc.line(margin, y, pageWidth - margin, y); y += 5;
-                          });
-                        }
-
-                        // Footer
-                        checkPageBreak(10);
-                        y += 4;
-                        addLine(y); y += 6;
-                        doc.setFontSize(10); doc.setTextColor(201, 168, 158); doc.setFont('helvetica', 'normal');
-                        doc.text('ScriptAlly', margin, y);
-                        doc.text(`Generated ${new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`, pageWidth - margin, y, { align: 'right' });
-
-                        const pdfFilename = `${(agentName || 'agent').toLowerCase().replace(/\s+/g, '-')}-${(manuscriptTitle || 'manuscript').toLowerCase().replace(/\s+/g, '-')}-query.pdf`;
-                        doc.save(pdfFilename);
-                      } catch (error: any) {
-                        console.error('PDF generation failed:', error?.message || error);
-                        alert("Failed to generate PDF. Please try again.");
-                      } finally {
-                        setIsGeneratingPDF(false);
-                      }
-                    }}
-                    className={`flex items-center justify-center gap-1 px-3 h-[28px] rounded-full text-xs font-medium cursor-pointer transition-colors shrink-0 border whitespace-nowrap ${
-                      isGeneratingPDF
-                        ? "bg-stone-100 text-stone-400 border-stone-200 cursor-not-allowed"
-                        : "border-[#e8e0d8] hover:bg-stone-100 bg-white text-stone-700 font-medium"
-                    }`}
-                  >
-                    <Download className="w-3 h-3 text-stone-500" />
-                    <span>{isGeneratingPDF ? "Generating…" : "Download PDF"}</span>
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={handleNextQuery}
+                  disabled={isNavDisabled}
+                  style={{ width: 28, height: 28, borderRadius: 6, border: "0.5px solid rgba(124,58,42,.25)", background: parchment, color: "#6a5045", display: "flex", alignItems: "center", justifyContent: "center", cursor: isNavDisabled ? "not-allowed" : "pointer", opacity: isNavDisabled ? 0.4 : 1, flexShrink: 0 }}
+                  title="Next Query"
+                >
+                  <ChevronRight style={{ width: 13, height: 13 }} />
+                </button>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
-          {/* READING PANEL — expanding dynamic flex card */}
-          <div id="reading-pane-export" className="flex-grow flex-1 min-w-0 flex flex-col overflow-y-auto p-4 relative w-full h-0 bg-stone-50 custom-query-list-scrollbar">
+          {/* Pane MountCard */}
+          <MountCard style={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }}>
             {activeQuery && activeAgent && activeMs ? (
-            <div className="flex flex-col relative bg-stone-50 gap-4">
-              
-              {/* Status pill with integrated elegant watermark behind it in top-right corner with 25px gaps */}
-              <div className="absolute right-[25px] top-[25px] z-20 flex flex-col items-end group/watermark">
-                <div className="relative flex items-center justify-end select-none">
-                  {/* Watermark image container positioned behind (z-0) with overflow-hidden */}
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[280px] h-20 flex items-center justify-center pointer-events-none z-0 rounded-xl overflow-hidden">
-                    {queryImage ? (
-                      <img
-                        src={queryImage}
-                        alt="Query watermark"
-                        style={{
-                          transform: `translate(${queryImageX}px, ${queryImageY}px) scale(${queryImageScale / 100})`,
-                          transformOrigin: 'center center'
-                        }}
-                        className="object-contain max-h-full max-w-full opacity-[0.22] transition-all"
-                        referrerPolicy="no-referrer"
-                      />
-                    ) : (
-                      <div 
-                        style={{
-                          transform: `translate(${queryImageX}px, ${queryImageY}px) scale(${queryImageScale / 100})`,
-                          transformOrigin: 'center center'
-                        }}
-                        className="w-full h-full flex items-center justify-center opacity-0 group-hover/watermark:opacity-[0.14] transition-opacity"
-                      >
-                        <ImageIcon className="w-8 h-8 text-[#7c3a2a] animate-pulse" />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Status Pill in front (z-10) - scaled to 1.0 */}
-                  <div className="relative z-10 pointer-events-auto">
-                    <StatusPill status={activeQuery.status} customLabel={statusDisplayLabel(activeQuery)} size="lg" className="mr-0 mt-0 [&>span]:!text-[14px]" />
-                  </div>
-                </div>
-
-                {/* Hidden input element for watermark upload */}
-                <input
-                  type="file"
-                  id="reading-pane-watermark-input"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleQueryImageUpload}
-                />
-
-                {/* Hover Control Bar for Watermark adjustments */}
-                <div className="absolute bottom-[-18px] right-1 bg-white/95 border border-[#EBDCD3] rounded-full px-2.5 py-1 shadow-sm flex items-center gap-1.5 z-30 opacity-0 group-hover/watermark:opacity-100 transition-opacity pointer-events-auto text-[9px] font-mono leading-none">
-                  <label 
-                    htmlFor="reading-pane-watermark-input"
-                    className="p-1 hover:bg-[#FAF1EF] text-stone-600 hover:text-[#7c3a2a] rounded cursor-pointer flex items-center justify-center transition-colors mr-0"
-                    title="Upload Watermark Image"
-                  >
-                    <Camera className="w-3.5 h-3.5 text-[#7c3a2a]" />
-                  </label>
-
-                  {queryImage && (
-                    <>
-                      <div className="w-[0.5px] h-3 bg-stone-200 self-stretch my-0.5" />
-                      <button
-                        type="button"
-                        onClick={() => handleUpdateImageOffset(-5, 0)}
-                        className="p-1 hover:bg-[#FAF1EF] text-stone-600 hover:text-[#7c3a2a] rounded cursor-pointer"
-                        title="Move Left"
-                      >
-                        ◀
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleUpdateImageOffset(0, -5)}
-                        className="p-1 hover:bg-[#FAF1EF] text-stone-600 hover:text-[#7c3a2a] rounded cursor-pointer"
-                        title="Move Up"
-                      >
-                        ▲
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleUpdateImageOffset(0, 5)}
-                        className="p-1 hover:bg-[#FAF1EF] text-stone-600 hover:text-[#7c3a2a] rounded cursor-pointer"
-                        title="Move Down"
-                      >
-                        ▼
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleUpdateImageOffset(5, 0)}
-                        className="p-1 hover:bg-[#FAF1EF] text-stone-600 hover:text-[#7c3a2a] rounded cursor-pointer"
-                        title="Move Right"
-                      >
-                        ▶
-                      </button>
-
-                      <div className="w-[0.5px] h-3 bg-stone-200 self-stretch my-0.5" />
-                      <button
-                        type="button"
-                        onClick={() => handleUpdateImageScale(Math.max(30, queryImageScale - 10))}
-                        className="px-1 text-stone-700 hover:text-[#7c3a2a] font-bold cursor-pointer"
-                        title="Zoom Out"
-                      >
-                        -
-                      </button>
-                      <span className="text-stone-500 scale-90 select-none">{queryImageScale}%</span>
-                      <button
-                        type="button"
-                        onClick={() => handleUpdateImageScale(Math.min(300, queryImageScale + 10))}
-                        className="px-1 text-stone-700 hover:text-[#7c3a2a] font-bold cursor-pointer"
-                        title="Zoom In"
-                      >
-                        +
-                      </button>
-
-                      <div className="w-[0.5px] h-3 bg-stone-200 self-stretch my-0.5" />
-                      <button
-                        type="button"
-                        onClick={handleRemoveQueryImage}
-                        className="p-1 hover:bg-[#FAF1EF] text-red-600 rounded cursor-pointer"
-                        title="Remove Watermark"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </>
-                  )}
-                  <div className="w-[0.5px] h-3 bg-stone-200 self-stretch my-0.5" />
-                  <button
-                    type="button"
-                    onClick={handleResetImagePosition}
-                    className="text-[9px] text-stone-500 hover:text-[#7c3a2a] underline px-1 cursor-pointer"
-                    title="Reset Position"
-                  >
-                    Reset
-                  </button>
-                </div>
-              </div>
-              
-              {/* Agent header — MountCard, no sage band */}
-              <MountCard style={{ padding: "20px 24px 18px", flexShrink: 0, position: "relative" }}>
-                <div style={{ position: "relative", zIndex: 4 }}>
-                  {/* Name + status chip row */}
-                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
-                    <h2 style={{ fontFamily: FONT_SERIF, fontSize: 38, fontWeight: 700, color: "#3a1c14", lineHeight: 1.1, margin: 0 }}>
-                      {activeAgent.name}
-                    </h2>
-                    <div style={{ flexShrink: 0, paddingTop: 4 }}>
-                      <StatusPill status={activeQuery.status} customLabel={statusDisplayLabel(activeQuery)} size="lg" />
-                    </div>
-                  </div>
-
-                  {/* Agency · email */}
-                  <p style={{ fontSize: 11, color: burgundy, marginTop: 6, marginBottom: 0, opacity: 0.85 }}>
-                    {activeAgent.agency}{activeAgent.email ? <> &middot; {activeAgent.email}</> : null}
-                  </p>
-
-                  {/* Genre tags */}
-                  {activeAgent.genres && activeAgent.genres.length > 0 && (
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 8 }}>
-                      {activeAgent.genres.map((genre, gIdx) => (
-                        <span key={gIdx} style={{
-                          background: "rgba(124,58,42,0.07)", color: burgundy,
-                          fontSize: 9, fontWeight: 700, padding: "2px 8px", borderRadius: 20,
-                          border: "1px solid rgba(124,58,42,0.15)", lineHeight: 1.6,
-                        }}>
-                          {genre}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* MSWL quote */}
-                  {activeAgent.mswlNotes && (
-                    <p style={{
-                      fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 11, color: "#5a3830",
-                      marginTop: 10, marginBottom: 0, borderLeft: `2px solid rgba(124,58,42,0.2)`,
-                      paddingLeft: 10, lineHeight: 1.5,
-                    }}>
-                      "{activeAgent.mswlNotes}"
-                    </p>
-                  )}
-
-                  {/* Stars + Submission method */}
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10, fontFamily: FONT_MONO, fontSize: 11, color: "#9a8579" }}>
-                    <div style={{ display: "flex", alignItems: "center", color: "#BA7517", gap: 1 }}>
-                      {Array.from({ length: 5 }).map((_, idx) => (
-                        <Star key={idx} className={`w-3 h-3 ${idx < activeAgent.starRating ? "fill-current" : "text-stone-200"}`} />
-                      ))}
-                    </div>
-                    <span style={{ color: "#d1c9c0" }}>|</span>
-                    <span>Submission method: {activeAgent.submissionMethod === "Email" ? "email" : activeAgent.submissionMethod}</span>
-                  </div>
-                </div>
-              </MountCard>
-
-              {/* Grid Cards scrollable wrapper styled in bento grid pattern */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 items-stretch">
-                
-                {/* 1. Tracking timeline history card */}
-                <MountCard style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 460, overflow: "hidden" }}>
-                  {/* Sage-band header */}
-                  <div style={{
-                    margin: "6px 6px 0", borderRadius: "8px 8px 0 0",
-                    background: sageBandGradient, borderBottom: `1px solid ${sageBandRule}`,
-                    padding: "7px 14px", display: "flex", alignItems: "center", gap: 7,
-                    flexShrink: 0, position: "relative", zIndex: 4,
-                  }}>
-                    <Clock className="w-3.5 h-3.5" style={{ color: "#5a6e58" }} />
-                    <span style={{ fontFamily: FONT_MONO, fontSize: 11, fontWeight: 700, color: "#4a5e48" }}>Tracking</span>
-                  </div>
-
-                  <div className="flex-grow space-y-3.5 overflow-y-auto max-h-[390px] custom-query-list-scrollbar pr-0.5 pt-4" style={{ padding: "16px 14px 14px", position: "relative", zIndex: 4 }}>
-                    {(() => {
-                      const validEnumValues = Object.values(QueryStatus);
-                      // Skip any activity documents with a type that does not match a QueryStatus enum value
-                      const activityEventsRaw = trackingEvents.filter(evt => {
-                        return validEnumValues.includes(evt.type as QueryStatus);
-                      });
-
-                      // Helper to parse dates/timestamps safely to time millis
-                      const getTime = (val: any) => {
-                        if (!val) return Date.now();
-                        if (val.toDate) return val.toDate().getTime();
-                        if (val.seconds) return val.seconds * 1000;
-                        return new Date(val).getTime();
-                      };
-
-                      // Deduplicate by grouping by 'type' and keeping only the one with the earliest 'createdAt'
-                      const deduplicatedMap: { [key: string]: any } = {};
-                      activityEventsRaw.forEach(evt => {
-                        const typeVal = evt.type as string;
-                        if (!deduplicatedMap[typeVal]) {
-                          deduplicatedMap[typeVal] = evt;
-                        } else {
-                          const existingTime = getTime(deduplicatedMap[typeVal].createdAt);
-                          const incomingTime = getTime(evt.createdAt);
-                          if (incomingTime < existingTime) {
-                            deduplicatedMap[typeVal] = evt;
-                          }
-                        }
-                      });
-                      const activityEvents = Object.values(deduplicatedMap);
-
-                      // Sort events chronologically ascending (oldest first)
-                      activityEvents.sort((a, b) => getTime(a.createdAt) - getTime(b.createdAt));
-
-                      // If there is no stored QueryStatus.QUERIED (Query sent) item, prepend a synthetic one at activeQuery.dateSent
-                      const isQueriedStored = activityEvents.some(evt => evt.type === QueryStatus.QUERIED);
-                      if (!isQueriedStored && activeQuery.dateSent) {
-                        activityEvents.unshift({
-                          type: QueryStatus.QUERIED,
-                          createdAt: activeQuery.dateSent,
-                          note: `Query sent via ${activeQuery.sendMethod || "Email"}`
-                        } as any);
-                      }
-
-                      // Define dynamic showWaiting (Part 4)
-                      // "Waiting to hear back" only shows when the writer has sent something
-                      // and is genuinely waiting for the agent to respond.
-                      // It does NOT show when the agent has requested materials and
-                      // the writer still needs to act.
-                      const WAITING_STATUSES = [
-                        QueryStatus.QUERIED,       // sent query, waiting for any response
-                        QueryStatus.PARTIAL_SENT,  // sent partial, waiting for agent feedback
-                        QueryStatus.FULL_SENT,     // sent full, waiting for agent feedback
-                      ];
-
-                      const showWaiting = WAITING_STATUSES.includes(currentStatus as QueryStatus);
-
-                      // Append to timeline items
-                      const timelineItems = [
-                        ...activityEvents,
-                        ...(showWaiting ? [{ type: 'waiting', synthetic: true } as any] : [])
-                      ];
-
-                      // Helper to format timestamps or strings as D MMM YYYY
-                      const formatDate = (val: any) => {
-                        if (!val) return "";
-                        const d = val && val.toDate ? val.toDate() : (val && val.seconds ? new Date(val.seconds * 1000) : new Date(val));
-                        if (isNaN(d.getTime())) return "";
-                        return d.toLocaleDateString("en-GB", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric"
-                        });
-                      };
-
-                      const TIMELINE_TITLES: Record<QueryStatus, string> = {
-                        [QueryStatus.QUERIED]:            'Query sent',
-                        [QueryStatus.PARTIAL_REQUESTED]:  'Partial manuscript requested',
-                        [QueryStatus.PARTIAL_SENT]:       'Partial manuscript sent',
-                        [QueryStatus.FULL_REQUESTED]:     'Full manuscript requested',
-                        [QueryStatus.FULL_SENT]:          'Full manuscript sent',
-                        [QueryStatus.REVISE_RESUBMIT]:    'Revise & resubmit requested',
-                        [QueryStatus.OFFER]:              'Offer of representation',
-                        [QueryStatus.REJECTED]:           'Query rejected',
-                        [QueryStatus.WITHDRAWN]:          'Query withdrawn',
-                        [QueryStatus.NO_RESPONSE]:        'Closed — no response',
-                      };
-
-                      return timelineItems.map((item, index) => {
-                        const isLast = index === timelineItems.length - 1;
-                        
-                        // Dot rendering
-                        let dotElement = null;
-                        if (item.type === 'waiting') {
-                          dotElement = (
-                            <div 
-                              className="rounded-full z-10 bg-transparent border-[1.5px] border-[#c9a89e] shrink-0 mt-[4px]" 
-                              style={{ width: '12px', height: '12px' }} 
-                            />
-                          );
-                        } else {
-                          const isClosed = [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE].includes(item.type as QueryStatus);
-                          const isOffer = item.type === QueryStatus.OFFER;
-                          
-                          if (isClosed) {
-                            dotElement = (
-                              <div 
-                                className="rounded-full z-10 bg-[#888] flex items-center justify-center text-white shrink-0 mt-[4px] select-none" 
-                                style={{ width: '12px', height: '12px' }}
-                              >
-                                <span className="text-[7.5px] font-bold leading-none">✕</span>
-                              </div>
-                            );
-                          } else if (isOffer) {
-                            dotElement = (
-                              <div 
-                                className="rounded-full z-10 bg-[#6b0f1a] shrink-0 mt-[4px]" 
-                                style={{ width: '12px', height: '12px' }} 
-                              />
-                            );
-                          } else {
-                            dotElement = (
-                              <div 
-                                className="rounded-full z-10 bg-[#7c3d3d] shrink-0 mt-[4px]" 
-                                style={{ width: '12px', height: '12px' }} 
-                              />
-                            );
-                          }
-                        }
-
-                        // Title derivation — a Full-sent entry on a resubmitted query reads "(v2)".
-                        const baseTitle = item.type === 'waiting'
-                          ? 'Waiting to hear back'
-                          : (TIMELINE_TITLES[item.type as QueryStatus] || item.type);
-                        const titleText =
-                          item.type === QueryStatus.FULL_SENT && (activeQuery.revisionRound ?? 1) >= 2
-                            ? `${baseTitle} (v${activeQuery.revisionRound})`
-                            : baseTitle;
-
-                        // Date formatting
-                        const dateText = item.type === 'waiting'
-                          ? (activeQuery.responseDeadline ? formatDate(activeQuery.responseDeadline) : "")
-                          : formatDate(item.createdAt);
-
-                        // Sub-detail calculation
-                        let displaySubDetail = "";
-                        if (item.type !== 'waiting') {
-                          if (item.type === QueryStatus.QUERIED) {
-                            displaySubDetail = `via ${activeQuery.sendMethod || "Email"}`;
-                          } else if (item.type === QueryStatus.PARTIAL_REQUESTED || item.type === QueryStatus.FULL_REQUESTED) {
-                            const qty = item.materialsQuantity || activeQuery.materialsRequestedQuantity;
-                            const mType = item.materialsType || activeQuery.materialsRequestedType;
-                            
-                            if (qty && mType) {
-                              const formattedType = mType.toLowerCase() === "other" ? "" : mType;
-                              displaySubDetail = `Requested: ${qty} ${formattedType}`.trim();
-                            } else if (item.note) {
-                              const parts = item.note.split("—");
-                              if (parts.length > 1) {
-                                displaySubDetail = `Requested: ${parts[1].trim()}`;
-                              } else {
-                                displaySubDetail = item.note;
-                              }
-                            } else {
-                              displaySubDetail = "Requested materials details";
-                            }
-                          } else if (item.type === QueryStatus.REJECTED) {
-                            const feedbackType = item.feedbackType || activeQuery.rejectionFeedbackType;
-                            if (feedbackType === "detailed" || (item.note && item.note.toLowerCase().includes("detailed feedback"))) {
-                              displaySubDetail = "Detailed feedback recorded";
-                            } else if (feedbackType === "standard" || (item.note && item.note.toLowerCase().includes("standard"))) {
-                              displaySubDetail = "Standard rejection";
-                            } else if (feedbackType === "form" || (item.note && item.note.toLowerCase().includes("form"))) {
-                              displaySubDetail = "Form rejection";
-                            } else {
-                              displaySubDetail = "Standard rejection";
-                            }
-                          }
-                        }
-
-                        const hasExpected = !!activeQuery.responseDeadline;
-                        const hasNudge = !!activeQuery.nudgeDate;
-                        const hasTintedBox = hasExpected || hasNudge;
-
-                        return (
-                          <div key={index} className="flex gap-4 animate-fade-in">
-                            {/* Left Dot and Line column */}
-                            <div className="flex flex-col items-center shrink-0 w-3 relative">
-                              {dotElement}
-                              {!isLast && (
-                                <div 
-                                  className="absolute top-[16px] bottom-[-14px] bg-[#e8e0d8]" 
-                                  style={{ width: '1px' }} 
-                                />
-                              )}
-                            </div>
-
-                            {/* Right details column */}
-                            <div className="flex-grow pb-4">
-                              <div className="flex justify-between items-baseline gap-1.5">
-                                <h5 className="text-[12px] font-medium text-[#3a1c14] leading-tight select-none">
-                                  {titleText}
-                                </h5>
-                                {dateText && (
-                                  <span className="text-[10px] text-[#c9a89e] shrink-0 font-mono select-none">
-                                    {dateText}
-                                  </span>
-                                )}
-                              </div>
-
-                              {item.type !== 'waiting' && displaySubDetail && (
-                                <p className="text-[11px] text-[#a08070] mt-0.5 font-sans leading-tight">
-                                  {displaySubDetail}
-                                </p>
-                              )}
-
-                              {item.type === 'waiting' && hasTintedBox && (
-                                <div className="mt-2.5 p-2 px-3 bg-[#FFF0F0] border border-[#fbdcd5] rounded-md text-[11px] leading-relaxed text-[#7c3a2a] space-y-0.5">
-                                  {hasExpected && (
-                                    <div>
-                                      Response expected by {formatDate(activeQuery.responseDeadline)}
-                                    </div>
-                                  )}
-                                  {hasNudge && (
-                                    <div>
-                                      Nudge set for {formatDate(activeQuery.nudgeDate)}
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      });
-                    })()}
-                  </div>
-
-                  {/* Only show a next-step prompt at the bottom of the timeline when clear action is needed */}
-                  {[QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED].includes(currentStatus as QueryStatus) && (
-                    <div className="pt-3 mt-auto shrink-0">
-                      <div className="p-3 bg-[#FAF1EF] border border-[#7c3a2a]/20 rounded-lg shadow-3xs">
-                        <span className="text-[9px] font-mono text-[#7c3a2a] font-bold uppercase tracking-wider block mb-0.5">ACTION REQUIRED</span>
-                        <p className="text-[11px] text-[#3a1c14] leading-relaxed font-sans font-medium">
-                          {currentStatus === QueryStatus.PARTIAL_REQUESTED 
-                            ? "Partial manuscript has been requested. Polish your pages and send them to the agent." 
-                            : "Full manuscript has been requested. Take a deep breath, verify all requirements, and send the full manuscript!"}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </MountCard>
-
-                {/* 2. What you sent card */}
-                <MountCard style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
-                  {/* Sage-band header */}
-                  <div style={{
-                    margin: "6px 6px 0", borderRadius: "8px 8px 0 0",
-                    background: sageBandGradient, borderBottom: `1px solid ${sageBandRule}`,
-                    padding: "7px 14px", display: "flex", alignItems: "center", gap: 7,
-                    flexShrink: 0, position: "relative", zIndex: 4,
-                  }}>
-                    <Send className="w-3.5 h-3.5" style={{ color: "#5a6e58" }} />
-                    <span style={{ fontFamily: FONT_MONO, fontSize: 11, fontWeight: 700, color: "#4a5e48" }}>What you sent</span>
-                  </div>
-
-                  <div style={{ padding: "12px 14px 14px", flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", position: "relative", zIndex: 4 }}>
-                  {isEditMode ? (
-                    <div className="space-y-4 text-xs overflow-y-auto max-h-[440px] custom-query-list-scrollbar pr-0.5">
-
-                      {/* Non-editable Agent */}
-                      <div>
-                        <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1">Target Agent</label>
-                        <div className="w-full p-2 bg-stone-150 text-stone-500 rounded border border-stone-200 text-xs">
-                          {activeAgent.name} ({activeAgent.agency})
-                        </div>
-                        <span className="text-[9px] text-stone-400 mt-0.5 block italic">Cannot be changed</span>
-                      </div>
-
-                      {/* Manuscript selection */}
-                      <div>
-                        <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1">Manuscript Title</label>
-                        <select
-                          value={editMsId}
-                          onChange={(e) => setEditMsId(e.target.value)}
-                          className="w-full text-xs p-2 bg-white border border-[#EBDCD3] rounded focus:outline-[#7c3a2a] cursor-pointer"
-                        >
-                          {manuscripts.map(m => (
-                            <option key={m.id} value={m.id}>{m.title}</option>
-                          ))}
-                        </select>
-                      </div>
-
-                      {/* Date sent */}
-                      <div>
-                        <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1">Date Sent</label>
-                        <input
-                          type="date"
-                          value={editDateSent}
-                          onChange={(e) => handleDateSentChange(e.target.value)}
-                          className="w-full text-xs p-2 bg-white border border-[#EBDCD3] rounded focus:outline-[#7c3a2a]"
-                        />
-                      </div>
-
-                      {/* Send method */}
-                      <div>
-                        <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1">Send Method</label>
-                        <select
-                          value={editSendMethod}
-                          onChange={(e) => setEditSendMethod(e.target.value)}
-                          className="w-full text-xs p-2 bg-white border border-[#EBDCD3] rounded focus:outline-[#7c3a2a] cursor-pointer"
-                        >
-                          <option value="Email">Email</option>
-                          <option value="Online Form">Online Form</option>
-                          <option value="Query Manager">Query Manager</option>
-                          <option value="Post">Post</option>
-                        </select>
-                      </div>
-
-                      {/* Personalisation notes */}
-                      <div>
-                        <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1">Personalisation Notes</label>
-                        <textarea
-                          value={editPersonalisationNotes}
-                          onChange={(e) => setEditPersonalisationNotes(e.target.value)}
-                          className="w-full text-xs p-2 bg-white border border-[#EBDCD3] rounded focus:outline-[#7c3a2a] min-h-[60px]"
-                          placeholder="Hook details..."
-                        />
-                      </div>
-
-                      {/* Edit deadline */}
-                      <div>
-                        <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1">Response Deadline</label>
-                        <input
-                          type="date"
-                          value={editResponseDeadline}
-                          onChange={(e) => setEditResponseDeadline(e.target.value)}
-                          className="w-full text-xs p-2 bg-white border border-[#EBDCD3] rounded focus:outline-[#7c3a2a]"
-                        />
-                      </div>
-
-                      {/* If no response */}
-                      <div>
-                        <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1">If no response</label>
-                        <select
-                          value={editIfNoResponse}
-                          onChange={(e) => setEditIfNoResponse(e.target.value)}
-                          className="w-full text-xs p-2 bg-white border border-[#EBDCD3] rounded focus:outline-[#7c3a2a] cursor-pointer"
-                        >
-                          <option value="Remind me to nudge">Remind me to nudge</option>
-                          <option value="Mark as no response automatically">Mark as no response automatically</option>
-                          <option value="Do nothing">Do nothing</option>
-                        </select>
-                      </div>
-
-                      {/* Materials Sent — same structured editor as Log a Query, so editing never
-                          downgrades the recorded quantities. */}
-                      <div>
-                        <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1.5">Materials Sent</label>
-                        <MaterialsField
-                          materials={editMaterials}
-                          onMaterialsChange={(next) => { setEditMaterials(next); setMaterialsTouched(true); }}
-                          packageId={editPackageId}
-                          onPackageChange={(id) => { setEditPackageId(id); setMaterialsTouched(true); }}
-                          manuscriptId={activeQuery.manuscriptId}
-                          palette={allAvailableMaterials}
-                          allowCustom
-                          onNavigate={onNavigate}
-                        />
-                      </div>
-
-                      {/* Rejection Details */}
-                      {[QueryStatus.REJECTED, QueryStatus.WITHDRAWN].includes(activeQuery.status) && (
-                        <div className="border-t border-[#EBDCD3] pt-3.5 space-y-3.5">
-                          <div>
-                            <label className="block text-[10px] uppercase font-bold text-[#A32D2D] mb-1">Rejection Type</label>
-                            <select
-                              value={editRejectionType}
-                              onChange={(e) => setEditRejectionType(e.target.value)}
-                              className="w-full text-xs p-2 bg-white border border-[#EBDCD3] rounded focus:outline-[#7c3a2a] cursor-pointer"
-                            >
-                              <option value="Personalised rejection">Personalised rejection</option>
-                              <option value="Form rejection">Form rejection</option>
-                              <option value="No reason given">No reason given</option>
-                            </select>
-                          </div>
-                          <div>
-                            <label className="block text-[10px] uppercase font-bold text-[#A32D2D] mb-1">Agent Comments / Feedback</label>
-                            <textarea
-                              value={editAgentComments}
-                              onChange={(e) => setEditAgentComments(e.target.value)}
-                              className="w-full text-xs p-2 bg-white border border-[#EBDCD3] rounded focus:outline-[#7c3a2a] min-h-[60px]"
-                              placeholder="Paste comments here..."
-                            />
-                          </div>
-                        </div>
-                      )}
-
-                    </div>
-                  ) : (
-                    <div className="space-y-4 overflow-y-auto max-h-[440px] custom-query-list-scrollbar pr-0.5">
-                      {/* Manuscript Details Inner Card */}
-                      <div className="bg-[#FAF8F5] border border-[#e8d5cc] rounded-md p-3 space-y-2.5">
-                        <span className="text-[10px] text-stone-400 font-mono uppercase tracking-wider block leading-none font-bold">Manuscript</span>
-                        <div className="inline-block bg-white border border-[#d1d5db] rounded-full px-3.5 py-1 text-[13px] font-bold text-[#7c3d3d] leading-snug shadow-3xs">
-                          {activeMs.title}
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
-                          <div>
-                            <span className="text-stone-400 block uppercase">Genre</span>
-                            <span className="font-medium text-[#3a1c14]">{activeMs.genre}</span>
-                          </div>
-                          <div>
-                            <span className="text-stone-400 block uppercase">Word count</span>
-                            <span className="font-medium text-[#3a1c14]">{activeMs.wordCount.toLocaleString()} values</span>
-                          </div>
-                        </div>
-
-                        <div className="border-t border-[#e8d5cc] my-2" />
-
-                        <p className="text-[11px] italic text-[#6a5045] leading-relaxed">
-                          {activeMs.logline}
-                        </p>
-                      </div>
-
-                      {/* Materials Included */}
-                      <div className="space-y-1.5">
-                        <span className="block text-[10px] font-medium font-mono text-[#c9a89e] uppercase tracking-wider select-none" style={{ letterSpacing: "0.060em" }}>
-                          Materials included
-                        </span>
-                        <div className="flex flex-wrap gap-1.5">
-                          {(() => {
-                            const mats = Array.isArray((activeQuery as any).materialsWanted) 
-                              ? (activeQuery as any).materialsWanted 
-                              : Array.isArray(activeAgent.materialsWanted) 
-                                ? activeAgent.materialsWanted 
-                                : [];
-                            if (mats && mats.length > 0) {
-                              return mats.map((mat: string | QueryMaterial, mIdx: number) => (
-                                <span key={mIdx} className="py-[3px] px-[10px] bg-[#FAF1EF] text-[#7c3a2a] rounded-full text-[11px] font-medium leading-none whitespace-nowrap shadow-3xs select-none">
-                                  {formatQueryMaterial(mat)}
-                                </span>
-                              ));
-                            }
-                            return (
-                              <span className="text-[11px] text-[#7c3a2a] bg-[#FAF1EF] rounded-full py-[3px] px-[10px] italic">No materials recorded.</span>
-                            );
-                          })()}
-                        </div>
-                      </div>
-
-                      {/* Personalisation note */}
-                      <div className="space-y-1.5">
-                        <span className="block text-[10px] font-medium font-mono text-[#c9a89e] uppercase tracking-wider select-none" style={{ letterSpacing: "0.060em" }}>
-                          Your personalisation note
-                        </span>
-                        <p className="text-[11px] italic text-[#a08070] leading-relaxed">
-                          {activeQuery.personalisationNotes 
-                            ? `"${activeQuery.personalisationNotes}"`
-                            : "No personalisation note recorded."}
-                        </p>
-                      </div>
-
-                      {/* Rejection Details Read Mode */}
-                      {[QueryStatus.REJECTED, QueryStatus.WITHDRAWN].includes(activeQuery.status) &&
-                        (activeQuery.rejectionFeedbackType || activeQuery.rejectionFeedbackText || activeQuery.rejectionLesson || activeQuery.rejectionType) && (
-                        <div className="bg-[#FAF1EF] border border-[#e8d5cc]/60 p-3 rounded-lg space-y-1.5 mt-2">
-                          <span className="text-[10px] font-mono text-[#7c3a2a] font-bold uppercase block">Archived Rejection Details</span>
-                          <div className="text-[11px] space-y-1">
-                            {(() => {
-                              const typeLabel = activeQuery.rejectionFeedbackType === "detailed"
-                                ? "Personalised — they left a note"
-                                : activeQuery.rejectionFeedbackType === "standard"
-                                ? "Standard pass"
-                                : activeQuery.rejectionFeedbackType === "form"
-                                ? "Form rejection"
-                                : activeQuery.rejectionType;
-                              const stageLabel = activeQuery.rejectedFromStatus && activeQuery.rejectedFromStatus !== QueryStatus.QUERIED
-                                ? `After: ${activeQuery.rejectedFromStatus}`
-                                : null;
-                              return (
-                                <>
-                                  {typeLabel && (
-                                    <span className="font-semibold text-stone-600 block">Type: <span className="text-stone-800">{typeLabel}</span></span>
-                                  )}
-                                  {stageLabel && (
-                                    <span className="font-semibold text-stone-600 block">{stageLabel}</span>
-                                  )}
-                                </>
-                              );
-                            })()}
-                            {(activeQuery.rejectionFeedbackText || activeQuery.agentComments) && (
-                              <p className="italic text-stone-600 bg-white p-2 border border-stone-200/55 rounded-md mt-1 leading-snug">
-                                "{activeQuery.rejectionFeedbackText || activeQuery.agentComments}"
-                              </p>
-                            )}
-                            {activeQuery.rejectionLesson && (
-                              <div className="mt-1">
-                                <span className="font-semibold text-stone-600 block">Note to self:</span>
-                                <p className="italic text-stone-600 leading-snug">{activeQuery.rejectionLesson}</p>
-                              </div>
-                            )}
-                            {activeAgent?.requeryPreference && (
-                              <span className="font-semibold text-stone-600 block mt-1">
-                                Query this agent again? <span className="text-stone-800 capitalize">{activeAgent.requeryPreference}</span>
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  </div>
-                </MountCard>
-
-                {/* 3. Notes card */}
+              <>
+                {/* 4b — Action band */}
                 {(() => {
-                  const activeJournalEntries = journalEntries
-                    .filter(entry => entry.queryId === activeQuery.id)
-                    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-
+                  const action = getPrimaryAction(currentStatus as QueryStatus);
+                  const agentFirstName = (activeAgent.name || activeAgent.agency || "Agent").split(" ")[0];
+                  const whoseTurnText = action.ballHolder === "writer" ? "Your move"
+                    : action.ballHolder === "agent" ? `Waiting on ${agentFirstName}`
+                    : null;
                   return (
-                    <MountCard style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 350, overflow: "hidden" }}>
-                      {/* Sage-band header */}
-                      <div style={{
-                        margin: "6px 6px 0", borderRadius: "8px 8px 0 0",
-                        background: sageBandGradient, borderBottom: `1px solid ${sageBandRule}`,
-                        padding: "7px 14px", display: "flex", alignItems: "center", gap: 7,
-                        flexShrink: 0, position: "relative", zIndex: 4,
-                      }}>
-                        <Notebook className="w-3.5 h-3.5" style={{ color: "#5a6e58" }} />
-                        <span style={{ fontFamily: FONT_MONO, fontSize: 11, fontWeight: 700, color: "#4a5e48" }}>Notes</span>
-                      </div>
-
-                      <div style={{ padding: "12px 14px 14px", flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", position: "relative", zIndex: 4 }}>
-                      {/* WhatsApp-style messaging box with background extending behind bubbles and text input */}
-                      <div className="flex-grow flex flex-col justify-between p-3.5 h-full min-h-[300px] bg-[#FAF8F5] rounded-xl border border-[#ebd8c5]/40">
-                        {/* Chat Messages scroll area with transparent background */}
-                        <div 
-                          ref={chatContainerRef}
-                          className="flex-grow overflow-y-auto max-h-[250px] pr-1 space-y-2 flex flex-col custom-query-list-scrollbar"
-                          style={{ 
-                            backgroundColor: "transparent"
-                          }}
-                        >
-                          {activeJournalEntries.map((entry, index) => {
-                            const isEditing = editingJournalId === entry.id;
-                            return (
-                              <div 
-                                key={entry.id} 
-                                className="relative group max-w-[85%] bg-white text-[#3a1c14] rounded-[15px] pl-[20px] pr-[20px] py-2 shadow-sm text-[11.5px] leading-relaxed text-left self-start animate-fade-in"
-                                style={{ borderStyle: "none", borderWidth: "0px", backgroundColor: "#ffffff" }}
-                              >
-                                {isEditing ? (
-                                  <div className="flex flex-col gap-1.5 py-1 min-w-[200px] w-full">
-                                    <textarea
-                                      value={editingJournalText}
-                                      onChange={(e) => setEditingJournalText(e.target.value)}
-                                      className="w-full text-[11.5px] border border-stone-200 rounded-md p-1.5 outline-none font-sans bg-[#faf8f5] focus:border-[#7c3d3d] resize-none"
-                                      rows={2}
-                                      autoFocus
-                                    />
-                                    <div className="flex items-center justify-end gap-1.5">
-                                      <button
-                                        type="button"
-                                        onClick={() => setEditingJournalId(null)}
-                                        className="px-2 py-0.5 text-[9px] font-medium text-stone-500 hover:bg-[#faf8f5] rounded cursor-pointer transition-colors"
-                                      >
-                                        Cancel
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={async () => {
-                                          if (!editingJournalText.trim()) return;
-                                          await updateJournalEntry(entry.id, editingJournalText.trim());
-                                          setEditingJournalId(null);
-                                        }}
-                                        className="px-2 py-0.5 text-[9px] font-medium text-white bg-[#7c3d3d] hover:bg-[#6e3528] rounded cursor-pointer transition-colors"
-                                      >
-                                        Save
-                                      </button>
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <>
-                                    {/* Hover Actions Menu */}
-                                    <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-white/90 backdrop-blur-xs px-1 rounded-md border border-stone-100 absolute top-1 right-2 z-10 pointer-events-auto">
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          setEditingJournalId(entry.id);
-                                          setEditingJournalText(entry.entryText);
-                                        }}
-                                        className="text-stone-500 hover:text-[#7c3d3d] transition-colors cursor-pointer p-0.5"
-                                        title="Edit Note"
-                                      >
-                                        <Pencil className="w-3 h-3" />
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={async () => {
-                                          const confirmDelete = window.confirm("Are you sure you want to delete this journal note?");
-                                          if (confirmDelete) {
-                                            await deleteJournalEntry(entry.id);
-                                          }
-                                        }}
-                                        className="text-stone-500 hover:text-red-500 transition-colors cursor-pointer p-0.5"
-                                        title="Delete Note"
-                                      >
-                                        <Trash2 className="w-3 h-3" />
-                                      </button>
-                                    </div>
-
-                                    <p className={`break-words font-sans text-[#3a1c14] whitespace-pre-wrap text-left pr-4 ${index === 0 ? "font-normal italic" : "font-medium"}`}>{entry.entryText}</p>
-                                    <div className="text-[9px] text-[#8c706d] text-left mt-1.5 select-none font-mono flex items-center justify-start gap-1 font-light leading-none">
-                                      <span>{formatWhatsAppDate(entry.createdAt)}</span>
-                                    </div>
-                                  </>
-                                )}
-                              </div>
-                            );
-                          })}
-
-                          {activeJournalEntries.length === 0 && (
-                            <div className="flex-grow flex flex-col items-center justify-center text-center py-8 px-4 h-full my-auto">
-                              <div className="w-10 h-10 rounded-full bg-white/80 flex items-center justify-center mb-2 shadow-4xs">
-                                <Send className="w-4 h-4 text-stone-400 rotate-45 -translate-x-[1px]" />
-                              </div>
-                              <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider font-mono">Activity Journal</span>
-                              <p className="text-[11px] text-stone-400 mt-1 max-w-[180px] leading-snug font-sans">
-                                Send notes on phone calls, agent feedback, or private status updates here.
-                              </p>
+                    <div style={{ margin: "6px 6px 0", borderRadius: "8px 8px 0 0", background: "linear-gradient(180deg,#f6e4db,#eed3c6)", borderBottom: "1px solid rgba(124,58,42,.18)", boxShadow: "inset 0 2px 5px rgba(124,58,42,.12)", padding: "10px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexShrink: 0, position: "relative", zIndex: 4 }}>
+                      {/* Left: wax seal + status label + whose-turn */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                        <div style={{ width: 44, height: 44, borderRadius: "50%", background: "radial-gradient(circle at 35% 30%,#fbeee6,#f1d4c6)", border: "1.5px solid rgba(124,58,42,0.7)", boxShadow: "inset 0 1px 3px rgba(124,58,42,.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          <StatusDot status={activeQuery.status} size={18} />
+                        </div>
+                        <div>
+                          <div style={{ fontFamily: FONT_MONO, fontSize: 10, textTransform: "uppercase" as const, letterSpacing: ".12em", color: "#9a8579" }}>
+                            {statusDisplayLabel(activeQuery)}
+                          </div>
+                          {whoseTurnText && (
+                            <div style={{ fontFamily: "'Caveat', cursive", fontSize: 20, color: "#9a5240", lineHeight: 1.1 }}>
+                              {whoseTurnText}
                             </div>
                           )}
                         </div>
+                      </div>
 
-                        {/* WhatsApp-style Input box */}
-                        <form onSubmit={handlePostJournal} className="mt-3 flex items-center gap-2 select-none shrink-0">
-                          <div className="flex-grow bg-white border border-stone-200 rounded-full py-1.5 px-4 flex items-center shadow-3xs">
-                            <input
-                              type="text"
-                              placeholder="Type a journal note..."
-                              value={journalInput}
-                              onChange={(e) => setJournalInput(e.target.value)}
-                              className="w-full text-xs bg-transparent outline-none border-none text-[#333333] placeholder-stone-400 py-0.5 leading-tight font-sans"
-                            />
-                          </div>
+                      {/* Right: Edit, Download PDF, primary CTA */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0, flexWrap: "wrap" as const, justifyContent: "flex-end" }}>
+                        <button
+                          type="button"
+                          onClick={() => setIsEditMode(prev => !prev)}
+                          style={{ height: 28, padding: "0 12px", borderRadius: 20, border: "1px solid rgba(124,58,42,.22)", background: "rgba(255,255,255,.5)", color: "#7c3a2a", fontSize: 11, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 5 }}
+                        >
+                          <Pencil style={{ width: 12, height: 12 }} />
+                          Edit query
+                        </button>
+                        <button
+                          type="button"
+                          disabled={isGeneratingPDF}
+                          onClick={handleDownloadPDF}
+                          style={{ height: 28, padding: "0 12px", borderRadius: 20, border: "1px solid rgba(124,58,42,.22)", background: "rgba(255,255,255,.5)", color: "#7c3a2a", fontSize: 11, fontWeight: 600, cursor: isGeneratingPDF ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: 5, opacity: isGeneratingPDF ? 0.6 : 1 }}
+                        >
+                          <Download style={{ width: 12, height: 12 }} />
+                          {isGeneratingPDF ? "Generating…" : "Download PDF"}
+                        </button>
+                        {action.kind === "mark-sent" ? (
                           <button
-                            type="submit"
-                            disabled={!journalInput.trim()}
-                            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0 ${
-                              journalInput.trim()
-                                ? "bg-[#00a884] hover:bg-[#008f72] text-white cursor-pointer shadow-3xs hover:scale-105"
-                                : "bg-stone-100 text-stone-300 cursor-not-allowed border border-stone-200"
-                            }`}
+                            ref={markSentTriggerRef}
+                            type="button"
+                            onClick={() => setIsMarkSentOpen(o => !o)}
+                            style={{ height: 28, padding: "0 14px", borderRadius: 20, background: "linear-gradient(180deg,#f5e2da,#efd5ca)", border: "1px solid rgba(124,58,42,.22)", color: burgundy, fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
                           >
-                            <Send className={`w-3.5 h-3.5 ${journalInput.trim() ? "text-white" : "text-stone-300"}`} />
+                            <Send style={{ width: 13, height: 13, strokeWidth: 2.5 } as any} />
+                            {action.label}
                           </button>
-                        </form>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setIsRecordResponseFocusFormOpen(true)}
+                            style={{ height: 28, padding: "0 14px", borderRadius: 20, background: "linear-gradient(180deg,#f5e2da,#efd5ca)", border: "1px solid rgba(124,58,42,.22)", color: burgundy, fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
+                          >
+                            <Check style={{ width: 13, height: 13, strokeWidth: 2.5 } as any} />
+                            {action.label}
+                          </button>
+                        )}
+                        <AnimatePresence>
+                          {isMarkSentOpen && (() => {
+                            const a2 = getPrimaryAction(currentStatus as QueryStatus);
+                            if (a2.kind !== "mark-sent") return null;
+                            return (
+                              <MarkSentPopover
+                                key="mark-sent"
+                                style={markSentMenuStyle}
+                                kind={a2.markKind}
+                                query={activeQuery}
+                                agent={activeAgent}
+                                triggerRef={markSentTriggerRef}
+                                onClose={() => setIsMarkSentOpen(false)}
+                                onRecordResponseInstead={() => {
+                                  setIsMarkSentOpen(false);
+                                  setIsRecordResponseFocusFormOpen(true);
+                                }}
+                                onSave={async ({ sentDate, responseDeadline, nudgeDate }) => {
+                                  await recordMaterialsSent({
+                                    queryId: activeQuery.id,
+                                    targetStatus: a2.target as QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT,
+                                    sentDate,
+                                    isResubmit: a2.markKind === "resubmit",
+                                    responseDeadline,
+                                    nudgeDate,
+                                  });
+                                }}
+                              />
+                            );
+                          })()}
+                        </AnimatePresence>
                       </div>
-                      </div>
-                    </MountCard>
+                    </div>
                   );
                 })()}
 
-                </div>
+                {/* Scrollable body: identity + ledger */}
+                <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column", position: "relative", zIndex: 4, minHeight: 0 }}>
 
-              {/* Edit Mode Footer */}
-              {isEditMode && (
-                <div className="p-3 bg-stone-50 border-t border-[#EBDCD3] flex justify-end gap-3 select-none shrink-0 z-15 shadow-md">
-                  <button
-                    type="button"
-                    onClick={() => setIsEditMode(false)}
-                    className="px-4 py-1.5 border border-stone-300 bg-white hover:bg-stone-55 text-stone-500 text-xs font-bold rounded-lg cursor-pointer transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSaveChanges}
-                    className="px-4 py-1.5 bg-[#7c3a2a] hover:bg-[#632e22] text-white text-xs font-bold rounded-lg cursor-pointer transition-all"
-                  >
-                    Save changes
-                  </button>
-                </div>
-              )}
+                  {/* 4c — Identity */}
+                  {(() => {
+                    const hasName = !!(activeAgent.name?.trim());
+                    const nameplate = hasName ? activeAgent.name : activeAgent.agency;
+                    return (
+                      <div style={{ flexShrink: 0, padding: "16px 24px 12px", textAlign: "center" }}>
+                        {/* Agency-only kicker */}
+                        {!hasName && (
+                          <div style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase" as const, letterSpacing: ".14em", color: labelColor, marginBottom: 4 }}>
+                            Agency · no named agent
+                          </div>
+                        )}
+                        {/* Nameplate flanked by hairline rules */}
+                        <div style={{ display: "flex", alignItems: "center", gap: 14, justifyContent: "center" }}>
+                          <div style={{ flex: 1, height: 1, background: "rgba(124,58,42,.4)", maxWidth: 80 }} />
+                          <h2 style={{ fontFamily: FONT_SERIF, fontSize: 20, fontWeight: 600, textTransform: "uppercase" as const, letterSpacing: ".15em", color: "#3a1c14", margin: 0, lineHeight: 1.15, whiteSpace: "nowrap" as const }}>
+                            {nameplate}
+                          </h2>
+                          <div style={{ flex: 1, height: 1, background: "rgba(124,58,42,.4)", maxWidth: 80 }} />
+                        </div>
+                        {/* Agency line when there's a named agent */}
+                        {hasName && activeAgent.agency && (
+                          <p style={{ fontFamily: FONT_SERIF, fontStyle: "italic", color: burgundy, fontSize: 12, marginTop: 3, marginBottom: 0 }}>
+                            {activeAgent.agency}
+                          </p>
+                        )}
+                        {/* Diamond flourish divider */}
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, margin: "8px auto", width: 120 }}>
+                          <div style={{ flex: 1, height: 1, background: "rgba(124,58,42,.2)" }} />
+                          <div style={{ width: 5, height: 5, background: burgundy, transform: "rotate(45deg)", flexShrink: 0 }} />
+                          <div style={{ flex: 1, height: 1, background: "rgba(124,58,42,.2)" }} />
+                        </div>
+                        {/* Attribute rows */}
+                        <div style={{ display: "flex", flexDirection: "column", gap: 5, alignItems: "center" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, color: labelColor, textTransform: "uppercase" as const, letterSpacing: ".08em" }}>Agent fit</span>
+                            <div style={{ display: "flex", gap: 2, alignItems: "center" }}>
+                              {Array.from({ length: 5 }).map((_, idx) => (
+                                <Star key={idx} style={{ width: 11, height: 11, color: idx < activeAgent.starRating ? "#BA7517" : "#d1c9c0" }} className={idx < activeAgent.starRating ? "fill-current" : ""} />
+                              ))}
+                            </div>
+                          </div>
+                          {activeAgent.genres && activeAgent.genres.length > 0 && (
+                            <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" as const, justifyContent: "center" }}>
+                              <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, color: labelColor, textTransform: "uppercase" as const, letterSpacing: ".08em" }}>Seeking</span>
+                              <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 3, justifyContent: "center" }}>
+                                {activeAgent.genres.map((genre, gIdx) => (
+                                  <span key={gIdx} style={{ background: "rgba(124,58,42,.07)", color: burgundy, fontSize: 9, fontWeight: 700, padding: "2px 8px", borderRadius: 20, border: "1px solid rgba(124,58,42,.15)" }}>
+                                    {genre}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
 
-            </div>
-          ) : (
-            <div className="flex-grow flex flex-col justify-center items-center text-center p-8 text-stone-400 italic">
-              <Notebook className="w-12 h-12 text-[#7c3a2a]/20 mx-auto mb-2" />
-              Select a query dispatch from the column to open detailed materials.
-            </div>
-          )}
-          </div>
-        </MountCard>
+                  {/* Hairline before ledger */}
+                  <div style={{ height: 1, background: "rgba(124,58,42,.15)", flexShrink: 0, margin: "0 16px" }} />
+
+                  {/* 4d — Three-column ledger */}
+                  <div style={{ flex: 1, overflow: "hidden", display: "flex", minHeight: 0 }}>
+
+                    {/* ── Column 1: Tracking ── */}
+                    <div style={{ flex: 1, overflowY: "auto", padding: "12px 14px", display: "flex", flexDirection: "column", minWidth: 0 }} className="custom-query-list-scrollbar">
+                      {/* Running head */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12, flexShrink: 0 }}>
+                        <div style={{ flex: 1, height: 1, background: "rgba(124,58,42,.2)" }} />
+                        <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, textTransform: "uppercase" as const, letterSpacing: ".18em", color: labelColor, whiteSpace: "nowrap" as const }}>Tracking</span>
+                        <div style={{ flex: 1, height: 1, background: "rgba(124,58,42,.2)" }} />
+                      </div>
+                      {/* Timeline (same logic as before) */}
+                      {(() => {
+                        const validEnumValues = Object.values(QueryStatus);
+                        const activityEventsRaw = trackingEvents.filter(evt => validEnumValues.includes(evt.type as QueryStatus));
+                        const getTime = (val: any) => {
+                          if (!val) return Date.now();
+                          if (val.toDate) return val.toDate().getTime();
+                          if (val.seconds) return val.seconds * 1000;
+                          return new Date(val).getTime();
+                        };
+                        const deduplicatedMap: { [key: string]: any } = {};
+                        activityEventsRaw.forEach(evt => {
+                          const typeVal = evt.type as string;
+                          if (!deduplicatedMap[typeVal]) {
+                            deduplicatedMap[typeVal] = evt;
+                          } else {
+                            const existingTime = getTime(deduplicatedMap[typeVal].createdAt);
+                            const incomingTime = getTime(evt.createdAt);
+                            if (incomingTime < existingTime) deduplicatedMap[typeVal] = evt;
+                          }
+                        });
+                        const activityEvents = Object.values(deduplicatedMap);
+                        activityEvents.sort((a, b) => getTime(a.createdAt) - getTime(b.createdAt));
+                        const isQueriedStored = activityEvents.some(evt => evt.type === QueryStatus.QUERIED);
+                        if (!isQueriedStored && activeQuery.dateSent) {
+                          activityEvents.unshift({ type: QueryStatus.QUERIED, createdAt: activeQuery.dateSent, note: `Query sent via ${activeQuery.sendMethod || "Email"}` } as any);
+                        }
+                        const WAITING_STATUSES = [QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT];
+                        const showWaiting = WAITING_STATUSES.includes(currentStatus as QueryStatus);
+                        const timelineItems = [...activityEvents, ...(showWaiting ? [{ type: 'waiting', synthetic: true } as any] : [])];
+                        const formatDate = (val: any) => {
+                          if (!val) return "";
+                          const d = val && val.toDate ? val.toDate() : (val && val.seconds ? new Date(val.seconds * 1000) : new Date(val));
+                          if (isNaN(d.getTime())) return "";
+                          return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+                        };
+                        const TIMELINE_TITLES: Record<QueryStatus, string> = {
+                          [QueryStatus.QUERIED]: 'Query sent',
+                          [QueryStatus.PARTIAL_REQUESTED]: 'Partial manuscript requested',
+                          [QueryStatus.PARTIAL_SENT]: 'Partial manuscript sent',
+                          [QueryStatus.FULL_REQUESTED]: 'Full manuscript requested',
+                          [QueryStatus.FULL_SENT]: 'Full manuscript sent',
+                          [QueryStatus.REVISE_RESUBMIT]: 'Revise & resubmit requested',
+                          [QueryStatus.OFFER]: 'Offer of representation',
+                          [QueryStatus.REJECTED]: 'Query rejected',
+                          [QueryStatus.WITHDRAWN]: 'Query withdrawn',
+                          [QueryStatus.NO_RESPONSE]: 'Closed — no response',
+                        };
+                        return timelineItems.map((item, index) => {
+                          const isLast = index === timelineItems.length - 1;
+                          let dotElement = null;
+                          if (item.type === 'waiting') {
+                            dotElement = <div className="rounded-full z-10 bg-transparent border-[1.5px] border-[#c9a89e] shrink-0 mt-[4px]" style={{ width: 12, height: 12 }} />;
+                          } else {
+                            const isClosed = [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE].includes(item.type as QueryStatus);
+                            const isOffer = item.type === QueryStatus.OFFER;
+                            if (isClosed) {
+                              dotElement = <div className="rounded-full z-10 bg-[#888] flex items-center justify-center text-white shrink-0 mt-[4px] select-none" style={{ width: 12, height: 12 }}><span className="text-[7.5px] font-bold leading-none">✕</span></div>;
+                            } else if (isOffer) {
+                              dotElement = <div className="rounded-full z-10 bg-[#6b0f1a] shrink-0 mt-[4px]" style={{ width: 12, height: 12 }} />;
+                            } else {
+                              dotElement = <div className="rounded-full z-10 bg-[#7c3d3d] shrink-0 mt-[4px]" style={{ width: 12, height: 12 }} />;
+                            }
+                          }
+                          const baseTitle = item.type === 'waiting' ? 'Waiting to hear back' : (TIMELINE_TITLES[item.type as QueryStatus] || item.type);
+                          const titleText = item.type === QueryStatus.FULL_SENT && (activeQuery.revisionRound ?? 1) >= 2 ? `${baseTitle} (v${activeQuery.revisionRound})` : baseTitle;
+                          const dateText = item.type === 'waiting' ? (activeQuery.responseDeadline ? formatDate(activeQuery.responseDeadline) : "") : formatDate(item.createdAt);
+                          let displaySubDetail = "";
+                          if (item.type !== 'waiting') {
+                            if (item.type === QueryStatus.QUERIED) {
+                              displaySubDetail = `via ${activeQuery.sendMethod || "Email"}`;
+                            } else if (item.type === QueryStatus.PARTIAL_REQUESTED || item.type === QueryStatus.FULL_REQUESTED) {
+                              const qty = item.materialsQuantity || activeQuery.materialsRequestedQuantity;
+                              const mType = item.materialsType || activeQuery.materialsRequestedType;
+                              if (qty && mType) {
+                                const formattedType = mType.toLowerCase() === "other" ? "" : mType;
+                                displaySubDetail = `Requested: ${qty} ${formattedType}`.trim();
+                              } else if (item.note) {
+                                const parts = item.note.split("—");
+                                displaySubDetail = parts.length > 1 ? `Requested: ${parts[1].trim()}` : item.note;
+                              } else {
+                                displaySubDetail = "Requested materials details";
+                              }
+                            } else if (item.type === QueryStatus.REJECTED) {
+                              const feedbackType = item.feedbackType || activeQuery.rejectionFeedbackType;
+                              if (feedbackType === "detailed" || (item.note && item.note.toLowerCase().includes("detailed feedback"))) displaySubDetail = "Detailed feedback recorded";
+                              else if (feedbackType === "standard" || (item.note && item.note.toLowerCase().includes("standard"))) displaySubDetail = "Standard rejection";
+                              else if (feedbackType === "form" || (item.note && item.note.toLowerCase().includes("form"))) displaySubDetail = "Form rejection";
+                              else displaySubDetail = "Standard rejection";
+                            }
+                          }
+                          const hasExpected = !!activeQuery.responseDeadline;
+                          const hasNudge = !!activeQuery.nudgeDate;
+                          const hasTintedBox = hasExpected || hasNudge;
+                          return (
+                            <div key={index} className="flex gap-4 animate-fade-in">
+                              <div className="flex flex-col items-center shrink-0 w-3 relative">
+                                {dotElement}
+                                {!isLast && <div className="absolute top-[16px] bottom-[-14px] bg-[#e8e0d8]" style={{ width: 1 }} />}
+                              </div>
+                              <div className="flex-grow pb-4">
+                                <div className="flex justify-between items-baseline gap-1.5">
+                                  <h5 className="text-[12px] font-medium text-[#3a1c14] leading-tight select-none">{titleText}</h5>
+                                  {dateText && <span className="text-[10px] text-[#c9a89e] shrink-0 font-mono select-none">{dateText}</span>}
+                                </div>
+                                {item.type !== 'waiting' && displaySubDetail && (
+                                  <p className="text-[11px] text-[#a08070] mt-0.5 font-sans leading-tight">{displaySubDetail}</p>
+                                )}
+                                {item.type === 'waiting' && hasTintedBox && (
+                                  <div className="mt-2.5 p-2 px-3 bg-[#FFF0F0] border border-[#fbdcd5] rounded-md text-[11px] leading-relaxed text-[#7c3a2a] space-y-0.5">
+                                    {hasExpected && <div>Response expected by {formatDate(activeQuery.responseDeadline)}</div>}
+                                    {hasNudge && <div>Nudge set for {formatDate(activeQuery.nudgeDate)}</div>}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        });
+                      })()}
+                      {/* Action required prompt */}
+                      {[QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED].includes(currentStatus as QueryStatus) && (
+                        <div className="pt-3 mt-auto shrink-0">
+                          <div className="p-3 bg-[#FAF1EF] border border-[#7c3a2a]/20 rounded-lg shadow-3xs">
+                            <span className="text-[9px] font-mono text-[#7c3a2a] font-bold uppercase tracking-wider block mb-0.5">ACTION REQUIRED</span>
+                            <p className="text-[11px] text-[#3a1c14] leading-relaxed font-sans font-medium">
+                              {currentStatus === QueryStatus.PARTIAL_REQUESTED ? "Partial manuscript has been requested. Polish your pages and send them to the agent." : "Full manuscript has been requested. Take a deep breath, verify all requirements, and send the full manuscript!"}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Ledger divider */}
+                    <div style={{ width: 1, display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0, margin: "16px 0" }}>
+                      <div style={{ flex: 1, width: 1, background: "linear-gradient(to bottom, transparent, rgba(124,58,42,.28) 30%)" }} />
+                      <div style={{ width: 5, height: 5, background: burgundy, transform: "rotate(45deg)", flexShrink: 0 }} />
+                      <div style={{ flex: 1, width: 1, background: "linear-gradient(to bottom, rgba(124,58,42,.28) 70%, transparent)" }} />
+                    </div>
+
+                    {/* ── Column 2: What you sent ── */}
+                    <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, minHeight: 0, overflow: "hidden", padding: "12px 14px" }}>
+                      {/* Running head */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12, flexShrink: 0 }}>
+                        <div style={{ flex: 1, height: 1, background: "rgba(124,58,42,.2)" }} />
+                        <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, textTransform: "uppercase" as const, letterSpacing: ".18em", color: labelColor, whiteSpace: "nowrap" as const }}>What you sent</span>
+                        <div style={{ flex: 1, height: 1, background: "rgba(124,58,42,.2)" }} />
+                      </div>
+                      {/* Content area */}
+                      <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }} className="custom-query-list-scrollbar">
+                        {isEditMode ? (
+                          <div className="space-y-4 text-xs">
+                            <div>
+                              <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1">Target Agent</label>
+                              <div className="w-full p-2 bg-stone-150 text-stone-500 rounded border border-stone-200 text-xs">{activeAgent.name} ({activeAgent.agency})</div>
+                              <span className="text-[9px] text-stone-400 mt-0.5 block italic">Cannot be changed</span>
+                            </div>
+                            <div>
+                              <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1">Manuscript Title</label>
+                              <select value={editMsId} onChange={(e) => setEditMsId(e.target.value)} className="w-full text-xs p-2 bg-white border border-[#EBDCD3] rounded focus:outline-[#7c3a2a] cursor-pointer">
+                                {manuscripts.map(m => <option key={m.id} value={m.id}>{m.title}</option>)}
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1">Date Sent</label>
+                              <input type="date" value={editDateSent} onChange={(e) => handleDateSentChange(e.target.value)} className="w-full text-xs p-2 bg-white border border-[#EBDCD3] rounded focus:outline-[#7c3a2a]" />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1">Send Method</label>
+                              <select value={editSendMethod} onChange={(e) => setEditSendMethod(e.target.value)} className="w-full text-xs p-2 bg-white border border-[#EBDCD3] rounded focus:outline-[#7c3a2a] cursor-pointer">
+                                <option value="Email">Email</option>
+                                <option value="Online Form">Online Form</option>
+                                <option value="Query Manager">Query Manager</option>
+                                <option value="Post">Post</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1">Personalisation Notes</label>
+                              <textarea value={editPersonalisationNotes} onChange={(e) => setEditPersonalisationNotes(e.target.value)} className="w-full text-xs p-2 bg-white border border-[#EBDCD3] rounded focus:outline-[#7c3a2a] min-h-[60px]" placeholder="Hook details..." />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1">Response Deadline</label>
+                              <input type="date" value={editResponseDeadline} onChange={(e) => setEditResponseDeadline(e.target.value)} className="w-full text-xs p-2 bg-white border border-[#EBDCD3] rounded focus:outline-[#7c3a2a]" />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1">If no response</label>
+                              <select value={editIfNoResponse} onChange={(e) => setEditIfNoResponse(e.target.value)} className="w-full text-xs p-2 bg-white border border-[#EBDCD3] rounded focus:outline-[#7c3a2a] cursor-pointer">
+                                <option value="Remind me to nudge">Remind me to nudge</option>
+                                <option value="Mark as no response automatically">Mark as no response automatically</option>
+                                <option value="Do nothing">Do nothing</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1.5">Materials Sent</label>
+                              <MaterialsField
+                                materials={editMaterials}
+                                onMaterialsChange={(next) => { setEditMaterials(next); setMaterialsTouched(true); }}
+                                packageId={editPackageId}
+                                onPackageChange={(id) => { setEditPackageId(id); setMaterialsTouched(true); }}
+                                manuscriptId={activeQuery.manuscriptId}
+                                palette={allAvailableMaterials}
+                                allowCustom
+                                onNavigate={onNavigate}
+                              />
+                            </div>
+                            {[QueryStatus.REJECTED, QueryStatus.WITHDRAWN].includes(activeQuery.status) && (
+                              <div className="border-t border-[#EBDCD3] pt-3.5 space-y-3.5">
+                                <div>
+                                  <label className="block text-[10px] uppercase font-bold text-[#A32D2D] mb-1">Rejection Type</label>
+                                  <select value={editRejectionType} onChange={(e) => setEditRejectionType(e.target.value)} className="w-full text-xs p-2 bg-white border border-[#EBDCD3] rounded focus:outline-[#7c3a2a] cursor-pointer">
+                                    <option value="Personalised rejection">Personalised rejection</option>
+                                    <option value="Form rejection">Form rejection</option>
+                                    <option value="No reason given">No reason given</option>
+                                  </select>
+                                </div>
+                                <div>
+                                  <label className="block text-[10px] uppercase font-bold text-[#A32D2D] mb-1">Agent Comments / Feedback</label>
+                                  <textarea value={editAgentComments} onChange={(e) => setEditAgentComments(e.target.value)} className="w-full text-xs p-2 bg-white border border-[#EBDCD3] rounded focus:outline-[#7c3a2a] min-h-[60px]" placeholder="Paste comments here..." />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            <div className="bg-[#FAF8F5] border border-[#e8d5cc] rounded-md p-3 space-y-2.5">
+                              <span className="text-[10px] text-stone-400 font-mono uppercase tracking-wider block leading-none font-bold">Manuscript</span>
+                              <div className="inline-block bg-white border border-[#d1d5db] rounded-full px-3.5 py-1 text-[13px] font-bold text-[#7c3d3d] leading-snug shadow-3xs">{activeMs.title}</div>
+                              <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
+                                <div><span className="text-stone-400 block uppercase">Genre</span><span className="font-medium text-[#3a1c14]">{activeMs.genre}</span></div>
+                                <div><span className="text-stone-400 block uppercase">Word count</span><span className="font-medium text-[#3a1c14]">{activeMs.wordCount.toLocaleString()} words</span></div>
+                              </div>
+                              <div className="border-t border-[#e8d5cc] my-2" />
+                              <p className="text-[11px] italic text-[#6a5045] leading-relaxed">{activeMs.logline}</p>
+                            </div>
+                            <div className="space-y-1.5">
+                              <span className="block text-[10px] font-medium font-mono text-[#c9a89e] uppercase tracking-wider select-none" style={{ letterSpacing: "0.060em" }}>Materials included</span>
+                              <div className="flex flex-wrap gap-1.5">
+                                {(() => {
+                                  const mats = Array.isArray((activeQuery as any).materialsWanted) ? (activeQuery as any).materialsWanted : Array.isArray(activeAgent.materialsWanted) ? activeAgent.materialsWanted : [];
+                                  if (mats && mats.length > 0) return mats.map((mat: string | QueryMaterial, mIdx: number) => (
+                                    <span key={mIdx} className="py-[3px] px-[10px] bg-[#FAF1EF] text-[#7c3a2a] rounded-full text-[11px] font-medium leading-none whitespace-nowrap shadow-3xs select-none">{formatQueryMaterial(mat)}</span>
+                                  ));
+                                  return <span className="text-[11px] text-[#7c3a2a] bg-[#FAF1EF] rounded-full py-[3px] px-[10px] italic">No materials recorded.</span>;
+                                })()}
+                              </div>
+                            </div>
+                            <div className="space-y-1.5">
+                              <span className="block text-[10px] font-medium font-mono text-[#c9a89e] uppercase tracking-wider select-none" style={{ letterSpacing: "0.060em" }}>Your personalisation note</span>
+                              <p className="text-[11px] italic text-[#a08070] leading-relaxed">{activeQuery.personalisationNotes ? `"${activeQuery.personalisationNotes}"` : "No personalisation note recorded."}</p>
+                            </div>
+                            {[QueryStatus.REJECTED, QueryStatus.WITHDRAWN].includes(activeQuery.status) && (activeQuery.rejectionFeedbackType || activeQuery.rejectionFeedbackText || activeQuery.rejectionLesson || activeQuery.rejectionType) && (
+                              <div className="bg-[#FAF1EF] border border-[#e8d5cc]/60 p-3 rounded-lg space-y-1.5 mt-2">
+                                <span className="text-[10px] font-mono text-[#7c3a2a] font-bold uppercase block">Archived Rejection Details</span>
+                                <div className="text-[11px] space-y-1">
+                                  {(() => {
+                                    const typeLabel = activeQuery.rejectionFeedbackType === "detailed" ? "Personalised — they left a note" : activeQuery.rejectionFeedbackType === "standard" ? "Standard pass" : activeQuery.rejectionFeedbackType === "form" ? "Form rejection" : activeQuery.rejectionType;
+                                    const stageLabel = activeQuery.rejectedFromStatus && activeQuery.rejectedFromStatus !== QueryStatus.QUERIED ? `After: ${activeQuery.rejectedFromStatus}` : null;
+                                    return (
+                                      <>
+                                        {typeLabel && <span className="font-semibold text-stone-600 block">Type: <span className="text-stone-800">{typeLabel}</span></span>}
+                                        {stageLabel && <span className="font-semibold text-stone-600 block">{stageLabel}</span>}
+                                      </>
+                                    );
+                                  })()}
+                                  {(activeQuery.rejectionFeedbackText || activeQuery.agentComments) && (
+                                    <p className="italic text-stone-600 bg-white p-2 border border-stone-200/55 rounded-md mt-1 leading-snug">"{activeQuery.rejectionFeedbackText || activeQuery.agentComments}"</p>
+                                  )}
+                                  {activeQuery.rejectionLesson && (
+                                    <div className="mt-1">
+                                      <span className="font-semibold text-stone-600 block">Note to self:</span>
+                                      <p className="italic text-stone-600 leading-snug">{activeQuery.rejectionLesson}</p>
+                                    </div>
+                                  )}
+                                  {activeAgent?.requeryPreference && (
+                                    <span className="font-semibold text-stone-600 block mt-1">Query this agent again? <span className="text-stone-800 capitalize">{activeAgent.requeryPreference}</span></span>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      {/* Edit mode save/cancel footer */}
+                      {isEditMode && (
+                        <div style={{ flexShrink: 0, paddingTop: 10, borderTop: "1px solid #EBDCD3", display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 8 }}>
+                          <button type="button" onClick={() => setIsEditMode(false)} style={{ padding: "5px 14px", border: "1px solid #d1d5db", background: "white", color: "#6b7280", fontSize: 11, fontWeight: 700, borderRadius: 6, cursor: "pointer" }}>Cancel</button>
+                          <button type="button" onClick={handleSaveChanges} style={{ padding: "5px 14px", background: "#7c3a2a", color: "white", fontSize: 11, fontWeight: 700, borderRadius: 6, cursor: "pointer", border: "none" }}>Save changes</button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Ledger divider */}
+                    <div style={{ width: 1, display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0, margin: "16px 0" }}>
+                      <div style={{ flex: 1, width: 1, background: "linear-gradient(to bottom, transparent, rgba(124,58,42,.28) 30%)" }} />
+                      <div style={{ width: 5, height: 5, background: burgundy, transform: "rotate(45deg)", flexShrink: 0 }} />
+                      <div style={{ flex: 1, width: 1, background: "linear-gradient(to bottom, rgba(124,58,42,.28) 70%, transparent)" }} />
+                    </div>
+
+                    {/* ── Column 3: Notes ── */}
+                    <div style={{ flex: 1, overflow: "hidden", padding: "12px 14px", display: "flex", flexDirection: "column", minWidth: 0 }}>
+                      {/* Running head */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12, flexShrink: 0 }}>
+                        <div style={{ flex: 1, height: 1, background: "rgba(124,58,42,.2)" }} />
+                        <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, textTransform: "uppercase" as const, letterSpacing: ".18em", color: labelColor, whiteSpace: "nowrap" as const }}>Notes</span>
+                        <div style={{ flex: 1, height: 1, background: "rgba(124,58,42,.2)" }} />
+                      </div>
+                      {/* Notes content */}
+                      {(() => {
+                        const activeJournalEntries = journalEntries
+                          .filter(entry => entry.queryId === activeQuery.id)
+                          .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+                        return (
+                          <div className="flex-grow flex flex-col justify-between p-3.5 h-full bg-[#FAF8F5] rounded-xl border border-[#ebd8c5]/40" style={{ overflow: "hidden", minHeight: 0 }}>
+                            <div ref={chatContainerRef} className="flex-grow overflow-y-auto pr-1 space-y-2 flex flex-col custom-query-list-scrollbar" style={{ backgroundColor: "transparent" }}>
+                              {activeJournalEntries.map((entry, index) => {
+                                const isEditing = editingJournalId === entry.id;
+                                return (
+                                  <div key={entry.id} className="relative group max-w-[85%] bg-white text-[#3a1c14] rounded-[15px] pl-[20px] pr-[20px] py-2 shadow-sm text-[11.5px] leading-relaxed text-left self-start animate-fade-in" style={{ borderStyle: "none", borderWidth: "0px", backgroundColor: "#ffffff" }}>
+                                    {isEditing ? (
+                                      <div className="flex flex-col gap-1.5 py-1 min-w-[200px] w-full">
+                                        <textarea value={editingJournalText} onChange={(e) => setEditingJournalText(e.target.value)} className="w-full text-[11.5px] border border-stone-200 rounded-md p-1.5 outline-none font-sans bg-[#faf8f5] focus:border-[#7c3d3d] resize-none" rows={2} autoFocus />
+                                        <div className="flex items-center justify-end gap-1.5">
+                                          <button type="button" onClick={() => setEditingJournalId(null)} className="px-2 py-0.5 text-[9px] font-medium text-stone-500 hover:bg-[#faf8f5] rounded cursor-pointer transition-colors">Cancel</button>
+                                          <button type="button" onClick={async () => { if (!editingJournalText.trim()) return; await updateJournalEntry(entry.id, editingJournalText.trim()); setEditingJournalId(null); }} className="px-2 py-0.5 text-[9px] font-medium text-white bg-[#7c3d3d] hover:bg-[#6e3528] rounded cursor-pointer transition-colors">Save</button>
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <>
+                                        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-white/90 backdrop-blur-xs px-1 rounded-md border border-stone-100 absolute top-1 right-2 z-10 pointer-events-auto">
+                                          <button type="button" onClick={() => { setEditingJournalId(entry.id); setEditingJournalText(entry.entryText); }} className="text-stone-500 hover:text-[#7c3d3d] transition-colors cursor-pointer p-0.5" title="Edit Note"><Pencil className="w-3 h-3" /></button>
+                                          <button type="button" onClick={async () => { const confirmDelete = window.confirm("Are you sure you want to delete this journal note?"); if (confirmDelete) await deleteJournalEntry(entry.id); }} className="text-stone-500 hover:text-red-500 transition-colors cursor-pointer p-0.5" title="Delete Note"><Trash2 className="w-3 h-3" /></button>
+                                        </div>
+                                        <p className={`break-words font-sans text-[#3a1c14] whitespace-pre-wrap text-left pr-4 ${index === 0 ? "font-normal italic" : "font-medium"}`}>{entry.entryText}</p>
+                                        <div className="text-[9px] text-[#8c706d] text-left mt-1.5 select-none font-mono flex items-center justify-start gap-1 font-light leading-none"><span>{formatWhatsAppDate(entry.createdAt)}</span></div>
+                                      </>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                              {activeJournalEntries.length === 0 && (
+                                <div className="flex-grow flex flex-col items-center justify-center text-center py-8 px-4 h-full my-auto">
+                                  <div className="w-10 h-10 rounded-full bg-white/80 flex items-center justify-center mb-2 shadow-4xs"><Send className="w-4 h-4 text-stone-400 rotate-45 -translate-x-[1px]" /></div>
+                                  <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider font-mono">Activity Journal</span>
+                                  <p className="text-[11px] text-stone-400 mt-1 max-w-[180px] leading-snug font-sans">Send notes on phone calls, agent feedback, or private status updates here.</p>
+                                </div>
+                              )}
+                            </div>
+                            <form onSubmit={handlePostJournal} className="mt-3 flex items-center gap-2 select-none shrink-0">
+                              <div className="flex-grow bg-white border border-stone-200 rounded-full py-1.5 px-4 flex items-center shadow-3xs">
+                                <input type="text" placeholder="Type a journal note..." value={journalInput} onChange={(e) => setJournalInput(e.target.value)} className="w-full text-xs bg-transparent outline-none border-none text-[#333333] placeholder-stone-400 py-0.5 leading-tight font-sans" />
+                              </div>
+                              <button type="submit" disabled={!journalInput.trim()} className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0 ${journalInput.trim() ? "bg-[#00a884] hover:bg-[#008f72] text-white cursor-pointer shadow-3xs hover:scale-105" : "bg-stone-100 text-stone-300 cursor-not-allowed border border-stone-200"}`}>
+                                <Send className={`w-3.5 h-3.5 ${journalInput.trim() ? "text-white" : "text-stone-300"}`} />
+                              </button>
+                            </form>
+                          </div>
+                        );
+                      })()}
+                    </div>
+
+                  </div>{/* end three-column ledger */}
+                </div>{/* end scrollable body */}
+              </>
+            ) : (
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: 32, color: "#9c8878", position: "relative", zIndex: 4 }}>
+                <Notebook style={{ width: 48, height: 48, color: "rgba(124,58,42,.2)", marginBottom: 8 }} />
+                <span>Select a query to open the reading pane.</span>
+              </div>
+            )}
+          </MountCard>
+        </div>
       </div>
 
     {activeQuery && (

@@ -17,6 +17,7 @@ import {
   Bell,
   BookOpen,
   ChevronDown,
+  HelpCircle,
   LogOut,
   Sparkles,
   User,
@@ -148,6 +149,107 @@ export const Nav: React.FC<NavProps> = ({ activeTab, onNavigate, searchQuery, se
       setSuccessAnimationTaskId(null);
     }, 450);
   };
+
+  // On the Queries route the sidebar (z-51) covers the full left side, so the top bar
+  // slims to 36px and shows only the right cluster — logo / links / search are in the sidebar.
+  if (activeTab === "queries") {
+    return (
+      <>
+        {(showUserDropdown || showBellDropdown) && (
+          <div className="fixed inset-0 z-40 bg-transparent" onClick={closeAll} />
+        )}
+        <header
+          className="sticky top-0 z-50"
+          style={{
+            background: kraft,
+            borderBottom: `1.5px solid ${scrolled ? "#b8b2a8" : "transparent"}`,
+            transition: "border-color 0.25s ease",
+          }}
+        >
+          <div className="flex items-center justify-end gap-3 px-4 md:px-10 lg:px-14 xl:px-16" style={{ height: 36 }}>
+            {/* Help */}
+            <button
+              onClick={() => onNavigate("help")}
+              className="flex items-center justify-center cursor-pointer"
+              style={{ background: "transparent", border: "none", padding: 4, color: burgundy }}
+              title="Help Centre"
+              aria-label="Help Centre"
+            >
+              <HelpCircle className="w-[16px] h-[16px]" />
+            </button>
+
+            {/* Settings */}
+            <button
+              onClick={() => { onNavigate("account"); closeAll(); }}
+              className="flex items-center justify-center cursor-pointer"
+              style={{ background: "transparent", border: "none", padding: 4, color: burgundy }}
+              title="Settings"
+              aria-label="Settings"
+            >
+              <Settings className="w-[16px] h-[16px]" />
+            </button>
+
+            {/* User chip */}
+            <div className="relative flex items-center">
+              <button
+                onClick={() => { setShowUserDropdown(!showUserDropdown); setShowBellDropdown(false); }}
+                className="flex items-center gap-1.5 cursor-pointer"
+                style={{ background: "transparent", border: "none", padding: 2 }}
+              >
+                <span
+                  className="flex items-center justify-center select-none shrink-0"
+                  style={{
+                    width: 24, height: 24, borderRadius: "50%",
+                    background: parchment, border: "1px solid rgba(124,58,42,0.25)",
+                    fontFamily: FONT_SERIF, fontSize: 11, fontWeight: 500, color: burgundy,
+                  }}
+                >
+                  {currentUser.name[0]?.toUpperCase()}
+                </span>
+                <ChevronDown className="w-3 h-3 shrink-0" style={{ color: labelColor }} />
+              </button>
+
+              <AnimatePresence>
+                {showUserDropdown && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 4 }}
+                    transition={{ duration: 0.12 }}
+                    className="absolute right-0 top-[calc(100%+8px)] w-52 p-1 text-left"
+                    style={{
+                      background: parchment, border: "0.5px solid #e0d5c8",
+                      borderRadius: 12, boxShadow: "0 8px 24px rgba(58,28,20,0.16)", zIndex: 60, fontFamily: FONT_SANS,
+                    }}
+                  >
+                    <div className="px-3 py-2" style={{ borderBottom: hairline }}>
+                      <p style={{ fontSize: 12, fontWeight: 600, color: bodyInk }}>{currentUser.name}</p>
+                      <p className="truncate" style={{ fontSize: 10, color: mutedInk, marginTop: 2 }}>{currentUser.email}</p>
+                    </div>
+                    <div className="py-1">
+                      <MenuItem onClick={() => { onNavigate("account"); setShowUserDropdown(false); }}>
+                        <span className="flex items-center gap-1.5"><User className="w-3.5 h-3.5" style={{ color: burgundy }} /> My Account</span>
+                      </MenuItem>
+                      <MenuItem onClick={() => { onNavigate("plans"); setShowUserDropdown(false); }}>
+                        <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5" style={{ color: burgundy }} /> {currentUser.plan === UserPlan.PRO ? "Plans" : "Upgrade to Pro"}</span>
+                      </MenuItem>
+                      <MenuItem onClick={() => { onNavigate("import"); setShowUserDropdown(false); }}>
+                        <span className="flex items-center gap-1.5"><BookOpen className="w-3.5 h-3.5" style={{ color: burgundy }} /> Import CSV Data</span>
+                      </MenuItem>
+                      <MenuDivider />
+                      <MenuItem onClick={() => { logout(); setShowUserDropdown(false); }}>
+                        <span className="flex items-center gap-1.5"><LogOut className="w-3.5 h-3.5" /> Log Out</span>
+                      </MenuItem>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </header>
+      </>
+    );
+  }
 
   return (
     <>
