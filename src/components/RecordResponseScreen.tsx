@@ -124,6 +124,34 @@ export const RecordResponseScreen: React.FC<RecordResponseScreenProps> = ({ isOp
     setError(null);
   };
 
+  // Reopen the picker to choose a different query (clears the in-progress outcome).
+  const reopenList = () => {
+    setSelectedQueryId("");
+    setOutcome(null);
+    setPendingOutcome(null);
+    setError(null);
+  };
+
+  // Row content (StatusDot + agent · agency + manuscript · status), shared by the list and the
+  // collapsed "selected" row.
+  const queryRowInner = (q: any) => {
+    const a = agentFor(q);
+    return (
+      <>
+        <StatusDot status={q.status} size={20} />
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <span style={{ display: "block", fontFamily: FONT_SANS, fontSize: 13, color: bodyInk, fontWeight: 500 }}>
+            {a?.name?.trim() || a?.agency || "Unknown agent"}
+            {a?.name?.trim() && a?.agency ? <span style={{ fontWeight: 400, color: mutedInk }}> · {a.agency}</span> : null}
+          </span>
+          <span style={{ display: "block", fontFamily: FONT_SANS, fontSize: 11.5, color: mutedInk, marginTop: 1 }}>
+            {msTitleFor(q)} · {q.status}
+          </span>
+        </span>
+      </>
+    );
+  };
+
   const pickOutcome = (o: QueryStatus) => {
     setError(null);
     if (!selectedQuery) return;
@@ -226,47 +254,51 @@ export const RecordResponseScreen: React.FC<RecordResponseScreenProps> = ({ isOp
             </p>
           ) : (
             <>
-              {/* ── Which query? (first ~5 visible; scroll for the rest, edges fade mid-scroll) ── */}
+              {/* ── Which query? ── Once one is picked the list collapses to just that row + a
+                  "select a different query" button, to keep the container compact. ── */}
               <label style={fieldLabel}>Which query?</label>
-              <FadeScroll maxHeight={330} style={{ marginBottom: 18 }}>
-                <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-                {awaiting.map((q) => {
-                  const a = agentFor(q);
-                  const sel = q.id === selectedQueryId;
-                  return (
-                    <button
-                      key={q.id}
-                      type="button"
-                      onClick={() => selectQuery(q.id)}
-                      className="cursor-pointer"
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 11,
-                        textAlign: "left",
-                        padding: "10px 12px",
-                        borderRadius: 10,
-                        border: `1px solid ${sel ? "#d8a89a" : "#e6ddd0"}`,
-                        background: sel ? "#fdf3ee" : parchment,
-                        transition: "background .12s, border-color .12s",
-                      }}
-                    >
-                      <StatusDot status={q.status} size={20} />
-                      <span style={{ flex: 1, minWidth: 0 }}>
-                        <span style={{ display: "block", fontFamily: FONT_SANS, fontSize: 13, color: bodyInk, fontWeight: 500 }}>
-                          {a?.name?.trim() || a?.agency || "Unknown agent"}
-                          {a?.name?.trim() && a?.agency ? <span style={{ fontWeight: 400, color: mutedInk }}> · {a.agency}</span> : null}
-                        </span>
-                        <span style={{ display: "block", fontFamily: FONT_SANS, fontSize: 11.5, color: mutedInk, marginTop: 1 }}>
-                          {msTitleFor(q)} · {q.status}
-                        </span>
-                      </span>
-                      {sel && <Check size={15} strokeWidth={2.4} style={{ color: burgundy, flexShrink: 0 }} aria-hidden="true" />}
-                    </button>
-                  );
-                })}
+              {!selectedQuery ? (
+                <FadeScroll maxHeight={330} style={{ marginBottom: 18 }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+                    {awaiting.map((q) => (
+                      <button
+                        key={q.id}
+                        type="button"
+                        onClick={() => selectQuery(q.id)}
+                        className="cursor-pointer"
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 11,
+                          textAlign: "left",
+                          padding: "10px 12px",
+                          borderRadius: 10,
+                          border: "1px solid #e6ddd0",
+                          background: parchment,
+                          transition: "background .12s, border-color .12s",
+                        }}
+                      >
+                        {queryRowInner(q)}
+                      </button>
+                    ))}
+                  </div>
+                </FadeScroll>
+              ) : (
+                <div style={{ marginBottom: 18 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 11, padding: "10px 12px", borderRadius: 10, border: "1px solid #d8a89a", background: "#fdf3ee" }}>
+                    {queryRowInner(selectedQuery)}
+                    <Check size={15} strokeWidth={2.4} style={{ color: burgundy, flexShrink: 0 }} aria-hidden="true" />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={reopenList}
+                    className="cursor-pointer"
+                    style={{ marginTop: 8, fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.05em", color: sageText, background: "transparent", border: "none", padding: "2px 0", display: "inline-flex", alignItems: "center", gap: 6 }}
+                  >
+                    <CornerUpLeft size={12} strokeWidth={2} aria-hidden="true" /> Select a different query
+                  </button>
                 </div>
-              </FadeScroll>
+              )}
 
               {/* ── What came back? ── */}
               {selectedQuery && (
