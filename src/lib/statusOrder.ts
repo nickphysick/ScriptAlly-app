@@ -20,3 +20,16 @@ export const STATUS_ORDER: QueryStatus[] = [
   QueryStatus.REVISE_RESUBMIT,
   QueryStatus.OFFER,
 ];
+
+/**
+ * EXPECTED_NEXT_STEPS — for a query AWAITING a response (an outgoing state), the incoming outcomes
+ * that ordinarily follow. Single source of truth for the Record-a-response screen's "pulse the
+ * likely outcomes" cue: an offered outcome NOT in this list is a step out of the usual order and
+ * triggers a gentle confirm. A status absent here pulses nothing (every choice confirms) — a safe
+ * default. Keyed by exact QueryStatus strings so it can't drift from the pipeline order above.
+ */
+export const EXPECTED_NEXT_STEPS: Partial<Record<QueryStatus, QueryStatus[]>> = {
+  [QueryStatus.QUERIED]: [QueryStatus.PARTIAL_REQUESTED, QueryStatus.REJECTED],
+  [QueryStatus.PARTIAL_SENT]: [QueryStatus.FULL_REQUESTED, QueryStatus.REJECTED],
+  [QueryStatus.FULL_SENT]: [QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER, QueryStatus.REJECTED],
+};

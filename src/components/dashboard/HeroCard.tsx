@@ -7,7 +7,7 @@
  * was dropped in the June 2026 refinement.)
  */
 import React, { useState } from "react";
-import { Send, UserPlus, BookOpen } from "lucide-react";
+import { Send, UserPlus, BookOpen, CornerUpLeft } from "lucide-react";
 import { MountCard } from "../MountCard";
 import "./heroRim.css";
 import {
@@ -120,6 +120,7 @@ export interface HeroCardProps {
   firstName: string;
   quote: { text: string; author: string };
   onSendQuery: () => void;
+  onRecordResponse: () => void;
   onAddAgent: () => void;
   onAddManuscript: () => void;
 }
@@ -128,6 +129,7 @@ export const HeroCard: React.FC<HeroCardProps> = ({
   firstName,
   quote,
   onSendQuery,
+  onRecordResponse,
   onAddAgent,
   onAddManuscript,
 }) => {
@@ -165,11 +167,17 @@ export const HeroCard: React.FC<HeroCardProps> = ({
             </>
           )}
 
-          <div className="flex gap-[10px] flex-wrap">
+          {/* Two halves of the querying loop (Send query · Record a response), then a divider before the setup actions. */}
+          <div className="flex gap-[10px] flex-wrap items-center">
             <PinkButton onClick={onSendQuery}>
               <Send className="w-3 h-3 shrink-0" />
               Send query
             </PinkButton>
+            <PinkButton onClick={onRecordResponse}>
+              <CornerUpLeft className="w-3 h-3 shrink-0" />
+              Record a response
+            </PinkButton>
+            <span aria-hidden="true" style={{ width: 1, alignSelf: "stretch", minHeight: 22, background: "rgba(124,58,42,0.15)", margin: "0 2px" }} />
             <GhostButton onClick={onAddAgent}>
               <UserPlus className="w-3 h-3 shrink-0" />
               Add agent

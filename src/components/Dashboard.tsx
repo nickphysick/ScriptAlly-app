@@ -20,6 +20,7 @@ import {
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { QuerySlideInPanel } from "./QuerySlideInPanel";
 import { RecordResponseModal } from "./RecordResponseModal";
+import { RecordResponseScreen } from "./RecordResponseScreen";
 import { NudgeModal } from "./NudgeModal";
 import { recordQueryResponse } from "../lib/recordResponse";
 import { CalendarView } from "./CalendarView";
@@ -524,6 +525,8 @@ export const Dashboard: React.FC<{
 
   // Drives the unified RecordResponseModal launched from the query slide-in panel.
   const [recordResponseQueryId, setRecordResponseQueryId] = useState<string | null>(null);
+  // The hero "Record a response" screen (paste-email fast lane + manual flow).
+  const [recordResponseScreenOpen, setRecordResponseScreenOpen] = useState(false);
 
   // Drives the Nudge modal (opened from a nudge_overdue row's "Nudge" button).
   const [nudgeTask, setNudgeTask] = useState<Task | null>(null);
@@ -1652,6 +1655,7 @@ export const Dashboard: React.FC<{
                 firstName={getUserFirstName()}
                 quote={quote}
                 onSendQuery={() => onNavigate("queries", "Send a query")}
+                onRecordResponse={() => setRecordResponseScreenOpen(true)}
                 onAddAgent={() => onNavigate("agents", "Add an agent")}
                 onAddManuscript={() => onNavigate("manuscripts", "Add a manuscript")}
               />
@@ -2425,6 +2429,13 @@ export const Dashboard: React.FC<{
         onActivityDeleted={() => {
           console.log("Timeline activity record successfully deleted.");
         }}
+      />
+
+      {/* Record-a-response screen (hero entry): paste-email fast lane + manual record-a-response flow. */}
+      <RecordResponseScreen
+        isOpen={recordResponseScreenOpen}
+        onClose={() => setRecordResponseScreenOpen(false)}
+        onNavigate={onNavigate}
       />
 
       {/* Unified Record-response modal (shared with the Queries page) */}
