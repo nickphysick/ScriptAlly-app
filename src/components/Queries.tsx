@@ -39,7 +39,7 @@ import { editMaterialsUpdate } from "../lib/packageMetrics";
 import { MountCard } from "./MountCard";
 import { ScriptAllyLogo } from "./ScriptAllyLogo";
 import {
-  kraft, parchment, PAPER_TEXTURE, sageBandGradient, sageBandRule,
+  kraft, parchment, PAPER_TEXTURE,
   burgundy, FONT_SERIF, FONT_MONO, mountShadow, labelColor,
 } from "../lib/designTokens";
 
@@ -1611,6 +1611,10 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         .queries-cursor-blink {
           animation: queriesCursorBlink 1s steps(1, end) infinite;
         }
+        .pane-reading-card > div[aria-hidden="true"] {
+          border-top-width: 2px !important;
+          border-top-color: #7c3a2a !important;
+        }
       `}</style>
 
       {/* QUICK INLINE LOG DIALOG PORTAL */}
@@ -1717,7 +1721,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           width: 252,
           height: "100vh",
           zIndex: 51,
-          background: parchment,
+          background: "#f8ece5",
           backgroundImage: PAPER_TEXTURE,
           boxShadow: "2px 0 16px rgba(58,28,20,0.10)",
           borderRight: "1px solid rgba(124,58,42,0.13)",
@@ -1747,7 +1751,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             </span>
             <span
               className="queries-cursor-blink"
-              style={{ display: "inline-block", width: 3, height: 23, background: burgundy, borderRadius: 1, marginLeft: 3, verticalAlign: "middle", flexShrink: 0 }}
+              style={{ display: "inline-block", width: 4.5, height: 34, background: burgundy, borderRadius: 1, marginLeft: 6, verticalAlign: "middle", transform: "translateY(7px)", flexShrink: 0 }}
             />
           </div>
         </div>
@@ -2360,26 +2364,24 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             flexShrink: 0, display: "flex", flexDirection: "column", height: "calc(100vh - 36px - 16px)", overflow: "hidden",
           }}
         >
-          {/* Sage-band header */}
+          {/* List header — plain, no band */}
           <div style={{
-            margin: "6px 6px 0", borderRadius: "8px 8px 0 0",
-            background: sageBandGradient,
-            borderBottom: `1px solid ${sageBandRule}`,
-            padding: "8px 12px",
+            padding: "14px 15px 12px",
+            borderBottom: "1px solid rgba(124,58,42,0.12)",
             display: "flex", alignItems: "center", justifyContent: "space-between",
             flexShrink: 0, position: "relative", zIndex: 4,
           }}>
-            <span style={{ fontFamily: FONT_MONO, fontSize: 11, fontWeight: 700, color: "#4a5e48" }}>
-              {sortedList.length} queries
+            <span style={{ fontFamily: FONT_SERIF, fontSize: 16, fontWeight: 600, color: "#2e3a2c" }}>
+              {sortedList.length} {sortedList.length === 1 ? "query" : "queries"}
             </span>
             <button
               onClick={handleExportFilteredCSV}
               style={{
-                display: "flex", alignItems: "center", gap: 4,
+                display: "inline-flex", alignItems: "center", gap: 6,
                 background: "transparent", border: "none", cursor: "pointer",
-                fontFamily: FONT_MONO, fontSize: 9, color: "#6a7e68", fontWeight: 600,
+                fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: ".05em", textTransform: "uppercase",
+                color: burgundy, opacity: 0.78,
               }}
-              className="hover:text-[#4a5e48] transition-colors"
             >
               <Download className="w-3 h-3" />
               Export these as CSV
@@ -2472,8 +2474,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     className={`cursor-pointer transition-all flex flex-col gap-1 ${isClosed ? "opacity-60" : ""}`}
                     style={{
                       padding: "10px 10px 10px 12px",
-                      background: isSelected ? "rgba(233,196,184,0.22)" : "transparent",
-                      borderLeft: isSelected ? `3px solid ${burgundy}` : "3px solid transparent",
+                      background: isSelected ? "#e4ebdf" : "transparent",
+                      borderLeft: isSelected ? "3px solid #8a9e88" : "3px solid transparent",
                       borderRadius: isSelected ? "0 6px 6px 0" : undefined,
                     }}
                   >
@@ -2657,82 +2659,128 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         <div style={{ flexGrow: 1, flex: 1, minWidth: 0, display: "flex", flexDirection: "column", alignSelf: "start" }}>
 
           {/* Pane MountCard — sizes to content */}
-          <MountCard style={{ minWidth: 0, display: "flex", flexDirection: "column", position: "relative" }}>
+          <MountCard className="pane-reading-card" style={{ minWidth: 0, display: "flex", flexDirection: "column", position: "relative" }}>
             {activeQuery && activeAgent && activeMs ? (
               <>
-                {/* 4b — Action band */}
+                {/* Masthead — 3-column: [left: seal+status+turn] [center: nameplate+agency+stars+genres] [right: edit+pdf+cta] */}
                 {(() => {
                   const action = getPrimaryAction(currentStatus as QueryStatus);
+                  const hasName = !!(activeAgent.name?.trim());
+                  const nameplate = hasName ? activeAgent.name : activeAgent.agency;
                   const agentFirstName = (activeAgent.name || activeAgent.agency || "Agent").split(" ")[0];
                   const whoseTurnText = action.ballHolder === "writer" ? "Your move"
-                    : action.ballHolder === "agent" ? `Waiting on ${agentFirstName}`
+                    : action.ballHolder === "agent" ? `waiting on ${agentFirstName}…`
                     : null;
                   return (
-                    <div style={{ margin: "6px 6px 0", borderRadius: "8px 8px 0 0", background: sageBandGradient, borderBottom: `1px solid ${sageBandRule}`, boxShadow: "inset 0 2px 4px rgba(90,110,88,.14)", padding: "10px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexShrink: 0, position: "relative", zIndex: 4 }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "210px 1fr 210px", gap: 18, alignItems: "start", padding: "24px 26px 22px", background: "linear-gradient(180deg,#faece4 0%,rgba(250,236,228,0) 100%)", position: "relative", zIndex: 4 }}>
+
                       {/* Left: wax seal + status label + whose-turn */}
-                      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                        <div style={{ width: 44, height: 44, borderRadius: "50%", background: "radial-gradient(circle at 35% 30%,#fbeee6,#f1d4c6)", border: "1.5px solid rgba(124,58,42,0.7)", boxShadow: "inset 0 1px 3px rgba(124,58,42,.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                          <StatusDot status={activeQuery.status} size={18} />
-                        </div>
-                        <div>
-                          <div style={{ fontFamily: FONT_MONO, fontSize: 10, textTransform: "uppercase" as const, letterSpacing: ".12em", color: "#5a6e58" }}>
-                            {statusDisplayLabel(activeQuery)}
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 10 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
+                          <div style={{ width: 42, height: 42, borderRadius: "50%", background: "radial-gradient(circle at 35% 30%,#fbeee6,#f1d4c6)", border: "1.5px solid rgba(124,58,42,0.7)", boxShadow: "inset 0 1px 3px rgba(124,58,42,.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                            <StatusDot status={activeQuery.status} size={18} />
                           </div>
-                          {whoseTurnText && (
-                            <div style={{ fontFamily: "'Caveat', cursive", fontSize: 20, color: "#9a5240", lineHeight: 1.1 }}>
-                              {whoseTurnText}
+                          <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase" as const, color: burgundy }}>
+                            {statusDisplayLabel(activeQuery)}
+                          </span>
+                        </div>
+                        {whoseTurnText && (
+                          <div style={{ fontFamily: "'Caveat', cursive", fontSize: 21, color: "#9a5240", lineHeight: 1 }}>
+                            {whoseTurnText}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Center: agent identity */}
+                      <div style={{ textAlign: "center" }}>
+                        {!hasName && (
+                          <div style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase" as const, letterSpacing: ".14em", color: labelColor, marginBottom: 4 }}>
+                            Agency · no named agent
+                          </div>
+                        )}
+                        <div style={{ display: "flex", alignItems: "center", gap: 15, justifyContent: "center" }}>
+                          <div style={{ flex: 1, height: 1, background: "rgba(124,58,42,.4)", maxWidth: 30 }} />
+                          <h2 style={{ fontFamily: FONT_SERIF, fontSize: 29, fontWeight: 600, textTransform: "uppercase" as const, letterSpacing: ".15em", color: "#3a1c14", margin: 0, lineHeight: 1.1 }}>
+                            {nameplate}
+                          </h2>
+                          <div style={{ flex: 1, height: 1, background: "rgba(124,58,42,.4)", maxWidth: 30 }} />
+                        </div>
+                        {hasName && activeAgent.agency && (
+                          <p style={{ fontFamily: FONT_SERIF, fontStyle: "italic", color: burgundy, fontSize: 16, marginTop: 9, marginBottom: 0 }}>
+                            {activeAgent.agency}
+                          </p>
+                        )}
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, margin: "13px auto" }}>
+                          <div style={{ width: 46, height: 1, background: "rgba(124,58,42,.35)" }} />
+                          <div style={{ width: 5, height: 5, background: burgundy, transform: "rotate(45deg)" }} />
+                          <div style={{ width: 46, height: 1, background: "rgba(124,58,42,.35)" }} />
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 7, alignItems: "center" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                            <span style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: ".16em", textTransform: "uppercase" as const, color: labelColor }}>Agent fit</span>
+                            <div style={{ display: "flex", gap: 3 }}>
+                              {Array.from({ length: 5 }).map((_, idx) => (
+                                <Star key={idx} style={{ width: 14, height: 14, color: idx < activeAgent.starRating ? "#7c3a2a" : "#cdbfae" }} className={idx < activeAgent.starRating ? "fill-current" : ""} />
+                              ))}
+                            </div>
+                          </div>
+                          {activeAgent.genres && activeAgent.genres.length > 0 && (
+                            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                              <span style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: ".16em", textTransform: "uppercase" as const, color: labelColor }}>Seeking</span>
+                              <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6, justifyContent: "center" }}>
+                                {activeAgent.genres.map((genre, gIdx) => (
+                                  <span key={gIdx} style={{ fontFamily: FONT_MONO, fontSize: 9.5, textTransform: "uppercase" as const, letterSpacing: ".05em", background: "#f1eae0", color: "#6b5d52", borderRadius: 7, padding: "5px 11px" }}>
+                                    {genre}
+                                  </span>
+                                ))}
+                              </div>
                             </div>
                           )}
                         </div>
                       </div>
 
-                      {/* Right: icon-only Edit + icon-only PDF | primary CTA */}
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
-                        {/* Edit query — icon only */}
-                        <button
-                          type="button"
-                          onClick={() => setIsEditMode(prev => !prev)}
-                          title="Edit query"
-                          aria-label="Edit query"
-                          style={{ width: 34, height: 34, borderRadius: "50%", border: "1px solid rgba(90,110,88,.3)", background: "rgba(255,255,255,.4)", color: burgundy, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, transition: "background 0.15s" }}
-                          onMouseEnter={e => (e.currentTarget.style.background = "#ffffff")}
-                          onMouseLeave={e => (e.currentTarget.style.background = "rgba(255,255,255,.4)")}
-                        >
-                          <Pencil style={{ width: 15, height: 15 }} />
-                        </button>
-                        {/* Download PDF — icon only */}
-                        <button
-                          type="button"
-                          disabled={isGeneratingPDF}
-                          onClick={handleDownloadPDF}
-                          title={isGeneratingPDF ? "Generating PDF…" : "Download PDF"}
-                          aria-label="Download PDF"
-                          style={{ width: 34, height: 34, borderRadius: "50%", border: "1px solid rgba(90,110,88,.3)", background: "rgba(255,255,255,.4)", color: burgundy, display: "flex", alignItems: "center", justifyContent: "center", cursor: isGeneratingPDF ? "not-allowed" : "pointer", flexShrink: 0, opacity: isGeneratingPDF ? 0.5 : 1, transition: "background 0.15s" }}
-                          onMouseEnter={e => { if (!isGeneratingPDF) e.currentTarget.style.background = "#ffffff"; }}
-                          onMouseLeave={e => (e.currentTarget.style.background = "rgba(255,255,255,.4)")}
-                        >
-                          <Download style={{ width: 15, height: 15 }} />
-                        </button>
-                        {/* Separator */}
-                        <div style={{ width: 1, height: 22, background: "rgba(90,110,88,.35)", flexShrink: 0 }} />
-                        {/* Primary CTA — label from engine */}
+                      {/* Right: icon buttons (Edit + PDF) + primary CTA */}
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 11 }}>
+                        <div style={{ display: "flex", gap: 8 }}>
+                          <button
+                            type="button"
+                            onClick={() => setIsEditMode(prev => !prev)}
+                            title="Edit query" aria-label="Edit query"
+                            style={{ width: 34, height: 34, borderRadius: 9, border: "1px solid rgba(124,58,42,.22)", background: "#fff", color: burgundy, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+                            onMouseEnter={e => (e.currentTarget.style.background = "#f8e7dc")}
+                            onMouseLeave={e => (e.currentTarget.style.background = "#fff")}
+                          >
+                            <Pencil style={{ width: 14, height: 14 }} />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={isGeneratingPDF}
+                            onClick={handleDownloadPDF}
+                            title={isGeneratingPDF ? "Generating PDF…" : "Download PDF"} aria-label="Download PDF"
+                            style={{ width: 34, height: 34, borderRadius: 9, border: "1px solid rgba(124,58,42,.22)", background: "#fff", color: burgundy, display: "flex", alignItems: "center", justifyContent: "center", cursor: isGeneratingPDF ? "not-allowed" : "pointer", opacity: isGeneratingPDF ? 0.5 : 1 }}
+                            onMouseEnter={e => { if (!isGeneratingPDF) e.currentTarget.style.background = "#f8e7dc"; }}
+                            onMouseLeave={e => (e.currentTarget.style.background = "#fff")}
+                          >
+                            <Download style={{ width: 14, height: 14 }} />
+                          </button>
+                        </div>
                         {action.kind === "mark-sent" ? (
                           <button
                             ref={markSentTriggerRef}
                             type="button"
                             onClick={() => setIsMarkSentOpen(o => !o)}
-                            style={{ height: 32, padding: "0 14px", borderRadius: 20, background: "linear-gradient(180deg,#f5e2da,#efd5ca)", border: "1px solid rgba(124,58,42,.22)", color: burgundy, fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}
+                            style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 500, color: burgundy, background: "linear-gradient(180deg,#f5e2da,#efd5ca)", border: "1px solid rgba(124,58,42,.28)", borderRadius: 9, padding: "10px 16px", cursor: "pointer", boxShadow: "0 1px 2px rgba(124,58,42,.12)" }}
                           >
-                            <Send style={{ width: 13, height: 13, strokeWidth: 2.5 } as any} />
+                            <Send style={{ width: 15, height: 15, strokeWidth: 2 } as any} />
                             {action.label}
                           </button>
                         ) : (
                           <button
                             type="button"
                             onClick={() => setIsRecordResponseFocusFormOpen(true)}
-                            style={{ height: 32, padding: "0 14px", borderRadius: 20, background: "linear-gradient(180deg,#f5e2da,#efd5ca)", border: "1px solid rgba(124,58,42,.22)", color: burgundy, fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}
+                            style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 500, color: burgundy, background: "linear-gradient(180deg,#f5e2da,#efd5ca)", border: "1px solid rgba(124,58,42,.28)", borderRadius: 9, padding: "10px 16px", cursor: "pointer", boxShadow: "0 1px 2px rgba(124,58,42,.12)" }}
                           >
-                            <Check style={{ width: 13, height: 13, strokeWidth: 2.5 } as any} />
+                            <Send style={{ width: 15, height: 15, strokeWidth: 2 } as any} />
                             {action.label}
                           </button>
                         )}
@@ -2768,74 +2816,16 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           })()}
                         </AnimatePresence>
                       </div>
+
                     </div>
                   );
                 })()}
 
-                {/* Body: identity + ledger — sizes to content */}
+                {/* Body: ledger */}
                 <div style={{ display: "flex", flexDirection: "column", position: "relative", zIndex: 4 }}>
 
-                  {/* 4c — Identity */}
-                  {(() => {
-                    const hasName = !!(activeAgent.name?.trim());
-                    const nameplate = hasName ? activeAgent.name : activeAgent.agency;
-                    return (
-                      <div style={{ flexShrink: 0, padding: "16px 24px 12px", textAlign: "center" }}>
-                        {/* Agency-only kicker */}
-                        {!hasName && (
-                          <div style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase" as const, letterSpacing: ".14em", color: labelColor, marginBottom: 4 }}>
-                            Agency · no named agent
-                          </div>
-                        )}
-                        {/* Nameplate flanked by hairline rules */}
-                        <div style={{ display: "flex", alignItems: "center", gap: 14, justifyContent: "center" }}>
-                          <div style={{ flex: 1, height: 1, background: "rgba(124,58,42,.4)", maxWidth: 80 }} />
-                          <h2 style={{ fontFamily: FONT_SERIF, fontSize: 20, fontWeight: 600, textTransform: "uppercase" as const, letterSpacing: ".15em", color: "#3a1c14", margin: 0, lineHeight: 1.15, whiteSpace: "nowrap" as const }}>
-                            {nameplate}
-                          </h2>
-                          <div style={{ flex: 1, height: 1, background: "rgba(124,58,42,.4)", maxWidth: 80 }} />
-                        </div>
-                        {/* Agency line when there's a named agent */}
-                        {hasName && activeAgent.agency && (
-                          <p style={{ fontFamily: FONT_SERIF, fontStyle: "italic", color: burgundy, fontSize: 12, marginTop: 3, marginBottom: 0 }}>
-                            {activeAgent.agency}
-                          </p>
-                        )}
-                        {/* Diamond flourish divider */}
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, margin: "8px auto", width: 120 }}>
-                          <div style={{ flex: 1, height: 1, background: "rgba(124,58,42,.2)" }} />
-                          <div style={{ width: 5, height: 5, background: burgundy, transform: "rotate(45deg)", flexShrink: 0 }} />
-                          <div style={{ flex: 1, height: 1, background: "rgba(124,58,42,.2)" }} />
-                        </div>
-                        {/* Attribute rows */}
-                        <div style={{ display: "flex", flexDirection: "column", gap: 5, alignItems: "center" }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                            <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, color: labelColor, textTransform: "uppercase" as const, letterSpacing: ".08em" }}>Agent fit</span>
-                            <div style={{ display: "flex", gap: 2, alignItems: "center" }}>
-                              {Array.from({ length: 5 }).map((_, idx) => (
-                                <Star key={idx} style={{ width: 11, height: 11, color: idx < activeAgent.starRating ? "#BA7517" : "#d1c9c0" }} className={idx < activeAgent.starRating ? "fill-current" : ""} />
-                              ))}
-                            </div>
-                          </div>
-                          {activeAgent.genres && activeAgent.genres.length > 0 && (
-                            <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" as const, justifyContent: "center" }}>
-                              <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, color: labelColor, textTransform: "uppercase" as const, letterSpacing: ".08em" }}>Seeking</span>
-                              <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 3, justifyContent: "center" }}>
-                                {activeAgent.genres.map((genre, gIdx) => (
-                                  <span key={gIdx} style={{ background: "rgba(124,58,42,.07)", color: burgundy, fontSize: 9, fontWeight: 700, padding: "2px 8px", borderRadius: 20, border: "1px solid rgba(124,58,42,.15)" }}>
-                                    {genre}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })()}
-
-                  {/* Hairline before ledger */}
-                  <div style={{ height: 1, background: "rgba(124,58,42,.15)", flexShrink: 0, margin: "0 16px" }} />
+                  {/* Hairline — masthead/ledger divider */}
+                  <div style={{ height: 1, background: "rgba(124,58,42,.38)", flexShrink: 0, margin: "0 16px" }} />
 
                   {/* 4d — Three-column ledger — natural height */}
                   <div style={{ display: "flex", minHeight: 280 }}>
@@ -3146,7 +3136,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     </div>
 
                     {/* ── Column 3: Notes ── */}
-                    <div style={{ flex: 1, padding: "12px 14px", display: "flex", flexDirection: "column", minWidth: 0 }}>
+                    <div style={{ flex: 1, padding: "12px 14px", display: "flex", flexDirection: "column", minWidth: 0, minHeight: 0 }}>
                       {/* Running head */}
                       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12, flexShrink: 0 }}>
                         <div style={{ flex: 1, height: 1, background: "rgba(124,58,42,.2)" }} />
@@ -3159,8 +3149,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           .filter(entry => entry.queryId === activeQuery.id)
                           .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
                         return (
-                          <div className="flex flex-col p-3.5 bg-[#FAF8F5] rounded-xl border border-[#ebd8c5]/40">
-                            <div ref={chatContainerRef} className="flex flex-col space-y-2 pr-1" style={{ backgroundColor: "transparent" }}>
+                          <div className="flex flex-col p-3.5 bg-[#FAF8F5] rounded-xl border border-[#ebd8c5]/40" style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+                            <div ref={chatContainerRef} className="flex flex-col space-y-2 pr-1" style={{ backgroundColor: "transparent", flex: 1, overflowY: "auto", minHeight: 0 }}>
                               {activeJournalEntries.map((entry, index) => {
                                 const isEditing = editingJournalId === entry.id;
                                 return (
