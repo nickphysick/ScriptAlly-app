@@ -825,7 +825,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
                     </div>
                   ) : (
                     [...activeAgentQueries]
-                      .sort((a,b)=> new Date(b.dateSent).getTime() - new Date(a.dateSent).getTime())
+                      .sort((a,b)=> (b.dateSent ? new Date(b.dateSent).getTime() : 0) - (a.dateSent ? new Date(a.dateSent).getTime() : 0))
                       .map(query => {
                         const ms = manuscripts.find(m => m.id === query.manuscriptId);
                         return (
@@ -839,7 +839,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
                               </div>
                             </div>
                             <div className="flex justify-between items-center text-[10px] text-stone-400 font-mono mt-0.5">
-                              <span>Sent: {new Date(query.dateSent).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</span>
+                              <span>Sent: {query.dateSent ? new Date(query.dateSent).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—"}</span>
                               <span>{query.sendMethod || "Email"}</span>
                             </div>
                           </div>

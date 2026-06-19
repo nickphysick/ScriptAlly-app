@@ -36,6 +36,12 @@ import { MarkSentPopover, MarkSentKind } from "./MarkSentPopover";
 import { useFixedMenu } from "./forms/useFixedMenu";
 import { MaterialsField } from "./MaterialsField";
 import { editMaterialsUpdate } from "../lib/packageMetrics";
+import { MountCard } from "./MountCard";
+import { ScriptAllyLogo } from "./ScriptAllyLogo";
+import {
+  kraft, parchment, PAPER_TEXTURE, sageBandGradient, sageBandRule,
+  burgundy, FONT_SERIF, FONT_MONO, mountShadow,
+} from "../lib/designTokens";
 
 const normalizeStatus = (status: string | QueryStatus): QueryStatus => {
   if (!status) return QueryStatus.QUERIED;
@@ -530,6 +536,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   const [sortOption, setSortOption] = useState<string>("Newest first");
   const [groupOption, setGroupOption] = useState<"None" | "Status" | "Action Required" | "Manuscript" | "Agent Fit Rating">("None");
   const [devTheme, setDevTheme] = useState<"burgundy" | "slate" | "emerald">("burgundy");
+  const [filterAccordionOpen, setFilterAccordionOpen] = useState(true);
+  const [groupAccordionOpen, setGroupAccordionOpen] = useState(false);
+  const [sortAccordionOpen, setSortAccordionOpen] = useState(false);
 
   const THEMES = {
     burgundy: {
@@ -837,9 +846,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     const agB = agents.find(ag => ag.id === b.agentId)?.name || "";
 
     if (sortOption === "Newest first") {
-      return new Date(b.dateSent).getTime() - new Date(a.dateSent).getTime();
+      return (b.dateSent ? new Date(b.dateSent).getTime() : 0) - (a.dateSent ? new Date(a.dateSent).getTime() : 0);
     } else if (sortOption === "Oldest first") {
-      return new Date(a.dateSent).getTime() - new Date(b.dateSent).getTime();
+      return (a.dateSent ? new Date(a.dateSent).getTime() : 0) - (b.dateSent ? new Date(b.dateSent).getTime() : 0);
     } else if (sortOption === "Agent name A-Z") {
       return agA.localeCompare(agB);
     } else if (sortOption === "Agent name Z-A") {
@@ -1405,23 +1414,318 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         </div>
       )}
 
-      {/* THREE-PANEL LAYOUT CONTAINER matching the Agents page spacing & background */}
-      <div 
+      {/* FIXED SIDEBAR — sits in front of Nav (z-51) covering its left portion */}
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: 252,
+          height: "100vh",
+          zIndex: 51,
+          background: parchment,
+          backgroundImage: PAPER_TEXTURE,
+          boxShadow: "2px 0 16px rgba(58,28,20,0.10)",
+          borderRight: "1px solid rgba(124,58,42,0.13)",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+        }}
+      >
+        {/* Wordmark */}
+        <div style={{ padding: "18px 20px 14px", borderBottom: "1px solid rgba(124,58,42,0.10)", flexShrink: 0 }}>
+          <ScriptAllyLogo size="sm" iconColor={burgundy} textColor="#3a1c14" />
+        </div>
+
+        {/* Back to dashboard */}
+        <div style={{ padding: "10px 14px 0", flexShrink: 0 }}>
+          <button
+            onClick={() => {
+              if (typeof (window as any).__scriptAllyNavigate === "function") {
+                (window as any).__scriptAllyNavigate("dashboard");
+              } else {
+                window.location.hash = "#/dashboard";
+              }
+            }}
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              width: "100%", padding: "7px 10px", borderRadius: 8,
+              border: "none", background: "transparent", cursor: "pointer",
+              color: "#7c3a2a", fontSize: 12, fontWeight: 600,
+            }}
+            className="hover:bg-[rgba(124,58,42,0.07)] transition-colors"
+          >
+            <ChevronLeft className="w-3.5 h-3.5" />
+            Back to dashboard
+          </button>
+        </div>
+
+        <div style={{ height: 1, margin: "10px 14px", background: "rgba(124,58,42,0.10)" }} />
+
+        {/* Scrollable filter region */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "0 14px 12px" }} className="custom-query-list-scrollbar">
+
+          {/* "All queries" pinned row */}
+          <button
+            onClick={() => { setSelectedStatusFilters(["All"]); setSelectedManuscriptFilter("All"); }}
+            style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              width: "100%", padding: "7px 10px", borderRadius: 8,
+              border: "none", cursor: "pointer", marginBottom: 6,
+              background: selectedStatusFilters.includes("All") && selectedManuscriptFilter === "All"
+                ? "rgba(124,58,42,0.09)" : "transparent",
+              color: selectedStatusFilters.includes("All") && selectedManuscriptFilter === "All"
+                ? burgundy : "#3a1c14",
+              fontWeight: selectedStatusFilters.includes("All") && selectedManuscriptFilter === "All" ? 700 : 500,
+              fontSize: 12,
+            }}
+            className="hover:bg-[rgba(124,58,42,0.05)] transition-colors"
+          >
+            <span>All queries</span>
+            <span style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#9a8579" }}>{queries.length}</span>
+          </button>
+
+          {/* Filter accordion */}
+          <div style={{ marginBottom: 4 }}>
+            <button
+              onClick={() => setFilterAccordionOpen(o => !o)}
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                width: "100%", padding: "5px 10px 5px 4px",
+                border: "none", background: "transparent", cursor: "pointer",
+                borderBottom: "1px solid rgba(124,58,42,0.10)", marginBottom: 6,
+              }}
+            >
+              <span style={{ fontFamily: FONT_MONO, fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#9a8579" }}>Filter</span>
+              <ChevronRight className="w-3 h-3 text-stone-400" style={{ transform: filterAccordionOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.15s" }} />
+            </button>
+            {filterAccordionOpen && (
+              <div>
+                {/* Status sub-section */}
+                <div style={{ marginBottom: 10 }}>
+                  <span style={{ display: "block", fontFamily: FONT_MONO, fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: `${burgundy}99`, marginBottom: 4, paddingLeft: 4 }}>Status</span>
+                  <div style={{ marginBottom: 2 }}>
+                    <span style={{ display: "block", fontFamily: FONT_MONO, fontSize: 9, color: "#9a8579", textTransform: "uppercase", letterSpacing: "0.05em", padding: "3px 4px", fontWeight: 600 }}>Active</span>
+                  </div>
+                  {[
+                    { id: QueryStatus.QUERIED, label: "Queried", count: queries.filter(q => q.status === QueryStatus.QUERIED).length },
+                    { id: QueryStatus.PARTIAL_REQUESTED, label: "Partial req", count: queries.filter(q => q.status === QueryStatus.PARTIAL_REQUESTED).length },
+                    { id: QueryStatus.PARTIAL_SENT, label: "Partial sent", count: queries.filter(q => q.status === QueryStatus.PARTIAL_SENT).length },
+                    { id: QueryStatus.FULL_REQUESTED, label: "Full req", count: queries.filter(q => q.status === QueryStatus.FULL_REQUESTED).length },
+                    { id: QueryStatus.FULL_SENT, label: "Full sent", count: queries.filter(q => q.status === QueryStatus.FULL_SENT).length },
+                    { id: QueryStatus.REVISE_RESUBMIT, label: "R&R", count: queries.filter(q => q.status === QueryStatus.REVISE_RESUBMIT).length },
+                    { id: QueryStatus.OFFER, label: "Offers", count: queries.filter(q => q.status === QueryStatus.OFFER).length },
+                  ].map(item => {
+                    const isActive = selectedStatusFilters.includes(item.id);
+                    return (
+                      <button key={item.id} onClick={() => {
+                        let next = [...selectedStatusFilters].filter(f => f !== "All");
+                        if (next.includes(item.id)) { next = next.filter(f => f !== item.id); }
+                        else { next.push(item.id); }
+                        setSelectedStatusFilters(next.length === 0 ? ["All"] : next);
+                      }}
+                        style={{
+                          display: "flex", alignItems: "center", justifyContent: "space-between",
+                          width: "100%", padding: "5px 8px", borderRadius: 7,
+                          border: "none", cursor: "pointer", marginBottom: 1,
+                          background: isActive ? "rgba(124,58,42,0.09)" : "transparent",
+                          color: isActive ? burgundy : "#5a5047",
+                          fontWeight: isActive ? 700 : 500, fontSize: 11,
+                        }}
+                        className="hover:bg-[rgba(124,58,42,0.05)] transition-colors"
+                      >
+                        <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <StatusDot status={item.id} size={11} />
+                          {item.label}
+                        </span>
+                        <span style={{ fontFamily: FONT_MONO, fontSize: 9, color: "#9a8579" }}>{item.count || "-"}</span>
+                      </button>
+                    );
+                  })}
+                  <div style={{ marginTop: 6, marginBottom: 2 }}>
+                    <span style={{ display: "block", fontFamily: FONT_MONO, fontSize: 9, color: "#9a8579", textTransform: "uppercase", letterSpacing: "0.05em", padding: "3px 4px", fontWeight: 600 }}>Closed</span>
+                  </div>
+                  {[
+                    { id: QueryStatus.REJECTED, label: "Rejected", count: queries.filter(q => q.status === QueryStatus.REJECTED).length },
+                    { id: QueryStatus.WITHDRAWN, label: "Withdrawn", count: queries.filter(q => q.status === QueryStatus.WITHDRAWN).length },
+                    { id: QueryStatus.NO_RESPONSE, label: "No response", count: queries.filter(q => q.status === QueryStatus.NO_RESPONSE).length },
+                  ].map(item => {
+                    const isActive = selectedStatusFilters.includes(item.id);
+                    return (
+                      <button key={item.id} onClick={() => {
+                        let next = [...selectedStatusFilters].filter(f => f !== "All");
+                        if (next.includes(item.id)) { next = next.filter(f => f !== item.id); }
+                        else { next.push(item.id); }
+                        setSelectedStatusFilters(next.length === 0 ? ["All"] : next);
+                      }}
+                        style={{
+                          display: "flex", alignItems: "center", justifyContent: "space-between",
+                          width: "100%", padding: "5px 8px", borderRadius: 7,
+                          border: "none", cursor: "pointer", marginBottom: 1,
+                          background: isActive ? "rgba(124,58,42,0.09)" : "transparent",
+                          color: isActive ? burgundy : "#5a5047",
+                          fontWeight: isActive ? 700 : 500, fontSize: 11,
+                        }}
+                        className="hover:bg-[rgba(124,58,42,0.05)] transition-colors"
+                      >
+                        <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <StatusDot status={item.id} size={11} />
+                          {item.label}
+                        </span>
+                        <span style={{ fontFamily: FONT_MONO, fontSize: 9, color: "#9a8579" }}>{item.count || "-"}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                {/* Manuscripts sub-section */}
+                {manuscripts.length > 0 && (
+                  <div>
+                    <span style={{ display: "block", fontFamily: FONT_MONO, fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: `${burgundy}99`, marginBottom: 4, paddingLeft: 4 }}>Manuscript</span>
+                    {manuscripts.map(m => {
+                      const isActive = selectedManuscriptFilter === m.id;
+                      const count = queries.filter(q => q.manuscriptId === m.id).length;
+                      return (
+                        <button key={m.id} onClick={() => setSelectedManuscriptFilter(isActive ? "All" : m.id)}
+                          style={{
+                            display: "flex", alignItems: "center", justifyContent: "space-between",
+                            width: "100%", padding: "5px 8px", borderRadius: 7,
+                            border: "none", cursor: "pointer", marginBottom: 1,
+                            background: isActive ? "rgba(124,58,42,0.09)" : "transparent",
+                            color: isActive ? burgundy : "#5a5047",
+                            fontWeight: isActive ? 700 : 500, fontSize: 11, textAlign: "left",
+                          }}
+                          className="hover:bg-[rgba(124,58,42,0.05)] transition-colors"
+                        >
+                          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, marginRight: 4 }}>{m.title}</span>
+                          <span style={{ fontFamily: FONT_MONO, fontSize: 9, color: "#9a8579", flexShrink: 0 }}>{count || "-"}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Group accordion */}
+          <div style={{ marginBottom: 4 }}>
+            <button
+              onClick={() => setGroupAccordionOpen(o => !o)}
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                width: "100%", padding: "5px 10px 5px 4px",
+                border: "none", background: "transparent", cursor: "pointer",
+                borderBottom: "1px solid rgba(124,58,42,0.10)", marginBottom: 6,
+              }}
+            >
+              <span style={{ fontFamily: FONT_MONO, fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#9a8579" }}>Group</span>
+              <ChevronRight className="w-3 h-3 text-stone-400" style={{ transform: groupAccordionOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.15s" }} />
+            </button>
+            {groupAccordionOpen && (
+              <div>
+                {[
+                  { id: "None", label: "No grouping" },
+                  { id: "Status", label: "Status" },
+                  { id: "Action Required", label: "Action required" },
+                  { id: "Manuscript", label: "Manuscript" },
+                  { id: "Agent Fit Rating", label: "Agent fit rating" },
+                ].map(item => {
+                  const isActive = groupOption === item.id;
+                  return (
+                    <button key={item.id} onClick={() => setGroupOption(item.id as any)}
+                      style={{
+                        display: "flex", alignItems: "center", justifyContent: "space-between",
+                        width: "100%", padding: "5px 8px", borderRadius: 7,
+                        border: "none", cursor: "pointer", marginBottom: 1,
+                        background: isActive ? "rgba(124,58,42,0.09)" : "transparent",
+                        color: isActive ? burgundy : "#5a5047",
+                        fontWeight: isActive ? 700 : 500, fontSize: 11,
+                      }}
+                      className="hover:bg-[rgba(124,58,42,0.05)] transition-colors"
+                    >
+                      <span>{item.label}</span>
+                      {isActive && <Check className="w-3 h-3" style={{ color: burgundy }} />}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Sort accordion */}
+          <div style={{ marginBottom: 4 }}>
+            <button
+              onClick={() => setSortAccordionOpen(o => !o)}
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                width: "100%", padding: "5px 10px 5px 4px",
+                border: "none", background: "transparent", cursor: "pointer",
+                borderBottom: "1px solid rgba(124,58,42,0.10)", marginBottom: 6,
+              }}
+            >
+              <span style={{ fontFamily: FONT_MONO, fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#9a8579" }}>Sort</span>
+              <ChevronRight className="w-3 h-3 text-stone-400" style={{ transform: sortAccordionOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.15s" }} />
+            </button>
+            {sortAccordionOpen && (
+              <div>
+                {[
+                  { id: "Newest first", label: "Newest first" },
+                  { id: "Oldest first", label: "Oldest first" },
+                  { id: "Agent name A-Z", label: "Agent A–Z" },
+                  { id: "Agent name Z-A", label: "Agent Z–A" },
+                  { id: "Status", label: "Status" },
+                  { id: "Response due soonest", label: "Response due soonest" },
+                ].map(item => {
+                  const isActive = sortOption === item.id;
+                  return (
+                    <button key={item.id} onClick={() => setSortOption(item.id)}
+                      style={{
+                        display: "flex", alignItems: "center", justifyContent: "space-between",
+                        width: "100%", padding: "5px 8px", borderRadius: 7,
+                        border: "none", cursor: "pointer", marginBottom: 1,
+                        background: isActive ? "rgba(124,58,42,0.09)" : "transparent",
+                        color: isActive ? burgundy : "#5a5047",
+                        fontWeight: isActive ? 700 : 500, fontSize: 11,
+                      }}
+                      className="hover:bg-[rgba(124,58,42,0.05)] transition-colors"
+                    >
+                      <span>{item.label}</span>
+                      {isActive && <Check className="w-3 h-3" style={{ color: burgundy }} />}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Export all pinned at bottom */}
+        <div style={{ padding: "12px 14px", borderTop: "1px solid rgba(124,58,42,0.10)", flexShrink: 0 }}>
+          <button
+            onClick={() => exportQueriesToCSV(queries, `ScriptAlly_Queries_${new Date().toISOString().slice(0, 10)}`)}
+            style={{
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+              width: "100%", padding: "8px 12px", borderRadius: 8,
+              border: "1px solid rgba(124,58,42,0.18)", background: "rgba(124,58,42,0.05)",
+              color: burgundy, fontSize: 11, fontWeight: 600, cursor: "pointer",
+            }}
+            className="hover:bg-[rgba(124,58,42,0.10)] transition-colors"
+          >
+            <Download className="w-3.5 h-3.5" />
+            Export all as CSV
+          </button>
+        </div>
+      </div>
+
+      {/* TWO-PANEL LAYOUT CONTAINER — offset by sidebar width */}
+      <div
         className="flex-grow bg-[#dce0d9] min-h-0 overflow-hidden w-full flex flex-row p-[8px] gap-[8px]"
-        style={{ minHeight: "calc(100vh - 64px)", maxHeight: "calc(100vh - 64px)" }}
+        style={{ minHeight: "calc(100vh - 64px)", maxHeight: "calc(100vh - 64px)", paddingLeft: 260 }}
         id="queries-main-panel-container"
       >
 
-        {/* LEFT PANEL */}
-        <div 
-          className="bg-white border border-[#e8e0d8] rounded-xl flex flex-col h-full overflow-hidden shrink-0 select-none shadow-3xs" 
-          style={{ 
-            width: "15%", 
-            minWidth: "15%", 
-            maxWidth: "15%", 
-            flexShrink: 0 
-          }}
-        >
+        {/* OLD LEFT PANEL — hidden, kept for structural integrity */}
+        <div style={{ display: "none" }}>
           
 
          {/* Scrollable subdivisions */}
@@ -1740,15 +2044,43 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
       </div>
 
-        {/* ---------------- panel 2: middle list panel ---------------- */}
-        <div 
-          className="bg-white border border-[#e8e0d8] rounded-xl flex flex-col h-full overflow-hidden shrink-0 shadow-3xs" 
-          style={{ width: "calc(20% + 50px)", minWidth: "calc(20% + 50px)", maxWidth: "calc(20% + 50px)", flexShrink: 0 }}
+        {/* ---------------- panel 2: middle list panel (MountCard) ---------------- */}
+        <MountCard
+          style={{
+            width: "calc(20% + 50px)", minWidth: "calc(20% + 50px)", maxWidth: "calc(20% + 50px)",
+            flexShrink: 0, display: "flex", flexDirection: "column", height: "100%", overflow: "hidden",
+          }}
         >
+          {/* Sage-band header */}
+          <div style={{
+            margin: "6px 6px 0", borderRadius: "8px 8px 0 0",
+            background: sageBandGradient,
+            borderBottom: `1px solid ${sageBandRule}`,
+            padding: "8px 12px",
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            flexShrink: 0, position: "relative", zIndex: 4,
+          }}>
+            <span style={{ fontFamily: FONT_MONO, fontSize: 11, fontWeight: 700, color: "#4a5e48" }}>
+              {sortedList.length} queries
+            </span>
+            <button
+              onClick={handleExportFilteredCSV}
+              style={{
+                display: "flex", alignItems: "center", gap: 4,
+                background: "transparent", border: "none", cursor: "pointer",
+                fontFamily: FONT_MONO, fontSize: 9, color: "#6a7e68", fontWeight: 600,
+              }}
+              className="hover:text-[#4a5e48] transition-colors"
+            >
+              <Download className="w-3 h-3" />
+              Export these as CSV
+            </button>
+          </div>
+
           {/* Search bar */}
-          <div className="py-2 pr-2 border-b border-[#EBDCD3] bg-white shrink-0 pl-[13px]">
+          <div style={{ padding: "8px 12px 6px", borderBottom: "1px solid rgba(124,58,42,0.10)", flexShrink: 0, position: "relative", zIndex: 4 }}>
             <div className="relative">
-               <Search className="absolute left-2.5 top-2.5 w-3.5 h-3.5 text-stone-400" />
+              <Search className="absolute left-2.5 top-2.5 w-3.5 h-3.5 text-stone-400" />
               <input
                 type="text"
                 placeholder="Find query..."
@@ -1759,29 +2091,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             </div>
           </div>
 
-          {/* Count bar */}
-          <div className="pl-[15px] pr-2.5 py-1.5 border-b border-[#EBDCD3] bg-[#FAFAF9] shrink-0 mb-[10px] flex items-center justify-between" style={{ marginBottom: "10px" }}>
-            <span className="text-[10px] text-stone-500 font-semibold font-mono">
-              {sortedList.length} queries
-            </span>
-            <div className="flex items-center gap-1.5">
-              <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-stone-400/80">Group:</span>
-              <select
-                value={groupOption}
-                onChange={(e) => setGroupOption(e.target.value as any)}
-                className="text-[10px] py-[1.5px] px-1.5 bg-white border border-[#CBD5E1] rounded text-[#3a1c14]/85 focus:outline-none focus:ring-0 focus:border-[#CBD5E1] cursor-pointer font-sans leading-none font-medium h-[22px]"
-              >
-                <option value="None">No grouping</option>
-                <option value="Status">Status</option>
-                <option value="Action Required">Action Required</option>
-                <option value="Manuscript">Manuscript</option>
-                <option value="Agent Fit Rating">Agent Fit Rating</option>
-              </select>
-            </div>
-          </div>
-
           {/* Scrolling query cards list */}
-          <div className="flex-1 overflow-y-scroll custom-query-list-scrollbar divide-y divide-[#EBDCD3]/60 bg-white px-[10px]">
+          <div className="flex-1 overflow-y-scroll custom-query-list-scrollbar divide-y divide-[#EBDCD3]/60 px-[6px]" style={{ position: "relative", zIndex: 4, background: parchment }}>
             {(() => {
               const statusOrder = [
                 QueryStatus.QUERIED,
@@ -1824,44 +2135,63 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 const daysDiff = Math.max(1, Math.round((new Date().getTime() - dateObj.getTime()) / (1000 * 60 * 60 * 24)));
                 const relativeText = `${daysDiff} days ago`;
 
+                const statusChip = undoingQueryIds.has(q.id) ? (
+                  <div className="animate-pulse flex items-center gap-1 min-h-[20px]">
+                    <span className="w-1.5 h-1.5 bg-[#7c3a2a] rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                    <span className="w-1.5 h-1.5 bg-[#7c3a2a] rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                    <span className="w-1.5 h-1.5 bg-[#7c3a2a] rounded-full animate-bounce"></span>
+                  </div>
+                ) : (
+                  <span style={{
+                    display: "inline-flex", alignItems: "center", gap: 4,
+                    padding: "2px 7px 2px 5px", borderRadius: 20,
+                    background: isClosed ? "#ece7df" : "rgba(253,250,245,0.95)",
+                    border: `1px solid ${isClosed ? "rgba(154,144,130,0.3)" : "rgba(124,58,42,0.18)"}`,
+                    fontSize: 9, fontWeight: 700, fontFamily: FONT_MONO,
+                    color: isClosed ? "#9a9082" : burgundy,
+                    whiteSpace: "nowrap", flexShrink: 0,
+                  }}>
+                    <StatusDot status={q.status} size={9} />
+                    {getStatusLabel(q.status)}
+                  </span>
+                );
+
                 return (
                   <div
                     key={q.id}
                     onClick={() => setSelectedQueryId(q.id)}
-                    className={`pt-[10px] pb-[10px] pr-[10px] pl-[15px] cursor-pointer transition-all flex flex-col gap-1.5 ${
-                      isSelected 
-                        ? "bg-[#FDF8F6]" 
-                        : "bg-white hover:bg-[#FBF6F4]"
-                    } ${isClosed ? "opacity-60" : ""}`}
-                    style={isSelected ? { borderLeft: "3.5px solid #7c3a2a" } : undefined}
+                    className={`cursor-pointer transition-all flex flex-col gap-1 ${isClosed ? "opacity-60" : ""}`}
+                    style={{
+                      padding: "10px 10px 10px 12px",
+                      background: isSelected ? "rgba(233,196,184,0.22)" : "transparent",
+                      borderLeft: isSelected ? `3px solid ${burgundy}` : "3px solid transparent",
+                      borderRadius: isSelected ? "0 6px 6px 0" : undefined,
+                    }}
                   >
-                    {/* Top row: Agent name and status pill */}
-                    <div className="flex justify-between items-center gap-1.5 font-sans">
-                      <h4 className="text-[13px] font-medium text-[#3a1c14] leading-tight truncate max-w-[110px]">
+                    {/* Top row: Agent name (Playfair) and status chip */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 6 }}>
+                      <h4 style={{
+                        fontFamily: FONT_SERIF, fontSize: 13, fontWeight: 700,
+                        color: "#3a1c14", lineHeight: 1.2,
+                        overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                        flex: 1, minWidth: 0,
+                      }}>
                         {agent.name}
                       </h4>
-                      {undoingQueryIds.has(q.id) ? (
-                        <div className="animate-pulse flex items-center gap-1 pr-2 py-1 min-h-[22px]">
-                          <span className="w-1.5 h-1.5 bg-[#7c3a2a] rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                          <span className="w-1.5 h-1.5 bg-[#7c3a2a] rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                          <span className="w-1.5 h-1.5 bg-[#7c3a2a] rounded-full animate-bounce"></span>
-                        </div>
-                      ) : (
-                        getListStatusPill(q.status)
-                      )}
+                      {statusChip}
                     </div>
 
-                    {/* Second row: Agency name */}
-                    <p className="text-[11px] text-stone-500 leading-relaxed truncate max-w-[180px] mb-0 py-1 min-h-[22px]" style={{ marginBottom: "0px" }}>
+                    {/* Agency in mono-muted */}
+                    <p style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#9a8579", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {agent.agency}
                     </p>
 
-                    {/* Bottom row: manuscript name in burgundy and time since sent */}
-                    <div className="flex items-center justify-between gap-1.5 mt-0.5">
-                      <span className="text-[11px] text-[#7c3a2a] font-medium min-w-0 flex-1">
+                    {/* Bottom: manuscript in burgundy, time in mono */}
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6, marginTop: 2 }}>
+                      <span style={{ fontSize: 10, color: burgundy, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
                         {ms.title}
                       </span>
-                      <span className="text-[10px] text-stone-400 shrink-0 font-mono text-right">
+                      <span style={{ fontFamily: FONT_MONO, fontSize: 9, color: "#b0a89e", flexShrink: 0 }}>
                         {relativeText}
                       </span>
                     </div>
@@ -2012,10 +2342,10 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             )}
           </div>
 
-        </div>
+        </MountCard>
 
         {/* READING PANEL COLUMN WRAPPER with dynamic height matching user selection */}
-        <div className="bg-white border border-[#e8e0d8] rounded-xl flex-grow flex-1 min-w-0 h-fit max-h-full flex flex-col overflow-hidden relative shadow-sm">
+        <MountCard style={{ flexGrow: 1, flex: 1, minWidth: 0, maxHeight: "100%", display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }}>
 
           {/* SLIM CONTROL BAR */}
           {activeQuery && activeAgent && activeMs && (
@@ -2046,6 +2376,14 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                       </span>
                     );
 
+                    const ctaBtnStyle: React.CSSProperties = {
+                      height: 28, background: "linear-gradient(180deg, #f5e2da, #efd5ca)",
+                      color: burgundy, border: "1px solid rgba(124,58,42,0.22)",
+                      display: "flex", alignItems: "center", gap: 6, padding: "0 14px",
+                      borderRadius: 20, fontSize: 12, fontWeight: 700, cursor: "pointer",
+                      flexShrink: 0, userSelect: "none",
+                    };
+
                     if (action.kind === "mark-sent") {
                       return (
                         <>
@@ -2053,9 +2391,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           <button
                             ref={markSentTriggerRef}
                             onClick={() => setIsMarkSentOpen(o => !o)}
-                            className="h-[28px] bg-[#7c3a2a] hover:bg-[#6c3224] text-[#fffffd] flex items-center gap-1.5 px-3.5 rounded-full text-xs font-bold cursor-pointer transition-colors border-0 shrink-0 select-none"
+                            style={ctaBtnStyle}
                           >
-                            <Send className="w-3.5 h-3.5 text-[#fffffd] stroke-[2.5]" />
+                            <Send className="w-3.5 h-3.5 stroke-[2.5]" style={{ color: burgundy }} />
                             <span>{action.label}</span>
                           </button>
                         </>
@@ -2067,9 +2405,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                         {chip}
                         <button
                           onClick={() => setIsRecordResponseFocusFormOpen(true)}
-                          className="h-[28px] bg-[#7c3a2a] hover:bg-[#6c3224] text-[#fffffd] flex items-center gap-1.5 px-3.5 rounded-full text-xs font-bold cursor-pointer transition-colors border-0 shrink-0 select-none"
+                          style={ctaBtnStyle}
                         >
-                          <Check className="w-3.5 h-3.5 text-[#fffffd] stroke-[2.5]" />
+                          <Check className="w-3.5 h-3.5 stroke-[2.5]" style={{ color: burgundy }} />
                           <span>{action.label}</span>
                         </button>
                       </>
@@ -2774,193 +3112,80 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 </div>
               </div>
               
-              {/* Agent sticky header with matching shadow and borders */}
-              <div className="bg-white border border-[#e8e0d8] min-h-[135px] p-6 flex justify-between items-center select-none shrink-0 z-10 shadow-sm rounded-xl relative">
-                {/* Status pill with integrated elegant watermark behind it in top-right corner with 25px gaps */}
-                <div className="hidden absolute right-[25px] top-[25px] z-20 flex flex-col items-end group/watermark">
-                  <div className="relative flex items-center justify-end select-none">
-                    {/* Watermark image container positioned behind (z-0) with overflow-hidden */}
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[280px] h-20 flex items-center justify-center pointer-events-none z-0 rounded-xl overflow-hidden">
-                      {queryImage ? (
-                        <img
-                          src={queryImage}
-                          alt="Query watermark"
-                          style={{
-                            transform: `translate(${queryImageX}px, ${queryImageY}px) scale(${queryImageScale / 100})`,
-                            transformOrigin: 'center center'
-                          }}
-                          className="object-contain max-h-full max-w-full opacity-[0.22] transition-all"
-                          referrerPolicy="no-referrer"
-                        />
-                      ) : (
-                        <div 
-                          style={{
-                            transform: `translate(${queryImageX}px, ${queryImageY}px) scale(${queryImageScale / 100})`,
-                            transformOrigin: 'center center'
-                          }}
-                          className="w-full h-full flex items-center justify-center opacity-0 group-hover/watermark:opacity-[0.14] transition-opacity"
-                        >
-                          <ImageIcon className="w-8 h-8 text-[#7c3a2a] animate-pulse" />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Status Pill in front (z-10) - scaled to 1.0 */}
-                    <div className="relative z-10 pointer-events-auto">
+              {/* Agent header — MountCard, no sage band */}
+              <MountCard style={{ padding: "20px 24px 18px", flexShrink: 0, position: "relative" }}>
+                <div style={{ position: "relative", zIndex: 4 }}>
+                  {/* Name + status chip row */}
+                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
+                    <h2 style={{ fontFamily: FONT_SERIF, fontSize: 38, fontWeight: 700, color: "#3a1c14", lineHeight: 1.1, margin: 0 }}>
+                      {activeAgent.name}
+                    </h2>
+                    <div style={{ flexShrink: 0, paddingTop: 4 }}>
                       <StatusPill status={activeQuery.status} customLabel={statusDisplayLabel(activeQuery)} size="lg" />
                     </div>
                   </div>
 
-                  {/* Hidden input element for watermark upload */}
-                  <input
-                    type="file"
-                    id="reading-pane-watermark-input"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleQueryImageUpload}
-                  />
-
-                  {/* Hover Control Bar for Watermark adjustments */}
-                  <div className="absolute bottom-[-18px] right-1 bg-white/95 border border-[#EBDCD3] rounded-full px-2.5 py-1 shadow-sm flex items-center gap-1.5 z-30 opacity-0 group-hover/watermark:opacity-100 transition-opacity pointer-events-auto text-[9px] font-mono leading-none">
-                    <label 
-                      htmlFor="reading-pane-watermark-input"
-                      className="p-1 hover:bg-[#FAF1EF] text-stone-600 hover:text-[#7c3a2a] rounded cursor-pointer flex items-center justify-center transition-colors"
-                      title="Upload Watermark Image"
-                    >
-                      <Camera className="w-3.5 h-3.5 text-[#7c3a2a]" />
-                    </label>
-
-                    {queryImage && (
-                      <>
-                        <div className="w-[0.5px] h-3 bg-stone-200 self-stretch my-0.5" />
-                        <button
-                          type="button"
-                          onClick={() => handleUpdateImageOffset(-5, 0)}
-                          className="p-1 hover:bg-[#FAF1EF] text-stone-600 hover:text-[#7c3a2a] rounded cursor-pointer"
-                          title="Move Left"
-                        >
-                          ◀
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleUpdateImageOffset(0, -5)}
-                          className="p-1 hover:bg-[#FAF1EF] text-stone-600 hover:text-[#7c3a2a] rounded cursor-pointer"
-                          title="Move Up"
-                        >
-                          ▲
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleUpdateImageOffset(0, 5)}
-                          className="p-1 hover:bg-[#FAF1EF] text-stone-600 hover:text-[#7c3a2a] rounded cursor-pointer"
-                          title="Move Down"
-                        >
-                          ▼
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleUpdateImageOffset(5, 0)}
-                          className="p-1 hover:bg-[#FAF1EF] text-stone-600 hover:text-[#7c3a2a] rounded cursor-pointer"
-                          title="Move Right"
-                        >
-                          ▶
-                        </button>
-
-                        <div className="w-[0.5px] h-3 bg-stone-200 self-stretch my-0.5" />
-                        <button
-                          type="button"
-                          onClick={() => handleUpdateImageScale(Math.max(30, queryImageScale - 10))}
-                          className="px-1 text-stone-700 hover:text-[#7c3a2a] font-bold cursor-pointer"
-                          title="Zoom Out"
-                        >
-                          -
-                        </button>
-                        <span className="text-stone-500 scale-90 select-none">{queryImageScale}%</span>
-                        <button
-                          type="button"
-                          onClick={() => handleUpdateImageScale(Math.min(300, queryImageScale + 10))}
-                          className="px-1 text-stone-700 hover:text-[#7c3a2a] font-bold cursor-pointer"
-                          title="Zoom In"
-                        >
-                          +
-                        </button>
-
-                        <div className="w-[0.5px] h-3 bg-stone-200 self-stretch my-0.5" />
-                        <button
-                          type="button"
-                          onClick={handleRemoveQueryImage}
-                          className="p-1 hover:bg-[#FAF1EF] text-red-600 rounded cursor-pointer"
-                          title="Remove Watermark"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </>
-                    )}
-                    <div className="w-[0.5px] h-3 bg-stone-200 self-stretch my-0.5" />
-                    <button
-                      type="button"
-                      onClick={handleResetImagePosition}
-                      className="text-[9px] text-stone-500 hover:text-[#7c3a2a] underline px-1 cursor-pointer"
-                      title="Reset Position"
-                    >
-                      Reset
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex flex-col justify-center">
-                  <h2 className="font-serif text-[35px] font-bold text-[#3a1c14] leading-[42px]">
-                    {activeAgent.name}
-                  </h2>
-                  
-                  {activeAgent.mswlNotes && (
-                    <p className="italic text-stone-600 text-[11.5px] mt-1.5 mb-2 max-w-[548px] leading-relaxed border-l-2 border-[#7c3a2a]/20 pl-2.5">
-                      "{activeAgent.mswlNotes}"
-                    </p>
-                  )}
-
-                  <p className="text-[11px] text-[#7c3a2a]/80 leading-snug mt-1">
-                    {activeAgent.agency} &middot; {activeAgent.email}
+                  {/* Agency · email */}
+                  <p style={{ fontSize: 11, color: burgundy, marginTop: 6, marginBottom: 0, opacity: 0.85 }}>
+                    {activeAgent.agency}{activeAgent.email ? <> &middot; {activeAgent.email}</> : null}
                   </p>
+
+                  {/* Genre tags */}
                   {activeAgent.genres && activeAgent.genres.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-1.5 max-w-md">
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 8 }}>
                       {activeAgent.genres.map((genre, gIdx) => (
-                        <span key={gIdx} className="bg-[#FAF1EF] text-[#7c3a2a] text-[9px] font-bold px-2 py-0.5 rounded-full select-none leading-none border border-[#EBDCD3]/40">
+                        <span key={gIdx} style={{
+                          background: "rgba(124,58,42,0.07)", color: burgundy,
+                          fontSize: 9, fontWeight: 700, padding: "2px 8px", borderRadius: 20,
+                          border: "1px solid rgba(124,58,42,0.15)", lineHeight: 1.6,
+                        }}>
                           {genre}
                         </span>
                       ))}
                     </div>
                   )}
-                  
-                  {/* Meta metadata row */}
-                  <div className="flex items-center gap-3 mt-2 text-[11px] text-stone-500 font-mono leading-none">
-                    <div className="flex items-center text-[#BA7517] gap-0.5">
+
+                  {/* MSWL quote */}
+                  {activeAgent.mswlNotes && (
+                    <p style={{
+                      fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 11, color: "#5a3830",
+                      marginTop: 10, marginBottom: 0, borderLeft: `2px solid rgba(124,58,42,0.2)`,
+                      paddingLeft: 10, lineHeight: 1.5,
+                    }}>
+                      "{activeAgent.mswlNotes}"
+                    </p>
+                  )}
+
+                  {/* Stars + Submission method */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10, fontFamily: FONT_MONO, fontSize: 11, color: "#9a8579" }}>
+                    <div style={{ display: "flex", alignItems: "center", color: "#BA7517", gap: 1 }}>
                       {Array.from({ length: 5 }).map((_, idx) => (
                         <Star key={idx} className={`w-3 h-3 ${idx < activeAgent.starRating ? "fill-current" : "text-stone-200"}`} />
                       ))}
                     </div>
-                    <span className="text-stone-300">|</span>
-                    <span>
-                      Submitted by: {activeAgent.submissionMethod === "Email" ? "email" : activeAgent.submissionMethod}
-                    </span>
+                    <span style={{ color: "#d1c9c0" }}>|</span>
+                    <span>Submission method: {activeAgent.submissionMethod === "Email" ? "email" : activeAgent.submissionMethod}</span>
                   </div>
                 </div>
-
-
-              </div>
+              </MountCard>
 
               {/* Grid Cards scrollable wrapper styled in bento grid pattern */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 items-stretch">
                 
                 {/* 1. Tracking timeline history card */}
-                <div className="relative bg-white border border-[#e8e0d8] rounded-xl flex flex-col p-4 pt-8 shadow-sm h-full min-h-[460px]">
-                  {/* Overlapping Pill Header */}
-                  <span className="absolute top-[-14px] left-1/2 -translate-x-1/2 bg-[#fdf8f6] border border-[#d1d5db] py-[5px] px-[16px] rounded-full flex items-center gap-1.5 shadow-sm whitespace-nowrap z-10 select-none">
-                    <GitCommit className="w-3.5 h-3.5 text-black" />
-                    <span className="text-black text-[13px] font-normal">Tracking</span>
-                  </span>
+                <MountCard style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 460, overflow: "hidden" }}>
+                  {/* Sage-band header */}
+                  <div style={{
+                    margin: "6px 6px 0", borderRadius: "8px 8px 0 0",
+                    background: sageBandGradient, borderBottom: `1px solid ${sageBandRule}`,
+                    padding: "7px 14px", display: "flex", alignItems: "center", gap: 7,
+                    flexShrink: 0, position: "relative", zIndex: 4,
+                  }}>
+                    <Clock className="w-3.5 h-3.5" style={{ color: "#5a6e58" }} />
+                    <span style={{ fontFamily: FONT_MONO, fontSize: 11, fontWeight: 700, color: "#4a5e48" }}>Tracking</span>
+                  </div>
 
-                  <div className="flex-grow space-y-3.5 overflow-y-auto max-h-[390px] custom-query-list-scrollbar pr-0.5 pt-4">
+                  <div className="flex-grow space-y-3.5 overflow-y-auto max-h-[390px] custom-query-list-scrollbar pr-0.5 pt-4" style={{ padding: "16px 14px 14px", position: "relative", zIndex: 4 }}>
                     {(() => {
                       const validEnumValues = Object.values(QueryStatus);
                       // Skip any activity documents with a type that does not match a QueryStatus enum value
@@ -3211,19 +3436,25 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                       </div>
                     </div>
                   )}
-                </div>
+                </MountCard>
 
                 {/* 2. What you sent card */}
-                <div className="relative bg-white border border-[#e8e0d8] rounded-xl flex flex-col p-4 pt-8 shadow-sm h-full">
-                  {/* Overlapping Pill Header */}
-                  <span className="absolute top-[-14px] left-1/2 -translate-x-1/2 bg-[#fdf8f6] border border-[#d1d5db] py-[5px] px-[16px] rounded-full flex items-center gap-1.5 shadow-sm whitespace-nowrap z-10 select-none">
-                    <Send className="w-[17px] h-[17px] text-black" />
-                    <span className="text-black text-[13px] font-normal">What you sent</span>
-                  </span>
+                <MountCard style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
+                  {/* Sage-band header */}
+                  <div style={{
+                    margin: "6px 6px 0", borderRadius: "8px 8px 0 0",
+                    background: sageBandGradient, borderBottom: `1px solid ${sageBandRule}`,
+                    padding: "7px 14px", display: "flex", alignItems: "center", gap: 7,
+                    flexShrink: 0, position: "relative", zIndex: 4,
+                  }}>
+                    <Send className="w-3.5 h-3.5" style={{ color: "#5a6e58" }} />
+                    <span style={{ fontFamily: FONT_MONO, fontSize: 11, fontWeight: 700, color: "#4a5e48" }}>What you sent</span>
+                  </div>
 
+                  <div style={{ padding: "12px 14px 14px", flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", position: "relative", zIndex: 4 }}>
                   {isEditMode ? (
                     <div className="space-y-4 text-xs overflow-y-auto max-h-[440px] custom-query-list-scrollbar pr-0.5">
-                      
+
                       {/* Non-editable Agent */}
                       <div>
                         <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1">Target Agent</label>
@@ -3467,7 +3698,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                       )}
                     </div>
                   )}
-                </div>
+                  </div>
+                </MountCard>
 
                 {/* 3. Notes card */}
                 {(() => {
@@ -3476,15 +3708,21 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
                   return (
-                    <div className="relative bg-white border border-[#e8e0d8] rounded-xl flex flex-col p-4 pt-8 shadow-sm h-full min-h-[350px]">
-                      {/* Overlapping Pill Header - Notes */}
-                      <span className="absolute top-[-14px] left-1/2 -translate-x-1/2 bg-[#fdf8f6] border border-[#d1d5db] py-[5px] px-[16px] rounded-full flex items-center gap-1.5 shadow-sm whitespace-nowrap z-10 select-none">
-                        <Notebook className="w-3.5 h-3.5 text-black" />
-                        <span className="text-black text-[13px] font-normal">Notes</span>
-                      </span>
+                    <MountCard style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 350, overflow: "hidden" }}>
+                      {/* Sage-band header */}
+                      <div style={{
+                        margin: "6px 6px 0", borderRadius: "8px 8px 0 0",
+                        background: sageBandGradient, borderBottom: `1px solid ${sageBandRule}`,
+                        padding: "7px 14px", display: "flex", alignItems: "center", gap: 7,
+                        flexShrink: 0, position: "relative", zIndex: 4,
+                      }}>
+                        <Notebook className="w-3.5 h-3.5" style={{ color: "#5a6e58" }} />
+                        <span style={{ fontFamily: FONT_MONO, fontSize: 11, fontWeight: 700, color: "#4a5e48" }}>Notes</span>
+                      </div>
 
+                      <div style={{ padding: "12px 14px 14px", flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", position: "relative", zIndex: 4 }}>
                       {/* WhatsApp-style messaging box with background extending behind bubbles and text input */}
-                      <div className="flex-grow flex flex-col justify-between p-3.5 h-full min-h-[300px] bg-[#FAF8F5] rounded-xl border border-[#ebd8c5]/40 mt-3.5">
+                      <div className="flex-grow flex flex-col justify-between p-3.5 h-full min-h-[300px] bg-[#FAF8F5] rounded-xl border border-[#ebd8c5]/40">
                         {/* Chat Messages scroll area with transparent background */}
                         <div 
                           ref={chatContainerRef}
@@ -3608,7 +3846,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           </button>
                         </form>
                       </div>
-                    </div>
+                      </div>
+                    </MountCard>
                   );
                 })()}
 
@@ -3641,10 +3880,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
               Select a query dispatch from the column to open detailed materials.
             </div>
           )}
-        </div>
+          </div>
+        </MountCard>
       </div>
-
-    </div>
 
     {activeQuery && (
       <RecordResponseModal
@@ -3652,7 +3890,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         onClose={() => setIsRecordResponseModalOpen(false)}
         query={activeQuery}
         agent={{
-          name: activeAgent?.name || "the agent",
+          name: activeAgent?.name || activeAgent?.agency || "the agent",
           agency: activeAgent?.agency || "Agency",
           responseTimeWeeks: activeAgent?.responseTimeWeeks || 6,
           submissionMethod: activeAgent?.submissionMethod || "Email"

@@ -202,7 +202,7 @@ export interface Query {
   agentId: string;
   packageId: string; // Links to active SubmissionPackage
   status: QueryStatus;
-  dateSent: string; // ISO String
+  dateSent?: string; // ISO String; absent for provisional (undated) imported queries
   personalisationNotes: string;
   sendMethod: SubmissionMethod;
   nudgeDate?: string; // ISO String or date (when they plan to nudge)

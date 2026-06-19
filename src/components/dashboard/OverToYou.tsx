@@ -123,7 +123,7 @@ export const buildOverToYouRows = (tasks: Task[], queries: Query[], agents: Agen
       const type = task.taskType as UrgentType;
       const q = queries.find((item) => item.id === task.relatedRecordId);
       const agent = q ? agents.find((a) => a.id === q.agentId) : undefined;
-      const agentName = agent?.name || "the agent";
+      const agentName = agent?.name || agent?.agency || "the agent";
       const title = task.manuscriptTitle || "your manuscript";
 
       const rawDeadline = q?.responseDeadline ? new Date(q.responseDeadline) : null;
@@ -202,11 +202,11 @@ const itemSubject = (type: RecommendedType, task: Task, queries: Query[], agents
   if (type === "no_response_close") {
     const q = queries.find((x) => x.id === task.relatedRecordId);
     const ag = q ? agents.find((a) => a.id === q.agentId) : undefined;
-    return boldAgent(ag?.name || "the agent");
+    return boldAgent(ag?.name || ag?.agency || "the agent");
   }
   // dream_agent_unqueried / data_quality_poor → relatedRecordId is an agent id.
   const ag = agents.find((a) => a.id === task.relatedRecordId);
-  return boldAgent(ag?.name || "the agent");
+  return boldAgent(ag?.name || ag?.agency || "the agent");
 };
 
 /** One summarised, expandable row per recommended type that has >= 1 task (data-driven). */

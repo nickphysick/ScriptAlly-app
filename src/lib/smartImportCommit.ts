@@ -9,7 +9,7 @@
  * derives status, stage dates, and the "Responses Received" flag identically to hand-logged
  * queries. No model involvement here.
  */
-import { doc, setDoc, getDocs, deleteDoc, collection, Timestamp } from "firebase/firestore";
+import { doc, setDoc, getDocs, deleteDoc, collection, Timestamp, updateDoc, deleteField } from "firebase/firestore";
 import { db } from "./firebase";
 import { recomputeQuery } from "./recomputeQuery";
 import { Agent, ActivityType, QueryStatus, SubmissionMethod } from "../types";
@@ -270,6 +270,11 @@ export async function commitSmartImport(
       }
       queryId = res.id;
       importedQueryIds.add(queryId);
+      // addQuery always defaults dateSent to today; for provisional (undated) imports that
+      // fabricates a date. Clear it so the feeds never show a made-up sent date.
+      if (!q.dateQueried) {
+        await updateDoc(doc(db, "users", userId, "queries", queryId), { dateSent: deleteField() });
+      }
     } catch (e) {
       console.error("Smart Import: query write failed:", agent.name, e);
       outcome.errors.push(`Couldn't import the query to ${agent.name}.`);

@@ -238,6 +238,21 @@ export function parseModel(result: SmartImportResult): { agents: ReviewAgent[]; 
   return { agents, queries };
 }
 
+/** Pure cascade for the agents-screen bin: marks the agent deleted and all its not-yet-removed queries
+ *  removed. Extracted from the UI's remove() handler so it can be unit-tested without React. */
+export function applyAgentRemoval(
+  agents: ReviewAgent[],
+  queries: ReviewQuery[],
+  id: string
+): { agents: ReviewAgent[]; queries: ReviewQuery[] } {
+  return {
+    agents: agents.map((a) => (a.id === id ? { ...a, deleted: true } : a)),
+    queries: queries.map((q) =>
+      q.agentRef === id && !q.removed ? { ...q, removed: true, removedReason: "Agent removed" as const } : q
+    ),
+  };
+}
+
 /** Convert the final working model back into a SmartImportResult for commitSmartImport. Starts from
  *  the original parse (so per-stage dates the model never surfaced survive), excludes deleted agents /
  *  removed queries, carries merge-repointed agentRefs, and — the date-attribution fix — writes each
@@ -249,7 +264,9 @@ export function modelToResult(result: SmartImportResult, agents: ReviewAgent[], 
     const o = origAgents.get(a.id);
     return { ...(o ?? { ref: a.id, confidence: "high" as const, name: a.name }), ref: a.id, name: a.name, agency: a.agency, genres: a.genres, website: a.website || o?.website, responseTimeWeeks: a.weeks };
   });
-  const queriesOut: ParsedQuery[] = queries.filter((q) => !q.removed).map((q) => {
+  // Cross-reference guard: exclude queries whose agent was deleted even if the cascade missed them.
+  const survivingAgentIds = new Set(agentsOut.map((a) => a.ref));
+  const queriesOut: ParsedQuery[] = queries.filter((q) => !q.removed && survivingAgentIds.has(q.agentRef)).map((q) => {
     const o = (result.queries || [])[Number(q.id.slice(1))];
     const base: ParsedQuery = { ...(o ?? { agentRef: q.agentRef, confidence: "high" as const, status: q.status, dateQueried: null }), agentRef: q.agentRef, status: q.status };
     base.dateQueried = q.dateQueried; // the queried-rung anchor (edited or carried)

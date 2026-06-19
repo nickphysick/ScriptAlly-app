@@ -7,6 +7,8 @@ vi.mock('firebase/firestore', () => ({
   getDocs: vi.fn(async () => ({ docs: [] as any[] })),
   setDoc: vi.fn(async () => {}),
   deleteDoc: vi.fn(async () => {}),
+  updateDoc: vi.fn(async () => {}),
+  deleteField: vi.fn(() => ({ _sentinel: 'deleteField' })),
   Timestamp: {
     fromMillis: (ms: number) => ({ _ts: ms }),
     fromDate: (d: Date) => ({ _ts: d.getTime() }),
@@ -15,12 +17,14 @@ vi.mock('firebase/firestore', () => ({
 vi.mock('./firebase', () => ({ db: {} }));
 vi.mock('./recomputeQuery', () => ({ recomputeQuery: vi.fn(async () => {}) }));
 
-import { setDoc } from 'firebase/firestore';
+import { setDoc, updateDoc } from 'firebase/firestore';
 import { impliedRungs, assignTimes, commitSmartImport } from './smartImportCommit';
+import { parseModel, modelToResult } from './smartImportReviewModel';
 import { ParsedAgent, ParsedQuery, SmartImportResult } from '../types/smartImport';
 import { QueryStatus } from '../types';
 
 const mockSetDoc = vi.mocked(setDoc);
+const mockUpdateDoc = vi.mocked(updateDoc);
 
 const q = (over: Partial<ParsedQuery> = {}): ParsedQuery => ({
   agentRef: 'a1', dateQueried: null, status: QueryStatus.QUERIED, confidence: 'high', ...over,
@@ -138,7 +142,7 @@ describe('assignTimes — ordering keys for derivation (never surfaced)', () => 
 });
 
 describe('commitSmartImport — orchestration', () => {
-  beforeEach(() => { mockSetDoc.mockClear(); });
+  beforeEach(() => { mockSetDoc.mockClear(); mockUpdateDoc.mockClear(); });
 
   const agent = (over: Partial<ParsedAgent> = {}): ParsedAgent => ({ ref: 'a1', name: 'Jane Doe', agency: 'Acme', confidence: 'high', ...over });
   const result = (agents: ParsedAgent[], queries: ParsedQuery[]): SmartImportResult => ({
@@ -192,6 +196,28 @@ describe('commitSmartImport — orchestration', () => {
     expect(out.queriesImported).toBe(1);
   });
 
+  it('passes real dateQueried as dateSent for dated queries; clears dateSent (deleteField) for provisional ones', async () => {
+    const { deps } = makeDeps();
+    const r = result(
+      [agent({ ref: 'a1' })],
+      [
+        q({ agentRef: 'a1', status: QueryStatus.QUERIED, dateQueried: '2026-03-15' }), // dated
+        q({ agentRef: 'a1', status: QueryStatus.QUERIED, dateQueried: null }),           // provisional
+      ]
+    );
+    await commitSmartImport(deps as any, r, 'ms1');
+    const addQueryCalls = (deps.addQuery as any).mock.calls;
+    // Dated query passes its real date through to addQuery.
+    expect(addQueryCalls[0][0].dateSent).toBe('2026-03-15');
+    // Provisional query omits dateSent from addQuery (addQuery would default it to today).
+    expect(addQueryCalls[1][0].dateSent).toBeUndefined();
+    // commitSmartImport then clears the today-stamp via updateDoc+deleteField for the provisional one.
+    const clearCalls = mockUpdateDoc.mock.calls.filter(
+      (c) => (c[1] as any)?.dateSent?._sentinel === 'deleteField'
+    );
+    expect(clearCalls.length).toBe(1);
+  });
+
   it('collapses the dashboard feed into ONE "Smart import ·" summary (existing activity type)', async () => {
     const { deps } = makeDeps();
     const r = result(
@@ -205,5 +231,89 @@ describe('commitSmartImport — orchestration', () => {
     expect(summaries.length).toBe(1);
     expect((summaries[0][1] as any).description).toBe('Smart import · 2 agents added, 2 queries logged');
     expect((summaries[0][1] as any).activityType).toBe('Status Changed'); // allowlisted type → passes rules, shows in feed
+  });
+});
+
+describe('commitSmartImport — deleted-agent exclusion (the masking case)', () => {
+  // This test guards the specific failure mode where an agency-only undated agent was deleted on
+  // the review screen but still committed. Before the B3 rules fix, the undated query write was
+  // silently rejected by Firestore (dateSent is string check failed), making it appear to work.
+  // After B3, absent dateSent is allowed, so the exclusion must hold at the model level.
+  beforeEach(() => { mockSetDoc.mockClear(); mockUpdateDoc.mockClear(); });
+
+  const makeDeps = () => {
+    let n = 0;
+    return {
+      deps: {
+        userId: 'u1',
+        existingAgents: [] as any[],
+        manuscriptTitle: 'My Novel',
+        addAgent: vi.fn(async () => ({ success: true, id: `ag-${++n}` })),
+        addQuery: vi.fn(async () => ({ success: true, id: `q-${++n}` })),
+      },
+    };
+  };
+
+  it('deleting an agency-only undated agent on the review screen excludes it and its query from the commit', async () => {
+    const rawResult: SmartImportResult = {
+      columnMapping: {}, statusTranslations: [], warnings: [],
+      agents: [
+        { ref: 'a1', name: 'Jane Doe', agency: 'Acme Lit', confidence: 'high' },
+        { ref: 'a2', name: '', agency: 'Curtis Brown', confidence: 'high' }, // agency-only
+      ],
+      queries: [
+        { agentRef: 'a1', dateQueried: '2026-03-15', status: QueryStatus.QUERIED, confidence: 'high' },
+        { agentRef: 'a2', dateQueried: null, status: QueryStatus.QUERIED, confidence: 'high' }, // undated
+      ],
+    };
+
+    // Simulate the review-screen remove() cascade: mark a2 deleted, its query removed.
+    const { agents, queries } = parseModel(rawResult);
+    const agencyOnlyAgent = agents.find((a) => a.id === 'a2')!;
+    agencyOnlyAgent.deleted = true;
+    const agencyOnlyQuery = queries.find((q) => q.agentRef === 'a2')!;
+    agencyOnlyQuery.removed = true;
+
+    // modelToResult produces the filtered SmartImportResult (what onImportClick hands to handleImport).
+    const filteredResult = modelToResult(rawResult, agents, queries);
+
+    // Guard: the filtered result must exclude the deleted agent + removed query.
+    expect(filteredResult.agents.map((a) => a.ref)).toEqual(['a1']);
+    expect(filteredResult.queries).toHaveLength(1);
+    expect(filteredResult.queries[0].agentRef).toBe('a1');
+  });
+
+  it('cross-reference guard: if the cascade missed marking q.removed, the deleted agent ID check still excludes the query', async () => {
+    const rawResult: SmartImportResult = {
+      columnMapping: {}, statusTranslations: [], warnings: [],
+      agents: [
+        { ref: 'a1', name: 'Jane Doe', agency: 'Acme Lit', confidence: 'high' },
+        { ref: 'a2', name: '', agency: 'Curtis Brown', confidence: 'high' },
+      ],
+      queries: [
+        { agentRef: 'a1', dateQueried: '2026-03-15', status: QueryStatus.QUERIED, confidence: 'high' },
+        { agentRef: 'a2', dateQueried: null, status: QueryStatus.QUERIED, confidence: 'high' },
+      ],
+    };
+
+    const { agents, queries } = parseModel(rawResult);
+    // Agent deleted, but simulate cascade MISS: q.removed is NOT set.
+    agents.find((a) => a.id === 'a2')!.deleted = true;
+    // queries[1] still has removed: false (the broken-link scenario)
+
+    const filteredResult = modelToResult(rawResult, agents, queries);
+
+    // The cross-reference guard must catch it: query whose agentRef points to a deleted agent is excluded.
+    expect(filteredResult.agents.map((a) => a.ref)).toEqual(['a1']);
+    expect(filteredResult.queries).toHaveLength(1);
+    expect(filteredResult.queries[0].agentRef).toBe('a1');
+
+    const { deps } = makeDeps();
+    const out = await commitSmartImport(deps as any, filteredResult, 'ms1');
+    expect(out.agentsCreated).toBe(1);
+    expect(out.queriesImported).toBe(1);
+    expect((deps.addAgent as any).mock.calls).toHaveLength(1);
+    expect((deps.addAgent as any).mock.calls[0][0].agency).toBe('Acme Lit');
+    expect((deps.addQuery as any).mock.calls).toHaveLength(1);
   });
 });

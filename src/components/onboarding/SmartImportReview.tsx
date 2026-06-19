@@ -21,7 +21,7 @@ import { PinkButton } from "../dashboard/HeroCard";
 import {
   ReviewAgent, ReviewQuery, ReasonItem, CheckReason, AgentStatus,
   agentStatus, resolveReason, queryStatusOf, fmtDate, QUERY_STATUS_OPTIONS,
-  dupNoteOpen, dupNoteKept, dupNoteMerged, parseModel, modelToResult,
+  dupNoteOpen, dupNoteKept, dupNoteMerged, parseModel, modelToResult, applyAgentRemoval,
   currentDate, statusDateLabel, quoteStatuses,
 } from "../../lib/smartImportReviewModel";
 
@@ -892,8 +892,10 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   const remove = (id: string) => {
     const a = agents.find((x) => x.id === id);
     const qc = queryCount(id);
-    setAgents((xs) => xs.map((x) => (x.id === id ? { ...x, deleted: true } : x)));
-    setQueries((qs) => qs.map((q) => (q.agentRef === id && !q.removed ? { ...q, removed: true, removedReason: "Agent removed" } : q)));
+    console.log('[SmartImport] remove() called — agentId:', id, '| found:', !!a, '| qc:', qc);
+    const next = applyAgentRemoval(agents, queries, id);
+    setAgents(next.agents);
+    setQueries(next.queries);
     if (a && qc > 0) setTopcap(`${a.name || a.agency} (${qc} quer${qc === 1 ? "y" : "ies"}) was removed — see ${qc === 1 ? "it" : "them"} on the Queries tab under "Not being imported"`);
     setTick((t) => t + 1);
   };
@@ -1037,6 +1039,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
 
   const onImportClick = () => {
     if (!canImport) { pulseBlocked(qActive.filter((q) => queryStatusOf(q) !== "captured").map((q) => q.id)); return; }
+    console.log('[SmartImport] import clicked — deletedAgents:', agents.filter((a) => a.deleted).map((a) => a.id), '| removedQueries:', queries.filter((q) => q.removed).length);
     void onImport?.(modelToResult(result, agents, queries));
   };
 
