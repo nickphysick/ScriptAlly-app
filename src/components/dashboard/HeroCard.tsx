@@ -39,6 +39,9 @@ const btnBase: React.CSSProperties = {
   transition: "all 0.2s",
 };
 
+/** Tighter padding for the hero's four-button row so they all stay on one line. */
+const heroBtnCompact: React.CSSProperties = { padding: "9px 13px" };
+
 /** Pink primary button (hero actions, task sends). */
 export const PinkButton: React.FC<{
   onClick: () => void;
@@ -140,7 +143,7 @@ export const HeroCard: React.FC<HeroCardProps> = ({
 
       {/* Body */}
       <div style={{ padding: "33px 31px 31px", margin: "6px 6px 6px", position: "relative", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-        <div style={{ position: "relative", zIndex: 4, maxWidth: 520 }}>
+        <div style={{ position: "relative", zIndex: 4, maxWidth: 620 }}>
           <div style={{ fontFamily: FONT_SERIF, fontSize: 38, fontWeight: 500, color: headingInk, lineHeight: 1.1 }}>
             Welcome back, <em style={{ color: burgundy, fontStyle: "italic" }}>{firstName}</em>
           </div>
@@ -167,22 +170,23 @@ export const HeroCard: React.FC<HeroCardProps> = ({
             </>
           )}
 
-          {/* Two halves of the querying loop (Send query · Record a response), then a divider before the setup actions. */}
-          <div className="flex gap-[10px] flex-wrap items-center">
-            <PinkButton onClick={onSendQuery}>
+          {/* Two halves of the querying loop (Send query · Record a response), then a divider before the
+              setup actions. Compact padding keeps all four on one line at the hero's width. */}
+          <div className="flex gap-[8px] flex-wrap items-center">
+            <PinkButton onClick={onSendQuery} style={heroBtnCompact}>
               <Send className="w-3 h-3 shrink-0" />
               Send query
             </PinkButton>
-            <PinkButton onClick={onRecordResponse}>
+            <PinkButton onClick={onRecordResponse} style={heroBtnCompact}>
               <CornerUpLeft className="w-3 h-3 shrink-0" />
               Record a response
             </PinkButton>
-            <span aria-hidden="true" style={{ width: 1, alignSelf: "stretch", minHeight: 22, background: "rgba(124,58,42,0.15)", margin: "0 2px" }} />
-            <GhostButton onClick={onAddAgent}>
+            <span aria-hidden="true" style={{ width: 1, alignSelf: "stretch", minHeight: 22, background: "rgba(124,58,42,0.15)", margin: "0 1px" }} />
+            <GhostButton onClick={onAddAgent} style={heroBtnCompact}>
               <UserPlus className="w-3 h-3 shrink-0" />
               Add agent
             </GhostButton>
-            <GhostButton onClick={onAddManuscript}>
+            <GhostButton onClick={onAddManuscript} style={heroBtnCompact}>
               <BookOpen className="w-3 h-3 shrink-0" />
               Add manuscript
             </GhostButton>

@@ -21,6 +21,7 @@ import type { RecordResponseData } from "../lib/recordResponse";
 import { EXPECTED_NEXT_STEPS } from "../lib/statusOrder";
 import { QueryStatus } from "../types";
 import { MountPanel } from "./MountPanel";
+import { FadeScroll } from "./FadeScroll";
 import { StatusDot } from "./StatusDot";
 import { BrandDatePicker } from "./forms";
 import { EmailBandHeader } from "./emailImport/parts";
@@ -225,9 +226,10 @@ export const RecordResponseScreen: React.FC<RecordResponseScreenProps> = ({ isOp
             </p>
           ) : (
             <>
-              {/* ── Which query? ── */}
+              {/* ── Which query? (first ~5 visible; scroll for the rest, edges fade mid-scroll) ── */}
               <label style={fieldLabel}>Which query?</label>
-              <div style={{ display: "flex", flexDirection: "column", gap: 7, marginBottom: 18 }}>
+              <FadeScroll maxHeight={330} style={{ marginBottom: 18 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
                 {awaiting.map((q) => {
                   const a = agentFor(q);
                   const sel = q.id === selectedQueryId;
@@ -263,7 +265,8 @@ export const RecordResponseScreen: React.FC<RecordResponseScreenProps> = ({ isOp
                     </button>
                   );
                 })}
-              </div>
+                </div>
+              </FadeScroll>
 
               {/* ── What came back? ── */}
               {selectedQuery && (
