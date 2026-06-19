@@ -153,6 +153,7 @@
       <button class="btn" onclick="claim()">Claim your spot</button>
     </div>
     <p class="reassure">We'll email you the moment we get going. No spam, ever.</p>
+    <p id="formErr" role="alert" style="display:none;font-size:12.5px;color:#a14434;margin:9px auto 0"></p>
     <div class="done" id="done"><div class="dt">You're in — founding writer #<span id="rank">68</span>.</div><div class="dd">We'll email you the moment we get going. Welcome to the trenches.</div></div>
   </section>
 </div>
@@ -173,10 +174,12 @@
 </footer>
 
 <script>
-  var CURRENT = 67, CAP = 100;
+  var CAP = 100, CURRENT = null; // both filled from the live counter; no hardcoded tally.
   var reduce = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
   var numEl = document.getElementById('num'), fillEl = document.getElementById('fill');
+
   function animateCount(){
+    if(CURRENT == null) return;
     if(reduce){ numEl.textContent = CURRENT; fillEl.style.width = (CURRENT/CAP*100)+'%'; return; }
     var start=null, dur=1500;
     requestAnimationFrame(function step(ts){
@@ -187,14 +190,71 @@
     });
     setTimeout(function(){ fillEl.style.width=(CURRENT/CAP*100)+'%'; },80);
   }
-  window.addEventListener('load', animateCount);
+
+  // If the live tally can't be fetched, quietly hide the count widgets — never show a made-up number.
+  function hideCount(){
+    var row=document.querySelector('.counter .row'), bar=document.querySelector('.counter .bar');
+    if(row) row.style.display='none';
+    if(bar) bar.style.display='none';
+  }
+
+  function loadCount(){
+    fetch('/api/waitlist', { headers:{ 'Accept':'application/json' } })
+      .then(function(r){ if(!r.ok) throw new Error('bad status'); return r.json(); })
+      .then(function(d){
+        if(typeof d.count !== 'number') throw new Error('no count');
+        if(typeof d.cap === 'number' && d.cap > 0) CAP = d.cap;
+        CURRENT = d.count;
+        animateCount();
+      })
+      .catch(function(){ hideCount(); });
+  }
+  window.addEventListener('load', loadCount);
+
+  function showError(msg){
+    var e=document.getElementById('formErr');
+    e.textContent=msg; e.style.display='block';
+  }
 
   function claim(){
     var input=document.getElementById('email'), val=(input.value||'').trim();
-    if(!val||!val.includes('@')){input.focus();input.style.borderColor='#a14434';input.style.outline='2px solid #a14434';return;}
-    document.getElementById('rank').textContent=CURRENT+1;
-    document.getElementById('join').style.display='none';
-    document.getElementById('done').classList.add('show');
+    var btn=document.querySelector('#join .btn');
+    document.getElementById('formErr').style.display='none';
+    input.style.borderColor=''; input.style.outline='';
+    if(!val||!val.includes('@')){ input.focus(); input.style.borderColor='#a14434'; input.style.outline='2px solid #a14434'; showError('Please enter a valid email address.'); return; }
+
+    var label=btn.textContent;
+    btn.disabled=true; btn.style.opacity='0.7'; btn.textContent='Joining…';
+
+    fetch('/api/waitlist', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Accept':'application/json' },
+      body: JSON.stringify({ email: val })
+    })
+      .then(function(r){ return r.json().then(function(d){ return { ok:r.ok, d:d }; }, function(){ return { ok:r.ok, d:null }; }); })
+      .then(function(res){
+        if(!res.ok || !res.d || res.d.ok!==true){
+          showError((res.d && res.d.error) || 'Something went wrong. Please try again.');
+          btn.disabled=false; btn.style.opacity=''; btn.textContent=label;
+          return;
+        }
+        var pos=res.d.position, cap=(typeof res.d.cap==='number'?res.d.cap:CAP);
+        var dt=document.querySelector('#done .dt'), dd=document.querySelector('#done .dd');
+        if(pos>cap){
+          dt.innerHTML='You’re on the list — #'+pos+'.';
+          dd.textContent='The founding 100 filled up, but you’re in line. We’ll email you the moment we get going.';
+        } else {
+          dt.innerHTML='You’re in — founding writer #'+pos+'.';
+          dd.textContent='We’ll email you the moment we get going. Welcome to the trenches.';
+        }
+        document.getElementById('join').style.display='none';
+        document.querySelector('.reassure').style.display='none';
+        document.getElementById('done').classList.add('show');
+      })
+      .catch(function(){
+        showError('Network error — please check your connection and try again.');
+        btn.disabled=false; btn.style.opacity=''; btn.textContent=label;
+      });
   }
 
   var feats=['Dashboard','Query pipeline','A query\u2019s story','Agent database','Smart Import','Fortnight in focus','Submission packages'];
