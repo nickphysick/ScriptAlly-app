@@ -161,8 +161,8 @@ export const Nav: React.FC<NavProps> = ({ activeTab, onNavigate, searchQuery, se
         <header
           className="sticky top-0 z-50"
           style={{
-            background: kraft,
-            borderBottom: `1.5px solid ${scrolled ? "#b8b2a8" : "transparent"}`,
+            background: parchment,
+            borderBottom: `1.5px solid ${scrolled ? "rgba(124,58,42,0.18)" : "transparent"}`,
             transition: "border-color 0.25s ease",
           }}
         >
@@ -178,18 +178,7 @@ export const Nav: React.FC<NavProps> = ({ activeTab, onNavigate, searchQuery, se
               <HelpCircle className="w-[16px] h-[16px]" />
             </button>
 
-            {/* Settings */}
-            <button
-              onClick={() => { onNavigate("account"); closeAll(); }}
-              className="flex items-center justify-center cursor-pointer"
-              style={{ background: "transparent", border: "none", padding: 4, color: burgundy }}
-              title="Settings"
-              aria-label="Settings"
-            >
-              <Settings className="w-[16px] h-[16px]" />
-            </button>
-
-            {/* User chip */}
+            {/* User chip — avatar + name + chevron */}
             <div className="relative flex items-center">
               <button
                 onClick={() => { setShowUserDropdown(!showUserDropdown); setShowBellDropdown(false); }}
@@ -200,11 +189,14 @@ export const Nav: React.FC<NavProps> = ({ activeTab, onNavigate, searchQuery, se
                   className="flex items-center justify-center select-none shrink-0"
                   style={{
                     width: 24, height: 24, borderRadius: "50%",
-                    background: parchment, border: "1px solid rgba(124,58,42,0.25)",
+                    background: "rgba(124,58,42,0.10)", border: "1px solid rgba(124,58,42,0.25)",
                     fontFamily: FONT_SERIF, fontSize: 11, fontWeight: 500, color: burgundy,
                   }}
                 >
                   {currentUser.name[0]?.toUpperCase()}
+                </span>
+                <span style={{ fontFamily: FONT_SANS, fontSize: 12, color: "#3a1c14", fontWeight: 500 }} className="max-sm:hidden">
+                  {currentUser.name}
                 </span>
                 <ChevronDown className="w-3 h-3 shrink-0" style={{ color: labelColor }} />
               </button>

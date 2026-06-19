@@ -1478,7 +1478,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   return (
     <div 
       className="w-full flex flex-col overflow-hidden text-[#3a1c14] font-sans relative queries-container-theme"
-      style={{ height: "calc(100vh - 36px)", backgroundColor: curTheme.outerBg }}
+      style={{ minHeight: "calc(100vh - 36px)", backgroundColor: "#ffffff" }}
     >
       <style>{`
         .custom-query-list-scrollbar::-webkit-scrollbar {
@@ -1604,6 +1604,13 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         .queries-container-theme .hover\:bg-\[\#632f2f\]:hover {
           background-color: ${curTheme.primaryHover} !important;
         }
+        @keyframes queriesCursorBlink {
+          0%, 49% { opacity: 1; }
+          50%, 100% { opacity: 0; }
+        }
+        .queries-cursor-blink {
+          animation: queriesCursorBlink 1s steps(1, end) infinite;
+        }
       `}</style>
 
       {/* QUICK INLINE LOG DIALOG PORTAL */}
@@ -1722,6 +1729,27 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         {/* Wordmark */}
         <div style={{ padding: "18px 20px 14px", borderBottom: "1px solid rgba(124,58,42,0.10)", flexShrink: 0 }}>
           <ScriptAllyLogo size="sm" iconColor={burgundy} textColor="#3a1c14" />
+        </div>
+
+        {/* Page title — "Agent database" with blinking cursor + selection highlight on "database" */}
+        <div style={{ padding: "18px 20px 10px", flexShrink: 0 }}>
+          <div style={{ display: "flex", alignItems: "baseline", flexWrap: "nowrap" }}>
+            <span style={{ fontFamily: FONT_SERIF, fontSize: 24, fontWeight: 600, color: "#3a1c14", lineHeight: 1.2 }}>
+              Agent{" "}
+            </span>
+            <span style={{
+              fontFamily: FONT_SERIF, fontSize: 24, fontWeight: 600, color: "#3a1c14", lineHeight: 1.2,
+              background: "rgba(124,58,42,.22)", borderRadius: 3,
+              WebkitBoxDecorationBreak: "clone", boxDecorationBreak: "clone" as any,
+              paddingLeft: 2, paddingRight: 2,
+            }}>
+              database
+            </span>
+            <span
+              className="queries-cursor-blink"
+              style={{ display: "inline-block", width: 3, height: 23, background: burgundy, borderRadius: 1, marginLeft: 3, verticalAlign: "middle", flexShrink: 0 }}
+            />
+          </div>
         </div>
 
         {/* Back to dashboard */}
@@ -2000,8 +2028,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
       {/* TWO-PANEL LAYOUT CONTAINER — offset by sidebar width */}
       <div
-        className="flex-grow bg-[#dce0d9] min-h-0 overflow-hidden w-full flex flex-row p-[8px] gap-[8px]"
-        style={{ minHeight: "calc(100vh - 36px)", maxHeight: "calc(100vh - 36px)", paddingLeft: 260 }}
+        className="flex-grow bg-white min-h-0 w-full flex flex-row p-[8px] gap-[8px]"
+        style={{ minHeight: "calc(100vh - 36px - 16px)", alignItems: "start", paddingLeft: 260 }}
         id="queries-main-panel-container"
       >
 
@@ -2329,7 +2357,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         <MountCard
           style={{
             width: "calc(20% + 50px)", minWidth: "calc(20% + 50px)", maxWidth: "calc(20% + 50px)",
-            flexShrink: 0, display: "flex", flexDirection: "column", height: "100%", overflow: "hidden",
+            flexShrink: 0, display: "flex", flexDirection: "column", height: "calc(100vh - 36px - 16px)", overflow: "hidden",
           }}
         >
           {/* Sage-band header */}
@@ -2626,52 +2654,10 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         </MountCard>
 
         {/* ATELIER READING PANEL */}
-        <div style={{ flexGrow: 1, flex: 1, minWidth: 0, maxHeight: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        <div style={{ flexGrow: 1, flex: 1, minWidth: 0, display: "flex", flexDirection: "column", alignSelf: "start" }}>
 
-          {/* 4a — Centred nav row ABOVE the MountCard pane */}
-          {activeQuery && activeAgent && activeMs && (() => {
-            const currentIndex = sortedList.findIndex(q => q.id === activeQuery.id);
-            const isNavDisabled = sortedList.length <= 1;
-            const handlePrevQuery = () => {
-              if (isNavDisabled) return;
-              const prevIdx = currentIndex <= 0 ? sortedList.length - 1 : currentIndex - 1;
-              setSelectedQueryId(sortedList[prevIdx].id);
-            };
-            const handleNextQuery = () => {
-              if (isNavDisabled) return;
-              const nextIdx = currentIndex === sortedList.length - 1 || currentIndex === -1 ? 0 : currentIndex + 1;
-              setSelectedQueryId(sortedList[nextIdx].id);
-            };
-            return (
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, padding: "4px 8px", flexShrink: 0, userSelect: "none" }}>
-                <button
-                  type="button"
-                  onClick={handlePrevQuery}
-                  disabled={isNavDisabled}
-                  style={{ width: 28, height: 28, borderRadius: 6, border: "0.5px solid rgba(124,58,42,.25)", background: parchment, color: "#6a5045", display: "flex", alignItems: "center", justifyContent: "center", cursor: isNavDisabled ? "not-allowed" : "pointer", opacity: isNavDisabled ? 0.4 : 1, flexShrink: 0 }}
-                  title="Previous Query"
-                >
-                  <ChevronLeft style={{ width: 13, height: 13 }} />
-                </button>
-                <div style={{ textAlign: "center", lineHeight: 1.3 }}>
-                  <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#a08070", letterSpacing: ".04em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 200 }}>{activeMs.title}</div>
-                  <div style={{ fontFamily: FONT_SERIF, fontSize: 15, fontWeight: 600, color: "#3a1c14", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 200 }}>{activeAgent.name || activeAgent.agency}</div>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleNextQuery}
-                  disabled={isNavDisabled}
-                  style={{ width: 28, height: 28, borderRadius: 6, border: "0.5px solid rgba(124,58,42,.25)", background: parchment, color: "#6a5045", display: "flex", alignItems: "center", justifyContent: "center", cursor: isNavDisabled ? "not-allowed" : "pointer", opacity: isNavDisabled ? 0.4 : 1, flexShrink: 0 }}
-                  title="Next Query"
-                >
-                  <ChevronRight style={{ width: 13, height: 13 }} />
-                </button>
-              </div>
-            );
-          })()}
-
-          {/* Pane MountCard */}
-          <MountCard style={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }}>
+          {/* Pane MountCard — sizes to content */}
+          <MountCard style={{ minWidth: 0, display: "flex", flexDirection: "column", position: "relative" }}>
             {activeQuery && activeAgent && activeMs ? (
               <>
                 {/* 4b — Action band */}
@@ -2682,14 +2668,14 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     : action.ballHolder === "agent" ? `Waiting on ${agentFirstName}`
                     : null;
                   return (
-                    <div style={{ margin: "6px 6px 0", borderRadius: "8px 8px 0 0", background: "linear-gradient(180deg,#f6e4db,#eed3c6)", borderBottom: "1px solid rgba(124,58,42,.18)", boxShadow: "inset 0 2px 5px rgba(124,58,42,.12)", padding: "10px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexShrink: 0, position: "relative", zIndex: 4 }}>
+                    <div style={{ margin: "6px 6px 0", borderRadius: "8px 8px 0 0", background: sageBandGradient, borderBottom: `1px solid ${sageBandRule}`, boxShadow: "inset 0 2px 4px rgba(90,110,88,.14)", padding: "10px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexShrink: 0, position: "relative", zIndex: 4 }}>
                       {/* Left: wax seal + status label + whose-turn */}
                       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                         <div style={{ width: 44, height: 44, borderRadius: "50%", background: "radial-gradient(circle at 35% 30%,#fbeee6,#f1d4c6)", border: "1.5px solid rgba(124,58,42,0.7)", boxShadow: "inset 0 1px 3px rgba(124,58,42,.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                           <StatusDot status={activeQuery.status} size={18} />
                         </div>
                         <div>
-                          <div style={{ fontFamily: FONT_MONO, fontSize: 10, textTransform: "uppercase" as const, letterSpacing: ".12em", color: "#9a8579" }}>
+                          <div style={{ fontFamily: FONT_MONO, fontSize: 10, textTransform: "uppercase" as const, letterSpacing: ".12em", color: "#5a6e58" }}>
                             {statusDisplayLabel(activeQuery)}
                           </div>
                           {whoseTurnText && (
@@ -2700,31 +2686,42 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                         </div>
                       </div>
 
-                      {/* Right: Edit, Download PDF, primary CTA */}
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0, flexWrap: "wrap" as const, justifyContent: "flex-end" }}>
+                      {/* Right: icon-only Edit + icon-only PDF | primary CTA */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+                        {/* Edit query — icon only */}
                         <button
                           type="button"
                           onClick={() => setIsEditMode(prev => !prev)}
-                          style={{ height: 28, padding: "0 12px", borderRadius: 20, border: "1px solid rgba(124,58,42,.22)", background: "rgba(255,255,255,.5)", color: "#7c3a2a", fontSize: 11, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: 5 }}
+                          title="Edit query"
+                          aria-label="Edit query"
+                          style={{ width: 34, height: 34, borderRadius: "50%", border: "1px solid rgba(90,110,88,.3)", background: "rgba(255,255,255,.4)", color: burgundy, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, transition: "background 0.15s" }}
+                          onMouseEnter={e => (e.currentTarget.style.background = "#ffffff")}
+                          onMouseLeave={e => (e.currentTarget.style.background = "rgba(255,255,255,.4)")}
                         >
-                          <Pencil style={{ width: 12, height: 12 }} />
-                          Edit query
+                          <Pencil style={{ width: 15, height: 15 }} />
                         </button>
+                        {/* Download PDF — icon only */}
                         <button
                           type="button"
                           disabled={isGeneratingPDF}
                           onClick={handleDownloadPDF}
-                          style={{ height: 28, padding: "0 12px", borderRadius: 20, border: "1px solid rgba(124,58,42,.22)", background: "rgba(255,255,255,.5)", color: "#7c3a2a", fontSize: 11, fontWeight: 600, cursor: isGeneratingPDF ? "not-allowed" : "pointer", display: "flex", alignItems: "center", gap: 5, opacity: isGeneratingPDF ? 0.6 : 1 }}
+                          title={isGeneratingPDF ? "Generating PDF…" : "Download PDF"}
+                          aria-label="Download PDF"
+                          style={{ width: 34, height: 34, borderRadius: "50%", border: "1px solid rgba(90,110,88,.3)", background: "rgba(255,255,255,.4)", color: burgundy, display: "flex", alignItems: "center", justifyContent: "center", cursor: isGeneratingPDF ? "not-allowed" : "pointer", flexShrink: 0, opacity: isGeneratingPDF ? 0.5 : 1, transition: "background 0.15s" }}
+                          onMouseEnter={e => { if (!isGeneratingPDF) e.currentTarget.style.background = "#ffffff"; }}
+                          onMouseLeave={e => (e.currentTarget.style.background = "rgba(255,255,255,.4)")}
                         >
-                          <Download style={{ width: 12, height: 12 }} />
-                          {isGeneratingPDF ? "Generating…" : "Download PDF"}
+                          <Download style={{ width: 15, height: 15 }} />
                         </button>
+                        {/* Separator */}
+                        <div style={{ width: 1, height: 22, background: "rgba(90,110,88,.35)", flexShrink: 0 }} />
+                        {/* Primary CTA — label from engine */}
                         {action.kind === "mark-sent" ? (
                           <button
                             ref={markSentTriggerRef}
                             type="button"
                             onClick={() => setIsMarkSentOpen(o => !o)}
-                            style={{ height: 28, padding: "0 14px", borderRadius: 20, background: "linear-gradient(180deg,#f5e2da,#efd5ca)", border: "1px solid rgba(124,58,42,.22)", color: burgundy, fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
+                            style={{ height: 32, padding: "0 14px", borderRadius: 20, background: "linear-gradient(180deg,#f5e2da,#efd5ca)", border: "1px solid rgba(124,58,42,.22)", color: burgundy, fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}
                           >
                             <Send style={{ width: 13, height: 13, strokeWidth: 2.5 } as any} />
                             {action.label}
@@ -2733,7 +2730,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           <button
                             type="button"
                             onClick={() => setIsRecordResponseFocusFormOpen(true)}
-                            style={{ height: 28, padding: "0 14px", borderRadius: 20, background: "linear-gradient(180deg,#f5e2da,#efd5ca)", border: "1px solid rgba(124,58,42,.22)", color: burgundy, fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6 }}
+                            style={{ height: 32, padding: "0 14px", borderRadius: 20, background: "linear-gradient(180deg,#f5e2da,#efd5ca)", border: "1px solid rgba(124,58,42,.22)", color: burgundy, fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}
                           >
                             <Check style={{ width: 13, height: 13, strokeWidth: 2.5 } as any} />
                             {action.label}
@@ -2775,8 +2772,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   );
                 })()}
 
-                {/* Scrollable body: identity + ledger */}
-                <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column", position: "relative", zIndex: 4, minHeight: 0 }}>
+                {/* Body: identity + ledger — sizes to content */}
+                <div style={{ display: "flex", flexDirection: "column", position: "relative", zIndex: 4 }}>
 
                   {/* 4c — Identity */}
                   {(() => {
@@ -2840,11 +2837,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   {/* Hairline before ledger */}
                   <div style={{ height: 1, background: "rgba(124,58,42,.15)", flexShrink: 0, margin: "0 16px" }} />
 
-                  {/* 4d — Three-column ledger */}
-                  <div style={{ flex: 1, overflow: "hidden", display: "flex", minHeight: 0 }}>
+                  {/* 4d — Three-column ledger — natural height */}
+                  <div style={{ display: "flex", minHeight: 280 }}>
 
                     {/* ── Column 1: Tracking ── */}
-                    <div style={{ flex: 1, overflowY: "auto", padding: "12px 14px", display: "flex", flexDirection: "column", minWidth: 0 }} className="custom-query-list-scrollbar">
+                    <div style={{ flex: 1, padding: "12px 14px", display: "flex", flexDirection: "column", minWidth: 0 }}>
                       {/* Running head */}
                       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12, flexShrink: 0 }}>
                         <div style={{ flex: 1, height: 1, background: "rgba(124,58,42,.2)" }} />
@@ -2991,7 +2988,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     </div>
 
                     {/* ── Column 2: What you sent ── */}
-                    <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, minHeight: 0, overflow: "hidden", padding: "12px 14px" }}>
+                    <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, padding: "12px 14px" }}>
                       {/* Running head */}
                       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12, flexShrink: 0 }}>
                         <div style={{ flex: 1, height: 1, background: "rgba(124,58,42,.2)" }} />
@@ -2999,7 +2996,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                         <div style={{ flex: 1, height: 1, background: "rgba(124,58,42,.2)" }} />
                       </div>
                       {/* Content area */}
-                      <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }} className="custom-query-list-scrollbar">
+                      <div style={{ flex: 1 }}>
                         {isEditMode ? (
                           <div className="space-y-4 text-xs">
                             <div>
@@ -3149,7 +3146,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     </div>
 
                     {/* ── Column 3: Notes ── */}
-                    <div style={{ flex: 1, overflow: "hidden", padding: "12px 14px", display: "flex", flexDirection: "column", minWidth: 0 }}>
+                    <div style={{ flex: 1, padding: "12px 14px", display: "flex", flexDirection: "column", minWidth: 0 }}>
                       {/* Running head */}
                       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12, flexShrink: 0 }}>
                         <div style={{ flex: 1, height: 1, background: "rgba(124,58,42,.2)" }} />
@@ -3162,8 +3159,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           .filter(entry => entry.queryId === activeQuery.id)
                           .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
                         return (
-                          <div className="flex-grow flex flex-col justify-between p-3.5 h-full bg-[#FAF8F5] rounded-xl border border-[#ebd8c5]/40" style={{ overflow: "hidden", minHeight: 0 }}>
-                            <div ref={chatContainerRef} className="flex-grow overflow-y-auto pr-1 space-y-2 flex flex-col custom-query-list-scrollbar" style={{ backgroundColor: "transparent" }}>
+                          <div className="flex flex-col p-3.5 bg-[#FAF8F5] rounded-xl border border-[#ebd8c5]/40">
+                            <div ref={chatContainerRef} className="flex flex-col space-y-2 pr-1" style={{ backgroundColor: "transparent" }}>
                               {activeJournalEntries.map((entry, index) => {
                                 const isEditing = editingJournalId === entry.id;
                                 return (
