@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Coming Soon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ground:#f5f1eb;--parchment:#fdf9f5;--burgundy:#7c3a2a;--burgundy-soft:#9a5142;
+    --sage:#8a9e88;--sage-fill:#e9ede6;--sage-mark:#5a6e58;--pink-fill:#f8e7dc;
+    --pink-band-a:#f2dcd3;--pink-band-b:#eed4cb;--amber:#b98a4e;
+    --btn:#f5e2da;--btn-mid:#e8c8bc;--btn-edge:#efd5ca;--ink:#3a322c;--ink-soft:#6f655c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:'Inter',sans-serif;background:var(--ground);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 24px}
+  @media (max-width:560px){.wrap{padding:0 18px}}
+  .grain{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")}
+  .mount{background:var(--parchment);border-radius:14px;padding:7px;box-shadow:0 1px 2px rgba(60,40,30,.06),0 8px 30px rgba(60,40,30,.08)}
+  .mount .frame{border:1px solid var(--burgundy);border-radius:9px;overflow:hidden}
+
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:24px 0}
+  .word{font-family:'Playfair Display',serif;font-weight:600;font-size:23px;color:var(--burgundy)}
+  .word b{color:var(--ink)}
+  .badge{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--burgundy);border:1px solid #cdbfb0;border-radius:20px;padding:6px 13px;background:var(--parchment)}
+
+  .hero{text-align:center;padding:30px 0 10px}
+  .eyebrow{display:inline-flex;align-items:center;gap:9px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--burgundy);margin-bottom:18px}
+  .eyebrow .rule{width:22px;height:2px;background:var(--burgundy);border-radius:2px}
+  h1{font-family:'Playfair Display',serif;font-weight:600;font-size:clamp(34px,5.2vw,54px);line-height:1.04;color:var(--ink);letter-spacing:-.5px}
+  h1 .em{color:var(--burgundy);font-style:italic;font-weight:500}
+  @media (max-width:560px){h1{font-size:33px}}
+  .sub{font-size:16.5px;line-height:1.62;color:var(--ink-soft);max-width:36em;margin:18px auto 0}
+  .sub-body{margin-top:10px}
+  @media (max-width:560px){.sub{font-size:15px}}
+
+  .reel-sec{margin-top:34px;padding:26px 0 18px}
+  .reel-cap{text-align:center;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:22px}
+  .reel{position:relative;width:100%;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent)}
+  .reel-track{display:flex;gap:20px;width:max-content;animation:marquee 46s linear infinite}
+  .reel:hover .reel-track{animation-play-state:paused}
+  @keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  .card{width:320px;flex:none}
+  @media (max-width:560px){.card{width:255px}}
+  .card .frame{background:var(--parchment)}
+  .card .ch{display:flex;align-items:center;gap:8px;padding:9px 13px;background:linear-gradient(180deg,#d9ddd5,#d5dbd3)}
+  .card .ch .v{width:3px;height:18px;background:var(--burgundy);border-radius:2px}
+  .card .ch .t{font-family:'Playfair Display',serif;font-weight:600;font-size:13.5px;color:#2f372e}
+  .ph-img{aspect-ratio:16/10;background:repeating-linear-gradient(45deg,#f1ece2,#f1ece2 12px,#ece6da 12px,#ece6da 24px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#b3a896}
+  .ph-img svg{opacity:.7}
+  .ph-img span{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase}
+
+  .membership{text-align:center;padding:46px 0 6px}
+  .mem-head{font-family:'Playfair Display',serif;font-weight:600;font-size:clamp(20px,2.6vw,25px);color:var(--ink);margin-bottom:16px}
+  .counter{max-width:520px;margin:0 auto}
+  .counter .phead{display:flex;align-items:center;gap:11px;padding:11px 16px;background:linear-gradient(180deg,var(--pink-band-a),var(--pink-band-b))}
+  .counter .phead .v{width:3px;height:24px;background:var(--burgundy);border-radius:2px;flex:none}
+  .counter .phead .t{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#5a2c20;font-weight:500}
+  .counter .phead .e{margin-left:auto;color:#86483a;flex:none}
+  .counter .body{padding:20px 22px 22px;text-align:left}
+  .counter .row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px}
+  .counter .num{font-family:'Playfair Display',serif;font-size:44px;font-weight:600;color:var(--burgundy);line-height:1}
+  .counter .num span{font-size:20px;color:var(--ink-soft)}
+  .counter .free{font-family:'Caveat',cursive;font-size:22px;color:var(--burgundy-soft);text-align:right;flex:1}
+  @media (max-width:560px){.counter .row{flex-direction:column;align-items:flex-start;gap:7px}.counter .free{text-align:left}}
+  .bar{height:9px;border-radius:6px;background:#dcd6ca;overflow:hidden}
+  .bar>i{display:block;height:100%;width:0;border-radius:6px;background:linear-gradient(90deg,var(--burgundy-soft),var(--burgundy));transition:width 1.4s cubic-bezier(.2,.7,.2,1)}
+  .counter .line{font-size:13px;color:var(--ink);margin-top:12px}
+  .counter .line b{color:var(--burgundy);font-weight:600}
+
+  .join-intro{font-size:14.5px;line-height:1.5;color:var(--ink-soft);max-width:480px;margin:22px auto 0}
+  .join{display:flex;flex-wrap:wrap;gap:10px;max-width:520px;margin:14px auto 0;justify-content:center}
+  .join input{flex:1 1 240px;min-width:0;font-family:'Inter',sans-serif;font-size:15px;color:var(--ink);background:var(--parchment);border:1px solid #c3b9aa;border-radius:9px;padding:14px 16px}
+  .join input:focus{outline:2px solid var(--burgundy);outline-offset:1px;border-color:var(--burgundy)}
+  .btn{font-family:'Inter',sans-serif;font-weight:600;font-size:15px;color:var(--burgundy);cursor:pointer;background:linear-gradient(180deg,var(--btn),var(--btn-mid));border:1px solid var(--btn-edge);border-radius:9px;padding:14px 24px;white-space:nowrap;transition:transform .12s,box-shadow .12s,filter .12s;box-shadow:0 1px 0 rgba(255,255,255,.6) inset,0 2px 6px rgba(124,58,42,.12)}
+  .btn:hover{filter:brightness(1.03);transform:translateY(-1px)}
+  .btn:focus-visible{outline:2px solid var(--burgundy);outline-offset:2px}
+  @media (max-width:560px){.join{flex-direction:column;gap:8px}.join input{width:100%;padding:10px 14px;font-size:14px}.join .btn{width:100%}}
+  .reassure{font-size:12.5px;color:var(--ink-soft);margin:11px auto 0}
+  .done{display:none;max-width:520px;margin:16px auto 0;padding:15px 18px;border-radius:10px;background:var(--pink-fill);border:1px solid #ecc9ba}
+  .done.show{display:block}
+  .done .dt{font-family:'Playfair Display',serif;font-size:17px;color:var(--burgundy)}
+  .done .dd{font-size:13px;color:var(--ink)}
+
+  .reassure-band{background:linear-gradient(180deg,#d9ddd5,#d5dbd3);padding:48px 24px;text-align:center;margin-top:24px}
+  .reassure-inner{max-width:620px;margin:0 auto}
+  .closing-label{display:inline-flex;align-items:center;gap:9px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--burgundy);margin-bottom:20px}
+  .closing-label .rule{width:22px;height:2px;background:var(--burgundy);border-radius:2px}
+  .closing-p{font-size:15.5px;line-height:1.72;color:var(--ink-soft);margin:0}
+  .signoff-wrap{text-align:center;padding:28px 24px 0}
+  .closing-signoff{font-family:'Playfair Display',serif;font-style:italic;font-weight:500;font-size:19px;color:var(--burgundy);margin:0}
+
+  footer{padding:30px 0 50px;text-align:center}
+  footer .fword{font-family:'Playfair Display',serif;font-weight:600;font-size:16px;color:var(--burgundy)}
+  footer .fline{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin-top:8px}
+
+  @media(prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}*{transition:none!important}
+    .reel-track{animation:none}.reel{overflow-x:auto}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="topbar"><div class="word">Script<b>Ally</b></div><span class="badge">Coming soon</span></div>
+</div>
+
+<div class="wrap">
+  <section class="hero">
+    <span class="eyebrow"><span class="rule"></span>Take the eerie out of query<span class="rule"></span></span>
+    <h1>A living database<br>for your <span class="em">agent queries</span>.</h1>
+    <p class="sub sub-lead">Your time is important. We're here to give some of it back.</p>
+    <p class="sub sub-body">Materials, agents and queries, all collated in one orderly little ecosystem. We track everything so you never miss a beat.</p>
+  </section>
+</div>
+
+<section class="reel-sec">
+  <div class="reel-cap">Show, don't tell, right?</div>
+  <div class="reel">
+    <div class="reel-track" id="reelTrack"></div>
+  </div>
+</section>
+
+<div class="wrap">
+  <section class="membership">
+    <h2 class="mem-head">We'd love for you to help shape our vision.</h2>
+    <div class="counter mount grain">
+      <div class="frame">
+        <div class="phead">
+          <span class="v"></span>
+          <span class="t">An exclusive membership for our founding writers</span>
+          <span class="e"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6 4.5 2.3 7.1L12 16.6 5.7 21l2.3-7.1-6-4.5h7.6z"/></svg></span>
+        </div>
+        <div class="body">
+          <div class="row">
+            <div class="num"><span id="num">0</span><span>&nbsp;/ 100</span></div>
+            <div class="free">spots are filling…</div>
+          </div>
+          <div class="bar"><i id="fill"></i></div>
+          <div class="line">The first <b>100 founding writers</b> get 6 months free, then half price for life.</div>
+        </div>
+      </div>
+    </div>
+
+    <p class="join-intro">Whether you're in the querying trenches or just getting started, give us a try and let us know what you think.</p>
+    <div class="join" id="join">
+      <input type="email" id="email" placeholder="your@email.com" aria-label="Email address" autocomplete="email">
+      <button class="btn" onclick="claim()">Claim your spot</button>
+    </div>
+    <p class="reassure">We'll email you the moment we get going. No spam, ever.</p>
+    <div class="done" id="done"><div class="dt">You're in — founding writer #<span id="rank">68</span>.</div><div class="dd">We'll email you the moment we get going. Welcome to the trenches.</div></div>
+  </section>
+</div>
+
+<section class="reassure-band">
+  <div class="reassure-inner">
+    <div class="closing-label"><span class="rule"></span>A reassuring note<span class="rule"></span></div>
+    <p class="closing-p">We won't tell you how to write. We won't unleash a hive-mind behemoth to suck the soul from your manuscript. That's not what we're about. You tell your story, you hone your craft. When the time comes that you need a champion for your words, let ScriptAlly guide you through the process. Let us be the finger on the pulse of your querying journey.</p>
+  </div>
+</section>
+<div class="signoff-wrap">
+  <p class="closing-signoff">We look forward to having you on board.</p>
+</div>
+
+<footer>
+  <div class="fword">ScriptAlly</div>
+  <div class="fline">Coming soon</div>
+</footer>
+
+<script>
+  var CURRENT = 67, CAP = 100;
+  var reduce = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var numEl = document.getElementById('num'), fillEl = document.getElementById('fill');
+  function animateCount(){
+    if(reduce){ numEl.textContent = CURRENT; fillEl.style.width = (CURRENT/CAP*100)+'%'; return; }
+    var start=null, dur=1500;
+    requestAnimationFrame(function step(ts){
+      if(!start) start=ts;
+      var p=Math.min((ts-start)/dur,1), eased=1-Math.pow(1-p,3);
+      numEl.textContent=Math.round(eased*CURRENT);
+      requestAnimationFrame(p<1?step:function(){numEl.textContent=CURRENT;});
+    });
+    setTimeout(function(){ fillEl.style.width=(CURRENT/CAP*100)+'%'; },80);
+  }
+  window.addEventListener('load', animateCount);
+
+  function claim(){
+    var input=document.getElementById('email'), val=(input.value||'').trim();
+    if(!val||!val.includes('@')){input.focus();input.style.borderColor='#a14434';input.style.outline='2px solid #a14434';return;}
+    document.getElementById('rank').textContent=CURRENT+1;
+    document.getElementById('join').style.display='none';
+    document.getElementById('done').classList.add('show');
+  }
+
+  var feats=['Dashboard','Query pipeline','A query\u2019s story','Agent database','Smart Import','Fortnight in focus','Submission packages'];
+  var imgIcon='<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>';
+  function cardHTML(n){return '<div class="card mount grain"><div class="frame"><div class="ch"><span class="v"></span><span class="t">'+n+'</span></div><div class="ph-img">'+imgIcon+'<span>Screenshot here</span></div></div></div>';}
+  var html=feats.map(cardHTML).join('');
+  document.getElementById('reelTrack').innerHTML=html+html;
+</script>
+
+</body>
+</html>
