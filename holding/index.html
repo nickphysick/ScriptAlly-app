@@ -17,6 +17,7 @@
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
   body{font-family:'Inter',sans-serif;background:var(--ground);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
   .wrap{max-width:1040px;margin:0 auto;padding:0 24px}
   @media (max-width:560px){.wrap{padding:0 18px}}
   .grain{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")}
@@ -26,7 +27,8 @@
   .topbar{display:flex;align-items:center;justify-content:space-between;padding:24px 0}
   .word{font-family:'Playfair Display',serif;font-weight:600;font-size:23px;color:var(--burgundy)}
   .word b{color:var(--ink)}
-  .badge{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--burgundy);border:1px solid #cdbfb0;border-radius:20px;padding:6px 13px;background:var(--parchment)}
+  .tagbadge{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--burgundy);border:1px solid #cdbfb0;border-radius:20px;padding:6px 13px;background:var(--parchment)}
+  @media (max-width:560px){.tagbadge{display:none}}
 
   .hero{text-align:center;padding:30px 0 10px}
   .eyebrow{display:inline-flex;align-items:center;gap:9px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--burgundy);margin-bottom:18px}
@@ -38,41 +40,55 @@
   .sub-body{margin-top:10px}
   @media (max-width:560px){.sub{font-size:15px}}
 
-  .reel-sec{margin-top:34px;padding:26px 0 18px}
-  .reel-cap{text-align:center;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:22px}
-  .reel{position:relative;width:100%;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent)}
-  .reel-track{display:flex;gap:20px;width:max-content;animation:marquee 46s linear infinite}
-  .reel:hover .reel-track{animation-play-state:paused}
-  @keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-  .card{width:320px;flex:none}
-  @media (max-width:560px){.card{width:255px}}
+  /* ===== feature carousel: 3-up, faded edges, chevrons, auto-advance ===== */
+  .reel-sec{margin-top:34px;padding:26px 0 22px}
+  .reel-cap{text-align:center;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:24px}
+  .reel-wrap{max-width:980px;margin:0 auto;padding:0 48px;position:relative}
+  @media (max-width:560px){.reel-wrap{padding:0 42px}.reel{-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 3%,#000 97%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 3%,#000 97%,transparent 100%)}}
+  .reel{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 4%,#000 96%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 4%,#000 96%,transparent 100%)}
+  .reel-track{display:flex;gap:18px;will-change:transform}
+  .card{flex:0 0 calc((100% - 36px)/3)}
+  @media (max-width:560px){.card{flex:0 0 100%}}
   .card .frame{background:var(--parchment)}
   .card .ch{display:flex;align-items:center;gap:8px;padding:9px 13px;background:linear-gradient(180deg,#d9ddd5,#d5dbd3)}
   .card .ch .v{width:3px;height:18px;background:var(--burgundy);border-radius:2px}
-  .card .ch .t{font-family:'Playfair Display',serif;font-weight:600;font-size:13.5px;color:#2f372e}
-  .ph-img{aspect-ratio:16/10;background:repeating-linear-gradient(45deg,#f1ece2,#f1ece2 12px,#ece6da 12px,#ece6da 24px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#b3a896}
+  .card .ch .t{font-family:'Playfair Display',serif;font-weight:600;font-size:13.5px;color:#2f372e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ph-img{aspect-ratio:16/10;background:repeating-linear-gradient(45deg,#efe9df,#efe9df 12px,#e9e2d6 12px,#e9e2d6 24px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#b3a896}
   .ph-img svg{opacity:.7}
   .ph-img span{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase}
+  .chev{position:absolute;top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;background:var(--parchment);border:1px solid #d8cdbf;color:var(--burgundy);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 3px 10px rgba(60,40,30,.16);z-index:5;transition:transform .12s,box-shadow .12s,filter .12s}
+  .chev:hover{filter:brightness(1.02);box-shadow:0 5px 14px rgba(60,40,30,.22)}
+  .chev:active{transform:translateY(-50%) scale(.95)}
+  .chev:focus-visible{outline:2px solid var(--burgundy);outline-offset:2px}
+  .chev.left{left:0}.chev.right{right:0}
+  @media (max-width:560px){.chev{width:36px;height:36px}}
 
-  .membership{text-align:center;padding:46px 0 6px}
-  .mem-head{font-family:'Playfair Display',serif;font-weight:600;font-size:clamp(20px,2.6vw,25px);color:var(--ink);margin-bottom:16px}
-  .counter{max-width:520px;margin:0 auto}
-  .counter .phead{display:flex;align-items:center;gap:11px;padding:11px 16px;background:linear-gradient(180deg,var(--pink-band-a),var(--pink-band-b))}
-  .counter .phead .v{width:3px;height:24px;background:var(--burgundy);border-radius:2px;flex:none}
-  .counter .phead .t{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#5a2c20;font-weight:500}
+  /* ===== membership (enlarged) ===== */
+  .membership{text-align:center;padding:50px 0 6px}
+  .mem-head-row{display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:20px}
+  .mem-head{font-family:'Playfair Display',serif;font-weight:600;font-size:clamp(22px,3vw,29px);color:var(--ink);margin:0;max-width:18em}
+  .darrow{width:48px;height:74px;flex:none}
+  .darrow.left{transform:rotate(-9deg)}
+  .darrow.right{transform:rotate(9deg)}
+  @media (max-width:560px){.darrow{width:30px;height:48px}.mem-head-row{gap:8px}.mem-head{font-size:21px}}
+
+  .counter{max-width:600px;margin:0 auto}
+  .counter .phead{display:flex;align-items:center;gap:12px;padding:14px 20px;background:linear-gradient(180deg,var(--pink-band-a),var(--pink-band-b))}
+  .counter .phead .v{width:3px;height:26px;background:var(--burgundy);border-radius:2px;flex:none}
+  .counter .phead .t{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:#5a2c20;font-weight:500}
   .counter .phead .e{margin-left:auto;color:#86483a;flex:none}
-  .counter .body{padding:20px 22px 22px;text-align:left}
-  .counter .row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px}
-  .counter .num{font-family:'Playfair Display',serif;font-size:44px;font-weight:600;color:var(--burgundy);line-height:1}
-  .counter .num span{font-size:20px;color:var(--ink-soft)}
-  .counter .free{font-family:'Caveat',cursive;font-size:22px;color:var(--burgundy-soft);text-align:right;flex:1}
-  @media (max-width:560px){.counter .row{flex-direction:column;align-items:flex-start;gap:7px}.counter .free{text-align:left}}
-  .bar{height:9px;border-radius:6px;background:#dcd6ca;overflow:hidden}
+  .counter .body{padding:26px 30px 30px;text-align:left}
+  .counter .row{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px}
+  .counter .num{font-family:'Playfair Display',serif;font-size:52px;font-weight:600;color:var(--burgundy);line-height:1}
+  .counter .num span{font-size:24px;color:var(--ink-soft)}
+  .counter .free{font-family:'Caveat',cursive;font-size:24px;color:var(--burgundy-soft);text-align:right;flex:1}
+  @media (max-width:560px){.counter .row{flex-direction:column;align-items:flex-start;gap:8px}.counter .free{text-align:left}.counter .num{font-size:44px}}
+  .bar{height:10px;border-radius:6px;background:#e3ddd1;overflow:hidden}
   .bar>i{display:block;height:100%;width:0;border-radius:6px;background:linear-gradient(90deg,var(--burgundy-soft),var(--burgundy));transition:width 1.4s cubic-bezier(.2,.7,.2,1)}
-  .counter .line{font-size:13px;color:var(--ink);margin-top:12px}
+  .counter .line{font-size:14px;color:var(--ink);margin-top:14px}
   .counter .line b{color:var(--burgundy);font-weight:600}
 
-  .join-intro{font-size:14.5px;line-height:1.5;color:var(--ink-soft);max-width:480px;margin:22px auto 0}
+  .join-intro{font-size:14.5px;line-height:1.5;color:var(--ink-soft);max-width:480px;margin:24px auto 0}
   .join{display:flex;flex-wrap:wrap;gap:10px;max-width:520px;margin:14px auto 0;justify-content:center}
   .join input{flex:1 1 240px;min-width:0;font-family:'Inter',sans-serif;font-size:15px;color:var(--ink);background:var(--parchment);border:1px solid #c3b9aa;border-radius:9px;padding:14px 16px}
   .join input:focus{outline:2px solid var(--burgundy);outline-offset:1px;border-color:var(--burgundy)}
@@ -98,88 +114,94 @@
   footer .fword{font-family:'Playfair Display',serif;font-weight:600;font-size:16px;color:var(--burgundy)}
   footer .fline{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin-top:8px}
 
-  @media(prefers-reduced-motion:reduce){
-    html{scroll-behavior:auto}*{transition:none!important}
-    .reel-track{animation:none}.reel{overflow-x:auto}
-  }
+  @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
 </style>
 </head>
 <body>
 
-<div class="wrap">
-  <div class="topbar"><div class="word">Script<b>Ally</b></div><span class="badge">Coming soon</span></div>
-</div>
 
-<div class="wrap">
-  <section class="hero">
-    <span class="eyebrow"><span class="rule"></span>Take the eerie out of query<span class="rule"></span></span>
-    <h1>A living database<br>for your <span class="em">agent queries</span>.</h1>
-    <p class="sub sub-lead">Your time is important. We're here to give some of it back.</p>
-    <p class="sub sub-body">Materials, agents and queries, all collated in one orderly little ecosystem. We track everything so you never miss a beat.</p>
-  </section>
-</div>
+    <div class="wrap">
+      <div class="topbar"><div class="word">Script<b>Ally</b></div><span class="tagbadge">Coming soon</span></div>
+    </div>
 
-<section class="reel-sec">
-  <div class="reel-cap">Show, don't tell, right?</div>
-  <div class="reel">
-    <div class="reel-track" id="reelTrack"></div>
-  </div>
-</section>
+    <div class="wrap">
+      <section class="hero">
+        <span class="eyebrow"><span class="rule"></span>Take the eerie out of query<span class="rule"></span></span>
+        <h1>A living database<br>for your <span class="em">agent queries</span>.</h1>
+        <p class="sub sub-lead">Your time is important. We're here to give some of it back.</p>
+        <p class="sub sub-body">Materials, agents and queries, all collated in one orderly little ecosystem. We track everything so you never miss a beat.</p>
+      </section>
+    </div>
 
-<div class="wrap">
-  <section class="membership">
-    <h2 class="mem-head">We'd love for you to help shape our vision.</h2>
-    <div class="counter mount grain">
-      <div class="frame">
-        <div class="phead">
-          <span class="v"></span>
-          <span class="t">An exclusive membership for our founding writers</span>
-          <span class="e"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6 4.5 2.3 7.1L12 16.6 5.7 21l2.3-7.1-6-4.5h7.6z"/></svg></span>
-        </div>
-        <div class="body">
-          <div class="row">
-            <div class="num"><span id="num">0</span><span>&nbsp;/ 100</span></div>
-            <div class="free">spots are filling…</div>
-          </div>
-          <div class="bar"><i id="fill"></i></div>
-          <div class="line">The first <b>100 founding writers</b> get 6 months free, then half price for life.</div>
-        </div>
+    <section class="reel-sec">
+      <div class="reel-cap">Show, don't tell, right?</div>
+      <div class="reel-wrap">
+        <button class="chev left" id="chevPrev" aria-label="Previous"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+        <div class="reel" id="reel"><div class="reel-track" id="reelTrack"></div></div>
+        <button class="chev right" id="chevNext" aria-label="Next"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
       </div>
+    </section>
+
+    <div class="wrap">
+      <section class="membership">
+        <div class="mem-head-row">
+          <svg class="darrow left" viewBox="0 0 54 86" fill="none" stroke="#9a5142" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M31 7 C 23 23, 35 41, 27 64"/><path d="M17 53 C 21 59, 24 62, 27 67 C 31 61, 35 57, 40 54"/></svg>
+          <h2 class="mem-head">We'd love for you to help shape our vision.</h2>
+          <svg class="darrow right" viewBox="0 0 54 86" fill="none" stroke="#9a5142" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7 C 31 23, 19 41, 27 64"/><path d="M14 54 C 19 57, 23 61, 27 67 C 30 62, 33 59, 37 53"/></svg>
+        </div>
+
+        <div class="counter mount grain">
+          <div class="frame">
+            <div class="phead">
+              <span class="v"></span>
+              <span class="t">An exclusive membership for our founding writers</span>
+              <span class="e"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6 4.5 2.3 7.1L12 16.6 5.7 21l2.3-7.1-6-4.5h7.6z"/></svg></span>
+            </div>
+            <div class="body">
+              <div class="row">
+                <div class="num"><span id="num">0</span><span>&nbsp;/ 100</span></div>
+                <div class="free">spots are filling…</div>
+              </div>
+              <div class="bar"><i id="fill"></i></div>
+              <div class="line">The first <b>100 founding writers</b> get 6 months free, then half price for life.</div>
+            </div>
+          </div>
+        </div>
+
+        <p class="join-intro">Whether you're in the querying trenches or just getting started, give us a try and let us know what you think.</p>
+        <div class="join" id="join">
+          <input type="email" id="email" placeholder="your@email.com" aria-label="Email address" autocomplete="email">
+          <button class="btn" onclick="claim()">Claim your spot</button>
+        </div>
+        <p class="reassure">We'll email you the moment we get going. No spam, ever.</p>
+        <p id="formErr" role="alert" style="display:none;font-size:12.5px;color:#a14434;margin:9px auto 0"></p>
+        <div class="done" id="done"><div class="dt">You're in — founding writer #<span id="rank">13</span>.</div><div class="dd">We'll email you the moment we get going. Welcome to the trenches.</div></div>
+      </section>
     </div>
 
-    <p class="join-intro">Whether you're in the querying trenches or just getting started, give us a try and let us know what you think.</p>
-    <div class="join" id="join">
-      <input type="email" id="email" placeholder="your@email.com" aria-label="Email address" autocomplete="email">
-      <button class="btn" onclick="claim()">Claim your spot</button>
+    <section class="reassure-band">
+      <div class="reassure-inner">
+        <div class="closing-label"><span class="rule"></span>A reassuring note<span class="rule"></span></div>
+        <p class="closing-p">We won't tell you how to write. We won't unleash a hive-mind behemoth to suck the soul from your manuscript. That's not what we're about. You tell your story, you hone your craft. When the time comes that you need a champion for your words, let ScriptAlly guide you through the process. Let us be the finger on the pulse of your querying journey.</p>
+      </div>
+    </section>
+    <div class="signoff-wrap">
+      <p class="closing-signoff">We look forward to having you on board.</p>
     </div>
-    <p class="reassure">We'll email you the moment we get going. No spam, ever.</p>
-    <p id="formErr" role="alert" style="display:none;font-size:12.5px;color:#a14434;margin:9px auto 0"></p>
-    <div class="done" id="done"><div class="dt">You're in — founding writer #<span id="rank">68</span>.</div><div class="dd">We'll email you the moment we get going. Welcome to the trenches.</div></div>
-  </section>
-</div>
 
-<section class="reassure-band">
-  <div class="reassure-inner">
-    <div class="closing-label"><span class="rule"></span>A reassuring note<span class="rule"></span></div>
-    <p class="closing-p">We won't tell you how to write. We won't unleash a hive-mind behemoth to suck the soul from your manuscript. That's not what we're about. You tell your story, you hone your craft. When the time comes that you need a champion for your words, let ScriptAlly guide you through the process. Let us be the finger on the pulse of your querying journey.</p>
-  </div>
-</section>
-<div class="signoff-wrap">
-  <p class="closing-signoff">We look forward to having you on board.</p>
-</div>
+    <footer>
+      <div class="fword">ScriptAlly</div>
+      <div class="fline">Coming soon</div>
+    </footer>
 
-<footer>
-  <div class="fword">ScriptAlly</div>
-  <div class="fline">Coming soon</div>
-</footer>
 
 <script>
-  var CAP = 100, CURRENT = null; // both filled from the live counter; no hardcoded tally.
   var reduce = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
-  var numEl = document.getElementById('num'), fillEl = document.getElementById('fill');
 
+  /* ---- counter (always visible, even at zero) — driven by GET /api/waitlist ---- */
+  var CURRENT = 0, CAP = 100;             // never hidden; populated from the live count
+  var numEl = document.getElementById('num'), fillEl = document.getElementById('fill');
   function animateCount(){
-    if(CURRENT == null) return;
     if(reduce){ numEl.textContent = CURRENT; fillEl.style.width = (CURRENT/CAP*100)+'%'; return; }
     var start=null, dur=1500;
     requestAnimationFrame(function step(ts){
@@ -190,14 +212,6 @@
     });
     setTimeout(function(){ fillEl.style.width=(CURRENT/CAP*100)+'%'; },80);
   }
-
-  // If the live tally can't be fetched, quietly hide the count widgets — never show a made-up number.
-  function hideCount(){
-    var row=document.querySelector('.counter .row'), bar=document.querySelector('.counter .bar');
-    if(row) row.style.display='none';
-    if(bar) bar.style.display='none';
-  }
-
   function loadCount(){
     fetch('/api/waitlist', { headers:{ 'Accept':'application/json' } })
       .then(function(r){ if(!r.ok) throw new Error('bad status'); return r.json(); })
@@ -207,15 +221,15 @@
         CURRENT = d.count;
         animateCount();
       })
-      .catch(function(){ hideCount(); });
+      .catch(function(){ animateCount(); }); // leave the counter at 0 and show it — never hide
   }
-  window.addEventListener('load', loadCount);
 
   function showError(msg){
     var e=document.getElementById('formErr');
     e.textContent=msg; e.style.display='block';
   }
 
+  /* ---- signup capture: POST /api/waitlist (preserved from e1a0c43) ---- */
   function claim(){
     var input=document.getElementById('email'), val=(input.value||'').trim();
     var btn=document.querySelector('#join .btn');
@@ -257,11 +271,40 @@
       });
   }
 
-  var feats=['Dashboard','Query pipeline','A query\u2019s story','Agent database','Smart Import','Fortnight in focus','Submission packages'];
-  var imgIcon='<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>';
+  /* ---- carousel: 3-up, faded edges, auto-advance, chevrons, hover-pause ---- */
+  var GAP = 18;
+  var feats = ['Dashboard','Query pipeline','A query\u2019s story','Agent database','Smart Import','Fortnight in focus','Submission packages'];
+  var imgIcon = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>';
   function cardHTML(n){return '<div class="card mount grain"><div class="frame"><div class="ch"><span class="v"></span><span class="t">'+n+'</span></div><div class="ph-img">'+imgIcon+'<span>Screenshot here</span></div></div></div>';}
-  var html=feats.map(cardHTML).join('');
-  document.getElementById('reelTrack').innerHTML=html+html;
+  var track = document.getElementById('reelTrack'), reel = document.getElementById('reel');
+  var N = feats.length;
+  // three copies for a seamless loop
+  track.innerHTML = feats.map(cardHTML).join('') + feats.map(cardHTML).join('') + feats.map(cardHTML).join('');
+  var idx = N, step = 0, timer = null;
+  function place(animate){
+    track.style.transition = (animate && !reduce) ? 'transform .65s cubic-bezier(.45,0,.2,1)' : 'none';
+    track.style.transform = 'translateX(' + (-idx*step) + 'px)';
+  }
+  function measure(){
+    var c = track.children[0];
+    if(!c) return;
+    step = c.getBoundingClientRect().width + GAP;
+    place(false);
+  }
+  function settle(){
+    if(idx < N){ idx += N; place(false); }
+    else if(idx >= 2*N){ idx -= N; place(false); }
+  }
+  track.addEventListener('transitionend', settle);
+  function go(d){ idx += d; place(true); }
+  function startAuto(){ if(reduce) return; clearInterval(timer); timer = setInterval(function(){ go(-1); }, 4200); } // drifts right
+  function restAuto(){ clearInterval(timer); startAuto(); }
+  document.getElementById('chevPrev').onclick = function(){ go(-1); restAuto(); };
+  document.getElementById('chevNext').onclick = function(){ go(1); restAuto(); };
+  reel.addEventListener('mouseenter', function(){ clearInterval(timer); });
+  reel.addEventListener('mouseleave', function(){ startAuto(); });
+  window.addEventListener('resize', measure);
+  window.addEventListener('load', function(){ measure(); loadCount(); startAuto(); });
 </script>
 
 </body>
