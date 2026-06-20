@@ -75,7 +75,7 @@ const getPrimaryAction = (status: QueryStatus): PrimaryAction => {
     case QueryStatus.QUERIED:
     case QueryStatus.PARTIAL_SENT:
     case QueryStatus.FULL_SENT:
-      return { kind: "record", label: "Record their response →", ballHolder: "agent" };
+      return { kind: "record", label: "Record response", ballHolder: "agent" };
     default:
       // OFFER / REJECTED / WITHDRAWN / NO_RESPONSE — unchanged, no ball-holder chip.
       return { kind: "record", label: "Record response", ballHolder: null };
@@ -1612,8 +1612,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           animation: queriesCursorBlink 1s steps(1, end) infinite;
         }
         .pane-reading-card > div[aria-hidden="true"] {
-          border-top-width: 2px !important;
-          border-top-color: #7c3a2a !important;
+          border-top: 1.5px solid #7c3a2a !important;
         }
       `}</style>
 
@@ -2402,8 +2401,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             </div>
           </div>
 
-          {/* Scrolling query cards list */}
-          <div className="flex-1 overflow-y-scroll custom-query-list-scrollbar divide-y divide-[#EBDCD3]/60 px-[6px]" style={{ position: "relative", zIndex: 4, background: parchment }}>
+          {/* Scrolling query cards list — mx-[6px] keeps row backgrounds inside the inner frame border */}
+          <div className="flex-1 overflow-y-scroll custom-query-list-scrollbar divide-y divide-[#EBDCD3]/60 mx-[6px]" style={{ position: "relative", zIndex: 4, background: parchment }}>
             {(() => {
               const statusOrder = [
                 QueryStatus.QUERIED,
@@ -2739,9 +2738,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                         </div>
                       </div>
 
-                      {/* Right: icon buttons (Edit + PDF) + primary CTA */}
-                      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 11 }}>
-                        <div style={{ display: "flex", gap: 8 }}>
+                      {/* Right: icon buttons (Edit + PDF) + primary CTA — all in one row */}
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
+                        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                           <button
                             type="button"
                             onClick={() => setIsEditMode(prev => !prev)}
@@ -2763,7 +2762,6 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           >
                             <Download style={{ width: 14, height: 14 }} />
                           </button>
-                        </div>
                         {action.kind === "mark-sent" ? (
                           <button
                             ref={markSentTriggerRef}
@@ -2784,6 +2782,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                             {action.label}
                           </button>
                         )}
+                        </div>
                         <AnimatePresence>
                           {isMarkSentOpen && (() => {
                             const a2 = getPrimaryAction(currentStatus as QueryStatus);
@@ -2822,7 +2821,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 })()}
 
                 {/* Body: ledger */}
-                <div style={{ display: "flex", flexDirection: "column", position: "relative", zIndex: 4 }}>
+                <div style={{ display: "flex", flexDirection: "column", position: "relative", zIndex: 4, paddingBottom: 24 }}>
 
                   {/* Hairline — masthead/ledger divider */}
                   <div style={{ height: 1, background: "rgba(124,58,42,.38)", flexShrink: 0, margin: "0 16px" }} />
@@ -3063,7 +3062,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           <div className="space-y-4">
                             <div className="bg-[#FAF8F5] border border-[#e8d5cc] rounded-md p-3 space-y-2.5">
                               <span className="text-[10px] text-stone-400 font-mono uppercase tracking-wider block leading-none font-bold">Manuscript</span>
-                              <div className="inline-block bg-white border border-[#d1d5db] rounded-full px-3.5 py-1 text-[13px] font-bold text-[#7c3d3d] leading-snug shadow-3xs">{activeMs.title}</div>
+                              <div className="inline-block bg-white border border-[#d1d5db] rounded-full px-3.5 py-1 text-[13px] font-normal text-[#7c3d3d] leading-snug shadow-3xs" style={{ fontFamily: FONT_SERIF }}>{activeMs.title}</div>
                               <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
                                 <div><span className="text-stone-400 block uppercase">Genre</span><span className="font-medium text-[#3a1c14]">{activeMs.genre}</span></div>
                                 <div><span className="text-stone-400 block uppercase">Word count</span><span className="font-medium text-[#3a1c14]">{activeMs.wordCount.toLocaleString()} words</span></div>

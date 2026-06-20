@@ -162,8 +162,7 @@ export const Nav: React.FC<NavProps> = ({ activeTab, onNavigate, searchQuery, se
           className="sticky top-0 z-50"
           style={{
             background: parchment,
-            borderBottom: `1.5px solid ${scrolled ? "rgba(124,58,42,0.18)" : "transparent"}`,
-            transition: "border-color 0.25s ease",
+            borderBottom: "1px solid rgba(60,50,40,.10)",
           }}
         >
           <div className="flex items-center justify-end gap-3 px-4 md:px-10 lg:px-14 xl:px-16" style={{ height: 36 }}>
