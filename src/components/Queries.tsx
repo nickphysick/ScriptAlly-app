@@ -1611,9 +1611,6 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         .queries-cursor-blink {
           animation: queriesCursorBlink 1s steps(1, end) infinite;
         }
-        .pane-reading-card > div[aria-hidden="true"] {
-          border-top: 1.5px solid #7c3a2a !important;
-        }
       `}</style>
 
       {/* QUICK INLINE LOG DIALOG PORTAL */}
@@ -2029,10 +2026,10 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         </div>
       </div>
 
-      {/* TWO-PANEL LAYOUT CONTAINER — offset by sidebar width */}
+      {/* MAIN CONTENT — offset by sidebar width; control bar then two-column content grid */}
       <div
-        className="flex-grow bg-white min-h-0 w-full flex flex-row p-[8px] gap-[8px]"
-        style={{ minHeight: "calc(100vh - 36px - 16px)", alignItems: "start", paddingLeft: 260 }}
+        className="flex-grow w-full"
+        style={{ paddingLeft: 260, background: "#ffffff", minHeight: "calc(100vh - 36px)" }}
         id="queries-main-panel-container"
       >
 
@@ -2356,53 +2353,131 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
       </div>
 
-        {/* ---------------- panel 2: middle list panel (MountCard) ---------------- */}
-        <MountCard
-          style={{
-            width: "calc(20% + 50px)", minWidth: "calc(20% + 50px)", maxWidth: "calc(20% + 50px)",
-            flexShrink: 0, display: "flex", flexDirection: "column", height: "calc(100vh - 36px - 16px)", overflow: "hidden",
-          }}
-        >
-          {/* List header — plain, no band */}
-          <div style={{
-            padding: "14px 15px 12px",
-            borderBottom: "1px solid rgba(124,58,42,0.12)",
-            display: "flex", alignItems: "center", justifyContent: "space-between",
-            flexShrink: 0, position: "relative", zIndex: 4,
-          }}>
-            <span style={{ fontFamily: FONT_SERIF, fontSize: 16, fontWeight: 600, color: "#2e3a2c" }}>
-              {sortedList.length} {sortedList.length === 1 ? "query" : "queries"}
-            </span>
-            <button
-              onClick={handleExportFilteredCSV}
-              style={{
-                display: "inline-flex", alignItems: "center", gap: 6,
-                background: "transparent", border: "none", cursor: "pointer",
-                fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: ".05em", textTransform: "uppercase",
-                color: burgundy, opacity: 0.78,
-              }}
-            >
-              <Download className="w-3 h-3" />
-              Export these as CSV
-            </button>
-          </div>
-
-          {/* Search bar */}
-          <div style={{ padding: "8px 12px 6px", borderBottom: "1px solid rgba(124,58,42,0.10)", flexShrink: 0, position: "relative", zIndex: 4 }}>
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 w-3.5 h-3.5 text-stone-400" />
-              <input
-                type="text"
-                placeholder="Find query..."
-                value={listSearch}
-                onChange={(e) => setListSearch(e.target.value)}
-                className="w-full pl-8 pr-2.5 py-1.5 text-xs bg-[#FAF8F5] rounded border border-[#EBDCD3] placeholder-stone-400 focus:outline-[#7c3a2a] text-[#3a1c14]"
-              />
+        {/* ── Control bar — sticky below slim nav, 360px/1fr grid aligns over columns ── */}
+        {(() => {
+          const ctrlAction = currentStatus
+            ? getPrimaryAction(currentStatus as QueryStatus)
+            : { kind: "record" as const, label: "Record response", ballHolder: null as null };
+          const hasActive = !!(activeQuery && activeAgent && activeMs);
+          return (
+            <div style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 16, padding: "12px 22px", background: "#ffffff", borderBottom: "1px solid #e8e3da", position: "sticky", top: 36, zIndex: 10 }}>
+              {/* Left zone: search input */}
+              <div style={{ position: "relative" }}>
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400 pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="Find query…"
+                  value={listSearch}
+                  onChange={(e) => setListSearch(e.target.value)}
+                  onFocus={e => (e.currentTarget.style.textAlign = "left")}
+                  onBlur={e => { if (!e.currentTarget.value) e.currentTarget.style.textAlign = "center"; }}
+                  style={{ width: "100%", background: "#fffdf9", border: "1px solid #e3d7c8", borderRadius: 10, padding: "10px 12px 10px 36px", fontSize: 13, color: "#8a7a6c", fontFamily: "inherit", outline: "none", textAlign: "center" }}
+                />
+              </div>
+              {/* Right zone: action buttons, centred */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 9 }}>
+                {ctrlAction.kind === "mark-sent" ? (
+                  <button
+                    ref={markSentTriggerRef}
+                    type="button"
+                    onClick={() => hasActive && setIsMarkSentOpen(o => !o)}
+                    style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 500, color: burgundy, background: "linear-gradient(180deg,#f5e2da,#efd5ca)", border: "1px solid rgba(124,58,42,.28)", borderRadius: 9, padding: "9px 16px", cursor: hasActive ? "pointer" : "default", boxShadow: "0 1px 2px rgba(124,58,42,.12)", opacity: hasActive ? 1 : 0.5 }}
+                  >
+                    <Send style={{ width: 15, height: 15, strokeWidth: 2 } as any} />
+                    {ctrlAction.label}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => hasActive && setIsRecordResponseFocusFormOpen(true)}
+                    style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 500, color: burgundy, background: "linear-gradient(180deg,#f5e2da,#efd5ca)", border: "1px solid rgba(124,58,42,.28)", borderRadius: 9, padding: "9px 16px", cursor: hasActive ? "pointer" : "default", boxShadow: "0 1px 2px rgba(124,58,42,.12)", opacity: hasActive ? 1 : 0.5 }}
+                  >
+                    <Send style={{ width: 15, height: 15, strokeWidth: 2 } as any} />
+                    {ctrlAction.label}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => hasActive && setIsEditMode(prev => !prev)}
+                  onMouseEnter={e => { if (hasActive) e.currentTarget.style.background = "#fffaf6"; }}
+                  onMouseLeave={e => (e.currentTarget.style.background = "#ffffff")}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: 12.5, fontWeight: 500, color: burgundy, background: "#ffffff", border: "1px solid rgba(124,58,42,.22)", borderRadius: 9, padding: "9px 14px", cursor: hasActive ? "pointer" : "default", opacity: hasActive ? 1 : 0.5 }}
+                >
+                  <Pencil style={{ width: 13, height: 13 }} />
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  onClick={() => hasActive && !isGeneratingPDF && handleDownloadPDF()}
+                  onMouseEnter={e => { if (hasActive && !isGeneratingPDF) e.currentTarget.style.background = "#fffaf6"; }}
+                  onMouseLeave={e => (e.currentTarget.style.background = "#ffffff")}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: 12.5, fontWeight: 500, color: burgundy, background: "#ffffff", border: "1px solid rgba(124,58,42,.22)", borderRadius: 9, padding: "9px 14px", cursor: (hasActive && !isGeneratingPDF) ? "pointer" : "default", opacity: (hasActive && !isGeneratingPDF) ? 1 : 0.5 }}
+                >
+                  <Download style={{ width: 13, height: 13 }} />
+                  {isGeneratingPDF ? "Generating…" : "Download as PDF"}
+                </button>
+              </div>
             </div>
-          </div>
+          );
+        })()}
 
-          {/* Scrolling query cards list — mx-[6px] keeps row backgrounds inside the inner frame border */}
-          <div className="flex-1 overflow-y-scroll custom-query-list-scrollbar divide-y divide-[#EBDCD3]/60 mx-[6px]" style={{ position: "relative", zIndex: 4, background: parchment }}>
+        {/* MarkSentPopover — anchored via useFixedMenu to the control bar CTA */}
+        <AnimatePresence>
+          {isMarkSentOpen && activeQuery && activeAgent && (() => {
+            const a2 = getPrimaryAction(currentStatus as QueryStatus);
+            if (a2.kind !== "mark-sent") return null;
+            return (
+              <MarkSentPopover
+                key="mark-sent"
+                style={markSentMenuStyle}
+                kind={a2.markKind}
+                query={activeQuery}
+                agent={activeAgent}
+                triggerRef={markSentTriggerRef}
+                onClose={() => setIsMarkSentOpen(false)}
+                onRecordResponseInstead={() => {
+                  setIsMarkSentOpen(false);
+                  setIsRecordResponseFocusFormOpen(true);
+                }}
+                onSave={async ({ sentDate, responseDeadline, nudgeDate }) => {
+                  await recordMaterialsSent({
+                    queryId: activeQuery.id,
+                    targetStatus: a2.target as QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT,
+                    sentDate,
+                    isResubmit: a2.markKind === "resubmit",
+                    responseDeadline,
+                    nudgeDate,
+                  });
+                }}
+              />
+            );
+          })()}
+        </AnimatePresence>
+
+        {/* ── Content grid: 360px list + 1fr reading pane ── */}
+        <div style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 16, padding: "16px 22px 80px", alignItems: "start" }}>
+
+          {/* List card — outer rim + inner bordered frame */}
+          <div style={{ border: "1px solid rgba(90,55,42,.16)", borderRadius: 14, background: parchment, backgroundImage: PAPER_TEXTURE, padding: 7, boxShadow: "0 1px 3px rgba(40,22,14,.05), 0 7px 20px rgba(40,22,14,.07)" }}>
+            <div style={{ border: "1px solid rgba(124,58,42,.22)", borderRadius: 8, overflow: "hidden", background: parchment }}>
+
+              {/* List head row */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px 12px", borderBottom: "1px solid #ece0d2" }}>
+                <span style={{ fontFamily: FONT_SERIF, fontSize: 15, fontWeight: 600, color: "#2e3a2c" }}>
+                  {sortedList.length} {sortedList.length === 1 ? "query" : "queries"}
+                </span>
+                <button
+                  onClick={handleExportFilteredCSV}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "transparent", border: "none", cursor: "pointer", fontFamily: FONT_MONO, fontSize: 9, letterSpacing: ".05em", textTransform: "uppercase", color: burgundy, opacity: 0.72 }}
+                >
+                  <Download className="w-3 h-3" />
+                  Export these as CSV
+                </button>
+              </div>
+
+              {/* Rows container — 9px padding so row backgrounds stay inside the inner frame border */}
+              <div style={{ padding: 9 }}>
+                <div className="custom-query-list-scrollbar divide-y divide-[#ece0d2]/80">
             {(() => {
               const statusOrder = [
                 QueryStatus.QUERIED,
@@ -2650,36 +2725,34 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 No matching queries found.
               </div>
             )}
-          </div>
+                </div>{/* closes divide-y rows */}
+              </div>{/* closes padding:9 rows-container */}
+            </div>{/* closes inner bordered frame */}
+          </div>{/* closes outer rim — list card */}
 
-        </MountCard>
-
-        {/* ATELIER READING PANEL */}
-        <div style={{ flexGrow: 1, flex: 1, minWidth: 0, display: "flex", flexDirection: "column", alignSelf: "start" }}>
-
-          {/* Pane MountCard — sizes to content */}
-          <MountCard className="pane-reading-card" style={{ minWidth: 0, display: "flex", flexDirection: "column", position: "relative" }}>
+          {/* Reading pane card — 3px burgundy top accent via border-top on inner frame */}
+          <div style={{ border: "1px solid rgba(90,55,42,.16)", borderRadius: 14, background: parchment, backgroundImage: PAPER_TEXTURE, padding: 7, boxShadow: "0 1px 3px rgba(40,22,14,.05), 0 7px 20px rgba(40,22,14,.07)" }}>
+            <div style={{ borderLeft: "1px solid rgba(124,58,42,.22)", borderRight: "1px solid rgba(124,58,42,.22)", borderBottom: "1px solid rgba(124,58,42,.22)", borderTop: "3px solid #7c3a2a", borderRadius: 8, overflow: "hidden", background: parchment }}>
             {activeQuery && activeAgent && activeMs ? (
               <>
-                {/* Masthead — 3-column: [left: seal+status+turn] [center: nameplate+agency+stars+genres] [right: edit+pdf+cta] */}
+                {/* Masthead — statusrow (seal+status LEFT, whose-turn RIGHT) + centred mhead */}
                 {(() => {
-                  const action = getPrimaryAction(currentStatus as QueryStatus);
+                  const paneAction = getPrimaryAction(currentStatus as QueryStatus);
                   const hasName = !!(activeAgent.name?.trim());
                   const nameplate = hasName ? activeAgent.name : activeAgent.agency;
                   const agentFirstName = (activeAgent.name || activeAgent.agency || "Agent").split(" ")[0];
-                  const whoseTurnText = action.ballHolder === "writer" ? "Your move"
-                    : action.ballHolder === "agent" ? `waiting on ${agentFirstName}…`
+                  const whoseTurnText = paneAction.ballHolder === "writer" ? "Your move"
+                    : paneAction.ballHolder === "agent" ? `waiting on ${agentFirstName}…`
                     : null;
                   return (
-                    <div style={{ display: "grid", gridTemplateColumns: "210px 1fr 210px", gap: 18, alignItems: "start", padding: "24px 26px 22px", background: "linear-gradient(180deg,#faece4 0%,rgba(250,236,228,0) 100%)", position: "relative", zIndex: 4 }}>
-
-                      {/* Left: wax seal + status label + whose-turn */}
-                      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 10 }}>
+                    <div style={{ padding: "18px 26px 18px", background: "linear-gradient(180deg,#faece4 0%,rgba(250,236,228,0) 100%)" }}>
+                      {/* Status row */}
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
-                          <div style={{ width: 42, height: 42, borderRadius: "50%", background: "radial-gradient(circle at 35% 30%,#fbeee6,#f1d4c6)", border: "1.5px solid rgba(124,58,42,0.7)", boxShadow: "inset 0 1px 3px rgba(124,58,42,.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                            <StatusDot status={activeQuery.status} size={18} />
+                          <div style={{ width: 48, height: 48, borderRadius: "50%", background: "radial-gradient(circle at 35% 30%,#fbeee6,#f1d4c6)", border: "1.5px solid rgba(124,58,42,0.7)", boxShadow: "inset 0 1px 3px rgba(124,58,42,.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                            <StatusDot status={activeQuery.status} size={21} />
                           </div>
-                          <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase" as const, color: burgundy }}>
+                          <span style={{ fontFamily: FONT_MONO, fontSize: 15, letterSpacing: ".1em", textTransform: "uppercase" as const, color: burgundy }}>
                             {statusDisplayLabel(activeQuery)}
                           </span>
                         </div>
@@ -2689,8 +2762,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           </div>
                         )}
                       </div>
-
-                      {/* Center: agent identity */}
+                      {/* Agent identity — centred */}
                       <div style={{ textAlign: "center" }}>
                         {!hasName && (
                           <div style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase" as const, letterSpacing: ".14em", color: labelColor, marginBottom: 4 }}>
@@ -2737,105 +2809,20 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           )}
                         </div>
                       </div>
-
-                      {/* Right: icon buttons (Edit + PDF) + primary CTA — all in one row */}
-                      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
-                        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                          <button
-                            type="button"
-                            onClick={() => setIsEditMode(prev => !prev)}
-                            title="Edit query" aria-label="Edit query"
-                            style={{ width: 34, height: 34, borderRadius: 9, border: "1px solid rgba(124,58,42,.22)", background: "#fff", color: burgundy, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
-                            onMouseEnter={e => (e.currentTarget.style.background = "#f8e7dc")}
-                            onMouseLeave={e => (e.currentTarget.style.background = "#fff")}
-                          >
-                            <Pencil style={{ width: 14, height: 14 }} />
-                          </button>
-                          <button
-                            type="button"
-                            disabled={isGeneratingPDF}
-                            onClick={handleDownloadPDF}
-                            title={isGeneratingPDF ? "Generating PDF…" : "Download PDF"} aria-label="Download PDF"
-                            style={{ width: 34, height: 34, borderRadius: 9, border: "1px solid rgba(124,58,42,.22)", background: "#fff", color: burgundy, display: "flex", alignItems: "center", justifyContent: "center", cursor: isGeneratingPDF ? "not-allowed" : "pointer", opacity: isGeneratingPDF ? 0.5 : 1 }}
-                            onMouseEnter={e => { if (!isGeneratingPDF) e.currentTarget.style.background = "#f8e7dc"; }}
-                            onMouseLeave={e => (e.currentTarget.style.background = "#fff")}
-                          >
-                            <Download style={{ width: 14, height: 14 }} />
-                          </button>
-                        {action.kind === "mark-sent" ? (
-                          <button
-                            ref={markSentTriggerRef}
-                            type="button"
-                            onClick={() => setIsMarkSentOpen(o => !o)}
-                            style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 500, color: burgundy, background: "linear-gradient(180deg,#f5e2da,#efd5ca)", border: "1px solid rgba(124,58,42,.28)", borderRadius: 9, padding: "10px 16px", cursor: "pointer", boxShadow: "0 1px 2px rgba(124,58,42,.12)" }}
-                          >
-                            <Send style={{ width: 15, height: 15, strokeWidth: 2 } as any} />
-                            {action.label}
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => setIsRecordResponseFocusFormOpen(true)}
-                            style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 500, color: burgundy, background: "linear-gradient(180deg,#f5e2da,#efd5ca)", border: "1px solid rgba(124,58,42,.28)", borderRadius: 9, padding: "10px 16px", cursor: "pointer", boxShadow: "0 1px 2px rgba(124,58,42,.12)" }}
-                          >
-                            <Send style={{ width: 15, height: 15, strokeWidth: 2 } as any} />
-                            {action.label}
-                          </button>
-                        )}
-                        </div>
-                        <AnimatePresence>
-                          {isMarkSentOpen && (() => {
-                            const a2 = getPrimaryAction(currentStatus as QueryStatus);
-                            if (a2.kind !== "mark-sent") return null;
-                            return (
-                              <MarkSentPopover
-                                key="mark-sent"
-                                style={markSentMenuStyle}
-                                kind={a2.markKind}
-                                query={activeQuery}
-                                agent={activeAgent}
-                                triggerRef={markSentTriggerRef}
-                                onClose={() => setIsMarkSentOpen(false)}
-                                onRecordResponseInstead={() => {
-                                  setIsMarkSentOpen(false);
-                                  setIsRecordResponseFocusFormOpen(true);
-                                }}
-                                onSave={async ({ sentDate, responseDeadline, nudgeDate }) => {
-                                  await recordMaterialsSent({
-                                    queryId: activeQuery.id,
-                                    targetStatus: a2.target as QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT,
-                                    sentDate,
-                                    isResubmit: a2.markKind === "resubmit",
-                                    responseDeadline,
-                                    nudgeDate,
-                                  });
-                                }}
-                              />
-                            );
-                          })()}
-                        </AnimatePresence>
-                      </div>
-
                     </div>
                   );
                 })()}
 
-                {/* Body: ledger */}
-                <div style={{ display: "flex", flexDirection: "column", position: "relative", zIndex: 4, paddingBottom: 24 }}>
+                {/* Sub-cards row */}
+                <div style={{ display: "flex", gap: 14, padding: "6px 22px 26px", alignItems: "stretch" }}>
 
-                  {/* Hairline — masthead/ledger divider */}
-                  <div style={{ height: 1, background: "rgba(124,58,42,.38)", flexShrink: 0, margin: "0 16px" }} />
-
-                  {/* 4d — Three-column ledger — natural height */}
-                  <div style={{ display: "flex", minHeight: 280 }}>
-
-                    {/* ── Column 1: Tracking ── */}
-                    <div style={{ flex: 1, padding: "12px 14px", display: "flex", flexDirection: "column", minWidth: 0 }}>
+                  {/* ── Sub-card 1: Tracking ── */}
+                  <div style={{ flex: 1, border: "1px solid rgba(124,58,42,.16)", borderRadius: 12, background: "#fffefb", padding: "18px 18px 20px", display: "flex", flexDirection: "column", boxShadow: "0 1px 2px rgba(40,22,14,.03)", minWidth: 0 }}>
                       {/* Running head */}
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12, flexShrink: 0 }}>
-                        <div style={{ flex: 1, height: 1, background: "rgba(124,58,42,.2)" }} />
-                        <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, textTransform: "uppercase" as const, letterSpacing: ".18em", color: labelColor, whiteSpace: "nowrap" as const }}>Tracking</span>
-                        <div style={{ flex: 1, height: 1, background: "rgba(124,58,42,.2)" }} />
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 18 }}>
+                        <div style={{ height: 1, width: 22, background: "rgba(124,58,42,.3)" }} />
+                        <span style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase" as const, letterSpacing: ".16em", color: "#2e3a2c" }}>Tracking</span>
+                        <div style={{ height: 1, width: 22, background: "rgba(124,58,42,.3)" }} />
                       </div>
                       {/* Timeline (same logic as before) */}
                       {(() => {
@@ -2967,22 +2954,15 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           </div>
                         </div>
                       )}
-                    </div>
+                    </div>{/* ── end sub-card 1: Tracking ── */}
 
-                    {/* Ledger divider */}
-                    <div style={{ width: 1, display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0, margin: "16px 0" }}>
-                      <div style={{ flex: 1, width: 1, background: "linear-gradient(to bottom, transparent, rgba(124,58,42,.28) 30%)" }} />
-                      <div style={{ width: 5, height: 5, background: burgundy, transform: "rotate(45deg)", flexShrink: 0 }} />
-                      <div style={{ flex: 1, width: 1, background: "linear-gradient(to bottom, rgba(124,58,42,.28) 70%, transparent)" }} />
-                    </div>
-
-                    {/* ── Column 2: What you sent ── */}
-                    <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, padding: "12px 14px" }}>
+                  {/* ── Sub-card 2: What you sent ── */}
+                  <div style={{ flex: 1, border: "1px solid rgba(124,58,42,.16)", borderRadius: 12, background: "#fffefb", padding: "18px 18px 20px", display: "flex", flexDirection: "column", boxShadow: "0 1px 2px rgba(40,22,14,.03)", minWidth: 0 }}>
                       {/* Running head */}
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12, flexShrink: 0 }}>
-                        <div style={{ flex: 1, height: 1, background: "rgba(124,58,42,.2)" }} />
-                        <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, textTransform: "uppercase" as const, letterSpacing: ".18em", color: labelColor, whiteSpace: "nowrap" as const }}>What you sent</span>
-                        <div style={{ flex: 1, height: 1, background: "rgba(124,58,42,.2)" }} />
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 18 }}>
+                        <div style={{ height: 1, width: 22, background: "rgba(124,58,42,.3)" }} />
+                        <span style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase" as const, letterSpacing: ".16em", color: "#2e3a2c" }}>What you sent</span>
+                        <div style={{ height: 1, width: 22, background: "rgba(124,58,42,.3)" }} />
                       </div>
                       {/* Content area */}
                       <div style={{ flex: 1 }}>
@@ -3125,22 +3105,15 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           <button type="button" onClick={handleSaveChanges} style={{ padding: "5px 14px", background: "#7c3a2a", color: "white", fontSize: 11, fontWeight: 700, borderRadius: 6, cursor: "pointer", border: "none" }}>Save changes</button>
                         </div>
                       )}
-                    </div>
+                    </div>{/* ── end sub-card 2: What you sent ── */}
 
-                    {/* Ledger divider */}
-                    <div style={{ width: 1, display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0, margin: "16px 0" }}>
-                      <div style={{ flex: 1, width: 1, background: "linear-gradient(to bottom, transparent, rgba(124,58,42,.28) 30%)" }} />
-                      <div style={{ width: 5, height: 5, background: burgundy, transform: "rotate(45deg)", flexShrink: 0 }} />
-                      <div style={{ flex: 1, width: 1, background: "linear-gradient(to bottom, rgba(124,58,42,.28) 70%, transparent)" }} />
-                    </div>
-
-                    {/* ── Column 3: Notes ── */}
-                    <div style={{ flex: 1, padding: "12px 14px", display: "flex", flexDirection: "column", minWidth: 0, minHeight: 0 }}>
+                  {/* ── Sub-card 3: Notes — journal pins to bottom via flex-1 on messages area ── */}
+                  <div style={{ flex: 1, border: "1px solid rgba(124,58,42,.16)", borderRadius: 12, background: "#fffefb", padding: "18px 18px 20px", display: "flex", flexDirection: "column", boxShadow: "0 1px 2px rgba(40,22,14,.03)", minWidth: 0 }}>
                       {/* Running head */}
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12, flexShrink: 0 }}>
-                        <div style={{ flex: 1, height: 1, background: "rgba(124,58,42,.2)" }} />
-                        <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, textTransform: "uppercase" as const, letterSpacing: ".18em", color: labelColor, whiteSpace: "nowrap" as const }}>Notes</span>
-                        <div style={{ flex: 1, height: 1, background: "rgba(124,58,42,.2)" }} />
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 18 }}>
+                        <div style={{ height: 1, width: 22, background: "rgba(124,58,42,.3)" }} />
+                        <span style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase" as const, letterSpacing: ".16em", color: "#2e3a2c" }}>Notes</span>
+                        <div style={{ height: 1, width: 22, background: "rgba(124,58,42,.3)" }} />
                       </div>
                       {/* Notes content */}
                       {(() => {
@@ -3194,20 +3167,21 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           </div>
                         );
                       })()}
-                    </div>
+                  </div>{/* ── end sub-card 3: Notes ── */}
 
-                  </div>{/* end three-column ledger */}
-                </div>{/* end scrollable body */}
+                </div>{/* end sub-cards row */}
               </>
             ) : (
-              <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: 32, color: "#9c8878", position: "relative", zIndex: 4 }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: 32, color: "#9c8878" }}>
                 <Notebook style={{ width: 48, height: 48, color: "rgba(124,58,42,.2)", marginBottom: 8 }} />
                 <span>Select a query to open the reading pane.</span>
               </div>
             )}
-          </MountCard>
-        </div>
-      </div>
+            </div>{/* closes inner bordered frame */}
+          </div>{/* closes outer rim — reading pane card */}
+
+        </div>{/* closes content grid */}
+      </div>{/* closes main container */}
 
     {activeQuery && (
       <RecordResponseModal
