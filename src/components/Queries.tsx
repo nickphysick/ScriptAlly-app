@@ -2892,17 +2892,13 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           const isLast = index === timelineItems.length - 1;
                           let dotElement = null;
                           if (item.type === 'waiting') {
+                            // Non-status projection node (future "waiting to hear back") — keep its
+                            // neutral hollow marker; it isn't a QueryStatus and has no dot artwork.
                             dotElement = <div className="rounded-full z-10 bg-transparent border-[1.5px] border-[#c9a89e] shrink-0 mt-[4px]" style={{ width: 12, height: 12 }} />;
                           } else {
-                            const isClosed = [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE].includes(item.type as QueryStatus);
-                            const isOffer = item.type === QueryStatus.OFFER;
-                            if (isClosed) {
-                              dotElement = <div className="rounded-full z-10 bg-[#888] flex items-center justify-center text-white shrink-0 mt-[4px] select-none" style={{ width: 12, height: 12 }}><span className="text-[7.5px] font-bold leading-none">✕</span></div>;
-                            } else if (isOffer) {
-                              dotElement = <div className="rounded-full z-10 bg-[#6b0f1a] shrink-0 mt-[4px]" style={{ width: 12, height: 12 }} />;
-                            } else {
-                              dotElement = <div className="rounded-full z-10 bg-[#7c3d3d] shrink-0 mt-[4px]" style={{ width: 12, height: 12 }} />;
-                            }
+                            // Status-bearing node — route through the canonical StatusDot map (was a
+                            // hand-built dot here; repointed so the designed artwork is the one source).
+                            dotElement = <StatusDot status={item.type as QueryStatus} size={12} className="z-10 mt-[4px]" />;
                           }
                           const baseTitle = item.type === 'waiting' ? 'Waiting to hear back' : (TIMELINE_TITLES[item.type as QueryStatus] || item.type);
                           const titleText = item.type === QueryStatus.FULL_SENT && (activeQuery.revisionRound ?? 1) >= 2 ? `${baseTitle} (v${activeQuery.revisionRound})` : baseTitle;
