@@ -165,7 +165,7 @@ export const Nav: React.FC<NavProps> = ({ activeTab, onNavigate, searchQuery, se
             borderBottom: "1px solid #e2ded7",
           }}
         >
-          <div className="flex items-center justify-end gap-3 px-4 md:px-10 lg:px-14 xl:px-16" style={{ height: 36 }}>
+          <div className="flex items-center justify-end gap-3 px-4 md:px-10 lg:px-14 xl:px-16" style={{ height: 43 }}>
             {/* Help */}
             <button
               onClick={() => onNavigate("help")}

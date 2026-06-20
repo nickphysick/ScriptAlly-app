@@ -528,6 +528,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   // States for Agent Notes card
   const [isEditingNotes, setIsEditingNotes] = useState(false);
   const [notesValue, setNotesValue] = useState("");
+  const [notesFade, setNotesFade] = useState({ top: false, bottom: false });
   
   // Left Filters state (configured to always align with Agents-style)
   const [selectedStatusFilters, setSelectedStatusFilters] = useState<string[]>(["All"]);
@@ -637,6 +638,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
   // Chat scroll container ref
   const chatContainerRef = React.useRef<HTMLDivElement>(null);
+  // Stable refs for keyboard navigation (updated each render before return)
+  const sortedListRef = useRef<any[]>([]);
+  const selectedQueryIdRef = useRef<string | null>(null);
 
   // Contextual action states
   const [showActionDropdown, setShowActionDropdown] = useState(false);
@@ -747,10 +751,34 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
   // Auto scroll chat container to bottom when journalEntries or selectedQueryId changes
   useEffect(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    const el = chatContainerRef.current;
+    if (el) {
+      el.scrollTop = el.scrollHeight;
+      setNotesFade({ top: el.scrollHeight > el.clientHeight, bottom: false });
     }
   }, [journalEntries, selectedQueryId]);
+
+  // Arrow-key navigation through the query list — registers once, reads state via stable refs
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+      const el = document.activeElement as HTMLElement | null;
+      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
+      e.preventDefault();
+      const list = sortedListRef.current;
+      const currentId = selectedQueryIdRef.current;
+      const idx = list.findIndex((q: any) => q.id === currentId);
+      if (idx === -1) return;
+      const nextIdx = e.key === "ArrowDown"
+        ? Math.min(idx + 1, list.length - 1)
+        : Math.max(idx - 1, 0);
+      if (nextIdx === idx) return;
+      setSelectedQueryId(list[nextIdx].id);
+      document.getElementById(`query-row-${list[nextIdx].id}`)?.scrollIntoView({ block: "nearest" });
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const triggerNotesEdit = () => {
     if (activeAgent) {
@@ -782,6 +810,16 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   ).length;
   
   const offerCount = queries.filter(q => q.status === QueryStatus.OFFER).length;
+
+  // Sidebar filter group visibility (only show group label when ≥1 row would render)
+  const hasActiveQueries = queries.some(q =>
+    [QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT,
+     QueryStatus.FULL_REQUESTED, QueryStatus.FULL_SENT, QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER]
+     .includes(q.status)
+  );
+  const hasClosedQueries = queries.some(q =>
+    [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE].includes(q.status)
+  );
 
   const RESPONSE_RECEIVED_STATUSES = [
     QueryStatus.PARTIAL_REQUESTED,
@@ -1475,10 +1513,14 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     }
   };
 
+  // Keep stable refs in sync for keydown handler (runs before each render's effects)
+  sortedListRef.current = sortedList;
+  selectedQueryIdRef.current = selectedQueryId;
+
   return (
-    <div 
+    <div
       className="w-full flex flex-col overflow-hidden text-[#3a1c14] font-sans relative queries-container-theme"
-      style={{ height: "calc(100vh - 36px)", backgroundColor: "#ffffff" }}
+      style={{ height: "calc(100vh - 43px)", backgroundColor: "#ffffff" }}
     >
       <style>{`
         .custom-query-list-scrollbar::-webkit-scrollbar {
@@ -1736,9 +1778,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           overflow: "hidden",
         }}
       >
-        {/* Wordmark */}
-        <div style={{ padding: "18px 20px 14px", borderBottom: "1px solid rgba(124,58,42,0.10)", flexShrink: 0 }}>
-          <ScriptAllyLogo size="sm" iconColor={burgundy} textColor="#3a1c14" />
+        {/* Logo — no standalone image file in project; using SVG component at lg size (~196px wide) */}
+        <div style={{ padding: "18px 20px 14px", borderBottom: "1px solid rgba(124,58,42,0.10)", flexShrink: 0, display: "flex", justifyContent: "center" }}>
+          <ScriptAllyLogo size="lg" iconColor={burgundy} textColor={burgundy} />
         </div>
 
         {/* Page title — "Agent database" */}
@@ -1805,12 +1847,13 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             </button>
             {filterAccordionOpen && (
               <div>
-                {/* Status sub-section */}
+                {/* Status sub-section — "Status" heading removed; groups hidden when empty */}
                 <div style={{ marginBottom: 10 }}>
-                  <span style={{ display: "block", fontFamily: FONT_MONO, fontSize: 9.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: `${burgundy}99`, marginBottom: 4, paddingLeft: 4 }}>Status</span>
-                  <div style={{ marginBottom: 2 }}>
-                    <span style={{ display: "block", fontFamily: FONT_MONO, fontSize: 9.5, color: "#9a8579", textTransform: "uppercase", letterSpacing: "0.05em", padding: "3px 4px", fontWeight: 600 }}>Active</span>
-                  </div>
+                  {hasActiveQueries && (
+                    <div style={{ marginBottom: 2 }}>
+                      <span style={{ display: "block", fontFamily: FONT_MONO, fontSize: 9.5, color: "#9a8579", textTransform: "uppercase", letterSpacing: "0.05em", padding: "3px 4px", fontWeight: 600 }}>Active</span>
+                    </div>
+                  )}
                   {[
                     { id: QueryStatus.QUERIED, label: "Queried", count: queries.filter(q => q.status === QueryStatus.QUERIED).length },
                     { id: QueryStatus.PARTIAL_REQUESTED, label: "Partial req", count: queries.filter(q => q.status === QueryStatus.PARTIAL_REQUESTED).length },
@@ -1819,7 +1862,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     { id: QueryStatus.FULL_SENT, label: "Full sent", count: queries.filter(q => q.status === QueryStatus.FULL_SENT).length },
                     { id: QueryStatus.REVISE_RESUBMIT, label: "R&R", count: queries.filter(q => q.status === QueryStatus.REVISE_RESUBMIT).length },
                     { id: QueryStatus.OFFER, label: "Offers", count: queries.filter(q => q.status === QueryStatus.OFFER).length },
-                  ].map(item => {
+                  ].filter(item => item.count > 0).map(item => {
                     const isActive = selectedStatusFilters.includes(item.id);
                     return (
                       <button key={item.id} onClick={() => {
@@ -1846,14 +1889,16 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                       </button>
                     );
                   })}
-                  <div style={{ marginTop: 6, marginBottom: 2 }}>
-                    <span style={{ display: "block", fontFamily: FONT_MONO, fontSize: 9.5, color: "#9a8579", textTransform: "uppercase", letterSpacing: "0.05em", padding: "3px 4px", fontWeight: 600 }}>Closed</span>
-                  </div>
+                  {hasClosedQueries && (
+                    <div style={{ marginTop: 6, marginBottom: 2 }}>
+                      <span style={{ display: "block", fontFamily: FONT_MONO, fontSize: 9.5, color: "#9a8579", textTransform: "uppercase", letterSpacing: "0.05em", padding: "3px 4px", fontWeight: 600 }}>Closed</span>
+                    </div>
+                  )}
                   {[
                     { id: QueryStatus.REJECTED, label: "Rejected", count: queries.filter(q => q.status === QueryStatus.REJECTED).length },
                     { id: QueryStatus.WITHDRAWN, label: "Withdrawn", count: queries.filter(q => q.status === QueryStatus.WITHDRAWN).length },
                     { id: QueryStatus.NO_RESPONSE, label: "No response", count: queries.filter(q => q.status === QueryStatus.NO_RESPONSE).length },
-                  ].map(item => {
+                  ].filter(item => item.count > 0).map(item => {
                     const isActive = selectedStatusFilters.includes(item.id);
                     return (
                       <button key={item.id} onClick={() => {
@@ -2539,6 +2584,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 return (
                   <div
                     key={q.id}
+                    id={`query-row-${q.id}`}
                     onClick={() => setSelectedQueryId(q.id)}
                     className={`cursor-pointer transition-all flex flex-col gap-1 ${isClosed ? "opacity-60" : ""}`}
                     style={{
@@ -3121,13 +3167,24 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                         const activeJournalEntries = journalEntries
                           .filter(entry => entry.queryId === activeQuery.id)
                           .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+                        const topFade = notesFade.top ? "transparent 0px, black 26px" : "black 0px";
+                        const bottomFade = notesFade.bottom ? "black calc(100% - 26px), transparent 100%" : "black 100%";
+                        const maskValue = `linear-gradient(to bottom, ${topFade}, ${bottomFade})`;
+                        const handleNotesScroll = () => {
+                          const el = chatContainerRef.current;
+                          if (!el) return;
+                          setNotesFade({
+                            top: el.scrollTop > 3,
+                            bottom: el.scrollHeight - el.clientHeight - el.scrollTop > 3,
+                          });
+                        };
                         return (
                           <div className="flex flex-col p-3.5 bg-[#FAF8F5] rounded-xl border border-[#ebd8c5]/40" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
-                            <div ref={chatContainerRef} className="flex flex-col space-y-2 pr-1" style={{ backgroundColor: "transparent", flex: 1, overflowY: "auto", minHeight: 0, paddingBottom: 12 }}>
+                            <div ref={chatContainerRef} onScroll={handleNotesScroll} className="flex flex-col space-y-2 pr-1" style={{ backgroundColor: "transparent", flex: 1, overflowY: "auto", minHeight: 0, paddingBottom: 12, WebkitMaskImage: maskValue, maskImage: maskValue }}>
                               {activeJournalEntries.map((entry, index) => {
                                 const isEditing = editingJournalId === entry.id;
                                 return (
-                                  <div key={entry.id} className="relative group max-w-[85%] bg-white text-[#3a1c14] rounded-[15px] pl-[20px] pr-[20px] py-2 shadow-sm text-[11.5px] leading-relaxed text-left self-start animate-fade-in" style={{ borderStyle: "none", borderWidth: "0px", backgroundColor: "#ffffff" }}>
+                                  <div key={entry.id} className="relative group max-w-[85%] text-[#3a1c14] rounded-[15px] pl-[20px] pr-[20px] py-2 shadow-sm text-[11.5px] leading-relaxed text-left self-start animate-fade-in" style={{ background: "#fbf3e9", border: "1px solid #efe2d0" }}>
                                     {isEditing ? (
                                       <div className="flex flex-col gap-1.5 py-1 min-w-[200px] w-full">
                                         <textarea value={editingJournalText} onChange={(e) => setEditingJournalText(e.target.value)} className="w-full text-[11.5px] border border-stone-200 rounded-md p-1.5 outline-none font-sans bg-[#faf8f5] focus:border-[#7c3d3d] resize-none" rows={2} autoFocus />
@@ -3143,7 +3200,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                                           <button type="button" onClick={async () => { const confirmDelete = window.confirm("Are you sure you want to delete this journal note?"); if (confirmDelete) await deleteJournalEntry(entry.id); }} className="text-stone-500 hover:text-red-500 transition-colors cursor-pointer p-0.5" title="Delete Note"><Trash2 className="w-3 h-3" /></button>
                                         </div>
                                         <p className={`break-words font-sans text-[#3a1c14] whitespace-pre-wrap text-left pr-4 ${index === 0 ? "font-normal italic" : "font-medium"}`}>{entry.entryText}</p>
-                                        <div className="text-[9px] text-[#8c706d] text-left mt-1.5 select-none font-mono flex items-center justify-start gap-1 font-light leading-none"><span>{formatWhatsAppDate(entry.createdAt)}</span></div>
+                                        <div className="text-[9px] text-left mt-1.5 select-none font-mono flex items-center justify-start gap-1 font-light leading-none" style={{ color: "#a8927e" }}><span>{formatWhatsAppDate(entry.createdAt)}</span></div>
                                       </>
                                     )}
                                   </div>
@@ -3161,8 +3218,16 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                               <div className="flex-grow bg-white border border-stone-200 rounded-full py-1.5 px-4 flex items-center shadow-3xs">
                                 <input type="text" placeholder="Type a journal note..." value={journalInput} onChange={(e) => setJournalInput(e.target.value)} className="w-full text-xs bg-transparent outline-none border-none text-[#333333] placeholder-stone-400 py-0.5 leading-tight font-sans" />
                               </div>
-                              <button type="submit" disabled={!journalInput.trim()} className={`w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0 ${journalInput.trim() ? "bg-[#00a884] hover:bg-[#008f72] text-white cursor-pointer shadow-3xs hover:scale-105" : "bg-stone-100 text-stone-300 cursor-not-allowed border border-stone-200"}`}>
-                                <Send className={`w-3.5 h-3.5 ${journalInput.trim() ? "text-white" : "text-stone-300"}`} />
+                              <button
+                                type="submit"
+                                disabled={!journalInput.trim()}
+                                className="w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0"
+                                style={journalInput.trim()
+                                  ? { background: "linear-gradient(180deg,#f5e2da,#efd5ca)", border: "1px solid rgba(124,58,42,.28)", cursor: "pointer" }
+                                  : { background: "#f1f1f0", border: "1px solid #e5e0d8", cursor: "not-allowed" }
+                                }
+                              >
+                                <Send className="w-3.5 h-3.5" style={{ color: journalInput.trim() ? burgundy : "#c5b9b0" }} />
                               </button>
                             </form>
                           </div>
