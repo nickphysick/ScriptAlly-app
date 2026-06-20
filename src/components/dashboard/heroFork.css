@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * Animation mechanics for the hero's spine-and-fork querying tour (HeroPipelineStrip).
- * Ported from scriptally-pipeline-tour-v6.html / scriptally-journey-hero-fork.html and
- * scoped under .hero-fork so it can't leak. Only motion lives here (keyframes, transitions,
- * pulse, hover) — geometry, colours, fonts and sizes are set inline in the component
- * (the codebase's "critical styles inline, not Tailwind" convention).
+ * Ported from scriptally-journey-hero-fork-v2.html (motion from scriptally-pipeline-tour-v6.html)
+ * and scoped under .hero-fork so it can't leak. v2: large icons, NO connector track, and every
+ * stage always-on — zero-count stages rest at 20% opacity and bloom to full as the pulse passes.
+ * Only motion lives here (keyframes, transitions, pulse, hover); geometry, colours, fonts and
+ * sizes are set inline in the component ("critical styles inline, not Tailwind").
  */
 
 .hero-fork { position: relative; }
@@ -16,35 +17,35 @@
 .hero-fork .hf-dotwrap.pulsing { animation: hf-dotpulse 1.6s ease-out; }
 @keyframes hf-dotpulse {
   0%   { transform: scale(1);    box-shadow: 0 0 0 0 rgba(124, 58, 42, 0); }
-  22%  { transform: scale(1.24); box-shadow: 0 0 0 5px rgba(124, 58, 42, 0.14); }
+  22%  { transform: scale(1.18); box-shadow: 0 0 0 8px rgba(124, 58, 42, 0.13); }
   100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(124, 58, 42, 0); }
 }
 
-/* ghost StatusDot (empty stages): hidden at rest, revealed on bloom/hover */
-.hero-fork .hf-ghost { opacity: 0; transition: opacity 1s ease-in-out; will-change: opacity; }
-.hero-fork .hf-node.empty.peek .hf-ghost,
-.hero-fork .hf-node.empty:hover .hf-ghost { opacity: 1; }
+/* zero-count StatusDot: always visible, faint at rest, blooms to full as the pulse passes */
+.hero-fork .hf-ghost { opacity: 0.2; transition: opacity 1s ease-in-out; will-change: opacity; }
+.hero-fork .hf-node.peek .hf-ghost,
+.hero-fork .hf-node:hover .hf-ghost { opacity: 1; }
 
 /* caption near a node — opacity fade only, never animated transforms */
 .hero-fork .hf-capt { opacity: 0; transition: opacity 1s ease-in-out; pointer-events: none; }
-.hero-fork .hf-capt.show,
-.hero-fork .hf-node:hover .hf-capt,
-.hero-fork .hf-node.empty.peek .hf-capt { opacity: 1; }
+.hero-fork .hf-node.show .hf-capt,
+.hero-fork .hf-node.peek .hf-capt,
+.hero-fork .hf-node:hover .hf-capt { opacity: 1; }
 
 /* gentle hover lift on a populated cluster (not the ghost) */
-.hero-fork .hf-node:hover .hf-dotwrap { transform: scale(1.12); transition: transform 0.2s; }
+.hero-fork .hf-node:hover .hf-dotwrap { transform: scale(1.08); transition: transform 0.2s; }
 
-/* the travelling pulse(s): radial glow + solid core. Position via transform (translate) so a
-   single mechanism covers the horizontal spine AND the diagonal fork branches. */
+/* the travelling pulse(s): small radial glow + solid core. Positioned via transform (translate)
+   so one mechanism covers the horizontal spine AND the diagonal fork branches. */
 .hero-fork .hf-pulse {
   position: absolute; left: 0; top: 0; width: 9px; height: 9px; border-radius: 50%;
-  opacity: 0; transition: opacity 0.4s; z-index: 2; pointer-events: none;
+  opacity: 0; transition: opacity 0.4s; z-index: 3; pointer-events: none;
   background: radial-gradient(circle, rgba(124, 58, 42, 0.95) 0%, rgba(124, 58, 42, 0) 72%);
   will-change: transform, opacity;
 }
 .hero-fork .hf-pulse::after { content: ''; position: absolute; inset: 1.5px; border-radius: 50%; background: #7c3a2a; }
 
-/* Reduced motion: no travelling tour or pulses; JS pins populated captions + blooms empties. */
+/* Reduced motion: no travelling tour or pulses; JS pins all captions visible (zeros stay faint). */
 @media (prefers-reduced-motion: reduce) {
   .hero-fork .hf-dotwrap.pulsing { animation: none; }
   .hero-fork .hf-pulse { display: none; }

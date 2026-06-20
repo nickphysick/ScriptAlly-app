@@ -5,18 +5,21 @@
  * Hero pipeline strip — the animated AGGREGATE querying tour in the dashboard hero (the slot
  * the author quote used to occupy). One row sums every query across every manuscript, drawn as
  * a left-anchored SPINE of the five active stages (Queried → Full Sent) that FORKS at the end
- * into the two terminal outcomes — Offer (upper branch) and Closed (lower branch). A travelling
- * pulse rides the spine, dwelling on populated stages and blooming empty ones in passing; at the
- * fork it splits into two pulses that travel the branches simultaneously. Behaviour/geometry
- * match scriptally-journey-hero-fork.html (motion from scriptally-pipeline-tour-v6.html).
+ * into the two terminal outcomes — Offer (upper) and Closed (lower). A travelling pulse rides
+ * the (invisible) spine, dwelling on populated stages and blooming zero stages in passing; at
+ * the fork it splits into two pulses that travel to the terminals simultaneously. Behaviour /
+ * geometry match scriptally-journey-hero-fork-v2.html (motion from scriptally-pipeline-tour-v6).
+ *
+ * v2 traits: large ~38px canonical StatusDots; NO connector track (no lines, no junction dot —
+ * the fork is conveyed by placement + the pulse split); every stage is always-on — populated at
+ * full strength, zero-count at 20% opacity blooming to full as the pulse passes (no hidden ghost).
  *
  * The column → QueryStatus mapping is reused verbatim from the removed PipelinePanel — Closed
  * aggregates Rejected / Withdrawn / No Response / Revise & Resubmit (R&R is NOT a visible stage;
  * the parked R&R-in-Closed behaviour is preserved as-is, not corrected here).
  *
- * One representative dot per stage (canonical StatusDot; muted ghost when empty). Fully disabled
- * under prefers-reduced-motion (static, legible spine+fork). Zero-state (0 queries) renders a
- * quiet static spine+fork of visible ghost stages — no tour, no captions.
+ * Fully disabled under prefers-reduced-motion (static, legible spine+fork; zeros stay faint).
+ * Zero-state (0 queries) renders a quiet spine+fork with every icon at the faint rest opacity.
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Query, QueryStatus } from "../../types";
@@ -25,7 +28,7 @@ import { burgundy, FONT_MONO } from "../../lib/designTokens";
 import "./heroFork.css";
 
 interface Stage {
-  status: QueryStatus; // representative status drawn as the stage's dot / empty ghost
+  status: QueryStatus; // representative status drawn as the stage's dot
   agg: QueryStatus[]; // statuses this stage counts
   sing: string;
   plur: string;
@@ -39,9 +42,9 @@ const STAGES: Stage[] = [
   { status: QueryStatus.PARTIAL_SENT, agg: [QueryStatus.PARTIAL_SENT], sing: "partial sent", plur: "partials sent" },
   { status: QueryStatus.FULL_REQUESTED, agg: [QueryStatus.FULL_REQUESTED], sing: "full requested", plur: "fulls requested" },
   { status: QueryStatus.FULL_SENT, agg: [QueryStatus.FULL_SENT], sing: "full sent", plur: "fulls sent" },
-  { status: QueryStatus.OFFER, agg: [QueryStatus.OFFER], sing: "offer", plur: "offers" }, // terminal: upper branch
+  { status: QueryStatus.OFFER, agg: [QueryStatus.OFFER], sing: "offer", plur: "offers" }, // terminal: upper
   {
-    status: QueryStatus.REJECTED, // terminal: lower branch
+    status: QueryStatus.REJECTED, // terminal: lower
     agg: [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE, QueryStatus.REVISE_RESUBMIT],
     sing: "closed",
     plur: "closed",
@@ -58,24 +61,23 @@ const DWELL = 2100;
 const GAP = 320;
 const REST = 1700;
 const GLIDE_PER_COL = 1300; // ms per spine step (speed = step / 1300)
-const PEEK_BEFORE = 650; // begin empty-stage bloom this long before the pulse passes
-const PEEK_AFTER = 520; // linger this long after passing, then ease out
+const PEEK_BEFORE = 650; // begin zero-stage bloom this long before the pulse passes
+const PEEK_AFTER = 520; // linger this long after passing, then ease back to rest
 
 // Geometry (proportions of the strip width W, recomputed on resize).
-const DOT = 20;
+const DOT = 38; // large icon (~2× the usual StatusDot)
 const R = DOT / 2;
-const CGAP = 8; // dot → caption gap
-const PAD_L = 11; // first spine node centre x (its dot's left edge ≈ hero content-left)
+const CGAP = 10; // dot → caption gap
+const PAD_L = 20; // first spine node centre x (its dot's left edge ≈ hero content-left)
 const SPINE_END = 0.58; // last spine node at 0.58·W
-const FORK = 0.7; // fork junction at 0.70·W
 const TERM = 0.87; // terminals at 0.87·W
 const SPLAY = 26; // terminal vertical offset from the spine
-const SPINE_Y = 58;
-const H = 116; // block height: spine ± splay + caption reserve above Offer / below Closed
+const SPINE_Y = 66;
+const H = 150; // taller block: large icons + caption reserve above Offer / below Closed
 
 interface Geom {
   xs: number[]; // 5 spine node centre x's
-  xf: number; // fork x
+  xf: number; // fork point x (where the spine pulse hands off)
   offer: { x: number; y: number };
   closed: { x: number; y: number };
   step: number; // spine column spacing
@@ -83,9 +85,8 @@ interface Geom {
 const geomFor = (W: number): Geom | null => {
   if (!W) return null;
   const xs = [0, 1, 2, 3, 4].map((i) => PAD_L + (SPINE_END * W - PAD_L) * (i / 4));
-  const xf = FORK * W;
   const xt = TERM * W;
-  return { xs, xf, offer: { x: xt, y: SPINE_Y - SPLAY }, closed: { x: xt, y: SPINE_Y + SPLAY }, step: xs[1] - xs[0] };
+  return { xs, xf: 0.7 * W, offer: { x: xt, y: SPINE_Y - SPLAY }, closed: { x: xt, y: SPINE_Y + SPLAY }, step: xs[1] - xs[0] };
 };
 
 /** Node centre (x, y) for each stage index. */
@@ -100,7 +101,7 @@ const captBase: React.CSSProperties = {
   textTransform: "uppercase",
   whiteSpace: "nowrap",
 };
-/** Caption placement is relative to the node box (DOT×DOT): Queried left-aligned under its dot,
+/** Caption placement relative to the node box (DOT×DOT): Queried left-aligned under its dot,
  *  spine middles centred, terminals right-aligned (Offer above, Closed below). */
 const captStyle = (i: number, populated: boolean): React.CSSProperties => {
   const color = populated ? burgundy : "#aaa093";
@@ -139,7 +140,7 @@ export const HeroPipelineStrip: React.FC<HeroPipelineStripProps> = ({ queries })
   const g = useMemo(() => geomFor(W), [W]);
 
   useEffect(() => {
-    if (isZero || !g) return; // zero-state: quiet ghost spine+fork, no tour
+    if (isZero || !g) return; // zero-state: quiet faint spine+fork, no tour
     const box = boxRef.current;
     if (!box) return;
     const nodes = Array.from(box.querySelectorAll<HTMLElement>(".hf-node"));
@@ -147,11 +148,8 @@ export const HeroPipelineStrip: React.FC<HeroPipelineStripProps> = ({ queries })
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) {
-      // Static legible version: every count shown; empty stages reveal ghost + "0 …" caption.
-      nodes.forEach((node, i) => {
-        if (counts[i] > 0) node.querySelector(".hf-capt")?.classList.add("show");
-        else node.classList.add("peek");
-      });
+      // Static legible version: show every caption; zeros stay at the 20% rest opacity.
+      nodes.forEach((node) => node.classList.add("show"));
       return;
     }
 
@@ -202,7 +200,7 @@ export const HeroPipelineStrip: React.FC<HeroPipelineStripProps> = ({ queries })
 
     const speed = g.step / GLIDE_PER_COL; // px per ms
 
-    // Glide the spine pulse horizontally, blooming any empty spine nodes it passes.
+    // Glide the spine pulse, blooming any zero spine nodes it passes.
     const glideSpine = async (fromX: number, toX: number) => {
       const dist = toX - fromX;
       if (dist <= 1) return;
@@ -225,10 +223,9 @@ export const HeroPipelineStrip: React.FC<HeroPipelineStripProps> = ({ queries })
     const dwell = async (i: number) => {
       const wrap = nodes[i].querySelector<HTMLElement>(".hf-dotwrap");
       if (wrap) { wrap.classList.remove("pulsing"); void wrap.offsetWidth; wrap.classList.add("pulsing"); }
-      const capt = nodes[i].querySelector(".hf-capt");
-      capt?.classList.add("show");
+      nodes[i].classList.add("show");
       await wait(DWELL);
-      capt?.classList.remove("show");
+      nodes[i].classList.remove("show");
       await wait(GAP);
     };
 
@@ -236,13 +233,13 @@ export const HeroPipelineStrip: React.FC<HeroPipelineStripProps> = ({ queries })
       if (counts[i] > 0) {
         const wrap = nodes[i].querySelector<HTMLElement>(".hf-dotwrap");
         if (wrap) { wrap.classList.remove("pulsing"); void wrap.offsetWidth; wrap.classList.add("pulsing"); }
-        nodes[i].querySelector(".hf-capt")?.classList.add("show");
+        nodes[i].classList.add("show");
       } else {
-        nodes[i].classList.add("peek"); // bloom ghost + greyed "0 …" caption
+        nodes[i].classList.add("peek"); // bloom faint icon to full + greyed "0 …" caption
       }
     };
     const clearTerminal = (i: number) => {
-      nodes[i].querySelector(".hf-capt")?.classList.remove("show");
+      nodes[i].classList.remove("show");
       nodes[i].classList.remove("peek");
     };
 
@@ -263,7 +260,7 @@ export const HeroPipelineStrip: React.FC<HeroPipelineStripProps> = ({ queries })
         show(spineP);
         await wait(300);
 
-        // Spine: stop on populated stages (dwell); empties bloom as the pulse passes.
+        // Spine: stop on populated stages (dwell); zeros bloom as the pulse passes.
         let cur = startX;
         for (let i = 0; i < 5; i++) {
           if (counts[i] === 0) continue;
@@ -274,10 +271,10 @@ export const HeroPipelineStrip: React.FC<HeroPipelineStripProps> = ({ queries })
           if (cancelled) break;
         }
         if (cancelled) break;
-        await glideSpine(cur, g.xf); // reach the fork (blooms any trailing empty spine nodes)
+        await glideSpine(cur, g.xf); // reach the fork (blooms any trailing zero spine nodes)
         hide(spineP);
 
-        // Fork: split into two pulses travelling both branches at once.
+        // Fork: split into two pulses travelling to both terminals at once.
         place(offerP, g.xf, SPINE_Y); place(closedP, g.xf, SPINE_Y);
         show(offerP); show(closedP);
         move(offerP, g.offer.x, g.offer.y, branchDur);
@@ -310,16 +307,6 @@ export const HeroPipelineStrip: React.FC<HeroPipelineStripProps> = ({ queries })
     <div className="hero-fork" style={{ width: "100%", maxWidth: 780, position: "relative", height: H }} ref={boxRef}>
       {g && (
         <>
-          {/* dashed spine + two branch tracks, with the small fork-junction dot */}
-          <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} aria-hidden="true" style={{ position: "absolute", inset: 0, zIndex: 1, overflow: "visible" }}>
-            <g stroke={burgundy} strokeWidth={1.5} strokeOpacity={0.2} strokeDasharray="4 7" strokeLinecap="round" fill="none">
-              <line x1={g.xs[0]} y1={SPINE_Y} x2={g.xf} y2={SPINE_Y} />
-              <line x1={g.xf} y1={SPINE_Y} x2={g.offer.x} y2={g.offer.y} />
-              <line x1={g.xf} y1={SPINE_Y} x2={g.closed.x} y2={g.closed.y} />
-            </g>
-            <circle cx={g.xf} cy={SPINE_Y} r={2} fill={burgundy} fillOpacity={0.55} />
-          </svg>
-
           {!isZero && (
             <>
               <div className="hf-pulse spine" />
@@ -332,14 +319,14 @@ export const HeroPipelineStrip: React.FC<HeroPipelineStripProps> = ({ queries })
             const { x, y } = nodePos(g, i);
             const populated = counts[i] > 0;
             return (
-              <div key={i} className={`hf-node${populated ? "" : " empty"}`} style={{ position: "absolute", left: x - R, top: y - R, width: DOT, height: DOT, zIndex: 3 }}>
+              <div key={i} className={`hf-node${populated ? "" : " empty"}`} style={{ position: "absolute", left: x - R, top: y - R, width: DOT, height: DOT, zIndex: 2 }}>
                 {populated ? (
                   <span className="hf-dotwrap">
                     <StatusDot status={s.status} size={DOT} />
                   </span>
                 ) : (
-                  // Zero-state shows ghosts quietly (no .hf-ghost hide class); the tour keeps it.
-                  <StatusDot status={s.status} size={DOT} ghost className={isZero ? undefined : "hf-ghost"} />
+                  // Always-on at the faint rest state; blooms to full as the pulse passes.
+                  <StatusDot status={s.status} size={DOT} ghost className="hf-ghost" />
                 )}
                 {!isZero && (
                   <span className="hf-capt" style={captStyle(i, populated)}>
