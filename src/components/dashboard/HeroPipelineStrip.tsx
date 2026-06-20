@@ -2,24 +2,24 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Hero pipeline strip — the animated AGGREGATE querying tour in the dashboard hero (the slot
- * the author quote used to occupy). One row sums every query across every manuscript, drawn as
- * a left-anchored SPINE of the five active stages (Queried → Full Sent) that FORKS at the end
- * into the two terminal outcomes — Offer (upper) and Closed (lower). A travelling pulse rides
- * the (invisible) spine, dwelling on populated stages and blooming zero stages in passing; at
- * the fork it splits into two pulses that travel to the terminals simultaneously. Behaviour /
- * geometry match scriptally-journey-hero-fork-v2.html (motion from scriptally-pipeline-tour-v6).
+ * Hero pipeline strip — the animated AGGREGATE querying tour in the dashboard hero (the slot the
+ * author quote used to occupy). One left-anchored SINGLE ROW of seven statuses (no fork), summing
+ * every query across every manuscript. A travelling pulse rides the row left→right along an
+ * invisible line, dwelling on populated stages and blooming zero stages in passing. Behaviour /
+ * geometry match scriptally-journey-hero-flat.html (motion from scriptally-pipeline-tour-v6).
  *
- * v2 traits: large ~38px canonical StatusDots; NO connector track (no lines, no junction dot —
- * the fork is conveyed by placement + the pulse split); every stage is always-on — populated at
- * full strength, zero-count at 20% opacity blooming to full as the pulse passes (no hidden ghost).
+ * Traits: large ~38px canonical StatusDots; NO connector track (nothing joins the nodes); every
+ * stage always-on — populated at full strength, zero-count at 20% opacity blooming to full as the
+ * pulse passes (no hidden ghost).
  *
- * The column → QueryStatus mapping is reused verbatim from the removed PipelinePanel — Closed
- * aggregates Rejected / Withdrawn / No Response / Revise & Resubmit (R&R is NOT a visible stage;
- * the parked R&R-in-Closed behaviour is preserved as-is, not corrected here).
+ * Row order: Queried · Rejected · Partial Requested · Partial Sent · Full Requested · Full Sent ·
+ * Offer. The mapping is reused verbatim from the old PipelinePanel — the "Rejected" node is the
+ * old Closed aggregate, just relabelled and moved to position 2; it still counts Rejected +
+ * Withdrawn + No Response + Revise & Resubmit (R&R is NOT a visible stage; the parked
+ * R&R-in-Closed behaviour is preserved as-is, not corrected here).
  *
- * Fully disabled under prefers-reduced-motion (static, legible spine+fork; zeros stay faint).
- * Zero-state (0 queries) renders a quiet spine+fork with every icon at the faint rest opacity.
+ * Disabled under prefers-reduced-motion (static row; zeros stay faint). Zero-state (0 queries)
+ * renders a quiet row with every icon at the faint rest opacity, no tour, no captions.
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Query, QueryStatus } from "../../types";
@@ -34,33 +34,33 @@ interface Stage {
   plur: string;
 }
 
-/* Five spine stages + two terminals. Mapping reused verbatim from the old PipelinePanel —
-   Closed aggregates four states (incl. R&R, which is not a visible stage here). */
+/* Seven nodes, single row. Mapping reused verbatim from the old PipelinePanel; the closed
+   aggregate is relabelled "Rejected" and moved to position 2 (it still folds in R&R). */
 const STAGES: Stage[] = [
   { status: QueryStatus.QUERIED, agg: [QueryStatus.QUERIED], sing: "queried", plur: "queried" },
+  {
+    status: QueryStatus.REJECTED, // the closed-states aggregate, relabelled + repositioned
+    agg: [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE, QueryStatus.REVISE_RESUBMIT],
+    sing: "rejected",
+    plur: "rejected",
+  },
   { status: QueryStatus.PARTIAL_REQUESTED, agg: [QueryStatus.PARTIAL_REQUESTED], sing: "partial requested", plur: "partials requested" },
   { status: QueryStatus.PARTIAL_SENT, agg: [QueryStatus.PARTIAL_SENT], sing: "partial sent", plur: "partials sent" },
   { status: QueryStatus.FULL_REQUESTED, agg: [QueryStatus.FULL_REQUESTED], sing: "full requested", plur: "fulls requested" },
   { status: QueryStatus.FULL_SENT, agg: [QueryStatus.FULL_SENT], sing: "full sent", plur: "fulls sent" },
-  { status: QueryStatus.OFFER, agg: [QueryStatus.OFFER], sing: "offer", plur: "offers" }, // terminal: upper
-  {
-    status: QueryStatus.REJECTED, // terminal: lower
-    agg: [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE, QueryStatus.REVISE_RESUBMIT],
-    sing: "closed",
-    plur: "closed",
-  },
+  { status: QueryStatus.OFFER, agg: [QueryStatus.OFFER], sing: "offer", plur: "offers" },
 ];
-const OFFER = 5;
-const CLOSED = 6;
+const N = STAGES.length; // 7
+const LAST = N - 1;
 
-/** "queried"/"closed" never inflect; the others pluralise the leading noun at count !== 1. */
+/** "queried"/"rejected" never inflect; the others pluralise the leading noun at count !== 1. */
 const caption = (count: number, s: Stage) => `${count} ${count === 1 ? s.sing : s.plur}`;
 
 // Timing — matches the sketch.
 const DWELL = 2100;
 const GAP = 320;
 const REST = 1700;
-const GLIDE_PER_COL = 1300; // ms per spine step (speed = step / 1300)
+const GLIDE_PER_COL = 1300; // ms per step (speed = step / 1300)
 const PEEK_BEFORE = 650; // begin zero-stage bloom this long before the pulse passes
 const PEEK_AFTER = 520; // linger this long after passing, then ease back to rest
 
@@ -68,30 +68,10 @@ const PEEK_AFTER = 520; // linger this long after passing, then ease back to res
 const DOT = 38; // large icon (~2× the usual StatusDot)
 const R = DOT / 2;
 const CGAP = 10; // dot → caption gap
-const PAD_L = 20; // first spine node centre x (its dot's left edge ≈ hero content-left)
-const SPINE_END = 0.58; // last spine node at 0.58·W
-const TERM = 0.87; // terminals at 0.87·W
-const SPLAY = 26; // terminal vertical offset from the spine
-const SPINE_Y = 66;
-const H = 150; // taller block: large icons + caption reserve above Offer / below Closed
-
-interface Geom {
-  xs: number[]; // 5 spine node centre x's
-  xf: number; // fork point x (where the spine pulse hands off)
-  offer: { x: number; y: number };
-  closed: { x: number; y: number };
-  step: number; // spine column spacing
-}
-const geomFor = (W: number): Geom | null => {
-  if (!W) return null;
-  const xs = [0, 1, 2, 3, 4].map((i) => PAD_L + (SPINE_END * W - PAD_L) * (i / 4));
-  const xt = TERM * W;
-  return { xs, xf: 0.7 * W, offer: { x: xt, y: SPINE_Y - SPLAY }, closed: { x: xt, y: SPINE_Y + SPLAY }, step: xs[1] - xs[0] };
-};
-
-/** Node centre (x, y) for each stage index. */
-const nodePos = (g: Geom, i: number): { x: number; y: number } =>
-  i < 5 ? { x: g.xs[i], y: SPINE_Y } : i === OFFER ? g.offer : g.closed;
+const PAD_L = 20; // first node centre x (its dot's left edge ≈ hero content-left)
+const PAD_R = 24; // last node centre at W − 24
+const SPINE_Y = 22; // single-row baseline (dots near the top, captions below)
+const H = 66; // single-row block: dot + caption reserve only
 
 const captBase: React.CSSProperties = {
   position: "absolute",
@@ -101,14 +81,13 @@ const captBase: React.CSSProperties = {
   textTransform: "uppercase",
   whiteSpace: "nowrap",
 };
-/** Caption placement relative to the node box (DOT×DOT): Queried left-aligned under its dot,
- *  spine middles centred, terminals right-aligned (Offer above, Closed below). */
+/** Caption relative to the node box (DOT×DOT), always below: Queried left-aligned (no overhang),
+ *  Offer (last) right-aligned, the rest centred. */
 const captStyle = (i: number, populated: boolean): React.CSSProperties => {
   const color = populated ? burgundy : "#aaa093";
   if (i === 0) return { ...captBase, color, left: 0, top: DOT + CGAP, textAlign: "left" };
-  if (i < 5) return { ...captBase, color, left: R, top: DOT + CGAP, transform: "translateX(-50%)", textAlign: "center" };
-  if (i === OFFER) return { ...captBase, color, right: 0, bottom: DOT + CGAP, textAlign: "right" };
-  return { ...captBase, color, right: 0, top: DOT + CGAP, textAlign: "right" }; // Closed
+  if (i === LAST) return { ...captBase, color, right: 0, top: DOT + CGAP, textAlign: "right" };
+  return { ...captBase, color, left: R, top: DOT + CGAP, transform: "translateX(-50%)", textAlign: "center" };
 };
 
 export interface HeroPipelineStripProps {
@@ -137,26 +116,28 @@ export const HeroPipelineStrip: React.FC<HeroPipelineStripProps> = ({ queries })
     return () => ro.disconnect();
   }, []);
 
-  const g = useMemo(() => geomFor(W), [W]);
+  // Node centre x's: seven evenly from PAD_L to W − PAD_R.
+  const xs = useMemo(() => {
+    if (!W) return null;
+    return STAGES.map((_, i) => PAD_L + (W - PAD_R - PAD_L) * (i / LAST));
+  }, [W]);
 
   useEffect(() => {
-    if (isZero || !g) return; // zero-state: quiet faint spine+fork, no tour
+    if (isZero || !xs) return; // zero-state: quiet faint row, no tour
     const box = boxRef.current;
     if (!box) return;
     const nodes = Array.from(box.querySelectorAll<HTMLElement>(".hf-node"));
-    if (nodes.length < 7) return;
+    if (nodes.length < N) return;
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) {
-      // Static legible version: show every caption; zeros stay at the 20% rest opacity.
+      // Static legible row: show every caption; zeros stay at the 20% rest opacity.
       nodes.forEach((node) => node.classList.add("show"));
       return;
     }
 
-    const spineP = box.querySelector<HTMLElement>(".hf-pulse.spine");
-    const offerP = box.querySelector<HTMLElement>(".hf-pulse.offer");
-    const closedP = box.querySelector<HTMLElement>(".hf-pulse.closed");
-    if (!spineP || !offerP || !closedP) return;
+    const pulse = box.querySelector<HTMLElement>(".hf-pulse");
+    if (!pulse) return;
 
     let cancelled = false;
     let visible = true;
@@ -185,29 +166,27 @@ export const HeroPipelineStrip: React.FC<HeroPipelineStripProps> = ({ queries })
     io.observe(box);
 
     // Pulse positioning via transform (centres the 9px dot on x,y).
-    const place = (el: HTMLElement, x: number, y: number) => {
-      el.style.transition = "none";
-      el.style.transform = `translate(${x - 4.5}px, ${y - 4.5}px)`;
-      void el.offsetWidth;
-      el.style.transition = "";
+    const place = (x: number, y: number) => {
+      pulse.style.transition = "none";
+      pulse.style.transform = `translate(${x - 4.5}px, ${y - 4.5}px)`;
+      void pulse.offsetWidth;
+      pulse.style.transition = "";
     };
-    const move = (el: HTMLElement, x: number, y: number, dur: number) => {
-      el.style.transition = `transform ${dur}ms linear, opacity 0.4s`;
-      el.style.transform = `translate(${x - 4.5}px, ${y - 4.5}px)`;
+    const move = (x: number, y: number, dur: number) => {
+      pulse.style.transition = `transform ${dur}ms linear, opacity 0.4s`;
+      pulse.style.transform = `translate(${x - 4.5}px, ${y - 4.5}px)`;
     };
-    const show = (el: HTMLElement) => { el.style.opacity = "1"; };
-    const hide = (el: HTMLElement) => { el.style.opacity = "0"; };
 
-    const speed = g.step / GLIDE_PER_COL; // px per ms
+    const speed = (xs[1] - xs[0]) / GLIDE_PER_COL; // px per ms
 
-    // Glide the spine pulse, blooming any zero spine nodes it passes.
-    const glideSpine = async (fromX: number, toX: number) => {
+    // Glide the pulse horizontally, blooming any zero nodes it passes.
+    const glide = async (fromX: number, toX: number) => {
       const dist = toX - fromX;
       if (dist <= 1) return;
       const dur = dist / speed;
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < N; i++) {
         if (counts[i] !== 0) continue;
-        const xc = g.xs[i];
+        const xc = xs[i];
         if (xc > fromX + 1 && xc <= toX + 1) {
           const t = (xc - fromX) / speed;
           const a = setTimeout(() => { timers.delete(a); nodes[i].classList.add("peek"); }, Math.max(0, t - PEEK_BEFORE));
@@ -215,9 +194,9 @@ export const HeroPipelineStrip: React.FC<HeroPipelineStripProps> = ({ queries })
           timers.add(a); timers.add(b);
         }
       }
-      move(spineP, toX, SPINE_Y, dur);
+      move(toX, SPINE_Y, dur);
       await wait(dur);
-      for (let i = 0; i < 5; i++) if (counts[i] === 0) nodes[i].classList.remove("peek");
+      for (let i = 0; i < N; i++) if (counts[i] === 0) nodes[i].classList.remove("peek");
     };
 
     const dwell = async (i: number) => {
@@ -229,67 +208,36 @@ export const HeroPipelineStrip: React.FC<HeroPipelineStripProps> = ({ queries })
       await wait(GAP);
     };
 
-    const resolveTerminal = (i: number) => {
-      if (counts[i] > 0) {
-        const wrap = nodes[i].querySelector<HTMLElement>(".hf-dotwrap");
-        if (wrap) { wrap.classList.remove("pulsing"); void wrap.offsetWidth; wrap.classList.add("pulsing"); }
-        nodes[i].classList.add("show");
-      } else {
-        nodes[i].classList.add("peek"); // bloom faint icon to full + greyed "0 …" caption
-      }
-    };
-    const clearTerminal = (i: number) => {
-      nodes[i].classList.remove("show");
-      nodes[i].classList.remove("peek");
-    };
-
-    const branchLen = Math.hypot(g.offer.x - g.xf, SPLAY);
-    const branchDur = branchLen / speed;
-    const startX = g.xs[0] - g.step / 2;
+    const step = xs[1] - xs[0];
+    const startX = xs[0] - step / 2;
+    const endX = xs[LAST] + step / 2; // glide off the right edge
 
     (async () => {
       while (!cancelled) {
         await waitVisible();
         if (cancelled) break;
-        if (g.step <= 0) { await wait(200); continue; }
+        if (step <= 0) { await wait(200); continue; }
 
-        hide(spineP); hide(offerP); hide(closedP);
-        place(spineP, startX, SPINE_Y);
+        pulse.style.opacity = "0";
+        place(startX, SPINE_Y);
         await wait(700);
         if (cancelled) break;
-        show(spineP);
+        pulse.style.opacity = "1";
         await wait(300);
 
-        // Spine: stop on populated stages (dwell); zeros bloom as the pulse passes.
+        // Stop on populated stages (dwell); zeros bloom as the pulse passes.
         let cur = startX;
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < N; i++) {
           if (counts[i] === 0) continue;
-          await glideSpine(cur, g.xs[i]);
-          cur = g.xs[i];
+          await glide(cur, xs[i]);
+          cur = xs[i];
           if (cancelled) break;
           await dwell(i);
           if (cancelled) break;
         }
         if (cancelled) break;
-        await glideSpine(cur, g.xf); // reach the fork (blooms any trailing zero spine nodes)
-        hide(spineP);
-
-        // Fork: split into two pulses travelling to both terminals at once.
-        place(offerP, g.xf, SPINE_Y); place(closedP, g.xf, SPINE_Y);
-        show(offerP); show(closedP);
-        move(offerP, g.offer.x, g.offer.y, branchDur);
-        move(closedP, g.closed.x, g.closed.y, branchDur);
-        await wait(branchDur);
-        if (cancelled) break;
-
-        resolveTerminal(OFFER); resolveTerminal(CLOSED);
-        if (counts[OFFER] === 0) hide(offerP);
-        if (counts[CLOSED] === 0) hide(closedP);
-        await wait(DWELL);
-        clearTerminal(OFFER); clearTerminal(CLOSED);
-        hide(offerP); hide(closedP);
-
-        await wait(GAP);
+        await glide(cur, endX); // glide off the right, blooming any trailing zero (e.g. Offer)
+        pulse.style.opacity = "0";
         await wait(REST);
       }
     })();
@@ -305,21 +253,15 @@ export const HeroPipelineStrip: React.FC<HeroPipelineStripProps> = ({ queries })
 
   return (
     <div className="hero-fork" style={{ width: "100%", maxWidth: 780, position: "relative", height: H }} ref={boxRef}>
-      {g && (
+      {xs && (
         <>
-          {!isZero && (
-            <>
-              <div className="hf-pulse spine" />
-              <div className="hf-pulse offer" />
-              <div className="hf-pulse closed" />
-            </>
-          )}
+          {!isZero && <div className="hf-pulse" />}
 
           {STAGES.map((s, i) => {
-            const { x, y } = nodePos(g, i);
+            const x = xs[i];
             const populated = counts[i] > 0;
             return (
-              <div key={i} className={`hf-node${populated ? "" : " empty"}`} style={{ position: "absolute", left: x - R, top: y - R, width: DOT, height: DOT, zIndex: 2 }}>
+              <div key={i} className={`hf-node${populated ? "" : " empty"}`} style={{ position: "absolute", left: x - R, top: SPINE_Y - R, width: DOT, height: DOT, zIndex: 2 }}>
                 {populated ? (
                   <span className="hf-dotwrap">
                     <StatusDot status={s.status} size={DOT} />

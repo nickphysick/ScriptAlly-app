@@ -2,9 +2,10 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Dashboard hero — parchment MountCard with the serif greeting, rotating quote, action
- * buttons and the line-SVG paper-plane corner motif. (The date / day-of-journey caption
- * was dropped in the June 2026 refinement.)
+ * Dashboard hero — parchment MountCard with the serif greeting, the aggregate querying
+ * pipeline strip (HeroPipelineStrip, in the old author-quote slot), the action buttons, and
+ * the three-planes artwork on the right. (The date / day-of-journey caption was dropped in
+ * the June 2026 refinement; the single line-SVG paper plane was replaced by the artwork.)
  */
 import React from "react";
 import { Send, UserPlus, BookOpen, CornerUpLeft } from "lucide-react";
@@ -99,25 +100,16 @@ export const GhostButton: React.FC<{
   </button>
 );
 
-/** Inline line-SVG paper plane in brand colours with a dashed flight path. */
-const PlaneMotif: React.FC = () => (
-  <svg
-    width="200"
-    height="160"
-    viewBox="0 0 200 160"
+/** Three-planes hero artwork — right-hand side, vertically centred at 50% of the hero's
+ *  (content-driven) height. The wrapper resolves "50%" against the auto-height card via
+ *  top/bottom:25%, and the image fills that height keeping its aspect ratio. Decorative. */
+const PlanesArt: React.FC = () => (
+  <div
     aria-hidden="true"
-    style={{ position: "absolute", right: 14, bottom: 6, zIndex: 1, opacity: 0.85, pointerEvents: "none" }}
+    style={{ position: "absolute", top: "25%", bottom: "25%", right: 24, zIndex: 1, pointerEvents: "none" }}
   >
-    <path d="M30 110 C 60 80, 110 60, 168 38" fill="none" stroke="#c9a89e" strokeWidth="1.2" strokeDasharray="3 5" />
-    <g transform="translate(150,22) rotate(18)">
-      <path d="M0 16 L44 0 L18 30 Z" fill="#f5e2da" stroke="#7c3a2a" strokeWidth="1.4" strokeLinejoin="round" />
-      <path d="M0 16 L18 30 L16 42 L22 27" fill="#efd5ca" stroke="#7c3a2a" strokeWidth="1.4" strokeLinejoin="round" />
-      <path d="M44 0 L18 30" fill="none" stroke="#7c3a2a" strokeWidth="1.4" />
-    </g>
-    <circle cx="52" cy="96" r="2" fill="#c9a89e" />
-    <circle cx="92" cy="74" r="2" fill="#c9a89e" />
-    <circle cx="130" cy="56" r="2" fill="#c9a89e" />
-  </svg>
+    <img src="/Sent_queries_final.png" alt="" style={{ height: "100%", width: "auto", display: "block", objectFit: "contain" }} />
+  </div>
 );
 
 export interface HeroCardProps {
@@ -149,16 +141,16 @@ export const HeroCard: React.FC<HeroCardProps> = ({
         <div style={{ position: "relative", zIndex: 4, maxWidth: 780 }}>
           <div style={{ fontFamily: FONT_SERIF, fontSize: 38, fontWeight: 500, color: headingInk, lineHeight: 1.1 }}>
             {hasJourney ? (
-              <>This is your journey so far, <em style={{ color: burgundy, fontStyle: "italic" }}>{firstName}</em>…</>
+              <>Your journey so far, <em style={{ color: burgundy, fontStyle: "italic" }}>{firstName}</em>…</>
             ) : (
               <>Your journey starts here, <em style={{ color: burgundy, fontStyle: "italic" }}>{firstName}</em></>
             )}
           </div>
 
-          {/* Aggregate querying pipeline — the animated tour, in the old author-quote slot.
-              §7 spacing: equal margins above (heading → dots) and below (caption reserve →
+          {/* Aggregate querying pipeline — the animated single-row tour, in the old quote slot.
+              §8 spacing: equal margins above (heading → row) and below (caption reserve →
               buttons) so the strip reads as deliberately centred between them. */}
-          <div style={{ margin: "24px 0" }}>
+          <div style={{ margin: "22px 0" }}>
             <HeroPipelineStrip queries={queries} />
           </div>
 
@@ -185,7 +177,7 @@ export const HeroCard: React.FC<HeroCardProps> = ({
           </div>
         </div>
 
-        <PlaneMotif />
+        <PlanesArt />
       </div>
     </MountCard>
   );
