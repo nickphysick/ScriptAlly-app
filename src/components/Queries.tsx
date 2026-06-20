@@ -1745,7 +1745,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         <div style={{ padding: "20px 22px 16px", flexShrink: 0 }}>
           <div>
             <span style={{ fontFamily: FONT_SERIF, fontSize: 27, fontWeight: 600, color: "#2e3a2c", lineHeight: 1.2 }}>
-              Agent{" "}
+              Query{" "}
             </span>
             <span style={{ fontFamily: FONT_SERIF, fontSize: 27, fontWeight: 600, color: burgundy, lineHeight: 1.2 }}>
               database
@@ -3123,7 +3123,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
                         return (
                           <div className="flex flex-col p-3.5 bg-[#FAF8F5] rounded-xl border border-[#ebd8c5]/40" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
-                            <div ref={chatContainerRef} className="flex flex-col space-y-2 pr-1" style={{ backgroundColor: "transparent", flex: 1, overflowY: "auto", minHeight: 0 }}>
+                            <div ref={chatContainerRef} className="flex flex-col space-y-2 pr-1" style={{ backgroundColor: "transparent", flex: 1, overflowY: "auto", minHeight: 0, paddingBottom: 12 }}>
                               {activeJournalEntries.map((entry, index) => {
                                 const isEditing = editingJournalId === entry.id;
                                 return (
