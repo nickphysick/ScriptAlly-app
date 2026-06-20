@@ -1478,7 +1478,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   return (
     <div 
       className="w-full flex flex-col overflow-hidden text-[#3a1c14] font-sans relative queries-container-theme"
-      style={{ minHeight: "calc(100vh - 36px)", backgroundColor: "#ffffff" }}
+      style={{ height: "calc(100vh - 36px)", backgroundColor: "#ffffff" }}
     >
       <style>{`
         .custom-query-list-scrollbar::-webkit-scrollbar {
@@ -1610,6 +1610,18 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         }
         .queries-cursor-blink {
           animation: queriesCursorBlink 1s steps(1, end) infinite;
+        }
+        /* Short-screen fallback: below 620px viewport height, release fixed shell */
+        @media (max-height: 620px) {
+          .queries-container-theme {
+            height: auto !important;
+            min-height: 100vh !important;
+            overflow: auto !important;
+            overflow-y: auto !important;
+          }
+          .queries-content-grid {
+            min-height: 560px;
+          }
         }
       `}</style>
 
@@ -1761,7 +1773,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         <div style={{ height: 1, margin: "10px 14px", background: "rgba(124,58,42,0.10)" }} />
 
         {/* Scrollable filter region */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "0 14px 12px" }} className="custom-query-list-scrollbar">
+        <div style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "0 14px 12px" }} className="custom-query-list-scrollbar">
 
           {/* "All queries" pinned row */}
           <button
@@ -2011,8 +2023,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
       {/* MAIN CONTENT — offset by sidebar width; control bar then two-column content grid */}
       <div
-        className="flex-grow w-full"
-        style={{ paddingLeft: 262, background: "#ffffff", minHeight: "calc(100vh - 36px)" }}
+        className="w-full"
+        style={{ paddingLeft: 262, background: "#ffffff", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}
         id="queries-main-panel-container"
       >
 
@@ -2343,7 +2355,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             : { kind: "record" as const, label: "Record response", ballHolder: null as null };
           const hasActive = !!(activeQuery && activeAgent && activeMs);
           return (
-            <div style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 16, padding: "11px 16px", background: parchment, border: "1px solid rgba(90,55,42,.14)", borderRadius: 14, boxShadow: "0 2px 12px rgba(40,22,14,.07)", margin: "18px 22px 16px", alignItems: "center" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 16, padding: "11px 16px", background: parchment, border: "1px solid rgba(90,55,42,.14)", borderRadius: 14, boxShadow: "0 2px 12px rgba(40,22,14,.07)", margin: "18px 22px 16px", alignItems: "center", flexShrink: 0 }}>
               {/* Left zone: search input */}
               <div style={{ position: "relative" }}>
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400 pointer-events-none" />
@@ -2438,14 +2450,14 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         </AnimatePresence>
 
         {/* ── Content grid: 360px list + 1fr reading pane ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 16, padding: "0 22px 80px", alignItems: "start" }}>
+        <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 16, padding: "0 22px 16px", alignItems: "stretch", flex: 1, minHeight: 0 }}>
 
           {/* List card — outer rim + inner bordered frame */}
-          <div style={{ border: "1px solid rgba(90,55,42,.16)", borderRadius: 14, background: parchment, backgroundImage: PAPER_TEXTURE, padding: 7, boxShadow: "0 1px 3px rgba(40,22,14,.05), 0 7px 20px rgba(40,22,14,.07)" }}>
-            <div style={{ border: "1px solid rgba(124,58,42,.22)", borderRadius: 8, overflow: "hidden", background: parchment }}>
+          <div style={{ border: "1px solid rgba(90,55,42,.16)", borderRadius: 14, background: parchment, backgroundImage: PAPER_TEXTURE, padding: 7, boxShadow: "0 1px 3px rgba(40,22,14,.05), 0 7px 20px rgba(40,22,14,.07)", minHeight: 0, display: "flex", flexDirection: "column" }}>
+            <div style={{ border: "1px solid rgba(124,58,42,.22)", borderRadius: 8, overflow: "hidden", background: parchment, flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
 
               {/* List head row */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "15px 16px 13px", borderBottom: "1px solid #ece0d2" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "15px 16px 13px", borderBottom: "1px solid #ece0d2", flexShrink: 0 }}>
                 <span style={{ fontFamily: FONT_SERIF, fontSize: 16, fontWeight: 600, color: "#2e3a2c" }}>
                   {sortedList.length} {sortedList.length === 1 ? "query" : "queries"}
                 </span>
@@ -2459,8 +2471,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
               </div>
 
               {/* Rows container — 9px padding so row backgrounds stay inside the inner frame border */}
-              <div style={{ padding: 9 }}>
-                <div className="custom-query-list-scrollbar divide-y divide-[#ece0d2]/80">
+              <div style={{ padding: 9, flex: 1, minHeight: 0, overflowY: "auto" }} className="custom-query-list-scrollbar">
+                <div className="divide-y divide-[#ece0d2]/80">
             {(() => {
               const statusOrder = [
                 QueryStatus.QUERIED,
@@ -2714,8 +2726,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           </div>{/* closes outer rim — list card */}
 
           {/* Reading pane card — 3px burgundy top accent via border-top on inner frame */}
-          <div style={{ border: "1px solid rgba(90,55,42,.16)", borderRadius: 14, background: parchment, backgroundImage: PAPER_TEXTURE, padding: 7, boxShadow: "0 1px 3px rgba(40,22,14,.05), 0 7px 20px rgba(40,22,14,.07)" }}>
-            <div style={{ borderLeft: "1px solid rgba(124,58,42,.22)", borderRight: "1px solid rgba(124,58,42,.22)", borderBottom: "1px solid rgba(124,58,42,.22)", borderTop: "3px solid #7c3a2a", borderRadius: 8, overflow: "hidden", background: parchment }}>
+          <div style={{ border: "1px solid rgba(90,55,42,.16)", borderRadius: 14, background: parchment, backgroundImage: PAPER_TEXTURE, padding: 7, boxShadow: "0 1px 3px rgba(40,22,14,.05), 0 7px 20px rgba(40,22,14,.07)", minHeight: 0, display: "flex", flexDirection: "column" }}>
+            <div style={{ borderLeft: "1px solid rgba(124,58,42,.22)", borderRight: "1px solid rgba(124,58,42,.22)", borderBottom: "1px solid rgba(124,58,42,.22)", borderTop: "3px solid #7c3a2a", borderRadius: 8, overflow: "hidden", background: parchment, flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
             {activeQuery && activeAgent && activeMs ? (
               <>
                 {/* Masthead — statusrow (seal+status LEFT, whose-turn RIGHT) + centred mhead */}
@@ -2728,7 +2740,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     : paneAction.ballHolder === "agent" ? `waiting on ${agentFirstName}…`
                     : null;
                   return (
-                    <div style={{ display: "grid", gridTemplateColumns: "200px 1fr 200px", gap: 16, alignItems: "start", padding: "22px 26px 20px", background: "linear-gradient(180deg,#faece4 0%,rgba(250,236,228,0) 100%)" }}>
+                    <div style={{ display: "grid", gridTemplateColumns: "200px 1fr 200px", gap: 16, alignItems: "start", padding: "22px 26px 20px", background: "linear-gradient(180deg,#faece4 0%,rgba(250,236,228,0) 100%)", flexShrink: 0 }}>
                       {/* LEFT: seal + status label */}
                       <div style={{ display: "flex", alignItems: "center", gap: 13, paddingTop: 6 }}>
                         <div style={{ width: 48, height: 48, borderRadius: "50%", background: "radial-gradient(circle at 35% 30%,#fbeee6,#f1d4c6)", border: "1.5px solid rgba(124,58,42,0.7)", boxShadow: "inset 0 1px 3px rgba(124,58,42,.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -2800,16 +2812,18 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 })()}
 
                 {/* Sub-cards row */}
-                <div style={{ display: "flex", gap: 14, padding: "6px 22px 26px", alignItems: "stretch" }}>
+                <div style={{ display: "flex", gap: 14, padding: "6px 22px 14px", alignItems: "stretch", flex: 1, minHeight: 0 }}>
 
                   {/* ── Sub-card 1: Tracking ── */}
-                  <div style={{ flex: 1, border: "1px solid rgba(124,58,42,.16)", borderRadius: 12, background: "#fffefb", padding: "18px 18px 20px", display: "flex", flexDirection: "column", boxShadow: "0 1px 2px rgba(40,22,14,.03)", minWidth: 0 }}>
+                  <div style={{ flex: 1, border: "1px solid rgba(124,58,42,.16)", borderRadius: 12, background: "#fffefb", padding: "18px 18px 20px", display: "flex", flexDirection: "column", boxShadow: "0 1px 2px rgba(40,22,14,.03)", minWidth: 0, minHeight: 0 }}>
                       {/* Running head */}
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 18 }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 18, flexShrink: 0 }}>
                         <div style={{ height: 1, width: 22, background: "rgba(124,58,42,.3)" }} />
                         <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, textTransform: "uppercase" as const, letterSpacing: ".16em", color: "#2e3a2c" }}>Tracking</span>
                         <div style={{ height: 1, width: 22, background: "rgba(124,58,42,.3)" }} />
                       </div>
+                      {/* Scrollable body: timeline + action required */}
+                      <div style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
                       {/* Timeline (same logic as before) */}
                       {(() => {
                         const validEnumValues = Object.values(QueryStatus);
@@ -2940,18 +2954,19 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           </div>
                         </div>
                       )}
+                      </div>{/* end scrollable tracking body */}
                     </div>{/* ── end sub-card 1: Tracking ── */}
 
                   {/* ── Sub-card 2: What you sent ── */}
-                  <div style={{ flex: 1, border: "1px solid rgba(124,58,42,.16)", borderRadius: 12, background: "#fffefb", padding: "18px 18px 20px", display: "flex", flexDirection: "column", boxShadow: "0 1px 2px rgba(40,22,14,.03)", minWidth: 0 }}>
+                  <div style={{ flex: 1, border: "1px solid rgba(124,58,42,.16)", borderRadius: 12, background: "#fffefb", padding: "18px 18px 20px", display: "flex", flexDirection: "column", boxShadow: "0 1px 2px rgba(40,22,14,.03)", minWidth: 0, minHeight: 0 }}>
                       {/* Running head */}
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 18 }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 18, flexShrink: 0 }}>
                         <div style={{ height: 1, width: 22, background: "rgba(124,58,42,.3)" }} />
                         <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, textTransform: "uppercase" as const, letterSpacing: ".16em", color: "#2e3a2c" }}>What you sent</span>
                         <div style={{ height: 1, width: 22, background: "rgba(124,58,42,.3)" }} />
                       </div>
                       {/* Content area */}
-                      <div style={{ flex: 1 }}>
+                      <div style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
                         {isEditMode ? (
                           <div className="space-y-4 text-xs">
                             <div>
@@ -3094,9 +3109,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     </div>{/* ── end sub-card 2: What you sent ── */}
 
                   {/* ── Sub-card 3: Notes — journal pins to bottom via flex-1 on messages area ── */}
-                  <div style={{ flex: 1, border: "1px solid rgba(124,58,42,.16)", borderRadius: 12, background: "#fffefb", padding: "18px 18px 20px", display: "flex", flexDirection: "column", boxShadow: "0 1px 2px rgba(40,22,14,.03)", minWidth: 0 }}>
+                  <div style={{ flex: 1, border: "1px solid rgba(124,58,42,.16)", borderRadius: 12, background: "#fffefb", padding: "18px 18px 20px", display: "flex", flexDirection: "column", boxShadow: "0 1px 2px rgba(40,22,14,.03)", minWidth: 0, minHeight: 0 }}>
                       {/* Running head */}
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 18 }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 18, flexShrink: 0 }}>
                         <div style={{ height: 1, width: 22, background: "rgba(124,58,42,.3)" }} />
                         <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, textTransform: "uppercase" as const, letterSpacing: ".16em", color: "#2e3a2c" }}>Notes</span>
                         <div style={{ height: 1, width: 22, background: "rgba(124,58,42,.3)" }} />
@@ -3107,7 +3122,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           .filter(entry => entry.queryId === activeQuery.id)
                           .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
                         return (
-                          <div className="flex flex-col p-3.5 bg-[#FAF8F5] rounded-xl border border-[#ebd8c5]/40" style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+                          <div className="flex flex-col p-3.5 bg-[#FAF8F5] rounded-xl border border-[#ebd8c5]/40" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
                             <div ref={chatContainerRef} className="flex flex-col space-y-2 pr-1" style={{ backgroundColor: "transparent", flex: 1, overflowY: "auto", minHeight: 0 }}>
                               {activeJournalEntries.map((entry, index) => {
                                 const isEditing = editingJournalId === entry.id;
