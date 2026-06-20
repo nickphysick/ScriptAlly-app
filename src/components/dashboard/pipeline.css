@@ -2,11 +2,12 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Animated "Query pipeline" panel — the travelling-light tour. Ported from
- * scriptally-pipeline-tour-v6.html. Scoped under .sa-pipeline so it can't leak.
- * Only animation mechanics live here (keyframes, transitions, hover, pulse) — colours,
- * fonts and sizes of the static structure are set inline in PipelinePanel.tsx (the
- * codebase's "critical styles inline, not Tailwind" convention).
+ * Animated querying-pipeline tour (the travelling-light motion). Ported from
+ * scriptally-pipeline-tour-v6.html and now used by the dashboard hero's aggregate strip.
+ * Scoped under .sa-pipeline so it can't leak. Only animation mechanics live here (keyframes,
+ * transitions, hover, pulse) — colours, fonts and sizes of the static structure are set
+ * inline in HeroPipelineStrip.tsx (the codebase's "critical styles inline, not Tailwind"
+ * convention).
  */
 
 .sa-pipeline .sa-prow { display: flex; align-items: center; padding: 16px 22px 40px; }

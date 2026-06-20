@@ -54,7 +54,6 @@ import { MountCard } from "./MountCard";
 import { HeroCard } from "./dashboard/HeroCard";
 import { OverToYou } from "./dashboard/OverToYou";
 import { StatCards } from "./dashboard/StatCards";
-import { PipelinePanel } from "./dashboard/PipelinePanel";
 import { FortnightInFocus } from "./dashboard/FortnightInFocus";
 import { replacePlaceholders, extractAgentFromText } from "../lib/activityUtils";
 import {
@@ -1653,7 +1652,7 @@ export const Dashboard: React.FC<{
             <div className="flex flex-col gap-[16px]">
               <HeroCard
                 firstName={getUserFirstName()}
-                quote={quote}
+                queries={queries}
                 onSendQuery={() => onNavigate("queries", "Send a query")}
                 onRecordResponse={() => setRecordResponseScreenOpen(true)}
                 onAddAgent={() => onNavigate("agents", "Add an agent")}
@@ -1918,8 +1917,9 @@ export const Dashboard: React.FC<{
               );
             }
 
-            // Standard layout: the animated "Query pipeline" panel (see PipelinePanel).
-            return <PipelinePanel manuscripts={manuscripts} queries={queries} />;
+            // Standard layout: the query pipeline moved up into the hero (HeroPipelineStrip),
+            // so nothing renders here. The magazine layout keeps its own pipeline matrix above.
+            return null;
           })()}
         </div>
 

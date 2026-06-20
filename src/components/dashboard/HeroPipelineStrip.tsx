@@ -2,38 +2,37 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Animated "Query pipeline" panel. Replaces the old sage-band + seven-column-label header
- * with a quiet always-on tour: a soft light drifts left→right across each manuscript's
- * status row, dwelling on populated stages (pulsing their StatusDots + naming the count)
- * and gliding through empty stages whose greyed "would-be" StatusDot + label bloom in
- * passing. Behaviour/timing match scriptally-pipeline-tour-v6.html.
+ * Hero pipeline strip — the animated AGGREGATE querying tour that lives in the dashboard hero
+ * (in the slot the author quote used to occupy). One row sums every query across every
+ * manuscript into seven stages; a single travelling pulse dwells on populated stages (pulsing
+ * the representative StatusDot and naming the count) and glides through empty stages whose
+ * muted ghost dot + greyed caption bloom as it passes. Behaviour/timing match
+ * scriptally-journey-hero-v6behaviour.html (derived from scriptally-pipeline-tour-v6.html);
+ * animation mechanics are reused from the shared pipeline.css (scoped under .sa-pipeline).
  *
- * Data is read-only: each stage's count comes from the manuscript's queries via the same
- * column→QueryStatus mapping the old panel used (Closed aggregates Rejected / Withdrawn /
- * No Response / Revise & Resubmit). The animation is pure DOM/CSS (no React re-renders per
- * frame); it pauses off-screen and is fully disabled under prefers-reduced-motion.
+ * The column → QueryStatus mapping is reused verbatim from the removed PipelinePanel — Closed
+ * aggregates Rejected / Withdrawn / No Response / Revise & Resubmit (the parked R&R-in-Closed
+ * behaviour is preserved as-is, not corrected here).
+ *
+ * One representative dot per stage (not a per-query cluster). Fully disabled under
+ * prefers-reduced-motion (static, legible row with every count shown). Zero-state (0 queries
+ * across the account) renders a quiet strip of seven visible ghost stages — no tour, no
+ * captions; the hero supplies the "your journey starts here" heading in that case.
  */
 import React, { useEffect, useMemo, useRef } from "react";
-import { Manuscript, Query, QueryStatus } from "../../types";
+import { Query, QueryStatus } from "../../types";
 import { StatusDot } from "../StatusDot";
-import {
-  parchment,
-  burgundy,
-  headingInk,
-  mutedInk,
-  FONT_SERIF,
-  FONT_MONO,
-} from "../../lib/designTokens";
+import { burgundy, FONT_MONO } from "../../lib/designTokens";
 import "./pipeline.css";
 
-/* Column model — order, the representative status for the ghost glyph, the aggregated
-   statuses counted in the column, and the caption nouns. Closed aggregates four states. */
 interface Stage {
-  status: QueryStatus; // representative status drawn as the empty-stage ghost
-  agg: QueryStatus[]; // statuses this column counts
+  status: QueryStatus; // representative status drawn as the stage's dot / empty ghost
+  agg: QueryStatus[]; // statuses this stage counts
   sing: string;
   plur: string;
 }
+
+/* Reused verbatim from the old PipelinePanel — Closed aggregates four states (incl. R&R). */
 const STAGES: Stage[] = [
   { status: QueryStatus.QUERIED, agg: [QueryStatus.QUERIED], sing: "queried", plur: "queried" },
   { status: QueryStatus.PARTIAL_REQUESTED, agg: [QueryStatus.PARTIAL_REQUESTED], sing: "partial requested", plur: "partials requested" },
@@ -49,15 +48,18 @@ const STAGES: Stage[] = [
   },
 ];
 
+/** "queried"/"closed" never inflect; the others pluralise the leading noun at count !== 1. */
 const caption = (count: number, s: Stage) => `${count} ${count === 1 ? s.sing : s.plur}`;
 
-// Timing — matches the sketch.
+// Timing — matches the sketch (and the old PipelinePanel).
 const DWELL = 2100;
 const GAP = 320;
 const REST = 1700;
-const GLIDE_PER_COL = 1300; // ms per column of travel (SPEED = columnSpacing / 1300)
+const GLIDE_PER_COL = 1300; // ms per column of travel (speed = columnSpacing / 1300)
 const PEEK_BEFORE = 650; // begin empty-stage bloom this long before the pulse arrives
 const PEEK_AFTER = 520; // linger this long after passing, then ease out
+
+const DOT = 18; // representative dot size (hero focal element)
 
 const captStyle: React.CSSProperties = {
   fontFamily: FONT_MONO,
@@ -66,18 +68,23 @@ const captStyle: React.CSSProperties = {
   textTransform: "uppercase",
 };
 
-const PipelineRow: React.FC<{ manuscript: Manuscript; queries: Query[] }> = ({ manuscript, queries }) => {
+export interface HeroPipelineStripProps {
+  queries: Query[];
+}
+
+export const HeroPipelineStrip: React.FC<HeroPipelineStripProps> = ({ queries }) => {
   const psRef = useRef<HTMLDivElement>(null);
 
-  // Per-stage query lists (populated cells render one real StatusDot per query).
-  const lists = useMemo(() => {
-    const mq = queries.filter((q) => q.manuscriptId === manuscript.id);
-    return STAGES.map((s) => mq.filter((q) => s.agg.includes(q.status)));
-  }, [queries, manuscript.id]);
-  const counts = lists.map((l) => l.length);
+  // Aggregate counts across the whole account (each query falls in exactly one stage).
+  const counts = useMemo(
+    () => STAGES.map((s) => queries.filter((q) => s.agg.includes(q.status)).length),
+    [queries]
+  );
+  const isZero = counts.reduce((a, b) => a + b, 0) === 0;
   const countsKey = counts.join(",");
 
   useEffect(() => {
+    if (isZero) return; // zero-state: quiet ghost strip, no tour
     const ps = psRef.current;
     if (!ps) return;
     const cells = Array.from(ps.querySelectorAll<HTMLElement>(".sa-cell"));
@@ -85,9 +92,10 @@ const PipelineRow: React.FC<{ manuscript: Manuscript; queries: Query[] }> = ({ m
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduce) {
-      // Static legible panel: populated captions always visible; empties stay hover-only.
+      // Static legible row: every count shown; empty stages reveal their ghost + "0 …" caption.
       cells.forEach((cell, i) => {
         if (counts[i] > 0) cell.querySelector(".sa-capt")?.classList.add("show");
+        else cell.classList.add("peek");
       });
       return;
     }
@@ -107,7 +115,7 @@ const PipelineRow: React.FC<{ manuscript: Manuscript; queries: Query[] }> = ({ m
     const waitVisible = () =>
       visible ? Promise.resolve() : new Promise<void>((res) => resumeWaiters.push(res));
 
-    // Pause the loop while the row is off-screen; resume on re-entry.
+    // Pause the loop while the hero is off-screen; resume on re-entry.
     const io = new IntersectionObserver(
       (entries) => {
         for (const e of entries) {
@@ -200,85 +208,39 @@ const PipelineRow: React.FC<{ manuscript: Manuscript; queries: Query[] }> = ({ m
       resumeWaiters = [];
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [countsKey]);
+  }, [countsKey, isZero]);
 
   return (
-    <div className="sa-prow">
-      <div className="sa-plabel">
-        <div className="truncate" style={{ fontFamily: FONT_SERIF, fontSize: 16, color: headingInk }} title={manuscript.title}>
-          {manuscript.title}
+    <div className="sa-pipeline" style={{ width: "100%", maxWidth: 780 }}>
+      {/* caption drop-zone reserved beneath the dots so fades never shift layout */}
+      <div style={{ paddingBottom: 30 }}>
+        <div ref={psRef} className="sa-pstatus" style={{ flex: "none" }}>
+          <div className="sa-track" />
+          {!isZero && <div className="sa-pulse" />}
+          {STAGES.map((s, i) => {
+            const c = counts[i];
+            const populated = c > 0;
+            return (
+              <div className={`sa-cell${populated ? "" : " empty"}`} key={i}>
+                {populated ? (
+                  <span className="sa-dotwrap">
+                    <StatusDot status={s.status} size={DOT} />
+                  </span>
+                ) : (
+                  // Zero-state shows the ghosts quietly (no .sa-ghost hide class); the tour
+                  // hides them until they bloom, so it keeps the class.
+                  <StatusDot status={s.status} size={DOT} ghost className={isZero ? undefined : "sa-ghost"} />
+                )}
+                {!isZero && (
+                  <span className="sa-capt" style={{ ...captStyle, color: populated ? burgundy : "#aaa093" }}>
+                    {caption(c, s)}
+                  </span>
+                )}
+              </div>
+            );
+          })}
         </div>
-        <div className="truncate" style={{ fontFamily: FONT_MONO, fontSize: 7.5, letterSpacing: "0.07em", textTransform: "uppercase", color: mutedInk, marginTop: 3 }}>
-          {manuscript.genre} · {manuscript.wordCount?.toLocaleString() || 0}
-        </div>
-      </div>
-
-      <div className="sa-pstatus" ref={psRef}>
-        <div className="sa-track" />
-        <div className="sa-pulse" />
-        {STAGES.map((s, i) => {
-          const list = lists[i];
-          const pop = list.length > 0;
-          return (
-            <div className={`sa-cell${pop ? "" : " empty"}`} key={i}>
-              {pop ? (
-                <span className="sa-dotwrap">
-                  {list.map((q) => (
-                    <StatusDot key={q.id} status={q.status} size={16} />
-                  ))}
-                </span>
-              ) : (
-                <StatusDot status={s.status} size={16} ghost className="sa-ghost" />
-              )}
-              <span
-                className="sa-capt"
-                style={{ ...captStyle, color: pop ? burgundy : "#aaa093" }}
-              >
-                {caption(counts[i], s)}
-              </span>
-            </div>
-          );
-        })}
       </div>
     </div>
   );
 };
-
-export interface PipelinePanelProps {
-  manuscripts: Manuscript[];
-  queries: Query[];
-}
-
-export const PipelinePanel: React.FC<PipelinePanelProps> = ({ manuscripts, queries }) => (
-  <div
-    id="query-status-breakdown-card"
-    className="sa-pipeline"
-    style={{
-      position: "relative",
-      background: parchment,
-      borderRadius: 14,
-      boxShadow: "0 1px 3px rgba(40,22,14,.08), 0 6px 20px rgba(40,22,14,.12)",
-      overflow: "hidden",
-    }}
-  >
-    {/* signature inset mount frame */}
-    <div aria-hidden="true" style={{ position: "absolute", inset: 6, border: "1px solid rgba(124,58,42,0.28)", borderRadius: 10, pointerEvents: "none", zIndex: 3 }} />
-
-    {/* subtle title — short burgundy rule + muted Playfair, no band */}
-    <div style={{ position: "relative", zIndex: 2, padding: "16px 22px 0", display: "flex", alignItems: "center", gap: 10 }}>
-      <span aria-hidden="true" style={{ width: 2.5, height: 14, background: burgundy, borderRadius: 2, opacity: 0.7, flexShrink: 0 }} />
-      <span style={{ fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 500, color: headingInk, opacity: 0.82 }}>Query pipeline</span>
-    </div>
-
-    <div style={{ position: "relative", zIndex: 2 }}>
-      {manuscripts.map((m) => (
-        <PipelineRow key={m.id} manuscript={m} queries={queries} />
-      ))}
-      {manuscripts.length === 0 && (
-        <div className="p-8 text-center text-xs italic" style={{ color: "rgba(58,28,20,0.4)" }}>
-          Get started by creating your very first manuscript structure!
-        </div>
-      )}
-    </div>
-  </div>
-);
