@@ -536,6 +536,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   const [selectedAgentFilter, setSelectedAgentFilter] = useState<string>("All");
   const [sortOption, setSortOption] = useState<string>("Newest first");
   const [groupOption, setGroupOption] = useState<"None" | "Status" | "Action Required" | "Manuscript" | "Agent Fit Rating">("None");
+  const [sortKey, setSortKey] = useState<string>("date_queried");
+  const [sortDirs, setSortDirs] = useState<Record<string, number>>({});
   const [devTheme, setDevTheme] = useState<"burgundy" | "slate" | "emerald">("burgundy");
   const [filterAccordionOpen, setFilterAccordionOpen] = useState(true);
   const [groupAccordionOpen, setGroupAccordionOpen] = useState(false);
@@ -886,26 +888,33 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   });
 
   // Sort queries matching Sort selector
+  const STATUS_SORT_ORDER = [
+    QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT,
+    QueryStatus.FULL_REQUESTED, QueryStatus.FULL_SENT, QueryStatus.REVISE_RESUBMIT,
+    QueryStatus.OFFER, QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE,
+  ];
+  const sortDir = sortDirs[sortKey] ?? 0;
   const sortedList = [...filteredList].sort((a, b) => {
     const agA = agents.find(ag => ag.id === a.agentId)?.name || "";
     const agB = agents.find(ag => ag.id === b.agentId)?.name || "";
-
-    if (sortOption === "Newest first") {
-      return (b.dateSent ? new Date(b.dateSent).getTime() : 0) - (a.dateSent ? new Date(a.dateSent).getTime() : 0);
-    } else if (sortOption === "Oldest first") {
-      return (a.dateSent ? new Date(a.dateSent).getTime() : 0) - (b.dateSent ? new Date(b.dateSent).getTime() : 0);
-    } else if (sortOption === "Agent name A-Z") {
-      return agA.localeCompare(agB);
-    } else if (sortOption === "Agent name Z-A") {
-      return agB.localeCompare(agA);
-    } else if (sortOption === "Status") {
-      return a.status.localeCompare(b.status);
-    } else if (sortOption === "Response due soonest") {
-      const deadA = a.responseDeadline ? new Date(a.responseDeadline).getTime() : Infinity;
-      const deadB = b.responseDeadline ? new Date(b.responseDeadline).getTime() : Infinity;
-      return deadA - deadB;
+    let cmp = 0;
+    if (sortKey === "a_z") {
+      cmp = agA.localeCompare(agB);
+    } else if (sortKey === "status") {
+      cmp = STATUS_SORT_ORDER.indexOf(a.status as QueryStatus) - STATUS_SORT_ORDER.indexOf(b.status as QueryStatus);
+    } else if (sortKey === "date_queried") {
+      const tA = a.dateSent ? new Date(a.dateSent).getTime() : 0;
+      const tB = b.dateSent ? new Date(b.dateSent).getTime() : 0;
+      cmp = tB - tA;
+    } else if (sortKey === "last_updated") {
+      const toMs = (v: any) => !v ? 0 : typeof v === "string" ? new Date(v).getTime() : (v?.toDate?.()?.getTime?.() ?? 0);
+      cmp = toMs(b.lastStatusChange) - toMs(a.lastStatusChange);
+    } else if (sortKey === "next_response_due") {
+      const dA = a.responseDeadline ? new Date(a.responseDeadline).getTime() : Infinity;
+      const dB = b.responseDeadline ? new Date(b.responseDeadline).getTime() : Infinity;
+      cmp = dA - dB;
     }
-    return 0;
+    return sortDir === 1 ? -cmp : cmp;
   });
 
   // Automatically select first element if currently selected is filtered out
@@ -1795,6 +1804,33 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         {/* Scrollable filter region */}
         <div style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "0 14px 12px" }} className="custom-query-list-scrollbar">
 
+          {/* Manuscript — chip (1 ms) or dropdown (multiple) */}
+          {manuscripts.length === 1 && (
+            <div style={{ margin: "4px 2px 8px", padding: "10px 12px", borderRadius: 10, background: "#f6efe7", border: "1px solid rgba(124,58,42,.14)", display: "flex", alignItems: "center", gap: 9 }}>
+              <Book className="w-4 h-4" style={{ color: burgundy, flexShrink: 0 }} />
+              <span style={{ fontFamily: FONT_SERIF, fontSize: 14.5, color: "#2e3a2c", lineHeight: 1.2 }}>{manuscripts[0].title}</span>
+            </div>
+          )}
+          {manuscripts.length > 1 && (
+            <div style={{ margin: "4px 2px 8px" }}>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.08em", textTransform: "uppercase" as const, color: "#9a8579", marginBottom: 4, paddingLeft: 2 }}>Manuscript</div>
+              <div style={{ position: "relative" }}>
+                <select
+                  value={selectedManuscriptFilter}
+                  onChange={e => setSelectedManuscriptFilter(e.target.value)}
+                  style={{ width: "100%", padding: "9px 28px 9px 12px", background: "#fff", border: "1px solid #e3d7c8", borderRadius: 10, fontSize: 13.5, color: "#3a1c14", cursor: "pointer", appearance: "none" as const, fontFamily: "inherit" }}
+                >
+                  {manuscripts.map(m => {
+                    const count = queries.filter(q => q.manuscriptId === m.id).length;
+                    return <option key={m.id} value={m.id}>{m.title} ({count})</option>;
+                  })}
+                  <option value="All">All manuscripts ({queries.length})</option>
+                </select>
+                <ChevronRight className="w-3.5 h-3.5" style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%) rotate(90deg)", pointerEvents: "none", color: "#9a8579" }} />
+              </div>
+            </div>
+          )}
+
           {/* "All queries" pinned row */}
           <button
             onClick={() => { setSelectedStatusFilters(["All"]); setSelectedManuscriptFilter("All"); }}
@@ -1811,22 +1847,12 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             <span style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#9a8579" }}>{queries.length}</span>
           </button>
 
-          {/* Filter accordion */}
+          {/* Filter — static header, always open */}
           <div style={{ marginBottom: 4 }}>
-            <button
-              onClick={() => setFilterAccordionOpen(o => !o)}
-              style={{
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-                width: "100%", padding: "5px 10px 5px 4px",
-                border: "none", background: "transparent", cursor: "pointer",
-                borderBottom: "1px solid rgba(124,58,42,0.10)", marginBottom: 6,
-              }}
-            >
-              <span style={{ fontFamily: FONT_MONO, fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#9a8579" }}>Filter</span>
-              <ChevronRight className="w-3 h-3 text-stone-400" style={{ transform: filterAccordionOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.15s" }} />
-            </button>
-            {filterAccordionOpen && (
-              <div>
+            <div style={{ padding: "11px 12px", margin: "8px 2px 2px" }}>
+              <span style={{ fontFamily: FONT_MONO, fontSize: 11, letterSpacing: ".12em", textTransform: "uppercase" as const, color: burgundy, fontWeight: 500 }}>Filter</span>
+            </div>
+            <div>
                 {/* Status sub-section */}
                 <div style={{ marginBottom: 10 }}>
                   {/* All active parent row */}
@@ -1944,125 +1970,51 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     </>
                   )}
                 </div>
-                {/* Manuscripts sub-section */}
-                {manuscripts.length > 0 && (
-                  <div>
-                    <span style={{ display: "block", fontFamily: FONT_MONO, fontSize: 9.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: `${burgundy}99`, marginBottom: 4, paddingLeft: 4 }}>Manuscript</span>
-                    {manuscripts.map(m => {
-                      const isActive = selectedManuscriptFilter === m.id;
-                      const count = queries.filter(q => q.manuscriptId === m.id).length;
-                      return (
-                        <button key={m.id} onClick={() => setSelectedManuscriptFilter(isActive ? "All" : m.id)}
-                          style={{
-                            display: "flex", alignItems: "flex-start", justifyContent: "space-between",
-                            width: "100%", padding: "9px 12px", borderRadius: 9,
-                            border: "none", cursor: "pointer", marginBottom: 1,
-                            background: isActive ? "rgba(124,58,42,0.09)" : "transparent",
-                            color: isActive ? burgundy : "#5a5047",
-                            fontWeight: 400, fontSize: 14, textAlign: "left",
-                          }}
-                          className="hover:bg-[rgba(124,58,42,0.05)] transition-colors"
-                        >
-                          <span style={{ flex: 1, marginRight: 4, whiteSpace: "normal", lineHeight: 1.35 }}>{m.title}</span>
-                          <span style={{ fontFamily: FONT_MONO, fontSize: 9, color: "#9a8579", flexShrink: 0 }}>{count || "-"}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
+            </div>
           </div>
 
-          {/* Group accordion */}
+          {/* Sort — static header, always open, 5 toggle rows */}
           <div style={{ marginBottom: 4 }}>
-            <button
-              onClick={() => setGroupAccordionOpen(o => !o)}
-              style={{
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-                width: "100%", padding: "5px 10px 5px 4px",
-                border: "none", background: "transparent", cursor: "pointer",
-                borderBottom: "1px solid rgba(124,58,42,0.10)", marginBottom: 6,
-              }}
-            >
-              <span style={{ fontFamily: FONT_MONO, fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#9a8579" }}>Group</span>
-              <ChevronRight className="w-3 h-3 text-stone-400" style={{ transform: groupAccordionOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.15s" }} />
-            </button>
-            {groupAccordionOpen && (
-              <div>
-                {[
-                  { id: "None", label: "No grouping" },
-                  { id: "Status", label: "Status" },
-                  { id: "Action Required", label: "Action required" },
-                  { id: "Manuscript", label: "Manuscript" },
-                  { id: "Agent Fit Rating", label: "Agent fit rating" },
-                ].map(item => {
-                  const isActive = groupOption === item.id;
-                  return (
-                    <button key={item.id} onClick={() => setGroupOption(item.id as any)}
-                      style={{
-                        display: "flex", alignItems: "center", justifyContent: "space-between",
-                        width: "100%", padding: "9px 12px", borderRadius: 9,
-                        border: "none", cursor: "pointer", marginBottom: 1,
-                        background: isActive ? "rgba(124,58,42,0.09)" : "transparent",
-                        color: isActive ? burgundy : "#5a5047",
-                        fontWeight: isActive ? 700 : 500, fontSize: 14,
-                      }}
-                      className="hover:bg-[rgba(124,58,42,0.05)] transition-colors"
-                    >
-                      <span>{item.label}</span>
-                      {isActive && <Check className="w-3 h-3" style={{ color: burgundy }} />}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Sort accordion */}
-          <div style={{ marginBottom: 4 }}>
-            <button
-              onClick={() => setSortAccordionOpen(o => !o)}
-              style={{
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-                width: "100%", padding: "5px 10px 5px 4px",
-                border: "none", background: "transparent", cursor: "pointer",
-                borderBottom: "1px solid rgba(124,58,42,0.10)", marginBottom: 6,
-              }}
-            >
-              <span style={{ fontFamily: FONT_MONO, fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#9a8579" }}>Sort</span>
-              <ChevronRight className="w-3 h-3 text-stone-400" style={{ transform: sortAccordionOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.15s" }} />
-            </button>
-            {sortAccordionOpen && (
-              <div>
-                {[
-                  { id: "Newest first", label: "Newest first" },
-                  { id: "Oldest first", label: "Oldest first" },
-                  { id: "Agent name A-Z", label: "Agent A–Z" },
-                  { id: "Agent name Z-A", label: "Agent Z–A" },
-                  { id: "Status", label: "Status" },
-                  { id: "Response due soonest", label: "Response due soonest" },
-                ].map(item => {
-                  const isActive = sortOption === item.id;
-                  return (
-                    <button key={item.id} onClick={() => setSortOption(item.id)}
-                      style={{
-                        display: "flex", alignItems: "center", justifyContent: "space-between",
-                        width: "100%", padding: "9px 12px", borderRadius: 9,
-                        border: "none", cursor: "pointer", marginBottom: 1,
-                        background: isActive ? "rgba(124,58,42,0.09)" : "transparent",
-                        color: isActive ? burgundy : "#5a5047",
-                        fontWeight: isActive ? 700 : 500, fontSize: 14,
-                      }}
-                      className="hover:bg-[rgba(124,58,42,0.05)] transition-colors"
-                    >
-                      <span>{item.label}</span>
-                      {isActive && <Check className="w-3 h-3" style={{ color: burgundy }} />}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+            <div style={{ padding: "11px 12px", margin: "8px 2px 2px" }}>
+              <span style={{ fontFamily: FONT_MONO, fontSize: 11, letterSpacing: ".12em", textTransform: "uppercase" as const, color: burgundy, fontWeight: 500 }}>Sort</span>
+            </div>
+            {[
+              { id: "a_z", label: "A–Z", dirs: ["A → Z", "Z → A"] },
+              { id: "status", label: "Status", dirs: ["start → end", "end → start"] },
+              { id: "date_queried", label: "Date queried", dirs: ["most recent", "longest ago"] },
+              { id: "last_updated", label: "Last updated", dirs: ["most recent", "longest ago"] },
+              { id: "next_response_due", label: "Next response due", dirs: ["soonest first", "latest first"] },
+            ].map(item => {
+              const isOn = sortKey === item.id;
+              const dir = sortDirs[item.id] ?? 0;
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => {
+                    if (isOn) {
+                      setSortDirs(d => ({ ...d, [item.id]: d[item.id] ? 0 : 1 }));
+                    } else {
+                      setSortKey(item.id);
+                    }
+                  }}
+                  style={{
+                    display: "block", padding: "9px 12px", borderRadius: 9, cursor: "pointer",
+                    background: isOn ? "rgba(124,58,42,0.10)" : "transparent",
+                    color: isOn ? burgundy : "#5b4d43",
+                    marginBottom: 1,
+                  }}
+                  className="hover:bg-[rgba(124,58,42,0.05)] transition-colors"
+                >
+                  <div style={{ fontSize: 14 }}>{item.label}</div>
+                  {isOn && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 5, fontFamily: FONT_MONO, fontSize: 10.5, letterSpacing: ".02em", color: burgundy }}>
+                      <span style={{ opacity: 0.65 }}>⇅</span>
+                      <span>{item.dirs[dir]}</span>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -3225,16 +3177,14 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                                 );
                               })}
                               {activeJournalEntries.length === 0 && (
-                                <div className="flex-grow flex flex-col items-center justify-center text-center py-8 px-4 h-full my-auto">
-                                  <div className="w-10 h-10 rounded-full bg-white/80 flex items-center justify-center mb-2 shadow-4xs"><Send className="w-4 h-4 text-stone-400 rotate-45 -translate-x-[1px]" /></div>
-                                  <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider font-mono">Activity Journal</span>
-                                  <p className="text-[11px] text-stone-400 mt-1 max-w-[180px] leading-snug font-sans">Send notes on phone calls, agent feedback, or private status updates here.</p>
+                                <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", color: "#8a7a6c", fontSize: 12.5, lineHeight: 1.65, padding: "20px" }}>
+                                  <span>Updates, comments, feedback — write anything here. It's all private, and it'll stay attached to this query.</span>
                                 </div>
                               )}
                             </div>
                             <form onSubmit={handlePostJournal} className="mt-3 flex items-center gap-2 select-none shrink-0">
                               <div className="flex-grow bg-white border border-stone-200 rounded-full py-1.5 px-4 flex items-center shadow-3xs">
-                                <input type="text" placeholder="Type a journal note..." value={journalInput} onChange={(e) => setJournalInput(e.target.value)} className="w-full text-xs bg-transparent outline-none border-none text-[#333333] placeholder-stone-400 py-0.5 leading-tight font-sans" />
+                                <input type="text" placeholder="Write a note…" value={journalInput} onChange={(e) => setJournalInput(e.target.value)} className="w-full text-xs bg-transparent outline-none border-none text-[#333333] placeholder-stone-400 py-0.5 leading-tight font-sans" />
                               </div>
                               <button
                                 type="submit"

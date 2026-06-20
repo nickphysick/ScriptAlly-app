@@ -169,19 +169,20 @@ export const Nav: React.FC<NavProps> = ({ activeTab, onNavigate, searchQuery, se
           }}
         >
           <div className="flex items-center justify-between px-6" style={{ height: 67 }}>
-            {/* Left group: page title + back to dashboard */}
-            <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-              <span style={{ fontFamily: FONT_SERIF, fontSize: 21, fontWeight: 600, color: "#2e3a2c", lineHeight: 1, whiteSpace: "nowrap" }}>
-                Query <span style={{ color: burgundy }}>database</span>
-              </span>
+            {/* Left group: back link · divider · title */}
+            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
               <button
                 onClick={() => onNavigate("dashboard")}
                 className="qnav-back flex items-center"
                 style={{ display: "flex", alignItems: "center", gap: 6, background: "transparent", border: "none", cursor: "pointer", fontSize: 13.5, fontWeight: 400, padding: "5px 8px", borderRadius: 8 }}
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
-                Back to dashboard
+                Dashboard
               </button>
+              <div style={{ width: 1, height: 24, background: "#e2ded7", flexShrink: 0 }} />
+              <span style={{ fontFamily: FONT_SERIF, fontSize: 21, fontWeight: 600, color: "#2e3a2c", lineHeight: 1, whiteSpace: "nowrap" }}>
+                Query <span style={{ color: burgundy }}>database</span>
+              </span>
             </div>
 
             {/* Right group: help + user chip */}
