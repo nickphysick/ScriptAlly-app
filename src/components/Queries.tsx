@@ -841,6 +841,13 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     ? Math.round((responsesReceivedVal / queries.length) * 100)
     : 0;
 
+  const ACTIVE_STATUSES = [QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_REQUESTED, QueryStatus.FULL_SENT, QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER];
+  const CLOSED_STATUSES = [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE];
+  const nonZeroActiveStatuses = ACTIVE_STATUSES.filter(s => queries.some(q => q.status === s));
+  const nonZeroClosedStatuses = CLOSED_STATUSES.filter(s => queries.some(q => q.status === s));
+  const allActiveHighlighted = nonZeroActiveStatuses.length > 0 && !selectedStatusFilters.includes("All") && nonZeroActiveStatuses.every(s => selectedStatusFilters.includes(s)) && !CLOSED_STATUSES.some(s => selectedStatusFilters.includes(s));
+  const allClosedHighlighted = nonZeroClosedStatuses.length > 0 && !selectedStatusFilters.includes("All") && nonZeroClosedStatuses.every(s => selectedStatusFilters.includes(s)) && !ACTIVE_STATUSES.some(s => selectedStatusFilters.includes(s));
+
   // Filter queries matching Left Panel filters + Search Query
   const filteredList = queries.filter(q => {
     const agent = agents.find(a => a.id === q.agentId);
@@ -1520,7 +1527,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   return (
     <div
       className="w-full flex flex-col overflow-hidden text-[#3a1c14] font-sans relative queries-container-theme"
-      style={{ height: "calc(100vh - 43px)", backgroundColor: "#ffffff" }}
+      style={{ height: "calc(100vh - 67px)", backgroundColor: "#ffffff" }}
     >
       <style>{`
         .custom-query-list-scrollbar::-webkit-scrollbar {
@@ -1778,41 +1785,12 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           overflow: "hidden",
         }}
       >
-        {/* Logo — no standalone image file in project; using SVG component at lg size (~196px wide) */}
-        <div style={{ padding: "18px 20px 14px", borderBottom: "1px solid rgba(124,58,42,0.10)", flexShrink: 0, display: "flex", justifyContent: "center" }}>
-          <ScriptAllyLogo size="lg" iconColor={burgundy} textColor={burgundy} />
+        {/* Logo */}
+        <div style={{ padding: "22px 22px 8px", flexShrink: 0, display: "flex", justifyContent: "center" }}>
+          <img src="/scriptally-title.png" style={{ width: 188, height: "auto" }} alt="ScriptAlly" />
         </div>
 
-        {/* Page title — "Agent database" */}
-        <div style={{ padding: "20px 22px 16px", flexShrink: 0 }}>
-          <div>
-            <span style={{ fontFamily: FONT_SERIF, fontSize: 27, fontWeight: 600, color: "#2e3a2c", lineHeight: 1.2 }}>
-              Query{" "}
-            </span>
-            <span style={{ fontFamily: FONT_SERIF, fontSize: 27, fontWeight: 600, color: burgundy, lineHeight: 1.2 }}>
-              database
-            </span>
-          </div>
-        </div>
-
-        {/* Back to dashboard */}
-        <div style={{ padding: "10px 14px 0", flexShrink: 0 }}>
-          <button
-            onClick={() => onNavigate?.("dashboard")}
-            style={{
-              display: "flex", alignItems: "center", gap: 6,
-              width: "100%", padding: "7px 10px", borderRadius: 8,
-              border: "none", background: "transparent", cursor: "pointer",
-              color: "#7c3a2a", fontSize: 14, fontWeight: 600,
-            }}
-            className="hover:bg-[rgba(124,58,42,0.07)] transition-colors"
-          >
-            <ChevronLeft className="w-3.5 h-3.5" />
-            Back to dashboard
-          </button>
-        </div>
-
-        <div style={{ height: 1, margin: "10px 14px", background: "rgba(124,58,42,0.10)" }} />
+        <div style={{ height: 1, margin: "8px 14px 12px", background: "rgba(124,58,42,0.10)" }} />
 
         {/* Scrollable filter region */}
         <div style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "0 14px 12px" }} className="custom-query-list-scrollbar">
@@ -1822,13 +1800,15 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             onClick={() => { setSelectedStatusFilters(["All"]); setSelectedManuscriptFilter("All"); }}
             style={{
               display: "flex", alignItems: "center", justifyContent: "space-between",
-              width: "100%", padding: "11px 12px", borderRadius: 9,
+              width: "100%", padding: "9px 12px", borderRadius: 9,
               border: "none", cursor: "pointer", marginBottom: 6,
-              background: "rgba(124,58,42,0.08)",
+              background: selectedStatusFilters.includes("All") && selectedManuscriptFilter === "All" ? "rgba(124,58,42,0.09)" : "transparent",
+              color: selectedStatusFilters.includes("All") && selectedManuscriptFilter === "All" ? burgundy : "#5a5047",
             }}
+            className="hover:bg-[rgba(124,58,42,0.05)] transition-colors"
           >
-            <span style={{ fontFamily: FONT_SERIF, fontSize: 16, fontWeight: 600, color: burgundy }}>All queries</span>
-            <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: burgundy }}>{queries.length}</span>
+            <span style={{ fontSize: 14, fontWeight: 500 }}>All queries</span>
+            <span style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#9a8579" }}>{queries.length}</span>
           </button>
 
           {/* Filter accordion */}
@@ -1847,84 +1827,122 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             </button>
             {filterAccordionOpen && (
               <div>
-                {/* Status sub-section — "Status" heading removed; groups hidden when empty */}
+                {/* Status sub-section */}
                 <div style={{ marginBottom: 10 }}>
-                  {hasActiveQueries && (
-                    <div style={{ marginBottom: 2 }}>
-                      <span style={{ display: "block", fontFamily: FONT_MONO, fontSize: 9.5, color: "#9a8579", textTransform: "uppercase", letterSpacing: "0.05em", padding: "3px 4px", fontWeight: 600 }}>Active</span>
-                    </div>
-                  )}
-                  {[
-                    { id: QueryStatus.QUERIED, label: "Queried", count: queries.filter(q => q.status === QueryStatus.QUERIED).length },
-                    { id: QueryStatus.PARTIAL_REQUESTED, label: "Partial req", count: queries.filter(q => q.status === QueryStatus.PARTIAL_REQUESTED).length },
-                    { id: QueryStatus.PARTIAL_SENT, label: "Partial sent", count: queries.filter(q => q.status === QueryStatus.PARTIAL_SENT).length },
-                    { id: QueryStatus.FULL_REQUESTED, label: "Full req", count: queries.filter(q => q.status === QueryStatus.FULL_REQUESTED).length },
-                    { id: QueryStatus.FULL_SENT, label: "Full sent", count: queries.filter(q => q.status === QueryStatus.FULL_SENT).length },
-                    { id: QueryStatus.REVISE_RESUBMIT, label: "R&R", count: queries.filter(q => q.status === QueryStatus.REVISE_RESUBMIT).length },
-                    { id: QueryStatus.OFFER, label: "Offers", count: queries.filter(q => q.status === QueryStatus.OFFER).length },
-                  ].filter(item => item.count > 0).map(item => {
-                    const isActive = selectedStatusFilters.includes(item.id);
-                    return (
-                      <button key={item.id} onClick={() => {
-                        let next = [...selectedStatusFilters].filter(f => f !== "All");
-                        if (next.includes(item.id)) { next = next.filter(f => f !== item.id); }
-                        else { next.push(item.id); }
-                        setSelectedStatusFilters(next.length === 0 ? ["All"] : next);
-                      }}
+                  {/* All active parent row */}
+                  {nonZeroActiveStatuses.length > 0 && (
+                    <>
+                      <button
+                        onClick={() => {
+                          setSelectedStatusFilters(allActiveHighlighted ? ["All"] : nonZeroActiveStatuses);
+                          setSelectedManuscriptFilter("All");
+                        }}
                         style={{
                           display: "flex", alignItems: "center", justifyContent: "space-between",
                           width: "100%", padding: "9px 12px", borderRadius: 9,
                           border: "none", cursor: "pointer", marginBottom: 1,
-                          background: isActive ? "rgba(124,58,42,0.09)" : "transparent",
-                          color: isActive ? burgundy : "#5a5047",
-                          fontWeight: isActive ? 700 : 500, fontSize: 14,
+                          background: allActiveHighlighted ? "rgba(124,58,42,0.09)" : "transparent",
+                          color: allActiveHighlighted ? burgundy : "#5a5047",
+                          fontSize: 14, fontWeight: 400,
                         }}
                         className="hover:bg-[rgba(124,58,42,0.05)] transition-colors"
                       >
-                        <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <StatusDot status={item.id} size={11} />
-                          {item.label}
-                        </span>
-                        <span style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#9a8579" }}>{item.count || "-"}</span>
+                        <span>All active</span>
+                        <span style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#9a8579" }}>{nonZeroActiveStatuses.reduce((acc, s) => acc + queries.filter(q => q.status === s).length, 0)}</span>
                       </button>
-                    );
-                  })}
-                  {hasClosedQueries && (
-                    <div style={{ marginTop: 6, marginBottom: 2 }}>
-                      <span style={{ display: "block", fontFamily: FONT_MONO, fontSize: 9.5, color: "#9a8579", textTransform: "uppercase", letterSpacing: "0.05em", padding: "3px 4px", fontWeight: 600 }}>Closed</span>
-                    </div>
+                      {[
+                        { id: QueryStatus.QUERIED, label: "Queried" },
+                        { id: QueryStatus.PARTIAL_REQUESTED, label: "Partial req" },
+                        { id: QueryStatus.PARTIAL_SENT, label: "Partial sent" },
+                        { id: QueryStatus.FULL_REQUESTED, label: "Full req" },
+                        { id: QueryStatus.FULL_SENT, label: "Full sent" },
+                        { id: QueryStatus.REVISE_RESUBMIT, label: "R&R" },
+                        { id: QueryStatus.OFFER, label: "Offers" },
+                      ].filter(item => queries.some(q => q.status === item.id)).map(item => {
+                        const count = queries.filter(q => q.status === item.id).length;
+                        const isActive = selectedStatusFilters.includes(item.id);
+                        return (
+                          <button key={item.id} onClick={() => {
+                            let next = [...selectedStatusFilters].filter(f => f !== "All");
+                            if (next.includes(item.id)) { next = next.filter(f => f !== item.id); }
+                            else { next.push(item.id); }
+                            setSelectedStatusFilters(next.length === 0 ? ["All"] : next);
+                          }}
+                            style={{
+                              display: "flex", alignItems: "center", justifyContent: "space-between",
+                              width: "100%", padding: "9px 12px 9px 30px", borderRadius: 9,
+                              border: "none", cursor: "pointer", marginBottom: 1,
+                              background: isActive ? "rgba(124,58,42,0.09)" : "transparent",
+                              color: isActive ? burgundy : "#5a5047",
+                              fontWeight: 400, fontSize: 14,
+                            }}
+                            className="hover:bg-[rgba(124,58,42,0.05)] transition-colors"
+                          >
+                            <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                              <StatusDot status={item.id} size={11} />
+                              {item.label}
+                            </span>
+                            <span style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#9a8579" }}>{count}</span>
+                          </button>
+                        );
+                      })}
+                    </>
                   )}
-                  {[
-                    { id: QueryStatus.REJECTED, label: "Rejected", count: queries.filter(q => q.status === QueryStatus.REJECTED).length },
-                    { id: QueryStatus.WITHDRAWN, label: "Withdrawn", count: queries.filter(q => q.status === QueryStatus.WITHDRAWN).length },
-                    { id: QueryStatus.NO_RESPONSE, label: "No response", count: queries.filter(q => q.status === QueryStatus.NO_RESPONSE).length },
-                  ].filter(item => item.count > 0).map(item => {
-                    const isActive = selectedStatusFilters.includes(item.id);
-                    return (
-                      <button key={item.id} onClick={() => {
-                        let next = [...selectedStatusFilters].filter(f => f !== "All");
-                        if (next.includes(item.id)) { next = next.filter(f => f !== item.id); }
-                        else { next.push(item.id); }
-                        setSelectedStatusFilters(next.length === 0 ? ["All"] : next);
-                      }}
+                  {/* All closed parent row */}
+                  {nonZeroClosedStatuses.length > 0 && (
+                    <>
+                      <button
+                        onClick={() => {
+                          setSelectedStatusFilters(allClosedHighlighted ? ["All"] : nonZeroClosedStatuses);
+                          setSelectedManuscriptFilter("All");
+                        }}
                         style={{
                           display: "flex", alignItems: "center", justifyContent: "space-between",
                           width: "100%", padding: "9px 12px", borderRadius: 9,
-                          border: "none", cursor: "pointer", marginBottom: 1,
-                          background: isActive ? "rgba(124,58,42,0.09)" : "transparent",
-                          color: isActive ? burgundy : "#5a5047",
-                          fontWeight: isActive ? 700 : 500, fontSize: 14,
+                          border: "none", cursor: "pointer", marginBottom: 1, marginTop: nonZeroActiveStatuses.length > 0 ? 4 : 0,
+                          background: allClosedHighlighted ? "rgba(124,58,42,0.09)" : "transparent",
+                          color: allClosedHighlighted ? burgundy : "#5a5047",
+                          fontSize: 14, fontWeight: 400,
                         }}
                         className="hover:bg-[rgba(124,58,42,0.05)] transition-colors"
                       >
-                        <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <StatusDot status={item.id} size={11} />
-                          {item.label}
-                        </span>
-                        <span style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#9a8579" }}>{item.count || "-"}</span>
+                        <span>All closed</span>
+                        <span style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#9a8579" }}>{nonZeroClosedStatuses.reduce((acc, s) => acc + queries.filter(q => q.status === s).length, 0)}</span>
                       </button>
-                    );
-                  })}
+                      {[
+                        { id: QueryStatus.REJECTED, label: "Rejected" },
+                        { id: QueryStatus.WITHDRAWN, label: "Withdrawn" },
+                        { id: QueryStatus.NO_RESPONSE, label: "No response" },
+                      ].filter(item => queries.some(q => q.status === item.id)).map(item => {
+                        const count = queries.filter(q => q.status === item.id).length;
+                        const isActive = selectedStatusFilters.includes(item.id);
+                        return (
+                          <button key={item.id} onClick={() => {
+                            let next = [...selectedStatusFilters].filter(f => f !== "All");
+                            if (next.includes(item.id)) { next = next.filter(f => f !== item.id); }
+                            else { next.push(item.id); }
+                            setSelectedStatusFilters(next.length === 0 ? ["All"] : next);
+                          }}
+                            style={{
+                              display: "flex", alignItems: "center", justifyContent: "space-between",
+                              width: "100%", padding: "9px 12px 9px 30px", borderRadius: 9,
+                              border: "none", cursor: "pointer", marginBottom: 1,
+                              background: isActive ? "rgba(124,58,42,0.09)" : "transparent",
+                              color: isActive ? burgundy : "#5a5047",
+                              fontWeight: 400, fontSize: 14,
+                            }}
+                            className="hover:bg-[rgba(124,58,42,0.05)] transition-colors"
+                          >
+                            <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                              <StatusDot status={item.id} size={11} />
+                              {item.label}
+                            </span>
+                            <span style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#9a8579" }}>{count}</span>
+                          </button>
+                        );
+                      })}
+                    </>
+                  )}
                 </div>
                 {/* Manuscripts sub-section */}
                 {manuscripts.length > 0 && (
@@ -1936,16 +1954,16 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                       return (
                         <button key={m.id} onClick={() => setSelectedManuscriptFilter(isActive ? "All" : m.id)}
                           style={{
-                            display: "flex", alignItems: "center", justifyContent: "space-between",
+                            display: "flex", alignItems: "flex-start", justifyContent: "space-between",
                             width: "100%", padding: "9px 12px", borderRadius: 9,
                             border: "none", cursor: "pointer", marginBottom: 1,
                             background: isActive ? "rgba(124,58,42,0.09)" : "transparent",
                             color: isActive ? burgundy : "#5a5047",
-                            fontWeight: isActive ? 700 : 500, fontSize: 14, textAlign: "left",
+                            fontWeight: 400, fontSize: 14, textAlign: "left",
                           }}
                           className="hover:bg-[rgba(124,58,42,0.05)] transition-colors"
                         >
-                          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, marginRight: 4 }}>{m.title}</span>
+                          <span style={{ flex: 1, marginRight: 4, whiteSpace: "normal", lineHeight: 1.35 }}>{m.title}</span>
                           <span style={{ fontFamily: FONT_MONO, fontSize: 9, color: "#9a8579", flexShrink: 0 }}>{count || "-"}</span>
                         </button>
                       );

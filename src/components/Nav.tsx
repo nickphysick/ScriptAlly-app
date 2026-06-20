@@ -17,6 +17,7 @@ import {
   Bell,
   BookOpen,
   ChevronDown,
+  ChevronLeft,
   HelpCircle,
   LogOut,
   Sparkles,
@@ -158,14 +159,33 @@ export const Nav: React.FC<NavProps> = ({ activeTab, onNavigate, searchQuery, se
         {(showUserDropdown || showBellDropdown) && (
           <div className="fixed inset-0 z-40 bg-transparent" onClick={closeAll} />
         )}
+        <style>{`.qnav-back{color:#8a7a6c;transition:color 0.15s}.qnav-back:hover{color:#7c3a2a}`}</style>
         <header
           className="sticky top-0 z-50"
           style={{
             background: parchment,
             borderBottom: "1px solid #e2ded7",
+            marginLeft: 262,
           }}
         >
-          <div className="flex items-center justify-end gap-3 px-4 md:px-10 lg:px-14 xl:px-16" style={{ height: 43 }}>
+          <div className="flex items-center justify-between px-6" style={{ height: 67 }}>
+            {/* Left group: page title + back to dashboard */}
+            <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+              <span style={{ fontFamily: FONT_SERIF, fontSize: 21, fontWeight: 600, color: "#2e3a2c", lineHeight: 1, whiteSpace: "nowrap" }}>
+                Query <span style={{ color: burgundy }}>database</span>
+              </span>
+              <button
+                onClick={() => onNavigate("dashboard")}
+                className="qnav-back flex items-center"
+                style={{ display: "flex", alignItems: "center", gap: 6, background: "transparent", border: "none", cursor: "pointer", fontSize: 13.5, fontWeight: 400, padding: "5px 8px", borderRadius: 8 }}
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+                Back to dashboard
+              </button>
+            </div>
+
+            {/* Right group: help + user chip */}
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             {/* Help */}
             <button
               onClick={() => onNavigate("help")}
@@ -236,6 +256,7 @@ export const Nav: React.FC<NavProps> = ({ activeTab, onNavigate, searchQuery, se
                 )}
               </AnimatePresence>
             </div>
+            </div>{/* end right group */}
           </div>
         </header>
       </>
