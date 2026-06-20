@@ -1714,13 +1714,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           position: "fixed",
           top: 0,
           left: 0,
-          width: 252,
+          width: 262,
           height: "100vh",
           zIndex: 51,
-          background: "#f8ece5",
-          backgroundImage: PAPER_TEXTURE,
-          boxShadow: "2px 0 16px rgba(58,28,20,0.10)",
-          borderRight: "1px solid rgba(124,58,42,0.13)",
+          background: "#fdfaf5",
+          borderRight: "1px solid #e2ded7",
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
@@ -1731,24 +1729,15 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           <ScriptAllyLogo size="sm" iconColor={burgundy} textColor="#3a1c14" />
         </div>
 
-        {/* Page title — "Agent database" with blinking cursor + selection highlight on "database" */}
-        <div style={{ padding: "18px 20px 10px", flexShrink: 0 }}>
-          <div style={{ display: "flex", alignItems: "baseline", flexWrap: "nowrap" }}>
-            <span style={{ fontFamily: FONT_SERIF, fontSize: 24, fontWeight: 600, color: "#3a1c14", lineHeight: 1.2 }}>
+        {/* Page title — "Agent database" */}
+        <div style={{ padding: "20px 22px 16px", flexShrink: 0 }}>
+          <div>
+            <span style={{ fontFamily: FONT_SERIF, fontSize: 27, fontWeight: 600, color: "#2e3a2c", lineHeight: 1.2 }}>
               Agent{" "}
             </span>
-            <span style={{
-              fontFamily: FONT_SERIF, fontSize: 24, fontWeight: 600, color: "#3a1c14", lineHeight: 1.2,
-              background: "rgba(124,58,42,.22)", borderRadius: 3,
-              WebkitBoxDecorationBreak: "clone", boxDecorationBreak: "clone" as any,
-              paddingLeft: 2, paddingRight: 2,
-            }}>
+            <span style={{ fontFamily: FONT_SERIF, fontSize: 27, fontWeight: 600, color: burgundy, lineHeight: 1.2 }}>
               database
             </span>
-            <span
-              className="queries-cursor-blink"
-              style={{ display: "inline-block", width: 4.5, height: 34, background: burgundy, borderRadius: 1, marginLeft: 6, verticalAlign: "middle", transform: "translateY(7px)", flexShrink: 0 }}
-            />
           </div>
         </div>
 
@@ -1760,7 +1749,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
               display: "flex", alignItems: "center", gap: 6,
               width: "100%", padding: "7px 10px", borderRadius: 8,
               border: "none", background: "transparent", cursor: "pointer",
-              color: "#7c3a2a", fontSize: 12, fontWeight: 600,
+              color: "#7c3a2a", fontSize: 14, fontWeight: 600,
             }}
             className="hover:bg-[rgba(124,58,42,0.07)] transition-colors"
           >
@@ -1779,19 +1768,13 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             onClick={() => { setSelectedStatusFilters(["All"]); setSelectedManuscriptFilter("All"); }}
             style={{
               display: "flex", alignItems: "center", justifyContent: "space-between",
-              width: "100%", padding: "7px 10px", borderRadius: 8,
+              width: "100%", padding: "11px 12px", borderRadius: 9,
               border: "none", cursor: "pointer", marginBottom: 6,
-              background: selectedStatusFilters.includes("All") && selectedManuscriptFilter === "All"
-                ? "rgba(124,58,42,0.09)" : "transparent",
-              color: selectedStatusFilters.includes("All") && selectedManuscriptFilter === "All"
-                ? burgundy : "#3a1c14",
-              fontWeight: selectedStatusFilters.includes("All") && selectedManuscriptFilter === "All" ? 700 : 500,
-              fontSize: 12,
+              background: "rgba(124,58,42,0.08)",
             }}
-            className="hover:bg-[rgba(124,58,42,0.05)] transition-colors"
           >
-            <span>All queries</span>
-            <span style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#9a8579" }}>{queries.length}</span>
+            <span style={{ fontFamily: FONT_SERIF, fontSize: 16, fontWeight: 600, color: burgundy }}>All queries</span>
+            <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: burgundy }}>{queries.length}</span>
           </button>
 
           {/* Filter accordion */}
@@ -1805,16 +1788,16 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 borderBottom: "1px solid rgba(124,58,42,0.10)", marginBottom: 6,
               }}
             >
-              <span style={{ fontFamily: FONT_MONO, fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#9a8579" }}>Filter</span>
+              <span style={{ fontFamily: FONT_MONO, fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#9a8579" }}>Filter</span>
               <ChevronRight className="w-3 h-3 text-stone-400" style={{ transform: filterAccordionOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.15s" }} />
             </button>
             {filterAccordionOpen && (
               <div>
                 {/* Status sub-section */}
                 <div style={{ marginBottom: 10 }}>
-                  <span style={{ display: "block", fontFamily: FONT_MONO, fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: `${burgundy}99`, marginBottom: 4, paddingLeft: 4 }}>Status</span>
+                  <span style={{ display: "block", fontFamily: FONT_MONO, fontSize: 9.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: `${burgundy}99`, marginBottom: 4, paddingLeft: 4 }}>Status</span>
                   <div style={{ marginBottom: 2 }}>
-                    <span style={{ display: "block", fontFamily: FONT_MONO, fontSize: 9, color: "#9a8579", textTransform: "uppercase", letterSpacing: "0.05em", padding: "3px 4px", fontWeight: 600 }}>Active</span>
+                    <span style={{ display: "block", fontFamily: FONT_MONO, fontSize: 9.5, color: "#9a8579", textTransform: "uppercase", letterSpacing: "0.05em", padding: "3px 4px", fontWeight: 600 }}>Active</span>
                   </div>
                   {[
                     { id: QueryStatus.QUERIED, label: "Queried", count: queries.filter(q => q.status === QueryStatus.QUERIED).length },
@@ -1835,11 +1818,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                       }}
                         style={{
                           display: "flex", alignItems: "center", justifyContent: "space-between",
-                          width: "100%", padding: "5px 8px", borderRadius: 7,
+                          width: "100%", padding: "9px 12px", borderRadius: 9,
                           border: "none", cursor: "pointer", marginBottom: 1,
                           background: isActive ? "rgba(124,58,42,0.09)" : "transparent",
                           color: isActive ? burgundy : "#5a5047",
-                          fontWeight: isActive ? 700 : 500, fontSize: 11,
+                          fontWeight: isActive ? 700 : 500, fontSize: 14,
                         }}
                         className="hover:bg-[rgba(124,58,42,0.05)] transition-colors"
                       >
@@ -1847,12 +1830,12 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           <StatusDot status={item.id} size={11} />
                           {item.label}
                         </span>
-                        <span style={{ fontFamily: FONT_MONO, fontSize: 9, color: "#9a8579" }}>{item.count || "-"}</span>
+                        <span style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#9a8579" }}>{item.count || "-"}</span>
                       </button>
                     );
                   })}
                   <div style={{ marginTop: 6, marginBottom: 2 }}>
-                    <span style={{ display: "block", fontFamily: FONT_MONO, fontSize: 9, color: "#9a8579", textTransform: "uppercase", letterSpacing: "0.05em", padding: "3px 4px", fontWeight: 600 }}>Closed</span>
+                    <span style={{ display: "block", fontFamily: FONT_MONO, fontSize: 9.5, color: "#9a8579", textTransform: "uppercase", letterSpacing: "0.05em", padding: "3px 4px", fontWeight: 600 }}>Closed</span>
                   </div>
                   {[
                     { id: QueryStatus.REJECTED, label: "Rejected", count: queries.filter(q => q.status === QueryStatus.REJECTED).length },
@@ -1869,11 +1852,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                       }}
                         style={{
                           display: "flex", alignItems: "center", justifyContent: "space-between",
-                          width: "100%", padding: "5px 8px", borderRadius: 7,
+                          width: "100%", padding: "9px 12px", borderRadius: 9,
                           border: "none", cursor: "pointer", marginBottom: 1,
                           background: isActive ? "rgba(124,58,42,0.09)" : "transparent",
                           color: isActive ? burgundy : "#5a5047",
-                          fontWeight: isActive ? 700 : 500, fontSize: 11,
+                          fontWeight: isActive ? 700 : 500, fontSize: 14,
                         }}
                         className="hover:bg-[rgba(124,58,42,0.05)] transition-colors"
                       >
@@ -1881,7 +1864,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           <StatusDot status={item.id} size={11} />
                           {item.label}
                         </span>
-                        <span style={{ fontFamily: FONT_MONO, fontSize: 9, color: "#9a8579" }}>{item.count || "-"}</span>
+                        <span style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#9a8579" }}>{item.count || "-"}</span>
                       </button>
                     );
                   })}
@@ -1889,7 +1872,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 {/* Manuscripts sub-section */}
                 {manuscripts.length > 0 && (
                   <div>
-                    <span style={{ display: "block", fontFamily: FONT_MONO, fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: `${burgundy}99`, marginBottom: 4, paddingLeft: 4 }}>Manuscript</span>
+                    <span style={{ display: "block", fontFamily: FONT_MONO, fontSize: 9.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: `${burgundy}99`, marginBottom: 4, paddingLeft: 4 }}>Manuscript</span>
                     {manuscripts.map(m => {
                       const isActive = selectedManuscriptFilter === m.id;
                       const count = queries.filter(q => q.manuscriptId === m.id).length;
@@ -1897,11 +1880,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                         <button key={m.id} onClick={() => setSelectedManuscriptFilter(isActive ? "All" : m.id)}
                           style={{
                             display: "flex", alignItems: "center", justifyContent: "space-between",
-                            width: "100%", padding: "5px 8px", borderRadius: 7,
+                            width: "100%", padding: "9px 12px", borderRadius: 9,
                             border: "none", cursor: "pointer", marginBottom: 1,
                             background: isActive ? "rgba(124,58,42,0.09)" : "transparent",
                             color: isActive ? burgundy : "#5a5047",
-                            fontWeight: isActive ? 700 : 500, fontSize: 11, textAlign: "left",
+                            fontWeight: isActive ? 700 : 500, fontSize: 14, textAlign: "left",
                           }}
                           className="hover:bg-[rgba(124,58,42,0.05)] transition-colors"
                         >
@@ -1927,7 +1910,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 borderBottom: "1px solid rgba(124,58,42,0.10)", marginBottom: 6,
               }}
             >
-              <span style={{ fontFamily: FONT_MONO, fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#9a8579" }}>Group</span>
+              <span style={{ fontFamily: FONT_MONO, fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#9a8579" }}>Group</span>
               <ChevronRight className="w-3 h-3 text-stone-400" style={{ transform: groupAccordionOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.15s" }} />
             </button>
             {groupAccordionOpen && (
@@ -1944,11 +1927,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     <button key={item.id} onClick={() => setGroupOption(item.id as any)}
                       style={{
                         display: "flex", alignItems: "center", justifyContent: "space-between",
-                        width: "100%", padding: "5px 8px", borderRadius: 7,
+                        width: "100%", padding: "9px 12px", borderRadius: 9,
                         border: "none", cursor: "pointer", marginBottom: 1,
                         background: isActive ? "rgba(124,58,42,0.09)" : "transparent",
                         color: isActive ? burgundy : "#5a5047",
-                        fontWeight: isActive ? 700 : 500, fontSize: 11,
+                        fontWeight: isActive ? 700 : 500, fontSize: 14,
                       }}
                       className="hover:bg-[rgba(124,58,42,0.05)] transition-colors"
                     >
@@ -1972,7 +1955,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 borderBottom: "1px solid rgba(124,58,42,0.10)", marginBottom: 6,
               }}
             >
-              <span style={{ fontFamily: FONT_MONO, fontSize: 9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#9a8579" }}>Sort</span>
+              <span style={{ fontFamily: FONT_MONO, fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#9a8579" }}>Sort</span>
               <ChevronRight className="w-3 h-3 text-stone-400" style={{ transform: sortAccordionOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.15s" }} />
             </button>
             {sortAccordionOpen && (
@@ -1990,11 +1973,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     <button key={item.id} onClick={() => setSortOption(item.id)}
                       style={{
                         display: "flex", alignItems: "center", justifyContent: "space-between",
-                        width: "100%", padding: "5px 8px", borderRadius: 7,
+                        width: "100%", padding: "9px 12px", borderRadius: 9,
                         border: "none", cursor: "pointer", marginBottom: 1,
                         background: isActive ? "rgba(124,58,42,0.09)" : "transparent",
                         color: isActive ? burgundy : "#5a5047",
-                        fontWeight: isActive ? 700 : 500, fontSize: 11,
+                        fontWeight: isActive ? 700 : 500, fontSize: 14,
                       }}
                       className="hover:bg-[rgba(124,58,42,0.05)] transition-colors"
                     >
@@ -2029,7 +2012,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
       {/* MAIN CONTENT — offset by sidebar width; control bar then two-column content grid */}
       <div
         className="flex-grow w-full"
-        style={{ paddingLeft: 260, background: "#ffffff", minHeight: "calc(100vh - 36px)" }}
+        style={{ paddingLeft: 262, background: "#ffffff", minHeight: "calc(100vh - 36px)" }}
         id="queries-main-panel-container"
       >
 
@@ -2360,7 +2343,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             : { kind: "record" as const, label: "Record response", ballHolder: null as null };
           const hasActive = !!(activeQuery && activeAgent && activeMs);
           return (
-            <div style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 16, padding: "12px 22px", background: "#ffffff", borderBottom: "1px solid #e8e3da", position: "sticky", top: 36, zIndex: 10 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 16, padding: "11px 16px", background: parchment, border: "1px solid rgba(90,55,42,.14)", borderRadius: 14, boxShadow: "0 2px 12px rgba(40,22,14,.07)", margin: "18px 22px 16px", alignItems: "center" }}>
               {/* Left zone: search input */}
               <div style={{ position: "relative" }}>
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400 pointer-events-none" />
@@ -2371,7 +2354,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   onChange={(e) => setListSearch(e.target.value)}
                   onFocus={e => (e.currentTarget.style.textAlign = "left")}
                   onBlur={e => { if (!e.currentTarget.value) e.currentTarget.style.textAlign = "center"; }}
-                  style={{ width: "100%", background: "#fffdf9", border: "1px solid #e3d7c8", borderRadius: 10, padding: "10px 12px 10px 36px", fontSize: 13, color: "#8a7a6c", fontFamily: "inherit", outline: "none", textAlign: "center" }}
+                  style={{ width: "100%", background: "#fff", border: "1px solid #e6dccd", borderRadius: 10, padding: "11px 14px 11px 38px", fontSize: 13.5, color: "#8a7a6c", fontFamily: "inherit", outline: "none", textAlign: "center" }}
                 />
               </div>
               {/* Right zone: action buttons, centred */}
@@ -2381,7 +2364,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     ref={markSentTriggerRef}
                     type="button"
                     onClick={() => hasActive && setIsMarkSentOpen(o => !o)}
-                    style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 500, color: burgundy, background: "linear-gradient(180deg,#f5e2da,#efd5ca)", border: "1px solid rgba(124,58,42,.28)", borderRadius: 9, padding: "9px 16px", cursor: hasActive ? "pointer" : "default", boxShadow: "0 1px 2px rgba(124,58,42,.12)", opacity: hasActive ? 1 : 0.5 }}
+                    style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13.5, fontWeight: 500, color: burgundy, background: "linear-gradient(180deg,#f5e2da,#efd5ca)", border: "1px solid rgba(124,58,42,.28)", borderRadius: 10, padding: "10px 18px", cursor: hasActive ? "pointer" : "default", boxShadow: "0 1px 2px rgba(124,58,42,.12)", opacity: hasActive ? 1 : 0.5 }}
                   >
                     <Send style={{ width: 15, height: 15, strokeWidth: 2 } as any} />
                     {ctrlAction.label}
@@ -2390,7 +2373,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   <button
                     type="button"
                     onClick={() => hasActive && setIsRecordResponseFocusFormOpen(true)}
-                    style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13, fontWeight: 500, color: burgundy, background: "linear-gradient(180deg,#f5e2da,#efd5ca)", border: "1px solid rgba(124,58,42,.28)", borderRadius: 9, padding: "9px 16px", cursor: hasActive ? "pointer" : "default", boxShadow: "0 1px 2px rgba(124,58,42,.12)", opacity: hasActive ? 1 : 0.5 }}
+                    style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13.5, fontWeight: 500, color: burgundy, background: "linear-gradient(180deg,#f5e2da,#efd5ca)", border: "1px solid rgba(124,58,42,.28)", borderRadius: 10, padding: "10px 18px", cursor: hasActive ? "pointer" : "default", boxShadow: "0 1px 2px rgba(124,58,42,.12)", opacity: hasActive ? 1 : 0.5 }}
                   >
                     <Send style={{ width: 15, height: 15, strokeWidth: 2 } as any} />
                     {ctrlAction.label}
@@ -2401,7 +2384,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   onClick={() => hasActive && setIsEditMode(prev => !prev)}
                   onMouseEnter={e => { if (hasActive) e.currentTarget.style.background = "#fffaf6"; }}
                   onMouseLeave={e => (e.currentTarget.style.background = "#ffffff")}
-                  style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: 12.5, fontWeight: 500, color: burgundy, background: "#ffffff", border: "1px solid rgba(124,58,42,.22)", borderRadius: 9, padding: "9px 14px", cursor: hasActive ? "pointer" : "default", opacity: hasActive ? 1 : 0.5 }}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: 13, fontWeight: 500, color: burgundy, background: "#ffffff", border: "1px solid rgba(124,58,42,.22)", borderRadius: 10, padding: "10px 16px", cursor: hasActive ? "pointer" : "default", opacity: hasActive ? 1 : 0.5 }}
                 >
                   <Pencil style={{ width: 13, height: 13 }} />
                   Edit
@@ -2411,7 +2394,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   onClick={() => hasActive && !isGeneratingPDF && handleDownloadPDF()}
                   onMouseEnter={e => { if (hasActive && !isGeneratingPDF) e.currentTarget.style.background = "#fffaf6"; }}
                   onMouseLeave={e => (e.currentTarget.style.background = "#ffffff")}
-                  style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: 12.5, fontWeight: 500, color: burgundy, background: "#ffffff", border: "1px solid rgba(124,58,42,.22)", borderRadius: 9, padding: "9px 14px", cursor: (hasActive && !isGeneratingPDF) ? "pointer" : "default", opacity: (hasActive && !isGeneratingPDF) ? 1 : 0.5 }}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: 13, fontWeight: 500, color: burgundy, background: "#ffffff", border: "1px solid rgba(124,58,42,.22)", borderRadius: 10, padding: "10px 16px", cursor: (hasActive && !isGeneratingPDF) ? "pointer" : "default", opacity: (hasActive && !isGeneratingPDF) ? 1 : 0.5 }}
                 >
                   <Download style={{ width: 13, height: 13 }} />
                   {isGeneratingPDF ? "Generating…" : "Download as PDF"}
@@ -2455,15 +2438,15 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         </AnimatePresence>
 
         {/* ── Content grid: 360px list + 1fr reading pane ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 16, padding: "16px 22px 80px", alignItems: "start" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 16, padding: "0 22px 80px", alignItems: "start" }}>
 
           {/* List card — outer rim + inner bordered frame */}
           <div style={{ border: "1px solid rgba(90,55,42,.16)", borderRadius: 14, background: parchment, backgroundImage: PAPER_TEXTURE, padding: 7, boxShadow: "0 1px 3px rgba(40,22,14,.05), 0 7px 20px rgba(40,22,14,.07)" }}>
             <div style={{ border: "1px solid rgba(124,58,42,.22)", borderRadius: 8, overflow: "hidden", background: parchment }}>
 
               {/* List head row */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px 12px", borderBottom: "1px solid #ece0d2" }}>
-                <span style={{ fontFamily: FONT_SERIF, fontSize: 15, fontWeight: 600, color: "#2e3a2c" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "15px 16px 13px", borderBottom: "1px solid #ece0d2" }}>
+                <span style={{ fontFamily: FONT_SERIF, fontSize: 16, fontWeight: 600, color: "#2e3a2c" }}>
                   {sortedList.length} {sortedList.length === 1 ? "query" : "queries"}
                 </span>
                 <button
@@ -2556,8 +2539,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     {/* Top row: Agent name (Playfair) and status chip */}
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 6 }}>
                       <h4 style={{
-                        fontFamily: FONT_SERIF, fontSize: 13, fontWeight: 700,
-                        color: "#3a1c14", lineHeight: 1.2,
+                        fontFamily: FONT_SERIF, fontSize: 16.5, fontWeight: 500,
+                        color: "#2e3a2c", lineHeight: 1.2,
                         overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                         flex: 1, minWidth: 0,
                       }}>
@@ -2567,13 +2550,13 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     </div>
 
                     {/* Agency in mono-muted (or fallback kicker for agency-only agents) */}
-                    <p style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#9a8579", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <p style={{ fontFamily: FONT_MONO, fontSize: 9.5, color: "#9a8579", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {agent.name?.trim() ? agent.agency : "Agency · no named agent"}
                     </p>
 
                     {/* Bottom: manuscript in burgundy, time in mono */}
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6, marginTop: 2 }}>
-                      <span style={{ fontSize: 10, color: burgundy, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
+                      <span style={{ fontSize: 12, color: burgundy, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
                         {ms.title}
                       </span>
                       <span style={{ fontFamily: FONT_MONO, fontSize: 9, color: "#b0a89e", flexShrink: 0 }}>
@@ -2745,24 +2728,17 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     : paneAction.ballHolder === "agent" ? `waiting on ${agentFirstName}…`
                     : null;
                   return (
-                    <div style={{ padding: "18px 26px 18px", background: "linear-gradient(180deg,#faece4 0%,rgba(250,236,228,0) 100%)" }}>
-                      {/* Status row */}
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
-                          <div style={{ width: 48, height: 48, borderRadius: "50%", background: "radial-gradient(circle at 35% 30%,#fbeee6,#f1d4c6)", border: "1.5px solid rgba(124,58,42,0.7)", boxShadow: "inset 0 1px 3px rgba(124,58,42,.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                            <StatusDot status={activeQuery.status} size={21} />
-                          </div>
-                          <span style={{ fontFamily: FONT_MONO, fontSize: 15, letterSpacing: ".1em", textTransform: "uppercase" as const, color: burgundy }}>
-                            {statusDisplayLabel(activeQuery)}
-                          </span>
+                    <div style={{ display: "grid", gridTemplateColumns: "200px 1fr 200px", gap: 16, alignItems: "start", padding: "22px 26px 20px", background: "linear-gradient(180deg,#faece4 0%,rgba(250,236,228,0) 100%)" }}>
+                      {/* LEFT: seal + status label */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 13, paddingTop: 6 }}>
+                        <div style={{ width: 48, height: 48, borderRadius: "50%", background: "radial-gradient(circle at 35% 30%,#fbeee6,#f1d4c6)", border: "1.5px solid rgba(124,58,42,0.7)", boxShadow: "inset 0 1px 3px rgba(124,58,42,.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          <StatusDot status={activeQuery.status} size={21} />
                         </div>
-                        {whoseTurnText && (
-                          <div style={{ fontFamily: "'Caveat', cursive", fontSize: 21, color: "#9a5240", lineHeight: 1 }}>
-                            {whoseTurnText}
-                          </div>
-                        )}
+                        <span style={{ fontFamily: FONT_MONO, fontSize: 15, letterSpacing: ".1em", textTransform: "uppercase" as const, color: burgundy }}>
+                          {statusDisplayLabel(activeQuery)}
+                        </span>
                       </div>
-                      {/* Agent identity — centred */}
+                      {/* CENTER: Agent identity */}
                       <div style={{ textAlign: "center" }}>
                         {!hasName && (
                           <div style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase" as const, letterSpacing: ".14em", color: labelColor, marginBottom: 4 }}>
@@ -2809,6 +2785,16 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           )}
                         </div>
                       </div>
+                      {/* RIGHT: whose-turn text */}
+                      {whoseTurnText ? (
+                        <div style={{ textAlign: "right", paddingTop: 10 }}>
+                          <div style={{ fontFamily: "'Caveat', cursive", fontSize: 23, color: "#9a5240", lineHeight: 1 }}>
+                            {whoseTurnText}
+                          </div>
+                        </div>
+                      ) : (
+                        <div />
+                      )}
                     </div>
                   );
                 })()}
@@ -2821,7 +2807,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                       {/* Running head */}
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 18 }}>
                         <div style={{ height: 1, width: 22, background: "rgba(124,58,42,.3)" }} />
-                        <span style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase" as const, letterSpacing: ".16em", color: "#2e3a2c" }}>Tracking</span>
+                        <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, textTransform: "uppercase" as const, letterSpacing: ".16em", color: "#2e3a2c" }}>Tracking</span>
                         <div style={{ height: 1, width: 22, background: "rgba(124,58,42,.3)" }} />
                       </div>
                       {/* Timeline (same logic as before) */}
@@ -2961,7 +2947,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                       {/* Running head */}
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 18 }}>
                         <div style={{ height: 1, width: 22, background: "rgba(124,58,42,.3)" }} />
-                        <span style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase" as const, letterSpacing: ".16em", color: "#2e3a2c" }}>What you sent</span>
+                        <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, textTransform: "uppercase" as const, letterSpacing: ".16em", color: "#2e3a2c" }}>What you sent</span>
                         <div style={{ height: 1, width: 22, background: "rgba(124,58,42,.3)" }} />
                       </div>
                       {/* Content area */}
@@ -3112,7 +3098,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                       {/* Running head */}
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 18 }}>
                         <div style={{ height: 1, width: 22, background: "rgba(124,58,42,.3)" }} />
-                        <span style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase" as const, letterSpacing: ".16em", color: "#2e3a2c" }}>Notes</span>
+                        <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, textTransform: "uppercase" as const, letterSpacing: ".16em", color: "#2e3a2c" }}>Notes</span>
                         <div style={{ height: 1, width: 22, background: "rgba(124,58,42,.3)" }} />
                       </div>
                       {/* Notes content */}
