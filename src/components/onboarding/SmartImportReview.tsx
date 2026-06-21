@@ -18,7 +18,6 @@ import { PREDEFINED_GENRES } from "../../lib/manuscripts";
 import { StatusDot } from "../StatusDot";
 import { statusBurgundy, statusSageRing, statusSageMark } from "../../lib/designTokens";
 import { PinkButton } from "../dashboard/HeroCard";
-import { ScriptAllyLogo } from "../ScriptAllyLogo";
 import {
   ReviewAgent, ReviewQuery, ReasonItem, CheckReason, AgentStatus,
   agentStatus, resolveReason, queryStatusOf, fmtDate, QUERY_STATUS_OPTIONS,
@@ -1205,9 +1204,10 @@ export interface SmartImportReviewProps {
 /** Slim onboarding top bar — logo left, search/bell/avatar right. Exported so the post-import
  *  loader mounts the exact same nav as the review screens. */
 export const OnbNav: React.FC<{ userInitial: string }> = ({ userInitial }) => (
-  <nav style={{ height: 56, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 28px", background: "#fdfaf5", borderBottom: "1px solid #e8dfd1", position: "sticky", top: 0, zIndex: 40 }}>
-    <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-      <ScriptAllyLogo size="sm" textColor="#7c3a2a" iconColor="#7c3a2a" />
+  <nav style={{ height: 76, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 100px", background: "#fdfaf5", borderBottom: "1px solid #e8dfd1", position: "sticky", top: 0, zIndex: 40 }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+      <img src="/scriptally-logo-new-basic.png" alt="" aria-hidden="true" style={{ height: 34, width: "auto", display: "block" }} />
+      <img src="/scriptally-title-v2.png" alt="ScriptAlly" style={{ height: 34, width: "auto", display: "block", maxWidth: "none" }} />
     </div>
     <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
       <button aria-label="Search" style={{ background: "none", border: "none", color: "#b1a596", cursor: "pointer", padding: 8, borderRadius: 8, lineHeight: 0 }}
@@ -1284,10 +1284,10 @@ const PinkTag: React.FC = () => (
   <span style={{ fontFamily: CAVEAT, background: "#f0cdbf", color: "#a85a44", padding: "1px 13px", borderRadius: 16, fontSize: "0.86em", verticalAlign: 1 }}>pink</span>
 );
 
-/** "In case you're stuck…" margin-note FAQ accordion. */
+/** "FAQs" margin-note accordion. */
 const FaqList: React.FC<{ items: { q: string; a: string }[]; open: Set<number>; onToggle: (i: number) => void }> = ({ items, open, onToggle }) => (
   <div>
-    <p style={{ fontFamily: CAVEAT, fontSize: 24, color: "#7c3a2a", margin: "0 0 12px", paddingLeft: 2 }}>In case you're stuck…</p>
+    <p style={{ fontFamily: CAVEAT, fontSize: 24, color: "#7c3a2a", margin: "0 0 12px", paddingLeft: 2 }}>FAQs</p>
     {items.map((item, i) => {
       const isOpen = open.has(i);
       return (
@@ -1310,6 +1310,87 @@ const FaqList: React.FC<{ items: { q: string; a: string }[]; open: Set<number>; 
     })}
   </div>
 );
+
+// ── Windowed fit-to-screen shell (final B-redesign layout) ───────────────────────────────────────
+// Full-viewport: full-width sticky nav + a white window that fits the viewport and scrolls
+// internally (no page scroll). The pink/sage rim is the dashboard hero rim (heroRim.css) recoloured
+// and mounted on the window's 7px outer band — same mask-composite ring geometry so the corners
+// render as cleanly as the dashboard's.
+const REVIEW_SHELL_CSS = `
+.sa-rv-root{ position:fixed; inset:0; z-index:50; background:#f2ede7; display:flex; flex-direction:column; overflow:hidden; }
+.sa-rv-window{ position:relative; flex:1 1 auto; min-height:0; width:100%; max-width:1200px; margin:18px auto;
+  background:#fff; border:1px solid #ddd2c0; border-radius:22px; box-shadow:0 30px 70px -42px rgba(60,40,28,.45);
+  overflow:hidden; display:flex; flex-direction:column;
+  --rim-glow:rgba(238,196,180,.8); --rim-base:rgba(238,196,180,.13); }
+.sa-rv-window.allclear{ --rim-glow:rgba(138,158,136,.72); --rim-base:rgba(138,158,136,.16); }
+/* burgundy inset frame, 7px from the window edge */
+.sa-rv-window::after{ content:""; position:absolute; inset:7px; border:1px solid rgba(124,58,42,.3);
+  border-radius:15px; pointer-events:none; z-index:3; }
+/* pink wave — dashboard hero rim, recoloured; fills the full 7px band, edge-to-frame */
+.sa-rv-rim{ position:absolute; inset:0; border-radius:22px; padding:7px; z-index:1; pointer-events:none; overflow:hidden;
+  background:var(--rim-base); transition:background .55s ease;
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor;
+          mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);  mask-composite:exclude; }
+.sa-rv-band{ position:absolute; top:-10%; bottom:-10%; width:60%; filter:blur(4px);
+  background:linear-gradient(95deg, transparent 0%, var(--rim-glow) 50%, transparent 100%);
+  animation:saRvRimCross 16s linear infinite; }
+@keyframes saRvRimCross{ 0%{left:-60%} 100%{left:114%} }
+.sa-rv-grid{ display:grid; grid-template-columns:1fr 340px; gap:38px; height:100%; padding:28px 30px;
+  align-items:stretch; overflow:hidden; position:relative; z-index:2; }
+.sa-rv-main{ display:flex; flex-direction:column; min-height:0; }
+.sa-rv-board{ display:flex; flex-direction:column; gap:34px; padding:18px 16px 0 28px; overflow-y:auto; min-height:0; }
+.sa-rv-card{ background:#fdfaf5; border-radius:16px; box-shadow:0 18px 44px -30px rgba(60,40,28,.4);
+  flex:1 1 auto; min-height:0; display:flex; padding:7px; }
+.sa-rv-frame{ flex:1 1 auto; min-height:0; width:100%; border:1px solid rgba(124,58,42,.3); border-radius:11px;
+  overflow:hidden; display:flex; }
+.sa-rv-scroll{ flex:1 1 auto; min-height:0; width:100%; overflow-y:auto;
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 var(--ft,0px),#000 calc(100% - var(--fb,0px)),transparent 100%);
+          mask-image:linear-gradient(to bottom,transparent 0,#000 var(--ft,0px),#000 calc(100% - var(--fb,0px)),transparent 100%); }
+@keyframes saImpBlink{0%,50%{opacity:1}50.01%,100%{opacity:0}}
+@keyframes saImpModalPop{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes saImpFaqDrop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media(max-width:880px){ .sa-rv-grid{ grid-template-columns:1fr; } }
+@media(prefers-reduced-motion:reduce){ .sa-rv-band{ animation:none; opacity:0; } }
+`;
+
+/** Full-viewport windowed shell: cream ground, full-width nav, white window with the recoloured rim. */
+const ReviewShell: React.FC<{ userInitial: string; allClear: boolean; modal?: React.ReactNode; children: React.ReactNode }> = ({ userInitial, allClear, modal, children }) => (
+  <div className="sa-rv-root" style={{ fontFamily: "Inter, sans-serif", color: "#2a2521" }}>
+    <style>{REVIEW_SHELL_CSS}</style>
+    {modal}
+    <OnbNav userInitial={userInitial} />
+    <div className={`sa-rv-window${allClear ? " allclear" : ""}`}>
+      <div className="sa-rv-rim" aria-hidden="true"><div className="sa-rv-band" /></div>
+      {children}
+    </div>
+  </div>
+);
+
+/** Records card: parchment rim → burgundy hairline frame (clipping context) → internally-scrolling
+ *  region with 28px scroll-edge fades (top/bottom, only mid-scroll). */
+const RecordsCard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const fade = () => {
+    const el = ref.current; if (!el) return;
+    el.style.setProperty("--ft", (el.scrollTop > 3 ? 28 : 0) + "px");
+    el.style.setProperty("--fb", (el.scrollHeight - el.clientHeight - el.scrollTop > 3 ? 28 : 0) + "px");
+  };
+  useEffect(() => {
+    const el = ref.current; if (!el) return;
+    el.addEventListener("scroll", fade, { passive: true });
+    const ro = new ResizeObserver(fade);
+    ro.observe(el);
+    return () => { el.removeEventListener("scroll", fade); ro.disconnect(); };
+  }, []);
+  useEffect(() => { fade(); }); // recompute after every render (rows added / removed / resolved)
+  return (
+    <div className="sa-rv-card">
+      <div className="sa-rv-frame">
+        <div className="sa-rv-scroll" ref={ref}>{children}</div>
+      </div>
+    </div>
+  );
+};
 
 export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, onBack, onSkip, error, onImport, userName }) => {
   const initial = useMemo(() => parseModel(result), [result]);
@@ -1766,56 +1847,45 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
     ];
 
     return (
-      <div style={{ minHeight: "100vh", background: "radial-gradient(circle at 18% 8%,rgba(255,255,255,.45),transparent 42%), repeating-linear-gradient(94deg,rgba(150,120,90,.025) 0 2px,transparent 2px 5px), #f2ede7", fontFamily: "Inter, sans-serif", color: "#2a2521" }}>
-        <style>{`
-          @keyframes saImpBlink{0%,50%{opacity:1}50.01%,100%{opacity:0}}
-          @keyframes saImpModalPop{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:none}}
-          @keyframes saImpFaqDrop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
-        `}</style>
+      <ReviewShell userInitial={userInitial} allClear={needCount === 0}
+        modal={showSkipModal ? <SkipSetupModal onClose={() => setShowSkipModal(false)} onSkip={onSkip} /> : null}>
+        <div className="sa-rv-grid">
 
-        {showSkipModal && <SkipSetupModal onClose={() => setShowSkipModal(false)} onSkip={onSkip} />}
-        <OnbNav userInitial={userInitial} />
-
-        {/* Two-column grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 44, maxWidth: 1160, margin: "0 auto", padding: "46px 40px 60px", alignItems: "start" }}>
-
-          {/* ── Left: header + list card + footer ── */}
-          <div>
+          {/* ── Left: header + records card + footer ── */}
+          <div className="sa-rv-main">
             {/* Header */}
-            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 18 }}>
-              <div>
-                <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: ".18em", textTransform: "uppercase", color: "#5a6e58" }}>Data captured</span>
-                <h1 style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 30, margin: "6px 0 4px", color: "#33302b" }}>
-                  Populating your{" "}
-                  <span style={{ background: "rgba(124,58,42,.16)", borderRadius: 2, padding: ".02em .1em" }}>agent database</span>
-                  <span style={{ display: "inline-block", width: 2, height: "1.23em", background: "#33302b", marginLeft: 6, verticalAlign: "-0.28em", animation: "saImpBlink 1.06s steps(1,end) infinite" }} aria-hidden />
-                </h1>
-                <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
-                  <span style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#e6ebe3", color: "#5a6e58" }}>{okCount} ready to import</span>
-                  {needCount > 0
-                    ? <span style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#f0cdbf", color: "#a85a44" }}>{needCount} to check</span>
-                    : <span style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#e6ebe3", color: "#5a6e58" }}>all clear</span>}
-                </div>
+            <div style={{ marginBottom: 16 }}>
+              <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: ".18em", textTransform: "uppercase", color: "#5a6e58" }}>Data captured</span>
+              <h1 style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 30, margin: "6px 0 4px", color: "#33302b" }}>
+                Populating your{" "}
+                <span style={{ background: "rgba(124,58,42,.16)", borderRadius: 2, padding: ".02em .1em" }}>agent database</span>
+                <span style={{ display: "inline-block", width: 2, height: "1.23em", background: "#33302b", marginLeft: 6, verticalAlign: "-0.28em", animation: "saImpBlink 1.06s steps(1,end) infinite" }} aria-hidden />
+              </h1>
+              <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
+                <span style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#e6ebe3", color: "#5a6e58" }}>{okCount} ready to import</span>
+                {needCount > 0
+                  ? <span style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#f0cdbf", color: "#a85a44" }}>{needCount} to check</span>
+                  : <span style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#e6ebe3", color: "#5a6e58" }}>all clear</span>}
               </div>
             </div>
 
             {/* Commit-error banner */}
             {error && (
-              <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#fdecea", border: "1px solid #e6b6a8", borderRadius: 9, padding: "10px 13px", fontFamily: "Inter", fontSize: 12, color: C.invalid, marginBottom: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#fdecea", border: "1px solid #e6b6a8", borderRadius: 9, padding: "10px 13px", fontFamily: "Inter", fontSize: 12, color: C.invalid, marginBottom: 14 }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.invalid} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
                 {error}
               </div>
             )}
 
-            {/* Agent list card */}
-            <div style={{ background: "#fdfaf5", borderRadius: 16, border: "1px solid #efe6d8", boxShadow: "0 18px 44px -30px rgba(60,40,28,.4)", overflow: "hidden" }}>
+            {/* Records card — internal scroll + edge fades */}
+            <RecordsCard>
               {agentRows.length > 0
                 ? agentRows
                 : <div style={{ padding: "32px 22px", fontFamily: "Inter", fontSize: 13, color: "#9c8878", textAlign: "center" }}>No agents to review.</div>}
-            </div>
+            </RecordsCard>
 
             {/* Footer */}
-            <div style={{ display: "flex", alignItems: "center", gap: 18, marginTop: 24 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 18, marginTop: 18, flexShrink: 0 }}>
               <button onClick={() => (hadDuplicates ? switchScreen("duplicates") : onBack?.())}
                 style={{ fontFamily: MONO, fontSize: 13, color: "#8a8178", background: "none", border: "none", cursor: "pointer" }}
                 onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; }}
@@ -1837,7 +1907,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
           </div>
 
           {/* ── Right: sidebar board ── */}
-          <aside style={{ display: "flex", flexDirection: "column", gap: 34, padding: "18px 16px 0 4px" }}>
+          <aside className="sa-rv-board">
             <WhereYouAreCard step="agents" onSkip={() => setShowSkipModal(true)} />
             <PinkSlip>
               Anything in <PinkTag /> needs a quick look. It might be a duplicate, or could be missing the agency's name (we need this). Check these for us, add any further details you can, then we'll move on to capturing your queries.
@@ -1845,7 +1915,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
             <FaqList items={FAQ_ITEMS} open={openFaqs} onToggle={toggleFaq} />
           </aside>
         </div>
-      </div>
+      </ReviewShell>
     );
   }
   // ─────────────────────────────────────────────────────────────────────────────────────────────
@@ -1896,48 +1966,37 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
     ];
 
     return (
-      <div style={{ minHeight: "100vh", background: "radial-gradient(circle at 18% 8%,rgba(255,255,255,.45),transparent 42%), repeating-linear-gradient(94deg,rgba(150,120,90,.025) 0 2px,transparent 2px 5px), #f2ede7", fontFamily: "Inter, sans-serif", color: "#2a2521" }}>
-        <style>{`
-          @keyframes saImpBlink{0%,50%{opacity:1}50.01%,100%{opacity:0}}
-          @keyframes saImpModalPop{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:none}}
-          @keyframes saImpFaqDrop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
-        `}</style>
+      <ReviewShell userInitial={userInitial} allClear={qLookCount === 0}
+        modal={showSkipModal ? <SkipSetupModal onClose={() => setShowSkipModal(false)} onSkip={onSkip} /> : null}>
+        <div className="sa-rv-grid">
 
-        {showSkipModal && <SkipSetupModal onClose={() => setShowSkipModal(false)} onSkip={onSkip} />}
-        <OnbNav userInitial={userInitial} />
-
-        {/* Two-column grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 44, maxWidth: 1160, margin: "0 auto", padding: "46px 40px 60px", alignItems: "start" }}>
-
-          {/* ── Left: header + list card + footer ── */}
-          <div>
-            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 18 }}>
-              <div>
-                <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: ".18em", textTransform: "uppercase", color: "#5a6e58" }}>Data captured</span>
-                <h1 style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 30, margin: "6px 0 4px", color: "#33302b" }}>
-                  Populating your{" "}
-                  <span style={{ background: "rgba(124,58,42,.16)", borderRadius: 2, padding: ".02em .1em" }}>query log</span>
-                  <span style={{ display: "inline-block", width: 2, height: "1.23em", background: "#33302b", marginLeft: 6, verticalAlign: "-0.28em", animation: "saImpBlink 1.06s steps(1,end) infinite" }} aria-hidden />
-                </h1>
-                <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
-                  <span style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#e6ebe3", color: "#5a6e58" }}>{qReadyCount} ready to import</span>
-                  {qLookCount > 0
-                    ? <span style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#f0cdbf", color: "#a85a44" }}>{qLookCount} to check</span>
-                    : <span style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#e6ebe3", color: "#5a6e58" }}>all clear</span>}
-                </div>
+          {/* ── Left: header + records card + footer ── */}
+          <div className="sa-rv-main">
+            <div style={{ marginBottom: 16 }}>
+              <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: ".18em", textTransform: "uppercase", color: "#5a6e58" }}>Data captured</span>
+              <h1 style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 30, margin: "6px 0 4px", color: "#33302b" }}>
+                Populating your{" "}
+                <span style={{ background: "rgba(124,58,42,.16)", borderRadius: 2, padding: ".02em .1em" }}>query log</span>
+                <span style={{ display: "inline-block", width: 2, height: "1.23em", background: "#33302b", marginLeft: 6, verticalAlign: "-0.28em", animation: "saImpBlink 1.06s steps(1,end) infinite" }} aria-hidden />
+              </h1>
+              <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
+                <span style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#e6ebe3", color: "#5a6e58" }}>{qReadyCount} ready to import</span>
+                {qLookCount > 0
+                  ? <span style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#f0cdbf", color: "#a85a44" }}>{qLookCount} to check</span>
+                  : <span style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#e6ebe3", color: "#5a6e58" }}>all clear</span>}
               </div>
             </div>
 
             {/* Commit-error banner */}
             {error && (
-              <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#fdecea", border: "1px solid #e6b6a8", borderRadius: 9, padding: "10px 13px", fontFamily: "Inter", fontSize: 12, color: C.invalid, marginBottom: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#fdecea", border: "1px solid #e6b6a8", borderRadius: 9, padding: "10px 13px", fontFamily: "Inter", fontSize: 12, color: C.invalid, marginBottom: 14 }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.invalid} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
                 {error}
               </div>
             )}
 
-            {/* Query list card */}
-            <div style={{ background: "#fdfaf5", borderRadius: 16, border: "1px solid #efe6d8", boxShadow: "0 18px 44px -30px rgba(60,40,28,.4)", overflow: "hidden" }}>
+            {/* Records card — internal scroll + edge fades */}
+            <RecordsCard>
               {states.length > 0
                 ? states.map(({ q, state }) => (
                     <QueryRow key={q.id} query={q} agentName={agentNameOf(q.agentRef)} origin={originOf(q)} reviewState={state}
@@ -1954,10 +2013,10 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
                     />
                   ))
                 : <div style={{ padding: "32px 22px", fontFamily: "Inter", fontSize: 13, color: "#9c8878", textAlign: "center" }}>No queries to review.</div>}
-            </div>
+            </RecordsCard>
 
             {/* Footer */}
-            <div style={{ display: "flex", alignItems: "center", gap: 18, marginTop: 24 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 18, marginTop: 18, flexShrink: 0 }}>
               <button onClick={() => switchScreen("agents")}
                 style={{ fontFamily: MONO, fontSize: 13, color: "#8a8178", background: "none", border: "none", cursor: "pointer" }}
                 onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; }}
@@ -1969,7 +2028,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
                   onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; }}
                 >Reset all changes</button>
-                {/* Commit seam: onImportClick awaits onImport(modelToResult(...)) → hand-off to the loader (next prompt). */}
+                {/* Commit seam: onImportClick awaits onImport(modelToResult(...)) → hand-off to the loader. */}
                 <button onClick={onImportClick}
                   style={{ fontFamily: MONO, fontSize: 13.5, background: "rgba(199,212,195,.5)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", color: canImport ? "#5a6e58" : "#8a9e88", border: "1px solid rgba(255,255,255,.55)", borderRadius: 11, padding: "13px 32px", cursor: canImport ? "pointer" : "not-allowed", fontWeight: 600, letterSpacing: ".02em", boxShadow: "0 10px 22px -12px rgba(90,110,88,.5),inset 0 1px 0 rgba(255,255,255,.65)", opacity: canImport ? 1 : 0.65, transition: "background .15s,color .15s,box-shadow .15s,transform .15s,border-color .15s" }}
                   onMouseEnter={(e) => { if (canImport) { e.currentTarget.style.background = "rgba(245,226,218,.62)"; e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.transform = "translateY(-1px)"; } }}
@@ -1980,7 +2039,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
           </div>
 
           {/* ── Right: sidebar board ── */}
-          <aside style={{ display: "flex", flexDirection: "column", gap: 34, padding: "18px 16px 0 4px" }}>
+          <aside className="sa-rv-board">
             <WhereYouAreCard step="queries" onSkip={() => setShowSkipModal(true)} />
             <PinkSlip>
               Anything in <PinkTag /> needs a quick look. A query might be missing its date, or we couldn't match it to an agent. Check these for us, add any further details you can, then we'll bring it all into your log.
@@ -1988,7 +2047,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
             <FaqList items={FAQ_ITEMS} open={openFaqs} onToggle={toggleFaq} />
           </aside>
         </div>
-      </div>
+      </ReviewShell>
     );
   }
   // ─────────────────────────────────────────────────────────────────────────────────────────────

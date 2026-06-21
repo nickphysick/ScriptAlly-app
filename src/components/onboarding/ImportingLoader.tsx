@@ -59,7 +59,9 @@ export const ImportingLoader: React.FC<ImportingLoaderProps> = ({ complete, onPr
   }, [complete]);
 
   return (
-    <div style={{ minHeight: "100vh", background: "radial-gradient(circle at 50% 38%,rgba(255,255,255,.55),transparent 55%), repeating-linear-gradient(94deg,rgba(150,120,90,.022) 0 2px,transparent 2px 5px), #ece4d8", fontFamily: "Inter, sans-serif", color: "#2a2521" }}>
+    // Full-viewport (fixed) so it escapes the narrow onboarding column wrapper and renders at the
+    // same full-width scale as the review screens: cream ground, full-width nav, centred stage.
+    <div style={{ position: "fixed", inset: 0, zIndex: 50, background: "#f2ede7", display: "flex", flexDirection: "column", overflow: "hidden", fontFamily: "Inter, sans-serif", color: "#2a2521" }}>
       <style>{`
         @keyframes saLdrBreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
         @keyframes saLdrPing{0%{transform:scale(.85);opacity:.55}80%{opacity:0}100%{transform:scale(1.95);opacity:0}}
@@ -80,7 +82,7 @@ export const ImportingLoader: React.FC<ImportingLoaderProps> = ({ complete, onPr
 
       <OnbNav userInitial={userInitial} />
 
-      <main style={{ minHeight: "calc(100vh - 56px)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <main style={{ flex: "1 1 auto", minHeight: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
         <div className={`sa-ldr-stage${complete ? " done" : ""}`} style={{ padding: "40px 30px", textAlign: "center" }}>
           {/* Emblem — parchment disc + breathing book, two sage rings pulsing outward */}
           <div style={{ position: "relative", width: 200, height: 200, display: "grid", placeItems: "center", margin: "0 auto 30px" }}>

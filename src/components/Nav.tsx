@@ -287,9 +287,17 @@ export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, 
           <button
             onClick={() => { onNavigate("dashboard"); closeAll(); }}
             className="cursor-pointer select-none shrink-0"
-            style={{ background: "transparent", border: "none", padding: 0, marginTop: 3, lineHeight: 0 }}
+            style={{ background: "transparent", border: "none", padding: 0, marginTop: 3, lineHeight: 0, display: "flex", alignItems: "center", gap: 8 }}
             aria-label="ScriptAlly — go to dashboard"
           >
+            <img
+              src="/scriptally-logo-new-basic.png"
+              alt=""
+              aria-hidden="true"
+              width={30}
+              height={30}
+              style={{ width: 30, height: 30, maxWidth: "none", flexShrink: 0, display: "block" }}
+            />
             <ScriptAllyLogo size="md" className="!h-[46px] [&>svg]:!h-[46px]" textColor={burgundy} iconColor={burgundy} />
           </button>
 
