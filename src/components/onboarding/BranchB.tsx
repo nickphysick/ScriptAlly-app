@@ -17,16 +17,25 @@ import { runSmartImport, validateSmartImport, ValidatedImport } from "../../lib/
 import { commitSmartImport, CommitOutcome } from "../../lib/smartImportCommit";
 import { Form11Card, SelectRow, BookMotif, InboxMotif, FONT_SANS, FONT_MONO } from "./chrome";
 import { SmartImportReview } from "./SmartImportReview";
+import { ImportingLoader } from "./ImportingLoader";
 import { ManuscriptFields, ManuscriptFieldsState, emptyManuscriptFields } from "./ManuscriptFields";
+
+/** UX-only floor so the post-import loader is held for a deliberate minimum (never a fake delay on
+ *  errors — Promise.all rejects as soon as the commit does). */
+const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 export interface BranchBProps {
   onSkip: () => void;
   /** Back from B2 — returns to the welcome step. */
   onExit: () => void;
-  /** B2 Continue — parent saves the manuscript (status Querying); resolves true on success. */
+  /** B2 Continue — parent HOLDS the entered details in flow state (no write yet); resolves true to
+   *  advance. The manuscript is created later, once, via onEnsureManuscript. */
   onSaveBook: (fields: ManuscriptFieldsState) => Promise<boolean>;
-  /** The manuscript every imported query attaches to (set by the parent after B2 saves). */
-  manuscriptId: string | null;
+  /** Held B2 details, used to pre-fill the book step when re-entering Branch B (Back then forward). */
+  initialBook?: ManuscriptFieldsState | null;
+  /** Create-or-reuse the manuscript from the held details, returning its id (null if it couldn't be
+   *  created). Idempotent — call it at the commit ending; every imported query attaches to this id. */
+  onEnsureManuscript: () => Promise<string | null>;
   /** Pre-selected import option: deep/interest → "smart", early → "byhand". */
   defaultImport: "smart" | "byhand";
   /** "Add them by hand" — drops into the existing add-agents flow. */
@@ -90,12 +99,13 @@ const EscapeHatch: React.FC<{ onOpen: () => void }> = ({ onOpen }) => (
 // it hands to handleImport — see SmartImportReview + smartImportReviewModel.
 
 export const BranchB: React.FC<BranchBProps> = ({
-  onSkip, onExit, onSaveBook, manuscriptId, defaultImport, onAddByHand, onOpenImportDesk, onImportComplete, error,
+  onSkip, onExit, onSaveBook, initialBook, onEnsureManuscript, defaultImport, onAddByHand, onOpenImportDesk, onImportComplete, error,
 }) => {
   const { currentUser, agents, addAgent, addQuery } = useScriptAllyDb();
 
   const [screen, setScreen] = useState<B3Screen>("book");
-  const [fields, setFields] = useState<ManuscriptFieldsState>(emptyManuscriptFields());
+  // Seed from any held draft so Back-to-welcome-then-forward re-fills the book step.
+  const [fields, setFields] = useState<ManuscriptFieldsState>(initialBook ?? emptyManuscriptFields());
   const [fieldError, setFieldError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -104,6 +114,9 @@ export const BranchB: React.FC<BranchBProps> = ({
   const [validated, setValidated] = useState<ValidatedImport | null>(null);
   const [outcome, setOutcome] = useState<CommitOutcome | null>(null);
   const [commitError, setCommitError] = useState<string | null>(null);
+  // Drives the loader's completion beat: flipped true only after a genuine success (commit resolved
+  // with rows imported AND the 5s floor elapsed). The loader then plays its finish and routes on.
+  const [importComplete, setImportComplete] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const shownError = error || fieldError;
@@ -125,18 +138,35 @@ export const BranchB: React.FC<BranchBProps> = ({
    *  inline fix (statuses, dates, dedupe, exclusions, recovered names) and builds the result via
    *  modelToResult, so we just commit it — same deps and post-import flow as before. */
   const handleImport = async (result: SmartImportResult) => {
-    if (!currentUser || !manuscriptId) return;
+    if (!currentUser) return;
     setCommitError(null);
-    setScreen("importing");
+    setImportComplete(false);
+    setScreen("importing"); // the loader shows the instant Import is pressed
     try {
-      const outcome = await commitSmartImport(
-        { userId: currentUser.id, existingAgents: agents, manuscriptTitle: fields.title, addAgent, addQuery },
-        result,
-        manuscriptId
-      );
-      // Always show what actually happened — the commit must never finish silently.
-      setOutcome(outcome);
-      setScreen("done");
+      // Create (or reuse) the manuscript from the held details — the single deferred write — then
+      // attach this import's queries to it. Idempotent: a retry after a failed commit reuses the id.
+      const mId = await onEnsureManuscript();
+      if (!mId) {
+        setCommitError("Couldn't set up your manuscript — nothing's lost. Try again, or use the Import desk.");
+        setScreen("review");
+        return;
+      }
+      // Run the commit and a 5s UX floor together. The floor never hides an error: if the commit
+      // rejects, Promise.all rejects immediately (we don't wait out the 5s to surface the failure).
+      const [committed] = await Promise.all([
+        commitSmartImport(
+          { userId: currentUser.id, existingAgents: agents, manuscriptTitle: fields.title, addAgent, addQuery },
+          result,
+          mId
+        ),
+        delay(5000),
+      ]);
+      setOutcome(committed);
+      // Never route on a false success: if nothing actually landed, surface the outcome screen
+      // ("That didn't work — here's why") instead of the loader's completion + dashboard route.
+      if (committed.queriesImported === 0) { setScreen("done"); return; }
+      // Genuine success → let the loader play its completion beat, then it calls onProceed to route.
+      setImportComplete(true);
     } catch (e) {
       console.error("Smart Import commit failed:", e);
       setCommitError("Something went wrong bringing your pipeline in — nothing is lost. Try again, or use the Import desk.");
@@ -243,14 +273,14 @@ export const BranchB: React.FC<BranchBProps> = ({
   }
 
   // ── Reading the file ─────────────────────────────────────────────────────
-  if (screen === "reading" || screen === "importing") {
+  if (screen === "reading") {
     return (
       <Form11Card
         dotIndex={2}
         onSkip={onSkip}
         pre="Your pipeline"
-        name={screen === "reading" ? "Reading your file…" : "Bringing it in…"}
-        sub={screen === "reading" ? "Matching your columns to ScriptAlly" : "Writing agents, queries, and history"}
+        name="Reading your file…"
+        sub="Matching your columns to ScriptAlly"
         motif={<InboxMotif />}
         primaryLabel="Working…"
         primaryDisabled
@@ -263,9 +293,20 @@ export const BranchB: React.FC<BranchBProps> = ({
           <style>{`@keyframes sa-ob-pulse2{0%,100%{opacity:0.25;transform:scale(0.85);}50%{opacity:1;transform:scale(1);}}`}</style>
         </div>
         <p style={{ fontFamily: FONT_SANS, fontSize: 12, color: "#9c8878", textAlign: "center", margin: 0 }}>
-          {screen === "reading" ? "This usually takes a few seconds." : "Almost there — don't close this tab."}
+          This usually takes a few seconds.
         </p>
       </Form11Card>
+    );
+  }
+
+  // ── Bringing it in — the held post-import loader (5s floor + commit), then routes to the dashboard.
+  if (screen === "importing") {
+    return (
+      <ImportingLoader
+        complete={importComplete}
+        onProceed={() => { if (outcome) onImportComplete(outcome); }}
+        userName={currentUser?.name}
+      />
     );
   }
 
@@ -279,6 +320,7 @@ export const BranchB: React.FC<BranchBProps> = ({
         onSkip={onSkip}
         error={commitError}
         onImport={handleImport}
+        userName={currentUser?.name}
       />
     );
   }

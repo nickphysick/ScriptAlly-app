@@ -164,3 +164,30 @@ export function manuscriptLimitError(plan: UserPlan | undefined, existingCount: 
   }
   return null;
 }
+
+/** Mutable holder for a created manuscript's id (in the onboarding component this is a ref's value). */
+export interface ManuscriptIdCache {
+  id: string | null;
+}
+
+/**
+ * Deferred, idempotent manuscript creation for the Branch-B onboarding flow. The manuscript is
+ * created from the held draft EXACTLY ONCE: the first successful write caches its id, and every later
+ * call (a second flow ending, or a retry after a failed import commit) reuses that id instead of
+ * writing a second manuscript. This is what stops the Free-tier 1-manuscript cap being tripped by
+ * navigation or retries — there are 0 manuscripts until the single create, and never more than 1.
+ *
+ * `create` performs the one real write (returning the new id, or null on failure/limit). A failed
+ * attempt is NOT cached, so a later retry can still succeed.
+ */
+export async function ensureManuscriptOnce(
+  cache: ManuscriptIdCache,
+  hasDraft: boolean,
+  create: () => Promise<string | null>
+): Promise<string | null> {
+  if (cache.id) return cache.id; // already created — reuse, never create twice
+  if (!hasDraft) return null; // nothing entered — nothing to create
+  const id = await create();
+  if (id) cache.id = id; // cache only on success; a failed attempt stays retryable
+  return id;
+}

@@ -2538,7 +2538,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   </div>
                 ) : (
                   <span style={{ display: "inline-flex", flexShrink: 0 }}>
-                    <StatusDot status={q.status} size={9} />
+                    <StatusDot status={q.status} />
                   </span>
                 );
 
@@ -2889,7 +2889,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           } else {
                             // Status-bearing node — route through the canonical StatusDot map (was a
                             // hand-built dot here; repointed so the designed artwork is the one source).
-                            dotElement = <StatusDot status={item.type as QueryStatus} size={12} className="z-10 mt-[4px]" />;
+                            dotElement = <StatusDot status={item.type as QueryStatus} overrideSize={25} className="z-10 mt-[4px]" />;
                           }
                           const baseTitle = item.type === 'waiting' ? 'Waiting to hear back' : (TIMELINE_TITLES[item.type as QueryStatus] || item.type);
                           const titleText = item.type === QueryStatus.FULL_SENT && (activeQuery.revisionRound ?? 1) >= 2 ? `${baseTitle} (v${activeQuery.revisionRound})` : baseTitle;

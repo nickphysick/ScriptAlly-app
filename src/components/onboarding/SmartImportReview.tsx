@@ -184,6 +184,368 @@ const DupControl: React.FC<{ members: ReviewAgent[]; queryCount: (id: string) =>
   </div>
 );
 
+// ── Flat agent row — used by the new agents-screen two-column layout ─────────────────────────
+interface AgentRowProps {
+  agent: ReviewAgent;
+  queryCount: number;
+  dupOpen: boolean;
+  clusterPeers?: ReviewAgent[];
+  open: boolean;
+  onToggleOpen: () => void;
+  onPatch: (p: Partial<ReviewAgent>) => void;
+  onDelete: () => void;
+  onResolveReason: (kind: CheckReason) => void;
+  onReopenReason: (kind: CheckReason) => void;
+  onMerge?: () => void;
+  onKeepBoth?: () => void;
+}
+
+const solidMini: React.CSSProperties = { fontFamily: MONO, fontSize: 12, padding: "9px 15px", borderRadius: 9, cursor: "pointer", border: "none", background: "#f5e2da", color: "#7c3a2a", fontWeight: 500 };
+const ghostMini: React.CSSProperties = { fontFamily: MONO, fontSize: 12, padding: "9px 15px", borderRadius: 9, cursor: "pointer", background: "transparent", color: "#8a8178", border: "1px solid #e3ccc0" };
+
+const AgentRow: React.FC<AgentRowProps> = ({
+  agent, queryCount, dupOpen, clusterPeers, open,
+  onToggleOpen, onPatch, onDelete, onResolveReason, onMerge, onKeepBoth,
+}) => {
+  const [agencyInput, setAgencyInput] = useState("");
+  const agencyRef = useRef<HTMLInputElement>(null);
+  const invalid = !agent.agency.trim();
+  const status = agentStatus(agent, dupOpen);
+  const needsCheck = status !== "captured";
+  const disp = agent.name || agent.agency;
+  const subline = agent.name && agent.agency ? agent.agency : !agent.name && agent.agency ? "Agent name not recorded" : null;
+  const av = agent.name
+    ? initials(agent.name)
+    : (agent.agency.match(/\b\w/g)?.slice(0, 2).join("").toUpperCase() ?? "–");
+  const accentColor = needsCheck ? "#a85a44" : "#5a6e58";
+  const avBg = needsCheck ? "#f0cdbf" : "#e6ebe3";
+  const avInk = needsCheck ? "#a85a44" : "#5a6e58";
+  const pillBg = needsCheck ? "#f0cdbf" : "#e6ebe3";
+  const pillInk = needsCheck ? "#a85a44" : "#5a6e58";
+  const openDupReason = dupOpen && (clusterPeers?.length ?? 0) > 0;
+  const openMappingReason = !invalid && !openDupReason ? agent.reasons.find((r) => r.kind === "mapping" && !r.resolved) : null;
+
+  return (
+    <div style={{ background: needsCheck ? "#fdf3ee" : "transparent", borderBottom: "1px solid #efe6d8" }}>
+      {/* Main row */}
+      <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "16px 22px" }}>
+        <span aria-hidden style={{ width: 3, alignSelf: "stretch", borderRadius: 3, background: accentColor, minHeight: 38, flexShrink: 0 }} />
+        <span style={{ width: 38, height: 38, borderRadius: 9, background: avBg, color: avInk, display: "grid", placeItems: "center", fontFamily: MONO, fontSize: 12.5, fontWeight: 500, flexShrink: 0, letterSpacing: 0 }}>
+          {av}
+        </span>
+        <span style={{ flex: 1, minWidth: 0 }}>
+          {disp
+            ? <div style={{ fontFamily: SERIF, fontSize: 18, color: "#2a2521", lineHeight: 1.1 }}>{disp}</div>
+            : <div style={{ fontFamily: SERIF, fontSize: 18, color: "#a89684", fontStyle: "italic", lineHeight: 1.1 }}>Name this agent</div>}
+          {subline && <div style={{ fontFamily: MONO, fontSize: 11.5, color: "#8a8178", marginTop: 1 }}>{subline}</div>}
+        </span>
+        <span style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+          <span style={{ fontFamily: MONO, fontSize: 11, padding: "4px 9px", borderRadius: 20, background: pillBg, color: pillInk, whiteSpace: "nowrap" }}>
+            {needsCheck ? "Needs a look" : "Ready"}
+          </span>
+          {!needsCheck && (
+            <button onClick={onToggleOpen}
+              style={{ fontFamily: MONO, fontSize: 11.5, color: "#aaa094", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = "#8a8178"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = "#aaa094"; }}
+            >{open ? "Close" : "Add details"}</button>
+          )}
+          <button title="Don't import" onClick={onDelete}
+            style={{ background: "none", border: "none", color: "#b6a99a", cursor: "pointer", padding: 4, borderRadius: 6, lineHeight: 0, fontSize: 14, fontFamily: "sans-serif" }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.background = "rgba(124,58,42,.08)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = "#b6a99a"; e.currentTarget.style.background = "none"; }}
+          >✕</button>
+        </span>
+      </div>
+
+      {/* "Add details" editor — ready items only */}
+      {open && !needsCheck && (
+        <div style={{ padding: "12px 22px 18px", borderTop: "0.5px solid #e8ddce", display: "flex", flexDirection: "column", gap: 11 }}>
+          <div style={{ display: "flex", gap: 10 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <span style={flab}>Agent name</span>
+              <div style={{ position: "relative" }}>
+                <input value={agent.agencyOnly ? "" : agent.name} disabled={agent.agencyOnly} placeholder={agent.agencyOnly ? "Referenced by agency only" : "e.g. Eleanor Vance"}
+                  onChange={(e) => onPatch({ name: e.target.value })}
+                  style={{ ...finBase, ...(agent.agencyOnly ? { background: "#f3efe8", color: "#a89684", fontStyle: "italic" } : {}) }} />
+                <span title="Don't know the name? Use agency only"
+                  onClick={() => onPatch({ agencyOnly: !agent.agencyOnly, ...(!agent.agencyOnly ? { name: "" } : {}) })}
+                  style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", width: 18, height: 18, borderRadius: "50%", border: `1px solid ${agent.agencyOnly ? "#8a9e88" : "#d8c8b8"}`, background: agent.agencyOnly ? "#8a9e88" : "#fff", color: agent.agencyOnly ? "#fff" : C.muted, fontFamily: MONO, fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>?</span>
+              </div>
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <span style={flab}>Agency</span>
+              <input value={agent.agency} placeholder="Agency" onChange={(e) => onPatch({ agency: e.target.value })} style={finBase} />
+            </div>
+          </div>
+          <div>
+            <span style={flab}>Genres they're looking for</span>
+            <GenreCombobox options={PREDEFINED_GENRES as unknown as string[]} value={agent.genres} onChange={(g) => onPatch({ genres: g })} placeholder="Type or pick…" />
+          </div>
+          <div>
+            <span style={flab}>Website</span>
+            <input value={agent.website} placeholder="agency.com/their-page" onChange={(e) => onPatch({ website: e.target.value })} style={finBase} />
+          </div>
+          <div style={{ display: "flex", gap: 10 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <span style={flab}>Submissions</span>
+              <SegmentedToggle<"open" | "closed"> value={agent.submissionsOpen ? "open" : "closed"}
+                options={[{ value: "open", label: "Open" }, { value: "closed", label: "Closed" }]}
+                onChange={(v) => onPatch({ submissionsOpen: v === "open" })} ariaLabel="Submissions status" />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <span style={flab}>Typically replies in</span>
+              <WeekSlider value={agent.weeks} onChange={(w) => onPatch({ weeks: w })} min={1} max={26} />
+            </div>
+          </div>
+          <div>
+            <span style={flab}>Agent fit</span>
+            <div style={{ fontSize: 10, color: C.muted, margin: "-2px 0 7px", lineHeight: 1.35 }}>Log how good a match this agent would be for you.</div>
+            <FitStars value={agent.rating} onChange={(r) => onPatch({ rating: r })} size={17} />
+          </div>
+        </div>
+      )}
+
+      {/* Inline reason panel — needs-check items */}
+      {needsCheck && (
+        <div style={{ padding: "0 22px 18px 79px" }}>
+          {/* Missing agency */}
+          {invalid && (
+            <>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "Inter", fontSize: 12.5, color: "#9a5040", marginBottom: 11 }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a85a44" strokeWidth="1.8" strokeLinecap="round" style={{ flexShrink: 0 }}><path d="M12 8v5"/><circle cx="12" cy="16.5" r=".4" fill="#a85a44" stroke="none"/><path d="M12 3l9 16H3z"/></svg>
+                An agency is required before this one can import.
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                <input ref={agencyRef} type="text" value={agencyInput} onChange={(e) => setAgencyInput(e.target.value)}
+                  placeholder="Agency name" aria-label="Agency name"
+                  style={{ fontFamily: MONO, fontSize: 12.5, padding: "9px 13px", border: "1px solid #e3ccc0", borderRadius: 9, background: "#fff", minWidth: 220, color: "#2a2521", outline: "none" }}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = "#9a5040"; }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = "#e3ccc0"; }}
+                  onKeyDown={(e) => { if (e.key === "Enter") { const v = agencyInput.trim(); if (v) { onPatch({ agency: v }); setAgencyInput(""); } } }}
+                />
+                <button onClick={() => { const v = agencyInput.trim(); if (v) { onPatch({ agency: v }); setAgencyInput(""); } else { agencyRef.current?.focus(); } }}
+                  style={solidMini}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0d3c7"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "#f5e2da"; }}
+                >Save agency</button>
+                <button onClick={() => onPatch({ agencyOnly: true, name: "" })} style={ghostMini}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.borderColor = "#9a5040"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; e.currentTarget.style.borderColor = "#e3ccc0"; }}
+                >Reference by agency only</button>
+              </div>
+            </>
+          )}
+          {/* Suspected duplicate */}
+          {openDupReason && clusterPeers && (
+            <>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "Inter", fontSize: 12.5, color: "#9a5040", marginBottom: 11 }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a85a44" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><rect x="4" y="4" width="13" height="13" rx="2"/><path d="M9 9h11v11H9z" fill="#fdf3ee"/><rect x="9" y="9" width="11" height="11" rx="2"/></svg>
+                Suspected duplicate of{" "}
+                <b style={{ color: "#7c3a2a", fontWeight: 500 }}>{clusterPeers.map((p) => p.name || p.agency).join(", ")}</b>.
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                <span style={{ fontFamily: MONO, fontSize: 12, color: "#8a8178", marginRight: 4 }}>Same agent, or two different people?</span>
+                <button onClick={onMerge} style={solidMini}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0d3c7"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "#f5e2da"; }}
+                >Merge them</button>
+                <button onClick={onKeepBoth} style={ghostMini}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.borderColor = "#9a5040"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; e.currentTarget.style.borderColor = "#e3ccc0"; }}
+                >Keep both</button>
+              </div>
+            </>
+          )}
+          {/* Mapping note (low-confidence / flag) */}
+          {openMappingReason && (
+            <>
+              <div style={{ fontFamily: "Inter", fontSize: 12.5, color: "#9a5040", marginBottom: 11 }}>{quoteStatuses(openMappingReason.note)}</div>
+              <button onClick={() => onResolveReason("mapping")} style={ghostMini}
+                onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.borderColor = "#9a5040"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; e.currentTarget.style.borderColor = "#e3ccc0"; }}
+              >Mark as checked</button>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ── Query row (Queries B-redesign) ──────────────────────────────────────────────────────────────
+// Flat list row mirroring AgentRow. A query's review state is derived by the screen (status-mapping
+// reason from the model, plus the two presentational query cases — missing date, unmatched agent).
+type QueryReviewState = "ready" | "mapping" | "needs-date" | "unmatched";
+interface QueryRowProps {
+  query: ReviewQuery;
+  /** Agent name (Playfair) — agent.name || agent.agency, or "Unknown agent" if unmatched. */
+  agentName: string;
+  /** Leading sub-line segment: the agency, "Agency only", or "From your file" (unmatched). */
+  origin: string;
+  reviewState: QueryReviewState;
+  open: boolean;
+  onToggleOpen: () => void;
+  onPatch: (p: Partial<ReviewQuery>) => void;
+  onDelete: () => void;
+  onResolveMapping: () => void;
+  onSaveDate: (iso: string) => void;
+  onLeaveUndated: () => void;
+  agentOptions: { id: string; label: string }[];
+  onLinkAgent: (agentId: string) => void;
+  onAddNewAgent: () => void;
+}
+
+const QueryRow: React.FC<QueryRowProps> = ({
+  query, agentName, origin, reviewState, open, onToggleOpen, onPatch, onDelete,
+  onResolveMapping, onSaveDate, onLeaveUndated, agentOptions, onLinkAgent, onAddNewAgent,
+}) => {
+  const [dateInput, setDateInput] = useState("");
+  const [linkChoice, setLinkChoice] = useState("");
+  const needsCheck = reviewState !== "ready";
+  const dateStr = currentDate(query);
+  const av = initials(agentName) || "–";
+  const accentColor = needsCheck ? "#a85a44" : "#5a6e58";
+  const avBg = needsCheck ? "#f0cdbf" : "#e6ebe3";
+  const avInk = needsCheck ? "#a85a44" : "#5a6e58";
+  const pillBg = needsCheck ? "#f0cdbf" : "#e6ebe3";
+  const pillInk = needsCheck ? "#a85a44" : "#5a6e58";
+  const beyondQueried = query.status !== QueryStatus.QUERIED;
+
+  return (
+    <div style={{ background: needsCheck ? "#fdf3ee" : "transparent", borderBottom: "1px solid #efe6d8" }}>
+      {/* Main row */}
+      <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "16px 22px" }}>
+        <span aria-hidden style={{ width: 3, alignSelf: "stretch", borderRadius: 3, background: accentColor, minHeight: 38, flexShrink: 0 }} />
+        <span style={{ width: 38, height: 38, borderRadius: 9, background: avBg, color: avInk, display: "grid", placeItems: "center", fontFamily: MONO, fontSize: 12.5, fontWeight: 500, flexShrink: 0 }}>{av}</span>
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontFamily: SERIF, fontSize: 18, color: "#2a2521", lineHeight: 1.1 }}>{agentName}</div>
+          <div style={{ fontFamily: MONO, fontSize: 11.5, color: "#8a8178", marginTop: 1 }}>
+            {origin} · {query.status} · {dateStr ? fmtDate(dateStr) : "Undated"}
+          </div>
+        </span>
+        <span style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+          <span style={{ fontFamily: MONO, fontSize: 11, padding: "4px 9px", borderRadius: 20, background: pillBg, color: pillInk, whiteSpace: "nowrap" }}>
+            {needsCheck ? "Needs a look" : "Ready"}
+          </span>
+          {!needsCheck && (
+            <button onClick={onToggleOpen}
+              style={{ fontFamily: MONO, fontSize: 11.5, color: "#aaa094", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = "#8a8178"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = "#aaa094"; }}
+            >{open ? "Close" : "Add details"}</button>
+          )}
+          <button title="Don't import" onClick={onDelete}
+            style={{ background: "none", border: "none", color: "#b6a99a", cursor: "pointer", padding: 4, borderRadius: 6, lineHeight: 0, fontSize: 14, fontFamily: "sans-serif" }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.background = "rgba(124,58,42,.08)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = "#b6a99a"; e.currentTarget.style.background = "none"; }}
+          >✕</button>
+        </span>
+      </div>
+
+      {/* "Add details" editor — ready rows: status + dates (mirrors QueryCard editor) */}
+      {open && !needsCheck && (
+        <div style={{ padding: "12px 22px 18px", borderTop: "0.5px solid #e8ddce", display: "flex", flexDirection: "column", gap: 11 }}>
+          <div style={{ display: "flex", gap: 10 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <span style={flab}>Status</span>
+              <select value={query.status} onChange={(e) => onPatch({ status: e.target.value as QueryStatus })} style={{ ...finBase, cursor: "pointer" }}>
+                {QUERY_STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <span style={flab}>Date queried</span>
+              <input type="date" value={query.dateQueried ?? ""} onChange={(e) => onPatch({ dateQueried: e.target.value || null })} style={finBase} />
+            </div>
+          </div>
+          {beyondQueried && (
+            <div style={{ display: "flex", gap: 10 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <span style={flab}>{statusDateLabel(query.status)}</span>
+                <input type="date" value={query.statusDate ?? ""} onChange={(e) => onPatch({ statusDate: e.target.value || null })} style={finBase} />
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }} />
+            </div>
+          )}
+          <div style={{ fontSize: 10, color: C.muted, lineHeight: 1.35 }}>Dates are optional — add what you remember and your timeline stays accurate.</div>
+        </div>
+      )}
+
+      {/* Inline reason panel — needs-a-look rows */}
+      {needsCheck && (
+        <div style={{ padding: "0 22px 18px 79px" }}>
+          {/* Missing date */}
+          {reviewState === "needs-date" && (
+            <>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "Inter", fontSize: 12.5, color: "#9a5040", marginBottom: 11 }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a85a44" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>
+                We couldn't find the date this query was sent.
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                <input type="date" value={dateInput} onChange={(e) => setDateInput(e.target.value)} aria-label="Date sent"
+                  style={{ fontFamily: MONO, fontSize: 12.5, padding: "9px 13px", border: "1px solid #e3ccc0", borderRadius: 9, background: "#fff", minWidth: 220, color: "#2a2521", outline: "none" }}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = "#9a5040"; }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = "#e3ccc0"; }}
+                />
+                <button onClick={() => { if (dateInput) { onSaveDate(dateInput); setDateInput(""); } }} style={solidMini}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0d3c7"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "#f5e2da"; }}
+                >Save date</button>
+                <button onClick={onLeaveUndated} style={ghostMini}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.borderColor = "#9a5040"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; e.currentTarget.style.borderColor = "#e3ccc0"; }}
+                >Leave undated</button>
+              </div>
+            </>
+          )}
+          {/* Unmatched agent */}
+          {reviewState === "unmatched" && (
+            <>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "Inter", fontSize: 12.5, color: "#9a5040", marginBottom: 11 }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a85a44" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M9 17H7a5 5 0 0 1 0-10h2M15 7h2a5 5 0 0 1 4 8"/><path d="M8 12h4M3 3l18 18"/></svg>
+                We couldn't match this query to an agent in your list.
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                <select value={linkChoice} onChange={(e) => setLinkChoice(e.target.value)} aria-label="Link to an agent"
+                  style={{ fontFamily: MONO, fontSize: 12.5, padding: "9px 13px", border: "1px solid #e3ccc0", borderRadius: 9, background: "#fff", minWidth: 220, color: "#2a2521", outline: "none", cursor: "pointer" }}>
+                  <option value="">Link to an agent…</option>
+                  {agentOptions.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
+                </select>
+                <button onClick={() => { if (linkChoice) { onLinkAgent(linkChoice); setLinkChoice(""); } }} style={solidMini}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0d3c7"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "#f5e2da"; }}
+                >Link</button>
+                <button onClick={onAddNewAgent} style={ghostMini}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.borderColor = "#9a5040"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; e.currentTarget.style.borderColor = "#e3ccc0"; }}
+                >Add as new agent</button>
+              </div>
+            </>
+          )}
+          {/* Status-interpretation (mapping) note — pick/confirm the status, then resolve the flag.
+              The dropdown writes through onPatch({ status }) (the same set-status path the Add-details
+              editor uses); the derived-status engine runs at commit (recomputeQuery, single writer). */}
+          {reviewState === "mapping" && (
+            <>
+              <div style={{ fontFamily: "Inter", fontSize: 12.5, color: "#9a5040", marginBottom: 11 }}>{quoteStatuses(query.reasons.find((r) => r.kind === "mapping" && !r.resolved)?.note ?? "")}</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                <select value={query.status} onChange={(e) => onPatch({ status: e.target.value as QueryStatus })} aria-label="Query status"
+                  style={{ fontFamily: MONO, fontSize: 12.5, padding: "9px 13px", border: "1px solid #e3ccc0", borderRadius: 9, background: "#fff", minWidth: 220, color: "#2a2521", outline: "none", cursor: "pointer" }}>
+                  {QUERY_STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+                </select>
+                <button onClick={onResolveMapping} style={solidMini}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0d3c7"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "#f5e2da"; }}
+                >Status is correct</button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ── Agent card ────────────────────────────────────────────────────────────────────────────────
 interface AgentCardProps {
   agent: ReviewAgent;
@@ -208,6 +570,13 @@ const AgentCard: React.FC<AgentCardProps> = ({
   agent, queryCount, dupOpen, open, onToggleOpen, onPatch, onDelete, cardRef, highlighted, onHoverPair, pulse, compact, stacked, onResolveReason, onReopenReason,
 }) => {
   const [confirming, setConfirming] = useState(false);
+  // If the card unmounts while the bin is pending (e.g. user navigated to Queries before clicking
+  // "Remove"), commit the deletion — the bin click already expressed the intent.
+  const confirmingRef = useRef(false);
+  confirmingRef.current = confirming;
+  const onDeleteRef = useRef(onDelete);
+  onDeleteRef.current = onDelete;
+  useEffect(() => () => { if (confirmingRef.current) onDeleteRef.current(); }, []);
   const invalid = !agent.agency.trim();
   const disp = agent.name || agent.agency;
   const status = agentStatus(agent, dupOpen);
@@ -825,9 +1194,205 @@ export interface SmartImportReviewProps {
    *  ready for Prompt 1's commitSmartImport(deps, result, manuscriptId) — agents → queries →
    *  activities → recompute. The host owns the commit deps; this component owns the conversion. */
   onImport?: (result: SmartImportResult) => void | Promise<void>;
+  /** User's display name — the slim onboarding nav shows the first initial as avatar. */
+  userName?: string;
 }
 
-export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, onBack, onSkip, error, onImport }) => {
+// ── Shared B-redesign chrome (Agents + Queries screens) ──────────────────────────────────────────
+// Extracted once so the two screens never re-implement the nav, skip modal, sidebar board or FAQ.
+
+/** Slim onboarding top bar — logo left, search/bell/avatar right. Exported so the post-import
+ *  loader mounts the exact same nav as the review screens. */
+export const OnbNav: React.FC<{ userInitial: string }> = ({ userInitial }) => (
+  <nav style={{ height: 76, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 100px", background: "#fdfaf5", borderBottom: "1px solid #e8dfd1", position: "sticky", top: 0, zIndex: 40 }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+      <img src="/scriptally-logo-new-basic.png" alt="" aria-hidden="true" style={{ height: 34, width: "auto", display: "block" }} />
+      <img src="/scriptally-title-v2.png" alt="ScriptAlly" style={{ height: 34, width: "auto", display: "block", maxWidth: "none" }} />
+    </div>
+    <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+      <button aria-label="Search" style={{ background: "none", border: "none", color: "#b1a596", cursor: "pointer", padding: 8, borderRadius: 8, lineHeight: 0 }}
+        onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.background = "rgba(124,58,42,.07)"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.color = "#b1a596"; e.currentTarget.style.background = "none"; }}
+      ><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></button>
+      <button aria-label="Alerts" style={{ background: "none", border: "none", color: "#b1a596", cursor: "pointer", padding: 8, borderRadius: 8, lineHeight: 0 }}
+        onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.background = "rgba(124,58,42,.07)"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.color = "#b1a596"; e.currentTarget.style.background = "none"; }}
+      ><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></button>
+      <span style={{ width: 30, height: 30, borderRadius: "50%", background: "#f5e2da", color: "#7c3a2a", display: "grid", placeItems: "center", fontFamily: MONO, fontSize: 12, marginLeft: 8 }}>{userInitial}</span>
+    </div>
+  </nav>
+);
+
+/** "Skip setup for now?" confirm overlay. Parent renders this only while open. */
+const SkipSetupModal: React.FC<{ onClose: () => void; onSkip?: () => void }> = ({ onClose, onSkip }) => (
+  <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(42,37,33,.42)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 60, padding: 20 }}>
+    <div onClick={(e) => e.stopPropagation()} style={{ background: "#fdfaf5", borderRadius: 16, padding: "30px 30px 24px", maxWidth: 380, width: "100%", boxShadow: "0 30px 70px -28px rgba(40,28,18,.6)", animation: "saImpModalPop .18s ease" }}>
+      <h3 style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 22, margin: "0 0 10px", color: "#2a2521" }}>Skip setup for now?</h3>
+      <p style={{ fontSize: 13.5, lineHeight: 1.55, color: "#8a8178", margin: "0 0 22px" }}>You can import a spreadsheet or add agents by hand any time from your dashboard. Nothing you've captured will be lost.</p>
+      <div style={{ display: "flex", gap: 14, justifyContent: "flex-end", alignItems: "center" }}>
+        <button onClick={onClose} style={{ fontFamily: MONO, fontSize: 13, color: "#8a8178", background: "none", border: "none", cursor: "pointer" }}>Keep setting up</button>
+        <button onClick={() => { onClose(); onSkip?.(); }}
+          style={{ fontFamily: MONO, fontSize: 13.5, background: "rgba(199,212,195,.5)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", color: "#5a6e58", border: "1px solid rgba(255,255,255,.55)", borderRadius: 11, padding: "13px 32px", cursor: "pointer", fontWeight: 600, letterSpacing: ".02em", boxShadow: "0 10px 22px -12px rgba(90,110,88,.5),inset 0 1px 0 rgba(255,255,255,.65)" }}
+        >Skip for now</button>
+      </div>
+    </div>
+  </div>
+);
+
+/** Paperclipped "Where you are" card with the Agents → Queries → Import step rail. */
+const WhereYouAreCard: React.FC<{ step: "agents" | "queries"; onSkip: () => void }> = ({ step, onSkip }) => {
+  const dot = (state: "done" | "on" | "todo") => (
+    <span style={{ width: 13, height: 13, borderRadius: "50%", display: "inline-block",
+      background: state === "on" ? "#7c3a2a" : state === "done" ? "#bcb3a4" : "transparent",
+      border: `2px solid ${state === "on" ? "#7c3a2a" : state === "done" ? "#bcb3a4" : "#c9bfb1"}` }} />
+  );
+  const lbl = (state: "done" | "on" | "todo", text: string) => (
+    <b style={{ display: "inline-flex", alignItems: "center", gap: 7, fontWeight: 400, color: state === "on" ? "#7c3a2a" : "#8a8178" }}>{dot(state)}{text}</b>
+  );
+  return (
+    <div style={{ background: "#fdfaf5", borderRadius: 3, padding: "18px 20px", transform: "rotate(-.7deg)", position: "relative", boxShadow: "0 14px 26px -18px rgba(40,28,18,.45)" }}>
+      <svg style={{ position: "absolute", top: -14, left: -11, transform: "rotate(-12deg)", filter: "drop-shadow(0 2px 2px rgba(40,28,18,.3))" }} width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#9b9384" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 14 }}>
+        <div style={{ fontFamily: MONO, fontSize: 10.5, letterSpacing: ".16em", textTransform: "uppercase", color: "#8a8178" }}>Where you are</div>
+        <button onClick={onSkip}
+          style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".04em", color: "#7c3a2a", background: "#f5e2da", border: "none", borderRadius: 20, padding: "5px 12px", cursor: "pointer", whiteSpace: "nowrap" }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = "#f0d3c7"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "#f5e2da"; }}
+        >Skip setup</button>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 9, fontFamily: MONO, fontSize: 12, color: "#8a8178" }}>
+        {lbl(step === "agents" ? "on" : "done", "Agents")}
+        <span style={{ color: "#cabfae" }}>→</span>
+        {lbl(step === "queries" ? "on" : "todo", "Queries")}
+        <span style={{ color: "#cabfae" }}>→</span>
+        {lbl("todo", "Import")}
+      </div>
+    </div>
+  );
+};
+
+/** Tilted pink post-it. Children are the prose (with the inline "pink" tag). */
+const PinkSlip: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div style={{ background: "#f8e8e1", padding: "24px 22px 26px", position: "relative", transform: "rotate(-1.6deg)", boxShadow: "0 16px 32px -20px rgba(40,28,18,.5)" }}>
+    <span style={{ position: "absolute", top: -8, left: 24, width: 16, height: 16, borderRadius: "50%", background: "radial-gradient(circle at 35% 30%,#b65a44,#7c3a2a)", boxShadow: "0 3px 5px rgba(40,28,18,.4)" }} />
+    <p style={{ fontFamily: CAVEAT, fontSize: 23, lineHeight: 1.34, color: "#7c3a2a", margin: 0 }}>{children}</p>
+  </div>
+);
+
+/** The inline "pink" pill used inside a PinkSlip (kept in the handwriting font). */
+const PinkTag: React.FC = () => (
+  <span style={{ fontFamily: CAVEAT, background: "#f0cdbf", color: "#a85a44", padding: "1px 13px", borderRadius: 16, fontSize: "0.86em", verticalAlign: 1 }}>pink</span>
+);
+
+/** "FAQs" margin-note accordion. */
+const FaqList: React.FC<{ items: { q: string; a: string }[]; open: Set<number>; onToggle: (i: number) => void }> = ({ items, open, onToggle }) => (
+  <div>
+    <p style={{ fontFamily: CAVEAT, fontSize: 24, color: "#7c3a2a", margin: "0 0 12px", paddingLeft: 2 }}>FAQs</p>
+    {items.map((item, i) => {
+      const isOpen = open.has(i);
+      return (
+        <div key={i} style={{ borderBottom: i < items.length - 1 ? "1px dotted #d8cdbb" : "none" }}>
+          <button onClick={() => onToggle(i)}
+            style={{ width: "100%", textAlign: "left", background: "none", border: "none", cursor: "pointer", fontFamily: MONO, fontSize: 12, color: isOpen ? "#7c3a2a" : "#6a6055", padding: "11px 2px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; }}
+            onMouseLeave={(e) => { if (!isOpen) e.currentTarget.style.color = "#6a6055"; }}
+          >
+            <span>{item.q}</span>
+            <span style={{ color: isOpen ? "#7c3a2a" : "#b6a99a", flexShrink: 0 }}>{isOpen ? "−" : "+"}</span>
+          </button>
+          {isOpen && (
+            <div style={{ animation: "saImpFaqDrop .2s ease" }}>
+              <p style={{ fontSize: 12.5, lineHeight: 1.55, color: "#8a8178", margin: 0, padding: "0 2px 13px" }}>{item.a}</p>
+            </div>
+          )}
+        </div>
+      );
+    })}
+  </div>
+);
+
+// ── Windowed fit-to-screen shell (final B-redesign layout) ───────────────────────────────────────
+// Full-viewport: full-width sticky nav + a white window that fits the viewport and scrolls
+// internally (no page scroll). The pink/sage rim is the dashboard hero rim (heroRim.css) recoloured
+// and mounted on the window's 7px outer band — same mask-composite ring geometry so the corners
+// render as cleanly as the dashboard's.
+const REVIEW_SHELL_CSS = `
+.sa-rv-root{ position:fixed; inset:0; z-index:50; background:#f2ede7; display:flex; flex-direction:column; overflow:hidden; }
+.sa-rv-window{ position:relative; flex:1 1 auto; min-height:0; width:100%; max-width:1200px; margin:18px auto;
+  background:#fff; border:1px solid #ddd2c0; border-radius:22px; box-shadow:0 30px 70px -42px rgba(60,40,28,.45);
+  overflow:hidden; display:flex; flex-direction:column;
+  --rim-glow:rgba(238,196,180,.8); --rim-base:rgba(238,196,180,.13); }
+.sa-rv-window.allclear{ --rim-glow:rgba(138,158,136,.72); --rim-base:rgba(138,158,136,.16); }
+/* burgundy inset frame, 7px from the window edge */
+.sa-rv-window::after{ content:""; position:absolute; inset:7px; border:1px solid rgba(124,58,42,.3);
+  border-radius:15px; pointer-events:none; z-index:3; }
+/* pink wave — dashboard hero rim, recoloured; fills the full 7px band, edge-to-frame */
+.sa-rv-rim{ position:absolute; inset:0; border-radius:22px; padding:7px; z-index:1; pointer-events:none; overflow:hidden;
+  background:var(--rim-base); transition:background .55s ease;
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor;
+          mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);  mask-composite:exclude; }
+.sa-rv-band{ position:absolute; top:-10%; bottom:-10%; width:60%; filter:blur(4px);
+  background:linear-gradient(95deg, transparent 0%, var(--rim-glow) 50%, transparent 100%);
+  animation:saRvRimCross 16s linear infinite; }
+@keyframes saRvRimCross{ 0%{left:-60%} 100%{left:114%} }
+.sa-rv-grid{ display:grid; grid-template-columns:1fr 340px; gap:38px; height:100%; padding:28px 30px;
+  align-items:stretch; overflow:hidden; position:relative; z-index:2; }
+.sa-rv-main{ display:flex; flex-direction:column; min-height:0; }
+.sa-rv-board{ display:flex; flex-direction:column; gap:34px; padding:18px 16px 0 28px; overflow-y:auto; min-height:0; }
+.sa-rv-card{ background:#fdfaf5; border-radius:16px; box-shadow:0 18px 44px -30px rgba(60,40,28,.4);
+  flex:1 1 auto; min-height:0; display:flex; padding:7px; }
+.sa-rv-frame{ flex:1 1 auto; min-height:0; width:100%; border:1px solid rgba(124,58,42,.3); border-radius:11px;
+  overflow:hidden; display:flex; }
+.sa-rv-scroll{ flex:1 1 auto; min-height:0; width:100%; overflow-y:auto;
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 var(--ft,0px),#000 calc(100% - var(--fb,0px)),transparent 100%);
+          mask-image:linear-gradient(to bottom,transparent 0,#000 var(--ft,0px),#000 calc(100% - var(--fb,0px)),transparent 100%); }
+@keyframes saImpBlink{0%,50%{opacity:1}50.01%,100%{opacity:0}}
+@keyframes saImpModalPop{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes saImpFaqDrop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@media(max-width:880px){ .sa-rv-grid{ grid-template-columns:1fr; } }
+@media(prefers-reduced-motion:reduce){ .sa-rv-band{ animation:none; opacity:0; } }
+`;
+
+/** Full-viewport windowed shell: cream ground, full-width nav, white window with the recoloured rim. */
+const ReviewShell: React.FC<{ userInitial: string; allClear: boolean; modal?: React.ReactNode; children: React.ReactNode }> = ({ userInitial, allClear, modal, children }) => (
+  <div className="sa-rv-root" style={{ fontFamily: "Inter, sans-serif", color: "#2a2521" }}>
+    <style>{REVIEW_SHELL_CSS}</style>
+    {modal}
+    <OnbNav userInitial={userInitial} />
+    <div className={`sa-rv-window${allClear ? " allclear" : ""}`}>
+      <div className="sa-rv-rim" aria-hidden="true"><div className="sa-rv-band" /></div>
+      {children}
+    </div>
+  </div>
+);
+
+/** Records card: parchment rim → burgundy hairline frame (clipping context) → internally-scrolling
+ *  region with 28px scroll-edge fades (top/bottom, only mid-scroll). */
+const RecordsCard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const fade = () => {
+    const el = ref.current; if (!el) return;
+    el.style.setProperty("--ft", (el.scrollTop > 3 ? 28 : 0) + "px");
+    el.style.setProperty("--fb", (el.scrollHeight - el.clientHeight - el.scrollTop > 3 ? 28 : 0) + "px");
+  };
+  useEffect(() => {
+    const el = ref.current; if (!el) return;
+    el.addEventListener("scroll", fade, { passive: true });
+    const ro = new ResizeObserver(fade);
+    ro.observe(el);
+    return () => { el.removeEventListener("scroll", fade); ro.disconnect(); };
+  }, []);
+  useEffect(() => { fade(); }); // recompute after every render (rows added / removed / resolved)
+  return (
+    <div className="sa-rv-card">
+      <div className="sa-rv-frame">
+        <div className="sa-rv-scroll" ref={ref}>{children}</div>
+      </div>
+    </div>
+  );
+};
+
+export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, onBack, onSkip, error, onImport, userName }) => {
   const initial = useMemo(() => parseModel(result), [result]);
   const [agents, setAgents] = useState<ReviewAgent[]>(initial.agents);
   const [queries, setQueries] = useState<ReviewQuery[]>(initial.queries);
@@ -852,6 +1417,14 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   const [topcap, setTopcap] = useState<string | null>(null);
   const [pulseIds, setPulseIds] = useState<string[]>([]);
   const [compact, setCompact] = useState(false);
+  // Agents-screen B-redesign state
+  const [showSkipModal, setShowSkipModal] = useState(false);
+  const [openFaqs, setOpenFaqs] = useState<Set<number>>(new Set());
+  // Queries-screen B-redesign: which undated queries the user has acknowledged via "Leave undated".
+  // A purely presentational dismissal — undated queries already import fine (dates are never gating),
+  // so this only flips the soft "needs a look" prompt to Ready. No model/date is written.
+  const [undatedAck, setUndatedAck] = useState<Set<string>>(new Set());
+  const toggleFaq = (i: number) => setOpenFaqs((prev) => { const next = new Set(prev); if (next.has(i)) next.delete(i); else next.add(i); return next; });
 
   const midRef = useRef<HTMLDivElement>(null);
   const bandRef = useRef<HTMLDivElement>(null);
@@ -892,7 +1465,6 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   const remove = (id: string) => {
     const a = agents.find((x) => x.id === id);
     const qc = queryCount(id);
-    console.log('[SmartImport] remove() called — agentId:', id, '| found:', !!a, '| qc:', qc);
     const next = applyAgentRemoval(agents, queries, id);
     setAgents(next.agents);
     setQueries(next.queries);
@@ -1039,7 +1611,6 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
 
   const onImportClick = () => {
     if (!canImport) { pulseBlocked(qActive.filter((q) => queryStatusOf(q) !== "captured").map((q) => q.id)); return; }
-    console.log('[SmartImport] import clicked — deletedAgents:', agents.filter((a) => a.deleted).map((a) => a.id), '| removedQueries:', queries.filter((q) => q.removed).length);
     void onImport?.(modelToResult(result, agents, queries));
   };
 
@@ -1227,6 +1798,259 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
       onReopenReason={() => reopenQueryReason(q.id, "mapping")}
     />
   ));
+
+  // ── New agents-screen layout (B-redesign) ─────────────────────────────────────────────────
+  // Cast prevents TypeScript narrowing `screen` after the early return, keeping the old
+  // duplicates/queries code's `screen === "agents"` comparisons valid.
+  if ((screen as string) === "agents") {
+    // Build flat AgentRow list — clusters shown as leader row with inline dup reason
+    const agentRows: React.ReactNode[] = [];
+    const consumed2 = new Set<string>();
+    for (const a of active) {
+      if (consumed2.has(a.id)) continue;
+      if (a.mergeWith.length > 0 && !a.mergeResolved) {
+        const members = [a, ...a.mergeWith.map((id) => active.find((x) => x.id === id)).filter((x): x is ReviewAgent => !!x)];
+        members.forEach((m) => consumed2.add(m.id));
+        agentRows.push(
+          <AgentRow key={a.id} agent={a} queryCount={queryCount(a.id)} dupOpen={true}
+            clusterPeers={members.slice(1)}
+            open={openId === a.id}
+            onToggleOpen={() => { setOpenId((cur) => (cur === a.id ? null : a.id)); setTick((t) => t + 1); }}
+            onPatch={(p) => patch(a.id, p)} onDelete={() => remove(a.id)}
+            onMerge={() => members.slice(1).forEach((m) => removeDuplicate(m.id))}
+            onKeepBoth={() => keepBoth(a.id)}
+            onResolveReason={(kind) => { if (kind === "mapping") resolveMapping(a.id); }}
+            onReopenReason={(kind) => reopenReason(a.id, kind)}
+          />
+        );
+      } else {
+        consumed2.add(a.id);
+        agentRows.push(
+          <AgentRow key={a.id} agent={a} queryCount={queryCount(a.id)} dupOpen={openDupIds.has(a.id)}
+            open={openId === a.id}
+            onToggleOpen={() => { setOpenId((cur) => (cur === a.id ? null : a.id)); setTick((t) => t + 1); }}
+            onPatch={(p) => patch(a.id, p)} onDelete={() => remove(a.id)}
+            onResolveReason={(kind) => { if (kind === "mapping") resolveMapping(a.id); }}
+            onReopenReason={(kind) => reopenReason(a.id, kind)}
+          />
+        );
+      }
+    }
+
+    const userInitial = userName ? userName[0].toUpperCase() : "?";
+    const FAQ_ITEMS = [
+      { q: 'What does “needs a look” mean?', a: "We've flagged something worth a glance — a suspected duplicate, or a missing agency. Everything else is ready to import as-is." },
+      { q: "Can I add more agents later?", a: "Any time, from your dashboard — by import or by hand." },
+      { q: "What if I don't have the agent's name?", a: "Leave the name blank and we'll track them by agency only. Add it whenever you find out." },
+      { q: "Is the agency name required?", a: "Yes — every agent needs at least an agency, even when the person's name is blank." },
+      { q: "What happens when I delete a duplicate?", a: "We import just one of the two records and merge any queries from the duplicate onto that single agent — so nothing's lost." },
+    ];
+
+    return (
+      <ReviewShell userInitial={userInitial} allClear={needCount === 0}
+        modal={showSkipModal ? <SkipSetupModal onClose={() => setShowSkipModal(false)} onSkip={onSkip} /> : null}>
+        <div className="sa-rv-grid">
+
+          {/* ── Left: header + records card + footer ── */}
+          <div className="sa-rv-main">
+            {/* Header */}
+            <div style={{ marginBottom: 16 }}>
+              <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: ".18em", textTransform: "uppercase", color: "#5a6e58" }}>Data captured</span>
+              <h1 style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 30, margin: "6px 0 4px", color: "#33302b" }}>
+                Populating your{" "}
+                <span style={{ background: "rgba(124,58,42,.16)", borderRadius: 2, padding: ".02em .1em" }}>agent database</span>
+                <span style={{ display: "inline-block", width: 2, height: "1.23em", background: "#33302b", marginLeft: 6, verticalAlign: "-0.28em", animation: "saImpBlink 1.06s steps(1,end) infinite" }} aria-hidden />
+              </h1>
+              <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
+                <span style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#e6ebe3", color: "#5a6e58" }}>{okCount} ready to import</span>
+                {needCount > 0
+                  ? <span style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#f0cdbf", color: "#a85a44" }}>{needCount} to check</span>
+                  : <span style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#e6ebe3", color: "#5a6e58" }}>all clear</span>}
+              </div>
+            </div>
+
+            {/* Commit-error banner */}
+            {error && (
+              <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#fdecea", border: "1px solid #e6b6a8", borderRadius: 9, padding: "10px 13px", fontFamily: "Inter", fontSize: 12, color: C.invalid, marginBottom: 14 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.invalid} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+                {error}
+              </div>
+            )}
+
+            {/* Records card — internal scroll + edge fades */}
+            <RecordsCard>
+              {agentRows.length > 0
+                ? agentRows
+                : <div style={{ padding: "32px 22px", fontFamily: "Inter", fontSize: 13, color: "#9c8878", textAlign: "center" }}>No agents to review.</div>}
+            </RecordsCard>
+
+            {/* Footer */}
+            <div style={{ display: "flex", alignItems: "center", gap: 18, marginTop: 18, flexShrink: 0 }}>
+              <button onClick={() => (hadDuplicates ? switchScreen("duplicates") : onBack?.())}
+                style={{ fontFamily: MONO, fontSize: 13, color: "#8a8178", background: "none", border: "none", cursor: "pointer" }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; }}
+              >‹ Back</button>
+              <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 22 }}>
+                <button onClick={reset}
+                  style={{ fontFamily: MONO, fontSize: 13, color: "#8a8178", background: "none", border: "none", cursor: "pointer" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; }}
+                >Reset all changes</button>
+                <button onClick={onContinueClick}
+                  style={{ fontFamily: MONO, fontSize: 13.5, background: "rgba(199,212,195,.5)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", color: allCaptured ? "#5a6e58" : "#8a9e88", border: "1px solid rgba(255,255,255,.55)", borderRadius: 11, padding: "13px 32px", cursor: allCaptured ? "pointer" : "not-allowed", fontWeight: 600, letterSpacing: ".02em", boxShadow: "0 10px 22px -12px rgba(90,110,88,.5),inset 0 1px 0 rgba(255,255,255,.65)", opacity: allCaptured ? 1 : 0.65, transition: "background .15s,color .15s,box-shadow .15s,transform .15s,border-color .15s" }}
+                  onMouseEnter={(e) => { if (allCaptured) { e.currentTarget.style.background = "rgba(245,226,218,.62)"; e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.transform = "translateY(-1px)"; } }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(199,212,195,.5)"; e.currentTarget.style.color = allCaptured ? "#5a6e58" : "#8a9e88"; e.currentTarget.style.transform = "none"; }}
+                >Continue →</button>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Right: sidebar board ── */}
+          <aside className="sa-rv-board">
+            <WhereYouAreCard step="agents" onSkip={() => setShowSkipModal(true)} />
+            <PinkSlip>
+              Anything in <PinkTag /> needs a quick look. It might be a duplicate, or could be missing the agency's name (we need this). Check these for us, add any further details you can, then we'll move on to capturing your queries.
+            </PinkSlip>
+            <FaqList items={FAQ_ITEMS} open={openFaqs} onToggle={toggleFaq} />
+          </aside>
+        </div>
+      </ReviewShell>
+    );
+  }
+  // ─────────────────────────────────────────────────────────────────────────────────────────────
+
+  // ── New queries-screen layout (B-redesign) ────────────────────────────────────────────────────
+  // Reuses the Agents chrome (nav, two-column grid, sidebar board, header pattern, glass CTA,
+  // single-click bin, inline reason panel). Only the rows + sidebar copy differ.
+  if ((screen as string) === "queries") {
+    const userInitial = userName ? userName[0].toUpperCase() : "?";
+    // Link targets for an unmatched query: every surviving agent.
+    const linkOptions = active.map((a) => ({ id: a.id, label: a.name || a.agency || "Unnamed agent" }));
+    // Per-query review state — the model's real status-mapping reason, plus the two presentational
+    // query cases (missing date, unmatched agent). Derived here only; the shared model is untouched,
+    // and `canImport` (below) is unchanged so an undated query still imports without a forced click.
+    const reviewStateOf = (q: ReviewQuery): QueryReviewState => {
+      const matched = agents.find((a) => a.id === q.agentRef && !a.deleted);
+      if (!matched) return "unmatched";
+      if (q.reasons.some((r) => r.kind === "mapping" && !r.resolved)) return "mapping";
+      if (!currentDate(q) && !undatedAck.has(q.id)) return "needs-date";
+      return "ready";
+    };
+    const originOf = (q: ReviewQuery): string => {
+      const a = agents.find((x) => x.id === q.agentRef && !x.deleted);
+      if (!a) return "From your file";
+      if (a.agencyOnly || !a.name) return "Agency only";
+      return a.agency || "Agency only";
+    };
+    const states = qActive.map((q) => ({ q, state: reviewStateOf(q) }));
+    const qLookCount = states.filter((s) => s.state !== "ready").length;
+    const qReadyCount = qActive.length - qLookCount;
+    const saveQueryDate = (q: ReviewQuery, iso: string) => {
+      if (q.status === QueryStatus.QUERIED) patchQuery(q.id, { dateQueried: iso });
+      else patchQuery(q.id, { statusDate: iso });
+    };
+    const leaveUndated = (id: string) => { setUndatedAck((prev) => new Set(prev).add(id)); setTick((t) => t + 1); };
+    // FLAGGED: no add-a-new-agent path exists in the review model (agents are fixed from the import).
+    // The unmatched branch is itself unreachable in the normal flow (validation drops unmatched queries
+    // and the agents-cascade repoints/removes the rest), so this never fires in practice. Left as a
+    // no-op rather than inventing write logic — see discrepancy report.
+    const addNewAgentForQuery = (_id: string) => {};
+
+    const FAQ_ITEMS = [
+      { q: 'What does “needs a look” mean?', a: "We've flagged a query that's missing its date, or that we couldn't match to an agent. Everything else is ready to import." },
+      { q: "Can I add more queries later?", a: "Any time — log a new query from your dashboard whenever you send one." },
+      { q: "What if I don't know the date I sent it?", a: "Leave it undated. We'll never guess a date for you — you can fill it in later if it turns up." },
+      { q: "Can a query have no agent?", a: "No — every query is linked to an agent. Match it to one you already have, or add the agent as new." },
+      { q: "What does the status mean?", a: "It's where the query sits in your pipeline — queried, partial, full, and so on. We read it from your file; correct any that look off." },
+    ];
+
+    return (
+      <ReviewShell userInitial={userInitial} allClear={qLookCount === 0}
+        modal={showSkipModal ? <SkipSetupModal onClose={() => setShowSkipModal(false)} onSkip={onSkip} /> : null}>
+        <div className="sa-rv-grid">
+
+          {/* ── Left: header + records card + footer ── */}
+          <div className="sa-rv-main">
+            <div style={{ marginBottom: 16 }}>
+              <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: ".18em", textTransform: "uppercase", color: "#5a6e58" }}>Data captured</span>
+              <h1 style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 30, margin: "6px 0 4px", color: "#33302b" }}>
+                Populating your{" "}
+                <span style={{ background: "rgba(124,58,42,.16)", borderRadius: 2, padding: ".02em .1em" }}>query log</span>
+                <span style={{ display: "inline-block", width: 2, height: "1.23em", background: "#33302b", marginLeft: 6, verticalAlign: "-0.28em", animation: "saImpBlink 1.06s steps(1,end) infinite" }} aria-hidden />
+              </h1>
+              <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
+                <span style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#e6ebe3", color: "#5a6e58" }}>{qReadyCount} ready to import</span>
+                {qLookCount > 0
+                  ? <span style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#f0cdbf", color: "#a85a44" }}>{qLookCount} to check</span>
+                  : <span style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#e6ebe3", color: "#5a6e58" }}>all clear</span>}
+              </div>
+            </div>
+
+            {/* Commit-error banner */}
+            {error && (
+              <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#fdecea", border: "1px solid #e6b6a8", borderRadius: 9, padding: "10px 13px", fontFamily: "Inter", fontSize: 12, color: C.invalid, marginBottom: 14 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.invalid} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+                {error}
+              </div>
+            )}
+
+            {/* Records card — internal scroll + edge fades */}
+            <RecordsCard>
+              {states.length > 0
+                ? states.map(({ q, state }) => (
+                    <QueryRow key={q.id} query={q} agentName={agentNameOf(q.agentRef)} origin={originOf(q)} reviewState={state}
+                      open={openId === q.id}
+                      onToggleOpen={() => { setOpenId((cur) => (cur === q.id ? null : q.id)); setTick((t) => t + 1); }}
+                      onPatch={(p) => patchQuery(q.id, p)}
+                      onDelete={() => removeQuery(q.id)}
+                      onResolveMapping={() => resolveQueryMapping(q.id)}
+                      onSaveDate={(iso) => saveQueryDate(q, iso)}
+                      onLeaveUndated={() => leaveUndated(q.id)}
+                      agentOptions={linkOptions}
+                      onLinkAgent={(agentId) => patchQuery(q.id, { agentRef: agentId })}
+                      onAddNewAgent={() => addNewAgentForQuery(q.id)}
+                    />
+                  ))
+                : <div style={{ padding: "32px 22px", fontFamily: "Inter", fontSize: 13, color: "#9c8878", textAlign: "center" }}>No queries to review.</div>}
+            </RecordsCard>
+
+            {/* Footer */}
+            <div style={{ display: "flex", alignItems: "center", gap: 18, marginTop: 18, flexShrink: 0 }}>
+              <button onClick={() => switchScreen("agents")}
+                style={{ fontFamily: MONO, fontSize: 13, color: "#8a8178", background: "none", border: "none", cursor: "pointer" }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; }}
+              >‹ Back</button>
+              <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 22 }}>
+                <button onClick={reset}
+                  style={{ fontFamily: MONO, fontSize: 13, color: "#8a8178", background: "none", border: "none", cursor: "pointer" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; }}
+                >Reset all changes</button>
+                {/* Commit seam: onImportClick awaits onImport(modelToResult(...)) → hand-off to the loader. */}
+                <button onClick={onImportClick}
+                  style={{ fontFamily: MONO, fontSize: 13.5, background: "rgba(199,212,195,.5)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", color: canImport ? "#5a6e58" : "#8a9e88", border: "1px solid rgba(255,255,255,.55)", borderRadius: 11, padding: "13px 32px", cursor: canImport ? "pointer" : "not-allowed", fontWeight: 600, letterSpacing: ".02em", boxShadow: "0 10px 22px -12px rgba(90,110,88,.5),inset 0 1px 0 rgba(255,255,255,.65)", opacity: canImport ? 1 : 0.65, transition: "background .15s,color .15s,box-shadow .15s,transform .15s,border-color .15s" }}
+                  onMouseEnter={(e) => { if (canImport) { e.currentTarget.style.background = "rgba(245,226,218,.62)"; e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.transform = "translateY(-1px)"; } }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(199,212,195,.5)"; e.currentTarget.style.color = canImport ? "#5a6e58" : "#8a9e88"; e.currentTarget.style.transform = "none"; }}
+                >Import and get started →</button>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Right: sidebar board ── */}
+          <aside className="sa-rv-board">
+            <WhereYouAreCard step="queries" onSkip={() => setShowSkipModal(true)} />
+            <PinkSlip>
+              Anything in <PinkTag /> needs a quick look. A query might be missing its date, or we couldn't match it to an agent. Check these for us, add any further details you can, then we'll bring it all into your log.
+            </PinkSlip>
+            <FaqList items={FAQ_ITEMS} open={openFaqs} onToggle={toggleFaq} />
+          </aside>
+        </div>
+      </ReviewShell>
+    );
+  }
+  // ─────────────────────────────────────────────────────────────────────────────────────────────
 
   return (
     <div style={{ background: C.band, minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center", paddingBottom: bannerH + 12, overflowX: "hidden" }}>

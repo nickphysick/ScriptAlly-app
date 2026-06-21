@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseModel, modelToResult, dateFieldForStatus, quoteStatuses } from './smartImportReviewModel';
+import { parseModel, modelToResult, applyAgentRemoval, dateFieldForStatus, quoteStatuses } from './smartImportReviewModel';
 import { QueryStatus } from '../types';
 import { ParsedAgent, ParsedQuery, SmartImportResult } from '../types/smartImport';
 
@@ -100,6 +100,31 @@ describe('quoteStatuses — statuses in prose render lowercase, single-quoted', 
   it('handles multi-word and already-quoted statuses', () => {
     expect(quoteStatuses("read as Full Sent")).toBe("read as 'full sent'");
     expect(quoteStatuses('"Rejected" by the agent')).toBe("'rejected' by the agent");
+  });
+});
+
+describe('applyAgentRemoval — cascade path (real delete handler logic)', () => {
+  it('marks the agent deleted and cascades all its queries to removed', () => {
+    const r = result([agent({ ref: 'a1' }), agent({ ref: 'a2', name: 'Bob', agency: 'Beta' })],
+                     [query({ agentRef: 'a1' }), query({ agentRef: 'a2' })]);
+    const m = parseModel(r);
+    const next = applyAgentRemoval(m.agents, m.queries, 'a1');
+    expect(next.agents.find((a) => a.id === 'a1')!.deleted).toBe(true);
+    expect(next.agents.find((a) => a.id === 'a2')!.deleted).toBe(false);
+    expect(next.queries[0].removed).toBe(true);   // a1's query cascaded
+    expect(next.queries[0].removedReason).toBe('Agent removed');
+    expect(next.queries[1].removed).toBe(false);  // a2's query untouched
+  });
+
+  it('cascade path into modelToResult: deleted agent and its queries excluded from output', () => {
+    const r = result([agent({ ref: 'a1' }), agent({ ref: 'a2', name: 'Bob', agency: 'Beta' })],
+                     [query({ agentRef: 'a1' }), query({ agentRef: 'a2' })]);
+    const m = parseModel(r);
+    const next = applyAgentRemoval(m.agents, m.queries, 'a1');  // real cascade, not hand-set
+    const out = modelToResult(r, next.agents, next.queries);
+    expect(out.agents.map((a) => a.ref)).toEqual(['a2']);
+    expect(out.queries.length).toBe(1);
+    expect(out.queries[0].agentRef).toBe('a2');
   });
 });
 

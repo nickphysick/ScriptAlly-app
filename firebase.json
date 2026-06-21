@@ -7,7 +7,17 @@
     "database": "ai-studio-ae82196c-c59e-40b9-b209-9fb02f67ade6",
     "rules": "firestore.rules"
   },
+  "emulators": {
+    "firestore": {
+      "port": 8080,
+      "host": "127.0.0.1"
+    },
+    "ui": {
+      "enabled": false
+    }
+  },
   "hosting": {
+    "site": "scriptally-app",
     "public": "dist",
     "ignore": [
       "firebase.json",

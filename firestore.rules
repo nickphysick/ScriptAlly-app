@@ -41,6 +41,13 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
+    // The single admin account permitted to create/delete shared communityAgents docs (FINDING-1).
+    // MUST stay in sync with ADMIN_UID in src/lib/seedCommunityAgents.ts. The UID is NOT secret —
+    // security is enforced by this rule, not by hiding the value.
+    function isAdmin() {
+      return isSignedIn() && request.auth.uid == 'r8kbaKbmguNfaoJTb9wH4BetJab2';
+    }
+
     // ----------------------------------------------------
     // COMPONENT VALIDATORS (TYPE & SIZE CHECKS)
     // ----------------------------------------------------
@@ -285,7 +292,19 @@ service cloud.firestore {
         )
         && data.description is string && data.description.size() <= 512
         && data.date is string && data.date.size() <= 64
-        && data.details is string && data.details.size() <= 4096;
+        && data.details is string && data.details.size() <= 4096
+        && (!data.keys().hasAny(['resultingStatus']) || (data.resultingStatus is string && (
+          data.resultingStatus == 'Queried' ||
+          data.resultingStatus == 'Partial Requested' ||
+          data.resultingStatus == 'Partial Sent' ||
+          data.resultingStatus == 'Full Requested' ||
+          data.resultingStatus == 'Full Sent' ||
+          data.resultingStatus == 'Revise & Resubmit' ||
+          data.resultingStatus == 'Offer' ||
+          data.resultingStatus == 'Rejected' ||
+          data.resultingStatus == 'Withdrawn' ||
+          data.resultingStatus == 'No Response'
+        )));
     }
 
     function isValidJournalEntry(data, userId) {
@@ -454,17 +473,19 @@ service cloud.firestore {
     // user imports that agent (Discover.tsx / Dashboard.tsx, both best-effort/try-caught), so the
     // update surface is narrowed to exactly that. Editing the agents' own fields is an admin/seed
     // concern, never a client write.
-    // FOLLOW-UP (not done here — needs a server path, don't build unattended): client `create` is
-    // still open because seeding runs client-side (seedCommunityAgentsIfEmpty). Move seeding to an
-    // admin script / Cloud Function, then change `create` below to `if false`.
+    // LOCKED (FINDING-1): `create` and `delete` are now admin-only — closing the "any signed-in
+    // user can inject agents into the shared pool" gap. Client seeding (seedCommunityAgentsIfEmpty)
+    // runs only when the admin signs in. `update` deliberately stays open to any signed-in user but
+    // is hard-narrowed to a single +1 bump of contributedByCount (no other field, no decrement),
+    // which preserves the popularity counter without re-opening any injection/defacement surface.
     match /communityAgents/{agentId} {
       allow get, list: if isSignedIn();
-      allow create: if isSignedIn() && isValidId(agentId) && isValidCommunityAgent(incoming());
+      allow create: if isAdmin() && isValidId(agentId) && isValidCommunityAgent(incoming());
       allow update: if isSignedIn() && isValidId(agentId)
         && incoming().diff(existing()).affectedKeys().hasOnly(['contributedByCount'])
         && incoming().contributedByCount is int
         && incoming().contributedByCount == existing().contributedByCount + 1;
-      allow delete: if false;
+      allow delete: if isAdmin();
     }
 
     // ROUTE: Founding-writer waitlist (holding page) — NO client access.

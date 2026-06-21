@@ -142,7 +142,7 @@ const markerFor = (type: FType, q?: Query): Marker => {
 };
 
 const renderMarker = (m: Marker, size: number) => {
-  if (m.kind === "status") return <StatusDot status={m.status} size={size} />;
+  if (m.kind === "status") return <StatusDot status={m.status} overrideSize={size} />;
   const Icon = m.icon === "agent" ? UserRound : m.icon === "query" ? Send : BookOpen;
   return <Icon style={{ width: size, height: size, color: burgundy, flexShrink: 0 }} strokeWidth={2} aria-hidden="true" />;
 };
@@ -631,7 +631,7 @@ export const FortnightInFocus: React.FC<FortnightInFocusProps> = ({
         {slice.map((d, i) => {
           const idx = offset + i;
           const evs = eventsOn(d);
-          const { size, gap } = fitIconSize(cellInnerW, evs.length, { max: 30, min: 12 });
+          const { size, gap } = fitIconSize(cellInnerW, evs.length, { max: 20, min: 12 });
           return (
             <DayCell
               key={dayKey(d)}

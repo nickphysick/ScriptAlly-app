@@ -55,6 +55,8 @@ import { HeroCard } from "./dashboard/HeroCard";
 import { OverToYou } from "./dashboard/OverToYou";
 import { StatCards } from "./dashboard/StatCards";
 import { FortnightInFocus } from "./dashboard/FortnightInFocus";
+import { WhatsLivePanel } from "./dashboard/WhatsLivePanel";
+import { DashboardSkeleton } from "./dashboard/DashboardSkeleton";
 import { replacePlaceholders, extractAgentFromText } from "../lib/activityUtils";
 import {
   Sparkles,
@@ -465,6 +467,7 @@ export const Dashboard: React.FC<{
 }) => {
   const {
     currentUser,
+    collectionsReady,
     manuscripts,
     agents,
     queries,
@@ -476,6 +479,16 @@ export const Dashboard: React.FC<{
     updateQueryStatus,
     undoQueryStatus
   } = useScriptAllyDb();
+
+  // Loading vs loaded-empty vs loaded-with-data. While the user's collections are still loading we
+  // show the skeleton — never the empty/onboarding state — but only if the load takes a moment
+  // (~180ms), so fast loads don't flash it.
+  const [showSkeleton, setShowSkeleton] = useState(false);
+  useEffect(() => {
+    if (collectionsReady) { setShowSkeleton(false); return; }
+    const t = setTimeout(() => setShowSkeleton(true), 180);
+    return () => clearTimeout(t);
+  }, [collectionsReady]);
 
   const [isTasksPanelOpen, setIsTasksPanelOpen] = useState(false);
   const [spotlightTaskIndex, setSpotlightTaskIndex] = useState(0);
@@ -1399,6 +1412,13 @@ export const Dashboard: React.FC<{
     }
   };
 
+  // Data still loading → skeleton (after the ~180ms delay); never the empty/onboarding state and
+  // never a half-rendered dashboard. Both the skeleton and the pre-delay placeholder are full-height
+  // so the page footer (a sibling after AppShell) can't ride up and flash while content is empty.
+  if (!collectionsReady) {
+    return showSkeleton ? <DashboardSkeleton /> : <div className="min-h-screen" aria-hidden="true" />;
+  }
+
   return (
     <div
       className="min-h-screen pb-16 font-sans"
@@ -1652,7 +1672,7 @@ export const Dashboard: React.FC<{
             <div className="flex flex-col gap-[16px]">
               <HeroCard
                 firstName={getUserFirstName()}
-                queries={queries}
+                quote={quote}
                 onSendQuery={() => onNavigate("queries", "Send a query")}
                 onRecordResponse={() => setRecordResponseScreenOpen(true)}
                 onAddAgent={() => onNavigate("agents", "Add an agent")}
@@ -1763,6 +1783,9 @@ export const Dashboard: React.FC<{
               );
             })()
           )}
+
+          {/* ==================== WHAT'S LIVE RIGHT NOW (above Fortnight) ==================== */}
+          {!isMagazineLayout && <WhatsLivePanel queries={queries} />}
 
           {/* ==================== FORTNIGHT IN FOCUS ==================== */}
           <FortnightInFocus
@@ -1917,8 +1940,9 @@ export const Dashboard: React.FC<{
               );
             }
 
-            // Standard layout: the query pipeline moved up into the hero (HeroPipelineStrip),
-            // so nothing renders here. The magazine layout keeps its own pipeline matrix above.
+            // Standard layout: the query pipeline now lives in the standalone "What's live right
+            // now?" panel above Fortnight (WhatsLivePanel), so nothing renders here. The magazine
+            // layout keeps its own pipeline matrix above.
             return null;
           })()}
         </div>

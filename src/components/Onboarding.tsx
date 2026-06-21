@@ -11,7 +11,7 @@ import { CreamUnderstood } from "./onboarding/chrome";
 import { BranchA, BranchAResult } from "./onboarding/BranchA";
 import { BranchB } from "./onboarding/BranchB";
 import { ManuscriptFieldsState } from "./onboarding/ManuscriptFields";
-import { buildManuscriptPayload, manuscriptLimitError } from "../lib/manuscripts";
+import { buildManuscriptPayload, manuscriptLimitError, ensureManuscriptOnce, ManuscriptIdCache } from "../lib/manuscripts";
 import {
   Send,
   UserPlus,
@@ -993,8 +993,15 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   };
 
   // "Skip setup" from the welcome step → Branch C (exploring): mark complete and go to the dashboard.
-  const handleStageSkip = () => {
-    void finishOnboarding({ journeyStage: "exploring" });
+  // If the user entered a manuscript in Branch B then backed out here, honour it (create once) and
+  // record them as querying rather than exploring.
+  const handleStageSkip = async () => {
+    if (b2DraftRef.current) {
+      await ensureBranchBManuscript();
+      await finishOnboarding({ journeyStage: "querying" });
+      return;
+    }
+    await finishOnboarding({ journeyStage: "exploring" });
   };
 
   // After the cream beat shows (~1.2s), enter the branch the chosen stage maps to.
@@ -1063,14 +1070,36 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     }
   };
 
-  // B2: the book the pipeline attaches to — saved as Querying (no readiness question). The id is
-  // kept so B3's import can attach every query to it.
-  const [b2ManuscriptId, setB2ManuscriptId] = useState<string | null>(null);
+  // B2 (Branch B): the book the pipeline attaches to. To avoid tripping the Free-tier 1-manuscript
+  // cap mid-flow, NOTHING is written here — the entered details are HELD in flow state and the
+  // manuscript is created exactly once, later, at commit/finish (ensureBranchBManuscript). Held in a
+  // ref alongside state so the deferred create + idempotency guard read the latest value synchronously.
+  const [b2Draft, setB2Draft] = useState<ManuscriptFieldsState | null>(null);
+  const b2DraftRef = useRef<ManuscriptFieldsState | null>(null);
+  const b2IdCache = useRef<ManuscriptIdCache>({ id: null }); // caches the id once the single write lands
+
+  // B2 Continue: hold the details only — no Firestore write, no cap check at this step. (The cap can
+  // therefore never fire mid-flow: there are 0 manuscripts until the single commit/finish write.)
   const handleBranchBSaveBook = async (fields: ManuscriptFieldsState): Promise<boolean> => {
-    const id = await saveBranchManuscript(fields, ManuscriptStatus.QUERYING);
-    if (id) setB2ManuscriptId(id);
-    return !!id;
+    setBranchError(null);
+    setB2Draft(fields);
+    b2DraftRef.current = fields;
+    setManuscriptTitle(fields.title);
+    saveProgress({ manuscriptTitle: fields.title, manuscriptGenre: fields.genre });
+    return true; // advance to the pipeline step; the manuscript is created later, exactly once.
   };
+
+  // Deferred single write: create the Branch-B manuscript from the held details exactly once.
+  // Idempotent and retry-safe — once created, the id is cached, so a re-run after a partial failure
+  // reuses it rather than creating a second (the cap can't be tripped by a retry, and every imported
+  // query attaches to one manuscript). Returns the id, or null if there's no draft / the write failed.
+  const ensureBranchBManuscript = (): Promise<string | null> =>
+    ensureManuscriptOnce(b2IdCache.current, !!b2DraftRef.current, () =>
+      saveBranchManuscript(b2DraftRef.current!, ManuscriptStatus.QUERYING));
+
+  // Abandoning the manuscript path (switching the Stage-1 answer away from Branch B) forgets the held
+  // draft, so a later Skip can't resurrect a manuscript the user has moved on from.
+  const forgetB2Draft = () => { setB2Draft(null); b2DraftRef.current = null; b2IdCache.current = { id: null }; };
 
   // The single completion path: mark onboardingComplete (+ optional journeyStage) and exit to the
   // dashboard. Every "Skip setup" and every branch finish routes through here. Writes are
@@ -1082,7 +1111,12 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     onComplete();
   };
 
-  const handleSkip = () => { void finishOnboarding(); };
+  // Skipping with manuscript details already entered honours them: create the manuscript once (0
+  // exist mid-flow, so the cap can't fire), then finish. A skip before any details writes nothing.
+  const handleSkip = async () => {
+    if (b2DraftRef.current) await ensureBranchBManuscript();
+    await finishOnboarding();
+  };
 
   const handleScreen5Continue = async (name: string, agency: string, agentOption: AgentOption) => {
     setAgentName(name);
@@ -1157,12 +1191,18 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
               onSkip={handleSkip}
               onExit={() => { setBranchError(null); setFlow(null); }}
               onSaveBook={handleBranchBSaveBook}
-              manuscriptId={b2ManuscriptId}
+              initialBook={b2Draft}
+              onEnsureManuscript={ensureBranchBManuscript}
               defaultImport={queryingStage === "early" ? "byhand" : "smart"}
-              onAddByHand={() => { setFlow(null); goTo(5); }}
-              onOpenImportDesk={() => {
+              onAddByHand={async () => {
+                // Manual-add finish: create the held manuscript once, then drop into the agents step.
+                if (await ensureBranchBManuscript()) { setBranchError(null); setFlow(null); goTo(5); }
+              }}
+              onOpenImportDesk={async () => {
+                // Escape hatch into the Import desk: create the manuscript first (best-effort), then finish.
+                await ensureBranchBManuscript();
                 sessionStorage.setItem("scriptally_post_onboarding_tab", "import");
-                void finishOnboarding();
+                await finishOnboarding();
               }}
               onImportComplete={() => void finishOnboarding()}
               error={branchError}
@@ -1182,7 +1222,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
           }}>
             <WelcomeStageScreen
               selected={queryingStage}
-              onSelect={(s) => { setQueryingStage(s); saveProgress({ queryingStage: s }); }}
+              onSelect={(s) => { setQueryingStage(s); saveProgress({ queryingStage: s }); if (STAGE_TO_BRANCH[s] !== "B") forgetB2Draft(); }}
               onContinue={handleStageContinue}
               onSkip={handleStageSkip}
             />
