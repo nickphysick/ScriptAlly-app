@@ -69,7 +69,7 @@ const PEEK_BEFORE = 650; // begin zero-stage bloom this long before the playhead
 const PEEK_AFTER = 520; // linger this long after passing, then ease back to rest
 
 // Geometry (proportions of the row width W, recomputed on resize).
-const DOT = 38;
+const DOT = 40;
 const R = DOT / 2;
 const CGAP = 10; // dot → caption gap
 const CAP_H = 12; // caption line reserve

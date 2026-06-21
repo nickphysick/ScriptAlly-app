@@ -1697,13 +1697,6 @@ export const Dashboard: React.FC<{
         </div>
       )}
 
-      {/* ============ WHAT'S LIVE RIGHT NOW — full-width pipeline panel above Fortnight ============ */}
-      {!isMagazineLayout && (
-        <div className="w-full max-w-none px-4 md:px-10 lg:px-8 xl:px-8 pt-[14px]">
-          <WhatsLivePanel queries={queries} />
-        </div>
-      )}
-
       {/* ============ LOWER ROW: pipeline (left) · timeline (right) ============ */}
       <div className={isMagazineLayout
         ? "grid grid-cols-1 lg:grid-cols-[1.8fr_1.1fr] xl:grid-cols-[2fr_1fr] gap-0 bg-[#FAF8F5] border-t border-[#e8e0d8] items-stretch"
@@ -1771,6 +1764,9 @@ export const Dashboard: React.FC<{
               );
             })()
           )}
+
+          {/* ==================== WHAT'S LIVE RIGHT NOW (above Fortnight) ==================== */}
+          {!isMagazineLayout && <WhatsLivePanel queries={queries} />}
 
           {/* ==================== FORTNIGHT IN FOCUS ==================== */}
           <FortnightInFocus
