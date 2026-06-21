@@ -63,6 +63,7 @@ export const AppShell: React.FC<AppShellProps> = ({
   <>
     <Nav
       activeTab={activeTab}
+      activeSubPage={activeSubPage}
       onNavigate={onNavigate}
       searchQuery={searchQuery}
       setSearchQuery={setSearchQuery}

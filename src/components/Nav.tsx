@@ -46,6 +46,7 @@ import {
 
 interface NavProps {
   activeTab: string;
+  activeSubPage?: string;
   onNavigate: (tab: string, subPageName?: string) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
@@ -108,7 +109,7 @@ const NavLink: React.FC<{ label: string; active: boolean; onClick: () => void }>
   </button>
 );
 
-export const Nav: React.FC<NavProps> = ({ activeTab, onNavigate, searchQuery, setSearchQuery }) => {
+export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, searchQuery, setSearchQuery }) => {
   const { currentUser, tasks, dismissTask, logout } = useScriptAllyDb();
 
   const [showUserDropdown, setShowUserDropdown] = useState(false);
@@ -151,9 +152,10 @@ export const Nav: React.FC<NavProps> = ({ activeTab, onNavigate, searchQuery, se
     }, 450);
   };
 
-  // On the Queries route the sidebar (z-51) covers the full left side, so the top bar
-  // slims to 36px and shows only the right cluster — logo / links / search are in the sidebar.
-  if (activeTab === "queries") {
+  // On the Query-database workspace the fixed sidebar (z-51) covers the full left side, so the
+  // top bar offsets right of it and shows the "Query database" cluster. The Queries hub (and the
+  // orphaned Landing) have no sidebar, so they fall through to the standard global nav below.
+  if (activeTab === "queries" && activeSubPage !== "Hub" && activeSubPage !== "Landing") {
     return (
       <>
         {(showUserDropdown || showBellDropdown) && (
@@ -168,19 +170,19 @@ export const Nav: React.FC<NavProps> = ({ activeTab, onNavigate, searchQuery, se
             marginLeft: 262,
           }}
         >
-          <div className="flex items-center justify-between px-6" style={{ height: 67 }}>
+          <div className="flex items-center justify-between px-6" style={{ height: 45 }}>
             {/* Left group: back link · divider · title */}
-            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
               <button
                 onClick={() => onNavigate("dashboard")}
                 className="qnav-back flex items-center"
-                style={{ display: "flex", alignItems: "center", gap: 6, background: "transparent", border: "none", cursor: "pointer", fontSize: 13.5, fontWeight: 400, padding: "5px 8px", borderRadius: 8 }}
+                style={{ display: "flex", alignItems: "center", gap: 6, background: "transparent", border: "none", cursor: "pointer", fontSize: 13.5, fontWeight: 400, padding: "3px 6px", borderRadius: 8 }}
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
                 Dashboard
               </button>
-              <div style={{ width: 1, height: 24, background: "#e2ded7", flexShrink: 0 }} />
-              <span style={{ fontFamily: FONT_SERIF, fontSize: 21, fontWeight: 600, color: "#2e3a2c", lineHeight: 1, whiteSpace: "nowrap" }}>
+              <div style={{ width: 1, height: 20, background: "#e2ded7", flexShrink: 0 }} />
+              <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 600, color: "#2e3a2c", lineHeight: 1, whiteSpace: "nowrap" }}>
                 Query <span style={{ color: burgundy }}>database</span>
               </span>
             </div>

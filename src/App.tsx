@@ -11,6 +11,7 @@ import { AppShell } from "./components/AppShell";
 import { Dashboard } from "./components/Dashboard";
 import { Queries } from "./components/Queries";
 import { QueriesLanding } from "./components/QueriesLanding";
+import { QueriesHub } from "./components/QueriesHub";
 import { Agents } from "./components/Agents";
 import { DiscoverNewAgents } from "./components/DiscoverNewAgents";
 import { SubmissionPackages } from "./components/SubmissionPackages";
@@ -97,7 +98,7 @@ function AppContent() {
     } else {
       // Set sensible defaults for each tab
       if (tab === "dashboard") setActiveSubPage("Dashboard");
-      if (tab === "queries") setActiveSubPage("Landing");
+      if (tab === "queries") setActiveSubPage("Hub");
       if (tab === "agents") setActiveSubPage("Agents database");
       if (tab === "manuscripts") setActiveSubPage("All manuscripts");
       if (tab === "pricing") setActiveSubPage("Pricing plans");
@@ -170,7 +171,13 @@ function AppContent() {
           />
         )}
         {activeTab === "queries" && (
-          activeSubPage === "Landing" ? (
+          activeSubPage === "Hub" ? (
+            // Card 3 ("Update an existing query") is a deliberate placeholder for now — the real
+            // entry point will be wired later. Until then it surfaces a gentle "coming soon" note.
+            <QueriesHub onNavigate={handleNavigate} onUpdateExisting={() => setSuccessToast("Coming soon — you'll be able to update an existing query here.")} />
+          ) : activeSubPage === "Landing" ? (
+            // Orphaned: the old data-dense overview. No nav path reaches "Landing" now that the
+            // global Queries link defaults to "Hub". Kept for reference pending removal.
             <QueriesLanding onNavigate={handleNavigate} />
           ) : (
             <Queries searchQuery={searchQuery} onNavigate={handleNavigate} activeSubPage={activeSubPage} />
