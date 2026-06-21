@@ -28,10 +28,14 @@ export interface BranchBProps {
   onSkip: () => void;
   /** Back from B2 — returns to the welcome step. */
   onExit: () => void;
-  /** B2 Continue — parent saves the manuscript (status Querying); resolves true on success. */
+  /** B2 Continue — parent HOLDS the entered details in flow state (no write yet); resolves true to
+   *  advance. The manuscript is created later, once, via onEnsureManuscript. */
   onSaveBook: (fields: ManuscriptFieldsState) => Promise<boolean>;
-  /** The manuscript every imported query attaches to (set by the parent after B2 saves). */
-  manuscriptId: string | null;
+  /** Held B2 details, used to pre-fill the book step when re-entering Branch B (Back then forward). */
+  initialBook?: ManuscriptFieldsState | null;
+  /** Create-or-reuse the manuscript from the held details, returning its id (null if it couldn't be
+   *  created). Idempotent — call it at the commit ending; every imported query attaches to this id. */
+  onEnsureManuscript: () => Promise<string | null>;
   /** Pre-selected import option: deep/interest → "smart", early → "byhand". */
   defaultImport: "smart" | "byhand";
   /** "Add them by hand" — drops into the existing add-agents flow. */
@@ -95,12 +99,13 @@ const EscapeHatch: React.FC<{ onOpen: () => void }> = ({ onOpen }) => (
 // it hands to handleImport — see SmartImportReview + smartImportReviewModel.
 
 export const BranchB: React.FC<BranchBProps> = ({
-  onSkip, onExit, onSaveBook, manuscriptId, defaultImport, onAddByHand, onOpenImportDesk, onImportComplete, error,
+  onSkip, onExit, onSaveBook, initialBook, onEnsureManuscript, defaultImport, onAddByHand, onOpenImportDesk, onImportComplete, error,
 }) => {
   const { currentUser, agents, addAgent, addQuery } = useScriptAllyDb();
 
   const [screen, setScreen] = useState<B3Screen>("book");
-  const [fields, setFields] = useState<ManuscriptFieldsState>(emptyManuscriptFields());
+  // Seed from any held draft so Back-to-welcome-then-forward re-fills the book step.
+  const [fields, setFields] = useState<ManuscriptFieldsState>(initialBook ?? emptyManuscriptFields());
   const [fieldError, setFieldError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -133,18 +138,26 @@ export const BranchB: React.FC<BranchBProps> = ({
    *  inline fix (statuses, dates, dedupe, exclusions, recovered names) and builds the result via
    *  modelToResult, so we just commit it — same deps and post-import flow as before. */
   const handleImport = async (result: SmartImportResult) => {
-    if (!currentUser || !manuscriptId) return;
+    if (!currentUser) return;
     setCommitError(null);
     setImportComplete(false);
     setScreen("importing"); // the loader shows the instant Import is pressed
     try {
+      // Create (or reuse) the manuscript from the held details — the single deferred write — then
+      // attach this import's queries to it. Idempotent: a retry after a failed commit reuses the id.
+      const mId = await onEnsureManuscript();
+      if (!mId) {
+        setCommitError("Couldn't set up your manuscript — nothing's lost. Try again, or use the Import desk.");
+        setScreen("review");
+        return;
+      }
       // Run the commit and a 5s UX floor together. The floor never hides an error: if the commit
       // rejects, Promise.all rejects immediately (we don't wait out the 5s to surface the failure).
       const [committed] = await Promise.all([
         commitSmartImport(
           { userId: currentUser.id, existingAgents: agents, manuscriptTitle: fields.title, addAgent, addQuery },
           result,
-          manuscriptId
+          mId
         ),
         delay(5000),
       ]);
