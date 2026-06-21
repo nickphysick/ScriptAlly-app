@@ -23,6 +23,14 @@
   100% { transform: scale(1);   box-shadow: 0 0 0 0 rgba(124, 58, 42, 0); }
 }
 
+/* zero-count stages pulse only very slightly as the line passes (no opacity change, no halo) */
+.wl-row .wl-dotwrap.pulsing-faint { animation: wl-dotpulse-faint 1.6s ease-out; }
+@keyframes wl-dotpulse-faint {
+  0%   { transform: scale(1); }
+  22%  { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
 /* zero-count StatusDot: stays faint at 20% (the line passes behind it; no bloom). Hover reveals it. */
 .wl-row .wl-ghost { opacity: 0.2; transition: opacity 1s ease-in-out; will-change: opacity; }
 .wl-row .wl-node:hover .wl-ghost { opacity: 1; }
@@ -37,7 +45,8 @@
 
 /* Reduced motion: no sequence; JS pins every caption + a fully-drawn line, zeros faint. */
 @media (prefers-reduced-motion: reduce) {
-  .wl-row .wl-dotwrap.pulsing { animation: none; }
+  .wl-row .wl-dotwrap.pulsing,
+  .wl-row .wl-dotwrap.pulsing-faint { animation: none; }
   .wl-row .wl-capt { transition: none; }
   .wl-row .wl-ghost { transition: none; }
 }

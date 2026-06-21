@@ -210,13 +210,16 @@ export const WhatsLivePanel: React.FC<WhatsLivePanelProps> = ({ queries }) => {
       await wait(dur);
     };
 
-    // The line reaches a stage → its caption appears (and stays). Active stages also pulse
-    // (50% larger); zero-count stages do NOT animate or change opacity — caption only.
+    // The line reaches a stage → its caption appears (and stays) and the icon pulses: active
+    // stages pulse 50% larger; zero-count stages pulse only very slightly (no opacity change).
     const pulseLabel = (i: number) => {
       nodes[i].classList.add("show");
-      if (counts[i] > 0) {
-        const wrap = nodes[i].querySelector<HTMLElement>(".wl-dotwrap");
-        if (wrap) { wrap.classList.remove("pulsing"); void wrap.offsetWidth; wrap.classList.add("pulsing"); }
+      const wrap = nodes[i].querySelector<HTMLElement>(".wl-dotwrap");
+      if (wrap) {
+        const cls = counts[i] > 0 ? "pulsing" : "pulsing-faint";
+        wrap.classList.remove("pulsing", "pulsing-faint");
+        void wrap.offsetWidth;
+        wrap.classList.add(cls);
       }
     };
 
