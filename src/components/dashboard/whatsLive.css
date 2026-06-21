@@ -18,9 +18,9 @@
 .wl-row .wl-dotwrap { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; will-change: transform; }
 .wl-row .wl-dotwrap.pulsing { animation: wl-dotpulse 1.6s ease-out; }
 @keyframes wl-dotpulse {
-  0%   { transform: scale(1);   box-shadow: 0 0 0 0 rgba(124, 58, 42, 0); }
-  22%  { transform: scale(1.5); box-shadow: 0 0 0 12px rgba(124, 58, 42, 0.12); }
-  100% { transform: scale(1);   box-shadow: 0 0 0 0 rgba(124, 58, 42, 0); }
+  0%   { transform: scale(1); }
+  22%  { transform: scale(1.5); }
+  100% { transform: scale(1); }
 }
 
 /* zero-count stages pulse only very slightly as the line passes (no opacity change, no halo) */
