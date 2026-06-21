@@ -199,7 +199,7 @@ service cloud.firestore {
           data.status == 'Withdrawn' ||
           data.status == 'No Response'
         )
-        && data.dateSent is string && data.dateSent.size() <= 64
+        && (data.get('dateSent', null) == null || (data.dateSent is string && data.dateSent.size() <= 64))
         && (data.get('personalisationNotes', null) == null || (data.personalisationNotes is string && data.personalisationNotes.size() <= 16384))
         && data.sendMethod is string && (
           data.sendMethod == 'Email' ||
@@ -466,5 +466,12 @@ service cloud.firestore {
         && incoming().contributedByCount == existing().contributedByCount + 1;
       allow delete: if false;
     }
+
+    // ROUTE: Founding-writer waitlist (holding page) — NO client access.
+    // The holding-page form never touches Firestore directly; it posts to the `waitlist`
+    // HTTP function, which writes via the Admin SDK and bypasses these rules. These explicit
+    // denies are belt-and-braces over the default-deny catch-all, per the allowlist principle.
+    match /waitlist/{id}  { allow read, write: if false; }
+    match /counters/{id}  { allow read, write: if false; }
   }
 }

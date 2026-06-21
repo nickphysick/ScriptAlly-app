@@ -20,11 +20,12 @@ import {
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { QuerySlideInPanel } from "./QuerySlideInPanel";
 import { RecordResponseModal } from "./RecordResponseModal";
+import { RecordResponseScreen } from "./RecordResponseScreen";
 import { NudgeModal } from "./NudgeModal";
 import { recordQueryResponse } from "../lib/recordResponse";
 import { CalendarView } from "./CalendarView";
 import { StatusDot } from "./StatusDot";
-import { getPillLabelAndDot } from "./TimelineDot";
+import { getPillLabelAndDot, renderTimelineDot } from "./TimelineDot";
 import { getTimelineFamily, FAMILY_CARD_STYLE } from "../lib/timelineEvent";
 import {
   pageGround,
@@ -53,7 +54,6 @@ import { MountCard } from "./MountCard";
 import { HeroCard } from "./dashboard/HeroCard";
 import { OverToYou } from "./dashboard/OverToYou";
 import { StatCards } from "./dashboard/StatCards";
-import { PipelinePanel } from "./dashboard/PipelinePanel";
 import { FortnightInFocus } from "./dashboard/FortnightInFocus";
 import { replacePlaceholders, extractAgentFromText } from "../lib/activityUtils";
 import {
@@ -524,6 +524,8 @@ export const Dashboard: React.FC<{
 
   // Drives the unified RecordResponseModal launched from the query slide-in panel.
   const [recordResponseQueryId, setRecordResponseQueryId] = useState<string | null>(null);
+  // The hero "Record a response" screen (paste-email fast lane + manual flow).
+  const [recordResponseScreenOpen, setRecordResponseScreenOpen] = useState(false);
 
   // Drives the Nudge modal (opened from a nudge_overdue row's "Nudge" button).
   const [nudgeTask, setNudgeTask] = useState<Task | null>(null);
@@ -904,7 +906,7 @@ export const Dashboard: React.FC<{
   const dynamicActiveQueriesPerWeek = Array.from({ length: 8 }, (_, idx) => {
     const weekEndTime = nowTime - (7 - idx) * ONE_WEEK_MS;
     return queries.filter(q => {
-      const sentTime = new Date(q.dateSent).getTime();
+      const sentTime = q.dateSent ? new Date(q.dateSent).getTime() : Infinity;
       if (sentTime > weekEndTime) return false;
       return [
         QueryStatus.QUERIED,
@@ -981,7 +983,7 @@ export const Dashboard: React.FC<{
   const statActiveWeeks = [1, 2, 3, 4, 5, 6, 7].map(idx => {
     const weekEndTime = nowTime - (7 - idx) * ONE_WEEK_MS;
     const atWeek = queries.filter(q =>
-      new Date(q.dateSent).getTime() <= weekEndTime && STAT_ACTIVE_STATUSES.includes(q.status));
+      q.dateSent && new Date(q.dateSent).getTime() <= weekEndTime && STAT_ACTIVE_STATUSES.includes(q.status));
     const counts = new Map<QueryStatus, number>();
     atWeek.forEach(q => counts.set(q.status, (counts.get(q.status) || 0) + 1));
     const composition = STATUS_ORDER
@@ -1650,8 +1652,9 @@ export const Dashboard: React.FC<{
             <div className="flex flex-col gap-[16px]">
               <HeroCard
                 firstName={getUserFirstName()}
-                quote={quote}
+                queries={queries}
                 onSendQuery={() => onNavigate("queries", "Send a query")}
+                onRecordResponse={() => setRecordResponseScreenOpen(true)}
                 onAddAgent={() => onNavigate("agents", "Add an agent")}
                 onAddManuscript={() => onNavigate("manuscripts", "Add a manuscript")}
               />
@@ -1914,8 +1917,9 @@ export const Dashboard: React.FC<{
               );
             }
 
-            // Standard layout: the animated "Query pipeline" panel (see PipelinePanel).
-            return <PipelinePanel manuscripts={manuscripts} queries={queries} />;
+            // Standard layout: the query pipeline moved up into the hero (HeroPipelineStrip),
+            // so nothing renders here. The magazine layout keeps its own pipeline matrix above.
+            return null;
           })()}
         </div>
 
@@ -1983,13 +1987,46 @@ export const Dashboard: React.FC<{
                           <div style={{ ...labelStyle, marginBottom: 12 }}>{formattedDateHeader}</div>
 
                           {events.map((act, evIdx) => {
+                            // Smart Import summary — no agent/query context; render through the
+                            // standard event-card structure (icon + title + meta) rather than raw text.
+                            if (typeof act.description === "string" && act.description.startsWith("Smart import ·")) {
+                              const dotIdx = act.description.indexOf(" · ");
+                              const summaryTitle = dotIdx >= 0 ? act.description.slice(0, dotIdx) : act.description;
+                              const summaryMeta = dotIdx >= 0 ? act.description.slice(dotIdx + 3) : "";
+                              const isLast = evIdx === events.length - 1;
+                              const importCardStyle = FAMILY_CARD_STYLE["outgoing"];
+                              return (
+                                <div key={act.id} className="flex animate-fade-in" style={{ gap: 12, marginBottom: isLast ? 18 : 14 }}>
+                                  <div className="flex flex-col items-center shrink-0" style={{ width: 22 }}>
+                                    <span style={{ marginTop: 13 }}>{renderTimelineDot("Smart import")}</span>
+                                    {!isLast && <span style={{ width: 1.5, flex: 1, background: "#e8dcd0", marginTop: 5 }} />}
+                                  </div>
+                                  <div
+                                    className="transition-all"
+                                    style={{ flex: 1, minWidth: 0, position: "relative", overflow: "hidden", borderRadius: 11, padding: "11px 14px 12px", background: "#fffdfa", border: "0.5px solid #f0eae2" }}
+                                  >
+                                    <span style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 3, background: importCardStyle.accent }} />
+                                    <div className="flex justify-between items-center" style={{ gap: 8 }}>
+                                      <span style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 500, padding: "3px 8px", borderRadius: 20, background: importCardStyle.chipBg, color: importCardStyle.chipText, whiteSpace: "nowrap" }}>
+                                        Import
+                                      </span>
+                                      <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, color: "#bcaa9c", whiteSpace: "nowrap" }}>{getFormattedTime(act.date)}</span>
+                                    </div>
+                                    <div style={{ fontFamily: FONT_SERIF, fontWeight: 500, fontSize: 16, color: "#7c3a2a", lineHeight: 1.2, marginTop: 3 }}>{summaryTitle}</div>
+                                    {summaryMeta && (
+                                      <div style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.06em", color: "#9c8878", marginTop: 3, overflowWrap: "break-word" }}>{summaryMeta}</div>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            }
                             const q = queries.find(item => item.id === act.queryId);
                             const agent = q ? agents.find(ag => ag.id === q.agentId) : null;
                             const resolvedAgent = agent || extractAgentFromText(act.description);
                             const ms = (q && manuscripts.find(m => m.id === q.manuscriptId)) || manuscripts.find(m => m.id === act.manuscriptId) || null;
                             const msTitle = ms ? ms.title : "";
                             const agency = resolvedAgent?.agency || "";
-                            const agentName = resolvedAgent?.name || "The agent";
+                            const agentName = resolvedAgent?.name || resolvedAgent?.agency || "the agent";
                             const formattedTime = getFormattedTime(act.date);
 
                             const pillData = getPillLabelAndDot(act.description, act.activityType, act.resultingStatus);
@@ -2394,6 +2431,13 @@ export const Dashboard: React.FC<{
         }}
       />
 
+      {/* Record-a-response screen (hero entry): paste-email fast lane + manual record-a-response flow. */}
+      <RecordResponseScreen
+        isOpen={recordResponseScreenOpen}
+        onClose={() => setRecordResponseScreenOpen(false)}
+        onNavigate={onNavigate}
+      />
+
       {/* Unified Record-response modal (shared with the Queries page) */}
       {recordResponseQueryId && (() => {
         const q = queries.find(item => item.id === recordResponseQueryId);
@@ -2406,7 +2450,7 @@ export const Dashboard: React.FC<{
             onClose={() => setRecordResponseQueryId(null)}
             query={q}
             agent={{
-              name: ag?.name || "the agent",
+              name: ag?.name || ag?.agency || "the agent",
               agency: ag?.agency || "Agency",
               responseTimeWeeks: ag?.responseTimeWeeks || 6,
               submissionMethod: (ag as any)?.submissionMethod || "Email"
@@ -2424,7 +2468,7 @@ export const Dashboard: React.FC<{
                 queryId: q.id,
                 previousStatus: q.status,
                 newStatus: result.newStatus,
-                agentName: ag?.name || "the agent",
+                agentName: ag?.name || ag?.agency || "the agent",
                 undoFn: result.undo,
               });
             }}

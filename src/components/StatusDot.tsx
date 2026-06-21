@@ -5,32 +5,23 @@
  * StatusDot — ScriptAlly's canonical, permanent query-status glyph. Every visual
  * representation of a QueryStatus anywhere in the app renders through this component.
  *
- * The grammar:
- *   · ring fill = depth into the journey (empty / half / full / solid)
- *   · warm pink centre = your material went out; sage = the agent moved, ball is with you
- *   · the mark is the verb (→ sent, ← received, ✎ revise, ✓ offered, × closed)
+ * The artwork is the designed PNG set in /public/status-dots, one image per status, mapped
+ * here as the SINGLE SOURCE OF TRUTH (STATUS_DOT_IMAGE). Change a path here and it propagates
+ * to every render site — they all go through this component, never their own dot.
  *
- * Closed-family statuses (Rejected / Withdrawn / No Response) all render the Closed glyph.
- * Geometry is the approved reference math — do not tweak locally; sizes 12–28px are vetted.
- * Colours come from the design-token module as SVG attribute values (never Tailwind classes —
- * Tailwind has silently overridden critical colours in this codebase before).
+ * Closed-family statuses share the Closed image apart from Rejected, which has its own.
+ *
+ * Rendering rules (per design spec):
+ *   · smooth (default) image-rendering — the PNGs are 500×500 so they stay crisp at every
+ *     size used in the app (9–22px); never upscaled.
+ *   · the artwork is never altered — no tint, filter, opacity shift, border-radius clip, or
+ *     object-fit crop; aspect ratio preserved (square source into a square box).
+ *   · EXCEPTION: the optional `ghost` "would-be"/skipped treatment has no dedicated artwork,
+ *     so it is muted with a grayscale+opacity filter. (Provide ghosted PNGs to drop this.)
  */
 import React from "react";
 import { QueryStatus } from "../types";
 import { normalizeStatus, getStatusLabel } from "./StatusPill";
-import {
-  statusBurgundy,
-  statusPinkFill,
-  statusSageRing,
-  statusSageFill,
-  statusSageMark,
-  statusTrack,
-  statusClosedRing,
-  statusClosedTrack,
-  statusClosedFill,
-  statusClosedMark,
-  statusParchment,
-} from "../lib/designTokens";
 
 /** Legend source: map over this and render the actual <StatusDot> — never redraw copies. */
 export const STATUS_DOT_LEGEND: { status: QueryStatus; label: string }[] = [
@@ -44,279 +35,95 @@ export const STATUS_DOT_LEGEND: { status: QueryStatus; label: string }[] = [
   { status: QueryStatus.REJECTED, label: "Closed" },
 ];
 
-const CLOSED_FAMILY = new Set<QueryStatus>([
-  QueryStatus.REJECTED,
-  QueryStatus.WITHDRAWN,
-  QueryStatus.NO_RESPONSE,
-]);
+const CLOSED_IMG = "/status-dots/closed.png";
+
+/** SINGLE SOURCE OF TRUTH — QueryStatus → dot image path. The closed family (Withdrawn /
+ *  No Response) reuses the Closed image; Rejected has its own. */
+const STATUS_DOT_IMAGE: Record<QueryStatus, string> = {
+  [QueryStatus.QUERIED]: "/status-dots/queried.png",
+  [QueryStatus.PARTIAL_REQUESTED]: "/status-dots/partial-requested.png",
+  [QueryStatus.PARTIAL_SENT]: "/status-dots/partial-sent.png",
+  [QueryStatus.FULL_REQUESTED]: "/status-dots/full-requested.png",
+  [QueryStatus.FULL_SENT]: "/status-dots/full-sent.png",
+  [QueryStatus.REVISE_RESUBMIT]: "/status-dots/revise-resubmit.png",
+  [QueryStatus.OFFER]: "/status-dots/offer.png",
+  [QueryStatus.REJECTED]: "/status-dots/rejected.png",
+  [QueryStatus.WITHDRAWN]: CLOSED_IMG,
+  [QueryStatus.NO_RESPONSE]: CLOSED_IMG,
+};
 
 const warnedUnknownStatuses = new Set<string>();
 
-/** Ring layers: optional centre fill, the track, then a sweep (0 / 0.5 / 1 of the circle). */
-const ringLayers = (
-  S: number,
-  fraction: number,
-  sweepColor: string,
-  trackColor: string,
-  fillColor: string | null
-): React.ReactNode => {
-  const c = S / 2;
-  const r = S / 2 - 2;
-  const sw = Math.max(S * 0.15, 1.8);
-  const C = 2 * Math.PI * r;
-  return (
-    <>
-      {fillColor && <circle cx={c} cy={c} r={+(r - sw / 2 + 0.4).toFixed(2)} fill={fillColor} />}
-      <circle cx={c} cy={c} r={r} fill="none" stroke={trackColor} strokeWidth={sw} />
-      {fraction >= 1 && <circle cx={c} cy={c} r={r} fill="none" stroke={sweepColor} strokeWidth={sw} />}
-      {fraction > 0 && fraction < 1 && (
-        <circle
-          cx={c}
-          cy={c}
-          r={r}
-          fill="none"
-          stroke={sweepColor}
-          strokeWidth={sw}
-          strokeLinecap="round"
-          strokeDasharray={`${(C * fraction).toFixed(2)} ${C.toFixed(2)}`}
-          transform={`rotate(-90 ${c} ${c})`}
-        />
-      )}
-    </>
-  );
-};
-
-/** Solid disc (Offer): filled circle r with a matching stroke of the ring width. */
-const solidDisc = (S: number, color: string): React.ReactNode => {
-  const c = S / 2;
-  const r = S / 2 - 2;
-  const sw = Math.max(S * 0.15, 1.8);
-  return <circle cx={c} cy={c} r={r} fill={color} stroke={color} strokeWidth={sw} />;
-};
-
-/** Direction arrow: → (sent) or ← (received). */
-const arrowMark = (S: number, right: boolean, color: string): React.ReactNode => {
-  const c = S / 2;
-  const a = S * 0.17;
-  const h = S * 0.13;
-  const sw = Math.max(S * 0.1, 1.3);
-  const x1 = right ? c - a : c + a;
-  const x2 = right ? c + a : c - a;
-  const hx = right ? x2 - h : x2 + h;
-  return (
-    <g stroke={color} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" fill="none">
-      <line x1={+x1.toFixed(2)} y1={c} x2={+x2.toFixed(2)} y2={c} />
-      <polyline
-        points={`${hx.toFixed(2)},${(c - h).toFixed(2)} ${x2.toFixed(2)},${c} ${hx.toFixed(2)},${(c + h).toFixed(2)}`}
-      />
-    </g>
-  );
-};
-
-/** Pencil ✎ (Revise & Resubmit): diagonal body + filled nib triangle to the tip. */
-const pencilMark = (S: number, color: string): React.ReactNode => {
-  const c = S / 2;
-  const d = S * 0.155;
-  const sw = Math.max(S * 0.1, 1.3);
-  const tx = c - d; // tip
-  const ty = c + d;
-  const bx = c + d; // top of body
-  const by = c - d;
-  const jx = c - d * 0.38; // where body meets nib
-  const jy = c + d * 0.38;
-  const px = d * 0.42; // nib half-width (perpendicular)
-  return (
-    <g stroke={color} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
-      <line x1={bx.toFixed(2)} y1={by.toFixed(2)} x2={jx.toFixed(2)} y2={jy.toFixed(2)} />
-      <path
-        d={`M${(jx + px * 0.707).toFixed(2)} ${(jy + px * 0.707).toFixed(2)} L${tx.toFixed(2)} ${ty.toFixed(2)} L${(jx - px * 0.707).toFixed(2)} ${(jy - px * 0.707).toFixed(2)}`}
-        fill={color}
-        stroke="none"
-      />
-    </g>
-  );
-};
-
-/** Tick ✓ (Offer), drawn in parchment over the solid disc. */
-const tickMark = (S: number, color: string): React.ReactNode => {
-  const c = S / 2;
-  const a = S * 0.16;
-  const sw = Math.max(S * 0.11, 1.4);
-  return (
-    <polyline
-      points={`${(c - a).toFixed(2)},${c.toFixed(2)} ${(c - a * 0.25).toFixed(2)},${(c + a * 0.72).toFixed(2)} ${(c + a).toFixed(2)},${(c - a * 0.62).toFixed(2)}`}
-      fill="none"
-      stroke={color}
-      strokeWidth={sw}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  );
-};
-
-/** Cross × (Closed). */
-const crossMark = (S: number, color: string): React.ReactNode => {
-  const c = S / 2;
-  const a = S * 0.13;
-  const sw = Math.max(S * 0.1, 1.3);
-  return (
-    <g stroke={color} strokeWidth={sw} strokeLinecap="round">
-      <line x1={c - a} y1={c - a} x2={c + a} y2={c + a} />
-      <line x1={c + a} y1={c - a} x2={c - a} y2={c + a} />
-    </g>
-  );
-};
-
-/** The colour set a glyph draws with. Swapped wholesale for the muted `ghost` treatment. */
-interface DotPalette {
-  burgundy: string;
-  pinkFill: string;
-  sageRing: string;
-  sageFill: string;
-  sageMark: string;
-  track: string;
-  closedRing: string;
-  closedTrack: string;
-  closedFill: string;
-  closedMark: string;
-  parchment: string;
-}
-
-const REAL_PALETTE: DotPalette = {
-  burgundy: statusBurgundy,
-  pinkFill: statusPinkFill,
-  sageRing: statusSageRing,
-  sageFill: statusSageFill,
-  sageMark: statusSageMark,
-  track: statusTrack,
-  closedRing: statusClosedRing,
-  closedTrack: statusClosedTrack,
-  closedFill: statusClosedFill,
-  closedMark: statusClosedMark,
-  parchment: statusParchment,
-};
-
-/** Greyed "would-be" treatment — same glyph geometry, drained of colour (the pipeline ghost). */
-const GHOST_PALETTE: DotPalette = {
-  burgundy: "#b0a698",
-  pinkFill: "#efe9e1",
-  sageRing: "#c7bfb4",
-  sageFill: "#efe9e1",
-  sageMark: "#b0a698",
-  track: "#e4ddd2",
-  closedRing: "#c7bfb4",
-  closedTrack: "#e4ddd2",
-  closedFill: "#efe9e1",
-  closedMark: "#b0a698",
-  parchment: "#efe9e1",
-};
-
-const glyphFor = (status: QueryStatus, S: number, p: DotPalette): React.ReactNode => {
-  if (CLOSED_FAMILY.has(status)) {
-    return (
-      <>
-        {ringLayers(S, 1, p.closedRing, p.closedTrack, p.closedFill)}
-        {crossMark(S, p.closedMark)}
-      </>
-    );
-  }
-  switch (status) {
-    case QueryStatus.QUERIED:
-      return (
-        <>
-          {ringLayers(S, 0, p.burgundy, p.track, p.pinkFill)}
-          {arrowMark(S, true, p.burgundy)}
-        </>
-      );
-    case QueryStatus.PARTIAL_REQUESTED:
-      return (
-        <>
-          {ringLayers(S, 0.5, p.sageRing, p.track, p.sageFill)}
-          {arrowMark(S, false, p.sageMark)}
-        </>
-      );
-    case QueryStatus.PARTIAL_SENT:
-      return (
-        <>
-          {ringLayers(S, 0.5, p.burgundy, p.track, p.pinkFill)}
-          {arrowMark(S, true, p.burgundy)}
-        </>
-      );
-    case QueryStatus.FULL_REQUESTED:
-      return (
-        <>
-          {ringLayers(S, 1, p.sageRing, p.track, p.sageFill)}
-          {arrowMark(S, false, p.sageMark)}
-        </>
-      );
-    case QueryStatus.FULL_SENT:
-      return (
-        <>
-          {ringLayers(S, 1, p.burgundy, p.track, p.pinkFill)}
-          {arrowMark(S, true, p.burgundy)}
-        </>
-      );
-    case QueryStatus.REVISE_RESUBMIT:
-      return (
-        <>
-          {ringLayers(S, 1, p.sageRing, p.track, p.sageFill)}
-          {pencilMark(S, p.sageMark)}
-        </>
-      );
-    case QueryStatus.OFFER:
-      return (
-        <>
-          {solidDisc(S, p.burgundy)}
-          {tickMark(S, p.parchment)}
-        </>
-      );
-    default:
-      return null;
-  }
-};
+/** Every status dot renders at this fixed size, everywhere it appears (design requirement).
+ *  The per-call `size` prop is accepted for backwards-compatibility but no longer changes the
+ *  rendered size — change this one constant to resize all dots app-wide. */
+const DOT_SIZE = 30;
 
 export interface StatusDotProps {
   /** Exact QueryStatus enum string (e.g. "Partial Requested" — never camelCase variants). */
   status: QueryStatus | string;
-  /** Pixel size. Default 13, hard minimum 12 — never rendered below 12px. */
+  /** Deprecated/ignored: all dots render at DOT_SIZE (30px) app-wide. Kept so existing call
+   *  sites that still pass a size don't need touching. */
   size?: number;
   className?: string;
-  /** Muted "would-be" treatment — same glyph, drained of colour. Default false (full colour). */
+  /** Muted "would-be"/skipped treatment — the same artwork, drained of colour. Default false. */
   ghost?: boolean;
 }
 
-export const StatusDot: React.FC<StatusDotProps> = ({ status, size = 13, className, ghost = false }) => {
-  const S = Math.max(12, size);
+export const StatusDot: React.FC<StatusDotProps> = ({ status, className, ghost = false }) => {
+  const S = DOT_SIZE;
   const norm = normalizeStatus(status);
   const known = Object.values(QueryStatus).includes(norm);
-  const palette = ghost ? GHOST_PALETTE : REAL_PALETTE;
 
   if (!known && !warnedUnknownStatuses.has(String(status))) {
     warnedUnknownStatuses.add(String(status));
-    console.warn(`[StatusDot] Unknown query status "${status}" — rendering neutral track.`);
+    console.warn(`[StatusDot] Unknown query status "${status}" — rendering neutral dot.`);
   }
 
   const label = known ? getStatusLabel(norm) : String(status);
-  const c = S / 2;
-  const r = S / 2 - 2;
-  const sw = Math.max(S * 0.15, 1.8);
+  const src = known ? STATUS_DOT_IMAGE[norm] : undefined;
+
+  // Unknown/unmapped status — neutral hollow dot so a bad value never crashes or shows nothing.
+  if (!src) {
+    return (
+      <span
+        role="img"
+        aria-label={label}
+        title={label}
+        className={className}
+        style={{
+          width: S,
+          height: S,
+          flexShrink: 0,
+          display: "inline-block",
+          verticalAlign: "middle",
+          borderRadius: "50%",
+          border: `${Math.max(S * 0.15, 1.8)}px solid #c7bfb4`,
+          boxSizing: "border-box",
+        }}
+      />
+    );
+  }
 
   return (
-    <svg
+    <img
+      src={src}
       width={S}
       height={S}
-      viewBox={`0 0 ${S} ${S}`}
-      role="img"
-      aria-label={label}
+      alt={label}
       className={className}
-      style={{ flexShrink: 0, verticalAlign: "middle", display: "inline-block" }}
-    >
-      <title>{label}</title>
-      {known ? (
-        glyphFor(norm, S, palette)
-      ) : (
-        <circle cx={c} cy={c} r={r} fill="none" stroke={palette.track} strokeWidth={sw} />
-      )}
-    </svg>
+      style={{
+        width: S,
+        height: S,
+        maxWidth: "none", // resist any global `img{max-width:100%}` reset so it's always exactly 30px
+        flexShrink: 0,
+        display: "inline-block",
+        verticalAlign: "middle",
+        // ghost: no dedicated artwork, so drain the same image to grey (the one permitted
+        // exception). Opacity is left alone so external CSS (e.g. the hero's .hf-ghost peek/hover
+        // reveal) keeps controlling it; ghost sites without that CSS read as muted grey.
+        ...(ghost ? { filter: "grayscale(1)" } : null),
+      }}
+    />
   );
 };

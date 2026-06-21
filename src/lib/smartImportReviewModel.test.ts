@@ -104,18 +104,20 @@ describe('quoteStatuses — statuses in prose render lowercase, single-quoted', 
 });
 
 describe('modelToResult — exclusions & merge repointing', () => {
-  it('drops deleted agents and removed queries; carries a repointed agentRef', () => {
+  it('drops deleted agents and removed queries; carries a merge-repointed agentRef', () => {
+    // Merge scenario: a1 deleted (merged into a2). removeDuplicate repoints a1's queries to
+    // the survivor (a2). The repointed agentRef must survive through modelToResult.
     const r = result(
       [agent({ ref: 'a1' }), agent({ ref: 'a2', name: 'Bob', agency: 'Beta' })],
       [query({ agentRef: 'a1' }), query({ agentRef: 'a2' })]
     );
     const m = parseModel(r);
-    m.agents.find((a) => a.id === 'a2')!.deleted = true;          // agent removed
-    m.queries[1].removed = true;                                  // its query excluded
-    m.queries[0].agentRef = 'a2';                                 // (pretend) merge-repoint survives
+    m.agents.find((a) => a.id === 'a1')!.deleted = true;          // a1 deleted (merged into a2)
+    m.queries[0].agentRef = 'a2';                                 // a1's query repointed to survivor a2
+    // q1 stays agentRef:'a2', not removed — both survive under a2
     const out = modelToResult(r, m.agents, m.queries);
-    expect(out.agents.map((a) => a.ref)).toEqual(['a1']);         // deleted agent gone
-    expect(out.queries.length).toBe(1);                           // removed query gone
-    expect(out.queries[0].agentRef).toBe('a2');                   // repointed ref carried
+    expect(out.agents.map((a) => a.ref)).toEqual(['a2']);         // a1 gone, a2 survives
+    expect(out.queries.length).toBe(2);                           // both queries survive
+    expect(out.queries.every((q) => q.agentRef === 'a2')).toBe(true); // repointed ref carried
   });
 });

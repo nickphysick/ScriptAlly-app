@@ -17,6 +17,8 @@ import {
   Bell,
   BookOpen,
   ChevronDown,
+  ChevronLeft,
+  HelpCircle,
   LogOut,
   Sparkles,
   User,
@@ -148,6 +150,119 @@ export const Nav: React.FC<NavProps> = ({ activeTab, onNavigate, searchQuery, se
       setSuccessAnimationTaskId(null);
     }, 450);
   };
+
+  // On the Queries route the sidebar (z-51) covers the full left side, so the top bar
+  // slims to 36px and shows only the right cluster — logo / links / search are in the sidebar.
+  if (activeTab === "queries") {
+    return (
+      <>
+        {(showUserDropdown || showBellDropdown) && (
+          <div className="fixed inset-0 z-40 bg-transparent" onClick={closeAll} />
+        )}
+        <style>{`.qnav-back{color:#8a7a6c;transition:color 0.15s}.qnav-back:hover{color:#7c3a2a}`}</style>
+        <header
+          className="sticky top-0 z-50"
+          style={{
+            background: parchment,
+            borderBottom: "1px solid #e2ded7",
+            marginLeft: 262,
+          }}
+        >
+          <div className="flex items-center justify-between px-6" style={{ height: 67 }}>
+            {/* Left group: back link · divider · title */}
+            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+              <button
+                onClick={() => onNavigate("dashboard")}
+                className="qnav-back flex items-center"
+                style={{ display: "flex", alignItems: "center", gap: 6, background: "transparent", border: "none", cursor: "pointer", fontSize: 13.5, fontWeight: 400, padding: "5px 8px", borderRadius: 8 }}
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+                Dashboard
+              </button>
+              <div style={{ width: 1, height: 24, background: "#e2ded7", flexShrink: 0 }} />
+              <span style={{ fontFamily: FONT_SERIF, fontSize: 21, fontWeight: 600, color: "#2e3a2c", lineHeight: 1, whiteSpace: "nowrap" }}>
+                Query <span style={{ color: burgundy }}>database</span>
+              </span>
+            </div>
+
+            {/* Right group: help + user chip */}
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            {/* Help */}
+            <button
+              onClick={() => onNavigate("help")}
+              className="flex items-center justify-center cursor-pointer"
+              style={{ background: "transparent", border: "none", padding: 4, color: burgundy }}
+              title="Help Centre"
+              aria-label="Help Centre"
+            >
+              <HelpCircle className="w-[16px] h-[16px]" />
+            </button>
+
+            {/* User chip — avatar + name + chevron */}
+            <div className="relative flex items-center">
+              <button
+                onClick={() => { setShowUserDropdown(!showUserDropdown); setShowBellDropdown(false); }}
+                className="flex items-center gap-1.5 cursor-pointer"
+                style={{ background: "transparent", border: "none", padding: 2 }}
+              >
+                <span
+                  className="flex items-center justify-center select-none shrink-0"
+                  style={{
+                    width: 24, height: 24, borderRadius: "50%",
+                    background: "rgba(124,58,42,0.10)", border: "1px solid rgba(124,58,42,0.25)",
+                    fontFamily: FONT_SERIF, fontSize: 11, fontWeight: 500, color: burgundy,
+                  }}
+                >
+                  {currentUser.name[0]?.toUpperCase()}
+                </span>
+                <span style={{ fontFamily: FONT_SANS, fontSize: 12, color: "#3a1c14", fontWeight: 500 }} className="max-sm:hidden">
+                  {currentUser.name}
+                </span>
+                <ChevronDown className="w-3 h-3 shrink-0" style={{ color: labelColor }} />
+              </button>
+
+              <AnimatePresence>
+                {showUserDropdown && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 4 }}
+                    transition={{ duration: 0.12 }}
+                    className="absolute right-0 top-[calc(100%+8px)] w-52 p-1 text-left"
+                    style={{
+                      background: parchment, border: "0.5px solid #e0d5c8",
+                      borderRadius: 12, boxShadow: "0 8px 24px rgba(58,28,20,0.16)", zIndex: 60, fontFamily: FONT_SANS,
+                    }}
+                  >
+                    <div className="px-3 py-2" style={{ borderBottom: hairline }}>
+                      <p style={{ fontSize: 12, fontWeight: 600, color: bodyInk }}>{currentUser.name}</p>
+                      <p className="truncate" style={{ fontSize: 10, color: mutedInk, marginTop: 2 }}>{currentUser.email}</p>
+                    </div>
+                    <div className="py-1">
+                      <MenuItem onClick={() => { onNavigate("account"); setShowUserDropdown(false); }}>
+                        <span className="flex items-center gap-1.5"><User className="w-3.5 h-3.5" style={{ color: burgundy }} /> My Account</span>
+                      </MenuItem>
+                      <MenuItem onClick={() => { onNavigate("plans"); setShowUserDropdown(false); }}>
+                        <span className="flex items-center gap-1.5"><Sparkles className="w-3.5 h-3.5" style={{ color: burgundy }} /> {currentUser.plan === UserPlan.PRO ? "Plans" : "Upgrade to Pro"}</span>
+                      </MenuItem>
+                      <MenuItem onClick={() => { onNavigate("import"); setShowUserDropdown(false); }}>
+                        <span className="flex items-center gap-1.5"><BookOpen className="w-3.5 h-3.5" style={{ color: burgundy }} /> Import CSV Data</span>
+                      </MenuItem>
+                      <MenuDivider />
+                      <MenuItem onClick={() => { logout(); setShowUserDropdown(false); }}>
+                        <span className="flex items-center gap-1.5"><LogOut className="w-3.5 h-3.5" /> Log Out</span>
+                      </MenuItem>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+            </div>{/* end right group */}
+          </div>
+        </header>
+      </>
+    );
+  }
 
   return (
     <>

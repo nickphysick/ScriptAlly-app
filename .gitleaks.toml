@@ -1,0 +1,21 @@
+title = "ScriptAlly gitleaks config"
+
+# ── Allowlist ──────────────────────────────────────────────────────────────────
+# Firebase web-config keys (VITE_FIREBASE_API_KEY / AIza…) are browser-public by
+# design: every visitor to the app downloads them as part of the JS bundle.
+# They are NOT secrets — they identify the Firebase project, not authenticate to it.
+# Security is enforced by Firestore rules, not by keeping these values private.
+#
+# We allowlist the two committed env files that carry these keys so gitleaks
+# does not raise false positives. Any other file that contains an AIza… value
+# would still be flagged (it shouldn't be there).
+[allowlist]
+  description = "Firebase web-config API keys — public browser values, not secrets."
+  paths = [
+    # Both env files are intentionally committed with Firebase web-config values.
+    '''^\.env\.production$''',
+    '''^\.env\.development$''',
+    # The example file contains placeholder text only, but also references the key
+    # variable name, which could trip pattern matchers.
+    '''^\.env\.example$''',
+  ]

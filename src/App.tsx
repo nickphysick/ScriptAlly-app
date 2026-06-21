@@ -27,6 +27,8 @@ import { Onboarding } from "./components/Onboarding";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { StatusDotDemo } from "./components/StatusDotDemo";
 import { PlansPage } from "./components/PlansPage";
+// TEMP (Prompt 2): email-import dev preview route — remove with the Nav dropdown item next prompt.
+import { EmailImportDevPage } from "./components/emailImport/EmailImportDevPage";
 import { LandingPage } from "./features/landing/LandingPage";
 import { Palette, X, Check } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -197,6 +199,10 @@ function AppContent() {
         {activeTab === "plans" && (
           <PlansPage />
         )}
+        {/* TEMP (Prompt 2): email-import UI dev preview — relocate the entry button to Record-a-response next prompt, then delete this route. */}
+        {activeTab === "email-import-dev" && (
+          <EmailImportDevPage onNavigate={handleNavigate} onSuccessToast={(msg) => setSuccessToast(msg)} />
+        )}
         {activeTab === "import" && (
           <ImportCsv onNavigate={handleNavigate} />
         )}
@@ -276,8 +282,8 @@ function AppContent() {
         </div>
       )}
 
-      {/* Footer copyright stamp block */}
-      <footer className="bg-[#3a1c14] text-stone-400 py-10 border-t border-[#7c3a2a]/20">
+      {/* Footer copyright stamp block — hidden on the Queries workspace */}
+      {activeTab !== "queries" && <footer className="bg-[#3a1c14] text-stone-400 py-10 border-t border-[#7c3a2a]/20">
         <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-6 text-xs animate-fade-in">
           <div className="flex flex-col md:flex-row items-center gap-4">
             <div className="flex items-center gap-2">
@@ -300,7 +306,7 @@ function AppContent() {
             Crafted for fiction authors querying literary agents. Keep writing, keep pitching. &copy; {new Date().getFullYear()}.
           </p>
         </div>
-      </footer>
+      </footer>}
     </div>
   );
 }

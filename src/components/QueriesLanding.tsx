@@ -977,7 +977,7 @@ export const QueriesLanding: React.FC<QueriesLandingProps> = ({ onNavigate }) =>
             onClose={() => setRecordResponseQueryId(null)}
             query={q}
             agent={{
-              name: ag?.name || "the agent",
+              name: ag?.name || ag?.agency || "the agent",
               agency: ag?.agency || "Agency",
               responseTimeWeeks: ag?.responseTimeWeeks || 6,
               submissionMethod: (ag as any)?.submissionMethod || "Email"
@@ -995,7 +995,7 @@ export const QueriesLanding: React.FC<QueriesLandingProps> = ({ onNavigate }) =>
                 queryId: q.id,
                 previousStatus: q.status,
                 newStatus: result.newStatus,
-                agentName: ag?.name || "the agent",
+                agentName: ag?.name || ag?.agency || "the agent",
                 undoFn: result.undo,
               });
             }}

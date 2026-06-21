@@ -829,7 +829,7 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ searchQuery, onN
                               <span className="text-[9px] font-mono bg-amber-50 text-amber-700 border border-amber-200/40 px-1.5 py-0.5 rounded font-bold uppercase tracking-tight">
                                 {q.status}
                               </span>
-                              <span className="block text-[9px] text-stone-400 mt-1 font-mono font-medium">Sent: {new Date(q.dateSent).toLocaleDateString("en-GB", { day: 'numeric', month: 'short' })}</span>
+                              <span className="block text-[9px] text-stone-400 mt-1 font-mono font-medium">Sent: {q.dateSent ? new Date(q.dateSent).toLocaleDateString("en-GB", { day: 'numeric', month: 'short' }) : "—"}</span>
                             </div>
                           </div>
                         );

@@ -1,8 +1,8 @@
 name: CI
 
-# Verify every push to main and every PR: typecheck, tests, production build.
-# No secrets needed — the Firebase web config in .env.production is non-secret (it ships to the
-# browser), so `vite build` works in CI as-is. This is the safety net the app lacked (no staging).
+# Runs on every push to main and every pull-request.
+# No secrets required — the Firebase web config in .env.production is non-secret
+# (it ships to every browser), so `vite build` works without any CI secrets.
 
 on:
   push:
@@ -12,22 +12,50 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history lets gitleaks scan all commits in a PR, not just the tip.
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          # Matches the developer machine (node --version = v24.16.0).
+          # No .nvmrc or engines field in package.json; pin here explicitly.
+          node-version: '24'
           cache: 'npm'
 
       - name: Install
         run: npm ci
 
+      # ── Code quality ──────────────────────────────────────────────────────
       - name: Typecheck
         run: npx tsc --noEmit
 
+      # ── Tests ─────────────────────────────────────────────────────────────
       - name: Test
         run: npm test
 
+      # ── Production build ──────────────────────────────────────────────────
+      # .env.production is committed (Firebase web-config values are browser-public).
+      # Vite picks it up automatically; no CI secrets needed.
       - name: Build
         run: npm run build
+
+      # ── Dependency audit ──────────────────────────────────────────────────
+      # Report-only: surfaces High/Critical advisories in the job log.
+      # Does not fail the build on its own — low/moderate noise is expected in
+      # a Vite/React dev toolchain. Revisit --audit-level once the advisory
+      # backlog is understood.
+      - name: Dependency audit
+        run: npm audit --audit-level=high || true
+
+      # ── Secret scanning ───────────────────────────────────────────────────
+      # gitleaks scans every commit for accidentally committed credentials.
+      # Firebase web-config API keys (AIza…) are intentionally public —
+      # see .gitleaks.toml for the allowlist that suppresses those findings.
+      - name: Secret scan (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

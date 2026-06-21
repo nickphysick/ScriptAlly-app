@@ -1,0 +1,49 @@
+version: 2
+
+updates:
+  # ── npm (app dependencies) ─────────────────────────────────────────────────
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Europe/London"
+    # Keep the open-PR count manageable so the queue doesn't grow unreviewed.
+    open-pull-requests-limit: 8
+    # Group minor/patch updates by dependency type so they land as a handful
+    # of PRs rather than one per package.
+    groups:
+      dev-toolchain:
+        patterns:
+          - "vite"
+          - "@vitejs/*"
+          - "@tailwindcss/*"
+          - "typescript"
+          - "vitest"
+          - "@types/*"
+        update-types:
+          - "minor"
+          - "patch"
+      firebase:
+        patterns:
+          - "firebase"
+          - "firebase-admin"
+        update-types:
+          - "minor"
+          - "patch"
+    # Major version bumps open individual PRs so they can be reviewed carefully.
+    # (Grouped PRs above only cover minor/patch; majors always go solo.)
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  # ── GitHub Actions ─────────────────────────────────────────────────────────
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Europe/London"
+    open-pull-requests-limit: 4
