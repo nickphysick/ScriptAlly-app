@@ -17,6 +17,7 @@
     }
   },
   "hosting": {
+    "site": "scriptally-app",
     "public": "dist",
     "ignore": [
       "firebase.json",
