@@ -30,7 +30,6 @@ import { StatusDotDemo } from "./components/StatusDotDemo";
 import { PlansPage } from "./components/PlansPage";
 // TEMP (Prompt 2): email-import dev preview route — remove with the Nav dropdown item next prompt.
 import { EmailImportDevPage } from "./components/emailImport/EmailImportDevPage";
-import { LandingPage } from "./features/landing/LandingPage";
 import { Palette, X, Check } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -58,7 +57,7 @@ const useHash = () => {
 };
 
 function AppContent() {
-  const { currentUser, updateUserProfile } = useScriptAllyDb();
+  const { currentUser, authReady, updateUserProfile } = useScriptAllyDb();
 
   // Page routing context state
   const [activeTab, setActiveTab] = useState<string>("dashboard");
@@ -122,13 +121,42 @@ function AppContent() {
     return <PlansPage />;
   }
 
-  // Logged-out front door (no router). Landing by default; the landing's CTAs deep-link
-  // into the existing Auth screen via hash. Every branch here lives inside `!currentUser`,
-  // so a logged-in visitor never sees the landing and the app path below is untouched.
+  // Boot: while Firebase Auth is still resolving the session, show a neutral splash — never a
+  // landing/auth view. Stops the old "calmer place to query" landing flashing on a hard refresh
+  // of the dashboard (currentUser is null for a beat before auth resolves).
+  if (!authReady) {
+    return (
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          background: "#F5F0EA",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <span
+          style={{
+            fontFamily: '"Playfair Display", Georgia, serif',
+            fontSize: 22,
+            letterSpacing: "-0.01em",
+            color: "#7c3a2a",
+            opacity: 0.45,
+          }}
+        >
+          ScriptAlly
+        </span>
+      </div>
+    );
+  }
+
+  // Logged-out front door: the public marketing landing is now the separate holding page, and the
+  // app is reached via its "Log in" link — so logged-out visitors here get the sign-in screen
+  // (#/signup or #/start opens it in sign-up mode). No in-app landing is rendered.
   if (!currentUser) {
-    if (hash === "#/signin") return <Auth initialMode="login" />;
     if (hash === "#/signup" || hash === "#/start") return <Auth initialMode="signup" />;
-    return <LandingPage />;
+    return <Auth initialMode="login" />;
   }
 
   const freshSignupFlag = sessionStorage.getItem("scriptally_new_signup") === "true";

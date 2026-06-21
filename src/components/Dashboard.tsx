@@ -56,6 +56,7 @@ import { OverToYou } from "./dashboard/OverToYou";
 import { StatCards } from "./dashboard/StatCards";
 import { FortnightInFocus } from "./dashboard/FortnightInFocus";
 import { WhatsLivePanel } from "./dashboard/WhatsLivePanel";
+import { DashboardSkeleton } from "./dashboard/DashboardSkeleton";
 import { replacePlaceholders, extractAgentFromText } from "../lib/activityUtils";
 import {
   Sparkles,
@@ -466,6 +467,7 @@ export const Dashboard: React.FC<{
 }) => {
   const {
     currentUser,
+    collectionsReady,
     manuscripts,
     agents,
     queries,
@@ -477,6 +479,16 @@ export const Dashboard: React.FC<{
     updateQueryStatus,
     undoQueryStatus
   } = useScriptAllyDb();
+
+  // Loading vs loaded-empty vs loaded-with-data. While the user's collections are still loading we
+  // show the skeleton — never the empty/onboarding state — but only if the load takes a moment
+  // (~180ms), so fast loads don't flash it.
+  const [showSkeleton, setShowSkeleton] = useState(false);
+  useEffect(() => {
+    if (collectionsReady) { setShowSkeleton(false); return; }
+    const t = setTimeout(() => setShowSkeleton(true), 180);
+    return () => clearTimeout(t);
+  }, [collectionsReady]);
 
   const [isTasksPanelOpen, setIsTasksPanelOpen] = useState(false);
   const [spotlightTaskIndex, setSpotlightTaskIndex] = useState(0);
@@ -1399,6 +1411,12 @@ export const Dashboard: React.FC<{
       return dateStr.toUpperCase();
     }
   };
+
+  // Data still loading → skeleton (after the ~180ms delay); never the empty/onboarding state and
+  // never a half-rendered dashboard. The AppShell chrome keeps rendering around this.
+  if (!collectionsReady) {
+    return showSkeleton ? <DashboardSkeleton /> : null;
+  }
 
   return (
     <div

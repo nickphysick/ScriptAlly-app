@@ -136,6 +136,8 @@ function formatHumanDate(dateInput: string | Date | undefined): string {
 
 interface DbContextType {
   currentUser: User | null;
+  authReady: boolean;
+  collectionsReady: boolean;
   manuscripts: Manuscript[];
   versions: ManuscriptVersion[];
   packages: SubmissionPackage[];
@@ -239,6 +241,13 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [agents, setAgents] = useState<Agent[]>([]);
   const [communityAgents, setCommunityAgents] = useState<CommunityAgent[]>([]);
   const [queries, setQueries] = useState<Query[]>([]);
+  // Boot-state flags that drive the clean dashboard load:
+  //  · authReady   — false until the first onAuthStateChanged resolves (and, for a signed-in user,
+  //                  the user doc loads). While false the app shows a neutral splash, never the landing.
+  //  · collectionsReady — false until the signed-in user's manuscripts, agents AND queries have each
+  //                  delivered their first snapshot. Lets the dashboard tell "loading" from "empty".
+  const [authReady, setAuthReady] = useState<boolean>(false);
+  const [collectionsReady, setCollectionsReady] = useState<boolean>(false);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]);
   const [dismissedTasks, setDismissedTasks] = useState<DismissedTask[]>([]);
@@ -299,6 +308,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       if (!firebaseUser) {
         // No authenticated user — show the Auth screen
         setCurrentUser(null);
+        setAuthReady(true);          // auth resolved: definitively logged out
+        setCollectionsReady(false);  // next sign-in starts in the loading state
+        try { localStorage.removeItem("scriptally_was_authed"); } catch {}
 
         // Clean up any active listeners
         unsubUser();
@@ -314,6 +326,14 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       }
 
       const uid = firebaseUser.uid;
+
+      // Track first-load of the collections the dashboard's empty-state depends on, so the UI can
+      // tell "still loading" from "genuinely empty" (kills the empty-state flicker on boot).
+      setCollectionsReady(false);
+      let mLoaded = false, aLoaded = false, qLoaded = false;
+      const markCollectionsLoaded = () => {
+        if (mLoaded && aLoaded && qLoaded) setCollectionsReady(true);
+      };
 
       // Seed community agents once after authenticated session is established. Writes are
       // admin-only (FINDING-1) — the helper no-ops for non-admin uids, so this only writes
@@ -351,6 +371,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           if (snap.exists()) {
             const data = snap.data() as User;
             setCurrentUser(data);
+            setAuthReady(true); // auth resolved AND user doc loaded — safe to leave the splash
+            try { localStorage.setItem("scriptally_was_authed", "1"); } catch {}
           }
         }, (error) => {
           handleFirestoreError(error, OperationType.GET, `users/${uid}`);
@@ -361,7 +383,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           const arr: Manuscript[] = [];
           snap.forEach(d => arr.push(d.data() as Manuscript));
           setManuscripts(arr);
+          mLoaded = true; markCollectionsLoaded();
         }, (error) => {
+          mLoaded = true; markCollectionsLoaded(); // don't hang the loading state on a read error
           handleFirestoreError(error, OperationType.GET, `users/${uid}/manuscripts`);
         });
 
@@ -388,7 +412,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           const arr: Agent[] = [];
           snap.forEach(d => arr.push(d.data() as Agent));
           setAgents(arr);
+          aLoaded = true; markCollectionsLoaded();
         }, (error) => {
+          aLoaded = true; markCollectionsLoaded();
           handleFirestoreError(error, OperationType.GET, `users/${uid}/agents`);
         });
 
@@ -397,7 +423,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           const arr: Query[] = [];
           snap.forEach(d => arr.push(d.data() as Query));
           setQueries(arr);
+          qLoaded = true; markCollectionsLoaded();
         }, (error) => {
+          qLoaded = true; markCollectionsLoaded();
           handleFirestoreError(error, OperationType.GET, `users/${uid}/queries`);
         });
 
@@ -454,6 +482,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
       } catch (err) {
         console.error("Bootstrapping/authentication loading failures:", err);
+        setAuthReady(true);          // never strand the app on the boot splash
+        setCollectionsReady(true);   // …or on the loading skeleton
       }
     });
 
@@ -2255,6 +2285,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     <DbContext.Provider
       value={{
         currentUser,
+        authReady,
+        collectionsReady,
         manuscripts,
         versions,
         packages,
