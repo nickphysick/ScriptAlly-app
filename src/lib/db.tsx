@@ -136,6 +136,7 @@ function formatHumanDate(dateInput: string | Date | undefined): string {
 
 interface DbContextType {
   currentUser: User | null;
+  collectionsReady: boolean;
   manuscripts: Manuscript[];
   versions: ManuscriptVersion[];
   packages: SubmissionPackage[];
@@ -239,6 +240,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [agents, setAgents] = useState<Agent[]>([]);
   const [communityAgents, setCommunityAgents] = useState<CommunityAgent[]>([]);
   const [queries, setQueries] = useState<Query[]>([]);
+  // False until the signed-in user's core collections (manuscripts, agents, queries) have each
+  // delivered their first snapshot. Lets the dashboard tell "still loading" from "genuinely empty"
+  // so the empty/onboarding state can't flash on boot.
+  const [collectionsReady, setCollectionsReady] = useState<boolean>(false);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]);
   const [dismissedTasks, setDismissedTasks] = useState<DismissedTask[]>([]);
@@ -299,6 +304,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       if (!firebaseUser) {
         // No authenticated user — show the Auth screen
         setCurrentUser(null);
+        setCollectionsReady(false); // next sign-in starts in the loading state
 
         // Clean up any active listeners
         unsubUser();
@@ -314,6 +320,14 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       }
 
       const uid = firebaseUser.uid;
+
+      // Track first-load of the collections the dashboard's empty-state depends on, so the UI can
+      // tell "still loading" from "genuinely empty" (kills the empty-state flicker on boot).
+      setCollectionsReady(false);
+      let mLoaded = false, aLoaded = false, qLoaded = false;
+      const markCollectionsLoaded = () => {
+        if (mLoaded && aLoaded && qLoaded) setCollectionsReady(true);
+      };
 
       // Seed community agents once after authenticated session is established
       seedCommunityAgentsIfEmpty().catch(err => {
@@ -359,7 +373,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           const arr: Manuscript[] = [];
           snap.forEach(d => arr.push(d.data() as Manuscript));
           setManuscripts(arr);
+          mLoaded = true; markCollectionsLoaded();
         }, (error) => {
+          mLoaded = true; markCollectionsLoaded(); // don't hang the loading state on a read error
           handleFirestoreError(error, OperationType.GET, `users/${uid}/manuscripts`);
         });
 
@@ -386,7 +402,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           const arr: Agent[] = [];
           snap.forEach(d => arr.push(d.data() as Agent));
           setAgents(arr);
+          aLoaded = true; markCollectionsLoaded();
         }, (error) => {
+          aLoaded = true; markCollectionsLoaded();
           handleFirestoreError(error, OperationType.GET, `users/${uid}/agents`);
         });
 
@@ -395,7 +413,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           const arr: Query[] = [];
           snap.forEach(d => arr.push(d.data() as Query));
           setQueries(arr);
+          qLoaded = true; markCollectionsLoaded();
         }, (error) => {
+          qLoaded = true; markCollectionsLoaded();
           handleFirestoreError(error, OperationType.GET, `users/${uid}/queries`);
         });
 
@@ -452,6 +472,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
       } catch (err) {
         console.error("Bootstrapping/authentication loading failures:", err);
+        setCollectionsReady(true); // never strand the dashboard on the loading skeleton
       }
     });
 
@@ -2253,6 +2274,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     <DbContext.Provider
       value={{
         currentUser,
+        collectionsReady,
         manuscripts,
         versions,
         packages,
