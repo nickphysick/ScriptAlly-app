@@ -15,9 +15,10 @@
  *   - /waitlist, /counters: hard deny
  *
  * FINDINGS:
- *   FINDING-1 (OPEN): communityAgents.create is open to any signed-in user — cannot close until
- *     seedCommunityAgentsIfEmpty() (src/lib/db.tsx:319) is moved to a server path (Admin SDK /
- *     Cloud Function). Test documents the gap; rule is unchanged pending that migration decision.
+ *   FINDING-1 (FIXED): communityAgents create/delete are now admin-only (isAdmin() UID in
+ *     firestore.rules). Regular users can no longer inject agents into the shared pool; the client
+ *     seed write (seedCommunityAgentsIfEmpty) no-ops for non-admin uids. Reads stay open, and the
+ *     +1 contributedByCount popularity bump stays open but hard-narrowed (no other field, no jump).
  *   FINDING-2 (FIXED): resultingStatus in isValidActivity() now enforces the QueryStatus enum.
  *     Bogus values are rejected; the three flipped tests confirm this.
  */
@@ -50,6 +51,8 @@ const PROJECT_ID = 'demo-scriptally-test';
 
 const ALICE = 'alice-uid';
 const BOB   = 'bob-uid';
+// MUST match the isAdmin() UID literal in firestore.rules and ADMIN_UID in src/lib/seedCommunityAgents.ts.
+const ADMIN = 'r8kbaKbmguNfaoJTb9wH4BetJab2';
 
 let testEnv: RulesTestEnvironment;
 
@@ -74,6 +77,7 @@ afterEach(async () => {
 
 // ─── Context helpers ──────────────────────────────────────────────────────────
 
+const adminCtx   = () => testEnv.authenticatedContext(ADMIN);
 const aliceCtx   = () => testEnv.authenticatedContext(ALICE);
 const bobCtx     = () => testEnv.authenticatedContext(BOB);
 const unauthed   = () => testEnv.unauthenticatedContext();
@@ -796,25 +800,67 @@ describe('/communityAgents', () => {
   });
 
   /**
-   * FINDING-1: communityAgents.create is open to ANY signed-in user.
-   * The rules comment acknowledges this: seeding is currently client-side (seedCommunityAgentsIfEmpty).
-   * Confirmed here: a regular user can create a community agent with a valid payload.
-   * Impact: any authenticated user can inject arbitrary agents into the shared community pool.
-   * Fix: move seeding to an Admin SDK script or Cloud Function, then change create rule to `if false`.
+   * FINDING-1 (FIXED): communityAgents.create is now admin-only. A regular signed-in user can no
+   * longer inject agents into the shared pool; only the admin UID may create. Reads stay open so
+   * everyone's Discover list still works, and the +1 contributedByCount bump stays open (below).
    */
-  it('[FINDING-1] any signed-in user can create a community agent (open create — known concern)', async () => {
-    await assertSucceeds(
+  it('[FINDING-1] regular signed-in user CANNOT create a community agent (admin-only)', async () => {
+    await assertFails(
       setDoc(doc(aliceCtx().firestore(), 'communityAgents', 'ca-1'), validCommunityAgent())
     );
   });
 
-  it('signed-in user can increment contributedByCount by exactly 1', async () => {
+  it('[FINDING-1] admin user CAN create a community agent', async () => {
+    await assertSucceeds(
+      setDoc(doc(adminCtx().firestore(), 'communityAgents', 'ca-1'), validCommunityAgent())
+    );
+  });
+
+  it('[FINDING-1] regular user can still READ the pool after the lock', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'communityAgents', 'ca-1'), validCommunityAgent());
+    });
+    await assertSucceeds(getDoc(doc(aliceCtx().firestore(), 'communityAgents', 'ca-1')));
+  });
+
+  it('blocks unauthenticated create (defence in depth)', async () => {
+    await assertFails(
+      setDoc(doc(unauthed().firestore(), 'communityAgents', 'ca-1'), validCommunityAgent())
+    );
+  });
+
+  it('regular signed-in user can increment contributedByCount by exactly 1 (popularity bump kept)', async () => {
     await asAdmin(async (ctx) => {
       await setDoc(doc(ctx.firestore(), 'communityAgents', 'ca-1'), validCommunityAgent());
     });
     await assertSucceeds(
       updateDoc(doc(aliceCtx().firestore(), 'communityAgents', 'ca-1'), {
         contributedByCount: 1,
+      })
+    );
+  });
+
+  it('blocks regular user from incrementing contributedByCount by more than 1', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'communityAgents', 'ca-1'), validCommunityAgent());
+    });
+    await assertFails(
+      updateDoc(doc(aliceCtx().firestore(), 'communityAgents', 'ca-1'), {
+        contributedByCount: 5, // +5 — only +1 is allowed
+      })
+    );
+  });
+
+  it('blocks regular user from setting an arbitrary contributedByCount', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'communityAgents', 'ca-1'), {
+        ...validCommunityAgent(),
+        contributedByCount: 10,
+      });
+    });
+    await assertFails(
+      updateDoc(doc(aliceCtx().firestore(), 'communityAgents', 'ca-1'), {
+        contributedByCount: 9999, // arbitrary jump — must be rejected
       })
     );
   });
@@ -833,7 +879,7 @@ describe('/communityAgents', () => {
     );
   });
 
-  it('blocks signed-in user from updating community agent name', async () => {
+  it('blocks signed-in user from updating any field other than contributedByCount', async () => {
     await asAdmin(async (ctx) => {
       await setDoc(doc(ctx.firestore(), 'communityAgents', 'ca-1'), validCommunityAgent());
     });
@@ -844,7 +890,19 @@ describe('/communityAgents', () => {
     );
   });
 
-  it('blocks signed-in user from deleting a community agent', async () => {
+  it('blocks signed-in user from bumping count AND editing another field together', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'communityAgents', 'ca-1'), validCommunityAgent());
+    });
+    await assertFails(
+      updateDoc(doc(aliceCtx().firestore(), 'communityAgents', 'ca-1'), {
+        contributedByCount: 1,
+        name: 'Sneaky Edit', // piggy-backing another field onto the +1 — must be rejected
+      })
+    );
+  });
+
+  it('blocks regular signed-in user from deleting a community agent (admin-only)', async () => {
     await asAdmin(async (ctx) => {
       await setDoc(doc(ctx.firestore(), 'communityAgents', 'ca-1'), validCommunityAgent());
     });
@@ -853,17 +911,20 @@ describe('/communityAgents', () => {
     );
   });
 
+  it('admin user CAN delete a community agent', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'communityAgents', 'ca-1'), validCommunityAgent());
+    });
+    await assertSucceeds(
+      deleteDoc(doc(adminCtx().firestore(), 'communityAgents', 'ca-1'))
+    );
+  });
+
   it('blocks unauthenticated read', async () => {
     await asAdmin(async (ctx) => {
       await setDoc(doc(ctx.firestore(), 'communityAgents', 'ca-1'), validCommunityAgent());
     });
     await assertFails(getDoc(doc(unauthed().firestore(), 'communityAgents', 'ca-1')));
-  });
-
-  it('blocks unauthenticated create', async () => {
-    await assertFails(
-      setDoc(doc(unauthed().firestore(), 'communityAgents', 'ca-1'), validCommunityAgent())
-    );
   });
 });
 

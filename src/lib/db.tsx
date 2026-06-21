@@ -315,8 +315,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
       const uid = firebaseUser.uid;
 
-      // Seed community agents once after authenticated session is established
-      seedCommunityAgentsIfEmpty().catch(err => {
+      // Seed community agents once after authenticated session is established. Writes are
+      // admin-only (FINDING-1) — the helper no-ops for non-admin uids, so this only writes
+      // when the admin signs in; everyone else just reads the already-populated pool.
+      seedCommunityAgentsIfEmpty(uid).catch(err => {
         console.error("Error running community agents seeding check:", err);
       });
 

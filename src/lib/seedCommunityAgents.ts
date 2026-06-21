@@ -8,6 +8,11 @@ import { collection, doc, setDoc, getDocs, limit, query } from "firebase/firesto
 import { CommunityAgent, SubmissionStatus, SubmissionMethod } from "../types";
 import { seedAgents } from "./seeds";
 
+// The single admin account permitted to create/delete shared communityAgents docs (FINDING-1).
+// MUST stay in sync with the isAdmin() UID literal in firestore.rules. The UID is NOT secret —
+// security is enforced by the rule, not by hiding this value. Regular users only read the pool.
+export const ADMIN_UID = "r8kbaKbmguNfaoJTb9wH4BetJab2";
+
 // Defined list of 25 community agent seed records as requested
 export const customCommunitySeedRecords: CommunityAgent[] = [
   {
@@ -582,7 +587,12 @@ export const localSeedCommunityAgents: CommunityAgent[] = [
  * Checks whether the communityAgents collection already has documents,
  * and if not (or if some specific records are missing), writes the local seed records to Firestore.
  */
-export async function seedCommunityAgentsIfEmpty(): Promise<void> {
+export async function seedCommunityAgentsIfEmpty(currentUid?: string): Promise<void> {
+  // Writes to communityAgents are admin-only (FINDING-1). Regular users only read the already-
+  // populated pool — never attempt the seed write, so they get no permission-denied noise.
+  if (currentUid !== ADMIN_UID) {
+    return;
+  }
   try {
     const collRef = collection(db, "communityAgents");
     const qSnapshot = await getDocs(collRef);
