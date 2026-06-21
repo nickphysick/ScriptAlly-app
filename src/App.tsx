@@ -30,9 +30,26 @@ import { StatusDotDemo } from "./components/StatusDotDemo";
 import { PlansPage } from "./components/PlansPage";
 // TEMP (Prompt 2): email-import dev preview route — remove with the Nav dropdown item next prompt.
 import { EmailImportDevPage } from "./components/emailImport/EmailImportDevPage";
+// TEMP: agents-screen B-redesign dev preview — remove after visual sign-off.
+import { SmartImportReview } from "./components/onboarding/SmartImportReview";
+import { REVIEW_FIXTURE } from "./components/onboarding/SmartImportReviewFixture";
+// TEMP: post-import loader dev preview — remove after visual sign-off.
+import { ImportingLoader } from "./components/onboarding/ImportingLoader";
 import { LandingPage } from "./features/landing/LandingPage";
 import { Palette, X, Check } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+
+/** TEMP dev harness for the post-import loader (#/import-loader): loops loading → complete so both
+ *  states can be reviewed. The real flow drives `complete` from BranchB's commit + 5s floor. */
+const ImportingLoaderDevHarness: React.FC = () => {
+  const [complete, setComplete] = useState(false);
+  useEffect(() => {
+    const id = setInterval(() => setComplete((c) => !c), 4000);
+    return () => clearInterval(id);
+  }, []);
+  // onProceed is a no-op here so the completion state stays on screen for review (no real route).
+  return <ImportingLoader complete={complete} onProceed={() => {}} userName="Nick" />;
+};
 
 /** Dev review surface for the canonical StatusDot (no router — reached via #/status-dots). */
 const useStatusDotDemoRoute = () => {
@@ -120,6 +137,14 @@ function AppContent() {
   // without signing in. In prod the hash simply falls through to the normal app/landing.
   if (hash === "#/plans" && import.meta.env.DEV) {
     return <PlansPage />;
+  }
+  // Dev-only agents-screen B-redesign preview.
+  if (hash === "#/import-review" && import.meta.env.DEV) {
+    return <SmartImportReview result={REVIEW_FIXTURE} userName="Nick" onSkip={() => {}} />;
+  }
+  // Dev-only post-import loader preview (auto-loops loading → complete).
+  if (hash === "#/import-loader" && import.meta.env.DEV) {
+    return <ImportingLoaderDevHarness />;
   }
 
   // Logged-out front door (no router). Landing by default; the landing's CTAs deep-link
