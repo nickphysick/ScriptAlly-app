@@ -2,38 +2,36 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Motion for the "What's live right now?" panel (WhatsLivePanel). Scoped under .wl-row so it
- * can't leak. There is NO travelling pulse — an invisible playhead drives the timing in JS;
- * here we only define the on-dwell dot pulse, the zero-stage faint→full bloom, and the caption
- * fade. Geometry/colours/sizes are set inline in the component ("critical styles inline").
+ * Motion for the "What's live right now?" panel (WhatsLivePanel). Scoped under .wl-row.
+ * The sequence (dotted connector line drawn dot-by-dot, pausing on active stages) is driven
+ * in JS; here we define the on-dwell dot pulse (and matching hover), the zero-stage faint
+ * rest, and the caption fade. Geometry/colours/sizes are set inline in the component.
  */
 
 .wl-row { position: relative; }
 
-/* representative-dot cluster on a populated stage; pulses on dwell */
+/* representative-dot cluster on a populated stage; pulses 50% larger on dwell */
 .wl-row .wl-dotwrap { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; will-change: transform; }
 .wl-row .wl-dotwrap.pulsing { animation: wl-dotpulse 1.6s ease-out; }
 @keyframes wl-dotpulse {
-  0%   { transform: scale(1);    box-shadow: 0 0 0 0 rgba(124, 58, 42, 0); }
-  22%  { transform: scale(1.33); box-shadow: 0 0 0 10px rgba(124, 58, 42, 0.13); }
-  100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(124, 58, 42, 0); }
+  0%   { transform: scale(1);   box-shadow: 0 0 0 0 rgba(124, 58, 42, 0); }
+  22%  { transform: scale(1.5); box-shadow: 0 0 0 12px rgba(124, 58, 42, 0.12); }
+  100% { transform: scale(1);   box-shadow: 0 0 0 0 rgba(124, 58, 42, 0); }
 }
 
-/* zero-count StatusDot: always visible, faint at rest, blooms to full as the playhead passes */
+/* zero-count StatusDot: rests faint at 20% (the line passes straight over it; no bloom) */
 .wl-row .wl-ghost { opacity: 0.2; transition: opacity 1s ease-in-out; will-change: opacity; }
-.wl-row .wl-node.peek .wl-ghost,
 .wl-row .wl-node:hover .wl-ghost { opacity: 1; }
 
-/* caption below a node — opacity fade only */
+/* caption below a node — opacity fade only; stays visible once shown until the cycle resets */
 .wl-row .wl-capt { opacity: 0; transition: opacity 1s ease-in-out; pointer-events: none; }
 .wl-row .wl-node.show .wl-capt,
-.wl-row .wl-node.peek .wl-capt,
 .wl-row .wl-node:hover .wl-capt { opacity: 1; }
 
-/* gentle hover lift on a populated cluster (not the ghost) */
-.wl-row .wl-node:hover .wl-dotwrap { transform: scale(1.08); transition: transform 0.2s; }
+/* hover lifts a populated cluster to the same 50%-larger size as the active pulse */
+.wl-row .wl-node:hover .wl-dotwrap { transform: scale(1.5); transition: transform 0.2s; }
 
-/* Reduced motion: no sequence; JS pins all captions visible (zeros stay faint). */
+/* Reduced motion: no sequence; JS pins populated captions + a fully-drawn line, zeros faint. */
 @media (prefers-reduced-motion: reduce) {
   .wl-row .wl-dotwrap.pulsing { animation: none; }
   .wl-row .wl-capt { transition: none; }
