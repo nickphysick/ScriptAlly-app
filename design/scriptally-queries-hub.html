@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Queries hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#f7f2ea;
+    --card:#fdf9f2;
+    --card-hover:#fffdf8;
+    --parchment:#fdfaf5;
+    --burgundy:#72243e;
+    --burgundy-soft:#8a3a4e;
+    --brick:#7c3a2a;
+    --ink:#2e3a2c;
+    --muted:#8a7a6c;
+    --muted-2:#a8927e;
+    --border:#e9ded0;
+    --border-soft:#efe7da;
+    --blush-1:#f8e8df;
+    --blush-2:#f1d9cd;
+    --divider:#e2ded7;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+
+  /* ---------- top masthead ---------- */
+  .masthead{
+    height:64px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 34px;
+    border-bottom:1px solid var(--divider);
+    background:var(--parchment);
+  }
+  .wordmark{
+    font-family:'Playfair Display',serif;
+    font-size:26px;
+    font-weight:700;
+    font-style:italic;
+    color:var(--burgundy);
+    letter-spacing:.2px;
+    line-height:1;
+  }
+  .wordmark .plane{font-style:normal;}
+  .mast-right{display:flex;align-items:center;gap:16px;}
+  .help{
+    width:30px;height:30px;border-radius:50%;
+    border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--muted);font-size:15px;background:#fff;
+  }
+  .account{
+    display:flex;align-items:center;gap:9px;
+    color:var(--ink);font-size:14px;font-weight:500;
+  }
+  .avatar{
+    width:30px;height:30px;border-radius:50%;
+    background:var(--blush-1);color:var(--burgundy);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Playfair Display',serif;font-size:14px;font-weight:600;
+    border:1px solid var(--blush-2);
+  }
+  .chev{color:var(--muted);font-size:11px;}
+
+  /* ---------- hub content ---------- */
+  .hub{
+    max-width:1040px;
+    margin:0 auto;
+    padding:74px 32px 90px;
+    text-align:center;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--muted-2);
+    margin:0 0 18px;
+  }
+  .hero{
+    font-family:'Playfair Display',serif;
+    font-weight:600;
+    font-size:clamp(30px,4.4vw,46px);
+    line-height:1.08;
+    margin:0 auto 16px;
+    color:var(--ink);
+    max-width:14ch;
+  }
+  .sub{
+    font-size:15px;
+    line-height:1.6;
+    color:var(--muted);
+    margin:0 auto;
+    max-width:46ch;
+  }
+
+  .cards{
+    margin-top:54px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:22px;
+  }
+
+  .card{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:22px;
+    padding:38px 26px 30px;
+    text-decoration:none;
+    color:inherit;
+    cursor:pointer;
+    box-shadow:0 1px 2px rgba(114,36,62,.04);
+    transition:transform .28s cubic-bezier(.2,.7,.3,1),
+               box-shadow .28s ease,
+               border-color .28s ease,
+               background .28s ease;
+    opacity:0;
+    transform:translateY(14px);
+    animation:rise .6s cubic-bezier(.2,.7,.3,1) forwards;
+  }
+  .card:nth-child(1){animation-delay:.06s;}
+  .card:nth-child(2){animation-delay:.15s;}
+  .card:nth-child(3){animation-delay:.24s;}
+  @keyframes rise{to{opacity:1;transform:translateY(0);}}
+
+  .card:hover{
+    transform:translateY(-5px);
+    background:var(--card-hover);
+    border-color:rgba(114,36,62,.34);
+    box-shadow:0 16px 34px -16px rgba(114,36,62,.30);
+  }
+  .card:focus-visible{
+    outline:2px solid var(--burgundy);
+    outline-offset:3px;
+  }
+
+  .illo-wrap{
+    width:96px;height:96px;border-radius:50%;
+    background:radial-gradient(circle at 50% 38%,var(--blush-1),var(--blush-2));
+    border:1px solid rgba(124,58,42,.16);
+    display:flex;align-items:center;justify-content:center;
+    margin-bottom:24px;
+    transition:transform .28s ease;
+  }
+  .card:hover .illo-wrap{transform:scale(1.05);}
+  .illo-wrap svg{width:50px;height:50px;}
+  .illo-wrap svg [stroke]{stroke:var(--burgundy);}
+  .illo-wrap svg [fill="solid"]{fill:var(--burgundy);stroke:none;}
+
+  .card h2{
+    font-family:'Playfair Display',serif;
+    font-weight:600;
+    font-size:21px;
+    margin:0 0 10px;
+    color:var(--ink);
+    transition:color .2s ease;
+    letter-spacing:.2px;
+  }
+  .card:hover h2{color:var(--burgundy);}
+  .card p{
+    font-size:13.5px;
+    line-height:1.55;
+    color:var(--muted);
+    margin:0 0 22px;
+    max-width:24ch;
+  }
+  .go{
+    margin-top:auto;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--burgundy);
+    display:inline-flex;align-items:center;gap:7px;
+    opacity:.7;
+    transition:opacity .25s ease;
+  }
+  .card:hover .go{opacity:1;}
+  .go .arrow{
+    display:inline-block;
+    transition:transform .25s ease;
+  }
+  .card:hover .go .arrow{transform:translateX(4px);}
+
+  /* footer hint */
+  .hub-foot{
+    margin-top:46px;
+    font-family:'Playfair Display',serif;
+    font-style:italic;
+    font-size:14.5px;
+    color:var(--muted-2);
+  }
+
+  @media (max-width:780px){
+    .cards{grid-template-columns:1fr;gap:16px;}
+    .card{padding:32px 24px 26px;}
+    .hub{padding:54px 22px 70px;}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .card{animation:none;opacity:1;transform:none;}
+    .card,.illo-wrap,.go .arrow{transition:none;}
+  }
+</style>
+</head>
+<body>
+
+  <header class="masthead">
+    <div class="wordmark">ScriptAlly<span class="plane"> ✑</span></div>
+    <div class="mast-right">
+      <div class="help">?</div>
+      <div class="account">
+        <span class="avatar">W</span>
+        <span>Writer Querying</span>
+        <span class="chev">▾</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="hub">
+    <p class="eyebrow">Queries</p>
+    <h1 class="hero">What would you like to do?</h1>
+    <p class="sub">Jump into your tracker, log a query you've just sent, or record a response to one already out there.</p>
+
+    <div class="cards">
+
+      <!-- 1. Query database -->
+      <a class="card" href="#" aria-label="Open the query database">
+        <span class="illo-wrap">
+          <svg viewBox="0 0 48 48" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="8" y="9" width="32" height="30" rx="4" stroke="" />
+            <line x1="14" y1="17" x2="34" y2="17" stroke="" />
+            <line x1="14" y1="24" x2="30" y2="24" stroke="" />
+            <line x1="14" y1="31" x2="30" y2="31" stroke="" />
+            <circle cx="38" cy="24" r="0" />
+          </svg>
+        </span>
+        <h2>Query database</h2>
+        <p>Browse and track every query you've sent.</p>
+        <span class="go">Open <span class="arrow">→</span></span>
+      </a>
+
+      <!-- 2. Log a new query -->
+      <a class="card" href="#" aria-label="Log a new query">
+        <span class="illo-wrap">
+          <svg viewBox="0 0 48 48" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M40 8 L21 27" stroke="" />
+            <path d="M40 8 L30 40 L21 27 L8 20 Z" stroke="" />
+            <path d="M21 27 L29 22" stroke="" />
+            <line x1="11" y1="34" x2="15" y2="38" stroke="" opacity="0.55"/>
+            <line x1="8" y1="40" x2="10" y2="42" stroke="" opacity="0.4"/>
+          </svg>
+        </span>
+        <h2>Log a new query</h2>
+        <p>Record a query you've just sent to an agent.</p>
+        <span class="go">Start <span class="arrow">→</span></span>
+      </a>
+
+      <!-- 3. Update an existing query -->
+      <a class="card" href="#" aria-label="Update an existing query">
+        <span class="illo-wrap">
+          <svg viewBox="0 0 48 48" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="8" y="13" width="32" height="23" rx="3.5" stroke="" />
+            <path d="M9 15 L24 27 L39 15" stroke="" />
+            <path d="M31 9 a8 8 0 1 1 -7 4" stroke="" />
+            <path d="M31 4 L31 10 L25 10" stroke="" />
+          </svg>
+        </span>
+        <h2>Update an existing query</h2>
+        <p>Add a response, note, or status change.</p>
+        <span class="go">Update <span class="arrow">→</span></span>
+      </a>
+
+    </div>
+
+    <p class="hub-foot">Everything you send, in one quiet place.</p>
+  </main>
+
+</body>
+</html>

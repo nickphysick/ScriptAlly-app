@@ -328,7 +328,7 @@ export const FortnightInFocus: React.FC<FortnightInFocusProps> = ({
   }, [today]);
   const TODAY_IDX = 6;
 
-  const agentName = useCallback((q: Query) => agents.find((a) => a.id === q.agentId)?.name || "The agent", [agents]);
+  const agentName = useCallback((q: Query) => { const a = agents.find((x) => x.id === q.agentId); return a?.name || a?.agency || "the agent"; }, [agents]);
   const agentAgency = useCallback((q: Query) => agents.find((a) => a.id === q.agentId)?.agency || "", [agents]);
   const msTitle = useCallback((q: Query) => manuscripts.find((m) => m.id === q.manuscriptId)?.title || "", [manuscripts]);
 
@@ -442,22 +442,20 @@ export const FortnightInFocus: React.FC<FortnightInFocusProps> = ({
       }
     });
 
-    // Entity-added markers from the activity log (the two non-query icons)
+    // Agent + manuscript added markers from the activity log (Fortnight intentionally shows
+    // these; only Story-so-far cuts housekeeping). Agent-added events are collected first and
+    // deduplicated by description (addAgent + backfill can both emit one), preferring the
+    // stable-id backfill entry so the agents-array lookup resolves agency-only names.
+    const agentAddedByDesc = new Map<string, Activity>();
     activities.forEach((act) => {
       const d = coerceDate(act.date);
       if (!inWindow(d) || !d) return;
       if (act.activityType === ActivityType.AGENT_ADDED) {
-        const parsed = extractAgentFromText(act.description);
-        out.push({
-          id: `agentadd-${act.id}`,
-          type: "agent_added",
-          date: d,
-          title: parsed?.name || "New agent",
-          agency: parsed?.agency || "",
-          line: "Agent added",
-          marker: markerFor("agent_added"),
-          urgency: "neutral",
-        });
+        const isStable = act.id.startsWith("act-added-agent-");
+        const prev = agentAddedByDesc.get(act.description);
+        if (!prev || (isStable && !prev.id.startsWith("act-added-agent-"))) {
+          agentAddedByDesc.set(act.description, act);
+        }
       } else if (act.activityType === ActivityType.MANUSCRIPT_ADDED) {
         const title = manuscripts.find((m) => m.id === act.manuscriptId)?.title || "New manuscript";
         out.push({
@@ -471,6 +469,28 @@ export const FortnightInFocus: React.FC<FortnightInFocusProps> = ({
         });
       }
     });
+    for (const act of agentAddedByDesc.values()) {
+      const d = coerceDate(act.date)!;
+      const stableMatch = act.id.match(/^act-added-agent-(.+)$/);
+      const agentId = stableMatch?.[1] ?? null;
+      const agent = agentId ? agents.find((a) => a.id === agentId) : null;
+      const parsed = extractAgentFromText(act.description);
+      // Agency-only descriptions ("Added Curtis Brown") have no "at" so parsed is null;
+      // strip the "Added " prefix as a last resort before falling back to "the agent".
+      const agencyFallback = parsed == null
+        ? (act.description.match(/^Added\s+(.+)$/) ?? [])[1] ?? null
+        : null;
+      out.push({
+        id: `agentadd-${act.id}`,
+        type: "agent_added",
+        date: d,
+        title: agent?.name || agent?.agency || parsed?.name || parsed?.agency || agencyFallback || "the agent",
+        agency: agent?.agency || parsed?.agency || agencyFallback || "",
+        line: "Agent added",
+        marker: markerFor("agent_added"),
+        urgency: "neutral",
+      });
+    }
 
     return out;
   }, [queries, agents, manuscripts, activities, today, agentName, agentAgency, msTitle]);

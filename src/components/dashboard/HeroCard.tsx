@@ -2,18 +2,20 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Dashboard hero — parchment MountCard with the serif greeting, rotating quote, action
- * buttons and the line-SVG paper-plane corner motif. (The date / day-of-journey caption
- * was dropped in the June 2026 refinement.)
+ * Dashboard hero — parchment MountCard with the serif greeting, the aggregate querying
+ * pipeline strip (HeroPipelineStrip, in the old author-quote slot), the action buttons, and
+ * the three-planes artwork on the right. (The date / day-of-journey caption was dropped in
+ * the June 2026 refinement; the single line-SVG paper plane was replaced by the artwork.)
  */
-import React, { useState } from "react";
-import { Send, UserPlus, BookOpen } from "lucide-react";
+import React from "react";
+import { Send, UserPlus, BookOpen, CornerUpLeft } from "lucide-react";
 import { MountCard } from "../MountCard";
+import { HeroPipelineStrip } from "./HeroPipelineStrip";
+import { Query } from "../../types";
 import "./heroRim.css";
 import {
   headingInk,
   burgundy,
-  labelStyle,
   FONT_SERIF,
   FONT_MONO,
   buttonPinkBg,
@@ -38,6 +40,9 @@ const btnBase: React.CSSProperties = {
   gap: 7,
   transition: "all 0.2s",
 };
+
+/** Tighter padding for the hero's four-button row so they all stay on one line. */
+const heroBtnCompact: React.CSSProperties = { padding: "9px 13px" };
 
 /** Pink primary button (hero actions, task sends). */
 export const PinkButton: React.FC<{
@@ -95,42 +100,37 @@ export const GhostButton: React.FC<{
   </button>
 );
 
-/** Inline line-SVG paper plane in brand colours with a dashed flight path. */
-const PlaneMotif: React.FC = () => (
-  <svg
-    width="200"
-    height="160"
-    viewBox="0 0 200 160"
+/** Three-planes hero artwork — right-hand side, vertically centred at 50% of the hero's
+ *  (content-driven) height. The wrapper resolves "50%" against the auto-height card via
+ *  top/bottom:25%, and the image fills that height keeping its aspect ratio. Decorative. */
+const PlanesArt: React.FC = () => (
+  <div
     aria-hidden="true"
-    style={{ position: "absolute", right: 14, bottom: 6, zIndex: 1, opacity: 0.85, pointerEvents: "none" }}
+    style={{ position: "absolute", top: "25%", bottom: "25%", right: 24, zIndex: 1, pointerEvents: "none" }}
   >
-    <path d="M30 110 C 60 80, 110 60, 168 38" fill="none" stroke="#c9a89e" strokeWidth="1.2" strokeDasharray="3 5" />
-    <g transform="translate(150,22) rotate(18)">
-      <path d="M0 16 L44 0 L18 30 Z" fill="#f5e2da" stroke="#7c3a2a" strokeWidth="1.4" strokeLinejoin="round" />
-      <path d="M0 16 L18 30 L16 42 L22 27" fill="#efd5ca" stroke="#7c3a2a" strokeWidth="1.4" strokeLinejoin="round" />
-      <path d="M44 0 L18 30" fill="none" stroke="#7c3a2a" strokeWidth="1.4" />
-    </g>
-    <circle cx="52" cy="96" r="2" fill="#c9a89e" />
-    <circle cx="92" cy="74" r="2" fill="#c9a89e" />
-    <circle cx="130" cy="56" r="2" fill="#c9a89e" />
-  </svg>
+    <img src="/Sent_queries_final.png" alt="" style={{ height: "100%", width: "auto", display: "block", objectFit: "contain" }} />
+  </div>
 );
 
 export interface HeroCardProps {
   firstName: string;
-  quote: { text: string; author: string };
+  /** Every query across all manuscripts — drives the aggregate pipeline strip + heading variant. */
+  queries: Query[];
   onSendQuery: () => void;
+  onRecordResponse: () => void;
   onAddAgent: () => void;
   onAddManuscript: () => void;
 }
 
 export const HeroCard: React.FC<HeroCardProps> = ({
   firstName,
-  quote,
+  queries,
   onSendQuery,
+  onRecordResponse,
   onAddAgent,
   onAddManuscript,
 }) => {
+  const hasJourney = queries.length > 0;
   return (
     <MountCard className="flex flex-col">
       {/* Ambient sage rim wave (decorative; z1 — above card bg, below frame z3 and content z4) */}
@@ -138,50 +138,46 @@ export const HeroCard: React.FC<HeroCardProps> = ({
 
       {/* Body */}
       <div style={{ padding: "33px 31px 31px", margin: "6px 6px 6px", position: "relative", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-        <div style={{ position: "relative", zIndex: 4, maxWidth: 520 }}>
+        <div style={{ position: "relative", zIndex: 4, maxWidth: 780 }}>
           <div style={{ fontFamily: FONT_SERIF, fontSize: 38, fontWeight: 500, color: headingInk, lineHeight: 1.1 }}>
-            Welcome back, <em style={{ color: burgundy, fontStyle: "italic" }}>{firstName}</em>
+            {hasJourney ? (
+              <>Your journey so far, <em style={{ color: burgundy, fontStyle: "italic" }}>{firstName}</em>…</>
+            ) : (
+              <>Your journey starts here, <em style={{ color: burgundy, fontStyle: "italic" }}>{firstName}</em></>
+            )}
           </div>
 
-          {quote.text && (
-            <>
-              <div
-                style={{
-                  fontFamily: FONT_SERIF,
-                  fontStyle: "italic",
-                  fontSize: 14.5,
-                  color: "#6a5a50",
-                  borderLeft: `2px solid ${burgundy}`,
-                  paddingLeft: 14,
-                  lineHeight: 1.6,
-                  margin: "16px 0 6px",
-                }}
-              >
-                {quote.text}
-              </div>
-              <div style={{ ...labelStyle, marginBottom: 20, paddingLeft: 16 }}>
-                — {quote.author || "Unknown"}
-              </div>
-            </>
-          )}
+          {/* Aggregate querying pipeline — the animated single-row tour, in the old quote slot.
+              §8 spacing: equal margins above (heading → row) and below (caption reserve →
+              buttons) so the strip reads as deliberately centred between them. */}
+          <div style={{ margin: "22px 0" }}>
+            <HeroPipelineStrip queries={queries} />
+          </div>
 
-          <div className="flex gap-[10px] flex-wrap">
-            <PinkButton onClick={onSendQuery}>
+          {/* Two halves of the querying loop (Send query · Record a response), then a divider before the
+              setup actions. Compact padding keeps all four on one line at the hero's width. */}
+          <div className="flex gap-[8px] flex-wrap items-center">
+            <PinkButton onClick={onSendQuery} style={heroBtnCompact}>
               <Send className="w-3 h-3 shrink-0" />
               Send query
             </PinkButton>
-            <GhostButton onClick={onAddAgent}>
+            <PinkButton onClick={onRecordResponse} style={heroBtnCompact}>
+              <CornerUpLeft className="w-3 h-3 shrink-0" />
+              Record a response
+            </PinkButton>
+            <span aria-hidden="true" style={{ width: 1, alignSelf: "stretch", minHeight: 22, background: "rgba(124,58,42,0.15)", margin: "0 1px" }} />
+            <GhostButton onClick={onAddAgent} style={heroBtnCompact}>
               <UserPlus className="w-3 h-3 shrink-0" />
               Add agent
             </GhostButton>
-            <GhostButton onClick={onAddManuscript}>
+            <GhostButton onClick={onAddManuscript} style={heroBtnCompact}>
               <BookOpen className="w-3 h-3 shrink-0" />
               Add manuscript
             </GhostButton>
           </div>
         </div>
 
-        <PlaneMotif />
+        <PlanesArt />
       </div>
     </MountCard>
   );
