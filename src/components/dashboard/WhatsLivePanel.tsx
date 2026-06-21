@@ -74,8 +74,8 @@ const R = DOT / 2;
 const CGAP = 10; // dot → caption gap (caption sits directly beneath)
 const PAD_L = 70; // first node centre x — room for the leftmost centred caption + a gap
 const PAD_R = 70; // last node centre at W − 70 — room for the rightmost centred caption
-const H_STRIP = 104; // body row height (fits the larger icon, its 1.5× pulse, and the caption)
-const SPINE_Y = 48; // icon row baseline (icons sit visually centred; captions fade in below)
+const H_STRIP = 83; // body row height (~20% shorter); fits the icon, its pulse, and the caption
+const SPINE_Y = 38; // icon row baseline (icons sit visually centred; captions fade in below)
 
 const INACTIVE_INK = "#9a948a"; // grey for the zero-count "no …" captions (matches the faded icons)
 
