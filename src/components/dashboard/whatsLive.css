@@ -15,7 +15,7 @@
 .wl-row .wl-dotwrap.pulsing { animation: wl-dotpulse 1.6s ease-out; }
 @keyframes wl-dotpulse {
   0%   { transform: scale(1);    box-shadow: 0 0 0 0 rgba(124, 58, 42, 0); }
-  22%  { transform: scale(1.18); box-shadow: 0 0 0 8px rgba(124, 58, 42, 0.13); }
+  22%  { transform: scale(1.33); box-shadow: 0 0 0 10px rgba(124, 58, 42, 0.13); }
   100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(124, 58, 42, 0); }
 }
 

@@ -29,6 +29,7 @@ import {
   sageBandGradient,
   sageBandRule,
   headingInk,
+  bodyInk,
   burgundy,
   mutedInk,
   FONT_SERIF,
@@ -73,10 +74,10 @@ const DOT = 40;
 const R = DOT / 2;
 const CGAP = 10; // dot → caption gap
 const CAP_H = 12; // caption line reserve
-const PAD_L = 20; // first node centre x (its dot's left edge ≈ body content-left)
-const PAD_R = 22; // last node centre at W − 22
-const H_STRIP = 96; // body row height; the dot+caption block is centred within it
-const SPINE_Y = Math.round(H_STRIP / 2 - (CGAP + CAP_H) / 2); // vertical centre of the row block
+const PAD_L = 60; // first node centre x — generous gap before the leftmost icon
+const PAD_R = 60; // last node centre at W − 60 — matching gap after the rightmost icon
+const H_STRIP = 72; // body row height (≈75% of the prior height)
+const SPINE_Y = Math.round(H_STRIP / 2); // icons visually vertically centred (caption flashes below)
 
 const captBase: React.CSSProperties = {
   position: "absolute",
@@ -87,8 +88,8 @@ const captBase: React.CSSProperties = {
   whiteSpace: "nowrap",
 };
 /** Caption relative to the node box (DOT×DOT), always below: Queried left, R&R (last) right, rest centred. */
-const captStyle = (i: number, populated: boolean): React.CSSProperties => {
-  const color = populated ? burgundy : "#aaa093";
+const captStyle = (i: number, _populated: boolean): React.CSSProperties => {
+  const color = bodyInk; // normal text (not muted) for the flashed caption
   if (i === 0) return { ...captBase, color, left: 0, top: DOT + CGAP, textAlign: "left" };
   if (i === LAST) return { ...captBase, color, right: 0, top: DOT + CGAP, textAlign: "right" };
   return { ...captBase, color, left: R, top: DOT + CGAP, transform: "translateX(-50%)", textAlign: "center" };
