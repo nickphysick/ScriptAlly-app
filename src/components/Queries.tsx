@@ -1536,7 +1536,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   return (
     <div
       className="w-full flex flex-col overflow-hidden text-[#3a1c14] font-sans relative queries-container-theme"
-      style={{ height: "calc(100vh - 67px)", backgroundColor: "#ffffff" }}
+      style={{ height: "calc(100vh - 45px)", backgroundColor: "#ffffff" }}
     >
       <style>{`
         .custom-query-list-scrollbar::-webkit-scrollbar {
@@ -1795,11 +1795,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         }}
       >
         {/* Logo */}
-        <div style={{ padding: "22px 22px 8px", flexShrink: 0, display: "flex", justifyContent: "center" }}>
+        <div style={{ padding: "16px 22px 4px", flexShrink: 0, display: "flex", justifyContent: "center" }}>
           <img src="/scriptally-title-v2.png" style={{ width: 188, height: "auto" }} alt="ScriptAlly" />
         </div>
 
-        <div style={{ height: 1, margin: "8px 14px 12px", background: "rgba(124,58,42,0.10)" }} />
+        <div style={{ height: 1, margin: "4px 14px 8px", background: "rgba(124,58,42,0.10)" }} />
 
         {/* Scrollable filter region */}
         <div style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "0 14px 12px" }} className="custom-query-list-scrollbar">
@@ -1836,7 +1836,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             onClick={() => { setSelectedStatusFilters(["All"]); setSelectedManuscriptFilter("All"); }}
             style={{
               display: "flex", alignItems: "center", justifyContent: "space-between",
-              width: "100%", padding: "9px 12px", borderRadius: 9,
+              width: "100%", padding: "6px 12px", borderRadius: 9,
               border: "none", cursor: "pointer", marginBottom: 6,
               background: selectedStatusFilters.includes("All") && selectedManuscriptFilter === "All" ? "rgba(124,58,42,0.09)" : "transparent",
               color: selectedStatusFilters.includes("All") && selectedManuscriptFilter === "All" ? burgundy : "#5a5047",
@@ -1849,12 +1849,12 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
           {/* Filter — static header, always open */}
           <div style={{ marginBottom: 4 }}>
-            <div style={{ padding: "11px 12px", margin: "8px 2px 2px" }}>
+            <div style={{ padding: "6px 12px", margin: "4px 2px 2px" }}>
               <span style={{ fontFamily: FONT_MONO, fontSize: 11, letterSpacing: ".12em", textTransform: "uppercase" as const, color: burgundy, fontWeight: 500 }}>Filter</span>
             </div>
             <div>
                 {/* Status sub-section */}
-                <div style={{ marginBottom: 10 }}>
+                <div style={{ marginBottom: 4 }}>
                   {/* All active parent row */}
                   {nonZeroActiveStatuses.length > 0 && (
                     <>
@@ -1865,7 +1865,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                         }}
                         style={{
                           display: "flex", alignItems: "center", justifyContent: "space-between",
-                          width: "100%", padding: "9px 12px", borderRadius: 9,
+                          width: "100%", padding: "6px 12px", borderRadius: 9,
                           border: "none", cursor: "pointer", marginBottom: 1,
                           background: allActiveHighlighted ? "rgba(124,58,42,0.09)" : "transparent",
                           color: allActiveHighlighted ? burgundy : "#5a5047",
@@ -1896,7 +1896,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           }}
                             style={{
                               display: "flex", alignItems: "center", justifyContent: "space-between",
-                              width: "100%", padding: "9px 12px 9px 30px", borderRadius: 9,
+                              width: "100%", padding: "6px 12px 6px 30px", borderRadius: 9,
                               border: "none", cursor: "pointer", marginBottom: 1,
                               background: isActive ? "rgba(124,58,42,0.09)" : "transparent",
                               color: isActive ? burgundy : "#5a5047",
@@ -1924,7 +1924,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                         }}
                         style={{
                           display: "flex", alignItems: "center", justifyContent: "space-between",
-                          width: "100%", padding: "9px 12px", borderRadius: 9,
+                          width: "100%", padding: "6px 12px", borderRadius: 9,
                           border: "none", cursor: "pointer", marginBottom: 1, marginTop: nonZeroActiveStatuses.length > 0 ? 4 : 0,
                           background: allClosedHighlighted ? "rgba(124,58,42,0.09)" : "transparent",
                           color: allClosedHighlighted ? burgundy : "#5a5047",
@@ -1951,7 +1951,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           }}
                             style={{
                               display: "flex", alignItems: "center", justifyContent: "space-between",
-                              width: "100%", padding: "9px 12px 9px 30px", borderRadius: 9,
+                              width: "100%", padding: "6px 12px 6px 30px", borderRadius: 9,
                               border: "none", cursor: "pointer", marginBottom: 1,
                               background: isActive ? "rgba(124,58,42,0.09)" : "transparent",
                               color: isActive ? burgundy : "#5a5047",
@@ -1975,7 +1975,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
           {/* Sort — static header, always open, 5 toggle rows */}
           <div style={{ marginBottom: 4 }}>
-            <div style={{ padding: "11px 12px", margin: "8px 2px 2px" }}>
+            <div style={{ padding: "6px 12px", margin: "4px 2px 2px" }}>
               <span style={{ fontFamily: FONT_MONO, fontSize: 11, letterSpacing: ".12em", textTransform: "uppercase" as const, color: burgundy, fontWeight: 500 }}>Sort</span>
             </div>
             {[
@@ -1998,7 +1998,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     }
                   }}
                   style={{
-                    display: "block", padding: "9px 12px", borderRadius: 9, cursor: "pointer",
+                    display: "block", padding: "6px 12px", borderRadius: 9, cursor: "pointer",
                     background: isOn ? "rgba(124,58,42,0.10)" : "transparent",
                     color: isOn ? burgundy : "#5b4d43",
                     marginBottom: 1,
@@ -2019,12 +2019,12 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         </div>
 
         {/* Export all pinned at bottom */}
-        <div style={{ padding: "12px 14px", borderTop: "1px solid rgba(124,58,42,0.10)", flexShrink: 0 }}>
+        <div style={{ padding: "9px 14px", borderTop: "1px solid rgba(124,58,42,0.10)", flexShrink: 0 }}>
           <button
             onClick={() => exportQueriesToCSV(queries, `ScriptAlly_Queries_${new Date().toISOString().slice(0, 10)}`)}
             style={{
               display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-              width: "100%", padding: "8px 12px", borderRadius: 8,
+              width: "100%", padding: "7px 12px", borderRadius: 8,
               border: "1px solid rgba(124,58,42,0.18)", background: "rgba(124,58,42,0.05)",
               color: burgundy, fontSize: 11, fontWeight: 600, cursor: "pointer",
             }}
