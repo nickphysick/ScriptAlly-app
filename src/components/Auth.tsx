@@ -5,211 +5,315 @@
 
 import React, { useState } from "react";
 import { useScriptAllyDb } from "../lib/db";
-import { MapPin, Feather, Key, Mail, CheckCircle } from "lucide-react";
+import { signInWithGoogle, sendReset, isValidEmail } from "../lib/authActions";
+import { LoginDashboardPreview } from "./auth/LoginDashboardPreview";
+import "./auth/auth.css";
+
+type Mode = "signin" | "signup";
+type Banner = { type: "error" | "success"; message: string; offerReset?: boolean } | null;
+
+// Brand mark used in the top nav and the form's brand lockup (the quill from the mockup).
+const QuillMark: React.FC<{ size?: number }> = ({ size = 17 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 5c-4 1-9 4-12 9-1 1.5-1.8 3.4-2 5" />
+    <path d="M20 5c1 5-2 11-8 13" />
+    <path d="M6 19c2-3 5-5 9-6" />
+  </svg>
+);
+
+const BannerIcon: React.FC<{ type: "error" | "success" }> = ({ type }) =>
+  type === "success" ? (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+  ) : (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 8v5M12 16h.01" /></svg>
+  );
 
 export const Auth: React.FC<{ initialMode?: "login" | "signup" }> = ({ initialMode }) => {
-  const { login, signup, resetPassword } = useScriptAllyDb();
-  // `initialMode` only seeds the initial state; omitting it preserves today's default
-  // (sign-in). The in-screen "need an account?" toggle below remains the live switch.
-  const [isLogin, setIsLogin] = useState(initialMode ? initialMode === "login" : true);
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [password, setPassword] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
-  const [infoMsg, setInfoMsg] = useState("");
+  const { login, signup } = useScriptAllyDb();
 
+  // Default mode is Create account — the page is the founding-members front door. `initialMode`
+  // only forces sign-in when something explicitly asks for it (e.g. a #/login deep link).
+  const [mode, setMode] = useState<Mode>(initialMode === "login" ? "signin" : "signup");
+  const [view, setView] = useState<"auth" | "reset">("auth");
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [resetEmail, setResetEmail] = useState("");
+
+  const [showPw, setShowPw] = useState(false);
+  const [errs, setErrs] = useState<{ name?: string; email?: string; pw?: string; reset?: string }>({});
+  const [banner, setBanner] = useState<Banner>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
+  const [resetBusy, setResetBusy] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+
+  const isSignin = mode === "signin";
+
+  const switchMode = (m: Mode) => {
+    setMode(m);
+    setErrs({});
+    setBanner(null);
+  };
+
+  // ── Email / password ────────────────────────────────────────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setInfoMsg("");
-    if (!email) {
-      setErrorMsg("Please provide an email address.");
-      return;
-    }
-    // The user's own password is required — there is no default. An empty submit must be caught
-    // here (and by the input's `required`) rather than reaching Firebase as auth/missing-password.
-    if (!password) {
-      setErrorMsg("Please enter your password.");
-      return;
-    }
+    setBanner(null);
+    const next: typeof errs = {};
+    if (mode === "signup" && !name.trim()) next.name = "Please tell us your name.";
+    if (!email.trim()) next.email = "Please enter your email address.";
+    else if (!isValidEmail(email)) next.email = "That doesn’t look like a valid email address.";
+    if (!password) next.pw = "Please enter your password.";
+    else if (mode === "signup" && password.length < 8) next.pw = "Use at least 8 characters for your password.";
+    setErrs(next);
+    if (Object.keys(next).length) return;
 
+    setSubmitting(true);
     try {
-      if (isLogin) {
-        const ok = await login(email, password);
-        if (!ok) {
-          setErrorMsg("Authentication failed. Please try again.");
-        }
-      } else {
-        if (!name) {
-          setErrorMsg("Please enter your name.");
-          return;
-        }
-        const ok = await signup(name, email, password);
-        if (!ok) {
-          setErrorMsg("Failed to initialize Portfolio account. Check credentials.");
-        }
-      }
+      // Existing db.tsx exports — unchanged. On success, the onAuthStateChanged listener takes over
+      // and App swaps this screen for the app, so there is nothing to do here on the happy path.
+      if (isSignin) await login(email.trim(), password);
+      else await signup(name.trim(), email.trim(), password);
     } catch (err: any) {
-      setErrorMsg(err?.message || "An authentication error occurred.");
+      setBanner({ type: "error", message: err?.message || "Something went wrong. Please try again.", offerReset: isSignin });
+      setSubmitting(false);
     }
   };
 
-  const handleForgotPassword = async () => {
-    setErrorMsg("");
-    setInfoMsg("");
+  // ── Google ──────────────────────────────────────────────────────────────────────────────────
+  const handleGoogle = async () => {
+    setBanner(null);
+    setErrs({});
+    setGoogleBusy(true);
     try {
-      await resetPassword(email);
-      setInfoMsg(`Password reset link sent to ${email}. Check your inbox.`);
+      await signInWithGoogle(); // success unmounts this screen via the auth listener; cancel is silent
     } catch (err: any) {
-      setErrorMsg(err?.message || "Could not send a reset link. Please try again.");
+      setBanner({ type: "error", message: err?.message || "Something went wrong. Please try again." });
+    } finally {
+      setGoogleBusy(false);
     }
   };
 
+  // ── Password reset ──────────────────────────────────────────────────────────────────────────
+  const openReset = () => {
+    setResetEmail(email.trim());
+    setErrs({});
+    setBanner(null);
+    setResetSent(false);
+    setView("reset");
+  };
+  const backToAuth = () => {
+    setView("auth");
+    setErrs({});
+    setBanner(null);
+  };
+  const handleReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetEmail.trim() || !isValidEmail(resetEmail)) {
+      setErrs({ reset: "Please enter a valid email address." });
+      return;
+    }
+    setErrs({});
+    setResetBusy(true);
+    try {
+      await sendReset(resetEmail); // resolves even when no account exists (privacy)
+      setResetSent(true);
+    } catch (err: any) {
+      setErrs({ reset: err?.message || "Could not send the reset link. Please try again." });
+    } finally {
+      setResetBusy(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-[#F5F0EA] flex items-center justify-center p-4 md:p-8 font-sans relative overflow-hidden">
-      {/* Decorative Warm Watercolor Circles / Desk Blobs */}
-      <div className="absolute top-[-10%] right-[-10%] w-[45%] h-[45%] rounded-full bg-[#7c3a2a]/5 blur-3xl" />
-      <div className="absolute bottom-[-15%] left-[-10%] w-[50%] h-[50%] rounded-full bg-[#3a1c14]/5 blur-3xl" />
-
-      {/* Main Card */}
-      <div className="relative w-full max-w-4xl bg-[#F8F5F0] rounded-2xl border border-[#7c3a2a]/10 shadow-xl overflow-hidden grid md:grid-cols-12 z-10">
-        
-        {/* Left Editorial Promo Section */}
-        <div className="md:col-span-5 bg-[#3a1c14] text-[#F8F5F0] p-6 md:p-10 flex flex-col justify-between relative">
-          {/* Subtle line background */}
-          <div className="absolute inset-0 opacity-10 bg-[linear-gradient(to_bottom,transparent_39px,#f3ede4_40px)] bg-[size:100%_40px]" />
-          
-          <div className="relative">
-            <div className="flex items-center gap-2 mb-8">
-              <span className="p-1.5 bg-[#7c3a2a] rounded text-[#F8F5F0] inline-block font-serif font-bold text-lg">S</span>
-              <span className="font-serif font-semibold text-xl tracking-tight text-cream-100">ScriptAlly</span>
-            </div>
-            
-            <h2 className="font-serif text-3xl md:text-3xl font-normal leading-tight mb-4 text-[#F5F0EA]">
-              The story <span className="italic">behind</span> the story.
-            </h2>
-            <p className="text-sm font-light text-[#F5F0EA]/80 leading-relaxed mb-6">
-              Ditch the clunky, sterile spreadsheets. ScriptAlly provides writers with a warm, literary stationer's dashboard to organize query submissions, agent profiles, submission versions, and follow-ups.
-            </p>
-
-            <div className="space-y-4 pt-4 border-t border-[#F5F0EA]/10">
-              <div className="flex items-start gap-2.5 text-xs">
-                <CheckCircle className="w-4 h-4 text-[#3B6D11] shrink-0 mt-0.5" />
-                <span>Manage submission metadata, query versions, and active response tracking.</span>
-              </div>
-              <div className="flex items-start gap-2.5 text-xs">
-                <CheckCircle className="w-4 h-4 text-[#3B6D11] shrink-0 mt-0.5" />
-                <span>Interactive query logs, journal tracking, and automatic chronological Activities metrics.</span>
-              </div>
-              <div className="flex items-start gap-2.5 text-xs">
-                <CheckCircle className="w-4 h-4 text-[#3B6D11] shrink-0 mt-0.5" />
-                <span>Dynamic notification systems reminding you of nudges and submissions updates.</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="relative mt-8 pt-4 border-t border-[#F5F0EA]/10 text-center md:text-left">
-            <span className="text-[10px] uppercase tracking-wider text-[#F5F0EA]/50 font-mono">
-              Designed for novelists & essayists
-            </span>
-          </div>
+    <div className="sa-au-root">
+      <div className="topnav">
+        <div className="nav-brand">
+          <div className="nav-chip"><QuillMark size={16} /></div>
+          <span className="nav-word">ScriptAlly</span>
         </div>
+        <div className="nav-right">
+          <span className="nav-pill"><span className="dot" />Founding Members open</span>
+          <a className="nav-link" href="https://scriptally.ink">
+            Back to site
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M7 17 17 7M9 7h8v8" /></svg>
+          </a>
+        </div>
+      </div>
 
-        {/* Right Auth Forms Section */}
-        <div className="md:col-span-7 p-6 md:p-10 flex flex-col justify-center">
-          
-          {/* Header togglers */}
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="font-serif text-2xl text-[#3a1c14] font-medium">
-              {isLogin ? "Welcome back" : "Create writer portfolio"}
-            </h3>
-            <button
-              onClick={() => {
-                setIsLogin(!isLogin);
-                setErrorMsg("");
-              }}
-              className="text-xs font-medium text-[#7c3a2a] hover:underline"
-            >
-              {isLogin ? "Need an account? Sign up" : "Already registered? Login"}
-            </button>
-          </div>
+      <div className="scene">
+        <div className="split-card paper">
+          <div className="au-rim" aria-hidden="true"><div className="au-band" /></div>
+          <div className="frame">
 
-          {errorMsg && (
-            <div className="p-3 mb-6 rounded bg-[#A32D2D]/10 border border-[#A32D2D]/20 text-xs text-[#A32D2D] font-medium">
-              {errorMsg}
-            </div>
-          )}
-
-          {infoMsg && (
-            <div className="p-3 mb-6 rounded bg-[#3B6D11]/10 border border-[#3B6D11]/20 text-xs text-[#3B6D11] font-medium">
-              {infoMsg}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
-              <div>
-                <label className="block text-xs font-semibold text-[#3a1c14]/70 mb-1">YOUR PEN NAME / FULL NAME</label>
-                <div className="relative">
-                  <Feather className="absolute left-3 top-3 w-4 h-4 text-[#3a1c14]/40" />
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g. Lucy Sterling"
-                    className="w-full pl-9 pr-3 py-2 text-sm bg-white rounded border border-[#7c3a2a]/10 focus:outline-none focus:border-[#7c3a2a] focus:ring-1 focus:ring-[#7c3a2a]/20 text-[#3a1c14]"
-                  />
-                </div>
+            {/* ===== LEFT: FORM ===== */}
+            <div className="col-form">
+              <div className="brand-lock">
+                <div className="chip"><QuillMark size={17} /></div>
+                <span className="word">ScriptAlly</span>
               </div>
-            )}
 
-            <div>
-              <label className="block text-xs font-semibold text-[#3a1c14]/70 mb-1">EMAIL ADDRESS</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 w-4 h-4 text-[#3a1c14]/40" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@literarydomain.com"
-                  className="w-full pl-9 pr-3 py-2 text-sm bg-white rounded border border-[#7c3a2a]/10 focus:outline-none focus:border-[#7c3a2a] focus:ring-1 focus:ring-[#7c3a2a]/20 text-[#3a1c14]"
-                  required
-                />
-              </div>
-            </div>
+              {view === "auth" ? (
+                <div>
+                  <h1 className="lead-h">{isSignin ? "Welcome back" : "Take the eerie out of query"}</h1>
+                  <p className="lead-s">
+                    {isSignin
+                      ? "Sign in to pick up your querying where you left off."
+                      : "Let’s put ScriptAlly to work on organising your pipeline."}
+                  </p>
 
-            <div>
-              <div className="flex justify-between items-center mb-1">
-                <label className="text-xs font-semibold text-[#3a1c14]/70">PASSWORD</label>
-                {isLogin && (
-                  <button type="button" onClick={handleForgotPassword} className="text-[10px] text-[#7c3a2a]/70 hover:underline">
-                    Forgot secret?
+                  <div className="seg" role="tablist">
+                    <button type="button" className={`seg-opt${isSignin ? " active" : ""}`} onClick={() => switchMode("signin")}>Sign in</button>
+                    <button type="button" className={`seg-opt${!isSignin ? " active" : ""}`} onClick={() => switchMode("signup")}>Create account</button>
+                  </div>
+
+                  <button type="button" className="g-btn" onClick={handleGoogle} disabled={googleBusy}>
+                    <svg viewBox="0 0 24 24">
+                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z" />
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.15-4.53H2.18v2.84A11 11 0 0 0 12 23z" />
+                      <path fill="#FBBC05" d="M5.85 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88l3.67-2.84z" />
+                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1A11 11 0 0 0 2.18 7.06l3.67 2.84C6.71 7.31 9.14 5.38 12 5.38z" />
+                    </svg>
+                    {googleBusy ? "Connecting to Google…" : isSignin ? "Continue with Google" : "Sign up with Google"}
                   </button>
-                )}
+
+                  <div className="divider"><span>or with email</span></div>
+
+                  <form onSubmit={handleSubmit} noValidate>
+                    {!isSignin && (
+                      <div className="field">
+                        <label htmlFor="au-name">Your name</label>
+                        <div className={`inp${errs.name ? " bad" : ""}`}>
+                          <span className="ic"><QuillMark size={15} /></span>
+                          <input id="au-name" type="text" autoComplete="name" placeholder="e.g. Lucy Sterling" value={name} onChange={(e) => setName(e.target.value)} />
+                        </div>
+                        {errs.name && <div className="err">{errs.name}</div>}
+                      </div>
+                    )}
+
+                    <div className="field">
+                      <label htmlFor="au-email">Email address</label>
+                      <div className={`inp${errs.email ? " bad" : ""}`}>
+                        <span className="ic">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5" /><path d="m3.5 7 8.5 6 8.5-6" /></svg>
+                        </span>
+                        <input id="au-email" type="email" autoComplete="email" placeholder="you@email.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+                      </div>
+                      {errs.email && <div className="err">{errs.email}</div>}
+                    </div>
+
+                    <div className="field">
+                      <div className="lab-row">
+                        <label htmlFor="au-pw">Password</label>
+                        <button type="button" className="forgot" onClick={openReset} style={{ visibility: isSignin ? "visible" : "hidden" }}>Forgot?</button>
+                      </div>
+                      <div className={`inp${errs.pw ? " bad" : ""}`}>
+                        <span className="ic">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><circle cx="8" cy="15" r="4" /><path d="m11 12 8-8M16 5l3 3M14 7l2 2" /></svg>
+                        </span>
+                        <input id="au-pw" type={showPw ? "text" : "password"} autoComplete={isSignin ? "current-password" : "new-password"} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
+                        <button type="button" className="eye" aria-label={showPw ? "Hide password" : "Show password"} onClick={() => setShowPw((s) => !s)}>
+                          {showPw ? (
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><path d="M3 3l18 18M10.6 10.6a3 3 0 0 0 4.2 4.2" /><path d="M9.4 5.2A9.3 9.3 0 0 1 12 5c6.5 0 10 7 10 7a16 16 0 0 1-3.3 4M6.6 6.6A16 16 0 0 0 2 12s3.5 7 10 7a9.3 9.3 0 0 0 3-.5" /></svg>
+                          ) : (
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" /><circle cx="12" cy="12" r="3" /></svg>
+                          )}
+                        </button>
+                      </div>
+                      {errs.pw && <div className="err">{errs.pw}</div>}
+                    </div>
+
+                    {banner && (
+                      <div className={`banner ${banner.type}`}>
+                        <span className="b-ic"><BannerIcon type={banner.type} /></span>
+                        <span>
+                          {banner.message}
+                          {banner.offerReset && (
+                            <> <button type="button" onClick={openReset}>Reset your password</button>.</>
+                          )}
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="btn-row">
+                      <button type="submit" className="b-primary" disabled={submitting}>
+                        {submitting && <span className="spin" />}
+                        {submitting
+                          ? isSignin ? "Signing in…" : "Creating account…"
+                          : isSignin ? "Sign in" : "Create your account"}
+                      </button>
+                    </div>
+                  </form>
+
+                  <div className="foot">
+                    {isSignin ? (
+                      <>New to ScriptAlly? <button type="button" className="link" onClick={() => switchMode("signup")}>Create an account</button></>
+                    ) : (
+                      <>Already have an account? <button type="button" className="link" onClick={() => switchMode("signin")}>Sign in</button></>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  {!resetSent ? (
+                    <form onSubmit={handleReset} noValidate>
+                      <h1 className="reset-head">Reset your password</h1>
+                      <p className="reset-blurb">Enter the email on your account and we’ll send a secure link to set a new password.</p>
+                      <div className="field">
+                        <label htmlFor="au-reset">Email address</label>
+                        <div className={`inp${errs.reset ? " bad" : ""}`}>
+                          <span className="ic">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5" /><path d="m3.5 7 8.5 6 8.5-6" /></svg>
+                          </span>
+                          <input id="au-reset" type="email" autoComplete="email" placeholder="you@email.com" value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} />
+                        </div>
+                        {errs.reset && <div className="err">{errs.reset}</div>}
+                      </div>
+                      <div className="btn-row">
+                        <button type="submit" className="b-primary" disabled={resetBusy}>
+                          {resetBusy && <span className="spin" />}
+                          {resetBusy ? "Sending…" : "Send reset link"}
+                        </button>
+                      </div>
+                      <button type="button" className="back-link" onClick={backToAuth}>← Back to sign in</button>
+                    </form>
+                  ) : (
+                    <div>
+                      <div className="reset-ok">
+                        <div className="ok-ring">
+                          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                        </div>
+                        <h4>Check your inbox</h4>
+                        <p>If an account exists for <b>{resetEmail.trim()}</b>, a reset link is on its way. It expires in an hour.</p>
+                      </div>
+                      <button type="button" className="back-link" onClick={backToAuth}>← Back to sign in</button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="spacer" />
+              {view === "auth" && !isSignin && (
+                <p className="terms">By continuing you agree to our <a href="https://scriptally.ink/terms">Terms</a> &amp; <a href="https://scriptally.ink/privacy">Privacy Policy</a>.</p>
+              )}
+            </div>
+
+            {/* ===== RIGHT: FEATURE PANEL ===== */}
+            <div className="col-feature">
+              <div className="feat-head">
+                <div className="feat-eyebrow">Query with confidence</div>
+                <h2 className="feat-h">Every query, request &amp; submission, slotted into a <em>clear, orderly database</em>.</h2>
+                <p className="feat-s">Build your agent list, curate your submission packages, set reminders for important dates — ScriptAlly tracks your querying journey from start to finish, so you can get back to writing.</p>
               </div>
-              <div className="relative">
-                <Key className="absolute left-3 top-3 w-4 h-4 text-[#3a1c14]/40" />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••••••"
-                  required
-                  className="w-full pl-9 pr-3 py-2 text-sm bg-white rounded border border-[#7c3a2a]/10 focus:outline-none focus:border-[#7c3a2a] focus:ring-1 focus:ring-[#7c3a2a]/20 text-[#3a1c14]"
-                />
+              <div className="preview-wrap">
+                <LoginDashboardPreview />
               </div>
             </div>
 
-            <button
-              type="submit"
-              className="w-full py-2.5 mt-2 bg-[#7c3a2a] hover:bg-[#7c3a2a]/95 text-white rounded font-serif font-medium shadow-md transition-colors text-sm"
-            >
-              {isLogin ? "Authenticate Account" : "Init ScriptAlly Portfolio"}
-            </button>
-          </form>
-
+          </div>
         </div>
-
       </div>
     </div>
   );

@@ -176,10 +176,11 @@ function AppContent() {
   }
 
   // Logged-out front door: the public marketing landing is now the separate holding page, and the
-  // app is reached via its "Log in" link — so logged-out visitors here get the sign-in screen.
+  // app is reached via its "Log in" link. As a founding-members acquisition page the screen defaults
+  // to Create account; an explicit #/login (or #/signin) deep link opens it in sign-in mode instead.
   if (!currentUser) {
-    if (hash === "#/signup" || hash === "#/start") return <Auth initialMode="signup" />;
-    return <Auth initialMode="login" />;
+    if (hash === "#/login" || hash === "#/signin") return <Auth initialMode="login" />;
+    return <Auth initialMode="signup" />;
   }
 
   const freshSignupFlag = sessionStorage.getItem("scriptally_new_signup") === "true";
