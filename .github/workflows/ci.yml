@@ -14,14 +14,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Java is required by the Firebase Firestore emulator (it ships as a JVM JAR).
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install
-        run: npm ci
+        run: npm ci --cache /tmp/npm-cache
 
       - name: Typecheck
         run: npx tsc --noEmit
@@ -29,5 +37,16 @@ jobs:
       - name: Test
         run: npm test
 
+      - name: Rules tests (Firestore emulator)
+        run: npm run test:rules
+
       - name: Build
         run: npm run build
+
+      - name: Dependency audit
+        run: npm audit --audit-level=high || true
+
+      - name: Secret scan (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
