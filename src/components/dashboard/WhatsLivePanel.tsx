@@ -71,15 +71,16 @@ const QUERIED_BEAT = 400; // brief beat after Queried shows before the line star
 // Geometry (proportions of the row width W, recomputed on resize).
 const DOT = 50; // resting icon size (matches the .wl-dot CSS override)
 const R = DOT / 2;
-const CGAP = 10; // dot → caption gap (caption sits directly beneath)
+const CGAP = 8; // dot → caption gap (caption sits directly beneath)
+const CAP_H = 16; // caption line reserve (smaller serif) — used to vertically centre the block
 const PAD_L = 70; // first node centre x — room for the leftmost centred caption + a gap
 const PAD_R = 70; // last node centre at W − 70 — room for the rightmost centred caption
 const H_STRIP = 83; // body row height (~20% shorter); fits the icon, its pulse, and the caption
-const SPINE_Y = 38; // icon row baseline (icons sit visually centred; captions fade in below)
+const SPINE_Y = Math.round((H_STRIP - (DOT + CGAP + CAP_H)) / 2 + R); // centre the icon+caption block
 
 const INACTIVE_INK = "#9a948a"; // grey for the zero-count "no …" captions (matches the faded icons)
 
-/** Caption matches the "More room for the journey" line: Playfair 17/500, centred beneath. */
+/** Caption: serif (as the "More room for the journey" line), but smaller; centred beneath. */
 const captStyle = (populated: boolean): React.CSSProperties => ({
   position: "absolute",
   left: R,
@@ -87,7 +88,7 @@ const captStyle = (populated: boolean): React.CSSProperties => ({
   transform: "translateX(-50%)",
   textAlign: "center",
   fontFamily: FONT_SERIF,
-  fontSize: 17,
+  fontSize: 13,
   fontWeight: 500,
   color: populated ? headingInk : INACTIVE_INK,
   whiteSpace: "nowrap",
