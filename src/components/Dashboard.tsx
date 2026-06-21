@@ -1413,9 +1413,10 @@ export const Dashboard: React.FC<{
   };
 
   // Data still loading → skeleton (after the ~180ms delay); never the empty/onboarding state and
-  // never a half-rendered dashboard. The AppShell chrome keeps rendering around this.
+  // never a half-rendered dashboard. Both the skeleton and the pre-delay placeholder are full-height
+  // so the page footer (a sibling after AppShell) can't ride up and flash while content is empty.
   if (!collectionsReady) {
-    return showSkeleton ? <DashboardSkeleton /> : null;
+    return showSkeleton ? <DashboardSkeleton /> : <div className="min-h-screen" aria-hidden="true" />;
   }
 
   return (

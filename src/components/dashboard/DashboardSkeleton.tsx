@@ -36,7 +36,7 @@ const Card: React.FC<{ className?: string; style?: React.CSSProperties; children
 
 export const DashboardSkeleton: React.FC = () => {
   return (
-    <div aria-hidden="true" aria-busy="true">
+    <div aria-hidden="true" aria-busy="true" style={{ minHeight: "100vh" }}>
       <style>{`
         @keyframes skShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
         .sk-block {
