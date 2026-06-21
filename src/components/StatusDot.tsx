@@ -65,13 +65,16 @@ export interface StatusDotProps {
   /** Deprecated/ignored: all dots render at DOT_SIZE (30px) app-wide. Kept so existing call
    *  sites that still pass a size don't need touching. */
   size?: number;
+  /** Explicit pixel size that OVERRIDES the app-wide 30px — used only by the dense timelines,
+   *  where a full-size dot would be clipped by the compact layout. Min 12. */
+  overrideSize?: number;
   className?: string;
   /** Muted "would-be"/skipped treatment — the same artwork, drained of colour. Default false. */
   ghost?: boolean;
 }
 
-export const StatusDot: React.FC<StatusDotProps> = ({ status, className, ghost = false }) => {
-  const S = DOT_SIZE;
+export const StatusDot: React.FC<StatusDotProps> = ({ status, overrideSize, className, ghost = false }) => {
+  const S = Math.max(12, overrideSize ?? DOT_SIZE);
   const norm = normalizeStatus(status);
   const known = Object.values(QueryStatus).includes(norm);
 

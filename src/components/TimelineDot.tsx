@@ -20,7 +20,7 @@ import { StatusDot } from "./StatusDot";
  */
 export const renderTimelineDot = (label: string, resultingStatus?: QueryStatus): React.ReactNode => {
   if (resultingStatus) {
-    return <StatusDot status={resultingStatus} size={13} />;
+    return <StatusDot status={resultingStatus} overrideSize={13} />;
   }
 
   const LABEL_TO_STATUS: Record<string, QueryStatus> = {
@@ -38,7 +38,7 @@ export const renderTimelineDot = (label: string, resultingStatus?: QueryStatus):
   };
   const mapped = LABEL_TO_STATUS[label];
   if (mapped) {
-    return <StatusDot status={mapped} size={13} />;
+    return <StatusDot status={mapped} overrideSize={13} />;
   }
 
   if (label === "Nudge sent") {

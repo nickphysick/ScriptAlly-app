@@ -2537,17 +2537,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     <span className="w-1.5 h-1.5 bg-[#7c3a2a] rounded-full animate-bounce"></span>
                   </div>
                 ) : (
-                  <span style={{
-                    display: "inline-flex", alignItems: "center", gap: 4,
-                    padding: "2px 7px 2px 5px", borderRadius: 20,
-                    background: isClosed ? "#ece7df" : "rgba(253,250,245,0.95)",
-                    border: `1px solid ${isClosed ? "rgba(154,144,130,0.3)" : "rgba(124,58,42,0.18)"}`,
-                    fontSize: 9, fontWeight: 700, fontFamily: FONT_MONO,
-                    color: isClosed ? "#9a9082" : burgundy,
-                    whiteSpace: "nowrap", flexShrink: 0,
-                  }}>
-                    <StatusDot status={q.status} size={9} />
-                    {getStatusLabel(q.status)}
+                  <span style={{ display: "inline-flex", flexShrink: 0 }}>
+                    <StatusDot status={q.status} />
                   </span>
                 );
 
@@ -2894,11 +2885,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           if (item.type === 'waiting') {
                             // Non-status projection node (future "waiting to hear back") — keep its
                             // neutral hollow marker; it isn't a QueryStatus and has no dot artwork.
-                            dotElement = <div className="rounded-full z-10 bg-transparent border-[1.5px] border-[#c9a89e] shrink-0 mt-[4px]" style={{ width: 12, height: 12 }} />;
+                            dotElement = <div className="rounded-full z-10 bg-transparent border-[1.5px] border-[#c9a89e] shrink-0 mt-[4px]" style={{ width: 25, height: 25 }} />;
                           } else {
                             // Status-bearing node — route through the canonical StatusDot map (was a
                             // hand-built dot here; repointed so the designed artwork is the one source).
-                            dotElement = <StatusDot status={item.type as QueryStatus} size={12} className="z-10 mt-[4px]" />;
+                            dotElement = <StatusDot status={item.type as QueryStatus} overrideSize={25} className="z-10 mt-[4px]" />;
                           }
                           const baseTitle = item.type === 'waiting' ? 'Waiting to hear back' : (TIMELINE_TITLES[item.type as QueryStatus] || item.type);
                           const titleText = item.type === QueryStatus.FULL_SENT && (activeQuery.revisionRound ?? 1) >= 2 ? `${baseTitle} (v${activeQuery.revisionRound})` : baseTitle;
@@ -2932,9 +2923,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           const hasTintedBox = hasExpected || hasNudge;
                           return (
                             <div key={index} className="flex gap-4 animate-fade-in">
-                              <div className="flex flex-col items-center shrink-0 w-3 relative">
+                              <div className="flex flex-col items-center shrink-0 w-[26px] relative">
                                 {dotElement}
-                                {!isLast && <div className="absolute top-[16px] bottom-[-14px] bg-[#e8e0d8]" style={{ width: 1 }} />}
+                                {!isLast && <div className="absolute left-1/2 -translate-x-1/2 top-[30px] bottom-[-14px] bg-[#e8e0d8]" style={{ width: 1 }} />}
                               </div>
                               <div className="flex-grow pb-4">
                                 <div className="flex justify-between items-baseline gap-1.5">
