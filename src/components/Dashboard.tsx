@@ -55,6 +55,7 @@ import { HeroCard } from "./dashboard/HeroCard";
 import { OverToYou } from "./dashboard/OverToYou";
 import { StatCards } from "./dashboard/StatCards";
 import { FortnightInFocus } from "./dashboard/FortnightInFocus";
+import { WhatsLivePanel } from "./dashboard/WhatsLivePanel";
 import { replacePlaceholders, extractAgentFromText } from "../lib/activityUtils";
 import {
   Sparkles,
@@ -1652,7 +1653,7 @@ export const Dashboard: React.FC<{
             <div className="flex flex-col gap-[16px]">
               <HeroCard
                 firstName={getUserFirstName()}
-                queries={queries}
+                quote={quote}
                 onSendQuery={() => onNavigate("queries", "Send a query")}
                 onRecordResponse={() => setRecordResponseScreenOpen(true)}
                 onAddAgent={() => onNavigate("agents", "Add an agent")}
@@ -1693,6 +1694,13 @@ export const Dashboard: React.FC<{
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ============ WHAT'S LIVE RIGHT NOW — full-width pipeline panel above Fortnight ============ */}
+      {!isMagazineLayout && (
+        <div className="w-full max-w-none px-4 md:px-10 lg:px-8 xl:px-8 pt-[14px]">
+          <WhatsLivePanel queries={queries} />
         </div>
       )}
 
@@ -1917,8 +1925,9 @@ export const Dashboard: React.FC<{
               );
             }
 
-            // Standard layout: the query pipeline moved up into the hero (HeroPipelineStrip),
-            // so nothing renders here. The magazine layout keeps its own pipeline matrix above.
+            // Standard layout: the query pipeline now lives in the standalone "What's live right
+            // now?" panel above Fortnight (WhatsLivePanel), so nothing renders here. The magazine
+            // layout keeps its own pipeline matrix above.
             return null;
           })()}
         </div>

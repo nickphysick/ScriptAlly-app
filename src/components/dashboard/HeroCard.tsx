@@ -2,20 +2,18 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Dashboard hero — parchment MountCard with the serif greeting, the aggregate querying
- * pipeline strip (HeroPipelineStrip, in the old author-quote slot), the action buttons, and
- * the three-planes artwork on the right. (The date / day-of-journey caption was dropped in
- * the June 2026 refinement; the single line-SVG paper plane was replaced by the artwork.)
+ * Dashboard hero — parchment MountCard with the serif greeting, rotating quote, action
+ * buttons and the line-SVG paper-plane corner motif. (The date / day-of-journey caption
+ * was dropped in the June 2026 refinement.)
  */
-import React from "react";
+import React, { useState } from "react";
 import { Send, UserPlus, BookOpen, CornerUpLeft } from "lucide-react";
 import { MountCard } from "../MountCard";
-import { HeroPipelineStrip } from "./HeroPipelineStrip";
-import { Query } from "../../types";
 import "./heroRim.css";
 import {
   headingInk,
   burgundy,
+  labelStyle,
   FONT_SERIF,
   FONT_MONO,
   buttonPinkBg,
@@ -100,22 +98,30 @@ export const GhostButton: React.FC<{
   </button>
 );
 
-/** Three-planes hero artwork — right-hand side, vertically centred at 50% of the hero's
- *  (content-driven) height. The wrapper resolves "50%" against the auto-height card via
- *  top/bottom:25%, and the image fills that height keeping its aspect ratio. Decorative. */
-const PlanesArt: React.FC = () => (
-  <div
+/** Inline line-SVG paper plane in brand colours with a dashed flight path. */
+const PlaneMotif: React.FC = () => (
+  <svg
+    width="200"
+    height="160"
+    viewBox="0 0 200 160"
     aria-hidden="true"
-    style={{ position: "absolute", top: "25%", bottom: "25%", right: 24, zIndex: 1, pointerEvents: "none" }}
+    style={{ position: "absolute", right: 14, bottom: 6, zIndex: 1, opacity: 0.85, pointerEvents: "none" }}
   >
-    <img src="/Sent_queries_final.png" alt="" style={{ height: "100%", width: "auto", display: "block", objectFit: "contain" }} />
-  </div>
+    <path d="M30 110 C 60 80, 110 60, 168 38" fill="none" stroke="#c9a89e" strokeWidth="1.2" strokeDasharray="3 5" />
+    <g transform="translate(150,22) rotate(18)">
+      <path d="M0 16 L44 0 L18 30 Z" fill="#f5e2da" stroke="#7c3a2a" strokeWidth="1.4" strokeLinejoin="round" />
+      <path d="M0 16 L18 30 L16 42 L22 27" fill="#efd5ca" stroke="#7c3a2a" strokeWidth="1.4" strokeLinejoin="round" />
+      <path d="M44 0 L18 30" fill="none" stroke="#7c3a2a" strokeWidth="1.4" />
+    </g>
+    <circle cx="52" cy="96" r="2" fill="#c9a89e" />
+    <circle cx="92" cy="74" r="2" fill="#c9a89e" />
+    <circle cx="130" cy="56" r="2" fill="#c9a89e" />
+  </svg>
 );
 
 export interface HeroCardProps {
   firstName: string;
-  /** Every query across all manuscripts — drives the aggregate pipeline strip + heading variant. */
-  queries: Query[];
+  quote: { text: string; author: string };
   onSendQuery: () => void;
   onRecordResponse: () => void;
   onAddAgent: () => void;
@@ -124,13 +130,12 @@ export interface HeroCardProps {
 
 export const HeroCard: React.FC<HeroCardProps> = ({
   firstName,
-  queries,
+  quote,
   onSendQuery,
   onRecordResponse,
   onAddAgent,
   onAddManuscript,
 }) => {
-  const hasJourney = queries.length > 0;
   return (
     <MountCard className="flex flex-col">
       {/* Ambient sage rim wave (decorative; z1 — above card bg, below frame z3 and content z4) */}
@@ -138,21 +143,32 @@ export const HeroCard: React.FC<HeroCardProps> = ({
 
       {/* Body */}
       <div style={{ padding: "33px 31px 31px", margin: "6px 6px 6px", position: "relative", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-        <div style={{ position: "relative", zIndex: 4, maxWidth: 780 }}>
+        <div style={{ position: "relative", zIndex: 4, maxWidth: 620 }}>
           <div style={{ fontFamily: FONT_SERIF, fontSize: 38, fontWeight: 500, color: headingInk, lineHeight: 1.1 }}>
-            {hasJourney ? (
-              <>Your journey so far, <em style={{ color: burgundy, fontStyle: "italic" }}>{firstName}</em>…</>
-            ) : (
-              <>Your journey starts here, <em style={{ color: burgundy, fontStyle: "italic" }}>{firstName}</em></>
-            )}
+            Welcome back, <em style={{ color: burgundy, fontStyle: "italic" }}>{firstName}</em>
           </div>
 
-          {/* Aggregate querying pipeline — the animated single-row tour, in the old quote slot.
-              §8 spacing: equal margins above (heading → row) and below (caption reserve →
-              buttons) so the strip reads as deliberately centred between them. */}
-          <div style={{ margin: "22px 0" }}>
-            <HeroPipelineStrip queries={queries} />
-          </div>
+          {quote.text && (
+            <>
+              <div
+                style={{
+                  fontFamily: FONT_SERIF,
+                  fontStyle: "italic",
+                  fontSize: 14.5,
+                  color: "#6a5a50",
+                  borderLeft: `2px solid ${burgundy}`,
+                  paddingLeft: 14,
+                  lineHeight: 1.6,
+                  margin: "16px 0 6px",
+                }}
+              >
+                {quote.text}
+              </div>
+              <div style={{ ...labelStyle, marginBottom: 20, paddingLeft: 16 }}>
+                — {quote.author || "Unknown"}
+              </div>
+            </>
+          )}
 
           {/* Two halves of the querying loop (Send query · Record a response), then a divider before the
               setup actions. Compact padding keeps all four on one line at the hero's width. */}
@@ -177,7 +193,7 @@ export const HeroCard: React.FC<HeroCardProps> = ({
           </div>
         </div>
 
-        <PlanesArt />
+        <PlaneMotif />
       </div>
     </MountCard>
   );
