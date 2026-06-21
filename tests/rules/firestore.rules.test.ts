@@ -14,9 +14,12 @@
  *   - /test/connection: public read allowed, write blocked
  *   - /waitlist, /counters: hard deny
  *
- * FINDINGS surfaced in comments where rules confirm a security concern:
- *   FINDING-1: communityAgents.create is open to any signed-in user (known, documented in rules)
- *   FINDING-2: activities.update allows resultingStatus with no type validation
+ * FINDINGS:
+ *   FINDING-1 (OPEN): communityAgents.create is open to any signed-in user — cannot close until
+ *     seedCommunityAgentsIfEmpty() (src/lib/db.tsx:319) is moved to a server path (Admin SDK /
+ *     Cloud Function). Test documents the gap; rule is unchanged pending that migration decision.
+ *   FINDING-2 (FIXED): resultingStatus in isValidActivity() now enforces the QueryStatus enum.
+ *     Bogus values are rejected; the three flipped tests confirm this.
  */
 
 import {
@@ -627,24 +630,41 @@ describe('/users/{userId}/activities', () => {
     );
   });
 
-  /**
-   * FINDING-2: resultingStatus is in the activities update affectedKeys allowlist but is absent
-   * from isValidActivity(). Any value — even a nonsense string — passes the update rule.
-   * Impact: malformed resultingStatus values won't be caught server-side; recomputeQuery
-   * ignores them, but the data quality gap is a latent correctness risk.
-   * Fix: add `(!data.keys().hasAny(['resultingStatus']) || data.resultingStatus is string &&
-   *       data.resultingStatus.size() <= 64)` (or an enum check) to isValidActivity().
-   */
-  it('[FINDING-2] activities update accepts resultingStatus with any value (no type validation)', async () => {
+  it('rejects activity update with a bogus resultingStatus (enum enforced — FINDING-2 fixed)', async () => {
     await asAdmin(async (ctx) => {
       await setDoc(doc(ctx.firestore(), 'users', ALICE, 'activities', 'act-1'), validActivity(ALICE));
     });
     const db = aliceCtx().firestore();
-    // This SHOULD succeed — confirming the unvalidated field passes through
-    await assertSucceeds(
+    await assertFails(
       updateDoc(doc(db, 'users', ALICE, 'activities', 'act-1'), {
         ...validActivity(ALICE),
         resultingStatus: 'not-a-real-status',
+      })
+    );
+  });
+
+  it('accepts activity update with a valid resultingStatus enum value', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'activities', 'act-1'), validActivity(ALICE));
+    });
+    const db = aliceCtx().firestore();
+    await assertSucceeds(
+      updateDoc(doc(db, 'users', ALICE, 'activities', 'act-1'), {
+        ...validActivity(ALICE),
+        resultingStatus: 'Queried',
+      })
+    );
+  });
+
+  it('accepts activity update with resultingStatus: "Revise & Resubmit" (ampersand in enum)', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'activities', 'act-1'), validActivity(ALICE));
+    });
+    const db = aliceCtx().firestore();
+    await assertSucceeds(
+      updateDoc(doc(db, 'users', ALICE, 'activities', 'act-1'), {
+        ...validActivity(ALICE),
+        resultingStatus: 'Revise & Resubmit',
       })
     );
   });

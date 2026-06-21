@@ -285,7 +285,19 @@ service cloud.firestore {
         )
         && data.description is string && data.description.size() <= 512
         && data.date is string && data.date.size() <= 64
-        && data.details is string && data.details.size() <= 4096;
+        && data.details is string && data.details.size() <= 4096
+        && (!data.keys().hasAny(['resultingStatus']) || (data.resultingStatus is string && (
+          data.resultingStatus == 'Queried' ||
+          data.resultingStatus == 'Partial Requested' ||
+          data.resultingStatus == 'Partial Sent' ||
+          data.resultingStatus == 'Full Requested' ||
+          data.resultingStatus == 'Full Sent' ||
+          data.resultingStatus == 'Revise & Resubmit' ||
+          data.resultingStatus == 'Offer' ||
+          data.resultingStatus == 'Rejected' ||
+          data.resultingStatus == 'Withdrawn' ||
+          data.resultingStatus == 'No Response'
+        )));
     }
 
     function isValidJournalEntry(data, userId) {
