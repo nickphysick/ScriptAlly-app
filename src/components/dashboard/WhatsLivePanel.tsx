@@ -64,11 +64,9 @@ const LAST = N - 1;
 const caption = (count: number, s: Stage) => (count === 0 ? s.zero : `${count} ${count === 1 ? s.sing : s.plur}`);
 
 // Timing.
-const DWELL = 2100; // pause at an active stage while its pulse + caption play
-const REST = 1700; // hold at the end before the cycle resets
-const LINE_PER_COL = 700; // ms to draw the dotted line across one inter-stage gap
-const QUERIED_BEAT = 1000; // the first stage's pulse beat before the line starts (if zero-count)
-const INACTIVE_BLOOM = 1600; // how long a zero stage holds full opacity as the line passes
+const DWELL = 700; // brief pause of the line at an active stage while its pulse plays
+const LINE_PER_COL = 1400; // ms to draw the dotted line across one inter-stage gap (deliberately slow)
+const QUERIED_BEAT = 400; // brief beat after Queried shows before the line starts
 
 // Geometry (proportions of the row width W, recomputed on resize).
 const DOT = 50; // resting icon size (matches the .wl-dot CSS override)
@@ -117,6 +115,7 @@ export interface WhatsLivePanelProps {
 export const WhatsLivePanel: React.FC<WhatsLivePanelProps> = ({ queries }) => {
   const rowRef = useRef<HTMLDivElement>(null);
   const [W, setW] = useState(0);
+  const playedRef = useRef(false); // the tour plays once per mount — no replay until refresh / nav back
 
   const counts = useMemo(
     () => LIVE.map((s) => queries.filter((q) => s.agg.includes(q.status)).length),
@@ -161,14 +160,16 @@ export const WhatsLivePanel: React.FC<WhatsLivePanelProps> = ({ queries }) => {
 
     const full = xs[LAST] - xs[0];
 
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) {
-      // Static: every caption shown, line fully drawn, no pulses (zeros stay faint).
+    // End-state: line fully drawn, every caption shown (zeros stay faint, no pulses).
+    const showStatic = () => {
       nodes.forEach((node) => node.classList.add("show"));
       line.style.transition = "none";
       line.style.width = `${full}px`;
-      return;
-    }
+    };
+    // Reduced-motion, or a re-render after the tour already ran this mount (e.g. a resize) →
+    // jump straight to the end-state. The tour itself never replays until the panel re-mounts.
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce || playedRef.current) { showStatic(); return; }
 
     let cancelled = false;
     let visible = true;
@@ -209,52 +210,32 @@ export const WhatsLivePanel: React.FC<WhatsLivePanelProps> = ({ queries }) => {
       await wait(dur);
     };
 
-    // Every stage pulses + shows its caption as the line reaches it. Populated → caption stays
-    // in colour; zero → pulse + bloom the faded icon (held briefly) + a grey "no …" caption.
+    // The line reaches a stage → its caption appears (and stays). Active stages also pulse
+    // (50% larger); zero-count stages do NOT animate or change opacity — caption only.
     const pulseLabel = (i: number) => {
-      const wrap = nodes[i].querySelector<HTMLElement>(".wl-dotwrap");
-      if (wrap) { wrap.classList.remove("pulsing"); void wrap.offsetWidth; wrap.classList.add("pulsing"); }
       nodes[i].classList.add("show");
-      if (counts[i] === 0) {
-        nodes[i].classList.add("peek"); // bloom the faint icon to full while it pulses
-        const t = setTimeout(() => { timers.delete(t); nodes[i].classList.remove("peek"); }, INACTIVE_BLOOM);
-        timers.add(t);
+      if (counts[i] > 0) {
+        const wrap = nodes[i].querySelector<HTMLElement>(".wl-dotwrap");
+        if (wrap) { wrap.classList.remove("pulsing"); void wrap.offsetWidth; wrap.classList.add("pulsing"); }
       }
     };
 
-    const reset = async () => {
-      nodes.forEach((n) => n.classList.remove("show", "peek"));
-      line.style.transition = "opacity 0.6s";
-      line.style.opacity = "0";
-      await wait(1000); // let captions + line fade out
-      line.style.transition = "none";
-      line.style.width = "0px";
-      line.style.opacity = "1";
-      curX = xs[0];
-      void line.offsetWidth;
-    };
-
     (async () => {
-      while (!cancelled) {
-        await waitVisible();
-        if (cancelled) break;
-        if (full <= 0) { await wait(200); continue; }
+      await waitVisible();
+      if (cancelled || full <= 0) return;
+      playedRef.current = true; // it begins playing now — re-renders this mount won't replay it
 
-        await wait(500); // settle
-        // Queried plays first; then the line draws, pausing on active stages only.
-        pulseLabel(0);
-        await wait(counts[0] > 0 ? DWELL : QUERIED_BEAT);
-        if (cancelled) break;
-        for (let i = 1; i <= LAST; i++) {
-          await drawTo(xs[i]);
-          if (cancelled) break;
-          pulseLabel(i);
-          if (counts[i] > 0) { await wait(DWELL); if (cancelled) break; } // active pauses; zero passes over
-        }
-        if (cancelled) break;
-        await wait(REST);
-        if (cancelled) break;
-        await reset();
+      await wait(500); // settle
+      // Queried plays first; then the line draws ONCE, pausing briefly on active stages and
+      // passing straight over the inactive ones, and stops at the end (no replay this mount).
+      pulseLabel(0);
+      await wait(counts[0] > 0 ? DWELL : QUERIED_BEAT);
+      if (cancelled) return;
+      for (let i = 1; i <= LAST; i++) {
+        await drawTo(xs[i]);
+        if (cancelled) return;
+        pulseLabel(i);
+        if (counts[i] > 0) { await wait(DWELL); if (cancelled) return; } // brief pause on active
       }
     })();
 

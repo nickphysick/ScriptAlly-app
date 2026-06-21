@@ -23,9 +23,8 @@
   100% { transform: scale(1);   box-shadow: 0 0 0 0 rgba(124, 58, 42, 0); }
 }
 
-/* zero-count StatusDot: rests faint at 20%, blooms to full as the line passes (then settles back) */
+/* zero-count StatusDot: stays faint at 20% (the line passes behind it; no bloom). Hover reveals it. */
 .wl-row .wl-ghost { opacity: 0.2; transition: opacity 1s ease-in-out; will-change: opacity; }
-.wl-row .wl-node.peek .wl-ghost,
 .wl-row .wl-node:hover .wl-ghost { opacity: 1; }
 
 /* caption below a node — opacity fade only; stays visible once shown until the cycle resets */
