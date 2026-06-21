@@ -28,7 +28,7 @@
   .ha-login{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#7c3a2a;text-decoration:none;border:1px solid #dcae9f;border-radius:20px;padding:8px 16px;background:linear-gradient(180deg,#f5e2da,#e8c8bc)}
   .ha-login:hover{filter:brightness(.97)}
   .brandhead{text-align:center;padding:18px 0 8px}
-  .brandmark{height:clamp(120px,18vw,185px);aspect-ratio:12/5;margin:0 auto;-webkit-mask:var(--logo) center/contain no-repeat;mask:var(--logo) center/contain no-repeat;background:linear-gradient(100deg,var(--burgundy) 0 40%,#cf9482 50%,var(--burgundy) 60% 100%);background-size:230% 100%;animation:sheen 5s ease-in-out infinite}
+  .brandmark{height:clamp(120px,18vw,185px);width:auto;margin:0 auto;display:block}
   @keyframes sheen{0%,55%{background-position:150% 0}100%{background-position:-50% 0}}
   @media (prefers-reduced-motion:reduce){.brandmark{animation:none}}
   .brand-sub{font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-soft);margin-top:14px}
@@ -144,7 +144,8 @@
     <nav class="ha-topnav"><a class="ha-login" href="https://scriptally-app.web.app">Log in</a></nav>
 
     <header class="brandhead">
-      <div class="brandmark" role="img" aria-label="ScriptAlly"></div>
+      <img class="brandmark" src="scriptally-title-v2.png" alt="ScriptAlly">
+
       <div class="brand-sub">Coming soon</div>
     </header>
 
