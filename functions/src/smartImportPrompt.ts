@@ -18,8 +18,11 @@ You receive CSV text exported from a spreadsheet. The layout is unknown and ofte
   near the bottom, summary/total rows ("Total queries sent: ~30"), and placeholder rows ("??"/"TBC").
   Map ONLY the genuine query rows beneath the real header.
 
-OUTPUT — return the JSON object ONLY. No preamble, no explanation, no markdown code fences. Emit
-COMPACT JSON: no line breaks, no indentation, no spaces after punctuation. Shape:
+OUTPUT — your ENTIRE reply must be the JSON object and nothing else. Do NOT think out loud, deliberate,
+weigh options, or explain — no text before or after the JSON, no markdown fences. Begin your reply with
+the character { . This is a straightforward field-mapping task (the app does all the judgement
+afterwards), so no reasoning is needed. Emit COMPACT JSON: no line breaks, no indentation, no spaces
+after punctuation. Shape:
 
 {"agents":[{"ref":"a1","name":"","agency":""}],"queries":[{"agentRef":"a1","status":"Queried"}]}
 
@@ -65,10 +68,11 @@ Rules:
   With only one date column, set "dateQueried" only. Never fabricate a date for a stage with no source.
 - Genres: the RAW genre/wishlist words from the sheet (e.g. ["litfic","sci-fi","YA"]); do NOT normalise,
   expand, or invent — the app maps them onto its own list.
-- Agents: one object per distinct agent; link each query via "agentRef". Dedupe on the NORMALISED
-  name + agency (trim, case-insensitive) — the same agent only when BOTH match. AGENCY is the identity:
-  an agent with no name is still valid (name ""). Never merge two different agencies; never split one
-  agent across refs.
+- Agents: emit ONE agent object per query row, with its own "ref", transcribing that row's agent name
+  and agency exactly as written, and link the row's query to it via "agentRef". Do NOT deduplicate,
+  merge, or judge whether two rows are the same agent or agency — the app does ALL of that afterwards.
+  Emit apparent duplicates as SEPARATE agents (e.g. "Jamal Carter" and "J. Carter" become two agent
+  objects). An agent with no name is valid — name "", identified by its agency.
 - Never invent data. Do NOT include any column-mapping or status-translation summary. Do NOT match
   against the user's existing database — that happens later in code.
 `.trim();
