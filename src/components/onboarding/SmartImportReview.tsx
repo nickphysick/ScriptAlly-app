@@ -1207,7 +1207,7 @@ export const OnbNav: React.FC<{ userInitial: string }> = ({ userInitial }) => (
   <nav style={{ height: 76, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 100px", background: "#fdfaf5", borderBottom: "1px solid #e8dfd1", position: "sticky", top: 0, zIndex: 40 }}>
     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
       <img src="/scriptally-logo-new-basic.png" alt="" aria-hidden="true" style={{ height: 34, width: "auto", display: "block" }} />
-      <img src="/scriptally-title-v2.png" alt="ScriptAlly" style={{ height: 34, width: "auto", display: "block", maxWidth: "none" }} />
+      <img src="/scriptally-title-v3.png" alt="ScriptAlly" style={{ height: 34, width: "auto", display: "block", maxWidth: "none" }} />
     </div>
     <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
       <button aria-label="Search" style={{ background: "none", border: "none", color: "#b1a596", cursor: "pointer", padding: 8, borderRadius: 8, lineHeight: 0 }}

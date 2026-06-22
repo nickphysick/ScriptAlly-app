@@ -1796,7 +1796,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
       >
         {/* Logo */}
         <div style={{ padding: "16px 22px 4px", flexShrink: 0, display: "flex", justifyContent: "center" }}>
-          <img src="/scriptally-title-v2.png" style={{ width: 188, height: "auto" }} alt="ScriptAlly" />
+          <img src="/scriptally-title-v3.png" style={{ width: 188, height: "auto" }} alt="ScriptAlly" />
         </div>
 
         <div style={{ height: 1, margin: "4px 14px 8px", background: "rgba(124,58,42,0.10)" }} />
