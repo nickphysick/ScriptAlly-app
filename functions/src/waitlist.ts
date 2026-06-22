@@ -3,7 +3,8 @@
  *
  * Backs the founding-writer signup form on the prod holding page (holding/index.html),
  * reached same-origin via the Firebase Hosting rewrite  /api/waitlist → this function
- * (see firebase.holding.json). The static page only does plain fetch() — no Firebase SDK,
+ * (see the "holding" hosting target in firebase.json). The static page only does plain
+ * fetch() — no Firebase SDK,
  * no exposed config, no CORS. This function writes via the Admin SDK, which bypasses
  * Firestore rules (the waitlist/ and counters/ paths are explicitly denied to all clients).
  *

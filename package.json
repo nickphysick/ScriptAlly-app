@@ -15,8 +15,9 @@
     "check:derivation": "esbuild scripts/derivationCheck.ts --bundle --platform=node --outfile=/tmp/derivationCheck.cjs && node /tmp/derivationCheck.cjs",
     "deploy:rules:dryrun": "firebase deploy --only firestore:rules --dry-run --project prod",
     "deploy:rules": "firebase deploy --only firestore:rules --project prod",
-    "deploy:hosting": "npm run build && firebase deploy --only hosting --project prod",
-    "deploy:dev": "firebase deploy --project dev"
+    "deploy:app": "npm run build && firebase deploy --only hosting:app --project prod",
+    "deploy:holding": "firebase deploy --only hosting:holding --project prod",
+    "deploy:dev": "npm run build && firebase deploy --only hosting:dev --project dev"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
