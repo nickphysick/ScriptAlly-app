@@ -3,5 +3,18 @@
     "default": "gen-lang-client-0801391782",
     "prod": "gen-lang-client-0801391782",
     "dev": "scriptally-dev"
+  },
+  "targets": {
+    "gen-lang-client-0801391782": {
+      "hosting": {
+        "app": ["scriptally-app"],
+        "holding": ["gen-lang-client-0801391782"]
+      }
+    },
+    "scriptally-dev": {
+      "hosting": {
+        "dev": ["scriptally-dev"]
+      }
+    }
   }
 }

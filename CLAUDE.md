@@ -1,7 +1,11 @@
 # ScriptAlly — Project Notes
 
 ## Deployment
-- Deploy with `git push` then `firebase deploy` (Firebase Hosting).
+- **Hosting is two separate sites on the prod project, wired via named targets** (`.firebaserc` `targets` + the `hosting` array in `firebase.json`) — never a bare `firebase deploy` (that would push functions + firestore rules + every site at once). Each site has its own script:
+  - **App** (site `scriptally-app`, serves `dist`): `npm run deploy:app` → `firebase deploy --only hosting:app --project prod`
+  - **Holding** (default site `gen-lang-client-0801391782`, serves `holding/`, the "Coming Soon" page): `npm run deploy:holding` → `firebase deploy --only hosting:holding --project prod`
+  - **Dev** (project `scriptally-dev`, site `scriptally-dev`, serves `dist`): `npm run deploy:dev` → `firebase deploy --only hosting:dev --project dev`
+- **Firestore rules** deploy separately and deliberately: `npm run deploy:rules` (dry-run: `npm run deploy:rules:dryrun`). **Functions** deploy separately: `firebase deploy --only functions[:<name>] --project prod`. Keep these out of hosting deploys.
 
 ## Conventions & invariants
 - **QueryStatus:** always use the exact `QueryStatus` enum strings (e.g. `"Partial Requested"`, `"Revise & Resubmit"`). Never camelCase or ad-hoc variants.
