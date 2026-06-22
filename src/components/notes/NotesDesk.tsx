@@ -2,15 +2,18 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * NotesDesk — the hero's right-hand "desk". Compose happens IN PLACE (no floating popover, which
- * escaped onto other cards under the dashboard's transformed ancestor): a resting colour picker →
- * grab a colour → write on that sticky → optionally anchor a date. Populated desks show the
- * recent-three fan + a "+" that returns to the picker. Vertically centred in the hero's column.
+ * NotesDesk — the hero's right-hand "desk". Compose happens IN PLACE (no floating popover): a resting
+ * colour picker → grab a colour → write on that sticky → optionally anchor a date. Populated desks
+ * show the recent-three fan with the newest front-and-centre and a "+" riding its top-right corner.
+ *
+ * Centring: every state renders a CONTENT-SIZED cluster — the front sticky sits in normal flow (so it
+ * defines the height and is centred by the flex column), older stickies are absolutely positioned
+ * behind it, bottom-aligned. No fixed-height stage, so there's no dead space leaving the notes low.
  */
 import React, { useState } from "react";
 import { Plus, X, Calendar, Maximize2 } from "lucide-react";
 import type { Note, NoteColour } from "../../types";
-import { FONT_MONO, burgundy, mutedInk, buttonPinkBg, buttonPinkBorder } from "../../lib/designTokens";
+import { FONT_MONO, burgundy, mutedInk, parchment, buttonPinkBorder } from "../../lib/designTokens";
 import { FONT_CAVEAT, NOTE_THEMES } from "./notesTheme";
 import { PostIt } from "./PostIt";
 import { NoteEditor } from "./NoteEditor";
@@ -27,52 +30,28 @@ export interface NotesDeskProps {
   onDelete: (id: string) => void;
 }
 
-interface FanItem { note: Note; x: number; rot: number; z: number; front: boolean; }
+const NOTE_W = 168;
+const NOTE_MINH = 130;
+const PICK_W = 152;
+const PICK_MINH = 118;
 
-/** Most-recent note takes the straight, readable, on-top slot; the rest tuck behind it. */
-function buildFan(top: Note[]): FanItem[] {
-  const n = top.length;
-  if (n === 0) return [];
-  if (n === 1) return [{ note: top[0], x: 0, rot: 0, z: 3, front: true }];
-  if (n === 2) {
-    return [
-      { note: top[1], x: -30, rot: -9, z: 1, front: false },
-      { note: top[0], x: 30, rot: 9, z: 2, front: true },
-    ];
-  }
-  return [
-    { note: top[1], x: -40, rot: -12, z: 1, front: false },
-    { note: top[2], x: 40, rot: 12, z: 2, front: false },
-    { note: top[0], x: 0, rot: 0, z: 3, front: true },
-  ];
-}
-
-const fanNoteBase = (x: number, rot: number, z: number, hovered: boolean): React.CSSProperties => ({
-  position: "absolute",
-  left: "50%",
-  bottom: 8,
-  marginLeft: -75,
-  transformOrigin: "50% 100%",
-  transform: hovered
-    ? `translateX(${x}px) translateY(-16px) rotate(0deg) scale(1.05)`
-    : `translateX(${x}px) rotate(${rot}deg)`,
-  zIndex: hovered ? 60 : z,
-  boxShadow: hovered ? "1px 12px 26px rgba(58,28,20,0.22)" : undefined,
-});
-
-/* The colour picker fan — grab a colour to compose with it. Back two spread on hover to be hittable. */
-const PICKER: { colour: NoteColour; x: number; spreadX: number; rot: number; z: number; front?: boolean }[] = [
-  { colour: "yellow", x: -38, spreadX: -64, rot: -12, z: 1 },
-  { colour: "sage", x: 38, spreadX: 64, rot: 12, z: 2 },
-  { colour: "pink", x: 0, spreadX: 0, rot: 0, z: 3, front: true },
+/** Behind-the-front slots for older notes: left then right, slight tilt, lower z. */
+const SIDE_SLOTS = [
+  { x: -42, rot: -11, z: 1 },
+  { x: 42, rot: 11, z: 2 },
 ];
 
-const STAGE_HEIGHT = 196;
+/** Colour-picker fan — pink front, yellow/sage behind (spread out on hover to be hittable). */
+const PICKER_SIDES: { colour: NoteColour; x: number; spreadX: number; rot: number; z: number }[] = [
+  { colour: "yellow", x: -38, spreadX: -66, rot: -11, z: 1 },
+  { colour: "sage", x: 38, spreadX: 66, rot: 11, z: 2 },
+];
 
 export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onComplete, onDelete }) => {
   const [seeAllOpen, setSeeAllOpen] = useState(false);
   const [editing, setEditing] = useState<Note | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [cornerHover, setCornerHover] = useState(false);
 
   // Compose-in-place state
   const [pickerOpen, setPickerOpen] = useState(false); // populated desk: "+" opened the picker
@@ -84,13 +63,16 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
   const [hoverColour, setHoverColour] = useState<NoteColour | null>(null);
 
   const active = byMostRecent(activeNotes(notes));
-  const fan = buildFan(active.slice(0, 3));
+  const top = active.slice(0, 3);
+  const front = top[0];
+  const sides = top.slice(1).map((note, i) => ({ note, ...SIDE_SLOTS[i] }));
   const isEmpty = active.length === 0;
 
   const composing = composeColour !== null;
   const showPicker = !composing && (isEmpty || pickerOpen);
   const showFan = !composing && !showPicker;
 
+  const openPicker = () => setPickerOpen(true);
   const grabColour = (c: NoteColour) => {
     setComposeColour(c);
     setComposeText("");
@@ -116,35 +98,9 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
 
   return (
     <div style={{ position: "relative", width: 296, flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-      {/* "+" — only on the populated fan; opens the colour picker */}
-      {showFan ? (
-        <button
-          onClick={() => setPickerOpen(true)}
-          aria-label="New note"
-          style={{
-            position: "absolute",
-            top: 4,
-            right: 2,
-            width: 28,
-            height: 28,
-            borderRadius: "50%",
-            background: buttonPinkBg,
-            border: `0.5px solid ${buttonPinkBorder}`,
-            color: burgundy,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            zIndex: 5,
-          }}
-        >
-          <Plus size={15} />
-        </button>
-      ) : null}
-
-      {/* ---- COMPOSE: write on the grabbed sticky ---- */}
+      {/* ---- COMPOSE: write on the grabbed sticky (content-sized → centred) ---- */}
       {composing ? (
-        <div style={{ position: "relative", width: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: STAGE_HEIGHT }}>
+        <div style={{ position: "relative", width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
           <div
             style={{
               position: "relative",
@@ -224,21 +180,22 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
         </div>
       ) : null}
 
-      {/* ---- PICKER: grab a colour ---- */}
+      {/* ---- PICKER: grab a colour (pink front in flow, yellow/sage behind) ---- */}
       {showPicker ? (
         <div
           onMouseEnter={() => setPickerHover(true)}
           onMouseLeave={() => { setPickerHover(false); setHoverColour(null); }}
-          style={{ position: "relative", width: "100%", height: STAGE_HEIGHT }}
+          style={{ position: "relative", width: "100%", display: "flex", justifyContent: "center" }}
         >
           {/* back-to-fan affordance when reached via "+" on a populated desk */}
           {pickerOpen && !isEmpty ? (
-            <button onClick={() => setPickerOpen(false)} aria-label="Back to notes" style={{ position: "absolute", top: 0, right: 2, background: "none", border: "none", color: mutedInk, cursor: "pointer", lineHeight: 0, zIndex: 7 }}>
+            <button onClick={() => setPickerOpen(false)} aria-label="Back to notes" style={{ position: "absolute", top: -6, right: 2, background: "none", border: "none", color: mutedInk, cursor: "pointer", lineHeight: 0, zIndex: 12 }}>
               <X size={16} />
             </button>
           ) : null}
 
-          {PICKER.map((p) => {
+          {/* sides — absolute, bottom-aligned behind the front */}
+          {PICKER_SIDES.map((p) => {
             const theme = NOTE_THEMES[p.colour];
             const hov = hoverColour === p.colour;
             const x = pickerHover ? p.spreadX : p.x;
@@ -250,76 +207,135 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
                 onMouseLeave={() => setHoverColour((c) => (c === p.colour ? null : c))}
                 style={{
                   position: "absolute",
+                  bottom: 0,
                   left: "50%",
-                  bottom: 8,
-                  marginLeft: -70,
+                  marginLeft: -PICK_W / 2,
                   transformOrigin: "50% 100%",
                   transform: hov ? `translateX(${x}px) translateY(-8px) rotate(0deg) scale(1.04)` : `translateX(${x}px) rotate(${p.rot}deg)`,
                   zIndex: hov ? 60 : p.z,
                 }}
               >
-                <PostIt colour={p.colour} theme={theme} width={140} minHeight={110} surfaced={false} onClick={() => grabColour(p.colour)}>
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, minHeight: 80, textAlign: "center", color: theme.ink }}>
-                    <Plus size={p.front ? 20 : 17} strokeWidth={2.25} />
-                    {p.front ? (
-                      <div style={{ fontFamily: FONT_CAVEAT, fontSize: 16, fontWeight: 600, lineHeight: 1.15 }}>jot a note or create a task</div>
-                    ) : null}
+                <PostIt colour={p.colour} theme={theme} width={PICK_W} minHeight={PICK_MINH} surfaced={false} onClick={() => grabColour(p.colour)}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 88, color: theme.ink }}>
+                    <Plus size={17} strokeWidth={2.25} />
                   </div>
                 </PostIt>
               </div>
             );
           })}
+
+          {/* front pink — in flow → defines height + centred */}
+          <div
+            className="sa-fan-note"
+            onMouseEnter={() => setHoverColour("pink")}
+            onMouseLeave={() => setHoverColour((c) => (c === "pink" ? null : c))}
+            style={{ position: "relative", zIndex: 3, transformOrigin: "50% 100%", transform: hoverColour === "pink" ? "translateY(-6px) scale(1.03)" : "none" }}
+          >
+            <PostIt colour="pink" theme={NOTE_THEMES.pink} width={PICK_W} minHeight={PICK_MINH} surfaced={false} onClick={() => grabColour("pink")}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, minHeight: 88, textAlign: "center", color: NOTE_THEMES.pink.ink }}>
+                <Plus size={20} strokeWidth={2.25} />
+                <div style={{ fontFamily: FONT_CAVEAT, fontSize: 16, fontWeight: 600, lineHeight: 1.15 }}>jot a note or create a task</div>
+              </div>
+            </PostIt>
+          </div>
         </div>
       ) : null}
 
-      {/* ---- POPULATED FAN ---- */}
-      {showFan ? (
+      {/* ---- POPULATED FAN: newest front-and-centre, older behind ---- */}
+      {showFan && front ? (
         <>
-          <div style={{ position: "relative", width: "100%", height: STAGE_HEIGHT }}>
-            {fan.map((f) => (
-              <div
-                key={f.note.id}
-                className="sa-fan-note"
-                style={fanNoteBase(f.x, f.rot, f.z, hoveredId === f.note.id)}
-                onMouseEnter={() => setHoveredId(f.note.id)}
-                onMouseLeave={() => setHoveredId((id) => (id === f.note.id ? null : id))}
+          <div style={{ position: "relative", width: "100%", display: "flex", justifyContent: "center" }}>
+            {/* older notes — absolute, bottom-aligned behind */}
+            {sides.map((s) => {
+              const hov = hoveredId === s.note.id;
+              return (
+                <div
+                  key={s.note.id}
+                  className="sa-fan-note"
+                  onMouseEnter={() => setHoveredId(s.note.id)}
+                  onMouseLeave={() => setHoveredId((id) => (id === s.note.id ? null : id))}
+                  style={{
+                    position: "absolute",
+                    bottom: 0,
+                    left: "50%",
+                    marginLeft: -NOTE_W / 2,
+                    transformOrigin: "50% 100%",
+                    transform: hov ? `translateX(${s.x}px) translateY(-12px) rotate(0deg) scale(1.04)` : `translateX(${s.x}px) rotate(${s.rot}deg)`,
+                    zIndex: hov ? 60 : s.z,
+                    boxShadow: hov ? "1px 12px 26px rgba(58,28,20,0.22)" : undefined,
+                  }}
+                >
+                  <PostIt colour={s.note.colour} text={s.note.text} dueDate={s.note.dueDate} surfaced={false} clampLines={4} width={NOTE_W} minHeight={NOTE_MINH} onClick={() => setEditing(s.note)} />
+                </div>
+              );
+            })}
+
+            {/* newest — in flow, front-and-centre, carries the corner "+" */}
+            <div
+              className="sa-fan-note"
+              onMouseEnter={() => setHoveredId(front.id)}
+              onMouseLeave={() => setHoveredId((id) => (id === front.id ? null : id))}
+              style={{ position: "relative", zIndex: 3, transformOrigin: "50% 100%", transform: hoveredId === front.id ? "translateY(-12px) scale(1.04)" : "none" }}
+            >
+              <PostIt colour={front.colour} text={front.text} dueDate={front.dueDate} surfaced clampLines={4} width={NOTE_W} minHeight={NOTE_MINH} onClick={() => setEditing(front)} />
+
+              {/* "+" riding the front note's top-right corner — opens the colour picker */}
+              <button
+                onClick={(e) => { e.stopPropagation(); openPicker(); }}
+                onMouseEnter={() => setCornerHover(true)}
+                onMouseLeave={() => setCornerHover(false)}
+                aria-label="New note"
+                style={{
+                  position: "absolute",
+                  top: -11,
+                  right: -11,
+                  width: 30,
+                  height: 30,
+                  borderRadius: "50%",
+                  background: cornerHover ? "#fff3ed" : parchment,
+                  color: burgundy,
+                  border: `0.5px solid ${buttonPinkBorder}`,
+                  boxShadow: "0 1px 4px rgba(58,28,20,0.18)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  transform: cornerHover ? "scale(1.08)" : "none",
+                  transition: "transform 0.12s ease, background 0.12s ease",
+                  zIndex: 10,
+                }}
               >
-                <PostIt
-                  colour={f.note.colour}
-                  text={f.note.text}
-                  dueDate={f.note.dueDate}
-                  surfaced={f.front}
-                  clampLines={4}
-                  onClick={() => setEditing(f.note)}
-                />
-              </div>
-            ))}
+                <Plus size={16} />
+              </button>
+            </div>
           </div>
 
-          <button
-            onClick={() => setSeeAllOpen(true)}
-            style={{
-              width: "100%",
-              marginTop: 6,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 5,
-              background: "none",
-              border: "none",
-              color: mutedInk,
-              fontFamily: FONT_MONO,
-              fontSize: 9,
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              cursor: "pointer",
-              padding: "4px 2px",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = burgundy)}
-            onMouseLeave={(e) => (e.currentTarget.style.color = mutedInk)}
-          >
-            {active.length > 3 ? `See all · ${active.length}` : "See all"} <Maximize2 size={11} />
-          </button>
+          {active.length > 1 ? (
+            <button
+              onClick={() => setSeeAllOpen(true)}
+              style={{
+                width: "100%",
+                marginTop: 12,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 5,
+                background: "none",
+                border: "none",
+                color: mutedInk,
+                fontFamily: FONT_MONO,
+                fontSize: 9,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                cursor: "pointer",
+                padding: "4px 2px",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = burgundy)}
+              onMouseLeave={(e) => (e.currentTarget.style.color = mutedInk)}
+            >
+              {active.length > 3 ? `See all · ${active.length}` : "See all"} <Maximize2 size={11} />
+            </button>
+          ) : null}
         </>
       ) : null}
 
