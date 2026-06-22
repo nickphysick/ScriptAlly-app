@@ -421,6 +421,9 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
                   textTransform: "uppercase",
                   color: burgundy,
                   lineHeight: 1,
+                  opacity: deskHover ? 1 : 0,
+                  pointerEvents: deskHover ? "auto" : "none",
+                  transition: "opacity 0.16s ease",
                 }}
               >
                 {/* pin dot at top-centre, just above the tab edge */}

@@ -30,6 +30,7 @@ export const DeskNote: React.FC<DeskNoteProps> = ({ note, width = 210, minHeight
   const theme = NOTE_THEMES[note.colour];
   const deep = NOTE_DEEP_SHADE[note.colour];
   const [confirm, setConfirm] = useState<Confirm>("none");
+  const [noteHover, setNoteHover] = useState(false);
   const [dismissHover, setDismissHover] = useState(false);
   const [tickHover, setTickHover] = useState(false);
   const isTask = !!note.dueDate;
@@ -82,7 +83,7 @@ export const DeskNote: React.FC<DeskNoteProps> = ({ note, width = 210, minHeight
 
   // ---- four-corner note ----
   return (
-    <div style={sticky}>
+    <div style={sticky} onMouseEnter={() => setNoteHover(true)} onMouseLeave={() => { setNoteHover(false); setDismissHover(false); }}>
       <div style={{ position: "absolute", left: 0, right: 0, top: 0, height: 16, background: `linear-gradient(180deg, ${theme.sheen}, transparent)`, pointerEvents: "none" }} />
 
       {/* top row: due (TL) · dismiss × (TR) */}
@@ -99,7 +100,7 @@ export const DeskNote: React.FC<DeskNoteProps> = ({ note, width = 210, minHeight
           onMouseEnter={() => setDismissHover(true)}
           onMouseLeave={() => setDismissHover(false)}
           aria-label="Dismiss note"
-          style={{ background: "none", border: "none", padding: 0, lineHeight: 0, cursor: "pointer", color: theme.ink, opacity: dismissHover ? 0.85 : 0.38, transition: "opacity 0.12s ease", marginRight: -1, marginTop: -1 }}
+          style={{ background: "none", border: "none", padding: 0, lineHeight: 0, cursor: "pointer", color: theme.ink, opacity: noteHover ? (dismissHover ? 0.85 : 0.38) : 0, pointerEvents: noteHover ? "auto" : "none", transition: "opacity 0.12s ease", marginRight: -1, marginTop: -1 }}
         >
           <Trash2 size={13} strokeWidth={2} />
         </button>
