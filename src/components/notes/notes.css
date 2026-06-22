@@ -1,0 +1,28 @@
+/*
+ * Notes — animation-only CSS. Colours/borders stay INLINE on the components (known footgun);
+ * this file holds ONLY keyframes + transitions that can't be expressed inline.
+ */
+
+/* See-all overlay: staggered entrance for each spread note (delay set inline per index). */
+@keyframes sa-note-in {
+  from { opacity: 0; transform: translateY(34px) scale(0.9); }
+  to   { opacity: 1; transform: none; }
+}
+.sa-ovpi {
+  transform-origin: 50% 100%;
+  animation: sa-note-in 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+
+/* Desk fan: smooth lift/return on hover (transform itself is set inline per note). */
+.sa-fan-note {
+  transition: transform 0.26s cubic-bezier(0.2, 0.7, 0.2, 1), box-shadow 0.2s;
+}
+
+/* To-do "Noted by you" row: animate out when ticked done (Prompt 4). */
+@keyframes sa-row-leave {
+  to { opacity: 0; transform: translateX(10px); max-height: 0; padding-top: 0; padding-bottom: 0; }
+}
+.sa-row-leaving {
+  animation: sa-row-leave 0.32s ease forwards;
+  overflow: hidden;
+}

@@ -6,7 +6,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useScriptAllyDb } from "../lib/db";
-import { UserPlan, QueryStatus, ManuscriptStatus, ActivityType, Query, Task, Manuscript, Agent } from "../types";
+import { UserPlan, QueryStatus, ManuscriptStatus, ActivityType, Query, Task, Manuscript, Agent, Note } from "../types";
 import { STATUS_ORDER } from "../lib/statusOrder";
 import { manuscriptGenres } from "../lib/manuscripts";
 import { agentBuckets } from "../lib/lifecycle";
@@ -473,12 +473,21 @@ export const Dashboard: React.FC<{
     queries,
     activities,
     tasks,
+    notes,
     logout,
     dismissTask,
     logNudge,
     updateQueryStatus,
-    undoQueryStatus
+    undoQueryStatus,
+    addNote,
+    updateNote,
+    deleteNote
   } = useScriptAllyDb();
+
+  // Note desk/to-do callbacks — completing stamps doneAt; saving forwards the edited fields.
+  const handleSaveNote = (id: string, fields: { text: string; colour: Note["colour"]; dueDate: string | null }) =>
+    updateNote(id, fields);
+  const handleCompleteNote = (id: string) => updateNote(id, { done: true, doneAt: new Date().toISOString() });
 
   // Loading vs loaded-empty vs loaded-with-data. While the user's collections are still loading we
   // show the skeleton — never the empty/onboarding state — but only if the load takes a moment
@@ -1677,6 +1686,11 @@ export const Dashboard: React.FC<{
                 onRecordResponse={() => setRecordResponseScreenOpen(true)}
                 onAddAgent={() => onNavigate("agents", "Add an agent")}
                 onAddManuscript={() => onNavigate("manuscripts", "Add a manuscript")}
+                notes={notes}
+                onAddNote={addNote}
+                onSaveNote={handleSaveNote}
+                onCompleteNote={handleCompleteNote}
+                onDeleteNote={deleteNote}
               />
               <StatCards
                 queriesSentTotal={totalQueriesSent}

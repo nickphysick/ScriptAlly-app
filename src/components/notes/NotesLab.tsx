@@ -12,6 +12,8 @@ import { pageGround, PAGE_GRAIN, FONT_SERIF, headingInk, mutedInk, FONT_MONO, bu
 import { PostIt } from "./PostIt";
 import { NoteQuickAdd } from "./NoteQuickAdd";
 import { NoteEditor } from "./NoteEditor";
+import { NotesDesk } from "./NotesDesk";
+import { MountCard } from "../MountCard";
 import { byMostRecent, activeNotes } from "./notesUtils";
 
 let seq = 0;
@@ -22,6 +24,8 @@ const SEED: Note[] = [
   { id: mkId(), userId: "lab", text: "Polish the synopsis before the next batch goes out", colour: "pink", dueDate: "2026-06-23", done: false, doneAt: null, createdAt: nowISO(), updatedAt: nowISO() },
   { id: mkId(), userId: "lab", text: "Priya Anand loves slow-burn — lead with the romance", colour: "sage", dueDate: null, done: false, doneAt: null, createdAt: nowISO(), updatedAt: nowISO() },
   { id: mkId(), userId: "lab", text: "Idea: open chapter 1 on the clock, not the city", colour: "yellow", dueDate: null, done: false, doneAt: null, createdAt: nowISO(), updatedAt: nowISO() },
+  { id: mkId(), userId: "lab", text: "Read Margaret's R&R notes before replying", colour: "pink", dueDate: "2026-06-30", done: false, doneAt: null, createdAt: nowISO(), updatedAt: nowISO() },
+  { id: mkId(), userId: "lab", text: "Chase the Curtis Brown partial — overdue", colour: "sage", dueDate: "2026-06-18", done: false, doneAt: null, createdAt: nowISO(), updatedAt: nowISO() },
 ];
 
 export const NotesLab: React.FC = () => {
@@ -52,6 +56,30 @@ export const NotesLab: React.FC = () => {
         <div style={{ marginTop: 28, maxWidth: 460 }}>
           <NoteQuickAdd onAdd={addNote} />
         </div>
+
+        {/* Desk-in-hero preview (Prompt 3) — the real NotesDesk in a parchment hero shell */}
+        <div style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: burgundy, margin: "34px 0 14px" }}>
+          Desk preview — hover the fan · + adds · See all spreads
+        </div>
+        <MountCard className="flex flex-col">
+          <div style={{ padding: "33px 31px", margin: 6, display: "flex", gap: 20, alignItems: "stretch", minHeight: 300 }}>
+            <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+              <div style={{ fontFamily: FONT_SERIF, fontSize: 34, fontWeight: 500, color: headingInk, lineHeight: 1.1 }}>
+                Welcome back, <em style={{ color: burgundy, fontStyle: "italic" }}>Writer</em>
+              </div>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: mutedInk, marginTop: 10 }}>(left column stand-in)</div>
+              <button
+                onClick={() => setNotes([])}
+                style={{ marginTop: 16, alignSelf: "flex-start", fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.05em", textTransform: "uppercase", color: burgundy, background: "none", border: "0.5px solid #e8c8bc", borderRadius: 8, padding: "7px 12px", cursor: "pointer" }}
+              >
+                Clear all (preview empty state)
+              </button>
+            </div>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <NotesDesk notes={notes} onAdd={addNote} onSave={saveNote} onComplete={completeNote} onDelete={deleteNote} />
+            </div>
+          </div>
+        </MountCard>
 
         <div style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: burgundy, margin: "34px 0 14px" }}>
           {visible.length} active — click one to edit

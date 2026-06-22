@@ -6,9 +6,11 @@
  * buttons and the three-planes artwork on the right (50% of the card height). (The date /
  * day-of-journey caption was dropped in the June 2026 refinement.)
  */
-import React, { useState } from "react";
+import React from "react";
 import { Send, UserPlus, BookOpen, CornerUpLeft } from "lucide-react";
 import { MountCard } from "../MountCard";
+import { NotesDesk } from "../notes/NotesDesk";
+import type { Note, NoteColour } from "../../types";
 import "./heroRim.css";
 import {
   headingInk,
@@ -98,18 +100,6 @@ export const GhostButton: React.FC<{
   </button>
 );
 
-/** Three-planes hero artwork — right-hand side, vertically centred at 50% of the hero's
- *  (content-driven) height. The wrapper resolves "50%" against the auto-height card via
- *  top/bottom:25%, and the image fills that height keeping its aspect ratio. Decorative. */
-const PlanesArt: React.FC = () => (
-  <div
-    aria-hidden="true"
-    style={{ position: "absolute", top: "25%", bottom: "25%", right: 28, zIndex: 1, pointerEvents: "none" }}
-  >
-    <img src="/Sent%20queries%20final.png" alt="" style={{ height: "100%", width: "auto", display: "block", objectFit: "contain" }} />
-  </div>
-);
-
 export interface HeroCardProps {
   firstName: string;
   quote: { text: string; author: string };
@@ -117,6 +107,12 @@ export interface HeroCardProps {
   onRecordResponse: () => void;
   onAddAgent: () => void;
   onAddManuscript: () => void;
+  /** User notes for the desk fan (the paper-plane motif is kept as a faint accent above it). */
+  notes: Note[];
+  onAddNote: (fields: { text: string; colour: NoteColour; dueDate: string | null }) => void;
+  onSaveNote: (id: string, fields: { text: string; colour: NoteColour; dueDate: string | null }) => void;
+  onCompleteNote: (id: string) => void;
+  onDeleteNote: (id: string) => void;
 }
 
 export const HeroCard: React.FC<HeroCardProps> = ({
@@ -126,15 +122,20 @@ export const HeroCard: React.FC<HeroCardProps> = ({
   onRecordResponse,
   onAddAgent,
   onAddManuscript,
+  notes,
+  onAddNote,
+  onSaveNote,
+  onCompleteNote,
+  onDeleteNote,
 }) => {
   return (
     <MountCard className="flex flex-col">
       {/* Ambient sage rim wave (decorative; z1 — above card bg, below frame z3 and content z4) */}
       <div className="hero-rim" aria-hidden="true"><div className="hero-band" /></div>
 
-      {/* Body */}
-      <div style={{ padding: "33px 31px 31px", margin: "6px 6px 6px", position: "relative", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-        <div style={{ position: "relative", zIndex: 4, maxWidth: 620 }}>
+      {/* Body — left content + the notes desk on the right */}
+      <div style={{ padding: "33px 31px 31px", margin: "6px 6px 6px", position: "relative", flex: 1, display: "flex", gap: 20, alignItems: "stretch" }}>
+        <div style={{ position: "relative", zIndex: 4, flex: 1, minWidth: 0, maxWidth: 620, display: "flex", flexDirection: "column", justifyContent: "center" }}>
           <div style={{ fontFamily: FONT_SERIF, fontSize: 38, fontWeight: 500, color: headingInk, lineHeight: 1.1 }}>
             Welcome back, <em style={{ color: burgundy, fontStyle: "italic" }}>{firstName}</em>
           </div>
@@ -184,7 +185,16 @@ export const HeroCard: React.FC<HeroCardProps> = ({
           </div>
         </div>
 
-        <PlanesArt />
+        {/* Right: the notes desk (fan of 3 most recent active notes, planes a faint accent above) */}
+        <div style={{ position: "relative", zIndex: 4, display: "flex", alignItems: "center" }}>
+          <NotesDesk
+            notes={notes}
+            onAdd={onAddNote}
+            onSave={onSaveNote}
+            onComplete={onCompleteNote}
+            onDelete={onDeleteNote}
+          />
+        </div>
       </div>
     </MountCard>
   );
