@@ -4,10 +4,13 @@
  *
  * See-all overlay — dims the whole dashboard and spreads every active note in a gentle arc with a
  * staggered entrance. Title "On your desk" lives ONLY here. Close on ×, scrim click or Esc; clicking
- * a note opens the editor. Layout values locked to scriptally-dashboard-notes.html.
+ * a card opens the editor, and (unlike the tiny desk stickies) each larger card gets hover corner
+ * actions — edit + delete. Portalled to <body> so the fixed overlay isn't captured by the
+ * dashboard's transformed ancestor. Layout values locked to scriptally-dashboard-notes.html.
  */
 import React, { useEffect } from "react";
-import { X } from "lucide-react";
+import { createPortal } from "react-dom";
+import { X, Pencil } from "lucide-react";
 import type { Note } from "../../types";
 import { FONT_SERIF, FONT_MONO } from "../../lib/designTokens";
 import { PostIt } from "./PostIt";
@@ -17,10 +20,11 @@ import "./notes.css";
 export interface NotesSeeAllOverlayProps {
   notes: Note[];
   onEdit: (note: Note) => void;
+  onDelete: (note: Note) => void;
   onClose: () => void;
 }
 
-export const NotesSeeAllOverlay: React.FC<NotesSeeAllOverlayProps> = ({ notes, onEdit, onClose }) => {
+export const NotesSeeAllOverlay: React.FC<NotesSeeAllOverlayProps> = ({ notes, onEdit, onDelete, onClose }) => {
   const spread = byMostRecent(activeNotes(notes));
   const n = spread.length;
 
@@ -35,7 +39,21 @@ export const NotesSeeAllOverlay: React.FC<NotesSeeAllOverlayProps> = ({ notes, o
   // Mock step is 212px; tighten for larger sets so the arc keeps within the viewport.
   const step = n > 5 ? Math.max(132, 1180 / n) : 212;
 
-  return (
+  const cornerBtn: React.CSSProperties = {
+    width: 24,
+    height: 24,
+    borderRadius: 7,
+    background: "rgba(255,255,255,0.85)",
+    border: "0.5px solid rgba(58,28,20,0.14)",
+    color: "#5b3528",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    padding: 0,
+  };
+
+  return createPortal(
     <div style={{ position: "fixed", inset: 0, zIndex: 250 }}>
       {/* scrim */}
       <div
@@ -95,7 +113,16 @@ export const NotesSeeAllOverlay: React.FC<NotesSeeAllOverlayProps> = ({ notes, o
                 transform: `translate(calc(-50% + ${x}px), -50%) rotate(${ang}deg)`,
               }}
             >
-              <div className="sa-ovpi" style={{ animationDelay: `${i * 70}ms` }}>
+              <div className="sa-ovpi sa-seecard" style={{ animationDelay: `${i * 70}ms`, position: "relative" }}>
+                {/* hover corner actions — edit + delete (the small desk stickies deliberately have none) */}
+                <div className="sa-corner" style={{ position: "absolute", top: 8, right: 8, gap: 4, zIndex: 2 }}>
+                  <button aria-label="Edit" style={cornerBtn} onClick={(e) => { e.stopPropagation(); onEdit(note); }}>
+                    <Pencil size={12} />
+                  </button>
+                  <button aria-label="Delete" style={cornerBtn} onClick={(e) => { e.stopPropagation(); onDelete(note); }} onMouseEnter={(e) => (e.currentTarget.style.color = "#a8442f")} onMouseLeave={(e) => (e.currentTarget.style.color = "#5b3528")}>
+                    <X size={12} />
+                  </button>
+                </div>
                 <PostIt
                   colour={note.colour}
                   text={note.text}
@@ -114,6 +141,7 @@ export const NotesSeeAllOverlay: React.FC<NotesSeeAllOverlayProps> = ({ notes, o
       <div style={{ position: "absolute", bottom: 46, left: 0, right: 0, textAlign: "center", fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(253,250,245,0.55)", zIndex: 2, pointerEvents: "none" }}>
         click anywhere to close
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

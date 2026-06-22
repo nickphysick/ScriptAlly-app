@@ -18,7 +18,7 @@
  * No nudge modal / logging / timeline here; snooze/dismiss are intentionally not rendered.
  */
 import React, { useEffect, useRef, useState } from "react";
-import { Feather, Star, ClipboardList, Archive, ChevronDown, Check, Calendar, PenLine } from "lucide-react";
+import { Feather, Star, ClipboardList, Archive, ChevronDown, Check, Calendar, PenLine, X } from "lucide-react";
 import { Task, Query, Agent, Note } from "../../types";
 import { MountCard } from "../MountCard";
 import {
@@ -34,8 +34,8 @@ import {
   FONT_SERIF,
   FONT_MONO,
 } from "../../lib/designTokens";
-import { FONT_CAVEAT, DUE_SOON_BG } from "../notes/notesTheme";
-import { datedTodoNotes, overdueNoteCount, isDueOrOverdue, formatDueLabel, todayLocalISO } from "../notes/notesUtils";
+import { FONT_CAVEAT, DUE_CHIP_STAGES } from "../notes/notesTheme";
+import { datedTodoNotes, overdueNoteCount, dueStage, dueChipLabel, todayLocalISO } from "../notes/notesUtils";
 import "../notes/notes.css";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -253,6 +253,8 @@ const OTY_CSS = `
 .oty-rec-row:hover { background: #faf5ef; }
 .oty-rec-item { transition: background 0.15s ease; }
 .oty-rec-item:hover { background: #f3ece2; }
+.oty-note-del { display: none; }
+.oty-note-row:hover .oty-note-del { display: flex; }
 .oty-hint { transition: opacity 0.25s ease; }
 @media (prefers-reduced-motion: reduce) {
   .oty-pulse-ring, .oty-action { animation: none !important; }
@@ -323,9 +325,10 @@ export interface OverToYouProps {
   onAllTasks: () => void; // kept for call-site compatibility; superseded by the scroll hint
   onOpenQuery: (queryId: string) => void;
   onCompleteNote: (id: string) => void; // tick a dated note done from its To-do row
+  onDeleteNote: (note: Note) => void; // hover-× delete from its To-do row (with undo)
 }
 
-export const OverToYou: React.FC<OverToYouProps> = ({ tasks, queries, agents, notes, onAction, onNudge, onOpenQuery, onCompleteNote }) => {
+export const OverToYou: React.FC<OverToYouProps> = ({ tasks, queries, agents, notes, onAction, onNudge, onOpenQuery, onCompleteNote, onDeleteNote }) => {
   const urgentRows = buildOverToYouRows(tasks, queries, agents);
   const recommendedRows = buildRecommendedRows(tasks, queries, agents);
   const recommendedTotal = recommendedRows.reduce((sum, r) => sum + r.count, 0);
@@ -343,11 +346,16 @@ export const OverToYou: React.FC<OverToYouProps> = ({ tasks, queries, agents, no
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const toggle = (type: string) => setExpanded((prev) => ({ ...prev, [type]: !prev[type] }));
 
-  // Tick → play the leave animation, then complete (the live notes subscription drops the row).
+  // Tick → complete · hover-× → delete. Both play the leave animation, then act (the live notes
+  // subscription drops the row); the undo toast is raised by the Dashboard wrappers.
   const [leavingIds, setLeavingIds] = useState<Set<string>>(new Set());
   const tickNote = (id: string) => {
     setLeavingIds((prev) => new Set(prev).add(id));
     setTimeout(() => onCompleteNote(id), 320);
+  };
+  const dropNote = (note: Note) => {
+    setLeavingIds((prev) => new Set(prev).add(note.id));
+    setTimeout(() => onDeleteNote(note), 320);
   };
 
   // A recommended item routes via its query (relatedRecordId) when query-related, else via actionPath.
@@ -496,17 +504,18 @@ export const OverToYou: React.FC<OverToYouProps> = ({ tasks, queries, agents, no
             </div>
 
             {notedRows.map((note, i) => {
-              const soon = isDueOrOverdue(note.dueDate, today);
+              const stage = dueStage(note.dueDate, today) ?? "cool";
+              const s = DUE_CHIP_STAGES[stage];
               const leaving = leavingIds.has(note.id);
               return (
                 <div
                   key={note.id}
-                  className={leaving ? "sa-row-leaving" : undefined}
-                  style={{ display: "flex", alignItems: "flex-start", gap: 11, padding: "11px 2px", borderTop: i > 0 ? "0.5px solid #f0e6d8" : undefined }}
+                  className={`oty-note-row${leaving ? " sa-row-leaving" : ""}`}
+                  style={{ position: "relative", display: "flex", alignItems: "flex-start", gap: 11, padding: "11px 2px", borderTop: i > 0 ? "0.5px solid #f0e6d8" : undefined }}
                 >
                   <button
                     type="button"
-                    aria-label="Mark done"
+                    aria-label="Complete"
                     onClick={() => tickNote(note.id)}
                     style={{
                       width: 18,
@@ -525,7 +534,7 @@ export const OverToYou: React.FC<OverToYouProps> = ({ tasks, queries, agents, no
                   >
                     {leaving ? <Check size={11} strokeWidth={3.5} color="#fff" /> : null}
                   </button>
-                  <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ flex: 1, minWidth: 0, paddingRight: 22 }}>
                     <div style={{ fontFamily: FONT_CAVEAT, fontSize: 18, fontWeight: 500, lineHeight: 1.2, color: "#46352b" }}>
                       {note.text}
                     </div>
@@ -539,16 +548,42 @@ export const OverToYou: React.FC<OverToYouProps> = ({ tasks, queries, agents, no
                         fontSize: 8.5,
                         letterSpacing: "0.05em",
                         textTransform: "uppercase",
-                        color: burgundy,
-                        background: soon ? DUE_SOON_BG : "#fff3ed",
-                        border: "0.5px solid #eed6c8",
+                        color: s.ink,
+                        background: s.bg,
+                        border: `0.5px solid ${s.border}`,
                         borderRadius: 20,
                         padding: "2px 7px",
                       }}
                     >
-                      <Calendar size={9} strokeWidth={2} /> {formatDueLabel(note.dueDate, today)}
+                      {s.dot ? <span style={{ width: 5, height: 5, borderRadius: "50%", background: s.dot }} /> : <Calendar size={9} strokeWidth={2} />}
+                      {dueChipLabel(note.dueDate, today)}
                     </div>
                   </div>
+                  <button
+                    type="button"
+                    aria-label="Delete"
+                    className="oty-note-del"
+                    onClick={() => dropNote(note)}
+                    style={{
+                      position: "absolute",
+                      right: 0,
+                      top: 11,
+                      width: 24,
+                      height: 24,
+                      borderRadius: 7,
+                      border: "0.5px solid #e0d5c8",
+                      background: "#fff",
+                      color: "#b08a7c",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                      padding: 0,
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = "#a8442f"; e.currentTarget.style.borderColor = "#e3c2b6"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = "#b08a7c"; e.currentTarget.style.borderColor = "#e0d5c8"; }}
+                  >
+                    <X size={13} />
+                  </button>
                 </div>
               );
             })}

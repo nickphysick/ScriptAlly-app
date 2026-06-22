@@ -43,7 +43,8 @@ import {
   labelColor,
   mutedInk,
 } from "../lib/designTokens";
-import { overdueNoteCount } from "./notes/notesUtils";
+import { overdueNoteCount, isOverdue, dueChipLabel } from "./notes/notesUtils";
+import { FONT_CAVEAT, DUE_CHIP_STAGES } from "./notes/notesTheme";
 
 interface NavProps {
   activeTab: string;
@@ -129,8 +130,9 @@ export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, 
   if (!currentUser) return null;
 
   // An overdue dated note raises the same alarm as a missed agent deadline, so it counts toward the
-  // bell badge alongside the derived tasks. Not-yet-due notes don't (they're not overdue yet).
-  const activeTasksCount = tasks.length + overdueNoteCount(notes);
+  // bell badge alongside the derived tasks (and appears in the dropdown list so the number matches).
+  const overdueNotes = notes.filter((n) => !n.done && isOverdue(n.dueDate));
+  const activeTasksCount = tasks.length + overdueNotes.length;
   const badgeText = activeTasksCount > 9 ? "9+" : activeTasksCount.toString();
 
   const closeAll = () => {
@@ -386,7 +388,7 @@ export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, 
                     </div>
 
                     <div className="max-h-64 overflow-y-auto py-1">
-                      {tasks.length === 0 ? (
+                      {tasks.length === 0 && overdueNotes.length === 0 ? (
                         <div className="p-4 text-center" style={{ fontSize: 12, color: mutedInk, fontStyle: "italic" }}>
                           All caught up! No active tasks.
                         </div>
@@ -455,6 +457,39 @@ export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, 
                           );
                         })
                       )}
+
+                      {/* Overdue notes — listed so the count matches the badge (your own dated tasks). */}
+                      {overdueNotes.map((note) => (
+                        <div key={note.id} className="p-2.5" style={{ borderBottom: hairline, fontSize: 12 }}>
+                          <div className="flex justify-between items-start gap-2">
+                            <span style={{ fontFamily: FONT_CAVEAT, fontSize: 16, fontWeight: 500, color: "#46352b", lineHeight: 1.2 }}>
+                              {note.text}
+                            </span>
+                            <span
+                              className="shrink-0"
+                              style={{
+                                fontFamily: FONT_MONO,
+                                fontSize: 8.5,
+                                letterSpacing: "0.05em",
+                                textTransform: "uppercase",
+                                color: DUE_CHIP_STAGES.over.ink,
+                                background: DUE_CHIP_STAGES.over.bg,
+                                border: `0.5px solid ${DUE_CHIP_STAGES.over.border}`,
+                                borderRadius: 20,
+                                padding: "2px 7px",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 4,
+                                marginTop: 1,
+                              }}
+                            >
+                              <span style={{ width: 5, height: 5, borderRadius: "50%", background: DUE_CHIP_STAGES.over.dot || "#b5402a" }} />
+                              {dueChipLabel(note.dueDate)}
+                            </span>
+                          </div>
+                          <p style={{ ...labelStyle, letterSpacing: "0.08em", marginTop: 5 }}>Noted by you</p>
+                        </div>
+                      ))}
                     </div>
                   </motion.div>
                 )}

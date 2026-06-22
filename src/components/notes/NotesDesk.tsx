@@ -289,6 +289,7 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
                   text={f.note.text}
                   dueDate={f.note.dueDate}
                   surfaced={f.front}
+                  clampLines={4}
                   onClick={() => setEditing(f.note)}
                 />
               </div>
@@ -330,6 +331,7 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
             setSeeAllOpen(false);
             setEditing(note);
           }}
+          onDelete={(note) => onDelete(note.id)}
           onClose={() => setSeeAllOpen(false)}
         />
       ) : null}

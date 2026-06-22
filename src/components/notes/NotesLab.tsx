@@ -98,6 +98,7 @@ export const NotesLab: React.FC = () => {
             onAllTasks={() => {}}
             onOpenQuery={() => {}}
             onCompleteNote={completeNote}
+            onDeleteNote={(note) => deleteNote(note.id)}
           />
         </div>
 

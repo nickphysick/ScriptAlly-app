@@ -29,3 +29,10 @@ export const NOTE_COLOURS: NoteColour[] = ["pink", "sage", "yellow"];
 
 /** Warm fill for a due chip that's due-today/overdue (mock: `.hrow .hd.soon`). */
 export const DUE_SOON_BG = "#fbe6da";
+
+/** Staged due-chip palette — cool (ahead) → warm (today/imminent) → over (overdue, with a dot). */
+export const DUE_CHIP_STAGES = {
+  cool: { bg: "#fff3ed", border: "#eed6c8", ink: "#7c3a2a", dot: null as string | null },
+  warm: { bg: "#fbe6da", border: "#f0cdbd", ink: "#7c3a2a", dot: null as string | null },
+  over: { bg: "#f6d6c9", border: "#e9b6a4", ink: "#9a3f2c", dot: "#b5402a" as string | null },
+};

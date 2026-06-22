@@ -10,8 +10,8 @@ import React from "react";
 import { Calendar } from "lucide-react";
 import type { NoteColour } from "../../types";
 import { FONT_MONO } from "../../lib/designTokens";
-import { NOTE_THEMES, FONT_CAVEAT, type NoteTheme } from "./notesTheme";
-import { formatDueLabel } from "./notesUtils";
+import { NOTE_THEMES, FONT_CAVEAT, DUE_CHIP_STAGES, type NoteTheme } from "./notesTheme";
+import { dueStage, dueChipLabel } from "./notesUtils";
 
 export interface PostItProps {
   colour: NoteColour;
@@ -30,6 +30,8 @@ export interface PostItProps {
   minHeight?: number | string;
   /** Larger body for the See-all overlay. */
   bodyFontSize?: number;
+  /** Clamp the body to N lines (desk cards); omit for full text (See all / editor). */
+  clampLines?: number;
   /** Custom body content (overrides `text`) — e.g. the empty-state copy. Inherits Caveat + ink. */
   children?: React.ReactNode;
 }
@@ -46,6 +48,7 @@ export const PostIt: React.FC<PostItProps> = ({
   width = 150,
   minHeight = 114,
   bodyFontSize = 17.5,
+  clampLines,
   children,
 }) => {
   const theme = themeOverride ?? NOTE_THEMES[colour];
@@ -99,28 +102,41 @@ export const PostIt: React.FC<PostItProps> = ({
           fontWeight: 500,
           lineHeight: 1.2,
           wordBreak: "break-word",
+          ...(clampLines && !children
+            ? { display: "-webkit-box", WebkitLineClamp: clampLines, WebkitBoxOrient: "vertical" as const, overflow: "hidden" }
+            : {}),
         }}
       >
         {children ?? text}
       </div>
-      {surfaced && dueDate ? (
-        <div
-          style={{
-            marginTop: 8,
-            fontFamily: FONT_MONO,
-            fontSize: 8,
-            letterSpacing: "0.06em",
-            textTransform: "uppercase",
-            opacity: 0.72,
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 4,
-          }}
-        >
-          <Calendar size={9} strokeWidth={2} />
-          {formatDueLabel(dueDate)}
-        </div>
-      ) : null}
+      {surfaced && dueDate
+        ? (() => {
+            const stage = dueStage(dueDate) ?? "cool";
+            const s = DUE_CHIP_STAGES[stage];
+            return (
+              <div
+                style={{
+                  marginTop: 8,
+                  fontFamily: FONT_MONO,
+                  fontSize: 8,
+                  letterSpacing: "0.05em",
+                  textTransform: "uppercase",
+                  color: s.ink,
+                  background: s.bg,
+                  border: `0.5px solid ${s.border}`,
+                  borderRadius: 20,
+                  padding: "2px 7px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 4,
+                }}
+              >
+                {s.dot ? <span style={{ width: 5, height: 5, borderRadius: "50%", background: s.dot }} /> : <Calendar size={9} strokeWidth={2} />}
+                {dueChipLabel(dueDate)}
+              </div>
+            );
+          })()
+        : null}
     </div>
   );
 };

@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { useScriptAllyDb } from "../lib/db";
 import { UserPlan, QueryStatus, ManuscriptStatus, ActivityType, Query, Task, Manuscript, Agent, Note } from "../types";
@@ -484,10 +485,32 @@ export const Dashboard: React.FC<{
     deleteNote
   } = useScriptAllyDb();
 
-  // Note desk/to-do callbacks — completing stamps doneAt; saving forwards the edited fields.
+  // Note desk/to-do callbacks. Complete + delete both raise an undo toast; the user-facing verb is
+  // "Completed" (the field stays done/doneAt). Delete-undo re-creates via addNote (new id/createdAt).
   const handleSaveNote = (id: string, fields: { text: string; colour: Note["colour"]; dueDate: string | null }) =>
     updateNote(id, fields);
-  const handleCompleteNote = (id: string) => updateNote(id, { done: true, doneAt: new Date().toISOString() });
+  const [noteToast, setNoteToast] = useState<{ msg: string; onUndo: () => void } | null>(null);
+  const noteToastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const showNoteToast = (msg: string, onUndo: () => void) => {
+    if (noteToastTimer.current) clearTimeout(noteToastTimer.current);
+    setNoteToast({ msg, onUndo });
+    noteToastTimer.current = setTimeout(() => setNoteToast(null), 4500);
+  };
+  const completeNoteWithUndo = (id: string) => {
+    updateNote(id, { done: true, doneAt: new Date().toISOString() });
+    showNoteToast("Note completed", () => updateNote(id, { done: false, doneAt: null }));
+  };
+  const deleteNoteWithUndo = (id: string) => {
+    const snap = notes.find((n) => n.id === id);
+    deleteNote(id);
+    showNoteToast("Note deleted", () => {
+      if (snap) addNote({ text: snap.text, colour: snap.colour, dueDate: snap.dueDate });
+    });
+  };
+  const dismissNoteToast = () => {
+    if (noteToastTimer.current) clearTimeout(noteToastTimer.current);
+    setNoteToast(null);
+  };
 
   // Loading vs loaded-empty vs loaded-with-data. While the user's collections are still loading we
   // show the skeleton — never the empty/onboarding state — but only if the load takes a moment
@@ -1689,8 +1712,8 @@ export const Dashboard: React.FC<{
                 notes={notes}
                 onAddNote={addNote}
                 onSaveNote={handleSaveNote}
-                onCompleteNote={handleCompleteNote}
-                onDeleteNote={deleteNote}
+                onCompleteNote={completeNoteWithUndo}
+                onDeleteNote={deleteNoteWithUndo}
               />
               <StatCards
                 queriesSentTotal={totalQueriesSent}
@@ -1724,7 +1747,8 @@ export const Dashboard: React.FC<{
                     setSelectedQueryIdForPanel(qid);
                     setIsQueryPanelOpen(true);
                   }}
-                  onCompleteNote={handleCompleteNote}
+                  onCompleteNote={completeNoteWithUndo}
+                  onDeleteNote={(note) => deleteNoteWithUndo(note.id)}
                 />
               </div>
             </div>
@@ -2616,6 +2640,42 @@ export const Dashboard: React.FC<{
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Note undo toast — Complete / Delete both land here (portalled to <body>). */}
+      {noteToast
+        ? createPortal(
+            <div
+              style={{
+                position: "fixed",
+                left: "50%",
+                bottom: 34,
+                transform: "translateX(-50%)",
+                background: "#3a2c26",
+                color: "#fdfaf5",
+                borderRadius: 11,
+                padding: "12px 16px",
+                display: "flex",
+                alignItems: "center",
+                gap: 16,
+                boxShadow: "0 10px 30px rgba(0,0,0,0.28)",
+                zIndex: 1000,
+                fontFamily: '"Inter", system-ui, sans-serif',
+              }}
+            >
+              <span style={{ display: "flex", alignItems: "center", gap: 9, fontSize: 13 }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9fc09a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 13l4 4L19 7" /></svg>
+                {noteToast.msg}
+              </span>
+              <button
+                onClick={() => { noteToast.onUndo(); dismissNoteToast(); }}
+                style={{ fontFamily: '"JetBrains Mono", monospace', fontSize: 10, fontWeight: 500, letterSpacing: "0.06em", textTransform: "uppercase", color: "#f3c8b8", background: "none", border: "none", cursor: "pointer" }}
+              >
+                Undo
+              </button>
+            </div>,
+            document.body
+          )
+        : null}
 
       {/* Full Calendar Modal Lightbox Overlay */}
       {isFullCalendarOpen && (

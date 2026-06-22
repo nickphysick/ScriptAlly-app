@@ -7,6 +7,7 @@
  * (complete), or Delete. Rendered as a centred parchment card over a soft scrim; Esc or scrim closes.
  */
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Check, Trash2, X } from "lucide-react";
 import type { Note, NoteColour } from "../../types";
 import {
@@ -67,7 +68,9 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onComplete
 
   const theme = NOTE_THEMES[colour];
 
-  return (
+  // Portalled to <body> so the fixed overlay (and BrandDatePicker inside it) can't be captured by the
+  // dashboard's transformed ancestor — the same containing-block trap that displaced the old popover.
+  return createPortal(
     <div
       onClick={onClose}
       style={{
@@ -111,6 +114,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onComplete
           value={text}
           onChange={(e) => setText(e.target.value)}
           rows={3}
+          maxLength={280}
           autoFocus
           style={{
             width: "100%",
@@ -143,7 +147,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onComplete
           </div>
         </div>
 
-        {/* actions: Delete (quiet, left) · Done + Save (right) */}
+        {/* actions: Delete (quiet, left) · Completed (dated tasks only) + Save (right) */}
         <div style={{ display: "flex", alignItems: "center", marginTop: 18 }}>
           <button
             onClick={() => {
@@ -170,30 +174,33 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onComplete
 
           <div style={{ flex: 1 }} />
 
-          <button
-            onClick={() => {
-              onComplete(note.id);
-              onClose();
-            }}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              background: "#fff",
-              border: "0.5px solid #cdd5cb",
-              color: "#5a6e58",
-              fontFamily: FONT_MONO,
-              fontSize: 10,
-              letterSpacing: "0.04em",
-              textTransform: "uppercase",
-              borderRadius: 9,
-              padding: "9px 13px",
-              cursor: "pointer",
-              marginRight: 9,
-            }}
-          >
-            <Check size={13} /> Done
-          </button>
+          {/* Only a dated task can be "Completed" — an undated reference note can't. */}
+          {note.dueDate ? (
+            <button
+              onClick={() => {
+                onComplete(note.id);
+                onClose();
+              }}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                background: "#fff",
+                border: "0.5px solid #cdd5cb",
+                color: "#5a6e58",
+                fontFamily: FONT_MONO,
+                fontSize: 10,
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+                borderRadius: 9,
+                padding: "9px 13px",
+                cursor: "pointer",
+                marginRight: 9,
+              }}
+            >
+              <Check size={13} /> Completed
+            </button>
+          ) : null}
 
           <button
             onClick={save}
@@ -217,6 +224,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({ note, onSave, onComplete
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

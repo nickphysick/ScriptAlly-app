@@ -54,6 +54,44 @@ export const formatDueLabel = (dueDate: string | null | undefined, today: string
   return `Due ${due.getDate()} ${MONTHS_SHORT[due.getMonth()]}`;
 };
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+const pad2 = (n: number) => String(n).padStart(2, "0");
+const toISO = (d: Date) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+
+/**
+ * The chip's warming stage for a due date — all plain string compares, no Date maths for the
+ * boundaries: cool (still ahead), warm (due today or tomorrow — imminent), over (strictly past).
+ * Only `over` raises the alarm (header count + bell). Returns null for undated notes.
+ */
+export type DueStage = "cool" | "warm" | "over";
+export const dueStage = (dueDate: string | null | undefined, today: string = todayLocalISO()): DueStage | null => {
+  if (!dueDate) return null;
+  if (dueDate < today) return "over";
+  const t = fromISO(today);
+  if (t) {
+    const tomorrow = toISO(new Date(t.getFullYear(), t.getMonth(), t.getDate() + 1));
+    if (dueDate <= tomorrow) return "warm";
+  }
+  return "cool";
+};
+
+/** Whole days a dated task is overdue (>= 1 once past). 0 if not overdue. */
+export const overdueDays = (dueDate: string | null | undefined, today: string = todayLocalISO()): number => {
+  const d = dueDate ? fromISO(dueDate) : null;
+  const t = fromISO(today);
+  if (!d || !t) return 0;
+  return Math.max(0, Math.round((t.getTime() - d.getTime()) / DAY_MS));
+};
+
+/** Chip label: "Overdue · N days" once past, otherwise the friendly "Due …" label. */
+export const dueChipLabel = (dueDate: string | null | undefined, today: string = todayLocalISO()): string => {
+  if (dueStage(dueDate, today) === "over") {
+    const n = overdueDays(dueDate, today);
+    return `Overdue · ${n} day${n === 1 ? "" : "s"}`;
+  }
+  return formatDueLabel(dueDate, today);
+};
+
 /** Active = not done. Every active note lives on the desk (there is no separate "pinned" flag). */
 export const activeNotes = (notes: Note[]): Note[] => notes.filter((n) => !n.done);
 
