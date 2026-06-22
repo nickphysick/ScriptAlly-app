@@ -111,9 +111,9 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
       ) : null}
 
       {isEmpty ? (
-        /* ---- empty state: copy written on the topmost post-it, CTA beneath ---- */
+        /* ---- empty state: the whole copy + CTA live on the topmost post-it ---- */
         <div style={{ position: "relative", paddingTop: 8 }}>
-          <div style={{ position: "relative", height: 196 }}>
+          <div style={{ position: "relative", height: 232 }}>
             {/* two faint blank post-its hold the fan's shape */}
             {EMPTY_BACK.map((ex, i) => (
               <div
@@ -122,7 +122,7 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
                   position: "absolute",
                   left: "50%",
                   bottom: 8,
-                  marginLeft: -70,
+                  marginLeft: -82,
                   transformOrigin: "50% 100%",
                   transform: `translateX(${ex.x}px) rotate(${ex.rot}deg)`,
                   zIndex: ex.z,
@@ -130,51 +130,47 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
                   filter: "saturate(0.85)",
                 }}
               >
-                <PostIt colour={ex.colour} text="" width={140} minHeight={108} surfaced={false} />
+                <PostIt colour={ex.colour} text="" width={164} minHeight={134} surfaced={false} />
               </div>
             ))}
-            {/* front post-it carries the copy */}
+            {/* front post-it carries the copy AND the CTA — the whole note is clickable */}
             <div
               style={{
                 position: "absolute",
                 left: "50%",
                 bottom: 8,
-                marginLeft: -92,
+                marginLeft: -108,
                 transformOrigin: "50% 100%",
                 transform: "translateX(0px) rotate(0deg)",
                 zIndex: 3,
               }}
             >
-              <PostIt colour="pink" width={184} minHeight={150} surfaced={false}>
+              <PostIt colour="pink" width={216} minHeight={208} surfaced={false} onClick={() => setQuickAddOpen(true)}>
                 {/* fontFamily set explicitly — JSX element children don't inherit the post-it's Caveat */}
-                <div style={{ fontFamily: FONT_CAVEAT, fontSize: 26, fontWeight: 700, lineHeight: 1 }}>Note to self?</div>
-                <div style={{ fontFamily: FONT_CAVEAT, fontSize: 17, fontWeight: 500, lineHeight: 1.22, marginTop: 9, opacity: 0.85 }}>
-                  Leave a note or create a task and it'll be pinned here, front and centre.
+                <div style={{ display: "flex", flexDirection: "column", minHeight: 178 }}>
+                  <div style={{ fontFamily: FONT_CAVEAT, fontSize: 30, fontWeight: 700, lineHeight: 1 }}>Note to self?</div>
+                  <div style={{ fontFamily: FONT_CAVEAT, fontSize: 19, fontWeight: 500, lineHeight: 1.22, marginTop: 11, opacity: 0.85 }}>
+                    Leave a note or create a task and it'll be pinned here, front and centre.
+                  </div>
+                  <div
+                    style={{
+                      marginTop: "auto",
+                      paddingTop: 14,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 6,
+                      fontFamily: FONT_CAVEAT,
+                      fontSize: 20,
+                      fontWeight: 700,
+                      textDecoration: "underline",
+                      textUnderlineOffset: 3,
+                    }}
+                  >
+                    <Plus size={16} strokeWidth={2.5} /> Write your first note
+                  </div>
                 </div>
               </PostIt>
             </div>
-          </div>
-          <div style={{ textAlign: "center", marginTop: 14 }}>
-            <button
-              onClick={() => setQuickAddOpen(true)}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 7,
-                background: buttonPinkBg,
-                border: `0.5px solid ${buttonPinkBorder}`,
-                color: burgundy,
-                fontFamily: FONT_MONO,
-                fontSize: 11,
-                fontWeight: 500,
-                letterSpacing: "0.05em",
-                borderRadius: 10,
-                padding: "10px 16px",
-                cursor: "pointer",
-              }}
-            >
-              <Plus size={14} /> Write your first note
-            </button>
           </div>
         </div>
       ) : (
