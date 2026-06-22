@@ -358,6 +358,24 @@ export const OverToYou: React.FC<OverToYouProps> = ({ tasks, queries, agents, no
     setTimeout(() => onDeleteNote(note), 320);
   };
 
+  // Keep the "leaving" set in step with the live notes (the single source of truth). Once a ticked
+  // note actually drops out of the list (completed via the subscription), clear its flag — so if it
+  // is UNDONE and returns, it renders normally instead of staying collapsed under a stale leave
+  // animation. This is the To-do undo re-render fix.
+  useEffect(() => {
+    setLeavingIds((prev) => {
+      if (prev.size === 0) return prev;
+      const present = new Set(notedRows.map((n) => n.id));
+      let changed = false;
+      const next = new Set<string>();
+      prev.forEach((id) => {
+        if (present.has(id)) next.add(id);
+        else changed = true;
+      });
+      return changed ? next : prev;
+    });
+  }, [notedRows]);
+
   // A recommended item routes via its query (relatedRecordId) when query-related, else via actionPath.
   const routeItem = (task: Task) => {
     if (task.taskType === "no_response_close") onOpenQuery(task.relatedRecordId);
