@@ -88,12 +88,12 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--white);color:var(
 .sign{font-family:'Playfair Display',serif;font-style:italic;font-size:19px;color:var(--burg);margin:22px 0 0}
 
 /* hero row — title + slogan beside the dashboard */
-.herorow{padding:48px 0 96px}
+.herorow{min-height:calc(100vh - 50px);min-height:calc(100dvh - 50px);display:flex;flex-direction:column;justify-content:center;padding:32px 0 56px}
 .hgrid{display:grid;grid-template-columns:1fr 1.12fr;gap:50px;align-items:center}
 .hmast{text-align:center}
-.hmast .logo-img{height:clamp(80px,9vw,128px);margin:0 auto}
-.hmast .slogan{margin-top:14px}
-.hdev .dbody{height:clamp(230px,30vw,360px)}
+.hmast .logo-img{height:clamp(88px,9.5vw,140px);margin:0 auto}
+.hmast .slogan{margin-top:16px}
+.hdev .dbody{height:clamp(260px,34vw,460px)}
 
 /* what does it do — soft-pink band */
 .whatband{background:#f9e9e3;padding:86px 0 94px}
