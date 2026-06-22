@@ -15,7 +15,8 @@ import { formatDueLabel } from "./notesUtils";
 
 export interface PostItProps {
   colour: NoteColour;
-  text: string;
+  /** Note body text. Optional when `children` is supplied (e.g. the empty-state copy). */
+  text?: string;
   dueDate?: string | null; // "YYYY-MM-DD"
   /** Show the due chip — only the front/surfaced note carries it. Default true. */
   surfaced?: boolean;
@@ -27,6 +28,8 @@ export interface PostItProps {
   minHeight?: number | string;
   /** Larger body for the See-all overlay. */
   bodyFontSize?: number;
+  /** Custom body content (overrides `text`) — e.g. the empty-state copy. Inherits Caveat + ink. */
+  children?: React.ReactNode;
 }
 
 export const PostIt: React.FC<PostItProps> = ({
@@ -40,6 +43,7 @@ export const PostIt: React.FC<PostItProps> = ({
   width = 150,
   minHeight = 114,
   bodyFontSize = 17.5,
+  children,
 }) => {
   const theme = NOTE_THEMES[colour];
   return (
@@ -94,7 +98,7 @@ export const PostIt: React.FC<PostItProps> = ({
           wordBreak: "break-word",
         }}
       >
-        {text}
+        {children ?? text}
       </div>
       {surfaced && dueDate ? (
         <div

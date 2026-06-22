@@ -12,8 +12,7 @@ import { pageGround, PAGE_GRAIN, FONT_SERIF, headingInk, mutedInk, FONT_MONO, bu
 import { PostIt } from "./PostIt";
 import { NoteQuickAdd } from "./NoteQuickAdd";
 import { NoteEditor } from "./NoteEditor";
-import { NotesDesk } from "./NotesDesk";
-import { MountCard } from "../MountCard";
+import { HeroCard } from "../dashboard/HeroCard";
 import { OverToYou } from "../dashboard/OverToYou";
 import { byMostRecent, activeNotes } from "./notesUtils";
 
@@ -58,29 +57,29 @@ export const NotesLab: React.FC = () => {
           <NoteQuickAdd onAdd={addNote} />
         </div>
 
-        {/* Desk-in-hero preview (Prompt 3) — the real NotesDesk in a parchment hero shell */}
-        <div style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: burgundy, margin: "34px 0 14px" }}>
-          Desk preview — hover the fan · + adds · See all spreads
+        {/* Desk-in-hero preview (Prompt 3) — the REAL HeroCard, prop-driven (no auth needed) */}
+        <div style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: burgundy, margin: "34px 0 14px", display: "flex", alignItems: "center", gap: 14 }}>
+          Hero preview — hover the fan · + adds · See all spreads
+          <button
+            onClick={() => setNotes([])}
+            style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.05em", textTransform: "uppercase", color: burgundy, background: "none", border: "0.5px solid #e8c8bc", borderRadius: 8, padding: "5px 10px", cursor: "pointer" }}
+          >
+            Clear all (empty state)
+          </button>
         </div>
-        <MountCard className="flex flex-col">
-          <div style={{ padding: "33px 31px", margin: 6, display: "flex", gap: 20, alignItems: "stretch", minHeight: 300 }}>
-            <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-              <div style={{ fontFamily: FONT_SERIF, fontSize: 34, fontWeight: 500, color: headingInk, lineHeight: 1.1 }}>
-                Welcome back, <em style={{ color: burgundy, fontStyle: "italic" }}>Writer</em>
-              </div>
-              <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: mutedInk, marginTop: 10 }}>(left column stand-in)</div>
-              <button
-                onClick={() => setNotes([])}
-                style={{ marginTop: 16, alignSelf: "flex-start", fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.05em", textTransform: "uppercase", color: burgundy, background: "none", border: "0.5px solid #e8c8bc", borderRadius: 8, padding: "7px 12px", cursor: "pointer" }}
-              >
-                Clear all (preview empty state)
-              </button>
-            </div>
-            <div style={{ display: "flex", alignItems: "center" }}>
-              <NotesDesk notes={notes} onAdd={addNote} onSave={saveNote} onComplete={completeNote} onDelete={deleteNote} />
-            </div>
-          </div>
-        </MountCard>
+        <HeroCard
+          firstName="Writer"
+          quote={{ text: "There is no greater agony than bearing an untold story inside you.", author: "Maya Angelou" }}
+          onSendQuery={() => {}}
+          onRecordResponse={() => {}}
+          onAddAgent={() => {}}
+          onAddManuscript={() => {}}
+          notes={notes}
+          onAddNote={addNote}
+          onSaveNote={saveNote}
+          onCompleteNote={completeNote}
+          onDeleteNote={deleteNote}
+        />
 
         {/* To-do "Noted by you" group preview (Prompt 4) — OverToYou with no derived tasks */}
         <div style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: burgundy, margin: "34px 0 14px" }}>

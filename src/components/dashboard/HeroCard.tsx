@@ -133,11 +133,20 @@ export const HeroCard: React.FC<HeroCardProps> = ({
       {/* Ambient sage rim wave (decorative; z1 — above card bg, below frame z3 and content z4) */}
       <div className="hero-rim" aria-hidden="true"><div className="hero-band" /></div>
 
-      {/* Body — left content + the notes desk on the right */}
-      <div style={{ padding: "33px 31px 31px", margin: "6px 6px 6px", position: "relative", flex: 1, display: "flex", gap: 20, alignItems: "stretch" }}>
-        <div style={{ position: "relative", zIndex: 4, flex: 1, minWidth: 0, maxWidth: 620, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          <div style={{ fontFamily: FONT_SERIF, fontSize: 38, fontWeight: 500, color: headingInk, lineHeight: 1.1 }}>
-            Welcome back, <em style={{ color: burgundy, fontStyle: "italic" }}>{firstName}</em>
+      {/* Body — split in half: greeting (left) · notes desk centred in the right half */}
+      <div style={{ padding: "33px 31px 31px", margin: "6px 6px 6px", position: "relative", flex: 1, display: "flex", alignItems: "stretch" }}>
+        <div style={{ position: "relative", zIndex: 4, flex: 1, minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          {/* Greeting with the paper-planes motif flying alongside it */}
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <div style={{ fontFamily: FONT_SERIF, fontSize: 38, fontWeight: 500, color: headingInk, lineHeight: 1.1 }}>
+              Welcome back, <em style={{ color: burgundy, fontStyle: "italic" }}>{firstName}</em>
+            </div>
+            <img
+              src="/Sent%20queries%20final.png"
+              alt=""
+              aria-hidden="true"
+              style={{ height: 60, width: "auto", flexShrink: 0, opacity: 0.9, pointerEvents: "none" }}
+            />
           </div>
 
           {quote.text && (
@@ -185,8 +194,8 @@ export const HeroCard: React.FC<HeroCardProps> = ({
           </div>
         </div>
 
-        {/* Right: the notes desk (fan of 3 most recent active notes, planes a faint accent above) */}
-        <div style={{ position: "relative", zIndex: 4, display: "flex", alignItems: "center" }}>
+        {/* Right half: the notes desk, centred */}
+        <div style={{ position: "relative", zIndex: 4, flex: 1, minWidth: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <NotesDesk
             notes={notes}
             onAdd={onAddNote}

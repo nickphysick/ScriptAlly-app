@@ -10,7 +10,7 @@
 import React, { useState } from "react";
 import { Plus, Maximize2 } from "lucide-react";
 import type { Note, NoteColour } from "../../types";
-import { FONT_SERIF, FONT_MONO, burgundy, mutedInk, buttonPinkBg, buttonPinkBorder } from "../../lib/designTokens";
+import { FONT_MONO, burgundy, mutedInk, buttonPinkBg, buttonPinkBorder } from "../../lib/designTokens";
 import { PostIt } from "./PostIt";
 import { NoteQuickAdd } from "./NoteQuickAdd";
 import { NoteEditor } from "./NoteEditor";
@@ -46,10 +46,11 @@ function buildFan(top: Note[]): FanItem[] {
   ];
 }
 
-const EXAMPLES: { colour: NoteColour; text: string; x: number; rot: number; z: number }[] = [
-  { colour: "sage", text: "Priya loves slow-burn", x: -40, rot: -12, z: 1 },
-  { colour: "yellow", text: "Open on the clock, not the city", x: 40, rot: 12, z: 2 },
-  { colour: "pink", text: "Polish the synopsis", x: 0, rot: 0, z: 3 },
+// Empty state: two faint blank post-its hold the fan's shape behind the front one, which carries
+// the "Note to self?" copy. Only the CTA sits beneath the fan.
+const EMPTY_BACK: { colour: NoteColour; x: number; rot: number; z: number }[] = [
+  { colour: "sage", x: -40, rot: -12, z: 1 },
+  { colour: "yellow", x: 40, rot: 12, z: 2 },
 ];
 
 const fanNoteBase = (x: number, rot: number, z: number, hovered: boolean): React.CSSProperties => ({
@@ -82,14 +83,6 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
 
   return (
     <div style={{ position: "relative", width: 296, flexShrink: 0, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-      {/* faint paper-planes accent above the desk */}
-      <img
-        src="/Sent%20queries%20final.png"
-        alt=""
-        aria-hidden="true"
-        style={{ position: "absolute", top: -10, right: 4, width: 96, opacity: 0.38, pointerEvents: "none", zIndex: 0 }}
-      />
-
       {/* "+" create affordance */}
       {!isEmpty ? (
         <button
@@ -117,10 +110,11 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
       ) : null}
 
       {isEmpty ? (
-        /* ---- empty state ---- */
+        /* ---- empty state: copy written on the topmost post-it, CTA beneath ---- */
         <div style={{ position: "relative", paddingTop: 8 }}>
-          <div style={{ position: "relative", height: 150 }}>
-            {EXAMPLES.map((ex, i) => (
+          <div style={{ position: "relative", height: 196 }}>
+            {/* two faint blank post-its hold the fan's shape */}
+            {EMPTY_BACK.map((ex, i) => (
               <div
                 key={i}
                 style={{
@@ -135,21 +129,33 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
                   filter: "saturate(0.85)",
                 }}
               >
-                <PostIt colour={ex.colour} text={ex.text} width={140} minHeight={104} surfaced={false} />
+                <PostIt colour={ex.colour} text="" width={140} minHeight={108} surfaced={false} />
               </div>
             ))}
+            {/* front post-it carries the copy */}
+            <div
+              style={{
+                position: "absolute",
+                left: "50%",
+                bottom: 8,
+                marginLeft: -92,
+                transformOrigin: "50% 100%",
+                transform: "translateX(0px) rotate(0deg)",
+                zIndex: 3,
+              }}
+            >
+              <PostIt colour="pink" width={184} minHeight={150} surfaced={false}>
+                <div style={{ fontSize: 25, fontWeight: 700, lineHeight: 1 }}>Note to self?</div>
+                <div style={{ fontSize: 16, fontWeight: 500, lineHeight: 1.22, marginTop: 9, opacity: 0.85 }}>
+                  Leave a note or create a task and it'll be pinned here, front and centre.
+                </div>
+              </PostIt>
+            </div>
           </div>
-          <div style={{ textAlign: "center", marginTop: 16 }}>
-            <div style={{ fontFamily: "'Caveat', cursive", fontSize: 28, fontWeight: 600, color: burgundy, lineHeight: 1 }}>
-              Note to self?
-            </div>
-            <div style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 13, color: "#6a5a50", lineHeight: 1.5, margin: "8px auto 0", maxWidth: 240 }}>
-              Leave a note or create a task and it'll be pinned here, front and centre.
-            </div>
+          <div style={{ textAlign: "center", marginTop: 14 }}>
             <button
               onClick={() => setQuickAddOpen(true)}
               style={{
-                marginTop: 14,
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 7,
