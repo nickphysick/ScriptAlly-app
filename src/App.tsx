@@ -35,6 +35,8 @@ import { SmartImportReview } from "./components/onboarding/SmartImportReview";
 import { REVIEW_FIXTURE } from "./components/onboarding/SmartImportReviewFixture";
 // TEMP: post-import loader dev preview — remove after visual sign-off.
 import { ImportingLoader } from "./components/onboarding/ImportingLoader";
+// Dev review surface for the notes pieces (PostIt / quick-add / editor) — #/notes-lab, DEV only.
+import { NotesLab } from "./components/notes/NotesLab";
 import { Palette, X, Check } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -144,6 +146,10 @@ function AppContent() {
   // Dev-only post-import loader preview (auto-loops loading → complete).
   if (hash === "#/import-loader" && import.meta.env.DEV) {
     return <ImportingLoaderDevHarness />;
+  }
+  // Dev-only notes review surface (PostIt / quick-add / editor) — local state, no persistence.
+  if (hash === "#/notes-lab" && import.meta.env.DEV) {
+    return <NotesLab />;
   }
 
   // Boot: while Firebase Auth is still resolving the session, show a neutral splash — never a
