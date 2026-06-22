@@ -278,7 +278,8 @@ service cloud.firestore {
     // (nullable), the stamps are full ISO datetimes (doneAt nullable). Every field is validated —
     // any field absent from this shape is silently dropped on write.
     function isValidUserNote(data, userId) {
-      return data.id is string && data.id.size() <= 128
+      return data.keys().hasOnly(['id', 'userId', 'text', 'colour', 'dueDate', 'done', 'doneAt', 'createdAt', 'updatedAt'])
+        && data.id is string && data.id.size() <= 128
         && data.userId == userId
         && data.text is string && data.text.size() >= 1 && data.text.size() <= 16384
         && data.colour is string && (data.colour == 'pink' || data.colour == 'sage' || data.colour == 'yellow')
