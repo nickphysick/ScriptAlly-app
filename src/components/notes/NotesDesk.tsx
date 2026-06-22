@@ -16,6 +16,7 @@ import type { Note, NoteColour } from "../../types";
 import { FONT_MONO, burgundy, mutedInk, parchment, buttonPinkBorder } from "../../lib/designTokens";
 import { FONT_CAVEAT, NOTE_THEMES, NOTE_COLOURS } from "./notesTheme";
 import { PostIt } from "./PostIt";
+import { DeskNote } from "./DeskNote";
 import { NoteEditor } from "./NoteEditor";
 import { NotesSeeAllOverlay } from "./NotesSeeAllOverlay";
 import { NoteComposeCalendar } from "./NoteComposeCalendar";
@@ -305,7 +306,7 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
                     boxShadow: hov ? "1px 12px 26px rgba(58,28,20,0.22)" : undefined,
                   }}
                 >
-                  <PostIt colour={s.note.colour} text={s.note.text} dueDate={s.note.dueDate} metaRow createdAt={s.note.createdAt} clampLines={4} width={NOTE_W} minHeight={NOTE_MINH} onClick={() => setEditing(s.note)} />
+                  <DeskNote note={s.note} width={NOTE_W} minHeight={NOTE_MINH} onOpen={() => setEditing(s.note)} onComplete={onComplete} onDelete={(n) => onDelete(n.id)} />
                 </div>
               );
             })}
@@ -317,9 +318,9 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
               onMouseLeave={() => setHoveredId((id) => (id === front.id ? null : id))}
               style={{ position: "relative", zIndex: 3, transformOrigin: "50% 100%", transform: hoveredId === front.id ? "translateY(-12px) scale(1.04)" : "none" }}
             >
-              <PostIt colour={front.colour} text={front.text} dueDate={front.dueDate} metaRow createdAt={front.createdAt} clampLines={4} width={NOTE_W} minHeight={NOTE_MINH} onClick={() => setEditing(front)} />
+              <DeskNote note={front} width={NOTE_W} minHeight={NOTE_MINH} onOpen={() => setEditing(front)} onComplete={onComplete} onDelete={(n) => onDelete(n.id)} />
 
-              {/* "+" riding the front note's top-right corner — straight to a fresh sticky */}
+              {/* add-+ tab straddling the front note's top edge (centred) — fresh sticky / picker */}
               <button
                 onClick={(e) => { e.stopPropagation(); addAnother(); }}
                 onMouseEnter={() => setCornerHover(true)}
@@ -327,25 +328,26 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
                 aria-label="New note"
                 style={{
                   position: "absolute",
-                  top: -11,
-                  right: -11,
-                  width: 30,
-                  height: 30,
-                  borderRadius: "50%",
+                  top: -13,
+                  left: "50%",
+                  transform: cornerHover ? "translateX(-50%) scale(1.06)" : "translateX(-50%)",
+                  transformOrigin: "50% 50%",
+                  width: 32,
+                  height: 21,
+                  borderRadius: 8,
                   background: cornerHover ? "#fff3ed" : parchment,
                   color: burgundy,
                   border: `0.5px solid ${buttonPinkBorder}`,
-                  boxShadow: "0 1px 4px rgba(58,28,20,0.18)",
+                  boxShadow: "0 2px 6px rgba(58,28,20,0.18)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   cursor: "pointer",
-                  transform: cornerHover ? "scale(1.08)" : "none",
                   transition: "transform 0.12s ease, background 0.12s ease",
                   zIndex: 10,
                 }}
               >
-                <Plus size={16} />
+                <Plus size={15} />
               </button>
             </div>
           </div>

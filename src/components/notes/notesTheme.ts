@@ -27,6 +27,13 @@ export const NOTE_THEMES: Record<NoteColour, NoteTheme> = {
 
 export const NOTE_COLOURS: NoteColour[] = ["pink", "sage", "yellow"];
 
+/** A deeper shade of each note colour — used for the confirm Delete/Complete buttons on the sticky. */
+export const NOTE_DEEP_SHADE: Record<NoteColour, { bg: string; ink: string }> = {
+  pink: { bg: "#d29c89", ink: "#41201a" },
+  sage: { bg: "#9aae90", ink: "#283326" },
+  yellow: { bg: "#d6c272", ink: "#443916" },
+};
+
 /** Warm fill for a due chip that's due-today/overdue (mock: `.hrow .hd.soon`). */
 export const DUE_SOON_BG = "#fbe6da";
 
