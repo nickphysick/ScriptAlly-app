@@ -12,9 +12,9 @@
  */
 import React, { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Plus, X, Calendar, Maximize2 } from "lucide-react";
+import { Plus, X, Calendar } from "lucide-react";
 import type { Note, NoteColour } from "../../types";
-import { FONT_MONO, burgundy, mutedInk, parchment, buttonPinkBorder } from "../../lib/designTokens";
+import { FONT_MONO, burgundy, parchment, buttonPinkBorder } from "../../lib/designTokens";
 import { FONT_CAVEAT, NOTE_THEMES, NOTE_COLOURS } from "./notesTheme";
 import { PostIt } from "./PostIt";
 import { DeskNote } from "./DeskNote";
@@ -150,6 +150,7 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
 
   return (
     <div
+      className="sa-board"
       onMouseEnter={() => setDeskHover(true)}
       onMouseLeave={() => setDeskHover(false)}
       style={{ position: "relative", width: 296, height: DESK_H, flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}
@@ -403,26 +404,29 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
 
             {active.length > 1 ? (
               <button
+                className="sa-seeall-tab"
                 onClick={() => setSeeAllOpen(true)}
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 5,
-                  background: "none",
-                  border: "none",
-                  color: mutedInk,
+                  position: "relative",
+                  marginTop: 5,
+                  background: "#fbf4ea",
+                  border: "0.5px solid #e6d6c8",
+                  borderRadius: "4px 4px 7px 7px",
+                  padding: "9px 16px 8px",
+                  boxShadow: "0 4px 12px rgba(58,28,20,0.2)",
+                  cursor: "pointer",
                   fontFamily: FONT_MONO,
                   fontSize: 9,
+                  fontWeight: 500,
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
-                  cursor: "pointer",
-                  padding: "2px 2px",
+                  color: burgundy,
+                  lineHeight: 1,
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = burgundy)}
-                onMouseLeave={(e) => (e.currentTarget.style.color = mutedInk)}
               >
-                {active.length > 3 ? `See all · ${active.length}` : "See all"} <Maximize2 size={11} />
+                {/* pin dot at top-centre, just above the tab edge */}
+                <span aria-hidden="true" style={{ position: "absolute", top: -3, left: "50%", transform: "translateX(-50%)", width: 6, height: 6, borderRadius: "50%", background: "#c9a08f", boxShadow: "0 1px 2px rgba(58,28,20,0.25)" }} />
+                See all · {active.length}
               </button>
             ) : null}
           </div>

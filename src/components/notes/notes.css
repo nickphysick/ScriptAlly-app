@@ -22,6 +22,15 @@
 .sa-seecard .sa-corner { display: none; }
 .sa-seecard:hover .sa-corner { display: flex; }
 
+/* Pinned "See all" index tab: revealed on desk hover/focus (pointer devices); on touch it's always
+   visible so non-hover users aren't stranded. */
+.sa-seeall-tab { transition: opacity 0.22s ease, transform 0.22s ease; }
+@media (hover: hover) and (pointer: fine) {
+  .sa-seeall-tab { opacity: 0; transform: translateY(7px); }
+  .sa-board:hover .sa-seeall-tab,
+  .sa-board:focus-within .sa-seeall-tab { opacity: 1; transform: translateY(0); }
+}
+
 /* To-do "Noted by you" row: animate out when ticked done (Prompt 4). */
 @keyframes sa-row-leave {
   to { opacity: 0; transform: translateX(10px); max-height: 0; padding-top: 0; padding-bottom: 0; }
