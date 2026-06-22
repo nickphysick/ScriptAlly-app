@@ -29,9 +29,10 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--white);color:var(
 
 /* masthead */
 .masthead{text-align:center;padding:64px 0 0}
-.logo{height:clamp(120px,14vw,168px);aspect-ratio:12/5;margin:0 auto;-webkit-mask:var(--logo) center/contain no-repeat;mask:var(--logo) center/contain no-repeat;background:linear-gradient(100deg,var(--burg) 0 40%,#cf9482 50%,var(--burg) 60% 100%);background-size:230% 100%;animation:sheen 5s ease-in-out infinite}
-@keyframes sheen{0%,55%{background-position:150% 0}100%{background-position:-50% 0}}
-@media(prefers-reduced-motion:reduce){.logo{animation:none}}
+.logo-img{height:clamp(96px,12vw,150px);width:auto;display:block;margin:0 auto}
+.pulse{display:inline-block;margin:0 .12em;color:var(--burg);transform-origin:center;animation:heartbeat 1.5s ease-in-out infinite}
+@keyframes heartbeat{0%,45%,100%{transform:scale(1)}12%{transform:scale(1.22)}24%{transform:scale(1)}33%{transform:scale(1.14)}}
+@media(prefers-reduced-motion:reduce){.pulse{animation:none}}
 .slogan{font-family:'Caveat',cursive;font-weight:600;font-size:clamp(27px,3vw,40px);line-height:1.1;color:var(--brown);margin:18px 0 0}
 .slogan b{color:var(--burg);font-weight:600}
 .rule{border:0;height:1px;width:100%;background:#e0dcd4;margin:64px 0 0}
@@ -102,18 +103,13 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--white);color:var(
 <nav class="nav"><span class="coming">Coming soon</span><a class="login" href="https://scriptally-app.web.app">Founders log in</a></nav>
 
 <section class="masthead bg-white"><div class="inner">
-  <div class="logo" role="img" aria-label="ScriptAlly"></div>
-  <p class="slogan">A finger on the <b>pulse</b> of your querying journey</p>
-</div>
-  <hr class="rule">
-  <div class="inner">
-  <h2 class="about-h">What does ScriptAlly do?</h2>
-  <p class="about-sub">Let us show you&hellip;</p>
+  <img class="logo-img" src="scriptally-title-holding.png" alt="ScriptAlly">
+  <p class="slogan">A living database for your agent queries</p>
 </div></section>
 
 <section class="feat bg-white"><div class="inner"><div class="grid">
   <div class="ftext">
-    <h2 class="fh">A living database for your <span class="em">agent queries</span>.</h2>
+    <h2 class="fh">A finger on the <span class="pulse">pulse</span> of your querying journey</h2>
     <p class="fp">Every agent, every submission, every reply &mdash; collated in one living workspace that keeps itself current as you query, so nothing slips through the cracks.</p>
   </div>
   <div class="fimg"><div class="device"><div class="chrome"><i></i><i></i><i></i></div><div class="dhead">Dashboard</div><div class="dbody">SCREENSHOT HERE</div></div></div>
