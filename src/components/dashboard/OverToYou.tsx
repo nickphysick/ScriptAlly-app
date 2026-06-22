@@ -2,45 +2,40 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * "Over to you" — the dashboard's high-priority action container (hero-right slot).
- * One height-capped, internally-scrolling MountCard with two zones:
- *   Zone A "To-do list"  — a PINNED sage header (serif title + pulsing dot + burgundy count
- *                          pill) above the urgent/overdue task rows.
- *   Zone B "When you have a moment" — a sage header STRIP (rows below sit on parchment) with one
- *                          EXPANDABLE summary row per recommended task type; expanding lists the
- *                          underlying agents/records/queries inline.
- * The Zone A rows + Zone B scroll together; a thin footer hint ("Scroll to see N recommended
- * actions") is pinned at the bottom and shown ONLY while the Zone B header is scrolled out of
- * view (IntersectionObserver, root = the scroll container).
+ * "Over to you" — the dashboard's high-priority action container (hero-right slot, STANDARD layout).
+ * One height-capped, internally-scrolling MountCard with a pink header band and a THREE-TAB body:
+ *   · Urgent        — urgent-family task rows (burgundy).
+ *   · Housekeeping  — recommended-family task rows, FLATTENED (sage).
+ *   · Notes to self — active (not-done) notes from the standalone notes store (rose).
+ * Each tab shows a count; the strip defaults to Urgent unless its count is 0, then the first
+ * non-empty tab in [Urgent, Housekeeping, Notes]. The pulsing header dot shows only while Urgent > 0.
  *
  * SURFACE ONLY: every action keeps its CURRENT behaviour — navigate via onAction
- * (Dashboard wires this to onNavigate(actionPath)); query-related items open via onOpenQuery.
- * No nudge modal / logging / timeline here; snooze/dismiss are intentionally not rendered.
+ * (Dashboard wires this to onNavigate(actionPath)); query-related items open via onOpenQuery;
+ * nudge_overdue opens the Nudge modal via onNudge. The Notes tab SHARES the hero's notes store
+ * (onAddNote / onCompleteNote = addNote / completeNoteWithUndo) — it never forks it.
+ * snooze/dismiss + onAllTasks are kept on the props for call-site compatibility, not rendered.
  */
 import React, { useEffect, useRef, useState } from "react";
-import { Feather, Star, ClipboardList, Archive, ChevronDown, Check, Calendar, PenLine, X, Hourglass } from "lucide-react";
-import { Task, Query, Agent, Note } from "../../types";
+import { CheckCircle2, ListChecks, PlusCircle, Plus, Check, Calendar, X } from "lucide-react";
+import { Task, Query, Agent, Note, NoteColour } from "../../types";
 import { MountCard } from "../MountCard";
 import {
-  sageBandGradient,
-  sageBandRule,
-  sageText,
   parchment,
   burgundy,
   bodyInk,
   mutedInk,
-  labelStyle,
-  buttonPinkBg,
   FONT_SERIF,
   FONT_MONO,
 } from "../../lib/designTokens";
-import { FONT_CAVEAT, DUE_CHIP_STAGES } from "../notes/notesTheme";
-import { datedTodoNotes, overdueNoteCount, dueStage, dueChipLabel, todayLocalISO } from "../notes/notesUtils";
+import { FONT_CAVEAT, NOTE_THEMES, NOTE_COLOURS } from "../notes/notesTheme";
+import { activeNotes, byMostRecent, formatCreatedStamp } from "../notes/notesUtils";
+import { NoteComposeCalendar } from "../notes/NoteComposeCalendar";
 import "../notes/notes.css";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-/* ── Zone A — urgent/overdue task types (broadened beyond the old OVER_TO_YOU_TYPES) ─────── */
+/* ── Urgent-family task types ─────────────────────────────────────────────────────────────── */
 const URGENT_TYPES = [
   "offer_received",
   "partial_requested",
@@ -66,34 +61,35 @@ const URGENT_ACTION: Record<UrgentType, string> = {
   nudge_overdue: "Nudge",
 };
 
-/* ── Zone B — recommended types, in display order. NOTE: querying_unstarted lives HERE, not in
-      Zone A, despite its "overdue" priority (special-cased per the brief). ─────────────────── */
-const RECOMMENDED_TYPES = [
+/* ── Housekeeping (recommended) task types, in display order. NOTE: querying_unstarted lives HERE,
+      not in Urgent, despite its "overdue" priority (special-cased per the original design). ────── */
+const HOUSEKEEPING_TYPES = [
   "dream_agent_unqueried",
   "querying_unstarted",
   "data_quality_poor",
   "no_response_close",
 ] as const;
-type RecommendedType = (typeof RECOMMENDED_TYPES)[number];
+type HousekeepingType = (typeof HOUSEKEEPING_TYPES)[number];
 
-const RECOMMENDED_ICON: Record<RecommendedType, React.ComponentType<any>> = {
-  dream_agent_unqueried: Star,
-  querying_unstarted: Feather,
-  data_quality_poor: ClipboardList,
-  no_response_close: Archive,
+const HOUSE_CHIP: Record<HousekeepingType, string> = {
+  dream_agent_unqueried: "DREAM",
+  querying_unstarted: "START",
+  data_quality_poor: "DETAILS",
+  no_response_close: "CLOSE",
 };
 
-const recommendedLabel = (type: RecommendedType, n: number): string => {
-  switch (type) {
-    case "dream_agent_unqueried":
-      return `${n} agent${n === 1 ? "" : "s"} ready to query`;
-    case "querying_unstarted":
-      return `${n} manuscript${n === 1 ? "" : "s"} ready to start querying`;
-    case "data_quality_poor":
-      return `${n} record${n === 1 ? "" : "s"} missing key details`;
-    case "no_response_close":
-      return `${n} to consider closing`;
-  }
+const HOUSE_DESC: Record<HousekeepingType, string> = {
+  dream_agent_unqueried: "A dream agent ready to query",
+  querying_unstarted: "Ready to start querying",
+  data_quality_poor: "Missing key details",
+  no_response_close: "No reply yet — consider closing",
+};
+
+const HOUSE_ACTION_FALLBACK: Record<HousekeepingType, string> = {
+  dream_agent_unqueried: "Query",
+  querying_unstarted: "Start",
+  data_quality_poor: "Fill in",
+  no_response_close: "Review",
 };
 
 /** Whole-unit overdue gap: weeks once the gap reaches 7 days, else days. e.g. "3 weeks", "5 days". */
@@ -116,7 +112,7 @@ export interface OverToYouRow {
   deadline: Date | null;
 }
 
-/** Build the Zone-A rows from the live tasks, sorted deadline-asc (ordering kept isolated). */
+/** Build the urgent rows from the live tasks, sorted deadline-asc (ordering kept isolated). */
 export const buildOverToYouRows = (tasks: Task[], queries: Query[], agents: Agent[]): OverToYouRow[] => {
   const now = new Date();
 
@@ -181,26 +177,22 @@ export const buildOverToYouRows = (tasks: Task[], queries: Query[], agents: Agen
   });
 };
 
-interface RecommendedItem {
+export interface HousekeepingRow {
   task: Task;
+  type: HousekeepingType;
+  chip: string;
   subject: React.ReactNode; // agent name (bold) or manuscript title — the row's subject
+  description: string;
+  actionLabel: string;
 }
 
-interface RecommendedRow {
-  type: RecommendedType;
-  count: number;
-  label: string;
-  Icon: React.ComponentType<any>;
-  items: RecommendedItem[];
-}
-
-/** The subject shown for one expanded item: agent name (bold) or manuscript title. */
-const itemSubject = (type: RecommendedType, task: Task, queries: Query[], agents: Agent[]): React.ReactNode => {
+/** The subject shown for a housekeeping row: agent name (bold serif) or manuscript title. */
+const itemSubject = (type: HousekeepingType, task: Task, queries: Query[], agents: Agent[]): React.ReactNode => {
   const boldAgent = (name: string) => (
-    <span style={{ fontFamily: FONT_SERIF, fontWeight: 700, color: bodyInk }}>{name}</span>
+    <span style={{ fontFamily: FONT_SERIF, fontWeight: 700, color: burgundy }}>{name}</span>
   );
   if (type === "querying_unstarted") {
-    return <span style={{ fontFamily: FONT_SERIF, color: bodyInk }}>{task.manuscriptTitle || "Untitled manuscript"}</span>;
+    return <span style={{ fontFamily: FONT_SERIF, fontWeight: 700, color: burgundy }}>{task.manuscriptTitle || "Untitled manuscript"}</span>;
   }
   if (type === "no_response_close") {
     const q = queries.find((x) => x.id === task.relatedRecordId);
@@ -212,19 +204,20 @@ const itemSubject = (type: RecommendedType, task: Task, queries: Query[], agents
   return boldAgent(ag?.name || ag?.agency || "the agent");
 };
 
-/** One summarised, expandable row per recommended type that has >= 1 task (data-driven). */
-const buildRecommendedRows = (tasks: Task[], queries: Query[], agents: Agent[]): RecommendedRow[] =>
-  RECOMMENDED_TYPES.map((type): RecommendedRow | null => {
-    const matched = tasks.filter((t) => t.taskType === type);
-    if (matched.length === 0) return null;
-    return {
-      type,
-      count: matched.length,
-      label: recommendedLabel(type, matched.length),
-      Icon: RECOMMENDED_ICON[type],
-      items: matched.map((task) => ({ task, subject: itemSubject(type, task, queries, agents) })),
-    };
-  }).filter((r): r is RecommendedRow => r !== null);
+/** Flattened housekeeping rows — one per recommended-family task, in HOUSEKEEPING_TYPES order. */
+export const buildHousekeepingRows = (tasks: Task[], queries: Query[], agents: Agent[]): HousekeepingRow[] =>
+  HOUSEKEEPING_TYPES.flatMap((type) =>
+    tasks
+      .filter((t) => t.taskType === type)
+      .map((task) => ({
+        task,
+        type,
+        chip: HOUSE_CHIP[type],
+        subject: itemSubject(type, task, queries, agents),
+        description: HOUSE_DESC[type],
+        actionLabel: task.actionLabel || HOUSE_ACTION_FALLBACK[type],
+      }))
+  );
 
 /* ── Scoped animation/hover CSS (keyframes + prefers-reduced-motion can't be expressed inline) ── */
 const OTY_CSS = `
@@ -233,146 +226,225 @@ const OTY_CSS = `
   70%  { transform: scale(2.6); opacity: 0; }
   100% { transform: scale(2.6); opacity: 0; }
 }
-@keyframes oty-wiggle {
-  0%, 90%, 100% { transform: rotate(0deg); }
-  92% { transform: rotate(-7deg); }
-  95% { transform: rotate(6deg); }
-  97% { transform: rotate(-3deg); }
+@keyframes oty-badge-pulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.12); }
 }
 .oty-pulse-ring { animation: oty-pulse-ring 2.4s ease-out infinite; }
-.oty-action {
-  animation: oty-wiggle 3.6s ease-in-out infinite;
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
-}
-.oty-action:hover {
-  animation: none;
+.oty-badge-pulse { animation: oty-badge-pulse 2.2s ease-in-out infinite; }
+.oty-action { transition: box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease; }
+.oty-action.urgent:hover {
   box-shadow: 0 0 0 3px rgba(124, 58, 42, 0.12), 0 2px 9px rgba(124, 58, 42, 0.2);
   border-color: #d8a89a;
 }
-.oty-rec-row { transition: background 0.18s ease; }
-.oty-rec-row:hover { background: #faf5ef; }
-.oty-rec-item { transition: background 0.15s ease; }
-.oty-rec-item:hover { background: #f3ece2; }
-.oty-note-del { display: none; }
-.oty-note-row:hover .oty-note-del { display: flex; }
-/* task tick: sand-timer by default, swells into a tick on hover */
+.oty-action.sage:hover {
+  box-shadow: 0 0 0 3px rgba(90, 110, 88, 0.12), 0 2px 9px rgba(90, 110, 88, 0.18);
+  border-color: #b6c4b2;
+}
+.oty-tab { transition: color 0.15s ease; }
+.oty-note-row { transition: background 0.15s ease; }
+.oty-note-row:hover { background: #faf5ef; }
 .oty-tick { transition: transform 0.15s cubic-bezier(0.2,0.7,0.2,1); }
-.oty-tick .oty-ic { transition: opacity 0.14s ease; }
-.oty-tick .oty-check { position: absolute; opacity: 0; }
-.oty-tick:hover { transform: scale(1.2); }
-.oty-tick:hover .oty-hg { opacity: 0; }
-.oty-tick:hover .oty-check { opacity: 1; }
-.oty-hint { transition: opacity 0.25s ease; }
+.oty-tick:hover { transform: scale(1.18); }
+.oty-newnote { transition: background 0.15s ease, border-color 0.15s ease; }
+.oty-newnote:hover { background: #fdf6f2; border-color: #d9b6a8; }
+.oty-swatch { transition: transform 0.12s ease, box-shadow 0.12s ease; }
+.oty-swatch:hover { transform: scale(1.12); }
 @media (prefers-reduced-motion: reduce) {
-  .oty-pulse-ring, .oty-action { animation: none !important; }
+  .oty-pulse-ring, .oty-badge-pulse { animation: none !important; }
 }
 `;
 
-const chipStyle: React.CSSProperties = {
+const chipBase: React.CSSProperties = {
   fontFamily: FONT_MONO,
   fontSize: 8,
   fontWeight: 600,
   letterSpacing: "0.1em",
   textTransform: "uppercase",
-  color: burgundy,
-  background: "#faf1ef",
-  border: "0.5px solid #f2ddd5",
   borderRadius: 5,
   padding: "2px 6px",
   lineHeight: 1,
   flexShrink: 0,
 };
 
-const actionBtnStyle: React.CSSProperties = {
+const urgentChipStyle: React.CSSProperties = {
+  ...chipBase,
+  color: burgundy,
+  background: "#faf1ef",
+  border: "0.5px solid #f2ddd5",
+};
+
+const sageChipStyle: React.CSSProperties = {
+  ...chipBase,
+  color: "#5a6e58",
+  background: "#eef1ec",
+  border: "0.5px solid #dbe3d7",
+};
+
+const actionBtnBase: React.CSSProperties = {
   fontFamily: FONT_MONO,
   fontSize: 9.5,
   fontWeight: 500,
   letterSpacing: "0.06em",
-  background: "#ffffff",
-  color: burgundy,
-  border: "1px solid rgba(124,58,42,0.4)",
   borderRadius: 9,
   padding: "8px 14px",
   whiteSpace: "nowrap",
+  cursor: "pointer",
 };
 
-/* Shared count-pill shape; the two variants differ only in fill/number colour. */
-const countPillBase: React.CSSProperties = {
+// Soft-pink urgent action button.
+const urgentBtnStyle: React.CSSProperties = {
+  ...actionBtnBase,
+  background: "#f5e2da",
+  color: burgundy,
+  border: "1px solid #e8c8bc",
+};
+
+// Sage-toned housekeeping action button.
+const sageBtnStyle: React.CSSProperties = {
+  ...actionBtnBase,
+  background: "#eef1ec",
+  color: "#5a6e58",
+  border: "1px solid #cdd6c9",
+};
+
+/* ── Tabs ─────────────────────────────────────────────────────────────────────────────────── */
+type TabKey = "urgent" | "house" | "notes";
+
+interface TabSpec {
+  key: TabKey;
+  label: string;
+  activeLabel: string;
+  underline: string;
+  badgeBg: string;
+  badgeText: string;
+}
+
+const TAB_SPECS: TabSpec[] = [
+  { key: "urgent", label: "Urgent", activeLabel: "#7c3a2a", underline: "#7c3a2a", badgeBg: "#f6ddd1", badgeText: "#7c3a2a" },
+  { key: "house", label: "Housekeeping", activeLabel: "#5a6e58", underline: "#8a9e88", badgeBg: "#e9ede6", badgeText: "#5a6e58" },
+  { key: "notes", label: "Notes to self", activeLabel: "#bd7461", underline: "#bd7461", badgeBg: "#f7e3dc", badgeText: "#bd7461" },
+];
+
+const INACTIVE_LABEL = "#9c8878";
+const INACTIVE_BADGE_BG = "#ece4da";
+const INACTIVE_BADGE_TEXT = "#a8978a";
+
+const tabBadgeStyle = (active: boolean, spec: TabSpec): React.CSSProperties => ({
   fontFamily: FONT_MONO,
   fontSize: 10,
   fontWeight: 600,
-  minWidth: 20,
-  height: 20,
+  minWidth: 18,
+  height: 18,
   borderRadius: 999,
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
   padding: "0 6px",
   lineHeight: 1,
-};
+  background: active ? spec.badgeBg : INACTIVE_BADGE_BG,
+  color: active ? spec.badgeText : INACTIVE_BADGE_TEXT,
+});
 
-// White chip so the count reads cleanly on the pink To-do band.
-const urgentPillStyle: React.CSSProperties = { ...countPillBase, color: burgundy, background: "#ffffff", border: "0.5px solid rgba(124,58,42,0.2)" };
-const recommendedPillStyle: React.CSSProperties = {
-  ...countPillBase,
-  color: burgundy,
-  background: buttonPinkBg,
-  border: "0.5px solid rgba(124,58,42,0.22)",
-};
+/* ── Empty-state block ────────────────────────────────────────────────────────────────────── */
+const EmptyState: React.FC<{
+  icon: React.ReactNode;
+  title: string;
+  body: string;
+  cta?: { label: string; onClick: () => void };
+}> = ({ icon, title, body, cta }) => (
+  <div className="flex flex-col items-center justify-center text-center" style={{ height: "100%", padding: "30px 22px" }}>
+    {icon}
+    <div style={{ fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 600, color: bodyInk, marginTop: 11 }}>{title}</div>
+    <div style={{ fontSize: 12, color: mutedInk, marginTop: 5, lineHeight: 1.45, maxWidth: 240 }}>{body}</div>
+    {cta && (
+      <button
+        type="button"
+        onClick={cta.onClick}
+        className="oty-newnote"
+        style={{
+          marginTop: 14,
+          fontFamily: FONT_MONO,
+          fontSize: 10,
+          fontWeight: 500,
+          letterSpacing: "0.05em",
+          color: "#bd7461",
+          background: "#fbf2ee",
+          border: "1px dashed #e3bcae",
+          borderRadius: 9,
+          padding: "8px 14px",
+          cursor: "pointer",
+        }}
+      >
+        {cta.label}
+      </button>
+    )}
+  </div>
+);
 
 export interface OverToYouProps {
   tasks: Task[];
   queries: Query[];
   agents: Agent[];
-  notes: Note[]; // dated, not-done notes render as the "Noted by you" group between Zone A and Zone B
+  notes: Note[];
   onAction: (task: Task) => void;
   onNudge: (task: Task) => void; // nudge_overdue rows open the Nudge modal instead of navigating
-  onSnooze: (task: Task) => void; // kept for call-site compatibility; not rendered this prompt
-  onDismiss: (task: Task) => void; // kept for call-site compatibility; not rendered this prompt
-  onAllTasks: () => void; // kept for call-site compatibility; superseded by the scroll hint
+  onSnooze: (task: Task) => void; // kept for call-site compatibility; not rendered
+  onDismiss: (task: Task) => void; // kept for call-site compatibility; not rendered
+  onAllTasks: () => void; // kept for call-site compatibility; not rendered
   onOpenQuery: (queryId: string) => void;
-  onCompleteNote: (id: string) => void; // tick a dated note done from its To-do row
-  onDeleteNote: (note: Note) => void; // hover-× delete from its To-do row (with undo)
+  onAddNote: (fields: { text: string; colour?: NoteColour; dueDate?: string | null }) => void; // Notes tab create
+  onCompleteNote: (id: string) => void; // tick a note done from the Notes tab
+  onDeleteNote: (note: Note) => void; // kept for call-site compatibility; not rendered
 }
 
-export const OverToYou: React.FC<OverToYouProps> = ({ tasks, queries, agents, notes, onAction, onNudge, onOpenQuery, onCompleteNote, onDeleteNote }) => {
+export const OverToYou: React.FC<OverToYouProps> = ({
+  tasks,
+  queries,
+  agents,
+  notes,
+  onAction,
+  onNudge,
+  onOpenQuery,
+  onAddNote,
+  onCompleteNote,
+}) => {
   const urgentRows = buildOverToYouRows(tasks, queries, agents);
-  const recommendedRows = buildRecommendedRows(tasks, queries, agents);
-  const recommendedTotal = recommendedRows.reduce((sum, r) => sum + r.count, 0);
+  const houseRows = buildHousekeepingRows(tasks, queries, agents);
+  const noteRows = byMostRecent(activeNotes(notes)); // active (not-done), newest first
 
-  // "Noted by you" — dated, not-done notes (sorted dueDate-asc). Only OVERDUE ones raise the alarm
-  // (the header count + the nav bell); the group itself lists every dated task.
-  const today = todayLocalISO();
-  const notedRows = datedTodoNotes(notes);
-  const overdueCount = overdueNoteCount(notes, today);
-  const headerCount = urgentRows.length + overdueCount;
+  const urgentCount = urgentRows.length;
+  const houseCount = houseRows.length;
+  const notesCount = noteRows.length;
+  const counts: Record<TabKey, number> = { urgent: urgentCount, house: houseCount, notes: notesCount };
 
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const zoneBHeaderRef = useRef<HTMLDivElement>(null);
-  const [hintVisible, setHintVisible] = useState(false);
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
-  const toggle = (type: string) => setExpanded((prev) => ({ ...prev, [type]: !prev[type] }));
+  // Default tab: Urgent if > 0, else first non-empty in [Urgent, Housekeeping, Notes], else Urgent.
+  const defaultTab: TabKey =
+    urgentCount > 0 ? "urgent" : houseCount > 0 ? "house" : notesCount > 0 ? "notes" : "urgent";
 
-  // Tick → complete · hover-× → delete. Both play the leave animation, then act (the live notes
-  // subscription drops the row); the undo toast is raised by the Dashboard wrappers.
+  const [activeTab, setActiveTab] = useState<TabKey>(defaultTab);
+  // Default-tab logic: follow the computed default on load, and whenever a recompute changes WHICH
+  // tab is the default — until the user explicitly picks a tab, after which their choice sticks. That
+  // lets them open an empty tab to see its empty state, and never bounces the tab while composing.
+  const userPinned = useRef(false);
+  useEffect(() => {
+    if (!userPinned.current) setActiveTab(defaultTab);
+  }, [defaultTab]);
+  const selectTab = (k: TabKey) => {
+    userPinned.current = true;
+    setActiveTab(k);
+  };
+
+  // Notes: tick → complete (plays the leave animation, then the live subscription drops the row).
   const [leavingIds, setLeavingIds] = useState<Set<string>>(new Set());
   const tickNote = (id: string) => {
     setLeavingIds((prev) => new Set(prev).add(id));
     setTimeout(() => onCompleteNote(id), 320);
   };
-  const dropNote = (note: Note) => {
-    setLeavingIds((prev) => new Set(prev).add(note.id));
-    setTimeout(() => onDeleteNote(note), 320);
-  };
-
-  // Keep the "leaving" set in step with the live notes (the single source of truth). Once a ticked
-  // note actually drops out of the list (completed via the subscription), clear its flag — so if it
-  // is UNDONE and returns, it renders normally instead of staying collapsed under a stale leave
-  // animation. This is the To-do undo re-render fix.
   useEffect(() => {
     setLeavingIds((prev) => {
       if (prev.size === 0) return prev;
-      const present = new Set(notedRows.map((n) => n.id));
+      const present = new Set(noteRows.map((n) => n.id));
       let changed = false;
       const next = new Set<string>();
       prev.forEach((id) => {
@@ -381,29 +453,38 @@ export const OverToYou: React.FC<OverToYouProps> = ({ tasks, queries, agents, no
       });
       return changed ? next : prev;
     });
-  }, [notedRows]);
+  }, [noteRows]);
 
-  // A recommended item routes via its query (relatedRecordId) when query-related, else via actionPath.
-  const routeItem = (task: Task) => {
+  // ── Inline note composer (minimal — shares the hero's addNote store, not its post-it UI) ──
+  const [composing, setComposing] = useState(false);
+  const [draftText, setDraftText] = useState("");
+  const [draftColour, setDraftColour] = useState<NoteColour>("pink");
+  const [draftDue, setDraftDue] = useState<string | null>(null);
+  const [dateOpen, setDateOpen] = useState(false);
+
+  const resetCompose = () => {
+    setComposing(false);
+    setDraftText("");
+    setDraftColour("pink");
+    setDraftDue(null);
+    setDateOpen(false);
+  };
+  const openCompose = () => {
+    userPinned.current = true;
+    setActiveTab("notes");
+    setComposing(true);
+  };
+  const saveCompose = () => {
+    const text = draftText.trim();
+    if (!text) return;
+    onAddNote({ text, colour: draftColour, dueDate: draftDue });
+    resetCompose();
+  };
+
+  const routeHousekeeping = (task: Task) => {
     if (task.taskType === "no_response_close") onOpenQuery(task.relatedRecordId);
     else onAction(task);
   };
-
-  // Footer hint shows only while the Zone B header is out of the scroll viewport.
-  useEffect(() => {
-    const root = scrollRef.current;
-    const target = zoneBHeaderRef.current;
-    if (!root || !target || typeof IntersectionObserver === "undefined") {
-      setHintVisible(false);
-      return;
-    }
-    const io = new IntersectionObserver(
-      (entries) => setHintVisible(!entries[0].isIntersecting),
-      { root, threshold: 0 }
-    );
-    io.observe(target);
-    return () => io.disconnect();
-  }, [urgentRows.length, notedRows.length, recommendedRows.length]);
 
   return (
     // lg:h-full fills the absolutely-positioned hero cell (Dashboard caps it to the stat-cards
@@ -411,345 +492,400 @@ export const OverToYou: React.FC<OverToYouProps> = ({ tasks, queries, agents, no
     <MountCard className="flex flex-col lg:h-full" style={{ minHeight: 0 }}>
       <style>{OTY_CSS}</style>
 
-      {/* ── Zone A header — pinned PINK band (the To-do list is singled out as the urgent panel,
-            the lone pink header among the dashboard's sage container headers) ───────────────── */}
+      {/* ── Header — pinned PINK band (the To-do list is the lone pink header on the dashboard) ── */}
       <div
-        className="flex items-center justify-between shrink-0"
+        className="flex items-center shrink-0"
         style={{
           position: "relative",
           zIndex: 2,
           margin: "6px 6px 0",
           borderRadius: "8px 8px 0 0",
           padding: "13px 18px 12px",
-          background: "linear-gradient(135deg, #f5e2da 0%, #efd5ca 100%)",
+          background: "linear-gradient(135deg, #f3e0d6 0%, #eed4c8 100%)",
           borderBottom: "1px solid rgba(124,58,42,0.15)",
+          gap: 10,
         }}
       >
-        <span style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+        {/* Pulsing dot — ONLY while there are urgent items. */}
+        {urgentCount > 0 && (
           <span style={{ position: "relative", display: "inline-flex", width: 7, height: 7 }} aria-hidden="true">
-            <span
-              className="oty-pulse-ring"
-              style={{ position: "absolute", inset: 0, borderRadius: "50%", background: burgundy }}
-            />
+            <span className="oty-pulse-ring" style={{ position: "absolute", inset: 0, borderRadius: "50%", background: burgundy }} />
             <span style={{ position: "absolute", inset: 0, borderRadius: "50%", background: burgundy }} />
           </span>
-          <span style={{ fontFamily: FONT_SERIF, fontSize: 16, fontWeight: 600, color: bodyInk, lineHeight: 1 }}>
-            To-do list
-          </span>
-        </span>
-        {headerCount > 0 && (
-          <span aria-label={`${headerCount} urgent`} style={urgentPillStyle}>
-            {headerCount}
-          </span>
         )}
+        <span style={{ fontFamily: FONT_SERIF, fontSize: 16, fontWeight: 600, color: burgundy, lineHeight: 1 }}>
+          To-do list
+        </span>
       </div>
 
-      {/* ── Scroll region: Zone A rows + Zone B ──────────────────────────── */}
+      {/* ── Tab strip — on parchment, hairline underneath ───────────────────────────────────── */}
       <div
-        ref={scrollRef}
-        className="flex-1 min-h-0 overflow-y-auto"
-        style={{ position: "relative", zIndex: 2, margin: "0 6px", padding: "10px 12px 8px 14px" }}
+        className="flex items-stretch shrink-0"
+        style={{
+          position: "relative",
+          zIndex: 2,
+          margin: "0 6px",
+          padding: "0 8px",
+          background: parchment,
+          borderBottom: "1px solid #f0eae2",
+          gap: 2,
+        }}
+        role="tablist"
       >
-        {/* Zone A rows */}
-        {urgentRows.length === 0 ? (
-          // Fill the card only when there's truly nothing else below (no dated notes, no recommended).
-          <div className="flex flex-col items-center justify-center text-center" style={{ height: notedRows.length === 0 && recommendedRows.length === 0 ? "100%" : "auto", padding: "26px 16px 20px" }}>
-            <Feather className="w-[22px] h-[22px]" style={{ color: "#aab8a4", marginBottom: 9 }} strokeWidth={1.6} />
-            <div style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 13, color: "#5a6258" }}>
-              You're all caught up.
-            </div>
-          </div>
-        ) : (
-          urgentRows.map((row, i) => (
-            <div
-              key={row.task.id}
-              className="flex items-center justify-between gap-3"
-              style={{ padding: "10px 2px", borderTop: i > 0 ? "0.5px solid #f0e6d8" : undefined }}
+        {TAB_SPECS.map((spec) => {
+          const active = activeTab === spec.key;
+          const count = counts[spec.key];
+          const pulse = spec.key === "urgent" && urgentCount > 0;
+          return (
+            <button
+              key={spec.key}
+              role="tab"
+              aria-selected={active}
+              type="button"
+              onClick={() => selectTab(spec.key)}
+              className="oty-tab"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 7,
+                padding: "11px 10px 9px",
+                background: "transparent",
+                border: "none",
+                borderBottom: `2px solid ${active ? spec.underline : "transparent"}`,
+                marginBottom: -1,
+                cursor: "pointer",
+                fontFamily: FONT_SERIF,
+                fontSize: 13,
+                fontWeight: active ? 700 : 600,
+                color: active ? spec.activeLabel : INACTIVE_LABEL,
+              }}
             >
+              {spec.label}
+              <span className={pulse ? "oty-badge-pulse" : undefined} style={tabBadgeStyle(active, spec)}>
+                {count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* ── Body — one pane per tab; capped height, internal scroll ─────────────────────────── */}
+      <div
+        className="flex-1 min-h-0 overflow-y-auto"
+        style={{ position: "relative", zIndex: 2, margin: "0 6px 6px", padding: "8px 12px 10px 14px" }}
+      >
+        {/* ===== Urgent pane ===== */}
+        {activeTab === "urgent" &&
+          (urgentRows.length === 0 ? (
+            <EmptyState
+              icon={<CheckCircle2 className="w-[26px] h-[26px]" style={{ color: "#8a9e88" }} strokeWidth={1.6} />}
+              title="All clear"
+              body="Nothing needs you right now. Time to write."
+            />
+          ) : (
+            urgentRows.map((row, i) => (
               <div
-                style={{ flex: 1, minWidth: 0, cursor: "pointer" }}
-                onClick={() => onOpenQuery(row.task.relatedRecordId)}
+                key={row.task.id}
+                className="flex items-center justify-between gap-3"
+                style={{ padding: "10px 2px", borderTop: i > 0 ? "0.5px solid #f0e6d8" : undefined }}
               >
-                <div className="flex items-center gap-2" style={{ minWidth: 0 }}>
-                  <span style={chipStyle}>{row.chip}</span>
-                  <span
-                    style={{
-                      fontFamily: FONT_SERIF,
-                      color: burgundy,
-                      fontSize: 13,
-                      fontWeight: 700,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {row.agentName}
-                  </span>
-                </div>
-                <div style={{ fontSize: 11, color: mutedInk, marginTop: 3, lineHeight: 1.4 }}>{row.description}</div>
-              </div>
-              <button
-                className="oty-action cursor-pointer shrink-0"
-                style={{ ...actionBtnStyle, animationDelay: `${i * 0.18}s` }}
-                onClick={() => (row.type === "nudge_overdue" ? onNudge(row.task) : onAction(row.task))}
-              >
-                {row.actionLabel}
-              </button>
-            </div>
-          ))
-        )}
-
-        {/* ── "Noted by you" — dated, not-done notes; sits between must-do (Zone A) and nice-to-have
-              (Zone B). The group lists every dated task; only overdue ones bump the header count. ── */}
-        {notedRows.length > 0 && (
-          <>
-            <div
-              className="flex items-center justify-between"
-              style={{
-                background: sageBandGradient,
-                border: `1px solid ${sageBandRule}`,
-                borderRadius: 8,
-                padding: "8px 12px",
-                margin: "8px 0",
-                gap: 10,
-              }}
-            >
-              <span style={{ ...labelStyle, color: sageText, letterSpacing: "0.1em", display: "inline-flex", alignItems: "center", gap: 7, minWidth: 0 }}>
-                <PenLine className="w-[12px] h-[12px] shrink-0" /> Noted by you
-              </span>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 7, flexShrink: 0 }}>
-                <span style={{ ...labelStyle, color: sageText, letterSpacing: "0.1em", opacity: 0.85 }}>Your tasks</span>
-                <span
-                  aria-label={`${notedRows.length} noted`}
-                  style={{ ...countPillBase, color: sageText, background: parchment, border: "0.5px solid #cdd5cb" }}
-                >
-                  {notedRows.length}
-                </span>
-              </span>
-            </div>
-
-            {notedRows.map((note, i) => {
-              const stage = dueStage(note.dueDate, today) ?? "cool";
-              const s = DUE_CHIP_STAGES[stage];
-              const leaving = leavingIds.has(note.id);
-              return (
-                <div
-                  key={note.id}
-                  className={`oty-note-row${leaving ? " sa-row-leaving" : ""}`}
-                  style={{ position: "relative", display: "flex", alignItems: "flex-start", gap: 11, padding: "11px 2px", borderTop: i > 0 ? "0.5px solid #f0e6d8" : undefined }}
-                >
-                  <button
-                    type="button"
-                    aria-label="Complete"
-                    className={leaving ? undefined : "oty-tick"}
-                    onClick={() => tickNote(note.id)}
-                    style={{
-                      position: "relative",
-                      width: 18,
-                      height: 18,
-                      borderRadius: 6,
-                      border: `1.5px solid ${sageText}`,
-                      background: leaving ? sageText : "#fff",
-                      flexShrink: 0,
-                      cursor: "pointer",
-                      marginTop: 1,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      padding: 0,
-                    }}
-                  >
-                    {leaving ? (
-                      <Check size={11} strokeWidth={3.5} color="#fff" />
-                    ) : (
-                      <>
-                        <Hourglass className="oty-ic oty-hg" size={9} strokeWidth={2} color={sageText} />
-                        <Check className="oty-ic oty-check" size={11} strokeWidth={3} color={sageText} />
-                      </>
-                    )}
-                  </button>
-                  <div style={{ flex: 1, minWidth: 0, paddingRight: 22 }}>
-                    <div style={{ fontFamily: FONT_CAVEAT, fontSize: 18, fontWeight: 500, lineHeight: 1.2, color: "#46352b" }}>
-                      {note.text}
-                    </div>
-                    <div
-                      style={{
-                        marginTop: 6,
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 4,
-                        fontFamily: FONT_MONO,
-                        fontSize: 8.5,
-                        letterSpacing: "0.05em",
-                        textTransform: "uppercase",
-                        color: s.ink,
-                        background: s.bg,
-                        border: `0.5px solid ${s.border}`,
-                        borderRadius: 20,
-                        padding: "2px 7px",
-                      }}
-                    >
-                      {s.dot ? <span style={{ width: 5, height: 5, borderRadius: "50%", background: s.dot }} /> : <Calendar size={9} strokeWidth={2} />}
-                      {dueChipLabel(note.dueDate, today)}
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    aria-label="Delete"
-                    className="oty-note-del"
-                    onClick={() => dropNote(note)}
-                    style={{
-                      position: "absolute",
-                      right: 0,
-                      top: 11,
-                      width: 24,
-                      height: 24,
-                      borderRadius: 7,
-                      border: "0.5px solid #e0d5c8",
-                      background: "#fff",
-                      color: "#b08a7c",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      padding: 0,
-                    }}
-                    onMouseEnter={(e) => { e.currentTarget.style.color = "#a8442f"; e.currentTarget.style.borderColor = "#e3c2b6"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.color = "#b08a7c"; e.currentTarget.style.borderColor = "#e0d5c8"; }}
-                  >
-                    <X size={13} />
-                  </button>
-                </div>
-              );
-            })}
-          </>
-        )}
-
-        {/* Zone B */}
-        {recommendedRows.length > 0 && (
-          <>
-            <div
-              ref={zoneBHeaderRef}
-              className="flex items-center justify-between"
-              style={{
-                background: sageBandGradient,
-                border: `1px solid ${sageBandRule}`,
-                borderRadius: 8,
-                padding: "8px 12px",
-                margin: "8px 0",
-                gap: 10,
-              }}
-            >
-              <span
-                style={{
-                  ...labelStyle,
-                  color: sageText,
-                  letterSpacing: "0.1em",
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  minWidth: 0,
-                }}
-              >
-                When you have a moment
-              </span>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 7, flexShrink: 0 }}>
-                <span style={{ ...labelStyle, color: sageText, letterSpacing: "0.1em", opacity: 0.85 }}>Recommended</span>
-                <span aria-label={`${recommendedTotal} recommended`} style={recommendedPillStyle}>
-                  {recommendedTotal}
-                </span>
-              </span>
-            </div>
-
-            {recommendedRows.map((row) => {
-              const Icon = row.Icon;
-              const isOpen = !!expanded[row.type];
-              return (
-                <div key={row.type}>
-                  <button
-                    type="button"
-                    aria-expanded={isOpen}
-                    onClick={() => toggle(row.type)}
-                    className="oty-rec-row flex items-center gap-3 cursor-pointer"
-                    style={{ width: "100%", textAlign: "left", padding: "9px 8px", borderRadius: 8, background: "transparent", border: "none" }}
-                  >
+                <div style={{ flex: 1, minWidth: 0, cursor: "pointer" }} onClick={() => onOpenQuery(row.task.relatedRecordId)}>
+                  <div className="flex items-center gap-2" style={{ minWidth: 0 }}>
+                    <span style={urgentChipStyle}>{row.chip}</span>
                     <span
                       style={{
-                        width: 28,
-                        height: 28,
-                        borderRadius: 8,
-                        background: "#eef1ec",
-                        border: `0.5px solid ${sageBandRule}`,
-                        color: sageText,
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexShrink: 0,
-                      }}
-                    >
-                      <Icon className="w-[14px] h-[14px]" />
-                    </span>
-                    <span
-                      style={{
-                        flex: 1,
-                        minWidth: 0,
-                        fontSize: 12,
-                        color: bodyInk,
+                        fontFamily: FONT_SERIF,
+                        color: burgundy,
+                        fontSize: 13,
+                        fontWeight: 700,
                         whiteSpace: "nowrap",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                       }}
                     >
-                      {row.label}
+                      {row.agentName}
                     </span>
-                    <ChevronDown
-                      className="w-[15px] h-[15px] shrink-0"
-                      style={{ color: sageText, transition: "transform 0.18s ease", transform: isOpen ? "rotate(0deg)" : "rotate(-90deg)" }}
-                    />
-                  </button>
-
-                  {isOpen && (
-                    <div role="region" style={{ marginBottom: 2 }}>
-                      {row.items.map((it) => (
-                        <div
-                          key={it.task.id}
-                          className="oty-rec-item cursor-pointer"
-                          style={{ padding: "6px 8px 6px 44px", borderRadius: 6, fontSize: 12, color: bodyInk, lineHeight: 1.4 }}
-                          onClick={() => routeItem(it.task)}
-                        >
-                          {it.subject}
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  </div>
+                  <div style={{ fontSize: 11, color: mutedInk, marginTop: 3, lineHeight: 1.4 }}>{row.description}</div>
                 </div>
-              );
-            })}
+                <button
+                  className="oty-action urgent shrink-0"
+                  style={urgentBtnStyle}
+                  onClick={() => (row.type === "nudge_overdue" ? onNudge(row.task) : onAction(row.task))}
+                >
+                  {row.actionLabel}
+                </button>
+              </div>
+            ))
+          ))}
+
+        {/* ===== Housekeeping pane ===== */}
+        {activeTab === "house" &&
+          (houseRows.length === 0 ? (
+            <EmptyState
+              icon={<ListChecks className="w-[26px] h-[26px]" style={{ color: "#8a9e88" }} strokeWidth={1.6} />}
+              title="Nothing to tidy"
+              body="No stale queries or loose ends just now."
+            />
+          ) : (
+            houseRows.map((row, i) => (
+              <div
+                key={row.task.id}
+                className="flex items-center justify-between gap-3"
+                style={{ padding: "10px 2px", borderTop: i > 0 ? "0.5px solid #f0e6d8" : undefined }}
+              >
+                <div style={{ flex: 1, minWidth: 0, cursor: "pointer" }} onClick={() => routeHousekeeping(row.task)}>
+                  <div className="flex items-center gap-2" style={{ minWidth: 0 }}>
+                    <span style={sageChipStyle}>{row.chip}</span>
+                    <span
+                      style={{
+                        minWidth: 0,
+                        fontSize: 13,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                    >
+                      {row.subject}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 11, color: mutedInk, marginTop: 3, lineHeight: 1.4 }}>{row.description}</div>
+                </div>
+                <button className="oty-action sage shrink-0" style={sageBtnStyle} onClick={() => routeHousekeeping(row.task)}>
+                  {row.actionLabel}
+                </button>
+              </div>
+            ))
+          ))}
+
+        {/* ===== Notes pane ===== */}
+        {activeTab === "notes" && (
+          <>
+            {noteRows.length === 0 && !composing ? (
+              <EmptyState
+                icon={<PlusCircle className="w-[26px] h-[26px]" style={{ color: "#bd7461" }} strokeWidth={1.6} />}
+                title="No notes yet"
+                body="Jot a reminder to yourself — it'll wait here until you're ready."
+                cta={{ label: "+ Write your first note", onClick: openCompose }}
+              />
+            ) : (
+              <>
+                {noteRows.map((note, i) => {
+                  const theme = NOTE_THEMES[note.colour];
+                  const leaving = leavingIds.has(note.id);
+                  return (
+                    <div
+                      key={note.id}
+                      className={`oty-note-row${leaving ? " sa-row-leaving" : ""}`}
+                      style={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: 11,
+                        padding: "10px 4px 10px 0",
+                        borderLeft: `4px solid ${theme.fill}`,
+                        paddingLeft: 11,
+                        borderRadius: 4,
+                        borderTop: i > 0 ? "0.5px solid #f0e6d8" : undefined,
+                      }}
+                    >
+                      <button
+                        type="button"
+                        aria-label="Complete"
+                        className={leaving ? undefined : "oty-tick"}
+                        onClick={() => tickNote(note.id)}
+                        style={{
+                          width: 18,
+                          height: 18,
+                          borderRadius: "50%",
+                          border: `1.5px solid ${theme.ink}`,
+                          background: leaving ? theme.ink : "#fff",
+                          flexShrink: 0,
+                          cursor: "pointer",
+                          marginTop: 2,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          padding: 0,
+                        }}
+                      >
+                        {leaving && <Check size={11} strokeWidth={3.5} color="#fff" />}
+                      </button>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontFamily: FONT_CAVEAT, fontSize: 19, fontWeight: 500, lineHeight: 1.2, color: "#5a4a40" }}>
+                          {note.text}
+                        </div>
+                        <div
+                          style={{
+                            marginTop: 5,
+                            fontFamily: FONT_MONO,
+                            fontSize: 8.5,
+                            letterSpacing: "0.07em",
+                            textTransform: "uppercase",
+                            color: "#a8978a",
+                          }}
+                        >
+                          Noted {formatCreatedStamp(note.createdAt)}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* Inline composer OR the dashed "+ New note" row. */}
+                {composing ? (
+                  <div
+                    style={{
+                      marginTop: 10,
+                      borderRadius: 9,
+                      border: "1px solid #e3c8bc",
+                      background: "#fdf6f2",
+                      padding: "10px 11px",
+                    }}
+                  >
+                    <textarea
+                      autoFocus
+                      value={draftText}
+                      onChange={(e) => setDraftText(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          saveCompose();
+                        }
+                        if (e.key === "Escape") resetCompose();
+                      }}
+                      placeholder="Write a note to yourself…"
+                      rows={2}
+                      style={{
+                        width: "100%",
+                        resize: "none",
+                        border: "none",
+                        outline: "none",
+                        background: "transparent",
+                        fontFamily: FONT_CAVEAT,
+                        fontSize: 19,
+                        lineHeight: 1.25,
+                        color: "#5a4a40",
+                      }}
+                    />
+                    <div className="flex items-center justify-between" style={{ marginTop: 8, gap: 8 }}>
+                      <div className="flex items-center" style={{ gap: 8 }}>
+                        {NOTE_COLOURS.map((c) => (
+                          <button
+                            key={c}
+                            type="button"
+                            aria-label={c}
+                            className="oty-swatch"
+                            onClick={() => setDraftColour(c)}
+                            style={{
+                              width: 16,
+                              height: 16,
+                              borderRadius: "50%",
+                              background: NOTE_THEMES[c].fill,
+                              border: draftColour === c ? `2px solid ${NOTE_THEMES[c].ink}` : "1px solid rgba(0,0,0,0.12)",
+                              cursor: "pointer",
+                              padding: 0,
+                            }}
+                          />
+                        ))}
+                        <span style={{ position: "relative" }}>
+                          <button
+                            type="button"
+                            onClick={() => setDateOpen((v) => !v)}
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 4,
+                              fontFamily: FONT_MONO,
+                              fontSize: 9,
+                              letterSpacing: "0.04em",
+                              color: draftDue ? burgundy : "#a8978a",
+                              background: draftDue ? "#f6ddd1" : "transparent",
+                              border: `0.5px solid ${draftDue ? "#e8c8bc" : "#ddd0c4"}`,
+                              borderRadius: 7,
+                              padding: "4px 8px",
+                              cursor: "pointer",
+                              marginLeft: 4,
+                            }}
+                          >
+                            <Calendar size={11} strokeWidth={2} />
+                            {draftDue ? formatCreatedStamp(draftDue) : "Date"}
+                          </button>
+                          {dateOpen && (
+                            <span style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 30 }}>
+                              <NoteComposeCalendar
+                                value={draftDue}
+                                onPick={(iso) => {
+                                  setDraftDue(iso);
+                                  setDateOpen(false);
+                                }}
+                              />
+                            </span>
+                          )}
+                        </span>
+                      </div>
+                      <div className="flex items-center" style={{ gap: 6 }}>
+                        <button
+                          type="button"
+                          aria-label="Cancel"
+                          onClick={resetCompose}
+                          style={{ background: "transparent", border: "none", color: "#a8978a", cursor: "pointer", lineHeight: 0, padding: 4 }}
+                        >
+                          <X size={15} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={saveCompose}
+                          disabled={!draftText.trim()}
+                          style={{
+                            fontFamily: FONT_MONO,
+                            fontSize: 9.5,
+                            fontWeight: 500,
+                            letterSpacing: "0.06em",
+                            background: draftText.trim() ? "#f5e2da" : "#f0e7e0",
+                            color: draftText.trim() ? burgundy : "#bcab9d",
+                            border: `1px solid ${draftText.trim() ? "#e8c8bc" : "#e4dad0"}`,
+                            borderRadius: 9,
+                            padding: "7px 14px",
+                            cursor: draftText.trim() ? "pointer" : "default",
+                          }}
+                        >
+                          Save note
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={openCompose}
+                    className="oty-newnote"
+                    style={{
+                      width: "100%",
+                      marginTop: 10,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 7,
+                      fontFamily: FONT_MONO,
+                      fontSize: 10,
+                      fontWeight: 500,
+                      letterSpacing: "0.05em",
+                      color: "#bd7461",
+                      background: "transparent",
+                      border: "1px dashed #e3bcae",
+                      borderRadius: 9,
+                      padding: "9px 14px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <Plus size={13} strokeWidth={2.4} /> New note
+                  </button>
+                )}
+              </>
+            )}
           </>
         )}
       </div>
-
-      {/* ── Footer hint — pinned; visible only while the Zone B header is off-screen ──────── */}
-      {recommendedRows.length > 0 && (
-        <div
-          className="shrink-0"
-          style={{
-            position: "relative",
-            zIndex: 2,
-            margin: "0 6px 6px",
-            padding: "8px 14px",
-            borderTop: "0.5px solid #ece0d2",
-            background: parchment,
-          }}
-        >
-          <span
-            className="oty-hint"
-            aria-hidden={!hintVisible}
-            style={{ ...labelStyle, color: burgundy, opacity: hintVisible ? 1 : 0 }}
-          >
-            ↓ Scroll to see {recommendedTotal} recommended action{recommendedTotal === 1 ? "" : "s"}
-          </span>
-        </div>
-      )}
     </MountCard>
   );
 };

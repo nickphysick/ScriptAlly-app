@@ -1747,6 +1747,7 @@ export const Dashboard: React.FC<{
                     setSelectedQueryIdForPanel(qid);
                     setIsQueryPanelOpen(true);
                   }}
+                  onAddNote={addNote}
                   onCompleteNote={completeNoteWithUndo}
                   onDeleteNote={(note) => deleteNoteWithUndo(note.id)}
                 />

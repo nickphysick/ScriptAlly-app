@@ -97,6 +97,7 @@ export const NotesLab: React.FC = () => {
             onDismiss={() => {}}
             onAllTasks={() => {}}
             onOpenQuery={() => {}}
+            onAddNote={addNote}
             onCompleteNote={completeNote}
             onDeleteNote={(note) => deleteNote(note.id)}
           />
