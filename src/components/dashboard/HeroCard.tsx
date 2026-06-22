@@ -210,15 +210,15 @@ export const HeroCard: React.FC<HeroCardProps> = ({
               top: "50%",
               left: "50%",
               transform: "translate(-50%, -50%)",
-              height: "103%",
+              height: "113%",
               width: "auto",
-              maxWidth: "130%",
+              maxWidth: "143%",
               objectFit: "contain",
               pointerEvents: "none",
               zIndex: 0,
               // soft vignette so the corkboard fades out at the edges
-              WebkitMaskImage: "radial-gradient(ellipse at center, #000 66%, transparent 100%)",
-              maskImage: "radial-gradient(ellipse at center, #000 66%, transparent 100%)",
+              WebkitMaskImage: "radial-gradient(ellipse at center, #000 48%, transparent 100%)",
+              maskImage: "radial-gradient(ellipse at center, #000 48%, transparent 100%)",
             }}
           />
           <div style={{ position: "relative", zIndex: 1 }}>
