@@ -14,7 +14,7 @@ import React, { useState } from "react";
 import { Plus, X, Calendar, Maximize2 } from "lucide-react";
 import type { Note, NoteColour } from "../../types";
 import { FONT_MONO, burgundy, mutedInk, parchment, buttonPinkBorder } from "../../lib/designTokens";
-import { FONT_CAVEAT, NOTE_THEMES } from "./notesTheme";
+import { FONT_CAVEAT, NOTE_THEMES, NOTE_COLOURS } from "./notesTheme";
 import { PostIt } from "./PostIt";
 import { NoteEditor } from "./NoteEditor";
 import { NotesSeeAllOverlay } from "./NotesSeeAllOverlay";
@@ -41,6 +41,13 @@ const SIDE_SLOTS = [
   { x: 42, rot: 11, z: 2 },
 ];
 
+/** Wider slots for the existing notes when they fan BEHIND the add-another compose sticky. */
+const BEHIND_SLOTS = [
+  { x: -58, rot: -9, z: 3 },
+  { x: 64, rot: 10, z: 2 },
+  { x: -108, rot: -13, z: 1 },
+];
+
 /** Colour-picker fan — pink front, yellow/sage behind (spread out on hover to be hittable). */
 const PICKER_SIDES: { colour: NoteColour; x: number; spreadX: number; rot: number; z: number }[] = [
   { colour: "yellow", x: -38, spreadX: -66, rot: -11, z: 1 },
@@ -54,7 +61,6 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
   const [cornerHover, setCornerHover] = useState(false);
 
   // Compose-in-place state
-  const [pickerOpen, setPickerOpen] = useState(false); // populated desk: "+" opened the picker
   const [composeColour, setComposeColour] = useState<NoteColour | null>(null);
   const [composeText, setComposeText] = useState("");
   const [composeDue, setComposeDue] = useState<string | null>(null);
@@ -67,25 +73,26 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
   const front = top[0];
   const sides = top.slice(1).map((note, i) => ({ note, ...SIDE_SLOTS[i] }));
   const isEmpty = active.length === 0;
+  const lastUsedColour: NoteColour = front?.colour ?? "pink";
 
   const composing = composeColour !== null;
-  const showPicker = !composing && (isEmpty || pickerOpen);
-  const showFan = !composing && !showPicker;
+  // The full grab-a-colour picker is for the true empty state ONLY; "+" on a populated desk goes
+  // straight to a fresh sticky (Option B).
+  const showPicker = !composing && isEmpty;
+  const showFan = !composing && !isEmpty;
 
-  const openPicker = () => setPickerOpen(true);
   const grabColour = (c: NoteColour) => {
     setComposeColour(c);
     setComposeText("");
     setComposeDue(null);
     setDateOpen(false);
-    setPickerOpen(false);
   };
+  const addAnother = () => grabColour(lastUsedColour); // "+" → fresh sticky, last-used colour
   const resetCompose = () => {
     setComposeColour(null);
     setComposeText("");
     setComposeDue(null);
     setDateOpen(false);
-    setPickerOpen(false);
   };
   const saveCompose = () => {
     const trimmed = composeText.trim();
@@ -98,12 +105,30 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
 
   return (
     <div style={{ position: "relative", width: 296, flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-      {/* ---- COMPOSE: write on the grabbed sticky (content-sized → centred) ---- */}
+      {/* ---- COMPOSE: write on the sticky; existing notes fan behind (Option B) ---- */}
       {composing ? (
         <div style={{ position: "relative", width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <div style={{ position: "relative", width: "100%", display: "flex", justifyContent: "center" }}>
+            {/* existing notes, dimmed, fanned behind — never blank the desk */}
+            {!isEmpty ? (
+              <div style={{ position: "absolute", inset: 0, display: "flex", justifyContent: "center", alignItems: "flex-end", opacity: 0.5, filter: "saturate(0.82)", pointerEvents: "none", zIndex: 0 }}>
+                <div style={{ position: "relative", width: NOTE_W }}>
+                  {top.map((note, i) => {
+                    const b = BEHIND_SLOTS[i] ?? BEHIND_SLOTS[BEHIND_SLOTS.length - 1];
+                    return (
+                      <div key={note.id} style={{ position: "absolute", bottom: 0, left: "50%", marginLeft: -NOTE_W / 2, transformOrigin: "50% 100%", transform: `translateX(${b.x}px) rotate(${b.rot}deg)`, zIndex: b.z }}>
+                        <PostIt colour={note.colour} text={note.text} dueDate={note.dueDate} surfaced={false} metaRow createdAt={note.createdAt} clampLines={3} width={NOTE_W} minHeight={NOTE_MINH} />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : null}
+
           <div
             style={{
               position: "relative",
+              zIndex: 2,
               width: 248,
               background: composeTheme.fill,
               color: composeTheme.ink,
@@ -146,6 +171,27 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
               </div>
             ) : null}
 
+            {/* colour dots — recolour the sticky (colour optional) */}
+            <div style={{ display: "flex", gap: 7, marginTop: 6 }}>
+              {NOTE_COLOURS.map((c) => (
+                <button
+                  key={c}
+                  onClick={() => setComposeColour(c)}
+                  aria-label={c}
+                  style={{
+                    width: 14,
+                    height: 14,
+                    borderRadius: "50%",
+                    background: NOTE_THEMES[c].fill,
+                    border: "none",
+                    cursor: "pointer",
+                    padding: 0,
+                    boxShadow: composeColour === c ? `0 0 0 1.5px ${composeTheme.ink}` : "inset 0 0 0 1px rgba(58,28,20,0.16)",
+                  }}
+                />
+              ))}
+            </div>
+
             {/* bottom bar: add a date · Add · × */}
             <div style={{ display: "flex", alignItems: "center", gap: 8, borderTop: "1px solid rgba(58,28,20,0.1)", paddingTop: 9, marginTop: 6 }}>
               <button
@@ -167,6 +213,7 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
               </button>
             </div>
           </div>
+          </div>
 
           {/* anchored calendar (in-flow, never a floating layer) */}
           {dateOpen ? (
@@ -187,13 +234,6 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
           onMouseLeave={() => { setPickerHover(false); setHoverColour(null); }}
           style={{ position: "relative", width: "100%", display: "flex", justifyContent: "center" }}
         >
-          {/* back-to-fan affordance when reached via "+" on a populated desk */}
-          {pickerOpen && !isEmpty ? (
-            <button onClick={() => setPickerOpen(false)} aria-label="Back to notes" style={{ position: "absolute", top: -6, right: 2, background: "none", border: "none", color: mutedInk, cursor: "pointer", lineHeight: 0, zIndex: 12 }}>
-              <X size={16} />
-            </button>
-          ) : null}
-
           {/* sides — absolute, bottom-aligned behind the front */}
           {PICKER_SIDES.map((p) => {
             const theme = NOTE_THEMES[p.colour];
@@ -265,7 +305,7 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
                     boxShadow: hov ? "1px 12px 26px rgba(58,28,20,0.22)" : undefined,
                   }}
                 >
-                  <PostIt colour={s.note.colour} text={s.note.text} dueDate={s.note.dueDate} surfaced={false} clampLines={4} width={NOTE_W} minHeight={NOTE_MINH} onClick={() => setEditing(s.note)} />
+                  <PostIt colour={s.note.colour} text={s.note.text} dueDate={s.note.dueDate} metaRow createdAt={s.note.createdAt} clampLines={4} width={NOTE_W} minHeight={NOTE_MINH} onClick={() => setEditing(s.note)} />
                 </div>
               );
             })}
@@ -277,11 +317,11 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
               onMouseLeave={() => setHoveredId((id) => (id === front.id ? null : id))}
               style={{ position: "relative", zIndex: 3, transformOrigin: "50% 100%", transform: hoveredId === front.id ? "translateY(-12px) scale(1.04)" : "none" }}
             >
-              <PostIt colour={front.colour} text={front.text} dueDate={front.dueDate} surfaced clampLines={4} width={NOTE_W} minHeight={NOTE_MINH} onClick={() => setEditing(front)} />
+              <PostIt colour={front.colour} text={front.text} dueDate={front.dueDate} metaRow createdAt={front.createdAt} clampLines={4} width={NOTE_W} minHeight={NOTE_MINH} onClick={() => setEditing(front)} />
 
-              {/* "+" riding the front note's top-right corner — opens the colour picker */}
+              {/* "+" riding the front note's top-right corner — straight to a fresh sticky */}
               <button
-                onClick={(e) => { e.stopPropagation(); openPicker(); }}
+                onClick={(e) => { e.stopPropagation(); addAnother(); }}
                 onMouseEnter={() => setCornerHover(true)}
                 onMouseLeave={() => setCornerHover(false)}
                 aria-label="New note"

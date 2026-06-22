@@ -92,6 +92,14 @@ export const dueChipLabel = (dueDate: string | null | undefined, today: string =
   return formatDueLabel(dueDate, today);
 };
 
+/** Quiet "created" stamp for a desk sticky — date only, e.g. "12 Jun". From the full-ISO createdAt. */
+export const formatCreatedStamp = (createdAt: string | null | undefined): string => {
+  if (!createdAt) return "";
+  const d = new Date(createdAt);
+  if (isNaN(d.getTime())) return "";
+  return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`;
+};
+
 /** Active = not done. Every active note lives on the desk (there is no separate "pinned" flag). */
 export const activeNotes = (notes: Note[]): Note[] => notes.filter((n) => !n.done);
 

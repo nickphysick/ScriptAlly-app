@@ -11,7 +11,7 @@ import { Calendar } from "lucide-react";
 import type { NoteColour } from "../../types";
 import { FONT_MONO } from "../../lib/designTokens";
 import { NOTE_THEMES, FONT_CAVEAT, DUE_CHIP_STAGES, type NoteTheme } from "./notesTheme";
-import { dueStage, dueChipLabel } from "./notesUtils";
+import { dueStage, dueChipLabel, formatCreatedStamp } from "./notesUtils";
 
 export interface PostItProps {
   colour: NoteColour;
@@ -22,6 +22,10 @@ export interface PostItProps {
   dueDate?: string | null; // "YYYY-MM-DD"
   /** Show the due chip — only the front/surfaced note carries it. Default true. */
   surfaced?: boolean;
+  /** Desk-sticky mode: a top meta row (due pill top-left, created stamp top-right), text below. */
+  metaRow?: boolean;
+  /** Full-ISO created stamp, shown top-right in metaRow mode. */
+  createdAt?: string;
   onClick?: () => void;
   /** Positioning / fan transform injected by the parent. */
   style?: React.CSSProperties;
@@ -42,6 +46,8 @@ export const PostIt: React.FC<PostItProps> = ({
   text,
   dueDate,
   surfaced = true,
+  metaRow = false,
+  createdAt,
   onClick,
   style,
   className,
@@ -95,6 +101,46 @@ export const PostIt: React.FC<PostItProps> = ({
           boxShadow: "-2px -2px 4px rgba(58,28,20,0.13)",
         }}
       />
+      {/* meta row (desk sticky): due pill top-left, created stamp top-right; text below */}
+      {metaRow
+        ? (() => {
+            const stage = dueDate ? dueStage(dueDate) ?? "cool" : null;
+            const s = stage ? DUE_CHIP_STAGES[stage] : null;
+            return (
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, paddingRight: 16, marginBottom: 9, minHeight: 15 }}>
+                {s ? (
+                  <span
+                    style={{
+                      fontFamily: FONT_MONO,
+                      fontSize: 7.5,
+                      fontWeight: 500,
+                      letterSpacing: "0.05em",
+                      textTransform: "uppercase",
+                      color: s.ink,
+                      background: s.bg,
+                      border: `0.5px solid ${s.border}`,
+                      borderRadius: 20,
+                      padding: "2px 7px",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 4,
+                    }}
+                  >
+                    {s.dot ? <span style={{ width: 4, height: 4, borderRadius: "50%", background: s.dot }} /> : <Calendar size={8} strokeWidth={2} />}
+                    {dueChipLabel(dueDate)}
+                  </span>
+                ) : (
+                  <span />
+                )}
+                {createdAt ? (
+                  <span style={{ fontFamily: FONT_MONO, fontSize: 7, letterSpacing: "0.04em", textTransform: "uppercase", opacity: 0.5, whiteSpace: "nowrap", marginTop: 2 }}>
+                    {formatCreatedStamp(createdAt)}
+                  </span>
+                ) : null}
+              </div>
+            );
+          })()
+        : null}
       <div
         style={{
           fontFamily: FONT_CAVEAT,
@@ -109,7 +155,7 @@ export const PostIt: React.FC<PostItProps> = ({
       >
         {children ?? text}
       </div>
-      {surfaced && dueDate
+      {!metaRow && surfaced && dueDate
         ? (() => {
             const stage = dueStage(dueDate) ?? "cool";
             const s = DUE_CHIP_STAGES[stage];
