@@ -87,27 +87,24 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--white);color:var(
 .reassure p{font-size:15.5px;line-height:1.72;color:var(--soft);max-width:46em;margin:0 auto}
 .sign{font-family:'Playfair Display',serif;font-style:italic;font-size:19px;color:var(--burg);margin:22px 0 0}
 
-/* product showcase */
-.heroshot{padding:28px 0 14px;text-align:center}
-.heroshot .device{max-width:920px;margin:0 auto}
-.heroshot .dbody{height:clamp(240px,40vw,420px)}
+/* hero row — title + slogan beside the dashboard */
+.herorow{padding:48px 0 96px}
+.hgrid{display:grid;grid-template-columns:1fr 1.12fr;gap:50px;align-items:center}
+.hmast{text-align:center}
+.hmast .logo-img{height:clamp(80px,9vw,128px);margin:0 auto}
+.hmast .slogan{margin-top:14px}
+.hdev .dbody{height:clamp(230px,30vw,360px)}
 
-/* what does it do — full-width black band */
-.whatband{background:#141110;padding:86px 0 94px}
-.what-h{font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(44px,6.6vw,88px);letter-spacing:-1px;color:#fff;text-align:center;margin:0 0 54px}
+/* what does it do — soft-pink band */
+.whatband{background:#f9e9e3;padding:86px 0 94px}
+.what-h{font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(44px,6.6vw,88px);letter-spacing:-1px;color:var(--ink);text-align:center;margin:0 0 54px}
 .whatband .feat{padding:46px 0}
-.whatband .fh{color:#f4ece4}
-.whatband .fp{color:#b7a89b}
-.whatband .fp.ph{color:#cdb6a8}
-.whatband .device{box-shadow:0 26px 64px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,255,255,.04)}
-
-/* lead-in to founders */
-.leadin{text-align:center;padding:80px 0 6px}
-.leadin h2{font-family:'Playfair Display',serif;font-weight:600;font-size:clamp(26px,3.4vw,44px);line-height:1.2;letter-spacing:-.3px;color:var(--ink);margin:0 auto;max-width:18em}
 
 @media(max-width:860px){
   .whatband{padding:58px 0 64px}
   .what-h{margin-bottom:32px}
+  .hgrid{grid-template-columns:1fr;gap:32px}
+  .herorow{padding:36px 0 64px}
   .feat .grid,.feat.rev .grid{grid-template-columns:1fr;gap:30px}
   .feat.rev .ftext,.feat.rev .fimg{order:0}
   .feat{padding:52px 0}
@@ -122,21 +119,20 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--white);color:var(
 <body>
 <nav class="nav"><span class="coming">Coming soon</span><a class="login" href="https://scriptally-app.web.app">Founders log in</a></nav>
 
-<section class="masthead bg-white"><div class="inner">
-  <img class="logo-img" src="scriptally-title-holding.png" alt="ScriptAlly">
-  <p class="slogan">A living database for your agent queries</p>
-</div></section>
-
-<section class="heroshot bg-white"><div class="inner">
-  <div class="device"><div class="chrome"><i></i><i></i><i></i></div><div class="dhead">Dashboard</div><div class="dbody">SCREENSHOT HERE</div></div>
-</div></section>
+<section class="herorow bg-white"><div class="inner"><div class="hgrid">
+  <div class="hmast">
+    <img class="logo-img" src="scriptally-title-holding.png" alt="ScriptAlly">
+    <p class="slogan">A living database for your agent queries</p>
+  </div>
+  <div class="hdev"><div class="device"><div class="chrome"><i></i><i></i><i></i></div><div class="dhead">Dashboard</div><div class="dbody">SCREENSHOT HERE</div></div></div>
+</div></div></section>
 
 <section class="whatband"><div class="inner">
   <h2 class="what-h">What does it do?</h2>
 
   <div class="feat"><div class="grid">
     <div class="ftext">
-      <h2 class="fh">Feature one</h2>
+      <h2 class="fh">A finger on the <span class="pulse">pulse</span> of your querying journey</h2>
       <p class="fp">Every agent, every submission, every reply &mdash; collated in one living workspace that keeps itself current as you query, so nothing slips through the cracks.</p>
     </div>
     <div class="fimg"><div class="device"><div class="chrome"><i></i><i></i><i></i></div><div class="dhead">Feature</div><div class="dbody">SCREENSHOT HERE</div></div></div>
@@ -157,10 +153,6 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--white);color:var(
     </div>
     <div class="fimg"><div class="device"><div class="chrome"><i></i><i></i><i></i></div><div class="dhead">Feature</div><div class="dbody">SCREENSHOT HERE</div></div></div>
   </div></div>
-</div></section>
-
-<section class="leadin bg-white"><div class="inner">
-  <h2>ScriptAlly is a finger on the <span class="pulse">pulse</span> of your querying journey</h2>
 </div></section>
 
 <section class="founders bg-pink"><div class="inner"><div class="f-row">
