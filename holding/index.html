@@ -87,7 +87,27 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--white);color:var(
 .reassure p{font-size:15.5px;line-height:1.72;color:var(--soft);max-width:46em;margin:0 auto}
 .sign{font-family:'Playfair Display',serif;font-style:italic;font-size:19px;color:var(--burg);margin:22px 0 0}
 
+/* product showcase */
+.heroshot{padding:28px 0 14px;text-align:center}
+.heroshot .device{max-width:920px;margin:0 auto}
+.heroshot .dbody{height:clamp(240px,40vw,420px)}
+
+/* what does it do — full-width black band */
+.whatband{background:#141110;padding:86px 0 94px}
+.what-h{font-family:'Playfair Display',serif;font-weight:700;font-size:clamp(44px,6.6vw,88px);letter-spacing:-1px;color:#fff;text-align:center;margin:0 0 54px}
+.whatband .feat{padding:46px 0}
+.whatband .fh{color:#f4ece4}
+.whatband .fp{color:#b7a89b}
+.whatband .fp.ph{color:#cdb6a8}
+.whatband .device{box-shadow:0 26px 64px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,255,255,.04)}
+
+/* lead-in to founders */
+.leadin{text-align:center;padding:80px 0 6px}
+.leadin h2{font-family:'Playfair Display',serif;font-weight:600;font-size:clamp(26px,3.4vw,44px);line-height:1.2;letter-spacing:-.3px;color:var(--ink);margin:0 auto;max-width:18em}
+
 @media(max-width:860px){
+  .whatband{padding:58px 0 64px}
+  .what-h{margin-bottom:32px}
   .feat .grid,.feat.rev .grid{grid-template-columns:1fr;gap:30px}
   .feat.rev .ftext,.feat.rev .fimg{order:0}
   .feat{padding:52px 0}
@@ -107,29 +127,41 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--white);color:var(
   <p class="slogan">A living database for your agent queries</p>
 </div></section>
 
-<section class="feat bg-white"><div class="inner"><div class="grid">
-  <div class="ftext">
-    <h2 class="fh">A finger on the <span class="pulse">pulse</span> of your querying journey</h2>
-    <p class="fp">Every agent, every submission, every reply &mdash; collated in one living workspace that keeps itself current as you query, so nothing slips through the cracks.</p>
-  </div>
-  <div class="fimg"><div class="device"><div class="chrome"><i></i><i></i><i></i></div><div class="dhead">Dashboard</div><div class="dbody">SCREENSHOT HERE</div></div></div>
-</div></div></section>
+<section class="heroshot bg-white"><div class="inner">
+  <div class="device"><div class="chrome"><i></i><i></i><i></i></div><div class="dhead">Dashboard</div><div class="dbody">SCREENSHOT HERE</div></div>
+</div></section>
 
-<section class="feat rev bg-clay"><div class="inner"><div class="grid">
-  <div class="ftext">
-    <h2 class="fh">Feature two</h2>
-    <p class="fp ph">A short description of this feature will live here.</p>
-  </div>
-  <div class="fimg"><div class="device"><div class="chrome"><i></i><i></i><i></i></div><div class="dhead">Feature</div><div class="dbody">SCREENSHOT HERE</div></div></div>
-</div></div></section>
+<section class="whatband"><div class="inner">
+  <h2 class="what-h">What does it do?</h2>
 
-<section class="feat bg-white"><div class="inner"><div class="grid">
-  <div class="ftext">
-    <h2 class="fh">Feature three</h2>
-    <p class="fp ph">A short description of this feature will live here.</p>
-  </div>
-  <div class="fimg"><div class="device"><div class="chrome"><i></i><i></i><i></i></div><div class="dhead">Feature</div><div class="dbody">SCREENSHOT HERE</div></div></div>
-</div></div></section>
+  <div class="feat"><div class="grid">
+    <div class="ftext">
+      <h2 class="fh">Feature one</h2>
+      <p class="fp">Every agent, every submission, every reply &mdash; collated in one living workspace that keeps itself current as you query, so nothing slips through the cracks.</p>
+    </div>
+    <div class="fimg"><div class="device"><div class="chrome"><i></i><i></i><i></i></div><div class="dhead">Feature</div><div class="dbody">SCREENSHOT HERE</div></div></div>
+  </div></div>
+
+  <div class="feat rev"><div class="grid">
+    <div class="ftext">
+      <h2 class="fh">Feature two</h2>
+      <p class="fp ph">A short description of this feature will live here.</p>
+    </div>
+    <div class="fimg"><div class="device"><div class="chrome"><i></i><i></i><i></i></div><div class="dhead">Feature</div><div class="dbody">SCREENSHOT HERE</div></div></div>
+  </div></div>
+
+  <div class="feat"><div class="grid">
+    <div class="ftext">
+      <h2 class="fh">Feature three</h2>
+      <p class="fp ph">A short description of this feature will live here.</p>
+    </div>
+    <div class="fimg"><div class="device"><div class="chrome"><i></i><i></i><i></i></div><div class="dhead">Feature</div><div class="dbody">SCREENSHOT HERE</div></div></div>
+  </div></div>
+</div></section>
+
+<section class="leadin bg-white"><div class="inner">
+  <h2>ScriptAlly is a finger on the <span class="pulse">pulse</span> of your querying journey</h2>
+</div></section>
 
 <section class="founders bg-pink"><div class="inner"><div class="f-row">
   <div class="f-headside"><p class="f-hand">We'd love for you to help shape our vision.</p></div>
