@@ -8,7 +8,7 @@
  * — the created stamp owns that corner. Critical colours are inline (known Tailwind footgun).
  */
 import React, { useState } from "react";
-import { X, Check, Calendar, Hourglass } from "lucide-react";
+import { Trash2, Check, Calendar, Hourglass } from "lucide-react";
 import type { Note } from "../../types";
 import { FONT_MONO, FONT_SERIF, FONT_SANS } from "../../lib/designTokens";
 import { NOTE_THEMES, NOTE_DEEP_SHADE, FONT_CAVEAT } from "./notesTheme";
@@ -26,7 +26,7 @@ export interface DeskNoteProps {
 
 type Confirm = "none" | "delete" | "complete";
 
-export const DeskNote: React.FC<DeskNoteProps> = ({ note, width = 168, minHeight = 130, clampLines = 4, onOpen, onComplete, onDelete }) => {
+export const DeskNote: React.FC<DeskNoteProps> = ({ note, width = 210, minHeight = 163, clampLines = 4, onOpen, onComplete, onDelete }) => {
   const theme = NOTE_THEMES[note.colour];
   const deep = NOTE_DEEP_SHADE[note.colour];
   const [confirm, setConfirm] = useState<Confirm>("none");
@@ -99,9 +99,9 @@ export const DeskNote: React.FC<DeskNoteProps> = ({ note, width = 168, minHeight
           onMouseEnter={() => setDismissHover(true)}
           onMouseLeave={() => setDismissHover(false)}
           aria-label="Dismiss note"
-          style={{ background: "none", border: "none", padding: 0, lineHeight: 0, cursor: "pointer", color: theme.ink, opacity: dismissHover ? 0.85 : 0.34, transition: "opacity 0.12s ease", marginRight: -2, marginTop: -1 }}
+          style={{ background: "none", border: "none", padding: 0, lineHeight: 0, cursor: "pointer", color: theme.ink, opacity: dismissHover ? 0.85 : 0.38, transition: "opacity 0.12s ease", marginRight: -1, marginTop: -1 }}
         >
-          <X size={13} strokeWidth={2.2} />
+          <Trash2 size={13} strokeWidth={2} />
         </button>
       </div>
 
@@ -111,9 +111,9 @@ export const DeskNote: React.FC<DeskNoteProps> = ({ note, width = 168, minHeight
         style={{
           flex: 1,
           cursor: "pointer",
-          margin: "6px 0",
+          margin: "7px 0",
           fontFamily: FONT_CAVEAT,
-          fontSize: 17.5,
+          fontSize: 20,
           fontWeight: 500,
           lineHeight: 1.2,
           wordBreak: "break-word",

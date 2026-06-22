@@ -32,13 +32,13 @@ export interface NotesDeskProps {
   onDelete: (id: string) => void;
 }
 
-const NOTE_W = 168;
-const NOTE_MINH = 130;
-const PICK_W = 152;
+const NOTE_W = 210; // created notes — 25% larger than the picker placeholders
+const NOTE_MINH = 163;
+const PICK_W = 152; // empty-state grab-a-colour placeholders (unchanged)
 const PICK_MINH = 118;
 /** Fixed desk height — sized for the tallest in-flow state (compose sticky + bar) so the hero never
  *  resizes across empty / fan / compose / add. Content is vertically centred within it. */
-const DESK_H = 212;
+const DESK_H = 246;
 
 /** Behind-the-front slots for older notes: left then right, slight tilt, lower z. */
 const SIDE_SLOTS = [
