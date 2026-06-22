@@ -150,7 +150,6 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
 
   return (
     <div
-      className="sa-board"
       onMouseEnter={() => setDeskHover(true)}
       onMouseLeave={() => setDeskHover(false)}
       style={{ position: "relative", width: 296, height: DESK_H, flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}
@@ -374,8 +373,9 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
           </div>
 
           {/* + (hover) and See all — absolute bottom group, so the fan alone is centred (behind the
-              corkboard) and isn't pushed up by controls below it */}
-          <div style={{ position: "absolute", left: 0, right: 0, bottom: 6, display: "flex", flexDirection: "column", alignItems: "center", gap: 4, zIndex: 8 }}>
+              corkboard) and isn't pushed up by controls below it. z above the lifted-card z (60) so a
+              hovered card never moves in front of the +. */}
+          <div style={{ position: "absolute", left: 0, right: 0, bottom: 6, display: "flex", flexDirection: "column", alignItems: "center", gap: 4, zIndex: 70 }}>
             <button
               onClick={(e) => { e.stopPropagation(); addAnother(); }}
               onMouseEnter={() => setCornerHover(true)}
@@ -404,7 +404,6 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
 
             {active.length > 1 ? (
               <button
-                className="sa-seeall-tab"
                 onClick={() => setSeeAllOpen(true)}
                 style={{
                   position: "relative",
