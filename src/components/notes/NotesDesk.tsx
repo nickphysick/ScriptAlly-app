@@ -323,9 +323,9 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
             style={{ position: "relative", zIndex: 3, transformOrigin: "50% 100%", transform: hoverColour === "pink" ? "translateY(-6px) scale(1.03)" : "none" }}
           >
             <PostIt colour="pink" theme={NOTE_THEMES.pink} width={PICK_W} minHeight={PICK_MINH} surfaced={false} onClick={() => grabColour("pink")}>
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, minHeight: 88, textAlign: "center", color: NOTE_THEMES.pink.ink }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 7, minHeight: 88, textAlign: "center", color: NOTE_THEMES.pink.ink }}>
                 <Plus size={20} strokeWidth={2.25} />
-                <div style={{ fontFamily: FONT_CAVEAT, fontSize: 16, fontWeight: 600, lineHeight: 1.15 }}>jot a note or create a task</div>
+                <div style={{ fontFamily: FONT_MONO, fontSize: 8.5, fontWeight: 500, letterSpacing: "0.12em", textTransform: "uppercase", opacity: 0.55 }}>Add a note</div>
               </div>
             </PostIt>
           </div>
