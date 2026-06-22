@@ -8,7 +8,7 @@
  * — the created stamp owns that corner. Critical colours are inline (known Tailwind footgun).
  */
 import React, { useState } from "react";
-import { X, Check, Calendar } from "lucide-react";
+import { X, Check, Calendar, Hourglass } from "lucide-react";
 import type { Note } from "../../types";
 import { FONT_MONO, FONT_SERIF, FONT_SANS } from "../../lib/designTokens";
 import { NOTE_THEMES, NOTE_DEEP_SHADE, FONT_CAVEAT } from "./notesTheme";
@@ -31,6 +31,7 @@ export const DeskNote: React.FC<DeskNoteProps> = ({ note, width = 168, minHeight
   const deep = NOTE_DEEP_SHADE[note.colour];
   const [confirm, setConfirm] = useState<Confirm>("none");
   const [dismissHover, setDismissHover] = useState(false);
+  const [tickHover, setTickHover] = useState(false);
   const isTask = !!note.dueDate;
   const overdue = dueStage(note.dueDate) === "over";
 
@@ -130,10 +131,12 @@ export const DeskNote: React.FC<DeskNoteProps> = ({ note, width = 168, minHeight
         {isTask ? (
           <button
             onClick={() => setConfirm("complete")}
+            onMouseEnter={() => setTickHover(true)}
+            onMouseLeave={() => setTickHover(false)}
             aria-label="Complete task"
-            style={{ width: 16, height: 16, borderRadius: 5, border: `1.5px solid ${theme.ink}`, background: "rgba(255,255,255,0.4)", opacity: 0.65, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0, flexShrink: 0 }}
+            style={{ width: 16, height: 16, borderRadius: 5, border: `1.5px solid ${theme.ink}`, background: "rgba(255,255,255,0.4)", opacity: tickHover ? 1 : 0.62, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0, flexShrink: 0, transform: tickHover ? "scale(1.2)" : "none", transition: "transform 0.14s cubic-bezier(0.2,0.7,0.2,1), opacity 0.14s ease" }}
           >
-            <Check size={10} strokeWidth={2.5} color={theme.ink} />
+            {tickHover ? <Check size={10} strokeWidth={2.6} color={theme.ink} /> : <Hourglass size={9} strokeWidth={2} color={theme.ink} />}
           </button>
         ) : (
           <span />

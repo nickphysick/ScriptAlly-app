@@ -18,7 +18,7 @@
  * No nudge modal / logging / timeline here; snooze/dismiss are intentionally not rendered.
  */
 import React, { useEffect, useRef, useState } from "react";
-import { Feather, Star, ClipboardList, Archive, ChevronDown, Check, Calendar, PenLine, X } from "lucide-react";
+import { Feather, Star, ClipboardList, Archive, ChevronDown, Check, Calendar, PenLine, X, Hourglass } from "lucide-react";
 import { Task, Query, Agent, Note } from "../../types";
 import { MountCard } from "../MountCard";
 import {
@@ -255,6 +255,13 @@ const OTY_CSS = `
 .oty-rec-item:hover { background: #f3ece2; }
 .oty-note-del { display: none; }
 .oty-note-row:hover .oty-note-del { display: flex; }
+/* task tick: sand-timer by default, swells into a tick on hover */
+.oty-tick { transition: transform 0.15s cubic-bezier(0.2,0.7,0.2,1); }
+.oty-tick .oty-ic { transition: opacity 0.14s ease; }
+.oty-tick .oty-check { position: absolute; opacity: 0; }
+.oty-tick:hover { transform: scale(1.2); }
+.oty-tick:hover .oty-hg { opacity: 0; }
+.oty-tick:hover .oty-check { opacity: 1; }
 .oty-hint { transition: opacity 0.25s ease; }
 @media (prefers-reduced-motion: reduce) {
   .oty-pulse-ring, .oty-action { animation: none !important; }
@@ -534,8 +541,10 @@ export const OverToYou: React.FC<OverToYouProps> = ({ tasks, queries, agents, no
                   <button
                     type="button"
                     aria-label="Complete"
+                    className={leaving ? undefined : "oty-tick"}
                     onClick={() => tickNote(note.id)}
                     style={{
+                      position: "relative",
                       width: 18,
                       height: 18,
                       borderRadius: 6,
@@ -550,7 +559,14 @@ export const OverToYou: React.FC<OverToYouProps> = ({ tasks, queries, agents, no
                       padding: 0,
                     }}
                   >
-                    {leaving ? <Check size={11} strokeWidth={3.5} color="#fff" /> : null}
+                    {leaving ? (
+                      <Check size={11} strokeWidth={3.5} color="#fff" />
+                    ) : (
+                      <>
+                        <Hourglass className="oty-ic oty-hg" size={9} strokeWidth={2} color={sageText} />
+                        <Check className="oty-ic oty-check" size={11} strokeWidth={3} color={sageText} />
+                      </>
+                    )}
                   </button>
                   <div style={{ flex: 1, minWidth: 0, paddingRight: 22 }}>
                     <div style={{ fontFamily: FONT_CAVEAT, fontSize: 18, fontWeight: 500, lineHeight: 1.2, color: "#46352b" }}>

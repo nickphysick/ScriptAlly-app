@@ -64,6 +64,7 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
   const [editing, setEditing] = useState<Note | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [cornerHover, setCornerHover] = useState(false);
+  const [deskHover, setDeskHover] = useState(false);
 
   // Compose-in-place state
   const [composeColour, setComposeColour] = useState<NoteColour | null>(null);
@@ -148,7 +149,11 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
   const composeTheme = composeColour ? NOTE_THEMES[composeColour] : NOTE_THEMES.pink;
 
   return (
-    <div style={{ position: "relative", width: 296, height: DESK_H, flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+    <div
+      onMouseEnter={() => setDeskHover(true)}
+      onMouseLeave={() => setDeskHover(false)}
+      style={{ position: "relative", width: 296, height: DESK_H, flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}
+    >
       {/* ---- COMPOSE: write on the sticky; existing notes fan behind (Option B) ---- */}
       {composing ? (
         <div style={{ position: "relative", width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
@@ -364,65 +369,63 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
               style={{ position: "relative", zIndex: 3, transformOrigin: "50% 100%", transform: hoveredId === front.id ? "translateY(-12px) scale(1.04)" : "none" }}
             >
               <DeskNote note={front} width={NOTE_W} minHeight={NOTE_MINH} onOpen={() => setEditing(front)} onComplete={onComplete} onDelete={(n) => onDelete(n.id)} />
-
-              {/* add-+ tab straddling the front note's top edge (centred) — fresh sticky / picker */}
-              <button
-                onClick={(e) => { e.stopPropagation(); addAnother(); }}
-                onMouseEnter={() => setCornerHover(true)}
-                onMouseLeave={() => setCornerHover(false)}
-                aria-label="New note"
-                style={{
-                  position: "absolute",
-                  top: -13,
-                  left: "50%",
-                  transform: cornerHover ? "translateX(-50%) scale(1.06)" : "translateX(-50%)",
-                  transformOrigin: "50% 50%",
-                  width: 32,
-                  height: 21,
-                  borderRadius: 8,
-                  background: cornerHover ? "#fff3ed" : parchment,
-                  color: burgundy,
-                  border: `0.5px solid ${buttonPinkBorder}`,
-                  boxShadow: "0 2px 6px rgba(58,28,20,0.18)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  transition: "transform 0.12s ease, background 0.12s ease",
-                  zIndex: 10,
-                }}
-              >
-                <Plus size={15} />
-              </button>
             </div>
           </div>
 
-          {active.length > 1 ? (
+          {/* + (hover) and See all — absolute bottom group, so the fan alone is centred (behind the
+              corkboard) and isn't pushed up by controls below it */}
+          <div style={{ position: "absolute", left: 0, right: 0, bottom: 6, display: "flex", flexDirection: "column", alignItems: "center", gap: 4, zIndex: 8 }}>
             <button
-              onClick={() => setSeeAllOpen(true)}
+              onClick={(e) => { e.stopPropagation(); addAnother(); }}
+              onMouseEnter={() => setCornerHover(true)}
+              onMouseLeave={() => setCornerHover(false)}
+              aria-label="New note"
               style={{
-                width: "100%",
-                marginTop: 12,
+                width: 28,
+                height: 28,
+                borderRadius: "50%",
+                background: cornerHover ? "#fff3ed" : parchment,
+                color: burgundy,
+                border: `0.5px solid ${buttonPinkBorder}`,
+                boxShadow: "0 2px 6px rgba(58,28,20,0.16)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: 5,
-                background: "none",
-                border: "none",
-                color: mutedInk,
-                fontFamily: FONT_MONO,
-                fontSize: 9,
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
                 cursor: "pointer",
-                padding: "4px 2px",
+                opacity: deskHover ? 1 : 0,
+                pointerEvents: deskHover ? "auto" : "none",
+                transform: cornerHover ? "scale(1.08)" : "none",
+                transition: "opacity 0.16s ease, transform 0.12s ease, background 0.12s ease",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = burgundy)}
-              onMouseLeave={(e) => (e.currentTarget.style.color = mutedInk)}
             >
-              {active.length > 3 ? `See all · ${active.length}` : "See all"} <Maximize2 size={11} />
+              <Plus size={15} />
             </button>
-          ) : null}
+
+            {active.length > 1 ? (
+              <button
+                onClick={() => setSeeAllOpen(true)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 5,
+                  background: "none",
+                  border: "none",
+                  color: mutedInk,
+                  fontFamily: FONT_MONO,
+                  fontSize: 9,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  cursor: "pointer",
+                  padding: "2px 2px",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = burgundy)}
+                onMouseLeave={(e) => (e.currentTarget.style.color = mutedInk)}
+              >
+                {active.length > 3 ? `See all · ${active.length}` : "See all"} <Maximize2 size={11} />
+              </button>
+            ) : null}
+          </div>
         </>
       ) : null}
 

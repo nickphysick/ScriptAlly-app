@@ -198,15 +198,24 @@ export const HeroCard: React.FC<HeroCardProps> = ({
           </div>
         </div>
 
-        {/* Right half of the greeting container: the notes desk, centred within it */}
+        {/* Right half of the greeting container: the notes desk on a corkboard, centred within it */}
         <div style={{ position: "relative", zIndex: 4, flex: "1 1 0", minWidth: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <NotesDesk
-            notes={notes}
-            onAdd={onAddNote}
-            onSave={onSaveNote}
-            onComplete={onCompleteNote}
-            onDelete={onDeleteNote}
+          {/* corkboard backdrop — the post-its sit on it; 65% of the greeting container's height */}
+          <img
+            src="/corkboard%20splash.png"
+            alt=""
+            aria-hidden="true"
+            style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", height: "86%", width: "auto", maxWidth: "108%", objectFit: "contain", pointerEvents: "none", zIndex: 0 }}
           />
+          <div style={{ position: "relative", zIndex: 1 }}>
+            <NotesDesk
+              notes={notes}
+              onAdd={onAddNote}
+              onSave={onSaveNote}
+              onComplete={onCompleteNote}
+              onDelete={onDeleteNote}
+            />
+          </div>
         </div>
       </div>
     </MountCard>
