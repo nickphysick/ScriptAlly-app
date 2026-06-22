@@ -10,7 +10,8 @@
  * defines the height and is centred by the flex column), older stickies are absolutely positioned
  * behind it, bottom-aligned. No fixed-height stage, so there's no dead space leaving the notes low.
  */
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Plus, X, Calendar, Maximize2 } from "lucide-react";
 import type { Note, NoteColour } from "../../types";
 import { FONT_MONO, burgundy, mutedInk, parchment, buttonPinkBorder } from "../../lib/designTokens";
@@ -35,6 +36,9 @@ const NOTE_W = 168;
 const NOTE_MINH = 130;
 const PICK_W = 152;
 const PICK_MINH = 118;
+/** Fixed desk height — sized for the tallest in-flow state (compose sticky + bar) so the hero never
+ *  resizes across empty / fan / compose / add. Content is vertically centred within it. */
+const DESK_H = 212;
 
 /** Behind-the-front slots for older notes: left then right, slight tilt, lower z. */
 const SIDE_SLOTS = [
@@ -68,6 +72,45 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
   const [dateOpen, setDateOpen] = useState(false);
   const [pickerHover, setPickerHover] = useState(false);
   const [hoverColour, setHoverColour] = useState<NoteColour | null>(null);
+
+  // Floating date calendar: anchored to the compose sticky by MEASURED position and portalled to
+  // <body>, so it overlays the cards below the hero without growing/clipping the hero — and isn't
+  // mis-anchored by the dashboard's motion.div transform (a plain fixed layer would be).
+  const stickyRef = useRef<HTMLDivElement>(null);
+  const calRef = useRef<HTMLDivElement>(null);
+  const [calPos, setCalPos] = useState<{ top: number; left: number } | null>(null);
+
+  const openDate = () => {
+    const r = stickyRef.current?.getBoundingClientRect();
+    if (r) setCalPos({ top: r.bottom + 8, left: r.left });
+    setDateOpen(true);
+  };
+
+  useEffect(() => {
+    if (!dateOpen) return;
+    const reposition = () => {
+      const r = stickyRef.current?.getBoundingClientRect();
+      if (r) setCalPos({ top: r.bottom + 8, left: r.left });
+    };
+    reposition();
+    const onDown = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (calRef.current && !calRef.current.contains(t) && stickyRef.current && !stickyRef.current.contains(t)) {
+        setDateOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setDateOpen(false);
+    window.addEventListener("scroll", reposition, true);
+    window.addEventListener("resize", reposition);
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("scroll", reposition, true);
+      window.removeEventListener("resize", reposition);
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [dateOpen]);
 
   const active = byMostRecent(activeNotes(notes));
   const top = active.slice(0, 3);
@@ -105,7 +148,7 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
   const composeTheme = composeColour ? NOTE_THEMES[composeColour] : NOTE_THEMES.pink;
 
   return (
-    <div style={{ position: "relative", width: 296, flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+    <div style={{ position: "relative", width: 296, height: DESK_H, flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
       {/* ---- COMPOSE: write on the sticky; existing notes fan behind (Option B) ---- */}
       {composing ? (
         <div style={{ position: "relative", width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
@@ -127,6 +170,7 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
             ) : null}
 
           <div
+            ref={stickyRef}
             style={{
               position: "relative",
               zIndex: 2,
@@ -196,7 +240,7 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
             {/* bottom bar: add a date · Add · × */}
             <div style={{ display: "flex", alignItems: "center", gap: 8, borderTop: "1px solid rgba(58,28,20,0.1)", paddingTop: 9, marginTop: 6 }}>
               <button
-                onClick={() => setDateOpen((o) => !o)}
+                onClick={() => (dateOpen ? setDateOpen(false) : openDate())}
                 style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "transparent", border: "none", color: composeTheme.ink, opacity: composeDue ? 1 : 0.78, fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: "0.05em", textTransform: "uppercase", cursor: "pointer", padding: 0 }}
               >
                 <Calendar size={12} /> {composeDue ? "change date" : "add a date"}
@@ -215,18 +259,19 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
             </div>
           </div>
           </div>
-
-          {/* anchored calendar (in-flow, never a floating layer) */}
-          {dateOpen ? (
-            <div style={{ marginTop: 10, zIndex: 6 }}>
-              <NoteComposeCalendar
-                value={composeDue}
-                onPick={(iso) => { setComposeDue(iso); setDateOpen(false); }}
-              />
-            </div>
-          ) : null}
         </div>
       ) : null}
+
+      {/* floating date calendar — measured-position overlay portalled to <body> (never grows/clips the
+          hero, dodges the dashboard motion.div transform) */}
+      {composing && dateOpen && calPos
+        ? createPortal(
+            <div ref={calRef} style={{ position: "fixed", top: calPos.top, left: calPos.left, zIndex: 400 }}>
+              <NoteComposeCalendar value={composeDue} onPick={(iso) => { setComposeDue(iso); setDateOpen(false); }} />
+            </div>,
+            document.body
+          )
+        : null}
 
       {/* ---- PICKER: grab a colour (pink front in flow, yellow/sage behind) ---- */}
       {showPicker ? (
