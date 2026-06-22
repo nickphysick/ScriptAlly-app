@@ -14,6 +14,7 @@ import { NoteQuickAdd } from "./NoteQuickAdd";
 import { NoteEditor } from "./NoteEditor";
 import { NotesDesk } from "./NotesDesk";
 import { MountCard } from "../MountCard";
+import { OverToYou } from "../dashboard/OverToYou";
 import { byMostRecent, activeNotes } from "./notesUtils";
 
 let seq = 0;
@@ -80,6 +81,26 @@ export const NotesLab: React.FC = () => {
             </div>
           </div>
         </MountCard>
+
+        {/* To-do "Noted by you" group preview (Prompt 4) — OverToYou with no derived tasks */}
+        <div style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: burgundy, margin: "34px 0 14px" }}>
+          To-do "Noted by you" group — tick a dated note to complete it
+        </div>
+        <div style={{ maxWidth: 420, height: 460 }}>
+          <OverToYou
+            tasks={[]}
+            queries={[]}
+            agents={[]}
+            notes={notes}
+            onAction={() => {}}
+            onNudge={() => {}}
+            onSnooze={() => {}}
+            onDismiss={() => {}}
+            onAllTasks={() => {}}
+            onOpenQuery={() => {}}
+            onCompleteNote={completeNote}
+          />
+        </div>
 
         <div style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: burgundy, margin: "34px 0 14px" }}>
           {visible.length} active — click one to edit

@@ -1714,6 +1714,7 @@ export const Dashboard: React.FC<{
                   tasks={tasks}
                   queries={queries}
                   agents={agents}
+                  notes={notes}
                   onAction={(task) => onNavigate(task.actionPath, task.title)}
                   onNudge={(task) => setNudgeTask(task)}
                   onSnooze={(task) => dismissTask(task.taskType, task.relatedRecordId, "fixed snooze", 3)}
@@ -1723,6 +1724,7 @@ export const Dashboard: React.FC<{
                     setSelectedQueryIdForPanel(qid);
                     setIsQueryPanelOpen(true);
                   }}
+                  onCompleteNote={handleCompleteNote}
                 />
               </div>
             </div>

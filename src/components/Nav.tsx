@@ -43,6 +43,7 @@ import {
   labelColor,
   mutedInk,
 } from "../lib/designTokens";
+import { overdueNoteCount } from "./notes/notesUtils";
 
 interface NavProps {
   activeTab: string;
@@ -110,7 +111,7 @@ const NavLink: React.FC<{ label: string; active: boolean; onClick: () => void }>
 );
 
 export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, searchQuery, setSearchQuery }) => {
-  const { currentUser, tasks, dismissTask, logout } = useScriptAllyDb();
+  const { currentUser, tasks, notes, dismissTask, logout } = useScriptAllyDb();
 
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showBellDropdown, setShowBellDropdown] = useState(false);
@@ -127,7 +128,9 @@ export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, 
 
   if (!currentUser) return null;
 
-  const activeTasksCount = tasks.length;
+  // An overdue dated note raises the same alarm as a missed agent deadline, so it counts toward the
+  // bell badge alongside the derived tasks. Not-yet-due notes don't (they're not overdue yet).
+  const activeTasksCount = tasks.length + overdueNoteCount(notes);
   const badgeText = activeTasksCount > 9 ? "9+" : activeTasksCount.toString();
 
   const closeAll = () => {

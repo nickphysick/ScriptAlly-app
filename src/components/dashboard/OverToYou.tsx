@@ -18,8 +18,8 @@
  * No nudge modal / logging / timeline here; snooze/dismiss are intentionally not rendered.
  */
 import React, { useEffect, useRef, useState } from "react";
-import { Feather, Star, ClipboardList, Archive, ChevronDown } from "lucide-react";
-import { Task, Query, Agent } from "../../types";
+import { Feather, Star, ClipboardList, Archive, ChevronDown, Check, Calendar, PenLine } from "lucide-react";
+import { Task, Query, Agent, Note } from "../../types";
 import { MountCard } from "../MountCard";
 import {
   sageBandGradient,
@@ -34,6 +34,9 @@ import {
   FONT_SERIF,
   FONT_MONO,
 } from "../../lib/designTokens";
+import { FONT_CAVEAT, DUE_SOON_BG } from "../notes/notesTheme";
+import { datedTodoNotes, overdueNoteCount, isDueOrOverdue, formatDueLabel, todayLocalISO } from "../notes/notesUtils";
+import "../notes/notes.css";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -312,24 +315,40 @@ export interface OverToYouProps {
   tasks: Task[];
   queries: Query[];
   agents: Agent[];
+  notes: Note[]; // dated, not-done notes render as the "Noted by you" group between Zone A and Zone B
   onAction: (task: Task) => void;
   onNudge: (task: Task) => void; // nudge_overdue rows open the Nudge modal instead of navigating
   onSnooze: (task: Task) => void; // kept for call-site compatibility; not rendered this prompt
   onDismiss: (task: Task) => void; // kept for call-site compatibility; not rendered this prompt
   onAllTasks: () => void; // kept for call-site compatibility; superseded by the scroll hint
   onOpenQuery: (queryId: string) => void;
+  onCompleteNote: (id: string) => void; // tick a dated note done from its To-do row
 }
 
-export const OverToYou: React.FC<OverToYouProps> = ({ tasks, queries, agents, onAction, onNudge, onOpenQuery }) => {
+export const OverToYou: React.FC<OverToYouProps> = ({ tasks, queries, agents, notes, onAction, onNudge, onOpenQuery, onCompleteNote }) => {
   const urgentRows = buildOverToYouRows(tasks, queries, agents);
   const recommendedRows = buildRecommendedRows(tasks, queries, agents);
   const recommendedTotal = recommendedRows.reduce((sum, r) => sum + r.count, 0);
+
+  // "Noted by you" — dated, not-done notes (sorted dueDate-asc). Only OVERDUE ones raise the alarm
+  // (the header count + the nav bell); the group itself lists every dated task.
+  const today = todayLocalISO();
+  const notedRows = datedTodoNotes(notes);
+  const overdueCount = overdueNoteCount(notes, today);
+  const headerCount = urgentRows.length + overdueCount;
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const zoneBHeaderRef = useRef<HTMLDivElement>(null);
   const [hintVisible, setHintVisible] = useState(false);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const toggle = (type: string) => setExpanded((prev) => ({ ...prev, [type]: !prev[type] }));
+
+  // Tick → play the leave animation, then complete (the live notes subscription drops the row).
+  const [leavingIds, setLeavingIds] = useState<Set<string>>(new Set());
+  const tickNote = (id: string) => {
+    setLeavingIds((prev) => new Set(prev).add(id));
+    setTimeout(() => onCompleteNote(id), 320);
+  };
 
   // A recommended item routes via its query (relatedRecordId) when query-related, else via actionPath.
   const routeItem = (task: Task) => {
@@ -351,7 +370,7 @@ export const OverToYou: React.FC<OverToYouProps> = ({ tasks, queries, agents, on
     );
     io.observe(target);
     return () => io.disconnect();
-  }, [urgentRows.length, recommendedRows.length]);
+  }, [urgentRows.length, notedRows.length, recommendedRows.length]);
 
   return (
     // lg:h-full fills the absolutely-positioned hero cell (Dashboard caps it to the stat-cards
@@ -385,9 +404,9 @@ export const OverToYou: React.FC<OverToYouProps> = ({ tasks, queries, agents, on
             To-do list
           </span>
         </span>
-        {urgentRows.length > 0 && (
-          <span aria-label={`${urgentRows.length} urgent`} style={urgentPillStyle}>
-            {urgentRows.length}
+        {headerCount > 0 && (
+          <span aria-label={`${headerCount} urgent`} style={urgentPillStyle}>
+            {headerCount}
           </span>
         )}
       </div>
@@ -400,7 +419,8 @@ export const OverToYou: React.FC<OverToYouProps> = ({ tasks, queries, agents, on
       >
         {/* Zone A rows */}
         {urgentRows.length === 0 ? (
-          <div className="flex flex-col items-center justify-center text-center" style={{ height: "100%", padding: "26px 16px 20px" }}>
+          // Fill the card only when there's truly nothing else below (no dated notes, no recommended).
+          <div className="flex flex-col items-center justify-center text-center" style={{ height: notedRows.length === 0 && recommendedRows.length === 0 ? "100%" : "auto", padding: "26px 16px 20px" }}>
             <Feather className="w-[22px] h-[22px]" style={{ color: "#aab8a4", marginBottom: 9 }} strokeWidth={1.6} />
             <div style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 13, color: "#5a6258" }}>
               You're all caught up.
@@ -444,6 +464,95 @@ export const OverToYou: React.FC<OverToYouProps> = ({ tasks, queries, agents, on
               </button>
             </div>
           ))
+        )}
+
+        {/* ── "Noted by you" — dated, not-done notes; sits between must-do (Zone A) and nice-to-have
+              (Zone B). The group lists every dated task; only overdue ones bump the header count. ── */}
+        {notedRows.length > 0 && (
+          <>
+            <div
+              className="flex items-center justify-between"
+              style={{
+                background: sageBandGradient,
+                border: `1px solid ${sageBandRule}`,
+                borderRadius: 8,
+                padding: "8px 12px",
+                margin: "8px 0",
+                gap: 10,
+              }}
+            >
+              <span style={{ ...labelStyle, color: sageText, letterSpacing: "0.1em", display: "inline-flex", alignItems: "center", gap: 7, minWidth: 0 }}>
+                <PenLine className="w-[12px] h-[12px] shrink-0" /> Noted by you
+              </span>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 7, flexShrink: 0 }}>
+                <span style={{ ...labelStyle, color: sageText, letterSpacing: "0.1em", opacity: 0.85 }}>Your tasks</span>
+                <span
+                  aria-label={`${notedRows.length} noted`}
+                  style={{ ...countPillBase, color: sageText, background: parchment, border: "0.5px solid #cdd5cb" }}
+                >
+                  {notedRows.length}
+                </span>
+              </span>
+            </div>
+
+            {notedRows.map((note, i) => {
+              const soon = isDueOrOverdue(note.dueDate, today);
+              const leaving = leavingIds.has(note.id);
+              return (
+                <div
+                  key={note.id}
+                  className={leaving ? "sa-row-leaving" : undefined}
+                  style={{ display: "flex", alignItems: "flex-start", gap: 11, padding: "11px 2px", borderTop: i > 0 ? "0.5px solid #f0e6d8" : undefined }}
+                >
+                  <button
+                    type="button"
+                    aria-label="Mark done"
+                    onClick={() => tickNote(note.id)}
+                    style={{
+                      width: 18,
+                      height: 18,
+                      borderRadius: 6,
+                      border: `1.5px solid ${sageText}`,
+                      background: leaving ? sageText : "#fff",
+                      flexShrink: 0,
+                      cursor: "pointer",
+                      marginTop: 1,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: 0,
+                    }}
+                  >
+                    {leaving ? <Check size={11} strokeWidth={3.5} color="#fff" /> : null}
+                  </button>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontFamily: FONT_CAVEAT, fontSize: 18, fontWeight: 500, lineHeight: 1.2, color: "#46352b" }}>
+                      {note.text}
+                    </div>
+                    <div
+                      style={{
+                        marginTop: 6,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 4,
+                        fontFamily: FONT_MONO,
+                        fontSize: 8.5,
+                        letterSpacing: "0.05em",
+                        textTransform: "uppercase",
+                        color: burgundy,
+                        background: soon ? DUE_SOON_BG : "#fff3ed",
+                        border: "0.5px solid #eed6c8",
+                        borderRadius: 20,
+                        padding: "2px 7px",
+                      }}
+                    >
+                      <Calendar size={9} strokeWidth={2} /> {formatDueLabel(note.dueDate, today)}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </>
         )}
 
         {/* Zone B */}
