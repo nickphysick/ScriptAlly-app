@@ -47,11 +47,16 @@ function buildFan(top: Note[]): FanItem[] {
   ];
 }
 
-// Empty state: two faint blank post-its hold the fan's shape behind the front one, which carries
-// the "Note to self?" copy. Only the CTA sits beneath the fan.
-const EMPTY_BACK: { colour: NoteColour; x: number; rot: number; z: number }[] = [
-  { colour: "sage", x: -40, rot: -12, z: 1 },
-  { colour: "yellow", x: 40, rot: 12, z: 2 },
+// Empty state — a calm, desk-sized three-sticky fan. Two blank pale backs hold the shape; the pale
+// front sticky is the affordance (a "+" over one handwritten line). Pale tints applied inline.
+const EMPTY_PALE = {
+  yellow: { fill: "#f6efcf", fold: "#ebe1b9", ink: "#5a4a28", sheen: "rgba(110,90,40,.05)" },
+  sage: { fill: "#e7ece3", fold: "#d7ddd2", ink: "#41513b", sheen: "rgba(60,80,55,.05)" },
+  pink: { fill: "#f8e7e0", fold: "#eed7cd", ink: "#8a6256", sheen: "rgba(120,60,40,.05)" },
+};
+const EMPTY_BACK: { theme: typeof EMPTY_PALE.yellow; x: number; rot: number; z: number }[] = [
+  { theme: EMPTY_PALE.yellow, x: -38, rot: -12, z: 1 },
+  { theme: EMPTY_PALE.sage, x: 38, rot: 12, z: 2 },
 ];
 
 const fanNoteBase = (x: number, rot: number, z: number, hovered: boolean): React.CSSProperties => ({
@@ -72,6 +77,7 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
   const [seeAllOpen, setSeeAllOpen] = useState(false);
   const [editing, setEditing] = useState<Note | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [emptyHover, setEmptyHover] = useState(false);
 
   const active = byMostRecent(activeNotes(notes));
   const fan = buildFan(active.slice(0, 3));
@@ -111,66 +117,47 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
       ) : null}
 
       {isEmpty ? (
-        /* ---- empty state: the whole copy + CTA live on the topmost post-it ---- */
-        <div style={{ position: "relative", paddingTop: 8 }}>
-          <div style={{ position: "relative", height: 232 }}>
-            {/* two faint blank post-its hold the fan's shape */}
-            {EMPTY_BACK.map((ex, i) => (
-              <div
-                key={i}
-                style={{
-                  position: "absolute",
-                  left: "50%",
-                  bottom: 8,
-                  marginLeft: -82,
-                  transformOrigin: "50% 100%",
-                  transform: `translateX(${ex.x}px) rotate(${ex.rot}deg)`,
-                  zIndex: ex.z,
-                  opacity: 0.5,
-                  filter: "saturate(0.85)",
-                }}
-              >
-                <PostIt colour={ex.colour} text="" width={164} minHeight={134} surfaced={false} />
-              </div>
-            ))}
-            {/* front post-it carries the copy AND the CTA — the whole note is clickable */}
+        /* ---- empty state: a calm three-sticky fan; the pale-pink front sticky is the affordance ---- */
+        <div style={{ position: "relative", height: 188 }}>
+          {/* two blank pale backs hold the fan's shape */}
+          {EMPTY_BACK.map((ex, i) => (
             <div
+              key={i}
               style={{
                 position: "absolute",
                 left: "50%",
                 bottom: 8,
-                marginLeft: -108,
+                marginLeft: -70,
                 transformOrigin: "50% 100%",
-                transform: "translateX(0px) rotate(0deg)",
-                zIndex: 3,
+                transform: `translateX(${ex.x}px) rotate(${ex.rot}deg)`,
+                zIndex: ex.z,
               }}
             >
-              <PostIt colour="pink" width={216} minHeight={208} surfaced={false} onClick={() => setQuickAddOpen(true)}>
-                {/* fontFamily set explicitly — JSX element children don't inherit the post-it's Caveat */}
-                <div style={{ display: "flex", flexDirection: "column", minHeight: 178 }}>
-                  <div style={{ fontFamily: FONT_CAVEAT, fontSize: 30, fontWeight: 700, lineHeight: 1 }}>Note to self?</div>
-                  <div style={{ fontFamily: FONT_CAVEAT, fontSize: 19, fontWeight: 500, lineHeight: 1.22, marginTop: 11, opacity: 0.85 }}>
-                    Leave a note or create a task and it'll be pinned here, front and centre.
-                  </div>
-                  <div
-                    style={{
-                      marginTop: "auto",
-                      paddingTop: 14,
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 6,
-                      fontFamily: FONT_CAVEAT,
-                      fontSize: 20,
-                      fontWeight: 700,
-                      textDecoration: "underline",
-                      textUnderlineOffset: 3,
-                    }}
-                  >
-                    <Plus size={16} strokeWidth={2.5} /> Write your first note
-                  </div>
-                </div>
-              </PostIt>
+              <PostIt colour="yellow" theme={ex.theme} text="" width={140} minHeight={110} surfaced={false} />
             </div>
+          ))}
+          {/* front sticky — the whole note is clickable, opening the quick-add */}
+          <div
+            className="sa-fan-note"
+            onMouseEnter={() => setEmptyHover(true)}
+            onMouseLeave={() => setEmptyHover(false)}
+            style={{
+              position: "absolute",
+              left: "50%",
+              bottom: 8,
+              marginLeft: -70,
+              transformOrigin: "50% 100%",
+              transform: emptyHover ? "translateX(0px) translateY(-6px) rotate(0deg) scale(1.03)" : "translateX(0px) rotate(0deg)",
+              zIndex: emptyHover ? 60 : 3,
+            }}
+          >
+            <PostIt colour="pink" theme={EMPTY_PALE.pink} width={140} minHeight={110} surfaced={false} onClick={() => setQuickAddOpen(true)}>
+              {/* a "+" over one handwritten line, centred; ink set explicitly (children don't inherit) */}
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, minHeight: 80, textAlign: "center", color: EMPTY_PALE.pink.ink }}>
+                <Plus size={20} strokeWidth={2.25} />
+                <div style={{ fontFamily: FONT_CAVEAT, fontSize: 16, fontWeight: 600, lineHeight: 1.15 }}>jot a note or create a task</div>
+              </div>
+            </PostIt>
           </div>
         </div>
       ) : (

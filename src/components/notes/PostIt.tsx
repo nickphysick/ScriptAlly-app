@@ -10,11 +10,13 @@ import React from "react";
 import { Calendar } from "lucide-react";
 import type { NoteColour } from "../../types";
 import { FONT_MONO } from "../../lib/designTokens";
-import { NOTE_THEMES, FONT_CAVEAT } from "./notesTheme";
+import { NOTE_THEMES, FONT_CAVEAT, type NoteTheme } from "./notesTheme";
 import { formatDueLabel } from "./notesUtils";
 
 export interface PostItProps {
   colour: NoteColour;
+  /** Optional explicit theme override (e.g. the empty-state pale tints); falls back to NOTE_THEMES. */
+  theme?: NoteTheme;
   /** Note body text. Optional when `children` is supplied (e.g. the empty-state copy). */
   text?: string;
   dueDate?: string | null; // "YYYY-MM-DD"
@@ -34,6 +36,7 @@ export interface PostItProps {
 
 export const PostIt: React.FC<PostItProps> = ({
   colour,
+  theme: themeOverride,
   text,
   dueDate,
   surfaced = true,
@@ -45,7 +48,7 @@ export const PostIt: React.FC<PostItProps> = ({
   bodyFontSize = 17.5,
   children,
 }) => {
-  const theme = NOTE_THEMES[colour];
+  const theme = themeOverride ?? NOTE_THEMES[colour];
   return (
     <div
       className={className}
