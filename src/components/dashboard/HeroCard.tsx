@@ -217,8 +217,8 @@ export const HeroCard: React.FC<HeroCardProps> = ({
               pointerEvents: "none",
               zIndex: 0,
               // soft vignette so the corkboard fades out at the edges
-              WebkitMaskImage: "radial-gradient(ellipse at center, #000 36%, transparent 100%)",
-              maskImage: "radial-gradient(ellipse at center, #000 36%, transparent 100%)",
+              WebkitMaskImage: "radial-gradient(ellipse at center, #000 18%, transparent 96%)",
+              maskImage: "radial-gradient(ellipse at center, #000 18%, transparent 96%)",
             }}
           />
           <div style={{ position: "relative", zIndex: 1 }}>
