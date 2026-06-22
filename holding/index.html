@@ -27,6 +27,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--white);color:var(
 .nav.scrolled{border-bottom-color:#e4ddd2}
 .nav .coming{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.26em;text-transform:uppercase;color:var(--soft)}
 .nav .login{position:absolute;right:24px;top:50%;transform:translateY(-50%);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--burg);text-decoration:none;border:1px solid #dcae9f;border-radius:20px;padding:7px 15px;background:linear-gradient(180deg,var(--btn-a),var(--btn-b))}
+.nav .brand{position:absolute;left:24px;top:50%;transform:translateY(-50%);display:flex;align-items:center;line-height:0}
+.nav .brand img{height:26px;width:auto;display:block}
 
 /* masthead */
 .masthead{text-align:center;padding:64px 0 0}
@@ -90,11 +92,12 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--white);color:var(
 
 /* hero row — title + slogan beside the dashboard */
 .herorow{min-height:calc(100vh - 50px);min-height:calc(100dvh - 50px);display:flex;flex-direction:column;justify-content:center;padding:32px 0 56px}
-.hgrid{display:grid;grid-template-columns:1fr 1.42fr;gap:44px;align-items:center}
+.herorow .inner{max-width:1480px}
+.hgrid{display:grid;grid-template-columns:1fr 1.42fr;gap:48px;align-items:center}
 .hmast{text-align:center}
 .hmast .logo-img{height:clamp(88px,9.5vw,140px);margin:0 auto}
 .hmast .slogan{margin-top:16px}
-.hdev .dbody{height:clamp(346px,45vw,612px)}
+.hdev .dbody{height:clamp(300px,32vw,470px)}
 
 /* what does it do — soft-pink band */
 .whatband{background:#f9e9e3;padding:86px 0 94px}
@@ -106,6 +109,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--white);color:var(
   .what-h{margin-bottom:32px}
   .hgrid{grid-template-columns:1fr;gap:32px}
   .herorow{padding:36px 0 64px}
+  .nav .coming{display:none}
   .feat .grid,.feat.rev .grid{grid-template-columns:1fr;gap:30px}
   .feat.rev .ftext,.feat.rev .fimg{order:0}
   .feat{padding:52px 0}
@@ -118,7 +122,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--white);color:var(
 </style>
 </head>
 <body>
-<nav class="nav"><span class="coming">Coming soon</span><a class="login" href="https://scriptally-app.web.app">Founders log in</a></nav>
+<nav class="nav"><a class="brand" href="/"><img src="scriptally-title-holding.png" alt="ScriptAlly"></a><span class="coming">Coming soon</span><a class="login" href="https://scriptally-app.web.app">Founders log in</a></nav>
 
 <section class="herorow bg-white"><div class="inner"><div class="hgrid">
   <div class="hmast">
