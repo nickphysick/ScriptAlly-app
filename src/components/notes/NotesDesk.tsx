@@ -11,6 +11,7 @@ import React, { useState } from "react";
 import { Plus, Maximize2 } from "lucide-react";
 import type { Note, NoteColour } from "../../types";
 import { FONT_MONO, burgundy, mutedInk, buttonPinkBg, buttonPinkBorder } from "../../lib/designTokens";
+import { FONT_CAVEAT } from "./notesTheme";
 import { PostIt } from "./PostIt";
 import { NoteQuickAdd } from "./NoteQuickAdd";
 import { NoteEditor } from "./NoteEditor";
@@ -145,8 +146,9 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
               }}
             >
               <PostIt colour="pink" width={184} minHeight={150} surfaced={false}>
-                <div style={{ fontSize: 25, fontWeight: 700, lineHeight: 1 }}>Note to self?</div>
-                <div style={{ fontSize: 16, fontWeight: 500, lineHeight: 1.22, marginTop: 9, opacity: 0.85 }}>
+                {/* fontFamily set explicitly — JSX element children don't inherit the post-it's Caveat */}
+                <div style={{ fontFamily: FONT_CAVEAT, fontSize: 26, fontWeight: 700, lineHeight: 1 }}>Note to self?</div>
+                <div style={{ fontFamily: FONT_CAVEAT, fontSize: 17, fontWeight: 500, lineHeight: 1.22, marginTop: 9, opacity: 0.85 }}>
                   Leave a note or create a task and it'll be pinned here, front and centre.
                 </div>
               </PostIt>

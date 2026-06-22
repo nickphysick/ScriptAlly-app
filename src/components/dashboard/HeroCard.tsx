@@ -41,8 +41,8 @@ const btnBase: React.CSSProperties = {
   transition: "all 0.2s",
 };
 
-/** Tighter padding for the hero's four-button row so they all stay on one line. */
-const heroBtnCompact: React.CSSProperties = { padding: "9px 13px" };
+/** Compact, no-shrink hero buttons so all four stay on one line beside the notes desk. */
+const heroBtnCompact: React.CSSProperties = { padding: "8px 12px", fontSize: 10, flexShrink: 0, whiteSpace: "nowrap" };
 
 /** Pink primary button (hero actions, task sends). */
 export const PinkButton: React.FC<{
@@ -135,7 +135,9 @@ export const HeroCard: React.FC<HeroCardProps> = ({
 
       {/* Body — split in half: greeting (left) · notes desk centred in the right half */}
       <div style={{ padding: "33px 31px 31px", margin: "6px 6px 6px", position: "relative", flex: 1, display: "flex", alignItems: "stretch" }}>
-        <div style={{ position: "relative", zIndex: 4, flex: 1, minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+        {/* Left: greeting/quote/buttons takes the remaining space; the notes desk is a fixed slot on
+            the right (shrink-0) so it never overflows the card. Buttons are nowrap + compact. */}
+        <div style={{ position: "relative", zIndex: 4, flex: "1 1 0", minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "center" }}>
           {/* Greeting with the paper-planes motif flying alongside it */}
           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
             <div style={{ fontFamily: FONT_SERIF, fontSize: 38, fontWeight: 500, color: headingInk, lineHeight: 1.1 }}>
@@ -161,6 +163,7 @@ export const HeroCard: React.FC<HeroCardProps> = ({
                   paddingLeft: 14,
                   lineHeight: 1.6,
                   margin: "16px 0 6px",
+                  maxWidth: 440,
                 }}
               >
                 {quote.text}
@@ -173,7 +176,7 @@ export const HeroCard: React.FC<HeroCardProps> = ({
 
           {/* Two halves of the querying loop (Send query · Record a response), then a divider before the
               setup actions. Compact padding keeps all four on one line at the hero's width. */}
-          <div className="flex gap-[8px] flex-wrap items-center">
+          <div className="flex gap-[6px] flex-nowrap items-center">
             <PinkButton onClick={onSendQuery} style={heroBtnCompact}>
               <Send className="w-3 h-3 shrink-0" />
               Send query
@@ -194,8 +197,8 @@ export const HeroCard: React.FC<HeroCardProps> = ({
           </div>
         </div>
 
-        {/* Right half: the notes desk, centred */}
-        <div style={{ position: "relative", zIndex: 4, flex: 1, minWidth: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        {/* Right: the notes desk — a fixed slot, centred within it, that never overflows the card */}
+        <div style={{ position: "relative", zIndex: 4, flex: "0 0 auto", display: "flex", alignItems: "center", justifyContent: "center", paddingLeft: 12 }}>
           <NotesDesk
             notes={notes}
             onAdd={onAddNote}
