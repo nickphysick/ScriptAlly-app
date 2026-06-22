@@ -47,7 +47,7 @@ export const NotesLab: React.FC = () => {
   return (
     <div style={{ position: "fixed", inset: 0, overflow: "auto", background: pageGround }}>
       <div style={{ position: "fixed", inset: 0, background: PAGE_GRAIN, opacity: 0.25, pointerEvents: "none" }} />
-      <div style={{ position: "relative", maxWidth: 1060, margin: "0 auto", padding: "48px 30px 80px" }}>
+      <div style={{ position: "relative", maxWidth: 1200, margin: "0 auto", padding: "48px 30px 80px" }}>
         <div style={{ fontFamily: FONT_SERIF, fontSize: 30, fontWeight: 500, color: headingInk }}>Notes — lab</div>
         <div style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: mutedInk, marginTop: 6 }}>
           PostIt · quick-add · editor — local state, no persistence
