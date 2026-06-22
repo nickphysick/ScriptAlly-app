@@ -273,6 +273,22 @@ service cloud.firestore {
         && data.createdAt is string && data.createdAt.size() <= 64;
     }
 
+    // Top-level user-authored notes (desk notes / dated tasks). Distinct from the nested
+    // manuscript/agent notes above. All dates are ISO strings: dueDate is date-only "YYYY-MM-DD"
+    // (nullable), the stamps are full ISO datetimes (doneAt nullable). Every field is validated —
+    // any field absent from this shape is silently dropped on write.
+    function isValidUserNote(data, userId) {
+      return data.id is string && data.id.size() <= 128
+        && data.userId == userId
+        && data.text is string && data.text.size() >= 1 && data.text.size() <= 16384
+        && data.colour is string && (data.colour == 'pink' || data.colour == 'sage' || data.colour == 'yellow')
+        && (data.dueDate == null || (data.dueDate is string && data.dueDate.size() <= 16))
+        && data.done is bool
+        && (data.doneAt == null || (data.doneAt is string && data.doneAt.size() <= 64))
+        && data.createdAt is string && data.createdAt.size() <= 64
+        && data.updatedAt is string && data.updatedAt.size() <= 64;
+    }
+
     function isValidActivity(data, userId) {
       return data.id is string && data.id.size() <= 128
         && data.userId == userId
@@ -452,6 +468,16 @@ service cloud.firestore {
         allow create: if isOwner(userId) && isValidId(entryId) && isValidJournalEntry(incoming(), userId);
         allow update: if isOwner(userId) && isValidId(entryId) && isValidJournalEntry(incoming(), userId) && (
           incoming().diff(existing()).affectedKeys().hasOnly(['entryText'])
+        );
+      }
+
+      // ROUTE: Notes (user-authored desk notes / dated tasks)
+      match /notes/{noteId} {
+        allow get, delete: if isOwner(userId) && isValidId(noteId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(noteId) && isValidUserNote(incoming(), userId);
+        allow update: if isOwner(userId) && isValidId(noteId) && isValidUserNote(incoming(), userId) && (
+          incoming().diff(existing()).affectedKeys().hasOnly(['text', 'colour', 'dueDate', 'done', 'doneAt', 'updatedAt'])
         );
       }
 

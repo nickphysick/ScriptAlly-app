@@ -20,6 +20,7 @@ import {
   Activity,
   ActivityType,
   JournalEntry,
+  Note,
   DismissedTask,
   Task,
   CommunityAgent
@@ -146,6 +147,7 @@ interface DbContextType {
   queries: Query[];
   activities: Activity[];
   journalEntries: JournalEntry[];
+  notes: Note[];
   dismissedTasks: DismissedTask[];
   tasks: Task[];
   login: (email: string, password?: string) => Promise<boolean>;
@@ -204,6 +206,11 @@ interface DbContextType {
   deleteJournalEntry: (id: string) => Promise<void>;
   updateJournalEntry: (id: string, entryText: string) => Promise<void>;
 
+  // Note Actions (user-authored desk notes / dated tasks)
+  addNote: (fields: { text: string; colour?: Note["colour"]; dueDate?: string | null }) => Promise<void>;
+  updateNote: (id: string, fields: Partial<Pick<Note, "text" | "colour" | "dueDate" | "done" | "doneAt">>) => Promise<void>;
+  deleteNote: (id: string) => Promise<void>;
+
   // Activity Actions
   addActivity: (act: Omit<Activity, "id" | "userId"> & { id?: string }) => Promise<{ success: boolean; error?: string }>;
   deleteActivity: (id: string) => Promise<void>;
@@ -250,6 +257,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [collectionsReady, setCollectionsReady] = useState<boolean>(false);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]);
+  const [notes, setNotes] = useState<Note[]>([]);
   const [dismissedTasks, setDismissedTasks] = useState<DismissedTask[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
 
@@ -302,6 +310,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     let unsubQueries: () => void = () => {};
     let unsubActivities: () => void = () => {};
     let unsubJournal: () => void = () => {};
+    let unsubNotes: () => void = () => {};
     let unsubDismissed: () => void = () => {};
 
     const unsubAuth = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -321,6 +330,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         unsubQueries();
         unsubActivities();
         unsubJournal();
+        unsubNotes();
         unsubDismissed();
         return;
       }
@@ -471,6 +481,15 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           handleFirestoreError(error, OperationType.GET, `users/${uid}/journalEntries`);
         });
 
+        // Notes snap (user-authored desk notes / dated tasks)
+        unsubNotes = onSnapshot(collection(db, "users", uid, "notes"), (snap) => {
+          const arr: Note[] = [];
+          snap.forEach(d => arr.push(d.data() as Note));
+          setNotes(arr);
+        }, (error) => {
+          handleFirestoreError(error, OperationType.GET, `users/${uid}/notes`);
+        });
+
         // Dismissed snap
         unsubDismissed = onSnapshot(collection(db, "users", uid, "dismissedTasks"), (snap) => {
           const arr: DismissedTask[] = [];
@@ -497,6 +516,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       unsubQueries();
       unsubActivities();
       unsubJournal();
+      unsubNotes();
       unsubDismissed();
     };
   }, []);
@@ -1880,6 +1900,55 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
+  // Notes — user-authored desk notes / dated tasks. Owner-scoped subcollection; isolated path,
+  // never denormalised onto query/agent records. Dates are ISO strings (dueDate date-only).
+  const addNote = async (fields: { text: string; colour?: Note["colour"]; dueDate?: string | null }) => {
+    if (!currentUser) return;
+    const id = "note-" + Math.random().toString(36).substr(2, 9);
+    const now = new Date().toISOString();
+    const newNote: Note = {
+      id,
+      userId: currentUser.id,
+      text: fields.text,
+      colour: fields.colour ?? "pink",
+      dueDate: fields.dueDate ?? null,
+      done: false,
+      doneAt: null,
+      createdAt: now,
+      updatedAt: now
+    };
+    try {
+      await setDoc(doc(db, "users", currentUser.id, "notes", id), newNote);
+    } catch (e) {
+      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/notes/${id}`);
+    }
+  };
+
+  const updateNote = async (
+    id: string,
+    fields: Partial<Pick<Note, "text" | "colour" | "dueDate" | "done" | "doneAt">>
+  ) => {
+    if (!currentUser) return;
+    try {
+      // updatedAt is always bumped; completion stamps doneAt at the call site (updateNote(id, { done:true, doneAt: now })).
+      await updateDoc(doc(db, "users", currentUser.id, "notes", id), {
+        ...fields,
+        updatedAt: new Date().toISOString()
+      });
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/notes/${id}`);
+    }
+  };
+
+  const deleteNote = async (id: string) => {
+    if (!currentUser) return;
+    try {
+      await deleteDoc(doc(db, "users", currentUser.id, "notes", id));
+    } catch (e) {
+      handleFirestoreError(e, OperationType.DELETE, `users/${currentUser.id}/notes/${id}`);
+    }
+  };
+
   const updateQuery = async (queryId: string, fields: Partial<Query>) => {
     if (!currentUser) return;
     const targetQ = queries.find(q => q.id === queryId);
@@ -2264,6 +2333,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       "queries",
       "activities",
       "journalEntries",
+      "notes",
       "dismissedTasks"
     ];
 
@@ -2295,6 +2365,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         queries,
         activities,
         journalEntries,
+        notes,
         dismissedTasks,
         tasks,
         login,
@@ -2325,6 +2396,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         addJournalEntry,
         deleteJournalEntry,
         updateJournalEntry,
+        addNote,
+        updateNote,
+        deleteNote,
         addActivity,
         deleteActivity,
         editActivity,

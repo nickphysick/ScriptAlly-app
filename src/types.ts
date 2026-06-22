@@ -294,6 +294,32 @@ export interface JournalEntry {
   createdAt: string; // ISO String
 }
 
+/**
+ * A user-authored note — the first STORED, user-originated object in the app (everything in the
+ * to-do system is otherwise derived). Lives in its own owner-scoped collection and is read by the
+ * desk, the To-do list and (later) Fortnight from that single source — never denormalised onto
+ * query/agent records.
+ *
+ * Dates are ISO strings (matching the rest of the per-user collections), split by granularity:
+ *  · dueDate — date-only "YYYY-MM-DD" (BrandDatePicker-native). Optional; with one, the note is also
+ *    a To-do task. Day-granular so overdue/due-today is a clean string compare, no timezone drift.
+ *  · createdAt / updatedAt / doneAt — full ISO datetime strings (new Date().toISOString()).
+ * Every ACTIVE (not-done) note lives on the desk — there is no separate "pinned" flag.
+ */
+export type NoteColour = "pink" | "sage" | "yellow";
+
+export interface Note {
+  id: string;
+  userId: string;
+  text: string;
+  colour: NoteColour;
+  dueDate: string | null; // "YYYY-MM-DD" — optional; with a date the note is also a task
+  done: boolean;
+  doneAt: string | null; // full ISO datetime, stamped on completion
+  createdAt: string; // full ISO datetime
+  updatedAt: string; // full ISO datetime
+}
+
 export interface DismissedTask {
   id: string;
   userId: string;
