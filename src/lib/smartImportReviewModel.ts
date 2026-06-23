@@ -242,6 +242,12 @@ export function queryReasonText(code: ReviewReasonCode, q: ReviewQuery): string 
         : `Did you send the full manuscript, or did the agent request it from you?`;
     case "status-wording":
       return `We've read this as '${lc(q.status)}' — does that look right, or is it further along?`;
+    case "check-name":
+      return `This looked more like a note than a name, so we've filed the real part and kept the rest in your notes${q.notes ? ` ("${q.notes}")` : ""}. Does that look right?`;
+    case "needs-identifying":
+      return q.notes
+        ? `We couldn't tell who this one was for — it just said "${q.notes}". Who was it? You can name the agent or agency on the Agents step.`
+        : `We couldn't tell who this one was for. You can name the agent or agency on the Agents step.`;
   }
 }
 

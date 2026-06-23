@@ -530,6 +530,28 @@ const QueryRow: React.FC<QueryRowProps> = ({
             </div>
           </div>
         );
+      case "check-name":
+        // The real part is already filed (agency on the agents screen) + the rest kept in notes; this
+        // is a confirm. The agency itself is edited on the Agents step if it's wrong.
+        return (
+          <div key={code} style={{ marginBottom: 14 }}>
+            {copy}
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+              {solidBtn("Looks right", () => onResolveReason("check-name"))}
+            </div>
+          </div>
+        );
+      case "needs-identifying":
+        // Identity is set on the Agents step (the empty agent is flagged needs-agency there). This
+        // query-side note just surfaces the context; acknowledging it clears the query flag.
+        return (
+          <div key={code} style={{ marginBottom: 14 }}>
+            {copy}
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+              {ghostBtn("Got it", () => onResolveReason("needs-identifying"))}
+            </div>
+          </div>
+        );
     }
   };
 

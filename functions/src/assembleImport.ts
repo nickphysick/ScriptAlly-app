@@ -13,8 +13,10 @@
  */
 import { parseImportDate } from "./parseImportDate";
 
-/** Reason codes the model is allowed to emit (anything else it invents is dropped). */
-const MODEL_REASONS = new Set(["status-direction", "status-wording"]);
+/** Reason codes the model is allowed to emit (anything else it invents is dropped). Kept in lockstep
+ *  with the client's ReviewReasonCode (src/types/smartImport.ts) — same cross-tsconfig duplication as
+ *  the QueryStatus strings. */
+const MODEL_REASONS = new Set(["status-direction", "status-wording", "check-name", "needs-identifying"]);
 
 export interface TimelineOut { type: string; date: string | null; raw: string | null; }
 export interface QueryOut {

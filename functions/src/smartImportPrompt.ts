@@ -40,6 +40,24 @@ agents[] — "ref" (e.g. "a1"), "name", "agency" on every agent; add ONLY when g
 queries[] — "agentRef" and "status" on every query; add ONLY when genuinely present:
   "sentDateRaw", "timeline", "notes", "reasons" (see below).
 
+NAMES vs NOTES — JUDGE whether the Agent / Agency cell holds a REAL name, or instead a submission
+method, a placeholder, or an annotation. Trackers often park notes in these columns ("submitted via
+QueryManager", "Wren & Co - submitted, agent TBC", "via the website", "TBC"). When a cell is NOT a
+real name:
+  - put any REAL part in the field it belongs in (a real agency → "agency"; a real person → "name");
+  - NEVER import a note, method, or placeholder as a name or agency — leave that field EMPTY rather
+    than transcribing junk into it;
+  - keep the leftover wording in the query's "notes" (it's useful context — don't discard it);
+  - flag it with a reason code (see "reasons": "check-name" / "needs-identifying").
+  Examples:
+  - "Wren & Co - submitted, agent TBC"  ->  agency:"Wren & Co", name:"" (agency-only is valid),
+    notes:"submitted, agent TBC", reasons:["check-name"].
+  - "submitted via QueryManager"  (a submission method — names no agent and no agency)  ->  name:"",
+    agency:"", notes:"submitted via QueryManager", reasons:["needs-identifying"]. Do NOT put the
+    method in the agency field.
+  Real names pass through untouched and UNFLAGGED. This is a judgement call — recognise the obvious
+  junk, file the real part, keep the rest in notes, flag it; the app's review screen is the safety net.
+
 DATES — you do NOT parse dates. The app parses them in deterministic code.
 - "sentDateRaw": copy the Date-sent column's cell for this row VERBATIM — exactly as written, no
   reformatting, no ISO conversion, no inference ("14/03/2024","6 May 2024","44621","March 2024","5th
@@ -78,15 +96,20 @@ timeline entry so the app can seed that step:
 "notes": the row's free-text note, transcribed, when it isn't fully captured by a timeline event
 (e.g. "wrong ms?? think i sent the old one"). Omit when empty or wholly consumed by a timeline entry.
 
-"reasons": an array of reason CODES — emit ONLY these two, ONLY when they genuinely apply:
+"reasons": an array of reason CODES — emit ONLY these, ONLY when they genuinely apply:
   - "status-direction": the status cell is a bare DIRECTION with no sent-vs-requested signal — a lone
     "FULL" or "Partial" with no "req/requested/sent/out" and no note that resolves it. Emit your
     best-guess "status" AND this code (the app asks the user which). If a note resolves it
     ("partial" + "sent first 50pp" -> "Partial Sent"), DON'T flag — map it silently.
   - "status-wording": the status wording is genuinely unclear in some other way. Emit your best-guess
     "status" AND this code.
-  Emit NO reason for a clear status. Do NOT invent other codes. Do NOT write any sentence — the app
-  supplies all wording from the code.
+  - "check-name": the agent/agency cell was a note or annotation, not a clean name — you extracted a
+    real agency and kept the rest in "notes" (see NAMES vs NOTES). The app asks the writer to confirm.
+  - "needs-identifying": the cell named NO real agent or agency at all (e.g. just a submission method),
+    so the row has nothing to attach to — leave name + agency empty, keep the phrase in "notes", and
+    emit this so the app asks the writer who it was for.
+  Emit NO reason for a clean row. Do NOT invent codes beyond this list. Do NOT write any sentence —
+  the app supplies all wording from the code.
 
 Rules recap:
 - Include EVERY genuine data row as one query object — never drop a row for a missing date, status, or

@@ -77,6 +77,16 @@ describe('queryReasonText — copy derived from the code (Form-11 voice)', () =>
     expect(text).toContain('14 Mar 2024');
     expect(text).toContain('20 Mar 2024');
   });
+  it('check-name reads as note-not-name and quotes the kept annotation', () => {
+    const text = queryReasonText('check-name', q({ notes: 'submitted, agent TBC' }));
+    expect(text).toMatch(/note than a name/i);
+    expect(text).toContain('submitted, agent TBC');
+  });
+  it('needs-identifying asks who it was and quotes the kept phrase', () => {
+    const text = queryReasonText('needs-identifying', q({ notes: 'submitted via QueryManager' }));
+    expect(text).toMatch(/who/i);
+    expect(text).toContain('submitted via QueryManager');
+  });
 });
 
 describe('statusDirectionChoices — the two real choices', () => {

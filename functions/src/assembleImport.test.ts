@@ -110,6 +110,29 @@ describe("assembleResult", () => {
     expect(q.timeline[0].date).not.toBeNull();
   });
 
+  it("name/agency discrimination: check-name + needs-identifying flow through, notes preserved", () => {
+    const model = {
+      agents: [
+        { ref: "a1", name: "", agency: "Wren & Co" }, // Wren: real agency extracted, name left empty
+        { ref: "a2", name: "", agency: "" },           // QueryManager: nothing identifiable
+      ],
+      queries: [
+        { agentRef: "a1", status: "Queried", sentDateRaw: "18/04/2024", notes: "submitted, agent TBC", reasons: ["check-name"] },
+        { agentRef: "a2", status: "Queried", notes: "submitted via QueryManager", reasons: ["needs-identifying"] },
+      ],
+    };
+    const out = assembleResult(model);
+    const qs = out.queries as QueryOut[];
+    expect(out.agents).toBe(model.agents); // agents pass through (agency-only Wren; empty a2 → needs-agency on review)
+    const wren = byRef(qs, "a1");
+    expect(wren.reasons).toContain("check-name"); // junk-name flag survives the allow-list
+    expect(wren.sentDate).toBe("2024-04-18");
+    expect(wren.notes).toBe("submitted, agent TBC"); // annotation kept, not imported as a name
+    const qm = byRef(qs, "a2");
+    expect(qm.reasons).toContain("needs-identifying");
+    expect(qm.notes).toBe("submitted via QueryManager"); // method kept as a hint, not imported as agency
+  });
+
   it("returns a malformed proposal untouched (client re-validates)", () => {
     expect(assembleResult(null)).toBeNull();
     expect(assembleResult({ nope: true })).toEqual({ nope: true });

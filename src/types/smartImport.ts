@@ -40,10 +40,13 @@ export type ReviewReasonCode =
   | "serial-outlier"
   | "no-date"
   | "status-direction"
-  | "status-wording";
+  | "status-wording"
+  | "check-name"          // agent/agency cell was a note, not a name — real part extracted, confirm
+  | "needs-identifying";  // cell named no real agent/agency at all — writer must say who it was
 
 export const REVIEW_REASON_CODES: readonly ReviewReasonCode[] = [
   "two-dates", "missing-day", "serial-outlier", "no-date", "status-direction", "status-wording",
+  "check-name", "needs-identifying",
 ];
 
 /** A later pipeline event lifted from a note (conservative): the event, its code-parsed date
