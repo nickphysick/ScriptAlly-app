@@ -17,6 +17,7 @@ import { runSmartImport, validateSmartImport, ValidatedImport } from "../../lib/
 import { commitSmartImport, CommitOutcome } from "../../lib/smartImportCommit";
 import { Form11Card, SelectRow, BookMotif, InboxMotif, FONT_SANS, FONT_MONO } from "./chrome";
 import { SmartImportReview } from "./SmartImportReview";
+import { ImportOverview } from "./ImportOverview";
 import { ImportingLoader } from "./ImportingLoader";
 import { ManuscriptFields, ManuscriptFieldsState, emptyManuscriptFields } from "./ManuscriptFields";
 
@@ -48,7 +49,7 @@ export interface BranchBProps {
   error?: string | null;
 }
 
-type B3Screen = "book" | "pipeline" | "reading" | "review" | "fallback" | "importing" | "done";
+type B3Screen = "book" | "pipeline" | "reading" | "overview" | "review" | "fallback" | "importing" | "done";
 
 const UploadIcon = (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
@@ -127,7 +128,8 @@ export const BranchB: React.FC<BranchBProps> = ({
     try {
       const result: SmartImportResult = await runSmartImport(file);
       setValidated(validateSmartImport(result));
-      setScreen("review");
+      setScreen("overview"); // positive arrival first; "Let's work through it" → review
+
     } catch (e) {
       console.error("Smart Import mapping failed:", e);
       setScreen("fallback"); // graceful fallback — never dead-end onboarding
@@ -306,6 +308,19 @@ export const BranchB: React.FC<BranchBProps> = ({
         complete={importComplete}
         onProceed={() => { if (outcome) onImportComplete(outcome); }}
         userName={currentUser?.name}
+      />
+    );
+  }
+
+  // ── Overview — "Here's what we found". Positive arrival before any work; reads the parsed result
+  //    for live tier counts, then "Let's work through it" routes into the review stages. ─
+  if (screen === "overview" && validated) {
+    return (
+      <ImportOverview
+        result={validated.result}
+        manuscriptTitle={fields.title}
+        userName={currentUser?.name}
+        onContinue={() => setScreen("review")}
       />
     );
   }

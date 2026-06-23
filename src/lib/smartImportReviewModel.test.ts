@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseModel, modelToResult, applyAgentRemoval, quoteStatuses, queryReasonText, statusDirectionChoices, ReviewQuery } from './smartImportReviewModel';
+import { parseModel, modelToResult, applyAgentRemoval, quoteStatuses, queryReasonText, statusDirectionChoices, reviewTallies, ReviewQuery } from './smartImportReviewModel';
 import { QueryStatus } from '../types';
 import { ParsedAgent, ParsedQuery, SmartImportResult } from '../types/smartImport';
 
@@ -87,6 +87,39 @@ describe('statusDirectionChoices — the two real choices', () => {
   it('offers the partial pair for a partial status', () => {
     expect(statusDirectionChoices(QueryStatus.PARTIAL_SENT).map((c) => c.status))
       .toEqual([QueryStatus.PARTIAL_SENT, QueryStatus.PARTIAL_REQUESTED]);
+  });
+});
+
+describe('reviewTallies — two-tier classification (fix=blocking, sharpen=optional)', () => {
+  it('agency-less agent → fix; query with open reason → sharpen; clean → ready; always sums', () => {
+    const r = result(
+      [
+        agent({ ref: 'a1', name: 'Clean', agency: 'Acme' }),          // ready
+        agent({ ref: 'a2', name: 'NoAgency', agency: '' }),            // fix (no agency)
+      ],
+      [
+        query({ agentRef: 'a1', reasons: ['no-date'] }),              // sharpen
+        query({ agentRef: 'a1' }),                                    // ready
+      ]
+    );
+    const { agents, queries } = parseModel(r);
+    const t = reviewTallies(agents, queries);
+    expect(t).toEqual({ agents: 2, queries: 2, ready: 2, fix: 1, sharpen: 1 });
+    expect(t.ready + t.fix + t.sharpen).toBe(t.agents + t.queries);
+  });
+
+  it('an unresolved duplicate cluster marks every member as fix', () => {
+    const r = result(
+      [
+        agent({ ref: 'a1', name: 'Jonathan Pryce', agency: 'Pryce Literary' }),
+        agent({ ref: 'a2', name: 'J. Pryce', agency: 'Pryce Lit' }),
+      ],
+      [query({ agentRef: 'a1' })]
+    );
+    const { agents, queries } = parseModel(r); // parseModel clusters these as likely-dupes
+    const t = reviewTallies(agents, queries);
+    expect(t.fix).toBe(2);    // both cluster members blocking until merged/kept
+    expect(t.ready).toBe(1);  // the one clean query
   });
 });
 

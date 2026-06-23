@@ -133,6 +133,49 @@ export const queryStatusOf = (q: ReviewQuery): "needs-check" | "captured" =>
 /** The date shown on a query row: its sent date (the spine), regardless of status. */
 export const currentDate = (q: ReviewQuery): string | null => q.sentDate;
 
+// ── Two-tier review classification (overview + pills + guided overlay all read this) ──────────────
+// FIX (gold, BLOCKING): an agent with no agency, or an agent caught in an unresolved duplicate
+// cluster — import is gated on these. SHARPEN (pink, OPTIONAL): a query's typed reasons, or an
+// agent's non-duplicate "mapping" flag — each has a safe default, so they're skippable. Everything
+// else is READY.
+export type ReviewTier = "ready" | "fix" | "sharpen";
+
+/** Agents in an unresolved duplicate cluster — the leaders carrying an open `duplicate` reason and
+ *  every sibling they merge with. */
+export function unresolvedDuplicateAgentIds(agents: ReviewAgent[]): Set<string> {
+  const ids = new Set<string>();
+  for (const a of agents) {
+    if (a.deleted) continue;
+    if (a.mergeWith.length && a.reasons.some((r) => r.kind === "duplicate" && !r.resolved)) {
+      ids.add(a.id);
+      for (const m of a.mergeWith) ids.add(m);
+    }
+  }
+  return ids;
+}
+
+export const agentTier = (a: ReviewAgent, inUnresolvedDup: boolean): ReviewTier =>
+  !a.agency.trim() || inUnresolvedDup ? "fix"
+    : a.reasons.some((r) => r.kind === "mapping" && !r.resolved) ? "sharpen"
+    : "ready";
+
+export const queryTier = (q: ReviewQuery): ReviewTier =>
+  q.reasons.some((r) => !r.resolved) ? "sharpen" : "ready";
+
+export interface ReviewTallies { agents: number; queries: number; ready: number; fix: number; sharpen: number; }
+
+/** Live counts by tier across surviving agents + queries (deleted/removed excluded). ready+fix+sharpen
+ *  always equals agents+queries — every live record sits in exactly one tier. */
+export function reviewTallies(agents: ReviewAgent[], queries: ReviewQuery[]): ReviewTallies {
+  const liveAgents = agents.filter((a) => !a.deleted);
+  const liveQueries = queries.filter((q) => !q.removed);
+  const dupIds = unresolvedDuplicateAgentIds(agents);
+  const t: ReviewTallies = { agents: liveAgents.length, queries: liveQueries.length, ready: 0, fix: 0, sharpen: 0 };
+  for (const a of liveAgents) t[agentTier(a, dupIds.has(a.id))]++;
+  for (const q of liveQueries) t[queryTier(q)]++;
+  return t;
+}
+
 const isReviewReasonCode = (c: unknown): c is ReviewReasonCode =>
   typeof c === "string" && (REVIEW_REASON_CODES as readonly string[]).includes(c);
 const coerceStatus = (s: unknown): QueryStatus | null =>

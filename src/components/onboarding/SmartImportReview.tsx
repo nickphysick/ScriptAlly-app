@@ -1264,7 +1264,7 @@ const REVIEW_SHELL_CSS = `
 `;
 
 /** Full-viewport windowed shell: cream ground, full-width nav, white window with the recoloured rim. */
-const ReviewShell: React.FC<{ userInitial: string; allClear: boolean; modal?: React.ReactNode; children: React.ReactNode }> = ({ userInitial, allClear, modal, children }) => (
+export const ReviewShell: React.FC<{ userInitial: string; allClear: boolean; modal?: React.ReactNode; children: React.ReactNode }> = ({ userInitial, allClear, modal, children }) => (
   <div className="sa-rv-root" style={{ fontFamily: "Inter, sans-serif", color: "#2a2521" }}>
     <style>{REVIEW_SHELL_CSS}</style>
     {modal}
