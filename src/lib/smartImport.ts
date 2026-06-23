@@ -85,8 +85,8 @@ export function validateSmartImport(result: SmartImportResult): ValidatedImport 
       continue;
     }
 
-    // Date order where present: queried ≤ partialRequested ≤ partialSent ≤ fullRequested ≤ fullSent ≤ closed.
-    const seq = [q.dateQueried, q.partialRequestedDate, q.partialSentDate, q.fullRequestedDate, q.fullSentDate, q.closedDate]
+    // Date order where present: the sent date (the spine) then each later timeline event, in order.
+    const seq = [q.sentDate, ...(q.timeline ?? []).map((t) => t.date)]
       .filter((d): d is string => !!d);
     for (let i = 1; i < seq.length; i++) {
       if (seq[i] < seq[i - 1]) {

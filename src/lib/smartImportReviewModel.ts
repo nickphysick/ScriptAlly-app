@@ -5,10 +5,15 @@
  * Smart Import review — the pure working model behind the two-screen review UI. No React, no
  * Firebase: parsing a `SmartImportResult` into the editable `agents[]` + `queries[]` model, the
  * status/reason derivations the cards read, and converting the final model back into a
- * `SmartImportResult` for Prompt 1's `commitSmartImport`. Kept standalone so it's unit-testable.
+ * `SmartImportResult` for commitSmartImport. Kept standalone so it's unit-testable.
+ *
+ * Query shape (the redesign): a query carries its SENT date (the spine), an optional `timeline` of
+ * later events lifted from notes, and a list of TYPED reasons. Each reason's wording + input is
+ * derived from its code (queryReasonText / statusDirectionChoices) so copy stays consistent
+ * run-to-run and the function payload stays tiny.
  */
 import { QueryStatus } from "../types";
-import { ParsedAgent, ParsedQuery, SmartImportResult } from "../types/smartImport";
+import { ParsedAgent, ParsedQuery, SmartImportResult, ReviewReasonCode, REVIEW_REASON_CODES } from "../types/smartImport";
 import { normaliseGenres } from "./manuscripts";
 
 // ── Working model ───────────────────────────────────────────────────────────────────────────────
@@ -40,8 +45,6 @@ export interface ReasonItem { kind: CheckReason; note: string; resolved: boolean
 
 /** Default note for the mapping reason when the mapper didn't supply a sentence of its own. */
 export const MAPPING_NOTE = "We weren't fully sure we read this agent's details correctly — worth a quick look.";
-/** Default note for a query whose status mapping was low-confidence. */
-export const QUERY_CHECK_NOTE = "We weren't fully sure how to read this query's status — worth a quick look.";
 export const dupNoteOpen = (agency: string) =>
   `Looks like the same agent at ${agency}, imported more than once — remove the duplicate, or keep both.`;
 export const dupNoteKept = (agency: string) => `Kept both — separate agents at ${agency}.`;
@@ -56,20 +59,28 @@ export const agentStatus = (a: ReviewAgent, dupOpen = false): AgentStatus =>
 export const resolveReason = (a: ReviewAgent, kind: CheckReason): ReasonItem[] =>
   a.reasons.map((r) => (r.kind === kind ? { ...r, resolved: true } : r));
 
+// ── Query working model ─────────────────────────────────────────────────────────────────────────
+/** A later pipeline event on a query (editable): the event, its parsed date, and the verbatim note
+ *  date it came from. */
+export interface ReviewTimelineEvent { type: QueryStatus; date: string | null; raw: string | null; }
+
+/** A typed query reason. Copy + the right input are derived from `code` (queryReasonText /
+ *  statusDirectionChoices). Resolving sets `resolved` — the row goes Ready when none remain open. */
+export interface QueryReason { code: ReviewReasonCode; resolved: boolean; }
+
 export interface ReviewQuery {
   id: string;
   agentRef: string;
   status: QueryStatus;
-  /** The queried-rung date (the anchor). When status is "Queried" this is the query's only date. */
-  dateQueried: string | null;
-  /** The current-status rung's date (e.g. the full-sent date), kept separate from the queried anchor
-   *  so both can be edited beyond Queried. Unused while status is Queried. Carries across status
-   *  changes (relabelled, never discarded). All dates optional — never a check reason, never gating. */
-  statusDate: string | null;
-  /** Quiet, informational hint about an unparseable date cell — shown by the date field, never a reason. */
-  dateNote: string | null;
-  /** Reason/resolve machinery — a query only ever carries a STATUS-interpretation reason (never date). */
-  reasons: ReasonItem[];
+  /** The query's sent date — the spine. The row shows this date alongside the status. */
+  sentDate: string | null;
+  /** The verbatim Date-sent cell, kept so reason copy can quote what they wrote. */
+  sentDateRaw: string | null;
+  /** Later events lifted from notes (editable). Seeds activity rungs on commit. */
+  timeline: ReviewTimelineEvent[];
+  /** Typed, resolvable reasons. A query can carry more than one. */
+  reasons: QueryReason[];
+  notes: string;
   removed: boolean;
   removedReason?: "Agent removed" | "Removed by you";
 }
@@ -102,7 +113,7 @@ export const nameCompatible = (n1 = "", n2 = ""): boolean => {
   return firstNameCompatible(firstOf(n1), firstOf(n2));
 };
 
-// ── Query dates & status options ─────────────────────────────────────────────────────────────────
+// ── Query dates, status options & reason copy ────────────────────────────────────────────────────
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 /** Format an ISO date for display; null → "date needed" (never a fabricated date). */
 export const fmtDate = (iso: string | null): string => {
@@ -115,56 +126,62 @@ export const QUERY_STATUS_OPTIONS: QueryStatus[] = [
   QueryStatus.FULL_REQUESTED, QueryStatus.FULL_SENT, QueryStatus.REVISE_RESUBMIT,
   QueryStatus.OFFER, QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE,
 ];
+export const hasOpenQueryReasons = (q: ReviewQuery) => q.reasons.some((r) => !r.resolved);
 export const queryStatusOf = (q: ReviewQuery): "needs-check" | "captured" =>
-  q.reasons.some((r) => !r.resolved) ? "needs-check" : "captured";
+  hasOpenQueryReasons(q) ? "needs-check" : "captured";
 
-/** The date shown on the card for a query: the queried anchor while Queried, else the status-rung date. */
-export const currentDate = (q: ReviewQuery): string | null =>
-  q.status === QueryStatus.QUERIED ? q.dateQueried : q.statusDate;
+/** The date shown on a query row: its sent date (the spine), regardless of status. */
+export const currentDate = (q: ReviewQuery): string | null => q.sentDate;
 
-/** Editor label for a query's current-status date field (distinct from "Date queried"). */
-const STATUS_DATE_LABEL: Partial<Record<QueryStatus, string>> = {
-  [QueryStatus.PARTIAL_REQUESTED]: "Date partial requested",
-  [QueryStatus.PARTIAL_SENT]: "Date partial sent",
-  [QueryStatus.FULL_REQUESTED]: "Date full requested",
-  [QueryStatus.FULL_SENT]: "Date full sent",
-  [QueryStatus.OFFER]: "Date of offer",
-  [QueryStatus.REVISE_RESUBMIT]: "Date R&R received",
-  [QueryStatus.REJECTED]: "Date rejected",
-  [QueryStatus.WITHDRAWN]: "Date withdrawn",
-  [QueryStatus.NO_RESPONSE]: "Date closed",
-};
-export const statusDateLabel = (status: QueryStatus): string => STATUS_DATE_LABEL[status] ?? "Date of this status";
+const isReviewReasonCode = (c: unknown): c is ReviewReasonCode =>
+  typeof c === "string" && (REVIEW_REASON_CODES as readonly string[]).includes(c);
+const coerceStatus = (s: unknown): QueryStatus | null =>
+  typeof s === "string" && (Object.values(QueryStatus) as string[]).includes(s) ? (s as QueryStatus) : null;
 
-/** Presentation only: render any QueryStatus named in prose lowercase + single-quoted (e.g. "mapped
- *  to Queried" → "mapped to 'queried'"). The enum stays exact for logic — this is just for note text. */
-const STATUS_PROSE_RE = new RegExp(
-  "['‘’\"]?(" + QUERY_STATUS_OPTIONS.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).sort((a, b) => b.length - a.length).join("|") + ")['‘’\"]?",
-  "gi",
-);
-export const quoteStatuses = (text: string): string =>
-  text.replace(STATUS_PROSE_RE, (_m, s: string) => `'${s.toLowerCase()}'`);
+/** Whether a status is a "full" or "partial" material stage (drives the status-direction choices). */
+const isPartialStage = (s: QueryStatus) => s === QueryStatus.PARTIAL_REQUESTED || s === QueryStatus.PARTIAL_SENT;
 
-/** Which ParsedQuery field carries the date for a status's RUNG — i.e. which rung a known or
- *  user-set date should seed. This is what keeps the timeline honest: a Full Sent date seeds the
- *  full-sent rung, an Offer date the offer rung, etc. (commitSmartImport's impliedRungs reads exactly
- *  these per-rung fields). Every status maps to its own field — Offer → offerDate, Revise & Resubmit
- *  → reviseDate — so a date is never bodged onto the queried rung by default. */
-export const dateFieldForStatus = (status: QueryStatus): keyof ParsedQuery => {
-  switch (status) {
-    case QueryStatus.QUERIED: return "dateQueried";
-    case QueryStatus.PARTIAL_REQUESTED: return "partialRequestedDate";
-    case QueryStatus.PARTIAL_SENT: return "partialSentDate";
-    case QueryStatus.FULL_REQUESTED: return "fullRequestedDate";
-    case QueryStatus.FULL_SENT: return "fullSentDate";
-    case QueryStatus.OFFER: return "offerDate";
-    case QueryStatus.REVISE_RESUBMIT: return "reviseDate";
-    case QueryStatus.REJECTED:
-    case QueryStatus.WITHDRAWN:
-    case QueryStatus.NO_RESPONSE: return "closedDate";
-    default: return "dateQueried";
+/** The two real choices a `status-direction` flag offers — sent-by-me vs requested-by-agent, for the
+ *  material (full/partial) implied by the best-guess status. */
+export function statusDirectionChoices(status: QueryStatus): { label: string; status: QueryStatus }[] {
+  return isPartialStage(status)
+    ? [{ label: "I sent the partial", status: QueryStatus.PARTIAL_SENT },
+       { label: "The agent requested it", status: QueryStatus.PARTIAL_REQUESTED }]
+    : [{ label: "I sent the full", status: QueryStatus.FULL_SENT },
+       { label: "The agent requested it", status: QueryStatus.FULL_REQUESTED }];
+}
+
+/** Lowercase a status for prose ("Full Requested" → "full requested"). */
+const lc = (s: string) => s.toLowerCase();
+
+/**
+ * The plain-English message for a typed query reason, in the Form-11 voice — specific about what we
+ * saw, never apologetic, fix offered in place. Assembled from the code (+ the query's own values),
+ * so wording stays consistent run-to-run and the function payload stays tiny.
+ */
+export function queryReasonText(code: ReviewReasonCode, q: ReviewQuery): string {
+  switch (code) {
+    case "two-dates": {
+      const ev = q.timeline[0];
+      const evLabel = ev ? lc(ev.type) : "a later step";
+      const sent = q.sentDate ? fmtDate(q.sentDate) : (q.sentDateRaw || "the first date");
+      const evDate = ev?.date ? fmtDate(ev.date) : (ev?.raw || "the second date");
+      return `We found two dates here. We've read ${sent} as the day you sent the query, and ${evDate} — from your note — as the day the ${evLabel} happened. Right way round?`;
+    }
+    case "missing-day":
+      return `You've got ${q.sentDateRaw || "a month and year"} here, but no specific day. Pin it to a date, or keep it as just the month?`;
+    case "serial-outlier":
+      return `We read this as ${fmtDate(q.sentDate)} — but that's well outside your other dates (it came through as a stray spreadsheet number). Is that right, or shall we set it?`;
+    case "no-date":
+      return `We don't have a date for this one. When did you send the query?`;
+    case "status-direction":
+      return isPartialStage(q.status)
+        ? `Did you send the partial manuscript, or did the agent request it from you?`
+        : `Did you send the full manuscript, or did the agent request it from you?`;
+    case "status-wording":
+      return `We've read this as '${lc(q.status)}' — does that look right, or is it further along?`;
   }
-};
+}
 
 /** Parse the AI result into the editable working model. Duplicate detection: named agents at a
  *  near-identical agency (agencyKey) with compatible names are clustered as likely the same person. */
@@ -218,19 +235,24 @@ export function parseModel(result: SmartImportResult): { agents: ReviewAgent[]; 
   }
 
   const queries: ReviewQuery[] = (result.queries || []).map((q, i) => {
-    const status = (q.status as QueryStatus) ?? QueryStatus.QUERIED;
+    const status = coerceStatus(q.status) ?? QueryStatus.QUERIED;
+    const timeline: ReviewTimelineEvent[] = (q.timeline || []).map((t) => ({
+      type: coerceStatus(t.type) ?? status,
+      date: t.date ?? null,
+      raw: t.raw ?? null,
+    }));
+    const reasons: QueryReason[] = (q.reasons || [])
+      .filter(isReviewReasonCode)
+      .map((code) => ({ code, resolved: false }));
     return {
       id: `q${i}`,
       agentRef: q.agentRef,
       status,
-      dateQueried: q.dateQueried ?? null, // the queried-rung anchor
-      // The current-status rung's own date (e.g. fullSentDate) — only beyond Queried, else it IS the anchor.
-      statusDate: status === QueryStatus.QUERIED ? null : ((q[dateFieldForStatus(status)] as string | null | undefined) ?? null),
-      dateNote: q.dateNote ?? null, // informational only — never a reason
-      // A query reason is ONLY ever a genuine STATUS-interpretation ambiguity (never a date).
-      reasons: (q.confidence === "low" || !!(q.flags && q.flags.length)
-        ? [{ kind: "mapping", note: friendly(q.flags) || QUERY_CHECK_NOTE, resolved: false, undoable: true } as ReasonItem]
-        : []),
+      sentDate: q.sentDate ?? null,
+      sentDateRaw: q.sentDateRaw ?? null,
+      timeline,
+      reasons,
+      notes: q.notes ?? "",
       removed: false,
     };
   });
@@ -253,26 +275,36 @@ export function applyAgentRemoval(
   };
 }
 
-/** Convert the final working model back into a SmartImportResult for commitSmartImport. Starts from
- *  the original parse (so per-stage dates the model never surfaced survive), excludes deleted agents /
- *  removed queries, carries merge-repointed agentRefs, and — the date-attribution fix — writes each
- *  query's single date to the rung field matching its CURRENT status (a Full Sent date → fullSentDate,
- *  seeding the full-sent rung), never silently to the queried rung. null stays null (never fabricated). */
+/** Convert the final working model back into a SmartImportResult for commitSmartImport. Excludes
+ *  deleted agents / removed queries, carries merge-repointed agentRefs, and writes each query's
+ *  edited spine (sentDate) + timeline straight through. null stays null (never fabricated). */
 export function modelToResult(result: SmartImportResult, agents: ReviewAgent[], queries: ReviewQuery[]): SmartImportResult {
   const origAgents = new Map((result.agents || []).map((a) => [a.ref, a]));
   const agentsOut: ParsedAgent[] = agents.filter((a) => !a.deleted).map((a) => {
     const o = origAgents.get(a.id);
-    return { ...(o ?? { ref: a.id, confidence: "high" as const, name: a.name }), ref: a.id, name: a.name, agency: a.agency, genres: a.genres, website: a.website || o?.website, responseTimeWeeks: a.weeks };
+    return { ...(o ?? { ref: a.id, name: a.name }), ref: a.id, name: a.name, agency: a.agency, genres: a.genres, website: a.website || o?.website, responseTimeWeeks: a.weeks };
   });
   // Cross-reference guard: exclude queries whose agent was deleted even if the cascade missed them.
   const survivingAgentIds = new Set(agentsOut.map((a) => a.ref));
   const queriesOut: ParsedQuery[] = queries.filter((q) => !q.removed && survivingAgentIds.has(q.agentRef)).map((q) => {
     const o = (result.queries || [])[Number(q.id.slice(1))];
-    const base: ParsedQuery = { ...(o ?? { agentRef: q.agentRef, confidence: "high" as const, status: q.status, dateQueried: null }), agentRef: q.agentRef, status: q.status };
-    base.dateQueried = q.dateQueried; // the queried-rung anchor (edited or carried)
-    // Beyond Queried, the current-status rung gets its own date; for Queried the rung IS dateQueried.
-    if (q.status !== QueryStatus.QUERIED) (base as unknown as Record<string, string | null>)[dateFieldForStatus(q.status)] = q.statusDate;
-    return base;
+    return {
+      agentRef: q.agentRef,
+      status: q.status,
+      sentDate: q.sentDate,
+      sentDateRaw: q.sentDateRaw ?? o?.sentDateRaw ?? null,
+      timeline: q.timeline.map((t) => ({ type: t.type, date: t.date, raw: t.raw })),
+      notes: q.notes ?? o?.notes ?? "",
+    };
   });
-  return { columnMapping: {}, statusTranslations: [], agents: agentsOut, queries: queriesOut, warnings: [] };
+  return { agents: agentsOut, queries: queriesOut };
 }
+
+/** Presentation only: render any QueryStatus named in prose lowercase + single-quoted (e.g. "mapped
+ *  to Queried" → "mapped to 'queried'"). The enum stays exact for logic — this is just for note text. */
+const STATUS_PROSE_RE = new RegExp(
+  "['‘’\"]?(" + QUERY_STATUS_OPTIONS.map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).sort((a, b) => b.length - a.length).join("|") + ")['‘’\"]?",
+  "gi",
+);
+export const quoteStatuses = (text: string): string =>
+  text.replace(STATUS_PROSE_RE, (_m, s: string) => `'${s.toLowerCase()}'`);

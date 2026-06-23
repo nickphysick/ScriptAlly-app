@@ -20,15 +20,16 @@ vi.mock('./recomputeQuery', () => ({ recomputeQuery: vi.fn(async () => {}) }));
 import { setDoc, updateDoc } from 'firebase/firestore';
 import { impliedRungs, assignTimes, commitSmartImport } from './smartImportCommit';
 import { parseModel, modelToResult } from './smartImportReviewModel';
-import { ParsedAgent, ParsedQuery, SmartImportResult } from '../types/smartImport';
+import { ParsedAgent, ParsedQuery, SmartImportResult, TimelineEvent } from '../types/smartImport';
 import { QueryStatus } from '../types';
 
 const mockSetDoc = vi.mocked(setDoc);
 const mockUpdateDoc = vi.mocked(updateDoc);
 
 const q = (over: Partial<ParsedQuery> = {}): ParsedQuery => ({
-  agentRef: 'a1', dateQueried: null, status: QueryStatus.QUERIED, confidence: 'high', ...over,
+  agentRef: 'a1', status: QueryStatus.QUERIED, sentDate: null, ...over,
 });
+const ev = (type: QueryStatus, date: string | null): TimelineEvent => ({ type, date, raw: null });
 
 describe('impliedRungs — the history shape a final status implies', () => {
   const statuses = (qq: ParsedQuery) => impliedRungs(qq).map((r) => r.status);
@@ -49,8 +50,8 @@ describe('impliedRungs — the history shape a final status implies', () => {
     ]);
   });
 
-  it('a dated partial stage on a Full Sent query is still included', () => {
-    expect(statuses(q({ status: QueryStatus.FULL_SENT, partialSentDate: '2026-02-01' }))).toEqual([
+  it('a timeline partial event on a Full Sent query is still included', () => {
+    expect(statuses(q({ status: QueryStatus.FULL_SENT, timeline: [ev(QueryStatus.PARTIAL_SENT, '2026-02-01')] }))).toEqual([
       QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT,
       QueryStatus.FULL_REQUESTED, QueryStatus.FULL_SENT,
     ]);
@@ -62,31 +63,39 @@ describe('impliedRungs — the history shape a final status implies', () => {
     ]);
   });
 
-  it('a terminal status → queried + the terminal rung, carrying its closed date', () => {
-    const rungs = impliedRungs(q({ status: QueryStatus.REJECTED, closedDate: '2026-03-03' }));
+  it('a terminal status → queried + the terminal rung, carrying its timeline-event date', () => {
+    const rungs = impliedRungs(q({ status: QueryStatus.REJECTED, timeline: [ev(QueryStatus.REJECTED, '2026-03-03')] }));
     expect(rungs.map((r) => r.status)).toEqual([QueryStatus.QUERIED, QueryStatus.REJECTED]);
     expect(rungs.find((r) => r.status === QueryStatus.REJECTED)?.date).toBe('2026-03-03');
   });
 
-  it('Offer → queried + offer rung, carrying its OWN offer date (not the queried rung)', () => {
-    const rungs = impliedRungs(q({ status: QueryStatus.OFFER, dateQueried: '2025-11-05', offerDate: '2026-04-01' }));
+  it('Offer → queried + offer rung, carrying the spine on queried and the event date on offer', () => {
+    const rungs = impliedRungs(q({ status: QueryStatus.OFFER, sentDate: '2025-11-05', timeline: [ev(QueryStatus.OFFER, '2026-04-01')] }));
     expect(rungs.map((r) => r.status)).toEqual([QueryStatus.QUERIED, QueryStatus.OFFER]);
     expect(rungs.find((r) => r.status === QueryStatus.QUERIED)?.date).toBe('2025-11-05');
     expect(rungs.find((r) => r.status === QueryStatus.OFFER)?.date).toBe('2026-04-01');
   });
 
-  it('Revise & Resubmit → carries its OWN revise date on the R&R rung (a full was read)', () => {
-    const rungs = impliedRungs(q({ status: QueryStatus.REVISE_RESUBMIT, reviseDate: '2026-05-05' }));
+  it('Revise & Resubmit → carries its event date on the R&R rung (a full was read)', () => {
+    const rungs = impliedRungs(q({ status: QueryStatus.REVISE_RESUBMIT, timeline: [ev(QueryStatus.REVISE_RESUBMIT, '2026-05-05')] }));
     expect(rungs.map((r) => r.status)).toContain(QueryStatus.FULL_SENT); // R&R implies a full was read
     expect(rungs.find((r) => r.status === QueryStatus.REVISE_RESUBMIT)?.date).toBe('2026-05-05');
   });
 
   it('carries the real date onto each dated rung and null onto the rest', () => {
-    const rungs = impliedRungs(q({ status: QueryStatus.PARTIAL_SENT, dateQueried: '2026-01-01', partialSentDate: '2026-02-02' }));
+    const rungs = impliedRungs(q({ status: QueryStatus.PARTIAL_SENT, sentDate: '2026-01-01', timeline: [ev(QueryStatus.PARTIAL_SENT, '2026-02-02')] }));
     const byStatus = Object.fromEntries(rungs.map((r) => [r.status, r.date]));
-    expect(byStatus[QueryStatus.QUERIED]).toBe('2026-01-01');
-    expect(byStatus[QueryStatus.PARTIAL_REQUESTED]).toBeNull(); // never fabricated
-    expect(byStatus[QueryStatus.PARTIAL_SENT]).toBe('2026-02-02');
+    expect(byStatus[QueryStatus.QUERIED]).toBe('2026-01-01');     // the spine
+    expect(byStatus[QueryStatus.PARTIAL_REQUESTED]).toBeNull();   // implied, never fabricated
+    expect(byStatus[QueryStatus.PARTIAL_SENT]).toBe('2026-02-02'); // the timeline event
+  });
+
+  it('a full-requested timeline event seeds an agent-response rung (the under-count fix)', () => {
+    // A Queried-status row whose note says the full was requested: the event becomes a real
+    // FULL_REQUESTED rung, which recomputeQuery counts as an agent response.
+    const rungs = impliedRungs(q({ status: QueryStatus.QUERIED, sentDate: '2026-01-01', timeline: [ev(QueryStatus.FULL_REQUESTED, '2026-01-20')] }));
+    expect(rungs.map((r) => r.status)).toContain(QueryStatus.FULL_REQUESTED);
+    expect(rungs.find((r) => r.status === QueryStatus.FULL_REQUESTED)?.date).toBe('2026-01-20');
   });
 });
 
@@ -122,7 +131,6 @@ describe('assignTimes — ordering keys for derivation (never surfaced)', () => 
     expect(out[2].ms).toBe(new Date('2026-05-05').getTime());
     expect(out[1].ms).toBe(out[2].ms - 1);
     expect(out[0].ms).toBe(out[1].ms - 1);
-    // monotonic increasing ⇒ the dated final rung derives as the status
     expect(out[0].ms).toBeLessThan(out[1].ms);
     expect(out[1].ms).toBeLessThan(out[2].ms);
   });
@@ -144,10 +152,8 @@ describe('assignTimes — ordering keys for derivation (never surfaced)', () => 
 describe('commitSmartImport — orchestration', () => {
   beforeEach(() => { mockSetDoc.mockClear(); mockUpdateDoc.mockClear(); });
 
-  const agent = (over: Partial<ParsedAgent> = {}): ParsedAgent => ({ ref: 'a1', name: 'Jane Doe', agency: 'Acme', confidence: 'high', ...over });
-  const result = (agents: ParsedAgent[], queries: ParsedQuery[]): SmartImportResult => ({
-    columnMapping: {}, statusTranslations: [], agents, queries, warnings: [],
-  });
+  const agent = (over: Partial<ParsedAgent> = {}): ParsedAgent => ({ ref: 'a1', name: 'Jane Doe', agency: 'Acme', ...over });
+  const result = (agents: ParsedAgent[], queries: ParsedQuery[]): SmartImportResult => ({ agents, queries });
 
   const makeDeps = () => {
     const calls: string[] = [];
@@ -173,16 +179,14 @@ describe('commitSmartImport — orchestration', () => {
     const out = await commitSmartImport(deps as any, r, 'ms1');
     expect(out.agentsCreated).toBe(2);
     expect(out.queriesImported).toBe(2);
-    // every agent call precedes every query call
     expect(calls.lastIndexOf('agent')).toBeLessThan(calls.indexOf('query'));
   });
 
   it('imports a date-less query (provisional) — never zero', async () => {
     const { deps } = makeDeps();
-    const out = await commitSmartImport(deps as any, result([agent()], [q({ dateQueried: null, status: QueryStatus.QUERIED })]), 'ms1');
+    const out = await commitSmartImport(deps as any, result([agent()], [q({ sentDate: null, status: QueryStatus.QUERIED })]), 'ms1');
     expect(out.queriesImported).toBe(1);
     expect(out.queriesSkipped).toBe(0);
-    // a provisional rung was seeded with dateProvisional:true
     const provisional = mockSetDoc.mock.calls.some((c) => (c[1] as any)?.dateProvisional === true);
     expect(provisional).toBe(true);
   });
@@ -196,22 +200,19 @@ describe('commitSmartImport — orchestration', () => {
     expect(out.queriesImported).toBe(1);
   });
 
-  it('passes real dateQueried as dateSent for dated queries; clears dateSent (deleteField) for provisional ones', async () => {
+  it('passes real sentDate as dateSent for dated queries; clears dateSent (deleteField) for provisional ones', async () => {
     const { deps } = makeDeps();
     const r = result(
       [agent({ ref: 'a1' })],
       [
-        q({ agentRef: 'a1', status: QueryStatus.QUERIED, dateQueried: '2026-03-15' }), // dated
-        q({ agentRef: 'a1', status: QueryStatus.QUERIED, dateQueried: null }),           // provisional
+        q({ agentRef: 'a1', status: QueryStatus.QUERIED, sentDate: '2026-03-15' }), // dated
+        q({ agentRef: 'a1', status: QueryStatus.QUERIED, sentDate: null }),          // provisional
       ]
     );
     await commitSmartImport(deps as any, r, 'ms1');
     const addQueryCalls = (deps.addQuery as any).mock.calls;
-    // Dated query passes its real date through to addQuery.
     expect(addQueryCalls[0][0].dateSent).toBe('2026-03-15');
-    // Provisional query omits dateSent from addQuery (addQuery would default it to today).
     expect(addQueryCalls[1][0].dateSent).toBeUndefined();
-    // commitSmartImport then clears the today-stamp via updateDoc+deleteField for the provisional one.
     const clearCalls = mockUpdateDoc.mock.calls.filter(
       (c) => (c[1] as any)?.dateSent?._sentinel === 'deleteField'
     );
@@ -230,15 +231,11 @@ describe('commitSmartImport — orchestration', () => {
     );
     expect(summaries.length).toBe(1);
     expect((summaries[0][1] as any).description).toBe('Smart import · 2 agents added, 2 queries logged');
-    expect((summaries[0][1] as any).activityType).toBe('Status Changed'); // allowlisted type → passes rules, shows in feed
+    expect((summaries[0][1] as any).activityType).toBe('Status Changed');
   });
 });
 
 describe('commitSmartImport — deleted-agent exclusion (the masking case)', () => {
-  // This test guards the specific failure mode where an agency-only undated agent was deleted on
-  // the review screen but still committed. Before the B3 rules fix, the undated query write was
-  // silently rejected by Firestore (dateSent is string check failed), making it appear to work.
-  // After B3, absent dateSent is allowed, so the exclusion must hold at the model level.
   beforeEach(() => { mockSetDoc.mockClear(); mockUpdateDoc.mockClear(); });
 
   const makeDeps = () => {
@@ -254,62 +251,39 @@ describe('commitSmartImport — deleted-agent exclusion (the masking case)', () 
     };
   };
 
+  const rawResult = (): SmartImportResult => ({
+    agents: [
+      { ref: 'a1', name: 'Jane Doe', agency: 'Acme Lit' },
+      { ref: 'a2', name: '', agency: 'Curtis Brown' }, // agency-only
+    ],
+    queries: [
+      { agentRef: 'a1', status: QueryStatus.QUERIED, sentDate: '2026-03-15' },
+      { agentRef: 'a2', status: QueryStatus.QUERIED, sentDate: null }, // undated
+    ],
+  });
+
   it('deleting an agency-only undated agent on the review screen excludes it and its query from the commit', async () => {
-    const rawResult: SmartImportResult = {
-      columnMapping: {}, statusTranslations: [], warnings: [],
-      agents: [
-        { ref: 'a1', name: 'Jane Doe', agency: 'Acme Lit', confidence: 'high' },
-        { ref: 'a2', name: '', agency: 'Curtis Brown', confidence: 'high' }, // agency-only
-      ],
-      queries: [
-        { agentRef: 'a1', dateQueried: '2026-03-15', status: QueryStatus.QUERIED, confidence: 'high' },
-        { agentRef: 'a2', dateQueried: null, status: QueryStatus.QUERIED, confidence: 'high' }, // undated
-      ],
-    };
-
-    // Simulate the review-screen remove() cascade: mark a2 deleted, its query removed.
-    const { agents, queries } = parseModel(rawResult);
-    const agencyOnlyAgent = agents.find((a) => a.id === 'a2')!;
-    agencyOnlyAgent.deleted = true;
-    const agencyOnlyQuery = queries.find((q) => q.agentRef === 'a2')!;
-    agencyOnlyQuery.removed = true;
-
-    // modelToResult produces the filtered SmartImportResult (what onImportClick hands to handleImport).
-    const filteredResult = modelToResult(rawResult, agents, queries);
-
-    // Guard: the filtered result must exclude the deleted agent + removed query.
-    expect(filteredResult.agents.map((a) => a.ref)).toEqual(['a1']);
-    expect(filteredResult.queries).toHaveLength(1);
-    expect(filteredResult.queries[0].agentRef).toBe('a1');
+    const raw = rawResult();
+    const { agents, queries } = parseModel(raw);
+    agents.find((a) => a.id === 'a2')!.deleted = true;
+    queries.find((qq) => qq.agentRef === 'a2')!.removed = true;
+    const filtered = modelToResult(raw, agents, queries);
+    expect(filtered.agents.map((a) => a.ref)).toEqual(['a1']);
+    expect(filtered.queries).toHaveLength(1);
+    expect(filtered.queries[0].agentRef).toBe('a1');
   });
 
   it('cross-reference guard: if the cascade missed marking q.removed, the deleted agent ID check still excludes the query', async () => {
-    const rawResult: SmartImportResult = {
-      columnMapping: {}, statusTranslations: [], warnings: [],
-      agents: [
-        { ref: 'a1', name: 'Jane Doe', agency: 'Acme Lit', confidence: 'high' },
-        { ref: 'a2', name: '', agency: 'Curtis Brown', confidence: 'high' },
-      ],
-      queries: [
-        { agentRef: 'a1', dateQueried: '2026-03-15', status: QueryStatus.QUERIED, confidence: 'high' },
-        { agentRef: 'a2', dateQueried: null, status: QueryStatus.QUERIED, confidence: 'high' },
-      ],
-    };
-
-    const { agents, queries } = parseModel(rawResult);
-    // Agent deleted, but simulate cascade MISS: q.removed is NOT set.
-    agents.find((a) => a.id === 'a2')!.deleted = true;
-    // queries[1] still has removed: false (the broken-link scenario)
-
-    const filteredResult = modelToResult(rawResult, agents, queries);
-
-    // The cross-reference guard must catch it: query whose agentRef points to a deleted agent is excluded.
-    expect(filteredResult.agents.map((a) => a.ref)).toEqual(['a1']);
-    expect(filteredResult.queries).toHaveLength(1);
-    expect(filteredResult.queries[0].agentRef).toBe('a1');
+    const raw = rawResult();
+    const { agents, queries } = parseModel(raw);
+    agents.find((a) => a.id === 'a2')!.deleted = true; // cascade MISS: q.removed not set
+    const filtered = modelToResult(raw, agents, queries);
+    expect(filtered.agents.map((a) => a.ref)).toEqual(['a1']);
+    expect(filtered.queries).toHaveLength(1);
+    expect(filtered.queries[0].agentRef).toBe('a1');
 
     const { deps } = makeDeps();
-    const out = await commitSmartImport(deps as any, filteredResult, 'ms1');
+    const out = await commitSmartImport(deps as any, filtered, 'ms1');
     expect(out.agentsCreated).toBe(1);
     expect(out.queriesImported).toBe(1);
     expect((deps.addAgent as any).mock.calls).toHaveLength(1);

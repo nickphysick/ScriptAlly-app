@@ -3,13 +3,11 @@ import { validateSmartImport } from './smartImport';
 import { ParsedAgent, ParsedQuery, SmartImportResult } from '../types/smartImport';
 import { QueryStatus } from '../types';
 
-const agent = (over: Partial<ParsedAgent> = {}): ParsedAgent => ({ ref: 'a1', name: 'Jane Doe', confidence: 'high', ...over });
+const agent = (over: Partial<ParsedAgent> = {}): ParsedAgent => ({ ref: 'a1', name: 'Jane Doe', ...over });
 const query = (over: Partial<ParsedQuery> = {}): ParsedQuery => ({
-  agentRef: 'a1', dateQueried: '2026-01-01', status: QueryStatus.QUERIED, confidence: 'high', ...over,
+  agentRef: 'a1', status: QueryStatus.QUERIED, sentDate: '2026-01-01', ...over,
 });
-const result = (agents: ParsedAgent[], queries: ParsedQuery[]): SmartImportResult => ({
-  columnMapping: {}, statusTranslations: [], agents, queries, warnings: [],
-});
+const result = (agents: ParsedAgent[], queries: ParsedQuery[]): SmartImportResult => ({ agents, queries });
 
 describe('validateSmartImport — drop-and-report (never silently write a bad row)', () => {
   it('keeps a fully valid row', () => {
@@ -29,8 +27,8 @@ describe('validateSmartImport — drop-and-report (never silently write a bad ro
     expect(r.skipped[0].reason).toMatch(/Unrecognised status/);
   });
 
-  it('IMPORTS a row with no query date (provisional) — never drops it for a missing date', () => {
-    const r = validateSmartImport(result([agent()], [query({ dateQueried: null })]));
+  it('IMPORTS a row with no sent date (provisional) — never drops it for a missing date', () => {
+    const r = validateSmartImport(result([agent()], [query({ sentDate: null })]));
     expect(r.importable).toHaveLength(1);
     expect(r.skipped).toHaveLength(0);
   });
@@ -51,8 +49,11 @@ describe('validateSmartImport — drop-and-report (never silently write a bad ro
     expect(r.skipped[0].reason).toMatch(/no agent name or agency/);
   });
 
-  it('flags out-of-order dates as a warning but STILL imports the row (never auto-fixed)', () => {
-    const r = validateSmartImport(result([agent()], [query({ dateQueried: '2026-05-01', partialRequestedDate: '2026-01-01' })]));
+  it('flags out-of-order dates (sent date after a later timeline event) but STILL imports the row', () => {
+    const r = validateSmartImport(result([agent()], [query({
+      sentDate: '2026-05-01',
+      timeline: [{ type: QueryStatus.PARTIAL_REQUESTED, date: '2026-01-01', raw: null }],
+    })]));
     expect(r.importable).toHaveLength(1);
     expect(r.dateWarnings.length).toBeGreaterThan(0);
   });

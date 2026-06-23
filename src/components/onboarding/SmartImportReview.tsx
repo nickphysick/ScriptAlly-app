@@ -11,7 +11,7 @@
  * and the commit wiring follow.
  */
 import React, { useState, useRef, useMemo, useCallback, useEffect, useLayoutEffect } from "react";
-import { SmartImportResult } from "../../types/smartImport";
+import { SmartImportResult, ReviewReasonCode } from "../../types/smartImport";
 import { QueryStatus } from "../../types";
 import { SegmentedToggle, WeekSlider, GenreCombobox, FitStars } from "../forms";
 import { PREDEFINED_GENRES } from "../../lib/manuscripts";
@@ -22,7 +22,7 @@ import {
   ReviewAgent, ReviewQuery, ReasonItem, CheckReason, AgentStatus,
   agentStatus, resolveReason, queryStatusOf, fmtDate, QUERY_STATUS_OPTIONS,
   dupNoteOpen, dupNoteKept, dupNoteMerged, parseModel, modelToResult, applyAgentRemoval,
-  currentDate, statusDateLabel, quoteStatuses,
+  currentDate, quoteStatuses, queryReasonText, statusDirectionChoices,
 } from "../../lib/smartImportReviewModel";
 
 // ── Palette (from the sketch; critical colours inline per house style) ──────────────────────────
@@ -374,50 +374,164 @@ const AgentRow: React.FC<AgentRowProps> = ({
 };
 
 // ── Query row (Queries B-redesign) ──────────────────────────────────────────────────────────────
-// Flat list row mirroring AgentRow. A query's review state is derived by the screen (status-mapping
-// reason from the model, plus the two presentational query cases — missing date, unmatched agent).
-type QueryReviewState = "ready" | "mapping" | "needs-date" | "unmatched";
+// Flat list row. A query is "Ready" when it carries no open reason; otherwise it shows one inline
+// panel per typed reason (stacked), each with the catalogue copy + the right input. Copy is derived
+// from the reason code (queryReasonText) so it stays consistent run-to-run.
+const reasonStripStyle: React.CSSProperties = { display: "flex", alignItems: "flex-start", gap: 8, fontFamily: "Inter", fontSize: 12.5, color: "#9a5040", marginBottom: 11, lineHeight: 1.5, maxWidth: 560 };
+const dateBoxStyle: React.CSSProperties = { fontFamily: MONO, fontSize: 12.5, padding: "9px 13px", border: "1px solid #e3ccc0", borderRadius: 9, background: "#fff", minWidth: 180, color: "#2a2521", outline: "none" };
+const ReasonIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#b5654a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4m0 4h.01"/></svg>
+);
+
 interface QueryRowProps {
   query: ReviewQuery;
-  /** Agent name (Playfair) — agent.name || agent.agency, or "Unknown agent" if unmatched. */
+  /** Agent name (Playfair) — agent.name || agent.agency. */
   agentName: string;
-  /** Leading sub-line segment: the agency, "Agency only", or "From your file" (unmatched). */
+  /** Leading sub-line segment: the agency or "Agency only". */
   origin: string;
-  reviewState: QueryReviewState;
   open: boolean;
   onToggleOpen: () => void;
   onPatch: (p: Partial<ReviewQuery>) => void;
   onDelete: () => void;
-  onResolveMapping: () => void;
-  onSaveDate: (iso: string) => void;
-  onLeaveUndated: () => void;
-  agentOptions: { id: string; label: string }[];
-  onLinkAgent: (agentId: string) => void;
-  onAddNewAgent: () => void;
+  /** Resolve one typed reason, optionally applying the user's fix (status / sentDate / timeline). */
+  onResolveReason: (code: ReviewReasonCode, patch?: Partial<ReviewQuery>) => void;
+  /** Two-dates "Swap": swap the sent date with the first timeline event. */
+  onSwapDates: () => void;
 }
 
 const QueryRow: React.FC<QueryRowProps> = ({
-  query, agentName, origin, reviewState, open, onToggleOpen, onPatch, onDelete,
-  onResolveMapping, onSaveDate, onLeaveUndated, agentOptions, onLinkAgent, onAddNewAgent,
+  query, agentName, origin, open, onToggleOpen, onPatch, onDelete, onResolveReason, onSwapDates,
 }) => {
-  const [dateInput, setDateInput] = useState("");
-  const [linkChoice, setLinkChoice] = useState("");
-  const needsCheck = reviewState !== "ready";
+  // Per-reason local date drafts (so typing doesn't commit until "Save"), and the wording dropdown.
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [serialEditing, setSerialEditing] = useState(false);
+  const [wording, setWording] = useState<QueryStatus>(query.status);
+  const setDraft = (k: string, v: string) => setDrafts((d) => ({ ...d, [k]: v }));
+
+  const openReasons = query.reasons.filter((r) => !r.resolved);
+  const needsCheck = openReasons.length > 0;
   const dateStr = currentDate(query);
   const av = initials(agentName) || "–";
   const accentColor = needsCheck ? "#a85a44" : "#5a6e58";
   const avBg = needsCheck ? "#f0cdbf" : "#e6ebe3";
-  const avInk = needsCheck ? "#a85a44" : "#5a6e58";
-  const pillBg = needsCheck ? "#f0cdbf" : "#e6ebe3";
   const pillInk = needsCheck ? "#a85a44" : "#5a6e58";
-  const beyondQueried = query.status !== QueryStatus.QUERIED;
+
+  const dateInput = (k: string, label: string, prefill: string | null) => (
+    <input type="date" aria-label={label} value={drafts[k] ?? prefill ?? ""} onChange={(e) => setDraft(k, e.target.value)}
+      style={dateBoxStyle} onFocus={(e) => { e.currentTarget.style.borderColor = "#9a5040"; }} onBlur={(e) => { e.currentTarget.style.borderColor = "#e3ccc0"; }} />
+  );
+  const solidBtn = (label: string, onClick: () => void) => (
+    <button onClick={onClick} style={solidMini}
+      onMouseEnter={(e) => { e.currentTarget.style.background = "#f0d3c7"; }}
+      onMouseLeave={(e) => { e.currentTarget.style.background = "#f5e2da"; }}>{label}</button>
+  );
+  const ghostBtn = (label: string, onClick: () => void) => (
+    <button onClick={onClick} style={ghostMini}
+      onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.borderColor = "#9a5040"; }}
+      onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; e.currentTarget.style.borderColor = "#e3ccc0"; }}>{label}</button>
+  );
+
+  const renderReason = (code: ReviewReasonCode) => {
+    const copy = <div style={reasonStripStyle}><ReasonIcon /><span>{queryReasonText(code, query)}</span></div>;
+    switch (code) {
+      case "two-dates": {
+        const ev = query.timeline[0];
+        return (
+          <div key={code} style={{ marginBottom: 14 }}>
+            {copy}
+            <div style={{ borderLeft: "2px solid #ecd9cd", paddingLeft: 16, display: "flex", flexDirection: "column", gap: 10, margin: "4px 0 12px", maxWidth: 520 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <span style={{ fontFamily: MONO, fontSize: 12, width: 130, flexShrink: 0 }}>Query sent<span style={{ display: "block", color: C.muted, fontSize: 10.5 }}>you → agent</span></span>
+                <input type="date" aria-label="Query sent date" value={query.sentDate ?? ""} onChange={(e) => onPatch({ sentDate: e.target.value || null })} style={dateBoxStyle} />
+              </div>
+              {ev && (
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <span style={{ fontFamily: MONO, fontSize: 12, width: 130, flexShrink: 0 }}>{ev.type}<span style={{ display: "block", color: C.muted, fontSize: 10.5 }}>agent → you</span></span>
+                  <input type="date" aria-label="Event date" value={ev.date ?? ""} onChange={(e) => onPatch({ timeline: query.timeline.map((t, i) => (i === 0 ? { ...t, date: e.target.value || null } : t)) })} style={dateBoxStyle} />
+                </div>
+              )}
+            </div>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              {solidBtn("Yes, that's right", () => onResolveReason("two-dates"))}
+              {ev && ghostBtn("Swap the dates", onSwapDates)}
+              {ghostBtn("It's just one date", () => onResolveReason("two-dates", { timeline: [] }))}
+            </div>
+          </div>
+        );
+      }
+      case "missing-day":
+        return (
+          <div key={code} style={{ marginBottom: 14 }}>
+            {copy}
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+              {dateInput(code, "Pin to a date", null)}
+              {solidBtn("Save date", () => { const v = drafts[code]; if (v) onResolveReason("missing-day", { sentDate: v }); })}
+              {ghostBtn("Keep as month", () => onResolveReason("missing-day"))}
+            </div>
+          </div>
+        );
+      case "serial-outlier":
+        return (
+          <div key={code} style={{ marginBottom: 14 }}>
+            {copy}
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+              {serialEditing
+                ? <>{dateInput(code, "Set a different date", query.sentDate)}{solidBtn("Save date", () => { const v = drafts[code] ?? query.sentDate; if (v) onResolveReason("serial-outlier", { sentDate: v }); })}</>
+                : <>{solidBtn("That's right", () => onResolveReason("serial-outlier"))}{ghostBtn("Set a different date", () => setSerialEditing(true))}</>}
+              {ghostBtn("Leave undated", () => onResolveReason("serial-outlier", { sentDate: null }))}
+            </div>
+          </div>
+        );
+      case "no-date":
+        return (
+          <div key={code} style={{ marginBottom: 14 }}>
+            {copy}
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+              {dateInput(code, "Date sent", null)}
+              {solidBtn("Save date", () => { const v = drafts[code]; if (v) onResolveReason("no-date", { sentDate: v }); })}
+              {ghostBtn("Leave undated", () => onResolveReason("no-date"))}
+            </div>
+          </div>
+        );
+      case "status-direction":
+        return (
+          <div key={code} style={{ marginBottom: 14 }}>
+            {copy}
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              {statusDirectionChoices(query.status).map((c) => (
+                <button key={c.status} onClick={() => onResolveReason("status-direction", { status: c.status })}
+                  style={{ border: "1px solid #e0d3c6", background: "#fff", borderRadius: 9, padding: "10px 14px", fontSize: 13, color: "#2a2521", cursor: "pointer", textAlign: "left" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#7c3a2a"; e.currentTarget.style.background = "#faeee7"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#e0d3c6"; e.currentTarget.style.background = "#fff"; }}>
+                  <span style={{ fontWeight: 600 }}>{c.label}</span>
+                  <span style={{ display: "block", fontFamily: MONO, fontSize: 11, color: C.muted, marginTop: 2 }}>→ {c.status}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      case "status-wording":
+        return (
+          <div key={code} style={{ marginBottom: 14 }}>
+            {copy}
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+              <select value={wording} onChange={(e) => setWording(e.target.value as QueryStatus)} aria-label="Query status"
+                style={{ ...dateBoxStyle, minWidth: 200, cursor: "pointer" }}>
+                {QUERY_STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+              {solidBtn("That's right", () => onResolveReason("status-wording", { status: wording }))}
+            </div>
+          </div>
+        );
+    }
+  };
 
   return (
     <div style={{ background: needsCheck ? "#fdf3ee" : "transparent", borderBottom: "1px solid #efe6d8" }}>
       {/* Main row */}
       <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "16px 22px" }}>
         <span aria-hidden style={{ width: 3, alignSelf: "stretch", borderRadius: 3, background: accentColor, minHeight: 38, flexShrink: 0 }} />
-        <span style={{ width: 38, height: 38, borderRadius: 9, background: avBg, color: avInk, display: "grid", placeItems: "center", fontFamily: MONO, fontSize: 12.5, fontWeight: 500, flexShrink: 0 }}>{av}</span>
+        <span style={{ width: 38, height: 38, borderRadius: 9, background: avBg, color: pillInk, display: "grid", placeItems: "center", fontFamily: MONO, fontSize: 12.5, fontWeight: 500, flexShrink: 0 }}>{av}</span>
         <span style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontFamily: SERIF, fontSize: 18, color: "#2a2521", lineHeight: 1.1 }}>{agentName}</div>
           <div style={{ fontFamily: MONO, fontSize: 11.5, color: "#8a8178", marginTop: 1 }}>
@@ -425,7 +539,7 @@ const QueryRow: React.FC<QueryRowProps> = ({
           </div>
         </span>
         <span style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
-          <span style={{ fontFamily: MONO, fontSize: 11, padding: "4px 9px", borderRadius: 20, background: pillBg, color: pillInk, whiteSpace: "nowrap" }}>
+          <span style={{ fontFamily: MONO, fontSize: 11, padding: "4px 9px", borderRadius: 20, background: needsCheck ? "#f0cdbf" : "#e6ebe3", color: pillInk, whiteSpace: "nowrap" }}>
             {needsCheck ? "Needs a look" : "Ready"}
           </span>
           {!needsCheck && (
@@ -443,7 +557,7 @@ const QueryRow: React.FC<QueryRowProps> = ({
         </span>
       </div>
 
-      {/* "Add details" editor — ready rows: status + dates (mirrors QueryCard editor) */}
+      {/* "Add details" editor — ready rows: status + sent date */}
       {open && !needsCheck && (
         <div style={{ padding: "12px 22px 18px", borderTop: "0.5px solid #e8ddce", display: "flex", flexDirection: "column", gap: 11 }}>
           <div style={{ display: "flex", gap: 10 }}>
@@ -454,92 +568,18 @@ const QueryRow: React.FC<QueryRowProps> = ({
               </select>
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <span style={flab}>Date queried</span>
-              <input type="date" value={query.dateQueried ?? ""} onChange={(e) => onPatch({ dateQueried: e.target.value || null })} style={finBase} />
+              <span style={flab}>Date sent</span>
+              <input type="date" value={query.sentDate ?? ""} onChange={(e) => onPatch({ sentDate: e.target.value || null })} style={finBase} />
             </div>
           </div>
-          {beyondQueried && (
-            <div style={{ display: "flex", gap: 10 }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <span style={flab}>{statusDateLabel(query.status)}</span>
-                <input type="date" value={query.statusDate ?? ""} onChange={(e) => onPatch({ statusDate: e.target.value || null })} style={finBase} />
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }} />
-            </div>
-          )}
           <div style={{ fontSize: 10, color: C.muted, lineHeight: 1.35 }}>Dates are optional — add what you remember and your timeline stays accurate.</div>
         </div>
       )}
 
-      {/* Inline reason panel — needs-a-look rows */}
+      {/* Inline reason panels — one per open typed reason, stacked */}
       {needsCheck && (
         <div style={{ padding: "0 22px 18px 79px" }}>
-          {/* Missing date */}
-          {reviewState === "needs-date" && (
-            <>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "Inter", fontSize: 12.5, color: "#9a5040", marginBottom: 11 }}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a85a44" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>
-                We couldn't find the date this query was sent.
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                <input type="date" value={dateInput} onChange={(e) => setDateInput(e.target.value)} aria-label="Date sent"
-                  style={{ fontFamily: MONO, fontSize: 12.5, padding: "9px 13px", border: "1px solid #e3ccc0", borderRadius: 9, background: "#fff", minWidth: 220, color: "#2a2521", outline: "none" }}
-                  onFocus={(e) => { e.currentTarget.style.borderColor = "#9a5040"; }}
-                  onBlur={(e) => { e.currentTarget.style.borderColor = "#e3ccc0"; }}
-                />
-                <button onClick={() => { if (dateInput) { onSaveDate(dateInput); setDateInput(""); } }} style={solidMini}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0d3c7"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "#f5e2da"; }}
-                >Save date</button>
-                <button onClick={onLeaveUndated} style={ghostMini}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.borderColor = "#9a5040"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; e.currentTarget.style.borderColor = "#e3ccc0"; }}
-                >Leave undated</button>
-              </div>
-            </>
-          )}
-          {/* Unmatched agent */}
-          {reviewState === "unmatched" && (
-            <>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "Inter", fontSize: 12.5, color: "#9a5040", marginBottom: 11 }}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a85a44" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M9 17H7a5 5 0 0 1 0-10h2M15 7h2a5 5 0 0 1 4 8"/><path d="M8 12h4M3 3l18 18"/></svg>
-                We couldn't match this query to an agent in your list.
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                <select value={linkChoice} onChange={(e) => setLinkChoice(e.target.value)} aria-label="Link to an agent"
-                  style={{ fontFamily: MONO, fontSize: 12.5, padding: "9px 13px", border: "1px solid #e3ccc0", borderRadius: 9, background: "#fff", minWidth: 220, color: "#2a2521", outline: "none", cursor: "pointer" }}>
-                  <option value="">Link to an agent…</option>
-                  {agentOptions.map((o) => <option key={o.id} value={o.id}>{o.label}</option>)}
-                </select>
-                <button onClick={() => { if (linkChoice) { onLinkAgent(linkChoice); setLinkChoice(""); } }} style={solidMini}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0d3c7"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "#f5e2da"; }}
-                >Link</button>
-                <button onClick={onAddNewAgent} style={ghostMini}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.borderColor = "#9a5040"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; e.currentTarget.style.borderColor = "#e3ccc0"; }}
-                >Add as new agent</button>
-              </div>
-            </>
-          )}
-          {/* Status-interpretation (mapping) note — pick/confirm the status, then resolve the flag.
-              The dropdown writes through onPatch({ status }) (the same set-status path the Add-details
-              editor uses); the derived-status engine runs at commit (recomputeQuery, single writer). */}
-          {reviewState === "mapping" && (
-            <>
-              <div style={{ fontFamily: "Inter", fontSize: 12.5, color: "#9a5040", marginBottom: 11 }}>{quoteStatuses(query.reasons.find((r) => r.kind === "mapping" && !r.resolved)?.note ?? "")}</div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                <select value={query.status} onChange={(e) => onPatch({ status: e.target.value as QueryStatus })} aria-label="Query status"
-                  style={{ fontFamily: MONO, fontSize: 12.5, padding: "9px 13px", border: "1px solid #e3ccc0", borderRadius: 9, background: "#fff", minWidth: 220, color: "#2a2521", outline: "none", cursor: "pointer" }}>
-                  {QUERY_STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
-                </select>
-                <button onClick={onResolveMapping} style={solidMini}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0d3c7"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "#f5e2da"; }}
-                >Status is correct</button>
-              </div>
-            </>
-          )}
+          {openReasons.map((r) => renderReason(r.code))}
         </div>
       )}
     </div>
@@ -793,136 +833,6 @@ const PipelineTrack: React.FC<{ status: QueryStatus }> = ({ status }) => {
     <div style={wrap}>
       {parts}
       <span style={{ ...trackLabel, color: labelColour }}>{status}</span>
-    </div>
-  );
-};
-
-interface QueryCardProps {
-  query: ReviewQuery;
-  agentName: string;
-  open: boolean;
-  onToggleOpen: () => void;
-  onPatch: (patch: Partial<ReviewQuery>) => void;
-  onDelete: () => void;
-  cardRef?: (el: HTMLDivElement | null) => void;
-  highlighted: boolean;
-  onHoverPair: (on: boolean) => void;
-  compact: boolean;
-  pulse: boolean;
-  onResolveReason: () => void;
-  onReopenReason: () => void;
-}
-
-const QueryCard: React.FC<QueryCardProps> = ({
-  query, agentName, open, onToggleOpen, onPatch, onDelete, cardRef, highlighted, onHoverPair, compact, pulse, onResolveReason, onReopenReason,
-}) => {
-  const [confirming, setConfirming] = useState(false);
-  const status = queryStatusOf(query);
-  const leftColour = status === "needs-check" ? C.burgundy : C.sageEdge;
-
-  return (
-    <div
-      ref={cardRef}
-      data-query={query.id}
-      onMouseEnter={() => onHoverPair(true)}
-      onMouseLeave={() => onHoverPair(false)}
-      style={{
-        position: "relative", background: C.cardFill, borderRadius: 9, padding: "10px 12px 10px 16px",
-        boxShadow: highlighted ? "0 8px 22px rgba(58,28,20,0.20)" : "0 1px 4px rgba(58,28,20,0.07)",
-        transform: highlighted ? "scale(1.02)" : "none",
-        transition: "transform .15s ease, box-shadow .15s ease",
-        animation: pulse ? "saImpPulse 0.7s ease 2" : undefined,
-      }}
-    >
-      {/* colour-coded left accent, clipped to the card's rounded outline (same as agents) */}
-      <span aria-hidden style={{ position: "absolute", inset: 0, borderRadius: 9, overflow: "hidden", pointerEvents: "none", zIndex: 0 }}>
-        <span style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 4, background: leftColour }} />
-      </span>
-      {/* bin */}
-      <span title="Remove" onClick={() => setConfirming(true)} style={{ position: "absolute", top: 7, right: 9, width: 15, height: 15, color: "#c8b8a8", cursor: "pointer", zIndex: 4, opacity: 0.7 }}
-        onMouseEnter={(e) => { e.currentTarget.style.color = C.invalid; e.currentTarget.style.opacity = "1"; }}
-        onMouseLeave={(e) => { e.currentTarget.style.color = "#c8b8a8"; e.currentTarget.style.opacity = "0.7"; }}>
-        <BinIcon />
-      </span>
-
-      {/* row — name + date on top, the status as a mini pipeline track beneath (no separate left dot;
-          the canonical glyph lives at the track's current stage) */}
-      <div data-arow style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", gap: 11 }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontFamily: SERIF, fontSize: 15, color: "#2e2018", lineHeight: 1.15, display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
-            <span>{agentName}</span>
-            <span style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.02em", color: C.meta }}>
-              {currentDate(query)
-                ? `· ${fmtDate(currentDate(query))}`
-                : <span style={{ color: C.muted, fontStyle: "italic" }}>add a date for full tracking</span>}
-            </span>
-          </div>
-          <PipelineTrack status={query.status} />
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0, marginRight: 18 }}>
-          <StateChip status={status} />
-          <button onClick={(e) => { e.stopPropagation(); onToggleOpen(); }} style={{ fontFamily: MONO, fontSize: 8.5, color: C.muted, background: "none", border: "none", cursor: "pointer", padding: 0 }}>
-            {open ? "Close" : "Make changes"}
-          </button>
-        </div>
-      </div>
-
-      {/* editor — status, the queried date, and (beyond Queried) the current-status date */}
-      {open && (() => {
-        const beyondQueried = query.status !== QueryStatus.QUERIED;
-        const addDateHint = <div style={{ fontSize: 9.5, color: C.muted, fontStyle: "italic", lineHeight: 1.3, marginTop: 4 }}>add a date for full tracking</div>;
-        return (
-          <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", gap: 11, marginTop: 12, paddingTop: 12, borderTop: "0.5px solid #e8ddce" }}>
-            <div style={{ display: "flex", gap: 10 }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <span style={flab}>Status</span>
-                <select value={query.status} onChange={(e) => onPatch({ status: e.target.value as QueryStatus })}
-                  style={{ ...finBase, cursor: "pointer" }}>
-                  {QUERY_STATUS_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <span style={flab}>Date queried</span>
-                <input type="date" value={query.dateQueried ?? ""} onChange={(e) => onPatch({ dateQueried: e.target.value || null })} style={finBase} />
-                {!query.dateQueried && addDateHint}
-                {query.dateNote && <div style={{ fontSize: 9.5, color: C.meta, fontStyle: "italic", lineHeight: 1.3, marginTop: 4 }}>{query.dateNote}</div>}
-              </div>
-            </div>
-            {beyondQueried && (
-              <div style={{ display: "flex", gap: 10 }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <span style={flab}>{statusDateLabel(query.status)}</span>
-                  <input type="date" value={query.statusDate ?? ""} onChange={(e) => onPatch({ statusDate: e.target.value || null })} style={finBase} />
-                  {!query.statusDate && addDateHint}
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }} />
-              </div>
-            )}
-            <div style={{ fontSize: 10, color: C.muted, lineHeight: 1.35 }}>Dates are optional — add what you remember and your timeline stays accurate.</div>
-          </div>
-        );
-      })()}
-
-      {/* inline notes (mobile fallback) */}
-      {compact && query.reasons.length > 0 && (
-        <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", gap: 8, marginTop: 11 }}>
-          {query.reasons.map((r) => (
-            <InlineNote key={r.kind} text={r.note} resolved={r.resolved} kind={r.kind} undoable={r.undoable} agencyBlocked={false}
-              onResolve={onResolveReason} onReopen={onReopenReason} />
-          ))}
-        </div>
-      )}
-
-      {/* delete confirm */}
-      {confirming && (
-        <div style={{ position: "absolute", inset: 0, background: "rgba(250,248,243,0.96)", borderRadius: 8, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, zIndex: 5, padding: "0 16px", textAlign: "center" }}>
-          <div style={{ fontFamily: SERIF, fontSize: 13, color: "#2e2018", lineHeight: 1.25 }}>Remove this query?</div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={() => { setConfirming(false); onDelete(); }} style={{ background: C.burgundy, color: "#fff", border: "none", borderRadius: 8, fontFamily: MONO, fontSize: 9, letterSpacing: "0.04em", padding: "7px 15px", cursor: "pointer" }}>Remove</button>
-            <button onClick={() => setConfirming(false)} style={{ background: "#fff", border: "1px solid #e0d5c8", color: "#6a5a50", borderRadius: 8, fontFamily: MONO, fontSize: 9, padding: "7px 15px", cursor: "pointer" }}>Keep</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
@@ -1421,9 +1331,6 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   const [showSkipModal, setShowSkipModal] = useState(false);
   const [openFaqs, setOpenFaqs] = useState<Set<number>>(new Set());
   // Queries-screen B-redesign: which undated queries the user has acknowledged via "Leave undated".
-  // A purely presentational dismissal — undated queries already import fine (dates are never gating),
-  // so this only flips the soft "needs a look" prompt to Ready. No model/date is written.
-  const [undatedAck, setUndatedAck] = useState<Set<string>>(new Set());
   const toggleFaq = (i: number) => setOpenFaqs((prev) => { const next = new Set(prev); if (next.has(i)) next.delete(i); else next.add(i); return next; });
 
   const midRef = useRef<HTMLDivElement>(null);
@@ -1606,8 +1513,24 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
 
   const patchQuery = (id: string, p: Partial<ReviewQuery>) => { setQueries((xs) => xs.map((q) => (q.id === id ? { ...q, ...p } : q))); setTick((t) => t + 1); };
   const removeQuery = (id: string) => { setQueries((xs) => xs.map((q) => (q.id === id ? { ...q, removed: true, removedReason: "Removed by you" } : q))); setTick((t) => t + 1); };
-  const resolveQueryMapping = (id: string) => { setQueries((xs) => xs.map((q) => (q.id === id ? { ...q, reasons: q.reasons.map((r) => (r.kind === "mapping" ? { ...r, resolved: true } : r)) } : q))); setTick((t) => t + 1); };
-  const reopenQueryReason = (id: string, kind: CheckReason) => { setQueries((xs) => xs.map((q) => (q.id === id ? { ...q, reasons: q.reasons.map((r) => (r.kind === kind ? { ...r, resolved: false } : r)) } : q))); setTick((t) => t + 1); };
+  // Mark one typed reason resolved (the row goes Ready when none remain open). `patch` lets a
+  // resolution also apply the user's fix (set the status, set/clear the sent date, edit the timeline)
+  // in the same update.
+  const resolveQueryReason = (id: string, code: ReviewReasonCode, patch: Partial<ReviewQuery> = {}) => {
+    setQueries((xs) => xs.map((q) => (q.id === id
+      ? { ...q, ...patch, reasons: q.reasons.map((r) => (r.code === code ? { ...r, resolved: true } : r)) }
+      : q)));
+    setTick((t) => t + 1);
+  };
+  // Swap which date is the sent date vs the (first) timeline event — the two-dates "Swap" control.
+  const swapQueryDates = (id: string) => {
+    setQueries((xs) => xs.map((q) => {
+      if (q.id !== id || q.timeline.length === 0) return q;
+      const [ev, ...rest] = q.timeline;
+      return { ...q, sentDate: ev.date, sentDateRaw: ev.raw, timeline: [{ ...ev, date: q.sentDate, raw: q.sentDateRaw }, ...rest] };
+    }));
+    setTick((t) => t + 1);
+  };
 
   const onImportClick = () => {
     if (!canImport) { pulseBlocked(qActive.filter((q) => queryStatusOf(q) !== "captured").map((q) => q.id)); return; }
@@ -1639,17 +1562,9 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
           : new Set([a.id]));
       });
     });
-  } else if (screen === "queries") {
-    // Queries carry only status-interpretation notes. Duplicate detection is settled by now, so guard
-    // against any non-mapping reason ever surfacing here (parseModel only makes query `mapping` notes).
-    qActive.forEach((q) => {
-      q.reasons.filter((r) => r.kind === "mapping").forEach((r) => {
-        const noteId = `${q.id}:${r.kind}`;
-        notes.push({ noteId, cardId: q.id, side: notes.length % 2 === 0 ? "l" : "r", text: r.note, resolved: r.resolved, kind: r.kind, undoable: r.undoable, agencyBlocked: false });
-        notePairCards.set(noteId, new Set([q.id]));
-      });
-    });
   }
+  // The queries screen (B-redesign) renders its typed reasons INLINE in each QueryRow — not as
+  // margin post-its — so it contributes no notes to the gutter layer here.
   // Resolve the current hover into the set of cards + notes to highlight (bidirectional).
   const hl = { cards: new Set<string>(), noteIds: new Set<string>() };
   if (hoverTarget) {
@@ -1779,26 +1694,6 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
     }
   }
 
-  // Query cards (Queries screen) — one per surviving query.
-  const queryCards = qActive.map((q) => (
-    <QueryCard
-      key={q.id}
-      query={q}
-      agentName={agentNameOf(q.agentRef)}
-      open={openId === q.id}
-      onToggleOpen={() => { setOpenId((cur) => (cur === q.id ? null : q.id)); setTick((t) => t + 1); }}
-      onPatch={(p) => patchQuery(q.id, p)}
-      onDelete={() => removeQuery(q.id)}
-      cardRef={(el) => { cardEls.current[q.id] = el; }}
-      highlighted={hl.cards.has(q.id)}
-      onHoverPair={(on) => setHoverTarget(on ? { type: "card", id: q.id } : null)}
-      compact={compact}
-      pulse={pulseIds.includes(q.id)}
-      onResolveReason={() => resolveQueryMapping(q.id)}
-      onReopenReason={() => reopenQueryReason(q.id, "mapping")}
-    />
-  ));
-
   // ── New agents-screen layout (B-redesign) ─────────────────────────────────────────────────
   // Cast prevents TypeScript narrowing `screen` after the early return, keeping the old
   // duplicates/queries code's `screen === "agents"` comparisons valid.
@@ -1925,40 +1820,19 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   // single-click bin, inline reason panel). Only the rows + sidebar copy differ.
   if ((screen as string) === "queries") {
     const userInitial = userName ? userName[0].toUpperCase() : "?";
-    // Link targets for an unmatched query: every surviving agent.
-    const linkOptions = active.map((a) => ({ id: a.id, label: a.name || a.agency || "Unnamed agent" }));
-    // Per-query review state — the model's real status-mapping reason, plus the two presentational
-    // query cases (missing date, unmatched agent). Derived here only; the shared model is untouched,
-    // and `canImport` (below) is unchanged so an undated query still imports without a forced click.
-    const reviewStateOf = (q: ReviewQuery): QueryReviewState => {
-      const matched = agents.find((a) => a.id === q.agentRef && !a.deleted);
-      if (!matched) return "unmatched";
-      if (q.reasons.some((r) => r.kind === "mapping" && !r.resolved)) return "mapping";
-      if (!currentDate(q) && !undatedAck.has(q.id)) return "needs-date";
-      return "ready";
-    };
+    // A query "needs a look" while it carries any open typed reason; otherwise it's ready. Missing
+    // dates surface as a `no-date` reason from the engine, so there's no separate presentational state.
     const originOf = (q: ReviewQuery): string => {
       const a = agents.find((x) => x.id === q.agentRef && !x.deleted);
       if (!a) return "From your file";
       if (a.agencyOnly || !a.name) return "Agency only";
       return a.agency || "Agency only";
     };
-    const states = qActive.map((q) => ({ q, state: reviewStateOf(q) }));
-    const qLookCount = states.filter((s) => s.state !== "ready").length;
+    const qLookCount = qActive.filter((q) => queryStatusOf(q) === "needs-check").length;
     const qReadyCount = qActive.length - qLookCount;
-    const saveQueryDate = (q: ReviewQuery, iso: string) => {
-      if (q.status === QueryStatus.QUERIED) patchQuery(q.id, { dateQueried: iso });
-      else patchQuery(q.id, { statusDate: iso });
-    };
-    const leaveUndated = (id: string) => { setUndatedAck((prev) => new Set(prev).add(id)); setTick((t) => t + 1); };
-    // FLAGGED: no add-a-new-agent path exists in the review model (agents are fixed from the import).
-    // The unmatched branch is itself unreachable in the normal flow (validation drops unmatched queries
-    // and the agents-cascade repoints/removes the rest), so this never fires in practice. Left as a
-    // no-op rather than inventing write logic — see discrepancy report.
-    const addNewAgentForQuery = (_id: string) => {};
 
     const FAQ_ITEMS = [
-      { q: 'What does “needs a look” mean?', a: "We've flagged a query that's missing its date, or that we couldn't match to an agent. Everything else is ready to import." },
+      { q: 'What does “needs a look” mean?', a: "We've flagged a query where we spotted two dates, an odd-looking date, or a status we weren't sure how to read. Everything else is ready to import." },
       { q: "Can I add more queries later?", a: "Any time — log a new query from your dashboard whenever you send one." },
       { q: "What if I don't know the date I sent it?", a: "Leave it undated. We'll never guess a date for you — you can fill it in later if it turns up." },
       { q: "Can a query have no agent?", a: "No — every query is linked to an agent. Match it to one you already have, or add the agent as new." },
@@ -1997,19 +1871,15 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
 
             {/* Records card — internal scroll + edge fades */}
             <RecordsCard>
-              {states.length > 0
-                ? states.map(({ q, state }) => (
-                    <QueryRow key={q.id} query={q} agentName={agentNameOf(q.agentRef)} origin={originOf(q)} reviewState={state}
+              {qActive.length > 0
+                ? qActive.map((q) => (
+                    <QueryRow key={q.id} query={q} agentName={agentNameOf(q.agentRef)} origin={originOf(q)}
                       open={openId === q.id}
                       onToggleOpen={() => { setOpenId((cur) => (cur === q.id ? null : q.id)); setTick((t) => t + 1); }}
                       onPatch={(p) => patchQuery(q.id, p)}
                       onDelete={() => removeQuery(q.id)}
-                      onResolveMapping={() => resolveQueryMapping(q.id)}
-                      onSaveDate={(iso) => saveQueryDate(q, iso)}
-                      onLeaveUndated={() => leaveUndated(q.id)}
-                      agentOptions={linkOptions}
-                      onLinkAgent={(agentId) => patchQuery(q.id, { agentRef: agentId })}
-                      onAddNewAgent={() => addNewAgentForQuery(q.id)}
+                      onResolveReason={(code, patch) => resolveQueryReason(q.id, code, patch)}
+                      onSwapDates={() => swapQueryDates(q.id)}
                     />
                   ))
                 : <div style={{ padding: "32px 22px", fontFamily: "Inter", fontSize: 13, color: "#9c8878", textAlign: "center" }}>No queries to review.</div>}
@@ -2142,7 +2012,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
                   ? allClusters.map((c) => (c.resolved && c.type !== "open"
                     ? renderResolvedCluster({ leaderId: c.leaderId, members: c.members, type: c.type as "merge" | "keepboth", survivor: c.survivor })
                     : renderCluster(c.members[0], c.openMembers, true)))
-                  : screen === "agents" ? units : queryCards}
+                  : units /* queries render in their own early-return layout above */}
               </div>
             </div>
 
@@ -2202,8 +2072,8 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
             notes={notes} midRef={midRef} bandRef={bandRef} cardEls={cardEls}
             highlightedNotes={hl.noteIds}
             onHover={(id) => setHoverTarget(id ? { type: "note", id } : null)}
-            onResolveMapping={screen === "queries" ? resolveQueryMapping : resolveMapping}
-            onReopen={screen === "queries" ? reopenQueryReason : reopenReason}
+            onResolveMapping={resolveMapping}
+            onReopen={reopenReason}
             tick={tick}
           />
         )}

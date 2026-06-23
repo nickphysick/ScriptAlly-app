@@ -1,95 +1,92 @@
 import { describe, it, expect } from 'vitest';
-import { parseModel, modelToResult, applyAgentRemoval, dateFieldForStatus, quoteStatuses } from './smartImportReviewModel';
+import { parseModel, modelToResult, applyAgentRemoval, quoteStatuses, queryReasonText, statusDirectionChoices, ReviewQuery } from './smartImportReviewModel';
 import { QueryStatus } from '../types';
 import { ParsedAgent, ParsedQuery, SmartImportResult } from '../types/smartImport';
 
-const agent = (over: Partial<ParsedAgent> = {}): ParsedAgent => ({ ref: 'a1', name: 'Jane Doe', agency: 'Acme', confidence: 'high', ...over });
-const query = (over: Partial<ParsedQuery> = {}): ParsedQuery => ({ agentRef: 'a1', dateQueried: null, status: QueryStatus.QUERIED, confidence: 'high', ...over });
-const result = (agents: ParsedAgent[], queries: ParsedQuery[]): SmartImportResult => ({ columnMapping: {}, statusTranslations: [], agents, queries, warnings: [] });
+const agent = (over: Partial<ParsedAgent> = {}): ParsedAgent => ({ ref: 'a1', name: 'Jane Doe', agency: 'Acme', ...over });
+const query = (over: Partial<ParsedQuery> = {}): ParsedQuery => ({ agentRef: 'a1', status: QueryStatus.QUERIED, sentDate: null, ...over });
+const result = (agents: ParsedAgent[], queries: ParsedQuery[]): SmartImportResult => ({ agents, queries });
 
-describe('dateFieldForStatus — which rung a status date seeds', () => {
-  it('ladder statuses map to their own rung field', () => {
-    expect(dateFieldForStatus(QueryStatus.QUERIED)).toBe('dateQueried');
-    expect(dateFieldForStatus(QueryStatus.PARTIAL_REQUESTED)).toBe('partialRequestedDate');
-    expect(dateFieldForStatus(QueryStatus.PARTIAL_SENT)).toBe('partialSentDate');
-    expect(dateFieldForStatus(QueryStatus.FULL_REQUESTED)).toBe('fullRequestedDate');
-    expect(dateFieldForStatus(QueryStatus.FULL_SENT)).toBe('fullSentDate');
+describe('parseModel — the new structured query shape', () => {
+  it('reads the sent date (spine), timeline, and typed reasons', () => {
+    const { queries } = parseModel(result([agent()], [query({
+      status: QueryStatus.FULL_REQUESTED,
+      sentDate: '2024-03-14', sentDateRaw: '14/03/2024',
+      timeline: [{ type: QueryStatus.FULL_REQUESTED, date: '2024-03-20', raw: '20/3' }],
+      reasons: ['two-dates'],
+    })]));
+    expect(queries[0].sentDate).toBe('2024-03-14');
+    expect(queries[0].sentDateRaw).toBe('14/03/2024');
+    expect(queries[0].timeline).toEqual([{ type: QueryStatus.FULL_REQUESTED, date: '2024-03-20', raw: '20/3' }]);
+    expect(queries[0].reasons).toEqual([{ code: 'two-dates', resolved: false }]);
   });
-  it('closed-family maps to closedDate', () => {
-    expect(dateFieldForStatus(QueryStatus.REJECTED)).toBe('closedDate');
-    expect(dateFieldForStatus(QueryStatus.WITHDRAWN)).toBe('closedDate');
-    expect(dateFieldForStatus(QueryStatus.NO_RESPONSE)).toBe('closedDate');
+
+  it('a null status defaults to Queried; unknown reason codes are dropped', () => {
+    const { queries } = parseModel(result([agent()], [query({ status: null, reasons: ['no-date', 'bogus' as any] })]));
+    expect(queries[0].status).toBe(QueryStatus.QUERIED);
+    expect(queries[0].reasons).toEqual([{ code: 'no-date', resolved: false }]);
   });
-  it('Offer & Revise & Resubmit map to their own rung fields', () => {
-    expect(dateFieldForStatus(QueryStatus.OFFER)).toBe('offerDate');
-    expect(dateFieldForStatus(QueryStatus.REVISE_RESUBMIT)).toBe('reviseDate');
+
+  it('a clean query carries no reasons (Ready)', () => {
+    const { queries } = parseModel(result([agent()], [query({ sentDate: '2026-01-01' })]));
+    expect(queries[0].reasons).toEqual([]);
   });
 });
 
-describe('parseModel — queried anchor and current-status date kept separate', () => {
-  it('a Full Sent query reads its status date from fullSentDate, anchor from dateQueried', () => {
-    const { queries } = parseModel(result([agent()], [query({ status: QueryStatus.FULL_SENT, dateQueried: '2026-01-01', fullSentDate: '2026-02-02' })]));
-    expect(queries[0].statusDate).toBe('2026-02-02');
-    expect(queries[0].dateQueried).toBe('2026-01-01');
-  });
-  it('a Full Sent query with only a queried date has no status date (shows "add a date")', () => {
-    const { queries } = parseModel(result([agent()], [query({ status: QueryStatus.FULL_SENT, dateQueried: '2026-01-01' })]));
-    expect(queries[0].statusDate).toBeNull(); // not mis-shown as the full-sent date
-    expect(queries[0].dateQueried).toBe('2026-01-01');
-  });
-  it('a Queried query keeps its date as the queried anchor, no separate status date', () => {
-    const { queries } = parseModel(result([agent()], [query({ status: QueryStatus.QUERIED, dateQueried: '2026-01-01' })]));
-    expect(queries[0].dateQueried).toBe('2026-01-01');
-    expect(queries[0].statusDate).toBeNull();
-  });
-});
-
-describe('modelToResult — a status date attaches to the rung matching the current status', () => {
-  it('THE FIX: a status date on a Full Sent query seeds fullSentDate, NOT dateQueried', () => {
-    const r = result([agent()], [query({ status: QueryStatus.FULL_SENT, dateQueried: null })]);
-    const m = parseModel(r);
-    m.queries[0].statusDate = '2026-02-20'; // user fills the full-sent date
-    const out = modelToResult(r, m.agents, m.queries);
-    expect(out.queries[0].fullSentDate).toBe('2026-02-20'); // seeds the full-sent rung
-    expect(out.queries[0].dateQueried).toBeNull();           // NOT the queried rung
-  });
-  it('beyond Queried, both the queried anchor and the status date round-trip independently', () => {
-    const r = result([agent()], [query({ status: QueryStatus.FULL_SENT })]);
-    const m = parseModel(r);
-    m.queries[0].dateQueried = '2026-01-01';
-    m.queries[0].statusDate = '2026-02-20';
-    const out = modelToResult(r, m.agents, m.queries);
-    expect(out.queries[0].dateQueried).toBe('2026-01-01'); // queried rung
-    expect(out.queries[0].fullSentDate).toBe('2026-02-20'); // full-sent rung
-  });
-  it('a Queried query round-trips its date to dateQueried', () => {
+describe('modelToResult — the edited spine + timeline round-trip', () => {
+  it('writes the edited sent date and status straight through', () => {
     const r = result([agent()], [query({ status: QueryStatus.QUERIED })]);
     const m = parseModel(r);
-    m.queries[0].dateQueried = '2026-03-03';
+    m.queries[0].sentDate = '2026-03-03';
+    m.queries[0].status = QueryStatus.PARTIAL_SENT;
     const out = modelToResult(r, m.agents, m.queries);
-    expect(out.queries[0].dateQueried).toBe('2026-03-03');
+    expect(out.queries[0].sentDate).toBe('2026-03-03');
+    expect(out.queries[0].status).toBe(QueryStatus.PARTIAL_SENT);
   });
-  it('THE FIX: a status date on an Offer query seeds offerDate, NOT dateQueried', () => {
-    const r = result([agent()], [query({ status: QueryStatus.OFFER, dateQueried: '2025-11-05' })]);
-    const m = parseModel(r);
-    m.queries[0].statusDate = '2026-01-10'; // when the offer came in
-    const out = modelToResult(r, m.agents, m.queries);
-    expect(out.queries[0].offerDate).toBe('2026-01-10');   // seeds the offer rung
-    expect(out.queries[0].dateQueried).toBe('2025-11-05');  // queried anchor preserved
-  });
-  it('THE FIX: a status date on a Revise & Resubmit query seeds reviseDate, NOT dateQueried', () => {
-    const r = result([agent()], [query({ status: QueryStatus.REVISE_RESUBMIT, dateQueried: '2025-11-05' })]);
-    const m = parseModel(r);
-    m.queries[0].statusDate = '2026-02-15';
-    const out = modelToResult(r, m.agents, m.queries);
-    expect(out.queries[0].reviseDate).toBe('2026-02-15');
-    expect(out.queries[0].dateQueried).toBe('2025-11-05');
-  });
-  it('a still-needed date stays null — never fabricated', () => {
-    const r = result([agent()], [query({ status: QueryStatus.FULL_SENT, dateQueried: null })]);
+
+  it('round-trips a timeline event', () => {
+    const r = result([agent()], [query({
+      status: QueryStatus.FULL_REQUESTED, sentDate: '2024-03-14',
+      timeline: [{ type: QueryStatus.FULL_REQUESTED, date: '2024-03-20', raw: '20/3' }],
+    })]);
     const m = parseModel(r);
     const out = modelToResult(r, m.agents, m.queries);
-    expect(out.queries[0].fullSentDate ?? null).toBeNull();
+    expect(out.queries[0].timeline).toEqual([{ type: QueryStatus.FULL_REQUESTED, date: '2024-03-20', raw: '20/3' }]);
+  });
+
+  it('a still-needed sent date stays null — never fabricated', () => {
+    const r = result([agent()], [query({ status: QueryStatus.FULL_SENT, sentDate: null })]);
+    const m = parseModel(r);
+    const out = modelToResult(r, m.agents, m.queries);
+    expect(out.queries[0].sentDate).toBeNull();
+  });
+});
+
+describe('queryReasonText — copy derived from the code (Form-11 voice)', () => {
+  const q = (over: Partial<ReviewQuery> = {}): ReviewQuery => ({
+    id: 'q0', agentRef: 'a1', status: QueryStatus.QUERIED, sentDate: null, sentDateRaw: null, timeline: [], reasons: [], notes: '', removed: false, ...over,
+  });
+  it('missing-day quotes what they wrote', () => {
+    expect(queryReasonText('missing-day', q({ sentDateRaw: 'March 2024' }))).toContain('March 2024');
+  });
+  it('status-direction asks sent vs requested for the full', () => {
+    expect(queryReasonText('status-direction', q({ status: QueryStatus.FULL_REQUESTED }))).toMatch(/full manuscript/i);
+  });
+  it('two-dates names both dates', () => {
+    const text = queryReasonText('two-dates', q({ sentDate: '2024-03-14', timeline: [{ type: QueryStatus.FULL_REQUESTED, date: '2024-03-20', raw: '20/3' }] }));
+    expect(text).toContain('14 Mar 2024');
+    expect(text).toContain('20 Mar 2024');
+  });
+});
+
+describe('statusDirectionChoices — the two real choices', () => {
+  it('offers the full pair for a full status', () => {
+    expect(statusDirectionChoices(QueryStatus.FULL_REQUESTED).map((c) => c.status))
+      .toEqual([QueryStatus.FULL_SENT, QueryStatus.FULL_REQUESTED]);
+  });
+  it('offers the partial pair for a partial status', () => {
+    expect(statusDirectionChoices(QueryStatus.PARTIAL_SENT).map((c) => c.status))
+      .toEqual([QueryStatus.PARTIAL_SENT, QueryStatus.PARTIAL_REQUESTED]);
   });
 });
 
@@ -111,16 +108,16 @@ describe('applyAgentRemoval — cascade path (real delete handler logic)', () =>
     const next = applyAgentRemoval(m.agents, m.queries, 'a1');
     expect(next.agents.find((a) => a.id === 'a1')!.deleted).toBe(true);
     expect(next.agents.find((a) => a.id === 'a2')!.deleted).toBe(false);
-    expect(next.queries[0].removed).toBe(true);   // a1's query cascaded
+    expect(next.queries[0].removed).toBe(true);
     expect(next.queries[0].removedReason).toBe('Agent removed');
-    expect(next.queries[1].removed).toBe(false);  // a2's query untouched
+    expect(next.queries[1].removed).toBe(false);
   });
 
   it('cascade path into modelToResult: deleted agent and its queries excluded from output', () => {
     const r = result([agent({ ref: 'a1' }), agent({ ref: 'a2', name: 'Bob', agency: 'Beta' })],
                      [query({ agentRef: 'a1' }), query({ agentRef: 'a2' })]);
     const m = parseModel(r);
-    const next = applyAgentRemoval(m.agents, m.queries, 'a1');  // real cascade, not hand-set
+    const next = applyAgentRemoval(m.agents, m.queries, 'a1');
     const out = modelToResult(r, next.agents, next.queries);
     expect(out.agents.map((a) => a.ref)).toEqual(['a2']);
     expect(out.queries.length).toBe(1);
@@ -130,19 +127,16 @@ describe('applyAgentRemoval — cascade path (real delete handler logic)', () =>
 
 describe('modelToResult — exclusions & merge repointing', () => {
   it('drops deleted agents and removed queries; carries a merge-repointed agentRef', () => {
-    // Merge scenario: a1 deleted (merged into a2). removeDuplicate repoints a1's queries to
-    // the survivor (a2). The repointed agentRef must survive through modelToResult.
     const r = result(
       [agent({ ref: 'a1' }), agent({ ref: 'a2', name: 'Bob', agency: 'Beta' })],
       [query({ agentRef: 'a1' }), query({ agentRef: 'a2' })]
     );
     const m = parseModel(r);
-    m.agents.find((a) => a.id === 'a1')!.deleted = true;          // a1 deleted (merged into a2)
-    m.queries[0].agentRef = 'a2';                                 // a1's query repointed to survivor a2
-    // q1 stays agentRef:'a2', not removed — both survive under a2
+    m.agents.find((a) => a.id === 'a1')!.deleted = true;  // a1 merged into a2
+    m.queries[0].agentRef = 'a2';                         // a1's query repointed to survivor a2
     const out = modelToResult(r, m.agents, m.queries);
-    expect(out.agents.map((a) => a.ref)).toEqual(['a2']);         // a1 gone, a2 survives
-    expect(out.queries.length).toBe(2);                           // both queries survive
-    expect(out.queries.every((q) => q.agentRef === 'a2')).toBe(true); // repointed ref carried
+    expect(out.agents.map((a) => a.ref)).toEqual(['a2']);
+    expect(out.queries.length).toBe(2);
+    expect(out.queries.every((qq) => qq.agentRef === 'a2')).toBe(true);
   });
 });

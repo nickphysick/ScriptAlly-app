@@ -61,34 +61,37 @@ const LADDER: QueryStatus[] = [
   QueryStatus.FULL_REQUESTED,
   QueryStatus.FULL_SENT,
 ];
-const STAGE_DATE_FIELD: Partial<Record<QueryStatus, keyof ParsedQuery>> = {
-  [QueryStatus.QUERIED]: "dateQueried",
-  [QueryStatus.PARTIAL_REQUESTED]: "partialRequestedDate",
-  [QueryStatus.PARTIAL_SENT]: "partialSentDate",
-  [QueryStatus.FULL_REQUESTED]: "fullRequestedDate",
-  [QueryStatus.FULL_SENT]: "fullSentDate",
-};
-const TERMINAL = new Set<QueryStatus>([
+// Off-ladder final statuses, in a stable display order after the ladder.
+const OFF_LADDER: QueryStatus[] = [
+  QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER,
   QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE,
-]);
+];
 
 interface SeedRung { status: QueryStatus; date: string | null; }
 
 /**
  * The activity rungs a query's final status implies, in pipeline order — so the SHAPE of the
  * history is correct (a "Partial Sent" query shows queried → partial-requested → partial-sent).
- * Each rung carries its genuine sheet date, or null when none is known (→ provisional, never
- * fabricated). A "sent" stage implies its matching "requested"; R&R implies a full was read.
+ *
+ * Dates come from the query's SPINE (sentDate → the queried rung) and its `timeline` (each note
+ * event → its matching rung, carrying its parsed date). Every other implied rung is provisional
+ * (date null, never fabricated). A "sent" stage implies its matching "requested"; R&R implies a
+ * full was read. Seeding a timeline event (e.g. a full-requested) as a real rung is what lets
+ * recomputeQuery set hasAgentResponded correctly — the "Responses Received" under-count fix.
  */
 export function impliedRungs(q: ParsedQuery): SeedRung[] {
   const final = q.status!;
   const include = new Set<QueryStatus>([QueryStatus.QUERIED]);
 
-  // Any ladder stage the sheet actually dated is part of the real shape.
-  for (const s of LADDER) {
-    const f = STAGE_DATE_FIELD[s];
-    if (f && q[f]) include.add(s);
+  // Dates we genuinely know: the spine seeds the queried rung; each timeline event seeds its own rung.
+  const dateFor = new Map<QueryStatus, string | null>();
+  dateFor.set(QueryStatus.QUERIED, q.sentDate ?? null);
+  for (const ev of q.timeline ?? []) {
+    if (!ev?.type) continue;
+    include.add(ev.type);
+    if (ev.date) dateFor.set(ev.type, ev.date); // first dated wins per status
   }
+
   // The minimal implied path for the final status.
   const finalIdx = LADDER.indexOf(final);
   if (finalIdx >= 0) {
@@ -104,20 +107,10 @@ export function impliedRungs(q: ParsedQuery): SeedRung[] {
   if (include.has(QueryStatus.FULL_SENT)) include.add(QueryStatus.FULL_REQUESTED);
 
   const rungs: SeedRung[] = [];
-  for (const s of LADDER) {
-    if (include.has(s)) {
-      const f = STAGE_DATE_FIELD[s];
-      rungs.push({ status: s, date: (f ? (q[f] as string | null | undefined) : null) ?? null });
-    }
-  }
-  if (finalIdx < 0) {
-    // Off-ladder final rung — each carries its own date field: terminals → closedDate, Offer →
-    // offerDate, Revise & Resubmit → reviseDate. A user-set date lands on its own rung, not queried.
-    const finalDate = TERMINAL.has(final) ? (q.closedDate ?? null)
-      : final === QueryStatus.OFFER ? (q.offerDate ?? null)
-      : final === QueryStatus.REVISE_RESUBMIT ? (q.reviseDate ?? null)
-      : null;
-    rungs.push({ status: final, date: finalDate });
+  for (const s of LADDER) if (include.has(s)) rungs.push({ status: s, date: dateFor.get(s) ?? null });
+  // Off-ladder rungs (the final status and/or any note event beyond the ladder), in stable order.
+  for (const s of OFF_LADDER) if (include.has(s) || s === final) {
+    if (!rungs.some((r) => r.status === s)) rungs.push({ status: s, date: dateFor.get(s) ?? null });
   }
   return rungs;
 }
@@ -260,7 +253,7 @@ export async function commitSmartImport(
           sendMethod: SubmissionMethod.EMAIL,
           status: q.status!,
           // Only pass a real query date; without one the query imports provisionally.
-          ...(q.dateQueried ? { dateSent: q.dateQueried } : {}),
+          ...(q.sentDate ? { dateSent: q.sentDate } : {}),
         },
         true
       );
@@ -272,7 +265,7 @@ export async function commitSmartImport(
       importedQueryIds.add(queryId);
       // addQuery always defaults dateSent to today; for provisional (undated) imports that
       // fabricates a date. Clear it so the feeds never show a made-up sent date.
-      if (!q.dateQueried) {
+      if (!q.sentDate) {
         await updateDoc(doc(db, "users", userId, "queries", queryId), { dateSent: deleteField() });
       }
     } catch (e) {
