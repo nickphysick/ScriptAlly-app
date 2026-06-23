@@ -1808,7 +1808,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
                   style={{ fontFamily: MONO, fontSize: 13, color: "#8a8178", background: "none", border: "none", cursor: "pointer" }}
                   onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; }}
-                >Reset all changes <span style={{ color: "#cbb9aa" }}>· just this step</span></button>
+                >Reset all changes made here</button>
                 <button onClick={onContinueClick}
                   style={{ fontFamily: MONO, fontSize: 13.5, background: "rgba(199,212,195,.5)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", color: allCaptured ? "#5a6e58" : "#8a9e88", border: "1px solid rgba(255,255,255,.55)", borderRadius: 11, padding: "13px 32px", cursor: allCaptured ? "pointer" : "not-allowed", fontWeight: 600, letterSpacing: ".02em", boxShadow: "0 10px 22px -12px rgba(90,110,88,.5),inset 0 1px 0 rgba(255,255,255,.65)", opacity: allCaptured ? 1 : 0.65, transition: "background .15s,color .15s,box-shadow .15s,transform .15s,border-color .15s" }}
                   onMouseEnter={(e) => { if (allCaptured) { e.currentTarget.style.background = "rgba(245,226,218,.62)"; e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.transform = "translateY(-1px)"; } }}
@@ -1914,7 +1914,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
                   style={{ fontFamily: MONO, fontSize: 13, color: "#8a8178", background: "none", border: "none", cursor: "pointer" }}
                   onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; }}
-                >Reset all changes <span style={{ color: "#cbb9aa" }}>· just this step</span></button>
+                >Reset all changes made here</button>
                 {/* Commit seam: onImportClick awaits onImport(modelToResult(...)) → hand-off to the loader. */}
                 <button onClick={onImportClick}
                   style={{ fontFamily: MONO, fontSize: 13.5, background: "rgba(199,212,195,.5)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", color: canImport ? "#5a6e58" : "#8a9e88", border: "1px solid rgba(255,255,255,.55)", borderRadius: 11, padding: "13px 32px", cursor: canImport ? "pointer" : "not-allowed", fontWeight: 600, letterSpacing: ".02em", boxShadow: "0 10px 22px -12px rgba(90,110,88,.5),inset 0 1px 0 rgba(255,255,255,.65)", opacity: canImport ? 1 : 0.65, transition: "background .15s,color .15s,box-shadow .15s,transform .15s,border-color .15s" }}
@@ -2054,7 +2054,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
             {screen === "duplicates" ? (
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 16px", borderTop: "0.5px solid rgba(124,58,42,0.16)" }}>
                 <span onClick={onBack} style={{ fontFamily: MONO, fontSize: 10, color: "#9a8a72", cursor: "pointer" }}>‹ Back</span>
-                <span onClick={reset} style={{ fontFamily: MONO, fontSize: 9, color: "#b6a89a", cursor: "pointer", letterSpacing: "0.03em" }}>Reset all changes</span>
+                <span onClick={reset} style={{ fontFamily: MONO, fontSize: 9, color: "#b6a89a", cursor: "pointer", letterSpacing: "0.03em" }}>Reset all changes made here</span>
                 {/* always available — proceeding is the deliberate "don't trap people" skip; unresolved clusters carry through */}
                 <button onClick={() => switchScreen("agents")}
                   style={{ background: "#f5e2da", border: "1px solid #e8c8bc", color: C.burgundy, fontFamily: MONO, fontSize: 10.5, fontWeight: 500, letterSpacing: "0.07em", borderRadius: 10, padding: "10px 20px", cursor: "pointer" }}
@@ -2064,7 +2064,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 16px", borderTop: "0.5px solid rgba(124,58,42,0.16)" }}>
                 {/* if the session opened on the duplicates stage, Back returns there (decisions stay fixable) */}
                 <span onClick={() => (hadDuplicates ? switchScreen("duplicates") : onBack())} style={{ fontFamily: MONO, fontSize: 10, color: "#9a8a72", cursor: "pointer" }}>‹ Back{hadDuplicates ? " to duplicates" : ""}</span>
-                <span onClick={reset} style={{ fontFamily: MONO, fontSize: 9, color: "#b6a89a", cursor: "pointer", letterSpacing: "0.03em" }}>Reset all changes</span>
+                <span onClick={reset} style={{ fontFamily: MONO, fontSize: 9, color: "#b6a89a", cursor: "pointer", letterSpacing: "0.03em" }}>Reset all changes made here</span>
                 <button
                   onClick={onContinueClick}
                   aria-disabled={!allCaptured}
@@ -2074,7 +2074,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
             ) : (
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 16px", borderTop: "0.5px solid rgba(124,58,42,0.16)" }}>
                 <span onClick={() => switchScreen("agents")} style={{ fontFamily: MONO, fontSize: 10, color: "#9a8a72", cursor: "pointer" }}>‹ Back to agents</span>
-                <span onClick={reset} style={{ fontFamily: MONO, fontSize: 9, color: "#b6a89a", cursor: "pointer", letterSpacing: "0.03em" }}>Reset all changes</span>
+                <span onClick={reset} style={{ fontFamily: MONO, fontSize: 9, color: "#b6a89a", cursor: "pointer", letterSpacing: "0.03em" }}>Reset all changes made here</span>
                 <PinkButton onClick={onImportClick} style={canImport ? undefined : { opacity: 0.5, cursor: "not-allowed" }}>
                   Import {qActive.length} quer{qActive.length === 1 ? "y" : "ies"}
                 </PinkButton>
