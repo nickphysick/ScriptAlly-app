@@ -35,6 +35,10 @@ export interface ReviewAgent {
   mergeWith: string[];   // ids of likely-duplicate siblings (same agency); kept intact across resolve
   mergeResolved: boolean;
   deleted: boolean;
+  /** Which stage set this agent aside (when deleted) — lets the duplicates-stage reset restore only
+   *  its own set-asides, and keeps duplicates-stage merges out of the generic agents/queries tray
+   *  (they're recovered on the duplicates stage). Undefined until the agent is set aside. */
+  setAsideStage?: "duplicates" | "agents";
 }
 
 /** Why a card needs a look. `duplicate` resolves via the remove-one / keep-both controls; `mapping`
@@ -162,18 +166,29 @@ export const agentTier = (a: ReviewAgent, inUnresolvedDup: boolean): ReviewTier 
 export const queryTier = (q: ReviewQuery): ReviewTier =>
   q.reasons.some((r) => !r.resolved) ? "sharpen" : "ready";
 
-export interface ReviewTallies { agents: number; queries: number; ready: number; fix: number; sharpen: number; }
+/** A single population's counts. Its tiers always reconcile to `total` — every live record in that
+ *  population sits in exactly one tier. Agents use ready+fix (fix = blocking); queries use
+ *  ready+sharpen (sharpen = optional). A record with multiple reasons counts ONCE (by tier, not reason). */
+export interface PopulationTally { total: number; ready: number; fix: number; sharpen: number; }
+export interface ReviewTallies { agents: PopulationTally; queries: PopulationTally; }
 
-/** Live counts by tier across surviving agents + queries (deleted/removed excluded). ready+fix+sharpen
- *  always equals agents+queries — every live record sits in exactly one tier. */
+/** Per-population tier counts — NEVER pooled across agents and queries (that was the "37 ready" bug:
+ *  19 ready agents + 18 ready queries summed into one meaningless number). Each population reconciles
+ *  to its own total. Agents: the only blocking tier (fix = missing agency or a duplicate group);
+ *  anything else is ready. Queries: never blocking — sharpen if any open reason, else ready. */
 export function reviewTallies(agents: ReviewAgent[], queries: ReviewQuery[]): ReviewTallies {
   const liveAgents = agents.filter((a) => !a.deleted);
   const liveQueries = queries.filter((q) => !q.removed);
   const dupIds = unresolvedDuplicateAgentIds(agents);
-  const t: ReviewTallies = { agents: liveAgents.length, queries: liveQueries.length, ready: 0, fix: 0, sharpen: 0 };
-  for (const a of liveAgents) t[agentTier(a, dupIds.has(a.id))]++;
-  for (const q of liveQueries) t[queryTier(q)]++;
-  return t;
+  const ag: PopulationTally = { total: liveAgents.length, ready: 0, fix: 0, sharpen: 0 };
+  for (const a of liveAgents) {
+    if (!a.agency.trim() || dupIds.has(a.id)) ag.fix++; else ag.ready++;
+  }
+  const qy: PopulationTally = { total: liveQueries.length, ready: 0, fix: 0, sharpen: 0 };
+  for (const q of liveQueries) {
+    if (q.reasons.some((r) => !r.resolved)) qy.sharpen++; else qy.ready++; // multi-reason → counted once
+  }
+  return { agents: ag, queries: qy };
 }
 
 const isReviewReasonCode = (c: unknown): c is ReviewReasonCode =>

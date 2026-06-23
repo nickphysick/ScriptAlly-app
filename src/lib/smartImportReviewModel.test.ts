@@ -90,25 +90,35 @@ describe('statusDirectionChoices — the two real choices', () => {
   });
 });
 
-describe('reviewTallies — two-tier classification (fix=blocking, sharpen=optional)', () => {
-  it('agency-less agent → fix; query with open reason → sharpen; clean → ready; always sums', () => {
+describe('reviewTallies — per-population, never pooled (the "37" fix)', () => {
+  it('each population reconciles to its own total; agents use fix, queries use sharpen', () => {
     const r = result(
       [
-        agent({ ref: 'a1', name: 'Clean', agency: 'Acme' }),          // ready
-        agent({ ref: 'a2', name: 'NoAgency', agency: '' }),            // fix (no agency)
+        agent({ ref: 'a1', name: 'Clean', agency: 'Acme' }),          // agent ready
+        agent({ ref: 'a2', name: 'NoAgency', agency: '' }),            // agent fix (no agency)
       ],
       [
-        query({ agentRef: 'a1', reasons: ['no-date'] }),              // sharpen
-        query({ agentRef: 'a1' }),                                    // ready
+        query({ agentRef: 'a1', reasons: ['no-date'] }),              // query sharpen
+        query({ agentRef: 'a1' }),                                    // query ready
       ]
     );
     const { agents, queries } = parseModel(r);
     const t = reviewTallies(agents, queries);
-    expect(t).toEqual({ agents: 2, queries: 2, ready: 2, fix: 1, sharpen: 1 });
-    expect(t.ready + t.fix + t.sharpen).toBe(t.agents + t.queries);
+    expect(t.agents).toEqual({ total: 2, ready: 1, fix: 1, sharpen: 0 });
+    expect(t.queries).toEqual({ total: 2, ready: 1, fix: 0, sharpen: 1 });
+    // each column reconciles to its own total — agents+queries are NEVER summed together
+    expect(t.agents.ready + t.agents.fix).toBe(t.agents.total);
+    expect(t.queries.ready + t.queries.sharpen).toBe(t.queries.total);
   });
 
-  it('an unresolved duplicate cluster marks every member as fix', () => {
+  it('a query with TWO reasons (status-wording + no-date) counts once in sharpen, not twice', () => {
+    const r = result([agent()], [query({ agentRef: 'a1', reasons: ['status-wording', 'no-date'] })]);
+    const { agents, queries } = parseModel(r);
+    const t = reviewTallies(agents, queries);
+    expect(t.queries).toEqual({ total: 1, ready: 0, fix: 0, sharpen: 1 });
+  });
+
+  it('an unresolved duplicate cluster marks every member as a fix (agent-side)', () => {
     const r = result(
       [
         agent({ ref: 'a1', name: 'Jonathan Pryce', agency: 'Pryce Literary' }),
@@ -118,8 +128,8 @@ describe('reviewTallies — two-tier classification (fix=blocking, sharpen=optio
     );
     const { agents, queries } = parseModel(r); // parseModel clusters these as likely-dupes
     const t = reviewTallies(agents, queries);
-    expect(t.fix).toBe(2);    // both cluster members blocking until merged/kept
-    expect(t.ready).toBe(1);  // the one clean query
+    expect(t.agents).toEqual({ total: 2, ready: 0, fix: 2, sharpen: 0 });
+    expect(t.queries).toEqual({ total: 1, ready: 1, fix: 0, sharpen: 0 });
   });
 });
 

@@ -321,6 +321,7 @@ export const BranchB: React.FC<BranchBProps> = ({
         manuscriptTitle={fields.title}
         userName={currentUser?.name}
         onContinue={() => setScreen("review")}
+        onSkip={onSkip}
       />
     );
   }
