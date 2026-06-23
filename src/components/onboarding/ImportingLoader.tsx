@@ -10,6 +10,7 @@
  */
 import React, { useEffect, useRef, useState } from "react";
 import { OnbNav } from "./SmartImportReview";
+import { DashboardSkeleton } from "../dashboard/DashboardSkeleton";
 
 const SERIF = "'Playfair Display',serif";
 const MONO = "'JetBrains Mono',monospace";
@@ -41,6 +42,10 @@ export interface ImportingLoaderProps {
 export const ImportingLoader: React.FC<ImportingLoaderProps> = ({ complete, onProceed, userName }) => {
   const userInitial = userName ? userName[0].toUpperCase() : "?";
   const [msgIndex, setMsgIndex] = useState(0);
+  // Once complete, a brief "all set" beat, then the loader card fades out to reveal the dashboard
+  // skeleton that's been assembling behind it — a seamless handoff into the real dashboard (which
+  // opens on the same skeleton), so the prior screen never lingers and no status line flashes.
+  const [revealing, setRevealing] = useState(false);
 
   // Cycle the decorative status lines while loading; stop the moment we're complete.
   useEffect(() => {
@@ -49,13 +54,14 @@ export const ImportingLoader: React.FC<ImportingLoaderProps> = ({ complete, onPr
     return () => clearInterval(id);
   }, [complete]);
 
-  // On completion, hold the "You're all set" beat, then hand back to the host to route.
+  // On completion: hold the "all set" beat, fade the card to reveal the assembled dashboard, then route.
   const proceedRef = useRef(onProceed);
   proceedRef.current = onProceed;
   useEffect(() => {
-    if (!complete) return;
-    const id = setTimeout(() => proceedRef.current(), 900);
-    return () => clearTimeout(id);
+    if (!complete) { setRevealing(false); return; }
+    const fade = setTimeout(() => setRevealing(true), 600);
+    const go = setTimeout(() => proceedRef.current(), 1300);
+    return () => { clearTimeout(fade); clearTimeout(go); };
   }, [complete]);
 
   return (
@@ -68,14 +74,16 @@ export const ImportingLoader: React.FC<ImportingLoaderProps> = ({ complete, onPr
         @keyframes saLdrSlide{0%{left:-40%}100%{left:100%}}
         @keyframes saLdrSettle{from{transform:scale(1.06)}to{transform:scale(1)}}
         @keyframes saLdrFade{from{opacity:0}to{opacity:1}}
-        @keyframes saLdrStack{from{opacity:0;transform:translateX(-9px) rotate(-1.4deg)}to{opacity:1;transform:none}}
         .sa-ldr-disc{animation:saLdrBreathe 2.6s ease-in-out infinite;}
         .sa-ldr-stage.done .sa-ldr-disc{animation:saLdrSettle .6s ease forwards;}
         .sa-ldr-ring{animation:saLdrPing 2.4s ease-out infinite;}
         .sa-ldr-ring.r2{animation-delay:1.2s;}
         .sa-ldr-slider{animation:saLdrSlide 1.35s ease-in-out infinite;}
+        /* the loader card lifts away to reveal the assembling dashboard behind it */
+        .sa-ldr-card{transition:opacity .55s ease, transform .55s ease;}
+        .sa-ldr-card.fade{opacity:0;transform:translateY(-6px) scale(.985);pointer-events:none;}
         @media(prefers-reduced-motion:reduce){
-          .sa-ldr-disc,.sa-ldr-ring,.sa-ldr-slider,.sa-ldr-stackline{animation:none!important;}
+          .sa-ldr-disc,.sa-ldr-ring,.sa-ldr-slider{animation:none!important;}
           .sa-ldr-ring{opacity:.25;}
           .sa-ldr-slider{display:none;}
         }
@@ -83,10 +91,17 @@ export const ImportingLoader: React.FC<ImportingLoaderProps> = ({ complete, onPr
 
       <OnbNav userInitial={userInitial} />
 
-      <main style={{ flex: "1 1 auto", minHeight: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div className={`sa-ldr-stage${complete ? " done" : ""}`} style={{ padding: "40px 30px", textAlign: "center" }}>
+      <main style={{ flex: "1 1 auto", minHeight: 0, position: "relative", overflow: "hidden" }}>
+        {/* The dashboard building itself behind the loader — the real skeleton, slotting in staggered,
+            so the home you're about to land on is visibly assembling while you wait. */}
+        <div aria-hidden="true" style={{ position: "absolute", inset: 0, overflow: "hidden", paddingTop: 6 }}>
+          <DashboardSkeleton slotIn />
+        </div>
+
+        <div className={`sa-ldr-stage${complete ? " done" : ""} sa-ldr-card${revealing ? " fade" : ""}`}
+          style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%,-50%)", padding: "30px 40px 34px", textAlign: "center", background: "#fff", border: "1px solid #e7ddd2", borderRadius: 18, boxShadow: "0 30px 70px -26px rgba(58,28,20,.5)", minWidth: 300 }}>
           {/* Emblem — parchment disc + breathing book, two sage rings pulsing outward */}
-          <div style={{ position: "relative", width: 200, height: 200, display: "grid", placeItems: "center", margin: "0 auto 30px" }}>
+          <div style={{ position: "relative", width: 160, height: 160, display: "grid", placeItems: "center", margin: "0 auto 22px" }}>
             {!complete && (
               <>
                 <span className="sa-ldr-ring" style={ringStyle} />
@@ -102,25 +117,15 @@ export const ImportingLoader: React.FC<ImportingLoaderProps> = ({ complete, onPr
             </div>
           </div>
 
-          <h1 style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 25, color: "#33302b", margin: "0 0 12px" }}>
+          <h1 style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 24, color: "#33302b", margin: "0 0 10px" }}>
             {complete ? "You're all set" : "Setting up your dashboard"}
           </h1>
-          <p key={complete ? "done" : msgIndex} style={{ fontFamily: MONO, fontSize: 13, letterSpacing: ".02em", color: "#8a8178", margin: "0 auto 26px", minHeight: 18, animation: "saLdrFade .3s ease" }}>
+          <p key={complete ? "done" : msgIndex} style={{ fontFamily: MONO, fontSize: 13, letterSpacing: ".02em", color: "#8a8178", margin: "0 auto 22px", minHeight: 18, animation: "saLdrFade .3s ease" }}>
             {complete ? "Opening your dashboard…" : MESSAGES[msgIndex]}
           </p>
-          {complete ? (
-            // The done beat — the jumbled stack from the processing tidy, now resolved into one
-            // orderly, fully-sage stack. The bookend of the messy→orderly motif. Calm, not confetti.
-            <div style={{ display: "flex", flexDirection: "column", gap: 6, width: 200, margin: "0 auto" }}>
-              {[0, 1, 2, 3, 4].map((i) => (
-                <span key={i} className="sa-ldr-stackline" style={{ height: 8, borderRadius: 3, background: "#e9ede6", borderLeft: "2px solid #8a9e88", animation: "saLdrStack .45s ease both", animationDelay: `${i * 0.08}s` }} />
-              ))}
-            </div>
-          ) : (
-            <div style={{ width: 240, height: 5, borderRadius: 5, background: "rgba(138,158,136,.18)", overflow: "hidden", position: "relative", margin: "0 auto" }}>
-              <span className="sa-ldr-slider" style={{ position: "absolute", top: 0, left: "-40%", height: "100%", width: "38%", borderRadius: 5, background: "linear-gradient(90deg,transparent,#9fb09c,transparent)" }} />
-            </div>
-          )}
+          <div style={{ width: 240, height: 5, borderRadius: 5, background: "rgba(138,158,136,.18)", overflow: "hidden", position: "relative", margin: "0 auto", opacity: complete ? 0 : 1, transition: "opacity .4s ease" }}>
+            <span className="sa-ldr-slider" style={{ position: "absolute", top: 0, left: "-40%", height: "100%", width: "38%", borderRadius: 5, background: "linear-gradient(90deg,transparent,#9fb09c,transparent)" }} />
+          </div>
         </div>
       </main>
     </div>

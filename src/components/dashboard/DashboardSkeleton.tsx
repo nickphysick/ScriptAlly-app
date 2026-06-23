@@ -34,9 +34,17 @@ const Card: React.FC<{ className?: string; style?: React.CSSProperties; children
   </div>
 );
 
-export const DashboardSkeleton: React.FC = () => {
+/**
+ * `slotIn` (opt-in, default off): the major cards rise + fade in one-by-one, staggered — the
+ * "dashboard building itself" beat used behind the post-import loader (ImportingLoader). The live
+ * loading usage in Dashboard.tsx leaves it off, so that path is unchanged. Reduced-motion → the
+ * cards are simply present (no stagger), matching the rest of the skeleton.
+ */
+export const DashboardSkeleton: React.FC<{ slotIn?: boolean }> = ({ slotIn = false }) => {
+  const slc = slotIn ? "sk-slot" : "";
+  const sl = (i: number): React.CSSProperties => (slotIn ? { animationDelay: `${0.1 + i * 0.16}s` } : {});
   return (
-    <div aria-hidden="true" aria-busy="true" style={{ minHeight: "100vh" }}>
+    <div aria-hidden="true" aria-busy="true" className={slotIn ? "sk-slotin" : ""} style={{ minHeight: "100vh" }}>
       <style>{`
         @keyframes skShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
         .sk-block {
@@ -51,8 +59,11 @@ export const DashboardSkeleton: React.FC = () => {
           border-radius: 16px;
           box-shadow: 0 1px 2px rgba(60,40,30,.04), 0 8px 30px rgba(60,40,30,.05);
         }
+        @keyframes skSlot { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+        .sk-slotin .sk-slot { opacity: 0; animation: skSlot .55s cubic-bezier(.22,1,.36,1) both; }
         @media (prefers-reduced-motion: reduce) {
           .sk-block { animation: none; background-image: none; background-color: #e7ddce; }
+          .sk-slotin .sk-slot { opacity: 1; transform: none; animation: none; }
         }
       `}</style>
 
@@ -61,7 +72,7 @@ export const DashboardSkeleton: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-[16px] items-stretch">
           <div className="flex flex-col gap-[16px]">
             {/* Hero banner */}
-            <Card style={{ minHeight: 150, padding: 24 }}>
+            <Card className={slc} style={{ minHeight: 150, padding: 24, ...sl(0) }}>
               <Block w={120} h={11} r={5} />
               <Block w="56%" h={26} r={7} style={{ marginTop: 16 }} />
               <Block w="42%" h={13} r={5} style={{ marginTop: 12 }} />
@@ -73,7 +84,7 @@ export const DashboardSkeleton: React.FC = () => {
             </Card>
 
             {/* Four stat-chart cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-[16px] items-stretch">
+            <div className={`grid grid-cols-2 lg:grid-cols-4 gap-[16px] items-stretch ${slc}`} style={sl(1)}>
               {Array.from({ length: 4 }).map((_, i) => (
                 <Card key={i} style={{ minHeight: 170, padding: "23px 23px 21px", display: "flex", flexDirection: "column" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -91,7 +102,7 @@ export const DashboardSkeleton: React.FC = () => {
           {/* Task panel "Over to you" — fills the cell height (driven by the left column) */}
           <div className="relative">
             <div className="lg:absolute lg:inset-0">
-              <Card style={{ height: "100%", minHeight: 336, padding: 22, display: "flex", flexDirection: "column" }}>
+              <Card className={slc} style={{ height: "100%", minHeight: 336, padding: 22, display: "flex", flexDirection: "column", ...sl(2) }}>
                 <Block w={140} h={14} r={6} />
                 <Block w={90} h={10} r={5} style={{ marginTop: 10 }} />
                 <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 20 }}>
@@ -116,7 +127,7 @@ export const DashboardSkeleton: React.FC = () => {
         {/* Left column */}
         <div className="flex flex-col gap-[16px]">
           {/* "What's live right now?" — header + horizontal pipeline strip on a spine */}
-          <Card style={{ padding: 20 }}>
+          <Card className={slc} style={{ padding: 20, ...sl(3) }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <Block w={170} h={13} r={6} />
               <Block w={70} h={9} r={5} />
@@ -132,7 +143,7 @@ export const DashboardSkeleton: React.FC = () => {
           </Card>
 
           {/* Fortnight-in-Focus — header + 14-day grid */}
-          <Card style={{ minHeight: 320, padding: 20 }}>
+          <Card className={slc} style={{ minHeight: 320, padding: 20, ...sl(4) }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <Block w={160} h={13} r={6} />
               <Block w={90} h={9} r={5} />
@@ -145,7 +156,7 @@ export const DashboardSkeleton: React.FC = () => {
         </div>
 
         {/* Right: "the story so far" activity timeline */}
-        <Card style={{ minHeight: 360, padding: 22, display: "flex", flexDirection: "column" }}>
+        <Card className={slc} style={{ minHeight: 360, padding: 22, display: "flex", flexDirection: "column", ...sl(5) }}>
           <Block w={130} h={13} r={6} />
           <div style={{ display: "flex", flexDirection: "column", gap: 16, marginTop: 20 }}>
             {Array.from({ length: 6 }).map((_, i) => (
