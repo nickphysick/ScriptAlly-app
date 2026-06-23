@@ -78,8 +78,8 @@ export const ImportOverview: React.FC<Props> = ({ result, manuscriptTitle, userN
   const userInitial = userName ? userName[0].toUpperCase() : "?";
 
   return (
-    <ReviewShell userInitial={userInitial} allClear={allClear}>
-      <div style={{ position: "relative", padding: "32px 40px 0" }}>
+    <ReviewShell userInitial={userInitial} allClear={allClear} fit>
+      <div style={{ position: "relative", padding: "32px 40px 0", flex: "0 1 auto", minHeight: 0, overflowY: "auto" }}>
         {/* Scrawled corner note — muted grey handwriting, no card, slight tilt */}
         <div style={{ position: "absolute", top: 22, right: 30, width: 210, textAlign: "right", zIndex: 5, pointerEvents: "none" }}>
           <p style={{ fontFamily: CAVEAT, fontSize: 17, lineHeight: 1.3, color: "#a89b8e", margin: 0, transform: "rotate(-1.6deg)" }}>
@@ -127,7 +127,7 @@ export const ImportOverview: React.FC<Props> = ({ result, manuscriptTitle, userN
         )}
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 40px 22px" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 40px 22px", flexShrink: 0 }}>
         <button onClick={onSkip} disabled={!onSkip}
           style={{ fontFamily: MONO, fontSize: 12.5, color: C.muted, background: "none", border: "none", cursor: onSkip ? "pointer" : "default" }}>Skip setup</button>
         <button onClick={onContinue}

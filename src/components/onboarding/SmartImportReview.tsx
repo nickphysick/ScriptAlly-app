@@ -329,6 +329,13 @@ const AgentRow: React.FC<AgentRowProps> = ({
                   onMouseEnter={(e) => { e.currentTarget.style.background = "#f0d3c7"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = "#f5e2da"; }}
                 >Save agency</button>
+                {agent.name.trim() && (
+                  <button onClick={() => onPatch({ agencyWaived: true })} style={ghostMini}
+                    title="Import now with no agency — add it later from the agent's profile"
+                    onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.borderColor = "#9a5040"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; e.currentTarget.style.borderColor = "#e3ccc0"; }}
+                  >Use the agent's name as primary reference</button>
+                )}
                 <button onClick={() => onPatch({ agencyOnly: true, name: "" })} style={ghostMini}
                   onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.borderColor = "#9a5040"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; e.currentTarget.style.borderColor = "#e3ccc0"; }}
@@ -1298,15 +1305,20 @@ const REVIEW_SHELL_CSS = `
 @keyframes saImpFaqDrop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 @media(max-width:880px){ .sa-rv-grid{ grid-template-columns:1fr; } }
 @media(prefers-reduced-motion:reduce){ .sa-rv-band{ animation:none; opacity:0; } }
+/* fit variant (overview): window is only as tall as its content, vertically centred below the nav,
+   capped so it never spills off-screen — content scrolls inside the card, never the page. */
+.sa-rv-window.fit{ flex:0 1 auto; height:auto; max-height:calc(100vh - 116px); margin:auto; }
 `;
 
-/** Full-viewport windowed shell: cream ground, full-width nav, white window with the recoloured rim. */
-export const ReviewShell: React.FC<{ userInitial: string; allClear: boolean; modal?: React.ReactNode; children: React.ReactNode }> = ({ userInitial, allClear, modal, children }) => (
+/** Full-viewport windowed shell: cream ground, full-width nav, white window with the recoloured rim.
+ *  `fit` sizes the window to its content and centres it (for the short overview); without it the
+ *  window fills the viewport for the scrolling review screens. */
+export const ReviewShell: React.FC<{ userInitial: string; allClear: boolean; fit?: boolean; modal?: React.ReactNode; children: React.ReactNode }> = ({ userInitial, allClear, fit, modal, children }) => (
   <div className="sa-rv-root" style={{ fontFamily: "Inter, sans-serif", color: "#2a2521" }}>
     <style>{REVIEW_SHELL_CSS}</style>
     {modal}
     <OnbNav userInitial={userInitial} />
-    <div className={`sa-rv-window${allClear ? " allclear" : ""}`}>
+    <div className={`sa-rv-window${allClear ? " allclear" : ""}${fit ? " fit" : ""}`}>
       <div className="sa-rv-rim" aria-hidden="true"><div className="sa-rv-band" /></div>
       {children}
     </div>

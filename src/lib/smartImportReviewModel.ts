@@ -39,6 +39,10 @@ export interface ReviewAgent {
    *  its own set-asides, and keeps duplicates-stage merges out of the generic agents/queries tray
    *  (they're recovered on the duplicates stage). Undefined until the agent is set aside. */
   setAsideStage?: "duplicates" | "agents";
+  /** The writer chose "use the agent's name as primary reference" — import with NO agency yet (the
+   *  empty agency is honest; resolvable later from the agent's profile). Lifts the blocking
+   *  needs-agency gate without inventing a placeholder. Only meaningful when a name is present. */
+  agencyWaived?: boolean;
 }
 
 /** Why a card needs a look. `duplicate` resolves via the remove-one / keep-both controls; `mapping`
@@ -59,7 +63,7 @@ export const dupNoteMerged = "Merged the duplicate in — its queries moved acro
 export type AgentStatus = "needs-agency" | "needs-check" | "captured";
 export const hasOpenReasons = (a: ReviewAgent) => a.reasons.some((r) => !r.resolved);
 export const agentStatus = (a: ReviewAgent, dupOpen = false): AgentStatus =>
-  !a.agency.trim() ? "needs-agency" : hasOpenReasons(a) || dupOpen ? "needs-check" : "captured";
+  !a.agency.trim() && !a.agencyWaived ? "needs-agency" : hasOpenReasons(a) || dupOpen ? "needs-check" : "captured";
 export const resolveReason = (a: ReviewAgent, kind: CheckReason): ReasonItem[] =>
   a.reasons.map((r) => (r.kind === kind ? { ...r, resolved: true } : r));
 
