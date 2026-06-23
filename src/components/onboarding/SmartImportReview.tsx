@@ -849,6 +849,43 @@ const DeadBox: React.FC<{ query: ReviewQuery; agentName: string }> = ({ query, a
   </div>
 );
 
+// ── Gentle-undo toast (the instant "oops" affordance) + Set-aside tray (the recoverable shelf) ────
+const UndoToast: React.FC<{ msg: string; onUndo: () => void; onClose: () => void }> = ({ msg, onUndo, onClose }) => (
+  <div role="status" style={{ position: "fixed", left: "50%", bottom: 28, transform: "translateX(-50%)", zIndex: 80, display: "flex", alignItems: "center", gap: 14, background: "#2e2018", color: "#f3e9e0", borderRadius: 11, padding: "11px 14px 11px 18px", boxShadow: "0 14px 34px -12px rgba(58,28,20,.5)", fontFamily: "Inter,sans-serif", fontSize: 13 }}>
+    <span>{msg}</span>
+    <button onClick={onUndo} style={{ fontFamily: MONO, fontSize: 12, fontWeight: 600, color: "#e8b9a6", background: "none", border: "none", cursor: "pointer", padding: 0 }}>Undo</button>
+    <button onClick={onClose} aria-label="Dismiss" style={{ background: "none", border: "none", color: "#9a8c80", cursor: "pointer", fontSize: 16, lineHeight: 1, padding: 0 }}>×</button>
+  </div>
+);
+
+interface SetAsideItem { kind: "agent" | "query"; id: string; name: string; sub: string; }
+const SetAsideTray: React.FC<{ items: SetAsideItem[]; onRestore: (kind: "agent" | "query", id: string) => void }> = ({ items, onRestore }) => {
+  const [open, setOpen] = useState(false);
+  if (items.length === 0) return null;
+  return (
+    <div style={{ marginTop: 12, border: "1px solid #e7ddd2", borderRadius: 11, background: "#f6efe6", overflow: "hidden", flexShrink: 0 }}>
+      <button onClick={() => setOpen((o) => !o)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 9, padding: "10px 14px", background: "none", border: "none", cursor: "pointer", fontFamily: MONO, fontSize: 11.5, color: "#8a7c6e" }}>
+        <span style={{ width: 11, height: 11, borderRadius: 3, background: "#e3d8cc", flexShrink: 0 }} />
+        <span><b style={{ color: "#6a5c50" }}>{items.length}</b> set aside</span>
+        <span style={{ marginLeft: "auto", color: "#b6a89a" }}>{open ? "Hide ▲" : "Review ▼"}</span>
+      </button>
+      {open && (
+        <div>
+          {items.map((it) => (
+            <div key={`${it.kind}-${it.id}`} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 14px", borderTop: "1px solid #ece2d5" }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontFamily: SERIF, fontSize: 13.5, color: "#8a8076", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{it.name}</div>
+                <div style={{ fontFamily: MONO, fontSize: 9.5, color: "#ada093", marginTop: 1 }}>{it.sub}</div>
+              </div>
+              <button onClick={() => onRestore(it.kind, it.id)} style={{ fontFamily: MONO, fontSize: 11, color: "#5a6e58", background: "#e9ede6", border: "1px solid #cdd8ca", borderRadius: 7, padding: "6px 11px", cursor: "pointer", flexShrink: 0 }}>Restore</button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 // ── Bottom guidance banner — step-aware torn-paper slip (Agents → Queries → Import) ──────────────
 // Frame from scriptally-import-banner-concepts.html Option A; the "?" folds in Option B's FAQs.
 const TORN_TOP = "polygon(0% 13px,4% 5px,8% 12px,12% 4px,16% 11px,20% 6px,24% 14px,28% 5px,32% 12px,36% 7px,40% 13px,44% 4px,48% 11px,52% 6px,56% 13px,60% 5px,64% 12px,68% 7px,72% 14px,76% 5px,80% 11px,84% 6px,88% 13px,92% 5px,96% 12px,100% 8px,100% 100%,0% 100%)";
@@ -1337,6 +1374,28 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   // Queries-screen B-redesign: which undated queries the user has acknowledged via "Leave undated".
   const toggleFaq = (i: number) => setOpenFaqs((prev) => { const next = new Set(prev); if (next.has(i)) next.delete(i); else next.add(i); return next; });
 
+  // ── Gentle-undo: a brief "Undo" toast for the instant "oops", plus the Set-aside tray (below).
+  // Removing a record is never a hard delete during review — it sets the record aside (recoverable
+  // via the tray) until the final Import. Corrective edits stay friction-free (no toast/confirm).
+  const [toast, setToast] = useState<{ msg: string; undo: () => void } | null>(null);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const flashToast = (msg: string, undo: () => void) => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    setToast({ msg, undo });
+    toastTimer.current = setTimeout(() => setToast(null), 6000);
+  };
+  const dismissToast = () => { if (toastTimer.current) clearTimeout(toastTimer.current); setToast(null); };
+  // Restore a set-aside agent: un-delete it AND bring back the queries its removal cascaded.
+  const restoreAgent = (id: string) => {
+    setAgents((xs) => xs.map((a) => (a.id === id ? { ...a, deleted: false } : a)));
+    setQueries((xs) => xs.map((q) => (q.agentRef === id && q.removed && q.removedReason === "Agent removed" ? { ...q, removed: false, removedReason: undefined } : q)));
+    dismissToast(); setTick((t) => t + 1);
+  };
+  const restoreQuery = (id: string) => {
+    setQueries((xs) => xs.map((q) => (q.id === id ? { ...q, removed: false, removedReason: undefined } : q)));
+    dismissToast(); setTick((t) => t + 1);
+  };
+
   const midRef = useRef<HTMLDivElement>(null);
   const bandRef = useRef<HTMLDivElement>(null);
   const cardEls = useRef<Record<string, HTMLDivElement | null>>({});
@@ -1379,7 +1438,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
     const next = applyAgentRemoval(agents, queries, id);
     setAgents(next.agents);
     setQueries(next.queries);
-    if (a && qc > 0) setTopcap(`${a.name || a.agency} (${qc} quer${qc === 1 ? "y" : "ies"}) was removed — see ${qc === 1 ? "it" : "them"} on the Queries tab under "Not being imported"`);
+    flashToast(`${(a?.name || a?.agency || "Agent")} set aside${qc > 0 ? ` (with ${qc} quer${qc === 1 ? "y" : "ies"})` : ""}`, () => restoreAgent(id));
     setTick((t) => t + 1);
   };
 
@@ -1522,6 +1581,13 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   const qActive = queries.filter((q) => !q.removed);
   const qDead = queries.filter((q) => q.removed);
   const agentNameOf = (ref: string) => { const a = agents.find((x) => x.id === ref); return (a && (a.name || a.agency)) || "Unknown agent"; };
+  // Set-aside shelf contents: deleted agents + queries the user removed directly (queries removed by
+  // an agent's cascade ride back with that agent's restore, so they're not listed twice).
+  const setAsideItems: SetAsideItem[] = [
+    ...agents.filter((a) => a.deleted).map((a) => ({ kind: "agent" as const, id: a.id, name: a.name || a.agency || "Unnamed agent", sub: "Agent · set aside" })),
+    ...queries.filter((q) => q.removed && q.removedReason === "Removed by you").map((q) => ({ kind: "query" as const, id: q.id, name: agentNameOf(q.agentRef), sub: `Query · ${q.status}` })),
+  ];
+  const onRestoreSetAside = (kind: "agent" | "query", id: string) => (kind === "agent" ? restoreAgent(id) : restoreQuery(id));
   const qOk = qActive.filter((q) => queryStatusOf(q) === "captured").length;
   const qNeed = qActive.length - qOk;
   // Mirror the Agents all-resolved gate: import only with ≥1 query AND nothing left to check. A
@@ -1529,7 +1595,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   const canImport = qActive.length > 0 && qNeed === 0;
 
   const patchQuery = (id: string, p: Partial<ReviewQuery>) => { setQueries((xs) => xs.map((q) => (q.id === id ? { ...q, ...p } : q))); setTick((t) => t + 1); };
-  const removeQuery = (id: string) => { setQueries((xs) => xs.map((q) => (q.id === id ? { ...q, removed: true, removedReason: "Removed by you" } : q))); setTick((t) => t + 1); };
+  const removeQuery = (id: string) => { setQueries((xs) => xs.map((q) => (q.id === id ? { ...q, removed: true, removedReason: "Removed by you" } : q))); flashToast("Query set aside", () => restoreQuery(id)); setTick((t) => t + 1); };
   // Mark one typed reason resolved (the row goes Ready when none remain open). `patch` lets a
   // resolution also apply the user's fix (set the status, set/clear the sent date, edit the timeline)
   // in the same update.
@@ -1796,6 +1862,8 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
                 : <div style={{ padding: "32px 22px", fontFamily: "Inter", fontSize: 13, color: "#9c8878", textAlign: "center" }}>No agents to review.</div>}
             </RecordsCard>
 
+            <SetAsideTray items={setAsideItems} onRestore={onRestoreSetAside} />
+
             {/* Footer */}
             <div style={{ display: "flex", alignItems: "center", gap: 18, marginTop: 18, flexShrink: 0 }}>
               <button onClick={() => (hadDuplicates ? switchScreen("duplicates") : onBack?.())}
@@ -1827,6 +1895,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
             <FaqList items={FAQ_ITEMS} open={openFaqs} onToggle={toggleFaq} />
           </aside>
         </div>
+        {toast && <UndoToast msg={toast.msg} onUndo={toast.undo} onClose={dismissToast} />}
       </ReviewShell>
     );
   }
@@ -1902,6 +1971,8 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
                 : <div style={{ padding: "32px 22px", fontFamily: "Inter", fontSize: 13, color: "#9c8878", textAlign: "center" }}>No queries to review.</div>}
             </RecordsCard>
 
+            <SetAsideTray items={setAsideItems} onRestore={onRestoreSetAside} />
+
             {/* Footer */}
             <div style={{ display: "flex", alignItems: "center", gap: 18, marginTop: 18, flexShrink: 0 }}>
               <button onClick={() => switchScreen("agents")}
@@ -1934,6 +2005,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
             <FaqList items={FAQ_ITEMS} open={openFaqs} onToggle={toggleFaq} />
           </aside>
         </div>
+        {toast && <UndoToast msg={toast.msg} onUndo={toast.undo} onClose={dismissToast} />}
       </ReviewShell>
     );
   }
