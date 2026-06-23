@@ -22,7 +22,7 @@ import {
   ReviewAgent, ReviewQuery, ReasonItem, CheckReason, AgentStatus,
   agentStatus, resolveReason, queryStatusOf, fmtDate, QUERY_STATUS_OPTIONS,
   dupNoteOpen, dupNoteKept, dupNoteMerged, parseModel, modelToResult, applyAgentRemoval, seedUnidentifiedSetAside, decideStageEntry,
-  currentDate, quoteStatuses, queryReasonText, statusDirectionChoices,
+  currentDate, quoteStatuses, queryReasonText, statusDirectionChoices, removeDuplicateRecord, buildClusters,
 } from "../../lib/smartImportReviewModel";
 
 // ── Palette (from the sketch; critical colours inline per house style) ──────────────────────────
@@ -1793,42 +1793,15 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   // single member remains. snapshotCluster (first-write-wins) captures the original cluster so the
   // duplicates-stage reset / Undo can restore the whole group.
   const removeDuplicate = (removedId: string) => {
+    // The cluster leader anchors the snapshot/undo; the pure transform owns the set-aside + re-seat.
     const leader = agents.find((a) => !a.deleted && !a.mergeResolved && a.mergeWith.length > 0 && (a.id === removedId || a.mergeWith.includes(removedId)));
     if (!leader) return;
-    const groupIds = [leader.id, ...leader.mergeWith].filter((id) => !(agents.find((x) => x.id === id)?.deleted));
-    const remaining = groupIds.filter((id) => id !== removedId);
-    if (remaining.length === 0) return; // never set aside the last member
-    const survivorId = remaining.includes(leader.id) ? leader.id : remaining[0]; // queries consolidate here
-    const resolvingToOne = remaining.length === 1;
-    const newLeaderId = remaining.includes(leader.id) ? leader.id : remaining[0];
-    const newMergeWith = remaining.filter((id) => id !== newLeaderId);
-
+    const next = removeDuplicateRecord(agents, queries, removedId);
+    if (next.survivorId === null) return; // never set aside the last member
     snapshotCluster(leader.id);
-    setQueries((qs) => qs.map((q) => (q.agentRef === removedId ? { ...q, agentRef: survivorId } : q)));
-    setAgents((xs) => xs.map((a) => {
-      if (a.id === removedId) return { ...a, deleted: true, setAsideStage: "duplicates" as const };
-      if (resolvingToOne) {
-        // One left → cluster resolved; the keeper drops its duplicate flag with a "merged" note.
-        if (a.id === survivorId) {
-          const reasons = a.reasons.some((r) => r.kind === "duplicate")
-            ? a.reasons.map((r) => (r.kind === "duplicate" ? { ...r, resolved: true, undoable: false, note: dupNoteMerged } : r))
-            : a.reasons;
-          return { ...a, mergeResolved: true, mergeWith: [], reasons };
-        }
-        return a;
-      }
-      // 2+ remain → cluster stays open. Re-seat the leader (carrying an open duplicate reason) and its
-      // mergeWith; the other remaining members are plain siblings (no duplicate reason of their own).
-      if (a.id === newLeaderId) {
-        const reasons = a.reasons.some((r) => r.kind === "duplicate" && !r.resolved)
-          ? a.reasons
-          : [{ kind: "duplicate" as CheckReason, note: dupNoteOpen(a.agency), resolved: false, undoable: true }, ...a.reasons.filter((r) => r.kind !== "duplicate")];
-        return { ...a, mergeResolved: false, mergeWith: newMergeWith, reasons };
-      }
-      if (remaining.includes(a.id)) return { ...a, mergeResolved: false, mergeWith: [], reasons: a.reasons.filter((r) => r.kind !== "duplicate") };
-      return a;
-    }));
-    const label = leader && (agents.find((x) => x.id === removedId)?.name || agents.find((x) => x.id === removedId)?.agency) || "Record";
+    setAgents(next.agents);
+    setQueries(next.queries);
+    const label = (agents.find((x) => x.id === removedId)?.name || agents.find((x) => x.id === removedId)?.agency) || "Record";
     flashToast(`${label} set aside`, () => undoCluster(leader.id));
     setTick((t) => t + 1);
   };
@@ -2120,21 +2093,8 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
 
   // Every detected cluster, resolved or not — the duplicates stage renders open ones in the active
   // resolve UI and resolved ones in their settled state, so a decision stays revisitable via Back.
-  type DupCluster = { leaderId: string; members: ReviewAgent[]; openMembers: ReviewAgent[]; resolved: boolean; type: "open" | "merge" | "keepboth"; survivor?: ReviewAgent };
-  const allClusters: DupCluster[] = [];
-  {
-    const seen = new Set<string>();
-    for (const a of agents) {
-      if (seen.has(a.id) || a.mergeWith.length === 0) continue;
-      const members = [a, ...a.mergeWith.map((id) => agents.find((x) => x.id === id)).filter((x): x is ReviewAgent => !!x)];
-      members.forEach((m) => seen.add(m.id));
-      const removed = members.find((m) => m.deleted);
-      const resolved = !!removed || members.some((m) => m.mergeResolved);
-      const type: DupCluster["type"] = removed ? "merge" : resolved ? "keepboth" : "open";
-      const survivor = type === "merge" ? members.find((m) => !m.deleted) : a;
-      allClusters.push({ leaderId: a.id, members, openMembers: members.filter((m) => !m.deleted), resolved, type, survivor });
-    }
-  }
+  // Pure + unit-tested in smartImportReviewModel (a partial 3-way never classifies as merged).
+  const allClusters = buildClusters(agents);
 
   // Compose the cards column (Agents screen) into render units (singles + duplicate clusters), in order.
   const units: React.ReactNode[] = [];

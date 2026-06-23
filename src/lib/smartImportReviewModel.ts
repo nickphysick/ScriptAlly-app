@@ -386,6 +386,93 @@ export function seedUnidentifiedSetAside(
   };
 }
 
+/** A duplicate cluster as the duplicates stage renders it: the open (unresolved) members, plus a
+ *  resolution verdict once it's settled. `type` is "open" while 2+ members are still live; "merge"
+ *  only once it's down to a single keeper; "keepboth" when the writer chose to keep them apart. */
+export interface DupCluster {
+  leaderId: string;
+  members: ReviewAgent[];
+  openMembers: ReviewAgent[];
+  resolved: boolean;
+  type: "open" | "merge" | "keepboth";
+  survivor?: ReviewAgent;
+}
+
+/** Build the duplicate clusters from the working agents (incl. resolved/removed ones, so the
+ *  duplicates stage can show settled clusters on revisit). Anchored on each cluster's leader (the
+ *  only member that carries `mergeWith`). Extracted from the UI so the classification is unit-tested.
+ *
+ *  A cluster is "merge" ONLY once a single live member remains — a partially-resolved 3-way (one set
+ *  aside, two still open) stays "open", so removing one member never collapses the rest. */
+export function buildClusters(agents: ReviewAgent[]): DupCluster[] {
+  const out: DupCluster[] = [];
+  const seen = new Set<string>();
+  for (const a of agents) {
+    if (seen.has(a.id) || a.mergeWith.length === 0) continue;
+    const members = [a, ...a.mergeWith.map((id) => agents.find((x) => x.id === id)).filter((x): x is ReviewAgent => !!x)];
+    members.forEach((m) => seen.add(m.id));
+    const openMembers = members.filter((m) => !m.deleted);
+    const anyDeleted = members.some((m) => m.deleted);
+    const anyResolvedFlag = members.some((m) => m.mergeResolved);
+    // "merge" only when down to one keeper; 2+ live members ⇒ still an open cluster (no premature collapse).
+    const type: DupCluster["type"] = anyDeleted && openMembers.length <= 1 ? "merge" : (anyResolvedFlag && !anyDeleted) ? "keepboth" : "open";
+    const resolved = type !== "open";
+    const survivor = type === "merge" ? openMembers[0] : a;
+    out.push({ leaderId: a.id, members, openMembers, resolved, type, survivor });
+  }
+  return out;
+}
+
+/** Pure core of "Remove this one" on the duplicates stage (Fix 4 + the leader-removal fix). Sets aside
+ *  ONLY the clicked record (`deleted` + setAsideStage "duplicates"), repoints its queries to the
+ *  surviving keeper, and re-seats the rest of the cluster on a LIVE leader so a 3-way takes two
+ *  deliberate removals to reach one keeper. The set-aside record's `mergeWith` is CLEARED — otherwise a
+ *  removed *leader* would still anchor a phantom cluster and `buildClusters` would read the open
+ *  remainder as a completed merge (the "remove one removes two" regression). The cluster auto-resolves
+ *  only when a single member remains. Pure: returns new arrays; the UI keeps the snapshot/undo/toast. */
+export function removeDuplicateRecord(
+  agents: ReviewAgent[],
+  queries: ReviewQuery[],
+  removedId: string
+): { agents: ReviewAgent[]; queries: ReviewQuery[]; survivorId: string | null } {
+  const leader = agents.find((a) => !a.deleted && !a.mergeResolved && a.mergeWith.length > 0 && (a.id === removedId || a.mergeWith.includes(removedId)));
+  if (!leader) return { agents, queries, survivorId: null };
+  const groupIds = [leader.id, ...leader.mergeWith].filter((id) => !(agents.find((x) => x.id === id)?.deleted));
+  const remaining = groupIds.filter((id) => id !== removedId);
+  if (remaining.length === 0) return { agents, queries, survivorId: null }; // never set aside the last member
+  const survivorId = remaining.includes(leader.id) ? leader.id : remaining[0]; // queries consolidate here
+  const resolvingToOne = remaining.length === 1;
+  const newLeaderId = survivorId;
+  const newMergeWith = remaining.filter((id) => id !== newLeaderId);
+
+  const nextQueries = queries.map((q) => (q.agentRef === removedId ? { ...q, agentRef: survivorId } : q));
+  const nextAgents = agents.map((a) => {
+    // Set aside the clicked record only — and clear its mergeWith so it can never anchor a cluster.
+    if (a.id === removedId) return { ...a, deleted: true, setAsideStage: "duplicates" as const, mergeWith: [] };
+    if (resolvingToOne) {
+      // One left → cluster resolved; the keeper drops its duplicate flag with a "merged" note.
+      if (a.id === survivorId) {
+        const reasons = a.reasons.some((r) => r.kind === "duplicate")
+          ? a.reasons.map((r) => (r.kind === "duplicate" ? { ...r, resolved: true, undoable: false, note: dupNoteMerged } : r))
+          : a.reasons;
+        return { ...a, mergeResolved: true, mergeWith: [], reasons };
+      }
+      return a;
+    }
+    // 2+ remain → cluster stays open. Re-seat the leader (carrying an open duplicate reason) and its
+    // mergeWith; the other remaining members are plain siblings (no duplicate reason of their own).
+    if (a.id === newLeaderId) {
+      const reasons = a.reasons.some((r) => r.kind === "duplicate" && !r.resolved)
+        ? a.reasons
+        : [{ kind: "duplicate" as CheckReason, note: dupNoteOpen(a.agency), resolved: false, undoable: true }, ...a.reasons.filter((r) => r.kind !== "duplicate")];
+      return { ...a, mergeResolved: false, mergeWith: newMergeWith, reasons };
+    }
+    if (remaining.includes(a.id)) return { ...a, mergeResolved: false, mergeWith: [], reasons: a.reasons.filter((r) => r.kind !== "duplicate") };
+    return a;
+  });
+  return { agents: nextAgents, queries: nextQueries, survivorId };
+}
+
 /** Convert the final working model back into a SmartImportResult for commitSmartImport. Excludes
  *  deleted agents / removed queries, carries merge-repointed agentRefs, and writes each query's
  *  edited spine (sentDate) + timeline straight through. null stays null (never fabricated). */
