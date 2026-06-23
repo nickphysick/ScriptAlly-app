@@ -1321,6 +1321,10 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   // remain the ways to revisit a merge.)
   const baselineRef = useRef<{ agents: ReviewAgent[]; queries: ReviewQuery[] } | null>(null);
   if (baselineRef.current === null) baselineRef.current = { agents: JSON.parse(JSON.stringify(initial.agents)), queries: JSON.parse(JSON.stringify(initial.queries)) };
+  // Separate Queries-stage baseline: the queries as they stood on ENTERING the Queries stage (after
+  // every agents-stage cascade). Resetting on Queries reverts only the queries-stage edits to this,
+  // leaving the agents-stage edits (removed duplicates, added agencies) exactly as the user left them.
+  const queriesBaselineRef = useRef<ReviewQuery[] | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
   const [hoverTarget, setHoverTarget] = useState<{ type: "card" | "note"; id: string } | null>(null);
   const [tick, setTick] = useState(0);              // nudges the notes layout after edits
@@ -1480,6 +1484,10 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
     if (screen === "duplicates" && name === "agents") {
       baselineRef.current = { agents: JSON.parse(JSON.stringify(agents)), queries: JSON.parse(JSON.stringify(queries)) };
     }
+    // Entering the Queries stage: snapshot the queries (post agents-cascade) as the Queries reset point.
+    if (name === "queries") {
+      queriesBaselineRef.current = queries.map((q) => JSON.parse(JSON.stringify(q)) as ReviewQuery);
+    }
     setScreen(name); setOpenId(null); setHoverTarget(null); setPulseIds([]); setTick((t) => t + 1);
     requestAnimationFrame(() => window.scrollTo({ top: 0 }));
   };
@@ -1492,12 +1500,21 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
       : active.filter((a) => statusOf(a) !== "captured").map((a) => a.id));
   };
 
-  // Reset to the post-duplicates baseline (NOT the pristine parse): reverts Agents-screen edits while
-  // preserving the locked duplicate decisions. snapRef is kept so those merges stay individually undoable.
+  // Reset scoped to the CURRENT stage — never reaches across stages.
+  //  • Queries stage: revert only the queries to their on-entry snapshot, leaving every agents-stage
+  //    edit (removed duplicates, added agencies) exactly as the user left it.
+  //  • Agents / duplicates stage: revert agents AND their query cascade to the post-duplicates
+  //    baseline (an agent removal cascades to its queries, so the two revert together). snapRef is
+  //    kept so merges stay individually undoable.
   const reset = () => {
-    const b = baselineRef.current!;
-    setAgents(b.agents.map((a) => JSON.parse(JSON.stringify(a)) as ReviewAgent));
-    setQueries(b.queries.map((q) => JSON.parse(JSON.stringify(q)) as ReviewQuery));
+    if ((screen as string) === "queries") {
+      const qb = queriesBaselineRef.current;
+      if (qb) setQueries(qb.map((q) => JSON.parse(JSON.stringify(q)) as ReviewQuery));
+    } else {
+      const b = baselineRef.current!;
+      setAgents(b.agents.map((a) => JSON.parse(JSON.stringify(a)) as ReviewAgent));
+      setQueries(b.queries.map((q) => JSON.parse(JSON.stringify(q)) as ReviewQuery));
+    }
     setOpenId(null); setTopcap(null); setPulseIds([]); setTick((t) => t + 1);
   };
 
@@ -1791,7 +1808,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
                   style={{ fontFamily: MONO, fontSize: 13, color: "#8a8178", background: "none", border: "none", cursor: "pointer" }}
                   onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; }}
-                >Reset all changes</button>
+                >Reset all changes <span style={{ color: "#cbb9aa" }}>· just this step</span></button>
                 <button onClick={onContinueClick}
                   style={{ fontFamily: MONO, fontSize: 13.5, background: "rgba(199,212,195,.5)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", color: allCaptured ? "#5a6e58" : "#8a9e88", border: "1px solid rgba(255,255,255,.55)", borderRadius: 11, padding: "13px 32px", cursor: allCaptured ? "pointer" : "not-allowed", fontWeight: 600, letterSpacing: ".02em", boxShadow: "0 10px 22px -12px rgba(90,110,88,.5),inset 0 1px 0 rgba(255,255,255,.65)", opacity: allCaptured ? 1 : 0.65, transition: "background .15s,color .15s,box-shadow .15s,transform .15s,border-color .15s" }}
                   onMouseEnter={(e) => { if (allCaptured) { e.currentTarget.style.background = "rgba(245,226,218,.62)"; e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.transform = "translateY(-1px)"; } }}
@@ -1897,7 +1914,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
                   style={{ fontFamily: MONO, fontSize: 13, color: "#8a8178", background: "none", border: "none", cursor: "pointer" }}
                   onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; }}
-                >Reset all changes</button>
+                >Reset all changes <span style={{ color: "#cbb9aa" }}>· just this step</span></button>
                 {/* Commit seam: onImportClick awaits onImport(modelToResult(...)) → hand-off to the loader. */}
                 <button onClick={onImportClick}
                   style={{ fontFamily: MONO, fontSize: 13.5, background: "rgba(199,212,195,.5)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", color: canImport ? "#5a6e58" : "#8a9e88", border: "1px solid rgba(255,255,255,.55)", borderRadius: 11, padding: "13px 32px", cursor: canImport ? "pointer" : "not-allowed", fontWeight: 600, letterSpacing: ".02em", boxShadow: "0 10px 22px -12px rgba(90,110,88,.5),inset 0 1px 0 rgba(255,255,255,.65)", opacity: canImport ? 1 : 0.65, transition: "background .15s,color .15s,box-shadow .15s,transform .15s,border-color .15s" }}
