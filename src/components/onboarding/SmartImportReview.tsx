@@ -582,7 +582,13 @@ const FocusOverlay: React.FC<{
             <>
               <div style={{ padding: "20px 26px 0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <span style={{ fontFamily: MONO, fontSize: 12, color: C.muted }}><b style={{ color: "#7c3a2a" }}>{currentIdx + 1}</b> of {order.length}</span>
-                <span style={{ fontFamily: MONO, fontSize: 11, padding: "5px 11px", borderRadius: 7, fontWeight: 500, ...(isFix ? { background: "#f4ead0", color: "#6f5618" } : { background: "#f5e2da", color: "#7c3a2a" }) }}>{isFix ? "! Quick fix" : "✦ Sharpen"}</span>
+                <span style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                  <span style={{ fontFamily: MONO, fontSize: 11, padding: "5px 11px", borderRadius: 7, fontWeight: 500, ...(isFix ? { background: "#f4ead0", color: "#6f5618" } : { background: "#f5e2da", color: "#7c3a2a" }) }}>{isFix ? "! Quick fix" : "✦ Sharpen"}</span>
+                  {/* Reversible escape to the full list — a lens, not a door (re-enter via "Work through
+                      them →"). Always reachable, even on a blocking fix; the stage gate still holds. */}
+                  <button onClick={onClose} style={{ fontFamily: MONO, fontSize: 11.5, color: "#b6a89a", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = "#8a7c6e"; }} onMouseLeave={(e) => { e.currentTarget.style.color = "#b6a89a"; }}>View all</button>
+                </span>
               </div>
               <div style={{ display: "flex", gap: 5, padding: "14px 26px 0" }}>
                 {order.map((segId, i) => (
@@ -1504,7 +1510,12 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   // writer skipped this session (sharpen only). The overlay drives the same state as the inline list.
   const [focus, setFocus] = useState<{ stage: "agents" | "queries"; order: string[] } | null>(null);
   const [focusSkipped, setFocusSkipped] = useState<Set<string>>(new Set());
-  const closeFocus = () => { setFocus(null); setFocusSkipped(new Set()); };
+  // Stages the writer has left the walk for ("View all") — suppresses auto-reopen so the escape sticks
+  // until they step back in via "Work through them →". The walk is guided-by-default, never coercive.
+  const [escaped, setEscaped] = useState<Set<"agents" | "queries">>(new Set());
+  // closeFocus = leave the guided card for the inline list (reversible). The stage gate still holds on
+  // the list — this frees the writer from the card, not from any blocking fix.
+  const closeFocus = () => { if (focus) setEscaped((e) => new Set(e).add(focus.stage)); setFocus(null); setFocusSkipped(new Set()); };
   const skipFocus = (id: string) => setFocusSkipped((s) => new Set(s).add(id));
 
   const [toast, setToast] = useState<{ msg: string; undo: () => void } | null>(null);
@@ -1699,7 +1710,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
     if (name === "queries") {
       queriesBaselineRef.current = queries.map((q) => JSON.parse(JSON.stringify(q)) as ReviewQuery);
     }
-    setScreen(name); setOpenId(null); setHoverTarget(null); setPulseIds([]); setTick((t) => t + 1);
+    setScreen(name); setFocus(null); setOpenId(null); setHoverTarget(null); setPulseIds([]); setTick((t) => t + 1);
     requestAnimationFrame(() => window.scrollTo({ top: 0 }));
   };
 
@@ -1756,6 +1767,24 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   // Mirror the Agents all-resolved gate: import only with ≥1 query AND nothing left to check. A
   // missing date is NOT a check reason, so "date needed" never blocks import.
   const canImport = qActive.length > 0 && qNeed === 0;
+
+  // Default to the guided walk: on entering a review stage that has flagged items (and the writer
+  // hasn't escaped it), open the overlay straight onto the first item, fixes-first. A zero-flag stage
+  // stays on the clean inline list (no empty overlay). Re-evaluates on stage change and on escape.
+  useEffect(() => {
+    if (focus) return;
+    if (screen !== "agents" && screen !== "queries") return;
+    if (escaped.has(screen)) return;
+    const order = screen === "agents"
+      ? active.filter((a) => statusOf(a) !== "captured")
+          .sort((a, b) => { const fa = !a.agency.trim() && !a.agencyWaived, fb = !b.agency.trim() && !b.agencyWaived; return fa === fb ? 0 : fa ? -1 : 1; })
+          .map((a) => a.id)
+      : qActive.filter((q) => queryStatusOf(q) === "needs-check").map((q) => q.id);
+    if (order.length === 0) return;
+    setFocusSkipped(new Set());
+    setFocus({ stage: screen, order });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen, escaped]);
 
   const patchQuery = (id: string, p: Partial<ReviewQuery>) => { setQueries((xs) => xs.map((q) => (q.id === id ? { ...q, ...p } : q))); setTick((t) => t + 1); };
   const removeQuery = (id: string) => { setQueries((xs) => xs.map((q) => (q.id === id ? { ...q, removed: true, removedReason: "Removed by you" } : q))); flashToast("Query set aside", () => restoreQuery(id)); setTick((t) => t + 1); };
@@ -1992,6 +2021,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
       const order = active.filter((a) => statusOf(a) !== "captured")
         .sort((a, b) => (agentTierOf(a) === agentTierOf(b) ? 0 : agentTierOf(a) === "fix" ? -1 : 1)) // fixes first
         .map((a) => a.id);
+      setEscaped((e) => { const n = new Set(e); n.delete("agents"); return n; }); // re-entering the walk
       setFocusSkipped(new Set()); setFocus({ stage: "agents", order });
     };
     const agentsOverlay = focus?.stage === "agents" ? (
@@ -2125,6 +2155,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
 
     const openQueriesFocus = () => {
       const order = qActive.filter((q) => queryStatusOf(q) === "needs-check").map((q) => q.id); // all sharpen
+      setEscaped((e) => { const n = new Set(e); n.delete("queries"); return n; }); // re-entering the walk
       setFocusSkipped(new Set()); setFocus({ stage: "queries", order });
     };
     const queriesOverlay = focus?.stage === "queries" ? (
