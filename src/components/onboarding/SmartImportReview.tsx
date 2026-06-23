@@ -521,6 +521,94 @@ const QueryReasonPanel: React.FC<QueryReasonPanelProps> = ({ query, code, onPatc
   }
 };
 
+// Agent-fix content for the guided overlay (and reusable): the agency input + "use the agent's name
+// as primary" escape (prompt A), mirroring the inline AgentRow needs-agency controls.
+const AgentFixPanel: React.FC<{ agent: ReviewAgent; onPatch: (p: Partial<ReviewAgent>) => void }> = ({ agent, onPatch }) => {
+  const [v, setV] = useState("");
+  return (
+    <div>
+      <div style={reasonStripStyle}><ReasonIcon /><span>An agency is required before this one can import — add it, or use the agent's name as the primary reference.</span></div>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+        <input type="text" value={v} onChange={(e) => setV(e.target.value)} placeholder="Agency name" aria-label="Agency name"
+          style={dateBoxStyle} onFocus={(e) => { e.currentTarget.style.borderColor = "#9a5040"; }} onBlur={(e) => { e.currentTarget.style.borderColor = "#e3ccc0"; }} />
+        <button onClick={() => { const t = v.trim(); if (t) onPatch({ agency: t }); }} style={solidMini}
+          onMouseEnter={(e) => { e.currentTarget.style.background = "#f0d3c7"; }} onMouseLeave={(e) => { e.currentTarget.style.background = "#f5e2da"; }}>Save agency</button>
+        {agent.name.trim() && (
+          <button onClick={() => onPatch({ agencyWaived: true })} style={ghostMini}
+            onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.borderColor = "#9a5040"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; e.currentTarget.style.borderColor = "#e3ccc0"; }}>Use the agent's name as primary reference</button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ── Guided focus-overlay ──────────────────────────────────────────────────────────────────────────
+// One flagged item at a time over a dimmed review screen, fixes before sharpen. It drives the SAME
+// state as the inline list, so resolving here updates the row behind the glass and (when the last
+// blocking fix clears) flips the screen's `allClear` → the rim sweeps pink → sage. Skip is sharpen-only.
+const FocusOverlay: React.FC<{
+  order: string[];                                  // ids to walk, fixes-first (snapshotted at open)
+  statusOf: (id: string) => "done" | "skip" | "open";
+  tierOf: (id: string) => "fix" | "sharpen";
+  headerFor: (id: string) => { who: string; sub: string };
+  renderContent: (id: string) => React.ReactNode;
+  onSkip: (id: string) => void;
+  onClose: () => void;
+}> = ({ order, statusOf, tierOf, headerFor, renderContent, onSkip, onClose }) => {
+  const states = order.map(statusOf);
+  const currentIdx = states.findIndex((s) => s === "open");
+  const fixesLeft = order.some((id, i) => states[i] === "open" && tierOf(id) === "fix");
+  const done = currentIdx === -1;
+  const card: React.CSSProperties = { width: 560, maxWidth: "100%", background: "#fff", borderRadius: 18, boxShadow: "0 30px 70px -20px rgba(58,28,20,.5)", overflow: "hidden", border: "1px solid #e7ddd2", animation: "saImpFocusPop .18s ease" };
+  return (
+    <div role="dialog" aria-modal="true" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      style={{ position: "fixed", inset: 0, background: "rgba(58,28,20,.34)", backdropFilter: "blur(2px)", WebkitBackdropFilter: "blur(2px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 60, padding: 24 }}>
+      <div style={card}>
+        {done ? (
+          <div style={{ padding: "40px 30px", textAlign: "center" }}>
+            <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 26, color: fixesLeft ? "#a85a44" : "#5a6e58" }}>{fixesLeft ? "Almost there" : "All sorted ✦"}</div>
+            <p style={{ color: "#6a5c50", fontSize: 14.5, margin: "10px auto 22px", maxWidth: 380 }}>
+              {fixesLeft ? "A fix still needs doing before you can import — pop back to it whenever you're ready." : "Your records are looking sharp. Anything you skipped is saved as-is and easy to revisit later."}
+            </p>
+            <button onClick={onClose} style={{ fontFamily: MONO, fontSize: 13, background: "#7c3a2a", color: "#fff", border: "none", borderRadius: 9, padding: "11px 18px", cursor: "pointer" }}>Back to the list</button>
+          </div>
+        ) : (() => {
+          const id = order[currentIdx];
+          const tier = tierOf(id);
+          const isFix = tier === "fix";
+          const h = headerFor(id);
+          return (
+            <>
+              <div style={{ padding: "20px 26px 0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontFamily: MONO, fontSize: 12, color: C.muted }}><b style={{ color: "#7c3a2a" }}>{currentIdx + 1}</b> of {order.length}</span>
+                <span style={{ fontFamily: MONO, fontSize: 11, padding: "5px 11px", borderRadius: 7, fontWeight: 500, ...(isFix ? { background: "#f4ead0", color: "#6f5618" } : { background: "#f5e2da", color: "#7c3a2a" }) }}>{isFix ? "! Quick fix" : "✦ Sharpen"}</span>
+              </div>
+              <div style={{ display: "flex", gap: 5, padding: "14px 26px 0" }}>
+                {order.map((segId, i) => (
+                  <div key={segId} style={{ height: 4, flex: 1, borderRadius: 3, background: states[i] === "done" ? "#8a9e88" : states[i] === "skip" ? "#e8c8bc" : i === currentIdx ? "#7c3a2a" : "#eee2d6" }} />
+                ))}
+              </div>
+              <div style={{ padding: "18px 26px 4px" }}>
+                <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 22, color: "#3a1c14" }}>{h.who}</div>
+                <div style={{ fontFamily: MONO, fontSize: 12, color: C.muted, marginTop: 3, marginBottom: 14 }}>{h.sub}</div>
+                {renderContent(id)}
+              </div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 26px 22px", marginTop: 6, borderTop: "1px solid #f3ece3" }}>
+                <button onClick={() => onSkip(id)} disabled={isFix}
+                  style={{ fontFamily: MONO, fontSize: 13, color: isFix ? "#d8ccbe" : C.muted, background: "none", border: "none", cursor: isFix ? "not-allowed" : "pointer" }}>
+                  {isFix ? "Must be fixed to import" : "Skip for now →"}
+                </button>
+                <span style={{ fontFamily: MONO, fontSize: 11, color: "#c2b2a4" }}>{isFix ? "" : "Come back to it any time"}</span>
+              </div>
+            </>
+          );
+        })()}
+      </div>
+    </div>
+  );
+};
+
 interface QueryRowProps {
   query: ReviewQuery;
   /** Agent name (Playfair) — agent.name || agent.agency. */
@@ -1322,8 +1410,9 @@ const REVIEW_SHELL_CSS = `
 @keyframes saImpBlink{0%,50%{opacity:1}50.01%,100%{opacity:0}}
 @keyframes saImpModalPop{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:none}}
 @keyframes saImpFaqDrop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+@keyframes saImpFocusPop{from{opacity:0;transform:translateY(6px) scale(.985)}to{opacity:1;transform:none}}
 @media(max-width:880px){ .sa-rv-grid{ grid-template-columns:1fr; } }
-@media(prefers-reduced-motion:reduce){ .sa-rv-band{ animation:none; opacity:0; } }
+@media(prefers-reduced-motion:reduce){ .sa-rv-band{ animation:none; opacity:0; } *{ animation-duration:0.001ms !important; } }
 /* fit variant (overview): window is only as tall as its content, vertically centred below the nav,
    capped so it never spills off-screen — content scrolls inside the card, never the page. */
 .sa-rv-window.fit{ flex:0 1 auto; height:auto; max-height:calc(100vh - 116px); margin:auto; }
@@ -1411,6 +1500,13 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   // ── Gentle-undo: a brief "Undo" toast for the instant "oops", plus the Set-aside tray (below).
   // Removing a record is never a hard delete during review — it sets the record aside (recoverable
   // via the tray) until the final Import. Corrective edits stay friction-free (no toast/confirm).
+  // Guided focus-overlay: which stage's walk is open + its snapshotted ordered ids, and which items the
+  // writer skipped this session (sharpen only). The overlay drives the same state as the inline list.
+  const [focus, setFocus] = useState<{ stage: "agents" | "queries"; order: string[] } | null>(null);
+  const [focusSkipped, setFocusSkipped] = useState<Set<string>>(new Set());
+  const closeFocus = () => { setFocus(null); setFocusSkipped(new Set()); };
+  const skipFocus = (id: string) => setFocusSkipped((s) => new Set(s).add(id));
+
   const [toast, setToast] = useState<{ msg: string; undo: () => void } | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const flashToast = (msg: string, undo: () => void) => {
@@ -1891,9 +1987,36 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
       { q: "What happens when I delete a duplicate?", a: "We import just one of the two records and merge any queries from the duplicate onto that single agent — so nothing's lost." },
     ];
 
+    const agentTierOf = (a: ReviewAgent): "fix" | "sharpen" => (!a.agency.trim() && !a.agencyWaived ? "fix" : "sharpen");
+    const openAgentsFocus = () => {
+      const order = active.filter((a) => statusOf(a) !== "captured")
+        .sort((a, b) => (agentTierOf(a) === agentTierOf(b) ? 0 : agentTierOf(a) === "fix" ? -1 : 1)) // fixes first
+        .map((a) => a.id);
+      setFocusSkipped(new Set()); setFocus({ stage: "agents", order });
+    };
+    const agentsOverlay = focus?.stage === "agents" ? (
+      <FocusOverlay
+        order={focus.order}
+        statusOf={(id) => { const a = agents.find((x) => x.id === id); return !a || a.deleted || statusOf(a) === "captured" ? "done" : focusSkipped.has(id) ? "skip" : "open"; }}
+        tierOf={(id) => { const a = agents.find((x) => x.id === id); return a && agentTierOf(a) === "fix" ? "fix" : "sharpen"; }}
+        headerFor={(id) => { const a = agents.find((x) => x.id === id); return { who: a?.name || a?.agency || "Unnamed agent", sub: a?.agency ? a.agency : "No agency yet" }; }}
+        renderContent={(id) => {
+          const a = agents.find((x) => x.id === id);
+          if (!a) return null;
+          return (!a.agency.trim() && !a.agencyWaived)
+            ? <AgentFixPanel agent={a} onPatch={(p) => patch(id, p)} />
+            : (<div><div style={reasonStripStyle}><ReasonIcon /><span>{quoteStatuses(a.reasons.find((r) => !r.resolved)?.note ?? "Worth a quick look.")}</span></div>
+                <button onClick={() => resolveMapping(id)} style={solidMini}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "#f0d3c7"; }} onMouseLeave={(e) => { e.currentTarget.style.background = "#f5e2da"; }}>Looks right</button></div>);
+        }}
+        onSkip={skipFocus}
+        onClose={closeFocus}
+      />
+    ) : null;
+
     return (
       <ReviewShell userInitial={userInitial} allClear={needCount === 0}
-        modal={showSkipModal ? <SkipSetupModal onClose={() => setShowSkipModal(false)} onSkip={onSkip} /> : null}>
+        modal={showSkipModal ? <SkipSetupModal onClose={() => setShowSkipModal(false)} onSkip={onSkip} /> : agentsOverlay}>
         <div className="sa-rv-grid">
 
           {/* ── Left: header + records card + footer ── */}
@@ -1919,6 +2042,14 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
               <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#fdecea", border: "1px solid #e6b6a8", borderRadius: 9, padding: "10px 13px", fontFamily: "Inter", fontSize: 12, color: C.invalid, marginBottom: 14 }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.invalid} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
                 {error}
+              </div>
+            )}
+
+            {/* Guided-mode launcher — the inline list stays as scan-mode */}
+            {needCount > 0 && (
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 18, background: "#fdfaf5", border: "1px solid #e7ddd2", borderRadius: 13, padding: "14px 18px", marginBottom: 12 }}>
+                <div style={{ fontFamily: "Inter", fontSize: 14, color: "#33302b" }}><b>{needCount} to work through.</b> We'll take them one at a time — fixes first.</div>
+                <button onClick={openAgentsFocus} style={{ fontFamily: MONO, fontSize: 13, background: "#7c3a2a", color: "#fff", padding: "11px 18px", borderRadius: 9, border: "none", cursor: "pointer", fontWeight: 500, whiteSpace: "nowrap" }}>Work through them →</button>
               </div>
             )}
 
@@ -1992,9 +2123,31 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
       { q: "What does the status mean?", a: "It's where the query sits in your pipeline — queried, partial, full, and so on. We read it from your file; correct any that look off." },
     ];
 
+    const openQueriesFocus = () => {
+      const order = qActive.filter((q) => queryStatusOf(q) === "needs-check").map((q) => q.id); // all sharpen
+      setFocusSkipped(new Set()); setFocus({ stage: "queries", order });
+    };
+    const queriesOverlay = focus?.stage === "queries" ? (
+      <FocusOverlay
+        order={focus.order}
+        statusOf={(id) => { const q = queries.find((x) => x.id === id); return !q || q.removed || queryStatusOf(q) === "captured" ? "done" : focusSkipped.has(id) ? "skip" : "open"; }}
+        tierOf={() => "sharpen"}
+        headerFor={(id) => { const q = queries.find((x) => x.id === id); return q ? { who: agentNameOf(q.agentRef), sub: `${originOf(q)} · ${q.status}` } : { who: "", sub: "" }; }}
+        renderContent={(id) => {
+          const q = queries.find((x) => x.id === id);
+          if (!q) return null;
+          return q.reasons.filter((r) => !r.resolved).map((r) => (
+            <QueryReasonPanel key={r.code} query={q} code={r.code} onPatch={(p) => patchQuery(id, p)} onResolveReason={(code, patch) => resolveQueryReason(id, code, patch)} onSwapDates={() => swapQueryDates(id)} />
+          ));
+        }}
+        onSkip={skipFocus}
+        onClose={closeFocus}
+      />
+    ) : null;
+
     return (
       <ReviewShell userInitial={userInitial} allClear={qLookCount === 0}
-        modal={showSkipModal ? <SkipSetupModal onClose={() => setShowSkipModal(false)} onSkip={onSkip} /> : null}>
+        modal={showSkipModal ? <SkipSetupModal onClose={() => setShowSkipModal(false)} onSkip={onSkip} /> : queriesOverlay}>
         <div className="sa-rv-grid">
 
           {/* ── Left: header + records card + footer ── */}
@@ -2019,6 +2172,14 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
               <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#fdecea", border: "1px solid #e6b6a8", borderRadius: 9, padding: "10px 13px", fontFamily: "Inter", fontSize: 12, color: C.invalid, marginBottom: 14 }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.invalid} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
                 {error}
+              </div>
+            )}
+
+            {/* Guided-mode launcher — the inline list stays as scan-mode */}
+            {qLookCount > 0 && (
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 18, background: "#fdfaf5", border: "1px solid #e7ddd2", borderRadius: 13, padding: "14px 18px", marginBottom: 12 }}>
+                <div style={{ fontFamily: "Inter", fontSize: 14, color: "#33302b" }}><b>{qLookCount} to sharpen.</b> Want to go through them one at a time? Each is optional.</div>
+                <button onClick={openQueriesFocus} style={{ fontFamily: MONO, fontSize: 13, background: "#7c3a2a", color: "#fff", padding: "11px 18px", borderRadius: 9, border: "none", cursor: "pointer", fontWeight: 500, whiteSpace: "nowrap" }}>Work through them →</button>
               </div>
             )}
 
