@@ -523,22 +523,43 @@ const QueryReasonPanel: React.FC<QueryReasonPanelProps> = ({ query, code, onPatc
 
 // Agent-fix content for the guided overlay (and reusable): the agency input + "use the agent's name
 // as primary" escape (prompt A), mirroring the inline AgentRow needs-agency controls.
+// Missing-agency card — sketch B, variant B (the quiet neutral note). No alarm colour: the note
+// just informs, and the recommended button carries the emphasis via a slow "breathing" glow
+// (.sa-agency-rec, defined in REVIEW_SHELL_CSS; reduced-motion → static soft ring). Skip lives in
+// the FocusOverlay foot, since agency fixes are non-skippable from here.
 const AgentFixPanel: React.FC<{ agent: ReviewAgent; onPatch: (p: Partial<ReviewAgent>) => void }> = ({ agent, onPatch }) => {
   const [v, setV] = useState("");
   return (
     <div>
-      <div style={reasonStripStyle}><ReasonIcon /><span>An agency is required before this one can import — add it, or use the agent's name as the primary reference.</span></div>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-        <input type="text" value={v} onChange={(e) => setV(e.target.value)} placeholder="Agency name" aria-label="Agency name"
-          style={dateBoxStyle} onFocus={(e) => { e.currentTarget.style.borderColor = "#9a5040"; }} onBlur={(e) => { e.currentTarget.style.borderColor = "#e3ccc0"; }} />
-        <button onClick={() => { const t = v.trim(); if (t) onPatch({ agency: t }); }} style={solidMini}
-          onMouseEnter={(e) => { e.currentTarget.style.background = "#f0d3c7"; }} onMouseLeave={(e) => { e.currentTarget.style.background = "#f5e2da"; }}>Save agency</button>
-        {agent.name.trim() && (
-          <button onClick={() => onPatch({ agencyWaived: true })} style={ghostMini}
-            onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.borderColor = "#9a5040"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; e.currentTarget.style.borderColor = "#e3ccc0"; }}>Use the agent's name as primary reference</button>
-        )}
+      <div style={{ display: "flex", gap: 10, alignItems: "flex-start", background: "#f6f1ea", border: "1px solid #e7ddd2", borderRadius: 11, padding: "13px 15px", margin: "2px 0 4px", fontSize: 13, lineHeight: 1.5, color: "#5a4a3e", maxWidth: 560 }}>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9a8c80" strokeWidth="2" style={{ flexShrink: 0, marginTop: 1 }}><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 8h.01" /></svg>
+        <p style={{ margin: 0 }}>Agency names are a required field, and we can't see one attached to this record. If you don't have this to hand, we recommend using the agent's name as the primary field for now. Don't worry — this can always be updated later.</p>
       </div>
+      <div style={{ display: "flex", gap: 9, marginTop: 14, maxWidth: 560 }}>
+        <input type="text" value={v} onChange={(e) => setV(e.target.value)} placeholder="Agency name (if you have it)" aria-label="Agency name"
+          style={{ flex: 1, fontFamily: "Inter", fontSize: 13, padding: "10px 13px", border: "1px solid #e7ddd2", borderRadius: 9, background: "#fff", color: "#3a1c14", outline: "none" }}
+          onFocus={(e) => { e.currentTarget.style.borderColor = "#9a5040"; }} onBlur={(e) => { e.currentTarget.style.borderColor = "#e7ddd2"; }} />
+        <button onClick={() => { const t = v.trim(); if (t) onPatch({ agency: t }); }}
+          style={{ fontFamily: MONO, fontSize: 12.5, padding: "10px 16px", borderRadius: 9, border: "1px solid #e7ddd2", background: "#fff", color: C.muted, cursor: "pointer" }}
+          onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#9a5040"; e.currentTarget.style.color = "#7c3a2a"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#e7ddd2"; e.currentTarget.style.color = C.muted; }}>Save</button>
+      </div>
+      {agent.name.trim() && (
+        <>
+          <div style={{ textAlign: "center", fontFamily: MONO, fontSize: 10.5, letterSpacing: ".1em", color: C.muted, margin: "16px 0 12px", position: "relative" }} aria-hidden>
+            <span style={{ position: "absolute", left: 0, top: "50%", width: "40%", height: 1, background: "#e7ddd2" }} />
+            OR
+            <span style={{ position: "absolute", right: 0, top: "50%", width: "40%", height: 1, background: "#e7ddd2" }} />
+          </div>
+          <div style={{ position: "relative", maxWidth: 560 }}>
+            <span style={{ position: "absolute", top: -9, right: 12, zIndex: 2, fontFamily: MONO, fontSize: 9.5, letterSpacing: ".08em", textTransform: "uppercase", background: "#5a6e58", color: "#fff", padding: "3px 8px", borderRadius: 6 }}>Recommended for now</span>
+            <button className="sa-agency-rec" onClick={() => onPatch({ agencyWaived: true })}
+              style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, fontFamily: MONO, fontSize: 13.5, background: "#f5e2da", color: "#7c3a2a", border: "1.5px solid #e8c8bc", padding: "14px 18px", borderRadius: 12, fontWeight: 500, cursor: "pointer" }}>
+              Use the agent's name as the primary field →
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 };
@@ -1471,6 +1492,10 @@ const REVIEW_SHELL_CSS = `
 @keyframes saImpFaqDrop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 @keyframes saImpFocusPop{from{opacity:0;transform:translateY(6px) scale(.985)}to{opacity:1;transform:none}}
 @keyframes saImpDimIn{from{opacity:0}to{opacity:1}}
+/* slow, soft "breathing" glow on the recommended action (agency card) — guides, never nags */
+@keyframes saAgencyBreathe{0%,100%{box-shadow:0 0 0 0 rgba(124,58,42,.18),0 0 0 0 rgba(124,58,42,.10)}50%{box-shadow:0 0 0 4px rgba(124,58,42,.10),0 0 22px 3px rgba(124,58,42,.16)}}
+.sa-agency-rec{animation:saAgencyBreathe 2.6s ease-in-out infinite;}
+@media(prefers-reduced-motion:reduce){.sa-agency-rec{animation:none;box-shadow:0 0 0 3px rgba(124,58,42,.10);}}
 @media(max-width:880px){ .sa-rv-grid{ grid-template-columns:1fr; } }
 @media(prefers-reduced-motion:reduce){ .sa-rv-band{ animation:none; opacity:0; } *{ animation-duration:0.001ms !important; } }
 /* fit variant (overview): window is only as tall as its content, vertically centred below the nav,
