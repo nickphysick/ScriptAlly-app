@@ -21,7 +21,7 @@ import { PinkButton } from "../dashboard/HeroCard";
 import {
   ReviewAgent, ReviewQuery, ReasonItem, CheckReason, AgentStatus,
   agentStatus, resolveReason, queryStatusOf, fmtDate, QUERY_STATUS_OPTIONS,
-  dupNoteOpen, dupNoteKept, dupNoteMerged, parseModel, modelToResult, applyAgentRemoval,
+  dupNoteOpen, dupNoteKept, dupNoteMerged, parseModel, modelToResult, applyAgentRemoval, seedUnidentifiedSetAside,
   currentDate, quoteStatuses, queryReasonText, statusDirectionChoices,
 } from "../../lib/smartImportReviewModel";
 
@@ -887,7 +887,7 @@ const UndoToast: React.FC<{ msg: string; onUndo: () => void; onClose: () => void
   </div>
 );
 
-interface SetAsideItem { kind: "agent" | "query"; id: string; name: string; sub: string; }
+interface SetAsideItem { kind: "agent" | "query"; id: string; name: string; sub: string; context?: string; unidentified?: boolean; }
 const SetAsideTray: React.FC<{ items: SetAsideItem[]; onRestore: (kind: "agent" | "query", id: string) => void }> = ({ items, onRestore }) => {
   const [open, setOpen] = useState(false);
   if (items.length === 0) return null;
@@ -905,8 +905,9 @@ const SetAsideTray: React.FC<{ items: SetAsideItem[]; onRestore: (kind: "agent" 
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontFamily: SERIF, fontSize: 13.5, color: "#8a8076", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{it.name}</div>
                 <div style={{ fontFamily: MONO, fontSize: 9.5, color: "#ada093", marginTop: 1 }}>{it.sub}</div>
+                {it.context && <div style={{ fontFamily: "Inter", fontSize: 11.5, fontStyle: "italic", color: "#9a8c80", marginTop: 3, whiteSpace: "normal" }}>Your note said “{it.context}” — no problem, set aside for now. Name them any time if a reply lands.</div>}
               </div>
-              <button onClick={() => onRestore(it.kind, it.id)} style={{ fontFamily: MONO, fontSize: 11, color: "#5a6e58", background: "#e9ede6", border: "1px solid #cdd8ca", borderRadius: 7, padding: "6px 11px", cursor: "pointer", flexShrink: 0 }}>Restore</button>
+              <button onClick={() => onRestore(it.kind, it.id)} style={{ fontFamily: MONO, fontSize: 11, color: "#5a6e58", background: "#e9ede6", border: "1px solid #cdd8ca", borderRadius: 7, padding: "6px 11px", cursor: "pointer", flexShrink: 0 }}>{it.unidentified ? "Name it instead" : "Restore"}</button>
             </div>
           ))}
         </div>
@@ -1375,8 +1376,11 @@ const RecordsCard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, onBack, onSkip, error, onImport, userName }) => {
   const initial = useMemo(() => parseModel(result), [result]);
-  const [agents, setAgents] = useState<ReviewAgent[]>(initial.agents);
-  const [queries, setQueries] = useState<ReviewQuery[]>(initial.queries);
+  // Auto-set-aside the truly-unidentifiable (no name AND no agency) before review begins — they never
+  // hit the blocking needs-agency gate; they wait in the tray with a "Name it instead" escape.
+  const seeded = useMemo(() => seedUnidentifiedSetAside(initial.agents, initial.queries), [initial]);
+  const [agents, setAgents] = useState<ReviewAgent[]>(seeded.agents);
+  const [queries, setQueries] = useState<ReviewQuery[]>(seeded.queries);
   // Open with the focused duplicates stage only when the import actually has clusters (never empty).
   // `hadDuplicates` is fixed for the session: it keeps the stage reachable again via Agents' Back even
   // after every cluster is resolved (so a mistaken merge can be undone).
@@ -1391,7 +1395,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   // edits and keeps the merge / keep-both decisions intact. (Per-cluster Undo / Back-to-duplicates
   // remain the ways to revisit a merge.)
   const baselineRef = useRef<{ agents: ReviewAgent[]; queries: ReviewQuery[] } | null>(null);
-  if (baselineRef.current === null) baselineRef.current = { agents: JSON.parse(JSON.stringify(initial.agents)), queries: JSON.parse(JSON.stringify(initial.queries)) };
+  if (baselineRef.current === null) baselineRef.current = { agents: JSON.parse(JSON.stringify(seeded.agents)), queries: JSON.parse(JSON.stringify(seeded.queries)) };
   // Separate Queries-stage baseline: the queries as they stood on ENTERING the Queries stage (after
   // every agents-stage cascade). Resetting on Queries reverts only the queries-stage edits to this,
   // leaving the agents-stage edits (removed duplicates, added agencies) exactly as the user left them.
@@ -1421,7 +1425,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   const dismissToast = () => { if (toastTimer.current) clearTimeout(toastTimer.current); setToast(null); };
   // Restore a set-aside agent: un-delete it AND bring back the queries its removal cascaded.
   const restoreAgent = (id: string) => {
-    setAgents((xs) => xs.map((a) => (a.id === id ? { ...a, deleted: false, setAsideStage: undefined } : a)));
+    setAgents((xs) => xs.map((a) => (a.id === id ? { ...a, deleted: false, setAsideStage: undefined, setAsideContext: undefined } : a)));
     setQueries((xs) => xs.map((q) => (q.agentRef === id && q.removed && q.removedReason === "Agent removed" ? { ...q, removed: false, removedReason: undefined } : q)));
     dismissToast(); setTick((t) => t + 1);
   };
@@ -1647,7 +1651,11 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   const setAsideItems: SetAsideItem[] = [
     // Duplicates-stage merges are recovered on the duplicates stage (its own reset / per-cluster undo),
     // not here — so they don't surface in the agents/queries tray.
-    ...agents.filter((a) => a.deleted && a.setAsideStage !== "duplicates").map((a) => ({ kind: "agent" as const, id: a.id, name: a.name || a.agency || "Unnamed agent", sub: "Agent · set aside" })),
+    ...agents.filter((a) => a.deleted && a.setAsideStage !== "duplicates").map((a) => (
+      a.setAsideStage === "unidentified"
+        ? { kind: "agent" as const, id: a.id, name: "Couldn't tell who this was for", sub: "Set aside — name it any time", context: a.setAsideContext, unidentified: true }
+        : { kind: "agent" as const, id: a.id, name: a.name || a.agency || "Unnamed agent", sub: "Agent · set aside" }
+    )),
     ...queries.filter((q) => q.removed && q.removedReason === "Removed by you").map((q) => ({ kind: "query" as const, id: q.id, name: agentNameOf(q.agentRef), sub: `Query · ${q.status}` })),
   ];
   const onRestoreSetAside = (kind: "agent" | "query", id: string) => (kind === "agent" ? restoreAgent(id) : restoreQuery(id));

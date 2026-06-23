@@ -38,7 +38,10 @@ export interface ReviewAgent {
   /** Which stage set this agent aside (when deleted) — lets the duplicates-stage reset restore only
    *  its own set-asides, and keeps duplicates-stage merges out of the generic agents/queries tray
    *  (they're recovered on the duplicates stage). Undefined until the agent is set aside. */
-  setAsideStage?: "duplicates" | "agents";
+  setAsideStage?: "duplicates" | "agents" | "unidentified";
+  /** Context shown in the set-aside tray for an auto-set-aside (unidentified) agent — the writer's own
+   *  note ("submitted via QueryManager"), so the shelf explains itself rather than just listing it. */
+  setAsideContext?: string;
   /** The writer chose "use the agent's name as primary reference" — import with NO agency yet (the
    *  empty agency is honest; resolvable later from the agent's profile). Lifts the blocking
    *  needs-agency gate without inventing a placeholder. Only meaningful when a name is present. */
@@ -197,6 +200,9 @@ export function reviewTallies(agents: ReviewAgent[], queries: ReviewQuery[]): Re
 
 const isReviewReasonCode = (c: unknown): c is ReviewReasonCode =>
   typeof c === "string" && (REVIEW_REASON_CODES as readonly string[]).includes(c);
+/** Reason codes that describe the AGENT's identity (name/agency), not the query. Handled on the
+ *  Agents stage; stripped from query reasons so they never render as query noise. */
+export const AGENT_IDENTITY_CODES = new Set<ReviewReasonCode>(["check-name", "needs-identifying"]);
 const coerceStatus = (s: unknown): QueryStatus | null =>
   typeof s === "string" && (Object.values(QueryStatus) as string[]).includes(s) ? (s as QueryStatus) : null;
 
@@ -309,8 +315,11 @@ export function parseModel(result: SmartImportResult): { agents: ReviewAgent[]; 
       date: t.date ?? null,
       raw: t.raw ?? null,
     }));
+    // Agent-identity codes (check-name / needs-identifying) are about the AGENT's name/agency, not the
+    // query — they're handled on the Agents stage (agency-only agents are captured/editable there; the
+    // truly-unidentifiable are auto-set-aside). Strip them here so they never echo as query noise.
     const reasons: QueryReason[] = (q.reasons || [])
-      .filter(isReviewReasonCode)
+      .filter((c): c is ReviewReasonCode => isReviewReasonCode(c) && !AGENT_IDENTITY_CODES.has(c))
       .map((code) => ({ code, resolved: false }));
     return {
       id: `q${i}`,
@@ -339,6 +348,29 @@ export function applyAgentRemoval(
     agents: agents.map((a) => (a.id === id ? { ...a, deleted: true } : a)),
     queries: queries.map((q) =>
       q.agentRef === id && !q.removed ? { ...q, removed: true, removedReason: "Agent removed" as const } : q
+    ),
+  };
+}
+
+/** On entering review, an agent with NEITHER a name NOR an agency can't be identified or imported —
+ *  and unlike a named agent it has nothing to key on, so the blocking needs-agency gate would be a
+ *  dead end. Instead, auto-set it aside (recoverable via the tray, with a "Name it instead" escape):
+ *  mark it deleted with stage "unidentified" + the writer's own note as context, and cascade its
+ *  queries to removed. A "has a name, no agency" agent (Priya/Owen) is NOT touched — that's prompt A's
+ *  needs-agency card. Returns new arrays (pure); applied once at review init. */
+export function seedUnidentifiedSetAside(
+  agents: ReviewAgent[],
+  queries: ReviewQuery[]
+): { agents: ReviewAgent[]; queries: ReviewQuery[] } {
+  const unidentified = new Set(agents.filter((a) => !a.deleted && !a.name.trim() && !a.agency.trim()).map((a) => a.id));
+  if (unidentified.size === 0) return { agents, queries };
+  const noteFor = (id: string) => queries.find((q) => q.agentRef === id && (q.notes || "").trim())?.notes?.trim();
+  return {
+    agents: agents.map((a) => (unidentified.has(a.id)
+      ? { ...a, deleted: true, setAsideStage: "unidentified" as const, setAsideContext: noteFor(a.id) }
+      : a)),
+    queries: queries.map((q) =>
+      unidentified.has(q.agentRef) && !q.removed ? { ...q, removed: true, removedReason: "Agent removed" as const } : q
     ),
   };
 }

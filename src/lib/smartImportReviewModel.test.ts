@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseModel, modelToResult, applyAgentRemoval, quoteStatuses, queryReasonText, statusDirectionChoices, reviewTallies, ReviewQuery } from './smartImportReviewModel';
+import { parseModel, modelToResult, applyAgentRemoval, quoteStatuses, queryReasonText, statusDirectionChoices, reviewTallies, seedUnidentifiedSetAside, ReviewQuery } from './smartImportReviewModel';
 import { QueryStatus } from '../types';
 import { ParsedAgent, ParsedQuery, SmartImportResult } from '../types/smartImport';
 
@@ -30,6 +30,32 @@ describe('parseModel — the new structured query shape', () => {
   it('a clean query carries no reasons (Ready)', () => {
     const { queries } = parseModel(result([agent()], [query({ sentDate: '2026-01-01' })]));
     expect(queries[0].reasons).toEqual([]);
+  });
+
+  it('strips agent-identity codes (check-name / needs-identifying) from query reasons — they belong to the agent', () => {
+    const { queries } = parseModel(result([agent()], [query({ reasons: ['check-name', 'no-date', 'needs-identifying'] })]));
+    expect(queries[0].reasons.map((r) => r.code)).toEqual(['no-date']); // only the genuine query reason survives
+  });
+});
+
+describe('seedUnidentifiedSetAside — graceful handling of the truly unidentifiable', () => {
+  it('no-name-no-agency agent → auto-set-aside (unidentified) with the note as context; its query removed', () => {
+    const r = result([agent({ ref: 'a1', name: '', agency: '' })], [query({ agentRef: 'a1', notes: 'submitted via QueryManager' })]);
+    const m = parseModel(r);
+    const out = seedUnidentifiedSetAside(m.agents, m.queries);
+    const a = out.agents.find((x) => x.id === 'a1')!;
+    expect(a.deleted).toBe(true);
+    expect(a.setAsideStage).toBe('unidentified');
+    expect(a.setAsideContext).toBe('submitted via QueryManager');
+    expect(out.queries[0].removed).toBe(true); // dependent flags follow the record off-screen
+  });
+
+  it('has-name-no-agency agent (Priya) is NOT auto-set-aside — that stays the needs-agency card', () => {
+    const r = result([agent({ ref: 'a1', name: 'Priya Raman', agency: '' })], [query({ agentRef: 'a1' })]);
+    const m = parseModel(r);
+    const out = seedUnidentifiedSetAside(m.agents, m.queries);
+    expect(out.agents.find((x) => x.id === 'a1')!.deleted).toBe(false);
+    expect(out.queries[0].removed).toBe(false);
   });
 });
 
