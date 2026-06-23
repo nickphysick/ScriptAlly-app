@@ -576,62 +576,81 @@ const FocusOverlay: React.FC<{
   renderContent: (id: string) => React.ReactNode;
   onSkip: (id: string) => void;
   onClose: () => void;
-}> = ({ order, statusOf, tierOf, headerFor, renderContent, onSkip, onClose }) => {
+  doneChip: string;                                 // stage-aware handoff confirm ("Agents all sorted — …")
+}> = ({ order, statusOf, tierOf, headerFor, renderContent, onSkip, onClose, doneChip }) => {
   const states = order.map(statusOf);
-  const currentIdx = states.findIndex((s) => s === "open");
+  const frontier = states.findIndex((s) => s === "open"); // the live item; -1 once every item is handled
   const fixesLeft = order.some((id, i) => states[i] === "open" && tierOf(id) === "fix");
-  const done = currentIdx === -1;
+  const done = frontier === -1;
+  // The card normally follows the frontier (resolving an item glides forward to the next open one).
+  // "← Back" drops out of follow-mode to revisit an earlier — already-resolved — item without
+  // un-resolving it; stepping forward to the frontier re-arms follow so resolves auto-advance again.
+  const [pos, setPos] = useState(0);
+  const [following, setFollowing] = useState(true);
+  useEffect(() => { if (following && frontier !== -1 && pos !== frontier) setPos(frontier); }, [following, frontier, pos]);
   const card: React.CSSProperties = { width: 560, maxWidth: "100%", background: "#fff", borderRadius: 18, boxShadow: "0 30px 70px -20px rgba(58,28,20,.5)", overflow: "hidden", border: "1px solid #e7ddd2", animation: "saImpFocusPop .18s ease" };
   return (
-    <div role="dialog" aria-modal="true" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    <div role="dialog" aria-modal="true"
       style={{ position: "fixed", inset: 0, background: "rgba(58,28,20,.34)", backdropFilter: "blur(2px)", WebkitBackdropFilter: "blur(2px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 60, padding: 24 }}>
-      <div style={card}>
         {done ? (
-          <div style={{ padding: "40px 30px", textAlign: "center" }}>
+          <div className={fixesLeft ? undefined : "sa-stage-done"} style={{ ...card, padding: "40px 30px", textAlign: "center" }}>
             <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 26, color: fixesLeft ? "#a85a44" : "#5a6e58" }}>{fixesLeft ? "Almost there" : "All sorted ✦"}</div>
+            {!fixesLeft && (
+              <div className="sa-done-chip" style={{ display: "inline-flex", alignItems: "center", gap: 7, fontFamily: MONO, fontSize: 12, color: "#5a6e58", background: "#e9ede6", padding: "7px 13px", borderRadius: 8, margin: "14px 0 2px" }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M20 6 9 17l-5-5" /></svg>{doneChip}
+              </div>
+            )}
             <p style={{ color: "#6a5c50", fontSize: 14.5, margin: "10px auto 22px", maxWidth: 380 }}>
               {fixesLeft ? "A fix still needs doing before you can import — pop back to it whenever you're ready." : "Your records are looking sharp. Anything you skipped is saved as-is and easy to revisit later."}
             </p>
-            <button onClick={onClose} style={{ fontFamily: MONO, fontSize: 13, background: "#7c3a2a", color: "#fff", border: "none", borderRadius: 9, padding: "11px 18px", cursor: "pointer" }}>Back to the list</button>
+            <button onClick={onClose} style={{ fontFamily: MONO, fontSize: 13, background: "#7c3a2a", color: "#fff", border: "none", borderRadius: 9, padding: "11px 18px", cursor: "pointer" }}>Review and confirm</button>
           </div>
         ) : (() => {
-          const id = order[currentIdx];
+          const idx = Math.min(pos, order.length - 1);
+          const id = order[idx];
           const tier = tierOf(id);
           const isFix = tier === "fix";
+          const shown = states[idx];                 // status of the card on screen (may be a resolved one, when reviewing back)
+          const reviewing = shown !== "open";          // viewing an already-handled item via "← Back"
           const h = headerFor(id);
           return (
-            <>
+            <div style={card}>
               <div style={{ padding: "20px 26px 0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ fontFamily: MONO, fontSize: 12, color: C.muted }}><b style={{ color: "#7c3a2a" }}>{currentIdx + 1}</b> of {order.length}</span>
-                <span style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                  <span style={{ fontFamily: MONO, fontSize: 11, padding: "5px 11px", borderRadius: 7, fontWeight: 500, ...(isFix ? { background: "#f4ead0", color: "#6f5618" } : { background: "#f5e2da", color: "#7c3a2a" }) }}>{isFix ? "! Quick fix" : "✦ Sharpen"}</span>
-                  {/* Reversible escape to the full list — a lens, not a door (re-enter via "Work through
-                      them →"). Always reachable, even on a blocking fix; the stage gate still holds. */}
-                  <button onClick={onClose} style={{ fontFamily: MONO, fontSize: 11.5, color: "#b6a89a", background: "none", border: "none", cursor: "pointer", padding: 0 }}
-                    onMouseEnter={(e) => { e.currentTarget.style.color = "#8a7c6e"; }} onMouseLeave={(e) => { e.currentTarget.style.color = "#b6a89a"; }}>View all</button>
-                </span>
+                <span style={{ fontFamily: MONO, fontSize: 12, color: C.muted }}><b style={{ color: "#7c3a2a" }}>{idx + 1}</b> of {order.length}</span>
+                <span style={{ fontFamily: MONO, fontSize: 11, padding: "5px 11px", borderRadius: 7, fontWeight: 500, ...(isFix ? { background: "#f4ead0", color: "#6f5618" } : { background: "#f5e2da", color: "#7c3a2a" }) }}>{isFix ? "! Quick fix" : "✦ Sharpen"}</span>
               </div>
               <div style={{ display: "flex", gap: 5, padding: "14px 26px 0" }}>
                 {order.map((segId, i) => (
-                  <div key={segId} style={{ height: 4, flex: 1, borderRadius: 3, background: states[i] === "done" ? "#8a9e88" : states[i] === "skip" ? "#e8c8bc" : i === currentIdx ? "#7c3a2a" : "#eee2d6" }} />
+                  <div key={segId} style={{ height: 4, flex: 1, borderRadius: 3, background: states[i] === "done" ? "#8a9e88" : states[i] === "skip" ? "#e8c8bc" : i === idx ? "#7c3a2a" : "#eee2d6" }} />
                 ))}
               </div>
               <div style={{ padding: "18px 26px 4px" }}>
                 <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 22, color: "#3a1c14" }}>{h.who}</div>
                 <div style={{ fontFamily: MONO, fontSize: 12, color: C.muted, marginTop: 3, marginBottom: 14 }}>{h.sub}</div>
+                {reviewing && (
+                  <div style={{ fontFamily: MONO, fontSize: 11.5, color: "#5a6e58", background: "#e9ede6", borderRadius: 8, padding: "8px 12px", marginBottom: 14, display: "inline-block" }}>{shown === "skip" ? "Skipped for now — saved as-is" : "Already sorted ✦"}</div>
+                )}
                 {renderContent(id)}
               </div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 26px 22px", marginTop: 6, borderTop: "1px solid #f3ece3" }}>
-                <button onClick={() => onSkip(id)} disabled={isFix}
-                  style={{ fontFamily: MONO, fontSize: 13, color: isFix ? "#d8ccbe" : C.muted, background: "none", border: "none", cursor: isFix ? "not-allowed" : "pointer" }}>
-                  {isFix ? "Must be fixed to import" : "Skip for now →"}
-                </button>
-                <span style={{ fontFamily: MONO, fontSize: 11, color: "#c2b2a4" }}>{isFix ? "" : "Come back to it any time"}</span>
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", padding: "16px 26px 22px", marginTop: 6, borderTop: "1px solid #f3ece3" }}>
+                <button onClick={() => { setFollowing(false); setPos((p) => Math.max(0, p - 1)); }} disabled={idx === 0}
+                  style={{ fontFamily: MONO, fontSize: 13, color: idx === 0 ? "#d8ccbe" : C.muted, background: "none", border: "none", cursor: idx === 0 ? "not-allowed" : "pointer" }}>← Back</button>
+                {reviewing ? (
+                  <button onClick={() => setPos((p) => { const n = Math.min(order.length - 1, p + 1); if (frontier === -1 || n >= frontier) setFollowing(true); return n; })}
+                    style={{ fontFamily: MONO, fontSize: 13, color: C.muted, background: "none", border: "none", cursor: "pointer" }}>Next →</button>
+                ) : (
+                  <div style={{ textAlign: "right" }}>
+                    <button onClick={() => onSkip(id)} disabled={isFix}
+                      style={{ fontFamily: MONO, fontSize: 13, color: isFix ? "#d8ccbe" : C.muted, background: "none", border: "none", cursor: isFix ? "not-allowed" : "pointer", padding: 0 }}>
+                      {isFix ? "Must be fixed to import" : "Skip for now →"}
+                    </button>
+                    {!isFix && <div style={{ fontFamily: CAVEAT, fontSize: 15, color: "#b3a394", marginTop: 4 }}>come back to this shortly</div>}
+                  </div>
+                )}
               </div>
-            </>
+            </div>
           );
         })()}
-      </div>
     </div>
   );
 };
@@ -1496,6 +1515,12 @@ const REVIEW_SHELL_CSS = `
 @keyframes saAgencyBreathe{0%,100%{box-shadow:0 0 0 0 rgba(124,58,42,.18),0 0 0 0 rgba(124,58,42,.10)}50%{box-shadow:0 0 0 4px rgba(124,58,42,.10),0 0 22px 3px rgba(124,58,42,.16)}}
 .sa-agency-rec{animation:saAgencyBreathe 2.6s ease-in-out infinite;}
 @media(prefers-reduced-motion:reduce){.sa-agency-rec{animation:none;box-shadow:0 0 0 3px rgba(124,58,42,.10);}}
+/* completed-stage sage pulse (sketch C beat 1) — the done card swells sage once, faint tint at the
+   peak, a quiet "that's done"; reduced-motion → a static soft sage ring. */
+@keyframes saStagePulse{0%{box-shadow:0 30px 70px -20px rgba(58,28,20,.5),0 0 0 0 rgba(134,165,131,0)}30%{box-shadow:0 30px 70px -20px rgba(58,28,20,.5),0 0 0 5px rgba(134,165,131,.35),0 0 34px 6px rgba(134,165,131,.4);background:#f3f7f1}60%{box-shadow:0 30px 70px -20px rgba(58,28,20,.5),0 0 0 5px rgba(134,165,131,.18),0 0 28px 4px rgba(134,165,131,.22)}100%{box-shadow:0 30px 70px -20px rgba(58,28,20,.5),0 0 0 0 rgba(134,165,131,0)}}
+.sa-stage-done{animation:saStagePulse 1.5s ease-in-out;}
+.sa-done-chip{opacity:0;animation:saImpDimIn .5s ease .2s forwards;}
+@media(prefers-reduced-motion:reduce){.sa-stage-done{animation:none;box-shadow:0 30px 70px -20px rgba(58,28,20,.5),0 0 0 4px rgba(134,165,131,.25);}.sa-done-chip{animation:none;opacity:1;}}
 @media(max-width:880px){ .sa-rv-grid{ grid-template-columns:1fr; } }
 @media(prefers-reduced-motion:reduce){ .sa-rv-band{ animation:none; opacity:0; } *{ animation-duration:0.001ms !important; } }
 /* fit variant (overview): window is only as tall as its content, vertically centred below the nav,
@@ -1589,15 +1614,15 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   // writer skipped this session (sharpen only). The overlay drives the same state as the inline list.
   const [focus, setFocus] = useState<{ stage: "agents" | "queries"; order: string[] } | null>(null);
   const [focusSkipped, setFocusSkipped] = useState<Set<string>>(new Set());
-  // Stages the writer has left the walk for ("View all") — suppresses auto-reopen so the escape sticks
-  // until they step back in via "Work through them →". The walk is guided-by-default, never coercive.
+  // Stages the writer has finished the walk for (closed via "Review and confirm") — suppresses
+  // auto-reopen so they land on the inline list for a final look instead of being pulled back in.
   const [escaped, setEscaped] = useState<Set<"agents" | "queries">>(new Set());
   // Pre-walk intro: which beat is showing (0 intro · 1 ready spotlight · 2 check spotlight · null off)
   // and which stages have already played it this session (so it doesn't replay on revisit).
   const [introStep, setIntroStep] = useState<number | null>(null);
   const [introSeen, setIntroSeen] = useState<Set<"agents" | "queries">>(new Set());
-  // closeFocus = leave the guided card for the inline list (reversible). The stage gate still holds on
-  // the list — this frees the writer from the card, not from any blocking fix.
+  // closeFocus = finish the walk ("Review and confirm") and drop to the inline list for a final look.
+  // Marking the stage escaped keeps the list from re-opening the walk; the stage gate still holds.
   const closeFocus = () => { if (focus) setEscaped((e) => new Set(e).add(focus.stage)); setFocus(null); setFocusSkipped(new Set()); };
   const skipFocus = (id: string) => setFocusSkipped((s) => new Set(s).add(id));
 
@@ -2125,6 +2150,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
         }}
         onSkip={skipFocus}
         onClose={closeFocus}
+        doneChip="Agents all sorted — on to your queries"
       />
     ) : null;
 
@@ -2162,14 +2188,6 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
               <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#fdecea", border: "1px solid #e6b6a8", borderRadius: 9, padding: "10px 13px", fontFamily: "Inter", fontSize: 12, color: C.invalid, marginBottom: 14 }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.invalid} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
                 {error}
-              </div>
-            )}
-
-            {/* Guided-mode launcher — the inline list stays as scan-mode */}
-            {needCount > 0 && (
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 18, background: "#fdfaf5", border: "1px solid #e7ddd2", borderRadius: 13, padding: "14px 18px", marginBottom: 12 }}>
-                <div style={{ fontFamily: "Inter", fontSize: 14, color: "#33302b" }}><b>{needCount} to work through.</b> We'll take them one at a time — fixes first.</div>
-                <button onClick={openAgentsFocus} style={{ fontFamily: MONO, fontSize: 13, background: "#7c3a2a", color: "#fff", padding: "11px 18px", borderRadius: 9, border: "none", cursor: "pointer", fontWeight: 500, whiteSpace: "nowrap" }}>Work through them →</button>
               </div>
             )}
 
@@ -2263,6 +2281,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
         }}
         onSkip={skipFocus}
         onClose={closeFocus}
+        doneChip="Queries all sorted — ready to import"
       />
     ) : null;
 
@@ -2299,14 +2318,6 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
               <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#fdecea", border: "1px solid #e6b6a8", borderRadius: 9, padding: "10px 13px", fontFamily: "Inter", fontSize: 12, color: C.invalid, marginBottom: 14 }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.invalid} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
                 {error}
-              </div>
-            )}
-
-            {/* Guided-mode launcher — the inline list stays as scan-mode */}
-            {qLookCount > 0 && (
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 18, background: "#fdfaf5", border: "1px solid #e7ddd2", borderRadius: 13, padding: "14px 18px", marginBottom: 12 }}>
-                <div style={{ fontFamily: "Inter", fontSize: 14, color: "#33302b" }}><b>{qLookCount} to sharpen.</b> Want to go through them one at a time? Each is optional.</div>
-                <button onClick={openQueriesFocus} style={{ fontFamily: MONO, fontSize: 13, background: "#7c3a2a", color: "#fff", padding: "11px 18px", borderRadius: 9, border: "none", cursor: "pointer", fontWeight: 500, whiteSpace: "nowrap" }}>Work through them →</button>
               </div>
             )}
 
