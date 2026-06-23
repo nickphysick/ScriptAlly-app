@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseModel, modelToResult, applyAgentRemoval, quoteStatuses, queryReasonText, statusDirectionChoices, reviewTallies, seedUnidentifiedSetAside, ReviewQuery } from './smartImportReviewModel';
+import { parseModel, modelToResult, applyAgentRemoval, quoteStatuses, queryReasonText, statusDirectionChoices, reviewTallies, seedUnidentifiedSetAside, decideStageEntry, ReviewQuery } from './smartImportReviewModel';
 import { QueryStatus } from '../types';
 import { ParsedAgent, ParsedQuery, SmartImportResult } from '../types/smartImport';
 
@@ -123,6 +123,22 @@ describe('statusDirectionChoices — the two real choices', () => {
   it('offers the partial pair for a partial status', () => {
     expect(statusDirectionChoices(QueryStatus.PARTIAL_SENT).map((c) => c.status))
       .toEqual([QueryStatus.PARTIAL_SENT, QueryStatus.PARTIAL_REQUESTED]);
+  });
+});
+
+describe('decideStageEntry — intro before walk on first entry, suppressed after', () => {
+  it('first flagged visit → intro (the welcome plays before the walk)', () => {
+    expect(decideStageEntry({ flagged: true, introSeen: false, escaped: false })).toBe('intro');
+  });
+  it('revisit after the intro has been seen → walk (no replay)', () => {
+    expect(decideStageEntry({ flagged: true, introSeen: true, escaped: false })).toBe('walk');
+  });
+  it('escaped via "View all" → none (stay on the list, no intro, no walk)', () => {
+    expect(decideStageEntry({ flagged: true, introSeen: true, escaped: true })).toBe('none');
+    expect(decideStageEntry({ flagged: true, introSeen: false, escaped: true })).toBe('none');
+  });
+  it('zero flagged items → none (clean list, no empty overlay)', () => {
+    expect(decideStageEntry({ flagged: false, introSeen: false, escaped: false })).toBe('none');
   });
 });
 

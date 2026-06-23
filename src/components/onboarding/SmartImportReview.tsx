@@ -21,7 +21,7 @@ import { PinkButton } from "../dashboard/HeroCard";
 import {
   ReviewAgent, ReviewQuery, ReasonItem, CheckReason, AgentStatus,
   agentStatus, resolveReason, queryStatusOf, fmtDate, QUERY_STATUS_OPTIONS,
-  dupNoteOpen, dupNoteKept, dupNoteMerged, parseModel, modelToResult, applyAgentRemoval, seedUnidentifiedSetAside,
+  dupNoteOpen, dupNoteKept, dupNoteMerged, parseModel, modelToResult, applyAgentRemoval, seedUnidentifiedSetAside, decideStageEntry,
   currentDate, quoteStatuses, queryReasonText, statusDirectionChoices,
 } from "../../lib/smartImportReviewModel";
 
@@ -613,6 +613,59 @@ const FocusOverlay: React.FC<{
       </div>
     </div>
   );
+};
+
+// ── Pre-walk intro sequence (Phase 4b) ────────────────────────────────────────────────────────────
+// A short oriented welcome at the start of each review stage, before the walk opens: an intro beat,
+// then a spotlight on the "ready" pill (reassurance) and the "to check" pill (sets up the walk), then
+// hand off into the walk. Plays once per stage per session; stage-true copy + colour (agents = gold
+// "quick fix"; queries = pink "sharpen"). Reduced-motion still shows the copy, advanceable by button.
+const PreWalkIntro: React.FC<{
+  stageLabel: string; readyCount: number; checkCount: number; checkTier: "fix" | "sharpen"; step: number;
+  onIntroGo: () => void; onNextReady: () => void; onLetsGo: () => void;
+}> = ({ stageLabel, readyCount, checkCount, checkTier, step, onIntroGo, onNextReady, onLetsGo }) => {
+  const dim = <div aria-hidden style={{ position: "fixed", inset: 0, background: "rgba(40,28,22,.58)", zIndex: 55, animation: "saImpDimIn .4s ease" }} />;
+  const gold = checkTier === "fix";
+
+  if (step === 0) {
+    return (<>{dim}
+      <div style={{ position: "fixed", left: "50%", top: "46%", transform: "translate(-50%,-50%)", zIndex: 70, width: 440, maxWidth: "90vw", background: "#fdfaf5", border: "1px solid #7c3a2a", borderRadius: 18, padding: "34px 36px 30px", textAlign: "center", boxShadow: "0 30px 70px -30px rgba(58,28,20,.5)", animation: "saImpFocusPop .4s ease" }}>
+        <div style={{ width: 46, height: 46, borderRadius: "50%", background: "#e9ede6", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", color: "#5a6e58" }}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22V8M12 8c0-3 2-5 5-5 0 3-2 5-5 5Zm0 3c0-3-2-5-5-5 0 3 2 5 5 5Z"/></svg>
+        </div>
+        <h2 style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 25, margin: 0, color: "#3a1c14" }}>Now to populate your {stageLabel}</h2>
+        <button onClick={onIntroGo} style={{ marginTop: 22, fontFamily: MONO, fontSize: 14, background: "#f5e2da", color: "#7c3a2a", border: "1px solid #e8c8bc", padding: "13px 26px", borderRadius: 11, fontWeight: 500, cursor: "pointer" }}>Let's do it →</button>
+      </div>
+    </>);
+  }
+
+  const lit: "ready" | "check" = step === 1 ? "ready" : "check";
+  const pill = (kind: "ready" | "check") => {
+    const isLit = lit === kind;
+    const base = kind === "ready" ? { background: "#e9ede6", color: "#5a6e58" } : gold ? { background: "#f4ead0", color: "#6f5618" } : { background: "#f5e2da", color: "#7c3a2a" };
+    const ring = kind === "ready" ? "#9db09a" : gold ? "#e5d29a" : "#e8c8bc";
+    const label = kind === "ready" ? `${readyCount} ready to import` : `${checkCount} to ${gold ? "fix" : "check"}`;
+    return <span style={{ fontFamily: MONO, fontSize: 13, padding: "9px 16px", borderRadius: 9, fontWeight: 500, ...base, opacity: isLit ? 1 : 0.4, transform: isLit ? "scale(1.04)" : "none", boxShadow: isLit ? `0 0 0 3px ${ring}` : "none", transition: "all .3s ease" }}>{label}</span>;
+  };
+  const coach = lit === "ready"
+    ? { dot: "✓", dotBg: { background: "#e9ede6", color: "#5a6e58" }, hd: "Good to go", body: <><b>{readyCount} read cleanly</b> — nothing for you to do with these.</>, btn: "Next →", onClick: onNextReady }
+    : gold
+      ? { dot: "!", dotBg: { background: "#f4ead0", color: "#6f5618" }, hd: "A couple need a quick fix first", body: <>A couple need an agency before they can join — <b>we'll go through them together, one at a time.</b></>, btn: "Let's go →", onClick: onLetsGo }
+      : { dot: "✦", dotBg: { background: "#f5e2da", color: "#7c3a2a" }, hd: `${checkCount} worth a look`, body: <>A few have a date to confirm or a status to clarify — <b>we'll go through them together, one at a time.</b></>, btn: "Let's go →", onClick: onLetsGo };
+
+  return (<>{dim}
+    <div style={{ position: "fixed", top: 130, left: "50%", transform: "translateX(-50%)", zIndex: 60, display: "flex", flexDirection: "column", alignItems: "center", gap: 16, width: 360, maxWidth: "92vw" }}>
+      <div style={{ display: "flex", gap: 12 }}>{pill("ready")}{pill("check")}</div>
+      <div style={{ position: "relative", width: "100%", background: "#fdfaf5", border: "1px solid #7c3a2a", borderRadius: 14, padding: "17px 19px", boxShadow: "0 22px 50px -26px rgba(58,28,20,.5)", animation: "saImpFocusPop .35s ease" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 9, fontWeight: 600, fontSize: 14.5, color: "#3a1c14" }}>
+          <span style={{ width: 22, height: 22, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, ...coach.dotBg }}>{coach.dot}</span>
+          {coach.hd}
+        </div>
+        <p style={{ margin: "9px 0 0", fontSize: 13.5, color: "#5a4a3e", lineHeight: 1.5 }}>{coach.body}</p>
+        <button onClick={coach.onClick} style={{ marginTop: 13, fontFamily: MONO, fontSize: 12.5, background: "#7c3a2a", color: "#fff", border: "none", padding: "9px 17px", borderRadius: 9, fontWeight: 500, cursor: "pointer" }}>{coach.btn}</button>
+      </div>
+    </div>
+  </>);
 };
 
 interface QueryRowProps {
@@ -1417,6 +1470,7 @@ const REVIEW_SHELL_CSS = `
 @keyframes saImpModalPop{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:none}}
 @keyframes saImpFaqDrop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 @keyframes saImpFocusPop{from{opacity:0;transform:translateY(6px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes saImpDimIn{from{opacity:0}to{opacity:1}}
 @media(max-width:880px){ .sa-rv-grid{ grid-template-columns:1fr; } }
 @media(prefers-reduced-motion:reduce){ .sa-rv-band{ animation:none; opacity:0; } *{ animation-duration:0.001ms !important; } }
 /* fit variant (overview): window is only as tall as its content, vertically centred below the nav,
@@ -1513,6 +1567,10 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   // Stages the writer has left the walk for ("View all") — suppresses auto-reopen so the escape sticks
   // until they step back in via "Work through them →". The walk is guided-by-default, never coercive.
   const [escaped, setEscaped] = useState<Set<"agents" | "queries">>(new Set());
+  // Pre-walk intro: which beat is showing (0 intro · 1 ready spotlight · 2 check spotlight · null off)
+  // and which stages have already played it this session (so it doesn't replay on revisit).
+  const [introStep, setIntroStep] = useState<number | null>(null);
+  const [introSeen, setIntroSeen] = useState<Set<"agents" | "queries">>(new Set());
   // closeFocus = leave the guided card for the inline list (reversible). The stage gate still holds on
   // the list — this frees the writer from the card, not from any blocking fix.
   const closeFocus = () => { if (focus) setEscaped((e) => new Set(e).add(focus.stage)); setFocus(null); setFocusSkipped(new Set()); };
@@ -1710,7 +1768,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
     if (name === "queries") {
       queriesBaselineRef.current = queries.map((q) => JSON.parse(JSON.stringify(q)) as ReviewQuery);
     }
-    setScreen(name); setFocus(null); setOpenId(null); setHoverTarget(null); setPulseIds([]); setTick((t) => t + 1);
+    setScreen(name); setFocus(null); setIntroStep(null); setOpenId(null); setHoverTarget(null); setPulseIds([]); setTick((t) => t + 1);
     requestAnimationFrame(() => window.scrollTo({ top: 0 }));
   };
 
@@ -1768,23 +1826,24 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   // missing date is NOT a check reason, so "date needed" never blocks import.
   const canImport = qActive.length > 0 && qNeed === 0;
 
-  // Default to the guided walk: on entering a review stage that has flagged items (and the writer
-  // hasn't escaped it), open the overlay straight onto the first item, fixes-first. A zero-flag stage
-  // stays on the clean inline list (no empty overlay). Re-evaluates on stage change and on escape.
+  // On entering a flagged review stage: first time this session → play the pre-walk intro (which hands
+  // off into the walk on "Let's go"); thereafter (or if escaped) → the guided walk opens by default,
+  // unless the writer escaped to the list. A zero-flag stage stays on the clean inline list (no intro,
+  // no overlay). One unified decision so intro and walk can't both fire.
   useEffect(() => {
-    if (focus) return;
+    if (introStep !== null || focus) return;
     if (screen !== "agents" && screen !== "queries") return;
-    if (escaped.has(screen)) return;
     const order = screen === "agents"
       ? active.filter((a) => statusOf(a) !== "captured")
           .sort((a, b) => { const fa = !a.agency.trim() && !a.agencyWaived, fb = !b.agency.trim() && !b.agencyWaived; return fa === fb ? 0 : fa ? -1 : 1; })
           .map((a) => a.id)
       : qActive.filter((q) => queryStatusOf(q) === "needs-check").map((q) => q.id);
-    if (order.length === 0) return;
-    setFocusSkipped(new Set());
-    setFocus({ stage: screen, order });
+    const action = decideStageEntry({ flagged: order.length > 0, introSeen: introSeen.has(screen), escaped: escaped.has(screen) });
+    if (action === "intro") { setIntroSeen((s) => new Set(s).add(screen)); setIntroStep(0); return; }
+    if (action === "walk") { setFocusSkipped(new Set()); setFocus({ stage: screen, order }); }
+    // "none" → stay on the clean/escaped list
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [screen, escaped]);
+  }, [screen, escaped, introStep]);
 
   const patchQuery = (id: string, p: Partial<ReviewQuery>) => { setQueries((xs) => xs.map((q) => (q.id === id ? { ...q, ...p } : q))); setTick((t) => t + 1); };
   const removeQuery = (id: string) => { setQueries((xs) => xs.map((q) => (q.id === id ? { ...q, removed: true, removedReason: "Removed by you" } : q))); flashToast("Query set aside", () => restoreQuery(id)); setTick((t) => t + 1); };
@@ -2044,9 +2103,15 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
       />
     ) : null;
 
+    const agentsIntro = introStep !== null ? (
+      <PreWalkIntro stageLabel="agent database" readyCount={okCount} checkCount={needCount} checkTier="fix" step={introStep}
+        onIntroGo={() => setIntroStep(1)} onNextReady={() => setIntroStep(2)}
+        onLetsGo={() => { setIntroStep(null); openAgentsFocus(); }} />
+    ) : null;
+
     return (
       <ReviewShell userInitial={userInitial} allClear={needCount === 0}
-        modal={showSkipModal ? <SkipSetupModal onClose={() => setShowSkipModal(false)} onSkip={onSkip} /> : agentsOverlay}>
+        modal={showSkipModal ? <SkipSetupModal onClose={() => setShowSkipModal(false)} onSkip={onSkip} /> : (agentsIntro ?? agentsOverlay)}>
         <div className="sa-rv-grid">
 
           {/* ── Left: header + records card + footer ── */}
@@ -2176,9 +2241,15 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
       />
     ) : null;
 
+    const queriesIntro = introStep !== null ? (
+      <PreWalkIntro stageLabel="query log" readyCount={qReadyCount} checkCount={qLookCount} checkTier="sharpen" step={introStep}
+        onIntroGo={() => setIntroStep(1)} onNextReady={() => setIntroStep(2)}
+        onLetsGo={() => { setIntroStep(null); openQueriesFocus(); }} />
+    ) : null;
+
     return (
       <ReviewShell userInitial={userInitial} allClear={qLookCount === 0}
-        modal={showSkipModal ? <SkipSetupModal onClose={() => setShowSkipModal(false)} onSkip={onSkip} /> : queriesOverlay}>
+        modal={showSkipModal ? <SkipSetupModal onClose={() => setShowSkipModal(false)} onSkip={onSkip} /> : (queriesIntro ?? queriesOverlay)}>
         <div className="sa-rv-grid">
 
           {/* ── Left: header + records card + footer ── */}

@@ -179,6 +179,17 @@ export const queryTier = (q: ReviewQuery): ReviewTier =>
 export interface PopulationTally { total: number; ready: number; fix: number; sharpen: number; }
 export interface ReviewTallies { agents: PopulationTally; queries: PopulationTally; }
 
+/** What should happen on entering a review stage: play the pre-walk intro (first flagged visit),
+ *  open the guided walk (intro already seen, not escaped), or nothing (zero-flag, or escaped to the
+ *  list). Pure so the entry rule is unit-testable: intro-before-walk on first entry, suppressed after. */
+export type StageEntryAction = "intro" | "walk" | "none";
+export function decideStageEntry(opts: { flagged: boolean; introSeen: boolean; escaped: boolean }): StageEntryAction {
+  if (!opts.flagged) return "none";                         // zero-flag → clean list
+  if (!opts.introSeen && !opts.escaped) return "intro";     // first flagged visit → welcome
+  if (opts.escaped) return "none";                          // chose "View all" → stay on the list
+  return "walk";                                            // seen the intro → straight into the walk
+}
+
 /** Per-population tier counts — NEVER pooled across agents and queries (that was the "37 ready" bug:
  *  19 ready agents + 18 ready queries summed into one meaningless number). Each population reconciles
  *  to its own total. Agents: the only blocking tier (fix = missing agency or a duplicate group);
