@@ -14,6 +14,7 @@ import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 import Anthropic from "@anthropic-ai/sdk";
 import { SYSTEM_PROMPT } from "./smartImportPrompt";
+import { assembleResult } from "./assembleImport";
 // Single source of truth for the AI model — shared with the email-import path (emailImportCore.MODEL,
 // a side-effect-free pure-core constant) so file-import and email-import can't drift, and dev and
 // prod always run the same model.
@@ -96,7 +97,7 @@ export const smartImportMap = onCall(
     const first = parseReply(extractText(msg));
     if (first.ok) {
       console.log(`smartImportMap: mapped in ${Date.now() - startedMs}ms`);
-      return first.value; // SmartImportResult — re-validated on the client
+      return assembleResult(first.value); // structured shape — re-validated on the client
     }
     if (first.kind === "badjson") {
       // A JSON object was present but wouldn't parse — almost always truncation at the token ceiling.
@@ -116,7 +117,7 @@ export const smartImportMap = onCall(
     const second = parseReply(extractText(retryMsg));
     if (second.ok) {
       console.log(`smartImportMap: mapped on retry in ${Date.now() - startedMs}ms`);
-      return second.value; // SmartImportResult — re-validated on the client
+      return assembleResult(second.value); // structured shape — re-validated on the client
     }
     // Still unusable. Log cause + duration only (no payload / user data / key), then surface the error.
     console.error(`smartImportMap: mapping unusable after retry (${second.kind}) after ${Date.now() - startedMs}ms`);
