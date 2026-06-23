@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
     "build": "vite build",
+    "build:dev": "vite build --mode development && node scripts/assert-build-target.mjs dev",
+    "build:prod": "vite build --mode production && node scripts/assert-build-target.mjs prod",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
@@ -16,7 +18,8 @@
     "deploy:rules:dryrun": "firebase deploy --only firestore:rules --dry-run --project prod",
     "deploy:rules": "firebase deploy --only firestore:rules --project prod",
     "deploy:hosting": "npm run build && firebase deploy --only hosting --project prod",
-    "deploy:dev": "firebase deploy --project dev"
+    "deploy:dev": "npm run build:dev && firebase deploy --only hosting --config firebase.dev.json --project dev && firebase deploy --only functions:smartImportMap --project dev",
+    "deploy:prod": "npm run build:prod && firebase deploy --only hosting --project prod && firebase deploy --only functions:smartImportMap --project prod"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

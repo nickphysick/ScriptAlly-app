@@ -24,6 +24,12 @@ const firebaseConfig = {
 // Initialize the Firebase app
 const app = initializeApp(firebaseConfig);
 
+// Non-prod safety beacon: make the active backend obvious at a glance, so "which project am I on?"
+// is never a guessing game again. Production builds (import.meta.env.PROD) stay silent.
+if (!import.meta.env.PROD) {
+  console.info(`[ScriptAlly] backend project: ${firebaseConfig.projectId} (mode=${import.meta.env.MODE}) — NON-PROD`);
+}
+
 // Firestore database id. Production uses a NAMED database (ai-studio-…, CRITICAL — the default
 // database would be a different, empty store). A dev project typically uses the default
 // database: leave VITE_FIREBASE_DATABASE_ID empty or "(default)" and getFirestore is called
