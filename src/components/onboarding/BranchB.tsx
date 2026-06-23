@@ -18,6 +18,7 @@ import { commitSmartImport, CommitOutcome } from "../../lib/smartImportCommit";
 import { Form11Card, SelectRow, BookMotif, InboxMotif, FONT_SANS, FONT_MONO } from "./chrome";
 import { SmartImportReview } from "./SmartImportReview";
 import { ImportOverview } from "./ImportOverview";
+import { ImportTidyAnimation } from "./ImportTidyAnimation";
 import { ImportingLoader } from "./ImportingLoader";
 import { ManuscriptFields, ManuscriptFieldsState, emptyManuscriptFields } from "./ManuscriptFields";
 
@@ -49,7 +50,7 @@ export interface BranchBProps {
   error?: string | null;
 }
 
-type B3Screen = "book" | "pipeline" | "reading" | "overview" | "review" | "fallback" | "importing" | "done";
+type B3Screen = "book" | "pipeline" | "reading" | "tidying" | "overview" | "review" | "fallback" | "importing" | "done";
 
 const UploadIcon = (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
@@ -128,7 +129,7 @@ export const BranchB: React.FC<BranchBProps> = ({
     try {
       const result: SmartImportResult = await runSmartImport(file);
       setValidated(validateSmartImport(result));
-      setScreen("overview"); // positive arrival first; "Let's work through it" → review
+      setScreen("tidying"); // play the messy→orderly beat, then → overview
 
     } catch (e) {
       console.error("Smart Import mapping failed:", e);
@@ -310,6 +311,11 @@ export const BranchB: React.FC<BranchBProps> = ({
         userName={currentUser?.name}
       />
     );
+  }
+
+  // ── Tidying beat — the writer's own messy values straighten into clean lines before the Overview.
+  if (screen === "tidying" && validated) {
+    return <ImportTidyAnimation result={validated.result} onDone={() => setScreen("overview")} />;
   }
 
   // ── Overview — "Here's what we found". Positive arrival before any work; reads the parsed result
