@@ -52,8 +52,10 @@ const Tier: React.FC<{ tone: "ok" | "fix" | "sharp"; glyph: string; title: strin
 };
 
 const Column: React.FC<{ label: string; total: number; children: React.ReactNode }> = ({ label, total, children }) => (
+  // The card frame (overflow:hidden + borderRadius) clips the header fill to the rounded top corners —
+  // canonical header-fill structure: no ::before overlay, no radius-matching on the header itself.
   <div style={{ border: `1px solid ${C.hairline}`, borderRadius: 13, background: C.parchment, overflow: "hidden" }}>
-    <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", padding: "13px 18px", borderBottom: "1px solid #efe2d6", background: "#fff" }}>
+    <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", padding: "13px 18px", borderBottom: "1px solid #efe2d6", background: "#DCE0D9" }}>
       <span style={{ fontFamily: MONO, fontSize: 12, letterSpacing: ".1em", textTransform: "uppercase", color: C.ink, fontWeight: 500 }}>{label}</span>
       <span style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 22, color: C.burgundy }}>{total}<small style={{ fontFamily: MONO, fontSize: 9.5, color: C.muted, fontWeight: 400, letterSpacing: ".04em", marginLeft: 4 }}>in total</small></span>
     </div>
