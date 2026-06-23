@@ -68,13 +68,14 @@ export const ImportingLoader: React.FC<ImportingLoaderProps> = ({ complete, onPr
         @keyframes saLdrSlide{0%{left:-40%}100%{left:100%}}
         @keyframes saLdrSettle{from{transform:scale(1.06)}to{transform:scale(1)}}
         @keyframes saLdrFade{from{opacity:0}to{opacity:1}}
+        @keyframes saLdrStack{from{opacity:0;transform:translateX(-9px) rotate(-1.4deg)}to{opacity:1;transform:none}}
         .sa-ldr-disc{animation:saLdrBreathe 2.6s ease-in-out infinite;}
         .sa-ldr-stage.done .sa-ldr-disc{animation:saLdrSettle .6s ease forwards;}
         .sa-ldr-ring{animation:saLdrPing 2.4s ease-out infinite;}
         .sa-ldr-ring.r2{animation-delay:1.2s;}
         .sa-ldr-slider{animation:saLdrSlide 1.35s ease-in-out infinite;}
         @media(prefers-reduced-motion:reduce){
-          .sa-ldr-disc,.sa-ldr-ring,.sa-ldr-slider{animation:none!important;}
+          .sa-ldr-disc,.sa-ldr-ring,.sa-ldr-slider,.sa-ldr-stackline{animation:none!important;}
           .sa-ldr-ring{opacity:.25;}
           .sa-ldr-slider{display:none;}
         }
@@ -107,9 +108,19 @@ export const ImportingLoader: React.FC<ImportingLoaderProps> = ({ complete, onPr
           <p key={complete ? "done" : msgIndex} style={{ fontFamily: MONO, fontSize: 13, letterSpacing: ".02em", color: "#8a8178", margin: "0 auto 26px", minHeight: 18, animation: "saLdrFade .3s ease" }}>
             {complete ? "Opening your dashboard…" : MESSAGES[msgIndex]}
           </p>
-          <div style={{ width: 240, height: 5, borderRadius: 5, background: complete ? "linear-gradient(90deg,#9fb09c,#8a9e88)" : "rgba(138,158,136,.18)", overflow: "hidden", position: "relative", margin: "0 auto" }}>
-            {!complete && <span className="sa-ldr-slider" style={{ position: "absolute", top: 0, left: "-40%", height: "100%", width: "38%", borderRadius: 5, background: "linear-gradient(90deg,transparent,#9fb09c,transparent)" }} />}
-          </div>
+          {complete ? (
+            // The done beat — the jumbled stack from the processing tidy, now resolved into one
+            // orderly, fully-sage stack. The bookend of the messy→orderly motif. Calm, not confetti.
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, width: 200, margin: "0 auto" }}>
+              {[0, 1, 2, 3, 4].map((i) => (
+                <span key={i} className="sa-ldr-stackline" style={{ height: 8, borderRadius: 3, background: "#e9ede6", borderLeft: "2px solid #8a9e88", animation: "saLdrStack .45s ease both", animationDelay: `${i * 0.08}s` }} />
+              ))}
+            </div>
+          ) : (
+            <div style={{ width: 240, height: 5, borderRadius: 5, background: "rgba(138,158,136,.18)", overflow: "hidden", position: "relative", margin: "0 auto" }}>
+              <span className="sa-ldr-slider" style={{ position: "absolute", top: 0, left: "-40%", height: "100%", width: "38%", borderRadius: 5, background: "linear-gradient(90deg,transparent,#9fb09c,transparent)" }} />
+            </div>
+          )}
         </div>
       </main>
     </div>
