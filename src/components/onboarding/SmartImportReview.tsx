@@ -1387,7 +1387,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   const dismissToast = () => { if (toastTimer.current) clearTimeout(toastTimer.current); setToast(null); };
   // Restore a set-aside agent: un-delete it AND bring back the queries its removal cascaded.
   const restoreAgent = (id: string) => {
-    setAgents((xs) => xs.map((a) => (a.id === id ? { ...a, deleted: false } : a)));
+    setAgents((xs) => xs.map((a) => (a.id === id ? { ...a, deleted: false, setAsideStage: undefined } : a)));
     setQueries((xs) => xs.map((q) => (q.agentRef === id && q.removed && q.removedReason === "Agent removed" ? { ...q, removed: false, removedReason: undefined } : q)));
     dismissToast(); setTick((t) => t + 1);
   };
@@ -1436,7 +1436,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
     const a = agents.find((x) => x.id === id);
     const qc = queryCount(id);
     const next = applyAgentRemoval(agents, queries, id);
-    setAgents(next.agents);
+    setAgents(next.agents.map((x) => (x.id === id ? { ...x, setAsideStage: "agents" as const } : x)));
     setQueries(next.queries);
     flashToast(`${(a?.name || a?.agency || "Agent")} set aside${qc > 0 ? ` (with ${qc} quer${qc === 1 ? "y" : "ies"})` : ""}`, () => restoreAgent(id));
     setTick((t) => t + 1);
@@ -1469,29 +1469,51 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
     setTick((t) => t + 1);
   };
 
-  // Duplicate removal (NOT the bin): merge by explicit survivor choice. The removed record's queries
-  // are repointed to the survivor — never dropped. The survivor's `duplicate` reason resolves with a
-  // "merged" note; the merge is reversible via the duplicates stage (snapshot Undo).
+  // Duplicate removal (NOT the bin): set aside ONLY the clicked record. The other members stay
+  // flagged as a duplicate group for individual judgement — so a 3-way group takes two deliberate
+  // removals to reach one keeper. The removed record's queries repoint to the consolidation target
+  // (the leader if it survives, else the first remaining), never dropped; the record is set aside
+  // (recoverable on the duplicates stage), never hard-deleted. The cluster only resolves once a
+  // single member remains. snapshotCluster (first-write-wins) captures the original cluster so the
+  // duplicates-stage reset / Undo can restore the whole group.
   const removeDuplicate = (removedId: string) => {
-    const leader = agents.find((a) => !a.deleted && a.mergeWith.length > 0 && (a.id === removedId || a.mergeWith.includes(removedId)));
+    const leader = agents.find((a) => !a.deleted && !a.mergeResolved && a.mergeWith.length > 0 && (a.id === removedId || a.mergeWith.includes(removedId)));
     if (!leader) return;
-    const group = [leader.id, ...leader.mergeWith];
-    const survivorId = group.find((id) => id !== removedId && !(agents.find((x) => x.id === id)?.deleted));
-    if (!survivorId) return;
+    const groupIds = [leader.id, ...leader.mergeWith].filter((id) => !(agents.find((x) => x.id === id)?.deleted));
+    const remaining = groupIds.filter((id) => id !== removedId);
+    if (remaining.length === 0) return; // never set aside the last member
+    const survivorId = remaining.includes(leader.id) ? leader.id : remaining[0]; // queries consolidate here
+    const resolvingToOne = remaining.length === 1;
+    const newLeaderId = remaining.includes(leader.id) ? leader.id : remaining[0];
+    const newMergeWith = remaining.filter((id) => id !== newLeaderId);
+
     snapshotCluster(leader.id);
     setQueries((qs) => qs.map((q) => (q.agentRef === removedId ? { ...q, agentRef: survivorId } : q)));
     setAgents((xs) => xs.map((a) => {
-      if (a.id === removedId) return { ...a, deleted: true };
-      if (a.id === survivorId) {
-        const hasDup = a.reasons.some((r) => r.kind === "duplicate");
-        const reasons = hasDup
-          ? a.reasons.map((r) => (r.kind === "duplicate" ? { ...r, resolved: true, undoable: false, note: dupNoteMerged } : r))
-          : [{ kind: "duplicate" as CheckReason, note: dupNoteMerged, resolved: true, undoable: false }, ...a.reasons];
-        return { ...a, mergeResolved: true, reasons };
+      if (a.id === removedId) return { ...a, deleted: true, setAsideStage: "duplicates" as const };
+      if (resolvingToOne) {
+        // One left → cluster resolved; the keeper drops its duplicate flag with a "merged" note.
+        if (a.id === survivorId) {
+          const reasons = a.reasons.some((r) => r.kind === "duplicate")
+            ? a.reasons.map((r) => (r.kind === "duplicate" ? { ...r, resolved: true, undoable: false, note: dupNoteMerged } : r))
+            : a.reasons;
+          return { ...a, mergeResolved: true, mergeWith: [], reasons };
+        }
+        return a;
       }
-      if (group.includes(a.id)) return { ...a, mergeResolved: true };
+      // 2+ remain → cluster stays open. Re-seat the leader (carrying an open duplicate reason) and its
+      // mergeWith; the other remaining members are plain siblings (no duplicate reason of their own).
+      if (a.id === newLeaderId) {
+        const reasons = a.reasons.some((r) => r.kind === "duplicate" && !r.resolved)
+          ? a.reasons
+          : [{ kind: "duplicate" as CheckReason, note: dupNoteOpen(a.agency), resolved: false, undoable: true }, ...a.reasons.filter((r) => r.kind !== "duplicate")];
+        return { ...a, mergeResolved: false, mergeWith: newMergeWith, reasons };
+      }
+      if (remaining.includes(a.id)) return { ...a, mergeResolved: false, mergeWith: [], reasons: a.reasons.filter((r) => r.kind !== "duplicate") };
       return a;
     }));
+    const label = leader && (agents.find((x) => x.id === removedId)?.name || agents.find((x) => x.id === removedId)?.agency) || "Record";
+    flashToast(`${label} set aside`, () => undoCluster(leader.id));
     setTick((t) => t + 1);
   };
 
@@ -1560,12 +1582,17 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   };
 
   // Reset scoped to the CURRENT stage — never reaches across stages.
-  //  • Queries stage: revert only the queries to their on-entry snapshot, leaving every agents-stage
-  //    edit (removed duplicates, added agencies) exactly as the user left it.
-  //  • Agents / duplicates stage: revert agents AND their query cascade to the post-duplicates
-  //    baseline (an agent removal cascades to its queries, so the two revert together). snapRef is
-  //    kept so merges stay individually undoable.
+  //  • Duplicates stage: restore every duplicates-stage decision (set-aside merges AND keep-boths) to
+  //    its original group via the per-cluster snapshots — the set-aside-restore model, not a baseline.
+  //    Agent/query-stage set-asides (no cluster snapshot) are untouched.
+  //  • Queries stage: revert only the queries to their on-entry snapshot, leaving agents-stage edits.
+  //  • Agents stage: revert agents AND their query cascade to the post-duplicates baseline.
   const reset = () => {
+    if ((screen as string) === "duplicates") {
+      Object.keys(snapRef.current).forEach((leaderId) => undoCluster(leaderId)); // restores members + repointed queries
+      setOpenId(null); setTopcap(null); setPulseIds([]); setTick((t) => t + 1);
+      return;
+    }
     if ((screen as string) === "queries") {
       const qb = queriesBaselineRef.current;
       if (qb) setQueries(qb.map((q) => JSON.parse(JSON.stringify(q)) as ReviewQuery));
@@ -1584,7 +1611,9 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   // Set-aside shelf contents: deleted agents + queries the user removed directly (queries removed by
   // an agent's cascade ride back with that agent's restore, so they're not listed twice).
   const setAsideItems: SetAsideItem[] = [
-    ...agents.filter((a) => a.deleted).map((a) => ({ kind: "agent" as const, id: a.id, name: a.name || a.agency || "Unnamed agent", sub: "Agent · set aside" })),
+    // Duplicates-stage merges are recovered on the duplicates stage (its own reset / per-cluster undo),
+    // not here — so they don't surface in the agents/queries tray.
+    ...agents.filter((a) => a.deleted && a.setAsideStage !== "duplicates").map((a) => ({ kind: "agent" as const, id: a.id, name: a.name || a.agency || "Unnamed agent", sub: "Agent · set aside" })),
     ...queries.filter((q) => q.removed && q.removedReason === "Removed by you").map((q) => ({ kind: "query" as const, id: q.id, name: agentNameOf(q.agentRef), sub: `Query · ${q.status}` })),
   ];
   const onRestoreSetAside = (kind: "agent" | "query", id: string) => (kind === "agent" ? restoreAgent(id) : restoreQuery(id));
