@@ -655,57 +655,109 @@ const FocusOverlay: React.FC<{
   );
 };
 
-// ── Pre-walk intro sequence (Phase 4b) ────────────────────────────────────────────────────────────
-// A short oriented welcome at the start of each review stage, before the walk opens: an intro beat,
-// then a spotlight on the "ready" pill (reassurance) and the "to check" pill (sets up the walk), then
-// hand off into the walk. Plays once per stage per session; stage-true copy + colour (agents = gold
-// "quick fix"; queries = pink "sharpen"). Reduced-motion still shows the copy, advanceable by button.
-const PreWalkIntro: React.FC<{
-  stageLabel: string; readyCount: number; checkCount: number; checkTier: "fix" | "sharpen"; step: number;
+// ── In-place coachmark intro (sketch A) ─────────────────────────────────────────────────────────────
+// A product-tour-style orientation at the start of each flagged stage: the screen stays put, a dim
+// falls over everything EXCEPT the real header pill (which shows through a hole-punch + ring), and a
+// callout sits beneath it. It tours the live "ready" pill (reassurance) → the "to check" pill (sets up
+// the work), then hands off. The pills are measured (getBoundingClientRect) so the spotlight escapes
+// the review window's overflow clip and re-measures on resize. Plays once per stage per session;
+// stage-true copy + colour (agents/duplicates = gold "quick fix"; queries = pink "sharpen"). Stages
+// with no "ready" beat (duplicates) jump welcome → to-check. Reduced-motion drops the slides/fades.
+const CoachmarkIntro: React.FC<{
+  welcomeHeading: string;
+  readyCount: number; checkCount: number;
+  checkTier: "fix" | "sharpen";
+  hasReadyBeat: boolean;                 // false (duplicates) → welcome advances straight to the check beat
+  step: number;                          // 0 welcome · 1 ready spotlight · 2 to-check spotlight
+  readyRef: React.RefObject<HTMLElement | null>;
+  checkRef: React.RefObject<HTMLElement | null>;
+  checkCopy?: { hd: string; body: React.ReactNode }; // stage-specific to-check copy (else derived from tier)
   onIntroGo: () => void; onNextReady: () => void; onLetsGo: () => void;
-}> = ({ stageLabel, readyCount, checkCount, checkTier, step, onIntroGo, onNextReady, onLetsGo }) => {
-  const dim = <div aria-hidden style={{ position: "fixed", inset: 0, background: "rgba(40,28,22,.58)", zIndex: 55, animation: "saImpDimIn .4s ease" }} />;
+}> = ({ welcomeHeading, readyCount, checkCount, checkTier, hasReadyBeat, step, readyRef, checkRef, checkCopy, onIntroGo, onNextReady, onLetsGo }) => {
   const gold = checkTier === "fix";
+  const [rect, setRect] = useState<{ left: number; top: number; width: number; height: number } | null>(null);
+
+  // Measure the pill this beat is about (re-measure on resize/scroll) so the fixed spotlight + callout
+  // land on the real element wherever it sits — the product-tour approach, robust to layout.
+  useLayoutEffect(() => {
+    if (step === 0) { setRect(null); return; }
+    const target = step === 1 ? readyRef.current : checkRef.current;
+    const measure = () => {
+      const el = step === 1 ? readyRef.current : checkRef.current;
+      if (!el) { setRect(null); return; }
+      const r = el.getBoundingClientRect();
+      setRect({ left: r.left, top: r.top, width: r.width, height: r.height });
+    };
+    measure();
+    if (!target) return;
+    window.addEventListener("resize", measure);
+    window.addEventListener("scroll", measure, true);
+    return () => { window.removeEventListener("resize", measure); window.removeEventListener("scroll", measure, true); };
+  }, [step, readyRef, checkRef]);
 
   if (step === 0) {
-    return (<>{dim}
-      <div style={{ position: "fixed", left: "50%", top: "46%", transform: "translate(-50%,-50%)", zIndex: 70, width: 440, maxWidth: "90vw", background: "#fdfaf5", border: "1px solid #7c3a2a", borderRadius: 18, padding: "34px 36px 30px", textAlign: "center", boxShadow: "0 30px 70px -30px rgba(58,28,20,.5)", animation: "saImpFocusPop .4s ease" }}>
-        <div style={{ width: 46, height: 46, borderRadius: "50%", background: "#e9ede6", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", color: "#5a6e58" }}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22V8M12 8c0-3 2-5 5-5 0 3-2 5-5 5Zm0 3c0-3-2-5-5-5 0 3 2 5 5 5Z"/></svg>
+    return (
+      <>
+        <div className="sa-cm-veil" aria-hidden onMouseDown={(e) => e.preventDefault()} />
+        <div className="sa-cm-welcome" role="dialog" aria-modal="true">
+          <div style={{ width: 46, height: 46, borderRadius: "50%", background: "#e9ede6", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", color: "#5a6e58" }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22V8M12 8c0-3 2-5 5-5 0 3-2 5-5 5Zm0 3c0-3-2-5-5-5 0 3 2 5 5 5Z"/></svg>
+          </div>
+          <h2 style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 25, margin: 0, color: "#3a1c14" }}>{welcomeHeading}</h2>
+          <button onClick={onIntroGo} style={{ marginTop: 22, fontFamily: MONO, fontSize: 14, background: "#f5e2da", color: "#7c3a2a", border: "1px solid #e8c8bc", padding: "13px 26px", borderRadius: 11, fontWeight: 500, cursor: "pointer" }}>Let's do it →</button>
         </div>
-        <h2 style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 25, margin: 0, color: "#3a1c14" }}>Now to populate your {stageLabel}</h2>
-        <button onClick={onIntroGo} style={{ marginTop: 22, fontFamily: MONO, fontSize: 14, background: "#f5e2da", color: "#7c3a2a", border: "1px solid #e8c8bc", padding: "13px 26px", borderRadius: 11, fontWeight: 500, cursor: "pointer" }}>Let's do it →</button>
-      </div>
-    </>);
+      </>
+    );
   }
 
-  const lit: "ready" | "check" = step === 1 ? "ready" : "check";
-  const pill = (kind: "ready" | "check") => {
-    const isLit = lit === kind;
-    const base = kind === "ready" ? { background: "#e9ede6", color: "#5a6e58" } : gold ? { background: "#f4ead0", color: "#6f5618" } : { background: "#f5e2da", color: "#7c3a2a" };
-    const ring = kind === "ready" ? "#9db09a" : gold ? "#e5d29a" : "#e8c8bc";
-    const label = kind === "ready" ? `${readyCount} ready to import` : `${checkCount} to ${gold ? "fix" : "check"}`;
-    return <span style={{ fontFamily: MONO, fontSize: 13, padding: "9px 16px", borderRadius: 9, fontWeight: 500, ...base, opacity: isLit ? 1 : 0.4, transform: isLit ? "scale(1.04)" : "none", boxShadow: isLit ? `0 0 0 3px ${ring}` : "none", transition: "all .3s ease" }}>{label}</span>;
-  };
-  const coach = lit === "ready"
-    ? { dot: "✓", dotBg: { background: "#e9ede6", color: "#5a6e58" }, hd: "Good to go", body: <><b>{readyCount} read cleanly</b> — nothing for you to do with these.</>, btn: "Next →", onClick: onNextReady }
-    : gold
-      ? { dot: "!", dotBg: { background: "#f4ead0", color: "#6f5618" }, hd: "A couple need a quick fix first", body: <>A couple need an agency before they can join — <b>we'll go through them together, one at a time.</b></>, btn: "Let's go →", onClick: onLetsGo }
-      : { dot: "✦", dotBg: { background: "#f5e2da", color: "#7c3a2a" }, hd: `${checkCount} worth a look`, body: <>A few have a date to confirm or a status to clarify — <b>we'll go through them together, one at a time.</b></>, btn: "Let's go →", onClick: onLetsGo };
+  // Beat copy — ready = reassurance; to-check = sets up the work ("…it won't take a sec.").
+  const onReady = step === 1;
+  const checkBase = gold
+    ? { ring: "#e5d29a", dot: "!", dotBg: { background: "#f4ead0", color: "#6f5618" }, hd: `${checkCount === 1 ? "One" : checkCount} need${checkCount === 1 ? "s" : ""} a quick fix`, body: <>A quick fix each — a missing agency, say. <b>We'll work through these now — it won't take a sec.</b></> as React.ReactNode }
+    : { ring: "#e8c8bc", dot: "✦", dotBg: { background: "#f5e2da", color: "#7c3a2a" }, hd: `${checkCount === 1 ? "One" : checkCount} to sharpen`, body: <>A date to confirm or a status to clarify. <b>We'll work through these now — it won't take a sec.</b></> as React.ReactNode };
+  const coach = onReady
+    ? { ring: "#9db09a", dot: "✓", dotBg: { background: "#e9ede6", color: "#5a6e58" }, hd: "Good to go", body: <><b>{readyCount} read cleanly</b> — nothing for you to do with these.</> as React.ReactNode, btn: "Next →", onClick: onNextReady }
+    : { ...checkBase, hd: checkCopy?.hd ?? checkBase.hd, body: checkCopy?.body ?? checkBase.body, btn: "Let's go →", onClick: onLetsGo };
 
-  return (<>{dim}
-    <div style={{ position: "fixed", top: 130, left: "50%", transform: "translateX(-50%)", zIndex: 60, display: "flex", flexDirection: "column", alignItems: "center", gap: 16, width: 360, maxWidth: "92vw" }}>
-      <div style={{ display: "flex", gap: 12 }}>{pill("ready")}{pill("check")}</div>
-      <div style={{ position: "relative", width: "100%", background: "#fdfaf5", border: "1px solid #7c3a2a", borderRadius: 14, padding: "17px 19px", boxShadow: "0 22px 50px -26px rgba(58,28,20,.5)", animation: "saImpFocusPop .35s ease" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 9, fontWeight: 600, fontSize: 14.5, color: "#3a1c14" }}>
-          <span style={{ width: 22, height: 22, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, ...coach.dotBg }}>{coach.dot}</span>
-          {coach.hd}
+  // Without a measured pill (e.g. a layout the ref didn't find) fall back to a centred card so the
+  // intro never strands — the user can still advance.
+  if (!rect) {
+    return (
+      <>
+        <div className="sa-cm-veil" aria-hidden />
+        <div className="sa-cm-welcome" role="dialog" aria-modal="true" style={{ width: 360 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 9, fontWeight: 600, fontSize: 14.5, color: "#3a1c14" }}>
+            <span style={{ width: 22, height: 22, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, ...coach.dotBg }}>{coach.dot}</span>{coach.hd}
+          </div>
+          <p style={{ margin: "9px 0 0", fontSize: 13.5, color: "#5a4a3e", lineHeight: 1.5 }}>{coach.body}</p>
+          <button onClick={coach.onClick} style={{ marginTop: 14, fontFamily: MONO, fontSize: 12.5, background: "#7c3a2a", color: "#fff", border: "none", padding: "9px 17px", borderRadius: 9, fontWeight: 500, cursor: "pointer" }}>{coach.btn}</button>
+        </div>
+      </>
+    );
+  }
+
+  // Callout sits beneath the pill, beak under the pill's centre — clamped to stay on screen.
+  const calloutW = 340;
+  const calloutLeft = Math.max(16, Math.min(rect.left, window.innerWidth - calloutW - 16));
+  const beak = rect.left + rect.width / 2 - calloutLeft - 7;
+  const stepN = onReady ? 1 : (hasReadyBeat ? 2 : 1);
+  const stepTotal = hasReadyBeat ? 2 : 1;
+
+  return (
+    <>
+      {/* transparent click-shield (the dim itself is the spotlight's hole-punch shadow) */}
+      <div className="sa-cm-block" aria-hidden onMouseDown={(e) => e.preventDefault()} />
+      <div className="sa-cm-spot" aria-hidden style={{ left: rect.left - 4, top: rect.top - 4, width: rect.width + 8, height: rect.height + 8, boxShadow: `0 0 0 4px ${coach.ring},0 0 0 9999px rgba(40,28,22,.62)` }} />
+      <div className="sa-cm-callout" role="dialog" aria-modal="true" style={{ left: calloutLeft, top: rect.top + rect.height + 16, ["--beak" as string]: `${beak}px` }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 9, fontWeight: 600, fontSize: 14.5, color: "#3a1c14" }}>
+          <span style={{ width: 22, height: 22, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, ...coach.dotBg }}>{coach.dot}</span>{coach.hd}
         </div>
         <p style={{ margin: "9px 0 0", fontSize: 13.5, color: "#5a4a3e", lineHeight: 1.5 }}>{coach.body}</p>
-        <button onClick={coach.onClick} style={{ marginTop: 13, fontFamily: MONO, fontSize: 12.5, background: "#7c3a2a", color: "#fff", border: "none", padding: "9px 17px", borderRadius: 9, fontWeight: 500, cursor: "pointer" }}>{coach.btn}</button>
+        <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".12em", color: C.muted, marginTop: 13 }}>{stepN} OF {stepTotal}</div>
+        <button onClick={coach.onClick} style={{ marginTop: 10, fontFamily: MONO, fontSize: 12.5, background: "#7c3a2a", color: "#fff", border: "none", padding: "9px 17px", borderRadius: 9, fontWeight: 500, cursor: "pointer" }}>{coach.btn}</button>
       </div>
-    </div>
-  </>);
+    </>
+  );
 };
 
 interface QueryRowProps {
@@ -1521,6 +1573,17 @@ const REVIEW_SHELL_CSS = `
 .sa-stage-done{animation:saStagePulse 1.5s ease-in-out;}
 .sa-done-chip{opacity:0;animation:saImpDimIn .5s ease .2s forwards;}
 @media(prefers-reduced-motion:reduce){.sa-stage-done{animation:none;box-shadow:0 30px 70px -20px rgba(58,28,20,.5),0 0 0 4px rgba(134,165,131,.25);}.sa-done-chip{animation:none;opacity:1;}}
+/* in-place coachmark intro (sketch A) — the screen stays put; a dim falls over everything except the
+   real pill, which shows through a box-shadow hole-punch + coloured ring (.sa-cm-spot, sized to the
+   measured pill rect so it escapes the window's overflow clip). A callout sits beneath with an up-beak,
+   and slides along as the spotlight tours ready → to-check. Welcome fades opacity-only (no slide). */
+.sa-cm-veil{position:fixed;inset:0;background:rgba(40,28,22,.62);z-index:54;animation:saImpDimIn .6s ease;}
+.sa-cm-block{position:fixed;inset:0;z-index:59;}
+.sa-cm-spot{position:fixed;z-index:60;border-radius:20px;pointer-events:none;transition:left .55s cubic-bezier(.4,0,.2,1),top .55s ease,width .4s ease,box-shadow .45s ease;}
+.sa-cm-callout{position:fixed;z-index:62;width:340px;max-width:92vw;background:#fdfaf5;border:1px solid #7c3a2a;border-radius:14px;padding:18px 20px 16px;text-align:center;box-shadow:0 22px 50px -26px rgba(58,28,20,.5);transition:left .55s cubic-bezier(.4,0,.2,1),top .55s ease;animation:saImpFocusPop .4s ease;}
+.sa-cm-callout::before{content:"";position:absolute;top:-8px;left:var(--beak,40px);width:15px;height:15px;background:#fdfaf5;border-left:1px solid #7c3a2a;border-top:1px solid #7c3a2a;transform:rotate(45deg);transition:left .55s ease;}
+.sa-cm-welcome{position:fixed;left:50%;top:46%;transform:translate(-50%,-50%);z-index:62;width:430px;max-width:90vw;background:#fdfaf5;border:1px solid #7c3a2a;border-radius:18px;padding:34px 36px 30px;text-align:center;box-shadow:0 30px 70px -30px rgba(58,28,20,.5);animation:saImpDimIn .6s ease;}
+@media(prefers-reduced-motion:reduce){.sa-cm-spot,.sa-cm-callout,.sa-cm-callout::before{transition:none;}.sa-cm-callout,.sa-cm-welcome,.sa-cm-veil{animation:none;}}
 @media(max-width:880px){ .sa-rv-grid{ grid-template-columns:1fr; } }
 @media(prefers-reduced-motion:reduce){ .sa-rv-band{ animation:none; opacity:0; } *{ animation-duration:0.001ms !important; } }
 /* fit variant (overview): window is only as tall as its content, vertically centred below the nav,
@@ -1620,7 +1683,11 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   // Pre-walk intro: which beat is showing (0 intro · 1 ready spotlight · 2 check spotlight · null off)
   // and which stages have already played it this session (so it doesn't replay on revisit).
   const [introStep, setIntroStep] = useState<number | null>(null);
-  const [introSeen, setIntroSeen] = useState<Set<"agents" | "queries">>(new Set());
+  const [introSeen, setIntroSeen] = useState<Set<"duplicates" | "agents" | "queries">>(new Set());
+  // The live header pills the coachmark intro spotlights in place — measured (getBoundingClientRect)
+  // so the dim-cutout escapes the window's overflow clip. One pair, shared by whichever stage renders.
+  const readyPillRef = useRef<HTMLSpanElement>(null);
+  const checkPillRef = useRef<HTMLSpanElement>(null);
   // closeFocus = finish the walk ("Review and confirm") and drop to the inline list for a final look.
   // Marking the stage escaped keeps the list from re-opening the walk; the stage gate still holds.
   const closeFocus = () => { if (focus) setEscaped((e) => new Set(e).add(focus.stage)); setFocus(null); setFocusSkipped(new Set()); };
@@ -1882,6 +1949,12 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   // no overlay). One unified decision so intro and walk can't both fire.
   useEffect(() => {
     if (introStep !== null || focus) return;
+    // Duplicates: an intro-only stage (no walk) — orient once, then drop to the inline resolve cards.
+    if (screen === "duplicates") {
+      const action = decideStageEntry({ flagged: openDupIds.size > 0, introSeen: introSeen.has("duplicates"), escaped: false });
+      if (action === "intro") { setIntroSeen((s) => new Set(s).add("duplicates")); setIntroStep(0); }
+      return;
+    }
     if (screen !== "agents" && screen !== "queries") return;
     const order = screen === "agents"
       ? active.filter((a) => statusOf(a) !== "captured")
@@ -2155,7 +2228,8 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
     ) : null;
 
     const agentsIntro = introStep !== null ? (
-      <PreWalkIntro stageLabel="agent database" readyCount={okCount} checkCount={needCount} checkTier="fix" step={introStep}
+      <CoachmarkIntro welcomeHeading="Now to populate your agent database" readyCount={okCount} checkCount={needCount} checkTier="fix" hasReadyBeat step={introStep}
+        readyRef={readyPillRef} checkRef={checkPillRef}
         onIntroGo={() => setIntroStep(1)} onNextReady={() => setIntroStep(2)}
         onLetsGo={() => { setIntroStep(null); openAgentsFocus(); }} />
     ) : null;
@@ -2176,9 +2250,9 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
                 <span style={{ display: "inline-block", width: 2, height: "1.23em", background: "#33302b", marginLeft: 6, verticalAlign: "-0.28em", animation: "saImpBlink 1.06s steps(1,end) infinite" }} aria-hidden />
               </h1>
               <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
-                <span style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#e6ebe3", color: "#5a6e58" }}>{okCount} ready to import</span>
+                <span ref={readyPillRef} style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#e6ebe3", color: "#5a6e58" }}>{okCount} ready to import</span>
                 {needCount > 0
-                  ? <span style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#f0cdbf", color: "#a85a44" }}>{needCount} to check</span>
+                  ? <span ref={checkPillRef} style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#f0cdbf", color: "#a85a44" }}>{needCount} to check</span>
                   : <span style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#e6ebe3", color: "#5a6e58" }}>all clear</span>}
               </div>
             </div>
@@ -2286,7 +2360,8 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
     ) : null;
 
     const queriesIntro = introStep !== null ? (
-      <PreWalkIntro stageLabel="query log" readyCount={qReadyCount} checkCount={qLookCount} checkTier="sharpen" step={introStep}
+      <CoachmarkIntro welcomeHeading="Now to populate your query log" readyCount={qReadyCount} checkCount={qLookCount} checkTier="sharpen" hasReadyBeat step={introStep}
+        readyRef={readyPillRef} checkRef={checkPillRef}
         onIntroGo={() => setIntroStep(1)} onNextReady={() => setIntroStep(2)}
         onLetsGo={() => { setIntroStep(null); openQueriesFocus(); }} />
     ) : null;
@@ -2306,9 +2381,9 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
                 <span style={{ display: "inline-block", width: 2, height: "1.23em", background: "#33302b", marginLeft: 6, verticalAlign: "-0.28em", animation: "saImpBlink 1.06s steps(1,end) infinite" }} aria-hidden />
               </h1>
               <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
-                <span style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#e6ebe3", color: "#5a6e58" }}>{qReadyCount} ready to import</span>
+                <span ref={readyPillRef} style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#e6ebe3", color: "#5a6e58" }}>{qReadyCount} ready to import</span>
                 {qLookCount > 0
-                  ? <span style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#f0cdbf", color: "#a85a44" }}>{qLookCount} to check</span>
+                  ? <span ref={checkPillRef} style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#f0cdbf", color: "#a85a44" }}>{qLookCount} to check</span>
                   : <span style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#e6ebe3", color: "#5a6e58" }}>all clear</span>}
               </div>
             </div>
@@ -2377,8 +2452,21 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   }
   // ─────────────────────────────────────────────────────────────────────────────────────────────
 
+  // Duplicates is an intro-only stage (no walk): welcome → spotlight the "possible doubles" pill →
+  // close to the inline resolve cards. checkCopy keeps the to-check beat duplicates-true.
+  const duplicatesIntro = (screen as string) === "duplicates" && introStep !== null ? (
+    <CoachmarkIntro
+      welcomeHeading={clusters.length === 1 ? "First, a possible duplicate" : "First, a couple of possible duplicates"}
+      readyCount={0} checkCount={clusters.length} checkTier="fix" hasReadyBeat={false} step={introStep}
+      readyRef={readyPillRef} checkRef={checkPillRef}
+      checkCopy={{ hd: clusters.length === 1 ? "One looks like the same agent" : `${clusters.length} look like the same agent`, body: <>Two records that look like one agent — keep both, or merge them. <b>We'll sort these now — it won't take a sec.</b></> }}
+      onIntroGo={() => setIntroStep(2)} onNextReady={() => setIntroStep(2)}
+      onLetsGo={() => setIntroStep(null)} />
+  ) : null;
+
   return (
     <div style={{ background: C.band, minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center", paddingBottom: bannerH + 12, overflowX: "hidden" }}>
+      {duplicatesIntro}
       <style>{`@keyframes saImpPulse{0%{box-shadow:0 0 0 0 rgba(176,74,58,0.55)}70%{box-shadow:0 0 0 7px rgba(176,74,58,0)}100%{box-shadow:0 0 0 0 rgba(176,74,58,0)}}`}</style>
       {/* Navigation runs entirely through the panel footer (Continue / Back / "Review all agents →")
           and the duplicates flow — no top tab switcher (it was a dev-only browsing aid). */}
@@ -2450,7 +2538,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
               </div>
               <div style={{ display: "flex", gap: 6, marginTop: 9 }}>
                 {screen === "duplicates"
-                  ? <span style={{ fontFamily: MONO, fontSize: 8.5, padding: "3px 8px", borderRadius: 14, background: clusters.length ? C.noteFill : "#e7ece1", color: clusters.length ? C.burgundy : "#44563a" }}>{clusters.length ? `${clusters.length} possible double${clusters.length === 1 ? "" : "s"}` : "All sorted"}</span>
+                  ? <span ref={checkPillRef} style={{ fontFamily: MONO, fontSize: 8.5, padding: "3px 8px", borderRadius: 14, background: clusters.length ? C.noteFill : "#e7ece1", color: clusters.length ? C.burgundy : "#44563a" }}>{clusters.length ? `${clusters.length} possible double${clusters.length === 1 ? "" : "s"}` : "All sorted"}</span>
                   : <>
                     <span style={{ fontFamily: MONO, fontSize: 8.5, padding: "3px 8px", borderRadius: 14, background: "#fff", color: "#44563a" }}>{screen === "agents" ? okCount : qOk} ready to import</span>
                     <span style={{ fontFamily: MONO, fontSize: 8.5, padding: "3px 8px", borderRadius: 14, background: C.noteFill, color: C.burgundy }}>{screen === "agents" ? needCount : qNeed} to check</span>
