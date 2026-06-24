@@ -2430,7 +2430,8 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
                 : <div style={{ padding: "32px 22px", fontFamily: "Inter", fontSize: 13, color: "#9c8878", textAlign: "center" }}>No agents to review.</div>}
             </RecordsCard>
 
-            <SetAsideTray items={setAsideItems} onRestore={onRestoreSetAside} />
+            {/* Scoped to this page — agent set-asides only, so they don't bleed onto the queries page. */}
+            <SetAsideTray items={setAsideItems.filter((i) => i.kind === "agent")} onRestore={onRestoreSetAside} />
 
             {/* Footer */}
             <div className="sa-asm sa-asm-b" style={{ display: "flex", alignItems: "center", gap: 18, marginTop: 18, flexShrink: 0, animationDelay: "640ms" }}>
@@ -2571,7 +2572,8 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
                 : <div style={{ padding: "32px 22px", fontFamily: "Inter", fontSize: 13, color: "#9c8878", textAlign: "center" }}>No queries to review.</div>}
             </RecordsCard>
 
-            <SetAsideTray items={setAsideItems} onRestore={onRestoreSetAside} />
+            {/* Scoped to this page — query set-asides only; agent set-asides stay on the agents page. */}
+            <SetAsideTray items={setAsideItems.filter((i) => i.kind === "query")} onRestore={onRestoreSetAside} />
 
             {/* Footer */}
             <div className="sa-asm sa-asm-b" style={{ display: "flex", alignItems: "center", gap: 18, marginTop: 18, flexShrink: 0, animationDelay: "640ms" }}>
