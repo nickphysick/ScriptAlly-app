@@ -185,11 +185,14 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
       <style>{`
         @keyframes saScAppear{from{opacity:0}to{opacity:1}}
         @keyframes saScPop{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.14)}100%{transform:scale(1);opacity:1}}
+        /* Intro beat — each scrap squeeze-pops in (squash → overshoot → settle); rotation held via --r. */
+        @keyframes saScSqueeze{0%{transform:translate(-50%,-50%) rotate(var(--r,0deg)) scale(.18,.64);opacity:0}55%{transform:translate(-50%,-50%) rotate(var(--r,0deg)) scale(1.12,.9);opacity:1}74%{transform:translate(-50%,-50%) rotate(var(--r,0deg)) scale(.95,1.05)}100%{transform:translate(-50%,-50%) rotate(var(--r,0deg)) scale(1,1);opacity:1}}
         /* gentle independent drift while we wait (offsets/rotation/duration set per card via vars) */
         @keyframes saScBob{0%,100%{transform:translate(-50%,-50%) rotate(var(--r,0deg))}50%{transform:translate(calc(-50% + var(--bx,5px)), calc(-50% + var(--by,-6px))) rotate(calc(var(--r,0deg) + var(--br,1deg)))}}
         @keyframes saScSpark{0%{transform:scale(.3);opacity:0}20%{transform:scale(1.1);opacity:1}55%{transform:scale(1);opacity:1}100%{transform:scale(.96) translateY(-10px);opacity:0}}
         .sa-sc-card{transition:left .6s cubic-bezier(.34,1.3,.5,1), top .6s cubic-bezier(.34,1.3,.5,1), transform .6s cubic-bezier(.34,1.3,.5,1), background .4s ease, border-color .4s ease;}
         .sa-sc-appear{animation:saScAppear .4s ease both;}
+        .sa-sc-squeeze{animation:saScSqueeze .52s cubic-bezier(.34,1.56,.64,1) both;}
         .sa-sc-float{animation:saScBob var(--d,3.6s) ease-in-out infinite;animation-delay:var(--dl,0s);}
         .sa-sc-layer{position:absolute;left:17px;right:17px;top:0;bottom:0;display:flex;align-items:center;transition:opacity .4s ease;}
         .sa-sc-dotpop svg{animation:saScPop .5s cubic-bezier(.34,1.56,.64,1);}
@@ -198,7 +201,7 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
         .sa-sc-spark.a{background:#e9ede6;color:#5a6e58;}
         .sa-sc-spark.p{background:#f5e2da;color:#7c3a2a;}
         .sa-sc-spark.d{background:#eef1ec;color:#5a6e58;}
-        @media(prefers-reduced-motion:reduce){.sa-sc-card{transition:none;}.sa-sc-appear,.sa-sc-float,.sa-sc-dotpop svg,.sa-sc-spark{animation:none;}}
+        @media(prefers-reduced-motion:reduce){.sa-sc-card{transition:none;}.sa-sc-appear,.sa-sc-squeeze,.sa-sc-float,.sa-sc-dotpop svg,.sa-sc-spark{animation:none;}}
       `}</style>
 
       <OnbNav userInitial={userInitial} />
@@ -218,7 +221,7 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
           const left = inStack ? "50%" : `calc(50% + ${slot.dx}px)`;
           const transform = inStack ? "translate(-50%, -50%) rotate(0deg)" : `translate(-50%, -50%) rotate(${slot.r}deg)`;
           return (
-            <div key={i} className={`sa-sc-card${reduced ? "" : " sa-sc-appear"}${drifting ? " sa-sc-float" : ""}`} aria-hidden
+            <div key={i} className={`sa-sc-card${reduced || introDone ? "" : " sa-sc-squeeze"}${drifting ? " sa-sc-float" : ""}`} aria-hidden
               style={{
                 position: "absolute", left, top, transform, width: CARD_W, minHeight: 62, zIndex: isMoved ? 20 + i : 10,
                 animationDelay: reduced ? undefined : `${50 + i * 80}ms`,
