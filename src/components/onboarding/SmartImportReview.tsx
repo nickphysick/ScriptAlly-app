@@ -729,7 +729,9 @@ const FocusOverlay: React.FC<{
             <div style={card}>
               <div style={{ padding: "20px 26px 0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <span style={{ fontFamily: MONO, fontSize: 12, color: C.muted }}><b style={{ color: "#7c3a2a" }}>{idx + 1}</b> of {order.length}</span>
-                <span style={{ fontFamily: MONO, fontSize: 11, padding: "5px 11px", borderRadius: 7, fontWeight: 500, ...(isFix ? { background: "#f4ead0", color: "#6f5618" } : { background: "#f5e2da", color: "#7c3a2a" }) }}>{h.pill}</span>
+                {shown === "done"
+                  ? <span style={{ fontFamily: MONO, fontSize: 11, padding: "5px 11px", borderRadius: 7, fontWeight: 500, background: "#e3ebdf", color: "#5a6e58" }}>✓ Sorted</span>
+                  : <span style={{ fontFamily: MONO, fontSize: 11, padding: "5px 11px", borderRadius: 7, fontWeight: 500, ...(isFix ? { background: "#f4ead0", color: "#6f5618" } : { background: "#f5e2da", color: "#7c3a2a" }) }}>{h.pill}</span>}
               </div>
               <div style={{ display: "flex", gap: 5, padding: "14px 26px 0" }}>
                 {order.map((segId, i) => (
@@ -737,17 +739,25 @@ const FocusOverlay: React.FC<{
                 ))}
               </div>
               <div style={{ padding: "18px 26px 4px" }}>
-                {reviewing ? (
-                  // Phase-1 interim resolved view — Phase 2 replaces this with the clean "✓ Sorted" state.
+                {shown === "done" ? (
+                  // Resolved (back-navigation) state — sage avatar + a restatement of the choice + a single
+                  // "Change this" that resets THIS record to pending (session-only). No "worth a look" wording.
                   <>
-                    <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 22, color: "#3a1c14" }}>{h.who}</div>
-                    <div style={{ fontFamily: MONO, fontSize: 11.5, color: "#5a6e58", background: "#e9ede6", borderRadius: 8, padding: "8px 12px", margin: "8px 0 14px", display: "inline-block" }}>{shown === "skip" ? "Skipped for now — saved as-is" : "Already sorted ✦"}</div>
-                    {renderContent(id)}
+                    <div className="sa-focus-reveal sa-fr1" style={{ display: "flex", alignItems: "center", gap: 11, marginBottom: 13 }}>
+                      <span style={{ width: 38, height: 38, borderRadius: "50%", background: "#e3ebdf", color: "#5a6e58", fontFamily: SERIF, fontWeight: 600, fontSize: 17, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, border: "1px solid #cfdcc9" }}>{(h.who || "?").trim()[0]?.toUpperCase() || "?"}</span>
+                      <span style={{ fontFamily: MONO, fontSize: 12, color: C.muted, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{h.who}</span>
+                    </div>
+                    <div className="sa-focus-reveal sa-fr2" style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 20, color: "#5a6e58", lineHeight: 1.3, marginBottom: 8 }}>All sorted</div>
+                    <p className="sa-focus-reveal sa-fr3" style={{ fontFamily: "Inter", fontSize: 13.5, color: "#5a4a3e", lineHeight: 1.55, margin: "0 0 16px", maxWidth: 470 }}>{h.resolved?.line ?? "You've reviewed this one."}</p>
+                    <button className="sa-focus-reveal sa-fr3" onClick={() => h.resolved?.onChange()}
+                      style={{ fontFamily: MONO, fontSize: 12.5, color: "#7c3a2a", background: "#f7efe9", border: "1px solid #e8d8cf", borderRadius: 9, padding: "9px 15px", cursor: "pointer" }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = "#f0d3c7"; }} onMouseLeave={(e) => { e.currentTarget.style.background = "#f7efe9"; }}>↩ Change this</button>
                   </>
                 ) : (
-                  // Working state: avatar + name, the ISSUE as the headline, then the plain-language options —
-                  // revealing in a gentle stagger (avatar → headline → actions), layered on the lift entrance.
+                  // Working state (open, or a skipped item revisited): avatar + name, the ISSUE as the headline,
+                  // then the plain-language options — revealing in a gentle stagger (avatar → headline → actions).
                   <>
+                    {shown === "skip" && <div style={{ fontFamily: MONO, fontSize: 11, color: "#a08a52", background: "#f6efd9", borderRadius: 7, padding: "5px 10px", margin: "0 0 12px", display: "inline-block" }}>Skipped earlier — pick it up whenever</div>}
                     <div className="sa-focus-reveal sa-fr1" style={{ display: "flex", alignItems: "center", gap: 11, marginBottom: 13 }}>
                       <span style={{ width: 38, height: 38, borderRadius: "50%", background: "#f3ece3", color: "#7c3a2a", fontFamily: SERIF, fontWeight: 600, fontSize: 17, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, border: "1px solid #ecd9cd" }}>{(h.who || "?").trim()[0]?.toUpperCase() || "?"}</span>
                       <span style={{ fontFamily: MONO, fontSize: 12, color: C.muted, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{h.who}</span>
@@ -2239,6 +2249,12 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
     }));
     setTick((t) => t + 1);
   };
+  // "Change this" reset: re-open a resolved query's typed reasons so the working focus card returns.
+  // Session-only (flips resolved flags); the user's applied fixes stay. Inverse of resolveQueryReason.
+  const reopenQueryReasons = (id: string) => {
+    setQueries((xs) => xs.map((q) => (q.id === id ? { ...q, reasons: q.reasons.map((r) => ({ ...r, resolved: false })) } : q)));
+    setTick((t) => t + 1);
+  };
 
   const onImportClick = () => {
     if (!canImport) { pulseBlocked(qActive.filter((q) => queryStatusOf(q) !== "captured").map((q) => q.id)); return; }
@@ -2490,7 +2506,16 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
           // needs-agency (the blocking fix) takes priority; otherwise it's the low-confidence mapping flag.
           const key = a && !a.agency.trim() && !a.agencyWaived ? "agent-needs-agency" : "agent-mapping";
           const { pill, headline } = focusReasonMeta(key);
-          return { who, pill, headline };
+          // Resolved (back-navigation) state: restate what was chosen + reset-to-pending. Three routes —
+          // name-as-primary (waived), agency typed, or the mapping detail confirmed.
+          const resolved = a && statusOf(a) === "captured"
+            ? a.agencyWaived
+              ? { line: `You chose to use ${who}'s name as the primary field. Their agency can be added any time.`, onChange: () => patch(id, { agencyWaived: false }) }
+              : a.reasons.some((r) => r.kind === "mapping")
+                ? { line: `You confirmed ${who}'s details look right.`, onChange: () => reopenReason(id, "mapping") }
+                : { line: `You added the agency — ${a.agency}.`, onChange: () => patch(id, { agency: "", agencyWaived: false }) }
+            : undefined;
+          return { who, pill, headline, resolved };
         }}
         renderContent={(id) => {
           const a = agents.find((x) => x.id === id);
@@ -2643,7 +2668,11 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
           // The card headlines the query's primary open reason (its first unresolved typed reason).
           const code = (q.reasons.find((r) => !r.resolved) ?? q.reasons[0])?.code;
           const meta = code ? focusReasonMeta(code) : { pill: "To check", headline: "Worth a quick look" };
-          return { who: agentNameOf(q.agentRef), pill: meta.pill, headline: meta.headline };
+          // Resolved (back-navigation): restate the outcome; "Change this" re-opens its reasons.
+          const resolved = queryStatusOf(q) === "captured"
+            ? { line: `You've sorted this query — ${q.status.toLowerCase()}${q.sentDate ? `, sent ${fmtDate(q.sentDate)}` : ""}.`, onChange: () => reopenQueryReasons(id) }
+            : undefined;
+          return { who: agentNameOf(q.agentRef), pill: meta.pill, headline: meta.headline, resolved };
         }}
         renderContent={(id) => {
           const q = queries.find((x) => x.id === id);
