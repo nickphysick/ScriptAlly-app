@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { parseModel, modelToResult, applyAgentRemoval, quoteStatuses, queryReasonText, statusDirectionChoices, reviewTallies, seedUnidentifiedSetAside, decideStageEntry, doneStageMessage, keepBothLabel, dupNoteKept, ReviewQuery } from './smartImportReviewModel';
+import { parseModel, modelToResult, applyAgentRemoval, quoteStatuses, queryReasonText, statusDirectionChoices, reviewTallies, seedUnidentifiedSetAside, decideStageEntry, doneStageMessage, keepBothLabel, dupNoteKept, focusReasonMeta, type FocusReasonKey, ReviewQuery } from './smartImportReviewModel';
 import { QueryStatus } from '../types';
-import { ParsedAgent, ParsedQuery, SmartImportResult } from '../types/smartImport';
+import { ParsedAgent, ParsedQuery, SmartImportResult, REVIEW_REASON_CODES } from '../types/smartImport';
 
 const agent = (over: Partial<ParsedAgent> = {}): ParsedAgent => ({ ref: 'a1', name: 'Jane Doe', agency: 'Acme', ...over });
 const query = (over: Partial<ParsedQuery> = {}): ParsedQuery => ({ agentRef: 'a1', status: QueryStatus.QUERIED, sentDate: null, ...over });
@@ -283,5 +283,29 @@ describe('keep-both copy is count-aware (2 → both, 3+ → all)', () => {
     expect(keepBothLabel(4)).not.toMatch(/both/i);
     expect(dupNoteKept('Acme', 3)).toMatch(/Kept all/);
     expect(dupNoteKept('Acme', 3)).not.toMatch(/both/i);
+  });
+});
+
+describe('focusReasonMeta — in-focus card pill + headline (both walks)', () => {
+  const keys: FocusReasonKey[] = ['agent-needs-agency', 'agent-mapping', ...REVIEW_REASON_CODES];
+
+  it('gives every reason — both agent keys and every query code — a non-empty pill and headline', () => {
+    for (const k of keys) {
+      const { pill, headline } = focusReasonMeta(k);
+      expect(pill.trim().length, `pill for ${k}`).toBeGreaterThan(0);
+      expect(headline.trim().length, `headline for ${k}`).toBeGreaterThan(0);
+    }
+  });
+
+  it('drops the generic "Quick fix"/"Sharpen" wording — pills are context-specific', () => {
+    for (const k of keys) {
+      expect(focusReasonMeta(k).pill).not.toMatch(/quick fix|sharpen/i);
+    }
+  });
+
+  it('maps the brief examples', () => {
+    expect(focusReasonMeta('agent-needs-agency')).toEqual({ pill: 'No agency name', headline: 'No agency on record yet' });
+    expect(focusReasonMeta('status-direction').pill).toBe('Status to check');
+    expect(focusReasonMeta('two-dates').headline).toMatch(/two dates/i);
   });
 });

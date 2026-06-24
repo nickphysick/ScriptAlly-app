@@ -24,7 +24,7 @@ import {
   agentStatus, resolveReason, queryStatusOf, fmtDate, QUERY_STATUS_OPTIONS,
   dupNoteOpen, dupNoteKept, dupNoteMerged, parseModel, modelToResult, applyAgentRemoval, seedUnidentifiedSetAside, decideStageEntry,
   currentDate, quoteStatuses, queryReasonText, statusDirectionChoices, removeDuplicateRecord, buildClusters, doneStageMessage,
-  keepBothLabel, keptClusterLabel, mergedAwayByKeeper,
+  keepBothLabel, keptClusterLabel, mergedAwayByKeeper, focusReasonMeta,
 } from "../../lib/smartImportReviewModel";
 
 // ── Palette (from the sketch; critical colours inline per house style) ──────────────────────────
@@ -629,7 +629,10 @@ const FocusOverlay: React.FC<{
   order: string[];                                  // ids to walk, fixes-first (snapshotted at open)
   statusOf: (id: string) => "done" | "skip" | "open";
   tierOf: (id: string) => "fix" | "sharpen";
-  headerFor: (id: string) => { who: string; sub: string };
+  // who = the record's name/context (small, beside the avatar); pill = context-specific corner label;
+  // headline = the issue itself (prominent). `resolved` is present when this record is already sorted
+  // (drives the Phase-2 resolved state on back-navigation): a restatement + a reset-to-pending action.
+  headerFor: (id: string) => { who: string; pill: string; headline: string; resolved?: { line: string; onChange: () => void } };
   renderContent: (id: string) => React.ReactNode;
   onSkip: (id: string) => void;
   onClose: () => void;
@@ -726,7 +729,7 @@ const FocusOverlay: React.FC<{
             <div style={card}>
               <div style={{ padding: "20px 26px 0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <span style={{ fontFamily: MONO, fontSize: 12, color: C.muted }}><b style={{ color: "#7c3a2a" }}>{idx + 1}</b> of {order.length}</span>
-                <span style={{ fontFamily: MONO, fontSize: 11, padding: "5px 11px", borderRadius: 7, fontWeight: 500, ...(isFix ? { background: "#f4ead0", color: "#6f5618" } : { background: "#f5e2da", color: "#7c3a2a" }) }}>{isFix ? "! Quick fix" : "✦ Sharpen"}</span>
+                <span style={{ fontFamily: MONO, fontSize: 11, padding: "5px 11px", borderRadius: 7, fontWeight: 500, ...(isFix ? { background: "#f4ead0", color: "#6f5618" } : { background: "#f5e2da", color: "#7c3a2a" }) }}>{h.pill}</span>
               </div>
               <div style={{ display: "flex", gap: 5, padding: "14px 26px 0" }}>
                 {order.map((segId, i) => (
@@ -734,12 +737,25 @@ const FocusOverlay: React.FC<{
                 ))}
               </div>
               <div style={{ padding: "18px 26px 4px" }}>
-                <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 22, color: "#3a1c14" }}>{h.who}</div>
-                <div style={{ fontFamily: MONO, fontSize: 12, color: C.muted, marginTop: 3, marginBottom: 14 }}>{h.sub}</div>
-                {reviewing && (
-                  <div style={{ fontFamily: MONO, fontSize: 11.5, color: "#5a6e58", background: "#e9ede6", borderRadius: 8, padding: "8px 12px", marginBottom: 14, display: "inline-block" }}>{shown === "skip" ? "Skipped for now — saved as-is" : "Already sorted ✦"}</div>
+                {reviewing ? (
+                  // Phase-1 interim resolved view — Phase 2 replaces this with the clean "✓ Sorted" state.
+                  <>
+                    <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 22, color: "#3a1c14" }}>{h.who}</div>
+                    <div style={{ fontFamily: MONO, fontSize: 11.5, color: "#5a6e58", background: "#e9ede6", borderRadius: 8, padding: "8px 12px", margin: "8px 0 14px", display: "inline-block" }}>{shown === "skip" ? "Skipped for now — saved as-is" : "Already sorted ✦"}</div>
+                    {renderContent(id)}
+                  </>
+                ) : (
+                  // Working state: avatar + name, the ISSUE as the headline, then the plain-language options —
+                  // revealing in a gentle stagger (avatar → headline → actions), layered on the lift entrance.
+                  <>
+                    <div className="sa-focus-reveal sa-fr1" style={{ display: "flex", alignItems: "center", gap: 11, marginBottom: 13 }}>
+                      <span style={{ width: 38, height: 38, borderRadius: "50%", background: "#f3ece3", color: "#7c3a2a", fontFamily: SERIF, fontWeight: 600, fontSize: 17, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, border: "1px solid #ecd9cd" }}>{(h.who || "?").trim()[0]?.toUpperCase() || "?"}</span>
+                      <span style={{ fontFamily: MONO, fontSize: 12, color: C.muted, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{h.who}</span>
+                    </div>
+                    <div className="sa-focus-reveal sa-fr2" style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 22, color: "#3a1c14", lineHeight: 1.25, marginBottom: 14 }}>{h.headline}</div>
+                    <div className="sa-focus-reveal sa-fr3">{renderContent(id)}</div>
+                  </>
                 )}
-                {renderContent(id)}
               </div>
               <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", padding: "16px 26px 22px", marginTop: 6, borderTop: "1px solid #f3ece3" }}>
                 <button onClick={() => { setFollowing(false); setPos((p) => Math.max(0, p - 1)); }} disabled={idx === 0}
@@ -1786,6 +1802,14 @@ const REVIEW_SHELL_CSS = `
 .sa-card-in{animation:saCardIn .32s cubic-bezier(.22,1,.36,1) both;}
 .sa-card-out{animation:saCardOut .30s ease both;pointer-events:none;}
 @media(prefers-reduced-motion:reduce){.sa-card-in,.sa-card-out{animation:none;}}
+/* in-focus card content stagger (avatar → headline → actions), layered on the lift-from-row entrance.
+   Replays per card because CardSwitcher remounts the incoming card. Reduced-motion → all appear at once. */
+@keyframes saFocusReveal{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+.sa-focus-reveal{opacity:0;animation:saFocusReveal .5s cubic-bezier(.22,.61,.36,1) both;}
+.sa-focus-reveal.sa-fr1{animation-delay:.06s;}
+.sa-focus-reveal.sa-fr2{animation-delay:.17s;}
+.sa-focus-reveal.sa-fr3{animation-delay:.29s;}
+@media(prefers-reduced-motion:reduce){.sa-focus-reveal{opacity:1;animation:none;}}
 /* stage-entry "assemble" — on entering a flagged stage the review screen builds itself from the
    edges behind the intro: header slides from the top, sidebar from the right, footer from the
    bottom, and each list row in from the left, staggered (rhymes with the loader's scatter→settle).
@@ -2460,7 +2484,14 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
         order={focus.order}
         statusOf={(id) => { const a = agents.find((x) => x.id === id); return !a || a.deleted || statusOf(a) === "captured" ? "done" : focusSkipped.has(id) ? "skip" : "open"; }}
         tierOf={(id) => { const a = agents.find((x) => x.id === id); return a && agentTierOf(a) === "fix" ? "fix" : "sharpen"; }}
-        headerFor={(id) => { const a = agents.find((x) => x.id === id); return { who: a?.name || a?.agency || "Unnamed agent", sub: a?.agency ? a.agency : "No agency yet" }; }}
+        headerFor={(id) => {
+          const a = agents.find((x) => x.id === id);
+          const who = a?.name || a?.agency || "Unnamed agent";
+          // needs-agency (the blocking fix) takes priority; otherwise it's the low-confidence mapping flag.
+          const key = a && !a.agency.trim() && !a.agencyWaived ? "agent-needs-agency" : "agent-mapping";
+          const { pill, headline } = focusReasonMeta(key);
+          return { who, pill, headline };
+        }}
         renderContent={(id) => {
           const a = agents.find((x) => x.id === id);
           if (!a) return null;
@@ -2606,7 +2637,14 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
         order={focus.order}
         statusOf={(id) => { const q = queries.find((x) => x.id === id); return !q || q.removed || queryStatusOf(q) === "captured" ? "done" : focusSkipped.has(id) ? "skip" : "open"; }}
         tierOf={() => "sharpen"}
-        headerFor={(id) => { const q = queries.find((x) => x.id === id); return q ? { who: agentNameOf(q.agentRef), sub: `${originOf(q)} · ${q.status}` } : { who: "", sub: "" }; }}
+        headerFor={(id) => {
+          const q = queries.find((x) => x.id === id);
+          if (!q) return { who: "", pill: "", headline: "" };
+          // The card headlines the query's primary open reason (its first unresolved typed reason).
+          const code = (q.reasons.find((r) => !r.resolved) ?? q.reasons[0])?.code;
+          const meta = code ? focusReasonMeta(code) : { pill: "To check", headline: "Worth a quick look" };
+          return { who: agentNameOf(q.agentRef), pill: meta.pill, headline: meta.headline };
+        }}
         renderContent={(id) => {
           const q = queries.find((x) => x.id === id);
           if (!q) return null;

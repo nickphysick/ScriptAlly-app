@@ -297,6 +297,28 @@ export function queryReasonText(code: ReviewReasonCode, q: ReviewQuery): string 
   }
 }
 
+/** The guided focus-card's WORKING-state copy per flagged reason, across BOTH walks. `pill` is the
+ *  context-specific corner label (replaces the generic "Quick fix"/"Sharpen"); `headline` states the
+ *  issue itself in the card's prominent Playfair voice (no longer a muted subtitle). The two agent keys
+ *  cover the agents walk; the ReviewReasonCode arm covers the queries walk. Pure + tested so the wording
+ *  stays consistent run-to-run. The detailed question + inputs still come from queryReasonText /
+ *  QueryReasonPanel / AgentFixPanel — this is only the orientation (pill + headline). */
+export type FocusReasonKey = "agent-needs-agency" | "agent-mapping" | ReviewReasonCode;
+export function focusReasonMeta(key: FocusReasonKey): { pill: string; headline: string } {
+  switch (key) {
+    case "agent-needs-agency": return { pill: "No agency name", headline: "No agency on record yet" };
+    case "agent-mapping":      return { pill: "Detail to check", headline: "Worth a quick look at the details" };
+    case "two-dates":          return { pill: "Two dates found", headline: "We spotted two dates here" };
+    case "missing-day":        return { pill: "Day to confirm",  headline: "A month, but no exact day" };
+    case "serial-outlier":     return { pill: "Date to confirm", headline: "This date looks out of place" };
+    case "no-date":            return { pill: "Date needed",     headline: "No date on this one yet" };
+    case "status-direction":   return { pill: "Status to check", headline: "Who made the first move?" };
+    case "status-wording":     return { pill: "Status to check", headline: "Worth checking this status" };
+    case "check-name":         return { pill: "Name to check",   headline: "Worth checking this name" };
+    case "needs-identifying":  return { pill: "Who's this for?", headline: "We couldn't tell who this was for" };
+  }
+}
+
 /** Parse the AI result into the editable working model. Duplicate detection: named agents at a
  *  near-identical agency (agencyKey) with compatible names are clustered as likely the same person. */
 export function parseModel(result: SmartImportResult): { agents: ReviewAgent[]; queries: ReviewQuery[] } {
