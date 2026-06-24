@@ -62,15 +62,14 @@ const SCATTER = [
   { dx: -36, dy: -196, r: 3, bx: 5, by: 6, br: 1.3, d: 3.4, dl: 0.55 },
   { dx: 58, dy: 168, r: -4, bx: -6, by: -6, br: -1.0, d: 3.9, dl: 0.85 },
 ];
-const STEP = 74;          // centred-column row pitch
+const GRID_X = 150;       // half the gap between the two grid columns (centre-relative)
+const GRID_ROW = 82;      // grid row pitch
 // ── Three-zone timing spine: Intro (fixed) → Work (elastic, loops till extraction) → Reveal (gated) ──
 const INTRO_MS = 1200;    // fixed intro beat (the squeeze-pop scatter entrance)
 const FLOOR_MS = 2800;    // Reveal floor: fast extraction is padded to here so the reveal never flashes
 const SLOW_AT_MS = 10000; // past this, the status text owns up to a larger import
 const TIMEOUT_MS = 30000; // hard wait ceiling → host fallback (never an infinite loop)
-const LAND_STAGGER = 360; // ms between successive cards starting their fly-in
-const RESOLVE_LAG = 320;  // ms after a card starts flying in before it crystallises (lands → clean)
-const HOLD = 700;         // ms after the last card resolves before handing to the Overview
+const CRYST_STAGGER = 150; // ms between successive cards crystallising in place
 const WAIT_TXT = ["Reading your file…", "Parsing agents…", "Interpreting dates…", "Matching statuses…", "Tidying records…", "Almost there…"];
 const SLOW_TXT = "Larger import — almost there…";
 const SPARK_KINDS = ["q", "a", "p", "d"] as const;
@@ -116,8 +115,10 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
   const [minElapsed, setMinElapsed] = useState(false); // Reveal floor reached
   const [slow, setSlow] = useState(false);             // a larger import — own up to the longer wait
   const [settling, setSettling] = useState(false);
-  const [moved, setMoved] = useState(0);     // cards that have snapped to their column slot
-  const [resolved, setResolved] = useState(0); // cards that have crystallised messy → clean
+  const [resolved, setResolved] = useState(0); // cards that have crystallised messy → clean (in place)
+  const [arranged, setArranged] = useState(false); // crystallised cards moved into the tidy grid
+  const [squeeze, setSqueeze] = useState(false);   // grid squeezes to centre (then fades into the tick)
+  const [tick, setTick] = useState(false);         // the big sage tick lands — hands to the Overview
   const [txtIdx, setTxtIdx] = useState(0);     // rotating status line during the wait
   const [waitStarted, setWaitStarted] = useState(false); // kicks the bar's ease off the start line
   const [sparks, setSparks] = useState<{ id: number; kind: typeof SPARK_KINDS[number]; x: number; y: number }[]>([]);
@@ -155,7 +156,7 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
   // Defensive reset if extraction is re-run (complete → false). Real flow is one-shot; matters for a
   // re-upload or the dev harness loop.
   useEffect(() => {
-    if (!complete) { setSettling(false); setMoved(0); setResolved(0); }
+    if (!complete) { setSettling(false); setResolved(0); setArranged(false); setSqueeze(false); setTick(false); }
   }, [complete]);
 
   // Kick the bar off the start line so its long ease toward ~78% animates (instead of rendering parked).
@@ -203,18 +204,27 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
     return () => { clearInterval(iv); setForms([]); };
   }, [reduced, settling, introDone, n]);
 
-  // Snap each card in, then crystallise it a beat later; finally hand off to the Overview. Reduced-motion
-  // skips the fly-in (cards are simply present, clean) but still only proceeds once complete.
+  // Reveal choreography (only once extraction's back AND the floor's met): the scraps crystallise in
+  // place → arrange into a tidy grid → squeeze to centre → resolve into the big sage tick → hand off to
+  // the Overview. Reduced-motion shows them already in the grid, then runs the squeeze→tick beats.
   const proceedRef = useRef(onProceed); proceedRef.current = onProceed;
   useEffect(() => {
     if (!settling) return;
-    if (reduced) { setMoved(n); setResolved(n); const t = setTimeout(() => proceedRef.current(), HOLD); return () => clearTimeout(t); }
     const timers: ReturnType<typeof setTimeout>[] = [];
-    for (let i = 0; i < n; i++) {
-      timers.push(setTimeout(() => setMoved((c) => Math.max(c, i + 1)), i * LAND_STAGGER));
-      timers.push(setTimeout(() => setResolved((c) => Math.max(c, i + 1)), i * LAND_STAGGER + RESOLVE_LAG));
+    if (reduced) {
+      setResolved(n); setArranged(true);
+      timers.push(setTimeout(() => setSqueeze(true), 600));
+      timers.push(setTimeout(() => setTick(true), 1020));
+      timers.push(setTimeout(() => proceedRef.current(), 1970));
+      return () => timers.forEach(clearTimeout);
     }
-    timers.push(setTimeout(() => proceedRef.current(), Math.max(0, n - 1) * LAND_STAGGER + RESOLVE_LAG + HOLD));
+    for (let i = 0; i < n; i++) timers.push(setTimeout(() => setResolved((c) => Math.max(c, i + 1)), i * CRYST_STAGGER)); // 1 · crystallise in place
+    const cryst = Math.max(0, n - 1) * CRYST_STAGGER + 420;
+    timers.push(setTimeout(() => setArranged(true), cryst + 220));        // 2 · arrange into the grid
+    const sq = cryst + 220 + 720;
+    timers.push(setTimeout(() => setSqueeze(true), sq));                  // 3 · squeeze to centre
+    timers.push(setTimeout(() => setTick(true), sq + 430));               // 4 · the tick
+    timers.push(setTimeout(() => proceedRef.current(), sq + 430 + 1000)); //     hand off
     return () => timers.forEach(clearTimeout);
   }, [settling, reduced, n]);
 
@@ -236,7 +246,11 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
         /* gentle independent drift while we wait (offsets/rotation/duration set per card via vars) */
         @keyframes saScBob{0%,100%{transform:translate(-50%,-50%) rotate(var(--r,0deg))}50%{transform:translate(calc(-50% + var(--bx,5px)), calc(-50% + var(--by,-6px))) rotate(calc(var(--r,0deg) + var(--br,1deg)))}}
         @keyframes saScSpark{0%{transform:scale(.3);opacity:0}20%{transform:scale(1.1);opacity:1}55%{transform:scale(1);opacity:1}100%{transform:scale(.96) translateY(-10px);opacity:0}}
-        .sa-sc-card{transition:left .6s cubic-bezier(.34,1.3,.5,1), top .6s cubic-bezier(.34,1.3,.5,1), transform .6s cubic-bezier(.34,1.3,.5,1), width .55s cubic-bezier(.4,0,.2,1), background .4s ease, border-color .4s ease, box-shadow .5s ease;}
+        .sa-sc-card{transition:left .6s cubic-bezier(.34,1.3,.5,1), top .6s cubic-bezier(.34,1.3,.5,1), transform .7s cubic-bezier(.5,0,.3,1), width .55s cubic-bezier(.4,0,.2,1), opacity .5s ease .12s, background .4s ease, border-color .4s ease, box-shadow .5s ease;}
+        @keyframes saScBigtick{0%{transform:translate(-50%,-50%) scale(0);opacity:0}60%{transform:translate(-50%,-50%) scale(1.12);opacity:1}100%{transform:translate(-50%,-50%) scale(1);opacity:1}}
+        @keyframes saScHalo{0%{box-shadow:0 0 0 0 rgba(138,158,136,.42)}100%{box-shadow:0 0 0 26px rgba(138,158,136,0)}}
+        .sa-sc-bigtick{animation:saScBigtick .75s cubic-bezier(.34,1.56,.64,1) forwards, saScHalo 1.6s ease .5s;}
+        @media(prefers-reduced-motion:reduce){.sa-sc-bigtick{animation:none;transform:translate(-50%,-50%) scale(1);opacity:1;}}
         .sa-sc-appear{animation:saScAppear .4s ease both;}
         .sa-sc-squeeze{animation:saScSqueeze .52s cubic-bezier(.34,1.56,.64,1) both;}
         .sa-sc-float{animation:saScBob var(--d,3.6s) ease-in-out infinite;animation-delay:var(--dl,0s);}
@@ -279,23 +293,29 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
           <div style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center", fontFamily: SERIF, fontSize: 22, color: "#7c3a2a" }}>Reading your file…</div>
         ) : cards.map((card, i) => {
           const slot = SCATTER[i % SCATTER.length];
-          const isMoved = i < moved;
-          const isDone = i < resolved;
-          // reduced-motion: cards sit straight in the centred column (no scatter, no fly-in).
-          const inStack = reduced || isMoved;
-          const drifting = !reduced && introDone && !settling && !isMoved; // bob through the Work zone (after the intro beat)
-          const colTop = `calc(50% + ${(i - (n - 1) / 2) * STEP}px)`;
-          const top = inStack ? colTop : `calc(50% + ${slot.dy}px)`;
-          const left = inStack ? "50%" : `calc(50% + ${slot.dx}px)`;
-          const transform = inStack ? "translate(-50%, -50%) rotate(0deg)" : `translate(-50%, -50%) rotate(${slot.r}deg)`;
+          const isDone = i < resolved;                 // crystallised (clean on-brand layer)
+          const drifting = !reduced && introDone && !settling; // bob through the Work zone (after the intro beat)
+          // 2-column grid centred on the stage; a lone last card (odd count) centres in its row.
+          const cols = 2, rows = Math.ceil(n / cols), col = i % cols, row = Math.floor(i / cols);
+          const lone = i === n - 1 && n % cols === 1;
+          const gx = lone ? 0 : (col === 0 ? -GRID_X : GRID_X);
+          const gy = (row - (rows - 1) / 2) * GRID_ROW;
+          let left: string, top: string, transform: string, cardOpacity = 1;
+          if (squeeze) {                               // squeeze to centre + fade into the tick
+            left = "50%"; top = "50%"; transform = "translate(-50%,-50%) scale(.24)"; cardOpacity = 0;
+          } else if (arranged || reduced) {            // tidy grid
+            left = `calc(50% + ${gx}px)`; top = `calc(50% + ${gy}px)`; transform = "translate(-50%,-50%) rotate(0deg)";
+          } else {                                     // scattered — straightens to 0° as it crystallises in place
+            left = `calc(50% + ${slot.dx}px)`; top = `calc(50% + ${slot.dy}px)`; transform = `translate(-50%,-50%) rotate(${isDone ? 0 : slot.r}deg)`;
+          }
           return (
             <div key={i} className={`sa-sc-card${reduced || introDone ? "" : " sa-sc-squeeze"}${drifting ? " sa-sc-float" : ""}`} aria-hidden
               style={{
-                position: "absolute", left, top, transform, width: isDone ? RESOLVED_W : CARD_W, minHeight: 66, zIndex: isMoved ? 20 + i : 10,
+                position: "absolute", left, top, transform, opacity: cardOpacity, width: isDone ? RESOLVED_W : CARD_W, minHeight: 66, zIndex: arranged ? 20 + i : (isDone ? 15 : 10),
                 animationDelay: reduced ? undefined : `${50 + i * 80}ms`,
                 ["--r" as string]: `${slot.r}deg`, ["--bx" as string]: `${slot.bx}px`, ["--by" as string]: `${slot.by}px`, ["--br" as string]: `${slot.br}deg`, ["--d" as string]: `${slot.d}s`, ["--dl" as string]: `${slot.dl}s`,
                 background: "#fff", border: isDone ? "1px solid transparent" : "1px solid #e7ddd2", borderRadius: 13,
-                boxShadow: isDone ? "0 13px 32px -15px rgba(58,28,20,.3)" : (isMoved ? "0 8px 22px -16px rgba(58,28,20,.34)" : "0 14px 30px -16px rgba(58,28,20,.4)"),
+                boxShadow: isDone ? "0 13px 32px -15px rgba(58,28,20,.3)" : "0 14px 30px -16px rgba(58,28,20,.4)",
               }}>
               {/* messy (raw) layer — fades out on crystallise */}
               <div style={{ position: "absolute", inset: 0, padding: "13px 17px", display: "flex", alignItems: "center", gap: 10, opacity: isDone ? 0 : 1, transition: "opacity .4s ease" }}>
@@ -325,10 +345,17 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
           <div key={s.id} className={`sa-sc-spark ${s.kind}`} aria-hidden style={{ left: `${s.x}%`, top: `${s.y}%` }}>{SPARK_GLYPH[s.kind]}</div>
         ))}
 
-        {/* the remainder of a big import — resolves quietly into the base of the stack */}
+        {/* the remainder of a big import — a quiet pill below the grid; fades as the grid squeezes away */}
         {settling && remainder > 0 && (
-          <div className="sa-sc-appear" style={{ position: "absolute", left: "50%", top: `calc(50% + ${(n - (n - 1) / 2) * STEP}px)`, transform: "translate(-50%, -50%)", fontFamily: MONO, fontSize: 11.5, color: "#8a8178", background: "#efe7db", padding: "5px 13px", borderRadius: 20, whiteSpace: "nowrap" }}>
+          <div style={{ position: "absolute", left: "50%", top: `calc(50% + ${(Math.ceil(n / 2) - 1) / 2 * GRID_ROW + 72}px)`, transform: "translate(-50%, -50%)", opacity: squeeze ? 0 : 1, transition: "opacity .4s ease", fontFamily: MONO, fontSize: 11.5, color: "#8a8178", background: "#efe7db", padding: "5px 13px", borderRadius: 20, whiteSpace: "nowrap" }}>
             + {remainder} more, tidied
+          </div>
+        )}
+
+        {/* the done beat — records squeeze to centre and resolve into the big sage tick (hands to the Overview) */}
+        {tick && (
+          <div className="sa-sc-bigtick" style={{ position: "absolute", left: "50%", top: "50%", width: 116, height: 116, borderRadius: "50%", background: "#e9ede6", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 40, boxShadow: "0 14px 36px -18px rgba(58,28,20,.3)" }} aria-hidden>
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#5a6e58" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
           </div>
         )}
       </main>
