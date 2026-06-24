@@ -227,7 +227,7 @@ const AgentRow: React.FC<AgentRowProps> = ({
   const openMappingReason = !invalid && !openDupReason ? agent.reasons.find((r) => r.kind === "mapping" && !r.resolved) : null;
 
   return (
-    <div style={{ background: needsCheck ? "#fdf3ee" : "transparent", borderBottom: "1px solid #efe6d8" }}>
+    <div data-row-id={agent.id} style={{ background: needsCheck ? "#fdf3ee" : "transparent", borderBottom: "1px solid #efe6d8" }}>
       {/* Main row */}
       <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "16px 22px" }}>
         <span aria-hidden style={{ width: 3, alignSelf: "stretch", borderRadius: 3, background: accentColor, minHeight: 38, flexShrink: 0 }} />
@@ -623,10 +623,44 @@ const FocusOverlay: React.FC<{
   const [pos, setPos] = useState(0);
   const [following, setFollowing] = useState(true);
   useEffect(() => { if (following && frontier !== -1 && pos !== frontier) setPos(frontier); }, [following, frontier, pos]);
+
+  // Entrance (Option C — lift from the row): on open, the first card grows out of its OWN list row in
+  // the dimmed list and floats to centre, so the writer sees which record they're now on. Measured from
+  // the source row's rect; falls back to a centre rise-and-settle (Option A) if the row can't be measured
+  // (off-screen / not found). Reduced-motion: appears at centre, no movement. This is the WALK ENTRANCE
+  // only — card-to-card advance stays the CardSwitcher crossfade.
+  const reducedMo = prefersReducedMotion();
+  const [entered, setEntered] = useState(reducedMo);
+  const [startTf, setStartTf] = useState("translate(0, 34px) scale(.98)"); // Option A fallback (centre rise-and-settle)
+  useLayoutEffect(() => {
+    if (reducedMo) { setEntered(true); return; }
+    // Measure the source row SYNCHRONOUSLY (its rect is final this commit; getBoundingClientRect works
+    // even when the tab is hidden). setStartTf re-renders before paint, so the card's first paint is
+    // already at the lift's start — no flash (it's opacity 0 until `entered`).
+    const firstId = order[0];
+    const sel = firstId != null ? (typeof CSS !== "undefined" && CSS.escape ? CSS.escape(String(firstId)) : String(firstId)) : null;
+    const el = sel ? (document.querySelector(`[data-row-id="${sel}"]`) as HTMLElement | null) : null;
+    if (el) {
+      const r = el.getBoundingClientRect();
+      if (r.width > 0 && r.top > 8 && r.bottom < window.innerHeight - 8) {
+        const dx = (r.left + r.width / 2) - window.innerWidth / 2;
+        const dy = (r.top + r.height / 2) - window.innerHeight / 2;
+        setStartTf(`translate(${dx}px, ${dy}px) scale(.18)`); // Option C — lift from the actual row
+      }
+    }
+    // Flip `entered` next tick to kick the transition. rAF is smoothest, but it PAUSES in a hidden tab —
+    // so a setTimeout guarantees the card never stays stuck invisible. Both just set the same flag.
+    const raf = requestAnimationFrame(() => setEntered(true));
+    const to = setTimeout(() => setEntered(true), 80);
+    return () => { cancelAnimationFrame(raf); clearTimeout(to); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const card: React.CSSProperties = { width: 560, maxWidth: "100%", background: "#fff", borderRadius: 18, boxShadow: "0 30px 70px -20px rgba(58,28,20,.5)", overflow: "hidden", border: "1px solid #e7ddd2", animation: "saImpFocusPop .18s ease" };
   return (
     <div role="dialog" aria-modal="true"
-      style={{ position: "fixed", inset: 0, background: "rgba(58,28,20,.34)", backdropFilter: "blur(2px)", WebkitBackdropFilter: "blur(2px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 60, padding: 24 }}>
+      style={{ position: "fixed", inset: 0, background: "rgba(58,28,20,.34)", backdropFilter: "blur(2px)", WebkitBackdropFilter: "blur(2px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 60, padding: 24, animation: "saImpDimIn .4s ease" }}>
+      <div style={{ transformOrigin: "center", transform: entered ? "none" : startTf, opacity: entered ? 1 : 0, transition: reducedMo ? "none" : "transform .55s cubic-bezier(.3,.9,.3,1), opacity .35s ease", display: "flex", justifyContent: "center", width: "100%" }}>
         {done ? (() => {
           // Honest end-of-stage message: only claim "all sorted" when nothing was skipped/left open.
           const skipped = states.filter((s) => s === "skip").length;
@@ -695,6 +729,7 @@ const FocusOverlay: React.FC<{
             </CardSwitcher>
           );
         })()}
+      </div>
     </div>
   );
 };
@@ -911,7 +946,7 @@ const QueryRow: React.FC<QueryRowProps> = ({
 
 
   return (
-    <div style={{ background: needsCheck ? "#fdf3ee" : "transparent", borderBottom: "1px solid #efe6d8" }}>
+    <div data-row-id={query.id} style={{ background: needsCheck ? "#fdf3ee" : "transparent", borderBottom: "1px solid #efe6d8" }}>
       {/* Main row */}
       <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "16px 22px" }}>
         <span aria-hidden style={{ width: 3, alignSelf: "stretch", borderRadius: 3, background: accentColor, minHeight: 38, flexShrink: 0 }} />
