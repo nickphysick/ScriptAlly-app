@@ -19,7 +19,7 @@ vi.mock('./recomputeQuery', () => ({ recomputeQuery: vi.fn(async () => {}) }));
 
 import { setDoc, updateDoc } from 'firebase/firestore';
 import { impliedRungs, assignTimes, commitSmartImport } from './smartImportCommit';
-import { parseModel, modelToResult } from './smartImportReviewModel';
+import { parseModel, modelToResult, seedUnidentifiedSetAside, buildClusters } from './smartImportReviewModel';
 import { ParsedAgent, ParsedQuery, SmartImportResult, TimelineEvent } from '../types/smartImport';
 import { QueryStatus } from '../types';
 
@@ -289,5 +289,101 @@ describe('commitSmartImport — deleted-agent exclusion (the masking case)', () 
     expect((deps.addAgent as any).mock.calls).toHaveLength(1);
     expect((deps.addAgent as any).mock.calls[0][0].agency).toBe('Acme Lit');
     expect((deps.addQuery as any).mock.calls).toHaveLength(1);
+  });
+});
+
+// ── Agency-less agents — data-integrity guard (the Priya case) ────────────────────────────────────
+// Locks the DOWNSTREAM (post-extraction) pipeline so a named agency-less agent can never be silently
+// dropped again. If these pass but a live import still drops Priya, the cause is upstream EXTRACTION
+// (functions/src/smartImportPrompt.ts), not parse/validate/commit. (Exact 14/16 counts depend on the
+// real CSV + the live function; this proves the invariants the deterministic path must honour.)
+describe('agency-less agents — data-integrity guard (downstream of extraction)', () => {
+  const agent = (over: Partial<ParsedAgent> = {}): ParsedAgent => ({ ref: 'a1', name: 'Jane Doe', agency: 'Acme', ...over });
+  const result = (agents: ParsedAgent[], queries: ParsedQuery[]): SmartImportResult => ({ agents, queries });
+  const makeDeps = () => ({
+    userId: 'u1', existingAgents: [] as any[], manuscriptTitle: 'My Novel',
+    addAgent: vi.fn(async () => ({ success: true, id: `ag-${Math.random()}` })),
+    addQuery: vi.fn(async () => ({ success: true, id: `q-${Math.random()}` })),
+  });
+
+  // The salient shape of the messy import: a clean agent, a named NO-agency agent (Priya), an
+  // agency-only agent (no name), and an unidentifiable no-name-no-agency row ("follow up everyone").
+  const messyish = (): SmartImportResult => result(
+    [
+      agent({ ref: 'a1', name: 'Clara Voss', agency: 'Pemberton Literary' }),
+      agent({ ref: 'a2', name: 'Priya Raman', agency: '' }),        // named, NO agency — must survive
+      agent({ ref: 'a3', name: '', agency: 'Westbrook Literary' }),  // agency-only — must survive
+      agent({ ref: 'a4', name: '', agency: '' }),                    // "follow up everyone" — set aside
+    ],
+    [
+      q({ agentRef: 'a1', status: QueryStatus.QUERIED }),
+      q({ agentRef: 'a2', status: QueryStatus.PARTIAL_SENT }),       // Priya's query
+      q({ agentRef: 'a3', status: QueryStatus.REJECTED }),
+      q({ agentRef: 'a4', status: QueryStatus.QUERIED, notes: 'follow up everyone' }),
+    ],
+  );
+  // The review flow up to the import seam: parse → auto-set-aside the unidentifiable → "use her name".
+  const review = (r: SmartImportResult) => {
+    let { agents, queries } = parseModel(r);
+    ({ agents, queries } = seedUnidentifiedSetAside(agents, queries));
+    agents = agents.map((a) => (a.id === 'a2' ? { ...a, agencyWaived: true } : a)); // Priya: "use her name"
+    return { agents, queries };
+  };
+
+  it('1. a named agency-less agent survives modelToResult with an empty agency', () => {
+    const r = messyish();
+    const { agents, queries } = review(r);
+    const priya = modelToResult(r, agents, queries).agents.find((a) => a.ref === 'a2');
+    expect(priya).toBeDefined();
+    expect(priya!.name).toBe('Priya Raman');
+    expect(priya!.agency).toBe('');
+  });
+
+  it('2. an agency-only agent (no name) survives modelToResult', () => {
+    const r = messyish();
+    const { agents, queries } = review(r);
+    const a3 = modelToResult(r, agents, queries).agents.find((a) => a.ref === 'a3');
+    expect(a3).toBeDefined();
+    expect(a3!.name).toBe('');
+    expect(a3!.agency).toBe('Westbrook Literary');
+  });
+
+  it('3. no-name-no-agency is set aside AND present (with context), never silently absent', () => {
+    const r = messyish();
+    const { agents, queries } = review(r);
+    const followUp = agents.find((a) => a.id === 'a4');
+    expect(followUp).toBeDefined();                          // present, not silently dropped
+    expect(followUp!.deleted).toBe(true);                    // set aside
+    expect(followUp!.setAsideStage).toBe('unidentified');
+    expect(followUp!.setAsideContext).toBe('follow up everyone'); // recoverable, with its own note
+    const out = modelToResult(r, agents, queries);           // and excluded from the import (agent + query)
+    expect(out.agents.some((a) => a.ref === 'a4')).toBe(false);
+    expect(out.queries.some((qq) => qq.agentRef === 'a4')).toBe(false);
+  });
+
+  it('4. two agency-less agents are NOT clustered as duplicates', () => {
+    const r = result(
+      [agent({ ref: 'x1', name: 'Alice Smith', agency: '' }), agent({ ref: 'x2', name: 'Bob Jones', agency: '' })],
+      [q({ agentRef: 'x1' }), q({ agentRef: 'x2' })],
+    );
+    const { agents } = parseModel(r);
+    expect(agents.every((a) => a.mergeWith.length === 0)).toBe(true); // empty agency is not a match signal
+    expect(buildClusters(agents)).toHaveLength(0);
+  });
+
+  it('5. end-to-end downstream: Priya is committed (agency ""), the unidentifiable row is not', async () => {
+    const r = messyish();
+    const { agents, queries } = review(r);
+    const finalResult = modelToResult(r, agents, queries);
+    const deps = makeDeps();
+    const out = await commitSmartImport(deps as any, finalResult, 'ms1');
+
+    const written = deps.addAgent.mock.calls.map((c: any[]) => c[0]);
+    const priya = written.find((a: any) => a.name === 'Priya Raman');
+    expect(priya, 'Priya must be written').toBeDefined();
+    expect(priya.agency).toBe('');                                   // imported with an empty agency
+    expect(written.some((a: any) => !a.name && !a.agency)).toBe(false); // follow-up never written
+    expect(out.agentsCreated).toBe(3);                                // Clara + Priya + agency-only
+    expect(out.queriesImported).toBe(3);                              // follow-up's query skipped, not the rest
   });
 });
