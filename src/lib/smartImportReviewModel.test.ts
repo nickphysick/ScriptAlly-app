@@ -264,6 +264,13 @@ describe('doneStageMessage — the all-sorted message tells the truth', () => {
     expect(m.heading).toBe('Almost there');
     expect(m.chip).toBeNull();
   });
+
+  it('uses a stage-specific celebratory body when given (agents → full list)', () => {
+    const agents = "Your data is looking sharp — let's take a look at the full list";
+    expect(doneStageMessage({ fixesLeft: false, skipped: 0, sortedChip: 'Agents reviewed', celebratoryBody: agents }).body).toBe(agents);
+    // default body when none supplied
+    expect(doneStageMessage({ fixesLeft: false, skipped: 0, sortedChip: chip }).body).toMatch(/ready to import/);
+  });
 });
 
 describe('keep-both copy is count-aware (2 → both, 3+ → all)', () => {

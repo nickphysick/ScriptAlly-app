@@ -245,7 +245,7 @@ const AgentRow: React.FC<AgentRowProps> = ({
             {needsCheck ? "Needs a look" : "Ready"}
           </span>
           {!needsCheck && (
-            <button onClick={onToggleOpen}
+            <button onClick={onToggleOpen} data-coach="add-details"
               style={{ fontFamily: MONO, fontSize: 11.5, color: "#aaa094", background: "none", border: "none", cursor: "pointer", padding: 0 }}
               onMouseEnter={(e) => { e.currentTarget.style.color = "#8a8178"; }}
               onMouseLeave={(e) => { e.currentTarget.style.color = "#aaa094"; }}
@@ -610,8 +610,9 @@ const FocusOverlay: React.FC<{
   renderContent: (id: string) => React.ReactNode;
   onSkip: (id: string) => void;
   onClose: () => void;
-  doneChip: string;                                 // stage-aware handoff confirm ("Agents all sorted — …")
-}> = ({ order, statusOf, tierOf, headerFor, renderContent, onSkip, onClose, doneChip }) => {
+  doneChip: string;                                 // stage-aware handoff confirm ("Agents reviewed", …)
+  doneBody?: string;                                // stage-aware celebratory body (else a generic line)
+}> = ({ order, statusOf, tierOf, headerFor, renderContent, onSkip, onClose, doneChip, doneBody }) => {
   const states = order.map(statusOf);
   const frontier = states.findIndex((s) => s === "open"); // the live item; -1 once every item is handled
   const fixesLeft = order.some((id, i) => states[i] === "open" && tierOf(id) === "fix");
@@ -629,7 +630,7 @@ const FocusOverlay: React.FC<{
         {done ? (() => {
           // Honest end-of-stage message: only claim "all sorted" when nothing was skipped/left open.
           const skipped = states.filter((s) => s === "skip").length;
-          const msg = doneStageMessage({ fixesLeft, skipped, sortedChip: doneChip });
+          const msg = doneStageMessage({ fixesLeft, skipped, sortedChip: doneChip, celebratoryBody: doneBody });
           const celebratory = !fixesLeft && skipped === 0;
           return (
           // On-brand parchment + clipped-frame card (the canonical Form-11 panel treatment), not plain white.
@@ -642,7 +643,7 @@ const FocusOverlay: React.FC<{
                 </div>
               )}
               <p style={{ color: "#6a5c50", fontSize: 14.5, margin: "10px auto 22px", maxWidth: 380 }}>{msg.body}</p>
-              <button onClick={onClose} style={{ fontFamily: MONO, fontSize: 13, background: "#7c3a2a", color: "#fff", border: "none", borderRadius: 9, padding: "11px 18px", cursor: "pointer" }}>Review and confirm</button>
+              <button onClick={onClose} style={{ fontFamily: MONO, fontSize: 13, background: "#f5e2da", color: "#7c3a2a", border: "1px solid #e8c8bc", borderRadius: 11, padding: "12px 22px", fontWeight: 500, cursor: "pointer" }}>Review and confirm</button>
             </div>
           </div>
           );
@@ -824,6 +825,63 @@ const CoachmarkIntro: React.FC<{
   );
 };
 
+// ── One-shot spotlight coachmark ───────────────────────────────────────────────────────────────────
+// Reuses the coachmark pattern/CSS for a single, dismissable tip pointed at a live control (found by
+// selector + measured, so it escapes the window's overflow clip and re-measures on resize/scroll).
+// Used on the full review screen to point out "Add details". Reduced-motion is handled by COACHMARK_CSS.
+const SpotlightCoachmark: React.FC<{ targetSelector: string; title: string; body: React.ReactNode; onDismiss: () => void }> = ({ targetSelector, title, body, onDismiss }) => {
+  const [rect, setRect] = useState<{ left: number; top: number; width: number; height: number } | null>(null);
+  useLayoutEffect(() => {
+    const measure = () => {
+      const el = document.querySelector(targetSelector) as HTMLElement | null;
+      if (!el) { setRect(null); return; }
+      const r = el.getBoundingClientRect();
+      setRect({ left: r.left, top: r.top, width: r.width, height: r.height });
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    window.addEventListener("scroll", measure, true);
+    return () => { window.removeEventListener("resize", measure); window.removeEventListener("scroll", measure, true); };
+  }, [targetSelector]);
+
+  const head = (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 9, fontWeight: 600, fontSize: 14.5, color: "#3a1c14" }}>
+      <span style={{ width: 22, height: 22, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, background: "#e9ede6", color: "#5a6e58" }}>✦</span>{title}
+    </div>
+  );
+  // No measurable target → a centred card so the tip never strands.
+  if (!rect) {
+    return (
+      <>
+        <style>{COACHMARK_CSS}</style>
+        <div className="sa-cm-veil" aria-hidden />
+        <div className="sa-cm-welcome" role="dialog" aria-modal="true" style={{ width: 360 }}>
+          {head}
+          <p style={{ margin: "9px 0 0", fontSize: 13.5, color: "#5a4a3e", lineHeight: 1.5 }}>{body}</p>
+          <button onClick={onDismiss} style={{ ...cmPinkBtn, marginTop: 14 }}>Got it →</button>
+        </div>
+      </>
+    );
+  }
+  const calloutW = 340;
+  const calloutLeft = Math.max(16, Math.min(rect.left + rect.width / 2 - calloutW / 2, window.innerWidth - calloutW - 16));
+  const beak = rect.left + rect.width / 2 - calloutLeft - 7;
+  // place above the control if it sits low on screen, else beneath
+  const below = rect.top + rect.height + 16 + 150 < window.innerHeight;
+  return (
+    <>
+      <style>{COACHMARK_CSS}</style>
+      <div className="sa-cm-block" aria-hidden onMouseDown={(e) => e.preventDefault()} />
+      <div className="sa-cm-spot" aria-hidden style={{ left: rect.left - 6, top: rect.top - 6, width: rect.width + 12, height: rect.height + 12, boxShadow: "0 0 0 4px #9db09a,0 0 0 9999px rgba(40,28,22,.62)" }} />
+      <div className="sa-cm-callout" role="dialog" aria-modal="true" style={{ left: calloutLeft, top: below ? rect.top + rect.height + 16 : undefined, bottom: below ? undefined : window.innerHeight - rect.top + 16, ["--beak" as string]: `${beak}px` }}>
+        {head}
+        <p style={{ margin: "9px 0 0", fontSize: 13.5, color: "#5a4a3e", lineHeight: 1.5 }}>{body}</p>
+        <button onClick={onDismiss} style={{ ...cmPinkBtn, marginTop: 14 }}>Got it →</button>
+      </div>
+    </>
+  );
+};
+
 interface QueryRowProps {
   query: ReviewQuery;
   /** Agent name (Playfair) — agent.name || agent.agency. */
@@ -869,7 +927,7 @@ const QueryRow: React.FC<QueryRowProps> = ({
             {needsCheck ? "Needs a look" : "Ready"}
           </span>
           {!needsCheck && (
-            <button onClick={onToggleOpen}
+            <button onClick={onToggleOpen} data-coach="add-details"
               style={{ fontFamily: MONO, fontSize: 11.5, color: "#aaa094", background: "none", border: "none", cursor: "pointer", padding: 0 }}
               onMouseEnter={(e) => { e.currentTarget.style.color = "#8a8178"; }}
               onMouseLeave={(e) => { e.currentTarget.style.color = "#aaa094"; }}
@@ -1652,6 +1710,10 @@ const REVIEW_SHELL_CSS = `
 @keyframes saQuickPulse{0%,100%{box-shadow:0 0 0 0 rgba(138,158,136,0)}50%{box-shadow:0 0 0 3px rgba(138,158,136,.30)}}
 .sa-quick-pulse{animation:saQuickPulse 2.6s ease-in-out infinite;}
 @media(prefers-reduced-motion:reduce){.sa-quick-pulse{animation:none;}}
+/* slow, soft pulse inviting the writer onward once they've reached the full review (Continue button) */
+@keyframes saContinuePulse{0%,100%{box-shadow:0 10px 22px -12px rgba(90,110,88,.5),inset 0 1px 0 rgba(255,255,255,.65),0 0 0 0 rgba(138,158,136,0)}50%{box-shadow:0 10px 22px -12px rgba(90,110,88,.5),inset 0 1px 0 rgba(255,255,255,.65),0 0 0 5px rgba(138,158,136,.26)}}
+.sa-continue-pulse{animation:saContinuePulse 2.4s ease-in-out infinite;}
+@media(prefers-reduced-motion:reduce){.sa-continue-pulse{animation:none;}}
 /* completed-stage sage pulse (sketch C beat 1) — the done card swells sage once, faint tint at the
    peak, a quiet "that's done"; reduced-motion → a static soft sage ring. */
 @keyframes saStagePulse{0%{box-shadow:0 30px 70px -20px rgba(58,28,20,.5),0 0 0 0 rgba(134,165,131,0)}30%{box-shadow:0 30px 70px -20px rgba(58,28,20,.5),0 0 0 5px rgba(134,165,131,.35),0 0 34px 6px rgba(134,165,131,.4);background:#f3f7f1}60%{box-shadow:0 30px 70px -20px rgba(58,28,20,.5),0 0 0 5px rgba(134,165,131,.18),0 0 28px 4px rgba(134,165,131,.22)}100%{box-shadow:0 30px 70px -20px rgba(58,28,20,.5),0 0 0 0 rgba(134,165,131,0)}}
@@ -1760,6 +1822,10 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   // and which stages have already played it this session (so it doesn't replay on revisit).
   const [introStep, setIntroStep] = useState<number | null>(null);
   const [introSeen, setIntroSeen] = useState<Set<"duplicates" | "agents" | "queries">>(new Set());
+  // Full-review "Add details" tip: shown once, after the writer lands on the agents review with
+  // everything ready (no intro/walk up). On dismiss, the Continue button takes up a gentle pulse.
+  const [addDetailsCoachSeen, setAddDetailsCoachSeen] = useState(false);
+  const [showAddDetailsCoach, setShowAddDetailsCoach] = useState(false);
   // The live header pills the coachmark intro spotlights in place — measured (getBoundingClientRect)
   // so the dim-cutout escapes the window's overflow clip. One pair, shared by whichever stage renders.
   const readyPillRef = useRef<HTMLSpanElement>(null);
@@ -2017,6 +2083,17 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [screen, escaped, introStep]);
 
+  // Once the writer is on the full agents review with everything ready and no intro/walk up, show a
+  // brief "Add details" tip — once per session. A short delay lets the assemble settle first.
+  useEffect(() => {
+    if (addDetailsCoachSeen) return;
+    if (screen !== "agents" || introStep !== null || focus) return;
+    if (!(needCount === 0 && active.length > 0)) return;
+    const t = setTimeout(() => { setAddDetailsCoachSeen(true); setShowAddDetailsCoach(true); }, 700);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen, introStep, focus, needCount, addDetailsCoachSeen]);
+
   const patchQuery = (id: string, p: Partial<ReviewQuery>) => { setQueries((xs) => xs.map((q) => (q.id === id ? { ...q, ...p } : q))); setTick((t) => t + 1); };
   const removeQuery = (id: string) => { setQueries((xs) => xs.map((q) => (q.id === id ? { ...q, removed: true, removedReason: "Removed by you" } : q))); flashToast("Query set aside", () => restoreQuery(id)); setTick((t) => t + 1); };
   // Mark one typed reason resolved (the row goes Ready when none remain open). `patch` lets a
@@ -2259,7 +2336,8 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
         }}
         onSkip={skipFocus}
         onClose={closeFocus}
-        doneChip="Agents all sorted — on to your queries"
+        doneChip="Agents reviewed"
+        doneBody="Your data is looking sharp — let's take a look at the full list"
       />
     ) : null;
 
@@ -2270,9 +2348,18 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
         onLetsGo={() => { setIntroStep(null); openAgentsFocus(); }} />
     ) : null;
 
+    // Full-review "Add details" tip — points at the first ready row's control, dismissable.
+    const addDetailsCoach = showAddDetailsCoach ? (
+      <SpotlightCoachmark
+        targetSelector='[data-coach="add-details"]'
+        title="Add as much or as little as you like"
+        body={<>You can add more detail to any record to sharpen your tracking — or come back to it whenever you like.</>}
+        onDismiss={() => setShowAddDetailsCoach(false)} />
+    ) : null;
+
     return (
       <ReviewShell userInitial={userInitial} allClear={needCount === 0}
-        modal={showSkipModal ? <SkipSetupModal onClose={() => setShowSkipModal(false)} onSkip={onSkip} /> : (agentsIntro ?? agentsOverlay)}>
+        modal={showSkipModal ? <SkipSetupModal onClose={() => setShowSkipModal(false)} onSkip={onSkip} /> : (agentsIntro ?? agentsOverlay ?? addDetailsCoach)}>
         <div className="sa-rv-grid" key={screen}>
 
           {/* ── Left: header + records card + footer ── */}
@@ -2324,6 +2411,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
                   onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; }}
                 >Reset all changes made here</button>
                 <button onClick={onContinueClick}
+                  className={addDetailsCoachSeen && !showAddDetailsCoach && allCaptured ? "sa-continue-pulse" : undefined}
                   style={{ fontFamily: MONO, fontSize: 13.5, background: "rgba(199,212,195,.5)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", color: allCaptured ? "#5a6e58" : "#8a9e88", border: "1px solid rgba(255,255,255,.55)", borderRadius: 11, padding: "13px 32px", cursor: allCaptured ? "pointer" : "not-allowed", fontWeight: 600, letterSpacing: ".02em", boxShadow: "0 10px 22px -12px rgba(90,110,88,.5),inset 0 1px 0 rgba(255,255,255,.65)", opacity: allCaptured ? 1 : 0.65, transition: "background .15s,color .15s,box-shadow .15s,transform .15s,border-color .15s" }}
                   onMouseEnter={(e) => { if (allCaptured) { e.currentTarget.style.background = "rgba(245,226,218,.62)"; e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.transform = "translateY(-1px)"; } }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(199,212,195,.5)"; e.currentTarget.style.color = allCaptured ? "#5a6e58" : "#8a9e88"; e.currentTarget.style.transform = "none"; }}

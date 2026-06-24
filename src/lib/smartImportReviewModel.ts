@@ -204,7 +204,7 @@ export function decideStageEntry(opts: { flagged: boolean; introSeen: boolean; e
  *  `sortedChip` is the stage-aware confirmation ("Queries all sorted — ready to import"); it is only
  *  returned when nothing was skipped, so we never tell the writer everything's sorted when it isn't. */
 export interface DoneStageMessage { heading: string; chip: string | null; body: string }
-export function doneStageMessage(opts: { fixesLeft: boolean; skipped: number; sortedChip: string }): DoneStageMessage {
+export function doneStageMessage(opts: { fixesLeft: boolean; skipped: number; sortedChip: string; celebratoryBody?: string }): DoneStageMessage {
   if (opts.fixesLeft) {
     return { heading: "Almost there", chip: null, body: "A fix still needs doing before you can import — pop back to it whenever you're ready." };
   }
@@ -212,7 +212,7 @@ export function doneStageMessage(opts: { fixesLeft: boolean; skipped: number; so
     const n = opts.skipped === 1 ? "One is" : `${opts.skipped} are`;
     return { heading: "Saved for now", chip: null, body: `${n} still open — saved as-is, and easy to revisit whenever you like.` };
   }
-  return { heading: "All sorted ✦", chip: opts.sortedChip, body: "Your records are looking sharp — everything's ready to import." };
+  return { heading: "All sorted ✦", chip: opts.sortedChip, body: opts.celebratoryBody ?? "Your records are looking sharp — everything's ready to import." };
 }
 
 /** Per-population tier counts — NEVER pooled across agents and queries (that was the "37 ready" bug:
