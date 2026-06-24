@@ -18,6 +18,7 @@ import { PREDEFINED_GENRES } from "../../lib/manuscripts";
 import { StatusDot } from "../StatusDot";
 import { statusBurgundy, statusSageRing, statusSageMark } from "../../lib/designTokens";
 import { PinkButton } from "../dashboard/HeroCard";
+import { SheenWave } from "./SheenWave";
 import {
   ReviewAgent, ReviewQuery, ReasonItem, CheckReason, AgentStatus,
   agentStatus, resolveReason, queryStatusOf, fmtDate, QUERY_STATUS_OPTIONS,
@@ -662,20 +663,29 @@ const FocusOverlay: React.FC<{
       style={{ position: "fixed", inset: 0, background: "rgba(58,28,20,.34)", backdropFilter: "blur(2px)", WebkitBackdropFilter: "blur(2px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 60, padding: 24, animation: "saImpDimIn .4s ease" }}>
       <div style={{ transformOrigin: "center", transform: entered ? "none" : startTf, opacity: entered ? 1 : 0, transition: reducedMo ? "none" : "transform .55s cubic-bezier(.3,.9,.3,1), opacity .35s ease", display: "flex", justifyContent: "center", width: "100%" }}>
         {done ? (() => {
-          // Honest end-of-stage message: only claim "all sorted" when nothing was skipped/left open.
+          // Honest end-of-stage message: only claim "reviewed" when nothing was skipped/left open.
           const skipped = states.filter((s) => s === "skip").length;
           const msg = doneStageMessage({ fixesLeft, skipped, sortedChip: doneChip, celebratoryBody: doneBody });
           const celebratory = !fixesLeft && skipped === 0;
+          // All-sorted (Phase 7): big sage tick, "{stage} reviewed" heading, pink onward button, wrapped
+          // in the travelling sheen-wave border. (doneChip carries the stage heading, e.g. "Agents reviewed".)
+          if (celebratory) return (
+            <SheenWave radius={18} borderWidth={2} style={{ width: 560, maxWidth: "100%", boxShadow: "0 30px 70px -20px rgba(58,28,20,.5)", animation: "saImpFocusPop .18s ease" }}>
+              <div style={{ background: "#fdfaf5", borderRadius: 18, padding: "44px 30px 34px", textAlign: "center" }}>
+                <div className="sa-bigtick" style={{ width: 64, height: 64, borderRadius: "50%", background: "#e9ede6", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto", boxShadow: "0 0 0 8px rgba(138,158,136,.14)" }}>
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#5a6e58" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                </div>
+                <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 27, color: "#5a6e58", marginTop: 20 }}>{doneChip}</div>
+                <p style={{ color: "#6a5c50", fontSize: 14.5, margin: "10px auto 24px", maxWidth: 380 }}>{msg.body}</p>
+                <button onClick={onClose} style={{ fontFamily: MONO, fontSize: 13.5, background: "#f5e2da", color: "#7c3a2a", border: "1px solid #e8c8bc", borderRadius: 11, padding: "13px 24px", fontWeight: 500, cursor: "pointer" }}>Review and confirm →</button>
+              </div>
+            </SheenWave>
+          );
+          // Not all-sorted (a fix still open, or items skipped) — keep the honest message card, no tick.
           return (
-          // On-brand parchment + clipped-frame card (the canonical Form-11 panel treatment), not plain white.
-          <div className={celebratory ? "sa-stage-done" : undefined} style={{ width: 560, maxWidth: "100%", background: "#fdfaf5", borderRadius: 18, padding: 8, border: "1px solid rgba(124,58,42,0.12)", boxShadow: "0 30px 70px -20px rgba(58,28,20,.5)", animation: "saImpFocusPop .18s ease" }}>
+          <div style={{ width: 560, maxWidth: "100%", background: "#fdfaf5", borderRadius: 18, padding: 8, border: "1px solid rgba(124,58,42,0.12)", boxShadow: "0 30px 70px -20px rgba(58,28,20,.5)", animation: "saImpFocusPop .18s ease" }}>
             <div style={{ border: `1px solid ${C.frame}`, borderRadius: 12, overflow: "hidden", background: "#fdfaf5", padding: "40px 30px", textAlign: "center" }}>
               <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 26, color: fixesLeft ? "#a85a44" : "#5a6e58" }}>{msg.heading}</div>
-              {msg.chip && (
-                <div className="sa-done-chip" style={{ display: "inline-flex", alignItems: "center", gap: 7, fontFamily: MONO, fontSize: 12, color: "#5a6e58", background: "#e9ede6", padding: "7px 13px", borderRadius: 8, margin: "14px 0 2px" }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M20 6 9 17l-5-5" /></svg>{msg.chip}
-                </div>
-              )}
               <p style={{ color: "#6a5c50", fontSize: 14.5, margin: "10px auto 22px", maxWidth: 380 }}>{msg.body}</p>
               <button onClick={onClose} style={{ fontFamily: MONO, fontSize: 13, background: "#f5e2da", color: "#7c3a2a", border: "1px solid #e8c8bc", borderRadius: 11, padding: "12px 22px", fontWeight: 500, cursor: "pointer" }}>Review and confirm</button>
             </div>
@@ -1754,6 +1764,10 @@ const REVIEW_SHELL_CSS = `
 @keyframes saStagePulse{0%{box-shadow:0 30px 70px -20px rgba(58,28,20,.5),0 0 0 0 rgba(134,165,131,0)}30%{box-shadow:0 30px 70px -20px rgba(58,28,20,.5),0 0 0 5px rgba(134,165,131,.35),0 0 34px 6px rgba(134,165,131,.4);background:#f3f7f1}60%{box-shadow:0 30px 70px -20px rgba(58,28,20,.5),0 0 0 5px rgba(134,165,131,.18),0 0 28px 4px rgba(134,165,131,.22)}100%{box-shadow:0 30px 70px -20px rgba(58,28,20,.5),0 0 0 0 rgba(134,165,131,0)}}
 .sa-stage-done{animation:saStagePulse 1.5s ease-in-out;}
 .sa-done-chip{opacity:0;animation:saImpDimIn .5s ease .2s forwards;}
+/* big sage tick on the all-sorted screen — pops in once; reduced-motion shows it static. */
+@keyframes saBigTickPop{0%{transform:scale(.4);opacity:0}55%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+.sa-bigtick{animation:saBigTickPop .55s cubic-bezier(.34,1.56,.64,1) both;}
+@media(prefers-reduced-motion:reduce){.sa-bigtick{animation:none;opacity:1;}}
 @media(prefers-reduced-motion:reduce){.sa-stage-done{animation:none;box-shadow:0 30px 70px -20px rgba(58,28,20,.5),0 0 0 4px rgba(134,165,131,.25);}.sa-done-chip{animation:none;opacity:1;}}
 /* the coachmark intro's CSS now lives in COACHMARK_CSS, self-injected by <CoachmarkIntro> so it also
    styles correctly on the duplicates stage (which renders its own layout, not ReviewShell). */
@@ -2515,7 +2529,8 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
         }}
         onSkip={skipFocus}
         onClose={closeFocus}
-        doneChip="Queries all sorted — ready to import"
+        doneChip="Queries reviewed"
+        doneBody="Your queries are looking sharp — let's take a look at the full list."
       />
     ) : null;
 
