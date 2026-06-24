@@ -164,10 +164,8 @@ export const AddAgentFocusForm: React.FC<AddAgentFocusFormProps> = ({
       setFormError("Agent name is required.");
       return;
     }
-    if (!agency.trim()) {
-      setFormError("Agency is required.");
-      return;
-    }
+    // Agency is optional (empty-and-valid): a named agent whose agency you don't know yet is a complete,
+    // valid record. The identity anchor (name) is required above; the rule admits name-or-agency.
     if (materials.pages.on && !materials.pages.count.trim()) {
       setFormError("Enter how many sample pages they want.");
       return;
