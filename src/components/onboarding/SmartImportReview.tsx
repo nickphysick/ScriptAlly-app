@@ -598,15 +598,18 @@ const FocusOverlay: React.FC<{
           const msg = doneStageMessage({ fixesLeft, skipped, sortedChip: doneChip });
           const celebratory = !fixesLeft && skipped === 0;
           return (
-          <div className={celebratory ? "sa-stage-done" : undefined} style={{ ...card, padding: "40px 30px", textAlign: "center" }}>
-            <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 26, color: fixesLeft ? "#a85a44" : "#5a6e58" }}>{msg.heading}</div>
-            {msg.chip && (
-              <div className="sa-done-chip" style={{ display: "inline-flex", alignItems: "center", gap: 7, fontFamily: MONO, fontSize: 12, color: "#5a6e58", background: "#e9ede6", padding: "7px 13px", borderRadius: 8, margin: "14px 0 2px" }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M20 6 9 17l-5-5" /></svg>{msg.chip}
-              </div>
-            )}
-            <p style={{ color: "#6a5c50", fontSize: 14.5, margin: "10px auto 22px", maxWidth: 380 }}>{msg.body}</p>
-            <button onClick={onClose} style={{ fontFamily: MONO, fontSize: 13, background: "#7c3a2a", color: "#fff", border: "none", borderRadius: 9, padding: "11px 18px", cursor: "pointer" }}>Review and confirm</button>
+          // On-brand parchment + clipped-frame card (the canonical Form-11 panel treatment), not plain white.
+          <div className={celebratory ? "sa-stage-done" : undefined} style={{ width: 560, maxWidth: "100%", background: "#fdfaf5", borderRadius: 18, padding: 8, border: "1px solid rgba(124,58,42,0.12)", boxShadow: "0 30px 70px -20px rgba(58,28,20,.5)", animation: "saImpFocusPop .18s ease" }}>
+            <div style={{ border: `1px solid ${C.frame}`, borderRadius: 12, overflow: "hidden", background: "#fdfaf5", padding: "40px 30px", textAlign: "center" }}>
+              <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 26, color: fixesLeft ? "#a85a44" : "#5a6e58" }}>{msg.heading}</div>
+              {msg.chip && (
+                <div className="sa-done-chip" style={{ display: "inline-flex", alignItems: "center", gap: 7, fontFamily: MONO, fontSize: 12, color: "#5a6e58", background: "#e9ede6", padding: "7px 13px", borderRadius: 8, margin: "14px 0 2px" }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M20 6 9 17l-5-5" /></svg>{msg.chip}
+                </div>
+              )}
+              <p style={{ color: "#6a5c50", fontSize: 14.5, margin: "10px auto 22px", maxWidth: 380 }}>{msg.body}</p>
+              <button onClick={onClose} style={{ fontFamily: MONO, fontSize: 13, background: "#7c3a2a", color: "#fff", border: "none", borderRadius: 9, padding: "11px 18px", cursor: "pointer" }}>Review and confirm</button>
+            </div>
           </div>
           );
         })() : (() => {
@@ -667,6 +670,23 @@ const FocusOverlay: React.FC<{
 // the review window's overflow clip and re-measures on resize. Plays once per stage per session;
 // stage-true copy + colour (agents/duplicates = gold "quick fix"; queries = pink "sharpen"). Stages
 // with no "ready" beat (duplicates) jump welcome → to-check. Reduced-motion drops the slides/fades.
+//
+// The coachmark's CSS travels WITH the component (self-injected) rather than living in
+// REVIEW_SHELL_CSS — so it styles correctly on the duplicates stage too, which renders its own
+// layout (not ReviewShell) and so never received those rules (the "tiny, no-background" intro bug).
+const COACHMARK_CSS = `
+@keyframes saCmFade{from{opacity:0}to{opacity:1}}
+@keyframes saCmPop{from{opacity:0;transform:translateY(6px) scale(.985)}to{opacity:1;transform:none}}
+.sa-cm-veil{position:fixed;inset:0;background:rgba(40,28,22,.62);z-index:54;animation:saCmFade .6s ease;}
+.sa-cm-block{position:fixed;inset:0;z-index:59;}
+.sa-cm-spot{position:fixed;z-index:60;border-radius:20px;pointer-events:none;transition:left .55s cubic-bezier(.4,0,.2,1),top .55s ease,width .4s ease,box-shadow .45s ease;}
+.sa-cm-callout{position:fixed;z-index:62;width:340px;max-width:92vw;background:#fdfaf5;border:1px solid #7c3a2a;border-radius:14px;padding:18px 20px 16px;text-align:center;box-shadow:0 22px 50px -26px rgba(58,28,20,.5);transition:left .55s cubic-bezier(.4,0,.2,1),top .55s ease;animation:saCmPop .4s ease;}
+.sa-cm-callout::before{content:"";position:absolute;top:-8px;left:var(--beak,40px);width:15px;height:15px;background:#fdfaf5;border-left:1px solid #7c3a2a;border-top:1px solid #7c3a2a;transform:rotate(45deg);transition:left .55s ease;}
+.sa-cm-welcome{position:fixed;left:50%;top:46%;transform:translate(-50%,-50%);z-index:62;width:430px;max-width:90vw;background:#fdfaf5;border:1px solid #7c3a2a;border-radius:18px;padding:34px 36px 30px;text-align:center;box-shadow:0 30px 70px -30px rgba(58,28,20,.5);animation:saCmFade .6s ease;}
+@media(prefers-reduced-motion:reduce){.sa-cm-spot,.sa-cm-callout,.sa-cm-callout::before{transition:none;}.sa-cm-callout,.sa-cm-welcome,.sa-cm-veil{animation:none;}}
+`;
+// Parchment "pink" advance button — sketch A's callout/welcome CTA (not the off-brand burgundy fill).
+const cmPinkBtn: React.CSSProperties = { fontFamily: MONO, fontSize: 13, background: "#f5e2da", color: "#7c3a2a", border: "1px solid #e8c8bc", padding: "11px 22px", borderRadius: 11, fontWeight: 500, cursor: "pointer" };
 const CoachmarkIntro: React.FC<{
   welcomeHeading: string;
   readyCount: number; checkCount: number;
@@ -702,13 +722,14 @@ const CoachmarkIntro: React.FC<{
   if (step === 0) {
     return (
       <>
+        <style>{COACHMARK_CSS}</style>
         <div className="sa-cm-veil" aria-hidden onMouseDown={(e) => e.preventDefault()} />
         <div className="sa-cm-welcome" role="dialog" aria-modal="true">
           <div style={{ width: 46, height: 46, borderRadius: "50%", background: "#e9ede6", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", color: "#5a6e58" }}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22V8M12 8c0-3 2-5 5-5 0 3-2 5-5 5Zm0 3c0-3-2-5-5-5 0 3 2 5 5 5Z"/></svg>
           </div>
           <h2 style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 25, margin: 0, color: "#3a1c14" }}>{welcomeHeading}</h2>
-          <button onClick={onIntroGo} style={{ marginTop: 22, fontFamily: MONO, fontSize: 14, background: "#f5e2da", color: "#7c3a2a", border: "1px solid #e8c8bc", padding: "13px 26px", borderRadius: 11, fontWeight: 500, cursor: "pointer" }}>Let's do it →</button>
+          <button onClick={onIntroGo} style={{ ...cmPinkBtn, marginTop: 22, fontSize: 14, padding: "13px 26px" }}>Let's do it →</button>
         </div>
       </>
     );
@@ -728,13 +749,14 @@ const CoachmarkIntro: React.FC<{
   if (!rect) {
     return (
       <>
+        <style>{COACHMARK_CSS}</style>
         <div className="sa-cm-veil" aria-hidden />
         <div className="sa-cm-welcome" role="dialog" aria-modal="true" style={{ width: 360 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 9, fontWeight: 600, fontSize: 14.5, color: "#3a1c14" }}>
             <span style={{ width: 22, height: 22, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, ...coach.dotBg }}>{coach.dot}</span>{coach.hd}
           </div>
           <p style={{ margin: "9px 0 0", fontSize: 13.5, color: "#5a4a3e", lineHeight: 1.5 }}>{coach.body}</p>
-          <button onClick={coach.onClick} style={{ marginTop: 14, fontFamily: MONO, fontSize: 12.5, background: "#7c3a2a", color: "#fff", border: "none", padding: "9px 17px", borderRadius: 9, fontWeight: 500, cursor: "pointer" }}>{coach.btn}</button>
+          <button onClick={coach.onClick} style={{ ...cmPinkBtn, marginTop: 14 }}>{coach.btn}</button>
         </div>
       </>
     );
@@ -749,6 +771,7 @@ const CoachmarkIntro: React.FC<{
 
   return (
     <>
+      <style>{COACHMARK_CSS}</style>
       {/* transparent click-shield (the dim itself is the spotlight's hole-punch shadow) */}
       <div className="sa-cm-block" aria-hidden onMouseDown={(e) => e.preventDefault()} />
       <div className="sa-cm-spot" aria-hidden style={{ left: rect.left - 4, top: rect.top - 4, width: rect.width + 8, height: rect.height + 8, boxShadow: `0 0 0 4px ${coach.ring},0 0 0 9999px rgba(40,28,22,.62)` }} />
@@ -758,7 +781,7 @@ const CoachmarkIntro: React.FC<{
         </div>
         <p style={{ margin: "9px 0 0", fontSize: 13.5, color: "#5a4a3e", lineHeight: 1.5 }}>{coach.body}</p>
         <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".12em", color: C.muted, marginTop: 13 }}>{stepN} OF {stepTotal}</div>
-        <button onClick={coach.onClick} style={{ marginTop: 10, fontFamily: MONO, fontSize: 12.5, background: "#7c3a2a", color: "#fff", border: "none", padding: "9px 17px", borderRadius: 9, fontWeight: 500, cursor: "pointer" }}>{coach.btn}</button>
+        <button onClick={coach.onClick} style={{ ...cmPinkBtn, marginTop: 10 }}>{coach.btn}</button>
       </div>
     </>
   );
@@ -1577,17 +1600,8 @@ const REVIEW_SHELL_CSS = `
 .sa-stage-done{animation:saStagePulse 1.5s ease-in-out;}
 .sa-done-chip{opacity:0;animation:saImpDimIn .5s ease .2s forwards;}
 @media(prefers-reduced-motion:reduce){.sa-stage-done{animation:none;box-shadow:0 30px 70px -20px rgba(58,28,20,.5),0 0 0 4px rgba(134,165,131,.25);}.sa-done-chip{animation:none;opacity:1;}}
-/* in-place coachmark intro (sketch A) — the screen stays put; a dim falls over everything except the
-   real pill, which shows through a box-shadow hole-punch + coloured ring (.sa-cm-spot, sized to the
-   measured pill rect so it escapes the window's overflow clip). A callout sits beneath with an up-beak,
-   and slides along as the spotlight tours ready → to-check. Welcome fades opacity-only (no slide). */
-.sa-cm-veil{position:fixed;inset:0;background:rgba(40,28,22,.62);z-index:54;animation:saImpDimIn .6s ease;}
-.sa-cm-block{position:fixed;inset:0;z-index:59;}
-.sa-cm-spot{position:fixed;z-index:60;border-radius:20px;pointer-events:none;transition:left .55s cubic-bezier(.4,0,.2,1),top .55s ease,width .4s ease,box-shadow .45s ease;}
-.sa-cm-callout{position:fixed;z-index:62;width:340px;max-width:92vw;background:#fdfaf5;border:1px solid #7c3a2a;border-radius:14px;padding:18px 20px 16px;text-align:center;box-shadow:0 22px 50px -26px rgba(58,28,20,.5);transition:left .55s cubic-bezier(.4,0,.2,1),top .55s ease;animation:saImpFocusPop .4s ease;}
-.sa-cm-callout::before{content:"";position:absolute;top:-8px;left:var(--beak,40px);width:15px;height:15px;background:#fdfaf5;border-left:1px solid #7c3a2a;border-top:1px solid #7c3a2a;transform:rotate(45deg);transition:left .55s ease;}
-.sa-cm-welcome{position:fixed;left:50%;top:46%;transform:translate(-50%,-50%);z-index:62;width:430px;max-width:90vw;background:#fdfaf5;border:1px solid #7c3a2a;border-radius:18px;padding:34px 36px 30px;text-align:center;box-shadow:0 30px 70px -30px rgba(58,28,20,.5);animation:saImpDimIn .6s ease;}
-@media(prefers-reduced-motion:reduce){.sa-cm-spot,.sa-cm-callout,.sa-cm-callout::before{transition:none;}.sa-cm-callout,.sa-cm-welcome,.sa-cm-veil{animation:none;}}
+/* the coachmark intro's CSS now lives in COACHMARK_CSS, self-injected by <CoachmarkIntro> so it also
+   styles correctly on the duplicates stage (which renders its own layout, not ReviewShell). */
 @media(max-width:880px){ .sa-rv-grid{ grid-template-columns:1fr; } }
 @media(prefers-reduced-motion:reduce){ .sa-rv-band{ animation:none; opacity:0; } *{ animation-duration:0.001ms !important; } }
 /* fit variant (overview): window is only as tall as its content, vertically centred below the nav,
