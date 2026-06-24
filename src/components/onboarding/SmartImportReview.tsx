@@ -1632,6 +1632,19 @@ const REVIEW_SHELL_CSS = `
 .sa-card-in{animation:saCardIn .32s cubic-bezier(.22,1,.36,1) both;}
 .sa-card-out{animation:saCardOut .30s ease both;pointer-events:none;}
 @media(prefers-reduced-motion:reduce){.sa-card-in,.sa-card-out{animation:none;}}
+/* stage-entry "assemble" — on entering a flagged stage the review screen builds itself from the
+   edges behind the intro: header slides from the top, sidebar from the right, footer from the
+   bottom, and each list row in from the left, staggered (rhymes with the loader's scatter→settle).
+   Replays per stage because the grid is keyed by the screen. Reduced-motion shows it assembled. */
+@keyframes saAsmT{from{opacity:0;transform:translateY(-26px)}to{opacity:1;transform:none}}
+@keyframes saAsmB{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+@keyframes saAsmL{from{opacity:0;transform:translateX(-46px)}to{opacity:1;transform:none}}
+@keyframes saAsmR{from{opacity:0;transform:translateX(46px)}to{opacity:1;transform:none}}
+.sa-asm{opacity:0;animation-duration:.5s;animation-timing-function:cubic-bezier(.22,1,.36,1);animation-fill-mode:both;}
+.sa-asm-t{animation-name:saAsmT;}.sa-asm-b{animation-name:saAsmB;}.sa-asm-l{animation-name:saAsmL;}.sa-asm-r{animation-name:saAsmR;}
+.sa-asm-rows>*{opacity:0;animation:saAsmL .5s cubic-bezier(.22,1,.36,1) both;}
+.sa-asm-rows>*:nth-child(1){animation-delay:.20s}.sa-asm-rows>*:nth-child(2){animation-delay:.27s}.sa-asm-rows>*:nth-child(3){animation-delay:.34s}.sa-asm-rows>*:nth-child(4){animation-delay:.41s}.sa-asm-rows>*:nth-child(5){animation-delay:.48s}.sa-asm-rows>*:nth-child(6){animation-delay:.55s}.sa-asm-rows>*:nth-child(7){animation-delay:.62s}.sa-asm-rows>*:nth-child(8){animation-delay:.69s}.sa-asm-rows>*:nth-child(n+9){animation-delay:.76s}
+@media(prefers-reduced-motion:reduce){.sa-asm,.sa-asm-rows>*{animation:none;opacity:1;transform:none;}}
 /* slow, soft "breathing" glow on the recommended action (agency card) — guides, never nags */
 @keyframes saAgencyBreathe{0%,100%{box-shadow:0 0 0 0 rgba(124,58,42,.18),0 0 0 0 rgba(124,58,42,.10)}50%{box-shadow:0 0 0 4px rgba(124,58,42,.10),0 0 22px 3px rgba(124,58,42,.16)}}
 .sa-agency-rec{animation:saAgencyBreathe 2.6s ease-in-out infinite;}
@@ -1686,7 +1699,7 @@ const RecordsCard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <div className="sa-rv-card">
       <div className="sa-rv-frame">
-        <div className="sa-rv-scroll" ref={ref}>{children}</div>
+        <div className="sa-rv-scroll sa-asm-rows" ref={ref}>{children}</div>
       </div>
     </div>
   );
@@ -2257,12 +2270,12 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
     return (
       <ReviewShell userInitial={userInitial} allClear={needCount === 0}
         modal={showSkipModal ? <SkipSetupModal onClose={() => setShowSkipModal(false)} onSkip={onSkip} /> : (agentsIntro ?? agentsOverlay)}>
-        <div className="sa-rv-grid">
+        <div className="sa-rv-grid" key={screen}>
 
           {/* ── Left: header + records card + footer ── */}
           <div className="sa-rv-main">
             {/* Header */}
-            <div style={{ marginBottom: 16 }}>
+            <div className="sa-asm sa-asm-t" style={{ marginBottom: 16, animationDelay: "60ms" }}>
               <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: ".18em", textTransform: "uppercase", color: "#5a6e58" }}>Data captured</span>
               <h1 style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 30, margin: "6px 0 4px", color: "#33302b" }}>
                 Populating your{" "}
@@ -2295,7 +2308,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
             <SetAsideTray items={setAsideItems} onRestore={onRestoreSetAside} />
 
             {/* Footer */}
-            <div style={{ display: "flex", alignItems: "center", gap: 18, marginTop: 18, flexShrink: 0 }}>
+            <div className="sa-asm sa-asm-b" style={{ display: "flex", alignItems: "center", gap: 18, marginTop: 18, flexShrink: 0, animationDelay: "150ms" }}>
               <button onClick={() => (hadDuplicates ? switchScreen("duplicates") : onBack?.())}
                 style={{ fontFamily: MONO, fontSize: 13, color: "#8a8178", background: "none", border: "none", cursor: "pointer" }}
                 onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; }}
@@ -2317,7 +2330,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
           </div>
 
           {/* ── Right: sidebar board ── */}
-          <aside className="sa-rv-board">
+          <aside className="sa-rv-board sa-asm sa-asm-r" style={{ animationDelay: "120ms" }}>
             <WhereYouAreCard step="agents" onSkip={() => setShowSkipModal(true)} />
             <PinkSlip>
               Anything in <PinkTag /> needs a quick look. It might be a duplicate, or could be missing the agency's name (we need this). Check these for us, add any further details you can, then we'll move on to capturing your queries.
@@ -2389,11 +2402,11 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
     return (
       <ReviewShell userInitial={userInitial} allClear={qLookCount === 0}
         modal={showSkipModal ? <SkipSetupModal onClose={() => setShowSkipModal(false)} onSkip={onSkip} /> : (queriesIntro ?? queriesOverlay)}>
-        <div className="sa-rv-grid">
+        <div className="sa-rv-grid" key={screen}>
 
           {/* ── Left: header + records card + footer ── */}
           <div className="sa-rv-main">
-            <div style={{ marginBottom: 16 }}>
+            <div className="sa-asm sa-asm-t" style={{ marginBottom: 16, animationDelay: "60ms" }}>
               <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: ".18em", textTransform: "uppercase", color: "#5a6e58" }}>Data captured</span>
               <h1 style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 30, margin: "6px 0 4px", color: "#33302b" }}>
                 Populating your{" "}
@@ -2435,7 +2448,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
             <SetAsideTray items={setAsideItems} onRestore={onRestoreSetAside} />
 
             {/* Footer */}
-            <div style={{ display: "flex", alignItems: "center", gap: 18, marginTop: 18, flexShrink: 0 }}>
+            <div className="sa-asm sa-asm-b" style={{ display: "flex", alignItems: "center", gap: 18, marginTop: 18, flexShrink: 0, animationDelay: "150ms" }}>
               <button onClick={() => switchScreen("agents")}
                 style={{ fontFamily: MONO, fontSize: 13, color: "#8a8178", background: "none", border: "none", cursor: "pointer" }}
                 onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; }}
@@ -2458,7 +2471,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
           </div>
 
           {/* ── Right: sidebar board ── */}
-          <aside className="sa-rv-board">
+          <aside className="sa-rv-board sa-asm sa-asm-r" style={{ animationDelay: "120ms" }}>
             <WhereYouAreCard step="queries" onSkip={() => setShowSkipModal(true)} />
             <PinkSlip>
               Anything in <PinkTag /> needs a quick look. A query might be missing its date, or we couldn't match it to an agent. Check these for us, add any further details you can, then we'll bring it all into your log.
