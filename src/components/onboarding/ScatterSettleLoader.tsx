@@ -19,6 +19,7 @@
  */
 import React, { useEffect, useRef, useState } from "react";
 import { OnbNav } from "./SmartImportReview";
+import { SheenWave } from "./SheenWave";
 import { StatusDot } from "../StatusDot";
 import { QueryStatus } from "../../types";
 
@@ -83,7 +84,8 @@ const SPARK_GLYPH: Record<typeof SPARK_KINDS[number], React.ReactNode> = {
 const prefersReduced = () =>
   typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-const CARD_W = 440;
+const CARD_W = 440;        // wide while messy (holds the full raw row)
+const RESOLVED_W = 268;    // tightens to the on-brand card width on crystallise (grid-friendly)
 
 // Work-zone "forms being filled" — a small Add-an-agent / Log-a-query form drifts through behind the
 // scraps, its fields populated from the writer's own raw cells (display-only; split on the visible
@@ -234,7 +236,7 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
         /* gentle independent drift while we wait (offsets/rotation/duration set per card via vars) */
         @keyframes saScBob{0%,100%{transform:translate(-50%,-50%) rotate(var(--r,0deg))}50%{transform:translate(calc(-50% + var(--bx,5px)), calc(-50% + var(--by,-6px))) rotate(calc(var(--r,0deg) + var(--br,1deg)))}}
         @keyframes saScSpark{0%{transform:scale(.3);opacity:0}20%{transform:scale(1.1);opacity:1}55%{transform:scale(1);opacity:1}100%{transform:scale(.96) translateY(-10px);opacity:0}}
-        .sa-sc-card{transition:left .6s cubic-bezier(.34,1.3,.5,1), top .6s cubic-bezier(.34,1.3,.5,1), transform .6s cubic-bezier(.34,1.3,.5,1), background .4s ease, border-color .4s ease;}
+        .sa-sc-card{transition:left .6s cubic-bezier(.34,1.3,.5,1), top .6s cubic-bezier(.34,1.3,.5,1), transform .6s cubic-bezier(.34,1.3,.5,1), width .55s cubic-bezier(.4,0,.2,1), background .4s ease, border-color .4s ease, box-shadow .5s ease;}
         .sa-sc-appear{animation:saScAppear .4s ease both;}
         .sa-sc-squeeze{animation:saScSqueeze .52s cubic-bezier(.34,1.56,.64,1) both;}
         .sa-sc-float{animation:saScBob var(--d,3.6s) ease-in-out infinite;animation-delay:var(--dl,0s);}
@@ -289,29 +291,30 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
           return (
             <div key={i} className={`sa-sc-card${reduced || introDone ? "" : " sa-sc-squeeze"}${drifting ? " sa-sc-float" : ""}`} aria-hidden
               style={{
-                position: "absolute", left, top, transform, width: CARD_W, minHeight: 62, zIndex: isMoved ? 20 + i : 10,
+                position: "absolute", left, top, transform, width: isDone ? RESOLVED_W : CARD_W, minHeight: 66, zIndex: isMoved ? 20 + i : 10,
                 animationDelay: reduced ? undefined : `${50 + i * 80}ms`,
                 ["--r" as string]: `${slot.r}deg`, ["--bx" as string]: `${slot.bx}px`, ["--by" as string]: `${slot.by}px`, ["--br" as string]: `${slot.br}deg`, ["--d" as string]: `${slot.d}s`, ["--dl" as string]: `${slot.dl}s`,
-                background: isDone ? "#fdfcf9" : "#fff", border: `1px solid ${isDone ? "#e3ddd0" : "#e7ddd2"}`, borderRadius: 13,
-                boxShadow: isMoved ? "0 8px 22px -16px rgba(58,28,20,.34)" : "0 14px 30px -16px rgba(58,28,20,.4)",
-                padding: "13px 17px",
+                background: "#fff", border: isDone ? "1px solid transparent" : "1px solid #e7ddd2", borderRadius: 13,
+                boxShadow: isDone ? "0 13px 32px -15px rgba(58,28,20,.3)" : (isMoved ? "0 8px 22px -16px rgba(58,28,20,.34)" : "0 14px 30px -16px rgba(58,28,20,.4)"),
               }}>
-              {/* messy (raw) layer */}
-              <div className="sa-sc-layer" style={{ opacity: isDone ? 0 : 1, gap: 10 }}>
+              {/* messy (raw) layer — fades out on crystallise */}
+              <div style={{ position: "absolute", inset: 0, padding: "13px 17px", display: "flex", alignItems: "center", gap: 10, opacity: isDone ? 0 : 1, transition: "opacity .4s ease" }}>
                 <span style={{ width: 22, height: 22, borderRadius: 6, background: "#f2ece3", display: "flex", alignItems: "center", justifyContent: "center", color: "#bcae9f", flexShrink: 0, fontSize: 12 }}>▦</span>
                 <span style={{ fontFamily: MONO, fontSize: 12.5, color: "#a89a8c", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{card.messy}</span>
               </div>
-              {/* clean (resolved) layer */}
-              <div className="sa-sc-layer" style={{ opacity: isDone ? 1 : 0, gap: 13 }}>
-                <span className={isDone ? "sa-sc-dotpop" : undefined} style={{ flexShrink: 0, display: "inline-flex" }}>
-                  {card.status ? <StatusDot status={card.status} overrideSize={30} /> : <span style={{ width: 30, height: 30, borderRadius: "50%", border: "2px solid #e3d4c7", display: "inline-block" }} />}
-                </span>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontFamily: SERIF, fontSize: 16, fontWeight: 600, lineHeight: 1.1, color: "#3a1c14", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{card.name || "—"}</div>
-                  <div style={{ fontFamily: MONO, fontSize: 11.5, color: "#9a8c80", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {card.agency ? `${card.agency} · ` : ""}<span style={{ color: "#3a1c14" }}>{card.status ? String(card.status) : ""}</span>{card.date ? ` · ${card.date}` : ""}
+              {/* clean (on-brand) layer — the white rim (inset 5) holds the SheenWave inset frame: dot + name + agency */}
+              <div style={{ position: "absolute", inset: 5, opacity: isDone ? 1 : 0, transition: "opacity .45s ease .1s" }}>
+                <SheenWave radius={9} borderWidth={1.5} style={{ height: "100%", background: "#fff", padding: "11px 14px", display: "flex", alignItems: "center" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 11, width: "100%", minWidth: 0 }}>
+                    <span className={isDone ? "sa-sc-dotpop" : undefined} style={{ width: 25, height: 25, flexShrink: 0, display: "inline-flex" }}>
+                      {card.status ? <StatusDot status={card.status} overrideSize={25} /> : <span style={{ width: 25, height: 25, borderRadius: "50%", border: "2px solid #e3d4c7", display: "inline-block" }} />}
+                    </span>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontFamily: SERIF, fontSize: 14, fontWeight: 600, lineHeight: 1.1, color: "#3a1c14", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{card.name || "—"}</div>
+                      <div style={{ fontFamily: "Inter", fontSize: 11, color: "#9a8c80", marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{card.agency || ""}</div>
+                    </div>
                   </div>
-                </div>
+                </SheenWave>
               </div>
             </div>
           );

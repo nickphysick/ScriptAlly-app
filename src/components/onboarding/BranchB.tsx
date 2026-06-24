@@ -14,6 +14,7 @@ import { useScriptAllyDb } from "../../lib/db";
 import { QueryStatus } from "../../types";
 import { SmartImportResult } from "../../types/smartImport";
 import { runSmartImport, validateSmartImport, ValidatedImport, sampleRawRecords, RawRecordSample } from "../../lib/smartImport";
+import { agentAgencyLine } from "../../lib/agentDisplay";
 import { commitSmartImport, CommitOutcome } from "../../lib/smartImportCommit";
 import { Form11Card, SelectRow, BookMotif, InboxMotif, FONT_SANS, FONT_MONO } from "./chrome";
 import { SmartImportReview } from "./SmartImportReview";
@@ -293,7 +294,7 @@ export const BranchB: React.FC<BranchBProps> = ({
       if (!q) return { messy: r.messy }; // still scattered / not yet extracted
       const agent = resultAgents.find((a) => a.ref === q.agentRef);
       const name = agent?.name?.trim() || agent?.agency?.trim() || "New agent";
-      const agency = agent?.agency?.trim() || "Agency only";
+      const agency = agentAgencyLine(agent ?? {}); // agency, or "No agency" — never the inverted "Agency only" for a named record
       const date = q.sentDate ? fmtDate(q.sentDate) : "Undated";
       return { messy: r.messy, name, agency, date, status: q.status ?? QueryStatus.QUERIED };
     });
