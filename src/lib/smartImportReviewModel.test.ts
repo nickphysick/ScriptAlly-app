@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseModel, modelToResult, applyAgentRemoval, quoteStatuses, queryReasonText, statusDirectionChoices, reviewTallies, seedUnidentifiedSetAside, decideStageEntry, doneStageMessage, ReviewQuery } from './smartImportReviewModel';
+import { parseModel, modelToResult, applyAgentRemoval, quoteStatuses, queryReasonText, statusDirectionChoices, reviewTallies, seedUnidentifiedSetAside, decideStageEntry, doneStageMessage, keepBothLabel, dupNoteKept, ReviewQuery } from './smartImportReviewModel';
 import { QueryStatus } from '../types';
 import { ParsedAgent, ParsedQuery, SmartImportResult } from '../types/smartImport';
 
@@ -263,5 +263,18 @@ describe('doneStageMessage — the all-sorted message tells the truth', () => {
     const m = doneStageMessage({ fixesLeft: true, skipped: 0, sortedChip: chip });
     expect(m.heading).toBe('Almost there');
     expect(m.chip).toBeNull();
+  });
+});
+
+describe('keep-both copy is count-aware (2 → both, 3+ → all)', () => {
+  it('a 2-record cluster says "keep both"', () => {
+    expect(keepBothLabel(2)).toBe("They're different — keep both");
+    expect(dupNoteKept('Acme', 2)).toMatch(/Kept both/);
+  });
+  it('a 3+ record cluster says "keep them all" — never "both"', () => {
+    expect(keepBothLabel(3)).toBe("They're all different — keep them all");
+    expect(keepBothLabel(4)).not.toMatch(/both/i);
+    expect(dupNoteKept('Acme', 3)).toMatch(/Kept all/);
+    expect(dupNoteKept('Acme', 3)).not.toMatch(/both/i);
   });
 });

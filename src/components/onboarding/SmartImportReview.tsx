@@ -23,6 +23,7 @@ import {
   agentStatus, resolveReason, queryStatusOf, fmtDate, QUERY_STATUS_OPTIONS,
   dupNoteOpen, dupNoteKept, dupNoteMerged, parseModel, modelToResult, applyAgentRemoval, seedUnidentifiedSetAside, decideStageEntry,
   currentDate, quoteStatuses, queryReasonText, statusDirectionChoices, removeDuplicateRecord, buildClusters, doneStageMessage,
+  keepBothLabel, keptClusterLabel,
 } from "../../lib/smartImportReviewModel";
 
 // ── Palette (from the sketch; critical colours inline per house style) ──────────────────────────
@@ -51,7 +52,7 @@ const CAVEAT = "'Caveat',cursive";
 
 // Composition widths. The whole thing widens together: a wider panel for un-squashed text, wider
 // notes that wrap shorter, and a wider band so both margins still clear the panel at desktop width.
-const PANEL_W = 520;  // a touch wider again
+const PANEL_W = 800;  // wide like the agents/queries review window — use more of the screen
 const BAND_W = 1280;  // panel + wide gutters so notes spread across the full width without crowding
 const NOTE_W = 172;   // smaller post-its (less busy; more fit the gutters without overlap)
 // Below this viewport width the side margins can't hold post-its, so notes collapse inline beneath
@@ -180,7 +181,7 @@ const DupControl: React.FC<{ members: ReviewAgent[]; queryCount: (id: string) =>
     <button
       onClick={onKeepBoth}
       style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: "0.03em", color: "#a07868", background: "#fff", border: "1px solid #eccebf", borderRadius: 8, padding: "6px 12px", cursor: "pointer", marginTop: 6 }}
-    >They're different — keep both</button>
+    >{keepBothLabel(members.length)}</button>
   </div>
 );
 
@@ -732,7 +733,7 @@ const CoachmarkIntro: React.FC<{
   checkRef: React.RefObject<HTMLElement | null>;
   checkCopy?: { hd: string; body: React.ReactNode }; // stage-specific to-check copy (else derived from tier)
   onIntroGo: () => void; onNextReady: () => void; onLetsGo: () => void;
-}> = ({ welcomeHeading, readyCount, checkCount, checkTier, hasReadyBeat, step, readyRef, checkRef, checkCopy, onIntroGo, onNextReady, onLetsGo }) => {
+}> = ({ welcomeHeading, readyCount, checkCount, checkTier, step, readyRef, checkRef, checkCopy, onIntroGo, onNextReady, onLetsGo }) => {
   const gold = checkTier === "fix";
   const [rect, setRect] = useState<{ left: number; top: number; width: number; height: number } | null>(null);
 
@@ -801,8 +802,6 @@ const CoachmarkIntro: React.FC<{
   const calloutW = 340;
   const calloutLeft = Math.max(16, Math.min(rect.left, window.innerWidth - calloutW - 16));
   const beak = rect.left + rect.width / 2 - calloutLeft - 7;
-  const stepN = onReady ? 1 : (hasReadyBeat ? 2 : 1);
-  const stepTotal = hasReadyBeat ? 2 : 1;
 
   return (
     <>
@@ -815,8 +814,7 @@ const CoachmarkIntro: React.FC<{
           <span style={{ width: 22, height: 22, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, ...coach.dotBg }}>{coach.dot}</span>{coach.hd}
         </div>
         <p style={{ margin: "9px 0 0", fontSize: 13.5, color: "#5a4a3e", lineHeight: 1.5 }}>{coach.body}</p>
-        <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: ".12em", color: C.muted, marginTop: 13 }}>{stepN} OF {stepTotal}</div>
-        <button onClick={coach.onClick} style={{ ...cmPinkBtn, marginTop: 10 }}>{coach.btn}</button>
+        <button onClick={coach.onClick} style={{ ...cmPinkBtn, marginTop: 14 }}>{coach.btn}</button>
       </div>
     </>
   );
@@ -1269,8 +1267,8 @@ const GuidanceBanner: React.FC<{ step: "duplicates" | "agents" | "queries"; comp
   const dupLine: React.ReactNode = dupCount === 0
     ? <>These are sorted — review everyone whenever you're ready.</>
     : dupCount === 1
-    ? <>First, let's clear a possible double — then you'll review everyone.</>
-    : <>First, let's clear a couple of possible doubles — then you'll review everyone.</>;
+    ? <>First, let's clear a possible duplicate — then you'll review everyone.</>
+    : <>First, let's clear a couple of possible duplicates — then you'll review everyone.</>;
   const content = step === "duplicates" ? { line: dupLine, faqs: DUP_FAQS } : BANNER[step];
   const { line, faqs } = content;
   const cur = step === "queries" ? 1 : 0; // Import (index 2) is the upcoming action — never "now" here
@@ -1887,7 +1885,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
     snapshotCluster(leader.id);
     const group = new Set([leader.id, ...leader.mergeWith]);
     setAgents((xs) => xs.map((a) => {
-      if (a.id === leaderId) return { ...a, mergeResolved: true, reasons: a.reasons.map((r) => (r.kind === "duplicate" ? { ...r, resolved: true, undoable: true, note: dupNoteKept(a.agency) } : r)) };
+      if (a.id === leaderId) return { ...a, mergeResolved: true, reasons: a.reasons.map((r) => (r.kind === "duplicate" ? { ...r, resolved: true, undoable: true, note: dupNoteKept(a.agency, group.size) } : r)) };
       if (group.has(a.id)) return { ...a, mergeResolved: true };
       return a;
     }));
@@ -2131,7 +2129,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   // ("Merged into …" / "Kept both") with an Undo that restores the pre-resolution snapshot.
   const renderResolvedCluster = (c: { leaderId: string; members: ReviewAgent[]; type: "merge" | "keepboth"; survivor?: ReviewAgent }) => {
     const survivorName = c.survivor ? (c.survivor.name || c.survivor.agency || "this agent") : "this agent";
-    const label = c.type === "merge" ? `Merged into ${survivorName}` : "Kept both";
+    const label = c.type === "merge" ? `Merged into ${survivorName}` : keptClusterLabel(c.members.length);
     return (
       <div key={`resclu-${c.leaderId}`} style={{ background: C.doneFill, border: "1px solid rgba(90,110,88,0.3)", borderRadius: 12, padding: "10px 12px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
         <div style={{ minWidth: 0 }}>
@@ -2489,16 +2487,23 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   // close to the inline resolve cards. checkCopy keeps the to-check beat duplicates-true.
   const duplicatesIntro = (screen as string) === "duplicates" && introStep !== null ? (
     <CoachmarkIntro
-      welcomeHeading={clusters.length === 1 ? "First, a possible duplicate" : "First, a couple of possible duplicates"}
+      welcomeHeading="First, some possible duplicates. Let's tidy them up."
       readyCount={0} checkCount={clusters.length} checkTier="fix" hasReadyBeat={false} step={introStep}
       readyRef={readyPillRef} checkRef={checkPillRef}
-      checkCopy={{ hd: clusters.length === 1 ? "One looks like the same agent" : `${clusters.length} look like the same agent`, body: <>Two records that look like one agent — keep both, or merge them. <b>We'll sort these now — it won't take a sec.</b></> }}
+      checkCopy={{
+        hd: clusters.length === 1 ? "A possible duplicate" : `${clusters.length} possible duplicates`,
+        body: clusters.length === 1
+          ? <>We've found 1 instance of an agent record potentially being duplicated. Take a quick look and confirm.</>
+          : <>We've found {clusters.length} instances of agent records potentially being duplicated. Take a quick look and confirm.</>,
+      }}
       onIntroGo={() => setIntroStep(2)} onNextReady={() => setIntroStep(2)}
       onLetsGo={() => setIntroStep(null)} />
   ) : null;
 
+  // Ground reuses the agents/queries review pages' background (.sa-rv-root #f2ede7) — NOT a bespoke
+  // kraft + lined-paper treatment. The cut-off ruled-paper divs have been removed for parity.
   return (
-    <div style={{ background: C.band, minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center", paddingBottom: bannerH + 12, overflowX: "hidden" }}>
+    <div style={{ background: "#f2ede7", minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center", paddingBottom: bannerH + 12, overflowX: "hidden" }}>
       {duplicatesIntro}
       <style>{`@keyframes saImpPulse{0%{box-shadow:0 0 0 0 rgba(176,74,58,0.55)}70%{box-shadow:0 0 0 7px rgba(176,74,58,0)}100%{box-shadow:0 0 0 0 rgba(176,74,58,0)}}`}</style>
       {/* Navigation runs entirely through the panel footer (Continue / Back / "Review all agents →")
@@ -2523,10 +2528,6 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
       )}
 
       <div ref={bandRef} style={{ position: "relative", width: BAND_W, maxWidth: "100%", margin: "0 auto", paddingTop: 14, paddingBottom: 30 }}>
-        {/* ruled-paper + margin line (decorative) */}
-        <div aria-hidden style={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none", background: "repeating-linear-gradient(transparent,transparent 28px,rgba(110,130,140,0.15) 28px,rgba(110,130,140,0.15) 29px)", WebkitMaskImage: "radial-gradient(ellipse 72% 82% at 50% 44%,#000 18%,rgba(0,0,0,0.5) 55%,transparent 82%)", maskImage: "radial-gradient(ellipse 72% 82% at 50% 44%,#000 18%,rgba(0,0,0,0.5) 55%,transparent 82%)" }} />
-        <div aria-hidden style={{ position: "absolute", top: 0, bottom: 0, left: 64, width: 1, zIndex: 0, pointerEvents: "none", background: "#e6a99c", opacity: 0.35, WebkitMaskImage: "linear-gradient(transparent 0%,#000 16%,#000 70%,transparent 100%)", maskImage: "linear-gradient(transparent 0%,#000 16%,#000 70%,transparent 100%)" }} />
-
         {/* chrome */}
         <div style={{ position: "relative", zIndex: 3, display: "flex", alignItems: "center", justifyContent: "space-between", width: panelWidth, margin: "0 auto 10px" }}>
           <span style={{ display: "flex", gap: 5 }}>
@@ -2565,13 +2566,13 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
                 </div>
                 <div>
                   <div style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "#5a6e58" }}>{screen === "duplicates" ? "Before you review" : screen === "agents" ? "Data captured" : "Queries allocated to agents"}</div>
-                  <div style={{ fontFamily: SERIF, fontSize: 17, fontWeight: 500, color: C.head, lineHeight: 1.12 }}>{screen === "duplicates" ? (clusters.length === 0 ? "All doubles sorted" : clusters.length === 1 ? "One looks like the same agent" : clusters.length === 2 ? "A couple look like the same agent" : "A few look like the same agent") : screen === "agents" ? "Populating your agent database" : "Database populated"}</div>
-                  <div style={{ fontSize: 9.5, color: "#6a7e68", fontWeight: 300, fontStyle: "italic", marginTop: 2 }}>{screen === "duplicates" ? "Sort these doubles first and the rest of your list stays tidy" : screen === "agents" ? "Amend if you like, or continue on to queries…" : "Check and continue…"}</div>
+                  <div style={{ fontFamily: SERIF, fontSize: 17, fontWeight: 500, color: C.head, lineHeight: 1.12 }}>{screen === "duplicates" ? (clusters.length === 0 ? "All duplicates sorted" : clusters.length === 1 ? "One looks like the same agent" : clusters.length === 2 ? "A couple look like the same agent" : "A few look like the same agent") : screen === "agents" ? "Populating your agent database" : "Database populated"}</div>
+                  <div style={{ fontSize: 9.5, color: "#6a7e68", fontWeight: 300, fontStyle: "italic", marginTop: 2 }}>{screen === "duplicates" ? "Sort these duplicates first and the rest of your list stays tidy" : screen === "agents" ? "Amend if you like, or continue on to queries…" : "Check and continue…"}</div>
                 </div>
               </div>
               <div style={{ display: "flex", gap: 6, marginTop: 9 }}>
                 {screen === "duplicates"
-                  ? <span ref={checkPillRef} style={{ fontFamily: MONO, fontSize: 8.5, padding: "3px 8px", borderRadius: 14, background: clusters.length ? C.noteFill : "#e7ece1", color: clusters.length ? C.burgundy : "#44563a" }}>{clusters.length ? `${clusters.length} possible double${clusters.length === 1 ? "" : "s"}` : "All sorted"}</span>
+                  ? <span ref={checkPillRef} style={{ fontFamily: MONO, fontSize: 8.5, padding: "3px 8px", borderRadius: 14, background: clusters.length ? C.noteFill : "#e7ece1", color: clusters.length ? C.burgundy : "#44563a" }}>{clusters.length ? `${clusters.length} possible duplicate${clusters.length === 1 ? "" : "s"}` : "All sorted"}</span>
                   : <>
                     <span style={{ fontFamily: MONO, fontSize: 8.5, padding: "3px 8px", borderRadius: 14, background: "#fff", color: "#44563a" }}>{screen === "agents" ? okCount : qOk} ready to import</span>
                     <span style={{ fontFamily: MONO, fontSize: 8.5, padding: "3px 8px", borderRadius: 14, background: C.noteFill, color: C.burgundy }}>{screen === "agents" ? needCount : qNeed} to check</span>

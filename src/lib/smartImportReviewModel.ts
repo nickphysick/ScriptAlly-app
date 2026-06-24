@@ -58,8 +58,15 @@ export interface ReasonItem { kind: CheckReason; note: string; resolved: boolean
 export const MAPPING_NOTE = "We weren't fully sure we read this agent's details correctly — worth a quick look.";
 export const dupNoteOpen = (agency: string) =>
   `Looks like the same agent at ${agency}, imported more than once — remove the duplicate, or keep both.`;
-export const dupNoteKept = (agency: string) => `Kept both — separate agents at ${agency}.`;
+// Count-aware: "both" only reads right for a 2-record cluster; 3+ says "all".
+export const dupNoteKept = (agency: string, count = 2) =>
+  `${count > 2 ? "Kept all" : "Kept both"} — separate agents at ${agency}.`;
 export const dupNoteMerged = "Merged the duplicate in — its queries moved across, nothing lost.";
+/** The "they're not duplicates" control's label — never says "both" for a 3+ cluster. Pure + tested. */
+export const keepBothLabel = (count: number) =>
+  count > 2 ? "They're all different — keep them all" : "They're different — keep both";
+/** The settled-cluster verdict label for a kept-apart cluster. */
+export const keptClusterLabel = (count: number) => (count > 2 ? "Kept all" : "Kept both");
 
 /** Status precedence: no agency is a distinct blocking state; otherwise any open reason — or being a
  *  member of an unresolved duplicate cluster — means needs-check. */
