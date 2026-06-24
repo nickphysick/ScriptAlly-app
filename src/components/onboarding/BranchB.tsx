@@ -303,6 +303,7 @@ export const BranchB: React.FC<BranchBProps> = ({
         complete={extractComplete && !!validated}
         total={validated ? resultQueries.length : rawSample.length}
         onProceed={() => setScreen("overview")}
+        onTimeout={() => setScreen("fallback")}
         userName={currentUser?.name}
       />
     );

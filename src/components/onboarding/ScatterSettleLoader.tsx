@@ -44,6 +44,8 @@ export interface ScatterSettleLoaderProps {
   total: number;
   /** Called once the settle beat finishes — the host routes to the Overview. */
   onProceed: () => void;
+  /** Hard-timeout / unrecoverable wait — the host exits to its fallback (never dead-ends onboarding). */
+  onTimeout?: () => void;
   userName?: string;
 }
 
@@ -60,11 +62,16 @@ const SCATTER = [
   { dx: 58, dy: 168, r: -4, bx: -6, by: -6, br: -1.0, d: 3.9, dl: 0.85 },
 ];
 const STEP = 74;          // centred-column row pitch
-const MIN_SCATTER = 1500; // ms cards stay strewn before they're allowed to snap (covers fast extraction)
+// ── Three-zone timing spine: Intro (fixed) → Work (elastic, loops till extraction) → Reveal (gated) ──
+const INTRO_MS = 1200;    // fixed intro beat (the squeeze-pop scatter entrance)
+const FLOOR_MS = 2800;    // Reveal floor: fast extraction is padded to here so the reveal never flashes
+const SLOW_AT_MS = 10000; // past this, the status text owns up to a larger import
+const TIMEOUT_MS = 30000; // hard wait ceiling → host fallback (never an infinite loop)
 const LAND_STAGGER = 360; // ms between successive cards starting their fly-in
 const RESOLVE_LAG = 320;  // ms after a card starts flying in before it crystallises (lands → clean)
 const HOLD = 700;         // ms after the last card resolves before handing to the Overview
 const WAIT_TXT = ["Reading your file…", "Parsing agents…", "Interpreting dates…", "Matching statuses…", "Tidying records…", "Almost there…"];
+const SLOW_TXT = "Larger import — almost there…";
 const SPARK_KINDS = ["q", "a", "p", "d"] as const;
 const SPARK_GLYPH: Record<typeof SPARK_KINDS[number], React.ReactNode> = {
   q: "?",
@@ -78,11 +85,13 @@ const prefersReduced = () =>
 
 const CARD_W = 440;
 
-export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards, complete, total, onProceed, userName }) => {
+export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards, complete, total, onProceed, onTimeout, userName }) => {
   const reduced = prefersReduced();
   const userInitial = userName ? userName[0].toUpperCase() : "?";
   const n = cards.length;
-  const [minElapsed, setMinElapsed] = useState(false);
+  const [introDone, setIntroDone] = useState(reduced); // intro beat over → the Work zone (drift) begins
+  const [minElapsed, setMinElapsed] = useState(false); // Reveal floor reached
+  const [slow, setSlow] = useState(false);             // a larger import — own up to the longer wait
   const [settling, setSettling] = useState(false);
   const [moved, setMoved] = useState(0);     // cards that have snapped to their column slot
   const [resolved, setResolved] = useState(0); // cards that have crystallised messy → clean
@@ -91,12 +100,25 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
   const [sparks, setSparks] = useState<{ id: number; kind: typeof SPARK_KINDS[number]; x: number; y: number }[]>([]);
   const sparkId = useRef(0);
 
-  // Minimum scatter window so a fast extraction still shows the strewn beat (no delay under reduced-motion).
+  // Timing spine — Intro (fixed) then the Reveal floor. The floor pads a fast extraction so the reveal
+  // never flashes. Reduced-motion keeps the gate (we still wait for the data) but skips the timed
+  // theatre — records appear in order the moment extraction returns.
   useEffect(() => {
-    if (reduced) { setMinElapsed(true); return; }
-    const t = setTimeout(() => setMinElapsed(true), MIN_SCATTER);
-    return () => clearTimeout(t);
+    if (reduced) { setIntroDone(true); setMinElapsed(true); return; }
+    const t1 = setTimeout(() => setIntroDone(true), INTRO_MS);
+    const t2 = setTimeout(() => setMinElapsed(true), FLOOR_MS);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [reduced]);
+
+  // Larger-import status shift (both motion prefs) + a hard wait ceiling → the host's fallback, so a
+  // hung or error-bound extraction never spins forever. Both disarm the moment the data is back.
+  const timeoutRef = useRef(onTimeout); timeoutRef.current = onTimeout;
+  useEffect(() => {
+    if (complete) return; // data's back — the settle path owns the rest
+    const slowT = setTimeout(() => setSlow(true), SLOW_AT_MS);
+    const killT = setTimeout(() => timeoutRef.current?.(), TIMEOUT_MS);
+    return () => { clearTimeout(slowT); clearTimeout(killT); };
+  }, [complete]);
 
   // Begin settling ONLY once extraction has actually returned (and, for the animated path, the cards
   // have had their scatter moment). Honest: nothing snaps or completes before the data is ready.
@@ -156,7 +178,7 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
   // Bar: eases to ~78% across the wait (never parked), then completes to 100% as cards resolve.
   const barW = settling ? Math.round(78 + (resolved / Math.max(1, n)) * 22) : (waitStarted ? 78 : 4);
   const barTransition = settling ? "width .45s ease" : "width 6s cubic-bezier(.25,.6,.4,1)";
-  const txt = allShownResolved ? "ready — here's what we found" : settling ? "Tidying records…" : WAIT_TXT[txtIdx];
+  const txt = allShownResolved ? "ready — here's what we found" : settling ? "Tidying records…" : slow ? SLOW_TXT : WAIT_TXT[txtIdx];
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 50, background: "#fbf7f1", display: "flex", flexDirection: "column", overflow: "hidden", fontFamily: "Inter, sans-serif", color: "#3a1c14", backgroundImage: "repeating-linear-gradient(to bottom,transparent 0,transparent 33px,rgba(124,58,42,.022) 33px,rgba(124,58,42,.022) 34px)" }}>
@@ -190,7 +212,7 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
           const isDone = i < resolved;
           // reduced-motion: cards sit straight in the centred column (no scatter, no fly-in).
           const inStack = reduced || isMoved;
-          const drifting = !reduced && !settling && !isMoved; // bob only during the animated wait
+          const drifting = !reduced && introDone && !settling && !isMoved; // bob through the Work zone (after the intro beat)
           const colTop = `calc(50% + ${(i - (n - 1) / 2) * STEP}px)`;
           const top = inStack ? colTop : `calc(50% + ${slot.dy}px)`;
           const left = inStack ? "50%" : `calc(50% + ${slot.dx}px)`;
