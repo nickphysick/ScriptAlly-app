@@ -553,9 +553,9 @@ const AgentFixPanel: React.FC<{ agent: ReviewAgent; onPatch: (p: Partial<ReviewA
             <span style={{ position: "absolute", right: 0, top: "50%", width: "40%", height: 1, background: "#e7ddd2" }} />
           </div>
           <div style={{ position: "relative", maxWidth: 560 }}>
-            <span style={{ position: "absolute", top: -9, right: 12, zIndex: 2, fontFamily: MONO, fontSize: 9.5, letterSpacing: ".08em", textTransform: "uppercase", background: "#e9ede6", color: "#5a6e58", padding: "3px 8px", borderRadius: 6 }}>for quickness</span>
-            <button className="sa-agency-rec" onClick={() => onPatch({ agencyWaived: true })}
-              style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, fontFamily: MONO, fontSize: 13.5, background: "#f5e2da", color: "#7c3a2a", border: "1.5px solid #e8c8bc", padding: "14px 18px", borderRadius: 12, fontWeight: 500, cursor: "pointer" }}>
+            <span className="sa-quick-pulse" style={{ position: "absolute", top: -9, right: 12, zIndex: 2, fontFamily: MONO, fontSize: 9.5, letterSpacing: ".08em", textTransform: "uppercase", background: "#e9ede6", color: "#5a6e58", padding: "3px 8px", borderRadius: 6 }}>for quickness</span>
+            <button onClick={() => onPatch({ agencyWaived: true })}
+              style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, fontFamily: MONO, fontSize: 13, background: "#f7efe9", color: "#7c3a2a", border: "1px solid #e8d8cf", padding: "13px 18px", borderRadius: 11, fontWeight: 500, cursor: "pointer" }}>
               Use the agent's name as the primary field →
             </button>
           </div>
@@ -773,9 +773,13 @@ const CoachmarkIntro: React.FC<{
 
   // Beat copy — ready = reassurance; to-check = sets up the work ("…it won't take a sec.").
   const onReady = step === 1;
+  // "{x} need a check" + a single warm reason line — used by both the agents (gold) and queries (pink)
+  // intros; only the ring/dot colour differs by tier.
+  const checkHd = checkCount === 1 ? "One needs a check" : `${checkCount} need a check`;
+  const checkBody = <>We're missing some details we need to give you the best possible ScriptAlly experience. <b>Let's work through these now — it won't take a second.</b></> as React.ReactNode;
   const checkBase = gold
-    ? { ring: "#e5d29a", dot: "!", dotBg: { background: "#f4ead0", color: "#6f5618" }, hd: `${checkCount === 1 ? "One" : checkCount} need${checkCount === 1 ? "s" : ""} a quick fix`, body: <>A quick fix each — a missing agency, say. <b>We'll work through these now — it won't take a sec.</b></> as React.ReactNode }
-    : { ring: "#e8c8bc", dot: "✦", dotBg: { background: "#f5e2da", color: "#7c3a2a" }, hd: `${checkCount === 1 ? "One" : checkCount} to sharpen`, body: <>A date to confirm or a status to clarify. <b>We'll work through these now — it won't take a sec.</b></> as React.ReactNode };
+    ? { ring: "#e5d29a", dot: "!", dotBg: { background: "#f4ead0", color: "#6f5618" }, hd: checkHd, body: checkBody }
+    : { ring: "#e8c8bc", dot: "✦", dotBg: { background: "#f5e2da", color: "#7c3a2a" }, hd: checkHd, body: checkBody };
   const coach = onReady
     ? { ring: "#9db09a", dot: "✓", dotBg: { background: "#e9ede6", color: "#5a6e58" }, hd: "Good to go", body: <><b>{readyCount} read cleanly</b> — nothing for you to do with these.</> as React.ReactNode, btn: "Next →", onClick: onNextReady }
     : { ...checkBase, hd: checkCopy?.hd ?? checkBase.hd, body: checkCopy?.body ?? checkBase.body, btn: "Let's go →", onClick: onLetsGo };
@@ -1638,15 +1642,16 @@ const REVIEW_SHELL_CSS = `
 @keyframes saAsmB{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
 @keyframes saAsmL{from{opacity:0;transform:translateX(-46px)}to{opacity:1;transform:none}}
 @keyframes saAsmR{from{opacity:0;transform:translateX(46px)}to{opacity:1;transform:none}}
-.sa-asm{opacity:0;animation-duration:.5s;animation-timing-function:cubic-bezier(.22,1,.36,1);animation-fill-mode:both;}
+.sa-asm{opacity:0;animation-duration:.7s;animation-timing-function:cubic-bezier(.22,1,.36,1);animation-fill-mode:both;}
 .sa-asm-t{animation-name:saAsmT;}.sa-asm-b{animation-name:saAsmB;}.sa-asm-l{animation-name:saAsmL;}.sa-asm-r{animation-name:saAsmR;}
-.sa-asm-rows>*{opacity:0;animation:saAsmL .5s cubic-bezier(.22,1,.36,1) both;}
-.sa-asm-rows>*:nth-child(1){animation-delay:.20s}.sa-asm-rows>*:nth-child(2){animation-delay:.27s}.sa-asm-rows>*:nth-child(3){animation-delay:.34s}.sa-asm-rows>*:nth-child(4){animation-delay:.41s}.sa-asm-rows>*:nth-child(5){animation-delay:.48s}.sa-asm-rows>*:nth-child(6){animation-delay:.55s}.sa-asm-rows>*:nth-child(7){animation-delay:.62s}.sa-asm-rows>*:nth-child(8){animation-delay:.69s}.sa-asm-rows>*:nth-child(n+9){animation-delay:.76s}
+.sa-asm-rows>*{opacity:0;animation:saAsmL .62s cubic-bezier(.22,1,.36,1) both;}
+.sa-asm-rows>*:nth-child(1){animation-delay:.34s}.sa-asm-rows>*:nth-child(2){animation-delay:.47s}.sa-asm-rows>*:nth-child(3){animation-delay:.60s}.sa-asm-rows>*:nth-child(4){animation-delay:.73s}.sa-asm-rows>*:nth-child(5){animation-delay:.86s}.sa-asm-rows>*:nth-child(6){animation-delay:.99s}.sa-asm-rows>*:nth-child(7){animation-delay:1.12s}.sa-asm-rows>*:nth-child(8){animation-delay:1.25s}.sa-asm-rows>*:nth-child(n+9){animation-delay:1.38s}
 @media(prefers-reduced-motion:reduce){.sa-asm,.sa-asm-rows>*{animation:none;opacity:1;transform:none;}}
-/* slow, soft "breathing" glow on the recommended action (agency card) — guides, never nags */
-@keyframes saAgencyBreathe{0%,100%{box-shadow:0 0 0 0 rgba(124,58,42,.18),0 0 0 0 rgba(124,58,42,.10)}50%{box-shadow:0 0 0 4px rgba(124,58,42,.10),0 0 22px 3px rgba(124,58,42,.16)}}
-.sa-agency-rec{animation:saAgencyBreathe 2.6s ease-in-out infinite;}
-@media(prefers-reduced-motion:reduce){.sa-agency-rec{animation:none;box-shadow:0 0 0 3px rgba(124,58,42,.10);}}
+/* slow, soft pulse on the sage "for quickness" pill — guides toward the recommended path without the
+   button itself having to shout (the breathing glow moved off the button onto this pill). */
+@keyframes saQuickPulse{0%,100%{box-shadow:0 0 0 0 rgba(138,158,136,0)}50%{box-shadow:0 0 0 3px rgba(138,158,136,.30)}}
+.sa-quick-pulse{animation:saQuickPulse 2.6s ease-in-out infinite;}
+@media(prefers-reduced-motion:reduce){.sa-quick-pulse{animation:none;}}
 /* completed-stage sage pulse (sketch C beat 1) — the done card swells sage once, faint tint at the
    peak, a quiet "that's done"; reduced-motion → a static soft sage ring. */
 @keyframes saStagePulse{0%{box-shadow:0 30px 70px -20px rgba(58,28,20,.5),0 0 0 0 rgba(134,165,131,0)}30%{box-shadow:0 30px 70px -20px rgba(58,28,20,.5),0 0 0 5px rgba(134,165,131,.35),0 0 34px 6px rgba(134,165,131,.4);background:#f3f7f1}60%{box-shadow:0 30px 70px -20px rgba(58,28,20,.5),0 0 0 5px rgba(134,165,131,.18),0 0 28px 4px rgba(134,165,131,.22)}100%{box-shadow:0 30px 70px -20px rgba(58,28,20,.5),0 0 0 0 rgba(134,165,131,0)}}
@@ -2273,7 +2278,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
           {/* ── Left: header + records card + footer ── */}
           <div className="sa-rv-main">
             {/* Header */}
-            <div className="sa-asm sa-asm-t" style={{ marginBottom: 16, animationDelay: "60ms" }}>
+            <div className="sa-asm sa-asm-t" style={{ marginBottom: 16, animationDelay: "120ms" }}>
               <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: ".18em", textTransform: "uppercase", color: "#5a6e58" }}>Data captured</span>
               <h1 style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 30, margin: "6px 0 4px", color: "#33302b" }}>
                 Populating your{" "}
@@ -2306,7 +2311,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
             <SetAsideTray items={setAsideItems} onRestore={onRestoreSetAside} />
 
             {/* Footer */}
-            <div className="sa-asm sa-asm-b" style={{ display: "flex", alignItems: "center", gap: 18, marginTop: 18, flexShrink: 0, animationDelay: "150ms" }}>
+            <div className="sa-asm sa-asm-b" style={{ display: "flex", alignItems: "center", gap: 18, marginTop: 18, flexShrink: 0, animationDelay: "640ms" }}>
               <button onClick={() => (hadDuplicates ? switchScreen("duplicates") : onBack?.())}
                 style={{ fontFamily: MONO, fontSize: 13, color: "#8a8178", background: "none", border: "none", cursor: "pointer" }}
                 onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; }}
@@ -2328,7 +2333,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
           </div>
 
           {/* ── Right: sidebar board ── */}
-          <aside className="sa-rv-board sa-asm sa-asm-r" style={{ animationDelay: "120ms" }}>
+          <aside className="sa-rv-board sa-asm sa-asm-r" style={{ animationDelay: "300ms" }}>
             <WhereYouAreCard step="agents" onSkip={() => setShowSkipModal(true)} />
             <PinkSlip>
               Anything in <PinkTag /> needs a quick look. It might be a duplicate, or could be missing the agency's name (we need this). Check these for us, add any further details you can, then we'll move on to capturing your queries.
@@ -2404,7 +2409,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
 
           {/* ── Left: header + records card + footer ── */}
           <div className="sa-rv-main">
-            <div className="sa-asm sa-asm-t" style={{ marginBottom: 16, animationDelay: "60ms" }}>
+            <div className="sa-asm sa-asm-t" style={{ marginBottom: 16, animationDelay: "120ms" }}>
               <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: ".18em", textTransform: "uppercase", color: "#5a6e58" }}>Data captured</span>
               <h1 style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 30, margin: "6px 0 4px", color: "#33302b" }}>
                 Populating your{" "}
@@ -2446,7 +2451,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
             <SetAsideTray items={setAsideItems} onRestore={onRestoreSetAside} />
 
             {/* Footer */}
-            <div className="sa-asm sa-asm-b" style={{ display: "flex", alignItems: "center", gap: 18, marginTop: 18, flexShrink: 0, animationDelay: "150ms" }}>
+            <div className="sa-asm sa-asm-b" style={{ display: "flex", alignItems: "center", gap: 18, marginTop: 18, flexShrink: 0, animationDelay: "640ms" }}>
               <button onClick={() => switchScreen("agents")}
                 style={{ fontFamily: MONO, fontSize: 13, color: "#8a8178", background: "none", border: "none", cursor: "pointer" }}
                 onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; }}
@@ -2469,7 +2474,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
           </div>
 
           {/* ── Right: sidebar board ── */}
-          <aside className="sa-rv-board sa-asm sa-asm-r" style={{ animationDelay: "120ms" }}>
+          <aside className="sa-rv-board sa-asm sa-asm-r" style={{ animationDelay: "300ms" }}>
             <WhereYouAreCard step="queries" onSkip={() => setShowSkipModal(true)} />
             <PinkSlip>
               Anything in <PinkTag /> needs a quick look. A query might be missing its date, or we couldn't match it to an agent. Check these for us, add any further details you can, then we'll bring it all into your log.
