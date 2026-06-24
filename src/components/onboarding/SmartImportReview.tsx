@@ -24,7 +24,7 @@ import {
   agentStatus, resolveReason, queryStatusOf, fmtDate, QUERY_STATUS_OPTIONS,
   dupNoteOpen, dupNoteKept, dupNoteMerged, parseModel, modelToResult, applyAgentRemoval, seedUnidentifiedSetAside, decideStageEntry,
   currentDate, quoteStatuses, queryReasonText, statusDirectionChoices, removeDuplicateRecord, buildClusters, doneStageMessage,
-  keepBothLabel, keptClusterLabel,
+  keepBothLabel, keptClusterLabel, mergedAwayByKeeper,
 } from "../../lib/smartImportReviewModel";
 
 // ── Palette (from the sketch; critical colours inline per house style) ──────────────────────────
@@ -157,8 +157,29 @@ const InlineNote: React.FC<{ text: string; resolved: boolean; kind: CheckReason;
   );
 };
 
+// ── Resolve-bar bits ─────────────────────────────────────────────────────────────────────────────
+// A quiet sage pill on the surviving record once a cluster has absorbed a duplicate.
+const KeptTag: React.FC = () => (
+  <span style={{ fontFamily: MONO, fontSize: 7.5, letterSpacing: "0.04em", textTransform: "uppercase", color: "#5a6e58", background: "rgba(90,110,88,0.1)", border: "1px solid rgba(90,110,88,0.26)", borderRadius: 6, padding: "2px 7px", whiteSpace: "nowrap", flexShrink: 0 }}>
+    kept as the main record
+  </span>
+);
+// The slim sage confirmation bar a removed duplicate collapses into (it does NOT vanish): the moved
+// record (struck) merged into the keeper, with a query-count-aware "moved across" note. The collapse
+// animation + reduced-motion fallback live in saDupBarIn (injected in the duplicates return).
+const MergedBar: React.FC<{ removedName: string; keptName: string; n: number }> = ({ removedName, keptName, n }) => (
+  <div className="sa-dup-bar" style={{ display: "flex", alignItems: "center", gap: 8, background: C.doneFill, border: "1px solid rgba(90,110,88,0.28)", borderRadius: 9, padding: "7px 11px", marginTop: 7 }}>
+    <span style={{ color: "#5a6e58", fontSize: 11, flexShrink: 0 }}>✓</span>
+    <span style={{ fontFamily: "Inter", fontSize: 11.5, color: C.doneInk, lineHeight: 1.3, minWidth: 0 }}>
+      <span style={{ textDecoration: "line-through", opacity: 0.7 }}>{removedName}</span>
+      {" merged into "}<strong style={{ fontWeight: 600 }}>{keptName}</strong>
+      {" — its quer"}{n === 1 ? "y" : "ies"}{" moved across"}
+    </span>
+  </div>
+);
+
 // ── Shared dedupe control (rendered once per cluster) ────────────────────────────────────────────
-const DupControl: React.FC<{ members: ReviewAgent[]; queryCount: (id: string) => number; onRemove: (id: string) => void; onKeepBoth: () => void }> = ({ members, queryCount, onRemove, onKeepBoth }) => (
+const DupControl: React.FC<{ members: ReviewAgent[]; queryCount: (id: string) => number; onRemove: (id: string) => void; onKeepBoth: () => void; keptId?: string }> = ({ members, queryCount, onRemove, onKeepBoth, keptId }) => (
   <div style={{ position: "relative", zIndex: 1, marginTop: 9, padding: "10px 11px", background: "#fff", border: "0.5px solid #f1d9cd", borderRadius: 9 }}>
     {members.map((s) => {
       const n = queryCount(s.id);
@@ -166,6 +187,7 @@ const DupControl: React.FC<{ members: ReviewAgent[]; queryCount: (id: string) =>
         <div key={s.id} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, color: "#6a5a50", padding: "4px 0" }}>
           <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#c9a89e", flexShrink: 0 }} />
           <span style={{ flex: 1, minWidth: 0 }}>{(s.name || "—")} — {s.agency}</span>
+          {keptId === s.id && <KeptTag />}
           <span style={{ fontFamily: MONO, fontSize: 8, color: C.meta }}>{n} quer{n === 1 ? "y" : "ies"}</span>
           <button
             onClick={() => onRemove(s.id)}
@@ -1945,6 +1967,9 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
 
   const active = agents.filter((a) => !a.deleted);
   const queryCount = useCallback((id: string) => queries.filter((q) => q.agentRef === id && !q.removed).length, [queries]);
+  // How many queries a now-merged-away record brought across — counted from the ORIGINAL import (its
+  // live count is 0 post-merge), so the bar pluralises "quer{y|ies}" correctly. Read-only.
+  const movedCount = useCallback((removedId: string) => (result.queries || []).filter((q) => q.agentRef === removedId).length, [result]);
 
   // Ids of agents inside an unresolved duplicate cluster (both members count as needs-check).
   const openDupIds = useMemo(() => {
@@ -2265,7 +2290,10 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   // dedupe control below; each member's other reasons (e.g. a mapping note) stay per-card.
   // `resolveOnly` (the duplicates stage) drops the stacked cards + "Make changes" — editing details
   // is premature there; the candidate rows already name each agent, and editing lives on Agents.
-  const renderCluster = (leader: ReviewAgent, members: ReviewAgent[], resolveOnly = false) => (
+  //  `bars` are this cluster's already-merged-away records — they collapse into sage confirmation
+  //  bars beneath the live members (they never just vanish), and once any exist the surviving leader
+  //  is tagged "kept as the main record".
+  const renderCluster = (leader: ReviewAgent, members: ReviewAgent[], resolveOnly = false, bars: ReviewAgent[] = []) => (
     <div key={`clu-${leader.id}`} style={{ position: "relative", background: "#fdf2ec", border: "1px solid #f0d6c9", borderRadius: 12, padding: "10px 9px 11px" }}>
       <div style={{ position: "relative", zIndex: 1, fontFamily: MONO, fontSize: 8, letterSpacing: "0.06em", textTransform: "uppercase", color: "#b07a64", display: "flex", alignItems: "center", gap: 6, margin: "0 2px 8px" }}>
         <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#d8a08c" }} />Looks like the same agent, imported more than once
@@ -2279,7 +2307,8 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
           ))}
         </div>
       )}
-      <DupControl members={members} queryCount={queryCount} onRemove={removeDuplicate} onKeepBoth={() => keepBoth(leader.id)} />
+      <DupControl members={members} queryCount={queryCount} onRemove={removeDuplicate} onKeepBoth={() => keepBoth(leader.id)} keptId={bars.length ? leader.id : undefined} />
+      {bars.map((m) => <MergedBar key={`bar-${m.id}`} removedName={m.name || m.agency || "—"} keptName={leader.name || leader.agency || "the kept record"} n={movedCount(m.id)} />)}
     </div>
   );
 
@@ -2304,6 +2333,37 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
         <button onClick={() => undoCluster(c.leaderId)}
           style={{ flexShrink: 0, fontFamily: MONO, fontSize: 8.5, letterSpacing: "0.04em", textTransform: "uppercase", color: "#5a6e58", background: "rgba(255,255,255,0.6)", border: "1px solid rgba(90,110,88,0.4)", borderRadius: 7, padding: "4px 10px", cursor: "pointer" }}
         >Undo</button>
+      </div>
+    );
+  };
+
+  // A cluster resolved by merging down to one keeper. buildClusters drops these (the keeper's mergeWith
+  // is cleared on resolve), so they render from the mergedAwayByKeeper projection: the surviving record
+  // (tagged + its consolidated query count) above the sage confirmation bars for each record it absorbed.
+  // Undo restores every snapshot that covers this group, recovering the whole original cluster.
+  const renderResolvedMerge = (keeper: ReviewAgent, bars: ReviewAgent[]) => {
+    const ids = [keeper.id, ...bars.map((b) => b.id)];
+    const undoAll = () => Object.keys(snapRef.current)
+      .filter((k) => snapRef.current[k].agents.some((a) => ids.includes(a.id)))
+      .forEach((k) => undoCluster(k));
+    const kn = queryCount(keeper.id);
+    return (
+      <div key={`resmerge-${keeper.id}`} style={{ position: "relative", background: "#fdf2ec", border: "1px solid #f0d6c9", borderRadius: 12, padding: "10px 9px 11px" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, margin: "0 2px 8px" }}>
+          <div style={{ fontFamily: MONO, fontSize: 8, letterSpacing: "0.06em", textTransform: "uppercase", color: "#5a6e58", display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#8a9e88" }} />Duplicate sorted
+          </div>
+          <button onClick={undoAll}
+            style={{ flexShrink: 0, fontFamily: MONO, fontSize: 8.5, letterSpacing: "0.04em", textTransform: "uppercase", color: "#5a6e58", background: "rgba(255,255,255,0.6)", border: "1px solid rgba(90,110,88,0.4)", borderRadius: 7, padding: "4px 10px", cursor: "pointer" }}
+          >Undo</button>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#fff", border: "0.5px solid #e2d8c8", borderRadius: 9, padding: "8px 11px" }}>
+          <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#8a9e88", flexShrink: 0 }} />
+          <span style={{ flex: 1, minWidth: 0, fontSize: 11.5, color: "#5a4a40" }}>{keeper.name || keeper.agency || "—"}{keeper.name && keeper.agency ? ` — ${keeper.agency}` : ""}</span>
+          <KeptTag />
+          <span style={{ fontFamily: MONO, fontSize: 8, color: C.meta }}>{kn} quer{kn === 1 ? "y" : "ies"}</span>
+        </div>
+        {bars.map((m) => <MergedBar key={`bar-${m.id}`} removedName={m.name || m.agency || "—"} keptName={keeper.name || keeper.agency || "the kept record"} n={movedCount(m.id)} />)}
       </div>
     );
   };
@@ -2683,7 +2743,10 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   return (
     <ReviewShell userInitial={userInitial} allClear={clusters.length === 0}
       modal={showSkipModal ? <SkipSetupModal onClose={() => setShowSkipModal(false)} onSkip={onSkip} /> : duplicatesIntro}>
-      <style>{`@keyframes saImpPulse{0%{box-shadow:0 0 0 0 rgba(176,74,58,0.55)}70%{box-shadow:0 0 0 7px rgba(176,74,58,0)}100%{box-shadow:0 0 0 0 rgba(176,74,58,0)}}`}</style>
+      <style>{`@keyframes saImpPulse{0%{box-shadow:0 0 0 0 rgba(176,74,58,0.55)}70%{box-shadow:0 0 0 7px rgba(176,74,58,0)}100%{box-shadow:0 0 0 0 rgba(176,74,58,0)}}
+        @keyframes saDupBarIn{from{opacity:0;max-height:0;transform:translateY(-4px);margin-top:0}to{opacity:1;max-height:60px;transform:none;margin-top:7px}}
+        .sa-dup-bar{animation:saDupBarIn .42s cubic-bezier(.22,.61,.36,1) both;overflow:hidden}
+        @media(prefers-reduced-motion:reduce){.sa-dup-bar{animation:none}}`}</style>
       <div className="sa-rv-grid" key={screen}>
 
         {/* ── Left: header + records + footer ── */}
@@ -2705,13 +2768,36 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
             </div>
           )}
 
-          {/* Records card — duplicate clusters, internal scroll + edge fades */}
+          {/* Records card — duplicate clusters, internal scroll + edge fades. Open clusters carry their
+              already-merged bars; keep-boths show their settled card; clusters merged down to one keeper
+              (which buildClusters drops) render from the mergedAwayByKeeper projection so nothing vanishes. */}
           <RecordsCard>
-            {allClusters.length > 0
-              ? allClusters.map((c) => (c.resolved && c.type !== "open"
-                ? renderResolvedCluster({ leaderId: c.leaderId, members: c.members, type: c.type as "merge" | "keepboth", survivor: c.survivor })
-                : renderCluster(c.members[0], c.openMembers, true)))
-              : <div style={{ padding: "32px 22px", fontFamily: "Inter", fontSize: 13, color: "#9c8878", textAlign: "center" }}>No duplicates to review.</div>}
+            {(() => {
+              const byKeeper = mergedAwayByKeeper(agents);
+              const placed = new Set<string>();
+              const out: React.ReactNode[] = [];
+              for (const c of allClusters) {
+                if (c.type === "keepboth") {
+                  out.push(renderResolvedCluster({ leaderId: c.leaderId, members: c.members, type: "keepboth", survivor: c.survivor }));
+                  c.members.forEach((m) => placed.add(m.id));
+                } else { // open (merge type never arises — a resolved merge has no live anchor)
+                  const bars = byKeeper.get(c.leaderId) ?? [];
+                  out.push(renderCluster(c.members[0], c.openMembers, true, bars));
+                  placed.add(c.leaderId);
+                  bars.forEach((b) => placed.add(b.id));
+                }
+              }
+              // Fully-resolved merges: a keeper no longer anchoring any open cluster, plus its bars.
+              for (const [keeperId, bars] of byKeeper) {
+                if (placed.has(keeperId)) continue;
+                const keeper = agents.find((a) => a.id === keeperId);
+                if (!keeper || keeper.deleted) continue;
+                out.push(renderResolvedMerge(keeper, bars));
+              }
+              return out.length
+                ? out
+                : <div style={{ padding: "32px 22px", fontFamily: "Inter", fontSize: 13, color: "#9c8878", textAlign: "center" }}>No duplicates to review.</div>;
+            })()}
           </RecordsCard>
 
           {/* Footer */}

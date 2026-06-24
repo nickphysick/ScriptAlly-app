@@ -35,6 +35,10 @@ export interface ReviewAgent {
   mergeWith: string[];   // ids of likely-duplicate siblings (same agency); kept intact across resolve
   mergeResolved: boolean;
   deleted: boolean;
+  /** Client-only. When this record was merged away on the duplicates stage, the id of the keeper its
+   *  queries moved onto — the data behind the "✓ merged into …" resolve bar. NEVER reaches Firestore:
+   *  merged-away records are `deleted` (excluded by modelToResult, which also picks fields explicitly). */
+  mergedIntoId?: string;
   /** Which stage set this agent aside (when deleted) — lets the duplicates-stage reset restore only
    *  its own set-asides, and keeps duplicates-stage merges out of the generic agents/queries tray
    *  (they're recovered on the duplicates stage). Undefined until the agent is set aside. */
@@ -448,6 +452,34 @@ export function buildClusters(agents: ReviewAgent[]): DupCluster[] {
   return out;
 }
 
+/** Follow a merged-away record's `mergedIntoId` to the FINAL live keeper — handling a keeper that was
+ *  itself later merged away (m1→L, then L→m2 ⇒ m1 resolves to m2). Stops at the first live record (or
+ *  a broken/cyclic chain). Pure: read-only over the working agents. */
+export function resolveMergeKeeper(agents: ReviewAgent[], startId: string): string {
+  let id = startId;
+  for (let i = 0; i < 12; i++) {
+    const a = agents.find((x) => x.id === id);
+    if (!a || !a.deleted || !a.mergedIntoId || a.mergedIntoId === id) break;
+    id = a.mergedIntoId;
+  }
+  return id;
+}
+
+/** Records merged away on the duplicates stage (deleted, with a recorded keeper), grouped by their
+ *  FINAL live keeper — the data behind the per-keeper "✓ merged into …" resolve bars. This is the ONLY
+ *  way merged-away records resurface for rendering: buildClusters deliberately drops them (clearing the
+ *  removed record's mergeWith is the remove-one-removes-two regression fix), so the bars read from here,
+ *  never from clustering. Pure + unit-tested. */
+export function mergedAwayByKeeper(agents: ReviewAgent[]): Map<string, ReviewAgent[]> {
+  const out = new Map<string, ReviewAgent[]>();
+  for (const a of agents) {
+    if (!a.deleted || a.setAsideStage !== "duplicates" || !a.mergedIntoId) continue;
+    const keeperId = resolveMergeKeeper(agents, a.mergedIntoId);
+    (out.get(keeperId) ?? out.set(keeperId, []).get(keeperId)!).push(a);
+  }
+  return out;
+}
+
 /** Pure core of "Remove this one" on the duplicates stage (Fix 4 + the leader-removal fix). Sets aside
  *  ONLY the clicked record (`deleted` + setAsideStage "duplicates"), repoints its queries to the
  *  surviving keeper, and re-seats the rest of the cluster on a LIVE leader so a 3-way takes two
@@ -473,7 +505,9 @@ export function removeDuplicateRecord(
   const nextQueries = queries.map((q) => (q.agentRef === removedId ? { ...q, agentRef: survivorId } : q));
   const nextAgents = agents.map((a) => {
     // Set aside the clicked record only — and clear its mergeWith so it can never anchor a cluster.
-    if (a.id === removedId) return { ...a, deleted: true, setAsideStage: "duplicates" as const, mergeWith: [] };
+    // Record the keeper its queries moved onto (mergedIntoId) for the "merged into …" resolve bar; this
+    // is read-only presentation data and never re-enters clustering (which still keys off mergeWith).
+    if (a.id === removedId) return { ...a, deleted: true, setAsideStage: "duplicates" as const, mergeWith: [], mergedIntoId: survivorId };
     if (resolvingToOne) {
       // One left → cluster resolved; the keeper drops its duplicate flag with a "merged" note.
       if (a.id === survivorId) {
