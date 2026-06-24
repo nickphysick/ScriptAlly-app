@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseModel, modelToResult, applyAgentRemoval, quoteStatuses, queryReasonText, statusDirectionChoices, reviewTallies, seedUnidentifiedSetAside, decideStageEntry, ReviewQuery } from './smartImportReviewModel';
+import { parseModel, modelToResult, applyAgentRemoval, quoteStatuses, queryReasonText, statusDirectionChoices, reviewTallies, seedUnidentifiedSetAside, decideStageEntry, doneStageMessage, ReviewQuery } from './smartImportReviewModel';
 import { QueryStatus } from '../types';
 import { ParsedAgent, ParsedQuery, SmartImportResult } from '../types/smartImport';
 
@@ -233,5 +233,35 @@ describe('modelToResult — exclusions & merge repointing', () => {
     expect(out.agents.map((a) => a.ref)).toEqual(['a2']);
     expect(out.queries.length).toBe(2);
     expect(out.queries.every((qq) => qq.agentRef === 'a2')).toBe(true);
+  });
+});
+
+describe('doneStageMessage — the all-sorted message tells the truth', () => {
+  const chip = 'Queries all sorted — ready to import';
+
+  it('claims "all sorted" + shows the chip ONLY when nothing was skipped', () => {
+    const m = doneStageMessage({ fixesLeft: false, skipped: 0, sortedChip: chip });
+    expect(m.heading).toBe('All sorted ✦');
+    expect(m.chip).toBe(chip);
+  });
+
+  it('does NOT claim all-sorted (no chip) when items were skipped/left open', () => {
+    const m = doneStageMessage({ fixesLeft: false, skipped: 2, sortedChip: chip });
+    expect(m.chip).toBeNull();                 // never the false "ready to import" claim
+    expect(m.heading).not.toBe('All sorted ✦');
+    expect(m.body).toMatch(/still open/);
+    // the two states must read differently
+    expect(m).not.toEqual(doneStageMessage({ fixesLeft: false, skipped: 0, sortedChip: chip }));
+  });
+
+  it('singular vs plural wording for the open count', () => {
+    expect(doneStageMessage({ fixesLeft: false, skipped: 1, sortedChip: chip }).body).toMatch(/^One is still open/);
+    expect(doneStageMessage({ fixesLeft: false, skipped: 3, sortedChip: chip }).body).toMatch(/^3 are still open/);
+  });
+
+  it('a blocking fix shows "Almost there", never the chip', () => {
+    const m = doneStageMessage({ fixesLeft: true, skipped: 0, sortedChip: chip });
+    expect(m.heading).toBe('Almost there');
+    expect(m.chip).toBeNull();
   });
 });

@@ -22,7 +22,7 @@ import {
   ReviewAgent, ReviewQuery, ReasonItem, CheckReason, AgentStatus,
   agentStatus, resolveReason, queryStatusOf, fmtDate, QUERY_STATUS_OPTIONS,
   dupNoteOpen, dupNoteKept, dupNoteMerged, parseModel, modelToResult, applyAgentRemoval, seedUnidentifiedSetAside, decideStageEntry,
-  currentDate, quoteStatuses, queryReasonText, statusDirectionChoices, removeDuplicateRecord, buildClusters,
+  currentDate, quoteStatuses, queryReasonText, statusDirectionChoices, removeDuplicateRecord, buildClusters, doneStageMessage,
 } from "../../lib/smartImportReviewModel";
 
 // ── Palette (from the sketch; critical colours inline per house style) ──────────────────────────
@@ -552,7 +552,7 @@ const AgentFixPanel: React.FC<{ agent: ReviewAgent; onPatch: (p: Partial<ReviewA
             <span style={{ position: "absolute", right: 0, top: "50%", width: "40%", height: 1, background: "#e7ddd2" }} />
           </div>
           <div style={{ position: "relative", maxWidth: 560 }}>
-            <span style={{ position: "absolute", top: -9, right: 12, zIndex: 2, fontFamily: MONO, fontSize: 9.5, letterSpacing: ".08em", textTransform: "uppercase", background: "#5a6e58", color: "#fff", padding: "3px 8px", borderRadius: 6 }}>Recommended for now</span>
+            <span style={{ position: "absolute", top: -9, right: 12, zIndex: 2, fontFamily: MONO, fontSize: 9.5, letterSpacing: ".08em", textTransform: "uppercase", background: "#e9ede6", color: "#5a6e58", padding: "3px 8px", borderRadius: 6 }}>for quickness</span>
             <button className="sa-agency-rec" onClick={() => onPatch({ agencyWaived: true })}
               style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, fontFamily: MONO, fontSize: 13.5, background: "#f5e2da", color: "#7c3a2a", border: "1.5px solid #e8c8bc", padding: "14px 18px", borderRadius: 12, fontWeight: 500, cursor: "pointer" }}>
               Use the agent's name as the primary field →
@@ -592,20 +592,24 @@ const FocusOverlay: React.FC<{
   return (
     <div role="dialog" aria-modal="true"
       style={{ position: "fixed", inset: 0, background: "rgba(58,28,20,.34)", backdropFilter: "blur(2px)", WebkitBackdropFilter: "blur(2px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 60, padding: 24 }}>
-        {done ? (
-          <div className={fixesLeft ? undefined : "sa-stage-done"} style={{ ...card, padding: "40px 30px", textAlign: "center" }}>
-            <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 26, color: fixesLeft ? "#a85a44" : "#5a6e58" }}>{fixesLeft ? "Almost there" : "All sorted ✦"}</div>
-            {!fixesLeft && (
+        {done ? (() => {
+          // Honest end-of-stage message: only claim "all sorted" when nothing was skipped/left open.
+          const skipped = states.filter((s) => s === "skip").length;
+          const msg = doneStageMessage({ fixesLeft, skipped, sortedChip: doneChip });
+          const celebratory = !fixesLeft && skipped === 0;
+          return (
+          <div className={celebratory ? "sa-stage-done" : undefined} style={{ ...card, padding: "40px 30px", textAlign: "center" }}>
+            <div style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 26, color: fixesLeft ? "#a85a44" : "#5a6e58" }}>{msg.heading}</div>
+            {msg.chip && (
               <div className="sa-done-chip" style={{ display: "inline-flex", alignItems: "center", gap: 7, fontFamily: MONO, fontSize: 12, color: "#5a6e58", background: "#e9ede6", padding: "7px 13px", borderRadius: 8, margin: "14px 0 2px" }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M20 6 9 17l-5-5" /></svg>{doneChip}
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M20 6 9 17l-5-5" /></svg>{msg.chip}
               </div>
             )}
-            <p style={{ color: "#6a5c50", fontSize: 14.5, margin: "10px auto 22px", maxWidth: 380 }}>
-              {fixesLeft ? "A fix still needs doing before you can import — pop back to it whenever you're ready." : "Your records are looking sharp. Anything you skipped is saved as-is and easy to revisit later."}
-            </p>
+            <p style={{ color: "#6a5c50", fontSize: 14.5, margin: "10px auto 22px", maxWidth: 380 }}>{msg.body}</p>
             <button onClick={onClose} style={{ fontFamily: MONO, fontSize: 13, background: "#7c3a2a", color: "#fff", border: "none", borderRadius: 9, padding: "11px 18px", cursor: "pointer" }}>Review and confirm</button>
           </div>
-        ) : (() => {
+          );
+        })() : (() => {
           const idx = Math.min(pos, order.length - 1);
           const id = order[idx];
           const tier = tierOf(id);

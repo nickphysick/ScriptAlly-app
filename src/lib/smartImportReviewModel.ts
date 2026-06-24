@@ -190,6 +190,24 @@ export function decideStageEntry(opts: { flagged: boolean; introSeen: boolean; e
   return "walk";                                            // seen the intro → straight into the walk
 }
 
+/** The walk's end-of-stage message. Pure so it can be tested. Three honest states:
+ *   • a blocking fix is still open → "Almost there" (you can't import yet).
+ *   • everything was actually resolved → the celebratory "All sorted ✦" + the stage's handoff chip.
+ *   • some were skipped / left open → NO "all sorted" claim and NO chip; an honest "saved for now" note.
+ *  `sortedChip` is the stage-aware confirmation ("Queries all sorted — ready to import"); it is only
+ *  returned when nothing was skipped, so we never tell the writer everything's sorted when it isn't. */
+export interface DoneStageMessage { heading: string; chip: string | null; body: string }
+export function doneStageMessage(opts: { fixesLeft: boolean; skipped: number; sortedChip: string }): DoneStageMessage {
+  if (opts.fixesLeft) {
+    return { heading: "Almost there", chip: null, body: "A fix still needs doing before you can import — pop back to it whenever you're ready." };
+  }
+  if (opts.skipped > 0) {
+    const n = opts.skipped === 1 ? "One is" : `${opts.skipped} are`;
+    return { heading: "Saved for now", chip: null, body: `${n} still open — saved as-is, and easy to revisit whenever you like.` };
+  }
+  return { heading: "All sorted ✦", chip: opts.sortedChip, body: "Your records are looking sharp — everything's ready to import." };
+}
+
 /** Per-population tier counts — NEVER pooled across agents and queries (that was the "37 ready" bug:
  *  19 ready agents + 18 ready queries summed into one meaningless number). Each population reconciles
  *  to its own total. Agents: the only blocking tier (fix = missing agency or a duplicate group);
