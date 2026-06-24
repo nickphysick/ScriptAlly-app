@@ -564,6 +564,39 @@ const AgentFixPanel: React.FC<{ agent: ReviewAgent; onPatch: (p: Partial<ReviewA
   );
 };
 
+// Crossfaded card advance: keeps the OUTGOING card mounted for one beat while the INCOMING card
+// rises in, so there's never a blank frame between items. Stashing the previous node during render
+// (the canonical "derive state from a changed prop" pattern) keeps content updates within the same
+// card live, and only transitions when the card key changes. Reduced-motion → instant swap.
+const prefersReducedMotion = () =>
+  typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const CardSwitcher: React.FC<{ cardKey: React.Key; children: React.ReactNode }> = ({ cardKey, children }) => {
+  const reduced = prefersReducedMotion();
+  const [shownKey, setShownKey] = useState(cardKey);
+  const [outgoing, setOutgoing] = useState<{ key: React.Key; node: React.ReactNode } | null>(null);
+  const lastNode = useRef<React.ReactNode>(children);
+  if (cardKey !== shownKey) {
+    if (!reduced) setOutgoing({ key: shownKey, node: lastNode.current }); // the card we're leaving
+    setShownKey(cardKey);
+  }
+  lastNode.current = children;
+  useEffect(() => {
+    if (!outgoing) return;
+    const t = setTimeout(() => setOutgoing(null), 340);
+    return () => clearTimeout(t);
+  }, [outgoing]);
+  return (
+    <div style={{ position: "relative", display: "flex", justifyContent: "center" }}>
+      {outgoing && (
+        <div key={`out-${outgoing.key}`} className="sa-card-out" aria-hidden style={{ position: "absolute", top: 0, left: 0, right: 0, display: "flex", justifyContent: "center" }}>
+          {outgoing.node}
+        </div>
+      )}
+      <div key={`in-${cardKey}`} className={reduced ? undefined : "sa-card-in"}>{children}</div>
+    </div>
+  );
+};
+
 // ── Guided focus-overlay ──────────────────────────────────────────────────────────────────────────
 // One flagged item at a time over a dimmed review screen, fixes before sharpen. It drives the SAME
 // state as the inline list, so resolving here updates the row behind the glass and (when the last
@@ -621,6 +654,7 @@ const FocusOverlay: React.FC<{
           const reviewing = shown !== "open";          // viewing an already-handled item via "← Back"
           const h = headerFor(id);
           return (
+            <CardSwitcher cardKey={idx}>
             <div style={card}>
               <div style={{ padding: "20px 26px 0", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <span style={{ fontFamily: MONO, fontSize: 12, color: C.muted }}><b style={{ color: "#7c3a2a" }}>{idx + 1}</b> of {order.length}</span>
@@ -656,6 +690,7 @@ const FocusOverlay: React.FC<{
                 )}
               </div>
             </div>
+            </CardSwitcher>
           );
         })()}
     </div>
@@ -1590,6 +1625,13 @@ const REVIEW_SHELL_CSS = `
 @keyframes saImpFaqDrop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 @keyframes saImpFocusPop{from{opacity:0;transform:translateY(6px) scale(.985)}to{opacity:1;transform:none}}
 @keyframes saImpDimIn{from{opacity:0}to{opacity:1}}
+/* per-item walk advance — a "deal the next card" crossfade with a brief overlap (no blank frame):
+   the outgoing card eases up + out while the incoming rises in from just below. */
+@keyframes saCardIn{from{opacity:0;transform:translateY(11px)}to{opacity:1;transform:none}}
+@keyframes saCardOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-9px)}}
+.sa-card-in{animation:saCardIn .32s cubic-bezier(.22,1,.36,1) both;}
+.sa-card-out{animation:saCardOut .30s ease both;pointer-events:none;}
+@media(prefers-reduced-motion:reduce){.sa-card-in,.sa-card-out{animation:none;}}
 /* slow, soft "breathing" glow on the recommended action (agency card) — guides, never nags */
 @keyframes saAgencyBreathe{0%,100%{box-shadow:0 0 0 0 rgba(124,58,42,.18),0 0 0 0 rgba(124,58,42,.10)}50%{box-shadow:0 0 0 4px rgba(124,58,42,.10),0 0 22px 3px rgba(124,58,42,.16)}}
 .sa-agency-rec{animation:saAgencyBreathe 2.6s ease-in-out infinite;}
