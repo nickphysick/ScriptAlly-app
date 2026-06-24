@@ -2673,177 +2673,80 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
       onLetsGo={() => setIntroStep(null)} />
   ) : null;
 
-  // Ground reuses the agents/queries review pages' background (.sa-rv-root #f2ede7) — NOT a bespoke
-  // kraft + lined-paper treatment. The cut-off ruled-paper divs have been removed for parity.
+  // Duplicates now shares the agents/queries window chrome: it mounts inside ReviewShell (same shell,
+  // not a lookalike) — the bespoke parchment panel + sage band + bottom GuidanceBanner are gone.
+  const userInitial = userName ? userName[0].toUpperCase() : "?";
+  const dupTitle = clusters.length === 0 ? "All duplicates sorted"
+    : clusters.length === 1 ? "One looks like the same agent"
+    : clusters.length === 2 ? "A couple look like the same agent"
+    : "A few look like the same agent";
   return (
-    <div style={{ background: "#f2ede7", minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center", paddingBottom: bannerH + 12, overflowX: "hidden" }}>
-      {duplicatesIntro}
+    <ReviewShell userInitial={userInitial} allClear={clusters.length === 0}
+      modal={showSkipModal ? <SkipSetupModal onClose={() => setShowSkipModal(false)} onSkip={onSkip} /> : duplicatesIntro}>
       <style>{`@keyframes saImpPulse{0%{box-shadow:0 0 0 0 rgba(176,74,58,0.55)}70%{box-shadow:0 0 0 7px rgba(176,74,58,0)}100%{box-shadow:0 0 0 0 rgba(176,74,58,0)}}`}</style>
-      {/* Navigation runs entirely through the panel footer (Continue / Back / "Review all agents →")
-          and the duplicates flow — no top tab switcher (it was a dev-only browsing aid). */}
-      {topcap && <div style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#A89A90", textAlign: "center", padding: "16px 0 6px" }}>{topcap}</div>}
+      <div className="sa-rv-grid" key={screen}>
 
-      {/* compact-only hint banner (the rotated corner sticky can't fit the margins) — not on the dup stage */}
-      {compact && screen !== "duplicates" && (
-        <div style={{ width: panelWidth, margin: "12px auto 0", background: C.sticky, padding: "10px 13px", fontFamily: CAVEAT, fontWeight: 600, fontSize: 15, lineHeight: 1.2, color: C.stickyInk, borderRadius: 4, boxShadow: "0 4px 12px rgba(58,28,20,0.12)" }}>
-          {screen === "agents"
-            ? <>Don't know the agent's name? Tap the <span style={{ display: "inline-flex", width: 15, height: 15, borderRadius: "50%", border: `1.4px solid ${C.burgundy}`, color: C.burgundy, alignItems: "center", justifyContent: "center", fontFamily: MONO, fontSize: 9, transform: "translateY(2px)" }}>?</span> in that field &amp; we'll reference them by agency only.</>
-            : "Queries relating to agents you just opted not to import won't be included — they're shown at the bottom for reference."}
-        </div>
-      )}
-
-      {/* commit-error banner — a failed import is never silent */}
-      {error && (
-        <div style={{ width: panelWidth, margin: "12px auto 0", display: "flex", alignItems: "center", gap: 8, background: "#fdecea", border: "1px solid #e6b6a8", borderRadius: 9, padding: "10px 13px", fontFamily: "Inter", fontSize: 12, color: C.invalid }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.invalid} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><circle cx="12" cy="12" r="9" /><path d="M12 8v4M12 16h.01" /></svg>
-          {error}
-        </div>
-      )}
-
-      <div ref={bandRef} style={{ position: "relative", width: BAND_W, maxWidth: "100%", margin: "0 auto", paddingTop: 14, paddingBottom: 30 }}>
-        {/* chrome */}
-        <div style={{ position: "relative", zIndex: 3, display: "flex", alignItems: "center", justifyContent: "space-between", width: panelWidth, margin: "0 auto 10px" }}>
-          <span style={{ display: "flex", gap: 5 }}>
-            {[0, 1, 2, 3, 4].map((i) => <span key={i} style={{ width: i === 3 ? 18 : 5, height: 5, borderRadius: i === 3 ? 3 : "50%", background: i === 3 ? C.burgundy : "#cabfae" }} />)}
-          </span>
-          <span onClick={onSkip} style={{ fontFamily: MONO, fontSize: 10, color: C.muted, cursor: onSkip ? "pointer" : "default" }}>Skip setup</span>
-        </div>
-
-        {/* corner sticky hint — higher and further right, clear of the panel and the other notes (not on dup) */}
-        {!compact && screen !== "duplicates" && (
-          <div style={{ position: "absolute", zIndex: 6, top: -10, right: -20, width: 158, background: C.sticky, padding: "13px 14px 15px", fontFamily: CAVEAT, fontWeight: 600, fontSize: 15, lineHeight: 1.2, color: C.stickyInk, boxShadow: "0 7px 18px rgba(58,28,20,0.18)", transform: "rotate(2.6deg)", borderRadius: 2 }}>
-            <span style={{ position: "absolute", top: -7, left: "50%", transform: "translateX(-50%)", width: 13, height: 13, borderRadius: "50%", background: "#b04a3a", boxShadow: "0 2px 3px rgba(0,0,0,.3)" }} />
-            {screen === "agents"
-              ? <>Don't know the agent's name? Tap the <span style={{ display: "inline-flex", width: 15, height: 15, borderRadius: "50%", border: `1.4px solid ${C.burgundy}`, color: C.burgundy, alignItems: "center", justifyContent: "center", fontFamily: MONO, fontSize: 9, transform: "translateY(2px)" }}>?</span> in that field &amp; we'll reference them by agency only.</>
-              : "Queries relating to agents you just opted not to import won't be included — they're shown at the bottom for reference."}
+        {/* ── Left: header + records + footer ── */}
+        <div className="sa-rv-main">
+          {/* Header — same chrome as the agents/queries review pages (no sage band) */}
+          <div className="sa-asm sa-asm-t" style={{ marginBottom: 16, animationDelay: "120ms" }}>
+            <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: ".18em", textTransform: "uppercase", color: "#5a6e58" }}>Before you review</span>
+            <h1 style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 30, margin: "6px 0 4px", color: "#33302b" }}>{dupTitle}</h1>
+            <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
+              <span ref={checkPillRef} style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: clusters.length ? "#f0cdbf" : "#e6ebe3", color: clusters.length ? "#a85a44" : "#5a6e58" }}>{clusters.length ? `${clusters.length} possible duplicate${clusters.length === 1 ? "" : "s"}` : "All sorted"}</span>
+            </div>
           </div>
-        )}
 
-        {/* panel chrome — three nested layers (matches scriptally-header-fill-target.html):
-            • panel  → parchment fill; its 8px padding is the even white rim on all four sides
-            • frame  → the thin burgundy line inset at the rim, with overflow:hidden so it clips
-                       everything inside (header included) to its own radius — the rim shows above
-                       AND beside the sage, uniform all the way round
-            • header → sage fill with NO radius/margin of its own; it ends at the frame border */}
-        <div style={{ position: "relative", zIndex: 2, width: panelWidth, margin: "0 auto", background: C.panel, borderRadius: 17, padding: 8, border: "1px solid rgba(124,58,42,0.10)", boxShadow: "0 14px 44px rgba(58,28,20,0.16)" }}>
-          <div style={{ border: `1px solid ${C.frame}`, borderRadius: 10, overflow: "hidden", background: C.panel }}>
-            {/* sage header — fills the frame's top; the frame's overflow:hidden clips it cleanly */}
-            <div style={{ background: C.sage, padding: "14px 16px 13px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
-                <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#fdfaf5", border: "1px solid rgba(124,58,42,0.25)", display: "flex", alignItems: "center", justifyContent: "center", color: C.burgundy, flexShrink: 0 }}>
-                  {screen === "duplicates"
-                    ? <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="8" y="8" width="12" height="12" rx="2" /><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" /></svg>
-                    : screen === "agents"
-                      ? <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /></svg>
-                      : <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M13 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" /></svg>}
-                </div>
-                <div>
-                  <div style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "#5a6e58" }}>{screen === "duplicates" ? "Before you review" : screen === "agents" ? "Data captured" : "Queries allocated to agents"}</div>
-                  <div style={{ fontFamily: SERIF, fontSize: 17, fontWeight: 500, color: C.head, lineHeight: 1.12 }}>{screen === "duplicates" ? (clusters.length === 0 ? "All duplicates sorted" : clusters.length === 1 ? "One looks like the same agent" : clusters.length === 2 ? "A couple look like the same agent" : "A few look like the same agent") : screen === "agents" ? "Populating your agent database" : "Database populated"}</div>
-                  <div style={{ fontSize: 9.5, color: "#6a7e68", fontWeight: 300, fontStyle: "italic", marginTop: 2 }}>{screen === "duplicates" ? "Sort these duplicates first and the rest of your list stays tidy" : screen === "agents" ? "Amend if you like, or continue on to queries…" : "Check and continue…"}</div>
-                </div>
-              </div>
-              <div style={{ display: "flex", gap: 6, marginTop: 9 }}>
-                {screen === "duplicates"
-                  ? <span ref={checkPillRef} style={{ fontFamily: MONO, fontSize: 8.5, padding: "3px 8px", borderRadius: 14, background: clusters.length ? C.noteFill : "#e7ece1", color: clusters.length ? C.burgundy : "#44563a" }}>{clusters.length ? `${clusters.length} possible duplicate${clusters.length === 1 ? "" : "s"}` : "All sorted"}</span>
-                  : <>
-                    <span style={{ fontFamily: MONO, fontSize: 8.5, padding: "3px 8px", borderRadius: 14, background: "#fff", color: "#44563a" }}>{screen === "agents" ? okCount : qOk} ready to import</span>
-                    <span style={{ fontFamily: MONO, fontSize: 8.5, padding: "3px 8px", borderRadius: 14, background: C.noteFill, color: C.burgundy }}>{screen === "agents" ? needCount : qNeed} to check</span>
-                  </>}
-              </div>
+          {/* Commit-error banner */}
+          {error && (
+            <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#fdecea", border: "1px solid #e6b6a8", borderRadius: 9, padding: "10px 13px", fontFamily: "Inter", fontSize: 12, color: C.invalid, marginBottom: 14 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.invalid} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><circle cx="12" cy="12" r="9" /><path d="M12 8v4M12 16h.01" /></svg>
+              {error}
             </div>
+          )}
 
-            {/* scrolling cards */}
-            {/* Cap the scroll area to whatever's left above the pinned banner, so the panel's footer
-                (Continue / Import) is visible at load without scrolling under the banner. */}
-            <div ref={midRef} style={{ maxHeight: `min(520px, calc(100vh - ${bannerH + 350}px))`, overflowY: "auto", overflowX: "hidden", padding: "12px 12px 6px" }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10, position: "relative" }}>
-                {screen === "duplicates"
-                  ? allClusters.map((c) => (c.resolved && c.type !== "open"
-                    ? renderResolvedCluster({ leaderId: c.leaderId, members: c.members, type: c.type as "merge" | "keepboth", survivor: c.survivor })
-                    : renderCluster(c.members[0], c.openMembers, true)))
-                  : units /* queries render in their own early-return layout above */}
-              </div>
+          {/* Records card — duplicate clusters, internal scroll + edge fades */}
+          <RecordsCard>
+            {allClusters.length > 0
+              ? allClusters.map((c) => (c.resolved && c.type !== "open"
+                ? renderResolvedCluster({ leaderId: c.leaderId, members: c.members, type: c.type as "merge" | "keepboth", survivor: c.survivor })
+                : renderCluster(c.members[0], c.openMembers, true)))
+              : <div style={{ padding: "32px 22px", fontFamily: "Inter", fontSize: 13, color: "#9c8878", textAlign: "center" }}>No duplicates to review.</div>}
+          </RecordsCard>
+
+          {/* Footer */}
+          <div className="sa-asm sa-asm-b" style={{ display: "flex", alignItems: "center", gap: 18, marginTop: 18, flexShrink: 0, animationDelay: "640ms" }}>
+            <button onClick={onBack}
+              style={{ fontFamily: MONO, fontSize: 13, color: "#8a8178", background: "none", border: "none", cursor: "pointer" }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; }}
+            >‹ Back</button>
+            <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 22 }}>
+              <button onClick={reset}
+                style={{ fontFamily: MONO, fontSize: 13, color: "#8a8178", background: "none", border: "none", cursor: "pointer" }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; }}
+              >Reset all changes made here</button>
+              {/* always available — proceeding is the deliberate "don't trap people" skip; unresolved clusters carry through */}
+              <button onClick={() => switchScreen("agents")}
+                style={{ fontFamily: MONO, fontSize: 13.5, background: "rgba(199,212,195,.5)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", color: "#5a6e58", border: "1px solid rgba(255,255,255,.55)", borderRadius: 11, padding: "13px 32px", cursor: "pointer", fontWeight: 600, letterSpacing: ".02em", boxShadow: "0 10px 22px -12px rgba(90,110,88,.5),inset 0 1px 0 rgba(255,255,255,.65)", transition: "background .15s,color .15s,transform .15s" }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(245,226,218,.62)"; e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(199,212,195,.5)"; e.currentTarget.style.color = "#5a6e58"; e.currentTarget.style.transform = "none"; }}
+              >Review all agents →</button>
             </div>
-
-            {/* gatebar — reflects the current screen's blocker (the duplicates stage is non-gated) */}
-            {screen === "duplicates" ? null : screen === "agents" ? (!allCaptured && (
-              <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", fontFamily: MONO, fontSize: 8.5, letterSpacing: "0.02em", color: C.invalid, background: "#fff4f1", borderTop: "0.5px solid #f0d8cc" }}>
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={C.invalid} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 8v4M12 16h.01" /></svg>
-                {invalidCount > 0
-                  ? (invalidCount === 1 ? "One agent needs an agency before we can continue" : `${invalidCount} agents need an agency before we can continue`)
-                  : (needCount === 1 ? "One agent still needs checking before we can continue" : `${needCount} agents still need checking before we can continue`)}
-              </div>
-            )) : (!canImport && (
-              <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", fontFamily: MONO, fontSize: 8.5, letterSpacing: "0.02em", color: C.invalid, background: "#fff4f1", borderTop: "0.5px solid #f0d8cc" }}>
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={C.invalid} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 8v4M12 16h.01" /></svg>
-                {qActive.length === 0
-                  ? "Nothing to import yet"
-                  : (qNeed === 1 ? "One query still needs checking before we can import" : `${qNeed} queries still need checking before we can import`)}
-              </div>
-            ))}
-
-            {/* footer */}
-            {screen === "duplicates" ? (
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 16px", borderTop: "0.5px solid rgba(124,58,42,0.16)" }}>
-                <span onClick={onBack} style={{ fontFamily: MONO, fontSize: 10, color: "#9a8a72", cursor: "pointer" }}>‹ Back</span>
-                <span onClick={reset} style={{ fontFamily: MONO, fontSize: 9, color: "#b6a89a", cursor: "pointer", letterSpacing: "0.03em" }}>Reset all changes made here</span>
-                {/* always available — proceeding is the deliberate "don't trap people" skip; unresolved clusters carry through */}
-                <button onClick={() => switchScreen("agents")}
-                  style={{ background: "#f5e2da", border: "1px solid #e8c8bc", color: C.burgundy, fontFamily: MONO, fontSize: 10.5, fontWeight: 500, letterSpacing: "0.07em", borderRadius: 10, padding: "10px 20px", cursor: "pointer" }}
-                >Review all agents →</button>
-              </div>
-            ) : screen === "agents" ? (
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 16px", borderTop: "0.5px solid rgba(124,58,42,0.16)" }}>
-                {/* if the session opened on the duplicates stage, Back returns there (decisions stay fixable) */}
-                <span onClick={() => (hadDuplicates ? switchScreen("duplicates") : onBack())} style={{ fontFamily: MONO, fontSize: 10, color: "#9a8a72", cursor: "pointer" }}>‹ Back{hadDuplicates ? " to duplicates" : ""}</span>
-                <span onClick={reset} style={{ fontFamily: MONO, fontSize: 9, color: "#b6a89a", cursor: "pointer", letterSpacing: "0.03em" }}>Reset all changes made here</span>
-                <button
-                  onClick={onContinueClick}
-                  aria-disabled={!allCaptured}
-                  style={{ background: !allCaptured ? "#efe7df" : "#f5e2da", border: `1px solid ${!allCaptured ? "#e2d6c8" : "#e8c8bc"}`, color: !allCaptured ? "#b6a596" : C.burgundy, fontFamily: MONO, fontSize: 10.5, fontWeight: 500, letterSpacing: "0.07em", borderRadius: 10, padding: "10px 20px", cursor: !allCaptured ? "not-allowed" : "pointer", opacity: !allCaptured ? 0.6 : 1 }}
-                >Continue →</button>
-              </div>
-            ) : (
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "13px 16px", borderTop: "0.5px solid rgba(124,58,42,0.16)" }}>
-                <span onClick={() => switchScreen("agents")} style={{ fontFamily: MONO, fontSize: 10, color: "#9a8a72", cursor: "pointer" }}>‹ Back to agents</span>
-                <span onClick={reset} style={{ fontFamily: MONO, fontSize: 9, color: "#b6a89a", cursor: "pointer", letterSpacing: "0.03em" }}>Reset all changes made here</span>
-                <PinkButton onClick={onImportClick} style={canImport ? undefined : { opacity: 0.5, cursor: "not-allowed" }}>
-                  Import {qActive.length} quer{qActive.length === 1 ? "y" : "ies"}
-                </PinkButton>
-              </div>
-            )}
           </div>
         </div>
 
-        {/* post-it notes layer (desktop only; mobile uses inline notes inside each card) */}
-        {!compact && (
-          <NotesLayer
-            notes={notes} midRef={midRef} bandRef={bandRef} cardEls={cardEls}
-            highlightedNotes={hl.noteIds}
-            onHover={(id) => setHoverTarget(id ? { type: "note", id } : null)}
-            onResolveMapping={resolveMapping}
-            onReopen={reopenReason}
-            tick={tick}
-          />
-        )}
-
-        {/* "Not being imported" — excluded queries with their reason (Queries screen only) */}
-        {screen === "queries" && qDead.length > 0 && (
-          <div style={{ position: "relative", zIndex: 2, width: panelWidth, margin: "16px auto 0" }}>
-            <div style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: "0.08em", textTransform: "uppercase", color: "#a89a8c", margin: "0 2px 9px", display: "flex", alignItems: "center", gap: 6 }}>
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#b3a799" strokeWidth="2.4"><circle cx="12" cy="12" r="9" /><path d="M8 12h8" strokeLinecap="round" /></svg>
-              Not being imported ({qDead.length})
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {qDead.map((q) => <DeadBox key={q.id} query={q} agentName={agentNameOf(q.agentRef)} />)}
-            </div>
-          </div>
-        )}
+        {/* ── Right: sidebar board ── */}
+        <aside className="sa-rv-board sa-asm sa-asm-r" style={{ animationDelay: "300ms" }}>
+          <WhereYouAreCard step="agents" onSkip={() => setShowSkipModal(true)} />
+          <PinkSlip>
+            Two records that look like the same agent? Remove the duplicate and its queries move onto the one you keep — nothing's lost. Genuinely different people? Keep them both.
+          </PinkSlip>
+          <FaqList items={DUP_FAQS} open={openFaqs} onToggle={toggleFaq} />
+        </aside>
       </div>
-
-      {/* step-aware guidance banner, docked full-width below the panel */}
-      <GuidanceBanner step={screen} compact={compact} dupCount={clusters.length} onHeight={setBannerH} />
-    </div>
+      {toast && <UndoToast msg={toast.msg} onUndo={toast.undo} onClose={dismissToast} />}
+    </ReviewShell>
   );
 };
