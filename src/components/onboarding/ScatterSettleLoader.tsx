@@ -27,9 +27,10 @@ export interface LoaderCard {
   messy: string;
   /** Clean agent name (Playfair) — filled once extraction completes. */
   name?: string;
-  /** "Agency · Status · Date" line — filled once extraction completes. */
-  detail?: string;
-  /** Drives the real StatusDot — filled once extraction completes. */
+  /** The clean detail parts — agency + date sit muted, the status is highlighted in ink between them. */
+  agency?: string;
+  date?: string;
+  /** Drives the real StatusDot AND the highlighted status label — filled once extraction completes. */
   status?: QueryStatus | string;
 }
 export interface ScatterSettleLoaderProps {
@@ -155,7 +156,9 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
                 </span>
                 <div style={{ minWidth: 0 }}>
                   <div style={{ fontFamily: SERIF, fontSize: 16, fontWeight: 600, lineHeight: 1.1, color: "#3a1c14", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{card.name || "—"}</div>
-                  <div style={{ fontFamily: MONO, fontSize: 11.5, color: "#9a8c80", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{card.detail || ""}</div>
+                  <div style={{ fontFamily: MONO, fontSize: 11.5, color: "#9a8c80", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {card.agency ? `${card.agency} · ` : ""}<span style={{ color: "#3a1c14" }}>{card.status ? String(card.status) : ""}</span>{card.date ? ` · ${card.date}` : ""}
+                  </div>
                 </div>
               </div>
             </div>

@@ -295,7 +295,7 @@ export const BranchB: React.FC<BranchBProps> = ({
       const name = agent?.name?.trim() || agent?.agency?.trim() || "New agent";
       const agency = agent?.agency?.trim() || "Agency only";
       const date = q.sentDate ? fmtDate(q.sentDate) : "Undated";
-      return { messy: r.messy, name, detail: `${agency} · ${q.status || "Queried"} · ${date}`, status: q.status ?? undefined };
+      return { messy: r.messy, name, agency, date, status: q.status ?? QueryStatus.QUERIED };
     });
     return (
       <ScatterSettleLoader

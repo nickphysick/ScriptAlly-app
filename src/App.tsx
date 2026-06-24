@@ -58,13 +58,13 @@ const ImportingLoaderDevHarness: React.FC = () => {
 /** TEMP dev harness for the scatter-settle extraction loader (#/scatter-loader): mock raw cells, a
  *  simulated ~2.2s extraction, then it snaps + crystallises. Loops so both states can be reviewed. */
 const ScatterLoaderDevHarness: React.FC = () => {
-  const SAMPLE: { messy: string; name: string; detail: string; status: QueryStatus }[] = [
-    { messy: 'J. Carter · Carter & Vale · "replied, wants pages" · 44621', name: "Jamal Carter", detail: "Carter & Vale · Partial Requested · 1 Mar 2022", status: QueryStatus.PARTIAL_REQUESTED },
-    { messy: "Okonkwo Lit · fulls req · 12.4.24", name: "Maria Okonkwo", detail: "Okonkwo Literary · Full Requested · 12 Apr 2024", status: QueryStatus.FULL_REQUESTED },
-    { messy: "Vidal · Quill · sent · 6 May", name: "Tomas Vidal", detail: "The Quill Agency · Queried · 6 May 2024", status: QueryStatus.QUERIED },
-    { messy: "G. Salt · offer!! · 02/13/2024", name: "Gregory Salt", detail: "Penhallow Literary · Offer · 13 Feb 2024", status: QueryStatus.OFFER },
-    { messy: "Mercer · R&R · 18 Apr", name: "Daniel Mercer", detail: "Saltmarsh Literary · Revise & Resubmit · 18 Apr 2024", status: QueryStatus.REVISE_RESUBMIT },
-    { messy: "Webb · rejected · 5.2.24", name: "Marianne Webb", detail: "The Greenhouse · Rejected · 5 Feb 2024", status: QueryStatus.REJECTED },
+  const SAMPLE: { messy: string; name: string; agency: string; date: string; status: QueryStatus }[] = [
+    { messy: 'J. Carter · Carter & Vale · "replied, wants pages" · 44621', name: "Jamal Carter", agency: "Carter & Vale", date: "1 Mar 2022", status: QueryStatus.PARTIAL_REQUESTED },
+    { messy: "Okonkwo Lit · fulls req · 12.4.24", name: "Maria Okonkwo", agency: "Okonkwo Literary", date: "12 Apr 2024", status: QueryStatus.FULL_REQUESTED },
+    { messy: "Vidal · Quill · sent · 6 May", name: "Tomas Vidal", agency: "The Quill Agency", date: "6 May 2024", status: QueryStatus.QUERIED },
+    { messy: "G. Salt · offer!! · 02/13/2024", name: "Gregory Salt", agency: "Penhallow Literary", date: "13 Feb 2024", status: QueryStatus.OFFER },
+    { messy: "Mercer · R&R · 18 Apr", name: "Daniel Mercer", agency: "Saltmarsh Literary", date: "18 Apr 2024", status: QueryStatus.REVISE_RESUBMIT },
+    { messy: "Webb · rejected · 5.2.24", name: "Marianne Webb", agency: "The Greenhouse", date: "5 Feb 2024", status: QueryStatus.REJECTED },
   ];
   const [complete, setComplete] = useState(false);
   useEffect(() => {
@@ -73,7 +73,7 @@ const ScatterLoaderDevHarness: React.FC = () => {
     const id = setInterval(cycle, 8000);
     return () => clearInterval(id);
   }, []);
-  const cards: LoaderCard[] = SAMPLE.map((s) => complete ? { messy: s.messy, name: s.name, detail: s.detail, status: s.status } : { messy: s.messy });
+  const cards: LoaderCard[] = SAMPLE.map((s) => complete ? { messy: s.messy, name: s.name, agency: s.agency, date: s.date, status: s.status } : { messy: s.messy });
   return <ScatterSettleLoader cards={cards} complete={complete} total={28} onProceed={() => {}} userName="Nick" />;
 };
 
