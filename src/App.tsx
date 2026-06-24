@@ -35,6 +35,9 @@ import { SmartImportReview } from "./components/onboarding/SmartImportReview";
 import { REVIEW_FIXTURE } from "./components/onboarding/SmartImportReviewFixture";
 // TEMP: post-import loader dev preview — remove after visual sign-off.
 import { ImportingLoader } from "./components/onboarding/ImportingLoader";
+// TEMP: scatter-settle extraction loader dev preview (#/scatter-loader) — remove after sign-off.
+import { ScatterSettleLoader, LoaderCard } from "./components/onboarding/ScatterSettleLoader";
+import { QueryStatus } from "./types";
 // Dev review surface for the notes pieces (PostIt / quick-add / editor) — #/notes-lab, DEV only.
 import { NotesLab } from "./components/notes/NotesLab";
 import { Palette, X, Check } from "lucide-react";
@@ -50,6 +53,30 @@ const ImportingLoaderDevHarness: React.FC = () => {
   }, []);
   // onProceed is a no-op here so the completion state stays on screen for review (no real route).
   return <ImportingLoader complete={complete} onProceed={() => {}} userName="Nick" />;
+};
+
+/** TEMP dev harness for the scatter-settle extraction loader (#/scatter-loader): mock raw cells, a
+ *  simulated ~2.2s extraction, then it snaps + crystallises. Loops so both states can be reviewed. */
+const ScatterLoaderDevHarness: React.FC = () => {
+  const SAMPLE: { headline: string; raw: string; status: QueryStatus }[] = [
+    { headline: "Tomas Vidal", raw: "44197", status: QueryStatus.QUERIED },
+    { headline: "Niamh O'Brien", raw: "full req 20/3", status: QueryStatus.FULL_REQUESTED },
+    { headline: "Gregory Salt", raw: "no response", status: QueryStatus.NO_RESPONSE },
+    { headline: "Aisha Bello", raw: "OFFER!!", status: QueryStatus.OFFER },
+    { headline: "Marsh & Booth", raw: "rejected 5.2.24", status: QueryStatus.REJECTED },
+    { headline: "Clara Voss", raw: "partial - sent", status: QueryStatus.PARTIAL_REQUESTED },
+    { headline: "Jude Okafor", raw: "1/11/2025", status: QueryStatus.QUERIED },
+    { headline: "Wren & Co", raw: "withdrew", status: QueryStatus.WITHDRAWN },
+  ];
+  const [complete, setComplete] = useState(false);
+  useEffect(() => {
+    const cycle = () => { setComplete(false); setTimeout(() => setComplete(true), 2200); };
+    cycle();
+    const id = setInterval(cycle, 7000);
+    return () => clearInterval(id);
+  }, []);
+  const cards: LoaderCard[] = SAMPLE.map((s) => ({ headline: s.headline, raw: s.raw, status: complete ? s.status : undefined }));
+  return <ScatterSettleLoader cards={cards} complete={complete} total={28} onProceed={() => {}} userName="Nick" />;
 };
 
 /** Dev review surface for the canonical StatusDot (no router — reached via #/status-dots). */
@@ -146,6 +173,10 @@ function AppContent() {
   // Dev-only post-import loader preview (auto-loops loading → complete).
   if (hash === "#/import-loader" && import.meta.env.DEV) {
     return <ImportingLoaderDevHarness />;
+  }
+  // Dev-only scatter-settle extraction loader preview (auto-loops scatter → snap/crystallise).
+  if (hash === "#/scatter-loader" && import.meta.env.DEV) {
+    return <ScatterLoaderDevHarness />;
   }
   // Dev-only notes review surface (PostIt / quick-add / editor) — local state, no persistence.
   if (hash === "#/notes-lab" && import.meta.env.DEV) {

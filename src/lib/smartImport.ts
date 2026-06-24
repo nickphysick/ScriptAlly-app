@@ -23,6 +23,32 @@ export async function fileToCsv(file: File): Promise<string> {
   return XLSX.utils.sheet_to_csv(ws); // also handles .csv
 }
 
+/** One raw record sampled straight from the uploaded sheet — DISPLAY-ONLY, for the scatter-settle
+ *  loader so the writer sees their actual cells the instant they upload, while the real (cloud)
+ *  extraction runs. This NEVER feeds runSmartImport / the real mapping; it just reads a few rows.
+ *  `raw` is a deliberately messy-looking cell (a serial date, a slashed date, a status token) so the
+ *  "messy → clean" crystallise lands on something true to the file. */
+export interface RawRecordSample { headline: string; detail: string; raw: string }
+export async function sampleRawRecords(file: File, max = 8): Promise<RawRecordSample[]> {
+  const buf = await file.arrayBuffer();
+  const wb = XLSX.read(buf, { type: "array" });
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  if (!ws) return [];
+  const rows = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, blankrows: false, defval: "" });
+  if (rows.length < 2) return [];
+  const looksMessy = (c: string) =>
+    /\d{1,4}[\/.\-]\d{1,4}/.test(c) || /^\d{5}$/.test(c) ||
+    /req|sent|reject|offer|partial|full|pass|no\s*response|withdraw|queried/i.test(c);
+  return rows.slice(1, 1 + max).map((cells) => {
+    const ne = (cells as unknown[]).map((c) => String(c ?? "").trim()).filter(Boolean);
+    return {
+      headline: ne[0] || "Record",
+      detail: ne[1] || "",
+      raw: ne.find(looksMessy) || ne[2] || ne[1] || "",
+    };
+  });
+}
+
 export async function runSmartImport(file: File): Promise<SmartImportResult> {
   // Dev-only escape hatch: lets the review screen be exercised without a deployed function.
   // Set window.__SA_SMART_IMPORT_MOCK to a SmartImportResult in the console; never set in code.

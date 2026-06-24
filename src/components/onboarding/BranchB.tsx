@@ -13,13 +13,14 @@ import React, { useRef, useState } from "react";
 import { useScriptAllyDb } from "../../lib/db";
 import { QueryStatus } from "../../types";
 import { SmartImportResult } from "../../types/smartImport";
-import { runSmartImport, validateSmartImport, ValidatedImport } from "../../lib/smartImport";
+import { runSmartImport, validateSmartImport, ValidatedImport, sampleRawRecords, RawRecordSample } from "../../lib/smartImport";
 import { commitSmartImport, CommitOutcome } from "../../lib/smartImportCommit";
 import { Form11Card, SelectRow, BookMotif, InboxMotif, FONT_SANS, FONT_MONO } from "./chrome";
 import { SmartImportReview } from "./SmartImportReview";
 import { ImportOverview } from "./ImportOverview";
 import { ImportTidyAnimation } from "./ImportTidyAnimation";
 import { ImportingLoader } from "./ImportingLoader";
+import { ScatterSettleLoader, LoaderCard } from "./ScatterSettleLoader";
 import { ManuscriptFields, ManuscriptFieldsState, emptyManuscriptFields } from "./ManuscriptFields";
 
 /** UX-only floor so the post-import loader is held for a deliberate minimum (never a fake delay on
@@ -114,6 +115,10 @@ export const BranchB: React.FC<BranchBProps> = ({
   const [importOption, setImportOption] = useState<"smart" | "byhand">(defaultImport);
   const [fileName, setFileName] = useState("");
   const [validated, setValidated] = useState<ValidatedImport | null>(null);
+  // Scatter-settle loader (extraction wait): the writer's raw cells sampled client-side (display only),
+  // plus the "extraction done" signal that triggers the snap-and-crystallise settle.
+  const [rawSample, setRawSample] = useState<RawRecordSample[]>([]);
+  const [extractComplete, setExtractComplete] = useState(false);
   const [outcome, setOutcome] = useState<CommitOutcome | null>(null);
   const [commitError, setCommitError] = useState<string | null>(null);
   // Drives the loader's completion beat: flipped true only after a genuine success (commit resolved
@@ -125,12 +130,15 @@ export const BranchB: React.FC<BranchBProps> = ({
 
   const handleFile = async (file: File) => {
     setFileName(file.name);
-    setScreen("reading");
+    setRawSample([]); setExtractComplete(false); setValidated(null);
+    setScreen("reading"); // the scatter-settle loader takes over from here
+    // Display-only: show the writer's actual raw cells the instant they upload, scattered, while the
+    // real extraction runs. Never feeds runSmartImport; a parse failure just leaves the loader plain.
+    sampleRawRecords(file).then(setRawSample).catch(() => setRawSample([]));
     try {
       const result: SmartImportResult = await runSmartImport(file);
       setValidated(validateSmartImport(result));
-      setScreen("tidying"); // play the messy→orderly beat, then → overview
-
+      setExtractComplete(true); // loader snaps the cards in, crystallises them, then routes to Overview
     } catch (e) {
       console.error("Smart Import mapping failed:", e);
       setScreen("fallback"); // graceful fallback — never dead-end onboarding
@@ -275,30 +283,22 @@ export const BranchB: React.FC<BranchBProps> = ({
     );
   }
 
-  // ── Reading the file ─────────────────────────────────────────────────────
+  // ── Reading the file — scatter-and-settle loader (raw cells in, clean StatusDots out) ─────────────
   if (screen === "reading") {
+    const resultQueries = validated?.result.queries ?? [];
+    const cards: LoaderCard[] = rawSample.map((r, i) => ({
+      headline: r.headline,
+      raw: r.raw,
+      status: extractComplete ? (resultQueries[i]?.status ?? undefined) : undefined,
+    }));
     return (
-      <Form11Card
-        dotIndex={2}
-        onSkip={onSkip}
-        pre="Your pipeline"
-        name="Reading your file…"
-        sub="Matching your columns to ScriptAlly"
-        motif={<InboxMotif />}
-        primaryLabel="Working…"
-        primaryDisabled
-        onPrimary={() => {}}
-      >
-        <div style={{ display: "flex", justifyContent: "center", gap: 8, padding: "26px 0 30px" }}>
-          {[0, 1, 2].map((i) => (
-            <span key={i} style={{ width: 9, height: 9, borderRadius: "50%", background: "#7c3a2a", animation: "sa-ob-pulse2 1.2s infinite ease-in-out", animationDelay: `${i * 0.2}s` }} />
-          ))}
-          <style>{`@keyframes sa-ob-pulse2{0%,100%{opacity:0.25;transform:scale(0.85);}50%{opacity:1;transform:scale(1);}}`}</style>
-        </div>
-        <p style={{ fontFamily: FONT_SANS, fontSize: 12, color: "#9c8878", textAlign: "center", margin: 0 }}>
-          This usually takes a few seconds.
-        </p>
-      </Form11Card>
+      <ScatterSettleLoader
+        cards={cards}
+        complete={extractComplete && !!validated}
+        total={validated ? resultQueries.length : rawSample.length}
+        onProceed={() => setScreen("overview")}
+        userName={currentUser?.name}
+      />
     );
   }
 
