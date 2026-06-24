@@ -31,6 +31,7 @@ import { StatusDot } from "./StatusDot";
 import { RecordResponseModal } from "./RecordResponseModal";
 import { RecordResponseFocusForm } from "./RecordResponseFocusForm";
 import { recordQueryResponse } from "../lib/recordResponse";
+import { agentLabel, agentAgencyLine } from "../lib/agentDisplay";
 import { formatQueryMaterial, materialLabel } from "../lib/materials";
 import { MarkSentPopover, MarkSentKind } from "./MarkSentPopover";
 import { useFixedMenu } from "./forms/useFixedMenu";
@@ -1715,7 +1716,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   className="w-full text-xs p-2.5 bg-white rounded border border-[#7c3a2a]/10"
                 >
                   {agents.map(a => (
-                    <option key={a.id} value={a.id}>{a.name} ({a.agency})</option>
+                    <option key={a.id} value={a.id}>{agentLabel(a)}</option>
                   ))}
                 </select>
               </div>
@@ -2570,7 +2571,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
                     {/* Agency in mono-muted (or fallback kicker for agency-only agents) */}
                     <p style={{ fontFamily: FONT_MONO, fontSize: 9.5, color: "#9a8579", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {agent.name?.trim() ? agent.agency : "Agency · no named agent"}
+                      {agentAgencyLine(agent)}
                     </p>
 
                     {/* Bottom: manuscript in burgundy, time in mono */}
@@ -2974,7 +2975,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           <div className="space-y-4 text-xs">
                             <div>
                               <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1">Target Agent</label>
-                              <div className="w-full p-2 bg-stone-150 text-stone-500 rounded border border-stone-200 text-xs">{activeAgent.name} ({activeAgent.agency})</div>
+                              <div className="w-full p-2 bg-stone-150 text-stone-500 rounded border border-stone-200 text-xs">{agentLabel(activeAgent)}</div>
                               <span className="text-[9px] text-stone-400 mt-0.5 block italic">Cannot be changed</span>
                             </div>
                             <div>
