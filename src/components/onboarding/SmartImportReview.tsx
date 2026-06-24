@@ -759,6 +759,8 @@ const FocusOverlay: React.FC<{
 const COACHMARK_CSS = `
 @keyframes saCmFade{from{opacity:0}to{opacity:1}}
 @keyframes saCmPop{from{opacity:0;transform:translateY(6px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes saCmRing{from{stroke-dasharray:0 94.2}to{stroke-dasharray:94.2 94.2}}
+.sa-cm-ring{stroke-dasharray:0 94.2;animation:saCmRing 3.5s linear forwards;}
 .sa-cm-veil{position:fixed;inset:0;background:rgba(40,28,22,.62);z-index:54;animation:saCmFade .6s ease;}
 .sa-cm-block{position:fixed;inset:0;z-index:59;}
 .sa-cm-spot{position:fixed;z-index:60;border-radius:20px;pointer-events:none;transition:left .55s cubic-bezier(.4,0,.2,1),top .55s ease,width .4s ease,box-shadow .45s ease;}
@@ -778,8 +780,9 @@ const CoachmarkIntro: React.FC<{
   readyRef: React.RefObject<HTMLElement | null>;
   checkRef: React.RefObject<HTMLElement | null>;
   checkCopy?: { hd: string; body: React.ReactNode }; // stage-specific to-check copy (else derived from tier)
+  autoAdvanceCheck?: boolean;            // the to-check beat self-advances (duplicates) — no "Let's go" click
   onIntroGo: () => void; onNextReady: () => void; onLetsGo: () => void;
-}> = ({ welcomeHeading, readyCount, checkCount, checkTier, step, readyRef, checkRef, checkCopy, onIntroGo, onNextReady, onLetsGo }) => {
+}> = ({ welcomeHeading, readyCount, checkCount, checkTier, step, readyRef, checkRef, checkCopy, autoAdvanceCheck, onIntroGo, onNextReady, onLetsGo }) => {
   const gold = checkTier === "fix";
   const [rect, setRect] = useState<{ left: number; top: number; width: number; height: number } | null>(null);
 
@@ -800,6 +803,18 @@ const CoachmarkIntro: React.FC<{
     window.addEventListener("scroll", measure, true);
     return () => { window.removeEventListener("resize", measure); window.removeEventListener("scroll", measure, true); };
   }, [step, readyRef, checkRef]);
+
+  // Auto-advancing to-check beat (duplicates): a circular loader fills (~3.5s) then hands off — no
+  // second "Let's go" click. Reduced-motion → a short fixed delay (~0.8s), no animated fill. The hook
+  // is here (before the early returns) so it runs unconditionally; setTimeout fires even in a hidden tab.
+  const reducedMo = prefersReducedMotion();
+  const autoAdvancing = !!autoAdvanceCheck && step >= 2; // step 2 = the to-check beat
+  useEffect(() => {
+    if (!autoAdvancing) return;
+    const t = setTimeout(() => onLetsGo(), reducedMo ? 800 : 3500);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoAdvancing, reducedMo]);
 
   if (step === 0) {
     return (
@@ -830,6 +845,18 @@ const CoachmarkIntro: React.FC<{
     ? { ring: "#9db09a", dot: "✓", dotBg: { background: "#e9ede6", color: "#5a6e58" }, hd: "Good to go", body: <><b>{readyCount} read cleanly</b> — nothing for you to do with these.</> as React.ReactNode, btn: "Next →", onClick: onNextReady }
     : { ...checkBase, hd: checkCopy?.hd ?? checkBase.hd, body: checkCopy?.body ?? checkBase.body, btn: "Let's go →", onClick: onLetsGo };
 
+  // "Let's go" button, or — on the auto-advancing to-check beat — the circular progress loader.
+  const advanceControl = autoAdvancing ? (
+    <div style={{ marginTop: 16, display: "flex", justifyContent: "center" }} aria-label="Opening the review…">
+      <svg width="34" height="34" viewBox="0 0 36 36">
+        <circle cx="18" cy="18" r="15" fill="none" stroke="#e8c8bc" strokeWidth="3" />
+        {!reducedMo && <circle className="sa-cm-ring" cx="18" cy="18" r="15" fill="none" stroke="#7c3a2a" strokeWidth="3" strokeLinecap="round" transform="rotate(-90 18 18)" />}
+      </svg>
+    </div>
+  ) : (
+    <button onClick={coach.onClick} style={{ ...cmPinkBtn, marginTop: 14 }}>{coach.btn}</button>
+  );
+
   // Without a measured pill (e.g. a layout the ref didn't find) fall back to a centred card so the
   // intro never strands — the user can still advance.
   if (!rect) {
@@ -842,7 +869,7 @@ const CoachmarkIntro: React.FC<{
             <span style={{ width: 22, height: 22, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, ...coach.dotBg }}>{coach.dot}</span>{coach.hd}
           </div>
           <p style={{ margin: "9px 0 0", fontSize: 13.5, color: "#5a4a3e", lineHeight: 1.5 }}>{coach.body}</p>
-          <button onClick={coach.onClick} style={{ ...cmPinkBtn, marginTop: 14 }}>{coach.btn}</button>
+          {advanceControl}
         </div>
       </>
     );
@@ -864,7 +891,7 @@ const CoachmarkIntro: React.FC<{
           <span style={{ width: 22, height: 22, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, ...coach.dotBg }}>{coach.dot}</span>{coach.hd}
         </div>
         <p style={{ margin: "9px 0 0", fontSize: 13.5, color: "#5a4a3e", lineHeight: 1.5 }}>{coach.body}</p>
-        <button onClick={coach.onClick} style={{ ...cmPinkBtn, marginTop: 14 }}>{coach.btn}</button>
+        {advanceControl}
       </div>
     </>
   );
@@ -2635,6 +2662,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
       welcomeHeading="First, some possible duplicates. Let's tidy them up."
       readyCount={0} checkCount={clusters.length} checkTier="fix" hasReadyBeat={false} step={introStep}
       readyRef={readyPillRef} checkRef={checkPillRef}
+      autoAdvanceCheck
       checkCopy={{
         hd: clusters.length === 1 ? "A possible duplicate" : `${clusters.length} possible duplicates`,
         body: clusters.length === 1
