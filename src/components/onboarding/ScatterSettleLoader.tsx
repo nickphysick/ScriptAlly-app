@@ -85,6 +85,27 @@ const prefersReduced = () =>
 
 const CARD_W = 440;
 
+// Work-zone "forms being filled" — a small Add-an-agent / Log-a-query form drifts through behind the
+// scraps, its fields populated from the writer's own raw cells (display-only; split on the visible
+// separators — never invented). A capped, cycling pool keeps it lively without instantiating dozens.
+const FORM_POOL = 6;       // max forms alive at once
+const FORM_SPAWN = 720;    // ms between spawns
+const FORM_LIFE = 3000;    // ms a form lives (fade in → drift up → fade out)
+type FormKind = "agent" | "query";
+const FORM_META: Record<FormKind, { title: string; glyph: React.ReactNode; accent: string; fields: [string, string] }> = {
+  agent: { title: "Add an agent", accent: "#5a6e58", fields: ["Name", "Agency"],
+    glyph: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="3.4" /><path d="M5.5 20a6.5 6.5 0 0 1 13 0" /></svg> },
+  query: { title: "Log a query", accent: "#7c3a2a", fields: ["Status", "Date sent"],
+    glyph: <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M2 12 22 3 13 22l-2.5-7.5L2 12Z" /></svg> },
+};
+// Two evocative field values pulled from the raw scrap (split on its own separators; trimmed). Honest:
+// these are the writer's cells, never fabricated — just shown as if being typed into the form.
+const formFields = (messy: string, kind: FormKind): [string, string] => {
+  const parts = messy.split(/[·,|]/).map((p) => p.trim()).filter(Boolean);
+  if (kind === "agent") return [parts[0] || "…", parts[1] || "…"];                         // name · agency (head)
+  return [parts[parts.length - 2] || parts[0] || "…", parts[parts.length - 1] || "…"];     // status-ish · date-ish (tail)
+};
+
 export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards, complete, total, onProceed, onTimeout, userName }) => {
   const reduced = prefersReduced();
   const userInitial = userName ? userName[0].toUpperCase() : "?";
@@ -99,6 +120,9 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
   const [waitStarted, setWaitStarted] = useState(false); // kicks the bar's ease off the start line
   const [sparks, setSparks] = useState<{ id: number; kind: typeof SPARK_KINDS[number]; x: number; y: number }[]>([]);
   const sparkId = useRef(0);
+  const [forms, setForms] = useState<{ id: number; kind: FormKind; messy: string; x: number; y: number; rot: number }[]>([]);
+  const formId = useRef(0);
+  const cardsRef = useRef(cards); cardsRef.current = cards; // read latest scraps in the spawn loop without re-arming it
 
   // Timing spine — Intro (fixed) then the Reveal floor. The floor pads a fast extraction so the reveal
   // never flashes. Reduced-motion keeps the gate (we still wait for the data) but skips the timed
@@ -157,6 +181,26 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
     return () => { clearInterval(id); setSparks([]); };
   }, [reduced, settling, n]);
 
+  // Work-zone forms — a capped, cycling pool of Add-an-agent / Log-a-query forms drifts through behind
+  // the scraps, each populated from one raw scrap. Begins after the intro beat; clears when settling.
+  useEffect(() => {
+    if (reduced || settling || !introDone || n === 0) return;
+    const spawn = () => {
+      const id = ++formId.current;
+      const card = cardsRef.current[id % n];
+      if (!card) return;
+      const kind: FormKind = id % 2 === 0 ? "agent" : "query";
+      const x = 16 + Math.random() * 68;   // % of the stage
+      const y = 24 + Math.random() * 50;
+      const rot = (Math.random() * 5 - 2.5);
+      setForms((f) => (f.length >= FORM_POOL ? f : [...f, { id, kind, messy: card.messy, x, y, rot }]));
+      setTimeout(() => setForms((f) => f.filter((fm) => fm.id !== id)), FORM_LIFE);
+    };
+    spawn();
+    const iv = setInterval(spawn, FORM_SPAWN);
+    return () => { clearInterval(iv); setForms([]); };
+  }, [reduced, settling, introDone, n]);
+
   // Snap each card in, then crystallise it a beat later; finally hand off to the Overview. Reduced-motion
   // skips the fly-in (cards are simply present, clean) but still only proceeds once complete.
   const proceedRef = useRef(onProceed); proceedRef.current = onProceed;
@@ -201,12 +245,34 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
         .sa-sc-spark.a{background:#e9ede6;color:#5a6e58;}
         .sa-sc-spark.p{background:#f5e2da;color:#7c3a2a;}
         .sa-sc-spark.d{background:#eef1ec;color:#5a6e58;}
-        @media(prefers-reduced-motion:reduce){.sa-sc-card{transition:none;}.sa-sc-appear,.sa-sc-squeeze,.sa-sc-float,.sa-sc-dotpop svg,.sa-sc-spark{animation:none;}}
+        /* Work-zone forms — drift up through the background, behind the scraps. */
+        @keyframes saScForm{0%{opacity:0;transform:translate(-50%,-50%) translateY(18px) scale(.93) rotate(var(--fr,0deg))}16%{opacity:1}82%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) translateY(-32px) scale(.98) rotate(var(--fr,0deg))}}
+        .sa-sc-form{position:absolute;animation:saScForm 3s cubic-bezier(.4,0,.3,1) forwards;z-index:4;pointer-events:none;}
+        @media(prefers-reduced-motion:reduce){.sa-sc-card{transition:none;}.sa-sc-appear,.sa-sc-squeeze,.sa-sc-float,.sa-sc-dotpop svg,.sa-sc-spark{animation:none;}.sa-sc-form{display:none;}}
       `}</style>
 
       <OnbNav userInitial={userInitial} />
 
       <main style={{ flex: "1 1 auto", minHeight: 0, position: "relative", overflow: "hidden" }}>
+        {/* Work-zone forms — Add-an-agent / Log-a-query, fields filling from the raw scraps, drifting BEHIND them */}
+        {!reduced && !settling && forms.map((fm) => {
+          const meta = FORM_META[fm.kind];
+          const [v1, v2] = formFields(fm.messy, fm.kind);
+          const rows: [string, string][] = [[meta.fields[0], v1], [meta.fields[1], v2]];
+          return (
+            <div key={fm.id} className="sa-sc-form" style={{ left: `${fm.x}%`, top: `${fm.y}%`, width: 248, ["--fr" as string]: `${fm.rot}deg` }} aria-hidden>
+              <div style={{ background: "#fffdfa", border: "1px solid #ece1d4", borderRadius: 11, boxShadow: "0 12px 28px -18px rgba(58,28,20,.32)", padding: "11px 13px", opacity: 0.84 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 9, color: meta.accent, fontFamily: MONO, fontSize: 10.5, fontWeight: 600 }}>{meta.glyph}{meta.title}</div>
+                {rows.map(([label, val], k) => (
+                  <div key={k} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: k === 0 ? 6 : 0 }}>
+                    <span style={{ fontFamily: MONO, fontSize: 8, color: "#a89a8c", width: 50, flexShrink: 0, textTransform: "uppercase", letterSpacing: ".04em" }}>{label}</span>
+                    <span style={{ flex: 1, minWidth: 0, fontFamily: "Inter", fontSize: 11, color: "#5a4a3e", background: "#f6f1ea", border: "1px solid #ece1d4", borderRadius: 6, padding: "4px 8px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{val}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
         {n === 0 ? (
           <div style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center", fontFamily: SERIF, fontSize: 22, color: "#7c3a2a" }}>Reading your file…</div>
         ) : cards.map((card, i) => {
