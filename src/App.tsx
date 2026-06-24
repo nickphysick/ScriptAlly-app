@@ -32,7 +32,7 @@ import { PlansPage } from "./components/PlansPage";
 import { EmailImportDevPage } from "./components/emailImport/EmailImportDevPage";
 // TEMP: agents-screen B-redesign dev preview — remove after visual sign-off.
 import { SmartImportReview } from "./components/onboarding/SmartImportReview";
-import { REVIEW_FIXTURE } from "./components/onboarding/SmartImportReviewFixture";
+import { REVIEW_FIXTURE, REVIEW_FIXTURE_DUPES } from "./components/onboarding/SmartImportReviewFixture";
 // TEMP: post-import loader dev preview — remove after visual sign-off.
 import { ImportingLoader } from "./components/onboarding/ImportingLoader";
 // TEMP: scatter-settle extraction loader dev preview (#/scatter-loader) — remove after sign-off.
@@ -165,6 +165,9 @@ function AppContent() {
     return <PlansPage />;
   }
   // Dev-only agents-screen B-redesign preview.
+  if (hash === "#/import-review-dupes" && import.meta.env.DEV) {
+    return <SmartImportReview result={REVIEW_FIXTURE_DUPES} userName="Nick" onSkip={() => {}} />;
+  }
   if (hash === "#/import-review" && import.meta.env.DEV) {
     return <SmartImportReview result={REVIEW_FIXTURE} userName="Nick" onSkip={() => {}} />;
   }

@@ -34,3 +34,25 @@ export const REVIEW_FIXTURE: SmartImportResult = {
     { agentRef: "a7", status: QueryStatus.QUERIED, sentDate: "2024-04-18", sentDateRaw: "18/04/2024", reasons: ["status-wording"] },
   ],
 };
+
+/** Dev-only fixture for #/import-review-dupes — lands on the DUPLICATES stage (a 3-way cluster at
+ *  "Carter & Vale" + a 2-way at "Beth Books"), so the duplicates background, resolve-bar and
+ *  auto-advance pop-up can be reviewed (the main fixture has no clusters). */
+export const REVIEW_FIXTURE_DUPES: SmartImportResult = {
+  agents: [
+    { ref: "d1", name: "Jamal Carter", agency: "Carter & Vale" },
+    { ref: "d2", name: "J. Carter", agency: "Carter & Vale Literary" },
+    { ref: "d3", name: "Jamal P. Carter", agency: "Carter & Vale" },
+    { ref: "d4", name: "Sarah Beth", agency: "Beth Books" },
+    { ref: "d5", name: "S. Beth", agency: "Beth Books" },
+    { ref: "d6", name: "Tomas Vidal", agency: "The Quill Agency" },
+  ],
+  queries: [
+    { agentRef: "d1", status: QueryStatus.QUERIED, sentDate: "2024-02-01", sentDateRaw: "01/02/2024" },
+    { agentRef: "d2", status: QueryStatus.FULL_REQUESTED, sentDate: "2024-03-10", sentDateRaw: "10/03/2024" },
+    { agentRef: "d3", status: QueryStatus.NO_RESPONSE, sentDate: "2024-01-15", sentDateRaw: "15/01/2024" },
+    { agentRef: "d4", status: QueryStatus.QUERIED, sentDate: "2024-04-02", sentDateRaw: "02/04/2024" },
+    { agentRef: "d5", status: QueryStatus.PARTIAL_REQUESTED, sentDate: "2024-04-20", sentDateRaw: "20/04/2024" },
+    { agentRef: "d6", status: QueryStatus.QUERIED, sentDate: "2024-05-06", sentDateRaw: "06/05/2024" },
+  ],
+};
