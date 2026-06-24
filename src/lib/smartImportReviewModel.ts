@@ -72,8 +72,9 @@ export const keepBothLabel = (count: number) =>
 /** The settled-cluster verdict label for a kept-apart cluster. */
 export const keptClusterLabel = (count: number) => (count > 2 ? "Kept all" : "Kept both");
 
-/** Status precedence: no agency is a distinct blocking state; otherwise any open reason — or being a
- *  member of an unresolved duplicate cluster — means needs-check. */
+/** Status precedence: a missing agency surfaces as `needs-agency` (an OPTIONAL chance to sharpen — it
+ *  never blocks Continue/Import); any open reason — or an unresolved duplicate — is `needs-check`;
+ *  otherwise `captured`. "all clear" means genuinely nothing left, but import is never gated on it. */
 export type AgentStatus = "needs-agency" | "needs-check" | "captured";
 export const hasOpenReasons = (a: ReviewAgent) => a.reasons.some((r) => !r.resolved);
 export const agentStatus = (a: ReviewAgent, dupOpen = false): AgentStatus =>
@@ -156,10 +157,11 @@ export const queryStatusOf = (q: ReviewQuery): "needs-check" | "captured" =>
 export const currentDate = (q: ReviewQuery): string | null => q.sentDate;
 
 // ── Two-tier review classification (overview + pills + guided overlay all read this) ──────────────
-// FIX (gold, BLOCKING): an agent with no agency, or an agent caught in an unresolved duplicate
-// cluster — import is gated on these. SHARPEN (pink, OPTIONAL): a query's typed reasons, or an
-// agent's non-duplicate "mapping" flag — each has a safe default, so they're skippable. Everything
-// else is READY.
+// Import is NEVER gated on a per-record review (both reviews are advisory). FIX is reserved for the one
+// genuine hard decision — an unresolved duplicate — which lives on its own dedicated duplicates stage
+// BEFORE the per-record review. SHARPEN (OPTIONAL): a missing agency, a query's typed reasons, or an
+// agent's "mapping" flag — each has a safe default and is skippable; it never blocks Continue/Import.
+// Everything else is READY.
 export type ReviewTier = "ready" | "fix" | "sharpen";
 
 /** Agents in an unresolved duplicate cluster — the leaders carrying an open `duplicate` reason and
@@ -177,8 +179,8 @@ export function unresolvedDuplicateAgentIds(agents: ReviewAgent[]): Set<string> 
 }
 
 export const agentTier = (a: ReviewAgent, inUnresolvedDup: boolean): ReviewTier =>
-  !a.agency.trim() || inUnresolvedDup ? "fix"
-    : a.reasons.some((r) => r.kind === "mapping" && !r.resolved) ? "sharpen"
+  inUnresolvedDup ? "fix"                                                    // the only hard fix (duplicates stage)
+    : (!a.agency.trim() && !a.agencyWaived) || a.reasons.some((r) => r.kind === "mapping" && !r.resolved) ? "sharpen"
     : "ready";
 
 export const queryTier = (q: ReviewQuery): ReviewTier =>
@@ -221,15 +223,18 @@ export function doneStageMessage(opts: { fixesLeft: boolean; skipped: number; so
 
 /** Per-population tier counts — NEVER pooled across agents and queries (that was the "37 ready" bug:
  *  19 ready agents + 18 ready queries summed into one meaningless number). Each population reconciles
- *  to its own total. Agents: the only blocking tier (fix = missing agency or a duplicate group);
- *  anything else is ready. Queries: never blocking — sharpen if any open reason, else ready. */
+ *  to its own total. Both populations are advisory now: ready + sharpen, never blocking. (Agents can
+ *  also carry `fix` only for an unresolved duplicate — handled on the duplicates stage, so it's 0 by
+ *  the time the per-record agents review runs.) A record with multiple reasons counts ONCE (by tier). */
 export function reviewTallies(agents: ReviewAgent[], queries: ReviewQuery[]): ReviewTallies {
   const liveAgents = agents.filter((a) => !a.deleted);
   const liveQueries = queries.filter((q) => !q.removed);
   const dupIds = unresolvedDuplicateAgentIds(agents);
   const ag: PopulationTally = { total: liveAgents.length, ready: 0, fix: 0, sharpen: 0 };
   for (const a of liveAgents) {
-    if (!a.agency.trim() || dupIds.has(a.id)) ag.fix++; else ag.ready++;
+    if (dupIds.has(a.id)) ag.fix++;
+    else if ((!a.agency.trim() && !a.agencyWaived) || a.reasons.some((r) => r.kind === "mapping" && !r.resolved)) ag.sharpen++;
+    else ag.ready++;
   }
   const qy: PopulationTally = { total: liveQueries.length, ready: 0, fix: 0, sharpen: 0 };
   for (const q of liveQueries) {

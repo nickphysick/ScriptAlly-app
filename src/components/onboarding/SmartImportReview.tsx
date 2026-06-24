@@ -104,8 +104,8 @@ const chipBase: React.CSSProperties = { fontFamily: MONO, fontSize: 8, letterSpa
 const StateChip: React.FC<{ status: AgentStatus }> = ({ status }) => {
   if (status === "needs-agency")
     return (
-      <span style={{ ...chipBase, background: "#fdecea", color: C.invalid }}>
-        <span style={{ width: 6, height: 6, borderRadius: "50%", background: C.invalid }} />Needs agency
+      <span style={{ ...chipBase, background: C.noteFill, color: C.burgundy }}>
+        <span style={{ width: 6, height: 6, borderRadius: "50%", background: C.burgundy }} />No agency
       </span>
     );
   if (status === "needs-check")
@@ -338,7 +338,7 @@ const AgentRow: React.FC<AgentRowProps> = ({
             <>
               <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "Inter", fontSize: 12.5, color: "#9a5040", marginBottom: 11 }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a85a44" strokeWidth="1.8" strokeLinecap="round" style={{ flexShrink: 0 }}><path d="M12 8v5"/><circle cx="12" cy="16.5" r=".4" fill="#a85a44" stroke="none"/><path d="M12 3l9 16H3z"/></svg>
-                An agency is required before this one can import.
+                No agency yet — add it to sharpen this record, or carry on without one. Nothing's lost.
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                 <input ref={agencyRef} type="text" value={agencyInput} onChange={(e) => setAgencyInput(e.target.value)}
@@ -358,7 +358,7 @@ const AgentRow: React.FC<AgentRowProps> = ({
                     title="Import now with no agency — add it later from the agent's profile"
                     onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.borderColor = "#9a5040"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; e.currentTarget.style.borderColor = "#e3ccc0"; }}
-                  >Use the agent's name as primary reference</button>
+                  >Carry on without an agency</button>
                 )}
                 <button onClick={() => onPatch({ agencyOnly: true, name: "" })} style={ghostMini}
                   onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.borderColor = "#9a5040"; }}
@@ -557,7 +557,7 @@ const AgentFixPanel: React.FC<{ agent: ReviewAgent; onPatch: (p: Partial<ReviewA
     <div>
       <div style={{ display: "flex", gap: 10, alignItems: "flex-start", background: "#f6f1ea", border: "1px solid #e7ddd2", borderRadius: 11, padding: "13px 15px", margin: "2px 0 4px", fontSize: 13, lineHeight: 1.5, color: "#5a4a3e", maxWidth: 560 }}>
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9a8c80" strokeWidth="2" style={{ flexShrink: 0, marginTop: 1 }}><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 8h.01" /></svg>
-        <p style={{ margin: 0 }}>Agency names are a required field, and we can't see one attached to this record. If you don't have this to hand, we recommend using the agent's name as the primary field for now. Don't worry — this can always be updated later.</p>
+        <p style={{ margin: 0 }}>We don't have an agency for this one. Add it to sharpen this record — or carry on without one; nothing's lost, and you can add it any time.</p>
       </div>
       <div style={{ display: "flex", gap: 9, marginTop: 14, maxWidth: 560 }}>
         <input type="text" value={v} onChange={(e) => setV(e.target.value)} placeholder="Agency name (if you have it)" aria-label="Agency name"
@@ -579,7 +579,7 @@ const AgentFixPanel: React.FC<{ agent: ReviewAgent; onPatch: (p: Partial<ReviewA
             <span className="sa-quick-pulse" style={{ position: "absolute", top: -9, right: 12, zIndex: 2, fontFamily: MONO, fontSize: 9.5, letterSpacing: ".08em", textTransform: "uppercase", background: "#e9ede6", color: "#5a6e58", padding: "3px 8px", borderRadius: 6 }}>for quickness</span>
             <button onClick={() => onPatch({ agencyWaived: true })}
               style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, fontFamily: MONO, fontSize: 13, background: "#f7efe9", color: "#7c3a2a", border: "1px solid #e8d8cf", padding: "13px 18px", borderRadius: 11, fontWeight: 500, cursor: "pointer" }}>
-              Use the agent's name as the primary field →
+              Carry on without an agency →
             </button>
           </div>
         </>
@@ -2018,9 +2018,8 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   const statusOf = useCallback((a: ReviewAgent) => agentStatus(a, openDupIds.has(a.id)), [openDupIds]);
 
   const okCount = active.filter((a) => statusOf(a) === "captured").length;
-  const needCount = active.length - okCount;
-  const invalidCount = active.filter((a) => !a.agency.trim()).length;
-  const allCaptured = needCount === 0;
+  const needCount = active.length - okCount;       // sharpen items (incl. missing agency) — advisory, never blocks
+  const allCaptured = needCount === 0;             // "all clear" — informational only
 
   const patch = (id: string, p: Partial<ReviewAgent>) => { setAgents((xs) => xs.map((a) => (a.id === id ? { ...a, ...p } : a))); setTick((t) => t + 1); };
 
@@ -2139,12 +2138,10 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
     requestAnimationFrame(() => window.scrollTo({ top: 0 }));
   };
 
-  // Continue: when all agents are captured, advance to Queries; otherwise pulse the blocker(s).
+  // Continue is advisory: sharpen items (missing agency, mapping) never block — proceed to Queries
+  // whenever there's at least one agent to carry forward. "all clear" is informational, not a gate.
   const onContinueClick = () => {
-    if (allCaptured) { switchScreen("queries"); return; }
-    pulseBlocked(invalidCount > 0
-      ? active.filter((a) => !a.agency.trim()).map((a) => a.id)
-      : active.filter((a) => statusOf(a) !== "captured").map((a) => a.id));
+    if (active.length > 0) switchScreen("queries");
   };
 
   // Reset scoped to the CURRENT stage — never reaches across stages.
@@ -2189,9 +2186,10 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   const onRestoreSetAside = (kind: "agent" | "query", id: string) => (kind === "agent" ? restoreAgent(id) : restoreQuery(id));
   const qOk = qActive.filter((q) => queryStatusOf(q) === "captured").length;
   const qNeed = qActive.length - qOk;
-  // Mirror the Agents all-resolved gate: import only with ≥1 query AND nothing left to check. A
-  // missing date is NOT a check reason, so "date needed" never blocks import.
-  const canImport = qActive.length > 0 && qNeed === 0;
+  // Advisory review (parity with Agents): import is available whenever there's ≥1 query to bring
+  // across. Sharpen items (dates/statuses to confirm) NEVER block — they're optional, surfaced on the
+  // button, and resolvable any time. "all clear" (qNeed === 0) is informational, not a gate.
+  const canImport = qActive.length > 0;
 
   // On entering a flagged review stage: first time this session → play the pre-walk intro (which hands
   // off into the walk on "Let's go"); thereafter (or if escaped) → the guided walk opens by default,
@@ -2257,7 +2255,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   };
 
   const onImportClick = () => {
-    if (!canImport) { pulseBlocked(qActive.filter((q) => queryStatusOf(q) !== "captured").map((q) => q.id)); return; }
+    if (!canImport) return; // nothing to import (no active queries)
     void onImport?.(modelToResult(result, agents, queries));
   };
 
@@ -2487,7 +2485,9 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
       { q: "What happens when I delete a duplicate?", a: "We import just one of the two records and merge any queries from the duplicate onto that single agent — so nothing's lost." },
     ];
 
-    const agentTierOf = (a: ReviewAgent): "fix" | "sharpen" => (!a.agency.trim() && !a.agencyWaived ? "fix" : "sharpen");
+    // Advisory review: every agent flag (missing agency, mapping) is an OPTIONAL sharpen — never a
+    // blocking fix. (Duplicates are the one real decision, resolved on their own stage upstream.)
+    const agentTierOf = (_a: ReviewAgent): "fix" | "sharpen" => "sharpen";
     const openAgentsFocus = () => {
       const order = active.filter((a) => statusOf(a) !== "captured")
         .sort((a, b) => (agentTierOf(a) === agentTierOf(b) ? 0 : agentTierOf(a) === "fix" ? -1 : 1)) // fixes first
@@ -2534,7 +2534,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
     ) : null;
 
     const agentsIntro = introStep !== null ? (
-      <CoachmarkIntro welcomeHeading="Now to populate your agent database" readyCount={okCount} checkCount={needCount} checkTier="fix" hasReadyBeat step={introStep}
+      <CoachmarkIntro welcomeHeading="Now to populate your agent database" readyCount={okCount} checkCount={needCount} checkTier="sharpen" hasReadyBeat step={introStep}
         readyRef={readyPillRef} checkRef={checkPillRef}
         onIntroGo={() => setIntroStep(1)} onNextReady={() => setIntroStep(2)}
         onLetsGo={() => { setIntroStep(null); openAgentsFocus(); }} />
@@ -2567,7 +2567,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
               <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
                 <span ref={readyPillRef} style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#e6ebe3", color: "#5a6e58" }}>{okCount} ready to import</span>
                 {needCount > 0
-                  ? <span ref={checkPillRef} style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#f0cdbf", color: "#a85a44" }}>{needCount} to check</span>
+                  ? <span ref={checkPillRef} style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#f0cdbf", color: "#a85a44" }}>{needCount} to sharpen</span>
                   : <span style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#e6ebe3", color: "#5a6e58" }}>all clear</span>}
               </div>
             </div>
@@ -2605,10 +2605,10 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
                 >Reset all changes made here</button>
                 <button onClick={onContinueClick}
                   className={addDetailsCoachSeen && !showAddDetailsCoach && allCaptured ? "sa-continue-pulse" : undefined}
-                  style={{ fontFamily: MONO, fontSize: 13.5, background: "rgba(199,212,195,.5)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", color: allCaptured ? "#5a6e58" : "#8a9e88", border: "1px solid rgba(255,255,255,.55)", borderRadius: 11, padding: "13px 32px", cursor: allCaptured ? "pointer" : "not-allowed", fontWeight: 600, letterSpacing: ".02em", boxShadow: "0 10px 22px -12px rgba(90,110,88,.5),inset 0 1px 0 rgba(255,255,255,.65)", opacity: allCaptured ? 1 : 0.65, transition: "background .15s,color .15s,box-shadow .15s,transform .15s,border-color .15s" }}
-                  onMouseEnter={(e) => { if (allCaptured) { e.currentTarget.style.background = "rgba(245,226,218,.62)"; e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.transform = "translateY(-1px)"; } }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(199,212,195,.5)"; e.currentTarget.style.color = allCaptured ? "#5a6e58" : "#8a9e88"; e.currentTarget.style.transform = "none"; }}
-                >Continue →</button>
+                  style={{ fontFamily: MONO, fontSize: 13.5, background: "rgba(199,212,195,.5)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", color: active.length > 0 ? "#5a6e58" : "#8a9e88", border: "1px solid rgba(255,255,255,.55)", borderRadius: 11, padding: "13px 32px", cursor: active.length > 0 ? "pointer" : "not-allowed", fontWeight: 600, letterSpacing: ".02em", boxShadow: "0 10px 22px -12px rgba(90,110,88,.5),inset 0 1px 0 rgba(255,255,255,.65)", opacity: active.length > 0 ? 1 : 0.65, transition: "background .15s,color .15s,box-shadow .15s,transform .15s,border-color .15s" }}
+                  onMouseEnter={(e) => { if (active.length > 0) { e.currentTarget.style.background = "rgba(245,226,218,.62)"; e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.transform = "translateY(-1px)"; } }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(199,212,195,.5)"; e.currentTarget.style.color = active.length > 0 ? "#5a6e58" : "#8a9e88"; e.currentTarget.style.transform = "none"; }}
+                >{needCount > 0 ? `Continue · ${needCount} to sharpen →` : "Continue →"}</button>
               </div>
             </div>
           </div>
@@ -2712,7 +2712,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
               <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
                 <span ref={readyPillRef} style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#e6ebe3", color: "#5a6e58" }}>{qReadyCount} ready to import</span>
                 {qLookCount > 0
-                  ? <span ref={checkPillRef} style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#f0cdbf", color: "#a85a44" }}>{qLookCount} to check</span>
+                  ? <span ref={checkPillRef} style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#f0cdbf", color: "#a85a44" }}>{qLookCount} to sharpen</span>
                   : <span style={{ fontFamily: MONO, fontSize: 12, padding: "5px 11px", borderRadius: 20, background: "#e6ebe3", color: "#5a6e58" }}>all clear</span>}
               </div>
             </div>
@@ -2762,7 +2762,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
                   style={{ fontFamily: MONO, fontSize: 13.5, background: "rgba(199,212,195,.5)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", color: canImport ? "#5a6e58" : "#8a9e88", border: "1px solid rgba(255,255,255,.55)", borderRadius: 11, padding: "13px 32px", cursor: canImport ? "pointer" : "not-allowed", fontWeight: 600, letterSpacing: ".02em", boxShadow: "0 10px 22px -12px rgba(90,110,88,.5),inset 0 1px 0 rgba(255,255,255,.65)", opacity: canImport ? 1 : 0.65, transition: "background .15s,color .15s,box-shadow .15s,transform .15s,border-color .15s" }}
                   onMouseEnter={(e) => { if (canImport) { e.currentTarget.style.background = "rgba(245,226,218,.62)"; e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.transform = "translateY(-1px)"; } }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(199,212,195,.5)"; e.currentTarget.style.color = canImport ? "#5a6e58" : "#8a9e88"; e.currentTarget.style.transform = "none"; }}
-                >Import and get started →</button>
+                >{qNeed > 0 ? `Import ${active.length} agent${active.length === 1 ? "" : "s"} · ${qNeed} to sharpen →` : "Import and get started →"}</button>
               </div>
             </div>
           </div>

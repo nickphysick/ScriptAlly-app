@@ -71,12 +71,15 @@ export const ImportOverview: React.FC<Props> = ({ result, manuscriptTitle, userN
   const liveAgents = agents.filter((a) => !a.deleted);
   const noAgency = liveAgents.filter((a) => !a.agency.trim()).length;
   const dupGroups = liveAgents.filter((a) => a.mergeWith.length > 0 && !a.mergeResolved).length; // leaders = group count
-  const fixBits: string[] = [];
-  if (dupGroups) fixBits.push(`${dupGroups} possible duplicate set${dupGroups === 1 ? "" : "s"} to merge`);
-  if (noAgency) fixBits.push(`${noAgency} missing an agency`);
-  const agentFixDesc = fixBits.length ? `${fixBits.join(", and ")}. These need sorting before they can join.` : "A couple of details to sort before these can join.";
+  // Duplicates are the one real decision (their own stage). A missing agency is now an optional sharpen.
+  const agentFixDesc = dupGroups
+    ? `${dupGroups} possible duplicate set${dupGroups === 1 ? "" : "s"} to merge — sorted on the duplicates step.`
+    : "A duplicate set to merge.";
+  const agentSharpenDesc = noAgency
+    ? `${noAgency} could use an agency, plus the odd detail to confirm. Optional — and nothing's lost without one.`
+    : "A detail or two to confirm. Optional — each one sharpens your tracking.";
 
-  const allClear = t.agents.fix === 0 && t.queries.sharpen === 0;
+  const allClear = t.agents.fix === 0 && t.agents.sharpen === 0 && t.queries.sharpen === 0;
   const userInitial = userName ? userName[0].toUpperCase() : "?";
 
   return (
@@ -103,7 +106,10 @@ export const ImportOverview: React.FC<Props> = ({ result, manuscriptTitle, userN
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, marginTop: 20 }}>
           <Column label="Agents" total={t.agents.total}>
             <Tier first tone="ok" glyph="✓" title="Ready to go" count={t.agents.ready}
-              desc="Have an agency and read cleanly — good to import as they are." />
+              desc="Read cleanly — good to import as they are." />
+            {t.agents.sharpen > 0 && (
+              <Tier tone="sharp" glyph="✦" title="Chances to sharpen" count={t.agents.sharpen} desc={agentSharpenDesc} />
+            )}
             {t.agents.fix > 0 && (
               <Tier tone="fix" glyph="!" title="A quick fix" count={t.agents.fix} desc={agentFixDesc} />
             )}
@@ -119,7 +125,7 @@ export const ImportOverview: React.FC<Props> = ({ result, manuscriptTitle, userN
           </Column>
         </div>
 
-        {t.queries.sharpen > 0 && (
+        {(t.agents.sharpen > 0 || t.queries.sharpen > 0) && (
           <div style={{ display: "flex", gap: 11, alignItems: "flex-start", background: C.pinkWash, border: `1px solid ${C.pinkEdge}`, borderRadius: 12, padding: "13px 17px", marginTop: 18 }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill={C.burgundy} style={{ flexShrink: 0, marginTop: 1 }}><path d="M12 2l1.6 6.4L20 10l-6.4 1.6L12 18l-1.6-6.4L4 10l6.4-1.6L12 2z" /></svg>
             <p style={{ margin: 0, fontSize: 13, color: "#7a4636", lineHeight: 1.45 }}>

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseModel, modelToResult, applyAgentRemoval, quoteStatuses, queryReasonText, statusDirectionChoices, reviewTallies, seedUnidentifiedSetAside, decideStageEntry, doneStageMessage, keepBothLabel, dupNoteKept, focusReasonMeta, type FocusReasonKey, ReviewQuery } from './smartImportReviewModel';
+import { parseModel, modelToResult, applyAgentRemoval, quoteStatuses, queryReasonText, statusDirectionChoices, reviewTallies, seedUnidentifiedSetAside, decideStageEntry, doneStageMessage, keepBothLabel, dupNoteKept, focusReasonMeta, agentTier, type FocusReasonKey, ReviewQuery } from './smartImportReviewModel';
 import { QueryStatus } from '../types';
 import { ParsedAgent, ParsedQuery, SmartImportResult, REVIEW_REASON_CODES } from '../types/smartImport';
 
@@ -147,7 +147,7 @@ describe('reviewTallies — per-population, never pooled (the "37" fix)', () => 
     const r = result(
       [
         agent({ ref: 'a1', name: 'Clean', agency: 'Acme' }),          // agent ready
-        agent({ ref: 'a2', name: 'NoAgency', agency: '' }),            // agent fix (no agency)
+        agent({ ref: 'a2', name: 'NoAgency', agency: '' }),            // agent sharpen (no agency — advisory, NOT a fix)
       ],
       [
         query({ agentRef: 'a1', reasons: ['no-date'] }),              // query sharpen
@@ -156,11 +156,21 @@ describe('reviewTallies — per-population, never pooled (the "37" fix)', () => 
     );
     const { agents, queries } = parseModel(r);
     const t = reviewTallies(agents, queries);
-    expect(t.agents).toEqual({ total: 2, ready: 1, fix: 1, sharpen: 0 });
+    // Advisory parity: a missing agency is a SHARPEN, never a fix (fix is reserved for unresolved dups).
+    expect(t.agents).toEqual({ total: 2, ready: 1, fix: 0, sharpen: 1 });
     expect(t.queries).toEqual({ total: 2, ready: 1, fix: 0, sharpen: 1 });
     // each column reconciles to its own total — agents+queries are NEVER summed together
-    expect(t.agents.ready + t.agents.fix).toBe(t.agents.total);
+    expect(t.agents.ready + t.agents.sharpen + t.agents.fix).toBe(t.agents.total);
     expect(t.queries.ready + t.queries.sharpen).toBe(t.queries.total);
+  });
+
+  it('agentTier: a missing agency is SHARPEN (advisory), only an unresolved duplicate is a hard fix', () => {
+    const { agents } = parseModel(result(
+      [agent({ ref: 'p', name: 'Priya Raman', agency: '' }), agent({ ref: 'c', name: 'Clara', agency: 'Acme' })], []));
+    const priya = agents.find((a) => a.id === 'p')!, clara = agents.find((a) => a.id === 'c')!;
+    expect(agentTier(priya, false)).toBe('sharpen');   // missing agency → optional sharpen, never a fix
+    expect(agentTier(clara, false)).toBe('ready');     // clean
+    expect(agentTier(clara, true)).toBe('fix');        // unresolved duplicate is the one hard fix (its own stage)
   });
 
   it('a query with TWO reasons (status-wording + no-date) counts once in sharpen, not twice', () => {
