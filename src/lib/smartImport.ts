@@ -26,9 +26,9 @@ export async function fileToCsv(file: File): Promise<string> {
 /** One raw record sampled straight from the uploaded sheet — DISPLAY-ONLY, for the scatter-settle
  *  loader so the writer sees their actual cells the instant they upload, while the real (cloud)
  *  extraction runs. This NEVER feeds runSmartImport / the real mapping; it just reads a few rows.
- *  `raw` is a deliberately messy-looking cell (a serial date, a slashed date, a status token) so the
- *  "messy → clean" crystallise lands on something true to the file. */
-export interface RawRecordSample { headline: string; detail: string; raw: string }
+ *  `messy` is the row's own cells joined as the writer typed them (serial dates, slashed dates,
+ *  status scribbles) so the "messy → clean" crystallise lands on something true to the file. */
+export interface RawRecordSample { messy: string }
 export async function sampleRawRecords(file: File, max = 8): Promise<RawRecordSample[]> {
   const buf = await file.arrayBuffer();
   const wb = XLSX.read(buf, { type: "array" });
@@ -36,16 +36,10 @@ export async function sampleRawRecords(file: File, max = 8): Promise<RawRecordSa
   if (!ws) return [];
   const rows = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, blankrows: false, defval: "" });
   if (rows.length < 2) return [];
-  const looksMessy = (c: string) =>
-    /\d{1,4}[\/.\-]\d{1,4}/.test(c) || /^\d{5}$/.test(c) ||
-    /req|sent|reject|offer|partial|full|pass|no\s*response|withdraw|queried/i.test(c);
   return rows.slice(1, 1 + max).map((cells) => {
     const ne = (cells as unknown[]).map((c) => String(c ?? "").trim()).filter(Boolean);
-    return {
-      headline: ne[0] || "Record",
-      detail: ne[1] || "",
-      raw: ne.find(looksMessy) || ne[2] || ne[1] || "",
-    };
+    const joined = ne.slice(0, 5).join("  ·  ");
+    return { messy: (joined.length > 74 ? joined.slice(0, 73) + "…" : joined) || "(blank row)" };
   });
 }
 

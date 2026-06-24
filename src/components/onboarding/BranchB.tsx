@@ -21,6 +21,7 @@ import { ImportOverview } from "./ImportOverview";
 import { ImportTidyAnimation } from "./ImportTidyAnimation";
 import { ImportingLoader } from "./ImportingLoader";
 import { ScatterSettleLoader, LoaderCard } from "./ScatterSettleLoader";
+import { fmtDate } from "../../lib/smartImportReviewModel";
 import { ManuscriptFields, ManuscriptFieldsState, emptyManuscriptFields } from "./ManuscriptFields";
 
 /** UX-only floor so the post-import loader is held for a deliberate minimum (never a fake delay on
@@ -286,11 +287,16 @@ export const BranchB: React.FC<BranchBProps> = ({
   // ── Reading the file — scatter-and-settle loader (raw cells in, clean StatusDots out) ─────────────
   if (screen === "reading") {
     const resultQueries = validated?.result.queries ?? [];
-    const cards: LoaderCard[] = rawSample.map((r, i) => ({
-      headline: r.headline,
-      raw: r.raw,
-      status: extractComplete ? (resultQueries[i]?.status ?? undefined) : undefined,
-    }));
+    const resultAgents = validated?.result.agents ?? [];
+    const cards: LoaderCard[] = rawSample.map((r, i) => {
+      const q = extractComplete ? resultQueries[i] : undefined;
+      if (!q) return { messy: r.messy }; // still scattered / not yet extracted
+      const agent = resultAgents.find((a) => a.ref === q.agentRef);
+      const name = agent?.name?.trim() || agent?.agency?.trim() || "New agent";
+      const agency = agent?.agency?.trim() || "Agency only";
+      const date = q.sentDate ? fmtDate(q.sentDate) : "Undated";
+      return { messy: r.messy, name, detail: `${agency} · ${q.status || "Queried"} · ${date}`, status: q.status ?? undefined };
+    });
     return (
       <ScatterSettleLoader
         cards={cards}
