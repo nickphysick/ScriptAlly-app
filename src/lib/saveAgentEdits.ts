@@ -131,8 +131,11 @@ export function sanitizeAgentPatch(patch: AgentEditPatch): SanitizedAgentWrite {
 
 /**
  * Sanitise the patch and commit it (plus any `extraWrites`) as a single atomic `writeBatch`.
- * The agent doc always carries a fresh `lastCheckedDate` (mirrors `updateAgent`). Returns a typed
- * result; never throws.
+ *
+ * Deliberately does NOT touch `lastCheckedDate`: a field edit is not a re-verification, so it must
+ * not reset the freshness clock (unlike `updateAgent`, which stamps it). The rule requires
+ * `lastCheckedDate` to be present, but `batch.update` merges, so the existing value is preserved on
+ * the resulting doc and the rule still passes. Returns a typed result; never throws.
  */
 export async function commitAgentEdits(
   db: Firestore,
@@ -150,10 +153,7 @@ export async function commitAgentEdits(
     const batch = writeBatch(db);
 
     const agentRef = doc(db, "users", userId, "agents", agentId);
-    const update: Record<string, unknown> = {
-      ...sanitized.fields,
-      lastCheckedDate: new Date().toISOString(),
-    };
+    const update: Record<string, unknown> = { ...sanitized.fields };
     for (const key of sanitized.deletes) update[key] = deleteField();
     batch.update(agentRef, update);
 
