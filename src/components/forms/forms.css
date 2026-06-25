@@ -361,6 +361,13 @@
   padding: 9px 12px; margin-bottom: 14px;
 }
 .sa-expect strong { color: #7c3a2a; font-weight: 600; }
+/* "Add their details" — opens the Edit Agent drawer to complete a quick-added stub */
+.sa-expect-action {
+  font-family: inherit; font-size: inherit; color: #7c3a2a; font-weight: 600;
+  background: none; border: none; padding: 0; cursor: pointer;
+  text-decoration: underline; text-underline-offset: 2px;
+}
+.sa-expect-action:hover { color: #5e2b1f; }
 
 /* inline form error */
 .sa-error {

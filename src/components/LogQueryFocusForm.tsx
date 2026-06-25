@@ -13,6 +13,7 @@ import { FormShell, BrandDropdown, BrandDatePicker, FormField } from "./forms";
 import { MaterialsField } from "./MaterialsField";
 import { materialsLinkWrites } from "../lib/packageMetrics";
 import { AgentSearchField } from "./AgentSearchField";
+import { EditAgentDrawer } from "./EditAgentDrawer";
 import planeAnimation from "../assets/query-plane-animation.json";
 
 interface LogQueryFocusFormProps {
@@ -68,6 +69,9 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
   const [customNudgeDate, setCustomNudgeDate] = useState<string>("");
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  // Stub-completion: opens EditAgentDrawer OVER this form so a writer can fill a quick-added agent's
+  // missing fields (chiefly responseTimeWeeks) without leaving the log flow.
+  const [completeStubOpen, setCompleteStubOpen] = useState<boolean>(false);
 
   // Manuscripts offered for a NEW query — shelved books are hidden (their queries/stats are kept,
   // they're just not query-able targets). lifecycle.ts.
@@ -89,6 +93,7 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
       setCustomNudgeDate("");
       setFormError(null);
       setIsSubmitting(false);
+      setCompleteStubOpen(false);
     }
   }, [isOpen, pickable]);
 
@@ -97,6 +102,16 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
   useEffect(() => {
     setSelectedPackageId("");
   }, [selectedManuscriptId]);
+
+  // Re-sync the selected agent from live state: after the stub-completion drawer saves through
+  // saveAgentEdits, the agents array updates and the freshly-filled responseTimeWeeks flows back in,
+  // re-arming the deadline effect + clearing the "no response time" notice. A just-quick-added agent
+  // may not be in `agents` yet — keep the local snapshot until its row lands.
+  useEffect(() => {
+    if (!selectedAgent) return;
+    const fresh = agents.find((a) => a.id === selectedAgent.id);
+    if (fresh && fresh !== selectedAgent) setSelectedAgent(fresh);
+  }, [agents, selectedAgent]);
 
   // Auto-calculate the expected response deadline from the agent + date sent (unchanged)
   useEffect(() => {
@@ -304,6 +319,7 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
   );
 
   return (
+    <>
     <FormShell
       preLabel="Logging a query to"
       name={selectedAgent ? selectedAgent.name : "Select an agent"}
@@ -370,7 +386,16 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
               {selectedAgent.responseTimeWeeks ? (
                 <>Response expected by <strong>{formatExpectedDate(responseDeadlineDate)}</strong></>
               ) : (
-                "No response time on record for this agent yet."
+                <>
+                  No response time on record for this agent yet.{" "}
+                  <button
+                    type="button"
+                    className="sa-expect-action"
+                    onClick={() => setCompleteStubOpen(true)}
+                  >
+                    Add their details
+                  </button>
+                </>
               )}
             </div>
           )}
@@ -418,5 +443,19 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
 
           {formError && <div className="sa-error">{formError}</div>}
     </FormShell>
+
+    {/* Stub-completion drawer — mounted OVER the form (position:fixed, z1000+). Saves through
+        saveAgentEdits (deadline fan-out included); the re-sync effect pulls the filled agent back
+        into selectedAgent so "Response expected by" lights up without leaving the log flow. */}
+    {selectedAgent && (
+      <EditAgentDrawer
+        agent={selectedAgent}
+        isOpen={completeStubOpen}
+        onClose={() => setCompleteStubOpen(false)}
+        onOpenQuery={() => setCompleteStubOpen(false)}
+        onSavedToast={onSuccessToast}
+      />
+    )}
+    </>
   );
 };

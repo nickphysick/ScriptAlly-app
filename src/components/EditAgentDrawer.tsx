@@ -103,9 +103,17 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
   }, [orig, isOpen]);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape" && isOpen && !editing) onClose(); };
-    if (isOpen) window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    // Capture-phase + stopImmediatePropagation so the top-most overlay owns Escape: when the drawer
+    // is opened OVER a FormShell (the Log-a-Query stub-completion entry), Esc closes only the drawer
+    // and never reaches the form beneath. While a field is being edited inline, Esc belongs to that
+    // field — let it through untouched.
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || !isOpen || editing) return;
+      e.stopImmediatePropagation();
+      onClose();
+    };
+    if (isOpen) window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
   }, [isOpen, onClose, editing]);
 
   if (!isOpen) return null;
