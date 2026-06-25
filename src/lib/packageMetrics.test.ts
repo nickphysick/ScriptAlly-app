@@ -17,8 +17,24 @@ import {
   MIN_SENDS_FOR_CLAIM,
   materialsLinkWrites,
   editMaterialsUpdate,
+  resolveActivePackage,
 } from "./packageMetrics";
-import { Query, QueryStatus, SubmissionMethod, SubmissionPackage, ManuscriptVersion, ComponentType, QueryMaterial } from "../types";
+import { Query, QueryStatus, SubmissionMethod, SubmissionPackage, ManuscriptVersion, ComponentType, QueryMaterial, Manuscript, ManuscriptStatus } from "../types";
+
+const ms = (over: Partial<Manuscript>): Manuscript =>
+  ({
+    id: "m",
+    userId: "u",
+    title: "T",
+    genre: "Fantasy",
+    ageCategory: "Adult",
+    wordCount: 90000,
+    logline: "",
+    comparableTitles: "",
+    status: ManuscriptStatus.QUERYING,
+    statusChangedDate: "2026-01-01",
+    ...over,
+  }) as Manuscript;
 
 const q = (over: Partial<Query>): Query =>
   ({
@@ -193,6 +209,32 @@ describe("editMaterialsUpdate (edit-save omit-when-untouched gating)", () => {
     expect(r).toEqual({});
     expect("packageId" in r).toBe(false);
     expect("materialsWanted" in r).toBe(false);
+  });
+});
+
+describe("resolveActivePackage (user-chosen default, graceful)", () => {
+  const active = pkg({ id: "p-active", manuscriptId: "m", status: "Active" });
+  const retired = pkg({ id: "p-retired", manuscriptId: "m", status: "Retired" });
+  const otherMs = pkg({ id: "p-other", manuscriptId: "m2", status: "Active" });
+
+  it("returns null when no active package is set", () => {
+    expect(resolveActivePackage(ms({}), [active])).toBeNull();
+  });
+  it("returns null for a null/undefined manuscript", () => {
+    expect(resolveActivePackage(null, [active])).toBeNull();
+    expect(resolveActivePackage(undefined, [active])).toBeNull();
+  });
+  it("resolves a valid active package on the same manuscript", () => {
+    expect(resolveActivePackage(ms({ activePackageId: "p-active" }), [active, retired])).toBe(active);
+  });
+  it("returns null when the active package is retired", () => {
+    expect(resolveActivePackage(ms({ activePackageId: "p-retired" }), [active, retired])).toBeNull();
+  });
+  it("returns null when the active package id is missing from the list", () => {
+    expect(resolveActivePackage(ms({ activePackageId: "p-gone" }), [active])).toBeNull();
+  });
+  it("returns null when the active package belongs to a different manuscript", () => {
+    expect(resolveActivePackage(ms({ id: "m", activePackageId: "p-other" }), [otherMs])).toBeNull();
   });
 });
 

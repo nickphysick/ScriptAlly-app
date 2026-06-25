@@ -11,7 +11,7 @@ import { pickableManuscripts } from "../lib/lifecycle";
 import { QueryStatus, Agent, SubmissionMethod, SubmissionStatus, QueryMaterial } from "../types";
 import { FormShell, BrandDropdown, BrandDatePicker, FormField } from "./forms";
 import { MaterialsField } from "./MaterialsField";
-import { materialsLinkWrites } from "../lib/packageMetrics";
+import { materialsLinkWrites, resolveActivePackage } from "../lib/packageMetrics";
 import { AgentSearchField } from "./AgentSearchField";
 import { EditAgentDrawer } from "./EditAgentDrawer";
 import planeAnimation from "../assets/query-plane-animation.json";
@@ -45,7 +45,7 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
   onSuccessToast,
   onNavigate,
 }) => {
-  const { manuscripts, agents, queries, addQuery, addAgent, currentUser } = useScriptAllyDb();
+  const { manuscripts, agents, queries, packages, addQuery, addAgent, currentUser } = useScriptAllyDb();
 
   // ── Save-path state — read verbatim by handleFormSubmit (unchanged) ──
   const [selectedManuscriptId, setSelectedManuscriptId] = useState<string>("");
@@ -97,11 +97,14 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
     }
   }, [isOpen, pickable]);
 
-  // Packages are per-manuscript — switching the target manuscript drops any attached package so a
-  // query can't link a package that belongs to a different manuscript.
+  // Packages are per-manuscript. When the target manuscript changes (and on open), pre-fill the
+  // attached package from that manuscript's chosen ACTIVE package — resolveActivePackage returns ""
+  // when there's no active one (or it's retired/missing), so a query never links a stale or
+  // cross-manuscript package. The writer can still detach to free text in MaterialsField.
   useEffect(() => {
-    setSelectedPackageId("");
-  }, [selectedManuscriptId]);
+    const m = manuscripts.find((mm) => mm.id === selectedManuscriptId);
+    setSelectedPackageId(resolveActivePackage(m, packages)?.id ?? "");
+  }, [selectedManuscriptId, manuscripts, packages]);
 
   // Re-sync the selected agent from live state: after the stub-completion drawer saves through
   // saveAgentEdits, the agents array updates and the freshly-filled responseTimeWeeks flows back in,

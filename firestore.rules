@@ -90,7 +90,8 @@ service cloud.firestore {
         && (!data.keys().hasAll(['shelvedReason']) || (data.shelvedReason is string && data.shelvedReason.size() <= 2048))
         && (!data.keys().hasAll(['notes']) || (data.notes is string && data.notes.size() <= 16384))
         && (!data.keys().hasAll(['subGenres']) || (data.subGenres is list && data.subGenres.size() <= 20))
-        && (!data.keys().hasAll(['shelved']) || data.shelved is bool);
+        && (!data.keys().hasAll(['shelved']) || data.shelved is bool)
+        && (!data.keys().hasAll(['activePackageId']) || (data.activePackageId is string && data.activePackageId.size() <= 128));
     }
 
     function isValidVersion(data, userId) {
@@ -107,7 +108,10 @@ service cloud.firestore {
         && data.fileAttached is bool
         && data.createdDate is string && data.createdDate.size() <= 64
         && (!data.keys().hasAll(['fileName']) || (data.fileName is string && data.fileName.size() <= 512))
-        && (!data.keys().hasAll(['contentDraft']) || (data.contentDraft is string && data.contentDraft.size() <= 262144));
+        && (!data.keys().hasAll(['contentDraft']) || (data.contentDraft is string && data.contentDraft.size() <= 262144))
+        && (!data.keys().hasAll(['notes']) || (data.notes is string && data.notes.size() <= 16384))
+        && (!data.keys().hasAll(['contentType']) || (data.contentType is string && (data.contentType == 'text' || data.contentType == 'link' || data.contentType == 'file')))
+        && (!data.keys().hasAll(['contentLink']) || (data.contentLink is string && data.contentLink.size() <= 2048));
     }
 
     function isValidPackage(data, userId) {
@@ -373,7 +377,7 @@ service cloud.firestore {
         allow create: if isOwner(userId) && isValidId(manuscriptId) && isValidManuscript(incoming(), userId);
         allow update: if isOwner(userId) && isValidId(manuscriptId) && isValidManuscript(incoming(), userId) && (
           incoming().diff(existing()).affectedKeys().hasOnly([
-            'title', 'genre', 'subGenres', 'ageCategory', 'wordCount', 'logline', 'comparableTitles', 'status', 'shelvedReason', 'statusChangedDate', 'notes', 'shelved'
+            'title', 'genre', 'subGenres', 'ageCategory', 'wordCount', 'logline', 'comparableTitles', 'status', 'shelvedReason', 'statusChangedDate', 'notes', 'shelved', 'activePackageId'
           ])
         );
 
@@ -390,7 +394,7 @@ service cloud.firestore {
         allow list: if isOwner(userId);
         allow create: if isOwner(userId) && isValidId(versionId) && isValidVersion(incoming(), userId);
         allow update: if isOwner(userId) && isValidId(versionId) && isValidVersion(incoming(), userId) && (
-          incoming().diff(existing()).affectedKeys().hasOnly(['versionName', 'fileAttached', 'fileName', 'contentDraft'])
+          incoming().diff(existing()).affectedKeys().hasOnly(['versionName', 'fileAttached', 'fileName', 'contentDraft', 'notes', 'contentType', 'contentLink'])
         );
       }
 

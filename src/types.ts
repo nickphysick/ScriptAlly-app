@@ -68,6 +68,10 @@ export interface Manuscript {
   // picker and new-query suggestions, but keeps all queries/stats/history. Reversible (Reactivate).
   // Absent === not shelved. Deliberately NOT folded into `status` so the workflow status is preserved.
   shelved?: boolean;
+  // The user-chosen default submission package for this manuscript — exactly one, never auto-promoted.
+  // Pre-fills `packageId` on a newly logged query. Absent === no active package yet. Resolve via
+  // resolveActivePackage() (returns null when it points at a retired/missing/cross-manuscript package).
+  activePackageId?: string;
 }
 
 export enum ComponentType {
@@ -86,7 +90,12 @@ export interface ManuscriptVersion {
   fileAttached: boolean; // attachment mock flag
   fileName?: string;
   createdDate: string; // ISO String
-  contentDraft?: string; // rich editing mock content
+  contentDraft?: string; // the pasted/typed text body (reused as the v1 "Paste" content for text mode)
+  // Authoring fields (redesign). `contentType` selects the mode: 'text' uses contentDraft, 'link' uses
+  // contentLink; 'file' is reserved (v1 renders Attach-file as a disabled "coming soon" — no Storage).
+  notes?: string;
+  contentType?: "text" | "link" | "file";
+  contentLink?: string;
 }
 
 export interface SubmissionPackage {

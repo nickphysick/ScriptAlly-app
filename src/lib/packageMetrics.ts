@@ -21,7 +21,7 @@
  *   requestRate  = requests / sent   (null when sent === 0 → rendered as "—")
  *   responseRate = responses / sent  (null when sent === 0 → rendered as "—")
  */
-import { ManuscriptVersion, SubmissionPackage, Query, QueryStatus, QueryMaterial } from "../types";
+import { Manuscript, ManuscriptVersion, SubmissionPackage, Query, QueryStatus, QueryMaterial } from "../types";
 
 /** Request-or-beyond statuses: the agent asked for materials (or went further). Exact enum strings. */
 const REQUEST_OR_BEYOND: ReadonlySet<QueryStatus> = new Set<QueryStatus>([
@@ -149,4 +149,16 @@ export function editMaterialsUpdate(args: { touched: boolean; packageId: string;
   materialsWanted: (string | QueryMaterial)[];
 }> {
   return args.touched ? materialsLinkWrites({ packageId: args.packageId, materials: args.materials }) : {};
+}
+
+/**
+ * Resolve a manuscript's chosen active package to a live SubmissionPackage. Returns null when there
+ * is none, or when the stored activePackageId points at a package that is retired, missing, or belongs
+ * to a different manuscript — so the UI/prefill degrade gracefully ("no active yet") and never link a
+ * stale or cross-manuscript package. The app never sets active automatically; this only reads it.
+ */
+export function resolveActivePackage(manuscript: Manuscript | null | undefined, packages: SubmissionPackage[]): SubmissionPackage | null {
+  const id = manuscript?.activePackageId;
+  if (!id) return null;
+  return packages.find((p) => p.id === id && p.manuscriptId === manuscript!.id && p.status !== "Retired") ?? null;
 }

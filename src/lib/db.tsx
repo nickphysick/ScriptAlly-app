@@ -172,13 +172,16 @@ interface DbContextType {
   
   // Version Actions
   addVersion: (v: Omit<ManuscriptVersion, "id" | "userId" | "createdDate">) => Promise<void>;
-  updateVersion: (id: string, fields: Partial<Pick<ManuscriptVersion, "versionName" | "contentDraft" | "fileAttached" | "fileName">>) => Promise<void>;
+  updateVersion: (id: string, fields: Partial<Pick<ManuscriptVersion, "versionName" | "contentDraft" | "fileAttached" | "fileName" | "notes" | "contentType" | "contentLink">>) => Promise<void>;
   deleteVersion: (id: string) => Promise<void>;
 
   // Package Actions
   addPackage: (p: Omit<SubmissionPackage, "id" | "userId" | "status" | "createdDate">) => Promise<{ success: boolean; error?: string }>;
   updatePackage: (id: string, fields: Partial<Pick<SubmissionPackage, "packageName" | "queryLetterVersionId" | "synopsisVersionId" | "samplePagesVersionId">>) => Promise<void>;
   retirePackage: (id: string) => Promise<void>;
+  // The user-chosen active package for a manuscript (single writer — one field, last write wins).
+  // Pass "" to clear. Pre-fills packageId on newly logged queries; never auto-set by the app.
+  setActivePackage: (manuscriptId: string, packageId: string) => Promise<void>;
   
   // Agent Actions
   addAgent: (a: Omit<Agent, "id" | "userId" | "dateAdded" | "lastCheckedDate"> & { id?: string }, bypassLimits?: boolean) => Promise<{ success: boolean; error?: string; id?: string }>;
@@ -1065,6 +1068,17 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         date: dateStr,
         details: ""
       });
+    }
+  };
+
+  // Set (or clear, with "") the manuscript's chosen active package. Direct write — no MANUSCRIPT_UPDATED
+  // activity (this is a quiet preference, not an edit). One field = inherently single-writer.
+  const setActivePackage = async (manuscriptId: string, packageId: string) => {
+    if (!currentUser) return;
+    try {
+      await updateDoc(doc(db, "users", currentUser.id, "manuscripts", manuscriptId), { activePackageId: packageId });
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/manuscripts/${manuscriptId}`);
     }
   };
 
@@ -2438,6 +2452,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         addPackage,
         updatePackage,
         retirePackage,
+        setActivePackage,
         addAgent,
         updateAgent,
         saveAgentEdits,
