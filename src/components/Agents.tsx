@@ -33,6 +33,7 @@ import {
   PauseCircle
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { EditAgentDrawer } from "./EditAgentDrawer";
 
 interface AgentsProps {
   searchQuery?: string;
@@ -101,6 +102,10 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
 
   // Form Editing State
   const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
+  // Edit Agent drawer (Prompt 2) — store the id so the agent prop stays LIVE (a save updates the
+  // live doc → the drawer reseeds to saved values). The legacy `editingAgent` modal stays for
+  // Prompt 4; this re-points only the "Edit profile" trigger.
+  const [editDrawerAgentId, setEditDrawerAgentId] = useState<string | null>(null);
 
   // Agent Notes State (Card 3 Jottings)
   const [agentNotesList, setAgentNotesList] = useState<{ id: string; text: string; createdAt: string }[]>([]);
@@ -564,7 +569,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
               </button>
 
               <button
-                onClick={() => startEditAgent(activeAgent)}
+                onClick={() => setEditDrawerAgentId(activeAgent.id)}
                 className="h-[28px] border border-[#e8e0d8] hover:bg-stone-100 bg-white flex items-center gap-1 px-3 rounded-full text-xs text-stone-700 font-medium cursor-pointer transition-colors"
               >
                 <Pencil className="w-3 h-3 text-stone-500" />
@@ -1194,6 +1199,22 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Edit Agent drawer — opened from "Edit profile". Agent looked up live by id so a save
+          reseeds it to the saved state. onOpenQuery navigates to the queries DB (the Edit Query
+          drawer isn't mounted on this page — full in-place open is a later entry-point pass). */}
+      {(() => {
+        const drawerAgent = editDrawerAgentId ? agents.find((a) => a.id === editDrawerAgentId) : null;
+        return drawerAgent ? (
+          <EditAgentDrawer
+            agent={drawerAgent}
+            isOpen
+            onClose={() => setEditDrawerAgentId(null)}
+            onOpenQuery={() => { setEditDrawerAgentId(null); onNavigate?.("queries"); }}
+            onSavedToast={(msg) => { setToastMessage(msg); setTimeout(() => setToastMessage(null), 3000); }}
+          />
+        ) : null;
+      })()}
     </div>
   );
 };
