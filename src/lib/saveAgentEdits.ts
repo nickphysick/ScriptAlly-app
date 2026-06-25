@@ -26,7 +26,7 @@ import {
   deleteField,
   writeBatch,
 } from "firebase/firestore";
-import { SubmissionStatus } from "../types";
+import { SubmissionStatus, AgentSocial } from "../types";
 
 /** The panel's edit patch. Any key left `undefined` is omitted from the write. A `responseTimeWeeks`
  *  of `null` is the explicit "Not set" intent → the field is deleted (deadline falls back to
@@ -38,6 +38,12 @@ export interface AgentEditPatch {
   website?: string;
   country?: string;
   city?: string;
+  // Social handles — the canonical list plus the mirrored discrete fields (X/Bluesky/Instagram) the
+  // agent-database display still reads. See [[agent-socials-display-backlog]].
+  socials?: AgentSocial[];
+  twitter?: string;
+  bluesky?: string;
+  instagram?: string;
   genres?: string[];
   mswlNotes?: string;
   notes?: string;
@@ -100,11 +106,20 @@ export function sanitizeAgentPatch(patch: AgentEditPatch): SanitizedAgentWrite {
   const errors: string[] = [];
 
   // Plain string fields — pass through when defined (the panel owns trimming/UX copy).
-  for (const k of ["name", "agency", "email", "website", "country", "city", "mswlNotes", "notes", "submissionMethod"] as const) {
+  for (const k of ["name", "agency", "email", "website", "country", "city", "twitter", "bluesky", "instagram", "mswlNotes", "notes", "submissionMethod"] as const) {
     const v = patch[k];
     if (v === undefined) continue;
     if (typeof v !== "string") { errors.push(`${k} must be a string.`); continue; }
     fields[k] = v;
+  }
+
+  // Social handles list — { platform, handle } entries, capped at 30 (mirrors the Firestore rule).
+  if (patch.socials !== undefined) {
+    if (!Array.isArray(patch.socials)) errors.push("socials must be a list.");
+    else if (patch.socials.length > 30) errors.push("socials is capped at 30.");
+    else if (!patch.socials.every((s) => s && typeof s.platform === "string" && typeof s.handle === "string")) {
+      errors.push("each social needs a platform and handle.");
+    } else fields.socials = patch.socials;
   }
 
   if (patch.genres !== undefined) {

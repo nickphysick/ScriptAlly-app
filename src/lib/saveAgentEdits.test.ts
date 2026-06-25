@@ -82,6 +82,22 @@ describe("sanitizeAgentPatch", () => {
     expect(r.fields.city).toBe("London");
   });
 
+  it("passes a valid socials list + mirrored discrete handles through", () => {
+    const r = sanitizeAgentPatch({
+      socials: [{ platform: "X / Twitter", handle: "@a" }, { platform: "Bluesky", handle: "b.bsky" }],
+      twitter: "@a", bluesky: "b.bsky", instagram: "",
+    });
+    expect(r.errors).toEqual([]);
+    expect((r.fields.socials as unknown[]).length).toBe(2);
+    expect(r.fields.twitter).toBe("@a");
+    expect(r.fields.instagram).toBe("");
+  });
+
+  it("rejects a malformed socials list (caps at 30, requires platform+handle)", () => {
+    expect(sanitizeAgentPatch({ socials: Array(31).fill({ platform: "X", handle: "y" }) }).errors.length).toBe(1);
+    expect(sanitizeAgentPatch({ socials: [{ platform: "X" } as never] }).errors.length).toBe(1);
+  });
+
   it("passes a full valid patch through cleanly", () => {
     const r = sanitizeAgentPatch({
       name: "Sarah Latham", agency: "Curtis Brown", email: "s@cb.com", website: "",
