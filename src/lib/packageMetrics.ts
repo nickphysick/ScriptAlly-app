@@ -48,6 +48,16 @@ export const isRequest = (q: Query): boolean =>
  */
 export const isResponse = (q: Query): boolean => q.hasAgentResponded === true || isRequest(q);
 
+/**
+ * "In flight" = the send is still awaiting the agent's first move — Queried, with no request or
+ * response recorded yet. The moment any outcome lands (a request, a rejection, a withdrawal, or a
+ * no-response close) the query is "resolved". Per the redesign's locked decision, in-flight queries
+ * are shown separately and EXCLUDED from rate denominators, so a package isn't dragged down by sends
+ * that simply haven't had time to come back. (A Partial/Full Sent already counts as a request, so it
+ * is resolved, not in flight — isResponse short-circuits it here.)
+ */
+export const isInFlight = (q: Query): boolean => q.status === QueryStatus.QUERIED && !isResponse(q);
+
 export interface RateStat {
   sent: number;
   requests: number;
@@ -68,6 +78,39 @@ const statsFor = (S: Query[]): RateStat => {
 /** Performance for one package: queries whose packageId === pkgId. */
 export function packageMetrics(pkgId: string, queries: Query[]): RateStat {
   return statsFor(queries.filter((q) => q.packageId === pkgId));
+}
+
+/**
+ * Resolved-aware performance for a package — the shape the redesign's spotlight, shelf and per-package
+ * funnel consume. Same raw counts as packageMetrics, plus the in-flight split: `inFlight` Queried sends
+ * are held back, and the *Resolved rates divide requests/responses by `resolved` (= sent − inFlight)
+ * rather than by every send. This is the single source of truth for the locked "rates over resolved
+ * queries only" decision; the legacy Performance view still reads packageMetrics' sent-denominator
+ * rates, so the two are intentionally distinct (see RECON note).
+ */
+export interface PackageFunnel extends RateStat {
+  inFlight: number; // Queried, awaiting the agent's first move — excluded from the resolved rates
+  resolved: number; // sent − inFlight
+  requestRateResolved: number | null; // requests / resolved  (null when resolved === 0)
+  responseRateResolved: number | null; // responses / resolved
+}
+
+const funnelFor = (S: Query[]): PackageFunnel => {
+  const base = statsFor(S);
+  const inFlight = S.filter(isInFlight).length;
+  const resolved = base.sent - inFlight;
+  return {
+    ...base,
+    inFlight,
+    resolved,
+    requestRateResolved: rate(base.requests, resolved),
+    responseRateResolved: rate(base.responses, resolved),
+  };
+};
+
+/** Resolved-aware performance for one package (queries whose packageId === pkgId). */
+export function packageFunnel(pkgId: string, queries: Query[]): PackageFunnel {
+  return funnelFor(queries.filter((q) => q.packageId === pkgId));
 }
 
 /** Active packages that reference a given component version (any of the three slots). */

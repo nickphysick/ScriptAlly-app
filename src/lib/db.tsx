@@ -176,7 +176,7 @@ interface DbContextType {
   deleteVersion: (id: string) => Promise<void>;
 
   // Package Actions
-  addPackage: (p: Omit<SubmissionPackage, "id" | "userId" | "status" | "createdDate">) => Promise<{ success: boolean; error?: string }>;
+  addPackage: (p: Omit<SubmissionPackage, "id" | "userId" | "status" | "createdDate">) => Promise<{ success: boolean; error?: string; id?: string }>;
   updatePackage: (id: string, fields: Partial<Pick<SubmissionPackage, "packageName" | "queryLetterVersionId" | "synopsisVersionId" | "samplePagesVersionId">>) => Promise<void>;
   retirePackage: (id: string) => Promise<void>;
   // The user-chosen active package for a manuscript (single writer — one field, last write wins).
@@ -1197,7 +1197,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   };
 
   // Package Action with Pro checking
-  const addPackage = async (p: Omit<SubmissionPackage, "id" | "userId" | "status" | "createdDate">): Promise<{ success: boolean; error?: string }> => {
+  const addPackage = async (p: Omit<SubmissionPackage, "id" | "userId" | "status" | "createdDate">): Promise<{ success: boolean; error?: string; id?: string }> => {
     if (!currentUser) return { success: false, error: "Authentication required." };
 
     if (currentUser.plan === UserPlan.FREE) {
@@ -1218,7 +1218,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
     try {
       await setDoc(doc(db, "users", currentUser.id, "packages", id), newPkg);
-      return { success: true };
+      return { success: true, id };
     } catch (e) {
       handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/packages/${id}`);
       return { success: false, error: "Database transaction error." };

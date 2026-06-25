@@ -6,7 +6,9 @@ import { describe, it, expect } from "vitest";
 import {
   isRequest,
   isResponse,
+  isInFlight,
   packageMetrics,
+  packageFunnel,
   componentMetrics,
   packagesUsingVersion,
   formatRate,
@@ -143,6 +145,46 @@ describe("packageMetrics", () => {
   it("guards against divide-by-zero (no queries → null rates)", () => {
     const m = packageMetrics("EMPTY", [q({ packageId: "P1" })]);
     expect(m).toEqual({ sent: 0, requests: 0, responses: 0, requestRate: null, responseRate: null });
+  });
+});
+
+describe("isInFlight (awaiting the agent's first move)", () => {
+  it("is true only for a plain Queried with no outcome yet", () => {
+    expect(isInFlight(q({ status: QueryStatus.QUERIED }))).toBe(true);
+  });
+  it("is false once any outcome lands (request, response, rejection, withdrawal, no-response)", () => {
+    expect(isInFlight(q({ status: QueryStatus.PARTIAL_REQUESTED }))).toBe(false);
+    expect(isInFlight(q({ status: QueryStatus.PARTIAL_SENT }))).toBe(false); // already a request → resolved
+    expect(isInFlight(q({ status: QueryStatus.REJECTED }))).toBe(false);
+    expect(isInFlight(q({ status: QueryStatus.WITHDRAWN }))).toBe(false);
+    expect(isInFlight(q({ status: QueryStatus.NO_RESPONSE }))).toBe(false);
+    expect(isInFlight(q({ status: QueryStatus.QUERIED, hasAgentResponded: true }))).toBe(false);
+  });
+});
+
+describe("packageFunnel (resolved-only rates; in-flight excluded)", () => {
+  it("splits in-flight out and divides the resolved rates by resolved, not by every send", () => {
+    const queries = [
+      q({ packageId: "P1", status: QueryStatus.FULL_REQUESTED, hasAgentResponded: true }), // request + response
+      q({ packageId: "P1", status: QueryStatus.REJECTED, hasAgentResponded: true }), // response, no request
+      q({ packageId: "P1", status: QueryStatus.QUERIED }), // in flight
+      q({ packageId: "P1", status: QueryStatus.QUERIED }), // in flight
+      q({ packageId: "OTHER", status: QueryStatus.OFFER, hasAgentResponded: true }),
+    ];
+    const f = packageFunnel("P1", queries);
+    expect(f.sent).toBe(4);
+    expect(f.inFlight).toBe(2);
+    expect(f.resolved).toBe(2);
+    expect(f.requests).toBe(1);
+    expect(f.responses).toBe(2);
+    // sent-denominator (legacy) request rate would be 1/4 = 25%; resolved is 1/2 = 50%
+    expect(f.requestRate).toBe(0.25);
+    expect(f.requestRateResolved).toBe(0.5);
+    expect(f.responseRateResolved).toBe(1);
+  });
+  it("guards divide-by-zero: all sends in flight → resolved 0 → null resolved rates (never NaN)", () => {
+    const f = packageFunnel("P1", [q({ packageId: "P1", status: QueryStatus.QUERIED }), q({ packageId: "P1", status: QueryStatus.QUERIED })]);
+    expect(f).toMatchObject({ sent: 2, inFlight: 2, resolved: 0, requestRateResolved: null, responseRateResolved: null });
   });
 });
 

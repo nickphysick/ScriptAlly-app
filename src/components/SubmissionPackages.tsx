@@ -19,16 +19,20 @@ import { createPortal } from "react-dom";
 import { useScriptAllyDb } from "../lib/db";
 import { ManuscriptVersion, SubmissionPackage, ComponentType, UserPlan } from "../types";
 import { MountPanel } from "./MountPanel";
+import { SheenWave } from "./onboarding/SheenWave";
 import {
   versionSnippet,
   versionMeta,
   packagesUsingVersion,
   componentMetrics,
   packageMetrics,
+  packageFunnel,
+  resolveActivePackage,
   formatRate,
   barWidth,
   meetsSampleThreshold,
   MIN_SENDS_FOR_CLAIM,
+  type PackageFunnel,
 } from "../lib/packageMetrics";
 import {
   pageGround,
@@ -73,10 +77,18 @@ import {
   Trophy,
   Sun,
   PieChart,
+  Star,
+  ArrowRight,
+  ArrowLeft,
+  Sparkles,
 } from "lucide-react";
 
 const AMBER = "#b98a4e";
 const GREY_DOT = "#c4b4aa";
+
+/** Quiet dotted placeholders needed to fill the shelf's last grid row flush. `tiles` already counts
+ *  the Build tile (the first ghost), so this returns only the extra *empty* ghosts after it. */
+const ghostCount = (tiles: number, cols: number): number => (cols <= 0 ? 0 : (cols - (tiles % cols)) % cols);
 
 /** Per-component-kind presentation (the three material kinds this page manages). */
 const COMP: Record<string, { label: string; slotLabel: string; noun: string; Icon: React.ComponentType<any>; color: string; tile: string }> = {
@@ -319,7 +331,7 @@ interface FormState {
 }
 
 export const SubmissionPackages: React.FC = () => {
-  const { currentUser, manuscripts, versions, packages, queries, addVersion, updateVersion, deleteVersion, addPackage, updatePackage } = useScriptAllyDb();
+  const { currentUser, manuscripts, versions, packages, queries, addVersion, updateVersion, deleteVersion, addPackage, updatePackage, setActivePackage } = useScriptAllyDb();
   const isPro = currentUser?.plan === UserPlan.PRO;
 
   const [activeMsId, setActiveMsId] = useState<string | null>(() =>
@@ -337,6 +349,14 @@ export const SubmissionPackages: React.FC = () => {
   const [sel, setSel] = useState<Record<string, string>>({}); // keyed by ComponentType → versionId
   const [editingPkgId, setEditingPkgId] = useState<string | null>(null);
   const [pkgError, setPkgError] = useState<string | null>(null);
+
+  // Redesign: the build drawer (slide-in) + "set active on create" toggle, the per-package detail
+  // screen, and the responsive column count used to fill the shelf's last row flush.
+  const [buildOpen, setBuildOpen] = useState(false);
+  const [setActiveOnCreate, setSetActiveOnCreate] = useState(true);
+  const [detailPkgId, setDetailPkgId] = useState<string | null>(null);
+  const shelfRef = useRef<HTMLDivElement>(null);
+  const [shelfCols, setShelfCols] = useState(3);
 
   // "In the query log" tab — static illustration only (not wired to the real log form; that's Prompt 2)
   const [logTier, setLogTier] = useState<"free" | "pro">("free");
@@ -362,12 +382,29 @@ export const SubmissionPackages: React.FC = () => {
     return () => document.removeEventListener("mousedown", onClick);
   }, [msMenuOpen]);
 
+  // Measure the shelf width → how many cards fit per row, so the dotted ghosts fill the last row flush.
+  useEffect(() => {
+    const el = shelfRef.current;
+    if (!el) return;
+    const MIN_TILE = 248, GAP = 14;
+    const compute = () => setShelfCols(Math.max(1, Math.floor((el.clientWidth + GAP) / (MIN_TILE + GAP))));
+    compute();
+    const ro = new ResizeObserver(compute);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [view, detailPkgId, packages.length]);
+
   const activeMs = useMemo(() => manuscripts.find((m) => m.id === activeMsId) ?? manuscripts[0], [manuscripts, activeMsId]);
   const msId = activeMs?.id;
 
   const msVersions = useMemo(() => versions.filter((v) => v.manuscriptId === msId), [versions, msId]);
   const msPackages = useMemo(() => packages.filter((p) => p.manuscriptId === msId && p.status !== "Retired"), [packages, msId]);
   const msQueries = useMemo(() => queries.filter((q) => q.manuscriptId === msId), [queries, msId]);
+
+  // Close the detail screen if its package is gone (deleted/retired, or the manuscript changed).
+  useEffect(() => {
+    if (detailPkgId && !msPackages.some((p) => p.id === detailPkgId)) setDetailPkgId(null);
+  }, [detailPkgId, msPackages]);
 
   if (!currentUser) return null;
 
@@ -401,6 +438,8 @@ export const SubmissionPackages: React.FC = () => {
   };
 
   const resetBuilder = () => { setPkgName(""); setSel({}); setEditingPkgId(null); setPkgError(null); };
+  const openBuild = () => { resetBuilder(); setSetActiveOnCreate(true); setBuildOpen(true); };
+  const closeBuild = () => { resetBuilder(); setBuildOpen(false); };
   const editPkg = (p: SubmissionPackage) => {
     setEditingPkgId(p.id);
     setPkgName(p.packageName);
@@ -411,6 +450,7 @@ export const SubmissionPackages: React.FC = () => {
     });
     setPkgError(null);
     setView("packages");
+    setBuildOpen(true);
   };
   const createOrSave = async () => {
     const ql = sel[ComponentType.QUERY_LETTER];
@@ -421,10 +461,15 @@ export const SubmissionPackages: React.FC = () => {
     if (editingPkgId) {
       await updatePackage(editingPkgId, fields);
       resetBuilder();
+      setBuildOpen(false);
     } else {
       const r = await addPackage({ manuscriptId: msId, ...fields });
       if (!r.success) { setPkgError(r.error ?? "Couldn't create the package. Please try again."); return; }
+      // Locked decision: the user chooses active. The build toggle (default on) promotes the new
+      // package; the app never auto-promotes elsewhere.
+      if (setActiveOnCreate && r.id) await setActivePackage(msId, r.id);
       resetBuilder();
+      setBuildOpen(false);
     }
   };
 
@@ -522,8 +567,10 @@ export const SubmissionPackages: React.FC = () => {
     );
   };
 
-  // ── Packages tab: builder + your-packages list ──────────────────────────────
-  const renderPackages = () => {
+  const verName = (id: string) => msVersions.find((v) => v.id === id)?.versionName ?? "—";
+
+  // ── The package builder (name + three pickers + live preview + set-active), shown in the build drawer ──
+  const renderBuilder = () => {
     const rateLabelFor = (v: ManuscriptVersion) => {
       const cm = componentMetrics(v.id, msPackages, msQueries);
       // always show the count so a 1-of-1 reads as "100% req · 1/1", never a bare "100% req"
@@ -533,82 +580,404 @@ export const SubmissionPackages: React.FC = () => {
     const sy = sel[ComponentType.SYNOPSIS];
     const pg = sel[ComponentType.SAMPLE_PAGES];
     const canSave = !!(pkgName.trim() && ql && sy && pg);
-    const verName = (id: string) => msVersions.find((v) => v.id === id)?.versionName ?? "—";
+    const chosen: [ComponentType, string][] = [
+      [ComponentType.QUERY_LETTER, ql],
+      [ComponentType.SYNOPSIS, sy],
+      [ComponentType.SAMPLE_PAGES, pg],
+    ];
 
     return (
-      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-        {/* Builder */}
+      <div style={{ padding: "20px 22px 22px", display: "flex", flexDirection: "column", gap: 12 }}>
+        <input value={pkgName} maxLength={120} onChange={(e) => setPkgName(e.target.value)} placeholder={'Package name — e.g. "Comp-heavy", "Standard sub"'} style={inputStyle} autoFocus />
+        {LIB_KINDS.map((kind) => {
+          const m = COMP[kind];
+          const kindVersions = msVersions.filter((v) => v.componentType === kind);
+          return (
+            <div key={kind} style={{ display: "flex", alignItems: "center", gap: 11, background: "#fbf6ef", border: "1px solid #e8ddcf", borderRadius: 10, padding: "11px 12px" }}>
+              <span style={{ width: 30, height: 30, borderRadius: 8, background: m.tile, color: m.color, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <m.Icon style={{ width: 15, height: 15 }} strokeWidth={2} aria-hidden="true" />
+              </span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.06em", textTransform: "uppercase", color: mutedInk, marginBottom: 2 }}>{m.slotLabel}</div>
+                <SlotDropdown
+                  versions={kindVersions}
+                  selectedId={sel[kind]}
+                  rateLabel={rateLabelFor}
+                  newLabel={`+ New ${m.noun}`}
+                  onSelect={(id) => setSel((s) => ({ ...s, [kind]: id }))}
+                  onNew={() => openNew(kind)}
+                />
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Live preview — the package as it will read once saved */}
+        <div style={{ background: "#f7f1e8", border: "1px dashed #e0d2c0", borderRadius: 10, padding: "12px 13px" }}>
+          <div style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: "0.08em", textTransform: "uppercase", color: labelColor, marginBottom: 8 }}>Preview</div>
+          {canSave ? (
+            <>
+              <div style={{ fontFamily: FONT_SERIF, fontSize: 15, fontWeight: 500, color: headingInk, marginBottom: 8, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{pkgName.trim()}</div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                {chosen.map(([kind, id]) => <Chip key={kind} kind={kind} label={verName(id)} />)}
+              </div>
+            </>
+          ) : (
+            <div style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 12.5, color: mutedInk }}>Name it and pick one of each to see the package preview.</div>
+          )}
+        </div>
+
+        {/* Set-active toggle (create only) — defaults on per the locked decision */}
+        {!editingPkgId && (
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={setActiveOnCreate}
+              aria-label="Make this the active package"
+              onClick={() => setSetActiveOnCreate((v) => !v)}
+              style={{ width: 38, height: 22, borderRadius: 999, border: "none", cursor: "pointer", padding: 2, background: setActiveOnCreate ? "#8a9e88" : "#d8cbbd", display: "inline-flex", alignItems: "center", justifyContent: setActiveOnCreate ? "flex-end" : "flex-start", transition: "background .18s", flexShrink: 0 }}
+            >
+              <span style={{ width: 18, height: 18, borderRadius: "50%", background: "#fff", boxShadow: "0 1px 2px rgba(58,28,20,0.2)" }} />
+            </button>
+            <span style={{ fontFamily: FONT_SANS, fontSize: 12.5, color: bodyInk }}>
+              Make this the active package
+              <span style={{ display: "block", fontFamily: FONT_MONO, fontSize: 9, color: mutedInk, letterSpacing: "0.02em", marginTop: 1 }}>pre-fills new queries on this manuscript</span>
+            </span>
+          </div>
+        )}
+
+        {pkgError && <div style={{ fontFamily: FONT_SANS, fontSize: 12.5, color: "#A32D2D" }}>{pkgError}</div>}
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 9, marginTop: 4 }}>
+          <button style={ghostBtn} onClick={closeBuild}>Cancel</button>
+          <button style={{ ...addBtn, padding: "11px 22px", opacity: canSave ? 1 : 0.45, cursor: canSave ? "pointer" : "not-allowed" }} disabled={!canSave} onClick={createOrSave}>
+            <Check style={{ width: 12, height: 12 }} strokeWidth={2.4} aria-hidden="true" /> {editingPkgId ? "Save changes" : "Create package"}
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  // ── The slide-in build drawer (scrim + left panel). Mounted in both list & detail so editing a
+  //    package from the detail screen can open it. SlotDropdown menus portal to <body> (no clip). ──
+  const renderBuildDrawer = () => (
+    <>
+      <div
+        aria-hidden="true"
+        onClick={closeBuild}
+        style={{ position: "fixed", inset: 0, zIndex: 90, background: "rgba(58,28,20,0.28)", opacity: buildOpen ? 1 : 0, pointerEvents: buildOpen ? "auto" : "none", transition: "opacity .28s" }}
+      />
+      <aside
+        role="dialog"
+        aria-modal={buildOpen}
+        aria-label={editingPkgId ? "Edit package" : "Build a package"}
+        aria-hidden={!buildOpen}
+        style={{ position: "fixed", top: 0, left: 0, height: "100%", width: "min(440px, 92vw)", zIndex: 91, transform: buildOpen ? "translateX(0)" : "translateX(-101%)", transition: "transform .28s cubic-bezier(.4,0,.2,1)", padding: 14, overflowY: "auto", background: pageGround, boxShadow: buildOpen ? "8px 0 32px rgba(58,28,20,0.18)" : "none" }}
+      >
         <MountPanel>
           <BandHeader title={editingPkgId ? "Edit package" : "Build a package"} meta="name it, pick one of each — reuse across as many queries as you like" Icon={Plus} />
-          <div style={{ padding: "20px 22px 22px", display: "flex", flexDirection: "column", gap: 12 }}>
-            <input value={pkgName} maxLength={120} onChange={(e) => setPkgName(e.target.value)} placeholder={'Package name — e.g. "Comp-heavy", "Standard sub"'} style={inputStyle} />
-            {LIB_KINDS.map((kind) => {
-              const m = COMP[kind];
-              const kindVersions = msVersions.filter((v) => v.componentType === kind);
+          {renderBuilder()}
+        </MountPanel>
+      </aside>
+    </>
+  );
+
+  // ── A quiet "Build a package" tab docked to the left edge. ──
+  const renderLeftBuildTab = () =>
+    buildOpen ? null : (
+      <button
+        onClick={openBuild}
+        title="Build a package"
+        style={{ position: "fixed", left: 0, top: "42%", zIndex: 40, display: "inline-flex", alignItems: "center", gap: 7, padding: "13px 9px", border: `1px solid ${buttonPinkBorder}`, borderLeft: "none", borderRadius: "0 12px 12px 0", background: parchment, color: burgundy, cursor: "pointer", boxShadow: "2px 2px 10px rgba(58,28,20,0.12)", writingMode: "vertical-rl", transform: "rotate(180deg)", fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: 500 }}
+      >
+        <Plus style={{ width: 13, height: 13 }} strokeWidth={2.4} aria-hidden="true" /> Build a package
+      </button>
+    );
+
+  // ── Packages view: active spotlight + shelf of other packages + dotted ghosts. ──
+  const renderPackagesView = () => {
+    const active = resolveActivePackage(activeMs, msPackages);
+    const shelf = msPackages.filter((p) => p.id !== active?.id);
+    const fOf = (p: SubmissionPackage) => packageFunnel(p.id, msQueries);
+    const activeF = active ? fOf(active) : null;
+    const qualified = (f: PackageFunnel) => meetsSampleThreshold(f.resolved) && f.requestRateResolved !== null;
+
+    // best qualified package overall — the Top-performer tag + the suggestion source
+    let best: { p: SubmissionPackage; f: PackageFunnel } | null = null;
+    for (const p of msPackages) {
+      const f = fOf(p);
+      if (qualified(f) && (!best || f.requestRateResolved! > best.f.requestRateResolved!)) best = { p, f };
+    }
+
+    // divergence suggestion: the best qualified package NOT currently active, ahead by a clear margin
+    const NUDGE_MARGIN = 0.05;
+    let leader: { p: SubmissionPackage; f: PackageFunnel } | null = null;
+    for (const p of shelf) {
+      const f = fOf(p);
+      if (qualified(f) && (!leader || f.requestRateResolved! > leader.f.requestRateResolved!)) leader = { p, f };
+    }
+    let suggestion: { p: SubmissionPackage; f: PackageFunnel } | null = null;
+    if (leader) {
+      if (!activeF) suggestion = leader; // nothing active → suggest the leader
+      else if (qualified(activeF) && leader.f.requestRateResolved! - activeF.requestRateResolved! >= NUDGE_MARGIN) suggestion = leader;
+      // if the active package isn't qualified yet, hold the nudge — too early to second-guess it
+    }
+
+    // benchmark across the other packages (qualified average)
+    const otherQual = shelf.map(fOf).filter(qualified);
+    const othersAvg = otherQual.length ? otherQual.reduce((s, f) => s + f.requestRateResolved!, 0) / otherQual.length : null;
+
+    const benchmarkLine = (f: PackageFunnel, activePkg: SubmissionPackage): React.ReactNode => {
+      if (!qualified(f)) {
+        return <>Still early — {f.resolved === 0 ? "no resolved sends yet" : `${f.resolved} resolved send${f.resolved === 1 ? "" : "s"} so far`}. Rates firm up around {MIN_SENDS_FOR_CLAIM} resolved.</>;
+      }
+      if (best && best.p.id === activePkg.id) {
+        return <>Your <b style={{ color: sageText, fontWeight: 600 }}>sharpest package</b> — the best resolved request rate on {activeMs?.title}.</>;
+      }
+      if (othersAvg !== null) {
+        const diff = Math.round((f.requestRateResolved! - othersAvg) * 100);
+        if (diff > 0) return <>Running <b style={{ color: burgundy }}>{diff} pts above</b> your other packages' average ({formatRate(othersAvg)}).</>;
+        if (diff < 0) return <>Running <b style={{ color: burgundy }}>{Math.abs(diff)} pts below</b> your other packages' average ({formatRate(othersAvg)}) — a stronger option may be on the shelf.</>;
+        return <>On par with your other packages' average ({formatRate(othersAvg)}).</>;
+      }
+      return <>Across {f.resolved} resolved send{f.resolved === 1 ? "" : "s"} on {activeMs?.title}.</>;
+    };
+
+    const sageBand = (eyebrow: string, title: string, badge?: React.ReactNode) => (
+      <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 22px", background: sageBandGradient, borderBottom: `1px solid ${sageBandRule}` }}>
+        <span aria-hidden="true" style={{ width: 3, height: 30, borderRadius: 2, background: burgundy, flexShrink: 0 }} />
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: sageText, marginBottom: 3 }}>{eyebrow}</div>
+          <div style={{ fontFamily: FONT_SERIF, fontSize: 22, fontWeight: 500, color: headingInk, lineHeight: 1.05, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{title}</div>
+        </div>
+        {badge}
+      </div>
+    );
+
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
+        {active && activeF ? (
+          /* ── Active spotlight: greeting container (MountPanel + sage SheenWave rim) ── */
+          <MountPanel>
+            <SheenWave radius={9} borderWidth={2}>
+              {sageBand(
+                "Active package",
+                active.packageName,
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: FONT_MONO, fontSize: 9, fontWeight: 500, letterSpacing: "0.06em", textTransform: "uppercase", color: "#4f6a4d", background: "#e3ebdf", border: "0.5px solid #cdddc8", borderRadius: 20, padding: "4px 10px", flexShrink: 0 }}>
+                  <Star style={{ width: 11, height: 11, fill: "#7f9a7c", color: "#7f9a7c" }} strokeWidth={1.5} aria-hidden="true" /> Active
+                </span>,
+              )}
+              <div style={{ padding: "20px 22px 22px" }}>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 18 }}>
+                  <Chip kind={ComponentType.QUERY_LETTER} label={verName(active.queryLetterVersionId)} />
+                  <Chip kind={ComponentType.SYNOPSIS} label={verName(active.synopsisVersionId)} />
+                  <Chip kind={ComponentType.SAMPLE_PAGES} label={verName(active.samplePagesVersionId)} />
+                </div>
+
+                <div className="sp-spot" style={{ display: "flex", gap: 22, alignItems: "center" }}>
+                  <div style={{ flexShrink: 0 }}>
+                    <div style={{ fontFamily: FONT_SERIF, fontSize: 44, fontWeight: 500, color: burgundy, lineHeight: 1 }}>{formatRate(activeF.requestRateResolved)}</div>
+                    <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.06em", textTransform: "uppercase", color: mutedInk, marginTop: 4 }}>request rate</div>
+                  </div>
+                  <div className="sp-spot-div" style={{ width: 1, alignSelf: "stretch", background: "rgba(124,58,42,0.12)" }} aria-hidden="true" />
+                  <div style={{ flex: 1, minWidth: 0, fontFamily: FONT_SANS, fontSize: 13, color: "#4a3e34", lineHeight: 1.55 }}>
+                    {benchmarkLine(activeF, active)}
+                    <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#6a5e54", marginTop: 8 }}>
+                      {activeF.requests} of {activeF.resolved} resolved · {activeF.sent} sent
+                      {activeF.inFlight > 0 && <> · <span style={{ color: AMBER }}>{activeF.inFlight} in flight</span></>}
+                    </div>
+                  </div>
+                </div>
+
+                {suggestion && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 18, background: amberBandGradient, border: `1px solid ${amberBandRule}`, borderRadius: 11, padding: "12px 14px" }}>
+                    <Sparkles style={{ width: 17, height: 17, color: "#8a6a2e", flexShrink: 0 }} strokeWidth={1.8} aria-hidden="true" />
+                    <div style={{ flex: 1, minWidth: 0, fontFamily: FONT_SANS, fontSize: 12.5, color: "#5a4a36", lineHeight: 1.5 }}>
+                      <b style={{ color: "#7a5a26", fontWeight: 600 }}>{suggestion.p.packageName}</b> is winning more requests — {formatRate(suggestion.f.requestRateResolved)} vs {formatRate(activeF.requestRateResolved)}.
+                    </div>
+                    <button onClick={() => { if (msId) setActivePackage(msId, suggestion!.p.id); }} style={{ ...addBtn, flexShrink: 0, padding: "8px 14px" }}>
+                      <Star style={{ width: 11, height: 11 }} strokeWidth={2} aria-hidden="true" /> Set active
+                    </button>
+                  </div>
+                )}
+
+                <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end" }}>
+                  <button onClick={() => setDetailPkgId(active.id)} className="sp-link" style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "transparent", border: "none", cursor: "pointer", fontFamily: FONT_MONO, fontSize: 10.5, letterSpacing: "0.05em", textTransform: "uppercase", color: burgundy }}>
+                    View funnel <ArrowRight style={{ width: 13, height: 13 }} strokeWidth={2.2} aria-hidden="true" />
+                  </button>
+                </div>
+              </div>
+            </SheenWave>
+          </MountPanel>
+        ) : (
+          /* ── Empty spotlight: no active package chosen yet ── */
+          <MountPanel>
+            <SheenWave radius={9} borderWidth={2}>
+              {sageBand("No active package", "Choose your default package")}
+              <div style={{ padding: "20px 22px 22px", fontFamily: FONT_SANS, fontSize: 13.5, color: "#4a3e34", lineHeight: 1.55 }}>
+                {msPackages.length === 0 ? (
+                  <>Build your first package — then set it active to pre-fill the materials on every new query for <b>{activeMs?.title}</b>.</>
+                ) : suggestion ? (
+                  <>
+                    Set a package active to pre-fill new queries on this manuscript. Based on what's winning requests, we'd suggest{" "}
+                    <b style={{ color: burgundy }}>{suggestion.p.packageName}</b> ({formatRate(suggestion.f.requestRateResolved)} request rate).
+                    <div style={{ marginTop: 14 }}>
+                      <button onClick={() => { if (msId) setActivePackage(msId, suggestion!.p.id); }} style={{ ...addBtn, padding: "9px 16px" }}>
+                        <Star style={{ width: 12, height: 12 }} strokeWidth={2} aria-hidden="true" /> Set “{suggestion.p.packageName}” active
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>Set a package active from the shelf below — tap its star — to pre-fill the materials on every new query for <b>{activeMs?.title}</b>. The app never picks for you.</>
+                )}
+              </div>
+            </SheenWave>
+          </MountPanel>
+        )}
+
+        {/* ── Shelf: the other packages + dotted ghosts ── */}
+        <div>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 12, padding: "0 2px" }}>
+            <h3 style={{ fontFamily: FONT_SERIF, fontSize: 17, fontWeight: 500, color: headingInk, margin: 0 }}>{active ? "Other packages" : "Your packages"}</h3>
+            <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.04em", color: mutedInk }}>
+              {shelf.length} {shelf.length === 1 ? "package" : "packages"}{active ? " besides active" : ""}
+            </span>
+          </div>
+
+          <div ref={shelfRef} style={{ display: "grid", gridTemplateColumns: `repeat(${shelfCols}, minmax(0, 1fr))`, gap: 14 }}>
+            {shelf.map((p) => {
+              const f = fOf(p);
+              const isBest = !!best && best.p.id === p.id && msPackages.length >= 2;
+              const early = !qualified(f);
               return (
-                <div key={kind} style={{ display: "flex", alignItems: "center", gap: 11, background: "#fbf6ef", border: "1px solid #e8ddcf", borderRadius: 10, padding: "11px 12px" }}>
-                  <span title="Drag to reorder (coming soon)" style={{ color: "#cbbcae", display: "inline-flex", cursor: "grab", flexShrink: 0 }}>
-                    <GripVertical style={{ width: 14, height: 14 }} aria-hidden="true" />
-                  </span>
-                  <span style={{ width: 30, height: 30, borderRadius: 8, background: m.tile, color: m.color, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <m.Icon style={{ width: 15, height: 15 }} strokeWidth={2} aria-hidden="true" />
-                  </span>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.06em", textTransform: "uppercase", color: mutedInk, marginBottom: 2 }}>{m.slotLabel}</div>
-                    <SlotDropdown
-                      versions={kindVersions}
-                      selectedId={sel[kind]}
-                      rateLabel={rateLabelFor}
-                      newLabel={`+ New ${m.noun}`}
-                      onSelect={(id) => setSel((s) => ({ ...s, [kind]: id }))}
-                      onNew={() => openNew(kind)}
-                    />
+                <div
+                  key={p.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setDetailPkgId(p.id)}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setDetailPkgId(p.id); } }}
+                  className="sp-shelf-card"
+                  style={{ background: "#fbf6ef", border: "1px solid #e8ddcf", borderRadius: 12, padding: "14px 15px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 10, minHeight: 132, transition: "border-color .15s, box-shadow .15s" }}
+                >
+                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
+                    <span style={{ fontFamily: FONT_SERIF, fontSize: 16, fontWeight: 500, color: headingInk, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>{p.packageName}</span>
+                    <button
+                      title="Set as active package"
+                      aria-label={`Set ${p.packageName} as the active package`}
+                      onClick={(e) => { e.stopPropagation(); if (msId) setActivePackage(msId, p.id); }}
+                      className="sp-star"
+                      style={{ background: "transparent", border: "none", cursor: "pointer", color: "#c0ae9c", padding: 3, display: "inline-flex", borderRadius: 6, flexShrink: 0 }}
+                    >
+                      <Star style={{ width: 16, height: 16 }} strokeWidth={1.8} aria-hidden="true" />
+                    </button>
+                  </div>
+
+                  {(isBest || early) && (
+                    <div>
+                      {isBest ? (
+                        <span style={{ fontFamily: FONT_MONO, fontSize: 8.5, fontWeight: 500, letterSpacing: "0.07em", textTransform: "uppercase", color: "#8a6a2e", background: "#f3e6cf", border: "0.5px solid #e3cda0", borderRadius: 20, padding: "3px 8px" }}>Top performer</span>
+                      ) : (
+                        <span style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: "0.06em", textTransform: "uppercase", color: "#9c8878", background: "#f1ece3", borderRadius: 20, padding: "3px 8px" }}>early</span>
+                      )}
+                    </div>
+                  )}
+
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                    <span style={{ fontFamily: FONT_SERIF, fontSize: 26, fontWeight: 500, color: early ? mutedInk : burgundy, lineHeight: 1 }}>{formatRate(f.requestRateResolved)}</span>
+                    <span style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.05em", textTransform: "uppercase", color: mutedInk }}>req rate</span>
+                  </div>
+
+                  <div style={{ marginTop: "auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, fontFamily: FONT_MONO, fontSize: 10, color: "#6a5e54" }}>
+                    <span>Sent {f.sent}×{f.inFlight > 0 && <span style={{ color: AMBER }}> · {f.inFlight} in flight</span>}</span>
+                    <ArrowRight style={{ width: 13, height: 13, color: burgundy, flexShrink: 0 }} strokeWidth={2} aria-hidden="true" />
                   </div>
                 </div>
               );
             })}
-            {pkgError && <div style={{ fontFamily: FONT_SANS, fontSize: 12.5, color: "#A32D2D" }}>{pkgError}</div>}
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: 9, marginTop: 4 }}>
-              {editingPkgId && <button style={ghostBtn} onClick={resetBuilder}>Cancel edit</button>}
-              <button style={{ ...addBtn, padding: "11px 22px", opacity: canSave ? 1 : 0.45, cursor: canSave ? "pointer" : "not-allowed" }} disabled={!canSave} onClick={createOrSave}>
-                <Check style={{ width: 12, height: 12 }} strokeWidth={2.4} aria-hidden="true" /> {editingPkgId ? "Save changes" : "Create package"}
-              </button>
-            </div>
-          </div>
-        </MountPanel>
 
-        {/* Your packages */}
+            {/* Build ghost (first) then quiet ghosts to fill the row flush */}
+            <button onClick={openBuild} className="sp-ghost-build" style={{ border: `1.5px dashed ${buttonPinkBorder}`, borderRadius: 12, padding: "14px 15px", background: "transparent", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, minHeight: 132, color: burgundy, transition: "background .15s, border-color .15s" }}>
+              <span style={{ width: 34, height: 34, borderRadius: 10, background: buttonPinkBg, border: `1px solid ${buttonPinkBorder}`, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                <Plus style={{ width: 17, height: 17 }} strokeWidth={2.2} aria-hidden="true" />
+              </span>
+              <span style={{ fontFamily: FONT_SERIF, fontSize: 14.5, fontWeight: 500 }}>Build a package</span>
+              <span style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.03em", color: mutedInk }}>a letter · a synopsis · sample pages</span>
+            </button>
+
+            {Array.from({ length: ghostCount(shelf.length + 1, shelfCols) }).map((_, i) => (
+              <div key={`ghost-${i}`} aria-hidden="true" style={{ border: "1.5px dashed #e6dccb", borderRadius: 12, minHeight: 132, background: "transparent" }} />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // ── Per-package detail: KPIs from the resolved-aware funnel. The horizontal pipeline funnel,
+  //    head-to-head and component attribution land in Phase 4; this is the navigable shell. ──
+  const renderDetail = () => {
+    const p = msPackages.find((pp) => pp.id === detailPkgId);
+    if (!p) return null; // guarded by the effect that clears a stale detailPkgId
+    const f = packageFunnel(p.id, msQueries);
+    const activePkg = resolveActivePackage(activeMs, msPackages);
+    const isActive = activePkg?.id === p.id;
+    const early = !(meetsSampleThreshold(f.resolved) && f.requestRateResolved !== null);
+
+    const kpi = (label: string, value: string, accent?: string) => (
+      <div style={{ flex: "1 1 0", minWidth: 96, background: "#fbf6ef", border: "1px solid #e8ddcf", borderRadius: 11, padding: "13px 14px" }}>
+        <div style={{ fontFamily: FONT_SERIF, fontSize: 24, fontWeight: 500, color: accent ?? headingInk, lineHeight: 1 }}>{value}</div>
+        <div style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: "0.06em", textTransform: "uppercase", color: mutedInk, marginTop: 5 }}>{label}</div>
+      </div>
+    );
+
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+          <button onClick={() => setDetailPkgId(null)} className="sp-link" style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "transparent", border: "none", cursor: "pointer", fontFamily: FONT_MONO, fontSize: 10.5, letterSpacing: "0.05em", textTransform: "uppercase", color: burgundy }}>
+            <ArrowLeft style={{ width: 14, height: 14 }} strokeWidth={2.2} aria-hidden="true" /> Back to packages
+          </button>
+          <div style={{ display: "flex", gap: 9 }}>
+            {!isActive && (
+              <button onClick={() => { if (msId) setActivePackage(msId, p.id); }} style={{ ...ghostBtn, display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 14px" }}>
+                <Star style={{ width: 12, height: 12, color: AMBER }} strokeWidth={2} aria-hidden="true" /> Set active
+              </button>
+            )}
+            <button onClick={() => editPkg(p)} style={{ ...addBtn, padding: "8px 14px" }}>
+              <Pencil style={{ width: 12, height: 12 }} strokeWidth={2} aria-hidden="true" /> Edit
+            </button>
+          </div>
+        </div>
+
         <MountPanel>
-          <BandHeader title="Your packages" meta={`${msPackages.length} package${msPackages.length === 1 ? "" : "s"} on this manuscript`} Icon={Package} />
+          <BandHeader
+            title={p.packageName}
+            meta={`${isActive ? "Active · " : ""}${f.sent} sent · ${f.resolved} resolved${f.inFlight > 0 ? ` · ${f.inFlight} in flight` : ""}`}
+            Icon={Package}
+          />
           <div style={{ padding: "20px 22px 22px" }}>
-            {msPackages.length === 0 ? (
-              <div style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 13.5, color: mutedInk }}>No packages yet — build one above to reuse across your queries.</div>
-            ) : (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 14 }}>
-                {msPackages.map((p) => {
-                  const m = packageMetrics(p.id, msQueries);
-                  return (
-                    <div key={p.id} style={{ background: "#fbf6ef", border: "1px solid #e8ddcf", borderRadius: 11, padding: "14px 15px" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, gap: 8 }}>
-                        <span style={{ fontFamily: FONT_SERIF, fontSize: 16, fontWeight: 500, color: headingInk, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.packageName}</span>
-                        <button onClick={() => editPkg(p)} className="sp-icon-btn" style={{ display: "inline-flex", alignItems: "center", gap: 4, fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.05em", textTransform: "uppercase", color: mutedInk, background: "transparent", border: "none", cursor: "pointer", padding: "3px 5px", borderRadius: 6, flexShrink: 0 }}>
-                          <Pencil style={{ width: 11, height: 11 }} strokeWidth={2} aria-hidden="true" /> Edit
-                        </button>
-                      </div>
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                        <Chip kind={ComponentType.QUERY_LETTER} label={verName(p.queryLetterVersionId)} />
-                        <Chip kind={ComponentType.SYNOPSIS} label={verName(p.synopsisVersionId)} />
-                        <Chip kind={ComponentType.SAMPLE_PAGES} label={verName(p.samplePagesVersionId)} />
-                      </div>
-                      <div style={{ marginTop: 11, display: "flex", gap: 16 }}>
-                        <span style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#6a5e54" }}>Sent <b style={{ color: burgundy, fontWeight: 500 }}>{m.sent}×</b></span>
-                        <span style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#6a5e54" }}>Requests <b style={{ color: burgundy, fontWeight: 500 }}>{formatRate(m.requestRate)}</b></span>
-                      </div>
-                    </div>
-                  );
-                })}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 18 }}>
+              <Chip kind={ComponentType.QUERY_LETTER} label={verName(p.queryLetterVersionId)} />
+              <Chip kind={ComponentType.SYNOPSIS} label={verName(p.synopsisVersionId)} />
+              <Chip kind={ComponentType.SAMPLE_PAGES} label={verName(p.samplePagesVersionId)} />
+            </div>
+
+            <div className="sp-kpis" style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+              {kpi("Request rate", formatRate(f.requestRateResolved), early ? mutedInk : burgundy)}
+              {kpi("Response rate", formatRate(f.responseRateResolved), early ? mutedInk : "#5a6e58")}
+              {kpi("Requests", `${f.requests}/${f.resolved}`)}
+              {kpi("Sent", `${f.sent}`)}
+              {kpi("In flight", `${f.inFlight}`, f.inFlight > 0 ? AMBER : undefined)}
+            </div>
+
+            {early && (
+              <div style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 13, color: mutedInk, lineHeight: 1.5, marginTop: 16 }}>
+                Rates are computed over resolved sends only (in-flight queries are held back). This package has {f.resolved} resolved so far — once it reaches {MIN_SENDS_FOR_CLAIM}, its numbers earn a confident read and a Top-performer tag.
               </div>
             )}
+
+            <div style={{ fontFamily: FONT_MONO, fontSize: 9.5, color: mutedInk, letterSpacing: "0.03em", marginTop: 18, paddingTop: 14, borderTop: "1px dashed rgba(124,58,42,0.18)", lineHeight: 1.5 }}>
+              The horizontal pipeline funnel (Queried → Responded → Partial → Full → Offer), the head-to-head against your active package, and per-component attribution arrive in the next checkpoint.
+            </div>
           </div>
         </MountPanel>
       </div>
@@ -879,12 +1248,19 @@ export const SubmissionPackages: React.FC = () => {
         .sp-icon-btn:hover { color: ${burgundy}; background: rgba(124,58,42,0.06); }
         .sp-ver:hover { border-color: #ddcdba; }
         .sp-dd-opt:hover { background: #f5e2da; color: ${burgundy}; }
+        .sp-shelf-card:hover { border-color: #d8c4b0; box-shadow: 0 3px 14px rgba(58,28,20,0.08); }
+        .sp-shelf-card:focus-visible { outline: 2px solid ${burgundy}; outline-offset: 2px; }
+        .sp-star:hover { color: ${AMBER}; background: rgba(185,138,78,0.10); }
+        .sp-ghost-build:hover { background: ${buttonPinkBg}; border-color: ${burgundy}; }
+        .sp-link:hover { text-decoration: underline; }
         @media (max-width: 760px) {
           .sp-pkg-row { grid-template-columns: 1fr !important; gap: 12px !important; }
           .sp-attr-grid { grid-template-columns: 1fr !important; }
           .sp-strat { flex-direction: column !important; align-items: flex-start !important; }
           .sp-strat-div { display: none !important; }
           .sp-headrow { flex-direction: column !important; align-items: center !important; gap: 14px !important; }
+          .sp-spot { flex-direction: column !important; align-items: flex-start !important; gap: 14px !important; }
+          .sp-spot-div { display: none !important; }
         }
       `}</style>
 
@@ -963,7 +1339,11 @@ export const SubmissionPackages: React.FC = () => {
             </div>
           </MountPanel>
         ) : view === "packages" ? (
-          renderPackages()
+          <>
+            {detailPkgId ? renderDetail() : renderPackagesView()}
+            {renderLeftBuildTab()}
+            {renderBuildDrawer()}
+          </>
         ) : (
           <MountPanel>
             <BandHeader title="Materials library" meta="every version of every component — the building blocks for packages" Icon={Layers} />
