@@ -114,6 +114,10 @@ export interface Agent {
   agency: string;
   email: string;
   website: string;
+  // Optional location — simple stored fields (added in the v12 Edit Agent revision). The flag-icon
+  // picker + territory tags are a later enhancement; these just hold the agent's country/city.
+  country?: string;
+  city?: string;
   twitter?: string;
   bluesky?: string;
   instagram?: string;

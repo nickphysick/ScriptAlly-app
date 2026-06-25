@@ -155,6 +155,8 @@ service cloud.firestore {
         && (!data.keys().hasAll(['twitter']) || (data.twitter is string && data.twitter.size() <= 128))
         && (!data.keys().hasAll(['bluesky']) || (data.bluesky is string && data.bluesky.size() <= 128))
         && (!data.keys().hasAll(['instagram']) || (data.instagram is string && data.instagram.size() <= 128))
+        && (!data.keys().hasAll(['country']) || (data.country is string && data.country.size() <= 128))
+        && (!data.keys().hasAll(['city']) || (data.city is string && data.city.size() <= 128))
         && (!data.keys().hasAll(['agentNotes']) || (data.agentNotes is string && data.agentNotes.size() <= 4096))
         && (!data.keys().hasAll(['requeryPreference']) || (data.requeryPreference is string && (data.requeryPreference == 'yes' || data.requeryPreference == 'maybe' || data.requeryPreference == 'no')))
         && (!data.keys().hasAll(['socials']) || (data.socials is list && data.socials.size() <= 30))
@@ -409,7 +411,7 @@ service cloud.firestore {
         allow create: if isOwner(userId) && isValidId(agentId) && isValidAgent(incoming(), userId);
         allow update: if isOwner(userId) && isValidId(agentId) && isValidAgent(incoming(), userId) && (
           incoming().diff(existing()).affectedKeys().hasOnly([
-            'name', 'agency', 'email', 'website', 'twitter', 'bluesky', 'instagram', 'socials', 'genres', 'mswlNotes',
+            'name', 'agency', 'email', 'website', 'country', 'city', 'twitter', 'bluesky', 'instagram', 'socials', 'genres', 'mswlNotes',
             'starRating', 'submissionStatus', 'responseTimeWeeks', 'noResponseMeansNo', 'submissionMethod',
             'materialsWanted', 'lastCheckedDate', 'notes', 'agentNotes', 'requeryPreference', 'importedNeedsReview', 'setAside'
           ])

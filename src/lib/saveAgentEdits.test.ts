@@ -75,6 +75,13 @@ describe("sanitizeAgentPatch", () => {
     expect(r.fields.notes).toBe("Met at the 2025 festival.");
   });
 
+  it("passes country/city through (string fields, v12 location)", () => {
+    const r = sanitizeAgentPatch({ country: "United Kingdom", city: "London" });
+    expect(r.errors).toEqual([]);
+    expect(r.fields.country).toBe("United Kingdom");
+    expect(r.fields.city).toBe("London");
+  });
+
   it("passes a full valid patch through cleanly", () => {
     const r = sanitizeAgentPatch({
       name: "Sarah Latham", agency: "Curtis Brown", email: "s@cb.com", website: "",
@@ -116,5 +123,24 @@ describe("firestore.rules · responseTimeWeeks relaxation (rule-text)", () => {
 
   it("the agents update allowlist still includes responseTimeWeeks (so a deleteField passes affectedKeys)", () => {
     expect(rules).toMatch(/hasOnly\(\[[\s\S]*'responseTimeWeeks'[\s\S]*\]\)/);
+  });
+
+  it("isValidAgent admits optional country/city as strings (v12 location, optional-field idiom)", () => {
+    expect(agentBody).toMatch(
+      /!data\.keys\(\)\.hasAll\(\['country'\]\) \|\| \(data\.country is string && data\.country\.size\(\) <= 128\)/
+    );
+    expect(agentBody).toMatch(
+      /!data\.keys\(\)\.hasAll\(\['city'\]\) \|\| \(data\.city is string && data\.city\.size\(\) <= 128\)/
+    );
+  });
+
+  it("the agents update allowlist includes country + city (so the drawer can write them)", () => {
+    expect(rules).toMatch(/hasOnly\(\[[\s\S]*'country'[\s\S]*\]\)/);
+    expect(rules).toMatch(/hasOnly\(\[[\s\S]*'city'[\s\S]*\]\)/);
+  });
+
+  it("isValidCommunityAgent does NOT add country/city (scoped to user agents only)", () => {
+    expect(communityBody).not.toMatch(/data\.country is string/);
+    expect(communityBody).not.toMatch(/data\.city is string/);
   });
 });

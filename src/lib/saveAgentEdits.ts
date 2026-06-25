@@ -36,6 +36,8 @@ export interface AgentEditPatch {
   agency?: string;
   email?: string;
   website?: string;
+  country?: string;
+  city?: string;
   genres?: string[];
   mswlNotes?: string;
   notes?: string;
@@ -98,7 +100,7 @@ export function sanitizeAgentPatch(patch: AgentEditPatch): SanitizedAgentWrite {
   const errors: string[] = [];
 
   // Plain string fields — pass through when defined (the panel owns trimming/UX copy).
-  for (const k of ["name", "agency", "email", "website", "mswlNotes", "notes", "submissionMethod"] as const) {
+  for (const k of ["name", "agency", "email", "website", "country", "city", "mswlNotes", "notes", "submissionMethod"] as const) {
     const v = patch[k];
     if (v === undefined) continue;
     if (typeof v !== "string") { errors.push(`${k} must be a string.`); continue; }
