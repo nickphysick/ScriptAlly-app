@@ -13,7 +13,7 @@ import {
 import { useScriptAllyDb } from "../lib/db";
 import { QueryStatus, Manuscript } from "../types";
 import { seedFacts } from "../lib/seeds";
-import { QuerySlideInPanel } from "./QuerySlideInPanel";
+import { useOpenEditQuery } from "./EditQueryHost";
 import { RecordResponseModal } from "./RecordResponseModal";
 import { recordQueryResponse } from "../lib/recordResponse";
 
@@ -25,10 +25,8 @@ export const QueriesLanding: React.FC<QueriesLandingProps> = ({ onNavigate }) =>
   const {
     currentUser, queries, agents, manuscripts, tasks, updateQueryStatus, undoQueryStatus, activities
   } = useScriptAllyDb();
-
-  // State for Query Detail Slide-in Panel
-  const [selectedQueryIdForPanel, setSelectedQueryIdForPanel] = useState<string | null>(null);
-  const [isQueryPanelOpen, setIsQueryPanelOpen] = useState(false);
+  // Query editing is the app-level Edit Query drawer (the slide-in panel is retired).
+  const openEditQuery = useOpenEditQuery();
 
   // Undo Toast States
   const [undoToastInfo, setUndoToastInfo] = useState<{
@@ -719,10 +717,7 @@ export const QueriesLanding: React.FC<QueriesLandingProps> = ({ onNavigate }) =>
                 return (
                   <div 
                     key={q.id}
-                    onClick={() => {
-                      setSelectedQueryIdForPanel(q.id);
-                      setIsQueryPanelOpen(true);
-                    }}
+                    onClick={() => openEditQuery(q.id)}
                     className="min-w-[220px] max-w-[220px] bg-[#FCFAF7] border border-stone-200/50 rounded-xl p-3.5 cursor-pointer hover:bg-[#FBF6F4] hover:border-[#7c3a2a] transition-all hover:-translate-y-0.5 shrink-0 flex flex-col justify-between h-36"
                   >
                     <div>
@@ -952,18 +947,7 @@ export const QueriesLanding: React.FC<QueriesLandingProps> = ({ onNavigate }) =>
         </div>
       </div>
 
-      {/* Query Detail Slide-in Panel Rendering Block (Unified tracking details view) */}
-      <QuerySlideInPanel
-        isOpen={isQueryPanelOpen}
-        queryId={selectedQueryIdForPanel}
-        onClose={() => {
-          setIsQueryPanelOpen(false);
-          setSelectedQueryIdForPanel(null);
-        }}
-        onNavigate={onNavigate}
-        onSaveStatusChange={handleSaveStatusChange}
-        onRecordResponse={(qid) => setRecordResponseQueryId(qid)}
-      />
+      {/* Query editing is the app-level Edit Query drawer (EditQueryHost) — the slide-in panel is retired. */}
 
       {/* Unified Record-response modal (shared with the Queries page) */}
       {recordResponseQueryId && (() => {

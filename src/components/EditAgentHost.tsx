@@ -14,6 +14,7 @@
 import React, { createContext, useContext, useState } from "react";
 import { useScriptAllyDb } from "../lib/db";
 import { EditAgentDrawer } from "./EditAgentDrawer";
+import { useOpenEditQuery } from "./EditQueryHost";
 
 /** opts.fromTask = opened from a `data_quality_poor` to-do → the drawer highlights deficient fields. */
 export type OpenEditAgent = (agentId: string, opts?: { fromTask?: boolean }) => void;
@@ -24,11 +25,12 @@ export const useOpenEditAgent = () => useContext(OpenEditAgentContext);
 
 export const EditAgentHost: React.FC<{
   children: React.ReactNode;
-  /** A query row in the drawer links out to the queries view. */
-  onOpenQuery: (queryId: string) => void;
   onSavedToast: (msg: string) => void;
-}> = ({ children, onOpenQuery, onSavedToast }) => {
+}> = ({ children, onSavedToast }) => {
   const { agents } = useScriptAllyDb();
+  // A query row in the agent drawer now opens the Edit Query drawer (this host sits inside
+  // EditQueryHost), instead of navigating away.
+  const openEditQuery = useOpenEditQuery();
   const [open, setOpen] = useState<{ id: string; fromTask: boolean } | null>(null);
   // Looked up live by id, so a save reseeds the drawer to the saved values.
   const agent = open ? agents.find((a) => a.id === open.id) ?? null : null;
@@ -43,7 +45,7 @@ export const EditAgentHost: React.FC<{
           lockScroll
           highlightNeeds={open!.fromTask}
           onClose={() => setOpen(null)}
-          onOpenQuery={(qid) => { setOpen(null); onOpenQuery(qid); }}
+          onOpenQuery={(qid) => { setOpen(null); openEditQuery(qid); }}
           onSavedToast={onSavedToast}
         />
       )}

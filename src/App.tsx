@@ -9,6 +9,7 @@ import { BrandProvider } from "./lib/brand";
 import { Auth } from "./components/Auth";
 import { AppShell } from "./components/AppShell";
 import { EditAgentHost } from "./components/EditAgentHost";
+import { EditQueryHost } from "./components/EditQueryHost";
 import { Dashboard } from "./components/Dashboard";
 import { Queries } from "./components/Queries";
 import { QueriesLanding } from "./components/QueriesLanding";
@@ -39,9 +40,10 @@ import { ImportingLoader } from "./components/onboarding/ImportingLoader";
 // TEMP: scatter-settle extraction loader dev preview (#/scatter-loader) — remove after sign-off.
 import { ScatterSettleLoader, LoaderCard } from "./components/onboarding/ScatterSettleLoader";
 import { QueryStatus, SubmissionStatus, SubmissionMethod } from "./types";
-// TEMP: Form11Drawer review harness (#/drawer-lab) — renders the Edit Agent (and, later, Edit Query)
-// drawers over a mock record so the shared shell can be eyeballed without signing in. DEV only.
+// TEMP: Form11Drawer review harness (#/drawer-lab) — renders the Edit Agent / Edit Query drawers over
+// a mock record so the shared shell can be eyeballed without signing in. DEV only.
 import { EditAgentDrawer } from "./components/EditAgentDrawer";
+import { EditQueryDrawer } from "./components/EditQueryDrawer";
 // Dev review surface for the notes pieces (PostIt / quick-add / editor) — #/notes-lab, DEV only.
 import { NotesLab } from "./components/notes/NotesLab";
 import { Palette, X, Check } from "lucide-react";
@@ -85,6 +87,7 @@ const ScatterLoaderDevHarness: React.FC = () => {
  *  agent so the extracted shell can be reviewed without signing in. Sits inside DbProvider, so the
  *  drawer's useScriptAllyDb works (queries/manuscripts come back empty when signed out). */
 const DrawerLab: React.FC = () => {
+  const [which, setWhich] = useState<"agent" | "query">("agent");
   const [open, setOpen] = useState(true);
   const mockAgent = {
     id: "lab-agent", userId: "lab", name: "Eleanor Hart", agency: "Hart & Quill Literary",
@@ -98,12 +101,29 @@ const DrawerLab: React.FC = () => {
     notes: "Met at a conference; very warm in person.",
     dateAdded: new Date().toISOString(), lastCheckedDate: new Date().toISOString(),
   } as any;
+  const mockQuery = {
+    id: "lab-query", userId: "lab", manuscriptId: "lab-ms", agentId: "lab-agent", packageId: "",
+    status: QueryStatus.PARTIAL_REQUESTED, dateSent: "2026-03-04T10:00:00.000Z",
+    personalisationNotes: "Mentioned her love of saltmarsh settings and her recent podcast interview.",
+    sendMethod: SubmissionMethod.EMAIL,
+    materialsWanted: ["Query Letter", "Synopsis", "First 50 pages"],
+    responseDeadline: "2026-08-01T10:00:00.000Z",
+  } as any;
+  const btn = (active: boolean): React.CSSProperties => ({
+    padding: "7px 14px", borderRadius: 8, border: `1px solid ${active ? "#e8c8bc" : "#e0d5c8"}`,
+    background: active ? "#f5e2da" : "#fffdf9", color: active ? "#7c3a2a" : "#9c8878",
+    fontFamily: "'JetBrains Mono', monospace", fontSize: 10, textTransform: "uppercase", cursor: "pointer",
+  });
   return (
     <div style={{ minHeight: "100vh", background: "#F5F0EA", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      {!open && (
-        <button onClick={() => setOpen(true)} style={{ padding: "10px 18px", borderRadius: 8, border: "1px solid #e8c8bc", background: "#f5e2da", color: "#7c3a2a", fontFamily: "'JetBrains Mono', monospace", fontSize: 11, textTransform: "uppercase", cursor: "pointer" }}>Reopen drawer</button>
-      )}
-      <EditAgentDrawer agent={mockAgent} isOpen={open} onClose={() => setOpen(false)} />
+      <div style={{ position: "fixed", top: 20, left: 20, display: "flex", gap: 8, zIndex: 2000 }}>
+        <button style={btn(which === "agent")} onClick={() => { setWhich("agent"); setOpen(true); }}>Agent drawer</button>
+        <button style={btn(which === "query")} onClick={() => { setWhich("query"); setOpen(true); }}>Query drawer</button>
+        {!open && <button style={btn(false)} onClick={() => setOpen(true)}>Reopen</button>}
+      </div>
+      {which === "agent"
+        ? <EditAgentDrawer agent={mockAgent} isOpen={open} onClose={() => setOpen(false)} />
+        : <EditQueryDrawer query={mockQuery} isOpen={open} onClose={() => setOpen(false)} />}
     </div>
   );
 };
@@ -282,10 +302,11 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-[#F5F0EA] text-[#3a1c14] selection:bg-[#7c3a2a]/20 selection:text-[#3a1c14] selection:font-bold">
       {/* Shared app shell: full-width top bar + left nav rail; routed pages render inside.
-          EditAgentHost mounts the single Edit Agent drawer as an app-level overlay (opened via
-          useOpenEditAgent — no route change, scroll preserved). */}
+          EditQueryHost + EditAgentHost mount the single Edit Query / Edit Agent drawers as app-level
+          overlays (opened via useOpenEditQuery / useOpenEditAgent — no route change, scroll preserved).
+          EditQueryHost wraps EditAgentHost so an agent-drawer query row can open the query drawer. */}
+      <EditQueryHost onSavedToast={(msg) => setSuccessToast(msg)}>
       <EditAgentHost
-        onOpenQuery={() => handleNavigate("queries")}
         onSavedToast={(msg) => setSuccessToast(msg)}
       >
       <AppShell
@@ -352,6 +373,7 @@ function AppContent() {
         )}
       </AppShell>
       </EditAgentHost>
+      </EditQueryHost>
 
       {/* Focus Mode Overlay Dialog Form */}
       <LogQueryFocusForm

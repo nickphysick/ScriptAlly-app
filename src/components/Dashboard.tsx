@@ -19,7 +19,7 @@ import {
   limit 
 } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
-import { QuerySlideInPanel } from "./QuerySlideInPanel";
+import { useOpenEditQuery } from "./EditQueryHost";
 import { RecordResponseModal } from "./RecordResponseModal";
 import { RecordResponseScreen } from "./RecordResponseScreen";
 import { NudgeModal } from "./NudgeModal";
@@ -472,6 +472,7 @@ export const Dashboard: React.FC<{
   searchQuery
 }) => {
   const openEditAgent = useOpenEditAgent();
+  const openEditQuery = useOpenEditQuery();
   const {
     currentUser,
     collectionsReady,
@@ -558,9 +559,8 @@ export const Dashboard: React.FC<{
     return () => unsubscribe();
   }, [currentUser?.id]);
 
-  // Query Details Slide-in Panel and Undo Toast states
-  const [selectedQueryIdForPanel, setSelectedQueryIdForPanel] = useState<string | null>(null);
-  const [isQueryPanelOpen, setIsQueryPanelOpen] = useState(false);
+  // Undo Toast + calendar states (the query slide-in panel is retired — query editing is the
+  // app-level Edit Query drawer, opened via openEditQuery).
   const [isFullCalendarOpen, setIsFullCalendarOpen] = useState(false);
   const [undoToastInfo, setUndoToastInfo] = useState<{
     queryId: string;
@@ -1749,10 +1749,7 @@ export const Dashboard: React.FC<{
                   onSnooze={(task) => dismissTask(task.taskType, task.relatedRecordId, "fixed snooze", 3)}
                   onDismiss={(task) => dismissTask(task.taskType, task.relatedRecordId, "permanent")}
                   onAllTasks={() => setIsTasksPanelOpen(true)}
-                  onOpenQuery={(qid) => {
-                    setSelectedQueryIdForPanel(qid);
-                    setIsQueryPanelOpen(true);
-                  }}
+                  onOpenQuery={(qid) => openEditQuery(qid)}
                   onAddNote={addNote}
                   onCompleteNote={completeNoteWithUndo}
                   onDeleteNote={(note) => deleteNoteWithUndo(note.id)}
@@ -1841,7 +1838,7 @@ export const Dashboard: React.FC<{
             manuscripts={manuscripts}
             activities={mergedActivities}
             isMagazineLayout={isMagazineLayout}
-            onOpenQuery={(qid) => { setSelectedQueryIdForPanel(qid); setIsQueryPanelOpen(true); }}
+            onOpenQuery={(qid) => openEditQuery(qid)}
             onOpenFullCalendar={() => setIsFullCalendarOpen(true)}
           />
 
@@ -2161,7 +2158,7 @@ export const Dashboard: React.FC<{
                             }
 
                             const openEvent = () => {
-                              if (act.queryId) { setSelectedQueryIdForPanel(act.queryId); setIsQueryPanelOpen(true); }
+                              if (act.queryId) { openEditQuery(act.queryId); }
                               else { onNavigate("queries", act.description); }
                             };
 
@@ -2417,10 +2414,7 @@ export const Dashboard: React.FC<{
                                   onNavigate={onNavigate} 
                                   dismissTask={dismissTask} 
                                   onClosePanel={() => setIsTasksPanelOpen(false)} 
-                                  onOpenQuery={(qId) => {
-                                    setSelectedQueryIdForPanel(qId);
-                                    setIsQueryPanelOpen(true);
-                                  }}
+                                  onOpenQuery={(qId) => openEditQuery(qId)}
                                 />
                               ))}
                             </div>
@@ -2442,10 +2436,7 @@ export const Dashboard: React.FC<{
                                   onNavigate={onNavigate} 
                                   dismissTask={dismissTask} 
                                   onClosePanel={() => setIsTasksPanelOpen(false)} 
-                                  onOpenQuery={(qId) => {
-                                    setSelectedQueryIdForPanel(qId);
-                                    setIsQueryPanelOpen(true);
-                                  }}
+                                  onOpenQuery={(qId) => openEditQuery(qId)}
                                 />
                               ))}
                             </div>
@@ -2467,10 +2458,7 @@ export const Dashboard: React.FC<{
                                   onNavigate={onNavigate} 
                                   dismissTask={dismissTask} 
                                   onClosePanel={() => setIsTasksPanelOpen(false)} 
-                                  onOpenQuery={(qId) => {
-                                    setSelectedQueryIdForPanel(qId);
-                                    setIsQueryPanelOpen(true);
-                                  }}
+                                  onOpenQuery={(qId) => openEditQuery(qId)}
                                 />
                               ))}
                             </div>
@@ -2486,21 +2474,8 @@ export const Dashboard: React.FC<{
         )}
       </AnimatePresence>
 
-      {/* Query Slide-in panel */}
-      <QuerySlideInPanel
-        isOpen={isQueryPanelOpen}
-        onClose={() => {
-          setIsQueryPanelOpen(false);
-          setSelectedQueryIdForPanel(null);
-        }}
-        queryId={selectedQueryIdForPanel}
-        onNavigate={onNavigate}
-        onSaveStatusChange={handleSaveStatusChange}
-        onRecordResponse={(qid) => setRecordResponseQueryId(qid)}
-        onActivityDeleted={() => {
-          console.log("Timeline activity record successfully deleted.");
-        }}
-      />
+      {/* Edit Query is now an app-level overlay (EditQueryHost) opened via openEditQuery(id) — the
+          legacy QuerySlideInPanel slab is retired. */}
 
       {/* Record-a-response screen (hero entry): paste-email fast lane + manual record-a-response flow. */}
       <RecordResponseScreen
