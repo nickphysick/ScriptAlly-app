@@ -112,6 +112,8 @@ function AppContent() {
   const [isLogQueryOpen, setIsLogQueryOpen] = useState<boolean>(false);
   const [isAddAgentOpen, setIsAddAgentOpen] = useState<boolean>(false);
   const [isAddManuscriptOpen, setIsAddManuscriptOpen] = useState<boolean>(false);
+  // Deep-link target for the Edit Agent drawer (e.g. the "Edit Agent" to-do task) — one-shot.
+  const [agentDrawerId, setAgentDrawerId] = useState<string | null>(null);
 
   useEffect(() => {
     if (successToast) {
@@ -133,6 +135,13 @@ function AppContent() {
     }
     if (subPageName === "Add a manuscript" || subPageName === "Add a Manuscript") {
       setIsAddManuscriptOpen(true);
+      return;
+    }
+    // Deep-link "edit-agent:<id>" → open the Agents tab AND the Edit Agent drawer for that agent.
+    if (tab === "agents" && subPageName && subPageName.startsWith("edit-agent:")) {
+      setActiveTab("agents");
+      setActiveSubPage("Agents database");
+      setAgentDrawerId(subPageName.slice("edit-agent:".length));
       return;
     }
     setActiveTab(tab);
@@ -277,7 +286,7 @@ function AppContent() {
           activeSubPage === "Discover new agents" ? (
             <DiscoverNewAgents onNavigate={handleNavigate} />
           ) : (
-            <Agents searchQuery={searchQuery} onNavigate={handleNavigate} />
+            <Agents searchQuery={searchQuery} onNavigate={handleNavigate} openAgentId={agentDrawerId} onAgentDrawerConsumed={() => setAgentDrawerId(null)} />
           )
         )}
         {activeTab === "manuscripts" && (

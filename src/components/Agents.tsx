@@ -38,6 +38,9 @@ import { EditAgentDrawer } from "./EditAgentDrawer";
 interface AgentsProps {
   searchQuery?: string;
   onNavigate?: (tab: string, subPageName?: string) => void;
+  /** Deep-link: open the Edit Agent drawer for this agent on arrival (one-shot, then consumed). */
+  openAgentId?: string | null;
+  onAgentDrawerConsumed?: () => void;
 }
 
 /** A handle is treated as a clickable link only when it's an explicit URL or a bare domain. */
@@ -72,7 +75,7 @@ function formatWhatsAppDate(dateString: string): string {
   return `${day} ${month}, ${time}`;
 }
 
-export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
+export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, openAgentId, onAgentDrawerConsumed }) => {
   const {
     currentUser,
     agents,
@@ -104,6 +107,14 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
   // the drawer reseeds to saved values). This is the only agent-edit surface; the legacy inline
   // modal was retired in Prompt 4.
   const [editDrawerAgentId, setEditDrawerAgentId] = useState<string | null>(null);
+
+  // Deep-link entry (e.g. the "Edit Agent" to-do task): open the drawer for the routed agent, then
+  // tell App to clear the one-shot target so it doesn't reopen on the next render.
+  useEffect(() => {
+    if (!openAgentId) return;
+    setEditDrawerAgentId(openAgentId);
+    onAgentDrawerConsumed?.();
+  }, [openAgentId, onAgentDrawerConsumed]);
 
   // Agent Notes State (Card 3 Jottings)
   const [agentNotesList, setAgentNotesList] = useState<{ id: string; text: string; createdAt: string }[]>([]);

@@ -269,7 +269,8 @@ const TaskPanelCard: React.FC<{
 
   const handleActionClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onNavigate(task.actionPath, task.title);
+    // The "Edit Agent" housekeeping task opens the Edit Agent drawer for its agent; others navigate.
+    onNavigate(task.actionPath, task.taskType === "data_quality_poor" ? `edit-agent:${task.relatedRecordId}` : task.title);
     onClosePanel();
   };
 
@@ -1738,7 +1739,7 @@ export const Dashboard: React.FC<{
                   queries={queries}
                   agents={agents}
                   notes={notes}
-                  onAction={(task) => onNavigate(task.actionPath, task.title)}
+                  onAction={(task) => onNavigate(task.actionPath, task.taskType === "data_quality_poor" ? `edit-agent:${task.relatedRecordId}` : task.title)}
                   onNudge={(task) => setNudgeTask(task)}
                   onSnooze={(task) => dismissTask(task.taskType, task.relatedRecordId, "fixed snooze", 3)}
                   onDismiss={(task) => dismissTask(task.taskType, task.relatedRecordId, "permanent")}
