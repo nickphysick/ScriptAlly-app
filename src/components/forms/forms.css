@@ -598,6 +598,19 @@
   display: flex; justify-content: space-between; margin-top: 7px;
   font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.04em; color: #bcae9e;
 }
+/* Not-set ("?") state — greyed slider + muted readout + the "?" affordance (Edit Agent drawer) */
+.sa-wk-read.muted { color: #a89a8a; font-weight: 400; font-style: italic; }
+.sa-wk-slider.notset { opacity: 0.4; }
+.sa-wk-q {
+  flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%; border: 1px solid #d8cab9;
+  background: transparent; color: #a89a8a; font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .14s;
+}
+.sa-wk-q:hover { border-color: #8a9e88; color: #5a6e58; background: #eef2ec; }
+.sa-wk-hint {
+  margin-top: 8px; font-size: 10.5px; line-height: 1.45; color: #5a6e58;
+  background: #eef2ec; border: 1px solid #d8e0d4; border-radius: 7px; padding: 8px 10px;
+}
 
 /* materials wanted — pill toggle chips + revealed detail inputs */
 .sa-aa-chips { display: flex; flex-wrap: wrap; gap: 6px; }

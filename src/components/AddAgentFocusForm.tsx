@@ -19,6 +19,8 @@ import {
   Em,
 } from "./forms";
 import profileAnimation from "../assets/agent-profile-animation.json";
+import { AGENT_GENRES, SOCIAL_PLATFORMS, METHOD_OPTIONS as METHOD_LIST } from "../lib/agentOptions";
+import { buildAgentMaterials } from "../lib/agentMaterials";
 
 interface AddAgentFocusFormProps {
   isOpen: boolean;
@@ -26,21 +28,8 @@ interface AddAgentFocusFormProps {
   onSuccessToast: (message: string) => void;
 }
 
-const GENRES = [
-  "Action & adventure", "Children’s", "Commercial fiction", "Contemporary", "Cosy crime",
-  "Crime", "Dystopian", "Fantasy", "Historical fiction", "Horror", "Literary fiction",
-  "Magical realism", "Memoir", "Middle grade", "Mystery", "Non-fiction", "Picture book",
-  "Romance", "Romantasy", "Sci-fi", "Speculative fiction", "Thriller", "Upmarket",
-  "Women’s fiction", "Young adult",
-];
-
-const SOCIAL_PLATFORMS = ["X / Twitter", "Bluesky", "Instagram", "QueryTracker", "TikTok", "Other"];
 const platformOptions = SOCIAL_PLATFORMS.map((p) => ({ value: p, label: p }));
-
-const METHOD_OPTIONS = ["Email", "QueryManager", "Agency form", "Post", "Other"].map((m) => ({
-  value: m,
-  label: m,
-}));
+const methodOptions = METHOD_LIST.map((m) => ({ value: m, label: m }));
 
 const POLICY_OPTIONS = ["Responds to all", "Only responds if interested", "No response means pass"].map(
   (p) => ({ value: p, label: p })
@@ -143,21 +132,21 @@ export const AddAgentFocusForm: React.FC<AddAgentFocusFormProps> = ({
   const addSocialRow = () => setSocials((prev) => [...prev, { platform: "", handle: "" }]);
   const removeSocialRow = (i: number) => setSocials((prev) => prev.filter((_, idx) => idx !== i));
 
-  // Build the display-friendly materialsWanted string[] from the chip selections.
-  const buildMaterials = (): string[] => {
-    const out: string[] = [];
-    if (materials.queryLetter) out.push("Query letter");
-    if (materials.synopsis) out.push("Synopsis");
-    if (materials.pages.on) out.push(materials.pages.count ? `First ${materials.pages.count} pages` : "Sample pages");
-    if (materials.chapters.on)
-      out.push(materials.chapters.count ? `First ${materials.chapters.count} chapters` : "Chapters");
-    if (materials.words.on) {
-      const digits = materials.words.count.replace(/\D/g, "");
-      out.push(digits ? `${Number(digits).toLocaleString("en-US")} words` : "Word count");
-    }
-    if (materials.other.on && materials.other.text.trim()) out.push(materials.other.text.trim());
-    return out;
-  };
+  // Build the display-friendly materialsWanted string[] from the chip selections, through the shared
+  // canonical encoder (single source of truth with the Edit Agent drawer's round-trip).
+  const buildMaterials = (): string[] =>
+    buildAgentMaterials({
+      selected: [
+        ...(materials.queryLetter ? ["Query letter"] : []),
+        ...(materials.synopsis ? ["Synopsis"] : []),
+        ...(materials.pages.on ? ["Pages"] : []),
+        ...(materials.chapters.on ? ["Chapters"] : []),
+        ...(materials.words.on ? ["Word count"] : []),
+        ...(materials.other.on ? ["Other"] : []),
+      ],
+      counts: { Pages: materials.pages.count, Chapters: materials.chapters.count, "Word count": materials.words.count },
+      otherText: materials.other.text,
+    });
 
   const handleSubmit = async () => {
     if (!name.trim()) {
@@ -344,7 +333,7 @@ export const AddAgentFocusForm: React.FC<AddAgentFocusFormProps> = ({
       </FormField>
 
       <FormField label="Genres">
-        <GenreCombobox options={GENRES} value={genres} onChange={setGenres} />
+        <GenreCombobox options={AGENT_GENRES} value={genres} onChange={setGenres} />
       </FormField>
 
       {/* ── How they submit ─────────────────────────────────────────── */}
@@ -365,7 +354,7 @@ export const AddAgentFocusForm: React.FC<AddAgentFocusFormProps> = ({
       <WeekSlider value={responseTimeWeeks} onChange={setResponseTimeWeeks} />
 
       <FormField label="Submission method">
-        <BrandDropdown value={submissionMethod} options={METHOD_OPTIONS} onChange={setSubmissionMethod} />
+        <BrandDropdown value={submissionMethod} options={methodOptions} onChange={setSubmissionMethod} />
       </FormField>
 
       <FormField label="Materials wanted">
