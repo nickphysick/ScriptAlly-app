@@ -273,7 +273,7 @@ const TaskPanelCard: React.FC<{
     e.stopPropagation();
     // The "Edit Agent" housekeeping task opens the Edit Agent drawer in place (app-level overlay —
     // no route change); every other task navigates.
-    if (task.taskType === "data_quality_poor") openEditAgent(task.relatedRecordId);
+    if (task.taskType === "data_quality_poor") openEditAgent(task.relatedRecordId, { fromTask: true });
     else onNavigate(task.actionPath, task.title);
     onClosePanel();
   };
@@ -1744,7 +1744,7 @@ export const Dashboard: React.FC<{
                   queries={queries}
                   agents={agents}
                   notes={notes}
-                  onAction={(task) => task.taskType === "data_quality_poor" ? openEditAgent(task.relatedRecordId) : onNavigate(task.actionPath, task.title)}
+                  onAction={(task) => task.taskType === "data_quality_poor" ? openEditAgent(task.relatedRecordId, { fromTask: true }) : onNavigate(task.actionPath, task.title)}
                   onNudge={(task) => setNudgeTask(task)}
                   onSnooze={(task) => dismissTask(task.taskType, task.relatedRecordId, "fixed snooze", 3)}
                   onDismiss={(task) => dismissTask(task.taskType, task.relatedRecordId, "permanent")}

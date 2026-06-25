@@ -34,6 +34,7 @@ import {
   AgentMaterialsState, MAT_OPTS, MAT_QTY, buildAgentMaterials, parseAgentMaterials, materialsCountErrors,
 } from "../lib/agentMaterials";
 import { AGENT_GENRES, SOCIAL_PLATFORMS, METHOD_OPTIONS, COUNTRIES } from "../lib/agentOptions";
+import { agentDataQualityNeeds, AgentDataNeed } from "../lib/agentDataQuality";
 import editPencil from "../assets/edit-pencil-animation.json";
 
 const C = {
@@ -53,9 +54,6 @@ const NOREPLY_TRUE = "Only responds if interested";
 const NOREPLY_FALSE = "Responds either way";
 const noReplyLabel = (b: boolean) => (b ? NOREPLY_TRUE : NOREPLY_FALSE);
 
-const METHOD_DD = METHOD_OPTIONS.map((s) => ({ value: s, label: s }));
-const NOREPLY_DD = [NOREPLY_TRUE, NOREPLY_FALSE].map((s) => ({ value: s, label: s }));
-const COUNTRY_DD = COUNTRIES.map((c) => ({ value: c, label: c }));
 const SOCIAL_DD = SOCIAL_PLATFORMS.map((p) => ({ value: p, label: p }));
 
 const AWAITING_REPLY = new Set<QueryStatus>([QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT]);
@@ -109,6 +107,8 @@ export interface EditAgentDrawerProps {
   onClose: () => void;
   /** Lock background (window) scroll at its current position while open — the app-level overlay use. */
   lockScroll?: boolean;
+  /** Opened from a `data_quality_poor` to-do → highlight the deficient fields (banner + pulsing ring). */
+  highlightNeeds?: boolean;
   /** Read-only queries list rows link out via this (the Edit Query drawer isn't mounted here). */
   onOpenQuery?: (queryId: string) => void;
   onSavedToast?: (msg: string) => void;
@@ -117,7 +117,10 @@ export interface EditAgentDrawerProps {
 const prefersReducedMotion = () =>
   typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen, onClose, lockScroll, onOpenQuery, onSavedToast }) => {
+/** Field labels for the needs-attention banner copy. */
+const NEED_LABEL: Record<AgentDataNeed, string> = { mswl: "manuscript wishlist", materials: "materials wanted" };
+
+export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen, onClose, lockScroll, highlightNeeds, onOpenQuery, onSavedToast }) => {
   const { queries, manuscripts, saveAgentEdits } = useScriptAllyDb();
 
   const orig = useMemo(() => draftFromAgent(agent), [agent]);
@@ -186,6 +189,20 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
   if (S.name.trim() === "") liveErrors.name = "An agent needs a name. Add one to save, or undo to keep what was there.";
   if (S.email.trim() !== "" && !emailOk(S.email)) liveErrors.email = "That doesn’t look like an email address. Fix it or clear the field.";
   const blocked = Object.keys(liveErrors).length > 0 || materialsBad.size > 0 || needAgencyConfirm;
+
+  // Needs-highlight (task-routed opens only). highlightSet = the fields deficient AT OPEN (the same
+  // predicate the to-do uses, on the original agent); `remaining` re-runs the predicate on the LIVE
+  // draft so a field's pulse clears the moment it's filled. When `remaining` empties, the banner
+  // flips to "all set" and a save makes the derived task re-evaluate clean (it disappears).
+  const highlightSet: AgentDataNeed[] = highlightNeeds
+    ? agentDataQualityNeeds({ mswlNotes: agent.mswlNotes, materialsWanted: agent.materialsWanted })
+    : [];
+  const draftNeeds = highlightSet.length
+    ? agentDataQualityNeeds({ mswlNotes: S.mswl, materialsWanted: buildAgentMaterials(S.materials) })
+    : [];
+  const remaining = highlightSet.filter((n) => draftNeeds.includes(n));
+  const needRing = (n: AgentDataNeed): "" | "pulse" | "done" =>
+    !highlightSet.includes(n) ? "" : remaining.includes(n) ? "pulse" : "done";
 
   const set = <K extends keyof Draft>(k: K, v: Draft[K]) => {
     if (k === "agency") setAgencyConfirmed(false); // re-clearing prompts confirm again
@@ -364,6 +381,16 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
 
               {/* scrolling body */}
               <div className="ea-body" style={{ flex: 1, overflowY: "auto", padding: "16px 20px 20px" }}>
+                {highlightSet.length > 0 && (
+                  <div className={`ea-needbanner${remaining.length === 0 ? " allset" : ""}`}>
+                    {remaining.length === 0 ? <OkIcon /> : <AlertIcon />}
+                    <span>
+                      {remaining.length === 0
+                        ? <>All set — the highlighted details are filled. <b>Save</b> to clear this from your to-do list.</>
+                        : <>This agent’s profile needs a little more. Add the highlighted <b>{remaining.map((n) => NEED_LABEL[n]).join(" and ")}</b> to complete it.</>}
+                    </span>
+                  </div>
+                )}
                 <Sec>Identity</Sec>
                 <Field><Label on={dirty.name}>Name</Label><TextField field="name" value={S.name} placeholder="Agent name" /></Field>
                 <Two>
@@ -371,7 +398,7 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
                   <Field><Label on={dirty.rating}>Agent fit</Label><div style={{ minHeight: 38, display: "flex", alignItems: "center" }}><FitStars value={S.rating} size={20} showMeaning={false} onChange={(n) => set("rating", n)} /></div></Field>
                 </Two>
                 <Two>
-                  <Field><Label on={dirty.country}>Country</Label><div style={{ marginTop: 2 }}><BrandDropdown value={S.country} options={COUNTRY_DD} onChange={(v) => set("country", v)} placeholder="Add country" /></div></Field>
+                  <Field><Label on={dirty.country}>Country</Label><EaSelect value={S.country} options={COUNTRIES} onChange={(v) => set("country", v)} placeholder="Select a country…" /></Field>
                   <Field><Label on={dirty.city}>City</Label><TextField field="city" value={S.city} placeholder="Add city (optional)" /></Field>
                 </Two>
 
@@ -391,7 +418,7 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
                       <SoftNote>You have <b>{openCount} open {openCount === 1 ? "query" : "queries"}</b> to {firstName(S.name)}. Marking them closed won’t touch those — it just stops them appearing when you log a new query.</SoftNote>
                     )}
                   </Field>
-                  <Field><Label on={dirty.method}>Submission method</Label><div style={{ marginTop: 2 }}><BrandDropdown value={S.method} options={METHOD_DD} onChange={(v) => set("method", v)} /></div></Field>
+                  <Field><Label on={dirty.method}>Submission method</Label><EaSelect value={S.method} options={METHOD_OPTIONS} onChange={(v) => set("method", v)} /></Field>
                 </Two>
                 <Field>
                   <Label on={dirty.weeks}>Response time</Label>
@@ -403,12 +430,12 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
                     notSetHint="No turnaround on record — their queries won’t get a “response expected by” date or a follow-up nudge until you add one."
                   />
                 </Field>
-                <Field><Label on={dirty.noReply}>Response policy</Label><div style={{ marginTop: 2 }}><BrandDropdown value={noReplyLabel(S.noReply)} options={NOREPLY_DD} onChange={(v) => set("noReply", v === NOREPLY_TRUE)} /></div></Field>
-                <Field><Label on={dirty.materials}>Materials wanted</Label><MaterialsControl state={S.materials} bad={materialsBad} onChange={(v) => set("materials", v)} /></Field>
+                <Field><Label on={dirty.noReply}>Response policy</Label><EaSelect value={noReplyLabel(S.noReply)} options={[NOREPLY_TRUE, NOREPLY_FALSE]} onChange={(v) => set("noReply", v === NOREPLY_TRUE)} /></Field>
+                <Field><Label on={dirty.materials}>Materials wanted</Label><NeedWrap ring={needRing("materials")}><MaterialsControl state={S.materials} bad={materialsBad} onChange={(v) => set("materials", v)} /></NeedWrap></Field>
 
                 <Sec top>Genres &amp; wishlist</Sec>
                 <Field><Label on={dirty.genres}>Genres</Label><div style={{ marginTop: 2 }}><GenreCombobox options={AGENT_GENRES} value={S.genres} onChange={(v) => set("genres", v)} placeholder="Type a genre…" /></div></Field>
-                <Field><Label on={dirty.mswl}>Manuscript wishlist (MSWL)</Label><TextField field="mswl" value={S.mswl} placeholder="Add a manuscript wishlist" multiline quoted /></Field>
+                <Field><Label on={dirty.mswl}>Manuscript wishlist (MSWL)</Label><NeedWrap ring={needRing("mswl")}><TextField field="mswl" value={S.mswl} placeholder="Add a manuscript wishlist" multiline quoted /></NeedWrap></Field>
 
                 <Sec top>Notes</Sec>
                 <Field last><Label on={dirty.notes}>Private notes</Label><TextField field="notes" value={S.notes} placeholder="Add a private note" multiline /></Field>
@@ -467,7 +494,24 @@ const Two: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px", marginBottom: 14 }}>{children}</div>
 );
 
-// ── status toggle: sage Open / burgundy Closed; Unknown → neutral caption ────────
+// ── needs-attention ring wrapper (task-routed opens): pink pulse while deficient, sage once filled ─
+const NeedWrap: React.FC<{ ring: "" | "pulse" | "done"; children: React.ReactNode }> = ({ ring, children }) =>
+  ring ? <div className={`ea-need ea-need-${ring}`}>{children}</div> : <>{children}</>;
+
+// ── one-click styled native select (method / response policy / country) ──────────
+// Always visible, opens on a single click (no reveal indirection), commits on change. Styled to
+// read like the resting click-to-edit fields. An empty value shows the muted placeholder option.
+const EaSelect: React.FC<{ value: string; options: string[]; onChange: (v: string) => void; placeholder?: string }> = ({ value, options, onChange, placeholder }) => {
+  const empty = value.trim() === "";
+  return (
+    <select className={`ea-select${empty ? " ph" : ""}`} value={value} onChange={(e) => onChange(e.target.value)}>
+      {placeholder && <option value="">{placeholder}</option>}
+      {options.map((o) => <option key={o} value={o}>{o}</option>)}
+    </select>
+  );
+};
+
+// ── status toggle: sage Open / soft-pink Closed; Unknown → neutral caption ────────
 const StatusToggle: React.FC<{ value: SubmissionStatus; onChange: (s: SubmissionStatus) => void }> = ({ value, onChange }) => {
   const isUnknown = value !== SubmissionStatus.OPEN && value !== SubmissionStatus.CLOSED;
   return (
@@ -475,9 +519,9 @@ const StatusToggle: React.FC<{ value: SubmissionStatus; onChange: (s: Submission
       <div className="ea-segtoggle">
         {([SubmissionStatus.OPEN, SubmissionStatus.CLOSED] as const).map((s) => {
           const on = value === s;
-          // Open uses the light sage we use elsewhere (band/StatusDot-incoming family); Closed burgundy.
-          const activeBg = s === SubmissionStatus.OPEN ? C.sage1 : C.burgundy;
-          const activeColor = s === SubmissionStatus.OPEN ? C.darkSage : "#f5efe7";
+          // v14 A+B semantic: Open = light panel-header sage; Closed = soft-pink + burgundy text.
+          const activeBg = s === SubmissionStatus.OPEN ? C.sage1 : C.pink;
+          const activeColor = s === SubmissionStatus.OPEN ? C.darkSage : C.burgundy;
           return (
             <button key={s} type="button" className="ea-seg" aria-pressed={on}
               onClick={() => onChange(s)}
@@ -602,6 +646,14 @@ const EditAgentStyles: React.FC = () => (
     .ea-slide.ea-closing > div { animation: ea-slide-out .5s cubic-bezier(.22,.61,.36,1) forwards; }
     @media (prefers-reduced-motion: reduce) { .ea-slide > div, .ea-slide.ea-closing > div { animation: none !important; } }
     .ea-body::-webkit-scrollbar{width:7px;} .ea-body::-webkit-scrollbar-thumb{background:#e3d6c8;border-radius:4px;}
+    .ea-needbanner{display:flex;gap:9px;align-items:flex-start;background:#fdf0ea;border:1px solid #f0d4c8;border-radius:10px;padding:11px 13px;margin-bottom:16px;font-size:11.5px;line-height:1.5;color:#8a5a44;}
+    .ea-needbanner b{font-weight:600;}
+    .ea-needbanner.allset{background:#eef2ec;border-color:#d8e0d4;color:#5a6e58;}
+    .ea-need{border-radius:10px;}
+    @keyframes ea-need-pulse{0%,100%{box-shadow:0 0 0 0 rgba(232,200,188,0);}50%{box-shadow:0 0 0 4px rgba(232,200,188,0.6);}}
+    .ea-need-pulse{animation:ea-need-pulse 1.8s ease-in-out infinite;}
+    .ea-need-done{box-shadow:0 0 0 2px rgba(138,158,136,0.55);transition:box-shadow .3s;}
+    @media (prefers-reduced-motion: reduce){.ea-need-pulse{animation:none;box-shadow:0 0 0 3px rgba(232,200,188,0.7);}}
     .ea-editable{position:relative;display:flex;align-items:center;gap:8px;min-height:38px;padding:8px 11px;background:#fffdf9;border:1px solid #ece2d4;border-radius:8px;cursor:text;transition:border-color .14s,background .14s;margin-top:2px;}
     .ea-editable.selectable{cursor:pointer;}
     .ea-editable:hover{border-color:#d8c9b6;background:#fffefb;}
@@ -615,6 +667,10 @@ const EditAgentStyles: React.FC = () => (
     .ea-inp{width:100%;background:#fff;border:1px solid #e0d5c8;border-radius:8px;padding:8px 11px;font-size:12.5px;color:#3a1c14;font-family:'Inter',sans-serif;outline:none;margin-top:2px;min-height:38px;}
     .ea-inp:focus{border-color:#8a9e88;box-shadow:0 0 0 3px rgba(138,158,136,0.12);}
     .ea-inp.bad{border-color:#e6bdb0;box-shadow:0 0 0 3px rgba(168,58,42,0.10);}
+    .ea-select{margin-top:2px;width:100%;min-height:38px;-webkit-appearance:none;appearance:none;padding:8px 30px 8px 11px;font-size:12.5px;color:#3a1c14;font-family:'Inter',sans-serif;background-color:#fffdf9;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%237c3a2a' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");background-repeat:no-repeat;background-position:right 10px center;border:1px solid #ece2d4;border-radius:8px;cursor:pointer;outline:none;transition:border-color .14s,background-color .14s;}
+    .ea-select:hover{border-color:#d8c9b6;background-color:#fffefb;}
+    .ea-select:focus{border-color:#8a9e88;box-shadow:0 0 0 3px rgba(138,158,136,0.16);}
+    .ea-select.ph{color:#b9aa99;}
     .ea-segtoggle{display:inline-flex;background:#e1d4c3;border:1px solid #d4c5b2;border-radius:9px;padding:3px;gap:3px;}
     .ea-seg{font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;border:none;border-radius:7px;padding:7px 20px;cursor:pointer;transition:all .14s;}
     .ea-matpills{display:flex;flex-wrap:wrap;gap:7px;}

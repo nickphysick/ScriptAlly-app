@@ -15,7 +15,9 @@ import React, { createContext, useContext, useState } from "react";
 import { useScriptAllyDb } from "../lib/db";
 import { EditAgentDrawer } from "./EditAgentDrawer";
 
-const OpenEditAgentContext = createContext<(agentId: string) => void>(() => {});
+/** opts.fromTask = opened from a `data_quality_poor` to-do → the drawer highlights deficient fields. */
+export type OpenEditAgent = (agentId: string, opts?: { fromTask?: boolean }) => void;
+const OpenEditAgentContext = createContext<OpenEditAgent>(() => {});
 
 /** Open the Edit Agent drawer for an agent id, from anywhere under <EditAgentHost>. */
 export const useOpenEditAgent = () => useContext(OpenEditAgentContext);
@@ -27,20 +29,21 @@ export const EditAgentHost: React.FC<{
   onSavedToast: (msg: string) => void;
 }> = ({ children, onOpenQuery, onSavedToast }) => {
   const { agents } = useScriptAllyDb();
-  const [openId, setOpenId] = useState<string | null>(null);
+  const [open, setOpen] = useState<{ id: string; fromTask: boolean } | null>(null);
   // Looked up live by id, so a save reseeds the drawer to the saved values.
-  const agent = openId ? agents.find((a) => a.id === openId) ?? null : null;
+  const agent = open ? agents.find((a) => a.id === open.id) ?? null : null;
 
   return (
-    <OpenEditAgentContext.Provider value={setOpenId}>
+    <OpenEditAgentContext.Provider value={(id, opts) => setOpen({ id, fromTask: !!opts?.fromTask })}>
       {children}
       {agent && (
         <EditAgentDrawer
           agent={agent}
           isOpen
           lockScroll
-          onClose={() => setOpenId(null)}
-          onOpenQuery={(qid) => { setOpenId(null); onOpenQuery(qid); }}
+          highlightNeeds={open!.fromTask}
+          onClose={() => setOpen(null)}
+          onOpenQuery={(qid) => { setOpen(null); onOpenQuery(qid); }}
           onSavedToast={onSavedToast}
         />
       )}
