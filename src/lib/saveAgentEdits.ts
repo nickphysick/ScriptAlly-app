@@ -64,6 +64,28 @@ export interface AgentExtraWrite {
 
 export type SaveAgentResult = { ok: true } | { ok: false; error: string };
 
+/** Firestore caps a writeBatch at 500 ops. */
+const BATCH_CAP = 500;
+
+/**
+ * Split fan-out writes so every batch stays within the 500-op cap. The FIRST chunk shares its batch
+ * with the agent doc, so it reserves one slot (≤ cap-1 extras); later chunks use the full cap. Pure
+ * — the local proof for the chunking math (the multi-doc commit itself needs the emulator). With no
+ * extra writes it returns a single empty chunk → one agent-only batch (the common case stays atomic).
+ */
+export function chunkExtraWrites(extraWrites: AgentExtraWrite[], cap = BATCH_CAP): AgentExtraWrite[][] {
+  if (extraWrites.length === 0) return [[]];
+  const chunks: AgentExtraWrite[][] = [];
+  let i = 0;
+  chunks.push(extraWrites.slice(i, i + (cap - 1)));
+  i += cap - 1;
+  while (i < extraWrites.length) {
+    chunks.push(extraWrites.slice(i, i + cap));
+    i += cap;
+  }
+  return chunks;
+}
+
 const VALID_SUBMISSION_STATUSES = new Set<string>(Object.values(SubmissionStatus));
 const MATERIALS_CAP = 20;
 const STAR_MIN = 1;
@@ -137,6 +159,11 @@ export function sanitizeAgentPatch(patch: AgentEditPatch): SanitizedAgentWrite {
  * not reset the freshness clock (unlike `updateAgent`, which stamps it). The rule requires
  * `lastCheckedDate` to be present, but `batch.update` merges, so the existing value is preserved on
  * the resulting doc and the rule still passes. Returns a typed result; never throws.
+ *
+ * `extraWrites` is THE fan-out seam (Prompt 3): the agent doc rides in the FIRST batch alongside as
+ * many query-deadline updates as fit, so the common case (≤ 499 extras) is a single atomic commit.
+ * An unusually large fan-out spills into further batches committed in sequence (no longer one atomic
+ * unit — acceptable for the >499 tail, which doesn't arise in practice).
  */
 export async function commitAgentEdits(
   db: Firestore,
@@ -151,21 +178,20 @@ export async function commitAgentEdits(
   if (sanitized.errors.length) return { ok: false, error: sanitized.errors[0] };
 
   try {
-    const batch = writeBatch(db);
-
     const agentRef = doc(db, "users", userId, "agents", agentId);
-    const update: Record<string, unknown> = { ...sanitized.fields };
-    for (const key of sanitized.deletes) update[key] = deleteField();
-    batch.update(agentRef, update);
+    const agentUpdate: Record<string, unknown> = { ...sanitized.fields };
+    for (const key of sanitized.deletes) agentUpdate[key] = deleteField();
 
-    // ───────────────────────────────────────────────────────────────────────────────────────
-    // FAN-OUT SEAM (Prompt 3): when responseTimeWeeks changes, the deadline fan-out passes the
-    // per-query `responseDeadline` recomputes here so they commit ATOMICALLY with the agent edit.
-    // Empty today — the agent update is the only op. (writeBatch caps at 500 ops; Prompt 3 chunks.)
-    // ───────────────────────────────────────────────────────────────────────────────────────
-    for (const op of extraWrites) batch.update(op.ref, op.data);
+    // The agent doc rides in the first batch; the deadline fan-out fills the rest, chunked to the
+    // 500-op cap and committed in sequence.
+    const chunks = chunkExtraWrites(extraWrites);
+    for (let c = 0; c < chunks.length; c++) {
+      const batch = writeBatch(db);
+      if (c === 0) batch.update(agentRef, agentUpdate);
+      for (const op of chunks[c]) batch.update(op.ref, op.data);
+      await batch.commit();
+    }
 
-    await batch.commit();
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "Couldn't save the agent." };

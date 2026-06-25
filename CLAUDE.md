@@ -29,6 +29,7 @@
 2. **"Responses Received" undercount** — imported Partial Sent / Full Sent queries derive `hasAgentResponded=false`, so they under-count. Fix when next doing CSV-import work: seed an implied mini-history, or derive the flag from status position (Partial Requested onward = agent has responded).
 
 ## Loose ends
+- **Response-deadline formula — canonical util, ~5 inline copies remain (backlog, low risk):** the `dateSent + responseTimeWeeks*7` calc now has ONE source of truth, `src/lib/responseDeadline.ts` (`computeResponseDeadline`). The three that matter most already share it: **create** (`addQuery`, db.tsx), **recompute** (the Prompt-3 fan-out `computeAgentDeadlineWrites`), and the **display fallback** (`activityUtils.ts`) — so a stored deadline and an agent edit provably agree. Still inlined elsewhere (separate code paths, lower risk): `db.tsx` updateQueryStatus `calcDeadline` (~:1562), `recordResponse.ts` (~:428), `LogQueryFocusForm.tsx` (~:106), `Queries.tsx` (~:940), `MarkSentPopover.tsx` `addWeeks` (~:42, local-date variant). Repoint opportunistically when next in each file; verify each keeps its own anchor (now vs dateSent) and output format.
 - **Security — `ANTHROPIC_API_KEY` rotation pending:** the key was pasted into chat in a prior session. Rotation (revoke → new key → re-set on BOTH projects → redeploy functions) was advised but never confirmed. **Verify rotation before any further Functions work.** (Do not paste the key into chat again.)
 
 ## Next session — start here

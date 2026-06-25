@@ -69,6 +69,8 @@ import { queriesForManuscript, queriesForAgent, activityIdsForQueries } from "./
 import { recomputeQuery as recomputeQueryOnline, subcollectionDocToDerivable, monotonicEventTime } from "./recomputeQuery";
 import { buildNudgeWrites } from "./logNudge";
 import { commitAgentEdits, AgentEditPatch, AgentExtraWrite, SaveAgentResult } from "./saveAgentEdits";
+import { computeAgentDeadlineWrites } from "./computeAgentDeadlineWrites";
+import { computeResponseDeadline } from "./responseDeadline";
 
 // Connection validation test on boot as requested by skill
 async function testConnection() {
@@ -1373,7 +1375,25 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     extraWrites: AgentExtraWrite[] = []
   ): Promise<SaveAgentResult> => {
     if (!currentUser) return Promise.resolve({ ok: false, error: "Not signed in." });
-    return commitAgentEdits(db, currentUser.id, agentId, patch, extraWrites);
+
+    // responseTimeWeeks deadline fan-out (Prompt 3): a NUMERIC turnaround change recomputes the
+    // denormalised responseDeadline on this agent's QUERIED queries that already carry one, in the
+    // SAME atomic batch as the agent write. Computed in this funnel (not the drawer) so Firestore
+    // stays out of the component — the ref factory and the agent's live queries only exist here.
+    // "Not set" (null) and a no-op (same number) produce no query writes; computeAgentDeadlineWrites
+    // owns the QUERIED ∩ has-deadline filter.
+    let allExtra = extraWrites;
+    const prevWeeks = agents.find(a => a.id === agentId)?.responseTimeWeeks;
+    if (typeof patch.responseTimeWeeks === "number" && patch.responseTimeWeeks !== prevWeeks) {
+      const fanOut = computeAgentDeadlineWrites(
+        queries.filter(q => q.agentId === agentId),
+        patch.responseTimeWeeks,
+        (queryId) => doc(db, "users", currentUser.id, "queries", queryId),
+      );
+      allExtra = extraWrites.concat(fanOut);
+    }
+
+    return commitAgentEdits(db, currentUser.id, agentId, patch, allExtra);
   };
 
   const deleteAgent = async (id: string) => {
@@ -1449,9 +1469,11 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     const agent = agents.find(a => a.id === q.agentId);
     let dead: string | undefined = undefined;
     if (agent) {
-      const d = new Date();
-      d.setDate(d.getDate() + (agent.responseTimeWeeks * 7));
-      dead = d.toISOString();
+      // Create-time deadline. Shares the ONE canonical formula with the Prompt-3 fan-out + the
+      // activityUtils fallback (computeResponseDeadline) so the date a query is born with and the
+      // date an agent edit recomputes it to can never drift. Anchor stays "now" by design (a fresh
+      // send): now ≈ dateSent at creation. The day-arithmetic now lives in a single place.
+      dead = computeResponseDeadline(new Date().toISOString(), agent.responseTimeWeeks);
     }
 
     const id = q.id || "q-" + Math.random().toString(36).substr(2, 9);

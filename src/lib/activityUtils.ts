@@ -1,4 +1,5 @@
 import { Activity, ActivityType } from "../types";
+import { computeResponseDeadline } from "./responseDeadline";
 
 export const getActivityKeyAndDefaults = (description: string, activityType?: ActivityType) => {
   const normalized = (description || "").toLowerCase();
@@ -108,8 +109,8 @@ export const replacePlaceholders = (
     }
   } else if (q && q.dateSent && agent && (agent as any).responseTimeWeeks) {
     try {
-      const d = new Date(q.dateSent);
-      d.setDate(d.getDate() + ((agent as any).responseTimeWeeks * 7));
+      // Same canonical formula the stored deadline + the Prompt-3 fan-out use → zero drift.
+      const d = new Date(computeResponseDeadline(q.dateSent, (agent as any).responseTimeWeeks));
       deadlineStr = d.toLocaleDateString("en-GB", {
         day: "numeric",
         month: "short",
