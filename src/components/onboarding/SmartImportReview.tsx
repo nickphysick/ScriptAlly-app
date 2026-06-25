@@ -2841,28 +2841,40 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
           <RecordsCard>
             {(() => {
               const byKeeper = mergedAwayByKeeper(agents);
+              // Anchor each cluster at the agents-index of its TOPMOST original member, then render in that
+              // order. A cluster that resolves down to one keeper is dropped by buildClusters and would
+              // otherwise be re-appended at the end (the "confirmation lands below the fold" bug); anchoring
+              // it on the same member it sat on while open keeps the resolve bar in the slot the writer
+              // just acted in — nothing relocates, items below simply reflow upward.
+              const idx = new Map<string, number>(agents.map((a, i): [string, number] => [a.id, i]));
+              const at = (...ids: string[]) => Math.min(...ids.map((id) => idx.get(id) ?? 0));
               const placed = new Set<string>();
-              const out: React.ReactNode[] = [];
+              const units: { sort: number; node: React.ReactNode }[] = [];
               for (const c of allClusters) {
                 if (c.type === "keepboth") {
-                  out.push(renderResolvedCluster({ leaderId: c.leaderId, members: c.members, type: "keepboth", survivor: c.survivor }));
+                  units.push({ sort: at(...c.members.map((m) => m.id)),
+                    node: renderResolvedCluster({ leaderId: c.leaderId, members: c.members, type: "keepboth", survivor: c.survivor }) });
                   c.members.forEach((m) => placed.add(m.id));
                 } else { // open (merge type never arises — a resolved merge has no live anchor)
                   const bars = byKeeper.get(c.leaderId) ?? [];
-                  out.push(renderCluster(c.members[0], c.openMembers, true, bars));
+                  units.push({ sort: at(c.leaderId, ...bars.map((b) => b.id)),
+                    node: renderCluster(c.members[0], c.openMembers, true, bars) });
                   placed.add(c.leaderId);
                   bars.forEach((b) => placed.add(b.id));
                 }
               }
-              // Fully-resolved merges: a keeper no longer anchoring any open cluster, plus its bars.
+              // Fully-resolved merges: a keeper no longer anchoring any open cluster, plus its bars. Anchored
+              // at the original cluster's top (keeper or a removed member, whichever sat highest) so the
+              // confirmation lands in place — where the writer just acted — never at the bottom of the list.
               for (const [keeperId, bars] of byKeeper) {
                 if (placed.has(keeperId)) continue;
                 const keeper = agents.find((a) => a.id === keeperId);
                 if (!keeper || keeper.deleted) continue;
-                out.push(renderResolvedMerge(keeper, bars));
+                units.push({ sort: at(keeperId, ...bars.map((b) => b.id)), node: renderResolvedMerge(keeper, bars) });
               }
-              return out.length
-                ? out
+              units.sort((a, b) => a.sort - b.sort);
+              return units.length
+                ? units.map((u) => u.node)
                 : <div style={{ padding: "32px 22px", fontFamily: "Inter", fontSize: 13, color: "#9c8878", textAlign: "center" }}>No duplicates to review.</div>;
             })()}
           </RecordsCard>
