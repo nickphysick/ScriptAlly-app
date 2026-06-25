@@ -20,6 +20,7 @@ import {
   ChevronLeft,
   HelpCircle,
   LogOut,
+  Search,
   Sparkles,
   User,
   Settings,
@@ -116,6 +117,7 @@ export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, 
 
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showBellDropdown, setShowBellDropdown] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [successAnimationTaskId, setSuccessAnimationTaskId] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
 
@@ -168,11 +170,10 @@ export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, 
         )}
         <style>{`.qnav-back{color:#8a7a6c;transition:color 0.15s}.qnav-back:hover{color:#7c3a2a}`}</style>
         <header
-          className="sticky top-0 z-50"
+          className="sticky top-0 z-50 md:ml-[262px]"
           style={{
             background: parchment,
             borderBottom: "1px solid #e2ded7",
-            marginLeft: 262,
           }}
         >
           <div className="flex items-center justify-between px-6" style={{ height: 45 }}>
@@ -313,18 +314,30 @@ export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, 
             ))}
           </nav>
 
-          {/* Search — live typeahead, immediately after the links */}
-          <div className="ml-1">
+          {/* Search — live typeahead, immediately after the links (desktop only; below md the
+              inline field is hidden and the slim bar uses the search icon-toggle on the right). */}
+          <div className="ml-1 max-md:hidden">
             <NavSearch searchQuery={searchQuery} setSearchQuery={setSearchQuery} onNavigate={onNavigate} />
           </div>
 
-          {/* Right cluster — bell, settings, user */}
+          {/* Right cluster — (mobile search) · bell · settings · user */}
           <div className="ml-auto flex items-center gap-3 shrink-0">
+            {/* Mobile search toggle — below md, reveals the full-width search row beneath the bar. */}
+            <button
+              onClick={() => { setMobileSearchOpen((v) => !v); closeAll(); }}
+              className="md:hidden flex items-center justify-center cursor-pointer"
+              style={{ minWidth: 44, minHeight: 44, background: "transparent", border: "none", padding: 4, color: burgundy }}
+              aria-label="Search"
+              aria-expanded={mobileSearchOpen}
+            >
+              <Search className="w-[18px] h-[18px]" />
+            </button>
+
             {/* Bell */}
             <div className="relative flex items-center">
               <button
                 onClick={() => { setShowBellDropdown(!showBellDropdown); setShowUserDropdown(false); }}
-                className="relative flex items-center justify-center cursor-pointer"
+                className="relative flex items-center justify-center cursor-pointer max-md:min-w-[44px] max-md:min-h-[44px]"
                 style={{ background: "transparent", border: "none", padding: 4, color: burgundy }}
                 title="Notifications"
               >
@@ -496,10 +509,11 @@ export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, 
               </AnimatePresence>
             </div>
 
-            {/* Settings gear — moved here from the old sidebar bottom */}
+            {/* Settings gear — moved here from the old sidebar bottom. Below md it is hidden; the
+                "you" menu carries Account settings, so the slim bar stays wordmark·search·bell·you. */}
             <button
               onClick={() => { onNavigate("account"); closeAll(); }}
-              className="flex items-center justify-center cursor-pointer"
+              className="flex items-center justify-center cursor-pointer max-md:hidden"
               style={{ background: "transparent", border: "none", padding: 4, color: burgundy }}
               title="Settings"
               aria-label="Settings"
@@ -511,7 +525,7 @@ export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, 
             <div className="relative flex items-center">
               <button
                 onClick={() => { setShowUserDropdown(!showUserDropdown); setShowBellDropdown(false); }}
-                className="flex items-center gap-2 cursor-pointer"
+                className="flex items-center gap-2 cursor-pointer max-md:min-h-[44px]"
                 style={{ background: "transparent", border: "none", padding: 2 }}
               >
                 <span
@@ -569,6 +583,13 @@ export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, 
                       <MenuItem onClick={() => { onNavigate("import"); setShowUserDropdown(false); }}>
                         <span className="flex items-center gap-1.5"><BookOpen className="w-3.5 h-3.5" style={{ color: burgundy }} /> Import CSV Data</span>
                       </MenuItem>
+                      {/* Help Centre — mobile-only: the slim bar drops the desktop gear/help affordances,
+                          so the "you" menu carries Help below md. Desktop menu stays identical. */}
+                      <div className="md:hidden">
+                        <MenuItem onClick={() => { onNavigate("help"); setShowUserDropdown(false); }}>
+                          <span className="flex items-center gap-1.5"><HelpCircle className="w-3.5 h-3.5" style={{ color: burgundy }} /> Help Centre</span>
+                        </MenuItem>
+                      </div>
                       <MenuDivider />
                       <MenuItem onClick={() => { logout(); setShowUserDropdown(false); }}>
                         <span className="flex items-center gap-1.5"><LogOut className="w-3.5 h-3.5" /> Log Out</span>
@@ -580,6 +601,14 @@ export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, 
             </div>
           </div>
         </div>
+
+        {/* Mobile search row — full-width field revealed below the slim bar by the search toggle.
+            Reuses the existing NavSearch (one search system), just presented full-width on mobile. */}
+        {mobileSearchOpen && (
+          <div className="md:hidden px-4 pb-3 pt-0.5">
+            <NavSearch variant="mobile" searchQuery={searchQuery} setSearchQuery={setSearchQuery} onNavigate={onNavigate} />
+          </div>
+        )}
       </header>
     </>
   );

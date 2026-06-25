@@ -33,6 +33,12 @@ interface NavSearchProps {
   searchQuery: string;
   setSearchQuery: (q: string) => void;
   onNavigate: (tab: string, subPageName?: string) => void;
+  /**
+   * "desktop" (default) keeps the original 200px pill, hidden below sm.
+   * "mobile" is the slim-bar presentation: full-width pill, always visible, autofocused — used by
+   * the top bar's mobile search toggle. The default preserves the desktop instance exactly.
+   */
+  variant?: "desktop" | "mobile";
 }
 
 const PINK = "#f8e7dc";
@@ -53,7 +59,8 @@ type Flat =
   | { kind: "agent"; agent: Agent }
   | { kind: "query"; query: Query; agent?: Agent; manuscriptTitle: string };
 
-export const NavSearch: React.FC<NavSearchProps> = ({ searchQuery, setSearchQuery, onNavigate }) => {
+export const NavSearch: React.FC<NavSearchProps> = ({ searchQuery, setSearchQuery, onNavigate, variant = "desktop" }) => {
+  const isMobile = variant === "mobile";
   const { agents, queries, manuscripts } = useScriptAllyDb();
   const [open, setOpen] = useState(false);
   const [highlight, setHighlight] = useState(0);
@@ -162,17 +169,18 @@ export const NavSearch: React.FC<NavSearchProps> = ({ searchQuery, setSearchQuer
   let idx = -1; // running index across the flattened list (agents then queries)
 
   return (
-    <div ref={wrapRef} className="relative max-sm:hidden" style={{ flexShrink: 0 }}>
+    <div ref={wrapRef} className={isMobile ? "relative w-full" : "relative max-sm:hidden"} style={{ flexShrink: 0 }}>
       {/* Search pill (parchment, as before) */}
       <div
         className="flex items-center gap-2"
-        style={{ background: "#ffffff", border: "0.5px solid #e0d5c8", borderRadius: 9, padding: "8px 12px", width: 200 }}
+        style={{ background: "#ffffff", border: "0.5px solid #e0d5c8", borderRadius: 9, padding: "8px 12px", width: isMobile ? "100%" : 200 }}
       >
         <Search className="w-[13px] h-[13px] shrink-0" style={{ color: labelColor }} />
         <input
           type="text"
           placeholder="Search…"
           value={searchQuery}
+          autoFocus={isMobile}
           onChange={(e) => { setSearchQuery(e.target.value); setOpen(e.target.value.trim().length > 0); }}
           onFocus={() => { if (term) setOpen(true); }}
           onKeyDown={onKeyDown}
@@ -191,8 +199,8 @@ export const NavSearch: React.FC<NavSearchProps> = ({ searchQuery, setSearchQuer
           role="listbox"
           className="absolute left-0 top-[calc(100%+8px)]"
           style={{
-            width: 340,
-            maxWidth: "90vw",
+            width: isMobile ? "100%" : 340,
+            maxWidth: isMobile ? "100%" : "90vw",
             background: parchment,
             borderRadius: 12,
             boxShadow: "0 1px 3px rgba(40,22,14,.10), 0 12px 30px rgba(40,22,14,.18)",

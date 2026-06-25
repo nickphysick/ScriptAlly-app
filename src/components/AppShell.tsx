@@ -14,6 +14,7 @@
  */
 import React from "react";
 import { Nav } from "./Nav";
+import { BottomTabBar } from "./BottomTabBar";
 import { kraft, burgundy, ghostButtonText, FONT_SANS } from "../lib/designTokens";
 
 const PINK = "#f8e7dc"; // soft-pink pill fill — mirrors the primary NavLink (inline, not Tailwind)
@@ -85,6 +86,9 @@ export const AppShell: React.FC<AppShellProps> = ({
         />
       </div>
     )}
-    <main>{children}</main>
+    {/* Below md the fixed bottom tab bar overlays the foot of the page, so reserve clearance
+        (~62px bar + safe-area) so the last card / list row can scroll fully clear of it. */}
+    <main className="pb-[76px] md:pb-0">{children}</main>
+    <BottomTabBar activeTab={activeTab} onNavigate={onNavigate} />
   </>
 );
