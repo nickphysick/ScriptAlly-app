@@ -537,7 +537,14 @@ export const QuerySlideInPanel: React.FC<QuerySlideInPanelProps> = ({
 
                     <div className="border-l-4 border-red-500 pl-3.5 py-2 bg-white rounded-lg border-t border-r border-b">
                       <p className="font-semibold text-xs text-stone-800">
-                        {activityToDelete.description}
+                        {/* Resolve the agent live by query.agentId (same treatment the timeline rows
+                            use) so the confirm reflects the current name, not a stale stored copy. */}
+                        {(() => {
+                          const ra = agent || extractAgentFromText(activityToDelete.description);
+                          return formatRichText(
+                            boldAgentAndAgencyInText(activityToDelete.description, ra?.name, ra?.agency)
+                          );
+                        })()}
                       </p>
                       <p className="text-stone-400 mt-1 text-[10px] font-mono">
                         {new Date(activityToDelete.date).toLocaleString("en-GB", {
