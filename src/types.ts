@@ -25,6 +25,19 @@ export interface User {
   journeyStage?: "starting" | "querying" | "exploring";
 }
 
+/**
+ * Smart Import entitlement usage — stored in the ADMIN-ONLY subdoc `users/{uid}/private/entitlement`,
+ * written ONLY by the smartImportMap function via the admin SDK. The client may read it (to derive
+ * entitlement state — see src/lib/smartImportEntitlement.ts) but can never write or delete it
+ * (firestore.rules: `allow read: if isOwner; allow write: if false`). It lives in a subcollection
+ * so it survives a delete-recreate of the user doc — making the free-once gate tamper-proof.
+ * Absent fields read as "not used".
+ */
+export interface SmartImportUsage {
+  smartImportFreeUsed?: boolean;        // lifetime free-once flag (Free tier)
+  smartImportLastUsedMonth?: string;    // "YYYY-MM" (UTC) of the most recent Pro import
+}
+
 export enum ManuscriptStatus {
   DRAFTING = "Drafting",
   REVISING = "Revising",

@@ -498,6 +498,15 @@ service cloud.firestore {
           incoming().diff(existing()).affectedKeys().hasOnly(['snoozeDays', 'dismissType', 'resurfaceDate'])
         );
       }
+
+      // ROUTE: private — server-only entitlement state (Smart Import usage). The owner may READ it,
+      // but NO client may write or delete it (write is admin-SDK only, which bypasses rules). Living
+      // in a subcollection means it survives a delete-recreate of the user doc — Firestore never
+      // cascade-deletes subcollections — so the free-once gate is genuinely tamper-proof.
+      match /private/{docId} {
+        allow read: if isOwner(userId);
+        allow write: if false;
+      }
     }
 
     // ROUTE: communityAgents (shared across all users)

@@ -306,6 +306,45 @@ describe('/users/{userId}', () => {
     );
   });
 
+  // ── Smart Import entitlement subdoc: users/{uid}/private/entitlement is owner-readable but
+  //    NO client can write or delete it (server/admin-SDK only). ──
+  it('owner can read their entitlement subdoc', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'private', 'entitlement'), { smartImportFreeUsed: true });
+    });
+    const db = aliceCtx().firestore();
+    await assertSucceeds(getDoc(doc(db, 'users', ALICE, 'private', 'entitlement')));
+  });
+
+  it('client cannot create the entitlement subdoc', async () => {
+    const db = aliceCtx().firestore();
+    await assertFails(setDoc(doc(db, 'users', ALICE, 'private', 'entitlement'), { smartImportFreeUsed: true }));
+  });
+
+  it('client cannot update the entitlement subdoc', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'private', 'entitlement'), { smartImportFreeUsed: true });
+    });
+    const db = aliceCtx().firestore();
+    await assertFails(updateDoc(doc(db, 'users', ALICE, 'private', 'entitlement'), { smartImportFreeUsed: false }));
+  });
+
+  it('client cannot delete the entitlement subdoc (survives a user-doc delete-recreate)', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'private', 'entitlement'), { smartImportFreeUsed: true });
+    });
+    const db = aliceCtx().firestore();
+    await assertFails(deleteDoc(doc(db, 'users', ALICE, 'private', 'entitlement')));
+  });
+
+  it('blocks cross-user read of the entitlement subdoc', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'private', 'entitlement'), { smartImportFreeUsed: true });
+    });
+    const db = bobCtx().firestore();
+    await assertFails(getDoc(doc(db, 'users', ALICE, 'private', 'entitlement')));
+  });
+
   it('blocks cross-user read', async () => {
     await asAdmin(async (ctx) => {
       await setDoc(doc(ctx.firestore(), 'users', ALICE), validUser(ALICE));

@@ -14,6 +14,7 @@ import { useScriptAllyDb } from "../../lib/db";
 import { QueryStatus } from "../../types";
 import { SmartImportResult } from "../../types/smartImport";
 import { runSmartImport, validateSmartImport, ValidatedImport, sampleRawRecords, RawRecordSample } from "../../lib/smartImport";
+import { useSmartImportEntitlement } from "../../lib/useSmartImportEntitlement";
 import { agentAgencyLine } from "../../lib/agentDisplay";
 import { commitSmartImport, CommitOutcome } from "../../lib/smartImportCommit";
 import { Form11Card, SelectRow, BookMotif, InboxMotif, FONT_SANS, FONT_MONO } from "./chrome";
@@ -49,11 +50,16 @@ export interface BranchBProps {
   onOpenImportDesk: () => void;
   /** Import committed — parent finishes onboarding to the dashboard. */
   onImportComplete: (outcome: CommitOutcome) => void;
+  /** "Upgrade to Pro" from the blocked (free-used) state — finish onboarding into the Plans page. */
+  onUpgrade?: () => void;
   /** Surfaced save/limit error from the parent (e.g. the Free-tier manuscript cap). */
   error?: string | null;
 }
 
-type B3Screen = "book" | "pipeline" | "reading" | "tidying" | "overview" | "review" | "fallback" | "importing" | "done";
+type B3Screen = "book" | "pipeline" | "confirm" | "blocked" | "reading" | "tidying" | "overview" | "review" | "fallback" | "importing" | "done";
+
+/** A blocked Smart Import attempt — the structured reason the gate (or the pre-check) surfaced. */
+type Blocked = { reason: "free_used" | "pro_month_used"; nextAvailable?: string };
 
 const UploadIcon = (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
@@ -104,9 +110,10 @@ const EscapeHatch: React.FC<{ onOpen: () => void }> = ({ onOpen }) => (
 // it hands to handleImport — see SmartImportReview + smartImportReviewModel.
 
 export const BranchB: React.FC<BranchBProps> = ({
-  onSkip, onExit, onSaveBook, initialBook, onEnsureManuscript, defaultImport, onAddByHand, onOpenImportDesk, onImportComplete, error,
+  onSkip, onExit, onSaveBook, initialBook, onEnsureManuscript, defaultImport, onAddByHand, onOpenImportDesk, onImportComplete, onUpgrade, error,
 }) => {
   const { currentUser, agents, addAgent, addQuery } = useScriptAllyDb();
+  const entitlement = useSmartImportEntitlement();
 
   const [screen, setScreen] = useState<B3Screen>("book");
   // Seed from any held draft so Back-to-welcome-then-forward re-fills the book step.
@@ -126,11 +133,26 @@ export const BranchB: React.FC<BranchBProps> = ({
   // Drives the loader's completion beat: flipped true only after a genuine success (commit resolved
   // with rows imported AND the 5s floor elapsed). The loader then plays its finish and routes on.
   const [importComplete, setImportComplete] = useState(false);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [blocked, setBlocked] = useState<Blocked | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const shownError = error || fieldError;
 
-  const handleFile = async (file: File) => {
+  // File chosen → gate it on the client first. If already used, go straight to the blocked screen
+  // (no wasted call); otherwise hold the file and ask for an explicit confirm before spending it.
+  // The server re-checks regardless — this is UX, not the enforcement.
+  const pickFile = (file: File) => {
+    if (!entitlement.allowed) {
+      setBlocked({ reason: entitlement.reason as Blocked["reason"], nextAvailable: entitlement.nextAvailable });
+      setScreen("blocked");
+      return;
+    }
+    setPendingFile(file);
+    setScreen("confirm");
+  };
+
+  const runMapping = async (file: File) => {
     setFileName(file.name);
     setRawSample([]); setExtractComplete(false); setValidated(null);
     setScreen("reading"); // the scatter-settle loader takes over from here
@@ -141,7 +163,16 @@ export const BranchB: React.FC<BranchBProps> = ({
       const result: SmartImportResult = await runSmartImport(file);
       setValidated(validateSmartImport(result));
       setExtractComplete(true); // loader snaps the cards in, crystallises them, then routes to Overview
-    } catch (e) {
+    } catch (e: any) {
+      // A blocked entitlement comes back as a structured HttpsError — branch on details.reason so the
+      // UI shows the right thing, not a raw error. (Covers a client/server race: client thought it was
+      // allowed but the server had already consumed it.)
+      const reason = e?.details?.reason;
+      if (reason === "free_used" || reason === "pro_month_used") {
+        setBlocked({ reason, nextAvailable: e?.details?.nextAvailable });
+        setScreen("blocked");
+        return;
+      }
       console.error("Smart Import mapping failed:", e);
       setScreen("fallback"); // graceful fallback — never dead-end onboarding
     }
@@ -238,7 +269,7 @@ export const BranchB: React.FC<BranchBProps> = ({
           type="file"
           accept=".csv,.xlsx,.xls"
           style={{ display: "none" }}
-          onChange={(e) => { const f = e.target.files?.[0]; if (f) void handleFile(f); e.target.value = ""; }}
+          onChange={(e) => { const f = e.target.files?.[0]; if (f) pickFile(f); e.target.value = ""; }}
         />
 
         {/* The hero: a large, inviting upload affordance — clicking it opens the picker directly. */}
@@ -281,6 +312,74 @@ export const BranchB: React.FC<BranchBProps> = ({
           onClick={() => setImportOption("byhand")}
         />
         <EscapeHatch onOpen={onOpenImportDesk} />
+      </Form11Card>
+    );
+  }
+
+  // ── Confirm — an explicit "this spends your Smart Import" beat so it's never burned by accident.
+  //    Wording is free vs Pro-monthly, driven by the entitlement helper. (Minimal by design — the
+  //    polished credit UI is a later prompt; this just guarantees correct behaviour.) ─
+  if (screen === "confirm") {
+    const isPro = entitlement.tier === "pro";
+    return (
+      <Form11Card
+        dotIndex={2}
+        onSkip={onSkip}
+        pre="Your pipeline"
+        name="This uses your Smart Import"
+        sub={isPro ? "One per month on Pro" : "Your one free Smart Import"}
+        motif={<InboxMotif />}
+        onBack={() => { setPendingFile(null); setScreen("pipeline"); }}
+        primaryLabel="Read my file →"
+        primaryFilled
+        onPrimary={() => { if (pendingFile) void runMapping(pendingFile); }}
+      >
+        <p style={{ fontFamily: FONT_SANS, fontSize: 13, color: "#3a1c14", lineHeight: 1.6, margin: "0 0 10px" }}>
+          {fileName ? <>We'll read <strong>{fileName}</strong> and show you everything </> : <>We'll read your file and show you everything </>}
+          before anything is saved — you confirm what lands.
+        </p>
+        <p style={{ fontFamily: FONT_SANS, fontSize: 12, color: "#9c8878", lineHeight: 1.55, margin: 0 }}>
+          {isPro
+            ? "This is this month's Smart Import. Your next one is available next month."
+            : "This is your one free Smart Import. Upgrade to Pro later for one every month."}
+        </p>
+      </Form11Card>
+    );
+  }
+
+  // ── Blocked — the entitlement is spent. free_used → upgrade path; pro_month_used → next-available
+  //    date. Never a raw error; always a way forward (add by hand). ─
+  if (screen === "blocked" && blocked) {
+    const isFreeUsed = blocked.reason === "free_used";
+    const nextLabel = blocked.nextAvailable
+      ? new Date(`${blocked.nextAvailable}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })
+      : "next month";
+    return (
+      <Form11Card
+        dotIndex={2}
+        onSkip={onSkip}
+        pre="Your pipeline"
+        name={isFreeUsed ? "Smart Import already used" : "Next Smart Import next month"}
+        sub={isFreeUsed ? "Upgrade for one every month" : `Available ${nextLabel}`}
+        motif={<InboxMotif />}
+        onBack={() => { setBlocked(null); setScreen("pipeline"); }}
+        primaryLabel={isFreeUsed ? "Upgrade to Pro →" : "Add them by hand →"}
+        primaryFilled={isFreeUsed}
+        onPrimary={() => (isFreeUsed ? (onUpgrade ? onUpgrade() : onAddByHand()) : onAddByHand())}
+      >
+        <p style={{ fontFamily: FONT_SANS, fontSize: 13, color: "#3a1c14", lineHeight: 1.6, margin: "0 0 12px" }}>
+          {isFreeUsed
+            ? "You've used your free Smart Import. Upgrade to Pro for a Smart Import every month — or add your agents by hand for now."
+            : <>You've used this month's Smart Import. Your next one is available on <strong>{nextLabel}</strong>. You can add agents by hand in the meantime.</>}
+        </p>
+        {isFreeUsed && (
+          <button
+            onClick={onAddByHand}
+            style={{ fontFamily: FONT_MONO, fontSize: 11, letterSpacing: "0.04em", color: "#9c8878", background: "none", border: "none", borderBottom: "0.5px solid #cdbdae", cursor: "pointer", padding: 0 }}
+          >
+            Add them by hand instead
+          </button>
+        )}
       </Form11Card>
     );
   }

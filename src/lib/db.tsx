@@ -7,6 +7,7 @@ import React, { createContext, useContext, useState, useEffect, useRef } from "r
 import {
   User,
   UserPlan,
+  SmartImportUsage,
   Manuscript,
   ManuscriptStatus,
   ManuscriptVersion,
@@ -141,6 +142,7 @@ function formatHumanDate(dateInput: string | Date | undefined): string {
 
 interface DbContextType {
   currentUser: User | null;
+  smartImportUsage: SmartImportUsage | null;
   authReady: boolean;
   collectionsReady: boolean;
   manuscripts: Manuscript[];
@@ -247,6 +249,10 @@ const DbContext = createContext<DbContextType | undefined>(undefined);
 
 export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  // Smart Import entitlement usage — read-only mirror of the admin-only subdoc
+  // users/{uid}/private/entitlement (the client never writes it). null === not yet loaded / absent,
+  // which the entitlement helper reads as "not used".
+  const [smartImportUsage, setSmartImportUsage] = useState<SmartImportUsage | null>(null);
   const [manuscripts, setManuscripts] = useState<Manuscript[]>([]);
   const [versions, setVersions] = useState<ManuscriptVersion[]>([]);
   const [packages, setPackages] = useState<SubmissionPackage[]>([]);
@@ -308,6 +314,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   // Synchronous database tracking in active real-time subscriber model
   useEffect(() => {
     let unsubUser: () => void = () => {};
+    let unsubEntitlement: () => void = () => {};
     let unsubManuscripts: () => void = () => {};
     let unsubVersions: () => void = () => {};
     let unsubPackages: () => void = () => {};
@@ -322,12 +329,14 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       if (!firebaseUser) {
         // No authenticated user — show the Auth screen
         setCurrentUser(null);
+        setSmartImportUsage(null);
         setAuthReady(true);          // auth resolved: definitively logged out
         setCollectionsReady(false);  // next sign-in starts in the loading state
         try { localStorage.removeItem("scriptally_was_authed"); } catch {}
 
         // Clean up any active listeners
         unsubUser();
+        unsubEntitlement();
         unsubManuscripts();
         unsubVersions();
         unsubPackages();
@@ -391,6 +400,15 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           }
         }, (error) => {
           handleFirestoreError(error, OperationType.GET, `users/${uid}`);
+        });
+
+        // Smart Import entitlement usage — read-only mirror of the admin-only subdoc. Absent doc
+        // (never imported) → null, which reads as "not used". A read error must never hang anything;
+        // the server gate is the real enforcement, so we just log and leave usage null.
+        unsubEntitlement = onSnapshot(doc(db, "users", uid, "private", "entitlement"), (snap) => {
+          setSmartImportUsage(snap.exists() ? (snap.data() as SmartImportUsage) : null);
+        }, (error) => {
+          handleFirestoreError(error, OperationType.GET, `users/${uid}/private/entitlement`);
         });
 
         // Manuscripts reader snap
@@ -514,6 +532,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     return () => {
       unsubAuth();
       unsubUser();
+      unsubEntitlement();
       unsubManuscripts();
       unsubVersions();
       unsubPackages();
@@ -2389,6 +2408,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     <DbContext.Provider
       value={{
         currentUser,
+        smartImportUsage,
         authReady,
         collectionsReady,
         manuscripts,

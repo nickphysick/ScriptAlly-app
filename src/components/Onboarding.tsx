@@ -1205,6 +1205,12 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                 await finishOnboarding();
               }}
               onImportComplete={() => void finishOnboarding()}
+              onUpgrade={() => {
+                // Free import spent → leave onboarding into the Plans page via the existing
+                // post-onboarding-tab hatch (App reads + clears it on completion).
+                sessionStorage.setItem("scriptally_post_onboarding_tab", "plans");
+                void finishOnboarding();
+              }}
               error={branchError}
             />
           </CenterWrap>
