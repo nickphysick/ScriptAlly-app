@@ -69,6 +69,12 @@ describe("sanitizeAgentPatch", () => {
     expect(sanitizeAgentPatch({ materialsWanted: ["Query Letter"] }).errors).toEqual([]);
   });
 
+  it("passes private notes through (string field)", () => {
+    const r = sanitizeAgentPatch({ notes: "Met at the 2025 festival." });
+    expect(r.errors).toEqual([]);
+    expect(r.fields.notes).toBe("Met at the 2025 festival.");
+  });
+
   it("passes a full valid patch through cleanly", () => {
     const r = sanitizeAgentPatch({
       name: "Sarah Latham", agency: "Curtis Brown", email: "s@cb.com", website: "",
