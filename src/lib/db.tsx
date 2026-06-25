@@ -71,6 +71,7 @@ import { buildNudgeWrites } from "./logNudge";
 import { commitAgentEdits, AgentEditPatch, AgentExtraWrite, SaveAgentResult } from "./saveAgentEdits";
 import { computeAgentDeadlineWrites } from "./computeAgentDeadlineWrites";
 import { computeResponseDeadline } from "./responseDeadline";
+import { agentDataQualityNeeds } from "./agentDataQuality";
 
 // Connection validation test on boot as requested by skill
 async function testConnection() {
@@ -700,12 +701,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         }
       }
 
-      const hasNoMaterials = !a.materialsWanted || 
-        (Array.isArray(a.materialsWanted) 
-          ? a.materialsWanted.length === 0 
-          : !Object.values(a.materialsWanted).some((v: any) => v === true || v?.selected === true));
-
-      if (a.mswlNotes.trim().length === 0 || hasNoMaterials) {
+      // Shared predicate — the SAME per-field list drives the drawer's needs-highlight + clearing.
+      if (agentDataQualityNeeds(a).length > 0) {
         calculatedTasks.push({
           id: `task-dq-${a.id}`,
           priority: "suggested",
