@@ -38,7 +38,10 @@ import { REVIEW_FIXTURE, REVIEW_FIXTURE_DUPES } from "./components/onboarding/Sm
 import { ImportingLoader } from "./components/onboarding/ImportingLoader";
 // TEMP: scatter-settle extraction loader dev preview (#/scatter-loader) — remove after sign-off.
 import { ScatterSettleLoader, LoaderCard } from "./components/onboarding/ScatterSettleLoader";
-import { QueryStatus } from "./types";
+import { QueryStatus, SubmissionStatus, SubmissionMethod } from "./types";
+// TEMP: Form11Drawer review harness (#/drawer-lab) — renders the Edit Agent (and, later, Edit Query)
+// drawers over a mock record so the shared shell can be eyeballed without signing in. DEV only.
+import { EditAgentDrawer } from "./components/EditAgentDrawer";
 // Dev review surface for the notes pieces (PostIt / quick-add / editor) — #/notes-lab, DEV only.
 import { NotesLab } from "./components/notes/NotesLab";
 import { Palette, X, Check } from "lucide-react";
@@ -76,6 +79,33 @@ const ScatterLoaderDevHarness: React.FC = () => {
   }, []);
   const cards: LoaderCard[] = SAMPLE.map((s) => complete ? { messy: s.messy, name: s.name, agency: s.agency, date: s.date, status: s.status } : { messy: s.messy });
   return <ScatterSettleLoader cards={cards} complete={complete} total={28} onProceed={() => {}} userName="Nick" />;
+};
+
+/** TEMP dev harness for the shared Form11Drawer (#/drawer-lab): renders EditAgentDrawer over a mock
+ *  agent so the extracted shell can be reviewed without signing in. Sits inside DbProvider, so the
+ *  drawer's useScriptAllyDb works (queries/manuscripts come back empty when signed out). */
+const DrawerLab: React.FC = () => {
+  const [open, setOpen] = useState(true);
+  const mockAgent = {
+    id: "lab-agent", userId: "lab", name: "Eleanor Hart", agency: "Hart & Quill Literary",
+    email: "eleanor@hartquill.co.uk", website: "hartquill.co.uk", country: "United Kingdom", city: "London",
+    socials: [{ platform: "X / Twitter", handle: "@eleanorhart" }],
+    submissionStatus: SubmissionStatus.OPEN, submissionMethod: SubmissionMethod.EMAIL,
+    noResponseMeansNo: false, responseTimeWeeks: 8, starRating: 4,
+    genres: ["Literary Fiction", "Upmarket Fiction"],
+    materialsWanted: ["Query Letter", "Synopsis", "First 50 pages"],
+    mswlNotes: "Voice-driven literary fiction with a strong sense of place.",
+    notes: "Met at a conference; very warm in person.",
+    dateAdded: new Date().toISOString(), lastCheckedDate: new Date().toISOString(),
+  } as any;
+  return (
+    <div style={{ minHeight: "100vh", background: "#F5F0EA", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      {!open && (
+        <button onClick={() => setOpen(true)} style={{ padding: "10px 18px", borderRadius: 8, border: "1px solid #e8c8bc", background: "#f5e2da", color: "#7c3a2a", fontFamily: "'JetBrains Mono', monospace", fontSize: 11, textTransform: "uppercase", cursor: "pointer" }}>Reopen drawer</button>
+      )}
+      <EditAgentDrawer agent={mockAgent} isOpen={open} onClose={() => setOpen(false)} />
+    </div>
+  );
 };
 
 /** Dev review surface for the canonical StatusDot (no router — reached via #/status-dots). */
@@ -183,6 +213,10 @@ function AppContent() {
   // Dev-only notes review surface (PostIt / quick-add / editor) — local state, no persistence.
   if (hash === "#/notes-lab" && import.meta.env.DEV) {
     return <NotesLab />;
+  }
+  // Dev-only Form11Drawer review surface (Edit Agent over a mock record). DEV only.
+  if (hash === "#/drawer-lab" && import.meta.env.DEV) {
+    return <DrawerLab />;
   }
 
   // Boot: while Firebase Auth is still resolving the session, show a neutral splash — never a

@@ -23,7 +23,6 @@
  * agent's queries inside that funnel (Prompt 3). Critical colours are inline (Tailwind drift trap).
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import Lottie from "lottie-react";
 import { useScriptAllyDb } from "../lib/db";
 import { Agent, AgentSocial, Query, QueryStatus, SubmissionStatus, SubmissionMethod } from "../types";
 import { BrandDropdown, WeekSlider, GenreCombobox, FitStars, SegmentedToggle } from "./forms";
@@ -35,7 +34,10 @@ import {
 } from "../lib/agentMaterials";
 import { AGENT_GENRES, SOCIAL_PLATFORMS, METHOD_OPTIONS, COUNTRIES } from "../lib/agentOptions";
 import { agentDataQualityNeeds, AgentDataNeed } from "../lib/agentDataQuality";
-import editPencil from "../assets/edit-pencil-animation.json";
+import {
+  Form11Drawer, Form11DrawerHandle, Form11Footer, Form11HeaderAvatar, RestingField, Form11Select,
+  BlockNote, ConfirmGuard, AlertIcon, OkIcon, prefersReducedMotion,
+} from "./Form11Drawer";
 
 const C = {
   parchment: "#fdfaf5", field: "#ffffff", fieldBorder: "#e0d5c8",
@@ -114,9 +116,6 @@ export interface EditAgentDrawerProps {
   onSavedToast?: (msg: string) => void;
 }
 
-const prefersReducedMotion = () =>
-  typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
 /** Per-deficiency copy for the in-focus journey + banner. `ref` keys the field for spotlight/scroll. */
 const NEED_INFO: Record<AgentDataNeed, { label: string; why: string; where: string }> = {
   responseTime: {
@@ -146,8 +145,7 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [agencyConfirmed, setAgencyConfirmed] = useState(false);
-  const [closing, setClosing] = useState(false);
-  const editBuf = useRef<string>("");
+  const drawerRef = useRef<Form11DrawerHandle>(null);
 
   // In-focus journey (task-routed opens). journeyFields = the deficiencies FROZEN at open (so the
   // step list doesn't shift as they're filled); journeyStep: -1 intro, 0..N-1 field steps, N success,
@@ -190,30 +188,7 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
     return () => clearTimeout(t);
   }, [currentField, journeyStep, S.weeks, S.materials, S.mswl]);
 
-  // Reset the slide-back only on (re)open — NOT on the post-save agent reseed (the host keeps the
-  // drawer mounted with isOpen=true through the close), which would otherwise cancel it mid-flight.
-  useEffect(() => { setClosing(false); }, [isOpen]);
-
-  // Lock the background at its current scroll position while open; restore (no jump) on close.
-  useEffect(() => {
-    if (!isOpen || !lockScroll) return;
-    const scrollY = window.scrollY;
-    const b = document.body;
-    const prev = { position: b.style.position, top: b.style.top, left: b.style.left, right: b.style.right, width: b.style.width };
-    b.style.position = "fixed"; b.style.top = `-${scrollY}px`; b.style.left = "0"; b.style.right = "0"; b.style.width = "100%";
-    return () => {
-      b.style.position = prev.position; b.style.top = prev.top; b.style.left = prev.left; b.style.right = prev.right; b.style.width = prev.width;
-      window.scrollTo(0, scrollY);
-    };
-  }, [isOpen, lockScroll]);
-
-  // Slide-back exit: every close path plays the reverse of the entrance, then unmounts on
-  // animationend (fallback timeout guards). Reduced-motion → instant (finishClose calls onClose).
-  useEffect(() => {
-    if (!closing) return;
-    const t = setTimeout(onClose, 250); // matches the ~0.18s fast exit (+ a little slack)
-    return () => clearTimeout(t);
-  }, [closing, onClose]);
+  // Slide-back, scroll-lock and Escape are now owned by Form11Drawer (the shared shell).
 
   // ── derived ──────────────────────────────────────────────────────────────────
   const agentQueries = queries.filter((q) => q.agentId === agent.id);
@@ -262,27 +237,10 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
   };
 
   // ── close / park / discard ─────────────────────────────────────────────────────
-  // park=true (outside-click / X / Esc) stashes an unsaved draft; park=false (save-complete) clears
-  // it. Triggers the slide-back; the deferred unmount happens on animationend / fallback timeout.
-  const finishClose = (park: boolean) => {
-    if (park && anyDirty) parkedDrafts.set(agent.id, S); else parkedDrafts.delete(agent.id);
-    if (prefersReducedMotion()) { onClose(); return; }
-    setClosing(true);
-  };
-  const closeRef = useRef<() => void>(() => {});
-  closeRef.current = () => finishClose(true);
-  useEffect(() => {
-    // Capture-phase + stopImmediatePropagation so the top overlay owns Escape (works when opened
-    // over a FormShell — the Log-a-Query stub path). Esc parks like an outside-click; an inline edit
-    // keeps its own Esc.
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape" || !isOpen || editing) return;
-      e.stopImmediatePropagation();
-      closeRef.current();
-    };
-    if (isOpen) window.addEventListener("keydown", onKey, true);
-    return () => window.removeEventListener("keydown", onKey, true);
-  }, [isOpen, editing]);
+  // onPark (outside-click / X / Esc, routed through Form11Drawer) stashes an unsaved draft keyed by
+  // agentId; reopening rehydrates it. A save clears it explicitly before the programmatic close.
+  const parkDraft = () => { if (anyDirty) parkedDrafts.set(agent.id, S); else parkedDrafts.delete(agent.id); };
+  const requestClose = () => drawerRef.current?.close(true);
 
   if (!isOpen) return null;
 
@@ -329,7 +287,7 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
     setSaved(true);
     onSavedToast?.("Agent updated");
     // Show the ✓ briefly, then slide back into the drawer (no park — it's saved).
-    setTimeout(() => finishClose(false), 600);
+    setTimeout(() => { parkedDrafts.delete(agent.id); drawerRef.current?.close(false); }, 600);
   };
 
   // ── small presentational helpers ──────────────────────────────────────────────
@@ -345,52 +303,37 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
     </div>
   );
 
-  // Click-to-edit TEXT field — resting bordered affordance; Enter commits, Shift+Enter newline, Esc reverts.
+  // Click-to-edit TEXT field — the shared RestingField + the agent's err-undo + agency-confirm notes.
   const TextField = ({ field, value, placeholder, multiline, quoted }: {
     field: keyof Draft; value: string; placeholder: string; multiline?: boolean; quoted?: boolean;
   }) => {
-    const isEditing = editing === field;
     const err = liveErrors[field as string];
-    const empty = value.trim() === "";
-    const display = empty ? (field === "name" ? "No name" : placeholder) : (quoted ? `“${value}”` : value);
-    if (isEditing) {
-      const common = {
-        autoFocus: true, defaultValue: value, placeholder,
-        onFocus: () => { editBuf.current = value; },
-        onBlur: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => { set(field, e.target.value as Draft[typeof field]); setEditing(null); },
-        className: `ea-inp${err ? " bad" : ""}`,
-        style: multiline ? { minHeight: 54, lineHeight: 1.45, resize: "vertical" as const, fontStyle: quoted ? ("italic" as const) : undefined } : undefined,
-      };
-      return multiline ? (
-        <textarea {...common} onKeyDown={(e) => {
-          if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); (e.target as HTMLTextAreaElement).blur(); }
-          else if (e.key === "Escape") { (e.target as HTMLTextAreaElement).value = editBuf.current; (e.target as HTMLTextAreaElement).blur(); }
-        }} />
-      ) : (
-        <input {...common} onKeyDown={(e) => {
-          if (e.key === "Enter") { e.preventDefault(); (e.target as HTMLInputElement).blur(); }
-          else if (e.key === "Escape") { (e.target as HTMLInputElement).value = editBuf.current; (e.target as HTMLInputElement).blur(); }
-        }} />
-      );
-    }
     return (
       <>
-        <div className="ea-editable" tabIndex={0} role="button"
-          onClick={() => setEditing(field as string)}
-          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setEditing(field as string); } }}>
-          <span className={`ea-fval${multiline || quoted ? " wrap" : ""}${empty ? " ph" : ""}${err ? " errval" : ""}`} style={{ fontStyle: quoted && !empty ? "italic" : undefined }}>{display}</span>
-          <span className="ea-hint"><PencilGlyph /></span>
-        </div>
-        {err && <ErrNote msg={err} onUndo={() => { set(field, orig[field] as Draft[typeof field]); setEditing(null); }} undoLabel={`Undo — keep “${String(orig[field]) || "blank"}”`} />}
+        <RestingField
+          value={value}
+          placeholder={placeholder}
+          emptyDisplay={field === "name" ? "No name" : placeholder}
+          multiline={multiline}
+          quoted={quoted}
+          error={!!err}
+          isEditing={editing === field}
+          onStartEdit={() => setEditing(field as string)}
+          onEndEdit={() => setEditing(null)}
+          onCommit={(v) => set(field, v as Draft[typeof field])}
+        />
+        {err && <BlockNote msg={err} onUndo={() => { set(field, orig[field] as Draft[typeof field]); setEditing(null); }} undoLabel={`Undo — keep “${String(orig[field]) || "blank"}”`} />}
         {field === "agency" && needAgencyConfirm && (
-          <ConfirmNote
-            name={firstName(S.name)}
+          <ConfirmGuard
+            message={<>Removing the agency means <b>{firstName(S.name)}</b> will be identified by its name alone.</>}
+            confirmLabel="Remove anyway"
+            keepLabel="Keep agency"
             onConfirm={() => setAgencyConfirmed(true)}
             onKeep={() => { set("agency", orig.agency); setEditing(null); }}
           />
         )}
         {field === "agency" && agencyRemoved && agencyConfirmed && (
-          <div className="ea-confirm done"><OkIcon /><span>Agency removed — this agent will show by name alone.</span></div>
+          <div className="f11-confirm done"><OkIcon /><span>Agency removed — this agent will show by name alone.</span></div>
         )}
       </>
     );
@@ -406,33 +349,39 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
   return (
     <>
       <EditAgentStyles />
-      <div onClick={() => finishClose(true)} style={{ position: "fixed", inset: 0, background: "rgba(58,28,20,0.18)", zIndex: 1000 }} />
-      <div className={`ea-slide${closing ? " ea-closing" : ""}`} style={{ position: "fixed", top: 0, right: 0, height: "100vh", zIndex: 1001, display: "flex", alignItems: "center", padding: "0 24px", boxSizing: "border-box" }}>
-        <div style={{ position: "relative" }} onAnimationEnd={() => { if (closing) onClose(); }}>
-          <div style={{ position: "absolute", top: 12, left: -21, width: 24, height: 92, zIndex: 3, background: C.parchment, borderRadius: "8px 0 0 8px", boxShadow: "-3px 3px 7px rgba(58,28,20,0.10)", display: "flex", alignItems: "center", justifyContent: "center", paddingRight: 4 }}>
-            <span style={{ writingMode: "vertical-rl", transform: "rotate(180deg)", fontFamily: MONO, fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: "#a89a8a", fontWeight: 500 }}>editing</span>
+      <Form11Drawer
+        ref={drawerRef}
+        isOpen={isOpen}
+        onClose={onClose}
+        onPark={parkDraft}
+        lockScroll={lockScroll}
+        suppressEsc={!!editing}
+        bodyRef={bodyRef}
+        bodyClassName={journeyActive ? "touring" : ""}
+        header={
+          <div style={{ background: `linear-gradient(135deg,${C.sage1},${C.sage2})`, padding: "15px 20px 15px 24px", display: "flex", alignItems: "flex-start", gap: 12, borderBottom: "1px solid rgba(124,58,42,0.12)", position: "relative", flexShrink: 0 }}>
+            <Form11HeaderAvatar />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontFamily: MONO, fontSize: 8, letterSpacing: "0.1em", textTransform: "uppercase", color: C.darkSage, marginBottom: 3 }}>Editing agent</div>
+              <h2 style={{ fontFamily: SERIF, fontSize: 18, color: "#2e3a2c", margin: 0, lineHeight: 1.1 }}>{S.name.trim() || "—"}</h2>
+              <div style={{ fontSize: 11, color: C.sub, marginTop: 2 }}>{S.agency.trim() || "—"}</div>
+            </div>
+            <div role="button" aria-label="Close" onClick={requestClose} style={{ position: "absolute", top: 13, right: 15, width: 22, height: 22, borderRadius: "50%", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: C.sub }}>
+              <svg viewBox="0 0 16 16" fill="none" width={16} height={16}><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" /></svg>
+            </div>
           </div>
-
-          <div style={{ width: 460, maxWidth: "calc(100vw - 60px)", maxHeight: "calc(100vh - 64px)", background: C.parchment, padding: 7, borderRadius: 14, boxShadow: "0 22px 60px rgba(58,28,20,0.28)", display: "flex" }}>
-            <div style={{ flex: 1, border: `1px solid ${C.burgundy}`, borderRadius: 10, overflow: "hidden", display: "flex", flexDirection: "column", minWidth: 0, position: "relative" }}>
-
-              {/* sage band */}
-              <div style={{ background: `linear-gradient(135deg,${C.sage1},${C.sage2})`, padding: "15px 20px 15px 24px", display: "flex", alignItems: "flex-start", gap: 12, borderBottom: "1px solid rgba(124,58,42,0.12)", position: "relative", flexShrink: 0 }}>
-                <div style={{ width: 38, height: 38, borderRadius: "50%", background: C.parchment, border: "1px solid rgba(124,58,42,0.25)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <Lottie animationData={editPencil} loop autoplay style={{ width: 30, height: 30 }} />
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontFamily: MONO, fontSize: 8, letterSpacing: "0.1em", textTransform: "uppercase", color: C.darkSage, marginBottom: 3 }}>Editing agent</div>
-                  <h2 style={{ fontFamily: SERIF, fontSize: 18, color: "#2e3a2c", margin: 0, lineHeight: 1.1 }}>{S.name.trim() || "—"}</h2>
-                  <div style={{ fontSize: 11, color: C.sub, marginTop: 2 }}>{S.agency.trim() || "—"}</div>
-                </div>
-                <div role="button" aria-label="Close" onClick={() => finishClose(true)} style={{ position: "absolute", top: 13, right: 15, width: 22, height: 22, borderRadius: "50%", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: C.sub }}>
-                  <svg viewBox="0 0 16 16" fill="none" width={16} height={16}><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" /></svg>
-                </div>
-              </div>
-
-              {/* scrolling body */}
-              <div ref={bodyRef} className={`ea-body${journeyActive ? " touring" : ""}`} style={{ position: "relative", flex: 1, overflowY: "auto", padding: "16px 20px 20px" }}>
+        }
+        footer={
+          <Form11Footer
+            statusText={footerText}
+            tone={blocked ? "blocked" : anyDirty ? "dirty" : "idle"}
+            onDiscard={discardAll}
+            onSave={handleSave}
+            saveDisabled={!anyDirty || blocked}
+            saving={saving}
+          />
+        }
+      >
                 {/* In-focus journey (intro → one field at a time → success), then a calm banner. */}
                 {journeyStep === -1 && (
                   <div className="ea-jcard">
@@ -568,24 +517,7 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
                 )}
                 {/* Scroll room so the active field can sit near the top and the floating card fits beneath. */}
                 {journeyActive && <div aria-hidden="true" style={{ height: 260 }} />}
-              </div>
-
-              {/* footer */}
-              <div style={{ flexShrink: 0, borderTop: "1px solid #ece2d6", background: C.parchment, padding: "13px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-                <div style={{ fontFamily: MONO, fontSize: 8.5, letterSpacing: "0.05em", textTransform: "uppercase", color: blocked ? C.err : anyDirty ? C.burgundy : "#bcae9e", flex: 1, minWidth: 0 }}>{footerText}</div>
-                <span role="button" className="ea-discard" onClick={discardAll}
-                  style={{ fontFamily: MONO, fontSize: 10, letterSpacing: "0.05em", textTransform: "uppercase", color: "#a89a8a", cursor: "pointer", padding: "9px 14px", borderRadius: 8 }}>Discard</span>
-                <button disabled={!anyDirty || blocked || saving} onClick={handleSave}
-                  style={{
-                    background: !anyDirty || blocked ? "#efe6da" : C.pink, border: `1px solid ${!anyDirty || blocked ? "#efe6da" : C.pinkBorder}`,
-                    color: !anyDirty || blocked ? "#bcae9e" : C.burgundy, fontFamily: MONO, fontSize: 10, letterSpacing: "0.06em",
-                    textTransform: "uppercase", padding: "9px 18px", borderRadius: 8, cursor: !anyDirty || blocked || saving ? "not-allowed" : "pointer", whiteSpace: "nowrap",
-                  }}>{saving ? "Saving…" : "Save changes"}</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      </Form11Drawer>
     </>
   );
 };
@@ -607,17 +539,10 @@ const NeedWrap: React.FC<{ ring: "" | "pulse" | "done" | "spotlight"; innerRef?:
   (ring || innerRef) ? <div ref={innerRef} className={ring ? `ea-need ea-need-${ring}` : undefined}>{children}</div> : <>{children}</>;
 
 // ── one-click styled native select (method / response policy / country) ──────────
-// Always visible, opens on a single click (no reveal indirection), commits on change. Styled to
-// read like the resting click-to-edit fields. An empty value shows the muted placeholder option.
-const EaSelect: React.FC<{ value: string; options: string[]; onChange: (v: string) => void; placeholder?: string }> = ({ value, options, onChange, placeholder }) => {
-  const empty = value.trim() === "";
-  return (
-    <select className={`ea-select${empty ? " ph" : ""}`} value={value} onChange={(e) => onChange(e.target.value)}>
-      {placeholder && <option value="">{placeholder}</option>}
-      {options.map((o) => <option key={o} value={o}>{o}</option>)}
-    </select>
-  );
-};
+// Now the shared Form11Select (always-visible, single-click, commit-on-change).
+const EaSelect: React.FC<{ value: string; options: string[]; onChange: (v: string) => void; placeholder?: string }> = (props) => (
+  <Form11Select {...props} />
+);
 
 // ── materials: soft-pink pills + revealed validated count inputs + Other free-text ─
 const MaterialsControl: React.FC<{ state: AgentMaterialsState; bad: Set<string>; onChange: (s: AgentMaterialsState) => void }> = ({ state, bad, onChange }) => {
@@ -686,49 +611,17 @@ const SocialsList: React.FC<{ socials: AgentSocial[]; onChange: (s: AgentSocial[
 };
 
 // ── notes ──────────────────────────────────────────────────────────────────────
-const ErrNote: React.FC<{ msg: string; onUndo: () => void; undoLabel: string }> = ({ msg, onUndo, undoLabel }) => (
-  <div style={{ marginTop: 8 }}>
-    <div style={{ display: "flex", gap: 7, alignItems: "flex-start", background: C.errBg, border: `1px solid ${C.errBorder}`, borderRadius: 7, padding: "8px 10px", fontSize: 11, color: C.err, lineHeight: 1.45 }}>
-      <AlertIcon /><span>{msg}</span>
-    </div>
-    <span role="button" onMouseDown={(e) => { e.preventDefault(); onUndo(); }}
-      style={{ display: "inline-block", marginTop: 6, fontFamily: MONO, fontSize: 9, letterSpacing: "0.04em", textTransform: "uppercase", color: C.burgundy, cursor: "pointer", borderBottom: "1px solid rgba(124,58,42,0.4)" }}>{undoLabel}</span>
-  </div>
-);
+// The error-undo note and the agency consequence-guard are now the shared BlockNote / ConfirmGuard;
+// AlertIcon / OkIcon are imported from Form11Drawer. Only the agent-specific sage note stays local.
 const SoftNote: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div style={{ display: "flex", gap: 7, alignItems: "flex-start", background: C.sageTint, border: "1px solid #d8e0d4", borderRadius: 7, padding: "8px 10px", marginTop: 8, fontSize: 11, color: C.darkSage, lineHeight: 1.45 }}>
     <OkIcon /><span>{children}</span>
   </div>
 );
-const ConfirmNote: React.FC<{ name: string; onConfirm: () => void; onKeep: () => void }> = ({ name, onConfirm, onKeep }) => (
-  <div style={{ marginTop: 8 }}>
-    <div className="ea-confirm"><AlertIcon /><span>Removing the agency means <b>{name}</b> will be identified by its name alone.</span></div>
-    <div style={{ display: "flex", gap: 8, marginTop: 7 }}>
-      <button type="button" className="ea-cbtn-go" onMouseDown={(e) => { e.preventDefault(); onConfirm(); }}>Remove anyway</button>
-      <button type="button" className="ea-cbtn-keep" onMouseDown={(e) => { e.preventDefault(); onKeep(); }}>Keep agency</button>
-    </div>
-  </div>
-);
 
-const AlertIcon = () => (
-  <svg viewBox="0 0 16 16" fill="none" width={13} height={13} style={{ flexShrink: 0, marginTop: 1 }}><path d="M8 2l6.5 11.5h-13L8 2z" stroke="currentColor" strokeWidth={1.3} strokeLinejoin="round" /><path d="M8 6.5v3M8 11.6h.01" stroke="currentColor" strokeWidth={1.3} strokeLinecap="round" /></svg>
-);
-const OkIcon = () => (
-  <svg viewBox="0 0 16 16" fill="none" width={13} height={13} style={{ flexShrink: 0, marginTop: 1 }}><circle cx="8" cy="8" r="6.2" stroke="currentColor" strokeWidth={1.2} /><path d="M5.5 8l1.7 1.7L10.5 6.5" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round" /></svg>
-);
-const PencilGlyph = () => (
-  <svg viewBox="0 0 16 16" fill="none" width={13} height={13}><path d="M11 2l3 3-8 8-3.5.5.5-3.5 8-8z" stroke="currentColor" strokeWidth={1.3} strokeLinejoin="round" /></svg>
-);
-
-/** Hover/scrollbar/animation + the resting-field, pill, toggle, social bits that can't be inline. */
+/** Agent-specific styles only — the shell, resting-field, select, confirm + motion live in Form11Styles. */
 const EditAgentStyles: React.FC = () => (
   <style>{`
-    @keyframes ea-slide-in { 0%{transform:translateX(125%) rotate(-5deg);} 65%{transform:translateX(0) rotate(-3deg);} 100%{transform:translateX(0) rotate(0deg);} }
-    @keyframes ea-slide-out { 0%{transform:translateX(0) rotate(0deg);} 100%{transform:translateX(130%) rotate(-4deg);} }
-    .ea-slide > div { animation: ea-slide-in .55s cubic-bezier(.22,.61,.36,1); transform-origin:center; }
-    .ea-slide.ea-closing > div { animation: ea-slide-out .18s cubic-bezier(.5,0,.9,.4) forwards; }
-    @media (prefers-reduced-motion: reduce) { .ea-slide > div, .ea-slide.ea-closing > div { animation: none !important; } }
-    .ea-body::-webkit-scrollbar{width:7px;} .ea-body::-webkit-scrollbar-thumb{background:#e3d6c8;border-radius:4px;}
     .ea-needbanner{display:flex;gap:9px;align-items:flex-start;background:#fdf0ea;border:1px solid #f0d4c8;border-radius:10px;padding:11px 13px;margin-bottom:16px;font-size:11.5px;line-height:1.5;color:#8a5a44;}
     .ea-needbanner b{font-weight:600;}
     .ea-needbanner.allset{background:#eef2ec;border-color:#d8e0d4;color:#5a6e58;}
@@ -740,9 +633,9 @@ const EditAgentStyles: React.FC = () => (
     .ea-need-spotlight{box-shadow:0 0 0 1px #e2a48f, 0 0 0 3px rgba(226,164,143,0.4);transition:box-shadow .2s;}
     @media (prefers-reduced-motion: reduce){.ea-need-pulse{animation:none;box-shadow:0 0 0 3px rgba(232,200,188,0.7);}.ea-need-spotlight{transition:none;}}
     /* "Fade the rest": every tour cell recedes while touring; the active cell stays full-strength. */
-    .ea-body.touring .ea-tcell{opacity:0.34;transition:opacity .2s;}
-    .ea-body.touring .ea-tcell.active{opacity:1;}
-    @media (prefers-reduced-motion: reduce){.ea-body.touring .ea-tcell{transition:none;}}
+    .f11-body.touring .ea-tcell{opacity:0.34;transition:opacity .2s;}
+    .f11-body.touring .ea-tcell.active{opacity:1;}
+    @media (prefers-reduced-motion: reduce){.f11-body.touring .ea-tcell{transition:none;}}
     .ea-jcard{background:#fdf0ea;border:1px solid #f0d4c8;border-radius:11px;padding:13px 15px;margin-bottom:16px;}
     .ea-jcard.success{background:#eef2ec;border-color:#d8e0d4;}
     .ea-jstep{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:#b08968;margin-bottom:4px;}
@@ -759,23 +652,6 @@ const EditAgentStyles: React.FC = () => (
     /* Floating advice card: anchored beneath the active field, caret up, full opacity above the fade. */
     .ea-jfloat{position:absolute;left:20px;right:20px;z-index:5;background:#fdf0ea;border:1px solid #f0d4c8;border-radius:11px;padding:13px 15px;box-shadow:0 10px 28px rgba(58,28,20,0.14);}
     .ea-jfloat::before{content:"";position:absolute;top:-7px;left:26px;width:12px;height:12px;background:#fdf0ea;border-left:1px solid #f0d4c8;border-top:1px solid #f0d4c8;transform:rotate(45deg);}
-    .ea-editable{position:relative;display:flex;align-items:center;gap:8px;min-height:38px;padding:8px 11px;background:#fffdf9;border:1px solid #ece2d4;border-radius:8px;cursor:text;transition:border-color .14s,background .14s;margin-top:2px;}
-    .ea-editable.selectable{cursor:pointer;}
-    .ea-editable:hover{border-color:#d8c9b6;background:#fffefb;}
-    .ea-editable:focus-visible{outline:none;border-color:#8a9e88;box-shadow:0 0 0 3px rgba(138,158,136,0.16);}
-    .ea-fval{flex:1;min-width:0;font-size:13px;color:#3a1c14;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .ea-fval.wrap{white-space:normal;}
-    .ea-fval.ph{color:#b9aa99;}
-    .ea-fval.errval{color:#a83a2a;}
-    .ea-hint{flex-shrink:0;display:flex;align-items:center;color:#cdbeae;opacity:0;transition:opacity .14s;}
-    .ea-editable:hover .ea-hint,.ea-editable:focus-visible .ea-hint{opacity:1;}
-    .ea-inp{width:100%;background:#fff;border:1px solid #e0d5c8;border-radius:8px;padding:8px 11px;font-size:12.5px;color:#3a1c14;font-family:'Inter',sans-serif;outline:none;margin-top:2px;min-height:38px;}
-    .ea-inp:focus{border-color:#8a9e88;box-shadow:0 0 0 3px rgba(138,158,136,0.12);}
-    .ea-inp.bad{border-color:#e6bdb0;box-shadow:0 0 0 3px rgba(168,58,42,0.10);}
-    .ea-select{margin-top:2px;width:100%;min-height:38px;-webkit-appearance:none;appearance:none;padding:8px 30px 8px 11px;font-size:12.5px;color:#3a1c14;font-family:'Inter',sans-serif;background-color:#fffdf9;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%237c3a2a' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");background-repeat:no-repeat;background-position:right 10px center;border:1px solid #ece2d4;border-radius:8px;cursor:pointer;outline:none;transition:border-color .14s,background-color .14s;}
-    .ea-select:hover{border-color:#d8c9b6;background-color:#fffefb;}
-    .ea-select:focus{border-color:#8a9e88;box-shadow:0 0 0 3px rgba(138,158,136,0.16);}
-    .ea-select.ph{color:#b9aa99;}
     .ea-segtoggle{display:inline-flex;background:#e1d4c3;border:1px solid #d4c5b2;border-radius:9px;padding:3px;gap:3px;}
     .ea-seg{font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;border:none;border-radius:7px;padding:7px 20px;cursor:pointer;transition:all .14s;}
     .ea-matpills{display:flex;flex-wrap:wrap;gap:7px;}
@@ -794,14 +670,7 @@ const EditAgentStyles: React.FC = () => (
     .ea-socialx:hover{background:#f3e0d8;color:#7c3a2a;}
     .ea-addsocial{margin-top:9px;display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:#7c3a2a;background:#f5e2da;border:1px solid #e8c8bc;border-radius:7px;padding:7px 12px;cursor:pointer;transition:all .14s;}
     .ea-addsocial:hover{background:#efd5ca;}
-    .ea-confirm{display:flex;gap:8px;align-items:flex-start;background:#fbf1e7;border:1px solid #ecd9c6;border-radius:9px;padding:9px 11px;font-size:11.5px;color:#8a5a3a;line-height:1.5;}
-    .ea-confirm.done{background:#eef2ec;border-color:#d8e0d4;color:#5a6e58;margin-top:8px;}
-    .ea-cbtn-go{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.04em;text-transform:uppercase;background:#f5e2da;color:#7c3a2a;border:1px solid #e8c8bc;border-radius:7px;padding:6px 12px;cursor:pointer;}
-    .ea-cbtn-go:hover{background:#efd5ca;}
-    .ea-cbtn-keep{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.04em;text-transform:uppercase;background:transparent;color:#9a8876;border:1px solid #e2d6c8;border-radius:7px;padding:6px 12px;cursor:pointer;}
-    .ea-cbtn-keep:hover{color:#7c3a2a;border-color:#d8c9b6;}
     .ea-qrow:hover{background:#fffdfa;}
     .ea-qrow:hover .ea-qgo{color:#7c3a2a!important;}
-    .ea-discard:hover{color:#a83a2a!important;background:#f7eee9;}
   `}</style>
 );
