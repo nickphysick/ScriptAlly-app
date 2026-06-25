@@ -22,7 +22,7 @@
  * Saves through useScriptAllyDb().saveAgentEdits; a numeric responseTimeWeeks change fans out to the
  * agent's queries inside that funnel (Prompt 3). Critical colours are inline (Tailwind drift trap).
  */
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Lottie from "lottie-react";
 import { useScriptAllyDb } from "../lib/db";
 import { Agent, AgentSocial, Query, QueryStatus, SubmissionStatus, SubmissionMethod } from "../types";
@@ -155,6 +155,8 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
   const [journeyFields, setJourneyFields] = useState<AgentDataNeed[]>([]);
   const [journeyStep, setJourneyStep] = useState<number | null>(null);
   const fieldRefs = useRef<Partial<Record<AgentDataNeed, HTMLDivElement | null>>>({});
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const [cardTop, setCardTop] = useState<number | null>(null); // floating advice-card offset within the body
   const highlightSet = journeyFields;
   const journeyActive = journeyStep !== null && journeyStep >= 0 && journeyStep < highlightSet.length;
   const currentField: AgentDataNeed | null = journeyActive ? highlightSet[journeyStep as number] : null;
@@ -170,11 +172,23 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
     setJourneyStep(needs.length ? -1 : null); // open the intro when there are deficiencies
   }, [orig, isOpen, agent.id, highlightNeeds]);
 
-  // Spotlight: scroll the current journey field into view when the step changes.
-  useEffect(() => {
-    if (!currentField) return;
-    fieldRefs.current[currentField]?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "center" });
-  }, [currentField]);
+  // Spotlight: scroll the active field to a consistent spot near the top of the body, then anchor the
+  // floating advice card just beneath it (re-measured after the scroll/layout settles).
+  useLayoutEffect(() => {
+    if (!currentField) { setCardTop(null); return; }
+    const reduce = prefersReducedMotion();
+    const measure = () => {
+      const el = fieldRefs.current[currentField];
+      if (el) setCardTop(el.offsetTop + el.offsetHeight + 10);
+    };
+    const el = fieldRefs.current[currentField];
+    if (el && bodyRef.current) {
+      bodyRef.current.scrollTo({ top: Math.max(0, el.offsetTop - 16), behavior: reduce ? "auto" : "smooth" });
+    }
+    measure();
+    const t = setTimeout(measure, reduce ? 0 : 280);
+    return () => clearTimeout(t);
+  }, [currentField, journeyStep, S.weeks, S.materials, S.mswl]);
 
   // Reset the slide-back only on (re)open — NOT on the post-save agent reseed (the host keeps the
   // drawer mounted with isOpen=true through the close), which would otherwise cancel it mid-flight.
@@ -326,7 +340,7 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
     </div>
   );
   const Sec = ({ children, top }: { children: React.ReactNode; top?: boolean }) => (
-    <div style={{ fontFamily: MONO, fontSize: 10, fontWeight: 600, letterSpacing: "0.13em", textTransform: "uppercase", color: "#5a4636", margin: top ? "24px 0 11px" : "2px 0 11px", display: "flex", alignItems: "center", gap: 9 }}>
+    <div className="ea-tcell" style={{ fontFamily: MONO, fontSize: 10, fontWeight: 600, letterSpacing: "0.13em", textTransform: "uppercase", color: "#5a4636", margin: top ? "24px 0 11px" : "2px 0 11px", display: "flex", alignItems: "center", gap: 9 }}>
       <span>{children}</span><span style={{ flex: 1, height: 1, background: "#e6d8c8" }} />
     </div>
   );
@@ -418,7 +432,7 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
               </div>
 
               {/* scrolling body */}
-              <div className="ea-body" style={{ flex: 1, overflowY: "auto", padding: "16px 20px 20px" }}>
+              <div ref={bodyRef} className={`ea-body${journeyActive ? " touring" : ""}`} style={{ position: "relative", flex: 1, overflowY: "auto", padding: "16px 20px 20px" }}>
                 {/* In-focus journey (intro → one field at a time → success), then a calm banner. */}
                 {journeyStep === -1 && (
                   <div className="ea-jcard">
@@ -430,8 +444,10 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
                     </div>
                   </div>
                 )}
+                {/* Advice card — floats beneath the active field (anchored to its offset), caret up,
+                    full opacity above the faded surroundings. */}
                 {journeyActive && currentField && (
-                  <div className="ea-jcard">
+                  <div className="ea-jfloat" style={{ top: cardTop ?? 0, visibility: cardTop === null ? "hidden" : "visible" }}>
                     <div className="ea-jstep">Step {(journeyStep as number) + 1} of {highlightSet.length}</div>
                     <div className="ea-jtitle">Add their {NEED_INFO[currentField].label}</div>
                     <div className="ea-jwhy">{NEED_INFO[currentField].why}</div>
@@ -504,7 +520,7 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
                   </Field>
                   <Field><Label on={dirty.method}>Submission method</Label><EaSelect value={S.method} options={METHOD_OPTIONS} onChange={(v) => set("method", v)} /></Field>
                 </Two>
-                <Field>
+                <Field active={currentField === "responseTime"}>
                   <Label on={dirty.weeks}>Response time</Label>
                   <NeedWrap ring={fieldHighlight("responseTime")} innerRef={(el) => { fieldRefs.current.responseTime = el; }}>
                     <WeekSlider
@@ -517,11 +533,11 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
                   </NeedWrap>
                 </Field>
                 <Field><Label on={dirty.noReply}>Response policy</Label><EaSelect value={noReplyLabel(S.noReply)} options={[NOREPLY_TRUE, NOREPLY_FALSE]} onChange={(v) => set("noReply", v === NOREPLY_TRUE)} /></Field>
-                <Field><Label on={dirty.materials}>Materials wanted</Label><NeedWrap ring={fieldHighlight("materials")} innerRef={(el) => { fieldRefs.current.materials = el; }}><MaterialsControl state={S.materials} bad={materialsBad} onChange={(v) => set("materials", v)} /></NeedWrap></Field>
+                <Field active={currentField === "materials"}><Label on={dirty.materials}>Materials wanted</Label><NeedWrap ring={fieldHighlight("materials")} innerRef={(el) => { fieldRefs.current.materials = el; }}><MaterialsControl state={S.materials} bad={materialsBad} onChange={(v) => set("materials", v)} /></NeedWrap></Field>
 
                 <Sec top>Genres &amp; wishlist</Sec>
                 <Field><Label on={dirty.genres}>Genres</Label><div style={{ marginTop: 2 }}><GenreCombobox options={AGENT_GENRES} value={S.genres} onChange={(v) => set("genres", v)} placeholder="Type a genre…" /></div></Field>
-                <Field><Label on={dirty.mswl}>Manuscript wishlist (MSWL)</Label><NeedWrap ring={fieldHighlight("mswl")} innerRef={(el) => { fieldRefs.current.mswl = el; }}><TextField field="mswl" value={S.mswl} placeholder="Add a manuscript wishlist" multiline quoted /></NeedWrap></Field>
+                <Field active={currentField === "mswl"}><Label on={dirty.mswl}>Manuscript wishlist (MSWL)</Label><NeedWrap ring={fieldHighlight("mswl")} innerRef={(el) => { fieldRefs.current.mswl = el; }}><TextField field="mswl" value={S.mswl} placeholder="Add a manuscript wishlist" multiline quoted /></NeedWrap></Field>
 
                 <Sec top>Notes</Sec>
                 <Field last><Label on={dirty.notes}>Private notes</Label><TextField field="notes" value={S.notes} placeholder="Add a private note" multiline /></Field>
@@ -550,6 +566,8 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
                     ))}
                   </>
                 )}
+                {/* Scroll room so the active field can sit near the top and the floating card fits beneath. */}
+                {journeyActive && <div aria-hidden="true" style={{ height: 260 }} />}
               </div>
 
               {/* footer */}
@@ -573,11 +591,14 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
 };
 
 // ── layout atoms ────────────────────────────────────────────────────────────────
-const Field: React.FC<{ children: React.ReactNode; last?: boolean }> = ({ children, last }) => (
-  <div style={{ marginBottom: last ? 4 : 14 }}>{children}</div>
+// `ea-tcell` = a tour cell: while the body is `touring` it fades to recede; the `active` cell (the
+// field being walked) is restored to full opacity. (Opacity can't be un-faded on a descendant, so
+// the un-fade lives on the cell itself, never an ancestor.)
+const Field: React.FC<{ children: React.ReactNode; last?: boolean; active?: boolean }> = ({ children, last, active }) => (
+  <div className={`ea-tcell${active ? " active" : ""}`} style={{ marginBottom: last ? 4 : 14 }}>{children}</div>
 );
 const Two: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px", marginBottom: 14 }}>{children}</div>
+  <div className="ea-tcell" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px", marginBottom: 14 }}>{children}</div>
 );
 
 // ── needs-attention ring wrapper (task-routed opens): steady spotlight in the journey; pink pulse
@@ -715,8 +736,13 @@ const EditAgentStyles: React.FC = () => (
     @keyframes ea-need-pulse{0%,100%{box-shadow:0 0 0 0 rgba(232,200,188,0);}50%{box-shadow:0 0 0 4px rgba(232,200,188,0.6);}}
     .ea-need-pulse{animation:ea-need-pulse 1.8s ease-in-out infinite;}
     .ea-need-done{box-shadow:0 0 0 2px rgba(138,158,136,0.55);transition:box-shadow .3s;}
-    .ea-need-spotlight{box-shadow:0 0 0 3px rgba(124,58,42,0.45);transition:box-shadow .25s;}
+    /* Active-field emphasis: soft-pink ring (border #e2a48f + 0 0 0 2px rgba(226,164,143,.4)), no glow */
+    .ea-need-spotlight{box-shadow:0 0 0 1px #e2a48f, 0 0 0 3px rgba(226,164,143,0.4);transition:box-shadow .2s;}
     @media (prefers-reduced-motion: reduce){.ea-need-pulse{animation:none;box-shadow:0 0 0 3px rgba(232,200,188,0.7);}.ea-need-spotlight{transition:none;}}
+    /* "Fade the rest": every tour cell recedes while touring; the active cell stays full-strength. */
+    .ea-body.touring .ea-tcell{opacity:0.34;transition:opacity .2s;}
+    .ea-body.touring .ea-tcell.active{opacity:1;}
+    @media (prefers-reduced-motion: reduce){.ea-body.touring .ea-tcell{transition:none;}}
     .ea-jcard{background:#fdf0ea;border:1px solid #f0d4c8;border-radius:11px;padding:13px 15px;margin-bottom:16px;}
     .ea-jcard.success{background:#eef2ec;border-color:#d8e0d4;}
     .ea-jstep{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:#b08968;margin-bottom:4px;}
@@ -730,6 +756,9 @@ const EditAgentStyles: React.FC = () => (
     .ea-jnext:hover{background:#5e2b1f;}
     .ea-jback,.ea-jskip{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;background:transparent;border:none;color:#a89a8a;cursor:pointer;padding:6px 4px;}
     .ea-jback:hover,.ea-jskip:hover{color:#7c3a2a;}
+    /* Floating advice card: anchored beneath the active field, caret up, full opacity above the fade. */
+    .ea-jfloat{position:absolute;left:20px;right:20px;z-index:5;background:#fdf0ea;border:1px solid #f0d4c8;border-radius:11px;padding:13px 15px;box-shadow:0 10px 28px rgba(58,28,20,0.14);}
+    .ea-jfloat::before{content:"";position:absolute;top:-7px;left:26px;width:12px;height:12px;background:#fdf0ea;border-left:1px solid #f0d4c8;border-top:1px solid #f0d4c8;transform:rotate(45deg);}
     .ea-editable{position:relative;display:flex;align-items:center;gap:8px;min-height:38px;padding:8px 11px;background:#fffdf9;border:1px solid #ece2d4;border-radius:8px;cursor:text;transition:border-color .14s,background .14s;margin-top:2px;}
     .ea-editable.selectable{cursor:pointer;}
     .ea-editable:hover{border-color:#d8c9b6;background:#fffefb;}
