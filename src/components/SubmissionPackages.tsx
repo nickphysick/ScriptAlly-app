@@ -325,7 +325,8 @@ export const SubmissionPackages: React.FC = () => {
   const [activeMsId, setActiveMsId] = useState<string | null>(() =>
     typeof window !== "undefined" ? localStorage.getItem("scriptally_active_manuscript_id") : null,
   );
-  const [tab, setTab] = useState<TabKey>("perf"); // Performance is the hero / default tab
+  // Redesign: two top-level views behind a centred Packages / Materials pill (was: 4 tabs).
+  const [view, setView] = useState<"packages" | "materials">("packages");
   const [msMenuOpen, setMsMenuOpen] = useState(false);
   const [form, setForm] = useState<FormState | null>(null);
   const [confirmDel, setConfirmDel] = useState<ManuscriptVersion | null>(null);
@@ -409,7 +410,7 @@ export const SubmissionPackages: React.FC = () => {
       [ComponentType.SAMPLE_PAGES]: p.samplePagesVersionId,
     });
     setPkgError(null);
-    setTab("pkgs");
+    setView("packages");
   };
   const createOrSave = async () => {
     const ql = sel[ComponentType.QUERY_LETTER];
@@ -883,75 +884,74 @@ export const SubmissionPackages: React.FC = () => {
           .sp-attr-grid { grid-template-columns: 1fr !important; }
           .sp-strat { flex-direction: column !important; align-items: flex-start !important; }
           .sp-strat-div { display: none !important; }
+          .sp-headrow { flex-direction: column !important; align-items: center !important; gap: 14px !important; }
         }
       `}</style>
 
       <div className="relative" style={{ zIndex: 1, maxWidth: 1000, margin: "0 auto", padding: "40px 20px 0" }}>
-        {/* ── Header ── */}
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 20, flexWrap: "wrap", marginBottom: 6 }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <h1 style={{ fontFamily: FONT_SERIF, fontSize: 28, fontWeight: 500, color: bodyInk, margin: 0 }}>Submission Packages</h1>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontFamily: FONT_MONO, fontSize: 9, fontWeight: 500, letterSpacing: "0.12em", color: burgundy, background: buttonPinkBg, border: `0.5px solid ${buttonPinkBorder}`, borderRadius: 20, padding: "4px 9px 3px" }}>
-                <Lock style={{ width: 9, height: 9 }} strokeWidth={2.4} aria-hidden="true" />
-                PRO
+        {/* ── Header: centred "Submission Packages · PRO" eyebrow + the big Packages / Materials pill,
+              with the manuscript selector floated to the right. ── */}
+        <div className="sp-headrow" style={{ display: "flex", alignItems: "flex-start", gap: 16, marginBottom: 26 }}>
+          <div style={{ flex: 1, minWidth: 0 }} aria-hidden="true" />
+
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14, flexShrink: 0 }}>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+              <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: sageText }}>Submission Packages</span>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontFamily: FONT_MONO, fontSize: 9, fontWeight: 500, letterSpacing: "0.12em", color: burgundy, background: buttonPinkBg, border: `0.5px solid ${buttonPinkBorder}`, borderRadius: 20, padding: "3px 8px 2px" }}>
+                <Lock style={{ width: 9, height: 9 }} strokeWidth={2.4} aria-hidden="true" /> PRO
               </span>
-            </div>
-            <div style={{ fontFamily: FONT_MONO, fontSize: 10.5, letterSpacing: "0.1em", textTransform: "uppercase", color: sageText }}>
-              Build · attach · learn what wins requests
+            </span>
+            {/* the Packages / Materials pill */}
+            <div role="tablist" aria-label="Submission packages views" style={{ display: "inline-flex", background: "#ece4da", borderRadius: 999, padding: 4, gap: 3, boxShadow: "inset 0 1px 2px rgba(58,28,20,0.06)" }}>
+              {([["packages", "Packages", Package], ["materials", "Materials", Layers]] as const).map(([v, label, Icon]) => {
+                const active = v === view;
+                return (
+                  <button
+                    key={v}
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => setView(v)}
+                    style={{ display: "inline-flex", alignItems: "center", gap: 9, padding: "11px 30px", borderRadius: 999, border: "none", cursor: "pointer", fontFamily: FONT_SERIF, fontSize: 15, fontWeight: 500, color: active ? burgundy : "#9c8878", background: active ? parchment : "transparent", boxShadow: active ? "0 1px 3px rgba(58,28,20,0.12)" : "none", transition: "color .18s, background .18s" }}
+                  >
+                    <Icon style={{ width: 16, height: 16 }} strokeWidth={1.9} aria-hidden="true" /> {label}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* manuscript selector */}
-          {activeMs && (
-            <div ref={msMenuRef} style={{ position: "relative" }}>
-              <button
-                onClick={() => setMsMenuOpen((o) => !o)}
-                aria-haspopup="listbox"
-                aria-expanded={msMenuOpen}
-                style={{ display: "inline-flex", alignItems: "center", gap: 8, background: parchment, border: `1px solid ${ghostButtonBorder}`, borderRadius: 10, padding: "9px 13px", fontFamily: FONT_SANS, fontSize: 13, color: bodyInk, cursor: "pointer", boxShadow: "0 1px 2px rgba(58,28,20,0.05)", maxWidth: 320 }}
-              >
-                <span style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.08em", textTransform: "uppercase", color: labelColor }}>Manuscript</span>
-                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{activeMs.title}</span>
-                <ChevronDown style={{ width: 13, height: 13, color: burgundy, flexShrink: 0 }} strokeWidth={2.2} aria-hidden="true" />
-              </button>
-              {msMenuOpen && (
-                <div role="listbox" style={{ position: "absolute", top: "calc(100% + 6px)", right: 0, minWidth: 240, maxWidth: 340, background: parchment, border: `1px solid ${ghostButtonBorder}`, borderRadius: 10, boxShadow: "0 8px 24px rgba(58,28,20,0.16)", padding: 5, zIndex: 30, maxHeight: 320, overflowY: "auto" }}>
-                  {manuscripts.map((m) => (
-                    <div
-                      key={m.id}
-                      role="option"
-                      aria-selected={m.id === activeMs.id}
-                      onClick={() => selectMs(m.id)}
-                      style={{ padding: "9px 11px", borderRadius: 7, fontFamily: FONT_SANS, fontSize: 13, color: m.id === activeMs.id ? burgundy : bodyInk, background: m.id === activeMs.id ? "#f5e2da" : "transparent", cursor: "pointer", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
-                    >
-                      {m.title}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* ── Tabs ── */}
-        <div style={{ display: "flex", gap: 4, margin: "18px 0 22px", borderBottom: "1px solid rgba(124,58,42,0.16)" }}>
-          {TABS.map((t) => {
-            const active = t.key === tab;
-            return (
-              <button
-                key={t.key}
-                className="sp-tab"
-                onClick={() => setTab(t.key)}
-                aria-current={active ? "page" : undefined}
-                style={{ position: "relative", display: "flex", alignItems: "center", gap: 7, background: "none", border: "none", padding: "11px 16px", cursor: "pointer", fontFamily: FONT_MONO, fontSize: 11, letterSpacing: "0.06em", textTransform: "uppercase", fontWeight: active ? 500 : 400, color: active ? burgundy : "#9c8878" }}
-              >
-                <t.Icon style={{ width: 14, height: 14 }} strokeWidth={2} aria-hidden="true" />
-                {t.label}
-                {active && <span aria-hidden="true" style={{ position: "absolute", left: 10, right: 10, bottom: -1, height: 2, background: burgundy, borderRadius: 2 }} />}
-              </button>
-            );
-          })}
+          {/* manuscript selector (top-right) */}
+          <div style={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "flex-end" }}>
+            {activeMs && (
+              <div ref={msMenuRef} style={{ position: "relative" }}>
+                <button
+                  onClick={() => setMsMenuOpen((o) => !o)}
+                  aria-haspopup="listbox"
+                  aria-expanded={msMenuOpen}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 8, background: parchment, border: `1px solid ${ghostButtonBorder}`, borderRadius: 10, padding: "9px 13px", fontFamily: FONT_SANS, fontSize: 13, color: bodyInk, cursor: "pointer", boxShadow: "0 1px 2px rgba(58,28,20,0.05)", maxWidth: 320 }}
+                >
+                  <span style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.08em", textTransform: "uppercase", color: labelColor }}>Manuscript</span>
+                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{activeMs.title}</span>
+                  <ChevronDown style={{ width: 13, height: 13, color: burgundy, flexShrink: 0 }} strokeWidth={2.2} aria-hidden="true" />
+                </button>
+                {msMenuOpen && (
+                  <div role="listbox" style={{ position: "absolute", top: "calc(100% + 6px)", right: 0, minWidth: 240, maxWidth: 340, background: parchment, border: `1px solid ${ghostButtonBorder}`, borderRadius: 10, boxShadow: "0 8px 24px rgba(58,28,20,0.16)", padding: 5, zIndex: 30, maxHeight: 320, overflowY: "auto" }}>
+                    {manuscripts.map((m) => (
+                      <div
+                        key={m.id}
+                        role="option"
+                        aria-selected={m.id === activeMs.id}
+                        onClick={() => selectMs(m.id)}
+                        style={{ padding: "9px 11px", borderRadius: 7, fontFamily: FONT_SANS, fontSize: 13, color: m.id === activeMs.id ? burgundy : bodyInk, background: m.id === activeMs.id ? "#f5e2da" : "transparent", cursor: "pointer", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                      >
+                        {m.title}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* ── Tab content ── */}
@@ -962,17 +962,13 @@ export const SubmissionPackages: React.FC = () => {
               Add a manuscript from the Manuscripts list first — packages are built per manuscript.
             </div>
           </MountPanel>
-        ) : tab === "lib" ? (
+        ) : view === "packages" ? (
+          renderPackages()
+        ) : (
           <MountPanel>
             <BandHeader title="Materials library" meta="every version of every component — the building blocks for packages" Icon={Layers} />
             <div style={{ padding: "20px 22px 22px" }}>{LIB_KINDS.map(renderSection)}</div>
           </MountPanel>
-        ) : tab === "perf" ? (
-          renderPerformance()
-        ) : tab === "pkgs" ? (
-          renderPackages()
-        ) : (
-          renderLog()
         )}
       </div>
 
