@@ -33,14 +33,11 @@ import {
   PauseCircle
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { EditAgentDrawer } from "./EditAgentDrawer";
+import { useOpenEditAgent } from "./EditAgentHost";
 
 interface AgentsProps {
   searchQuery?: string;
   onNavigate?: (tab: string, subPageName?: string) => void;
-  /** Deep-link: open the Edit Agent drawer for this agent on arrival (one-shot, then consumed). */
-  openAgentId?: string | null;
-  onAgentDrawerConsumed?: () => void;
 }
 
 /** A handle is treated as a clickable link only when it's an explicit URL or a bare domain. */
@@ -75,7 +72,8 @@ function formatWhatsAppDate(dateString: string): string {
   return `${day} ${month}, ${time}`;
 }
 
-export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, openAgentId, onAgentDrawerConsumed }) => {
+export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
+  const openEditAgent = useOpenEditAgent();
   const {
     currentUser,
     agents,
@@ -103,18 +101,8 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, openAge
   const deleteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingDeleteRef = useRef<{ agent: Agent; qn: number } | null>(null);
 
-  // Edit Agent drawer — store the id so the agent prop stays LIVE (a save updates the live doc →
-  // the drawer reseeds to saved values). This is the only agent-edit surface; the legacy inline
-  // modal was retired in Prompt 4.
-  const [editDrawerAgentId, setEditDrawerAgentId] = useState<string | null>(null);
-
-  // Deep-link entry (e.g. the "Edit Agent" to-do task): open the drawer for the routed agent, then
-  // tell App to clear the one-shot target so it doesn't reopen on the next render.
-  useEffect(() => {
-    if (!openAgentId) return;
-    setEditDrawerAgentId(openAgentId);
-    onAgentDrawerConsumed?.();
-  }, [openAgentId, onAgentDrawerConsumed]);
+  // Edit Agent drawer is now an APP-LEVEL overlay (EditAgentHost) opened via openEditAgent(id) — no
+  // route change, scroll preserved. "Edit profile" + the dashboard to-do both call it.
 
   // Agent Notes State (Card 3 Jottings)
   const [agentNotesList, setAgentNotesList] = useState<{ id: string; text: string; createdAt: string }[]>([]);
@@ -551,7 +539,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, openAge
               </button>
 
               <button
-                onClick={() => setEditDrawerAgentId(activeAgent.id)}
+                onClick={() => openEditAgent(activeAgent.id)}
                 className="h-[28px] border border-[#e8e0d8] hover:bg-stone-100 bg-white flex items-center gap-1 px-3 rounded-full text-xs text-stone-700 font-medium cursor-pointer transition-colors"
               >
                 <Pencil className="w-3 h-3 text-stone-500" />
@@ -1006,22 +994,6 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, openAge
             </motion.div>
           </div>
         );
-      })()}
-
-      {/* Edit Agent drawer — opened from "Edit profile". Agent looked up live by id so a save
-          reseeds it to the saved state. onOpenQuery navigates to the queries DB (the Edit Query
-          drawer isn't mounted on this page — full in-place open is a later entry-point pass). */}
-      {(() => {
-        const drawerAgent = editDrawerAgentId ? agents.find((a) => a.id === editDrawerAgentId) : null;
-        return drawerAgent ? (
-          <EditAgentDrawer
-            agent={drawerAgent}
-            isOpen
-            onClose={() => setEditDrawerAgentId(null)}
-            onOpenQuery={() => { setEditDrawerAgentId(null); onNavigate?.("queries"); }}
-            onSavedToast={(msg) => { setToastMessage(msg); setTimeout(() => setToastMessage(null), 3000); }}
-          />
-        ) : null;
       })()}
     </div>
   );

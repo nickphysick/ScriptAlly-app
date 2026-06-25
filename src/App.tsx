@@ -8,6 +8,7 @@ import { DbProvider, useScriptAllyDb } from "./lib/db";
 import { BrandProvider } from "./lib/brand";
 import { Auth } from "./components/Auth";
 import { AppShell } from "./components/AppShell";
+import { EditAgentHost } from "./components/EditAgentHost";
 import { Dashboard } from "./components/Dashboard";
 import { Queries } from "./components/Queries";
 import { QueriesLanding } from "./components/QueriesLanding";
@@ -112,8 +113,6 @@ function AppContent() {
   const [isLogQueryOpen, setIsLogQueryOpen] = useState<boolean>(false);
   const [isAddAgentOpen, setIsAddAgentOpen] = useState<boolean>(false);
   const [isAddManuscriptOpen, setIsAddManuscriptOpen] = useState<boolean>(false);
-  // Deep-link target for the Edit Agent drawer (e.g. the "Edit Agent" to-do task) — one-shot.
-  const [agentDrawerId, setAgentDrawerId] = useState<string | null>(null);
 
   useEffect(() => {
     if (successToast) {
@@ -135,13 +134,6 @@ function AppContent() {
     }
     if (subPageName === "Add a manuscript" || subPageName === "Add a Manuscript") {
       setIsAddManuscriptOpen(true);
-      return;
-    }
-    // Deep-link "edit-agent:<id>" → open the Agents tab AND the Edit Agent drawer for that agent.
-    if (tab === "agents" && subPageName && subPageName.startsWith("edit-agent:")) {
-      setActiveTab("agents");
-      setActiveSubPage("Agents database");
-      setAgentDrawerId(subPageName.slice("edit-agent:".length));
       return;
     }
     setActiveTab(tab);
@@ -255,7 +247,13 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-[#F5F0EA] text-[#3a1c14] selection:bg-[#7c3a2a]/20 selection:text-[#3a1c14] selection:font-bold">
-      {/* Shared app shell: full-width top bar + left nav rail; routed pages render inside. */}
+      {/* Shared app shell: full-width top bar + left nav rail; routed pages render inside.
+          EditAgentHost mounts the single Edit Agent drawer as an app-level overlay (opened via
+          useOpenEditAgent — no route change, scroll preserved). */}
+      <EditAgentHost
+        onOpenQuery={() => handleNavigate("queries")}
+        onSavedToast={(msg) => setSuccessToast(msg)}
+      >
       <AppShell
         activeTab={activeTab}
         activeSubPage={activeSubPage}
@@ -286,7 +284,7 @@ function AppContent() {
           activeSubPage === "Discover new agents" ? (
             <DiscoverNewAgents onNavigate={handleNavigate} />
           ) : (
-            <Agents searchQuery={searchQuery} onNavigate={handleNavigate} openAgentId={agentDrawerId} onAgentDrawerConsumed={() => setAgentDrawerId(null)} />
+            <Agents searchQuery={searchQuery} onNavigate={handleNavigate} />
           )
         )}
         {activeTab === "manuscripts" && (
@@ -319,6 +317,7 @@ function AppContent() {
           <AccountSettings onNavigate={handleNavigate} />
         )}
       </AppShell>
+      </EditAgentHost>
 
       {/* Focus Mode Overlay Dialog Form */}
       <LogQueryFocusForm

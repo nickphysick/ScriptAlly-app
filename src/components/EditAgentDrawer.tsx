@@ -40,7 +40,7 @@ const C = {
   parchment: "#fdfaf5", field: "#ffffff", fieldBorder: "#e0d5c8",
   burgundy: "#7c3a2a", deep: "#3a1c14", pink: "#f5e2da", pinkBorder: "#e8c8bc",
   label: "#9c8878", name: "#3a1c14", sub: "#6a7e68", sage1: "#d7ddd5", sage2: "#d5dbd3",
-  sageOpen: "#6c8a67", sageAccent: "#8a9e88", darkSage: "#5a6e58", sageTint: "#eef2ec",
+  sageAccent: "#8a9e88", darkSage: "#5a6e58", sageTint: "#eef2ec",
   err: "#a83a2a", errBg: "#f7e4de", errBorder: "#e6bdb0", muted: "#a89a8a",
 };
 const MONO = "'JetBrains Mono', monospace";
@@ -107,12 +107,17 @@ export interface EditAgentDrawerProps {
   agent: Agent;
   isOpen: boolean;
   onClose: () => void;
+  /** Lock background (window) scroll at its current position while open — the app-level overlay use. */
+  lockScroll?: boolean;
   /** Read-only queries list rows link out via this (the Edit Query drawer isn't mounted here). */
   onOpenQuery?: (queryId: string) => void;
   onSavedToast?: (msg: string) => void;
 }
 
-export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen, onClose, onOpenQuery, onSavedToast }) => {
+const prefersReducedMotion = () =>
+  typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen, onClose, lockScroll, onOpenQuery, onSavedToast }) => {
   const { queries, manuscripts, saveAgentEdits } = useScriptAllyDb();
 
   const orig = useMemo(() => draftFromAgent(agent), [agent]);
@@ -122,6 +127,7 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [agencyConfirmed, setAgencyConfirmed] = useState(false);
+  const [closing, setClosing] = useState(false);
   const editBuf = useRef<string>("");
 
   // Reseed when the agent changes or the drawer (re)opens — rehydrating a parked draft if one exists.
@@ -129,6 +135,31 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
     setS(parkedDrafts.get(agent.id) ?? orig);
     setEditing(null); setSaved(false); setSaveError(null); setAgencyConfirmed(false);
   }, [orig, isOpen, agent.id]);
+
+  // Reset the slide-back only on (re)open — NOT on the post-save agent reseed (the host keeps the
+  // drawer mounted with isOpen=true through the close), which would otherwise cancel it mid-flight.
+  useEffect(() => { setClosing(false); }, [isOpen]);
+
+  // Lock the background at its current scroll position while open; restore (no jump) on close.
+  useEffect(() => {
+    if (!isOpen || !lockScroll) return;
+    const scrollY = window.scrollY;
+    const b = document.body;
+    const prev = { position: b.style.position, top: b.style.top, left: b.style.left, right: b.style.right, width: b.style.width };
+    b.style.position = "fixed"; b.style.top = `-${scrollY}px`; b.style.left = "0"; b.style.right = "0"; b.style.width = "100%";
+    return () => {
+      b.style.position = prev.position; b.style.top = prev.top; b.style.left = prev.left; b.style.right = prev.right; b.style.width = prev.width;
+      window.scrollTo(0, scrollY);
+    };
+  }, [isOpen, lockScroll]);
+
+  // Slide-back exit: every close path plays the reverse of the entrance, then unmounts on
+  // animationend (fallback timeout guards). Reduced-motion → instant (finishClose calls onClose).
+  useEffect(() => {
+    if (!closing) return;
+    const t = setTimeout(onClose, 600);
+    return () => clearTimeout(t);
+  }, [closing, onClose]);
 
   // ── derived ──────────────────────────────────────────────────────────────────
   const agentQueries = queries.filter((q) => q.agentId === agent.id);
@@ -162,12 +193,15 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
   };
 
   // ── close / park / discard ─────────────────────────────────────────────────────
-  const parkAndClose = () => {
-    if (anyDirty) parkedDrafts.set(agent.id, S); else parkedDrafts.delete(agent.id);
-    onClose();
+  // park=true (outside-click / X / Esc) stashes an unsaved draft; park=false (save-complete) clears
+  // it. Triggers the slide-back; the deferred unmount happens on animationend / fallback timeout.
+  const finishClose = (park: boolean) => {
+    if (park && anyDirty) parkedDrafts.set(agent.id, S); else parkedDrafts.delete(agent.id);
+    if (prefersReducedMotion()) { onClose(); return; }
+    setClosing(true);
   };
-  const closeRef = useRef(parkAndClose);
-  closeRef.current = parkAndClose;
+  const closeRef = useRef<() => void>(() => {});
+  closeRef.current = () => finishClose(true);
   useEffect(() => {
     // Capture-phase + stopImmediatePropagation so the top overlay owns Escape (works when opened
     // over a FormShell — the Log-a-Query stub path). Esc parks like an outside-click; an inline edit
@@ -223,10 +257,10 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
     const res = await saveAgentEdits(agent.id, patch);
     setSaving(false);
     if (!res.ok) { setSaveError("error" in res ? res.error : "Couldn’t save the agent."); return; }
-    parkedDrafts.delete(agent.id);
     setSaved(true);
     onSavedToast?.("Agent updated");
-    setTimeout(() => setSaved(false), 1600);
+    // Show the ✓ briefly, then slide back into the drawer (no park — it's saved).
+    setTimeout(() => finishClose(false), 600);
   };
 
   // ── small presentational helpers ──────────────────────────────────────────────
@@ -293,24 +327,6 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
     );
   };
 
-  // Click-to-edit DROPDOWN field (country / method / no-reply) via the canonical BrandDropdown.
-  const SelectField = ({ field, value, options, onPick, placeholder }: {
-    field: keyof Draft; value: string; options: { value: string; label: string }[]; onPick: (v: string) => void; placeholder?: string;
-  }) => {
-    if (editing === field) {
-      return <div style={{ marginTop: 2 }}><BrandDropdown value={value} options={options} onChange={(v) => { onPick(v); setEditing(null); }} /></div>;
-    }
-    const empty = value.trim() === "";
-    return (
-      <div className="ea-editable selectable" tabIndex={0} role="button"
-        onClick={() => setEditing(field as string)}
-        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setEditing(field as string); } }}>
-        <span className={`ea-fval wrap${empty ? " ph" : ""}`}>{empty ? (placeholder || "Select…") : value}</span>
-        <span className="ea-hint"><Chevron /></span>
-      </div>
-    );
-  };
-
   const footerText = saveError ? saveError
     : saved ? "✓ Saved"
     : materialsBad.size > 0 ? "Can’t save — fix the highlighted count"
@@ -321,9 +337,9 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
   return (
     <>
       <EditAgentStyles />
-      <div onClick={parkAndClose} style={{ position: "fixed", inset: 0, background: "rgba(58,28,20,0.18)", zIndex: 1000 }} />
-      <div className="ea-slide" style={{ position: "fixed", top: 0, right: 0, height: "100vh", zIndex: 1001, display: "flex", alignItems: "center", padding: "0 24px", boxSizing: "border-box" }}>
-        <div style={{ position: "relative" }}>
+      <div onClick={() => finishClose(true)} style={{ position: "fixed", inset: 0, background: "rgba(58,28,20,0.18)", zIndex: 1000 }} />
+      <div className={`ea-slide${closing ? " ea-closing" : ""}`} style={{ position: "fixed", top: 0, right: 0, height: "100vh", zIndex: 1001, display: "flex", alignItems: "center", padding: "0 24px", boxSizing: "border-box" }}>
+        <div style={{ position: "relative" }} onAnimationEnd={() => { if (closing) onClose(); }}>
           <div style={{ position: "absolute", top: 12, left: -21, width: 24, height: 92, zIndex: 3, background: C.parchment, borderRadius: "8px 0 0 8px", boxShadow: "-3px 3px 7px rgba(58,28,20,0.10)", display: "flex", alignItems: "center", justifyContent: "center", paddingRight: 4 }}>
             <span style={{ writingMode: "vertical-rl", transform: "rotate(180deg)", fontFamily: MONO, fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: "#a89a8a", fontWeight: 500 }}>editing</span>
           </div>
@@ -341,7 +357,7 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
                   <h2 style={{ fontFamily: SERIF, fontSize: 18, color: "#2e3a2c", margin: 0, lineHeight: 1.1 }}>{S.name.trim() || "—"}</h2>
                   <div style={{ fontSize: 11, color: C.sub, marginTop: 2 }}>{S.agency.trim() || "—"}</div>
                 </div>
-                <div role="button" aria-label="Close" onClick={parkAndClose} style={{ position: "absolute", top: 13, right: 15, width: 22, height: 22, borderRadius: "50%", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: C.sub }}>
+                <div role="button" aria-label="Close" onClick={() => finishClose(true)} style={{ position: "absolute", top: 13, right: 15, width: 22, height: 22, borderRadius: "50%", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: C.sub }}>
                   <svg viewBox="0 0 16 16" fill="none" width={16} height={16}><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" /></svg>
                 </div>
               </div>
@@ -355,7 +371,7 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
                   <Field><Label on={dirty.rating}>Agent fit</Label><div style={{ minHeight: 38, display: "flex", alignItems: "center" }}><FitStars value={S.rating} size={20} showMeaning={false} onChange={(n) => set("rating", n)} /></div></Field>
                 </Two>
                 <Two>
-                  <Field><Label on={dirty.country}>Country</Label><SelectField field="country" value={S.country} options={COUNTRY_DD} onPick={(v) => set("country", v)} placeholder="Add country" /></Field>
+                  <Field><Label on={dirty.country}>Country</Label><div style={{ marginTop: 2 }}><BrandDropdown value={S.country} options={COUNTRY_DD} onChange={(v) => set("country", v)} placeholder="Add country" /></div></Field>
                   <Field><Label on={dirty.city}>City</Label><TextField field="city" value={S.city} placeholder="Add city (optional)" /></Field>
                 </Two>
 
@@ -375,7 +391,7 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
                       <SoftNote>You have <b>{openCount} open {openCount === 1 ? "query" : "queries"}</b> to {firstName(S.name)}. Marking them closed won’t touch those — it just stops them appearing when you log a new query.</SoftNote>
                     )}
                   </Field>
-                  <Field><Label on={dirty.method}>Submission method</Label><SelectField field="method" value={S.method} options={METHOD_DD} onPick={(v) => set("method", v)} /></Field>
+                  <Field><Label on={dirty.method}>Submission method</Label><div style={{ marginTop: 2 }}><BrandDropdown value={S.method} options={METHOD_DD} onChange={(v) => set("method", v)} /></div></Field>
                 </Two>
                 <Field>
                   <Label on={dirty.weeks}>Response time</Label>
@@ -387,7 +403,7 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
                     notSetHint="No turnaround on record — their queries won’t get a “response expected by” date or a follow-up nudge until you add one."
                   />
                 </Field>
-                <Field><Label on={dirty.noReply}>Response policy</Label><SelectField field="noReply" value={noReplyLabel(S.noReply)} options={NOREPLY_DD} onPick={(v) => set("noReply", v === NOREPLY_TRUE)} /></Field>
+                <Field><Label on={dirty.noReply}>Response policy</Label><div style={{ marginTop: 2 }}><BrandDropdown value={noReplyLabel(S.noReply)} options={NOREPLY_DD} onChange={(v) => set("noReply", v === NOREPLY_TRUE)} /></div></Field>
                 <Field><Label on={dirty.materials}>Materials wanted</Label><MaterialsControl state={S.materials} bad={materialsBad} onChange={(v) => set("materials", v)} /></Field>
 
                 <Sec top>Genres &amp; wishlist</Sec>
@@ -459,11 +475,13 @@ const StatusToggle: React.FC<{ value: SubmissionStatus; onChange: (s: Submission
       <div className="ea-segtoggle">
         {([SubmissionStatus.OPEN, SubmissionStatus.CLOSED] as const).map((s) => {
           const on = value === s;
-          const bg = s === SubmissionStatus.OPEN ? C.sageOpen : C.burgundy;
+          // Open uses the light sage we use elsewhere (band/StatusDot-incoming family); Closed burgundy.
+          const activeBg = s === SubmissionStatus.OPEN ? C.sage1 : C.burgundy;
+          const activeColor = s === SubmissionStatus.OPEN ? C.darkSage : "#f5efe7";
           return (
             <button key={s} type="button" className="ea-seg" aria-pressed={on}
               onClick={() => onChange(s)}
-              style={{ background: on ? bg : "transparent", color: on ? "#f5efe7" : "#94816e", boxShadow: on ? "0 1px 3px rgba(40,40,30,.22)" : "none" }}>
+              style={{ background: on ? activeBg : "transparent", color: on ? activeColor : "#94816e", boxShadow: on ? "0 1px 3px rgba(40,40,30,.22)" : "none" }}>
               {s}
             </button>
           );
@@ -574,15 +592,15 @@ const OkIcon = () => (
 const PencilGlyph = () => (
   <svg viewBox="0 0 16 16" fill="none" width={13} height={13}><path d="M11 2l3 3-8 8-3.5.5.5-3.5 8-8z" stroke="currentColor" strokeWidth={1.3} strokeLinejoin="round" /></svg>
 );
-const Chevron = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" width={13} height={13}><polyline points="6 9 12 15 18 9" /></svg>
-);
 
 /** Hover/scrollbar/animation + the resting-field, pill, toggle, social bits that can't be inline. */
 const EditAgentStyles: React.FC = () => (
   <style>{`
     @keyframes ea-slide-in { 0%{transform:translateX(125%) rotate(-5deg);} 65%{transform:translateX(0) rotate(-3deg);} 100%{transform:translateX(0) rotate(0deg);} }
+    @keyframes ea-slide-out { 0%{transform:translateX(0) rotate(0deg);} 35%{transform:translateX(0) rotate(-3deg);} 100%{transform:translateX(130%) rotate(-5deg);} }
     .ea-slide > div { animation: ea-slide-in .55s cubic-bezier(.22,.61,.36,1); transform-origin:center; }
+    .ea-slide.ea-closing > div { animation: ea-slide-out .5s cubic-bezier(.22,.61,.36,1) forwards; }
+    @media (prefers-reduced-motion: reduce) { .ea-slide > div, .ea-slide.ea-closing > div { animation: none !important; } }
     .ea-body::-webkit-scrollbar{width:7px;} .ea-body::-webkit-scrollbar-thumb{background:#e3d6c8;border-radius:4px;}
     .ea-editable{position:relative;display:flex;align-items:center;gap:8px;min-height:38px;padding:8px 11px;background:#fffdf9;border:1px solid #ece2d4;border-radius:8px;cursor:text;transition:border-color .14s,background .14s;margin-top:2px;}
     .ea-editable.selectable{cursor:pointer;}
@@ -597,7 +615,7 @@ const EditAgentStyles: React.FC = () => (
     .ea-inp{width:100%;background:#fff;border:1px solid #e0d5c8;border-radius:8px;padding:8px 11px;font-size:12.5px;color:#3a1c14;font-family:'Inter',sans-serif;outline:none;margin-top:2px;min-height:38px;}
     .ea-inp:focus{border-color:#8a9e88;box-shadow:0 0 0 3px rgba(138,158,136,0.12);}
     .ea-inp.bad{border-color:#e6bdb0;box-shadow:0 0 0 3px rgba(168,58,42,0.10);}
-    .ea-segtoggle{display:inline-flex;background:#e8ddd0;border:1px solid #ddcfbe;border-radius:9px;padding:3px;gap:3px;}
+    .ea-segtoggle{display:inline-flex;background:#e1d4c3;border:1px solid #d4c5b2;border-radius:9px;padding:3px;gap:3px;}
     .ea-seg{font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;border:none;border-radius:7px;padding:7px 20px;cursor:pointer;transition:all .14s;}
     .ea-matpills{display:flex;flex-wrap:wrap;gap:7px;}
     .ea-matpill{font-family:'Inter',sans-serif;font-size:12px;color:#7a6e60;background:#fffdf9;border:1px solid #e3d7c9;border-radius:18px;padding:6px 14px;cursor:pointer;transition:all .14s;}

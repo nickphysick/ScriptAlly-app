@@ -54,6 +54,7 @@ import {
 import { MountCard } from "./MountCard";
 import { HeroCard } from "./dashboard/HeroCard";
 import { OverToYou } from "./dashboard/OverToYou";
+import { useOpenEditAgent } from "./EditAgentHost";
 import { StatCards } from "./dashboard/StatCards";
 import { FortnightInFocus } from "./dashboard/FortnightInFocus";
 import { WhatsLivePanel } from "./dashboard/WhatsLivePanel";
@@ -207,6 +208,7 @@ const TaskPanelCard: React.FC<{
   onClosePanel: () => void;
   onOpenQuery?: (queryId: string) => void;
 }> = ({ task, onNavigate, dismissTask, onClosePanel, onOpenQuery }) => {
+  const openEditAgent = useOpenEditAgent();
   const { queries, agents, manuscripts } = useScriptAllyDb();
   const [showSnoozeDropdown, setShowSnoozeDropdown] = useState(false);
   const [isTouch, setIsTouch] = useState(false);
@@ -269,8 +271,10 @@ const TaskPanelCard: React.FC<{
 
   const handleActionClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // The "Edit Agent" housekeeping task opens the Edit Agent drawer for its agent; others navigate.
-    onNavigate(task.actionPath, task.taskType === "data_quality_poor" ? `edit-agent:${task.relatedRecordId}` : task.title);
+    // The "Edit Agent" housekeeping task opens the Edit Agent drawer in place (app-level overlay —
+    // no route change); every other task navigates.
+    if (task.taskType === "data_quality_poor") openEditAgent(task.relatedRecordId);
+    else onNavigate(task.actionPath, task.title);
     onClosePanel();
   };
 
@@ -463,10 +467,11 @@ const TaskPanelCard: React.FC<{
 export const Dashboard: React.FC<{
   onNavigate: (tab: string, subPageName?: string) => void;
   searchQuery: string;
-}> = ({ 
-  onNavigate, 
+}> = ({
+  onNavigate,
   searchQuery
 }) => {
+  const openEditAgent = useOpenEditAgent();
   const {
     currentUser,
     collectionsReady,
@@ -1739,7 +1744,7 @@ export const Dashboard: React.FC<{
                   queries={queries}
                   agents={agents}
                   notes={notes}
-                  onAction={(task) => onNavigate(task.actionPath, task.taskType === "data_quality_poor" ? `edit-agent:${task.relatedRecordId}` : task.title)}
+                  onAction={(task) => task.taskType === "data_quality_poor" ? openEditAgent(task.relatedRecordId) : onNavigate(task.actionPath, task.title)}
                   onNudge={(task) => setNudgeTask(task)}
                   onSnooze={(task) => dismissTask(task.taskType, task.relatedRecordId, "fixed snooze", 3)}
                   onDismiss={(task) => dismissTask(task.taskType, task.relatedRecordId, "permanent")}
