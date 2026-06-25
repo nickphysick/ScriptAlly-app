@@ -38,6 +38,7 @@ import {
   setDoc,
   updateDoc,
   deleteDoc,
+  deleteField,
   getDocs,
   collection,
 } from 'firebase/firestore';
@@ -462,6 +463,49 @@ describe('/users/{userId}/agents', () => {
     await assertFails(
       setDoc(doc(db, 'users', ALICE, 'agents', 'agent-1'), {
         ...validAgent(ALICE),
+        submissionStatus: 'Maybe',
+      })
+    );
+  });
+
+  // Edit Agent · Prompt 1 — "Not set" response time (the relaxed isValidAgent rule).
+  it('accepts an agent created with responseTimeWeeks ABSENT ("Not set")', async () => {
+    const db = aliceCtx().firestore();
+    const { responseTimeWeeks, ...noResponseTime } = validAgent(ALICE);
+    await assertSucceeds(
+      setDoc(doc(db, 'users', ALICE, 'agents', 'agent-1'), noResponseTime)
+    );
+  });
+
+  it('accepts an update that deleteField()s responseTimeWeeks ("Not set")', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'agents', 'agent-1'), validAgent(ALICE));
+    });
+    const db = aliceCtx().firestore();
+    await assertSucceeds(
+      updateDoc(doc(db, 'users', ALICE, 'agents', 'agent-1'), {
+        responseTimeWeeks: deleteField(),
+      })
+    );
+  });
+
+  it('still rejects a non-negative-int violation when responseTimeWeeks IS present', async () => {
+    const db = aliceCtx().firestore();
+    await assertFails(
+      setDoc(doc(db, 'users', ALICE, 'agents', 'agent-1'), {
+        ...validAgent(ALICE),
+        responseTimeWeeks: -3,
+      })
+    );
+  });
+
+  it('rejects an UPDATE that sets an invalid submissionStatus', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE, 'agents', 'agent-1'), validAgent(ALICE));
+    });
+    const db = aliceCtx().firestore();
+    await assertFails(
+      updateDoc(doc(db, 'users', ALICE, 'agents', 'agent-1'), {
         submissionStatus: 'Maybe',
       })
     );

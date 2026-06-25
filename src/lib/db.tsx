@@ -68,6 +68,7 @@ import { deriveQueryFields, getActivityTime, normalizeResultingStatus } from "./
 import { queriesForManuscript, queriesForAgent, activityIdsForQueries } from "./cascade";
 import { recomputeQuery as recomputeQueryOnline, subcollectionDocToDerivable, monotonicEventTime } from "./recomputeQuery";
 import { buildNudgeWrites } from "./logNudge";
+import { commitAgentEdits, AgentEditPatch, AgentExtraWrite, SaveAgentResult } from "./saveAgentEdits";
 
 // Connection validation test on boot as requested by skill
 async function testConnection() {
@@ -177,6 +178,7 @@ interface DbContextType {
   // Agent Actions
   addAgent: (a: Omit<Agent, "id" | "userId" | "dateAdded" | "lastCheckedDate"> & { id?: string }, bypassLimits?: boolean) => Promise<{ success: boolean; error?: string; id?: string }>;
   updateAgent: (id: string, fields: Partial<Agent>) => Promise<void>;
+  saveAgentEdits: (agentId: string, patch: AgentEditPatch, extraWrites?: AgentExtraWrite[]) => Promise<SaveAgentResult>;
   deleteAgent: (id: string) => Promise<void>;
   /** Set aside / bring back — reversible: drops from suggestions + idle bucket, keeps queries/history. */
   setAgentSetAside: (id: string, setAside: boolean) => Promise<void>;
@@ -1361,6 +1363,19 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
+  // The Edit Agent panel's write path (Prompt 2 UI calls this via useScriptAllyDb). Sanitises the
+  // patch (strips undefined, "Not set" → deleteField, guards the rule-enforced fields) and commits
+  // via writeBatch, leaving the `extraWrites` seam for the Prompt-3 deadline fan-out. Distinct from
+  // `updateAgent` (left untouched for its existing callers); returns a typed { ok } result.
+  const saveAgentEdits = (
+    agentId: string,
+    patch: AgentEditPatch,
+    extraWrites: AgentExtraWrite[] = []
+  ): Promise<SaveAgentResult> => {
+    if (!currentUser) return Promise.resolve({ ok: false, error: "Not signed in." });
+    return commitAgentEdits(db, currentUser.id, agentId, patch, extraWrites);
+  };
+
   const deleteAgent = async (id: string) => {
     if (!currentUser) return;
     const uid = currentUser.id;
@@ -2386,6 +2401,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         retirePackage,
         addAgent,
         updateAgent,
+        saveAgentEdits,
         deleteAgent,
         setAgentSetAside,
         addQuery,

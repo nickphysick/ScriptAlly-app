@@ -142,7 +142,10 @@ service cloud.firestore {
           data.submissionStatus == 'Closed' ||
           data.submissionStatus == 'Unknown'
         )
-        && data.responseTimeWeeks is int && data.responseTimeWeeks >= 0
+        // responseTimeWeeks may be ABSENT ("Not set" — the Edit Agent panel deleteField()s it so the
+        // deadline falls back to live-compute) OR a non-negative int. Mirrors the optional-field idiom
+        // below (twitter/socials/...). NOTE: isValidCommunityAgent keeps the strict int form.
+        && (!data.keys().hasAll(['responseTimeWeeks']) || (data.responseTimeWeeks is int && data.responseTimeWeeks >= 0))
         && data.noResponseMeansNo is bool
         && data.submissionMethod is string && data.submissionMethod.size() <= 128
         && (data.materialsWanted is list || data.materialsWanted is map) && data.materialsWanted.size() <= 20
