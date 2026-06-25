@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
-import { Agent, AgentSocial, SubmissionStatus, SubmissionMethod, QueryStatus } from "../types";
+import { Agent, AgentSocial, SubmissionStatus, QueryStatus } from "../types";
 import { StatusPill } from "./StatusPill";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase"; // Required for setting doc in online Mode
 import { collection, setDoc, doc, onSnapshot } from "firebase/firestore";
@@ -100,11 +100,9 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
   const deleteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingDeleteRef = useRef<{ agent: Agent; qn: number } | null>(null);
 
-  // Form Editing State
-  const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
-  // Edit Agent drawer (Prompt 2) — store the id so the agent prop stays LIVE (a save updates the
-  // live doc → the drawer reseeds to saved values). The legacy `editingAgent` modal stays for
-  // Prompt 4; this re-points only the "Edit profile" trigger.
+  // Edit Agent drawer — store the id so the agent prop stays LIVE (a save updates the live doc →
+  // the drawer reseeds to saved values). This is the only agent-edit surface; the legacy inline
+  // modal was retired in Prompt 4.
   const [editDrawerAgentId, setEditDrawerAgentId] = useState<string | null>(null);
 
   // Agent Notes State (Card 3 Jottings)
@@ -199,33 +197,6 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
       handleFirestoreError(err, OperationType.WRITE, `users/${currentUser.id}/agents/${selectedAgentId}/notes/${noteId}`);
     }
     setNoteInput("");
-  };
-
-  // Profile modal edit triggers
-  const startEditAgent = (agent: Agent) => {
-    setEditingAgent(JSON.parse(JSON.stringify(agent)));
-  };
-
-  const handleUpdateAgentSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingAgent) return;
-    await updateAgent(editingAgent.id, {
-      name: editingAgent.name,
-      agency: editingAgent.agency,
-      email: editingAgent.email,
-      website: editingAgent.website,
-      starRating: editingAgent.starRating,
-      submissionStatus: editingAgent.submissionStatus,
-      mswlNotes: editingAgent.mswlNotes,
-      submissionMethod: editingAgent.submissionMethod,
-      responseTimeWeeks: editingAgent.responseTimeWeeks,
-      noResponseMeansNo: editingAgent.noResponseMeansNo,
-      genres: editingAgent.genres,
-      notes: editingAgent.notes
-    });
-    setEditingAgent(null);
-    setToastMessage("Agent profile updated safely");
-    setTimeout(() => setToastMessage(null), 3000);
   };
 
   // Filter & Sort Logic for middle panel
@@ -1025,180 +996,6 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
           </div>
         );
       })()}
-
-      {/* ---------------- COMPREHENSIVE DIALOGUE MODAL EDIT PROFILE ---------------- */}
-      <AnimatePresence>
-        {editingAgent && (
-          <div className="fixed inset-0 bg-stone-950/40 backdrop-blur-sm flex items-center justify-center p-4 z-[999]" id="edit-agent-modal-overlay">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-2xl shadow-xl w-full max-w-xl max-h-[85vh] overflow-y-auto border border-[#FAF1EF]"
-            >
-              {/* Modal header */}
-              <div className="p-4 border-b border-[#FAF1EF] flex justify-between items-center bg-[#FAF8F5]">
-                <h4 style={{ fontFamily: "var(--font-serif, Georgia, serif)" }} className="text-base font-bold text-[#3a1c14]">
-                  Edit Agent Details
-                </h4>
-                <button
-                  onClick={() => setEditingAgent(null)}
-                  className="text-stone-400 hover:text-stone-700 cursor-pointer"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Edit forms */}
-              <form onSubmit={handleUpdateAgentSubmit} className="p-5 space-y-4 text-xs text-left">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-500 mb-1">Agent Name</label>
-                    <input
-                      required
-                      type="text"
-                      value={editingAgent.name}
-                      onChange={(e) => setEditingAgent({ ...editingAgent, name: e.target.value })}
-                      className="w-full text-xs p-2 bg-white rounded border border-[#e8d5cc] focus:ring-1 focus:ring-[#7c3a2a] outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-500 mb-1">Agency Name</label>
-                    <input
-                      required
-                      type="text"
-                      value={editingAgent.agency}
-                      onChange={(e) => setEditingAgent({ ...editingAgent, agency: e.target.value })}
-                      className="w-full text-xs p-2 bg-white rounded border border-[#e8d5cc] focus:ring-1 focus:ring-[#7c3a2a] outline-none"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-500 mb-1">Email address</label>
-                    <input
-                      type="email"
-                      value={editingAgent.email || ""}
-                      onChange={(e) => setEditingAgent({ ...editingAgent, email: e.target.value })}
-                      className="w-full text-xs p-2 bg-white rounded border border-[#e8d5cc] focus:ring-1 focus:ring-[#7c3a2a] outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-500 mb-1">Website URL</label>
-                    <input
-                      type="url"
-                      value={editingAgent.website || ""}
-                      onChange={(e) => setEditingAgent({ ...editingAgent, website: e.target.value })}
-                      className="w-full text-xs p-2 bg-white rounded border border-[#e8d5cc] focus:ring-1 focus:ring-[#7c3a2a] outline-none"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-500 mb-1">Status</label>
-                    <select
-                      value={editingAgent.submissionStatus}
-                      onChange={(e) => setEditingAgent({ ...editingAgent, submissionStatus: e.target.value as SubmissionStatus })}
-                      className="w-full text-xs p-2 bg-white rounded border border-[#e8d5cc] outline-none focus:ring-1 focus:ring-[#7c3a2a]"
-                    >
-                      <option value={SubmissionStatus.OPEN}>Open</option>
-                      <option value={SubmissionStatus.CLOSED}>Closed</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-500 mb-1">Rating</label>
-                    <select
-                      value={editingAgent.starRating}
-                      onChange={(e) => setEditingAgent({ ...editingAgent, starRating: parseInt(e.target.value) as any })}
-                      className="w-full text-xs p-2 bg-white rounded border border-[#e8d5cc] outline-none focus:ring-1 focus:ring-[#7c3a2a]"
-                    >
-                      <option value="5">Dream Agent (5★)</option>
-                      <option value="4">Strong match (4★)</option>
-                      <option value="3">Decent fit (3★)</option>
-                      <option value="2">Average fit (2★)</option>
-                      <option value="1">Reserve list (1★)</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-500 mb-1">Genres Looked For (Comma-separated)</label>
-                  <input
-                    type="text"
-                    value={editingAgent.genres ? editingAgent.genres.join(", ") : ""}
-                    onChange={(e) => setEditingAgent({ ...editingAgent, genres: e.target.value.split(",").map(val => val.trim()).filter(val => val !== "") })}
-                    placeholder="e.g. Literary Fiction, Fantasy, YA"
-                    className="w-full text-xs p-2 bg-white rounded border border-[#e8d5cc] outline-none focus:ring-1 focus:ring-[#7c3a2a]"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-500 mb-1">Submission Method</label>
-                    <select
-                      value={editingAgent.submissionMethod || "Email"}
-                      onChange={(e) => setEditingAgent({ ...editingAgent, submissionMethod: e.target.value as SubmissionMethod })}
-                      className="w-full text-xs p-2 bg-white rounded border border-[#e8d5cc] outline-none focus:ring-1 focus:ring-[#7c3a2a]"
-                    >
-                      <option value={SubmissionMethod.EMAIL}>Email</option>
-                      <option value={SubmissionMethod.ONLINE_FORM}>Online Form / QueryManager</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-500 mb-1">Response Time (weeks)</label>
-                    <input
-                      type="number"
-                      min="1"
-                      value={editingAgent.responseTimeWeeks || 6}
-                      onChange={(e) => setEditingAgent({ ...editingAgent, responseTimeWeeks: parseInt(e.target.value) || 6 })}
-                      className="w-full text-xs p-2 bg-white rounded border border-[#e8d5cc] outline-none focus:ring-1 focus:ring-[#7c3a2a]"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 py-1 cursor-pointer select-none font-semibold">
-                  <input
-                    id="no-response-toggle"
-                    type="checkbox"
-                    checked={editingAgent.noResponseMeansNo}
-                    onChange={(e) => setEditingAgent({ ...editingAgent, noResponseMeansNo: e.target.checked })}
-                    className="rounded text-[#7c3a2a]"
-                  />
-                  <label htmlFor="no-response-toggle">Silence policy means pass ("no response means no")</label>
-                </div>
-
-                <div>
-                  <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-500 mb-1">Manuscript wishlist text / MSWL</label>
-                  <textarea
-                    value={editingAgent.mswlNotes || ""}
-                    onChange={(e) => setEditingAgent({ ...editingAgent, mswlNotes: e.target.value })}
-                    placeholder="Look up their wishlist for specific queries cues..."
-                    className="w-full text-xs p-2 bg-white rounded border border-[#e8d5cc] outline-none focus:ring-1 focus:ring-[#7c3a2a] min-h-[60px]"
-                  />
-                </div>
-
-                <div className="flex justify-end gap-2.5 pt-4 border-t border-[#FAF1EF]">
-                  <button
-                    type="button"
-                    onClick={() => setEditingAgent(null)}
-                    className="bg-stone-200 text-stone-700 text-[10px] font-bold uppercase tracking-wider px-4 py-2 rounded-full cursor-pointer leading-normal border-0"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-[#7c3a2a] text-[#F8F5F0] text-[10px] font-bold uppercase tracking-wider px-4 py-2 rounded-full cursor-pointer leading-normal border-0"
-                  >
-                    Save Changes
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
 
       {/* Edit Agent drawer — opened from "Edit profile". Agent looked up live by id so a save
           reseeds it to the saved state. onOpenQuery navigates to the queries DB (the Edit Query
