@@ -26,7 +26,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import Lottie from "lottie-react";
 import { useScriptAllyDb } from "../lib/db";
 import { Agent, AgentSocial, Query, QueryStatus, SubmissionStatus, SubmissionMethod } from "../types";
-import { BrandDropdown, WeekSlider, GenreCombobox, FitStars } from "./forms";
+import { BrandDropdown, WeekSlider, GenreCombobox, FitStars, SegmentedToggle } from "./forms";
 import { StatusDot } from "./StatusDot";
 import { getStatusLabel } from "./StatusPill";
 import { AgentEditPatch } from "../lib/saveAgentEdits";
@@ -117,8 +117,24 @@ export interface EditAgentDrawerProps {
 const prefersReducedMotion = () =>
   typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-/** Field labels for the needs-attention banner copy. */
-const NEED_LABEL: Record<AgentDataNeed, string> = { mswl: "manuscript wishlist", materials: "materials wanted" };
+/** Per-deficiency copy for the in-focus journey + banner. `ref` keys the field for spotlight/scroll. */
+const NEED_INFO: Record<AgentDataNeed, { label: string; why: string; where: string }> = {
+  responseTime: {
+    label: "response time",
+    why: "Their typical turnaround lets ScriptAlly tell you when a query has gone cold and a chaser is due.",
+    where: "Their submission page or QueryTracker usually states a window (often 8–12 weeks). Not stated anywhere? Mark it Unknown.",
+  },
+  materials: {
+    label: "materials wanted",
+    why: "Sending exactly what they ask for — no more, no less — keeps your submission clean and on their good side.",
+    where: "Their submission guidelines list what to include: query letter, synopsis, first pages/chapters, word count.",
+  },
+  mswl: {
+    label: "manuscript wishlist",
+    why: "Their wishlist is your best steer on whether — and how — to pitch this particular book.",
+    where: "Look at their #MSWL posts, agency bio, or recent interviews for the kinds of stories they want.",
+  },
+};
 
 export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen, onClose, lockScroll, highlightNeeds, onOpenQuery, onSavedToast }) => {
   const { queries, manuscripts, saveAgentEdits } = useScriptAllyDb();
@@ -133,11 +149,32 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
   const [closing, setClosing] = useState(false);
   const editBuf = useRef<string>("");
 
+  // In-focus journey (task-routed opens). journeyFields = the deficiencies FROZEN at open (so the
+  // step list doesn't shift as they're filled); journeyStep: -1 intro, 0..N-1 field steps, N success,
+  // null = no journey / ended (→ calm banner). fieldRefs let the spotlight scroll a field into view.
+  const [journeyFields, setJourneyFields] = useState<AgentDataNeed[]>([]);
+  const [journeyStep, setJourneyStep] = useState<number | null>(null);
+  const fieldRefs = useRef<Partial<Record<AgentDataNeed, HTMLDivElement | null>>>({});
+  const highlightSet = journeyFields;
+  const journeyActive = journeyStep !== null && journeyStep >= 0 && journeyStep < highlightSet.length;
+  const currentField: AgentDataNeed | null = journeyActive ? highlightSet[journeyStep as number] : null;
+
   // Reseed when the agent changes or the drawer (re)opens — rehydrating a parked draft if one exists.
   useEffect(() => {
     setS(parkedDrafts.get(agent.id) ?? orig);
     setEditing(null); setSaved(false); setSaveError(null); setAgencyConfirmed(false);
-  }, [orig, isOpen, agent.id]);
+    const needs = highlightNeeds
+      ? agentDataQualityNeeds({ mswlNotes: agent.mswlNotes, materialsWanted: agent.materialsWanted, responseTimeWeeks: agent.responseTimeWeeks })
+      : [];
+    setJourneyFields(needs);
+    setJourneyStep(needs.length ? -1 : null); // open the intro when there are deficiencies
+  }, [orig, isOpen, agent.id, highlightNeeds]);
+
+  // Spotlight: scroll the current journey field into view when the step changes.
+  useEffect(() => {
+    if (!currentField) return;
+    fieldRefs.current[currentField]?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "center" });
+  }, [currentField]);
 
   // Reset the slide-back only on (re)open — NOT on the post-save agent reseed (the host keeps the
   // drawer mounted with isOpen=true through the close), which would otherwise cancel it mid-flight.
@@ -160,7 +197,7 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
   // animationend (fallback timeout guards). Reduced-motion → instant (finishClose calls onClose).
   useEffect(() => {
     if (!closing) return;
-    const t = setTimeout(onClose, 600);
+    const t = setTimeout(onClose, 250); // matches the ~0.18s fast exit (+ a little slack)
     return () => clearTimeout(t);
   }, [closing, onClose]);
 
@@ -190,19 +227,20 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
   if (S.email.trim() !== "" && !emailOk(S.email)) liveErrors.email = "That doesn’t look like an email address. Fix it or clear the field.";
   const blocked = Object.keys(liveErrors).length > 0 || materialsBad.size > 0 || needAgencyConfirm;
 
-  // Needs-highlight (task-routed opens only). highlightSet = the fields deficient AT OPEN (the same
-  // predicate the to-do uses, on the original agent); `remaining` re-runs the predicate on the LIVE
-  // draft so a field's pulse clears the moment it's filled. When `remaining` empties, the banner
-  // flips to "all set" and a save makes the derived task re-evaluate clean (it disappears).
-  const highlightSet: AgentDataNeed[] = highlightNeeds
-    ? agentDataQualityNeeds({ mswlNotes: agent.mswlNotes, materialsWanted: agent.materialsWanted })
-    : [];
+  // `remaining` re-runs the SAME predicate on the LIVE draft, so a field clears the instant it's
+  // filled (and a save makes the derived to-do re-evaluate clean → it disappears).
   const draftNeeds = highlightSet.length
-    ? agentDataQualityNeeds({ mswlNotes: S.mswl, materialsWanted: buildAgentMaterials(S.materials) })
+    ? agentDataQualityNeeds({ mswlNotes: S.mswl, materialsWanted: buildAgentMaterials(S.materials), responseTimeWeeks: S.weeks })
     : [];
   const remaining = highlightSet.filter((n) => draftNeeds.includes(n));
-  const needRing = (n: AgentDataNeed): "" | "pulse" | "done" =>
-    !highlightSet.includes(n) ? "" : remaining.includes(n) ? "pulse" : "done";
+  // During the journey only the current field rings (steady spotlight); once it ends, still-deficient
+  // fields gently pulse and cleared ones show the sage confirm.
+  const fieldHighlight = (n: AgentDataNeed): "" | "spotlight" | "pulse" | "done" => {
+    if (!highlightSet.includes(n)) return "";
+    if (journeyStep !== null && journeyStep < highlightSet.length) return n === currentField ? "spotlight" : "";
+    return remaining.includes(n) ? "pulse" : "done";
+  };
+  const bannerShown = highlightSet.length > 0 && (journeyStep === null || journeyStep >= highlightSet.length);
 
   const set = <K extends keyof Draft>(k: K, v: Draft[K]) => {
     if (k === "agency") setAgencyConfirmed(false); // re-clearing prompts confirm again
@@ -381,13 +419,48 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
 
               {/* scrolling body */}
               <div className="ea-body" style={{ flex: 1, overflowY: "auto", padding: "16px 20px 20px" }}>
-                {highlightSet.length > 0 && (
+                {/* In-focus journey (intro → one field at a time → success), then a calm banner. */}
+                {journeyStep === -1 && (
+                  <div className="ea-jcard">
+                    <div className="ea-jtitle">Let’s finish {firstName(S.name)}’s profile</div>
+                    <div className="ea-jwhy">{highlightSet.length} detail{highlightSet.length === 1 ? " is" : "s are"} missing — I’ll walk you through {highlightSet.length === 1 ? "it" : "them"}, one at a time.</div>
+                    <div className="ea-jrow">
+                      <button type="button" className="ea-jnext" onClick={() => setJourneyStep(0)}>Start</button>
+                      <button type="button" className="ea-jskip" onClick={() => setJourneyStep(null)}>I’ll do it myself</button>
+                    </div>
+                  </div>
+                )}
+                {journeyActive && currentField && (
+                  <div className="ea-jcard">
+                    <div className="ea-jstep">Step {(journeyStep as number) + 1} of {highlightSet.length}</div>
+                    <div className="ea-jtitle">Add their {NEED_INFO[currentField].label}</div>
+                    <div className="ea-jwhy">{NEED_INFO[currentField].why}</div>
+                    <div className="ea-jwhere"><b>Where to find it:</b> {NEED_INFO[currentField].where}</div>
+                    <div className="ea-jrow">
+                      <button type="button" className="ea-jback" onClick={() => setJourneyStep((journeyStep as number) === 0 ? -1 : (journeyStep as number) - 1)}>Back</button>
+                      <span style={{ flex: 1 }} />
+                      <button type="button" className="ea-jskip" onClick={() => setJourneyStep(null)}>Skip</button>
+                      <button type="button" className="ea-jnext" onClick={() => {
+                        const last = (journeyStep as number) === highlightSet.length - 1;
+                        if (!last) setJourneyStep((journeyStep as number) + 1);
+                        else setJourneyStep(remaining.length === 0 ? highlightSet.length : null);
+                      }}>{(journeyStep as number) === highlightSet.length - 1 ? "Finish" : "Next"}</button>
+                    </div>
+                  </div>
+                )}
+                {journeyStep === highlightSet.length && highlightSet.length > 0 && (
+                  <div className="ea-jcard success">
+                    <div className="ea-jtitle"><OkIcon /> All done — you can query {firstName(S.name)} with confidence.</div>
+                    <div className="ea-jrow"><button type="button" className="ea-jnext" onClick={() => setJourneyStep(null)}>Done</button></div>
+                  </div>
+                )}
+                {bannerShown && (
                   <div className={`ea-needbanner${remaining.length === 0 ? " allset" : ""}`}>
                     {remaining.length === 0 ? <OkIcon /> : <AlertIcon />}
                     <span>
                       {remaining.length === 0
                         ? <>All set — the highlighted details are filled. <b>Save</b> to clear this from your to-do list.</>
-                        : <>This agent’s profile needs a little more. Add the highlighted <b>{remaining.map((n) => NEED_LABEL[n]).join(" and ")}</b> to complete it.</>}
+                        : <>Still to add: <b>{remaining.map((n) => NEED_INFO[n].label).join(" and ")}</b>. The highlighted field{remaining.length === 1 ? "" : "s"} below need{remaining.length === 1 ? "s" : ""} it.</>}
                     </span>
                   </div>
                 )}
@@ -413,7 +486,18 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
                 <Two>
                   <Field>
                     <Label on={dirty.status}>Submission status</Label>
-                    <StatusToggle value={S.status} onChange={(v) => set("status", v)} />
+                    {/* Reuse the create form's SegmentedToggle verbatim; Unknown → neither lit + caption. */}
+                    <div style={{ marginTop: 2 }}>
+                      <SegmentedToggle<SubmissionStatus>
+                        ariaLabel="Submission status"
+                        value={S.status}
+                        options={[{ value: SubmissionStatus.OPEN, label: "Open" }, { value: SubmissionStatus.CLOSED, label: "Closed" }]}
+                        onChange={(v) => set("status", v)}
+                      />
+                      {S.status !== SubmissionStatus.OPEN && S.status !== SubmissionStatus.CLOSED && (
+                        <div style={{ fontSize: 10.5, color: C.muted, fontStyle: "italic", marginTop: 5 }}>Status unknown — choose Open or Closed</div>
+                      )}
+                    </div>
                     {S.status === SubmissionStatus.CLOSED && openCount > 0 && (
                       <SoftNote>You have <b>{openCount} open {openCount === 1 ? "query" : "queries"}</b> to {firstName(S.name)}. Marking them closed won’t touch those — it just stops them appearing when you log a new query.</SoftNote>
                     )}
@@ -422,20 +506,22 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
                 </Two>
                 <Field>
                   <Label on={dirty.weeks}>Response time</Label>
-                  <WeekSlider
-                    label=""
-                    value={S.weeks}
-                    onChange={(n) => set("weeks", n)}
-                    onUnknown={() => set("weeks", null)}
-                    notSetHint="No turnaround on record — their queries won’t get a “response expected by” date or a follow-up nudge until you add one."
-                  />
+                  <NeedWrap ring={fieldHighlight("responseTime")} innerRef={(el) => { fieldRefs.current.responseTime = el; }}>
+                    <WeekSlider
+                      label=""
+                      value={S.weeks}
+                      onChange={(n) => set("weeks", n)}
+                      onUnknown={() => set("weeks", null)}
+                      unknownHint="No turnaround on record means no “response expected by” date and no chaser reminder. If their guidelines don’t state one, a typical agency window is 8–12 weeks — set that, or mark Unknown."
+                    />
+                  </NeedWrap>
                 </Field>
                 <Field><Label on={dirty.noReply}>Response policy</Label><EaSelect value={noReplyLabel(S.noReply)} options={[NOREPLY_TRUE, NOREPLY_FALSE]} onChange={(v) => set("noReply", v === NOREPLY_TRUE)} /></Field>
-                <Field><Label on={dirty.materials}>Materials wanted</Label><NeedWrap ring={needRing("materials")}><MaterialsControl state={S.materials} bad={materialsBad} onChange={(v) => set("materials", v)} /></NeedWrap></Field>
+                <Field><Label on={dirty.materials}>Materials wanted</Label><NeedWrap ring={fieldHighlight("materials")} innerRef={(el) => { fieldRefs.current.materials = el; }}><MaterialsControl state={S.materials} bad={materialsBad} onChange={(v) => set("materials", v)} /></NeedWrap></Field>
 
                 <Sec top>Genres &amp; wishlist</Sec>
                 <Field><Label on={dirty.genres}>Genres</Label><div style={{ marginTop: 2 }}><GenreCombobox options={AGENT_GENRES} value={S.genres} onChange={(v) => set("genres", v)} placeholder="Type a genre…" /></div></Field>
-                <Field><Label on={dirty.mswl}>Manuscript wishlist (MSWL)</Label><NeedWrap ring={needRing("mswl")}><TextField field="mswl" value={S.mswl} placeholder="Add a manuscript wishlist" multiline quoted /></NeedWrap></Field>
+                <Field><Label on={dirty.mswl}>Manuscript wishlist (MSWL)</Label><NeedWrap ring={fieldHighlight("mswl")} innerRef={(el) => { fieldRefs.current.mswl = el; }}><TextField field="mswl" value={S.mswl} placeholder="Add a manuscript wishlist" multiline quoted /></NeedWrap></Field>
 
                 <Sec top>Notes</Sec>
                 <Field last><Label on={dirty.notes}>Private notes</Label><TextField field="notes" value={S.notes} placeholder="Add a private note" multiline /></Field>
@@ -494,9 +580,10 @@ const Two: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px", marginBottom: 14 }}>{children}</div>
 );
 
-// ── needs-attention ring wrapper (task-routed opens): pink pulse while deficient, sage once filled ─
-const NeedWrap: React.FC<{ ring: "" | "pulse" | "done"; children: React.ReactNode }> = ({ ring, children }) =>
-  ring ? <div className={`ea-need ea-need-${ring}`}>{children}</div> : <>{children}</>;
+// ── needs-attention ring wrapper (task-routed opens): steady spotlight in the journey; pink pulse
+//    while deficient afterwards; sage once filled. `innerRef` lets the journey scroll it into view. ─
+const NeedWrap: React.FC<{ ring: "" | "pulse" | "done" | "spotlight"; innerRef?: (el: HTMLDivElement | null) => void; children: React.ReactNode }> = ({ ring, innerRef, children }) =>
+  (ring || innerRef) ? <div ref={innerRef} className={ring ? `ea-need ea-need-${ring}` : undefined}>{children}</div> : <>{children}</>;
 
 // ── one-click styled native select (method / response policy / country) ──────────
 // Always visible, opens on a single click (no reveal indirection), commits on change. Styled to
@@ -508,31 +595,6 @@ const EaSelect: React.FC<{ value: string; options: string[]; onChange: (v: strin
       {placeholder && <option value="">{placeholder}</option>}
       {options.map((o) => <option key={o} value={o}>{o}</option>)}
     </select>
-  );
-};
-
-// ── status toggle: sage Open / soft-pink Closed; Unknown → neutral caption ────────
-const StatusToggle: React.FC<{ value: SubmissionStatus; onChange: (s: SubmissionStatus) => void }> = ({ value, onChange }) => {
-  const isUnknown = value !== SubmissionStatus.OPEN && value !== SubmissionStatus.CLOSED;
-  return (
-    <div style={{ marginTop: 2 }}>
-      <div className="ea-segtoggle">
-        {([SubmissionStatus.OPEN, SubmissionStatus.CLOSED] as const).map((s) => {
-          const on = value === s;
-          // v14 A+B semantic: Open = light panel-header sage; Closed = soft-pink + burgundy text.
-          const activeBg = s === SubmissionStatus.OPEN ? C.sage1 : C.pink;
-          const activeColor = s === SubmissionStatus.OPEN ? C.darkSage : C.burgundy;
-          return (
-            <button key={s} type="button" className="ea-seg" aria-pressed={on}
-              onClick={() => onChange(s)}
-              style={{ background: on ? activeBg : "transparent", color: on ? activeColor : "#94816e", boxShadow: on ? "0 1px 3px rgba(40,40,30,.22)" : "none" }}>
-              {s}
-            </button>
-          );
-        })}
-      </div>
-      {isUnknown && <div style={{ fontSize: 10.5, color: C.muted, fontStyle: "italic", marginTop: 5 }}>Status unknown — choose Open or Closed</div>}
-    </div>
   );
 };
 
@@ -641,9 +703,9 @@ const PencilGlyph = () => (
 const EditAgentStyles: React.FC = () => (
   <style>{`
     @keyframes ea-slide-in { 0%{transform:translateX(125%) rotate(-5deg);} 65%{transform:translateX(0) rotate(-3deg);} 100%{transform:translateX(0) rotate(0deg);} }
-    @keyframes ea-slide-out { 0%{transform:translateX(0) rotate(0deg);} 35%{transform:translateX(0) rotate(-3deg);} 100%{transform:translateX(130%) rotate(-5deg);} }
+    @keyframes ea-slide-out { 0%{transform:translateX(0) rotate(0deg);} 100%{transform:translateX(130%) rotate(-4deg);} }
     .ea-slide > div { animation: ea-slide-in .55s cubic-bezier(.22,.61,.36,1); transform-origin:center; }
-    .ea-slide.ea-closing > div { animation: ea-slide-out .5s cubic-bezier(.22,.61,.36,1) forwards; }
+    .ea-slide.ea-closing > div { animation: ea-slide-out .18s cubic-bezier(.5,0,.9,.4) forwards; }
     @media (prefers-reduced-motion: reduce) { .ea-slide > div, .ea-slide.ea-closing > div { animation: none !important; } }
     .ea-body::-webkit-scrollbar{width:7px;} .ea-body::-webkit-scrollbar-thumb{background:#e3d6c8;border-radius:4px;}
     .ea-needbanner{display:flex;gap:9px;align-items:flex-start;background:#fdf0ea;border:1px solid #f0d4c8;border-radius:10px;padding:11px 13px;margin-bottom:16px;font-size:11.5px;line-height:1.5;color:#8a5a44;}
@@ -653,7 +715,21 @@ const EditAgentStyles: React.FC = () => (
     @keyframes ea-need-pulse{0%,100%{box-shadow:0 0 0 0 rgba(232,200,188,0);}50%{box-shadow:0 0 0 4px rgba(232,200,188,0.6);}}
     .ea-need-pulse{animation:ea-need-pulse 1.8s ease-in-out infinite;}
     .ea-need-done{box-shadow:0 0 0 2px rgba(138,158,136,0.55);transition:box-shadow .3s;}
-    @media (prefers-reduced-motion: reduce){.ea-need-pulse{animation:none;box-shadow:0 0 0 3px rgba(232,200,188,0.7);}}
+    .ea-need-spotlight{box-shadow:0 0 0 3px rgba(124,58,42,0.45);transition:box-shadow .25s;}
+    @media (prefers-reduced-motion: reduce){.ea-need-pulse{animation:none;box-shadow:0 0 0 3px rgba(232,200,188,0.7);}.ea-need-spotlight{transition:none;}}
+    .ea-jcard{background:#fdf0ea;border:1px solid #f0d4c8;border-radius:11px;padding:13px 15px;margin-bottom:16px;}
+    .ea-jcard.success{background:#eef2ec;border-color:#d8e0d4;}
+    .ea-jstep{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:#b08968;margin-bottom:4px;}
+    .ea-jtitle{font-family:'Playfair Display',serif;font-size:15px;color:#3a1c14;margin-bottom:5px;display:flex;align-items:center;gap:7px;}
+    .ea-jcard.success .ea-jtitle{color:#3f5a3c;}
+    .ea-jwhy{font-size:11.5px;line-height:1.5;color:#7a5c48;margin-bottom:6px;}
+    .ea-jwhere{font-size:11px;line-height:1.5;color:#8a7d6e;margin-bottom:11px;}
+    .ea-jwhere b{color:#6a5e50;font-weight:600;}
+    .ea-jrow{display:flex;align-items:center;gap:8px;}
+    .ea-jnext{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.05em;text-transform:uppercase;background:#7c3a2a;color:#f8f5f0;border:none;border-radius:7px;padding:7px 16px;cursor:pointer;}
+    .ea-jnext:hover{background:#5e2b1f;}
+    .ea-jback,.ea-jskip{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;background:transparent;border:none;color:#a89a8a;cursor:pointer;padding:6px 4px;}
+    .ea-jback:hover,.ea-jskip:hover{color:#7c3a2a;}
     .ea-editable{position:relative;display:flex;align-items:center;gap:8px;min-height:38px;padding:8px 11px;background:#fffdf9;border:1px solid #ece2d4;border-radius:8px;cursor:text;transition:border-color .14s,background .14s;margin-top:2px;}
     .ea-editable.selectable{cursor:pointer;}
     .ea-editable:hover{border-color:#d8c9b6;background:#fffefb;}

@@ -30,4 +30,18 @@ describe("agentDataQualityNeeds", () => {
     expect(agentDataQualityNeeds({ mswlNotes: "x", materialsWanted: { query: { selected: true } } })).toEqual([]);
     expect(agentDataQualityNeeds({ mswlNotes: "x", materialsWanted: { query: { selected: false } } })).toEqual(["materials"]);
   });
+
+  it("flags response-time only for the 0 stub placeholder", () => {
+    const clean = { mswlNotes: "x", materialsWanted: ["Query letter"] };
+    expect(agentDataQualityNeeds({ ...clean, responseTimeWeeks: 0 })).toEqual(["responseTime"]);
+    expect(agentDataQualityNeeds({ ...clean, responseTimeWeeks: 8 })).toEqual([]);
+    // Explicit Unknown (absent / null) clears it — a valid answer.
+    expect(agentDataQualityNeeds({ ...clean, responseTimeWeeks: null })).toEqual([]);
+    expect(agentDataQualityNeeds({ ...clean, responseTimeWeeks: undefined })).toEqual([]);
+  });
+
+  it("returns the full set in journey order (responseTime → materials → mswl)", () => {
+    expect(agentDataQualityNeeds({ mswlNotes: "", materialsWanted: [], responseTimeWeeks: 0 }))
+      .toEqual(["responseTime", "materials", "mswl"]);
+  });
 });
