@@ -500,6 +500,7 @@ export const SubmissionPackages: React.FC = () => {
     });
     setPkgError(null);
     setView("packages");
+    setDetailPkgId(null); // leave the detail screen so the inline builder is visible in the list
     setBuildOpen(true);
   };
   const createOrSave = async () => {
@@ -588,7 +589,8 @@ export const SubmissionPackages: React.FC = () => {
 
   const verName = (id: string) => msVersions.find((v) => v.id === id)?.versionName ?? "—";
 
-  // ── The package builder (name + three pickers + live preview + set-active), shown in the build drawer ──
+  // ── The inline package builder (header + Close · name + three pickers row · preview + set-active
+  //    line · Create). Unfolds in place at the top of the Your-packages section; no drawer, no scrim. ──
   const renderBuilder = () => {
     const rateLabelFor = (v: ManuscriptVersion) => {
       const cm = componentMetrics(v.id, msPackages, msQueries);
@@ -606,68 +608,78 @@ export const SubmissionPackages: React.FC = () => {
     ];
 
     return (
-      <div style={{ padding: "20px 22px 22px", display: "flex", flexDirection: "column", gap: 12 }}>
-        <input value={pkgName} maxLength={120} onChange={(e) => setPkgName(e.target.value)} placeholder={'Package name — e.g. "Comp-heavy", "Standard sub"'} style={inputStyle} autoFocus />
-        {LIB_KINDS.map((kind) => {
-          const m = COMP[kind];
-          const kindVersions = msVersions.filter((v) => v.componentType === kind);
-          return (
-            <div key={kind} style={{ display: "flex", alignItems: "center", gap: 11, background: "#fbf6ef", border: "1px solid #e8ddcf", borderRadius: 10, padding: "11px 12px" }}>
-              <span style={{ width: 30, height: 30, borderRadius: 8, background: m.tile, color: m.color, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <m.Icon style={{ width: 15, height: 15 }} strokeWidth={2} aria-hidden="true" />
-              </span>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.06em", textTransform: "uppercase", color: mutedInk, marginBottom: 2 }}>{m.slotLabel}</div>
-                <SlotDropdown
-                  versions={kindVersions}
-                  selectedId={sel[kind]}
-                  rateLabel={rateLabelFor}
-                  newLabel={`+ New ${m.noun}`}
-                  onSelect={(id) => setSel((s) => ({ ...s, [kind]: id }))}
-                  onNew={() => openNew(kind, kind)}
-                />
-              </div>
-            </div>
-          );
-        })}
+      <div className="sp-inline-builder" style={{ background: parchment, border: `1px solid ${ghostButtonBorder}`, borderRadius: 14, boxShadow: "0 6px 20px rgba(58,28,20,0.08)", padding: "16px 18px 18px" }}>
+        {/* header row */}
+        <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 14 }}>
+          <span style={{ width: 3, height: 17, borderRadius: 2, background: burgundy, flexShrink: 0 }} aria-hidden="true" />
+          <span style={{ fontFamily: FONT_SERIF, fontSize: 16, fontWeight: 500, color: headingInk }}>{editingPkgId ? "Edit package" : "Build a package"}</span>
+          <span className="sp-build-hint" style={{ fontFamily: FONT_MONO, fontSize: 9, color: mutedInk, letterSpacing: "0.04em" }}>— name it, pick one of each</span>
+          <button onClick={closeBuild} aria-label="Close builder" className="sp-icon-btn" style={{ marginLeft: "auto", background: "transparent", border: "none", cursor: "pointer", color: mutedInk, display: "inline-flex", padding: 4, borderRadius: 6, flexShrink: 0 }}>
+            <X style={{ width: 16, height: 16 }} strokeWidth={2} aria-hidden="true" />
+          </button>
+        </div>
 
-        {/* Live preview — the package as it will read once saved */}
-        <div style={{ background: "#f7f1e8", border: "1px dashed #e0d2c0", borderRadius: 10, padding: "12px 13px" }}>
-          <div style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: "0.08em", textTransform: "uppercase", color: labelColor, marginBottom: 8 }}>Preview</div>
-          {canSave ? (
-            <>
-              <div style={{ fontFamily: FONT_SERIF, fontSize: 15, fontWeight: 500, color: headingInk, marginBottom: 8, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{pkgName.trim()}</div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+        {/* name + the three pickers — one row, wrapping gracefully at narrow widths */}
+        <div className="sp-build-row" style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+          <div style={{ flex: "1 1 180px", minWidth: 160 }}>
+            <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.06em", textTransform: "uppercase", color: mutedInk, marginBottom: 4 }}>Name</div>
+            <input value={pkgName} maxLength={120} onChange={(e) => setPkgName(e.target.value)} placeholder={'e.g. "Comp-heavy"'} style={inputStyle} autoFocus />
+          </div>
+          {LIB_KINDS.map((kind) => {
+            const m = COMP[kind];
+            const kindVersions = msVersions.filter((v) => v.componentType === kind);
+            return (
+              <div key={kind} style={{ flex: "1 1 180px", minWidth: 160 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 5, fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.06em", textTransform: "uppercase", color: mutedInk, marginBottom: 4 }}>
+                  <KindDot kind={kind} size={6} /> {m.slotLabel}
+                </div>
+                <div style={{ background: "#fbf6ef", border: "1px solid #e8ddcf", borderRadius: 10, padding: "11px 12px" }}>
+                  <SlotDropdown
+                    versions={kindVersions}
+                    selectedId={sel[kind]}
+                    rateLabel={rateLabelFor}
+                    newLabel={`+ New ${m.noun}`}
+                    onSelect={(id) => setSel((s) => ({ ...s, [kind]: id }))}
+                    onNew={() => openNew(kind, kind)}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* second line: live preview + the set-active toggle */}
+        <div className="sp-build-row2" style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 12, alignItems: "stretch" }}>
+          <div style={{ flex: "2 1 280px", minWidth: 220, background: "#f7f1e8", border: "1px dashed #e0d2c0", borderRadius: 10, padding: "11px 13px", display: "flex", alignItems: "center", gap: 12, minHeight: 44 }}>
+            <span style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: "0.08em", textTransform: "uppercase", color: labelColor, flexShrink: 0 }}>Preview</span>
+            {canSave ? (
+              <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0, flexWrap: "wrap" }}>
+                <span style={{ fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 500, color: headingInk, whiteSpace: "nowrap" }}>{pkgName.trim()}</span>
                 {chosen.map(([kind, id]) => <Chip key={kind} kind={kind} label={verName(id)} />)}
               </div>
-            </>
-          ) : (
-            <div style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 12.5, color: mutedInk }}>Name it and pick one of each to see the package preview.</div>
+            ) : (
+              <span style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 12, color: mutedInk }}>Name it and pick one of each.</span>
+            )}
+          </div>
+          {!editingPkgId && (
+            <div style={{ flex: "1 1 200px", minWidth: 190, display: "flex", alignItems: "center", gap: 10, background: "#f3f6f1", borderRadius: 10, padding: "10px 13px" }}>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={setActiveOnCreate}
+                aria-label="Make this the active package"
+                onClick={() => setSetActiveOnCreate((v) => !v)}
+                style={{ width: 38, height: 22, borderRadius: 999, border: "none", cursor: "pointer", padding: 2, background: setActiveOnCreate ? "#8a9e88" : "#d8cbbd", display: "inline-flex", alignItems: "center", justifyContent: setActiveOnCreate ? "flex-end" : "flex-start", transition: "background .18s", flexShrink: 0 }}
+              >
+                <span style={{ width: 18, height: 18, borderRadius: "50%", background: "#fff", boxShadow: "0 1px 2px rgba(58,28,20,0.2)" }} />
+              </button>
+              <span style={{ fontFamily: FONT_SANS, fontSize: 12, color: bodyInk, lineHeight: 1.3 }}>Make this the active package</span>
+            </div>
           )}
         </div>
 
-        {/* Set-active toggle (create only) — defaults on per the locked decision */}
-        {!editingPkgId && (
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={setActiveOnCreate}
-              aria-label="Make this the active package"
-              onClick={() => setSetActiveOnCreate((v) => !v)}
-              style={{ width: 38, height: 22, borderRadius: 999, border: "none", cursor: "pointer", padding: 2, background: setActiveOnCreate ? "#8a9e88" : "#d8cbbd", display: "inline-flex", alignItems: "center", justifyContent: setActiveOnCreate ? "flex-end" : "flex-start", transition: "background .18s", flexShrink: 0 }}
-            >
-              <span style={{ width: 18, height: 18, borderRadius: "50%", background: "#fff", boxShadow: "0 1px 2px rgba(58,28,20,0.2)" }} />
-            </button>
-            <span style={{ fontFamily: FONT_SANS, fontSize: 12.5, color: bodyInk }}>
-              Make this the active package
-              <span style={{ display: "block", fontFamily: FONT_MONO, fontSize: 9, color: mutedInk, letterSpacing: "0.02em", marginTop: 1 }}>pre-fills new queries on this manuscript</span>
-            </span>
-          </div>
-        )}
-
-        {pkgError && <div style={{ fontFamily: FONT_SANS, fontSize: 12.5, color: "#A32D2D" }}>{pkgError}</div>}
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 9, marginTop: 4 }}>
+        {pkgError && <div style={{ fontFamily: FONT_SANS, fontSize: 12.5, color: "#A32D2D", marginTop: 10 }}>{pkgError}</div>}
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 9, marginTop: 14 }}>
           <button style={ghostBtn} onClick={closeBuild}>Cancel</button>
           <button style={{ ...addBtn, padding: "11px 22px", opacity: canSave ? 1 : 0.45, cursor: canSave ? "pointer" : "not-allowed" }} disabled={!canSave} onClick={createOrSave}>
             <Check style={{ width: 12, height: 12 }} strokeWidth={2.4} aria-hidden="true" /> {editingPkgId ? "Save changes" : "Create package"}
@@ -677,43 +689,7 @@ export const SubmissionPackages: React.FC = () => {
     );
   };
 
-  // ── The slide-in build drawer (scrim + left panel). Mounted in both list & detail so editing a
-  //    package from the detail screen can open it. SlotDropdown menus portal to <body> (no clip). ──
-  const renderBuildDrawer = () => (
-    <>
-      <div
-        aria-hidden="true"
-        onClick={closeBuild}
-        style={{ position: "fixed", inset: 0, zIndex: 90, background: "rgba(58,28,20,0.28)", opacity: buildOpen ? 1 : 0, pointerEvents: buildOpen ? "auto" : "none", transition: "opacity .28s" }}
-      />
-      <aside
-        role="dialog"
-        aria-modal={buildOpen}
-        aria-label={editingPkgId ? "Edit package" : "Build a package"}
-        aria-hidden={!buildOpen}
-        style={{ position: "fixed", top: 0, left: 0, height: "100%", width: "min(440px, 92vw)", zIndex: 91, transform: buildOpen ? "translateX(0)" : "translateX(-101%)", transition: "transform .28s cubic-bezier(.4,0,.2,1)", padding: 14, overflowY: "auto", background: pageGround, boxShadow: buildOpen ? "8px 0 32px rgba(58,28,20,0.18)" : "none" }}
-      >
-        <MountPanel>
-          <BandHeader title={editingPkgId ? "Edit package" : "Build a package"} meta="name it, pick one of each — reuse across as many queries as you like" Icon={Plus} />
-          {renderBuilder()}
-        </MountPanel>
-      </aside>
-    </>
-  );
-
-  // ── A quiet "Build a package" tab docked to the left edge. ──
-  const renderLeftBuildTab = () =>
-    buildOpen ? null : (
-      <button
-        onClick={openBuild}
-        title="Build a package"
-        style={{ position: "fixed", left: 0, top: "42%", zIndex: 40, display: "inline-flex", alignItems: "center", gap: 7, padding: "13px 9px", border: `1px solid ${buttonPinkBorder}`, borderLeft: "none", borderRadius: "0 12px 12px 0", background: parchment, color: burgundy, cursor: "pointer", boxShadow: "2px 2px 10px rgba(58,28,20,0.12)", writingMode: "vertical-rl", transform: "rotate(180deg)", fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: 500 }}
-      >
-        <Plus style={{ width: 13, height: 13 }} strokeWidth={2.4} aria-hidden="true" /> Build a package
-      </button>
-    );
-
-  // ── Packages view: active spotlight + shelf of other packages + dotted ghosts. ──
+  // ── Packages view: active spotlight + inline builder + shelf of other packages + dotted ghosts. ──
   const renderPackagesView = () => {
     const active = resolveActivePackage(activeMs, msPackages);
     const shelf = msPackages.filter((p) => p.id !== active?.id);
@@ -796,7 +772,14 @@ export const SubmissionPackages: React.FC = () => {
               <div style={{ fontFamily: FONT_SERIF, fontSize: 24, fontWeight: 500, color: headingInk, lineHeight: 1.1 }}>Choose your default package</div>
               <div style={{ fontFamily: FONT_SANS, fontSize: 13.5, color: "#4a3e34", lineHeight: 1.55, marginTop: 11 }}>
                 {msPackages.length === 0 ? (
-                  <>Build your first package — then set it active to pre-fill the materials on every new query for <b>{activeMs?.title}</b>.</>
+                  <>
+                    Build your first package — then set it active to pre-fill the materials on every new query for <b>{activeMs?.title}</b>.
+                    <div style={{ marginTop: 14 }}>
+                      <button onClick={openBuild} style={{ ...addBtn, padding: "9px 16px" }}>
+                        <Plus style={{ width: 12, height: 12 }} strokeWidth={2.4} aria-hidden="true" /> Build your first package
+                      </button>
+                    </div>
+                  </>
                 ) : suggestion ? (
                   <>
                     Set a package active to pre-fill new queries on this manuscript. Based on what's winning requests, we'd suggest{" "}
@@ -814,6 +797,9 @@ export const SubmissionPackages: React.FC = () => {
             </div>,
           )
         )}
+
+        {/* Inline builder — unfolds in place above the shelf when a ghost / empty-CTA opens it */}
+        {buildOpen && renderBuilder()}
 
         {/* ── Shelf: the other packages + dotted ghosts ── */}
         <div>
@@ -1366,6 +1352,7 @@ export const SubmissionPackages: React.FC = () => {
         .sp-add-mat:hover { border-color: #c9a89e !important; color: ${burgundy} !important; background: rgba(251,243,236,0.4) !important; }
         .sp-link:hover { text-decoration: underline; }
         @media (max-width: 880px) { .sp-lib { grid-template-columns: 1fr !important; } }
+        @media (max-width: 560px) { .sp-workspace { padding: 16px 14px 20px !important; } .sp-build-hint { display: none; } }
         /* spotlight: diagonal sage wash + corner glow (the greeting-container treatment) */
         .sp-wave { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
         .sp-wave::before { content: ''; position: absolute; top: -60%; left: -75%; width: 55%; height: 220%; background: linear-gradient(100deg, transparent 0%, rgba(138,158,136,0.07) 35%, rgba(176,200,168,0.20) 50%, rgba(138,158,136,0.07) 65%, transparent 100%); transform: rotate(6deg); animation: spSheen 9s ease-in-out infinite; }
@@ -1452,7 +1439,8 @@ export const SubmissionPackages: React.FC = () => {
           </div>
         </div>
 
-        {/* ── Tab content ── */}
+        {/* ── Tab content — both pill views housed in one workspace container. No overflow:hidden, so
+              the inline builder's SlotDropdown menus stay free; the spotlight keeps its own frame-clip. ── */}
         {!activeMs ? (
           <MountPanel>
             <BandHeader title="No manuscripts yet" Icon={Layers} />
@@ -1460,14 +1448,12 @@ export const SubmissionPackages: React.FC = () => {
               Add a manuscript from the Manuscripts list first — packages are built per manuscript.
             </div>
           </MountPanel>
-        ) : view === "packages" ? (
-          <>
-            {detailPkgId ? renderDetail() : renderPackagesView()}
-            {renderLeftBuildTab()}
-            {renderBuildDrawer()}
-          </>
         ) : (
-          renderLibrary()
+          // Workspace surface: a soft warm near-white, a hair lighter than the parchment cards
+          // (#fdfaf5) so cards read as sitting ON it, and clearly lighter than the kraft ground.
+          <div className="sp-workspace" style={{ background: "#fefcf8", border: "1px solid rgba(124,58,42,0.10)", borderRadius: 18, boxShadow: "0 1px 2px rgba(58,28,20,0.04), 0 12px 34px rgba(58,28,20,0.06)", padding: "24px 24px 28px" }}>
+            {view === "packages" ? (detailPkgId ? renderDetail() : renderPackagesView()) : renderLibrary()}
+          </div>
         )}
       </div>
 
