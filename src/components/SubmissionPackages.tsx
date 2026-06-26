@@ -352,6 +352,7 @@ interface FormState {
   notes: string;
   mode: ContentMode;
   link: string; // → contentLink
+  selectInto?: ComponentType; // when opened from a build slot's "+ New …", auto-fill that slot on create
 }
 
 export const SubmissionPackages: React.FC = () => {
@@ -438,8 +439,8 @@ export const SubmissionPackages: React.FC = () => {
     setMsMenuOpen(false);
   };
 
-  const openNew = (kind: ComponentType) =>
-    setForm({ kind, name: "", content: "", notes: "", mode: kind === ComponentType.SAMPLE_PAGES ? "link" : "paste", link: "" });
+  const openNew = (kind: ComponentType, selectInto?: ComponentType) =>
+    setForm({ kind, name: "", content: "", notes: "", mode: kind === ComponentType.SAMPLE_PAGES ? "link" : "paste", link: "", selectInto });
   const openEdit = (v: ManuscriptVersion) =>
     setForm({ kind: v.componentType, editing: v, name: v.versionName, content: v.contentDraft ?? "", notes: v.notes ?? "", mode: v.contentType === "link" ? "link" : "paste", link: v.contentLink ?? "" });
 
@@ -468,7 +469,13 @@ export const SubmissionPackages: React.FC = () => {
         await updateVersion(form.editing.id, { versionName: name, notes, ...payload });
       }
     } else {
-      await addVersion({ manuscriptId: msId, componentType: form.kind, versionName: name, fileAttached: false, notes, ...payload });
+      const newId = await addVersion({ manuscriptId: msId, componentType: form.kind, versionName: name, fileAttached: false, notes, ...payload });
+      // Wired build flow: a version created from a build-slot "+ New …" drops straight into that slot
+      // (only when the kind still matches — the user may have switched the type in the editor).
+      if (newId && form.selectInto && form.selectInto === form.kind) {
+        const slot = form.selectInto;
+        setSel((s) => ({ ...s, [slot]: newId }));
+      }
     }
     setForm(null);
   };
@@ -617,7 +624,7 @@ export const SubmissionPackages: React.FC = () => {
                   rateLabel={rateLabelFor}
                   newLabel={`+ New ${m.noun}`}
                   onSelect={(id) => setSel((s) => ({ ...s, [kind]: id }))}
-                  onNew={() => openNew(kind)}
+                  onNew={() => openNew(kind, kind)}
                 />
               </div>
             </div>

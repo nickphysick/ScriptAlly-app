@@ -171,7 +171,7 @@ interface DbContextType {
   setManuscriptShelved: (id: string, shelved: boolean) => Promise<void>;
   
   // Version Actions
-  addVersion: (v: Omit<ManuscriptVersion, "id" | "userId" | "createdDate">) => Promise<void>;
+  addVersion: (v: Omit<ManuscriptVersion, "id" | "userId" | "createdDate">) => Promise<string>;
   updateVersion: (id: string, fields: Partial<Pick<ManuscriptVersion, "versionName" | "contentDraft" | "fileAttached" | "fileName" | "notes" | "contentType" | "contentLink">>) => Promise<void>;
   deleteVersion: (id: string) => Promise<void>;
 
@@ -1154,8 +1154,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   };
 
   // Version Actions
-  const addVersion = async (v: Omit<ManuscriptVersion, "id" | "userId" | "createdDate">) => {
-    if (!currentUser) return;
+  const addVersion = async (v: Omit<ManuscriptVersion, "id" | "userId" | "createdDate">): Promise<string> => {
+    if (!currentUser) return "";
     const id = "ver-" + Math.random().toString(36).substr(2, 9);
     const newVer: ManuscriptVersion = {
       ...v,
@@ -1165,8 +1165,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     };
     try {
       await setDoc(doc(db, "users", currentUser.id, "versions", id), newVer);
+      return id; // returned so a build-slot "+ New …" can auto-select the freshly created version
     } catch (e) {
       handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/versions/${id}`);
+      return "";
     }
   };
 
