@@ -39,6 +39,8 @@ import { REVIEW_FIXTURE, REVIEW_FIXTURE_DUPES } from "./components/onboarding/Sm
 import { ImportingLoader } from "./components/onboarding/ImportingLoader";
 // TEMP: scatter-settle extraction loader dev preview (#/scatter-loader) — remove after sign-off.
 import { ScatterSettleLoader, LoaderCard } from "./components/onboarding/ScatterSettleLoader";
+// TEMP: duplicate-query reconcile card dev preview (#/reconcile-card) — remove after sign-off.
+import { ReconcileCardDevPreview } from "./components/onboarding/ReconcileCard";
 import { QueryStatus, SubmissionStatus, SubmissionMethod } from "./types";
 // TEMP: Form11Drawer review harness (#/drawer-lab) — renders the Edit Agent / Edit Query drawers over
 // a mock record so the shared shell can be eyeballed without signing in. DEV only.
@@ -229,6 +231,10 @@ function AppContent() {
   // Dev-only scatter-settle extraction loader preview (auto-loops scatter → snap/crystallise).
   if (hash === "#/scatter-loader" && import.meta.env.DEV) {
     return <ScatterLoaderDevHarness />;
+  }
+  // Dev-only duplicate-query reconcile card preview (working ⇄ sorted, local state).
+  if (hash === "#/reconcile-card" && import.meta.env.DEV) {
+    return <ReconcileCardDevPreview />;
   }
   // Dev-only notes review surface (PostIt / quick-add / editor) — local state, no persistence.
   if (hash === "#/notes-lab" && import.meta.env.DEV) {

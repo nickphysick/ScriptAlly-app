@@ -588,14 +588,29 @@ export const rowsIdentical = (a: ReviewQuery, b: ReviewQuery): boolean =>
 const ladderMax = (statuses: QueryStatus[]): QueryStatus =>
   statuses.reduce((a, b) => (QUERY_STATUS_OPTIONS.indexOf(b) > QUERY_STATUS_OPTIONS.indexOf(a) ? b : a), statuses[0] ?? QueryStatus.QUERIED);
 
+/** The current status the engine derives over the UNION of a cluster's rows — built as the exact
+ *  committed rung shape (impliedRungs + assignTimes) then read back with deriveStatus, so it equals
+ *  what recomputeQuery writes post-commit. The reconcile card's DEFAULT kept status (no divergence).
+ *  Notes are irrelevant to derivation, so the seed omits them. */
+export function derivedCurrentStatus(rows: ReviewQuery[]): QueryStatus {
+  const seed: ParsedQuery = {
+    agentRef: rows[0]?.agentRef ?? "",
+    status: ladderMax(rows.map((r) => r.status)),
+    sentDate: rows.find((r) => r.status === QueryStatus.QUERIED)?.sentDate ?? null,
+    timeline: rows.flatMap((r) => [{ type: r.status, date: r.sentDate, raw: r.sentDateRaw }, ...r.timeline]),
+    notes: "",
+  };
+  return deriveStatus(assignTimes(impliedRungs(seed), 0).map((t) => ({ resultingStatus: t.status, date: t.ms })));
+}
+
 /** Collapse duplicate rows (the same submission recorded at different stages) into ONE query whose
  *  history is the UNION of the rows' rungs — each row becomes a timeline event carrying its own
- *  status, date and note. The current status is ENGINE-DERIVED: we build the exact rung shape commit
- *  will (impliedRungs + assignTimes), then read the status back with deriveStatus, so the collapsed
- *  query's status equals what recomputeQuery writes post-commit — the UI default can't diverge. The
- *  kept row (matching the derived status) lends id/agentRef; the others' facts ride its history.
- *  Pure: no Firestore, returns a new ReviewQuery. (Caller removes the absorbed rows + agent.) */
-export function reconcileRows(rows: ReviewQuery[]): ReviewQuery {
+ *  status, date and note. The kept status DEFAULTS to the engine derivation (derivedCurrentStatus),
+ *  so the collapsed query equals what recomputeQuery writes — no divergence; `keptStatus` applies the
+ *  writer's explicit override (selecting the other row on the card). The kept row (matching the kept
+ *  status) lends id/agentRef; the others' facts ride its history. Pure: returns a new ReviewQuery.
+ *  (Caller removes the absorbed rows + agent.) */
+export function reconcileRows(rows: ReviewQuery[], keptStatus?: QueryStatus): ReviewQuery {
   // Every row becomes a timeline event at its own status/date, carrying its note (the harvest). A row
   // literally at QUERIED donates the spine date so the query's dateSent is set; otherwise unknown.
   const queriedRow = rows.find((r) => r.status === QueryStatus.QUERIED);
@@ -605,10 +620,7 @@ export function reconcileRows(rows: ReviewQuery[]): ReviewQuery {
     { type: r.status, date: r.sentDate, raw: r.sentDateRaw, ...(r.notes.trim() ? { note: r.notes.trim() } : {}) },
     ...r.timeline,
   ]);
-  // Derive the current status the way commit will (importBase 0: the keys are ordering-only).
-  const seed: ParsedQuery = { agentRef: rows[0].agentRef, status: ladderMax(rows.map((r) => r.status)), sentDate, sentDateRaw, timeline, notes: "" };
-  const timed = assignTimes(impliedRungs(seed), 0);
-  const status = deriveStatus(timed.map((t) => ({ resultingStatus: t.status, date: t.ms })));
+  const status = keptStatus ?? derivedCurrentStatus(rows);
   const keeper = rows.find((r) => r.status === status) ?? rows[0];
   return { ...keeper, status, sentDate, sentDateRaw, timeline, notes: "", reasons: [], removed: false, removedReason: undefined };
 }

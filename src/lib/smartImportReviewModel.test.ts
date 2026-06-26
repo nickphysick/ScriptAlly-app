@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseModel, modelToResult, applyAgentRemoval, quoteStatuses, queryReasonText, statusDirectionChoices, reviewTallies, seedUnidentifiedSetAside, decideStageEntry, doneStageMessage, keepBothLabel, dupNoteKept, focusReasonMeta, agentTier, reconcileRows, rowsIdentical, type FocusReasonKey, ReviewQuery } from './smartImportReviewModel';
+import { parseModel, modelToResult, applyAgentRemoval, quoteStatuses, queryReasonText, statusDirectionChoices, reviewTallies, seedUnidentifiedSetAside, decideStageEntry, doneStageMessage, keepBothLabel, dupNoteKept, focusReasonMeta, agentTier, reconcileRows, rowsIdentical, derivedCurrentStatus, type FocusReasonKey, ReviewQuery } from './smartImportReviewModel';
 import { impliedRungs, assignTimes } from './impliedRungs';
 import { deriveStatus } from './queryDerivation';
 import { QueryStatus } from '../types';
@@ -415,5 +415,24 @@ describe('reconcileRows — collapse duplicate query rows into one (Priya part 2
     expect(rowsIdentical(a, row({ status: QueryStatus.PARTIAL_SENT, sentDate: '2024-05-02' }))).toBe(false);
     expect(rowsIdentical(a, row({ status: QueryStatus.PARTIAL_REQUESTED, sentDate: '2024-05-01' }))).toBe(false);
     expect(rowsIdentical(row({ status: QueryStatus.QUERIED, sentDate: null }), row({ status: QueryStatus.QUERIED, sentDate: null }))).toBe(true);
+  });
+
+  it('derivedCurrentStatus is the card default (engine-derived) — Priya → Partial Sent', () => {
+    expect(derivedCurrentStatus([
+      row({ status: QueryStatus.PARTIAL_REQUESTED, sentDate: null }),
+      row({ status: QueryStatus.PARTIAL_SENT, sentDate: '2024-05-01' }),
+    ])).toBe(QueryStatus.PARTIAL_SENT);
+  });
+
+  it('keptStatus override: selecting the other row keeps the query at that status (history still holds both rungs)', () => {
+    const collapsed = reconcileRows([
+      row({ id: 'q1', status: QueryStatus.PARTIAL_REQUESTED, sentDate: null, notes: 'asked for 50pp' }),
+      row({ id: 'q2', status: QueryStatus.PARTIAL_SENT, sentDate: '2024-05-01' }),
+    ], QueryStatus.PARTIAL_REQUESTED);
+    expect(collapsed.status).toBe(QueryStatus.PARTIAL_REQUESTED); // the writer's explicit override
+    expect(collapsed.id).toBe('q1');                              // the kept row lends identity
+    const statuses = rungs(collapsed).map((r) => r.status);
+    expect(statuses).toContain(QueryStatus.PARTIAL_REQUESTED);
+    expect(statuses).toContain(QueryStatus.PARTIAL_SENT);         // both rungs still present
   });
 });
