@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseModel, modelToResult, applyAgentRemoval, quoteStatuses, queryReasonText, statusDirectionChoices, reviewTallies, seedUnidentifiedSetAside, decideStageEntry, doneStageMessage, keepBothLabel, dupNoteKept, focusReasonMeta, agentTier, reconcileRows, rowsIdentical, derivedCurrentStatus, type FocusReasonKey, ReviewQuery } from './smartImportReviewModel';
+import { parseModel, modelToResult, applyAgentRemoval, quoteStatuses, queryReasonText, statusDirectionChoices, reviewTallies, seedUnidentifiedSetAside, decideStageEntry, doneStageMessage, keepBothLabel, dupNoteKept, focusReasonMeta, agentTier, reconcileRows, rowsIdentical, derivedCurrentStatus, applyDuplicateCollapse, type FocusReasonKey, ReviewQuery } from './smartImportReviewModel';
 import { impliedRungs, assignTimes } from './impliedRungs';
 import { deriveStatus } from './queryDerivation';
 import { QueryStatus } from '../types';
@@ -434,5 +434,21 @@ describe('reconcileRows — collapse duplicate query rows into one (Priya part 2
     const statuses = rungs(collapsed).map((r) => r.status);
     expect(statuses).toContain(QueryStatus.PARTIAL_REQUESTED);
     expect(statuses).toContain(QueryStatus.PARTIAL_SENT);         // both rungs still present
+  });
+
+  it('applyDuplicateCollapse: merges the two Priya agents AND collapses their two query rows into one', () => {
+    // two agency-less Priya agents (cluster via part 1), one query each — PR "50pp"/no-date + PS 1 May.
+    const { agents, queries } = parseModel(result(
+      [agent({ ref: 'p1', name: 'Priya Raman', agency: '' }), agent({ ref: 'p2', name: 'Priya Raman', agency: '' })],
+      [query({ agentRef: 'p1', status: QueryStatus.PARTIAL_REQUESTED, notes: 'asked for 50pp' }),
+       query({ agentRef: 'p2', status: QueryStatus.PARTIAL_SENT, sentDate: '2024-05-01' })],
+    ));
+    const out = applyDuplicateCollapse(agents, queries, 'p2');
+    expect(out.agents.find((a) => a.id === 'p2')!.deleted).toBe(true); // duplicate agent merged away
+    const live = out.queries.filter((q) => !q.removed);
+    expect(live.length).toBe(1);                                       // ONE query, not two (the fix)
+    expect(live[0].status).toBe(QueryStatus.PARTIAL_SENT);             // engine-derived current
+    const pr = rungs(live[0]).find((r) => r.status === QueryStatus.PARTIAL_REQUESTED)!;
+    expect(pr.note).toBe('asked for 50pp');                            // discarded row's note in history
   });
 });

@@ -57,7 +57,9 @@ export const REVIEW_FIXTURE_DUPES: SmartImportResult = {
     { agentRef: "d4", status: QueryStatus.QUERIED, sentDate: "2024-04-02", sentDateRaw: "02/04/2024" },
     { agentRef: "d5", status: QueryStatus.PARTIAL_REQUESTED, sentDate: "2024-04-20", sentDateRaw: "20/04/2024" },
     { agentRef: "d6", status: QueryStatus.QUERIED, sentDate: "2024-05-06", sentDateRaw: "06/05/2024" },
-    { agentRef: "d7", status: QueryStatus.QUERIED, sentDate: "2024-06-01", sentDateRaw: "01/06/2024" },
-    { agentRef: "d8", status: QueryStatus.FULL_REQUESTED, sentDate: "2024-06-10", sentDateRaw: "10/06/2024" },
+    // The two Priya rows DIFFER (Partial Requested "50pp"/no-date + Partial Sent 1 May) → the part-2
+    // reconcile card collapses them into one query, deriving Partial Sent + harvesting "asked for 50pp".
+    { agentRef: "d7", status: QueryStatus.PARTIAL_REQUESTED, sentDate: null, sentDateRaw: null, notes: "asked for 50pp" },
+    { agentRef: "d8", status: QueryStatus.PARTIAL_SENT, sentDate: "2024-05-01", sentDateRaw: "01/05/2024" },
   ],
 };

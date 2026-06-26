@@ -25,7 +25,9 @@ import {
   dupNoteOpen, dupNoteKept, dupNoteMerged, parseModel, modelToResult, applyAgentRemoval, seedUnidentifiedSetAside, decideStageEntry,
   currentDate, quoteStatuses, queryReasonText, statusDirectionChoices, removeDuplicateRecord, buildClusters, doneStageMessage,
   keepBothLabel, keptClusterLabel, mergedAwayByKeeper, focusReasonMeta,
+  rowsIdentical, derivedCurrentStatus, applyDuplicateCollapse,
 } from "../../lib/smartImportReviewModel";
+import { ReconcileCard, ReconcileCardRow } from "./ReconcileCard";
 
 // ── Palette (from the sketch; critical colours inline per house style) ──────────────────────────
 const C = {
@@ -1918,6 +1920,12 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   // Per-cluster pre-resolution snapshot (keyed by leader id) — restored verbatim on Undo, so a merge or
   // keep-both can be cleanly reversed (un-delete the removed agent, revert repointed queries).
   const snapRef = useRef<Record<string, { agents: ReviewAgent[]; queries: { id: string; agentRef: string }[] }>>({});
+  // Reconcile (part 2): per-cluster query-collapse. A FULL snapshot (the cluster's agents + queries) so
+  // "Change this" / reset can revert a collapse — the merge snapRef above only stores agentRefs, which
+  // can't undo a collapsed timeline / removed row. `reconciled` drives the card's working↔sorted state,
+  // keyed by the cluster leader id.
+  const reconcileSnapRef = useRef<Record<string, { agents: ReviewAgent[]; queries: ReviewQuery[] }>>({});
+  const [reconciled, setReconciled] = useState<Record<string, { keptId: string; kind: "collapsed" | "split" }>>({});
   // "Reset all changes" baseline. Starts as the pristine parse, but is RE-CAPTURED the moment the user
   // leaves the locked duplicates stage — so resetting on the Agents screen reverts only Agents-screen
   // edits and keeps the merge / keep-both decisions intact. (Per-cluster Undo / Back-to-duplicates
@@ -2097,6 +2105,48 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
     setTick((t) => t + 1);
   };
 
+  // ── Reconcile (part 2): collapse a flagged pair's two query rows into ONE ──────────────────────────
+  // Full snapshot of the cluster (agents + queries) so the collapse is revertible; first-write-wins.
+  const snapReconcile = (leaderId: string) => {
+    if (reconcileSnapRef.current[leaderId]) return;
+    const leader = agents.find((a) => a.id === leaderId);
+    if (!leader) return;
+    const ids = new Set([leader.id, ...leader.mergeWith]);
+    reconcileSnapRef.current[leaderId] = {
+      agents: agents.filter((a) => ids.has(a.id)).map((a) => JSON.parse(JSON.stringify(a)) as ReviewAgent),
+      queries: queries.filter((q) => ids.has(q.agentRef)).map((q) => JSON.parse(JSON.stringify(q)) as ReviewQuery),
+    };
+  };
+  // "Looks right" — merge the pair AND collapse their two query rows into one derived-history query.
+  const reconcileCollapse = (leaderId: string, removedId: string, keptStatus: QueryStatus, keptId: string) => {
+    snapReconcile(leaderId);
+    const next = applyDuplicateCollapse(agents, queries, removedId, keptStatus);
+    setAgents(next.agents); setQueries(next.queries);
+    setReconciled((r) => ({ ...r, [leaderId]: { keptId, kind: "collapsed" } }));
+    setTick((t) => t + 1);
+  };
+  // "These are actually different submissions" — keep both as separate queries (the additive merge).
+  const reconcileSplit = (leaderId: string, removedId: string, keptId: string) => {
+    snapReconcile(leaderId);
+    const next = removeDuplicateRecord(agents, queries, removedId);
+    setAgents(next.agents); setQueries(next.queries);
+    setReconciled((r) => ({ ...r, [leaderId]: { keptId, kind: "split" } }));
+    setTick((t) => t + 1);
+  };
+  // "↩ Change this" / reset — restore the cluster's pre-collapse agents + queries by id.
+  const revertReconcile = (leaderId: string) => {
+    const snap = reconcileSnapRef.current[leaderId];
+    if (snap) {
+      const aMap = new Map(snap.agents.map((a) => [a.id, a]));
+      const qMap = new Map(snap.queries.map((q) => [q.id, q]));
+      setAgents((xs) => xs.map((a) => aMap.get(a.id) ?? a));
+      setQueries((xs) => xs.map((q) => qMap.get(q.id) ?? q));
+      delete reconcileSnapRef.current[leaderId];
+    }
+    setReconciled((r) => { const n = { ...r }; delete n[leaderId]; return n; });
+    setTick((t) => t + 1);
+  };
+
   // Mark a non-duplicate (mapping) reason as checked — resolve in place, keeping the struck note.
   const resolveMapping = (id: string) => { setAgents((xs) => xs.map((a) => (a.id === id ? { ...a, reasons: resolveReason(a, "mapping") } : a))); setTick((t) => t + 1); };
 
@@ -2152,6 +2202,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   //  • Agents stage: revert agents AND their query cascade to the post-duplicates baseline.
   const reset = () => {
     if ((screen as string) === "duplicates") {
+      Object.keys(reconcileSnapRef.current).forEach((leaderId) => revertReconcile(leaderId)); // undo collapses/splits
       Object.keys(snapRef.current).forEach((leaderId) => undoCluster(leaderId)); // restores members + repointed queries
       setOpenId(null); setTopcap(null); setPulseIds([]); setTick((t) => t + 1);
       return;
@@ -2422,6 +2473,36 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   // resolve UI and resolved ones in their settled state, so a decision stays revisitable via Back.
   // Pure + unit-tested in smartImportReviewModel (a partial 3-way never classifies as merged).
   const allClusters = buildClusters(agents);
+
+  // Render a flagged pair as the reconcile card (part 2): working while the cluster is open, sorted once
+  // collapsed/split. `members` = the two cluster agents (keeper first). Rows are the live member queries
+  // while open, or the pre-collapse snapshot once resolved (one row is then removed but still shown so the
+  // harvest/summary reads correctly). manuscriptTitle is "" — the import has no per-row title (degenerate
+  // axis), so the card omits its confirming-context title line.
+  const renderReconcileCard = (leaderId: string, members: ReviewAgent[]) => {
+    const keeper = members[0];
+    const res = reconciled[leaderId] ?? null;
+    const snap = reconcileSnapRef.current[leaderId];
+    const memberIds = new Set(members.map((m) => m.id));
+    const sourceQueries = res && snap ? snap.queries : queries;
+    const rowQs = sourceQueries.filter((q) => memberIds.has(q.agentRef) && (res ? true : !q.removed));
+    const rows: ReconcileCardRow[] = rowQs.map((q) => ({ id: q.id, status: q.status, dateLabel: q.sentDate ? fmtDate(q.sentDate) : "no date", note: q.notes.trim() }));
+    const defaultKeptId = (rowQs.find((q) => q.status === derivedCurrentStatus(rowQs)) ?? rowQs[0])?.id ?? "";
+    const removedId = members[1]?.id ?? "";
+    return (
+      <ReconcileCard
+        key={`recon-${leaderId}`}
+        agentName={keeper.name || keeper.agency || "this agent"}
+        manuscriptTitle=""
+        rows={rows}
+        defaultKeptId={defaultKeptId}
+        resolved={res}
+        onLooksRight={(keptId) => reconcileCollapse(leaderId, removedId, rowQs.find((q) => q.id === keptId)!.status, keptId)}
+        onSplit={() => reconcileSplit(leaderId, removedId, defaultKeptId)}
+        onChange={() => revertReconcile(leaderId)}
+      />
+    );
+  };
 
   // Compose the cards column (Agents screen) into render units (singles + duplicate clusters), in order.
   const units: React.ReactNode[] = [];
@@ -2856,11 +2937,21 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
                     node: renderResolvedCluster({ leaderId: c.leaderId, members: c.members, type: "keepboth", survivor: c.survivor }) });
                   c.members.forEach((m) => placed.add(m.id));
                 } else { // open (merge type never arises — a resolved merge has no live anchor)
-                  const bars = byKeeper.get(c.leaderId) ?? [];
-                  units.push({ sort: at(c.leaderId, ...bars.map((b) => b.id)),
-                    node: renderCluster(c.members[0], c.openMembers, true, bars) });
-                  placed.add(c.leaderId);
-                  bars.forEach((b) => placed.add(b.id));
+                  // A two-member pair with one live query each that DIFFER → the reconcile card (collapse
+                  // into one query), in place. Identical rows / 3-ways / other shapes keep the dedupe control.
+                  const pair = c.openMembers.length === 2
+                    ? c.openMembers.map((m) => queries.find((q) => q.agentRef === m.id && !q.removed)).filter((q): q is ReviewQuery => !!q)
+                    : [];
+                  if (pair.length === 2 && !rowsIdentical(pair[0], pair[1])) {
+                    units.push({ sort: at(...c.members.map((m) => m.id)), node: renderReconcileCard(c.leaderId, c.openMembers) });
+                    c.members.forEach((m) => placed.add(m.id));
+                  } else {
+                    const bars = byKeeper.get(c.leaderId) ?? [];
+                    units.push({ sort: at(c.leaderId, ...bars.map((b) => b.id)),
+                      node: renderCluster(c.members[0], c.openMembers, true, bars) });
+                    placed.add(c.leaderId);
+                    bars.forEach((b) => placed.add(b.id));
+                  }
                 }
               }
               // Fully-resolved merges: a keeper no longer anchoring any open cluster, plus its bars. Anchored
@@ -2870,7 +2961,10 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
                 if (placed.has(keeperId)) continue;
                 const keeper = agents.find((a) => a.id === keeperId);
                 if (!keeper || keeper.deleted) continue;
-                units.push({ sort: at(keeperId, ...bars.map((b) => b.id)), node: renderResolvedMerge(keeper, bars) });
+                // A pair resolved via the reconcile card shows its OWN sorted state (collapsed/split), in
+                // place — not the generic resolved-merge bar.
+                units.push({ sort: at(keeperId, ...bars.map((b) => b.id)),
+                  node: reconciled[keeperId] ? renderReconcileCard(keeperId, [keeper, ...bars]) : renderResolvedMerge(keeper, bars) });
               }
               units.sort((a, b) => a.sort - b.sort);
               return units.length

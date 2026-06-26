@@ -625,6 +625,33 @@ export function reconcileRows(rows: ReviewQuery[], keptStatus?: QueryStatus): Re
   return { ...keeper, status, sentDate, sentDateRaw, timeline, notes: "", reasons: [], removed: false, removedReason: undefined };
 }
 
+/** Resolve a flagged cluster by COLLAPSING its query rows into one (the part-2 path) rather than the
+ *  additive merge. Reuses removeDuplicateRecord for the agent side (set aside the duplicate, repoint
+ *  its queries to the survivor, resolve the dup reason), then reconciles the survivor's now-merged
+ *  query rows into a single derived-history query and drops the absorbed row(s). `keptStatus` carries
+ *  the card's override. If fewer than 2 rows remain to collapse, the additive merge stands untouched.
+ *  Pure: returns new arrays (the UI keeps the snapshot/undo). */
+export function applyDuplicateCollapse(
+  agents: ReviewAgent[],
+  queries: ReviewQuery[],
+  removedId: string,
+  keptStatus?: QueryStatus
+): { agents: ReviewAgent[]; queries: ReviewQuery[]; survivorId: string | null } {
+  const merged = removeDuplicateRecord(agents, queries, removedId);
+  if (!merged.survivorId) return merged;
+  const survivorId = merged.survivorId;
+  const rows = merged.queries.filter((q) => !q.removed && q.agentRef === survivorId);
+  if (rows.length < 2) return merged; // nothing to collapse — the additive merge stands
+  const collapsed = reconcileRows(rows, keptStatus);
+  const absorbed = new Set(rows.filter((r) => r.id !== collapsed.id).map((r) => r.id));
+  const nextQueries = merged.queries.map((q) =>
+    q.id === collapsed.id ? collapsed
+      : absorbed.has(q.id) ? { ...q, removed: true, removedReason: "Removed by you" as const }
+      : q
+  );
+  return { agents: merged.agents, queries: nextQueries, survivorId };
+}
+
 /** Convert the final working model back into a SmartImportResult for commitSmartImport. Excludes
  *  deleted agents / removed queries, carries merge-repointed agentRefs, and writes each query's
  *  edited spine (sentDate) + timeline straight through. null stays null (never fabricated). */

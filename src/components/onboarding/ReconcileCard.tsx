@@ -85,7 +85,7 @@ export const ReconcileCard: React.FC<ReconcileCardProps> = ({
   const hasTitle = manuscriptTitle.trim().length > 0;
 
   return (
-    <MountPanel style={{ width: 580, maxWidth: "100%" }}>
+    <MountPanel style={{ width: "100%", maxWidth: 580, margin: "0 auto" }}>
       <style>{RECONCILE_STYLE}</style>
       {resolved === null
         ? renderWorking()
