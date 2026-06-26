@@ -12,9 +12,15 @@
 import { doc, setDoc, getDocs, deleteDoc, collection, Timestamp, updateDoc, deleteField } from "firebase/firestore";
 import { db } from "./firebase";
 import { recomputeQuery } from "./recomputeQuery";
-import { Agent, ActivityType, QueryStatus, SubmissionMethod } from "../types";
+import { Agent, ActivityType, SubmissionMethod } from "../types";
 import { SmartImportResult, ParsedAgent, ParsedQuery } from "../types/smartImport";
 import { validateSmartImport } from "./smartImport";
+import { impliedRungs, assignTimes } from "./impliedRungs";
+
+// The pure rung helpers moved to ./impliedRungs (so the pure review model can reuse them without
+// pulling Firebase). Re-exported here for back-compat: smartImportCommit.test.ts + emailImportCommit
+// import them from this module.
+export { impliedRungs, assignTimes };
 
 export interface CommitDeps {
   userId: string;
@@ -51,105 +57,6 @@ export function countExistingMatches(result: SmartImportResult, existingAgents: 
 
 const mapMethod = (m: ParsedAgent["submissionMethod"]): SubmissionMethod =>
   m === "Online Form" ? SubmissionMethod.ONLINE_FORM : SubmissionMethod.EMAIL;
-
-// The linear pipeline ladder. Terminal statuses (Offer/Rejected/Withdrawn/No Response) and R&R
-// aren't on it — they're appended as the final rung.
-const LADDER: QueryStatus[] = [
-  QueryStatus.QUERIED,
-  QueryStatus.PARTIAL_REQUESTED,
-  QueryStatus.PARTIAL_SENT,
-  QueryStatus.FULL_REQUESTED,
-  QueryStatus.FULL_SENT,
-];
-// Off-ladder final statuses, in a stable display order after the ladder.
-const OFF_LADDER: QueryStatus[] = [
-  QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER,
-  QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE,
-];
-
-interface SeedRung { status: QueryStatus; date: string | null; }
-
-/**
- * The activity rungs a query's final status implies, in pipeline order — so the SHAPE of the
- * history is correct (a "Partial Sent" query shows queried → partial-requested → partial-sent).
- *
- * Dates come from the query's SPINE (sentDate → the queried rung) and its `timeline` (each note
- * event → its matching rung, carrying its parsed date). Every other implied rung is provisional
- * (date null, never fabricated). A "sent" stage implies its matching "requested"; R&R implies a
- * full was read. Seeding a timeline event (e.g. a full-requested) as a real rung is what lets
- * recomputeQuery set hasAgentResponded correctly — the "Responses Received" under-count fix.
- */
-export function impliedRungs(q: ParsedQuery): SeedRung[] {
-  const final = q.status!;
-  const include = new Set<QueryStatus>([QueryStatus.QUERIED]);
-
-  // Dates we genuinely know: the spine seeds the queried rung; each timeline event seeds its own rung.
-  const dateFor = new Map<QueryStatus, string | null>();
-  dateFor.set(QueryStatus.QUERIED, q.sentDate ?? null);
-  for (const ev of q.timeline ?? []) {
-    if (!ev?.type) continue;
-    include.add(ev.type);
-    if (ev.date) dateFor.set(ev.type, ev.date); // first dated wins per status
-  }
-
-  // The minimal implied path for the final status.
-  const finalIdx = LADDER.indexOf(final);
-  if (finalIdx >= 0) {
-    include.add(final);
-    if (final === QueryStatus.PARTIAL_SENT) include.add(QueryStatus.PARTIAL_REQUESTED);
-    if (final === QueryStatus.FULL_SENT) include.add(QueryStatus.FULL_REQUESTED);
-  } else if (final === QueryStatus.REVISE_RESUBMIT) {
-    include.add(QueryStatus.FULL_REQUESTED);
-    include.add(QueryStatus.FULL_SENT);
-  }
-  // Sent implies requested (an agent action — what "Responses received" derives from).
-  if (include.has(QueryStatus.PARTIAL_SENT)) include.add(QueryStatus.PARTIAL_REQUESTED);
-  if (include.has(QueryStatus.FULL_SENT)) include.add(QueryStatus.FULL_REQUESTED);
-
-  const rungs: SeedRung[] = [];
-  for (const s of LADDER) if (include.has(s)) rungs.push({ status: s, date: dateFor.get(s) ?? null });
-  // Off-ladder rungs (the final status and/or any note event beyond the ladder), in stable order.
-  for (const s of OFF_LADDER) if (include.has(s) || s === final) {
-    if (!rungs.some((r) => r.status === s)) rungs.push({ status: s, date: dateFor.get(s) ?? null });
-  }
-  return rungs;
-}
-
-interface TimedRung extends SeedRung { ms: number; provisional: boolean; }
-
-/**
- * Assign each rung an ordering-key time so derivation sorts them in correct pipeline order.
- * Dated rungs keep their real time (clamped monotonic). A provisional (date-unknown) rung is
- * sequenced relative to the nearest known date — just after a known rung below it, or just before
- * the first known rung above it — and never carries a real date (dateProvisional:true). A query
- * with NO known dates gets a synthetic monotonic key from importBaseMs + ladder index. These keys
- * are internal only; nothing surfaces them (the UI renders "date needed").
- */
-export function assignTimes(rungs: SeedRung[], importBaseMs: number): TimedRung[] {
-  const out: TimedRung[] = rungs.map((r) => ({ ...r, ms: NaN, provisional: r.date == null }));
-  const firstDated = rungs.findIndex((r) => r.date != null);
-  if (firstDated === -1) {
-    out.forEach((r, i) => { r.ms = importBaseMs + i; });
-    return out;
-  }
-  // Forward: dated rungs anchor; provisional rungs after an anchor sit 1ms later.
-  let cursor = -Infinity;
-  for (let i = 0; i < out.length; i++) {
-    if (rungs[i].date != null) {
-      const d = new Date(rungs[i].date as string).getTime();
-      out[i].ms = cursor === -Infinity ? d : Math.max(d, cursor + 1);
-      cursor = out[i].ms;
-    } else if (cursor !== -Infinity) {
-      out[i].ms = cursor + 1;
-      cursor = out[i].ms;
-    }
-  }
-  // Backward: leading provisional rungs (before the first dated) sit just before it, in order.
-  for (let i = firstDated - 1; i >= 0; i--) {
-    out[i].ms = out[i + 1].ms - 1;
-  }
-  return out;
-}
 
 export async function commitSmartImport(
   deps: CommitDeps,
@@ -285,7 +192,9 @@ export async function commitSmartImport(
           type: rung.status,
           resultingStatus: rung.status,
           createdAt: Timestamp.fromMillis(rung.ms),
-          note: rung.provisional ? `${rung.status} (imported — date needed)` : `${rung.status} (imported)`,
+          // A carried note (the duplicate-collapse harvest, e.g. "asked for 50pp") rides its own rung;
+          // ordinary imports have none → the generated label, byte-identical to before.
+          note: rung.note ?? (rung.provisional ? `${rung.status} (imported — date needed)` : `${rung.status} (imported)`),
           ...(rung.provisional ? { dateProvisional: true } : {}),
           queryId,
           agentName: agent.name,

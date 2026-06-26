@@ -55,6 +55,11 @@ export interface TimelineEvent {
   type: QueryStatus;
   date: string | null; // ISO
   raw: string | null;  // verbatim note date
+  /** Optional per-event note that rides this event onto its own activity rung (the field
+   *  EditQueryDrawer renders). Used by the duplicate-collapse reconcile to carry a discarded row's
+   *  note (e.g. "asked for 50pp") into the kept query's history. Absent for ordinary imports →
+   *  commit falls back to the generated "{status} (imported)" label, byte-identical to before. */
+  note?: string;
 }
 
 export interface ParsedQuery {

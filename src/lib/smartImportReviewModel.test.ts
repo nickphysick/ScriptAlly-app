@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { parseModel, modelToResult, applyAgentRemoval, quoteStatuses, queryReasonText, statusDirectionChoices, reviewTallies, seedUnidentifiedSetAside, decideStageEntry, doneStageMessage, keepBothLabel, dupNoteKept, focusReasonMeta, agentTier, type FocusReasonKey, ReviewQuery } from './smartImportReviewModel';
+import { parseModel, modelToResult, applyAgentRemoval, quoteStatuses, queryReasonText, statusDirectionChoices, reviewTallies, seedUnidentifiedSetAside, decideStageEntry, doneStageMessage, keepBothLabel, dupNoteKept, focusReasonMeta, agentTier, reconcileRows, rowsIdentical, type FocusReasonKey, ReviewQuery } from './smartImportReviewModel';
+import { impliedRungs, assignTimes } from './impliedRungs';
+import { deriveStatus } from './queryDerivation';
 import { QueryStatus } from '../types';
 import { ParsedAgent, ParsedQuery, SmartImportResult, REVIEW_REASON_CODES } from '../types/smartImport';
 
@@ -368,5 +370,50 @@ describe('focusReasonMeta — in-focus card pill + headline (both walks)', () =>
     expect(focusReasonMeta('agent-needs-agency')).toEqual({ pill: 'No agency name', headline: 'No agency on record yet' });
     expect(focusReasonMeta('status-direction').pill).toBe('Status to check');
     expect(focusReasonMeta('two-dates').headline).toMatch(/two dates/i);
+  });
+});
+
+describe('reconcileRows — collapse duplicate query rows into one (Priya part 2)', () => {
+  const row = (over: Partial<ReviewQuery>): ReviewQuery => ({
+    id: 'q', agentRef: 'a', status: QueryStatus.QUERIED, sentDate: null, sentDateRaw: null,
+    timeline: [], reasons: [], notes: '', removed: false, ...over,
+  });
+  // Mirror modelToResult's per-query mapping → the EXACT rung shape commit + recomputeQuery see.
+  const rungs = (q: ReviewQuery) => impliedRungs({
+    agentRef: q.agentRef, status: q.status, sentDate: q.sentDate, sentDateRaw: q.sentDateRaw,
+    timeline: q.timeline.map((t) => ({ type: t.type, date: t.date, raw: t.raw, ...(t.note ? { note: t.note } : {}) })),
+    notes: q.notes,
+  });
+  const engineDerived = (q: ReviewQuery) =>
+    deriveStatus(assignTimes(rungs(q), 0).map((t) => ({ resultingStatus: t.status, date: t.ms })));
+
+  it('Priya: Partial Requested ("asked for 50pp", no date) + Partial Sent (1 May) → one query at Partial Sent, both rungs, 50pp on its own rung', () => {
+    const collapsed = reconcileRows([
+      row({ id: 'q1', status: QueryStatus.PARTIAL_REQUESTED, sentDate: null, notes: 'asked for 50pp' }),
+      row({ id: 'q2', status: QueryStatus.PARTIAL_SENT, sentDate: '2024-05-01' }),
+    ]);
+    expect(collapsed.status).toBe(QueryStatus.PARTIAL_SENT);          // current status, engine-derived
+    expect(engineDerived(collapsed)).toBe(QueryStatus.PARTIAL_SENT);  // UI default == engine (no divergence)
+    const byStatus = new Map(rungs(collapsed).map((r) => [r.status, r]));
+    expect(byStatus.has(QueryStatus.PARTIAL_REQUESTED)).toBe(true);   // history holds both rungs
+    expect(byStatus.has(QueryStatus.PARTIAL_SENT)).toBe(true);
+    expect(byStatus.get(QueryStatus.PARTIAL_REQUESTED)!.note).toBe('asked for 50pp'); // the carrier carries
+  });
+
+  it('a noteless row leaves its rung noteless → commit applies the generated label (byte-identical to today)', () => {
+    const collapsed = reconcileRows([
+      row({ id: 'q1', status: QueryStatus.PARTIAL_REQUESTED, sentDate: null }),
+      row({ id: 'q2', status: QueryStatus.PARTIAL_SENT, sentDate: '2024-05-01' }),
+    ]);
+    const pr = rungs(collapsed).find((r) => r.status === QueryStatus.PARTIAL_REQUESTED)!;
+    expect(pr.note).toBeUndefined(); // commit's `rung.note ?? generated` falls back
+  });
+
+  it('rowsIdentical: same status + same date ⇒ identical (slim-bar path); any difference ⇒ not', () => {
+    const a = row({ status: QueryStatus.PARTIAL_SENT, sentDate: '2024-05-01' });
+    expect(rowsIdentical(a, row({ status: QueryStatus.PARTIAL_SENT, sentDate: '2024-05-01' }))).toBe(true);
+    expect(rowsIdentical(a, row({ status: QueryStatus.PARTIAL_SENT, sentDate: '2024-05-02' }))).toBe(false);
+    expect(rowsIdentical(a, row({ status: QueryStatus.PARTIAL_REQUESTED, sentDate: '2024-05-01' }))).toBe(false);
+    expect(rowsIdentical(row({ status: QueryStatus.QUERIED, sentDate: null }), row({ status: QueryStatus.QUERIED, sentDate: null }))).toBe(true);
   });
 });

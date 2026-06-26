@@ -15,6 +15,8 @@
 import { QueryStatus } from "../types";
 import { ParsedAgent, ParsedQuery, SmartImportResult, ReviewReasonCode, REVIEW_REASON_CODES } from "../types/smartImport";
 import { normaliseGenres } from "./manuscripts";
+import { impliedRungs, assignTimes } from "./impliedRungs";
+import { deriveStatus } from "./queryDerivation";
 
 // ── Working model ───────────────────────────────────────────────────────────────────────────────
 export interface ReviewAgent {
@@ -89,7 +91,7 @@ export const resolveReason = (a: ReviewAgent, kind: CheckReason): ReasonItem[] =
 // ── Query working model ─────────────────────────────────────────────────────────────────────────
 /** A later pipeline event on a query (editable): the event, its parsed date, and the verbatim note
  *  date it came from. */
-export interface ReviewTimelineEvent { type: QueryStatus; date: string | null; raw: string | null; }
+export interface ReviewTimelineEvent { type: QueryStatus; date: string | null; raw: string | null; note?: string; }
 
 /** A typed query reason. Copy + the right input are derived from `code` (queryReasonText /
  *  statusDirectionChoices). Resolving sets `resolved` — the row goes Ready when none remain open. */
@@ -394,6 +396,7 @@ export function parseModel(result: SmartImportResult): { agents: ReviewAgent[]; 
       type: coerceStatus(t.type) ?? status,
       date: t.date ?? null,
       raw: t.raw ?? null,
+      ...(t.note ? { note: t.note } : {}),
     }));
     // Agent-identity codes (check-name / needs-identifying) are about the AGENT's name/agency, not the
     // query — they're handled on the Agents stage (agency-only agents are captured/editable there; the
@@ -572,6 +575,44 @@ export function removeDuplicateRecord(
   return { agents: nextAgents, queries: nextQueries, survivorId };
 }
 
+// ── Duplicate-query collapse (Priya part 2) ──────────────────────────────────────────────────────
+/** Two import rows are IDENTICAL when they sit at the same status on the same date — a literal
+ *  copy-paste with nothing to reconcile. The duplicates flow routes these to the slim resolve bar,
+ *  not the reconcile card. Both-null dates count as identical. */
+export const rowsIdentical = (a: ReviewQuery, b: ReviewQuery): boolean =>
+  a.status === b.status && (a.sentDate ?? null) === (b.sentDate ?? null);
+
+/** The furthest-along status by the engine's order (ladder then off-ladder) — used only to SEED
+ *  impliedRungs so the full implied history is built. The collapsed query's real current status is
+ *  read back from the timed rungs (deriveStatus), never from this. */
+const ladderMax = (statuses: QueryStatus[]): QueryStatus =>
+  statuses.reduce((a, b) => (QUERY_STATUS_OPTIONS.indexOf(b) > QUERY_STATUS_OPTIONS.indexOf(a) ? b : a), statuses[0] ?? QueryStatus.QUERIED);
+
+/** Collapse duplicate rows (the same submission recorded at different stages) into ONE query whose
+ *  history is the UNION of the rows' rungs — each row becomes a timeline event carrying its own
+ *  status, date and note. The current status is ENGINE-DERIVED: we build the exact rung shape commit
+ *  will (impliedRungs + assignTimes), then read the status back with deriveStatus, so the collapsed
+ *  query's status equals what recomputeQuery writes post-commit — the UI default can't diverge. The
+ *  kept row (matching the derived status) lends id/agentRef; the others' facts ride its history.
+ *  Pure: no Firestore, returns a new ReviewQuery. (Caller removes the absorbed rows + agent.) */
+export function reconcileRows(rows: ReviewQuery[]): ReviewQuery {
+  // Every row becomes a timeline event at its own status/date, carrying its note (the harvest). A row
+  // literally at QUERIED donates the spine date so the query's dateSent is set; otherwise unknown.
+  const queriedRow = rows.find((r) => r.status === QueryStatus.QUERIED);
+  const sentDate = queriedRow?.sentDate ?? null;
+  const sentDateRaw = queriedRow?.sentDateRaw ?? null;
+  const timeline: ReviewTimelineEvent[] = rows.flatMap((r) => [
+    { type: r.status, date: r.sentDate, raw: r.sentDateRaw, ...(r.notes.trim() ? { note: r.notes.trim() } : {}) },
+    ...r.timeline,
+  ]);
+  // Derive the current status the way commit will (importBase 0: the keys are ordering-only).
+  const seed: ParsedQuery = { agentRef: rows[0].agentRef, status: ladderMax(rows.map((r) => r.status)), sentDate, sentDateRaw, timeline, notes: "" };
+  const timed = assignTimes(impliedRungs(seed), 0);
+  const status = deriveStatus(timed.map((t) => ({ resultingStatus: t.status, date: t.ms })));
+  const keeper = rows.find((r) => r.status === status) ?? rows[0];
+  return { ...keeper, status, sentDate, sentDateRaw, timeline, notes: "", reasons: [], removed: false, removedReason: undefined };
+}
+
 /** Convert the final working model back into a SmartImportResult for commitSmartImport. Excludes
  *  deleted agents / removed queries, carries merge-repointed agentRefs, and writes each query's
  *  edited spine (sentDate) + timeline straight through. null stays null (never fabricated). */
@@ -590,7 +631,7 @@ export function modelToResult(result: SmartImportResult, agents: ReviewAgent[], 
       status: q.status,
       sentDate: q.sentDate,
       sentDateRaw: q.sentDateRaw ?? o?.sentDateRaw ?? null,
-      timeline: q.timeline.map((t) => ({ type: t.type, date: t.date, raw: t.raw })),
+      timeline: q.timeline.map((t) => ({ type: t.type, date: t.date, raw: t.raw, ...(t.note ? { note: t.note } : {}) })),
       notes: q.notes ?? o?.notes ?? "",
     };
   });
