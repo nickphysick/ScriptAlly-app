@@ -60,11 +60,15 @@ export interface ReasonItem { kind: CheckReason; note: string; resolved: boolean
 
 /** Default note for the mapping reason when the mapper didn't supply a sentence of its own. */
 export const MAPPING_NOTE = "We weren't fully sure we read this agent's details correctly — worth a quick look.";
+// Agency-aware: an agency-less cluster (the Priya path) drops the dangling "at " rather than reading
+// "…the same agent at , imported…".
 export const dupNoteOpen = (agency: string) =>
-  `Looks like the same agent at ${agency}, imported more than once — remove the duplicate, or keep both.`;
-// Count-aware: "both" only reads right for a 2-record cluster; 3+ says "all".
+  agency.trim()
+    ? `Looks like the same agent at ${agency}, imported more than once — remove the duplicate, or keep both.`
+    : `Looks like the same agent, imported more than once — remove the duplicate, or keep both.`;
+// Count-aware: "both" only reads right for a 2-record cluster; 3+ says "all". Agency-aware like above.
 export const dupNoteKept = (agency: string, count = 2) =>
-  `${count > 2 ? "Kept all" : "Kept both"} — separate agents at ${agency}.`;
+  `${count > 2 ? "Kept all" : "Kept both"} — separate agents${agency.trim() ? ` at ${agency}` : ""}.`;
 export const dupNoteMerged = "Merged the duplicate in — its queries moved across, nothing lost.";
 /** The "they're not duplicates" control's label — never says "both" for a 3+ cluster. Pure + tested. */
 export const keepBothLabel = (count: number) =>
@@ -348,20 +352,29 @@ export function parseModel(result: SmartImportResult): { agents: ReviewAgent[]; 
     deleted: false,
   }));
 
-  // Duplicate clusters: named agents at a near-identical agency (agencyKey: suffix/noise stripped)
-  // whose names are compatible (surname match + initial/abbrev-compatible first name) are likely the
-  // same person — "j pryce"/"Jonathan Pryce" at "Pryce Lit"/"Pryce Literary". The LEADER carries the
-  // shared dedupe control + the single `duplicate` reason. Agency-only agents never cluster.
+  // Duplicate clusters: named agents likely the same person — surname match + initial/abbrev-compatible
+  // first name (nameCompatible) — are clustered for the writer to confirm. Agency is a POSITIVE signal:
+  // named agents at a near-identical agency (agencyKey: suffix/noise stripped) bucket together
+  // ("j pryce"/"Jonathan Pryce" at "Pryce Lit"/"Pryce Literary"). Agency-LESS named agents can't bucket
+  // on agency, so they pool and cluster on NAME alone — the fix for the silent agency-less duplicate
+  // (two "Priya Raman" rows, no agency, that used to skip the matcher entirely at `if (!key)`). Both
+  // agencies present and different ⇒ separate buckets, never compared (a real differentiator).
+  // Agency-only (no name) agents never cluster. The LEADER carries the dedupe control + `duplicate` reason.
+  // TODO: extend to one-absent — an agency-less agent could also match a PRESENT-agency agent by name;
+  //   today it only clusters with other agency-less agents (both-absent). Either-side is the goal.
   const byAgency = new Map<string, ReviewAgent[]>();
+  const agencyLess: ReviewAgent[] = [];
   for (const a of agents) {
+    if (!a.name.trim()) continue;                  // need a name to cluster on (agency-only never clusters)
     const key = agencyKey(a.agency);
-    if (!key || !a.name.trim()) continue;
-    (byAgency.get(key) ?? byAgency.set(key, []).get(key)!).push(a);
+    if (key) (byAgency.get(key) ?? byAgency.set(key, []).get(key)!).push(a);
+    else agencyLess.push(a);                        // agency missing → name-only pool (both-absent path)
   }
-  for (const sameAgency of byAgency.values()) {
-    // Sub-cluster by name compatibility (transitive: j ↔ jon ↔ jonathan all merge).
+  // Sub-cluster each candidate group identically (transitive: j ↔ jon ↔ jonathan all merge), then flag
+  // any cluster of 2+. The agency-less pool runs through the SAME nameCompatible sub-clustering.
+  for (const group of [...byAgency.values(), agencyLess]) {
     const clusters: ReviewAgent[][] = [];
-    for (const a of sameAgency) {
+    for (const a of group) {
       const hit = clusters.find((c) => c.some((m) => nameCompatible(m.name, a.name)));
       if (hit) hit.push(a); else clusters.push([a]);
     }

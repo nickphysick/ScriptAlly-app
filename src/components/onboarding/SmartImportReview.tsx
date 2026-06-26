@@ -186,7 +186,7 @@ const DupControl: React.FC<{ members: ReviewAgent[]; queryCount: (id: string) =>
       return (
         <div key={s.id} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, color: "#6a5a50", padding: "4px 0" }}>
           <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#c9a89e", flexShrink: 0 }} />
-          <span style={{ flex: 1, minWidth: 0 }}>{(s.name || "—")} — {s.agency}</span>
+          <span style={{ flex: 1, minWidth: 0 }}>{(s.name || "—")}{s.agency.trim() ? ` — ${s.agency}` : ""}</span>
           {keptId === s.id && <KeptTag />}
           <span style={{ fontFamily: MONO, fontSize: 8, color: C.meta }}>{n} quer{n === 1 ? "y" : "ies"}</span>
           <button

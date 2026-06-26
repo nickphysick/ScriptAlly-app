@@ -195,6 +195,57 @@ describe('reviewTallies — per-population, never pooled (the "37" fix)', () => 
   });
 });
 
+describe('parseModel — agency-less duplicate clustering (the Priya miss, part 1)', () => {
+  type Agents = ReturnType<typeof parseModel>['agents'];
+  // A cluster records its siblings on the leader's mergeWith; either record may be the leader.
+  const clustered = (agents: Agents, id1: string, id2: string) => {
+    const a = agents.find((x) => x.id === id1)!, b = agents.find((x) => x.id === id2)!;
+    return a.mergeWith.includes(id2) || b.mergeWith.includes(id1);
+  };
+  const anyDuplicate = (agents: Agents) => agents.some((a) => a.reasons.some((r) => r.kind === 'duplicate'));
+
+  it('RED→GREEN: two agency-less "Priya Raman" rows (caps + trailing space) cluster as one duplicate', () => {
+    const { agents } = parseModel(result(
+      [agent({ ref: 'p1', name: 'PRIYA RAMAN', agency: '' }), agent({ ref: 'p2', name: 'Priya Raman ', agency: '' })],
+      [query({ agentRef: 'p1' }), query({ agentRef: 'p2' })]
+    ));
+    expect(clustered(agents, 'p1', 'p2')).toBe(true);
+    expect(anyDuplicate(agents)).toBe(true);
+  });
+
+  it('reuses fuzzy nameCompatible on the agency-less pool (Jon ↔ Jonathan)', () => {
+    const { agents } = parseModel(result(
+      [agent({ ref: 'j1', name: 'Jon Pryce', agency: '' }), agent({ ref: 'j2', name: 'Jonathan Pryce', agency: '' })],
+      [query({ agentRef: 'j1' })]
+    ));
+    expect(clustered(agents, 'j1', 'j2')).toBe(true);
+  });
+
+  it('does NOT cluster agency-less records with different surnames', () => {
+    const { agents } = parseModel(result(
+      [agent({ ref: 'x', name: 'Priya Raman', agency: '' }), agent({ ref: 'y', name: 'Sara Okonkwo', agency: '' })], []));
+    expect(anyDuplicate(agents)).toBe(false);
+  });
+
+  it('unchanged: two DIFFERENT agents at the SAME agency do not cluster', () => {
+    const { agents } = parseModel(result(
+      [agent({ ref: 'a', name: 'Jane Doe', agency: 'Acme' }), agent({ ref: 'b', name: 'John Smith', agency: 'Acme' })], []));
+    expect(anyDuplicate(agents)).toBe(false);
+  });
+
+  it('unchanged: same name at DIFFERENT present agencies stays separate (moved-agency out of scope)', () => {
+    const { agents } = parseModel(result(
+      [agent({ ref: 'm1', name: 'Priya Raman', agency: 'Alpha Literary' }), agent({ ref: 'm2', name: 'Priya Raman', agency: 'Beta Books' })], []));
+    expect(anyDuplicate(agents)).toBe(false);
+  });
+
+  it('unchanged: the agency-positive path still clusters (Pryce Literary ≈ Pryce Lit)', () => {
+    const { agents } = parseModel(result(
+      [agent({ ref: 's1', name: 'Jonathan Pryce', agency: 'Pryce Literary' }), agent({ ref: 's2', name: 'J. Pryce', agency: 'Pryce Lit' })], []));
+    expect(clustered(agents, 's1', 's2')).toBe(true);
+  });
+});
+
 describe('quoteStatuses — statuses in prose render lowercase, single-quoted', () => {
   it('lowercases and single-quotes a status named in note prose', () => {
     expect(quoteStatuses("we mapped this to Queried — change it")).toBe("we mapped this to 'queried' — change it");
