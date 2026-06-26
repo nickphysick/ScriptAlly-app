@@ -85,7 +85,18 @@ import {
   Clock,
   ArrowLeftRight,
   Filter,
+  AlignLeft,
+  Link2,
+  Paperclip,
 } from "lucide-react";
+
+/** Content-type presentation for a material version (Paste = text, Attach = file, Link). */
+type ContentMode = "paste" | "attach" | "link";
+const CTYPE: Record<string, { label: string; Icon: React.ComponentType<any> }> = {
+  text: { label: "text", Icon: AlignLeft },
+  file: { label: "file", Icon: Paperclip },
+  link: { label: "link", Icon: Link2 },
+};
 
 const AMBER = "#b98a4e";
 const GREY_DOT = "#c4b4aa";
@@ -337,7 +348,10 @@ interface FormState {
   kind: ComponentType;
   editing?: ManuscriptVersion;
   name: string;
-  content: string;
+  content: string; // paste text → contentDraft
+  notes: string;
+  mode: ContentMode;
+  link: string; // → contentLink
 }
 
 export const SubmissionPackages: React.FC = () => {
@@ -424,18 +438,37 @@ export const SubmissionPackages: React.FC = () => {
     setMsMenuOpen(false);
   };
 
-  const openNew = (kind: ComponentType) => setForm({ kind, name: "", content: "" });
-  const openEdit = (v: ManuscriptVersion) => setForm({ kind: v.componentType, editing: v, name: v.versionName, content: v.contentDraft ?? "" });
+  const openNew = (kind: ComponentType) =>
+    setForm({ kind, name: "", content: "", notes: "", mode: kind === ComponentType.SAMPLE_PAGES ? "link" : "paste", link: "" });
+  const openEdit = (v: ManuscriptVersion) =>
+    setForm({ kind: v.componentType, editing: v, name: v.versionName, content: v.contentDraft ?? "", notes: v.notes ?? "", mode: v.contentType === "link" ? "link" : "paste", link: v.contentLink ?? "" });
 
   const saveForm = async () => {
     if (!form || !msId) return;
     const name = form.name.trim();
     if (!name) return;
-    const content = form.content.trim();
+    const notes = form.notes.trim();
+    // Exactly one content source of truth: link mode keeps contentLink (clears the paste text), paste
+    // mode keeps contentDraft (clears the link). Attach is disabled in v1, so mode is paste | link here.
+    const payload =
+      form.mode === "link"
+        ? { contentType: "link" as const, contentLink: form.link.trim(), contentDraft: "" }
+        : { contentType: "text" as const, contentDraft: form.content.trim(), contentLink: "" };
     if (form.editing) {
-      await updateVersion(form.editing.id, { versionName: name, contentDraft: content });
+      const sends = componentMetrics(form.editing.id, msPackages, msQueries).sent;
+      const contentChanged =
+        (form.editing.contentType ?? "text") !== payload.contentType ||
+        (form.editing.contentDraft ?? "") !== payload.contentDraft ||
+        (form.editing.contentLink ?? "") !== payload.contentLink;
+      if (sends > 0 && contentChanged) {
+        // Locked rule: changing the CONTENT of a version that's already been sent forks a NEW version,
+        // leaving the original (and the sends attributed to it) intact. Name/notes edits stay in place.
+        await addVersion({ manuscriptId: msId, componentType: form.kind, versionName: name, fileAttached: false, notes, ...payload });
+      } else {
+        await updateVersion(form.editing.id, { versionName: name, notes, ...payload });
+      }
     } else {
-      await addVersion({ manuscriptId: msId, componentType: form.kind, versionName: name, fileAttached: false, contentDraft: content });
+      await addVersion({ manuscriptId: msId, componentType: form.kind, versionName: name, fileAttached: false, notes, ...payload });
     }
     setForm(null);
   };
@@ -483,99 +516,68 @@ export const SubmissionPackages: React.FC = () => {
     }
   };
 
-  // ── Library section for one component kind ──────────────────────────────────
-  const renderSection = (kind: ComponentType) => {
+  // ── Materials library: three columns (query letters · synopses · sample pages), each a stack of
+  //    version cards + a dashed "New …" tile. The mockup's reusable-building-blocks view. ──
+  const renderMatColumn = (kind: ComponentType) => {
     const meta = COMP[kind];
     const rows = msVersions.filter((v) => v.componentType === kind);
-    // Rates are derived (over the manuscript's active packages + its queries). Highlight the best
-    // (highest request rate) version with the component colour; the rest grey.
-    const rated = rows.map((v) => ({
-      v,
-      usedBy: packagesUsingVersion(v.id, msPackages).length,
-      cm: componentMetrics(v.id, msPackages, msQueries),
-    }));
-    // best = highest request rate among QUALIFIED versions (≥ MIN_SENDS_FOR_CLAIM); a lucky 1-of-1 isn't crowned
-    let bestId: string | null = null;
-    let bestRate = -1;
-    for (const r of rated) {
-      if (meetsSampleThreshold(r.cm.sent) && r.cm.requestRate !== null && r.cm.requestRate > bestRate) {
-        bestRate = r.cm.requestRate;
-        bestId = r.v.id;
-      }
-    }
-
     return (
-      <div key={kind} style={{ marginTop: kind === LIB_KINDS[0] ? 0 : 22 }}>
-        {/* section header */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 11 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 9, minWidth: 0 }}>
-            <span style={{ width: 28, height: 28, borderRadius: 8, background: meta.tile, color: meta.color, display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <meta.Icon style={{ width: 15, height: 15 }} strokeWidth={2} aria-hidden="true" />
-            </span>
-            <div style={{ minWidth: 0 }}>
-              <div style={{ fontFamily: FONT_SERIF, fontSize: 16, fontWeight: 500, color: headingInk }}>{meta.label}</div>
-              <div style={{ fontFamily: FONT_MONO, fontSize: 9.5, color: mutedInk, letterSpacing: "0.04em", marginTop: 1 }}>
-                {rows.length} {rows.length === 1 ? meta.noun : `${meta.noun}s`}
-              </div>
-            </div>
-          </div>
-          <button style={addBtn} onClick={() => openNew(kind)}>
-            <Plus style={{ width: 11, height: 11 }} strokeWidth={2.4} aria-hidden="true" /> New {meta.noun}
-          </button>
+      <div key={kind} style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 12 }}>
+          <KindDot kind={kind} size={11} />
+          <span style={{ fontFamily: FONT_SERIF, fontSize: 17, fontWeight: 500, color: headingInk }}>{meta.label}</span>
+          <span style={{ marginLeft: "auto", fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: "0.05em", textTransform: "uppercase", color: mutedInk }}>{rows.length}</span>
         </div>
 
-        {/* version rows */}
-        {rated.length === 0 ? (
-          <div style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 13, color: mutedInk, padding: "10px 2px" }}>
-            No {meta.noun}s yet — add one to build packages from it.
-          </div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {rated.map(({ v, usedBy, cm }) => {
-              const snippet = versionSnippet(v);
-              const meta2 = versionMeta(v);
-              return (
-                <div key={v.id} className="sp-ver" style={{ display: "flex", alignItems: "center", gap: 12, background: "#fbf6ef", border: "1px solid #e8ddcf", borderRadius: 10, padding: "11px 14px" }}>
-                  <span style={{ width: 9, height: 9, borderRadius: "50%", background: v.id === bestId ? meta.color : GREY_DOT, flexShrink: 0 }} aria-hidden="true" />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 500, color: bodyInk }}>{v.versionName}</div>
-                    {(snippet || meta2) && (
-                      <div style={{ fontFamily: FONT_SANS, fontSize: 11.5, fontStyle: snippet ? "italic" : "normal", fontWeight: 300, color: "#8a7a6c", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        {snippet ?? meta2}
-                      </div>
-                    )}
-                  </div>
-                  <div style={{ textAlign: "right", flexShrink: 0, fontFamily: FONT_MONO, fontSize: 9.5, color: mutedInk, letterSpacing: "0.03em" }}>
-                    {snippet && meta2 ? <span>{meta2}</span> : null}
-                    <div>
-                      in {usedBy} package{usedBy === 1 ? "" : "s"} ·{" "}
-                      {cm.sent === 0 ? (
-                        <span>— req</span>
-                      ) : (
-                        <span>
-                          {/* below the sample threshold → muted, not the confident burgundy; count always shown */}
-                          <span style={{ color: meetsSampleThreshold(cm.sent) ? burgundy : mutedInk, fontWeight: 500 }}>{formatRate(cm.requestRate)} req</span>
-                          <span style={{ color: "#b3a99a", fontWeight: 400 }}> {cm.requests}/{cm.sent}</span>
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="sp-row-actions" style={{ display: "flex", gap: 4, flexShrink: 0 }}>
-                    <button className="sp-icon-btn" title="Edit" aria-label={`Edit ${v.versionName}`} onClick={() => openEdit(v)} style={{ background: "transparent", border: "none", cursor: "pointer", color: mutedInk, padding: 5, display: "inline-flex", borderRadius: 6 }}>
-                      <Pencil style={{ width: 14, height: 14 }} strokeWidth={2} aria-hidden="true" />
-                    </button>
-                    <button className="sp-icon-btn" title="Delete" aria-label={`Delete ${v.versionName}`} onClick={() => requestDelete(v)} style={{ background: "transparent", border: "none", cursor: "pointer", color: mutedInk, padding: 5, display: "inline-flex", borderRadius: 6 }}>
-                      <Trash2 style={{ width: 14, height: 14 }} strokeWidth={2} aria-hidden="true" />
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+        {rows.map((v) => {
+          const usedBy = packagesUsingVersion(v.id, msPackages).length;
+          const cm = componentMetrics(v.id, msPackages, msQueries);
+          const ct = CTYPE[v.contentType ?? "text"] ?? CTYPE.text;
+          const note = (v.notes ?? "").trim() || versionSnippet(v) || versionMeta(v) || "No notes.";
+          return (
+            <div
+              key={v.id}
+              className="sp-mat"
+              role="button"
+              tabIndex={0}
+              onClick={() => openEdit(v)}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openEdit(v); } }}
+              style={{ background: parchment, border: "1px solid rgba(124,58,42,0.14)", borderRadius: 12, padding: "13px 14px", marginBottom: 10, cursor: "pointer", transition: "border-color .14s, box-shadow .14s" }}
+            >
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
+                <span style={{ fontFamily: FONT_SERIF, fontSize: 15, fontWeight: 500, color: headingInk, lineHeight: 1.15, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{v.versionName}</span>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontFamily: FONT_MONO, fontSize: 7.5, letterSpacing: "0.04em", textTransform: "uppercase", color: mutedInk, background: "#f3ece2", border: "0.5px solid #e4d8ca", borderRadius: 6, padding: "3px 6px", flexShrink: 0 }}>
+                  <ct.Icon style={{ width: 10, height: 10 }} strokeWidth={2} aria-hidden="true" /> {ct.label}
+                </span>
+              </div>
+              <div style={{ fontFamily: FONT_SANS, fontSize: 11.5, fontStyle: "italic", color: "#6a5e54", lineHeight: 1.45, marginTop: 8, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>{note}</div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10, paddingTop: 9, borderTop: "1px solid rgba(124,58,42,0.08)" }}>
+                <span style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: "0.03em", textTransform: "uppercase", color: mutedInk }}>In {usedBy} package{usedBy === 1 ? "" : "s"}</span>
+                <span style={{ fontFamily: FONT_MONO, fontSize: 11, fontWeight: 500, color: cm.sent === 0 ? "#bdb3a4" : burgundy, fontStyle: cm.sent === 0 ? "italic" : "normal" }}>
+                  {cm.sent === 0 ? "no sends" : `${formatRate(cm.requestRate)} req`}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+
+        <button className="sp-add-mat" onClick={() => openNew(kind)} style={{ border: "1.5px dashed rgba(124,58,42,0.22)", borderRadius: 12, padding: 13, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, color: "#9c8878", cursor: "pointer", background: "transparent", fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.05em", textTransform: "uppercase", transition: "all .14s" }}>
+          <Plus style={{ width: 14, height: 14 }} strokeWidth={2} aria-hidden="true" /> New {meta.noun}
+        </button>
       </div>
     );
   };
+
+  const renderLibrary = () => (
+    <div>
+      <div style={{ fontFamily: FONT_SANS, fontSize: 12.5, color: "#8a7a6c", lineHeight: 1.5, maxWidth: 620, margin: "0 auto 20px", textAlign: "center" }}>
+        Your reusable building blocks. Write a query letter, a synopsis, a set of sample pages once — then mix and match them into packages. Each one's request rate is tracked wherever it's used.
+      </div>
+      <div className="sp-lib" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, alignItems: "start" }}>
+        {LIB_KINDS.map(renderMatColumn)}
+      </div>
+    </div>
+  );
 
   const verName = (id: string) => msVersions.find((v) => v.id === id)?.versionName ?? "—";
 
@@ -1352,7 +1354,11 @@ export const SubmissionPackages: React.FC = () => {
         .sp-star-box:hover { color: #8a9e88 !important; border-color: #cfdac9 !important; }
         .sp-ghost-build:hover { background: ${buttonPinkBg}; border-color: ${burgundy}; }
         .sp-ghost-quiet:hover { border-color: #c9a89e !important; color: ${burgundy} !important; background: rgba(251,243,236,0.4) !important; }
+        .sp-mat:hover { border-color: #c9a89e; box-shadow: 0 4px 13px rgba(58,28,20,0.07); }
+        .sp-mat:focus-visible { outline: 2px solid ${burgundy}; outline-offset: 2px; }
+        .sp-add-mat:hover { border-color: #c9a89e !important; color: ${burgundy} !important; background: rgba(251,243,236,0.4) !important; }
         .sp-link:hover { text-decoration: underline; }
+        @media (max-width: 880px) { .sp-lib { grid-template-columns: 1fr !important; } }
         /* spotlight: diagonal sage wash + corner glow (the greeting-container treatment) */
         .sp-wave { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
         .sp-wave::before { content: ''; position: absolute; top: -60%; left: -75%; width: 55%; height: 220%; background: linear-gradient(100deg, transparent 0%, rgba(138,158,136,0.07) 35%, rgba(176,200,168,0.20) 50%, rgba(138,158,136,0.07) 65%, transparent 100%); transform: rotate(6deg); animation: spSheen 9s ease-in-out infinite; }
@@ -1454,49 +1460,95 @@ export const SubmissionPackages: React.FC = () => {
             {renderBuildDrawer()}
           </>
         ) : (
-          <MountPanel>
-            <BandHeader title="Materials library" meta="every version of every component — the building blocks for packages" Icon={Layers} />
-            <div style={{ padding: "20px 22px 22px" }}>{LIB_KINDS.map(renderSection)}</div>
-          </MountPanel>
+          renderLibrary()
         )}
       </div>
 
-      {/* ── New / edit version form ── */}
-      {form && (
-        <Modal onClose={() => setForm(null)} labelledBy="sp-form-title">
-          <BandHeader title={`${form.editing ? "Edit" : "New"} ${COMP[form.kind].slotLabel.toLowerCase()}`} Icon={COMP[form.kind].Icon} />
-          <div style={{ padding: 20 }}>
-            <span id="sp-form-title" style={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>
-              {form.editing ? "Edit" : "New"} {COMP[form.kind].noun}
-            </span>
-            <label htmlFor="sp-name" style={labelStyle}>Name</label>
-            <input
-              id="sp-name"
-              autoFocus
-              value={form.name}
-              maxLength={120}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              placeholder={`e.g. ${form.kind === ComponentType.QUERY_LETTER ? "Comp-led" : form.kind === ComponentType.SYNOPSIS ? "Two-page detailed" : "First 3 chapters"}`}
-              style={inputStyle}
-            />
-            <label htmlFor="sp-content" style={{ ...labelStyle, marginTop: 16 }}>Content <span style={{ textTransform: "none", letterSpacing: 0, color: mutedInk }}>(optional — used for the preview & word count)</span></label>
-            <textarea
-              id="sp-content"
-              value={form.content}
-              onChange={(e) => setForm({ ...form, content: e.target.value })}
-              rows={5}
-              placeholder="Paste or draft the text…"
-              style={{ ...inputStyle, resize: "vertical", lineHeight: 1.5 }}
-            />
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: 9, marginTop: 18 }}>
-              <button style={ghostBtn} onClick={() => setForm(null)}>Cancel</button>
-              <button style={{ ...addBtn, padding: "10px 18px", opacity: form.name.trim() ? 1 : 0.45, cursor: form.name.trim() ? "pointer" : "not-allowed" }} disabled={!form.name.trim()} onClick={saveForm}>
-                {form.editing ? "Save changes" : "Create version"}
-              </button>
+      {/* ── Material editor (type · name · notes · content: Paste / Attach[soon] / Link) ── */}
+      {form && (() => {
+        const wc = form.content.trim() ? (form.content.trim().match(/\S+/g) ?? []).length : 0;
+        const sends = form.editing ? componentMetrics(form.editing.id, msPackages, msQueries).sent : 0;
+        const typeBtn = (kind: ComponentType, label: string) => {
+          const on = form.kind === kind;
+          const locked = !!form.editing; // a version's component kind is fixed once packages may reference it
+          return (
+            <button key={kind} disabled={locked && !on} onClick={() => { if (!locked) setForm({ ...form, kind }); }}
+              style={{ flex: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6, fontFamily: FONT_SANS, fontSize: 12, color: on ? bodyInk : "#6a5e54", background: on ? "#fff" : "#fbf6ef", border: `0.5px solid ${on ? "#c9a89e" : "#e8ddcf"}`, borderRadius: 9, padding: 9, cursor: locked ? (on ? "default" : "not-allowed") : "pointer", fontWeight: on ? 500 : 400, opacity: locked && !on ? 0.5 : 1 }}>
+              <KindDot kind={kind} /> {label}
+            </button>
+          );
+        };
+        const modeBtn = (m: ContentMode, label: string, Icon: React.ComponentType<any>, disabled?: boolean) => {
+          const on = form.mode === m;
+          return (
+            <button key={m} onClick={() => { if (!disabled) setForm({ ...form, mode: m }); }} disabled={disabled} title={disabled ? "File upload is coming soon" : undefined}
+              style={{ flex: 1, display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6, fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.03em", textTransform: "uppercase", color: on ? burgundy : "#9c8878", background: on ? buttonPinkBg : "#fbf6ef", border: `0.5px solid ${on ? buttonPinkBorder : "#e8ddcf"}`, borderRadius: 8, padding: 9, cursor: disabled ? "not-allowed" : "pointer", opacity: disabled ? 0.55 : 1 }}>
+              <Icon style={{ width: 13, height: 13 }} strokeWidth={2} aria-hidden="true" /> {label}{disabled ? " · soon" : ""}
+            </button>
+          );
+        };
+        return (
+          <Modal onClose={() => setForm(null)} labelledBy="sp-form-title">
+            <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "16px 20px", borderBottom: "1px solid rgba(124,58,42,0.1)" }}>
+              <span style={{ width: 3, height: 17, borderRadius: 2, background: burgundy }} aria-hidden="true" />
+              <span id="sp-form-title" style={{ fontFamily: FONT_SERIF, fontSize: 17, fontWeight: 500, color: headingInk }}>{form.editing ? "Edit material" : `New ${COMP[form.kind].noun}`}</span>
             </div>
-          </div>
-        </Modal>
-      )}
+            <div style={{ padding: "18px 20px", maxHeight: "70vh", overflowY: "auto" }}>
+              <label style={labelStyle}>Type</label>
+              <div style={{ display: "flex", gap: 7, marginBottom: 16 }}>
+                {typeBtn(ComponentType.QUERY_LETTER, "Query letter")}
+                {typeBtn(ComponentType.SYNOPSIS, "Synopsis")}
+                {typeBtn(ComponentType.SAMPLE_PAGES, "Sample pages")}
+              </div>
+
+              <label htmlFor="sp-name" style={labelStyle}>Name this version</label>
+              <input id="sp-name" autoFocus value={form.name} maxLength={120} onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder={`e.g. ${form.kind === ComponentType.QUERY_LETTER ? "Comp-led letter" : form.kind === ComponentType.SYNOPSIS ? "Two-page synopsis" : "First 3 chapters"}`} style={inputStyle} />
+
+              <label htmlFor="sp-notes" style={{ ...labelStyle, marginTop: 16 }}>Notes <span style={{ textTransform: "none", letterSpacing: 0, color: "#bdb3a4" }}>— what's different about this one (for you, not the agent)</span></label>
+              <textarea id="sp-notes" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2}
+                placeholder="e.g. Leads with two comp titles, punchier hook, cut the bio paragraph." style={{ ...inputStyle, resize: "vertical", lineHeight: 1.5, color: "#5a4a40" }} />
+
+              <label style={{ ...labelStyle, marginTop: 16 }}>Content</label>
+              <div style={{ display: "flex", gap: 6, marginBottom: 11 }}>
+                {modeBtn("paste", "Paste", AlignLeft)}
+                {modeBtn("attach", "Attach", Paperclip, true)}
+                {modeBtn("link", "Link", Link2)}
+              </div>
+              {form.mode === "link" ? (
+                <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+                  <input value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} placeholder="Paste a Google Docs / Dropbox link…" style={inputStyle} />
+                  <div style={{ fontFamily: FONT_MONO, fontSize: 9, color: "#9c8878", letterSpacing: "0.03em" }}>We'll keep the link — your document stays where it lives.</div>
+                </div>
+              ) : (
+                <div>
+                  <textarea value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} rows={6}
+                    placeholder={`Paste your ${COMP[form.kind].slotLabel.toLowerCase()} here…`} style={{ ...inputStyle, resize: "vertical", lineHeight: 1.55 }} />
+                  <div style={{ fontFamily: FONT_MONO, fontSize: 9, color: "#bdb3a4", textAlign: "right", marginTop: 6, letterSpacing: "0.02em" }}>{wc} word{wc === 1 ? "" : "s"}</div>
+                </div>
+              )}
+
+              {form.editing && sends > 0 && (
+                <div style={{ fontFamily: FONT_SANS, fontSize: 11, color: "#6a5e54", lineHeight: 1.45, marginTop: 12, background: "#f6efe6", border: "0.5px solid #e8ddcf", borderRadius: 9, padding: "9px 12px" }}>
+                  This version has been sent {sends} time{sends === 1 ? "" : "s"}. Editing its <b>content</b> saves a new version so the original keeps its results; name and notes update in place.
+                </div>
+              )}
+
+              <div style={{ display: "flex", alignItems: "center", gap: 9, marginTop: 18 }}>
+                {form.editing && (
+                  <button onClick={() => { const v = form.editing!; setForm(null); requestDelete(v); }} style={{ marginRight: "auto", display: "inline-flex", alignItems: "center", gap: 6, fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.04em", textTransform: "uppercase", color: "#9c8878", background: "transparent", border: "none", cursor: "pointer", padding: "8px 4px" }}>
+                    <Trash2 style={{ width: 13, height: 13 }} strokeWidth={2} aria-hidden="true" /> Delete
+                  </button>
+                )}
+                <button style={ghostBtn} onClick={() => setForm(null)}>Cancel</button>
+                <button style={{ ...addBtn, padding: "10px 18px", opacity: form.name.trim() ? 1 : 0.45, cursor: form.name.trim() ? "pointer" : "not-allowed" }} disabled={!form.name.trim()} onClick={saveForm}>
+                  {form.editing ? "Save material" : "Create version"}
+                </button>
+              </div>
+            </div>
+          </Modal>
+        );
+      })()}
 
       {/* ── Delete confirm / consequence-aware warning ── */}
       {confirmDel && (() => {

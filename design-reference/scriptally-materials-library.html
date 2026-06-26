@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Materials library</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{font-family:'Inter',sans-serif;background:#E6E2DC;color:#3a1c14;display:flex;flex-direction:column;overflow:hidden;}
+.nav{height:56px;background:#fdfaf5;border-bottom:1px solid rgba(124,58,42,0.12);display:flex;align-items:center;gap:24px;padding:0 22px;flex-shrink:0;}
+.brand{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:#2e2018;display:flex;align-items:center;gap:8px;}
+.brand svg{color:#7c3a2a;}
+.nav-links{display:flex;gap:3px;}
+.nav-links a{font-size:13px;color:#6a5e54;text-decoration:none;padding:6px 12px;border-radius:8px;}
+.nav-links a.on{background:#f5e2da;color:#7c3a2a;font-weight:500;}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:14px;color:#9c8878;}
+.nav-av{width:29px;height:29px;border-radius:50%;background:#f5e2da;color:#7c3a2a;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:13px;}
+
+.phead{position:relative;padding:20px 24px 4px;text-align:center;flex-shrink:0;}
+.phead-eyebrow{display:inline-flex;align-items:center;gap:9px;}
+.phead-eyebrow .t{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#9c8878;}
+.pro-pill{font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:500;letter-spacing:0.12em;color:#7c3a2a;background:#f5e2da;border:0.5px solid #e8c8bc;border-radius:20px;padding:3px 8px 2px;display:inline-flex;align-items:center;gap:4px;}
+.pill{display:inline-flex;background:#dcd6cd;border:1px solid rgba(124,58,42,0.1);border-radius:32px;padding:5px;gap:3px;margin-top:12px;box-shadow:inset 0 1px 2px rgba(58,28,20,0.07);}
+.pill button{font-family:'Playfair Display',serif;font-size:16px;color:#7a6e60;background:none;border:none;padding:11px 34px;border-radius:26px;cursor:pointer;transition:all .15s;}
+.pill button:hover{color:#5a4e44;}
+.pill button.on{background:#fdfaf5;color:#7c3a2a;font-weight:500;box-shadow:0 1px 3px rgba(58,28,20,0.13);}
+.ms-select{position:absolute;top:20px;right:24px;display:inline-flex;align-items:center;gap:8px;background:#fdfaf5;border:0.5px solid #e0d5c8;border-radius:9px;padding:8px 12px;font-size:12.5px;cursor:pointer;}
+.ms-select .ms-lab{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.07em;text-transform:uppercase;color:#9c8878;}
+.ms-select svg{color:#7c3a2a;}
+.subhint-wrap{text-align:center;padding:14px 24px 0;}
+.subhint{font-size:12.5px;color:#8a7a6c;line-height:1.5;max-width:600px;margin:0 auto;}
+
+.content{flex:1;overflow-y:auto;padding:16px 24px 40px;}
+.content::-webkit-scrollbar{width:8px;}.content::-webkit-scrollbar-thumb{background:#d8cdbe;border-radius:4px;}
+.lib{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+@media(max-width:880px){.lib{grid-template-columns:1fr;}}
+
+.col{display:flex;flex-direction:column;min-height:0;}
+.col-h{display:flex;align-items:center;gap:9px;margin-bottom:12px;}
+.col-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
+.col-dot.ql{background:#7c3a2a;}.col-dot.sy{background:#5a6e58;}.col-dot.pg{background:#b98a4e;}
+.col-t{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;color:#2e2018;}
+.col-n{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.05em;text-transform:uppercase;color:#9c8878;margin-left:auto;}
+
+.mat{background:#fdfaf5;border:1px solid rgba(124,58,42,0.14);border-radius:12px;padding:13px 14px;margin-bottom:10px;cursor:pointer;transition:border-color .14s,box-shadow .14s;}
+.mat:hover{border-color:#c9a89e;box-shadow:0 4px 13px rgba(58,28,20,0.07);}
+.mat-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+.mat-nm{font-family:'Playfair Display',serif;font-size:15px;font-weight:500;color:#2e2018;line-height:1.15;}
+.ctype{display:inline-flex;align-items:center;gap:4px;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.04em;text-transform:uppercase;color:#9c8878;background:#f3ece2;border:0.5px solid #e4d8ca;border-radius:6px;padding:3px 6px;flex-shrink:0;}
+.ctype svg{width:10px;height:10px;}
+.mat-note{font-size:11.5px;color:#6a5e54;line-height:1.45;margin-top:8px;font-style:italic;}
+.mat-foot{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:9px;border-top:1px solid rgba(124,58,42,0.08);}
+.mat-use{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.03em;text-transform:uppercase;color:#9c8878;}
+.mat-rate{font-family:'JetBrains Mono',monospace;font-size:11px;color:#7c3a2a;font-weight:500;}
+.mat-rate.muted{color:#bdb3a4;font-style:italic;}
+
+.add-mat{border:1.5px dashed rgba(124,58,42,0.22);border-radius:12px;padding:13px;display:flex;align-items:center;justify-content:center;gap:8px;color:#9c8878;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.05em;text-transform:uppercase;transition:all .14s;}
+.add-mat:hover{border-color:#c9a89e;color:#7c3a2a;background:rgba(251,243,236,0.4);}
+.add-mat svg{width:14px;height:14px;}
+
+/* editor modal */
+.mask{position:fixed;inset:0;background:rgba(58,28,20,0.34);display:none;align-items:center;justify-content:center;z-index:100;padding:24px;}
+.mask.show{display:flex;}
+.modal{max-width:520px;width:100%;max-height:88vh;background:#fdfaf5;border-radius:16px;box-shadow:0 20px 50px rgba(58,28,20,0.3);overflow:hidden;display:flex;flex-direction:column;}
+.m-h{padding:16px 20px;border-bottom:1px solid rgba(124,58,42,0.1);display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.m-h .rule{width:3px;height:17px;border-radius:2px;background:#7c3a2a;}
+.m-h .t{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;color:#2e2018;}
+.m-x{margin-left:auto;color:#9c8878;cursor:pointer;}
+.m-b{padding:18px 20px;overflow-y:auto;}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.06em;text-transform:uppercase;color:#9c8878;margin-bottom:7px;display:block;}
+.typesel{display:flex;gap:7px;margin-bottom:16px;}
+.typesel button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:#6a5e54;background:#fbf6ef;border:0.5px solid #e8ddcf;border-radius:9px;padding:9px;cursor:pointer;}
+.typesel button .d{width:7px;height:7px;border-radius:50%;}
+.typesel button.on{border-color:#c9a89e;background:#fff;color:#3a1c14;font-weight:500;box-shadow:0 1px 3px rgba(58,28,20,0.06);}
+.typesel .d.ql{background:#7c3a2a;}.typesel .d.sy{background:#5a6e58;}.typesel .d.pg{background:#b98a4e;}
+.fld{margin-bottom:16px;}
+.in{width:100%;background:#fff;border:0.5px solid #e0d5c8;border-radius:9px;padding:10px 13px;font-family:'Inter',sans-serif;font-size:14px;color:#3a1c14;outline:none;}
+.in:focus{border-color:#8a9e88;box-shadow:0 0 0 3px rgba(138,158,136,0.12);}
+textarea.in{resize:vertical;line-height:1.5;}
+.note-in{min-height:54px;font-size:13px;color:#5a4a40;}
+
+.modes{display:flex;gap:6px;margin-bottom:11px;}
+.modes button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.03em;text-transform:uppercase;color:#9c8878;background:#fbf6ef;border:0.5px solid #e8ddcf;border-radius:8px;padding:9px;cursor:pointer;}
+.modes button.on{background:#f5e2da;color:#7c3a2a;border-color:#e8c8bc;}
+.modes button svg{width:13px;height:13px;}
+.mode-body>div{display:none;}
+.mode-body>div.on{display:block;}
+.content-ta{min-height:150px;font-family:'Inter',sans-serif;font-size:13px;line-height:1.55;}
+.wc{font-family:'JetBrains Mono',monospace;font-size:9px;color:#bdb3a4;text-align:right;margin-top:6px;letter-spacing:0.02em;}
+.drop{border:1.5px dashed rgba(124,58,42,0.28);border-radius:11px;padding:30px 18px;text-align:center;background:rgba(251,243,236,0.35);cursor:pointer;}
+.drop:hover{border-color:#c9a89e;background:rgba(251,243,236,0.6);}
+.drop svg{width:28px;height:28px;color:#b98a4e;margin-bottom:9px;}
+.drop .d-t{font-size:13px;color:#5a4a40;margin-bottom:4px;}
+.drop .d-s{font-family:'JetBrains Mono',monospace;font-size:9px;color:#9c8878;letter-spacing:0.03em;}
+.drop .d-file{display:inline-flex;align-items:center;gap:8px;background:#fff;border:0.5px solid #e0d5c8;border-radius:8px;padding:8px 12px;margin-top:6px;font-size:12.5px;color:#3a1c14;}
+.drop .d-file svg{width:15px;height:15px;margin:0;color:#7c3a2a;}
+.linkrow{display:flex;flex-direction:column;gap:7px;}
+
+.m-f{padding:14px 20px;border-top:1px solid rgba(124,58,42,0.1);display:flex;gap:9px;align-items:center;flex-shrink:0;}
+.reuse-hint{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#9c8878;letter-spacing:0.02em;flex:1;line-height:1.4;}
+.btn{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;border-radius:9px;padding:11px 17px;cursor:pointer;border:0.5px solid;}
+.btn.pri{background:#f5e2da;color:#7c3a2a;border-color:#e8c8bc;}.btn.pri:hover{background:#efd5ca;}
+.btn.ghost{background:#fff;color:#9c8878;border-color:#e0d5c8;}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#2e2018;color:#fdfaf5;font-size:12.5px;padding:11px 18px;border-radius:10px;box-shadow:0 10px 30px rgba(58,28,20,0.3);opacity:0;pointer-events:none;transition:all .25s;z-index:200;display:flex;align-items:center;gap:8px;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast svg{color:#9aad98;}
+</style>
+</head>
+<body>
+<div class="nav">
+  <div class="brand"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>ScriptAlly</div>
+  <div class="nav-links"><a href="#">Dashboard</a><a href="#">Queries</a><a href="#">Agents</a><a href="#" class="on">Manuscripts</a></div>
+  <div class="nav-right"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><div style="display:flex;align-items:center;gap:7px;font-size:13px;color:#3a1c14;"><div class="nav-av">N</div>Nick</div></div>
+</div>
+<div class="phead">
+  <div class="ms-select"><span class="ms-lab">Manuscript</span><span>The Book of Lost Clockworks</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg></div>
+  <div class="phead-eyebrow"><span class="t">Submission Packages</span><span class="pro-pill"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>PRO</span></div>
+  <div class="pill"><button onclick="toast('Packages view — the spotlight &amp; shelf')">Packages</button><button class="on">Materials</button></div>
+</div>
+<div class="subhint-wrap"><div class="subhint">Your reusable building blocks. Write a query letter, a synopsis, a set of sample pages once — then mix and match them into packages. Each one's request rate is tracked wherever it's used.</div></div>
+
+<div class="content">
+  <div class="lib" id="lib"></div>
+</div>
+
+<!-- editor -->
+<div class="mask" id="editor" onclick="if(event.target===this)closeEd()">
+  <div class="modal">
+    <div class="m-h"><span class="rule"></span><span class="t" id="ed-title">New material</span><span class="m-x" onclick="closeEd()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></div>
+    <div class="m-b">
+      <span class="lbl">Type</span>
+      <div class="typesel" id="typesel">
+        <button data-t="ql" onclick="setType('ql')"><span class="d ql"></span>Query letter</button>
+        <button data-t="sy" onclick="setType('sy')"><span class="d sy"></span>Synopsis</button>
+        <button data-t="pg" onclick="setType('pg')"><span class="d pg"></span>Sample pages</button>
+      </div>
+      <div class="fld"><span class="lbl">Name this version</span><input class="in" id="ed-name" placeholder="e.g. &ldquo;Comp-led letter&rdquo;"/></div>
+      <div class="fld"><span class="lbl">Notes <span style="text-transform:none;letter-spacing:0;color:#bdb3a4;">— what's different about this one (for you, not the agent)</span></span><textarea class="in note-in" id="ed-notes" placeholder="e.g. Leads with two comp titles, punchier hook, cut the bio paragraph."></textarea></div>
+      <div class="fld">
+        <span class="lbl">Content</span>
+        <div class="modes" id="modes">
+          <button data-m="paste" class="on" onclick="setMode('paste')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="14" y2="17"/></svg>Paste</button>
+          <button data-m="attach" onclick="setMode('attach')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>Attach file</button>
+          <button data-m="link" onclick="setMode('link')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>Link</button>
+        </div>
+        <div class="mode-body">
+          <div data-m="paste" class="on"><textarea class="in content-ta" id="ed-content" oninput="updateWC()" placeholder="Paste your query letter here…"></textarea><div class="wc" id="wc">0 words</div></div>
+          <div data-m="attach"><div class="drop" onclick="fakeFile()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><div class="d-t" id="drop-t">Drag a file here, or browse</div><div class="d-s">PDF or Word · up to 10 MB</div><div id="drop-file"></div></div></div>
+          <div data-m="link"><div class="linkrow"><input class="in" placeholder="Paste a Google Docs / Dropbox link…"/><div class="d-s" style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#9c8878;letter-spacing:.03em;">We'll keep the link — your document stays where it lives.</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="m-f"><span class="reuse-hint">Saved to your library — reusable in any package.</span><button class="btn ghost" onclick="closeEd()">Cancel</button><button class="btn pri" onclick="saveEd()">Save material</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg"></span></div>
+
+<script>
+const TYPES={ql:{name:'Query letters',dot:'ql',single:'query letter'},sy:{name:'Synopses',dot:'sy',single:'synopsis'},pg:{name:'Sample pages',dot:'pg',single:'sample pages'}};
+const CIC={text:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="14" y2="17"/></svg>',
+ file:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+ link:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>'};
+let MAT={
+ ql:[{name:'Comp-led',ctype:'text',note:'Leads with two comp titles, punchier hook, no bio paragraph.',used:1,rate:50},
+     {name:'Standard',ctype:'text',note:'The classic structure — hook, bio, housekeeping.',used:1,rate:17},
+     {name:'Punchier hook',ctype:'text',note:'Same letter, rewritten opening line.',used:1,rate:null}],
+ sy:[{name:'Two-page detailed',ctype:'text',note:'Full plot with the ending spelled out.',used:1,rate:50},
+     {name:'One-page',ctype:'text',note:'Tighter, single page.',used:1,rate:12}],
+ pg:[{name:'First 3 chapters',ctype:'file',note:'Chapters 1–3, formatted to standard submission layout.',used:1,rate:50},
+     {name:'First 10 pages',ctype:'link',note:'Opening 10 pages — kept in Google Docs.',used:1,rate:12}]
+};
+const fmt=v=>v==null?'early':v+'%';
+let edType='ql', edMode='paste';
+
+function render(){
+  document.getElementById('lib').innerHTML=Object.keys(TYPES).map(k=>{const T=TYPES[k];
+    const cards=MAT[k].map((m,i)=>`<div class="mat" onclick="openEd('${k}',${i})">
+       <div class="mat-top"><div class="mat-nm">${m.name}</div><span class="ctype">${CIC[m.ctype]}${m.ctype}</span></div>
+       <div class="mat-note">${m.note}</div>
+       <div class="mat-foot"><span class="mat-use">In ${m.used} package${m.used===1?'':'s'}</span><span class="mat-rate ${m.rate==null?'muted':''}">${fmt(m.rate)}${m.rate==null?'':' req'}</span></div>
+      </div>`).join('');
+    return `<div class="col"><div class="col-h"><span class="col-dot ${T.dot}"></span><span class="col-t">${T.name}</span><span class="col-n">${MAT[k].length}</span></div>
+      ${cards}<div class="add-mat" onclick="openEd('${k}',null)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>New ${T.single}</div></div>`;
+  }).join('');
+}
+
+function setType(t){edType=t;document.querySelectorAll('#typesel button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+  // sensible default content mode per type
+  if(t==='pg'){setMode('attach');}else{setMode('paste');}
+  const ph={ql:'Paste your query letter here…',sy:'Paste your synopsis here…',pg:'Paste your sample pages here…'};
+  document.getElementById('ed-content').placeholder=ph[t];
+  document.getElementById('ed-name').placeholder = t==='ql'?'e.g. “Comp-led letter”':t==='sy'?'e.g. “Two-page synopsis”':'e.g. “First 3 chapters”';
+}
+function setMode(m){edMode=m;document.querySelectorAll('#modes button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
+  document.querySelectorAll('.mode-body>div').forEach(d=>d.classList.toggle('on',d.dataset.m===m));}
+function updateWC(){const w=(document.getElementById('ed-content').value.trim().match(/\S+/g)||[]).length;document.getElementById('wc').textContent=w+' word'+(w===1?'':'s');}
+function fakeFile(){document.getElementById('drop-file').innerHTML='<div class="d-file">'+CIC.file+'first-3-chapters.docx · 41 KB</div>';document.getElementById('drop-t').textContent='File attached';}
+
+function openEd(type,idx){setType(type);
+  document.getElementById('ed-title').textContent = idx==null?('New '+TYPES[type].single):'Edit material';
+  if(idx==null){document.getElementById('ed-name').value='';document.getElementById('ed-notes').value='';document.getElementById('ed-content').value='';updateWC();document.getElementById('drop-file').innerHTML='';document.getElementById('drop-t').textContent='Drag a file here, or browse';}
+  else{const m=MAT[type][idx];document.getElementById('ed-name').value=m.name;document.getElementById('ed-notes').value=m.note;setMode(m.ctype==='text'?'paste':m.ctype==='file'?'attach':'link');if(m.ctype==='text'){document.getElementById('ed-content').value='[ '+m.name+' content ]';updateWC();}}
+  document.getElementById('editor').classList.add('show');}
+function closeEd(){document.getElementById('editor').classList.remove('show');}
+function saveEd(){const name=(document.getElementById('ed-name').value||'Untitled').trim();
+  const ctype=edMode==='paste'?'text':edMode==='attach'?'file':'link';
+  MAT[edType].push({name,ctype,note:(document.getElementById('ed-notes').value||'').trim()||'No notes.',used:0,rate:null});
+  closeEd();render();toast(name+' saved to your '+TYPES[edType].name.toLowerCase());}
+function toast(m){const t=document.getElementById('toast');document.getElementById('toast-msg').textContent=m;t.classList.add('show');clearTimeout(window._t);window._t=setTimeout(()=>t.classList.remove('show'),2600);}
+render();
+</script>
+</body>
+</html>
