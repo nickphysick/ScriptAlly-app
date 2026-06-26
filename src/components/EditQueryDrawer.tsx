@@ -33,6 +33,7 @@ import { getStatusLabel } from "./StatusPill";
 import { getActivityTime, normalizeResultingStatus } from "../lib/queryDerivation";
 import { formatQueryMaterial } from "../lib/materials";
 import { computeResponseDeadline } from "../lib/responseDeadline";
+import { editMaterialsUpdate } from "../lib/packageMetrics";
 import {
   validateTimeline, appendNoteFor, ADVANCE_OPTIONS, RECLASSIFY_OPTIONS, TimelineError,
 } from "../lib/queryTimelineEdit";
@@ -44,7 +45,10 @@ const C = {
 };
 
 const METHOD_OPTIONS = [SubmissionMethod.EMAIL, SubmissionMethod.QUERY_MANAGER, SubmissionMethod.ONLINE_FORM, SubmissionMethod.POST];
+const IF_NO_RESPONSE_OPTIONS = ["Remind me to nudge", "Mark as no response automatically", "Do nothing"];
+const REJECTION_TYPE_OPTIONS = ["Personalised rejection", "Form rejection", "No reason given"];
 const AWAITING = new Set<QueryStatus>([QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT]);
+const CLOSED_REVIEW = new Set<QueryStatus>([QueryStatus.REJECTED, QueryStatus.WITHDRAWN]);
 const PRO_COPY = "Attach custom submission packages to submissions, then track by-package and by-component stats to see how agents are responding to different versions of your materials. Available on Pro.";
 
 const fmtDate = (d: string | number | Date | null | undefined): string => {
@@ -74,7 +78,7 @@ export interface EditQueryDrawerProps {
 }
 
 export const EditQueryDrawer: React.FC<EditQueryDrawerProps> = ({ query, isOpen, lockScroll, onClose, onSavedToast }) => {
-  const { agents, manuscripts, journalEntries, currentUser, addJournalEntry, updateJournalEntry, deleteJournalEntry } = useScriptAllyDb();
+  const { agents, manuscripts, packages, journalEntries, currentUser, addJournalEntry, updateJournalEntry, deleteJournalEntry } = useScriptAllyDb();
   const drawerRef = useRef<Form11DrawerHandle>(null);
 
   // ── staged edits ────────────────────────────────────────────────────────────────
@@ -86,6 +90,14 @@ export const EditQueryDrawer: React.FC<EditQueryDrawerProps> = ({ query, isOpen,
   const [draftPersonalisation, setDraftPersonalisation] = useState<string | null>(null);
   const [draftMaterials, setDraftMaterials] = useState<string[] | null>(null);
   const [draftAgentId, setDraftAgentId] = useState<string | null>(null);
+  // Parity fields lifted from the retired Queries.tsx inline editor — all stored, non-derived.
+  const [draftManuscriptId, setDraftManuscriptId] = useState<string | null>(null);
+  const [draftResponseDeadline, setDraftResponseDeadline] = useState<string | null>(null); // YYYY-MM-DD ("" = clear)
+  const [draftIfNoResponse, setDraftIfNoResponse] = useState<string | null>(null);
+  const [draftPackageId, setDraftPackageId] = useState<string | null>(null);
+  const [draftRejectionType, setDraftRejectionType] = useState<string | null>(null);
+  const [draftAgentComments, setDraftAgentComments] = useState<string | null>(null);
+  const [editingComments, setEditingComments] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [fork, setFork] = useState<{ id: string; mode: "ask" | "append" | "fix" } | null>(null);
@@ -100,16 +112,19 @@ export const EditQueryDrawer: React.FC<EditQueryDrawerProps> = ({ query, isOpen,
   useEffect(() => {
     setAppends([]); setEdits({}); setDeletes([]); setDraftDateSent(null);
     setDraftMethod(null); setDraftPersonalisation(null); setDraftMaterials(null); setDraftAgentId(null);
+    setDraftManuscriptId(null); setDraftResponseDeadline(null); setDraftIfNoResponse(null);
+    setDraftPackageId(null); setDraftRejectionType(null); setDraftAgentComments(null); setEditingComments(false);
     setSaving(false); setSaveError(null); setFork(null); setEditingPers(false);
     setMatAdding(false); setMatInput(""); setReassign(null); setProHint(false);
     setJournalInput(""); setEditNote(null);
   }, [query.id, isOpen]);
 
-  // Live identity — resolved by the STAGED agent (so a pending reassignment shows immediately).
+  // Live identity — resolved by the STAGED agent / manuscript (so a pending change shows immediately).
   const effAgentId = draftAgentId ?? query.agentId;
   const effAgent = agents.find((a) => a.id === effAgentId) || null;
   const origAgent = agents.find((a) => a.id === query.agentId) || null;
-  const manuscript = manuscripts.find((m) => m.id === query.manuscriptId) || null;
+  const effManuscriptId = draftManuscriptId ?? query.manuscriptId;
+  const manuscript = manuscripts.find((m) => m.id === effManuscriptId) || null;
   const agentName = effAgent?.name?.trim() || "Unknown agent";
   const agency = effAgent?.agency?.trim() || "";
   const msTitle = manuscript?.title || "Untitled manuscript";
@@ -143,6 +158,20 @@ export const EditQueryDrawer: React.FC<EditQueryDrawerProps> = ({ query, isOpen,
   })();
   const effMaterials = draftMaterials ?? baseMaterials;
 
+  // Parity fields (stored). Package + materials are mutually exclusive (one source of truth), so the
+  // free-text pills show only when no package is linked. Active packages for the (staged) manuscript.
+  const effIfNoResponse = draftIfNoResponse ?? ((query as { ifNoResponse?: string }).ifNoResponse || "Remind me to nudge");
+  const effPackageId = draftPackageId ?? (query.packageId || "");
+  const effRejectionType = draftRejectionType ?? (query.rejectionType || "Form rejection");
+  const effAgentComments = draftAgentComments ?? (query.agentComments || "");
+  const effDeadlineInput = draftResponseDeadline ?? (query.responseDeadline ? toDateInput(new Date(query.responseDeadline).getTime()) : "");
+  const packageOptions = [
+    { value: "", label: "Custom materials" },
+    ...packages.filter((p) => p.status === "Active" && p.manuscriptId === effManuscriptId).map((p) => ({ value: p.id, label: p.packageName })),
+  ];
+  const linkedPackage = packages.find((p) => p.id === effPackageId) || null;
+  const materialsTouched = draftMaterials !== null || draftPackageId !== null;
+
   const origDateSentMs = query.dateSent ? new Date(query.dateSent).getTime() : Date.now();
   const dateSentMs = draftDateSent ? fromDateInput(draftDateSent, 0) : origDateSentMs;
 
@@ -172,7 +201,9 @@ export const EditQueryDrawer: React.FC<EditQueryDrawerProps> = ({ query, isOpen,
     rungs: displayRows.filter((r) => !r.deleted && r.status).map((r) => ({ id: r.id, status: r.status as QueryStatus, timeMs: r.timeMs })),
   }), [displayRows, dateSentMs]);
 
-  const fieldDirty = draftMethod !== null || draftPersonalisation !== null || draftMaterials !== null || draftAgentId !== null || draftDateSent !== null;
+  const fieldDirty = draftMethod !== null || draftPersonalisation !== null || materialsTouched || draftAgentId !== null
+    || draftDateSent !== null || draftManuscriptId !== null || draftResponseDeadline !== null
+    || draftIfNoResponse !== null || draftRejectionType !== null || draftAgentComments !== null;
   const timelineDirty = appends.length > 0 || Object.keys(edits).length > 0 || deletes.length > 0;
   const dirty = fieldDirty || timelineDirty;
   const blocked = errors.length > 0;
@@ -233,6 +264,8 @@ export const EditQueryDrawer: React.FC<EditQueryDrawerProps> = ({ query, isOpen,
   const discardAll = () => {
     setAppends([]); setEdits({}); setDeletes([]); setDraftDateSent(null);
     setDraftMethod(null); setDraftPersonalisation(null); setDraftMaterials(null); setDraftAgentId(null);
+    setDraftManuscriptId(null); setDraftResponseDeadline(null); setDraftIfNoResponse(null);
+    setDraftPackageId(null); setDraftRejectionType(null); setDraftAgentComments(null); setEditingComments(false);
     setFork(null); setReassign(null); setSaveError(null); setEditingPers(false); setMatAdding(false);
   };
 
@@ -241,8 +274,14 @@ export const EditQueryDrawer: React.FC<EditQueryDrawerProps> = ({ query, isOpen,
     const queryFields: NonNullable<QueryEditOps["queryFields"]> = {};
     if (draftMethod !== null) queryFields.sendMethod = draftMethod;
     if (draftPersonalisation !== null) queryFields.personalisationNotes = draftPersonalisation;
-    if (draftMaterials !== null) queryFields.materialsWanted = draftMaterials;
     if (draftAgentId !== null) queryFields.agentId = draftAgentId;
+    if (draftManuscriptId !== null) queryFields.manuscriptId = draftManuscriptId;
+    if (draftIfNoResponse !== null) queryFields.ifNoResponse = draftIfNoResponse;
+    if (draftResponseDeadline !== null) queryFields.responseDeadline = draftResponseDeadline ? new Date(fromDateInput(draftResponseDeadline, 12)).toISOString() : "";
+    if (draftRejectionType !== null) queryFields.rejectionType = draftRejectionType;
+    if (draftAgentComments !== null) queryFields.agentComments = draftAgentComments;
+    // Materials ⟷ package are one source of truth (editMaterialsUpdate clears the other side).
+    if (materialsTouched) Object.assign(queryFields, editMaterialsUpdate({ touched: true, packageId: effPackageId, materials: effMaterials }));
     const ops: QueryEditOps = {
       appends,
       edits: Object.entries(edits).map(([id, e]) => ({ id, ...e })),
@@ -252,7 +291,7 @@ export const EditQueryDrawer: React.FC<EditQueryDrawerProps> = ({ query, isOpen,
     };
     setSaving(true); setSaveError(null);
     const res = await commitQueryEdits(db, currentUser.id, query.id, ops, {
-      agentName, manuscriptId: query.manuscriptId, manuscriptTitle: manuscript?.title || "",
+      agentName, manuscriptId: effManuscriptId, manuscriptTitle: manuscript?.title || "",
     });
     setSaving(false);
     if (!res.ok) { setSaveError("error" in res ? res.error : "Couldn’t save the query."); return; }
@@ -289,7 +328,7 @@ export const EditQueryDrawer: React.FC<EditQueryDrawerProps> = ({ query, isOpen,
         onClose={onClose}
         lockScroll={lockScroll}
         showRail
-        suppressEsc={editingPers || !!editNote || matAdding}
+        suppressEsc={editingPers || editingComments || !!editNote || matAdding}
         header={
           <div style={{ background: `linear-gradient(135deg,${C.bandFrom},${C.bandTo})`, padding: "15px 20px 15px 24px", display: "flex", alignItems: "flex-start", gap: 12, borderBottom: "1px solid rgba(124,58,42,0.12)", position: "relative", flexShrink: 0 }}>
             <Form11HeaderAvatar ring="rgba(124,58,42,0.22)" />
@@ -345,6 +384,11 @@ export const EditQueryDrawer: React.FC<EditQueryDrawerProps> = ({ query, isOpen,
 
         {/* ── Query details ─────────────────────────────────────────────────────── */}
         <Sec>Query details</Sec>
+        <Field>
+          <Label>Manuscript <DirtyDot on={draftManuscriptId !== null} /></Label>
+          <Form11Select value={effManuscriptId} options={manuscripts.map((m) => ({ value: m.id, label: m.title }))}
+            onChange={(v) => setDraftManuscriptId(v === query.manuscriptId ? null : v)} ariaLabel="Manuscript" />
+        </Field>
         <Two>
           <Field>
             <Label>Date sent <DirtyDot on={draftDateSent !== null} /></Label>
@@ -361,22 +405,45 @@ export const EditQueryDrawer: React.FC<EditQueryDrawerProps> = ({ query, isOpen,
           </Field>
         </Two>
 
+        <Two>
+          <Field>
+            <Label>Response deadline <DirtyDot on={draftResponseDeadline !== null} /></Label>
+            <input type="date" className="eq-datefield" value={effDeadlineInput}
+              onChange={(e) => setDraftResponseDeadline(e.target.value === (query.responseDeadline ? toDateInput(new Date(query.responseDeadline).getTime()) : "") ? null : e.target.value)} />
+          </Field>
+          <Field>
+            <Label>If no response <DirtyDot on={draftIfNoResponse !== null} /></Label>
+            <Form11Select value={effIfNoResponse} options={IF_NO_RESPONSE_OPTIONS}
+              onChange={(v) => setDraftIfNoResponse(v === ((query as { ifNoResponse?: string }).ifNoResponse || "Remind me to nudge") ? null : v)} ariaLabel="If no response" />
+          </Field>
+        </Two>
+
         <Field>
-          <Label>Materials sent <DirtyDot on={draftMaterials !== null} /></Label>
-          <div className="eq-matpills">
-            {effMaterials.length === 0 && !matAdding && <span style={{ fontSize: 12, color: C.muted, fontStyle: "italic" }}>No materials recorded</span>}
-            {effMaterials.map((m, i) => (
-              <span key={`${m}-${i}`} className="eq-matpill">{m}<button type="button" className="eq-matx" aria-label={`Remove ${m}`} onClick={() => removeMaterial(i)}>✕</button></span>
-            ))}
-            {matAdding ? (
-              <input autoFocus className="eq-matinput" placeholder="e.g. First 3 chapters" value={matInput}
-                onChange={(e) => setMatInput(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addMaterial(); } else if (e.key === "Escape") { setMatAdding(false); setMatInput(""); } }}
-                onBlur={addMaterial} />
-            ) : (
-              <button type="button" className="eq-matadd" onClick={() => setMatAdding(true)}>+ add</button>
-            )}
-          </div>
+          <Label>Materials sent <DirtyDot on={materialsTouched} /></Label>
+          {packageOptions.length > 1 && (
+            <div style={{ marginBottom: effPackageId ? 0 : 7 }}>
+              <Form11Select value={effPackageId} options={packageOptions}
+                onChange={(v) => { setDraftPackageId(v === (query.packageId || "") ? null : v); if (v) setDraftMaterials(null); }} ariaLabel="Submission package" />
+            </div>
+          )}
+          {effPackageId ? (
+            <div className="eq-pkglinked">Materials are defined by <b>{linkedPackage?.packageName || "the linked package"}</b>.</div>
+          ) : (
+            <div className="eq-matpills">
+              {effMaterials.length === 0 && !matAdding && <span style={{ fontSize: 12, color: C.muted, fontStyle: "italic" }}>No materials recorded</span>}
+              {effMaterials.map((m, i) => (
+                <span key={`${m}-${i}`} className="eq-matpill">{m}<button type="button" className="eq-matx" aria-label={`Remove ${m}`} onClick={() => removeMaterial(i)}>✕</button></span>
+              ))}
+              {matAdding ? (
+                <input autoFocus className="eq-matinput" placeholder="e.g. First 3 chapters" value={matInput}
+                  onChange={(e) => setMatInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addMaterial(); } else if (e.key === "Escape") { setMatAdding(false); setMatInput(""); } }}
+                  onBlur={addMaterial} />
+              ) : (
+                <button type="button" className="eq-matadd" onClick={() => setMatAdding(true)}>+ add</button>
+              )}
+            </div>
+          )}
         </Field>
 
         <Field>
@@ -394,6 +461,24 @@ export const EditQueryDrawer: React.FC<EditQueryDrawerProps> = ({ query, isOpen,
 
         <div className="eq-pkg"><button type="button" className="eq-pkg-link" onClick={() => setProHint((p) => !p)}>Attach submission package</button><span className="eq-pro">Pro</span></div>
         {proHint && <div className="eq-prohint"><span>{PRO_COPY}</span></div>}
+
+        {/* ── Rejection details (rejected / withdrawn only — parity with the retired inline editor) ── */}
+        {CLOSED_REVIEW.has(query.status) && (
+          <>
+            <Sec top>Rejection details</Sec>
+            <Field>
+              <Label>Rejection type <DirtyDot on={draftRejectionType !== null} /></Label>
+              <Form11Select value={effRejectionType} options={REJECTION_TYPE_OPTIONS}
+                onChange={(v) => setDraftRejectionType(v === (query.rejectionType || "Form rejection") ? null : v)} ariaLabel="Rejection type" />
+            </Field>
+            <Field>
+              <Label>Agent comments / feedback <DirtyDot on={draftAgentComments !== null} /></Label>
+              <RestingField value={effAgentComments} placeholder="Paste the agent’s feedback…" multiline
+                isEditing={editingComments} onStartEdit={() => setEditingComments(true)} onEndEdit={() => setEditingComments(false)}
+                onCommit={(v) => setDraftAgentComments(v === (query.agentComments || "") ? null : v)} />
+            </Field>
+          </>
+        )}
 
         {/* ── The record (timeline) — the ledger, editable through the fork ──────── */}
         <Sec top>The record</Sec>
@@ -592,6 +677,9 @@ const EditQueryStyles: React.FC = () => (
     .eq-matadd:hover{border-color:#7c3a2a;color:#7c3a2a;}
     .eq-matinput{font-family:'Inter',sans-serif;font-size:11.5px;color:#3a1c14;background:#fffdf9;border:1px solid #ece2d4;border-radius:999px;padding:4px 11px;outline:none;min-width:140px;}
     .eq-matinput:focus{border-color:#8a9e88;}
+    .eq-datefield{margin-top:2px;width:100%;min-height:38px;font-family:'Inter',sans-serif;font-size:12.5px;color:#3a1c14;background:#fffdf9;border:1px solid #ece2d4;border-radius:8px;padding:8px 11px;outline:none;box-sizing:border-box;}
+    .eq-datefield:focus{border-color:#8a9e88;}
+    .eq-pkglinked{margin-top:7px;font-size:11.5px;color:#6a5b4c;background:#f3ecdf;border:1px solid #e6d8c8;border-radius:8px;padding:8px 11px;}
     .eq-display{position:relative;min-height:38px;display:flex;align-items:center;gap:8px;padding:8px 11px;background:#fffdf9;border:1px solid #ece2d4;border-radius:8px;margin-top:2px;}
     .eq-display.click{cursor:pointer;transition:border-color .14s,background .14s;}
     .eq-display.click:hover{border-color:#d8c9b6;background:#fffefb;}

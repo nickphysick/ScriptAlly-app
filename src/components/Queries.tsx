@@ -32,11 +32,10 @@ import { RecordResponseModal } from "./RecordResponseModal";
 import { RecordResponseFocusForm } from "./RecordResponseFocusForm";
 import { recordQueryResponse } from "../lib/recordResponse";
 import { agentLabel, agentAgencyLine } from "../lib/agentDisplay";
-import { formatQueryMaterial, materialLabel } from "../lib/materials";
+import { formatQueryMaterial } from "../lib/materials";
 import { MarkSentPopover, MarkSentKind } from "./MarkSentPopover";
 import { useFixedMenu } from "./forms/useFixedMenu";
-import { MaterialsField } from "./MaterialsField";
-import { editMaterialsUpdate } from "../lib/packageMetrics";
+import { useOpenEditQuery } from "./EditQueryHost";
 import { MountCard } from "./MountCard";
 import { ScriptAllyLogo } from "./ScriptAllyLogo";
 import {
@@ -149,6 +148,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     deleteActivity,
     updateAgent
   } = useScriptAllyDb();
+  // Query editing is the app-level Edit Query drawer (the inline isEditMode editor is retired).
+  const openEditQuery = useOpenEditQuery();
 
   const [selectedQueryId, setSelectedQueryId] = useState<string | null>(null);
   const [selectedQuery, setSelectedQuery] = useState<any | null>(null);
@@ -648,28 +649,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   // Contextual action states
   const [showActionDropdown, setShowActionDropdown] = useState(false);
 
-  // Edit mode states
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [editMsId, setEditMsId] = useState("");
-  const [editDateSent, setEditDateSent] = useState("");
-  const [editSendMethod, setEditSendMethod] = useState("");
-  const [editPersonalisationNotes, setEditPersonalisationNotes] = useState("");
-  const [editResponseDeadline, setEditResponseDeadline] = useState("");
-  const [editIfNoResponse, setEditIfNoResponse] = useState("Remind me to nudge");
-  const [editMaterials, setEditMaterials] = useState<(string | QueryMaterial)[]>([]);
-  // The attached submission package (mutually exclusive with editMaterials — see the
-  // materialsLinkWrites guard in handleSaveChanges). "" === free text.
-  const [editPackageId, setEditPackageId] = useState<string>("");
-  // True once the user touches materials OR the package link in this edit session. When false,
-  // handleSaveChanges omits both fields so an unrelated edit (or saving a legacy query) preserves
-  // the stored values verbatim — never downgrading structured quantities or clobbering the link.
-  const [materialsTouched, setMaterialsTouched] = useState(false);
-  const [editRejectionType, setEditRejectionType] = useState("Form rejection");
-  const [editAgentComments, setEditAgentComments] = useState("");
-  
-  const [allAvailableMaterials, setAllAvailableMaterials] = useState<string[]>([
-    "Query Letter", "Synopsis", "Sample Pages", "Full Manuscript"
-  ]);
+  // Query editing now lives entirely in the Edit Query drawer (openEditQuery) — the inline
+  // isEditMode editor and its edit-state are retired. The reading pane below is view-only.
 
   // Create query inputs for inline quick-log portal
   const [showLogModal, setShowLogModal] = useState(false);
@@ -702,45 +683,12 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     if (agents.length > 0 && !logAgId) setLogAgId(agents[0].id);
   }, [manuscripts, packages, agents, logMsId, logAgId, logPkgId]);
 
-  // Synchronise edit values when selectedQuery changes
+  // The active query + its agent/manuscript, resolved live. The reading pane is view-only — editing
+  // is the Edit Query drawer (openEditQuery).
   const activeQuery = selectedQueryId ? (selectedQuery || queries.find(q => q.id === selectedQueryId)) : null;
   const currentStatus = activeQuery?.status ?? selectedQuery?.status;
   const activeAgent = activeQuery ? agents.find(a => a.id === activeQuery.agentId) : null;
   const activeMs = activeQuery ? manuscripts.find(m => m.id === activeQuery.manuscriptId) : null;
-
-  useEffect(() => {
-    if (activeQuery) {
-      setEditMsId(activeQuery.manuscriptId);
-      setEditDateSent(activeQuery.dateSent ? activeQuery.dateSent.split("T")[0] : "");
-      setEditSendMethod(activeQuery.sendMethod || "Email");
-      setEditPersonalisationNotes(activeQuery.personalisationNotes || "");
-      setEditResponseDeadline(activeQuery.responseDeadline ? activeQuery.responseDeadline.split("T")[0] : "");
-      setEditIfNoResponse((activeQuery as any).ifNoResponse || "Remind me to nudge");
-      
-      // Seed the editor from the query's own record (structured — preserves type/quantity) when
-      // it has one; otherwise fall back to the agent's requested materials as plain labels.
-      // materialsTouched starts false so an untouched save preserves the stored value verbatim.
-      const queryMats: (string | QueryMaterial)[] = activeQuery.materialsWanted || [];
-      const agentMats: string[] = activeAgent && Array.isArray(activeAgent.materialsWanted)
-        ? (activeAgent.materialsWanted as string[])
-        : [];
-      setEditMaterials(queryMats.length > 0 ? queryMats : agentMats);
-      setEditPackageId(activeQuery.packageId || "");
-      setMaterialsTouched(false);
-
-      // Chip palette: the standard set plus any custom labels already present on the query/agent.
-      const presentLabels = [...queryMats.map(materialLabel), ...agentMats];
-      const initialAvailable = Array.from(new Set([
-        "Query Letter", "Synopsis", "Sample Pages", "Full Manuscript",
-        ...presentLabels
-      ]));
-      setAllAvailableMaterials(initialAvailable);
-
-      setEditRejectionType(activeQuery.rejectionType || "Form rejection");
-      setEditAgentComments(activeQuery.agentComments || "");
-    }
-    setShowActionDropdown(false);
-  }, [selectedQueryId, isEditMode, activeQuery?.id, activeAgent?.id]);
 
   // Synchronise Agent Notes values when activeAgent changes
   useEffect(() => {
@@ -932,43 +880,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   }, [statusFiltersKey, selectedManuscriptFilter, listSearch, searchQuery, queries.length]);
 
   // Reactive date sent change handler that automatically projects response due expectations
-  const handleDateSentChange = (val: string) => {
-    setEditDateSent(val);
-    if (activeAgent) {
-      const d = new Date(val);
-      if (!isNaN(d.getTime())) {
-        d.setDate(d.getDate() + (activeAgent.responseTimeWeeks * 7));
-        setEditResponseDeadline(d.toISOString().split("T")[0]);
-      }
-    }
-  };
-
-  const handleSaveChanges = async () => {
-    if (!activeQuery) return;
-    const updates: Partial<Query> = {
-      manuscriptId: editMsId,
-      dateSent: editDateSent ? new Date(editDateSent).toISOString() : activeQuery.dateSent,
-      sendMethod: editSendMethod as any,
-      personalisationNotes: editPersonalisationNotes,
-      responseDeadline: editResponseDeadline ? new Date(editResponseDeadline).toISOString() : activeQuery.responseDeadline,
-    };
-    
-    updates.ifNoResponse = editIfNoResponse;
-    // Guard #1 + omit-when-untouched: when the user touched materials OR the package link this
-    // session, persist exactly one source of truth (package → clear materialsWanted; free text →
-    // clear packageId). Untouched → editMaterialsUpdate returns {} so BOTH keys are omitted and the
-    // stored values are preserved verbatim (updateQuery merges) — an agent-seeded list never lands
-    // behind a packageId, and a status/notes-only edit keeps the existing packageId.
-    Object.assign(updates, editMaterialsUpdate({ touched: materialsTouched, packageId: editPackageId, materials: editMaterials }));
-
-    if ([QueryStatus.REJECTED, QueryStatus.WITHDRAWN].includes(activeQuery.status)) {
-      updates.rejectionType = editRejectionType;
-      updates.agentComments = editAgentComments;
-    }
-
-    await updateQuery(activeQuery.id, updates);
-    setIsEditMode(false);
-  };
+  // Query-field editing (manuscript, dates, method, materials/package, personalisation, deadline,
+  // if-no-response, rejection details) now lives in the Edit Query drawer (openEditQuery), which
+  // commits through saveQueryEdits. The inline handleSaveChanges path is retired.
 
   // Active query activity timeline logs
   const activeActivities = activities
@@ -2409,7 +2323,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 )}
                 <button
                   type="button"
-                  onClick={() => hasActive && setIsEditMode(prev => !prev)}
+                  onClick={() => { if (hasActive && activeQuery) openEditQuery(activeQuery.id); }}
                   onMouseEnter={e => { if (hasActive) e.currentTarget.style.background = "#fffaf6"; }}
                   onMouseLeave={e => (e.currentTarget.style.background = "#ffffff")}
                   style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: 13, fontWeight: 500, color: burgundy, background: "#ffffff", border: "1px solid rgba(124,58,42,.22)", borderRadius: 10, padding: "10px 16px", cursor: hasActive ? "pointer" : "default", opacity: hasActive ? 1 : 0.5 }}
@@ -2971,79 +2885,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                       </div>
                       {/* Content area */}
                       <div style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
-                        {isEditMode ? (
-                          <div className="space-y-4 text-xs">
-                            <div>
-                              <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1">Target Agent</label>
-                              <div className="w-full p-2 bg-stone-150 text-stone-500 rounded border border-stone-200 text-xs">{agentLabel(activeAgent)}</div>
-                              <span className="text-[9px] text-stone-400 mt-0.5 block italic">Cannot be changed</span>
-                            </div>
-                            <div>
-                              <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1">Manuscript Title</label>
-                              <select value={editMsId} onChange={(e) => setEditMsId(e.target.value)} className="w-full text-xs p-2 bg-white border border-[#EBDCD3] rounded focus:outline-[#7c3a2a] cursor-pointer">
-                                {manuscripts.map(m => <option key={m.id} value={m.id}>{m.title}</option>)}
-                              </select>
-                            </div>
-                            <div>
-                              <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1">Date Sent</label>
-                              <input type="date" value={editDateSent} onChange={(e) => handleDateSentChange(e.target.value)} className="w-full text-xs p-2 bg-white border border-[#EBDCD3] rounded focus:outline-[#7c3a2a]" />
-                            </div>
-                            <div>
-                              <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1">Send Method</label>
-                              <select value={editSendMethod} onChange={(e) => setEditSendMethod(e.target.value)} className="w-full text-xs p-2 bg-white border border-[#EBDCD3] rounded focus:outline-[#7c3a2a] cursor-pointer">
-                                <option value="Email">Email</option>
-                                <option value="Online Form">Online Form</option>
-                                <option value="Query Manager">Query Manager</option>
-                                <option value="Post">Post</option>
-                              </select>
-                            </div>
-                            <div>
-                              <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1">Personalisation Notes</label>
-                              <textarea value={editPersonalisationNotes} onChange={(e) => setEditPersonalisationNotes(e.target.value)} className="w-full text-xs p-2 bg-white border border-[#EBDCD3] rounded focus:outline-[#7c3a2a] min-h-[60px]" placeholder="Hook details..." />
-                            </div>
-                            <div>
-                              <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1">Response Deadline</label>
-                              <input type="date" value={editResponseDeadline} onChange={(e) => setEditResponseDeadline(e.target.value)} className="w-full text-xs p-2 bg-white border border-[#EBDCD3] rounded focus:outline-[#7c3a2a]" />
-                            </div>
-                            <div>
-                              <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1">If no response</label>
-                              <select value={editIfNoResponse} onChange={(e) => setEditIfNoResponse(e.target.value)} className="w-full text-xs p-2 bg-white border border-[#EBDCD3] rounded focus:outline-[#7c3a2a] cursor-pointer">
-                                <option value="Remind me to nudge">Remind me to nudge</option>
-                                <option value="Mark as no response automatically">Mark as no response automatically</option>
-                                <option value="Do nothing">Do nothing</option>
-                              </select>
-                            </div>
-                            <div>
-                              <label className="block text-[10px] uppercase font-bold text-stone-400 mb-1.5">Materials Sent</label>
-                              <MaterialsField
-                                materials={editMaterials}
-                                onMaterialsChange={(next) => { setEditMaterials(next); setMaterialsTouched(true); }}
-                                packageId={editPackageId}
-                                onPackageChange={(id) => { setEditPackageId(id); setMaterialsTouched(true); }}
-                                manuscriptId={activeQuery.manuscriptId}
-                                palette={allAvailableMaterials}
-                                allowCustom
-                                onNavigate={onNavigate}
-                              />
-                            </div>
-                            {[QueryStatus.REJECTED, QueryStatus.WITHDRAWN].includes(activeQuery.status) && (
-                              <div className="border-t border-[#EBDCD3] pt-3.5 space-y-3.5">
-                                <div>
-                                  <label className="block text-[10px] uppercase font-bold text-[#A32D2D] mb-1">Rejection Type</label>
-                                  <select value={editRejectionType} onChange={(e) => setEditRejectionType(e.target.value)} className="w-full text-xs p-2 bg-white border border-[#EBDCD3] rounded focus:outline-[#7c3a2a] cursor-pointer">
-                                    <option value="Personalised rejection">Personalised rejection</option>
-                                    <option value="Form rejection">Form rejection</option>
-                                    <option value="No reason given">No reason given</option>
-                                  </select>
-                                </div>
-                                <div>
-                                  <label className="block text-[10px] uppercase font-bold text-[#A32D2D] mb-1">Agent Comments / Feedback</label>
-                                  <textarea value={editAgentComments} onChange={(e) => setEditAgentComments(e.target.value)} className="w-full text-xs p-2 bg-white border border-[#EBDCD3] rounded focus:outline-[#7c3a2a] min-h-[60px]" placeholder="Paste comments here..." />
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        ) : (
+                        {/* View-only — editing is the Edit Query drawer (openEditQuery). */}
                           <div className="space-y-4">
                             <div className="bg-[#FAF8F5] border border-[#e8d5cc] rounded-md p-3 space-y-2.5">
                               <span className="text-[10px] text-stone-400 font-mono uppercase tracking-wider block leading-none font-bold">Manuscript</span>
@@ -3101,15 +2943,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                               </div>
                             )}
                           </div>
-                        )}
                       </div>
-                      {/* Edit mode save/cancel footer */}
-                      {isEditMode && (
-                        <div style={{ flexShrink: 0, paddingTop: 10, borderTop: "1px solid #EBDCD3", display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 8 }}>
-                          <button type="button" onClick={() => setIsEditMode(false)} style={{ padding: "5px 14px", border: "1px solid #d1d5db", background: "white", color: "#6b7280", fontSize: 11, fontWeight: 700, borderRadius: 6, cursor: "pointer" }}>Cancel</button>
-                          <button type="button" onClick={handleSaveChanges} style={{ padding: "5px 14px", background: "#7c3a2a", color: "white", fontSize: 11, fontWeight: 700, borderRadius: 6, cursor: "pointer", border: "none" }}>Save changes</button>
-                        </div>
-                      )}
                     </div>{/* ── end sub-card 2: What you sent ── */}
 
                   {/* ── Sub-card 3: Notes — journal pins to bottom via flex-1 on messages area ── */}

@@ -15,7 +15,7 @@
  * the corrected status. Exact QueryStatus enum strings throughout (in lockstep with emailImportCommit).
  */
 import { Firestore, collection, doc, writeBatch, updateDoc, deleteDoc, Timestamp } from "firebase/firestore";
-import { QueryStatus, ActivityType } from "../types";
+import { QueryStatus, ActivityType, QueryMaterial } from "../types";
 import { recomputeQuery } from "./recomputeQuery";
 
 export interface QueryEditAppend {
@@ -37,13 +37,20 @@ export interface QueryEditOps {
   deletes: string[];
   /** When set, updates the query's stored `dateSent` (the locked root's date). */
   dateSentMs?: number;
-  /** Stored, NON-derived query inputs to patch in the same atomic batch (Prompt 4). Never status/
-   *  dates/round/responses — those stay derived. */
+  /** Stored, NON-derived query inputs to patch in the same atomic batch. Never status/round/
+   *  responses — those stay derived. (responseDeadline is a denormalised snapshot, not log-derived,
+   *  so it is editable here, matching the retired inline editor.) */
   queryFields?: {
     sendMethod?: string;
-    materialsWanted?: string[];
+    materialsWanted?: (string | QueryMaterial)[];
     personalisationNotes?: string;
     agentId?: string;
+    manuscriptId?: string;
+    responseDeadline?: string;
+    ifNoResponse?: string;
+    packageId?: string;
+    rejectionType?: string;
+    agentComments?: string;
   };
 }
 export interface QueryEditMeta {
@@ -154,6 +161,12 @@ export async function commitQueryEdits(
       if (f.materialsWanted !== undefined) queryPatch.materialsWanted = f.materialsWanted;
       if (f.personalisationNotes !== undefined) queryPatch.personalisationNotes = f.personalisationNotes;
       if (f.agentId !== undefined) queryPatch.agentId = f.agentId;
+      if (f.manuscriptId !== undefined) queryPatch.manuscriptId = f.manuscriptId;
+      if (f.responseDeadline !== undefined) queryPatch.responseDeadline = f.responseDeadline;
+      if (f.ifNoResponse !== undefined) queryPatch.ifNoResponse = f.ifNoResponse;
+      if (f.packageId !== undefined) queryPatch.packageId = f.packageId;
+      if (f.rejectionType !== undefined) queryPatch.rejectionType = f.rejectionType;
+      if (f.agentComments !== undefined) queryPatch.agentComments = f.agentComments;
     }
     if (Object.keys(queryPatch).length > 0) batch.update(queryRef, queryPatch);
 
