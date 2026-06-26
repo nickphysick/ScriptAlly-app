@@ -19,7 +19,6 @@ import { createPortal } from "react-dom";
 import { useScriptAllyDb } from "../lib/db";
 import { ManuscriptVersion, SubmissionPackage, ComponentType, UserPlan } from "../types";
 import { MountPanel } from "./MountPanel";
-import { SheenWave } from "./onboarding/SheenWave";
 import {
   versionSnippet,
   versionMeta,
@@ -27,6 +26,8 @@ import {
   componentMetrics,
   packageMetrics,
   packageFunnel,
+  packageStages,
+  avgReplyDays,
   resolveActivePackage,
   formatRate,
   barWidth,
@@ -81,6 +82,9 @@ import {
   ArrowRight,
   ArrowLeft,
   Sparkles,
+  Clock,
+  ArrowLeftRight,
+  Filter,
 } from "lucide-react";
 
 const AMBER = "#b98a4e";
@@ -141,16 +145,22 @@ const BandHeader: React.FC<{ title: string; meta?: string; Icon: React.Component
   );
 };
 
-/* ── Component chip (icon + version name), used in package cards. ── */
+/* ── Component chip (colour-dot + version name) — the mockup's component-identity marker
+ *    (query letter = burgundy · synopsis = sage · sample pages = amber). ── */
 const Chip: React.FC<{ kind: ComponentType; label: string }> = ({ kind, label }) => {
   const meta = COMP[kind];
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, maxWidth: "100%", fontFamily: FONT_SANS, fontSize: 11, color: "#5a4a40", background: "#f3ece2", border: "1px solid #e4d8ca", borderRadius: 7, padding: "4px 9px" }}>
-      <meta.Icon style={{ width: 11, height: 11, color: meta.color, flexShrink: 0 }} strokeWidth={2} aria-hidden="true" />
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, maxWidth: "100%", fontFamily: FONT_SANS, fontSize: 11, color: "#5a4a40", background: "#fbfdfa", border: "0.5px solid #d6e0d2", borderRadius: 7, padding: "4px 9px" }}>
+      <span style={{ width: 6, height: 6, borderRadius: "50%", background: meta.color, flexShrink: 0 }} aria-hidden="true" />
       <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</span>
     </span>
   );
 };
+
+/** Small colour-dot for a component kind (used in attribution headers + the funnel legend). */
+const KindDot: React.FC<{ kind: ComponentType; size?: number }> = ({ kind, size = 7 }) => (
+  <span style={{ width: size, height: size, borderRadius: "50%", background: COMP[kind].color, flexShrink: 0, display: "inline-block" }} aria-hidden="true" />
+);
 
 /* ── A labelled metric bar (Requests = burgundy, Responses = sage). ── */
 const MetricBar: React.FC<{ label: string; rate: number | null; n: number; total: number; variant: "req" | "resp" }> = ({ label, rate, n, total, variant }) => (
@@ -386,7 +396,7 @@ export const SubmissionPackages: React.FC = () => {
   useEffect(() => {
     const el = shelfRef.current;
     if (!el) return;
-    const MIN_TILE = 248, GAP = 14;
+    const MIN_TILE = 220, GAP = 13;
     const compute = () => setShelfCols(Math.max(1, Math.floor((el.clientWidth + GAP) / (MIN_TILE + GAP))));
     compute();
     const ro = new ResizeObserver(compute);
@@ -723,98 +733,59 @@ export const SubmissionPackages: React.FC = () => {
       // if the active package isn't qualified yet, hold the nudge — too early to second-guess it
     }
 
-    // benchmark across the other packages (qualified average)
-    const otherQual = shelf.map(fOf).filter(qualified);
-    const othersAvg = otherQual.length ? otherQual.reduce((s, f) => s + f.requestRateResolved!, 0) / otherQual.length : null;
+    // manuscript-wide resolved request rate — the spotlight's "vs X% manuscript avg" benchmark
+    const msAgg = msPackages.reduce((a, p) => { const f = fOf(p); return { req: a.req + f.requests, res: a.res + f.resolved }; }, { req: 0, res: 0 });
+    const msAvgRate = msAgg.res > 0 ? msAgg.req / msAgg.res : null;
 
-    const benchmarkLine = (f: PackageFunnel, activePkg: SubmissionPackage): React.ReactNode => {
-      if (!qualified(f)) {
-        return <>Still early — {f.resolved === 0 ? "no resolved sends yet" : `${f.resolved} resolved send${f.resolved === 1 ? "" : "s"} so far`}. Rates firm up around {MIN_SENDS_FOR_CLAIM} resolved.</>;
-      }
-      if (best && best.p.id === activePkg.id) {
-        return <>Your <b style={{ color: sageText, fontWeight: 600 }}>sharpest package</b> — the best resolved request rate on {activeMs?.title}.</>;
-      }
-      if (othersAvg !== null) {
-        const diff = Math.round((f.requestRateResolved! - othersAvg) * 100);
-        if (diff > 0) return <>Running <b style={{ color: burgundy }}>{diff} pts above</b> your other packages' average ({formatRate(othersAvg)}).</>;
-        if (diff < 0) return <>Running <b style={{ color: burgundy }}>{Math.abs(diff)} pts below</b> your other packages' average ({formatRate(othersAvg)}) — a stronger option may be on the shelf.</>;
-        return <>On par with your other packages' average ({formatRate(othersAvg)}).</>;
-      }
-      return <>Across {f.resolved} resolved send{f.resolved === 1 ? "" : "s"} on {activeMs?.title}.</>;
-    };
-
-    const sageBand = (eyebrow: string, title: string, badge?: React.ReactNode) => (
-      <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 22px", background: sageBandGradient, borderBottom: `1px solid ${sageBandRule}` }}>
-        <span aria-hidden="true" style={{ width: 3, height: 30, borderRadius: 2, background: burgundy, flexShrink: 0 }} />
-        <div style={{ minWidth: 0, flex: 1 }}>
-          <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: sageText, marginBottom: 3 }}>{eyebrow}</div>
-          <div style={{ fontFamily: FONT_SERIF, fontSize: 22, fontWeight: 500, color: headingInk, lineHeight: 1.05, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{title}</div>
+    // Spotlight shell: MountPanel's clip frame + a diagonal sage wash (the greeting-container treatment;
+    // the wave is a clipped overlay, never an overlay ::before border on the card itself).
+    const spotShell = (children: React.ReactNode) => (
+      <MountPanel>
+        <div style={{ position: "relative", overflow: "hidden" }}>
+          <div className="sp-wave" aria-hidden="true" />
+          <div style={{ position: "relative", zIndex: 1 }}>{children}</div>
         </div>
-        {badge}
-      </div>
+      </MountPanel>
     );
 
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
         {active && activeF ? (
-          /* ── Active spotlight: greeting container (MountPanel + sage SheenWave rim) ── */
-          <MountPanel>
-            <SheenWave radius={9} borderWidth={2}>
-              {sageBand(
-                "Active package",
-                active.packageName,
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: FONT_MONO, fontSize: 9, fontWeight: 500, letterSpacing: "0.06em", textTransform: "uppercase", color: "#4f6a4d", background: "#e3ebdf", border: "0.5px solid #cdddc8", borderRadius: 20, padding: "4px 10px", flexShrink: 0 }}>
-                  <Star style={{ width: 11, height: 11, fill: "#7f9a7c", color: "#7f9a7c" }} strokeWidth={1.5} aria-hidden="true" /> Active
-                </span>,
-              )}
-              <div style={{ padding: "20px 22px 22px" }}>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 18 }}>
+          spotShell(
+            <div className="sp-spot" style={{ display: "flex", alignItems: "center", gap: 26, padding: "22px 24px" }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: "0.1em", textTransform: "uppercase", color: "#5a6e58", background: "#e0e7dc", border: "0.5px solid #cbd8c4", borderRadius: 20, padding: "4px 10px", marginBottom: 12 }}>
+                  <Star style={{ width: 9, height: 9, fill: "#5a6e58", color: "#5a6e58" }} strokeWidth={1.5} aria-hidden="true" /> Active · queries pre-fill this
+                </span>
+                <div style={{ fontFamily: FONT_SERIF, fontSize: 28, fontWeight: 500, color: headingInk, marginBottom: 11, lineHeight: 1.1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{active.packageName}</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                   <Chip kind={ComponentType.QUERY_LETTER} label={verName(active.queryLetterVersionId)} />
                   <Chip kind={ComponentType.SYNOPSIS} label={verName(active.synopsisVersionId)} />
                   <Chip kind={ComponentType.SAMPLE_PAGES} label={verName(active.samplePagesVersionId)} />
                 </div>
-
-                <div className="sp-spot" style={{ display: "flex", gap: 22, alignItems: "center" }}>
-                  <div style={{ flexShrink: 0 }}>
-                    <div style={{ fontFamily: FONT_SERIF, fontSize: 44, fontWeight: 500, color: burgundy, lineHeight: 1 }}>{formatRate(activeF.requestRateResolved)}</div>
-                    <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.06em", textTransform: "uppercase", color: mutedInk, marginTop: 4 }}>request rate</div>
-                  </div>
-                  <div className="sp-spot-div" style={{ width: 1, alignSelf: "stretch", background: "rgba(124,58,42,0.12)" }} aria-hidden="true" />
-                  <div style={{ flex: 1, minWidth: 0, fontFamily: FONT_SANS, fontSize: 13, color: "#4a3e34", lineHeight: 1.55 }}>
-                    {benchmarkLine(activeF, active)}
-                    <div style={{ fontFamily: FONT_MONO, fontSize: 10, color: "#6a5e54", marginTop: 8 }}>
-                      {activeF.requests} of {activeF.resolved} resolved · {activeF.sent} sent
-                      {activeF.inFlight > 0 && <> · <span style={{ color: AMBER }}>{activeF.inFlight} in flight</span></>}
-                    </div>
-                  </div>
-                </div>
-
                 {suggestion && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 18, background: amberBandGradient, border: `1px solid ${amberBandRule}`, borderRadius: 11, padding: "12px 14px" }}>
-                    <Sparkles style={{ width: 17, height: 17, color: "#8a6a2e", flexShrink: 0 }} strokeWidth={1.8} aria-hidden="true" />
-                    <div style={{ flex: 1, minWidth: 0, fontFamily: FONT_SANS, fontSize: 12.5, color: "#5a4a36", lineHeight: 1.5 }}>
-                      <b style={{ color: "#7a5a26", fontWeight: 600 }}>{suggestion.p.packageName}</b> is winning more requests — {formatRate(suggestion.f.requestRateResolved)} vs {formatRate(activeF.requestRateResolved)}.
-                    </div>
-                    <button onClick={() => { if (msId) setActivePackage(msId, suggestion!.p.id); }} style={{ ...addBtn, flexShrink: 0, padding: "8px 14px" }}>
-                      <Star style={{ width: 11, height: 11 }} strokeWidth={2} aria-hidden="true" /> Set active
-                    </button>
+                  <div style={{ fontFamily: "'Caveat', cursive", fontSize: 17, color: burgundy, background: "rgba(255,255,255,0.55)", border: "0.5px dashed #b9c8b2", borderRadius: 10, padding: "8px 13px", marginTop: 14, display: "inline-flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+                    <span><b style={{ color: sageText }}>{suggestion.p.packageName}</b> is winning more requests — {formatRate(suggestion.f.requestRateResolved)} vs {formatRate(activeF.requestRateResolved)}.</span>
+                    <button onClick={() => { if (msId) setActivePackage(msId, suggestion!.p.id); }} style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: "0.04em", textTransform: "uppercase", color: sageText, background: "#e0e7dc", border: "0.5px solid #cbd8c4", borderRadius: 7, padding: "6px 10px", cursor: "pointer", flexShrink: 0 }}>Set active</button>
                   </div>
                 )}
-
-                <div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end" }}>
-                  <button onClick={() => setDetailPkgId(active.id)} className="sp-link" style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "transparent", border: "none", cursor: "pointer", fontFamily: FONT_MONO, fontSize: 10.5, letterSpacing: "0.05em", textTransform: "uppercase", color: burgundy }}>
-                    View funnel <ArrowRight style={{ width: 13, height: 13 }} strokeWidth={2.2} aria-hidden="true" />
-                  </button>
-                </div>
               </div>
-            </SheenWave>
-          </MountPanel>
+              <div style={{ textAlign: "center", flexShrink: 0 }}>
+                <div style={{ fontFamily: FONT_SERIF, fontSize: 50, fontWeight: 500, color: "#5a6e58", lineHeight: 0.9 }}>{formatRate(activeF.requestRateResolved)}</div>
+                <div style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: "0.05em", textTransform: "uppercase", color: mutedInk, marginTop: 6 }}>Request rate</div>
+                {msAvgRate !== null && <div style={{ fontFamily: FONT_MONO, fontSize: 8.5, color: AMBER, marginTop: 8 }}>vs {formatRate(msAvgRate)} manuscript avg</div>}
+                <button onClick={() => setDetailPkgId(active.id)} className="sp-link" style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.04em", textTransform: "uppercase", color: burgundy, marginTop: 13, display: "inline-flex", alignItems: "center", gap: 5, cursor: "pointer", background: "transparent", border: "none" }}>
+                  View funnel <ArrowRight style={{ width: 11, height: 11 }} strokeWidth={2.4} aria-hidden="true" />
+                </button>
+              </div>
+            </div>,
+          )
         ) : (
-          /* ── Empty spotlight: no active package chosen yet ── */
-          <MountPanel>
-            <SheenWave radius={9} borderWidth={2}>
-              {sageBand("No active package", "Choose your default package")}
-              <div style={{ padding: "20px 22px 22px", fontFamily: FONT_SANS, fontSize: 13.5, color: "#4a3e34", lineHeight: 1.55 }}>
+          spotShell(
+            <div style={{ padding: "22px 24px" }}>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9c8878", background: "#efe7df", border: "0.5px solid #e0d5c8", borderRadius: 20, padding: "4px 10px", marginBottom: 11 }}>No active package</span>
+              <div style={{ fontFamily: FONT_SERIF, fontSize: 24, fontWeight: 500, color: headingInk, lineHeight: 1.1 }}>Choose your default package</div>
+              <div style={{ fontFamily: FONT_SANS, fontSize: 13.5, color: "#4a3e34", lineHeight: 1.55, marginTop: 11 }}>
                 {msPackages.length === 0 ? (
                   <>Build your first package — then set it active to pre-fill the materials on every new query for <b>{activeMs?.title}</b>.</>
                 ) : suggestion ? (
@@ -831,8 +802,8 @@ export const SubmissionPackages: React.FC = () => {
                   <>Set a package active from the shelf below — tap its star — to pre-fill the materials on every new query for <b>{activeMs?.title}</b>. The app never picks for you.</>
                 )}
               </div>
-            </SheenWave>
-          </MountPanel>
+            </div>,
+          )
         )}
 
         {/* ── Shelf: the other packages + dotted ghosts ── */}
@@ -857,46 +828,42 @@ export const SubmissionPackages: React.FC = () => {
                   onClick={() => setDetailPkgId(p.id)}
                   onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setDetailPkgId(p.id); } }}
                   className="sp-shelf-card"
-                  style={{ background: "#fbf6ef", border: "1px solid #e8ddcf", borderRadius: 12, padding: "14px 15px", cursor: "pointer", display: "flex", flexDirection: "column", gap: 10, minHeight: 132, transition: "border-color .15s, box-shadow .15s" }}
+                  style={{ background: parchment, border: "1px solid rgba(124,58,42,0.14)", borderRadius: 13, padding: "15px 16px", cursor: "pointer", display: "flex", flexDirection: "column", minHeight: 122, transition: "border-color .14s, box-shadow .14s" }}
                 >
                   <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8 }}>
-                    <span style={{ fontFamily: FONT_SERIF, fontSize: 16, fontWeight: 500, color: headingInk, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>{p.packageName}</span>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontFamily: FONT_SERIF, fontSize: 16, fontWeight: 500, color: headingInk, lineHeight: 1.1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.packageName}</div>
+                      {isBest ? (
+                        <span style={{ display: "inline-block", marginTop: 6, fontFamily: FONT_MONO, fontSize: 7.5, letterSpacing: "0.05em", textTransform: "uppercase", color: sageText, background: "#e9ede6", border: "0.5px solid #cfdac9", borderRadius: 20, padding: "2px 7px" }}>★ Top performer</span>
+                      ) : early ? (
+                        <span style={{ display: "inline-block", marginTop: 6, fontFamily: FONT_MONO, fontSize: 7.5, letterSpacing: "0.05em", textTransform: "uppercase", color: "#9c8878", background: "#efe7df", border: "0.5px solid #e0d5c8", borderRadius: 20, padding: "2px 7px" }}>Early · {f.resolved}/{MIN_SENDS_FOR_CLAIM}</span>
+                      ) : null}
+                    </div>
                     <button
                       title="Set as active package"
                       aria-label={`Set ${p.packageName} as the active package`}
                       onClick={(e) => { e.stopPropagation(); if (msId) setActivePackage(msId, p.id); }}
-                      className="sp-star"
-                      style={{ background: "transparent", border: "none", cursor: "pointer", color: "#c0ae9c", padding: 3, display: "inline-flex", borderRadius: 6, flexShrink: 0 }}
+                      className="sp-star-box"
+                      style={{ width: 26, height: 26, borderRadius: 8, border: "0.5px solid #e0d5c8", background: "#fff", color: "#c4b4aa", display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}
                     >
-                      <Star style={{ width: 16, height: 16 }} strokeWidth={1.8} aria-hidden="true" />
+                      <Star style={{ width: 13, height: 13 }} strokeWidth={1.7} aria-hidden="true" />
                     </button>
                   </div>
 
-                  {(isBest || early) && (
-                    <div>
-                      {isBest ? (
-                        <span style={{ fontFamily: FONT_MONO, fontSize: 8.5, fontWeight: 500, letterSpacing: "0.07em", textTransform: "uppercase", color: "#8a6a2e", background: "#f3e6cf", border: "0.5px solid #e3cda0", borderRadius: 20, padding: "3px 8px" }}>Top performer</span>
-                      ) : (
-                        <span style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: "0.06em", textTransform: "uppercase", color: "#9c8878", background: "#f1ece3", borderRadius: 20, padding: "3px 8px" }}>early</span>
-                      )}
-                    </div>
-                  )}
-
-                  <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-                    <span style={{ fontFamily: FONT_SERIF, fontSize: 26, fontWeight: 500, color: early ? mutedInk : burgundy, lineHeight: 1 }}>{formatRate(f.requestRateResolved)}</span>
-                    <span style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.05em", textTransform: "uppercase", color: mutedInk }}>req rate</span>
+                  <div style={{ marginTop: 13 }}>
+                    <div style={{ fontFamily: FONT_SERIF, fontSize: early ? 16 : 23, fontStyle: early ? "italic" : "normal", color: early ? "#b3a99a" : burgundy, lineHeight: 1 }}>{formatRate(f.requestRateResolved)}</div>
+                    <div style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: "0.04em", textTransform: "uppercase", color: mutedInk, marginTop: 4 }}>{early ? "gathering data" : "request rate"}</div>
                   </div>
 
-                  <div style={{ marginTop: "auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, fontFamily: FONT_MONO, fontSize: 10, color: "#6a5e54" }}>
-                    <span>Sent {f.sent}×{f.inFlight > 0 && <span style={{ color: AMBER }}> · {f.inFlight} in flight</span>}</span>
-                    <ArrowRight style={{ width: 13, height: 13, color: burgundy, flexShrink: 0 }} strokeWidth={2} aria-hidden="true" />
+                  <div style={{ marginTop: "auto", paddingTop: 11, fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: "0.02em", color: "#bdb3a4" }}>
+                    {f.sent} sent{f.inFlight > 0 ? ` · ${f.inFlight} in flight` : ""}
                   </div>
                 </div>
               );
             })}
 
             {/* Build ghost (first) then quiet ghosts to fill the row flush */}
-            <button onClick={openBuild} className="sp-ghost-build" style={{ border: `1.5px dashed ${buttonPinkBorder}`, borderRadius: 12, padding: "14px 15px", background: "transparent", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, minHeight: 132, color: burgundy, transition: "background .15s, border-color .15s" }}>
+            <button onClick={openBuild} className="sp-ghost-build" style={{ border: `1.5px dashed ${buttonPinkBorder}`, borderRadius: 13, padding: "14px 15px", background: "transparent", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, minHeight: 122, color: burgundy, transition: "background .15s, border-color .15s" }}>
               <span style={{ width: 34, height: 34, borderRadius: 10, background: buttonPinkBg, border: `1px solid ${buttonPinkBorder}`, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                 <Plus style={{ width: 17, height: 17 }} strokeWidth={2.2} aria-hidden="true" />
               </span>
@@ -905,7 +872,9 @@ export const SubmissionPackages: React.FC = () => {
             </button>
 
             {Array.from({ length: ghostCount(shelf.length + 1, shelfCols) }).map((_, i) => (
-              <div key={`ghost-${i}`} aria-hidden="true" style={{ border: "1.5px dashed #e6dccb", borderRadius: 12, minHeight: 132, background: "transparent" }} />
+              <button key={`ghost-${i}`} onClick={openBuild} aria-label="Build a package" className="sp-ghost-quiet" style={{ border: "1.5px dashed rgba(124,58,42,0.20)", borderRadius: 13, minHeight: 122, background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#c4b4aa" }}>
+                <Plus style={{ width: 18, height: 18, opacity: 0.35 }} strokeWidth={1.6} aria-hidden="true" />
+              </button>
             ))}
           </div>
         </div>
@@ -913,73 +882,203 @@ export const SubmissionPackages: React.FC = () => {
     );
   };
 
-  // ── Per-package detail: KPIs from the resolved-aware funnel. The horizontal pipeline funnel,
-  //    head-to-head and component attribution land in Phase 4; this is the navigable shell. ──
+  // ── Per-package detail: KPIs + horizontal pipeline funnel + head-to-head vs active + component
+  //    attribution, all derived (packageFunnel / packageStages / avgReplyDays / componentMetrics). ──
   const renderDetail = () => {
     const p = msPackages.find((pp) => pp.id === detailPkgId);
     if (!p) return null; // guarded by the effect that clears a stale detailPkgId
     const f = packageFunnel(p.id, msQueries);
+    const stages = packageStages(p.id, msQueries);
+    const replyDays = avgReplyDays(p.id, msQueries);
     const activePkg = resolveActivePackage(activeMs, msPackages);
+    const af = activePkg ? packageFunnel(activePkg.id, msQueries) : null;
     const isActive = activePkg?.id === p.id;
     const early = !(meetsSampleThreshold(f.resolved) && f.requestRateResolved !== null);
 
-    const kpi = (label: string, value: string, accent?: string) => (
-      <div style={{ flex: "1 1 0", minWidth: 96, background: "#fbf6ef", border: "1px solid #e8ddcf", borderRadius: 11, padding: "13px 14px" }}>
-        <div style={{ fontFamily: FONT_SERIF, fontSize: 24, fontWeight: 500, color: accent ?? headingInk, lineHeight: 1 }}>{value}</div>
-        <div style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: "0.06em", textTransform: "uppercase", color: mutedInk, marginTop: 5 }}>{label}</div>
+    // manuscript-wide resolved request rate (the KPI comparison) + top-package detection
+    const msAgg = msPackages.reduce((a, pp) => { const ff = packageFunnel(pp.id, msQueries); return { req: a.req + ff.requests, res: a.res + ff.resolved }; }, { req: 0, res: 0 });
+    const msAvgRate = msAgg.res > 0 ? msAgg.req / msAgg.res : null;
+    let bestId: string | null = null, bestRate = -1;
+    for (const pp of msPackages) { const ff = packageFunnel(pp.id, msQueries); if (meetsSampleThreshold(ff.resolved) && ff.requestRateResolved !== null && ff.requestRateResolved > bestRate) { bestRate = ff.requestRateResolved; bestId = pp.id; } }
+    const isTop = bestId === p.id && msPackages.length >= 2;
+
+    const FUNNEL: { lab: string; n: number; tone: "burg" | "sage" | "gold" }[] = [
+      { lab: "Queried", n: stages.queried, tone: "burg" },
+      { lab: "Responded", n: stages.responded, tone: "sage" },
+      { lab: "Partial", n: stages.partial, tone: "sage" },
+      { lab: "Full", n: stages.full, tone: "sage" },
+      { lab: "Offer", n: stages.offer, tone: "gold" },
+    ];
+    const maxN = Math.max(FUNNEL[0].n, 1);
+    const toneBg = (t: "burg" | "sage" | "gold") =>
+      t === "burg" ? "linear-gradient(180deg,#9a5040,#7c3a2a)" : t === "gold" ? "linear-gradient(180deg,#c89a52,#a06f28)" : "linear-gradient(180deg,#9aad98,#7a8e78)";
+
+    const Card: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+      <MountPanel><div style={{ padding: "18px 20px" }}>{children}</div></MountPanel>
+    );
+    const cardHead = (Icon: React.ComponentType<any>, text: string) => (
+      <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.07em", textTransform: "uppercase", color: sageText, marginBottom: 14, display: "flex", alignItems: "center", gap: 8 }}>
+        <Icon style={{ width: 13, height: 13 }} strokeWidth={1.7} aria-hidden="true" /> {text}
+      </div>
+    );
+    const kpi = (label: string, value: React.ReactNode, accent: string, sub?: React.ReactNode, subColor?: string) => (
+      <div style={{ flex: "1 1 0", minWidth: 120, background: "#fbf6ef", border: "0.5px solid #e8ddcf", borderRadius: 12, padding: "15px 17px" }}>
+        <div style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: "0.05em", textTransform: "uppercase", color: mutedInk, marginBottom: 6 }}>{label}</div>
+        <div style={{ fontFamily: FONT_SERIF, fontSize: 27, fontWeight: 500, color: accent, lineHeight: 1 }}>{value}</div>
+        {sub && <div style={{ fontFamily: FONT_MONO, fontSize: 8.5, marginTop: 6, color: subColor ?? "#b3a99a" }}>{sub}</div>}
       </div>
     );
 
     return (
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-          <button onClick={() => setDetailPkgId(null)} className="sp-link" style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "transparent", border: "none", cursor: "pointer", fontFamily: FONT_MONO, fontSize: 10.5, letterSpacing: "0.05em", textTransform: "uppercase", color: burgundy }}>
-            <ArrowLeft style={{ width: 14, height: 14 }} strokeWidth={2.2} aria-hidden="true" /> Back to packages
-          </button>
-          <div style={{ display: "flex", gap: 9 }}>
-            {!isActive && (
-              <button onClick={() => { if (msId) setActivePackage(msId, p.id); }} style={{ ...ghostBtn, display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 14px" }}>
+      <div style={{ maxWidth: 860, margin: "0 auto", display: "flex", flexDirection: "column", gap: 16 }}>
+        <button onClick={() => setDetailPkgId(null)} className="sp-link" style={{ alignSelf: "flex-start", display: "inline-flex", alignItems: "center", gap: 7, background: "transparent", border: "none", cursor: "pointer", fontFamily: FONT_MONO, fontSize: 10.5, letterSpacing: "0.05em", textTransform: "uppercase", color: burgundy }}>
+          <ArrowLeft style={{ width: 13, height: 13 }} strokeWidth={2.4} aria-hidden="true" /> All packages
+        </button>
+
+        {/* head: name + tag + action */}
+        <div style={{ display: "flex", alignItems: "center", gap: 13, flexWrap: "wrap" }}>
+          <span style={{ fontFamily: FONT_SERIF, fontSize: 27, fontWeight: 500, color: headingInk }}>{p.packageName}</span>
+          {isActive ? (
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontFamily: FONT_MONO, fontSize: 8, fontWeight: 500, letterSpacing: "0.06em", textTransform: "uppercase", color: sageText, background: "#e0e7dc", border: "0.5px solid #cbd8c4", borderRadius: 20, padding: "3px 8px" }}>
+              <Star style={{ width: 8, height: 8, fill: sageText, color: sageText }} strokeWidth={1.5} aria-hidden="true" /> Active
+            </span>
+          ) : isTop ? (
+            <span style={{ fontFamily: FONT_MONO, fontSize: 8, fontWeight: 500, letterSpacing: "0.06em", textTransform: "uppercase", color: sageText, background: "#e9ede6", border: "0.5px solid #cfdac9", borderRadius: 20, padding: "3px 8px" }}>★ Top performer</span>
+          ) : early ? (
+            <span style={{ fontFamily: FONT_MONO, fontSize: 8, fontWeight: 500, letterSpacing: "0.06em", textTransform: "uppercase", color: "#9c8878", background: "#efe7df", border: "0.5px solid #e0d5c8", borderRadius: 20, padding: "3px 8px" }}>Early</span>
+          ) : null}
+          <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 9 }}>
+            {isActive ? (
+              <span style={{ fontFamily: FONT_MONO, fontSize: 10, textTransform: "uppercase", letterSpacing: "0.05em", color: mutedInk }}>Currently active</span>
+            ) : (
+              <button onClick={() => { if (msId) setActivePackage(msId, p.id); }} style={{ ...ghostBtn, display: "inline-flex", alignItems: "center", gap: 6, padding: "9px 15px" }}>
                 <Star style={{ width: 12, height: 12, color: AMBER }} strokeWidth={2} aria-hidden="true" /> Set active
               </button>
             )}
-            <button onClick={() => editPkg(p)} style={{ ...addBtn, padding: "8px 14px" }}>
+            <button onClick={() => editPkg(p)} style={{ ...addBtn, padding: "9px 15px" }}>
               <Pencil style={{ width: 12, height: 12 }} strokeWidth={2} aria-hidden="true" /> Edit
             </button>
           </div>
         </div>
 
-        <MountPanel>
-          <BandHeader
-            title={p.packageName}
-            meta={`${isActive ? "Active · " : ""}${f.sent} sent · ${f.resolved} resolved${f.inFlight > 0 ? ` · ${f.inFlight} in flight` : ""}`}
-            Icon={Package}
-          />
-          <div style={{ padding: "20px 22px 22px" }}>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 18 }}>
-              <Chip kind={ComponentType.QUERY_LETTER} label={verName(p.queryLetterVersionId)} />
-              <Chip kind={ComponentType.SYNOPSIS} label={verName(p.synopsisVersionId)} />
-              <Chip kind={ComponentType.SAMPLE_PAGES} label={verName(p.samplePagesVersionId)} />
-            </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          <Chip kind={ComponentType.QUERY_LETTER} label={verName(p.queryLetterVersionId)} />
+          <Chip kind={ComponentType.SYNOPSIS} label={verName(p.synopsisVersionId)} />
+          <Chip kind={ComponentType.SAMPLE_PAGES} label={verName(p.samplePagesVersionId)} />
+        </div>
 
-            <div className="sp-kpis" style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-              {kpi("Request rate", formatRate(f.requestRateResolved), early ? mutedInk : burgundy)}
-              {kpi("Response rate", formatRate(f.responseRateResolved), early ? mutedInk : "#5a6e58")}
-              {kpi("Requests", `${f.requests}/${f.resolved}`)}
-              {kpi("Sent", `${f.sent}`)}
-              {kpi("In flight", `${f.inFlight}`, f.inFlight > 0 ? AMBER : undefined)}
-            </div>
-
-            {early && (
-              <div style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 13, color: mutedInk, lineHeight: 1.5, marginTop: 16 }}>
-                Rates are computed over resolved sends only (in-flight queries are held back). This package has {f.resolved} resolved so far — once it reaches {MIN_SENDS_FOR_CLAIM}, its numbers earn a confident read and a Top-performer tag.
-              </div>
+        {/* KPIs (resolved-aware) */}
+        {!early && (
+          <div className="sp-kpis" style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
+            {kpi(
+              "Request rate",
+              formatRate(f.requestRateResolved),
+              burgundy,
+              msAvgRate !== null ? <>{(f.requestRateResolved ?? 0) >= msAvgRate ? "▲" : "▼"} vs {formatRate(msAvgRate)} avg</> : "manuscript avg —",
+              msAvgRate !== null && (f.requestRateResolved ?? 0) >= msAvgRate ? sageText : AMBER,
             )}
-
-            <div style={{ fontFamily: FONT_MONO, fontSize: 9.5, color: mutedInk, letterSpacing: "0.03em", marginTop: 18, paddingTop: 14, borderTop: "1px dashed rgba(124,58,42,0.18)", lineHeight: 1.5 }}>
-              The horizontal pipeline funnel (Queried → Responded → Partial → Full → Offer), the head-to-head against your active package, and per-component attribution arrive in the next checkpoint.
-            </div>
+            {kpi("Response rate", formatRate(f.responseRateResolved), sageText, <>{stages.responded} of {f.resolved} replied</>)}
+            {kpi("Avg reply time", replyDays === null ? "—" : <>{replyDays}<span style={{ fontSize: 14 }}> d</span></>, headingInk, "responding agents")}
           </div>
-        </MountPanel>
+        )}
+
+        {/* funnel — or early-box */}
+        <Card>
+          {cardHead(Filter, "Pipeline funnel — where it wins and stalls")}
+          {early ? (
+            <div style={{ background: "#f3f6f1", border: "0.5px solid #d6e0d2", borderRadius: 12, padding: 18, textAlign: "center" }}>
+              <div style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 18, color: mutedInk, marginBottom: 5 }}>{f.resolved} of {MIN_SENDS_FOR_CLAIM} resolved</div>
+              <div style={{ fontFamily: FONT_SANS, fontSize: 12.5, color: "#8a7a6c", maxWidth: 440, margin: "0 auto", lineHeight: 1.5 }}>
+                The funnel and a verdict appear once this package reaches {MIN_SENDS_FOR_CLAIM} resolved sends. A lucky 1-of-1 isn't a strategy — we won't crown it early.
+              </div>
+            </div>
+          ) : (
+            <>
+              <div style={{ display: "flex", alignItems: "flex-end", height: 150, padding: "6px 4px 0" }}>
+                {FUNNEL.map((s, i) => (
+                  <React.Fragment key={s.lab}>
+                    <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", height: "100%", justifyContent: "flex-end" }}>
+                      <div style={{ fontFamily: FONT_MONO, fontSize: 13, fontWeight: 500, color: bodyInk, marginBottom: 5 }}>{s.n}</div>
+                      <div style={{ width: "60%", height: `${Math.max((s.n / maxN) * 100, 3)}%`, background: toneBg(s.tone), borderRadius: "6px 6px 0 0", minHeight: 4 }} />
+                      <div style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: "0.02em", textTransform: "uppercase", color: "#7a6e60", marginTop: 8, textAlign: "center" }}>{s.lab}</div>
+                    </div>
+                    {i < FUNNEL.length - 1 && (() => {
+                      const next = FUNNEL[i + 1].n;
+                      const cv = s.n ? Math.round((next / s.n) * 100) : 0;
+                      const drop = s.n - next;
+                      return (
+                        <div style={{ width: 46, flexShrink: 0, textAlign: "center", fontFamily: FONT_MONO, fontSize: 8.5, color: mutedInk, paddingBottom: 34 }}>
+                          <span style={{ color: sageText, display: "block", fontSize: 10 }}>{cv}%</span>
+                          {drop > 0 && <span style={{ color: AMBER }}>−{drop}</span>}
+                        </div>
+                      );
+                    })()}
+                  </React.Fragment>
+                ))}
+              </div>
+              {f.inFlight > 0 && (
+                <div style={{ marginTop: 14, background: "#f6efe6", border: "0.5px solid #e8ddcf", borderRadius: 9, padding: "10px 13px", fontFamily: FONT_SANS, fontSize: 11.5, color: "#6a5e54", display: "flex", gap: 8, alignItems: "center", lineHeight: 1.4 }}>
+                  <Clock style={{ width: 14, height: 14, color: AMBER, flexShrink: 0 }} strokeWidth={2} aria-hidden="true" />
+                  <span><b style={{ color: AMBER, fontWeight: 500 }}>{f.inFlight} sent recently</b> — too soon to count; they join the funnel once an agent responds or the window lapses.</span>
+                </div>
+              )}
+              <div style={{ fontFamily: FONT_MONO, fontSize: 8.5, color: "#bdb3a4", marginTop: 9 }}>Rates use resolved queries only, so a fresh package isn't punished for queries still in flight.</div>
+            </>
+          )}
+        </Card>
+
+        {/* head-to-head vs active */}
+        {!early && !isActive && activePkg && af && (
+          <Card>
+            {cardHead(ArrowLeftRight, "Head-to-head vs your active package")}
+            <div className="sp-vs" style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 18, alignItems: "center" }}>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: "0.07em", textTransform: "uppercase", color: mutedInk, marginBottom: 4 }}>This</div>
+                <div style={{ fontFamily: FONT_SERIF, fontSize: 16, color: headingInk, marginBottom: 7 }}>{p.packageName}</div>
+                <div style={{ fontFamily: FONT_SERIF, fontSize: 30, fontWeight: 500, color: (f.requestRateResolved ?? 0) >= (af.requestRateResolved ?? 0) ? sageText : "#b3a99a" }}>{formatRate(f.requestRateResolved)}</div>
+              </div>
+              <div className="sp-vs-mid" style={{ fontFamily: FONT_MONO, fontSize: 10, color: mutedInk }}>vs</div>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: "0.07em", textTransform: "uppercase", color: mutedInk, marginBottom: 4 }}>Active</div>
+                <div style={{ fontFamily: FONT_SERIF, fontSize: 16, color: headingInk, marginBottom: 7 }}>{activePkg.packageName}</div>
+                <div style={{ fontFamily: FONT_SERIF, fontSize: 30, fontWeight: 500, color: (af.requestRateResolved ?? 0) > (f.requestRateResolved ?? 0) ? sageText : "#b3a99a" }}>{formatRate(af.requestRateResolved)}</div>
+              </div>
+            </div>
+            <div style={{ fontFamily: FONT_MONO, fontSize: 11, color: sageText, textAlign: "center", marginTop: 14, paddingTop: 13, borderTop: "1px solid rgba(124,58,42,0.1)" }}>
+              {(f.requestRateResolved ?? 0) > (af.requestRateResolved ?? 0)
+                ? <><b style={{ color: burgundy }}>{p.packageName}</b> wins requests by <b style={{ color: burgundy }}>+{Math.round(((f.requestRateResolved ?? 0) - (af.requestRateResolved ?? 0)) * 100)} points</b> — consider setting it active.</>
+                : <>Your active package leads by {Math.round(((af.requestRateResolved ?? 0) - (f.requestRateResolved ?? 0)) * 100)} points.</>}
+            </div>
+          </Card>
+        )}
+
+        {/* component attribution */}
+        {!early && (
+          <Card>
+            {cardHead(PieChart, "Component attribution — which part is carrying it")}
+            <div className="sp-attr" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
+              {[
+                { kind: ComponentType.QUERY_LETTER, id: p.queryLetterVersionId, label: "Query letter" },
+                { kind: ComponentType.SYNOPSIS, id: p.synopsisVersionId, label: "Synopsis" },
+                { kind: ComponentType.SAMPLE_PAGES, id: p.samplePagesVersionId, label: "Sample pages" },
+              ].map((c) => {
+                const cm = componentMetrics(c.id, msPackages, msQueries);
+                return (
+                  <div key={c.kind}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: "0.04em", textTransform: "uppercase", color: sageText, marginBottom: 7 }}>
+                      <KindDot kind={c.kind} /> {c.label}
+                    </div>
+                    <div style={{ fontFamily: FONT_SANS, fontSize: 12.5, color: bodyInk, marginBottom: 6, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{verName(c.id)}</div>
+                    <div style={{ height: 6, background: "#ece4da", borderRadius: 3, overflow: "hidden" }}>
+                      <div style={{ height: "100%", background: burgundy, borderRadius: 3, width: barWidth(cm.requestRate) }} />
+                    </div>
+                    <div style={{ fontFamily: FONT_MONO, fontSize: 11, color: burgundy, fontWeight: 500, marginTop: 6 }}>{formatRate(cm.requestRate)}<small style={{ color: "#b3a99a", fontWeight: 400, marginLeft: 3 }}>{cm.requests}/{cm.sent}</small></div>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+        )}
       </div>
     );
   };
@@ -1248,11 +1347,18 @@ export const SubmissionPackages: React.FC = () => {
         .sp-icon-btn:hover { color: ${burgundy}; background: rgba(124,58,42,0.06); }
         .sp-ver:hover { border-color: #ddcdba; }
         .sp-dd-opt:hover { background: #f5e2da; color: ${burgundy}; }
-        .sp-shelf-card:hover { border-color: #d8c4b0; box-shadow: 0 3px 14px rgba(58,28,20,0.08); }
+        .sp-shelf-card:hover { border-color: #c9a89e; box-shadow: 0 5px 16px rgba(58,28,20,0.08); }
         .sp-shelf-card:focus-visible { outline: 2px solid ${burgundy}; outline-offset: 2px; }
-        .sp-star:hover { color: ${AMBER}; background: rgba(185,138,78,0.10); }
+        .sp-star-box:hover { color: #8a9e88 !important; border-color: #cfdac9 !important; }
         .sp-ghost-build:hover { background: ${buttonPinkBg}; border-color: ${burgundy}; }
+        .sp-ghost-quiet:hover { border-color: #c9a89e !important; color: ${burgundy} !important; background: rgba(251,243,236,0.4) !important; }
         .sp-link:hover { text-decoration: underline; }
+        /* spotlight: diagonal sage wash + corner glow (the greeting-container treatment) */
+        .sp-wave { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+        .sp-wave::before { content: ''; position: absolute; top: -60%; left: -75%; width: 55%; height: 220%; background: linear-gradient(100deg, transparent 0%, rgba(138,158,136,0.07) 35%, rgba(176,200,168,0.20) 50%, rgba(138,158,136,0.07) 65%, transparent 100%); transform: rotate(6deg); animation: spSheen 9s ease-in-out infinite; }
+        .sp-wave::after { content: ''; position: absolute; right: -12%; bottom: -40%; width: 55%; height: 150%; background: radial-gradient(ellipse at center, rgba(138,158,136,0.13), transparent 68%); }
+        @keyframes spSheen { 0% { left: -75%; } 60% { left: 135%; } 100% { left: 135%; } }
+        @media (prefers-reduced-motion: reduce) { .sp-wave::before { animation: none; } }
         @media (max-width: 760px) {
           .sp-pkg-row { grid-template-columns: 1fr !important; gap: 12px !important; }
           .sp-attr-grid { grid-template-columns: 1fr !important; }
@@ -1261,6 +1367,9 @@ export const SubmissionPackages: React.FC = () => {
           .sp-headrow { flex-direction: column !important; align-items: center !important; gap: 14px !important; }
           .sp-spot { flex-direction: column !important; align-items: flex-start !important; gap: 14px !important; }
           .sp-spot-div { display: none !important; }
+          .sp-vs { grid-template-columns: 1fr !important; }
+          .sp-vs-mid { display: none !important; }
+          .sp-attr { grid-template-columns: 1fr !important; }
         }
       `}</style>
 

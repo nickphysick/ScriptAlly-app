@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Packages (spotlight & shelf + detail)</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{font-family:'Inter',sans-serif;background:#E6E2DC;color:#3a1c14;display:flex;flex-direction:column;overflow:hidden;}
+
+/* nav */
+.nav{height:56px;background:#fdfaf5;border-bottom:1px solid rgba(124,58,42,0.12);display:flex;align-items:center;gap:24px;padding:0 22px;flex-shrink:0;}
+.brand{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:#2e2018;display:flex;align-items:center;gap:8px;}
+.brand svg{color:#7c3a2a;}
+.nav-links{display:flex;gap:3px;}
+.nav-links a{font-size:13px;color:#6a5e54;text-decoration:none;padding:6px 12px;border-radius:8px;}
+.nav-links a.on{background:#f5e2da;color:#7c3a2a;font-weight:500;}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:14px;color:#9c8878;}
+.nav-av{width:29px;height:29px;border-radius:50%;background:#f5e2da;color:#7c3a2a;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:13px;}
+
+.subhead{height:50px;display:flex;align-items:center;gap:11px;padding:0 24px;flex-shrink:0;}
+.subhead .h-t{font-family:'Playfair Display',serif;font-size:20px;font-weight:500;color:#2e2018;}
+.pro-pill{font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:500;letter-spacing:0.12em;color:#7c3a2a;background:#f5e2da;border:0.5px solid #e8c8bc;border-radius:20px;padding:3px 8px 2px;display:inline-flex;align-items:center;gap:4px;}
+.ms-select{margin-left:auto;display:inline-flex;align-items:center;gap:8px;background:#fdfaf5;border:0.5px solid #e0d5c8;border-radius:9px;padding:8px 12px;font-size:12.5px;cursor:pointer;}
+.ms-select .ms-lab{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.07em;text-transform:uppercase;color:#9c8878;}
+.ms-select svg{color:#7c3a2a;}
+
+#stage{flex:1;display:flex;min-height:0;position:relative;}
+
+/* left build tab */
+.buildtab{width:54px;flex-shrink:0;background:#fbf6ef;border-right:1px solid rgba(124,58,42,0.12);display:flex;flex-direction:column;align-items:center;padding-top:20px;gap:11px;cursor:pointer;transition:background .15s;}
+.buildtab:hover{background:#f7efe5;}
+.buildtab .plus{width:32px;height:32px;border-radius:9px;background:#f5e2da;border:0.5px solid #e8c8bc;display:flex;align-items:center;justify-content:center;color:#7c3a2a;}
+.buildtab .vlab{writing-mode:vertical-rl;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.11em;text-transform:uppercase;color:#9c8878;}
+
+.content{flex:1;overflow-y:auto;padding:20px 28px;min-width:0;}
+.content::-webkit-scrollbar{width:8px;}.content::-webkit-scrollbar-thumb{background:#d8cdbe;border-radius:4px;}
+.zlab{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.09em;text-transform:uppercase;color:#9c8878;margin-bottom:10px;display:flex;align-items:center;gap:9px;}
+
+/* spotlight — greeting-container treatment: thin internal border + sage wave washing around */
+.spot-mount{background-color:#fdfaf5;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.03'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");border-radius:16px;padding:6px;box-shadow:0 1px 2px rgba(58,28,20,0.05),0 6px 20px rgba(58,28,20,0.07);}
+.spot-frame{position:relative;border:1px solid rgba(124,58,42,0.30);border-radius:11px;overflow:hidden;}
+.spot-wave{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+.spot-wave::before{content:'';position:absolute;top:-60%;left:-75%;width:55%;height:220%;background:linear-gradient(100deg,transparent 0%,rgba(138,158,136,0.07) 35%,rgba(176,200,168,0.20) 50%,rgba(138,158,136,0.07) 65%,transparent 100%);transform:rotate(6deg);animation:spotSheen 9s ease-in-out infinite;}
+.spot-wave::after{content:'';position:absolute;right:-12%;bottom:-40%;width:55%;height:150%;background:radial-gradient(ellipse at center,rgba(138,158,136,0.13),transparent 68%);}
+@keyframes spotSheen{0%{left:-75%}60%{left:135%}100%{left:135%}}
+.spot-inner{position:relative;z-index:1;padding:20px 24px;display:flex;align-items:center;gap:26px;}
+.spot-l{flex:1;min-width:0;}
+.spot-badge{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.1em;text-transform:uppercase;color:#5a6e58;background:#e0e7dc;border:0.5px solid #cbd8c4;border-radius:20px;padding:4px 10px;display:inline-flex;align-items:center;gap:5px;margin-bottom:11px;}
+.spot-name{font-family:'Playfair Display',serif;font-size:28px;font-weight:500;color:#2e2018;margin-bottom:11px;}
+.chips{display:flex;gap:6px;flex-wrap:wrap;}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#5a4a40;background:#fbfdfa;border:0.5px solid #d6e0d2;border-radius:7px;padding:4px 9px;}
+.chip .d{width:6px;height:6px;border-radius:50%;}
+.chip .d.ql{background:#7c3a2a;}.chip .d.sy{background:#5a6e58;}.chip .d.pg{background:#b98a4e;}
+.divhint{font-family:'Caveat',cursive;font-size:17px;color:#7c3a2a;background:rgba(255,255,255,0.55);border:0.5px dashed #b9c8b2;border-radius:10px;padding:8px 13px;margin-top:14px;display:inline-flex;align-items:center;gap:12px;}
+.divhint b{color:#5a6e58;}
+.divhint button{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.04em;text-transform:uppercase;color:#5a6e58;background:#e0e7dc;border:0.5px solid #cbd8c4;border-radius:7px;padding:6px 10px;cursor:pointer;}
+.spot-r{text-align:center;flex-shrink:0;}
+.spot-num{font-family:'Playfair Display',serif;font-size:50px;font-weight:500;color:#5a6e58;line-height:0.9;}
+.spot-lab{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.05em;text-transform:uppercase;color:#9c8878;margin-top:6px;}
+.spot-bench{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#b98a4e;margin-top:8px;}
+.spot-link{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.04em;text-transform:uppercase;color:#7c3a2a;margin-top:13px;display:inline-flex;align-items:center;gap:5px;cursor:pointer;}
+
+/* shelf */
+.shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:13px;}
+.ocard{background:#fdfaf5;border:1px solid rgba(124,58,42,0.14);border-radius:13px;padding:15px 16px;cursor:pointer;transition:border-color .14s,box-shadow .14s,transform .1s;}
+.ocard:hover{border-color:#c9a89e;box-shadow:0 5px 16px rgba(58,28,20,0.08);}
+.oc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+.oc-nm{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;color:#2e2018;line-height:1.1;}
+.oc-tag{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.05em;text-transform:uppercase;color:#5a6e58;background:#e9ede6;border:0.5px solid #cfdac9;border-radius:20px;padding:2px 7px;margin-top:6px;display:inline-block;}
+.oc-tag.early{color:#9c8878;background:#efe7df;border-color:#e0d5c8;}
+.star{width:26px;height:26px;border-radius:8px;border:0.5px solid #e0d5c8;background:#fff;display:flex;align-items:center;justify-content:center;color:#c4b4aa;flex-shrink:0;cursor:pointer;}
+.star:hover{color:#8a9e88;border-color:#cfdac9;}
+.star.on{background:#e9ede6;border-color:#cfdac9;color:#5a6e58;}
+.star svg{width:13px;height:13px;}
+.oc-mid{margin-top:13px;}
+.oc-rate{font-family:'Playfair Display',serif;font-size:23px;color:#7c3a2a;line-height:1;}
+.oc-rate.muted{color:#b3a99a;font-style:italic;font-size:16px;}
+.oc-rl{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.04em;text-transform:uppercase;color:#9c8878;margin-top:4px;}
+.oc-foot{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#bdb3a4;letter-spacing:0.02em;margin-top:11px;display:flex;align-items:center;gap:5px;}
+/* dotted placeholders — fill empty space, invite more packages */
+.ghost{border:1.5px dashed rgba(124,58,42,0.20);border-radius:13px;min-height:122px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#c4b4aa;cursor:pointer;transition:all .15s;}
+.ghost:hover{border-color:#c9a89e;color:#7c3a2a;background:rgba(251,243,236,0.4);}
+.ghost svg{width:22px;height:22px;}
+.ghost.lead{color:#9c8878;}
+.ghost.lead svg{color:#7c3a2a;}
+.ghost.lead span{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.05em;text-transform:uppercase;}
+.ghost .g-plus{opacity:.35;}
+.ghost:hover .g-plus{opacity:.7;}
+
+/* ===== build panel (slides from left) ===== */
+.scrim{position:absolute;inset:0;background:rgba(58,28,20,0.22);opacity:0;pointer-events:none;transition:opacity .2s;z-index:20;}
+.scrim.show{opacity:1;pointer-events:auto;}
+.bpanel{position:absolute;top:0;left:0;bottom:0;width:330px;background:#fdfaf5;border-right:1px solid rgba(124,58,42,0.16);box-shadow:12px 0 32px rgba(58,28,20,0.13);z-index:21;transform:translateX(-100%);transition:transform .22s cubic-bezier(.4,0,.2,1);padding:18px 20px;display:flex;flex-direction:column;overflow-y:auto;}
+.bpanel.show{transform:translateX(0);}
+.bp-h{display:flex;align-items:center;gap:9px;margin-bottom:16px;}
+.bp-h .rule{width:3px;height:16px;border-radius:2px;background:#7c3a2a;}
+.bp-h .t{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;color:#2e2018;}
+.bp-x{margin-left:auto;color:#9c8878;cursor:pointer;}
+.b-input{width:100%;background:#fff;border:0.5px solid #e0d5c8;border-radius:9px;padding:10px 13px;font-family:'Inter',sans-serif;font-size:14px;color:#3a1c14;outline:none;margin-bottom:11px;}
+.b-input:focus{border-color:#8a9e88;box-shadow:0 0 0 3px rgba(138,158,136,0.12);}
+.slot{background:#fbf6ef;border:0.5px solid #e8ddcf;border-radius:10px;padding:9px 12px;margin-bottom:9px;}
+.slot-lab{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.06em;text-transform:uppercase;color:#9c8878;margin-bottom:4px;}
+.dd{position:relative;}
+.dd-trig{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:#3a1c14;}
+.dd-trig .d{width:7px;height:7px;border-radius:50%;}
+.dd-trig .d.ql{background:#7c3a2a;}.dd-trig .d.sy{background:#5a6e58;}.dd-trig .d.pg{background:#b98a4e;}
+.dd-trig .chev{margin-left:auto;color:#7c3a2a;transition:transform .2s;}.dd.open .chev{transform:rotate(180deg);}
+.dd-menu{position:absolute;top:calc(100% + 5px);left:0;right:0;background:#fff;border:0.5px solid #e0d5c8;border-radius:10px;box-shadow:0 8px 22px rgba(58,28,20,0.16);padding:5px;z-index:30;display:none;}
+.dd.open .dd-menu{display:block;}
+.dd-opt{padding:8px 11px;border-radius:7px;font-size:13px;color:#3a1c14;cursor:pointer;display:flex;justify-content:space-between;gap:8px;}
+.dd-opt:hover{background:#f5e2da;color:#7c3a2a;}
+.dd-opt small{font-family:'JetBrains Mono',monospace;font-size:9px;color:#9c8878;}
+.b-preview{background:#f3f6f1;border:0.5px dashed #c4d2bd;border-radius:9px;padding:10px 12px;margin:4px 0 12px;}
+.pv-l{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.06em;text-transform:uppercase;color:#9aa893;margin-bottom:7px;}
+.sa-row{display:flex;align-items:center;gap:10px;margin:4px 0 14px;padding:10px 13px;background:#f3f6f1;border-radius:9px;cursor:pointer;}
+.sa-row .box{width:18px;height:18px;border-radius:5px;border:1.5px solid #a8bba0;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;}
+.sa-row.on .box{background:#5a6e58;border-color:#5a6e58;}
+.sa-txt{font-size:12px;color:#4a3e34;line-height:1.3;}.sa-txt b{color:#5a6e58;}
+.b-cta{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;color:#7c3a2a;background:#f5e2da;border:0.5px solid #e8c8bc;border-radius:9px;padding:12px;text-align:center;cursor:pointer;margin-top:auto;}
+.b-cta:hover{background:#efd5ca;}
+
+/* ===== detail screen ===== */
+.back{display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.05em;text-transform:uppercase;color:#7c3a2a;cursor:pointer;margin-bottom:16px;}
+.d-head{display:flex;align-items:center;gap:13px;margin-bottom:6px;}
+.d-name{font-family:'Playfair Display',serif;font-size:27px;font-weight:500;color:#2e2018;}
+.tag{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;border-radius:20px;padding:3px 8px;display:inline-flex;align-items:center;gap:3px;}
+.tag.active{background:#e0e7dc;color:#5a6e58;border:0.5px solid #cbd8c4;}
+.tag.top{background:#e9ede6;color:#5a6e58;border:0.5px solid #cfdac9;}
+.tag.early{background:#efe7df;color:#9c8878;border:0.5px solid #e0d5c8;}
+.d-act{margin-left:auto;}
+.btn{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;border-radius:8px;padding:9px 15px;cursor:pointer;border:0.5px solid;}
+.btn.sage{background:#e9ede6;color:#5a6e58;border-color:#cfdac9;}.btn.sage:hover{background:#e0e7dc;}
+.cur{font-family:'JetBrains Mono',monospace;font-size:10px;color:#9c8878;text-transform:uppercase;letter-spacing:.05em;}
+.card{background:#fdfaf5;border:1px solid rgba(124,58,42,0.13);border-radius:14px;padding:18px 20px;margin-bottom:16px;box-shadow:0 1px 2px rgba(58,28,20,0.04);}
+.card-h{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.07em;text-transform:uppercase;color:#5a6e58;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.card-h svg{width:13px;height:13px;}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:16px 0;}
+.kpi{background:#fbf6ef;border:0.5px solid #e8ddcf;border-radius:12px;padding:15px 17px;}
+.kpi-lab{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.05em;text-transform:uppercase;color:#9c8878;margin-bottom:6px;}
+.kpi-val{font-family:'Playfair Display',serif;font-size:27px;font-weight:500;color:#7c3a2a;line-height:1;}
+.kpi-val.sage{color:#5a6e58;}
+.kpi-sub{font-family:'JetBrains Mono',monospace;font-size:8.5px;margin-top:6px;color:#b3a99a;}
+.kpi-sub.up{color:#5a6e58;}.kpi-sub.down{color:#b98a4e;}
+/* funnel */
+.hfunnel{display:flex;align-items:flex-end;height:150px;padding:6px 4px 0;}
+.hf-col{flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end;}
+.hf-count{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;color:#3a1c14;margin-bottom:5px;}
+.hf-fill{width:60%;background:linear-gradient(180deg,#9a5040,#7c3a2a);border-radius:6px 6px 0 0;min-height:4px;}
+.hf-fill.sage{background:linear-gradient(180deg,#9aad98,#7a8e78);}
+.hf-fill.gold{background:linear-gradient(180deg,#c89a52,#a06f28);}
+.hf-lab{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.02em;text-transform:uppercase;color:#7a6e60;margin-top:8px;text-align:center;line-height:1.3;}
+.hf-conv{width:46px;flex-shrink:0;text-align:center;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#9c8878;padding-bottom:34px;}
+.hf-conv .pc{color:#5a6e58;display:block;font-size:10px;}
+.hf-conv .dr{color:#b98a4e;}
+.inflight-note{margin-top:14px;background:#f6efe6;border:0.5px solid #e8ddcf;border-radius:9px;padding:10px 13px;font-size:11.5px;color:#6a5e54;display:flex;gap:8px;align-items:center;line-height:1.4;}
+.inflight-note svg{color:#b98a4e;flex-shrink:0;}.inflight-note b{color:#b98a4e;font-weight:500;}
+.cohort-note{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#bdb3a4;margin-top:9px;}
+.attr{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.attr-h{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.04em;text-transform:uppercase;color:#5a6e58;margin-bottom:7px;display:flex;gap:6px;align-items:center;}
+.attr-h .d{width:7px;height:7px;border-radius:50%;}
+.attr-h .d.ql{background:#7c3a2a;}.attr-h .d.sy{background:#5a6e58;}.attr-h .d.pg{background:#b98a4e;}
+.attr-nm{font-size:12.5px;color:#3a1c14;margin-bottom:6px;}
+.attr-bar{height:6px;background:#ece4da;border-radius:3px;overflow:hidden;}
+.attr-bar>i{display:block;height:100%;background:#7c3a2a;border-radius:3px;}
+.attr-pc{font-family:'JetBrains Mono',monospace;font-size:11px;color:#7c3a2a;font-weight:500;margin-top:6px;}
+.vs{display:grid;grid-template-columns:1fr auto 1fr;gap:18px;align-items:center;}
+.vs-side{text-align:center;}
+.vs-role{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.07em;text-transform:uppercase;color:#9c8878;margin-bottom:4px;}
+.vs-nm{font-family:'Playfair Display',serif;font-size:16px;color:#2e2018;margin-bottom:7px;}
+.vs-rate{font-family:'Playfair Display',serif;font-size:30px;font-weight:500;}
+.vs-rate.win{color:#5a6e58;}.vs-rate.lose{color:#b3a99a;}
+.vs-mid{font-family:'JetBrains Mono',monospace;font-size:10px;color:#9c8878;}
+.vs-lift{font-family:'JetBrains Mono',monospace;font-size:11px;color:#5a6e58;text-align:center;margin-top:14px;padding-top:13px;border-top:1px solid rgba(124,58,42,0.1);}
+.vs-lift b{color:#7c3a2a;}
+.early-box{background:#f3f6f1;border:0.5px solid #d6e0d2;border-radius:12px;padding:18px;text-align:center;}
+.early-box .eb-r{font-family:'Playfair Display',serif;font-style:italic;font-size:18px;color:#9c8878;margin-bottom:5px;}
+.early-box .eb-n{font-size:12.5px;color:#8a7a6c;max-width:440px;margin:0 auto;line-height:1.5;}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#2e2018;color:#fdfaf5;font-size:12.5px;padding:11px 18px;border-radius:10px;box-shadow:0 10px 30px rgba(58,28,20,0.3);opacity:0;pointer-events:none;transition:all .25s;z-index:200;display:flex;align-items:center;gap:8px;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast svg{color:#9aad98;}
+.view{display:none;}.view.on{display:block;}
+@media(max-width:680px){.spot{flex-direction:column;align-items:flex-start;}.kpis,.attr,.vs{grid-template-columns:1fr;}.vs-mid{display:none;}}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="brand"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>ScriptAlly</div>
+  <div class="nav-links"><a href="#">Dashboard</a><a href="#">Queries</a><a href="#">Agents</a><a href="#" class="on">Manuscripts</a></div>
+  <div class="nav-right"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><div style="display:flex;align-items:center;gap:7px;font-size:13px;color:#3a1c14;"><div class="nav-av">N</div>Nick</div></div>
+</div>
+<div class="subhead">
+  <span class="h-t">Submission Packages</span>
+  <span class="pro-pill"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>PRO</span>
+  <div class="ms-select"><span class="ms-lab">Manuscript</span><span>The Book of Lost Clockworks</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg></div>
+</div>
+
+<div id="stage">
+  <!-- MAIN -->
+  <div id="view-main" class="view on" style="display:flex;flex:1;min-height:0;">
+    <div class="buildtab" onclick="openBuild()"><div class="plus"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><span class="vlab">Build a package</span></div>
+    <div class="content">
+      <span class="zlab">★ Active package</span>
+      <div id="spot"></div>
+      <div style="height:24px"></div>
+      <span class="zlab">Other packages <span style="font-family:'Caveat',cursive;font-size:15px;color:#9c8878;text-transform:none;letter-spacing:0;">— click any to dig in</span></span>
+      <div class="shelf" id="shelf"></div>
+    </div>
+    <!-- build panel -->
+    <div class="scrim" id="scrim" onclick="closeBuild()"></div>
+    <div class="bpanel" id="bpanel">
+      <div class="bp-h"><span class="rule"></span><span class="t">Build a package</span><span class="bp-x" onclick="closeBuild()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></div>
+      <input class="b-input" id="b-name" type="text" placeholder="Name it — e.g. &ldquo;Comp-heavy&rdquo;"/>
+      <div class="slot"><div class="slot-lab">Query letter</div><div class="dd" id="dd-ql"><div class="dd-trig" onclick="toggleDd('dd-ql')"><span class="d ql"></span><span id="v-ql">Comp-led</span><svg class="chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg></div><div class="dd-menu"><div class="dd-opt" onclick="pick('dd-ql','v-ql','Comp-led')">Comp-led<small>50%</small></div><div class="dd-opt" onclick="pick('dd-ql','v-ql','Standard')">Standard<small>17%</small></div></div></div></div>
+      <div class="slot"><div class="slot-lab">Synopsis</div><div class="dd" id="dd-sy"><div class="dd-trig" onclick="toggleDd('dd-sy')"><span class="d sy"></span><span id="v-sy">Two-page</span><svg class="chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg></div><div class="dd-menu"><div class="dd-opt" onclick="pick('dd-sy','v-sy','Two-page')">Two-page<small>50%</small></div><div class="dd-opt" onclick="pick('dd-sy','v-sy','One-page')">One-page<small>12%</small></div></div></div></div>
+      <div class="slot"><div class="slot-lab">Sample pages</div><div class="dd" id="dd-pg"><div class="dd-trig" onclick="toggleDd('dd-pg')"><span class="d pg"></span><span id="v-pg">First 3 chapters</span><svg class="chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg></div><div class="dd-menu"><div class="dd-opt" onclick="pick('dd-pg','v-pg','First 3 chapters')">First 3 chapters<small>50%</small></div><div class="dd-opt" onclick="pick('dd-pg','v-pg','First 10 pages')">First 10 pages<small>12%</small></div></div></div></div>
+      <div class="b-preview"><div class="pv-l">Preview</div><div class="chips"><span class="chip"><span class="d ql"></span><span id="pv-ql">Comp-led</span></span><span class="chip"><span class="d sy"></span><span id="pv-sy">Two-page</span></span><span class="chip"><span class="d pg"></span><span id="pv-pg">First 3 chapters</span></span></div></div>
+      <div class="sa-row on" id="sa-row" onclick="this.classList.toggle('on')"><span class="box"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span><span class="sa-txt">Set as <b>active</b> — new queries pre-fill with it</span></div>
+      <div class="b-cta" onclick="createPkg()">Create package</div>
+    </div>
+  </div>
+  <!-- DETAIL -->
+  <div id="view-detail" class="view" style="flex:1;overflow-y:auto;"></div>
+</div>
+
+<div class="toast" id="toast"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span id="toast-msg"></span></div>
+
+<script>
+const DOT={ql:'<span class="d ql"></span>',sy:'<span class="d sy"></span>',pg:'<span class="d pg"></span>'};
+const BENCH=22;
+let PKG={
+ comp:{name:'Comp-heavy',c:{ql:'Comp-led',sy:'Two-page',pg:'First 3 chapters'},resolved:4,inflight:1,funnel:[['Queried',4],['Responded',3],['Partial',2],['Full',1],['Offer',0]],req:50,resp:75,ttr:18},
+ standard:{name:'Standard sub',c:{ql:'Standard',sy:'One-page',pg:'First 10 pages'},resolved:6,inflight:2,funnel:[['Queried',6],['Responded',3],['Partial',1],['Full',0],['Offer',0]],req:17,resp:50,ttr:34},
+ punchy:{name:'Punchy',c:{ql:'Punchier hook',sy:'One-page',pg:'First 10 pages'},resolved:2,inflight:1,early:true,funnel:[['Queried',2],['Responded',1],['Partial',0],['Full',0],['Offer',0]],req:null,resp:null,ttr:null}
+};
+const MIN=4;
+let activeId='standard';
+const order=()=>Object.keys(PKG).sort((a,b)=>(PKG[b].req??-1)-(PKG[a].req??-1));
+const topId=()=>order().find(id=>!PKG[id].early&&PKG[id].resolved>=MIN);
+const fmt=v=>v==null?'—':v+'%';
+const chipsH=c=>`<span class="chip">${DOT.ql}${c.ql}</span><span class="chip">${DOT.sy}${c.sy}</span><span class="chip">${DOT.pg}${c.pg}</span>`;
+const starSVG=f=>`<svg viewBox="0 0 24 24" fill="${f?'currentColor':'none'}" stroke="currentColor" stroke-width="1.7"><polygon points="12 2 15 9 22 9.5 17 14.5 18.5 21.5 12 17.8 5.5 21.5 7 14.5 2 9.5 9 9"/></svg>`;
+
+/* ---- main ---- */
+function renderMain(){
+  const a=PKG[activeId],tId=topId(),div=tId&&tId!==activeId;
+  document.getElementById('spot').innerHTML=`<div class="spot-mount"><div class="spot-frame"><div class="spot-wave"></div><div class="spot-inner">
+    <div class="spot-l"><span class="spot-badge">${starSVG(1).replace('viewBox','width="9" height="9" viewBox')} Active · queries pre-fill this</span>
+      <div class="spot-name">${a.name}</div><div class="chips">${chipsH(a.c)}</div>
+      ${div?`<div class="divhint"><span><b>${PKG[tId].name}</b> is winning more requests — ${fmt(PKG[tId].req)} vs ${fmt(a.req)}.</span><button onclick="setActive('${tId}')">Set active</button></div>`:''}
+    </div>
+    <div class="spot-r"><div class="spot-num">${fmt(a.req)}</div><div class="spot-lab">Request rate</div><div class="spot-bench">vs ${BENCH}% manuscript avg</div><div class="spot-link" onclick="openDetail('${activeId}')">View funnel <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div></div>
+  </div></div></div>`;
+  const others=order().filter(id=>id!==activeId);
+  document.getElementById('shelf').innerHTML=others.map(id=>{const p=PKG[id];
+    const tag=id===topId()?'<span class="oc-tag">★ Top performer</span>':(p.early?'<span class="oc-tag early">Early · '+p.resolved+'/'+MIN+'</span>':'');
+    return `<div class="ocard" onclick="openDetail('${id}')">
+      <div class="oc-top"><div><div class="oc-nm">${p.name}</div>${tag}</div><div class="star" title="Set active" onclick="event.stopPropagation();setActive('${id}')">${starSVG(0)}</div></div>
+      <div class="oc-mid"><div class="oc-rate ${p.early?'muted':''}">${fmt(p.req)}</div><div class="oc-rl">${p.early?'gathering data':'request rate'}</div></div>
+      <div class="oc-foot">${p.resolved} sent · ${p.inflight} in flight</div>
+    </div>`;}).join('') + ghostSlots();
+}
+function ghostSlots(){return Array.from({length:4}).map((_,i)=> i===0
+  ? `<div class="ghost lead" onclick="openBuild()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>Build a package</span></div>`
+  : `<div class="ghost" onclick="openBuild()"><svg class="g-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="12" y1="6" x2="12" y2="18"/><line x1="6" y1="12" x2="18" y2="12"/></svg></div>`).join('');}
+
+/* ---- detail ---- */
+function renderDetail(id){
+  const p=PKG[id],a=PKG[activeId],tId=topId(),isA=id===activeId;
+  const maxN=p.funnel[0][1]||1;let cols='';
+  p.funnel.forEach((s,i)=>{const[lab,n]=s;const h=Math.max((n/maxN)*100,3);const cl=i===0?'':(i===4?'gold':'sage');
+    cols+=`<div class="hf-col"><div class="hf-count">${n}</div><div class="hf-fill ${cl}" style="height:${h}%"></div><div class="hf-lab">${lab}</div></div>`;
+    if(i<4){const nx=p.funnel[i+1][1];const cv=n?Math.round(nx/n*100):0;const dr=n-nx;cols+=`<div class="hf-conv"><span class="pc">${cv}%</span>${dr>0?'<span class="dr">−'+dr+'</span>':''}</div>`;}});
+  const kpis=p.early?'':`<div class="kpis">
+    <div class="kpi"><div class="kpi-lab">Request rate</div><div class="kpi-val">${fmt(p.req)}</div><div class="kpi-sub ${p.req>=BENCH?'up':'down'}">${p.req>=BENCH?'▲':'▼'} vs ${BENCH}% avg</div></div>
+    <div class="kpi"><div class="kpi-lab">Response rate</div><div class="kpi-val sage">${fmt(p.resp)}</div><div class="kpi-sub">${p.funnel[1][1]} of ${p.resolved} replied</div></div>
+    <div class="kpi"><div class="kpi-lab">Avg reply time</div><div class="kpi-val">${p.ttr}<span style="font-size:14px"> d</span></div><div class="kpi-sub">responding agents</div></div></div>`;
+  const funnelCard=p.early?`<div class="card"><div class="early-box"><div class="eb-r">${p.resolved} of ${MIN} sends</div><div class="eb-n">The funnel and a verdict appear once this package has ${MIN} sends. A lucky 1-of-1 isn't a strategy — we won't crown it early.</div></div></div>`
+    :`<div class="card"><div class="card-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 4 21 4 14 12.5 14 19 10 21 10 12.5 3 4"/></svg>Pipeline funnel — where it wins and stalls</div>
+      <div class="hfunnel">${cols}</div>
+      <div class="inflight-note"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg><span><b>${p.inflight} sent recently</b> — too soon to count; they join the funnel once an agent responds or the window lapses.</span></div>
+      <div class="cohort-note">Rates use resolved queries only, so a fresh package isn't punished for queries still in flight.</div></div>`;
+  const compare=(!p.early&&!isA)?`<div class="card"><div class="card-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M21 3l-7 7M8 21H3v-5M3 21l7-7"/></svg>Head-to-head vs your active package</div>
+      <div class="vs"><div class="vs-side"><div class="vs-role">This</div><div class="vs-nm">${p.name}</div><div class="vs-rate ${p.req>=a.req?'win':'lose'}">${fmt(p.req)}</div></div><div class="vs-mid">vs</div><div class="vs-side"><div class="vs-role">Active</div><div class="vs-nm">${a.name}</div><div class="vs-rate ${a.req>p.req?'win':'lose'}">${fmt(a.req)}</div></div></div>
+      <div class="vs-lift">${p.req>a.req?`<b>${p.name}</b> wins requests by <b>+${p.req-a.req} points</b> — consider setting it active.`:`Your active package leads by ${a.req-p.req} points.`}</div></div>`:'';
+  const attr=p.early?'':`<div class="card"><div class="card-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10H12Z"/></svg>Component attribution — which part is carrying it</div>
+    <div class="attr">
+      <div><div class="attr-h">${DOT.ql}Query letter</div><div class="attr-nm">${p.c.ql}</div><div class="attr-bar"><i style="width:${p.req||0}%"></i></div><div class="attr-pc">${fmt(p.req)}</div></div>
+      <div><div class="attr-h">${DOT.sy}Synopsis</div><div class="attr-nm">${p.c.sy}</div><div class="attr-bar"><i style="width:${p.req||0}%"></i></div><div class="attr-pc">${fmt(p.req)}</div></div>
+      <div><div class="attr-h">${DOT.pg}Sample pages</div><div class="attr-nm">${p.c.pg}</div><div class="attr-bar"><i style="width:${p.req||0}%"></i></div><div class="attr-pc">${fmt(p.req)}</div></div>
+    </div></div>`;
+  document.getElementById('view-detail').innerHTML=`<div class="content" style="max-width:860px;">
+    <div class="back" onclick="showMain()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>All packages</div>
+    <div class="d-head"><div class="d-name">${p.name}</div>${isA?'<span class="tag active">'+starSVG(1).replace('viewBox','width="8" height="8" viewBox')+'Active</span>':(id===tId?'<span class="tag top">★ Top performer</span>':(p.early?'<span class="tag early">Early</span>':''))}
+      <div class="d-act">${isA?'<span class="cur">Currently active</span>':'<button class="btn sage" onclick="setActive(\''+id+'\')">Set active</button>'}</div></div>
+    <div class="chips" style="margin:8px 0 4px;">${chipsH(p.c)}</div>
+    ${kpis}${funnelCard}${compare}${attr}
+  </div>`;
+}
+
+/* ---- nav + actions ---- */
+function showMain(){document.getElementById('view-detail').classList.remove('on');document.getElementById('view-main').classList.add('on');}
+function openDetail(id){renderDetail(id);document.getElementById('view-main').classList.remove('on');document.getElementById('view-detail').classList.add('on');document.getElementById('view-detail').scrollTop=0;}
+function setActive(id){activeId=id;renderMain();if(document.getElementById('view-detail').classList.contains('on'))renderDetail(id);toast(PKG[id].name+' is now active — new queries pre-fill with it');}
+function toast(m){const t=document.getElementById('toast');document.getElementById('toast-msg').textContent=m;t.classList.add('show');clearTimeout(window._t);window._t=setTimeout(()=>t.classList.remove('show'),2600);}
+/* build panel */
+function openBuild(){document.getElementById('bpanel').classList.add('show');document.getElementById('scrim').classList.add('show');}
+function closeBuild(){document.getElementById('bpanel').classList.remove('show');document.getElementById('scrim').classList.remove('show');document.querySelectorAll('.dd').forEach(d=>d.classList.remove('open'));}
+function toggleDd(id){const d=document.getElementById(id),w=d.classList.contains('open');document.querySelectorAll('.dd').forEach(x=>x.classList.remove('open'));if(!w)d.classList.add('open');}
+function pick(id,v,t){document.getElementById(v).textContent=t;document.getElementById('pv-'+v.split('-')[1]).textContent=t;document.getElementById(id).classList.remove('open');}
+function createPkg(){const name=(document.getElementById('b-name').value||'New package').trim();const key='p'+Date.now();
+  PKG[key]={name,c:{ql:document.getElementById('v-ql').textContent,sy:document.getElementById('v-sy').textContent,pg:document.getElementById('v-pg').textContent},resolved:0,inflight:0,early:true,funnel:[['Queried',0],['Responded',0],['Partial',0],['Full',0],['Offer',0]],req:null,resp:null,ttr:null};
+  const mk=document.getElementById('sa-row').classList.contains('on');if(mk)activeId=key;
+  closeBuild();renderMain();toast(mk?name+' created and set active':name+' created');document.getElementById('b-name').value='';}
+document.addEventListener('click',e=>{if(!e.target.closest('.dd'))document.querySelectorAll('.dd').forEach(d=>d.classList.remove('open'));});
+renderMain();
+</script>
+</body>
+</html>

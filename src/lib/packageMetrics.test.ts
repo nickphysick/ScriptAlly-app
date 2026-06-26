@@ -7,8 +7,11 @@ import {
   isRequest,
   isResponse,
   isInFlight,
+  reachedFull,
   packageMetrics,
   packageFunnel,
+  packageStages,
+  avgReplyDays,
   componentMetrics,
   packagesUsingVersion,
   formatRate,
@@ -185,6 +188,42 @@ describe("packageFunnel (resolved-only rates; in-flight excluded)", () => {
   it("guards divide-by-zero: all sends in flight → resolved 0 → null resolved rates (never NaN)", () => {
     const f = packageFunnel("P1", [q({ packageId: "P1", status: QueryStatus.QUERIED }), q({ packageId: "P1", status: QueryStatus.QUERIED })]);
     expect(f).toMatchObject({ sent: 2, inFlight: 2, resolved: 0, requestRateResolved: null, responseRateResolved: null });
+  });
+});
+
+describe("packageStages (cumulative funnel, monotonic, resolved-only)", () => {
+  it("counts each stage as reached-at-least and never widens", () => {
+    const queries = [
+      q({ packageId: "P1", status: QueryStatus.OFFER, hasAgentResponded: true }), // reaches every stage
+      q({ packageId: "P1", status: QueryStatus.FULL_REQUESTED, hasAgentResponded: true }), // ≤ full
+      q({ packageId: "P1", status: QueryStatus.PARTIAL_REQUESTED, hasAgentResponded: true }), // ≤ partial
+      q({ packageId: "P1", status: QueryStatus.REJECTED, hasAgentResponded: true }), // responded only
+      q({ packageId: "P1", status: QueryStatus.NO_RESPONSE }), // resolved, no reply
+      q({ packageId: "P1", status: QueryStatus.QUERIED }), // in flight — excluded
+    ];
+    const s = packageStages("P1", queries);
+    expect(s).toEqual({ queried: 5, responded: 4, partial: 3, full: 2, offer: 1 });
+    // monotonic non-increasing
+    expect(s.queried >= s.responded && s.responded >= s.partial && s.partial >= s.full && s.full >= s.offer).toBe(true);
+  });
+  it("reachedFull is true for full-or-beyond status or a recorded full-request date", () => {
+    expect(reachedFull(q({ status: QueryStatus.FULL_SENT }))).toBe(true);
+    expect(reachedFull(q({ status: QueryStatus.PARTIAL_REQUESTED }))).toBe(false);
+    expect(reachedFull(q({ status: QueryStatus.REJECTED, fullRequestedDate: "2026-03-01" }))).toBe(true);
+  });
+});
+
+describe("avgReplyDays (send → first agent move, responded only)", () => {
+  it("averages whole-days to the earliest of partial/full request or rejection", () => {
+    const queries = [
+      q({ packageId: "P1", status: QueryStatus.PARTIAL_REQUESTED, hasAgentResponded: true, dateSent: "2026-01-01", partialRequestedDate: "2026-01-11" }), // 10d
+      q({ packageId: "P1", status: QueryStatus.REJECTED, hasAgentResponded: true, dateSent: "2026-01-01", rejectedDate: "2026-01-21" }), // 20d
+      q({ packageId: "P1", status: QueryStatus.QUERIED, dateSent: "2026-01-01" }), // no reply → ignored
+    ];
+    expect(avgReplyDays("P1", queries)).toBe(15);
+  });
+  it("returns null when nothing qualifies", () => {
+    expect(avgReplyDays("P1", [q({ packageId: "P1", status: QueryStatus.QUERIED, dateSent: "2026-01-01" })])).toBeNull();
   });
 });
 

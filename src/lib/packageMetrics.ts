@@ -113,6 +113,60 @@ export function packageFunnel(pkgId: string, queries: Query[]): PackageFunnel {
   return funnelFor(queries.filter((q) => q.packageId === pkgId));
 }
 
+/** Full-or-beyond: the agent asked for the full manuscript (or went further). Exact enum strings. */
+const FULL_OR_BEYOND: ReadonlySet<QueryStatus> = new Set<QueryStatus>([
+  QueryStatus.FULL_REQUESTED,
+  QueryStatus.FULL_SENT,
+  QueryStatus.REVISE_RESUBMIT,
+  QueryStatus.OFFER,
+]);
+/** Did this query reach a full request (or beyond)? Current status OR a recorded full-request date. */
+export const reachedFull = (q: Query): boolean => FULL_OR_BEYOND.has(q.status) || !!q.fullRequestedDate;
+
+export interface PackageStages {
+  queried: number; // resolved sends (in-flight held out) — the funnel's mouth
+  responded: number; // the agent replied
+  partial: number; // reached a partial request (or beyond)
+  full: number; // reached a full request (or beyond)
+  offer: number; // reached an offer
+}
+
+/**
+ * Cumulative pipeline counts over a package's RESOLVED queries, for the detail-screen funnel. Each
+ * stage counts queries that reached AT LEAST that depth, so the series is monotonically non-increasing
+ * (queried ≥ responded ≥ partial ≥ full ≥ offer) and the funnel never widens. In-flight (Queried,
+ * unanswered) sends are excluded — they join the funnel once an outcome lands.
+ */
+export function packageStages(pkgId: string, queries: Query[]): PackageStages {
+  const S = queries.filter((q) => q.packageId === pkgId && !isInFlight(q));
+  return {
+    queried: S.length,
+    responded: S.filter(isResponse).length,
+    partial: S.filter(isRequest).length,
+    full: S.filter(reachedFull).length,
+    offer: S.filter((q) => q.status === QueryStatus.OFFER).length,
+  };
+}
+
+/**
+ * Average whole-days from send to the agent's FIRST move (a partial/full request or a rejection),
+ * over a package's responded queries that carry both a send date and a first-move date. null when none
+ * qualify. Uses Date.parse (not Date.now) so it stays pure/deterministic.
+ */
+export function avgReplyDays(pkgId: string, queries: Query[]): number | null {
+  const spans: number[] = [];
+  for (const q of queries) {
+    if (q.packageId !== pkgId || !isResponse(q) || !q.dateSent) continue;
+    const acts = [q.partialRequestedDate, q.fullRequestedDate, q.rejectedDate].filter(Boolean) as string[];
+    if (!acts.length) continue;
+    const sent = Date.parse(q.dateSent);
+    const first = Math.min(...acts.map((d) => Date.parse(d)));
+    if (!Number.isFinite(sent) || !Number.isFinite(first) || first < sent) continue;
+    spans.push((first - sent) / 86400000);
+  }
+  return spans.length ? Math.round(spans.reduce((a, b) => a + b, 0) / spans.length) : null;
+}
+
 /** Active packages that reference a given component version (any of the three slots). */
 export function packagesUsingVersion(versionId: string, packages: SubmissionPackage[]): SubmissionPackage[] {
   return packages.filter(
