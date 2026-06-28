@@ -669,45 +669,46 @@ export const SubmissionPackages: React.FC = () => {
 
   // ── First-run (no packages yet): how-it-works + primary CTA + a templates row. ──
   const renderFirstRun = () => (
-    // Keep the teaching content at a comfortable reading width even when the workspace is very wide.
-    <div style={{ maxWidth: 720, margin: "0 auto" }}>
-      <div style={{ background: parchment, border: "1px solid rgba(124,58,42,0.13)", borderRadius: 12, padding: "22px 18px", marginBottom: 14 }}>
-        <div style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 500, color: headingInk, textAlign: "center", marginBottom: 3 }}>Find out what wins requests</div>
-        <div style={{ fontFamily: FONT_SANS, fontSize: 11.5, color: "#8a7a6c", textAlign: "center", marginBottom: 18, lineHeight: 1.5, maxWidth: 460, marginLeft: "auto", marginRight: "auto" }}>
+    // Fills the full main pane (no narrow centred sub-column); only the running intro line stays capped.
+    <div style={{ padding: "28px 0 12px" }}>
+      <div style={{ background: parchment, border: "1px solid rgba(124,58,42,0.13)", borderRadius: 14, padding: "46px 40px", marginBottom: 20 }}>
+        <div style={{ fontFamily: FONT_SERIF, fontSize: 28, fontWeight: 500, color: headingInk, textAlign: "center", marginBottom: 7 }}>Find out what wins requests</div>
+        <div style={{ fontFamily: FONT_SANS, fontSize: 13, color: "#8a7a6c", textAlign: "center", marginBottom: 34, lineHeight: 1.55, maxWidth: 640, marginLeft: "auto", marginRight: "auto" }}>
           Test different versions of your submission and let the results tell you which combination agents respond to.
         </div>
         <div className="sp-hiw" style={{ display: "flex", alignItems: "flex-start", justifyContent: "center", gap: 0 }}>
           {HIW_STEPS.map((s, i) => (
             <React.Fragment key={s.label}>
-              <div style={{ flex: 1, maxWidth: 130, textAlign: "center" }}>
-                <div style={{ width: 42, height: 42, borderRadius: 11, margin: "0 auto 9px", display: "flex", alignItems: "center", justifyContent: "center", background: s.bg, color: s.fg }}>
-                  <s.Icon style={{ width: 20, height: 20 }} strokeWidth={1.8} aria-hidden="true" />
+              {/* flex:1 with a generous cap → the four steps spread across the full pane width */}
+              <div style={{ flex: 1, maxWidth: 300, textAlign: "center" }}>
+                <div style={{ width: 56, height: 56, borderRadius: 15, margin: "0 auto 12px", display: "flex", alignItems: "center", justifyContent: "center", background: s.bg, color: s.fg }}>
+                  <s.Icon style={{ width: 26, height: 26 }} strokeWidth={1.8} aria-hidden="true" />
                 </div>
-                <div style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: "0.04em", textTransform: "uppercase", color: burgundy, marginBottom: 4 }}>{s.label}</div>
-                <div style={{ fontFamily: FONT_SANS, fontSize: 10.5, color: "#6a5e54", lineHeight: 1.4 }}>{s.desc}</div>
+                <div style={{ fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.05em", textTransform: "uppercase", color: burgundy, marginBottom: 6 }}>{s.label}</div>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: "#6a5e54", lineHeight: 1.45 }}>{s.desc}</div>
               </div>
               {i < HIW_STEPS.length - 1 && (
-                <div className="sp-hiw-arrow" style={{ color: "#d3c4b6", alignSelf: "center", paddingTop: 14, flexShrink: 0 }}>
-                  <ArrowRight style={{ width: 18, height: 18 }} strokeWidth={2} aria-hidden="true" />
+                <div className="sp-hiw-arrow" style={{ color: "#d3c4b6", alignSelf: "flex-start", paddingTop: 20, flexShrink: 0 }}>
+                  <ArrowRight style={{ width: 22, height: 22 }} strokeWidth={2} aria-hidden="true" />
                 </div>
               )}
             </React.Fragment>
           ))}
         </div>
-        <div style={{ textAlign: "center", marginTop: 20 }}>
-          <button onClick={openBuild} style={{ display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.05em", textTransform: "uppercase", color: "#fff", background: burgundy, border: "none", borderRadius: 9, padding: "11px 20px", cursor: "pointer" }}>
-            <Plus style={{ width: 12, height: 12 }} strokeWidth={2.2} aria-hidden="true" /> Build your first package
+        <div style={{ textAlign: "center", marginTop: 34 }}>
+          <button onClick={openBuild} style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: FONT_MONO, fontSize: 10.5, letterSpacing: "0.05em", textTransform: "uppercase", color: "#fff", background: burgundy, border: "none", borderRadius: 10, padding: "13px 26px", cursor: "pointer" }}>
+            <Plus style={{ width: 13, height: 13 }} strokeWidth={2.2} aria-hidden="true" /> Build your first package
           </button>
         </div>
       </div>
 
-      <div style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: "0.08em", textTransform: "uppercase", color: mutedInk, margin: "6px 0 9px", textAlign: "center" }}>— or start from a template —</div>
-      <div className="sp-tmpl" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+      <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.08em", textTransform: "uppercase", color: mutedInk, margin: "10px 0 13px", textAlign: "center" }}>— or start from a template —</div>
+      <div className="sp-tmpl" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
         {TEMPLATES.map((t) => (
-          <div key={t.name} style={{ background: parchment, border: "1px solid rgba(124,58,42,0.13)", borderRadius: 10, padding: 12, textAlign: "center", display: "flex", flexDirection: "column" }}>
-            <div style={{ fontFamily: FONT_SERIF, fontSize: 13, color: headingInk, marginBottom: 4 }}>{t.name}</div>
-            <div style={{ fontFamily: FONT_SANS, fontSize: 9.5, color: "#9c8878", fontStyle: "italic", marginBottom: 9, lineHeight: 1.35, flex: 1 }}>{t.why}</div>
-            <button onClick={() => useTemplate(t)} style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: "0.04em", textTransform: "uppercase", color: burgundy, background: buttonPinkBg, border: `0.5px solid ${buttonPinkBorder}`, borderRadius: 7, padding: 7, cursor: "pointer" }}>Use template</button>
+          <div key={t.name} style={{ background: parchment, border: "1px solid rgba(124,58,42,0.13)", borderRadius: 11, padding: "16px 16px 14px", textAlign: "center", display: "flex", flexDirection: "column" }}>
+            <div style={{ fontFamily: FONT_SERIF, fontSize: 15, color: headingInk, marginBottom: 5 }}>{t.name}</div>
+            <div style={{ fontFamily: FONT_SANS, fontSize: 11, color: "#9c8878", fontStyle: "italic", marginBottom: 13, lineHeight: 1.4, flex: 1 }}>{t.why}</div>
+            <button onClick={() => useTemplate(t)} style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.04em", textTransform: "uppercase", color: burgundy, background: buttonPinkBg, border: `0.5px solid ${buttonPinkBorder}`, borderRadius: 8, padding: 9, cursor: "pointer" }}>Use template</button>
           </div>
         ))}
       </div>
