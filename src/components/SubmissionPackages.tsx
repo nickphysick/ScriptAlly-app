@@ -773,7 +773,7 @@ export const SubmissionPackages: React.FC = () => {
           </div>
 
           {/* pinned template cards — "Use template" scaffolds real records (wiring unchanged) */}
-          <div style={{ textAlign: "center", fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "#a8957f", margin: "26px 0 16px" }}>— or start from a template —</div>
+          <div style={{ textAlign: "center", fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "#a8957f", margin: "44px 0 16px" }}>— or start from a template —</div>
           <div className="sp-templ-row" style={{ display: "flex", gap: 20 }}>
             {TEMPLATES.map((t, i) => (
               <div key={t.name} style={{ flex: 1, background: parchment, border: "1px solid rgba(124,58,42,0.16)", borderRadius: 13, padding: "18px 20px 16px", textAlign: "center", boxShadow: "0 6px 15px rgba(58,28,20,0.08)", transform: tilt(i, TCARD_TILTS) }}>
@@ -1608,16 +1608,16 @@ export const SubmissionPackages: React.FC = () => {
         <>
           {renderSidebar()}
           {/* right column — offset past the fixed 264px sidebar, locked to the viewport minus the 64px nav */}
-          <div className="sp-main" style={{ marginLeft: 264, height: "calc(100vh - 64px)", display: "flex", flexDirection: "column", background: "#fdfaf5" }}>
+          <div className="sp-main" style={{ marginLeft: 264, height: "calc(100vh - 64px)", display: "flex", flexDirection: "column", background: "#ffffff" }}>
             {/* white title strip */}
-            <div style={{ background: "#fdfaf5", borderBottom: "1px solid rgba(124,58,42,0.1)", padding: "15px 30px", display: "flex", alignItems: "center", gap: 11, flexShrink: 0 }}>
+            <div style={{ background: "#ffffff", borderBottom: "1px solid rgba(124,58,42,0.1)", padding: "15px 30px", display: "flex", alignItems: "center", gap: 11, flexShrink: 0 }}>
               <span style={{ fontFamily: FONT_SERIF, fontSize: 24, fontWeight: 600, color: headingInk }}>Submission Package Builder</span>
               <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: FONT_MONO, fontSize: 8, fontWeight: 500, letterSpacing: "0.1em", color: burgundy, background: buttonPinkBg, border: `0.5px solid ${buttonPinkBorder}`, borderRadius: 20, padding: "3px 8px 2px" }}>
                 <Lock style={{ width: 7, height: 7 }} strokeWidth={2.4} aria-hidden="true" /> PRO
               </span>
             </div>
             {/* the only internal scroller — the reading pane (empty) or the spotlight + shelf */}
-            <div className="sp-scroll" style={{ flex: 1, minHeight: 0, overflowY: "auto", background: "#fdfaf5", padding: "24px 28px" }}>
+            <div className="sp-scroll" style={{ flex: 1, minHeight: 0, overflowY: "auto", background: "#ffffff", padding: "24px 28px" }}>
               <div style={{ maxWidth: 1500, margin: "0 auto" }}>
                 {detailPkgId
                   ? renderDetail()

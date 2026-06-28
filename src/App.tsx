@@ -486,8 +486,8 @@ function AppContent() {
         </div>
       )}
 
-      {/* Footer copyright stamp block — hidden on the Queries workspace */}
-      {activeTab !== "queries" && <footer className="bg-[#3a1c14] text-stone-400 py-10 border-t border-[#7c3a2a]/20">
+      {/* Footer copyright stamp block — hidden on the Queries workspace and the Package Builder shell */}
+      {activeTab !== "queries" && !(activeTab === "manuscripts" && activeSubPage === "Submission packages") && <footer className="bg-[#3a1c14] text-stone-400 py-10 border-t border-[#7c3a2a]/20">
         <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-6 text-xs animate-fade-in">
           <div className="flex flex-col md:flex-row items-center gap-4">
             <div className="flex items-center gap-2">
