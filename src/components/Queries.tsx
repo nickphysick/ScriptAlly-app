@@ -2722,73 +2722,67 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     </div>{/* ── end sub-card 1: Tracking ── */}
 
                   {/* ── Sub-card 2: What you sent ── */}
-                  <div style={{ flex: 1, border: "1px solid rgba(124,58,42,.16)", borderRadius: 12, background: "#fffefb", padding: "18px 18px 20px", display: "flex", flexDirection: "column", boxShadow: "0 1px 2px rgba(40,22,14,.03)", minWidth: 0, minHeight: 0 }}>
-                      {/* Running head */}
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 18, flexShrink: 0 }}>
-                        <div style={{ height: 1, width: 22, background: "rgba(124,58,42,.3)" }} />
-                        <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, textTransform: "uppercase" as const, letterSpacing: ".16em", color: "#2e3a2c" }}>What you sent</span>
-                        <div style={{ height: 1, width: 22, background: "rgba(124,58,42,.3)" }} />
+                  <div style={{ flex: 1, minWidth: 0, minHeight: 430, background: "#fdfaf5", border: "1px solid #e9dfd0", borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                      {/* pink header band */}
+                      <div style={{ padding: "9px 16px", textAlign: "center", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", borderBottom: "1px solid #e8cabb", flexShrink: 0 }}>
+                        <span style={{ fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 600, color: "#241c15" }}>What you sent</span>
                       </div>
-                      {/* Content area */}
-                      <div style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
-                        {/* View-only — editing is the Edit Query drawer (openEditQuery). */}
-                          <div className="space-y-4">
-                            <div className="bg-[#FAF8F5] border border-[#e8d5cc] rounded-md p-3 space-y-2.5">
-                              <span className="text-[10px] text-stone-400 font-mono uppercase tracking-wider block leading-none font-bold">Manuscript</span>
-                              <div className="inline-block bg-white border border-[#d1d5db] rounded-full px-3.5 py-1 text-[13px] font-normal text-[#7c3d3d] leading-snug shadow-3xs" style={{ fontFamily: FONT_SERIF }}>{activeMs.title}</div>
-                              <div className="grid grid-cols-2 gap-2 text-[10px] font-mono">
-                                <div><span className="text-stone-400 block uppercase">Genre</span><span className="font-medium text-[#3a1c14]">{activeMs.genre}</span></div>
-                                <div><span className="text-stone-400 block uppercase">Word count</span><span className="font-medium text-[#3a1c14]">{activeMs.wordCount.toLocaleString()} words</span></div>
-                              </div>
-                              <div className="border-t border-[#e8d5cc] my-2" />
-                              <p className="text-[11px] italic text-[#6a5045] leading-relaxed">{activeMs.logline}</p>
-                            </div>
-                            <div className="space-y-1.5">
-                              <span className="block text-[10px] font-medium font-mono text-[#c9a89e] uppercase tracking-wider select-none" style={{ letterSpacing: "0.060em" }}>Materials included</span>
-                              <div className="flex flex-wrap gap-1.5">
-                                {(() => {
-                                  const mats = Array.isArray((activeQuery as any).materialsWanted) ? (activeQuery as any).materialsWanted : Array.isArray(activeAgent.materialsWanted) ? activeAgent.materialsWanted : [];
-                                  if (mats && mats.length > 0) return mats.map((mat: string | QueryMaterial, mIdx: number) => (
-                                    <span key={mIdx} className="py-[3px] px-[10px] bg-[#FAF1EF] text-[#7c3a2a] rounded-full text-[11px] font-medium leading-none whitespace-nowrap shadow-3xs select-none">{formatQueryMaterial(mat)}</span>
-                                  ));
-                                  return <span className="text-[11px] text-[#7c3a2a] bg-[#FAF1EF] rounded-full py-[3px] px-[10px] italic">No materials recorded.</span>;
-                                })()}
-                              </div>
-                            </div>
-                            <div className="space-y-1.5">
-                              <span className="block text-[10px] font-medium font-mono text-[#c9a89e] uppercase tracking-wider select-none" style={{ letterSpacing: "0.060em" }}>Your personalisation note</span>
-                              <p className="text-[11px] italic text-[#a08070] leading-relaxed">{activeQuery.personalisationNotes ? `"${activeQuery.personalisationNotes}"` : "No personalisation note recorded."}</p>
-                            </div>
-                            {[QueryStatus.REJECTED, QueryStatus.WITHDRAWN].includes(activeQuery.status) && (activeQuery.rejectionFeedbackType || activeQuery.rejectionFeedbackText || activeQuery.rejectionLesson || activeQuery.rejectionType) && (
-                              <div className="bg-[#FAF1EF] border border-[#e8d5cc]/60 p-3 rounded-lg space-y-1.5 mt-2">
-                                <span className="text-[10px] font-mono text-[#7c3a2a] font-bold uppercase block">Archived Rejection Details</span>
-                                <div className="text-[11px] space-y-1">
-                                  {(() => {
-                                    const typeLabel = activeQuery.rejectionFeedbackType === "detailed" ? "Personalised — they left a note" : activeQuery.rejectionFeedbackType === "standard" ? "Standard pass" : activeQuery.rejectionFeedbackType === "form" ? "Form rejection" : activeQuery.rejectionType;
-                                    const stageLabel = activeQuery.rejectedFromStatus && activeQuery.rejectedFromStatus !== QueryStatus.QUERIED ? `After: ${activeQuery.rejectedFromStatus}` : null;
-                                    return (
-                                      <>
-                                        {typeLabel && <span className="font-semibold text-stone-600 block">Type: <span className="text-stone-800">{typeLabel}</span></span>}
-                                        {stageLabel && <span className="font-semibold text-stone-600 block">{stageLabel}</span>}
-                                      </>
-                                    );
-                                  })()}
-                                  {(activeQuery.rejectionFeedbackText || activeQuery.agentComments) && (
-                                    <p className="italic text-stone-600 bg-white p-2 border border-stone-200/55 rounded-md mt-1 leading-snug">"{activeQuery.rejectionFeedbackText || activeQuery.agentComments}"</p>
-                                  )}
-                                  {activeQuery.rejectionLesson && (
-                                    <div className="mt-1">
-                                      <span className="font-semibold text-stone-600 block">Note to self:</span>
-                                      <p className="italic text-stone-600 leading-snug">{activeQuery.rejectionLesson}</p>
-                                    </div>
-                                  )}
-                                  {activeAgent?.requeryPreference && (
-                                    <span className="font-semibold text-stone-600 block mt-1">Query this agent again? <span className="text-stone-800 capitalize">{activeAgent.requeryPreference}</span></span>
-                                  )}
+                      {/* spec sheet */}
+                      <div style={{ padding: "16px 16px 18px", flex: 1, minHeight: 0, overflowY: "auto" }}>
+                        {(() => {
+                          const mats: (string | QueryMaterial)[] = Array.isArray((activeQuery as any).materialsWanted) && (activeQuery as any).materialsWanted.length
+                            ? (activeQuery as any).materialsWanted
+                            : (Array.isArray(activeAgent.materialsWanted) ? activeAgent.materialsWanted : []);
+                          const materials = mats.map(formatQueryMaterial).filter(Boolean);
+                          const linkedPackage = activeQuery.packageId ? packages.find(p => p.id === activeQuery.packageId) : null;
+                          const minilabel: React.CSSProperties = { fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: "0.15em", textTransform: "uppercase", color: "#a89a8a" };
+                          const srow: React.CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderTop: "1px solid #efe5d8" };
+                          const pillStyle: React.CSSProperties = { display: "inline-flex", alignItems: "center", fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 500, color: "#6a5b4c", background: "#fdfaf5", border: "1px solid #ddcdbb", borderRadius: 999, padding: "4px 11px" };
+                          const pkgComponents = linkedPackage
+                            ? [["Query letter", linkedPackage.queryLetterVersionId], ["Synopsis", linkedPackage.synopsisVersionId], ["Sample pages", linkedPackage.samplePagesVersionId]].filter(([, v]) => !!v).map(([l]) => l as string)
+                            : [];
+                          return (
+                            <>
+                              <div style={{ fontFamily: FONT_SERIF, fontSize: 18, fontWeight: 600, color: "#241c15", lineHeight: 1.15, marginBottom: 12 }}>{activeMs.title}</div>
+                              <div style={srow}><span style={minilabel}>Genre</span><span style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, color: "#241c15" }}>{activeMs.genre || "—"}</span></div>
+                              <div style={srow}><span style={minilabel}>Word count</span><span style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, color: "#241c15" }}>{activeMs.wordCount ? activeMs.wordCount.toLocaleString() : "—"}</span></div>
+                              {activeMs.logline && (
+                                <div style={{ ...srow, paddingTop: 10 }}>
+                                  <span style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 12.5, color: "#5a4d40", lineHeight: 1.4 }}>{activeMs.logline}</span>
                                 </div>
+                              )}
+                              {/* Materials included */}
+                              <div style={{ marginTop: 17 }}>
+                                <div style={{ ...minilabel, display: "block", marginBottom: 8 }}>Materials included</div>
+                                {materials.length > 0 ? (
+                                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>{materials.map((m, i) => <span key={i} style={pillStyle}>{m}</span>)}</div>
+                                ) : (
+                                  <span style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 12, color: "#b3a596" }}>No materials recorded.</span>
+                                )}
                               </div>
-                            )}
-                          </div>
+                              {/* Submission package — Pro-gated */}
+                              <div style={{ marginTop: 17 }}>
+                                <div style={{ ...minilabel, display: "block", marginBottom: 8 }}>
+                                  Submission package
+                                  <span style={{ display: "inline-block", fontFamily: FONT_MONO, fontSize: 7, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "#8a6a3e", background: "#f3e7d3", border: "1px solid #e3cfa8", borderRadius: 999, padding: "1px 6px", marginLeft: 6, verticalAlign: "middle" }}>Pro</span>
+                                </div>
+                                {linkedPackage ? (
+                                  <div>
+                                    <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 600, color: "#241c15", marginBottom: 7 }}>{linkedPackage.packageName}</div>
+                                    {pkgComponents.length > 0 && <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>{pkgComponents.map((c, i) => <span key={i} style={pillStyle}>{c}</span>)}</div>}
+                                  </div>
+                                ) : (
+                                  <div style={{ display: "flex", gap: 10, alignItems: "flex-start", background: "#f7f1e8", border: "1px dashed #e4d8c2", borderRadius: 9, padding: "11px 13px" }}>
+                                    <span style={{ flexShrink: 0, color: "#b8a37e", marginTop: 1 }}>
+                                      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.3}><rect x="3.5" y="7" width="9" height="6.3" rx="1.3" /><path d="M5.6 7V5a2.4 2.4 0 014.8 0v2" /></svg>
+                                    </span>
+                                    <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, lineHeight: 1.5, color: "#9a8a6e" }}>Bundle these materials into a named package and track responses by package and component. <a href="#/plans" style={{ color: "#8a6a3e", fontWeight: 500, textDecoration: "none", borderBottom: "1px solid #d8c39a" }}>Available on Pro</a></span>
+                                  </div>
+                                )}
+                              </div>
+                            </>
+                          );
+                        })()}
                       </div>
                     </div>{/* ── end sub-card 2: What you sent ── */}
 
