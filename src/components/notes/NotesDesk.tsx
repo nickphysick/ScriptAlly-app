@@ -42,8 +42,8 @@ const DESK_H = 246;
 
 /** Behind-the-front slots for older notes: left then right, slight tilt, lower z. */
 const SIDE_SLOTS = [
-  { x: -42, rot: -11, z: 1 },
-  { x: 42, rot: 11, z: 2 },
+  { x: -60, rot: -11, z: 1 },
+  { x: 60, rot: 11, z: 2 },
 ];
 
 /** Wider slots for the existing notes when they fan BEHIND the add-another compose sticky. */
