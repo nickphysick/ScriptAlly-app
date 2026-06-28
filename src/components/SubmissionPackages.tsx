@@ -36,8 +36,7 @@ import {
   type PackageFunnel,
 } from "../lib/packageMetrics";
 import {
-  pageGround,
-  PAGE_GRAIN,
+  kraft,
   parchment,
   sageBandGradient,
   sageBandRule,
@@ -639,7 +638,7 @@ export const SubmissionPackages: React.FC = () => {
 
   // ── Left sidebar (full-height rail, nav colour): manuscript switcher + materials as building blocks. ──
   const renderSidebar = () => (
-    <aside className="sp-sidebar" style={{ background: "#fdfaf5", borderRight: "1px solid rgba(124,58,42,0.1)" }}>
+    <aside className="sp-sidebar" style={{ background: kraft, borderRight: "1px solid rgba(124,58,42,0.1)" }}>
       {/* tucked manuscript switcher — switching re-scopes the whole page */}
       {activeMs && (
         <div ref={msMenuRef} style={{ position: "relative" }}>
