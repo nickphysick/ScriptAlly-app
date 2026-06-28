@@ -1,0 +1,223 @@
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=JetBrains+Mono:wght@400;500&family=Inter:wght@300;400;500;600&family=Caveat:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page:#f2ede7; --parchment:#fdfaf5; --burgundy:#7c3a2a; --deep:#6b3023; --ink:#3a1c14;
+    --label:#9c8878; --muted:#b3a596; --hair:#ece0d2;
+    --sage:#8a9e88; --darksage:#5a6e58; --sagetint:#e9ede6;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; padding:30px; background:var(--page); font-family:'Inter',sans-serif; color:var(--ink);}
+  .cap{max-width:1080px; margin:0 auto 14px; font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.1em; text-transform:uppercase; color:var(--label);}
+
+  .pane{position:relative; max-width:1080px; margin:0 auto; background:#ffffff; border:1px solid #e6dccd; border-radius:14px; box-shadow:0 1px 3px rgba(58,28,20,0.07), 0 14px 38px rgba(58,28,20,0.11); overflow:hidden;}
+  .pane::before{content:""; position:absolute; inset:0; border-radius:14px; padding:1.5px; background:linear-gradient(135deg, transparent 0 43%, rgba(255,255,255,0.85) 50%, transparent 57% 100%); background-size:300% 300%; -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; z-index:4; animation:edgeGlint 7s linear infinite;}
+  @keyframes edgeGlint{0%{background-position:0% 0%;} 100%{background-position:100% 100%;}}
+  @media (prefers-reduced-motion: reduce){.pane::before{animation:none;}}
+  .hero{position:relative; padding:18px 28px 20px; border-left:3px solid var(--burgundy); background:#ffffff;}
+  .herometa{position:absolute; top:16px; right:28px; display:flex; flex-direction:column; align-items:flex-end; gap:8px;}
+  .heroname{display:flex; align-items:center; gap:10px; font-family:'Playfair Display',serif; font-size:29px; font-weight:600; color:#2a2017; letter-spacing:0.03em; white-space:nowrap;}
+  .heroname svg{flex-shrink:0;}
+  .initialdot{flex-shrink:0; width:30px; height:30px; border-radius:50%; background:var(--burgundy); color:#ffffff; display:inline-flex; align-items:center; justify-content:center; font-family:'Inter',sans-serif; font-size:11px; font-weight:600; letter-spacing:0.03em;}
+  .minilabel{font-family:'JetBrains Mono',monospace; font-size:8.5px; letter-spacing:0.15em; text-transform:uppercase; color:#a89a8a;}
+
+  /* ── hero: white, seamless (no divider) ── */
+  .statuschip{display:inline-flex; align-items:center; gap:8px; background:#fdfaf5; border:1px solid #e8cdc0; border-radius:999px; padding:5px 13px 5px 6px;}
+  .statuschip .sd{width:21px; height:21px;}
+  .statuschip .statuslbl{font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.15em; color:var(--burgundy); font-weight:500;}
+  .quip{font-family:'Caveat',cursive; font-size:23px; color:var(--ink); transform:rotate(-2deg); white-space:nowrap;}
+
+  .heroemail{display:flex; justify-content:flex-start; align-items:center; gap:7px; font-family:'Inter',sans-serif; font-size:13px; color:var(--burgundy); margin-top:11px;}
+  .heroemail svg{opacity:.8;}
+  .mswltext{font-family:'Inter',sans-serif; font-style:italic; font-size:11.5px; line-height:1.45; color:#8a7d6e; max-width:620px; margin:11px 0 0; text-align:left;}
+  .genres{display:flex; justify-content:flex-start; flex-wrap:wrap; gap:6px; margin-top:11px;}
+  .gpill{font-family:'JetBrains Mono',monospace; font-size:8px; letter-spacing:0.12em; text-transform:uppercase; color:#5a6e58; background:#fdfaf5; border:1px solid #cdddc7; border-radius:999px; padding:3px 10px;}
+
+  /* ── body ── */
+  .body{padding:22px 30px 30px; background:#ffffff;}
+  .cols{display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;}
+  .card{position:relative; min-height:430px; background:var(--parchment); border:1px solid #e9dfd0; border-radius:11px; overflow:hidden; display:flex; flex-direction:column; transition:transform .2s ease, box-shadow .2s ease;}
+  .card:hover{transform:scale(1.02); box-shadow:0 8px 22px rgba(58,28,20,.10); z-index:2;}
+  @media (prefers-reduced-motion: reduce){.card:hover{transform:none;}}
+  .cardhead{padding:9px 16px; text-align:center; background:linear-gradient(135deg,#f5e2da,#efd5ca); border-bottom:1px solid #e8cabb;}
+  .cardhead .t{font-family:'Playfair Display',serif; font-size:14px; font-weight:600; color:#241c15;}
+  .cardbody{padding:16px 16px 18px; flex:1; display:flex; flex-direction:column;}
+
+  /* timeline */
+  .ev{display:grid; grid-template-columns:30px 1fr; gap:11px; position:relative; padding-bottom:24px;}
+  .ev:last-child{padding-bottom:0;}
+  .evdot{position:relative; z-index:1; display:flex; justify-content:center;}
+  .evdot .sd{width:28px; height:28px;}
+  .ev:not(:last-child) .evdot::after{content:""; position:absolute; top:29px; bottom:-24px; left:50%; transform:translateX(-50%); width:1.6px; background:#e8dcd0;}
+  .evpills{display:flex; gap:5px; flex-wrap:wrap; margin-top:8px;}
+  .ev.nudge .evtitle{color:#8a6a3e; font-weight:600; font-style:normal;}
+  .ev.nudge .evsub{color:#a8946e;}
+  .ev.ghost .evdot::after{background:repeating-linear-gradient(#ddd0c0 0 3px, transparent 3px 6px);}
+  .evtop{display:flex; justify-content:space-between; align-items:baseline; gap:8px; padding-top:4px;}
+  .evtitle{font-family:'Inter',sans-serif; font-size:13px; font-weight:600; color:var(--ink);}
+  .evdate{font-family:'JetBrains Mono',monospace; font-size:9px; color:#a89a8a; white-space:nowrap;}
+  .evsub{font-family:'Inter',sans-serif; font-size:11px; color:#9a8d7e; margin-top:2px;}
+  .ev.ghost .evtitle{color:#a89a8a; font-weight:500; font-style:italic;}
+  .respmini{margin-top:8px;}
+  .respbar{position:relative; height:5px; border-radius:5px; background:#efe5d8; overflow:hidden;}
+  .respbar i{position:absolute; left:0; top:0; bottom:0; border-radius:5px; background:linear-gradient(90deg,#a9bca6,#8a9e88); width:73%;}
+  .respcap{display:flex; justify-content:space-between; margin-top:5px;}
+  .respcap span{font-family:'JetBrains Mono',monospace; font-size:8px; letter-spacing:0.05em; color:#a89a8a;}
+
+  /* book card */
+  .book{position:relative; background:#fbf7f1; border:1px solid #ece2d4; border-radius:9px; padding:14px 16px 14px 20px; overflow:hidden;}
+  .book::before{content:""; position:absolute; top:0; bottom:0; left:0; width:5px; background:linear-gradient(#7c3a2a,#6b3023);}
+  .booktag{display:inline-block; font-family:'JetBrains Mono',monospace; font-size:8px; letter-spacing:0.12em; text-transform:uppercase; color:var(--darksage); background:var(--sagetint); border:1px solid #d8e0d4; border-radius:999px; padding:2px 9px; margin-bottom:9px;}
+  .booktitle{font-family:'Playfair Display',serif; font-size:18px; font-weight:600; color:var(--burgundy); line-height:1.15;}
+  .bookmeta{font-family:'JetBrains Mono',monospace; font-size:8.5px; letter-spacing:0.1em; text-transform:uppercase; color:#a89a8a; margin-top:7px;}
+  .bookline{font-family:'Playfair Display',serif; font-style:italic; font-size:12.5px; color:#8a7d6e; margin-top:9px; border-top:1px solid #efe5d8; padding-top:10px;}
+
+  .msname{font-family:'Playfair Display',serif; font-size:18px; font-weight:600; color:#241c15; line-height:1.15; margin-bottom:12px;}
+  .srow{display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-top:1px solid #efe5d8;}
+  .srow.lg{padding-top:10px;}
+  .specval{font-family:'Inter',sans-serif; font-size:13px; color:#241c15;}
+  .logline{font-family:'Playfair Display',serif; font-style:italic; font-size:12.5px; color:#5a4d40; line-height:1.4;}
+
+  .kv{margin-top:17px;}
+  .propill{display:inline-block; font-family:'JetBrains Mono',monospace; font-size:7px; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:#8a6a3e; background:#f3e7d3; border:1px solid #e3cfa8; border-radius:999px; padding:1px 6px; margin-left:6px; vertical-align:middle;}
+  .pkgGate{display:flex; gap:10px; align-items:flex-start; background:#f7f1e8; border:1px dashed #e4d8c2; border-radius:9px; padding:11px 13px;}
+  .pkgGate .lk{flex-shrink:0; color:#b8a37e; margin-top:1px;}
+  .pkgGate .gt{font-family:'Inter',sans-serif; font-size:11px; line-height:1.5; color:#9a8a6e; }
+  .pkgGate .gt a{color:#8a6a3e; font-weight:500; text-decoration:none; border-bottom:1px solid #d8c39a;}
+  .kv .minilabel{display:block; margin-bottom:8px;}
+  .pills{display:flex; gap:6px; flex-wrap:wrap;}
+  .pill{display:inline-flex; align-items:center; font-family:'Inter',sans-serif; font-size:11px; font-weight:500; color:#6a5b4c; background:#fdfaf5; border:1px solid #ddcdbb; border-radius:999px; padding:4px 11px;}
+  .muted{font-family:'Inter',sans-serif; font-style:italic; font-size:12px; color:var(--muted);}
+
+  /* notes */
+  .notes{flex:1; display:flex; flex-direction:column;}
+  .notelist{flex:1;}
+  .note{background:#fffdf9; border-radius:11px; padding:11px 13px; margin-bottom:9px; box-shadow:0 1px 2px rgba(58,28,20,.05), 0 4px 12px rgba(58,28,20,.07);}
+  .notetext{font-size:12.5px; color:#4a3c30; line-height:1.48;}
+  .notefoot{display:flex; align-items:center; justify-content:space-between; margin-top:9px;}
+  .notemeta{font-family:'JetBrains Mono',monospace; font-size:8px; color:var(--muted); letter-spacing:0.08em; text-transform:uppercase;}
+  .noteacts{display:flex; gap:4px; opacity:0; transition:opacity .14s;}
+  .note:hover .noteacts{opacity:1;}
+  .noteacts button{width:22px; height:22px; border:none; background:transparent; border-radius:5px; color:#bcae9e; display:flex; align-items:center; justify-content:center; cursor:pointer;}
+  .noteacts button:hover{background:#f3ebe0; color:var(--burgundy);}
+  .noteinput{margin-top:auto; background:#fffdf9; border:1px solid #e6dccd; border-radius:10px; padding:9px 10px 9px 13px; display:flex; align-items:flex-end; gap:9px; box-shadow:0 1px 2px rgba(58,28,20,0.04);}
+  .noteinput textarea{flex:1; border:none; outline:none; background:transparent; resize:none; font-family:'Inter',sans-serif; font-size:12.5px; color:var(--ink); line-height:1.4; min-height:20px; padding:4px 0;}
+  .noteinput textarea::placeholder{color:#c2b3a0;}
+  .noteinput .send{flex-shrink:0; width:32px; height:32px; border:1px solid #e8c8bc; background:#f5e2da; border-radius:8px; color:var(--burgundy); display:flex; align-items:center; justify-content:center; cursor:pointer;}
+</style>
+
+<div class="cap">Query reading pane · canonical</div>
+
+<div class="pane">
+  <div class="hero">
+    <div class="herometa">
+      <div class="statuschip">
+        <svg class="sd" viewBox="0 0 30 30"><circle cx="15" cy="15" r="13" fill="#f8e7dc" stroke="#7c3a2a" stroke-width="1.6"/><path d="M9.5 15h9M14.5 11l4.5 4-4.5 4" fill="none" stroke="#7c3a2a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="statuslbl">PARTIAL SENT</span>
+      </div>
+      <div class="quip">waiting on Priya…</div>
+    </div>
+    <div class="heroname"><span class="initialdot">PR</span>Priya Raman</div>
+    <div class="heroemail">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="M3 6l9 6.5L21 6"/></svg>
+      priya.raman@saltmarshliterary.co.uk
+    </div>
+    <div class="mswltext">“Character-driven thrillers and upmarket book-club fiction with a strong sense of place — especially drawn to unreliable narrators and morally complex women.”</div>
+    <div class="genres">
+      <span class="gpill">Thriller</span>
+      <span class="gpill">Book Club Fiction</span>
+      <span class="gpill">Upmarket</span>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="cols">
+
+      <div class="card">
+        <div class="cardhead"><span class="t">Tracking</span></div>
+        <div class="cardbody">
+          <div class="ev">
+            <div class="evdot"><svg class="sd" viewBox="0 0 28 28"><circle cx="14" cy="14" r="11.5" fill="#f8e7dc" stroke="#7c3a2a" stroke-width="1.5"/><path d="M9.5 14h8M13.5 10.5l3.7 3.5-3.7 3.5" fill="none" stroke="#7c3a2a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div><div class="evtop"><span class="evtitle">Query sent</span><span class="evdate">1 MAY</span></div><div class="evsub">via Email</div><div class="evpills"><span class="pill">Query letter</span><span class="pill">Synopsis</span></div></div>
+          </div>
+          <div class="ev">
+            <div class="evdot"><svg class="sd" viewBox="0 0 28 28"><circle cx="14" cy="14" r="11.5" fill="#e9ede6" stroke="#8a9e88" stroke-width="1.5"/><path d="M18.5 14h-8M14.5 10.5l-3.7 3.5 3.7 3.5" fill="none" stroke="#5a6e58" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div><div class="evtop"><span class="evtitle">Partial requested</span><span class="evdate">1 MAY</span></div><div class="evsub">Priya asked for a partial</div></div>
+          </div>
+          <div class="ev">
+            <div class="evdot"><svg class="sd" viewBox="0 0 28 28"><circle cx="14" cy="14" r="11.5" fill="#f8e7dc" stroke="#7c3a2a" stroke-width="1.5"/><path d="M9.5 14h8M13.5 10.5l3.7 3.5-3.7 3.5" fill="none" stroke="#7c3a2a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div><div class="evtop"><span class="evtitle">Partial sent</span><span class="evdate">1 MAY</span></div><div class="evpills"><span class="pill">First 3 chapters</span></div></div>
+          </div>
+          <div class="ev ghost">
+            <div class="evdot"><svg class="sd" viewBox="0 0 28 28"><circle cx="14" cy="14" r="11.5" fill="none" stroke="#cfc6bb" stroke-width="1.4" stroke-dasharray="3 3"/></svg></div>
+            <div>
+              <div class="evtop"><span class="evtitle">Waiting to hear back</span></div>
+              <div class="respmini">
+                <div class="respbar"><i style="width:73%;"></i></div>
+                <div class="respcap"><span>DAY 41 OF ~56</span><span>EXP. ~26 JUN</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="ev nudge">
+            <div class="evdot"><svg class="sd" viewBox="0 0 28 28"><circle cx="14" cy="14" r="11.5" fill="#fbf3e3" stroke="#d8b87a" stroke-width="1.4" stroke-dasharray="3 3"/><path d="M14 8.5a3 3 0 0 0-3 3c0 3-1.1 3.6-1.1 3.6h8.2S17 14.5 17 11.5a3 3 0 0 0-3-3z M12.8 17.2a1.3 1.3 0 0 0 2.4 0" fill="none" stroke="#b98a4e" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div><div class="evtop"><span class="evtitle">Nudge reminder</span><span class="evdate">30 JUN</span></div><div class="evsub">We'll remind you to follow up if you still haven't heard back.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="cardhead"><span class="t">What you sent</span></div>
+        <div class="cardbody">
+          <div class="msname">Murphy's Day Out</div>
+          <div class="srow"><span class="minilabel">Genre</span><span class="specval">Thriller</span></div>
+          <div class="srow"><span class="minilabel">Word count</span><span class="specval">50,000</span></div>
+          <div class="srow lg"><span class="logline">Murphy catches a fly.</span></div>
+          <div class="kv">
+            <div class="minilabel">Materials included</div>
+            <div class="pills"><span class="pill">Query letter</span><span class="pill">Synopsis</span><span class="pill">First 3 chapters</span></div>
+          </div>
+          <div class="kv">
+            <div class="minilabel">Submission package <span class="propill">Pro</span></div>
+            <div class="pkgGate">
+              <span class="lk"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3.5" y="7" width="9" height="6.3" rx="1.3"/><path d="M5.6 7V5a2.4 2.4 0 014.8 0v2"/></svg></span>
+              <span class="gt">Bundle these materials into a named package and track responses by package and component. <a href="#">Available on Pro</a></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="cardhead"><span class="t">Notes</span></div>
+        <div class="cardbody">
+          <div class="notes">
+            <div class="notelist">
+              <div class="note">
+                <div class="notetext">Priya seemed warm at the agent panel — worth a gentle nudge if I haven't heard back by mid-June.</div>
+                <div class="notefoot"><span class="notemeta">25 Jun</span>
+                  <div class="noteacts">
+                    <button title="Edit"><svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M11 2l3 3-8 8-3.5.5.5-3.5 8-8z"/></svg></button>
+                    <button title="Delete"><svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M3 4h10M6 4V2.5h4V4M5 4l.6 9h4.8L11 4"/></svg></button>
+                  </div>
+                </div>
+              </div>
+              <div class="note">
+                <div class="notetext">Sent the partial the same day she asked — fingers crossed.</div>
+                <div class="notefoot"><span class="notemeta">1 May</span>
+                  <div class="noteacts">
+                    <button title="Edit"><svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"><path d="M11 2l3 3-8 8-3.5.5.5-3.5 8-8z"/></svg></button>
+                    <button title="Delete"><svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M3 4h10M6 4V2.5h4V4M5 4l.6 9h4.8L11 4"/></svg></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="noteinput">
+              <textarea rows="1" placeholder="Write a note…"></textarea>
+              <div class="send"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
