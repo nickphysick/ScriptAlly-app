@@ -272,11 +272,6 @@ export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, 
     );
   }
 
-  // The Submission Package Builder uses the Queries-style shell: a fixed logo sidebar (rendered by the
-  // page) covers the nav's left, so here the global bar offsets right of it, drops its logo, and takes
-  // the page's white (#fdfaf5) frame colour.
-  const packagesShell = activeTab === "manuscripts" && activeSubPage === "Submission packages";
-
   return (
     <>
       {/* Invisible backdrop to dismiss any open dropdown when clicking outside */}
@@ -286,17 +281,15 @@ export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, 
 
       {/* Single flush sticky bar — sits on the sand ground; grey divider appears on scroll. */}
       <header
-        className={`sticky top-0 z-50${packagesShell ? " md:ml-[264px]" : ""}`}
+        className="sticky top-0 z-50"
         style={{
-          background: packagesShell ? "#fdfaf5" : kraft,
-          borderBottom: packagesShell ? "1px solid rgba(124,58,42,0.1)" : `1.5px solid ${scrolled ? "#b8b2a8" : "transparent"}`,
+          background: kraft,
+          borderBottom: `1.5px solid ${scrolled ? "#b8b2a8" : "transparent"}`,
           transition: "border-color 0.25s ease",
         }}
       >
         <div className="flex items-center gap-4 px-4 md:px-10 lg:px-14 xl:px-16" style={{ height: 64 }}>
-          {/* Logo — a touch larger and nudged down so it sits on the baseline. Hidden on the Packages
-              shell, where the logo lives at the top of the page's fixed sidebar instead. */}
-          {!packagesShell && (
+          {/* Logo — a touch larger and nudged down so it sits on the baseline */}
           <button
             onClick={() => { onNavigate("dashboard"); closeAll(); }}
             className="cursor-pointer select-none shrink-0"
@@ -313,7 +306,6 @@ export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, 
             />
             <ScriptAllyLogo size="md" className="!h-[46px] [&>svg]:!h-[46px]" textColor={burgundy} iconColor={burgundy} />
           </button>
-          )}
 
           {/* Primary links */}
           <nav className="flex items-center gap-1 ml-2 max-md:hidden">

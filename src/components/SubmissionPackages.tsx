@@ -638,48 +638,49 @@ export const SubmissionPackages: React.FC = () => {
 
   // ── Left sidebar (full-height rail, nav colour): manuscript switcher + materials as building blocks. ──
   const renderSidebar = () => (
-    <aside className="sp-sidebar-fixed" style={{ position: "fixed", top: 0, left: 0, width: 264, height: "100vh", zIndex: 51, background: "#fdfaf5", borderRight: "1px solid rgba(124,58,42,0.1)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-      {/* logo (top) — aligns with the 64px global nav to its right */}
-      <div style={{ height: 64, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", borderBottom: "1px solid rgba(124,58,42,0.1)" }}>
-        <img src="/scriptally-title-nav.png" alt="ScriptAlly" style={{ width: 168, height: "auto" }} />
-      </div>
-
-      {/* materials — the scrollable middle */}
+    <aside className="sp-sidebar" style={{ width: 264, flexShrink: 0, background: "#fdfaf5", borderRight: "1px solid rgba(124,58,42,0.1)", display: "flex", flexDirection: "column", minHeight: 0 }}>
+      {/* materials — scrollable middle (no logo here; the logo lives in the full-width top nav) */}
       <div className="sp-side-body" style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "22px 18px" }}>
         <div style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 600, color: headingInk, marginBottom: 2 }}>Your materials</div>
-        <div style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: "0.05em", textTransform: "uppercase", color: mutedInk, marginBottom: 20 }}>building blocks</div>
+        <div style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: "0.05em", textTransform: "uppercase", color: mutedInk, marginBottom: 16 }}>building blocks</div>
+        {/* three summary count-cards — whole card opens the library; the + adds that type */}
         {LIB_KINDS.map((kind) => {
           const m = COMP[kind];
-          const rows = msVersions.filter((v) => v.componentType === kind);
+          const count = msVersions.filter((v) => v.componentType === kind).length;
           return (
-            <div key={kind} style={{ marginBottom: 18 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 9 }}>
-                <span style={{ width: 23, height: 23, borderRadius: 7, background: m.tile, color: m.color, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <m.Icon style={{ width: 12, height: 12 }} strokeWidth={1.9} aria-hidden="true" />
-                </span>
-                <span style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.05em", textTransform: "uppercase", color: "#6a5e54" }}>{m.label}</span>
-                {rows.length > 0 && <span style={{ marginLeft: "auto", fontFamily: FONT_MONO, fontSize: 9, color: "#bdb3a4" }}>{rows.length}</span>}
+            <div
+              key={kind}
+              role="button"
+              tabIndex={0}
+              onClick={() => setLibraryOpen(true)}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setLibraryOpen(true); } }}
+              className="sp-sumcard"
+              style={{ display: "flex", alignItems: "center", gap: 11, background: "#f8f3ec", border: "1px solid rgba(124,58,42,0.1)", borderRadius: 11, padding: "11px 12px", marginBottom: 10, cursor: "pointer", transition: "border-color .14s, box-shadow .14s" }}
+            >
+              <span style={{ width: 36, height: 36, borderRadius: 9, background: m.tile, color: m.color, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <m.Icon style={{ width: 17, height: 17 }} strokeWidth={1.9} aria-hidden="true" />
+              </span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: headingInk, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.label}</div>
+                <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.04em", color: count === 0 ? "#bdb3a4" : "#8a7a6c", marginTop: 2 }}>
+                  {count === 0 ? "none yet" : `${count} saved`}
+                </div>
               </div>
-              {rows.map((v) => {
-                const cm = componentMetrics(v.id, msPackages, msQueries);
-                return (
-                  <button key={v.id} onClick={() => openEdit(v)} className="sp-mat-row" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6, width: "100%", padding: "7px 9px", borderRadius: 8, background: "#f8f3ec", border: "0.5px solid rgba(124,58,42,0.09)", marginBottom: 5, cursor: "pointer", textAlign: "left" }}>
-                    <span style={{ fontFamily: FONT_SANS, fontSize: 11.5, color: bodyInk, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>{v.versionName}</span>
-                    <span style={{ fontFamily: FONT_MONO, fontSize: 8.5, color: cm.sent === 0 ? "#bdb3a4" : burgundy, flexShrink: 0 }}>{cm.sent === 0 ? "—" : formatRate(cm.requestRate)}</span>
-                  </button>
-                );
-              })}
-              <button onClick={() => openNew(kind)} className="sp-mat-add" style={{ display: "block", width: "100%", fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.04em", textTransform: "uppercase", color: "#9c8878", padding: "11px 10px", border: "1px dashed rgba(124,58,42,0.22)", borderRadius: 9, textAlign: "center", marginTop: rows.length > 0 ? 6 : 0, background: "transparent", cursor: "pointer" }}>
-                {ADD_LABEL[kind] ?? `+ Add ${m.noun}`}
+              <button
+                onClick={(e) => { e.stopPropagation(); openNew(kind); }}
+                className="sp-sumadd"
+                title={`Add a ${m.noun}`}
+                aria-label={`Add a ${m.noun}`}
+                style={{ width: 26, height: 26, borderRadius: 8, border: `1px solid ${buttonPinkBorder}`, background: buttonPinkBg, color: burgundy, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}
+              >
+                <Plus style={{ width: 13, height: 13 }} strokeWidth={2.4} aria-hidden="true" />
               </button>
             </div>
           );
         })}
-        {msVersions.length > 0 && (
-          <button onClick={() => setLibraryOpen(true)} className="sp-link" style={{ display: "block", width: "100%", fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.04em", textTransform: "uppercase", color: burgundy, textAlign: "center", marginTop: 6, paddingTop: 14, borderTop: "1px solid rgba(124,58,42,0.08)", background: "transparent", border: "none", cursor: "pointer" }}>
-            Manage all materials →
-          </button>
-        )}
+        <button onClick={() => setLibraryOpen(true)} className="sp-manage-btn" style={{ display: "block", width: "100%", marginTop: 4, fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.04em", textTransform: "uppercase", color: burgundy, background: buttonPinkBg, border: `0.5px solid ${buttonPinkBorder}`, borderRadius: 9, padding: "11px 10px", cursor: "pointer" }}>
+          Manage all materials →
+        </button>
       </div>
 
       {/* manuscript switcher — pinned to the bottom; opens upward */}
@@ -1537,13 +1538,18 @@ export const SubmissionPackages: React.FC = () => {
   return (
     <div className="sp-root font-sans" style={{ color: bodyInk }}>
       <style>{`
-        /* Queries-style shell: a fixed logo sidebar (z-51) covers the nav's left; the right column offsets
-           past it and locks to the viewport minus the 64px nav (only .sp-scroll scrolls). */
-        .sp-root { background: #fdfaf5; }
+        /* Pattern A shell: the full-width nav sits above; below it a viewport-locked row — the materials
+           rail + the content column. Only .sp-scroll scrolls (the rail scrolls independently if long). */
+        .sp-root { display: flex; flex-direction: row; height: calc(100vh - 64px); overflow: hidden; background: #ffffff; }
         .sp-mstuck:hover { background: #f5efe6 !important; }
+        .sp-sumcard:hover { border-color: #c9a89e !important; box-shadow: 0 3px 12px rgba(58,28,20,0.07); }
+        .sp-sumcard:focus-visible { outline: 2px solid ${burgundy}; outline-offset: 2px; }
+        .sp-sumadd:hover { background: #efd5ca !important; }
+        .sp-manage-btn:hover { background: #efd5ca !important; }
         @media (max-width: 768px) {
-          .sp-sidebar-fixed { position: static !important; width: 100% !important; height: auto !important; border-right: none !important; border-bottom: 1px solid rgba(124,58,42,0.1) !important; }
-          .sp-main { margin-left: 0 !important; height: auto !important; }
+          .sp-root { flex-direction: column; height: auto; min-height: calc(100vh - 64px); overflow: visible; }
+          .sp-sidebar { width: 100% !important; border-right: none !important; border-bottom: 1px solid rgba(124,58,42,0.1) !important; }
+          .sp-main { height: auto !important; }
           .sp-scroll { overflow-y: visible !important; }
         }
         .sp-tab { transition: color .18s; }
@@ -1607,8 +1613,8 @@ export const SubmissionPackages: React.FC = () => {
       ) : (
         <>
           {renderSidebar()}
-          {/* right column — offset past the fixed 264px sidebar, locked to the viewport minus the 64px nav */}
-          <div className="sp-main" style={{ marginLeft: 264, height: "calc(100vh - 64px)", display: "flex", flexDirection: "column", background: "#ffffff" }}>
+          {/* right column — the content scroller; sits beside the rail in the viewport-locked row */}
+          <div className="sp-main" style={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex", flexDirection: "column", background: "#ffffff" }}>
             {/* white title strip */}
             <div style={{ background: "#ffffff", borderBottom: "1px solid rgba(124,58,42,0.1)", padding: "15px 30px", display: "flex", alignItems: "center", gap: 11, flexShrink: 0 }}>
               <span style={{ fontFamily: FONT_SERIF, fontSize: 24, fontWeight: 600, color: headingInk }}>Submission Package Builder</span>
