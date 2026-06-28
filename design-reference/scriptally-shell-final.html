@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Submission Package Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{font-family:'Inter',sans-serif;background:#fdfaf5;color:#3a1c14;display:flex;height:100vh;overflow:hidden;}
+
+/* sidebar */
+.sidebar{width:264px;flex-shrink:0;background:#fdfaf5;border-right:1px solid rgba(124,58,42,0.1);display:flex;flex-direction:column;}
+.logo{display:flex;align-items:center;justify-content:center;gap:8px;height:58px;border-bottom:1px solid rgba(124,58,42,0.1);font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#2e2018;flex-shrink:0;}
+.logo svg{color:#7c3a2a;}
+.side-body{padding:22px 18px;overflow-y:auto;flex:1;}
+.side-h{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;color:#2e2018;margin-bottom:2px;}
+.side-sub{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.05em;text-transform:uppercase;color:#9c8878;margin-bottom:20px;}
+.mat-grp{margin-bottom:18px;}
+.mat-grp-h{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
+.mat-grp-ic{width:23px;height:23px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.mat-grp-ic svg{width:12px;height:12px;}
+.mat-grp-ic.ql{background:#f5e2da;color:#7c3a2a;}.mat-grp-ic.sy{background:#e6ece2;color:#5a6e58;}.mat-grp-ic.pg{background:#f6ecdc;color:#b98a4e;}
+.mat-grp-h .t{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.05em;text-transform:uppercase;color:#6a5e54;}
+.mat-add{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.04em;text-transform:uppercase;color:#9c8878;padding:11px 10px;border:1px dashed rgba(124,58,42,0.22);border-radius:9px;text-align:center;cursor:pointer;}
+.mat-add:hover{border-color:#c9a89e;color:#7c3a2a;}
+
+/* manuscript switcher — now pinned to the bottom */
+.ms-tuck{display:flex;align-items:center;gap:10px;padding:14px 16px;border-top:1px solid rgba(124,58,42,0.1);cursor:pointer;flex-shrink:0;background:#faf5ee;}
+.ms-tuck:hover{background:#f5efe6;}
+.ms-ic{width:34px;height:34px;border-radius:9px;background:#f5e2da;border:0.5px solid #e8c8bc;display:flex;align-items:center;justify-content:center;color:#7c3a2a;flex-shrink:0;}
+.ms-ic svg{width:16px;height:16px;}
+.ms-txt{flex:1;min-width:0;}
+.ms-l{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.07em;text-transform:uppercase;color:#a8957f;display:block;margin-bottom:1px;}
+.ms-n{font-family:'Playfair Display',serif;font-size:14.5px;font-weight:600;color:#2e2018;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.chev{color:#9c8878;flex-shrink:0;}
+
+/* right column */
+.right{flex:1;min-width:0;display:flex;flex-direction:column;}
+.topbar{height:58px;border-bottom:1px solid rgba(124,58,42,0.1);display:flex;align-items:center;gap:22px;padding:0 24px;flex-shrink:0;}
+.topbar a{font-size:13px;color:#6a5e54;text-decoration:none;}
+.topbar a.on{color:#7c3a2a;font-weight:500;background:#f5e2da;padding:6px 12px;border-radius:8px;}
+.tsearch{margin-left:14px;flex:1;max-width:320px;height:34px;background:#fdfaf5;border:1px solid rgba(124,58,42,0.14);border-radius:9px;display:flex;align-items:center;padding:0 12px;gap:8px;color:#b3a99a;font-size:12px;}
+.tright{margin-left:auto;display:flex;align-items:center;gap:14px;color:#9c8878;}
+.tav{width:28px;height:28px;border-radius:50%;background:#7c3a2a;color:#fdfaf5;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:12px;}
+.title-strip{padding:15px 30px;border-bottom:1px solid rgba(124,58,42,0.1);display:flex;align-items:center;gap:11px;flex-shrink:0;}
+.title-strip .t{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:#2e2018;}
+.pro{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:500;letter-spacing:0.1em;color:#7c3a2a;background:#f5e2da;border:0.5px solid #e8c8bc;border-radius:20px;padding:3px 8px 2px;display:inline-flex;align-items:center;gap:4px;}
+.pro svg{width:7px;height:7px;}
+.content{flex:1;min-height:0;overflow-y:auto;padding:24px 28px;background:#fdfaf5;}
+
+/* pane — SAGE scheme */
+.pane{background:#f0e8dc;border:1px solid rgba(124,58,42,0.12);border-radius:18px;box-shadow:0 6px 22px rgba(58,28,20,0.08);overflow:hidden;max-width:1500px;margin:0 auto;}
+.band{padding:24px 36px;text-align:center;position:relative;overflow:hidden;border-bottom:1px solid rgba(124,58,42,0.1);background:linear-gradient(135deg,#dee4d8,#d2dccb);}
+.band::after{content:'';position:absolute;top:-50%;left:-60%;width:46%;height:200%;background:linear-gradient(100deg,transparent,rgba(255,255,255,0.4),transparent);transform:rotate(8deg);}
+.band .ph{font-family:'Playfair Display',serif;font-size:31px;font-weight:600;color:#202a1d;position:relative;}
+.band .psub{font-size:13px;margin-top:7px;position:relative;max-width:550px;margin-left:auto;margin-right:auto;line-height:1.5;color:#566c54;}
+.desk-body{padding:28px 36px 32px;background:radial-gradient(rgba(124,58,42,0.04) 1px,transparent 1px);background-size:20px 20px;background-color:#eef1ea;}
+.desk-row{display:flex;align-items:flex-start;gap:0;margin-bottom:24px;}
+.obj{flex:0 0 188px;text-align:center;}
+.obj-card{background:#fdfaf5;border:1px solid rgba(124,58,42,0.16);border-radius:15px;padding:22px 16px 17px;box-shadow:0 9px 20px rgba(58,28,20,0.09);}
+.obj:nth-child(1) .obj-card{transform:rotate(-2deg);}.obj:nth-child(3) .obj-card{transform:rotate(1.5deg);}.obj:nth-child(5) .obj-card{transform:rotate(-1.2deg);}.obj:nth-child(7) .obj-card{transform:rotate(2deg);}
+.obj-ic{width:54px;height:54px;border-radius:14px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;}
+.obj-ic svg{width:26px;height:26px;}
+.obj-ic.a{background:#f5e2da;color:#7c3a2a;}.obj-ic.b{background:#e6ece2;color:#5a6e58;}.obj-ic.c{background:#f6ecdc;color:#b98a4e;}.obj-ic.d{background:#e9efe4;color:#5a6e58;}
+.obj-t{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:#2e2018;margin-bottom:4px;}
+.obj-s{font-size:11px;color:#7a6e60;line-height:1.4;}
+.conn{flex:1;display:flex;align-items:center;justify-content:center;padding-top:46px;color:#cbbba8;min-width:34px;}
+.conn svg{width:100%;max-width:76px;height:15px;}
+.cta-wrap{text-align:center;margin-bottom:6px;}
+.cta{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:#7c3a2a;background:#f5e2da;border:0.5px solid #e8c8bc;border-radius:11px;padding:15px 32px;box-shadow:0 5px 14px rgba(124,58,42,0.12);display:inline-flex;align-items:center;gap:9px;cursor:pointer;}
+.cta:hover{background:#efd5ca;}
+.templ-lead{text-align:center;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.12em;text-transform:uppercase;color:#a8957f;margin:24px 0 15px;}
+.templ-row{display:flex;gap:18px;}
+.tcard{flex:1;background:#fdfaf5;border:1px solid rgba(124,58,42,0.16);border-radius:12px;padding:16px 18px 14px;text-align:center;box-shadow:0 5px 13px rgba(58,28,20,0.07);}
+.templ-row .tcard:nth-child(1){transform:rotate(-1deg);}.templ-row .tcard:nth-child(2){transform:rotate(0.6deg);}.templ-row .tcard:nth-child(3){transform:rotate(-0.5deg);}
+.tpin{width:9px;height:9px;border-radius:50%;background:#b98a4e;margin:0 auto 9px;}
+.tn{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:#2e2018;}
+.ts{font-size:10.5px;font-style:italic;color:#9c8878;margin:3px 0 12px;line-height:1.4;}
+.tbtn{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.05em;text-transform:uppercase;color:#7c3a2a;background:#f5e2da;border:0.5px solid #e8c8bc;border-radius:7px;padding:9px;cursor:pointer;}
+.hero-note{position:absolute;right:7%;top:50%;font-family:'Caveat',cursive;font-size:21px;color:#5a6e58;transform:rotate(-6deg);}
+</style>
+</head>
+<body>
+<svg style="position:absolute;width:0;height:0"><defs><g id="env"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></g></defs></svg>
+
+<!-- sidebar: logo top, materials, manuscript switcher bottom -->
+<div class="sidebar">
+  <div class="logo"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>ScriptAlly</div>
+  <div class="side-body">
+    <div class="side-h">Your materials</div><div class="side-sub">building blocks</div>
+    <div class="mat-grp"><div class="mat-grp-h"><span class="mat-grp-ic ql"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><use href="#env"/></svg></span><span class="t">Query letters</span></div><div class="mat-add">+ Add a letter</div></div>
+    <div class="mat-grp"><div class="mat-grp-h"><span class="mat-grp-ic sy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg></span><span class="t">Synopses</span></div><div class="mat-add">+ Add a synopsis</div></div>
+    <div class="mat-grp"><div class="mat-grp-h"><span class="mat-grp-ic pg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span><span class="t">Sample pages</span></div><div class="mat-add">+ Add pages</div></div>
+  </div>
+  <div class="ms-tuck"><div class="ms-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div><div class="ms-txt"><span class="ms-l">Manuscript</span><span class="ms-n">Murphy's Day Out</span></div><span class="chev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 12 15 18 9"/></svg></span></div>
+</div>
+
+<div class="right">
+  <div class="topbar"><a>Dashboard</a><a>Queries</a><a>Agents</a><a class="on">Manuscripts</a><div class="tsearch"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Search…</div><div class="tright"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><div class="tav">B</div></div></div>
+  <div class="title-strip"><span class="t">Submission Package Builder</span><span class="pro"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>PRO</span></div>
+  <div class="content">
+    <div class="pane">
+      <div class="band"><div class="ph">Find out what wins requests</div><div class="psub">Test different versions of your submission and let the results tell you which combination agents respond to.</div></div>
+      <div class="desk-body">
+        <div class="desk-row">
+          <div class="obj"><div class="obj-card"><div class="obj-ic a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><use href="#env"/></svg></div><div class="obj-t">Write</div><div class="obj-s">Your letters, synopses &amp; pages</div></div></div>
+          <div class="conn"><svg viewBox="0 0 76 15" fill="none" stroke="currentColor" stroke-width="1.6" preserveAspectRatio="none"><path d="M0 8h68" stroke-dasharray="2 4"/><path d="M64 4l6 4-6 4"/></svg></div>
+          <div class="obj"><div class="obj-card"><div class="obj-ic b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div><div class="obj-t">Combine</div><div class="obj-s">Into a package</div></div></div>
+          <div class="conn"><svg viewBox="0 0 76 15" fill="none" stroke="currentColor" stroke-width="1.6" preserveAspectRatio="none"><path d="M0 8h68" stroke-dasharray="2 4"/><path d="M64 4l6 4-6 4"/></svg></div>
+          <div class="obj"><div class="obj-card"><div class="obj-ic c"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div><div class="obj-t">Attach</div><div class="obj-s">To your queries</div></div></div>
+          <div class="conn"><svg viewBox="0 0 76 15" fill="none" stroke="currentColor" stroke-width="1.6" preserveAspectRatio="none"><path d="M0 8h68" stroke-dasharray="2 4"/><path d="M64 4l6 4-6 4"/></svg></div>
+          <div class="obj"><div class="obj-card"><div class="obj-ic d"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="15 7 21 7 21 13"/></svg></div><div class="obj-t">See what wins</div><div class="obj-s">Which combo pulls requests</div></div></div>
+        </div>
+        <div class="cta-wrap"><button class="cta"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Build your first package</button></div>
+        <div class="templ-lead">— or start from a template —</div>
+        <div class="templ-row">
+          <div class="tcard"><div class="tpin"></div><div class="tn">Comp-led</div><div class="ts">A popular opener for commercial fiction</div><div class="tbtn">Use template</div></div>
+          <div class="tcard"><div class="tpin"></div><div class="tn">Character-first</div><div class="ts">Leads on voice — strong for literary</div><div class="tbtn">Use template</div></div>
+          <div class="tcard"><div class="tpin"></div><div class="tn">Standard</div><div class="ts">The classic, dependable structure</div><div class="tbtn">Use template</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

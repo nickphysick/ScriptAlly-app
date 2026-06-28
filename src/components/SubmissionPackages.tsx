@@ -638,28 +638,71 @@ export const SubmissionPackages: React.FC = () => {
 
   // ── Left sidebar (full-height rail, nav colour): manuscript switcher + materials as building blocks. ──
   const renderSidebar = () => (
-    <aside className="sp-sidebar" style={{ background: kraft, borderRight: "1px solid rgba(124,58,42,0.1)" }}>
-      {/* tucked manuscript switcher — switching re-scopes the whole page */}
+    <aside className="sp-sidebar-fixed" style={{ position: "fixed", top: 0, left: 0, width: 264, height: "100vh", zIndex: 51, background: "#fdfaf5", borderRight: "1px solid rgba(124,58,42,0.1)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      {/* logo (top) — aligns with the 64px global nav to its right */}
+      <div style={{ height: 64, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", borderBottom: "1px solid rgba(124,58,42,0.1)" }}>
+        <img src="/scriptally-title-nav.png" alt="ScriptAlly" style={{ width: 168, height: "auto" }} />
+      </div>
+
+      {/* materials — the scrollable middle */}
+      <div className="sp-side-body" style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "22px 18px" }}>
+        <div style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 600, color: headingInk, marginBottom: 2 }}>Your materials</div>
+        <div style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: "0.05em", textTransform: "uppercase", color: mutedInk, marginBottom: 20 }}>building blocks</div>
+        {LIB_KINDS.map((kind) => {
+          const m = COMP[kind];
+          const rows = msVersions.filter((v) => v.componentType === kind);
+          return (
+            <div key={kind} style={{ marginBottom: 18 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 9 }}>
+                <span style={{ width: 23, height: 23, borderRadius: 7, background: m.tile, color: m.color, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <m.Icon style={{ width: 12, height: 12 }} strokeWidth={1.9} aria-hidden="true" />
+                </span>
+                <span style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.05em", textTransform: "uppercase", color: "#6a5e54" }}>{m.label}</span>
+                {rows.length > 0 && <span style={{ marginLeft: "auto", fontFamily: FONT_MONO, fontSize: 9, color: "#bdb3a4" }}>{rows.length}</span>}
+              </div>
+              {rows.map((v) => {
+                const cm = componentMetrics(v.id, msPackages, msQueries);
+                return (
+                  <button key={v.id} onClick={() => openEdit(v)} className="sp-mat-row" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6, width: "100%", padding: "7px 9px", borderRadius: 8, background: "#f8f3ec", border: "0.5px solid rgba(124,58,42,0.09)", marginBottom: 5, cursor: "pointer", textAlign: "left" }}>
+                    <span style={{ fontFamily: FONT_SANS, fontSize: 11.5, color: bodyInk, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>{v.versionName}</span>
+                    <span style={{ fontFamily: FONT_MONO, fontSize: 8.5, color: cm.sent === 0 ? "#bdb3a4" : burgundy, flexShrink: 0 }}>{cm.sent === 0 ? "—" : formatRate(cm.requestRate)}</span>
+                  </button>
+                );
+              })}
+              <button onClick={() => openNew(kind)} className="sp-mat-add" style={{ display: "block", width: "100%", fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.04em", textTransform: "uppercase", color: "#9c8878", padding: "11px 10px", border: "1px dashed rgba(124,58,42,0.22)", borderRadius: 9, textAlign: "center", marginTop: rows.length > 0 ? 6 : 0, background: "transparent", cursor: "pointer" }}>
+                {ADD_LABEL[kind] ?? `+ Add ${m.noun}`}
+              </button>
+            </div>
+          );
+        })}
+        {msVersions.length > 0 && (
+          <button onClick={() => setLibraryOpen(true)} className="sp-link" style={{ display: "block", width: "100%", fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.04em", textTransform: "uppercase", color: burgundy, textAlign: "center", marginTop: 6, paddingTop: 14, borderTop: "1px solid rgba(124,58,42,0.08)", background: "transparent", border: "none", cursor: "pointer" }}>
+            Manage all materials →
+          </button>
+        )}
+      </div>
+
+      {/* manuscript switcher — pinned to the bottom; opens upward */}
       {activeMs && (
-        <div ref={msMenuRef} style={{ position: "relative" }}>
+        <div ref={msMenuRef} style={{ position: "relative", flexShrink: 0 }}>
           <button
             onClick={() => setMsMenuOpen((o) => !o)}
             aria-haspopup="listbox"
             aria-expanded={msMenuOpen}
             className="sp-mstuck"
-            style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "16px 20px", border: "none", borderBottom: "1px solid rgba(124,58,42,0.1)", background: "transparent", cursor: "pointer", textAlign: "left" }}
+            style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "14px 16px", border: "none", borderTop: "1px solid rgba(124,58,42,0.1)", background: "#faf5ee", cursor: "pointer", textAlign: "left" }}
           >
             <span style={{ width: 34, height: 34, borderRadius: 9, background: buttonPinkBg, border: `0.5px solid ${buttonPinkBorder}`, display: "flex", alignItems: "center", justifyContent: "center", color: burgundy, flexShrink: 0 }}>
               <BookOpen style={{ width: 16, height: 16 }} strokeWidth={1.8} aria-hidden="true" />
             </span>
             <span style={{ flex: 1, minWidth: 0 }}>
-              <span style={{ display: "block", fontFamily: FONT_MONO, fontSize: 8, letterSpacing: "0.07em", textTransform: "uppercase", color: "#a8957f", marginBottom: 1 }}>Manuscript</span>
-              <span style={{ display: "block", fontFamily: FONT_SERIF, fontSize: 15.5, fontWeight: 600, color: headingInk, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{activeMs.title}</span>
+              <span style={{ display: "block", fontFamily: FONT_MONO, fontSize: 7.5, letterSpacing: "0.07em", textTransform: "uppercase", color: "#a8957f", marginBottom: 1 }}>Manuscript</span>
+              <span style={{ display: "block", fontFamily: FONT_SERIF, fontSize: 14.5, fontWeight: 600, color: headingInk, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{activeMs.title}</span>
             </span>
-            <ChevronDown style={{ width: 15, height: 15, color: "#9c8878", flexShrink: 0 }} strokeWidth={2.2} aria-hidden="true" />
+            <ChevronDown style={{ width: 14, height: 14, color: "#9c8878", flexShrink: 0 }} strokeWidth={2.2} aria-hidden="true" />
           </button>
           {msMenuOpen && (
-            <div role="listbox" style={{ position: "absolute", top: "calc(100% + 2px)", left: 10, right: 10, background: parchment, border: `1px solid ${ghostButtonBorder}`, borderRadius: 10, boxShadow: "0 8px 24px rgba(58,28,20,0.16)", padding: 5, zIndex: 40, maxHeight: 320, overflowY: "auto" }}>
+            <div role="listbox" style={{ position: "absolute", bottom: "calc(100% + 2px)", left: 10, right: 10, background: parchment, border: `1px solid ${ghostButtonBorder}`, borderRadius: 10, boxShadow: "0 -8px 24px rgba(58,28,20,0.16)", padding: 5, zIndex: 40, maxHeight: 320, overflowY: "auto" }}>
               {manuscripts.map((m) => (
                 <div
                   key={m.id}
@@ -675,43 +718,6 @@ export const SubmissionPackages: React.FC = () => {
           )}
         </div>
       )}
-
-      <div style={{ padding: "22px 20px" }}>
-        <div style={{ fontFamily: FONT_SERIF, fontSize: 20, fontWeight: 600, color: headingInk, marginBottom: 3 }}>Your materials</div>
-        <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.05em", textTransform: "uppercase", color: mutedInk, marginBottom: 22 }}>building blocks</div>
-        {LIB_KINDS.map((kind) => {
-          const m = COMP[kind];
-          const rows = msVersions.filter((v) => v.componentType === kind);
-          return (
-            <div key={kind} style={{ marginBottom: 20 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-                <span style={{ width: 24, height: 24, borderRadius: 7, background: m.tile, color: m.color, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <m.Icon style={{ width: 13, height: 13 }} strokeWidth={1.9} aria-hidden="true" />
-                </span>
-                <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.05em", textTransform: "uppercase", color: "#6a5e54" }}>{m.label}</span>
-                {rows.length > 0 && <span style={{ marginLeft: "auto", fontFamily: FONT_MONO, fontSize: 9, color: "#bdb3a4" }}>{rows.length}</span>}
-              </div>
-              {rows.map((v) => {
-                const cm = componentMetrics(v.id, msPackages, msQueries);
-                return (
-                  <button key={v.id} onClick={() => openEdit(v)} className="sp-mat-row" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6, width: "100%", padding: "7px 9px", borderRadius: 8, background: "#f8f3ec", border: "0.5px solid rgba(124,58,42,0.09)", marginBottom: 5, cursor: "pointer", textAlign: "left" }}>
-                    <span style={{ fontFamily: FONT_SANS, fontSize: 11.5, color: bodyInk, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>{v.versionName}</span>
-                    <span style={{ fontFamily: FONT_MONO, fontSize: 8.5, color: cm.sent === 0 ? "#bdb3a4" : burgundy, flexShrink: 0 }}>{cm.sent === 0 ? "—" : formatRate(cm.requestRate)}</span>
-                  </button>
-                );
-              })}
-              <button onClick={() => openNew(kind)} className="sp-mat-add" style={{ display: "block", width: "100%", fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.04em", textTransform: "uppercase", color: "#9c8878", padding: "12px 10px", border: "1px dashed rgba(124,58,42,0.22)", borderRadius: 10, textAlign: "center", marginTop: rows.length > 0 ? 6 : 0, background: "transparent", cursor: "pointer" }}>
-                {ADD_LABEL[kind] ?? `+ Add ${m.noun}`}
-              </button>
-            </div>
-          );
-        })}
-        {msVersions.length > 0 && (
-          <button onClick={() => setLibraryOpen(true)} className="sp-link" style={{ display: "block", width: "100%", fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.04em", textTransform: "uppercase", color: burgundy, textAlign: "center", marginTop: 6, paddingTop: 14, borderTop: "1px solid rgba(124,58,42,0.08)", background: "transparent", border: "none", cursor: "pointer" }}>
-          Manage all materials →
-        </button>
-      )}
-      </div>
     </aside>
   );
 
@@ -721,29 +727,31 @@ export const SubmissionPackages: React.FC = () => {
   const renderFirstRun = () => {
     const tilt = (i: number, tilts: number[]) => (WORKTABLE_TILT ? `rotate(${tilts[i] ?? 0}deg)` : "none");
     return (
-      <div className="sp-pane" style={{ background: "#f0e8dc", border: "1px solid rgba(124,58,42,0.12)", borderRadius: 20, boxShadow: "0 6px 26px rgba(58,28,20,0.09)", overflow: "hidden" }}>
-        {/* pink hero band (rounded top, clipped by the pane) */}
-        <div style={{ position: "relative", overflow: "hidden", padding: "24px 40px", textAlign: "center", borderBottom: "1px solid rgba(124,58,42,0.1)", background: "linear-gradient(135deg, #f5e3d9, #f0dbcd 55%, #ecd5c6)" }}>
+      <div className="sp-pane" style={{ position: "relative", background: "#ffffff", border: "1px solid rgba(124,58,42,0.12)", borderRadius: 18, boxShadow: "0 6px 22px rgba(58,28,20,0.08)", overflow: "hidden" }}>
+        {/* soft-clay hero band (rounded top, clipped by the pane) */}
+        <div style={{ position: "relative", overflow: "hidden", padding: "24px 36px", textAlign: "center", borderBottom: "1px solid rgba(124,58,42,0.1)", background: "linear-gradient(135deg, #ecd9cc, #e4ccba)" }}>
           <span className="sp-band-sheen" aria-hidden="true" />
-          <div style={{ position: "relative", fontFamily: FONT_SERIF, fontSize: 33, fontWeight: 600, color: "#231b14" }}>Find out what wins requests</div>
-          <div style={{ position: "relative", fontFamily: FONT_SANS, fontSize: 13.5, color: "#7a5446", marginTop: 8, maxWidth: 560, marginLeft: "auto", marginRight: "auto", lineHeight: 1.55 }}>
+          <div style={{ position: "relative", fontFamily: FONT_SERIF, fontSize: 31, fontWeight: 600, color: "#3a2016" }}>Find out what wins requests</div>
+          <div style={{ position: "relative", fontFamily: FONT_SANS, fontSize: 13, color: "#9a6750", marginTop: 7, maxWidth: 550, marginLeft: "auto", marginRight: "auto", lineHeight: 1.5 }}>
             Test different versions of your submission and let the results tell you which combination agents respond to.
           </div>
         </div>
+        {/* the one restrained handwritten accent, near the hero */}
+        <div className="sp-startnote" aria-hidden="true" style={{ position: "absolute", right: "5%", top: 86, fontFamily: "'Caveat', cursive", fontSize: 21, color: burgundy, transform: "rotate(-6deg)", pointerEvents: "none", zIndex: 2 }}>start here</div>
 
-        {/* desk body — faint paper-grain over the pane */}
-        <div style={{ padding: "28px 40px 32px", backgroundImage: `radial-gradient(rgba(124,58,42,${GRAIN_OPACITY}) 1px, transparent 1px)`, backgroundSize: "20px 20px" }}>
+        {/* white content body — a clean sheet (no grain); cards float on shadow */}
+        <div style={{ padding: "28px 36px 32px", background: "#ffffff" }}>
           {/* object cards + dashed connectors that stretch to fill */}
           <div className="sp-desk-row" style={{ display: "flex", alignItems: "flex-start", gap: 0, marginBottom: 26 }}>
             {HIW_STEPS.map((s, i) => (
               <React.Fragment key={s.label}>
-                <div style={{ flex: "0 0 200px", textAlign: "center" }}>
-                  <div style={{ background: parchment, border: "1px solid rgba(124,58,42,0.16)", borderRadius: 16, padding: "24px 18px 20px", boxShadow: "0 10px 22px rgba(58,28,20,0.1)", transform: tilt(i, OBJ_TILTS) }}>
-                    <div style={{ width: 60, height: 60, borderRadius: 16, margin: "0 auto 14px", display: "flex", alignItems: "center", justifyContent: "center", background: s.bg, color: s.fg }}>
-                      <s.Icon style={{ width: 28, height: 28 }} strokeWidth={1.7} aria-hidden="true" />
+                <div style={{ flex: "0 0 188px", textAlign: "center" }}>
+                  <div style={{ background: "#fdf8f1", border: "1px solid rgba(124,58,42,0.16)", borderRadius: 15, padding: "22px 16px 17px", boxShadow: "0 9px 20px rgba(58,28,20,0.09)", transform: tilt(i, OBJ_TILTS) }}>
+                    <div style={{ width: 54, height: 54, borderRadius: 14, margin: "0 auto 12px", display: "flex", alignItems: "center", justifyContent: "center", background: s.bg, color: s.fg }}>
+                      <s.Icon style={{ width: 26, height: 26 }} strokeWidth={1.7} aria-hidden="true" />
                     </div>
-                    <div style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 600, color: headingInk, marginBottom: 5 }}>{s.label}</div>
-                    <div style={{ fontFamily: FONT_SANS, fontSize: 11.5, color: "#7a6e60", lineHeight: 1.45 }}>{s.desc}</div>
+                    <div style={{ fontFamily: FONT_SERIF, fontSize: 18, fontWeight: 600, color: headingInk, marginBottom: 4 }}>{s.label}</div>
+                    <div style={{ fontFamily: FONT_SANS, fontSize: 11, color: "#7a6e60", lineHeight: 1.4 }}>{s.desc}</div>
                   </div>
                 </div>
                 {i < HIW_STEPS.length - 1 && (
@@ -1529,13 +1537,13 @@ export const SubmissionPackages: React.FC = () => {
   return (
     <div className="sp-root font-sans" style={{ color: bodyInk }}>
       <style>{`
-        /* Viewport-locked shell: a full-height row; only .sp-scroll scrolls (desktop). 64px = the app top nav. */
-        .sp-root { display: flex; flex-direction: row; height: calc(100vh - 64px); overflow: hidden; background: #fdfaf5; }
-        .sp-sidebar { width: 288px; flex-shrink: 0; overflow-y: auto; }
-        .sp-mstuck:hover { background: #f1ebe2; }
-        @media (max-width: 980px) {
-          .sp-root { flex-direction: column; height: auto; min-height: calc(100vh - 64px); overflow: visible; }
-          .sp-sidebar { width: 100% !important; overflow-y: visible !important; border-right: none !important; border-bottom: 1px solid rgba(124,58,42,0.1) !important; }
+        /* Queries-style shell: a fixed logo sidebar (z-51) covers the nav's left; the right column offsets
+           past it and locks to the viewport minus the 64px nav (only .sp-scroll scrolls). */
+        .sp-root { background: #fdfaf5; }
+        .sp-mstuck:hover { background: #f5efe6 !important; }
+        @media (max-width: 768px) {
+          .sp-sidebar-fixed { position: static !important; width: 100% !important; height: auto !important; border-right: none !important; border-bottom: 1px solid rgba(124,58,42,0.1) !important; }
+          .sp-main { margin-left: 0 !important; height: auto !important; }
           .sp-scroll { overflow-y: visible !important; }
         }
         .sp-tab { transition: color .18s; }
@@ -1599,16 +1607,17 @@ export const SubmissionPackages: React.FC = () => {
       ) : (
         <>
           {renderSidebar()}
-          <div className="sp-main" style={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex", flexDirection: "column" }}>
-            {/* white title strip — left-aligned title + PRO; the manuscript selector lives in the sidebar */}
-            <div style={{ background: "#fdfaf5", borderBottom: "1px solid rgba(124,58,42,0.1)", padding: "17px 32px", display: "flex", alignItems: "center", gap: 11, flexShrink: 0 }}>
-              <span style={{ fontFamily: FONT_SERIF, fontSize: 26, fontWeight: 600, color: headingInk }}>Packages <em style={{ fontStyle: "italic" }}>&amp;</em> materials</span>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: FONT_MONO, fontSize: 8.5, fontWeight: 500, letterSpacing: "0.1em", color: burgundy, background: buttonPinkBg, border: `0.5px solid ${buttonPinkBorder}`, borderRadius: 20, padding: "4px 9px 3px" }}>
-                <Lock style={{ width: 8, height: 8 }} strokeWidth={2.4} aria-hidden="true" /> PRO
+          {/* right column — offset past the fixed 264px sidebar, locked to the viewport minus the 64px nav */}
+          <div className="sp-main" style={{ marginLeft: 264, height: "calc(100vh - 64px)", display: "flex", flexDirection: "column", background: "#fdfaf5" }}>
+            {/* white title strip */}
+            <div style={{ background: "#fdfaf5", borderBottom: "1px solid rgba(124,58,42,0.1)", padding: "15px 30px", display: "flex", alignItems: "center", gap: 11, flexShrink: 0 }}>
+              <span style={{ fontFamily: FONT_SERIF, fontSize: 24, fontWeight: 600, color: headingInk }}>Submission Package Builder</span>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: FONT_MONO, fontSize: 8, fontWeight: 500, letterSpacing: "0.1em", color: burgundy, background: buttonPinkBg, border: `0.5px solid ${buttonPinkBorder}`, borderRadius: 20, padding: "3px 8px 2px" }}>
+                <Lock style={{ width: 7, height: 7 }} strokeWidth={2.4} aria-hidden="true" /> PRO
               </span>
             </div>
-            {/* the only internal scroller — holds the reading pane (empty) or the spotlight + shelf */}
-            <div className="sp-scroll" style={{ flex: 1, minHeight: 0, overflowY: "auto", background: "#fdfaf5", padding: "26px 30px 40px" }}>
+            {/* the only internal scroller — the reading pane (empty) or the spotlight + shelf */}
+            <div className="sp-scroll" style={{ flex: 1, minHeight: 0, overflowY: "auto", background: "#fdfaf5", padding: "24px 28px" }}>
               <div style={{ maxWidth: 1500, margin: "0 auto" }}>
                 {detailPkgId
                   ? renderDetail()
