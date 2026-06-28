@@ -439,7 +439,8 @@ export const SubmissionPackages: React.FC = () => {
     const el = shelfRef.current;
     if (!el) return;
     const MIN_TILE = 220, GAP = 13;
-    const compute = () => setShelfCols(Math.max(1, Math.floor((el.clientWidth + GAP) / (MIN_TILE + GAP))));
+    // More cards per row as the workspace widens, but cap at 6 so a wide monitor never runs to a silly count.
+    const compute = () => setShelfCols(Math.min(6, Math.max(1, Math.floor((el.clientWidth + GAP) / (MIN_TILE + GAP)))));
     compute();
     const ro = new ResizeObserver(compute);
     ro.observe(el);
@@ -668,7 +669,8 @@ export const SubmissionPackages: React.FC = () => {
 
   // ── First-run (no packages yet): how-it-works + primary CTA + a templates row. ──
   const renderFirstRun = () => (
-    <div>
+    // Keep the teaching content at a comfortable reading width even when the workspace is very wide.
+    <div style={{ maxWidth: 720, margin: "0 auto" }}>
       <div style={{ background: parchment, border: "1px solid rgba(124,58,42,0.13)", borderRadius: 12, padding: "22px 18px", marginBottom: 14 }}>
         <div style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 500, color: headingInk, textAlign: "center", marginBottom: 3 }}>Find out what wins requests</div>
         <div style={{ fontFamily: FONT_SANS, fontSize: 11.5, color: "#8a7a6c", textAlign: "center", marginBottom: 18, lineHeight: 1.5, maxWidth: 460, marginLeft: "auto", marginRight: "auto" }}>
@@ -1509,7 +1511,9 @@ export const SubmissionPackages: React.FC = () => {
         }
       `}</style>
 
-      <div className="relative" style={{ zIndex: 1, maxWidth: 1000, margin: "0 auto", padding: "40px 20px 0" }}>
+      {/* Use the page width (edges aligned with the nav's px-6 gutter), capped at 1680 + centred so
+          ultra-wide monitors never stretch the layout to an awkward width. */}
+      <div className="relative" style={{ zIndex: 1, maxWidth: 1680, margin: "0 auto", padding: "40px 24px 0" }}>
         {/* ── Header: centred "Submission Packages · PRO" eyebrow + title; manuscript selector right. ── */}
         <div className="sp-headrow" style={{ display: "flex", alignItems: "flex-start", gap: 16, marginBottom: 26 }}>
           <div style={{ flex: 1, minWidth: 0 }} aria-hidden="true" />
