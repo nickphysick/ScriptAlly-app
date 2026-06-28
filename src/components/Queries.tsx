@@ -2652,82 +2652,55 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             <div style={{ borderLeft: "1px solid rgba(124,58,42,.22)", borderRight: "1px solid rgba(124,58,42,.22)", borderBottom: "1px solid rgba(124,58,42,.22)", borderTop: "3px solid #7c3a2a", borderRadius: 8, overflow: "hidden", background: parchment, flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
             {activeQuery && activeAgent && activeMs ? (
               <>
-                {/* Masthead — statusrow (seal+status LEFT, whose-turn RIGHT) + centred mhead */}
+                {/* ── Hero — editorial masthead (mockup: left-aligned, 3px burgundy rule) ── */}
                 {(() => {
                   const paneAction = getPrimaryAction(currentStatus as QueryStatus);
                   const hasName = !!(activeAgent.name?.trim());
-                  const nameplate = hasName ? activeAgent.name : activeAgent.agency;
+                  const nameplate = (hasName ? activeAgent.name : activeAgent.agency) || "Unknown agent";
                   const agentFirstName = (activeAgent.name || activeAgent.agency || "Agent").split(" ")[0];
-                  const whoseTurnText = paneAction.ballHolder === "writer" ? "Your move"
+                  const quip = paneAction.ballHolder === "writer" ? "Your move"
                     : paneAction.ballHolder === "agent" ? `waiting on ${agentFirstName}…`
                     : null;
+                  // Initials: first + last initial of the agent name (or agency), single token → one.
+                  const initials = (() => {
+                    const src = (activeAgent.name?.trim() || activeAgent.agency?.trim() || "");
+                    const parts = src.split(/\s+/).filter(Boolean);
+                    if (parts.length === 0) return "?";
+                    if (parts.length === 1) return parts[0][0].toUpperCase();
+                    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+                  })();
+                  const email = activeAgent.email?.trim();
+                  const mswl = activeAgent.mswlNotes?.trim();
+                  const genres = (activeAgent.genres || []).filter(Boolean);
                   return (
-                    <div style={{ display: "grid", gridTemplateColumns: "200px 1fr 200px", gap: 16, alignItems: "start", padding: "22px 26px 20px", background: "linear-gradient(180deg,#faece4 0%,rgba(250,236,228,0) 100%)", flexShrink: 0 }}>
-                      {/* LEFT: seal + status label */}
-                      <div style={{ display: "flex", alignItems: "center", gap: 13, paddingTop: 6 }}>
-                        <div style={{ width: 48, height: 48, borderRadius: "50%", background: "radial-gradient(circle at 35% 30%,#fbeee6,#f1d4c6)", border: "1.5px solid rgba(124,58,42,0.7)", boxShadow: "inset 0 1px 3px rgba(124,58,42,.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                          <StatusDot status={activeQuery.status} size={21} />
+                    <div style={{ position: "relative", padding: "18px 28px 20px", borderLeft: "3px solid #7c3a2a", background: "#ffffff", flexShrink: 0 }}>
+                      {/* meta stack — status chip + quip, top-right */}
+                      <div style={{ position: "absolute", top: 16, right: 28, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8, maxWidth: 240 }}>
+                        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#fdfaf5", border: "1px solid #e8cdc0", borderRadius: 999, padding: "5px 13px 5px 6px" }}>
+                          <StatusDot status={activeQuery.status} overrideSize={21} />
+                          <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".15em", color: burgundy, fontWeight: 500, textTransform: "uppercase" as const, whiteSpace: "nowrap" }}>{statusDisplayLabel(activeQuery)}</span>
                         </div>
-                        <span style={{ fontFamily: FONT_MONO, fontSize: 15, letterSpacing: ".1em", textTransform: "uppercase" as const, color: burgundy }}>
-                          {statusDisplayLabel(activeQuery)}
-                        </span>
+                        {quip && <div style={{ fontFamily: "'Caveat', cursive", fontSize: 23, color: "#241c15", transform: "rotate(-2deg)", whiteSpace: "nowrap", lineHeight: 1 }}>{quip}</div>}
                       </div>
-                      {/* CENTER: Agent identity */}
-                      <div style={{ textAlign: "center" }}>
-                        {!hasName && (
-                          <div style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase" as const, letterSpacing: ".14em", color: labelColor, marginBottom: 4 }}>
-                            Agency · no named agent
-                          </div>
-                        )}
-                        <div style={{ display: "flex", alignItems: "center", gap: 15, justifyContent: "center" }}>
-                          <div style={{ flex: 1, height: 1, background: "rgba(124,58,42,.4)", maxWidth: 30 }} />
-                          <h2 style={{ fontFamily: FONT_SERIF, fontSize: 29, fontWeight: 600, textTransform: "uppercase" as const, letterSpacing: ".15em", color: "#3a1c14", margin: 0, lineHeight: 1.1 }}>
-                            {nameplate}
-                          </h2>
-                          <div style={{ flex: 1, height: 1, background: "rgba(124,58,42,.4)", maxWidth: 30 }} />
-                        </div>
-                        {hasName && activeAgent.agency && (
-                          <p style={{ fontFamily: FONT_SERIF, fontStyle: "italic", color: burgundy, fontSize: 16, marginTop: 9, marginBottom: 0 }}>
-                            {activeAgent.agency}
-                          </p>
-                        )}
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, margin: "13px auto" }}>
-                          <div style={{ width: 46, height: 1, background: "rgba(124,58,42,.35)" }} />
-                          <div style={{ width: 5, height: 5, background: burgundy, transform: "rotate(45deg)" }} />
-                          <div style={{ width: 46, height: 1, background: "rgba(124,58,42,.35)" }} />
-                        </div>
-                        <div style={{ display: "flex", flexDirection: "column", gap: 7, alignItems: "center" }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                            <span style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: ".16em", textTransform: "uppercase" as const, color: labelColor }}>Agent fit</span>
-                            <div style={{ display: "flex", gap: 3 }}>
-                              {Array.from({ length: 5 }).map((_, idx) => (
-                                <Star key={idx} style={{ width: 14, height: 14, color: idx < activeAgent.starRating ? "#7c3a2a" : "#cdbfae" }} className={idx < activeAgent.starRating ? "fill-current" : ""} />
-                              ))}
-                            </div>
-                          </div>
-                          {activeAgent.genres && activeAgent.genres.length > 0 && (
-                            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                              <span style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: ".16em", textTransform: "uppercase" as const, color: labelColor }}>Seeking</span>
-                              <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6, justifyContent: "center" }}>
-                                {activeAgent.genres.map((genre, gIdx) => (
-                                  <span key={gIdx} style={{ fontFamily: FONT_MONO, fontSize: 9.5, textTransform: "uppercase" as const, letterSpacing: ".05em", background: "#f1eae0", color: "#6b5d52", borderRadius: 7, padding: "5px 11px" }}>
-                                    {genre}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
+                      {/* name + initials avatar */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, paddingRight: 250, minWidth: 0 }}>
+                        <span style={{ flexShrink: 0, width: 30, height: 30, borderRadius: "50%", background: burgundy, color: "#ffffff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 600, letterSpacing: ".03em" }}>{initials}</span>
+                        <span style={{ flex: 1, minWidth: 0, fontFamily: FONT_SERIF, fontSize: 29, fontWeight: 600, color: "#2a2017", letterSpacing: ".03em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{nameplate}</span>
                       </div>
-                      {/* RIGHT: whose-turn text */}
-                      {whoseTurnText ? (
-                        <div style={{ textAlign: "right", paddingTop: 10 }}>
-                          <div style={{ fontFamily: "'Caveat', cursive", fontSize: 23, color: "#9a5240", lineHeight: 1 }}>
-                            {whoseTurnText}
-                          </div>
+                      {/* detail lines: email · MSWL · genre pills (each collapses if absent) */}
+                      {email && (
+                        <div style={{ display: "flex", alignItems: "center", gap: 7, fontFamily: "'Inter',sans-serif", fontSize: 13, color: burgundy, marginTop: 11 }}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" style={{ opacity: .8, flexShrink: 0 }}><rect x="2.5" y="4.5" width="19" height="15" rx="2.5" /><path d="M3 6l9 6.5L21 6" /></svg>
+                          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{email}</span>
                         </div>
-                      ) : (
-                        <div />
+                      )}
+                      {mswl && <div style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 11.5, lineHeight: 1.45, color: "#8a7d6e", maxWidth: 620, margin: "11px 0 0" }}>“{mswl}”</div>}
+                      {genres.length > 0 && (
+                        <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6, marginTop: 11 }}>
+                          {genres.map((genre, gIdx) => (
+                            <span key={gIdx} style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: ".12em", textTransform: "uppercase" as const, color: "#5a6e58", background: "#fdfaf5", border: "1px solid #cdddc7", borderRadius: 999, padding: "3px 10px" }}>{genre}</span>
+                          ))}
+                        </div>
                       )}
                     </div>
                   );
