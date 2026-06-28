@@ -102,6 +102,14 @@ const CTYPE: Record<string, { label: string; Icon: React.ComponentType<any> }> =
 const AMBER = "#b98a4e";
 const GREY_DOT = "#c4b4aa";
 
+/** Worktable empty-state tunables — single sources so they're easy to dial on review.
+ *  GRAIN_OPACITY: the desk's paper-grain dot opacity (set 0 to switch the grain off).
+ *  WORKTABLE_TILT: the ±2° hand-placed tilt on the object/template cards (set false for dead-straight). */
+const GRAIN_OPACITY = 0.045;
+const WORKTABLE_TILT = true;
+const OBJ_TILTS = [-2, 1.5, -1.2, 2]; // per how-it-works object card
+const TCARD_TILTS = [-1, 0.6, -0.5]; // per template index card
+
 /** Quiet dotted placeholders needed to fill the shelf's last grid row flush. `tiles` already counts
  *  the Build tile (the first ghost), so this returns only the extra *empty* ghosts after it. */
 const ghostCount = (tiles: number, cols: number): number => (cols <= 0 ? 0 : (cols - (tiles % cols)) % cols);
@@ -631,7 +639,44 @@ export const SubmissionPackages: React.FC = () => {
 
   // ── Left sidebar: the manuscript's materials as building blocks (rows + "+ Add", "Manage all →"). ──
   const renderSidebar = () => (
-    <aside className="sp-sidebar" style={{ background: "#f8f3ec", borderRight: "1px solid rgba(124,58,42,0.1)", padding: "16px 15px", borderRadius: "17px 0 0 17px" }}>
+    <aside className="sp-sidebar" style={{ background: "#f8f3ec", borderRight: "1px solid rgba(124,58,42,0.1)", padding: 0, borderRadius: "17px 0 0 17px" }}>
+      {/* tucked manuscript switcher — relocated from the old top-right selector; switching re-scopes the page */}
+      {activeMs && (
+        <div ref={msMenuRef} style={{ position: "relative" }}>
+          <button
+            onClick={() => setMsMenuOpen((o) => !o)}
+            aria-haspopup="listbox"
+            aria-expanded={msMenuOpen}
+            style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "12px 14px", border: "none", borderBottom: "1px solid rgba(124,58,42,0.1)", borderRadius: "17px 0 0 0", background: "#fbf6ef", cursor: "pointer", textAlign: "left" }}
+          >
+            <span style={{ width: 26, height: 26, borderRadius: 7, background: buttonPinkBg, border: `0.5px solid ${buttonPinkBorder}`, display: "flex", alignItems: "center", justifyContent: "center", color: burgundy, flexShrink: 0 }}>
+              <BookOpen style={{ width: 13, height: 13 }} strokeWidth={1.8} aria-hidden="true" />
+            </span>
+            <span style={{ flex: 1, minWidth: 0 }}>
+              <span style={{ display: "block", fontFamily: FONT_MONO, fontSize: 6.5, letterSpacing: "0.07em", textTransform: "uppercase", color: "#a8957f" }}>Manuscript</span>
+              <span style={{ display: "block", fontFamily: FONT_SERIF, fontSize: 13, fontWeight: 600, color: headingInk, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{activeMs.title}</span>
+            </span>
+            <ChevronDown style={{ width: 13, height: 13, color: "#9c8878", flexShrink: 0 }} strokeWidth={2.2} aria-hidden="true" />
+          </button>
+          {msMenuOpen && (
+            <div role="listbox" style={{ position: "absolute", top: "calc(100% + 2px)", left: 8, right: 8, background: parchment, border: `1px solid ${ghostButtonBorder}`, borderRadius: 10, boxShadow: "0 8px 24px rgba(58,28,20,0.16)", padding: 5, zIndex: 40, maxHeight: 320, overflowY: "auto" }}>
+              {manuscripts.map((m) => (
+                <div
+                  key={m.id}
+                  role="option"
+                  aria-selected={m.id === activeMs.id}
+                  onClick={() => selectMs(m.id)}
+                  style={{ padding: "9px 11px", borderRadius: 7, fontFamily: FONT_SANS, fontSize: 13, color: m.id === activeMs.id ? burgundy : bodyInk, background: m.id === activeMs.id ? "#f5e2da" : "transparent", cursor: "pointer", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                >
+                  {m.title}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      <div style={{ padding: "14px 15px 16px" }}>
       <div style={{ fontFamily: FONT_SERIF, fontSize: 15, fontWeight: 500, color: headingInk }}>Your materials</div>
       <div style={{ fontFamily: FONT_MONO, fontSize: 7.5, letterSpacing: "0.04em", textTransform: "uppercase", color: mutedInk, marginBottom: 14 }}>building blocks</div>
       {LIB_KINDS.map((kind) => {
@@ -664,56 +709,86 @@ export const SubmissionPackages: React.FC = () => {
           Manage all materials →
         </button>
       )}
+      </div>
     </aside>
   );
 
-  // ── First-run (no packages yet): how-it-works + primary CTA + a templates row. ──
-  const renderFirstRun = () => (
-    // Fills the full main pane (no narrow centred sub-column); only the running intro line stays capped.
-    <div style={{ padding: "28px 0 12px" }}>
-      <div style={{ background: parchment, border: "1px solid rgba(124,58,42,0.13)", borderRadius: 14, padding: "46px 40px", marginBottom: 20 }}>
-        <div style={{ fontFamily: FONT_SERIF, fontSize: 28, fontWeight: 500, color: headingInk, textAlign: "center", marginBottom: 7 }}>Find out what wins requests</div>
-        <div style={{ fontFamily: FONT_SANS, fontSize: 13, color: "#8a7a6c", textAlign: "center", marginBottom: 34, lineHeight: 1.55, maxWidth: 640, marginLeft: "auto", marginRight: "auto" }}>
-          Test different versions of your submission and let the results tell you which combination agents respond to.
-        </div>
-        <div className="sp-hiw" style={{ display: "flex", alignItems: "flex-start", justifyContent: "center", gap: 0 }}>
-          {HIW_STEPS.map((s, i) => (
-            <React.Fragment key={s.label}>
-              {/* flex:1 with a generous cap → the four steps spread across the full pane width */}
-              <div style={{ flex: 1, maxWidth: 300, textAlign: "center" }}>
-                <div style={{ width: 56, height: 56, borderRadius: 15, margin: "0 auto 12px", display: "flex", alignItems: "center", justifyContent: "center", background: s.bg, color: s.fg }}>
-                  <s.Icon style={{ width: 26, height: 26 }} strokeWidth={1.8} aria-hidden="true" />
-                </div>
-                <div style={{ fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.05em", textTransform: "uppercase", color: burgundy, marginBottom: 6 }}>{s.label}</div>
-                <div style={{ fontFamily: FONT_SANS, fontSize: 12, color: "#6a5e54", lineHeight: 1.45 }}>{s.desc}</div>
-              </div>
-              {i < HIW_STEPS.length - 1 && (
-                <div className="sp-hiw-arrow" style={{ color: "#d3c4b6", alignSelf: "flex-start", paddingTop: 20, flexShrink: 0 }}>
-                  <ArrowRight style={{ width: 22, height: 22 }} strokeWidth={2} aria-hidden="true" />
-                </div>
-              )}
-            </React.Fragment>
-          ))}
-        </div>
-        <div style={{ textAlign: "center", marginTop: 34 }}>
-          <button onClick={openBuild} style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: FONT_MONO, fontSize: 10.5, letterSpacing: "0.05em", textTransform: "uppercase", color: "#fff", background: burgundy, border: "none", borderRadius: 10, padding: "13px 26px", cursor: "pointer" }}>
-            <Plus style={{ width: 13, height: 13 }} strokeWidth={2.2} aria-hidden="true" /> Build your first package
-          </button>
-        </div>
-      </div>
-
-      <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.08em", textTransform: "uppercase", color: mutedInk, margin: "10px 0 13px", textAlign: "center" }}>— or start from a template —</div>
-      <div className="sp-tmpl" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
-        {TEMPLATES.map((t) => (
-          <div key={t.name} style={{ background: parchment, border: "1px solid rgba(124,58,42,0.13)", borderRadius: 11, padding: "16px 16px 14px", textAlign: "center", display: "flex", flexDirection: "column" }}>
-            <div style={{ fontFamily: FONT_SERIF, fontSize: 15, color: headingInk, marginBottom: 5 }}>{t.name}</div>
-            <div style={{ fontFamily: FONT_SANS, fontSize: 11, color: "#9c8878", fontStyle: "italic", marginBottom: 13, lineHeight: 1.4, flex: 1 }}>{t.why}</div>
-            <button onClick={() => useTemplate(t)} style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.04em", textTransform: "uppercase", color: burgundy, background: buttonPinkBg, border: `0.5px solid ${buttonPinkBorder}`, borderRadius: 8, padding: 9, cursor: "pointer" }}>Use template</button>
+  // ── First-run (no packages yet): the worktable — pink hero band + dot-grain desk with the four
+  //    steps as tilted object cards joined by dashed connectors, a burgundy CTA, and pinned template
+  //    cards. Full-bleed in the main pane; the populated view never gets this. ──
+  const renderFirstRun = () => {
+    const tilt = (i: number, tilts: number[]) => (WORKTABLE_TILT ? `rotate(${tilts[i] ?? 0}deg)` : "none");
+    return (
+      <div style={{ position: "relative", overflow: "hidden", borderRadius: "0 17px 17px 0", backgroundColor: "#f0e8dc", backgroundImage: `radial-gradient(rgba(124,58,42,${GRAIN_OPACITY}) 1px, transparent 1px)`, backgroundSize: "20px 20px" }}>
+        {/* pink hero band (empty state only) — heading + the one capped running line */}
+        <div style={{ position: "relative", overflow: "hidden", padding: "26px 30px", textAlign: "center", borderBottom: "1px solid rgba(124,58,42,0.1)", background: "linear-gradient(135deg, #f5e3d9, #f0dbcd 55%, #ecd5c6)" }}>
+          <span className="sp-band-sheen" aria-hidden="true" />
+          <div style={{ position: "relative", fontFamily: FONT_SERIF, fontSize: 30, fontWeight: 600, color: "#5a2418", lineHeight: 1.05 }}>Find out what wins requests</div>
+          <div style={{ position: "relative", fontFamily: FONT_SANS, fontSize: 13, color: "#8a5a48", marginTop: 8, maxWidth: 540, marginLeft: "auto", marginRight: "auto", lineHeight: 1.55 }}>
+            Test different versions of your submission and let the results tell you which combination agents respond to.
           </div>
-        ))}
+        </div>
+
+        {/* desk surface */}
+        <div style={{ position: "relative", padding: "40px 44px 44px" }}>
+          <div aria-hidden="true" style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(255,253,248,0.5), transparent 30%)", pointerEvents: "none" }} />
+          <div style={{ position: "relative" }}>
+            {/* the only handwritten accent */}
+            <div className="sp-startnote" aria-hidden="true" style={{ position: "absolute", right: "6%", top: -18, fontFamily: "'Caveat', cursive", fontSize: 25, color: burgundy, transform: "rotate(-7deg)", textAlign: "center", pointerEvents: "none" }}>
+              start here
+              <svg viewBox="0 0 40 26" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" style={{ width: 40, height: 26, display: "block", margin: "2px auto 0" }}>
+                <path d="M37 3C28 4 7 7 4 21" /><path d="M4 21l-1-8M4 21l8-3" />
+              </svg>
+            </div>
+
+            {/* object cards + dashed connectors that stretch to fill */}
+            <div className="sp-desk-row" style={{ display: "flex", alignItems: "flex-start", gap: 0, marginBottom: 36 }}>
+              {HIW_STEPS.map((s, i) => (
+                <React.Fragment key={s.label}>
+                  <div style={{ width: 188, flexShrink: 0, textAlign: "center" }}>
+                    <div style={{ background: parchment, border: "1px solid rgba(124,58,42,0.16)", borderRadius: 16, padding: "24px 18px 20px", boxShadow: "0 10px 22px rgba(58,28,20,0.1)", transform: tilt(i, OBJ_TILTS) }}>
+                      <div style={{ width: 60, height: 60, borderRadius: 16, margin: "0 auto 14px", display: "flex", alignItems: "center", justifyContent: "center", background: s.bg, color: s.fg }}>
+                        <s.Icon style={{ width: 28, height: 28 }} strokeWidth={1.7} aria-hidden="true" />
+                      </div>
+                      <div style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 600, color: headingInk, marginBottom: 5 }}>{s.label}</div>
+                      <div style={{ fontFamily: FONT_SANS, fontSize: 11.5, color: "#7a6e60", lineHeight: 1.45 }}>{s.desc}</div>
+                    </div>
+                  </div>
+                  {i < HIW_STEPS.length - 1 && (
+                    <div className="sp-conn" style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", paddingTop: 50, color: "#cbbba8", minWidth: 40 }}>
+                      <svg viewBox="0 0 70 16" fill="none" stroke="currentColor" strokeWidth={1.6} preserveAspectRatio="none" style={{ width: "100%", maxWidth: 70, height: 16 }}>
+                        <path d="M0 8h62" strokeDasharray="2 4" /><path d="M58 4l6 4-6 4" />
+                      </svg>
+                    </div>
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+
+            {/* CTA — opens the inline builder (wiring unchanged) */}
+            <div style={{ textAlign: "center", marginBottom: 8 }}>
+              <button onClick={openBuild} style={{ fontFamily: FONT_MONO, fontSize: 11.5, letterSpacing: "0.06em", textTransform: "uppercase", color: "#fdfaf5", background: burgundy, border: "none", borderRadius: 12, padding: "16px 34px", boxShadow: "0 8px 20px rgba(124,58,42,0.3)", display: "inline-flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
+                <Plus style={{ width: 13, height: 13 }} strokeWidth={2.4} aria-hidden="true" /> Build your first package
+              </button>
+            </div>
+
+            {/* pinned template cards — "Use template" scaffolds real records (wiring unchanged) */}
+            <div style={{ textAlign: "center", fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "#a8957f", margin: "36px 0 18px" }}>— or start from a template —</div>
+            <div className="sp-templ-row" style={{ display: "flex", gap: 20 }}>
+              {TEMPLATES.map((t, i) => (
+                <div key={t.name} style={{ flex: 1, background: parchment, border: "1px solid rgba(124,58,42,0.16)", borderRadius: 13, padding: "18px 20px 16px", textAlign: "center", boxShadow: "0 6px 15px rgba(58,28,20,0.08)", transform: tilt(i, TCARD_TILTS) }}>
+                  <div aria-hidden="true" style={{ width: 10, height: 10, borderRadius: "50%", background: AMBER, margin: "0 auto 11px", boxShadow: "0 1px 3px rgba(0,0,0,0.22), inset 0 1px 1px rgba(255,255,255,0.4)" }} />
+                  <div style={{ fontFamily: FONT_SERIF, fontSize: 16, fontWeight: 600, color: headingInk }}>{t.name}</div>
+                  <div style={{ fontFamily: FONT_SANS, fontSize: 11, fontStyle: "italic", color: "#9c8878", margin: "4px 0 13px", lineHeight: 1.4 }}>{t.why}</div>
+                  <button onClick={() => useTemplate(t)} style={{ width: "100%", fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.05em", textTransform: "uppercase", color: burgundy, background: buttonPinkBg, border: `0.5px solid ${buttonPinkBorder}`, borderRadius: 8, padding: 9, cursor: "pointer" }}>Use template</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const verName = (id: string) => msVersions.find((v) => v.id === id)?.versionName ?? "—";
 
@@ -1486,12 +1561,14 @@ export const SubmissionPackages: React.FC = () => {
           .sp-two { grid-template-columns: 1fr !important; }
           .sp-sidebar { border-right: none !important; border-bottom: 1px solid rgba(124,58,42,0.1) !important; border-radius: 17px 17px 0 0 !important; }
         }
-        @media (max-width: 620px) {
-          .sp-hiw { flex-wrap: wrap !important; gap: 12px !important; }
-          .sp-hiw-arrow { display: none !important; }
-          .sp-tmpl { grid-template-columns: 1fr !important; }
+        .sp-band-sheen { position: absolute; top: -50%; left: -60%; width: 48%; height: 200%; background: linear-gradient(100deg, transparent, rgba(255,255,255,0.45), transparent); transform: rotate(8deg); pointer-events: none; }
+        @media (max-width: 900px) {
+          .sp-desk-row { flex-wrap: wrap !important; justify-content: center !important; gap: 16px !important; }
+          .sp-conn { display: none !important; }
+          .sp-startnote { display: none !important; }
+          .sp-templ-row { flex-wrap: wrap !important; }
         }
-        @media (max-width: 560px) { .sp-build-hint { display: none; } }
+        @media (max-width: 560px) { .sp-build-hint { display: none; } .sp-templ-row > div { flex-basis: 100% !important; } }
         /* spotlight: diagonal sage wash + corner glow (the greeting-container treatment) */
         .sp-wave { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
         .sp-wave::before { content: ''; position: absolute; top: -60%; left: -75%; width: 55%; height: 220%; background: linear-gradient(100deg, transparent 0%, rgba(138,158,136,0.07) 35%, rgba(176,200,168,0.20) 50%, rgba(138,158,136,0.07) 65%, transparent 100%); transform: rotate(6deg); animation: spSheen 9s ease-in-out infinite; }
@@ -1515,53 +1592,15 @@ export const SubmissionPackages: React.FC = () => {
       {/* Use the page width (edges aligned with the nav's px-6 gutter), capped at 1680 + centred so
           ultra-wide monitors never stretch the layout to an awkward width. */}
       <div className="relative" style={{ zIndex: 1, maxWidth: 1680, margin: "0 auto", padding: "40px 24px 0" }}>
-        {/* ── Header: centred "Submission Packages · PRO" eyebrow + title; manuscript selector right. ── */}
-        <div className="sp-headrow" style={{ display: "flex", alignItems: "flex-start", gap: 16, marginBottom: 26 }}>
-          <div style={{ flex: 1, minWidth: 0 }} aria-hidden="true" />
-
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 14, flexShrink: 0 }}>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: sageText }}>Submission Packages</span>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontFamily: FONT_MONO, fontSize: 9, fontWeight: 500, letterSpacing: "0.12em", color: burgundy, background: buttonPinkBg, border: `0.5px solid ${buttonPinkBorder}`, borderRadius: 20, padding: "3px 8px 2px" }}>
-                <Lock style={{ width: 9, height: 9 }} strokeWidth={2.4} aria-hidden="true" /> PRO
-              </span>
+        {/* ── Header: a single centred "Packages & materials" title + inline PRO pill. The eyebrow is
+              dropped; the manuscript selector now lives in the sidebar's tucked switcher. ── */}
+        <div className="sp-headrow" style={{ textAlign: "center", marginBottom: 22 }}>
+          <h1 style={{ margin: 0, fontFamily: FONT_SERIF, fontSize: 30, fontWeight: 600, color: headingInk, letterSpacing: "-0.005em", lineHeight: 1.1 }}>
+            Packages <em style={{ fontStyle: "italic" }}>&amp;</em> materials
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 4, verticalAlign: "middle", marginLeft: 9, fontFamily: FONT_MONO, fontSize: 9, fontWeight: 500, letterSpacing: "0.1em", color: burgundy, background: buttonPinkBg, border: `0.5px solid ${buttonPinkBorder}`, borderRadius: 20, padding: "3px 8px 2px" }}>
+              <Lock style={{ width: 9, height: 9 }} strokeWidth={2.4} aria-hidden="true" /> PRO
             </span>
-            {/* Materials now live in the sidebar — no view to toggle, so the pill is gone. */}
-            <span style={{ fontFamily: FONT_SERIF, fontSize: 26, fontWeight: 500, color: headingInk, lineHeight: 1 }}>Packages &amp; materials</span>
-          </div>
-
-          {/* manuscript selector (top-right) */}
-          <div style={{ flex: 1, minWidth: 0, display: "flex", justifyContent: "flex-end" }}>
-            {activeMs && (
-              <div ref={msMenuRef} style={{ position: "relative" }}>
-                <button
-                  onClick={() => setMsMenuOpen((o) => !o)}
-                  aria-haspopup="listbox"
-                  aria-expanded={msMenuOpen}
-                  style={{ display: "inline-flex", alignItems: "center", gap: 8, background: parchment, border: `1px solid ${ghostButtonBorder}`, borderRadius: 10, padding: "9px 13px", fontFamily: FONT_SANS, fontSize: 13, color: bodyInk, cursor: "pointer", boxShadow: "0 1px 2px rgba(58,28,20,0.05)", maxWidth: 320 }}
-                >
-                  <span style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.08em", textTransform: "uppercase", color: labelColor }}>Manuscript</span>
-                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{activeMs.title}</span>
-                  <ChevronDown style={{ width: 13, height: 13, color: burgundy, flexShrink: 0 }} strokeWidth={2.2} aria-hidden="true" />
-                </button>
-                {msMenuOpen && (
-                  <div role="listbox" style={{ position: "absolute", top: "calc(100% + 6px)", right: 0, minWidth: 240, maxWidth: 340, background: parchment, border: `1px solid ${ghostButtonBorder}`, borderRadius: 10, boxShadow: "0 8px 24px rgba(58,28,20,0.16)", padding: 5, zIndex: 30, maxHeight: 320, overflowY: "auto" }}>
-                    {manuscripts.map((m) => (
-                      <div
-                        key={m.id}
-                        role="option"
-                        aria-selected={m.id === activeMs.id}
-                        onClick={() => selectMs(m.id)}
-                        style={{ padding: "9px 11px", borderRadius: 7, fontFamily: FONT_SANS, fontSize: 13, color: m.id === activeMs.id ? burgundy : bodyInk, background: m.id === activeMs.id ? "#f5e2da" : "transparent", cursor: "pointer", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
-                      >
-                        {m.title}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+          </h1>
         </div>
 
         {/* ── Tab content — both pill views housed in one workspace container. No overflow:hidden, so
@@ -1584,11 +1623,13 @@ export const SubmissionPackages: React.FC = () => {
             ) : (
               <div className="sp-two" style={{ display: "grid", gridTemplateColumns: "228px minmax(0, 1fr)" }}>
                 {renderSidebar()}
-                <div style={{ padding: "18px 20px", minWidth: 0 }}>
-                  {/* First-run only while there's nothing yet AND the builder isn't open — opening it
-                      (from the CTA/templates) flips to the packages view where the inline builder lives. */}
-                  {msPackages.length === 0 && !buildOpen ? renderFirstRun() : renderPackagesView()}
-                </div>
+                {/* Empty state = the full-bleed worktable desk; the populated view keeps its padding.
+                    Opening the builder (CTA/templates) flips to the packages view with the inline builder. */}
+                {msPackages.length === 0 && !buildOpen ? (
+                  renderFirstRun()
+                ) : (
+                  <div style={{ padding: "18px 20px", minWidth: 0 }}>{renderPackagesView()}</div>
+                )}
               </div>
             )}
           </div>
