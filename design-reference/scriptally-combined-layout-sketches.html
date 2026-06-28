@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Combined layout sketches</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,500&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:#ded8d0;color:#3a1c14;padding:38px 22px 80px;}
+.wrap{max-width:1020px;margin:0 auto;}
+.intro{margin-bottom:30px;}
+.intro h1{font-family:'Playfair Display',serif;font-size:24px;font-weight:500;margin-bottom:7px;}
+.intro p{font-size:13.5px;color:#6a5e54;line-height:1.55;max-width:730px;}
+.intro p b{color:#3a1c14;font-weight:500;}
+
+.sketch{margin-bottom:40px;}
+.s-cap{display:flex;align-items:baseline;gap:12px;margin-bottom:4px;}
+.s-num{font-family:'Caveat',cursive;font-size:30px;color:#7c3a2a;font-weight:600;}
+.s-name{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;color:#2e2018;}
+.s-tag{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.06em;text-transform:uppercase;color:#5a6e58;background:#e9ede6;border:0.5px solid #cfdac9;border-radius:20px;padding:3px 9px;}
+.s-tag.amber{color:#b98a4e;background:#f7ecde;border-color:#ebd2bf;}
+.s-desc{font-size:12.5px;color:#6a5e54;line-height:1.5;margin:5px 0 14px;max-width:740px;}
+.s-desc b{color:#3a1c14;font-weight:500;}
+
+.screen{background:#f2ede7;border:1px solid rgba(124,58,42,0.16);border-radius:14px;overflow:hidden;box-shadow:0 6px 22px rgba(58,28,20,0.1);}
+.fnav{height:38px;background:#fdfaf5;border-bottom:1px solid rgba(124,58,42,0.1);display:flex;align-items:center;gap:8px;padding:0 14px;}
+.fnav .fb{font-family:'Playfair Display',serif;font-size:13px;font-weight:600;color:#7c3a2a;margin-right:auto;}
+.fnav .fl{font-size:10px;color:#b3a99a;}.fnav .fl.on{color:#7c3a2a;}
+.stage{padding:14px 18px 20px;position:relative;}
+.eyebrow{text-align:center;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.13em;text-transform:uppercase;color:#9c8878;margin-bottom:12px;}
+.ms{position:absolute;top:14px;right:18px;display:inline-flex;align-items:center;gap:6px;background:#fdfaf5;border:0.5px solid #e0d5c8;border-radius:8px;padding:5px 9px;font-size:10px;}
+.ms .l{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:0.06em;text-transform:uppercase;color:#9c8878;}
+
+.container{background:#fdfbf7;border:1px solid rgba(124,58,42,0.1);border-radius:16px;box-shadow:inset 0 1px 3px rgba(255,255,255,0.6),0 2px 10px rgba(58,28,20,0.05);overflow:hidden;}
+.two{display:grid;grid-template-columns:228px 1fr;}
+.sidebar{background:#f8f3ec;border-right:1px solid rgba(124,58,42,0.1);padding:16px 15px;}
+.side-h{font-family:'Playfair Display',serif;font-size:15px;font-weight:500;color:#2e2018;margin-bottom:3px;}
+.side-sub{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.04em;text-transform:uppercase;color:#9c8878;margin-bottom:14px;}
+.mat-grp{margin-bottom:14px;}
+.mat-grp-h{display:flex;align-items:center;gap:7px;margin-bottom:7px;}
+.mat-grp-h .d{width:8px;height:8px;border-radius:50%;}
+.mat-grp-h .d.ql{background:#7c3a2a;}.mat-grp-h .d.sy{background:#5a6e58;}.mat-grp-h .d.pg{background:#b98a4e;}
+.mat-grp-h .t{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.05em;text-transform:uppercase;color:#6a5e54;}
+.mat-grp-h .n{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8px;color:#bdb3a4;}
+.mat-r{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:6px 8px;border-radius:7px;background:#fdfaf5;border:0.5px solid rgba(124,58,42,0.09);margin-bottom:4px;}
+.mat-r .nm{font-size:11px;color:#3a1c14;}
+.mat-r .rt{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#7c3a2a;}
+.mat-add{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.04em;text-transform:uppercase;color:#9c8878;padding:5px 8px;border:1px dashed rgba(124,58,42,0.2);border-radius:7px;text-align:center;margin-top:3px;}
+.side-manage{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.04em;text-transform:uppercase;color:#7c3a2a;text-align:center;margin-top:8px;padding-top:11px;border-top:1px solid rgba(124,58,42,0.08);}
+
+.main{padding:16px 18px;}
+.seed-banner{display:flex;align-items:center;gap:9px;background:#eef2eb;border:0.5px solid #d3ddcd;border-radius:10px;padding:9px 13px;margin-bottom:14px;font-size:11.5px;color:#3a4a38;}
+.seed-banner svg{width:14px;height:14px;color:#5a6e58;flex-shrink:0;}
+.seed-banner b{color:#5a6e58;font-weight:500;}
+.zlab{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.08em;text-transform:uppercase;color:#9c8878;margin:14px 0 9px;display:flex;align-items:center;gap:7px;}
+.zlab .why{font-family:'Inter',sans-serif;text-transform:none;letter-spacing:0;font-size:10.5px;color:#bdb3a4;font-style:italic;}
+
+/* spotlight compact */
+.spot{position:relative;background:#fdfaf5;border:1px solid rgba(124,58,42,0.26);border-radius:11px;padding:14px 16px;display:flex;align-items:center;gap:16px;overflow:hidden;}
+.spot::after{content:'';position:absolute;right:-10%;bottom:-40%;width:50%;height:160%;background:radial-gradient(ellipse at center,rgba(138,158,136,0.16),transparent 66%);}
+.spot-l{flex:1;position:relative;z-index:1;}
+.spot-badge{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.09em;text-transform:uppercase;color:#5a6e58;background:#e0e7dc;border:0.5px solid #cbd8c4;border-radius:20px;padding:3px 8px;display:inline-block;margin-bottom:8px;}
+.spot-nm{font-family:'Playfair Display',serif;font-size:20px;font-weight:500;color:#2e2018;margin-bottom:8px;}
+.chips{display:flex;gap:5px;flex-wrap:wrap;}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:9.5px;color:#5a4a40;background:#fbfdfa;border:0.5px solid #d6e0d2;border-radius:6px;padding:3px 7px;}
+.chip .d{width:5px;height:5px;border-radius:50%;}
+.chip .d.ql{background:#7c3a2a;}.chip .d.sy{background:#5a6e58;}.chip .d.pg{background:#b98a4e;}
+.spot-r{text-align:center;position:relative;z-index:1;}
+.spot-num{font-family:'Playfair Display',serif;font-size:34px;font-weight:500;color:#5a6e58;line-height:0.9;}
+.spot-lab{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:0.05em;text-transform:uppercase;color:#9c8878;margin-top:4px;}
+
+.shelf{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.ocard{background:#fdfaf5;border:1px solid rgba(124,58,42,0.13);border-radius:10px;padding:11px 12px;}
+.oc-nm{font-family:'Playfair Display',serif;font-size:13px;font-weight:500;color:#2e2018;}
+.oc-tag{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:0.05em;text-transform:uppercase;color:#5a6e58;background:#e9ede6;border:0.5px solid #cfdac9;border-radius:20px;padding:2px 5px;margin-top:4px;display:inline-block;}
+.oc-rate{font-family:'Playfair Display',serif;font-size:17px;color:#7c3a2a;margin-top:9px;}
+.oc-rl{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:0.04em;text-transform:uppercase;color:#9c8878;}
+.ghost{border:1.5px dashed rgba(124,58,42,0.2);border-radius:10px;min-height:84px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:#bdb3a4;}
+.ghost .pl{width:24px;height:24px;border-radius:7px;background:#f5e2da;border:0.5px solid #e8c8bc;display:flex;align-items:center;justify-content:center;color:#7c3a2a;}
+.ghost svg{width:13px;height:13px;}.ghost span{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.04em;text-transform:uppercase;color:#9c8878;}
+
+/* how it works */
+.hiw{background:#fdfaf5;border:1px solid rgba(124,58,42,0.13);border-radius:12px;padding:20px 18px;margin-bottom:14px;}
+.hiw-t{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;color:#2e2018;text-align:center;margin-bottom:3px;}
+.hiw-s{font-size:11.5px;color:#8a7a6c;text-align:center;margin-bottom:18px;}
+.hiw-flow{display:flex;align-items:flex-start;justify-content:center;gap:0;}
+.hiw-step{flex:1;max-width:130px;text-align:center;}
+.hiw-ico{width:42px;height:42px;border-radius:11px;margin:0 auto 9px;display:flex;align-items:center;justify-content:center;}
+.hiw-ico.a{background:#f5e2da;color:#7c3a2a;}.hiw-ico.b{background:#e9ede6;color:#5a6e58;}.hiw-ico.c{background:#f7ecde;color:#b98a4e;}.hiw-ico.d{background:#eef2eb;color:#5a6e58;}
+.hiw-ico svg{width:20px;height:20px;}
+.hiw-st{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.04em;text-transform:uppercase;color:#7c3a2a;margin-bottom:4px;}
+.hiw-d{font-size:10.5px;color:#6a5e54;line-height:1.4;}
+.hiw-arrow{color:#d3c4b6;align-self:center;padding-top:14px;flex-shrink:0;}
+.hiw-arrow svg{width:18px;height:18px;}
+.empty-cta{text-align:center;margin-top:20px;}
+.empty-cta .btn{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.05em;text-transform:uppercase;color:#fff;background:#7c3a2a;border:none;border-radius:9px;padding:11px 20px;display:inline-flex;align-items:center;gap:7px;}
+.empty-cta .btn svg{width:12px;height:12px;}
+
+/* templates */
+.tmpl-h{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.08em;text-transform:uppercase;color:#9c8878;margin:6px 0 9px;text-align:center;}
+.tmpl-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.tmpl{background:#fdfaf5;border:1px solid rgba(124,58,42,0.13);border-radius:10px;padding:12px;text-align:center;}
+.tmpl-nm{font-family:'Playfair Display',serif;font-size:13px;color:#2e2018;margin-bottom:4px;}
+.tmpl-s{font-size:9.5px;color:#9c8878;font-style:italic;margin-bottom:9px;line-height:1.35;}
+.tmpl-b{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.04em;text-transform:uppercase;color:#7c3a2a;background:#f5e2da;border:0.5px solid #e8c8bc;border-radius:7px;padding:6px;}
+
+/* alt: hero on top + two col */
+.hero-full{margin-bottom:14px;}
+.altcols{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;}
+.col-h2{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.08em;text-transform:uppercase;color:#9c8878;margin-bottom:9px;}
+.mlist .mat-r{background:#fdfaf5;}
+
+.reco{background:#fdfaf5;border:1px solid rgba(124,58,42,0.15);border-radius:13px;padding:18px 20px;}
+.reco h3{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;margin-bottom:7px;}
+.reco p{font-size:12.5px;color:#5a4a40;line-height:1.6;}
+.reco p b{color:#7c3a2a;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="intro">
+    <h1>Packages &amp; materials on one page — and a first-run that sells itself</h1>
+    <p>Materials move into a <b>left sidebar</b> (your building blocks, always in view) with packages as the main workspace — so the relationship is visible and the page carries substance in every state. Sketches 1 &amp; 2 are the same shell <b>seeded</b> vs <b>genuinely empty</b>; sketch 3 is an alternative composition. The big pill goes away — materials live in the rail now, so there's nothing to toggle.</p>
+  </div>
+
+  <!-- SKETCH 1 -->
+  <div class="sketch">
+    <div class="s-cap"><span class="s-num">1</span><span class="s-name">Sidebar + workspace</span><span class="s-tag">Seeded first-run</span></div>
+    <div class="s-desc">How a brand-new Pro user lands: <b>example packages and materials pre-built</b> and clearly marked, so the page looks alive and the funnel/attribution are visible working — the proven way premium products beat the blank canvas. Edit or delete anytime.</div>
+    <div class="screen"><div class="fnav"><span class="fb">ScriptAlly</span><span class="fl">Dashboard</span><span class="fl">Queries</span><span class="fl">Agents</span><span class="fl on">Manuscripts</span></div>
+      <div class="stage">
+        <div class="ms"><span class="l">MS</span>Murphy's Day Out</div>
+        <div class="eyebrow">Submission packages · pro</div>
+        <div class="container"><div class="two">
+          <div class="sidebar">
+            <div class="side-h">Your materials</div><div class="side-sub">building blocks</div>
+            <div class="mat-grp"><div class="mat-grp-h"><span class="d ql"></span><span class="t">Query letters</span><span class="n">3</span></div>
+              <div class="mat-r"><span class="nm">Comp-led</span><span class="rt">48%</span></div><div class="mat-r"><span class="nm">Character-first</span><span class="rt">31%</span></div><div class="mat-r"><span class="nm">Standard</span><span class="rt">19%</span></div></div>
+            <div class="mat-grp"><div class="mat-grp-h"><span class="d sy"></span><span class="t">Synopses</span><span class="n">2</span></div>
+              <div class="mat-r"><span class="nm">Two-page</span><span class="rt">44%</span></div><div class="mat-r"><span class="nm">One-page</span><span class="rt">22%</span></div></div>
+            <div class="mat-grp"><div class="mat-grp-h"><span class="d pg"></span><span class="t">Sample pages</span><span class="n">2</span></div>
+              <div class="mat-r"><span class="nm">First 3 ch.</span><span class="rt">41%</span></div><div class="mat-r"><span class="nm">First 10 pp.</span><span class="rt">25%</span></div></div>
+            <div class="side-manage">Manage all materials →</div>
+          </div>
+          <div class="main">
+            <div class="seed-banner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7.4-6.3-4.6L5.7 21l2.3-7.4-6-4.6h7.6z"/></svg><span><b>Example packages</b> to explore — edit or delete them anytime.</span></div>
+            <div class="zlab">★ Active package</div>
+            <div class="spot"><div class="spot-l"><span class="spot-badge">★ Active · queries pre-fill this</span><div class="spot-nm">Comp-heavy</div><div class="chips"><span class="chip"><span class="d ql"></span>Comp-led</span><span class="chip"><span class="d sy"></span>Two-page</span><span class="chip"><span class="d pg"></span>First 3 ch.</span></div></div><div class="spot-r"><div class="spot-num">50%</div><div class="spot-lab">Request rate</div></div></div>
+            <div class="zlab">Your packages <span class="why">— combinations you're testing</span></div>
+            <div class="shelf"><div class="ocard"><div class="oc-nm">Character intro</div><span class="oc-tag">2nd best</span><div class="oc-rate">33%</div><div class="oc-rl">request rate</div></div><div class="ocard"><div class="oc-nm">Standard sub</div><span class="oc-tag">tested</span><div class="oc-rate">22%</div><div class="oc-rl">request rate</div></div><div class="ghost"><span class="pl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span><span>Build</span></div></div>
+          </div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SKETCH 2 -->
+  <div class="sketch">
+    <div class="s-cap"><span class="s-num">2</span><span class="s-name">Sidebar + workspace</span><span class="s-tag amber">Genuine empty</span></div>
+    <div class="s-desc">If they clear the examples (or you'd rather not seed): the main area becomes a <b>how-it-works infographic</b> + one primary CTA + a <b>templates row</b> for a fast start; the sidebar invites the first materials. Teaches the value instead of staring back blankly.</div>
+    <div class="screen"><div class="fnav"><span class="fb">ScriptAlly</span><span class="fl">Dashboard</span><span class="fl">Queries</span><span class="fl">Agents</span><span class="fl on">Manuscripts</span></div>
+      <div class="stage">
+        <div class="ms"><span class="l">MS</span>Murphy's Day Out</div>
+        <div class="eyebrow">Submission packages · pro</div>
+        <div class="container"><div class="two">
+          <div class="sidebar">
+            <div class="side-h">Your materials</div><div class="side-sub">building blocks</div>
+            <div class="mat-grp"><div class="mat-grp-h"><span class="d ql"></span><span class="t">Query letters</span></div><div class="mat-add">+ Add a letter</div></div>
+            <div class="mat-grp"><div class="mat-grp-h"><span class="d sy"></span><span class="t">Synopses</span></div><div class="mat-add">+ Add a synopsis</div></div>
+            <div class="mat-grp"><div class="mat-grp-h"><span class="d pg"></span><span class="t">Sample pages</span></div><div class="mat-add">+ Add pages</div></div>
+          </div>
+          <div class="main">
+            <div class="hiw">
+              <div class="hiw-t">Find out what wins requests</div>
+              <div class="hiw-s">Test different versions of your submission and let the results tell you which combination agents respond to.</div>
+              <div class="hiw-flow">
+                <div class="hiw-step"><div class="hiw-ico a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/></svg></div><div class="hiw-st">Write</div><div class="hiw-d">Your letters, synopses &amp; pages</div></div>
+                <div class="hiw-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+                <div class="hiw-step"><div class="hiw-ico b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div><div class="hiw-st">Combine</div><div class="hiw-d">Into a package</div></div>
+                <div class="hiw-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+                <div class="hiw-step"><div class="hiw-ico c"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></div><div class="hiw-st">Attach</div><div class="hiw-d">To your queries</div></div>
+                <div class="hiw-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+                <div class="hiw-step"><div class="hiw-ico d"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div><div class="hiw-st">See what wins</div><div class="hiw-d">Which combo pulls requests</div></div>
+              </div>
+              <div class="empty-cta"><button class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Build your first package</button></div>
+            </div>
+            <div class="tmpl-h">— or start from a template —</div>
+            <div class="tmpl-row">
+              <div class="tmpl"><div class="tmpl-nm">Comp-led</div><div class="tmpl-s">A popular opener for commercial fiction</div><div class="tmpl-b">Use template</div></div>
+              <div class="tmpl"><div class="tmpl-nm">Character-first</div><div class="tmpl-s">Leads on voice — strong for literary</div><div class="tmpl-b">Use template</div></div>
+              <div class="tmpl"><div class="tmpl-nm">Standard</div><div class="tmpl-s">The classic, dependable structure</div><div class="tmpl-b">Use template</div></div>
+            </div>
+          </div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SKETCH 3 -->
+  <div class="sketch">
+    <div class="s-cap"><span class="s-num">3</span><span class="s-name">Hero on top, two columns below</span><span class="s-tag">Alternative · seeded</span></div>
+    <div class="s-desc">A different composition: the active package gets a <b>full-width hero</b>, and beneath it packages and materials sit as <b>peer columns</b> rather than a nav rail. Materials read as a reference companion to the packages, not a sidebar.</div>
+    <div class="screen"><div class="fnav"><span class="fb">ScriptAlly</span><span class="fl">Dashboard</span><span class="fl">Queries</span><span class="fl">Agents</span><span class="fl on">Manuscripts</span></div>
+      <div class="stage">
+        <div class="ms"><span class="l">MS</span>Murphy's Day Out</div>
+        <div class="eyebrow">Submission packages · pro</div>
+        <div class="container" style="padding:18px 20px;">
+          <div class="spot hero-full"><div class="spot-l"><span class="spot-badge">★ Active · queries pre-fill this</span><div class="spot-nm">Comp-heavy</div><div class="chips"><span class="chip"><span class="d ql"></span>Comp-led</span><span class="chip"><span class="d sy"></span>Two-page</span><span class="chip"><span class="d pg"></span>First 3 ch.</span></div></div><div class="spot-r"><div class="spot-num">50%</div><div class="spot-lab">Request rate</div></div></div>
+          <div class="altcols">
+            <div>
+              <div class="col-h2">Your packages — combinations you're testing</div>
+              <div class="shelf" style="grid-template-columns:1fr 1fr;"><div class="ocard"><div class="oc-nm">Character intro</div><span class="oc-tag">2nd best</span><div class="oc-rate">33%</div><div class="oc-rl">request rate</div></div><div class="ocard"><div class="oc-nm">Standard sub</div><span class="oc-tag">tested</span><div class="oc-rate">22%</div><div class="oc-rl">request rate</div></div><div class="ghost"><span class="pl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span><span>Build</span></div><div class="ghost"><span style="font-size:18px;color:#d3c4b6;">+</span></div></div>
+            </div>
+            <div class="mlist">
+              <div class="col-h2">Your materials — building blocks</div>
+              <div class="mat-grp"><div class="mat-grp-h"><span class="d ql"></span><span class="t">Query letters</span><span class="n">3</span></div><div class="mat-r"><span class="nm">Comp-led</span><span class="rt">48%</span></div><div class="mat-r"><span class="nm">Character-first</span><span class="rt">31%</span></div></div>
+              <div class="mat-grp"><div class="mat-grp-h"><span class="d sy"></span><span class="t">Synopses</span><span class="n">2</span></div><div class="mat-r"><span class="nm">Two-page</span><span class="rt">44%</span></div></div>
+              <div class="mat-grp"><div class="mat-grp-h"><span class="d pg"></span><span class="t">Sample pages</span><span class="n">2</span></div><div class="mat-r"><span class="nm">First 3 ch.</span><span class="rt">41%</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="reco">
+    <h3>My lean</h3>
+    <p><b>Sketch 1's shell, with Sketch 2 as its true-empty fallback.</b> The sidebar-plus-workspace is the structure that earns its keep — materials always visible, packages front and centre, the build-from relationship made obvious, and no empty tab to switch to. <b>Seed it</b> (sketch 1) so the very first impression is a working, premium page; if a user clears the examples, fall back to the <b>how-it-works + templates</b> empty state (sketch 2) rather than blank cards. Sketch 3 is the one to pick instead if you'd rather the active package always be the hero and treat materials as a lighter companion column — but the sidebar version makes materials feel like a first-class half of the feature, which suits "this is a real Pro tool." Point me at one and I'll build it properly.</p>
+  </div>
+
+</div>
+</body>
+</html>

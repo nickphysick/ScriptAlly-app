@@ -88,6 +88,7 @@ import {
   AlignLeft,
   Link2,
   Paperclip,
+  TrendingUp,
 } from "lucide-react";
 
 /** Content-type presentation for a material version (Paste = text, Attach = file, Link). */
@@ -112,6 +113,31 @@ const COMP: Record<string, { label: string; slotLabel: string; noun: string; Ico
   [ComponentType.SAMPLE_PAGES]: { label: "Sample pages", slotLabel: "Sample pages", noun: "selection", Icon: BookOpen, color: AMBER, tile: "#f3e6cf" },
 };
 const LIB_KINDS: ComponentType[] = [ComponentType.QUERY_LETTER, ComponentType.SYNOPSIS, ComponentType.SAMPLE_PAGES];
+
+/** Starter templates — a named structure with suggested component-version names + a soft "why" (no
+ *  invented stats). "Use template" scaffolds REAL, empty materials + a package the user owns — never a
+ *  fake/seeded record, never an isExample flag. The user fills the content in afterwards. */
+const TEMPLATES: { name: string; why: string; letter: string; synopsis: string; pages: string }[] = [
+  { name: "Comp-led", why: "A popular opener for commercial fiction", letter: "Comp-led letter", synopsis: "Two-page synopsis", pages: "First 3 chapters" },
+  { name: "Character-first", why: "Leads on voice — strong for literary", letter: "Character-first letter", synopsis: "Two-page synopsis", pages: "First 3 chapters" },
+  { name: "Standard", why: "The classic, dependable structure", letter: "Standard letter", synopsis: "One-page synopsis", pages: "First 10 pages" },
+];
+
+/** The first-run "how it works" flow (Write → Combine → Attach → See what wins) — labelled, non-
+ *  interactive illustration; never a real record, never counted anywhere. */
+const HIW_STEPS: { label: string; desc: string; Icon: React.ComponentType<any>; bg: string; fg: string }[] = [
+  { label: "Write", desc: "Your letters, synopses & pages", Icon: Mail, bg: "#f5e2da", fg: burgundy },
+  { label: "Combine", desc: "Into a package", Icon: Package, bg: "#e9ede6", fg: "#5a6e58" },
+  { label: "Attach", desc: "To your queries", Icon: Send, bg: "#f7ecde", fg: AMBER },
+  { label: "See what wins", desc: "Which combo pulls requests", Icon: TrendingUp, bg: "#eef2eb", fg: "#5a6e58" },
+];
+
+/** Sidebar "+ Add" prompt per component kind. */
+const ADD_LABEL: Record<string, string> = {
+  [ComponentType.QUERY_LETTER]: "+ Add a letter",
+  [ComponentType.SYNOPSIS]: "+ Add a synopsis",
+  [ComponentType.SAMPLE_PAGES]: "+ Add pages",
+};
 
 type TabKey = "perf" | "pkgs" | "lib" | "log";
 const TABS: { key: TabKey; label: string; Icon: React.ComponentType<any> }[] = [
@@ -362,8 +388,9 @@ export const SubmissionPackages: React.FC = () => {
   const [activeMsId, setActiveMsId] = useState<string | null>(() =>
     typeof window !== "undefined" ? localStorage.getItem("scriptally_active_manuscript_id") : null,
   );
-  // Redesign: two top-level views behind a centred Packages / Materials pill (was: 4 tabs).
-  const [view, setView] = useState<"packages" | "materials">("packages");
+  // Combined layout: materials live in the left sidebar; "Manage all materials →" opens the full
+  // library in this overlay (the old Packages/Materials pill is gone — nothing to toggle).
+  const [libraryOpen, setLibraryOpen] = useState(false);
   const [msMenuOpen, setMsMenuOpen] = useState(false);
   const [form, setForm] = useState<FormState | null>(null);
   const [confirmDel, setConfirmDel] = useState<ManuscriptVersion | null>(null);
@@ -417,7 +444,7 @@ export const SubmissionPackages: React.FC = () => {
     const ro = new ResizeObserver(compute);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [view, detailPkgId, packages.length]);
+  }, [detailPkgId, packages.length]);
 
   const activeMs = useMemo(() => manuscripts.find((m) => m.id === activeMsId) ?? manuscripts[0], [manuscripts, activeMsId]);
   const msId = activeMs?.id;
@@ -499,7 +526,6 @@ export const SubmissionPackages: React.FC = () => {
       [ComponentType.SAMPLE_PAGES]: p.samplePagesVersionId,
     });
     setPkgError(null);
-    setView("packages");
     setDetailPkgId(null); // leave the detail screen so the inline builder is visible in the list
     setBuildOpen(true);
   };
@@ -583,6 +609,105 @@ export const SubmissionPackages: React.FC = () => {
       </div>
       <div className="sp-lib" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, alignItems: "start" }}>
         {LIB_KINDS.map(renderMatColumn)}
+      </div>
+    </div>
+  );
+
+  // ── Templates: scaffold three REAL (empty) materials + a real package the user owns, then open the
+  //    first material so they can fill it. No fake/seeded records, no stored stats. ──
+  const useTemplate = async (t: (typeof TEMPLATES)[number]) => {
+    if (!msId || !currentUser || !isPro) return; // addPackage is Pro-gated — don't strand orphan materials
+    const qlId = await addVersion({ manuscriptId: msId, componentType: ComponentType.QUERY_LETTER, versionName: t.letter, fileAttached: false, contentType: "text", contentDraft: "" });
+    const syId = await addVersion({ manuscriptId: msId, componentType: ComponentType.SYNOPSIS, versionName: t.synopsis, fileAttached: false, contentType: "text", contentDraft: "" });
+    const pgId = await addVersion({ manuscriptId: msId, componentType: ComponentType.SAMPLE_PAGES, versionName: t.pages, fileAttached: false, contentType: "text", contentDraft: "" });
+    if (!qlId || !syId || !pgId) return;
+    const r = await addPackage({ manuscriptId: msId, packageName: t.name, queryLetterVersionId: qlId, synopsisVersionId: syId, samplePagesVersionId: pgId });
+    if (r.success && r.id) await setActivePackage(msId, r.id); // their first package becomes the default
+    // open the new query letter so they complete it straight away
+    const seed: ManuscriptVersion = { id: qlId, manuscriptId: msId, userId: currentUser.id, componentType: ComponentType.QUERY_LETTER, versionName: t.letter, fileAttached: false, contentType: "text", contentDraft: "", createdDate: "" };
+    setForm({ kind: ComponentType.QUERY_LETTER, editing: seed, name: t.letter, content: "", notes: "", mode: "paste", link: "" });
+  };
+
+  // ── Left sidebar: the manuscript's materials as building blocks (rows + "+ Add", "Manage all →"). ──
+  const renderSidebar = () => (
+    <aside className="sp-sidebar" style={{ background: "#f8f3ec", borderRight: "1px solid rgba(124,58,42,0.1)", padding: "16px 15px", borderRadius: "17px 0 0 17px" }}>
+      <div style={{ fontFamily: FONT_SERIF, fontSize: 15, fontWeight: 500, color: headingInk }}>Your materials</div>
+      <div style={{ fontFamily: FONT_MONO, fontSize: 7.5, letterSpacing: "0.04em", textTransform: "uppercase", color: mutedInk, marginBottom: 14 }}>building blocks</div>
+      {LIB_KINDS.map((kind) => {
+        const m = COMP[kind];
+        const rows = msVersions.filter((v) => v.componentType === kind);
+        return (
+          <div key={kind} style={{ marginBottom: 14 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 7 }}>
+              <KindDot kind={kind} size={8} />
+              <span style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: "0.05em", textTransform: "uppercase", color: "#6a5e54" }}>{m.label}</span>
+              {rows.length > 0 && <span style={{ marginLeft: "auto", fontFamily: FONT_MONO, fontSize: 8, color: "#bdb3a4" }}>{rows.length}</span>}
+            </div>
+            {rows.map((v) => {
+              const cm = componentMetrics(v.id, msPackages, msQueries);
+              return (
+                <button key={v.id} onClick={() => openEdit(v)} className="sp-mat-row" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6, width: "100%", padding: "6px 8px", borderRadius: 7, background: parchment, border: "0.5px solid rgba(124,58,42,0.09)", marginBottom: 4, cursor: "pointer", textAlign: "left" }}>
+                  <span style={{ fontFamily: FONT_SANS, fontSize: 11, color: bodyInk, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>{v.versionName}</span>
+                  <span style={{ fontFamily: FONT_MONO, fontSize: 8.5, color: cm.sent === 0 ? "#bdb3a4" : burgundy, flexShrink: 0 }}>{cm.sent === 0 ? "—" : formatRate(cm.requestRate)}</span>
+                </button>
+              );
+            })}
+            <button onClick={() => openNew(kind)} className="sp-mat-add" style={{ display: "block", width: "100%", fontFamily: FONT_MONO, fontSize: 8, letterSpacing: "0.04em", textTransform: "uppercase", color: "#9c8878", padding: "6px 8px", border: "1px dashed rgba(124,58,42,0.2)", borderRadius: 7, textAlign: "center", marginTop: 3, background: "transparent", cursor: "pointer" }}>
+              {ADD_LABEL[kind] ?? `+ Add ${m.noun}`}
+            </button>
+          </div>
+        );
+      })}
+      {msVersions.length > 0 && (
+        <button onClick={() => setLibraryOpen(true)} className="sp-link" style={{ display: "block", width: "100%", fontFamily: FONT_MONO, fontSize: 8, letterSpacing: "0.04em", textTransform: "uppercase", color: burgundy, textAlign: "center", marginTop: 8, paddingTop: 11, borderTop: "1px solid rgba(124,58,42,0.08)", background: "transparent", border: "none", cursor: "pointer" }}>
+          Manage all materials →
+        </button>
+      )}
+    </aside>
+  );
+
+  // ── First-run (no packages yet): how-it-works + primary CTA + a templates row. ──
+  const renderFirstRun = () => (
+    <div>
+      <div style={{ background: parchment, border: "1px solid rgba(124,58,42,0.13)", borderRadius: 12, padding: "22px 18px", marginBottom: 14 }}>
+        <div style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 500, color: headingInk, textAlign: "center", marginBottom: 3 }}>Find out what wins requests</div>
+        <div style={{ fontFamily: FONT_SANS, fontSize: 11.5, color: "#8a7a6c", textAlign: "center", marginBottom: 18, lineHeight: 1.5, maxWidth: 460, marginLeft: "auto", marginRight: "auto" }}>
+          Test different versions of your submission and let the results tell you which combination agents respond to.
+        </div>
+        <div className="sp-hiw" style={{ display: "flex", alignItems: "flex-start", justifyContent: "center", gap: 0 }}>
+          {HIW_STEPS.map((s, i) => (
+            <React.Fragment key={s.label}>
+              <div style={{ flex: 1, maxWidth: 130, textAlign: "center" }}>
+                <div style={{ width: 42, height: 42, borderRadius: 11, margin: "0 auto 9px", display: "flex", alignItems: "center", justifyContent: "center", background: s.bg, color: s.fg }}>
+                  <s.Icon style={{ width: 20, height: 20 }} strokeWidth={1.8} aria-hidden="true" />
+                </div>
+                <div style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: "0.04em", textTransform: "uppercase", color: burgundy, marginBottom: 4 }}>{s.label}</div>
+                <div style={{ fontFamily: FONT_SANS, fontSize: 10.5, color: "#6a5e54", lineHeight: 1.4 }}>{s.desc}</div>
+              </div>
+              {i < HIW_STEPS.length - 1 && (
+                <div className="sp-hiw-arrow" style={{ color: "#d3c4b6", alignSelf: "center", paddingTop: 14, flexShrink: 0 }}>
+                  <ArrowRight style={{ width: 18, height: 18 }} strokeWidth={2} aria-hidden="true" />
+                </div>
+              )}
+            </React.Fragment>
+          ))}
+        </div>
+        <div style={{ textAlign: "center", marginTop: 20 }}>
+          <button onClick={openBuild} style={{ display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.05em", textTransform: "uppercase", color: "#fff", background: burgundy, border: "none", borderRadius: 9, padding: "11px 20px", cursor: "pointer" }}>
+            <Plus style={{ width: 12, height: 12 }} strokeWidth={2.2} aria-hidden="true" /> Build your first package
+          </button>
+        </div>
+      </div>
+
+      <div style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: "0.08em", textTransform: "uppercase", color: mutedInk, margin: "6px 0 9px", textAlign: "center" }}>— or start from a template —</div>
+      <div className="sp-tmpl" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+        {TEMPLATES.map((t) => (
+          <div key={t.name} style={{ background: parchment, border: "1px solid rgba(124,58,42,0.13)", borderRadius: 10, padding: 12, textAlign: "center", display: "flex", flexDirection: "column" }}>
+            <div style={{ fontFamily: FONT_SERIF, fontSize: 13, color: headingInk, marginBottom: 4 }}>{t.name}</div>
+            <div style={{ fontFamily: FONT_SANS, fontSize: 9.5, color: "#9c8878", fontStyle: "italic", marginBottom: 9, lineHeight: 1.35, flex: 1 }}>{t.why}</div>
+            <button onClick={() => useTemplate(t)} style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: "0.04em", textTransform: "uppercase", color: burgundy, background: buttonPinkBg, border: `0.5px solid ${buttonPinkBorder}`, borderRadius: 7, padding: 7, cursor: "pointer" }}>Use template</button>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -1351,8 +1476,19 @@ export const SubmissionPackages: React.FC = () => {
         .sp-mat:focus-visible { outline: 2px solid ${burgundy}; outline-offset: 2px; }
         .sp-add-mat:hover { border-color: #c9a89e !important; color: ${burgundy} !important; background: rgba(251,243,236,0.4) !important; }
         .sp-link:hover { text-decoration: underline; }
+        .sp-mat-row:hover { border-color: #c9a89e !important; background: #fff !important; }
+        .sp-mat-add:hover { border-color: #c9a89e !important; color: ${burgundy} !important; }
         @media (max-width: 880px) { .sp-lib { grid-template-columns: 1fr !important; } }
-        @media (max-width: 560px) { .sp-workspace { padding: 16px 14px 20px !important; } .sp-build-hint { display: none; } }
+        @media (max-width: 760px) {
+          .sp-two { grid-template-columns: 1fr !important; }
+          .sp-sidebar { border-right: none !important; border-bottom: 1px solid rgba(124,58,42,0.1) !important; border-radius: 17px 17px 0 0 !important; }
+        }
+        @media (max-width: 620px) {
+          .sp-hiw { flex-wrap: wrap !important; gap: 12px !important; }
+          .sp-hiw-arrow { display: none !important; }
+          .sp-tmpl { grid-template-columns: 1fr !important; }
+        }
+        @media (max-width: 560px) { .sp-build-hint { display: none; } }
         /* spotlight: diagonal sage wash + corner glow (the greeting-container treatment) */
         .sp-wave { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
         .sp-wave::before { content: ''; position: absolute; top: -60%; left: -75%; width: 55%; height: 220%; background: linear-gradient(100deg, transparent 0%, rgba(138,158,136,0.07) 35%, rgba(176,200,168,0.20) 50%, rgba(138,158,136,0.07) 65%, transparent 100%); transform: rotate(6deg); animation: spSheen 9s ease-in-out infinite; }
@@ -1374,8 +1510,7 @@ export const SubmissionPackages: React.FC = () => {
       `}</style>
 
       <div className="relative" style={{ zIndex: 1, maxWidth: 1000, margin: "0 auto", padding: "40px 20px 0" }}>
-        {/* ── Header: centred "Submission Packages · PRO" eyebrow + the big Packages / Materials pill,
-              with the manuscript selector floated to the right. ── */}
+        {/* ── Header: centred "Submission Packages · PRO" eyebrow + title; manuscript selector right. ── */}
         <div className="sp-headrow" style={{ display: "flex", alignItems: "flex-start", gap: 16, marginBottom: 26 }}>
           <div style={{ flex: 1, minWidth: 0 }} aria-hidden="true" />
 
@@ -1386,23 +1521,8 @@ export const SubmissionPackages: React.FC = () => {
                 <Lock style={{ width: 9, height: 9 }} strokeWidth={2.4} aria-hidden="true" /> PRO
               </span>
             </span>
-            {/* the Packages / Materials pill */}
-            <div role="tablist" aria-label="Submission packages views" style={{ display: "inline-flex", background: "#ece4da", borderRadius: 999, padding: 4, gap: 3, boxShadow: "inset 0 1px 2px rgba(58,28,20,0.06)" }}>
-              {([["packages", "Packages", Package], ["materials", "Materials", Layers]] as const).map(([v, label, Icon]) => {
-                const active = v === view;
-                return (
-                  <button
-                    key={v}
-                    role="tab"
-                    aria-selected={active}
-                    onClick={() => setView(v)}
-                    style={{ display: "inline-flex", alignItems: "center", gap: 9, padding: "11px 30px", borderRadius: 999, border: "none", cursor: "pointer", fontFamily: FONT_SERIF, fontSize: 15, fontWeight: 500, color: active ? burgundy : "#9c8878", background: active ? parchment : "transparent", boxShadow: active ? "0 1px 3px rgba(58,28,20,0.12)" : "none", transition: "color .18s, background .18s" }}
-                  >
-                    <Icon style={{ width: 16, height: 16 }} strokeWidth={1.9} aria-hidden="true" /> {label}
-                  </button>
-                );
-              })}
-            </div>
+            {/* Materials now live in the sidebar — no view to toggle, so the pill is gone. */}
+            <span style={{ fontFamily: FONT_SERIF, fontSize: 26, fontWeight: 500, color: headingInk, lineHeight: 1 }}>Packages &amp; materials</span>
           </div>
 
           {/* manuscript selector (top-right) */}
@@ -1449,13 +1569,47 @@ export const SubmissionPackages: React.FC = () => {
             </div>
           </MountPanel>
         ) : (
-          // Workspace surface: a soft warm near-white, a hair lighter than the parchment cards
-          // (#fdfaf5) so cards read as sitting ON it, and clearly lighter than the kraft ground.
-          <div className="sp-workspace" style={{ background: "#fefcf8", border: "1px solid rgba(124,58,42,0.10)", borderRadius: 18, boxShadow: "0 1px 2px rgba(58,28,20,0.04), 0 12px 34px rgba(58,28,20,0.06)", padding: "24px 24px 28px" }}>
-            {view === "packages" ? (detailPkgId ? renderDetail() : renderPackagesView()) : renderLibrary()}
+          // Workspace surface: a soft warm near-white, a hair lighter than the parchment cards (#fdfaf5),
+          // clearly lighter than the kraft ground. NO overflow:hidden — the inline builder's SlotDropdown
+          // menus must overflow freely (they also portal to <body>). Materials live in the left rail now;
+          // packages (or the first-run) fill the main. The detail screen takes the full width.
+          <div className="sp-workspace" style={{ background: "#fefcf8", border: "1px solid rgba(124,58,42,0.10)", borderRadius: 18, boxShadow: "0 1px 2px rgba(58,28,20,0.04), 0 12px 34px rgba(58,28,20,0.06)" }}>
+            {detailPkgId ? (
+              <div style={{ padding: "20px 22px 24px" }}>{renderDetail()}</div>
+            ) : (
+              <div className="sp-two" style={{ display: "grid", gridTemplateColumns: "228px minmax(0, 1fr)" }}>
+                {renderSidebar()}
+                <div style={{ padding: "18px 20px", minWidth: 0 }}>
+                  {/* First-run only while there's nothing yet AND the builder isn't open — opening it
+                      (from the CTA/templates) flips to the packages view where the inline builder lives. */}
+                  {msPackages.length === 0 && !buildOpen ? renderFirstRun() : renderPackagesView()}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
+
+      {/* ── "Manage all materials" — the full 3-column library in a wide overlay (reuses renderLibrary) ── */}
+      {libraryOpen && createPortal(
+        <div role="presentation" onMouseDown={() => setLibraryOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 110, background: "rgba(58,28,20,0.3)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "40px 20px", overflowY: "auto" }}>
+          <div role="dialog" aria-modal="true" aria-label="All materials" onMouseDown={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: 920 }}>
+            <MountPanel>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "16px 20px", borderBottom: "1px solid rgba(124,58,42,0.1)" }}>
+                <span style={{ width: 3, height: 17, borderRadius: 2, background: burgundy }} aria-hidden="true" />
+                <span style={{ fontFamily: FONT_SERIF, fontSize: 17, fontWeight: 500, color: headingInk }}>All materials</span>
+                <button onClick={() => setLibraryOpen(false)} aria-label="Close" className="sp-icon-btn" style={{ marginLeft: "auto", background: "transparent", border: "none", cursor: "pointer", color: mutedInk, display: "inline-flex", padding: 4, borderRadius: 6 }}>
+                  <X style={{ width: 18, height: 18 }} strokeWidth={2} aria-hidden="true" />
+                </button>
+              </div>
+              <div style={{ padding: "20px 22px 22px", maxHeight: "calc(100vh - 170px)", overflowY: "auto" }}>
+                {renderLibrary()}
+              </div>
+            </MountPanel>
+          </div>
+        </div>,
+        document.body,
+      )}
 
       {/* ── Material editor (type · name · notes · content: Paste / Attach[soon] / Link) ── */}
       {form && (() => {
