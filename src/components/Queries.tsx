@@ -2653,6 +2653,15 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             <div style={{ borderLeft: "1px solid rgba(124,58,42,.22)", borderRight: "1px solid rgba(124,58,42,.22)", borderBottom: "1px solid rgba(124,58,42,.22)", borderTop: "3px solid #7c3a2a", borderRadius: 8, overflow: "hidden", background: parchment, flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
             {activeQuery && activeAgent && activeMs ? (
               <>
+                <style>{`
+                  @keyframes qpCaretBlink { 0%,49%{opacity:1;} 50%,100%{opacity:0;} }
+                  .qp-caret{ display:inline-block; width:2px; height:0.95em; background:#241c15; margin-left:3px; vertical-align:text-bottom; animation:qpCaretBlink 1.1s steps(1) infinite; }
+                  .qp-noteacts{ opacity:0; transition:opacity .14s; }
+                  .qp-note:hover .qp-noteacts{ opacity:1; }
+                  .qp-noteact{ width:22px; height:22px; border:none; background:transparent; border-radius:5px; color:#bcae9e; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+                  .qp-noteact:hover{ background:#f3ebe0; color:#7c3a2a; }
+                  @media (prefers-reduced-motion: reduce){ .qp-caret{ animation:none; opacity:1; } }
+                `}</style>
                 {/* ── Hero — editorial masthead (mockup: left-aligned, 3px burgundy rule) ── */}
                 {(() => {
                   const paneAction = getPrimaryAction(currentStatus as QueryStatus);
@@ -2787,82 +2796,69 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     </div>{/* ── end sub-card 2: What you sent ── */}
 
                   {/* ── Sub-card 3: Notes — journal pins to bottom via flex-1 on messages area ── */}
-                  <div style={{ flex: 1, border: "1px solid rgba(124,58,42,.16)", borderRadius: 12, background: "#fffefb", padding: "18px 18px 20px", display: "flex", flexDirection: "column", boxShadow: "0 1px 2px rgba(40,22,14,.03)", minWidth: 0, minHeight: 0 }}>
-                      {/* Running head */}
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 18, flexShrink: 0 }}>
-                        <div style={{ height: 1, width: 22, background: "rgba(124,58,42,.3)" }} />
-                        <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, textTransform: "uppercase" as const, letterSpacing: ".16em", color: "#2e3a2c" }}>Notes</span>
-                        <div style={{ height: 1, width: 22, background: "rgba(124,58,42,.3)" }} />
+                  <div style={{ flex: 1, minWidth: 0, minHeight: 430, background: "#fdfaf5", border: "1px solid #e9dfd0", borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                      {/* pink header band */}
+                      <div style={{ padding: "9px 16px", textAlign: "center", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", borderBottom: "1px solid #e8cabb", flexShrink: 0 }}>
+                        <span style={{ fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 600, color: "#241c15" }}>Notes</span>
                       </div>
-                      {/* Notes content */}
-                      {(() => {
-                        const activeJournalEntries = journalEntries
-                          .filter(entry => entry.queryId === activeQuery.id)
-                          .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-                        const topFade = notesFade.top ? "transparent 0px, black 26px" : "black 0px";
-                        const bottomFade = notesFade.bottom ? "black calc(100% - 26px), transparent 100%" : "black 100%";
-                        const maskValue = `linear-gradient(to bottom, ${topFade}, ${bottomFade})`;
-                        const handleNotesScroll = () => {
-                          const el = chatContainerRef.current;
-                          if (!el) return;
-                          setNotesFade({
-                            top: el.scrollTop > 3,
-                            bottom: el.scrollHeight - el.clientHeight - el.scrollTop > 3,
-                          });
-                        };
-                        return (
-                          <div className="flex flex-col p-3.5 bg-[#FAF8F5] rounded-xl border border-[#ebd8c5]/40" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
-                            <div ref={chatContainerRef} onScroll={handleNotesScroll} className="flex flex-col space-y-2 pr-1" style={{ backgroundColor: "transparent", flex: 1, overflowY: "auto", minHeight: 0, paddingBottom: 12, WebkitMaskImage: maskValue, maskImage: maskValue }}>
-                              {activeJournalEntries.map((entry, index) => {
-                                const isEditing = editingJournalId === entry.id;
-                                return (
-                                  <div key={entry.id} className="relative group max-w-[85%] text-[#3a1c14] rounded-[15px] pl-[20px] pr-[20px] py-2 shadow-sm text-[11.5px] leading-relaxed text-left self-start animate-fade-in" style={{ background: "#fbf3e9", border: "1px solid #efe2d0" }}>
-                                    {isEditing ? (
-                                      <div className="flex flex-col gap-1.5 py-1 min-w-[200px] w-full">
-                                        <textarea value={editingJournalText} onChange={(e) => setEditingJournalText(e.target.value)} className="w-full text-[11.5px] border border-stone-200 rounded-md p-1.5 outline-none font-sans bg-[#faf8f5] focus:border-[#7c3d3d] resize-none" rows={2} autoFocus />
-                                        <div className="flex items-center justify-end gap-1.5">
-                                          <button type="button" onClick={() => setEditingJournalId(null)} className="px-2 py-0.5 text-[9px] font-medium text-stone-500 hover:bg-[#faf8f5] rounded cursor-pointer transition-colors">Cancel</button>
-                                          <button type="button" onClick={async () => { if (!editingJournalText.trim()) return; await updateJournalEntry(entry.id, editingJournalText.trim()); setEditingJournalId(null); }} className="px-2 py-0.5 text-[9px] font-medium text-white bg-[#7c3d3d] hover:bg-[#6e3528] rounded cursor-pointer transition-colors">Save</button>
-                                        </div>
-                                      </div>
-                                    ) : (
-                                      <>
-                                        <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-white/90 backdrop-blur-xs px-1 rounded-md border border-stone-100 absolute top-1 right-2 z-10 pointer-events-auto">
-                                          <button type="button" onClick={() => { setEditingJournalId(entry.id); setEditingJournalText(entry.entryText); }} className="text-stone-500 hover:text-[#7c3d3d] transition-colors cursor-pointer p-0.5" title="Edit Note"><Pencil className="w-3 h-3" /></button>
-                                          <button type="button" onClick={async () => { const confirmDelete = window.confirm("Are you sure you want to delete this journal note?"); if (confirmDelete) await deleteJournalEntry(entry.id); }} className="text-stone-500 hover:text-red-500 transition-colors cursor-pointer p-0.5" title="Delete Note"><Trash2 className="w-3 h-3" /></button>
-                                        </div>
-                                        <p className={`break-words font-sans text-[#3a1c14] whitespace-pre-wrap text-left pr-4 ${index === 0 ? "font-normal italic" : "font-medium"}`}>{entry.entryText}</p>
-                                        <div className="text-[9px] text-left mt-1.5 select-none font-mono flex items-center justify-start gap-1 font-light leading-none" style={{ color: "#a8927e" }}><span>{formatWhatsAppDate(entry.createdAt)}</span></div>
-                                      </>
-                                    )}
+                      {/* notes body — list (scrolls) + bottom-pinned composer */}
+                      <div style={{ padding: "16px 16px 18px", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+                        {(() => {
+                          const notes = journalEntries
+                            .filter(entry => entry.queryId === activeQuery.id)
+                            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()); // newest first
+                          const send = () => { const t = journalInput.trim(); if (!t) return; addJournalEntry(activeQuery.id, t); setJournalInput(""); };
+                          return (
+                            <>
+                              <div style={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column", paddingRight: 2 }}>
+                                {notes.length === 0 ? (
+                                  <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+                                    <span style={{ fontFamily: "'Caveat', cursive", fontSize: 21, color: "#241c15" }}>No notes added yet<span className="qp-caret" /></span>
                                   </div>
-                                );
-                              })}
-                              {activeJournalEntries.length === 0 && (
-                                <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", color: "#8a7a6c", fontSize: 12.5, lineHeight: 1.65, padding: "20px" }}>
-                                  <span>Updates, comments, feedback — write anything here. It's all private, and it'll stay attached to this query.</span>
-                                </div>
-                              )}
-                            </div>
-                            <form onSubmit={handlePostJournal} className="mt-3 flex items-center gap-2 select-none shrink-0">
-                              <div className="flex-grow bg-white border border-stone-200 rounded-full py-1.5 px-4 flex items-center shadow-3xs">
-                                <input type="text" placeholder="Write a note…" value={journalInput} onChange={(e) => setJournalInput(e.target.value)} className="w-full text-xs bg-transparent outline-none border-none text-[#333333] placeholder-stone-400 py-0.5 leading-tight font-sans" />
+                                ) : notes.map((entry) => {
+                                  const isEditing = editingJournalId === entry.id;
+                                  return (
+                                    <div key={entry.id} className="qp-note" style={{ background: "#fffdf9", borderRadius: 11, padding: "11px 13px", marginBottom: 9, boxShadow: "0 1px 2px rgba(58,28,20,.05), 0 4px 12px rgba(58,28,20,.07)" }}>
+                                      {isEditing ? (
+                                        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                                          <textarea value={editingJournalText} onChange={(e) => setEditingJournalText(e.target.value)} autoFocus rows={2} style={{ width: "100%", fontFamily: "'Inter',sans-serif", fontSize: 12.5, color: "#3a1c14", border: "1px solid #e6dccd", borderRadius: 7, padding: "6px 8px", outline: "none", resize: "vertical", background: "#fff" }} />
+                                          <div style={{ display: "flex", justifyContent: "flex-end", gap: 6 }}>
+                                            <button type="button" onClick={() => setEditingJournalId(null)} style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase" as const, letterSpacing: ".04em", background: "transparent", border: "none", color: "#a89a8a", cursor: "pointer" }}>Cancel</button>
+                                            <button type="button" onClick={async () => { if (!editingJournalText.trim()) return; await updateJournalEntry(entry.id, editingJournalText.trim()); setEditingJournalId(null); }} style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase" as const, letterSpacing: ".04em", background: burgundy, color: "#fff", border: "none", borderRadius: 6, padding: "5px 11px", cursor: "pointer" }}>Save</button>
+                                          </div>
+                                        </div>
+                                      ) : (
+                                        <>
+                                          <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 12.5, color: "#4a3c30", lineHeight: 1.48, whiteSpace: "pre-wrap" }}>{entry.entryText}</div>
+                                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 9 }}>
+                                            <span style={{ fontFamily: FONT_MONO, fontSize: 8, color: "#b3a596", letterSpacing: ".08em", textTransform: "uppercase" as const }}>{formatWhatsAppDate(entry.createdAt)}</span>
+                                            <div className="qp-noteacts" style={{ display: "flex", gap: 4 }}>
+                                              <button type="button" title="Edit" onClick={() => { setEditingJournalId(entry.id); setEditingJournalText(entry.entryText); }} className="qp-noteact"><Pencil style={{ width: 12, height: 12 }} /></button>
+                                              <button type="button" title="Delete" onClick={async () => { if (window.confirm("Delete this note?")) await deleteJournalEntry(entry.id); }} className="qp-noteact"><Trash2 style={{ width: 12, height: 12 }} /></button>
+                                            </div>
+                                          </div>
+                                        </>
+                                      )}
+                                    </div>
+                                  );
+                                })}
                               </div>
-                              <button
-                                type="submit"
-                                disabled={!journalInput.trim()}
-                                className="w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0"
-                                style={journalInput.trim()
-                                  ? { background: "linear-gradient(180deg,#f5e2da,#efd5ca)", border: "1px solid rgba(124,58,42,.28)", cursor: "pointer" }
-                                  : { background: "#f1f1f0", border: "1px solid #e5e0d8", cursor: "not-allowed" }
-                                }
-                              >
-                                <Send className="w-3.5 h-3.5" style={{ color: journalInput.trim() ? burgundy : "#c5b9b0" }} />
-                              </button>
-                            </form>
-                          </div>
-                        );
-                      })()}
+                              {/* composer — pinned to the column foot */}
+                              <div style={{ marginTop: 12, background: "#fffdf9", border: "1px solid #e6dccd", borderRadius: 10, padding: "9px 10px 9px 13px", display: "flex", alignItems: "flex-end", gap: 9, boxShadow: "0 1px 2px rgba(58,28,20,0.04)", flexShrink: 0 }}>
+                                <textarea
+                                  value={journalInput} rows={1} placeholder="Write a note…"
+                                  onChange={(e) => { setJournalInput(e.target.value); e.target.style.height = "auto"; e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px"; }}
+                                  onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); (e.target as HTMLTextAreaElement).style.height = "auto"; } }}
+                                  style={{ flex: 1, border: "none", outline: "none", background: "transparent", resize: "none", fontFamily: "'Inter',sans-serif", fontSize: 12.5, color: "#3a1c14", lineHeight: 1.4, minHeight: 20, maxHeight: 120, padding: "4px 0", overflowY: "auto" }}
+                                />
+                                <button type="button" onClick={send} disabled={!journalInput.trim()} style={{ flexShrink: 0, width: 32, height: 32, border: "1px solid #e8c8bc", background: journalInput.trim() ? "#f5e2da" : "#f1f1f0", borderRadius: 8, color: journalInput.trim() ? burgundy : "#c5b9b0", display: "flex", alignItems: "center", justifyContent: "center", cursor: journalInput.trim() ? "pointer" : "not-allowed" }}>
+                                  <svg viewBox="0 0 24 24" width={14} height={14} fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>
+                                </button>
+                              </div>
+                            </>
+                          );
+                        })()}
+                      </div>
                   </div>{/* ── end sub-card 3: Notes ── */}
 
                 </div>{/* end sub-cards row */}
