@@ -149,16 +149,23 @@ const ReadingPaneLab: React.FC = () => {
     { type: QueryStatus.PARTIAL_REQUESTED, createdAt: new Date(sentMs + dayMs).toISOString() },
     { type: QueryStatus.PARTIAL_SENT, createdAt: new Date(sentMs + 2 * dayMs).toISOString() },
   ];
-  return (
-    <div style={{ minHeight: "100vh", background: "#f2ede7", padding: 30 }}>
-      <div style={{ maxWidth: 360, background: "#fdfaf5", border: "1px solid #e9dfd0", borderRadius: 11, overflow: "hidden" }}>
-        <div style={{ padding: "9px 16px", textAlign: "center", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", borderBottom: "1px solid #e8cabb" }}>
-          <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 14, fontWeight: 600, color: "#241c15" }}>Tracking</span>
-        </div>
-        <div style={{ padding: "16px 16px 18px" }}>
-          <QueryTimeline query={mockQuery} agent={mockAgent} events={mockEvents} />
-        </div>
+  // Overdue case (Aisha): queried ~800 days ago, 6-week window — bar must cap + read "no reply yet".
+  const overdueSentMs = Date.now() - 800 * dayMs;
+  const overdueAgent = { id: "lab2", name: "Aisha Kapoor", agency: "Northwind", responseTimeWeeks: 6 } as any;
+  const overdueQuery = { id: "lab-q2", agentId: "lab2", manuscriptId: "lab-ms", status: QueryStatus.QUERIED, dateSent: new Date(overdueSentMs).toISOString(), sendMethod: SubmissionMethod.EMAIL, materialsWanted: ["Query letter"] } as any;
+  const overdueEvents = [{ type: QueryStatus.QUERIED, createdAt: new Date(overdueSentMs).toISOString() }];
+  const Card = ({ title, q, a, ev }: any) => (
+    <div style={{ maxWidth: 360, background: "#fdfaf5", border: "1px solid #e9dfd0", borderRadius: 11, overflow: "hidden", marginBottom: 24 }}>
+      <div style={{ padding: "9px 16px", textAlign: "center", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", borderBottom: "1px solid #e8cabb" }}>
+        <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 14, fontWeight: 600, color: "#241c15" }}>{title}</span>
       </div>
+      <div style={{ padding: "16px 16px 18px" }}><QueryTimeline query={q} agent={a} events={ev} /></div>
+    </div>
+  );
+  return (
+    <div style={{ minHeight: "100vh", background: "#f2ede7", padding: 30, display: "flex", gap: 24, alignItems: "flex-start", flexWrap: "wrap" }}>
+      <Card title="Tracking — within window" q={mockQuery} a={mockAgent} ev={mockEvents} />
+      <Card title="Tracking — overdue" q={overdueQuery} a={overdueAgent} ev={overdueEvents} />
     </div>
   );
 };

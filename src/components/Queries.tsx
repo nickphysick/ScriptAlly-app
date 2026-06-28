@@ -36,6 +36,7 @@ import { formatQueryMaterial } from "../lib/materials";
 import { MarkSentPopover, MarkSentKind } from "./MarkSentPopover";
 import { useFixedMenu } from "./forms/useFixedMenu";
 import { useOpenEditQuery } from "./EditQueryHost";
+import { useOpenEditAgent } from "./EditAgentHost";
 import { QueryTimeline } from "./reading-pane/QueryTimeline";
 import { MountCard } from "./MountCard";
 import { ScriptAllyLogo } from "./ScriptAllyLogo";
@@ -151,6 +152,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   } = useScriptAllyDb();
   // Query editing is the app-level Edit Query drawer (the inline isEditMode editor is retired).
   const openEditQuery = useOpenEditQuery();
+  const openEditAgent = useOpenEditAgent();
 
   const [selectedQueryId, setSelectedQueryId] = useState<string | null>(null);
   const [selectedQuery, setSelectedQuery] = useState<any | null>(null);
@@ -2648,14 +2650,15 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             </div>{/* closes inner bordered frame */}
           </div>{/* closes outer rim — list card */}
 
-          {/* Reading pane — the mockup's white pane with the animated edge glint */}
-          <div className="qp-pane" style={{ position: "relative", border: "1px solid #e6dccd", borderRadius: 14, background: "#ffffff", boxShadow: "0 1px 3px rgba(58,28,20,0.07), 0 14px 38px rgba(58,28,20,0.11)", overflow: "hidden", minHeight: 0, display: "flex", flexDirection: "column" }}>
-            <div style={{ background: "#ffffff", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+          {/* Reading pane — white pane, thin black border, edge glint. Content-height (alignSelf:start)
+              up to a viewport ceiling, then the columns scroll internally. */}
+          <div className="qp-pane" style={{ position: "relative", alignSelf: "start", maxHeight: "calc(100vh - 150px)", border: "1px solid #241c15", borderRadius: 14, background: "#ffffff", boxShadow: "0 1px 3px rgba(58,28,20,0.07), 0 14px 38px rgba(58,28,20,0.11)", overflow: "hidden", minHeight: 0, display: "flex", flexDirection: "column" }}>
+            <div style={{ display: "contents" }}>
             {activeQuery && activeAgent && activeMs ? (
               <>
                 <style>{`
-                  @keyframes qpCaretBlink { 0%,49%{opacity:1;} 50%,100%{opacity:0;} }
-                  .qp-caret{ display:inline-block; width:2px; height:0.95em; background:#241c15; margin-left:3px; vertical-align:text-bottom; animation:qpCaretBlink 1.1s steps(1) infinite; }
+                  /* inset grey divider between the hero band and the columns */
+                  .qp-hero::after{ content:""; position:absolute; left:28px; right:28px; bottom:0; height:1px; background:#d6cfc3; }
                   .qp-noteacts{ opacity:0; transition:opacity .14s; }
                   .qp-note:hover .qp-noteacts{ opacity:1; }
                   .qp-noteact{ width:22px; height:22px; border:none; background:transparent; border-radius:5px; color:#bcae9e; display:flex; align-items:center; justify-content:center; cursor:pointer; }
@@ -2666,7 +2669,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   /* edge glint — faint highlight travelling the pane border ring, calm 7s loop */
                   .qp-pane::before{ content:""; position:absolute; inset:0; border-radius:14px; padding:1.5px; background:linear-gradient(135deg, transparent 0 43%, rgba(255,255,255,0.85) 50%, transparent 57% 100%); background-size:300% 300%; -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; z-index:4; animation:qpGlint 7s linear infinite; }
                   @keyframes qpGlint{ 0%{background-position:0% 0%;} 100%{background-position:100% 100%;} }
-                  @media (prefers-reduced-motion: reduce){ .qp-caret{ animation:none; opacity:1; } .qp-card:hover{ transform:none; } .qp-pane::before{ animation:none; } }
+                  @media (prefers-reduced-motion: reduce){ .qp-card:hover{ transform:none; } .qp-pane::before{ animation:none; } }
                 `}</style>
                 {/* ── Hero — editorial masthead (mockup: left-aligned, 3px burgundy rule) ── */}
                 {(() => {
@@ -2689,7 +2692,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   const mswl = activeAgent.mswlNotes?.trim();
                   const genres = (activeAgent.genres || []).filter(Boolean);
                   return (
-                    <div style={{ position: "relative", padding: "18px 28px 20px", borderLeft: "3px solid #7c3a2a", background: "#ffffff", flexShrink: 0 }}>
+                    <div className="qp-hero" style={{ position: "relative", padding: "18px 28px 21px", background: "#ffffff", flexShrink: 0 }}>
                       {/* meta stack — status chip + quip, top-right */}
                       <div style={{ position: "absolute", top: 16, right: 28, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8, maxWidth: 240 }}>
                         <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#fdfaf5", border: "1px solid #e8cdc0", borderRadius: 999, padding: "5px 13px 5px 6px" }}>
@@ -2703,30 +2706,43 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                         <span style={{ flexShrink: 0, width: 30, height: 30, borderRadius: "50%", background: burgundy, color: "#ffffff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 600, letterSpacing: ".03em" }}>{initials}</span>
                         <span style={{ flex: 1, minWidth: 0, fontFamily: FONT_SERIF, fontSize: 29, fontWeight: 600, color: "#2a2017", letterSpacing: ".03em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{nameplate}</span>
                       </div>
-                      {/* detail lines: email · MSWL · genre pills (each collapses if absent) */}
-                      {email && (
+                      {/* detail lines: email · MSWL · genres. Empty addable fields keep their slot and
+                          show a quiet "add" reminder that opens the Edit Agent drawer. */}
+                      {email ? (
                         <div style={{ display: "flex", alignItems: "center", gap: 7, fontFamily: "'Inter',sans-serif", fontSize: 13, color: burgundy, marginTop: 11 }}>
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" style={{ opacity: .8, flexShrink: 0 }}><rect x="2.5" y="4.5" width="19" height="15" rx="2.5" /><path d="M3 6l9 6.5L21 6" /></svg>
                           <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{email}</span>
                         </div>
+                      ) : (
+                        <div role="button" tabIndex={0} onClick={() => openEditAgent(activeAgent.id)} style={{ display: "flex", alignItems: "center", gap: 7, fontFamily: "'Inter',sans-serif", fontSize: 13, color: "#b3a596", marginTop: 11, cursor: "pointer" }}>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" style={{ opacity: .8, flexShrink: 0 }}><rect x="2.5" y="4.5" width="19" height="15" rx="2.5" /><path d="M3 6l9 6.5L21 6" /></svg>
+                          <span>Add an email address</span>
+                        </div>
                       )}
-                      {mswl && <div style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 11.5, lineHeight: 1.45, color: "#8a7d6e", maxWidth: 620, margin: "11px 0 0" }}>“{mswl}”</div>}
-                      {genres.length > 0 && (
+                      {mswl ? (
+                        <div style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 11.5, lineHeight: 1.45, color: "#8a7d6e", maxWidth: 620, margin: "11px 0 0" }}>“{mswl}”</div>
+                      ) : (
+                        <div role="button" tabIndex={0} onClick={() => openEditAgent(activeAgent.id)} style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 11.5, lineHeight: 1.45, color: "#b3a596", margin: "11px 0 0", cursor: "pointer" }}>Add their wish list</div>
+                      )}
+                      {genres.length > 0 ? (
                         <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6, marginTop: 11 }}>
                           {genres.map((genre, gIdx) => (
                             <span key={gIdx} style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: ".12em", textTransform: "uppercase" as const, color: "#5a6e58", background: "#fdfaf5", border: "1px solid #cdddc7", borderRadius: 999, padding: "3px 10px" }}>{genre}</span>
                           ))}
                         </div>
+                      ) : (
+                        <div role="button" tabIndex={0} onClick={() => openEditAgent(activeAgent.id)} style={{ fontFamily: "'Inter',sans-serif", fontSize: 11.5, color: "#b3a596", marginTop: 11, cursor: "pointer" }}>Add the genres they represent</div>
                       )}
                     </div>
                   );
                 })()}
 
-                {/* Columns — equal-height grid */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gridTemplateRows: "minmax(0, 1fr)", gap: 16, padding: "16px 22px 24px", flex: 1, minHeight: 0 }}>
+                {/* Columns — equal-height grid (rows size to the tallest column's content; the grid
+                    shrinks + the columns scroll internally only when the pane hits its ceiling) */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, padding: "16px 22px 24px", flex: "0 1 auto", minHeight: 0 }}>
 
                   {/* ── Sub-card 1: Tracking ── */}
-                  <div className="qp-card" style={{ minWidth: 0, minHeight: 430, background: "#fdfaf5", border: "1px solid #e9dfd0", borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                  <div className="qp-card" style={{ minWidth: 0, background: "#fdfaf5", border: "1px solid #e9dfd0", borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
                       {/* pink header band */}
                       <div style={{ padding: "9px 16px", textAlign: "center", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", borderBottom: "1px solid #e8cabb", flexShrink: 0 }}>
                         <span style={{ fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 600, color: "#241c15" }}>Tracking</span>
@@ -2737,7 +2753,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     </div>{/* ── end sub-card 1: Tracking ── */}
 
                   {/* ── Sub-card 2: What you sent ── */}
-                  <div className="qp-card" style={{ minWidth: 0, minHeight: 430, background: "#fdfaf5", border: "1px solid #e9dfd0", borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                  <div className="qp-card" style={{ minWidth: 0, background: "#fdfaf5", border: "1px solid #e9dfd0", borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
                       {/* pink header band */}
                       <div style={{ padding: "9px 16px", textAlign: "center", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", borderBottom: "1px solid #e8cabb", flexShrink: 0 }}>
                         <span style={{ fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 600, color: "#241c15" }}>What you sent</span>
@@ -2761,18 +2777,20 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                               <div style={{ fontFamily: FONT_SERIF, fontSize: 18, fontWeight: 600, color: "#241c15", lineHeight: 1.15, marginBottom: 12 }}>{activeMs.title}</div>
                               <div style={srow}><span style={minilabel}>Genre</span><span style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, color: "#241c15" }}>{activeMs.genre || "—"}</span></div>
                               <div style={srow}><span style={minilabel}>Word count</span><span style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, color: "#241c15" }}>{activeMs.wordCount ? activeMs.wordCount.toLocaleString() : "—"}</span></div>
-                              {activeMs.logline && (
-                                <div style={{ ...srow, paddingTop: 10 }}>
+                              <div style={{ ...srow, paddingTop: 10 }}>
+                                {activeMs.logline ? (
                                   <span style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 12.5, color: "#5a4d40", lineHeight: 1.4 }}>{activeMs.logline}</span>
-                                </div>
-                              )}
+                                ) : (
+                                  <span role="button" tabIndex={0} onClick={() => onNavigate?.("manuscripts")} style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 12.5, color: "#b3a596", lineHeight: 1.4, cursor: "pointer" }}>Add a logline</span>
+                                )}
+                              </div>
                               {/* Materials included */}
                               <div style={{ marginTop: 17 }}>
                                 <div style={{ ...minilabel, display: "block", marginBottom: 8 }}>Materials included</div>
                                 {materials.length > 0 ? (
                                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>{materials.map((m, i) => <span key={i} style={pillStyle}>{m}</span>)}</div>
                                 ) : (
-                                  <span style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 12, color: "#b3a596" }}>No materials recorded.</span>
+                                  <span role="button" tabIndex={0} onClick={() => openEditQuery(activeQuery.id)} style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 12, color: "#b3a596", cursor: "pointer" }}>Add the materials you sent</span>
                                 )}
                               </div>
                               {/* Submission package — Pro-gated */}
@@ -2802,7 +2820,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     </div>{/* ── end sub-card 2: What you sent ── */}
 
                   {/* ── Sub-card 3: Notes — journal pins to bottom via flex-1 on messages area ── */}
-                  <div className="qp-card" style={{ minWidth: 0, minHeight: 430, background: "#fdfaf5", border: "1px solid #e9dfd0", borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                  <div className="qp-card" style={{ minWidth: 0, background: "#fdfaf5", border: "1px solid #e9dfd0", borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
                       {/* pink header band */}
                       <div style={{ padding: "9px 16px", textAlign: "center", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", borderBottom: "1px solid #e8cabb", flexShrink: 0 }}>
                         <span style={{ fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 600, color: "#241c15" }}>Notes</span>
@@ -2819,7 +2837,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                               <div style={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column", paddingRight: 2 }}>
                                 {notes.length === 0 ? (
                                   <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
-                                    <span style={{ fontFamily: "'Caveat', cursive", fontSize: 21, color: "#241c15" }}>No notes added yet<span className="qp-caret" /></span>
+                                    <span style={{ fontFamily: "'Caveat', cursive", fontSize: 21, color: "#241c15" }}>No notes added yet</span>
                                   </div>
                                 ) : notes.map((entry) => {
                                   const isEditing = editingJournalId === entry.id;

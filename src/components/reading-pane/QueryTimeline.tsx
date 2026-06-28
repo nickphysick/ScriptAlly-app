@@ -61,7 +61,7 @@ interface RowSpec {
   date?: string;
   sub?: string;
   pills?: string[];
-  resp?: { width: number; dayCap: string; expCap: string } | null;
+  resp?: { width: number; dayCap: string; expCap: string; overdue: boolean } | null;
 }
 
 export interface QueryTimelineProps {
@@ -127,10 +127,14 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
       const mDays = weeks * 7;
       const nDays = Math.max(0, Math.floor((now - lastSendMs) / DAY));
       const expMs = query.responseDeadline ? getTime(query.responseDeadline) : lastSendMs + mDays * DAY;
+      const overdue = nDays > mDays;
       resp = {
+        // Fill is capped at 100% (an overdue query can't read as "more than full").
         width: Math.max(0, Math.min(1, nDays / mDays)) * 100,
-        dayCap: `DAY ${nDays} OF ~${mDays}`,
-        expCap: `EXP. ~${fmtShort(expMs)}`,
+        // Past the window, "DAY 816 OF ~42" reads broken — switch to a plain overdue caption.
+        dayCap: overdue ? "NO REPLY YET" : `DAY ${nDays} OF ~${mDays}`,
+        expCap: `${overdue ? "DUE" : "EXP."} ~${fmtShort(expMs)}`,
+        overdue,
       };
     }
     rows.push({ key: "ghost", kind: "ghost", title: "Waiting to hear back", resp });
@@ -190,11 +194,11 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
               {row.kind === "ghost" && row.resp && (
                 <div style={{ marginTop: 8 }}>
                   <div style={{ position: "relative", height: 5, borderRadius: 5, background: "#efe5d8", overflow: "hidden" }}>
-                    <i style={{ position: "absolute", left: 0, top: 0, bottom: 0, borderRadius: 5, background: "linear-gradient(90deg,#a9bca6,#8a9e88)", width: `${row.resp.width}%` }} />
+                    <i style={{ position: "absolute", left: 0, top: 0, bottom: 0, borderRadius: 5, background: row.resp.overdue ? "linear-gradient(90deg,#d8b87a,#b98a4e)" : "linear-gradient(90deg,#a9bca6,#8a9e88)", width: `${row.resp.width}%` }} />
                   </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", marginTop: 5 }}>
-                    <span style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: "0.05em", color: "#a89a8a" }}>{row.resp.dayCap}</span>
-                    <span style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: "0.05em", color: "#a89a8a" }}>{row.resp.expCap}</span>
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: 10, marginTop: 5 }}>
+                    <span style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: "0.05em", color: "#a89a8a", whiteSpace: "nowrap" }}>{row.resp.dayCap}</span>
+                    <span style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: "0.05em", color: "#a89a8a", whiteSpace: "nowrap" }}>{row.resp.expCap}</span>
                   </div>
                 </div>
               )}
