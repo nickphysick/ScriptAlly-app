@@ -350,8 +350,8 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
                     bottom: 0,
                     left: "50%",
                     marginLeft: -NOTE_W / 2,
-                    transformOrigin: "50% 100%",
-                    transform: hov ? `translateX(${s.x}px) translateY(-12px) rotate(0deg) scale(1.04)` : `translateX(${s.x}px) rotate(${s.rot}deg)`,
+                    transformOrigin: "50% 50%",
+                    transform: hov ? `translateX(${s.x}px) translateY(-12px) rotate(0deg) scale(0.9)` : `translateX(${s.x}px) rotate(${s.rot}deg) scale(0.5)`,
                     zIndex: hov ? 60 : s.z,
                     boxShadow: hov ? "1px 12px 26px rgba(58,28,20,0.22)" : undefined,
                   }}
@@ -366,7 +366,7 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
               className="sa-fan-note"
               onMouseEnter={() => setHoveredId(front.id)}
               onMouseLeave={() => setHoveredId((id) => (id === front.id ? null : id))}
-              style={{ position: "relative", zIndex: 3, transformOrigin: "50% 100%", transform: hoveredId === front.id ? "translateY(-12px) scale(1.04)" : "none" }}
+              style={{ position: "relative", zIndex: 3, transformOrigin: "50% 50%", transform: hoveredId === front.id ? "translateY(-12px) scale(0.9)" : "scale(0.5)" }}
             >
               <DeskNote note={front} width={NOTE_W} minHeight={NOTE_MINH} onOpen={() => setEditing(front)} onComplete={onComplete} onDelete={(n) => onDelete(n.id)} />
             </div>

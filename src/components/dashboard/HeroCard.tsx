@@ -216,9 +216,14 @@ export const HeroCard: React.FC<HeroCardProps> = ({
               objectFit: "contain",
               pointerEvents: "none",
               zIndex: 0,
-              // soft vignette so the corkboard fades out at the edges
-              WebkitMaskImage: "radial-gradient(ellipse at center, #000 62%, transparent 100%)",
-              maskImage: "radial-gradient(ellipse at center, #000 62%, transparent 100%)",
+              // crisp fade to white on ALL four edges (intersecting linear masks fade the straight
+              // edges, not just the corners the way a radial ellipse did)
+              WebkitMaskImage:
+                "linear-gradient(to right, transparent 0%, #000 17%, #000 83%, transparent 100%), linear-gradient(to bottom, transparent 0%, #000 17%, #000 83%, transparent 100%)",
+              maskImage:
+                "linear-gradient(to right, transparent 0%, #000 17%, #000 83%, transparent 100%), linear-gradient(to bottom, transparent 0%, #000 17%, #000 83%, transparent 100%)",
+              WebkitMaskComposite: "source-in",
+              maskComposite: "intersect",
             }}
           />
           <div style={{ position: "relative", zIndex: 1 }}>
