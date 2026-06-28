@@ -301,8 +301,8 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
                   bottom: 0,
                   left: "50%",
                   marginLeft: -PICK_W / 2,
-                  transformOrigin: "50% 100%",
-                  transform: hov ? `translateX(${x}px) translateY(-8px) rotate(0deg) scale(1.04)` : `translateX(${x}px) rotate(${p.rot}deg)`,
+                  transformOrigin: "50% 50%",
+                  transform: hov ? `translateX(${x}px) translateY(-8px) rotate(0deg) scale(0.9)` : `translateX(${x}px) rotate(${p.rot}deg) scale(0.5)`,
                   zIndex: hov ? 60 : p.z,
                 }}
               >
@@ -320,7 +320,7 @@ export const NotesDesk: React.FC<NotesDeskProps> = ({ notes, onAdd, onSave, onCo
             className="sa-fan-note"
             onMouseEnter={() => setHoverColour("pink")}
             onMouseLeave={() => setHoverColour((c) => (c === "pink" ? null : c))}
-            style={{ position: "relative", zIndex: 3, transformOrigin: "50% 100%", transform: hoverColour === "pink" ? "translateY(-6px) scale(1.03)" : "none" }}
+            style={{ position: "relative", zIndex: 3, transformOrigin: "50% 50%", transform: hoverColour === "pink" ? "translateY(-6px) scale(0.9)" : "scale(0.5)" }}
           >
             <PostIt colour="pink" theme={NOTE_THEMES.pink} width={PICK_W} minHeight={PICK_MINH} surfaced={false} onClick={() => grabColour("pink")}>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 7, minHeight: 88, textAlign: "center", color: NOTE_THEMES.pink.ink }}>
