@@ -727,9 +727,9 @@ export const SubmissionPackages: React.FC = () => {
   const renderFirstRun = () => {
     const tilt = (i: number, tilts: number[]) => (WORKTABLE_TILT ? `rotate(${tilts[i] ?? 0}deg)` : "none");
     return (
-      <div className="sp-pane" style={{ position: "relative", background: "#ffffff", border: "1px solid rgba(124,58,42,0.12)", borderRadius: 18, boxShadow: "0 6px 22px rgba(58,28,20,0.08)", overflow: "hidden" }}>
-        {/* soft-clay hero band (rounded top, clipped by the pane) */}
-        <div style={{ position: "relative", overflow: "hidden", padding: "24px 36px", textAlign: "center", borderBottom: "1px solid rgba(124,58,42,0.1)", background: "linear-gradient(135deg, #ecd9cc, #e4ccba)" }}>
+      <div className="sp-pane" style={{ position: "relative", background: "#ffffff", border: "1px solid #1a1410", borderRadius: 18, boxShadow: "0 6px 22px rgba(58,28,20,0.08)", overflow: "hidden" }}>
+        {/* hero band — the same pink as the "Use template" buttons (buttonPinkBg) */}
+        <div style={{ position: "relative", overflow: "hidden", padding: "24px 36px", textAlign: "center", borderBottom: "1px solid rgba(124,58,42,0.1)", background: buttonPinkBg }}>
           <span className="sp-band-sheen" aria-hidden="true" />
           <div style={{ position: "relative", fontFamily: FONT_SERIF, fontSize: 31, fontWeight: 600, color: "#3a2016" }}>Find out what wins requests</div>
           <div style={{ position: "relative", fontFamily: FONT_SANS, fontSize: 13, color: "#9a6750", marginTop: 7, maxWidth: 550, marginLeft: "auto", marginRight: "auto", lineHeight: 1.5 }}>
