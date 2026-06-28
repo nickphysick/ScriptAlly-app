@@ -36,6 +36,7 @@ import { formatQueryMaterial } from "../lib/materials";
 import { MarkSentPopover, MarkSentKind } from "./MarkSentPopover";
 import { useFixedMenu } from "./forms/useFixedMenu";
 import { useOpenEditQuery } from "./EditQueryHost";
+import { QueryTimeline } from "./reading-pane/QueryTimeline";
 import { MountCard } from "./MountCard";
 import { ScriptAllyLogo } from "./ScriptAllyLogo";
 import {
@@ -2710,142 +2711,14 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 <div style={{ display: "flex", gap: 14, padding: "6px 22px 14px", alignItems: "stretch", flex: 1, minHeight: 0 }}>
 
                   {/* ── Sub-card 1: Tracking ── */}
-                  <div style={{ flex: 1, border: "1px solid rgba(124,58,42,.16)", borderRadius: 12, background: "#fffefb", padding: "18px 18px 20px", display: "flex", flexDirection: "column", boxShadow: "0 1px 2px rgba(40,22,14,.03)", minWidth: 0, minHeight: 0 }}>
-                      {/* Running head */}
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 18, flexShrink: 0 }}>
-                        <div style={{ height: 1, width: 22, background: "rgba(124,58,42,.3)" }} />
-                        <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, textTransform: "uppercase" as const, letterSpacing: ".16em", color: "#2e3a2c" }}>Tracking</span>
-                        <div style={{ height: 1, width: 22, background: "rgba(124,58,42,.3)" }} />
+                  <div style={{ flex: 1, minWidth: 0, minHeight: 430, background: "#fdfaf5", border: "1px solid #e9dfd0", borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                      {/* pink header band */}
+                      <div style={{ padding: "9px 16px", textAlign: "center", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", borderBottom: "1px solid #e8cabb", flexShrink: 0 }}>
+                        <span style={{ fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 600, color: "#241c15" }}>Tracking</span>
                       </div>
-                      {/* Scrollable body: timeline + action required */}
-                      <div style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
-                      {/* Timeline (same logic as before) */}
-                      {(() => {
-                        const validEnumValues = Object.values(QueryStatus);
-                        const activityEventsRaw = trackingEvents.filter(evt => validEnumValues.includes(evt.type as QueryStatus));
-                        const getTime = (val: any) => {
-                          if (!val) return Date.now();
-                          if (val.toDate) return val.toDate().getTime();
-                          if (val.seconds) return val.seconds * 1000;
-                          return new Date(val).getTime();
-                        };
-                        const deduplicatedMap: { [key: string]: any } = {};
-                        activityEventsRaw.forEach(evt => {
-                          const typeVal = evt.type as string;
-                          if (!deduplicatedMap[typeVal]) {
-                            deduplicatedMap[typeVal] = evt;
-                          } else {
-                            const existingTime = getTime(deduplicatedMap[typeVal].createdAt);
-                            const incomingTime = getTime(evt.createdAt);
-                            if (incomingTime < existingTime) deduplicatedMap[typeVal] = evt;
-                          }
-                        });
-                        const activityEvents = Object.values(deduplicatedMap);
-                        activityEvents.sort((a, b) => getTime(a.createdAt) - getTime(b.createdAt));
-                        const isQueriedStored = activityEvents.some(evt => evt.type === QueryStatus.QUERIED);
-                        if (!isQueriedStored && activeQuery.dateSent) {
-                          activityEvents.unshift({ type: QueryStatus.QUERIED, createdAt: activeQuery.dateSent, note: `Query sent via ${activeQuery.sendMethod || "Email"}` } as any);
-                        }
-                        const WAITING_STATUSES = [QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT];
-                        const showWaiting = WAITING_STATUSES.includes(currentStatus as QueryStatus);
-                        const timelineItems = [...activityEvents, ...(showWaiting ? [{ type: 'waiting', synthetic: true } as any] : [])];
-                        const formatDate = (val: any) => {
-                          if (!val) return "";
-                          const d = val && val.toDate ? val.toDate() : (val && val.seconds ? new Date(val.seconds * 1000) : new Date(val));
-                          if (isNaN(d.getTime())) return "";
-                          return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-                        };
-                        const TIMELINE_TITLES: Record<QueryStatus, string> = {
-                          [QueryStatus.QUERIED]: 'Query sent',
-                          [QueryStatus.PARTIAL_REQUESTED]: 'Partial manuscript requested',
-                          [QueryStatus.PARTIAL_SENT]: 'Partial manuscript sent',
-                          [QueryStatus.FULL_REQUESTED]: 'Full manuscript requested',
-                          [QueryStatus.FULL_SENT]: 'Full manuscript sent',
-                          [QueryStatus.REVISE_RESUBMIT]: 'Revise & resubmit requested',
-                          [QueryStatus.OFFER]: 'Offer of representation',
-                          [QueryStatus.REJECTED]: 'Query rejected',
-                          [QueryStatus.WITHDRAWN]: 'Query withdrawn',
-                          [QueryStatus.NO_RESPONSE]: 'Closed — no response',
-                        };
-                        return timelineItems.map((item, index) => {
-                          const isLast = index === timelineItems.length - 1;
-                          let dotElement = null;
-                          if (item.type === 'waiting') {
-                            // Non-status projection node (future "waiting to hear back") — keep its
-                            // neutral hollow marker; it isn't a QueryStatus and has no dot artwork.
-                            dotElement = <div className="rounded-full z-10 bg-transparent border-[1.5px] border-[#c9a89e] shrink-0 mt-[4px]" style={{ width: 25, height: 25 }} />;
-                          } else {
-                            // Status-bearing node — route through the canonical StatusDot map (was a
-                            // hand-built dot here; repointed so the designed artwork is the one source).
-                            dotElement = <StatusDot status={item.type as QueryStatus} overrideSize={25} className="z-10 mt-[4px]" />;
-                          }
-                          const baseTitle = item.type === 'waiting' ? 'Waiting to hear back' : (TIMELINE_TITLES[item.type as QueryStatus] || item.type);
-                          const titleText = item.type === QueryStatus.FULL_SENT && (activeQuery.revisionRound ?? 1) >= 2 ? `${baseTitle} (v${activeQuery.revisionRound})` : baseTitle;
-                          const dateText = item.type === 'waiting' ? (activeQuery.responseDeadline ? formatDate(activeQuery.responseDeadline) : "") : formatDate(item.createdAt);
-                          let displaySubDetail = "";
-                          if (item.type !== 'waiting') {
-                            if (item.type === QueryStatus.QUERIED) {
-                              displaySubDetail = `via ${activeQuery.sendMethod || "Email"}`;
-                            } else if (item.type === QueryStatus.PARTIAL_REQUESTED || item.type === QueryStatus.FULL_REQUESTED) {
-                              const qty = item.materialsQuantity || activeQuery.materialsRequestedQuantity;
-                              const mType = item.materialsType || activeQuery.materialsRequestedType;
-                              if (qty && mType) {
-                                const formattedType = mType.toLowerCase() === "other" ? "" : mType;
-                                displaySubDetail = `Requested: ${qty} ${formattedType}`.trim();
-                              } else if (item.note) {
-                                const parts = item.note.split("—");
-                                displaySubDetail = parts.length > 1 ? `Requested: ${parts[1].trim()}` : item.note;
-                              } else {
-                                displaySubDetail = "Requested materials details";
-                              }
-                            } else if (item.type === QueryStatus.REJECTED) {
-                              const feedbackType = item.feedbackType || activeQuery.rejectionFeedbackType;
-                              if (feedbackType === "detailed" || (item.note && item.note.toLowerCase().includes("detailed feedback"))) displaySubDetail = "Detailed feedback recorded";
-                              else if (feedbackType === "standard" || (item.note && item.note.toLowerCase().includes("standard"))) displaySubDetail = "Standard rejection";
-                              else if (feedbackType === "form" || (item.note && item.note.toLowerCase().includes("form"))) displaySubDetail = "Form rejection";
-                              else displaySubDetail = "Standard rejection";
-                            }
-                          }
-                          const hasExpected = !!activeQuery.responseDeadline;
-                          const hasNudge = !!activeQuery.nudgeDate;
-                          const hasTintedBox = hasExpected || hasNudge;
-                          return (
-                            <div key={index} className="flex gap-4 animate-fade-in">
-                              <div className="flex flex-col items-center shrink-0 w-[26px] relative">
-                                {dotElement}
-                                {!isLast && <div className="absolute left-1/2 -translate-x-1/2 top-[30px] bottom-[-14px] bg-[#e8e0d8]" style={{ width: 1 }} />}
-                              </div>
-                              <div className="flex-grow pb-4">
-                                <div className="flex justify-between items-baseline gap-1.5">
-                                  <h5 className="text-[12px] font-medium text-[#3a1c14] leading-tight select-none">{titleText}</h5>
-                                  {dateText && <span className="text-[10px] text-[#c9a89e] shrink-0 font-mono select-none">{dateText}</span>}
-                                </div>
-                                {item.type !== 'waiting' && displaySubDetail && (
-                                  <p className="text-[11px] text-[#a08070] mt-0.5 font-sans leading-tight">{displaySubDetail}</p>
-                                )}
-                                {item.type === 'waiting' && hasTintedBox && (
-                                  <div className="mt-2.5 p-2 px-3 bg-[#FFF0F0] border border-[#fbdcd5] rounded-md text-[11px] leading-relaxed text-[#7c3a2a] space-y-0.5">
-                                    {hasExpected && <div>Response expected by {formatDate(activeQuery.responseDeadline)}</div>}
-                                    {hasNudge && <div>Nudge set for {formatDate(activeQuery.nudgeDate)}</div>}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        });
-                      })()}
-                      {/* Action required prompt */}
-                      {[QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED].includes(currentStatus as QueryStatus) && (
-                        <div className="pt-3 mt-auto shrink-0">
-                          <div className="p-3 bg-[#FAF1EF] border border-[#7c3a2a]/20 rounded-lg shadow-3xs">
-                            <span className="text-[9px] font-mono text-[#7c3a2a] font-bold uppercase tracking-wider block mb-0.5">ACTION REQUIRED</span>
-                            <p className="text-[11px] text-[#3a1c14] leading-relaxed font-sans font-medium">
-                              {currentStatus === QueryStatus.PARTIAL_REQUESTED ? "Partial manuscript has been requested. Polish your pages and send them to the agent." : "Full manuscript has been requested. Take a deep breath, verify all requirements, and send the full manuscript!"}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-                      </div>{/* end scrollable tracking body */}
+                      <div style={{ padding: "16px 16px 18px", flex: 1, minHeight: 0, overflowY: "auto" }}>
+                        <QueryTimeline query={activeQuery} agent={activeAgent} events={trackingEvents} />
+                      </div>
                     </div>{/* ── end sub-card 1: Tracking ── */}
 
                   {/* ── Sub-card 2: What you sent ── */}

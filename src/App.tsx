@@ -46,6 +46,8 @@ import { QueryStatus, SubmissionStatus, SubmissionMethod } from "./types";
 // a mock record so the shared shell can be eyeballed without signing in. DEV only.
 import { EditAgentDrawer } from "./components/EditAgentDrawer";
 import { EditQueryDrawer } from "./components/EditQueryDrawer";
+// TEMP: query reading-pane review harness (#/reading-pane-lab) — DEV only.
+import { QueryTimeline } from "./components/reading-pane/QueryTimeline";
 // Dev review surface for the notes pieces (PostIt / quick-add / editor) — #/notes-lab, DEV only.
 import { NotesLab } from "./components/notes/NotesLab";
 import { Palette, X, Check } from "lucide-react";
@@ -126,6 +128,37 @@ const DrawerLab: React.FC = () => {
       {which === "agent"
         ? <EditAgentDrawer agent={mockAgent} isOpen={open} onClose={() => setOpen(false)} />
         : <EditQueryDrawer query={mockQuery} isOpen={open} onClose={() => setOpen(false)} />}
+    </div>
+  );
+};
+
+/** TEMP dev harness for the query reading-pane redesign (#/reading-pane-lab): renders the timeline
+ *  over a mock partial-sent query (turnaround + scheduled nudge) so the pipeline can be eyeballed. */
+const ReadingPaneLab: React.FC = () => {
+  const dayMs = 86400000;
+  const sentMs = Date.now() - 41 * dayMs;
+  const mockAgent = { id: "lab", name: "Priya Raman", agency: "Saltmarsh Literary", responseTimeWeeks: 8 } as any;
+  const mockQuery = {
+    id: "lab-q", agentId: "lab", manuscriptId: "lab-ms", status: QueryStatus.PARTIAL_SENT,
+    dateSent: new Date(sentMs).toISOString(), sendMethod: SubmissionMethod.EMAIL,
+    materialsWanted: ["Query letter", "Synopsis"],
+    nudgeDate: new Date(Date.now() + 9 * dayMs).toISOString(), revisionRound: 1,
+  } as any;
+  const mockEvents = [
+    { type: QueryStatus.QUERIED, createdAt: new Date(sentMs).toISOString() },
+    { type: QueryStatus.PARTIAL_REQUESTED, createdAt: new Date(sentMs + dayMs).toISOString() },
+    { type: QueryStatus.PARTIAL_SENT, createdAt: new Date(sentMs + 2 * dayMs).toISOString() },
+  ];
+  return (
+    <div style={{ minHeight: "100vh", background: "#f2ede7", padding: 30 }}>
+      <div style={{ maxWidth: 360, background: "#fdfaf5", border: "1px solid #e9dfd0", borderRadius: 11, overflow: "hidden" }}>
+        <div style={{ padding: "9px 16px", textAlign: "center", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", borderBottom: "1px solid #e8cabb" }}>
+          <span style={{ fontFamily: "'Playfair Display',serif", fontSize: 14, fontWeight: 600, color: "#241c15" }}>Tracking</span>
+        </div>
+        <div style={{ padding: "16px 16px 18px" }}>
+          <QueryTimeline query={mockQuery} agent={mockAgent} events={mockEvents} />
+        </div>
+      </div>
     </div>
   );
 };
@@ -243,6 +276,10 @@ function AppContent() {
   // Dev-only Form11Drawer review surface (Edit Agent over a mock record). DEV only.
   if (hash === "#/drawer-lab" && import.meta.env.DEV) {
     return <DrawerLab />;
+  }
+  // Dev-only query reading-pane timeline review surface. DEV only.
+  if (hash === "#/reading-pane-lab" && import.meta.env.DEV) {
+    return <ReadingPaneLab />;
   }
 
   // Boot: while Firebase Auth is still resolving the session, show a neutral splash — never a
