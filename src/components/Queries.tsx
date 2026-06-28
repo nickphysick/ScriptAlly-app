@@ -2648,9 +2648,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             </div>{/* closes inner bordered frame */}
           </div>{/* closes outer rim — list card */}
 
-          {/* Reading pane card — 3px burgundy top accent via border-top on inner frame */}
-          <div style={{ border: "1px solid rgba(90,55,42,.16)", borderRadius: 14, background: parchment, backgroundImage: PAPER_TEXTURE, padding: 7, boxShadow: "0 1px 3px rgba(40,22,14,.05), 0 7px 20px rgba(40,22,14,.07)", minHeight: 0, display: "flex", flexDirection: "column" }}>
-            <div style={{ borderLeft: "1px solid rgba(124,58,42,.22)", borderRight: "1px solid rgba(124,58,42,.22)", borderBottom: "1px solid rgba(124,58,42,.22)", borderTop: "3px solid #7c3a2a", borderRadius: 8, overflow: "hidden", background: parchment, flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+          {/* Reading pane — the mockup's white pane with the animated edge glint */}
+          <div className="qp-pane" style={{ position: "relative", border: "1px solid #e6dccd", borderRadius: 14, background: "#ffffff", boxShadow: "0 1px 3px rgba(58,28,20,0.07), 0 14px 38px rgba(58,28,20,0.11)", overflow: "hidden", minHeight: 0, display: "flex", flexDirection: "column" }}>
+            <div style={{ background: "#ffffff", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
             {activeQuery && activeAgent && activeMs ? (
               <>
                 <style>{`
@@ -2660,7 +2660,13 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   .qp-note:hover .qp-noteacts{ opacity:1; }
                   .qp-noteact{ width:22px; height:22px; border:none; background:transparent; border-radius:5px; color:#bcae9e; display:flex; align-items:center; justify-content:center; cursor:pointer; }
                   .qp-noteact:hover{ background:#f3ebe0; color:#7c3a2a; }
-                  @media (prefers-reduced-motion: reduce){ .qp-caret{ animation:none; opacity:1; } }
+                  /* column swell on hover */
+                  .qp-card{ transition:transform .2s ease, box-shadow .2s ease; }
+                  .qp-card:hover{ transform:scale(1.02); box-shadow:0 8px 22px rgba(58,28,20,.10); z-index:2; }
+                  /* edge glint — faint highlight travelling the pane border ring, calm 7s loop */
+                  .qp-pane::before{ content:""; position:absolute; inset:0; border-radius:14px; padding:1.5px; background:linear-gradient(135deg, transparent 0 43%, rgba(255,255,255,0.85) 50%, transparent 57% 100%); background-size:300% 300%; -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; z-index:4; animation:qpGlint 7s linear infinite; }
+                  @keyframes qpGlint{ 0%{background-position:0% 0%;} 100%{background-position:100% 100%;} }
+                  @media (prefers-reduced-motion: reduce){ .qp-caret{ animation:none; opacity:1; } .qp-card:hover{ transform:none; } .qp-pane::before{ animation:none; } }
                 `}</style>
                 {/* ── Hero — editorial masthead (mockup: left-aligned, 3px burgundy rule) ── */}
                 {(() => {
@@ -2716,11 +2722,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   );
                 })()}
 
-                {/* Sub-cards row */}
-                <div style={{ display: "flex", gap: 14, padding: "6px 22px 14px", alignItems: "stretch", flex: 1, minHeight: 0 }}>
+                {/* Columns — equal-height grid */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gridTemplateRows: "minmax(0, 1fr)", gap: 16, padding: "16px 22px 24px", flex: 1, minHeight: 0 }}>
 
                   {/* ── Sub-card 1: Tracking ── */}
-                  <div style={{ flex: 1, minWidth: 0, minHeight: 430, background: "#fdfaf5", border: "1px solid #e9dfd0", borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                  <div className="qp-card" style={{ minWidth: 0, minHeight: 430, background: "#fdfaf5", border: "1px solid #e9dfd0", borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
                       {/* pink header band */}
                       <div style={{ padding: "9px 16px", textAlign: "center", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", borderBottom: "1px solid #e8cabb", flexShrink: 0 }}>
                         <span style={{ fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 600, color: "#241c15" }}>Tracking</span>
@@ -2731,7 +2737,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     </div>{/* ── end sub-card 1: Tracking ── */}
 
                   {/* ── Sub-card 2: What you sent ── */}
-                  <div style={{ flex: 1, minWidth: 0, minHeight: 430, background: "#fdfaf5", border: "1px solid #e9dfd0", borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                  <div className="qp-card" style={{ minWidth: 0, minHeight: 430, background: "#fdfaf5", border: "1px solid #e9dfd0", borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
                       {/* pink header band */}
                       <div style={{ padding: "9px 16px", textAlign: "center", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", borderBottom: "1px solid #e8cabb", flexShrink: 0 }}>
                         <span style={{ fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 600, color: "#241c15" }}>What you sent</span>
@@ -2796,7 +2802,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     </div>{/* ── end sub-card 2: What you sent ── */}
 
                   {/* ── Sub-card 3: Notes — journal pins to bottom via flex-1 on messages area ── */}
-                  <div style={{ flex: 1, minWidth: 0, minHeight: 430, background: "#fdfaf5", border: "1px solid #e9dfd0", borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                  <div className="qp-card" style={{ minWidth: 0, minHeight: 430, background: "#fdfaf5", border: "1px solid #e9dfd0", borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
                       {/* pink header band */}
                       <div style={{ padding: "9px 16px", textAlign: "center", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", borderBottom: "1px solid #e8cabb", flexShrink: 0 }}>
                         <span style={{ fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 600, color: "#241c15" }}>Notes</span>
