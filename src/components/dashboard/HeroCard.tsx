@@ -202,7 +202,7 @@ export const HeroCard: React.FC<HeroCardProps> = ({
         <div style={{ position: "relative", zIndex: 4, flex: "1 1 0", minWidth: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
           {/* corkboard backdrop — the post-its sit on it; 65% of the greeting container's height */}
           <img
-            src="/corkboard%20splash.png"
+            src="/desk%20frame.png"
             alt=""
             aria-hidden="true"
             style={{
