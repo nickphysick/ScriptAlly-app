@@ -1809,7 +1809,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                          >
                            <span className="flex items-center gap-1.5 min-w-0" style={{ color: isActive ? "#7c3a2a" : "#3a1c14" }}>
                              {item.type === "filter" && item.id !== "All" && (
-                               <StatusDot status={item.id as QueryStatus} size={13} />
+                               <StatusDot status={item.id as QueryStatus} size={13} decorative />
                              )}
                              <span className={`truncate ${isActive ? "font-bold" : ""}`}>{item.label}</span>
                            </span>
@@ -1940,7 +1940,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                        >
                          <span className="flex items-center gap-1.5 min-w-0">
                            {item.id !== "All" && (
-                             <StatusDot status={item.id as QueryStatus} size={13} />
+                             <StatusDot status={item.id as QueryStatus} size={13} decorative />
                            )}
                            <span className="truncate">{item.label}</span>
                          </span>
@@ -2474,7 +2474,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     <div className="qp-hero" style={{ position: "relative", padding: "22px 28px 18px", background: "#ffffff", flexShrink: 0 }}>
                       {/* status chip — in-pane, top-right (soft, not a sticker) */}
                       <div style={{ position: "absolute", top: 22, right: 26, zIndex: 2, display: "inline-flex", alignItems: "center", gap: 8, background: "#fdfaf5", border: "1px solid #e3d9cc", borderRadius: 999, padding: "5px 13px 5px 6px", boxShadow: "0 1px 2px rgba(58,28,20,.05)" }}>
-                        <StatusDot status={activeQuery.status} overrideSize={21} />
+                        <StatusDot status={activeQuery.status} overrideSize={21} decorative />
                         <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: ".15em", color: burgundy, fontWeight: 500, textTransform: "uppercase" as const, whiteSpace: "nowrap" }}>{statusDisplayLabel(activeQuery)}</span>
                       </div>
                       {/* identity — larger avatar + agent name + agency */}

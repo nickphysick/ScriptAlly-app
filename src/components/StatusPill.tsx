@@ -97,7 +97,7 @@ export const StatusPill: React.FC<{
         border: border,
       }}
     >
-      <StatusDot status={norm} size={size === 'lg' ? 16 : 12} />
+      <StatusDot status={norm} size={size === 'lg' ? 16 : 12} decorative />
       <span>{label}</span>
     </div>
   );

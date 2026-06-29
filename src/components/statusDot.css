@@ -1,0 +1,43 @@
+/**
+ * StatusDot — pulse ring for the four "your move" states only
+ * (Partial Requested, Full Requested, Revise & Resubmit, Offer).
+ *
+ * Single source of truth for WHICH states pulse lives in StatusDot.tsx (STATUS_DOT_MAP);
+ * this file only owns the animation. The ring colour is passed per-dot via the
+ * --sa-dot-pulse-color custom property so it always matches that status' base colour.
+ *
+ * A slow (~2.4s) ring that expands and fades. prefers-reduced-motion drops the motion to a
+ * faint static ring so the "needs you" cue still reads without animation.
+ */
+@keyframes sa-statusdot-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  70% {
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+.sa-statusdot__pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1.5px var(--sa-dot-pulse-color, #c98e8a);
+  transform-origin: center;
+  pointer-events: none;
+  animation: sa-statusdot-pulse 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sa-statusdot__pulse {
+    animation: none;
+    /* faint static ring instead of motion */
+    transform: scale(1.18);
+    opacity: 0.28;
+  }
+}
