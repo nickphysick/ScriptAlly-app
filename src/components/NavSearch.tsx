@@ -173,7 +173,7 @@ export const NavSearch: React.FC<NavSearchProps> = ({ searchQuery, setSearchQuer
       {/* Search pill (parchment, as before) */}
       <div
         className="flex items-center gap-2"
-        style={{ background: "#ffffff", border: "0.5px solid #e0d5c8", borderRadius: 9, padding: "8px 12px", width: isMobile ? "100%" : 200 }}
+        style={{ background: "#ffffff", border: "0.5px solid #e0d5c8", borderRadius: 9, padding: "8px 12px", width: isMobile ? "100%" : 240 }}
       >
         <Search className="w-[13px] h-[13px] shrink-0" style={{ color: labelColor }} />
         <input
@@ -188,7 +188,7 @@ export const NavSearch: React.FC<NavSearchProps> = ({ searchQuery, setSearchQuer
           aria-expanded={showDropdown}
           aria-controls="nav-search-listbox"
           aria-autocomplete="list"
-          className="bg-transparent border-none outline-none w-full min-w-0 placeholder-[#c8b8a8]"
+          className="nav-search-field bg-transparent border-none outline-none w-full min-w-0 placeholder-[#c8b8a8]"
           style={{ fontFamily: FONT_SANS, fontSize: 12, color: bodyInk }}
         />
       </div>
