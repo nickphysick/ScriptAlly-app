@@ -112,11 +112,125 @@ const NavLink: React.FC<{ label: string; active: boolean; onClick: () => void }>
   </button>
 );
 
+// Small line-icons for the Queries dropdown, drawn inside a rose chip (stroke = currentColor).
+const QM_DB = (<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" /><path d="M8 9h8M8 13h8M8 17h5" /></svg>);
+const QM_LOG = (<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>);
+const QM_RECORD = (<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v4h4" /></svg>);
+
+// The three former hub choices, now reached from the nav. "Record a response" has no context-less
+// entry (the real flow is query-scoped, opened per-selected-query from the desk) so it lands on the
+// database — a "pick a query to update" step would be a follow-up.
+const QUERIES_MENU: { key: string; title: string; subtitle: string; sub: string; icon: React.ReactNode }[] = [
+  { key: "database", title: "Query database", subtitle: "Browse and track every query.", sub: "Query database", icon: QM_DB },
+  { key: "log", title: "Log a new query", subtitle: "Record one you've just sent.", sub: "Log a query", icon: QM_LOG },
+  { key: "record", title: "Record a response", subtitle: "Update one already out there.", sub: "Query database", icon: QM_RECORD },
+];
+
+/**
+ * Queries nav item — a dropdown (replaces the old "What would you like to do?" hub). The label opens
+ * the menu (it doesn't shortcut to the database — that variant is a one-line change if wanted). Full
+ * menu semantics: aria roles, arrow-key navigation, Esc/outside-click close, focus returns to trigger.
+ */
+const QueriesNavMenu: React.FC<{
+  active: boolean;
+  open: boolean;
+  setOpen: (next: boolean) => void;
+  onNavigate: (tab: string, subPageName?: string) => void;
+}> = ({ active, open, setOpen, onNavigate }) => {
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
+  const itemRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
+
+  // Move focus into the menu when it opens.
+  React.useEffect(() => {
+    if (!open) return;
+    const id = window.setTimeout(() => itemRefs.current[0]?.focus(), 0);
+    return () => window.clearTimeout(id);
+  }, [open]);
+
+  const closeToTrigger = () => { setOpen(false); triggerRef.current?.focus(); };
+  const activate = (item: typeof QUERIES_MENU[number]) => { setOpen(false); onNavigate("queries", item.sub); };
+
+  const onItemKey = (e: React.KeyboardEvent, idx: number) => {
+    const n = QUERIES_MENU.length;
+    if (e.key === "ArrowDown") { e.preventDefault(); itemRefs.current[(idx + 1) % n]?.focus(); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); itemRefs.current[(idx - 1 + n) % n]?.focus(); }
+    else if (e.key === "Home") { e.preventDefault(); itemRefs.current[0]?.focus(); }
+    else if (e.key === "End") { e.preventDefault(); itemRefs.current[n - 1]?.focus(); }
+    else if (e.key === "Escape") { e.preventDefault(); closeToTrigger(); }
+    else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activate(QUERIES_MENU[idx]); }
+    else if (e.key === "Tab") { setOpen(false); }
+  };
+
+  return (
+    <div style={{ position: "relative" }}>
+      <button
+        ref={triggerRef}
+        onClick={() => setOpen(!open)}
+        onKeyDown={(e) => {
+          if (!open && (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ")) { e.preventDefault(); setOpen(true); }
+          else if (open && e.key === "Escape") { e.preventDefault(); closeToTrigger(); }
+        }}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-current={active ? "page" : undefined}
+        className="cursor-pointer"
+        style={{
+          fontFamily: FONT_SANS, fontSize: 13, fontWeight: active ? 500 : 400, whiteSpace: "nowrap",
+          padding: "7px 14px", borderRadius: 20, border: "none",
+          background: active || open ? PINK : "transparent", color: active || open ? burgundy : ghostButtonText,
+          transition: "background 0.15s, color 0.15s", display: "inline-flex", alignItems: "center", gap: 5,
+        }}
+        onMouseEnter={(e) => { if (!active && !open) { e.currentTarget.style.background = PINK; e.currentTarget.style.color = burgundy; } }}
+        onMouseLeave={(e) => { if (!active && !open) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = ghostButtonText; } }}
+      >
+        Queries
+        <ChevronDown style={{ width: 13, height: 13, opacity: 0.7 }} />
+      </button>
+
+      {open && (
+        <div
+          role="menu"
+          aria-label="Queries"
+          style={{
+            position: "absolute", top: "calc(100% + 8px)", left: 0, zIndex: 60,
+            background: "#ffffff", border: "1px solid #e7ddcf", borderRadius: 12,
+            boxShadow: "0 8px 26px rgba(40,28,20,.16)", padding: 7, minWidth: 248,
+          }}
+        >
+          {QUERIES_MENU.map((item, idx) => (
+            <button
+              key={item.key}
+              ref={(el) => { itemRefs.current[idx] = el; }}
+              role="menuitem"
+              tabIndex={-1}
+              onClick={() => activate(item)}
+              onKeyDown={(e) => onItemKey(e, idx)}
+              className="w-full text-left cursor-pointer"
+              style={{ display: "flex", gap: 11, alignItems: "flex-start", padding: "9px 11px", borderRadius: 9, background: "transparent", border: "none" }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "#f7f1ea"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+            >
+              <span style={{ flexShrink: 0, width: 30, height: 30, borderRadius: 8, background: PINK, display: "flex", alignItems: "center", justifyContent: "center", color: burgundy }}>
+                {item.icon}
+              </span>
+              <span style={{ display: "block" }}>
+                <span style={{ display: "block", fontFamily: FONT_SANS, fontSize: 13, fontWeight: 600, color: "#2c2017" }}>{item.title}</span>
+                <span style={{ display: "block", fontFamily: FONT_SANS, fontSize: 11, color: "#9a8e80", marginTop: 1 }}>{item.subtitle}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, searchQuery, setSearchQuery }) => {
   const { currentUser, tasks, notes, dismissTask, logout } = useScriptAllyDb();
 
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showBellDropdown, setShowBellDropdown] = useState(false);
+  const [showQueriesMenu, setShowQueriesMenu] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [successAnimationTaskId, setSuccessAnimationTaskId] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
@@ -140,6 +254,7 @@ export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, 
   const closeAll = () => {
     setShowUserDropdown(false);
     setShowBellDropdown(false);
+    setShowQueriesMenu(false);
   };
 
   const handleActionTask = (task: any) => {
@@ -165,7 +280,7 @@ export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, 
   if (activeTab === "queries" && activeSubPage !== "Hub" && activeSubPage !== "Landing") {
     return (
       <>
-        {(showUserDropdown || showBellDropdown) && (
+        {(showUserDropdown || showBellDropdown || showQueriesMenu) && (
           <div className="fixed inset-0 z-40 bg-transparent" onClick={closeAll} />
         )}
         <style>{`.qnav-back{color:#8a7a6c;transition:color 0.15s}.qnav-back:hover{color:#7c3a2a}`}</style>
@@ -209,7 +324,7 @@ export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, 
             {/* User chip — avatar + name + chevron */}
             <div className="relative flex items-center">
               <button
-                onClick={() => { setShowUserDropdown(!showUserDropdown); setShowBellDropdown(false); }}
+                onClick={() => { setShowUserDropdown(!showUserDropdown); setShowBellDropdown(false); setShowQueriesMenu(false); }}
                 className="flex items-center gap-1.5 cursor-pointer"
                 style={{ background: "transparent", border: "none", padding: 2 }}
               >
@@ -275,7 +390,7 @@ export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, 
   return (
     <>
       {/* Invisible backdrop to dismiss any open dropdown when clicking outside */}
-      {(showUserDropdown || showBellDropdown) && (
+      {(showUserDropdown || showBellDropdown || showQueriesMenu) && (
         <div className="fixed inset-0 z-40 bg-transparent" onClick={closeAll} />
       )}
 
@@ -307,10 +422,20 @@ export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, 
             <ScriptAllyLogo size="md" className="!h-[46px] [&>svg]:!h-[46px]" textColor={burgundy} iconColor={burgundy} />
           </button>
 
-          {/* Primary links */}
+          {/* Primary links — "Queries" is a dropdown (the former hub's three choices) */}
           <nav className="flex items-center gap-1 ml-2 max-md:hidden">
             {PRIMARY.map((l) => (
-              <NavLink key={l.tab} label={l.label} active={activeTab === l.tab} onClick={() => { onNavigate(l.tab); closeAll(); }} />
+              l.tab === "queries" ? (
+                <QueriesNavMenu
+                  key={l.tab}
+                  active={activeTab === "queries"}
+                  open={showQueriesMenu}
+                  setOpen={(next) => { setShowQueriesMenu(next); if (next) { setShowUserDropdown(false); setShowBellDropdown(false); } }}
+                  onNavigate={(tab, sub) => { onNavigate(tab, sub); closeAll(); }}
+                />
+              ) : (
+                <NavLink key={l.tab} label={l.label} active={activeTab === l.tab} onClick={() => { onNavigate(l.tab); closeAll(); }} />
+              )
             ))}
           </nav>
 
@@ -336,7 +461,7 @@ export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, 
             {/* Bell */}
             <div className="relative flex items-center">
               <button
-                onClick={() => { setShowBellDropdown(!showBellDropdown); setShowUserDropdown(false); }}
+                onClick={() => { setShowBellDropdown(!showBellDropdown); setShowUserDropdown(false); setShowQueriesMenu(false); }}
                 className="relative flex items-center justify-center cursor-pointer max-md:min-w-[44px] max-md:min-h-[44px]"
                 style={{ background: "transparent", border: "none", padding: 4, color: burgundy }}
                 title="Notifications"
@@ -524,7 +649,7 @@ export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, 
             {/* User chip */}
             <div className="relative flex items-center">
               <button
-                onClick={() => { setShowUserDropdown(!showUserDropdown); setShowBellDropdown(false); }}
+                onClick={() => { setShowUserDropdown(!showUserDropdown); setShowBellDropdown(false); setShowQueriesMenu(false); }}
                 className="flex items-center gap-2 cursor-pointer max-md:min-h-[44px]"
                 style={{ background: "transparent", border: "none", padding: 2 }}
               >

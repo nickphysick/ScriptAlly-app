@@ -17,7 +17,6 @@ import { EditQueryHost } from "./components/EditQueryHost";
 import { Dashboard } from "./components/Dashboard";
 import { Queries } from "./components/Queries";
 import { QueriesLanding } from "./components/QueriesLanding";
-import { QueriesHub } from "./components/QueriesHub";
 import { Agents } from "./components/Agents";
 import { DiscoverNewAgents } from "./components/DiscoverNewAgents";
 import { SubmissionPackages } from "./components/SubmissionPackages";
@@ -329,7 +328,7 @@ function AppContent() {
     } else {
       // Set sensible defaults for each tab
       if (tab === "dashboard") setActiveSubPage("Dashboard");
-      if (tab === "queries") setActiveSubPage("Hub");
+      if (tab === "queries") setActiveSubPage("Query database");
       if (tab === "agents") setActiveSubPage("Agents database");
       if (tab === "manuscripts") setActiveSubPage("All manuscripts");
       if (tab === "pricing") setActiveSubPage("Pricing plans");
@@ -449,10 +448,12 @@ function AppContent() {
     );
   }
 
-  // The Queries "desk" (everything except the Hub/Landing entry screens) is the first page migrated
-  // onto the new left-sidebar SidebarShell; the global top <Nav> is suppressed for it. Hub/Landing
-  // and every other tab still render under the legacy top-bar AppShell until they migrate in turn.
-  const isQueriesDesk = activeTab === "queries" && activeSubPage !== "Hub" && activeSubPage !== "Landing";
+  // The Queries "desk" is reached straight from the nav now (the old "What would you like to do?"
+  // hub is gone — its three choices moved into the Queries nav dropdown). It renders on the new
+  // left-sidebar SidebarShell with the global top <Nav> suppressed; every other tab (and the
+  // orphaned Landing) still render under the legacy top-bar AppShell. A stale "Hub" subpage (old
+  // bookmark) falls through to the desk.
+  const isQueriesDesk = activeTab === "queries" && activeSubPage !== "Landing";
 
   return (
     <div className="min-h-screen bg-[#F5F0EA] text-[#3a1c14] selection:bg-[#7c3a2a]/20 selection:text-[#3a1c14] selection:font-bold">
@@ -490,13 +491,9 @@ function AppContent() {
           />
         )}
         {activeTab === "queries" && (
-          activeSubPage === "Hub" ? (
-            // Card 3 ("Update an existing query") is a deliberate placeholder for now — the real
-            // entry point will be wired later. Until then it surfaces a gentle "coming soon" note.
-            <QueriesHub onNavigate={handleNavigate} onUpdateExisting={() => setSuccessToast("Coming soon — you'll be able to update an existing query here.")} />
-          ) : activeSubPage === "Landing" ? (
-            // Orphaned: the old data-dense overview. No nav path reaches "Landing" now that the
-            // global Queries link defaults to "Hub". Kept for reference pending removal.
+          // Only the orphaned "Landing" still renders under AppShell; every live queries subpage is
+          // the desk (isQueriesDesk above), so it goes through SidebarShell, not here.
+          activeSubPage === "Landing" ? (
             <QueriesLanding onNavigate={handleNavigate} />
           ) : (
             <Queries searchQuery={searchQuery} onNavigate={handleNavigate} activeSubPage={activeSubPage} />

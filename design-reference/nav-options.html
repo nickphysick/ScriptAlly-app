@@ -1,0 +1,107 @@
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--page:#f2ede7;--burgundy:#7c3a2a;--burgundyD:#6b3023;--ink:#2c2017;--muted:#9a8e80;--rose:#f3e0d6;--roseBd:#e8cabb;--sage:#5a6e58;}
+  *{box-sizing:border-box;}
+  body{margin:0;padding:34px 26px 70px;background:#e8e4dd;font-family:'Inter',sans-serif;color:var(--ink);}
+  .head{max-width:1080px;margin:0 auto 24px;}
+  .head h1{font-family:'Playfair Display',serif;font-weight:600;font-size:23px;margin:0 0 6px;}
+  .head p{font-size:13px;line-height:1.55;color:#6a655c;margin:0;max-width:780px;}
+  .stack{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:28px;}
+  .opt{}
+  .cap{display:flex;align-items:baseline;gap:8px;margin-bottom:11px;}
+  .cap .n{font-family:'Playfair Display',serif;font-weight:600;font-size:16px;color:var(--burgundy);}
+  .cap .nm{font-family:'Playfair Display',serif;font-weight:600;font-size:16px;color:var(--ink);}
+  .cap .ds{font-size:12px;color:#7a6b5c;}
+
+  .frame{background:var(--page);border-radius:13px;overflow:visible;box-shadow:0 2px 6px rgba(40,28,20,.09),0 14px 34px rgba(40,28,20,.10);position:relative;padding-bottom:18px;}
+  .nav{display:flex;align-items:center;gap:20px;padding:0 24px;height:60px;border-bottom:1px solid #e7ddcf;position:relative;}
+  .logo{font-family:'Playfair Display',serif;font-weight:700;font-size:19px;color:var(--ink);}
+  .ni{font-size:14px;color:#9a8e80;position:relative;cursor:pointer;display:flex;align-items:center;gap:5px;}
+  .ni.active{color:var(--burgundyD);background:var(--rose);padding:7px 15px;border-radius:999px;font-weight:600;}
+  .ni .car{font-size:10px;opacity:.7;}
+  .search{margin-left:6px;padding:9px 15px;border-radius:999px;background:#fbf7f0;border:1px solid #e7ddcf;color:#b3a596;font-size:12.5px;min-width:180px;}
+  .grow{flex:1;}
+  .newbtn{display:inline-flex;align-items:center;gap:7px;padding:8px 15px;border-radius:999px;background:var(--rose);border:1px solid var(--roseBd);color:var(--burgundyD);font-size:12.5px;font-weight:600;position:relative;}
+  .rd{width:15px;height:15px;border-radius:50%;background:#ece3d6;}
+  .uu{width:28px;height:28px;border-radius:50%;background:var(--burgundy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;}
+
+  /* dropdown */
+  .menu{position:absolute;top:54px;background:#fff;border:1px solid #e7ddcf;border-radius:12px;box-shadow:0 8px 26px rgba(40,28,20,.16);padding:7px;min-width:248px;z-index:5;}
+  .mi{display:flex;gap:11px;align-items:flex-start;padding:9px 11px;border-radius:9px;cursor:pointer;}
+  .mi:hover{background:#f7f1ea;}
+  .mi .ic{flex-shrink:0;width:30px;height:30px;border-radius:8px;background:var(--rose);display:flex;align-items:center;justify-content:center;color:var(--burgundy);}
+  .mi .t{font-size:13px;font-weight:600;color:var(--ink);}
+  .mi .s{font-size:11px;color:var(--muted);margin-top:1px;}
+
+  .hint{display:flex;align-items:center;gap:10px;padding:14px 24px 0;font-size:12.5px;color:#7a6b5c;}
+  .arrow{color:var(--burgundy);font-weight:600;}
+  .toolbar{margin:13px 24px 0;background:#fff;border:1px solid #e7ddcf;border-radius:11px;padding:11px 14px;display:flex;align-items:center;gap:12px;}
+  .tbtitle{font-family:'Playfair Display',serif;font-size:15px;color:var(--ink);}
+  .tbgrow{flex:1;}
+  .pillbtn{display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:9px;font-size:12px;font-weight:600;}
+  .pillbtn.primary{background:var(--rose);border:1px solid var(--roseBd);color:var(--burgundyD);}
+  .pillbtn.ghost{background:#fff;border:1px solid #e7ddcf;color:#6a6052;}
+  .note{padding:10px 24px 0;font-size:11.5px;color:var(--muted);font-style:italic;}
+</style>
+
+<div class="head">
+  <h1>Replacing the Queries hub — nav options</h1>
+  <p>Four ways the nav can carry “open the database / log a query / record a response” without a dedicated landing page. Each shows the nav in its working state.</p>
+</div>
+
+<div class="stack">
+
+  <!-- 1 -->
+  <div class="opt">
+    <div class="cap"><span class="n">1.</span><span class="nm">Straight to the database</span><span class="ds">— Queries is a destination, not a menu</span></div>
+    <div class="frame">
+      <div class="nav"><span class="logo">ScriptAlly</span><span class="ni">Dashboard</span><span class="ni active">Queries</span><span class="ni">Agents</span><span class="ni">Manuscripts</span><span class="search">Search…</span><span class="grow"></span><span class="rd"></span><span class="rd"></span><span class="uu">B</span></div>
+      <div class="hint"><span class="arrow">→</span> Clicking <b>Queries</b> opens the database immediately. The two actions live where they belong, inside it:</div>
+      <div class="toolbar"><span class="tbtitle">Query database</span><span class="tbgrow"></span><span class="pillbtn primary">+ Log a new query</span><span class="pillbtn ghost">Record a response</span></div>
+      <div class="note">“Record a response” acts on whichever query you’ve selected — which is the whole point of the database.</div>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="opt">
+    <div class="cap"><span class="n">2.</span><span class="nm">Dropdown menu</span><span class="ds">— all three explicit, one click, no page</span></div>
+    <div class="frame">
+      <div class="nav"><span class="logo">ScriptAlly</span><span class="ni">Dashboard</span><span class="ni active">Queries <span class="car">▾</span></span><span class="ni">Agents</span><span class="ni">Manuscripts</span><span class="search">Search…</span><span class="grow"></span><span class="rd"></span><span class="rd"></span><span class="uu">B</span>
+        <div class="menu" style="left:200px;">
+          <div class="mi"><span class="ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/></svg></span><div><div class="t">Query database</div><div class="s">Browse and track every query.</div></div></div>
+          <div class="mi"><span class="ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></span><div><div class="t">Log a new query</div><div class="s">Record one you’ve just sent.</div></div></div>
+          <div class="mi"><span class="ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v4h4"/></svg></span><div><div class="t">Record a response</div><div class="s">Update one already out there.</div></div></div>
+        </div>
+      </div>
+      <div class="hint" style="padding-top:78px;">The label itself can still open the database; the caret reveals the actions.</div>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="opt">
+    <div class="cap"><span class="n">3.</span><span class="nm">Split item</span><span class="ds">— word goes to the database, caret opens the actions</span></div>
+    <div class="frame">
+      <div class="nav"><span class="logo">ScriptAlly</span><span class="ni">Dashboard</span><span class="ni active" style="padding-right:8px;">Queries <span style="width:1px;height:15px;background:#e0bfae;display:inline-block;margin:0 2px;"></span> <span class="car" style="opacity:1;">▾</span></span><span class="ni">Agents</span><span class="ni">Manuscripts</span><span class="search">Search…</span><span class="grow"></span><span class="rd"></span><span class="rd"></span><span class="uu">B</span></div>
+      <div class="hint">Click <b>Queries</b> → database. Click the <b>▾</b> → a small menu with “Log a new query” and “Record a response.” Most flexible, but split targets are fiddly to hit and easy to mis-click.</div>
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="opt">
+    <div class="cap"><span class="n">4.</span><span class="nm">Global “New” action</span><span class="ds">— Queries → database; creating anything lives in one place</span></div>
+    <div class="frame">
+      <div class="nav"><span class="logo">ScriptAlly</span><span class="ni">Dashboard</span><span class="ni active">Queries</span><span class="ni">Agents</span><span class="ni">Manuscripts</span><span class="search">Search…</span><span class="grow"></span>
+        <span class="newbtn">+ New <span class="car">▾</span>
+          <div class="menu" style="right:0;top:46px;min-width:210px;">
+            <div class="mi"><span class="ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></span><div><div class="t">Log a query</div></div></div>
+            <div class="mi"><span class="ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6"/></svg></span><div><div class="t">Add an agent</div></div></div>
+            <div class="mi"><span class="ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H19v15H6a2 2 0 0 0-2 2z"/></svg></span><div><div class="t">Add a manuscript</div></div></div>
+          </div>
+        </span>
+        <span class="rd" style="margin-left:14px;"></span><span class="uu">B</span></div>
+      <div class="hint" style="padding-top:72px;"><b>Queries</b> opens the database; the “+ New” on the right creates anything — mirrors the dashboard’s quick actions. Scales as you add object types.</div>
+    </div>
+  </div>
+
+</div>

@@ -50,10 +50,13 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({ activeTab, onNavigat
   >
     {TABS.map(({ tab, label, Icon }) => {
       const active = activeTab === tab;
+      // Queries goes straight to the database on mobile — the nav dropdown (desktop) doesn't belong
+      // in a bottom tab bar; logging/recording are reached via in-page buttons.
+      const sub = tab === "queries" ? "Query database" : undefined;
       return (
         <button
           key={tab}
-          onClick={() => onNavigate(tab)}
+          onClick={() => onNavigate(tab, sub)}
           aria-label={label}
           aria-current={active ? "page" : undefined}
           className="flex flex-col items-center justify-center gap-1 cursor-pointer"
