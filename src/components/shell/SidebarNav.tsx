@@ -73,7 +73,7 @@ const NavRow: React.FC<{ item: NavItem; active: boolean; onClick: () => void }> 
 export const SidebarNav: React.FC<SidebarNavProps> = ({ activeTab, onNavigate, context, account }) => (
   <aside
     style={{
-      width: 226,
+      width: 300, // +33% from the prior 226 (mockup widened the rail); content reflows, no restyle
       flexShrink: 0,
       background: chromeWhite,
       // Thicker grey right edge per the Query DB mockup (desk-scoped: the rail only renders there).

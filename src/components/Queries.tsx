@@ -46,7 +46,7 @@ import { ScriptAllyLogo } from "./ScriptAllyLogo";
 import {
   kraft, parchment, PAPER_TEXTURE,
   burgundy, FONT_SERIF, FONT_MONO, mountShadow, labelColor,
-  qdbPagePink, qdbDeskSurface, qdbSageFrame, qdbMasthead, qdbCardLine,
+  qdbPagePink, qdbDeskSurface, qdbDeskFrame, qdbMasthead, qdbCardLine,
 } from "../lib/designTokens";
 
 const normalizeStatus = (status: string | QueryStatus): QueryStatus => {
@@ -2087,7 +2087,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             sidebar + breadcrumb stay outside (the shell chrome). The action bar is INSIDE the frame —
             to make it a page-level toolbar instead, lift it above .qdesk. */}
         <div style={{ padding: 18, flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
-          <div className="qdesk" style={{ position: "relative", flex: 1, minHeight: 0, display: "flex", flexDirection: "column", border: `1.5px solid ${qdbSageFrame}`, borderRadius: 14, background: qdbDeskSurface, overflow: "hidden", boxShadow: "0 1px 3px rgba(40,28,20,.08), 0 16px 40px rgba(40,28,20,.12)" }}>
+          <div className="qdesk" style={{ position: "relative", flex: 1, minHeight: 0, display: "flex", flexDirection: "column", border: `1.5px solid ${qdbDeskFrame}`, borderRadius: 14, background: qdbDeskSurface, overflow: "hidden", boxShadow: "0 1px 3px rgba(40,28,20,.08), 0 16px 40px rgba(40,28,20,.12)" }}>
             {/* deskpad — the warm working surface inside the frame */}
             <div style={{ padding: 18, flex: 1, minHeight: 0, display: "flex", flexDirection: "column", gap: 12 }}>
 

@@ -23,9 +23,9 @@ export const insetBorder = "1px solid rgba(124,58,42,0.28)"; // the signature mo
    Surfaces for the Query Database "desk": a soft-pink well, a warm-cream desk
    container framed by a thin sage outline, white list/pane cards on top, with a
    faint-parchment agent masthead. Kept here (not scattered literals) per the brief. */
-export const qdbPagePink = "#f8eae3"; // page well behind the desk (Query-DB-scoped)
+export const qdbPagePink = "#f8eae3"; // page well / app-shell ground
 export const qdbDeskSurface = "#faf7f1"; // desk container fill (warm cream)
-export const qdbSageFrame = "#45583f"; // desk frame — thin sage outline, all sides
+export const qdbDeskFrame = "#b8b1a4"; // desk frame — thin grey outline, all sides
 export const qdbMasthead = "#faf4ea"; // agent masthead card fill
 export const qdbCardLine = "#ddd4c6"; // list / pane / column / masthead hairline
 export const burgundy = "#7c3a2a"; // primary
