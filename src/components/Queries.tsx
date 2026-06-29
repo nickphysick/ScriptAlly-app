@@ -2286,7 +2286,14 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         <style>{`
           .qdesk::before{ content:""; position:absolute; inset:0; border-radius:15px; padding:1.5px; background:linear-gradient(135deg, transparent 0 44%, rgba(255,255,255,0.8) 50%, transparent 56% 100%); background-size:300% 300%; -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; z-index:6; animation:qdeskGlint 7.5s linear infinite; }
           @keyframes qdeskGlint{ 0%{background-position:0% 0%;} 100%{background-position:100% 100%;} }
-          @media (prefers-reduced-motion: reduce){ .qdesk::before{ animation:none; } }
+          /* lifted-page list rows — rounded, no dividers; selected lifts off the stack */
+          .qrow{ position:relative; margin:3px 6px; padding:13px 15px; border-radius:9px; cursor:pointer; transition:background .14s ease, box-shadow .15s ease, transform .15s ease; }
+          .qrow:first-of-type{ margin-top:6px; }
+          .qrow:last-of-type{ margin-bottom:7px; }
+          .qrow:hover:not(.sel){ background:#fffdf9; box-shadow:0 2px 9px rgba(58,28,20,.09); }
+          .qrow.sel{ background:#fff; box-shadow:0 5px 16px rgba(58,28,20,.14); transform:translateX(2px); z-index:2; }
+          .qrow.sel::before{ content:""; position:absolute; left:0; top:9px; bottom:9px; width:3px; border-radius:3px; background:#7c3a2a; }
+          @media (prefers-reduced-motion: reduce){ .qdesk::before{ animation:none; } .qrow.sel{ transform:none; } }
         `}</style>
         <div className="qdesk" style={{ position: "relative", margin: "18px 22px 24px", border: "1.5px solid #241c15", borderRadius: 15, background: "#f6f1e9", overflow: "hidden", boxShadow: "0 1px 3px rgba(58,28,20,.08), 0 18px 44px rgba(58,28,20,.13)", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
           {/* flush black top rail — frame + rail read as one continuous black shape */}
@@ -2413,9 +2420,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 </button>
               </div>
 
-              {/* Rows container — 9px padding so row backgrounds stay inside the inner frame border */}
-              <div style={{ padding: 9, flex: 1, minHeight: 0, overflowY: "auto" }} className="custom-query-list-scrollbar">
-                <div className="divide-y divide-[#ece0d2]/80">
+              {/* Rows container — lifted rows carry their own margin, so the container is flush */}
+              <div style={{ padding: "2px 0 4px", flex: 1, minHeight: 0, overflowY: "auto" }} className="custom-query-list-scrollbar">
+                <div>
             {(() => {
               const statusOrder = [
                 QueryStatus.QUERIED,
@@ -2454,9 +2461,14 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 const isSelected = selectedQueryId === q.id;
                 const isClosed = [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE].includes(q.status);
                 
+                // Queried date — "Queried 14 Mar" (UK day-month); the year shows only when it
+                // isn't the current year ("Queried 1 Jul 2024").
                 const dateObj = new Date(q.dateSent);
-                const daysDiff = Math.max(1, Math.round((new Date().getTime() - dateObj.getTime()) / (1000 * 60 * 60 * 24)));
-                const relativeText = `${daysDiff} days ago`;
+                const queriedDate = `Queried ${dateObj.getDate()} ${dateObj.toLocaleString("en-GB", { month: "short" })}${dateObj.getFullYear() !== new Date().getFullYear() ? ` ${dateObj.getFullYear()}` : ""}`;
+                // The manuscript name is only worth a slot when the list spans more than one book —
+                // i.e. the user has multiple manuscripts and is viewing "All queries". Otherwise the
+                // queried date earns it (the book is already named in the sidebar).
+                const showManuscript = manuscripts.length > 1 && selectedManuscriptFilter === "All";
 
                 const statusChip = undoingQueryIds.has(q.id) ? (
                   <div className="animate-pulse flex items-center gap-1 min-h-[20px]">
@@ -2475,13 +2487,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     key={q.id}
                     id={`query-row-${q.id}`}
                     onClick={() => setSelectedQueryId(q.id)}
-                    className={`cursor-pointer transition-all flex flex-col gap-1 ${isClosed ? "opacity-60" : ""}`}
-                    style={{
-                      padding: "10px 10px 10px 12px",
-                      background: isSelected ? "#e4ebdf" : "transparent",
-                      borderLeft: isSelected ? "3px solid #8a9e88" : "3px solid transparent",
-                      borderRadius: isSelected ? "0 6px 6px 0" : undefined,
-                    }}
+                    className={`qrow flex flex-col gap-1 ${isSelected ? "sel" : ""} ${isClosed ? "opacity-60" : ""}`}
                   >
                     {/* Top row: Agent name (Playfair) and status chip */}
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 6 }}>
@@ -2501,14 +2507,23 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                       {agentAgencyLine(agent)}
                     </p>
 
-                    {/* Bottom: manuscript in burgundy, time in mono */}
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6, marginTop: 2 }}>
-                      <span style={{ fontSize: 12, color: burgundy, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
-                        {ms.title}
-                      </span>
-                      <span style={{ fontFamily: FONT_MONO, fontSize: 9, color: "#b0a89e", flexShrink: 0 }}>
-                        {relativeText}
-                      </span>
+                    {/* Bottom: queried date in burgundy; when the list spans multiple books the
+                        manuscript title leads and the queried date moves to a mono-muted trailer. */}
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 2 }}>
+                      {showManuscript ? (
+                        <>
+                          <span style={{ fontSize: 12, color: burgundy, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, minWidth: 0 }}>
+                            {ms.title}
+                          </span>
+                          <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, color: "#b0a89e", flexShrink: 0, whiteSpace: "nowrap" }}>
+                            {queriedDate}
+                          </span>
+                        </>
+                      ) : (
+                        <span style={{ fontSize: 12, color: burgundy, fontWeight: 600, whiteSpace: "nowrap" }}>
+                          {queriedDate}
+                        </span>
+                      )}
                     </div>
                   </div>
                 );
@@ -2547,7 +2562,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           {grpQueries.length}
                         </span>
                       </div>
-                      <div className="divide-y divide-[#EBDCD3]/30">
+                      <div>
                         {grpQueries.map(q => renderQueryCard(q))}
                       </div>
                     </div>
@@ -2573,7 +2588,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           {grpQueries.length}
                         </span>
                       </div>
-                      <div className="divide-y divide-[#EBDCD3]/30">
+                      <div>
                         {grpQueries.map(q => renderQueryCard(q))}
                       </div>
                     </div>
@@ -2603,7 +2618,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           {grpQueries.length}
                         </span>
                       </div>
-                      <div className="divide-y divide-[#EBDCD3]/30">
+                      <div>
                         {grpQueries.map(q => renderQueryCard(q))}
                       </div>
                     </div>
@@ -2639,7 +2654,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           {starQueries.length}
                         </span>
                       </div>
-                      <div className="divide-y divide-[#EBDCD3]/30">
+                      <div>
                         {starQueries.map(q => renderQueryCard(q))}
                       </div>
                     </div>
