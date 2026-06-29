@@ -2088,47 +2088,55 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   placeholder="Find query…"
                   value={listSearch}
                   onChange={(e) => setListSearch(e.target.value)}
-                  style={{ width: "100%", background: "#fff", border: "1px solid #e3d9cc", borderRadius: 11, padding: "11px 15px 11px 40px", fontSize: 13.5, color: "#8a7a6c", fontFamily: "inherit", outline: "none" }}
+                  style={{ width: "100%", background: "#fff", border: `1px solid ${qdbCardLine}`, borderRadius: 11, padding: "11px 15px 11px 40px", fontSize: 13.5, color: "#8a7a6c", fontFamily: "inherit", outline: "none" }}
                 />
               </div>
-              {/* Action buttons — right-aligned over the reading pane */}
-              <div style={{ display: "flex", alignItems: "center", gap: 9, justifyContent: "flex-end" }}>
+              {/* Action buttons — Record response + Edit start at the pane's left edge; Download as
+                  PDF is pushed to the far right. All three share one ghost style (white, grey border,
+                  black text/icons) — Record response is no longer pink/distinguished. */}
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 {ctrlAction.kind === "mark-sent" ? (
                   <button
                     ref={markSentTriggerRef}
                     type="button"
                     onClick={() => hasActive && setIsMarkSentOpen(o => !o)}
-                    style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13.5, fontWeight: 500, color: burgundy, background: "linear-gradient(180deg,#f5e2da,#efd5ca)", border: "1px solid rgba(124,58,42,.28)", borderRadius: 10, padding: "10px 18px", cursor: hasActive ? "pointer" : "default", boxShadow: "0 1px 2px rgba(124,58,42,.12)", opacity: hasActive ? 1 : 0.5 }}
+                    onMouseEnter={e => { if (hasActive) e.currentTarget.style.background = "#f7f2ea"; }}
+                    onMouseLeave={e => (e.currentTarget.style.background = "#ffffff")}
+                    style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 12.5, fontWeight: 500, color: "#1a1510", background: "#ffffff", border: `1px solid ${qdbCardLine}`, borderRadius: 11, padding: "10px 15px", whiteSpace: "nowrap", cursor: hasActive ? "pointer" : "default", opacity: hasActive ? 1 : 0.5 }}
                   >
-                    <Send style={{ width: 15, height: 15, strokeWidth: 2 } as any} />
+                    <Send style={{ width: 14, height: 14, strokeWidth: 1.8 } as any} />
                     {ctrlAction.label}
                   </button>
                 ) : (
                   <button
                     type="button"
                     onClick={() => hasActive && setIsRecordResponseFocusFormOpen(true)}
-                    style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13.5, fontWeight: 500, color: burgundy, background: "linear-gradient(180deg,#f5e2da,#efd5ca)", border: "1px solid rgba(124,58,42,.28)", borderRadius: 10, padding: "10px 18px", cursor: hasActive ? "pointer" : "default", boxShadow: "0 1px 2px rgba(124,58,42,.12)", opacity: hasActive ? 1 : 0.5 }}
+                    onMouseEnter={e => { if (hasActive) e.currentTarget.style.background = "#f7f2ea"; }}
+                    onMouseLeave={e => (e.currentTarget.style.background = "#ffffff")}
+                    style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 12.5, fontWeight: 500, color: "#1a1510", background: "#ffffff", border: `1px solid ${qdbCardLine}`, borderRadius: 11, padding: "10px 15px", whiteSpace: "nowrap", cursor: hasActive ? "pointer" : "default", opacity: hasActive ? 1 : 0.5 }}
                   >
-                    <Send style={{ width: 15, height: 15, strokeWidth: 2 } as any} />
+                    <Send style={{ width: 14, height: 14, strokeWidth: 1.8 } as any} />
                     {ctrlAction.label}
                   </button>
                 )}
                 <button
                   type="button"
                   onClick={() => { if (hasActive && activeQuery) openEditQuery(activeQuery.id); }}
-                  onMouseEnter={e => { if (hasActive) e.currentTarget.style.background = "#fffaf6"; }}
+                  onMouseEnter={e => { if (hasActive) e.currentTarget.style.background = "#f7f2ea"; }}
                   onMouseLeave={e => (e.currentTarget.style.background = "#ffffff")}
-                  style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: 13, fontWeight: 500, color: burgundy, background: "#ffffff", border: "1px solid rgba(124,58,42,.22)", borderRadius: 10, padding: "10px 16px", cursor: hasActive ? "pointer" : "default", opacity: hasActive ? 1 : 0.5 }}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: 12.5, fontWeight: 500, color: "#1a1510", background: "#ffffff", border: `1px solid ${qdbCardLine}`, borderRadius: 11, padding: "10px 15px", whiteSpace: "nowrap", cursor: hasActive ? "pointer" : "default", opacity: hasActive ? 1 : 0.5 }}
                 >
                   <Pencil style={{ width: 13, height: 13 }} />
                   Edit
                 </button>
+                {/* spacer — pushes Download as PDF to the far right edge of the pane */}
+                <div style={{ flex: 1 }} />
                 <button
                   type="button"
                   onClick={() => hasActive && !isGeneratingPDF && handleDownloadPDF()}
-                  onMouseEnter={e => { if (hasActive && !isGeneratingPDF) e.currentTarget.style.background = "#fffaf6"; }}
+                  onMouseEnter={e => { if (hasActive && !isGeneratingPDF) e.currentTarget.style.background = "#f7f2ea"; }}
                   onMouseLeave={e => (e.currentTarget.style.background = "#ffffff")}
-                  style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: 13, fontWeight: 500, color: burgundy, background: "#ffffff", border: "1px solid rgba(124,58,42,.22)", borderRadius: 10, padding: "10px 16px", cursor: (hasActive && !isGeneratingPDF) ? "pointer" : "default", opacity: (hasActive && !isGeneratingPDF) ? 1 : 0.5 }}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: 12.5, fontWeight: 500, color: "#1a1510", background: "#ffffff", border: `1px solid ${qdbCardLine}`, borderRadius: 11, padding: "10px 15px", whiteSpace: "nowrap", cursor: (hasActive && !isGeneratingPDF) ? "pointer" : "default", opacity: (hasActive && !isGeneratingPDF) ? 1 : 0.5 }}
                 >
                   <Download style={{ width: 13, height: 13 }} />
                   {isGeneratingPDF ? "Generating…" : "Download as PDF"}
