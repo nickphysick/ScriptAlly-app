@@ -2438,9 +2438,13 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
               </div>{/* closes padding:9 rows-container */}
           </div>{/* closes list card */}
 
-          {/* Reading pane — paper on the desk: white, grey outline, soft shadow (the black frame,
-              rail + glint now live on the desk). Content-height up to a ceiling, then scrolls. */}
-          <div className="qp-pane" style={{ position: "relative", alignSelf: "stretch", maxHeight: "100%", border: "1.5px solid #241c15", borderRadius: 14, background: "#ffffff", boxShadow: "0 1px 2px rgba(58,28,20,.05), 0 6px 18px rgba(58,28,20,.07)", overflow: "hidden", minHeight: 0, display: "flex", flexDirection: "column" }}>
+          {/* Reading pane — black frame heavier at the top (1.5px #241c15 + a flush 10px rail),
+              radius 14, overflow:hidden so the rail meets the corners; travelling edge-glint.
+              Height is content-driven: alignSelf:start lets the pane hug its tallest column's
+              content (capped at the well height), the columns scroll internally past that. */}
+          <div className="qp-pane" style={{ position: "relative", alignSelf: "start", maxHeight: "100%", border: "1.5px solid #241c15", borderRadius: 14, background: "#ffffff", boxShadow: "0 1px 2px rgba(58,28,20,.05), 0 6px 18px rgba(58,28,20,.07)", overflow: "hidden", minHeight: 0, display: "flex", flexDirection: "column" }}>
+            {/* flush 10px black top rail — frame + rail read as one continuous black shape */}
+            <div style={{ height: 10, background: "#241c15", flexShrink: 0 }} />
             <div style={{ display: "contents" }}>
             {activeQuery && activeAgent && activeMs ? (
               <>
@@ -2454,11 +2458,14 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   /* column swell on hover */
                   .qp-card{ transition:transform .2s ease, box-shadow .2s ease; }
                   .qp-card:hover{ transform:scale(1.02); box-shadow:0 8px 22px rgba(58,28,20,.10); z-index:2; }
+                  /* edge glint — faint highlight travelling the black frame ring, calm 7s loop */
+                  .qp-pane::before{ content:""; position:absolute; inset:0; border-radius:14px; padding:1.5px; background:linear-gradient(135deg, transparent 0 43%, rgba(255,255,255,0.85) 50%, transparent 57% 100%); background-size:300% 300%; -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; z-index:5; animation:qpGlint 7s linear infinite; }
+                  @keyframes qpGlint{ 0%{background-position:0% 0%;} 100%{background-position:100% 100%;} }
                   /* empty-state "add" pills — dashed, tappable, open the Edit Agent drawer */
                   .qaddpill{ display:inline-flex; align-items:center; gap:6px; font-family:'Inter',sans-serif; font-size:12px; color:#9a8a78; background:#faf6ef; border:1px dashed #d8ccba; border-radius:999px; padding:6px 13px; cursor:pointer; transition:color .14s, border-color .14s, background .14s; }
                   .qaddpill:hover{ color:#7c3a2a; border-color:#c9a98c; background:#fbf3ec; }
                   .qaddpill svg{ flex-shrink:0; opacity:.85; }
-                  @media (prefers-reduced-motion: reduce){ .qp-card:hover{ transform:none; } }
+                  @media (prefers-reduced-motion: reduce){ .qp-card:hover{ transform:none; } .qp-pane::before{ animation:none; } }
                 `}</style>
                 {/* ── Hero — identity (left) + in-pane status chip (top-right, under the rail) ── */}
                 {(() => {
@@ -2476,9 +2483,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   const mswl = activeAgent.mswlNotes?.trim();
                   const genres = (activeAgent.genres || []).filter(Boolean);
                   return (
-                    <div className="qp-hero" style={{ position: "relative", padding: "22px 28px 18px", background: "#ffffff", flexShrink: 0 }}>
-                      {/* status chip — in-pane, top-right (soft, not a sticker) */}
-                      <div style={{ position: "absolute", top: 22, right: 26, zIndex: 2, display: "inline-flex", alignItems: "center", gap: 8, background: "#fdfaf5", border: "1px solid #e3d9cc", borderRadius: 999, padding: "5px 13px 5px 6px", boxShadow: "0 1px 2px rgba(58,28,20,.05)" }}>
+                    <div className="qp-hero" style={{ position: "relative", padding: "20px 28px 18px", background: "#ffffff", flexShrink: 0 }}>
+                      {/* status chip — in-pane, top-right, just beneath the rail (soft, not a sticker) */}
+                      <div style={{ position: "absolute", top: 16, right: 26, zIndex: 2, display: "inline-flex", alignItems: "center", gap: 8, background: "#fdfaf5", border: "1px solid #e3d9cc", borderRadius: 999, padding: "5px 13px 5px 6px", boxShadow: "0 1px 2px rgba(58,28,20,.05)" }}>
                         <StatusDot status={activeQuery.status} overrideSize={21} />
                         <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: ".15em", color: burgundy, fontWeight: 500, textTransform: "uppercase" as const, whiteSpace: "nowrap" }}>{statusDisplayLabel(activeQuery)}</span>
                       </div>
