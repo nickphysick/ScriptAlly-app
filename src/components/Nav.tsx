@@ -182,13 +182,13 @@ const QueriesNavMenu: React.FC<{
         aria-current={active ? "page" : undefined}
         className="cursor-pointer"
         style={{
-          fontFamily: FONT_SANS, fontSize: 13, fontWeight: active ? 500 : 400, whiteSpace: "nowrap",
-          padding: "7px 14px", borderRadius: 20, border: "none",
-          background: active || open ? PINK : "transparent", color: active || open ? burgundy : ghostButtonText,
-          transition: "background 0.15s, color 0.15s", display: "inline-flex", alignItems: "center", gap: 5,
+          fontFamily: FONT_SANS, fontSize: 15, fontWeight: active ? 600 : 500, whiteSpace: "nowrap",
+          padding: "9px 16px", borderRadius: 10, border: "none",
+          background: active || open ? NAV_PILL_ACTIVE : "transparent", color: NAV_INK,
+          transition: "background 0.15s", display: "inline-flex", alignItems: "center", gap: 5,
         }}
-        onMouseEnter={(e) => { if (!active && !open) { e.currentTarget.style.background = PINK; e.currentTarget.style.color = burgundy; } }}
-        onMouseLeave={(e) => { if (!active && !open) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = ghostButtonText; } }}
+        onMouseEnter={(e) => { if (!active && !open) { e.currentTarget.style.background = NAV_PILL_HOVER; } }}
+        onMouseLeave={(e) => { if (!active && !open) { e.currentTarget.style.background = "transparent"; } }}
       >
         Queries
         <ChevronDown style={{ width: 13, height: 13, opacity: 0.7 }} />
