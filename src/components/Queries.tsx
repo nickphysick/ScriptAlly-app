@@ -2650,9 +2650,26 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             </div>{/* closes inner bordered frame */}
           </div>{/* closes outer rim — list card */}
 
-          {/* Reading pane — white pane, thin black border, edge glint. Content-height (alignSelf:start)
-              up to a viewport ceiling, then the columns scroll internally. */}
-          <div className="qp-pane" style={{ position: "relative", alignSelf: "start", maxHeight: "calc(100vh - 150px)", border: "1px solid #241c15", borderRadius: 14, background: "#ffffff", boxShadow: "0 1px 3px rgba(58,28,20,0.07), 0 14px 38px rgba(58,28,20,0.11)", overflow: "hidden", minHeight: 0, display: "flex", flexDirection: "column" }}>
+          {/* Reading pane wrapper — reserves the gap above for the straddling status / quip pills,
+              which must sit OUTSIDE the pane (its overflow:hidden clips the rail + columns). */}
+          <div style={{ position: "relative", alignSelf: "start", minHeight: 0, display: "flex", flexDirection: "column", paddingTop: 17 }}>
+            {activeQuery && activeAgent && activeMs && (() => {
+              const pa = getPrimaryAction(currentStatus as QueryStatus);
+              const fn = (activeAgent.name || activeAgent.agency || "Agent").split(" ")[0];
+              const q = pa.ballHolder === "writer" ? "Your move" : pa.ballHolder === "agent" ? `waiting on ${fn}…` : null;
+              return (
+                <div style={{ position: "absolute", top: 17, left: 26, right: 26, transform: "translateY(-50%)", zIndex: 6, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, pointerEvents: "none", flexWrap: "wrap" as const }}>
+                  <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#fdfaf5", border: "1.5px solid #241c15", borderRadius: 999, padding: "5px 14px 5px 6px", boxShadow: "0 2px 7px rgba(36,28,21,0.20)" }}>
+                    <StatusDot status={activeQuery.status} overrideSize={21} />
+                    <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".15em", color: burgundy, fontWeight: 500, textTransform: "uppercase" as const, whiteSpace: "nowrap" }}>{statusDisplayLabel(activeQuery)}</span>
+                  </div>
+                  {q && <div style={{ background: "#fdfaf5", border: "1.5px solid #241c15", borderRadius: 999, padding: "2px 16px 4px", boxShadow: "0 2px 7px rgba(36,28,21,0.20)", fontFamily: "'Caveat', cursive", fontSize: 21, color: "#241c15", whiteSpace: "nowrap", lineHeight: 1.1 }}>{q}</div>}
+                </div>
+              );
+            })()}
+          {/* Reading pane — white pane, thin black frame + 10px black top rail, edge glint. */}
+          <div className="qp-pane" style={{ position: "relative", maxHeight: "calc(100vh - 167px)", border: "1px solid #241c15", borderRadius: 14, background: "#ffffff", boxShadow: "0 1px 3px rgba(58,28,20,0.07), 0 14px 38px rgba(58,28,20,0.11)", overflow: "hidden", minHeight: 0, display: "flex", flexDirection: "column" }}>
+            {activeQuery && activeAgent && activeMs && <div style={{ height: 10, background: "#241c15", flexShrink: 0 }} />}
             <div style={{ display: "contents" }}>
             {activeQuery && activeAgent && activeMs ? (
               <>
@@ -2673,13 +2690,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 `}</style>
                 {/* ── Hero — editorial masthead (mockup: left-aligned, 3px burgundy rule) ── */}
                 {(() => {
-                  const paneAction = getPrimaryAction(currentStatus as QueryStatus);
                   const hasName = !!(activeAgent.name?.trim());
                   const nameplate = (hasName ? activeAgent.name : activeAgent.agency) || "Unknown agent";
-                  const agentFirstName = (activeAgent.name || activeAgent.agency || "Agent").split(" ")[0];
-                  const quip = paneAction.ballHolder === "writer" ? "Your move"
-                    : paneAction.ballHolder === "agent" ? `waiting on ${agentFirstName}…`
-                    : null;
                   // Initials: first + last initial of the agent name (or agency), single token → one.
                   const initials = (() => {
                     const src = (activeAgent.name?.trim() || activeAgent.agency?.trim() || "");
@@ -2693,18 +2705,15 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   const genres = (activeAgent.genres || []).filter(Boolean);
                   return (
                     <div className="qp-hero" style={{ position: "relative", padding: "18px 28px 21px", background: "#ffffff", flexShrink: 0 }}>
-                      {/* meta stack — status chip + quip, top-right */}
-                      <div style={{ position: "absolute", top: 16, right: 28, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8, maxWidth: 240 }}>
-                        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#fdfaf5", border: "1px solid #e8cdc0", borderRadius: 999, padding: "5px 13px 5px 6px" }}>
-                          <StatusDot status={activeQuery.status} overrideSize={21} />
-                          <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".15em", color: burgundy, fontWeight: 500, textTransform: "uppercase" as const, whiteSpace: "nowrap" }}>{statusDisplayLabel(activeQuery)}</span>
+                      {/* identity — larger avatar + agent name + agency (status/quip are the rail pills) */}
+                      <div style={{ display: "flex", alignItems: "center", gap: 13, minWidth: 0 }}>
+                        <span style={{ flexShrink: 0, width: 46, height: 46, borderRadius: "50%", background: burgundy, color: "#ffffff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontSize: 16, fontWeight: 600, letterSpacing: ".03em" }}>{initials}</span>
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ fontFamily: FONT_SERIF, fontSize: 27, fontWeight: 600, color: "#2a2017", letterSpacing: ".02em", lineHeight: 1.1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{nameplate}</div>
+                          {hasName && !!activeAgent.agency?.trim() && (
+                            <div style={{ fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: ".14em", textTransform: "uppercase" as const, color: "#a89a8a", marginTop: 3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{activeAgent.agency}</div>
+                          )}
                         </div>
-                        {quip && <div style={{ fontFamily: "'Caveat', cursive", fontSize: 23, color: "#241c15", transform: "rotate(-2deg)", whiteSpace: "nowrap", lineHeight: 1 }}>{quip}</div>}
-                      </div>
-                      {/* name + initials avatar */}
-                      <div style={{ display: "flex", alignItems: "center", gap: 10, paddingRight: 250, minWidth: 0 }}>
-                        <span style={{ flexShrink: 0, width: 30, height: 30, borderRadius: "50%", background: burgundy, color: "#ffffff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 600, letterSpacing: ".03em" }}>{initials}</span>
-                        <span style={{ flex: 1, minWidth: 0, fontFamily: FONT_SERIF, fontSize: 29, fontWeight: 600, color: "#2a2017", letterSpacing: ".03em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{nameplate}</span>
                       </div>
                       {/* detail lines: email · MSWL · genres. Empty addable fields keep their slot and
                           show a quiet "add" reminder that opens the Edit Agent drawer. */}
@@ -2893,8 +2902,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 <span>Select a query to open the reading pane.</span>
               </div>
             )}
-            </div>{/* closes inner bordered frame */}
-          </div>{/* closes outer rim — reading pane card */}
+            </div>{/* closes display:contents */}
+          </div>{/* closes qp-pane */}
+          </div>{/* closes pane wrapper */}
 
         </div>{/* closes content grid */}
       </div>{/* closes main container */}

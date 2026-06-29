@@ -162,10 +162,40 @@ const ReadingPaneLab: React.FC = () => {
       <div style={{ padding: "16px 16px 18px" }}><QueryTimeline query={q} agent={a} events={ev} /></div>
     </div>
   );
+  // Static mock of the new pane header (frame + rail + straddling pills + identity) — geometry check.
+  const pill: React.CSSProperties = { background: "#fdfaf5", border: "1.5px solid #241c15", borderRadius: 999, boxShadow: "0 2px 7px rgba(36,28,21,0.20)" };
+  const Header = () => (
+    <div style={{ position: "relative", paddingTop: 17, width: 620 }}>
+      <div style={{ position: "absolute", top: 17, left: 26, right: 26, transform: "translateY(-50%)", zIndex: 6, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+        <div style={{ ...pill, display: "inline-flex", alignItems: "center", gap: 8, padding: "5px 14px 5px 6px" }}>
+          <span style={{ width: 21, height: 21, borderRadius: "50%", background: "#f8e7dc", border: "1.6px solid #7c3a2a" }} />
+          <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, letterSpacing: ".15em", color: "#7c3a2a", fontWeight: 500, textTransform: "uppercase" }}>PARTIAL SENT</span>
+        </div>
+        <div style={{ ...pill, padding: "2px 16px 4px", fontFamily: "'Caveat',cursive", fontSize: 21, color: "#241c15", lineHeight: 1.1 }}>waiting on Priya…</div>
+      </div>
+      <div style={{ position: "relative", border: "1px solid #241c15", borderRadius: 14, background: "#fff", boxShadow: "0 14px 38px rgba(58,28,20,0.11)", overflow: "hidden" }}>
+        <div style={{ height: 10, background: "#241c15" }} />
+        <div style={{ position: "relative", padding: "18px 28px 21px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 13 }}>
+            <span style={{ width: 46, height: 46, borderRadius: "50%", background: "#7c3a2a", color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontSize: 16, fontWeight: 600 }}>PR</span>
+            <div>
+              <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 27, fontWeight: 600, color: "#2a2017", lineHeight: 1.1 }}>Priya Raman</div>
+              <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9.5, letterSpacing: ".14em", textTransform: "uppercase", color: "#a89a8a", marginTop: 3 }}>Saltmarsh Literary</div>
+            </div>
+          </div>
+          <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, color: "#7c3a2a", marginTop: 11 }}>priya.raman@saltmarshliterary.co.uk</div>
+          <div style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 11.5, color: "#8a7d6e", marginTop: 11 }}>“Character-driven thrillers and upmarket book-club fiction.”</div>
+        </div>
+      </div>
+    </div>
+  );
   return (
-    <div style={{ minHeight: "100vh", background: "#f2ede7", padding: 30, display: "flex", gap: 24, alignItems: "flex-start", flexWrap: "wrap" }}>
-      <Card title="Tracking — within window" q={mockQuery} a={mockAgent} ev={mockEvents} />
-      <Card title="Tracking — overdue" q={overdueQuery} a={overdueAgent} ev={overdueEvents} />
+    <div style={{ minHeight: "100vh", background: "#f2ede7", padding: 30 }}>
+      <div style={{ marginBottom: 30 }}><Header /></div>
+      <div style={{ display: "flex", gap: 24, alignItems: "flex-start", flexWrap: "wrap" }}>
+        <Card title="Tracking — within window" q={mockQuery} a={mockAgent} ev={mockEvents} />
+        <Card title="Tracking — overdue" q={overdueQuery} a={overdueAgent} ev={overdueEvents} />
+      </div>
     </div>
   );
 };
