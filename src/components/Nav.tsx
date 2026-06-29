@@ -410,7 +410,7 @@ export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, 
           transition: "border-color 0.25s ease",
         }}
       >
-        <div className="flex items-center gap-4 max-w-[var(--content-max)] mx-auto w-full px-4 md:px-8" style={{ height: 64 }}>
+        <div className="flex items-center gap-4 max-w-[var(--content-max)] mx-auto w-full px-4 md:px-8" style={{ height: 77 }}>
           {/* Logo — a touch larger and nudged down so it sits on the baseline */}
           <button
             onClick={() => { onNavigate("dashboard"); closeAll(); }}
@@ -676,7 +676,7 @@ export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, 
                 >
                   {currentUser.name[0]?.toUpperCase()}
                 </span>
-                <span style={{ fontFamily: FONT_SANS, fontSize: 13, color: bodyInk }} className="shrink-0 max-sm:hidden">
+                <span style={{ fontFamily: FONT_SANS, fontSize: 13, fontWeight: 500, color: bodyInk }} className="shrink-0 max-sm:hidden">
                   {currentUser.name}
                 </span>
                 <ChevronDown className="w-3.5 h-3.5 shrink-0" style={{ color: labelColor }} />

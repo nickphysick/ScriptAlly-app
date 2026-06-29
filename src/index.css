@@ -13,3 +13,11 @@
      screens. Reference via max-w-[var(--content-max)] — never hardcode the width twice. */
   --content-max: 1440px;
 }
+
+/* Top-nav search placeholder — Playfair Display 500 16px (typed text stays Source Sans Pro 12px,
+   set inline on the input). Colour stays the muted #c8b8a8 from the placeholder-[#c8b8a8] utility. */
+.nav-search-field::placeholder {
+  font-family: "Playfair Display", Georgia, serif;
+  font-weight: 500;
+  font-size: 16px;
+}
