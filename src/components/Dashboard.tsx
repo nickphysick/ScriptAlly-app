@@ -1516,7 +1516,7 @@ export const Dashboard: React.FC<{
             <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 24, fontWeight: 500, letterSpacing: "-0.02em", color: "#3a1c14", margin: "0 0 10px", lineHeight: 1.3 }}>
               Your querying journey starts here.
             </h2>
-            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 300, color: "#a08070", margin: 0, lineHeight: 1.65 }}>
+            <p style={{ fontFamily: "'Source Sans Pro', sans-serif", fontSize: 13, fontWeight: 300, color: "#a08070", margin: 0, lineHeight: 1.65 }}>
               You'll need a manuscript and at least one agent before you can log your first query. We'll guide you through it — no rush.
             </p>
           </div>
@@ -1538,10 +1538,10 @@ export const Dashboard: React.FC<{
               <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, textTransform: "uppercase", letterSpacing: "0.1em", color: "#7c3a2a", marginBottom: 5 }}>
                 Urgent · Next step
               </div>
-              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, fontWeight: 500, color: "#3a1c14", marginBottom: 3 }}>
+              <div style={{ fontFamily: "'Source Sans Pro', sans-serif", fontSize: 14, fontWeight: 500, color: "#3a1c14", marginBottom: 3 }}>
                 Add your manuscript
               </div>
-              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, fontWeight: 300, color: "#a08070" }}>
+              <div style={{ fontFamily: "'Source Sans Pro', sans-serif", fontSize: 12, fontWeight: 300, color: "#a08070" }}>
                 Everything in ScriptAlly starts here — just a title and genre to begin.
               </div>
             </div>
@@ -1580,10 +1580,10 @@ export const Dashboard: React.FC<{
                 textAlign: "center",
               }}>
                 <div style={{ fontSize: 22, marginBottom: 8 }}>{card.icon}</div>
-                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 500, color: "#3a1c14", marginBottom: 4 }}>
+                <div style={{ fontFamily: "'Source Sans Pro', sans-serif", fontSize: 13, fontWeight: 500, color: "#3a1c14", marginBottom: 4 }}>
                   {card.label}
                 </div>
-                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 300, color: "#a08070" }}>
+                <div style={{ fontFamily: "'Source Sans Pro', sans-serif", fontSize: 11, fontWeight: 300, color: "#a08070" }}>
                   {card.sub}
                 </div>
               </div>
@@ -1704,7 +1704,7 @@ export const Dashboard: React.FC<{
         </div>
       ) : (
         /* ============ TOP ROW: hero + stat cards (left) · Over to you (right) ============ */
-        <div className="w-full max-w-none px-4 md:px-10 lg:px-8 xl:px-8 pt-2">
+        <div className="w-full max-w-[var(--content-max)] mx-auto px-4 md:px-8 pt-2">
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-[16px] items-stretch">
             {/* Left: hero stacked above the four stat cards (shares the pipeline's width) */}
             <div className="flex flex-col gap-[16px]">
@@ -1763,7 +1763,7 @@ export const Dashboard: React.FC<{
       {/* ============ LOWER ROW: pipeline (left) · timeline (right) ============ */}
       <div className={isMagazineLayout
         ? "grid grid-cols-1 lg:grid-cols-[1.8fr_1.1fr] xl:grid-cols-[2fr_1fr] gap-0 bg-[#FAF8F5] border-t border-[#e8e0d8] items-stretch"
-        : "w-full max-w-none px-4 md:px-10 lg:px-8 xl:px-8 pt-[14px] grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-[16px] items-start"
+        : "w-full max-w-[var(--content-max)] mx-auto px-4 md:px-8 pt-[14px] grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-[16px] items-start"
       }>
         
         {/* LEFT COLUMN: Stat Cards & Pipeline Matrix */}
@@ -2309,7 +2309,7 @@ export const Dashboard: React.FC<{
 
       {/* Quiet Pro upsell (replaces the old three-format banner review arena) */}
       {!isMagazineLayout && currentUser.plan !== UserPlan.PRO && (
-        <div className="w-full max-w-none px-4 md:px-10 lg:px-8 xl:px-8 mt-[14px]">
+        <div className="w-full max-w-[var(--content-max)] mx-auto px-4 md:px-8 mt-[14px]">
           <MountCard>
             <div
               className="flex flex-col md:flex-row md:items-center justify-between gap-4"
@@ -2641,7 +2641,7 @@ export const Dashboard: React.FC<{
                 gap: 16,
                 boxShadow: "0 10px 30px rgba(0,0,0,0.28)",
                 zIndex: 1000,
-                fontFamily: '"Inter", system-ui, sans-serif',
+                fontFamily: '"Source Sans Pro", system-ui, sans-serif',
               }}
             >
               <span style={{ display: "flex", alignItems: "center", gap: 9, fontSize: 13 }}>

@@ -57,6 +57,13 @@ interface NavProps {
 
 const PINK = "#f8e7dc"; // soft-pink pill fill (inline — Tailwind has overridden this before)
 
+// Canonical primary-nav pill treatment (matches scriptally-nav-final.html): black ink throughout,
+// faint-pink hover, filled-pink active. NAV_PILL_HOVER is deepened from the mockup's #faeee8 so the
+// pill reads on the kraft bar (on the white mockup #faeee8 is fine; on sand it was near-invisible).
+const NAV_INK = "#241c15"; // link text — stays black in all states
+const NAV_PILL_HOVER = "#f3e3dc"; // faint pink hover pill
+const NAV_PILL_ACTIVE = "#f5e2da"; // filled pink active pill
+
 const PRIMARY: { tab: string; label: string }[] = [
   { tab: "dashboard", label: "Dashboard" },
   { tab: "queries", label: "Queries" },
@@ -87,7 +94,7 @@ const MenuItem: React.FC<{ onClick: () => void; children: React.ReactNode }> = (
 
 const MenuDivider: React.FC = () => <div style={{ height: 0.5, background: "#f0e6e0", margin: "4px 2px" }} />;
 
-/** Primary nav link — active gets a soft-pink pill; idle highlights the same pink on hover. */
+/** Primary nav link — black ink throughout; faint-pink pill on hover, filled-pink pill when active. */
 const NavLink: React.FC<{ label: string; active: boolean; onClick: () => void }> = ({ label, active, onClick }) => (
   <button
     onClick={onClick}
@@ -95,18 +102,18 @@ const NavLink: React.FC<{ label: string; active: boolean; onClick: () => void }>
     className="cursor-pointer"
     style={{
       fontFamily: FONT_SANS,
-      fontSize: 13,
-      fontWeight: active ? 500 : 400,
+      fontSize: 15,
+      fontWeight: active ? 600 : 500,
       whiteSpace: "nowrap",
-      padding: "7px 14px",
-      borderRadius: 20,
+      padding: "9px 16px",
+      borderRadius: 10,
       border: "none",
-      background: active ? PINK : "transparent",
-      color: active ? burgundy : ghostButtonText,
-      transition: "background 0.15s, color 0.15s",
+      background: active ? NAV_PILL_ACTIVE : "transparent",
+      color: NAV_INK,
+      transition: "background 0.15s",
     }}
-    onMouseEnter={(e) => { if (!active) { e.currentTarget.style.background = PINK; e.currentTarget.style.color = burgundy; } }}
-    onMouseLeave={(e) => { if (!active) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = ghostButtonText; } }}
+    onMouseEnter={(e) => { if (!active) { e.currentTarget.style.background = NAV_PILL_HOVER; } }}
+    onMouseLeave={(e) => { if (!active) { e.currentTarget.style.background = "transparent"; } }}
   >
     {label}
   </button>
@@ -403,7 +410,7 @@ export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, 
           transition: "border-color 0.25s ease",
         }}
       >
-        <div className="flex items-center gap-4 px-4 md:px-10 lg:px-14 xl:px-16" style={{ height: 64 }}>
+        <div className="flex items-center gap-4 max-w-[var(--content-max)] mx-auto w-full px-4 md:px-8" style={{ height: 64 }}>
           {/* Logo — a touch larger and nudged down so it sits on the baseline */}
           <button
             onClick={() => { onNavigate("dashboard"); closeAll(); }}
