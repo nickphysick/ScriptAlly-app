@@ -131,7 +131,7 @@ function formatWhatsAppDate(dateString: string): string {
   return `${day} ${month}, ${time}`;
 }
 
-export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string, subPageName?: string) => void; activeSubPage?: string }> = ({ searchQuery, onNavigate, activeSubPage }) => {
+export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string, subPageName?: string) => void; activeSubPage?: string; inShell?: boolean }> = ({ searchQuery, onNavigate, activeSubPage, inShell = false }) => {
   const {
     currentUser,
     manuscripts,
@@ -1454,7 +1454,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   return (
     <div
       className="w-full flex flex-col overflow-hidden text-[#3a1c14] font-sans relative queries-container-theme"
-      style={{ height: "calc(100vh - 45px)", backgroundColor: "#ffffff" }}
+      style={{ height: inShell ? "100%" : "calc(100vh - 45px)", backgroundColor: inShell ? "#f2ede7" : "#ffffff" }}
     >
       <style>{`
         .custom-query-list-scrollbar::-webkit-scrollbar {
@@ -1696,7 +1696,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         </div>
       )}
 
-      {/* FIXED SIDEBAR — sits in front of Nav (z-51) covering its left portion */}
+      {/* FIXED SIDEBAR — sits in front of Nav (z-51) covering its left portion.
+          Suppressed inside the new SidebarShell: the rail carries page nav + (Phase 2) filter/sort. */}
+      {!inShell && (
       <div
         style={{
           position: "fixed",
@@ -1953,11 +1955,13 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           </button>
         </div>
       </div>
+      )}
 
-      {/* MAIN CONTENT — offset by sidebar width; control bar then two-column content grid */}
+      {/* MAIN CONTENT — offset by sidebar width (zeroed inside the SidebarShell, which supplies its
+          own rail); control bar then two-column content grid */}
       <div
         className="w-full"
-        style={{ paddingLeft: 262, background: "#ffffff", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}
+        style={{ paddingLeft: inShell ? 0 : 262, background: inShell ? "#f2ede7" : "#ffffff", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}
         id="queries-main-panel-container"
       >
 

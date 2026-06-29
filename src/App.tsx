@@ -8,6 +8,9 @@ import { DbProvider, useScriptAllyDb } from "./lib/db";
 import { BrandProvider } from "./lib/brand";
 import { Auth } from "./components/Auth";
 import { AppShell } from "./components/AppShell";
+import { SidebarShell } from "./components/shell/SidebarShell";
+import { ShellAccountChip, ShellUtilityCluster } from "./components/shell/ShellChrome";
+import { QueriesRailContext } from "./components/shell/QueriesRailContext";
 import { EditAgentHost } from "./components/EditAgentHost";
 import { EditQueryHost } from "./components/EditQueryHost";
 import { Dashboard } from "./components/Dashboard";
@@ -50,7 +53,7 @@ import { EditQueryDrawer } from "./components/EditQueryDrawer";
 import { QueryTimeline } from "./components/reading-pane/QueryTimeline";
 // Dev review surface for the notes pieces (PostIt / quick-add / editor) — #/notes-lab, DEV only.
 import { NotesLab } from "./components/notes/NotesLab";
-import { Palette, X, Check } from "lucide-react";
+import { Palette, X, Check, HelpCircle, Bell, Settings, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 /** TEMP dev harness for the post-import loader (#/import-loader): loops loading → complete so both
@@ -200,6 +203,45 @@ const ReadingPaneLab: React.FC = () => {
   );
 };
 
+/** TEMP dev harness for the new SidebarShell chrome (#/shell-lab): renders the rail (global nav +
+ *  Queries context stub + a static account chip) and the top strip (breadcrumb + a static utility
+ *  cluster) around a placeholder well, so the shell can be eyeballed without signing in. DEV only. */
+const ShellLab: React.FC = () => {
+  const [tab, setTab] = useState("queries");
+  const account = (
+    <div style={{ marginTop: "auto", paddingTop: 13, borderTop: "0.5px solid #e7ddd2", display: "flex", alignItems: "center", gap: 10 }}>
+      <span style={{ width: 29, height: 29, borderRadius: "50%", background: "#fdfaf5", border: "1px solid rgba(124,58,42,0.25)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Playfair Display',serif", fontWeight: 600, fontSize: 13, color: "#7c3a2a" }}>N</span>
+      <span style={{ flex: 1, fontFamily: "'Source Sans Pro',sans-serif", fontSize: 12.5, color: "#3a1c14" }}>Nick Physick</span>
+      <ChevronDown className="w-3 h-3" style={{ color: "#9a8c80" }} />
+    </div>
+  );
+  const iconBtn: React.CSSProperties = { width: 31, height: 31, borderRadius: 9, border: "none", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#7c3a2a" };
+  const utility = (
+    <>
+      <button style={iconBtn}><HelpCircle className="w-4 h-4" /></button>
+      <button style={{ ...iconBtn, position: "relative" }}><Bell className="w-4 h-4" /><span style={{ position: "absolute", top: 1, right: 1, background: "#7c3a2a", color: "#fff", fontFamily: "'JetBrains Mono',monospace", fontSize: 7, fontWeight: 600, padding: "1px 3px", borderRadius: 5, lineHeight: 1 }}>3</span></button>
+      <button style={iconBtn}><Settings className="w-4 h-4" /></button>
+      <span style={{ width: 30, height: 30, borderRadius: "50%", background: "#fdfaf5", border: "1px solid rgba(124,58,42,0.25)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Playfair Display',serif", fontWeight: 600, fontSize: 13, color: "#7c3a2a" }}>N</span>
+    </>
+  );
+  return (
+    <SidebarShell
+      activeTab={tab}
+      onNavigate={(t) => setTab(t)}
+      breadcrumb={["Queries", "Query Database"]}
+      context={<QueriesRailContext />}
+      account={account}
+      utility={utility}
+    >
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", height: "100%", padding: 16 }}>
+        <span style={{ fontFamily: "'Caveat',cursive", fontSize: 22, color: "#9a8c80" }}>
+          Queries desk renders here (Phase 1 chrome preview)
+        </span>
+      </div>
+    </SidebarShell>
+  );
+};
+
 /** Dev review surface for the canonical StatusDot (no router — reached via #/status-dots). */
 const useStatusDotDemoRoute = () => {
   const [isDemo, setIsDemo] = useState(() => window.location.hash === "#/status-dots");
@@ -318,6 +360,11 @@ function AppContent() {
   if (hash === "#/reading-pane-lab" && import.meta.env.DEV) {
     return <ReadingPaneLab />;
   }
+  // Dev-only SidebarShell chrome review surface (no login) — rail + top strip + breadcrumb + the
+  // Queries context stub around a placeholder well. TEMP: remove when the shell migration lands.
+  if (hash === "#/shell-lab" && import.meta.env.DEV) {
+    return <ShellLab />;
+  }
 
   // Boot: while Firebase Auth is still resolving the session, show a neutral splash — never a
   // landing/auth view. Stops the old "calmer place to query" landing flashing on a hard refresh.
@@ -379,6 +426,11 @@ function AppContent() {
     );
   }
 
+  // The Queries "desk" (everything except the Hub/Landing entry screens) is the first page migrated
+  // onto the new left-sidebar SidebarShell; the global top <Nav> is suppressed for it. Hub/Landing
+  // and every other tab still render under the legacy top-bar AppShell until they migrate in turn.
+  const isQueriesDesk = activeTab === "queries" && activeSubPage !== "Hub" && activeSubPage !== "Landing";
+
   return (
     <div className="min-h-screen bg-[#F5F0EA] text-[#3a1c14] selection:bg-[#7c3a2a]/20 selection:text-[#3a1c14] selection:font-bold">
       {/* Shared app shell: full-width top bar + left nav rail; routed pages render inside.
@@ -389,6 +441,18 @@ function AppContent() {
       <EditAgentHost
         onSavedToast={(msg) => setSuccessToast(msg)}
       >
+      {isQueriesDesk ? (
+        <SidebarShell
+          activeTab={activeTab}
+          onNavigate={handleNavigate}
+          breadcrumb={["Queries", "Query Database"]}
+          context={<QueriesRailContext />}
+          account={<ShellAccountChip onNavigate={handleNavigate} />}
+          utility={<ShellUtilityCluster onNavigate={handleNavigate} />}
+        >
+          <Queries searchQuery={searchQuery} onNavigate={handleNavigate} activeSubPage={activeSubPage} inShell />
+        </SidebarShell>
+      ) : (
       <AppShell
         activeTab={activeTab}
         activeSubPage={activeSubPage}
@@ -452,6 +516,7 @@ function AppContent() {
           <AccountSettings onNavigate={handleNavigate} />
         )}
       </AppShell>
+      )}
       </EditAgentHost>
       </EditQueryHost>
 
