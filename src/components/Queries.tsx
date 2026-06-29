@@ -46,7 +46,7 @@ import { ScriptAllyLogo } from "./ScriptAllyLogo";
 import {
   kraft, parchment, PAPER_TEXTURE,
   burgundy, FONT_SERIF, FONT_MONO, mountShadow, labelColor,
-  qdbDeskSurface, qdbDeskFrame, qdbMasthead, qdbCardLine,
+  qdbDeskSurface, qdbDeskFrame, qdbCardLine,
 } from "../lib/designTokens";
 
 const normalizeStatus = (status: string | QueryStatus): QueryStatus => {
@@ -2500,7 +2500,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   const mswl = activeAgent.mswlNotes?.trim();
                   const genres = (activeAgent.genres || []).filter(Boolean);
                   return (
-                    <div className="qp-hero" style={{ position: "relative", margin: "16px 22px 5px", padding: "20px 22px 18px", border: `1px solid ${qdbCardLine}`, borderRadius: 11, background: qdbMasthead, boxShadow: "0 5px 16px rgba(40,28,20,.12)", textAlign: "center" as const, flexShrink: 0 }}>
+                    <div className="qp-hero" style={{ position: "relative", margin: "16px 22px 5px", padding: "20px 22px 18px", border: `1px solid ${qdbCardLine}`, borderRadius: 11, background: parchment, boxShadow: "0 5px 16px rgba(40,28,20,.12)", textAlign: "center" as const, flexShrink: 0 }}>
                       {/* status chip — pinned top-right inside the masthead box */}
                       <div style={{ position: "absolute", top: 14, right: 15, zIndex: 2, display: "inline-flex", alignItems: "center", gap: 7, background: "#ffffff", border: "1px solid #e7ddd0", borderRadius: 999, padding: "5px 13px 5px 6px" }}>
                         <StatusDot status={activeQuery.status} overrideSize={18} decorative />
@@ -2510,9 +2510,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                       <div style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 12, textAlign: "left" as const }}>
                         <span style={{ flexShrink: 0, width: 46, height: 46, borderRadius: "50%", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", border: "1px solid #e8cabb", color: burgundy, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontSize: 16, fontWeight: 600, letterSpacing: ".03em" }}>{initials}</span>
                         <div style={{ minWidth: 0 }}>
-                          <div style={{ fontFamily: FONT_SERIF, fontSize: 25, fontWeight: 600, color: "#2a2017", letterSpacing: ".02em", lineHeight: 1.05 }}>{nameplate}</div>
+                          <div style={{ fontFamily: FONT_SERIF, fontSize: 31, fontWeight: 600, color: "#2a2017", letterSpacing: ".02em", lineHeight: 1.05 }}>{nameplate}</div>
                           {hasName && !!activeAgent.agency?.trim() && (
-                            <div style={{ fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: ".06em", textTransform: "uppercase" as const, color: "#a89a8a", marginTop: 4 }}>{activeAgent.agency}</div>
+                            <div style={{ fontFamily: FONT_MONO, fontSize: 11, letterSpacing: ".06em", textTransform: "uppercase" as const, color: "#a89a8a", marginTop: 4 }}>{activeAgent.agency}</div>
                           )}
                         </div>
                       </div>
@@ -2569,7 +2569,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   <div className="qp-card" style={{ minWidth: 0, background: "#fdfaf5", border: `1px solid `, borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
                       {/* pink header band */}
                       <div style={{ padding: "9px 16px", textAlign: "center", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", borderBottom: "1px solid #e8cabb", flexShrink: 0 }}>
-                        <span style={{ fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 600, color: "#241c15" }}>Tracking</span>
+                        <span style={{ fontFamily: FONT_SERIF, fontSize: 15.5, fontWeight: 600, color: "#241c15" }}>Tracking</span>
                       </div>
                       <div style={{ padding: "16px 16px 18px", flex: 1, minHeight: 0, overflowY: "auto" }}>
                         <QueryTimeline query={activeQuery} agent={activeAgent} events={trackingEvents} />
@@ -2580,7 +2580,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   <div className="qp-card" style={{ minWidth: 0, background: "#fdfaf5", border: `1px solid `, borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
                       {/* pink header band */}
                       <div style={{ padding: "9px 16px", textAlign: "center", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", borderBottom: "1px solid #e8cabb", flexShrink: 0 }}>
-                        <span style={{ fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 600, color: "#241c15" }}>What you sent</span>
+                        <span style={{ fontFamily: FONT_SERIF, fontSize: 15.5, fontWeight: 600, color: "#241c15" }}>What you sent</span>
                       </div>
                       {/* spec sheet */}
                       <div style={{ padding: "16px 16px 18px", flex: 1, minHeight: 0, overflowY: "auto" }}>
@@ -2643,7 +2643,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   <div className="qp-card" style={{ minWidth: 0, background: "#fdfaf5", border: `1px solid `, borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
                       {/* pink header band */}
                       <div style={{ padding: "9px 16px", textAlign: "center", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", borderBottom: "1px solid #e8cabb", flexShrink: 0 }}>
-                        <span style={{ fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 600, color: "#241c15" }}>Notes</span>
+                        <span style={{ fontFamily: FONT_SERIF, fontSize: 15.5, fontWeight: 600, color: "#241c15" }}>Notes</span>
                       </div>
                       {/* notes body — list (scrolls) + bottom-pinned composer */}
                       <div style={{ padding: "16px 16px 18px", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
