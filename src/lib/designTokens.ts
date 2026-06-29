@@ -18,6 +18,16 @@ export const kraftGlow = "radial-gradient(ellipse at 50% 0%, rgba(253,250,245,0.
 /** Full page-ground background shorthand: glow over the sand base. */
 export const pageGround = `${kraftGlow}, ${kraft}`;
 export const insetBorder = "1px solid rgba(124,58,42,0.28)"; // the signature mount frame
+
+/* ── Query Database desk palette (qdb-batch-edits mockup) ─────────────────
+   Surfaces for the Query Database "desk": a soft-pink well, a warm-cream desk
+   container framed by a thin sage outline, white list/pane cards on top, with a
+   faint-parchment agent masthead. Kept here (not scattered literals) per the brief. */
+export const qdbPagePink = "#f8eae3"; // page well behind the desk (Query-DB-scoped)
+export const qdbDeskSurface = "#faf7f1"; // desk container fill (warm cream)
+export const qdbSageFrame = "#45583f"; // desk frame — thin sage outline, all sides
+export const qdbMasthead = "#faf4ea"; // agent masthead card fill
+export const qdbCardLine = "#ddd4c6"; // list / pane / column / masthead hairline
 export const burgundy = "#7c3a2a"; // primary
 export const deepBurgundy = "#6b3023"; // hover / darker
 export const bodyInk = "#3a1c14";
@@ -45,9 +55,9 @@ export const ghostButtonBg = "#ffffff";
 export const ghostButtonBorder = "#e0d5c8";
 export const ghostButtonText = "#6a5a50";
 
-/* ── Typography (the app's existing font stack — never add or change fonts) ── */
+/* ── Typography (Playfair Display serif/display · Source Sans Pro sans/body · JetBrains Mono labels · Caveat hand) ── */
 export const FONT_SERIF = "'Playfair Display', Georgia, serif";
-export const FONT_SANS = "'Inter', system-ui, sans-serif";
+export const FONT_SANS = "'Source Sans Pro', system-ui, sans-serif";
 export const FONT_MONO = "'JetBrains Mono', 'Fira Mono', monospace";
 
 /** The label style: mono, 9px, uppercase, wide tracking. Spread into a style object. */

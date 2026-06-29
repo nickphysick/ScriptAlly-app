@@ -76,7 +76,8 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ activeTab, onNavigate, c
       width: 226,
       flexShrink: 0,
       background: chromeWhite,
-      borderRight: `0.5px solid ${navBorder}`,
+      // Thicker grey right edge per the Query DB mockup (desk-scoped: the rail only renders there).
+      borderRight: "3px solid #d6cfc4",
       display: "flex",
       flexDirection: "column",
       padding: "18px 14px 14px",
