@@ -46,7 +46,7 @@ import { ScriptAllyLogo } from "./ScriptAllyLogo";
 import {
   kraft, parchment, PAPER_TEXTURE,
   burgundy, FONT_SERIF, FONT_MONO, mountShadow, labelColor,
-  qdbPagePink, qdbDeskSurface, qdbDeskFrame, qdbMasthead, qdbCardLine,
+  qdbDeskSurface, qdbDeskFrame, qdbMasthead, qdbCardLine,
 } from "../lib/designTokens";
 
 const normalizeStatus = (status: string | QueryStatus): QueryStatus => {
@@ -1484,7 +1484,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   return (
     <div
       className="w-full flex flex-col overflow-hidden text-[#3a1c14] font-sans relative queries-container-theme"
-      style={{ height: inShell ? "100%" : "calc(100vh - 45px)", backgroundColor: inShell ? qdbPagePink : "#ffffff" }}
+      style={{ height: inShell ? "100%" : "calc(100vh - 45px)", backgroundColor: "#ffffff" }}
     >
       <style>{`
         .custom-query-list-scrollbar::-webkit-scrollbar {

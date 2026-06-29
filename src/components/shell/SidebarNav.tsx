@@ -49,8 +49,8 @@ const NavRow: React.FC<{ item: NavItem; active: boolean; onClick: () => void }> 
         alignItems: "center",
         gap: 11,
         fontFamily: FONT_SANS,
-        fontSize: 13.5,
-        fontWeight: active ? 500 : 400,
+        fontSize: 15,
+        fontWeight: active ? 700 : 600,
         color: active ? burgundy : linkRest,
         background: active ? pinkActive : "transparent",
         border: "none",
@@ -76,8 +76,8 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ activeTab, onNavigate, c
       width: 300, // +33% from the prior 226 (mockup widened the rail); content reflows, no restyle
       flexShrink: 0,
       background: chromeWhite,
-      // Thicker grey right edge per the Query DB mockup (desk-scoped: the rail only renders there).
-      borderRight: "3px solid #d6cfc4",
+      // Thin grey right edge, matching the top strip's bottom border (desk-scoped: rail renders here).
+      borderRight: "1px solid #d6cfc4",
       display: "flex",
       flexDirection: "column",
       padding: "18px 14px 14px",

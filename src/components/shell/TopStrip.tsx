@@ -8,7 +8,6 @@
  */
 import React from "react";
 import { Breadcrumb } from "./Breadcrumb";
-import { chromeWhite, navBorder } from "./shellTokens";
 
 interface TopStripProps {
   breadcrumb: string[];
@@ -22,8 +21,8 @@ export const TopStrip: React.FC<TopStripProps> = ({ breadcrumb, onCrumbClick, ut
     style={{
       height: 48,
       flexShrink: 0,
-      background: chromeWhite,
-      borderBottom: `0.5px solid ${navBorder}`,
+      background: "transparent",
+      borderBottom: "1px solid #d6cfc4",
       display: "flex",
       alignItems: "center",
       gap: 10,

@@ -14,8 +14,6 @@
 import React from "react";
 import { SidebarNav } from "./SidebarNav";
 import { TopStrip } from "./TopStrip";
-// Page well / app-shell ground — soft pink, set at the shell level (was the cream shellToken).
-import { qdbPagePink } from "../../lib/designTokens";
 
 interface SidebarShellProps {
   activeTab: string;
@@ -41,11 +39,11 @@ export const SidebarShell: React.FC<SidebarShellProps> = ({
   utility,
   children,
 }) => (
-  <div style={{ display: "flex", height: "100vh", overflow: "hidden", background: qdbPagePink }}>
+  <div style={{ display: "flex", height: "100vh", overflow: "hidden", background: "#ffffff" }}>
     <SidebarNav activeTab={activeTab} onNavigate={onNavigate} context={context} account={account} />
     <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, minHeight: 0 }}>
       <TopStrip breadcrumb={breadcrumb} onCrumbClick={onCrumbClick} utility={utility} />
-      <div style={{ flex: 1, minHeight: 0, overflow: "hidden", background: qdbPagePink }}>{children}</div>
+      <div style={{ flex: 1, minHeight: 0, overflow: "hidden", background: "#ffffff" }}>{children}</div>
     </div>
   </div>
 );
