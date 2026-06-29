@@ -2751,7 +2751,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, padding: "16px 22px 24px", flex: "0 1 auto", minHeight: 0 }}>
 
                   {/* ── Sub-card 1: Tracking ── */}
-                  <div className="qp-card" style={{ minWidth: 0, background: "#fdfaf5", border: "1px solid #e9dfd0", borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                  <div className="qp-card" style={{ minWidth: 0, background: "#fdfaf5", border: "1px solid #cbc4b6", borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
                       {/* pink header band */}
                       <div style={{ padding: "9px 16px", textAlign: "center", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", borderBottom: "1px solid #e8cabb", flexShrink: 0 }}>
                         <span style={{ fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 600, color: "#241c15" }}>Tracking</span>
@@ -2762,7 +2762,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     </div>{/* ── end sub-card 1: Tracking ── */}
 
                   {/* ── Sub-card 2: What you sent ── */}
-                  <div className="qp-card" style={{ minWidth: 0, background: "#fdfaf5", border: "1px solid #e9dfd0", borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                  <div className="qp-card" style={{ minWidth: 0, background: "#fdfaf5", border: "1px solid #cbc4b6", borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
                       {/* pink header band */}
                       <div style={{ padding: "9px 16px", textAlign: "center", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", borderBottom: "1px solid #e8cabb", flexShrink: 0 }}>
                         <span style={{ fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 600, color: "#241c15" }}>What you sent</span>
@@ -2776,7 +2776,6 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           const materials = mats.map(formatQueryMaterial).filter(Boolean);
                           const linkedPackage = activeQuery.packageId ? packages.find(p => p.id === activeQuery.packageId) : null;
                           const minilabel: React.CSSProperties = { fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: "0.15em", textTransform: "uppercase", color: "#a89a8a" };
-                          const srow: React.CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderTop: "1px solid #efe5d8" };
                           const pillStyle: React.CSSProperties = { display: "inline-flex", alignItems: "center", fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 500, color: "#6a5b4c", background: "#fdfaf5", border: "1px solid #ddcdbb", borderRadius: 999, padding: "4px 11px" };
                           const pkgComponents = linkedPackage
                             ? [["Query letter", linkedPackage.queryLetterVersionId], ["Synopsis", linkedPackage.synopsisVersionId], ["Sample pages", linkedPackage.samplePagesVersionId]].filter(([, v]) => !!v).map(([l]) => l as string)
@@ -2784,13 +2783,17 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           return (
                             <>
                               <div style={{ fontFamily: FONT_SERIF, fontSize: 18, fontWeight: 600, color: "#241c15", lineHeight: 1.15, marginBottom: 12 }}>{activeMs.title}</div>
-                              <div style={srow}><span style={minilabel}>Genre</span><span style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, color: "#241c15" }}>{activeMs.genre || "—"}</span></div>
-                              <div style={srow}><span style={minilabel}>Word count</span><span style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, color: "#241c15" }}>{activeMs.wordCount ? activeMs.wordCount.toLocaleString() : "—"}</span></div>
-                              <div style={{ ...srow, paddingTop: 10 }}>
+                              {/* meta line — sage genre tag + muted word count */}
+                              <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 13 }}>
+                                {activeMs.genre && <span style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".1em", textTransform: "uppercase" as const, color: "#5a6e58", background: "#eef2ec", border: "1px solid #d8e0d4", borderRadius: 999, padding: "3px 10px" }}>{activeMs.genre}</span>}
+                                {!!activeMs.wordCount && <span style={{ fontFamily: FONT_MONO, fontSize: 10.5, color: "#a89a8a", letterSpacing: ".03em" }}>{activeMs.wordCount.toLocaleString()} words</span>}
+                              </div>
+                              {/* logline — pulled quote with a 2px left rule */}
+                              <div style={{ borderLeft: "2px solid #e7d3c9", paddingLeft: 12 }}>
                                 {activeMs.logline ? (
-                                  <span style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 12.5, color: "#5a4d40", lineHeight: 1.4 }}>{activeMs.logline}</span>
+                                  <span style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 12.5, color: "#5a4d40", lineHeight: 1.45 }}>{activeMs.logline}</span>
                                 ) : (
-                                  <span role="button" tabIndex={0} onClick={() => onNavigate?.("manuscripts")} style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 12.5, color: "#b3a596", lineHeight: 1.4, cursor: "pointer" }}>Add a logline</span>
+                                  <span role="button" tabIndex={0} onClick={() => onNavigate?.("manuscripts")} style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 12.5, color: "#b3a596", lineHeight: 1.45, cursor: "pointer" }}>Add a logline</span>
                                 )}
                               </div>
                               {/* Materials included */}
@@ -2818,7 +2821,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                                     <span style={{ flexShrink: 0, color: "#b8a37e", marginTop: 1 }}>
                                       <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.3}><rect x="3.5" y="7" width="9" height="6.3" rx="1.3" /><path d="M5.6 7V5a2.4 2.4 0 014.8 0v2" /></svg>
                                     </span>
-                                    <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, lineHeight: 1.5, color: "#9a8a6e" }}>Bundle these materials into a named package and track responses by package and component. <a href="#/plans" style={{ color: "#8a6a3e", fontWeight: 500, textDecoration: "none", borderBottom: "1px solid #d8c39a" }}>Available on Pro</a></span>
+                                    <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, lineHeight: 1.5, color: "#9a8a6e" }}>Attach custom packages to submissions and track performance to see which versions are landing best. <a href="#/plans" style={{ color: "#8a6a3e", fontWeight: 500, textDecoration: "none", borderBottom: "1px solid #d8c39a" }}>Available on Pro</a></span>
                                   </div>
                                 )}
                               </div>
@@ -2829,7 +2832,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     </div>{/* ── end sub-card 2: What you sent ── */}
 
                   {/* ── Sub-card 3: Notes — journal pins to bottom via flex-1 on messages area ── */}
-                  <div className="qp-card" style={{ minWidth: 0, background: "#fdfaf5", border: "1px solid #e9dfd0", borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                  <div className="qp-card" style={{ minWidth: 0, background: "#fdfaf5", border: "1px solid #cbc4b6", borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
                       {/* pink header band */}
                       <div style={{ padding: "9px 16px", textAlign: "center", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", borderBottom: "1px solid #e8cabb", flexShrink: 0 }}>
                         <span style={{ fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 600, color: "#241c15" }}>Notes</span>
