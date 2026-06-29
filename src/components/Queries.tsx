@@ -46,7 +46,7 @@ import { ScriptAllyLogo } from "./ScriptAllyLogo";
 import {
   kraft, parchment, PAPER_TEXTURE,
   burgundy, FONT_SERIF, FONT_MONO, mountShadow, labelColor,
-  qdbDeskSurface, qdbDeskFrame, qdbCardLine,
+  qdbDeskSurface, qdbDeskFrame, qdbCardLine, statusSageFill,
 } from "../lib/designTokens";
 
 const normalizeStatus = (status: string | QueryStatus): QueryStatus => {
@@ -2073,12 +2073,13 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             (The legacy black .qdesk frame + rail/glint is retired; the chrome frame is the shell.) ── */}
         <style>{`
           /* list rows — hairline dividers between rows; the selected row lifts off as a clean card
-             (white, shadow, slight translate, burgundy left bar) with its own divider hidden */
+             sage fill, shadow, slight translate, BLACK left bar) with its own divider hidden. Hover
+             sits flat on the same sage; the selected row is the raised one with the black bar. */
           .qrow{ position:relative; padding:12px 15px; cursor:pointer; border-bottom:1px solid #eee3d5; transition:background .14s ease, box-shadow .15s ease, transform .15s ease; }
           .qrow:last-child{ border-bottom:none; }
-          .qrow:hover:not(.sel){ background:#fcfbf8; }
-          .qrow.sel{ background:#fff; border-bottom-color:transparent; border-radius:9px; box-shadow:0 6px 16px rgba(40,28,20,.14); transform:translateX(3px); z-index:3; }
-          .qrow.sel::before{ content:""; position:absolute; left:0; top:7px; bottom:7px; width:3px; border-radius:0 3px 3px 0; background:#7c3a2a; }
+          .qrow:hover:not(.sel){ background:${statusSageFill}; }
+          .qrow.sel{ background:${statusSageFill}; border-bottom-color:transparent; border-radius:9px; box-shadow:0 6px 16px rgba(40,28,20,.14); transform:translateX(3px); z-index:3; }
+          .qrow.sel::before{ content:""; position:absolute; left:0; top:7px; bottom:7px; width:3px; border-radius:0 3px 3px 0; background:#1a1510; }
           @media (prefers-reduced-motion: reduce){ .qrow.sel{ transform:none; } }
         `}</style>
         {/* Worktable — ONE encompassing frame wrapping the action bar + list + pane on a warm cream
@@ -2121,7 +2122,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     onClick={() => hasActive && setIsMarkSentOpen(o => !o)}
                     onMouseEnter={e => { if (hasActive) e.currentTarget.style.background = "#f7f2ea"; }}
                     onMouseLeave={e => (e.currentTarget.style.background = "#ffffff")}
-                    style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 12.5, fontWeight: 500, color: "#1a1510", background: "#ffffff", border: `1px solid ${qdbCardLine}`, borderRadius: 11, padding: "10px 15px", whiteSpace: "nowrap", cursor: hasActive ? "pointer" : "default", opacity: hasActive ? 1 : 0.5 }}
+                    style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 12.5, fontWeight: 500, color: "#1a1510", background: "#ffffff", border: `1.5px solid ${qdbCardLine}`, borderRadius: 11, padding: "10px 15px", whiteSpace: "nowrap", cursor: hasActive ? "pointer" : "default", opacity: hasActive ? 1 : 0.5 }}
                   >
                     <Send style={{ width: 14, height: 14, strokeWidth: 1.8 } as any} />
                     {ctrlAction.label}
@@ -2132,7 +2133,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     onClick={() => hasActive && setIsRecordResponseFocusFormOpen(true)}
                     onMouseEnter={e => { if (hasActive) e.currentTarget.style.background = "#f7f2ea"; }}
                     onMouseLeave={e => (e.currentTarget.style.background = "#ffffff")}
-                    style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 12.5, fontWeight: 500, color: "#1a1510", background: "#ffffff", border: `1px solid ${qdbCardLine}`, borderRadius: 11, padding: "10px 15px", whiteSpace: "nowrap", cursor: hasActive ? "pointer" : "default", opacity: hasActive ? 1 : 0.5 }}
+                    style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 12.5, fontWeight: 500, color: "#1a1510", background: "#ffffff", border: `1.5px solid ${qdbCardLine}`, borderRadius: 11, padding: "10px 15px", whiteSpace: "nowrap", cursor: hasActive ? "pointer" : "default", opacity: hasActive ? 1 : 0.5 }}
                   >
                     <Send style={{ width: 14, height: 14, strokeWidth: 1.8 } as any} />
                     {ctrlAction.label}
@@ -2143,7 +2144,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   onClick={() => { if (hasActive && activeQuery) openEditQuery(activeQuery.id); }}
                   onMouseEnter={e => { if (hasActive) e.currentTarget.style.background = "#f7f2ea"; }}
                   onMouseLeave={e => (e.currentTarget.style.background = "#ffffff")}
-                  style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: 12.5, fontWeight: 500, color: "#1a1510", background: "#ffffff", border: `1px solid ${qdbCardLine}`, borderRadius: 11, padding: "10px 15px", whiteSpace: "nowrap", cursor: hasActive ? "pointer" : "default", opacity: hasActive ? 1 : 0.5 }}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: 12.5, fontWeight: 500, color: "#1a1510", background: "#ffffff", border: `1.5px solid ${qdbCardLine}`, borderRadius: 11, padding: "10px 15px", whiteSpace: "nowrap", cursor: hasActive ? "pointer" : "default", opacity: hasActive ? 1 : 0.5 }}
                 >
                   <Pencil style={{ width: 13, height: 13 }} />
                   Edit
@@ -2155,7 +2156,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   onClick={() => hasActive && !isGeneratingPDF && handleDownloadPDF()}
                   onMouseEnter={e => { if (hasActive && !isGeneratingPDF) e.currentTarget.style.background = "#f7f2ea"; }}
                   onMouseLeave={e => (e.currentTarget.style.background = "#ffffff")}
-                  style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: 12.5, fontWeight: 500, color: "#1a1510", background: "#ffffff", border: `1px solid ${qdbCardLine}`, borderRadius: 11, padding: "10px 15px", whiteSpace: "nowrap", cursor: (hasActive && !isGeneratingPDF) ? "pointer" : "default", opacity: (hasActive && !isGeneratingPDF) ? 1 : 0.5 }}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 7, fontSize: 12.5, fontWeight: 500, color: "#1a1510", background: "#ffffff", border: `1.5px solid ${qdbCardLine}`, borderRadius: 11, padding: "10px 15px", whiteSpace: "nowrap", cursor: (hasActive && !isGeneratingPDF) ? "pointer" : "default", opacity: (hasActive && !isGeneratingPDF) ? 1 : 0.5 }}
                 >
                   <Download style={{ width: 13, height: 13 }} />
                   {isGeneratingPDF ? "Generating…" : "Download as PDF"}
