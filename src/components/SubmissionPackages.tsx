@@ -728,7 +728,7 @@ export const SubmissionPackages: React.FC = () => {
   const renderFirstRun = () => {
     const tilt = (i: number, tilts: number[]) => (WORKTABLE_TILT ? `rotate(${tilts[i] ?? 0}deg)` : "none");
     return (
-      <div className="sp-pane" style={{ position: "relative", background: "#ffffff", border: "1px solid #1a1410", borderRadius: 18, boxShadow: "0 6px 22px rgba(58,28,20,0.08)", overflow: "hidden" }}>
+      <div className="sp-pane" style={{ position: "relative", background: "#ffffff", borderRadius: 18, boxShadow: "0 12px 34px rgba(58,28,20,0.16)", overflow: "hidden" }}>
         {/* hero band — the same pink as the "Use template" buttons (buttonPinkBg) */}
         <div style={{ position: "relative", overflow: "hidden", padding: "24px 36px", textAlign: "center", borderBottom: "1px solid rgba(124,58,42,0.1)", background: buttonPinkBg }}>
           <span className="sp-band-sheen" aria-hidden="true" />
@@ -737,9 +737,6 @@ export const SubmissionPackages: React.FC = () => {
             Test different versions of your submission and let the results tell you which combination agents respond to.
           </div>
         </div>
-        {/* the one restrained handwritten accent, near the hero */}
-        <div className="sp-startnote" aria-hidden="true" style={{ position: "absolute", right: "5%", top: 86, fontFamily: "'Caveat', cursive", fontSize: 21, color: burgundy, transform: "rotate(-6deg)", pointerEvents: "none", zIndex: 2 }}>start here</div>
-
         {/* white content body — a clean sheet (no grain); cards float on shadow */}
         <div style={{ padding: "28px 36px 32px", background: "#ffffff" }}>
           {/* object cards + dashed connectors that stretch to fill */}
@@ -1538,16 +1535,18 @@ export const SubmissionPackages: React.FC = () => {
   return (
     <div className="sp-root font-sans" style={{ color: bodyInk }}>
       <style>{`
-        /* Pattern A shell: the full-width nav sits above; below it a viewport-locked row — the materials
-           rail + the content column. Only .sp-scroll scrolls (the rail scrolls independently if long). */
-        .sp-root { display: flex; flex-direction: row; height: calc(100vh - 64px); overflow: hidden; background: #ffffff; }
+        /* Pattern A shell: full-width nav above; then a full-width title strip; then a viewport-locked
+           row — the materials rail + the content column. Only .sp-scroll scrolls (rail scrolls if long). */
+        .sp-root { display: flex; flex-direction: column; height: calc(100vh - 64px); overflow: hidden; background: #ffffff; }
+        .sp-rowbelow { flex: 1; min-height: 0; display: flex; }
         .sp-mstuck:hover { background: #f5efe6 !important; }
         .sp-sumcard:hover { border-color: #c9a89e !important; box-shadow: 0 3px 12px rgba(58,28,20,0.07); }
         .sp-sumcard:focus-visible { outline: 2px solid ${burgundy}; outline-offset: 2px; }
         .sp-sumadd:hover { background: #efd5ca !important; }
         .sp-manage-btn:hover { background: #efd5ca !important; }
         @media (max-width: 768px) {
-          .sp-root { flex-direction: column; height: auto; min-height: calc(100vh - 64px); overflow: visible; }
+          .sp-root { height: auto; min-height: calc(100vh - 64px); overflow: visible; }
+          .sp-rowbelow { flex-direction: column; }
           .sp-sidebar { width: 100% !important; border-right: none !important; border-bottom: 1px solid rgba(124,58,42,0.1) !important; }
           .sp-main { height: auto !important; }
           .sp-scroll { overflow-y: visible !important; }
@@ -1612,24 +1611,26 @@ export const SubmissionPackages: React.FC = () => {
         </div>
       ) : (
         <>
-          {renderSidebar()}
-          {/* right column — the content scroller; sits beside the rail in the viewport-locked row */}
-          <div className="sp-main" style={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex", flexDirection: "column", background: "#ffffff" }}>
-            {/* white title strip */}
-            <div style={{ background: "#ffffff", borderBottom: "1px solid rgba(124,58,42,0.1)", padding: "15px 30px", display: "flex", alignItems: "center", gap: 11, flexShrink: 0 }}>
-              <span style={{ fontFamily: FONT_SERIF, fontSize: 24, fontWeight: 600, color: headingInk }}>Submission Package Builder</span>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: FONT_MONO, fontSize: 8, fontWeight: 500, letterSpacing: "0.1em", color: burgundy, background: buttonPinkBg, border: `0.5px solid ${buttonPinkBorder}`, borderRadius: 20, padding: "3px 8px 2px" }}>
-                <Lock style={{ width: 7, height: 7 }} strokeWidth={2.4} aria-hidden="true" /> PRO
-              </span>
-            </div>
-            {/* the only internal scroller — the reading pane (empty) or the spotlight + shelf */}
-            <div className="sp-scroll" style={{ flex: 1, minHeight: 0, overflowY: "auto", background: "#ffffff", padding: "24px 28px" }}>
-              <div style={{ maxWidth: 1500, margin: "0 auto" }}>
-                {detailPkgId
-                  ? renderDetail()
-                  : msPackages.length === 0 && !buildOpen
-                    ? renderFirstRun()
-                    : renderPackagesView()}
+          {/* full-width white title strip — the sidebar begins beneath it */}
+          <div style={{ background: "#ffffff", borderBottom: "1px solid rgba(124,58,42,0.1)", padding: "15px 30px", display: "flex", alignItems: "center", gap: 11, flexShrink: 0 }}>
+            <span style={{ fontFamily: FONT_SERIF, fontSize: 24, fontWeight: 600, color: headingInk }}>Submission Package Builder</span>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: FONT_MONO, fontSize: 8, fontWeight: 500, letterSpacing: "0.1em", color: burgundy, background: buttonPinkBg, border: `0.5px solid ${buttonPinkBorder}`, borderRadius: 20, padding: "3px 8px 2px" }}>
+              <Lock style={{ width: 7, height: 7 }} strokeWidth={2.4} aria-hidden="true" /> PRO
+            </span>
+          </div>
+          {/* row beneath the title: the materials rail + the content scroller */}
+          <div className="sp-rowbelow">
+            {renderSidebar()}
+            <div className="sp-main" style={{ flex: 1, minWidth: 0, minHeight: 0, display: "flex", flexDirection: "column" }}>
+              {/* the only internal scroller — surround is the nav colour; the pane floats on it */}
+              <div className="sp-scroll" style={{ flex: 1, minHeight: 0, overflowY: "auto", background: kraft, padding: "24px 28px" }}>
+                <div style={{ maxWidth: 1500, margin: "0 auto" }}>
+                  {detailPkgId
+                    ? renderDetail()
+                    : msPackages.length === 0 && !buildOpen
+                      ? renderFirstRun()
+                      : renderPackagesView()}
+                </div>
               </div>
             </div>
           </div>
