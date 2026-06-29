@@ -656,6 +656,17 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
   // Chat scroll container ref
   const chatContainerRef = React.useRef<HTMLDivElement>(null);
+  // Query-list scroll container + scroll-aware edge fades: top/bottom overlays show only when there
+  // is content beyond that edge. Default hidden; recomputed on scroll, resize, and list change.
+  const listScrollRef = React.useRef<HTMLDivElement>(null);
+  const [listFade, setListFade] = useState<{ top: boolean; bottom: boolean }>({ top: false, bottom: false });
+  const recomputeListFades = React.useCallback(() => {
+    const el = listScrollRef.current;
+    const nextTop = !!el && el.scrollHeight > el.clientHeight + 3 && el.scrollTop > 3;
+    const nextBottom = !!el && el.scrollHeight > el.clientHeight + 3 && el.scrollTop + el.clientHeight < el.scrollHeight - 3;
+    // Bail out (return prev) when unchanged so the resize/content effects can't loop.
+    setListFade(prev => (prev.top === nextTop && prev.bottom === nextBottom ? prev : { top: nextTop, bottom: nextBottom }));
+  }, []);
   // Stable refs for keyboard navigation (updated each render before return)
   const sortedListRef = useRef<any[]>([]);
   const selectedQueryIdRef = useRef<string | null>(null);
@@ -892,6 +903,14 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
       setSelectedQueryId(null);
     }
   }, [statusFiltersKey, selectedManuscriptFilter, listSearch, searchQuery, queries.length]);
+
+  // Keep the list edge-fades in sync as content height, grouping, or selection changes, and on
+  // viewport resize. Scroll-driven updates come from the container's onScroll handler.
+  useEffect(() => {
+    recomputeListFades();
+    window.addEventListener("resize", recomputeListFades);
+    return () => window.removeEventListener("resize", recomputeListFades);
+  }, [recomputeListFades, sortedList.length, selectedQueryId, groupOption]);
 
   // Reactive date sent change handler that automatically projects response due expectations
   // Query-field editing (manuscript, dates, method, materials/package, personalisation, deadline,
@@ -2053,13 +2072,13 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         {/* ── The desk — control bar over a list card + reading pane on the shell's cream well.
             (The legacy black .qdesk frame + rail/glint is retired; the chrome frame is the shell.) ── */}
         <style>{`
-          /* lifted-page list rows — rounded, no dividers; selected lifts off the stack */
-          .qrow{ position:relative; margin:3px 6px; padding:13px 15px; border-radius:9px; cursor:pointer; transition:background .14s ease, box-shadow .15s ease, transform .15s ease; }
-          .qrow:first-of-type{ margin-top:6px; }
-          .qrow:last-of-type{ margin-bottom:7px; }
-          .qrow:hover:not(.sel){ background:#fffdf9; box-shadow:0 2px 9px rgba(58,28,20,.09); }
-          .qrow.sel{ background:#fff; box-shadow:0 5px 16px rgba(58,28,20,.14); transform:translateX(2px); z-index:2; }
-          .qrow.sel::before{ content:""; position:absolute; left:0; top:9px; bottom:9px; width:3px; border-radius:3px; background:#7c3a2a; }
+          /* list rows — hairline dividers between rows; the selected row lifts off as a clean card
+             (white, shadow, slight translate, burgundy left bar) with its own divider hidden */
+          .qrow{ position:relative; padding:12px 15px; cursor:pointer; border-bottom:1px solid #eee3d5; transition:background .14s ease, box-shadow .15s ease, transform .15s ease; }
+          .qrow:last-child{ border-bottom:none; }
+          .qrow:hover:not(.sel){ background:#fcfbf8; }
+          .qrow.sel{ background:#fff; border-bottom-color:transparent; border-radius:9px; box-shadow:0 6px 16px rgba(40,28,20,.14); transform:translateX(3px); z-index:3; }
+          .qrow.sel::before{ content:""; position:absolute; left:0; top:7px; bottom:7px; width:3px; border-radius:0 3px 3px 0; background:#7c3a2a; }
           @media (prefers-reduced-motion: reduce){ .qrow.sel{ transform:none; } }
         `}</style>
         {/* Worktable — ONE encompassing frame wrapping the action bar + list + pane on a warm cream
@@ -2199,9 +2218,13 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 </button>
               </div>
 
-              {/* Rows container — lifted rows carry their own margin, so the container is flush */}
-              <div style={{ padding: "2px 0 4px", flex: 1, minHeight: 0, overflowY: "auto" }} className="custom-query-list-scrollbar">
-                <div>
+              {/* Scroll area + scroll-aware edge fades — overlays fade in only when there is content
+                  beyond that edge. overflow-x hidden so the selected row's translate can't add a
+                  horizontal scrollbar. */}
+              <div style={{ position: "relative", flex: 1, minHeight: 0 }}>
+                <div aria-hidden="true" style={{ position: "absolute", left: 0, right: 0, top: 0, height: 26, pointerEvents: "none", zIndex: 2, background: "linear-gradient(to bottom, #fff, rgba(255,255,255,0))", opacity: listFade.top ? 1 : 0, transition: "opacity .16s ease" }} />
+                <div ref={listScrollRef} onScroll={recomputeListFades} style={{ height: "100%", overflowY: "auto", overflowX: "hidden", padding: "2px 0 4px" }} className="custom-query-list-scrollbar">
+                  <div>
             {(() => {
               const statusOrder = [
                 QueryStatus.QUERIED,
@@ -2431,8 +2454,10 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 No matching queries found.
               </div>
             )}
-                </div>{/* closes divide-y rows */}
-              </div>{/* closes padding:9 rows-container */}
+                  </div>{/* closes rows wrapper */}
+                </div>{/* closes scroll container */}
+                <div aria-hidden="true" style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 26, pointerEvents: "none", zIndex: 2, background: "linear-gradient(to top, #fff, rgba(255,255,255,0))", opacity: listFade.bottom ? 1 : 0, transition: "opacity .16s ease" }} />
+              </div>{/* closes scroll-area wrapper */}
           </div>{/* closes list card */}
 
           {/* Reading pane — a plain hairline paper card now (the heavy black frame, rail + glint moved
