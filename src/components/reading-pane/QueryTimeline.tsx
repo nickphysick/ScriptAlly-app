@@ -193,12 +193,12 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
               )}
               {row.kind === "ghost" && row.resp && (
                 <div style={{ marginTop: 8 }}>
-                  <div style={{ position: "relative", height: 5, borderRadius: 5, background: "#efe5d8", overflow: "hidden" }}>
-                    <i style={{ position: "absolute", left: 0, top: 0, bottom: 0, borderRadius: 5, background: row.resp.overdue ? "linear-gradient(90deg,#d8b87a,#b98a4e)" : "linear-gradient(90deg,#a9bca6,#8a9e88)", width: `${row.resp.width}%` }} />
+                  <div style={{ position: "relative", height: 5, borderRadius: 5, background: "#f4e4dc", overflow: "hidden" }}>
+                    <i style={{ position: "absolute", left: 0, top: 0, bottom: 0, borderRadius: 5, background: "linear-gradient(90deg,#e9bdac,#d99e86)", width: `${row.resp.width}%` }} />
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", gap: 10, marginTop: 5 }}>
-                    <span style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: "0.05em", color: "#a89a8a", whiteSpace: "nowrap" }}>{row.resp.dayCap}</span>
-                    <span style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: "0.05em", color: "#a89a8a", whiteSpace: "nowrap" }}>{row.resp.expCap}</span>
+                    <span style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: "0.05em", color: "#b59384", whiteSpace: "nowrap" }}>{row.resp.dayCap}</span>
+                    <span style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: "0.05em", color: "#b59384", whiteSpace: "nowrap" }}>{row.resp.expCap}</span>
                   </div>
                 </div>
               )}

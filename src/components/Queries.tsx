@@ -2500,7 +2500,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   const mswl = activeAgent.mswlNotes?.trim();
                   const genres = (activeAgent.genres || []).filter(Boolean);
                   return (
-                    <div className="qp-hero" style={{ position: "relative", margin: "16px 22px 0", padding: "20px 22px 18px", border: `1px solid ${qdbCardLine}`, borderRadius: 11, background: qdbMasthead, textAlign: "center" as const, flexShrink: 0 }}>
+                    <div className="qp-hero" style={{ position: "relative", margin: "16px 22px 5px", padding: "20px 22px 18px", border: `1px solid ${qdbCardLine}`, borderRadius: 11, background: qdbMasthead, boxShadow: "0 5px 16px rgba(40,28,20,.12)", textAlign: "center" as const, flexShrink: 0 }}>
                       {/* status chip — pinned top-right inside the masthead box */}
                       <div style={{ position: "absolute", top: 14, right: 15, zIndex: 2, display: "inline-flex", alignItems: "center", gap: 7, background: "#ffffff", border: "1px solid #e7ddd0", borderRadius: 999, padding: "5px 13px 5px 6px" }}>
                         <StatusDot status={activeQuery.status} overrideSize={18} decorative />
@@ -2508,7 +2508,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                       </div>
                       {/* identity — avatar to the LEFT of name/agency, the group centred */}
                       <div style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 12, textAlign: "left" as const }}>
-                        <span style={{ flexShrink: 0, width: 46, height: 46, borderRadius: "50%", background: burgundy, color: "#ffffff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontSize: 16, fontWeight: 600, letterSpacing: ".03em" }}>{initials}</span>
+                        <span style={{ flexShrink: 0, width: 46, height: 46, borderRadius: "50%", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", border: "1px solid #e8cabb", color: burgundy, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontSize: 16, fontWeight: 600, letterSpacing: ".03em" }}>{initials}</span>
                         <div style={{ minWidth: 0 }}>
                           <div style={{ fontFamily: FONT_SERIF, fontSize: 25, fontWeight: 600, color: "#2a2017", letterSpacing: ".02em", lineHeight: 1.05 }}>{nameplate}</div>
                           {hasName && !!activeAgent.agency?.trim() && (
@@ -2656,8 +2656,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                             <>
                               <div style={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column", paddingRight: 2 }}>
                                 {notes.length === 0 ? (
-                                  <div style={{ padding: "2px 0 14px" }}>
-                                    <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, color: "#9a8e80" }}>None recorded</span>
+                                  <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                    <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, color: "#9a8e80", border: "1px solid #ddd4c6", borderRadius: 8, padding: "7px 16px" }}>None recorded</span>
                                   </div>
                                 ) : notes.map((entry) => {
                                   const isEditing = editingJournalId === entry.id;
