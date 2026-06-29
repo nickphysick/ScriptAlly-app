@@ -2690,6 +2690,10 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   /* column swell on hover */
                   .qp-card{ transition:transform .2s ease, box-shadow .2s ease; }
                   .qp-card:hover{ transform:scale(1.02); box-shadow:0 8px 22px rgba(58,28,20,.10); z-index:2; }
+                  /* empty-state "add" pills — dashed, tappable, open the Edit Agent drawer */
+                  .qaddpill{ display:inline-flex; align-items:center; gap:6px; font-family:'Inter',sans-serif; font-size:12px; color:#9a8a78; background:#faf6ef; border:1px dashed #d8ccba; border-radius:999px; padding:6px 13px; cursor:pointer; transition:color .14s, border-color .14s, background .14s; }
+                  .qaddpill:hover{ color:#7c3a2a; border-color:#c9a98c; background:#fbf3ec; }
+                  .qaddpill svg{ flex-shrink:0; opacity:.85; }
                   @media (prefers-reduced-motion: reduce){ .qp-card:hover{ transform:none; } }
                 `}</style>
                 {/* ── Hero — identity (left) + in-pane status chip (top-right, under the rail) ── */}
@@ -2724,32 +2728,46 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           )}
                         </div>
                       </div>
-                      {/* detail lines: email · MSWL · genres. Empty addable fields keep their slot and
-                          show a quiet "add" reminder that opens the Edit Agent drawer. */}
-                      {email ? (
+                      {/* detail lines: email · MSWL · genres. Present fields render in place; any
+                          absent addable fields collapse into one wrapping row of dashed "add" pills
+                          (Layout 1) that open the Edit Agent drawer to that field. */}
+                      {email && (
                         <div style={{ display: "flex", alignItems: "center", gap: 7, fontFamily: "'Inter',sans-serif", fontSize: 13, color: burgundy, marginTop: 11 }}>
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" style={{ opacity: .8, flexShrink: 0 }}><rect x="2.5" y="4.5" width="19" height="15" rx="2.5" /><path d="M3 6l9 6.5L21 6" /></svg>
                           <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{email}</span>
                         </div>
-                      ) : (
-                        <div role="button" tabIndex={0} onClick={() => openEditAgent(activeAgent.id)} style={{ display: "flex", alignItems: "center", gap: 7, fontFamily: "'Inter',sans-serif", fontSize: 13, color: "#b3a596", marginTop: 11, cursor: "pointer" }}>
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" style={{ opacity: .8, flexShrink: 0 }}><rect x="2.5" y="4.5" width="19" height="15" rx="2.5" /><path d="M3 6l9 6.5L21 6" /></svg>
-                          <span>Add an email address</span>
-                        </div>
                       )}
-                      {mswl ? (
+                      {mswl && (
                         <div style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 11.5, lineHeight: 1.45, color: "#8a7d6e", maxWidth: 620, margin: "11px 0 0" }}>“{mswl}”</div>
-                      ) : (
-                        <div role="button" tabIndex={0} onClick={() => openEditAgent(activeAgent.id)} style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 11.5, lineHeight: 1.45, color: "#b3a596", margin: "11px 0 0", cursor: "pointer" }}>Add their wish list</div>
                       )}
-                      {genres.length > 0 ? (
+                      {genres.length > 0 && (
                         <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6, marginTop: 11 }}>
                           {genres.map((genre, gIdx) => (
                             <span key={gIdx} style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: ".12em", textTransform: "uppercase" as const, color: "#5a6e58", background: "#fdfaf5", border: "1px solid #cdddc7", borderRadius: 999, padding: "3px 10px" }}>{genre}</span>
                           ))}
                         </div>
-                      ) : (
-                        <div role="button" tabIndex={0} onClick={() => openEditAgent(activeAgent.id)} style={{ fontFamily: "'Inter',sans-serif", fontSize: 11.5, color: "#b3a596", marginTop: 11, cursor: "pointer" }}>Add the genres they represent</div>
+                      )}
+                      {(!email || !mswl || genres.length === 0) && (
+                        <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8, marginTop: 12 }}>
+                          {!email && (
+                            <span role="button" tabIndex={0} onClick={() => openEditAgent(activeAgent.id)} className="qaddpill">
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5" /><path d="M3 6l9 6.5L21 6" /></svg>
+                              Add an email address
+                            </span>
+                          )}
+                          {!mswl && (
+                            <span role="button" tabIndex={0} onClick={() => openEditAgent(activeAgent.id)} className="qaddpill">
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
+                              Add their wish list
+                            </span>
+                          )}
+                          {genres.length === 0 && (
+                            <span role="button" tabIndex={0} onClick={() => openEditAgent(activeAgent.id)} className="qaddpill">
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
+                              Add the genres they represent
+                            </span>
+                          )}
+                        </div>
                       )}
                     </div>
                   );
