@@ -3,9 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import jsPDF from "jspdf";
 import { motion, AnimatePresence } from "motion/react";
+import { QueriesRail } from "./shell/QueriesRail";
+import { QUERIES_RAIL_SLOT_ID } from "./shell/QueriesRailContext";
 import { useScriptAllyDb } from "../lib/db";
 import { 
   doc, 
@@ -545,6 +548,13 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   const [sortDirs, setSortDirs] = useState<Record<string, number>>({});
   const [devTheme, setDevTheme] = useState<"burgundy" | "slate" | "emerald">("burgundy");
   const [filterAccordionOpen, setFilterAccordionOpen] = useState(true);
+  // Inside the SidebarShell, the live filter/sort rail (QueriesRail) is portalled into the shell's
+  // rail slot so it shares this page's filter state. Resolve the slot node after the DOM commits.
+  const [railSlot, setRailSlot] = useState<HTMLElement | null>(null);
+  useLayoutEffect(() => {
+    if (!inShell) { setRailSlot(null); return; }
+    setRailSlot(document.getElementById(QUERIES_RAIL_SLOT_ID));
+  }, [inShell]);
   const [groupAccordionOpen, setGroupAccordionOpen] = useState(false);
   const [sortAccordionOpen, setSortAccordionOpen] = useState(false);
 
@@ -1696,272 +1706,26 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         </div>
       )}
 
-      {/* FIXED SIDEBAR — sits in front of Nav (z-51) covering its left portion.
-          Suppressed inside the new SidebarShell: the rail carries page nav + (Phase 2) filter/sort. */}
-      {!inShell && (
-      <div
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: 262,
-          height: "100vh",
-          zIndex: 51,
-          background: "#fdfaf5",
-          borderRight: "1px solid #e2ded7",
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-        }}
-      >
-        {/* Logo */}
-        <div style={{ padding: "16px 22px 4px", flexShrink: 0, display: "flex", justifyContent: "center" }}>
-          <img src="/scriptally-title-nav.png" style={{ width: 188, height: "auto" }} alt="ScriptAlly" />
-        </div>
 
-        <div style={{ height: 1, margin: "4px 14px 8px", background: "rgba(124,58,42,0.10)" }} />
-
-        {/* Scrollable filter region */}
-        <div style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "0 14px 12px" }} className="custom-query-list-scrollbar">
-
-          {/* Manuscript — chip (1 ms) or dropdown (multiple) */}
-          {manuscripts.length === 1 && (
-            <div style={{ margin: "4px 2px 8px", padding: "10px 12px", borderRadius: 10, background: "#f6efe7", border: "1px solid rgba(124,58,42,.14)", display: "flex", alignItems: "center", gap: 9 }}>
-              <Book className="w-4 h-4" style={{ color: burgundy, flexShrink: 0 }} />
-              <span style={{ fontFamily: FONT_SERIF, fontSize: 14.5, color: "#2e3a2c", lineHeight: 1.2 }}>{manuscripts[0].title}</span>
-            </div>
-          )}
-          {manuscripts.length > 1 && (
-            <div style={{ margin: "4px 2px 8px" }}>
-              <div style={{ fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.08em", textTransform: "uppercase" as const, color: "#9a8579", marginBottom: 4, paddingLeft: 2 }}>Manuscript</div>
-              <div style={{ position: "relative" }}>
-                <select
-                  value={selectedManuscriptFilter}
-                  onChange={e => setSelectedManuscriptFilter(e.target.value)}
-                  style={{ width: "100%", padding: "9px 28px 9px 12px", background: "#fff", border: "1px solid #e3d7c8", borderRadius: 10, fontSize: 13.5, color: "#3a1c14", cursor: "pointer", appearance: "none" as const, fontFamily: "inherit" }}
-                >
-                  {manuscripts.map(m => {
-                    const count = queries.filter(q => q.manuscriptId === m.id).length;
-                    return <option key={m.id} value={m.id}>{m.title} ({count})</option>;
-                  })}
-                  <option value="All">All manuscripts ({queries.length})</option>
-                </select>
-                <ChevronRight className="w-3.5 h-3.5" style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%) rotate(90deg)", pointerEvents: "none", color: "#9a8579" }} />
-              </div>
-            </div>
-          )}
-
-          {/* "All queries" pinned row */}
-          <button
-            onClick={() => { setSelectedStatusFilters(["All"]); setSelectedManuscriptFilter("All"); }}
-            style={{
-              display: "flex", alignItems: "center", justifyContent: "space-between",
-              width: "100%", padding: "6px 12px", borderRadius: 9,
-              border: "none", cursor: "pointer", marginBottom: 6,
-              background: selectedStatusFilters.includes("All") && selectedManuscriptFilter === "All" ? "rgba(124,58,42,0.09)" : "transparent",
-              color: selectedStatusFilters.includes("All") && selectedManuscriptFilter === "All" ? burgundy : "#5a5047",
-            }}
-            className="hover:bg-[rgba(124,58,42,0.05)] transition-colors"
-          >
-            <span style={{ fontSize: 14, fontWeight: 500 }}>All queries</span>
-            <span style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#9a8579" }}>{queries.length}</span>
-          </button>
-
-          {/* Filter — static header, always open */}
-          <div style={{ marginBottom: 4 }}>
-            <div style={{ padding: "6px 12px", margin: "4px 2px 2px" }}>
-              <span style={{ fontFamily: FONT_MONO, fontSize: 11, letterSpacing: ".12em", textTransform: "uppercase" as const, color: burgundy, fontWeight: 500 }}>Filter</span>
-            </div>
-            <div>
-                {/* Status sub-section */}
-                <div style={{ marginBottom: 4 }}>
-                  {/* All active parent row */}
-                  {nonZeroActiveStatuses.length > 0 && (
-                    <>
-                      <button
-                        onClick={() => {
-                          setSelectedStatusFilters(allActiveHighlighted ? ["All"] : nonZeroActiveStatuses);
-                          setSelectedManuscriptFilter("All");
-                        }}
-                        style={{
-                          display: "flex", alignItems: "center", justifyContent: "space-between",
-                          width: "100%", padding: "6px 12px", borderRadius: 9,
-                          border: "none", cursor: "pointer", marginBottom: 1,
-                          background: allActiveHighlighted ? "rgba(124,58,42,0.09)" : "transparent",
-                          color: allActiveHighlighted ? burgundy : "#5a5047",
-                          fontSize: 14, fontWeight: 400,
-                        }}
-                        className="hover:bg-[rgba(124,58,42,0.05)] transition-colors"
-                      >
-                        <span>All active</span>
-                        <span style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#9a8579" }}>{nonZeroActiveStatuses.reduce((acc, s) => acc + queries.filter(q => q.status === s).length, 0)}</span>
-                      </button>
-                      {[
-                        { id: QueryStatus.QUERIED, label: "Queried" },
-                        { id: QueryStatus.PARTIAL_REQUESTED, label: "Partial req" },
-                        { id: QueryStatus.PARTIAL_SENT, label: "Partial sent" },
-                        { id: QueryStatus.FULL_REQUESTED, label: "Full req" },
-                        { id: QueryStatus.FULL_SENT, label: "Full sent" },
-                        { id: QueryStatus.REVISE_RESUBMIT, label: "R&R" },
-                        { id: QueryStatus.OFFER, label: "Offers" },
-                      ].filter(item => queries.some(q => q.status === item.id)).map(item => {
-                        const count = queries.filter(q => q.status === item.id).length;
-                        const isActive = selectedStatusFilters.includes(item.id);
-                        return (
-                          <button key={item.id} onClick={() => {
-                            let next = [...selectedStatusFilters].filter(f => f !== "All");
-                            if (next.includes(item.id)) { next = next.filter(f => f !== item.id); }
-                            else { next.push(item.id); }
-                            setSelectedStatusFilters(next.length === 0 ? ["All"] : next);
-                          }}
-                            style={{
-                              display: "flex", alignItems: "center", justifyContent: "space-between",
-                              width: "100%", padding: "6px 12px 6px 30px", borderRadius: 9,
-                              border: "none", cursor: "pointer", marginBottom: 1,
-                              background: isActive ? "rgba(124,58,42,0.09)" : "transparent",
-                              color: isActive ? burgundy : "#5a5047",
-                              fontWeight: 400, fontSize: 14,
-                            }}
-                            className="hover:bg-[rgba(124,58,42,0.05)] transition-colors"
-                          >
-                            <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                              <StatusDot status={item.id} size={11} />
-                              {item.label}
-                            </span>
-                            <span style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#9a8579" }}>{count}</span>
-                          </button>
-                        );
-                      })}
-                    </>
-                  )}
-                  {/* All closed parent row */}
-                  {nonZeroClosedStatuses.length > 0 && (
-                    <>
-                      <button
-                        onClick={() => {
-                          setSelectedStatusFilters(allClosedHighlighted ? ["All"] : nonZeroClosedStatuses);
-                          setSelectedManuscriptFilter("All");
-                        }}
-                        style={{
-                          display: "flex", alignItems: "center", justifyContent: "space-between",
-                          width: "100%", padding: "6px 12px", borderRadius: 9,
-                          border: "none", cursor: "pointer", marginBottom: 1, marginTop: nonZeroActiveStatuses.length > 0 ? 4 : 0,
-                          background: allClosedHighlighted ? "rgba(124,58,42,0.09)" : "transparent",
-                          color: allClosedHighlighted ? burgundy : "#5a5047",
-                          fontSize: 14, fontWeight: 400,
-                        }}
-                        className="hover:bg-[rgba(124,58,42,0.05)] transition-colors"
-                      >
-                        <span>All closed</span>
-                        <span style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#9a8579" }}>{nonZeroClosedStatuses.reduce((acc, s) => acc + queries.filter(q => q.status === s).length, 0)}</span>
-                      </button>
-                      {[
-                        { id: QueryStatus.REJECTED, label: "Rejected" },
-                        { id: QueryStatus.WITHDRAWN, label: "Withdrawn" },
-                        { id: QueryStatus.NO_RESPONSE, label: "No response" },
-                      ].filter(item => queries.some(q => q.status === item.id)).map(item => {
-                        const count = queries.filter(q => q.status === item.id).length;
-                        const isActive = selectedStatusFilters.includes(item.id);
-                        return (
-                          <button key={item.id} onClick={() => {
-                            let next = [...selectedStatusFilters].filter(f => f !== "All");
-                            if (next.includes(item.id)) { next = next.filter(f => f !== item.id); }
-                            else { next.push(item.id); }
-                            setSelectedStatusFilters(next.length === 0 ? ["All"] : next);
-                          }}
-                            style={{
-                              display: "flex", alignItems: "center", justifyContent: "space-between",
-                              width: "100%", padding: "6px 12px 6px 30px", borderRadius: 9,
-                              border: "none", cursor: "pointer", marginBottom: 1,
-                              background: isActive ? "rgba(124,58,42,0.09)" : "transparent",
-                              color: isActive ? burgundy : "#5a5047",
-                              fontWeight: 400, fontSize: 14,
-                            }}
-                            className="hover:bg-[rgba(124,58,42,0.05)] transition-colors"
-                          >
-                            <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                              <StatusDot status={item.id} size={11} />
-                              {item.label}
-                            </span>
-                            <span style={{ fontFamily: FONT_MONO, fontSize: 11, color: "#9a8579" }}>{count}</span>
-                          </button>
-                        );
-                      })}
-                    </>
-                  )}
-                </div>
-            </div>
-          </div>
-
-          {/* Sort — static header, always open, 5 toggle rows */}
-          <div style={{ marginBottom: 4 }}>
-            <div style={{ padding: "6px 12px", margin: "4px 2px 2px" }}>
-              <span style={{ fontFamily: FONT_MONO, fontSize: 11, letterSpacing: ".12em", textTransform: "uppercase" as const, color: burgundy, fontWeight: 500 }}>Sort</span>
-            </div>
-            {[
-              { id: "a_z", label: "A–Z", dirs: ["A → Z", "Z → A"] },
-              { id: "status", label: "Status", dirs: ["start → end", "end → start"] },
-              { id: "date_queried", label: "Date queried", dirs: ["most recent", "longest ago"] },
-              { id: "last_updated", label: "Last updated", dirs: ["most recent", "longest ago"] },
-              { id: "next_response_due", label: "Next response due", dirs: ["soonest first", "latest first"] },
-            ].map(item => {
-              const isOn = sortKey === item.id;
-              const dir = sortDirs[item.id] ?? 0;
-              return (
-                <div
-                  key={item.id}
-                  onClick={() => {
-                    if (isOn) {
-                      setSortDirs(d => ({ ...d, [item.id]: d[item.id] ? 0 : 1 }));
-                    } else {
-                      setSortKey(item.id);
-                    }
-                  }}
-                  style={{
-                    display: "block", padding: "6px 12px", borderRadius: 9, cursor: "pointer",
-                    background: isOn ? "rgba(124,58,42,0.10)" : "transparent",
-                    color: isOn ? burgundy : "#5b4d43",
-                    marginBottom: 1,
-                  }}
-                  className="hover:bg-[rgba(124,58,42,0.05)] transition-colors"
-                >
-                  <div style={{ fontSize: 14 }}>{item.label}</div>
-                  {isOn && (
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 5, fontFamily: FONT_MONO, fontSize: 10.5, letterSpacing: ".02em", color: burgundy }}>
-                      <span style={{ opacity: 0.65 }}>⇅</span>
-                      <span>{item.dirs[dir]}</span>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Export all pinned at bottom */}
-        <div style={{ padding: "9px 14px", borderTop: "1px solid rgba(124,58,42,0.10)", flexShrink: 0 }}>
-          <button
-            onClick={() => exportQueriesToCSV(queries, `ScriptAlly_Queries_${new Date().toISOString().slice(0, 10)}`)}
-            style={{
-              display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-              width: "100%", padding: "7px 12px", borderRadius: 8,
-              border: "1px solid rgba(124,58,42,0.18)", background: "rgba(124,58,42,0.05)",
-              color: burgundy, fontSize: 11, fontWeight: 600, cursor: "pointer",
-            }}
-            className="hover:bg-[rgba(124,58,42,0.10)] transition-colors"
-          >
-            <Download className="w-3.5 h-3.5" />
-            Export all as CSV
-          </button>
-        </div>
-      </div>
+      {/* Live filter/sort rail — portalled into the SidebarShell rail slot (shares this page's state). */}
+      {railSlot && createPortal(
+        <QueriesRail
+          queries={queries}
+          manuscripts={manuscripts}
+          selectedStatusFilters={selectedStatusFilters}
+          setSelectedStatusFilters={setSelectedStatusFilters}
+          selectedManuscriptFilter={selectedManuscriptFilter}
+          setSelectedManuscriptFilter={setSelectedManuscriptFilter}
+          sortOption={sortOption}
+          setSortOption={setSortOption}
+        />,
+        railSlot,
       )}
 
-      {/* MAIN CONTENT — offset by sidebar width (zeroed inside the SidebarShell, which supplies its
-          own rail); control bar then two-column content grid */}
+      {/* MAIN CONTENT — the control bar then the two-column desk (list + reading pane). */}
       <div
         className="w-full"
-        style={{ paddingLeft: inShell ? 0 : 262, background: inShell ? "#f2ede7" : "#ffffff", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}
+        style={{ paddingLeft: 0, background: "#f2ede7", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}
         id="queries-main-panel-container"
       >
 
@@ -2285,11 +2049,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
       </div>
 
-        {/* ── The desk — one black frame + 10px rail wrapping the action bar and the list/pane
-            split. The signature shimmer lives on this frame now; the cards inside are plain paper. ── */}
+        {/* ── The desk — control bar over a list card + reading pane on the shell's cream well.
+            (The legacy black .qdesk frame + rail/glint is retired; the chrome frame is the shell.) ── */}
         <style>{`
-          .qdesk::before{ content:""; position:absolute; inset:0; border-radius:15px; padding:1.5px; background:linear-gradient(135deg, transparent 0 44%, rgba(255,255,255,0.8) 50%, transparent 56% 100%); background-size:300% 300%; -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; z-index:6; animation:qdeskGlint 7.5s linear infinite; }
-          @keyframes qdeskGlint{ 0%{background-position:0% 0%;} 100%{background-position:100% 100%;} }
           /* lifted-page list rows — rounded, no dividers; selected lifts off the stack */
           .qrow{ position:relative; margin:3px 6px; padding:13px 15px; border-radius:9px; cursor:pointer; transition:background .14s ease, box-shadow .15s ease, transform .15s ease; }
           .qrow:first-of-type{ margin-top:6px; }
@@ -2297,24 +2059,22 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           .qrow:hover:not(.sel){ background:#fffdf9; box-shadow:0 2px 9px rgba(58,28,20,.09); }
           .qrow.sel{ background:#fff; box-shadow:0 5px 16px rgba(58,28,20,.14); transform:translateX(2px); z-index:2; }
           .qrow.sel::before{ content:""; position:absolute; left:0; top:9px; bottom:9px; width:3px; border-radius:3px; background:#7c3a2a; }
-          @media (prefers-reduced-motion: reduce){ .qdesk::before{ animation:none; } .qrow.sel{ transform:none; } }
+          @media (prefers-reduced-motion: reduce){ .qrow.sel{ transform:none; } }
         `}</style>
-        <div className="qdesk" style={{ position: "relative", margin: "18px 22px 24px", border: "1.5px solid #241c15", borderRadius: 15, background: "#f6f1e9", overflow: "hidden", boxShadow: "0 1px 3px rgba(58,28,20,.08), 0 18px 44px rgba(58,28,20,.13)", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
-          {/* flush black top rail — frame + rail read as one continuous black shape */}
-          <div style={{ height: 11, background: "#241c15", flexShrink: 0 }} />
-          {/* deskpad — the parchment working surface */}
-          <div style={{ padding: "18px 20px 20px", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+        {/* Deskwrap — the working surface on the shell's cream well (the legacy black .qdesk frame +
+            rail is retired; the chrome frame is now the sidebar + top strip around the well). */}
+        <div style={{ padding: 18, flex: 1, minHeight: 0, display: "flex", flexDirection: "column", gap: 12 }}>
 
-        {/* ── Action bar — on the desk surface, above the split ── */}
+        {/* ── Control bar — search (list-pane width) over the list · actions over the reading pane ── */}
         {(() => {
           const ctrlAction = currentStatus
             ? getPrimaryAction(currentStatus as QueryStatus)
             : { kind: "record" as const, label: "Record response", ballHolder: null as null };
           const hasActive = !!(activeQuery && activeAgent && activeMs);
           return (
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18, flexShrink: 0 }}>
-              {/* Search — white field, grows to fill the surface */}
-              <div style={{ position: "relative", flex: 1 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 18, alignItems: "center", flexShrink: 0 }}>
+              {/* Search — white field, exactly the list-pane width, aligned above the list below */}
+              <div style={{ position: "relative" }}>
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400 pointer-events-none" />
                 <input
                   type="text"
@@ -2324,8 +2084,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   style={{ width: "100%", background: "#fff", border: "1px solid #e3d9cc", borderRadius: 11, padding: "11px 15px 11px 40px", fontSize: 13.5, color: "#8a7a6c", fontFamily: "inherit", outline: "none" }}
                 />
               </div>
-              {/* Action buttons */}
-              <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+              {/* Action buttons — right-aligned over the reading pane */}
+              <div style={{ display: "flex", alignItems: "center", gap: 9, justifyContent: "flex-end" }}>
                 {ctrlAction.kind === "mark-sent" ? (
                   <button
                     ref={markSentTriggerRef}
@@ -2407,8 +2167,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         {/* ── Content grid: 360px list + 1fr reading pane (inside the deskpad) ── */}
         <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 18, alignItems: "stretch", flex: 1, minHeight: 0 }}>
 
-          {/* List card — paper on the desk: white, grey outline, soft shadow */}
-          <div style={{ background: "#fff", border: "1px solid #cbc4b6", borderRadius: 12, overflow: "hidden", boxShadow: "0 1px 2px rgba(58,28,20,.05), 0 6px 18px rgba(58,28,20,.06)", minHeight: 0, display: "flex", flexDirection: "column" }}>
+          {/* List card — paper on the cream well: white, hairline outline, soft shadow */}
+          <div style={{ background: "#fff", border: "1px solid #e7ddd2", borderRadius: 14, overflow: "hidden", boxShadow: "0 1px 2px rgba(58,28,20,.05), 0 6px 18px rgba(58,28,20,.06)", minHeight: 0, display: "flex", flexDirection: "column" }}>
 
               {/* List head row */}
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px", borderBottom: "1px solid #f0e8db", flexShrink: 0 }}>
@@ -2680,7 +2440,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
           {/* Reading pane — paper on the desk: white, grey outline, soft shadow (the black frame,
               rail + glint now live on the desk). Content-height up to a ceiling, then scrolls. */}
-          <div className="qp-pane" style={{ position: "relative", alignSelf: "start", maxHeight: "calc(100vh - 178px)", border: "1px solid #cbc4b6", borderRadius: 12, background: "#ffffff", boxShadow: "0 1px 2px rgba(58,28,20,.05), 0 6px 18px rgba(58,28,20,.07)", overflow: "hidden", minHeight: 0, display: "flex", flexDirection: "column" }}>
+          <div className="qp-pane" style={{ position: "relative", alignSelf: "stretch", maxHeight: "100%", border: "1.5px solid #241c15", borderRadius: 14, background: "#ffffff", boxShadow: "0 1px 2px rgba(58,28,20,.05), 0 6px 18px rgba(58,28,20,.07)", overflow: "hidden", minHeight: 0, display: "flex", flexDirection: "column" }}>
             <div style={{ display: "contents" }}>
             {activeQuery && activeAgent && activeMs ? (
               <>
@@ -2941,8 +2701,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
         </div>{/* closes content grid */}
 
-          </div>{/* closes deskpad */}
-        </div>{/* closes qdesk */}
+        </div>{/* closes deskwrap */}
       </div>{/* closes main container */}
 
     {activeQuery && (

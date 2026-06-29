@@ -11,6 +11,7 @@ import { AppShell } from "./components/AppShell";
 import { SidebarShell } from "./components/shell/SidebarShell";
 import { ShellAccountChip, ShellUtilityCluster } from "./components/shell/ShellChrome";
 import { QueriesRailContext } from "./components/shell/QueriesRailContext";
+import { QueriesRail } from "./components/shell/QueriesRail";
 import { EditAgentHost } from "./components/EditAgentHost";
 import { EditQueryHost } from "./components/EditQueryHost";
 import { Dashboard } from "./components/Dashboard";
@@ -208,6 +209,17 @@ const ReadingPaneLab: React.FC = () => {
  *  cluster) around a placeholder well, so the shell can be eyeballed without signing in. DEV only. */
 const ShellLab: React.FC = () => {
   const [tab, setTab] = useState("queries");
+  // Mock data so the live QueriesRail (filter rows + StatusDots + counts + sort) can be eyeballed
+  // without signing in. Real desk data still requires auth (Queries returns null when signed out).
+  const [statusFilters, setStatusFilters] = useState<string[]>(["All"]);
+  const [msFilter, setMsFilter] = useState("All");
+  const [sort, setSort] = useState("Newest first");
+  const mockManuscripts = [{ id: "m1", title: "Murphy's Day Out" }, { id: "m2", title: "The Lantern" }] as any;
+  const mockQueries = [
+    QueryStatus.QUERIED, QueryStatus.QUERIED, QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED,
+    QueryStatus.PARTIAL_SENT, QueryStatus.FULL_REQUESTED, QueryStatus.FULL_SENT, QueryStatus.REVISE_RESUBMIT,
+    QueryStatus.OFFER, QueryStatus.REJECTED, QueryStatus.REJECTED, QueryStatus.NO_RESPONSE,
+  ].map((status, i) => ({ id: `q${i}`, status, manuscriptId: i % 2 ? "m2" : "m1" })) as any;
   const account = (
     <div style={{ marginTop: "auto", paddingTop: 13, borderTop: "0.5px solid #e7ddd2", display: "flex", alignItems: "center", gap: 10 }}>
       <span style={{ width: 29, height: 29, borderRadius: "50%", background: "#fdfaf5", border: "1px solid rgba(124,58,42,0.25)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Playfair Display',serif", fontWeight: 600, fontSize: 13, color: "#7c3a2a" }}>N</span>
@@ -229,13 +241,24 @@ const ShellLab: React.FC = () => {
       activeTab={tab}
       onNavigate={(t) => setTab(t)}
       breadcrumb={["Queries", "Query Database"]}
-      context={<QueriesRailContext />}
+      context={
+        <QueriesRail
+          queries={mockQueries}
+          manuscripts={mockManuscripts}
+          selectedStatusFilters={statusFilters}
+          setSelectedStatusFilters={setStatusFilters}
+          selectedManuscriptFilter={msFilter}
+          setSelectedManuscriptFilter={setMsFilter}
+          sortOption={sort}
+          setSortOption={setSort}
+        />
+      }
       account={account}
       utility={utility}
     >
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", height: "100%", padding: 16 }}>
         <span style={{ fontFamily: "'Caveat',cursive", fontSize: 22, color: "#9a8c80" }}>
-          Queries desk renders here (Phase 1 chrome preview)
+          Live rail at left · desk needs auth (signed-out Queries renders null)
         </span>
       </div>
     </SidebarShell>
