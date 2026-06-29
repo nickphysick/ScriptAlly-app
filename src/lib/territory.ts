@@ -217,3 +217,14 @@ export function detectHomeRegion(): string | undefined {
 export function getHomeCountry(user: { homeCountry?: string } | null | undefined): string {
   return toCode(user?.homeCountry) ?? detectHomeRegion() ?? "GB";
 }
+
+/**
+ * The home-country fragment to SPREAD into a new user document at signup: the silently-detected region
+ * as `homeCountry`, or an empty object when nothing resolves — so the key is OMITTED rather than written
+ * as null/"" (the `isValidUser` rule rejects a literal null). Read time supplies the default via
+ * `getHomeCountry()`; this only seeds an explicit value when one is actually known.
+ */
+export function homeCountrySeed(): { homeCountry: string } | Record<string, never> {
+  const detected = detectHomeRegion();
+  return detected ? { homeCountry: detected } : {};
+}

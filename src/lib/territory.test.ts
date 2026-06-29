@@ -16,6 +16,7 @@ import {
   isHomeMarket,
   detectHomeRegion,
   getHomeCountry,
+  homeCountrySeed,
 } from "./territory";
 
 describe("territory · COUNTRIES_ISO + QUICK_PICKS", () => {
@@ -140,5 +141,23 @@ describe("territory · getHomeCountry (fallback chain)", () => {
     const r = getHomeCountry(null);
     expect(/^[A-Z]{2}$/.test(r)).toBe(true);
     if (detectHomeRegion() === undefined) expect(r).toBe("GB");
+  });
+});
+
+describe("territory · homeCountrySeed (signup create fragment — omit, never null)", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("sets homeCountry when a region resolves", () => {
+    vi.stubGlobal("navigator", { language: "en-US" });
+    expect(homeCountrySeed()).toEqual({ homeCountry: "US" });
+  });
+
+  it("omits the key entirely when no region resolves (never null/empty)", () => {
+    vi.stubGlobal("navigator", { language: "" });
+    if (detectHomeRegion() === undefined) {
+      const seed = homeCountrySeed();
+      expect(Object.prototype.hasOwnProperty.call(seed, "homeCountry")).toBe(false);
+      expect(seed).toEqual({});
+    }
   });
 });

@@ -72,6 +72,7 @@ import { buildNudgeWrites } from "./logNudge";
 import { commitAgentEdits, AgentEditPatch, AgentExtraWrite, SaveAgentResult } from "./saveAgentEdits";
 import { computeAgentDeadlineWrites } from "./computeAgentDeadlineWrites";
 import { computeResponseDeadline } from "./responseDeadline";
+import { homeCountrySeed } from "./territory";
 import { agentDataQualityNeeds } from "./agentDataQuality";
 
 // Connection validation test on boot as requested by skill
@@ -383,6 +384,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
             trialStartDate: new Date().toISOString(),
             subscriptionStatus: "trialing",
             onboardingComplete: false,
+            // Silent home-market guess from the browser locale (never IP); omits the key when it can't
+            // resolve so the stored value is never null/"" — getHomeCountry() covers absent at read time.
+            ...homeCountrySeed(),
           };
           await setDoc(userDocRef, freshUser);
           signupTempNameRef.current = null;

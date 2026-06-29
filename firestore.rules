@@ -66,7 +66,10 @@ service cloud.firestore {
         )
         && (!data.keys().hasAny(['onboardingComplete']) || data.onboardingComplete is bool)
         && (!data.keys().hasAny(['queryingStage']) || (data.queryingStage is string && data.queryingStage.size() <= 32))
-        && (!data.keys().hasAny(['journeyStage']) || (data.journeyStage is string && data.journeyStage.size() <= 32));
+        && (!data.keys().hasAny(['journeyStage']) || (data.journeyStage is string && data.journeyStage.size() <= 32))
+        // Home market — ISO 3166-1 alpha-2, optional. Absent-or-string; rejects a literal null
+        // (data.homeCountry is string), so "not set" always means the key is omitted.
+        && (!data.keys().hasAny(['homeCountry']) || (data.homeCountry is string && data.homeCountry.size() <= 64));
     }
 
     function isValidManuscript(data, userId) {
@@ -367,7 +370,7 @@ service cloud.firestore {
       allow read, delete: if isOwner(userId);
       allow create: if isOwner(userId) && isValidUser(incoming());
       allow update: if isOwner(userId) && isValidUser(incoming()) && (
-        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus', 'onboardingComplete', 'queryingStage', 'journeyStage'])
+        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus', 'onboardingComplete', 'queryingStage', 'journeyStage', 'homeCountry'])
       );
 
       // ROUTE: Manuscripts

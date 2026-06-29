@@ -23,6 +23,10 @@ export interface User {
   // The collapsed 3-way that drives the onboarding branch: starting → Branch A,
   // querying → Branch B, exploring → Branch C (skip). Derived from queryingStage at the welcome step.
   journeyStage?: "starting" | "querying" | "exploring";
+  // The writer's home market — ISO 3166-1 alpha-2 (e.g. "GB"). Seeded silently from the browser locale
+  // at signup (never IP), defaults to "GB" at read time via getHomeCountry(), editable in settings.
+  // Drives the home-vs-foreign distinction on the agent database. Absent === not set (never null/"").
+  homeCountry?: string;
 }
 
 /**
