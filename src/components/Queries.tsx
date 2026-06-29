@@ -2281,29 +2281,40 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
       </div>
 
-        {/* ── Control bar — sticky below slim nav, 360px/1fr grid aligns over columns ── */}
+        {/* ── The desk — one black frame + 10px rail wrapping the action bar and the list/pane
+            split. The signature shimmer lives on this frame now; the cards inside are plain paper. ── */}
+        <style>{`
+          .qdesk::before{ content:""; position:absolute; inset:0; border-radius:15px; padding:1.5px; background:linear-gradient(135deg, transparent 0 44%, rgba(255,255,255,0.8) 50%, transparent 56% 100%); background-size:300% 300%; -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; z-index:6; animation:qdeskGlint 7.5s linear infinite; }
+          @keyframes qdeskGlint{ 0%{background-position:0% 0%;} 100%{background-position:100% 100%;} }
+          @media (prefers-reduced-motion: reduce){ .qdesk::before{ animation:none; } }
+        `}</style>
+        <div className="qdesk" style={{ position: "relative", margin: "18px 22px 24px", border: "1.5px solid #241c15", borderRadius: 15, background: "#f6f1e9", overflow: "hidden", boxShadow: "0 1px 3px rgba(58,28,20,.08), 0 18px 44px rgba(58,28,20,.13)", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+          {/* flush black top rail — frame + rail read as one continuous black shape */}
+          <div style={{ height: 11, background: "#241c15", flexShrink: 0 }} />
+          {/* deskpad — the parchment working surface */}
+          <div style={{ padding: "18px 20px 20px", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+
+        {/* ── Action bar — on the desk surface, above the split ── */}
         {(() => {
           const ctrlAction = currentStatus
             ? getPrimaryAction(currentStatus as QueryStatus)
             : { kind: "record" as const, label: "Record response", ballHolder: null as null };
           const hasActive = !!(activeQuery && activeAgent && activeMs);
           return (
-            <div style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 16, padding: "11px 16px", background: parchment, border: "1px solid rgba(90,55,42,.14)", borderRadius: 14, boxShadow: "0 2px 12px rgba(40,22,14,.07)", margin: "18px 22px 16px", alignItems: "center", flexShrink: 0 }}>
-              {/* Left zone: search input */}
-              <div style={{ position: "relative" }}>
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400 pointer-events-none" />
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18, flexShrink: 0 }}>
+              {/* Search — white field, grows to fill the surface */}
+              <div style={{ position: "relative", flex: 1 }}>
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400 pointer-events-none" />
                 <input
                   type="text"
                   placeholder="Find query…"
                   value={listSearch}
                   onChange={(e) => setListSearch(e.target.value)}
-                  onFocus={e => (e.currentTarget.style.textAlign = "left")}
-                  onBlur={e => { if (!e.currentTarget.value) e.currentTarget.style.textAlign = "center"; }}
-                  style={{ width: "100%", background: "#fff", border: "1px solid #e6dccd", borderRadius: 10, padding: "11px 14px 11px 38px", fontSize: 13.5, color: "#8a7a6c", fontFamily: "inherit", outline: "none", textAlign: "center" }}
+                  style={{ width: "100%", background: "#fff", border: "1px solid #e3d9cc", borderRadius: 11, padding: "11px 15px 11px 40px", fontSize: 13.5, color: "#8a7a6c", fontFamily: "inherit", outline: "none" }}
                 />
               </div>
-              {/* Right zone: action buttons, centred */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 9 }}>
+              {/* Action buttons */}
+              <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
                 {ctrlAction.kind === "mark-sent" ? (
                   <button
                     ref={markSentTriggerRef}
@@ -2382,15 +2393,14 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           })()}
         </AnimatePresence>
 
-        {/* ── Content grid: 360px list + 1fr reading pane ── */}
-        <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 16, padding: "0 22px 16px", alignItems: "stretch", flex: 1, minHeight: 0 }}>
+        {/* ── Content grid: 360px list + 1fr reading pane (inside the deskpad) ── */}
+        <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 18, alignItems: "stretch", flex: 1, minHeight: 0 }}>
 
-          {/* List card — outer rim + inner bordered frame */}
-          <div style={{ border: "1px solid rgba(90,55,42,.16)", borderRadius: 14, background: parchment, backgroundImage: PAPER_TEXTURE, padding: 7, boxShadow: "0 1px 3px rgba(40,22,14,.05), 0 7px 20px rgba(40,22,14,.07)", minHeight: 0, display: "flex", flexDirection: "column" }}>
-            <div style={{ border: "1px solid rgba(124,58,42,.22)", borderRadius: 8, overflow: "hidden", background: parchment, flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+          {/* List card — paper on the desk: white, grey outline, soft shadow */}
+          <div style={{ background: "#fff", border: "1px solid #cbc4b6", borderRadius: 12, overflow: "hidden", boxShadow: "0 1px 2px rgba(58,28,20,.05), 0 6px 18px rgba(58,28,20,.06)", minHeight: 0, display: "flex", flexDirection: "column" }}>
 
               {/* List head row */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "15px 16px 13px", borderBottom: "1px solid #ece0d2", flexShrink: 0 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px", borderBottom: "1px solid #f0e8db", flexShrink: 0 }}>
                 <span style={{ fontFamily: FONT_SERIF, fontSize: 16, fontWeight: 600, color: "#2e3a2c" }}>
                   {sortedList.length} {sortedList.length === 1 ? "query" : "queries"}
                 </span>
@@ -2647,13 +2657,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             )}
                 </div>{/* closes divide-y rows */}
               </div>{/* closes padding:9 rows-container */}
-            </div>{/* closes inner bordered frame */}
-          </div>{/* closes outer rim — list card */}
+          </div>{/* closes list card */}
 
-          {/* Reading pane — white pane, thin black frame + 10px black top rail, edge glint.
-              Content-height (alignSelf:start) up to a viewport ceiling, then columns scroll internally. */}
-          <div className="qp-pane" style={{ position: "relative", alignSelf: "start", maxHeight: "calc(100vh - 150px)", border: "1px solid #241c15", borderRadius: 14, background: "#ffffff", boxShadow: "0 1px 3px rgba(58,28,20,0.07), 0 14px 38px rgba(58,28,20,0.11)", overflow: "hidden", minHeight: 0, display: "flex", flexDirection: "column" }}>
-            {activeQuery && activeAgent && activeMs && <div style={{ height: 10, background: "#241c15", flexShrink: 0 }} />}
+          {/* Reading pane — paper on the desk: white, grey outline, soft shadow (the black frame,
+              rail + glint now live on the desk). Content-height up to a ceiling, then scrolls. */}
+          <div className="qp-pane" style={{ position: "relative", alignSelf: "start", maxHeight: "calc(100vh - 178px)", border: "1px solid #cbc4b6", borderRadius: 12, background: "#ffffff", boxShadow: "0 1px 2px rgba(58,28,20,.05), 0 6px 18px rgba(58,28,20,.07)", overflow: "hidden", minHeight: 0, display: "flex", flexDirection: "column" }}>
             <div style={{ display: "contents" }}>
             {activeQuery && activeAgent && activeMs ? (
               <>
@@ -2667,10 +2675,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   /* column swell on hover */
                   .qp-card{ transition:transform .2s ease, box-shadow .2s ease; }
                   .qp-card:hover{ transform:scale(1.02); box-shadow:0 8px 22px rgba(58,28,20,.10); z-index:2; }
-                  /* edge glint — faint highlight travelling the pane border ring, calm 7s loop */
-                  .qp-pane::before{ content:""; position:absolute; inset:0; border-radius:14px; padding:1.5px; background:linear-gradient(135deg, transparent 0 43%, rgba(255,255,255,0.85) 50%, transparent 57% 100%); background-size:300% 300%; -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; z-index:4; animation:qpGlint 7s linear infinite; }
-                  @keyframes qpGlint{ 0%{background-position:0% 0%;} 100%{background-position:100% 100%;} }
-                  @media (prefers-reduced-motion: reduce){ .qp-card:hover{ transform:none; } .qp-pane::before{ animation:none; } }
+                  @media (prefers-reduced-motion: reduce){ .qp-card:hover{ transform:none; } }
                 `}</style>
                 {/* ── Hero — identity (left) + in-pane status chip (top-right, under the rail) ── */}
                 {(() => {
@@ -2688,9 +2693,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   const mswl = activeAgent.mswlNotes?.trim();
                   const genres = (activeAgent.genres || []).filter(Boolean);
                   return (
-                    <div className="qp-hero" style={{ position: "relative", padding: "18px 28px 21px", background: "#ffffff", flexShrink: 0 }}>
-                      {/* status chip — in-pane, top-right, level with the identity row (soft, not a sticker) */}
-                      <div style={{ position: "absolute", top: 16, right: 28, zIndex: 2, display: "inline-flex", alignItems: "center", gap: 8, background: "#fdfaf5", border: "1px solid #e3d9cc", borderRadius: 999, padding: "5px 13px 5px 6px", boxShadow: "0 1px 2px rgba(58,28,20,.05)" }}>
+                    <div className="qp-hero" style={{ position: "relative", padding: "22px 28px 18px", background: "#ffffff", flexShrink: 0 }}>
+                      {/* status chip — in-pane, top-right (soft, not a sticker) */}
+                      <div style={{ position: "absolute", top: 22, right: 26, zIndex: 2, display: "inline-flex", alignItems: "center", gap: 8, background: "#fdfaf5", border: "1px solid #e3d9cc", borderRadius: 999, padding: "5px 13px 5px 6px", boxShadow: "0 1px 2px rgba(58,28,20,.05)" }}>
                         <StatusDot status={activeQuery.status} overrideSize={21} />
                         <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: ".15em", color: burgundy, fontWeight: 500, textTransform: "uppercase" as const, whiteSpace: "nowrap" }}>{statusDisplayLabel(activeQuery)}</span>
                       </div>
@@ -2898,6 +2903,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           </div>{/* closes qp-pane */}
 
         </div>{/* closes content grid */}
+
+          </div>{/* closes deskpad */}
+        </div>{/* closes qdesk */}
       </div>{/* closes main container */}
 
     {activeQuery && (
