@@ -2225,14 +2225,10 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 const isSelected = selectedQueryId === q.id;
                 const isClosed = [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE].includes(q.status);
                 
-                // Queried date — "Queried 14 Mar" (UK day-month); the year shows only when it
-                // isn't the current year ("Queried 1 Jul 2024").
+                // Queried date — bare, quiet "14 Mar" (UK day-month); the year shows only when it
+                // isn't the current year ("30 Jun 2024"). No "Queried" label; it sits in the corner.
                 const dateObj = new Date(q.dateSent);
-                const queriedDate = `Queried ${dateObj.getDate()} ${dateObj.toLocaleString("en-GB", { month: "short" })}${dateObj.getFullYear() !== new Date().getFullYear() ? ` ${dateObj.getFullYear()}` : ""}`;
-                // The manuscript name is only worth a slot when the list spans more than one book —
-                // i.e. the user has multiple manuscripts and is viewing "All queries". Otherwise the
-                // queried date earns it (the book is already named in the sidebar).
-                const showManuscript = manuscripts.length > 1 && selectedManuscriptFilter === "All";
+                const queriedDate = `${dateObj.getDate()} ${dateObj.toLocaleString("en-GB", { month: "short" })}${dateObj.getFullYear() !== new Date().getFullYear() ? ` ${dateObj.getFullYear()}` : ""}`;
 
                 const statusChip = undoingQueryIds.has(q.id) ? (
                   <div className="animate-pulse flex items-center gap-1 min-h-[20px]">
@@ -2251,13 +2247,13 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     key={q.id}
                     id={`query-row-${q.id}`}
                     onClick={() => setSelectedQueryId(q.id)}
-                    className={`qrow flex flex-col gap-1 ${isSelected ? "sel" : ""} ${isClosed ? "opacity-60" : ""}`}
+                    className={`qrow flex flex-col ${isSelected ? "sel" : ""} ${isClosed ? "opacity-60" : ""}`}
                   >
-                    {/* Top row: Agent name (Playfair) and status chip */}
+                    {/* Line 1: agent name (Playfair) left, StatusDot top-right */}
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 6 }}>
                       <h4 style={{
-                        fontFamily: FONT_SERIF, fontSize: 16.5, fontWeight: 500,
-                        color: "#2e3a2c", lineHeight: 1.2,
+                        fontFamily: FONT_SERIF, fontSize: 17, fontWeight: 500,
+                        color: "#2a2017", lineHeight: 1.2,
                         overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                         flex: 1, minWidth: 0,
                       }}>
@@ -2266,28 +2262,14 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                       {statusChip}
                     </div>
 
-                    {/* Agency in mono-muted (or fallback kicker for agency-only agents) */}
-                    <p style={{ fontFamily: FONT_MONO, fontSize: 9.5, color: "#9a8579", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {agentAgencyLine(agent)}
-                    </p>
-
-                    {/* Bottom: queried date in burgundy; when the list spans multiple books the
-                        manuscript title leads and the queried date moves to a mono-muted trailer. */}
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginTop: 2 }}>
-                      {showManuscript ? (
-                        <>
-                          <span style={{ fontSize: 12, color: burgundy, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, minWidth: 0 }}>
-                            {ms.title}
-                          </span>
-                          <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, color: "#b0a89e", flexShrink: 0, whiteSpace: "nowrap" }}>
-                            {queriedDate}
-                          </span>
-                        </>
-                      ) : (
-                        <span style={{ fontSize: 12, color: burgundy, fontWeight: 600, whiteSpace: "nowrap" }}>
-                          {queriedDate}
-                        </span>
-                      )}
+                    {/* Line 2: agency (mono caps, muted) left · bare queried date pinned bottom-right */}
+                    <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 8, marginTop: 7 }}>
+                      <span style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: ".04em", textTransform: "uppercase" as const, color: "#a89a8a", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, minWidth: 0 }}>
+                        {agentAgencyLine(agent)}
+                      </span>
+                      <span style={{ fontFamily: FONT_MONO, fontSize: 9, color: "#bcae9e", flexShrink: 0, whiteSpace: "nowrap" }}>
+                        {queriedDate}
+                      </span>
                     </div>
                   </div>
                 );
