@@ -728,7 +728,7 @@ export const SubmissionPackages: React.FC = () => {
   const renderFirstRun = () => {
     const tilt = (i: number, tilts: number[]) => (WORKTABLE_TILT ? `rotate(${tilts[i] ?? 0}deg)` : "none");
     return (
-      <div className="sp-pane" style={{ position: "relative", background: "#ffffff", borderRadius: 18, boxShadow: "0 12px 34px rgba(58,28,20,0.16)", overflow: "hidden" }}>
+      <div className="sp-pane" style={{ position: "relative", background: "#ffffff", border: "1px solid #d4d0c8", borderRadius: 18, boxShadow: "0 12px 34px rgba(58,28,20,0.16)", overflow: "hidden" }}>
         {/* hero band — the same pink as the "Use template" buttons (buttonPinkBg) */}
         <div style={{ position: "relative", overflow: "hidden", padding: "24px 36px", textAlign: "center", borderBottom: "1px solid rgba(124,58,42,0.1)", background: buttonPinkBg }}>
           <span className="sp-band-sheen" aria-hidden="true" />
@@ -765,7 +765,7 @@ export const SubmissionPackages: React.FC = () => {
 
           {/* soft-pink CTA — opens the inline builder (wiring unchanged) */}
           <div style={{ textAlign: "center", marginBottom: 8 }}>
-            <button onClick={openBuild} style={{ fontFamily: FONT_MONO, fontSize: 11.5, letterSpacing: "0.06em", textTransform: "uppercase", color: burgundy, background: buttonPinkBg, border: `0.5px solid ${buttonPinkBorder}`, borderRadius: 12, padding: "16px 34px", boxShadow: "0 5px 14px rgba(124,58,42,0.12)", display: "inline-flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
+            <button onClick={openBuild} className="sp-pinkpulse" style={{ fontFamily: FONT_MONO, fontSize: 11.5, letterSpacing: "0.06em", textTransform: "uppercase", color: burgundy, background: buttonPinkBg, border: `0.5px solid ${buttonPinkBorder}`, borderRadius: 12, padding: "16px 34px", boxShadow: "0 5px 14px rgba(124,58,42,0.12)", display: "inline-flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
               <Plus style={{ width: 14, height: 14 }} strokeWidth={2.6} aria-hidden="true" /> Build your first package
             </button>
           </div>
@@ -778,7 +778,7 @@ export const SubmissionPackages: React.FC = () => {
                 <div aria-hidden="true" style={{ width: 10, height: 10, borderRadius: "50%", background: AMBER, margin: "0 auto 11px", boxShadow: "0 1px 3px rgba(0,0,0,0.22), inset 0 1px 1px rgba(255,255,255,0.4)" }} />
                 <div style={{ fontFamily: FONT_SERIF, fontSize: 16, fontWeight: 600, color: headingInk }}>{t.name}</div>
                 <div style={{ fontFamily: FONT_SANS, fontSize: 11, fontStyle: "italic", color: "#9c8878", margin: "4px 0 13px", lineHeight: 1.4 }}>{t.why}</div>
-                <button onClick={() => useTemplate(t)} style={{ width: "100%", fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.05em", textTransform: "uppercase", color: burgundy, background: buttonPinkBg, border: `0.5px solid ${buttonPinkBorder}`, borderRadius: 8, padding: 10, cursor: "pointer" }}>Use template</button>
+                <button onClick={() => useTemplate(t)} className="sp-pinkpulse" style={{ width: "100%", fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.05em", textTransform: "uppercase", color: burgundy, background: buttonPinkBg, border: `0.5px solid ${buttonPinkBorder}`, borderRadius: 8, padding: 10, cursor: "pointer" }}>Use template</button>
               </div>
             ))}
           </div>
@@ -1544,6 +1544,10 @@ export const SubmissionPackages: React.FC = () => {
         .sp-sumcard:focus-visible { outline: 2px solid ${burgundy}; outline-offset: 2px; }
         .sp-sumadd:hover { background: #efd5ca !important; }
         .sp-manage-btn:hover { background: #efd5ca !important; }
+        /* container buttons (CTA + Use template) brighten + lift on hover */
+        .sp-pinkpulse { transition: filter .15s, transform .15s, box-shadow .15s; }
+        .sp-pinkpulse:hover { filter: brightness(1.07); transform: translateY(-1.5px) scale(1.02); box-shadow: 0 8px 20px rgba(124,58,42,0.25); }
+        .sp-pinkpulse:active { transform: translateY(0) scale(0.99); }
         @media (max-width: 768px) {
           .sp-root { height: auto; min-height: calc(100vh - 64px); overflow: visible; }
           .sp-rowbelow { flex-direction: column; }
