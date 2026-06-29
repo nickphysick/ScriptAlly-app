@@ -6,21 +6,19 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
 import { Agent, AgentSocial, SubmissionStatus, QueryStatus } from "../types";
-import { StatusPill } from "./StatusPill";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase"; // Required for setting doc in online Mode
 import { collection, setDoc, doc, onSnapshot } from "firebase/firestore";
-import { FitStars } from "./forms";
 import {
   Search,
   Clock,
-  ChevronRight,
-  ChevronLeft,
+  ChevronDown,
   Check,
   Plus,
   Pencil,
   SlidersHorizontal,
   FolderLock,
   Send,
+  Star,
   AlertTriangle,
   GitCommit,
   MessageSquare,
@@ -71,6 +69,51 @@ function formatWhatsAppDate(dateString: string): string {
   const time = d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
   return `${day} ${month}, ${time}`;
 }
+
+/**
+ * Agents-page content palette — SCOPED here (inline styles), deliberately NOT global tokens. The
+ * left controls/nav sidebar keeps the existing HOUSE palette (burgundy); only the contact-list
+ * content area uses this charcoal/sage scheme.
+ */
+const CC = {
+  bg: "#f2f0ec",
+  card: "#fcfbf9",
+  primary: "#2d2a26",
+  accent: "#e4eae0",
+  green: "#6f8161",
+  muted: "#8a857c",
+  hair: "rgba(45,42,38,0.11)",
+  avatarBg: "#f8ece6",
+  avatarInk: "#1c1a16",
+};
+
+/** Up-to-two-letter initials for the avatar circle. */
+const agentInitials = (name: string) =>
+  (name || "").trim().split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]!.toUpperCase()).join("") || "?";
+
+/** Sage section header used inside the expanded card (MSWL band + the three cards). */
+const SageHeader: React.FC<{ icon?: React.ReactNode; children: React.ReactNode }> = ({ icon, children }) => (
+  <div
+    className="flex items-center gap-1.5 px-3.5 py-2 text-[10px] font-mono font-bold uppercase tracking-[0.1em]"
+    style={{ background: CC.accent, color: CC.primary, borderBottom: `1px solid ${CC.hair}` }}
+  >
+    {icon}
+    <span>{children}</span>
+  </div>
+);
+
+/** Five stars, filled = sage; reads the agent's 1–5 rating. */
+const SageStars: React.FC<{ value: number; size?: number }> = ({ value, size = 14 }) => (
+  <span className="inline-flex items-center gap-[3px]" aria-label={`${value} of 5`}>
+    {[1, 2, 3, 4, 5].map((n) => (
+      <Star
+        key={n}
+        style={{ width: size, height: size, color: CC.green, fill: n <= value ? CC.green : "transparent" }}
+        strokeWidth={1.6}
+      />
+    ))}
+  </span>
+);
 
 export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
   const openEditAgent = useOpenEditAgent();
@@ -239,20 +282,13 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
   // Optimistically hide an agent that's mid-deferred-delete, so the list reflects the pending removal.
   if (pendingDelete) filteredAndSorted = filteredAndSorted.filter((a) => a.id !== pendingDelete.agent.id);
 
-  // Safe fallback list auto selection
+  // Accordion: `selectedAgentId` is the single OPEN row (null = all collapsed). Don't auto-open;
+  // just collapse if the open agent drops out of the filtered list.
   useEffect(() => {
-    if (filteredAndSorted.length > 0) {
-      const isStillInList = filteredAndSorted.some(ag => ag.id === selectedAgentId);
-      if (!isStillInList) {
-        setSelectedAgentId(filteredAndSorted[0].id);
-      }
-    } else {
+    if (selectedAgentId && !filteredAndSorted.some(ag => ag.id === selectedAgentId)) {
       setSelectedAgentId(null);
     }
-  }, [tabFilter, queryFilter, term, agents.length]);
-
-  const activeAgent = selectedAgentId ? agents.find(ag => ag.id === selectedAgentId) : null;
-  const activeAgentQueries = activeAgent ? queries.filter(q => q.agentId === selectedAgentId) : [];
+  }, [tabFilter, queryFilter, term, agents.length, selectedAgentId, filteredAndSorted]);
 
   // ── Lifecycle handlers (chunk 1) ──
   const firstName = (n: string) => n.split(" ")[0];
@@ -320,8 +356,8 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
 
   return (
     <div
-      className="flex-grow bg-[#dce0d9] min-h-0 overflow-hidden w-full flex flex-row p-[8px] gap-[8px]"
-      style={{ minHeight: "calc(100vh - 108px)", maxHeight: "calc(100vh - 108px)" }}
+      className="flex-grow min-h-0 overflow-hidden w-full flex flex-row p-[8px] gap-[8px]"
+      style={{ background: CC.bg, minHeight: "calc(100vh - 108px)", maxHeight: "calc(100vh - 108px)" }}
     >
       {/* ---------------- panel 1: left sidebar controls ---------------- */}
       <div
@@ -425,478 +461,290 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
         </div>
       </div>
 
-      {/* ---------------- panel 2: middle list panel ---------------- */}
-      <div
-        className="bg-white border border-[#e8e0d8] rounded-xl flex flex-col h-full overflow-hidden shrink-0"
-        style={{ width: "calc(20% + 50px)", minWidth: "calc(20% + 50px)", maxWidth: "calc(20% + 50px)", flexShrink: 0 }}
-      >
-        <div className="p-3 border-b border-[#e8e0d8]/60 space-y-1.5 bg-[#fafafa]">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400" />
+      {/* ---------------- content: full-width contact list (accordion) ---------------- */}
+      <div className="flex-grow flex-1 min-w-0 h-full flex flex-col rounded-xl overflow-hidden border" style={{ borderColor: CC.hair, background: CC.bg }}>
+        {/* scoped hover/focus that inline styles can't express (classes are agx-* — no global clash) */}
+        <style>{`
+          .agx-card { transition: box-shadow .15s ease; }
+          .agx-card:hover { box-shadow: 0 6px 18px rgba(45,42,38,0.10); }
+          .agx-row:hover { background: ${CC.accent} !important; }
+          .agx-search:focus { border-color: ${CC.green} !important; box-shadow: 0 0 0 2px rgba(111,129,97,0.16); }
+          .agx-note-send:disabled { opacity: .4; cursor: not-allowed; }
+        `}</style>
+
+        {/* search + count */}
+        <div className="px-4 py-3 flex items-center gap-3 shrink-0 border-b" style={{ borderColor: CC.hair }}>
+          <div className="relative flex-1" style={{ maxWidth: 440 }}>
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: CC.muted }} />
             <input
               type="text"
               value={listSearch}
               onChange={(e) => setListSearch(e.target.value)}
-              placeholder="Search agent name / agency..."
-              className="w-full pl-8 pr-3 py-1.5 bg-stone-50 rounded-md border border-[#e8e0d8] text-xs focus:bg-white focus:outline-none focus:ring-1 focus:ring-[#7c3a2a]"
+              placeholder="Search agent name or agency…"
+              className="agx-search w-full pl-9 pr-3 py-2 rounded-lg text-[13px] outline-none"
+              style={{ background: CC.card, border: `1px solid ${CC.hair}`, color: CC.primary }}
             />
           </div>
-          <span className="block text-[11px] text-stone-400 pl-0.5 font-medium">
-            Showing {filteredAndSorted.length} matching agents
+          <span className="text-[11px] font-medium select-none" style={{ color: CC.muted }}>
+            Showing {filteredAndSorted.length} {filteredAndSorted.length === 1 ? "agent" : "agents"}
           </span>
         </div>
 
-        {/* Vertical Stack List */}
-        <div className="flex-grow overflow-y-auto divide-y divide-[#e8e0d8]/40 custom-query-list-scrollbar">
+        {/* the list */}
+        <div className="flex-grow overflow-y-auto custom-query-list-scrollbar p-3" style={{ display: "flex", flexDirection: "column", gap: 9 }}>
           {filteredAndSorted.length === 0 ? (
-            <div className="p-8 text-center text-stone-400 text-xs select-none">
-              No matching agents found.
-            </div>
+            <div className="py-16 text-center text-[13px] select-none" style={{ color: CC.muted }}>No matching agents found.</div>
           ) : (
             filteredAndSorted.map((agent, i) => {
-              const isSelected = selectedAgentId === agent.id;
+              const expanded = selectedAgentId === agent.id;
+              const isOpen = agent.submissionStatus === SubmissionStatus.OPEN;
+              const isClosed = agent.submissionStatus === SubmissionStatus.CLOSED;
+              const isQueried = queries.some((q) => q.agentId === agent.id);
+              const agentQ = queries.filter((q) => q.agentId === agent.id);
               const isFirstSetAside = !!agent.setAside && (i === 0 || !filteredAndSorted[i - 1].setAside);
-
+              const socials = displaySocials(agent);
+              const labelStyle: React.CSSProperties = { fontFamily: "'JetBrains Mono', monospace", fontSize: 9, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: CC.muted, marginBottom: 3 };
+              const matPill: React.CSSProperties = { fontSize: 10, padding: "2px 8px", borderRadius: 999, background: CC.accent, color: CC.primary };
               return (
                 <React.Fragment key={agent.id}>
                   {isFirstSetAside && (
-                    <div className="px-3 pt-3 pb-1 text-[9px] font-mono uppercase tracking-[0.11em] text-stone-400 select-none">
+                    <div className="px-1 pt-1 text-[9px] font-mono uppercase tracking-[0.11em] select-none" style={{ color: CC.muted }}>
                       Set aside · hidden from suggestions
                     </div>
                   )}
-                <div
-                  onClick={() => setSelectedAgentId(agent.id)}
-                  className={`p-3 relative cursor-pointer flex flex-col gap-1 transition-all select-none ${
-                    isSelected ? "bg-[#FDF8F6]" : "hover:bg-stone-50 bg-white"
-                  } ${agent.setAside ? "opacity-60" : ""}`}
-                  style={{
-                    borderLeft: isSelected ? "3.5px solid #7c3a2a" : "3.5px solid transparent"
-                  }}
-                >
-                  <div className="flex justify-between items-start gap-2">
-                    <span className="font-serif text-[14px] font-bold text-[#3a1c14] truncate leading-tight flex-1">
-                      {agent.name}
-                    </span>
-                    {agent.setAside ? (
-                      <span className="text-[8px] font-bold font-mono uppercase tracking-[0.04em] px-1.5 py-0.5 rounded-full border shrink-0 bg-stone-100 border-stone-200 text-stone-500">Set aside</span>
-                    ) : (
-                      <span className={`text-[9px] font-bold font-sans uppercase tracking-[0.03em] px-1.5 py-0.5 rounded border shrink-0 ${
-                        agent.submissionStatus === SubmissionStatus.OPEN
-                          ? "bg-[#FAF1EF] border-[#EBDCD3]/40 text-[#7c3a2a]"
-                          : "bg-stone-50 border-stone-200 text-stone-400"
-                      }`}>
-                        {agent.submissionStatus}
+                  <div className="agx-card rounded-[14px]" style={{
+                    background: CC.card,
+                    border: `1px solid ${CC.hair}`,
+                    boxShadow: expanded ? "0 6px 20px rgba(45,42,38,0.10)" : "0 1px 2px rgba(45,42,38,0.05)",
+                    opacity: agent.setAside ? 0.62 : 1,
+                  }}>
+                    {/* ── collapsed row (click to expand/collapse) ── */}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedAgentId(expanded ? null : agent.id)}
+                      className="agx-row w-full text-left rounded-[14px]"
+                      aria-expanded={expanded}
+                      style={{ display: "grid", gridTemplateColumns: "44px minmax(150px,1.5fr) minmax(0,1.1fr) auto auto auto 18px", alignItems: "center", gap: 16, padding: "15px 22px", background: "transparent", border: "none", cursor: "pointer" }}
+                    >
+                      <span className="flex items-center justify-center rounded-full shrink-0 select-none" style={{ width: 44, height: 44, background: CC.avatarBg, color: CC.avatarInk, fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 15 }}>
+                        {agentInitials(agent.name)}
                       </span>
+                      <span className="min-w-0">
+                        <span className="block truncate" style={{ fontFamily: "'Playfair Display', serif", fontSize: 17, fontWeight: 600, color: CC.primary, lineHeight: 1.15 }}>{agent.name || "Unnamed agent"}</span>
+                        <span className="block truncate" style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.04em", color: CC.muted, marginTop: 2 }}>{agent.agency || "Independent"}</span>
+                      </span>
+                      <span className="hidden md:flex flex-wrap gap-1 min-w-0 items-center">
+                        {(agent.genres || []).slice(0, 3).map((g, gi) => (
+                          <span key={gi} className="truncate" style={{ fontSize: 10.5, padding: "2px 8px", borderRadius: 999, background: CC.bg, border: `1px solid ${CC.hair}`, color: CC.muted }}>{g}</span>
+                        ))}
+                        {(agent.genres?.length || 0) > 3 && <span style={{ fontSize: 10.5, color: CC.muted }}>+{agent.genres!.length - 3}</span>}
+                      </span>
+                      <span className="hidden sm:inline-flex shrink-0"><SageStars value={agent.starRating || 0} /></span>
+                      <span className="inline-flex items-center gap-1.5 shrink-0" style={{ fontSize: 11, fontWeight: 600, color: isOpen ? CC.green : CC.muted }}>
+                        <span style={{ width: 8, height: 8, borderRadius: "50%", background: isOpen ? CC.green : "#b9b4ab", flexShrink: 0 }} />
+                        {isOpen ? "Open" : isClosed ? "Closed" : "Unknown"}
+                      </span>
+                      {isQueried ? (
+                        <span className="inline-flex items-center gap-1.5 shrink-0" style={{ fontSize: 10.5, fontWeight: 600, padding: "3px 10px", borderRadius: 999, background: CC.accent, color: CC.primary }}>
+                          <Send className="w-3 h-3" /> Queried
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center shrink-0 select-none" style={{ fontSize: 10.5, fontWeight: 600, padding: "3px 10px", borderRadius: 999, background: "transparent", border: `1px solid ${CC.hair}`, color: CC.muted }}>
+                          Not queried
+                        </span>
+                      )}
+                      <ChevronDown className="w-[18px] h-[18px] shrink-0 transition-transform" style={{ color: CC.muted, transform: expanded ? "rotate(180deg)" : "rotate(0deg)" }} />
+                    </button>
+
+                    {/* ── expanded detail ── */}
+                    {expanded && (
+                      <div style={{ borderTop: `1px solid ${CC.hair}` }} className="animate-fade-in">
+                        {/* 1. header strip */}
+                        <div className="flex items-start justify-between gap-4 flex-wrap px-[22px] py-[18px]" style={{ background: CC.bg }}>
+                          <div className="flex items-start gap-3.5 min-w-0">
+                            <span className="flex items-center justify-center rounded-full shrink-0 select-none" style={{ width: 58, height: 58, background: CC.avatarBg, color: CC.avatarInk, fontFamily: "'Playfair Display', serif", fontWeight: 600, fontSize: 21 }}>
+                              {agentInitials(agent.name)}
+                            </span>
+                            <div className="min-w-0">
+                              <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 600, color: CC.primary, lineHeight: 1.1 }}>{agent.name || "Unnamed agent"}</div>
+                              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.04em", color: CC.muted, marginTop: 3 }}>{agent.agency || "Independent"}</div>
+                              {agent.email && <div style={{ fontSize: 12.5, color: CC.primary, marginTop: 5 }} className="break-all">{agent.email}</div>}
+                              {(agent.genres?.length || 0) > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-2">
+                                  {agent.genres!.map((g, gi) => <span key={gi} style={{ fontSize: 10.5, padding: "2px 8px", borderRadius: 999, background: CC.card, border: `1px solid ${CC.hair}`, color: CC.muted }}>{g}</span>)}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
+                            <button type="button" onClick={() => flipAvailability(agent)} title="Click to flip — the agent's own availability"
+                              className="inline-flex items-center gap-1.5 cursor-pointer"
+                              style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", padding: "6px 12px", borderRadius: 999, background: isOpen ? CC.accent : "transparent", border: `1px solid ${isOpen ? "transparent" : CC.hair}`, color: isOpen ? CC.green : CC.muted }}>
+                              <span style={{ width: 6, height: 6, borderRadius: "50%", background: isOpen ? CC.green : "#b9b4ab" }} />
+                              {isOpen ? "Open to queries" : isClosed ? "Closed" : "Availability unknown"}
+                            </button>
+                            <button type="button" onClick={() => onNavigate?.("queries", "Log a query")}
+                              className="inline-flex items-center gap-1.5 cursor-pointer"
+                              style={{ fontSize: 12, fontWeight: 600, padding: "7px 14px", borderRadius: 8, background: CC.primary, color: "#fcfbf9", border: "none" }}>
+                              <Send className="w-3.5 h-3.5" /> Send query
+                            </button>
+                            <button type="button" onClick={() => openEditAgent(agent.id)}
+                              className="inline-flex items-center gap-1.5 cursor-pointer"
+                              style={{ fontSize: 12, fontWeight: 600, padding: "7px 14px", borderRadius: 8, background: "transparent", color: CC.primary, border: `1px solid ${CC.hair}` }}>
+                              <Pencil className="w-3.5 h-3.5" /> Edit profile
+                            </button>
+                            <div className="relative">
+                              <button type="button" onClick={(e) => { e.stopPropagation(); setDetailMenuOpen((o) => !o); }} aria-label="More actions"
+                                style={{ width: 30, height: 30, borderRadius: 8, border: `1px solid ${CC.hair}`, background: "transparent", color: CC.muted, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                <MoreHorizontal className="w-4 h-4" />
+                              </button>
+                              {detailMenuOpen && (
+                                <>
+                                  <div className="fixed inset-0 z-30" onClick={() => setDetailMenuOpen(false)} />
+                                  <div className="absolute right-0 top-[36px] z-40 rounded-[11px] p-1.5" style={{ minWidth: 180, background: CC.card, border: `1px solid ${CC.hair}`, boxShadow: "0 12px 30px rgba(45,42,38,0.16)" }}>
+                                    <button onClick={() => toggleSetAside(agent)} className="flex items-center gap-2.5 w-full text-left px-2.5 py-2 rounded-[7px] hover:bg-[rgba(111,129,97,0.12)]" style={{ fontSize: 13, color: CC.primary }}>
+                                      <Archive className="w-3.5 h-3.5 shrink-0" style={{ color: CC.muted }} /> {agent.setAside ? "Bring back" : "Set aside"}
+                                    </button>
+                                    <div style={{ height: 1, background: CC.hair, margin: "4px 4px" }} />
+                                    <button onClick={() => { setDetailMenuOpen(false); setDeleteModalAgent(agent); }} className="flex items-center gap-2.5 w-full text-left px-2.5 py-2 rounded-[7px] hover:bg-[rgba(168,68,47,0.08)]" style={{ fontSize: 13, color: "#a8442f" }}>
+                                      <Trash2 className="w-3.5 h-3.5 shrink-0" /> Delete…
+                                    </button>
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 2. MSWL band */}
+                        <div style={{ borderTop: `1px solid ${CC.hair}` }}>
+                          <SageHeader icon={<Book className="w-3 h-3" />}>Manuscript wish list · MSWL</SageHeader>
+                          <div className="px-[22px] py-[14px]">
+                            {agent.mswlNotes && agent.mswlNotes.trim() ? (
+                              <p style={{ fontSize: 13, lineHeight: 1.6, color: CC.primary, fontStyle: "italic", whiteSpace: "pre-wrap" }}>&ldquo;{agent.mswlNotes}&rdquo;</p>
+                            ) : (
+                              <p style={{ fontSize: 12.5, color: CC.muted }}>
+                                No wish list recorded yet — add one via{" "}
+                                <button type="button" onClick={() => openEditAgent(agent.id)} style={{ color: CC.primary, fontWeight: 600, background: "none", border: "none", padding: 0, cursor: "pointer", textDecoration: "underline" }}>Edit profile</button>.
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* 3. three cards */}
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 p-[14px]" style={{ background: CC.bg, borderTop: `1px solid ${CC.hair}` }}>
+                          {/* Agent profile */}
+                          <div className="rounded-[12px] overflow-hidden flex flex-col" style={{ background: CC.card, border: `1px solid ${CC.hair}` }}>
+                            <SageHeader icon={<SlidersHorizontal className="w-3 h-3" />}>Agent profile</SageHeader>
+                            <div className="p-3.5 space-y-3 text-[12px]" style={{ color: CC.primary }}>
+                              <div>
+                                <div style={labelStyle}>Response time</div>
+                                <div>within {agent.responseTimeWeeks || 6} weeks{agent.noResponseMeansNo && <span style={{ color: CC.muted }}> · silence means pass</span>}</div>
+                              </div>
+                              <div>
+                                <div style={labelStyle}>Preferred method</div>
+                                <div>{agent.submissionMethod || "Email"}</div>
+                              </div>
+                              <div>
+                                <div style={labelStyle}>Wanted materials</div>
+                                <div className="flex flex-wrap gap-1">
+                                  {(() => {
+                                    const mats = Array.isArray(agent.materialsWanted)
+                                      ? agent.materialsWanted
+                                      : Object.keys(agent.materialsWanted || {}).filter((k) => (agent.materialsWanted as any)[k] === true);
+                                    return mats.length
+                                      ? mats.map((m, mi) => <span key={mi} style={matPill}>{m}</span>)
+                                      : <span style={{ color: CC.muted }}>None specified</span>;
+                                  })()}
+                                </div>
+                              </div>
+                              {agent.website && (
+                                <div>
+                                  <div style={labelStyle}>Website</div>
+                                  <a href={agent.website.startsWith("http") ? agent.website : `https://${agent.website}`} target="_blank" rel="noreferrer" referrerPolicy="no-referrer" className="break-all" style={{ color: CC.green, fontWeight: 600 }}>{agent.website}</a>
+                                </div>
+                              )}
+                              {socials.length > 0 && (
+                                <div>
+                                  <div style={labelStyle}>Socials</div>
+                                  <div className="flex flex-wrap gap-1">
+                                    {socials.map((s, si) => {
+                                      const href = socialHref(s.handle);
+                                      const inner = <><span style={{ fontWeight: 600 }}>{s.platform}</span><span style={{ color: CC.muted }}> · </span><span className="truncate">{s.handle}</span></>;
+                                      return href
+                                        ? <a key={si} href={href} target="_blank" rel="noreferrer" referrerPolicy="no-referrer" className="inline-flex items-center max-w-full" style={{ ...matPill }}>{inner}</a>
+                                        : <span key={si} className="inline-flex items-center max-w-full" style={{ ...matPill }}>{inner}</span>;
+                                    })}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Query history */}
+                          <div className="rounded-[12px] overflow-hidden flex flex-col" style={{ background: CC.card, border: `1px solid ${CC.hair}` }}>
+                            <SageHeader icon={<Clock className="w-3 h-3" />}>Query history</SageHeader>
+                            <div className="p-3.5 space-y-2.5 flex-grow overflow-y-auto custom-query-list-scrollbar" style={{ maxHeight: 300 }}>
+                              {agentQ.length === 0 ? (
+                                <div className="py-6 text-center text-[12px]" style={{ color: CC.muted }}>No queries sent yet.</div>
+                              ) : (
+                                [...agentQ]
+                                  .sort((a, b) => (b.dateSent ? new Date(b.dateSent).getTime() : 0) - (a.dateSent ? new Date(a.dateSent).getTime() : 0))
+                                  .map((query) => {
+                                    const ms = manuscripts.find((m) => m.id === query.manuscriptId);
+                                    return (
+                                      <div key={query.id} className="rounded-[9px] p-2.5" style={{ background: CC.bg, border: `1px solid ${CC.hair}` }}>
+                                        <div className="flex items-start justify-between gap-2">
+                                          <span className="font-serif font-semibold text-[12.5px] leading-tight break-words flex-1" style={{ color: CC.primary }}>{ms?.title || "Untitled draft"}</span>
+                                          <span className="inline-flex items-center gap-1 shrink-0" style={{ fontSize: 9.5, fontWeight: 600, padding: "2px 8px", borderRadius: 999, background: CC.accent, color: CC.primary }}>
+                                            <Send className="w-2.5 h-2.5" /> {query.status}
+                                          </span>
+                                        </div>
+                                        <div className="flex justify-between items-center mt-1.5" style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: CC.muted }}>
+                                          <span>Sent {query.dateSent ? new Date(query.dateSent).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—"}</span>
+                                          <span>{query.sendMethod || "Email"}</span>
+                                        </div>
+                                      </div>
+                                    );
+                                  })
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Notes */}
+                          <div className="rounded-[12px] overflow-hidden flex flex-col" style={{ background: CC.card, border: `1px solid ${CC.hair}` }}>
+                            <SageHeader icon={<Notebook className="w-3 h-3" />}>Notes</SageHeader>
+                            <div className="p-3.5 flex flex-col flex-grow" style={{ minHeight: 180 }}>
+                              <div className="flex-grow overflow-y-auto custom-query-list-scrollbar space-y-2" style={{ maxHeight: 230 }}>
+                                {agentNotesList.length === 0 ? (
+                                  <div className="py-6 text-center text-[12px]" style={{ color: CC.muted }}>No notes yet. Jot down a call, a preference, a bit of research…</div>
+                                ) : (
+                                  agentNotesList.map((note) => (
+                                    <div key={note.id} className="rounded-[10px] p-2.5" style={{ background: CC.bg, border: `1px solid ${CC.hair}` }}>
+                                      <p className="whitespace-pre-wrap break-words" style={{ fontSize: 11.5, lineHeight: 1.5, color: CC.primary }}>{note.text}</p>
+                                      <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: CC.muted, marginTop: 4 }}>{note.createdAt ? formatWhatsAppDate(note.createdAt) : "Just now"}</div>
+                                    </div>
+                                  ))
+                                )}
+                              </div>
+                              <form onSubmit={(e) => { e.preventDefault(); handleAddAgentNote(noteInput); }} className="flex items-center gap-2 mt-3 rounded-lg p-1 pl-2.5" style={{ background: CC.bg, border: `1px solid ${CC.hair}` }}>
+                                <input type="text" value={noteInput} onChange={(e) => setNoteInput(e.target.value)} placeholder="Write a note…" className="flex-grow bg-transparent text-[12px] outline-none" style={{ color: CC.primary }} />
+                                <button type="submit" disabled={!noteInput.trim()} className="agx-note-send shrink-0 flex items-center justify-center" aria-label="Add note" style={{ width: 26, height: 26, borderRadius: 999, background: CC.primary, color: "#fcfbf9", border: "none", cursor: "pointer" }}>
+                                  <Send className="w-3 h-3" />
+                                </button>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     )}
                   </div>
-
-                  <span className="text-[11px] text-stone-400 font-sans leading-none truncate pr-2">
-                    {agent.agency || "Independent"}
-                  </span>
-
-                  {/* Little matched genres pills */}
-                  {agent.genres && agent.genres.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-1 max-w-full">
-                      {agent.genres.slice(0, 3).map((g, gi) => (
-                        <span key={gi} className="bg-stone-50 text-stone-500 text-[8.5px] font-bold px-1.5 py-0.5 rounded border border-stone-200/50 truncate">
-                          {g}
-                        </span>
-                      ))}
-                      {agent.genres.length > 3 && (
-                        <span className="text-[8.5px] font-bold text-stone-400 pl-0.5">+{agent.genres.length - 3}</span>
-                      )}
-                    </div>
-                  )}
-                </div>
                 </React.Fragment>
               );
             })
           )}
         </div>
       </div>
-
-      {/* ---------------- panel 3: reading pane ---------------- */}
-      {!activeAgent ? (
-        <div className="bg-white border border-[#e8e0d8] rounded-xl flex-grow flex-1 min-w-0 h-full flex flex-col items-center justify-center p-8 select-none">
-          <SlidersHorizontal className="w-8 h-8 text-[#a0a89e]/30 mb-2" />
-          <span className="text-stone-500 text-sm font-serif">No Agent Selected</span>
-          <span className="text-stone-400 text-xs mt-1 text-center max-w-[280px]">
-            Select an agent from the address book list to view their full MSWL, profiling, history, and notes.
-          </span>
-        </div>
-      ) : (
-        <div className="bg-white border border-[#e8e0d8] rounded-xl flex-grow flex-1 min-w-0 h-full flex flex-col overflow-hidden">
-          {/* 1. TOP CONTROL BAR (Height 44px) */}
-          <div className="h-[44px] border-b border-[#e8e0d8] flex items-center px-4 justify-between bg-[#fafafa] shrink-0 select-none">
-            {/* Left group controls */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => onNavigate?.("queries", "Log a query")}
-                className="h-[28px] bg-[#7c3a2a] hover:bg-[#6c3224] text-white flex items-center gap-1.5 px-3.5 rounded-full text-xs font-bold cursor-pointer transition-colors border-0"
-              >
-                <Plus className="w-3.5 h-3.5 text-white stroke-[2.5]" />
-                <span>Send query</span>
-              </button>
-
-              <button
-                onClick={() => openEditAgent(activeAgent.id)}
-                className="h-[28px] border border-[#e8e0d8] hover:bg-stone-100 bg-white flex items-center gap-1 px-3 rounded-full text-xs text-stone-700 font-medium cursor-pointer transition-colors"
-              >
-                <Pencil className="w-3 h-3 text-stone-500" />
-                <span>Edit profile</span>
-              </button>
-            </div>
-
-            {/* Center controls: filtered listing previous / next slider */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => {
-                  const idx = filteredAndSorted.findIndex(a => a.id === selectedAgentId);
-                  if (idx > 0) {
-                    setSelectedAgentId(filteredAndSorted[idx - 1].id);
-                  }
-                }}
-                disabled={filteredAndSorted.findIndex(a => a.id === selectedAgentId) <= 0}
-                className="w-7 h-7 hover:bg-stone-100 text-stone-600 rounded flex items-center justify-center cursor-pointer disabled:opacity-30 disabled:hover:bg-transparent"
-                title="Previous Agent"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <span className="text-[11px] font-mono font-bold text-stone-500">
-                {filteredAndSorted.findIndex(a => a.id === selectedAgentId) + 1} / {filteredAndSorted.length}
-              </span>
-              <button
-                onClick={() => {
-                  const idx = filteredAndSorted.findIndex(a => a.id === selectedAgentId);
-                  if (idx >= 0 && idx < filteredAndSorted.length - 1) {
-                    setSelectedAgentId(filteredAndSorted[idx + 1].id);
-                  }
-                }}
-                disabled={filteredAndSorted.findIndex(a => a.id === selectedAgentId) >= filteredAndSorted.length - 1}
-                className="w-7 h-7 hover:bg-stone-100 text-stone-600 rounded flex items-center justify-center cursor-pointer disabled:opacity-30 disabled:hover:bg-transparent"
-                title="Next Agent"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Right group: ⋯ lifecycle menu — Set aside / Bring back · Delete… */}
-            <div className="relative">
-              <button
-                onClick={(e) => { e.stopPropagation(); setDetailMenuOpen((o) => !o); }}
-                title="More actions"
-                aria-label="More actions"
-                className="w-[30px] h-[30px] border border-[#e8e0d8] bg-white hover:bg-stone-100 rounded-[6px] flex items-center justify-center cursor-pointer text-stone-500 transition-colors"
-              >
-                <MoreHorizontal className="w-4 h-4" />
-              </button>
-              {detailMenuOpen && (
-                <>
-                  <div className="fixed inset-0 z-30" onClick={() => setDetailMenuOpen(false)} />
-                  <div className="absolute right-0 top-[36px] z-40 bg-white border border-[#e8e0d8] rounded-[11px] shadow-[0_12px_30px_rgba(58,28,20,0.16)] p-1.5 min-w-[186px]">
-                    <button
-                      onClick={() => toggleSetAside(activeAgent)}
-                      className="flex items-center gap-2.5 w-full text-left px-2.5 py-2 rounded-[7px] text-[13px] text-[#3a1c14] hover:bg-[rgba(138,158,136,0.14)] cursor-pointer"
-                    >
-                      <Archive className="w-3.5 h-3.5 text-stone-500 shrink-0" />
-                      {activeAgent.setAside ? "Bring back" : "Set aside"}
-                    </button>
-                    <div className="h-px bg-[#f0eae2] my-1 mx-1" />
-                    <button
-                      onClick={() => { setDetailMenuOpen(false); setDeleteModalAgent(activeAgent); }}
-                      className="flex items-center gap-2.5 w-full text-left px-2.5 py-2 rounded-[7px] text-[13px] text-[#a8442f] hover:bg-[rgba(168,68,47,0.08)] cursor-pointer"
-                    >
-                      <Trash2 className="w-3.5 h-3.5 shrink-0" />
-                      Delete…
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* INNER SCROLL COLUMN WRAP */}
-          <div className="flex-grow overflow-y-auto p-4 space-y-4 bg-stone-50 custom-query-list-scrollbar">
-            
-            {/* 2. AGENT HEADER CARD (Card 1) */}
-            <div className="bg-white border border-[#e8e0d8] rounded-xl p-4 flex flex-col justify-between relative min-h-[135px] shadow-sm select-none">
-              {/* Submission status absolute pill in top-right with 10px gap from border */}
-              {/* Availability — the agent's OWN status. Clickable to flip (Unknown → Open). */}
-              <button
-                onClick={() => flipAvailability(activeAgent)}
-                title="Click to flip — this is the agent's own availability to queries"
-                className={`absolute top-[10px] right-[10px] text-[10px] font-bold uppercase tracking-[0.05em] px-2.5 py-1 border rounded-full cursor-pointer transition-all hover:brightness-95 flex items-center gap-1.5 ${
-                  activeAgent.submissionStatus === SubmissionStatus.OPEN
-                    ? "bg-[#FAF1EF] text-[#7c3a2a] border-[#EBDCD3]"
-                    : activeAgent.submissionStatus === SubmissionStatus.CLOSED
-                    ? "bg-[rgba(186,117,23,0.12)] text-[#BA7517] border-[rgba(186,117,23,0.28)]"
-                    : "bg-stone-50 text-stone-400 border-stone-200"
-                }`}
-              >
-                <span className="w-[5px] h-[5px] rounded-full" style={{ background: "currentColor" }} />
-                {activeAgent.submissionStatus === SubmissionStatus.OPEN
-                  ? "Open to queries"
-                  : activeAgent.submissionStatus === SubmissionStatus.CLOSED
-                  ? "Closed to queries"
-                  : "Availability unknown"}
-              </button>
-
-              <div className="flex flex-col justify-center pr-[120px]">
-                <h2 className="font-serif text-[32px] font-bold text-[#3a1c14] leading-[38px] tracking-tight">
-                  {activeAgent.name}
-                </h2>
-                {activeAgent.agency && (
-                  <p className="text-[12.5px] text-[#7c3a2a] leading-snug mt-1 font-medium">
-                    {activeAgent.agency} &middot; {activeAgent.email || "No email address logged"}
-                  </p>
-                )}
-              </div>
-
-              <div className="flex items-center justify-between mt-3 font-mono text-[11px] text-stone-500 leading-none pb-0.5">
-                <div className="flex items-center gap-3">
-                  <FitStars value={activeAgent.starRating || 0} size={15} />
-                  <span className="text-stone-300">|</span>
-                  <span className="flex items-center gap-1 font-sans text-stone-500">
-                    Method: <span className="text-stone-700 font-bold">{activeAgent.submissionMethod || "Email"}</span>
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* 3. BENTO THREE COLUMN GRID STRETCH WRAP */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 items-stretch min-h-[460px]">
-              
-              {/* Card A: Agent Profile */}
-              <div className="relative bg-white border border-[#e8e0d8] rounded-xl flex flex-col p-4 pt-8 shadow-sm h-full">
-                <span className="absolute top-[-14px] left-1/2 -translate-x-1/2 bg-white border border-[#e8e0d8] py-1 px-4 rounded-full flex items-center gap-1.5 shadow-sm whitespace-nowrap z-10 select-none text-[12px] text-stone-700 font-medium font-sans">
-                  <SlidersHorizontal className="w-3.5 h-3.5 text-[#7c3a2a]" />
-                  <span>Agent Profile</span>
-                </span>
-
-                <div className="space-y-4 text-xs text-stone-600 mt-2 flex-grow overflow-y-auto max-h-[400px] custom-query-list-scrollbar pr-0.5">
-                  {activeAgent.website && (
-                    <div>
-                      <span className="block text-[9px] font-mono text-stone-400 font-bold uppercase select-none mb-0.5">Website hub</span>
-                      <a href={activeAgent.website} referrerPolicy="no-referrer" target="_blank" rel="noreferrer" className="text-[#7c3a2a] hover:underline font-bold break-all">
-                        {activeAgent.website}
-                      </a>
-                    </div>
-                  )}
-
-                  {(() => {
-                    const socials = displaySocials(activeAgent);
-                    if (!socials.length) return null;
-                    return (
-                      <div>
-                        <span className="block text-[9px] font-mono text-stone-400 font-bold uppercase select-none mb-0.5">Socials</span>
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {socials.map((s, si) => {
-                            const href = socialHref(s.handle);
-                            const cls = "inline-flex items-center gap-1 bg-[#FAF1EF] text-[#7c3a2a] border border-[#EBDCD3] text-[10px] font-semibold px-2 py-0.5 rounded-full max-w-full";
-                            const inner = <><span className="font-bold">{s.platform}</span><span className="text-stone-400">·</span><span className="truncate">{s.handle}</span></>;
-                            return href ? (
-                              <a key={si} href={href} referrerPolicy="no-referrer" target="_blank" rel="noreferrer" className={`${cls} hover:bg-[#f5e2da]`}>{inner}</a>
-                            ) : (
-                              <span key={si} className={cls}>{inner}</span>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })()}
-
-                  <div>
-                    <span className="block text-[9px] font-mono text-stone-400 font-bold uppercase select-none mb-0.5">Response time</span>
-                    <span className="text-stone-700 font-semibold font-sans">
-                      within {activeAgent.responseTimeWeeks || 6} weeks
-                      {activeAgent.noResponseMeansNo && <span className="text-stone-400 font-normal"> (Silence means pass)</span>}
-                    </span>
-                  </div>
-
-                  {activeAgent.agentNotes && activeAgent.agentNotes.trim() && (
-                    <div>
-                      <span className="block text-[9px] font-mono text-stone-400 font-bold uppercase select-none mb-0.5">Response policy</span>
-                      <span className="text-stone-700 font-semibold font-sans">{activeAgent.agentNotes}</span>
-                    </div>
-                  )}
-
-                  {activeAgent.genres && activeAgent.genres.length > 0 && (
-                    <div>
-                      <span className="block text-[9px] font-mono text-stone-400 font-bold uppercase select-none mb-0.5">Matched Genres</span>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {activeAgent.genres.map((g, gi) => (
-                          <span key={gi} className="bg-stone-50 border border-stone-200 text-stone-650 text-[9.5px] font-semibold px-2 py-0.5 rounded-full select-none">
-                            {g}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {activeAgent.materialsWanted && (
-                    <div>
-                      <span className="block text-[9px] font-mono text-stone-400 font-bold uppercase select-none mb-0.5">Wanted Materials</span>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {(Array.isArray(activeAgent.materialsWanted)
-                          ? activeAgent.materialsWanted
-                          : Object.keys(activeAgent.materialsWanted || {}).filter(k => (activeAgent.materialsWanted as any)[k] === true)
-                        ).map((mat, mi) => (
-                          <span key={mi} className="bg-[#FAF1EF] text-[#7c3a2a] border border-[#EBDCD3]/30 text-[9.5px] font-semibold px-2 py-0.5 rounded-full select-none">
-                            {mat}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {activeAgent.mswlNotes && (
-                    <div className="border-t border-stone-100 pt-3">
-                      <span className="block text-[9px] font-mono text-stone-400 font-bold uppercase select-none mb-1">MSWL Wishlist / Notes</span>
-                      <p className="text-stone-600 leading-relaxed font-sans text-[11.5px] whitespace-pre-wrap max-h-[170px] overflow-y-auto custom-query-list-scrollbar">
-                        "{activeAgent.mswlNotes}"
-                      </p>
-                    </div>
-                  )}
-
-                  {activeAgent.requeryPreference && (
-                    <div className="border-t border-stone-100 pt-3">
-                      <span className="block text-[9px] font-mono text-stone-400 font-bold uppercase select-none mb-1">Query again?</span>
-                      <span
-                        className="inline-flex items-center gap-1.5 py-[3px] px-[10px] rounded-full text-[11px] font-medium font-sans border"
-                        style={
-                          activeAgent.requeryPreference === "no"
-                            ? { background: "#FAF1EF", color: "#7c3a2a", borderColor: "#e8d5cc" }
-                            : activeAgent.requeryPreference === "yes"
-                            ? { background: "#EEF3EC", color: "#4a6741", borderColor: "#d2e0cc" }
-                            : { background: "#FBF6EC", color: "#8a6d2f", borderColor: "#ece0c6" }
-                        }
-                      >
-                        {activeAgent.requeryPreference === "yes"
-                          ? "Yes — open to querying again"
-                          : activeAgent.requeryPreference === "maybe"
-                          ? "Maybe — keep watching"
-                          : "No — not the right fit"}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Card B: Query History */}
-              <div className="relative bg-white border border-[#e8e0d8] rounded-xl flex flex-col p-4 pt-8 shadow-sm h-full">
-                <span className="absolute top-[-14px] left-1/2 -translate-x-1/2 bg-white border border-[#e8e0d8] py-1 px-4 rounded-full flex items-center gap-1.5 shadow-sm whitespace-nowrap z-10 select-none text-[12px] text-stone-700 font-medium font-sans">
-                  <Clock className="w-3.5 h-3.5 text-[#7c3a2a]" />
-                  <span>Query History</span>
-                </span>
-
-                <div className="space-y-3.5 mt-2 flex-grow overflow-y-auto max-h-[400px] custom-query-list-scrollbar pr-0.5">
-                  {activeAgentQueries.length === 0 ? (
-                    <div className="h-full flex flex-col items-center justify-center text-center p-6 text-stone-400 text-xs select-none">
-                      <Send className="w-6 h-6 text-stone-300 mb-1.5" />
-                      <span>No active queries sent yet.</span>
-                      <p className="text-[10px] text-stone-400/80 mt-1 leading-normal">
-                        Ready to query {activeAgent.name}? Tap Send Query above!
-                      </p>
-                    </div>
-                  ) : (
-                    [...activeAgentQueries]
-                      .sort((a,b)=> (b.dateSent ? new Date(b.dateSent).getTime() : 0) - (a.dateSent ? new Date(a.dateSent).getTime() : 0))
-                      .map(query => {
-                        const ms = manuscripts.find(m => m.id === query.manuscriptId);
-                        return (
-                          <div key={query.id} className="p-3 bg-stone-50 border border-stone-100 rounded-lg flex flex-col gap-1.5 hover:border-[#EBDCD3]/40 transition-all select-none">
-                            <div className="flex justify-between items-start gap-1">
-                              <span className="font-serif font-bold text-stone-850 text-[12.5px] leading-tight break-words flex-1 pr-1">
-                                {ms?.title || "Untitled draft"}
-                              </span>
-                              <div className="scale-75 origin-right shrink-0">
-                                <StatusPill status={query.status} />
-                              </div>
-                            </div>
-                            <div className="flex justify-between items-center text-[10px] text-stone-400 font-mono mt-0.5">
-                              <span>Sent: {query.dateSent ? new Date(query.dateSent).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—"}</span>
-                              <span>{query.sendMethod || "Email"}</span>
-                            </div>
-                          </div>
-                        );
-                      })
-                  )}
-                </div>
-              </div>
-
-              {/* Card C: Notes */}
-              <div className="relative bg-white border border-[#e8e0d8] rounded-xl flex flex-col pt-[30px] pr-[14px] pb-[14px] pl-[14px] shadow-sm h-full min-h-[350px]">
-                {/* Overlapping Pill Header - Notes */}
-                <span className="absolute top-[-14px] left-1/2 -translate-x-1/2 bg-[#fdf8f6] border border-[#d1d5db] py-[5px] px-[16px] rounded-full flex items-center gap-1.5 shadow-sm whitespace-nowrap z-10 select-none text-[12px] text-black shrink-0">
-                  <Notebook className="w-3.5 h-3.5 text-black" />
-                  <span className="text-black text-[13px] font-normal">Notes</span>
-                </span>
-
-                {/* WhatsApp-style messaging box with specific background */}
-                <div className="flex-grow flex flex-col justify-between p-3.5 h-full bg-[#FAF8F5] rounded-xl border border-[#ebd8c5]/40 mt-3.5">
-                  {/* Chat Messages scroll area with custom scrollbars */}
-                  <div
-                    className="flex-grow overflow-y-auto max-h-[250px] pr-1 space-y-2 flex flex-col custom-query-list-scrollbar"
-                    style={{ backgroundColor: "transparent" }}
-                  >
-                    {agentNotesList.length === 0 ? (
-                      <div className="flex-grow flex flex-col items-center justify-center text-center py-8 px-4 h-full my-auto select-none">
-                        <div className="w-10 h-10 rounded-full bg-white/85 flex items-center justify-center mb-2 shadow-xs">
-                          <Send className="w-4 h-4 text-stone-400 rotate-45 -translate-x-[1px]" />
-                        </div>
-                        <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider font-mono">Notes Journal</span>
-                        <p className="text-[11px] text-stone-400 mt-1 max-w-[180px] leading-snug font-sans">
-                          Send notes on phone calls, meeting updates, or private research details here.
-                        </p>
-                      </div>
-                    ) : (
-                      agentNotesList.map((note) => (
-                        <div
-                          key={note.id}
-                          className="relative group max-w-[85%] bg-white text-[#3a1c14] rounded-[15px] pl-[15px] pr-[15px] py-2 shadow-sm text-[11.5px] leading-relaxed text-left self-start animate-fade-in"
-                          style={{ borderStyle: "none", borderWidth: "0px" }}
-                        >
-                          <p className="break-words font-sans text-[#3a1c14] whitespace-pre-wrap text-left pr-1 font-medium leading-normal">{note.text}</p>
-                          <div className="text-[9px] text-[#8c706d] text-left mt-1 select-none font-mono flex items-center justify-start gap-1 font-light leading-none">
-                            <span>{note.createdAt ? formatWhatsAppDate(note.createdAt) : "Just now"}</span>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-
-                  {/* Notes Input Field row */}
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      handleAddAgentNote(noteInput);
-                    }}
-                    className="p-1 px-2 border rounded-lg bg-white flex items-center justify-between gap-1 shrink-0 mt-3"
-                    style={{ borderColor: "#ebd8c5" }}
-                  >
-                    <input
-                      type="text"
-                      value={noteInput}
-                      onChange={(e) => setNoteInput(e.target.value)}
-                      placeholder="Send a note..."
-                      className="flex-grow bg-transparent text-xs p-1 outline-none text-stone-750 focus:ring-0 placeholder-stone-400"
-                    />
-                    <button
-                      type="submit"
-                      disabled={!noteInput.trim()}
-                      className="w-[22px] h-[22px] rounded-full bg-[#7c3d3d] hover:bg-[#6c3224] flex items-center justify-center text-white cursor-pointer active:scale-95 transition-all shrink-0 p-0 disabled:bg-stone-200 disabled:cursor-not-allowed border-0"
-                    >
-                      <Send className="w-3 h-3 rotate-[330deg] text-white shrink-0 mr-[1px] mb-[1px]" />
-                    </button>
-                  </form>
-                </div>
-              </div>
-
-            </div>
-
-          </div>
-        </div>
-      )}
 
       {/* ---------------- TOAST hud ---------------- */}
       <AnimatePresence>
