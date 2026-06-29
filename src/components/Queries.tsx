@@ -2052,6 +2052,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         {/* ── The desk — control bar over a list card + reading pane on the shell's cream well.
             (The legacy black .qdesk frame + rail/glint is retired; the chrome frame is the shell.) ── */}
         <style>{`
+          /* encompassing frame — faint highlight travelling the black border ring, calm 7.5s loop */
+          .qdesk::before{ content:""; position:absolute; inset:0; border-radius:14px; padding:1.5px; background:linear-gradient(135deg, transparent 0 44%, rgba(255,255,255,0.8) 50%, transparent 56% 100%); background-size:300% 300%; -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; z-index:6; animation:qdeskGlint 7.5s linear infinite; }
+          @keyframes qdeskGlint{ 0%{background-position:0% 0%;} 100%{background-position:100% 100%;} }
           /* lifted-page list rows — rounded, no dividers; selected lifts off the stack */
           .qrow{ position:relative; margin:3px 6px; padding:13px 15px; border-radius:9px; cursor:pointer; transition:background .14s ease, box-shadow .15s ease, transform .15s ease; }
           .qrow:first-of-type{ margin-top:6px; }
@@ -2059,11 +2062,19 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           .qrow:hover:not(.sel){ background:#fffdf9; box-shadow:0 2px 9px rgba(58,28,20,.09); }
           .qrow.sel{ background:#fff; box-shadow:0 5px 16px rgba(58,28,20,.14); transform:translateX(2px); z-index:2; }
           .qrow.sel::before{ content:""; position:absolute; left:0; top:9px; bottom:9px; width:3px; border-radius:3px; background:#7c3a2a; }
-          @media (prefers-reduced-motion: reduce){ .qrow.sel{ transform:none; } }
+          @media (prefers-reduced-motion: reduce){ .qrow.sel{ transform:none; } .qdesk::before{ animation:none; } }
         `}</style>
-        {/* Deskwrap — the working surface on the shell's cream well (the legacy black .qdesk frame +
-            rail is retired; the chrome frame is now the sidebar + top strip around the well). */}
-        <div style={{ padding: 18, flex: 1, minHeight: 0, display: "flex", flexDirection: "column", gap: 12 }}>
+        {/* Worktable — ONE encompassing black frame (1px #241c15 + a flush 10px top rail + the
+            travelling edge-glint) wrapping the action bar + list + pane on a warm #f6f1e9 surface, so
+            the list and pane read as paper cards resting inside it. The sidebar + breadcrumb stay
+            outside (the shell chrome). The action bar is INSIDE the frame per the build decision — to
+            make it a page-level toolbar instead, lift it above .qdesk. */}
+        <div style={{ padding: 18, flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+          <div className="qdesk" style={{ position: "relative", flex: 1, minHeight: 0, display: "flex", flexDirection: "column", border: "1px solid #241c15", borderRadius: 14, background: "#f6f1e9", overflow: "hidden", boxShadow: "0 1px 3px rgba(58,28,20,.08), 0 18px 44px rgba(58,28,20,.13)" }}>
+            {/* flush 10px black top rail — frame + rail read as one continuous black shape */}
+            <div style={{ height: 10, background: "#241c15", flexShrink: 0 }} />
+            {/* deskpad — the warm working surface inside the frame */}
+            <div style={{ padding: 18, flex: 1, minHeight: 0, display: "flex", flexDirection: "column", gap: 12 }}>
 
         {/* ── Control bar — search (list-pane width) over the list · actions over the reading pane ── */}
         {(() => {
@@ -2420,13 +2431,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
               </div>{/* closes padding:9 rows-container */}
           </div>{/* closes list card */}
 
-          {/* Reading pane — black frame heavier at the top (1.5px #241c15 + a flush 10px rail),
-              radius 14, overflow:hidden so the rail meets the corners; travelling edge-glint.
-              Height is content-driven: alignSelf:start lets the pane hug its tallest column's
-              content (capped at the well height), the columns scroll internally past that. */}
-          <div className="qp-pane" style={{ position: "relative", alignSelf: "start", maxHeight: "100%", border: "1.5px solid #241c15", borderRadius: 14, background: "#ffffff", boxShadow: "0 1px 2px rgba(58,28,20,.05), 0 6px 18px rgba(58,28,20,.07)", overflow: "hidden", minHeight: 0, display: "flex", flexDirection: "column" }}>
-            {/* flush 10px black top rail — frame + rail read as one continuous black shape */}
-            <div style={{ height: 10, background: "#241c15", flexShrink: 0 }} />
+          {/* Reading pane — a plain hairline paper card now (the heavy black frame, rail + glint moved
+              outward to the encompassing .qdesk). Internals are untouched. Height stays content-driven:
+              alignSelf:start lets the pane hug its tallest column's content (capped at the well
+              height), the columns scroll internally past that — no stretch-to-fill. */}
+          <div className="qp-pane" style={{ position: "relative", alignSelf: "start", maxHeight: "100%", border: "1px solid #e7ddd2", borderRadius: 14, background: "#ffffff", boxShadow: "0 1px 2px rgba(58,28,20,.05), 0 6px 18px rgba(58,28,20,.07)", overflow: "hidden", minHeight: 0, display: "flex", flexDirection: "column" }}>
             <div style={{ display: "contents" }}>
             {activeQuery && activeAgent && activeMs ? (
               <>
@@ -2440,14 +2449,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   /* column swell on hover */
                   .qp-card{ transition:transform .2s ease, box-shadow .2s ease; }
                   .qp-card:hover{ transform:scale(1.02); box-shadow:0 8px 22px rgba(58,28,20,.10); z-index:2; }
-                  /* edge glint — faint highlight travelling the black frame ring, calm 7s loop */
-                  .qp-pane::before{ content:""; position:absolute; inset:0; border-radius:14px; padding:1.5px; background:linear-gradient(135deg, transparent 0 43%, rgba(255,255,255,0.85) 50%, transparent 57% 100%); background-size:300% 300%; -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; z-index:5; animation:qpGlint 7s linear infinite; }
-                  @keyframes qpGlint{ 0%{background-position:0% 0%;} 100%{background-position:100% 100%;} }
                   /* empty-state "add" pills — dashed, tappable, open the Edit Agent drawer */
                   .qaddpill{ display:inline-flex; align-items:center; gap:6px; font-family:'Inter',sans-serif; font-size:12px; color:#9a8a78; background:#faf6ef; border:1px dashed #d8ccba; border-radius:999px; padding:6px 13px; cursor:pointer; transition:color .14s, border-color .14s, background .14s; }
                   .qaddpill:hover{ color:#7c3a2a; border-color:#c9a98c; background:#fbf3ec; }
                   .qaddpill svg{ flex-shrink:0; opacity:.85; }
-                  @media (prefers-reduced-motion: reduce){ .qp-card:hover{ transform:none; } .qp-pane::before{ animation:none; } }
+                  @media (prefers-reduced-motion: reduce){ .qp-card:hover{ transform:none; } }
                 `}</style>
                 {/* ── Hero — identity (left) + in-pane status chip (top-right, under the rail) ── */}
                 {(() => {
@@ -2465,9 +2471,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   const mswl = activeAgent.mswlNotes?.trim();
                   const genres = (activeAgent.genres || []).filter(Boolean);
                   return (
-                    <div className="qp-hero" style={{ position: "relative", padding: "20px 28px 18px", background: "#ffffff", flexShrink: 0 }}>
-                      {/* status chip — in-pane, top-right, just beneath the rail (soft, not a sticker) */}
-                      <div style={{ position: "absolute", top: 16, right: 26, zIndex: 2, display: "inline-flex", alignItems: "center", gap: 8, background: "#fdfaf5", border: "1px solid #e3d9cc", borderRadius: 999, padding: "5px 13px 5px 6px", boxShadow: "0 1px 2px rgba(58,28,20,.05)" }}>
+                    <div className="qp-hero" style={{ position: "relative", padding: "22px 28px 18px", background: "#ffffff", flexShrink: 0 }}>
+                      {/* status chip — in-pane, top-right (soft, not a sticker) */}
+                      <div style={{ position: "absolute", top: 22, right: 26, zIndex: 2, display: "inline-flex", alignItems: "center", gap: 8, background: "#fdfaf5", border: "1px solid #e3d9cc", borderRadius: 999, padding: "5px 13px 5px 6px", boxShadow: "0 1px 2px rgba(58,28,20,.05)" }}>
                         <StatusDot status={activeQuery.status} overrideSize={21} />
                         <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: ".15em", color: burgundy, fontWeight: 500, textTransform: "uppercase" as const, whiteSpace: "nowrap" }}>{statusDisplayLabel(activeQuery)}</span>
                       </div>
@@ -2690,7 +2696,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
         </div>{/* closes content grid */}
 
-        </div>{/* closes deskwrap */}
+            </div>{/* closes deskpad */}
+          </div>{/* closes qdesk frame */}
+        </div>{/* closes worktable outer wrapper */}
       </div>{/* closes main container */}
 
     {activeQuery && (
