@@ -2469,8 +2469,6 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             {activeQuery && activeAgent && activeMs ? (
               <>
                 <style>{`
-                  /* inset grey divider between the hero band and the columns */
-                  .qp-hero::after{ content:""; position:absolute; left:28px; right:28px; bottom:0; height:1px; background:#d6cfc3; }
                   .qp-noteacts{ opacity:0; transition:opacity .14s; }
                   .qp-note:hover .qp-noteacts{ opacity:1; }
                   .qp-noteact{ width:22px; height:22px; border:none; background:transparent; border-radius:5px; color:#bcae9e; display:flex; align-items:center; justify-content:center; cursor:pointer; }
@@ -2484,7 +2482,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   .qaddpill svg{ flex-shrink:0; opacity:.85; }
                   @media (prefers-reduced-motion: reduce){ .qp-card:hover{ transform:none; } }
                 `}</style>
-                {/* ── Hero — identity (left) + in-pane status chip (top-right, under the rail) ── */}
+                {/* ── Masthead — a bordered card inset to the columns' width, content centred:
+                    avatar beside name/agency, then email · genres · add-pills. Status chip pinned
+                    top-right inside the box. ── */}
                 {(() => {
                   const hasName = !!(activeAgent.name?.trim());
                   const nameplate = (hasName ? activeAgent.name : activeAgent.agency) || "Unknown agent";
@@ -2500,73 +2500,73 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   const mswl = activeAgent.mswlNotes?.trim();
                   const genres = (activeAgent.genres || []).filter(Boolean);
                   return (
-                    <div className="qp-hero" style={{ position: "relative", padding: "22px 28px 18px", background: "#ffffff", flexShrink: 0 }}>
-                      {/* status chip — in-pane, top-right (soft, not a sticker) */}
-                      <div style={{ position: "absolute", top: 22, right: 26, zIndex: 2, display: "inline-flex", alignItems: "center", gap: 8, background: "#fdfaf5", border: "1px solid #e3d9cc", borderRadius: 999, padding: "5px 13px 5px 6px", boxShadow: "0 1px 2px rgba(58,28,20,.05)" }}>
-                        <StatusDot status={activeQuery.status} overrideSize={21} decorative />
-                        <span style={{ fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: ".15em", color: burgundy, fontWeight: 500, textTransform: "uppercase" as const, whiteSpace: "nowrap" }}>{statusDisplayLabel(activeQuery)}</span>
+                    <div className="qp-hero" style={{ position: "relative", margin: "16px 22px 0", padding: "20px 22px 18px", border: `1px solid ${qdbCardLine}`, borderRadius: 11, background: qdbMasthead, textAlign: "center" as const, flexShrink: 0 }}>
+                      {/* status chip — pinned top-right inside the masthead box */}
+                      <div style={{ position: "absolute", top: 14, right: 15, zIndex: 2, display: "inline-flex", alignItems: "center", gap: 7, background: "#ffffff", border: "1px solid #e7ddd0", borderRadius: 999, padding: "5px 13px 5px 6px" }}>
+                        <StatusDot status={activeQuery.status} overrideSize={18} decorative />
+                        <span style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: ".13em", color: burgundy, fontWeight: 600, textTransform: "uppercase" as const, whiteSpace: "nowrap" }}>{statusDisplayLabel(activeQuery)}</span>
                       </div>
-                      {/* identity — larger avatar + agent name + agency */}
-                      <div style={{ display: "flex", alignItems: "center", gap: 13, minWidth: 0, paddingRight: 180 }}>
+                      {/* identity — avatar to the LEFT of name/agency, the group centred */}
+                      <div style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 12, textAlign: "left" as const }}>
                         <span style={{ flexShrink: 0, width: 46, height: 46, borderRadius: "50%", background: burgundy, color: "#ffffff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontSize: 16, fontWeight: 600, letterSpacing: ".03em" }}>{initials}</span>
                         <div style={{ minWidth: 0 }}>
-                          <div style={{ fontFamily: FONT_SERIF, fontSize: 27, fontWeight: 600, color: "#2a2017", letterSpacing: ".02em", lineHeight: 1.1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{nameplate}</div>
+                          <div style={{ fontFamily: FONT_SERIF, fontSize: 25, fontWeight: 600, color: "#2a2017", letterSpacing: ".02em", lineHeight: 1.05 }}>{nameplate}</div>
                           {hasName && !!activeAgent.agency?.trim() && (
-                            <div style={{ fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: ".14em", textTransform: "uppercase" as const, color: "#a89a8a", marginTop: 3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{activeAgent.agency}</div>
+                            <div style={{ fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: ".06em", textTransform: "uppercase" as const, color: "#a89a8a", marginTop: 4 }}>{activeAgent.agency}</div>
                           )}
                         </div>
                       </div>
-                      {/* detail lines: email · MSWL · genres. Present fields render in place; any
-                          absent addable fields collapse into one wrapping row of dashed "add" pills
-                          (Layout 1) that open the Edit Agent drawer to that field. */}
-                      {email && (
-                        <div style={{ display: "flex", alignItems: "center", gap: 7, fontFamily: "'Inter',sans-serif", fontSize: 13, color: burgundy, marginTop: 11 }}>
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" style={{ opacity: .8, flexShrink: 0 }}><rect x="2.5" y="4.5" width="19" height="15" rx="2.5" /><path d="M3 6l9 6.5L21 6" /></svg>
-                          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{email}</span>
-                        </div>
-                      )}
-                      {mswl && (
-                        <div style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 11.5, lineHeight: 1.45, color: "#8a7d6e", maxWidth: 620, margin: "11px 0 0" }}>“{mswl}”</div>
-                      )}
-                      {genres.length > 0 && (
-                        <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6, marginTop: 11 }}>
-                          {genres.map((genre, gIdx) => (
-                            <span key={gIdx} style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: ".12em", textTransform: "uppercase" as const, color: "#5a6e58", background: "#fdfaf5", border: "1px solid #cdddc7", borderRadius: 999, padding: "3px 10px" }}>{genre}</span>
-                          ))}
-                        </div>
-                      )}
-                      {(!email || !mswl || genres.length === 0) && (
-                        <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8, marginTop: 12 }}>
-                          {!email && (
-                            <span role="button" tabIndex={0} onClick={() => openEditAgent(activeAgent.id)} className="qaddpill">
-                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5" /><path d="M3 6l9 6.5L21 6" /></svg>
-                              Add an email address
-                            </span>
-                          )}
-                          {!mswl && (
-                            <span role="button" tabIndex={0} onClick={() => openEditAgent(activeAgent.id)} className="qaddpill">
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
-                              Add their wish list
-                            </span>
-                          )}
-                          {genres.length === 0 && (
-                            <span role="button" tabIndex={0} onClick={() => openEditAgent(activeAgent.id)} className="qaddpill">
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
-                              Add the genres they represent
-                            </span>
-                          )}
-                        </div>
-                      )}
+                      {/* meta — email · MSWL · genres · add-pills, centred beneath the identity */}
+                      <div style={{ margin: "13px auto 0", display: "flex", flexDirection: "column", alignItems: "center", gap: 9 }}>
+                        {email && (
+                          <div style={{ display: "flex", alignItems: "center", gap: 7, fontFamily: "'Inter',sans-serif", fontSize: 12.5, color: burgundy }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" style={{ opacity: .8, flexShrink: 0 }}><rect x="2.5" y="4.5" width="19" height="15" rx="2.5" /><path d="M3 6l9 6.5L21 6" /></svg>
+                            <span>{email}</span>
+                          </div>
+                        )}
+                        {mswl && (
+                          <div style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 11.5, lineHeight: 1.45, color: "#8a7d6e", maxWidth: 520 }}>“{mswl}”</div>
+                        )}
+                        {genres.length > 0 && (
+                          <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6, justifyContent: "center" }}>
+                            {genres.map((genre, gIdx) => (
+                              <span key={gIdx} style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: ".12em", textTransform: "uppercase" as const, color: "#5a6e58", background: "#fdfaf5", border: "1px solid #cdddc7", borderRadius: 999, padding: "3px 10px" }}>{genre}</span>
+                            ))}
+                          </div>
+                        )}
+                        {(!email || !mswl || genres.length === 0) && (
+                          <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8, justifyContent: "center" }}>
+                            {!email && (
+                              <span role="button" tabIndex={0} onClick={() => openEditAgent(activeAgent.id)} className="qaddpill">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5" /><path d="M3 6l9 6.5L21 6" /></svg>
+                                Add an email address
+                              </span>
+                            )}
+                            {!mswl && (
+                              <span role="button" tabIndex={0} onClick={() => openEditAgent(activeAgent.id)} className="qaddpill">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
+                                Add their wish list
+                              </span>
+                            )}
+                            {genres.length === 0 && (
+                              <span role="button" tabIndex={0} onClick={() => openEditAgent(activeAgent.id)} className="qaddpill">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
+                                Add the genres they represent
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   );
                 })()}
 
                 {/* Columns — equal-height grid (rows size to the tallest column's content; the grid
                     shrinks + the columns scroll internally only when the pane hits its ceiling) */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, padding: "16px 22px 24px", flex: "0 1 auto", minHeight: 0 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, padding: "16px 22px 24px", flex: "0 1 auto", minHeight: 0, alignItems: "stretch" }}>
 
                   {/* ── Sub-card 1: Tracking ── */}
-                  <div className="qp-card" style={{ minWidth: 0, background: "#fdfaf5", border: "1px solid #cbc4b6", borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                  <div className="qp-card" style={{ minWidth: 0, background: "#fdfaf5", border: `1px solid `, borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
                       {/* pink header band */}
                       <div style={{ padding: "9px 16px", textAlign: "center", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", borderBottom: "1px solid #e8cabb", flexShrink: 0 }}>
                         <span style={{ fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 600, color: "#241c15" }}>Tracking</span>
@@ -2577,7 +2577,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     </div>{/* ── end sub-card 1: Tracking ── */}
 
                   {/* ── Sub-card 2: What you sent ── */}
-                  <div className="qp-card" style={{ minWidth: 0, background: "#fdfaf5", border: "1px solid #cbc4b6", borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                  <div className="qp-card" style={{ minWidth: 0, background: "#fdfaf5", border: `1px solid `, borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
                       {/* pink header band */}
                       <div style={{ padding: "9px 16px", textAlign: "center", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", borderBottom: "1px solid #e8cabb", flexShrink: 0 }}>
                         <span style={{ fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 600, color: "#241c15" }}>What you sent</span>
@@ -2603,14 +2603,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                                 {activeMs.genre && <span style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".1em", textTransform: "uppercase" as const, color: "#5a6e58", background: "#eef2ec", border: "1px solid #d8e0d4", borderRadius: 999, padding: "3px 10px" }}>{activeMs.genre}</span>}
                                 {!!activeMs.wordCount && <span style={{ fontFamily: FONT_MONO, fontSize: 10.5, color: "#a89a8a", letterSpacing: ".03em" }}>{activeMs.wordCount.toLocaleString()} words</span>}
                               </div>
-                              {/* logline — pulled quote with a 2px left rule */}
-                              <div style={{ borderLeft: "2px solid #e7d3c9", paddingLeft: 12 }}>
-                                {activeMs.logline ? (
-                                  <span style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 12.5, color: "#5a4d40", lineHeight: 1.45 }}>{activeMs.logline}</span>
-                                ) : (
-                                  <span role="button" tabIndex={0} onClick={() => onNavigate?.("manuscripts")} style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 12.5, color: "#b3a596", lineHeight: 1.45, cursor: "pointer" }}>Add a logline</span>
-                                )}
-                              </div>
+                              {/* (logline / pulled-quote removed per the mockup) */}
                               {/* Materials included */}
                               <div style={{ marginTop: 17 }}>
                                 <div style={{ ...minilabel, display: "block", marginBottom: 8 }}>Materials included</div>
@@ -2647,7 +2640,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     </div>{/* ── end sub-card 2: What you sent ── */}
 
                   {/* ── Sub-card 3: Notes — journal pins to bottom via flex-1 on messages area ── */}
-                  <div className="qp-card" style={{ minWidth: 0, background: "#fdfaf5", border: "1px solid #cbc4b6", borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                  <div className="qp-card" style={{ minWidth: 0, background: "#fdfaf5", border: `1px solid `, borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
                       {/* pink header band */}
                       <div style={{ padding: "9px 16px", textAlign: "center", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", borderBottom: "1px solid #e8cabb", flexShrink: 0 }}>
                         <span style={{ fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 600, color: "#241c15" }}>Notes</span>
@@ -2663,8 +2656,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                             <>
                               <div style={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column", paddingRight: 2 }}>
                                 {notes.length === 0 ? (
-                                  <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
-                                    <span style={{ fontFamily: "'Caveat', cursive", fontSize: 21, color: "#241c15" }}>No notes added yet</span>
+                                  <div style={{ padding: "2px 0 14px" }}>
+                                    <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, color: "#9a8e80" }}>None recorded</span>
                                   </div>
                                 ) : notes.map((entry) => {
                                   const isEditing = editingJournalId === entry.id;
