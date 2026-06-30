@@ -452,6 +452,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   };
 
   const [editingJournalId, setEditingJournalId] = useState<string | null>(null);
+  // Submission Packages Pro card — collapse preference (so it never dominates for non-Pro users).
+  const [pkgCardCollapsed, setPkgCardCollapsed] = useState(false);
   const [editingJournalText, setEditingJournalText] = useState("");
 
   // States and Handlers for Query Attachment Image Upload & Edit
@@ -2637,26 +2639,49 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                                 {materials.length > 0 ? (
                                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>{materials.map((m, i) => <span key={i} style={pillStyle}>{m}</span>)}</div>
                                 ) : (
-                                  <span role="button" tabIndex={0} onClick={() => openEditQuery(activeQuery.id)} style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 12, color: "#b3a596", cursor: "pointer" }}>Add the materials you sent</span>
+                                  <span role="button" tabIndex={0} onClick={() => openEditQuery(activeQuery.id)} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 12, color: "#2c2017", cursor: "pointer" }}>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M15.5 3.5 7 12a3 3 0 0 0 4.2 4.2l8-8a5 5 0 0 0-7-7l-8.2 8.2a7 7 0 0 0 9.9 9.9l7.3-7.3" /></svg>
+                                    Add the materials you sent
+                                  </span>
                                 )}
                               </div>
-                              {/* Submission package — Pro-gated */}
+                              {/* Submission Packages — attached package details, else the collapsible
+                                  Pro card (slate). Collapsed = a single quiet "[Pro] Do more…" row. */}
                               <div style={{ marginTop: 17 }}>
-                                <div style={{ ...minilabel, display: "block", marginBottom: 8 }}>
-                                  Submission package
-                                  <span style={{ display: "inline-block", fontFamily: FONT_MONO, fontSize: 7, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "#8a6a3e", background: "#f3e7d3", border: "1px solid #e3cfa8", borderRadius: 999, padding: "1px 6px", marginLeft: 6, verticalAlign: "middle" }}>Pro</span>
-                                </div>
                                 {linkedPackage ? (
-                                  <div>
+                                  <>
+                                    <div style={{ ...minilabel, display: "block", marginBottom: 8 }}>
+                                      Submission package
+                                      <span style={{ display: "inline-block", fontFamily: FONT_MONO, fontSize: 7, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "#fff", background: "#6A89A7", border: "1px solid #4f6e8a", borderRadius: 999, padding: "2px 7px", marginLeft: 6, verticalAlign: "middle" }}>Pro</span>
+                                    </div>
                                     <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 600, color: "#241c15", marginBottom: 7 }}>{linkedPackage.packageName}</div>
                                     {pkgComponents.length > 0 && <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>{pkgComponents.map((c, i) => <span key={i} style={pillStyle}>{c}</span>)}</div>}
+                                  </>
+                                ) : pkgCardCollapsed ? (
+                                  <div role="button" tabIndex={0} onClick={() => setPkgCardCollapsed(false)} style={{ display: "flex", alignItems: "center", gap: 9, background: "#fff", border: "1.5px solid #c2d2de", borderRadius: 13, padding: "11px 13px", cursor: "pointer" }}>
+                                    <span style={{ fontFamily: FONT_MONO, fontSize: 7, fontWeight: 500, letterSpacing: ".1em", textTransform: "uppercase" as const, color: "#fff", background: "#6A89A7", border: "1px solid #4f6e8a", borderRadius: 999, padding: "2px 7px" }}>Pro</span>
+                                    <span style={{ fontFamily: FONT_SERIF, fontWeight: 700, fontSize: 13.5, color: "#2c2017" }}>Do more with Packages</span>
+                                    <span style={{ marginLeft: "auto", color: "#6A89A7", display: "flex" }}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg></span>
                                   </div>
                                 ) : (
-                                  <div style={{ display: "flex", gap: 10, alignItems: "flex-start", background: "#f7f1e8", border: "1px dashed #e4d8c2", borderRadius: 9, padding: "11px 13px" }}>
-                                    <span style={{ flexShrink: 0, color: "#b8a37e", marginTop: 1 }}>
-                                      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={1.3}><rect x="3.5" y="7" width="9" height="6.3" rx="1.3" /><path d="M5.6 7V5a2.4 2.4 0 014.8 0v2" /></svg>
-                                    </span>
-                                    <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, lineHeight: 1.5, color: "#9a8a6e" }}>Attach custom packages to submissions and track performance to see which versions are landing best. <a href="#/plans" style={{ color: "#8a6a3e", fontWeight: 500, textDecoration: "none", borderBottom: "1px solid #d8c39a" }}>Available on Pro</a></span>
+                                  <div style={{ position: "relative", background: "#fff", border: "1.5px solid #c2d2de", borderRadius: 13, padding: "15px 14px 14px" }}>
+                                    <button type="button" onClick={() => setPkgCardCollapsed(true)} aria-label="Collapse" style={{ position: "absolute", top: 9, right: 9, width: 24, height: 24, borderRadius: 7, border: "1px solid #d6e0e8", background: "#f4f7fa", color: "#6A89A7", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round"><path d="M6 15l6-6 6 6" /></svg>
+                                    </button>
+                                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 9, fontFamily: FONT_SERIF, fontWeight: 800, fontSize: 15, color: "#2c2017", margin: "2px 0 3px", padding: "0 30px" }}>
+                                      <span style={{ fontFamily: FONT_MONO, fontSize: 7, fontWeight: 500, letterSpacing: ".1em", textTransform: "uppercase" as const, color: "#fff", background: "#6A89A7", border: "1px solid #4f6e8a", borderRadius: 999, padding: "2px 7px" }}>Pro</span>
+                                      Submission Packages
+                                    </div>
+                                    <div style={{ textAlign: "center", fontSize: 11, color: "#6a7a86", marginBottom: 13 }}>Do more with Packages</div>
+                                    <ul style={{ listStyle: "none", margin: "0 0 13px", padding: 0, display: "flex", flexDirection: "column", gap: 7 }}>
+                                      {["Attach a tailored bundle to each agent", "Compare which version lands requests", "Reuse your best pitch in one click"].map((b, i) => (
+                                        <li key={i} style={{ display: "flex", gap: 8, fontSize: 12, lineHeight: 1.35, color: "#4a4030" }}>
+                                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6A89A7" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}><path d="M20 6 9 17l-5-5" /></svg>
+                                          {b}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                    <button type="button" onClick={() => onNavigate?.("plans")} style={{ display: "block", width: "100%", textAlign: "center", fontFamily: FONT_SERIF, fontWeight: 700, fontSize: 13, color: "#fff", background: "#6A89A7", border: "1.5px solid #4f6e8a", borderRadius: 10, padding: 9, cursor: "pointer", boxShadow: "0 3px 0 #4f6e8a" }}>Try now for free</button>
                                   </div>
                                 )}
                               </div>
@@ -2670,7 +2695,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   <div className="qp-card" style={{ minWidth: 0, background: "#fdfaf5", border: `1.5px solid ${qdbBoldInk}`, borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 300, boxShadow: "0 8px 20px rgba(29,23,18,.18)" }}>
                       {/* pink header band */}
                       <div style={{ padding: "12px 16px", textAlign: "center", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", borderBottom: `1.5px solid ${qdbBoldInk}`, flexShrink: 0 }}>
-                        <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 800, color: qdbBoldInk }}>Notes</span>
+                        <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 800, color: qdbBoldInk }}>Journal</span>
                       </div>
                       {/* notes body — list (scrolls) + bottom-pinned composer */}
                       <div style={{ padding: "16px 16px 18px", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
@@ -2683,8 +2708,10 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                             <>
                               <div style={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column", paddingRight: 2 }}>
                                 {notes.length === 0 ? (
-                                  <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                    <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, color: "#9a8e80", border: "1px solid #ddd4c6", borderRadius: 8, padding: "7px 16px" }}>None recorded</span>
+                                  /* ghost first entry — dashed, shaped like a real entry; replaced on first save */
+                                  <div style={{ background: "#fdfbf7", border: "1px dashed #d8cebf", borderRadius: 11, padding: "11px 13px" }}>
+                                    <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: ".06em", textTransform: "uppercase" as const, color: "#bcae9d", marginBottom: 5 }}>Today</div>
+                                    <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 12.5, lineHeight: 1.5, color: "#9a8d7d" }}>Your notes on this agent appear here — first impressions, things they said, anything worth remembering.</div>
                                   </div>
                                 ) : notes.map((entry) => {
                                   const isEditing = editingJournalId === entry.id;
