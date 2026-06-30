@@ -2490,11 +2490,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   .qp-noteact{ width:22px; height:22px; border:none; background:transparent; border-radius:5px; color:#bcae9e; display:flex; align-items:center; justify-content:center; cursor:pointer; }
                   .qp-noteact:hover{ background:#f3ebe0; color:#7c3a2a; }
                   /* column swell on hover */
-                  .qp-card{ transition:transform .2s ease, box-shadow .2s ease; }
-                  .qp-card:hover{ transform:scale(1.02); box-shadow:0 8px 22px rgba(58,28,20,.10); z-index:2; }
+                  .qp-card{ transition:transform .18s ease, box-shadow .18s ease; }
+                  .qp-card:hover{ transform:scale(1.02); box-shadow:0 16px 30px rgba(29,23,18,.24); z-index:2; }
                   /* empty-state "add" pills — dashed, tappable, open the Edit Agent drawer */
-                  .qaddpill{ display:inline-flex; align-items:center; gap:6px; font-family:'Inter',sans-serif; font-size:12px; color:#9a8a78; background:#faf6ef; border:1px dashed #d8ccba; border-radius:999px; padding:6px 13px; cursor:pointer; transition:color .14s, border-color .14s, background .14s; }
-                  .qaddpill:hover{ color:#7c3a2a; border-color:#c9a98c; background:#fbf3ec; }
+                  .qaddpill{ display:inline-flex; align-items:center; gap:6px; font-family:'Inter',sans-serif; font-size:12px; font-weight:500; color:#6a5f54; background:#ffffff; border:1.5px dashed #c2b6a6; border-radius:999px; padding:6px 13px; cursor:pointer; transition:color .14s, border-color .14s, background .14s; }
+                  .qaddpill:hover{ color:#3a5066; border-color:#6A89A7; background:#fff; }
                   .qaddpill svg{ flex-shrink:0; opacity:.85; }
                   @media (prefers-reduced-motion: reduce){ .qp-card:hover{ transform:none; } }
                 `}</style>
@@ -2516,42 +2516,34 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   const mswl = activeAgent.mswlNotes?.trim();
                   const genres = (activeAgent.genres || []).filter(Boolean);
                   return (
-                    <div className="qp-hero" style={{ position: "relative", margin: "16px 22px 5px", padding: "20px 22px 18px", border: `1px solid ${qdbCardLine}`, borderRadius: 11, background: parchment, boxShadow: "0 5px 16px rgba(40,28,20,.12)", textAlign: "center" as const, flexShrink: 0 }}>
-                      {/* status chip — pinned top-right inside the masthead box */}
-                      <div style={{ position: "absolute", top: 14, right: 15, zIndex: 2, display: "inline-flex", alignItems: "center", gap: 7, background: "#ffffff", border: "1px solid #e7ddd0", borderRadius: 999, padding: "5px 13px 5px 6px" }}>
-                        <StatusDot status={activeQuery.status} overrideSize={18} decorative />
-                        <span style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: ".13em", color: burgundy, fontWeight: 600, textTransform: "uppercase" as const, whiteSpace: "nowrap" }}>{statusDisplayLabel(activeQuery)}</span>
-                      </div>
-                      {/* identity — avatar to the LEFT of name/agency, the group centred */}
-                      <div style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 12, textAlign: "left" as const }}>
-                        <span style={{ flexShrink: 0, width: 46, height: 46, borderRadius: "50%", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", border: "1px solid #e8cabb", color: burgundy, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: "'Inter',sans-serif", fontSize: 16, fontWeight: 600, letterSpacing: ".03em" }}>{initials}</span>
-                        <div style={{ minWidth: 0 }}>
-                          <div style={{ fontFamily: FONT_SERIF, fontSize: 31, fontWeight: 600, color: "#2a2017", letterSpacing: ".02em", lineHeight: 1.05 }}>{nameplate}</div>
-                          {hasName && !!activeAgent.agency?.trim() && (
-                            <div style={{ fontFamily: FONT_MONO, fontSize: 11, letterSpacing: ".06em", textTransform: "uppercase" as const, color: "#a89a8a", marginTop: 4 }}>{activeAgent.agency}</div>
+                    <div className="qp-hero" style={{ position: "relative", display: "flex", alignItems: "center", gap: 18, margin: "16px 18px 0", padding: "22px 26px", border: `1.5px solid ${qdbBoldInk}`, borderRadius: 20, background: "#faf5ee", boxShadow: "0 8px 20px rgba(29,23,18,.18)", flexShrink: 0 }}>
+                      {/* avatar — pink band, burgundy initials (agent only; user avatars stay burgundy elsewhere) */}
+                      <span style={{ flexShrink: 0, width: 66, height: 66, borderRadius: "50%", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", border: "1px solid #e8cabb", color: burgundy, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_SERIF, fontSize: 22, fontWeight: 700 }}>{initials}</span>
+                      {/* identity + meta, left-aligned */}
+                      <div style={{ flex: 1, minWidth: 0, paddingRight: 150 }}>
+                        <div style={{ fontFamily: FONT_SERIF, fontSize: 33, fontWeight: 800, color: qdbBoldInk, lineHeight: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{nameplate}</div>
+                        {hasName && !!activeAgent.agency?.trim() && (
+                          <div style={{ fontFamily: FONT_SERIF, fontSize: 17, fontWeight: 600, color: "#4a423a", marginTop: 2 }}>{activeAgent.agency}</div>
+                        )}
+                        <div style={{ marginTop: 9, display: "flex", flexDirection: "column", gap: 8 }}>
+                          {email && (
+                            <div style={{ display: "flex", alignItems: "center", gap: 7, fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 500, color: qdbBoldInk }}>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" style={{ opacity: .85, flexShrink: 0 }}><rect x="2.5" y="4.5" width="19" height="15" rx="2.5" /><path d="M3 6l9 6.5L21 6" /></svg>
+                              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{email}</span>
+                            </div>
                           )}
-                        </div>
-                      </div>
-                      {/* meta — email · MSWL · genres · add-pills, centred beneath the identity */}
-                      <div style={{ margin: "13px auto 0", display: "flex", flexDirection: "column", alignItems: "center", gap: 9 }}>
-                        {email && (
-                          <div style={{ display: "flex", alignItems: "center", gap: 7, fontFamily: "'Inter',sans-serif", fontSize: 12.5, color: burgundy }}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" style={{ opacity: .8, flexShrink: 0 }}><rect x="2.5" y="4.5" width="19" height="15" rx="2.5" /><path d="M3 6l9 6.5L21 6" /></svg>
-                            <span>{email}</span>
-                          </div>
-                        )}
-                        {mswl && (
-                          <div style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 11.5, lineHeight: 1.45, color: "#8a7d6e", maxWidth: 520 }}>“{mswl}”</div>
-                        )}
-                        {genres.length > 0 && (
-                          <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6, justifyContent: "center" }}>
-                            {genres.map((genre, gIdx) => (
-                              <span key={gIdx} style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: ".12em", textTransform: "uppercase" as const, color: "#5a6e58", background: "#fdfaf5", border: "1px solid #cdddc7", borderRadius: 999, padding: "3px 10px" }}>{genre}</span>
-                            ))}
-                          </div>
-                        )}
-                        {(!email || !mswl || genres.length === 0) && (
-                          <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8, justifyContent: "center" }}>
+                          {mswl && (
+                            <div style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 12, lineHeight: 1.45, color: "#5a5048", maxWidth: 560 }}>“{mswl}”</div>
+                          )}
+                          {genres.length > 0 && (
+                            <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6 }}>
+                              {genres.map((genre, gIdx) => (
+                                <span key={gIdx} style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: ".12em", textTransform: "uppercase" as const, color: "#5a6e58", background: "#fdfaf5", border: "1px solid #cdddc7", borderRadius: 999, padding: "3px 10px" }}>{genre}</span>
+                              ))}
+                            </div>
+                          )}
+                          {(!email || !mswl || genres.length === 0) && (
+                          <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8 }}>
                             {!email && (
                               <span role="button" tabIndex={0} onClick={() => openEditAgent(activeAgent.id)} className="qaddpill">
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5" /><path d="M3 6l9 6.5L21 6" /></svg>
@@ -2572,6 +2564,12 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                             )}
                           </div>
                         )}
+                        </div>{/* meta col */}
+                      </div>{/* identity + meta col */}
+                      {/* status chip — top-right bold pill: StatusDot + Playfair label */}
+                      <div style={{ position: "absolute", top: 20, right: 24, display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 17px 8px 9px", borderRadius: 999, background: "#fffefb", border: `1.5px solid ${qdbBoldInk}`, boxShadow: "0 2px 8px rgba(29,23,18,.10)" }}>
+                        <StatusDot status={activeQuery.status} overrideSize={20} decorative />
+                        <span style={{ fontFamily: FONT_SERIF, fontSize: 15, fontWeight: 700, color: qdbBoldInk }}>{statusDisplayLabel(activeQuery)}</span>
                       </div>
                     </div>
                   );
@@ -2579,13 +2577,13 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
                 {/* Columns — equal-height grid (rows size to the tallest column's content; the grid
                     shrinks + the columns scroll internally only when the pane hits its ceiling) */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, padding: "16px 22px 24px", flex: "0 1 auto", minHeight: 0, alignItems: "stretch" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 18, padding: "16px 18px 20px", flex: "0 1 auto", minHeight: 0, alignItems: "stretch" }}>
 
                   {/* ── Sub-card 1: Tracking ── */}
-                  <div className="qp-card" style={{ minWidth: 0, background: "#fdfaf5", border: `1px solid `, borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                  <div className="qp-card" style={{ minWidth: 0, background: "#fdfaf5", border: `1.5px solid ${qdbBoldInk}`, borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 300, boxShadow: "0 8px 20px rgba(29,23,18,.18)" }}>
                       {/* pink header band */}
-                      <div style={{ padding: "9px 16px", textAlign: "center", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", borderBottom: "1px solid #e8cabb", flexShrink: 0 }}>
-                        <span style={{ fontFamily: FONT_SERIF, fontSize: 15.5, fontWeight: 600, color: "#241c15" }}>Tracking</span>
+                      <div style={{ padding: "12px 16px", textAlign: "center", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", borderBottom: `1.5px solid ${qdbBoldInk}`, flexShrink: 0 }}>
+                        <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 800, color: qdbBoldInk }}>Tracking</span>
                       </div>
                       <div style={{ padding: "16px 16px 18px", flex: 1, minHeight: 0, overflowY: "auto" }}>
                         <QueryTimeline query={activeQuery} agent={activeAgent} events={trackingEvents} />
@@ -2593,10 +2591,10 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     </div>{/* ── end sub-card 1: Tracking ── */}
 
                   {/* ── Sub-card 2: What you sent ── */}
-                  <div className="qp-card" style={{ minWidth: 0, background: "#fdfaf5", border: `1px solid `, borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                  <div className="qp-card" style={{ minWidth: 0, background: "#fdfaf5", border: `1.5px solid ${qdbBoldInk}`, borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 300, boxShadow: "0 8px 20px rgba(29,23,18,.18)" }}>
                       {/* pink header band */}
-                      <div style={{ padding: "9px 16px", textAlign: "center", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", borderBottom: "1px solid #e8cabb", flexShrink: 0 }}>
-                        <span style={{ fontFamily: FONT_SERIF, fontSize: 15.5, fontWeight: 600, color: "#241c15" }}>What you sent</span>
+                      <div style={{ padding: "12px 16px", textAlign: "center", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", borderBottom: `1.5px solid ${qdbBoldInk}`, flexShrink: 0 }}>
+                        <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 800, color: qdbBoldInk }}>What you sent</span>
                       </div>
                       {/* spec sheet */}
                       <div style={{ padding: "16px 16px 18px", flex: 1, minHeight: 0, overflowY: "auto" }}>
@@ -2656,10 +2654,10 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     </div>{/* ── end sub-card 2: What you sent ── */}
 
                   {/* ── Sub-card 3: Notes — journal pins to bottom via flex-1 on messages area ── */}
-                  <div className="qp-card" style={{ minWidth: 0, background: "#fdfaf5", border: `1px solid `, borderRadius: 11, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+                  <div className="qp-card" style={{ minWidth: 0, background: "#fdfaf5", border: `1.5px solid ${qdbBoldInk}`, borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 300, boxShadow: "0 8px 20px rgba(29,23,18,.18)" }}>
                       {/* pink header band */}
-                      <div style={{ padding: "9px 16px", textAlign: "center", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", borderBottom: "1px solid #e8cabb", flexShrink: 0 }}>
-                        <span style={{ fontFamily: FONT_SERIF, fontSize: 15.5, fontWeight: 600, color: "#241c15" }}>Notes</span>
+                      <div style={{ padding: "12px 16px", textAlign: "center", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", borderBottom: `1.5px solid ${qdbBoldInk}`, flexShrink: 0 }}>
+                        <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 800, color: qdbBoldInk }}>Notes</span>
                       </div>
                       {/* notes body — list (scrolls) + bottom-pinned composer */}
                       <div style={{ padding: "16px 16px 18px", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
