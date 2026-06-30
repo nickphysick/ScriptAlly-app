@@ -100,7 +100,7 @@ const BinIcon: React.FC = () => (
 
 // ── Small shared bits ─────────────────────────────────────────────────────────────────────────
 const flab: React.CSSProperties = { fontFamily: MONO, fontSize: 7.5, letterSpacing: "0.09em", textTransform: "uppercase", color: C.muted, display: "block", marginBottom: 5 };
-const finBase: React.CSSProperties = { width: "100%", background: "#fff", border: "1px solid #e2d8cc", borderRadius: 7, padding: "7px 9px", fontFamily: "Inter", fontSize: 12, color: "#3a1c14", outline: "none" };
+const finBase: React.CSSProperties = { width: "100%", background: "#fff", border: "1px solid #e2d8cc", borderRadius: 7, padding: "7px 9px", fontFamily: "Source Sans Pro", fontSize: 12, color: "#3a1c14", outline: "none" };
 
 const chipBase: React.CSSProperties = { fontFamily: MONO, fontSize: 8, letterSpacing: "0.03em", padding: "3px 7px", borderRadius: 11, display: "inline-flex", alignItems: "center", gap: 4, whiteSpace: "nowrap" };
 const StateChip: React.FC<{ status: AgentStatus }> = ({ status }) => {
@@ -172,7 +172,7 @@ const KeptTag: React.FC = () => (
 const MergedBar: React.FC<{ removedName: string; keptName: string; n: number }> = ({ removedName, keptName, n }) => (
   <div className="sa-dup-bar" style={{ display: "flex", alignItems: "center", gap: 8, background: C.doneFill, border: "1px solid rgba(90,110,88,0.28)", borderRadius: 9, padding: "7px 11px", marginTop: 7 }}>
     <span style={{ color: "#5a6e58", fontSize: 11, flexShrink: 0 }}>✓</span>
-    <span style={{ fontFamily: "Inter", fontSize: 11.5, color: C.doneInk, lineHeight: 1.3, minWidth: 0 }}>
+    <span style={{ fontFamily: "Source Sans Pro", fontSize: 11.5, color: C.doneInk, lineHeight: 1.3, minWidth: 0 }}>
       <span style={{ textDecoration: "line-through", opacity: 0.7 }}>{removedName}</span>
       {" merged into "}<strong style={{ fontWeight: 600 }}>{keptName}</strong>
       {" — its quer"}{n === 1 ? "y" : "ies"}{" moved across"}
@@ -200,7 +200,7 @@ const DupControl: React.FC<{ members: ReviewAgent[]; queryCount: (id: string) =>
         </div>
       );
     })}
-    <div style={{ fontFamily: "Inter", fontSize: 10, color: "#9a7a6a", lineHeight: 1.35, margin: "6px 0 2px" }}>
+    <div style={{ fontFamily: "Source Sans Pro", fontSize: 10, color: "#9a7a6a", lineHeight: 1.35, margin: "6px 0 2px" }}>
       Remove whichever is the duplicate and its queries move onto the agent you keep — nothing is lost.
     </div>
     <button
@@ -338,7 +338,7 @@ const AgentRow: React.FC<AgentRowProps> = ({
           {/* Missing agency */}
           {invalid && (
             <>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "Inter", fontSize: 12.5, color: "#9a5040", marginBottom: 11 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "Source Sans Pro", fontSize: 12.5, color: "#9a5040", marginBottom: 11 }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a85a44" strokeWidth="1.8" strokeLinecap="round" style={{ flexShrink: 0 }}><path d="M12 8v5"/><circle cx="12" cy="16.5" r=".4" fill="#a85a44" stroke="none"/><path d="M12 3l9 16H3z"/></svg>
                 No agency yet — add it to sharpen this record, or carry on without one. Nothing's lost.
               </div>
@@ -372,7 +372,7 @@ const AgentRow: React.FC<AgentRowProps> = ({
           {/* Suspected duplicate */}
           {openDupReason && clusterPeers && (
             <>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "Inter", fontSize: 12.5, color: "#9a5040", marginBottom: 11 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "Source Sans Pro", fontSize: 12.5, color: "#9a5040", marginBottom: 11 }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a85a44" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><rect x="4" y="4" width="13" height="13" rx="2"/><path d="M9 9h11v11H9z" fill="#fdf3ee"/><rect x="9" y="9" width="11" height="11" rx="2"/></svg>
                 Suspected duplicate of{" "}
                 <b style={{ color: "#7c3a2a", fontWeight: 500 }}>{clusterPeers.map((p) => p.name || p.agency).join(", ")}</b>.
@@ -393,7 +393,7 @@ const AgentRow: React.FC<AgentRowProps> = ({
           {/* Mapping note (low-confidence / flag) */}
           {openMappingReason && (
             <>
-              <div style={{ fontFamily: "Inter", fontSize: 12.5, color: "#9a5040", marginBottom: 11 }}>{quoteStatuses(openMappingReason.note)}</div>
+              <div style={{ fontFamily: "Source Sans Pro", fontSize: 12.5, color: "#9a5040", marginBottom: 11 }}>{quoteStatuses(openMappingReason.note)}</div>
               <button onClick={() => onResolveReason("mapping")} style={ghostMini}
                 onMouseEnter={(e) => { e.currentTarget.style.color = "#7c3a2a"; e.currentTarget.style.borderColor = "#9a5040"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.color = "#8a8178"; e.currentTarget.style.borderColor = "#e3ccc0"; }}
@@ -410,7 +410,7 @@ const AgentRow: React.FC<AgentRowProps> = ({
 // Flat list row. A query is "Ready" when it carries no open reason; otherwise it shows one inline
 // panel per typed reason (stacked), each with the catalogue copy + the right input. Copy is derived
 // from the reason code (queryReasonText) so it stays consistent run-to-run.
-const reasonStripStyle: React.CSSProperties = { display: "flex", alignItems: "flex-start", gap: 8, fontFamily: "Inter", fontSize: 12.5, color: "#9a5040", marginBottom: 11, lineHeight: 1.5, maxWidth: 560 };
+const reasonStripStyle: React.CSSProperties = { display: "flex", alignItems: "flex-start", gap: 8, fontFamily: "Source Sans Pro", fontSize: 12.5, color: "#9a5040", marginBottom: 11, lineHeight: 1.5, maxWidth: 560 };
 const dateBoxStyle: React.CSSProperties = { fontFamily: MONO, fontSize: 12.5, padding: "9px 13px", border: "1px solid #e3ccc0", borderRadius: 9, background: "#fff", minWidth: 180, color: "#2a2521", outline: "none" };
 const ReasonIcon = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#b5654a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4m0 4h.01"/></svg>
@@ -563,7 +563,7 @@ const AgentFixPanel: React.FC<{ agent: ReviewAgent; onPatch: (p: Partial<ReviewA
       </div>
       <div style={{ display: "flex", gap: 9, marginTop: 14, maxWidth: 560 }}>
         <input type="text" value={v} onChange={(e) => setV(e.target.value)} placeholder="Agency name (if you have it)" aria-label="Agency name"
-          style={{ flex: 1, fontFamily: "Inter", fontSize: 13, padding: "10px 13px", border: "1px solid #e7ddd2", borderRadius: 9, background: "#fff", color: "#3a1c14", outline: "none" }}
+          style={{ flex: 1, fontFamily: "Source Sans Pro", fontSize: 13, padding: "10px 13px", border: "1px solid #e7ddd2", borderRadius: 9, background: "#fff", color: "#3a1c14", outline: "none" }}
           onFocus={(e) => { e.currentTarget.style.borderColor = "#9a5040"; }} onBlur={(e) => { e.currentTarget.style.borderColor = "#e7ddd2"; }} />
         <button onClick={() => { const t = v.trim(); if (t) onPatch({ agency: t }); }}
           style={{ fontFamily: MONO, fontSize: 12.5, padding: "10px 16px", borderRadius: 9, border: "1px solid #e7ddd2", background: "#fff", color: C.muted, cursor: "pointer" }}
@@ -750,7 +750,7 @@ const FocusOverlay: React.FC<{
                       <span style={{ fontFamily: MONO, fontSize: 12, color: C.muted, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{h.who}</span>
                     </div>
                     <div className="sa-focus-reveal sa-fr2" style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 20, color: "#5a6e58", lineHeight: 1.3, marginBottom: 8 }}>All sorted</div>
-                    <p className="sa-focus-reveal sa-fr3" style={{ fontFamily: "Inter", fontSize: 13.5, color: "#5a4a3e", lineHeight: 1.55, margin: "0 0 16px", maxWidth: 470 }}>{h.resolved?.line ?? "You've reviewed this one."}</p>
+                    <p className="sa-focus-reveal sa-fr3" style={{ fontFamily: "Source Sans Pro", fontSize: 13.5, color: "#5a4a3e", lineHeight: 1.55, margin: "0 0 16px", maxWidth: 470 }}>{h.resolved?.line ?? "You've reviewed this one."}</p>
                     <button className="sa-focus-reveal sa-fr3" onClick={() => h.resolved?.onChange()}
                       style={{ fontFamily: MONO, fontSize: 12.5, color: "#7c3a2a", background: "#f7efe9", border: "1px solid #e8d8cf", borderRadius: 9, padding: "9px 15px", cursor: "pointer" }}
                       onMouseEnter={(e) => { e.currentTarget.style.background = "#f0d3c7"; }} onMouseLeave={(e) => { e.currentTarget.style.background = "#f7efe9"; }}>↩ Change this</button>
@@ -1359,7 +1359,7 @@ const DeadBox: React.FC<{ query: ReviewQuery; agentName: string }> = ({ query, a
 
 // ── Gentle-undo toast (the instant "oops" affordance) + Set-aside tray (the recoverable shelf) ────
 const UndoToast: React.FC<{ msg: string; onUndo: () => void; onClose: () => void }> = ({ msg, onUndo, onClose }) => (
-  <div role="status" style={{ position: "fixed", left: "50%", bottom: 28, transform: "translateX(-50%)", zIndex: 80, display: "flex", alignItems: "center", gap: 14, background: "#2e2018", color: "#f3e9e0", borderRadius: 11, padding: "11px 14px 11px 18px", boxShadow: "0 14px 34px -12px rgba(58,28,20,.5)", fontFamily: "Inter,sans-serif", fontSize: 13 }}>
+  <div role="status" style={{ position: "fixed", left: "50%", bottom: 28, transform: "translateX(-50%)", zIndex: 80, display: "flex", alignItems: "center", gap: 14, background: "#2e2018", color: "#f3e9e0", borderRadius: 11, padding: "11px 14px 11px 18px", boxShadow: "0 14px 34px -12px rgba(58,28,20,.5)", fontFamily: "Source Sans Pro,sans-serif", fontSize: 13 }}>
     <span>{msg}</span>
     <button onClick={onUndo} style={{ fontFamily: MONO, fontSize: 12, fontWeight: 600, color: "#e8b9a6", background: "none", border: "none", cursor: "pointer", padding: 0 }}>Undo</button>
     <button onClick={onClose} aria-label="Dismiss" style={{ background: "none", border: "none", color: "#9a8c80", cursor: "pointer", fontSize: 16, lineHeight: 1, padding: 0 }}>×</button>
@@ -1384,7 +1384,7 @@ const SetAsideTray: React.FC<{ items: SetAsideItem[]; onRestore: (kind: "agent" 
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontFamily: SERIF, fontSize: 13.5, color: "#8a8076", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{it.name}</div>
                 <div style={{ fontFamily: MONO, fontSize: 9.5, color: "#ada093", marginTop: 1 }}>{it.sub}</div>
-                {it.context && <div style={{ fontFamily: "Inter", fontSize: 11.5, fontStyle: "italic", color: "#9a8c80", marginTop: 3, whiteSpace: "normal" }}>Your note said “{it.context}” — no problem, set aside for now. Name them any time if a reply lands.</div>}
+                {it.context && <div style={{ fontFamily: "Source Sans Pro", fontSize: 11.5, fontStyle: "italic", color: "#9a8c80", marginTop: 3, whiteSpace: "normal" }}>Your note said “{it.context}” — no problem, set aside for now. Name them any time if a reply lands.</div>}
               </div>
               <button onClick={() => onRestore(it.kind, it.id)} style={{ fontFamily: MONO, fontSize: 11, color: "#5a6e58", background: "#e9ede6", border: "1px solid #cdd8ca", borderRadius: 7, padding: "6px 11px", cursor: "pointer", flexShrink: 0 }}>{it.unidentified ? "Name it instead" : "Restore"}</button>
             </div>
@@ -1867,7 +1867,7 @@ const REVIEW_SHELL_CSS = `
  *  `fit` sizes the window to its content and centres it (for the short overview); without it the
  *  window fills the viewport for the scrolling review screens. */
 export const ReviewShell: React.FC<{ userInitial: string; allClear: boolean; fit?: boolean; modal?: React.ReactNode; children: React.ReactNode }> = ({ userInitial, allClear, fit, modal, children }) => (
-  <div className="sa-rv-root" style={{ fontFamily: "Inter, sans-serif", color: "#2a2521" }}>
+  <div className="sa-rv-root" style={{ fontFamily: "Source Sans Pro, sans-serif", color: "#2a2521" }}>
     <style>{REVIEW_SHELL_CSS}</style>
     {modal}
     <OnbNav userInitial={userInitial} />
@@ -2655,7 +2655,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
 
             {/* Commit-error banner */}
             {error && (
-              <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#fdecea", border: "1px solid #e6b6a8", borderRadius: 9, padding: "10px 13px", fontFamily: "Inter", fontSize: 12, color: C.invalid, marginBottom: 14 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#fdecea", border: "1px solid #e6b6a8", borderRadius: 9, padding: "10px 13px", fontFamily: "Source Sans Pro", fontSize: 12, color: C.invalid, marginBottom: 14 }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.invalid} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
                 {error}
               </div>
@@ -2665,7 +2665,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
             <RecordsCard>
               {agentRows.length > 0
                 ? agentRows
-                : <div style={{ padding: "32px 22px", fontFamily: "Inter", fontSize: 13, color: "#9c8878", textAlign: "center" }}>No agents to review.</div>}
+                : <div style={{ padding: "32px 22px", fontFamily: "Source Sans Pro", fontSize: 13, color: "#9c8878", textAlign: "center" }}>No agents to review.</div>}
             </RecordsCard>
 
             {/* Scoped to this page — agent set-asides only, so they don't bleed onto the queries page. */}
@@ -2800,7 +2800,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
 
             {/* Commit-error banner */}
             {error && (
-              <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#fdecea", border: "1px solid #e6b6a8", borderRadius: 9, padding: "10px 13px", fontFamily: "Inter", fontSize: 12, color: C.invalid, marginBottom: 14 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#fdecea", border: "1px solid #e6b6a8", borderRadius: 9, padding: "10px 13px", fontFamily: "Source Sans Pro", fontSize: 12, color: C.invalid, marginBottom: 14 }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.invalid} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
                 {error}
               </div>
@@ -2819,7 +2819,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
                       onSwapDates={() => swapQueryDates(q.id)}
                     />
                   ))
-                : <div style={{ padding: "32px 22px", fontFamily: "Inter", fontSize: 13, color: "#9c8878", textAlign: "center" }}>No queries to review.</div>}
+                : <div style={{ padding: "32px 22px", fontFamily: "Source Sans Pro", fontSize: 13, color: "#9c8878", textAlign: "center" }}>No queries to review.</div>}
             </RecordsCard>
 
             {/* Scoped to this page — query set-asides only; agent set-asides stay on the agents page. */}
@@ -2910,7 +2910,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
 
           {/* Commit-error banner */}
           {error && (
-            <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#fdecea", border: "1px solid #e6b6a8", borderRadius: 9, padding: "10px 13px", fontFamily: "Inter", fontSize: 12, color: C.invalid, marginBottom: 14 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, background: "#fdecea", border: "1px solid #e6b6a8", borderRadius: 9, padding: "10px 13px", fontFamily: "Source Sans Pro", fontSize: 12, color: C.invalid, marginBottom: 14 }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.invalid} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><circle cx="12" cy="12" r="9" /><path d="M12 8v4M12 16h.01" /></svg>
               {error}
             </div>
@@ -2969,7 +2969,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
               units.sort((a, b) => a.sort - b.sort);
               return units.length
                 ? units.map((u) => u.node)
-                : <div style={{ padding: "32px 22px", fontFamily: "Inter", fontSize: 13, color: "#9c8878", textAlign: "center" }}>No duplicates to review.</div>;
+                : <div style={{ padding: "32px 22px", fontFamily: "Source Sans Pro", fontSize: 13, color: "#9c8878", textAlign: "center" }}>No duplicates to review.</div>;
             })()}
           </RecordsCard>
 

@@ -661,7 +661,7 @@ const EditQueryStyles: React.FC = () => (
     .eq-change:hover{color:#7c3a2a;}
     .eq-reassign{background:#fdf6f0;border:1px solid #ecd9c6;border-radius:10px;padding:11px 12px;margin-bottom:14px;}
     .eq-reassign-h{font-size:11.5px;color:#7a5c48;font-weight:500;margin-bottom:8px;}
-    .eq-reassign-input{width:100%;font-family:'Inter',sans-serif;font-size:12.5px;color:#3a1c14;background:#fffdf9;border:1px solid #ece2d4;border-radius:8px;padding:8px 11px;outline:none;}
+    .eq-reassign-input{width:100%;font-family:'Source Sans Pro',sans-serif;font-size:12.5px;color:#3a1c14;background:#fffdf9;border:1px solid #ece2d4;border-radius:8px;padding:8px 11px;outline:none;}
     .eq-reassign-input:focus{border-color:#8a9e88;}
     .eq-reassign-list{display:flex;flex-direction:column;gap:2px;margin-top:7px;max-height:180px;overflow-y:auto;}
     .eq-reassign-row{display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;background:#fffdf9;border:1px solid #f0e7da;border-radius:8px;padding:7px 10px;cursor:pointer;}
@@ -670,14 +670,14 @@ const EditQueryStyles: React.FC = () => (
     .eq-reassign-agency{font-size:10.5px;color:#a89a8a;}
     .eq-reassign-empty{font-size:11.5px;color:#a89a8a;font-style:italic;padding:6px 2px;}
     .eq-matpills{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-top:2px;}
-    .eq-matpill{display:inline-flex;align-items:center;gap:5px;background:#ece3d6;border:1px solid transparent;color:#6a5b4c;border-radius:999px;font-family:'Inter',sans-serif;font-size:11px;font-weight:500;padding:4px 9px 4px 11px;}
+    .eq-matpill{display:inline-flex;align-items:center;gap:5px;background:#ece3d6;border:1px solid transparent;color:#6a5b4c;border-radius:999px;font-family:'Source Sans Pro',sans-serif;font-size:11px;font-weight:500;padding:4px 9px 4px 11px;}
     .eq-matx{background:transparent;border:none;color:#ab9a85;opacity:.6;cursor:pointer;font-size:10px;line-height:1;padding:0;}
     .eq-matpill:hover .eq-matx{opacity:1;} .eq-matx:hover{color:#7c3a2a;opacity:1;}
-    .eq-matadd{border:1px dashed #ddd0bf;color:#b9aa99;border-radius:999px;font-family:'Inter',sans-serif;font-size:11px;font-weight:500;padding:4px 11px;background:transparent;cursor:pointer;}
+    .eq-matadd{border:1px dashed #ddd0bf;color:#b9aa99;border-radius:999px;font-family:'Source Sans Pro',sans-serif;font-size:11px;font-weight:500;padding:4px 11px;background:transparent;cursor:pointer;}
     .eq-matadd:hover{border-color:#7c3a2a;color:#7c3a2a;}
-    .eq-matinput{font-family:'Inter',sans-serif;font-size:11.5px;color:#3a1c14;background:#fffdf9;border:1px solid #ece2d4;border-radius:999px;padding:4px 11px;outline:none;min-width:140px;}
+    .eq-matinput{font-family:'Source Sans Pro',sans-serif;font-size:11.5px;color:#3a1c14;background:#fffdf9;border:1px solid #ece2d4;border-radius:999px;padding:4px 11px;outline:none;min-width:140px;}
     .eq-matinput:focus{border-color:#8a9e88;}
-    .eq-datefield{margin-top:2px;width:100%;min-height:38px;font-family:'Inter',sans-serif;font-size:12.5px;color:#3a1c14;background:#fffdf9;border:1px solid #ece2d4;border-radius:8px;padding:8px 11px;outline:none;box-sizing:border-box;}
+    .eq-datefield{margin-top:2px;width:100%;min-height:38px;font-family:'Source Sans Pro',sans-serif;font-size:12.5px;color:#3a1c14;background:#fffdf9;border:1px solid #ece2d4;border-radius:8px;padding:8px 11px;outline:none;box-sizing:border-box;}
     .eq-datefield:focus{border-color:#8a9e88;}
     .eq-pkglinked{margin-top:7px;font-size:11.5px;color:#6a5b4c;background:#f3ecdf;border:1px solid #e6d8c8;border-radius:8px;padding:8px 11px;}
     .eq-display{position:relative;min-height:38px;display:flex;align-items:center;gap:8px;padding:8px 11px;background:#fffdf9;border:1px solid #ece2d4;border-radius:8px;margin-top:2px;}
@@ -709,7 +709,7 @@ const EditQueryStyles: React.FC = () => (
     .eq-fork-q{font-size:11.5px;color:#7a5c48;margin-bottom:8px;font-weight:500;}
     .eq-fork-row{display:flex;flex-wrap:wrap;gap:7px;align-items:center;}
     .eq-fork-fields{display:flex;gap:7px;margin-bottom:8px;}
-    .eq-fork-select,.eq-fork-date{flex:1;min-width:0;font-family:'Inter',sans-serif;font-size:12px;color:#3a1c14;background:#fffdf9;border:1px solid #ece2d4;border-radius:7px;padding:6px 8px;outline:none;}
+    .eq-fork-select,.eq-fork-date{flex:1;min-width:0;font-family:'Source Sans Pro',sans-serif;font-size:12px;color:#3a1c14;background:#fffdf9;border:1px solid #ece2d4;border-radius:7px;padding:6px 8px;outline:none;}
     .eq-fork-select:focus,.eq-fork-date:focus{border-color:#8a9e88;}
     .eq-fork-btn{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.03em;text-transform:uppercase;background:#fff;border:1px solid #e3d7c9;border-radius:7px;color:#6a5b4c;cursor:pointer;padding:7px 10px;}
     .eq-fork-btn:hover{border-color:#7c3a2a;color:#7c3a2a;}
@@ -730,13 +730,13 @@ const EditQueryStyles: React.FC = () => (
     .eq-note-btn{background:transparent;border:none;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.03em;text-transform:uppercase;color:#bcae9e;cursor:pointer;padding:0;}
     .eq-note-btn:hover{color:#7c3a2a;} .eq-note-btn.del:hover{color:#a83a2a;}
     .eq-note-text{font-size:12px;color:#3a1c14;line-height:1.5;white-space:pre-wrap;}
-    .eq-note-edit{width:100%;font-family:'Inter',sans-serif;font-size:12px;color:#3a1c14;background:#fff;border:1px solid #e0d5c8;border-radius:7px;padding:7px 9px;outline:none;resize:vertical;min-height:48px;}
+    .eq-note-edit{width:100%;font-family:'Source Sans Pro',sans-serif;font-size:12px;color:#3a1c14;background:#fff;border:1px solid #e0d5c8;border-radius:7px;padding:7px 9px;outline:none;resize:vertical;min-height:48px;}
     .eq-note-edit:focus{border-color:#8a9e88;}
     .eq-note-editrow{display:flex;gap:7px;margin-top:6px;}
     .eq-note-save{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.04em;text-transform:uppercase;background:#7c3a2a;color:#f8f5f0;border:none;border-radius:6px;cursor:pointer;padding:5px 11px;}
     .eq-note-cancel{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.04em;text-transform:uppercase;background:transparent;border:none;color:#a89a8a;cursor:pointer;}
     .eq-journal-add{display:flex;flex-direction:column;gap:7px;}
-    .eq-journal-input{width:100%;font-family:'Inter',sans-serif;font-size:12px;color:#3a1c14;background:#fffdf9;border:1px solid #ece2d4;border-radius:9px;padding:9px 11px;outline:none;resize:vertical;min-height:46px;}
+    .eq-journal-input{width:100%;font-family:'Source Sans Pro',sans-serif;font-size:12px;color:#3a1c14;background:#fffdf9;border:1px solid #ece2d4;border-radius:9px;padding:9px 11px;outline:none;resize:vertical;min-height:46px;}
     .eq-journal-input:focus{border-color:#8a9e88;}
     .eq-journal-btn{align-self:flex-start;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.04em;text-transform:uppercase;background:#7c3a2a;color:#f8f5f0;border:none;border-radius:7px;cursor:pointer;padding:7px 14px;}
     .eq-journal-btn:hover{background:#5e2b1f;} .eq-journal-btn:disabled{background:#efe6da;color:#bcae9e;cursor:not-allowed;}

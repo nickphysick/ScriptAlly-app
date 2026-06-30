@@ -34,7 +34,7 @@ const C = {
   hairline: "#e7ddd2",
 };
 const FONT_SERIF = "'Playfair Display', Georgia, serif";
-const FONT_SANS = "'Inter', system-ui, sans-serif";
+const FONT_SANS = "'Source Sans Pro', system-ui, sans-serif";
 const FONT_MONO = "'JetBrains Mono', monospace";
 const FONT_HAND = "'Caveat', cursive";
 

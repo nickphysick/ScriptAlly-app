@@ -24,8 +24,8 @@ export const FONT_PACKAGES: FontPackage[] = [
     id: "editorial-classic",
     name: "Editorial Classic",
     displayFont: "Playfair Display",
-    bodyFont: "Inter",
-    importUrl: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+    bodyFont: "Source Sans Pro",
+    importUrl: "https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&display=swap"
   },
   {
     id: "contemporary-prose",
@@ -185,7 +185,7 @@ export const BrandProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     // 1. Dynamic Font Link Loading
     const headingFontName = customHeadingFont || FONT_PACKAGES.find(p => p.id === fontPackageId)?.displayFont || "Playfair Display";
-    const bodyFontName = customBodyFont || FONT_PACKAGES.find(p => p.id === fontPackageId)?.bodyFont || "Inter";
+    const bodyFontName = customBodyFont || FONT_PACKAGES.find(p => p.id === fontPackageId)?.bodyFont || "Source Sans Pro";
 
     const fetchFontsLink = () => {
       const activePkg = FONT_PACKAGES.find(p => p.id === fontPackageId);

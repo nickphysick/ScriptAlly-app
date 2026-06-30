@@ -67,7 +67,7 @@ export const ImportingLoader: React.FC<ImportingLoaderProps> = ({ complete, onPr
   return (
     // Full-viewport (fixed) so it escapes the narrow onboarding column wrapper and renders at the
     // same full-width scale as the review screens: cream ground, full-width nav, centred stage.
-    <div style={{ position: "fixed", inset: 0, zIndex: 50, background: "#f2ede7", display: "flex", flexDirection: "column", overflow: "hidden", fontFamily: "Inter, sans-serif", color: "#2a2521" }}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 50, background: "#f2ede7", display: "flex", flexDirection: "column", overflow: "hidden", fontFamily: "Source Sans Pro, sans-serif", color: "#2a2521" }}>
       <style>{`
         @keyframes saLdrBreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
         @keyframes saLdrPing{0%{transform:scale(.85);opacity:.55}80%{opacity:0}100%{transform:scale(1.95);opacity:0}}

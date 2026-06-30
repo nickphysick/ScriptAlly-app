@@ -5,7 +5,7 @@
  * only a form's header text, corner motif, fields, and button label vary.
  *
  * Classes are namespaced `sa-` to avoid collisions with the app's Tailwind utilities.
- * Fonts (Playfair Display / Inter / JetBrains Mono) are referenced explicitly so the shell
+ * Fonts (Playfair Display / Source Sans Pro / JetBrains Mono) are referenced explicitly so the shell
  * is faithful regardless of the surrounding app's font config (links live in index.html).
  */
 
@@ -35,7 +35,7 @@
   box-shadow: 0 1px 2px rgba(58, 28, 20, 0.06), 0 6px 24px rgba(58, 28, 20, 0.1);
   /* faint paper grain */
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.03'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
-  font-family: 'Inter', sans-serif;
+  font-family: 'Source Sans Pro', sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 /* inset burgundy mount */
@@ -112,7 +112,7 @@
   color: #2e3a2c;
 }
 .sa-subline {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Source Sans Pro', sans-serif;
   font-size: 11px; font-weight: 300;
   color: #6a7e68;
   margin-top: 1px;
@@ -162,7 +162,7 @@
   border-radius: 9px;
   padding: 10px 13px;
   margin-bottom: 14px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Source Sans Pro', sans-serif;
   font-size: 13px;
   color: #3a1c14;
   box-shadow: inset 0 1px 2px rgba(58, 28, 20, 0.03);
@@ -199,7 +199,7 @@
 .sa-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
 .sa-chip {
   cursor: pointer;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Source Sans Pro', sans-serif;
   font-size: 12.5px;
   color: #6a5045;
   background: #ffffff;
@@ -226,7 +226,7 @@
 }
 .sa-mat-row-label {
   flex: 0 0 84px;
-  font-family: 'Inter', sans-serif; font-size: 12px; color: #7c3a2a; font-weight: 500;
+  font-family: 'Source Sans Pro', sans-serif; font-size: 12px; color: #7c3a2a; font-weight: 500;
 }
 .sa-mat-row .sa-dd { flex: 1; min-width: 0; }
 .sa-mat-row .sa-field { margin-bottom: 0; padding: 8px 11px; }
@@ -288,11 +288,11 @@
 }
 .sa-ag-meta { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.2; }
 .sa-ag-name {
-  font-family: 'Inter', sans-serif; font-size: 13px; color: #3a1c14; font-weight: 500;
+  font-family: 'Source Sans Pro', sans-serif; font-size: 13px; color: #3a1c14; font-weight: 500;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .sa-ag-agency {
-  font-family: 'Inter', sans-serif; font-size: 10.5px; color: #a08070;
+  font-family: 'Source Sans Pro', sans-serif; font-size: 10.5px; color: #a08070;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .sa-ag-stars { flex-shrink: 0; font-size: 10px; color: #c99a4e; letter-spacing: -1px; }
@@ -304,7 +304,7 @@
 .sa-ag-tag.q { background: #f5e2da; color: #7c3a2a; }
 .sa-ag-tag.nq { background: #f1ede7; color: #b0a193; }
 .sa-ag-empty {
-  font-family: 'Inter', sans-serif; font-size: 12.5px; color: #a08070; font-style: italic;
+  font-family: 'Source Sans Pro', sans-serif; font-size: 12.5px; color: #a08070; font-style: italic;
   padding: 12px 10px; text-align: center;
 }
 .sa-ag-empty-add {
@@ -319,7 +319,7 @@
 .sa-ag-addlink {
   cursor: pointer; display: block; text-align: left;
   background: none; border: 0; padding: 0; margin: 0 0 14px;
-  font-family: 'Inter', sans-serif; font-size: 11.5px; color: #a08070;
+  font-family: 'Source Sans Pro', sans-serif; font-size: 11.5px; color: #a08070;
 }
 .sa-ag-addlink span { color: #7c3a2a; font-weight: 500; text-decoration: underline; }
 .sa-ag-addlink:hover span { color: #5a2a1e; }
@@ -350,13 +350,13 @@
 .sa-qa-add:hover { background: #efd5ca; border-color: #d8a89a; }
 .sa-qa-add:disabled { opacity: 0.55; cursor: not-allowed; }
 .sa-qa-note {
-  font-family: 'Inter', sans-serif; font-size: 10.5px; font-style: italic; color: #a08070;
+  font-family: 'Source Sans Pro', sans-serif; font-size: 10.5px; font-style: italic; color: #a08070;
   margin-top: 9px; line-height: 1.35;
 }
 
 /* "Response expected by" readout (Log a Query) — surfaces the single deadline calc */
 .sa-expect {
-  font-family: 'Inter', sans-serif; font-size: 12px; color: #6a5045;
+  font-family: 'Source Sans Pro', sans-serif; font-size: 12px; color: #6a5045;
   background: #fbf6f0; border: 0.5px solid #ece0d4; border-radius: 9px;
   padding: 9px 12px; margin-bottom: 14px;
 }
@@ -371,7 +371,7 @@
 
 /* inline form error */
 .sa-error {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Source Sans Pro', sans-serif;
   font-size: 12px;
   color: #a0392a;
   margin: -4px 0 12px;
@@ -444,7 +444,7 @@
 .sa-dp-day {
   aspect-ratio: 1;
   display: flex; align-items: center; justify-content: center;
-  font-family: 'Inter', sans-serif; font-size: 12px;
+  font-family: 'Source Sans Pro', sans-serif; font-size: 12px;
   color: #3a1c14;
   border-radius: 7px;
   cursor: pointer;
@@ -505,7 +505,7 @@
 .sa-discard { margin-top: 10px; text-align: center; animation: sa-popIn 0.15s ease; }
 .sa-discard-msg {
   display: block;
-  font-family: 'Inter', sans-serif; font-size: 12.5px; color: #6a5045;
+  font-family: 'Source Sans Pro', sans-serif; font-size: 12.5px; color: #6a5045;
   margin-bottom: 10px;
 }
 .sa-discard-actions { display: flex; justify-content: center; gap: 8px; }
@@ -560,7 +560,7 @@
 
 /* "optional" / helper suffix on a label */
 .sa-label .sa-opt {
-  font-family: 'Inter', sans-serif; font-style: italic;
+  font-family: 'Source Sans Pro', sans-serif; font-style: italic;
   text-transform: none; letter-spacing: 0; color: #c9a89e; font-size: 11px;
 }
 
@@ -660,7 +660,7 @@
 .sa-aa-gchip button:hover { color: #7c3a2a; }
 .sa-aa-combo-in {
   flex: 1; min-width: 96px; border: none; outline: none; background: transparent;
-  font-family: 'Inter', sans-serif; font-size: 13px; color: #3a1c14; padding: 4px;
+  font-family: 'Source Sans Pro', sans-serif; font-size: 13px; color: #3a1c14; padding: 4px;
 }
 .sa-aa-combo-in::placeholder { color: #c8b8a8; }
 .sa-aa-combo-menu {
@@ -738,7 +738,7 @@
   display: block;
   width: 100%;
   text-align: right;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Source Sans Pro', sans-serif;
   font-size: 11px; color: #9c8878;
   text-decoration: underline; text-underline-offset: 2px;
   cursor: pointer;
@@ -750,7 +750,7 @@
 .sa-notspec-link:hover { color: #7c3a2a; }
 .sa-notspec-badge {
   display: inline-flex; align-items: center; gap: 5px;
-  font-family: 'Inter', sans-serif; font-size: 11.5px; color: #9c8878;
+  font-family: 'Source Sans Pro', sans-serif; font-size: 11.5px; color: #9c8878;
   margin-bottom: 6px;
 }
 .sa-notspec-badge button {
@@ -762,7 +762,7 @@
 .sa-chip-row { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
 .sa-chip {
   cursor: pointer; padding: 7px 12px;
-  font-family: 'Inter', sans-serif; font-size: 11.5px; font-weight: 500;
+  font-family: 'Source Sans Pro', sans-serif; font-size: 11.5px; font-weight: 500;
   border-radius: 20px;
   border: 0.5px solid #e0d5c8;
   background: #fff; color: #6a5045;
@@ -773,13 +773,13 @@
 .sa-chip.active { background: #7c3a2a; border-color: #7c3a2a; color: #f5ede8; }
 .sa-chip.active:hover { background: #5a2a1e; }
 .sa-muted-note {
-  font-family: 'Inter', sans-serif; font-size: 11.5px;
+  font-family: 'Source Sans Pro', sans-serif; font-size: 11.5px;
   color: #a08070; font-style: italic; margin-bottom: 14px; line-height: 1.4;
 }
 .sa-yn-row { display: flex; gap: 8px; margin-bottom: 14px; }
 .sa-yn-btn {
   flex: 1; padding: 9px; text-align: center;
-  font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500;
+  font-family: 'Source Sans Pro', sans-serif; font-size: 12px; font-weight: 500;
   border: 0.5px solid #e0d5c8; border-radius: 10px;
   background: #fff; color: #6a5045; cursor: pointer; transition: all 0.15s;
 }
@@ -787,7 +787,7 @@
 .sa-yn-btn.yes.active { background: #5a6e58; border-color: #5a6e58; color: #fff; }
 .sa-yn-btn.no.active  { background: #e8e8e8; border-color: #b0b0b0; color: #444; }
 .sa-quiet-note {
-  font-family: 'Inter', sans-serif; font-size: 11px;
+  font-family: 'Source Sans Pro', sans-serif; font-size: 11px;
   color: #a08070; margin-bottom: 14px; line-height: 1.45;
 }
 .sa-backward-confirm {
@@ -795,7 +795,7 @@
   padding: 12px 14px; margin-bottom: 14px;
 }
 .sa-backward-confirm p {
-  font-family: 'Inter', sans-serif; font-size: 12.5px; color: #5a3010;
+  font-family: 'Source Sans Pro', sans-serif; font-size: 12.5px; color: #5a3010;
   line-height: 1.45; margin-bottom: 10px;
 }
 .sa-backward-confirm-actions { display: flex; gap: 8px; }

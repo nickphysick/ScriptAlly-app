@@ -19,7 +19,7 @@ import { getStatusDescription } from "./StatusPill";
 const SIZES = [12, 16, 20, 30];
 
 const FONT_SERIF = "'Playfair Display', Georgia, serif";
-const FONT_SANS = "'Inter', system-ui, sans-serif";
+const FONT_SANS = "'Source Sans Pro', system-ui, sans-serif";
 const FONT_MONO = "'JetBrains Mono', 'Fira Mono', monospace";
 
 /** The three surfaces a dot must read against (per the design spec). */
