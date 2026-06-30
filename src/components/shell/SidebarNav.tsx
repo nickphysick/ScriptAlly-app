@@ -12,8 +12,8 @@
  */
 import React from "react";
 import { LayoutGrid, Send, Users, Book } from "lucide-react";
-import { FONT_SERIF, FONT_SANS, burgundy, bodyInk } from "../../lib/designTokens";
-import { chromeWhite, navBorder, linkRest, pinkActive, pinkHover, inkShell } from "./shellTokens";
+import { FONT_SERIF, burgundy, bodyInk } from "../../lib/designTokens";
+import { navBorder, pinkHover, inkShell } from "./shellTokens";
 
 interface NavItem {
   tab: string;
@@ -48,21 +48,24 @@ const NavRow: React.FC<{ item: NavItem; active: boolean; onClick: () => void }> 
         display: "flex",
         alignItems: "center",
         gap: 11,
-        fontFamily: FONT_SANS,
-        fontSize: 15,
-        fontWeight: active ? 700 : 600,
-        color: active ? burgundy : linkRest,
-        background: active ? pinkActive : "transparent",
-        border: "none",
-        borderRadius: 9,
-        padding: "9px 11px",
+        fontFamily: FONT_SERIF,
+        fontSize: 16,
+        fontWeight: 600,
+        color: active ? inkShell : "#5a5048",
+        // Active = pink accent chip + ink border + soft shadow; inactive keeps a transparent border
+        // of the same width so the box doesn't jump between states.
+        background: active ? "#f5c7c2" : "transparent",
+        border: active ? "1.5px solid #1d1712" : "1.5px solid transparent",
+        boxShadow: active ? "0 2px 8px rgba(29,23,18,.10)" : "none",
+        borderRadius: 11,
+        padding: "9px 13px",
         cursor: "pointer",
         width: "100%",
         textAlign: "left",
         transition: "background 0.14s, color 0.14s",
       }}
       onMouseEnter={(e) => { if (!active) { e.currentTarget.style.background = pinkHover; e.currentTarget.style.color = bodyInk; } }}
-      onMouseLeave={(e) => { if (!active) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = linkRest; } }}
+      onMouseLeave={(e) => { if (!active) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#5a5048"; } }}
     >
       <Icon style={{ width: 17, height: 17, flexShrink: 0 }} />
       {label}
@@ -75,9 +78,9 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ activeTab, onNavigate, c
     style={{
       width: 300, // +33% from the prior 226 (mockup widened the rail); content reflows, no restyle
       flexShrink: 0,
-      background: chromeWhite,
-      // Thin grey right edge, matching the top strip's bottom border (desk-scoped: rail renders here).
-      borderRight: "1px solid #d6cfc4",
+      background: "#faf5ee",
+      // Bold rail: cream field with a heavy ink right border (desk-scoped: rail renders only here).
+      borderRight: "1.5px solid #1d1712",
       display: "flex",
       flexDirection: "column",
       padding: "18px 14px 14px",
@@ -90,8 +93,8 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ activeTab, onNavigate, c
       onClick={() => onNavigate("dashboard")}
       style={{
         fontFamily: FONT_SERIF,
-        fontWeight: 600,
-        fontSize: 22,
+        fontWeight: 800,
+        fontSize: 24,
         color: inkShell,
         letterSpacing: "-0.01em",
         padding: "2px 8px 16px",

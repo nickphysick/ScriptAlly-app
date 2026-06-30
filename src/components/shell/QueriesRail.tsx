@@ -15,7 +15,7 @@ import { Book, ChevronDown, ChevronRight } from "lucide-react";
 import { Query, Manuscript, QueryStatus } from "../../types";
 import { StatusDot } from "../StatusDot";
 import { FONT_MONO, FONT_SANS, burgundy, bodyInk } from "../../lib/designTokens";
-import { cardCream, navBorder, pinkHover, sageTint, sageDark, mutedShell, inkShell } from "./shellTokens";
+import { pinkHover, sageDark, mutedShell, inkShell } from "./shellTokens";
 
 const ACTIVE: { id: QueryStatus; label: string }[] = [
   { id: QueryStatus.QUERIED, label: "Queried" },
@@ -90,14 +90,16 @@ export const QueriesRail: React.FC<QueriesRailProps> = ({
     justifyContent: "space-between",
     width: "100%",
     padding: "6px 9px",
-    borderRadius: 7,
-    border: "none",
+    borderRadius: 9,
+    // Bold: active filter = white with a heavy ink border; inactive keeps a transparent border
+    // of equal width so the row doesn't shift between states.
+    border: on ? "1.5px solid #1d1712" : "1.5px solid transparent",
     cursor: "pointer",
     fontFamily: FONT_SANS,
     fontSize: 12.5,
-    fontWeight: on ? 500 : 400,
+    fontWeight: on ? 600 : 500,
     color: on ? inkShell : bodyInk,
-    background: on ? sageTint : "transparent",
+    background: on ? "#ffffff" : "transparent",
     transition: "background 0.13s",
     textAlign: "left",
   });
@@ -120,8 +122,8 @@ export const QueriesRail: React.FC<QueriesRailProps> = ({
               fontSize: 12.5,
               fontWeight: 500,
               color: bodyInk,
-              background: cardCream,
-              border: `0.5px solid ${navBorder}`,
+              background: "#ffffff",
+              border: "1.5px solid #1d1712",
               borderRadius: 9,
               padding: "9px 30px 9px 33px",
               cursor: "pointer",
@@ -138,7 +140,7 @@ export const QueriesRail: React.FC<QueriesRailProps> = ({
           <ChevronDown style={{ width: 13, height: 13, color: mutedShell, position: "absolute", right: 11, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
         </div>
       ) : (
-        <div style={{ display: "flex", alignItems: "center", gap: 9, fontFamily: FONT_SANS, fontSize: 12.5, color: bodyInk, background: cardCream, border: `0.5px solid ${navBorder}`, borderRadius: 9, padding: "9px 11px", marginBottom: 14 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 9, fontFamily: FONT_SANS, fontSize: 12.5, color: bodyInk, background: "#ffffff", border: "1.5px solid #1d1712", borderRadius: 9, padding: "9px 11px", marginBottom: 14 }}>
           <Book style={{ width: 15, height: 15, color: burgundy, flexShrink: 0 }} />
           <span style={{ flex: 1, fontWeight: 500 }}>{manuscripts.length === 1 ? manuscripts[0].title : "All manuscripts"}</span>
         </div>
@@ -217,8 +219,8 @@ export const QueriesRail: React.FC<QueriesRailProps> = ({
               fontFamily: FONT_SANS,
               fontSize: 12,
               color: bodyInk,
-              background: cardCream,
-              border: `0.5px solid ${navBorder}`,
+              background: "#ffffff",
+              border: "1.5px solid #1d1712",
               borderRadius: 8,
               padding: "7px 28px 7px 10px",
               cursor: "pointer",
