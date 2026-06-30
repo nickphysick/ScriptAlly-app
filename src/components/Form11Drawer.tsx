@@ -349,11 +349,11 @@ export const Form11Styles: React.FC = () => (
     .f11-fval.errval{color:#a83a2a;}
     .f11-hint{flex-shrink:0;display:flex;align-items:center;color:#cdbeae;opacity:0;transition:opacity .14s;}
     .f11-editable:hover .f11-hint,.f11-editable:focus-visible .f11-hint{opacity:1;}
-    .f11-inp{width:100%;background:#fff;border:1px solid #e0d5c8;border-radius:8px;padding:8px 11px;font-size:12.5px;color:#3a1c14;font-family:'Inter',sans-serif;outline:none;margin-top:2px;min-height:38px;}
+    .f11-inp{width:100%;background:#fff;border:1px solid #e0d5c8;border-radius:8px;padding:8px 11px;font-size:12.5px;color:#3a1c14;font-family:'Source Sans Pro',sans-serif;outline:none;margin-top:2px;min-height:38px;}
     .f11-inp:focus{border-color:#8a9e88;box-shadow:0 0 0 3px rgba(138,158,136,0.12);}
     .f11-inp.bad{border-color:#e6bdb0;box-shadow:0 0 0 3px rgba(168,58,42,0.10);}
     /* always-visible native select */
-    .f11-select{margin-top:2px;width:100%;min-height:38px;-webkit-appearance:none;appearance:none;padding:8px 30px 8px 11px;font-size:12.5px;color:#3a1c14;font-family:'Inter',sans-serif;background-color:#fffdf9;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%237c3a2a' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");background-repeat:no-repeat;background-position:right 10px center;border:1px solid #ece2d4;border-radius:8px;cursor:pointer;outline:none;transition:border-color .14s,background-color .14s;}
+    .f11-select{margin-top:2px;width:100%;min-height:38px;-webkit-appearance:none;appearance:none;padding:8px 30px 8px 11px;font-size:12.5px;color:#3a1c14;font-family:'Source Sans Pro',sans-serif;background-color:#fffdf9;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%237c3a2a' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");background-repeat:no-repeat;background-position:right 10px center;border:1px solid #ece2d4;border-radius:8px;cursor:pointer;outline:none;transition:border-color .14s,background-color .14s;}
     .f11-select:hover{border-color:#d8c9b6;background-color:#fffefb;}
     .f11-select:focus{border-color:#8a9e88;box-shadow:0 0 0 3px rgba(138,158,136,0.16);}
     .f11-select.ph{color:#b9aa99;}

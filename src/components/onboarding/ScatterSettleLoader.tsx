@@ -237,7 +237,7 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
   const txt = allShownResolved ? "ready — here's what we found" : settling ? "Tidying records…" : slow ? SLOW_TXT : WAIT_TXT[txtIdx];
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 50, background: "#fbf7f1", display: "flex", flexDirection: "column", overflow: "hidden", fontFamily: "Inter, sans-serif", color: "#3a1c14", backgroundImage: "repeating-linear-gradient(to bottom,transparent 0,transparent 33px,rgba(124,58,42,.022) 33px,rgba(124,58,42,.022) 34px)" }}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 50, background: "#fbf7f1", display: "flex", flexDirection: "column", overflow: "hidden", fontFamily: "Source Sans Pro, sans-serif", color: "#3a1c14", backgroundImage: "repeating-linear-gradient(to bottom,transparent 0,transparent 33px,rgba(124,58,42,.022) 33px,rgba(124,58,42,.022) 34px)" }}>
       <style>{`
         @keyframes saScAppear{from{opacity:0}to{opacity:1}}
         @keyframes saScPop{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.14)}100%{transform:scale(1);opacity:1}}
@@ -282,7 +282,7 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
                 {rows.map(([label, val], k) => (
                   <div key={k} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: k === 0 ? 6 : 0 }}>
                     <span style={{ fontFamily: MONO, fontSize: 8, color: "#a89a8c", width: 50, flexShrink: 0, textTransform: "uppercase", letterSpacing: ".04em" }}>{label}</span>
-                    <span style={{ flex: 1, minWidth: 0, fontFamily: "Inter", fontSize: 11, color: "#5a4a3e", background: "#f6f1ea", border: "1px solid #ece1d4", borderRadius: 6, padding: "4px 8px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{val}</span>
+                    <span style={{ flex: 1, minWidth: 0, fontFamily: "Source Sans Pro", fontSize: 11, color: "#5a4a3e", background: "#f6f1ea", border: "1px solid #ece1d4", borderRadius: 6, padding: "4px 8px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{val}</span>
                   </div>
                 ))}
               </div>
@@ -331,7 +331,7 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
                     </span>
                     <div style={{ minWidth: 0 }}>
                       <div style={{ fontFamily: SERIF, fontSize: 14, fontWeight: 600, lineHeight: 1.1, color: "#3a1c14", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{card.name || "—"}</div>
-                      <div style={{ fontFamily: "Inter", fontSize: 11, color: "#9a8c80", marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{card.agency || ""}</div>
+                      <div style={{ fontFamily: "Source Sans Pro", fontSize: 11, color: "#9a8c80", marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{card.agency || ""}</div>
                     </div>
                   </div>
                 </SheenWave>

@@ -9,7 +9,7 @@
 import React from "react";
 
 const FONT_SERIF = "'Playfair Display', Georgia, serif";
-const FONT_SANS = "'Inter', system-ui, sans-serif";
+const FONT_SANS = "'Source Sans Pro', system-ui, sans-serif";
 const FONT_MONO = "'JetBrains Mono', 'Fira Mono', monospace";
 
 const PAPER_TEXTURE =

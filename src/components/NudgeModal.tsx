@@ -85,7 +85,7 @@ export const NudgeModal: React.FC<NudgeModalProps> = ({
       onClose={onClose}
       dirty={note.trim().length > 0}
     >
-      <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, lineHeight: 1.5, color: "#5a4034", marginBottom: 16 }}>
+      <p style={{ fontFamily: "'Source Sans Pro', sans-serif", fontSize: 13, lineHeight: 1.5, color: "#5a4034", marginBottom: 16 }}>
         {sentence}
       </p>
 
