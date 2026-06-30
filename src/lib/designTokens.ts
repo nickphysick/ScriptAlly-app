@@ -28,6 +28,36 @@ export const qdbDeskSurface = "#faf7f1"; // desk container fill (warm cream)
 export const qdbDeskFrame = "#b8b1a4"; // desk frame — thin grey outline, all sides
 export const qdbMasthead = "#ffffff"; // agent masthead — raised white card
 export const qdbCardLine = "#ddd4c6"; // list / pane / column / masthead hairline
+
+/* ── Query Database "bold theme" palette (qdb-bold-theme mockup) ──────────
+   Route-scoped to Queries.tsx / QueryTimeline.tsx ONLY — a bolder language
+   (cool blue-grey desk, slate-bordered white cards, heavy Playfair, ink
+   outlines, chunky radii). Do NOT consume these outside the Query DB route. */
+export const qdbBoldDesk = "#c3cfdb"; // working-pane ("desk") background — cool blue-grey
+export const qdbBoldSlate = "#6A89A7"; // list/pane card border + Pro slate badge/button
+export const qdbBoldInk = "#1d1712"; // strongest ink (outlines, headings)
+export const qdbBoldInk2 = "#2c2017"; // secondary ink (body)
+export const qdbBoldParchment = "#fdfaf5"; // column card surface
+export const qdbBoldPinkBand = "#f5c7c2"; // column band header fill
+export const qdbBoldBurgundy = "#7c3a2a"; // outgoing direction / burgundy ink
+export const qdbBoldSage = "#8a9e88"; // incoming direction / sage
+export const qdbBoldDarkSage = "#5a6e58"; // sage text
+export const qdbBoldSageTint = "#e9ede6"; // sage tint fill
+export const qdbBoldMuted = "#7d7268"; // muted text
+export const qdbBoldBtnPink = "#f5e2da"; // soft-pink button fill (Mark sent)
+export const qdbBoldBtnPinkBd = "#e8c8bc"; // soft-pink button border
+export const qdbBoldSel = "#f9ddd8"; // selected list-row fill
+export const qdbBoldSelBd = "#f1d2cc"; // selected list-row border
+// Direction colours — the bold theme OWNS the hex; StatusDot.statusDirection() owns the
+// classification, so spine + dot read the same fact ("out" | "in" | "closed").
+export const qdbBoldDirOut = "#7c3a2a"; // outgoing — burgundy
+export const qdbBoldDirIn = "#8a9e88"; // incoming — sage
+export const qdbBoldDirClosed = "#9b8c7a"; // closed — warm grey
+// Soft drop shadows (mockup --sh-card / --sh-btn / --sh-row).
+export const qdbBoldShadowCard = "0 8px 20px rgba(29,23,18,.18)";
+export const qdbBoldShadowBtn = "0 4px 11px rgba(29,23,18,.20)";
+export const qdbBoldShadowRow = "0 2px 8px rgba(29,23,18,.10)";
+
 export const burgundy = "#7c3a2a"; // primary
 export const deepBurgundy = "#6b3023"; // hover / darker
 export const bodyInk = "#3a1c14";

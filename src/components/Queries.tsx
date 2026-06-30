@@ -46,7 +46,8 @@ import { ScriptAllyLogo } from "./ScriptAllyLogo";
 import {
   kraft, parchment, PAPER_TEXTURE,
   burgundy, FONT_SERIF, FONT_MONO, mountShadow, labelColor,
-  qdbDeskSurface, qdbDeskFrame, qdbCardLine, statusSageFill,
+  qdbCardLine, statusSageFill,
+  qdbBoldDesk, qdbBoldSlate,
 } from "../lib/designTokens";
 
 const normalizeStatus = (status: string | QueryStatus): QueryStatus => {
@@ -2082,15 +2083,13 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           .qrow.sel::before{ content:""; position:absolute; left:0; top:7px; bottom:7px; width:3px; border-radius:0 3px 3px 0; background:#1a1510; }
           @media (prefers-reduced-motion: reduce){ .qrow.sel{ transform:none; } }
         `}</style>
-        {/* Worktable — ONE encompassing frame wrapping the action bar + list + pane on a warm cream
-            surface, so the list and pane read as white cards resting inside it. The frame is now a
-            uniform thin sage outline (no heavier top rail, no glint) per the approved mockup. The
-            sidebar + breadcrumb stay outside (the shell chrome). The action bar is INSIDE the frame —
-            to make it a page-level toolbar instead, lift it above .qdesk. */}
-        <div style={{ padding: 18, flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
-          <div className="qdesk" style={{ position: "relative", flex: 1, minHeight: 0, display: "flex", flexDirection: "column", border: `1.5px solid ${qdbDeskFrame}`, borderRadius: 14, background: qdbDeskSurface, overflow: "hidden", boxShadow: "0 1px 3px rgba(40,28,20,.08), 0 16px 40px rgba(40,28,20,.12)" }}>
-            {/* deskpad — the warm working surface inside the frame */}
-            <div style={{ padding: 18, flex: 1, minHeight: 0, display: "flex", flexDirection: "column", gap: 12 }}>
+        {/* Desk (bold theme) — a cool blue-grey working panel (no border, chunky radius, soft
+            shadow) on which the list + reading-pane sit as slate-bordered white cards. The action
+            bar lives inside it. Sidebar + breadcrumb stay outside (shell chrome, untouched). */}
+        <div style={{ padding: "8px 8px 16px", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+          <div className="qdesk" style={{ position: "relative", flex: 1, minHeight: 0, display: "flex", flexDirection: "column", border: "none", borderRadius: 26, background: qdbBoldDesk, overflow: "hidden", boxShadow: "0 8px 22px rgba(29,23,18,.10)" }}>
+            {/* deskpad — the blue-grey working surface */}
+            <div style={{ padding: 20, flex: 1, minHeight: 0, display: "flex", flexDirection: "column", gap: 16 }}>
 
         {/* ── Control bar — search (list-pane width) over the list · actions over the reading pane ── */}
         {(() => {
@@ -2202,8 +2201,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         {/* ── Content grid: 360px list + 1fr reading pane (inside the deskpad) ── */}
         <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 18, alignItems: "stretch", flex: 1, minHeight: 0 }}>
 
-          {/* List card — paper on the cream well: white, hairline outline, soft shadow */}
-          <div style={{ background: "#fff", border: `1px solid ${qdbCardLine}`, borderRadius: 14, overflow: "hidden", boxShadow: "0 1px 2px rgba(58,28,20,.05), 0 6px 18px rgba(58,28,20,.06)", minHeight: 0, display: "flex", flexDirection: "column" }}>
+          {/* List card (bold theme) — white, slate outline, chunky radius */}
+          <div style={{ background: "#ffffff", border: `1px solid ${qdbBoldSlate}`, borderRadius: 22, overflow: "hidden", boxShadow: "0 5px 16px rgba(29,23,18,.07)", minHeight: 0, display: "flex", flexDirection: "column" }}>
 
               {/* List head row */}
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px", borderBottom: "1px solid #f0e8db", flexShrink: 0 }}>
@@ -2465,7 +2464,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
               outward to the encompassing .qdesk). Internals are untouched. Height stays content-driven:
               alignSelf:start lets the pane hug its tallest column's content (capped at the well
               height), the columns scroll internally past that — no stretch-to-fill. */}
-          <div className="qp-pane" style={{ position: "relative", alignSelf: "start", maxHeight: "100%", border: `1px solid ${qdbCardLine}`, borderRadius: 14, background: "#ffffff", boxShadow: "0 1px 2px rgba(58,28,20,.05), 0 6px 18px rgba(58,28,20,.07)", overflow: "hidden", minHeight: 0, display: "flex", flexDirection: "column" }}>
+          <div className="qp-pane" style={{ position: "relative", alignSelf: "start", maxHeight: "100%", border: `1px solid ${qdbBoldSlate}`, borderRadius: 22, background: "#ffffff", boxShadow: "0 5px 16px rgba(29,23,18,.07)", overflow: "hidden", minHeight: 0, display: "flex", flexDirection: "column" }}>
             <div style={{ display: "contents" }}>
             {activeQuery && activeAgent && activeMs ? (
               <>
