@@ -75,6 +75,30 @@ const STATUS_DOT_MAP: Record<QueryStatus, DotSpec> = {
   [QueryStatus.NO_RESPONSE]: { base: "#C2B6A4", glyph: "ellipsis", pulse: false },
 };
 
+/**
+ * Pure, additive classification — NOT a render path. Maps a status to its pipeline *direction*
+ * so consumers (e.g. the Query DB list spine) can colour by the same fact the dot already shows,
+ * and the two can never disagree. The dot owns the glyph/base; the caller owns the direction hex.
+ *   out    — writer-side / outgoing (Queried, Partial Sent, Full Sent, Offer)
+ *   in     — agent request / incoming (Partial Requested, Full Requested, Revise & Resubmit)
+ *   closed — terminal (Rejected, Withdrawn, No Response, and any unknown)
+ */
+export const statusDirection = (status: QueryStatus | string): "out" | "in" | "closed" => {
+  switch (normalizeStatus(status)) {
+    case QueryStatus.QUERIED:
+    case QueryStatus.PARTIAL_SENT:
+    case QueryStatus.FULL_SENT:
+    case QueryStatus.OFFER:
+      return "out";
+    case QueryStatus.PARTIAL_REQUESTED:
+    case QueryStatus.FULL_REQUESTED:
+    case QueryStatus.REVISE_RESUBMIT:
+      return "in";
+    default:
+      return "closed";
+  }
+};
+
 /** Surfaces the base colour is mixed against to derive fill (parchment) and glyph (ink). */
 const PARCHMENT = "#fdf9f5";
 const INK = "#3a322c";

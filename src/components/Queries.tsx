@@ -30,7 +30,7 @@ import {
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { QueryStatus, Agent, Manuscript, Query, SubmissionMethod, ActivityType, QueryMaterial } from "../types";
 import { StatusPill, getStatusLabel } from "./StatusPill";
-import { StatusDot } from "./StatusDot";
+import { StatusDot, statusDirection } from "./StatusDot";
 import { RecordResponseModal } from "./RecordResponseModal";
 import { RecordResponseFocusForm } from "./RecordResponseFocusForm";
 import { recordQueryResponse } from "../lib/recordResponse";
@@ -46,8 +46,9 @@ import { ScriptAllyLogo } from "./ScriptAllyLogo";
 import {
   kraft, parchment, PAPER_TEXTURE,
   burgundy, FONT_SERIF, FONT_MONO, mountShadow, labelColor,
-  qdbCardLine, statusSageFill,
-  qdbBoldDesk, qdbBoldSlate,
+  qdbCardLine,
+  qdbBoldDesk, qdbBoldSlate, qdbBoldInk, qdbBoldInk2, qdbBoldMuted,
+  qdbBoldDirOut, qdbBoldDirIn, qdbBoldDirClosed,
 } from "../lib/designTokens";
 
 const normalizeStatus = (status: string | QueryStatus): QueryStatus => {
@@ -2073,15 +2074,14 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         {/* ── The desk — control bar over a list card + reading pane on the shell's cream well.
             (The legacy black .qdesk frame + rail/glint is retired; the chrome frame is the shell.) ── */}
         <style>{`
-          /* list rows — hairline dividers between rows; the selected row lifts off as a clean card
-             sage fill, shadow, slight translate, BLACK left bar) with its own divider hidden. Hover
-             sits flat on the same sage; the selected row is the raised one with the black bar. */
-          .qrow{ position:relative; padding:12px 15px; cursor:pointer; border-bottom:1px solid #eee3d5; transition:background .14s ease, box-shadow .15s ease, transform .15s ease; }
-          .qrow:last-child{ border-bottom:none; }
-          .qrow:hover:not(.sel){ background:${statusSageFill}; }
-          .qrow.sel{ background:${statusSageFill}; border-bottom-color:transparent; border-radius:9px; box-shadow:0 6px 16px rgba(40,28,20,.14); transform:translateX(3px); z-index:3; }
-          .qrow.sel::before{ content:""; position:absolute; left:0; top:7px; bottom:7px; width:3px; border-radius:0 3px 3px 0; background:#1a1510; }
-          @media (prefers-reduced-motion: reduce){ .qrow.sel{ transform:none; } }
+          /* list rows (bold theme) — soft lift-cards with a 5px direction spine (--spine set per
+             row from statusDirection). Hover + selected both lift; selected fills soft-pink. */
+          .qrow{ position:relative; overflow:hidden; margin:0 2px 7px; padding:11px 14px 11px 18px; background:#ffffff; border:1px solid #e7ddd0; border-radius:13px; box-shadow:0 1px 5px rgba(29,23,18,.11); cursor:pointer; transition:transform .14s ease, box-shadow .14s ease, background .14s ease, border-color .14s ease; }
+          .qrow:last-child{ margin-bottom:2px; }
+          .qrow::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:5px; background:var(--spine,#7c3a2a); }
+          .qrow:hover:not(.sel){ transform:translateY(-2px); box-shadow:0 9px 18px rgba(29,23,18,.16); }
+          .qrow.sel{ background:#f9ddd8; border-color:#f1d2cc; transform:translateY(-2px); box-shadow:0 10px 20px rgba(29,23,18,.20); }
+          @media (prefers-reduced-motion: reduce){ .qrow:hover, .qrow.sel{ transform:none; } }
         `}</style>
         {/* Desk (bold theme) — a cool blue-grey working panel (no border, chunky radius, soft
             shadow) on which the list + reading-pane sit as slate-bordered white cards. The action
@@ -2201,21 +2201,33 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         {/* ── Content grid: 360px list + 1fr reading pane (inside the deskpad) ── */}
         <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 18, alignItems: "stretch", flex: 1, minHeight: 0 }}>
 
-          {/* List card (bold theme) — white, slate outline, chunky radius */}
-          <div style={{ background: "#ffffff", border: `1px solid ${qdbBoldSlate}`, borderRadius: 22, overflow: "hidden", boxShadow: "0 5px 16px rgba(29,23,18,.07)", minHeight: 0, display: "flex", flexDirection: "column" }}>
+          {/* List card (bold theme) — white, slate outline, chunky radius; a padded flex column
+              holding the cream header pill above the gapped row-cards */}
+          <div style={{ background: "#ffffff", border: `1px solid ${qdbBoldSlate}`, borderRadius: 22, overflow: "hidden", boxShadow: "0 5px 16px rgba(29,23,18,.07)", minHeight: 0, display: "flex", flexDirection: "column", padding: 13, gap: 7 }}>
 
-              {/* List head row */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px", borderBottom: "1px solid #f0e8db", flexShrink: 0 }}>
-                <span style={{ fontFamily: FONT_SERIF, fontSize: 16, fontWeight: 600, color: "#2e3a2c" }}>
+              {/* List head — thin cream pill: count (Playfair) + Sort / Export mono icon-buttons */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 15px", background: "#faf5ee", border: `1.5px solid ${qdbBoldInk}`, borderRadius: 12, boxShadow: "0 2px 8px rgba(29,23,18,.10)", flexShrink: 0 }}>
+                <span style={{ fontFamily: FONT_SERIF, fontSize: 18, fontWeight: 800, color: qdbBoldInk }}>
                   {sortedList.length} {sortedList.length === 1 ? "query" : "queries"}
                 </span>
-                <button
-                  onClick={handleExportFilteredCSV}
-                  style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "transparent", border: "none", cursor: "pointer", fontFamily: FONT_MONO, fontSize: 9, letterSpacing: ".05em", textTransform: "uppercase", color: burgundy, opacity: 0.72 }}
-                >
-                  <Download className="w-3 h-3" />
-                  Export these as CSV
-                </button>
+                <div style={{ display: "flex", gap: 14 }}>
+                  <button
+                    type="button"
+                    onClick={() => setSortOption(sortOption === "Newest first" ? "Oldest first" : "Newest first")}
+                    style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "transparent", border: "none", cursor: "pointer", fontFamily: FONT_MONO, fontSize: 10, fontWeight: 600, letterSpacing: ".03em", textTransform: "uppercase" as const, color: qdbBoldInk2 }}
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M7 12h10M10 18h4" /></svg>
+                    Sort
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleExportFilteredCSV}
+                    style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "transparent", border: "none", cursor: "pointer", fontFamily: FONT_MONO, fontSize: 10, fontWeight: 600, letterSpacing: ".03em", textTransform: "uppercase" as const, color: qdbBoldInk2 }}
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14" /></svg>
+                    Export
+                  </button>
+                </div>
               </div>
 
               {/* Scroll area + scroll-aware edge fades — overlays fade in only when there is content
@@ -2261,7 +2273,6 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 if (!agent || !ms) return null;
 
                 const isSelected = selectedQueryId === q.id;
-                const isClosed = [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE].includes(q.status);
                 
                 // Queried date — bare, quiet "14 Mar" (UK day-month); the year shows only when it
                 // isn't the current year ("30 Jun 2024"). No "Queried" label; it sits in the corner.
@@ -2276,22 +2287,27 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   </div>
                 ) : (
                   <span style={{ display: "inline-flex", flexShrink: 0 }}>
-                    <StatusDot status={q.status} />
+                    <StatusDot status={q.status} overrideSize={22} />
                   </span>
                 );
+
+                // 5px direction spine — colour from statusDirection so it can never disagree with the dot.
+                const dir = statusDirection(q.status);
+                const spineColor = dir === "out" ? qdbBoldDirOut : dir === "in" ? qdbBoldDirIn : qdbBoldDirClosed;
 
                 return (
                   <div
                     key={q.id}
                     id={`query-row-${q.id}`}
                     onClick={() => setSelectedQueryId(q.id)}
-                    className={`qrow flex flex-col ${isSelected ? "sel" : ""} ${isClosed ? "opacity-60" : ""}`}
+                    className={`qrow ${isSelected ? "sel" : ""}`}
+                    style={{ ["--spine" as any]: spineColor }}
                   >
                     {/* Line 1: agent name (Playfair) left, StatusDot top-right */}
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 6 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
                       <h4 style={{
-                        fontFamily: FONT_SERIF, fontSize: 17, fontWeight: 500,
-                        color: "#2a2017", lineHeight: 1.2,
+                        fontFamily: FONT_SERIF, fontSize: 17, fontWeight: 700,
+                        color: qdbBoldInk, lineHeight: 1.05, margin: 0,
                         overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                         flex: 1, minWidth: 0,
                       }}>
@@ -2300,12 +2316,12 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                       {statusChip}
                     </div>
 
-                    {/* Line 2: agency (mono caps, muted) left · bare queried date pinned bottom-right */}
+                    {/* Line 2: agency (mono caps, muted) left · date sent pinned bottom-right */}
                     <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 8, marginTop: 7 }}>
-                      <span style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: ".04em", textTransform: "uppercase" as const, color: "#a89a8a", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, minWidth: 0 }}>
+                      <span style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: ".05em", textTransform: "uppercase" as const, color: qdbBoldMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, minWidth: 0 }}>
                         {agentAgencyLine(agent)}
                       </span>
-                      <span style={{ fontFamily: FONT_MONO, fontSize: 9, color: "#bcae9e", flexShrink: 0, whiteSpace: "nowrap" }}>
+                      <span style={{ fontFamily: FONT_MONO, fontSize: 9, fontWeight: 600, color: "#8a8076", flexShrink: 0, whiteSpace: "nowrap" }}>
                         {queriedDate}
                       </span>
                     </div>
