@@ -30,7 +30,7 @@ import {
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { QueryStatus, Agent, Manuscript, Query, SubmissionMethod, ActivityType, QueryMaterial } from "../types";
 import { StatusPill, getStatusLabel } from "./StatusPill";
-import { StatusDot, statusDirection } from "./StatusDot";
+import { StatusDot } from "./StatusDot";
 import { RecordResponseModal } from "./RecordResponseModal";
 import { RecordResponseFocusForm } from "./RecordResponseFocusForm";
 import { recordQueryResponse } from "../lib/recordResponse";
@@ -47,8 +47,7 @@ import {
   kraft, parchment, PAPER_TEXTURE,
   burgundy, FONT_SERIF, FONT_MONO, mountShadow, labelColor,
   qdbCardLine,
-  qdbBoldDesk, qdbBoldSlate, qdbBoldInk, qdbBoldInk2, qdbBoldMuted,
-  qdbBoldDirOut, qdbBoldDirIn, qdbBoldDirClosed,
+  qdbBoldDesk, qdbBoldInk, qdbBoldInk2, qdbBoldMuted,
 } from "../lib/designTokens";
 
 const normalizeStatus = (status: string | QueryStatus): QueryStatus => {
@@ -2076,14 +2075,12 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         {/* ── The desk — control bar over a list card + reading pane on the shell's cream well.
             (The legacy black .qdesk frame + rail/glint is retired; the chrome frame is the shell.) ── */}
         <style>{`
-          /* list rows (bold theme) — soft lift-cards with a 5px direction spine (--spine set per
-             row from statusDirection). Hover + selected both lift; selected fills soft-pink. */
-          .qrow{ position:relative; overflow:hidden; margin:0 2px 7px; padding:11px 14px 11px 18px; background:#ffffff; border:1px solid #e7ddd0; border-radius:13px; box-shadow:0 1px 5px rgba(29,23,18,.11); cursor:pointer; transition:transform .14s ease, box-shadow .14s ease, background .14s ease, border-color .14s ease; }
-          .qrow:last-child{ margin-bottom:2px; }
-          .qrow::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:5px; background:var(--spine,#7c3a2a); }
-          .qrow:hover:not(.sel){ transform:translateY(-2px); box-shadow:0 9px 18px rgba(29,23,18,.16); }
-          .qrow.sel{ background:#f9ddd8; border-color:#f1d2cc; transform:translateY(-2px); box-shadow:0 10px 20px rgba(29,23,18,.20); }
-          @media (prefers-reduced-motion: reduce){ .qrow:hover, .qrow.sel{ transform:none; } }
+          /* list rows (ledger + monogram, Design A) — hairline-divided, no card/border/spine/lift.
+             Selected = muted warm fill (not pink); hover = faint warm tint. */
+          .qrow{ position:relative; padding:12px 15px; cursor:pointer; border-bottom:1px solid #ece3d6; transition:background .14s ease; }
+          .qrow:last-child{ border-bottom:none; }
+          .qrow:hover:not(.sel){ background:#faf6f0; }
+          .qrow.sel{ background:#f1e7dd; }
         `}</style>
         {/* Desk (bold theme) — a cool blue-grey working panel (no border, chunky radius, soft
             shadow) on which the list + reading-pane sit as slate-bordered white cards. The action
@@ -2203,12 +2200,12 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         {/* ── Content grid: 360px list + 1fr reading pane (inside the deskpad) ── */}
         <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 18, alignItems: "stretch", flex: 1, minHeight: 0 }}>
 
-          {/* List card (bold theme) — white, slate outline, chunky radius; a padded flex column
-              holding the cream header pill above the gapped row-cards */}
-          <div style={{ background: "#ffffff", border: `1px solid ${qdbBoldSlate}`, borderRadius: 22, overflow: "hidden", boxShadow: "0 5px 16px rgba(29,23,18,.07)", minHeight: 0, display: "flex", flexDirection: "column", padding: 13, gap: 7 }}>
+          {/* List card (ledger) — white, NO border, soft shadow matching the pane; a flush flex
+              column: plain header + inset rule + hairline-divided rows below */}
+          <div style={{ background: "#ffffff", border: "none", borderRadius: 22, overflow: "hidden", boxShadow: "0 8px 26px rgba(29,23,18,.12)", minHeight: 0, display: "flex", flexDirection: "column" }}>
 
-              {/* List head — thin cream pill: count (Playfair) + Sort / Export mono icon-buttons */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 15px", background: "#faf5ee", border: `1.5px solid ${qdbBoldInk}`, borderRadius: 12, boxShadow: "0 2px 8px rgba(29,23,18,.10)", flexShrink: 0 }}>
+              {/* List head — no box: count (Playfair) + Sort / Export mono icon-buttons */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "15px 16px 11px", flexShrink: 0 }}>
                 <span style={{ fontFamily: FONT_SERIF, fontSize: 18, fontWeight: 800, color: qdbBoldInk }}>
                   {sortedList.length} {sortedList.length === 1 ? "query" : "queries"}
                 </span>
@@ -2231,10 +2228,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   </button>
                 </div>
               </div>
+              {/* thin inset grey rule beneath the header (doesn't reach the container edges) */}
+              <div style={{ height: 1, background: "#cfc6ba", margin: "0 6px", flexShrink: 0 }} />
 
               {/* Scroll area + scroll-aware edge fades — overlays fade in only when there is content
-                  beyond that edge. overflow-x hidden so the selected row's translate can't add a
-                  horizontal scrollbar. */}
+                  beyond that edge. overflow-x hidden keeps the list from spawning a horizontal bar. */}
               <div style={{ position: "relative", flex: 1, minHeight: 0 }}>
                 <div aria-hidden="true" style={{ position: "absolute", left: 0, right: 0, top: 0, height: 26, pointerEvents: "none", zIndex: 2, background: "linear-gradient(to bottom, #fff, rgba(255,255,255,0))", opacity: listFade.top ? 1 : 0, transition: "opacity .16s ease" }} />
                 <div ref={listScrollRef} onScroll={recomputeListFades} style={{ height: "100%", overflowY: "auto", overflowX: "hidden", padding: "2px 0 4px" }} className="custom-query-list-scrollbar">
@@ -2289,13 +2287,18 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   </div>
                 ) : (
                   <span style={{ display: "inline-flex", flexShrink: 0 }}>
-                    <StatusDot status={q.status} overrideSize={22} />
+                    <StatusDot status={q.status} overrideSize={20} />
                   </span>
                 );
 
-                // 5px direction spine — colour from statusDirection so it can never disagree with the dot.
-                const dir = statusDirection(q.status);
-                const spineColor = dir === "out" ? qdbBoldDirOut : dir === "in" ? qdbBoldDirIn : qdbBoldDirClosed;
+                // Monogram initials — first + last initial of the agent name (or agency); echoes the hero.
+                const monoInitials = (() => {
+                  const src = (agent.name?.trim() || agent.agency?.trim() || "");
+                  const parts = src.split(/\s+/).filter(Boolean);
+                  if (parts.length === 0) return "?";
+                  if (parts.length === 1) return parts[0][0].toUpperCase();
+                  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+                })();
 
                 return (
                   <div
@@ -2303,29 +2306,20 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     id={`query-row-${q.id}`}
                     onClick={() => setSelectedQueryId(q.id)}
                     className={`qrow ${isSelected ? "sel" : ""}`}
-                    style={{ ["--spine" as any]: spineColor }}
                   >
-                    {/* Line 1: agent name (Playfair) left, StatusDot top-right */}
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
-                      <h4 style={{
-                        fontFamily: FONT_SERIF, fontSize: 17, fontWeight: 700,
-                        color: qdbBoldInk, lineHeight: 1.05, margin: 0,
-                        overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                        flex: 1, minWidth: 0,
-                      }}>
-                        {agent.name?.trim() || agent.agency}
-                      </h4>
-                      {statusChip}
-                    </div>
-
-                    {/* Line 2: agency (mono caps, muted) left · date sent pinned bottom-right */}
-                    <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 8, marginTop: 7 }}>
-                      <span style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: ".05em", textTransform: "uppercase" as const, color: qdbBoldMuted, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, minWidth: 0 }}>
-                        {agentAgencyLine(agent)}
-                      </span>
-                      <span style={{ fontFamily: FONT_MONO, fontSize: 9, fontWeight: 600, color: "#8a8076", flexShrink: 0, whiteSpace: "nowrap" }}>
-                        {queriedDate}
-                      </span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
+                      {/* monogram disc — pink gradient + burgundy initials, echoing the hero avatar */}
+                      <span style={{ flexShrink: 0, width: 38, height: 38, borderRadius: "50%", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", border: "1px solid #e8c8bc", color: burgundy, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_SERIF, fontSize: 13, fontWeight: 700 }}>{monoInitials}</span>
+                      {/* middle — name over agency */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontFamily: FONT_SERIF, fontSize: 16, fontWeight: 700, color: qdbBoldInk, lineHeight: 1.1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{agent.name?.trim() || agent.agency}</div>
+                        <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: ".05em", textTransform: "uppercase" as const, color: qdbBoldMuted, marginTop: 3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{agentAgencyLine(agent)}</div>
+                      </div>
+                      {/* right — StatusDot over the date sent, stacked */}
+                      <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
+                        {statusChip}
+                        <span style={{ fontFamily: FONT_MONO, fontSize: 9, fontWeight: 600, color: "#8a8076", whiteSpace: "nowrap" }}>{queriedDate}</span>
+                      </div>
                     </div>
                   </div>
                 );
