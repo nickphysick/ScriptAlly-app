@@ -2586,7 +2586,20 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                         <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 800, color: qdbBoldInk }}>Tracking</span>
                       </div>
                       <div style={{ padding: "16px 16px 18px", flex: 1, minHeight: 0, overflowY: "auto" }}>
-                        <QueryTimeline query={activeQuery} agent={activeAgent} events={trackingEvents} />
+                        {(() => {
+                          // Pass the same open-state fact the control bar uses, so the trailing block
+                          // switches agent's-turn / writer's-turn / closed identically.
+                          const ta = getPrimaryAction(activeQuery.status as QueryStatus);
+                          return (
+                            <QueryTimeline
+                              query={activeQuery}
+                              agent={activeAgent}
+                              events={trackingEvents}
+                              primaryAction={{ ballHolder: ta.ballHolder, markKind: ta.kind === "mark-sent" ? ta.markKind : undefined }}
+                              onMarkSent={() => setIsMarkSentOpen(true)}
+                            />
+                          );
+                        })()}
                       </div>
                     </div>{/* ── end sub-card 1: Tracking ── */}
 

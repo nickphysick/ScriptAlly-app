@@ -30,9 +30,13 @@ const TL_TITLES: Record<QueryStatus, string> = {
   [QueryStatus.WITHDRAWN]: "Query withdrawn",
   [QueryStatus.NO_RESPONSE]: "Closed — no response",
 };
-const SENT_STATUSES = new Set<QueryStatus>([QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT]);
-const WAITING_STATUSES = new Set<QueryStatus>([QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT]);
 const DAY = 86400000;
+const FONT_SERIF = "'Playfair Display', serif";
+
+/** Stage default response windows, in WEEKS — one tunable source of truth; never inline these.
+ *  Used to project the expected-reply date from the relevant send date (NOT per-agent windows). */
+export const STAGE_RESPONSE_WINDOWS = { query: 8, partial: 12, full: 12 } as const;
+type SendStage = keyof typeof STAGE_RESPONSE_WINDOWS;
 
 const getTime = (val: any): number => {
   if (!val) return Date.now();
@@ -55,22 +59,31 @@ const MatPill: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 interface RowSpec {
   key: string;
-  kind: "status" | "ghost" | "nudge";
-  status?: QueryStatus;
+  status: QueryStatus;
   title: string;
   date?: string;
   sub?: string;
   pills?: string[];
-  resp?: { width: number; dayCap: string; expCap: string; overdue: boolean } | null;
+}
+
+/** Mirrors the relevant fields of getPrimaryAction(status) in Queries.tsx — passed in so the
+ *  trailing open-state block reads the same agent's-turn/writer's-turn fact as the control bar. */
+export interface QueryTimelinePrimaryAction {
+  ballHolder: "agent" | "writer" | null;
+  markKind?: "partial" | "full" | "resubmit";
 }
 
 export interface QueryTimelineProps {
   query: Query;
   agent: Agent | null;
   events: any[];
+  /** The open-state switch — from getPrimaryAction(query.status). Undefined ⇒ no trailing block. */
+  primaryAction?: QueryTimelinePrimaryAction;
+  /** Opens the existing contextual Mark-sent flow (writer's turn). */
+  onMarkSent?: () => void;
 }
 
-export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, events }) => {
+export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, events, primaryAction, onMarkSent }) => {
   const validEnumValues = Object.values(QueryStatus);
 
   // Dedupe the activity log by status (keep the earliest of each), then order chronologically.
@@ -103,7 +116,6 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
     else if (status === QueryStatus.PARTIAL_REQUESTED || status === QueryStatus.FULL_REQUESTED) sub = `${agent?.name?.split(" ")[0] || "The agent"} asked for ${status === QueryStatus.PARTIAL_REQUESTED ? "a partial" : "the full"}`;
     return {
       key: `s-${status}-${i}`,
-      kind: "status",
       status,
       title,
       date: fmtShort(getTime(evt.createdAt)),
@@ -112,100 +124,102 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
     };
   });
 
-  // ── forward projections ──────────────────────────────────────────────────────
+  // ── trailing open-state block — derived from getPrimaryAction(status).ballHolder (not stored) ──
+  const ballHolder = primaryAction?.ballHolder ?? null;
   const now = Date.now();
-  const awaiting = WAITING_STATUSES.has(query.status as QueryStatus);
-  if (awaiting) {
-    // Response-window bar — only when the agent has a turnaround on record.
-    let resp: RowSpec["resp"] = null;
-    const weeks = typeof agent?.responseTimeWeeks === "number" ? agent.responseTimeWeeks : 0;
-    if (weeks > 0) {
-      // Count from the latest send event (what we're waiting on a reply to).
-      const lastSendMs = statusEvents
-        .filter((e) => SENT_STATUSES.has(e.type as QueryStatus))
-        .reduce((mx, e) => Math.max(mx, getTime(e.createdAt)), 0) || (query.dateSent ? getTime(query.dateSent) : now);
-      const mDays = weeks * 7;
-      const nDays = Math.max(0, Math.floor((now - lastSendMs) / DAY));
-      const expMs = query.responseDeadline ? getTime(query.responseDeadline) : lastSendMs + mDays * DAY;
-      const overdue = nDays > mDays;
-      resp = {
-        // Fill is capped at 100% (an overdue query can't read as "more than full").
-        width: Math.max(0, Math.min(1, nDays / mDays)) * 100,
-        // Past the window, "DAY 816 OF ~42" reads broken — switch to a plain overdue caption.
-        dayCap: overdue ? "NO REPLY YET" : `DAY ${nDays} OF ~${mDays}`,
-        expCap: `${overdue ? "DUE" : "EXP."} ~${fmtShort(expMs)}`,
-        overdue,
-      };
+
+  // Agent's turn → waiting block. Expected reply = relevant send date + stage window (NOT per-agent).
+  let waiting: { nDays: number; widthPct: number; sentMs: number | null; expMs: number | null; overdue: boolean } | null = null;
+  if (ballHolder === "agent") {
+    const st = query.status as QueryStatus;
+    const stage: SendStage = st === QueryStatus.QUERIED ? "query" : st === QueryStatus.PARTIAL_SENT ? "partial" : "full";
+    const sendIso = st === QueryStatus.QUERIED ? query.dateSent : st === QueryStatus.PARTIAL_SENT ? query.partialSentDate : query.fullSentDate;
+    const mDays = STAGE_RESPONSE_WINDOWS[stage] * 7;
+    if (sendIso) {
+      const sentMs = getTime(sendIso);
+      const nDays = Math.max(0, Math.floor((now - sentMs) / DAY));
+      waiting = { nDays, widthPct: Math.max(0, Math.min(1, nDays / mDays)) * 100, sentMs, expMs: sentMs + mDays * DAY, overdue: nDays > mDays };
+    } else {
+      // Undated import — keep the pill (status still reads), no-op the bar + caption.
+      waiting = { nDays: 0, widthPct: 0, sentMs: null, expMs: null, overdue: false };
     }
-    rows.push({ key: "ghost", kind: "ghost", title: "Waiting to hear back", resp });
   }
-  // Scheduled nudge — the next upcoming reminder, when one is set in the future.
-  const nudgeMs = query.nudgeDate ? getTime(query.nudgeDate) : 0;
-  if (nudgeMs > now) {
-    rows.push({
-      key: "nudge",
-      kind: "nudge",
-      title: "Nudge reminder",
-      date: fmtShort(nudgeMs),
-      sub: "We'll remind you to follow up if you still haven't heard back.",
-    });
-  }
+
+  // Writer's turn → "send the {…}" prompt; the label comes from getPrimaryAction's markKind.
+  const sendWhat = primaryAction?.markKind === "partial" ? "partial" : primaryAction?.markKind === "full" ? "full" : "resubmission";
+
+  const sage = waiting ? !waiting.overdue : true; // sage within window, calm grey once past it
+  const wcol = sage
+    ? { pillBg: "#eef2ec", pillBd: "#cdd9c8", pillTx: "#3f5340", dim: "#5a6e58", barBg: "#e6ece4", barFill: "linear-gradient(90deg,#a9c0a4,#8aa886)" }
+    : { pillBg: "#eee9e2", pillBd: "#ddd4c6", pillTx: "#6a5f52", dim: "#8a7d6c", barBg: "#e7e0d6", barFill: "linear-gradient(90deg,#bdb3a4,#a89c8a)" };
 
   return (
     <div>
+      {/* timeline history — oldest at the top, newest at the bottom */}
       {rows.map((row, i) => {
         const isLast = i === rows.length - 1;
-        const dashedConnector = row.kind === "ghost" || row.kind === "nudge";
         return (
           <div key={row.key} style={{ display: "grid", gridTemplateColumns: "30px 1fr", gap: 11, position: "relative", paddingBottom: isLast ? 0 : 24 }}>
-            {/* dot column + connector */}
             <div style={{ position: "relative", display: "flex", justifyContent: "center" }}>
-              {row.kind === "status" && <StatusDot status={row.status as QueryStatus} overrideSize={28} />}
-              {row.kind === "ghost" && (
-                <svg width={28} height={28} viewBox="0 0 28 28"><circle cx="14" cy="14" r="11.5" fill="none" stroke="#cfc6bb" strokeWidth={1.4} strokeDasharray="3 3" /></svg>
-              )}
-              {row.kind === "nudge" && (
-                <svg width={28} height={28} viewBox="0 0 28 28"><circle cx="14" cy="14" r="11.5" fill="#fbf3e3" stroke="#d8b87a" strokeWidth={1.4} strokeDasharray="3 3" /><path d="M14 8.5a3 3 0 0 0-3 3c0 3-1.1 3.6-1.1 3.6h8.2S17 14.5 17 11.5a3 3 0 0 0-3-3z M12.8 17.2a1.3 1.3 0 0 0 2.4 0" fill="none" stroke="#b98a4e" strokeWidth={1.3} strokeLinecap="round" strokeLinejoin="round" /></svg>
-              )}
+              <StatusDot status={row.status} overrideSize={28} />
               {!isLast && (
-                <div style={{
-                  position: "absolute", top: 29, bottom: -24, left: "50%", transform: "translateX(-50%)", width: 1.6,
-                  ...(dashedConnector
-                    ? { background: "repeating-linear-gradient(#ddd0c0 0 3px, transparent 3px 6px)" }
-                    : { background: "#e8dcd0" }),
-                }} />
+                <div style={{ position: "absolute", top: 29, bottom: -24, left: "50%", transform: "translateX(-50%)", width: 1.6, background: "#e8dcd0" }} />
               )}
             </div>
-            {/* content */}
             <div style={{ paddingTop: 4 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
-                <span style={{
-                  fontFamily: "'Inter',sans-serif", fontSize: 13,
-                  fontWeight: row.kind === "status" ? 600 : row.kind === "nudge" ? 600 : 500,
-                  fontStyle: row.kind === "ghost" ? "italic" : "normal",
-                  color: row.kind === "ghost" ? "#a89a8a" : row.kind === "nudge" ? "#8a6a3e" : "#3a1c14",
-                }}>{row.title}</span>
+                <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 600, color: "#3a1c14" }}>{row.title}</span>
                 {row.date && <span style={{ fontFamily: FONT_MONO, fontSize: 9, color: "#a89a8a", whiteSpace: "nowrap" }}>{row.date}</span>}
               </div>
-              {row.sub && <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, color: row.kind === "nudge" ? "#a8946e" : "#9a8d7e", marginTop: 2 }}>{row.sub}</div>}
+              {row.sub && <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, color: "#9a8d7e", marginTop: 2 }}>{row.sub}</div>}
               {row.pills && row.pills.length > 0 && (
                 <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 8 }}>{row.pills.map((p, pi) => <MatPill key={pi}>{p}</MatPill>)}</div>
-              )}
-              {row.kind === "ghost" && row.resp && (
-                <div style={{ marginTop: 8 }}>
-                  <div style={{ position: "relative", height: 5, borderRadius: 5, background: "#f4e4dc", overflow: "hidden" }}>
-                    <i style={{ position: "absolute", left: 0, top: 0, bottom: 0, borderRadius: 5, background: "linear-gradient(90deg,#e9bdac,#d99e86)", width: `${row.resp.width}%` }} />
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", gap: 10, marginTop: 5 }}>
-                    <span style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: "0.05em", color: "#b59384", whiteSpace: "nowrap" }}>{row.resp.dayCap}</span>
-                    <span style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: "0.05em", color: "#b59384", whiteSpace: "nowrap" }}>{row.resp.expCap}</span>
-                  </div>
-                </div>
               )}
             </div>
           </div>
         );
       })}
+
+      {/* ── trailing open-state block — only marginally inset so the pill keeps width on one line ── */}
+      {ballHolder === "agent" && waiting && (
+        <div style={{ marginLeft: 4, marginTop: 16 }}>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 9, borderRadius: 999, padding: "8px 15px", fontWeight: 600, fontSize: 13, background: wcol.pillBg, border: `1px solid ${wcol.pillBd}`, color: wcol.pillTx }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M5 22h14M5 2h14M17 22v-4.2a2 2 0 0 0-.6-1.4L12 12l-4.4 4.4a2 2 0 0 0-.6 1.4V22M7 2v4.2a2 2 0 0 0 .6 1.4L12 12l4.4-4.4A2 2 0 0 0 17 6.2V2" /></svg>
+            Waiting to hear back
+            {waiting.sentMs != null && <span style={{ fontFamily: FONT_MONO, fontWeight: 600, fontSize: 12, color: wcol.dim }}>· {waiting.nDays} days</span>}
+          </span>
+          {/* bar + caption only when a send date is on record */}
+          {waiting.sentMs != null && waiting.expMs != null && (
+            <>
+              <div style={{ height: 6, borderRadius: 6, marginTop: 11, overflow: "hidden", background: wcol.barBg }}>
+                <div style={{ height: "100%", borderRadius: 6, width: `${waiting.widthPct}%`, background: wcol.barFill }} />
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.04em", color: "#7d7268", marginTop: 7 }}>
+                <span>SENT {fmtShort(waiting.sentMs)}</span>
+                <span>EXPECTED BY ~{fmtShort(waiting.expMs)}</span>
+              </div>
+            </>
+          )}
+          {/* nudge mount seam — the nudge line mounts here in a later phase; nothing else here now. */}
+        </div>
+      )}
+
+      {ballHolder === "writer" && (
+        <div style={{ marginLeft: 4, marginTop: 16 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, background: "#f6edd6", border: "1px solid #e3d3a6", borderRadius: 11, padding: "12px 14px" }}>
+            <span style={{ fontWeight: 600, fontSize: 12.5, color: "#7a5e1f" }}>Your move — send the {sendWhat}</span>
+            <button
+              type="button"
+              onClick={() => onMarkSent?.()}
+              style={{ alignSelf: "flex-start", fontFamily: FONT_SERIF, fontSize: 13, fontWeight: 700, color: "#7c3a2a", background: "#f5e2da", border: "1px solid #e8c8bc", borderRadius: 10, padding: "8px 16px", cursor: "pointer" }}
+            >
+              Mark sent
+            </button>
+          </div>
+          {/* nudge mount seam */}
+        </div>
+      )}
+      {/* ballHolder === null (closed / Offer): no trailing block — history only. */}
     </div>
   );
 };
