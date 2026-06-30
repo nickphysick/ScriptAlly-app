@@ -419,7 +419,7 @@ export const Nav: React.FC<NavProps> = ({ activeTab, activeSubPage, onNavigate, 
             aria-label="ScriptAlly — go to dashboard"
           >
             <img
-              src="/scriptally-logo-new-basic.png"
+              src="/scriptally-logo-v2.png"
               alt=""
               aria-hidden="true"
               width={30}
