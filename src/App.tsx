@@ -9,7 +9,7 @@ import { BrandProvider } from "./lib/brand";
 import { Auth } from "./components/Auth";
 import { AppShell } from "./components/AppShell";
 import { SidebarShell } from "./components/shell/SidebarShell";
-import { ShellAccountChip, ShellUtilityCluster } from "./components/shell/ShellChrome";
+import { ShellRailFoot } from "./components/shell/ShellChrome";
 import { QueriesRailContext } from "./components/shell/QueriesRailContext";
 import { QueriesRail } from "./components/shell/QueriesRail";
 import { EditAgentHost } from "./components/EditAgentHost";
@@ -469,10 +469,9 @@ function AppContent() {
         <SidebarShell
           activeTab={activeTab}
           onNavigate={handleNavigate}
-          breadcrumb={["Queries", "Query Database"]}
+          breadcrumb={["Queries", "Queries Hub"]}
           context={<QueriesRailContext />}
-          account={<ShellAccountChip onNavigate={handleNavigate} />}
-          utility={<ShellUtilityCluster onNavigate={handleNavigate} />}
+          account={<ShellRailFoot onNavigate={handleNavigate} />}
         >
           <Queries searchQuery={searchQuery} onNavigate={handleNavigate} activeSubPage={activeSubPage} inShell />
         </SidebarShell>

@@ -3,9 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * SidebarShell — the left-sidebar chrome that wraps a migrated page. A full-height flex row: the
- * SidebarNav rail (global page nav + a page-context slot + account foot) on the left, and a main
- * column on the right = a 48px TopStrip (breadcrumb + utility cluster) above a cream content well.
- * Both rail and strip are white, so the chrome reads as one continuous frame around the cream well.
+ * SidebarNav rail (global page nav + a page-context slot + a foot carrying the utility icons and the
+ * account chip) on the left, and the page's content column on the right, filling the height.
+ *
+ * The old top strip (breadcrumb + utility cluster) has been retired for the Queries Hub — the page
+ * owns its own header inside the working area, and the utilities + account live at the rail foot.
  *
  * This is the new shell the Queries page adopts first (Agents/Manuscripts migrate in follow-ups).
  * It is intentionally separate from the legacy top-bar `AppShell` (which still wraps the Dashboard
@@ -13,7 +15,6 @@
  */
 import React from "react";
 import { SidebarNav } from "./SidebarNav";
-import { TopStrip } from "./TopStrip";
 
 interface SidebarShellProps {
   activeTab: string;
@@ -41,9 +42,7 @@ export const SidebarShell: React.FC<SidebarShellProps> = ({
 }) => (
   <div style={{ display: "flex", height: "100vh", overflow: "hidden", background: "#ffffff" }}>
     <SidebarNav activeTab={activeTab} onNavigate={onNavigate} context={context} account={account} />
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, minHeight: 0 }}>
-      <TopStrip breadcrumb={breadcrumb} onCrumbClick={onCrumbClick} utility={utility} />
-      <div style={{ flex: 1, minHeight: 0, overflow: "hidden", background: "#ffffff" }}>{children}</div>
-    </div>
+    {/* Content column fills the full height (no top strip) — the page owns its own header. */}
+    <div style={{ flex: 1, minWidth: 0, minHeight: 0, overflow: "hidden", background: "#ffffff" }}>{children}</div>
   </div>
 );
