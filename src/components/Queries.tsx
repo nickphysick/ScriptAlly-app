@@ -28,7 +28,7 @@ import {
   addDoc
 } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
-import { QueryStatus, Agent, Manuscript, Query, SubmissionMethod, ActivityType, QueryMaterial } from "../types";
+import { QueryStatus, Agent, Manuscript, Query, SubmissionMethod, ActivityType, QueryMaterial, UserPlan } from "../types";
 import { StatusPill, getStatusLabel } from "./StatusPill";
 import { StatusDot } from "./StatusDot";
 import { RecordResponseModal } from "./RecordResponseModal";
@@ -451,8 +451,6 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   };
 
   const [editingJournalId, setEditingJournalId] = useState<string | null>(null);
-  // Submission Packages Pro card — defaults COLLAPSED so it never dominates for non-Pro users.
-  const [pkgCardCollapsed, setPkgCardCollapsed] = useState(true);
   const [editingJournalText, setEditingJournalText] = useState("");
 
   // States and Handlers for Query Attachment Image Upload & Edit
@@ -2638,67 +2636,72 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           const pkgComponents = linkedPackage
                             ? [["Query letter", linkedPackage.queryLetterVersionId], ["Synopsis", linkedPackage.synopsisVersionId], ["Sample pages", linkedPackage.samplePagesVersionId]].filter(([, v]) => !!v).map(([l]) => l as string)
                             : [];
+                          const isPro = currentUser?.plan === UserPlan.PRO;
+                          const proBadge = (ml: number) => (<span style={{ display: "inline-block", fontFamily: FONT_MONO, fontSize: 7, fontWeight: 500, letterSpacing: ".1em", textTransform: "uppercase" as const, color: "#fff", background: "#6A89A7", border: "1px solid #4f6e8a", borderRadius: 999, padding: "2px 7px", marginLeft: ml, verticalAlign: "middle" }}>Pro</span>);
+                          const openPackages = () => onNavigate?.("manuscripts", "Submission packages");
                           return (
                             <>
-                              <div style={{ fontFamily: FONT_SERIF, fontSize: 18, fontWeight: 600, color: "#241c15", lineHeight: 1.15, marginBottom: 12 }}>{activeMs.title}</div>
+                              {/* title + book icon */}
+                              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7c3a2a" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H19v15H6a2 2 0 0 0-2 2z" /><path d="M4 19.5A1.5 1.5 0 0 1 5.5 18H19" /></svg>
+                                <span style={{ fontFamily: FONT_SERIF, fontSize: 18, fontWeight: 600, color: "#241c15", lineHeight: 1.15 }}>{activeMs.title}</span>
+                              </div>
                               {/* meta line — sage genre tag + muted word count */}
-                              <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 13 }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 10 }}>
                                 {activeMs.genre && <span style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".1em", textTransform: "uppercase" as const, color: "#5a6e58", background: "#eef2ec", border: "1px solid #d8e0d4", borderRadius: 999, padding: "3px 10px" }}>{activeMs.genre}</span>}
                                 {!!activeMs.wordCount && <span style={{ fontFamily: FONT_MONO, fontSize: 10.5, color: "#a89a8a", letterSpacing: ".03em" }}>{activeMs.wordCount.toLocaleString()} words</span>}
                               </div>
-                              {/* (logline / pulled-quote removed per the mockup) */}
-                              {/* Materials included */}
-                              <div style={{ marginTop: 17 }}>
-                                <div style={{ fontFamily: FONT_SERIF, fontWeight: 700, fontSize: 14, color: "#2c2017", marginBottom: 8 }}>Materials included</div>
-                                {materials.length > 0 ? (
-                                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>{materials.map((m, i) => <span key={i} style={pillStyle}>{m}</span>)}</div>
-                                ) : (
-                                  <span role="button" tabIndex={0} onClick={() => openEditQuery(activeQuery.id)} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 12, color: "#2c2017", cursor: "pointer" }}>
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M15.5 3.5 7 12a3 3 0 0 0 4.2 4.2l8-8a5 5 0 0 0-7-7l-8.2 8.2a7 7 0 0 0 9.9 9.9l7.3-7.3" /></svg>
-                                    Add the materials you sent
-                                  </span>
-                                )}
-                              </div>
-                              {/* Submission Packages — attached package details, else the collapsible
-                                  Pro card (slate). Collapsed = a single quiet "[Pro] Do more…" row. */}
-                              <div style={{ marginTop: 17 }}>
-                                {linkedPackage ? (
-                                  <>
-                                    <div style={{ ...minilabel, display: "block", marginBottom: 8 }}>
-                                      Submission package
-                                      <span style={{ display: "inline-block", fontFamily: FONT_MONO, fontSize: 7, fontWeight: 500, letterSpacing: "0.1em", textTransform: "uppercase", color: "#fff", background: "#6A89A7", border: "1px solid #4f6e8a", borderRadius: 999, padding: "2px 7px", marginLeft: 6, verticalAlign: "middle" }}>Pro</span>
-                                    </div>
-                                    <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 600, color: "#241c15", marginBottom: 7 }}>{linkedPackage.packageName}</div>
-                                    {pkgComponents.length > 0 && <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>{pkgComponents.map((c, i) => <span key={i} style={pillStyle}>{c}</span>)}</div>}
-                                  </>
-                                ) : pkgCardCollapsed ? (
-                                  <div role="button" tabIndex={0} onClick={() => setPkgCardCollapsed(false)} style={{ display: "flex", alignItems: "center", gap: 9, background: "#fff", border: "1.5px solid #c2d2de", borderRadius: 13, padding: "11px 13px", cursor: "pointer" }}>
-                                    <span style={{ fontFamily: FONT_MONO, fontSize: 7, fontWeight: 500, letterSpacing: ".1em", textTransform: "uppercase" as const, color: "#fff", background: "#6A89A7", border: "1px solid #4f6e8a", borderRadius: 999, padding: "2px 7px" }}>Pro</span>
-                                    <span style={{ fontFamily: FONT_SERIF, fontWeight: 700, fontSize: 13.5, color: "#2c2017" }}>Do more with Packages</span>
-                                    <span style={{ marginLeft: "auto", color: "#6A89A7", display: "flex" }}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg></span>
-                                  </div>
-                                ) : (
-                                  <div style={{ position: "relative", background: "#fff", border: "1.5px solid #c2d2de", borderRadius: 13, padding: "15px 14px 14px" }}>
-                                    <button type="button" onClick={() => setPkgCardCollapsed(true)} aria-label="Collapse" style={{ position: "absolute", top: 9, right: 9, width: 24, height: 24, borderRadius: 7, border: "1px solid #d6e0e8", background: "#f4f7fa", color: "#6A89A7", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-                                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round"><path d="M6 15l6-6 6 6" /></svg>
-                                    </button>
-                                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 9, fontFamily: FONT_SERIF, fontWeight: 800, fontSize: 15, color: "#2c2017", margin: "2px 0 3px", padding: "0 30px" }}>
-                                      <span style={{ fontFamily: FONT_MONO, fontSize: 7, fontWeight: 500, letterSpacing: ".1em", textTransform: "uppercase" as const, color: "#fff", background: "#6A89A7", border: "1px solid #4f6e8a", borderRadius: 999, padding: "2px 7px" }}>Pro</span>
-                                      Submission Packages
-                                    </div>
-                                    <div style={{ textAlign: "center", fontSize: 11, color: "#6a7a86", marginBottom: 13 }}>Do more with Packages</div>
-                                    <ul style={{ listStyle: "none", margin: "0 0 13px", padding: 0, display: "flex", flexDirection: "column", gap: 7 }}>
-                                      {["Attach a tailored bundle to each agent", "Compare which version lands requests", "Reuse your best pitch in one click"].map((b, i) => (
-                                        <li key={i} style={{ display: "flex", gap: 8, fontSize: 12, lineHeight: 1.35, color: "#4a4030" }}>
-                                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6A89A7" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}><path d="M20 6 9 17l-5-5" /></svg>
-                                          {b}
-                                        </li>
-                                      ))}
-                                    </ul>
-                                    <button type="button" onClick={() => onNavigate?.("plans")} style={{ display: "block", width: "100%", textAlign: "center", fontFamily: FONT_SERIF, fontWeight: 700, fontSize: 13, color: "#fff", background: "#6A89A7", border: "1.5px solid #4f6e8a", borderRadius: 10, padding: 9, cursor: "pointer", boxShadow: "0 3px 0 #4f6e8a" }}>Try now for free</button>
-                                  </div>
-                                )}
-                              </div>
+                              {/* Sent via {method} — no date (that lives in Tracking) */}
+                              {activeQuery.sendMethod && (
+                                <div style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".08em", textTransform: "uppercase" as const, color: "#8a7d6c", marginBottom: 15 }}>Sent via {activeQuery.sendMethod}</div>
+                              )}
+                              {linkedPackage ? (
+                                /* Package attached — show its contents, no upsell */
+                                <div>
+                                  <div style={{ ...minilabel, display: "block", marginBottom: 8 }}>Submission package{proBadge(6)}</div>
+                                  <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 600, color: "#241c15", marginBottom: 7 }}>{linkedPackage.packageName}</div>
+                                  {pkgComponents.length > 0 && <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>{pkgComponents.map((c, i) => <span key={i} style={pillStyle}>{c}</span>)}</div>}
+                                </div>
+                              ) : (
+                                <div>
+                                  <div style={{ fontFamily: FONT_SERIF, fontWeight: 700, fontSize: 14, color: "#2c2017", marginBottom: 9 }}>Materials:</div>
+                                  {materials.length > 0 ? (
+                                    <>
+                                      {/* recorded — ticked checklist */}
+                                      <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+                                        {materials.map((m, i) => (
+                                          <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "'Inter',sans-serif", fontSize: 12.5, color: "#2c2017" }}>
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8a7d6c" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M14 3v5h5" /><path d="M6 3h9l5 5v11a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 19V4.5A1.5 1.5 0 0 1 6.5 3" /></svg>
+                                            <span style={{ flex: 1, minWidth: 0 }}>{m}</span>
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5a6e58" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M20 6 9 17l-5-5" /></svg>
+                                          </div>
+                                        ))}
+                                      </div>
+                                      {/* non-Pro upsell (only when no package attached) */}
+                                      {!isPro && (
+                                        <div style={{ marginTop: 15, fontFamily: "'Inter',sans-serif", fontSize: 12, lineHeight: 1.5, color: "#8a7d6c" }}>
+                                          <span style={{ fontWeight: 700, color: "#3a2c24" }}>Ready for serious insights?</span><br />
+                                          Attach a <span role="button" tabIndex={0} onClick={openPackages} style={{ color: "#42637e", fontWeight: 600, cursor: "pointer", borderBottom: "1px solid #c2d2de" }}>submission package</span>{proBadge(4)} and track performance across versions
+                                        </div>
+                                      )}
+                                    </>
+                                  ) : (
+                                    <>
+                                      {/* empty — pink materials tile · or · neutral package tile (matched pair) */}
+                                      <span role="button" tabIndex={0} onClick={() => openEditQuery(activeQuery.id)} style={{ display: "flex", alignItems: "center", gap: 8, background: "#fcf1ec", border: "1.5px dashed #e0b3a4", borderRadius: 10, padding: "9px 12px", fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 500, color: "#7c3a2a", cursor: "pointer" }}>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M15.5 3.5 7 12a3 3 0 0 0 4.2 4.2l8-8a5 5 0 0 0-7-7l-8.2 8.2a7 7 0 0 0 9.9 9.9l7.3-7.3" /></svg>
+                                        Add the materials you sent
+                                      </span>
+                                      <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, color: "#9a8e80", margin: "8px 0" }}>or</div>
+                                      <div role="button" tabIndex={0} onClick={openPackages} style={{ position: "relative", display: "flex", alignItems: "center", gap: 8, background: "transparent", border: "1.5px dashed #cbb6a6", borderRadius: 10, padding: "9px 12px", fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 500, color: "#6a5f52", cursor: "pointer" }}>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" style={{ flexShrink: 0 }}><path d="M12 5v14M5 12h14" /></svg>
+                                        Add a submission package
+                                        <span style={{ position: "absolute", top: -8, right: 10, fontFamily: FONT_MONO, fontSize: 7, fontWeight: 500, letterSpacing: ".1em", textTransform: "uppercase" as const, color: "#fff", background: "#6A89A7", border: "1px solid #4f6e8a", borderRadius: 999, padding: "2px 7px" }}>Pro</span>
+                                      </div>
+                                    </>
+                                  )}
+                                </div>
+                              )}
                             </>
                           );
                         })()}
