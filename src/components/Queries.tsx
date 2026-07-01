@@ -8,7 +8,7 @@ import { createPortal } from "react-dom";
 import jsPDF from "jspdf";
 import { motion, AnimatePresence } from "motion/react";
 import { QueriesRail } from "./shell/QueriesRail";
-import { QUERIES_RAIL_SLOT_ID, QUERIES_APPBAR_SLOT_ID } from "./shell/QueriesRailContext";
+import { QUERIES_RAIL_SLOT_ID } from "./shell/QueriesRailContext";
 import { useScriptAllyDb } from "../lib/db";
 import { 
   doc, 
@@ -554,11 +554,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   // Inside the SidebarShell, the live filter/sort rail (QueriesRail) is portalled into the shell's
   // rail slot so it shares this page's filter state. Resolve the slot node after the DOM commits.
   const [railSlot, setRailSlot] = useState<HTMLElement | null>(null);
-  const [appbarSlot, setAppbarSlot] = useState<HTMLElement | null>(null);
   useLayoutEffect(() => {
-    if (!inShell) { setRailSlot(null); setAppbarSlot(null); return; }
+    if (!inShell) { setRailSlot(null); return; }
     setRailSlot(document.getElementById(QUERIES_RAIL_SLOT_ID));
-    setAppbarSlot(document.getElementById(QUERIES_APPBAR_SLOT_ID));
   }, [inShell]);
   const [groupAccordionOpen, setGroupAccordionOpen] = useState(false);
   const [sortAccordionOpen, setSortAccordionOpen] = useState(false);
@@ -718,6 +716,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   const currentStatus = activeQuery?.status ?? selectedQuery?.status;
   const activeAgent = activeQuery ? agents.find(a => a.id === activeQuery.agentId) : null;
   const activeMs = activeQuery ? manuscripts.find(m => m.id === activeQuery.manuscriptId) : null;
+  // Queries Hub subtitle — the manuscript currently in scope ("Tracking …").
+  const trackedManuscript = selectedManuscriptFilter !== "All" ? manuscripts.find(m => m.id === selectedManuscriptFilter) : null;
+  const hubSubtitle = trackedManuscript ? trackedManuscript.title : "all manuscripts";
 
   // Synchronise Agent Notes values when activeAgent changes
   useEffect(() => {
@@ -1746,16 +1747,6 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         railSlot,
       )}
 
-      {/* Appbar heading — portalled into the shell top-bar slot, with the live query count. */}
-      {appbarSlot && createPortal(
-        <>
-          <span style={{ fontFamily: FONT_SERIF, fontWeight: 800, fontSize: 30, color: "#1d1712", lineHeight: 1, whiteSpace: "nowrap" }}>Your Query Database</span>
-          <span style={{ fontFamily: FONT_MONO, fontSize: 11, fontWeight: 500, letterSpacing: ".06em", textTransform: "uppercase" as const, color: "#8a7d6c", whiteSpace: "nowrap" }}>
-            {queries.length} {queries.length === 1 ? "query" : "queries"}
-          </span>
-        </>,
-        appbarSlot,
-      )}
 
       {/* MAIN CONTENT — the control bar then the two-column desk (list + reading pane). */}
       <div
@@ -2100,17 +2091,17 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         {/* Fit-to-screen: with queries present the desk FILLS the height below the appbar (flex:1),
             so 20 rows scroll inside the list column rather than pushing the page past 100vh. The
             EMPTY state keeps content-height (the centred welcome card needs no internal scroll). */}
-        <div style={{ padding: "8px 8px 30px", display: "flex", flexDirection: "column", ...(queries.length > 0 ? { flex: 1, minHeight: 0 } : {}) }}>
-          <div className="qdesk" style={{ position: "relative", display: "flex", flexDirection: "column", border: "none", borderRadius: 26, background: qdbBoldDesk, overflow: "hidden", boxShadow: "0 8px 22px rgba(29,23,18,.10)", ...(queries.length > 0 ? { flex: 1, minHeight: 0 } : {}) }}>
-            {/* deskpad — the blue-grey working surface */}
-            <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 16, ...(queries.length > 0 ? { flex: 1, minHeight: 0 } : {}) }}>
+        <div style={{ display: "flex", flexDirection: "column", ...(queries.length > 0 ? { flex: 1, minHeight: 0 } : {}) }}>
+          <div className="qdesk" style={{ position: "relative", display: "flex", flexDirection: "column", border: "none", borderRadius: 0, background: qdbBoldDesk, overflow: "hidden", ...(queries.length > 0 ? { flex: 1, minHeight: 0 } : {}) }}>
+            {/* desk surface — full-bleed blue-grey working area, 22/28/30 content inset (mockup .desk) */}
+            <div style={{ padding: "22px 28px 30px", display: "flex", flexDirection: "column", ...(queries.length > 0 ? { flex: 1, minHeight: 0 } : {}) }}>
 
         {queries.length === 0 ? (
           /* ── Empty database — no queries anywhere. Ghost list + a welcoming empty pane with a
              Smart Import invitation and manual-add fallbacks. The control bar (search/actions) is
              suppressed — nothing to search or act on yet. minHeight keeps the blue desk from
              collapsing to nothing. ── */
-          <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 18, alignItems: "start", minHeight: 540 }}>
+          <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "330px 1fr", gap: 18, alignItems: "start", minHeight: 540 }}>
 
             {/* Ghost list — the bold-theme white list card with faded placeholder rows. (Matches the
                 real list card chrome rather than a parchment MountPanel, so it sits naturally in the
@@ -2201,6 +2192,22 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         ) : (
         <>
 
+        {/* ── Queries Hub header — white bar spanning the desk: title + subtitle · soft-pink Log CTA ── */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, background: "#fffefb", border: "1.5px solid #1d1712", borderRadius: 14, padding: "13px 22px", marginBottom: 28, boxShadow: "0 8px 20px rgba(29,23,18,.18)", flexShrink: 0 }}>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontFamily: FONT_SERIF, fontWeight: 800, fontSize: 25, color: "#1d1712", lineHeight: 1 }}>Queries Hub</div>
+            <div style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".04em", textTransform: "uppercase" as const, color: "#5a6472", marginTop: 8, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Tracking {hubSubtitle}</div>
+          </div>
+          <button
+            type="button"
+            onClick={() => onNavigate?.("queries", "Log a query")}
+            style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "10px 17px", borderRadius: 12, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, whiteSpace: "nowrap", cursor: "pointer", background: "#f5e2da", border: "1.5px solid #e8c8bc", color: "#7c3a2a", boxShadow: "0 3px 0 #e2c2b5", flexShrink: 0 }}
+          >
+            <Plus style={{ width: 15, height: 15 }} />
+            Log a new query
+          </button>
+        </div>
+
         {/* ── Control bar — search (list-pane width) over the list · actions over the reading pane ── */}
         {(() => {
           const ctrlAction = currentStatus
@@ -2208,7 +2215,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             : { kind: "record" as const, label: "Record response", ballHolder: null as null };
           const hasActive = !!(activeQuery && activeAgent && activeMs);
           return (
-            <div style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 18, alignItems: "center", flexShrink: 0 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "330px 1fr", gap: 18, alignItems: "center", flexShrink: 0, marginBottom: 17 }}>
               {/* Search — white field, exactly the list-pane width, aligned above the list below */}
               <div style={{ position: "relative" }}>
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400 pointer-events-none" />
@@ -2231,7 +2238,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     onClick={() => hasActive && setIsMarkSentOpen(o => !o)}
                     onMouseEnter={e => { if (hasActive) e.currentTarget.style.background = "#f7f2ea"; }}
                     onMouseLeave={e => (e.currentTarget.style.background = "#ffffff")}
-                    style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, color: qdbBoldInk, background: "#ffffff", border: `1px solid ${qdbBoldInk}`, borderRadius: 11, padding: "10px 15px", whiteSpace: "nowrap", cursor: hasActive ? "pointer" : "default", opacity: hasActive ? 1 : 0.5 }}
+                    style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, color: qdbBoldInk, background: "#ffffff", border: `1px solid ${qdbBoldInk}`, borderRadius: 12, padding: "10px 15px", whiteSpace: "nowrap", boxShadow: "0 4px 11px rgba(29,23,18,.20)", cursor: hasActive ? "pointer" : "default", opacity: hasActive ? 1 : 0.5 }}
                   >
                     <Send style={{ width: 14, height: 14, strokeWidth: 1.8 } as any} />
                     {ctrlAction.label}
@@ -2242,7 +2249,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     onClick={() => hasActive && setIsRecordResponseFocusFormOpen(true)}
                     onMouseEnter={e => { if (hasActive) e.currentTarget.style.background = "#f7f2ea"; }}
                     onMouseLeave={e => (e.currentTarget.style.background = "#ffffff")}
-                    style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, color: qdbBoldInk, background: "#ffffff", border: `1px solid ${qdbBoldInk}`, borderRadius: 11, padding: "10px 15px", whiteSpace: "nowrap", cursor: hasActive ? "pointer" : "default", opacity: hasActive ? 1 : 0.5 }}
+                    style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, color: qdbBoldInk, background: "#ffffff", border: `1px solid ${qdbBoldInk}`, borderRadius: 12, padding: "10px 15px", whiteSpace: "nowrap", boxShadow: "0 4px 11px rgba(29,23,18,.20)", cursor: hasActive ? "pointer" : "default", opacity: hasActive ? 1 : 0.5 }}
                   >
                     <Send style={{ width: 14, height: 14, strokeWidth: 1.8 } as any} />
                     {ctrlAction.label}
@@ -2253,7 +2260,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   onClick={() => { if (hasActive && activeQuery) openEditQuery(activeQuery.id); }}
                   onMouseEnter={e => { if (hasActive) e.currentTarget.style.background = "#f7f2ea"; }}
                   onMouseLeave={e => (e.currentTarget.style.background = "#ffffff")}
-                  style={{ display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, color: qdbBoldInk, background: "#ffffff", border: `1px solid ${qdbBoldInk}`, borderRadius: 11, padding: "10px 15px", whiteSpace: "nowrap", cursor: hasActive ? "pointer" : "default", opacity: hasActive ? 1 : 0.5 }}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, color: qdbBoldInk, background: "#ffffff", border: `1px solid ${qdbBoldInk}`, borderRadius: 12, padding: "10px 15px", whiteSpace: "nowrap", boxShadow: "0 4px 11px rgba(29,23,18,.20)", cursor: hasActive ? "pointer" : "default", opacity: hasActive ? 1 : 0.5 }}
                 >
                   <Pencil style={{ width: 13, height: 13 }} />
                   Edit
@@ -2265,7 +2272,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   onClick={() => hasActive && !isGeneratingPDF && handleDownloadPDF()}
                   onMouseEnter={e => { if (hasActive && !isGeneratingPDF) e.currentTarget.style.background = "#f7f2ea"; }}
                   onMouseLeave={e => (e.currentTarget.style.background = "#ffffff")}
-                  style={{ display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, color: qdbBoldInk, background: "#ffffff", border: `1px solid ${qdbBoldInk}`, borderRadius: 11, padding: "10px 15px", whiteSpace: "nowrap", cursor: (hasActive && !isGeneratingPDF) ? "pointer" : "default", opacity: (hasActive && !isGeneratingPDF) ? 1 : 0.5 }}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, color: qdbBoldInk, background: "#ffffff", border: `1px solid ${qdbBoldInk}`, borderRadius: 12, padding: "10px 15px", whiteSpace: "nowrap", boxShadow: "0 4px 11px rgba(29,23,18,.20)", cursor: (hasActive && !isGeneratingPDF) ? "pointer" : "default", opacity: (hasActive && !isGeneratingPDF) ? 1 : 0.5 }}
                 >
                   <Download style={{ width: 13, height: 13 }} />
                   {isGeneratingPDF ? "Generating…" : "Download as PDF"}
@@ -2309,7 +2316,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         </AnimatePresence>
 
         {/* ── Content grid: 360px list + 1fr reading pane (inside the deskpad) ── */}
-        <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 18, flex: 1, minHeight: 0, alignItems: "stretch" }}>
+        <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "330px 1fr", gap: 18, flex: 1, minHeight: 0, alignItems: "stretch" }}>
 
           {/* List card (ledger) — white, NO border, soft shadow matching the pane; a flush flex
               column: plain header + inset rule + hairline-divided rows below */}
