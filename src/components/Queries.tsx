@@ -114,6 +114,7 @@ import {
   Notebook,
   FolderLock,
   Send,
+  Sparkles,
   AlertTriangle,
   Book,
   GitCommit,
@@ -2103,6 +2104,102 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             {/* deskpad — the blue-grey working surface */}
             <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 16 }}>
 
+        {queries.length === 0 ? (
+          /* ── Empty database — no queries anywhere. Ghost list + a welcoming empty pane with a
+             Smart Import invitation and manual-add fallbacks. The control bar (search/actions) is
+             suppressed — nothing to search or act on yet. minHeight keeps the blue desk from
+             collapsing to nothing. ── */
+          <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 18, alignItems: "start", minHeight: 540 }}>
+
+            {/* Ghost list — the bold-theme white list card with faded placeholder rows. (Matches the
+                real list card chrome rather than a parchment MountPanel, so it sits naturally in the
+                blue desk beside the white reading pane.) */}
+            <div style={{ background: "#ffffff", borderRadius: 22, overflow: "hidden", boxShadow: "0 8px 26px rgba(29,23,18,.12)", display: "flex", flexDirection: "column" }}>
+              <div style={{ padding: "15px 16px 11px", flexShrink: 0 }}>
+                <span style={{ fontFamily: FONT_SERIF, fontSize: 18, fontWeight: 800, color: qdbBoldInk }}>0 queries</span>
+              </div>
+              <div style={{ height: 1, background: "#cfc6ba", margin: "0 6px", flexShrink: 0 }} />
+              {/* faded placeholder rows — echo the real row layout (monogram + two lines + dot/date) */}
+              <div style={{ padding: "2px 0 4px", opacity: 0.38, pointerEvents: "none", userSelect: "none" as const }} aria-hidden="true">
+                {[0, 1, 2, 3].map((i) => (
+                  <div key={i} style={{ padding: "12px 15px", borderBottom: i < 3 ? "1px solid #ece3d6" : "none", display: "flex", alignItems: "center", gap: 11 }}>
+                    <span style={{ flexShrink: 0, width: 38, height: 38, borderRadius: "50%", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", border: "1px solid #e8c8bc" }} />
+                    <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 7 }}>
+                      <span style={{ height: 11, width: `${62 - i * 6}%`, borderRadius: 4, background: "#e7ddd0" }} />
+                      <span style={{ height: 8, width: `${42 - i * 5}%`, borderRadius: 4, background: "#efe7db" }} />
+                    </div>
+                    <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 7 }}>
+                      <span style={{ width: 14, height: 14, borderRadius: "50%", background: "#e2d8ca" }} />
+                      <span style={{ height: 8, width: 32, borderRadius: 4, background: "#efe7db" }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ padding: "16px 16px 22px", textAlign: "center" }}>
+                <span style={{ fontFamily: "'Caveat',cursive", fontSize: 19, color: "#8a7d6c" }}>your queries will line up here ↑</span>
+              </div>
+            </div>
+
+            {/* Empty reading pane — WHITE, 1.5px ink, radius 16; a proper welcome, not a placeholder */}
+            <div style={{ alignSelf: "start", background: "#fffefb", border: `1.5px solid ${qdbBoldInk}`, borderRadius: 16, padding: "44px 40px 40px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+              <h2 style={{ fontFamily: FONT_SERIF, fontSize: 29, fontWeight: 800, color: qdbBoldInk, margin: 0, lineHeight: 1.1 }}>No queries yet</h2>
+              <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, color: "#8a7d6c", margin: "11px 0 0", maxWidth: 460, lineHeight: 1.55 }}>
+                This is where every agent you've queried will live — their status, what you sent, and when to expect a reply.
+              </p>
+
+              {/* Smart Import invitation */}
+              <div style={{ marginTop: 30, width: "100%", maxWidth: 540, background: "#fcf9f3", border: "1px solid #e7ddce", borderRadius: 15, padding: "22px 24px", textAlign: "left" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 11 }}>
+                  <span style={{ flexShrink: 0, width: 40, height: 40, borderRadius: "50%", background: "#eef2f5", display: "flex", alignItems: "center", justifyContent: "center", color: "#5e7e9c" }}>
+                    <Sparkles style={{ width: 20, height: 20 }} />
+                  </span>
+                  <span style={{ fontFamily: FONT_SERIF, fontSize: 20, fontWeight: 800, color: qdbBoldInk }}>Smart Import</span>
+                  <span style={{ fontFamily: FONT_MONO, fontSize: 7.5, fontWeight: 500, letterSpacing: ".1em", textTransform: "uppercase" as const, color: "#fff", background: "#6A89A7", border: "1px solid #4f6e8a", borderRadius: 999, padding: "2px 7px" }}>Pro</span>
+                </div>
+                <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, color: "#6a5f52", lineHeight: 1.55, margin: "0 0 16px" }}>
+                  Upload your messy old spreadsheet and watch ScriptAlly build your whole database — every agent matched, sorted and dated, ready to track in seconds.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => onNavigate?.("import")}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, color: "#42637e", background: "#fff", border: "1.5px solid #9db4c6", borderRadius: 11, padding: "10px 18px", cursor: "pointer" }}
+                >
+                  <Sparkles style={{ width: 15, height: 15 }} />
+                  Try Smart Import
+                </button>
+              </div>
+
+              {/* divider */}
+              <div style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", maxWidth: 540, margin: "24px 0 22px" }}>
+                <div style={{ flex: 1, height: 1, background: "#e7ddce" }} />
+                <span style={{ fontFamily: FONT_MONO, fontSize: 10, fontWeight: 500, letterSpacing: ".08em", textTransform: "uppercase" as const, color: "#9a8e80" }}>or add them yourself</span>
+                <div style={{ flex: 1, height: 1, background: "#e7ddce" }} />
+              </div>
+
+              {/* manual-add fallbacks — ink-outline buttons */}
+              <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
+                <button
+                  type="button"
+                  onClick={() => onNavigate?.("queries", "Log a query")}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, color: qdbBoldInk, background: "#fffefb", border: `1.5px solid ${qdbBoldInk}`, borderRadius: 11, padding: "10px 18px", cursor: "pointer" }}
+                >
+                  <Plus style={{ width: 15, height: 15 }} />
+                  Add a query
+                </button>
+                <a
+                  href="/ScriptAlly-pipeline-import-template.xlsx"
+                  download
+                  style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, color: qdbBoldInk, background: "#fffefb", border: `1.5px solid ${qdbBoldInk}`, borderRadius: 11, padding: "10px 18px", textDecoration: "none" }}
+                >
+                  <Download style={{ width: 15, height: 15 }} />
+                  Download import template
+                </a>
+              </div>
+            </div>
+          </div>
+        ) : (
+        <>
+
         {/* ── Control bar — search (list-pane width) over the list · actions over the reading pane ── */}
         {(() => {
           const ctrlAction = currentStatus
@@ -2789,6 +2886,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           </div>{/* closes qp-pane */}
 
         </div>{/* closes content grid */}
+        </>
+        )}
 
             </div>{/* closes deskpad */}
           </div>{/* closes qdesk frame */}

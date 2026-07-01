@@ -149,6 +149,11 @@ export const QueriesRail: React.FC<QueriesRailProps> = ({
       {/* Filter */}
       <div style={secLabel}>Filter</div>
 
+      {queries.length === 0 ? (
+        /* Empty database — nothing to filter or sort yet; keep the manuscript selector above. */
+        <div style={{ padding: "2px 9px", fontFamily: FONT_SANS, fontSize: 12.5, fontStyle: "italic", color: "#b3a796" }}>Nothing to filter yet</div>
+      ) : (
+      <>
       {nonZeroActive.length > 0 && (
         <button
           type="button"
@@ -234,6 +239,8 @@ export const QueriesRail: React.FC<QueriesRailProps> = ({
           <ChevronDown style={{ width: 12, height: 12, color: mutedShell, position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
         </div>
       </div>
+      </>
+      )}
     </div>
   );
 };
