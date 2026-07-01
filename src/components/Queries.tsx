@@ -2586,7 +2586,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           {/* Reading pane — a plain hairline paper card. Fit-to-screen: it stretches to the grid
               height (alignItems:stretch) and scrolls internally (overflowY:auto, minHeight:0) so a
               tall reading pane never grows the page past 100vh; the columns still scroll within it. */}
-          <div className="qp-pane" style={{ position: "relative", minHeight: 0, border: "none", borderRadius: 22, background: "#ffffff", boxShadow: "0 8px 26px rgba(29,23,18,.12)", overflowY: "auto", overflowX: "hidden", display: "flex", flexDirection: "column" }}>
+          <div className="qp-pane" style={{ position: "relative", minHeight: 0, border: "1px solid #1d1712", borderRadius: 22, background: "#f5e9e7", boxShadow: "0 8px 26px rgba(29,23,18,.12)", overflowY: "auto", overflowX: "hidden", display: "flex", flexDirection: "column" }}>
             <div style={{ display: "contents" }}>
             {activeQuery && activeAgent && activeMs ? (
               <>
@@ -2622,11 +2622,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   const mswl = activeAgent.mswlNotes?.trim();
                   const genres = (activeAgent.genres || []).filter(Boolean);
                   return (
-                    <div className="qp-hero" style={{ position: "relative", margin: "16px 18px 0", padding: "22px 26px", border: `1.5px solid ${qdbBoldInk}`, borderRadius: 20, background: "#faf5ee", boxShadow: "0 8px 20px rgba(29,23,18,.18)", flexShrink: 0 }}>
+                    <div className="qp-hero" style={{ position: "relative", margin: "16px 18px 0", padding: "22px 26px", border: `1.5px solid ${qdbBoldInk}`, borderRadius: 20, background: "#fffefb", boxShadow: "0 8px 20px rgba(29,23,18,.18)", flexShrink: 0 }}>
                       {/* top row — avatar centred against the name + agency only (not the full stack) */}
                       <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-                        {/* avatar — pink-gradient disc, ink #2c2017 initials (agent monogram; the black user avatar stays distinct) */}
-                        <span style={{ flexShrink: 0, width: 66, height: 66, borderRadius: "50%", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", border: "1px solid #e8c8bc", color: qdbBoldInk2, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_SERIF, fontSize: 22, fontWeight: 700 }}>{initials}</span>
+                        {/* avatar — solid ink disc + white initials (per the Queries Hub mockup) */}
+                        <span style={{ flexShrink: 0, width: 66, height: 66, borderRadius: "50%", background: "#1d1712", border: "none", color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_SERIF, fontSize: 22, fontWeight: 700 }}>{initials}</span>
                         <div style={{ flex: 1, minWidth: 0, paddingRight: 150 }}>
                           <div style={{ fontFamily: FONT_SERIF, fontSize: 33, fontWeight: 800, color: qdbBoldInk, lineHeight: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{nameplate}</div>
                           {hasName && !!activeAgent.agency?.trim() && (
@@ -2689,9 +2689,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 18, padding: "16px 18px 20px", flex: "0 1 auto", minHeight: 0, alignItems: "stretch" }}>
 
                   {/* ── Sub-card 1: Tracking ── */}
-                  <div className="qp-card" style={{ minWidth: 0, background: "#fdfaf5", border: `1.5px solid ${qdbBoldInk}`, borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 300, boxShadow: "0 8px 20px rgba(29,23,18,.18)" }}>
+                  <div className="qp-card" style={{ minWidth: 0, background: "#fffefb", border: `1.5px solid ${qdbBoldInk}`, borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 300, boxShadow: "0 2px 7px rgba(29,23,18,.07)" }}>
                       {/* pink header band */}
-                      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: qdbBoldPinkBand, borderBottom: `1px solid ${qdbBoldInk2}`, flexShrink: 0 }}>
+                      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: qdbBoldPinkBand, borderBottom: `1.5px solid ${qdbBoldInk2}`, flexShrink: 0 }}>
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={qdbBoldInk2} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M3 12h4l3 8 4-16 3 8h4" /></svg>
                         <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 800, color: qdbBoldInk2 }}>Tracking</span>
                       </div>
@@ -2714,9 +2714,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     </div>{/* ── end sub-card 1: Tracking ── */}
 
                   {/* ── Sub-card 2: What you sent ── */}
-                  <div className="qp-card" style={{ minWidth: 0, background: "#fdfaf5", border: `1.5px solid ${qdbBoldInk}`, borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 300, boxShadow: "0 8px 20px rgba(29,23,18,.18)" }}>
+                  <div className="qp-card" style={{ minWidth: 0, background: "#fffefb", border: `1.5px solid ${qdbBoldInk}`, borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 300, boxShadow: "0 2px 7px rgba(29,23,18,.07)" }}>
                       {/* pink header band */}
-                      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: qdbBoldPinkBand, borderBottom: `1px solid ${qdbBoldInk2}`, flexShrink: 0 }}>
+                      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: qdbBoldPinkBand, borderBottom: `1.5px solid ${qdbBoldInk2}`, flexShrink: 0 }}>
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={qdbBoldInk2} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>
                         <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 800, color: qdbBoldInk2 }}>What you sent</span>
                       </div>
@@ -2806,9 +2806,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     </div>{/* ── end sub-card 2: What you sent ── */}
 
                   {/* ── Sub-card 3: Notes — journal pins to bottom via flex-1 on messages area ── */}
-                  <div className="qp-card" style={{ minWidth: 0, background: "#fdfaf5", border: `1.5px solid ${qdbBoldInk}`, borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 300, boxShadow: "0 8px 20px rgba(29,23,18,.18)" }}>
+                  <div className="qp-card" style={{ minWidth: 0, background: "#fffefb", border: `1.5px solid ${qdbBoldInk}`, borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 300, boxShadow: "0 2px 7px rgba(29,23,18,.07)" }}>
                       {/* pink header band */}
-                      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: qdbBoldPinkBand, borderBottom: `1px solid ${qdbBoldInk2}`, flexShrink: 0 }}>
+                      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: qdbBoldPinkBand, borderBottom: `1.5px solid ${qdbBoldInk2}`, flexShrink: 0 }}>
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={qdbBoldInk2} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H19v15H6a2 2 0 0 0-2 2z" /><path d="M4 19.5A1.5 1.5 0 0 1 5.5 18H19" /></svg>
                         <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 800, color: qdbBoldInk2 }}>Journal</span>
                       </div>
