@@ -2097,12 +2097,13 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         {/* Desk (bold theme) — a cool blue-grey working panel (no border, chunky radius, soft
             shadow) on which the list + reading-pane sit as slate-bordered white cards. The action
             bar lives inside it. Sidebar + breadcrumb stay outside (shell chrome, untouched). */}
-        {/* Desk hugs its content (not flex:1) — short content lets the cream page show beneath;
-            tall content grows the desk and the main column scrolls. ~30px cream margin below. */}
-        <div style={{ padding: "8px 8px 30px", display: "flex", flexDirection: "column" }}>
-          <div className="qdesk" style={{ position: "relative", display: "flex", flexDirection: "column", border: "none", borderRadius: 26, background: qdbBoldDesk, overflow: "hidden", boxShadow: "0 8px 22px rgba(29,23,18,.10)" }}>
+        {/* Fit-to-screen: with queries present the desk FILLS the height below the appbar (flex:1),
+            so 20 rows scroll inside the list column rather than pushing the page past 100vh. The
+            EMPTY state keeps content-height (the centred welcome card needs no internal scroll). */}
+        <div style={{ padding: "8px 8px 30px", display: "flex", flexDirection: "column", ...(queries.length > 0 ? { flex: 1, minHeight: 0 } : {}) }}>
+          <div className="qdesk" style={{ position: "relative", display: "flex", flexDirection: "column", border: "none", borderRadius: 26, background: qdbBoldDesk, overflow: "hidden", boxShadow: "0 8px 22px rgba(29,23,18,.10)", ...(queries.length > 0 ? { flex: 1, minHeight: 0 } : {}) }}>
             {/* deskpad — the blue-grey working surface */}
-            <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 16 }}>
+            <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 16, ...(queries.length > 0 ? { flex: 1, minHeight: 0 } : {}) }}>
 
         {queries.length === 0 ? (
           /* ── Empty database — no queries anywhere. Ghost list + a welcoming empty pane with a
@@ -2308,11 +2309,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         </AnimatePresence>
 
         {/* ── Content grid: 360px list + 1fr reading pane (inside the deskpad) ── */}
-        <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 18, alignItems: "start" }}>
+        <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 18, flex: 1, minHeight: 0, alignItems: "stretch" }}>
 
           {/* List card (ledger) — white, NO border, soft shadow matching the pane; a flush flex
               column: plain header + inset rule + hairline-divided rows below */}
-          <div style={{ background: "#ffffff", border: "none", borderRadius: 22, overflow: "hidden", boxShadow: "0 8px 26px rgba(29,23,18,.12)", display: "flex", flexDirection: "column" }}>
+          <div style={{ background: "#ffffff", border: "none", borderRadius: 22, overflow: "hidden", boxShadow: "0 8px 26px rgba(29,23,18,.12)", display: "flex", flexDirection: "column", minHeight: 0 }}>
 
               {/* List head — no box: count (Playfair) + Sort / Export mono icon-buttons */}
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "15px 16px 11px", flexShrink: 0 }}>
@@ -2341,11 +2342,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
               {/* thin inset grey rule beneath the header (doesn't reach the container edges) */}
               <div style={{ height: 1, background: "#cfc6ba", margin: "0 6px", flexShrink: 0 }} />
 
-              {/* Rows area — content-height now (the desk hugs its content, the main column scrolls),
-                  so the whole list shows; the fade overlays stay inert since there's no inner scroll. */}
-              <div style={{ position: "relative" }}>
+              {/* Rows area — flex:1 so it fills the list card below the fixed header; the inner scroll
+                  keeps the list within one screen and reactivates the top/bottom fade overlays. */}
+              <div style={{ position: "relative", flex: 1, minHeight: 0 }}>
                 <div aria-hidden="true" style={{ position: "absolute", left: 0, right: 0, top: 0, height: 26, pointerEvents: "none", zIndex: 2, background: "linear-gradient(to bottom, #fff, rgba(255,255,255,0))", opacity: listFade.top ? 1 : 0, transition: "opacity .16s ease" }} />
-                <div ref={listScrollRef} onScroll={recomputeListFades} style={{ overflowX: "hidden", padding: "2px 0 4px" }} className="custom-query-list-scrollbar">
+                <div ref={listScrollRef} onScroll={recomputeListFades} style={{ height: "100%", overflowY: "auto", overflowX: "hidden", padding: "2px 0 4px" }} className="custom-query-list-scrollbar">
                   <div>
             {(() => {
               const statusOrder = [
@@ -2582,11 +2583,10 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
               </div>{/* closes scroll-area wrapper */}
           </div>{/* closes list card */}
 
-          {/* Reading pane — a plain hairline paper card now (the heavy black frame, rail + glint moved
-              outward to the encompassing .qdesk). Internals are untouched. Height stays content-driven:
-              alignSelf:start lets the pane hug its tallest column's content (capped at the well
-              height), the columns scroll internally past that — no stretch-to-fill. */}
-          <div className="qp-pane" style={{ position: "relative", alignSelf: "start", border: "none", borderRadius: 22, background: "#ffffff", boxShadow: "0 8px 26px rgba(29,23,18,.12)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          {/* Reading pane — a plain hairline paper card. Fit-to-screen: it stretches to the grid
+              height (alignItems:stretch) and scrolls internally (overflowY:auto, minHeight:0) so a
+              tall reading pane never grows the page past 100vh; the columns still scroll within it. */}
+          <div className="qp-pane" style={{ position: "relative", minHeight: 0, border: "none", borderRadius: 22, background: "#ffffff", boxShadow: "0 8px 26px rgba(29,23,18,.12)", overflowY: "auto", overflowX: "hidden", display: "flex", flexDirection: "column" }}>
             <div style={{ display: "contents" }}>
             {activeQuery && activeAgent && activeMs ? (
               <>
