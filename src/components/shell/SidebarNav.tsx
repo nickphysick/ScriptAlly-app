@@ -12,8 +12,9 @@
  */
 import React from "react";
 import { LayoutGrid, Send, Users, Book } from "lucide-react";
-import { FONT_SERIF, burgundy, bodyInk } from "../../lib/designTokens";
+import { FONT_SERIF, bodyInk } from "../../lib/designTokens";
 import { navBorder, pinkHover, inkShell } from "./shellTokens";
+import { ScriptAllyLogo } from "../ScriptAllyLogo";
 
 interface NavItem {
   tab: string;
@@ -79,33 +80,36 @@ export const SidebarNav: React.FC<SidebarNavProps> = ({ activeTab, onNavigate, c
       width: 300, // +33% from the prior 226 (mockup widened the rail); content reflows, no restyle
       flexShrink: 0,
       background: "#faf5ee",
-      // Bold rail: cream field with a heavy ink right border (desk-scoped: rail renders only here).
-      borderRight: "1.5px solid #1d1712",
+      // Full-height rail: cream field with a grey hairline right edge (softened from Phase C's ink
+      // line so a page-tall border doesn't over-weight the chrome; inner cards keep their ink borders).
+      borderRight: "1px solid #d6cfc4",
+      position: "relative",
+      zIndex: 2,
       display: "flex",
       flexDirection: "column",
       padding: "18px 14px 14px",
       minHeight: 0,
     }}
   >
-    {/* Wordmark */}
+    {/* Logo + wordmark — the real assets, centred at the top of the rail */}
     <button
       type="button"
       onClick={() => onNavigate("dashboard")}
       style={{
-        fontFamily: FONT_SERIF,
-        fontWeight: 800,
-        fontSize: 24,
-        color: inkShell,
-        letterSpacing: "-0.01em",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 9,
         padding: "2px 8px 16px",
         background: "transparent",
         border: "none",
         cursor: "pointer",
-        textAlign: "left",
+        width: "100%",
       }}
       aria-label="ScriptAlly — go to dashboard"
     >
-      Script<span style={{ color: burgundy }}>Ally</span>
+      <img src="/scriptally-logo-v2.png" alt="" style={{ height: 30, width: "auto", flexShrink: 0 }} />
+      <ScriptAllyLogo size="md" />
     </button>
 
     {/* Global page nav */}

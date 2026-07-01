@@ -8,7 +8,7 @@ import { createPortal } from "react-dom";
 import jsPDF from "jspdf";
 import { motion, AnimatePresence } from "motion/react";
 import { QueriesRail } from "./shell/QueriesRail";
-import { QUERIES_RAIL_SLOT_ID } from "./shell/QueriesRailContext";
+import { QUERIES_RAIL_SLOT_ID, QUERIES_APPBAR_SLOT_ID } from "./shell/QueriesRailContext";
 import { useScriptAllyDb } from "../lib/db";
 import { 
   doc, 
@@ -555,9 +555,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   // Inside the SidebarShell, the live filter/sort rail (QueriesRail) is portalled into the shell's
   // rail slot so it shares this page's filter state. Resolve the slot node after the DOM commits.
   const [railSlot, setRailSlot] = useState<HTMLElement | null>(null);
+  const [appbarSlot, setAppbarSlot] = useState<HTMLElement | null>(null);
   useLayoutEffect(() => {
-    if (!inShell) { setRailSlot(null); return; }
+    if (!inShell) { setRailSlot(null); setAppbarSlot(null); return; }
     setRailSlot(document.getElementById(QUERIES_RAIL_SLOT_ID));
+    setAppbarSlot(document.getElementById(QUERIES_APPBAR_SLOT_ID));
   }, [inShell]);
   const [groupAccordionOpen, setGroupAccordionOpen] = useState(false);
   const [sortAccordionOpen, setSortAccordionOpen] = useState(false);
@@ -1745,10 +1747,21 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         railSlot,
       )}
 
+      {/* Appbar heading — portalled into the shell top-bar slot, with the live query count. */}
+      {appbarSlot && createPortal(
+        <>
+          <span style={{ fontFamily: FONT_SERIF, fontWeight: 800, fontSize: 30, color: "#1d1712", lineHeight: 1, whiteSpace: "nowrap" }}>Your Query Database</span>
+          <span style={{ fontFamily: FONT_MONO, fontSize: 11, fontWeight: 500, letterSpacing: ".06em", textTransform: "uppercase" as const, color: "#8a7d6c", whiteSpace: "nowrap" }}>
+            {queries.length} {queries.length === 1 ? "query" : "queries"}
+          </span>
+        </>,
+        appbarSlot,
+      )}
+
       {/* MAIN CONTENT — the control bar then the two-column desk (list + reading pane). */}
       <div
         className="w-full"
-        style={{ paddingLeft: 0, background: "#f2ede7", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}
+        style={{ paddingLeft: 0, background: "#faf5ee", flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column" }}
         id="queries-main-panel-container"
       >
 
@@ -2085,10 +2098,12 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         {/* Desk (bold theme) — a cool blue-grey working panel (no border, chunky radius, soft
             shadow) on which the list + reading-pane sit as slate-bordered white cards. The action
             bar lives inside it. Sidebar + breadcrumb stay outside (shell chrome, untouched). */}
-        <div style={{ padding: "8px 8px 16px", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
-          <div className="qdesk" style={{ position: "relative", flex: 1, minHeight: 0, display: "flex", flexDirection: "column", border: "none", borderRadius: 26, background: qdbBoldDesk, overflow: "hidden", boxShadow: "0 8px 22px rgba(29,23,18,.10)" }}>
+        {/* Desk hugs its content (not flex:1) — short content lets the cream page show beneath;
+            tall content grows the desk and the main column scrolls. ~30px cream margin below. */}
+        <div style={{ padding: "8px 8px 30px", display: "flex", flexDirection: "column" }}>
+          <div className="qdesk" style={{ position: "relative", display: "flex", flexDirection: "column", border: "none", borderRadius: 26, background: qdbBoldDesk, overflow: "hidden", boxShadow: "0 8px 22px rgba(29,23,18,.10)" }}>
             {/* deskpad — the blue-grey working surface */}
-            <div style={{ padding: 20, flex: 1, minHeight: 0, display: "flex", flexDirection: "column", gap: 16 }}>
+            <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 16 }}>
 
         {/* ── Control bar — search (list-pane width) over the list · actions over the reading pane ── */}
         {(() => {
@@ -2198,11 +2213,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         </AnimatePresence>
 
         {/* ── Content grid: 360px list + 1fr reading pane (inside the deskpad) ── */}
-        <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 18, alignItems: "stretch", flex: 1, minHeight: 0 }}>
+        <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 18, alignItems: "start" }}>
 
           {/* List card (ledger) — white, NO border, soft shadow matching the pane; a flush flex
               column: plain header + inset rule + hairline-divided rows below */}
-          <div style={{ background: "#ffffff", border: "none", borderRadius: 22, overflow: "hidden", boxShadow: "0 8px 26px rgba(29,23,18,.12)", minHeight: 0, display: "flex", flexDirection: "column" }}>
+          <div style={{ background: "#ffffff", border: "none", borderRadius: 22, overflow: "hidden", boxShadow: "0 8px 26px rgba(29,23,18,.12)", display: "flex", flexDirection: "column" }}>
 
               {/* List head — no box: count (Playfair) + Sort / Export mono icon-buttons */}
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "15px 16px 11px", flexShrink: 0 }}>
@@ -2231,11 +2246,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
               {/* thin inset grey rule beneath the header (doesn't reach the container edges) */}
               <div style={{ height: 1, background: "#cfc6ba", margin: "0 6px", flexShrink: 0 }} />
 
-              {/* Scroll area + scroll-aware edge fades — overlays fade in only when there is content
-                  beyond that edge. overflow-x hidden keeps the list from spawning a horizontal bar. */}
-              <div style={{ position: "relative", flex: 1, minHeight: 0 }}>
+              {/* Rows area — content-height now (the desk hugs its content, the main column scrolls),
+                  so the whole list shows; the fade overlays stay inert since there's no inner scroll. */}
+              <div style={{ position: "relative" }}>
                 <div aria-hidden="true" style={{ position: "absolute", left: 0, right: 0, top: 0, height: 26, pointerEvents: "none", zIndex: 2, background: "linear-gradient(to bottom, #fff, rgba(255,255,255,0))", opacity: listFade.top ? 1 : 0, transition: "opacity .16s ease" }} />
-                <div ref={listScrollRef} onScroll={recomputeListFades} style={{ height: "100%", overflowY: "auto", overflowX: "hidden", padding: "2px 0 4px" }} className="custom-query-list-scrollbar">
+                <div ref={listScrollRef} onScroll={recomputeListFades} style={{ overflowX: "hidden", padding: "2px 0 4px" }} className="custom-query-list-scrollbar">
                   <div>
             {(() => {
               const statusOrder = [
@@ -2476,7 +2491,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
               outward to the encompassing .qdesk). Internals are untouched. Height stays content-driven:
               alignSelf:start lets the pane hug its tallest column's content (capped at the well
               height), the columns scroll internally past that — no stretch-to-fill. */}
-          <div className="qp-pane" style={{ position: "relative", alignSelf: "start", maxHeight: "100%", border: "none", borderRadius: 22, background: "#ffffff", boxShadow: "0 8px 26px rgba(29,23,18,.12)", overflow: "hidden", minHeight: 0, display: "flex", flexDirection: "column" }}>
+          <div className="qp-pane" style={{ position: "relative", alignSelf: "start", border: "none", borderRadius: 22, background: "#ffffff", boxShadow: "0 8px 26px rgba(29,23,18,.12)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
             <div style={{ display: "contents" }}>
             {activeQuery && activeAgent && activeMs ? (
               <>

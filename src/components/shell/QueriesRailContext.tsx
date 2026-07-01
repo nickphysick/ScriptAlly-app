@@ -16,3 +16,7 @@ export const QUERIES_RAIL_SLOT_ID = "queries-rail-slot";
 export const QueriesRailContext: React.FC = () => (
   <div id={QUERIES_RAIL_SLOT_ID} style={{ display: "flex", flexDirection: "column", minHeight: 0 }} />
 );
+
+/** Appbar-heading slot in the shell top bar — the Queries page portals "Your Query Database" + the
+ *  live query count into this, the same way the rail is fed (the count lives in Queries.tsx). */
+export const QUERIES_APPBAR_SLOT_ID = "queries-appbar-slot";

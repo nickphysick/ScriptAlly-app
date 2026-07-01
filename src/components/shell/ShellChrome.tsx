@@ -17,21 +17,21 @@ import { FONT_SERIF, FONT_SANS, burgundy, bodyInk } from "../../lib/designTokens
 import { isOverdue } from "../notes/notesUtils";
 import { cardCream, chromeWhite, shellHairline, pinkHover, mutedShell } from "./shellTokens";
 
-const Avatar: React.FC<{ initial: string; size?: number }> = ({ initial, size = 30 }) => (
+const Avatar: React.FC<{ initial: string; size?: number; dark?: boolean }> = ({ initial, size = 30, dark = false }) => (
   <span
     style={{
       width: size,
       height: size,
       borderRadius: "50%",
-      background: cardCream,
-      border: "1px solid rgba(124,58,42,0.25)",
+      background: dark ? "#1d1712" : cardCream,
+      border: dark ? "none" : "1px solid rgba(124,58,42,0.25)",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
       fontFamily: FONT_SERIF,
       fontWeight: 600,
       fontSize: Math.round(size * 0.45),
-      color: burgundy,
+      color: dark ? "#ffffff" : burgundy,
       flexShrink: 0,
     }}
   >
@@ -144,7 +144,7 @@ export const ShellUtilityCluster: React.FC<{ onNavigate: (tab: string, sub?: str
           title="Account settings"
           aria-label="Account settings"
         >
-          <Avatar initial={currentUser.name[0]?.toUpperCase() ?? "?"} size={30} />
+          <Avatar dark initial={currentUser.name[0]?.toUpperCase() ?? "?"} size={30} />
         </button>
       )}
     </>
