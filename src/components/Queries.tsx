@@ -652,7 +652,10 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   
   // Quick list search
   const [listSearch, setListSearch] = useState("");
-  
+  // List-header dropdowns (Filter / Sort) — the menus themselves are built in a later phase.
+  const [filterMenuOpen, setFilterMenuOpen] = useState(false);
+  const [sortMenuOpen, setSortMenuOpen] = useState(false);
+
   // Journal text input
   const [journalInput, setJournalInput] = useState("");
 
@@ -2193,7 +2196,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         <>
 
         {/* ── Queries Hub header — white bar spanning the desk: title + subtitle · soft-pink Log CTA ── */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, background: "#fffefb", border: "1.5px solid #1d1712", borderRadius: 14, padding: "13px 22px", marginBottom: 28, boxShadow: "0 8px 20px rgba(29,23,18,.18)", flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, background: "#fffefb", border: "1.5px solid #1d1712", borderRadius: 14, padding: "13px 22px", marginBottom: 14, boxShadow: "0 8px 20px rgba(29,23,18,.18)", flexShrink: 0 }}>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontFamily: FONT_SERIF, fontWeight: 800, fontSize: 25, color: "#1d1712", lineHeight: 1 }}>Queries Hub</div>
             <div style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".04em", textTransform: "uppercase" as const, color: "#5a6472", marginTop: 8, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Tracking {hubSubtitle}</div>
@@ -2201,88 +2204,16 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           <button
             type="button"
             onClick={() => onNavigate?.("queries", "Log a query")}
-            style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "10px 17px", borderRadius: 12, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, whiteSpace: "nowrap", cursor: "pointer", background: "#f5e2da", border: "1.5px solid #e8c8bc", color: "#7c3a2a", boxShadow: "0 3px 0 #e2c2b5", flexShrink: 0 }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.05)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+            style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "10px 17px", borderRadius: 12, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, whiteSpace: "nowrap", cursor: "pointer", background: "#f5e2da", border: "1.5px solid #e8c8bc", color: "#7c3a2a", boxShadow: "0 3px 0 #e2c2b5", flexShrink: 0, transition: "transform .15s ease" }}
           >
             <Plus style={{ width: 15, height: 15 }} />
             Log a new query
           </button>
         </div>
 
-        {/* ── Control bar — search (list-pane width) over the list · actions over the reading pane ── */}
-        {(() => {
-          const ctrlAction = currentStatus
-            ? getPrimaryAction(currentStatus as QueryStatus)
-            : { kind: "record" as const, label: "Record response", ballHolder: null as null };
-          const hasActive = !!(activeQuery && activeAgent && activeMs);
-          return (
-            <div style={{ display: "grid", gridTemplateColumns: "330px 1fr", gap: 18, alignItems: "center", flexShrink: 0, marginBottom: 17 }}>
-              {/* Search — white field, exactly the list-pane width, aligned above the list below */}
-              <div style={{ position: "relative" }}>
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400 pointer-events-none" />
-                <input
-                  type="text"
-                  placeholder="Find query…"
-                  value={listSearch}
-                  onChange={(e) => setListSearch(e.target.value)}
-                  style={{ width: "100%", background: "#fff", border: `1px solid ${qdbBoldInk}`, borderRadius: 13, padding: "11px 15px 11px 40px", fontSize: 13.5, color: "#8a7a6c", fontFamily: "inherit", outline: "none" }}
-                />
-              </div>
-              {/* Action buttons — Record response + Edit start at the pane's left edge; Download as
-                  PDF is pushed to the far right. All three share one ghost style (white, grey border,
-                  black text/icons) — Record response is no longer pink/distinguished. */}
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                {ctrlAction.kind === "mark-sent" ? (
-                  <button
-                    ref={markSentTriggerRef}
-                    type="button"
-                    onClick={() => hasActive && setIsMarkSentOpen(o => !o)}
-                    onMouseEnter={e => { if (hasActive) e.currentTarget.style.background = "#f7f2ea"; }}
-                    onMouseLeave={e => (e.currentTarget.style.background = "#ffffff")}
-                    style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, color: qdbBoldInk, background: "#ffffff", border: `1px solid ${qdbBoldInk}`, borderRadius: 12, padding: "10px 15px", whiteSpace: "nowrap", boxShadow: "0 4px 11px rgba(29,23,18,.20)", cursor: hasActive ? "pointer" : "default", opacity: hasActive ? 1 : 0.5 }}
-                  >
-                    <Send style={{ width: 14, height: 14, strokeWidth: 1.8 } as any} />
-                    {ctrlAction.label}
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => hasActive && setIsRecordResponseFocusFormOpen(true)}
-                    onMouseEnter={e => { if (hasActive) e.currentTarget.style.background = "#f7f2ea"; }}
-                    onMouseLeave={e => (e.currentTarget.style.background = "#ffffff")}
-                    style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, color: qdbBoldInk, background: "#ffffff", border: `1px solid ${qdbBoldInk}`, borderRadius: 12, padding: "10px 15px", whiteSpace: "nowrap", boxShadow: "0 4px 11px rgba(29,23,18,.20)", cursor: hasActive ? "pointer" : "default", opacity: hasActive ? 1 : 0.5 }}
-                  >
-                    <Send style={{ width: 14, height: 14, strokeWidth: 1.8 } as any} />
-                    {ctrlAction.label}
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={() => { if (hasActive && activeQuery) openEditQuery(activeQuery.id); }}
-                  onMouseEnter={e => { if (hasActive) e.currentTarget.style.background = "#f7f2ea"; }}
-                  onMouseLeave={e => (e.currentTarget.style.background = "#ffffff")}
-                  style={{ display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, color: qdbBoldInk, background: "#ffffff", border: `1px solid ${qdbBoldInk}`, borderRadius: 12, padding: "10px 15px", whiteSpace: "nowrap", boxShadow: "0 4px 11px rgba(29,23,18,.20)", cursor: hasActive ? "pointer" : "default", opacity: hasActive ? 1 : 0.5 }}
-                >
-                  <Pencil style={{ width: 13, height: 13 }} />
-                  Edit
-                </button>
-                {/* spacer — pushes Download as PDF to the far right edge of the pane */}
-                <div style={{ flex: 1 }} />
-                <button
-                  type="button"
-                  onClick={() => hasActive && !isGeneratingPDF && handleDownloadPDF()}
-                  onMouseEnter={e => { if (hasActive && !isGeneratingPDF) e.currentTarget.style.background = "#f7f2ea"; }}
-                  onMouseLeave={e => (e.currentTarget.style.background = "#ffffff")}
-                  style={{ display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, color: qdbBoldInk, background: "#ffffff", border: `1px solid ${qdbBoldInk}`, borderRadius: 12, padding: "10px 15px", whiteSpace: "nowrap", boxShadow: "0 4px 11px rgba(29,23,18,.20)", cursor: (hasActive && !isGeneratingPDF) ? "pointer" : "default", opacity: (hasActive && !isGeneratingPDF) ? 1 : 0.5 }}
-                >
-                  <Download style={{ width: 13, height: 13 }} />
-                  {isGeneratingPDF ? "Generating…" : "Download as PDF"}
-                </button>
-              </div>
-            </div>
-          );
-        })()}
-
-        {/* MarkSentPopover — anchored via useFixedMenu to the control bar CTA */}
+        {/* MarkSentPopover — anchored via useFixedMenu to the actions-toolbar CTA */}
         <AnimatePresence>
           {isMarkSentOpen && activeQuery && activeAgent && (() => {
             const a2 = getPrimaryAction(currentStatus as QueryStatus);
@@ -2315,15 +2246,28 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           })()}
         </AnimatePresence>
 
-        {/* ── Content grid: 360px list + 1fr reading pane (inside the deskpad) ── */}
-        <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "330px 1fr", gap: 18, flex: 1, minHeight: 0, alignItems: "stretch" }}>
+        {/* ── Split — list card (full desk height, col 1) · actions toolbar (col 2 row 1) over the
+            reading pane (col 2 row 2). Rows: auto (toolbar) then 1fr (pane). ── */}
+        <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "330px 1fr", gridTemplateRows: "auto 1fr", columnGap: 20, rowGap: 14, flex: 1, minHeight: 0, alignItems: "start" }}>
 
-          {/* List card (ledger) — white, NO border, soft shadow matching the pane; a flush flex
-              column: plain header + inset rule + hairline-divided rows below */}
-          <div style={{ background: "#ffffff", border: "none", borderRadius: 22, overflow: "hidden", boxShadow: "0 8px 26px rgba(29,23,18,.12)", display: "flex", flexDirection: "column", minHeight: 0 }}>
+          {/* List card — spans both rows so it fills the desk height; search + header + CSV footer are
+              fixed, only the rows scroll (fit-to-screen, independent of row count). */}
+          <div style={{ gridColumn: 1, gridRow: "1 / span 2", alignSelf: "stretch", background: "#ffffff", border: "none", borderRadius: 22, overflow: "hidden", boxShadow: "0 8px 26px rgba(29,23,18,.12)", display: "flex", flexDirection: "column", minHeight: 0 }}>
 
-              {/* List head — no box: count (Playfair) + Sort / Export mono icon-buttons */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "15px 16px 11px", flexShrink: 0 }}>
+              {/* Search — fixed at the top of the list card */}
+              <div style={{ position: "relative", margin: "10px 6px 8px", flexShrink: 0 }}>
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400 pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  value={listSearch}
+                  onChange={(e) => setListSearch(e.target.value)}
+                  style={{ width: "100%", background: "#fff", border: `1px solid ${qdbBoldInk}`, borderRadius: 13, padding: "10px 15px 10px 38px", fontSize: 13.5, color: "#8a7a6c", fontFamily: "inherit", outline: "none", boxShadow: "0 2px 8px rgba(29,23,18,.10)" }}
+                />
+              </div>
+
+              {/* List head — count (Playfair) + Sort / Filter mono icon-buttons */}
+              <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "4px 6px 12px", flexShrink: 0 }}>
                 <span style={{ fontFamily: FONT_SERIF, fontSize: 18, fontWeight: 800, color: qdbBoldInk }}>
                   {sortedList.length} {sortedList.length === 1 ? "query" : "queries"}
                 </span>
@@ -2338,11 +2282,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   </button>
                   <button
                     type="button"
-                    onClick={handleExportFilteredCSV}
+                    onClick={() => setFilterMenuOpen((o) => !o)}
                     style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "transparent", border: "none", cursor: "pointer", fontFamily: FONT_MONO, fontSize: 10, fontWeight: 600, letterSpacing: ".03em", textTransform: "uppercase" as const, color: qdbBoldInk2 }}
                   >
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14" /></svg>
-                    Export
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M3 5h18l-7 8v6l-4 2v-8z" /></svg>
+                    Filter
                   </button>
                 </div>
               </div>
@@ -2588,12 +2532,59 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 </div>{/* closes scroll container */}
                 <div aria-hidden="true" style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 26, pointerEvents: "none", zIndex: 2, background: "linear-gradient(to top, #fff, rgba(255,255,255,0))", opacity: listFade.bottom ? 1 : 0, transition: "opacity .16s ease" }} />
               </div>{/* closes scroll-area wrapper */}
+
+              {/* CSV export — muted footer pinned to the list-card foot; disabled when nothing to export */}
+              <button
+                type="button"
+                onClick={() => sortedList.length > 0 && handleExportFilteredCSV()}
+                disabled={sortedList.length === 0}
+                style={{ flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, background: "transparent", border: "none", borderTop: "1px solid #ece3d6", padding: 11, fontFamily: FONT_MONO, fontSize: 9.5, fontWeight: 600, letterSpacing: ".06em", textTransform: "uppercase" as const, color: sortedList.length === 0 ? "#c3b8a8" : qdbBoldMuted, cursor: sortedList.length === 0 ? "default" : "pointer" }}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v11M7 9l5 5 5-5M5 21h14" /></svg>
+                Export as CSV
+              </button>
           </div>{/* closes list card */}
 
-          {/* Reading pane — blush paper card. Fit-to-screen: it HUGS its own content (alignSelf:start)
-              so the blue desk shows beneath it, while the list column stretches and scrolls; it only
-              scrolls internally (maxHeight:100% + overflowY:auto) if its content would exceed the desk. */}
-          <div className="qp-pane" style={{ position: "relative", alignSelf: "start", maxHeight: "100%", minHeight: 0, border: "1px solid #1d1712", borderRadius: 22, background: "#f5e9e7", boxShadow: "0 8px 26px rgba(29,23,18,.12)", overflowY: "auto", overflowX: "hidden", display: "flex", flexDirection: "column" }}>
+          {/* Actions toolbar — Record response + Edit begin at the pane's left edge; Download as PDF is
+              pushed to the far right. All three share the outlined ghost style (white, ink border). */}
+          {(() => {
+            const ctrlAction = currentStatus
+              ? getPrimaryAction(currentStatus as QueryStatus)
+              : { kind: "record" as const, label: "Record response", ballHolder: null as null };
+            const hasActive = !!(activeQuery && activeAgent && activeMs);
+            const abtn: React.CSSProperties = { display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, color: qdbBoldInk, background: "#ffffff", border: `1px solid ${qdbBoldInk}`, borderRadius: 12, padding: "9px 15px", whiteSpace: "nowrap", boxShadow: "0 4px 11px rgba(29,23,18,.20)", transition: "transform .16s ease" };
+            const swell = (on: boolean) => ({
+              onMouseEnter: (e: React.MouseEvent<HTMLButtonElement>) => { if (on) e.currentTarget.style.transform = "scale(1.04)"; },
+              onMouseLeave: (e: React.MouseEvent<HTMLButtonElement>) => { e.currentTarget.style.transform = "scale(1)"; },
+            });
+            return (
+              <div style={{ gridColumn: 2, gridRow: 1, display: "flex", gap: 12, alignItems: "center" }}>
+                {ctrlAction.kind === "mark-sent" ? (
+                  <button ref={markSentTriggerRef} type="button" onClick={() => hasActive && setIsMarkSentOpen(o => !o)} {...swell(hasActive)} style={{ ...abtn, gap: 8, cursor: hasActive ? "pointer" : "default", opacity: hasActive ? 1 : 0.5 }}>
+                    <Send style={{ width: 14, height: 14, strokeWidth: 1.8 } as any} />
+                    {ctrlAction.label}
+                  </button>
+                ) : (
+                  <button type="button" onClick={() => hasActive && setIsRecordResponseFocusFormOpen(true)} {...swell(hasActive)} style={{ ...abtn, gap: 8, cursor: hasActive ? "pointer" : "default", opacity: hasActive ? 1 : 0.5 }}>
+                    <Send style={{ width: 14, height: 14, strokeWidth: 1.8 } as any} />
+                    {ctrlAction.label}
+                  </button>
+                )}
+                <button type="button" onClick={() => { if (hasActive && activeQuery) openEditQuery(activeQuery.id); }} {...swell(hasActive)} style={{ ...abtn, cursor: hasActive ? "pointer" : "default", opacity: hasActive ? 1 : 0.5 }}>
+                  <Pencil style={{ width: 13, height: 13 }} />
+                  Edit
+                </button>
+                <button type="button" onClick={() => hasActive && !isGeneratingPDF && handleDownloadPDF()} {...swell(hasActive && !isGeneratingPDF)} style={{ ...abtn, marginLeft: "auto", cursor: (hasActive && !isGeneratingPDF) ? "pointer" : "default", opacity: (hasActive && !isGeneratingPDF) ? 1 : 0.5 }}>
+                  <Download style={{ width: 13, height: 13 }} />
+                  {isGeneratingPDF ? "Generating…" : "Download as PDF"}
+                </button>
+              </div>
+            );
+          })()}
+
+          {/* Reading pane — blush paper card (col 2, row 2). Fit: HUGS its content (blue desk shows
+              beneath); caps at the row height (maxHeight:100%) and scrolls internally if tall. */}
+          <div className="qp-pane" style={{ gridColumn: 2, gridRow: 2, position: "relative", alignSelf: "start", maxHeight: "100%", minHeight: 0, border: "1px solid #1d1712", borderRadius: 22, background: "#f5e9e7", boxShadow: "0 8px 26px rgba(29,23,18,.12)", overflowY: "auto", overflowX: "hidden", display: "flex", flexDirection: "column" }}>
             <div style={{ display: "contents" }}>
             {activeQuery && activeAgent && activeMs ? (
               <>
