@@ -14,6 +14,7 @@
  * and the not-yet-migrated tabs); the global top <Nav> is suppressed for any tab rendered here.
  */
 import React from "react";
+import { HelpCircle } from "lucide-react";
 import { SidebarNav } from "./SidebarNav";
 
 interface SidebarShellProps {
@@ -37,12 +38,25 @@ export const SidebarShell: React.FC<SidebarShellProps> = ({
   onCrumbClick,
   context,
   account,
-  utility,
   children,
 }) => (
   <div style={{ display: "flex", height: "100vh", overflow: "hidden", background: "#ffffff" }}>
-    <SidebarNav activeTab={activeTab} onNavigate={onNavigate} context={context} account={account} />
+    <SidebarNav activeTab={activeTab} onNavigate={onNavigate} account={account} />
     {/* Content column fills the full height (no top strip) — the page owns its own header. */}
     <div style={{ flex: 1, minWidth: 0, minHeight: 0, overflow: "hidden", background: "#ffffff" }}>{children}</div>
+    {/* Floating help — fixed bottom-right of the viewport */}
+    <button
+      type="button"
+      onClick={() => onNavigate("help")}
+      title="Help"
+      aria-label="Help"
+      style={{
+        position: "fixed", bottom: 22, right: 22, width: 48, height: 48, borderRadius: "50%",
+        background: "#fffefb", border: "1.5px solid #1d1712", boxShadow: "0 6px 18px rgba(29,23,18,.22)",
+        display: "flex", alignItems: "center", justifyContent: "center", color: "#7c3a2a", cursor: "pointer", zIndex: 60,
+      }}
+    >
+      <HelpCircle style={{ width: 22, height: 22 }} />
+    </button>
   </div>
 );

@@ -119,40 +119,18 @@ const IconButton: React.FC<{ title: string; onClick: () => void; children: React
   </button>
 );
 
-/** Rail foot — the utility icons (help · notifications · settings) in a row, over the account chip
- *  (black avatar disc + name + chevron), pinned to the sidebar bottom above a hairline. This restores
- *  the utilities + account to the rail now that the Queries Hub has no top bar. Matches the mockup
- *  `.railfoot`. Bell carries the live unread count (tasks + overdue dated notes). */
+/** Rail foot — the account chip (black avatar disc + name + chevron) pinned to the sidebar bottom
+ *  above a hairline. Per the Queries Hub redesign the utility icons moved off the rail (help is now a
+ *  floating FAB); the account chip is all that remains. Collapse-aware via `.qacct-*` classes: the
+ *  name + chevron hide when the rail is collapsed (rule lives in SidebarNav's scoped <style>). */
 export const ShellRailFoot: React.FC<{ onNavigate: (tab: string, sub?: string) => void }> = ({ onNavigate }) => {
-  const { currentUser, tasks, notes } = useScriptAllyDb();
+  const { currentUser } = useScriptAllyDb();
   if (!currentUser) return null;
-  const overdueNotes = notes.filter((n) => !n.done && isOverdue(n.dueDate));
-  const count = tasks.length + overdueNotes.length;
-  const badge = count > 0 ? (count > 9 ? "9+" : String(count)) : undefined;
-  const railIcon: React.CSSProperties = {
-    background: "transparent", border: "none", cursor: "pointer", color: "#8a7d6c",
-    display: "flex", alignItems: "center", justifyContent: "center", padding: 0, position: "relative",
-  };
   return (
     <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: 8, paddingTop: 13, borderTop: "1px solid #e7ddd0" }}>
-      {/* utility row — bare icons, space-between */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 6px" }}>
-        <button type="button" style={railIcon} title="Help Centre" aria-label="Help Centre" onClick={() => onNavigate("help")}>
-          <HelpCircle style={{ width: 18, height: 18 }} />
-        </button>
-        <button type="button" style={railIcon} title="Notifications" aria-label="Notifications" onClick={() => onNavigate("dashboard")}>
-          <Bell style={{ width: 18, height: 18 }} />
-          {badge && (
-            <span style={{ position: "absolute", top: -4, right: -6, background: burgundy, color: chromeWhite, fontFamily: "'JetBrains Mono', monospace", fontSize: 7, fontWeight: 600, padding: "1px 3px", borderRadius: 5, lineHeight: 1 }}>{badge}</span>
-          )}
-        </button>
-        <button type="button" style={railIcon} title="Settings" aria-label="Settings" onClick={() => onNavigate("account")}>
-          <Settings style={{ width: 18, height: 18 }} />
-        </button>
-      </div>
-      {/* account chip — black avatar disc + name + chevron */}
       <button
         type="button"
+        className="qacct"
         onClick={() => onNavigate("account")}
         title="Account settings"
         style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 8px", borderRadius: 10, background: "transparent", border: "none", cursor: "pointer", width: "100%", textAlign: "left" }}
@@ -160,8 +138,8 @@ export const ShellRailFoot: React.FC<{ onNavigate: (tab: string, sub?: string) =
         <span style={{ width: 26, height: 26, borderRadius: "50%", background: "#1d1712", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 600, flexShrink: 0, fontFamily: FONT_SANS }}>
           {currentUser.name[0]?.toUpperCase() ?? "?"}
         </span>
-        <span style={{ flex: 1, minWidth: 0, fontFamily: FONT_SERIF, fontWeight: 600, fontSize: 13, color: "#1d1712", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{currentUser.name}</span>
-        <ChevronDown style={{ width: 14, height: 14, color: "#9a8e80", flexShrink: 0 }} />
+        <span className="qacct-name" style={{ flex: 1, minWidth: 0, fontFamily: FONT_SERIF, fontWeight: 600, fontSize: 13, color: "#1d1712", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{currentUser.name}</span>
+        <ChevronDown className="qacct-chev" style={{ width: 14, height: 14, color: "#9a8e80", flexShrink: 0 }} />
       </button>
     </div>
   );
