@@ -10,7 +10,6 @@ import { Auth } from "./components/Auth";
 import { AppShell } from "./components/AppShell";
 import { SidebarShell } from "./components/shell/SidebarShell";
 import { ShellRailFoot } from "./components/shell/ShellChrome";
-import { QueriesRailContext } from "./components/shell/QueriesRailContext";
 import { QueriesRail } from "./components/shell/QueriesRail";
 import { EditAgentHost } from "./components/EditAgentHost";
 import { EditQueryHost } from "./components/EditQueryHost";
@@ -470,7 +469,6 @@ function AppContent() {
           activeTab={activeTab}
           onNavigate={handleNavigate}
           breadcrumb={["Queries", "Queries Hub"]}
-          context={<QueriesRailContext />}
           account={<ShellRailFoot onNavigate={handleNavigate} />}
         >
           <Queries searchQuery={searchQuery} onNavigate={handleNavigate} activeSubPage={activeSubPage} inShell />

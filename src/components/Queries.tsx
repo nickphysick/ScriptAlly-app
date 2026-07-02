@@ -3,12 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
-import { createPortal } from "react-dom";
+import React, { useState, useEffect, useRef } from "react";
 import jsPDF from "jspdf";
 import { motion, AnimatePresence } from "motion/react";
-import { QueriesRail } from "./shell/QueriesRail";
-import { QUERIES_RAIL_SLOT_ID } from "./shell/QueriesRailContext";
 import { useScriptAllyDb } from "../lib/db";
 import { 
   doc, 
@@ -551,13 +548,6 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   const [sortDirs, setSortDirs] = useState<Record<string, number>>({});
   const [devTheme, setDevTheme] = useState<"burgundy" | "slate" | "emerald">("burgundy");
   const [filterAccordionOpen, setFilterAccordionOpen] = useState(true);
-  // Inside the SidebarShell, the live filter/sort rail (QueriesRail) is portalled into the shell's
-  // rail slot so it shares this page's filter state. Resolve the slot node after the DOM commits.
-  const [railSlot, setRailSlot] = useState<HTMLElement | null>(null);
-  useLayoutEffect(() => {
-    if (!inShell) { setRailSlot(null); return; }
-    setRailSlot(document.getElementById(QUERIES_RAIL_SLOT_ID));
-  }, [inShell]);
   const [groupAccordionOpen, setGroupAccordionOpen] = useState(false);
   const [sortAccordionOpen, setSortAccordionOpen] = useState(false);
 
@@ -1735,20 +1725,6 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
       )}
 
 
-      {/* Live filter/sort rail — portalled into the SidebarShell rail slot (shares this page's state). */}
-      {railSlot && createPortal(
-        <QueriesRail
-          queries={queries}
-          manuscripts={manuscripts}
-          selectedStatusFilters={selectedStatusFilters}
-          setSelectedStatusFilters={setSelectedStatusFilters}
-          selectedManuscriptFilter={selectedManuscriptFilter}
-          setSelectedManuscriptFilter={setSelectedManuscriptFilter}
-          sortOption={sortOption}
-          setSortOption={setSortOption}
-        />,
-        railSlot,
-      )}
 
 
       {/* MAIN CONTENT — the control bar then the two-column desk (list + reading pane). */}
@@ -2274,7 +2250,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 <div style={{ display: "flex", gap: 14 }}>
                   <button
                     type="button"
-                    onClick={() => setSortOption(sortOption === "Newest first" ? "Oldest first" : "Newest first")}
+                    onClick={() => { setSortMenuOpen((o) => !o); setFilterMenuOpen(false); }}
                     style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "transparent", border: "none", cursor: "pointer", fontFamily: FONT_MONO, fontSize: 10, fontWeight: 600, letterSpacing: ".03em", textTransform: "uppercase" as const, color: qdbBoldInk2 }}
                   >
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M7 12h10M10 18h4" /></svg>
@@ -2282,13 +2258,103 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   </button>
                   <button
                     type="button"
-                    onClick={() => setFilterMenuOpen((o) => !o)}
+                    onClick={() => { setFilterMenuOpen((o) => !o); setSortMenuOpen(false); }}
                     style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "transparent", border: "none", cursor: "pointer", fontFamily: FONT_MONO, fontSize: 10, fontWeight: 600, letterSpacing: ".03em", textTransform: "uppercase" as const, color: qdbBoldInk2 }}
                   >
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M3 5h18l-7 8v6l-4 2v-8z" /></svg>
                     Filter
                   </button>
                 </div>
+
+                {/* click-away backdrop for the Filter / Sort menus */}
+                {(filterMenuOpen || sortMenuOpen) && (
+                  <div onClick={() => { setFilterMenuOpen(false); setSortMenuOpen(false); }} style={{ position: "fixed", inset: 0, zIndex: 20 }} />
+                )}
+
+                {/* Sort menu */}
+                {sortMenuOpen && (
+                  <div style={{ position: "absolute", top: "100%", right: 2, marginTop: 8, width: 178, background: "#fff", border: "1px solid #1d1712", borderRadius: 12, boxShadow: "0 12px 30px rgba(29,23,18,.22)", padding: 7, zIndex: 30 }}>
+                    <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: ".12em", textTransform: "uppercase" as const, color: qdbBoldMuted, padding: "4px 9px 7px" }}>Sort</div>
+                    {["Newest first", "Oldest first", "Agent name A-Z", "Agent name Z-A"].map((opt) => {
+                      const on = sortOption === opt;
+                      return (
+                        <button key={opt} type="button" onClick={() => { setSortOption(opt); setSortMenuOpen(false); }} style={{ display: "flex", alignItems: "center", width: "100%", textAlign: "left", border: "none", cursor: "pointer", padding: "7px 9px", borderRadius: 8, fontFamily: "'Inter',sans-serif", fontSize: 13, color: "#3a2c24", fontWeight: on ? 600 : 400, background: on ? "#f4ebe2" : "transparent" }}>
+                          {opt}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Filter menu — status set with live counts + direction dots (+ manuscript scope) */}
+                {filterMenuOpen && (() => {
+                  const countOf = (s: QueryStatus) => queries.filter((q) => q.status === s).length;
+                  const activeSum = ACTIVE_STATUSES.reduce((a, s) => a + countOf(s), 0);
+                  const closedSum = CLOSED_STATUSES.reduce((a, s) => a + countOf(s), 0);
+                  const toggleStatus = (id: QueryStatus) => {
+                    let next = selectedStatusFilters.filter((f) => f !== "All");
+                    next = next.includes(id) ? next.filter((f) => f !== id) : [...next, id];
+                    setSelectedStatusFilters(next.length === 0 ? ["All"] : next);
+                  };
+                  const dot = (kind: "nul" | "out" | "in" | "closed"): React.CSSProperties => ({
+                    width: 12, height: 12, borderRadius: "50%", border: "2px solid", flexShrink: 0,
+                    ...(kind === "nul" ? { borderColor: "#7d7268" }
+                      : kind === "out" ? { borderColor: "#7c3a2a", background: "#f8e7dc" }
+                      : kind === "in" ? { borderColor: "#8a9e88", background: "#e9ede6" }
+                      : { borderColor: "#a89f92", background: "#efece7" }),
+                  });
+                  const rowStyle = (on: boolean): React.CSSProperties => ({ display: "flex", alignItems: "center", gap: 9, width: "100%", textAlign: "left", border: "none", cursor: "pointer", padding: "7px 9px", borderRadius: 8, fontSize: 13, background: on ? "#f4ebe2" : "transparent" });
+                  const lbl = (on: boolean): React.CSSProperties => ({ flex: 1, color: "#3a2c24", fontFamily: "'Inter',sans-serif", fontWeight: on ? 600 : 400 });
+                  const cnt: React.CSSProperties = { fontFamily: FONT_MONO, fontSize: 11, color: qdbBoldMuted };
+                  const STATUS_ROWS: { id: QueryStatus; label: string; kind: "out" | "in" }[] = [
+                    { id: QueryStatus.QUERIED, label: "Queried", kind: "out" },
+                    { id: QueryStatus.PARTIAL_REQUESTED, label: "Partial req.", kind: "in" },
+                    { id: QueryStatus.PARTIAL_SENT, label: "Partial sent", kind: "out" },
+                    { id: QueryStatus.FULL_REQUESTED, label: "Full req.", kind: "in" },
+                    { id: QueryStatus.FULL_SENT, label: "Full sent", kind: "out" },
+                    { id: QueryStatus.REVISE_RESUBMIT, label: "R&R", kind: "in" },
+                    { id: QueryStatus.OFFER, label: "Offers", kind: "out" },
+                  ];
+                  return (
+                    <div style={{ position: "absolute", top: "100%", right: 2, marginTop: 8, width: 216, background: "#fff", border: "1px solid #1d1712", borderRadius: 12, boxShadow: "0 12px 30px rgba(29,23,18,.22)", padding: 7, zIndex: 30, maxHeight: 380, overflowY: "auto" }}>
+                      {/* Manuscript scope — only when tracking more than one book */}
+                      {manuscripts.length > 1 && (
+                        <>
+                          <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: ".12em", textTransform: "uppercase" as const, color: qdbBoldMuted, padding: "4px 9px 7px" }}>Manuscript</div>
+                          <button type="button" onClick={() => setSelectedManuscriptFilter("All")} style={rowStyle(selectedManuscriptFilter === "All")}>
+                            <span style={lbl(selectedManuscriptFilter === "All")}>All manuscripts</span>
+                            <span style={cnt}>{queries.length}</span>
+                          </button>
+                          {manuscripts.map((m) => {
+                            const on = selectedManuscriptFilter === m.id;
+                            return (
+                              <button key={m.id} type="button" onClick={() => setSelectedManuscriptFilter(m.id)} style={rowStyle(on)}>
+                                <span style={{ ...lbl(on), overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.title}</span>
+                                <span style={cnt}>{queries.filter((q) => q.manuscriptId === m.id).length}</span>
+                              </button>
+                            );
+                          })}
+                          <div style={{ height: 1, background: "#ece3d6", margin: "6px 4px" }} />
+                        </>
+                      )}
+                      <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: ".12em", textTransform: "uppercase" as const, color: qdbBoldMuted, padding: "4px 9px 7px" }}>Filter</div>
+                      <button type="button" onClick={() => setSelectedStatusFilters(allActiveHighlighted ? ["All"] : [...ACTIVE_STATUSES])} style={rowStyle(allActiveHighlighted)}>
+                        <span style={dot("nul")} /><span style={lbl(allActiveHighlighted)}>All active</span><span style={cnt}>{activeSum}</span>
+                      </button>
+                      {STATUS_ROWS.map((r) => {
+                        const on = selectedStatusFilters.includes(r.id);
+                        return (
+                          <button key={r.id} type="button" onClick={() => toggleStatus(r.id)} style={rowStyle(on)}>
+                            <span style={dot(r.kind)} /><span style={lbl(on)}>{r.label}</span><span style={cnt}>{countOf(r.id)}</span>
+                          </button>
+                        );
+                      })}
+                      <button type="button" onClick={() => setSelectedStatusFilters(allClosedHighlighted ? ["All"] : [...CLOSED_STATUSES])} style={rowStyle(allClosedHighlighted)}>
+                        <span style={dot("closed")} /><span style={lbl(allClosedHighlighted)}>All closed</span><span style={cnt}>{closedSum}</span>
+                      </button>
+                    </div>
+                  );
+                })()}
               </div>
               {/* thin inset grey rule beneath the header (doesn't reach the container edges) */}
               <div style={{ height: 1, background: "#cfc6ba", margin: "0 6px", flexShrink: 0 }} />
