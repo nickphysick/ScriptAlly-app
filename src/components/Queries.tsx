@@ -2064,110 +2064,113 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           .qrow:hover:not(.sel){ background:#faf6f0; }
           .qrow.sel{ background:#f1e7dd; }
         `}</style>
-        {/* Desk (bold theme) — a cool blue-grey working panel (no border, chunky radius, soft
-            shadow) on which the list + reading-pane sit as slate-bordered white cards. The action
-            bar lives inside it. Sidebar + breadcrumb stay outside (shell chrome, untouched). */}
-        {/* Fit-to-screen: with queries present the desk FILLS the height below the appbar (flex:1),
-            so 20 rows scroll inside the list column rather than pushing the page past 100vh. The
-            EMPTY state keeps content-height (the centred welcome card needs no internal scroll). */}
-        <div style={{ display: "flex", flexDirection: "column", ...(queries.length > 0 ? { flex: 1, minHeight: 0 } : {}) }}>
-          <div className="qdesk" style={{ position: "relative", display: "flex", flexDirection: "column", border: "none", borderRadius: 0, background: qdbBoldDesk, overflow: "hidden", ...(queries.length > 0 ? { flex: 1, minHeight: 0 } : {}) }}>
+        {/* Desk (bold theme) — a cool blue-grey full-bleed working panel on which the list + reading
+            pane sit as cards. Sidebar stays outside (shell chrome, untouched). */}
+        {/* Fit-to-screen: the desk FILLS the height below the header (flex:1) in BOTH states — the
+            list rows scroll internally so the page never exceeds 100vh; the empty state fills the
+            same way (centred placeholder + welcome pane). */}
+        <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+          <div className="qdesk" style={{ position: "relative", display: "flex", flexDirection: "column", border: "none", borderRadius: 0, background: qdbBoldDesk, overflow: "hidden", flex: 1, minHeight: 0 }}>
             {/* desk surface — full-bleed blue-grey working area, 22/28/30 content inset (mockup .desk) */}
-            <div style={{ padding: "22px 28px 30px", display: "flex", flexDirection: "column", ...(queries.length > 0 ? { flex: 1, minHeight: 0 } : {}) }}>
+            <div style={{ padding: "22px 28px 30px", display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
 
         {queries.length === 0 ? (
-          /* ── Empty database — no queries anywhere. Ghost list + a welcoming empty pane with a
-             Smart Import invitation and manual-add fallbacks. The control bar (search/actions) is
-             suppressed — nothing to search or act on yet. minHeight keeps the blue desk from
-             collapsing to nothing. ── */
-          <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "330px 1fr", gap: 18, alignItems: "start", minHeight: 540 }}>
+          /* ── Empty database — the Queries Hub header, a list card with a "No queries yet"
+             placeholder (Export disabled), and a welcome pane with Smart Import + manual add. ── */
+          <>
+          {/* Queries Hub header — shared look with the populated state */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, background: "#fffefb", border: "1.5px solid #1d1712", borderRadius: 14, padding: "13px 22px", marginBottom: 14, boxShadow: "0 8px 20px rgba(29,23,18,.18)", flexShrink: 0 }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontFamily: FONT_SERIF, fontWeight: 800, fontSize: 25, color: "#1d1712", lineHeight: 1 }}>Queries Hub</div>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".04em", textTransform: "uppercase" as const, color: "#5a6472", marginTop: 8, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Tracking {hubSubtitle}</div>
+            </div>
+            <button type="button" onClick={() => onNavigate?.("queries", "Log a query")} onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.05)"; }} onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }} style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "10px 17px", borderRadius: 12, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, whiteSpace: "nowrap", cursor: "pointer", background: "#f5e2da", border: "1.5px solid #e8c8bc", color: "#7c3a2a", boxShadow: "0 3px 0 #e2c2b5", flexShrink: 0, transition: "transform .15s ease" }}>
+              <Plus style={{ width: 15, height: 15 }} />
+              Log a new query
+            </button>
+          </div>
 
-            {/* Ghost list — the bold-theme white list card with faded placeholder rows. (Matches the
-                real list card chrome rather than a parchment MountPanel, so it sits naturally in the
-                blue desk beside the white reading pane.) */}
-            <div style={{ background: "#ffffff", borderRadius: 22, overflow: "hidden", boxShadow: "0 8px 26px rgba(29,23,18,.12)", display: "flex", flexDirection: "column" }}>
-              <div style={{ padding: "15px 16px 11px", flexShrink: 0 }}>
+          {/* Empty split — list placeholder (col 1) + welcome pane (col 2), both full desk height */}
+          <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "330px 1fr", columnGap: 20, flex: 1, minHeight: 0, alignItems: "stretch" }}>
+
+            {/* List card — search + header (0 queries · Sort · Filter) + centred placeholder + disabled CSV */}
+            <div style={{ alignSelf: "stretch", background: "#ffffff", borderRadius: 22, overflow: "hidden", boxShadow: "0 8px 26px rgba(29,23,18,.12)", display: "flex", flexDirection: "column", minHeight: 0 }}>
+              <div style={{ position: "relative", margin: "10px 6px 8px", flexShrink: 0 }}>
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400 pointer-events-none" />
+                <input type="text" placeholder="Search..." value={listSearch} onChange={(e) => setListSearch(e.target.value)} style={{ width: "100%", background: "#fff", border: `1px solid ${qdbBoldInk}`, borderRadius: 13, padding: "10px 15px 10px 38px", fontSize: 13.5, color: "#8a7a6c", fontFamily: "inherit", outline: "none", boxShadow: "0 2px 8px rgba(29,23,18,.10)" }} />
+              </div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "4px 6px 12px", flexShrink: 0 }}>
                 <span style={{ fontFamily: FONT_SERIF, fontSize: 18, fontWeight: 800, color: qdbBoldInk }}>0 queries</span>
+                <div style={{ display: "flex", gap: 14 }}>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: FONT_MONO, fontSize: 10, fontWeight: 600, letterSpacing: ".03em", textTransform: "uppercase" as const, color: "#c3b8a8" }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M7 12h10M10 18h4" /></svg>
+                    Sort
+                  </span>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: FONT_MONO, fontSize: 10, fontWeight: 600, letterSpacing: ".03em", textTransform: "uppercase" as const, color: "#c3b8a8" }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M3 5h18l-7 8v6l-4 2v-8z" /></svg>
+                    Filter
+                  </span>
+                </div>
               </div>
               <div style={{ height: 1, background: "#cfc6ba", margin: "0 6px", flexShrink: 0 }} />
-              {/* faded placeholder rows — echo the real row layout (monogram + two lines + dot/date) */}
-              <div style={{ padding: "2px 0 4px", opacity: 0.38, pointerEvents: "none", userSelect: "none" as const }} aria-hidden="true">
-                {[0, 1, 2, 3].map((i) => (
-                  <div key={i} style={{ padding: "12px 15px", borderBottom: i < 3 ? "1px solid #ece3d6" : "none", display: "flex", alignItems: "center", gap: 11 }}>
-                    <span style={{ flexShrink: 0, width: 38, height: 38, borderRadius: "50%", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", border: "1px solid #e8c8bc" }} />
-                    <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 7 }}>
-                      <span style={{ height: 11, width: `${62 - i * 6}%`, borderRadius: 4, background: "#e7ddd0" }} />
-                      <span style={{ height: 8, width: `${42 - i * 5}%`, borderRadius: 4, background: "#efe7db" }} />
-                    </div>
-                    <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 7 }}>
-                      <span style={{ width: 14, height: 14, borderRadius: "50%", background: "#e2d8ca" }} />
-                      <span style={{ height: 8, width: 32, borderRadius: 4, background: "#efe7db" }} />
-                    </div>
-                  </div>
-                ))}
+              {/* centred placeholder */}
+              <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: 24, gap: 8 }}>
+                <span style={{ color: "#c9bcab", display: "flex" }}>
+                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>
+                </span>
+                <span style={{ fontFamily: FONT_SERIF, fontWeight: 700, fontSize: 15, color: "#5a5048" }}>No queries yet</span>
+                <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, lineHeight: 1.5, color: "#7d7268", maxWidth: 200 }}>Your queries will appear here once you log or import them.</span>
               </div>
-              <div style={{ padding: "16px 16px 22px", textAlign: "center" }}>
-                <span style={{ fontFamily: "'Caveat',cursive", fontSize: 19, color: "#8a7d6c" }}>your queries will line up here ↑</span>
+              {/* CSV export — disabled (nothing to export) */}
+              <div style={{ flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, borderTop: "1px solid #ece3d6", padding: 11, fontFamily: FONT_MONO, fontSize: 9.5, fontWeight: 600, letterSpacing: ".06em", textTransform: "uppercase" as const, color: "#c3b8a8" }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v11M7 9l5 5 5-5M5 21h14" /></svg>
+                Export as CSV
               </div>
             </div>
 
-            {/* Empty reading pane — WHITE, 1.5px ink, radius 16; a proper welcome, not a placeholder */}
-            <div style={{ alignSelf: "start", background: "#fffefb", border: `1.5px solid ${qdbBoldInk}`, borderRadius: 16, padding: "44px 40px 40px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
-              <h2 style={{ fontFamily: FONT_SERIF, fontSize: 29, fontWeight: 800, color: qdbBoldInk, margin: 0, lineHeight: 1.1 }}>No queries yet</h2>
-              <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, color: "#8a7d6c", margin: "11px 0 0", maxWidth: 460, lineHeight: 1.55 }}>
-                This is where every agent you've queried will live — their status, what you sent, and when to expect a reply.
-              </p>
+            {/* Welcome pane — blush, centred onboarding (mockup .emptypane) */}
+            <div className="qp-pane" style={{ alignSelf: "stretch", minHeight: 0, background: "#f5e9e7", border: "1px solid #1d1712", borderRadius: 22, boxShadow: "0 8px 26px rgba(29,23,18,.12)", overflowY: "auto", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+              <div style={{ maxWidth: 460, width: "100%", textAlign: "center" }}>
+                <div style={{ fontFamily: FONT_SERIF, fontWeight: 800, fontSize: 25, color: qdbBoldInk, marginBottom: 9 }}>No queries yet</div>
+                <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 13.5, color: "#5a5048", lineHeight: 1.55, maxWidth: 360, margin: "0 auto 20px" }}>This is where you'll track every agent you query — what you sent, when it went, and what came back.</div>
 
-              {/* Smart Import invitation */}
-              <div style={{ marginTop: 30, width: "100%", maxWidth: 540, background: "#fcf9f3", border: "1px solid #e7ddce", borderRadius: 15, padding: "22px 24px", textAlign: "left" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 11 }}>
-                  <span style={{ flexShrink: 0, width: 40, height: 40, borderRadius: "50%", background: "#eef2f5", display: "flex", alignItems: "center", justifyContent: "center", color: "#5e7e9c" }}>
-                    <Sparkles style={{ width: 20, height: 20 }} />
-                  </span>
-                  <span style={{ fontFamily: FONT_SERIF, fontSize: 20, fontWeight: 800, color: qdbBoldInk }}>Smart Import</span>
-                  <span style={{ fontFamily: FONT_MONO, fontSize: 7.5, fontWeight: 500, letterSpacing: ".1em", textTransform: "uppercase" as const, color: "#fff", background: "#6A89A7", border: "1px solid #4f6e8a", borderRadius: 999, padding: "2px 7px" }}>Pro</span>
+                {/* Smart Import */}
+                <div style={{ position: "relative", background: "#fcf9f3", border: "1px solid #e7ddce", borderRadius: 15, padding: "19px 21px", textAlign: "left" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 11 }}>
+                    <span style={{ flexShrink: 0, width: 44, height: 44, borderRadius: 12, background: "#eef2f5", color: "#5e7e9c", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <Sparkles style={{ width: 23, height: 23 }} />
+                    </span>
+                    <span style={{ display: "flex", alignItems: "center", gap: 9, fontFamily: FONT_SERIF, fontWeight: 800, fontSize: 20, color: qdbBoldInk }}>Smart Import <span style={{ fontFamily: FONT_MONO, fontSize: 7.5, letterSpacing: ".1em", textTransform: "uppercase" as const, color: "#fff", background: "#6A89A7", border: "1px solid #4f6e8a", borderRadius: 999, padding: "2px 7px" }}>Pro</span></span>
+                  </div>
+                  <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, color: "#4f463c", lineHeight: 1.55, marginBottom: 16 }}>Upload your messy old spreadsheet and watch ScriptAlly build your whole database — every agent matched, sorted and dated, ready to track in seconds.</div>
+                  <button type="button" onClick={() => onNavigate?.("import")} style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: FONT_SERIF, fontWeight: 700, fontSize: 14, padding: "11px 21px", borderRadius: 11, cursor: "pointer", background: "#fff", border: "1.5px solid #9db4c6", color: "#42637e" }}>
+                    <Sparkles style={{ width: 18, height: 18 }} />
+                    Try Smart Import
+                  </button>
                 </div>
-                <p style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, color: "#6a5f52", lineHeight: 1.55, margin: "0 0 16px" }}>
-                  Upload your messy old spreadsheet and watch ScriptAlly build your whole database — every agent matched, sorted and dated, ready to track in seconds.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => onNavigate?.("import")}
-                  style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, color: "#42637e", background: "#fff", border: "1.5px solid #9db4c6", borderRadius: 11, padding: "10px 18px", cursor: "pointer" }}
-                >
-                  <Sparkles style={{ width: 15, height: 15 }} />
-                  Try Smart Import
-                </button>
-              </div>
 
-              {/* divider */}
-              <div style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", maxWidth: 540, margin: "24px 0 22px" }}>
-                <div style={{ flex: 1, height: 1, background: "#e7ddce" }} />
-                <span style={{ fontFamily: FONT_MONO, fontSize: 10, fontWeight: 500, letterSpacing: ".08em", textTransform: "uppercase" as const, color: "#9a8e80" }}>or add them yourself</span>
-                <div style={{ flex: 1, height: 1, background: "#e7ddce" }} />
-              </div>
+                {/* divider */}
+                <div style={{ display: "flex", alignItems: "center", gap: 13, margin: "20px 2px 16px" }}>
+                  <div style={{ flex: 1, height: 1, background: "#e6ddce" }} />
+                  <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".08em", textTransform: "uppercase" as const, color: "#a89a8b" }}>or add them yourself</span>
+                  <div style={{ flex: 1, height: 1, background: "#e6ddce" }} />
+                </div>
 
-              {/* manual-add fallbacks — ink-outline buttons */}
-              <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
-                <button
-                  type="button"
-                  onClick={() => onNavigate?.("queries", "Log a query")}
-                  style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, color: qdbBoldInk, background: "#fffefb", border: `1.5px solid ${qdbBoldInk}`, borderRadius: 11, padding: "10px 18px", cursor: "pointer" }}
-                >
-                  <Plus style={{ width: 15, height: 15 }} />
-                  Add a query
-                </button>
-                <a
-                  href="/ScriptAlly-pipeline-import-template.xlsx"
-                  download
-                  style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, color: qdbBoldInk, background: "#fffefb", border: `1.5px solid ${qdbBoldInk}`, borderRadius: 11, padding: "10px 18px", textDecoration: "none" }}
-                >
-                  <Download style={{ width: 15, height: 15 }} />
-                  Download import template
-                </a>
+                {/* manual add — ink-outline buttons */}
+                <div style={{ display: "flex", gap: 11, justifyContent: "center", flexWrap: "wrap" }}>
+                  <button type="button" onClick={() => onNavigate?.("queries", "Log a query")} style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: FONT_SERIF, fontWeight: 700, fontSize: 14, padding: "11px 20px", borderRadius: 11, cursor: "pointer", background: "#fffefb", border: "1.5px solid #1d1712", color: "#1d1712" }}>
+                    <Plus style={{ width: 15, height: 15 }} />
+                    Add a query
+                  </button>
+                  <a href="/ScriptAlly-pipeline-import-template.xlsx" download style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: FONT_SERIF, fontWeight: 700, fontSize: 14, padding: "11px 20px", borderRadius: 11, textDecoration: "none", background: "#fffefb", border: "1.5px solid #1d1712", color: "#1d1712" }}>
+                    <Download style={{ width: 15, height: 15 }} />
+                    Download import template
+                  </a>
+                </div>
               </div>
             </div>
           </div>
+          </>
         ) : (
         <>
 
