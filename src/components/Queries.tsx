@@ -27,7 +27,7 @@ import {
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { QueryStatus, Agent, Manuscript, Query, SubmissionMethod, ActivityType, QueryMaterial, UserPlan } from "../types";
 import { StatusPill, getStatusLabel } from "./StatusPill";
-import { StatusDot } from "./StatusDot";
+import { StatusDot, statusDirection } from "./StatusDot";
 import { RecordResponseModal } from "./RecordResponseModal";
 import { RecordResponseFocusForm } from "./RecordResponseFocusForm";
 import { recordQueryResponse } from "../lib/recordResponse";
@@ -2685,21 +2685,28 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   const email = activeAgent.email?.trim();
                   const mswl = activeAgent.mswlNotes?.trim();
                   const genres = (activeAgent.genres || []).filter(Boolean);
+                  // Status-tint hero: white → a soft tint of the query's status-direction colour, with
+                  // an enlarged StatusDot watermark on the right. Real status announced via the label.
+                  const heroDir = statusDirection(activeQuery.status);
+                  const heroTint = heroDir === "out" ? "#f9efe9" : heroDir === "in" ? "#eef3ec" : "#f0ece7";
+                  const heroStatColour = heroDir === "out" ? "#7c3a2a" : heroDir === "in" ? "#5a6e58" : "#8a7d6c";
                   return (
-                    <div className="qp-hero" style={{ position: "relative", margin: "16px 18px 0", padding: "22px 26px", border: `1.5px solid ${qdbBoldInk}`, borderRadius: 20, background: "#fffefb", boxShadow: "0 8px 20px rgba(29,23,18,.18)", flexShrink: 0 }}>
-                      {/* top row — avatar centred against the name + agency only (not the full stack) */}
-                      <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+                    <div className="qp-hero" style={{ position: "relative", overflow: "hidden", margin: "16px 18px 0", padding: "22px 26px", border: `1.5px solid ${qdbBoldInk}`, borderRadius: 20, background: `linear-gradient(90deg, #ffffff 36%, ${heroTint} 100%)`, boxShadow: "0 8px 20px rgba(29,23,18,.18)", flexShrink: 0 }}>
+                      {/* top row — avatar centred against the name + agency + status label */}
+                      <div style={{ position: "relative", zIndex: 2, display: "flex", alignItems: "center", gap: 18 }}>
                         {/* avatar — solid ink disc + white initials (per the Queries Hub mockup) */}
                         <span style={{ flexShrink: 0, width: 66, height: 66, borderRadius: "50%", background: "#1d1712", border: "none", color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_SERIF, fontSize: 22, fontWeight: 700 }}>{initials}</span>
-                        <div style={{ flex: 1, minWidth: 0, paddingRight: 150 }}>
+                        <div style={{ flex: 1, minWidth: 0, paddingRight: 120 }}>
                           <div style={{ fontFamily: FONT_SERIF, fontSize: 33, fontWeight: 800, color: qdbBoldInk, lineHeight: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{nameplate}</div>
                           {hasName && !!activeAgent.agency?.trim() && (
                             <div style={{ fontFamily: FONT_SERIF, fontSize: 17, fontWeight: 600, color: "#4a423a", marginTop: 2 }}>{activeAgent.agency}</div>
                           )}
+                          {/* real status — the accessible announcement (the watermark dot is aria-hidden) */}
+                          <div style={{ fontFamily: FONT_MONO, fontSize: 9.5, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase" as const, color: heroStatColour, marginTop: 8 }}>{statusDisplayLabel(activeQuery)}</div>
                         </div>
                       </div>
                       {/* meta — email / wish list / genres, indented to align under the name (avatar 66 + gap 18) */}
-                      <div style={{ marginTop: 12, marginLeft: 84, display: "flex", flexDirection: "column", gap: 8 }}>
+                      <div style={{ position: "relative", zIndex: 2, marginTop: 12, marginLeft: 84, display: "flex", flexDirection: "column", gap: 8 }}>
                           {email && (
                             <div style={{ display: "flex", alignItems: "center", gap: 7, fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 500, color: qdbBoldInk }}>
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" style={{ opacity: .85, flexShrink: 0 }}><rect x="2.5" y="4.5" width="19" height="15" rx="2.5" /><path d="M3 6l9 6.5L21 6" /></svg>
@@ -2739,10 +2746,10 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           </div>
                         )}
                       </div>{/* meta */}
-                      {/* status chip — top-right bold pill: StatusDot + Playfair label */}
-                      <div style={{ position: "absolute", top: 20, right: 24, display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 17px 8px 9px", borderRadius: 999, background: "#fffefb", border: `1.5px solid ${qdbBoldInk}`, boxShadow: "0 2px 8px rgba(29,23,18,.10)" }}>
-                        <StatusDot status={activeQuery.status} overrideSize={20} decorative />
-                        <span style={{ fontFamily: FONT_SERIF, fontSize: 15, fontWeight: 700, color: qdbBoldInk }}>{statusDisplayLabel(activeQuery)}</span>
+                      {/* status watermark — enlarged StatusDot, low-opacity, inset right so it isn't
+                          clipped; aria-hidden (the real status is announced by the label above). */}
+                      <div aria-hidden="true" style={{ position: "absolute", top: "50%", right: 16, transform: "translateY(-50%)", zIndex: 1, opacity: 0.22, pointerEvents: "none", display: "flex" }}>
+                        <StatusDot status={activeQuery.status} overrideSize={124} decorative />
                       </div>
                     </div>
                   );
