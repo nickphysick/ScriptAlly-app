@@ -2590,10 +2590,10 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
               </div>{/* closes scroll-area wrapper */}
           </div>{/* closes list card */}
 
-          {/* Reading pane — a plain hairline paper card. Fit-to-screen: it stretches to the grid
-              height (alignItems:stretch) and scrolls internally (overflowY:auto, minHeight:0) so a
-              tall reading pane never grows the page past 100vh; the columns still scroll within it. */}
-          <div className="qp-pane" style={{ position: "relative", minHeight: 0, border: "1px solid #1d1712", borderRadius: 22, background: "#f5e9e7", boxShadow: "0 8px 26px rgba(29,23,18,.12)", overflowY: "auto", overflowX: "hidden", display: "flex", flexDirection: "column" }}>
+          {/* Reading pane — blush paper card. Fit-to-screen: it HUGS its own content (alignSelf:start)
+              so the blue desk shows beneath it, while the list column stretches and scrolls; it only
+              scrolls internally (maxHeight:100% + overflowY:auto) if its content would exceed the desk. */}
+          <div className="qp-pane" style={{ position: "relative", alignSelf: "start", maxHeight: "100%", minHeight: 0, border: "1px solid #1d1712", borderRadius: 22, background: "#f5e9e7", boxShadow: "0 8px 26px rgba(29,23,18,.12)", overflowY: "auto", overflowX: "hidden", display: "flex", flexDirection: "column" }}>
             <div style={{ display: "contents" }}>
             {activeQuery && activeAgent && activeMs ? (
               <>
