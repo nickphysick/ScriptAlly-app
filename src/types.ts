@@ -27,6 +27,9 @@ export interface User {
   // at signup (never IP), defaults to "GB" at read time via getHomeCountry(), editable in settings.
   // Drives the home-vs-foreign distinction on the agent database. Absent === not set (never null/"").
   homeCountry?: string;
+  // Queries-page theme (route-scoped). "cappuccino" (default) | "bold". Chosen in Settings →
+  // Preferences; the Queries shell reads it and applies .t-capp / .t-bold. Absent === Cappuccino.
+  queriesTheme?: "cappuccino" | "bold";
 }
 
 /**

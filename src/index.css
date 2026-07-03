@@ -21,3 +21,38 @@
   font-weight: 500;
   font-size: 16px;
 }
+
+/* ── Queries-page themes — ROUTE-SCOPED. The class (.t-capp / .t-bold) is set on the SidebarShell
+   root only, so these custom properties cascade to the Queries chrome + rail and NOWHERE else.
+   Every themeable rule in Queries.tsx / SidebarNav.tsx reads var(--…). Cappuccino is the default.
+   Bold Pastille values are the dev-exact tokens — do not "improve" them. ── */
+.t-capp {
+  --bd: #d8cebf;   /* border colour — soft taupe */
+  --bdw: 1px;      /* border width */
+  --desk: #e8ddd0; /* working-area bg — warm */
+  --band: #f2ddd5; /* column-header band + active-nav pill — soft blush */
+  --pane: #fffefb; /* reading-pane surface — white */
+  --chromerad: 0px;   /* chrome corners (Queries-Hub bar, list panel) — square */
+  --listbg: #ffffff;  /* query-list panel bg */
+}
+.t-bold {
+  --bd: #1d1712;   /* ink */
+  --bdw: 1.5px;
+  --desk: #c2cfda; /* muted blue */
+  --band: #f4c7c2; /* vivid pink */
+  --pane: #ece2e0; /* blush */
+  --chromerad: 14px;  /* rounded */
+  --listbg: #f2e7dc;  /* warm cream */
+}
+/* A gentle fade when the theme swaps (≤150ms). */
+.t-capp, .t-bold { transition: background-color .15s ease; }
+/* Cappuccino-only Form 11 inset frame on the Queries Hub bar — square, burgundy. SCOPED under
+   .t-capp so it never leaks into Bold Pastille (a mockup bug once did). */
+.t-capp .qhbar::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px solid #7c3a2a;
+  border-radius: 0;
+  pointer-events: none;
+}

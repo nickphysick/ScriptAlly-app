@@ -44,7 +44,7 @@ import {
   kraft, parchment, PAPER_TEXTURE,
   burgundy, FONT_SERIF, FONT_MONO, mountShadow, labelColor,
   qdbCardLine,
-  qdbBoldDesk, qdbBoldInk, qdbBoldInk2, qdbBoldMuted, qdbBoldPinkBand,
+  qdbBoldInk, qdbBoldInk2, qdbBoldMuted,
 } from "../lib/designTokens";
 
 const normalizeStatus = (status: string | QueryStatus): QueryStatus => {
@@ -2070,7 +2070,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             list rows scroll internally so the page never exceeds 100vh; the empty state fills the
             same way (centred placeholder + welcome pane). */}
         <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
-          <div className="qdesk" style={{ position: "relative", display: "flex", flexDirection: "column", border: "none", borderRadius: 0, background: qdbBoldDesk, overflow: "hidden", flex: 1, minHeight: 0 }}>
+          <div className="qdesk" style={{ position: "relative", display: "flex", flexDirection: "column", border: "none", borderRadius: 0, background: "var(--desk)", overflow: "hidden", flex: 1, minHeight: 0 }}>
             {/* desk surface — full-bleed blue-grey working area, 22/28/30 content inset (mockup .desk) */}
             <div style={{ padding: "22px 28px 30px", display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
 
@@ -2079,7 +2079,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
              placeholder (Export disabled), and a welcome pane with Smart Import + manual add. ── */
           <>
           {/* Queries Hub header — shared look with the populated state */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, background: "#fffefb", border: "1.5px solid #1d1712", borderRadius: 14, padding: "13px 22px", marginBottom: 14, boxShadow: "0 8px 20px rgba(29,23,18,.18)", flexShrink: 0 }}>
+          <div className="qhbar" style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", padding: "13px 22px", marginBottom: 14, boxShadow: "0 8px 20px rgba(29,23,18,.18)", flexShrink: 0 }}>
             <div style={{ minWidth: 0 }}>
               <div style={{ fontFamily: FONT_SERIF, fontWeight: 800, fontSize: 25, color: "#1d1712", lineHeight: 1 }}>Queries Hub</div>
               <div style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".04em", textTransform: "uppercase" as const, color: "#5a6472", marginTop: 8, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Tracking {hubSubtitle}</div>
@@ -2094,10 +2094,10 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "330px 1fr", columnGap: 20, flex: 1, minHeight: 0, alignItems: "stretch" }}>
 
             {/* List card — search + header (0 queries · Sort · Filter) + centred placeholder + disabled CSV */}
-            <div style={{ alignSelf: "stretch", background: "#ffffff", borderRadius: 22, overflow: "hidden", boxShadow: "0 8px 26px rgba(29,23,18,.12)", display: "flex", flexDirection: "column", minHeight: 0 }}>
+            <div style={{ alignSelf: "stretch", background: "var(--listbg)", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", overflow: "hidden", boxShadow: "0 8px 26px rgba(29,23,18,.12)", display: "flex", flexDirection: "column", minHeight: 0 }}>
               <div style={{ position: "relative", margin: "10px 6px 8px", flexShrink: 0 }}>
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400 pointer-events-none" />
-                <input type="text" placeholder="Search..." value={listSearch} onChange={(e) => setListSearch(e.target.value)} style={{ width: "100%", background: "#fff", border: `1px solid ${qdbBoldInk}`, borderRadius: 13, padding: "10px 15px 10px 38px", fontSize: 13.5, color: "#8a7a6c", fontFamily: "inherit", outline: "none", boxShadow: "0 2px 8px rgba(29,23,18,.10)" }} />
+                <input type="text" placeholder="Search..." value={listSearch} onChange={(e) => setListSearch(e.target.value)} style={{ width: "100%", background: "#fff", border: "1px solid var(--bd)", borderRadius: 13, padding: "10px 15px 10px 38px", fontSize: 13.5, color: "#8a7a6c", fontFamily: "inherit", outline: "none", boxShadow: "0 2px 8px rgba(29,23,18,.10)" }} />
               </div>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "4px 6px 12px", flexShrink: 0 }}>
                 <span style={{ fontFamily: FONT_SERIF, fontSize: 18, fontWeight: 800, color: qdbBoldInk }}>0 queries</span>
@@ -2129,7 +2129,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             </div>
 
             {/* Welcome pane — blush, centred onboarding (mockup .emptypane) */}
-            <div className="qp-pane" style={{ alignSelf: "stretch", minHeight: 0, background: "#f5e9e7", border: "1px solid #1d1712", borderRadius: 22, boxShadow: "0 8px 26px rgba(29,23,18,.12)", overflowY: "auto", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+            <div className="qp-pane" style={{ alignSelf: "stretch", minHeight: 0, background: "var(--pane)", border: "var(--bdw) solid var(--bd)", borderRadius: 22, boxShadow: "0 8px 26px rgba(29,23,18,.12)", overflowY: "auto", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
               <div style={{ maxWidth: 460, width: "100%", textAlign: "center" }}>
                 <div style={{ fontFamily: FONT_SERIF, fontWeight: 800, fontSize: 25, color: qdbBoldInk, marginBottom: 9 }}>No queries yet</div>
                 <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 13.5, color: "#5a5048", lineHeight: 1.55, maxWidth: 360, margin: "0 auto 20px" }}>This is where you'll track every agent you query — what you sent, when it went, and what came back.</div>
@@ -2175,7 +2175,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         <>
 
         {/* ── Queries Hub header — white bar spanning the desk: title + subtitle · soft-pink Log CTA ── */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, background: "#fffefb", border: "1.5px solid #1d1712", borderRadius: 14, padding: "13px 22px", marginBottom: 14, boxShadow: "0 8px 20px rgba(29,23,18,.18)", flexShrink: 0 }}>
+        <div className="qhbar" style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", padding: "13px 22px", marginBottom: 14, boxShadow: "0 8px 20px rgba(29,23,18,.18)", flexShrink: 0 }}>
           <div style={{ minWidth: 0 }}>
             <div style={{ fontFamily: FONT_SERIF, fontWeight: 800, fontSize: 25, color: "#1d1712", lineHeight: 1 }}>Queries Hub</div>
             <div style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".04em", textTransform: "uppercase" as const, color: "#5a6472", marginTop: 8, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Tracking {hubSubtitle}</div>
@@ -2231,7 +2231,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
           {/* List card — spans both rows so it fills the desk height; search + header + CSV footer are
               fixed, only the rows scroll (fit-to-screen, independent of row count). */}
-          <div style={{ gridColumn: 1, gridRow: "1 / span 2", alignSelf: "stretch", background: "#ffffff", border: "none", borderRadius: 22, overflow: "hidden", boxShadow: "0 8px 26px rgba(29,23,18,.12)", display: "flex", flexDirection: "column", minHeight: 0 }}>
+          <div style={{ gridColumn: 1, gridRow: "1 / span 2", alignSelf: "stretch", background: "var(--listbg)", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", overflow: "hidden", boxShadow: "0 8px 26px rgba(29,23,18,.12)", display: "flex", flexDirection: "column", minHeight: 0 }}>
 
               {/* Search — fixed at the top of the list card */}
               <div style={{ position: "relative", margin: "10px 6px 8px", flexShrink: 0 }}>
@@ -2241,7 +2241,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   placeholder="Search..."
                   value={listSearch}
                   onChange={(e) => setListSearch(e.target.value)}
-                  style={{ width: "100%", background: "#fff", border: `1px solid ${qdbBoldInk}`, borderRadius: 13, padding: "10px 15px 10px 38px", fontSize: 13.5, color: "#8a7a6c", fontFamily: "inherit", outline: "none", boxShadow: "0 2px 8px rgba(29,23,18,.10)" }}
+                  style={{ width: "100%", background: "#fff", border: "1px solid var(--bd)", borderRadius: 13, padding: "10px 15px 10px 38px", fontSize: 13.5, color: "#8a7a6c", fontFamily: "inherit", outline: "none", boxShadow: "0 2px 8px rgba(29,23,18,.10)" }}
                 />
               </div>
 
@@ -2276,7 +2276,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
                 {/* Sort menu */}
                 {sortMenuOpen && (
-                  <div style={{ position: "absolute", top: "100%", right: 2, marginTop: 8, width: 178, background: "#fff", border: "1px solid #1d1712", borderRadius: 12, boxShadow: "0 12px 30px rgba(29,23,18,.22)", padding: 7, zIndex: 30 }}>
+                  <div style={{ position: "absolute", top: "100%", right: 2, marginTop: 8, width: 178, background: "#fff", border: "1px solid var(--bd)", borderRadius: 12, boxShadow: "0 12px 30px rgba(29,23,18,.22)", padding: 7, zIndex: 30 }}>
                     <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: ".12em", textTransform: "uppercase" as const, color: qdbBoldMuted, padding: "4px 9px 7px" }}>Sort</div>
                     {["Newest first", "Oldest first", "Agent name A-Z", "Agent name Z-A"].map((opt) => {
                       const on = sortOption === opt;
@@ -2319,7 +2319,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     { id: QueryStatus.OFFER, label: "Offers", kind: "out" },
                   ];
                   return (
-                    <div style={{ position: "absolute", top: "100%", right: 2, marginTop: 8, width: 216, background: "#fff", border: "1px solid #1d1712", borderRadius: 12, boxShadow: "0 12px 30px rgba(29,23,18,.22)", padding: 7, zIndex: 30, maxHeight: 380, overflowY: "auto" }}>
+                    <div style={{ position: "absolute", top: "100%", right: 2, marginTop: 8, width: 216, background: "#fff", border: "1px solid var(--bd)", borderRadius: 12, boxShadow: "0 12px 30px rgba(29,23,18,.22)", padding: 7, zIndex: 30, maxHeight: 380, overflowY: "auto" }}>
                       {/* Manuscript scope — only when tracking more than one book */}
                       {manuscripts.length > 1 && (
                         <>
@@ -2621,7 +2621,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
               ? getPrimaryAction(currentStatus as QueryStatus)
               : { kind: "record" as const, label: "Record response", ballHolder: null as null };
             const hasActive = !!(activeQuery && activeAgent && activeMs);
-            const abtn: React.CSSProperties = { display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, color: qdbBoldInk, background: "#ffffff", border: `1px solid ${qdbBoldInk}`, borderRadius: 12, padding: "9px 15px", whiteSpace: "nowrap", boxShadow: "0 4px 11px rgba(29,23,18,.20)", transition: "transform .16s ease" };
+            const abtn: React.CSSProperties = { display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, color: qdbBoldInk, background: "#ffffff", border: "1px solid var(--bd)", borderRadius: 12, padding: "9px 15px", whiteSpace: "nowrap", boxShadow: "0 4px 11px rgba(29,23,18,.20)", transition: "transform .16s ease" };
             const swell = (on: boolean) => ({
               onMouseEnter: (e: React.MouseEvent<HTMLButtonElement>) => { if (on) e.currentTarget.style.transform = "scale(1.04)"; },
               onMouseLeave: (e: React.MouseEvent<HTMLButtonElement>) => { e.currentTarget.style.transform = "scale(1)"; },
@@ -2653,7 +2653,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
           {/* Reading pane — blush paper card (col 2, row 2). Fit: HUGS its content (blue desk shows
               beneath); caps at the row height (maxHeight:100%) and scrolls internally if tall. */}
-          <div className="qp-pane" style={{ gridColumn: 2, gridRow: 2, position: "relative", alignSelf: "start", maxHeight: "100%", minHeight: 0, border: "1px solid #1d1712", borderRadius: 22, background: "#f5e9e7", boxShadow: "0 8px 26px rgba(29,23,18,.12)", overflowY: "auto", overflowX: "hidden", display: "flex", flexDirection: "column" }}>
+          <div className="qp-pane" style={{ gridColumn: 2, gridRow: 2, position: "relative", alignSelf: "start", maxHeight: "100%", minHeight: 0, border: "var(--bdw) solid var(--bd)", borderRadius: 22, background: "var(--pane)", boxShadow: "0 8px 26px rgba(29,23,18,.12)", overflowY: "auto", overflowX: "hidden", display: "flex", flexDirection: "column" }}>
             <div style={{ display: "contents" }}>
             {activeQuery && activeAgent && activeMs ? (
               <>
@@ -2694,7 +2694,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   const heroTint = heroDir === "out" ? "#f9efe9" : heroDir === "in" ? "#eef3ec" : "#f0ece7";
                   const heroStatColour = heroDir === "out" ? "#7c3a2a" : heroDir === "in" ? "#5a6e58" : "#8a7d6c";
                   return (
-                    <div className="qp-hero" style={{ position: "relative", overflow: "hidden", margin: "16px 18px 0", padding: "22px 26px", border: `1.5px solid ${qdbBoldInk}`, borderRadius: 20, background: `linear-gradient(90deg, #ffffff 36%, ${heroTint} 100%)`, boxShadow: "0 8px 20px rgba(29,23,18,.18)", flexShrink: 0 }}>
+                    <div className="qp-hero" style={{ position: "relative", overflow: "hidden", margin: "16px 18px 0", padding: "22px 26px", border: "var(--bdw) solid var(--bd)", borderRadius: 20, background: `linear-gradient(90deg, #ffffff 36%, ${heroTint} 100%)`, boxShadow: "0 8px 20px rgba(29,23,18,.18)", flexShrink: 0 }}>
                       {/* top row — avatar centred against the name + agency + status label */}
                       <div style={{ position: "relative", zIndex: 2, display: "flex", alignItems: "center", gap: 18 }}>
                         {/* avatar — solid ink disc + white initials (per the Queries Hub mockup) */}
@@ -2763,9 +2763,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 18, padding: "16px 18px 20px", flex: "0 1 auto", minHeight: 0, alignItems: "stretch" }}>
 
                   {/* ── Sub-card 1: Tracking ── */}
-                  <div className="qp-card" style={{ minWidth: 0, background: "#fffefb", border: `1.5px solid ${qdbBoldInk}`, borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 300, boxShadow: "0 2px 7px rgba(29,23,18,.07)" }}>
+                  <div className="qp-card" style={{ minWidth: 0, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 300, boxShadow: "0 2px 7px rgba(29,23,18,.07)" }}>
                       {/* pink header band */}
-                      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: qdbBoldPinkBand, borderBottom: `1.5px solid ${qdbBoldInk2}`, flexShrink: 0 }}>
+                      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "var(--band)", borderBottom: "var(--bdw) solid var(--bd)", flexShrink: 0 }}>
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={qdbBoldInk2} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M3 12h4l3 8 4-16 3 8h4" /></svg>
                         <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 800, color: qdbBoldInk2 }}>Tracking</span>
                       </div>
@@ -2788,9 +2788,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     </div>{/* ── end sub-card 1: Tracking ── */}
 
                   {/* ── Sub-card 2: What you sent ── */}
-                  <div className="qp-card" style={{ minWidth: 0, background: "#fffefb", border: `1.5px solid ${qdbBoldInk}`, borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 300, boxShadow: "0 2px 7px rgba(29,23,18,.07)" }}>
+                  <div className="qp-card" style={{ minWidth: 0, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 300, boxShadow: "0 2px 7px rgba(29,23,18,.07)" }}>
                       {/* pink header band */}
-                      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: qdbBoldPinkBand, borderBottom: `1.5px solid ${qdbBoldInk2}`, flexShrink: 0 }}>
+                      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "var(--band)", borderBottom: "var(--bdw) solid var(--bd)", flexShrink: 0 }}>
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={qdbBoldInk2} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>
                         <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 800, color: qdbBoldInk2 }}>What you sent</span>
                       </div>
@@ -2880,9 +2880,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     </div>{/* ── end sub-card 2: What you sent ── */}
 
                   {/* ── Sub-card 3: Notes — journal pins to bottom via flex-1 on messages area ── */}
-                  <div className="qp-card" style={{ minWidth: 0, background: "#fffefb", border: `1.5px solid ${qdbBoldInk}`, borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 300, boxShadow: "0 2px 7px rgba(29,23,18,.07)" }}>
+                  <div className="qp-card" style={{ minWidth: 0, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 300, boxShadow: "0 2px 7px rgba(29,23,18,.07)" }}>
                       {/* pink header band */}
-                      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: qdbBoldPinkBand, borderBottom: `1.5px solid ${qdbBoldInk2}`, flexShrink: 0 }}>
+                      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "var(--band)", borderBottom: "var(--bdw) solid var(--bd)", flexShrink: 0 }}>
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={qdbBoldInk2} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H19v15H6a2 2 0 0 0-2 2z" /><path d="M4 19.5A1.5 1.5 0 0 1 5.5 18H19" /></svg>
                         <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 800, color: qdbBoldInk2 }}>Journal</span>
                       </div>

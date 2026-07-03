@@ -59,10 +59,10 @@ const NavRow: React.FC<{ item: NavItem; active: boolean; onClick: () => void }> 
         fontSize: 20,
         fontWeight: 600,
         color: active ? inkShell : "#5a5048",
-        // Active = pink accent chip + ink border + soft shadow; inactive keeps a transparent border
-        // of the same width so the box doesn't jump between states.
-        background: active ? "#f5c7c2" : "transparent",
-        border: active ? "1.5px solid #1d1712" : "1.5px solid transparent",
+        // Active = themed accent band + themed border + soft shadow; inactive keeps a transparent
+        // border of equal width so the box doesn't jump. Reads the Queries theme vars (.t-capp/.t-bold).
+        background: active ? "var(--band)" : "transparent",
+        border: active ? "var(--bdw) solid var(--bd)" : "1.5px solid transparent",
         boxShadow: active ? "0 2px 8px rgba(29,23,18,.10)" : "none",
         borderRadius: 11,
         padding: "9px 11px",

@@ -28,6 +28,8 @@ interface SidebarShellProps {
   account?: React.ReactNode;
   /** Utility cluster for the top strip (help / notifications / settings / avatar). */
   utility?: React.ReactNode;
+  /** Queries-page theme — sets the CSS-var class on the shell root. Default Cappuccino. */
+  theme?: "cappuccino" | "bold";
   children: React.ReactNode;
 }
 
@@ -38,9 +40,10 @@ export const SidebarShell: React.FC<SidebarShellProps> = ({
   onCrumbClick,
   context,
   account,
+  theme,
   children,
 }) => (
-  <div style={{ display: "flex", height: "100vh", overflow: "hidden", background: "#ffffff" }}>
+  <div className={theme === "bold" ? "t-bold" : "t-capp"} style={{ display: "flex", height: "100vh", overflow: "hidden", background: "#ffffff" }}>
     <SidebarNav activeTab={activeTab} onNavigate={onNavigate} account={account} />
     {/* Content column fills the full height (no top strip) — the page owns its own header. */}
     <div style={{ flex: 1, minWidth: 0, minHeight: 0, overflow: "hidden", background: "#ffffff" }}>{children}</div>

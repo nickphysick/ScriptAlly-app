@@ -760,6 +760,30 @@ export const AccountSettings: React.FC<{ onNavigate: (tab: string, subPageName?:
 
   const preferencesSection = (
     <SectionCard title="Preferences" Icon={SlidersHorizontal} headingId="acct-h-preferences">
+      {/* Theme — functional today (applies to the Queries page). Persisted on the user profile. */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, padding: "14px 0", borderBottom: "0.5px solid #efe5da", marginBottom: 4 }}>
+        <div style={{ minWidth: 0 }}>
+          <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Theme</p>
+          <p style={helpText}>The look of your Queries page. (Coming to the rest of the app later.)</p>
+        </div>
+        <div role="radiogroup" aria-label="Queries page theme" style={{ display: "inline-flex", gap: 3, flexShrink: 0, background: "#f3ece2", border: "1px solid #e2d6c6", borderRadius: 10, padding: 3 }}>
+          {([["cappuccino", "Cappuccino"], ["bold", "Bold Pastille"]] as const).map(([val, label]) => {
+            const on = (currentUser?.queriesTheme ?? "cappuccino") === val;
+            return (
+              <button
+                key={val}
+                type="button"
+                role="radio"
+                aria-checked={on}
+                onClick={() => updateUserProfile({ queriesTheme: val })}
+                style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: on ? 700 : 500, color: on ? bodyInk : "#8a7d6c", background: on ? "#fffefb" : "transparent", border: on ? "1px solid #d8cebf" : "1px solid transparent", boxShadow: on ? "0 1px 2px rgba(29,23,18,.10)" : "none", borderRadius: 8, padding: "6px 13px", cursor: "pointer", whiteSpace: "nowrap" }}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
       <InertNotice>
         ScriptAlly doesn't apply these app-wide yet — they're coming soon. Dates currently follow your device's UK locale.
       </InertNotice>

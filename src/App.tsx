@@ -469,6 +469,7 @@ function AppContent() {
           activeTab={activeTab}
           onNavigate={handleNavigate}
           breadcrumb={["Queries", "Queries Hub"]}
+          theme={currentUser?.queriesTheme === "bold" ? "bold" : "cappuccino"}
           account={<ShellRailFoot onNavigate={handleNavigate} />}
         >
           <Queries searchQuery={searchQuery} onNavigate={handleNavigate} activeSubPage={activeSubPage} inShell />
