@@ -42,7 +42,7 @@
   --band: #f4c7c2; /* vivid pink */
   --pane: #ece2e0; /* blush */
   --chromerad: 14px;  /* rounded */
-  --listbg: #f2e7dc;  /* warm cream */
+  --listbg: #ffffff;  /* query-list panel is WHITE in both themes — only corners/border differ */
 }
 /* A gentle fade when the theme swaps (≤150ms). */
 .t-capp, .t-bold { transition: background-color .15s ease; }
