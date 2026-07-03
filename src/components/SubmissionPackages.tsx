@@ -20,7 +20,9 @@
  */
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
+import { ComponentType } from "../types";
 import { HubHeaderBar } from "./shell/HubHeaderBar";
+import { TypeGlyph } from "./packages/TypeGlyph";
 import { FONT_SERIF, FONT_MONO } from "../lib/designTokens";
 import { ChevronDown, Lock } from "lucide-react";
 
@@ -144,8 +146,25 @@ export const SubmissionPackages: React.FC = () => {
             {/* Content pane — hugs content height and scrolls internally (mockup .pane). The materials
                 rail joins this row in Phase 6; the home / composer / gallery views fill the pane P5+. */}
             <section className="pkg-pane" style={{ flex: 1, minWidth: 0, background: "var(--pane)", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", alignSelf: "flex-start", maxHeight: "100%", overflowY: "auto", padding: "16px 16px 20px" }}>
-              <div style={{ padding: "44px 8px", textAlign: "center", fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 14, color: "var(--muted)" }}>
-                The Package Builder is coming together — home, materials and the composer arrive in the next phases.
+              {/* Phase 3 interim — the three canonical material glyphs, each in its type-ink colour
+                  via currentColor. P5 replaces this placeholder with the first-visit home. */}
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 22, padding: "40px 8px" }}>
+                <div style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--muted)" }}>Canonical material glyphs</div>
+                <div style={{ display: "flex", gap: 34, flexWrap: "wrap", justifyContent: "center" }}>
+                  {([
+                    { type: ComponentType.QUERY_LETTER, label: "Query letter", ink: "var(--burg)" },
+                    { type: ComponentType.SYNOPSIS, label: "Synopsis", ink: "var(--sage-d)" },
+                    { type: ComponentType.SAMPLE_PAGES, label: "Sample pages", ink: "var(--gold)" },
+                  ] as const).map(({ type, label, ink }) => (
+                    <div key={label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                      <span style={{ color: ink, width: 46, height: 46, borderRadius: 12, display: "inline-flex", alignItems: "center", justifyContent: "center", border: "var(--bdw) solid var(--bd)", background: "#fffefb" }}>
+                        <TypeGlyph type={type} size={22} />
+                      </span>
+                      <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".04em", color: "var(--muted)" }}>{label}</span>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 13, color: "var(--muted)" }}>Home, materials and the composer arrive in the next phases.</div>
               </div>
             </section>
           </div>
