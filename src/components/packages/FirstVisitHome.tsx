@@ -108,10 +108,12 @@ export const FirstVisitHome: React.FC<FirstVisitHomeProps> = ({ onBuild, onCreat
       <style>{`
         .pkgfv .st2 { display:flex; align-items:center; justify-content:center; gap:34px; padding:20px 20px 4px; flex-wrap:wrap; }
         .pkgfv .lt { flex:0 1 400px; min-width:0; }
-        .pkgfv .lt h2 { font-family:${FONT_SERIF}; font-size:46px; font-weight:800; line-height:1.08; letter-spacing:-.8px; color:var(--ink); margin:0; }
+        /* Playfair loads up to 700 only, so 800/900 clamp to 700 — use loaded weights for a real step:
+           the setup line sits at 600 and the payoff "wins requests" at 700 (a touch bolder). */
+        .pkgfv .lt h2 { font-family:${FONT_SERIF}; font-size:46px; font-weight:600; line-height:1.08; letter-spacing:-.8px; color:var(--ink); margin:0; }
+        .pkgfv .wr { font-weight:700; white-space:nowrap; }
         .pkgfv .rel { position:relative; white-space:nowrap; }
-        .pkgfv .star { position:absolute; top:-14px; right:-20px; width:19px; height:19px; fill:var(--gold); transform-origin:center; animation:pkgGlint 2.6s ease-in-out infinite; }
-        .t-bold .pkgfv .star { fill:#f3e6cf; }
+        .pkgfv .star { position:absolute; top:-16px; left:-16px; width:19px; height:19px; fill:var(--pink-b); transform-origin:center; animation:pkgGlint 2.6s ease-in-out infinite; }
         @keyframes pkgGlint { 0%,100%{ transform:scale(1) rotate(0deg); opacity:.9; } 50%{ transform:scale(1.25) rotate(18deg); opacity:1; } 75%{ transform:scale(.92) rotate(8deg); opacity:.8; } }
         .pkgfv .sl { font-size:14.5px; color:#6a594d; line-height:1.65; max-width:380px; margin-top:16px; }
         .pkgfv .build { display:inline-block; margin:24px 0 0; font-family:${FONT_SERIF}; font-size:16px; font-weight:700; color:var(--ink); background:var(--pink); border:1px solid var(--pink-b); border-radius:12px; padding:15px 32px; cursor:pointer; transition:background .15s,transform .15s; }
@@ -134,7 +136,7 @@ export const FirstVisitHome: React.FC<FirstVisitHomeProps> = ({ onBuild, onCreat
         .pkgfv .winrow .wl { font-family:${FONT_MONO}; font-size:8px; letter-spacing:.08em; text-transform:uppercase; color:var(--burg); font-weight:500; }
         .pkgfv .winrow .wv { font-size:13.5px; font-weight:600; color:var(--ink); margin-top:2px; }
         .pkgfv .exlink { position:absolute; right:4px; bottom:0; font-family:${FONT_MONO}; font-size:8.5px; letter-spacing:.05em; color:var(--burg); text-decoration:underline; text-underline-offset:3px; cursor:pointer; background:none; border:0; padding:0; }
-        .pkgfv .divrule { display:flex; align-items:center; gap:14px; margin:8px 24px 0; }
+        .pkgfv .divrule { display:flex; align-items:center; gap:14px; margin:30px 24px 0; }
         .pkgfv .divrule::before, .pkgfv .divrule::after { content:''; flex:1; height:1px; background:#e6dac8; }
         .pkgfv .divrule span { font-family:${FONT_MONO}; font-size:8.5px; letter-spacing:.18em; text-transform:uppercase; color:#a4937f; }
         .pkgfv .contB { padding:14px 24px 8px; text-align:center; }
@@ -162,9 +164,9 @@ export const FirstVisitHome: React.FC<FirstVisitHomeProps> = ({ onBuild, onCreat
       <div className="st2">
         <div className="lt">
           <h2>
-            Find out what <span className="rel">wins requests
+            <span className="rel">Find
               <svg className="star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" /></svg>
-            </span>
+            </span> out what <span className="wr">wins requests</span>
           </h2>
           <div className="sl">Send different versions of your submission. ScriptAlly tracks which one gets agents asking for more.</div>
           <button type="button" className="build" onClick={onBuild}>＋ Build your first package</button>
@@ -193,7 +195,7 @@ export const FirstVisitHome: React.FC<FirstVisitHomeProps> = ({ onBuild, onCreat
       </div>
 
       {/* Divider + illustrative library cards */}
-      <div className="divrule"><span>Create a library of materials</span></div>
+      <div className="divrule"><span>Create your library of materials</span></div>
       <div className="contB">
         <div className="a2s">Give each piece a title, attach the file you actually send, and reuse it across any package.</div>
         <div className="librow">
