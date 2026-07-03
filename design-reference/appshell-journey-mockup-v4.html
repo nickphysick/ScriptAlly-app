@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — AppShell mockup v4 (Editorial drafts)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   ScriptAlly AppShell mockup v2
+   - Navigation is pure JS (no hash/anchors) so it runs inside
+     the sandboxed preview.
+   - Dashboard is a faithful reproduction of the live page,
+     sitting inside the persistent rail shell.
+   ============================================================ */
+
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:'Inter',sans-serif;color:#3a1c14;overflow:hidden}
+button{font-family:inherit}
+
+/* ---------- shared brand tokens ---------- */
+.shell{
+  --burg:#7c3a2a; --burgD:#6b3023; --ink:#3a1c14; --parch:#fdfaf5;
+  --muted:#9a8c80; --hair:#e7ddd2; --label:#9c8878; --green:#2e3a2c;
+  --sageA:#d7ddd5; --sageB:#d5dbd3; --sage:#8a9e88; --sageD:#5a6e58; --sageC:#e9ede6;
+  --btn:#f5e2da; --btnB:#e8c8bc; --btnH:#efd5ca; --postit:#f8e8e1;
+  --outTrack:rgba(124,58,42,0.28); --inTrack:rgba(138,158,136,0.35);
+}
+/* ---------- theme tokens ---------- */
+.t-capp{
+  --bd:#d8cebf; --bdw:1px; --desk:#e8ddd0; --band:#f2ddd5;
+  --pane:#fffefb; --card:#fffefb; --chromerad:0px;
+  --navpill:#f2ddd5; --listbg:#fffefb; --listrad:0px;
+}
+.t-bold{
+  --bd:#1d1712; --bdw:1.5px; --desk:#c2cfda; --band:#f4c7c2;
+  --pane:#ece2e0; --card:#fffefb; --chromerad:14px;
+  --navpill:#eec9c3; --listbg:#ffffff; --listrad:14px;
+}
+
+.shell{display:flex;height:100vh;background:var(--desk)}
+
+/* ============================================================
+   THE RAIL — persistent, never remounts, never moves on nav
+   ============================================================ */
+.rail{
+  width:216px;flex:none;background:#fffefb;
+  border-right:var(--bdw) solid var(--bd);
+  display:flex;flex-direction:column;
+  transition:width 200ms ease;position:relative;z-index:20;
+}
+.shell.collapsed .rail{width:60px}
+
+.rail-head{padding:18px 16px 14px;display:flex;align-items:center;gap:10px;min-height:58px}
+.wordmark{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;transition:opacity 150ms}
+.monogram-s{width:30px;height:30px;flex:none;border-radius:50%;background:#dfe7ec;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-style:italic;font-size:16px;color:#3a4650}
+.shell.collapsed .wordmark{opacity:0;width:0}
+
+.rail-collapse{position:absolute;top:22px;right:-11px;width:22px;height:22px;border-radius:50%;background:#fffefb;border:var(--bdw) solid var(--bd);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;z-index:25}
+.rail-collapse:hover{color:var(--burg)}
+
+.rail-search{margin:2px 12px 12px;display:flex;align-items:center;gap:8px;padding:7px 10px;border:var(--bdw) solid var(--bd);border-radius:9px;background:#fff;color:var(--muted);cursor:pointer;font-size:12px;white-space:nowrap;overflow:hidden}
+.rail-search:hover{border-color:var(--burg)}
+.rail-search kbd{font-family:'JetBrains Mono',monospace;font-size:9px;background:var(--hair);border-radius:4px;padding:1px 5px;margin-left:auto;color:var(--label)}
+.shell.collapsed .rail-search{justify-content:center;padding:7px 0}
+.shell.collapsed .rail-search .rs-label,.shell.collapsed .rail-search kbd{display:none}
+
+nav.rail-nav{padding:0 10px;display:flex;flex-direction:column;gap:3px}
+.nav-item{
+  display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;
+  color:#6a5a50;font-size:13px;background:none;border:1px solid transparent;
+  cursor:pointer;white-space:nowrap;text-align:left;width:100%;
+}
+.nav-item svg{flex:none;width:17px;height:17px;stroke:currentColor}
+.nav-item:hover{background:rgba(124,58,42,0.05)}
+.nav-item.active{background:var(--navpill);color:var(--burg);font-weight:500}
+.shell.collapsed .nav-item{justify-content:center;padding:9px 0}
+.shell.collapsed .nav-item .nl{display:none}
+
+.rail-foot{margin-top:auto;padding:12px}
+.icon-row{display:flex;gap:6px;margin-bottom:10px}
+.icon-btn{position:relative;flex:1;display:flex;align-items:center;justify-content:center;padding:7px 0;border:var(--bdw) solid var(--bd);background:#fff;border-radius:9px;color:#6a5a50;cursor:pointer}
+.icon-btn:hover{color:var(--burg)}
+.icon-btn .bdg{position:absolute;top:-5px;right:-4px;background:var(--burg);color:#fdfaf5;font-family:'JetBrains Mono',monospace;font-size:7px;font-weight:700;border-radius:99px;padding:1px 4px}
+.shell.collapsed .icon-row{flex-direction:column}
+
+.theme-seg{display:flex;border:var(--bdw) solid var(--bd);border-radius:9px;overflow:hidden;margin-bottom:12px}
+.theme-seg button{flex:1;border:none;background:transparent;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;padding:6px 0;color:var(--label);cursor:pointer}
+.theme-seg button.on{background:var(--band);color:var(--burg);font-weight:700}
+.shell.collapsed .theme-seg{display:none}
+
+.account{display:flex;align-items:center;gap:9px;padding:6px;border-radius:9px}
+.account:hover{background:rgba(124,58,42,0.05)}
+.avatar{width:30px;height:30px;flex:none;border-radius:50%;background:var(--parch);border:1px solid rgba(124,58,42,0.25);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:13px;color:var(--burg)}
+.account .an{font-size:12.5px;font-weight:500;white-space:nowrap;overflow:hidden}
+.account .ap{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.08em;color:var(--label);text-transform:uppercase}
+.shell.collapsed .account{justify-content:center;padding:6px 0}
+.shell.collapsed .account div:last-child{display:none}
+
+/* ============================================================
+   THE STAGE
+   ============================================================ */
+.stage{flex:1;min-width:0;display:flex;flex-direction:column;position:relative}
+.stage-scroll{flex:1;overflow-y:auto;padding:20px 24px 30px;scrollbar-width:thin;scrollbar-color:var(--bd) transparent}
+
+.page{display:none;max-width:1280px;margin:0 auto}
+.page.on{display:block;animation:pageIn 180ms ease-out}
+@keyframes pageIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.page.on{animation:none}.rail{transition:none}}
+
+/* ---------- page header bar (Queries / Agents / Manuscripts) ---------- */
+.qhbar{
+  position:relative;background:var(--card);border:var(--bdw) solid var(--bd);
+  border-radius:var(--chromerad);padding:16px 22px;margin-bottom:16px;
+  display:flex;align-items:center;gap:14px;
+}
+.t-capp .qhbar::after{content:'';position:absolute;inset:6px;border:1px solid var(--burg);pointer-events:none}
+.qh-eyebrow{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--label);margin-bottom:3px}
+.qh-title{font-family:'Playfair Display',serif;font-size:21px;font-weight:500;color:var(--ink)}
+.qh-cta{margin-left:auto;position:relative;z-index:2;background:var(--btn);border:1px solid var(--btnB);color:var(--burg);font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.07em;font-weight:500;padding:10px 20px;border-radius:10px;cursor:pointer;white-space:nowrap}
+.qh-cta:hover{background:var(--btnH)}
+
+/* ---------- shared small type ---------- */
+.lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--label)}
+.caveat{font-family:'Caveat',cursive;font-size:16px;color:#6a5a50}
+
+/* ---------- StatusDot (mockup approximation of the locked component) ---------- */
+.sdot{width:13px;height:13px;border-radius:50%;position:relative;flex:none;display:inline-block}
+.sdot .c{position:absolute;inset:2px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:6.5px;font-weight:700;line-height:1}
+.sdot.out{background:conic-gradient(var(--burg) var(--fill,0%),var(--outTrack) 0)}
+.sdot.out .c{background:#f8e7dc;color:var(--burg)}
+.sdot.in{background:conic-gradient(var(--sage) var(--fill,0%),var(--inTrack) 0)}
+.sdot.in .c{background:var(--sageC);color:var(--sageD)}
+.sdot.closed{background:#b8aca0}
+.sdot.closed .c{background:#f0ebe4;color:#8a7f74}
+
+/* ============================================================
+   DASHBOARD — faithful reproduction of the live page
+   ============================================================ */
+.dash{display:grid;grid-template-columns:1fr 372px;gap:20px;align-items:start}
+.dcol{display:flex;flex-direction:column;gap:20px;min-width:0}
+
+.dcard{background:#fffefb;border:1px solid #e7ddd2;border-radius:16px;box-shadow:0 1px 2px rgba(58,28,20,0.03),0 4px 14px rgba(58,28,20,0.04)}
+
+/* --- hero --- */
+.hero-card{padding:34px 38px 30px;display:flex;gap:28px;align-items:center;background:linear-gradient(180deg,#e6ebe3 0%,#fffefb 9%);border:1px solid #e7ddd2;border-radius:16px;box-shadow:0 1px 2px rgba(58,28,20,0.03),0 4px 14px rgba(58,28,20,0.04)}
+.hero-left{flex:1;min-width:0}
+.hi{font-family:'Playfair Display',serif;font-size:42px;font-weight:500;color:var(--green);line-height:1.1;white-space:nowrap}
+.hi .who{font-style:italic;color:var(--burg)}
+.hi .planes{font-size:20px;color:var(--burg);margin-left:8px;vertical-align:super}
+.quote{margin:20px 0 24px;border-left:3px solid var(--burg);padding-left:14px}
+.quote .q{font-family:'Playfair Display',serif;font-style:italic;font-size:15.5px;color:#4a3a30}
+.quote .a{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.2em;color:#8a7a6c;margin-top:7px;text-transform:uppercase}
+.cta-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.cta{display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.03em;padding:10px 18px;border-radius:10px;cursor:pointer}
+.cta svg{width:13px;height:13px;stroke:currentColor}
+.cta.pink{background:var(--postit);border:1px solid #eccfc0;color:var(--burg)}
+.cta.pink:hover{background:var(--btnH)}
+.cta.ghost{background:#fff;border:1px solid #e0d5c8;color:#5a4a40}
+.cta.ghost:hover{border-color:var(--burg);color:var(--burg)}
+.cta-div{width:1px;height:24px;background:var(--hair)}
+
+/* the corkboard — static, post-its only */
+.board{width:340px;flex:none;height:222px;background:#f4ead6;border:2px solid #d9c6a4;border-radius:12px;position:relative;box-shadow:inset 0 0 0 5px #faf3e4}
+.postit{position:absolute;width:72px;height:72px;border-radius:3px;box-shadow:0 2px 6px rgba(58,28,20,0.16);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.postit.y{background:#f7eec4;left:74px;top:66px;transform:rotate(-5deg)}
+.postit.p{background:#f6ded6;left:132px;top:72px;transform:rotate(1.5deg);z-index:2}
+.postit.g{background:#dfeadb;left:192px;top:64px;transform:rotate(5deg)}
+.postit.b{background:#dde7ec;left:120px;top:52px;transform:rotate(-2deg);opacity:.9}
+.postit .plus{font-family:'Playfair Display',serif;font-size:18px;color:var(--burg);line-height:1}
+.postit .pl{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.14em;color:var(--burg);text-transform:uppercase}
+
+/* --- stat cards --- */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.stat{position:relative;overflow:hidden;padding:18px 20px 16px;min-height:158px;display:flex;flex-direction:column}
+.stat .sl{display:flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#8a7a6c}
+.stat .sl svg{width:13px;height:13px;stroke:var(--burg)}
+.stat .num-row{display:flex;align-items:baseline;gap:10px;margin-top:12px}
+.stat .num{font-family:'Playfair Display',serif;font-size:38px;font-weight:500;color:var(--ink);line-height:1}
+.stat .pillb{font-family:'Inter',sans-serif;font-size:10px;color:#6a5a50;background:#faf6f0;border:1px solid var(--hair);border-radius:99px;padding:3px 10px;white-space:nowrap}
+.stat .ghosticon{position:absolute;top:16px;right:16px;opacity:.5}
+.stat .ghosticon svg{width:56px;height:56px;stroke:#ecd8cb;stroke-width:1.3}
+.stat .foot{margin-top:auto;padding-top:14px}
+.dashes{display:flex;gap:6px}
+.dashes span{flex:1;height:4px;border-radius:4px;background:#efe4d8}
+.gradbar{height:5px;border-radius:4px;background:linear-gradient(90deg,#7c3a2a 0%,#c99a86 60%,#f1e2d8 100%)}
+.people{display:flex;gap:5px;align-items:center}
+.people i{width:7px;height:7px;border-radius:50%;background:var(--burg);position:relative;display:inline-block}
+.people i::after{content:'';position:absolute;top:8px;left:-1.5px;width:10px;height:5px;border-radius:5px 5px 0 0;background:var(--burg)}
+.people .more{font-family:'JetBrains Mono',monospace;font-size:9px;color:#8a7a6c;margin-left:4px}
+.slider{position:relative;height:6px;border-radius:6px;background:#ece2d6}
+.slider .fill{position:absolute;left:0;top:0;bottom:0;width:55%;border-radius:6px;background:#7f9779}
+.slider .knob{position:absolute;left:55%;top:50%;transform:translate(-50%,-50%);width:15px;height:15px;border-radius:50%;background:#fff;border:2px solid #7f9779;box-shadow:0 1px 3px rgba(58,28,20,0.2)}
+
+/* --- banded panels (What's live / Fortnight) --- */
+.panel{overflow:hidden}
+.pband{display:flex;align-items:center;gap:10px;padding:14px 20px;background:linear-gradient(135deg,var(--sageA),var(--sageB));border-bottom:1px solid rgba(138,158,136,0.3)}
+.tick{width:4px;height:18px;border-radius:2px;background:var(--burg);flex:none}
+.pband h3{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;color:var(--green)}
+.pband .pr{margin-left:auto;display:flex;align-items:center;gap:8px}
+.pband .prm{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#5a6a58}
+.pband .prs{font-size:12px;color:#3a4a38}
+.pbody{padding:22px 24px;background:#fffefb}
+
+/* pipeline nodes */
+.pipe2{display:flex;align-items:flex-start}
+.pnode{display:flex;flex-direction:column;align-items:center;gap:12px;width:96px;flex:none}
+.pnode .circ{width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fff;font-size:20px;font-weight:600}
+.pnode .plabel{font-family:'Playfair Display',serif;font-size:14.5px;color:var(--ink);white-space:nowrap}
+.pdots{flex:1;border-top:2px dotted #cdb9aa;margin-top:31px}
+.pgap{flex:1}
+.circ.c-query{background:#f8e7dc;border:2px solid #e2b3a2;color:var(--burg)}
+.circ.c-preq{border:2.5px solid #d69c8e;color:#b06a56}
+.circ.c-psent{border:2.5px solid #9fb59b;color:#5a7a56}
+.circ.c-freq{border:2.5px solid #cf7a6a;color:#b85a48}
+.circ.c-fsent{border:2.5px solid #8fae89;color:#4f7a4a}
+.circ.c-rr{border:2.5px solid #dca263;color:#c08434}
+.circ svg{width:22px;height:22px;stroke:currentColor}
+
+/* fortnight strip */
+.fort{display:flex;align-items:stretch;gap:0}
+.fcell{flex:1;padding:6px 4px}
+.fcell .fm{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--label);margin-bottom:10px}
+.fdiv{width:1px;background:var(--hair);margin:0 18px}
+.ftoday{font-family:'Playfair Display',serif;font-size:15px;color:var(--ink);text-align:center;align-self:center;padding:0 6px;white-space:nowrap}
+.fevent{display:inline-flex;align-items:center;gap:8px;background:#fffdf9;border:0.5px solid #ece0d2;border-radius:8px;padding:8px 12px;font-size:12px}
+
+/* --- to-do list --- */
+.todo-card{overflow:hidden}
+.todo-band{display:flex;align-items:center;gap:9px;padding:15px 20px;background:linear-gradient(135deg,#f3ddd2,#eed2c5)}
+.todo-band .dot{width:8px;height:8px;border-radius:50%;background:var(--burg)}
+.todo-band h3{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;color:#6b2f20}
+.todo-tabs{display:flex;gap:20px;padding:12px 20px 0;border-bottom:1px solid var(--hair);background:#fffefb}
+.ttab{display:flex;align-items:center;gap:7px;font-family:'Playfair Display',serif;font-size:14.5px;color:#9a8c80;padding-bottom:11px;border-bottom:2px solid transparent;cursor:pointer;background:none;border-top:none;border-left:none;border-right:none}
+.ttab.on{color:var(--burg);border-bottom-color:var(--burg)}
+.ttab .cnt{font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;background:var(--postit);color:var(--burg);border-radius:99px;padding:2px 6px}
+.ttab:not(.on) .cnt{background:#f2ece4;color:#9a8c80}
+.todo-list{background:#fffefb}
+.trow{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid #f0e8de}
+.trow:last-child{border-bottom:none}
+.trow .tinfo{flex:1;min-width:0}
+.trow .tline1{display:flex;align-items:center;gap:9px}
+.chip{font-family:'JetBrains Mono',monospace;font-size:7.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:var(--postit);color:var(--burg);border-radius:5px;padding:3px 7px;flex:none}
+.trow .tname{font-family:'Playfair Display',serif;font-size:15px;font-weight:500;color:#8a3a28;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trow .tdesc{font-size:11.5px;color:#6a5a50;margin-top:4px;font-weight:300}
+.trow .tdesc b{font-weight:600}
+.tbtn{flex:none;background:var(--postit);border:1px solid #ecd0c2;color:var(--burg);font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.05em;padding:9px 16px;border-radius:9px;cursor:pointer;white-space:nowrap}
+.tbtn:hover{background:var(--btnH)}
+
+/* --- the story so far --- */
+.story-head{display:flex;align-items:center;gap:10px;padding:16px 20px 12px}
+.story-head h3{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;color:#6b2f20}
+.story-head svg{margin-left:auto;width:16px;height:16px;stroke:var(--burg)}
+.story-body{padding:2px 20px 18px}
+.sdate{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--label);margin:12px 0 8px}
+.sentry{display:flex;gap:11px;align-items:flex-start}
+.smark{margin-top:14px;flex:none}
+.scard{flex:1;background:#fffdf9;border:0.5px solid #ece0d2;border-left:3px solid #9fb59b;border-radius:8px;padding:10px 13px;margin-bottom:8px}
+.scard.pink{border-left-color:#dba18d}
+.scard .sl1{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.spill{font-family:'JetBrains Mono',monospace;font-size:7.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:var(--sageC);color:var(--sageD);border-radius:5px;padding:3px 8px}
+.spill.pink{background:var(--postit);color:var(--burg)}
+.stime{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--muted)}
+.sname{font-family:'Playfair Display',serif;font-size:15.5px;font-weight:500;color:#8a3a28;margin-top:6px}
+.scap{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+
+/* ============================================================
+   two-panel workspace (Queries / Agents / Manuscripts)
+   ============================================================ */
+.workspace{display:flex;gap:16px;align-items:stretch;height:calc(100vh - 160px);min-height:420px}
+.listpanel{width:300px;flex:none;background:var(--listbg);border:var(--bdw) solid var(--bd);border-radius:var(--listrad);display:flex;flex-direction:column;overflow:hidden}
+.lp-tools{padding:12px;border-bottom:1px solid var(--hair);display:flex;gap:8px}
+.lp-search{flex:1;border:1px solid var(--hair);border-radius:8px;padding:6px 10px;font-size:12px;font-family:'Inter',sans-serif;color:var(--ink);background:#fff;outline:none}
+.lp-search:focus{border-color:var(--sage);box-shadow:0 0 0 3px rgba(138,158,136,0.12)}
+.lp-rows{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--bd) transparent}
+.lp-row{display:flex;align-items:center;gap:10px;padding:11px 13px;border-bottom:1px solid var(--hair);cursor:pointer}
+.lp-row:hover{background:rgba(124,58,42,0.035)}
+.lp-row.sel{background:var(--band)}
+.mono-init{width:30px;height:30px;flex:none;border-radius:50%;background:linear-gradient(135deg,#f5e2da,#efd5ca);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:12px;color:var(--burg)}
+.lp-row .rn{font-size:12.5px;font-weight:500;line-height:1.25}
+.lp-row .rm{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;margin-top:2px}
+.lp-foot{border-top:1px solid var(--hair);padding:9px 13px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--label);cursor:pointer;display:flex;align-items:center;gap:7px}
+.lp-foot:hover{color:var(--burg)}
+
+.readpane{flex:1;min-width:0;overflow-y:auto;display:flex;flex-direction:column;gap:14px;scrollbar-width:thin;scrollbar-color:var(--bd) transparent;padding-bottom:4px}
+.rhero{background:linear-gradient(135deg,#ffffff 30%,var(--tint,#f8e7dc));border:var(--bdw) solid var(--bd);border-radius:14px;padding:20px 22px;display:flex;align-items:center;gap:16px}
+.rhero .havatar{width:52px;height:52px;flex:none;border-radius:50%;background:#1d1712;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:19px;color:var(--parch)}
+.rhero .hn{font-family:'Playfair Display',serif;font-size:20px;font-weight:500}
+.rhero .hs{font-size:12px;font-weight:300;color:#6a5a50;margin-top:2px}
+.rhero .hstat{margin-left:auto}
+.hpill{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--hair);border-radius:99px;padding:5px 12px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--burg)}
+.pcard{background:var(--card);border:var(--bdw) solid var(--bd);border-radius:14px;padding:16px 20px}
+.pcard h4{font-family:'Playfair Display',serif;font-size:15px;font-weight:500;margin-bottom:12px}
+.kv{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--hair);font-size:12.5px}
+.kv:last-child{border-bottom:none}
+.kv .k{color:var(--muted)}
+.kv .v{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink)}
+
+/* ---------- floating help + hint ---------- */
+.help-fab{position:fixed;bottom:20px;right:20px;width:38px;height:38px;border-radius:50%;background:var(--parch);border:var(--bdw) solid var(--bd);color:var(--burg);font-family:'Playfair Display',serif;font-size:17px;cursor:pointer;box-shadow:0 3px 12px rgba(58,28,20,0.12);z-index:30}
+.help-fab:hover{background:#fff}
+.demo-hint{position:fixed;bottom:8px;left:50%;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);pointer-events:none;z-index:5;white-space:nowrap}
+
+/* ---------- ⌘K palette ---------- */
+.kk-overlay{position:fixed;inset:0;background:rgba(29,23,18,0.35);backdrop-filter:blur(2px);z-index:60;display:none;align-items:flex-start;justify-content:center;padding-top:14vh}
+.kk-overlay.open{display:flex}
+.kk{width:520px;max-width:92vw;background:var(--parch);border-radius:14px;box-shadow:0 20px 60px rgba(29,23,18,0.35);overflow:hidden;border:1px solid rgba(124,58,42,0.28)}
+.kk input{width:100%;border:none;outline:none;background:transparent;padding:16px 20px;font-size:15px;font-family:'Inter',sans-serif;color:var(--ink);border-bottom:1px solid var(--hair)}
+.kk-list{max-height:300px;overflow-y:auto;padding:8px}
+.kk-item{display:flex;align-items:center;gap:11px;padding:10px 13px;border-radius:9px;font-size:13px;cursor:pointer;color:var(--ink)}
+.kk-item:hover{background:var(--btn);color:var(--burg)}
+.kk-item .ki{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--label);margin-left:auto}
+.kk-foot{border-top:1px solid var(--hair);padding:8px 16px;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.08em;color:var(--label);text-transform:uppercase}
+
+/* ============================================================
+   BOLD PASTILLE — dashboard restyle (content untouched)
+   Guide: dev-sampled Queries Hub bold. Ink 1.5px frames, white
+   #fffefb cards, vivid pink #f4c7c2 bands, blue desk, radius 14,
+   no inset frames, flat (no soft shadows).
+   ============================================================ */
+.t-bold .dcard,
+.t-bold .hero-card{
+  background:#fffefb;border:1.5px solid #1d1712;border-radius:14px;box-shadow:none;
+}
+/* hero loses the sage top glow — bold is flat white */
+.t-bold .hero-card{background:#fffefb}
+.t-bold .hi{color:#1d1712}
+
+/* banded headers: sage gradient -> vivid pink, ink rule beneath */
+.t-bold .pband{background:#f4c7c2;border-bottom:1.5px solid #1d1712}
+.t-bold .pband h3{color:#1d1712}
+.t-bold .pband .prm{color:#7a4438}
+.t-bold .pband .prs{color:#1d1712}
+.t-bold .todo-band{background:#f4c7c2;border-bottom:1.5px solid #1d1712}
+.t-bold .todo-band h3{color:#1d1712}
+.t-bold .story-head h3{color:#1d1712}
+
+/* corkboard gets the ink frame too */
+.t-bold .board{border:1.5px solid #1d1712;box-shadow:inset 0 0 0 5px #faf3e4}
+
+/* small furniture: white with 1px ink instead of soft hairlines */
+.t-bold .stat .pillb{background:#fff;border:1px solid #1d1712;color:#1d1712}
+.t-bold .fevent{background:#fff;border:1px solid #1d1712}
+.t-bold .scard{background:#fff;border:1px solid #1d1712;border-left-width:3px}
+.t-bold .ttab .cnt{border:1px solid rgba(29,23,18,0.35)}
+.t-bold .cta.ghost{border:1px solid #1d1712;color:#1d1712}
+.t-bold .cta-div{background:rgba(29,23,18,0.25)}
+
+/* pipeline circles pick up a crisper edge, ring colours unchanged */
+.t-bold .circ{background:#fff}
+
+/* interior dividers stay quiet — the frame does the talking */
+.t-bold .trow{border-bottom-color:#ece2da}
+.t-bold .todo-tabs{border-bottom-color:#ece2da}
+
+/* ============================================================
+   EDITORIAL — three drafts. Low colour, no whimsy, typographic.
+   Rule: burgundy survives only as the single brand accent
+   (active nav, ticks, key data). StatusDot keeps its colours —
+   in Editorial, the only colour left is the data.
+   ============================================================ */
+
+/* --- tokens --- */
+/* A · Broadsheet: paper white, hairlines, square, rule-under-title */
+.t-eda{--bd:#d6d1c6;--bdw:1px;--desk:#f2f0ea;--band:#ffffff;--pane:#ffffff;--card:#ffffff;--chromerad:0px;--navpill:#eceae2;--listbg:#ffffff;--listrad:0px}
+/* B · Manila: warm grey-beige ledger, putty bands, small radius */
+.t-edb{--bd:#c7c1b4;--bdw:1px;--desk:#e4e1da;--band:#edeae3;--pane:#fcfbf8;--card:#fcfbf8;--chromerad:6px;--navpill:#e7e3d9;--listbg:#fcfbf8;--listrad:6px}
+/* C · Masthead: white cards, ink section bands with cream type */
+.t-edc{--bd:#22211e;--bdw:1px;--desk:#eceded;--band:#22211e;--pane:#ffffff;--card:#ffffff;--chromerad:10px;--navpill:#22211e;--listbg:#ffffff;--listrad:10px}
+.t-edc .nav-item.active{color:#f4f1ea}
+
+/* --- shared editorial de-whimsify (applies to all three) --- */
+.ed .dcard,.ed .hero-card{background:var(--card);border:var(--bdw) solid var(--bd);border-radius:var(--chromerad);box-shadow:none}
+.ed .hi{color:#22201c}
+.ed .planes{display:none}
+.ed .quote .q{color:#3a3833}
+.ed .caveat{font-family:'Playfair Display',serif;font-style:italic;font-size:13.5px;color:#5a5650}
+.ed .board{background:var(--card);border:var(--bdw) solid var(--bd);box-shadow:none;border-radius:var(--chromerad)}
+.ed .postit{box-shadow:0 1px 3px rgba(30,28,24,0.12)}
+.ed .postit.y{background:#f1efe9}
+.ed .postit.p{background:#e9e6df}
+.ed .postit.g{background:#dedbd3}
+.ed .postit.b{background:#f4f2ec}
+.ed .postit .plus,.ed .postit .pl{color:#22201c}
+.ed .stat .sl svg{stroke:#22201c}
+.ed .ghosticon{opacity:.3}
+.ed .ghosticon svg{stroke:#ccc7bc}
+.ed .dashes span{background:#e6e3db}
+.ed .gradbar{background:#dcd8ce}
+.ed .people i,.ed .people i::after{background:#6a675f}
+.ed .slider{background:#e6e3db}
+.ed .slider .fill{background:var(--burg)}
+.ed .slider .knob{border-color:var(--burg)}
+.ed .pillb{background:transparent;border:1px solid var(--bd);color:#4a4740}
+.ed .chip{background:#efede6;color:#4a4740}
+.ed .ttab .cnt{background:#efede6;color:#4a4740;border:none}
+.ed .tname,.ed .sname{color:#22201c}
+.ed .fevent{background:var(--card);border:1px solid var(--bd)}
+.ed .scard{background:var(--card);border:1px solid var(--bd);border-left-width:3px}
+.ed .trow,.ed .todo-tabs{border-bottom-color:#e8e5dd}
+.ed .mono-init{background:#eceae3;color:#4a4740}
+.ed .hpill{border-color:var(--bd)}
+.ed .cta-div{background:var(--bd)}
+.ed .cta.ghost{background:transparent;border:1px solid var(--bd);color:#4a4740}
+.ed .cta.ghost:hover{border-color:#22201c;color:#22201c}
+.ed .circ{background:#fff}
+.ed .pband h3,.ed .todo-band h3,.ed .story-head h3{color:#22201c}
+.ed .pband .prm{color:#6a675f}
+.ed .pband .prs{color:#22201c}
+.ed .story-head svg{stroke:#8a867c}
+
+/* --- A · Broadsheet: bands are white with a heavy rule under the title row --- */
+.t-eda .pband,.t-eda .todo-band{background:#ffffff;border-bottom:2px solid #22201c}
+.t-eda .cta.pink,.t-eda .tbtn,.t-eda .qh-cta{background:#ffffff;border:1px solid #22201c;color:#22201c}
+.t-eda .cta.pink:hover,.t-eda .tbtn:hover,.t-eda .qh-cta:hover{background:#f2f0ea}
+
+/* --- B · Manila: putty bands, putty buttons, ledger quiet --- */
+.t-edb .pband,.t-edb .todo-band{background:#edeae3;border-bottom:1px solid #c7c1b4}
+.t-edb .cta.pink,.t-edb .tbtn,.t-edb .qh-cta{background:#edeae3;border:1px solid #b5afa2;color:#22201c}
+.t-edb .cta.pink:hover,.t-edb .tbtn:hover,.t-edb .qh-cta:hover{background:#e3dfd4}
+
+/* --- C · Masthead: ink bands with cream type, ink primary buttons --- */
+.t-edc .pband,.t-edc .todo-band{background:#22211e;border-bottom:1px solid #22211e}
+.t-edc .pband h3,.t-edc .todo-band h3{color:#f4f1ea}
+.t-edc .pband .prm{color:rgba(244,241,234,0.55)}
+.t-edc .pband .prs{color:#f4f1ea}
+.t-edc .pband .tick{background:#f4f1ea}
+.t-edc .todo-band .dot{background:#f4f1ea}
+.t-edc .pband svg{stroke:#f4f1ea}
+.t-edc .cta.pink,.t-edc .tbtn,.t-edc .qh-cta{background:#22211e;border:1px solid #22211e;color:#f4f1ea}
+.t-edc .cta.pink:hover,.t-edc .tbtn:hover,.t-edc .qh-cta:hover{background:#3a3833}
+
+.seg-cap{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--label);margin:0 2px 5px}
+.shell.collapsed .seg-cap{display:none}
+
+svg{fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+@media (max-width:1100px){
+  .dash{grid-template-columns:1fr}
+  .stat-row{grid-template-columns:repeat(2,1fr)}
+  .board{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="shell t-capp" id="shell">
+
+  <!-- ================= PERSISTENT RAIL ================= -->
+  <aside class="rail">
+    <button class="rail-collapse" id="collapseBtn" title="Collapse sidebar">‹</button>
+    <div class="rail-head">
+      <div class="monogram-s">S</div>
+      <div class="wordmark">ScriptAlly</div>
+    </div>
+
+    <div class="rail-search" id="kkTrigger">
+      <svg width="14" height="14" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <span class="rs-label">Search…</span>
+      <kbd>⌘K</kbd>
+    </div>
+
+    <nav class="rail-nav">
+      <button class="nav-item active" data-route="dashboard">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7.5" height="9" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="5.5" rx="1.5"/><rect x="13.5" y="12" width="7.5" height="9" rx="1.5"/><rect x="3" y="15.5" width="7.5" height="5.5" rx="1.5"/></svg>
+        <span class="nl">Dashboard</span>
+      </button>
+      <button class="nav-item" data-route="queries">
+        <svg viewBox="0 0 24 24"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4 18-7z"/></svg>
+        <span class="nl">Queries</span>
+      </button>
+      <button class="nav-item" data-route="agents">
+        <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17.5" cy="9" r="2.5"/><path d="M16 14.5c3 .3 5.5 2.3 5.5 5.5"/></svg>
+        <span class="nl">Agents</span>
+      </button>
+      <button class="nav-item" data-route="manuscripts">
+        <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg>
+        <span class="nl">Manuscripts</span>
+      </button>
+    </nav>
+
+    <div class="rail-foot">
+      <div class="icon-row">
+        <button class="icon-btn" title="Alerts">
+          <svg width="14" height="14" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+          <span class="bdg">9+</span>
+        </button>
+        <button class="icon-btn" title="Settings">
+          <svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.9 2.9l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.9-2.9l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.9-2.9l.1.1a1.7 1.7 0 0 0 1.9.3h.1a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5h.1a1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.9 2.9l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1a1.7 1.7 0 0 0 1.5 1h.2a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1z"/></svg>
+        </button>
+      </div>
+      <div class="theme-seg" role="group" aria-label="Theme" style="margin-bottom:8px">
+        <button data-th="capp" class="on">Capp</button>
+        <button data-th="bold">Bold</button>
+      </div>
+      <div class="seg-cap">Editorial drafts</div>
+      <div class="theme-seg" role="group" aria-label="Editorial drafts">
+        <button data-th="eda" title="A — Broadsheet">A</button>
+        <button data-th="edb" title="B — Manila">B</button>
+        <button data-th="edc" title="C — Masthead">C</button>
+      </div>
+      <div class="account">
+        <div class="avatar">B</div>
+        <div>
+          <div class="an">Bethus Wethus</div>
+          <div class="ap">Pro</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================= STAGE ================= -->
+  <div class="stage">
+    <div class="stage-scroll" id="stageScroll">
+
+      <!-- ========== DASHBOARD (faithful) ========== -->
+      <section class="page on" id="pg-dashboard">
+        <div class="dash">
+
+          <!-- LEFT COLUMN -->
+          <div class="dcol">
+
+            <!-- hero -->
+            <div class="hero-card">
+              <div class="hero-left">
+                <div class="hi">Welcome back, <span class="who">Bethus</span><span class="planes">🡒🡒</span></div>
+                <div class="quote">
+                  <div class="q">The first draft is just you telling yourself the story.</div>
+                  <div class="a">— Terry Pratchett</div>
+                </div>
+                <div class="cta-row">
+                  <button class="cta pink"><svg viewBox="0 0 24 24"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4 18-7z"/></svg>Send query</button>
+                  <button class="cta pink"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 5 5v1"/></svg>Record a response</button>
+                  <div class="cta-div"></div>
+                  <button class="cta ghost"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M18 8v6M15 11h6"/></svg>Add agent</button>
+                  <button class="cta ghost"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14z"/></svg>Add manuscript</button>
+                </div>
+              </div>
+              <div class="board">
+                <div class="postit b"></div>
+                <div class="postit y"></div>
+                <div class="postit p"><span class="plus">+</span><span class="pl">Add a note</span></div>
+                <div class="postit g"></div>
+              </div>
+            </div>
+
+            <!-- stat cards -->
+            <div class="stat-row">
+              <div class="dcard stat">
+                <div class="sl"><svg viewBox="0 0 24 24"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4 18-7z"/></svg>Queries sent</div>
+                <div class="ghosticon"><svg viewBox="0 0 24 24"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4 18-7z"/></svg></div>
+                <div class="num-row"><span class="num">20</span><span class="pillb">0 this week</span></div>
+                <div class="foot"><div class="dashes"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></div>
+              </div>
+              <div class="dcard stat">
+                <div class="sl"><svg viewBox="0 0 24 24"><path d="M6 2h12M6 22h12M8 2v4l4 4 4-4V2M8 22v-4l4-4 4 4v4"/></svg>Active queries</div>
+                <div class="ghosticon"><svg viewBox="0 0 24 24"><path d="M6 2h12M6 22h12M8 2v4l4 4 4-4V2M8 22v-4l4-4 4 4v4"/></svg></div>
+                <div class="num-row"><span class="num">16</span><span class="pillb">No change on last week</span></div>
+                <div class="foot"><div class="gradbar"></div></div>
+              </div>
+              <div class="dcard stat">
+                <div class="sl"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17.5" cy="9" r="2.5"/><path d="M16 14.5c3 .3 5.5 2.3 5.5 5.5"/></svg>Agents</div>
+                <div class="ghosticon"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17.5" cy="9" r="2.5"/><path d="M16 14.5c3 .3 5.5 2.3 5.5 5.5"/></svg></div>
+                <div class="num-row"><span class="num">16</span><span class="pillb">0 idle</span></div>
+                <div class="foot"><div class="people"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><span class="more">+6</span></div></div>
+              </div>
+              <div class="dcard stat">
+                <div class="sl"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 6L2 7"/></svg>Responses received</div>
+                <div class="ghosticon"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 6L2 7"/></svg></div>
+                <div class="num-row"><span class="num">11</span><span class="pillb">55% rate</span></div>
+                <div class="foot"><div class="slider"><div class="fill"></div><div class="knob"></div></div></div>
+              </div>
+            </div>
+
+            <!-- what's live right now -->
+            <div class="dcard panel">
+              <div class="pband">
+                <span class="tick"></span>
+                <h3>What&rsquo;s live right now?</h3>
+                <div class="pr"><span class="prm">Not shown here:</span><span class="prs">1 offer, 2 rejections, 1 closed</span></div>
+              </div>
+              <div class="pbody">
+                <div class="pipe2">
+                  <div class="pnode">
+                    <div class="circ c-query"><svg viewBox="0 0 24 24"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4 18-7z"/></svg></div>
+                    <div class="plabel">8 queried</div>
+                  </div>
+                  <div class="pdots"></div>
+                  <div class="pnode">
+                    <div class="circ c-preq">‹</div>
+                    <div class="plabel">3 partials requested</div>
+                  </div>
+                  <div class="pdots"></div>
+                  <div class="pnode">
+                    <div class="circ c-psent">›</div>
+                    <div class="plabel">1 partial sent</div>
+                  </div>
+                  <div class="pgap"></div>
+                  <div class="pnode"><div class="circ c-freq">«</div></div>
+                  <div class="pgap"></div>
+                  <div class="pnode"><div class="circ c-fsent">»</div></div>
+                  <div class="pgap"></div>
+                  <div class="pnode"><div class="circ c-rr"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/></svg></div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- fortnight in focus -->
+            <div class="dcard panel">
+              <div class="pband">
+                <span class="tick"></span>
+                <h3>Fortnight in focus</h3>
+                <div class="pr">
+                  <span class="prm">1 event last week · 1 coming up · 27 Jun – 10 Jul</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" style="stroke:#5a6a58"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+                </div>
+              </div>
+              <div class="pbody">
+                <div class="fort">
+                  <div class="fcell">
+                    <div class="fm">Last week · 27 Jun – 3 Jul</div>
+                    <span class="fevent"><span class="sdot in" style="--fill:100%"><span class="c">←</span></span> Partial requested — Greg Panetta</span>
+                  </div>
+                  <div class="fdiv"></div>
+                  <div class="ftoday">Today · Fri 3rd Jul</div>
+                  <div class="fdiv"></div>
+                  <div class="fcell" style="text-align:right">
+                    <div class="fm">Coming up · 4 – 10 Jul</div>
+                    <span class="fevent"><span class="sdot out" style="--fill:100%"><span class="c">→</span></span> Full due — Daniel O&rsquo;Rourke</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- RIGHT COLUMN -->
+          <div class="dcol">
+
+            <!-- to-do list -->
+            <div class="dcard todo-card">
+              <div class="todo-band"><span class="dot"></span><h3>To-do list</h3></div>
+              <div class="todo-tabs">
+                <button class="ttab on">Urgent <span class="cnt">7</span></button>
+                <button class="ttab">Housekeeping <span class="cnt">16</span></button>
+                <button class="ttab">Notes to self <span class="cnt">0</span></button>
+              </div>
+              <div class="todo-list">
+                <div class="trow">
+                  <div class="tinfo">
+                    <div class="tline1"><span class="chip">Pages</span><span class="tname">Daniel O&rsquo;Rourke</span></div>
+                    <div class="tdesc">Time to send your <b>full manuscript</b></div>
+                  </div>
+                  <button class="tbtn">Mark sent</button>
+                </div>
+                <div class="trow">
+                  <div class="tinfo">
+                    <div class="tline1"><span class="chip">Pages</span><span class="tname">Daniel O&rsquo;Rourke</span></div>
+                    <div class="tdesc">Time to send your <b>partial manuscript</b></div>
+                  </div>
+                  <button class="tbtn">Mark sent</button>
+                </div>
+                <div class="trow">
+                  <div class="tinfo">
+                    <div class="tline1"><span class="chip">Offer</span><span class="tname">Tom Ellery</span></div>
+                    <div class="tdesc">An offer to weigh — Tom Ellery</div>
+                  </div>
+                  <button class="tbtn">Review</button>
+                </div>
+                <div class="trow">
+                  <div class="tinfo">
+                    <div class="tline1"><span class="chip">Pages</span><span class="tname">Greg Panetta</span></div>
+                    <div class="tdesc">Time to send your <b>partial manuscript</b></div>
+                  </div>
+                  <button class="tbtn">Mark sent</button>
+                </div>
+                <div class="trow">
+                  <div class="tinfo">
+                    <div class="tline1"><span class="chip">Pages</span><span class="tname">Priya Raman</span></div>
+                    <div class="tdesc">Time to send your <b>partial manuscript</b></div>
+                  </div>
+                  <button class="tbtn">Mark sent</button>
+                </div>
+                <div class="trow">
+                  <div class="tinfo">
+                    <div class="tline1"><span class="chip">Revise</span><span class="tname">Sophie Dunn</span></div>
+                    <div class="tdesc">Time to revise and resubmit · Murphy&rsquo;s Day Out</div>
+                  </div>
+                  <button class="tbtn">Record</button>
+                </div>
+                <div class="trow">
+                  <div class="tinfo">
+                    <div class="tline1"><span class="chip">Pages</span><span class="tname">Jonathan Marsh</span></div>
+                    <div class="tdesc">Time to send your <b>full manuscript</b></div>
+                  </div>
+                  <button class="tbtn">Mark sent</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- the story so far -->
+            <div class="dcard">
+              <div class="story-head">
+                <span class="tick"></span>
+                <h3>The story so far</h3>
+                <svg viewBox="0 0 24 24"><ellipse cx="8" cy="7" rx="2.5" ry="4"/><path d="M6.5 12h3v2.5a1.5 1.5 0 0 1-3 0z"/><ellipse cx="16" cy="12" rx="2.5" ry="4"/><path d="M14.5 17h3v2.5a1.5 1.5 0 0 1-3 0z"/></svg>
+              </div>
+              <div class="story-body">
+                <div class="sdate">Sun 28 Jun</div>
+                <div class="sentry">
+                  <span class="smark sdot in" style="--fill:50%"><span class="c">←</span></span>
+                  <div class="scard">
+                    <div class="sl1"><span class="spill">Partial requested</span><span class="stime">6:17pm</span></div>
+                    <div class="sname">Greg Panetta</div>
+                    <div class="scap">Murphy&rsquo;s Day Out</div>
+                  </div>
+                </div>
+                <div class="sdate">Thu 25 Jun</div>
+                <div class="sentry">
+                  <span class="smark sdot out" style="--fill:0%"><span class="c">→</span></span>
+                  <div class="scard pink">
+                    <div class="sl1"><span class="spill pink">Import</span><span class="stime">9:49pm</span></div>
+                    <div class="sname">Smart Import</div>
+                    <div class="scap">Query history added</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== QUERIES ========== -->
+      <section class="page" id="pg-queries">
+        <div class="qhbar">
+          <div>
+            <div class="qh-eyebrow">16 open · 4 closed</div>
+            <div class="qh-title">Queries Hub</div>
+          </div>
+          <button class="qh-cta">Log a new query</button>
+        </div>
+
+        <div class="workspace">
+          <div class="listpanel">
+            <div class="lp-tools"><input class="lp-search" placeholder="Search queries…"></div>
+            <div class="lp-rows">
+              <div class="lp-row sel">
+                <div class="mono-init">DO</div>
+                <div><div class="rn">Daniel O&rsquo;Rourke</div><div class="rm">Full requested · 6 wks</div></div>
+                <span class="sdot in" style="--fill:100%;margin-left:auto"><span class="c">←</span></span>
+              </div>
+              <div class="lp-row">
+                <div class="mono-init">TE</div>
+                <div><div class="rn">Tom Ellery</div><div class="rm">Offer of representation</div></div>
+                <span class="sdot" style="background:var(--burg);margin-left:auto"><span class="c" style="background:var(--burg);color:var(--parch)">✓</span></span>
+              </div>
+              <div class="lp-row">
+                <div class="mono-init">GP</div>
+                <div><div class="rn">Greg Panetta</div><div class="rm">Partial requested · 5 days</div></div>
+                <span class="sdot in" style="--fill:50%;margin-left:auto"><span class="c">←</span></span>
+              </div>
+              <div class="lp-row">
+                <div class="mono-init">SD</div>
+                <div><div class="rn">Sophie Dunn</div><div class="rm">Revise &amp; resubmit</div></div>
+                <span class="sdot in" style="--fill:100%;margin-left:auto"><span class="c">✎</span></span>
+              </div>
+              <div class="lp-row">
+                <div class="mono-init">PR</div>
+                <div><div class="rn">Priya Raman</div><div class="rm">Partial requested · 2 wks</div></div>
+                <span class="sdot in" style="--fill:50%;margin-left:auto"><span class="c">←</span></span>
+              </div>
+              <div class="lp-row">
+                <div class="mono-init">JM</div>
+                <div><div class="rn">Jonathan Marsh</div><div class="rm">Full requested · 1 wk</div></div>
+                <span class="sdot in" style="--fill:100%;margin-left:auto"><span class="c">←</span></span>
+              </div>
+            </div>
+            <div class="lp-foot">
+              <svg width="12" height="12" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>
+              Export as CSV
+            </div>
+          </div>
+
+          <div class="readpane">
+            <div class="rhero" style="--tint:#e9ede6">
+              <div class="havatar">DO</div>
+              <div>
+                <div class="hn">Daniel O&rsquo;Rourke</div>
+                <div class="hs">Larkspur Literary · London</div>
+              </div>
+              <div class="hstat">
+                <span class="hpill"><span class="sdot in" style="--fill:100%"><span class="c">←</span></span> Full requested</span>
+              </div>
+            </div>
+            <div class="pcard">
+              <h4>Tracking</h4>
+              <div class="kv"><span class="k">Queried</span><span class="v">12 May 2026</span></div>
+              <div class="kv"><span class="k">Partial requested</span><span class="v">2 Jun 2026</span></div>
+              <div class="kv"><span class="k">Full requested</span><span class="v">28 Jun 2026</span></div>
+              <div class="kv"><span class="k">Your deadline</span><span class="v" style="color:var(--burg)">12 Jul 2026</span></div>
+            </div>
+            <div class="pcard">
+              <h4>Journal</h4>
+              <div class="caveat">He asked whether Murphy has a sequel in him. Have an answer ready before sending the full.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== AGENTS ========== -->
+      <section class="page" id="pg-agents">
+        <div class="qhbar">
+          <div>
+            <div class="qh-eyebrow">16 agents · 7 agencies</div>
+            <div class="qh-title">Agent Database</div>
+          </div>
+          <button class="qh-cta">Add an agent</button>
+        </div>
+
+        <div class="workspace">
+          <div class="listpanel">
+            <div class="lp-tools"><input class="lp-search" placeholder="Search agents…"></div>
+            <div class="lp-rows">
+              <div class="lp-row sel">
+                <div class="mono-init">DO</div>
+                <div><div class="rn">Daniel O&rsquo;Rourke</div><div class="rm">Larkspur Literary</div></div>
+              </div>
+              <div class="lp-row">
+                <div class="mono-init">TE</div>
+                <div><div class="rn">Tom Ellery</div><div class="rm">Wren &amp; Holt</div></div>
+              </div>
+              <div class="lp-row">
+                <div class="mono-init">GP</div>
+                <div><div class="rn">Greg Panetta</div><div class="rm">The Bindery</div></div>
+              </div>
+              <div class="lp-row">
+                <div class="mono-init">SD</div>
+                <div><div class="rn">Sophie Dunn</div><div class="rm">Dunn &amp; Foley</div></div>
+              </div>
+              <div class="lp-row">
+                <div class="mono-init">PR</div>
+                <div><div class="rn">Priya Raman</div><div class="rm">Larkspur Literary</div></div>
+              </div>
+            </div>
+            <div class="lp-foot">
+              <svg width="12" height="12" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>
+              Export as CSV
+            </div>
+          </div>
+
+          <div class="readpane">
+            <div class="rhero" style="--tint:#f8e7dc">
+              <div class="havatar">DO</div>
+              <div>
+                <div class="hn">Daniel O&rsquo;Rourke</div>
+                <div class="hs">Senior agent · Larkspur Literary · London</div>
+              </div>
+              <div class="hstat"><span class="hpill">★ 4.5 · Fast responder</span></div>
+            </div>
+            <div class="pcard">
+              <h4>Submission guidelines</h4>
+              <div class="kv"><span class="k">Wants</span><span class="v">Literary · Historical · Speculative</span></div>
+              <div class="kv"><span class="k">Send</span><span class="v">First 50 pages + synopsis</span></div>
+              <div class="kv"><span class="k">Via</span><span class="v">QueryManager</span></div>
+              <div class="kv"><span class="k">Typical response</span><span class="v">6–8 weeks</span></div>
+            </div>
+            <div class="pcard">
+              <h4>Your history</h4>
+              <div class="kv"><span class="k">Murphy&rsquo;s Day Out</span><span class="v" style="display:inline-flex;align-items:center;gap:7px"><span class="sdot in" style="--fill:100%"><span class="c">←</span></span> Full requested</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== MANUSCRIPTS ========== -->
+      <section class="page" id="pg-manuscripts">
+        <div class="qhbar">
+          <div>
+            <div class="qh-eyebrow">2 manuscripts · 1 querying</div>
+            <div class="qh-title">Manuscripts</div>
+          </div>
+          <button class="qh-cta">Add a manuscript</button>
+        </div>
+
+        <div class="workspace">
+          <div class="listpanel">
+            <div class="lp-tools"><input class="lp-search" placeholder="Search manuscripts…"></div>
+            <div class="lp-rows">
+              <div class="lp-row sel">
+                <div class="mono-init">MD</div>
+                <div><div class="rn">Murphy&rsquo;s Day Out</div><div class="rm">Querying · 16 open</div></div>
+              </div>
+              <div class="lp-row">
+                <div class="mono-init">TW</div>
+                <div><div class="rn">The Winter Archivist</div><div class="rm">Drafting</div></div>
+              </div>
+            </div>
+            <div class="lp-foot">
+              <svg width="12" height="12" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>
+              Export as CSV
+            </div>
+          </div>
+
+          <div class="readpane">
+            <div class="rhero" style="--tint:#f8e7dc">
+              <div class="havatar">MD</div>
+              <div>
+                <div class="hn">Murphy&rsquo;s Day Out</div>
+                <div class="hs">Commercial fiction · 88,000 words</div>
+              </div>
+              <div class="hstat"><span class="hpill">Querying</span></div>
+            </div>
+            <div class="pcard">
+              <h4>Submission package</h4>
+              <div class="kv"><span class="k">Query letter</span><span class="v">v6 · 14 Jun 2026</span></div>
+              <div class="kv"><span class="k">Synopsis</span><span class="v">v3 · one page</span></div>
+              <div class="kv"><span class="k">Opening pages</span><span class="v">Rev. chapter three</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<button class="help-fab" title="Help">?</button>
+<div class="demo-hint">Prototype · the rail is persistent — only the content area changes · ⌘K for search</div>
+
+<!-- ⌘K palette -->
+<div class="kk-overlay" id="kkOverlay">
+  <div class="kk">
+    <input id="kkInput" placeholder="Search or jump to…" autocomplete="off">
+    <div class="kk-list" id="kkList">
+      <div class="kk-item" data-route="dashboard">Go to Dashboard <span class="ki">Page</span></div>
+      <div class="kk-item" data-route="queries">Go to Queries Hub <span class="ki">Page</span></div>
+      <div class="kk-item" data-route="agents">Go to Agent Database <span class="ki">Page</span></div>
+      <div class="kk-item" data-route="manuscripts">Go to Manuscripts <span class="ki">Page</span></div>
+      <div class="kk-item" data-route="queries">Log a new query <span class="ki">Action</span></div>
+      <div class="kk-item" data-route="agents">Add an agent <span class="ki">Action</span></div>
+      <div class="kk-item" data-route="queries">Daniel O&rsquo;Rourke — Full requested <span class="ki">Query</span></div>
+    </div>
+    <div class="kk-foot">↵ open · esc close</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var shell = document.getElementById('shell');
+  var scroller = document.getElementById('stageScroll');
+  var routes = ['dashboard','queries','agents','manuscripts'];
+  var current = 'dashboard';
+  var savedScroll = {};
+
+  function show(route){
+    if(route === current) return;
+    savedScroll[current] = scroller.scrollTop;
+    current = route;
+    routes.forEach(function(r){
+      document.getElementById('pg-'+r).classList.remove('on');
+      var nav = document.querySelector('.nav-item[data-route="'+r+'"]');
+      if(nav) nav.classList.toggle('active', r===route);
+    });
+    var target = document.getElementById('pg-'+route);
+    void target.offsetWidth; // restart enter animation
+    target.classList.add('on');
+    scroller.scrollTop = savedScroll[route] || 0;
+  }
+
+  document.querySelectorAll('.nav-item').forEach(function(btn){
+    btn.addEventListener('click', function(){ show(btn.getAttribute('data-route')); });
+  });
+
+  // sidebar collapse
+  var collapseBtn = document.getElementById('collapseBtn');
+  collapseBtn.addEventListener('click', function(){
+    shell.classList.toggle('collapsed');
+    collapseBtn.textContent = shell.classList.contains('collapsed') ? '›' : '‹';
+  });
+
+  // themes
+  var THEME_CLASSES = ['t-capp','t-bold','t-eda','t-edb','t-edc','ed'];
+  var THEMES = {capp:['t-capp'],bold:['t-bold'],eda:['t-eda','ed'],edb:['t-edb','ed'],edc:['t-edc','ed']};
+  var segButtons = document.querySelectorAll('.theme-seg button');
+  function setTheme(name){
+    THEME_CLASSES.forEach(function(c){ shell.classList.remove(c); });
+    THEMES[name].forEach(function(c){ shell.classList.add(c); });
+    segButtons.forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-th')===name); });
+  }
+  segButtons.forEach(function(b){
+    b.addEventListener('click', function(){ setTheme(b.getAttribute('data-th')); });
+  });
+
+  // ⌘K palette
+  var overlay = document.getElementById('kkOverlay');
+  var kkInput = document.getElementById('kkInput');
+  function openKK(){ overlay.classList.add('open'); kkInput.value=''; filterKK(); kkInput.focus(); }
+  function closeKK(){ overlay.classList.remove('open'); }
+  document.getElementById('kkTrigger').addEventListener('click', openKK);
+  document.addEventListener('keydown', function(e){
+    if((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='k'){ e.preventDefault(); overlay.classList.contains('open') ? closeKK() : openKK(); }
+    if(e.key==='Escape') closeKK();
+  });
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) closeKK(); });
+  function filterKK(){
+    var q = kkInput.value.toLowerCase();
+    document.querySelectorAll('.kk-item').forEach(function(it){
+      it.style.display = it.textContent.toLowerCase().indexOf(q) > -1 ? 'flex' : 'none';
+    });
+  }
+  kkInput.addEventListener('input', filterKK);
+  document.querySelectorAll('.kk-item').forEach(function(it){
+    it.addEventListener('click', function(){ show(it.getAttribute('data-route')); closeKK(); });
+  });
+
+  // list row selection (cosmetic)
+  document.querySelectorAll('.lp-rows').forEach(function(panel){
+    panel.addEventListener('click', function(e){
+      var row = e.target.closest('.lp-row'); if(!row) return;
+      panel.querySelectorAll('.lp-row').forEach(function(r){ r.classList.remove('sel'); });
+      row.classList.add('sel');
+    });
+  });
+})();
+</script>
+</body>
+</html>
