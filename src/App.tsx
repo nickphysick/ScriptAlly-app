@@ -21,6 +21,7 @@ import { QueriesLanding } from "./components/QueriesLanding";
 import { Agents } from "./components/Agents";
 import { DiscoverNewAgents } from "./components/DiscoverNewAgents";
 import { SubmissionPackages } from "./components/SubmissionPackages";
+import { PkgLab } from "./components/packages/PkgLab";
 import { AllManuscripts } from "./components/AllManuscripts";
 import { Pricing } from "./components/Pricing";
 import { ImportCsv } from "./components/ImportCsv";
@@ -408,6 +409,10 @@ function AppContent() {
   // Dev-only notes review surface (PostIt / quick-add / editor) — local state, no persistence.
   if (hash === "#/notes-lab" && import.meta.env.DEV) {
     return <NotesLab />;
+  }
+  // Dev-only Submission Package Builder review surface (theme-toggleable, no auth). TEMP.
+  if (hash === "#/pkg-lab" && import.meta.env.DEV) {
+    return <PkgLab />;
   }
   // Dev-only Form11Drawer review surface (Edit Agent over a mock record). DEV only.
   if (hash === "#/drawer-lab" && import.meta.env.DEV) {
