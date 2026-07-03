@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Submission Package Builder (Cappuccino)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ===== THEME TOKENS (driven by root class) ===== */
+.t-capp{
+  --bd:#d8cebf; --bdw:1px; --desk:#e8ddd0; --band:#f2ddd5; --pane:#fffefb; --card:#fffefb; --chromerad:0px;
+  --navactive:#f2ddd5; --cardborder:#d8cebf; --cardbw:1px;
+}
+.t-bold{
+  --bd:#1d1712; --bdw:1.5px; --desk:#c2cfda; --band:#f4c7c2; --pane:#ece2e0; --card:#fffefb; --chromerad:14px;
+  --navactive:#eec9c3; --cardborder:#1d1712; --cardbw:1.5px;
+}
+/* shared brand */
+:root{--burg:#7c3a2a; --burg-d:#632e22; --ink:#241c15; --muted:#9a8c80; --pink:#f5e2da; --pink-b:#e8c8bc;
+  --tl:#f6ddd3; --ts:#e7ece4; --tp:#f3e6cf;
+  --pink-h:#efd5ca; --slate:#6A89A7; --sage:#8a9e88; --sage-d:#5a6e58; --gold:#a8842c;}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;color:var(--ink);}
+.pf{font-family:'Playfair Display',serif;}
+.mono{font-family:'JetBrains Mono',monospace;}
+.lab{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);}
+
+.app{display:flex;height:100vh;background:var(--desk);overflow:hidden;}
+
+/* ===== COLLAPSIBLE ICON SIDEBAR ===== */
+.rail{width:222px;flex-shrink:0;background:#fbf7f1;border-right:var(--bdw) solid var(--bd);
+  display:flex;flex-direction:column;transition:width .18s ease;padding:14px 12px;}
+.app.collapsed .rail{width:60px;padding:14px 8px;}
+.rail-mark{display:flex;align-items:center;gap:9px;padding:6px 6px 16px;}
+.rail-mark .glyph{width:30px;height:30px;flex-shrink:0;border-radius:8px;background:var(--burg);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:18px;font-weight:700;}
+.rail-mark .wm{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--ink);white-space:nowrap;}
+.rail-mark .wm b{color:var(--burg);}
+.collapse{margin-left:auto;background:none;border:0;color:var(--muted);cursor:pointer;font-size:14px;padding:4px;}
+.app.collapsed .wm,.app.collapsed .collapse,.app.collapsed .rlabel,.app.collapsed .switcher,.app.collapsed .chip .who{display:none;}
+
+.nav-i{display:flex;align-items:center;gap:12px;padding:10px 11px;border-radius:9px;cursor:pointer;color:#5d5247;
+  font-size:14px;font-weight:500;margin-bottom:3px;white-space:nowrap;}
+.nav-i svg{flex-shrink:0;color:#8c7d6f;}
+.nav-i:hover{background:rgba(124,58,42,.05);}
+.nav-i.active{background:var(--navactive);color:var(--burg);}
+.nav-i.active svg{color:var(--burg);}
+.app.collapsed .nav-i{justify-content:center;padding:10px 0;}
+
+.rail-foot{margin-top:auto;display:flex;flex-direction:column;gap:10px;}
+.switcher{display:flex;background:rgba(124,58,42,.06);border-radius:9px;padding:3px;gap:3px;}
+.switcher button{flex:1;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.03em;border:0;background:transparent;
+  color:#7a6b5e;padding:7px 4px;border-radius:6px;cursor:pointer;white-space:nowrap;}
+.switcher button.on{background:var(--pane);color:var(--burg);box-shadow:0 1px 2px rgba(58,28,20,.12);font-weight:500;}
+.chip{display:flex;align-items:center;gap:10px;padding:8px 6px;border-top:var(--bdw) solid var(--bd);}
+.chip .av{width:30px;height:30px;border-radius:50%;background:var(--ink);color:#fff;display:flex;align-items:center;
+  justify-content:center;font-weight:600;font-size:12px;flex-shrink:0;}
+.app.collapsed .chip{justify-content:center;padding:10px 0;}
+.chip .who{font-size:13px;color:var(--ink);font-weight:500;white-space:nowrap;}
+
+/* ===== DESK ===== */
+.desk{flex:1;min-width:0;display:flex;flex-direction:column;padding:16px;gap:14px;overflow:hidden;}
+
+/* Hub-style header bar (square in Cappuccino, inset burgundy frame) */
+.qhbar{position:relative;background:var(--card);border:var(--bdw) solid var(--bd);border-radius:var(--chromerad);
+  padding:20px 24px;display:flex;align-items:center;gap:14px;flex-shrink:0;}
+.t-capp .qhbar::after{content:'';position:absolute;inset:6px;border:1px solid var(--burg);pointer-events:none;}
+.qhbar h1{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:var(--ink);}
+.pro{display:inline-flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--slate);background:#e7eef3;border:1px solid #cfdde6;border-radius:999px;padding:4px 10px;}
+.msel{margin-left:auto;display:inline-flex;align-items:center;gap:9px;font-family:'Playfair Display',serif;font-size:15px;
+  font-weight:600;color:var(--ink);background:#fffefb;border:var(--cardbw) solid var(--cardborder);border-radius:10px;padding:9px 16px;}
+.msel svg{color:var(--burg);}
+.cta{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+  background:var(--pink);border:1px solid var(--pink-b);color:var(--burg);border-radius:10px;padding:11px 18px;cursor:pointer;
+  display:inline-flex;align-items:center;gap:8px;transition:background .15s,transform .15s;}
+.cta:hover{background:var(--pink-h);transform:translateY(-1px);}
+
+/* workspace: flush materials panel + content pane */
+.workspace{flex:1;min-height:0;display:flex;gap:14px;}
+
+.qlist{width:238px;flex-shrink:0;background:var(--card);border:var(--bdw) solid var(--bd);border-radius:var(--chromerad);
+  display:flex;flex-direction:column;overflow:hidden;}
+.qlist-head{padding:16px 16px 12px;}
+.qlist-head h2{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--ink);}
+.qlist-body{flex:1;overflow-y:auto;padding:4px 12px 12px;display:flex;flex-direction:column;gap:8px;}
+.mat{display:flex;align-items:center;gap:11px;padding:12px;border:var(--cardbw) solid var(--cardborder);border-radius:11px;background:var(--card);
+  cursor:pointer;transition:background .15s ease;}
+.mat:hover{background:#faeee8;}
+.mat .mi{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.mi.env{background:#f6ddd3;color:var(--burg);} .mi.doc{background:#e7ece4;color:var(--sage-d);} .mi.book{background:#f3e6cf;color:var(--gold);}
+.mat .mt{flex:1;min-width:0;}
+.mat .mt .nm{font-size:13.5px;font-weight:600;color:var(--ink);}
+.mat .mt .sub{font-size:11px;color:var(--muted);margin-top:1px;}
+.mat .add{width:26px;height:26px;border-radius:7px;background:var(--pink);border:1px solid var(--pink-b);color:var(--burg);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:15px;}
+.qlist-foot{padding:12px;}
+.manage{width:100%;font-family:'Playfair Display',serif;font-size:14px;font-weight:600;color:var(--ink);
+  background:var(--pink);border:1px solid var(--pink-b);border-radius:9px;padding:10px;cursor:pointer;margin-bottom:10px;}
+.manage:hover{background:var(--pink-h);}
+.ms-chip{display:flex;align-items:center;gap:10px;padding:9px 10px;border:var(--cardbw) solid var(--cardborder);border-radius:10px;background:var(--card);cursor:pointer;}
+.ms-chip .bk{color:var(--burg);flex-shrink:0;}
+.ms-chip .ml{flex:1;min-width:0;}
+.ms-chip .ml .lb{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.ms-chip .ml .nm{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--ink);line-height:1.1;}
+
+/* content pane */
+.pane{flex:1;min-width:0;background:var(--pane);border:var(--bdw) solid var(--bd);border-radius:var(--chromerad);
+  align-self:flex-start;max-height:100%;overflow-y:auto;padding:16px 16px 20px;}
+
+/* hero band (content — stays rounded) */
+.hero{background:var(--band);border:1px solid var(--bd);border-radius:13px;padding:34px 30px;text-align:center;margin-bottom:26px;}
+.t-bold .hero{border:1px solid #1d1712;}
+.hero h2{font-family:'Playfair Display',serif;font-size:31px;font-weight:700;color:var(--ink);}
+.winspot{position:relative;display:inline-block;}
+.star{position:absolute;top:-14px;right:-20px;width:19px;height:19px;fill:var(--gold);
+  transform-origin:center;animation:glint 2.6s ease-in-out infinite;}
+.star.s2{top:-3px;right:-31px;width:9px;height:9px;animation-delay:1.3s;opacity:.85;}
+.t-bold .star{fill:#f3e6cf;}
+@keyframes glint{
+  0%,100%{transform:scale(1) rotate(0deg);opacity:.9;}
+  50%{transform:scale(1.25) rotate(18deg);opacity:1;}
+  75%{transform:scale(.92) rotate(8deg);opacity:.8;}
+}
+@media (prefers-reduced-motion: reduce){.star{animation:none;}}
+.hero p{max-width:560px;margin:12px auto 0;font-size:14.5px;color:#7a5d52;line-height:1.5;}
+
+/* steps */
+.steps{display:flex;align-items:stretch;justify-content:center;gap:6px;margin-bottom:26px;flex-wrap:wrap;}
+.step{background:var(--card);border:var(--cardbw) solid var(--cardborder);border-radius:14px;padding:20px 16px;text-align:center;
+  width:168px;box-shadow:0 2px 10px rgba(58,28,20,.05);}
+.step:nth-child(1){animation-delay:0s;}
+.step:nth-child(3){animation-delay:1s;}
+.step:nth-child(5){animation-delay:2s;}
+.step:nth-child(7){animation-delay:3s;}
+
+.step .si{width:52px;height:52px;border-radius:13px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;}
+.si.env{background:#f6ddd3;color:var(--burg);} .si.box{background:#e7ece4;color:var(--sage-d);}
+.si.plane{background:#f6e7d6;color:#b98a4e;} .si.trend{background:#e7ece4;color:var(--sage-d);}
+.step h3{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;color:var(--ink);}
+.step .sd{font-size:12px;color:var(--muted);margin-top:4px;}
+.arr{align-self:center;color:#c9b6a6;flex-shrink:0;}
+.app.collapsed .arr,.arr{font-size:15px;}
+
+.build{display:inline-block;margin:24px 0 0;font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--ink);
+  background:var(--pink);border:1px solid var(--pink-b);border-radius:12px;padding:15px 32px;cursor:pointer;transition:background .15s,transform .15s;}
+.build:hover{background:var(--pink-h);transform:translateY(-1px);}
+
+.tmpl-lab{text-align:center;margin-bottom:16px;letter-spacing:.16em;}
+.tmpls{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.tmpl{background:var(--card);border:var(--cardbw) solid var(--cardborder);border-radius:13px;padding:22px 18px 18px;text-align:center;position:relative;
+  transition:transform .18s ease,box-shadow .18s ease;}
+.tmpl:hover{transform:scale(1.04);box-shadow:0 6px 20px rgba(58,28,20,.1);}
+.tmpl .dot{width:9px;height:9px;border-radius:50%;background:var(--gold);margin:0 auto 14px;}
+.tmpl-ic{width:44px;height:44px;border-radius:12px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;}
+.tmpl h4{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;color:var(--ink);}
+.tmpl .td{font-family:'Playfair Display',serif;font-style:italic;font-size:13px;color:#7a6d60;margin:6px 0 16px;line-height:1.4;}
+.tmpl .use{width:100%;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  background:var(--pink);border:1px solid var(--pink-b);color:var(--burg);border-radius:9px;padding:11px;cursor:pointer;}
+.tmpl .use:hover{background:var(--pink-h);}
+
+/* floating help */
+.help{position:fixed;right:22px;bottom:22px;width:44px;height:44px;border-radius:50%;background:var(--pane);
+  border:var(--bdw) solid var(--bd);color:var(--burg);font-family:'Playfair Display',serif;font-size:20px;cursor:pointer;
+  box-shadow:0 4px 14px rgba(58,28,20,.15);z-index:30;}
+
+/* ===== SECONDARY SCREENS ===== */
+.view{display:none;}
+.view.show{display:block;}
+.backrow{display:flex;align-items:center;gap:12px;margin-bottom:18px;}
+.backbtn{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  background:var(--card);border:var(--cardbw) solid var(--cardborder);color:var(--burg);border-radius:9px;padding:9px 14px;cursor:pointer;}
+.backbtn:hover{background:#faeee8;}
+.view-title{font-family:'Playfair Display',serif;font-size:23px;font-weight:700;color:var(--ink);}
+
+/* ===== COMPOSER (direction B: manifest + tray) ===== */
+#v-comp{margin:-16px -16px -20px;padding:0;}
+.t-bold #v-comp{background:#f2e8e6;border-radius:var(--chromerad);}
+.comp-band{display:flex;align-items:center;gap:12px;padding:13px 18px;background:var(--band);border-bottom:var(--bdw) solid var(--bd);}
+.comp-band .bic{color:var(--ink);display:flex;flex-shrink:0;}
+.hname{display:flex;align-items:center;gap:8px;min-width:0;}
+.hname input{border:0;outline:0;background:transparent;font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:var(--ink);
+  border-bottom:1.5px dashed rgba(36,28,21,.3);padding:2px 2px 3px;width:300px;}
+.hname input::placeholder{color:rgba(36,28,21,.45);font-style:italic;font-weight:500;}
+.hname .pen{color:rgba(36,28,21,.5);display:flex;}
+.comp-band .backl{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:#6a4436;cursor:pointer;}
+.fork{display:flex;align-items:center;gap:10px;padding:9px 18px;border-bottom:var(--bdw) solid var(--bd);background:rgba(124,58,42,.03);font-size:12px;color:#7a6a5e;}
+.fork .fl{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:#a4937f;}
+.fork .pkmini{display:inline-flex;align-items:center;gap:7px;background:#fffefb;border:var(--cardbw) solid var(--cardborder);border-radius:7px;
+  padding:5px 11px;font-size:11px;font-weight:600;cursor:pointer;color:var(--ink);}
+.fork .pkmini:hover{background:#faeee8;}
+.fork .pkmini .dup{font-size:13px;color:var(--burg);line-height:1;}
+.fork .chev{margin-left:auto;color:#a4937f;cursor:pointer;}
+.t-bold .fork{border-bottom:1px solid rgba(29,23,18,.28);}
+.comp-body{padding:18px;}
+.bwrap{display:flex;gap:16px;align-items:stretch;}
+.bcanvas{flex:0 1 380px;min-width:310px;display:flex;flex-direction:column;justify-content:center;gap:12px;}
+.brow{display:flex;align-items:center;gap:13px;background:#fffefb;border-radius:9px;padding:17px 16px;min-height:64px;}
+.brow.filled{border:var(--cardbw) solid var(--cardborder);box-shadow:0 3px 10px rgba(58,28,20,.07);}
+.brow.empty{border:1.5px dotted #bfae9a;}
+.brow.col{flex-direction:column;align-items:stretch;padding:0;gap:0;overflow:hidden;}
+.bhd{display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;
+  text-transform:uppercase;padding:7px 13px;}
+.bhd.hl{background:var(--tl);color:var(--burg);}
+.bhd.hs{background:var(--ts);color:var(--sage-d);}
+.bhd.hp{background:var(--tp);color:var(--gold);}
+.bbd{padding:14px 16px;font-size:11.5px;font-style:italic;color:var(--muted);}
+.brow .bti{font-family:'Playfair Display',serif;font-size:14.5px;font-weight:600;min-width:0;}
+.brow .bmeta{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);margin-top:2px;}
+.brow .hintt{font-size:11.5px;font-style:italic;color:var(--muted);}
+.brow .bact{margin-left:auto;display:flex;gap:10px;align-items:center;}
+.brow .rm2{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.05em;color:var(--muted);cursor:pointer;}
+.brow .rm2:hover{color:var(--burg);}
+.brow .addlink{color:var(--burg);font-size:11.5px;text-decoration:underline;text-underline-offset:2px;cursor:pointer;font-weight:500;}
+/* focus-driven picker */
+.brow.empty{cursor:pointer;}
+.brow.focus{outline:2px solid var(--sage-d);outline-offset:2px;}
+.brow.focus .bbd{color:#7a6a5c;}
+.pickB{flex:1;min-width:0;background:#fffefb;border:var(--cardbw) solid var(--cardborder);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;}
+.pickB-h{padding:11px 15px;border-bottom:var(--cardbw) solid var(--cardborder);display:flex;align-items:center;gap:9px;
+  font-family:'Playfair Display',serif;font-size:14.5px;font-weight:600;color:var(--ink);}
+.pickB-h.hl{background:var(--tl);} .pickB-h.hs{background:var(--ts);} .pickB-h.hp{background:var(--tp);}
+.pickB-h .cnt{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.06em;color:#7a6a5c;}
+.pickB-b{padding:13px;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:11px;align-content:start;flex:1;}
+.bigcard{background:#fffefb;border:var(--cardbw) solid var(--cardborder);border-radius:8px;padding:12px 14px;cursor:pointer;}
+.bigcard:hover{background:#faeee8;}
+.bigcard.current{opacity:.5;cursor:default;}
+.bigcard.current:hover{background:#fffefb;}
+.bigcard .nm{font-family:'Playfair Display',serif;font-size:14px;font-weight:600;color:var(--ink);}
+.bigcard .fm{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);margin:3px 0 7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bigcard .sn{font-family:'Playfair Display',serif;font-style:italic;font-size:11px;color:#6a5a4c;line-height:1.6;max-height:52px;overflow:hidden;
+  -webkit-mask-image:linear-gradient(#000 45%,transparent 95%);mask-image:linear-gradient(#000 45%,transparent 95%);}
+.bigcard .use{margin-top:9px;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.04em;color:var(--burg);}
+.bigcard.current .use{color:var(--sage-d);}
+.pickB-empty{padding:20px 16px;font-size:12px;font-style:italic;color:var(--muted);}
+.pickB-f{padding:10px 15px;border-top:1px dashed #e0d3c2;font-size:10.5px;color:var(--muted);}
+.pickB-f a{color:var(--burg);text-decoration:underline;text-underline-offset:2px;cursor:pointer;font-weight:500;}
+.comp-actions{display:flex;align-items:center;gap:14px;padding:0 18px 18px;}
+.save-pkg2{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--ink);background:#fffefb;
+  border:var(--cardbw) solid var(--cardborder);border-radius:10px;padding:11px 24px;cursor:pointer;}
+.save-pkg2:hover{background:#faeee8;}
+.cancel2{font-size:12.5px;color:var(--muted);background:none;border:0;cursor:pointer;padding:10px 6px;font-family:'Inter',sans-serif;}
+.cancel2:hover{color:var(--burg);}
+.tg{display:inline-flex;flex-shrink:0;}
+/* first visit: split stage with cycling product UI */
+.st2{display:flex;align-items:center;justify-content:center;gap:34px;padding:20px 20px 4px;}
+.st2 .lt{flex:0 1 400px;min-width:0;}
+.st2 h2{font-family:'Playfair Display',serif;font-size:46px;font-weight:800;line-height:1.08;letter-spacing:-.8px;color:var(--ink);}
+.st2 .rel{position:relative;white-space:nowrap;}
+.st2 .sl{font-size:14.5px;color:#6a594d;line-height:1.65;max-width:380px;margin-top:16px;}
+.st2 .rt{position:relative;width:470px;height:340px;flex-shrink:0;}
+.pgui{position:absolute;left:0;top:12px;transform:rotate(-2deg);width:256px;background:#fffefb;border:var(--cardbw) solid var(--cardborder);
+  border-radius:8px;padding:18px 19px 0;height:236px;overflow:hidden;box-shadow:0 12px 30px rgba(58,28,20,.10);}
+.pgui::after{content:'';position:absolute;left:0;right:0;bottom:0;height:56px;background:linear-gradient(rgba(255,254,251,0),#fffefb 78%);}
+.pgui .mt{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;background:var(--tl);color:var(--burg);
+  display:inline-block;border-radius:4px;padding:3px 7px;margin-bottom:9px;}
+.pgui .tx{font-family:'Playfair Display',serif;font-size:11.5px;line-height:1.82;color:#4f4136;}
+.pgui .tx .em{background:linear-gradient(transparent 60%,var(--hlc,var(--tl)) 60%);}
+.pkui{position:absolute;right:0;bottom:24px;z-index:2;transform:rotate(1.2deg);width:322px;background:#fffefb;
+  border:var(--cardbw) solid var(--cardborder);border-radius:12px;overflow:hidden;box-shadow:0 18px 44px rgba(58,28,20,.14);}
+.pkui-h{padding:11px 16px;border-bottom:var(--cardbw) solid var(--cardborder);display:flex;align-items:center;gap:9px;transition:background .5s;}
+.pkui-h .ic{display:flex;color:var(--ink);}
+.pkui-h .nm{font-family:'Playfair Display',serif;font-size:16.5px;font-weight:700;color:var(--ink);}
+.pkui-h .tagp{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.1em;text-transform:uppercase;
+  background:rgba(255,254,251,.75);border-radius:5px;padding:3px 7px;color:#6a5347;}
+.pkui-b{padding:13px 18px 16px;}
+.pkln{display:flex;align-items:center;gap:9px;font-size:12.5px;color:#5f5044;padding:4px 0;}
+.pkln .d{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.winrow{margin-top:11px;background:#fdf1ec;border-left:4px solid var(--burg);border-radius:0 8px 8px 0;padding:9px 12px;}
+.winrow .wl{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--burg);font-weight:500;}
+.winrow .wv{font-size:13.5px;font-weight:600;color:var(--ink);margin-top:2px;}
+.mex{padding:6px 20px 22px;}
+.mex-lab{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:#a4937f;text-align:center;margin-bottom:12px;}
+.mex-row{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;}
+.mexc{flex:0 1 258px;background:#fffefb;border:var(--cardbw) solid var(--cardborder);border-radius:10px;overflow:hidden;box-shadow:0 6px 16px rgba(58,28,20,.07);}
+.mexh{display:flex;align-items:center;gap:8px;padding:9px 14px;font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:var(--ink);border-bottom:var(--cardbw) solid var(--cardborder);}
+.mexh.xl{background:var(--tl);} .mexh.xs{background:var(--ts);} .mexh.xp{background:var(--tp);}
+.mexb{padding:12px 14px 13px;}
+.mexb i{display:block;height:5px;border-radius:3px;background:#f0e7d9;margin-bottom:7px;}
+.mexb span{display:block;font-size:11px;color:#8a7767;font-style:italic;margin-top:9px;}
+.divrule{display:flex;align-items:center;gap:14px;margin:8px 24px 0;}
+.divrule::before,.divrule::after{content:'';flex:1;height:1px;background:#e6dac8;}
+.divrule span{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.18em;text-transform:uppercase;color:#a4937f;}
+.contB{padding:14px 24px 8px;text-align:center;}
+.contB .a2s{font-size:12.5px;color:#7a685a;margin:0 auto;max-width:520px;line-height:1.55;}
+.librow{display:flex;justify-content:center;gap:16px;margin-top:16px;flex-wrap:wrap;}
+.lib{flex:0 1 254px;background:#fffefb;border:var(--cardbw) solid var(--cardborder);border-radius:11px;overflow:hidden;
+  box-shadow:0 8px 20px rgba(58,28,20,.09);cursor:pointer;text-align:left;transition:transform .14s;}
+.lib:hover{transform:translateY(-3px);}
+.lib-h{display:flex;align-items:center;gap:8px;padding:8px 14px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;
+  text-transform:uppercase;border-bottom:var(--cardbw) solid var(--cardborder);}
+.lib-h.xl{background:var(--tl);color:var(--burg);} .lib-h.xs{background:var(--ts);color:var(--sage-d);} .lib-h.xp{background:var(--tp);color:var(--gold);}
+.lib-b{padding:11px 14px 13px;}
+.lt2{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.14em;text-transform:uppercase;color:#b3a291;}
+.lib .ti{font-family:'Playfair Display',serif;font-size:15.5px;font-weight:700;color:var(--ink);margin:2px 0 9px;}
+.lfchip{display:inline-flex;align-items:center;gap:6px;background:#fdfaf5;border:1px solid #e4d8c6;border-radius:7px;padding:5px 9px;
+  font-family:'JetBrains Mono',monospace;font-size:8px;color:#5d5247;max-width:100%;}
+.lfchip svg{flex-shrink:0;}
+.lfchip .v{background:var(--pink);color:var(--burg);border-radius:4px;padding:1px 5px;font-size:7px;}
+.lib .used{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.06em;color:var(--muted);margin-top:9px;}
+.lib .used b{color:var(--burg);font-weight:500;}
+.exlink{position:absolute;right:4px;bottom:0;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.05em;color:var(--burg);
+  text-decoration:underline;text-underline-offset:3px;cursor:pointer;}
+/* first-visit: header row + example panel (app grammar) */
+.fv-head{display:flex;align-items:flex-start;gap:22px;padding:4px 2px 0;}
+.fv-t{flex:1;min-width:0;}
+.fv-head h2{font-family:'Playfair Display',serif;font-size:31px;font-weight:700;line-height:1.15;color:var(--ink);letter-spacing:-.3px;}
+.hl2{position:relative;white-space:nowrap;background:linear-gradient(transparent 58%,var(--tl) 58%,var(--tl) 94%,transparent 94%);padding:0 3px;}
+.fv-head p{font-size:13.5px;color:#6f5a4d;line-height:1.55;margin-top:7px;max-width:520px;}
+.fv-head .build{margin:4px 0 0;flex-shrink:0;}
+.expanel{margin-top:18px;border:var(--cardbw) solid var(--cardborder);border-radius:12px;background:#fffefb;overflow:hidden;}
+.expanel-h{display:flex;align-items:center;gap:11px;padding:11px 18px;background:var(--band);border-bottom:var(--cardbw) solid var(--cardborder);}
+.expanel-h h3{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--ink);}
+.ex-sub{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:rgba(36,28,21,.5);}
+.ex-nav{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.ex-cnt{font-family:'JetBrains Mono',monospace;font-size:9px;color:rgba(36,28,21,.55);}
+.exarr{width:24px;height:24px;border-radius:50%;background:rgba(255,254,251,.7);color:var(--ink);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;line-height:1;}
+.exarr:hover{background:#fffefb;color:var(--burg);}
+.expanel-b{display:flex;gap:34px;align-items:center;justify-content:center;padding:20px 26px;}
+.slidecap{max-width:340px;}
+.slidecap .stag{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  display:inline-flex;border-radius:7px;padding:7px 15px;font-weight:500;}
+.slidecap .why{font-size:12.5px;color:#7a6a5c;margin-top:9px;line-height:1.6;}
+.slidecap a{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.05em;color:var(--burg);text-decoration:underline;text-underline-offset:3px;cursor:pointer;display:inline-block;margin-top:9px;}
+/* C-home: how-it-works strip + postcard carousel */
+.brow2{display:flex;justify-content:center;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-top:16px;}
+.harr{color:#c9a595;font-size:15px;margin-top:9px;}
+.bst{display:flex;flex-direction:column;align-items:center;gap:6px;width:118px;text-align:center;}
+.bic2{width:40px;height:40px;box-shadow:0 2px 6px rgba(58,28,20,.08);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--ink);}
+.bic2.c1{background:var(--tl);} .bic2.c2{background:var(--ts);} .bic2.c3{background:var(--tp);} .bic2.c4{background:var(--band);}
+.bst b{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--ink);}
+.bst i{font-style:normal;font-size:10.5px;color:#8a6d60;line-height:1.4;}
+.car-lab{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:#a4937f;text-align:center;margin:16px 0 10px;}
+.v1wrap{display:flex;align-items:center;gap:14px;margin:0 auto;}
+.navb{width:30px;height:30px;border-radius:50%;background:#fffefb;border:var(--cardbw) solid var(--cardborder);color:#8a7a6c;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;}
+.navb:hover{color:var(--burg);background:#faeee8;}
+.v1card{flex:1;min-width:0;border:0;border-radius:11px;background:#fffefb;box-shadow:0 6px 20px rgba(58,28,20,.09);display:flex;overflow:hidden;cursor:pointer;position:relative;}
+.cedge{width:7px;flex-shrink:0;transition:background .45s;}
+.v1in{display:flex;gap:28px;align-items:center;justify-content:center;padding:20px 26px;flex:1;}
+.cnt{position:absolute;top:13px;right:16px;font-family:'JetBrains Mono',monospace;font-size:9px;color:#c3b3a2;}
+.stq{font-family:'Playfair Display',serif;font-style:italic;font-size:17.5px;color:#40312a;line-height:1.55;max-width:360px;}
+.stq::before{content:'\201C';font-size:28px;line-height:0;margin-right:1px;}
+.fade{transition:opacity .45s ease;}
+.mdesk{position:relative;width:360px;height:266px;flex-shrink:0;}
+.mdesk .pile{position:absolute;inset:8px 22px 26px;filter:blur(2.5px);opacity:.7;}
+.mdesk .pile i{position:absolute;inset:0;background:#fbf7f0;border:1px solid #d9cdbc;border-radius:4px;display:block;}
+.mdesk .pile i:nth-child(1){transform:rotate(3deg) translate(8px,-4px);}
+.mdesk .pile i:nth-child(2){transform:rotate(-2deg) translate(-7px,3px);}
+.mpg{position:absolute;width:172px;background:#fffefb;border:var(--cardbw) solid var(--cardborder);border-radius:4px 4px 0 0;border-bottom:0;padding:8px 9px 0;box-shadow:0 4px 12px rgba(58,28,20,.14);}
+.mpg::after{content:'';position:absolute;left:-2px;right:-2px;bottom:-2px;height:14px;background:linear-gradient(rgba(255,254,251,0),#fffefb 85%);}
+.mpg.p1{top:18px;left:8px;transform:rotate(-1.6deg);z-index:3;}
+.mpg.p2{top:34px;right:8px;transform:rotate(1.8deg);z-index:2;}
+.mtag{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.09em;text-transform:uppercase;display:inline-block;border-radius:3px;padding:2px 5px;margin-bottom:5px;}
+.mtag.l{background:var(--tl);color:var(--burg);} .mtag.s{background:var(--ts);color:var(--sage-d);}
+.mtx{font-family:'Playfair Display',serif;font-size:9px;line-height:1.7;color:#5a4a3e;max-height:150px;overflow:hidden;
+  -webkit-mask-image:linear-gradient(#000 55%,transparent 96%);mask-image:linear-gradient(#000 55%,transparent 96%);}
+.stx{min-height:212px;display:flex;flex-direction:column;justify-content:center;}
+.stx .stag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+  display:inline-flex;align-items:center;gap:6px;border-radius:5px;padding:3px 9px;margin:10px 0 6px;align-self:flex-start;}
+.stx h3{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--ink);}
+.stx p{font-size:13px;color:#7a6a5c;line-height:1.6;margin:7px 0 12px;max-width:360px;}
+.stx a{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;color:var(--burg);text-decoration:underline;text-underline-offset:3px;cursor:pointer;}
+.dots{display:flex;gap:7px;margin-top:12px;}
+.dot{width:7px;height:7px;border-radius:50%;background:#d5c6b4;cursor:pointer;transition:background .2s,transform .2s;}
+.dot.on{background:var(--burg);transform:scale(1.25);}
+/* home demo toggle + packages state */
+.hdemo{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.hdemo-l{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:#b3a596;}
+.hseg{font-family:'JetBrains Mono',monospace;font-size:9px;padding:5px 10px;border-radius:7px;color:#8a7a6c;cursor:pointer;background:rgba(124,58,42,.05);}
+.hseg.on{background:var(--card);color:var(--burg);box-shadow:0 1px 2px rgba(58,28,20,.1);}
+.hp-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.hp-title{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:var(--ink);}
+.hp-new{margin-left:auto;font-family:'Playfair Display',serif;font-size:14px;font-weight:600;color:var(--ink);
+  background:var(--band);border:var(--cardbw) solid var(--cardborder);border-radius:10px;padding:9px 18px;cursor:pointer;}
+.hp-new:hover{filter:brightness(.97);}
+.hp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;}
+.pkcard2{background:#fffefb;border:var(--cardbw) solid var(--cardborder);border-radius:10px;overflow:hidden;}
+.pk2head{background:var(--band);padding:10px 15px;border-bottom:var(--cardbw) solid var(--cardborder);}
+.pn2{font-family:'Playfair Display',serif;font-size:15.5px;font-weight:700;color:var(--ink);}
+.pk2body{padding:11px 15px 13px;}
+.pkline2{display:flex;align-items:center;gap:8px;font-size:11.5px;color:#6a5a50;padding:3px 0;}
+.pkline2.dim{color:var(--muted);font-style:italic;}
+.pkstats2{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.05em;color:var(--muted);margin:9px 0 10px;padding-top:8px;border-top:1px dashed #e4d8c8;}
+.pkstats2 b{color:var(--sage-d);}
+.pk2acts{display:flex;gap:12px;}
+.pk2a{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.04em;color:var(--burg);cursor:pointer;}
+.pk2a:hover{text-decoration:underline;}
+.pkghost{border:1.5px dotted #bfae9a;border-radius:10px;min-height:170px;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:8px;color:#a4937f;cursor:pointer;font-size:13px;}
+.pkghost:hover{border-color:var(--burg);color:var(--burg);background:rgba(124,58,42,.03);}
+.hp-foot{margin-top:16px;font-size:12px;color:#8a7a6c;font-style:italic;}
+.hp-foot a{color:var(--burg);text-decoration:underline;text-underline-offset:2px;cursor:pointer;}
+.comp-foot{display:flex;align-items:center;gap:12px;}
+.save-pkg{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;color:var(--ink);background:#fffefb;
+  border:var(--cardbw) solid var(--cardborder);border-radius:11px;padding:12px 24px;cursor:pointer;}
+.save-pkg:hover{background:#faf5ee;}
+.comp-hint{font-size:12px;color:var(--muted);font-style:italic;}
+
+/* materials manager — sheet gallery */
+.vh-ic{width:34px;height:34px;border-radius:10px;background:var(--band);color:var(--burg);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.shelfwrap{display:flex;flex-direction:column;gap:22px;}
+.shelf-h{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.shelf{display:flex;gap:14px;flex-wrap:wrap;}
+.mini{width:196px;background:#fffefb;border:var(--cardbw) solid var(--cardborder);border-radius:6px;
+  padding:12px 13px 0;box-shadow:0 5px 14px rgba(58,28,20,.12);position:relative;cursor:pointer;transition:transform .14s;}
+.mini:hover{transform:translateY(-3px);}
+.mti{font-family:'Playfair Display',serif;font-size:13px;font-weight:600;color:var(--ink);margin:7px 0 5px;}
+.mini .filechip{margin:0 0 8px;max-width:100%;font-size:8.5px;}
+.mtx{font-family:'Playfair Display',serif;font-size:9.4px;line-height:1.65;color:#5a4a3e;max-height:64px;overflow:hidden;
+  -webkit-mask-image:linear-gradient(#000 45%,transparent 88%);mask-image:linear-gradient(#000 45%,transparent 88%);}
+.musd{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.06em;color:var(--muted);padding:7px 0 9px;position:relative;z-index:2;}
+.musd b{color:var(--burg);font-weight:500;}
+.mini-add{width:196px;min-height:158px;border:1.5px dashed #cbb9a6;border-radius:6px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:7px;color:#a4937f;cursor:pointer;font-size:12px;text-align:center;padding:0 14px;}
+.mini-add:hover{border-color:var(--burg);color:var(--burg);background:rgba(124,58,42,.03);}
+
+/* add-material modal */
+.overlay{display:none;position:fixed;inset:0;background:rgba(36,28,21,.45);z-index:40;align-items:center;justify-content:center;padding:20px;}
+.overlay.show{display:flex;}
+.modal{width:440px;max-width:100%;background:var(--pane);border:var(--bdw) solid var(--bd);border-radius:14px;overflow:hidden;
+  box-shadow:0 18px 50px rgba(36,28,21,.3);position:relative;}
+.t-capp .modal::after{content:'';position:absolute;inset:6px;border:1px solid var(--burg);pointer-events:none;border-radius:8px;}
+.modal-band{background:var(--band);padding:16px 20px;display:flex;align-items:center;gap:11px;}
+.modal.m-letter .modal-band{background:#f6ddd3;}
+.modal.m-syn .modal-band{background:#e7ece4;}
+.modal.m-pages .modal-band{background:#f3e6cf;}
+.mb-ic{width:32px;height:32px;border-radius:9px;background:rgba(255,254,251,.65);color:var(--ink);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.modal-band h3{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:var(--ink);}
+.modal-x{background:none;border:0;font-size:17px;color:var(--muted);cursor:pointer;position:relative;z-index:2;margin-left:auto;}
+.soon{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;
+  background:#ece0c9;color:#9a7d4e;border:1px solid #e0d0b2;border-radius:5px;padding:2px 7px;margin-left:6px;}
+.attach-row{opacity:.75;}
+.attach-row:hover{background:transparent;color:var(--muted);border-color:#cbb9a6;}
+.modal-body{padding:20px;position:relative;z-index:1;}
+.f-lab{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.f-input,.f-area{width:100%;background:var(--card);border:var(--cardbw) solid var(--cardborder);border-radius:9px;
+  padding:11px 13px;font-family:'Inter',sans-serif;font-size:13.5px;color:var(--ink);outline:none;margin-bottom:14px;}
+.f-area{min-height:110px;resize:vertical;font-family:'Playfair Display',serif;font-size:14.5px;line-height:1.55;}
+.f-input::placeholder,.f-area::placeholder{color:#c4b5a5;font-style:italic;}
+.modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:0 20px 20px;position:relative;z-index:1;}
+.m-cancel{font-size:12.5px;background:none;border:0;color:var(--muted);cursor:pointer;padding:10px 8px;}
+.m-save{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--ink);background:#fffefb;
+  border:var(--cardbw) solid var(--cardborder);border-radius:10px;padding:10px 20px;cursor:pointer;}
+.m-save:hover{background:#faf5ee;}
+
+/* file attach + chips */
+.attach-row{display:flex;align-items:center;gap:9px;border:1.5px dashed #cbb9a6;border-radius:9px;padding:11px 13px;
+  font-size:12.5px;color:var(--muted);cursor:pointer;margin-bottom:14px;}
+.attach-row:hover{background:#faeee8;color:var(--burg);border-color:var(--pink-b);}
+.attach-row svg{flex-shrink:0;}
+.filechip{display:inline-flex;align-items:center;gap:7px;background:#fffefb;border:var(--cardbw) solid var(--cardborder);
+  border-radius:7px;padding:5px 9px;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#5d5247;max-width:100%;}
+.filechip .fx{color:var(--muted);cursor:pointer;margin-left:2px;}
+.filechip .vtag{background:#f3e6cf;color:var(--gold);border-radius:4px;padding:1px 5px;font-size:8px;letter-spacing:.05em;}
+.chip-note{font-size:10.5px;color:var(--muted);font-style:italic;margin:6px 0 14px;}
+
+/* type-aware modal (Bold Pastille): white body, header + save-hover mirror the material icon colour */
+.t-bold .modal{background:#fffefb;}
+.modal.m-letter .m-save:hover{background:#f6ddd3;}
+.modal.m-syn .m-save:hover{background:#e7ece4;}
+.modal.m-pages .m-save:hover{background:#f3e6cf;}
+
+/* ===== WORKED-EXAMPLES POPUP (single package view) ===== */
+.ex-modal{width:860px;max-width:96vw;background:var(--pane);border:var(--bdw) solid var(--bd);border-radius:14px;
+  box-shadow:0 18px 50px rgba(36,28,21,.3);position:relative;max-height:90vh;display:flex;flex-direction:column;}
+.t-bold .ex-modal{background:#fffefb;}
+.t-capp .ex-modal::after{content:'';position:absolute;inset:6px;border:1px solid var(--burg);pointer-events:none;border-radius:8px;}
+.ex-head{padding:16px 22px;position:relative;z-index:9;display:flex;align-items:center;gap:12px;
+  border-bottom:var(--bdw) solid var(--bd);}
+.ex-modal.pk-sl .ex-head{background:linear-gradient(135deg,#f6ddd3,#f0d0c2);}
+.ex-modal.pk-ss .ex-head{background:linear-gradient(135deg,#e9eee6,#dfe6db);}
+.ex-modal.pk-sp .ex-head{background:linear-gradient(135deg,#f5e9d3,#f0e0c2);}
+.ex-hic{width:34px;height:34px;border-radius:10px;background:rgba(255,254,251,.65);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ex-modal.pk-sl .ex-hic{color:var(--burg);}
+.ex-modal.pk-ss .ex-hic{color:var(--sage-d);}
+.ex-modal.pk-sp .ex-hic{color:var(--gold);}
+.ex-head h3{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--ink);}
+.ex-body{padding:16px 26px 8px;overflow-y:auto;position:relative;z-index:1;}
+
+/* the desk: two page-tops, blurred manuscript pile behind */
+.deskset{position:relative;width:640px;max-width:100%;margin:0 auto;padding:12px 0 4px;min-height:262px;}
+/* blurred manuscript pile (background prop) */
+.mspile{position:absolute;top:2px;left:50%;transform:translateX(-50%) rotate(-2deg);width:340px;height:210px;z-index:1;
+  filter:blur(3px);opacity:.75;pointer-events:none;}
+.mspile .sheetp{position:absolute;inset:0;background:#fbf7f0;border:1px solid #d9cdbc;border-radius:5px;box-shadow:0 4px 12px rgba(58,28,20,.1);}
+.mspile .p1{transform:rotate(3.5deg) translate(14px,-6px);}
+.mspile .p2{transform:rotate(-2.5deg) translate(-12px,4px);}
+.mspile .p3{transform:rotate(1deg);}
+.mspile .p3::before{content:'';position:absolute;inset:22px 26px auto 26px;height:130px;
+  background:repeating-linear-gradient(180deg,#c9baa6 0 2px, transparent 2px 11px);opacity:.7;}
+.t-bold .mspile .sheetp{border-color:#7a7068;}
+/* page tops */
+.pg{position:absolute;width:292px;background:#fffefb;border:var(--cardbw) solid var(--cardborder);border-radius:6px 6px 0 0;border-bottom:0;
+  padding:16px 17px 0;box-shadow:0 6px 18px rgba(58,28,20,.14);}
+.pg::after{content:'';position:absolute;left:calc(-1 * var(--cardbw));right:calc(-1 * var(--cardbw));bottom:-2px;height:26px;
+  background:linear-gradient(rgba(255,254,251,0), #fffefb 82%);pointer-events:none;}
+.pg-let{top:26px;left:14px;transform:rotate(-1.1deg);z-index:3;}
+.pg-syn{top:38px;right:14px;transform:rotate(1.2deg);z-index:2;}
+.pg-tag{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.11em;text-transform:uppercase;
+  display:inline-block;border-radius:5px;padding:3px 8px;margin-bottom:9px;}
+.pg-tag.tl{background:#f6ddd3;color:var(--burg);}
+.pg-tag.ts{background:#e7ece4;color:var(--sage-d);}
+.pg-tag.tp{background:#f3e6cf;color:var(--gold);}
+.pg-title{font-family:'Playfair Display',serif;font-size:13.5px;font-weight:600;color:var(--ink);margin-bottom:7px;}
+.pg-txt{font-family:'Playfair Display',serif;font-size:10.8px;line-height:1.7;color:#4a3c32;
+  max-height:118px;overflow:hidden;-webkit-mask-image:linear-gradient(#000 62%,transparent 97%);mask-image:linear-gradient(#000 62%,transparent 97%);}
+@media(max-width:700px){
+  .deskset{min-height:0;display:flex;flex-direction:column;gap:14px;align-items:center;}
+  .pg{position:static;transform:none;}
+  .mspile{display:none;}
+}
+/* info beneath */
+.sheet-info{margin:6px 4px 0;padding:13px 14px;border-top:1px dashed #d8c9b8;font-size:12px;line-height:1.6;color:#7a6d60;position:relative;z-index:1;}
+.sheet-info::before{content:'ⓘ ';color:var(--burg);}
+.ex-foot{display:flex;justify-content:center;padding:10px 22px 20px;position:relative;z-index:1;}
+.sheet-use{font-family:'Playfair Display',serif;font-size:14.5px;font-weight:600;color:var(--ink);background:#fffefb;
+  border:var(--cardbw) solid var(--cardborder);border-radius:10px;padding:11px 26px;cursor:pointer;}
+.sheet-use:hover{background:#faeee8;}
+@media(max-width:760px){.deskset{flex-direction:column;align-items:center;}.pagepair{width:300px;}}
+</style>
+</head>
+<body>
+
+<div class="app t-capp" id="app">
+
+  <!-- collapsible icon sidebar -->
+  <aside class="rail">
+    <div class="rail-mark">
+      <span class="glyph">S</span>
+      <span class="wm">Script<b>Ally</b></span>
+      <button class="collapse" onclick="toggleRail()" title="Collapse">⟨</button>
+    </div>
+
+    <div class="nav-i"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span class="rlabel">Dashboard</span></div>
+    <div class="nav-i"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-7-8-3z"/></svg><span class="rlabel">Queries</span></div>
+    <div class="nav-i"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0112 0M16 6a3 3 0 010 6M19 20a6 6 0 00-3-5"/></svg><span class="rlabel">Agents</span></div>
+    <div class="nav-i active"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 4h13a2 2 0 012 2v14H6a2 2 0 01-2-2z"/><path d="M4 18a2 2 0 012-2h13"/></svg><span class="rlabel">Manuscripts</span></div>
+
+    <div class="rail-foot">
+      <div class="switcher">
+        <button class="on" onclick="setTheme('capp',this)">Cappuccino</button>
+        <button onclick="setTheme('bold',this)">Bold Pastille</button>
+      </div>
+      <div class="chip"><span class="av">B</span><span class="who">Bethus Wethus</span></div>
+    </div>
+  </aside>
+
+  <!-- desk -->
+  <main class="desk">
+
+    <div class="qhbar">
+      <h1>Submission Package Builder</h1>
+      <span class="pro">🔒 Pro</span>
+      <span class="msel"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 4h13a2 2 0 012 2v14H6a2 2 0 01-2-2z"/><path d="M4 18a2 2 0 012-2h13"/></svg>Murphy's Day Out</span>
+    </div>
+
+    <div class="workspace">
+
+      <!-- flush materials panel -->
+      <aside class="qlist" id="qlist">
+        <div class="qlist-head"><h2>Your materials</h2><div class="lab" style="margin-top:4px;">Building blocks</div></div>
+        <div class="qlist-body">
+          <div class="mat"><span class="mi env"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M8.5 9a3.5 3.5 0 116 2.4c-1 .9-2.5 1.5-2.5 3.1"/><circle cx="12" cy="19" r="0.7" fill="currentColor"/></svg></span><div class="mt"><div class="nm">Query letters</div><div class="sub">1 saved</div></div><span class="add" onclick="openModal('letter')">＋</span></div>
+          <div class="mat"><span class="mi doc"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg></span><div class="mt"><div class="nm">Synopses</div><div class="sub">none yet</div></div><span class="add" onclick="openModal('syn')">＋</span></div>
+          <div class="mat"><span class="mi book"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M8 6h9a1 1 0 011 1v13a1 1 0 01-1 1H8a1 1 0 01-1-1V7a1 1 0 011-1z"/><path d="M6 17V4a1 1 0 011-1h8"/></svg></span><div class="mt"><div class="nm">Sample pages</div><div class="sub">none yet</div></div><span class="add" onclick="openModal('pages')">＋</span></div>
+        </div>
+        <div class="qlist-foot">
+          <button class="manage" onclick="showView('v-mgr')">Manage all materials →</button>
+        </div>
+      </aside>
+
+      <!-- content pane -->
+      <section class="pane">
+
+        <div class="view show" id="v-home">
+        <div class="hdemo"><span class="hdemo-l">Preview ·</span>
+          <span class="hseg on" onclick="homeState(0,this)">No packages yet</span>
+          <span class="hseg" onclick="homeState(2,this)">2 packages</span>
+        </div>
+
+        <div id="home-empty">
+        <div class="st2">
+          <div class="lt">
+            <h2>Find out what <span class="rel">wins requests<svg class="star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z"/></svg></span></h2>
+            <div class="sl">Send different versions of your submission. ScriptAlly tracks which one gets agents asking for more.</div>
+            <button class="build" onclick="showView('v-comp')">＋ Build your first package</button>
+          </div>
+          <div class="rt fade" id="car">
+            <div class="pgui">
+              <span class="mt">Query letter</span>
+              <div class="tx" id="pgT"></div>
+            </div>
+            <div class="pkui">
+              <div class="pkui-h" id="pkH"></div>
+              <div class="pkui-b">
+                <div id="pkC"></div>
+                <div class="winrow"><div class="wl" id="pkWl"></div><div class="wv" id="pkWv"></div></div>
+              </div>
+            </div>
+            <a class="exlink" id="exLink" onclick="carOpen()">See this example in full →</a>
+          </div>
+        </div>
+
+        <div class="divrule"><span>Create a library of materials</span></div>
+        <div class="contB">
+          <div class="a2s">Give each piece a title, attach the file you actually send, and reuse it across any package.</div>
+          <div class="librow">
+            <div class="lib" onclick="openModal('letter')">
+              <div class="lib-h xl"><svg class="tg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M8.5 9a3.5 3.5 0 116 2.4c-1 .9-2.5 1.5-2.5 3.1"/><circle cx="12" cy="19" r="0.6" fill="currentColor"/></svg>Query letter</div>
+              <div class="lib-b">
+                <div class="lt2">Title</div><div class="ti">Comp-led rework</div>
+                <span class="lfchip"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M14 3H6a1 1 0 00-1 1v16a1 1 0 001 1h12a1 1 0 001-1V8z"/><path d="M14 3v5h5"/></svg>MDO_Query_compled.docx<span class="v">v2</span></span>
+                <div class="used">IN <b>2 PACKAGES</b> · 3 SENT QUERIES</div>
+              </div>
+            </div>
+            <div class="lib" onclick="openModal('syn')">
+              <div class="lib-h xs"><svg class="tg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Synopsis</div>
+              <div class="lib-b">
+                <div class="lt2">Title</div><div class="ti">One-page synopsis</div>
+                <span class="lfchip"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M14 3H6a1 1 0 00-1 1v16a1 1 0 001 1h12a1 1 0 001-1V8z"/><path d="M14 3v5h5"/></svg>MDO_Synopsis.docx<span class="v">v1</span></span>
+                <div class="used">IN <b>1 PACKAGE</b></div>
+              </div>
+            </div>
+            <div class="lib" onclick="openModal('pages')">
+              <div class="lib-h xp"><svg class="tg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M8 6h9a1 1 0 011 1v13a1 1 0 01-1 1H8a1 1 0 01-1-1V7a1 1 0 011-1z"/><path d="M6 17V4a1 1 0 011-1h8"/></svg>Sample pages</div>
+              <div class="lib-b">
+                <div class="lt2">Title</div><div class="ti">Chapters 1–3</div>
+                <span class="lfchip"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M14 3H6a1 1 0 00-1 1v16a1 1 0 001 1h12a1 1 0 001-1V8z"/><path d="M14 3v5h5"/></svg>MDO_Pages_1-3.docx<span class="v">v1</span></span>
+                <div class="used">UNUSED — NEW</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        </div><!-- /home-empty -->
+
+        <div id="home-packages" style="display:none;">
+          <div class="hp-head">
+            <span class="hp-title">Your packages · 2</span>
+            <button class="hp-new" onclick="showView('v-comp')">＋ New package</button>
+          </div>
+          <div class="hp-grid">
+            <div class="pkcard2">
+              <div class="pk2head"><div class="pn2">Comp-led · v1</div></div>
+              <div class="pk2body">
+                <div class="pkline2"><svg class="tg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#7c3a2a" stroke-width="2.4" stroke-linecap="round"><path d="M8.5 9a3.5 3.5 0 116 2.4c-1 .9-2.5 1.5-2.5 3.1"/><circle cx="12" cy="19" r="0.6" fill="#7c3a2a"/></svg>example — …Query_v2.docx</div>
+                <div class="pkline2"><svg class="tg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#5a6e58" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>One-page synopsis</div>
+                <div class="pkline2 dim">No sample pages</div>
+                <div class="pkstats2">SENT WITH 3 QUERIES · <b>1 FULL REQUEST</b></div>
+                <div class="pk2acts"><span class="pk2a">✎ Edit</span><span class="pk2a">⧉ Copy</span><span class="pk2a">Attach to query →</span></div>
+              </div>
+            </div>
+            <div class="pkcard2">
+              <div class="pk2head"><div class="pn2">Hartley bespoke</div></div>
+              <div class="pk2body">
+                <div class="pkline2"><svg class="tg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#7c3a2a" stroke-width="2.4" stroke-linecap="round"><path d="M8.5 9a3.5 3.5 0 116 2.4c-1 .9-2.5 1.5-2.5 3.1"/><circle cx="12" cy="19" r="0.6" fill="#7c3a2a"/></svg>example — …Query_v2.docx</div>
+                <div class="pkline2"><svg class="tg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#5a6e58" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>One-page synopsis</div>
+                <div class="pkline2"><svg class="tg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#a8842c" stroke-width="1.9" stroke-linejoin="round"><path d="M8 6h9a1 1 0 011 1v13a1 1 0 01-1 1H8a1 1 0 01-1-1V7a1 1 0 011-1z"/><path d="M6 17V4a1 1 0 011-1h8"/></svg>Ch. 1–3 — …Pages_v1.docx</div>
+                <div class="pkstats2">SENT WITH 1 QUERY · AWAITING REPLY</div>
+                <div class="pk2acts"><span class="pk2a">✎ Edit</span><span class="pk2a">⧉ Copy</span><span class="pk2a">Attach to query →</span></div>
+              </div>
+            </div>
+            <div class="pkghost" onclick="showView('v-comp')">＋<span>New package</span></div>
+          </div>
+          <div class="hp-foot">Unsure which opening wins requests? <a onclick="openExamples('sl')">See the worked examples</a></div>
+        </div>
+        </div><!-- /v-home -->
+
+        <!-- ===== COMPOSER (manifest + tray) ===== -->
+        <div class="view" id="v-comp">
+          <div class="comp-band">
+            <span class="bic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 2l8.66 5v10L12 22l-8.66-5V7z"/><path d="M12 22V12M3.34 7L12 12l8.66-5"/></svg></span>
+            <div class="hname">
+              <input placeholder="Name this package…">
+              <span class="pen"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.8 2.8 0 014 4L7.5 20.5 2 22l1.5-5.5z"/></svg></span>
+            </div>
+          </div>
+
+          <div class="fork">
+            <span class="fl">Copy an existing package</span>
+            <span class="pkmini">Comp-led · v1 <span class="dup">⧉</span></span>
+            <span class="pkmini">Hartley bespoke <span class="dup">⧉</span></span>
+            <span class="chev">▾</span>
+          </div>
+
+          <div class="comp-body">
+            <div class="bwrap">
+              <div class="bcanvas">
+                <div class="brow filled">
+                  <span class="pg-tag tl" style="margin-bottom:0;"><svg class="tg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M8.5 9a3.5 3.5 0 116 2.4c-1 .9-2.5 1.5-2.5 3.1"/><circle cx="12" cy="19" r="0.6" fill="currentColor"/></svg></span>
+                  <div><div class="bti">example</div><div class="bmeta">MurphysDayOut_Query_v2.docx</div></div>
+                  <div class="bact"><span class="rm2" onclick="focusSlot('l')">⇄ SWAP</span><span class="rm2">✕</span></div>
+                </div>
+                <div class="brow empty col" id="row-s" onclick="focusSlot('s')">
+                  <div class="bhd hs"><svg class="tg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Synopsis</div>
+                  <div class="bbd">Choose from your materials →</div>
+                </div>
+                <div class="brow empty col" id="row-p" onclick="focusSlot('p')">
+                  <div class="bhd hp"><svg class="tg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M8 6h9a1 1 0 011 1v13a1 1 0 01-1 1H8a1 1 0 01-1-1V7a1 1 0 011-1z"/><path d="M6 17V4a1 1 0 011-1h8"/></svg>Sample pages</div>
+                  <div class="bbd">Choose from your materials →</div>
+                </div>
+              </div>
+
+              <aside class="pickB" id="pickB">
+                <div class="pickB-h hs" id="pkbH">≋ Choose a synopsis <span class="cnt" id="pkbC">1 SAVED</span></div>
+                <div class="pickB-b" id="pkbB"></div>
+                <div class="pickB-f" id="pkbF"></div>
+              </aside>
+            </div>
+          </div>
+
+          <div class="comp-actions">
+            <button class="save-pkg2">Save package</button>
+            <button class="cancel2" onclick="showView('v-home')">Cancel</button>
+          </div>
+        </div>
+
+        <!-- ===== MATERIALS MANAGER (sheet gallery) ===== -->
+        <div class="view" id="v-mgr">
+          <div class="backrow">
+            <span class="vh-ic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l5 5v13a1 1 0 01-1 1H6a1 1 0 01-1-1V4a1 1 0 011-1z"/><path d="M15 3v5h5M9 13h6M9 17h4"/></svg></span>
+            <span class="view-title">Your materials</span>
+            <button class="backbtn" style="margin-left:auto;" onclick="showView('v-home')">← Builder home</button>
+          </div>
+
+          <div class="shelfwrap">
+            <div>
+              <div class="shelf-h"><span class="pg-tag tl" style="margin-bottom:0;"><svg class="tg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M8.5 9a3.5 3.5 0 116 2.4c-1 .9-2.5 1.5-2.5 3.1"/><circle cx="12" cy="19" r="0.6" fill="currentColor"/></svg> Query letters · 2</span></div>
+              <div class="shelf">
+                <div class="mini">
+                  <span class="pg-tag tl">Query letter</span>
+                  <div class="mti">example</div>
+                  <div class="filechip">📄 MurphysDayOut_Query_v2.docx</div>
+                  <div class="mtx">Dear Ms Hartley,<br>THE LIGHTHOUSE AT WICK POINT is an 82,000-word literary mystery in the vein of The Lamplighters…</div>
+                  <div class="musd">IN <b>2 PACKAGES</b> · 3 SENT QUERIES</div>
+                </div>
+                <div class="mini">
+                  <span class="pg-tag tl">Query letter</span>
+                  <div class="mti">Comp-led rework</div>
+                  <div class="filechip">📄 MDO_Query_compled.docx</div>
+                  <div class="mtx">Dear Ms Hartley,<br>For readers of Magpie Murders and The Lamplighters: an 82,000-word mystery of tides and…</div>
+                  <div class="musd">UNUSED</div>
+                </div>
+                <div class="mini-add" onclick="openModal('letter')">＋<span>New letter</span></div>
+              </div>
+            </div>
+            <div>
+              <div class="shelf-h"><span class="pg-tag ts" style="margin-bottom:0;"><svg class="tg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg> Synopses · 1</span></div>
+              <div class="shelf">
+                <div class="mini">
+                  <span class="pg-tag ts">Synopsis</span>
+                  <div class="mti">One-page synopsis</div>
+                  <div class="filechip">📄 MDO_Synopsis.docx</div>
+                  <div class="mtx">ELSPETH MARR, 63, has kept two things all her life: the Wick Point light, and a secret…</div>
+                  <div class="musd">IN <b>1 PACKAGE</b></div>
+                </div>
+                <div class="mini-add" onclick="openModal('syn')">＋<span>New synopsis</span></div>
+              </div>
+            </div>
+            <div>
+              <div class="shelf-h"><span class="pg-tag tp" style="margin-bottom:0;"><svg class="tg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M8 6h9a1 1 0 011 1v13a1 1 0 01-1 1H8a1 1 0 01-1-1V7a1 1 0 011-1z"/><path d="M6 17V4a1 1 0 011-1h8"/></svg> Sample pages · 0</span></div>
+              <div class="shelf">
+                <div class="mini-add" style="width:250px;" onclick="openModal('pages')">＋<span>Most UK agents want the first three chapters</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+  </main>
+
+  <button class="help">?</button>
+
+  <!-- ===== ADD MATERIAL MODAL ===== -->
+  <div class="overlay" id="modal" onclick="if(event.target===this)closeModal()">
+    <div class="modal" id="matModal">
+      <div class="modal-band"><span class="mb-ic" id="matIc"></span><h3 id="matTitle">New material</h3><button class="modal-x" onclick="closeModal()">✕</button></div>
+      <div class="modal-body">
+        <div class="f-lab">Title</div>
+        <input class="f-input" placeholder="e.g. Query letter — comp-led v2">
+        <div class="f-lab">Attach file</div>
+        <div class="attach-row" style="cursor:default;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.5l-8.5 8.5a5 5 0 01-7-7l9-9a3.5 3.5 0 015 5l-9 9a2 2 0 01-3-3l8-8"/></svg>Attach file <span class="soon">Coming soon</span></div>
+        <div class="f-lab">Notes</div>
+        <textarea class="f-area" placeholder="Anything worth remembering about this version…"></textarea>
+      </div>
+      <div class="modal-foot">
+        <button class="m-cancel" onclick="closeModal()">Cancel</button>
+        <button class="m-save" onclick="closeModal()">Save material</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== WORKED EXAMPLES POPUP (one package at a time) ===== -->
+  <div class="overlay" id="exModal" onclick="if(event.target===this)closeExamples()">
+    <div class="ex-modal pk-sl" id="exBox">
+      <div class="ex-head">
+        <span class="ex-hic" id="exIc"></span>
+        <h3 id="exTitle">Comp-led package</h3>
+        <button class="modal-x" style="margin-left:auto" onclick="closeExamples()">✕</button>
+      </div>
+      <div class="ex-body">
+        <div class="deskset">
+          <div class="mspile"><div class="sheetp p1"></div><div class="sheetp p2"></div><div class="sheetp p3"></div></div>
+          <div class="pg pg-let">
+            <span class="pg-tag tl">Query letter</span>
+            <div class="pg-title">The Lighthouse at Wick Point</div>
+            <div class="pg-txt" id="exLet"></div>
+          </div>
+          <div class="pg pg-syn">
+            <span class="pg-tag ts">Synopsis</span>
+            <div class="pg-title">The Lighthouse at Wick Point</div>
+            <div class="pg-txt" id="exSyn"></div>
+          </div>
+        </div>
+        <div class="sheet-info" id="exInfo"></div>
+      </div>
+      <div class="ex-foot"><button class="sheet-use">Use this package as a starting point</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleRail(){document.getElementById('app').classList.toggle('collapsed');}
+function setTheme(t,btn){
+  const app=document.getElementById('app');
+  app.classList.remove('t-capp','t-bold');
+  app.classList.add(t==='capp'?'t-capp':'t-bold');
+  document.querySelectorAll('.switcher button').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+function showView(id){
+  applyPaneBg(id);
+  if(id==='v-comp'){setTimeout(()=>focusSlot('s'),0);}
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('show'));
+  document.getElementById(id).classList.add('show');
+}
+const MATIC={
+ 'm-letter':'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M8.5 9a3.5 3.5 0 116 2.4c-1 .9-2.5 1.5-2.5 3.1"/><circle cx="12" cy="19" r="0.7" fill="currentColor"/></svg>',
+ 'm-syn':'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>',
+ 'm-pages':'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M8 6h9a1 1 0 011 1v13a1 1 0 01-1 1H8a1 1 0 01-1-1V7a1 1 0 011-1z"/><path d="M6 17V4a1 1 0 011-1h8"/></svg>'};
+function openModal(type){
+  const m=document.getElementById('matModal');
+  m.classList.remove('m-letter','m-syn','m-pages');
+  const map={letter:['m-letter','New query letter'],syn:['m-syn','New synopsis'],pages:['m-pages','New sample pages']};
+  const t=map[type]||['m-letter','New material'];
+  m.classList.add(t[0]);
+  document.getElementById('matIc').innerHTML=MATIC[t[0]];
+  document.getElementById('matTitle').textContent=t[1];
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal(){document.getElementById('modal').classList.remove('show');}
+const EX={
+ sl:{title:'Comp-led package',
+  let:'Dear Ms Hartley,<br><br>THE LIGHTHOUSE AT WICK POINT is an 82,000-word literary mystery in the vein of <i>The Lamplighters</i> and <i>Magpie Murders</i>.<br><br>When retired keeper Elspeth Marr finds a stranger\'s coat folded on the rocks below her light, she recognises the mending in its sleeve — her own stitching, from thirty years ago…',
+  syn:'THE LIGHTHOUSE AT WICK POINT is a literary mystery set on the north-east Scottish coast. ELSPETH MARR, 63, a retired lighthouse keeper, discovers a drowned stranger wearing a coat she mended in 1994 — the year her brother was declared lost at sea…',
+  pages:'The body came in on the morning tide, the way the sea returned most things to Wick Point: patiently, and without apology.<br><br>Elspeth saw the coat before she saw the man…',
+  info:'Leads every document with market position. The letter opens on title, word count and two recent comps; the synopsis names genre and setting in its first line; the pages open on plot. Commercial fiction — thrillers, romance, book-club — tends to favour this: comps are how agents judge where a book sits, and the guidance is two or three from the last few years.'},
+ ss:{title:'Character-led package',
+  let:'Dear Ms Hartley,<br><br>Elspeth Marr has kept two things all her life: the Wick Point light, and a secret. When a drowned stranger washes ashore wearing a coat she mended thirty years ago, only one of them can survive the week.<br><br>THE LIGHTHOUSE AT WICK POINT is an 82,000-word literary mystery…',
+  syn:'ELSPETH MARR has spent sixty-three years believing that keeping the light and keeping quiet were the same duty. Both certainties drown with the stranger who washes ashore in her brother\'s coat…',
+  pages:'The light had been dark for eleven years, but Elspeth still climbed the tower every evening at dusk, the way other women her age took a turn around the garden.<br><br>It was habit, she told the village. It was penance, she told herself…',
+  info:'Leads every document with the protagonist. The letter skips the housekeeping and opens on Elspeth and the inciting incident; the synopsis begins inside her contradiction; the pages open in her voice rather than on the plot. Suits literary and voice-driven fiction, where the writing is the strongest card — the standard advice is to lead with your best selling point, and some agents prefer writers to jump straight to the pitch.'},
+ sp:{title:'Personalised package',
+  let:'Dear Ms Hartley,<br><br>Your Manuscript Wishlist asks for coastal settings, older protagonists and secrets that surface slowly — so I hope THE LIGHTHOUSE AT WICK POINT might be a good fit for your list.<br><br>When retired keeper Elspeth Marr finds a stranger\'s coat folded on the rocks below her light…',
+  syn:'A coastal mystery of long-buried family secrets: ELSPETH MARR, 63, has kept the Wick Point light — and a lie about her brother\'s death — for thirty years. When his coat comes back on a stranger\'s body, the tide starts returning everything she hid…',
+  pages:'From the lamp room Elspeth could see the whole crooked mile of coast the Wishaws had kept for four generations — every rock with a name, every name with a debt.<br><br>The coat was folded. That was the detail she couldn\'t leave alone…',
+  info:'Leads with why this agent. The letter opens on her wish list; the synopsis foregrounds the themes it named (coast, older protagonist, slow secrets); the pages open on the imagery most likely to land with her. Works across genres and is what agents ask for most directly — mass, unpersonalised queries are the ones they say they ignore, and one specific line of research is enough. Best kept for priority agents, since each package is bespoke.'}
+};
+const EXIC={
+ sl:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 4h4v16H5zM9 5h4v15H9z"/><path d="M13.5 6.2l3.8-1 4 15.4-3.8 1z"/></svg>',
+ ss:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20a7 7 0 0114 0"/><path d="M17.5 3.5l1.2 1.2M19.5 2.8l.4 1.6"/></svg>',
+ sp:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h11a1 1 0 011 1v14a1 1 0 01-1 1H8z"/><path d="M8 4v16M4.5 7H8M4.5 12H8M4.5 17H8"/><path d="M13 10.6c.55-1.1 2.2-1.1 2.75 0 .55-1.1 2.2-1.1 2.75 0 .4.85-.45 1.9-2.75 3.4-2.3-1.5-3.15-2.55-2.75-3.4z" fill="currentColor" stroke="none"/></svg>'};
+function openExamples(which){
+  const d=EX[which]||EX.sl;
+  const box=document.getElementById('exBox');
+  box.classList.remove('pk-sl','pk-ss','pk-sp');
+  box.classList.add('pk-'+(EX[which]?which:'sl'));
+  document.getElementById('exIc').innerHTML=EXIC[which]||EXIC.sl;
+  document.getElementById('exTitle').textContent=d.title;
+  document.getElementById('exLet').innerHTML=d.let;
+  document.getElementById('exSyn').innerHTML=d.syn;
+  document.getElementById('exInfo').innerHTML=d.info;
+  document.getElementById('exModal').classList.add('show');
+}
+function closeExamples(){document.getElementById('exModal').classList.remove('show');}
+/* postcard carousel */
+const ICONS={
+ sl:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 4h4v16H5zM9 5h4v15H9z"/><path d="M13.5 6.2l3.8-1 4 15.4-3.8 1z"/></svg>',
+ ss:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20a7 7 0 0114 0"/><path d="M17.5 3.5l1.2 1.2M19.5 2.8l.4 1.6"/></svg>',
+ sp:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h11a1 1 0 011 1v14a1 1 0 01-1 1H8z"/><path d="M8 4v16M4.5 7H8M4.5 12H8M4.5 17H8"/><path d="M13 10.6c.55-1.1 2.2-1.1 2.75 0 .55-1.1 2.2-1.1 2.75 0 .4.85-.45 1.9-2.75 3.4-2.3-1.5-3.15-2.55-2.75-3.4z" fill="currentColor" stroke="none"/></svg>'};
+const CAR=[
+ {key:'sl',name:'Comp-led · v1',tint:'var(--tl)',hl:'#f6ddd3',
+  tx:'Dear Ms Hartley,<br>THE LIGHTHOUSE AT WICK POINT is <span class="em">an 82,000-word literary mystery in the vein of The Lamplighters</span> and Magpie Murders. When retired keeper Elspeth Marr finds a stranger\u2019s coat folded on the rocks below her light\u2026',
+  lines:[['var(--burg)','Comp-led letter'],['var(--sage-d)','One-page synopsis']],
+  wl:'Sent with 3 queries',wv:'Partial requested \u2713'},
+ {key:'ss',name:'Character-led · v2',tint:'var(--ts)',hl:'#e7ece4',
+  tx:'Dear Ms Hartley,<br>Elspeth Marr has kept two things all her life: <span class="em">the Wick Point light, and a secret.</span> When a drowned stranger washes ashore wearing a coat she mended thirty years ago\u2026',
+  lines:[['var(--burg)','Character-led letter'],['var(--sage-d)','One-page synopsis'],['var(--gold)','Chapters 1\u20133']],
+  wl:'Sent with 4 queries',wv:'Full manuscript requested \u2713'},
+ {key:'sp',name:'Personalised',tint:'var(--tp)',hl:'#f3e6cf',
+  tx:'Dear Ms Hartley,<br>Your Manuscript Wishlist asks for <span class="em">coastal settings, older protagonists and secrets that surface slowly</span> \u2014 so I hope THE LIGHTHOUSE AT WICK POINT might be a good fit\u2026',
+  lines:[['var(--burg)','Personalised letter'],['var(--sage-d)','One-page synopsis']],
+  wl:'Sent with 1 query',wv:'Awaiting reply'}];
+let carI=0, carTimer=null;
+function carPaint(){
+  const d=CAR[carI];
+  const h=document.getElementById('pkH');
+  h.style.background=d.tint;
+  h.innerHTML='<span class="ic">'+ICONS[d.key]+'</span><span class="nm">'+d.name+'</span><span class="tagp">Package</span>';
+  const pg=document.getElementById('pgT');
+  pg.innerHTML=d.tx;
+  pg.parentElement.style.setProperty('--hlc',d.hl);
+  document.getElementById('pkC').innerHTML=d.lines.map(l=>'<div class="pkln"><span class="d" style="background:'+l[0]+'"></span>'+l[1]+'</div>').join('');
+  document.getElementById('pkWl').textContent=d.wl;
+  document.getElementById('pkWv').textContent=d.wv;
+}
+function carSwap(fn){const el=document.getElementById('car');el.style.opacity=0;setTimeout(()=>{fn();el.style.opacity=1;},450);}
+function carStep(d){carSwap(()=>{carI=(carI+d+3)%3;carPaint();});}
+function carOpen(){openExamples(CAR[carI].key);}
+function carAuto(){
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  carTimer=setInterval(()=>carStep(1),5000);
+  const w=document.getElementById('car');
+  w.addEventListener('mouseenter',()=>clearInterval(carTimer));
+  w.addEventListener('mouseleave',()=>{clearInterval(carTimer);carTimer=setInterval(()=>carStep(1),5000);});
+}
+carPaint();carAuto();
+const PICK={
+ l:{cls:'hl',glyph:'?',title:'Choose a query letter',cnt:'2 SAVED',foot:'Not listed? <a onclick="openModal(\'letter\')">Add a new query letter</a>',cards:[
+   {nm:'example',fm:'MurphysDayOut_Query_v2.docx · IN THIS PACKAGE',sn:'Dear Ms Hartley, THE LIGHTHOUSE AT WICK POINT is an 82,000-word literary mystery in the vein of The Lamplighters…',use:'✓ IN THIS PACKAGE',cur:true},
+   {nm:'Comp-led rework',fm:'MDO_Query_compled.docx · UNUSED',sn:'For readers of Magpie Murders and The Lamplighters: an 82,000-word mystery of tides and thirty-year silences…',use:'⇄ SWAP INTO PACKAGE'}]},
+ s:{cls:'hs',glyph:'≋',title:'Choose a synopsis',cnt:'1 SAVED',foot:'Not listed? <a onclick="openModal(\'syn\')">Add a new synopsis</a>',cards:[
+   {nm:'One-page synopsis',fm:'MDO_Synopsis.docx · IN 1 PACKAGE',sn:'Elspeth Marr, 63, has kept two things all her life: the Wick Point light, and a secret. When a drowned stranger washes ashore…',use:'＋ USE IN THIS PACKAGE'}]},
+ p:{cls:'hp',glyph:'▤',title:'Sample pages',cnt:'0 SAVED',foot:'<a onclick="openModal(\'pages\')">＋ Add new sample pages</a>',cards:[],empty:'None saved yet — most UK agents want the first three chapters.'}
+};
+function focusSlot(t){
+  const d=PICK[t];
+  const h=document.getElementById('pkbH');
+  h.className='pickB-h '+d.cls;
+  h.innerHTML=d.glyph+' '+d.title+' <span class="cnt">'+d.cnt+'</span>';
+  const b=document.getElementById('pkbB');
+  if(d.cards.length){
+    b.style.display='';
+    b.innerHTML=d.cards.map(c=>'<div class="bigcard'+(c.cur?' current':'')+'"><div class="nm">'+c.nm+'</div><div class="fm">'+c.fm+'</div><div class="sn">'+c.sn+'</div><div class="use">'+c.use+'</div></div>').join('');
+  }else{
+    b.style.display='';
+    b.innerHTML='<div class="pickB-empty">'+d.empty+'</div>';
+  }
+  document.getElementById('pkbF').innerHTML=d.foot;
+  ['l','s','p'].forEach(k=>{const r=document.getElementById('row-'+k);if(r)r.classList.toggle('focus',k===t);});
+}
+let homeMode=0;
+function applyPaneBg(viewId){
+  const pane=document.querySelector('.pane');
+  pane.style.background = (viewId==='v-home' && homeMode===0) ? '#fffefb' : '';
+}
+function homeState(n,btn){
+  homeMode=n;
+  document.querySelectorAll('.hseg').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('home-empty').style.display = n===0 ? '' : 'none';
+  document.getElementById('home-packages').style.display = n===0 ? 'none' : '';
+  document.getElementById('qlist').style.display = n===0 ? 'none' : '';
+  applyPaneBg('v-home');
+}
+document.getElementById('qlist').style.display='none';
+applyPaneBg('v-home');
+
+</script>
+</body>
+</html>
