@@ -15,6 +15,15 @@
  *     No Response, Withdrawn) keep a clear edge on cream / parchment / a selected row.
  * Change a value in the map and it propagates to every dot everywhere.
  *
+ * AMENDED LOCK (owner-approved, consolidated-v37): geometry, fills, glyphs and semantics stay
+ * locked, but the PALETTE of the six pipeline statuses (Queried → R&R) is now a per-theme token
+ * pair — ring/glyph read `--sd-hue`, the centre disc reads `--sd-centre` (values set on
+ * .t-capp/.t-bold/.t-edn in index.css). One hue per theme: direction/stage is carried by shape,
+ * not colour. The per-status spectrum hexes remain as FALLBACKS so un-themed surfaces
+ * (onboarding, auth preview, dev labs) render exactly as before. Closed-state statuses
+ * (Rejected/Withdrawn/No Response) and the Offer star keep their existing treatment in every
+ * theme, as does the ghost drain.
+ *
  * Rendering is pure CSS + inline SVG (no raster artwork): a tinted disc, a base-colour ring,
  * and a stroked/filled 24×24 glyph. The four "your move" states (Partial Requested,
  * Full Requested, Revise & Resubmit, Offer) get a slow pulsing ring — see statusDot.css,
@@ -122,6 +131,17 @@ const mix = (a: string, b: string, t: number): string => {
 
 const fillOf = (base: string) => mix(PARCHMENT, base, 0.2); // soft tint of the base
 const glyphColorOf = (base: string) => mix(base, INK, 0.22); // deepened for legibility
+
+/** The six pipeline statuses whose palette is theme-tokenised (amended lock). Offer and the
+ *  closed set keep their own treatment; ghost is always the neutral drain. */
+const THEME_TOKENISED: ReadonlySet<QueryStatus> = new Set([
+  QueryStatus.QUERIED,
+  QueryStatus.PARTIAL_REQUESTED,
+  QueryStatus.PARTIAL_SENT,
+  QueryStatus.FULL_REQUESTED,
+  QueryStatus.FULL_SENT,
+  QueryStatus.REVISE_RESUBMIT,
+]);
 
 const warnedUnknownStatuses = new Set<string>();
 
@@ -263,8 +283,14 @@ export const StatusDot: React.FC<StatusDotProps> = ({
   }
 
   const base = ghost ? GHOST_BASE : spec.base;
-  const fill = fillOf(base);
-  const glyphColor = glyphColorOf(base);
+  // Pipeline statuses read the theme token pair, falling back to today's exact per-status
+  // colours where no theme class is present (onboarding, auth preview, dev labs). Ghost and
+  // the exempt statuses (Offer, closed set) never consult the theme vars.
+  const themed = !ghost && THEME_TOKENISED.has(norm);
+  const ringColor = themed ? `var(--sd-hue, ${base})` : base;
+  const fill = themed ? `var(--sd-centre, ${fillOf(base)})` : fillOf(base);
+  const glyphColor = themed ? `var(--sd-hue, ${glyphColorOf(base)})` : glyphColorOf(base);
+  const pulseColor = themed ? `var(--sd-hue, ${base})` : base;
   const pulse = spec.pulse && !ghost;
   const glyphSize = Math.round(S * 0.62);
 
@@ -283,21 +309,21 @@ export const StatusDot: React.FC<StatusDotProps> = ({
         verticalAlign: "middle",
       }}
     >
-      {/* tinted disc + 1px base-colour ring (guarantees an edge on every surface) */}
+      {/* tinted disc + 1px ring (guarantees an edge on every surface) */}
       <span
         style={{
           position: "absolute",
           inset: 0,
           borderRadius: "50%",
           background: fill,
-          border: `1px solid ${base}`,
+          border: `1px solid ${ringColor}`,
           boxSizing: "border-box",
         }}
       />
       {pulse && (
         <span
           className="sa-statusdot__pulse"
-          style={{ ["--sa-dot-pulse-color" as string]: base } as React.CSSProperties}
+          style={{ ["--sa-dot-pulse-color" as string]: pulseColor } as React.CSSProperties}
         />
       )}
       <svg

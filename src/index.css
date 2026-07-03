@@ -85,6 +85,9 @@
   --navpill: #f0e8db;
   --navtext: #5d4037;
   --acc: #7c3a2a;
+  /* StatusDot amended lock: one hue per theme (ring/glyph) + centre disc. Shapes carry stage. */
+  --sd-hue: #7c3a2a;
+  --sd-centre: #f6e4da;
 }
 .t-bold {
   --bd: #1d1712;   /* ink */
@@ -109,6 +112,8 @@
   --navpill: #eec9c3;     /* unchanged */
   --navtext: #1d1712;
   --acc: #1d1712;
+  --sd-hue: #1d1712;
+  --sd-centre: #f8dcd8;
 }
 /* Editorial — the consolidated-v37 "Graphite · Soft · Tinted" system (t-edn + es4 + eb2 locked).
    Neutral whites/greys; graphite #44484d is the single accent. Containers are "Soft": 16px
@@ -136,6 +141,8 @@
   --navpill: #ececee;     /* 10% tint */
   --navtext: #44484d;
   --acc: #44484d;
+  --sd-hue: #44484d;
+  --sd-centre: #e9eaeb;
 }
 /* Editorial "Soft" container: 16px radius, no border, layered shadow. Defined here so the
    dashboard rebuild + any Editorial container can share one class (theme-scoped). */
