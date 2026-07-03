@@ -22,12 +22,12 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
 import { ComponentType } from "../types";
 import { HubHeaderBar } from "./shell/HubHeaderBar";
-import { TypeGlyph } from "./packages/TypeGlyph";
+import { FirstVisitHome } from "./packages/FirstVisitHome";
 import { FONT_SERIF, FONT_MONO } from "../lib/designTokens";
 import { ChevronDown, Lock } from "lucide-react";
 
 export const SubmissionPackages: React.FC = () => {
-  const { currentUser, manuscripts } = useScriptAllyDb();
+  const { currentUser, manuscripts, versions, packages } = useScriptAllyDb();
 
   const [activeMsId, setActiveMsId] = useState<string | null>(() =>
     typeof window !== "undefined" ? localStorage.getItem("scriptally_active_manuscript_id") : null,
@@ -56,6 +56,12 @@ export const SubmissionPackages: React.FC = () => {
   }, [msMenuOpen]);
 
   const activeMs = useMemo(() => manuscripts.find((m) => m.id === activeMsId) ?? manuscripts[0], [manuscripts, activeMsId]);
+  const msId = activeMs?.id;
+  const msVersions = useMemo(() => versions.filter((v) => v.manuscriptId === msId), [versions, msId]);
+  const msPackages = useMemo(() => packages.filter((p) => p.manuscriptId === msId && p.status !== "Retired"), [packages, msId]);
+  // First-visit: no materials AND no (active) packages for this manuscript. The materials rail and the
+  // packages home appear from Phase 6 once either count is non-zero.
+  const firstVisit = msVersions.length === 0 && msPackages.length === 0;
 
   if (!currentUser) return null;
 
@@ -65,6 +71,11 @@ export const SubmissionPackages: React.FC = () => {
     setMsMenuOpen(false);
   };
   const multiMs = manuscripts.length > 1;
+
+  // Later-phase targets — stubbed for Phase 5 (composer = P7, create-modal = P9, worked-examples = P10).
+  const openComposer = () => {};
+  const openCreate = (_type: ComponentType) => {};
+  const openExample = (_key: string) => {};
 
   // Book glyph for the manuscript selector — burgundy strokes, sampled from the mockup .msel.
   const bookIcon = (
@@ -145,27 +156,15 @@ export const SubmissionPackages: React.FC = () => {
           <div className="pkg-workspace" style={{ flex: 1, minHeight: 0, display: "flex", gap: 14 }}>
             {/* Content pane — hugs content height and scrolls internally (mockup .pane). The materials
                 rail joins this row in Phase 6; the home / composer / gallery views fill the pane P5+. */}
-            <section className="pkg-pane" style={{ flex: 1, minWidth: 0, background: "var(--pane)", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", alignSelf: "flex-start", maxHeight: "100%", overflowY: "auto", padding: "16px 16px 20px" }}>
-              {/* Phase 3 interim — the three canonical material glyphs, each in its type-ink colour
-                  via currentColor. P5 replaces this placeholder with the first-visit home. */}
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 22, padding: "40px 8px" }}>
-                <div style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".08em", textTransform: "uppercase", color: "var(--muted)" }}>Canonical material glyphs</div>
-                <div style={{ display: "flex", gap: 34, flexWrap: "wrap", justifyContent: "center" }}>
-                  {([
-                    { type: ComponentType.QUERY_LETTER, label: "Query letter", ink: "var(--burg)" },
-                    { type: ComponentType.SYNOPSIS, label: "Synopsis", ink: "var(--sage-d)" },
-                    { type: ComponentType.SAMPLE_PAGES, label: "Sample pages", ink: "var(--gold)" },
-                  ] as const).map(({ type, label, ink }) => (
-                    <div key={label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-                      <span style={{ color: ink, width: 46, height: 46, borderRadius: 12, display: "inline-flex", alignItems: "center", justifyContent: "center", border: "var(--bdw) solid var(--bd)", background: "#fffefb" }}>
-                        <TypeGlyph type={type} size={22} />
-                      </span>
-                      <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".04em", color: "var(--muted)" }}>{label}</span>
-                    </div>
-                  ))}
+            <section className="pkg-pane" style={{ flex: 1, minWidth: 0, background: firstVisit ? "#fffefb" : "var(--pane)", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", alignSelf: "flex-start", maxHeight: "100%", overflowY: "auto", padding: "16px 16px 20px" }}>
+              {firstVisit ? (
+                <FirstVisitHome onBuild={openComposer} onCreate={openCreate} onExample={openExample} />
+              ) : (
+                /* Has materials or packages — the packages home lands in Phase 6. */
+                <div style={{ padding: "44px 8px", textAlign: "center", fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 14, color: "var(--muted)" }}>
+                  Your packages will appear here — the packages home arrives in the next phase.
                 </div>
-                <div style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 13, color: "var(--muted)" }}>Home, materials and the composer arrive in the next phases.</div>
-              </div>
+              )}
             </section>
           </div>
         </>
