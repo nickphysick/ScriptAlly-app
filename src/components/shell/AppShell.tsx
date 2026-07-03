@@ -74,7 +74,8 @@ const RailNavItem: React.FC<{ label: string; Icon: React.ComponentType<{ style?:
       fontFamily: FONT_SANS,
       fontSize: 13,
       fontWeight: active ? 500 : 400,
-      color: active ? burgundy : "#6a5a50",
+      // Active text is theme-driven (v37: capp mocha / bold ink / editorial graphite).
+      color: active ? `var(--navtext, ${burgundy})` : "#6a5a50",
       background: active ? "var(--navpill)" : "transparent",
       border: "1px solid transparent",
       cursor: "pointer",
@@ -186,7 +187,9 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
   const closeAll = () => { setShowBell(false); setShowAccount(false); };
   if (!currentUser) return null;
 
-  const theme = currentUser.queriesTheme === "bold" ? "bold" : "cappuccino";
+  const theme = currentUser.queriesTheme === "bold" || currentUser.queriesTheme === "editorial"
+    ? currentUser.queriesTheme
+    : "cappuccino";
   const planLabel = currentUser.plan === UserPlan.PRO ? "Pro" : "Free";
 
   const themeSegBtn = (on: boolean): React.CSSProperties => ({
@@ -328,7 +331,7 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
           aria-label="Queries page theme"
           style={{ display: "flex", border: "var(--bdw) solid var(--bd)", borderRadius: 9, overflow: "hidden", marginBottom: 12 }}
         >
-          {([["cappuccino", "Capp"], ["bold", "Bold"]] as const).map(([val, label]) => (
+          {([["cappuccino", "Capp"], ["bold", "Bold"], ["editorial", "Editorial"]] as const).map(([val, label]) => (
             <button
               key={val}
               type="button"
@@ -516,9 +519,11 @@ interface AppShellProps {
   onNavigate: (tab: string, subPageName?: string) => void;
   searchQuery: string;
   setSearchQuery: (q: string) => void;
-  theme: "cappuccino" | "bold";
+  theme: "cappuccino" | "bold" | "editorial";
   children: React.ReactNode;
 }
+
+const THEME_CLASS = { cappuccino: "t-capp", bold: "t-bold", editorial: "t-edn" } as const;
 
 export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, searchQuery, setSearchQuery, theme, children }) => {
   const stageRef = useRef<HTMLDivElement>(null);
@@ -533,7 +538,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
 
   return (
     <div
-      className={theme === "bold" ? "t-bold" : "t-capp"}
+      className={THEME_CLASS[theme]}
       style={{ display: "flex", height: "100vh", overflow: "hidden", background: "#F5F0EA" }}
     >
       <Rail activeTab={routeKey} onNavigate={onNavigate} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />

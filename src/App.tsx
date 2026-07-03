@@ -517,7 +517,7 @@ function AppContent() {
         onNavigate={handleNavigate}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
-        theme={currentUser?.queriesTheme === "bold" ? "bold" : "cappuccino"}
+        theme={currentUser?.queriesTheme === "bold" || currentUser?.queriesTheme === "editorial" ? currentUser.queriesTheme : "cappuccino"}
       >
         {/* The four main pages stay MOUNTED across navigation (display toggling) so page-local
             state — Queries filters/sort/selection above all — survives leaving and returning. */}

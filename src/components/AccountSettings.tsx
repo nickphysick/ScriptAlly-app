@@ -767,7 +767,7 @@ export const AccountSettings: React.FC<{ onNavigate: (tab: string, subPageName?:
           <p style={helpText}>The look of your Queries page. (Coming to the rest of the app later.)</p>
         </div>
         <div role="radiogroup" aria-label="Queries page theme" style={{ display: "inline-flex", gap: 3, flexShrink: 0, background: "#f3ece2", border: "1px solid #e2d6c6", borderRadius: 10, padding: 3 }}>
-          {([["cappuccino", "Cappuccino"], ["bold", "Bold Pastille"]] as const).map(([val, label]) => {
+          {([["cappuccino", "Cappuccino"], ["bold", "Bold Pastille"], ["editorial", "Editorial"]] as const).map(([val, label]) => {
             const on = (currentUser?.queriesTheme ?? "cappuccino") === val;
             return (
               <button

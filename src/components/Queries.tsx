@@ -2084,7 +2084,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
               <div style={{ fontFamily: FONT_SERIF, fontWeight: 800, fontSize: 25, color: "#1d1712", lineHeight: 1 }}>Queries Hub</div>
               <div style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".04em", textTransform: "uppercase" as const, color: "#5a6472", marginTop: 8, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Tracking {hubSubtitle}</div>
             </div>
-            <button type="button" onClick={() => onNavigate?.("queries", "Log a query")} onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.05)"; }} onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }} style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "10px 17px", borderRadius: 12, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, whiteSpace: "nowrap", cursor: "pointer", background: "#f5e2da", border: "1.5px solid #e8c8bc", color: "#7c3a2a", boxShadow: "0 3px 0 #e2c2b5", flexShrink: 0, transition: "transform .15s ease" }}>
+            <button type="button" className="qcta-pink qcta-raised" onClick={() => onNavigate?.("queries", "Log a query")} onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.05)"; }} onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }} style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "10px 17px", borderRadius: 12, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, whiteSpace: "nowrap", cursor: "pointer", background: "#f5e2da", border: "1.5px solid #e8c8bc", color: "#7c3a2a", boxShadow: "0 3px 0 #e2c2b5", flexShrink: 0, transition: "transform .15s ease" }}>
               <Plus style={{ width: 15, height: 15 }} />
               Log a new query
             </button>
@@ -2182,6 +2182,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           </div>
           <button
             type="button"
+            className="qcta-pink qcta-raised"
             onClick={() => onNavigate?.("queries", "Log a query")}
             onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.05)"; }}
             onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
@@ -2440,7 +2441,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   >
                     <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
                       {/* monogram disc — pink gradient + burgundy initials, echoing the hero avatar */}
-                      <span style={{ flexShrink: 0, width: 38, height: 38, borderRadius: "50%", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", border: "1px solid #e8c8bc", color: qdbBoldInk2, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_SERIF, fontSize: 13, fontWeight: 700 }}>{monoInitials}</span>
+                      <span className="qmono" style={{ flexShrink: 0, width: 38, height: 38, borderRadius: "50%", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", border: "1px solid #e8c8bc", color: qdbBoldInk2, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_SERIF, fontSize: 13, fontWeight: 700 }}>{monoInitials}</span>
                       {/* middle — name over agency */}
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontFamily: FONT_SERIF, fontSize: 16, fontWeight: 700, color: qdbBoldInk, lineHeight: 1.1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{agent.name?.trim() || agent.agency}</div>

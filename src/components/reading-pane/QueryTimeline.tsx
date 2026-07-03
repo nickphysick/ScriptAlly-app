@@ -210,6 +210,7 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
             <span style={{ fontWeight: 600, fontSize: 12.5, color: "#7a5e1f" }}>Your move — send the {sendWhat}</span>
             <button
               type="button"
+              className="qcta-pink"
               onClick={() => onMarkSent?.()}
               style={{ alignSelf: "flex-start", fontFamily: FONT_SERIF, fontSize: 13, fontWeight: 700, color: "#7c3a2a", background: "#f5e2da", border: "1px solid #e8c8bc", borderRadius: 10, padding: "8px 16px", cursor: "pointer" }}
             >

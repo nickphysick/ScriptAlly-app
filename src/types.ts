@@ -27,9 +27,11 @@ export interface User {
   // at signup (never IP), defaults to "GB" at read time via getHomeCountry(), editable in settings.
   // Drives the home-vs-foreign distinction on the agent database. Absent === not set (never null/"").
   homeCountry?: string;
-  // Queries-page theme (route-scoped). "cappuccino" (default) | "bold". Chosen in Settings →
-  // Preferences; the Queries shell reads it and applies .t-capp / .t-bold. Absent === Cappuccino.
-  queriesTheme?: "cappuccino" | "bold";
+  // App theme. "cappuccino" (default) | "bold" | "editorial". Chosen in Settings → Preferences or
+  // the rail-foot switcher (same field); the AppShell root applies .t-capp / .t-bold / .t-edn.
+  // Absent === Cappuccino. NOTE: prod firestore.rules still enum-restrict this to the first two —
+  // "editorial" persists only once the parked rules edit ships (see BUILD-REPORT.md).
+  queriesTheme?: "cappuccino" | "bold" | "editorial";
 }
 
 /**

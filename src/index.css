@@ -45,21 +45,46 @@
   font-size: 16px;
 }
 
-/* ── App themes. The class (.t-capp / .t-bold) is set on the AppShell root (was the SidebarShell
-   root pre-router), so these custom properties cascade to the shell chrome (rail, help FAB) and the
-   Queries page. Page INTERIORS other than Queries still hard-code their styling in this phase.
-   Every themeable rule in Queries.tsx / the shell reads var(--…). Cappuccino is the default.
-   Bold Pastille values are the dev-exact tokens — do not "improve" them. ── */
+/* ── App themes. The class (.t-capp / .t-bold / .t-edn) is set on the AppShell root, so these
+   custom properties cascade to the shell chrome (rail, help FAB) and the Queries page; the
+   dashboard consumes them from the consolidated-v37 rebuild onward. Every themeable rule reads
+   var(--…). Cappuccino is the default. Values are design-locked from
+   design-reference/dashboard-consolidated-v37.html — do not "improve" them.
+
+   Shared per-theme token vocabulary (all three themes define every one of these):
+     --bd/--bdw/--desk/--band/--pane/--card/--chromerad/--listbg   surfaces (pre-existing)
+     --hdr          header text (greeting + section/band titles)
+     --band-a/-b    section band gradient stops   --band-bd  band bottom rule
+     --band-meta/--band-strong                    band meta / strong text
+     --abtn-bg/--abtn-bd/--abtn-bdw/--abtn-ink/--abtn-hov   the ONE button treatment
+                    (all greeting CTAs + row actions + page CTAs — no primary/ghost split)
+     --navpill/--navtext                          rail active pill + text
+     --acc          theme accent (chip dot, pins, Editorial's graphite)                     ── */
 .t-capp {
   --bd: #d8cebf;   /* border colour — soft taupe */
   --bdw: 1px;      /* border width */
   --desk: #e8ddd0; /* working-area bg — warm */
-  --band: #f2ddd5; /* column-header band + active-nav pill — soft blush */
+  --band: #f2ddd5; /* soft blush (To-do band family — the urgency signal keeps pink) */
   --pane: #fffefb; /* reading-pane surface — white */
-  --card: #fffefb; /* card/container surface (per the mockup; matches --pane in Cappuccino) */
+  --card: #fffefb; /* card/container surface */
   --chromerad: 0px;   /* chrome corners (Queries-Hub bar, list panel) — square */
   --listbg: #ffffff;  /* query-list panel bg */
-  --navpill: #f2ddd5; /* rail active-nav pill (appshell-journey-mockup-v4) */
+  --hdr: #5d4037;         /* Mocha — replaces the green #2e3a2c family in chrome */
+  --band-a: #ece5d8;      /* Foam gradient start */
+  --band-b: #e5ddcd;      /* Foam gradient end */
+  --band-bd: rgba(112,94,70,0.25);
+  --band-meta: #705e46;
+  --band-strong: #4a4036;
+  --abtn-bg: #ffffff;
+  --abtn-bd: #ded3c2;
+  --abtn-bdw: 1px;
+  --abtn-ink: #5d4037;
+  --abtn-hov: #f4f2ef;    /* pre-computed ~4% toward black over white (no runtime color-mix) */
+  /* Mockup resolves the nav pill to the button surface (#ffffff) — white-on-white in the white
+     rail fails contrast, so the brief's pre-authorised fallback applies: foam pill, mocha text. */
+  --navpill: #f0e8db;
+  --navtext: #5d4037;
+  --acc: #7c3a2a;
 }
 .t-bold {
   --bd: #1d1712;   /* ink */
@@ -69,11 +94,97 @@
   --pane: #ece2e0; /* blush */
   --card: #fffefb; /* card/container surface — WHITE; diverges from the blush --pane in Bold */
   --chromerad: 14px;  /* rounded */
-  --listbg: #ffffff;  /* query-list panel is WHITE in both themes — only corners/border differ */
-  --navpill: #eec9c3; /* rail active-nav pill (appshell-journey-mockup-v4) */
+  --listbg: #ffffff;
+  --hdr: #000000;         /* black headers */
+  --band-a: #f4c7c2;      /* bands stay vivid pink (flat — both stops equal) */
+  --band-b: #f4c7c2;
+  --band-bd: #1d1712;     /* 1.5px ink rule (width comes from --bdw) */
+  --band-meta: #7a4438;
+  --band-strong: #1d1712;
+  --abtn-bg: #fffefb;
+  --abtn-bd: #1d1712;
+  --abtn-bdw: 1.5px;
+  --abtn-ink: #1d1712;
+  --abtn-hov: #f5e9e7;
+  --navpill: #eec9c3;     /* unchanged */
+  --navtext: #1d1712;
+  --acc: #1d1712;
+}
+/* Editorial — the consolidated-v37 "Graphite · Soft · Tinted" system (t-edn + es4 + eb2 locked).
+   Neutral whites/greys; graphite #44484d is the single accent. Containers are "Soft": 16px
+   radius, borderless, layered shadow (.sa-soft below). All tints pre-computed as static hexes. */
+.t-edn {
+  --bd: #e3e2e0;   /* hairline */
+  --bdw: 1px;
+  --desk: #f4f4f3;
+  --band: #f4f4f5; /* graphite 6% tint on white */
+  --pane: #ffffff;
+  --card: #ffffff;
+  --chromerad: 16px;
+  --listbg: #ffffff;
+  --hdr: #000000;         /* headers black; body ink stays #1a1a1a */
+  --band-a: #f4f4f5;
+  --band-b: #f4f4f5;
+  --band-bd: transparent; /* no band bottom border in Editorial */
+  --band-meta: #8b8b8b;
+  --band-strong: #1a1a1a;
+  --abtn-bg: #eeeff0;     /* Tinted (9%) */
+  --abtn-bd: transparent; /* no border */
+  --abtn-bdw: 1px;
+  --abtn-ink: #181a1d;    /* 85% toward black graphite */
+  --abtn-hov: #e4e5e7;    /* 16% tint */
+  --navpill: #ececee;     /* 10% tint */
+  --navtext: #44484d;
+  --acc: #44484d;
+}
+/* Editorial "Soft" container: 16px radius, no border, layered shadow. Defined here so the
+   dashboard rebuild + any Editorial container can share one class (theme-scoped). */
+.t-edn .sa-soft {
+  border: none !important;
+  border-radius: 16px !important;
+  box-shadow: 0 1px 2px rgba(20,20,20,0.05), 0 12px 32px rgba(20,20,20,0.07) !important;
 }
 /* A gentle fade when the theme swaps (≤150ms). */
-.t-capp, .t-bold { transition: background-color .15s ease; }
+.t-capp, .t-bold, .t-edn { transition: background-color .15s ease; }
+
+/* ── The ONE button treatment per theme (v37 lock: no primary/ghost split). `.sa-btn` is the
+   class new/rebuilt buttons use; `.qcta-pink` retokens the EXISTING soft-pink CTA sites (the
+   Queries hub "Log a new query" pair, the timeline "Mark sent") onto the same tokens.
+   !important because the underlying styles are inline (the critical-styles-inline convention).
+   The old pink hard shadow is retired in every theme (v37 buttons are flat) — qcta-raised
+   remains as the neutraliser on the sites that carried it. ── */
+.sa-btn,
+.qcta-pink {
+  background: var(--abtn-bg, #f5e2da) !important;
+  border-color: var(--abtn-bd, #e8c8bc) !important;
+  border-width: var(--abtn-bdw, 1px) !important;
+  color: var(--abtn-ink, #7c3a2a) !important;
+}
+.sa-btn:hover,
+.qcta-pink:hover { background: var(--abtn-hov, #efd5ca) !important; }
+.qcta-raised { box-shadow: none !important; }
+
+/* ── Editorial-scoped CONTENT deviations (graphite system). StatusDot is never restyled by
+   theme CSS — its palette is a component-level theme token from the amended lock. ── */
+/* List monograms: pink gradient → neutral. */
+.t-edn .qmono {
+  background: #f1f1ef !important;
+  border-color: #e3e2e0 !important;
+  color: #555555 !important;
+}
+/* Caveat handwritten notes read as quiet serif in Editorial. */
+.t-edn .qcaveat {
+  font-family: "Playfair Display", Georgia, serif !important;
+  font-style: italic !important;
+  font-size: 13.5px !important;
+  color: #5a5650 !important;
+}
+/* Chips/badges/counters → neutral. (Pro pills stay slate — Pro gating is a locked visual.) */
+.t-edn .qchip {
+  background: #f1f1ef !important;
+  border-color: #e3e2e0 !important;
+  color: #555555 !important;
+}
 
 /* ── AppShell stage pages — route content enters with a 180ms ease-out fade + 4px rise (no exit
    animation). Pages stay MOUNTED across navigation (display toggling), so the animation restarts
