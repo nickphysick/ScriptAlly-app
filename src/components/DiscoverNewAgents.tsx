@@ -48,8 +48,10 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
   const selected = pickable.find(m => m.id === selectedId) || pickable[0];
 
   return (
-    // Dashboard ground (kraftGlow over kraft). 108px = 64px nav + 44px agents sub-nav.
-    <div style={{ background: pageGround, color: bodyInk, minHeight: "calc(100vh - 108px)" }}>
+    // Dashboard ground (kraftGlow over kraft). Fills the remaining stage height under the 44px
+    // agents sub-nav (a flex child of the AppShell agents slot); grows + stage-scrolls when taller.
+    // Was minHeight calc(100vh - 108px) against the retired 64px top bar.
+    <div style={{ background: pageGround, color: bodyInk, flex: "1 0 auto" }}>
       <div style={{ maxWidth: 820, margin: "0 auto", padding: "28px 24px 44px" }}>
         {/* Page header */}
         <header style={{ marginBottom: 22 }}>

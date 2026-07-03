@@ -37,8 +37,11 @@ interface NavSearchProps {
    * "desktop" (default) keeps the original 200px pill, hidden below sm.
    * "mobile" is the slim-bar presentation: full-width pill, always visible, autofocused — used by
    * the top bar's mobile search toggle. The default preserves the desktop instance exactly.
+   * "rail" is the AppShell sidebar presentation: full-width pill (the rail is ~216px), never
+   * autofocused, no breakpoint hiding (the rail itself is desktop-only). Behaviour is otherwise
+   * identical to desktop — same typeahead, same result navigation.
    */
-  variant?: "desktop" | "mobile";
+  variant?: "desktop" | "mobile" | "rail";
 }
 
 const PINK = "#f8e7dc";
@@ -61,6 +64,8 @@ type Flat =
 
 export const NavSearch: React.FC<NavSearchProps> = ({ searchQuery, setSearchQuery, onNavigate, variant = "desktop" }) => {
   const isMobile = variant === "mobile";
+  const isRail = variant === "rail";
+  const fullWidth = isMobile || isRail;
   const { agents, queries, manuscripts } = useScriptAllyDb();
   const [open, setOpen] = useState(false);
   const [highlight, setHighlight] = useState(0);
@@ -169,11 +174,11 @@ export const NavSearch: React.FC<NavSearchProps> = ({ searchQuery, setSearchQuer
   let idx = -1; // running index across the flattened list (agents then queries)
 
   return (
-    <div ref={wrapRef} className={isMobile ? "relative w-full" : "relative max-sm:hidden"} style={{ flexShrink: 0 }}>
+    <div ref={wrapRef} className={fullWidth ? "relative w-full" : "relative max-sm:hidden"} style={{ flexShrink: 0 }}>
       {/* Search pill (parchment, as before) */}
       <div
         className="flex items-center gap-2"
-        style={{ background: "#ffffff", border: "0.5px solid #e0d5c8", borderRadius: 9, padding: "8px 12px", width: isMobile ? "100%" : 240 }}
+        style={{ background: "#ffffff", border: "0.5px solid #e0d5c8", borderRadius: 9, padding: "8px 12px", width: fullWidth ? "100%" : 240 }}
       >
         <Search className="w-[13px] h-[13px] shrink-0" style={{ color: labelColor }} />
         <input

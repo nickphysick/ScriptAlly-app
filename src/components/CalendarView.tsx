@@ -553,7 +553,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onNavigate, isDashbo
   const dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
   return (
-    <div className={isDashboard ? "w-full bg-white transition-all duration-300" : "min-h-[calc(100vh-64px)] w-full bg-[#F5F0EA] p-[20px] px-[24px]"}>
+    // Non-dashboard branch fills the viewport (was calc(100vh-64px) against the retired top bar);
+    // it renders inside the Dashboard's full-calendar overlay, which provides the scrolling.
+    <div className={isDashboard ? "w-full bg-white transition-all duration-300" : "min-h-screen w-full bg-[#F5F0EA] p-[20px] px-[24px]"}>
       <div className={isDashboard ? "flex flex-col gap-3" : "max-w-7xl mx-auto flex flex-col gap-3"}>
         
         {/* ==================== TOOLBAR ==================== */}

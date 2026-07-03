@@ -330,9 +330,11 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ searchQuery, onN
   };
 
   return (
+    // Locked to the AppShell manuscripts slot (height 100% of the visible stage) — was
+    // calc(100vh - 64px) against the retired top bar.
     <div
       className="flex-grow bg-[#dce0d9] min-h-0 overflow-hidden w-full flex flex-row p-[8px] gap-[8px]"
-      style={{ minHeight: "calc(100vh - 64px)", maxHeight: "calc(100vh - 64px)" }}
+      style={{ minHeight: "100%", maxHeight: "100%" }}
     >
       {/* ---------------- panel 1: left sidebar controls ---------------- */}
       <div

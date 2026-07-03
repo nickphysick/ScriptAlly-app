@@ -22,9 +22,10 @@
   font-size: 16px;
 }
 
-/* ── Queries-page themes — ROUTE-SCOPED. The class (.t-capp / .t-bold) is set on the SidebarShell
-   root only, so these custom properties cascade to the Queries chrome + rail and NOWHERE else.
-   Every themeable rule in Queries.tsx / SidebarNav.tsx reads var(--…). Cappuccino is the default.
+/* ── App themes. The class (.t-capp / .t-bold) is set on the AppShell root (was the SidebarShell
+   root pre-router), so these custom properties cascade to the shell chrome (rail, help FAB) and the
+   Queries page. Page INTERIORS other than Queries still hard-code their styling in this phase.
+   Every themeable rule in Queries.tsx / the shell reads var(--…). Cappuccino is the default.
    Bold Pastille values are the dev-exact tokens — do not "improve" them. ── */
 .t-capp {
   --bd: #d8cebf;   /* border colour — soft taupe */
@@ -34,6 +35,7 @@
   --pane: #fffefb; /* reading-pane surface — white */
   --chromerad: 0px;   /* chrome corners (Queries-Hub bar, list panel) — square */
   --listbg: #ffffff;  /* query-list panel bg */
+  --navpill: #f2ddd5; /* rail active-nav pill (appshell-journey-mockup-v4) */
 }
 .t-bold {
   --bd: #1d1712;   /* ink */
@@ -43,9 +45,22 @@
   --pane: #ece2e0; /* blush */
   --chromerad: 14px;  /* rounded */
   --listbg: #ffffff;  /* query-list panel is WHITE in both themes — only corners/border differ */
+  --navpill: #eec9c3; /* rail active-nav pill (appshell-journey-mockup-v4) */
 }
 /* A gentle fade when the theme swaps (≤150ms). */
 .t-capp, .t-bold { transition: background-color .15s ease; }
+
+/* ── AppShell stage pages — route content enters with a 180ms ease-out fade + 4px rise (no exit
+   animation). Pages stay MOUNTED across navigation (display toggling), so the animation restarts
+   naturally on each re-show (display:none terminates it). Spec: appshell-journey-mockup-v4. ── */
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+.stage-page-on { animation: pageIn 180ms ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  .stage-page-on { animation: none; }
+}
 /* Cappuccino-only Form 11 inset frame on the Queries Hub bar — square, burgundy. SCOPED under
    .t-capp so it never leaks into Bold Pastille (a mockup bug once did). */
 .t-capp .qhbar::after {

@@ -4,12 +4,14 @@
  */
 
 import React, { useState, useEffect } from "react";
+import { BrowserRouter, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { DbProvider, useScriptAllyDb } from "./lib/db";
 import { BrandProvider } from "./lib/brand";
 import { Auth } from "./components/Auth";
-import { AppShell } from "./components/AppShell";
+import { AppShell, StagePage, AgentsSubNav } from "./components/shell/AppShell";
+// SidebarShell + QueriesRail are retired from the live path (the global AppShell absorbed the
+// Queries rail) but still power the dev-only #/shell-lab review surface.
 import { SidebarShell } from "./components/shell/SidebarShell";
-import { ShellRailFoot } from "./components/shell/ShellChrome";
 import { QueriesRail } from "./components/shell/QueriesRail";
 import { EditAgentHost } from "./components/EditAgentHost";
 import { EditQueryHost } from "./components/EditQueryHost";
@@ -286,12 +288,55 @@ const useHash = () => {
   return hash;
 };
 
+/**
+ * Maps a legacy (tab, subPageName) navigation call onto a router path. This is the write side of
+ * the navigate bridge — existing onNavigate call sites keep their old vocabulary; the read side
+ * (path → props) lives in AppContent. Focus-form interceptions never reach this function.
+ */
+function pathFor(tab: string, subPageName?: string): string {
+  switch (tab) {
+    case "dashboard": return "/dashboard";
+    case "queries": {
+      // The orphaned Landing keeps its guarded niche behind a param; named database aliases land
+      // on the desk; any OTHER subpage value is a query id (NavSearch deep-selection) — carried
+      // through ?q= exactly as Queries' "unrecognised subpage = id" contract expects.
+      if (subPageName === "Landing") return "/queries?view=landing";
+      const dbAliases = ["Query database", "Queries database", "All queries", "Hub"];
+      if (subPageName && !dbAliases.includes(subPageName)) return `/queries?q=${encodeURIComponent(subPageName)}`;
+      return "/queries";
+    }
+    case "agents": return subPageName === "Discover new agents" ? "/agents/discover" : "/agents";
+    case "manuscripts": return subPageName === "Submission packages" ? "/manuscripts/packages" : "/manuscripts";
+    // Two distinct pricing surfaces, exactly as before the router: the "pricing" tab renders
+    // Pricing; "plans" (user-menu Plans/Upgrade, MaterialsField Pro gate) renders the
+    // presentational PlansPage. Consolidating them is a separate decision — not this commit.
+    case "pricing": return "/pricing";
+    case "plans": return "/plans";
+    case "import": return "/import";
+    case "help": return "/help";
+    case "account": return "/account";
+    case "email-import-dev": return "/email-import-dev"; // TEMP dev tab — unreferenced, kept guarded
+    default: return "/dashboard";
+  }
+}
+
+const KNOWN_PATHS = new Set([
+  "/dashboard", "/queries", "/agents", "/agents/discover",
+  "/manuscripts", "/manuscripts/packages", "/pricing", "/plans", "/help", "/account", "/import",
+  "/email-import-dev",
+]);
+
 function AppContent() {
   const { currentUser, authReady, updateUserProfile } = useScriptAllyDb();
 
-  // Page routing context state
-  const [activeTab, setActiveTab] = useState<string>("dashboard");
-  const [activeSubPage, setActiveSubPage] = useState<string>("Dashboard");
+  // URL routing — replaces the old activeTab/activeSubPage state machine. The path is the single
+  // source of truth; pages stay mounted across navigation (StagePage display toggling).
+  const location = useLocation();
+  const navigate = useNavigate();
+  const path = location.pathname.replace(/\/+$/, "") || "/";
+  const routeKey = path.split("/")[1] || "";
+  const params = new URLSearchParams(location.search);
+
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isBrandStudioOpen, setIsBrandStudioOpen] = useState<boolean>(false);
   const [successToast, setSuccessToast] = useState<string | null>(null);
@@ -308,6 +353,8 @@ function AppContent() {
     }
   }, [successToast]);
 
+  // The navigate bridge — same signature and interception contract as the old state setter, so no
+  // onNavigate call site needed touching. Interceptions open overlays and NEVER navigate.
   const handleNavigate = (tab: string, subPageName?: string) => {
     if (subPageName === "Log a query" || subPageName === "Send a query") {
       setIsLogQueryOpen(true);
@@ -321,19 +368,8 @@ function AppContent() {
       setIsAddManuscriptOpen(true);
       return;
     }
-    setActiveTab(tab);
-    if (subPageName) {
-      setActiveSubPage(subPageName);
-    } else {
-      // Set sensible defaults for each tab
-      if (tab === "dashboard") setActiveSubPage("Dashboard");
-      if (tab === "queries") setActiveSubPage("Query database");
-      if (tab === "agents") setActiveSubPage("Agents database");
-      if (tab === "manuscripts") setActiveSubPage("All manuscripts");
-      if (tab === "pricing") setActiveSubPage("Pricing plans");
-      if (tab === "import") setActiveSubPage("Migration desk");
-    }
-    // Clear quick filters on direct pivots
+    navigate(pathFor(tab, subPageName));
+    // Clear quick filters on direct pivots (matches the old behaviour — never on interceptions)
     setSearchQuery("");
   };
 
@@ -447,94 +483,124 @@ function AppContent() {
     );
   }
 
-  // The Queries "desk" is reached straight from the nav now (the old "What would you like to do?"
-  // hub is gone — its three choices moved into the Queries nav dropdown). It renders on the new
-  // left-sidebar SidebarShell with the global top <Nav> suppressed; every other tab (and the
-  // orphaned Landing) still render under the legacy top-bar AppShell. A stale "Hub" subpage (old
-  // bookmark) falls through to the desk.
-  const isQueriesDesk = activeTab === "queries" && activeSubPage !== "Landing";
+  // Any unknown path (including "/") lands on the dashboard. All the early returns above (dev
+  // labs, auth, onboarding) run first, so a logged-out deep link keeps its URL until sign-in.
+  if (!KNOWN_PATHS.has(path)) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  // Queries subpage-equivalent, read from the URL: ?view=landing keeps the orphaned Landing
+  // guard; ?q=<id> is deep-selection (Queries treats an unrecognised subpage value as a query id,
+  // exactly as it did with the old activeSubPage).
+  const queriesSub = params.get("view") === "landing" ? "Landing" : (params.get("q") ?? "Query database");
+  const agentsDiscover = path === "/agents/discover";
+  const manuscriptsPackages = path === "/manuscripts/packages";
+  const showFooter = routeKey !== "queries" && !manuscriptsPackages;
 
   return (
-    <div className="min-h-screen bg-[#F5F0EA] text-[#3a1c14] selection:bg-[#7c3a2a]/20 selection:text-[#3a1c14] selection:font-bold">
-      {/* Shared app shell: full-width top bar + left nav rail; routed pages render inside.
-          EditQueryHost + EditAgentHost mount the single Edit Query / Edit Agent drawers as app-level
-          overlays (opened via useOpenEditQuery / useOpenEditAgent — no route change, scroll preserved).
-          EditQueryHost wraps EditAgentHost so an agent-drawer query row can open the query drawer. */}
+    <div className="text-[#3a1c14] selection:bg-[#7c3a2a]/20 selection:text-[#3a1c14] selection:font-bold">
+      {/* Global AppShell: persistent left rail + the stage (the app's scroll container); pages
+          render inside as persistent StagePage slots. EditQueryHost + EditAgentHost mount the
+          single Edit Query / Edit Agent drawers as app-level overlays (opened via
+          useOpenEditQuery / useOpenEditAgent — no route change, scroll preserved). */}
       <EditQueryHost onSavedToast={(msg) => setSuccessToast(msg)}>
       <EditAgentHost
         onSavedToast={(msg) => setSuccessToast(msg)}
       >
-      {isQueriesDesk ? (
-        <SidebarShell
-          activeTab={activeTab}
-          onNavigate={handleNavigate}
-          breadcrumb={["Queries", "Queries Hub"]}
-          theme={currentUser?.queriesTheme === "bold" ? "bold" : "cappuccino"}
-          account={<ShellRailFoot onNavigate={handleNavigate} />}
-        >
-          <Queries searchQuery={searchQuery} onNavigate={handleNavigate} activeSubPage={activeSubPage} inShell />
-        </SidebarShell>
-      ) : (
       <AppShell
-        activeTab={activeTab}
-        activeSubPage={activeSubPage}
+        routeKey={routeKey}
         onNavigate={handleNavigate}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
+        theme={currentUser?.queriesTheme === "bold" ? "bold" : "cappuccino"}
       >
-        {activeTab === "dashboard" && (
-          <Dashboard 
-            onNavigate={handleNavigate} 
-            searchQuery={searchQuery} 
+        {/* The four main pages stay MOUNTED across navigation (display toggling) so page-local
+            state — Queries filters/sort/selection above all — survives leaving and returning. */}
+        <StagePage active={routeKey === "dashboard"}>
+          <Dashboard
+            onNavigate={handleNavigate}
+            searchQuery={searchQuery}
           />
-        )}
-        {activeTab === "queries" && (
-          // Only the orphaned "Landing" still renders under AppShell; every live queries subpage is
-          // the desk (isQueriesDesk above), so it goes through SidebarShell, not here.
-          activeSubPage === "Landing" ? (
+        </StagePage>
+
+        {/* The Queries desk owns its internal scroll (no page scrollbar) — its slot is the same
+            box the retired SidebarShell content column gave it: full height, clipped, white. */}
+        <StagePage active={routeKey === "queries"} layout="fill" clip background="#ffffff">
+          {queriesSub === "Landing" ? (
             <QueriesLanding onNavigate={handleNavigate} />
           ) : (
-            <Queries searchQuery={searchQuery} onNavigate={handleNavigate} activeSubPage={activeSubPage} />
-          )
-        )}
-        {activeTab === "agents" && (
-          activeSubPage === "Discover new agents" ? (
+            <Queries searchQuery={searchQuery} onNavigate={handleNavigate} activeSubPage={queriesSub} inShell />
+          )}
+        </StagePage>
+
+        <StagePage active={routeKey === "agents"} layout="fillColumn">
+          <AgentsSubNav discover={agentsDiscover} onNavigate={handleNavigate} />
+          {agentsDiscover ? (
             <DiscoverNewAgents onNavigate={handleNavigate} />
           ) : (
             <Agents searchQuery={searchQuery} onNavigate={handleNavigate} />
-          )
-        )}
-        {activeTab === "manuscripts" && (
-          activeSubPage === "Submission packages" ? (
+          )}
+        </StagePage>
+
+        <StagePage active={routeKey === "manuscripts"} layout="fill">
+          {manuscriptsPackages ? (
             <SubmissionPackages />
           ) : (
-            <AllManuscripts 
-              searchQuery={searchQuery} 
+            <AllManuscripts
+              searchQuery={searchQuery}
               onNavigate={handleNavigate}
             />
-          )
+          )}
+        </StagePage>
+
+        {/* Secondary pages mount on demand (same lifecycle as the old conditional render). */}
+        {routeKey === "pricing" && (
+          <StagePage active><Pricing /></StagePage>
         )}
-        {activeTab === "pricing" && (
-          <Pricing />
-        )}
-        {activeTab === "plans" && (
-          <PlansPage />
+        {routeKey === "plans" && (
+          <StagePage active><PlansPage /></StagePage>
         )}
         {/* TEMP (Prompt 2): email-import UI dev preview — relocate the entry button to Record-a-response next prompt, then delete this route. */}
-        {activeTab === "email-import-dev" && (
-          <EmailImportDevPage onNavigate={handleNavigate} onSuccessToast={(msg) => setSuccessToast(msg)} />
+        {routeKey === "email-import-dev" && (
+          <StagePage active><EmailImportDevPage onNavigate={handleNavigate} onSuccessToast={(msg) => setSuccessToast(msg)} /></StagePage>
         )}
-        {activeTab === "import" && (
-          <ImportCsv onNavigate={handleNavigate} />
+        {routeKey === "import" && (
+          <StagePage active><ImportCsv onNavigate={handleNavigate} /></StagePage>
         )}
-        {activeTab === "help" && (
-          <HelpCentre />
+        {routeKey === "help" && (
+          <StagePage active><HelpCentre /></StagePage>
         )}
-        {activeTab === "account" && (
-          <AccountSettings onNavigate={handleNavigate} />
+        {routeKey === "account" && (
+          <StagePage active><AccountSettings onNavigate={handleNavigate} /></StagePage>
         )}
+
+        {/* Footer copyright stamp block — in stage flow; hidden on the Queries workspace and the
+            Package Builder shell (same visibility rule as before the router). */}
+        {showFooter && <footer className="bg-[#3a1c14] text-stone-400 py-10 border-t border-[#7c3a2a]/20">
+          <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-6 text-xs animate-fade-in">
+            <div className="flex flex-col md:flex-row items-center gap-4">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded bg-[#7c3a2a] flex items-center justify-center text-white font-serif font-bold text-xs shadow">
+                  S
+                </div>
+                <span className="font-serif font-bold text-[#F8F5F0]">ScriptAlly</span>
+                <span>&middot; The Literary Querying Companion</span>
+              </div>
+              <div className="h-4 w-[1px] bg-stone-700 hidden md:block" />
+              <button
+                onClick={() => handleNavigate("help")}
+                className="text-[#dbbdb5] hover:text-[#F8F5F0] transition-colors cursor-pointer font-medium underline decoration-[#dbbdb5]/30 hover:decoration-[#F8F5F0] underline-offset-4"
+                id="footer-help-centre-btn"
+              >
+                Help Centre
+              </button>
+            </div>
+            <p className="font-light text-center md:text-right">
+              Crafted for fiction authors querying literary agents. Keep writing, keep pitching. &copy; {new Date().getFullYear()}.
+            </p>
+          </div>
+        </footer>}
       </AppShell>
-      )}
       </EditAgentHost>
       </EditQueryHost>
 
@@ -576,11 +642,13 @@ function AppContent() {
       </AnimatePresence>
 
       {/* Floating Theme Builder — DEV-only builder tool (localStorage theme tweaking). Hidden in
-          the production build so normal users can't reach it; use `npm run dev` to access it. */}
+          the production build so normal users can't reach it; use `npm run dev` to access it.
+          Offset upward (bottom 72) so it clears the global help "?" FAB now parked bottom-right. */}
       {import.meta.env.DEV && (
         <button
           onClick={() => setIsBrandStudioOpen(true)}
-          className="fixed bottom-6 right-6 z-45 w-12 h-12 rounded-full bg-[#7c3a2a] text-white hover:scale-110 active:scale-95 shadow-[0_4px_16px_rgba(124,58,42,0.3)] hover:shadow-[0_8px_24px_rgba(124,58,42,0.45)] transition-all flex items-center justify-center group"
+          className="fixed right-6 z-45 w-12 h-12 rounded-full bg-[#7c3a2a] text-white hover:scale-110 active:scale-95 shadow-[0_4px_16px_rgba(124,58,42,0.3)] hover:shadow-[0_8px_24px_rgba(124,58,42,0.45)] transition-all flex items-center justify-center group"
+          style={{ bottom: 72 }}
           title="Builder Branding Room"
           id="builder-brand-floater"
         >
@@ -606,31 +674,6 @@ function AppContent() {
         </div>
       )}
 
-      {/* Footer copyright stamp block — hidden on the Queries workspace and the Package Builder shell */}
-      {activeTab !== "queries" && !(activeTab === "manuscripts" && activeSubPage === "Submission packages") && <footer className="bg-[#3a1c14] text-stone-400 py-10 border-t border-[#7c3a2a]/20">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-6 text-xs animate-fade-in">
-          <div className="flex flex-col md:flex-row items-center gap-4">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded bg-[#7c3a2a] flex items-center justify-center text-white font-serif font-bold text-xs shadow">
-                S
-              </div>
-              <span className="font-serif font-bold text-[#F8F5F0]">ScriptAlly</span>
-              <span>&middot; The Literary Querying Companion</span>
-            </div>
-            <div className="h-4 w-[1px] bg-stone-700 hidden md:block" />
-            <button 
-              onClick={() => handleNavigate("help")}
-              className="text-[#dbbdb5] hover:text-[#F8F5F0] transition-colors cursor-pointer font-medium underline decoration-[#dbbdb5]/30 hover:decoration-[#F8F5F0] underline-offset-4"
-              id="footer-help-centre-btn"
-            >
-              Help Centre
-            </button>
-          </div>
-          <p className="font-light text-center md:text-right">
-            Crafted for fiction authors querying literary agents. Keep writing, keep pitching. &copy; {new Date().getFullYear()}.
-          </p>
-        </div>
-      </footer>}
     </div>
   );
 }
@@ -640,7 +683,12 @@ export default function App() {
     <ErrorBoundary>
       <DbProvider>
         <BrandProvider>
-          <AppContent />
+          {/* BrowserRouter carries the URL; the dev-lab hashes (#/shell-lab etc.) and the pre-auth
+              #/login / #/signin / #/plans deep links read window.location.hash directly and coexist
+              with it (a hash is never part of the pathname). */}
+          <BrowserRouter>
+            <AppContent />
+          </BrowserRouter>
         </BrandProvider>
       </DbProvider>
     </ErrorBoundary>

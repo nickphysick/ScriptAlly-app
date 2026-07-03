@@ -1482,7 +1482,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   return (
     <div
       className="w-full flex flex-col overflow-hidden text-[#3a1c14] font-sans relative queries-container-theme"
-      style={{ height: inShell ? "100%" : "calc(100vh - 45px)", backgroundColor: "#faf5ee" }}
+      style={{ height: "100%", backgroundColor: "#faf5ee" }}
     >
       <style>{`
         .custom-query-list-scrollbar::-webkit-scrollbar {

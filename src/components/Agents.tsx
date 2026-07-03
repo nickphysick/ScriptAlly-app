@@ -355,9 +355,12 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate }) => {
   };
 
   return (
+    // Sized by the AppShell agents slot (a 100%-height flex column under the 44px sub-nav):
+    // flex-grow + min-h-0 fill exactly the remaining stage height — was calc(100vh - 108px)
+    // against the retired 64px top bar.
     <div
       className="flex-grow min-h-0 overflow-hidden w-full flex flex-row p-[8px] gap-[8px]"
-      style={{ background: CC.bg, minHeight: "calc(100vh - 108px)", maxHeight: "calc(100vh - 108px)" }}
+      style={{ background: CC.bg }}
     >
       {/* ---------------- panel 1: left sidebar controls ---------------- */}
       <div

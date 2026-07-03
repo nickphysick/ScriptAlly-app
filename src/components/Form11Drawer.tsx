@@ -29,6 +29,7 @@ import React, {
 } from "react";
 import Lottie from "lottie-react";
 import editPencil from "../assets/edit-pencil-animation.json";
+import { lockStageScroll } from "../lib/stageScroll";
 
 export const F11 = {
   parchment: "#fdfaf5",
@@ -276,13 +277,18 @@ export const Form11Drawer = forwardRef<Form11DrawerHandle, Form11DrawerProps>(fu
   }, [isOpen, suppressEsc]);
 
   // Lock the background at its current scroll position while open; restore (no jump) on close.
+  // Since the AppShell migration the page scrolls inside the stage element, not the window, so the
+  // stage is locked too (releaseStage always restores to "", so a close after a route change can
+  // never leave the stage wedged). The body lock is kept belt-and-braces for window-scroll edges.
   useEffect(() => {
     if (!isOpen || !lockScroll) return;
     const scrollY = window.scrollY;
+    const releaseStage = lockStageScroll();
     const b = document.body;
     const prev = { position: b.style.position, top: b.style.top, left: b.style.left, right: b.style.right, width: b.style.width };
     b.style.position = "fixed"; b.style.top = `-${scrollY}px`; b.style.left = "0"; b.style.right = "0"; b.style.width = "100%";
     return () => {
+      releaseStage();
       b.style.position = prev.position; b.style.top = prev.top; b.style.left = prev.left; b.style.right = prev.right; b.style.width = prev.width;
       window.scrollTo(0, scrollY);
     };
@@ -301,7 +307,9 @@ export const Form11Drawer = forwardRef<Form11DrawerHandle, Form11DrawerProps>(fu
             <span style={{ writingMode: "vertical-rl", transform: "rotate(180deg)", fontFamily: F11_MONO, fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: "#a89a8a", fontWeight: 500 }}>{tabLabel}</span>
           </div>
 
-          <div style={{ width, maxWidth: "calc(100vw - 60px)", maxHeight: "calc(100vh - 64px)", background: F11.parchment, padding: 7, borderRadius: 14, boxShadow: "0 22px 60px rgba(58,28,20,0.28)", display: "flex" }}>
+          {/* maxHeight leaves a small symmetric breathing gap top+bottom (was calc(100vh - 64px)
+              to clear the retired top bar; the drawer overlays the full viewport now). */}
+          <div style={{ width, maxWidth: "calc(100vw - 60px)", maxHeight: "calc(100vh - 32px)", background: F11.parchment, padding: 7, borderRadius: 14, boxShadow: "0 22px 60px rgba(58,28,20,0.28)", display: "flex" }}>
             <div style={{ flex: 1, border: `1px solid ${F11.burgundy}`, borderRadius: 10, overflow: "hidden", display: "flex", flexDirection: "column", minWidth: 0, position: "relative" }}>
               {header}
               <div

@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { useScriptAllyDb } from "../lib/db";
 import { UserPlan, QueryStatus, ManuscriptStatus, ActivityType, Query, Task, Manuscript, Agent, Note } from "../types";
 import { STATUS_ORDER } from "../lib/statusOrder";
+import { lockStageScroll } from "../lib/stageScroll";
 import { manuscriptGenres } from "../lib/manuscripts";
 import { agentBuckets } from "../lib/lifecycle";
 import { 
@@ -704,11 +705,14 @@ export const Dashboard: React.FC<{
       }
     };
     window.addEventListener("keydown", handleKeyDown);
+    // The page scrolls inside the AppShell stage now — lock it alongside the body (belt-and-braces).
+    const releaseStage = lockStageScroll();
     const originalStyle = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    
+
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
+      releaseStage();
       document.body.style.overflow = originalStyle;
     };
   }, [isTasksPanelOpen]);
@@ -1468,17 +1472,19 @@ export const Dashboard: React.FC<{
         style={{ position: "fixed", inset: 0, opacity: 0.25, pointerEvents: "none", zIndex: 0, backgroundImage: PAGE_GRAIN }}
       />
       
-      {/* Developer-only floating layout toggle */}
+      {/* Developer-only floating layout toggle. Left offset lives in the classes (not inline) so
+          it clears the AppShell rail's account chip on desktop (rail is 216px; 232 = rail + 16)
+          while keeping the old 16px on mobile, where the rail is hidden. Position only. */}
       <button
         onClick={() => {
           const next = !isMagazineLayout;
           setIsMagazineLayout(next);
           localStorage.setItem("scriptally_is_magazine_layout", String(next));
         }}
+        className="left-4 md:left-[232px] hover:opacity-100 transition-opacity select-none"
         style={{
           position: 'fixed',
           bottom: '16px',
-          left: '16px',
           zIndex: 9999,
           background: '#ffffff',
           color: '#6a5a50',
@@ -1492,7 +1498,6 @@ export const Dashboard: React.FC<{
           opacity: 0.75,
           boxShadow: '0 1px 3px rgba(58,28,20,0.08)'
         }}
-        className="hover:opacity-100 transition-opacity select-none"
       >
         Switch layout
       </button>

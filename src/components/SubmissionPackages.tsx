@@ -1535,9 +1535,11 @@ export const SubmissionPackages: React.FC = () => {
   return (
     <div className="sp-root font-sans" style={{ color: bodyInk }}>
       <style>{`
-        /* Pattern A shell: full-width nav above; then a full-width title strip; then a viewport-locked
-           row — the materials rail + the content column. Only .sp-scroll scrolls (rail scrolls if long). */
-        .sp-root { display: flex; flex-direction: column; height: calc(100vh - 64px); overflow: hidden; background: #ffffff; }
+        /* Pattern A shell: a full-width title strip over a viewport-locked row — the materials rail +
+           the content column. Only .sp-scroll scrolls (rail scrolls if long). Height comes from the
+           AppShell manuscripts slot (100% of the visible stage — was calc(100vh - 64px) against the
+           retired top bar). */
+        .sp-root { display: flex; flex-direction: column; height: 100%; overflow: hidden; background: #ffffff; }
         .sp-rowbelow { flex: 1; min-height: 0; display: flex; }
         .sp-mstuck:hover { background: #f5efe6 !important; }
         .sp-sumcard:hover { border-color: #c9a89e !important; box-shadow: 0 3px 12px rgba(58,28,20,0.07); }
@@ -1549,7 +1551,7 @@ export const SubmissionPackages: React.FC = () => {
         .sp-pinkpulse:hover { filter: brightness(1.07); transform: translateY(-1.5px) scale(1.02); box-shadow: 0 8px 20px rgba(124,58,42,0.25); }
         .sp-pinkpulse:active { transform: translateY(0) scale(0.99); }
         @media (max-width: 768px) {
-          .sp-root { height: auto; min-height: calc(100vh - 64px); overflow: visible; }
+          .sp-root { height: auto; min-height: 100%; overflow: visible; }
           .sp-rowbelow { flex-direction: column; }
           .sp-sidebar { width: 100% !important; border-right: none !important; border-bottom: 1px solid rgba(124,58,42,0.1) !important; }
           .sp-main { height: auto !important; }
@@ -1602,8 +1604,8 @@ export const SubmissionPackages: React.FC = () => {
 
       {/* Use the page width (edges aligned with the nav's px-6 gutter), capped at 1680 + centred so
           ultra-wide monitors never stretch the layout to an awkward width. */}
-      {/* Viewport-locked shell (full height − the 64px top nav on desktop): a full-height sidebar rail +
-          a main column whose content scrolls. Nav / sidebar / title strip / surround are all #fdfaf5;
+      {/* Viewport-locked shell (100% of the AppShell stage): a full-height sidebar rail +
+          a main column whose content scrolls. Sidebar / title strip / surround are all #fdfaf5;
           the reading pane is the one distinct surface. All real modals portal to <body>, so the root's
           overflow:hidden never clips them. */}
       {!activeMs ? (

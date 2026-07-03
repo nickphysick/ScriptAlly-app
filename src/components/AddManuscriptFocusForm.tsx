@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
+import { getStageScrollEl } from "../lib/stageScroll";
 import { ManuscriptStatus, UserPlan } from "../types";
 import { PREDEFINED_GENRES, AGE_CATEGORIES, genreWordCountRange } from "../lib/manuscripts";
 import { 
@@ -69,7 +70,8 @@ export const AddManuscriptFocusForm: React.FC<AddManuscriptFocusFormProps> = ({
   // Reset form state on open
   useEffect(() => {
     if (isOpen) {
-      scrollPositionRef.current = window.scrollY;
+      // The page scrolls inside the AppShell stage now, not the window.
+      scrollPositionRef.current = getStageScrollEl()?.scrollTop ?? window.scrollY;
       setStep(1);
       setVisitedSteps({ 1: true });
       setTitle("");
@@ -325,9 +327,12 @@ export const AddManuscriptFocusForm: React.FC<AddManuscriptFocusFormProps> = ({
         onSuccessToast("Manuscript saved successfully");
         onClose();
         
-        // Restore scroll position after animation or modal closes
+        // Restore scroll position after animation or modal closes (stage-first — the AppShell
+        // stage is the scroll container; window is the pre-shell fallback)
         setTimeout(() => {
-          window.scrollTo({ top: scrollPositionRef.current, behavior: "instant" });
+          const stage = getStageScrollEl();
+          if (stage) stage.scrollTop = scrollPositionRef.current;
+          else window.scrollTo({ top: scrollPositionRef.current, behavior: "instant" });
         }, 50);
       } else {
         setFormError(result.error || "An database error occurred while saving.");
