@@ -6,12 +6,35 @@
   --font-serif: "Playfair Display", Georgia, serif;
   --font-mono: "JetBrains Mono", monospace;
 
-  --color-burgundy: #7c3a2a;
+  --color-burgundy: var(--burg); /* aliased to the canonical --burg (:root) — never duplicate the hex */
 
   /* Shared content gutter: the top nav and the page content rows both centre their inner
      contents at this max-width (with px-4 md:px-8) so they align. Caps width on very wide
      screens. Reference via max-w-[var(--content-max)] — never hardcode the width twice. */
   --content-max: 1440px;
+}
+
+/* ── Brand + type-tint tokens — canonical CSS custom properties, sampled verbatim from the approved
+   Package Builder mockup (design-refs/scriptally-package-builder-cappuccino.html :root). These are
+   THEME-INDEPENDENT brand constants (the per-theme surfaces live in .t-capp / .t-bold below). Every
+   component references var(--…) — no component may reference an undefined variable, and no hex is
+   duplicated in TSX. NOTE: designTokens.ts still holds JS copies of some of these (the pink trio,
+   burgundy) — a consolidation follow-up is flagged so the two sources can't drift. ── */
+:root {
+  --burg: #7c3a2a;    /* query-letter ink · primary brand (=== --color-burgundy) */
+  --burg-d: #632e22;  /* deep burgundy */
+  --ink: #241c15;     /* near-black — glyph strokes on tinted bands, headings */
+  --muted: #9a8c80;   /* muted mono captions */
+  --pink: #f5e2da;    /* soft-pink CTA fill */
+  --pink-b: #e8c8bc;  /* soft-pink CTA border */
+  --pink-h: #efd5ca;  /* soft-pink CTA hover */
+  --tl: #f6ddd3;      /* query-letter type tint */
+  --ts: #e7ece4;      /* synopsis type tint */
+  --tp: #f3e6cf;      /* sample-pages type tint */
+  --slate: #6A89A7;   /* Pro pill · slate accents */
+  --sage: #8a9e88;    /* sage accent */
+  --sage-d: #5a6e58;  /* synopsis ink · focus ring */
+  --gold: #a8842c;    /* sample-pages ink · star glint */
 }
 
 /* Top-nav search placeholder — Playfair Display 500 16px (typed text stays Source Sans Pro 12px,
@@ -33,6 +56,7 @@
   --desk: #e8ddd0; /* working-area bg — warm */
   --band: #f2ddd5; /* column-header band + active-nav pill — soft blush */
   --pane: #fffefb; /* reading-pane surface — white */
+  --card: #fffefb; /* card/container surface (per the mockup; matches --pane in Cappuccino) */
   --chromerad: 0px;   /* chrome corners (Queries-Hub bar, list panel) — square */
   --listbg: #ffffff;  /* query-list panel bg */
   --navpill: #f2ddd5; /* rail active-nav pill (appshell-journey-mockup-v4) */
@@ -43,6 +67,7 @@
   --desk: #c2cfda; /* muted blue */
   --band: #f4c7c2; /* vivid pink */
   --pane: #ece2e0; /* blush */
+  --card: #fffefb; /* card/container surface — WHITE; diverges from the blush --pane in Bold */
   --chromerad: 14px;  /* rounded */
   --listbg: #ffffff;  /* query-list panel is WHITE in both themes — only corners/border differ */
   --navpill: #eec9c3; /* rail active-nav pill (appshell-journey-mockup-v4) */
