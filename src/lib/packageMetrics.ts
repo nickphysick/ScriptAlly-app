@@ -167,6 +167,14 @@ export function avgReplyDays(pkgId: string, queries: Query[]): number | null {
   return spans.length ? Math.round(spans.reduce((a, b) => a + b, 0) / spans.length) : null;
 }
 
+/** A package slot (`queryLetterVersionId` / `synopsisVersionId` / `samplePagesVersionId`) holds a
+ *  version-id reference, or the empty string when unfilled. `isValidPackage` (firestore.rules) requires
+ *  all three slot keys to be PRESENT, so a package write must send `UNFILLED_SLOT` for an empty slot —
+ *  never omit the key. Single source of the sentinel: the composer and the future attach-flow read /
+ *  write through it rather than rediscovering `""`. */
+export const UNFILLED_SLOT = "";
+export const isSlotFilled = (id: string | null | undefined): id is string => !!id && id !== UNFILLED_SLOT;
+
 /** Active packages that reference a given component version (any of the three slots). */
 export function packagesUsingVersion(versionId: string, packages: SubmissionPackage[]): SubmissionPackage[] {
   return packages.filter(
