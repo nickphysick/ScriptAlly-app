@@ -1,0 +1,1959 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Consolidated mockup v37 (all theme picks locked)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   ScriptAlly AppShell mockup v2
+   - Navigation is pure JS (no hash/anchors) so it runs inside
+     the sandboxed preview.
+   - Dashboard is a faithful reproduction of the live page,
+     sitting inside the persistent rail shell.
+   ============================================================ */
+
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:'Inter',sans-serif;color:#3a1c14;overflow:hidden}
+button{font-family:inherit}
+
+/* ---------- shared brand tokens ---------- */
+.shell{
+  --burg:#7c3a2a; --burgD:#6b3023; --ink:#3a1c14; --parch:#fdfaf5;
+  --muted:#9a8c80; --hair:#e7ddd2; --label:#9c8878; --green:#705e46;
+  --sageA:#cdc7bf; --sageB:#c6c0b9; --sage:#8a9e88; --sageD:#5a6e58; --sageC:#e9ede6;
+  --btn:#f5e2da; --btnB:#e8c8bc; --btnH:#efd5ca; --postit:#f8e8e1;
+  --outTrack:rgba(124,58,42,0.28); --inTrack:rgba(138,158,136,0.35);
+}
+/* ---------- theme tokens ---------- */
+.t-capp{
+  --bd:#d8cebf; --bdw:1px; --desk:#e8ddd0; --band:#f2ddd5;
+  --pane:#fffefb; --card:#fffefb; --chromerad:0px;
+  --navpill:var(--cbtn,#ffffff); --navtext:var(--cbtnT,#5d4037); --listbg:#fffefb; --listrad:0px;
+  --green:var(--cghead,#5d4037); --sageA:var(--cbandA,#ece5d8); --sageB:var(--cbandB,#e5ddcd);
+}
+.t-bold{
+  --bd:#1d1712; --bdw:1.5px; --desk:#c2cfda; --band:#f4c7c2;
+  --pane:#ece2e0; --card:#fffefb; --chromerad:14px;
+  --navpill:#eec9c3; --navtext:#1d1712; --green:var(--bhead,#000000); --listbg:#ffffff; --listrad:14px;
+}
+
+.shell{display:flex;height:100vh;background:var(--desk)}
+
+/* ============================================================
+   THE RAIL — persistent, never remounts, never moves on nav
+   ============================================================ */
+.rail{
+  width:216px;flex:none;background:#fffefb;
+  border-right:var(--bdw) solid var(--bd);
+  display:flex;flex-direction:column;
+  transition:width 200ms ease;position:relative;z-index:20;
+}
+.shell.collapsed .rail{width:60px}
+
+.rail-head{padding:18px 16px 14px;display:flex;align-items:center;gap:10px;min-height:58px}
+.wordmark{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;transition:opacity 150ms}
+.monogram-s{width:30px;height:30px;flex:none;border-radius:50%;background:#dfe7ec;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-style:italic;font-size:16px;color:#3a4650}
+.shell.collapsed .wordmark{opacity:0;width:0}
+
+.rail-collapse{position:absolute;top:22px;right:-11px;width:22px;height:22px;border-radius:50%;background:#fffefb;border:var(--bdw) solid var(--bd);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;z-index:25}
+.rail-collapse:hover{color:var(--burg)}
+
+.rail-search{margin:2px 12px 12px;display:flex;align-items:center;gap:8px;padding:7px 10px;border:var(--bdw) solid var(--bd);border-radius:9px;background:#fff;color:var(--muted);cursor:pointer;font-size:12px;white-space:nowrap;overflow:hidden}
+.rail-search:hover{border-color:var(--burg)}
+.rail-search kbd{font-family:'JetBrains Mono',monospace;font-size:9px;background:var(--hair);border-radius:4px;padding:1px 5px;margin-left:auto;color:var(--label)}
+.shell.collapsed .rail-search{justify-content:center;padding:7px 0}
+.shell.collapsed .rail-search .rs-label,.shell.collapsed .rail-search kbd{display:none}
+
+nav.rail-nav{padding:0 10px;display:flex;flex-direction:column;gap:3px}
+.nav-item{
+  display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;
+  color:#6a5a50;font-size:13px;background:none;border:1px solid transparent;
+  cursor:pointer;white-space:nowrap;text-align:left;width:100%;
+}
+.nav-item svg{flex:none;width:17px;height:17px;stroke:currentColor}
+.nav-item:hover{background:rgba(124,58,42,0.05)}
+.nav-item.active{background:var(--navpill);color:var(--navtext,var(--burg));font-weight:500}
+.shell.collapsed .nav-item{justify-content:center;padding:9px 0}
+.shell.collapsed .nav-item .nl{display:none}
+
+.rail-foot{margin-top:auto;padding:12px}
+.icon-row{display:flex;gap:6px;margin-bottom:10px}
+.icon-btn{position:relative;flex:1;display:flex;align-items:center;justify-content:center;padding:7px 0;border:var(--bdw) solid var(--bd);background:#fff;border-radius:9px;color:#6a5a50;cursor:pointer}
+.icon-btn:hover{color:var(--burg)}
+.icon-btn .bdg{position:absolute;top:-5px;right:-4px;background:var(--burg);color:#fdfaf5;font-family:'JetBrains Mono',monospace;font-size:7px;font-weight:700;border-radius:99px;padding:1px 4px}
+.shell.collapsed .icon-row{flex-direction:column}
+
+.theme-seg{display:flex;border:var(--bdw) solid var(--bd);border-radius:9px;overflow:hidden;margin-bottom:12px}
+.theme-seg button{flex:1;border:none;background:transparent;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;padding:6px 0;color:var(--label);cursor:pointer}
+.theme-seg button.on{background:var(--band);color:var(--burg);font-weight:700}
+.shell.collapsed .theme-seg{display:none}
+
+.account{display:flex;align-items:center;gap:9px;padding:6px;border-radius:9px}
+.account:hover{background:rgba(124,58,42,0.05)}
+.avatar{width:30px;height:30px;flex:none;border-radius:50%;background:var(--parch);border:1px solid rgba(124,58,42,0.25);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:13px;color:var(--burg)}
+.account .an{font-size:12.5px;font-weight:500;white-space:nowrap;overflow:hidden}
+.account .ap{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.08em;color:var(--label);text-transform:uppercase}
+.shell.collapsed .account{justify-content:center;padding:6px 0}
+.shell.collapsed .account div:last-child{display:none}
+
+/* ============================================================
+   THE STAGE
+   ============================================================ */
+.stage{flex:1;min-width:0;display:flex;flex-direction:column;position:relative}
+.stage-scroll{flex:1;overflow-y:auto;padding:20px 24px 30px;scrollbar-width:thin;scrollbar-color:var(--bd) transparent}
+
+.page{display:none;max-width:1280px;margin:0 auto}
+.page.on{display:block;animation:pageIn 180ms ease-out}
+@keyframes pageIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.page.on{animation:none}.rail{transition:none}}
+
+/* ---------- page header bar (Queries / Agents / Manuscripts) ---------- */
+.qhbar{
+  position:relative;background:var(--card);border:var(--bdw) solid var(--bd);
+  border-radius:var(--chromerad);padding:16px 22px;margin-bottom:16px;
+  display:flex;align-items:center;gap:14px;
+}
+.t-capp .qhbar::after{content:'';position:absolute;inset:6px;border:1px solid var(--burg);pointer-events:none}
+.qh-eyebrow{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--label);margin-bottom:3px}
+.qh-title{font-family:'Playfair Display',serif;font-size:21px;font-weight:500;color:var(--ink)}
+.qh-cta{margin-left:auto;position:relative;z-index:2;background:var(--btn);border:1px solid var(--btnB);color:var(--burg);font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.07em;font-weight:500;padding:10px 20px;border-radius:10px;cursor:pointer;white-space:nowrap}
+.qh-cta:hover{background:var(--btnH)}
+
+/* ---------- shared small type ---------- */
+.lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--label)}
+.caveat{font-family:'Caveat',cursive;font-size:16px;color:#6a5a50}
+
+/* ---------- StatusDot (mockup approximation of the locked component) ---------- */
+.sdot{width:13px;height:13px;border-radius:50%;position:relative;flex:none;display:inline-block}
+.sdot .c{position:absolute;inset:2px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:6.5px;font-weight:700;line-height:1}
+.sdot.out{background:conic-gradient(var(--sdo,#7c3a2a) var(--fill,0%),color-mix(in srgb,var(--sdo,#7c3a2a) 28%,transparent) 0)}
+.sdot.out .c{background:var(--sdoc,#f8e7dc);color:var(--sdo,#7c3a2a)}
+.sdot.in{background:conic-gradient(var(--sdi,#8a9e88) var(--fill,0%),color-mix(in srgb,var(--sdi,#8a9e88) 35%,transparent) 0)}
+.sdot.in .c{background:var(--sdic,#e9ede6);color:var(--sdit,#5a6e58)}
+/* per-theme direction colours (StatusDot lock consciously overridden by owner) */
+.t-capp{--sdo:#7c3a2a;--sdoc:#f6e4da;--sdi:#7c3a2a;--sdic:#f6e4da;--sdit:#7c3a2a}
+.t-bold{--sdo:#1d1712;--sdoc:#f8dcd8;--sdi:#1d1712;--sdic:#f8dcd8;--sdit:#1d1712}
+.t-edn{--sdo:#44484d;--sdoc:#e9eaeb;--sdi:#44484d;--sdic:#e9eaeb;--sdit:#44484d}
+.sdot.closed{background:#b8aca0}
+.sdot.closed .c{background:#f0ebe4;color:#8a7f74}
+
+/* ============================================================
+   DASHBOARD — faithful reproduction of the live page
+   ============================================================ */
+.dash{display:grid;grid-template-columns:1fr 372px;gap:20px;align-items:start}
+.dcol{display:flex;flex-direction:column;gap:20px;min-width:0}
+
+.dcard{background:#fffefb;border:1px solid #e7ddd2;border-radius:16px;box-shadow:0 1px 2px rgba(58,28,20,0.03),0 4px 14px rgba(58,28,20,0.04)}
+
+/* --- hero --- */
+.hero-card{padding:34px 38px 30px;display:flex;gap:28px;align-items:center;background:linear-gradient(180deg,#e6ebe3 0%,#fffefb 9%);border:1px solid #e7ddd2;border-radius:16px;box-shadow:0 1px 2px rgba(58,28,20,0.03),0 4px 14px rgba(58,28,20,0.04)}
+.hero-left{flex:1;min-width:0}
+.hi{font-family:'Playfair Display',serif;font-size:42px;font-weight:500;color:var(--green);line-height:1.1;white-space:nowrap}
+.hi .who{font-style:italic;color:var(--burg)}
+.hi .planes{font-size:20px;color:var(--burg);margin-left:8px;vertical-align:super}
+.quote{margin:20px 0 24px;border-left:3px solid var(--burg);padding-left:14px}
+.quote .q{font-family:'Playfair Display',serif;font-style:italic;font-size:15.5px;color:#4a3a30}
+.quote .a{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.2em;color:#8a7a6c;margin-top:7px;text-transform:uppercase}
+.cta-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.cta{display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.03em;padding:10px 18px;border-radius:10px;cursor:pointer}
+.cta svg{width:13px;height:13px;stroke:currentColor}
+.cta.pink{background:var(--postit);border:1px solid #eccfc0;color:var(--burg)}
+.cta.pink:hover{background:var(--btnH)}
+.cta.ghost{background:#fff;border:1px solid #e0d5c8;color:#5a4a40}
+.cta.ghost:hover{border-color:var(--burg);color:var(--burg)}
+.cta-div{width:1px;height:24px;background:var(--hair)}
+
+/* the corkboard — static, post-its only */
+.board{width:340px;flex:none;height:222px;background:#f4ead6;border:2px solid #d9c6a4;border-radius:12px;position:relative;box-shadow:inset 0 0 0 5px #faf3e4}
+.postit{position:absolute;width:72px;height:72px;border-radius:3px;box-shadow:0 2px 6px rgba(58,28,20,0.16);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.postit.y{background:#f7eec4;left:74px;top:66px;transform:rotate(-5deg)}
+.postit.p{background:#f6ded6;left:132px;top:72px;transform:rotate(1.5deg);z-index:2}
+.postit.g{background:#dfeadb;left:192px;top:64px;transform:rotate(5deg)}
+.postit.b{background:#dde7ec;left:120px;top:52px;transform:rotate(-2deg);opacity:.9}
+.postit .plus{font-family:'Playfair Display',serif;font-size:18px;color:var(--burg);line-height:1}
+.postit .pl{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.14em;color:var(--burg);text-transform:uppercase}
+
+/* --- stat cards --- */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.stat{position:relative;overflow:hidden;padding:18px 20px 16px;min-height:158px;display:flex;flex-direction:column}
+.stat .sl{display:flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#8a7a6c}
+.stat .sl svg{width:13px;height:13px;stroke:var(--burg)}
+.stat .num-row{display:flex;align-items:baseline;gap:10px;margin-top:12px}
+.stat .num{font-family:'Playfair Display',serif;font-size:38px;font-weight:500;color:var(--ink);line-height:1}
+.stat .pillb{font-family:'Inter',sans-serif;font-size:10px;color:#6a5a50;background:#faf6f0;border:1px solid var(--hair);border-radius:99px;padding:3px 10px;white-space:nowrap}
+.stat .ghosticon{position:absolute;top:16px;right:16px;opacity:.5}
+.stat .ghosticon svg{width:56px;height:56px;stroke:#ecd8cb;stroke-width:1.3}
+.stat .foot{margin-top:auto;padding-top:14px}
+/* mini data visuals for the stat cards */
+.mbar{display:flex;gap:4px;align-items:flex-end;height:26px}
+.mbar i{flex:1;background:#d9cbb8;border-radius:3px 3px 0 0;height:var(--h,40%)}
+.mbar i.hot{background:var(--burg)}
+.segbar{display:flex;height:8px;border-radius:6px;overflow:hidden}
+.segbar i{display:block}
+.t-edn .mbar i{background:#e3e2e0}
+.t-edn .mbar i.hot{background:var(--acc)}
+
+.dashes{display:flex;gap:6px}
+.dashes span{flex:1;height:4px;border-radius:4px;background:#efe4d8}
+.gradbar{height:5px;border-radius:4px;background:linear-gradient(90deg,#7c3a2a 0%,#c99a86 60%,#f1e2d8 100%)}
+.people{display:flex;gap:5px;align-items:center}
+.people i{width:7px;height:7px;border-radius:50%;background:var(--burg);position:relative;display:inline-block}
+.people i::after{content:'';position:absolute;top:8px;left:-1.5px;width:10px;height:5px;border-radius:5px 5px 0 0;background:var(--burg)}
+.people .more{font-family:'JetBrains Mono',monospace;font-size:9px;color:#8a7a6c;margin-left:4px}
+.slider{position:relative;height:6px;border-radius:6px;background:#ece2d6}
+.slider .fill{position:absolute;left:0;top:0;bottom:0;width:52%;border-radius:6px;background:#7f9779}
+.slider .knob{position:absolute;left:52%;top:50%;transform:translate(-50%,-50%);width:15px;height:15px;border-radius:50%;background:#fff;border:2px solid #7f9779;box-shadow:0 1px 3px rgba(58,28,20,0.2)}
+
+/* --- banded panels (What's live / Fortnight) --- */
+.panel{overflow:hidden}
+.pband{display:flex;align-items:center;gap:10px;padding:14px 20px;background:linear-gradient(135deg,var(--sageA),var(--sageB));border-bottom:1px solid rgba(112,94,70,0.25)}
+.tick{width:4px;height:18px;border-radius:2px;background:var(--burg);flex:none}
+.pband h3{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;color:var(--green)}
+.pband .pr{margin-left:auto;display:flex;align-items:center;gap:8px}
+.pband .prm{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#705e46}
+.pband .prs{font-size:12px;color:#4a4036}
+.pbody{padding:22px 24px;background:#fffefb}
+
+/* pipeline nodes */
+.pipe2{display:flex;align-items:flex-start}
+.pnode{display:flex;flex-direction:column;align-items:center;gap:12px;width:96px;flex:none}
+.pnode .circ{width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fff;font-size:20px;font-weight:600}
+.pnode .plabel{font-family:'Playfair Display',serif;font-size:14.5px;color:var(--ink);white-space:nowrap}
+.pdots{flex:1;border-top:2px dotted #cdb9aa;margin-top:31px}
+.pgap{flex:1}
+/* single theme hue — the glyphs carry stage/direction meaning */
+.circ.c-query{background:var(--sdoc,#f8e7dc);border:2px solid var(--sdo,#7c3a2a);color:var(--sdo,#7c3a2a)}
+.circ.c-preq,.circ.c-psent,.circ.c-freq,.circ.c-fsent,.circ.c-rr{border:2.5px solid var(--sdo,#7c3a2a);color:var(--sdo,#7c3a2a)}
+.circ svg{width:22px;height:22px;stroke:currentColor}
+
+/* fortnight strip */
+.fort{display:flex;align-items:stretch;gap:0}
+.fcell{flex:1;padding:6px 4px}
+.fcell .fm{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--label);margin-bottom:10px}
+.fdiv{width:1px;background:var(--hair);margin:0 18px}
+.ftoday{font-family:'Playfair Display',serif;font-size:15px;color:var(--ink);text-align:center;align-self:center;padding:0 6px;white-space:nowrap}
+.fevent{display:inline-flex;align-items:center;gap:8px;background:#fffdf9;border:0.5px solid #ece0d2;border-radius:8px;padding:8px 12px;font-size:12px}
+
+/* --- to-do list --- */
+.todo-card{overflow:hidden}
+.todo-band{display:flex;align-items:center;gap:9px;padding:15px 20px;background:linear-gradient(135deg,#f3ddd2,#eed2c5)}
+.todo-band .dot{width:8px;height:8px;border-radius:50%;background:var(--burg)}
+.todo-band h3{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;color:#6b2f20}
+.todo-tabs{display:flex;gap:20px;padding:12px 20px 0;border-bottom:1px solid var(--hair);background:#fffefb}
+.ttab{display:flex;align-items:center;gap:7px;font-family:'Playfair Display',serif;font-size:14.5px;color:#9a8c80;padding-bottom:11px;border-bottom:2px solid transparent;cursor:pointer;background:none;border-top:none;border-left:none;border-right:none}
+.ttab.on{color:var(--burg);border-bottom-color:var(--burg)}
+.ttab .cnt{font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;background:var(--postit);color:var(--burg);border-radius:99px;padding:2px 6px}
+.ttab:not(.on) .cnt{background:#f2ece4;color:#9a8c80}
+.todo-list{background:#fffefb}
+.trow{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid #f0e8de}
+.trow:last-child{border-bottom:none}
+.trow .tinfo{flex:1;min-width:0}
+.trow .tline1{display:flex;align-items:center;gap:9px}
+.chip{font-family:'JetBrains Mono',monospace;font-size:7.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:var(--postit);color:var(--burg);border-radius:5px;padding:3px 7px;flex:none}
+.trow .tname{font-family:'Playfair Display',serif;font-size:15px;font-weight:500;color:#8a3a28;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trow .tdesc{font-size:11.5px;color:#6a5a50;margin-top:4px;font-weight:300}
+.trow .tdesc b{font-weight:600}
+.tbtn{flex:none;background:var(--postit);border:1px solid #ecd0c2;color:var(--burg);font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.05em;padding:9px 16px;border-radius:9px;cursor:pointer;white-space:nowrap}
+.tbtn:hover{background:var(--btnH)}
+
+/* --- the story so far --- */
+.story-head{display:flex;align-items:center;gap:10px;padding:16px 20px 12px}
+.story-head h3{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;color:#6b2f20}
+.story-head svg{margin-left:auto;width:16px;height:16px;stroke:var(--burg)}
+.story-body{padding:2px 20px 18px}
+.sdate{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--label);margin:12px 0 8px}
+.sentry{display:flex;gap:11px;align-items:flex-start}
+.smark{margin-top:14px;flex:none}
+.scard{flex:1;background:#fffdf9;border:0.5px solid #ece0d2;border-left:3px solid #9fb59b;border-radius:8px;padding:10px 13px;margin-bottom:8px}
+.scard.pink{border-left-color:#dba18d}
+.scard .sl1{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.spill{font-family:'JetBrains Mono',monospace;font-size:7.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:var(--sageC);color:var(--sageD);border-radius:5px;padding:3px 8px}
+.spill.pink{background:var(--postit);color:var(--burg)}
+.stime{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--muted)}
+.sname{font-family:'Playfair Display',serif;font-size:15.5px;font-weight:500;color:#8a3a28;margin-top:6px}
+.scap{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+
+/* ============================================================
+   two-panel workspace (Queries / Agents / Manuscripts)
+   ============================================================ */
+.workspace{display:flex;gap:16px;align-items:stretch;height:calc(100vh - 160px);min-height:420px}
+.listpanel{width:300px;flex:none;background:var(--listbg);border:var(--bdw) solid var(--bd);border-radius:var(--listrad);display:flex;flex-direction:column;overflow:hidden}
+.lp-tools{padding:12px;border-bottom:1px solid var(--hair);display:flex;gap:8px}
+.lp-search{flex:1;border:1px solid var(--hair);border-radius:8px;padding:6px 10px;font-size:12px;font-family:'Inter',sans-serif;color:var(--ink);background:#fff;outline:none}
+.lp-search:focus{border-color:#b5a78f;box-shadow:0 0 0 3px rgba(112,94,70,0.12)}
+.lp-rows{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--bd) transparent}
+.lp-row{display:flex;align-items:center;gap:10px;padding:11px 13px;border-bottom:1px solid var(--hair);cursor:pointer}
+.lp-row:hover{background:rgba(124,58,42,0.035)}
+.lp-row.sel{background:var(--band)}
+.mono-init{width:30px;height:30px;flex:none;border-radius:50%;background:linear-gradient(135deg,#f5e2da,#efd5ca);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:12px;color:var(--burg)}
+.lp-row .rn{font-size:12.5px;font-weight:500;line-height:1.25}
+.lp-row .rm{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;margin-top:2px}
+.lp-foot{border-top:1px solid var(--hair);padding:9px 13px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--label);cursor:pointer;display:flex;align-items:center;gap:7px}
+.lp-foot:hover{color:var(--burg)}
+
+.readpane{flex:1;min-width:0;overflow-y:auto;display:flex;flex-direction:column;gap:14px;scrollbar-width:thin;scrollbar-color:var(--bd) transparent;padding-bottom:4px}
+.rhero{background:linear-gradient(135deg,#ffffff 30%,var(--tint,#f8e7dc));border:var(--bdw) solid var(--bd);border-radius:14px;padding:20px 22px;display:flex;align-items:center;gap:16px}
+.rhero .havatar{width:52px;height:52px;flex:none;border-radius:50%;background:#1d1712;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:19px;color:var(--parch)}
+.rhero .hn{font-family:'Playfair Display',serif;font-size:20px;font-weight:500}
+.rhero .hs{font-size:12px;font-weight:300;color:#6a5a50;margin-top:2px}
+.rhero .hstat{margin-left:auto}
+.hpill{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--hair);border-radius:99px;padding:5px 12px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--burg)}
+.pcard{background:var(--card);border:var(--bdw) solid var(--bd);border-radius:14px;padding:16px 20px}
+.pcard h4{font-family:'Playfair Display',serif;font-size:15px;font-weight:500;margin-bottom:12px}
+.kv{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--hair);font-size:12.5px}
+.kv:last-child{border-bottom:none}
+.kv .k{color:var(--muted)}
+.kv .v{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink)}
+
+/* ---------- floating help + hint ---------- */
+/* greeting name: same voice as the rest of the heading */
+.ho-hi em,.hi .who{font-style:normal !important;color:inherit !important}
+
+/* ---------- Timeline drawer ---------- */
+/* ============================================================
+   DRAWER — per-theme header / colour / border drafts (A·B·C)
+   ============================================================ */
+.tl-drawer{overflow:hidden}
+.tl-tick{display:none;width:4px;height:16px;border-radius:2px;flex:none}
+.tlp-lbl{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.14em;text-transform:uppercase;color:var(--label,#9c8878);margin-right:auto;align-self:center}
+
+/* --- Cappuccino --- */
+.t-capp .tl-drawer{background:#fdfaf5;border:1px solid #e0d6c6}
+.t-capp .tl-drawer .scard{border-color:#ece0d0}
+/* A · Sage band (dashboard family) */
+.t-capp .tl-drawer .tl-head{background:linear-gradient(135deg,var(--cbandA,#ece5d8),var(--cbandB,#e5ddcd));border-bottom:1px solid rgba(112,94,70,0.25);padding:16px 20px 13px}
+.t-capp .tl-drawer .tl-head h3{color:var(--green)}
+.t-capp .tl-drawer .tl-eyebrow{color:#705e46}
+/* B · Form 11 (burgundy inset frame, quiet head) */
+.t-capp .tl-drawer.hd2 .tl-head{background:transparent;border-bottom:1px solid #e7ddd2;padding:18px 22px 13px}
+.t-capp .tl-drawer.hd2 .tl-head h3{color:#3a1c14}
+.t-capp .tl-drawer.hd2 .tl-eyebrow{color:#9c8878}
+.t-capp .tl-drawer.hd2 .tl-tick{display:block;background:#7c3a2a}
+.t-capp .tl-drawer.hd2::after{content:'';position:absolute;inset:7px;border:1px solid #7c3a2a;border-radius:12px;pointer-events:none}
+/* C · Blush band (attention family) */
+.t-capp .tl-drawer.hd3 .tl-head{background:linear-gradient(135deg,#f3ddd2,#eed2c5);border-bottom:1px solid rgba(124,58,42,0.15)}
+.t-capp .tl-drawer.hd3 .tl-head h3{color:#6b2f20}
+.t-capp .tl-drawer.hd3 .tl-eyebrow{color:#8a5a48}
+.t-capp .tl-drawer.hd3::after{content:none}
+
+/* --- Bold Pastille --- */
+.t-bold .tl-drawer{background:#fffefb;border:1.5px solid #1d1712}
+.t-bold .tl-drawer .scard{border-color:#1d1712;border-width:1px;border-left-width:3px}
+/* A · Vivid pink band (Queries bold language) */
+.t-bold .tl-drawer .tl-head{background:var(--bband,#f4c7c2);border-bottom:1.5px solid #1d1712;padding:16px 20px 13px}
+.t-bold .tl-drawer .tl-head h3{color:#1d1712}
+.t-bold .tl-drawer .tl-eyebrow{color:#7a4438}
+/* B · Blush sheet (blush body, white head) */
+.t-bold .tl-drawer.hd2{background:#f5e9e7}
+.t-bold .tl-drawer.hd2 .tl-head{background:#fffefb;border-bottom:1.5px solid #1d1712}
+.t-bold .tl-drawer.hd2 .tl-eyebrow{color:#8a7a72}
+.t-bold .tl-drawer.hd2 .scard{background:#fffefb}
+/* C · Desk-blue band */
+.t-bold .tl-drawer.hd3{background:#fffefb}
+.t-bold .tl-drawer.hd3 .tl-head{background:#c3cfdb;border-bottom:1.5px solid #1d1712}
+.t-bold .tl-drawer.hd3 .tl-eyebrow{color:#4a5866}
+
+/* --- Editorial (Graphite · Soft) --- */
+.t-edn .tl-drawer{background:#ffffff;border-color:transparent}
+.t-edn .tl-drawer .scard{border-color:#e3e2e0}
+/* A · Hairline head + graphite tick */
+.t-edn .tl-drawer .tl-head{background:var(--eband,color-mix(in srgb,var(--acc) 6%,#fff));border-bottom:none;padding:16px 20px 13px}
+.t-edn .tl-drawer .tl-head h3{color:#1a1a1a}
+.t-edn .tl-drawer .tl-eyebrow{color:#8b8b8b}
+.t-edn .tl-drawer .tl-tick{display:none}
+/* B · Tinted band (Soft's own header language) */
+.t-edn .tl-drawer.hd2 .tl-head{background:color-mix(in srgb,var(--acc) 6%,#fff);border-bottom:none}
+.t-edn .tl-drawer.hd2 .tl-tick{display:none}
+.t-edn .tl-drawer.hd2{border-color:transparent}
+/* C · Accent underline (no band, no frame) */
+.t-edn .tl-drawer.hd3 .tl-head{background:#fff;border-bottom:none}
+.t-edn .tl-drawer.hd3 .tl-tick{display:none}
+.t-edn .tl-drawer.hd3 .tl-head h3{position:relative;padding-bottom:9px}
+.t-edn .tl-drawer.hd3 .tl-head h3::after{content:'';position:absolute;left:0;bottom:0;width:32px;height:3px;border-radius:2px;background:var(--acc)}
+
+/* ============================================================
+   BLENDED TIMELINE FITS — for a pinned, always-on drawer
+   ============================================================ */
+/* Docked card: the drawer chrome disappears; what remains is a native
+   dashboard panel (theme band + theme frame) standing on the desk */
+.tl-drawer.dk2{top:0;bottom:0;right:0;border-radius:0;border:none;box-shadow:none;background:var(--desk,#e8ddd0);padding:20px 24px 26px 0}
+.tl-drawer.dk2 .tl-head{border:var(--bdw,1px) solid var(--bd,#d8cebf);border-bottom-width:0;border-radius:14px 14px 0 0}
+.tl-drawer.dk2 .tl-body{border:var(--bdw,1px) solid var(--bd,#d8cebf);border-top:1px solid var(--hair,#e7ddd2);border-radius:0 0 14px 14px;background:var(--card,#fffefb)}
+.t-edn .tl-drawer.dk2 .tl-head,.t-edn .tl-drawer.dk2 .tl-body{border-color:#e3e2e0}
+/* Flush rail: app-chrome column behind a single hairline seam */
+.tl-drawer.dk3{top:0;bottom:0;right:0;border-radius:0;border:none;border-left:var(--bdw,1px) solid var(--bd,#d8cebf);box-shadow:none;background:var(--pane,#fffefb)}
+.tl-drawer.dk3 .tl-head{background:transparent;border-bottom:1px solid var(--hair,#e7ddd2);padding:22px 20px 12px}
+.tl-drawer.dk3 .tl-head h3{color:var(--ink,#3a1c14)}
+.tl-drawer.dk3 .tl-eyebrow{color:var(--label,#9c8878)}
+.tl-drawer.dk3 .tl-tick{display:block;background:var(--burg)}
+.t-edn .tl-drawer.dk3 .tl-tick{background:var(--acc)}
+.t-edn .tl-drawer.dk3{border-left-color:#e3e2e0}
+/* pin */
+.tpin{margin-left:auto;background:none;border:none;color:var(--label,#9c8878);cursor:pointer;padding:2px;display:flex}
+.tpin svg{stroke:currentColor}
+.tpin:hover{color:var(--ink,#3a1c14)}
+.tl-drawer.pinned .tpin{color:var(--burg)}
+.t-edn .tl-drawer.pinned .tpin{color:var(--acc)}
+.tl-drawer.pinned #tlClose{display:none}
+.tl-drawer .ttx{margin-left:6px}
+
+/* ---------- Cappuccino coffee sampler (mockup only) ---------- */
+.t-capp .cta.pink,.t-capp .tbtn,.t-capp .act,.t-capp .qh-cta{background:var(--cbtn,#ffffff);border-color:var(--cbtnB,#ded3c2);color:var(--cbtnT,#5d4037)}
+.t-capp .cta.pink:hover,.t-capp .tbtn:hover,.t-capp .act:hover,.t-capp .qh-cta:hover{background:color-mix(in srgb,#000 6%,var(--cbtn,#ffffff))}
+.t-capp .dt-todo{background:var(--cbtn,#ffffff);border-color:var(--cbtnB,#ded3c2);color:var(--cbtnT,#5d4037)}
+.t-capp .cta.ghost{background:var(--cbtn,#ffffff);border:1px solid var(--cbtnB,#ded3c2);color:var(--cbtnT,#5d4037)}
+.t-capp .cta.ghost:hover{background:color-mix(in srgb,#000 4%,var(--cbtn,#ffffff))}
+/* Bold: white fill, ink frame — all four CTAs alike */
+.t-bold .cta.pink,.t-bold .cta.ghost,.t-bold .tbtn,.t-bold .qh-cta,.t-bold .act{background:var(--bbtn,#fffefb);border:1.5px solid #1d1712;color:var(--bbtnT,#1d1712);box-shadow:none}
+.t-bold .cta.pink:hover,.t-bold .cta.ghost:hover,.t-bold .tbtn:hover,.t-bold .qh-cta:hover,.t-bold .act:hover{background:color-mix(in srgb,#000 4%,var(--bbtn,#fffefb))}
+.cap-sampler{display:none}
+.bold-sampler{display:none}
+.t-bold .bold-sampler{display:block}
+.edn-sampler{display:none}
+.t-edn .edn-sampler{display:block}
+.shell.collapsed .bold-sampler,.shell.collapsed .edn-sampler{display:none}
+.t-capp .cap-sampler{display:block}
+.shell.collapsed .cap-sampler{display:none}
+.picks-btn{display:none;width:100%;margin-bottom:10px;border:1px dashed var(--bd,#d8cebf);background:transparent;border-radius:9px;padding:6px 0;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--label,#9c8878);cursor:pointer}
+.t-capp .picks-btn,.t-bold .picks-btn,.t-edn .picks-btn{display:block}
+.shell.collapsed .picks-btn{display:none}
+.picks-btn:hover{color:var(--ink,#3a1c14);border-color:var(--ink,#3a1c14)}
+.ccap{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.16em;text-transform:uppercase;color:#9c8878;margin:0 2px 4px}
+.crow{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.cdot{width:17px;height:17px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #cfc7ba;padding:0;cursor:pointer}
+.cdot.on{box-shadow:0 0 0 2px #7c3a2a}
+.cpill{height:17px;border-radius:99px;padding:0 9px;font-family:'JetBrains Mono',monospace;font-size:7px;cursor:pointer}
+.cpill.on{outline:2px solid #7c3a2a;outline-offset:1px}
+
+/* ============================================================
+   BARELY-A-CONTAINER TIMELINE — the page continues; the timeline
+   is simply on it. Variants differ only in the whisper of a seam.
+   ============================================================ */
+.tl-drawer.f1,.tl-drawer.f2,.tl-drawer.f3,.tl-drawer.f4{
+  top:0;bottom:0;right:0;border-radius:0;border:none;box-shadow:none;
+  background:var(--desk,#e8ddd0);
+}
+.tl-drawer.f1 .tl-head,.tl-drawer.f2 .tl-head,.tl-drawer.f3 .tl-head,.tl-drawer.f4 .tl-head{
+  background:transparent;border-bottom:none;padding:26px 24px 8px 20px;
+}
+.tl-drawer.f1 .tl-head h3,.tl-drawer.f2 .tl-head h3,.tl-drawer.f3 .tl-head h3,.tl-drawer.f4 .tl-head h3{color:var(--ink,#3a1c14)}
+.tl-drawer.f1 .tl-tick,.tl-drawer.f2 .tl-tick,.tl-drawer.f3 .tl-tick,.tl-drawer.f4 .tl-tick{display:block;background:var(--burg)}
+.t-edn .tl-drawer.f1 .tl-tick,.t-edn .tl-drawer.f2 .tl-tick,.t-edn .tl-drawer.f3 .tl-tick,.t-edn .tl-drawer.f4 .tl-tick{background:var(--acc)}
+.tl-drawer.f1 .tl-body,.tl-drawer.f2 .tl-body,.tl-drawer.f3 .tl-body,.tl-drawer.f4 .tl-body{padding:4px 22px 24px 18px}
+/* editorial entries match Soft's borderless cards when the container dissolves */
+.t-edn .tl-drawer.f1 .scard,.t-edn .tl-drawer.f2 .scard,.t-edn .tl-drawer.f3 .scard,.t-edn .tl-drawer.f4 .scard{border-color:transparent;box-shadow:0 1px 2px rgba(20,20,20,0.05),0 8px 20px rgba(20,20,20,0.06)}
+
+/* F2 · Recessed: pressed slightly into the desk — depth, not lines */
+.tl-drawer.f2{background:color-mix(in srgb,#000 4%,var(--desk,#e8ddd0));
+  box-shadow:inset 12px 0 20px -14px rgba(30,20,12,0.28),inset 0 12px 20px -14px rgba(30,20,12,0.14)}
+/* F3 · Seam: one fading hairline */
+.tl-drawer.f3::before{content:'';position:absolute;left:0;top:18px;bottom:18px;width:1px;
+  background:linear-gradient(180deg,transparent,var(--bd,#d8cebf) 18%,var(--bd,#d8cebf) 82%,transparent)}
+/* F4 · Perforated: a stationery tear-off edge */
+.tl-drawer.f4::before{content:'';position:absolute;left:0;top:16px;bottom:16px;width:0;
+  border-left:2px dotted color-mix(in srgb,var(--ink,#3a1c14) 28%,transparent)}
+
+/* refined tab */
+.tl-cnt{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;background:var(--burg);color:#fdfaf5;border-radius:99px;padding:1px 5px}
+.tl-eyebrow{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--label,#9c8878);margin-bottom:3px}
+.tl-picker{display:flex;gap:4px;padding:10px 20px 0;justify-content:flex-end}
+.tl-picker button{border:1px solid var(--hair,#e7ddd2);background:transparent;border-radius:99px;padding:3px 10px;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.05em;color:var(--label,#9c8878);cursor:pointer}
+.tl-picker button.on{background:rgba(20,15,10,0.05);color:var(--ink,#3a1c14);font-weight:700}
+
+/* T1 · Panel (default): recessed drawer, entries as floating cards */
+.tl-drawer{background:color-mix(in srgb,#000 3%,var(--pane,#fffefb))}
+.tl-drawer .tl-body{padding:4px 16px 20px}
+.tl-drawer .sdate{padding:14px 4px 6px !important}
+.tl-drawer .sentry{padding:5px 0 !important;gap:10px}
+.tl-drawer .scard{background:var(--card,#fffefb);border:1px solid var(--hair,#e7ddd2);border-left-width:3px;border-radius:12px;padding:12px 14px;box-shadow:0 1px 2px rgba(20,20,20,0.04),0 6px 16px rgba(20,20,20,0.05)}
+
+/* T2 · Spine: continuous line, dots as nodes, uncarded text */
+.tl-drawer.tl2 .tl-body{position:relative;padding:8px 18px 24px 0}
+.tl-drawer.tl2 .tl-body::before{content:'';position:absolute;left:31px;top:10px;bottom:14px;width:2px;background:var(--hair,#e7ddd2);border-radius:2px}
+.tl-drawer.tl2 .sdate{position:relative;margin-left:52px;padding:16px 0 6px !important}
+.tl-drawer.tl2 .sentry{padding:4px 0 10px 20px !important;gap:14px}
+.tl-drawer.tl2 .smark{margin-left:3px;position:relative;z-index:1;box-shadow:0 0 0 3px var(--pane,#fffefb)}
+.tl-drawer.tl2 .scard{background:transparent;border:none;box-shadow:none;border-radius:0;padding:0 14px 0 0}
+/* T3 · Ledger: flush sheet, hairline rows, sticky date bands */
+.tl-drawer.tl3{background:var(--card,#fffefb)}
+.tl-drawer.tl3 .tl-body{padding:0 0 20px}
+.tl-drawer.tl3 .sdate{position:sticky;top:0;background:color-mix(in srgb,#000 3%,var(--card,#fffefb));border-top:1px solid var(--hair,#e7ddd2);border-bottom:1px solid var(--hair,#e7ddd2);padding:8px 20px !important;margin:0;z-index:1}
+.tl-drawer.tl3 .sentry{padding:14px 20px !important;border-bottom:1px solid var(--hair,#e7ddd2);margin:0}
+.tl-drawer.tl3 .scard{background:transparent;border:none;box-shadow:none;border-radius:0;padding:0}
+/* T4 · Floating: detached panel, matches the floating bar language */
+.tl-drawer.tl4{top:14px;bottom:14px;border-radius:18px;border:1px solid var(--hair,#e7ddd2);box-shadow:0 6px 18px rgba(20,20,20,0.08),0 24px 60px rgba(20,20,20,0.14);right:14px;transform:translateX(calc(102% + 14px))}
+.shell.tl-open.on-dash .tl-drawer.tl4{transform:none}
+
+.tl-tab{position:fixed;right:0;top:42%;z-index:45;display:none;flex-direction:column;align-items:center;gap:8px;
+  padding:14px 8px;background:var(--card,#fffefb);border:var(--bdw,1px) solid var(--bd,#e0d6c6);border-right:none;
+  border-radius:12px 0 0 12px;box-shadow:-3px 3px 14px rgba(20,20,20,0.08);cursor:pointer}
+.shell.on-dash .tl-tab{display:flex}
+.shell.tl-open .tl-tab{display:none}
+.tl-lbl{writing-mode:vertical-rl;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--label,#9c8878)}
+.tl-dot{width:7px;height:7px;border-radius:50%;background:var(--burg)}
+.tl-drawer{position:fixed;right:0;top:0;bottom:0;width:285px;z-index:46;background:var(--pane,#fffefb);
+  border-left:var(--bdw,1px) solid var(--bd,#e0d6c6);box-shadow:-14px 0 40px rgba(20,20,20,0.10);
+  transform:translateX(102%);transition:transform 360ms cubic-bezier(.22,.8,.3,1);display:flex;flex-direction:column}
+.shell.tl-open.on-dash .tl-drawer{transform:none}
+.tl-head{display:flex;align-items:center;gap:10px;padding:18px 20px 12px;border-bottom:1px solid var(--hair,#e7ddd2)}
+.tl-head h3{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;color:var(--ink,#3a1c14)}
+.tl-body{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--bd) transparent;padding-bottom:16px}
+.stage-scroll{transition:padding-right 360ms cubic-bezier(.22,.8,.3,1)}
+.shell.tl-open.on-dash .stage-scroll{padding-right:309px}
+@media (max-width:1180px){.shell.tl-open.on-dash .stage-scroll{padding-right:26px}.tl-drawer{box-shadow:-18px 0 50px rgba(20,20,20,0.25)}}
+@media (prefers-reduced-motion:reduce){.tl-drawer,.stage-scroll{transition:none}}
+
+.help-fab{position:fixed;bottom:20px;right:20px;width:38px;height:38px;border-radius:50%;background:var(--parch);border:var(--bdw) solid var(--bd);color:var(--burg);font-family:'Playfair Display',serif;font-size:17px;cursor:pointer;box-shadow:0 3px 12px rgba(58,28,20,0.12);z-index:30}
+.help-fab:hover{background:#fff}
+.demo-hint{position:fixed;bottom:8px;left:50%;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);pointer-events:none;z-index:5;white-space:nowrap}
+
+/* ---------- ⌘K palette ---------- */
+.kk-overlay{position:fixed;inset:0;background:rgba(29,23,18,0.35);backdrop-filter:blur(2px);z-index:60;display:none;align-items:flex-start;justify-content:center;padding-top:14vh}
+.kk-overlay.open{display:flex}
+.kk{width:520px;max-width:92vw;background:var(--parch);border-radius:14px;box-shadow:0 20px 60px rgba(29,23,18,0.35);overflow:hidden;border:1px solid rgba(124,58,42,0.28)}
+.kk input{width:100%;border:none;outline:none;background:transparent;padding:16px 20px;font-size:15px;font-family:'Inter',sans-serif;color:var(--ink);border-bottom:1px solid var(--hair)}
+.kk-list{max-height:300px;overflow-y:auto;padding:8px}
+.kk-item{display:flex;align-items:center;gap:11px;padding:10px 13px;border-radius:9px;font-size:13px;cursor:pointer;color:var(--ink)}
+.kk-item:hover{background:var(--btn);color:var(--burg)}
+.kk-item .ki{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--label);margin-left:auto}
+.kk-foot{border-top:1px solid var(--hair);padding:8px 16px;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.08em;color:var(--label);text-transform:uppercase}
+
+/* ============================================================
+   BOLD PASTILLE — dashboard restyle (content untouched)
+   Guide: dev-sampled Queries Hub bold. Ink 1.5px frames, white
+   #fffefb cards, vivid pink #f4c7c2 bands, blue desk, radius 14,
+   no inset frames, flat (no soft shadows).
+   ============================================================ */
+.t-bold .dcard,
+.t-bold .hero-card{
+  background:#fffefb;border:1.5px solid #1d1712;border-radius:14px;box-shadow:none;
+}
+/* hero loses the sage top glow — bold is flat white */
+.t-bold .hero-card{background:#fffefb}
+.t-bold .hi{color:var(--bhead,#000000)}
+
+/* banded headers: sage gradient -> vivid pink, ink rule beneath */
+.t-bold .pband{background:var(--bband,#f4c7c2);border-bottom:1.5px solid #1d1712}
+.t-bold .pband h3{color:var(--bhead,#000000)}
+.t-bold .pband .prm{color:#7a4438}
+.t-bold .pband .prs{color:#1d1712}
+.t-bold .todo-band{background:var(--bband,#f4c7c2);border-bottom:1.5px solid #1d1712}
+.t-bold .todo-band h3{color:var(--bhead,#000000)}
+.t-bold .story-head h3{color:var(--bhead,#000000)}
+
+/* corkboard gets the ink frame too */
+.t-bold .board{border:1.5px solid #1d1712;box-shadow:inset 0 0 0 5px #faf3e4}
+
+/* small furniture: white with 1px ink instead of soft hairlines */
+.t-bold .stat .pillb{background:#fff;border:1px solid #1d1712;color:#1d1712}
+.t-bold .fevent{background:#fff;border:1px solid #1d1712}
+.t-bold .scard{background:#fff;border:1px solid #1d1712;border-left-width:3px}
+.t-bold .ttab .cnt{border:1px solid rgba(29,23,18,0.35)}
+.t-bold .cta.ghost{border:1px solid #1d1712;color:#1d1712}
+.t-bold .cta-div{background:rgba(29,23,18,0.25)}
+
+/* pipeline circles pick up a crisper edge, ring colours unchanged */
+.t-bold .circ{background:#fff}
+
+/* interior dividers stay quiet — the frame does the talking */
+.t-bold .trow{border-bottom-color:#ece2da}
+.t-bold .todo-tabs{border-bottom-color:#ece2da}
+
+/* ============================================================
+   EDITORIAL — three drafts. Low colour, no whimsy, typographic.
+   Rule: burgundy survives only as the single brand accent
+   (active nav, ticks, key data). StatusDot keeps its colours —
+   in Editorial, the only colour left is the data.
+   ============================================================ */
+
+/* --- tokens --- */
+/* A · Broadsheet: paper white, hairlines, square, rule-under-title */
+.t-eda{--bd:#d6d1c6;--bdw:1px;--desk:#f2f0ea;--band:#ffffff;--pane:#ffffff;--card:#ffffff;--chromerad:0px;--navpill:#eceae2;--listbg:#ffffff;--listrad:0px}
+/* B · Manila: warm grey-beige ledger, putty bands, small radius */
+/* --- Editorial · Neutral system: whites, blacks, greys; ONE accent
+       at decision points only (ticks, primary buttons, active states).
+       Accent set by the swatch row via --acc. --- */
+.t-edn{--bd:#e3e2e0;--bdw:1px;--desk:#f4f4f3;--band:#ffffff;--pane:#ffffff;--card:#ffffff;--chromerad:10px;--listbg:#ffffff;--listrad:10px;--acc:#44484d;--navpill:color-mix(in srgb,var(--acc) 10%,#fff);--navtext:var(--acc);--ink:#1a1a1a;--muted:#6b6b6b;--label:#8b8b8b;--hair:#ececea;--green:var(--ehead,#000000)}
+.t-edn .nav-item.active{color:var(--acc)}
+.t-edn .pband,.t-edn .todo-band{background:#ffffff;border-bottom:1px solid #e3e2e0}
+.t-edn .pband h3,.t-edn .todo-band h3{color:var(--ebandT,var(--ehead,#000000))}
+.t-edn .story-head h3{color:var(--ehead,#000000)}
+.t-edn .pband .prm{color:#8b8b8b}
+.t-edn .pband .prs{color:#1a1a1a}
+.t-edn .tick,.t-edn .todo-band .dot{background:var(--acc)}
+.t-edn .cta.pink,.t-edn .tbtn,.t-edn .qh-cta{background:var(--acc);border:1px solid var(--acc);color:#fff}
+.t-edn .cta.pink:hover,.t-edn .tbtn:hover,.t-edn .qh-cta:hover{background:color-mix(in srgb,var(--acc) 85%,#000)}
+.t-edn .cta.ghost{border:1px solid #d6d5d2;color:#3a3a3a}
+.t-edn .cta.ghost:hover{border-color:#1a1a1a;color:#1a1a1a}
+.t-edn .chip,.t-edn .ttab .cnt{background:#f1f1ef;color:#555555}
+.t-edn .ttab.on{color:#1a1a1a;border-bottom-color:var(--acc)}
+.t-edn .tname,.t-edn .sname{color:#1a1a1a}
+.t-edn .hi .who,.t-edn .ho-hi em{color:var(--acc)}
+.t-edn .quote{border-left-color:var(--acc)}
+.t-edn .mono-init{background:#f1f1ef;color:#555555}
+.t-edn .slider .fill{background:var(--acc)}
+.t-edn .slider .knob{border-color:var(--acc)}
+.t-edn .stat .sl svg,.t-edn .stat2 .cap svg{stroke:var(--acc)}
+.t-edn .stat2{background:#fff;border-color:#e3e2e0}
+.t-edn .stat2 .n{color:#1a1a1a}
+.t-edn .ho-chip{background:transparent;border:none;color:#1a1a1a}
+.t-edn{--chipdot:var(--acc)}
+
+.t-edn .dt-todo{background:color-mix(in srgb,var(--acc) 8%,#fff);border-color:color-mix(in srgb,var(--acc) 32%,#fff);color:color-mix(in srgb,var(--acc) 82%,#000)}
+.t-edn .dt-todo .cnt,.t-edn .dt-todo .tdot{background:var(--acc)}
+.t-edn .lp-row.sel{background:color-mix(in srgb,var(--acc) 8%,#fff)}
+.t-edn .hpill{color:var(--acc)}
+.t-edn .theme-seg button.on,.t-edn .hero-picker button.on,.t-edn .tb-picker button.on{background:#efefed;color:var(--acc)}
+.t-edn .railcnt{background:var(--acc)}
+
+/* --- Editorial component-style variants (containers / headers / pills / buttons) --- */
+/* S2 · Underline: borderless soft-shadow cards; headers carry an accent underline; tinted secondaries */
+.t-edn.es2 :is(.dcard,.stat2,.pcard,.rhero,.listpanel){border-color:transparent;box-shadow:0 1px 2px rgba(20,20,20,0.04),0 8px 22px rgba(20,20,20,0.06)}
+.t-edn.es2 .qhbar{border-color:transparent;box-shadow:0 1px 2px rgba(20,20,20,0.04),0 8px 22px rgba(20,20,20,0.06)}
+.t-edn.es2 .pband,.t-edn.es2 .todo-band{border-bottom:none}
+.t-edn.es2 .pband h3,.t-edn.es2 .todo-band h3,.t-edn.es2 .story-head h3{position:relative;padding-bottom:9px}
+.t-edn.es2 :is(.pband,.todo-band,.story-head) h3::after{content:'';position:absolute;left:0;bottom:0;width:32px;height:3px;border-radius:2px;background:var(--acc)}
+.t-edn.es2 .tick,.t-edn.es2 .todo-band .dot{display:none}
+.t-edn.es2 .cta.ghost{background:color-mix(in srgb,var(--acc) 6%,#fff);border-color:transparent;color:color-mix(in srgb,var(--acc) 80%,#000)}
+/* S3 · Ruled: square, ink top-rules on headers, rectangular buttons, boxed mono tags */
+.t-edn.es3{--chromerad:0px;--listrad:0px}
+.t-edn.es3 :is(.dcard,.stat2,.pcard,.rhero,.listpanel,.qhbar){border-radius:0;border-color:#d9d8d5;box-shadow:none}
+.t-edn.es3 .pband,.t-edn.es3 .todo-band{border-top:2px solid #1a1a1a;border-bottom:1px solid #e3e2e0}
+.t-edn.es3 :is(.cta,.tbtn,.qh-cta,.ho-chip,.dt-todo,.tbtn){border-radius:3px}
+.t-edn.es3 .cta.ghost{border:1px solid #1a1a1a;color:#1a1a1a;background:transparent}
+.t-edn.es3 :is(.chip,.ttab .cnt,.spill,.g-tag){border-radius:2px;background:#ffffff;border:1px solid #cfcecb;color:#3a3a3a}
+/* S4 · Soft: 16px radius, borderless layered shadows, accent-tinted header bands, pill buttons */
+.t-edn.es4{--chromerad:16px;--listrad:16px}
+.t-edn.es4 :is(.dcard,.stat2,.pcard,.rhero,.listpanel,.qhbar){border-radius:16px;border-color:transparent;box-shadow:0 1px 2px rgba(20,20,20,0.05),0 12px 32px rgba(20,20,20,0.07)}
+.t-edn.es4 .pband,.t-edn.es4 .todo-band{background:var(--eband,color-mix(in srgb,var(--acc) 6%,#fff));border-bottom:none}
+.t-edn.es4 :is(.cta,.tbtn,.qh-cta,.act){border-radius:99px}
+.t-edn.es4 .stat2{border-radius:16px}
+
+/* --- button formatting variants (Editorial) --- */
+/* Tinted: quiet accent-wash primaries — the calm default */
+.t-edn.eb2 :is(.cta.pink,.cta.ghost,.tbtn,.qh-cta,.act){background:var(--ebtn,color-mix(in srgb,var(--acc) 9%,#fff));border:1px solid var(--ebtnB,transparent);color:var(--ebtnT,color-mix(in srgb,var(--acc) 85%,#000))}
+.t-edn.eb2 :is(.cta.pink,.cta.ghost,.tbtn,.qh-cta,.act):hover{background:color-mix(in srgb,#000 5%,var(--ebtn,color-mix(in srgb,var(--acc) 9%,#fff)))}
+/* Outline: white with an accent stroke */
+.t-edn.eb3 :is(.cta.pink,.tbtn,.qh-cta,.act){background:#fff;border:1.5px solid var(--acc);color:color-mix(in srgb,var(--acc) 88%,#000)}
+.t-edn.eb3 :is(.cta.pink,.tbtn,.qh-cta,.act):hover{background:color-mix(in srgb,var(--acc) 6%,#fff)}
+.t-edn.eb3 .cta.ghost{background:#fff;border:1px solid #d6d5d2;color:#3a3a3a}
+/* Ghost: text-first, wash on hover only */
+.t-edn.eb4 :is(.cta.pink,.tbtn,.qh-cta,.act){background:transparent;border-color:transparent;color:color-mix(in srgb,var(--acc) 85%,#000)}
+.t-edn.eb4 :is(.cta.pink,.tbtn,.qh-cta,.act):hover{background:color-mix(in srgb,var(--acc) 8%,#fff)}
+.t-edn.eb4 .cta.ghost{background:transparent;border-color:transparent;color:#6b6b6b}
+.t-edn.eb4 .cta.ghost:hover{background:#f0f0ee}
+
+.edcap{display:none;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.16em;text-transform:uppercase;color:#8b8b8b;margin:0 2px 4px}
+.t-edn .edcap{display:block}
+.shell.collapsed .edcap{display:none}
+
+.est-row{display:none;border:1px solid #d8cebf;border-radius:9px;overflow:hidden;margin-bottom:12px}
+.t-edn .est-row{display:flex}
+.est-row button{flex:1;border:none;background:transparent;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.04em;text-transform:uppercase;padding:6px 0;color:#8b8b8b;cursor:pointer}
+.est-row button.on{background:#efefed;color:var(--acc);font-weight:700}
+.shell.collapsed .est-row{display:none}
+
+/* accent swatch row (rail foot, editorial only) */
+.acc-row{display:none;gap:7px;margin-bottom:12px;flex-wrap:wrap}
+.t-edn .acc-row{display:flex}
+.acc{width:17px;height:17px;border-radius:50%;background:var(--a);border:2px solid #fff;box-shadow:0 0 0 1px #cfcfcd;padding:0}
+.acc.on{box-shadow:0 0 0 2px var(--a)}
+.shell.collapsed .acc-row{display:none}
+
+.t-edb{--bd:#000000;--bdw:1px;--desk:#9c9a9a;--band:#464646;--pane:#f8f7f6;--card:#f8f7f6;--chromerad:6px;--navpill:#e8e7e6;--listbg:#f8f7f6;--listrad:6px}
+.t-edb .nav-item.active{color:#a35e47}
+/* C · Masthead: white cards, ink section bands with cream type */
+.t-edc{--bd:#22211e;--bdw:1px;--desk:#eceded;--band:#22211e;--pane:#ffffff;--card:#ffffff;--chromerad:10px;--navpill:#22211e;--listbg:#ffffff;--listrad:10px}
+.t-edc .nav-item.active{color:#f4f1ea}
+
+/* --- shared editorial de-whimsify (applies to all three) --- */
+.ed .dcard,.ed .hero-card{background:var(--card);border:var(--bdw) solid var(--bd);border-radius:var(--chromerad);box-shadow:none}
+.ed .hi{color:#22201c}
+.ed .planes{display:none}
+.ed .quote .q{color:#3a3833}
+.ed .caveat{font-family:'Playfair Display',serif;font-style:italic;font-size:13.5px;color:#5a5650}
+.ed .board{background:var(--card);border:var(--bdw) solid var(--bd);box-shadow:none;border-radius:var(--chromerad)}
+.ed .postit{box-shadow:0 1px 3px rgba(30,28,24,0.12)}
+.ed .postit.y{background:#f1efe9}
+.ed .postit.p{background:#e9e6df}
+.ed .postit.g{background:#dedbd3}
+.ed .postit.b{background:#f4f2ec}
+.ed .postit .plus,.ed .postit .pl{color:#22201c}
+.ed .stat .sl svg{stroke:#22201c}
+.ed .ghosticon{opacity:.3}
+.ed .ghosticon svg{stroke:#ccc7bc}
+.ed .dashes span{background:#e6e3db}
+.ed .gradbar{background:#dcd8ce}
+.ed .people i,.ed .people i::after{background:#6a675f}
+.ed .slider{background:#e6e3db}
+.ed .slider .fill{background:var(--burg)}
+.ed .slider .knob{border-color:var(--burg)}
+.ed .pillb{background:transparent;border:1px solid var(--bd);color:#4a4740}
+.ed .chip{background:#efede6;color:#4a4740}
+.ed .ttab .cnt{background:#efede6;color:#4a4740;border:none}
+.ed .tname,.ed .sname{color:#22201c}
+.ed .fevent{background:var(--card);border:1px solid var(--bd)}
+.ed .scard{background:var(--card);border:1px solid var(--bd);border-left-width:3px}
+.ed .trow,.ed .todo-tabs{border-bottom-color:#e8e5dd}
+.ed .mono-init{background:#eceae3;color:#4a4740}
+.ed .hpill{border-color:var(--bd)}
+.ed .cta-div{background:var(--bd)}
+.ed .cta.ghost{background:transparent;border:1px solid var(--bd);color:#4a4740}
+.ed .cta.ghost:hover{border-color:#22201c;color:#22201c}
+.ed .circ{background:#fff}
+.ed .pband h3,.ed .todo-band h3,.ed .story-head h3{color:#22201c}
+.ed .pband .prm{color:#6a675f}
+.ed .pband .prs{color:#22201c}
+.ed .story-head svg{stroke:#8a867c}
+
+/* --- A · Broadsheet: bands are white with a heavy rule under the title row --- */
+.t-eda .pband,.t-eda .todo-band{background:#ffffff;border-bottom:2px solid #22201c}
+.t-eda .cta.pink,.t-eda .tbtn,.t-eda .qh-cta{background:#ffffff;border:1px solid #22201c;color:#22201c}
+.t-eda .cta.pink:hover,.t-eda .tbtn:hover,.t-eda .qh-cta:hover{background:#f2f0ea}
+
+/* --- Editorial · Urban loft: concrete #9c9a9a, brick #a35e47,
+       black #000, charcoal #464646 — modern industrial; concrete
+       ground, white surfaces, crisp black lines, brick accents --- */
+.t-edb .pband,.t-edb .todo-band{background:#464646;border-bottom:1px solid #000000}
+.t-edb .pband h3,.t-edb .todo-band h3{color:#f8f7f6}
+.t-edb .pband .prm{color:rgba(248,247,246,0.6)}
+.t-edb .pband .prs{color:#f8f7f6}
+.t-edb .cta.pink,.t-edb .tbtn,.t-edb .qh-cta{background:#a35e47;border:1px solid #a35e47;color:#f8f7f6}
+.t-edb .cta.pink:hover,.t-edb .tbtn:hover,.t-edb .qh-cta:hover{background:#8f5140}
+.t-edb .cta.ghost{border:1px solid #000000;color:#141414}
+.t-edb .chip,.t-edb .ttab .cnt{background:#efedec;color:#464646}
+.t-edb .mono-init{background:#e8e7e6;color:#464646}
+.t-edb .tick,.t-edb .todo-band .dot{background:#a35e47}
+.t-edb .ttab.on{color:#141414;border-bottom-color:#000000}
+.t-edb .tname,.t-edb .sname,.t-edb .hi .who,.t-edb .ho-hi em{color:#a35e47}
+.t-edb .quote{border-left-color:#a35e47}
+.t-edb .slider .fill{background:#a35e47}
+.t-edb .slider .knob{border-color:#a35e47}
+.t-edb .dt-todo{background:#f2e5df;border-color:#a35e47;color:#8f5140}
+.t-edb .dt-todo .cnt,.t-edb .dt-todo .tdot{background:#a35e47}
+.t-edb .ho-chip{background:#f2e5df;border-color:#caa08f;color:#8f5140}
+.t-edb .ho-chip .tdot{background:#a35e47}
+.t-edb .ho-stats .stat{background:#f8f7f6;border-color:#000000}
+.t-edb .hero-picker button.on,.t-edb .tb-picker button.on{color:#141414}
+
+/* --- C · Masthead: ink bands with cream type, ink primary buttons --- */
+.t-edc .pband,.t-edc .todo-band{background:#22211e;border-bottom:1px solid #22211e}
+.t-edc .pband h3,.t-edc .todo-band h3{color:#f4f1ea}
+.t-edc .pband .prm{color:rgba(244,241,234,0.55)}
+.t-edc .pband .prs{color:#f4f1ea}
+.t-edc .pband .tick{background:#f4f1ea}
+.t-edc .todo-band .dot{background:#f4f1ea}
+.t-edc .pband svg{stroke:#f4f1ea}
+.t-edc .cta.pink,.t-edc .tbtn,.t-edc .qh-cta{background:#22211e;border:1px solid #22211e;color:#f4f1ea}
+.t-edc .cta.pink:hover,.t-edc .tbtn:hover,.t-edc .qh-cta:hover{background:#3a3833}
+
+/* ============================================================
+   DARK EDITORIAL DRAFTS
+   Cyber    — requested palette: #0B0C10 / #1F2833 / #C5C6C7 / #66FCF1
+   Nocturne — dark academia: ink-brown, parchment text, brandy gold
+   Graphite — cool professional dark, muted steel-blue accent
+   ============================================================ */
+.t-cyb{--bd:#2e3a46;--bdw:1px;--desk:#0b0c10;--band:#1f2833;--pane:#12161c;--card:#151a21;--chromerad:8px;--navpill:#1f2833;--listbg:#151a21;--listrad:8px;--ink:#c5c6c7;--muted:#9aa2ab;--label:#7a828c;--hair:#242e38;--acc:#66fcf1;--accink:#0b0c10}
+.t-noct{--bd:#3a3129;--bdw:1px;--desk:#16120e;--band:#2a221b;--pane:#1b1712;--card:#201a15;--chromerad:8px;--navpill:#2a221b;--listbg:#201a15;--listrad:8px;--ink:#e9ddcd;--muted:#b3a695;--label:#9a8c7c;--hair:#2e2620;--acc:#c9974a;--accink:#1b130a}
+.t-graph{--bd:#2b3036;--bdw:1px;--desk:#0f1113;--band:#1e2226;--pane:#141619;--card:#17191c;--chromerad:8px;--navpill:#1e2226;--listbg:#17191c;--listrad:8px;--ink:#d7dade;--muted:#a6acb4;--label:#8a9098;--hair:#23272c;--acc:#8fb0cc;--accink:#0f1113}
+
+/* shared dark scaffolding */
+.eddark{color:var(--ink)}
+.eddark .rail{background:var(--pane)}
+.eddark .wordmark,.eddark .account .an,.eddark .dt-user,.eddark .fevent,.eddark .ftoday{color:var(--ink)}
+.eddark .rail-search,.eddark .icon-btn,.eddark .dt-search,.eddark .lp-search,.eddark .rail-collapse{background:var(--card);color:var(--muted)}
+.eddark .dt-search::placeholder,.eddark .lp-search::placeholder,.eddark .kk input::placeholder{color:var(--label)}
+.eddark .monogram-s,.eddark .avatar{background:var(--band);border-color:var(--bd);color:var(--ink)}
+.eddark .nav-item{color:var(--muted)}
+.eddark .nav-item.active{color:var(--acc)}
+.eddark .nav-item:hover,.eddark .account:hover{background:rgba(255,255,255,0.04)}
+.eddark .railcnt{background:var(--acc);color:var(--accink)}
+.eddark .hi,.eddark .ho-hi,.eddark .qh-title,.eddark .pnode .plabel,.eddark .kv .v,.eddark .rn,.eddark .hn{color:var(--ink)}
+.eddark .hi .who,.eddark .ho-hi em{color:var(--acc)}
+.eddark .quote .q,.eddark .ho-status,.eddark .caveat,.eddark .ho-quoteline,.eddark .tdesc,.eddark .hs{color:var(--muted)}
+.eddark .quote{border-left-color:var(--acc)}
+.eddark .pband h3,.eddark .todo-band h3,.eddark .story-head h3{color:var(--ink)}
+.eddark .pband .prs{color:var(--ink)}
+.eddark .pband .prm{color:var(--label)}
+.eddark .pband,.eddark .todo-band{background:var(--band);border-bottom:1px solid var(--bd)}
+.eddark .tick,.eddark .todo-band .dot,.eddark .ho-chip .tdot,.eddark .dt-todo .tdot{background:var(--acc)}
+.eddark .trow,.eddark .todo-tabs,.eddark .kv,.eddark .lp-row,.eddark .lp-tools,.eddark .lp-foot{border-color:var(--hair)}
+.eddark .tname,.eddark .sname{color:var(--ink)}
+.eddark .ttab{color:var(--label)}
+.eddark .ttab.on{color:var(--ink);border-bottom-color:var(--acc)}
+.eddark .chip,.eddark .ttab .cnt{background:var(--band);color:var(--muted)}
+.eddark .tbtn,.eddark .cta.pink,.eddark .qh-cta{background:var(--acc);border:1px solid var(--acc);color:var(--accink)}
+.eddark .tbtn:hover,.eddark .cta.pink:hover,.eddark .qh-cta:hover{filter:brightness(1.1)}
+.eddark .cta.ghost{color:var(--ink);border-color:var(--bd);background:transparent}
+.eddark .cta-div,.eddark .fdiv,.eddark .tbp-sep{background:var(--bd)}
+.eddark .stat .sl{color:var(--label)}
+.eddark .stat .sl svg{stroke:var(--acc)}
+.eddark .ghosticon svg{stroke:var(--band)}
+.eddark .pillb{color:var(--muted);border-color:var(--bd)}
+.eddark .dashes span,.eddark .gradbar,.eddark .slider{background:var(--band)}
+.eddark .slider .fill{background:var(--acc)}
+.eddark .slider .knob{background:var(--card);border-color:var(--acc)}
+.eddark .people i,.eddark .people i::after{background:var(--muted)}
+.eddark .circ{background:var(--card)}
+.eddark .mono-init{background:var(--band);color:var(--ink)}
+.eddark .lp-row.sel{background:var(--band)}
+.eddark .lp-foot{color:var(--label)}
+.eddark .rhero{background:linear-gradient(135deg,var(--card) 40%,var(--band))}
+.eddark .hpill{background:var(--card);border-color:var(--bd);color:var(--acc)}
+.eddark .board{background:var(--card);border-color:var(--bd)}
+.eddark .postit.y{background:#2e2c22}.eddark .postit.p{background:#332a28}.eddark .postit.g{background:#26302a}.eddark .postit.b{background:#262d33}
+.eddark .postit .plus,.eddark .postit .pl{color:var(--muted)}
+.eddark .ho-quote{background:var(--band)}
+.eddark .ho-quote .q{color:var(--ink)}
+.eddark .ho-quote .a{color:var(--label)}
+.eddark .ho-quote::before{background:var(--acc)}
+.eddark .hnote.n1{background:#2e2c22}.eddark .hnote.n2{background:#26302a}.eddark .hnote.n3{background:#262d33}
+.eddark .ho-chip,.eddark .dt-todo{background:var(--band);border-color:var(--bd);color:var(--ink)}
+.eddark .dt-todo .cnt{background:var(--acc);color:var(--accink)}
+.eddark .dt-icon,.eddark .dt-si{color:var(--muted)}
+.eddark .dt-icon:hover,.eddark .dt-si:hover{color:var(--acc)}
+.eddark .dt-date{color:var(--label)}
+.eddark .hero-picker button,.eddark .tb-picker button{background:var(--card);border-color:var(--bd);color:var(--label)}
+.eddark .hero-picker button.on,.eddark .tb-picker button.on{background:var(--band);color:var(--acc)}
+.eddark .theme-seg{border-color:var(--bd)}
+.eddark .theme-seg button{color:var(--label)}
+.eddark .theme-seg button.on{background:var(--band);color:var(--acc)}
+.eddark .help-fab{background:var(--card);color:var(--acc);border-color:var(--bd)}
+.eddark .todo-tray{box-shadow:0 18px 50px rgba(0,0,0,0.55)}
+.eddark .story-head svg{stroke:var(--muted)}
+.eddark .demo-hint{color:var(--label)}
+.eddark .kk{background:var(--card);border-color:var(--bd)}
+.eddark .kk input{color:var(--ink);border-bottom-color:var(--hair)}
+.eddark .kk-item{color:var(--ink)}
+.eddark .kk-item:hover{background:var(--band);color:var(--acc)}
+.eddark .seg-cap{color:var(--label)}
+
+.seg-cap{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--label);margin:0 2px 5px}
+.shell.collapsed .seg-cap{display:none}
+
+/* ============================================================
+   DASHBOARD-ONLY THIN TOP BAR — search · settings · user
+   ============================================================ */
+.dtopbar{display:flex;align-items:center;gap:14px;margin:-20px -24px 16px;padding:9px 24px;background:var(--card);border-bottom:var(--bdw) solid var(--bd)}
+.dt-searchwrap{display:flex;align-items:center;gap:9px;width:370px;background:rgba(20,15,10,0.035);border:1px solid var(--hair,#e7ddd2);border-radius:99px;padding:7px 13px 7px 15px;transition:background 160ms ease,border-color 160ms ease,box-shadow 160ms ease}
+.dt-searchwrap svg{stroke:var(--label,#9c8878);flex:none}
+.dt-searchwrap kbd{font-family:'JetBrains Mono',monospace;font-size:8px;background:var(--card,#fffefb);border:1px solid var(--hair,#e7ddd2);border-radius:5px;padding:2px 6px;color:var(--label,#9c8878)}
+.dt-searchwrap:focus-within{background:var(--card,#fffefb);border-color:#b8b0a6;box-shadow:0 0 0 3px rgba(20,15,10,0.05)}
+.dt-searchwrap:focus-within svg{stroke:var(--ink,#3a1c14)}
+.dt-search{flex:1;min-width:0;border:none;background:transparent;outline:none;font-size:12.5px;font-family:'Inter',sans-serif;color:var(--ink,#3a1c14)}
+.dt-search::placeholder{color:var(--label,#9c8878)}
+.dt-right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.dt-icon{background:none;border:none;color:#6a5a50;cursor:pointer;display:flex;padding:4px}
+.dt-icon:hover{color:var(--burg)}
+.dt-user{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:500;color:var(--ink);cursor:pointer}
+.ed .dt-search:focus{border-color:#b5afa2;box-shadow:0 0 0 3px rgba(181,175,162,0.18)}
+
+/* ============================================================
+   GREETING DRAFTS — mockup-only picker + three uncontained
+   treatments of the hero. Default = today's card.
+   ============================================================ */
+.hero-picker{display:flex;align-items:center;gap:6px;justify-content:flex-end;margin:-4px 0 10px}
+.hp-lbl{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-right:4px}
+.hero-picker button{border:1px solid var(--bd);background:var(--card);border-radius:99px;padding:4px 12px;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.05em;color:var(--label);cursor:pointer}
+.hero-picker button.on{background:var(--band);color:var(--burg);font-weight:700}
+
+/* --- OPEN: greeting sits directly on the desk; whitespace is the
+       container; a hairline rule closes the header zone; post-its
+       float free (frame removed) --- */
+#pg-dashboard.hv-open .hero-card{background:transparent;border:none;box-shadow:none;border-radius:0;padding:22px 6px 30px;border-bottom:1px solid var(--bd)}
+#pg-dashboard.hv-open .hi{font-size:47px}
+#pg-dashboard.hv-open .board{background:transparent;border:none;box-shadow:none}
+#pg-dashboard.hv-open .postit{box-shadow:0 3px 10px rgba(58,28,20,0.18)}
+#pg-dashboard.hv-open .postit.y{transform:rotate(-8deg) translate(-16px,-8px)}
+#pg-dashboard.hv-open .postit.g{transform:rotate(7deg) translate(14px,10px)}
+#pg-dashboard.hv-open .postit.b{transform:rotate(-3deg) translate(6px,-20px)}
+
+/* --- BAND: full-bleed tinted band behind the greeting (edge to
+       edge, not a card); content resumes on the desk below --- */
+#pg-dashboard.hv-band .hero-card{background:var(--band);border:none;box-shadow:none;border-radius:0;margin:-16px -24px 20px;padding:30px 38px 26px;border-bottom:var(--bdw) solid var(--bd)}
+#pg-dashboard.hv-band .board{background:transparent;border:none;box-shadow:none}
+#pg-dashboard.hv-band .quote .q{color:#3a2c24}
+#pg-dashboard.hv-band .cta.ghost{background:rgba(255,255,255,0.55)}
+
+/* --- MASTHEAD: compact editorial header — greeting left, actions
+       right on one baseline, quote beneath, heavy rule closes it;
+       corkboard retired --- */
+#pg-dashboard.hv-mast .hero-card{background:transparent;border:none;box-shadow:none;border-radius:0;padding:12px 6px 18px;border-bottom:2px solid #22201c}
+#pg-dashboard.hv-mast .board{display:none}
+#pg-dashboard.hv-mast .hero-left{display:grid;grid-template-columns:1fr auto;align-items:center;column-gap:24px}
+#pg-dashboard.hv-mast .hi{font-size:29px;grid-column:1;grid-row:1}
+#pg-dashboard.hv-mast .cta-row{grid-column:2;grid-row:1;flex-wrap:nowrap}
+#pg-dashboard.hv-mast .quote{grid-column:1 / -1;grid-row:2;margin:12px 0 0;border-left:none;padding-left:0;display:flex;align-items:baseline;gap:12px}
+#pg-dashboard.hv-mast .quote .q{font-size:13.5px}
+#pg-dashboard.hv-mast .quote .a{margin-top:0}
+
+/* ============================================================
+   TOP BAR DRAFTS — width × colour × layout, freely combinable
+   ============================================================ */
+.dt-left{display:none;align-items:center}
+.dt-date{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--label);white-space:nowrap}
+.dt-si{display:none;background:none;border:none;color:#6a5a50;cursor:pointer;padding:4px}
+.dt-si:hover{color:var(--burg)}
+
+/* widths (default = full-bleed) */
+.dtopbar.tb-w-content{margin:0 0 16px;border:var(--bdw) solid var(--bd);border-radius:var(--chromerad)}
+.dtopbar.tb-w-float{margin:-8px 0 16px;border:var(--bdw) solid var(--bd);border-radius:99px;padding:8px 18px;box-shadow:0 2px 10px rgba(58,28,20,0.07)}
+
+/* colours (default = card) */
+.dtopbar.tb-c-desk{background:transparent;box-shadow:none}
+.dtopbar.tb-c-desk.tb-w-full, .dtopbar.tb-c-desk:not(.tb-w-content):not(.tb-w-float){border-bottom-color:transparent}
+.dtopbar.tb-c-band{background:var(--band)}
+.dtopbar.tb-c-ink{background:#22211e;border-color:#22211e}
+.dtopbar.tb-c-ink .dt-search{background:rgba(255,255,255,0.09);border-color:rgba(244,241,234,0.28);color:#f4f1ea}
+.dtopbar.tb-c-ink .dt-search::placeholder{color:rgba(244,241,234,0.55)}
+.dtopbar.tb-c-ink .dt-icon,.dtopbar.tb-c-ink .dt-si{color:#d8d4ca}
+.dtopbar.tb-c-ink .dt-icon:hover,.dtopbar.tb-c-ink .dt-si:hover{color:#ffffff}
+.dtopbar.tb-c-ink .dt-user span{color:#f4f1ea}
+.dtopbar.tb-c-ink .dt-date{color:rgba(244,241,234,0.6)}
+
+/* layouts (default = search left) */
+.dtopbar.tb-l-center .dt-left{display:flex;flex:1}
+.dtopbar.tb-l-center .dt-search{width:340px}
+.dtopbar.tb-l-center .dt-right{flex:1;justify-content:flex-end;margin-left:0}
+.dtopbar.tb-l-min .dt-left{display:flex;flex:1}
+.dtopbar.tb-l-min .dt-search{display:none}
+.dtopbar.tb-l-min .dt-si{display:flex}
+
+/* picker */
+.tb-picker{display:flex;align-items:center;gap:6px;justify-content:flex-end;margin:-4px 0 8px;flex-wrap:wrap}
+.tb-picker button{border:1px solid var(--bd);background:var(--card);border-radius:99px;padding:4px 11px;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.05em;color:var(--label);cursor:pointer}
+.tb-picker button.on{background:var(--band);color:var(--burg);font-weight:700}
+.tbp-group{display:inline-flex;gap:4px}
+.tbp-sep{width:1px;height:16px;background:var(--bd);margin:0 4px}
+
+svg{fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+/* ============================================================
+   RADICAL GREETING DRAFTS — best-in-class open headers
+   O1 Salutation (Notion/Asana centred calm)
+   O2 Briefing (Stripe: the greeting IS the status)
+   O3 Desk scene (warm split: text left, desk objects right)
+   ============================================================ */
+.hero-open{display:none;border-bottom:1px solid var(--bd);padding:26px 8px 30px;margin-bottom:4px}
+#pg-dashboard.hv-o1 .hero-card,#pg-dashboard.hv-o2 .hero-card,#pg-dashboard.hv-o3 .hero-card{display:none}
+#pg-dashboard.hv-o1 .hero-open,#pg-dashboard.hv-o2 .hero-open{display:block}
+#pg-dashboard.hv-o3 .hero-open{display:grid;grid-template-columns:1fr 340px;column-gap:26px;align-items:center;padding:22px 6px 28px}
+
+.ho-eyebrow{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--label);display:flex;gap:10px;align-items:center}
+.ho-top{margin-top:10px}
+.ho-hi{font-family:'Playfair Display',serif;font-size:44px;font-weight:500;color:var(--green);line-height:1.08}
+.ho-hi em{font-style:italic;color:var(--burg)}
+.ho-ctas{display:flex;gap:10px;align-items:center;margin-top:22px;flex-wrap:wrap}
+.ho-status{font-size:13.5px;color:#5a4a40;margin-top:16px;font-weight:300}
+.ho-status b{font-family:'Playfair Display',serif;font-weight:600;color:var(--burg);font-size:16px}
+.ho-quoteline{display:none;font-family:'Playfair Display',serif;font-style:italic;font-size:12.5px;color:var(--muted);margin-top:12px}
+.ho-quoteline span{font-family:'JetBrains Mono',monospace;font-style:normal;font-size:8px;letter-spacing:.14em;text-transform:uppercase}
+
+.ho-scene{display:none;position:relative;height:212px}
+.ho-quote{position:absolute;left:26%;top:10%;width:172px;background:#f8e8e1;padding:18px 15px 13px;box-shadow:0 3px 10px rgba(58,28,20,0.18);transform:rotate(2.5deg)}
+.ho-quote::before{content:'';position:absolute;top:-5px;left:50%;width:10px;height:10px;border-radius:50%;background:var(--burg);box-shadow:0 1px 2px rgba(0,0,0,0.3)}
+.ho-quote .q{font-family:'Caveat',cursive;font-size:17px;line-height:1.3;color:#4a3a30;display:block}
+.ho-quote .a{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.12em;color:#8a7a6c;text-transform:uppercase;display:block;margin-top:9px}
+.hnote{position:absolute;width:64px;height:64px;box-shadow:0 3px 9px rgba(58,28,20,0.16)}
+.hnote.n1{background:#f7eec4;left:4%;top:56%;transform:rotate(-8deg)}
+.hnote.n2{background:#dfeadb;right:5%;top:6%;transform:rotate(7deg)}
+.hnote.n3{background:#dde7ec;right:12%;top:60%;transform:rotate(-4deg)}
+
+/* focus hand-off: outgoing returns toward its home (down-left, where
+   the minis live), incoming snaps in from the same direction with a
+   slight overshoot. Swap ≈ 700ms total, close ≈ 660ms. */
+@keyframes goHome{to{opacity:0;transform:translate(-48px,34px) scale(.84)}}
+@keyframes snapIn{0%{opacity:0;transform:translate(-36px,22px) scale(.9)}70%{opacity:1;transform:translate(2px,-2px) scale(1.012)}100%{opacity:1;transform:none}}
+.ho-side .fstat.leaving,.ho-side .todo-card.leaving{animation:goHome 300ms cubic-bezier(.5,0,.8,.4) forwards}
+.ho-side .fstat.arriving,.ho-side .todo-card.arriving{animation:snapIn 400ms cubic-bezier(.22,.8,.3,1) both}
+@media (prefers-reduced-motion:reduce){.ho-side .fstat.leaving,.ho-side .todo-card.leaving,.ho-side .fstat.arriving,.ho-side .todo-card.arriving{animation:none}}
+
+/* --- hand-off variants (picker, mockup only). Default A = go home. --- */
+.ho-side .leaving{z-index:1}
+.ho-side .arriving{z-index:2}
+/* B · Crossfade: overlap, out sinks, in settles from above */
+@keyframes bOut{to{opacity:0;transform:translateY(10px)}}
+@keyframes bIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+.shell.an-b .ho-side .leaving{animation:bOut 280ms ease forwards}
+.shell.an-b .ho-side .arriving{animation:bIn 320ms ease both}
+/* C · Shuffle: dealt away right, next drawn in from the same edge */
+@keyframes cOut{to{opacity:0;transform:translateX(64px) rotate(1.5deg)}}
+@keyframes cIn{from{opacity:0;transform:translateX(72px)}to{opacity:1;transform:none}}
+.shell.an-c .ho-side .leaving{animation:cOut 250ms cubic-bezier(.5,0,.8,.4) forwards}
+.shell.an-c .ho-side .arriving{animation:cIn 360ms cubic-bezier(.22,.8,.3,1) both}
+/* D · Flip: the panel turns over */
+.ho-side{perspective:1400px}
+@keyframes dOut{to{opacity:0;transform:rotateY(-68deg)}}
+@keyframes dIn{from{opacity:0;transform:rotateY(68deg)}to{opacity:1;transform:none}}
+.shell.an-d .ho-side .leaving{animation:dOut 240ms cubic-bezier(.5,0,.8,.4) forwards}
+.shell.an-d .ho-side .arriving{animation:dIn 340ms cubic-bezier(.22,.8,.3,1) both}
+/* E · Zoom-through: out recedes forward, in rises from beneath */
+@keyframes eOut{to{opacity:0;transform:scale(1.06)}}
+@keyframes eIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+.shell.an-e .ho-side .leaving{animation:eOut 300ms ease forwards}
+.shell.an-e .ho-side .arriving{animation:eIn 340ms cubic-bezier(.22,.8,.3,1) both}
+
+.an-picker{position:fixed;bottom:8px;left:24px;z-index:50;display:flex;align-items:center;gap:5px}
+.an-picker span{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--label,#9c8878);margin-right:3px}
+.an-picker button{border:1px solid var(--bd,#d8cebf);background:var(--card,#fffefb);border-radius:99px;padding:4px 11px;font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--label,#9c8878);cursor:pointer}
+.an-picker button.on{background:var(--band,#f2ddd5);color:var(--ink,#3a1c14);font-weight:700}
+
+/* focusable stat cards */
+#b-stats .stat,.stat2{cursor:pointer;transition:transform 160ms ease,box-shadow 160ms ease,border-color 160ms ease}
+#b-stats .stat:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(58,28,20,0.10)}
+.stat2:hover{transform:translateY(-1px)}
+.ho-stats.cols3{grid-template-columns:repeat(3,1fr)}
+.fstat{position:absolute;inset:0;display:flex;flex-direction:column;background:#fffefb;border:1px solid #e7ddd2;border-radius:14px;padding:20px 22px;text-align:left}
+.t-bold .fstat{border:1.5px solid #1d1712}
+.t-edn .fstat{background:#ffffff;border-color:transparent;border-radius:16px;box-shadow:0 1px 2px rgba(20,20,20,0.05),0 12px 32px rgba(20,20,20,0.07)}
+.fstat .cap{display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#8a7a6c}
+.fstat .cap svg{stroke:#7c3a2a;flex:none}
+.t-edn .fstat .cap svg{stroke:var(--acc)}
+.fstat .bign{font-family:'Playfair Display',serif;font-size:52px;font-weight:500;color:var(--ink,#3a1c14);line-height:1;margin-top:16px}
+.fstat .sub{font-size:12.5px;color:#8a7a6c;margin-top:8px}
+.fstat .ffoot{margin-top:auto;padding-top:18px}
+.unpin{position:absolute;top:14px;right:14px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--hair,#e7ddd2);background:transparent;border-radius:99px;padding:5px 12px;color:var(--label,#9c8878);cursor:pointer}
+.unpin:hover{color:var(--ink,#3a1c14);border-color:var(--ink,#3a1c14)}
+
+/* 2x2 stats fill the left column while the to-do panel is open */
+.ho-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;text-align:left;max-height:0;opacity:0;overflow:clip;overflow-clip-margin:28px;margin-top:0;transition:max-height 360ms cubic-bezier(.22,.8,.3,1),opacity 240ms ease,margin-top 360ms cubic-bezier(.22,.8,.3,1)}
+.hero-open.split .ho-stats{max-height:340px;opacity:1;margin-top:22px;transition-delay:60ms}
+.stat2{background:#fffefb;border:1px solid #e7ddd2;border-radius:14px;padding:14px 17px}
+.stat2 .cap{display:flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:#8a7a6c}
+.stat2 .cap svg{stroke:#7c3a2a;flex:none}
+.stat2 .n{font-family:'Playfair Display',serif;font-size:30px;font-weight:500;color:#3a1c14;line-height:1.05;margin-top:8px}
+.stat2 .p{font-size:10.5px;color:#8a7a6c;margin-top:4px}
+.t-bold .stat2{background:#fffefb;border:1.5px solid #1d1712}
+.t-edb .stat2{background:#f8f7f6;border:1px solid #000000}
+.t-edb .stat2 .cap svg{stroke:#a35e47}
+.t-edb .stat2 .n{color:#141414}
+#pg-dashboard.split-open #b-stats{max-height:0;opacity:0;overflow:clip;overflow-clip-margin:28px;margin-bottom:-20px;transition:max-height 360ms cubic-bezier(.22,.8,.3,1),opacity 200ms ease,margin-bottom 360ms cubic-bezier(.22,.8,.3,1)}
+#pg-dashboard #b-stats{max-height:260px;margin-bottom:0;transition:max-height 360ms cubic-bezier(.22,.8,.3,1),opacity 240ms ease 100ms,margin-bottom 360ms cubic-bezier(.22,.8,.3,1);overflow:clip;overflow-clip-margin:28px}
+/* panel height follows the greeting column — bottoms align */
+
+/* split greeting: chip slides the salutation left, To-do spawns right */
+#pg-dashboard.hv-o1 .hero-open{display:grid;grid-template-columns:1fr 0px;gap:0;transition:grid-template-columns 360ms cubic-bezier(.22,.8,.3,1),gap 360ms cubic-bezier(.22,.8,.3,1)}
+#pg-dashboard.hv-o1 .hero-open.split{grid-template-columns:1fr 380px;gap:20px}
+.ho-main{min-width:0}
+.ho-side{min-width:0;position:relative;opacity:0;transform:translateX(14px);transition:opacity 240ms ease,transform 340ms cubic-bezier(.22,.8,.3,1);pointer-events:none}
+.hero-open.split .ho-side{opacity:1;transform:none;pointer-events:auto;transition-delay:90ms}
+.ho-side .todo-card{text-align:left;position:absolute;inset:0;display:flex;flex-direction:column}
+.ho-side .todo-list{flex:1;min-height:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--bd) transparent}
+.ttx{margin-left:auto;background:none;border:none;font-size:17px;line-height:1;color:inherit;opacity:.65;padding:0 2px;cursor:pointer}
+.ttx:hover{opacity:1}
+.trow{transition:opacity 220ms ease,transform 220ms ease}
+.trow.done{opacity:0;transform:translateX(10px)}
+.ho-chip{transition:opacity 260ms ease}
+.ho-chip.gone{opacity:0;pointer-events:none}
+@media (prefers-reduced-motion:reduce){#pg-dashboard.hv-o1 .hero-open,.ho-side,.trow{transition:none}}
+
+/* O1 · Salutation — centred, calm, no desk objects */
+#pg-dashboard.hv-o1 .ho-status{display:none}
+#pg-dashboard.hv-o1 .hero-open{text-align:center;padding:36px 0 34px}
+#pg-dashboard.hv-o1 .ho-eyebrow{justify-content:center}
+#pg-dashboard.hv-o1 .ho-hi{font-size:49px}
+#pg-dashboard.hv-o1 .ho-ctas{justify-content:center;margin-top:18px}
+
+/* O2 · Briefing — greeting left, actions right; the status line is the hero */
+#pg-dashboard.hv-o2 .hero-open{padding:22px 6px 24px}
+#pg-dashboard.hv-o2 .ho-top{display:flex;align-items:center;justify-content:space-between;gap:20px}
+#pg-dashboard.hv-o2 .ho-hi{font-size:32px}
+#pg-dashboard.hv-o2 .ho-ctas{margin-top:0;flex-wrap:nowrap}
+#pg-dashboard.hv-o2 .ho-status{font-family:'Playfair Display',serif;font-size:22px;font-weight:400;color:var(--ink);margin-top:15px}
+#pg-dashboard.hv-o2 .ho-status b{font-size:24px}
+#pg-dashboard.hv-o2 .ho-quoteline{display:block}
+
+/* O3 · Desk scene — text column left, quote-as-post-it among notes right */
+#pg-dashboard.hv-o3 .ho-hi{font-size:39px}
+#pg-dashboard.hv-o3 .ho-scene{display:block}
+
+/* ============================================================
+   DASHBOARD LAYOUT DRAFTS — grid areas, worst → best
+   ============================================================ */
+.dash .blk{min-width:0}
+#b-hero{grid-area:hero}#b-stats{grid-area:stats}#b-live{grid-area:live}
+#b-fort{grid-area:fort}#b-todo{grid-area:todo}#b-story{grid-area:story}
+.dash.l-current{grid-template-columns:1fr 372px;grid-template-areas:"hero todo" "stats todo" "live todo" "fort story"}
+.dash.l-metrics{grid-template-columns:1fr 372px;grid-template-areas:"hero hero" "stats stats" "live todo" "fort story"}
+.dash.l-action{grid-template-columns:1.05fr 1fr;grid-template-areas:"hero hero" "todo stats" "todo story" "live live" "fort fort"}
+.dash.l-command{grid-template-columns:1.05fr 1fr;grid-template-areas:"hero hero" "live live" "todo story" "todo stats" "fort fort"}
+
+.dash.l-tray{grid-template-columns:1fr 372px;grid-template-areas:"hero hero" "live live" "stats stats" "fort story"}
+.l-tray #b-todo{display:none}
+.dash.l-mtray{grid-template-columns:1fr 372px;grid-template-areas:"hero hero" "stats stats" "live story" "fort fort"}
+.dash.l-final{grid-template-columns:1fr;grid-template-areas:"hero" "stats" "fort" "live"}
+.l-final #b-todo{display:none}
+.l-mtray #b-todo{display:none}
+
+/* --- tray position drafts --- */
+#todoTrigB,#todoTrigC,#todoTrigD{display:none}
+.shell.pos-b #todoTrig{display:none}
+.shell.pos-b #todoTrigB{display:flex}
+.shell.pos-c #todoTrig{display:none}
+.shell.pos-c #todoTrigC{display:flex}
+.shell.pos-d #todoTrig{display:none}
+.shell.pos-d #todoTrigD{display:inline-flex}
+.shell.pos-b .todo-tray{left:auto;right:20px}
+.shell.pos-c .todo-tray{position:fixed;left:224px;top:104px;z-index:70}
+.shell.collapsed.pos-c .todo-tray{left:68px}
+.shell.pos-d .todo-tray{left:50%;margin-left:-280px;top:296px}
+.railcnt{margin-left:auto;background:var(--burg);color:#fdfaf5;font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;border-radius:99px;padding:1px 6px}
+.shell.collapsed .railcnt{display:none}
+.t-edb .railcnt{background:#6d8196}
+.ho-chip{display:inline-flex;align-items:center;gap:10px;margin:16px 0 0;background:transparent;border:none;color:#3b2a20;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:6px 2px;cursor:pointer}
+.ho-chip:hover{opacity:.72}
+.ho-chip .tdot{width:7px;height:7px;border-radius:50%;background:var(--chipdot,#7c3a2a);animation:chippulse 2s ease-out infinite}
+@keyframes chippulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--chipdot,#7c3a2a) 45%,transparent)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+@media (prefers-reduced-motion:reduce){.ho-chip .tdot{animation:none}}
+.t-capp .ho-chip{color:#3b2a20}
+.t-capp{--chipdot:#7c3a2a}
+.t-bold .ho-chip{color:#000000}
+.t-bold{--chipdot:#1d1712}
+.ho-chip .chev{stroke:currentColor}
+.t-edb .ho-chip{background:#ffffe3;border-color:#4a4a4a;color:#2e2e2e}
+.t-edb .ho-chip .tdot{background:#6d8196}
+
+/* --- To-do tray from the top bar --- */
+.page{position:relative}
+.dt-todo{display:flex;align-items:center;gap:7px;background:var(--postit);border:1px solid #ecd0c2;color:var(--burg);font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.06em;font-weight:500;padding:7px 13px;border-radius:99px;cursor:pointer;margin-right:12px}
+.dt-todo:hover{background:var(--btnH)}
+.dt-todo .tdot{width:6px;height:6px;border-radius:50%;background:var(--burg)}
+.dt-todo .cnt{background:var(--burg);color:#fdfaf5;border-radius:99px;font-size:8px;font-weight:700;padding:1px 6px}
+.dt-todo .chev{stroke:currentColor;transition:transform 150ms}
+.dt-todo.open .chev{transform:rotate(180deg)}
+.dtopbar.tb-c-ink .dt-todo{background:rgba(255,255,255,0.1);border-color:rgba(244,241,234,0.3);color:#f4f1ea}
+.todo-tray{display:none;position:absolute;z-index:40;top:54px;left:20px;width:560px;max-width:94%;background:var(--card);border:var(--bdw) solid var(--bd);border-radius:14px;box-shadow:0 18px 50px rgba(29,23,18,0.22);overflow:hidden}
+.todo-tray.open{display:block;animation:trayIn 160ms ease-out}
+@keyframes trayIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.todo-tray .todo-list{max-height:372px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--bd) transparent}
+@media (prefers-reduced-motion:reduce){.todo-tray.open{animation:none}}
+
+/* compact stat strip when stats are demoted to a column (drafts 3 & 4) */
+.l-action #b-stats,.l-command #b-stats{grid-template-columns:repeat(2,1fr);gap:12px}
+.l-action #b-stats .stat,.l-command #b-stats .stat{min-height:0;padding:14px 16px}
+.l-action #b-stats .ghosticon,.l-command #b-stats .ghosticon,
+.l-action #b-stats .foot,.l-command #b-stats .foot{display:none}
+.l-action #b-stats .num,.l-command #b-stats .num{font-size:27px}
+.l-action #b-stats .num-row,.l-command #b-stats .num-row{margin-top:8px}
+
+@media (max-width:1100px){
+  .dash{display:flex;flex-direction:column}
+
+  .ho-scene{display:none !important}
+  #pg-dashboard.hv-o3 .hero-open{display:block}
+
+  .stat-row{grid-template-columns:repeat(2,1fr)}
+  .board{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="shell t-capp pos-d es4 eb2 on-dash an-d" id="shell">
+
+  <!-- ================= PERSISTENT RAIL ================= -->
+  <aside class="rail">
+    <button class="rail-collapse" id="collapseBtn" title="Collapse sidebar">‹</button>
+    <div class="rail-head">
+      <div class="monogram-s">S</div>
+      <div class="wordmark">ScriptAlly</div>
+    </div>
+
+    <div class="rail-search" id="kkTrigger">
+      <svg width="14" height="14" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <span class="rs-label">Search…</span>
+      <kbd>⌘K</kbd>
+    </div>
+
+    <nav class="rail-nav">
+      <button class="nav-item active" data-route="dashboard">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7.5" height="9" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="5.5" rx="1.5"/><rect x="13.5" y="12" width="7.5" height="9" rx="1.5"/><rect x="3" y="15.5" width="7.5" height="5.5" rx="1.5"/></svg>
+        <span class="nl">Dashboard</span>
+      </button>
+      <button class="nav-item" data-route="queries">
+        <svg viewBox="0 0 24 24"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4 18-7z"/></svg>
+        <span class="nl">Queries</span>
+      </button>
+      <button class="nav-item" data-route="agents">
+        <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17.5" cy="9" r="2.5"/><path d="M16 14.5c3 .3 5.5 2.3 5.5 5.5"/></svg>
+        <span class="nl">Agents</span>
+      </button>
+      <button class="nav-item" data-route="manuscripts">
+        <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg>
+        <span class="nl">Manuscripts</span>
+      </button>
+      <button class="nav-item" id="todoTrigC" data-todotrig>
+        <svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg>
+        <span class="nl">To-do</span><span class="railcnt">7</span>
+      </button>
+    </nav>
+
+    <div class="rail-foot">
+      <div class="icon-row">
+        <button class="icon-btn" title="Alerts">
+          <svg width="14" height="14" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+          <span class="bdg">9+</span>
+        </button>
+        <button class="icon-btn" title="Settings">
+          <svg width="14" height="14" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.9 2.9l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.9-2.9l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.9-2.9l.1.1a1.7 1.7 0 0 0 1.9.3h.1a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5h.1a1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.9 2.9l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1a1.7 1.7 0 0 0 1.5 1h.2a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1z"/></svg>
+        </button>
+      </div>
+      <div class="theme-seg" role="group" aria-label="Theme">
+        <button data-th="capp" class="on">Capp</button>
+        <button data-th="bold">Bold</button>
+        <button data-th="ed">Editorial</button>
+      </div>
+      
+      <div class="account">
+        <div class="avatar">B</div>
+        <div>
+          <div class="an">Bethus Wethus</div>
+          <div class="ap">Pro</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================= STAGE ================= -->
+  <div class="stage">
+    <div class="stage-scroll" id="stageScroll">
+
+      <!-- ========== DASHBOARD (faithful) ========== -->
+      <section class="page on hv-o1" id="pg-dashboard">
+
+        <!-- dashboard-only thin top bar -->
+        <div class="dtopbar tb-w-float tb-l-center" id="dtopbar">
+          <div class="dt-left">
+            <button class="dt-todo" id="todoTrig" data-todotrig><span class="tdot"></span>To-do<span class="cnt">7</span><svg class="chev" width="10" height="10" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+            <span class="dt-date">Friday 3 July</span>
+          </div>
+          <div class="dt-searchwrap">
+            <svg width="13" height="13" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            <input class="dt-search" placeholder="Search agents, queries&hellip;">
+            <kbd>&#8984;K</kbd>
+          </div>
+          <div class="dt-right">
+            <button class="dt-todo" id="todoTrigB" data-todotrig><span class="tdot"></span>To-do<span class="cnt">7</span><svg class="chev" width="10" height="10" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+            <button class="dt-si" title="Search">
+              <svg width="15" height="15" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            </button>
+            <button class="dt-icon" title="Settings">
+              <svg width="15" height="15" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.9 2.9l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.9-2.9l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.9-2.9l.1.1a1.7 1.7 0 0 0 1.9.3h.1a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.5h.1a1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.9 2.9l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1a1.7 1.7 0 0 0 1.5 1h.2a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.5 1z"/></svg>
+            </button>
+            <div class="dt-user">
+              <div class="avatar" style="width:26px;height:26px;font-size:11px">B</div>
+              <span>Bethus Wethus</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="dash l-final" id="dashGrid">
+
+          <div class="blk" id="b-hero">
+            <!-- hero -->
+            <div class="hero-card">
+              <div class="hero-left">
+                <div class="hi">Welcome back, <span class="who">Bethus</span><span class="planes">🡒🡒</span></div>
+                <div class="quote">
+                  <div class="q">The first draft is just you telling yourself the story.</div>
+                  <div class="a">— Terry Pratchett</div>
+                </div>
+                <div class="cta-row">
+                  <button class="cta pink"><svg viewBox="0 0 24 24"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4 18-7z"/></svg>Send query</button>
+                  <button class="cta pink"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 5 5v1"/></svg>Record a response</button>
+                  <div class="cta-div"></div>
+                  <button class="cta ghost"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M18 8v6M15 11h6"/></svg>Add agent</button>
+                  <button class="cta ghost"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14z"/></svg>Add manuscript</button>
+                </div>
+              </div>
+              <div class="board">
+                <div class="postit b"></div>
+                <div class="postit y"></div>
+                <div class="postit p"><span class="plus">+</span><span class="pl">Add a note</span></div>
+                <div class="postit g"></div>
+              </div>
+            </div>
+
+            <!-- radical open-greeting drafts (hidden unless a draft is selected) -->
+            <div class="hero-open">
+              <div class="ho-main">
+                <div class="ho-eyebrow"><span>Friday 3 July</span><span>&middot;</span><span>Week nine of querying</span></div>
+                <div class="ho-top">
+                  <h1 class="ho-hi">Good afternoon, <em>Bethus</em></h1>
+                  <button class="ho-chip" id="todoTrigD"><span class="tdot"></span><span id="chipTxt">7 things need your attention</span><svg class="chev" width="10" height="10" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+                  <div class="ho-ctas">
+                    <button class="cta pink"><svg viewBox="0 0 24 24"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4 18-7z"/></svg>Send query</button>
+                    <button class="cta pink"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 5 5v1"/></svg>Record a response</button>
+                    <div class="cta-div"></div>
+                    <button class="cta ghost"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M18 8v6M15 11h6"/></svg>Add agent</button>
+                    <button class="cta ghost"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14z"/></svg>Add manuscript</button>
+                  </div>
+                </div>
+                <div class="ho-stats">
+                  <div class="stat2" data-s="1" title="Pin to focus"><div class="cap"><svg viewBox="0 0 24 24" width="12" height="12"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4 18-7z"/></svg>Queries sent</div><div class="n">23</div><div class="p">+3 this week</div></div>
+                  <div class="stat2" data-s="2" title="Pin to focus"><div class="cap"><svg viewBox="0 0 24 24" width="12" height="12"><path d="M6 2h12M6 22h12M8 2v4l4 4 4-4V2M8 22v-4l4-4 4 4v4"/></svg>Active queries</div><div class="n">16</div><div class="p">8 awaiting a reply</div></div>
+                  <div class="stat2" data-s="3" title="Pin to focus"><div class="cap"><svg viewBox="0 0 24 24" width="12" height="12"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17.5" cy="9" r="2.5"/><path d="M16 14.5c3 .3 5.5 2.3 5.5 5.5"/></svg>Agents</div><div class="n">18</div><div class="p">2 idle</div></div>
+                  <div class="stat2" data-s="4" title="Pin to focus"><div class="cap"><svg viewBox="0 0 24 24" width="12" height="12"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 6L2 7"/></svg>Responses received</div><div class="n">12</div><div class="p">52% rate</div></div>
+                </div>
+                <p class="ho-status"><b>16</b> queries live&ensp;&middot;&ensp;<b>3</b> agents waiting on your pages&ensp;&middot;&ensp;<b>1</b> offer to weigh</p>
+                <p class="ho-quoteline">&ldquo;The first draft is just you telling yourself the story.&rdquo; <span>&mdash; Terry Pratchett</span></p>
+              </div>
+              <div class="ho-side">
+                <div class="dcard todo-card" id="hoTodo">
+                  <div class="todo-band"><span class="dot"></span><h3>To-do list</h3><button class="ttx" id="hoTodoClose" title="Close">&times;</button></div>
+                  <div class="todo-tabs">
+                    <button class="ttab on">Urgent <span class="cnt" id="hoUrgCnt">7</span></button>
+                    <button class="ttab">Housekeeping <span class="cnt">16</span></button>
+                    <button class="ttab">Notes to self <span class="cnt">0</span></button>
+                  </div>
+                  <div class="todo-list" id="hoTodoList">
+                    <div class="trow"><div class="tinfo"><div class="tline1"><span class="chip">Pages</span><span class="tname">Daniel O&rsquo;Rourke</span></div><div class="tdesc">Time to send your <b>full manuscript</b></div></div><button class="tbtn">Mark sent</button></div>
+                    <div class="trow"><div class="tinfo"><div class="tline1"><span class="chip">Pages</span><span class="tname">Daniel O&rsquo;Rourke</span></div><div class="tdesc">Time to send your <b>partial manuscript</b></div></div><button class="tbtn">Mark sent</button></div>
+                    <div class="trow"><div class="tinfo"><div class="tline1"><span class="chip">Offer</span><span class="tname">Tom Ellery</span></div><div class="tdesc">An offer to weigh &mdash; Tom Ellery</div></div><button class="tbtn">Review</button></div>
+                    <div class="trow"><div class="tinfo"><div class="tline1"><span class="chip">Pages</span><span class="tname">Greg Panetta</span></div><div class="tdesc">Time to send your <b>partial manuscript</b></div></div><button class="tbtn">Mark sent</button></div>
+                    <div class="trow"><div class="tinfo"><div class="tline1"><span class="chip">Pages</span><span class="tname">Priya Raman</span></div><div class="tdesc">Time to send your <b>partial manuscript</b></div></div><button class="tbtn">Mark sent</button></div>
+                    <div class="trow"><div class="tinfo"><div class="tline1"><span class="chip">Revise</span><span class="tname">Sophie Dunn</span></div><div class="tdesc">Time to revise and resubmit &middot; Murphy&rsquo;s Day Out</div></div><button class="tbtn">Record</button></div>
+                    <div class="trow"><div class="tinfo"><div class="tline1"><span class="chip">Pages</span><span class="tname">Jonathan Marsh</span></div><div class="tdesc">Time to send your <b>full manuscript</b></div></div><button class="tbtn">Mark sent</button></div>
+                  </div>
+                </div>
+                <div class="fstat" data-s="1" style="display:none">
+                  <button class="unpin">Unpin</button>
+                  <div class="cap"><svg viewBox="0 0 24 24" width="13" height="13"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4 18-7z"/></svg>Queries sent</div>
+                  <div class="bign">23</div>
+                  <div class="sub">+3 this week &middot; best week since May</div>
+                  <div class="ffoot"><div class="mbar" style="height:38px"><i style="--h:30%"></i><i style="--h:55%"></i><i style="--h:40%"></i><i style="--h:20%"></i><i style="--h:65%"></i><i style="--h:45%"></i><i style="--h:35%"></i><i class="hot" style="--h:80%"></i></div></div>
+                </div>
+                <div class="fstat" data-s="2" style="display:none">
+                  <button class="unpin">Unpin</button>
+                  <div class="cap"><svg viewBox="0 0 24 24" width="13" height="13"><path d="M6 2h12M6 22h12M8 2v4l4 4 4-4V2M8 22v-4l4-4 4 4v4"/></svg>Active queries</div>
+                  <div class="bign">16</div>
+                  <div class="sub">8 awaiting a reply &middot; 5 with your pages out</div>
+                  <div class="ffoot"><div class="segbar" style="height:10px"><i style="flex:8;background:#7c3a2a"></i><i style="flex:3;background:#a98d68"></i><i style="flex:2;background:#c9ab8a"></i><i style="flex:2;background:#ddcbb4"></i><i style="flex:1;background:#eee2d2"></i></div></div>
+                </div>
+                <div class="fstat" data-s="3" style="display:none">
+                  <button class="unpin">Unpin</button>
+                  <div class="cap"><svg viewBox="0 0 24 24" width="13" height="13"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17.5" cy="9" r="2.5"/><path d="M16 14.5c3 .3 5.5 2.3 5.5 5.5"/></svg>Agents</div>
+                  <div class="bign">18</div>
+                  <div class="sub">2 idle &middot; 4 new this month</div>
+                  <div class="ffoot"><div class="people"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><span class="more">+8</span></div></div>
+                </div>
+                <div class="fstat" data-s="4" style="display:none">
+                  <button class="unpin">Unpin</button>
+                  <div class="cap"><svg viewBox="0 0 24 24" width="13" height="13"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 6L2 7"/></svg>Responses received</div>
+                  <div class="bign">12</div>
+                  <div class="sub">52% response rate &middot; median 31 days</div>
+                  <div class="ffoot"><div class="slider"><div class="fill"></div><div class="knob"></div></div></div>
+                </div>
+              </div>
+              <div class="ho-scene">
+                <div class="ho-quote"><span class="q">&ldquo;The first draft is just you telling yourself the story.&rdquo;</span><span class="a">&mdash; Terry Pratchett</span></div>
+                <span class="hnote n1"></span><span class="hnote n2"></span><span class="hnote n3"></span>
+              </div>
+            </div>
+          </div>
+
+            <!-- stat cards -->
+            <div class="stat-row blk" id="b-stats">
+              <div class="dcard stat" data-s="1" title="Pin to focus">
+                <div class="sl"><svg viewBox="0 0 24 24"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4 18-7z"/></svg>Queries sent</div>
+                <div class="ghosticon"><svg viewBox="0 0 24 24"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4 18-7z"/></svg></div>
+                <div class="num-row"><span class="num">23</span><span class="pillb">+3 this week</span></div>
+                <div class="foot"><div class="mbar"><i style="--h:30%"></i><i style="--h:55%"></i><i style="--h:40%"></i><i style="--h:20%"></i><i style="--h:65%"></i><i style="--h:45%"></i><i style="--h:35%"></i><i class="hot" style="--h:80%"></i></div></div>
+              </div>
+              <div class="dcard stat" data-s="2" title="Pin to focus">
+                <div class="sl"><svg viewBox="0 0 24 24"><path d="M6 2h12M6 22h12M8 2v4l4 4 4-4V2M8 22v-4l4-4 4 4v4"/></svg>Active queries</div>
+                <div class="ghosticon"><svg viewBox="0 0 24 24"><path d="M6 2h12M6 22h12M8 2v4l4 4 4-4V2M8 22v-4l4-4 4 4v4"/></svg></div>
+                <div class="num-row"><span class="num">16</span><span class="pillb">8 awaiting a reply</span></div>
+                <div class="foot"><div class="segbar"><i style="flex:8;background:#7c3a2a"></i><i style="flex:3;background:#a98d68"></i><i style="flex:2;background:#c9ab8a"></i><i style="flex:2;background:#ddcbb4"></i><i style="flex:1;background:#eee2d2"></i></div></div>
+              </div>
+              <div class="dcard stat" data-s="3" title="Pin to focus">
+                <div class="sl"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17.5" cy="9" r="2.5"/><path d="M16 14.5c3 .3 5.5 2.3 5.5 5.5"/></svg>Agents</div>
+                <div class="ghosticon"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17.5" cy="9" r="2.5"/><path d="M16 14.5c3 .3 5.5 2.3 5.5 5.5"/></svg></div>
+                <div class="num-row"><span class="num">18</span><span class="pillb">2 idle</span></div>
+                <div class="foot"><div class="people"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><span class="more">+6</span></div></div>
+              </div>
+              <div class="dcard stat" data-s="4" title="Pin to focus">
+                <div class="sl"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 6L2 7"/></svg>Responses received</div>
+                <div class="ghosticon"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 6L2 7"/></svg></div>
+                <div class="num-row"><span class="num">12</span><span class="pillb">52% rate</span></div>
+                <div class="foot"><div class="slider"><div class="fill"></div><div class="knob"></div></div></div>
+              </div>
+            </div>
+
+            <!-- what's live right now -->
+            <div class="dcard panel blk" id="b-live">
+              <div class="pband">
+                <span class="tick"></span>
+                <h3>What&rsquo;s live right now?</h3>
+                <div class="pr"><span class="prm">Not shown here:</span><span class="prs">1 offer, 2 rejections, 1 closed</span></div>
+              </div>
+              <div class="pbody">
+                <div class="pipe2">
+                  <div class="pnode">
+                    <div class="circ c-query"><svg viewBox="0 0 24 24"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4 18-7z"/></svg></div>
+                    <div class="plabel">8 queried</div>
+                  </div>
+                  <div class="pdots"></div>
+                  <div class="pnode">
+                    <div class="circ c-preq">‹</div>
+                    <div class="plabel">3 partials requested</div>
+                  </div>
+                  <div class="pdots"></div>
+                  <div class="pnode">
+                    <div class="circ c-psent">›</div>
+                    <div class="plabel">1 partial sent</div>
+                  </div>
+                  <div class="pgap"></div>
+                  <div class="pnode"><div class="circ c-freq">«</div></div>
+                  <div class="pgap"></div>
+                  <div class="pnode"><div class="circ c-fsent">»</div></div>
+                  <div class="pgap"></div>
+                  <div class="pnode"><div class="circ c-rr"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/></svg></div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- fortnight in focus -->
+            <div class="dcard panel blk" id="b-fort">
+              <div class="pband">
+                <span class="tick"></span>
+                <h3>Fortnight in focus</h3>
+                <div class="pr">
+                  <span class="prm">1 event last week · 1 coming up · 27 Jun – 10 Jul</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" style="stroke:#5a6a58"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+                </div>
+              </div>
+              <div class="pbody">
+                <div class="fort">
+                  <div class="fcell">
+                    <div class="fm">Last week · 27 Jun – 3 Jul</div>
+                    <span class="fevent"><span class="sdot in" style="--fill:100%"><span class="c">←</span></span> Partial requested — Greg Panetta</span>
+                  </div>
+                  <div class="fdiv"></div>
+                  <div class="ftoday">Today · Fri 3rd Jul</div>
+                  <div class="fdiv"></div>
+                  <div class="fcell" style="text-align:right">
+                    <div class="fm">Coming up · 4 – 10 Jul</div>
+                    <span class="fevent"><span class="sdot out" style="--fill:100%"><span class="c">→</span></span> Full due — Daniel O&rsquo;Rourke</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- to-do list -->
+            <div class="dcard todo-card blk" id="b-todo">
+              <div class="todo-band"><span class="dot"></span><h3>To-do list</h3></div>
+              <div class="todo-tabs">
+                <button class="ttab on">Urgent <span class="cnt">7</span></button>
+                <button class="ttab">Housekeeping <span class="cnt">16</span></button>
+                <button class="ttab">Notes to self <span class="cnt">0</span></button>
+              </div>
+              <div class="todo-list">
+                <div class="trow">
+                  <div class="tinfo">
+                    <div class="tline1"><span class="chip">Pages</span><span class="tname">Daniel O&rsquo;Rourke</span></div>
+                    <div class="tdesc">Time to send your <b>full manuscript</b></div>
+                  </div>
+                  <button class="tbtn">Mark sent</button>
+                </div>
+                <div class="trow">
+                  <div class="tinfo">
+                    <div class="tline1"><span class="chip">Pages</span><span class="tname">Daniel O&rsquo;Rourke</span></div>
+                    <div class="tdesc">Time to send your <b>partial manuscript</b></div>
+                  </div>
+                  <button class="tbtn">Mark sent</button>
+                </div>
+                <div class="trow">
+                  <div class="tinfo">
+                    <div class="tline1"><span class="chip">Offer</span><span class="tname">Tom Ellery</span></div>
+                    <div class="tdesc">An offer to weigh — Tom Ellery</div>
+                  </div>
+                  <button class="tbtn">Review</button>
+                </div>
+                <div class="trow">
+                  <div class="tinfo">
+                    <div class="tline1"><span class="chip">Pages</span><span class="tname">Greg Panetta</span></div>
+                    <div class="tdesc">Time to send your <b>partial manuscript</b></div>
+                  </div>
+                  <button class="tbtn">Mark sent</button>
+                </div>
+                <div class="trow">
+                  <div class="tinfo">
+                    <div class="tline1"><span class="chip">Pages</span><span class="tname">Priya Raman</span></div>
+                    <div class="tdesc">Time to send your <b>partial manuscript</b></div>
+                  </div>
+                  <button class="tbtn">Mark sent</button>
+                </div>
+                <div class="trow">
+                  <div class="tinfo">
+                    <div class="tline1"><span class="chip">Revise</span><span class="tname">Sophie Dunn</span></div>
+                    <div class="tdesc">Time to revise and resubmit · Murphy&rsquo;s Day Out</div>
+                  </div>
+                  <button class="tbtn">Record</button>
+                </div>
+                <div class="trow">
+                  <div class="tinfo">
+                    <div class="tline1"><span class="chip">Pages</span><span class="tname">Jonathan Marsh</span></div>
+                    <div class="tdesc">Time to send your <b>full manuscript</b></div>
+                  </div>
+                  <button class="tbtn">Mark sent</button>
+                </div>
+              </div>
+            </div>
+
+        </div>
+      </section>
+
+      <!-- ========== QUERIES ========== -->
+      <section class="page" id="pg-queries">
+        <div class="qhbar">
+          <div>
+            <div class="qh-eyebrow">16 open · 4 closed</div>
+            <div class="qh-title">Queries Hub</div>
+          </div>
+          <button class="qh-cta">Log a new query</button>
+        </div>
+
+        <div class="workspace">
+          <div class="listpanel">
+            <div class="lp-tools"><input class="lp-search" placeholder="Search queries…"></div>
+            <div class="lp-rows">
+              <div class="lp-row sel">
+                <div class="mono-init">DO</div>
+                <div><div class="rn">Daniel O&rsquo;Rourke</div><div class="rm">Full requested · 6 wks</div></div>
+                <span class="sdot in" style="--fill:100%;margin-left:auto"><span class="c">←</span></span>
+              </div>
+              <div class="lp-row">
+                <div class="mono-init">TE</div>
+                <div><div class="rn">Tom Ellery</div><div class="rm">Offer of representation</div></div>
+                <span class="sdot" style="background:var(--burg);margin-left:auto"><span class="c" style="background:var(--burg);color:var(--parch)">✓</span></span>
+              </div>
+              <div class="lp-row">
+                <div class="mono-init">GP</div>
+                <div><div class="rn">Greg Panetta</div><div class="rm">Partial requested · 5 days</div></div>
+                <span class="sdot in" style="--fill:50%;margin-left:auto"><span class="c">←</span></span>
+              </div>
+              <div class="lp-row">
+                <div class="mono-init">SD</div>
+                <div><div class="rn">Sophie Dunn</div><div class="rm">Revise &amp; resubmit</div></div>
+                <span class="sdot in" style="--fill:100%;margin-left:auto"><span class="c">✎</span></span>
+              </div>
+              <div class="lp-row">
+                <div class="mono-init">PR</div>
+                <div><div class="rn">Priya Raman</div><div class="rm">Partial requested · 2 wks</div></div>
+                <span class="sdot in" style="--fill:50%;margin-left:auto"><span class="c">←</span></span>
+              </div>
+              <div class="lp-row">
+                <div class="mono-init">JM</div>
+                <div><div class="rn">Jonathan Marsh</div><div class="rm">Full requested · 1 wk</div></div>
+                <span class="sdot in" style="--fill:100%;margin-left:auto"><span class="c">←</span></span>
+              </div>
+            </div>
+            <div class="lp-foot">
+              <svg width="12" height="12" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>
+              Export as CSV
+            </div>
+          </div>
+
+          <div class="readpane">
+            <div class="rhero" style="--tint:#e9ede6">
+              <div class="havatar">DO</div>
+              <div>
+                <div class="hn">Daniel O&rsquo;Rourke</div>
+                <div class="hs">Larkspur Literary · London</div>
+              </div>
+              <div class="hstat">
+                <span class="hpill"><span class="sdot in" style="--fill:100%"><span class="c">←</span></span> Full requested</span>
+              </div>
+            </div>
+            <div class="pcard">
+              <h4>Tracking</h4>
+              <div class="kv"><span class="k">Queried</span><span class="v">12 May 2026</span></div>
+              <div class="kv"><span class="k">Partial requested</span><span class="v">2 Jun 2026</span></div>
+              <div class="kv"><span class="k">Full requested</span><span class="v">28 Jun 2026</span></div>
+              <div class="kv"><span class="k">Your deadline</span><span class="v" style="color:var(--burg)">12 Jul 2026</span></div>
+            </div>
+            <div class="pcard">
+              <h4>Journal</h4>
+              <div class="caveat">He asked whether Murphy has a sequel in him. Have an answer ready before sending the full.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== AGENTS ========== -->
+      <section class="page" id="pg-agents">
+        <div class="qhbar">
+          <div>
+            <div class="qh-eyebrow">16 agents · 7 agencies</div>
+            <div class="qh-title">Agent Database</div>
+          </div>
+          <button class="qh-cta">Add an agent</button>
+        </div>
+
+        <div class="workspace">
+          <div class="listpanel">
+            <div class="lp-tools"><input class="lp-search" placeholder="Search agents…"></div>
+            <div class="lp-rows">
+              <div class="lp-row sel">
+                <div class="mono-init">DO</div>
+                <div><div class="rn">Daniel O&rsquo;Rourke</div><div class="rm">Larkspur Literary</div></div>
+              </div>
+              <div class="lp-row">
+                <div class="mono-init">TE</div>
+                <div><div class="rn">Tom Ellery</div><div class="rm">Wren &amp; Holt</div></div>
+              </div>
+              <div class="lp-row">
+                <div class="mono-init">GP</div>
+                <div><div class="rn">Greg Panetta</div><div class="rm">The Bindery</div></div>
+              </div>
+              <div class="lp-row">
+                <div class="mono-init">SD</div>
+                <div><div class="rn">Sophie Dunn</div><div class="rm">Dunn &amp; Foley</div></div>
+              </div>
+              <div class="lp-row">
+                <div class="mono-init">PR</div>
+                <div><div class="rn">Priya Raman</div><div class="rm">Larkspur Literary</div></div>
+              </div>
+            </div>
+            <div class="lp-foot">
+              <svg width="12" height="12" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>
+              Export as CSV
+            </div>
+          </div>
+
+          <div class="readpane">
+            <div class="rhero" style="--tint:#f8e7dc">
+              <div class="havatar">DO</div>
+              <div>
+                <div class="hn">Daniel O&rsquo;Rourke</div>
+                <div class="hs">Senior agent · Larkspur Literary · London</div>
+              </div>
+              <div class="hstat"><span class="hpill">★ 4.5 · Fast responder</span></div>
+            </div>
+            <div class="pcard">
+              <h4>Submission guidelines</h4>
+              <div class="kv"><span class="k">Wants</span><span class="v">Literary · Historical · Speculative</span></div>
+              <div class="kv"><span class="k">Send</span><span class="v">First 50 pages + synopsis</span></div>
+              <div class="kv"><span class="k">Via</span><span class="v">QueryManager</span></div>
+              <div class="kv"><span class="k">Typical response</span><span class="v">6–8 weeks</span></div>
+            </div>
+            <div class="pcard">
+              <h4>Your history</h4>
+              <div class="kv"><span class="k">Murphy&rsquo;s Day Out</span><span class="v" style="display:inline-flex;align-items:center;gap:7px"><span class="sdot in" style="--fill:100%"><span class="c">←</span></span> Full requested</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== MANUSCRIPTS ========== -->
+      <section class="page" id="pg-manuscripts">
+        <div class="qhbar">
+          <div>
+            <div class="qh-eyebrow">2 manuscripts · 1 querying</div>
+            <div class="qh-title">Manuscripts</div>
+          </div>
+          <button class="qh-cta">Add a manuscript</button>
+        </div>
+
+        <div class="workspace">
+          <div class="listpanel">
+            <div class="lp-tools"><input class="lp-search" placeholder="Search manuscripts…"></div>
+            <div class="lp-rows">
+              <div class="lp-row sel">
+                <div class="mono-init">MD</div>
+                <div><div class="rn">Murphy&rsquo;s Day Out</div><div class="rm">Querying · 16 open</div></div>
+              </div>
+              <div class="lp-row">
+                <div class="mono-init">TW</div>
+                <div><div class="rn">The Winter Archivist</div><div class="rm">Drafting</div></div>
+              </div>
+            </div>
+            <div class="lp-foot">
+              <svg width="12" height="12" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>
+              Export as CSV
+            </div>
+          </div>
+
+          <div class="readpane">
+            <div class="rhero" style="--tint:#f8e7dc">
+              <div class="havatar">MD</div>
+              <div>
+                <div class="hn">Murphy&rsquo;s Day Out</div>
+                <div class="hs">Commercial fiction · 88,000 words</div>
+              </div>
+              <div class="hstat"><span class="hpill">Querying</span></div>
+            </div>
+            <div class="pcard">
+              <h4>Submission package</h4>
+              <div class="kv"><span class="k">Query letter</span><span class="v">v6 · 14 Jun 2026</span></div>
+              <div class="kv"><span class="k">Synopsis</span><span class="v">v3 · one page</span></div>
+              <div class="kv"><span class="k">Opening pages</span><span class="v">Rev. chapter three</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- Timeline drawer (dashboard) -->
+<button class="tl-tab" id="tlTab">
+    <svg width="13" height="13" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
+    <span class="tl-lbl">Timeline</span>
+    <span class="tl-cnt">2</span>
+  </button>
+<aside class="tl-drawer tl4" id="tlDrawer" aria-label="Timeline">
+  <div class="tl-head">
+    <span class="tl-tick"></span>
+    <div>
+      <div class="tl-eyebrow">This fortnight &middot; 2 events</div>
+      <h3>Timeline</h3>
+    </div>
+    <button class="tpin" id="tlPin" title="Pin open">
+      <svg width="13" height="13" viewBox="0 0 24 24"><path d="M12 17v5"/><path d="M9 3h6l1 7 2.5 2.5H5.5L8 10z"/></svg>
+    </button>
+    <button class="ttx" id="tlClose" title="Close">&times;</button>
+  </div>
+  
+  
+  <div class="tl-body">
+    <div class="sdate" style="padding:12px 20px 4px">Sun 28 Jun</div>
+    <div class="sentry" style="padding:6px 20px">
+      <span class="smark sdot in" style="--fill:50%"><span class="c">←</span></span>
+      <div class="scard">
+        <div class="sl1"><span class="spill">Partial requested</span><span class="stime">6:17pm</span></div>
+        <div class="sname">Greg Panetta</div>
+        <div class="scap">Murphy&rsquo;s Day Out</div>
+      </div>
+    </div>
+    <div class="sdate" style="padding:12px 20px 4px">Thu 25 Jun</div>
+    <div class="sentry" style="padding:6px 20px">
+      <span class="smark sdot out" style="--fill:0%"><span class="c">→</span></span>
+      <div class="scard pink">
+        <div class="sl1"><span class="spill pink">Import</span><span class="stime">9:49pm</span></div>
+        <div class="sname">Smart Import</div>
+        <div class="scap">Query history added</div>
+      </div>
+    </div>
+  </div>
+</aside>
+</div>
+
+
+
+<button class="help-fab" title="Help">?</button>
+
+<div class="demo-hint">Consolidated prototype — every chosen option locked in · ⌘K for search</div>
+
+<!-- ⌘K palette -->
+<div class="kk-overlay" id="kkOverlay">
+  <div class="kk">
+    <input id="kkInput" placeholder="Search or jump to…" autocomplete="off">
+    <div class="kk-list" id="kkList">
+      <div class="kk-item" data-route="dashboard">Go to Dashboard <span class="ki">Page</span></div>
+      <div class="kk-item" data-route="queries">Go to Queries Hub <span class="ki">Page</span></div>
+      <div class="kk-item" data-route="agents">Go to Agent Database <span class="ki">Page</span></div>
+      <div class="kk-item" data-route="manuscripts">Go to Manuscripts <span class="ki">Page</span></div>
+      <div class="kk-item" data-route="queries">Log a new query <span class="ki">Action</span></div>
+      <div class="kk-item" data-route="agents">Add an agent <span class="ki">Action</span></div>
+      <div class="kk-item" data-route="queries">Daniel O&rsquo;Rourke — Full requested <span class="ki">Query</span></div>
+    </div>
+    <div class="kk-foot">↵ open · esc close</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var shell = document.getElementById('shell');
+  var scroller = document.getElementById('stageScroll');
+  var routes = ['dashboard','queries','agents','manuscripts'];
+  var current = 'dashboard';
+  var savedScroll = {};
+
+  function show(route){
+    if(route === current) return;
+    savedScroll[current] = scroller.scrollTop;
+    current = route;
+    routes.forEach(function(r){
+      document.getElementById('pg-'+r).classList.remove('on');
+      var nav = document.querySelector('.nav-item[data-route="'+r+'"]');
+      if(nav) nav.classList.toggle('active', r===route);
+    });
+    var target = document.getElementById('pg-'+route);
+    void target.offsetWidth; // restart enter animation
+    target.classList.add('on');
+    scroller.scrollTop = savedScroll[route] || 0;
+    shell.classList.toggle('on-dash', route === 'dashboard');
+  }
+
+  document.querySelectorAll('.nav-item').forEach(function(btn){
+    btn.addEventListener('click', function(){ show(btn.getAttribute('data-route')); });
+  });
+
+  // sidebar collapse
+  var collapseBtn = document.getElementById('collapseBtn');
+  collapseBtn.addEventListener('click', function(){
+    shell.classList.toggle('collapsed');
+    collapseBtn.textContent = shell.classList.contains('collapsed') ? '›' : '‹';
+  });
+
+  // themes
+  var THEME_CLASSES = ['t-capp','t-bold','t-eda','t-edb','t-edc','t-edn','t-cyb','t-noct','t-graph','ed','eddark'];
+  var THEMES = {capp:['t-capp'],bold:['t-bold'],ed:['t-edn','ed'],cyb:['t-cyb','ed','eddark'],noct:['t-noct','ed','eddark'],graph:['t-graph','ed','eddark']};
+  var segButtons = document.querySelectorAll('.theme-seg button');
+  function setTheme(name){
+    THEME_CLASSES.forEach(function(c){ shell.classList.remove(c); });
+    THEMES[name].forEach(function(c){ shell.classList.add(c); });
+    segButtons.forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-th')===name); });
+  }
+  segButtons.forEach(function(b){
+    b.addEventListener('click', function(){ setTheme(b.getAttribute('data-th')); });
+  });
+
+  // ⌘K palette
+  var overlay = document.getElementById('kkOverlay');
+  var kkInput = document.getElementById('kkInput');
+  function openKK(){ overlay.classList.add('open'); kkInput.value=''; filterKK(); kkInput.focus(); }
+  function closeKK(){ overlay.classList.remove('open'); }
+  document.getElementById('kkTrigger').addEventListener('click', openKK);
+  document.addEventListener('keydown', function(e){
+    if((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='k'){ e.preventDefault(); overlay.classList.contains('open') ? closeKK() : openKK(); }
+    if(e.key==='Escape') closeKK();
+  });
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) closeKK(); });
+  function filterKK(){
+    var q = kkInput.value.toLowerCase();
+    document.querySelectorAll('.kk-item').forEach(function(it){
+      it.style.display = it.textContent.toLowerCase().indexOf(q) > -1 ? 'flex' : 'none';
+    });
+  }
+  kkInput.addEventListener('input', filterKK);
+  document.querySelectorAll('.kk-item').forEach(function(it){
+    it.addEventListener('click', function(){ show(it.getAttribute('data-route')); closeKK(); });
+  });
+
+  // timeline pin
+  document.getElementById('tlPin').addEventListener('click', function(){
+    tlD2.classList.toggle('pinned');
+    this.title = tlD2.classList.contains('pinned') ? 'Unpin' : 'Pin open';
+  });
+
+  // timeline drawer
+  document.getElementById('tlTab').addEventListener('click', function(){ shell.classList.add('tl-open'); });
+  document.getElementById('tlClose').addEventListener('click', function(){ shell.classList.remove('tl-open'); });
+
+  // focus slot: to-do or any pinned stat card occupies the right track
+  var heroOpen = document.querySelector('#pg-dashboard .hero-open');
+  var pgDash = document.getElementById('pg-dashboard');
+  var chipBtn = document.getElementById('todoTrigD');
+  var chipTxt = document.getElementById('chipTxt');
+  var hoList = document.getElementById('hoTodoList');
+  var hoUrgCnt = document.getElementById('hoUrgCnt');
+  var hoTodo = document.getElementById('hoTodo');
+  var hoStats = document.querySelector('.ho-stats');
+  var fstats = Array.prototype.slice.call(document.querySelectorAll('.fstat'));
+  var minis = Array.prototype.slice.call(document.querySelectorAll('.stat2'));
+  var FOC = null; // null | 'todo' | '1'..'4'
+
+  function applyFocus(){
+    var split = FOC !== null;
+    heroOpen.classList.toggle('split', split);
+    pgDash.classList.toggle('split-open', split);
+    chipBtn.classList.toggle('open', FOC === 'todo');
+    hoTodo.style.display = FOC === 'todo' ? '' : 'none';
+    fstats.forEach(function(f){ f.style.display = (FOC === f.getAttribute('data-s')) ? '' : 'none'; });
+    hoStats.classList.toggle('cols3', split && FOC !== 'todo');
+    minis.forEach(function(m){ m.style.display = (FOC === m.getAttribute('data-s')) ? 'none' : ''; });
+  }
+  var animating = false;
+  var AN = 'd'; // Flip — locked
+  var TIMING = {
+    a:{switchAt:300, inMs:420, outMs:300, keep:false},
+    b:{switchAt:60,  inMs:330, outMs:280, keep:true},
+    c:{switchAt:240, inMs:370, outMs:250, keep:false},
+    d:{switchAt:230, inMs:350, outMs:240, keep:false},
+    e:{switchAt:60,  inMs:350, outMs:300, keep:true}
+  };
+  function panelFor(f){
+    if(f === 'todo') return hoTodo;
+    for(var i=0;i<fstats.length;i++){ if(fstats[i].getAttribute('data-s') === f) return fstats[i]; }
+    return null;
+  }
+  function setFocus(v){
+    if(animating || v === FOC) return;
+    var prev = FOC, t = TIMING[AN];
+    if(prev !== null && v !== null){
+      animating = true;
+      var out = panelFor(prev), inn = panelFor(v);
+      out.classList.add('leaving');
+      setTimeout(function(){
+        FOC = v; applyFocus();
+        if(t.keep) out.style.display = '';   // let the exit finish while the new one arrives
+        inn.classList.add('arriving');
+        setTimeout(function(){
+          FOC = v; applyFocus();             // normalise displays
+          out.style.display = 'none';
+          out.classList.remove('leaving');
+          inn.classList.remove('arriving');
+          animating = false;
+        }, Math.max(t.inMs, t.keep ? t.outMs - t.switchAt : 0) + 30);
+      }, t.switchAt);
+    } else if(prev !== null && v === null){
+      animating = true;
+      var out2 = panelFor(prev);
+      out2.classList.add('leaving');
+      setTimeout(function(){
+        out2.classList.remove('leaving');
+        FOC = null; applyFocus();
+        animating = false;
+      }, t.outMs);
+    } else {
+      FOC = v; applyFocus();
+      var inn2 = panelFor(v);
+      inn2.classList.add('arriving');
+      setTimeout(function(){ inn2.classList.remove('arriving'); }, t.inMs + 60);
+    }
+  }
+  chipBtn.addEventListener('click', function(){ setFocus(FOC === 'todo' ? null : 'todo'); });
+  document.getElementById('hoTodoClose').addEventListener('click', function(){ setFocus(null); });
+  document.querySelectorAll('#b-stats .stat, .stat2').forEach(function(card){
+    card.addEventListener('click', function(){ setFocus(card.getAttribute('data-s')); });
+  });
+  document.querySelectorAll('.unpin').forEach(function(u){
+    u.addEventListener('click', function(e){ e.stopPropagation(); setFocus(null); });
+  });
+
+  function refreshCounts(){
+    var n = hoList.querySelectorAll('.trow').length;
+    hoUrgCnt.textContent = n;
+    chipTxt.textContent = n === 1 ? '1 thing needs your attention' : n + ' things need your attention';
+    if(n === 0){
+      setFocus(null);
+      chipBtn.classList.add('gone');
+    }
+  }
+  hoList.addEventListener('click', function(e){
+    var btn = e.target.closest('.tbtn'); if(!btn) return;
+    var row = btn.closest('.trow');
+    row.classList.add('done');
+    setTimeout(function(){ row.remove(); refreshCounts(); }, 230);
+  });
+  applyFocus();
+
+  // list row selection (cosmetic)
+  document.querySelectorAll('.lp-rows').forEach(function(panel){
+    panel.addEventListener('click', function(e){
+      var row = e.target.closest('.lp-row'); if(!row) return;
+      panel.querySelectorAll('.lp-row').forEach(function(r){ r.classList.remove('sel'); });
+      row.classList.add('sel');
+    });
+  });
+})();
+</script>
+</body>
+</html>
