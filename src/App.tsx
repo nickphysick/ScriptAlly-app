@@ -525,6 +525,7 @@ function AppContent() {
           <Dashboard
             onNavigate={handleNavigate}
             searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
           />
         </StagePage>
 

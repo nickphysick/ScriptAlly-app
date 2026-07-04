@@ -16,9 +16,21 @@ import { getStageScrollEl } from "../../lib/stageScroll";
 
 export const TIMELINE_PIN_KEY = "sa.timelinePinned";
 
-const readPinned = (): boolean => {
-  try { return localStorage.getItem(TIMELINE_PIN_KEY) === "1"; } catch { return false; }
+/** Pure, storage-injectable pin persistence (unit-tested; the component passes localStorage). */
+export const readTimelinePinned = (storage?: Pick<Storage, "getItem">): boolean => {
+  try {
+    const s = storage ?? (typeof localStorage !== "undefined" ? localStorage : undefined);
+    return s?.getItem(TIMELINE_PIN_KEY) === "1";
+  } catch { return false; }
 };
+export const writeTimelinePinned = (pinned: boolean, storage?: Pick<Storage, "setItem">): void => {
+  try {
+    const s = storage ?? (typeof localStorage !== "undefined" ? localStorage : undefined);
+    s?.setItem(TIMELINE_PIN_KEY, pinned ? "1" : "0");
+  } catch { /* private mode — ignore */ }
+};
+
+const readPinned = (): boolean => readTimelinePinned();
 
 interface TimelineDrawerProps {
   /** Entries within the current fortnight — the head eyebrow count. */
@@ -35,7 +47,7 @@ export const TimelineDrawer: React.FC<TimelineDrawerProps> = ({ fortnightCount, 
   const togglePin = () => {
     setPinned((p) => {
       const next = !p;
-      try { localStorage.setItem(TIMELINE_PIN_KEY, next ? "1" : "0"); } catch { /* private mode */ }
+      writeTimelinePinned(next);
       if (next) setOpen(true);
       return next;
     });
