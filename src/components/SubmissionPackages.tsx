@@ -44,7 +44,10 @@ export const SubmissionPackages: React.FC = () => {
   const [composer, setComposer] = useState<{ name: string; sel: SlotSelection; editId: string | null } | null>(null);
   const [managerOpen, setManagerOpen] = useState(false); // materials manager (Phase 8)
   // Material create/edit modal (Phase 9): null = closed; version=null → create for `type`, else edit it.
-  const [matModal, setMatModal] = useState<{ type: ComponentType; version: ManuscriptVersion | null } | null>(null);
+  // fromComposer marks a create opened from the composer's own "Add a new …" — that one slots on save.
+  const [matModal, setMatModal] = useState<{ type: ComponentType; version: ManuscriptVersion | null; fromComposer?: boolean } | null>(null);
+  // The pending composer-origin pick (fresh version id → its slot), handed to the Composer as a prop.
+  const [autoPick, setAutoPick] = useState<{ type: ComponentType; versionId: string; token: number } | undefined>(undefined);
 
   // Default to the first manuscript when none is selected / the saved one is gone.
   useEffect(() => {
@@ -85,9 +88,11 @@ export const SubmissionPackages: React.FC = () => {
   const multiMs = manuscripts.length > 1;
 
   // Composer (Phase 7) — new / edit / copy all open the same view; save does the add or update.
-  const openNew = () => setComposer({ name: "", sel: emptySelection(), editId: null });
-  const openEdit = (pkg: SubmissionPackage) => setComposer({ name: pkg.packageName, sel: selectionFromPackage(pkg), editId: pkg.id });
-  const openCopy = (pkg: SubmissionPackage) => setComposer({ name: `Copy of ${pkg.packageName}`, sel: selectionFromPackage(pkg), editId: null });
+  // Each open clears any stale composer-origin pick: a create whose write resolved after its composer
+  // closed must not slot itself into a later, unrelated draft.
+  const openNew = () => { setAutoPick(undefined); setComposer({ name: "", sel: emptySelection(), editId: null }); };
+  const openEdit = (pkg: SubmissionPackage) => { setAutoPick(undefined); setComposer({ name: pkg.packageName, sel: selectionFromPackage(pkg), editId: pkg.id }); };
+  const openCopy = (pkg: SubmissionPackage) => { setAutoPick(undefined); setComposer({ name: `Copy of ${pkg.packageName}`, sel: selectionFromPackage(pkg), editId: null }); };
   const saveComposer = (name: string, sel: SlotSelection) => {
     if (!msId) return;
     const slots = {
@@ -103,6 +108,9 @@ export const SubmissionPackages: React.FC = () => {
 
   // Material create/edit modal (Phase 9). Create is invoked with a type; edit with an existing version.
   const openCreate = (type: ComponentType) => setMatModal({ type, version: null });
+  // The composer's own "Add a new …" — that material was created FOR the slot that asked, so it slots
+  // itself on save. Creates from the rail / manager / first-visit just save to the library.
+  const openCreateFromComposer = (type: ComponentType) => setMatModal({ type, version: null, fromComposer: true });
   const openEditMaterial = (v: ManuscriptVersion) => setMatModal({ type: v.componentType, version: v });
   const saveMaterial = (name: string, content: string) => {
     if (!msId || !matModal) return;
@@ -113,7 +121,10 @@ export const SubmissionPackages: React.FC = () => {
       updateVersion(matModal.version.id, { versionName: trimmed, contentDraft: content });
     } else {
       // Create — text mode (the only content channel in v1); fileAttached:false is required by the rules.
-      addVersion({ manuscriptId: msId, componentType: matModal.type, versionName: trimmed, fileAttached: false, contentDraft: content, contentType: "text" });
+      const { type, fromComposer } = matModal;
+      addVersion({ manuscriptId: msId, componentType: type, versionName: trimmed, fileAttached: false, contentDraft: content, contentType: "text" }).then((id) => {
+        if (id && fromComposer) setAutoPick((p) => ({ type, versionId: id, token: (p?.token ?? 0) + 1 }));
+      });
     }
     setMatModal(null);
   };
@@ -219,7 +230,8 @@ export const SubmissionPackages: React.FC = () => {
                   initialSelection={composer.sel}
                   onSave={saveComposer}
                   onCancel={() => setComposer(null)}
-                  onCreate={openCreate}
+                  onCreate={openCreateFromComposer}
+                  autoPick={autoPick}
                 />
               ) : managerOpen ? (
                 <MaterialsManager versions={msVersions} packages={msPackages} queries={msQueries} onBack={() => setManagerOpen(false)} onEdit={openEditMaterial} onCreate={openCreate} />

@@ -49,9 +49,26 @@ export const PkgLab: React.FC = () => {
   const [view, setView] = useState<View>("first");
   const noop = () => {};
   // Material modal (Phase 9) — every add/edit affordance opens it here so all entry points are previewable.
-  const [matModal, setMatModal] = useState<{ type: ComponentType; version: ManuscriptVersion | null } | null>(null);
+  // Versions are STATEFUL so the modal round-trips: creates append, edits apply, and a composer-origin
+  // create demonstrates the auto-slot (same seam the real host wires).
+  const [versions, setVersions] = useState<ManuscriptVersion[]>(MOCK_VERSIONS);
+  const [matModal, setMatModal] = useState<{ type: ComponentType; version: ManuscriptVersion | null; fromComposer?: boolean } | null>(null);
+  const [autoPick, setAutoPick] = useState<{ type: ComponentType; versionId: string; token: number } | undefined>(undefined);
   const openMat = (type: ComponentType) => setMatModal({ type, version: null });
+  const composerMat = (type: ComponentType) => setMatModal({ type, version: null, fromComposer: true });
   const editMat = (v: ManuscriptVersion) => setMatModal({ type: v.componentType, version: v });
+  const saveMat = (name: string, content: string) => {
+    if (!matModal) return;
+    if (matModal.version) {
+      const vid = matModal.version.id;
+      setVersions((vs) => vs.map((v) => (v.id === vid ? { ...v, versionName: name, contentDraft: content } : v)));
+    } else {
+      const id = `v-lab-${versions.length}`; // adds only in the lab, so length is collision-free
+      setVersions((vs) => [...vs, { id, manuscriptId: "m", userId: "lab", componentType: matModal.type, versionName: name, fileAttached: false, createdDate: "2026-01-02T00:00:00.000Z", contentDraft: content }]);
+      if (matModal.fromComposer) setAutoPick((p) => ({ type: matModal.type, versionId: id, token: (p?.token ?? 0) + 1 }));
+    }
+    setMatModal(null);
+  };
 
   // Mock qhbar chrome so the lab proves the header renders above the views (the real page mounts it).
   const proPill = (
@@ -72,7 +89,7 @@ export const PkgLab: React.FC = () => {
         <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--muted)" }}>#/pkg-lab</span>
         <div style={{ display: "flex", gap: 6 }}>
           {(["first", "packages", "composer", "manager"] as View[]).map((v) => (
-            <button key={v} type="button" onClick={() => setView(v)} style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".04em", textTransform: "uppercase", padding: "7px 13px", borderRadius: 8, cursor: "pointer", border: "1px solid var(--bd)", background: view === v ? "var(--band)" : "#fffefb", color: view === v ? "var(--burg)" : "var(--ink)" }}>
+            <button key={v} type="button" onClick={() => { setView(v); setAutoPick(undefined); /* a remounting Composer must not re-apply a stale pick */ }} style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".04em", textTransform: "uppercase", padding: "7px 13px", borderRadius: 8, cursor: "pointer", border: "1px solid var(--bd)", background: view === v ? "var(--band)" : "#fffefb", color: view === v ? "var(--burg)" : "var(--ink)" }}>
               {v === "first" ? "First-visit" : v === "packages" ? "Packages" : v === "composer" ? "Composer" : "Manager"}
             </button>
           ))}
@@ -96,24 +113,24 @@ export const PkgLab: React.FC = () => {
         </section>
       ) : view === "packages" ? (
         <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", gap: 14, alignItems: "flex-start" }}>
-          <MaterialsRail versions={MOCK_VERSIONS} onCreate={openMat} onManage={noop} />
+          <MaterialsRail versions={versions} onCreate={openMat} onManage={noop} />
           <section style={{ flex: 1, minWidth: 0, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", padding: "16px 16px 20px" }}>
-            <PackagesHome packages={MOCK_PACKAGES} versions={MOCK_VERSIONS} queries={MOCK_QUERIES} onNew={noop} onEdit={noop} onCopy={noop} />
+            <PackagesHome packages={MOCK_PACKAGES} versions={versions} queries={MOCK_QUERIES} onNew={noop} onEdit={noop} onCopy={noop} />
           </section>
         </div>
       ) : view === "composer" ? (
         <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", gap: 14, alignItems: "flex-start" }}>
-          <MaterialsRail versions={MOCK_VERSIONS} onCreate={openMat} onManage={noop} />
+          <MaterialsRail versions={versions} onCreate={openMat} onManage={noop} />
           {/* Composer brings its own .c2 container — the section is bare. */}
           <section style={{ flex: 1, minWidth: 0 }}>
-            <Composer versions={MOCK_VERSIONS} packages={MOCK_PACKAGES} initialName="" initialSelection={emptySelection()} onSave={noop} onCancel={noop} onCreate={openMat} />
+            <Composer versions={versions} packages={MOCK_PACKAGES} initialName="" initialSelection={emptySelection()} onSave={noop} onCancel={noop} onCreate={composerMat} autoPick={autoPick} />
           </section>
         </div>
       ) : (
         <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", gap: 14, alignItems: "flex-start" }}>
-          <MaterialsRail versions={MOCK_VERSIONS} onCreate={openMat} onManage={noop} />
+          <MaterialsRail versions={versions} onCreate={openMat} onManage={noop} />
           <section style={{ flex: 1, minWidth: 0, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", padding: "16px 16px 20px" }}>
-            <MaterialsManager versions={MOCK_VERSIONS} packages={MOCK_PACKAGES} queries={MOCK_QUERIES} onBack={noop} onEdit={editMat} onCreate={openMat} />
+            <MaterialsManager versions={versions} packages={MOCK_PACKAGES} queries={MOCK_QUERIES} onBack={noop} onEdit={editMat} onCreate={openMat} />
           </section>
         </div>
       )}
@@ -125,7 +142,7 @@ export const PkgLab: React.FC = () => {
           initialName={matModal.version?.versionName ?? ""}
           initialContent={matModal.version?.contentDraft ?? ""}
           onCancel={() => setMatModal(null)}
-          onSave={() => setMatModal(null)}
+          onSave={saveMat}
         />
       )}
     </div>

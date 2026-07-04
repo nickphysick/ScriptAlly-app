@@ -15,7 +15,7 @@
  * Save is enabled once a name is present and ≥1 slot is filled. Colours are theme tokens — the name
  * band is var(--band) (vivid pink #f4c7c2 in Bold, matching the Hub's "What you sent" header).
  */
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ManuscriptVersion, SubmissionPackage, ComponentType } from "../../types";
 import { TypeGlyph } from "./TypeGlyph";
 import { TYPE_META, BUILDER_TYPES, SlotSelection, selectionFromPackage } from "./typeMeta";
@@ -57,15 +57,31 @@ export interface ComposerProps {
   onSave: (name: string, selection: SlotSelection) => void;
   onCancel: () => void;
   onCreate: (type: ComponentType) => void;
+  /** A material created via this composer's "Add a new …", handed back once the write resolves: it
+   *  slots straight into its type's slot with the normal post-choice focus advance. The token marks
+   *  each create so successive picks re-fire. Creates from the rail/manager/first-visit never set it. */
+  autoPick?: { type: ComponentType; versionId: string; token: number };
 }
 
-export const Composer: React.FC<ComposerProps> = ({ versions, packages, editingId, initialName, initialSelection, onSave, onCancel, onCreate }) => {
+export const Composer: React.FC<ComposerProps> = ({ versions, packages, editingId, initialName, initialSelection, onSave, onCancel, onCreate, autoPick }) => {
   const [name, setName] = useState(initialName);
   const [sel, setSel] = useState<SlotSelection>(initialSelection);
   const [focus, setFocus] = useState<ComponentType>(() => firstUnfilled(initialSelection));
   const [drawerOpen, setDrawerOpen] = useState(false);
   // The copy drawer offers every OTHER package (you don't copy a package into itself).
   const drawerPackages = packages.filter((p) => p.id !== editingId);
+
+  // Apply a composer-origin create: same semantics as choose(), but keyed by the pick's TYPE rather
+  // than live focus — the write resolves after the modal has closed, and a click landing in that gap
+  // must not misdirect the material into whichever slot is focused by then. Fires once per token;
+  // `sel` is deliberately not a dep (the render that carries a new token carries current sel).
+  useEffect(() => {
+    if (!autoPick) return;
+    const next: SlotSelection = { ...sel, [autoPick.type]: autoPick.versionId };
+    setSel(next);
+    const remaining = BUILDER_TYPES.find((t) => t !== autoPick.type && !isSlotFilled(next[t]));
+    if (remaining) setFocus(remaining);
+  }, [autoPick?.token]);
 
   const choose = (vid: string) => {
     const next: SlotSelection = { ...sel, [focus]: vid };
