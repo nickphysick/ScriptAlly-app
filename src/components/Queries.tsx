@@ -33,6 +33,7 @@ import { RecordResponseFocusForm } from "./RecordResponseFocusForm";
 import { recordQueryResponse } from "../lib/recordResponse";
 import { agentLabel, agentAgencyLine } from "../lib/agentDisplay";
 import { formatQueryMaterial } from "../lib/materials";
+import { formatListRowDate } from "../lib/listRowDate";
 import { MarkSentPopover, MarkSentKind } from "./MarkSentPopover";
 import { useFixedMenu } from "./forms/useFixedMenu";
 import { useOpenEditQuery } from "./EditQueryHost";
@@ -662,6 +663,16 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     // Bail out (return prev) when unchanged so the resize/content effects can't loop.
     setListFade(prev => (prev.top === nextTop && prev.bottom === nextBottom ? prev : { top: nextTop, bottom: nextBottom }));
   }, []);
+  // rAF-throttled recompute for the high-frequency sources (scroll, ResizeObserver bursts). The
+  // timeout is the fallback for throttled/backgrounded windows where rAF never runs.
+  const listFadeTick = React.useRef(false);
+  const scheduleListFades = React.useCallback(() => {
+    if (listFadeTick.current) return;
+    listFadeTick.current = true;
+    const run = () => { if (!listFadeTick.current) return; listFadeTick.current = false; recomputeListFades(); };
+    requestAnimationFrame(run);
+    window.setTimeout(run, 80);
+  }, [recomputeListFades]);
   // Stable refs for keyboard navigation (updated each render before return)
   const sortedListRef = useRef<any[]>([]);
   const selectedQueryIdRef = useRef<string | null>(null);
@@ -687,6 +698,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
       const matched = queries.find(q => q.id === activeSubPage);
       if (matched) {
         setSelectedQueryId(activeSubPage);
+        // Deep-linked arrival (?q=<id>): bring the row into the middle of the list viewport so it
+        // lands clear of both edge fades. Only on the selection CHANGE — not on every data tick.
+        if (selectedQueryId !== activeSubPage) {
+          document.getElementById(`query-row-${activeSubPage}`)?.scrollIntoView({ block: "center" });
+        }
         return;
       }
     }
@@ -903,12 +919,21 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   }, [statusFiltersKey, selectedManuscriptFilter, listSearch, searchQuery, queries.length]);
 
   // Keep the list edge-fades in sync as content height, grouping, or selection changes, and on
-  // viewport resize. Scroll-driven updates come from the container's onScroll handler.
+  // viewport resize. Scroll-driven updates come from the container's onScroll handler. The
+  // ResizeObserver covers the display-toggled page slot: data usually lands while this page is
+  // hidden (persistent StagePage, display:none → clientHeight 0, fades computed off), and nothing
+  // else re-runs when the slot becomes visible — the observer fires on that 0 → real size flip.
   useEffect(() => {
     recomputeListFades();
-    window.addEventListener("resize", recomputeListFades);
-    return () => window.removeEventListener("resize", recomputeListFades);
-  }, [recomputeListFades, sortedList.length, selectedQueryId, groupOption]);
+    const el = listScrollRef.current;
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(scheduleListFades) : null;
+    if (ro && el) {
+      ro.observe(el);
+      if (el.firstElementChild) ro.observe(el.firstElementChild); // rows wrapper — content growth
+    }
+    window.addEventListener("resize", scheduleListFades);
+    return () => { ro?.disconnect(); window.removeEventListener("resize", scheduleListFades); };
+  }, [recomputeListFades, scheduleListFades, sortedList.length, selectedQueryId, groupOption]);
 
   // Reactive date sent change handler that automatically projects response due expectations
   // Query-field editing (manuscript, dates, method, materials/package, personalisation, deadline,
@@ -1615,16 +1640,26 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         .queries-cursor-blink {
           animation: queriesCursorBlink 1s steps(1, end) infinite;
         }
-        /* Short-screen fallback: below 620px viewport height, release fixed shell */
+        /* Short-screen fallback: below 620px viewport height the fit-to-screen clamp would crush
+           the desk, so the desk chain is released (auto height, no clip) with a 560px grid floor
+           and the main panel (overflow-y auto) scrolls internally. !important because the desk
+           heights are inline styles. The old release-to-window-scroll form (height:auto +
+           min-height:100vh on the page root) is gone: the AppShell stage clips its slots, so a
+           grown page was cut off, not scrollable. */
         @media (max-height: 620px) {
-          .queries-container-theme {
-            height: auto !important;
-            min-height: 100vh !important;
-            overflow: auto !important;
-            overflow-y: auto !important;
+          .qdesk {
+            flex: 0 0 auto !important;
+            overflow: visible !important;
           }
+          /* Fixed height (not just a floor): with the desk released to auto, a free grid sizes to
+             its content and the list re-expands to every row. Pinned via flex-basis — the grid is
+             a flex item with inline flex:1 1 0%, so in the main axis the height property alone
+             would lose to flex sizing. 560px keeps the tracks definite so the list keeps its
+             internal scroll. */
           .queries-content-grid {
-            min-height: 560px;
+            flex: 0 0 560px !important;
+            height: 560px !important;
+            min-height: 560px !important;
           }
         }
       `}</style>
@@ -2366,8 +2401,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
               {/* Rows area — flex:1 so it fills the list card below the fixed header; the inner scroll
                   keeps the list within one screen and reactivates the top/bottom fade overlays. */}
               <div style={{ position: "relative", flex: 1, minHeight: 0 }}>
-                <div aria-hidden="true" style={{ position: "absolute", left: 0, right: 0, top: 0, height: 26, pointerEvents: "none", zIndex: 2, background: "linear-gradient(to bottom, #fff, rgba(255,255,255,0))", opacity: listFade.top ? 1 : 0, transition: "opacity .16s ease" }} />
-                <div ref={listScrollRef} onScroll={recomputeListFades} style={{ height: "100%", overflowY: "auto", overflowX: "hidden", padding: "2px 0 4px" }} className="custom-query-list-scrollbar">
+                <div aria-hidden="true" style={{ position: "absolute", left: 0, right: 0, top: 0, height: 28, pointerEvents: "none", zIndex: 2, background: "linear-gradient(to bottom, var(--listbg, #ffffff), transparent)", opacity: listFade.top ? 1 : 0, transition: "opacity .16s ease" }} />
+                <div ref={listScrollRef} onScroll={scheduleListFades} style={{ height: "100%", overflowY: "auto", overflowX: "hidden", padding: "2px 0 4px" }} className="custom-query-list-scrollbar">
                   <div>
             {(() => {
               const statusOrder = [
@@ -2408,8 +2443,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 
                 // Queried date — bare, quiet "14 Mar" (UK day-month); the year shows only when it
                 // isn't the current year ("30 Jun 2024"). No "Queried" label; it sits in the corner.
-                const dateObj = new Date(q.dateSent);
-                const queriedDate = `${dateObj.getDate()} ${dateObj.toLocaleString("en-GB", { month: "short" })}${dateObj.getFullYear() !== new Date().getFullYear() ? ` ${dateObj.getFullYear()}` : ""}`;
+                // Null (absent/unparseable dateSent — provisional imports) renders a muted em-dash.
+                const queriedDate = formatListRowDate(q.dateSent) ?? "—";
 
                 const statusChip = undoingQueryIds.has(q.id) ? (
                   <div className="animate-pulse flex items-center gap-1 min-h-[20px]">
@@ -2600,7 +2635,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             )}
                   </div>{/* closes rows wrapper */}
                 </div>{/* closes scroll container */}
-                <div aria-hidden="true" style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 26, pointerEvents: "none", zIndex: 2, background: "linear-gradient(to top, #fff, rgba(255,255,255,0))", opacity: listFade.bottom ? 1 : 0, transition: "opacity .16s ease" }} />
+                <div aria-hidden="true" style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 28, pointerEvents: "none", zIndex: 2, background: "linear-gradient(to top, var(--listbg, #ffffff), transparent)", opacity: listFade.bottom ? 1 : 0, transition: "opacity .16s ease" }} />
               </div>{/* closes scroll-area wrapper */}
 
               {/* CSV export — muted footer pinned to the list-card foot; disabled when nothing to export */}
