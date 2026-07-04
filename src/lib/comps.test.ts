@@ -1,6 +1,16 @@
 import { describe, it, expect } from "vitest";
-import { parseLegacyComps, manuscriptComps, compsSearchText } from "./comps";
-import { Manuscript, ManuscriptStatus } from "../types";
+import {
+  parseLegacyComps,
+  manuscriptComps,
+  compsSearchText,
+  isOlderComp,
+  pitchLine,
+  pitchLineText,
+  withCompAdded,
+  withCompRemoved,
+  MAX_COMPS,
+} from "./comps";
+import { CompTitle, Manuscript, ManuscriptStatus } from "../types";
 
 const baseMs = (over: Partial<Manuscript> & Record<string, unknown> = {}): Manuscript =>
   ({
@@ -80,6 +90,55 @@ describe("manuscriptComps", () => {
   it("prefers an empty structured array over a lingering legacy string (never resurrects removed comps)", () => {
     const ms = baseMs({ comps: [], comparableTitles: "A meets B" });
     expect(manuscriptComps(ms)).toEqual([]);
+  });
+});
+
+describe("pitchLine", () => {
+  const c = (title: string): CompTitle => ({ title, source: "user" });
+
+  it("composes from the first two shelf comps in shelf order", () => {
+    expect(pitchLine([c("Gearbreakers"), c("A Darker Shade of Magic"), c("Gilded")])).toEqual({
+      kind: "two",
+      a: "Gearbreakers",
+      b: "A Darker Shade of Magic",
+    });
+    expect(pitchLineText([c("A"), c("B")])).toBe("A meets B");
+  });
+
+  it("returns the one-comp and empty variants", () => {
+    expect(pitchLine([c("Gearbreakers")])).toEqual({ kind: "one", a: "Gearbreakers" });
+    expect(pitchLine([])).toEqual({ kind: "none" });
+    expect(pitchLineText([c("A")])).toBeNull();
+    expect(pitchLineText([])).toBeNull();
+  });
+});
+
+describe("isOlderComp", () => {
+  it("is true at exactly five years old and older, false younger", () => {
+    expect(isOlderComp(2021, 2026)).toBe(true);
+    expect(isOlderComp(2001, 2026)).toBe(true);
+    expect(isOlderComp(2022, 2026)).toBe(false);
+    expect(isOlderComp(2026, 2026)).toBe(false);
+  });
+  it("is false when the year is unknown", () => {
+    expect(isOlderComp(undefined, 2026)).toBe(false);
+  });
+});
+
+describe("withCompAdded / withCompRemoved", () => {
+  const c = (title: string): CompTitle => ({ title, source: "user" });
+
+  it("appends and removes by index without mutating", () => {
+    const shelf = [c("A"), c("B")];
+    const grown = withCompAdded(shelf, c("C"));
+    expect(grown.map((x) => x.title)).toEqual(["A", "B", "C"]);
+    expect(shelf).toHaveLength(2);
+    expect(withCompRemoved(grown, 1).map((x) => x.title)).toEqual(["A", "C"]);
+  });
+
+  it("refuses to grow past the shelf cap", () => {
+    const full = Array.from({ length: MAX_COMPS }, (_, i) => c(`T${i}`));
+    expect(withCompAdded(full, c("overflow"))).toBe(full);
   });
 });
 

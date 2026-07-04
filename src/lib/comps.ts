@@ -41,3 +41,41 @@ export function compsSearchText(m: Manuscript): string {
     .map((c) => c.title)
     .join(" ");
 }
+
+/** Shelf cap — mirrors the Firestore rules cap (`comps` list ≤ 12). */
+export const MAX_COMPS = 12;
+
+/**
+ * A comp published five or more years ago reads as "older" — derived at render, never stored.
+ * The same rule drives the shelf's gold OLDER COMP chip and the Suggestions age caution.
+ */
+export function isOlderComp(year: number | undefined, currentYear: number): boolean {
+  return typeof year === "number" && Number.isFinite(year) && year <= currentYear - 5;
+}
+
+export type PitchLine =
+  | { kind: "two"; a: string; b: string }
+  | { kind: "one"; a: string }
+  | { kind: "none" };
+
+/** The pitch line composes from the FIRST TWO shelf comps, in shelf order. */
+export function pitchLine(comps: CompTitle[]): PitchLine {
+  if (comps.length >= 2) return { kind: "two", a: comps[0].title, b: comps[1].title };
+  if (comps.length === 1) return { kind: "one", a: comps[0].title };
+  return { kind: "none" };
+}
+
+/** Clipboard text for the complete line, or null while it's incomplete. */
+export function pitchLineText(comps: CompTitle[]): string | null {
+  const p = pitchLine(comps);
+  return p.kind === "two" ? `${p.a} meets ${p.b}` : null;
+}
+
+/** Append respecting the shelf cap (a full shelf returns unchanged). */
+export function withCompAdded(comps: CompTitle[], comp: CompTitle): CompTitle[] {
+  return comps.length >= MAX_COMPS ? comps : [...comps, comp];
+}
+
+export function withCompRemoved(comps: CompTitle[], index: number): CompTitle[] {
+  return comps.filter((_, i) => i !== index);
+}

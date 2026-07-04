@@ -17,12 +17,14 @@
  */
 import React, { useState, useEffect, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
-import { Manuscript, ManuscriptStatus } from "../types";
+import { CompTitle, Manuscript, ManuscriptStatus } from "../types";
 import { motion, AnimatePresence } from "motion/react";
 import { Plus, Send, Pencil, MoreHorizontal, Archive, Trash2, X, Check } from "lucide-react";
 import { FieldCard } from "./manuscripts/FieldCard";
 import { MaterialsCard } from "./manuscripts/MaterialsCard";
+import { CompShelf } from "./manuscripts/CompShelf";
 import { isShelvedPresentation, wordCountWhisper } from "../lib/manuscriptPage";
+import { manuscriptComps, withCompAdded, withCompRemoved } from "../lib/comps";
 import "./manuscripts/manuscripts.css";
 
 /** Shared with the Submission Packages page — it reads this key to scope itself on open. */
@@ -95,8 +97,20 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
   const activeMs = selectedMsId ? manuscripts.find((m) => m.id === selectedMsId) : null;
   const msVersions = activeMs ? versions.filter((v) => v.manuscriptId === activeMs.id) : [];
   const msQueries = activeMs ? queries.filter((q) => q.manuscriptId === activeMs.id) : [];
+  const msComps = activeMs ? manuscriptComps(activeMs) : [];
   const shelvedP = activeMs ? isShelvedPresentation(activeMs) : false;
   const whisper = activeMs ? wordCountWhisper(activeMs.ageCategory, activeMs.genre) : null;
+
+  // Shelf writes — the ONLY comp-editing path. A first write on a legacy-string doc converts it
+  // to the structured array (the stray comparableTitles field is left behind, never written).
+  const addComp = async (c: CompTitle) => {
+    if (!activeMs) return;
+    await updateManuscript(activeMs.id, { comps: withCompAdded(msComps, c) });
+  };
+  const removeComp = async (index: number) => {
+    if (!activeMs) return;
+    await updateManuscript(activeMs.id, { comps: withCompRemoved(msComps, index) });
+  };
 
   // ── lifecycle (carried over: reversible shelve flag-flip with Undo; deferred delete) ──
   const toggleShelved = async (ms: Manuscript) => {
@@ -322,7 +336,13 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
                   <h3>Comparable titles</h3>
                   <span className="msv-lab">THE &lsquo;X MEETS Y&rsquo; OF YOUR PITCH</span>
                 </div>
-                {/* Comp shelf + pitch line land here (Phase 3); Suggestions beneath (Phase 4). */}
+                <CompShelf
+                  comps={msComps}
+                  currentYear={new Date().getFullYear()}
+                  onAdd={addComp}
+                  onRemove={removeComp}
+                />
+                {/* Suggestions land beneath the shelf hairline (Phase 4). */}
               </div>
               <div className="msv-rightcol">
                 <FieldCard
