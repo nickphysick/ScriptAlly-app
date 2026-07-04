@@ -109,12 +109,17 @@ export const Composer: React.FC<ComposerProps> = ({ versions, packages, editingI
       <style>{`
         .pkgcomp { position:relative; overflow:hidden; border-radius:var(--chromerad); border:var(--bdw) solid var(--bd); background:var(--pane); }
         .t-bold .pkgcomp { background:var(--card); } /* white ground beneath the pink name band (matches the inner cards) */
-        .pkgcomp .c2-band { display:flex; align-items:center; gap:14px; padding:17px 22px; background:var(--band); border-bottom:var(--bdw) solid var(--bd); }
-        .pkgcomp .bic { color:var(--ink); display:flex; flex-shrink:0; }
+        .pkgcomp .c2-band { display:flex; align-items:center; gap:14px; padding:17px 22px; background:linear-gradient(135deg,var(--band-a),var(--band-b)); border-bottom:var(--bdw) solid var(--bd); }
+        .pkgcomp .bic { color:var(--headT); display:flex; flex-shrink:0; }
         .pkgcomp .hname input { border:0; outline:0; background:transparent; font-family:${FONT_SERIF}; font-size:23px; font-weight:700; color:var(--ink); border-bottom:1.5px dashed rgba(36,28,21,.3); padding:2px 2px 4px; width:360px; max-width:48vw; }
         .pkgcomp .hname input::placeholder { color:rgba(36,28,21,.45); font-style:italic; font-weight:500; }
+        /* New-capp only (ref .c2-band input): mocha name text + mocha-dashed underline; Bold keeps ink. */
+        .t-capp .pkgcomp .hname input { color:var(--headT); border-bottom-color:rgba(93,64,55,.35); }
+        .t-capp .pkgcomp .hname input::placeholder { color:rgba(93,64,55,.5); }
         .pkgcomp .copybtn { margin-left:auto; display:inline-flex; align-items:center; gap:8px; font-family:${FONT_MONO}; font-size:9px; letter-spacing:.07em; text-transform:uppercase; color:#6a4436; background:rgba(255,254,251,.55); border:1px solid rgba(124,58,42,.18); border-radius:9px; padding:8px 13px; cursor:pointer; }
         .pkgcomp .copybtn:hover { background:#fffefb; color:var(--burg); }
+        /* New-capp only (ref .copybtn): mocha text + taupe hairline on the translucent chip. */
+        .t-capp .pkgcomp .copybtn { color:var(--btnT); border-color:var(--btnBd); }
         .pkgcomp .c2-body { display:flex; gap:20px; padding:24px; }
         .pkgcomp .mani { flex:0 1 430px; min-width:360px; display:flex; flex-direction:column; justify-content:center; gap:14px; }
         .pkgcomp .brow { display:flex; align-items:center; gap:14px; background:#fffefb; border-radius:10px; padding:19px 18px; min-height:72px; }
@@ -155,26 +160,29 @@ export const Composer: React.FC<ComposerProps> = ({ versions, packages, editingI
         .pkgcomp .save { font-family:${FONT_SERIF}; font-size:16.5px; font-weight:600; color:var(--ink); background:#fffefb; border:var(--bdw) solid var(--bd); border-radius:11px; padding:13px 28px; cursor:pointer; }
         .t-bold .pkgcomp .save { border:1.5px solid #1d1712; }
         .pkgcomp .save:hover:not(:disabled) { background:#faeee8; }
+        /* New-capp only (ref .btn): Save joins the white/taupe/mocha treatment; Bold stays white/ink. */
+        .t-capp .pkgcomp .save { color:var(--btnT); border-color:var(--btnBd); }
+        .t-capp .pkgcomp .save:hover:not(:disabled) { background:var(--btnH); }
         .pkgcomp .save:disabled { opacity:.5; cursor:not-allowed; }
         .pkgcomp .cancel { font-size:13.5px; color:var(--muted); background:none; border:0; cursor:pointer; }
         .pkgcomp .cancel:hover { color:var(--burg); }
         /* copy drawer */
         .pkgcomp .drawer { position:absolute; top:0; right:0; bottom:0; width:320px; background:#fffefb; border-left:var(--bdw) solid var(--bd); box-shadow:-14px 0 34px rgba(58,28,20,.14); display:flex; flex-direction:column; z-index:5; }
         .t-bold .pkgcomp .drawer { border-left:1.5px solid #1d1712; }
-        .pkgcomp .drawer-h { padding:15px 18px; background:var(--band); border-bottom:var(--bdw) solid var(--bd); display:flex; align-items:center; gap:10px; }
-        .pkgcomp .drawer-h h4 { font-family:${FONT_SERIF}; font-size:17px; font-weight:700; color:var(--ink); }
+        .pkgcomp .drawer-h { padding:15px 18px; background:linear-gradient(135deg,var(--band-a),var(--band-b)); border-bottom:var(--bdw) solid var(--bd); display:flex; align-items:center; gap:10px; }
+        .pkgcomp .drawer-h h4 { font-family:${FONT_SERIF}; font-size:17px; font-weight:700; color:var(--headT); }
         .pkgcomp .drawer-h .x { margin-left:auto; cursor:pointer; color:#6a4436; font-size:15px; background:none; border:0; padding:0; line-height:1; }
         .pkgcomp .drawer-b { padding:14px; display:flex; flex-direction:column; gap:11px; overflow-y:auto; }
         .pkgcomp .drawer-note { font-size:10.5px; color:var(--muted); font-style:italic; padding:2px 4px; }
         .pkgcomp .dpk { border:var(--bdw) solid var(--bd); border-radius:10px; overflow:hidden; background:#fffefb; }
         .t-bold .pkgcomp .dpk { border:1.5px solid #1d1712; }
-        .pkgcomp .dpk-h { padding:9px 14px; background:var(--band); display:flex; align-items:center; border-bottom:var(--bdw) solid var(--bd); }
-        .pkgcomp .dpk-h .nm { font-family:${FONT_SERIF}; font-size:14.5px; font-weight:700; color:var(--ink); }
+        .pkgcomp .dpk-h { padding:9px 14px; background:linear-gradient(135deg,var(--band-a),var(--band-b)); display:flex; align-items:center; border-bottom:var(--bdw) solid var(--bd); }
+        .pkgcomp .dpk-h .nm { font-family:${FONT_SERIF}; font-size:14.5px; font-weight:700; color:var(--headT); }
         .pkgcomp .dpk-b { padding:10px 14px 12px; }
         .pkgcomp .dpk .ln { display:flex; gap:7px; align-items:center; font-size:11.5px; color:#6a5a50; padding:2.5px 0; }
         .pkgcomp .dpk .dd { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-        .pkgcomp .dpk .cta { margin-top:9px; width:100%; font-family:${FONT_MONO}; font-size:9px; letter-spacing:.06em; text-transform:uppercase; background:var(--pink); border:1px solid var(--pink-b); color:var(--burg); border-radius:8px; padding:8px; cursor:pointer; }
-        .pkgcomp .dpk .cta:hover { background:var(--pink-h); }
+        .pkgcomp .dpk .cta { margin-top:9px; width:100%; font-family:${FONT_MONO}; font-size:9px; letter-spacing:.06em; text-transform:uppercase; background:var(--btnBg); border:1px solid var(--btnBd); color:var(--burg); border-radius:8px; padding:8px; cursor:pointer; }
+        .pkgcomp .dpk .cta:hover { background:var(--btnH); }
         @media (max-width: 820px) { .pkgcomp .c2-body { flex-direction:column; } .pkgcomp .drawer { width:100%; } }
       `}</style>
 

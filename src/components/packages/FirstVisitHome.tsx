@@ -98,14 +98,14 @@ export const FirstVisitHome: React.FC<FirstVisitHomeProps> = ({ onBuild, onCreat
         .pkgfv .lt { flex:0 1 400px; min-width:0; }
         /* Playfair loads up to 700 only, so 800/900 clamp to 700 — use loaded weights for a real step:
            the setup line sits at 600 and the payoff "wins requests" at 700 (a touch bolder). */
-        .pkgfv .lt h2 { font-family:${FONT_SERIF}; font-size:46px; font-weight:600; line-height:1.08; letter-spacing:-.8px; color:var(--ink); margin:0; }
+        .pkgfv .lt h2 { font-family:${FONT_SERIF}; font-size:46px; font-weight:600; line-height:1.08; letter-spacing:-.8px; color:var(--headT); margin:0; }
         .pkgfv .wr { font-weight:700; white-space:nowrap; }
         .pkgfv .rel { position:relative; white-space:nowrap; }
         .pkgfv .star { position:absolute; top:-16px; left:-16px; width:19px; height:19px; fill:var(--pink-b); transform-origin:center; animation:pkgGlint 2.6s ease-in-out infinite; }
         @keyframes pkgGlint { 0%,100%{ transform:scale(1) rotate(0deg); opacity:.9; } 50%{ transform:scale(1.25) rotate(18deg); opacity:1; } 75%{ transform:scale(.92) rotate(8deg); opacity:.8; } }
         .pkgfv .sl { font-size:14.5px; color:#6a594d; line-height:1.65; max-width:380px; margin-top:16px; }
-        .pkgfv .build { display:inline-block; margin:24px 0 0; font-family:${FONT_SERIF}; font-size:16px; font-weight:700; color:var(--ink); background:var(--pink); border:1px solid var(--pink-b); border-radius:12px; padding:15px 32px; cursor:pointer; transition:background .15s,transform .15s; }
-        .pkgfv .build:hover { background:var(--pink-h); transform:translateY(-1px); }
+        .pkgfv .build { display:inline-block; margin:24px 0 0; font-family:${FONT_SERIF}; font-size:16px; font-weight:700; color:var(--btnT); background:var(--btnBg); border:1px solid var(--btnBd); border-radius:12px; padding:15px 32px; cursor:pointer; transition:background .15s,transform .15s; }
+        .pkgfv .build:hover { background:var(--btnH); transform:translateY(-1px); }
         .pkgfv .rt { position:relative; width:470px; height:340px; flex-shrink:0; animation:pkgCarCycle 5s ease-in-out infinite; }
         .pkgfv .rt:hover { animation-play-state:paused; }
         @keyframes pkgCarCycle { 0%,100% { opacity:0; } 8%,92% { opacity:1; } }
@@ -127,13 +127,13 @@ export const FirstVisitHome: React.FC<FirstVisitHomeProps> = ({ onBuild, onCreat
         .pkgfv .pkui-b { padding:13px 18px 16px; }
         .pkgfv .pkln { display:flex; align-items:center; gap:9px; font-size:12.5px; color:#5f5044; padding:4px 0; }
         .pkgfv .pkln .d { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
-        .pkgfv .winrow { margin-top:11px; background:#fdf1ec; border-left:4px solid var(--burg); border-radius:0 8px 8px 0; padding:9px 12px; }
+        .pkgfv .winrow { margin-top:11px; background:var(--winBg); border-left:4px solid var(--burg); border-radius:0 8px 8px 0; padding:9px 12px; }
         .pkgfv .winrow .wl { font-family:${FONT_MONO}; font-size:8px; letter-spacing:.08em; text-transform:uppercase; color:var(--burg); font-weight:500; }
         .pkgfv .winrow .wv { font-size:13.5px; font-weight:600; color:var(--ink); margin-top:2px; }
         .pkgfv .exlink { position:absolute; right:4px; bottom:0; font-family:${FONT_MONO}; font-size:8.5px; letter-spacing:.05em; color:var(--burg); text-decoration:underline; text-underline-offset:3px; cursor:pointer; background:none; border:0; padding:0; }
         .pkgfv .divrule { display:flex; align-items:center; gap:14px; margin:52px 24px 0; }
         .pkgfv .divrule::before, .pkgfv .divrule::after { content:''; flex:1; height:1px; background:#e6dac8; }
-        .pkgfv .divrule span { font-family:${FONT_SERIF}; font-size:16.5px; font-weight:700; color:var(--ink); white-space:nowrap; }
+        .pkgfv .divrule span { font-family:${FONT_SERIF}; font-size:16.5px; font-weight:700; color:var(--headT); white-space:nowrap; }
         .pkgfv .contB { padding:14px 24px 8px; text-align:center; }
         .pkgfv .a2s { font-size:14px; color:#7a685a; margin:0 auto; max-width:560px; line-height:1.6; }
         .pkgfv .librow { display:flex; justify-content:center; gap:18px; margin-top:22px; flex-wrap:wrap; }

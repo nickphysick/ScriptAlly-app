@@ -104,6 +104,8 @@ export const MaterialModal: React.FC<MaterialModalProps> = ({ type, editing, ini
         .pkgmatm .m-cancel { font-size:12.5px; background:none; border:0; color:var(--muted); cursor:pointer; padding:10px 8px; font-family:${FONT_SANS}; }
         .pkgmatm .m-cancel:hover { color:var(--burg); }
         .pkgmatm .m-save { font-family:${FONT_SERIF}; font-size:15px; font-weight:600; color:var(--ink); background:var(--card); border:var(--bdw) solid var(--bd); border-radius:10px; padding:10px 20px; cursor:pointer; }
+        /* New-capp only: Save material joins the white/taupe/mocha treatment (hover stays type-tinted). */
+        .t-capp .pkgmatm .m-save { color:var(--btnT); border-color:var(--btnBd); }
         .pkgmatm .modal.m-letter .m-save:hover:not(:disabled) { background:var(--tl); }
         .pkgmatm .modal.m-syn .m-save:hover:not(:disabled) { background:var(--ts); }
         .pkgmatm .modal.m-pages .m-save:hover:not(:disabled) { background:var(--tp); }

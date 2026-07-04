@@ -181,7 +181,7 @@ export const SubmissionPackages: React.FC = () => {
           {manuscripts.map((m) => {
             const on = m.id === activeMs.id;
             return (
-              <button key={m.id} type="button" role="option" aria-selected={on} onClick={() => selectMs(m.id)} className="pkg-msopt" style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", textAlign: "left", fontFamily: FONT_SERIF, fontSize: 14, fontWeight: on ? 700 : 500, color: on ? "var(--burg)" : "var(--ink)", background: on ? "var(--band)" : "transparent", border: "none", borderRadius: 7, padding: "9px 11px", cursor: "pointer" }}>
+              <button key={m.id} type="button" role="option" aria-selected={on} onClick={() => selectMs(m.id)} className="pkg-msopt" style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", textAlign: "left", fontFamily: FONT_SERIF, fontSize: 14, fontWeight: on ? 700 : 500, color: on ? "var(--burg)" : "var(--ink)", background: on ? "linear-gradient(135deg, var(--band-a), var(--band-b))" : "transparent", border: "none", borderRadius: 7, padding: "9px 11px", cursor: "pointer" }}>
                 <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.title}</span>
               </button>
             );
@@ -194,7 +194,7 @@ export const SubmissionPackages: React.FC = () => {
   return (
     <div className="pkg-root" style={{ height: "100%", display: "flex", flexDirection: "column", padding: 16, gap: 14, overflow: "hidden", background: "var(--desk)" }}>
       <style>{`
-        .pkg-msopt:hover { background: var(--band) !important; }
+        .pkg-msopt:hover { background: linear-gradient(135deg, var(--band-a), var(--band-b)) !important; }
         @media (max-width: 768px) {
           .pkg-root { height: auto; min-height: 100%; overflow: visible; }
           .pkg-workspace { flex-direction: column; }
@@ -215,7 +215,7 @@ export const SubmissionPackages: React.FC = () => {
             titleAfter={firstVisit ? largerProPill : proPill}
             right={firstVisit ? undefined : msSelector}
             style={{ padding: "20px 24px", gap: 14, boxShadow: "none" }}
-            titleStyle={{ fontWeight: 700, fontSize: 26, color: "var(--ink)" }}
+            titleStyle={{ fontWeight: 700, fontSize: 26, color: "var(--headT)" }}
           />
           <div className="pkg-workspace" style={{ flex: 1, minHeight: 0, display: "flex", gap: 14 }}>
             {/* Materials rail — shown once the manuscript has any material or package (mockup .qlist). */}

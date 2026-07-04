@@ -68,13 +68,17 @@ export const PackagesHome: React.FC<PackagesHomeProps> = ({ packages, versions, 
         .pkglp .lp { display:flex; gap:16px; min-height:340px; }
         .pkglp .lp-list { width:270px; flex-shrink:0; background:var(--card); border:var(--bdw) solid var(--bd); border-radius:11px; overflow:hidden; display:flex; flex-direction:column; }
         .t-bold .pkglp .lp-list { border:1.5px solid #1d1712; }
-        .pkglp .lp-lh { padding:11px 15px; background:var(--band); border-bottom:var(--bdw) solid var(--bd); display:flex; align-items:center; }
-        .pkglp .lp-lh h4 { font-family:${FONT_SERIF}; font-size:15px; font-weight:700; color:var(--ink); }
+        .pkglp .lp-lh { padding:11px 15px; background:linear-gradient(135deg,var(--band-a),var(--band-b)); border-bottom:var(--bdw) solid var(--bd); display:flex; align-items:center; }
+        .pkglp .lp-lh h4 { font-family:${FONT_SERIF}; font-size:15px; font-weight:700; color:var(--headT); }
         .pkglp .np { margin-left:auto; font-family:${FONT_MONO}; font-size:8.5px; letter-spacing:.06em; color:var(--burg); cursor:pointer; background:rgba(255,254,251,.7); border-radius:6px; padding:5px 9px; border:0; }
         .pkglp .np:hover { background:#fffefb; }
+        /* New-capp only (ref .np): ＋ NEW becomes a real white/taupe/mocha button on the foam band.
+           Bold keeps the translucent burgundy chip (base rule above). */
+        .t-capp .pkglp .np { color:var(--btnT); background:var(--btnBg); border:1px solid var(--btnBd); }
+        .t-capp .pkglp .np:hover { background:var(--btnH); }
         .pkglp .lprow { padding:13px 15px; border-bottom:1px dashed #e7dbc9; cursor:pointer; text-align:left; background:none; width:100%; display:block; }
         .pkglp .lprow:hover { background:#faf4ec; }
-        .pkglp .lprow.on { background:#fdf1ec; border-left:3px solid var(--burg); padding-left:12px; }
+        .pkglp .lprow.on { background:var(--selBg); border-left:3px solid var(--burg); padding-left:12px; }
         .pkglp .lprow .nm { font-family:${FONT_SERIF}; font-size:15px; font-weight:700; color:var(--ink); }
         .pkglp .lprow .glyphs { display:flex; gap:6px; margin:6px 0 5px; }
         .pkglp .gch { width:20px; height:20px; border-radius:6px; display:flex; align-items:center; justify-content:center; }
@@ -86,9 +90,11 @@ export const PackagesHome: React.FC<PackagesHomeProps> = ({ packages, versions, 
         .pkglp .ghostrow:hover { color:var(--burg); background:#faf4ec; }
         .pkglp .lp-read { flex:1; min-width:0; background:var(--card); border:var(--bdw) solid var(--bd); border-radius:11px; overflow:hidden; display:flex; flex-direction:column; }
         .t-bold .pkglp .lp-read { border:1.5px solid #1d1712; }
-        .pkglp .lp-rh { padding:14px 20px; background:var(--band); border-bottom:var(--bdw) solid var(--bd); display:flex; align-items:center; gap:12px; }
-        .pkglp .lp-rh h3 { font-family:${FONT_SERIF}; font-size:20px; font-weight:800; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .pkglp .lp-rh { padding:14px 20px; background:linear-gradient(135deg,var(--band-a),var(--band-b)); border-bottom:var(--bdw) solid var(--bd); display:flex; align-items:center; gap:12px; }
+        .pkglp .lp-rh h3 { font-family:${FONT_SERIF}; font-size:20px; font-weight:800; color:var(--headT); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
         .pkglp .lp-rh .acts { margin-left:auto; display:flex; gap:12px; font-family:${FONT_MONO}; font-size:9px; color:#6a4436; flex-shrink:0; }
+        /* New-capp only (ref .acts): mocha at 75% on the foam band; Bold keeps its warm brown. */
+        .t-capp .pkglp .lp-rh .acts { color:var(--headT); opacity:.75; }
         .pkglp .lp-rh .acts button { background:none; border:0; padding:0; cursor:pointer; font:inherit; color:inherit; }
         .pkglp .lp-rh .acts button:hover { color:var(--burg); }
         .pkglp .lp-rh .acts .stub { color:var(--muted); cursor:default; }

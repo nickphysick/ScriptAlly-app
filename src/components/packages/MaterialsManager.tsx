@@ -63,8 +63,8 @@ export const MaterialsManager: React.FC<MaterialsManagerProps> = ({ versions, pa
   <div className="pkgmgr">
     <style>{`
       .pkgmgr .backrow { display:flex; align-items:center; gap:12px; margin-bottom:18px; }
-      .pkgmgr .vh-ic { width:34px; height:34px; border-radius:10px; background:var(--band); color:var(--burg); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-      .pkgmgr .view-title { font-family:${FONT_SERIF}; font-size:23px; font-weight:700; color:var(--ink); }
+      .pkgmgr .vh-ic { width:34px; height:34px; border-radius:10px; background:linear-gradient(135deg,var(--band-a),var(--band-b)); color:var(--burg); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+      .pkgmgr .view-title { font-family:${FONT_SERIF}; font-size:23px; font-weight:700; color:var(--headT); }
       .pkgmgr .backbtn { margin-left:auto; font-family:${FONT_MONO}; font-size:10px; letter-spacing:.08em; text-transform:uppercase; background:var(--card); border:var(--bdw) solid var(--bd); color:var(--burg); border-radius:9px; padding:9px 14px; cursor:pointer; }
       .pkgmgr .backbtn:hover { background:#faeee8; }
       .pkgmgr .shelfwrap { display:flex; flex-direction:column; gap:22px; }
