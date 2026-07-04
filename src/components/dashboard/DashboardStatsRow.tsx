@@ -3,30 +3,42 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * v37 stat cards — the full-width row, the focus-slot minis and the focused panels all render
- * from ONE definition list (useStatDefs), which reads only lib/dashboardStats selectors. Each
- * stat's signature visual (weekly bars / pipeline segbar / people row / rate slider) is a small
- * component shared by the row and the focused panel.
+ * from ONE definition list (useStatDefs), which reads only lib/dashboardStats selectors.
+ *
+ * Prod-pattern visuals (content pattern from the pre-rebuild production cards; ALL colour from
+ * the current theme tokens — never sage/green):
+ *  1 Queries sent   — 8 trailing ISO weeks; zero-weeks are low baseline dashes; current week in
+ *                     --sd-hue, earlier weeks in the muted theme tint. Hover a slot → "W/C … · N SENT".
+ *  2 Active queries — area sparkline of the active count at each week-end (derived-status fields
+ *                     only), theme-hue line over a soft fading fill. Hover a slot → "… · N ACTIVE".
+ *  3 Agents         — one person glyph per agent (≤10; then a +N chip): hue when they have an
+ *                     active query, muted when idle. Hover → "NAME · MOST-ADVANCED STATUS" / "· IDLE".
+ *  4 Responses      — the slider at the response rate. Hover the track → "9 OF 10 … · 90%".
+ * Every hover point is a StatTooltip (focusable, aria-labelled). Minis have no charts/hovers.
  */
 import React, { useMemo } from "react";
 import { Agent, Query, QueryStatus } from "../../types";
 import {
   activeQueriesOf,
+  activeTooltip,
+  activeWeeklySeries,
+  agentStatusSummaries,
+  agentTooltip,
+  AgentStatusSummary,
   awaitingReplyCount,
   idleAgentCount,
-  pipelineMix,
+  overflowTooltip,
   responseRatePercent,
   responsesReceivedCount,
+  responsesTooltip,
   sendsThisWeek,
+  sentTooltip,
   shownAgentCount,
+  trailingWeekStarts,
   weeklySendSeries,
 } from "../../lib/dashboardStats";
+import { StatTooltip } from "./StatTooltip";
 import type { FocusKey } from "./focusSlot";
-
-/* Stage ramp for the pipeline segbar — theme-hue-led: the first stage is the theme hue and the
-   later stages step toward the neutral track. Static hexes per theme are unnecessary here: the
-   lead segment reads var(--sd-hue); the tail uses fixed neutral steps that read correctly on all
-   three themes. */
-const SEG_TAIL = ["#a98d68", "#c9ab8a", "#ddcbb4", "#eee2d2", "#f4ede3"];
 
 const ICONS: Record<Exclude<FocusKey, "todo">, React.ReactNode> = {
   queriesSent: (
@@ -51,46 +63,98 @@ const ICONS: Record<Exclude<FocusKey, "todo">, React.ReactNode> = {
   ),
 };
 
-/* ── signature visuals ── */
+/* ── signature visuals (scale-aware: the focused panel passes a taller chart height) ── */
 
-const WeeklyBars: React.FC<{ series: number[] }> = ({ series }) => {
+const WeeklyBars: React.FC<{ series: number[]; weekStarts: Date[]; chartH: number }> = ({ series, weekStarts, chartH }) => {
   const max = Math.max(1, ...series);
   return (
-    <div className="sa-mbar" aria-hidden="true">
+    <div className="sa-mbar" style={{ ["--chart-h" as string]: `${chartH}px` } as React.CSSProperties}>
       {series.map((n, i) => (
-        <i key={i} className={i === series.length - 1 ? "hot" : undefined} style={{ ["--h" as string]: `${Math.max(8, Math.round((n / max) * 100))}%` } as React.CSSProperties} />
+        <span key={i} className="sa-mbar-slot">
+          <StatTooltip label={sentTooltip(weekStarts[i], n)} block>
+            <i
+              className={`${i === series.length - 1 && n > 0 ? "hot " : ""}${n === 0 ? "zero" : ""}`.trim() || undefined}
+              style={n > 0 ? ({ ["--h" as string]: `${Math.max(12, Math.round((n / max) * 100))}%` } as React.CSSProperties) : undefined}
+            />
+          </StatTooltip>
+        </span>
       ))}
     </div>
   );
 };
 
-const PipelineSegBar: React.FC<{ queries: Query[] }> = ({ queries }) => {
-  const mix = pipelineMix(activeQueriesOf(queries));
-  if (mix.length === 0) return <div className="sa-segbar" aria-hidden="true" />;
+/** Area sparkline — line in the theme hue over a soft fill fading to transparent (geometry
+ *  lifted from the retired StatCards line chart; colours retokened). */
+const ActiveSparkline: React.FC<{ series: number[]; weekStarts: Date[]; chartH: number }> = ({ series, weekStarts, chartH }) => {
+  const W = 160;
+  const H = 34;
+  const max = Math.max(1, ...series);
+  const pts = series.map((n, i) => {
+    const x = series.length === 1 ? W / 2 : (i / (series.length - 1)) * W;
+    const y = H - 3 - (n / max) * (H - 8);
+    return [x, y] as const;
+  });
+  const line = pts.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`).join(" ");
+  const fill = `${line} L${W} ${H} L0 ${H} Z`;
+  const gradId = React.useId();
   return (
-    <div className="sa-segbar" aria-hidden="true">
-      {mix.map((s, i) => (
-        <i key={s.status} style={{ flex: s.count, background: i === 0 ? "var(--sd-hue, #7c3a2a)" : SEG_TAIL[Math.min(i - 1, SEG_TAIL.length - 1)] }} />
+    <div className="sa-spark" style={{ ["--chart-h" as string]: `${chartH}px` } as React.CSSProperties}>
+      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="var(--sd-hue, #7c3a2a)" stopOpacity="0.22" />
+            <stop offset="100%" stopColor="var(--sd-hue, #7c3a2a)" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <path d={fill} fill={`url(#${gradId})`} stroke="none" />
+        <path d={line} fill="none" stroke="var(--sd-hue, #7c3a2a)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+      </svg>
+      {/* hover/focus slots — one per week, spanning the chart's full height */}
+      <div className="sa-spark-slots">
+        {series.map((n, i) => (
+          <StatTooltip key={i} label={activeTooltip(weekStarts[i], n)} block />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+/** Person glyph — filled silhouette; colour via currentColor (hue = active, muted = idle). */
+const PersonGlyph: React.FC<{ size: number }> = ({ size }) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true" style={{ display: "block" }}>
+    <circle cx="12" cy="7.2" r="4.2" fill="currentColor" />
+    <path d="M3.6 21c.4-4.4 4-7.4 8.4-7.4s8 3 8.4 7.4z" fill="currentColor" />
+  </svg>
+);
+
+const AgentPeopleRow: React.FC<{ summaries: AgentStatusSummary[]; glyphSize: number }> = ({ summaries, glyphSize }) => {
+  const shown = summaries.slice(0, 10);
+  const overflow = summaries.length - shown.length;
+  return (
+    <div className="sa-people">
+      {shown.map((s) => (
+        <StatTooltip key={s.id} label={agentTooltip(s.name, s.status)}>
+          <span className={`sa-person${s.status ? " on" : ""}`}>
+            <PersonGlyph size={glyphSize} />
+          </span>
+        </StatTooltip>
       ))}
+      {overflow > 0 && (
+        <StatTooltip label={overflowTooltip(overflow)}>
+          <span className="sa-more">+{overflow}</span>
+        </StatTooltip>
+      )}
     </div>
   );
 };
 
-const PeopleRow: React.FC<{ total: number }> = ({ total }) => {
-  const shown = Math.min(10, total);
-  return (
-    <div className="sa-people" aria-hidden="true">
-      {Array.from({ length: shown }, (_, i) => (<i key={i} />))}
-      {total > shown && <span className="sa-more">+{total - shown}</span>}
+const RateSlider: React.FC<{ pct: number; answered: number; total: number }> = ({ pct, answered, total }) => (
+  <StatTooltip label={responsesTooltip(answered, total, pct)} block>
+    <div className="sa-slider">
+      <div className="sa-fill" style={{ width: `${pct}%` }} />
+      <div className="sa-knob" style={{ left: `${pct}%` }} />
     </div>
-  );
-};
-
-const RateSlider: React.FC<{ pct: number }> = ({ pct }) => (
-  <div className="sa-slider" aria-hidden="true">
-    <div className="sa-fill" style={{ width: `${pct}%` }} />
-    <div className="sa-knob" style={{ left: `${pct}%` }} />
-  </div>
+  </StatTooltip>
 );
 
 /* ── one data source for all three renderings ── */
@@ -102,17 +166,21 @@ export interface StatDef {
   pill: string;
   /** Focused panel sub-line; empty string = omit (derivation not cleanly supported). */
   sub: string;
-  visual: React.ReactNode;
+  /** Scale-aware visual — the row renders visual(26), the focused panel visual(42). */
+  visual: (chartH: number) => React.ReactNode;
 }
 
 export const useStatDefs = (queries: Query[], agents: Agent[]): StatDef[] =>
   useMemo(() => {
     const now = new Date();
+    const weekStarts = trailingWeekStarts(now, 8);
     const series = weeklySendSeries(queries, now, 8);
+    const activeSeries = activeWeeklySeries(queries, now, 8);
     const thisWeek = sendsThisWeek(queries, now);
     const active = activeQueriesOf(queries);
     const awaiting = awaitingReplyCount(queries);
     const withPagesOut = queries.filter((q) => q.status === QueryStatus.PARTIAL_SENT || q.status === QueryStatus.FULL_SENT).length;
+    const summaries = agentStatusSummaries(agents, queries);
     const idle = idleAgentCount(agents, queries);
     const shownAgents = shownAgentCount(agents, queries);
     const responses = responsesReceivedCount(queries);
@@ -122,18 +190,17 @@ export const useStatDefs = (queries: Query[], agents: Agent[]): StatDef[] =>
         key: "queriesSent",
         label: "Queries sent",
         num: queries.length,
-        pill: `+${thisWeek} this week`,
-        // Comparative "best week since…" is not trivially derivable — omitted (see BUILD-REPORT).
-        sub: `+${thisWeek} this week`,
-        visual: <WeeklyBars series={series} />,
+        pill: `${thisWeek} this week`,
+        sub: `${thisWeek} this week`,
+        visual: (h) => <WeeklyBars series={series} weekStarts={weekStarts} chartH={h} />,
       },
       {
         key: "active",
         label: "Active queries",
         num: active.length,
-        pill: `${awaiting} awaiting a reply`,
+        pill: Number.isFinite(awaiting) ? `${awaiting} awaiting a reply` : "No change on last week",
         sub: `${awaiting} awaiting a reply · ${withPagesOut} with your pages out`,
-        visual: <PipelineSegBar queries={queries} />,
+        visual: (h) => <ActiveSparkline series={activeSeries} weekStarts={weekStarts} chartH={h} />,
       },
       {
         key: "agents",
@@ -141,7 +208,7 @@ export const useStatDefs = (queries: Query[], agents: Agent[]): StatDef[] =>
         num: shownAgents,
         pill: `${idle} idle`,
         sub: `${idle} idle`,
-        visual: <PeopleRow total={shownAgents} />,
+        visual: (h) => <AgentPeopleRow summaries={summaries} glyphSize={Math.round(h * 0.55)} />,
       },
       {
         key: "responses",
@@ -149,7 +216,7 @@ export const useStatDefs = (queries: Query[], agents: Agent[]): StatDef[] =>
         num: responses,
         pill: `${rate}% rate`,
         sub: `${rate}% response rate`,
-        visual: <RateSlider pct={rate} />,
+        visual: () => <RateSlider pct={rate} answered={responses} total={queries.length} />,
       },
     ];
   }, [queries, agents]);
@@ -157,11 +224,14 @@ export const useStatDefs = (queries: Query[], agents: Agent[]): StatDef[] =>
 /* ── renderings ── */
 
 export const StatCardFull: React.FC<{ def: StatDef; onPin: () => void }> = ({ def, onPin }) => (
-  <button type="button" className="sa-stat" title="Pin to focus" onClick={onPin}>
+  <div className="sa-stat" title="Pin to focus" role="button" tabIndex={0}
+    onClick={onPin}
+    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onPin(); } }}
+  >
     <div className="sa-cap">{ICONS[def.key]}{def.label}</div>
     <div className="sa-numrow"><span className="sa-num">{def.num}</span><span className="sa-pill">{def.pill}</span></div>
-    <div className="sa-foot">{def.visual}</div>
-  </button>
+    <div className="sa-foot">{def.visual(26)}</div>
+  </div>
 );
 
 export const StatMini: React.FC<{ def: StatDef; onPin: () => void }> = ({ def, onPin }) => (
@@ -179,7 +249,7 @@ export const StatFocusPanel = React.forwardRef<HTMLDivElement, { def: StatDef; o
       <div className="sa-cap">{ICONS[def.key]}{def.label}</div>
       <div className="sa-bign">{def.num}</div>
       {def.sub && <div className="sa-sub">{def.sub}</div>}
-      <div className="sa-ffoot">{def.visual}</div>
+      <div className="sa-ffoot">{def.visual(42)}</div>
     </div>
   ),
 );

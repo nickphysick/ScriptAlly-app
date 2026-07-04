@@ -17,6 +17,7 @@
  */
 import { Agent, Query, QueryStatus } from "../types";
 import { agentBuckets } from "./lifecycle";
+import { STATUS_ORDER } from "./statusOrder";
 
 /** Monday 00:00 (local) of the ISO week containing `d`. */
 export const isoWeekStart = (d: Date): Date => {
@@ -30,8 +31,22 @@ const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 const parseWhen = (v: unknown): number | null => {
   if (!v) return null;
-  const t = typeof v === "string" || v instanceof Date ? new Date(v as any).getTime() : NaN;
+  // Firestore Timestamps (lastStatusChange / responseReceivedAt) arrive as objects.
+  if (typeof v === "object" && v !== null) {
+    const anyV = v as any;
+    if (typeof anyV.toDate === "function") return anyV.toDate().getTime();
+    if (typeof anyV.seconds === "number") return anyV.seconds * 1000;
+    if (v instanceof Date) return v.getTime();
+    return null;
+  }
+  const t = typeof v === "string" ? new Date(v).getTime() : NaN;
   return Number.isFinite(t) ? t : null;
+};
+
+/** Monday 00:00 of each of the trailing `bins` ISO weeks, oldest first (current week last). */
+export const trailingWeekStarts = (now: Date, bins = 8): Date[] => {
+  const cur = isoWeekStart(now).getTime();
+  return Array.from({ length: bins }, (_, i) => new Date(cur - (bins - 1 - i) * WEEK_MS));
 };
 
 /** Sends per ISO week for the trailing `bins` weeks; index bins-1 = the current week. */
@@ -115,6 +130,84 @@ export const pipelineMix = (queries: Query[]): { status: QueryStatus; count: num
     .map((status) => ({ status, count: queries.filter((q) => q.status === status).length }))
     .filter((s) => s.count > 0);
 };
+
+const TERMINAL_STATUSES: ReadonlySet<QueryStatus> = new Set([
+  QueryStatus.OFFER,
+  QueryStatus.REJECTED,
+  QueryStatus.WITHDRAWN,
+  QueryStatus.NO_RESPONSE,
+]);
+
+/** When a terminal query stopped being active — the derived audit fields, oldest-truth first.
+ *  A terminal doc with no usable timestamp closes at its dateSent (conservative: it never
+ *  contributes to the historical active line). */
+const closedAtOf = (q: Query): number | null => {
+  if (!TERMINAL_STATUSES.has(q.status)) return null; // still active — never closed
+  return parseWhen(q.lastStatusChange) ?? parseWhen(q.responseReceivedAt) ?? parseWhen(q.dateSent);
+};
+
+/**
+ * Active-count sampled at the END of each of the trailing `bins` ISO weeks (the last sample is
+ * clamped to `now`, so it always equals the live active count). A query is active at time T when
+ * it was sent by T and had not reached a terminal status by T. Uses only derived fields
+ * (status + dateSent + lastStatusChange/responseReceivedAt) — no hand-rolled status logic.
+ */
+export const activeWeeklySeries = (queries: Query[], now: Date, bins = 8): number[] => {
+  const starts = trailingWeekStarts(now, bins);
+  return starts.map((ws, i) => {
+    const sampleAt = i === bins - 1 ? now.getTime() : ws.getTime() + WEEK_MS - 1;
+    let n = 0;
+    for (const q of queries) {
+      const sent = parseWhen(q.dateSent);
+      if (sent === null || sent > sampleAt) continue;
+      const closed = closedAtOf(q);
+      if (closed !== null && closed <= sampleAt) continue;
+      n++;
+    }
+    return n;
+  });
+};
+
+export interface AgentStatusSummary {
+  id: string;
+  name: string;
+  /** The agent's most advanced ACTIVE status (STATUS_ORDER journey), or null when idle. */
+  status: QueryStatus | null;
+}
+
+/** One entry per agent shown on the Agents card (agentBuckets order: queried then idle). */
+export const agentStatusSummaries = (agents: Agent[], queries: Query[]): AgentStatusSummary[] => {
+  const buckets = agentBuckets<Agent>(agents, queries);
+  const rank = (s: QueryStatus) => STATUS_ORDER.indexOf(s);
+  const summarise = (a: Agent): AgentStatusSummary => {
+    const active = queries.filter((q) => q.agentId === a.id && ACTIVE_STATUSES.has(q.status));
+    if (active.length === 0) return { id: a.id, name: a.name, status: null };
+    const best = active.reduce((top, q) => (rank(q.status) > rank(top.status) ? q : top));
+    return { id: a.id, name: a.name, status: best.status };
+  };
+  return [...buckets.queried, ...buckets.idle].map(summarise);
+};
+
+/* ── tooltip label builders (pure — one formatting source for every stat hover) ── */
+
+/** "W/C 23 JUN" — week-commencing label, en-GB, uppercase, no year. */
+export const wcLabel = (weekStart: Date): string =>
+  `W/C ${weekStart.toLocaleDateString("en-GB", { day: "numeric", month: "short" }).toUpperCase()}`;
+
+export const sentTooltip = (weekStart: Date, n: number): string =>
+  `${wcLabel(weekStart)} · ${n} SENT`;
+
+export const activeTooltip = (weekStart: Date, n: number): string =>
+  `${wcLabel(weekStart)} · ${n} ACTIVE`;
+
+export const agentTooltip = (name: string, status: QueryStatus | null): string =>
+  `${name.toUpperCase()} · ${status ? String(status).toUpperCase() : "IDLE"}`;
+
+export const overflowTooltip = (n: number): string =>
+  `+${n} MORE ${n === 1 ? "AGENT" : "AGENTS"}`;
+
+export const responsesTooltip = (answered: number, total: number, pct: number): string =>
+  `${answered} OF ${total} ${total === 1 ? "QUERY" : "QUERIES"} ANSWERED · ${pct}%`;
 
 const WEEK_WORDS = [
   "one", "two", "three", "four", "five", "six",

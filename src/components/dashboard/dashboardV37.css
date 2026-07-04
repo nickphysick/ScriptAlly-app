@@ -180,7 +180,8 @@
 }
 .sa-dash.split-open .sa-stats { max-height: 0; opacity: 0; margin-bottom: -20px; transition: max-height 360ms cubic-bezier(.22,.8,.3,1), opacity 200ms ease, margin-bottom 360ms cubic-bezier(.22,.8,.3,1); }
 .sa-stat {
-  position: relative; overflow: hidden; padding: 18px 20px 16px; min-height: 158px;
+  /* clip (not hidden) + clip-margin so StatTooltips above the chart are never cut */
+  position: relative; overflow: clip; overflow-clip-margin: 44px; padding: 18px 20px 16px; min-height: 158px;
   display: flex; flex-direction: column; text-align: left;
   background: var(--card, #fffefb);
   border: var(--bdw, 1px) solid var(--bd, #e7ddd2);
@@ -205,22 +206,53 @@
 .t-edn .sa-stat .sa-pill { background: transparent; border: 1px solid #e3e2e0; color: #6b6b6b; }
 .sa-stat .sa-foot { margin-top: auto; padding-top: 14px; }
 
-/* stat visuals */
-.sa-mbar { display: flex; gap: 4px; align-items: flex-end; height: 26px; }
-.sa-mbar i { flex: 1; background: #d9cbb8; border-radius: 3px 3px 0 0; height: var(--h, 40%); }
+/* stat visuals (prod-pattern rework). Muted tint per theme: #d9cbb8 capp/bold, #e3e2e0 edn. */
+.t-capp, .t-bold { --stat-muted: #d9cbb8; }
+.t-edn { --stat-muted: #e3e2e0; }
+.sa-mbar { display: flex; gap: 4px; align-items: flex-end; height: var(--chart-h, 26px); }
+.sa-mbar .sa-mbar-slot { flex: 1; height: 100%; display: flex; align-items: flex-end; }
+.sa-mbar .sa-mbar-slot > .sa-tipwrap { width: 100%; height: 100%; align-items: flex-end; }
+.sa-mbar i { display: block; width: 100%; background: var(--stat-muted, #d9cbb8); border-radius: 3px 3px 0 0; height: var(--h, 40%); }
 .sa-mbar i.hot { background: var(--sd-hue, #7c3a2a); }
-.t-edn .sa-mbar i { background: #e3e2e0; }
-.t-edn .sa-mbar i.hot { background: var(--acc, #44484d); }
+/* zero-weeks render as a low flat dash at the baseline */
+.sa-mbar i.zero { height: 3px; border-radius: 2px; opacity: 0.55; }
+.sa-spark { position: relative; height: var(--chart-h, 26px); }
+.sa-spark svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.sa-spark .sa-spark-slots { position: absolute; inset: 0; display: flex; }
+.sa-spark .sa-spark-slots > .sa-tipwrap { flex: 1; height: 100%; }
 .sa-segbar { display: flex; height: 8px; border-radius: 6px; overflow: hidden; background: #efe9e1; }
 .sa-segbar i { display: block; }
-.sa-people { display: flex; gap: 5px; align-items: center; }
-.sa-people i { width: 7px; height: 7px; border-radius: 50%; background: var(--sd-hue, #7c3a2a); position: relative; display: inline-block; }
-.sa-people i::after { content: ''; position: absolute; top: 8px; left: -1.5px; width: 10px; height: 5px; border-radius: 5px 5px 0 0; background: var(--sd-hue, #7c3a2a); }
-.sa-people .sa-more { font-family: var(--font-mono); font-size: 9px; color: #8a7a6c; margin-left: 4px; }
-.sa-slider { position: relative; height: 6px; border-radius: 6px; background: #ece2d6; }
+.sa-people { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+.sa-person { display: flex; color: var(--stat-muted, #d9cbb8); }
+.sa-person.on { color: var(--sd-hue, #7c3a2a); }
+.sa-people .sa-more {
+  font-family: var(--font-mono); font-size: 9px; color: #8a7a6c; margin-left: 4px;
+  border: 1px solid var(--bd, #e7ddd2); border-radius: 99px; padding: 1px 7px; background: transparent;
+}
+.sa-slider { position: relative; height: 6px; border-radius: 6px; background: #ece2d6; width: 100%; }
 .t-edn .sa-slider { background: #e3e2e0; }
 .sa-slider .sa-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; background: var(--sd-hue, #7f9779); }
 .sa-slider .sa-knob { position: absolute; top: 50%; transform: translate(-50%, -50%); width: 15px; height: 15px; border-radius: 50%; background: #fff; border: 2px solid var(--sd-hue, #7f9779); box-shadow: 0 1px 3px rgba(58,28,20,0.2); }
+
+/* ── StatTooltip — the one on-brand tip for every stat data point ── */
+.sa-tipwrap { position: relative; outline: none; }
+.sa-tipwrap:focus-visible { box-shadow: 0 0 0 2px var(--sd-hue, #7c3a2a); border-radius: 4px; }
+.sa-tip {
+  position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+  white-space: nowrap; z-index: 70; pointer-events: none;
+  background: var(--card, #fffefb);
+  border: 1px solid #ded3c2;
+  border-radius: min(8px, var(--chromerad, 8px));
+  padding: 4px 8px;
+  font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ink, #3a1c14);
+  opacity: 0; transition: opacity 80ms ease;
+  box-shadow: 0 2px 8px rgba(20, 20, 20, 0.10);
+}
+.sa-tip.on { opacity: 1; }
+.t-bold .sa-tip { border: 1.5px solid #1d1712; }
+.t-edn .sa-tip { border: none; box-shadow: 0 1px 2px rgba(20,20,20,0.06), 0 6px 18px rgba(20,20,20,0.12); }
+@media (prefers-reduced-motion: reduce) { .sa-tip { transition: none; } }
 
 /* ---------- section bands (What's live / Fortnight / drawer head) ---------- */
 .sa-band {

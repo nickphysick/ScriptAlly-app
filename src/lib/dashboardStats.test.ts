@@ -11,15 +11,24 @@ import { describe, expect, it } from "vitest";
 import { QueryStatus } from "../types";
 import {
   activeQueriesOf,
+  activeTooltip,
+  activeWeeklySeries,
+  agentStatusSummaries,
+  agentTooltip,
   awaitingReplyCount,
   chipText,
   idleAgentCount,
   isoWeekStart,
+  overflowTooltip,
   pipelineMix,
   responseRatePercent,
   responsesReceivedCount,
+  responsesTooltip,
   salutation,
   sendsThisWeek,
+  sentTooltip,
+  trailingWeekStarts,
+  wcLabel,
   weekOfQuerying,
   weeklySendSeries,
 } from "./dashboardStats";
@@ -139,6 +148,84 @@ describe("weekOfQuerying", () => {
   it("uses the earliest send", () => {
     const queries = [q({ dateSent: daysAgo(3) }), q({ dateSent: daysAgo(7 * 3 + 1) })];
     expect(weekOfQuerying(queries, NOW)).toBe("week four");
+  });
+});
+
+describe("trailingWeekStarts", () => {
+  it("returns Mondays oldest-first, current week last", () => {
+    const starts = trailingWeekStarts(NOW, 8);
+    expect(starts).toHaveLength(8);
+    expect(starts[7].getDate()).toBe(29); // Mon 29 June (current ISO week)
+    expect(starts[6].getDate()).toBe(22);
+    starts.forEach((d) => expect(d.getDay()).toBe(1));
+  });
+});
+
+describe("activeWeeklySeries", () => {
+  it("counts a query active from its sent week until its terminal close", () => {
+    const sent = daysAgo(28); // four weeks back
+    const closed = new Date(NOW.getTime() - 10 * 86400000); // ~1.5 weeks back
+    const queries = [
+      q({ dateSent: sent, status: QueryStatus.REJECTED, lastStatusChange: closed.toISOString() }),
+      q({ dateSent: daysAgo(3), status: QueryStatus.QUERIED }), // active this week only
+    ];
+    const s = activeWeeklySeries(queries, NOW, 8);
+    expect(s).toHaveLength(8);
+    expect(s[7]).toBe(1); // the live count: only the open query (last sample clamps to now)
+    expect(s[3]).toBe(1); // four weeks back: the (later-rejected) query was still open
+    expect(s[5]).toBe(1); // two weeks back: still open (closed ~1.5 weeks ago)
+    expect(s[0]).toBe(0); // before anything was sent
+  });
+  it("closes a terminal query with no timestamps at its dateSent (never counted active)", () => {
+    const queries = [q({ dateSent: daysAgo(20), status: QueryStatus.WITHDRAWN })];
+    expect(activeWeeklySeries(queries, NOW, 8).every((n) => n === 0)).toBe(true);
+  });
+  it("reads Firestore-Timestamp-shaped close dates", () => {
+    const queries = [
+      q({ dateSent: daysAgo(20), status: QueryStatus.REJECTED, lastStatusChange: { seconds: Math.floor((NOW.getTime() - 2 * 86400000) / 1000) } }),
+    ];
+    const s = activeWeeklySeries(queries, NOW, 8);
+    expect(s[5]).toBe(1); // open two weeks ago
+    expect(s[7]).toBe(0); // closed by now
+  });
+});
+
+describe("agentStatusSummaries", () => {
+  const agents = [
+    { id: "a1", name: "Margaret Atwood" },
+    { id: "a2", name: "Idle Ivy" },
+    { id: "a3", name: "Parked Pete", setAside: true },
+  ] as any[];
+  const queries = [
+    q({ agentId: "a1", status: QueryStatus.QUERIED }),
+    q({ agentId: "a1", status: QueryStatus.PARTIAL_REQUESTED }),
+    q({ agentId: "a1", status: QueryStatus.REJECTED }), // terminal — never the summary status
+  ];
+  it("reports the most advanced ACTIVE status per agent; idle agents get null", () => {
+    const s = agentStatusSummaries(agents, queries);
+    expect(s.find((x) => x.id === "a1")?.status).toBe(QueryStatus.PARTIAL_REQUESTED);
+    expect(s.find((x) => x.id === "a2")?.status).toBeNull();
+  });
+  it("excludes set-aside/closed unqueried agents (agentBuckets contract)", () => {
+    const s = agentStatusSummaries(agents, queries);
+    expect(s.some((x) => x.id === "a3")).toBe(false);
+    expect(s).toHaveLength(2);
+  });
+});
+
+describe("tooltip label builders", () => {
+  it("formats the week-commencing labels", () => {
+    expect(wcLabel(new Date(2026, 5, 23))).toBe("W/C 23 JUN");
+    expect(sentTooltip(new Date(2026, 5, 23), 2)).toBe("W/C 23 JUN · 2 SENT");
+    expect(activeTooltip(new Date(2026, 5, 30), 3)).toBe("W/C 30 JUN · 3 ACTIVE");
+  });
+  it("formats agent + overflow + responses labels", () => {
+    expect(agentTooltip("Margaret Atwood", QueryStatus.PARTIAL_REQUESTED)).toBe("MARGARET ATWOOD · PARTIAL REQUESTED");
+    expect(agentTooltip("Idle Ivy", null)).toBe("IDLE IVY · IDLE");
+    expect(overflowTooltip(4)).toBe("+4 MORE AGENTS");
+    expect(overflowTooltip(1)).toBe("+1 MORE AGENT");
+    expect(responsesTooltip(9, 10, 90)).toBe("9 OF 10 QUERIES ANSWERED · 90%");
+    expect(responsesTooltip(1, 1, 100)).toBe("1 OF 1 QUERY ANSWERED · 100%");
   });
 });
 
