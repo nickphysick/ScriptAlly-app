@@ -92,7 +92,7 @@ export const Composer: React.FC<ComposerProps> = ({ versions, packages, editingI
     <div className="pkgcomp">
       <style>{`
         .pkgcomp { position:relative; overflow:hidden; border-radius:var(--chromerad); border:var(--bdw) solid var(--bd); background:var(--pane); }
-        .t-bold .pkgcomp { background:#f2e8e6; }
+        .t-bold .pkgcomp { background:var(--card); } /* white ground beneath the pink name band (matches the inner cards) */
         .pkgcomp .c2-band { display:flex; align-items:center; gap:14px; padding:17px 22px; background:var(--band); border-bottom:var(--bdw) solid var(--bd); }
         .pkgcomp .bic { color:var(--ink); display:flex; flex-shrink:0; }
         .pkgcomp .hname input { border:0; outline:0; background:transparent; font-family:${FONT_SERIF}; font-size:23px; font-weight:700; color:var(--ink); border-bottom:1.5px dashed rgba(36,28,21,.3); padding:2px 2px 4px; width:360px; max-width:48vw; }
