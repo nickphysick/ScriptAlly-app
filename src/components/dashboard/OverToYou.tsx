@@ -396,6 +396,8 @@ export interface OverToYouProps {
   onAddNote: (fields: { text: string; colour?: NoteColour; dueDate?: string | null }) => void; // Notes tab create
   onCompleteNote: (id: string) => void; // tick a note done from the Notes tab
   onDeleteNote: (note: Note) => void; // kept for call-site compatibility; not rendered
+  /** When set, an × renders in the pink band — used by the dashboard focus slot. */
+  onClose?: () => void;
 }
 
 export const OverToYou: React.FC<OverToYouProps> = ({
@@ -408,6 +410,7 @@ export const OverToYou: React.FC<OverToYouProps> = ({
   onOpenQuery,
   onAddNote,
   onCompleteNote,
+  onClose,
 }) => {
   const urgentRows = buildOverToYouRows(tasks, queries, agents);
   const houseRows = buildHousekeepingRows(tasks, queries, agents);
@@ -516,6 +519,20 @@ export const OverToYou: React.FC<OverToYouProps> = ({
         <span style={{ fontFamily: FONT_SERIF, fontSize: 16, fontWeight: 600, color: burgundy, lineHeight: 1 }}>
           To-do list
         </span>
+        {/* Optional close — rendered only when the card lives in the dashboard focus slot. */}
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            title="Close"
+            aria-label="Close to-do list"
+            style={{ marginLeft: "auto", background: "none", border: "none", fontSize: 17, lineHeight: 1, color: burgundy, opacity: 0.65, padding: "0 2px", cursor: "pointer" }}
+            onMouseEnter={(e) => { e.currentTarget.style.opacity = "1"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.opacity = "0.65"; }}
+          >
+            ×
+          </button>
+        )}
       </div>
 
       {/* ── Tab strip — on parchment, hairline underneath ───────────────────────────────────── */}

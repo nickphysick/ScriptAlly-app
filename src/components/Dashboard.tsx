@@ -54,7 +54,15 @@ import {
 } from "../lib/designTokens";
 import { MountCard } from "./MountCard";
 import { HeroCard } from "./dashboard/HeroCard";
-import { OverToYou } from "./dashboard/OverToYou";
+import { OverToYou, buildOverToYouRows } from "./dashboard/OverToYou";
+// v37 consolidated dashboard pieces (BUILD-REPORT 4 Jul: layout = top bar → salutation greeting
+// with focus slot → stat row → Fortnight → What's live; timeline in the right-edge drawer).
+import { DashTopBar } from "./dashboard/DashTopBar";
+import { FocusGreeting } from "./dashboard/FocusGreeting";
+import { TimelineDrawer } from "./dashboard/TimelineDrawer";
+import { StatCardFull, useStatDefs } from "./dashboard/DashboardStatsRow";
+import { useFocusSlot } from "./dashboard/focusSlot";
+import "./dashboard/dashboardV37.css";
 import { useOpenEditAgent } from "./EditAgentHost";
 import { StatCards } from "./dashboard/StatCards";
 import { FortnightInFocus } from "./dashboard/FortnightInFocus";
@@ -468,9 +476,13 @@ const TaskPanelCard: React.FC<{
 export const Dashboard: React.FC<{
   onNavigate: (tab: string, subPageName?: string) => void;
   searchQuery: string;
+  /** Wires the dashboard top-bar search into the app's shared search state (optional so any
+   *  legacy call site without it still compiles; the bar's input is inert without it). */
+  setSearchQuery?: (q: string) => void;
 }> = ({
   onNavigate,
-  searchQuery
+  searchQuery,
+  setSearchQuery
 }) => {
   const openEditAgent = useOpenEditAgent();
   const openEditQuery = useOpenEditQuery();
@@ -492,6 +504,12 @@ export const Dashboard: React.FC<{
     updateNote,
     deleteNote
   } = useScriptAllyDb();
+
+  // v37 focus slot + stat definitions (hooks — must precede every conditional return).
+  const prefersReducedMotion =
+    typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const slot = useFocusSlot(prefersReducedMotion);
+  const statDefs = useStatDefs(queries, agents);
 
   // Note desk/to-do callbacks. Complete + delete both raise an undo toast; the user-facing verb is
   // "Completed" (the field stays done/doneAt). Delete-undo re-creates via addNote (new id/createdAt).
@@ -1454,6 +1472,36 @@ export const Dashboard: React.FC<{
     }
   };
 
+  // ── v37 derivations (plain values, computed each render — no hooks below the guards) ──
+  // Route visibility: the dashboard StagePage stays mounted; AppContent re-renders on every
+  // navigation, so reading location directly stays fresh without a hook-ordering hazard.
+  const isDashRoute = typeof window !== "undefined" && window.location.pathname === "/dashboard";
+  // The chip and the To-do card must agree — both read buildOverToYouRows.
+  const urgentRowCount = buildOverToYouRows(tasks, queries, agents).length;
+  const fortnightCount = mergedActivities.filter((a: any) => {
+    const t = new Date(a.date).getTime();
+    return Number.isFinite(t) && t >= Date.now() - 14 * 86400000;
+  }).length;
+  // The real To-do card, hosted by the focus slot (same handlers as its old grid position).
+  const todoPanel = (
+    <OverToYou
+      tasks={tasks}
+      queries={queries}
+      agents={agents}
+      notes={notes}
+      onAction={(task) => task.taskType === "data_quality_poor" ? openEditAgent(task.relatedRecordId, { fromTask: true }) : onNavigate(task.actionPath, task.title)}
+      onNudge={(task) => setNudgeTask(task)}
+      onSnooze={(task) => dismissTask(task.taskType, task.relatedRecordId, "fixed snooze", 3)}
+      onDismiss={(task) => dismissTask(task.taskType, task.relatedRecordId, "permanent")}
+      onAllTasks={() => setIsTasksPanelOpen(true)}
+      onOpenQuery={(qid) => openEditQuery(qid)}
+      onAddNote={addNote}
+      onCompleteNote={completeNoteWithUndo}
+      onDeleteNote={(note) => deleteNoteWithUndo(note.id)}
+      onClose={() => slot.request(null)}
+    />
+  );
+
   // Data still loading → skeleton (after the ~180ms delay); never the empty/onboarding state and
   // never a half-rendered dashboard. Both the skeleton and the pre-delay placeholder are full-height
   // so the page footer (a sibling after AppShell) can't ride up and flash while content is empty.
@@ -1464,43 +1512,8 @@ export const Dashboard: React.FC<{
   return (
     <div
       className="min-h-screen pb-16 font-sans"
-      style={{ background: pageGround, color: bodyInk }}
+      style={{ background: "var(--desk, #e8ddd0)", color: bodyInk }}
     >
-      {/* Fixed page grain - sits over the kraft ground, under the positioned cards */}
-      <div
-        aria-hidden="true"
-        style={{ position: "fixed", inset: 0, opacity: 0.25, pointerEvents: "none", zIndex: 0, backgroundImage: PAGE_GRAIN }}
-      />
-      
-      {/* Developer-only floating layout toggle. Left offset lives in the classes (not inline) so
-          it clears the AppShell rail's account chip on desktop (rail is 216px; 232 = rail + 16)
-          while keeping the old 16px on mobile, where the rail is hidden. Position only. */}
-      <button
-        onClick={() => {
-          const next = !isMagazineLayout;
-          setIsMagazineLayout(next);
-          localStorage.setItem("scriptally_is_magazine_layout", String(next));
-        }}
-        className="left-4 md:left-[232px] hover:opacity-100 transition-opacity select-none"
-        style={{
-          position: 'fixed',
-          bottom: '16px',
-          zIndex: 9999,
-          background: '#ffffff',
-          color: '#6a5a50',
-          border: '0.5px solid #e0d5c8',
-          borderRadius: 9,
-          padding: '6px 12px',
-          fontFamily: "'JetBrains Mono', monospace",
-          fontSize: 10,
-          letterSpacing: '0.05em',
-          cursor: 'pointer',
-          opacity: 0.75,
-          boxShadow: '0 1px 3px rgba(58,28,20,0.08)'
-        }}
-      >
-        Switch layout
-      </button>
 
       {/* ── Guided empty state for brand-new users ── */}
       {manuscripts.length === 0 && queries.length === 0 && agents.length === 0 && (
@@ -1597,427 +1610,52 @@ export const Dashboard: React.FC<{
         </div>
       )}
 
-      {isMagazineLayout ? (
-        /* ==================== MAGAZINE EDITORIAL HEADER + STRIP ==================== */
-        <div className="w-full flex flex-col">
-          {/* Full-bleed dark editorial header */}
-          <div style={{ background: '#3a1c14', padding: '24px 28px 28px' }} className="w-full flex flex-col md:flex-row md:items-end md:justify-between gap-6 animate-fade-in border-b border-[#4d261b]">
-            {/* Left side */}
-            <div className="flex-1 text-left">
-              <div style={{ fontSize: '10px', color: 'rgba(248,245,240,0.4)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '10px' }} className="font-mono">
-                {new Date().toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).toUpperCase()}
-              </div>
-              <div style={{ fontSize: '14px', color: 'rgba(248,245,240,0.6)', fontFamily: 'var(--font-serif)' }}>
-                Welcome back,
-              </div>
-              <div style={{ fontSize: '32px', fontWeight: 500, color: '#F8F5F0', fontFamily: 'var(--font-serif)', lineHeight: 1 }} className="mt-1 font-serif">
-                {getUserFirstName()}.
-              </div>
-              <div style={{ fontSize: '11px', color: 'rgba(248,245,240,0.45)', fontStyle: 'italic', marginTop: '10px', maxWidth: '400px', lineHeight: 1.5 }} className="font-serif">
-                {quote.text ? `"${quote.text}" — ${quote.author || "Unknown"}` : '"There is no greater agony than bearing an untold story inside you." — Maya Angelou'}
-              </div>
-            </div>
+      <div className={`sa-dash${slot.focus !== null ? " split-open" : ""}`}>
+        <DashTopBar
+          userName={getUserFirstName()}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery ?? (() => {})}
+          onSettings={() => onNavigate("account")}
+          onAccount={() => onNavigate("account")}
+          active={isDashRoute}
+        />
 
-            {/* Right side aligned to bottom */}
-            <div className="flex flex-wrap gap-2 md:mb-1 shrink-0 justify-start">
-              <button
-                onClick={() => onNavigate("queries", "Send a query")}
-                className="hover:bg-white/20 transition-all font-sans text-[11px] leading-none font-medium text-white px-3.5 py-2 border cursor-pointer"
-                style={{ background: 'rgba(255,255,255,0.12)', borderColor: 'rgba(255,255,255,0.2)', borderRadius: '6px' }}
-              >
-                Send query
-              </button>
-              <button
-                onClick={() => onNavigate("agents", "Add an agent")}
-                className="hover:bg-white/20 transition-all font-sans text-[11px] leading-none font-medium text-white px-3.5 py-2 border cursor-pointer"
-                style={{ background: 'rgba(255,255,255,0.12)', borderColor: 'rgba(255,255,255,0.2)', borderRadius: '6px' }}
-              >
-                Add agent
-              </button>
-              <button
-                onClick={() => onNavigate("manuscripts", "Add a manuscript")}
-                className="hover:bg-white/20 transition-all font-sans text-[11px] leading-none font-medium text-white px-3.5 py-2 border cursor-pointer"
-                style={{ background: 'rgba(255,255,255,0.12)', borderColor: 'rgba(255,255,255,0.2)', borderRadius: '6px' }}
-              >
-                Add manuscript
-              </button>
-            </div>
-          </div>
+        <FocusGreeting
+          firstName={getUserFirstName()}
+          queries={queries}
+          urgentCount={urgentRowCount}
+          slot={slot}
+          statDefs={statDefs}
+          todoPanel={todoPanel}
+          onSendQuery={() => onNavigate("queries", "Send a query")}
+          onRecordResponse={() => setRecordResponseScreenOpen(true)}
+          onAddAgent={() => onNavigate("agents", "Add an agent")}
+          onAddManuscript={() => onNavigate("manuscripts", "Add a manuscript")}
+        />
 
-          {/* Stats strip */}
-          <div className="w-full bg-white flex flex-col md:flex-row border-b border-[#e8e0d8] shadow-xs" style={{ borderBottomWidth: '0.5px' }}>
-            {/* Stat 1: Queries Sent */}
-            <div className="flex-1 flex items-center gap-[16px] p-[14px_20px] border-b md:border-b-0 md:border-r border-[#e8e0d8] text-left" style={{ borderBottomWidth: '0.5px', borderRightWidth: '0.5px' }}>
-              <span className="font-serif font-medium text-[#3a1c14] leading-none shrink-0" style={{ fontSize: '28px' }}>
-                {totalQueriesSent || 7}
-              </span>
-              <div className="flex flex-col gap-1">
-                <span className="font-bold uppercase" style={{ fontSize: '10px', letterSpacing: '0.06em', color: '#c9a89e' }}>
-                  Queries sent
-                </span>
-                <span className="inline-flex self-start py-0.5 px-2 text-[9px] font-bold text-[#7c3a2a] bg-[#FAF1EF] border border-[#F2DDD5] rounded-full leading-none whitespace-nowrap">
-                  {dynamicQueriesSentPerWeek[7] > 0 ? `${dynamicQueriesSentPerWeek[7]} this week` : "2 this week"}
-                </span>
-              </div>
-            </div>
-
-            {/* Stat 2: Active Queries */}
-            <div className="flex-1 flex items-center gap-[16px] p-[14px_20px] border-b md:border-b-0 md:border-r border-[#e8e0d8] text-left" style={{ borderBottomWidth: '0.5px', borderRightWidth: '0.5px' }}>
-              <span className="font-serif font-medium text-[#3a1c14] leading-none shrink-0" style={{ fontSize: '28px' }}>
-                {activeQueries.length || 6}
-              </span>
-              <div className="flex flex-col gap-1">
-                <span className="font-bold uppercase" style={{ fontSize: '10px', letterSpacing: '0.06em', color: '#c9a89e' }}>
-                  Active queries
-                </span>
-                <span className="inline-flex self-start py-0.5 px-2 text-[9px] font-bold text-[#7c3a2a] bg-[#FAF1EF] border border-[#F2DDD5] rounded-full leading-none whitespace-nowrap">
-                  57% rate
-                </span>
-              </div>
-            </div>
-
-            {/* Stat 3: Agents */}
-            <div className="flex-1 flex items-center gap-[16px] p-[14px_20px] border-b md:border-b-0 md:border-r border-[#e8e0d8] text-left" style={{ borderBottomWidth: '0.5px', borderRightWidth: '0.5px' }}>
-              <span className="font-serif font-medium text-[#3a1c14] leading-none shrink-0" style={{ fontSize: '28px' }}>
-                {totalAgentsCount || 7}
-              </span>
-              <div className="flex flex-col gap-1">
-                <span className="font-bold uppercase" style={{ fontSize: '10px', letterSpacing: '0.06em', color: '#c9a89e' }}>
-                  Agents
-                </span>
-                <span className="inline-flex self-start py-0.5 px-2 text-[9px] font-bold text-[#7c3a2a] bg-[#FAF1EF] border border-[#F2DDD5] rounded-full leading-none whitespace-nowrap">
-                  {queriedAgentsCount > 0 ? `${queriedAgentsCount} queried` : "6 queried"}
-                </span>
-              </div>
-            </div>
-
-            {/* Stat 4: Responses Received */}
-            <div className="flex-1 flex items-center gap-[16px] p-[14px_20px] text-left">
-              <span className="font-serif font-medium text-[#3a1c14] leading-none shrink-0" style={{ fontSize: '28px' }}>
-                {totalResponsesCalc || 4}
-              </span>
-              <div className="flex flex-col gap-1">
-                <span className="font-bold uppercase" style={{ fontSize: '10px', letterSpacing: '0.06em', color: '#c9a89e' }}>
-                  Responses received
-                </span>
-                <span className="inline-flex self-start py-0.5 px-2 text-[9px] font-bold text-[#7c3a2a] bg-[#FAF1EF] border border-[#F2DDD5] rounded-full leading-none whitespace-nowrap">
-                  2 this week
-                </span>
-              </div>
-            </div>
-          </div>
+        {/* Full-width stat row — collapses while a focus is open (.split-open above) */}
+        <div className="sa-stats" style={{ marginTop: 20 }}>
+          {statDefs.map((d) => (
+            <StatCardFull key={d.key} def={d} onPin={() => { if (!slot.animating) slot.request(d.key); }} />
+          ))}
         </div>
-      ) : (
-        /* ============ TOP ROW: hero + stat cards (left) · Over to you (right) ============ */
-        <div className="w-full max-w-none px-4 md:px-10 lg:px-8 xl:px-8 pt-2">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-[16px] items-stretch">
-            {/* Left: hero stacked above the four stat cards (shares the pipeline's width) */}
-            <div className="flex flex-col gap-[16px]">
-              <HeroCard
-                firstName={getUserFirstName()}
-                quote={quote}
-                onSendQuery={() => onNavigate("queries", "Send a query")}
-                onRecordResponse={() => setRecordResponseScreenOpen(true)}
-                onAddAgent={() => onNavigate("agents", "Add an agent")}
-                onAddManuscript={() => onNavigate("manuscripts", "Add a manuscript")}
-                notes={notes}
-                onAddNote={addNote}
-                onSaveNote={handleSaveNote}
-                onCompleteNote={completeNoteWithUndo}
-                onDeleteNote={deleteNoteWithUndo}
-              />
-              <StatCards
-                queriesSentTotal={totalQueriesSent}
-                sentThisWeek={finalQueriesSentPerWeek[7] ?? 0}
-                sentWeeks={statSentWeeks}
-                activeCount={activeQueries.length}
-                activeDiff={activeDiff}
-                activeWeeks={statActiveWeeks}
-                agentsTotal={totalAgentsCount}
-                agentsIdle={notQueriedAgentsCount}
-                agents={statAgents}
-                responses={statResponses}
-              />
-            </div>
-            {/* Right: Over to you. On lg+ the card absolutely fills this cell, so the row height
-                is driven by the LEFT column (hero + stat cards) rather than the To-do content —
-                overflow scrolls inside the card. When stacked (narrow), it flows at natural height. */}
-            <div className="relative">
-              <div className="lg:absolute lg:inset-0">
-                <OverToYou
-                  tasks={tasks}
-                  queries={queries}
-                  agents={agents}
-                  notes={notes}
-                  onAction={(task) => task.taskType === "data_quality_poor" ? openEditAgent(task.relatedRecordId, { fromTask: true }) : onNavigate(task.actionPath, task.title)}
-                  onNudge={(task) => setNudgeTask(task)}
-                  onSnooze={(task) => dismissTask(task.taskType, task.relatedRecordId, "fixed snooze", 3)}
-                  onDismiss={(task) => dismissTask(task.taskType, task.relatedRecordId, "permanent")}
-                  onAllTasks={() => setIsTasksPanelOpen(true)}
-                  onOpenQuery={(qid) => openEditQuery(qid)}
-                  onAddNote={addNote}
-                  onCompleteNote={completeNoteWithUndo}
-                  onDeleteNote={(note) => deleteNoteWithUndo(note.id)}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* ============ LOWER ROW: pipeline (left) · timeline (right) ============ */}
-      <div className={isMagazineLayout
-        ? "grid grid-cols-1 lg:grid-cols-[1.8fr_1.1fr] xl:grid-cols-[2fr_1fr] gap-0 bg-[#FAF8F5] border-t border-[#e8e0d8] items-stretch"
-        : "w-full max-w-none px-4 md:px-10 lg:px-8 xl:px-8 pt-[14px] grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-[16px] items-start"
-      }>
-        
-        {/* LEFT COLUMN: Stat Cards & Pipeline Matrix */}
-        <div ref={leftColumnRef} className={isMagazineLayout ? "flex flex-col gap-0" : "flex flex-col gap-[16px]"}>
-          
-          {isMagazineLayout && (
-            /* Magazine Urgent Action card */
-            (() => {
-              const urgentTasks = tasks.filter(t => t.priority === "urgent" || ["offer_received", "partial_requested", "full_requested", "revise_resubmit"].includes(t.taskType));
-              if (urgentTasks.length === 0) return null;
-              const actionTask = urgentTasks[0];
-              const { agentName, agency, manuscriptTitle } = getTaskContextInfo(actionTask, queries, agents, manuscripts);
-              
-              return (
-                <div className="bg-[#FFF0F0] border-b border-[#f5c8c8] p-[16px_24px] flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-left relative" style={{ borderBottomWidth: '0.5px' }}>
-                  <div 
-                    className="absolute bg-red-600 text-white text-[12px] font-extrabold rounded-full flex items-center justify-center select-none shadow-3xs" 
-                    style={{ width: "20px", height: "20px", top: "12px", right: "12px", zIndex: 10 }}
-                    title="Urgent"
-                  >
-                    !
-                  </div>
-                  <div className="text-left w-full sm:w-auto pr-8">
-                    <div style={{ fontSize: '9px', color: '#c9a89e', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.05em' }}>
-                      Action needed
-                    </div>
-                    <div style={{ fontSize: '14px', fontWeight: 500, color: '#3a1c14', fontFamily: 'var(--font-serif)' }} className="mt-1 leading-snug font-serif">
-                      {agentName ? `${agentName} requested a partial manuscript` : actionTask.title}
-                    </div>
-                    <div className="text-[11px] text-[#a08070] mt-1 font-sans">
-                      {manuscriptTitle || "Manuscript"} &middot; {agency || "Agency"}
-                    </div>
-                  </div>
-                  
-                  {/* Action Buttons Row */}
-                  <div className="flex items-center gap-[6px] shrink-0 self-end sm:self-center">
-                    <button
-                      onClick={() => onNavigate(actionTask.actionPath, actionTask.title)}
-                      className="bg-[#7c3a2a] text-white hover:bg-[#602d20] text-[11px] font-semibold leading-none py-2 px-3.5 rounded-lg transition-colors cursor-pointer"
-                    >
-                      Send now
-                    </button>
-                    <button
-                      onClick={async () => {
-                        await dismissTask(actionTask.taskType, actionTask.relatedRecordId, "fixed snooze", 3);
-                      }}
-                      className="text-[#a08070] hover:text-[#7c3a2a] text-[11px] font-medium leading-none py-2 px-3 bg-transparent hover:bg-stone-100/50 rounded-lg transition-all cursor-pointer border-0"
-                    >
-                      Snooze
-                    </button>
-                    <button
-                      onClick={async () => {
-                        await dismissTask(actionTask.taskType, actionTask.relatedRecordId, "permanent");
-                      }}
-                      className="text-[#a08070] hover:text-[#7c3a2a] text-[11px] font-medium leading-none py-2 px-3 bg-transparent hover:bg-stone-100/50 rounded-lg transition-all cursor-pointer border-0"
-                    >
-                      Dismiss
-                    </button>
-                  </div>
-                </div>
-              );
-            })()
-          )}
-
-          {/* ==================== WHAT'S LIVE RIGHT NOW (above Fortnight) ==================== */}
-          {!isMagazineLayout && <WhatsLivePanel queries={queries} />}
-
-          {/* ==================== FORTNIGHT IN FOCUS ==================== */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 20, marginTop: 20 }}>
           <FortnightInFocus
             queries={queries}
             agents={agents}
             manuscripts={manuscripts}
             activities={mergedActivities}
-            isMagazineLayout={isMagazineLayout}
+            isMagazineLayout={false}
             onOpenQuery={(qid) => openEditQuery(qid)}
             onOpenFullCalendar={() => setIsFullCalendarOpen(true)}
           />
-
-          {/* QUERY STATUS BREAKDOWN */}
-          {(() => {
-            // One hoverable canonical dot per query (StatusDot is the only glyph source)
-            const renderIndividualQueryDot = (
-              q: Query,
-              stage: 'queried' | 'part_req' | 'part_sent' | 'full_req' | 'full_sent' | 'offer' | 'closed'
-            ) => {
-              const agent = agents.find(a => a.id === q.agentId);
-              const formattedDate = q.dateSent ? new Date(q.dateSent).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
-
-              let dateLabel = "Sent";
-              let displayDate = formattedDate;
-              if (stage === 'part_req' && q.partialRequestedDate) {
-                dateLabel = "Requested";
-                displayDate = new Date(q.partialRequestedDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-              } else if (stage === 'part_sent' && q.partialSentDate) {
-                dateLabel = "Sent";
-                displayDate = new Date(q.partialSentDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-              } else if (stage === 'full_req' && q.fullRequestedDate) {
-                dateLabel = "Requested";
-                displayDate = new Date(q.fullRequestedDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-              } else if (stage === 'full_sent' && q.fullSentDate) {
-                dateLabel = "Sent";
-                displayDate = new Date(q.fullSentDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-              }
-
-              return (
-                <div
-                  key={q.id}
-                  className="relative group/dot inline-flex items-center justify-center select-none transition-all duration-300 hover:scale-130 hover:z-10 cursor-pointer"
-                  style={{ width: 13, height: 13 }}
-                >
-                  <StatusDot status={q.status} size={13} />
-
-                  {/* Hover tooltip — parchment, token system */}
-                  <div
-                    className="invisible group-hover/dot:visible opacity-0 group-hover/dot:opacity-100 absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-52 p-3 text-left pointer-events-none transition-all duration-200"
-                    style={{
-                      background: "#fdfaf5",
-                      border: "0.5px solid #e0d5c8",
-                      borderRadius: 10,
-                      boxShadow: "0 6px 20px rgba(58,28,20,0.14)",
-                      fontSize: 11,
-                    }}
-                  >
-                    <div className="truncate" style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 500, color: "#3a1c14" }}>{agent?.name || "Unknown Agent"}</div>
-                    <div className="truncate" style={{ fontSize: 10, color: "#8a7a6c" }}>{agent?.agency || "Independent"}</div>
-                    <div style={{ height: 0.5, background: "#ece0d2", margin: "6px 0" }} />
-                    <div className="flex justify-between gap-2" style={{ fontSize: 10, color: "#6a5a50" }}>
-                      <span>Status:</span>
-                      <span style={{ fontWeight: 500, color: "#7c3a2a" }}>{q.status}</span>
-                    </div>
-                    <div className="flex justify-between gap-2 mt-0.5" style={{ fontSize: 10, color: "#6a5a50" }}>
-                      <span>{dateLabel}:</span>
-                      <span style={{ fontFamily: "'JetBrains Mono', monospace", color: "#9c8878" }}>{displayDate}</span>
-                    </div>
-                  </div>
-                </div>
-              );
-            };
-
-            const renderStageColumn = (list: Query[], stageKey: 'queried' | 'part_req' | 'part_sent' | 'full_req' | 'full_sent' | 'offer' | 'closed') => {
-              if (list.length === 0) {
-                return (
-                  <div className="flex items-center justify-center" style={{ minHeight: 26 }}>
-                    <span className="select-none" style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: "#b8a898" }}>–</span>
-                  </div>
-                );
-              }
-              return (
-                <div className="flex items-center justify-center" style={{ minHeight: 26 }}>
-                  <div className="flex flex-row flex-wrap items-center justify-center max-w-full" style={{ gap: 4 }}>
-                    {list.map((q) => renderIndividualQueryDot(q, stageKey))}
-                  </div>
-                </div>
-              );
-            };
-
-            const splitByStage = (m: Manuscript) => {
-              const mQueries = queries.filter(q => q.manuscriptId === m.id);
-              return {
-                qQueried: mQueries.filter(q => q.status === QueryStatus.QUERIED),
-                qPartReq: mQueries.filter(q => q.status === QueryStatus.PARTIAL_REQUESTED),
-                qPartSent: mQueries.filter(q => q.status === QueryStatus.PARTIAL_SENT),
-                qFullReq: mQueries.filter(q => q.status === QueryStatus.FULL_REQUESTED),
-                qFullSent: mQueries.filter(q => q.status === QueryStatus.FULL_SENT),
-                qOffer: mQueries.filter(q => q.status === QueryStatus.OFFER),
-                qClosed: mQueries.filter(q =>
-                  [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE, QueryStatus.REVISE_RESUBMIT].includes(q.status)
-                ),
-              };
-            };
-
-            if (isMagazineLayout) {
-              return (
-                <div className="bg-white border-b border-[#e8e0d8] p-[20px_24px] relative transition-all duration-300" id="query-status-breakdown-card" style={{ borderBottomWidth: '0.5px' }}>
-                  <div className="flex flex-col w-full">
-                    <div className="flex items-center justify-between mb-[14px]">
-                      <span style={{ fontSize: '11px', fontWeight: 600, color: '#3a1c14' }} className="font-serif uppercase tracking-wider">
-                        Your querying pipeline
-                      </span>
-                      <span style={{ fontSize: '10px', color: '#c9a89e' }} className="font-sans font-medium">
-                        {manuscripts.filter(m => queries.some(q => q.manuscriptId === m.id)).length} manuscripts · {queries.length} queries
-                      </span>
-                    </div>
-                    {renderMagazinePipelineBuckets()}
-                    <div className="border-b border-[#e8e0d8] pb-2 mb-2 flex items-center text-[10px] uppercase font-semibold text-[#c9a89e] tracking-wider select-none mt-4">
-                      <div className="w-[240px] shrink-0 text-left">Manuscript</div>
-                      <div className="flex-grow grid grid-cols-7 gap-2 text-center text-[9px] font-sans">
-                        <div>Queried</div><div>Part Req</div><div>Part Sent</div><div>Full Req</div><div>Full Sent</div><div>Offer</div><div>Closed</div>
-                      </div>
-                    </div>
-                  </div>
-                  {manuscripts.map((m) => {
-                    const st = splitByStage(m);
-                    return (
-                      <div key={m.id} className="flex items-center px-0 py-3 bg-white border-b border-[#e8e0d8]/50 transition-colors duration-200">
-                        <div className="w-[240px] shrink-0 text-left pr-4">
-                          <p className="font-serif text-[13px] font-semibold text-[#3a1c14] leading-tight truncate" title={m.title}>{m.title}</p>
-                          <p className="text-[10px] text-[#c9a89e] font-sans truncate mt-0.5">{m.genre} &middot; {m.wordCount?.toLocaleString() || 0} words</p>
-                        </div>
-                        <div className="flex-grow grid grid-cols-7 gap-2 text-center items-center">
-                          {renderStageColumn(st.qQueried, 'queried')}
-                          {renderStageColumn(st.qPartReq, 'part_req')}
-                          {renderStageColumn(st.qPartSent, 'part_sent')}
-                          {renderStageColumn(st.qFullReq, 'full_req')}
-                          {renderStageColumn(st.qFullSent, 'full_sent')}
-                          {renderStageColumn(st.qOffer, 'offer')}
-                          {renderStageColumn(st.qClosed, 'closed')}
-                        </div>
-                      </div>
-                    );
-                  })}
-                  {manuscripts.length === 0 && (
-                    <div className="p-8 text-center text-[#3a1c14]/40 text-xs italic">
-                      Get started by creating your very first manuscript structure!
-                    </div>
-                  )}
-                </div>
-              );
-            }
-
-            // Standard layout: the query pipeline now lives in the standalone "What's live right
-            // now?" panel above Fortnight (WhatsLivePanel), so nothing renders here. The magazine
-            // layout keeps its own pipeline matrix above.
-            return null;
-          })()}
+          <WhatsLivePanel queries={queries} />
         </div>
 
-        {/* RIGHT COLUMN: Chronological Timeline Sidebar */}
-        <div
-          className={isMagazineLayout
-            ? "flex flex-col bg-[#FAF8F5] border-l border-[#e8e0d8] h-full"
-            : "flex flex-col"
-          }
-          style={isMagazineLayout ? { borderLeftWidth: '0.5px' } : { height: (leftColumnHeight && !isMobileLayout) ? `${leftColumnHeight}px` : 'auto' }}
-        >
-          {isMagazineLayout && (
-            <div className="p-[20px] border-b border-[#e8e0d8] text-left" style={{ borderBottomWidth: '0.5px' }}>
-              <div className="flex items-center justify-between mb-3 w-full">
-                <span className="font-serif text-[11px] font-semibold uppercase tracking-wider text-[#3a1c14]">
-                  Next up
-                </span>
-                <span className="bg-[#FAF1EF] border border-[#f2ddd5] text-[#7c3a2a] text-[9px] font-mono font-bold px-2 py-0.5 rounded-full leading-none">
-                  {tasks.length} items
-                </span>
-              </div>
-              {renderTasksSidebarWidget()}
-            </div>
-          )}
-
+        {/* Timeline — "The story so far", relocated into the right-edge floating drawer (v37).
+            The entry markup below is the existing story feed, unchanged. */}
+        <TimelineDrawer fortnightCount={fortnightCount} active={isDashRoute}>
           {/* "The story so far" — activity timeline */}
           {(() => {
             const timelineBody = (
@@ -2246,70 +1884,9 @@ export const Dashboard: React.FC<{
               </div>
             );
 
-            if (isMagazineLayout) {
-              return (
-                <div className="p-[20px] text-left flex-1 flex flex-col justify-between min-h-0 relative">
-                  <div className="flex items-center mb-4 w-full">
-                    <span className="font-serif text-[11px] font-semibold uppercase tracking-wider text-[#3a1c14]">
-                      Timeline
-                    </span>
-                  </div>
-                  {timelineBody}
-                </div>
-              );
-            }
-
-            return (
-              <MountCard className="flex-1 flex flex-col" style={{ minHeight: 0, overflow: "hidden" }}>
-                {/* Edge-to-edge sage band header */}
-                <div
-                  className="flex items-center justify-between"
-                  style={{
-                    position: "relative",
-                    zIndex: 2,
-                    margin: "6px 6px 0",
-                    borderRadius: "8px 8px 0 0",
-                    padding: "14px 20px 12px",
-                    background: sageBandGradient,
-                    borderBottom: `1px solid ${sageBandRule}`,
-                  }}
-                >
-                  {/* Uniform header: marker + plain title */}
-                  <span className="flex items-center">
-                    <span aria-hidden="true" style={{ width: 3, height: 18, borderRadius: 2, background: burgundy, marginRight: 12, flexShrink: 0, display: "inline-block" }} />
-                    <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 500, color: headingInk, lineHeight: 1.1 }}>The story so far</span>
-                  </span>
-                  {/* Far-right emblem */}
-                  <Footprints style={{ width: 20, height: 20, color: burgundy, flexShrink: 0 }} strokeWidth={1.8} aria-hidden="true" />
-                </div>
-
-                <div
-                  className="flex-1 flex flex-col min-h-0"
-                  style={{ position: "relative", zIndex: 2, margin: "0 6px 6px", padding: "16px 20px 12px" }}
-                >
-                  {timelineBody}
-
-                  {/* Ledger footer line */}
-                  <div
-                    className="text-center select-none"
-                    style={{
-                      marginTop: 12,
-                      paddingTop: 10,
-                      borderTop: hairline,
-                      fontFamily: FONT_SERIF,
-                      fontStyle: "italic",
-                      fontSize: 10.5,
-                      color: mutedInk,
-                    }}
-                  >
-                    "Every great voice was once a stack of letters."
-                  </div>
-                </div>
-              </MountCard>
-            );
+            return timelineBody;
           })()}
-        </div>
-
+          </TimelineDrawer>
       </div>
 
       {/* Quiet Pro upsell (replaces the old three-format banner review arena) */}

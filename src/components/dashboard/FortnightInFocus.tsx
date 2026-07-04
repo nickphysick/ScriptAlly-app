@@ -710,13 +710,13 @@ export const FortnightInFocus: React.FC<FortnightInFocusProps> = ({
       className="flex items-center justify-between flex-wrap"
       style={isMagazineLayout ? { padding: "12px 20px", gap: 10, borderBottom: "0.5px solid #e8d5cc" } : {
         position: "relative", zIndex: 2, margin: "6px 6px 0", borderRadius: "8px 8px 0 0",
-        padding: "12px 18px 10px", background: sageBandGradient, borderBottom: `1px solid ${sageBandRule}`, gap: 10,
+        padding: "12px 18px 10px", background: "linear-gradient(135deg, var(--band-a, #ece5d8), var(--band-b, #e5ddcd))", borderBottom: "var(--bdw, 1px) solid var(--band-bd, rgba(112,94,70,0.25))", gap: 10,
       }}
     >
       {/* Uniform header: marker + plain title */}
       <span className="flex items-center">
         <span aria-hidden="true" style={{ width: 3, height: 18, borderRadius: 2, background: burgundy, marginRight: 12, flexShrink: 0, display: "inline-block" }} />
-        <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 500, color: headingInk, lineHeight: 1.1 }}>Fortnight in focus</span>
+        <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 500, color: "var(--hdr, #5d4037)", lineHeight: 1.1 }}>Fortnight in focus</span>
       </span>
       {/* Right metadata (one mono language) + far-right emblem */}
       <span className="flex items-center" style={{ gap: 12 }}>

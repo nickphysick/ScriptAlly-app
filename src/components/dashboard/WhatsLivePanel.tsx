@@ -264,11 +264,11 @@ export const WhatsLivePanel: React.FC<WhatsLivePanelProps> = ({ queries }) => {
       {/* sage header band: keyline + title (left) · "Not shown here:" outcomes (right) */}
       <div
         className="flex items-center justify-between flex-wrap"
-        style={{ position: "relative", zIndex: 2, margin: "6px 6px 0", borderRadius: "8px 8px 0 0", padding: "12px 18px 10px", background: sageBandGradient, borderBottom: `1px solid ${sageBandRule}`, gap: 10 }}
+        style={{ position: "relative", zIndex: 2, margin: "6px 6px 0", borderRadius: "8px 8px 0 0", padding: "12px 18px 10px", background: "linear-gradient(135deg, var(--band-a, #ece5d8), var(--band-b, #e5ddcd))", borderBottom: "var(--bdw, 1px) solid var(--band-bd, rgba(112,94,70,0.25))", gap: 10 }}
       >
         <span className="flex items-center">
           <span aria-hidden="true" style={{ width: 3, height: 18, borderRadius: 2, background: burgundy, marginRight: 12, flexShrink: 0, display: "inline-block" }} />
-          <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 500, color: headingInk, lineHeight: 1.1 }}>What&rsquo;s live right now?</span>
+          <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 500, color: "var(--hdr, #5d4037)", lineHeight: 1.1 }}>What&rsquo;s live right now?</span>
         </span>
         <span style={{ fontFamily: FONT_MONO, fontSize: 11, letterSpacing: "0.04em", color: mutedInk, whiteSpace: "nowrap" }}>
           {inactiveParts.length > 0 ? (
