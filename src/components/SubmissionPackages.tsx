@@ -187,7 +187,8 @@ export const SubmissionPackages: React.FC = () => {
             {!firstVisit && <MaterialsRail versions={msVersions} onCreate={openCreate} onManage={openManage} />}
             {/* Content pane — hugs content height and scrolls internally (mockup .pane). First-visit is
                 white in both themes; the packages home sits on the themed pane surface. */}
-            <section className="pkg-pane" style={{ flex: 1, minWidth: 0, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", alignSelf: "flex-start", maxHeight: "100%", overflowY: "auto", padding: "16px 16px 20px" }}>
+            {/* Composer supplies its own bordered container (.c2), so the pane goes bare for it. */}
+            <section className="pkg-pane" style={{ flex: 1, minWidth: 0, background: composer ? "transparent" : "#fffefb", border: composer ? "none" : "var(--bdw) solid var(--bd)", borderRadius: composer ? 0 : "var(--chromerad)", alignSelf: "flex-start", maxHeight: "100%", overflowY: "auto", padding: composer ? 0 : "16px 16px 20px" }}>
               {composer ? (
                 <Composer
                   versions={msVersions}

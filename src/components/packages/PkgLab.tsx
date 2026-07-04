@@ -98,7 +98,8 @@ export const PkgLab: React.FC = () => {
       ) : (
         <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", gap: 14, alignItems: "flex-start" }}>
           <MaterialsRail versions={MOCK_VERSIONS} onCreate={noop} onManage={noop} />
-          <section style={{ flex: 1, minWidth: 0, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", padding: "16px 16px 20px" }}>
+          {/* Composer brings its own .c2 container — the section is bare. */}
+          <section style={{ flex: 1, minWidth: 0 }}>
             <Composer versions={MOCK_VERSIONS} packages={MOCK_PACKAGES} initialName="" initialSelection={emptySelection()} onSave={noop} onCancel={noop} onCreate={noop} />
           </section>
         </div>
