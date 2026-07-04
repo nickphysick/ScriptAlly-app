@@ -39,16 +39,14 @@ export interface PackagesHomeProps {
   /** Open the composer to edit / copy a package (Phase 7). */
   onEdit: (pkg: SubmissionPackage) => void;
   onCopy: (pkg: SubmissionPackage) => void;
-  /** Open the worked-examples popup (Phase 10). */
-  onExample: (slideKey: string) => void;
 }
 
-export const PackagesHome: React.FC<PackagesHomeProps> = ({ packages, versions, queries, onNew, onEdit, onCopy, onExample }) => (
+export const PackagesHome: React.FC<PackagesHomeProps> = ({ packages, versions, queries, onNew, onEdit, onCopy }) => (
   <div className="pkghome">
     <style>{`
       .pkghome .hp-head { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
       .pkghome .hp-title { font-family:${FONT_SERIF}; font-size:19px; font-weight:700; color:var(--ink); }
-      .pkghome .hp-new { margin-left:auto; font-family:${FONT_SERIF}; font-size:14px; font-weight:600; color:var(--ink); background:var(--band); border:var(--bdw) solid var(--bd); border-radius:10px; padding:9px 18px; cursor:pointer; transition:filter .15s; }
+      .pkghome .hp-new { margin-left:auto; font-family:${FONT_SERIF}; font-size:14px; font-weight:600; color:var(--ink); background:var(--sage); border:var(--bdw) solid var(--sage-d); border-radius:10px; padding:9px 18px; cursor:pointer; transition:filter .15s; }
       .pkghome .hp-new:hover { filter:brightness(.97); }
       .pkghome .hp-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:14px; }
       .pkghome .pkcard2 { background:#fffefb; border:var(--bdw) solid var(--bd); border-radius:10px; overflow:hidden; }
@@ -68,8 +66,6 @@ export const PackagesHome: React.FC<PackagesHomeProps> = ({ packages, versions, 
       .pkghome .pk2a.stub:hover { text-decoration:none; }
       .pkghome .pkghost { border:1.5px dotted #bfae9a; border-radius:10px; min-height:170px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; color:#a4937f; cursor:pointer; font-size:13px; background:none; }
       .pkghome .pkghost:hover { border-color:var(--burg); color:var(--burg); background:rgba(124,58,42,.03); }
-      .pkghome .hp-foot { margin-top:16px; font-size:12px; color:#8a7a6c; font-style:italic; }
-      .pkghome .hp-foot a { color:var(--burg); text-decoration:underline; text-underline-offset:2px; cursor:pointer; }
     `}</style>
 
     <div className="hp-head">
@@ -107,7 +103,5 @@ export const PackagesHome: React.FC<PackagesHomeProps> = ({ packages, versions, 
 
       <button type="button" className="pkghost" onClick={onNew}>＋<span>New package</span></button>
     </div>
-
-    <div className="hp-foot">Unsure which opening wins requests? <a onClick={() => onExample("sl")}>See the worked examples</a></div>
   </div>
 );

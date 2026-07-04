@@ -163,11 +163,11 @@ export const SubmissionPackages: React.FC = () => {
             {!firstVisit && <MaterialsRail versions={msVersions} onCreate={openCreate} onManage={openManage} />}
             {/* Content pane — hugs content height and scrolls internally (mockup .pane). First-visit is
                 white in both themes; the packages home sits on the themed pane surface. */}
-            <section className="pkg-pane" style={{ flex: 1, minWidth: 0, background: firstVisit ? "#fffefb" : "var(--pane)", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", alignSelf: "flex-start", maxHeight: "100%", overflowY: "auto", padding: "16px 16px 20px" }}>
+            <section className="pkg-pane" style={{ flex: 1, minWidth: 0, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", alignSelf: "flex-start", maxHeight: "100%", overflowY: "auto", padding: "16px 16px 20px" }}>
               {firstVisit ? (
                 <FirstVisitHome onBuild={openComposer} onCreate={openCreate} onExample={openExample} />
               ) : (
-                <PackagesHome packages={msPackages} versions={msVersions} queries={msQueries} onNew={openComposer} onEdit={() => openComposer()} onCopy={() => openComposer()} onExample={openExample} />
+                <PackagesHome packages={msPackages} versions={msVersions} queries={msQueries} onNew={openComposer} onEdit={() => openComposer()} onCopy={() => openComposer()} />
               )}
             </section>
           </div>

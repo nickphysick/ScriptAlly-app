@@ -65,7 +65,7 @@ const LIB_EXAMPLES: { type: ComponentType; head: "xl" | "xs" | "xp"; label: stri
 ];
 
 const docIcon = (
-  <svg width={11} height={11} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinejoin="round">
+  <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinejoin="round">
     <path d="M14 3H6a1 1 0 00-1 1v16a1 1 0 001 1h12a1 1 0 001-1V8z" />
     <path d="M14 3v5h5" />
   </svg>
@@ -136,25 +136,25 @@ export const FirstVisitHome: React.FC<FirstVisitHomeProps> = ({ onBuild, onCreat
         .pkgfv .winrow .wl { font-family:${FONT_MONO}; font-size:8px; letter-spacing:.08em; text-transform:uppercase; color:var(--burg); font-weight:500; }
         .pkgfv .winrow .wv { font-size:13.5px; font-weight:600; color:var(--ink); margin-top:2px; }
         .pkgfv .exlink { position:absolute; right:4px; bottom:0; font-family:${FONT_MONO}; font-size:8.5px; letter-spacing:.05em; color:var(--burg); text-decoration:underline; text-underline-offset:3px; cursor:pointer; background:none; border:0; padding:0; }
-        .pkgfv .divrule { display:flex; align-items:center; gap:14px; margin:30px 24px 0; }
+        .pkgfv .divrule { display:flex; align-items:center; gap:14px; margin:52px 24px 0; }
         .pkgfv .divrule::before, .pkgfv .divrule::after { content:''; flex:1; height:1px; background:#e6dac8; }
         .pkgfv .divrule span { font-family:${FONT_MONO}; font-size:8.5px; letter-spacing:.18em; text-transform:uppercase; color:#a4937f; }
         .pkgfv .contB { padding:14px 24px 8px; text-align:center; }
-        .pkgfv .a2s { font-size:12.5px; color:#7a685a; margin:0 auto; max-width:520px; line-height:1.55; }
-        .pkgfv .librow { display:flex; justify-content:center; gap:16px; margin-top:16px; flex-wrap:wrap; }
-        .pkgfv .lib { flex:0 1 254px; background:#fffefb; border:var(--bdw) solid var(--bd); border-radius:11px; overflow:hidden; box-shadow:0 8px 20px rgba(58,28,20,.09); cursor:pointer; text-align:left; transition:transform .14s; padding:0; font:inherit; color:inherit; }
+        .pkgfv .a2s { font-size:14px; color:#7a685a; margin:0 auto; max-width:560px; line-height:1.6; }
+        .pkgfv .librow { display:flex; justify-content:center; gap:18px; margin-top:22px; flex-wrap:wrap; }
+        .pkgfv .lib { flex:0 1 292px; background:#fffefb; border:var(--bdw) solid var(--bd); border-radius:12px; overflow:hidden; box-shadow:0 8px 20px rgba(58,28,20,.09); cursor:pointer; text-align:left; transition:transform .14s; padding:0; font:inherit; color:inherit; }
         .pkgfv .lib:hover { transform:translateY(-3px); }
-        .pkgfv .lib-h { display:flex; align-items:center; gap:8px; padding:8px 14px; font-family:${FONT_MONO}; font-size:8px; letter-spacing:.1em; text-transform:uppercase; border-bottom:var(--bdw) solid var(--bd); }
+        .pkgfv .lib-h { display:flex; align-items:center; gap:9px; padding:12px 17px; font-family:${FONT_MONO}; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; border-bottom:var(--bdw) solid var(--bd); }
         .pkgfv .lib-h.xl { background:var(--tl); color:var(--burg); }
         .pkgfv .lib-h.xs { background:var(--ts); color:var(--sage-d); }
         .pkgfv .lib-h.xp { background:var(--tp); color:var(--gold); }
-        .pkgfv .lib-b { padding:11px 14px 13px; }
-        .pkgfv .lt2 { font-family:${FONT_MONO}; font-size:6.5px; letter-spacing:.14em; text-transform:uppercase; color:#b3a291; }
-        .pkgfv .ti { font-family:${FONT_SERIF}; font-size:15.5px; font-weight:700; color:var(--ink); margin:2px 0 9px; }
-        .pkgfv .lfchip { display:inline-flex; align-items:center; gap:6px; background:#fdfaf5; border:1px solid #e4d8c6; border-radius:7px; padding:5px 9px; font-family:${FONT_MONO}; font-size:8px; color:#5d5247; max-width:100%; }
+        .pkgfv .lib-b { padding:20px 18px 22px; }
+        .pkgfv .lt2 { font-family:${FONT_MONO}; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:#b3a291; }
+        .pkgfv .ti { font-family:${FONT_SERIF}; font-size:19.5px; font-weight:700; color:var(--ink); margin:6px 0 15px; }
+        .pkgfv .lfchip { display:inline-flex; align-items:center; gap:7px; background:#fdfaf5; border:1px solid #e4d8c6; border-radius:8px; padding:9px 12px; font-family:${FONT_MONO}; font-size:10.5px; color:#5d5247; max-width:100%; }
         .pkgfv .lfchip svg { flex-shrink:0; }
-        .pkgfv .lfchip .v { background:var(--pink); color:var(--burg); border-radius:4px; padding:1px 5px; font-size:7px; }
-        .pkgfv .used { font-family:${FONT_MONO}; font-size:7px; letter-spacing:.06em; color:var(--muted); margin-top:9px; }
+        .pkgfv .lfchip .v { background:var(--pink); color:var(--burg); border-radius:4px; padding:2px 6px; font-size:9px; }
+        .pkgfv .used { font-family:${FONT_MONO}; font-size:9.5px; letter-spacing:.06em; color:var(--muted); margin-top:16px; }
         .pkgfv .used b { color:var(--burg); font-weight:500; }
         @media (prefers-reduced-motion: reduce) { .pkgfv .star { animation:none; } .pkgfv .rt { transition:none; } }
         @media (max-width: 900px) { .pkgfv .rt { display:none; } }
@@ -195,13 +195,13 @@ export const FirstVisitHome: React.FC<FirstVisitHomeProps> = ({ onBuild, onCreat
       </div>
 
       {/* Divider + illustrative library cards */}
-      <div className="divrule"><span>Create your library of materials</span></div>
+      <div className="divrule"><span>Curate your library of materials</span></div>
       <div className="contB">
-        <div className="a2s">Give each piece a title, attach the file you actually send, and reuse it across any package.</div>
+        <div className="a2s">Name each component, pin the actual file so you never lose track, then re-use it across multiple packages.</div>
         <div className="librow">
           {LIB_EXAMPLES.map((c) => (
             <button type="button" key={c.type} className="lib" onClick={() => onCreate(c.type)}>
-              <div className={`lib-h ${c.head}`}><TypeGlyph type={c.type} size={12} />{c.label}</div>
+              <div className={`lib-h ${c.head}`}><TypeGlyph type={c.type} size={14} />{c.label}</div>
               <div className="lib-b">
                 <div className="lt2">Title</div>
                 <div className="ti">{c.title}</div>
