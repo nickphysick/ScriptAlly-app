@@ -70,8 +70,8 @@ service cloud.firestore {
         // Home market — ISO 3166-1 alpha-2, optional. Absent-or-string; rejects a literal null
         // (data.homeCountry is string), so "not set" always means the key is omitted.
         && (!data.keys().hasAny(['homeCountry']) || (data.homeCountry is string && data.homeCountry.size() <= 64))
-        // Queries-page theme — optional; "cappuccino" | "bold". Absent-or-one-of-two.
-        && (!data.keys().hasAny(['queriesTheme']) || (data.queriesTheme is string && (data.queriesTheme == 'cappuccino' || data.queriesTheme == 'bold')));
+        // App theme — optional; "cappuccino" | "bold" | "editorial". Absent-or-one-of-three.
+        && (!data.keys().hasAny(['queriesTheme']) || (data.queriesTheme is string && (data.queriesTheme == 'cappuccino' || data.queriesTheme == 'bold' || data.queriesTheme == 'editorial')));
     }
 
     function isValidManuscript(data, userId) {
