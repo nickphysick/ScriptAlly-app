@@ -88,6 +88,17 @@
   /* StatusDot amended lock: one hue per theme (ring/glyph) + centre disc. Shapes carry stage. */
   --sd-hue: #7c3a2a;
   --sd-centre: #f6e4da;
+  /* ── Package Builder retokening (Mocha·Foam·White; ref design-refs/scriptally-builder-newcapp.html).
+     Bands consume the existing --band-a/--band-b directly. --headT/--btnT alias --hdr (mocha); the
+     button surface is the Builder's own warmer white — sampled #fffefb/#e0d5c8/#f7f2ea, deliberately
+     ≠ --abtn-* (#ffffff/#ded3c2/#f4f2ef). --band itself untouched (Queries Hub still reads it). */
+  --headT: var(--hdr);
+  --btnBg: #fffefb;
+  --btnBd: #e0d5c8;
+  --btnT: var(--hdr);
+  --btnH: #f7f2ea;
+  --selBg: #f3ede2;  /* selected-row foam tint */
+  --winBg: #f5f0e6;  /* result "win row" foam tint */
 }
 .t-bold {
   --bd: #1d1712;   /* ink */
@@ -114,6 +125,15 @@
   --acc: #1d1712;
   --sd-hue: #1d1712;
   --sd-centre: #f8dcd8;
+  /* Builder retokening — Bold aliases its CURRENT appearance so the sweep is a no-op here (headings
+     stay Builder ink #241c15, not the locked --hdr #000 — flagged for Bold's own retokening pass). */
+  --headT: var(--ink);
+  --btnBg: var(--pink);
+  --btnBd: var(--pink-b);
+  --btnT: var(--ink);
+  --btnH: var(--pink-h);
+  --selBg: #fdf1ec;
+  --winBg: #fdf1ec;
 }
 /* Editorial — the consolidated-v37 "Graphite · Soft · Tinted" system (t-edn + es4 + eb2 locked).
    Neutral whites/greys; graphite #44484d is the single accent. Containers are "Soft": 16px
@@ -143,6 +163,16 @@
   --acc: #44484d;
   --sd-hue: #44484d;
   --sd-centre: #e9eaeb;
+  /* Builder retokening — Editorial defined for completeness ("no component may reference an undefined
+     variable"): headings + buttons alias the locked t-edn equivalents; tints ride --band. The Builder
+     has never been designed for t-edn — these keep it coherent, nothing more. */
+  --headT: var(--hdr);
+  --btnBg: var(--abtn-bg);
+  --btnBd: var(--abtn-bd);
+  --btnT: var(--abtn-ink);
+  --btnH: var(--abtn-hov);
+  --selBg: var(--band);
+  --winBg: var(--band);
 }
 /* Editorial "Soft" container: 16px radius, no border, layered shadow. Defined here so the
    dashboard rebuild + any Editorial container can share one class (theme-scoped). */
