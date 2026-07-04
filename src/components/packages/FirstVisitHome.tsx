@@ -119,7 +119,12 @@ export const FirstVisitHome: React.FC<FirstVisitHomeProps> = ({ onBuild, onCreat
         .pkgfv .build { display:inline-block; margin:24px 0 0; font-family:${FONT_SERIF}; font-size:16px; font-weight:700; color:var(--ink); background:var(--pink); border:1px solid var(--pink-b); border-radius:12px; padding:15px 32px; cursor:pointer; transition:background .15s,transform .15s; }
         .pkgfv .build:hover { background:var(--pink-h); transform:translateY(-1px); }
         .pkgfv .rt { position:relative; width:470px; height:340px; flex-shrink:0; transition:opacity .45s ease; }
-        .pkgfv .pgui { position:absolute; left:0; top:12px; transform:rotate(-2deg); width:256px; background:#fffefb; border:var(--bdw) solid var(--bd); border-radius:8px; padding:18px 19px 0; height:236px; overflow:hidden; box-shadow:0 12px 30px rgba(58,28,20,.10); }
+        /* blurred manuscript pile behind the cards for depth (mockup .mdesk .pile: 2 sheets, blur, .7) */
+        .pkgfv .pile { position:absolute; inset:26px 74px 40px; filter:blur(2.5px); opacity:.7; z-index:0; pointer-events:none; }
+        .pkgfv .pile i { position:absolute; inset:0; background:#fbf7f0; border:1px solid #d9cdbc; border-radius:5px; display:block; }
+        .pkgfv .pile i:nth-child(1) { transform:rotate(3deg) translate(10px,-5px); }
+        .pkgfv .pile i:nth-child(2) { transform:rotate(-2deg) translate(-9px,4px); }
+        .pkgfv .pgui { position:absolute; left:0; top:12px; z-index:1; transform:rotate(-2deg); width:256px; background:#fffefb; border:var(--bdw) solid var(--bd); border-radius:8px; padding:18px 19px 0; height:236px; overflow:hidden; box-shadow:0 12px 30px rgba(58,28,20,.10); }
         .pkgfv .pgui::after { content:''; position:absolute; left:0; right:0; bottom:0; height:56px; background:linear-gradient(rgba(255,254,251,0),#fffefb 78%); }
         .pkgfv .pgui .mt { font-family:${FONT_MONO}; font-size:7.5px; letter-spacing:.1em; text-transform:uppercase; background:var(--tl); color:var(--burg); display:inline-block; border-radius:4px; padding:3px 7px; margin-bottom:9px; }
         .pkgfv .pgui .tx { font-family:${FONT_SERIF}; font-size:11.5px; line-height:1.82; color:#4f4136; }
@@ -150,7 +155,9 @@ export const FirstVisitHome: React.FC<FirstVisitHomeProps> = ({ onBuild, onCreat
         .pkgfv .lib-h.xp { background:var(--tp); color:var(--gold); }
         .pkgfv .lib-b { padding:20px 18px 22px; }
         .pkgfv .lt2 { font-family:${FONT_MONO}; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:#b3a291; }
-        .pkgfv .ti { font-family:${FONT_SERIF}; font-size:19.5px; font-weight:700; color:var(--ink); margin:6px 0 15px; }
+        /* NB: NOT ".ti" — that class is Tabler Icons (icon font, !important) and would mangle the title. */
+        .pkgfv .libti { font-family:${FONT_SERIF}; font-size:19.5px; font-weight:700; color:var(--ink); margin:6px 0 15px; }
+        .pkgfv .extag { margin-left:auto; font-family:${FONT_MONO}; font-size:7px; letter-spacing:.12em; text-transform:uppercase; background:rgba(255,255,255,.55); border-radius:4px; padding:2px 5px; }
         .pkgfv .lfchip { display:inline-flex; align-items:center; gap:7px; background:#fdfaf5; border:1px solid #e4d8c6; border-radius:8px; padding:9px 12px; font-family:${FONT_MONO}; font-size:10.5px; color:#5d5247; max-width:100%; }
         .pkgfv .lfchip svg { flex-shrink:0; }
         .pkgfv .lfchip .v { background:var(--pink); color:var(--burg); border-radius:4px; padding:2px 6px; font-size:9px; }
@@ -173,6 +180,7 @@ export const FirstVisitHome: React.FC<FirstVisitHomeProps> = ({ onBuild, onCreat
         </div>
 
         <div className="rt" style={{ opacity: visible ? 1 : 0 }} onMouseEnter={() => { hover.current = true; }} onMouseLeave={() => { hover.current = false; }}>
+          <div className="pile" aria-hidden="true"><i /><i /></div>
           <div className="pgui" style={{ ["--hlc" as string]: d.hl } as React.CSSProperties}>
             <span className="mt">Query letter</span>
             <div className="tx" dangerouslySetInnerHTML={{ __html: d.tx }} />
@@ -201,10 +209,10 @@ export const FirstVisitHome: React.FC<FirstVisitHomeProps> = ({ onBuild, onCreat
         <div className="librow">
           {LIB_EXAMPLES.map((c) => (
             <button type="button" key={c.type} className="lib" onClick={() => onCreate(c.type)}>
-              <div className={`lib-h ${c.head}`}><TypeGlyph type={c.type} size={14} />{c.label}</div>
+              <div className={`lib-h ${c.head}`}><TypeGlyph type={c.type} size={14} />{c.label}<span className="extag">Example</span></div>
               <div className="lib-b">
                 <div className="lt2">Title</div>
-                <div className="ti">{c.title}</div>
+                <div className="libti">{c.title}</div>
                 <span className="lfchip">{docIcon}{c.file}<span className="v">{c.ver}</span></span>
                 <div className="used">{c.used}</div>
               </div>

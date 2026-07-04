@@ -46,7 +46,7 @@ export const PackagesHome: React.FC<PackagesHomeProps> = ({ packages, versions, 
     <style>{`
       .pkghome .hp-head { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
       .pkghome .hp-title { font-family:${FONT_SERIF}; font-size:19px; font-weight:700; color:var(--ink); }
-      .pkghome .hp-new { margin-left:auto; font-family:${FONT_SERIF}; font-size:14px; font-weight:600; color:var(--ink); background:var(--sage); border:var(--bdw) solid var(--sage-d); border-radius:10px; padding:9px 18px; cursor:pointer; transition:filter .15s; }
+      .pkghome .hp-new { margin-left:auto; font-family:${FONT_SERIF}; font-size:14px; font-weight:600; color:var(--ink); background:var(--band); border:var(--bdw) solid var(--bd); border-radius:10px; padding:9px 18px; cursor:pointer; transition:filter .15s; }
       .pkghome .hp-new:hover { filter:brightness(.97); }
       .pkghome .hp-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:14px; }
       .pkghome .pkcard2 { background:#fffefb; border:var(--bdw) solid var(--bd); border-radius:10px; overflow:hidden; }
