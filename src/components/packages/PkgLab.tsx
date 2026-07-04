@@ -14,12 +14,13 @@ import { FirstVisitHome } from "./FirstVisitHome";
 import { MaterialsRail } from "./MaterialsRail";
 import { PackagesHome } from "./PackagesHome";
 import { Composer } from "./Composer";
+import { MaterialsManager } from "./MaterialsManager";
 import { HubHeaderBar } from "../shell/HubHeaderBar";
 import { emptySelection } from "./typeMeta";
 import { FONT_MONO } from "../../lib/designTokens";
 
 type Theme = "t-capp" | "t-bold";
-type View = "first" | "packages" | "composer";
+type View = "first" | "packages" | "composer" | "manager";
 
 const V = (id: string, componentType: ComponentType, versionName: string, fileName: string, contentDraft?: string): ManuscriptVersion => ({
   id, manuscriptId: "m", userId: "lab", componentType, versionName, fileAttached: true, fileName, createdDate: "2026-01-01T00:00:00.000Z", contentDraft,
@@ -65,9 +66,9 @@ export const PkgLab: React.FC = () => {
       <div style={{ display: "flex", alignItems: "center", gap: 10, maxWidth: 1200, margin: "0 auto 18px", flexWrap: "wrap" }}>
         <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--muted)" }}>#/pkg-lab</span>
         <div style={{ display: "flex", gap: 6 }}>
-          {(["first", "packages", "composer"] as View[]).map((v) => (
+          {(["first", "packages", "composer", "manager"] as View[]).map((v) => (
             <button key={v} type="button" onClick={() => setView(v)} style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".04em", textTransform: "uppercase", padding: "7px 13px", borderRadius: 8, cursor: "pointer", border: "1px solid var(--bd)", background: view === v ? "var(--band)" : "#fffefb", color: view === v ? "var(--burg)" : "var(--ink)" }}>
-              {v === "first" ? "First-visit" : v === "packages" ? "Packages" : "Composer"}
+              {v === "first" ? "First-visit" : v === "packages" ? "Packages" : v === "composer" ? "Composer" : "Manager"}
             </button>
           ))}
         </div>
@@ -95,12 +96,19 @@ export const PkgLab: React.FC = () => {
             <PackagesHome packages={MOCK_PACKAGES} versions={MOCK_VERSIONS} queries={MOCK_QUERIES} onNew={noop} onEdit={noop} onCopy={noop} />
           </section>
         </div>
-      ) : (
+      ) : view === "composer" ? (
         <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", gap: 14, alignItems: "flex-start" }}>
           <MaterialsRail versions={MOCK_VERSIONS} onCreate={noop} onManage={noop} />
           {/* Composer brings its own .c2 container — the section is bare. */}
           <section style={{ flex: 1, minWidth: 0 }}>
             <Composer versions={MOCK_VERSIONS} packages={MOCK_PACKAGES} initialName="" initialSelection={emptySelection()} onSave={noop} onCancel={noop} onCreate={noop} />
+          </section>
+        </div>
+      ) : (
+        <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", gap: 14, alignItems: "flex-start" }}>
+          <MaterialsRail versions={MOCK_VERSIONS} onCreate={noop} onManage={noop} />
+          <section style={{ flex: 1, minWidth: 0, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", padding: "16px 16px 20px" }}>
+            <MaterialsManager versions={MOCK_VERSIONS} packages={MOCK_PACKAGES} queries={MOCK_QUERIES} onBack={noop} onEdit={noop} onCreate={noop} />
           </section>
         </div>
       )}

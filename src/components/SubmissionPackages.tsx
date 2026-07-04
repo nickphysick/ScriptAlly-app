@@ -20,12 +20,13 @@
  */
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
-import { ComponentType, SubmissionPackage } from "../types";
+import { ComponentType, SubmissionPackage, ManuscriptVersion } from "../types";
 import { HubHeaderBar } from "./shell/HubHeaderBar";
 import { FirstVisitHome } from "./packages/FirstVisitHome";
 import { MaterialsRail } from "./packages/MaterialsRail";
 import { PackagesHome } from "./packages/PackagesHome";
 import { Composer } from "./packages/Composer";
+import { MaterialsManager } from "./packages/MaterialsManager";
 import { emptySelection, selectionFromPackage, SlotSelection } from "./packages/typeMeta";
 import { FONT_SERIF, FONT_MONO } from "../lib/designTokens";
 import { ChevronDown, Lock } from "lucide-react";
@@ -40,6 +41,7 @@ export const SubmissionPackages: React.FC = () => {
   const msMenuRef = useRef<HTMLDivElement>(null);
   // Composer working state (Phase 7): null = home; set = building/editing a package in the pane.
   const [composer, setComposer] = useState<{ name: string; sel: SlotSelection; editId: string | null } | null>(null);
+  const [managerOpen, setManagerOpen] = useState(false); // materials manager (Phase 8)
 
   // Default to the first manuscript when none is selected / the saved one is gone.
   useEffect(() => {
@@ -94,10 +96,10 @@ export const SubmissionPackages: React.FC = () => {
     else addPackage({ manuscriptId: msId, packageName: name, ...slots });
     setComposer(null);
   };
-  // Later-phase targets — stubbed until their phases (materials manager = P8, create-modal = P9,
-  // worked-examples = P10).
-  const openManage = () => {};
+  const openManage = () => setManagerOpen(true);
+  // Later-phase targets — stubbed until their phases (create/edit material modal = P9, examples = P10).
   const openCreate = (_type: ComponentType) => {};
+  const openEditMaterial = (_v: ManuscriptVersion) => {};
   const openExample = (_key: string) => {};
 
   // Book glyph for the manuscript selector — burgundy strokes, sampled from the mockup .msel.
@@ -200,6 +202,8 @@ export const SubmissionPackages: React.FC = () => {
                   onCancel={() => setComposer(null)}
                   onCreate={openCreate}
                 />
+              ) : managerOpen ? (
+                <MaterialsManager versions={msVersions} packages={msPackages} queries={msQueries} onBack={() => setManagerOpen(false)} onEdit={openEditMaterial} onCreate={openCreate} />
               ) : firstVisit ? (
                 <FirstVisitHome onBuild={openNew} onCreate={openCreate} onExample={openExample} />
               ) : (
