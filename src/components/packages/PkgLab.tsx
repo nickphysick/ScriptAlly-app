@@ -16,6 +16,7 @@ import { PackagesHome } from "./PackagesHome";
 import { Composer } from "./Composer";
 import { MaterialsManager } from "./MaterialsManager";
 import { MaterialModal } from "./MaterialModal";
+import { WorkedExample } from "./WorkedExample";
 import { HubHeaderBar } from "../shell/HubHeaderBar";
 import { emptySelection } from "./typeMeta";
 import { FONT_MONO } from "../../lib/designTokens";
@@ -57,6 +58,8 @@ export const PkgLab: React.FC = () => {
   const openMat = (type: ComponentType) => setMatModal({ type, version: null });
   const composerMat = (type: ComponentType) => setMatModal({ type, version: null, fromComposer: true });
   const editMat = (v: ManuscriptVersion) => setMatModal({ type: v.componentType, version: v });
+  // Worked-examples popup (Phase 10) — opened from the first-visit "See this example in full →".
+  const [example, setExample] = useState<string | null>(null);
   const saveMat = (name: string, content: string) => {
     if (!matModal) return;
     if (matModal.version) {
@@ -109,7 +112,7 @@ export const PkgLab: React.FC = () => {
 
       {view === "first" ? (
         <section style={{ maxWidth: 1200, margin: "0 auto", background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", padding: "16px 16px 20px" }}>
-          <FirstVisitHome onBuild={noop} onCreate={openMat} onExample={noop} />
+          <FirstVisitHome onBuild={noop} onCreate={openMat} onExample={setExample} />
         </section>
       ) : view === "packages" ? (
         <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", gap: 14, alignItems: "flex-start" }}>
@@ -144,6 +147,10 @@ export const PkgLab: React.FC = () => {
           onCancel={() => setMatModal(null)}
           onSave={saveMat}
         />
+      )}
+
+      {example && (
+        <WorkedExample exKey={example} onClose={() => setExample(null)} onUse={() => setExample(null)} />
       )}
     </div>
   );

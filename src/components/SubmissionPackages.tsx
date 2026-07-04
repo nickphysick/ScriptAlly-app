@@ -28,6 +28,7 @@ import { PackagesHome } from "./packages/PackagesHome";
 import { Composer } from "./packages/Composer";
 import { MaterialsManager } from "./packages/MaterialsManager";
 import { MaterialModal } from "./packages/MaterialModal";
+import { WorkedExample } from "./packages/WorkedExample";
 import { emptySelection, selectionFromPackage, SlotSelection } from "./packages/typeMeta";
 import { FONT_SERIF, FONT_MONO } from "../lib/designTokens";
 import { ChevronDown, Lock } from "lucide-react";
@@ -48,6 +49,8 @@ export const SubmissionPackages: React.FC = () => {
   const [matModal, setMatModal] = useState<{ type: ComponentType; version: ManuscriptVersion | null; fromComposer?: boolean } | null>(null);
   // The pending composer-origin pick (fresh version id → its slot), handed to the Composer as a prop.
   const [autoPick, setAutoPick] = useState<{ type: ComponentType; versionId: string; token: number } | undefined>(undefined);
+  // Worked-examples popup (Phase 10): the carousel slide key being viewed, or null.
+  const [example, setExample] = useState<string | null>(null);
 
   // Default to the first manuscript when none is selected / the saved one is gone.
   useEffect(() => {
@@ -129,8 +132,8 @@ export const SubmissionPackages: React.FC = () => {
     setMatModal(null);
   };
 
-  // Later-phase target — stubbed until its phase (worked examples = P10).
-  const openExample = (_key: string) => {};
+  // Worked-examples popup (Phase 10) — the first-visit demo stack's "See this example in full →".
+  const openExample = (key: string) => setExample(key);
 
   // Book glyph for the manuscript selector — burgundy strokes, sampled from the mockup .msel.
   const bookIcon = (
@@ -253,6 +256,14 @@ export const SubmissionPackages: React.FC = () => {
           initialContent={matModal.version?.contentDraft ?? ""}
           onCancel={() => setMatModal(null)}
           onSave={saveMaterial}
+        />
+      )}
+
+      {example && (
+        <WorkedExample
+          exKey={example}
+          onClose={() => setExample(null)}
+          onUse={() => { setExample(null); openNew(); }}
         />
       )}
     </div>
