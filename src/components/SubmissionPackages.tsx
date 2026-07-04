@@ -27,12 +27,13 @@ import { MaterialsRail } from "./packages/MaterialsRail";
 import { PackagesHome } from "./packages/PackagesHome";
 import { Composer } from "./packages/Composer";
 import { MaterialsManager } from "./packages/MaterialsManager";
+import { MaterialModal } from "./packages/MaterialModal";
 import { emptySelection, selectionFromPackage, SlotSelection } from "./packages/typeMeta";
 import { FONT_SERIF, FONT_MONO } from "../lib/designTokens";
 import { ChevronDown, Lock } from "lucide-react";
 
 export const SubmissionPackages: React.FC = () => {
-  const { currentUser, manuscripts, versions, packages, queries, addPackage, updatePackage } = useScriptAllyDb();
+  const { currentUser, manuscripts, versions, packages, queries, addPackage, updatePackage, addVersion, updateVersion } = useScriptAllyDb();
 
   const [activeMsId, setActiveMsId] = useState<string | null>(() =>
     typeof window !== "undefined" ? localStorage.getItem("scriptally_active_manuscript_id") : null,
@@ -42,6 +43,8 @@ export const SubmissionPackages: React.FC = () => {
   // Composer working state (Phase 7): null = home; set = building/editing a package in the pane.
   const [composer, setComposer] = useState<{ name: string; sel: SlotSelection; editId: string | null } | null>(null);
   const [managerOpen, setManagerOpen] = useState(false); // materials manager (Phase 8)
+  // Material create/edit modal (Phase 9): null = closed; version=null → create for `type`, else edit it.
+  const [matModal, setMatModal] = useState<{ type: ComponentType; version: ManuscriptVersion | null } | null>(null);
 
   // Default to the first manuscript when none is selected / the saved one is gone.
   useEffect(() => {
@@ -97,9 +100,25 @@ export const SubmissionPackages: React.FC = () => {
     setComposer(null);
   };
   const openManage = () => setManagerOpen(true);
-  // Later-phase targets — stubbed until their phases (create/edit material modal = P9, examples = P10).
-  const openCreate = (_type: ComponentType) => {};
-  const openEditMaterial = (_v: ManuscriptVersion) => {};
+
+  // Material create/edit modal (Phase 9). Create is invoked with a type; edit with an existing version.
+  const openCreate = (type: ComponentType) => setMatModal({ type, version: null });
+  const openEditMaterial = (v: ManuscriptVersion) => setMatModal({ type: v.componentType, version: v });
+  const saveMaterial = (name: string, content: string) => {
+    if (!msId || !matModal) return;
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    if (matModal.version) {
+      // Edit — only the two fields the dialog owns (versionName + the body text).
+      updateVersion(matModal.version.id, { versionName: trimmed, contentDraft: content });
+    } else {
+      // Create — text mode (the only content channel in v1); fileAttached:false is required by the rules.
+      addVersion({ manuscriptId: msId, componentType: matModal.type, versionName: trimmed, fileAttached: false, contentDraft: content, contentType: "text" });
+    }
+    setMatModal(null);
+  };
+
+  // Later-phase target — stubbed until its phase (worked examples = P10).
   const openExample = (_key: string) => {};
 
   // Book glyph for the manuscript selector — burgundy strokes, sampled from the mockup .msel.
@@ -212,6 +231,17 @@ export const SubmissionPackages: React.FC = () => {
             </section>
           </div>
         </>
+      )}
+
+      {matModal && (
+        <MaterialModal
+          type={matModal.type}
+          editing={matModal.version !== null}
+          initialName={matModal.version?.versionName ?? ""}
+          initialContent={matModal.version?.contentDraft ?? ""}
+          onCancel={() => setMatModal(null)}
+          onSave={saveMaterial}
+        />
       )}
     </div>
   );

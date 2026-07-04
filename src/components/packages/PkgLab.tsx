@@ -15,6 +15,7 @@ import { MaterialsRail } from "./MaterialsRail";
 import { PackagesHome } from "./PackagesHome";
 import { Composer } from "./Composer";
 import { MaterialsManager } from "./MaterialsManager";
+import { MaterialModal } from "./MaterialModal";
 import { HubHeaderBar } from "../shell/HubHeaderBar";
 import { emptySelection } from "./typeMeta";
 import { FONT_MONO } from "../../lib/designTokens";
@@ -47,6 +48,10 @@ export const PkgLab: React.FC = () => {
   const [theme, setTheme] = useState<Theme>("t-capp");
   const [view, setView] = useState<View>("first");
   const noop = () => {};
+  // Material modal (Phase 9) — every add/edit affordance opens it here so all entry points are previewable.
+  const [matModal, setMatModal] = useState<{ type: ComponentType; version: ManuscriptVersion | null } | null>(null);
+  const openMat = (type: ComponentType) => setMatModal({ type, version: null });
+  const editMat = (v: ManuscriptVersion) => setMatModal({ type: v.componentType, version: v });
 
   // Mock qhbar chrome so the lab proves the header renders above the views (the real page mounts it).
   const proPill = (
@@ -87,30 +92,41 @@ export const PkgLab: React.FC = () => {
 
       {view === "first" ? (
         <section style={{ maxWidth: 1200, margin: "0 auto", background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", padding: "16px 16px 20px" }}>
-          <FirstVisitHome onBuild={noop} onCreate={noop} onExample={noop} />
+          <FirstVisitHome onBuild={noop} onCreate={openMat} onExample={noop} />
         </section>
       ) : view === "packages" ? (
         <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", gap: 14, alignItems: "flex-start" }}>
-          <MaterialsRail versions={MOCK_VERSIONS} onCreate={noop} onManage={noop} />
+          <MaterialsRail versions={MOCK_VERSIONS} onCreate={openMat} onManage={noop} />
           <section style={{ flex: 1, minWidth: 0, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", padding: "16px 16px 20px" }}>
             <PackagesHome packages={MOCK_PACKAGES} versions={MOCK_VERSIONS} queries={MOCK_QUERIES} onNew={noop} onEdit={noop} onCopy={noop} />
           </section>
         </div>
       ) : view === "composer" ? (
         <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", gap: 14, alignItems: "flex-start" }}>
-          <MaterialsRail versions={MOCK_VERSIONS} onCreate={noop} onManage={noop} />
+          <MaterialsRail versions={MOCK_VERSIONS} onCreate={openMat} onManage={noop} />
           {/* Composer brings its own .c2 container — the section is bare. */}
           <section style={{ flex: 1, minWidth: 0 }}>
-            <Composer versions={MOCK_VERSIONS} packages={MOCK_PACKAGES} initialName="" initialSelection={emptySelection()} onSave={noop} onCancel={noop} onCreate={noop} />
+            <Composer versions={MOCK_VERSIONS} packages={MOCK_PACKAGES} initialName="" initialSelection={emptySelection()} onSave={noop} onCancel={noop} onCreate={openMat} />
           </section>
         </div>
       ) : (
         <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", gap: 14, alignItems: "flex-start" }}>
-          <MaterialsRail versions={MOCK_VERSIONS} onCreate={noop} onManage={noop} />
+          <MaterialsRail versions={MOCK_VERSIONS} onCreate={openMat} onManage={noop} />
           <section style={{ flex: 1, minWidth: 0, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", padding: "16px 16px 20px" }}>
-            <MaterialsManager versions={MOCK_VERSIONS} packages={MOCK_PACKAGES} queries={MOCK_QUERIES} onBack={noop} onEdit={noop} onCreate={noop} />
+            <MaterialsManager versions={MOCK_VERSIONS} packages={MOCK_PACKAGES} queries={MOCK_QUERIES} onBack={noop} onEdit={editMat} onCreate={openMat} />
           </section>
         </div>
+      )}
+
+      {matModal && (
+        <MaterialModal
+          type={matModal.type}
+          editing={matModal.version !== null}
+          initialName={matModal.version?.versionName ?? ""}
+          initialContent={matModal.version?.contentDraft ?? ""}
+          onCancel={() => setMatModal(null)}
+          onSave={() => setMatModal(null)}
+        />
       )}
     </div>
   );
