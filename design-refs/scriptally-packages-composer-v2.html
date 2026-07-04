@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — packages display + composer v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+.t-capp{--bd:#d8cebf;--bdw:1px;--desk:#e8ddd0;--band:#f2ddd5;--pane:#fffefb;--card:#fffefb;}
+.t-bold{--bd:#1d1712;--bdw:1.5px;--desk:#c2cfda;--band:#f4c7c2;--pane:#ece2e0;--card:#fffefb;}
+:root{--burg:#7c3a2a;--burg-d:#632e22;--ink:#241c15;--muted:#9a8c80;--sage-d:#5a6e58;--gold:#a8842c;
+  --pink:#f5e2da;--pink-b:#e8c8bc;--pink-h:#efd5ca;--tl:#f6ddd3;--ts:#e7ece4;--tp:#f3e6cf;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;color:var(--ink);background:var(--desk);padding:34px 20px 90px;transition:background .2s;}
+h1{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;text-align:center;}
+.sub{text-align:center;font-size:13px;color:#5a4f45;margin:8px auto 12px;max-width:720px;line-height:1.5;}
+.switcher{display:flex;justify-content:center;gap:3px;background:rgba(124,58,42,.08);border-radius:9px;padding:3px;width:230px;margin:0 auto 36px;}
+.switcher button{flex:1;font-family:'JetBrains Mono',monospace;font-size:10px;border:0;background:transparent;color:#7a6b5e;padding:8px;border-radius:6px;cursor:pointer;}
+.switcher button.on{background:#fffefb;color:var(--burg);box-shadow:0 1px 2px rgba(58,28,20,.12);font-weight:500;}
+.opt{max-width:960px;margin:0 auto 54px;}
+.opt-name{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;margin-bottom:4px;}
+.opt-desc{font-size:12.5px;color:#5a4f45;margin-bottom:13px;line-height:1.55;max-width:880px;}
+.pane{background:var(--pane);border:var(--bdw) solid var(--bd);border-radius:12px;padding:20px;}
+.mono{font-family:'JetBrains Mono',monospace;}
+.tg{display:inline-flex;flex-shrink:0;}
+.dd{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+/* ============ 1: LIST + READING PANE ============ */
+.lp{display:flex;gap:16px;min-height:340px;}
+.lp-list{width:270px;flex-shrink:0;background:var(--card);border:var(--bdw) solid var(--bd);border-radius:11px;overflow:hidden;display:flex;flex-direction:column;}
+.t-bold .lp-list{border:1.5px solid #1d1712;}
+.lp-lh{padding:11px 15px;background:var(--band);border-bottom:var(--bdw) solid var(--bd);display:flex;align-items:center;}
+.lp-lh h4{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;}
+.lp-lh .np{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.06em;color:var(--burg);cursor:pointer;background:rgba(255,254,251,.7);border-radius:6px;padding:5px 9px;}
+.lprow{padding:13px 15px;border-bottom:1px dashed #e7dbc9;cursor:pointer;}
+.lprow:hover{background:#faf4ec;}
+.lprow.on{background:#fdf1ec;border-left:3px solid var(--burg);padding-left:12px;}
+.lprow .nm{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;}
+.lprow .glyphs{display:flex;gap:6px;margin:6px 0 5px;}
+.lprow .gch{width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;}
+.lprow .gch.l{background:var(--tl);color:var(--burg);} .lprow .gch.s{background:var(--ts);color:var(--sage-d);} .lprow .gch.p{background:var(--tp);color:var(--gold);}
+.lprow .gch.off{background:#f2ece2;color:#c9bda9;}
+.lprow .st{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.05em;color:var(--muted);}
+.lprow .st b{color:var(--sage-d);font-weight:500;}
+.lp-read{flex:1;background:var(--card);border:var(--bdw) solid var(--bd);border-radius:11px;overflow:hidden;display:flex;flex-direction:column;}
+.t-bold .lp-read{border:1.5px solid #1d1712;}
+.lp-rh{padding:14px 20px;background:var(--band);border-bottom:var(--bdw) solid var(--bd);display:flex;align-items:center;gap:12px;}
+.lp-rh h3{font-family:'Playfair Display',serif;font-size:20px;font-weight:800;}
+.lp-rh .acts{margin-left:auto;display:flex;gap:12px;font-family:'JetBrains Mono',monospace;font-size:9px;color:#6a4436;}
+.lp-rh .acts span{cursor:pointer;}
+.lp-rb{padding:18px 20px;display:flex;flex-direction:column;gap:10px;flex:1;}
+.matrow{display:flex;align-items:center;gap:12px;border:var(--bdw) solid var(--bd);border-radius:10px;padding:12px 15px;background:#fffefb;}
+.t-bold .matrow{border:1.5px solid #1d1712;}
+.matrow .pill{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.09em;text-transform:uppercase;border-radius:5px;padding:4px 9px;display:inline-flex;gap:6px;align-items:center;flex-shrink:0;}
+.matrow .pill.l{background:var(--tl);color:var(--burg);} .matrow .pill.s{background:var(--ts);color:var(--sage-d);} .matrow .pill.p{background:var(--tp);color:var(--gold);}
+.matrow .ti{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;}
+.matrow .fn{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--muted);}
+.lp-stats{margin-top:auto;display:flex;gap:24px;border-top:1px dashed #e7dbc9;padding-top:14px;}
+.lpstat .v{font-family:'Playfair Display',serif;font-size:22px;font-weight:800;}
+.lpstat .k{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:2px;}
+.lpstat.win .v{color:var(--sage-d);}
+
+/* ============ 2: ROOMY CARDS ============ */
+.rc-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;}
+.rcard{background:var(--card);border:var(--bdw) solid var(--bd);border-radius:13px;overflow:hidden;}
+.t-bold .rcard{border:1.5px solid #1d1712;}
+.rc-h{padding:14px 20px;background:var(--band);border-bottom:var(--bdw) solid var(--bd);display:flex;align-items:center;gap:10px;}
+.rc-h h3{font-family:'Playfair Display',serif;font-size:19px;font-weight:800;}
+.rc-h .acts{margin-left:auto;display:flex;gap:11px;font-family:'JetBrains Mono',monospace;font-size:9px;color:#6a4436;}
+.rc-b{padding:14px 20px 16px;display:flex;flex-direction:column;gap:8px;}
+.rcml{display:flex;align-items:center;gap:11px;padding:8px 0;border-bottom:1px dashed #eee2d2;}
+.rcml:last-of-type{border-bottom:0;}
+.rcml .gch{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.rcml .gch.l{background:var(--tl);color:var(--burg);} .rcml .gch.s{background:var(--ts);color:var(--sage-d);} .rcml .gch.p{background:var(--tp);color:var(--gold);}
+.rcml .ti{font-family:'Playfair Display',serif;font-size:15.5px;font-weight:600;}
+.rcml .fn{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);margin-top:1px;}
+.rcml.none{color:var(--muted);font-style:italic;font-size:12.5px;}
+.rcml.none .gch{background:#f2ece2;color:#c9bda9;}
+.rc-f{background:#faf4ec;border-top:var(--bdw) solid var(--bd);padding:11px 20px;display:flex;align-items:center;}
+.t-bold .rc-f{background:#f5ece9;}
+.rc-f .st{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;color:#7a6a5c;}
+.rc-f .st b{color:var(--sage-d);font-weight:600;}
+
+/* ============ 3: LEDGER ============ */
+.ledger{background:var(--card);border:var(--bdw) solid var(--bd);border-radius:12px;overflow:hidden;}
+.t-bold .ledger{border:1.5px solid #1d1712;}
+.ldrow{display:flex;align-items:center;gap:20px;padding:16px 22px;border-bottom:1px dashed #e7dbc9;cursor:pointer;}
+.ldrow:hover{background:#faf4ec;}
+.ldrow:last-child{border-bottom:0;}
+.ldrow .nm{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;width:190px;flex-shrink:0;}
+.ldrow .chips{display:flex;gap:8px;flex:1;flex-wrap:wrap;}
+.ldchip{display:inline-flex;align-items:center;gap:7px;border:var(--bdw) solid var(--bd);border-radius:8px;padding:6px 11px;font-size:12px;font-weight:600;background:#fffefb;}
+.t-bold .ldchip{border:1.5px solid #1d1712;}
+.ldchip.off{border-style:dashed;color:var(--muted);font-weight:400;font-style:italic;}
+.ldrow .st{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--muted);width:200px;text-align:right;flex-shrink:0;}
+.ldrow .st b{color:var(--sage-d);}
+
+/* ============ COMPOSER V2 ============ */
+.c2{background:var(--pane);border:var(--bdw) solid var(--bd);border-radius:12px;overflow:hidden;position:relative;}
+.t-bold .c2{background:#f2e8e6;}
+.c2-band{display:flex;align-items:center;gap:14px;padding:17px 22px;background:var(--band);border-bottom:var(--bdw) solid var(--bd);}
+.c2-band .bic{color:var(--ink);display:flex;}
+.c2 .hname input{border:0;outline:0;background:transparent;font-family:'Playfair Display',serif;font-size:23px;font-weight:700;color:var(--ink);
+  border-bottom:1.5px dashed rgba(36,28,21,.3);padding:2px 2px 4px;width:360px;}
+.c2 .hname input::placeholder{color:rgba(36,28,21,.45);font-style:italic;font-weight:500;}
+.copybtn{margin-left:auto;display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.07em;
+  text-transform:uppercase;color:#6a4436;background:rgba(255,254,251,.55);border:1px solid rgba(124,58,42,.18);border-radius:9px;padding:8px 13px;cursor:pointer;}
+.copybtn:hover{background:#fffefb;color:var(--burg);}
+.c2-body{display:flex;gap:20px;padding:24px;}
+.c2 .mani{flex:0 1 430px;min-width:360px;display:flex;flex-direction:column;justify-content:center;gap:14px;}
+.c2 .brow{display:flex;align-items:center;gap:14px;background:#fffefb;border-radius:10px;padding:19px 18px;min-height:72px;}
+.c2 .brow.filled{border:var(--bdw) solid var(--bd);box-shadow:0 3px 10px rgba(58,28,20,.07);}
+.t-bold .c2 .brow.filled{border:1.5px solid #1d1712;}
+.c2 .brow.empty{border:1.5px dotted #bfae9a;flex-direction:column;align-items:stretch;padding:0;gap:0;overflow:hidden;}
+.c2 .bhd{display:flex;align-items:center;gap:9px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:9px 15px;}
+.c2 .bhd.hs{background:var(--ts);color:var(--sage-d);} .c2 .bhd.hp{background:var(--tp);color:var(--gold);}
+.c2 .bbd{padding:17px 18px;font-size:13.5px;font-style:italic;color:var(--muted);}
+.c2 .bti{font-family:'Playfair Display',serif;font-size:16.5px;font-weight:600;}
+.c2 .bmeta{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-top:3px;}
+.c2 .bact{margin-left:auto;display:flex;gap:12px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);}
+.c2 .bact span{cursor:pointer;}
+.c2 .pick{flex:1;min-width:0;background:#fffefb;border:var(--bdw) solid var(--bd);border-radius:11px;overflow:hidden;display:flex;flex-direction:column;}
+.t-bold .c2 .pick{border:1.5px solid #1d1712;}
+.c2 .pick-h{padding:13px 18px;background:var(--tl);border-bottom:var(--bdw) solid var(--bd);display:flex;align-items:center;gap:10px;
+  font-family:'Playfair Display',serif;font-size:17px;font-weight:700;}
+.c2 .pick-h .cnt{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;color:#7a6a5c;}
+.c2 .pick-b{padding:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:13px;align-content:start;flex:1;}
+.c2 .bigcard{background:#fffefb;border:var(--bdw) solid var(--bd);border-radius:9px;padding:15px 17px;cursor:pointer;}
+.t-bold .c2 .bigcard{border:1.5px solid #1d1712;}
+.c2 .bigcard:hover{background:#faeee8;}
+.c2 .bigcard .nm{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;}
+.c2 .bigcard .fm{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin:4px 0 8px;}
+.c2 .bigcard .sn{font-family:'Playfair Display',serif;font-style:italic;font-size:12px;color:#6a5a4c;line-height:1.6;max-height:56px;overflow:hidden;
+  -webkit-mask-image:linear-gradient(#000 45%,transparent 95%);mask-image:linear-gradient(#000 45%,transparent 95%);}
+.c2 .bigcard .use{margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--burg);}
+.c2 .pick-f{padding:12px 18px;border-top:1px dashed #e0d3c2;font-size:12px;color:var(--muted);}
+.c2 .pick-f a{color:var(--burg);text-decoration:underline;text-underline-offset:2px;cursor:pointer;font-weight:500;}
+.c2-foot{display:flex;align-items:center;gap:16px;padding:0 24px 22px;}
+.c2 .save{font-family:'Playfair Display',serif;font-size:16.5px;font-weight:600;color:var(--ink);background:#fffefb;
+  border:var(--bdw) solid var(--bd);border-radius:11px;padding:13px 28px;cursor:pointer;}
+.t-bold .c2 .save{border:1.5px solid #1d1712;}
+.c2 .save:hover{background:#faeee8;}
+.c2 .cancel{font-size:13.5px;color:var(--muted);background:none;border:0;cursor:pointer;}
+/* copy drawer */
+.drawer{position:absolute;top:0;right:0;bottom:0;width:320px;background:#fffefb;border-left:var(--bdw) solid var(--bd);
+  box-shadow:-14px 0 34px rgba(58,28,20,.14);display:flex;flex-direction:column;z-index:5;}
+.t-bold .drawer{border-left:1.5px solid #1d1712;}
+.drawer-h{padding:15px 18px;background:var(--band);border-bottom:var(--bdw) solid var(--bd);display:flex;align-items:center;gap:10px;}
+.drawer-h h4{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;}
+.drawer-h .x{margin-left:auto;cursor:pointer;color:#6a4436;font-size:15px;}
+.drawer-b{padding:14px;display:flex;flex-direction:column;gap:11px;overflow-y:auto;}
+.dpk{border:var(--bdw) solid var(--bd);border-radius:10px;overflow:hidden;background:#fffefb;}
+.t-bold .dpk{border:1.5px solid #1d1712;}
+.dpk-h{padding:9px 14px;background:var(--band);display:flex;align-items:center;border-bottom:var(--bdw) solid var(--bd);}
+.dpk-h .nm{font-family:'Playfair Display',serif;font-size:14.5px;font-weight:700;}
+.dpk-b{padding:10px 14px 12px;}
+.dpk .ln{display:flex;gap:7px;align-items:center;font-size:11.5px;color:#6a5a50;padding:2.5px 0;}
+.dpk .cta{margin-top:9px;width:100%;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;
+  background:var(--pink);border:1px solid var(--pink-b);color:var(--burg);border-radius:8px;padding:8px;cursor:pointer;}
+.dpk .cta:hover{background:var(--pink-h);}
+.drawer-note{font-size:10.5px;color:var(--muted);font-style:italic;padding:2px 4px;}
+</style>
+</head>
+<body class="t-capp" id="body">
+
+<h1>Packages display · Composer v2</h1>
+<div class="sub">Top: three treatments for the packages screen. Bottom: the composer scaled up, with "Copy an existing package" retired from the strip and reborn as a quiet header control opening a right-hand drawer.</div>
+<div class="switcher">
+  <button class="on" onclick="setT('t-capp',this)">Cappuccino</button>
+  <button onclick="setT('t-bold',this)">Bold Pastille</button>
+</div>
+
+<!-- ============ 1 ============ -->
+<div class="opt">
+  <div class="opt-name">1 · List + reading pane (my lean)</div>
+  <div class="opt-desc">The Queries Hub grammar, reused: compact package list left (name, three type chips showing filled/empty at a glance, one stat line), full reading pane right for the selected package — each material as a roomy row with pill, title and filename, big stat figures along the foot, actions in the pane header. Nothing is cramped because nothing has to fit in a card; and it scales to twenty packages without layout change. The dotted ghost "New" lives at the list foot.</div>
+  <div class="pane">
+    <div class="lp">
+      <div class="lp-list">
+        <div class="lp-lh"><h4>Packages · 2</h4><span class="np">＋ NEW</span></div>
+        <div class="lprow on">
+          <div class="nm">Comp-led · v1</div>
+          <div class="glyphs">
+            <span class="gch l"><svg class="tg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M8.5 9a3.5 3.5 0 116 2.4c-1 .9-2.5 1.5-2.5 3.1"/><circle cx="12" cy="19" r="0.6" fill="currentColor"/></svg></span>
+            <span class="gch s"><svg class="tg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg></span>
+            <span class="gch off"><svg class="tg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M8 6h9a1 1 0 011 1v13a1 1 0 01-1 1H8a1 1 0 01-1-1V7a1 1 0 011-1z"/><path d="M6 17V4a1 1 0 011-1h8"/></svg></span>
+          </div>
+          <div class="st">3 SENT · <b>1 FULL REQUEST</b></div>
+        </div>
+        <div class="lprow">
+          <div class="nm">Hartley bespoke</div>
+          <div class="glyphs">
+            <span class="gch l"><svg class="tg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M8.5 9a3.5 3.5 0 116 2.4c-1 .9-2.5 1.5-2.5 3.1"/><circle cx="12" cy="19" r="0.6" fill="currentColor"/></svg></span>
+            <span class="gch s"><svg class="tg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg></span>
+            <span class="gch p"><svg class="tg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M8 6h9a1 1 0 011 1v13a1 1 0 01-1 1H8a1 1 0 01-1-1V7a1 1 0 011-1z"/><path d="M6 17V4a1 1 0 011-1h8"/></svg></span>
+          </div>
+          <div class="st">1 SENT · AWAITING REPLY</div>
+        </div>
+      </div>
+      <div class="lp-read">
+        <div class="lp-rh">
+          <h3>Comp-led · v1</h3>
+          <div class="acts"><span>✎ EDIT</span><span>⧉ COPY</span><span>ATTACH →</span></div>
+        </div>
+        <div class="lp-rb">
+          <div class="matrow"><span class="pill l"><svg class="tg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M8.5 9a3.5 3.5 0 116 2.4c-1 .9-2.5 1.5-2.5 3.1"/><circle cx="12" cy="19" r="0.6" fill="currentColor"/></svg> Letter</span><span class="ti">Comp-led rework</span><span class="fn">MDO_Query_v2.docx</span></div>
+          <div class="matrow"><span class="pill s"><svg class="tg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg> Synopsis</span><span class="ti">One-page synopsis</span><span class="fn">MDO_Synopsis.docx</span></div>
+          <div class="matrow" style="border-style:dashed;color:var(--muted);"><span class="pill p"><svg class="tg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M8 6h9a1 1 0 011 1v13a1 1 0 01-1 1H8a1 1 0 01-1-1V7a1 1 0 011-1z"/><path d="M6 17V4a1 1 0 011-1h8"/></svg> Pages</span><span style="font-style:italic;font-size:13px;">No sample pages in this package</span></div>
+          <div class="lp-stats">
+            <div class="lpstat"><div class="v">3</div><div class="k">Queries sent</div></div>
+            <div class="lpstat win"><div class="v">1</div><div class="k">Full request</div></div>
+            <div class="lpstat"><div class="v">2</div><div class="k">Awaiting</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 2 ============ -->
+<div class="opt">
+  <div class="opt-name">2 · Roomy cards</div>
+  <div class="opt-desc">Keeps the grid, fixes the cramp: two columns max, each material gets its own spaced row (icon tile, Playfair title, filename beneath in mono — two lines, not one squeezed line), hairlines between rows, actions up in the band header, and the stats moved into a tinted footer strip so they stop competing with the contents. Half the density, twice the legibility, no new navigation model.</div>
+  <div class="pane">
+    <div class="rc-grid">
+      <div class="rcard">
+        <div class="rc-h"><h3>Comp-led · v1</h3><div class="acts"><span>✎</span><span>⧉</span><span>ATTACH →</span></div></div>
+        <div class="rc-b">
+          <div class="rcml"><span class="gch l"><svg class="tg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M8.5 9a3.5 3.5 0 116 2.4c-1 .9-2.5 1.5-2.5 3.1"/><circle cx="12" cy="19" r="0.6" fill="currentColor"/></svg></span><div><div class="ti">Comp-led rework</div><div class="fn">MDO_Query_v2.docx</div></div></div>
+          <div class="rcml"><span class="gch s"><svg class="tg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg></span><div><div class="ti">One-page synopsis</div><div class="fn">MDO_Synopsis.docx</div></div></div>
+          <div class="rcml none"><span class="gch"><svg class="tg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M8 6h9a1 1 0 011 1v13a1 1 0 01-1 1H8a1 1 0 01-1-1V7a1 1 0 011-1z"/><path d="M6 17V4a1 1 0 011-1h8"/></svg></span>No sample pages</div>
+        </div>
+        <div class="rc-f"><span class="st">SENT WITH 3 QUERIES · <b>1 FULL REQUEST</b></span></div>
+      </div>
+      <div class="rcard">
+        <div class="rc-h"><h3>Hartley bespoke</h3><div class="acts"><span>✎</span><span>⧉</span><span>ATTACH →</span></div></div>
+        <div class="rc-b">
+          <div class="rcml"><span class="gch l"><svg class="tg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M8.5 9a3.5 3.5 0 116 2.4c-1 .9-2.5 1.5-2.5 3.1"/><circle cx="12" cy="19" r="0.6" fill="currentColor"/></svg></span><div><div class="ti">Comp-led rework</div><div class="fn">MDO_Query_v2.docx</div></div></div>
+          <div class="rcml"><span class="gch s"><svg class="tg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg></span><div><div class="ti">One-page synopsis</div><div class="fn">MDO_Synopsis.docx</div></div></div>
+          <div class="rcml"><span class="gch p"><svg class="tg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M8 6h9a1 1 0 011 1v13a1 1 0 01-1 1H8a1 1 0 01-1-1V7a1 1 0 011-1z"/><path d="M6 17V4a1 1 0 011-1h8"/></svg></span><div><div class="ti">Chapters 1–3</div><div class="fn">MDO_Pages_1-3.docx</div></div></div>
+        </div>
+        <div class="rc-f"><span class="st">SENT WITH 1 QUERY · AWAITING REPLY</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 3 ============ -->
+<div class="opt">
+  <div class="opt-name">3 · The ledger</div>
+  <div class="opt-desc">Packages as full-width rows in one bordered register: name, then the contents as bordered chips (dashed = empty slot), stats right-aligned. Extremely scannable for comparing what differs between packages — the chips line up vertically — and the most compact. Weakest at showing filenames (they'd live in a hover or the row's expanded state).</div>
+  <div class="pane">
+    <div class="ledger">
+      <div class="ldrow">
+        <span class="nm">Comp-led · v1</span>
+        <span class="chips">
+          <span class="ldchip">? Comp-led rework</span>
+          <span class="ldchip">≡ One-page synopsis</span>
+          <span class="ldchip off">▤ no pages</span>
+        </span>
+        <span class="st">3 SENT · <b>1 FULL REQUEST</b></span>
+      </div>
+      <div class="ldrow">
+        <span class="nm">Hartley bespoke</span>
+        <span class="chips">
+          <span class="ldchip">? Comp-led rework</span>
+          <span class="ldchip">≡ One-page synopsis</span>
+          <span class="ldchip">▤ Chapters 1–3</span>
+        </span>
+        <span class="st">1 SENT · AWAITING REPLY</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ COMPOSER V2 ============ -->
+<div class="opt" style="margin-top:64px;">
+  <div class="opt-name">Composer v2 — bigger, with the copy drawer</div>
+  <div class="opt-desc">The fork strip is gone. In its place: a muted "⧉ Copy existing" control in the band's top right, which slides open a right-hand drawer of your packages — each a mini card with contents and a soft-pink "⧉ Copy into composer" — closing on choice or ✕. Everything is scaled up: 23px name input, 72px manifest rows with 16.5px titles, 17px picker header, 16px picker cards, roomier padding throughout. The drawer is open in this sketch; click ✕ / ⧉ Copy existing to toggle it.</div>
+  <div class="pane" style="padding:0;border:0;background:transparent;">
+    <div class="c2">
+      <div class="c2-band">
+        <span class="bic"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 2l8.66 5v10L12 22l-8.66-5V7z"/><path d="M12 22V12M3.34 7L12 12l8.66-5"/></svg></span>
+        <div class="hname"><input placeholder="Name this package…"></div>
+        <button class="copybtn" onclick="document.getElementById('dw').style.display='flex'">⧉ Copy existing</button>
+      </div>
+      <div class="c2-body">
+        <div class="mani">
+          <div class="brow filled">
+            <div><div class="bti">Comp-led rework</div><div class="bmeta">MDO_Query_v2.docx</div></div>
+            <div class="bact"><span>⇄ SWAP</span><span>✕</span></div>
+          </div>
+          <div class="brow empty">
+            <div class="bhd hs"><svg class="tg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Synopsis</div>
+            <div class="bbd">Choose from your materials →</div>
+          </div>
+          <div class="brow empty">
+            <div class="bhd hp"><svg class="tg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M8 6h9a1 1 0 011 1v13a1 1 0 01-1 1H8a1 1 0 01-1-1V7a1 1 0 011-1z"/><path d="M6 17V4a1 1 0 011-1h8"/></svg>Sample pages</div>
+            <div class="bbd">Choose from your materials →</div>
+          </div>
+        </div>
+        <div class="pick">
+          <div class="pick-h"><svg class="tg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M8.5 9a3.5 3.5 0 116 2.4c-1 .9-2.5 1.5-2.5 3.1"/><circle cx="12" cy="19" r="0.6" fill="currentColor"/></svg>Choose a query letter <span class="cnt">1 SAVED</span></div>
+          <div class="pick-b">
+            <div class="bigcard">
+              <div class="nm">Comp-led rework</div>
+              <div class="fm">MDO_Query_v2.docx · IN 2 PACKAGES</div>
+              <div class="sn">Dear Ms Hartley, THE LIGHTHOUSE AT WICK POINT is an 82,000-word literary mystery in the vein of The Lamplighters…</div>
+              <div class="use">✓ IN THIS PACKAGE</div>
+            </div>
+          </div>
+          <div class="pick-f">Not listed? <a>Add a new query letter</a></div>
+        </div>
+      </div>
+      <div class="c2-foot">
+        <button class="save">Save package</button>
+        <button class="cancel">Cancel</button>
+      </div>
+
+      <div class="drawer" id="dw">
+        <div class="drawer-h"><h4>Copy an existing package</h4><span class="x" onclick="document.getElementById('dw').style.display='none'">✕</span></div>
+        <div class="drawer-b">
+          <div class="drawer-note">Copies the contents into your new package — the original is untouched.</div>
+          <div class="dpk">
+            <div class="dpk-h"><span class="nm">Comp-led · v1</span></div>
+            <div class="dpk-b">
+              <div class="ln"><span class="dd" style="background:var(--burg)"></span>Comp-led rework</div>
+              <div class="ln"><span class="dd" style="background:var(--sage-d)"></span>One-page synopsis</div>
+              <button class="cta">⧉ Copy into composer</button>
+            </div>
+          </div>
+          <div class="dpk">
+            <div class="dpk-h"><span class="nm">Hartley bespoke</span></div>
+            <div class="dpk-b">
+              <div class="ln"><span class="dd" style="background:var(--burg)"></span>Comp-led rework</div>
+              <div class="ln"><span class="dd" style="background:var(--sage-d)"></span>One-page synopsis</div>
+              <div class="ln"><span class="dd" style="background:var(--gold)"></span>Chapters 1–3</div>
+              <button class="cta">⧉ Copy into composer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function setT(cls,btn){
+  document.getElementById('body').className=cls;
+  document.querySelectorAll('.switcher button').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+</script>
+</body>
+</html>
