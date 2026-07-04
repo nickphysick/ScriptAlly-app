@@ -16,12 +16,15 @@
  *  4 Responses      — the slider at the response rate. Hover the track → "9 OF 10 … · 90%".
  * Every hover point is a StatTooltip (focusable, aria-labelled). Minis have no charts/hovers.
  */
-import React, { useMemo } from "react";
+import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Agent, Query, QueryStatus } from "../../types";
 import {
   activeQueriesOf,
   activeTooltip,
   activeWeeklySeries,
+  AGENT_GRID_MAX_PER_ROW,
+  AGENT_GRID_GAP,
+  agentGridLayout,
   agentStatusSummaries,
   agentTooltip,
   AgentStatusSummary,
@@ -127,23 +130,61 @@ const PersonGlyph: React.FC<{ size: number }> = ({ size }) => (
   </svg>
 );
 
-const AgentPeopleRow: React.FC<{ summaries: AgentStatusSummary[]; glyphSize: number }> = ({ summaries, glyphSize }) => {
-  const shown = summaries.slice(0, 10);
-  const overflow = summaries.length - shown.length;
+/**
+ * Every agent, as a self-sizing icon grid (owner-locked rules): centred both axes in the
+ * available box, icons as large as the box height allows WITHOUT growing it, max 8 per row,
+ * shrinking as the roster grows so no agent is ever cut off. The box is measured with a
+ * ResizeObserver; the sizing itself is the pure agentGridLayout selector (unit-tested).
+ */
+const AgentIconGrid: React.FC<{ summaries: AgentStatusSummary[] }> = ({ summaries }) => {
+  const boxRef = useRef<HTMLDivElement>(null);
+  const [box, setBox] = useState({ w: 0, h: 0 });
+
+  useLayoutEffect(() => {
+    const el = boxRef.current;
+    if (!el) return;
+    const measure = () => setBox({ w: el.clientWidth, h: el.clientHeight });
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    // Belt-and-braces: RO callbacks ride the frame lifecycle, which occluded/never-painting
+    // windows may starve — a plain resize listener keeps the grid honest there too.
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, []);
+
+  const { size, shown, overflow } = agentGridLayout(summaries.length, box.w, box.h);
+  // Glyphs plus, in overflow mode, the "+N" chip occupying the final slot.
+  const cells: React.ReactNode[] = summaries.slice(0, shown).map((s) => (
+    <StatTooltip key={s.id} label={agentTooltip(s.name, s.status)}>
+      <span className={`sa-person${s.status ? " on" : ""}`}>
+        <PersonGlyph size={size} />
+      </span>
+    </StatTooltip>
+  ));
+  if (overflow > 0) {
+    cells.push(
+      <StatTooltip key="overflow" label={overflowTooltip(overflow)}>
+        <span className="sa-agrid-more" style={{ height: size, minWidth: size }}>+{overflow}</span>
+      </StatTooltip>,
+    );
+  }
+  const rows: React.ReactNode[][] = [];
+  for (let i = 0; i < cells.length; i += AGENT_GRID_MAX_PER_ROW) {
+    rows.push(cells.slice(i, i + AGENT_GRID_MAX_PER_ROW));
+  }
+
   return (
-    <div className="sa-people">
-      {shown.map((s) => (
-        <StatTooltip key={s.id} label={agentTooltip(s.name, s.status)}>
-          <span className={`sa-person${s.status ? " on" : ""}`}>
-            <PersonGlyph size={glyphSize} />
-          </span>
-        </StatTooltip>
-      ))}
-      {overflow > 0 && (
-        <StatTooltip label={overflowTooltip(overflow)}>
-          <span className="sa-more">+{overflow}</span>
-        </StatTooltip>
-      )}
+    <div ref={boxRef} className="sa-agrid">
+      {size > 0 &&
+        rows.map((row, ri) => (
+          <div key={ri} className="sa-agrid-row" style={{ gap: AGENT_GRID_GAP }}>
+            {row}
+          </div>
+        ))}
     </div>
   );
 };
@@ -168,6 +209,9 @@ export interface StatDef {
   sub: string;
   /** Scale-aware visual — the row renders visual(26), the focused panel visual(42). */
   visual: (chartH: number) => React.ReactNode;
+  /** The visual fills (and measures) the remaining card height instead of sitting at the foot —
+   *  used by the self-sizing agent grid. */
+  fillFoot?: boolean;
 }
 
 export const useStatDefs = (queries: Query[], agents: Agent[]): StatDef[] =>
@@ -208,7 +252,9 @@ export const useStatDefs = (queries: Query[], agents: Agent[]): StatDef[] =>
         num: shownAgents,
         pill: `${idle} idle`,
         sub: `${idle} idle`,
-        visual: (h) => <AgentPeopleRow summaries={summaries} glyphSize={Math.round(h * 0.55)} />,
+        // Self-sizing — the grid measures its own box; the chart-height arg is unused.
+        visual: () => <AgentIconGrid summaries={summaries} />,
+        fillFoot: true,
       },
       {
         key: "responses",
@@ -230,7 +276,7 @@ export const StatCardFull: React.FC<{ def: StatDef; onPin: () => void }> = ({ de
   >
     <div className="sa-cap">{ICONS[def.key]}{def.label}</div>
     <div className="sa-numrow"><span className="sa-num">{def.num}</span><span className="sa-pill">{def.pill}</span></div>
-    <div className="sa-foot">{def.visual(26)}</div>
+    <div className={`sa-foot${def.fillFoot ? " sa-foot-fill" : ""}`}>{def.visual(26)}</div>
   </div>
 );
 
@@ -249,7 +295,7 @@ export const StatFocusPanel = React.forwardRef<HTMLDivElement, { def: StatDef; o
       <div className="sa-cap">{ICONS[def.key]}{def.label}</div>
       <div className="sa-bign">{def.num}</div>
       {def.sub && <div className="sa-sub">{def.sub}</div>}
-      <div className="sa-ffoot">{def.visual(42)}</div>
+      <div className={`sa-ffoot${def.fillFoot ? " sa-foot-fill" : ""}`}>{def.visual(42)}</div>
     </div>
   ),
 );

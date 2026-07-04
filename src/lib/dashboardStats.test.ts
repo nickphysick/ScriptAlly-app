@@ -13,6 +13,8 @@ import {
   activeQueriesOf,
   activeTooltip,
   activeWeeklySeries,
+  AGENT_GRID_MIN_SIZE,
+  agentGridLayout,
   agentStatusSummaries,
   agentTooltip,
   awaitingReplyCount,
@@ -210,6 +212,58 @@ describe("agentStatusSummaries", () => {
     const s = agentStatusSummaries(agents, queries);
     expect(s.some((x) => x.id === "a3")).toBe(false);
     expect(s).toHaveLength(2);
+  });
+});
+
+describe("agentGridLayout (owner-locked grid rules + overflow mode)", () => {
+  it("caps rows at 8 icons and wraps", () => {
+    expect(agentGridLayout(3, 260, 60)).toMatchObject({ cols: 3, rows: 1, shown: 3, overflow: 0 });
+    expect(agentGridLayout(8, 260, 60)).toMatchObject({ cols: 8, rows: 1, shown: 8 });
+    expect(agentGridLayout(9, 260, 60)).toMatchObject({ cols: 8, rows: 2, shown: 9 });
+    expect(agentGridLayout(17, 260, 60)).toMatchObject({ cols: 8, rows: 3, shown: 17 });
+  });
+  it("sizes icons as large as the box height allows without growing it", () => {
+    const one = agentGridLayout(2, 260, 60);
+    expect(one.size).toBe(60); // height-bound: a single row uses the full height
+    const two = agentGridLayout(9, 260, 60);
+    // two rows + one 5px gap must fit: 2*size + 5 ≤ 60
+    expect(two.size * 2 + 5).toBeLessThanOrEqual(60);
+    expect(two.size).toBe(27);
+  });
+  it("keeps shrinking as volume grows, down to the legibility floor", () => {
+    const sizes = [4, 12, 17].map((n) => agentGridLayout(n, 260, 60).size);
+    for (let i = 1; i < sizes.length; i++) expect(sizes[i]).toBeLessThanOrEqual(sizes[i - 1]);
+    expect(sizes[2]).toBeGreaterThanOrEqual(AGENT_GRID_MIN_SIZE);
+  });
+  it("overflow mode: caps capacity at the floor and hands the rest to the +N chip — the box NEVER grows", () => {
+    // 60px box at floor 14 + gap 5 → maxRows = floor(65/19) = 3 → 23 glyphs + chip
+    const l = agentGridLayout(80, 260, 60);
+    expect(l.rows).toBe(3);
+    expect(l.shown).toBe(23);
+    expect(l.overflow).toBe(57);
+    expect(l.size).toBeGreaterThanOrEqual(AGENT_GRID_MIN_SIZE);
+    // the never-grows invariant: rendered rows always fit the box
+    expect(l.rows * l.size + (l.rows - 1) * 5).toBeLessThanOrEqual(60);
+  });
+  it("overflow mode holds the invariant across a sweep of counts and boxes", () => {
+    for (const n of [9, 24, 57, 113, 200]) {
+      for (const [w, h] of [[260, 60], [254, 79], [150, 40], [334, 159]]) {
+        const l = agentGridLayout(n, w, h);
+        expect(l.rows * l.size + (l.rows - 1) * 5).toBeLessThanOrEqual(h);
+        expect(l.shown + Math.min(1, l.overflow) <= l.rows * 8).toBe(true);
+        if (l.overflow > 0) expect(l.shown + l.overflow).toBe(n);
+      }
+    }
+  });
+  it("width-bound boxes still respect the floor via overflow mode", () => {
+    const l = agentGridLayout(8, 100, 60); // raw fit (100-35)/8 = 8 < floor → overflow mode
+    expect(l.size).toBeGreaterThanOrEqual(AGENT_GRID_MIN_SIZE);
+    expect(l.shown).toBeLessThan(8);
+    expect(l.overflow).toBe(8 - l.shown);
+  });
+  it("handles empty/degenerate boxes without NaN", () => {
+    expect(agentGridLayout(0, 260, 60)).toEqual({ cols: 0, rows: 0, size: 0, shown: 0, overflow: 0 });
+    expect(agentGridLayout(5, 0, 0)).toEqual({ cols: 0, rows: 0, size: 0, shown: 0, overflow: 0 });
   });
 });
 

@@ -188,6 +188,56 @@ export const agentStatusSummaries = (agents: Agent[], queries: Query[]): AgentSt
   return [...buckets.queried, ...buckets.idle].map(summarise);
 };
 
+/* ── agent icon grid (pure sizing — the Agents card renders every agent it can) ──
+   Rules (owner-locked): max 8 icons per row before wrapping; icons centred both axes in the
+   available box; sized as large as the box height allows WITHOUT growing the container; as
+   volume grows the size shrinks — and once the roster cannot fit at the legibility floor, the
+   grid caps at its capacity and the final slot becomes a "+N" overflow chip, so the container
+   still never grows and nothing is ever silently cut off (adversarial-review fix, 4 Jul). */
+export interface AgentGridLayout {
+  cols: number;
+  rows: number;
+  /** Icon edge in px (square glyph). */
+  size: number;
+  /** How many agent glyphs to render (== count unless overflowing). */
+  shown: number;
+  /** Agents beyond capacity, represented by the "+N" chip (0 = no chip). */
+  overflow: number;
+}
+
+export const AGENT_GRID_MAX_PER_ROW = 8;
+export const AGENT_GRID_GAP = 5;
+/** The legibility floor — small enough to pack, big enough to read, hover and focus, and tall
+ *  enough that the +N chip fits an icon row without growing it. */
+export const AGENT_GRID_MIN_SIZE = 14;
+
+const EMPTY_GRID: AgentGridLayout = { cols: 0, rows: 0, size: 0, shown: 0, overflow: 0 };
+
+export const agentGridLayout = (count: number, boxW: number, boxH: number, gap = AGENT_GRID_GAP): AgentGridLayout => {
+  if (count <= 0 || boxW <= 0 || boxH <= 0) return EMPTY_GRID;
+  const cols = Math.min(AGENT_GRID_MAX_PER_ROW, count);
+  const rows = Math.ceil(count / AGENT_GRID_MAX_PER_ROW);
+  const fit = (r: number, c: number) =>
+    Math.min(
+      Math.floor((boxH - (r - 1) * gap) / r),
+      Math.floor((boxW - (c - 1) * gap) / c),
+    );
+  const size = fit(rows, cols);
+  if (size >= AGENT_GRID_MIN_SIZE) return { cols, rows, size, shown: count, overflow: 0 };
+
+  // Overflow mode: cap the rows to what the box fits at the floor; the last slot is the chip.
+  const maxRows = Math.max(1, Math.floor((boxH + gap) / (AGENT_GRID_MIN_SIZE + gap)));
+  const cappedRows = Math.min(rows, maxRows);
+  const shown = Math.max(0, cappedRows * AGENT_GRID_MAX_PER_ROW - 1);
+  return {
+    cols: Math.min(AGENT_GRID_MAX_PER_ROW, shown + 1),
+    rows: cappedRows,
+    size: Math.max(AGENT_GRID_MIN_SIZE, fit(cappedRows, AGENT_GRID_MAX_PER_ROW)),
+    shown,
+    overflow: count - shown,
+  };
+};
+
 /* ── tooltip label builders (pure — one formatting source for every stat hover) ── */
 
 /** "W/C 23 JUN" — week-commencing label, en-GB, uppercase, no year. */

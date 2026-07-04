@@ -180,8 +180,9 @@
 }
 .sa-dash.split-open .sa-stats { max-height: 0; opacity: 0; margin-bottom: -20px; transition: max-height 360ms cubic-bezier(.22,.8,.3,1), opacity 200ms ease, margin-bottom 360ms cubic-bezier(.22,.8,.3,1); }
 .sa-stat {
-  /* clip (not hidden) + clip-margin so StatTooltips above the chart are never cut */
-  position: relative; overflow: clip; overflow-clip-margin: 44px; padding: 18px 20px 16px; min-height: 158px;
+  /* clip (not hidden) + clip-margin so StatTooltips above the chart are never cut.
+     min-height 190 = the original 158 + 20% (owner request, 4 Jul). */
+  position: relative; overflow: clip; overflow-clip-margin: 44px; padding: 18px 20px 16px; min-height: 190px;
   display: flex; flex-direction: column; text-align: left;
   background: var(--card, #fffefb);
   border: var(--bdw, 1px) solid var(--bd, #e7ddd2);
@@ -205,6 +206,9 @@
 .t-bold .sa-stat .sa-pill { background: #fff; border: 1px solid #1d1712; color: #1d1712; }
 .t-edn .sa-stat .sa-pill { background: transparent; border: 1px solid #e3e2e0; color: #6b6b6b; }
 .sa-stat .sa-foot { margin-top: auto; padding-top: 14px; }
+/* the agents card's visual fills the remaining height (the grid measures this box) */
+.sa-foot-fill { flex: 1; min-height: 0; display: flex; margin-top: 0; }
+.sa-foot-fill > * { flex: 1; min-width: 0; }
 
 /* stat visuals (prod-pattern rework). Muted tint per theme: #d9cbb8 capp/bold, #e3e2e0 edn. */
 .t-capp, .t-bold { --stat-muted: #d9cbb8; }
@@ -222,12 +226,17 @@
 .sa-spark .sa-spark-slots > .sa-tipwrap { flex: 1; height: 100%; }
 .sa-segbar { display: flex; height: 8px; border-radius: 6px; overflow: hidden; background: #efe9e1; }
 .sa-segbar i { display: block; }
-.sa-people { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+/* agent icon grid — rows of ≤8, centred both axes; icon size + overflow chip computed by
+   agentGridLayout. clip (NOT hidden) + clip-margin so the StatTooltips above the glyphs are
+   never cut (hidden ignores clip-margin — adversarial-review blocker fix, 4 Jul). */
+.sa-agrid { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; min-height: 0; overflow: clip; overflow-clip-margin: 44px; }
+.sa-agrid-row { display: flex; justify-content: center; align-items: center; }
 .sa-person { display: flex; color: var(--stat-muted, #d9cbb8); }
 .sa-person.on { color: var(--sd-hue, #7c3a2a); }
-.sa-people .sa-more {
-  font-family: var(--font-mono); font-size: 9px; color: #8a7a6c; margin-left: 4px;
-  border: 1px solid var(--bd, #e7ddd2); border-radius: 99px; padding: 1px 7px; background: transparent;
+.sa-agrid-more {
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: 9px; color: #8a7a6c;
+  border: 1px solid var(--bd, #e7ddd2); border-radius: 99px; padding: 0 6px;
 }
 .sa-slider { position: relative; height: 6px; border-radius: 6px; background: #ece2d6; width: 100%; }
 .t-edn .sa-slider { background: #e3e2e0; }
