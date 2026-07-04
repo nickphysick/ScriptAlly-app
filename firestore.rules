@@ -82,7 +82,10 @@ service cloud.firestore {
         && data.ageCategory is string && data.ageCategory.size() <= 128
         && data.wordCount is int && data.wordCount >= 0
         && data.logline is string && data.logline.size() <= 2048
-        && data.comparableTitles is string && data.comparableTitles.size() <= 1024
+        // Structured comps — a list of maps {title, author?, year?, note?, source?}. Per-item
+        // shape is client-enforced (rules can't iterate a list); optional-when-present so docs
+        // written before the hard cut stay updatable. Capped at 12 entries.
+        && (!data.keys().hasAll(['comps']) || (data.comps is list && data.comps.size() <= 12))
         && data.status is string && (
           data.status == 'Drafting' ||
           data.status == 'Revising' ||
@@ -383,7 +386,7 @@ service cloud.firestore {
         allow create: if isOwner(userId) && isValidId(manuscriptId) && isValidManuscript(incoming(), userId);
         allow update: if isOwner(userId) && isValidId(manuscriptId) && isValidManuscript(incoming(), userId) && (
           incoming().diff(existing()).affectedKeys().hasOnly([
-            'title', 'genre', 'subGenres', 'ageCategory', 'wordCount', 'logline', 'comparableTitles', 'status', 'shelvedReason', 'statusChangedDate', 'notes', 'shelved', 'activePackageId'
+            'title', 'genre', 'subGenres', 'ageCategory', 'wordCount', 'logline', 'comps', 'status', 'shelvedReason', 'statusChangedDate', 'notes', 'shelved', 'activePackageId'
           ])
         );
 

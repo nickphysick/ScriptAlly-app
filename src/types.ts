@@ -56,6 +56,19 @@ export enum ManuscriptStatus {
   ON_SUBMISSION = "On Submission",
 }
 
+/**
+ * One comparable title on a manuscript's comp shelf. `source` records how it arrived —
+ * 'user' (typed, imported or added by hand) or 'suggested' (accepted from Suggestions).
+ * Presentation facts (the pitch line, the "older comp" chip) are derived at render — never stored.
+ */
+export interface CompTitle {
+  title: string;
+  author?: string;
+  year?: number;
+  note?: string;
+  source?: "user" | "suggested";
+}
+
 export interface Manuscript {
   id: string;
   userId: string;
@@ -65,7 +78,10 @@ export interface Manuscript {
   ageCategory: string;
   wordCount: number;
   logline: string;
-  comparableTitles: string;
+  // Structured comps — the comp shelf is the single editing home. Stray dev docs may still carry
+  // the legacy string `comparableTitles`; read through manuscriptComps() (src/lib/comps.ts), which
+  // parses it at read time. The legacy field is never written back.
+  comps: CompTitle[];
   status: ManuscriptStatus;
   shelvedReason?: string;
   statusChangedDate: string; // ISO String

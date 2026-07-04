@@ -30,7 +30,10 @@ export const seedManuscripts: Manuscript[] = [
     ageCategory: "Young Adult",
     wordCount: 92400,
     logline: "In an alternate 1880 London, a clockmaker's apprentice discovers that her mechanical pocket watch holds the memories of the city's lost library.",
-    comparableTitles: "The Starless Sea meets Jonathan Strange & Mr Norrell",
+    comps: [
+      { title: "The Starless Sea", source: "user" },
+      { title: "Jonathan Strange & Mr Norrell", source: "user" },
+    ],
     status: ManuscriptStatus.QUERYING,
     statusChangedDate: "2026-04-10T14:30:00Z",
   }

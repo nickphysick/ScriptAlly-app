@@ -297,7 +297,6 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ searchQuery, onN
         ageCategory: editingMs.ageCategory,
         wordCount: editingMs.wordCount,
         logline: editingMs.logline,
-        comparableTitles: editingMs.comparableTitles,
         status: editingMs.status,
         shelvedReason: editingMs.shelvedReason || "",
         notes: editingMs.notes || ""
@@ -636,11 +635,6 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ searchQuery, onN
                 <p className="text-[12px] text-stone-500 font-medium mt-1">
                   {manuscriptGenres(activeMs).join(", ")} &middot; <span className="font-mono font-bold">{activeMs.wordCount?.toLocaleString() || 0}</span> Words in profile
                 </p>
-                {activeMs.comparableTitles && (
-                  <p className="text-[11px] text-[#7c3a2a] mt-1.5 font-medium italic">
-                    Comps: {activeMs.comparableTitles}
-                  </p>
-                )}
               </div>
 
               {/* Status and dates panel */}
@@ -936,16 +930,6 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ searchQuery, onN
                       <option value={ManuscriptStatus.ON_SUBMISSION}>On Submission</option>
                       <option value={ManuscriptStatus.SHELVED}>Shelved</option>
                     </select>
-                  </div>
-                  <div>
-                    <label className="block text-[10px] uppercase font-bold tracking-wider text-stone-500 mb-1">Comparable Titles</label>
-                    <input
-                      type="text"
-                      value={editingMs.comparableTitles || ""}
-                      onChange={(e) => setEditingMs({ ...editingMs, comparableTitles: e.target.value })}
-                      placeholder="e.g. TITLE meets TITLE"
-                      className="w-full text-xs p-2 bg-white rounded border border-[#e8d5cc] outline-none focus:ring-1 focus:ring-[#7c3a2a]"
-                    />
                   </div>
                 </div>
 

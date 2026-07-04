@@ -18,6 +18,7 @@
  * matched MSWL tokens, so callers can highlight them. `scoreCommunityAgent` adds the total.
  */
 import { CommunityAgent, Manuscript } from "../types";
+import { compsSearchText } from "./comps";
 
 /** The minimum total score (out of 75) for an agent to be surfaced as a suggestion. */
 export const MATCH_THRESHOLD = 42;
@@ -41,11 +42,10 @@ export const calculateCommunityAgentMatch = (commAgent: CommunityAgent, ms: Manu
     'drawn', 'particularly', 'interested'
   ]);
 
-  const msLogline = ms.logline;
-  const msComparable = ms.comparableTitles;
-
-  const loglineVal = msLogline ? msLogline.trim() : "";
-  const comparableVal = msComparable ? msComparable.trim() : "";
+  // Comps contribute their titles to the keyword surface (matching on titles — the structured
+  // authors/years/notes stay out of MSWL matching).
+  const loglineVal = (ms.logline || "").trim();
+  const comparableVal = compsSearchText(ms).trim();
 
   let overlapping: string[] = [];
 

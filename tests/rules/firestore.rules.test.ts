@@ -106,7 +106,7 @@ const validManuscript = (uid = ALICE) => ({
   ageCategory: 'Adult',
   wordCount: 90000,
   logline: 'A story.',
-  comparableTitles: '',
+  comps: [],
   status: 'Querying',
   statusChangedDate: '2026-01-01T00:00:00.000Z',
 });

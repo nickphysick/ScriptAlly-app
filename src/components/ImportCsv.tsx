@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useScriptAllyDb } from "../lib/db";
+import { parseLegacyComps } from "../lib/comps";
 import {
   UserPlan,
   QueryStatus,
@@ -92,7 +93,7 @@ function findFuzzyMatch(headers: string[], targetFields: string[]): Record<strin
     genre: ["genre", "category", "manuscript genre", "book genre"],
     wordCount: ["word count", "words", "wordcount", "length", "size"],
     logline: ["logline", "hook", "pitch", "one line", "elevator pitch", "summary"],
-    comparableTitles: ["comps", "comparable titles", "comparables", "similar books"],
+    comps: ["comps", "comparable titles", "comparables", "similar books"],
     ageCategory: ["age category", "audience", "target audience", "age", "category classification"],
     
     manuscriptId: ["manuscript", "manuscript title", "book", "story", "work to query", "related title"],
@@ -212,7 +213,7 @@ export const ImportCsv: React.FC<{
 
   const targetFields = {
     agents: ["name", "agency", "email", "website", "genres", "mswlNotes", "starRating", "notes"],
-    manuscripts: ["title", "genre", "wordCount", "logline", "comparableTitles", "ageCategory"],
+    manuscripts: ["title", "genre", "wordCount", "logline", "comps", "ageCategory"],
     queries: ["manuscriptId", "agentId", "status", "dateSent", "personalisationNotes"],
     activities: ["queryId", "manuscriptId", "activityType", "description", "date", "details"],
     user: ["name", "email", "plan", "trialStartDate", "subscriptionStatus"]
@@ -410,7 +411,8 @@ export const ImportCsv: React.FC<{
           const genre = getMappedValue("genre") || "Fiction";
           const wordCount = parseInt(getMappedValue("wordCount"), 10) || 85000;
           const logline = getMappedValue("logline") || "A compelling new manuscript.";
-          const comparableTitles = getMappedValue("comparableTitles") || "";
+          // Comps column → structured titles-only comps (split on commas / " meets ").
+          const comps = parseLegacyComps(getMappedValue("comps"));
           const ageCategory = getMappedValue("ageCategory") || "Adult";
 
           const msData = {
@@ -419,7 +421,7 @@ export const ImportCsv: React.FC<{
             subGenres: [],
             wordCount,
             logline,
-            comparableTitles,
+            comps,
             ageCategory,
             status: ManuscriptStatus.READY_TO_QUERY
           };
@@ -469,7 +471,7 @@ export const ImportCsv: React.FC<{
               subGenres: [],
               wordCount: 80000,
               logline: "Imported automatically to preserve Query relationships.",
-              comparableTitles: "",
+              comps: [],
               ageCategory: "General Adult",
               status: ManuscriptStatus.QUERYING
             };

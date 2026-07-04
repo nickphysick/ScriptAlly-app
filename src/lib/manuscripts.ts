@@ -7,7 +7,7 @@
  * primary+sub genre accessor, and one payload/limit-check helper so onboarding and
  * AddManuscriptFocusForm never diverge into two manuscript writers.
  */
-import { Manuscript, ManuscriptStatus, UserPlan } from "../types";
+import { CompTitle, Manuscript, ManuscriptStatus, UserPlan } from "../types";
 
 export const PREDEFINED_GENRES = [
   "Literary Fiction",
@@ -127,7 +127,7 @@ export interface ManuscriptDraft {
   ageCategory: string;
   wordCount?: number;
   logline?: string;
-  comparableTitles?: string;
+  comps?: CompTitle[];
   notes?: string;
   status: ManuscriptStatus;
   shelvedReason?: string;
@@ -148,7 +148,7 @@ export function buildManuscriptPayload(
     ageCategory: d.ageCategory,
     wordCount: d.wordCount ?? 0,
     logline: (d.logline || "").trim(),
-    comparableTitles: (d.comparableTitles || "").trim(),
+    comps: d.comps ?? [],
     status: d.status,
     notes: (d.notes || "").trim(),
     ...(d.status === ManuscriptStatus.SHELVED && d.shelvedReason

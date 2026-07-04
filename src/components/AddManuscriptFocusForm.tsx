@@ -314,7 +314,7 @@ export const AddManuscriptFocusForm: React.FC<AddManuscriptFocusFormProps> = ({
         ageCategory,
         wordCount,
         logline: logline.trim(),
-        comparableTitles: comparableTitlesList.join(", "),
+        comps: comparableTitlesList.map((t) => ({ title: t, source: "user" as const })),
         notes: synopsis.trim(), // Stored in notes field on DB per instructions
         status: msStatus,
         ...(msStatus === ManuscriptStatus.SHELVED ? { shelvedReason: shelvedReason.trim() } : {})

@@ -35,7 +35,7 @@ const ms = (over: Partial<Manuscript>): Manuscript =>
     ageCategory: "Adult",
     wordCount: 90000,
     logline: "",
-    comparableTitles: "",
+    comps: [],
     status: ManuscriptStatus.QUERYING,
     statusChangedDate: "2026-01-01",
     ...over,
