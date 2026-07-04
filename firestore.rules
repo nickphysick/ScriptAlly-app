@@ -170,7 +170,8 @@ service cloud.firestore {
         && (!data.keys().hasAll(['requeryPreference']) || (data.requeryPreference is string && (data.requeryPreference == 'yes' || data.requeryPreference == 'maybe' || data.requeryPreference == 'no')))
         && (!data.keys().hasAll(['socials']) || (data.socials is list && data.socials.size() <= 30))
         && (!data.keys().hasAll(['importedNeedsReview']) || data.importedNeedsReview is bool)
-        && (!data.keys().hasAll(['setAside']) || data.setAside is bool);
+        && (!data.keys().hasAll(['setAside']) || data.setAside is bool)
+        && (!data.keys().hasAll(['pinned']) || data.pinned is bool);
     }
 
     function isValidCommunityAgent(data) {
@@ -422,7 +423,7 @@ service cloud.firestore {
           incoming().diff(existing()).affectedKeys().hasOnly([
             'name', 'agency', 'email', 'website', 'country', 'city', 'twitter', 'bluesky', 'instagram', 'socials', 'genres', 'mswlNotes',
             'starRating', 'submissionStatus', 'responseTimeWeeks', 'noResponseMeansNo', 'submissionMethod',
-            'materialsWanted', 'lastCheckedDate', 'notes', 'agentNotes', 'requeryPreference', 'importedNeedsReview', 'setAside'
+            'materialsWanted', 'lastCheckedDate', 'notes', 'agentNotes', 'requeryPreference', 'importedNeedsReview', 'setAside', 'pinned'
           ])
         );
 

@@ -176,6 +176,9 @@ export interface Agent {
   // a set-aside agent is one YOU'RE not pursuing — dropped from "who to query next" and the idle
   // bucket/Agents stat card, but all queries + history kept. Reversible (Bring back). Absent === active.
   setAside?: boolean;
+  // Pinned to the top of the agents list (a "Pinned" group above every sort). Pure list ordering —
+  // no effect on suggestions, stats or Up next. Absent === not pinned (never null).
+  pinned?: boolean;
 }
 
 export interface CommunityAgent {
