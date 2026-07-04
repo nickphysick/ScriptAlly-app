@@ -544,7 +544,7 @@ function AppContent() {
           {agentsDiscover ? (
             <DiscoverNewAgents onNavigate={handleNavigate} />
           ) : (
-            <Agents searchQuery={searchQuery} onNavigate={handleNavigate} />
+            <Agents searchQuery={searchQuery} onNavigate={handleNavigate} active={routeKey === "agents" && !agentsDiscover} />
           )}
         </StagePage>
 

@@ -173,11 +173,11 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
   const { activeTasksCount, badgeText } = useTaskAlerts();
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // The dashboard hosts the canonical search in its top bar, so the rail search hides there
+  // The dashboard and the Agents page each host their own top-bar search (DashTopBar / the
+  // Agents pill, both gated on route visibility), so the rail search hides on those routes
   // (the nav list simply starts higher). ⌘K/Ctrl+K focuses the RAIL search on every other
-  // route; the dashboard's own binding (DashTopBar, gated on route visibility) is the only
-  // one live on /dashboard — never both.
-  const railSearchShown = activeTab !== "dashboard";
+  // route — exactly one ⌘K registration is live at a time, never both.
+  const railSearchShown = activeTab !== "dashboard" && activeTab !== "agents";
   useEffect(() => {
     if (!railSearchShown) return;
     const onKey = (e: KeyboardEvent) => {
