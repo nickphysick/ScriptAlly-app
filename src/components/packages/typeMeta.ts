@@ -7,7 +7,8 @@
  * model but has no shelf, slot or modal in this feature. Colours are theme tokens (index.css): the
  * `tint` is the type's tinted-band background, `ink` its stroke/label colour.
  */
-import { ComponentType } from "../../types";
+import { ComponentType, SubmissionPackage } from "../../types";
+import { UNFILLED_SLOT } from "../../lib/packageMetrics";
 
 export interface TypeMeta {
   /** Singular label ("Query letter"). */
@@ -38,3 +39,20 @@ export const SLOT_FIELD: Record<ComponentType, "queryLetterVersionId" | "synopsi
   [ComponentType.SAMPLE_PAGES]: "samplePagesVersionId",
   [ComponentType.FULL_MANUSCRIPT]: "queryLetterVersionId", // unused
 };
+
+/** Composer working-selection: type → version-id (UNFILLED_SLOT when empty). */
+export type SlotSelection = Record<ComponentType, string>;
+
+export const emptySelection = (): SlotSelection => ({
+  [ComponentType.QUERY_LETTER]: UNFILLED_SLOT,
+  [ComponentType.SYNOPSIS]: UNFILLED_SLOT,
+  [ComponentType.SAMPLE_PAGES]: UNFILLED_SLOT,
+  [ComponentType.FULL_MANUSCRIPT]: UNFILLED_SLOT,
+});
+
+export const selectionFromPackage = (pkg: SubmissionPackage): SlotSelection => ({
+  [ComponentType.QUERY_LETTER]: pkg.queryLetterVersionId,
+  [ComponentType.SYNOPSIS]: pkg.synopsisVersionId,
+  [ComponentType.SAMPLE_PAGES]: pkg.samplePagesVersionId,
+  [ComponentType.FULL_MANUSCRIPT]: UNFILLED_SLOT,
+});

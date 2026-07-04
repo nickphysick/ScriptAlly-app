@@ -20,22 +20,26 @@
  */
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
-import { ComponentType } from "../types";
+import { ComponentType, SubmissionPackage } from "../types";
 import { HubHeaderBar } from "./shell/HubHeaderBar";
 import { FirstVisitHome } from "./packages/FirstVisitHome";
 import { MaterialsRail } from "./packages/MaterialsRail";
 import { PackagesHome } from "./packages/PackagesHome";
+import { Composer } from "./packages/Composer";
+import { emptySelection, selectionFromPackage, SlotSelection } from "./packages/typeMeta";
 import { FONT_SERIF, FONT_MONO } from "../lib/designTokens";
 import { ChevronDown, Lock } from "lucide-react";
 
 export const SubmissionPackages: React.FC = () => {
-  const { currentUser, manuscripts, versions, packages, queries } = useScriptAllyDb();
+  const { currentUser, manuscripts, versions, packages, queries, addPackage, updatePackage } = useScriptAllyDb();
 
   const [activeMsId, setActiveMsId] = useState<string | null>(() =>
     typeof window !== "undefined" ? localStorage.getItem("scriptally_active_manuscript_id") : null,
   );
   const [msMenuOpen, setMsMenuOpen] = useState(false);
   const msMenuRef = useRef<HTMLDivElement>(null);
+  // Composer working state (Phase 7): null = home; set = building/editing a package in the pane.
+  const [composer, setComposer] = useState<{ name: string; sel: SlotSelection; editId: string | null } | null>(null);
 
   // Default to the first manuscript when none is selected / the saved one is gone.
   useEffect(() => {
@@ -75,9 +79,23 @@ export const SubmissionPackages: React.FC = () => {
   };
   const multiMs = manuscripts.length > 1;
 
-  // Later-phase targets — stubbed until their phases (composer = P7, materials manager = P8,
-  // create-modal = P9, worked-examples = P10).
-  const openComposer = () => {};
+  // Composer (Phase 7) — new / edit / copy all open the same view; save does the add or update.
+  const openNew = () => setComposer({ name: "", sel: emptySelection(), editId: null });
+  const openEdit = (pkg: SubmissionPackage) => setComposer({ name: pkg.packageName, sel: selectionFromPackage(pkg), editId: pkg.id });
+  const openCopy = (pkg: SubmissionPackage) => setComposer({ name: `Copy of ${pkg.packageName}`, sel: selectionFromPackage(pkg), editId: null });
+  const saveComposer = (name: string, sel: SlotSelection) => {
+    if (!msId) return;
+    const slots = {
+      queryLetterVersionId: sel[ComponentType.QUERY_LETTER],
+      synopsisVersionId: sel[ComponentType.SYNOPSIS],
+      samplePagesVersionId: sel[ComponentType.SAMPLE_PAGES],
+    };
+    if (composer?.editId) updatePackage(composer.editId, { packageName: name, ...slots });
+    else addPackage({ manuscriptId: msId, packageName: name, ...slots });
+    setComposer(null);
+  };
+  // Later-phase targets — stubbed until their phases (materials manager = P8, create-modal = P9,
+  // worked-examples = P10).
   const openManage = () => {};
   const openCreate = (_type: ComponentType) => {};
   const openExample = (_key: string) => {};
@@ -164,10 +182,20 @@ export const SubmissionPackages: React.FC = () => {
             {/* Content pane — hugs content height and scrolls internally (mockup .pane). First-visit is
                 white in both themes; the packages home sits on the themed pane surface. */}
             <section className="pkg-pane" style={{ flex: 1, minWidth: 0, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", alignSelf: "flex-start", maxHeight: "100%", overflowY: "auto", padding: "16px 16px 20px" }}>
-              {firstVisit ? (
-                <FirstVisitHome onBuild={openComposer} onCreate={openCreate} onExample={openExample} />
+              {composer ? (
+                <Composer
+                  versions={msVersions}
+                  packages={msPackages.filter((p) => p.id !== composer.editId)}
+                  initialName={composer.name}
+                  initialSelection={composer.sel}
+                  onSave={saveComposer}
+                  onCancel={() => setComposer(null)}
+                  onCreate={openCreate}
+                />
+              ) : firstVisit ? (
+                <FirstVisitHome onBuild={openNew} onCreate={openCreate} onExample={openExample} />
               ) : (
-                <PackagesHome packages={msPackages} versions={msVersions} queries={msQueries} onNew={openComposer} onEdit={() => openComposer()} onCopy={() => openComposer()} />
+                <PackagesHome packages={msPackages} versions={msVersions} queries={msQueries} onNew={openNew} onEdit={openEdit} onCopy={openCopy} />
               )}
             </section>
           </div>
