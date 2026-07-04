@@ -216,9 +216,12 @@ export const SearchSuggestionsList: React.FC<SearchSuggestionsListProps> = ({
                   onClick={() => openAgent(a)}
                   style={{ ...rowBase, background: active ? highlightBg : "transparent" }}
                 >
+                  {/* Monogram follows the StatusDot token pair so it lands burgundy-on-blush in
+                      Capp, ink-on-soft-pink in Bold, graphite-on-grey in Editorial; the fallbacks
+                      are the pre-theme colours for un-themed surfaces (mobile slim bar). */}
                   <span
                     className="flex items-center justify-center shrink-0"
-                    style={{ width: 28, height: 28, borderRadius: "50%", background: PINK, border: "0.5px solid #e8c8bc", fontFamily: FONT_SERIF, fontSize: 11, fontWeight: 600, color: burgundy }}
+                    style={{ width: 28, height: 28, borderRadius: "50%", background: `var(--sd-centre, ${PINK})`, border: "0.5px solid var(--sd-hue, #e8c8bc)", fontFamily: FONT_SERIF, fontSize: 11, fontWeight: 600, color: `var(--sd-hue, ${burgundy})` }}
                   >
                     {initialsOf(a.name)}
                   </span>
