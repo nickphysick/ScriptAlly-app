@@ -15,9 +15,10 @@
  *    Sent / Full Sent) — mirrors getPrimaryAction's classification without storing it.
  *  - Agents/idle = agentBuckets (lib/lifecycle.ts): idle = no queries ∧ open/unknown ∧ not set aside.
  */
-import { Agent, Query, QueryStatus } from "../types";
+import { Activity, Agent, Query, QueryStatus } from "../types";
 import { agentBuckets } from "./lifecycle";
 import { STATUS_ORDER } from "./statusOrder";
+import { AGENT_RESPONSE_STATUSES } from "./queryDerivation";
 
 /** Monday 00:00 (local) of the ISO week containing `d`. */
 export const isoWeekStart = (d: Date): Date => {
@@ -30,7 +31,7 @@ export const isoWeekStart = (d: Date): Date => {
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 const parseWhen = (v: unknown): number | null => {
-  if (!v) return null;
+  if (!v && v !== 0) return null;
   // Firestore Timestamps (lastStatusChange / responseReceivedAt) arrive as objects.
   if (typeof v === "object" && v !== null) {
     const anyV = v as any;
@@ -39,6 +40,7 @@ const parseWhen = (v: unknown): number | null => {
     if (v instanceof Date) return v.getTime();
     return null;
   }
+  if (typeof v === "number") return Number.isFinite(v) ? v : null; // epoch ms
   const t = typeof v === "string" ? new Date(v).getTime() : NaN;
   return Number.isFinite(t) ? t : null;
 };
@@ -171,8 +173,12 @@ export const activeWeeklySeries = (queries: Query[], now: Date, bins = 8): numbe
 export interface AgentStatusSummary {
   id: string;
   name: string;
+  /** Agency (empty string when unknown) — the hover panel's sub-line. */
+  agency: string;
   /** The agent's most advanced ACTIVE status (STATUS_ORDER journey), or null when idle. */
   status: QueryStatus | null;
+  /** The ranked query's response deadline (ISO), when one exists. */
+  respondBy: string | null;
 }
 
 /** One entry per agent shown on the Agents card (agentBuckets order: queried then idle). */
@@ -180,12 +186,132 @@ export const agentStatusSummaries = (agents: Agent[], queries: Query[]): AgentSt
   const buckets = agentBuckets<Agent>(agents, queries);
   const rank = (s: QueryStatus) => STATUS_ORDER.indexOf(s);
   const summarise = (a: Agent): AgentStatusSummary => {
+    const base = { id: a.id, name: a.name, agency: a.agency || "" };
     const active = queries.filter((q) => q.agentId === a.id && ACTIVE_STATUSES.has(q.status));
-    if (active.length === 0) return { id: a.id, name: a.name, status: null };
+    if (active.length === 0) return { ...base, status: null, respondBy: null };
     const best = active.reduce((top, q) => (rank(q.status) > rank(top.status) ? q : top));
-    return { id: a.id, name: a.name, status: best.status };
+    return { ...base, status: best.status, respondBy: best.responseDeadline ?? null };
   };
   return [...buckets.queried, ...buckets.idle].map(summarise);
+};
+
+/* ── hover-panel selectors (locked designs S1·A·A·A, 4 Jul) ── */
+
+/** "MON".."SUN" day chip from a query's dateSent. */
+export const dayChip = (when: unknown): string => {
+  const t = parseWhen(when);
+  if (t === null) return "—";
+  return new Date(t).toLocaleDateString("en-GB", { weekday: "short" }).toUpperCase();
+};
+
+export interface WeekRecipient {
+  id: string;
+  agentName: string;
+  agency: string;
+  day: string;
+}
+
+/** The queries sent in the ISO week starting `weekStart`, as panel rows ordered by send time. */
+export const weekRecipients = (queries: Query[], agents: Agent[], weekStart: Date): WeekRecipient[] => {
+  const from = weekStart.getTime();
+  const to = from + WEEK_MS;
+  return queries
+    .map((q) => ({ q, t: parseWhen(q.dateSent) }))
+    .filter((x): x is { q: Query; t: number } => x.t !== null && x.t >= from && x.t < to)
+    .sort((a, b) => a.t - b.t)
+    .map(({ q, t }) => {
+      const agent = agents.find((a) => a.id === q.agentId);
+      return {
+        id: q.id,
+        agentName: agent?.name || "Unknown agent",
+        agency: agent?.agency || "",
+        day: dayChip(t),
+      };
+    });
+};
+
+/** Footer for the recipients panel: `▲ +1 VS PRIOR WEEK · 10 TOTAL` (total = cumulative sends
+ *  through the hovered week). Delta omitted for the oldest bin (prior week underivable). */
+export const sentWeekFooter = (series: number[], idx: number): string => {
+  const cumulative = series.slice(0, idx + 1).reduce((a, b) => a + b, 0);
+  const total = `${cumulative} TOTAL`;
+  if (idx <= 0) return total;
+  const delta = series[idx] - series[idx - 1];
+  const deltaLabel = delta > 0 ? `▲ +${delta}` : delta < 0 ? `▼ ${delta}` : `· ±0`;
+  return `${deltaLabel} VS PRIOR WEEK · ${total}`;
+};
+
+export interface OutcomeGroup {
+  key: string;
+  label: string;
+  /** Which status the group's StatusDot renders (the real component, never a recreation). */
+  dotStatus: QueryStatus;
+  count: number;
+}
+
+/**
+ * Responses grouped by outcome, per the canonical once-per-query rule. Precedence per query:
+ * Offer > Revise & resubmit (current) > Full requested (derived stage date or current stage) >
+ * Partial requested (ditto) > Pass (Rejected). A legacy responder matching none of these (e.g.
+ * withdrawn with a bare hasAgentResponded flag) is skipped — the header count stays canonical,
+ * so group sums may undercount in that rare shape rather than guess. Zero groups drop out.
+ */
+export const outcomeGroups = (queries: Query[]): OutcomeGroup[] => {
+  const responded = queries.filter((q) =>
+    q.hasAgentResponded !== undefined ? q.hasAgentResponded : LEGACY_RESPONSE_STATUSES.has(q.status),
+  );
+  const counts = { offers: 0, rr: 0, fulls: 0, partials: 0, passes: 0 };
+  for (const q of responded) {
+    if (q.status === QueryStatus.OFFER) counts.offers++;
+    else if (q.status === QueryStatus.REVISE_RESUBMIT) counts.rr++;
+    else if (q.fullRequestedDate || q.status === QueryStatus.FULL_REQUESTED || q.status === QueryStatus.FULL_SENT) counts.fulls++;
+    else if (q.partialRequestedDate || q.status === QueryStatus.PARTIAL_REQUESTED || q.status === QueryStatus.PARTIAL_SENT) counts.partials++;
+    else if (q.status === QueryStatus.REJECTED) counts.passes++;
+  }
+  const groups: OutcomeGroup[] = [
+    { key: "offers", label: "Offers", dotStatus: QueryStatus.OFFER, count: counts.offers },
+    { key: "rr", label: "Revise & resubmit", dotStatus: QueryStatus.REVISE_RESUBMIT, count: counts.rr },
+    { key: "fulls", label: "Fulls requested", dotStatus: QueryStatus.FULL_REQUESTED, count: counts.fulls },
+    { key: "partials", label: "Partials requested", dotStatus: QueryStatus.PARTIAL_REQUESTED, count: counts.partials },
+    { key: "passes", label: "Passes", dotStatus: QueryStatus.REJECTED, count: counts.passes },
+  ];
+  return groups.filter((g) => g.count > 0);
+};
+
+/**
+ * Median days from dateSent to the FIRST agent-response activity (resultingStatus in the
+ * canonical AGENT_RESPONSE_STATUSES), rounded; null when no query has a derivable pair —
+ * the panel then omits its footer entirely (never estimate).
+ */
+export const medianReplyDays = (queries: Query[], activities: Activity[]): number | null => {
+  const byQuery = new Map<string, number>();
+  for (const a of activities) {
+    if (!a.resultingStatus || !AGENT_RESPONSE_STATUSES.has(a.resultingStatus)) continue;
+    const t = parseWhen(a.date);
+    if (t === null || !a.queryId) continue;
+    const prev = byQuery.get(a.queryId);
+    if (prev === undefined || t < prev) byQuery.set(a.queryId, t);
+  }
+  const spans: number[] = [];
+  for (const q of queries) {
+    const sent = parseWhen(q.dateSent);
+    const first = byQuery.get(q.id);
+    if (sent === null || first === undefined || first < sent) continue;
+    spans.push((first - sent) / 86400000);
+  }
+  if (spans.length === 0) return null;
+  spans.sort((a, b) => a - b);
+  const mid = Math.floor(spans.length / 2);
+  const median = spans.length % 2 ? spans[mid] : (spans[mid - 1] + spans[mid]) / 2;
+  return Math.round(median);
+};
+
+/** Ball-holder split for the mix panel footer: `2 WITH AGENTS · 1 WAITING ON YOU`. */
+export const ballHolderSplit = (queries: Query[]): string => {
+  const active = activeQueriesOf(queries);
+  const withAgents = active.filter((q) => AWAITING_REPLY_STATUSES.has(q.status)).length;
+  const onYou = active.length - withAgents;
+  return `${withAgents} WITH ${withAgents === 1 ? "AGENT" : "AGENTS"} · ${onYou} WAITING ON YOU`;
 };
 
 /* ── agent icon grid (pure sizing — the Agents card renders every agent it can) ──

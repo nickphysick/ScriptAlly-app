@@ -15,6 +15,12 @@ import {
   activeWeeklySeries,
   AGENT_GRID_MIN_SIZE,
   agentGridLayout,
+  ballHolderSplit,
+  dayChip,
+  medianReplyDays,
+  outcomeGroups,
+  sentWeekFooter,
+  weekRecipients,
   agentStatusSummaries,
   agentTooltip,
   awaitingReplyCount,
@@ -280,6 +286,93 @@ describe("tooltip label builders", () => {
     expect(overflowTooltip(1)).toBe("+1 MORE AGENT");
     expect(responsesTooltip(9, 10, 90)).toBe("9 OF 10 QUERIES ANSWERED · 90%");
     expect(responsesTooltip(1, 1, 100)).toBe("1 OF 1 QUERY ANSWERED · 100%");
+  });
+});
+
+describe("hover-panel selectors", () => {
+  const AGENTS2 = [
+    { id: "a1", name: "Margaret Atwood", agency: "Pemberton Literary" },
+    { id: "a2", name: "Priya Raman", agency: "" },
+  ] as any[];
+  // Current ISO week starts Mon 29 June 2026 (NOW is Fri 3 July).
+  const weekStart = new Date(2026, 5, 29);
+
+  it("weekRecipients: bounds to the week, orders by send time, tolerates unknown agents", () => {
+    const queries = [
+      q({ id: "q1", agentId: "a2", dateSent: new Date(2026, 6, 2, 9).toISOString() }), // Thu
+      q({ id: "q2", agentId: "a1", dateSent: new Date(2026, 5, 29, 8).toISOString() }), // Mon
+      q({ id: "q3", agentId: "ghost", dateSent: new Date(2026, 6, 1).toISOString() }), // Wed, unknown agent
+      q({ id: "q4", agentId: "a1", dateSent: new Date(2026, 5, 28).toISOString() }), // prior week — excluded
+      q({ id: "q5", agentId: "a1" }), // no dateSent — excluded
+    ];
+    const rows = weekRecipients(queries, AGENTS2, weekStart);
+    expect(rows.map((r) => r.id)).toEqual(["q2", "q3", "q1"]);
+    expect(rows[0]).toMatchObject({ agentName: "Margaret Atwood", agency: "Pemberton Literary", day: "MON" });
+    expect(rows[1].agentName).toBe("Unknown agent");
+    expect(rows[2].day).toBe("THU");
+  });
+
+  it("dayChip formats and survives garbage", () => {
+    expect(dayChip(new Date(2026, 5, 29))).toBe("MON");
+    expect(dayChip("not a date")).toBe("—");
+  });
+
+  it("sentWeekFooter: delta sign adapts; oldest bin omits the delta; total is cumulative", () => {
+    const series = [1, 3, 3, 2, 0, 0, 0, 1];
+    expect(sentWeekFooter(series, 0)).toBe("1 TOTAL");
+    expect(sentWeekFooter(series, 1)).toBe("▲ +2 VS PRIOR WEEK · 4 TOTAL");
+    expect(sentWeekFooter(series, 2)).toBe("· ±0 VS PRIOR WEEK · 7 TOTAL");
+    expect(sentWeekFooter(series, 3)).toBe("▼ -1 VS PRIOR WEEK · 9 TOTAL");
+    expect(sentWeekFooter(series, 7)).toBe("▲ +1 VS PRIOR WEEK · 10 TOTAL");
+  });
+
+  it("outcomeGroups: canonical grouping with zero-suppression and stage-date precedence", () => {
+    const queries = [
+      q({ status: QueryStatus.OFFER, hasAgentResponded: true }),
+      q({ status: QueryStatus.PARTIAL_SENT, hasAgentResponded: true }), // → partials (current stage)
+      q({ status: QueryStatus.WITHDRAWN, hasAgentResponded: true, fullRequestedDate: "2026-06-01" }), // → fulls (derived date)
+      q({ status: QueryStatus.REJECTED }), // legacy fallback → passes
+      q({ status: QueryStatus.QUERIED }), // not a responder
+      q({ status: QueryStatus.WITHDRAWN, hasAgentResponded: true }), // responder with no derivable outcome — skipped
+    ];
+    const groups = outcomeGroups(queries);
+    expect(groups.map((g) => [g.key, g.count])).toEqual([
+      ["offers", 1],
+      ["fulls", 1],
+      ["partials", 1],
+      ["passes", 1],
+    ]);
+    expect(groups.every((g) => g.count > 0)).toBe(true);
+  });
+
+  it("medianReplyDays: first agent-response per query, median across queries, null when underivable", () => {
+    const sent = (d: number) => new Date(2026, 5, d).toISOString();
+    const act = (queryId: string, d: number, status: QueryStatus) =>
+      ({ id: queryId + d, queryId, resultingStatus: status, date: new Date(2026, 5, d).toISOString() }) as any;
+    const queries = [
+      q({ id: "q1", dateSent: sent(1) }), // replies day 11 → 10 days
+      q({ id: "q2", dateSent: sent(1) }), // replies day 31 → 30 days (first of two responses)
+      q({ id: "q3", dateSent: sent(1) }), // no response
+    ];
+    const activities = [
+      act("q1", 11, QueryStatus.PARTIAL_REQUESTED),
+      act("q2", 31, QueryStatus.PARTIAL_REQUESTED),
+      act("q2", 40, QueryStatus.FULL_REQUESTED), // later response — ignored (first wins)
+      act("q3", 5, QueryStatus.NO_RESPONSE as any), // not an agent-response status
+    ];
+    expect(medianReplyDays(queries, activities)).toBe(20); // median of [10, 30]
+    expect(medianReplyDays(queries, [])).toBeNull();
+  });
+
+  it("ballHolderSplit pluralises and splits actives", () => {
+    const queries = [
+      q({ status: QueryStatus.QUERIED }), // with agent
+      q({ status: QueryStatus.FULL_SENT }), // with agent
+      q({ status: QueryStatus.PARTIAL_REQUESTED }), // on you
+      q({ status: QueryStatus.REJECTED }), // not active
+    ];
+    expect(ballHolderSplit(queries)).toBe("2 WITH AGENTS · 1 WAITING ON YOU");
+    expect(ballHolderSplit([q({ status: QueryStatus.QUERIED })])).toBe("1 WITH AGENT · 0 WAITING ON YOU");
   });
 });
 

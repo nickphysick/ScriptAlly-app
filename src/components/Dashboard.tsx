@@ -509,7 +509,9 @@ export const Dashboard: React.FC<{
   const prefersReducedMotion =
     typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const slot = useFocusSlot(prefersReducedMotion);
-  const statDefs = useStatDefs(queries, agents);
+  // NOTE: activities (not mergedActivities) — the raw feed is available above the guards; the
+  // hover panels' median-reply footer reads agent-response activities from it.
+  const statDefs = useStatDefs(queries, agents, activities);
 
   // Note desk/to-do callbacks. Complete + delete both raise an undo toast; the user-facing verb is
   // "Completed" (the field stays done/doneAt). Delete-undo re-creates via addNote (new id/createdAt).

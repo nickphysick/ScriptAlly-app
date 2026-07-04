@@ -175,14 +175,16 @@
 /* ---------- full-width stat row ---------- */
 .sa-stats {
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
-  max-height: 260px; margin-bottom: 0; overflow: clip; overflow-clip-margin: 28px;
+  /* clip-margin 260 lets the hover panels escape upward while expanded; the collapsed state
+     below restores the tight margin so the fold animation still clips. */
+  max-height: 260px; margin-bottom: 0; overflow: clip; overflow-clip-margin: 260px;
   transition: max-height 360ms cubic-bezier(.22,.8,.3,1), opacity 240ms ease 100ms, margin-bottom 360ms cubic-bezier(.22,.8,.3,1);
 }
-.sa-dash.split-open .sa-stats { max-height: 0; opacity: 0; margin-bottom: -20px; transition: max-height 360ms cubic-bezier(.22,.8,.3,1), opacity 200ms ease, margin-bottom 360ms cubic-bezier(.22,.8,.3,1); }
+.sa-dash.split-open .sa-stats { max-height: 0; opacity: 0; margin-bottom: -20px; overflow-clip-margin: 28px; transition: max-height 360ms cubic-bezier(.22,.8,.3,1), opacity 200ms ease, margin-bottom 360ms cubic-bezier(.22,.8,.3,1); }
 .sa-stat {
   /* clip (not hidden) + clip-margin so StatTooltips above the chart are never cut.
      min-height 190 = the original 158 + 20% (owner request, 4 Jul). */
-  position: relative; overflow: clip; overflow-clip-margin: 44px; padding: 18px 20px 16px; min-height: 190px;
+  position: relative; overflow: clip; overflow-clip-margin: 240px; padding: 18px 20px 16px; min-height: 190px;
   display: flex; flex-direction: column; text-align: left;
   background: var(--card, #fffefb);
   border: var(--bdw, 1px) solid var(--bd, #e7ddd2);
@@ -229,7 +231,7 @@
 /* agent icon grid — rows of ≤8, centred both axes; icon size + overflow chip computed by
    agentGridLayout. clip (NOT hidden) + clip-margin so the StatTooltips above the glyphs are
    never cut (hidden ignores clip-margin — adversarial-review blocker fix, 4 Jul). */
-.sa-agrid { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; min-height: 0; overflow: clip; overflow-clip-margin: 44px; }
+.sa-agrid { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; min-height: 0; overflow: clip; overflow-clip-margin: 240px; }
 .sa-agrid-row { display: flex; justify-content: center; align-items: center; }
 .sa-person { display: flex; color: var(--stat-muted, #d9cbb8); }
 .sa-person.on { color: var(--sd-hue, #7c3a2a); }
@@ -262,6 +264,82 @@
 .t-bold .sa-tip { border: 1.5px solid #1d1712; }
 .t-edn .sa-tip { border: none; box-shadow: 0 1px 2px rgba(20,20,20,0.06), 0 6px 18px rgba(20,20,20,0.12); }
 @media (prefers-reduced-motion: reduce) { .sa-tip { transition: none; } }
+
+/* ── StatHoverPanel — the rich stat-card hover panels (locked S1·A·A·A) ── */
+.sa-hpanel {
+  position: absolute; bottom: calc(100% + 9px); left: 50%; transform: translateX(-50%);
+  width: max-content; max-width: 300px; z-index: 70; pointer-events: none;
+  background: var(--card, #fffefb);
+  border: 1px solid #ded3c2; border-radius: 12px;
+  border-left: 3px solid var(--sd-hue, #7c3a2a); /* Cappuccino: burgundy left edge */
+  box-shadow: 0 2px 6px rgba(58,28,20,0.06), 0 10px 26px rgba(58,28,20,0.12);
+  opacity: 0; transition: opacity 90ms ease;
+  text-align: left; overflow: hidden;
+}
+.sa-hpanel.on { opacity: 1; }
+.sa-hpanel-start { left: 0; transform: none; }
+.sa-hpanel-end { left: auto; right: 0; transform: none; }
+.sa-hpanel-caret {
+  position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+  border: 6px solid transparent; border-top-color: #ded3c2;
+}
+.sa-hpanel-start .sa-hpanel-caret { left: 14px; transform: none; }
+.sa-hpanel-end .sa-hpanel-caret { left: auto; right: 14px; transform: none; }
+/* Bold: ink frame, hard offset shadow, vivid-pink sliver across the top inside the frame */
+.t-bold .sa-hpanel {
+  border: 1.5px solid #1d1712; border-left-width: 1.5px;
+  box-shadow: 4px 4px 0 rgba(29,23,18,0.14);
+}
+.t-bold .sa-hpanel::before { content: ""; display: block; height: 5px; background: #f4c7c2; }
+.t-bold .sa-hpanel-caret { border-top-color: #1d1712; }
+/* Editorial: borderless Soft; header band handles the tint */
+.t-edn .sa-hpanel {
+  border: none; border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(20,20,20,0.05), 0 12px 32px rgba(20,20,20,0.12);
+}
+.t-edn .sa-hpanel-caret { border-top-color: #ffffff; }
+/* shared internals */
+.sa-hp-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 14px;
+  padding: 8px 12px 6px;
+  font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--band-meta, #705e46);
+}
+.sa-hp-head .sa-hp-val { color: var(--ink, #3a1c14); }
+.t-edn .sa-hp-head { background: #f4f4f5; border-radius: 14px 14px 0 0; padding: 9px 12px 7px; color: #8b8b8b; }
+.t-edn .sa-hp-head .sa-hp-val { color: #1a1a1a; }
+.sa-hp-body { padding: 4px 12px 8px; }
+.sa-hp-row { display: flex; align-items: center; gap: 9px; padding: 5px 0; }
+.sa-hp-mono {
+  flex: none; border-radius: 50%;
+  background: var(--sd-centre, #f6e4da); color: var(--sd-hue, #7c3a2a);
+  box-shadow: inset 0 0 0 1px var(--sd-hue, #7c3a2a);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: var(--font-serif); font-weight: 600;
+}
+.sa-hp-name { font-family: var(--font-serif); font-size: 14.5px; color: var(--ink, #3a1c14); line-height: 1.15; }
+.sa-hp-agency { font-family: var(--font-mono); font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase; color: #8a7a6c; margin-top: 1px; }
+.sa-hp-day {
+  margin-left: auto; flex: none;
+  font-family: var(--font-mono); font-size: 7.5px; letter-spacing: 0.08em;
+  border: 1px solid var(--bd, #e7ddd2); border-radius: 6px; padding: 2px 6px; color: #8a7a6c;
+}
+.sa-hp-more { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: #8a7a6c; padding: 4px 0 2px; }
+.sa-hp-count { margin-left: auto; font-family: var(--font-serif); font-size: 15px; color: var(--ink, #3a1c14); }
+.sa-hp-label { font-family: var(--font-sans); font-size: 12px; color: var(--ink, #3a1c14); }
+.sa-hp-foot {
+  padding: 6px 12px 8px; border-top: 1px solid var(--bd, #e7ddd2);
+  font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--band-meta, #705e46);
+}
+.sa-hp-quiet { font-family: var(--font-serif); font-style: italic; font-size: 13px; color: #6a5a50; padding: 8px 12px 2px; }
+.sa-hp-quiet-sub { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: #8a7a6c; padding: 0 12px 10px; }
+.sa-hp-pill {
+  display: inline-flex; align-items: center; gap: 6px; margin: 6px 12px 10px;
+  border: 1px solid var(--bd, #e7ddd2); border-radius: 99px; padding: 4px 10px;
+  font-family: var(--font-mono); font-size: 7.5px; letter-spacing: 0.09em; text-transform: uppercase; color: #6a5a50;
+}
+@media (prefers-reduced-motion: reduce) { .sa-hpanel { transition: none; } }
 
 /* ---------- section bands (What's live / Fortnight / drawer head) ---------- */
 .sa-band {
