@@ -13,7 +13,7 @@ import React, { useState } from "react";
 import { SubmissionPackage, ManuscriptVersion, Query, ComponentType } from "../../types";
 import { TypeGlyph } from "./TypeGlyph";
 import { TYPE_META, BUILDER_TYPES, SLOT_FIELD } from "./typeMeta";
-import { isSlotFilled, isResponse, reachedFull } from "../../lib/packageMetrics";
+import { isSlotFilled, isRequest, isResponse, reachedFull } from "../../lib/packageMetrics";
 import { FONT_SERIF, FONT_MONO } from "../../lib/designTokens";
 
 /** l / s / p suffix for the tint classes, per type. */
@@ -28,22 +28,24 @@ const PILL_LABEL: Record<string, string> = {
   [ComponentType.SAMPLE_PAGES]: "Pages",
 };
 
-interface Counts { sent: number; full: number; responded: number; awaiting: number; }
+interface Counts { sent: number; full: number; partial: number; responded: number; awaiting: number; }
 const countsFor = (pkgId: string, queries: Query[]): Counts => {
   const mine = queries.filter((q) => q.packageId === pkgId);
   const sent = mine.length;
   const full = mine.filter(reachedFull).length;
+  // Partial = a materials request that hasn't reached full. NOT "responded − full" — that would
+  // count plain rejections/closes (responded, never requested) as fabricated partial requests.
+  const partial = mine.filter((q) => isRequest(q) && !reachedFull(q)).length;
   const responded = mine.filter(isResponse).length;
-  return { sent, full, responded, awaiting: sent - responded };
+  return { sent, full, partial, responded, awaiting: sent - responded };
 };
 
 /** Short list-row stat line ("3 SENT · 1 FULL REQUEST" / "1 SENT · AWAITING REPLY"). */
 const rowStat = (c: Counts): React.ReactNode => {
   if (c.sent === 0) return "NOT YET SENT";
-  const partial = c.responded - c.full;
   const head = `${c.sent} SENT · `;
   if (c.full > 0) return <>{head}<b>{c.full} FULL REQUEST{c.full === 1 ? "" : "S"}</b></>;
-  if (partial > 0) return <>{head}<b>{partial} PARTIAL REQUEST{partial === 1 ? "" : "S"}</b></>;
+  if (c.partial > 0) return <>{head}<b>{c.partial} PARTIAL REQUEST{c.partial === 1 ? "" : "S"}</b></>;
   return <>{head}AWAITING REPLY</>;
 };
 

@@ -48,8 +48,10 @@ const firstUnfilled = (s: SlotSelection): ComponentType => BUILDER_TYPES.find((t
 
 export interface ComposerProps {
   versions: ManuscriptVersion[];
-  /** Existing packages for the copy drawer (excluding the one being edited). */
+  /** All active packages for the manuscript — feeds the picker "IN N packages" badge. */
   packages: SubmissionPackage[];
+  /** The package being edited, if any — excluded from the copy-drawer source list. */
+  editingId?: string;
   initialName: string;
   initialSelection: SlotSelection;
   onSave: (name: string, selection: SlotSelection) => void;
@@ -57,11 +59,13 @@ export interface ComposerProps {
   onCreate: (type: ComponentType) => void;
 }
 
-export const Composer: React.FC<ComposerProps> = ({ versions, packages, initialName, initialSelection, onSave, onCancel, onCreate }) => {
+export const Composer: React.FC<ComposerProps> = ({ versions, packages, editingId, initialName, initialSelection, onSave, onCancel, onCreate }) => {
   const [name, setName] = useState(initialName);
   const [sel, setSel] = useState<SlotSelection>(initialSelection);
   const [focus, setFocus] = useState<ComponentType>(() => firstUnfilled(initialSelection));
   const [drawerOpen, setDrawerOpen] = useState(false);
+  // The copy drawer offers every OTHER package (you don't copy a package into itself).
+  const drawerPackages = packages.filter((p) => p.id !== editingId);
 
   const choose = (vid: string) => {
     const next: SlotSelection = { ...sel, [focus]: vid };
@@ -78,7 +82,9 @@ export const Composer: React.FC<ComposerProps> = ({ versions, packages, initialN
     setDrawerOpen(false);
   };
 
-  const canSave = name.trim().length > 0 && BUILDER_TYPES.some((t) => isSlotFilled(sel[t]));
+  // A slot only counts as filled if its version still exists (a deleted version renders empty, so
+  // enabling Save on a dead id would be inconsistent with the manifest).
+  const canSave = name.trim().length > 0 && BUILDER_TYPES.some((t) => isSlotFilled(sel[t]) && versions.some((v) => v.id === sel[t]));
   const fm = TYPE_META[focus];
   const focusVersions = versions.filter((v) => v.componentType === focus);
 
@@ -159,7 +165,7 @@ export const Composer: React.FC<ComposerProps> = ({ versions, packages, initialN
       <div className="c2-band">
         <span className="bic">{boxIcon}</span>
         <div className="hname"><input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name this package…" aria-label="Package name" /></div>
-        {packages.length > 0 && <button type="button" className="copybtn" onClick={() => setDrawerOpen(true)}>⧉ Copy existing</button>}
+        {drawerPackages.length > 0 && <button type="button" className="copybtn" onClick={() => setDrawerOpen(true)}>⧉ Copy existing</button>}
       </div>
 
       <div className="c2-body">
@@ -222,12 +228,12 @@ export const Composer: React.FC<ComposerProps> = ({ versions, packages, initialN
         <button type="button" className="cancel" onClick={onCancel}>Cancel</button>
       </div>
 
-      {drawerOpen && packages.length > 0 && (
+      {drawerOpen && drawerPackages.length > 0 && (
         <div className="drawer">
           <div className="drawer-h"><h4>Copy an existing package</h4><button type="button" className="x" aria-label="Close" onClick={() => setDrawerOpen(false)}>✕</button></div>
           <div className="drawer-b">
             <div className="drawer-note">Copies the contents into your new package — the original is untouched.</div>
-            {packages.map((p) => (
+            {drawerPackages.map((p) => (
               <div key={p.id} className="dpk">
                 <div className="dpk-h"><span className="nm">{p.packageName}</span></div>
                 <div className="dpk-b">

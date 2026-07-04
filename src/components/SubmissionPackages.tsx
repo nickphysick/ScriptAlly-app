@@ -192,7 +192,8 @@ export const SubmissionPackages: React.FC = () => {
               {composer ? (
                 <Composer
                   versions={msVersions}
-                  packages={msPackages.filter((p) => p.id !== composer.editId)}
+                  packages={msPackages}
+                  editingId={composer.editId ?? undefined}
                   initialName={composer.name}
                   initialSelection={composer.sel}
                   onSave={saveComposer}
