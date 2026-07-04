@@ -20,7 +20,7 @@
  * are inline or var(--…) — never Tailwind utilities (they have silently overridden inline-critical
  * colours in this codebase before). Tailwind is used for layout/breakpoints only.
  */
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { LayoutGrid, Send, Users, Book, ChevronLeft, Bell, Settings, User, Sparkles, BookOpen, HelpCircle, LogOut } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useScriptAllyDb } from "../../lib/db";
@@ -171,6 +171,24 @@ interface RailProps {
 const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSearchQuery }) => {
   const { currentUser, logout, updateUserProfile } = useScriptAllyDb();
   const { activeTasksCount, badgeText } = useTaskAlerts();
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // The dashboard hosts the canonical search in its top bar, so the rail search hides there
+  // (the nav list simply starts higher). ⌘K/Ctrl+K focuses the RAIL search on every other
+  // route; the dashboard's own binding (DashTopBar, gated on route visibility) is the only
+  // one live on /dashboard — never both.
+  const railSearchShown = activeTab !== "dashboard";
+  useEffect(() => {
+    if (!railSearchShown) return;
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [railSearchShown]);
 
   const [collapsed, setCollapsed] = useState<boolean>(() => {
     try { return localStorage.getItem(COLLAPSE_KEY) === "1"; } catch { return false; }
@@ -280,10 +298,13 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
         </span>
       </button>
 
-      {/* Search — the existing NavSearch typeahead, rail presentation */}
-      <div className="arail-search" style={{ margin: "2px 12px 12px" }}>
-        <NavSearch variant="rail" searchQuery={searchQuery} setSearchQuery={setSearchQuery} onNavigate={onNavigate} />
-      </div>
+      {/* Search — the existing NavSearch typeahead, rail presentation. Hidden on the dashboard
+          (its top bar is the canonical search there). */}
+      {railSearchShown && (
+        <div className="arail-search" style={{ margin: "2px 12px 12px" }}>
+          <NavSearch variant="rail" searchQuery={searchQuery} setSearchQuery={setSearchQuery} onNavigate={onNavigate} inputRef={searchInputRef} />
+        </div>
+      )}
 
       {/* Global page nav */}
       <nav style={{ padding: "0 10px", display: "flex", flexDirection: "column", gap: 3 }}>

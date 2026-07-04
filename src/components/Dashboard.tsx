@@ -1615,6 +1615,7 @@ export const Dashboard: React.FC<{
           userName={getUserFirstName()}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery ?? (() => {})}
+          onNavigate={onNavigate}
           onSettings={() => onNavigate("account")}
           onAccount={() => onNavigate("account")}
           active={isDashRoute}
