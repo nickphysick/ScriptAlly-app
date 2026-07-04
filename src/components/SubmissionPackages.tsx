@@ -114,6 +114,12 @@ export const SubmissionPackages: React.FC = () => {
       <Lock style={{ width: 9, height: 9 }} strokeWidth={2.4} aria-hidden="true" /> Pro
     </span>
   );
+  // First-visit shows a larger Pro badge (and no manuscript chip) — a leaner header for that state.
+  const largerProPill = (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: FONT_MONO, fontSize: 11, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--slate)", background: "#e7eef3", border: "1px solid #cfdde6", borderRadius: 999, padding: "6px 14px" }}>
+      <Lock style={{ width: 11, height: 11 }} strokeWidth={2.4} aria-hidden="true" /> Pro
+    </span>
+  );
 
   // Right slot of the header: the manuscript selector chip. One manuscript = plain, non-interactive;
   // 2+ = a button with a chevron that opens the switcher and re-scopes the builder's context.
@@ -170,9 +176,9 @@ export const SubmissionPackages: React.FC = () => {
       ) : (
         <>
           <HubHeaderBar
-            title="Submission Package Builder"
-            titleAfter={proPill}
-            right={msSelector}
+            title={firstVisit ? "Submission Packages" : "Submission Package Builder"}
+            titleAfter={firstVisit ? largerProPill : proPill}
+            right={firstVisit ? undefined : msSelector}
             style={{ padding: "20px 24px", gap: 14, boxShadow: "none" }}
             titleStyle={{ fontWeight: 700, fontSize: 26, color: "var(--ink)" }}
           />

@@ -12,7 +12,7 @@
  * create the user's own; the carousel + CTA + "See this example in full" are wired to callbacks the
  * orchestrator fills in later phases (composer = P7, create-modal = P9, worked-examples = P10).
  */
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState } from "react";
 import { ComponentType } from "../../types";
 import { TypeGlyph } from "./TypeGlyph";
 import { FONT_SERIF, FONT_MONO } from "../../lib/designTokens";
@@ -81,25 +81,13 @@ export interface FirstVisitHomeProps {
 }
 
 export const FirstVisitHome: React.FC<FirstVisitHomeProps> = ({ onBuild, onCreate, onExample }) => {
+  // Slide index. The 5s crossfade + auto-advance is driven ENTIRELY by a CSS animation (.rt below):
+  // opacity dips to 0 at each loop trough and the slide advances on `animationiteration` there, so the
+  // swap is invisible. This is deliberately NOT a JS setInterval+setTimeout crossfade — those get
+  // throttled/dropped in a background tab and can leave the stack stuck at low opacity (the reported
+  // bug). A CSS animation always cycles opacity back to 1 and pauses/resumes cleanly with the tab.
   const [carI, setCarI] = useState(0);
-  const [visible, setVisible] = useState(true);
-  const hover = useRef(false);
-
-  // 450ms crossfade, then swap to the next slide (functional setter → no stale closure).
-  const step = useCallback(() => {
-    setVisible(false);
-    window.setTimeout(() => {
-      setCarI((i) => (i + 1) % CAR.length);
-      setVisible(true);
-    }, 450);
-  }, []);
-
-  // 5s auto-rotate, paused on hover, disabled entirely under reduced-motion.
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const t = window.setInterval(() => { if (!hover.current) step(); }, 5000);
-    return () => window.clearInterval(t);
-  }, [step]);
+  const nextSlide = () => setCarI((i) => (i + 1) % CAR.length);
 
   const d = CAR[carI];
 
@@ -118,7 +106,9 @@ export const FirstVisitHome: React.FC<FirstVisitHomeProps> = ({ onBuild, onCreat
         .pkgfv .sl { font-size:14.5px; color:#6a594d; line-height:1.65; max-width:380px; margin-top:16px; }
         .pkgfv .build { display:inline-block; margin:24px 0 0; font-family:${FONT_SERIF}; font-size:16px; font-weight:700; color:var(--ink); background:var(--pink); border:1px solid var(--pink-b); border-radius:12px; padding:15px 32px; cursor:pointer; transition:background .15s,transform .15s; }
         .pkgfv .build:hover { background:var(--pink-h); transform:translateY(-1px); }
-        .pkgfv .rt { position:relative; width:470px; height:340px; flex-shrink:0; transition:opacity .45s ease; }
+        .pkgfv .rt { position:relative; width:470px; height:340px; flex-shrink:0; animation:pkgCarCycle 5s ease-in-out infinite; }
+        .pkgfv .rt:hover { animation-play-state:paused; }
+        @keyframes pkgCarCycle { 0%,100% { opacity:0; } 8%,92% { opacity:1; } }
         /* blurred manuscript pile behind the cards for depth (mockup .mdesk .pile: 2 sheets, blur, .7) */
         .pkgfv .pile { position:absolute; inset:26px 74px 40px; filter:blur(2.5px); opacity:.7; z-index:0; pointer-events:none; }
         .pkgfv .pile i { position:absolute; inset:0; background:#fbf7f0; border:1px solid #d9cdbc; border-radius:5px; display:block; }
@@ -143,7 +133,7 @@ export const FirstVisitHome: React.FC<FirstVisitHomeProps> = ({ onBuild, onCreat
         .pkgfv .exlink { position:absolute; right:4px; bottom:0; font-family:${FONT_MONO}; font-size:8.5px; letter-spacing:.05em; color:var(--burg); text-decoration:underline; text-underline-offset:3px; cursor:pointer; background:none; border:0; padding:0; }
         .pkgfv .divrule { display:flex; align-items:center; gap:14px; margin:52px 24px 0; }
         .pkgfv .divrule::before, .pkgfv .divrule::after { content:''; flex:1; height:1px; background:#e6dac8; }
-        .pkgfv .divrule span { font-family:${FONT_MONO}; font-size:8.5px; letter-spacing:.18em; text-transform:uppercase; color:#a4937f; }
+        .pkgfv .divrule span { font-family:${FONT_SERIF}; font-size:16.5px; font-weight:700; color:var(--ink); white-space:nowrap; }
         .pkgfv .contB { padding:14px 24px 8px; text-align:center; }
         .pkgfv .a2s { font-size:14px; color:#7a685a; margin:0 auto; max-width:560px; line-height:1.6; }
         .pkgfv .librow { display:flex; justify-content:center; gap:18px; margin-top:22px; flex-wrap:wrap; }
@@ -163,7 +153,7 @@ export const FirstVisitHome: React.FC<FirstVisitHomeProps> = ({ onBuild, onCreat
         .pkgfv .lfchip .v { background:var(--pink); color:var(--burg); border-radius:4px; padding:2px 6px; font-size:9px; }
         .pkgfv .used { font-family:${FONT_MONO}; font-size:9.5px; letter-spacing:.06em; color:var(--muted); margin-top:16px; }
         .pkgfv .used b { color:var(--burg); font-weight:500; }
-        @media (prefers-reduced-motion: reduce) { .pkgfv .star { animation:none; } .pkgfv .rt { transition:none; } }
+        @media (prefers-reduced-motion: reduce) { .pkgfv .star { animation:none; } .pkgfv .rt { animation:none; opacity:1; } }
         @media (max-width: 900px) { .pkgfv .rt { display:none; } }
       `}</style>
 
@@ -179,7 +169,7 @@ export const FirstVisitHome: React.FC<FirstVisitHomeProps> = ({ onBuild, onCreat
           <button type="button" className="build" onClick={onBuild}>＋ Build your first package</button>
         </div>
 
-        <div className="rt" style={{ opacity: visible ? 1 : 0 }} onMouseEnter={() => { hover.current = true; }} onMouseLeave={() => { hover.current = false; }}>
+        <div className="rt" onAnimationIteration={(e) => { if (e.animationName === "pkgCarCycle") nextSlide(); }}>
           <div className="pile" aria-hidden="true"><i /><i /></div>
           <div className="pgui" style={{ ["--hlc" as string]: d.hl } as React.CSSProperties}>
             <span className="mt">Query letter</span>

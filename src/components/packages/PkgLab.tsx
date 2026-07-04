@@ -51,6 +51,9 @@ export const PkgLab: React.FC = () => {
   const proPill = (
     <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: FONT_MONO, fontSize: 9, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--slate)", background: "#e7eef3", border: "1px solid #cfdde6", borderRadius: 999, padding: "4px 10px" }}>Pro</span>
   );
+  const largerProPill = (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: FONT_MONO, fontSize: 11, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--slate)", background: "#e7eef3", border: "1px solid #cfdde6", borderRadius: 999, padding: "6px 14px" }}>Pro</span>
+  );
   const msChip = (
     <span style={{ display: "inline-flex", alignItems: "center", gap: 9, fontFamily: "'Playfair Display', serif", fontSize: 15, fontWeight: 600, color: "var(--ink)", background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: 10, padding: "9px 16px" }}>
       <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="var(--burg)" strokeWidth={1.8} strokeLinejoin="round"><path d="M4 4h13a2 2 0 012 2v14H6a2 2 0 01-2-2z" /><path d="M4 18a2 2 0 012-2h13" /></svg>Murphy&apos;s Day Out
@@ -78,7 +81,7 @@ export const PkgLab: React.FC = () => {
       </div>
 
       <div style={{ maxWidth: 1200, margin: "0 auto 14px" }}>
-        <HubHeaderBar title="Submission Package Builder" titleAfter={proPill} right={msChip} style={{ padding: "20px 24px", gap: 14, boxShadow: "none" }} titleStyle={{ fontWeight: 700, fontSize: 26, color: "var(--ink)" }} />
+        <HubHeaderBar title={view === "first" ? "Submission Packages" : "Submission Package Builder"} titleAfter={view === "first" ? largerProPill : proPill} right={view === "first" ? undefined : msChip} style={{ padding: "20px 24px", gap: 14, boxShadow: "none" }} titleStyle={{ fontWeight: 700, fontSize: 26, color: "var(--ink)" }} />
       </div>
 
       {view === "first" ? (
