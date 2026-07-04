@@ -308,6 +308,64 @@
 .msv-input:focus { border-color: var(--msv-hue); }
 .msv-modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
 
+/* ── suggestions ── */
+.msv-sugghead {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 14px 20px 4px; margin-top: 6px; border-top: 1px solid var(--msv-hair);
+}
+.msv-suggtt { display: flex; align-items: center; gap: 9px; }
+.msv-suggtt svg {
+  width: 15px; height: 15px; stroke: var(--msv-hue); fill: none; stroke-width: 1.5;
+  stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0;
+}
+.msv-suggtt h4 {
+  font-family: 'Playfair Display', serif; font-size: 14px; font-weight: 500;
+  color: var(--msv-head); margin: 0;
+}
+/* Pro chip — replicates the Builder's shipped badge (slate on tint), precomputed hexes. */
+.msv-prochip {
+  display: inline-flex; align-items: center; font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: #6A89A7;
+  background: #e7eef3; border: 1px solid #cfdde6; border-radius: 999px; padding: 2.5px 8px;
+}
+.msv-suggintro {
+  padding: 10px 20px 18px; font-size: 12.5px; color: var(--msv-muted); max-width: 520px;
+  line-height: 1.55; margin: 0;
+}
+.msv-sugglist { padding: 6px 20px 8px; display: flex; flex-direction: column; }
+.msv-suggrow {
+  display: flex; align-items: flex-start; gap: 14px; padding: 13px 2px;
+  border-bottom: 1px solid var(--msv-hair);
+}
+.msv-suggrow:last-child { border-bottom: none; }
+.msv-suggrow .msv-bk { flex: 1; min-width: 0; }
+.msv-suggrow .msv-t { font-family: 'Playfair Display', serif; font-size: 14.5px; color: var(--msv-ink); }
+.msv-suggrow .msv-why { margin-top: 5px; font-size: 12px; line-height: 1.5; color: var(--msv-muted); }
+.msv-cautions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 7px; }
+.msv-caution {
+  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--msv-gold); border: 1px solid currentColor;
+  border-radius: 99px; padding: 2.5px 8px;
+}
+.msv-suggacts { display: flex; align-items: center; gap: 6px; flex-shrink: 0; padding-top: 2px; }
+.msv-dismiss {
+  width: 28px; height: 28px; border-radius: 8px; border: var(--msv-btnbd);
+  background: var(--msv-btnbg); color: var(--msv-muted); font-size: 13px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.msv-dismiss:hover { color: var(--msv-hue); background: var(--msv-btnhov); }
+.msv-suggfoot { padding: 10px 20px 16px; border-top: 1px solid var(--msv-hair); }
+.msv-shimmerwrap { padding: 4px 20px 14px; }
+.msv-shimmer {
+  height: 52px; border-radius: 9px; margin: 8px 0;
+  background: linear-gradient(100deg, rgba(0, 0, 0, 0.04) 30%, rgba(0, 0, 0, 0.09) 45%, rgba(0, 0, 0, 0.04) 60%);
+  background-size: 220% 100%; animation: msv-shm 1.1s linear infinite;
+}
+@keyframes msv-shm { to { background-position: -120% 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .msv-shimmer { animation: none; }
+}
+
 /* ── zero-manuscript empty state ── */
 .msv-empty { padding: 46px 20px; text-align: center; }
 .msv-empty .msv-lab { display: block; margin-top: 7px; }

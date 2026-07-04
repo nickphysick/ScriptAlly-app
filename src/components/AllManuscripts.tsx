@@ -23,8 +23,10 @@ import { Plus, Send, Pencil, MoreHorizontal, Archive, Trash2, X, Check } from "l
 import { FieldCard } from "./manuscripts/FieldCard";
 import { MaterialsCard } from "./manuscripts/MaterialsCard";
 import { CompShelf } from "./manuscripts/CompShelf";
+import { SuggestionsSection } from "./manuscripts/SuggestionsSection";
 import { isShelvedPresentation, wordCountWhisper } from "../lib/manuscriptPage";
 import { manuscriptComps, withCompAdded, withCompRemoved } from "../lib/comps";
+import { isProUser } from "../lib/suggestComps";
 import "./manuscripts/manuscripts.css";
 
 /** Shared with the Submission Packages page — it reads this key to scope itself on open. */
@@ -342,7 +344,18 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
                   onAdd={addComp}
                   onRemove={removeComp}
                 />
-                {/* Suggestions land beneath the shelf hairline (Phase 4). */}
+                <SuggestionsSection
+                  msId={activeMs.id}
+                  manuscriptTitle={activeMs.title}
+                  ageCategory={activeMs.ageCategory}
+                  genre={activeMs.genre}
+                  logline={activeMs.logline || ""}
+                  shelfTitles={msComps.map((c) => c.title)}
+                  isPro={isProUser(currentUser)}
+                  currentYear={new Date().getFullYear()}
+                  onAddToShelf={addComp}
+                  onUpgrade={() => onNavigate?.("plans")}
+                />
               </div>
               <div className="msv-rightcol">
                 <FieldCard
