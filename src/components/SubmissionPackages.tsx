@@ -23,11 +23,13 @@ import { useScriptAllyDb } from "../lib/db";
 import { ComponentType } from "../types";
 import { HubHeaderBar } from "./shell/HubHeaderBar";
 import { FirstVisitHome } from "./packages/FirstVisitHome";
+import { MaterialsRail } from "./packages/MaterialsRail";
+import { PackagesHome } from "./packages/PackagesHome";
 import { FONT_SERIF, FONT_MONO } from "../lib/designTokens";
 import { ChevronDown, Lock } from "lucide-react";
 
 export const SubmissionPackages: React.FC = () => {
-  const { currentUser, manuscripts, versions, packages } = useScriptAllyDb();
+  const { currentUser, manuscripts, versions, packages, queries } = useScriptAllyDb();
 
   const [activeMsId, setActiveMsId] = useState<string | null>(() =>
     typeof window !== "undefined" ? localStorage.getItem("scriptally_active_manuscript_id") : null,
@@ -59,8 +61,9 @@ export const SubmissionPackages: React.FC = () => {
   const msId = activeMs?.id;
   const msVersions = useMemo(() => versions.filter((v) => v.manuscriptId === msId), [versions, msId]);
   const msPackages = useMemo(() => packages.filter((p) => p.manuscriptId === msId && p.status !== "Retired"), [packages, msId]);
+  const msQueries = useMemo(() => queries.filter((q) => q.manuscriptId === msId), [queries, msId]);
   // First-visit: no materials AND no (active) packages for this manuscript. The materials rail and the
-  // packages home appear from Phase 6 once either count is non-zero.
+  // packages home appear once either count is non-zero.
   const firstVisit = msVersions.length === 0 && msPackages.length === 0;
 
   if (!currentUser) return null;
@@ -72,8 +75,10 @@ export const SubmissionPackages: React.FC = () => {
   };
   const multiMs = manuscripts.length > 1;
 
-  // Later-phase targets — stubbed for Phase 5 (composer = P7, create-modal = P9, worked-examples = P10).
+  // Later-phase targets — stubbed until their phases (composer = P7, materials manager = P8,
+  // create-modal = P9, worked-examples = P10).
   const openComposer = () => {};
+  const openManage = () => {};
   const openCreate = (_type: ComponentType) => {};
   const openExample = (_key: string) => {};
 
@@ -154,16 +159,15 @@ export const SubmissionPackages: React.FC = () => {
             titleStyle={{ fontWeight: 700, fontSize: 26, color: "var(--ink)" }}
           />
           <div className="pkg-workspace" style={{ flex: 1, minHeight: 0, display: "flex", gap: 14 }}>
-            {/* Content pane — hugs content height and scrolls internally (mockup .pane). The materials
-                rail joins this row in Phase 6; the home / composer / gallery views fill the pane P5+. */}
+            {/* Materials rail — shown once the manuscript has any material or package (mockup .qlist). */}
+            {!firstVisit && <MaterialsRail versions={msVersions} onCreate={openCreate} onManage={openManage} />}
+            {/* Content pane — hugs content height and scrolls internally (mockup .pane). First-visit is
+                white in both themes; the packages home sits on the themed pane surface. */}
             <section className="pkg-pane" style={{ flex: 1, minWidth: 0, background: firstVisit ? "#fffefb" : "var(--pane)", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", alignSelf: "flex-start", maxHeight: "100%", overflowY: "auto", padding: "16px 16px 20px" }}>
               {firstVisit ? (
                 <FirstVisitHome onBuild={openComposer} onCreate={openCreate} onExample={openExample} />
               ) : (
-                /* Has materials or packages — the packages home lands in Phase 6. */
-                <div style={{ padding: "44px 8px", textAlign: "center", fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 14, color: "var(--muted)" }}>
-                  Your packages will appear here — the packages home arrives in the next phase.
-                </div>
+                <PackagesHome packages={msPackages} versions={msVersions} queries={msQueries} onNew={openComposer} onEdit={() => openComposer()} onCopy={() => openComposer()} onExample={openExample} />
               )}
             </section>
           </div>
