@@ -1,0 +1,148 @@
+/**
+ * Marketing tier — MarketingShell nav + landing page styles (design ref:
+ * design-refs/landing-v13.html, pixel-authoritative; hexes copied verbatim from its :root).
+ *
+ * Scoping: everything lives under .mk- prefixed classes and the .mk-scope wrapper — the
+ * marketing pages render OUTSIDE the AppShell theme classes (.t-capp etc), so this file
+ * carries its own token copy rather than depending on workspace theme vars. The ref's body
+ * font is Inter; the app-wide precedent (SidebarShell, kept ever since) is Source Sans Pro,
+ * so the marketing tier stays on the app's own sans — logged in BUILD-REPORT.md.
+ * All tints are pre-computed hexes — no colour-mix() (repo rule).
+ */
+
+.mk-scope {
+  --mk-desk: #f2ede7;
+  --mk-card: #fffefb;
+  --mk-parch: #fdfaf5;
+  --mk-hair: #e7ddd2;
+  --mk-bd: #ded3c2;
+  --mk-head: #5d4037;
+  --mk-ink: #3a1c14;
+  --mk-label: #9c8878;
+  --mk-muted: #8a7a6c;
+  --mk-burg: #7c3a2a;
+  --mk-band-a: #ece5d8;
+  --mk-band-b: #e5ddcd;
+  --mk-centre: #f6e4da;
+  --mk-sage: #e9ede6;
+  --mk-sage-t: #5a6e58;
+  --mk-pink-a: #f3ddd2;
+  --mk-pink-b: #eed2c5;
+  font-family: "Source Sans Pro", system-ui, -apple-system, sans-serif;
+  background: var(--mk-desk);
+  color: var(--mk-ink);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Cappuccino-conformant buttons: white fill, taupe hairline, mocha text ── */
+.mk-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 11px 22px;
+  border-radius: 11px;
+  background: #ffffff;
+  border: 1px solid var(--mk-bd);
+  color: var(--mk-head);
+  text-decoration: none;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.05);
+}
+.mk-btn:hover { background: #f4f2ef; }
+.mk-btn.mk-ghost {
+  background: none;
+  border: none;
+  box-shadow: none;
+  color: #6a5a50;
+  padding: 11px 8px;
+}
+.mk-btn.mk-ghost:hover { color: var(--mk-head); background: none; }
+.mk-tlink {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--mk-burg);
+  text-decoration: none;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: inherit;
+  border-bottom: 1px solid rgba(124, 58, 42, 0.35);
+  padding: 0 0 1px;
+}
+.mk-tlink:hover { border-bottom-color: var(--mk-burg); }
+
+/* ── Pinned marketing nav — desk-coloured; hairline appears once scrolled (scrollY > 4) ── */
+.mk-navwrap {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  background: var(--mk-desk);
+  border-bottom: 1px solid transparent;
+  transition: border-color 180ms ease;
+}
+.mk-navwrap.mk-scrolled { border-bottom-color: #d8d2c8; }
+.mk-nav {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  padding: 16px 56px;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+.mk-brand { display: flex; align-items: center; gap: 10px; }
+.mk-brand-link { cursor: pointer; background: none; border: none; padding: 0; font-family: inherit; }
+.mk-monogram {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #dfe7ec;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 17px;
+  color: #3a4650;
+  flex: none;
+}
+.mk-wordmark {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 21px;
+  font-weight: 500;
+  color: var(--mk-ink);
+}
+.mk-links { display: flex; gap: 26px; margin-left: 16px; }
+.mk-links button {
+  font-size: 13px;
+  color: #6a5a50;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0;
+}
+.mk-links button:hover { color: var(--mk-head); }
+.mk-navright { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.mk-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--mk-parch);
+  border: 1px solid rgba(124, 58, 42, 0.3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 13px;
+  color: var(--mk-burg);
+  flex: none;
+}
+
+@media (max-width: 720px) {
+  .mk-nav { padding: 14px 22px; gap: 18px; }
+  .mk-links { display: none; }
+}

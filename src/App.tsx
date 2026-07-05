@@ -31,6 +31,12 @@ import { AddAgentFocusForm } from "./components/AddAgentFocusForm";
 import { AddManuscriptFocusForm } from "./components/AddManuscriptFocusForm";
 import { HelpCentre } from "./components/HelpCentre";
 import { AccountSettings } from "./components/AccountSettings";
+// Route tiers (landing build): marketing chrome for "/" + /pricing, focus chrome for
+// /account · /plans · /help; the workspace keeps the AppShell below, untouched.
+import { MarketingShell } from "./marketing/MarketingShell";
+import { Landing } from "./marketing/Landing";
+import { tierForPath, WORKSPACE_PATHS } from "./marketing/routeTiers";
+import { FocusShell } from "./components/shell/FocusShell";
 import { Onboarding } from "./components/Onboarding";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { StatusDotDemo } from "./components/StatusDotDemo";
@@ -296,6 +302,7 @@ const useHash = () => {
  */
 function pathFor(tab: string, subPageName?: string): string {
   switch (tab) {
+    case "landing": return "/"; // marketing front door (wordmarks navigate here from any tier)
     case "dashboard": return "/dashboard";
     case "queries": {
       // The orphaned Landing keeps its guarded niche behind a param; named database aliases land
@@ -321,11 +328,8 @@ function pathFor(tab: string, subPageName?: string): string {
   }
 }
 
-const KNOWN_PATHS = new Set([
-  "/dashboard", "/queries", "/agents", "/agents/discover",
-  "/manuscripts", "/manuscripts/packages", "/pricing", "/plans", "/help", "/account", "/import",
-  "/email-import-dev",
-]);
+// The workspace route set lives in marketing/routeTiers.ts (one source for the tier model);
+// marketing + focus paths return from their tier branches before the unknown-path redirect.
 
 function AppContent() {
   const { currentUser, authReady, updateUserProfile } = useScriptAllyDb();
@@ -468,9 +472,31 @@ function AppContent() {
     );
   }
 
-  // Logged-out front door: the public marketing landing is now the separate holding page, and the
-  // app is reached via its "Log in" link. As a founding-members acquisition page the screen defaults
-  // to Create account; an explicit #/login (or #/signin) deep link opens it in sign-in mode instead.
+  // ── Marketing tier (public): "/" and "/pricing" render for EVERYONE. A signed-in user is
+  // never auto-redirected away from the landing — their nav shows "Open dashboard" instead.
+  // The pre-auth hashes stay the auth transport on these routes (#/login · #/signin → sign-in,
+  // #/signup → create account — the holding page's existing links keep working); once auth
+  // completes while a hash is set, the journey finishes in the workspace.
+  const tier = tierForPath(path);
+  if (tier === "marketing") {
+    const authHash =
+      hash === "#/login" || hash === "#/signin" ? "login"
+      : hash === "#/signup" ? "signup"
+      : null;
+    if (authHash) {
+      if (!currentUser) return <Auth initialMode={authHash} />;
+      return <Navigate to="/dashboard" replace />; // auth just completed (or a stale link) → workspace
+    }
+    return (
+      <MarketingShell user={currentUser} onNavigate={handleNavigate} path={path}>
+        {path === "/pricing" ? <Pricing /> : <Landing onNavigate={handleNavigate} />}
+      </MarketingShell>
+    );
+  }
+
+  // Logged-out front door for the app tiers. As a founding-members acquisition page the screen
+  // defaults to Create account; an explicit #/login (or #/signin) deep link opens it in sign-in
+  // mode instead. (Deep links keep their URL until sign-in — unchanged behaviour.)
   if (!currentUser) {
     if (hash === "#/login" || hash === "#/signin") return <Auth initialMode="login" />;
     return <Auth initialMode="signup" />;
@@ -499,9 +525,26 @@ function AppContent() {
     );
   }
 
-  // Any unknown path (including "/") lands on the dashboard. All the early returns above (dev
-  // labs, auth, onboarding) run first, so a logged-out deep link keeps its URL until sign-in.
-  if (!KNOWN_PATHS.has(path)) {
+  // ── Focus tier (authed — the guard above already ran): slim-bar chrome, no rail. The
+  // workspace AppShell unmounts on these routes by design (the rail disappears); page-local
+  // workspace state resets on a tier crossing, while Firestore data lives in DbProvider above.
+  if (tier === "focus") {
+    return (
+      <FocusShell path={path} user={currentUser} onNavigate={handleNavigate}>
+        {path === "/account" ? (
+          <AccountSettings onNavigate={handleNavigate} />
+        ) : path === "/plans" ? (
+          <PlansPage />
+        ) : (
+          <HelpCentre />
+        )}
+      </FocusShell>
+    );
+  }
+
+  // Any unknown path lands on the dashboard. All the early returns above (dev labs, marketing,
+  // auth, onboarding, focus) run first, so a logged-out deep link keeps its URL until sign-in.
+  if (!WORKSPACE_PATHS.has(path)) {
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -570,25 +613,15 @@ function AppContent() {
           )}
         </StagePage>
 
-        {/* Secondary pages mount on demand (same lifecycle as the old conditional render). */}
-        {routeKey === "pricing" && (
-          <StagePage active><Pricing /></StagePage>
-        )}
-        {routeKey === "plans" && (
-          <StagePage active><PlansPage /></StagePage>
-        )}
+        {/* Secondary pages mount on demand (same lifecycle as the old conditional render).
+            /pricing, /plans, /help and /account left this shell for the marketing/focus tiers
+            (see the tier branches above) — the workspace keeps only its own routes. */}
         {/* TEMP (Prompt 2): email-import UI dev preview — relocate the entry button to Record-a-response next prompt, then delete this route. */}
         {routeKey === "email-import-dev" && (
           <StagePage active><EmailImportDevPage onNavigate={handleNavigate} onSuccessToast={(msg) => setSuccessToast(msg)} /></StagePage>
         )}
         {routeKey === "import" && (
           <StagePage active><ImportCsv onNavigate={handleNavigate} /></StagePage>
-        )}
-        {routeKey === "help" && (
-          <StagePage active><HelpCentre /></StagePage>
-        )}
-        {routeKey === "account" && (
-          <StagePage active><AccountSettings onNavigate={handleNavigate} /></StagePage>
         )}
 
         {/* Footer copyright stamp block — in stage flow; hidden on the Queries workspace and the
