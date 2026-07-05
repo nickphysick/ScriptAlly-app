@@ -87,10 +87,10 @@ const RailNavItem: React.FC<{
       display: "flex",
       alignItems: "center",
       gap: 10,
-      padding: muted ? "7px 10px" : "8px 10px",
+      padding: muted ? "8px 10px" : "9px 10px",
       borderRadius: 10,
       fontFamily: FONT_SANS,
-      fontSize: muted ? 12 : 12.5,
+      fontSize: muted ? 13 : 13.5,
       fontWeight: 500,
       color: active
         ? `var(--rail-ink, ${bodyInk})`
@@ -132,7 +132,7 @@ const RailNavItem: React.FC<{
         transition: "color 0.14s",
       }}
     >
-      <Icon style={{ width: 15, height: 15 }} />
+      <Icon style={{ width: muted ? 15 : 16, height: muted ? 15 : 16 }} />
       {badge && (
         <span
           style={{
@@ -243,7 +243,7 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
     <aside
       className={`arail${collapsed ? " arail-collapsed" : ""}`}
       style={{
-        width: collapsed ? 60 : 216,
+        width: collapsed ? 60 : 240,
         minWidth: 0,
         flexShrink: 0,
         // Rail frame per the three-themes ref, flush-panel translation: the mockup's card
@@ -343,7 +343,7 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
             border: "var(--rail-btn-bdw, 1px) solid var(--rail-btn-bd, #ded3c2)",
             color: "var(--rail-btn-tx, #5d4037)",
             borderRadius: 11, padding: "10px 13px",
-            fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500,
+            fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 500,
             boxShadow: "var(--rail-btn-shadow, 0 1px 2px rgba(58,28,20,0.05))",
             cursor: "pointer", whiteSpace: "nowrap", transition: "background 0.14s",
           }}
@@ -368,7 +368,7 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
               <div
                 className="arail-eyebrow"
                 style={{
-                  fontFamily: FONT_MONO, fontSize: 7.5, letterSpacing: "0.18em",
+                  fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: "0.18em",
                   textTransform: "uppercase", color: "var(--rail-label, #9c8878)",
                   padding: gi === 1 ? "12px 10px 6px" : "14px 10px 6px",
                 }}
@@ -413,12 +413,12 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
               onMouseLeave={(e) => { e.currentTarget.style.background = "var(--rail-btn-bg, #ffffff)"; }}
             >
               <span style={{ display: "flex", color: `var(--rail-accent, ${burgundy})` }}>
-                {key === "query" ? <Send style={{ width: 15, height: 15 }} /> : <User style={{ width: 15, height: 15 }} />}
+                {key === "query" ? <Send style={{ width: 16, height: 16 }} /> : <User style={{ width: 16, height: 16 }} />}
               </span>
               <span
                 className="arail-label"
                 style={{
-                  fontFamily: FONT_MONO, fontSize: 6.8, letterSpacing: "0.1em",
+                  fontFamily: FONT_MONO, fontSize: 7.5, letterSpacing: "0.1em",
                   textTransform: "uppercase", color: "var(--rail-btn-tx, #5d4037)",
                 }}
               >
@@ -501,7 +501,7 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
               <span style={{ display: "block", fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: bodyInk, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                 {currentUser.name}
               </span>
-              <span style={{ display: "block", fontFamily: FONT_MONO, fontSize: 8, letterSpacing: "0.08em", textTransform: "uppercase", color: labelColor }}>
+              <span style={{ display: "block", fontFamily: FONT_MONO, fontSize: 7, letterSpacing: "0.08em", textTransform: "uppercase", color: labelColor }}>
                 {planLabel}
               </span>
             </span>
