@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — The rail, v5 (record response on top)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--desk:#f2ede7;--card:#fffefb;--parch:#fdfaf5;--hair:#e7ddd2;--bd:#ded3c2;
+  --head:#5d4037;--ink:#3a1c14;--label:#9c8878;--muted:#8a7a6c;--burg:#7c3a2a;--centre:#f6e4da;--pill:#f1e9df}
+body{font-family:'Inter',sans-serif;background:var(--desk);color:var(--ink);padding:34px 30px 60px}
+button{font-family:inherit;cursor:pointer;background:none;border:none;color:inherit;text-align:left}
+h1{font-family:'Playfair Display',serif;font-size:26px;font-weight:500;color:var(--head)}
+.sub{font-size:12.5px;font-weight:300;color:var(--muted);margin-top:6px;max-width:720px;line-height:1.6}
+.row{display:flex;gap:34px;margin-top:30px;align-items:flex-start}
+.col{width:264px;flex:none}
+
+.rail{position:relative;background:var(--card);border:1px solid var(--hair);border-radius:16px;height:660px;
+  box-shadow:0 1px 3px rgba(58,28,20,0.05),0 12px 30px rgba(58,28,20,0.07);
+  display:flex;flex-direction:column;overflow:hidden}
+.brand{display:flex;align-items:center;gap:9px;padding:18px 20px 14px}
+.monogram{width:26px;height:26px;border-radius:50%;background:#dfe7ec;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:13px;color:#3a4650}
+.wordmark{font-family:'Playfair Display',serif;font-size:17px;font-weight:500}
+.foot{border-top:1px solid var(--hair);padding:12px 18px;display:flex;align-items:center;gap:9px}
+.foot .avatar{width:28px;height:28px;border-radius:50%;background:var(--parch);border:1px solid rgba(124,58,42,0.3);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:12px;color:var(--burg)}
+.foot .un{font-size:11.5px;font-weight:500}
+.foot .up{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.12em;color:var(--label);text-transform:uppercase}
+.nav{padding:2px 12px;flex:1}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--label);padding:14px 10px 6px}
+.item{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border-radius:10px;font-size:12.5px;font-weight:500;color:#5a4a40;margin-bottom:1px}
+.item svg{width:15px;height:15px;stroke:var(--burg);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.item:hover{background:#f7f3ed}
+.item.on{background:var(--pill);color:var(--head)}
+.util{padding:6px 12px 10px;border-top:1px solid var(--hair);margin:0 0}
+.util .item{font-size:12px;color:var(--muted)}
+.util .item svg{stroke:var(--muted)}
+.util .item:hover{color:var(--head)}
+.util .item:hover svg{stroke:var(--burg)}
+
+/* capture arrangements */
+.cap{margin:0 12px 10px}
+.cap.hide{display:none}
+/* A · row of three */
+.cap-a{display:flex;gap:7px}
+.cap-a button{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;background:#fff;border:1px solid var(--bd);border-radius:11px;padding:10px 4px 8px;box-shadow:0 1px 2px rgba(58,28,20,0.05)}
+.cap-a button:hover{background:#f4f2ef}
+.cap-a svg{width:15px;height:15px;stroke:var(--burg);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.cap-a .l{font-family:'JetBrains Mono',monospace;font-size:6.8px;letter-spacing:.1em;text-transform:uppercase;color:var(--head)}
+/* B · primary + two minis */
+.cap-b{display:flex;flex-direction:column;gap:8px}
+.capbtn{display:flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--bd);color:var(--head);border-radius:11px;padding:10px 13px;font-size:12.5px;font-weight:500;box-shadow:0 1px 2px rgba(58,28,20,0.05)}
+.capbtn:hover{background:#f4f2ef}
+.capbtn kbd{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7.5px;background:var(--parch);border:1px solid var(--hair);border-radius:5px;padding:2px 6px;color:var(--label)}
+.capmini{display:flex;gap:8px}
+.capmini button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--parch);border:1px solid var(--hair);border-radius:9px;padding:7px 0;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.08em;text-transform:uppercase;color:var(--head)}
+.capmini button:hover{border-color:var(--bd)}
+/* C · stacked ledger */
+.cap-c{display:flex;flex-direction:column;background:#fff;border:1px solid var(--bd);border-radius:12px;overflow:hidden;box-shadow:0 1px 2px rgba(58,28,20,0.05)}
+.cap-c button{display:flex;align-items:center;gap:10px;padding:9px 13px;font-size:12px;font-weight:500;color:var(--head);border-bottom:1px solid #f2e9db}
+.cap-c button:last-child{border-bottom:none}
+.cap-c button:hover{background:#f7f3ed}
+.cap-c svg{width:14px;height:14px;stroke:var(--burg);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.cap-c kbd{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7px;background:var(--parch);border:1px solid var(--hair);border-radius:5px;padding:1px 5px;color:var(--label)}
+
+/* picker */
+.pick{display:flex;flex-direction:column;gap:10px;padding-top:26px}
+.pick .vlab{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--burg)}
+.pick button.opt{border:1px solid var(--bd);background:var(--card);border-radius:11px;padding:10px 14px;font-size:12px;color:#5a4a40;width:260px}
+.pick button.opt small{display:block;font-size:10px;font-weight:300;color:var(--muted);margin-top:3px;line-height:1.45}
+.pick button.opt.on{border-color:var(--burg);background:var(--centre);color:var(--head)}
+</style>
+</head>
+<body>
+
+<h1>The rail — v5</h1>
+<p class="sub">Record a response takes the top slot — the most frequent capture, always first in reach. Query and Agent
+capture sit at the foot above Settings and Help.</p>
+
+<div class="row">
+  <div class="col">
+    <div class="rail">
+      <div class="brand"><span class="monogram">S</span><span class="wordmark">ScriptAlly</span></div>
+
+      <div class="cap" style="margin:2px 12px 8px">
+        <button class="capbtn" style="width:100%"><svg width="14" height="14" viewBox="0 0 24 24" style="stroke:var(--burg);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 5 5v1"/></svg>+ Record a response</button>
+      </div>
+      <div class="nav">
+        <button class="item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</button>
+        <div class="eyebrow">Querying</div>
+        <button class="item on"><svg viewBox="0 0 24 24"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4 18-7z"/></svg>Queries Hub</button>
+        <button class="item"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg>Rejection analytics</button>
+        <div class="eyebrow">Agents</div>
+        <button class="item"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17.5" cy="9" r="2.5"/><path d="M16 14.5c3 .3 5.5 2.3 5.5 5.5"/></svg>Agents database</button>
+        <button class="item"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>Discover new agents</button>
+        <div class="eyebrow">Manuscripts</div>
+        <button class="item"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14z"/></svg>Your manuscripts</button>
+        <button class="item"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg>Submission packages</button>
+      </div>
+
+      <div class="cap cap-a">
+        <button><svg viewBox="0 0 24 24"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4 18-7z"/></svg><span class="l">+ Query</span></button>
+        <button><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></svg><span class="l">+ Agent</span></button>
+      </div>
+
+      <div class="util">
+        <button class="item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</button>
+        <button class="item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 4.9.8c0 1.7-2.4 2.2-2.4 3.7"/><path d="M12 17h.01"/></svg>Help centre</button>
+      </div>
+      <div class="foot"><span class="avatar">B</span><div><div class="un">Bethus Wethus</div><div class="up">Free</div></div></div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
