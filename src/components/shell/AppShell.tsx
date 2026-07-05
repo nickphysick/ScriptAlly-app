@@ -90,7 +90,7 @@ const RailNavItem: React.FC<{
       padding: muted ? "8px 10px" : "9px 10px",
       borderRadius: 10,
       fontFamily: FONT_SANS,
-      fontSize: muted ? 13 : 14,
+      fontSize: muted ? 13 : 15,
       fontWeight: active ? 700 : 500,
       color: active
         ? `var(--rail-ink, ${bodyInk})`
@@ -306,15 +306,15 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
         <ChevronLeft style={{ width: 12, height: 12, transition: "transform 200ms ease" }} />
       </button>
 
-      {/* Wordmark + monogram (the real brand mark stands in for the mockup's S disc) */}
+      {/* Brand lockup — the new mark sits tight against the wordmark, the pair centred as one */}
       <button
         type="button"
         className="arail-head"
         onClick={() => { onNavigate("dashboard"); closeAll(); }}
         aria-label="ScriptAlly — go to dashboard"
-        style={{ display: "flex", alignItems: "center", gap: 8, padding: "18px 16px 14px", minHeight: 58, background: "transparent", border: "none", cursor: "pointer", width: "100%" }}
+        style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4, padding: "16px 12px 12px", minHeight: 58, background: "transparent", border: "none", cursor: "pointer", width: "100%" }}
       >
-        <img src="/scriptally-logo-v2.png" alt="" aria-hidden="true" width={30} height={30} style={{ width: 30, height: 30, flexShrink: 0, display: "block" }} />
+        <img src="/scriptally-logo-new.png" alt="" aria-hidden="true" width={40} height={40} style={{ width: 40, height: 40, flexShrink: 0, display: "block" }} />
         <span className="arail-wordmark" style={{ display: "flex", overflow: "hidden" }}>
           <ScriptAllyLogo size="sm" textColor={burgundy} iconColor={burgundy} />
         </span>
@@ -343,7 +343,7 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
             border: "var(--rail-btn-bdw, 1px) solid var(--rail-btn-bd, #ded3c2)",
             color: "var(--rail-btn-tx, #5d4037)",
             borderRadius: 11, padding: "10px 13px",
-            fontFamily: FONT_SANS, fontSize: 14, fontWeight: 500,
+            fontFamily: FONT_SANS, fontSize: 15, fontWeight: 500,
             boxShadow: "var(--rail-btn-shadow, 0 1px 2px rgba(58,28,20,0.05))",
             cursor: "pointer", whiteSpace: "nowrap", transition: "background 0.14s",
           }}
@@ -368,7 +368,7 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
               <div
                 className="arail-eyebrow"
                 style={{
-                  fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.18em",
+                  fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.18em",
                   textTransform: "uppercase", color: "var(--rail-label, #9c8878)",
                   padding: gi === 1 ? "12px 10px 6px" : "14px 10px 6px",
                 }}
