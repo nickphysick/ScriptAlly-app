@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Chrome overview (focus chrome + route tiers)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--desk:#f2ede7;--card:#fffefb;--parch:#fdfaf5;--hair:#e7ddd2;--bd:#ded3c2;
+  --head:#5d4037;--ink:#3a1c14;--label:#9c8878;--muted:#8a7a6c;--burg:#7c3a2a;
+  --bandA:#ece5d8;--bandB:#e5ddcd;--centre:#f6e4da}
+body{font-family:'Inter',sans-serif;background:var(--desk);color:var(--ink)}
+button{font-family:inherit;cursor:pointer}
+.mock{position:fixed;top:10px;right:12px;z-index:99;display:flex;gap:6px}
+.mock button{border:1px solid var(--bd);background:var(--card);border-radius:99px;padding:5px 13px;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--label)}
+.mock button.on{background:var(--centre);color:var(--burg);font-weight:700}
+.view{display:none}.view.on{display:block}
+.brand{display:flex;align-items:center;gap:10px}
+.monogram{width:26px;height:26px;border-radius:50%;background:#dfe7ec;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:13px;color:#3a4650}
+.wordmark{font-family:'Playfair Display',serif;font-size:17px;font-weight:500}
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--parch);border:1px solid rgba(124,58,42,0.3);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:13px;color:var(--burg)}
+.btn{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:500;padding:8px 15px;border-radius:10px;background:#fff;border:1px solid var(--bd);color:var(--head);text-decoration:none}
+.btn:hover{background:#f4f2ef}
+
+/* ===== FOCUS CHROME ===== */
+.fbar{position:sticky;top:0;background:var(--card);border-bottom:1px solid var(--hair);display:flex;align-items:center;gap:16px;padding:13px 32px;z-index:5}
+.fbar .crumb{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--label)}
+.fbar .right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.fpage{max-width:860px;margin:0 auto;padding:44px 32px 90px}
+.fpage h1{font-family:'Playfair Display',serif;font-size:34px;font-weight:500;color:var(--head)}
+.fpage .fsub{font-size:13.5px;font-weight:300;color:var(--muted);margin-top:8px}
+.fsec{background:var(--card);border:1px solid var(--hair);border-radius:16px;margin-top:26px;overflow:hidden;box-shadow:0 1px 3px rgba(58,28,20,0.05)}
+.fband{background:linear-gradient(135deg,var(--bandA),var(--bandB));border-bottom:1px solid rgba(112,94,70,0.25);padding:13px 22px;display:flex;align-items:center;gap:10px}
+.fband .tick{width:4px;height:14px;border-radius:2px;background:var(--burg)}
+.fband h3{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;color:var(--head)}
+.frow{display:flex;align-items:center;gap:14px;padding:15px 22px;border-bottom:1px solid #f2e9db;font-size:13px}
+.frow:last-child{border-bottom:none}
+.frow .fk{width:170px;flex:none;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--label)}
+.frow input{flex:1;border:1px solid var(--hair);border-radius:9px;padding:9px 12px;font-size:13px;font-family:'Inter',sans-serif;background:#fff;color:var(--ink);outline:none;max-width:340px}
+.frow .act{margin-left:auto;background:#fff;border:1px solid var(--bd);color:var(--head);font-size:11.5px;font-weight:500;border-radius:9px;padding:8px 15px}
+
+/* ===== FLOW MAP ===== */
+.map{max-width:1060px;margin:0 auto;padding:56px 32px 90px}
+.map h1{font-family:'Playfair Display',serif;font-size:32px;font-weight:500;color:var(--head)}
+.map .msub{font-size:13.5px;font-weight:300;color:var(--muted);margin-top:8px;max-width:620px;line-height:1.6}
+.tier{background:var(--card);border:1px solid var(--hair);border-radius:16px;margin-top:22px;overflow:hidden;box-shadow:0 1px 3px rgba(58,28,20,0.05)}
+.tier .tband{display:flex;align-items:center;gap:10px;padding:13px 22px;border-bottom:1px solid rgba(112,94,70,0.2)}
+.tier.t1 .tband{background:linear-gradient(135deg,#f3ddd2,#eed2c5)}
+.tier.t2 .tband{background:linear-gradient(135deg,var(--bandA),var(--bandB))}
+.tier.t3 .tband{background:linear-gradient(135deg,#e9e2d6,#e0d8c9)}
+.tband .tno{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.16em;color:var(--burg);text-transform:uppercase}
+.tband h3{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;color:var(--head)}
+.tband .chrome{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.tbody{padding:16px 22px 18px;display:flex;gap:26px;align-items:flex-start}
+.routes{display:flex;flex-wrap:wrap;gap:8px;flex:1}
+.rpill{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--head);background:var(--parch);border:1px solid var(--bd);border-radius:8px;padding:6px 11px}
+.rpill b{color:var(--burg);font-weight:700}
+.tnotes{width:46%;flex:none;font-size:12px;font-weight:300;line-height:1.65;color:#5a4a40}
+.tnotes b{font-weight:500;color:var(--ink)}
+.arrows{margin-top:26px;background:var(--parch);border:1px solid var(--bd);border-radius:16px;padding:20px 24px;position:relative;overflow:hidden}
+.arrows::after{content:'';position:absolute;inset:7px;border:1px solid var(--burg);border-radius:11px;opacity:.4;pointer-events:none}
+.arrows h4{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;color:var(--head);margin-bottom:12px}
+.aline{display:flex;gap:12px;align-items:baseline;padding:6px 0;font-size:12.5px;color:#5a4a40;border-top:1px solid var(--hair)}
+.aline:first-of-type{border-top:none}
+.aline .frm{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--burg);width:210px;flex:none;letter-spacing:.04em}
+</style>
+</head>
+<body>
+
+<div class="mock">
+  <button data-v="focus" class="on">Focus chrome · Account</button>
+  <button data-v="map">How it fits together</button>
+</div>
+
+<!-- ===== VIEW 1 · FOCUS CHROME (Account) ===== -->
+<div class="view on" id="v-focus">
+  <div class="fbar">
+    <div class="brand"><div class="monogram">S</div><div class="wordmark">ScriptAlly</div></div>
+    <span class="crumb">/ Account</span>
+    <div class="right">
+      <a class="btn" href="#">&larr; Back to dashboard</a>
+      <span class="avatar">W</span>
+    </div>
+  </div>
+  <div class="fpage">
+    <h1>My account</h1>
+    <p class="fsub">Your details, plan and preferences — the workshop is one click back.</p>
+    <div class="fsec">
+      <div class="fband"><span class="tick"></span><h3>Account details</h3></div>
+      <div class="frow"><span class="fk">Display name</span><input value="Writer"></div>
+      <div class="frow"><span class="fk">Email</span><input value="writer@example.com"></div>
+      <div class="frow"><span class="fk">Password</span><button class="act">Change password</button></div>
+    </div>
+    <div class="fsec">
+      <div class="fband"><span class="tick"></span><h3>Plan</h3></div>
+      <div class="frow"><span class="fk">Current plan</span><span>Free</span><button class="act" style="border-color:var(--burg);color:var(--burg)">Upgrade to Pro</button></div>
+      <div class="frow"><span class="fk">Smart email drops</span><span>1 free drop remaining</span></div>
+    </div>
+    <div class="fsec">
+      <div class="fband"><span class="tick"></span><h3>Preferences</h3></div>
+      <div class="frow"><span class="fk">Theme</span><span>Cappuccino</span><button class="act">Change</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== VIEW 2 · FLOW MAP ===== -->
+<div class="view" id="v-map">
+  <div class="map">
+    <h1>Three tiers of chrome</h1>
+    <p class="msub">Every route belongs to exactly one tier, and each tier owns its navigation.
+    Moving between tiers is always a deliberate step — into the workshop, out to the desk,
+    or back to the shop window.</p>
+
+    <div class="tier t1">
+      <div class="tband"><span class="tno">Tier 1</span><h3>Marketing</h3><span class="chrome">Chrome: pinned marketing nav · auth-aware right side</span></div>
+      <div class="tbody">
+        <div class="routes"><span class="rpill"><b>/</b> — landing</span><span class="rpill"><b>/pricing</b> — public pricing</span></div>
+        <div class="tnotes"><b>Everyone lands here, always.</b> Logged out: Log in + Start tracking.
+        Logged in: avatar + Open dashboard — no auto-redirect away from <b>/</b>.
+        The pinned nav grows its grey hairline on scroll.</div>
+      </div>
+    </div>
+
+    <div class="tier t2">
+      <div class="tband"><span class="tno">Tier 2</span><h3>Focus</h3><span class="chrome">Chrome: slim top bar · no rail</span></div>
+      <div class="tbody">
+        <div class="routes"><span class="rpill"><b>/account</b></span><span class="rpill"><b>/plans</b> — manage subscription</span><span class="rpill"><b>/help</b></span></div>
+        <div class="tnotes"><b>Step-out-of-the-workshop pages.</b> Wordmark (→ /), mono breadcrumb,
+        ← Back to dashboard, avatar. Settings and money decisions get quiet, not navigation.</div>
+      </div>
+    </div>
+
+    <div class="tier t3">
+      <div class="tband"><span class="tno">Tier 3</span><h3>Workspace</h3><span class="chrome">Chrome: AppShell rail · unchanged</span></div>
+      <div class="tbody">
+        <div class="routes">
+          <span class="rpill"><b>/dashboard</b></span><span class="rpill"><b>/queries</b> · ?q=</span>
+          <span class="rpill"><b>/agents</b> · /discover</span><span class="rpill"><b>/manuscripts</b> · /packages</span>
+          <span class="rpill"><b>/import</b></span>
+        </div>
+        <div class="tnotes"><b>The workshop.</b> Rail, themes, timeline drawer — exactly as built.
+        Nothing in this project touches workspace chrome.</div>
+      </div>
+    </div>
+
+    <div class="arrows">
+      <h4>The journeys between them</h4>
+      <div class="aline"><span class="frm">/ → signup → /dashboard</span>Get started completes into the workspace; first-run onboarding untouched.</div>
+      <div class="aline"><span class="frm">/ (logged in)</span>Stays on the landing; "Open dashboard" is the door. One canonical front page for everyone.</div>
+      <div class="aline"><span class="frm">rail avatar/gear → /account</span>Rail disappears; focus bar appears. "← Back to dashboard" returns to the workspace.</div>
+      <div class="aline"><span class="frm">in-app upgrade CTAs → /plans</span>Subscription management lives in focus chrome; the public /pricing stays marketing.</div>
+      <div class="aline"><span class="frm">focus wordmark → /</span>The wordmark always goes to the front door, from any tier.</div>
+      <div class="aline"><span class="frm">#/login · #/signin</span>Pre-auth hashes keep working; login is reachable from the marketing nav.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.mock button[data-v]').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('on'); });
+    document.getElementById('v-' + b.getAttribute('data-v')).classList.add('on');
+    document.querySelectorAll('.mock button[data-v]').forEach(function(x){ x.classList.toggle('on', x===b); });
+  });
+});
+</script>
+</body>
+</html>
