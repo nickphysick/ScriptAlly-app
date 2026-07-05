@@ -170,21 +170,46 @@
   margin-bottom: 12px;
   flex: none;
 }
-.agv2 .ag-chipgrp { display: flex; gap: 5px; align-items: center; }
-.agv2 .ag-chip {
+/* Segmented three-way filter toggles (the rail theme-switcher pattern, page tokens). The active
+   segment must read unmistakably STRONGER than inactive: band fill + header-colour text (+ the
+   Cappuccino hairline) vs muted text on the panel surface. */
+.agv2 .ag-seggrp { display: flex; align-items: center; gap: 8px; }
+.agv2 .ag-seglbl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--ag-muted);
+  flex: none;
+}
+.agv2 .ag-seg {
+  display: inline-flex;
+  gap: 3px;
+  background: var(--card, #fffefb);
+  border: var(--ag-edgew) solid var(--ag-edge);
+  border-radius: 16px;
+  padding: 3px;
+  box-shadow: var(--ag-shadow);
+}
+.t-edn .agv2 .ag-seg { border-color: transparent; box-shadow: 0 2px 8px rgba(20, 20, 25, 0.05); }
+.agv2 .ag-seg button {
   font-size: 12px;
   font-weight: 500;
   font-family: inherit;
   color: var(--ag-muted);
-  background: var(--card, #fffefb);
-  border: var(--ag-edgew) solid var(--ag-edge);
-  border-radius: 16px;
-  padding: 6px 13px;
+  background: none;
+  border: none;
+  border-radius: 12px;
+  padding: 5px 13px;
   cursor: pointer;
-  box-shadow: var(--ag-shadow);
+  white-space: nowrap;
 }
-.t-edn .agv2 .ag-chip { border-color: transparent; box-shadow: 0 2px 8px rgba(20, 20, 25, 0.05); }
-.agv2 .ag-chip.on { background: var(--ag-bandflat); color: var(--ag-ink); font-weight: 600; }
+.agv2 .ag-seg button.on {
+  background: linear-gradient(180deg, var(--band-a, #ece5d8), var(--band-b, #e5ddcd));
+  color: var(--hdr, #5d4037);
+  font-weight: 600;
+}
+.t-capp .agv2 .ag-seg button.on { box-shadow: inset 0 0 0 1px var(--ag-line); }
 .agv2 .ag-chipdiv { width: 1px; height: 18px; background: var(--ag-line); margin: 0 4px; flex: none; }
 .agv2 .ag-sortsel {
   font-family: inherit;
@@ -743,7 +768,7 @@
 
 /* ── Keyboard focus (a11y) ── */
 .agv2 .ag-row:focus-visible,
-.agv2 .ag-chip:focus-visible,
+.agv2 .ag-seg button:focus-visible,
 .agv2 .ag-btn:focus-visible,
 .agv2 .ag-upnext:focus-visible,
 .agv2 .ag-openpill:focus-visible,

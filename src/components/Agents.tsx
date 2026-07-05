@@ -633,29 +633,35 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
   return (
     <div className="agv2">
       <AgentsTopBar
-        count={filtered.length}
+        count={agents.length}
         search={search}
         onSearch={setSearch}
         onAddAgent={() => onNavigate?.("agents", "Add an agent")}
         searchRef={searchRef}
       />
 
-      {/* Control row: filter chips · sort · selected-agent actions */}
+      {/* Control row: segmented filter toggles · sort · selected-agent actions */}
       <div className="ag-chips">
-        <div className="ag-chipgrp" role="group" aria-label="Filter by availability">
-          {([["all", "All"], ["open", "Open"], ["closed", "Closed"]] as [AgentsSubFilter, string][]).map(([v, label]) => (
-            <button type="button" key={v} className={`ag-chip${subFilter === v ? " on" : ""}`} aria-pressed={subFilter === v} onClick={() => setSubFilter(v)}>
-              {label}
-            </button>
-          ))}
+        <div className="ag-seggrp">
+          <span className="ag-seglbl" aria-hidden="true">Status</span>
+          <div className="ag-seg" role="group" aria-label="Filter by availability">
+            {([["all", "All"], ["open", "Open"], ["closed", "Closed"]] as [AgentsSubFilter, string][]).map(([v, label]) => (
+              <button type="button" key={v} className={subFilter === v ? "on" : undefined} aria-pressed={subFilter === v} onClick={() => setSubFilter(v)}>
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
         <span className="ag-chipdiv" aria-hidden="true" />
-        <div className="ag-chipgrp" role="group" aria-label="Filter by queried">
-          {([["all", "Queried & not"], ["yes", "Queried"], ["no", "Not queried"]] as [AgentsQueriedFilter, string][]).map(([v, label]) => (
-            <button type="button" key={v} className={`ag-chip${queriedFilter === v ? " on" : ""}`} aria-pressed={queriedFilter === v} onClick={() => setQueriedFilter(v)}>
-              {label}
-            </button>
-          ))}
+        <div className="ag-seggrp">
+          <span className="ag-seglbl" aria-hidden="true">Queried</span>
+          <div className="ag-seg" role="group" aria-label="Filter by queried">
+            {([["all", "All"], ["yes", "Queried"], ["no", "Not queried"]] as [AgentsQueriedFilter, string][]).map(([v, label]) => (
+              <button type="button" key={v} className={queriedFilter === v ? "on" : undefined} aria-pressed={queriedFilter === v} onClick={() => setQueriedFilter(v)}>
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
         <span className="ag-chipdiv" aria-hidden="true" />
         <select

@@ -14,7 +14,7 @@ import { Search, Plus } from "lucide-react";
 import { agentsCountLabel } from "../../lib/agentsPage";
 
 interface AgentsTopBarProps {
-  /** Live filtered count — reflects the list the user is looking at. */
+  /** TOTAL agents on file — deliberately independent of the live filters (Nick's call). */
   count: number;
   search: string;
   onSearch: (term: string) => void;
@@ -27,7 +27,7 @@ export const AgentsTopBar: React.FC<AgentsTopBarProps> = ({ count, search, onSea
   <div className="ag-toppill ag-panel">
     <div className="ag-tleft">
       <span className="ag-ttl">
-        Agents <em>database</em>
+        A home for your <em>agents</em>
       </span>
       <span className="ag-tdiv" aria-hidden="true" />
       <span className="ag-tcount">{agentsCountLabel(count)}</span>
