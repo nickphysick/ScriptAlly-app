@@ -16,6 +16,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { CornerUpLeft, Mail, ArrowRight, Check } from "lucide-react";
 import { useScriptAllyDb } from "../lib/db";
+import { agentPrimary, AGENT_NOT_SPECIFIED } from "../lib/agentDisplay";
 import { recordQueryResponse } from "../lib/recordResponse";
 import type { RecordResponseData } from "../lib/recordResponse";
 import { EXPECTED_NEXT_STEPS } from "../lib/statusOrder";
@@ -141,7 +142,7 @@ export const RecordResponseScreen: React.FC<RecordResponseScreenProps> = ({ isOp
         <StatusDot status={q.status} size={20} />
         <span style={{ flex: 1, minWidth: 0 }}>
           <span style={{ display: "block", fontFamily: FONT_SANS, fontSize: 13, color: bodyInk, fontWeight: 500 }}>
-            {a?.name?.trim() || a?.agency || "Unknown agent"}
+            {a ? agentPrimary(a) : AGENT_NOT_SPECIFIED}
             {a?.name?.trim() && a?.agency ? <span style={{ fontWeight: 400, color: mutedInk }}> · {a.agency}</span> : null}
           </span>
           <span style={{ display: "block", fontFamily: FONT_SANS, fontSize: 11.5, color: mutedInk, marginTop: 1 }}>

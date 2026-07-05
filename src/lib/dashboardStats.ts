@@ -17,6 +17,7 @@
  */
 import { Activity, Agent, Query, QueryStatus } from "../types";
 import { agentBuckets } from "./lifecycle";
+import { agentPrimary, AGENT_NOT_SPECIFIED } from "./agentDisplay";
 import { STATUS_ORDER } from "./statusOrder";
 import { AGENT_RESPONSE_STATUSES } from "./queryDerivation";
 
@@ -223,8 +224,8 @@ export const weekRecipients = (queries: Query[], agents: Agent[], weekStart: Dat
       const agent = agents.find((a) => a.id === q.agentId);
       return {
         id: q.id,
-        agentName: agent?.name || "Unknown agent",
-        agency: agent?.agency || "",
+        agentName: agent ? agentPrimary(agent) : AGENT_NOT_SPECIFIED,
+        agency: agent && agent.name?.trim() ? agent.agency || "" : "",
         day: dayChip(t),
       };
     });

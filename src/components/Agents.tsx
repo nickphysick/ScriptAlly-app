@@ -45,6 +45,7 @@ import {
   formatTimelineDate,
   upNextMeta,
 } from "../lib/agentsPage";
+import { agentPrimary, agentSecondary, agentInitials } from "../lib/agentDisplay";
 import { agentLocation, flagFor, isHomeMarket, getHomeCountry, countryName } from "../lib/territory";
 import "flag-icons/css/flag-icons.min.css";
 import "./agents/agentsV2.css";
@@ -80,10 +81,8 @@ function displaySocials(agent: Agent): AgentSocial[] {
   return legacy;
 }
 
-/** Up-to-two-letter initials for the avatar discs. */
-const agentInitials = (name: string): string =>
-  (name || "").trim().split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]!.toUpperCase()).join("") || "?";
-
+// Avatar initials + primary/secondary lines come from the shared agentDisplay helpers (the
+// agency-primary fallback rule) — no local name-only copy may shadow them.
 const firstName = (n: string) => n.split(" ")[0];
 
 /** Five stars in the theme star colour (12px rows / 14px identity). */
@@ -299,7 +298,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
   const flipAvailability = async (agent: Agent) => {
     const next = agent.submissionStatus === SubmissionStatus.OPEN ? SubmissionStatus.CLOSED : SubmissionStatus.OPEN;
     await updateAgent(agent.id, { submissionStatus: next });
-    setToastMessage(`${firstName(agent.name)} marked ${next === SubmissionStatus.OPEN ? "open" : "closed"} to queries`);
+    setToastMessage(`${firstName(agentPrimary(agent))} marked ${next === SubmissionStatus.OPEN ? "open" : "closed"} to queries`);
     setTimeout(() => setToastMessage(null), 2500);
   };
 
@@ -310,12 +309,12 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
     await setAgentSetAside(agent.id, next);
     if (next) {
       setUndoToast({
-        msg: `${firstName(agent.name)} set aside — history kept, hidden from suggestions`,
+        msg: `${firstName(agentPrimary(agent))} set aside — history kept, hidden from suggestions`,
         undo: () => { void setAgentSetAside(agent.id, false); setUndoToast(null); },
       });
-      setTimeout(() => setUndoToast((t) => (t && t.msg.startsWith(firstName(agent.name)) ? null : t)), 6000);
+      setTimeout(() => setUndoToast((t) => (t && t.msg.startsWith(firstName(agentPrimary(agent))) ? null : t)), 6000);
     } else {
-      setToastMessage(`${firstName(agent.name)} back in your active list`);
+      setToastMessage(`${firstName(agentPrimary(agent))} back in your active list`);
       setTimeout(() => setToastMessage(null), 3000);
     }
   };
@@ -376,14 +375,14 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
         onClick={() => setSelectedAgentId(agent.id)}
         style={agent.setAside ? { opacity: 0.62 } : undefined}
       >
-        <span className="ag-mono-av" aria-hidden="true">{agentInitials(agent.name)}</span>
+        <span className="ag-mono-av" aria-hidden="true">{agentInitials(agent)}</span>
         <span className="ag-who">
           <span className="ag-name">
             {agent.pinned && <Pin className="ag-pin-ic" aria-label="Pinned" />}
-            {agent.name || "Unnamed agent"}
+            {agentPrimary(agent)}
           </span>
           <span className="ag-agency">
-            {agent.agency || "Independent"}
+            {agentSecondary(agent) || "Independent"}
             {rowFlag && (
               <span
                 className={`ag-rowflag ${rowFlag}`}
@@ -492,11 +491,11 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
         {/* 1 · Identity */}
         <div className="ag-psec">
           <div className="ag-ident">
-            <span className="ag-hero-av" aria-hidden="true">{agentInitials(a.name)}</span>
+            <span className="ag-hero-av" aria-hidden="true">{agentInitials(a)}</span>
             <div style={{ minWidth: 0 }}>
-              <div className="ag-iname">{a.name || "Unnamed agent"}</div>
+              <div className="ag-iname">{agentPrimary(a)}</div>
               <div className="ag-iag">
-                {a.agency || "Independent"}
+                {agentSecondary(a) || "Independent"}
                 {a.email ? ` · ${a.email}` : ""}
               </div>
               {location && locFlag && (
@@ -616,7 +615,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
         <div className="ag-psec">
           <div className="ag-twocol">
             <div className="ag-col">
-              <div className="ag-eyebrow">Your history with {firstName(a.name || "them")}<span className="ag-rule" /></div>
+              <div className="ag-eyebrow">Your history with {firstName(agentPrimary(a) || "them")}<span className="ag-rule" /></div>
               {timeline.length ? (
                 <div className="ag-tl-scroll">
                   <div className="ag-tl">
@@ -869,10 +868,10 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
                       <PauseCircle className="w-5 h-5" />
                     </div>
                     <h3 className="font-serif text-[19px] leading-tight mb-2.5 text-[#3a1c14]">
-                      {a.name} has {qn} quer{qn > 1 ? "ies" : "y"} in your pipeline
+                      {agentPrimary(a)} has {qn} quer{qn > 1 ? "ies" : "y"} in your pipeline
                     </h3>
                     <p className="text-[13.5px] font-light leading-relaxed text-[rgba(58,28,20,0.72)]">
-                      Deleting {firstName(a.name)} would also erase those <b className="text-[#7c3a2a] font-medium">{qn} quer{qn > 1 ? "ies" : "y"}</b> from the manuscripts they belong to — losing that part of your record. <b className="text-[#7c3a2a] font-medium">Set them aside</b> instead: they vanish from suggestions but the history stays, and you can bring them back.
+                      Deleting {firstName(agentPrimary(a))} would also erase those <b className="text-[#7c3a2a] font-medium">{qn} quer{qn > 1 ? "ies" : "y"}</b> from the manuscripts they belong to — losing that part of your record. <b className="text-[#7c3a2a] font-medium">Set them aside</b> instead: they vanish from suggestions but the history stays, and you can bring them back.
                     </p>
                     <div className="flex items-center gap-2.5 mt-5 flex-wrap">
                       <button onClick={() => { setDeleteModalAgent(null); void toggleSetAside(a); }} className="font-mono text-[11px] rounded-[9px] py-2.5 px-4 bg-[#f5e2da] text-[#7c3a2a] border-[0.5px] border-[#e8c8bc] hover:bg-[#efd5ca] cursor-pointer">Set aside</button>
@@ -885,7 +884,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
                     <div className="w-[42px] h-[42px] rounded-[11px] bg-[rgba(168,68,47,0.12)] text-[#a8442f] flex items-center justify-center mb-3.5">
                       <Trash2 className="w-5 h-5" />
                     </div>
-                    <h3 className="font-serif text-[19px] leading-tight mb-2.5 text-[#3a1c14]">Delete {a.name}?</h3>
+                    <h3 className="font-serif text-[19px] leading-tight mb-2.5 text-[#3a1c14]">Delete {agentPrimary(a)}?</h3>
                     <p className="text-[13.5px] font-light leading-relaxed text-[rgba(58,28,20,0.72)]">
                       They have <b className="text-[#7c3a2a] font-medium">no queries</b>, so nothing else is affected — this just removes them from your agent database.
                     </p>

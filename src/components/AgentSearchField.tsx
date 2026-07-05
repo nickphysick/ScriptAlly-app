@@ -15,15 +15,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useFixedMenu } from "./forms/useFixedMenu";
 import type { Agent } from "../types";
-
-const initialsOf = (name: string): string =>
-  name
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((w) => w[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
+import { agentPrimary, agentSecondary, agentInitials } from "../lib/agentDisplay";
 
 interface AgentSearchFieldProps {
   agents: Agent[];
@@ -286,7 +278,7 @@ export const AgentSearchField: React.FC<AgentSearchFieldProps> = ({
             role="combobox"
             aria-expanded={open}
             aria-autocomplete="list"
-            value={open ? queryText : selectedAgent ? selectedAgent.name : ""}
+            value={open ? queryText : selectedAgent ? agentPrimary(selectedAgent) : ""}
             onFocus={() => {
               setOpen(true);
               setQueryText("");
@@ -345,10 +337,10 @@ export const AgentSearchField: React.FC<AgentSearchFieldProps> = ({
                       onMouseEnter={() => setHl(idx)}
                       onClick={() => pick(a)}
                     >
-                      <span className="sa-ag-avatar">{initialsOf(a.name)}</span>
+                      <span className="sa-ag-avatar">{agentInitials(a)}</span>
                       <span className="sa-ag-meta">
-                        <span className="sa-ag-name">{a.name}</span>
-                        <span className="sa-ag-agency">{a.agency || "Independent"}</span>
+                        <span className="sa-ag-name">{agentPrimary(a)}</span>
+                        <span className="sa-ag-agency">{agentSecondary(a) || "Independent"}</span>
                       </span>
                       {a.starRating ? <span className="sa-ag-stars">{"★".repeat(a.starRating)}</span> : null}
                       <span className={`sa-ag-tag ${queried ? "q" : "nq"}`}>{queried ? "Queried" : "Not queried"}</span>

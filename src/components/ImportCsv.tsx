@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useScriptAllyDb } from "../lib/db";
+import { agentPrimary, AGENT_NOT_SPECIFIED } from "../lib/agentDisplay";
 import { parseLegacyComps } from "../lib/comps";
 import {
   UserPlan,
@@ -1396,7 +1397,7 @@ export const ImportCsv: React.FC<{
                         return (
                           <tr key={q.id} className="hover:bg-[#FAF1EF]/10 transition-colors text-stone-800">
                             <td className="p-3 font-serif font-bold text-[#3a1c14]">{ms ? ms.title : "Unknown Manuscript"}</td>
-                            <td className="p-3 text-stone-700 font-medium">{ag ? ag.name : "Unknown Agent"}</td>
+                            <td className="p-3 text-stone-700 font-medium">{ag ? agentPrimary(ag) : AGENT_NOT_SPECIFIED}</td>
                             <td className="p-3">
                               <span className="bg-amber-100/50 text-[#BA7517] border border-amber-200/50 rounded px-1.5 py-0.5 text-[10px] font-mono uppercase font-bold">
                                 {q.status}

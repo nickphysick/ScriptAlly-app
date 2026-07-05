@@ -31,7 +31,7 @@ import { StatusDot, statusDirection } from "./StatusDot";
 import { RecordResponseModal } from "./RecordResponseModal";
 import { RecordResponseFocusForm } from "./RecordResponseFocusForm";
 import { recordQueryResponse } from "../lib/recordResponse";
-import { agentLabel, agentAgencyLine } from "../lib/agentDisplay";
+import { agentLabel, agentAgencyLine, agentPrimary, agentInitials } from "../lib/agentDisplay";
 import { formatQueryMaterial } from "../lib/materials";
 import { formatListRowDate } from "../lib/listRowDate";
 import { MarkSentPopover, MarkSentKind } from "./MarkSentPopover";
@@ -1124,7 +1124,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
       const ag = agents.find(a => a.id === q.agentId);
       const ms = manuscripts.find(m => m.id === q.manuscriptId);
 
-      const agentName = ag?.name || "";
+      const agentName = ag ? agentPrimary(ag) : "";
       const agencyName = ag?.agency || "";
       const agentEmail = ag?.email || "";
       const manuscriptTitle = ms?.title || "";
@@ -1217,7 +1217,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     if (!activeQuery || !activeAgent || !activeMs) return;
     setIsGeneratingPDF(true);
     try {
-      const agentName = activeAgent.name;
+      const agentName = agentPrimary(activeAgent);
       const agencyName = activeAgent.agency;
       const status = getStatusLabel(activeQuery.status);
       const sendMethod = activeQuery.sendMethod;
@@ -2459,13 +2459,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 );
 
                 // Monogram initials — first + last initial of the agent name (or agency); echoes the hero.
-                const monoInitials = (() => {
-                  const src = (agent.name?.trim() || agent.agency?.trim() || "");
-                  const parts = src.split(/\s+/).filter(Boolean);
-                  if (parts.length === 0) return "?";
-                  if (parts.length === 1) return parts[0][0].toUpperCase();
-                  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-                })();
+                const monoInitials = agentInitials(agent);
 
                 return (
                   <div
@@ -2479,7 +2473,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                       <span className="qmono" style={{ flexShrink: 0, width: 38, height: 38, borderRadius: "50%", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", border: "1px solid #e8c8bc", color: qdbBoldInk2, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_SERIF, fontSize: 13, fontWeight: 700 }}>{monoInitials}</span>
                       {/* middle — name over agency */}
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontFamily: FONT_SERIF, fontSize: 16, fontWeight: 700, color: qdbBoldInk, lineHeight: 1.1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{agent.name?.trim() || agent.agency}</div>
+                        <div style={{ fontFamily: FONT_SERIF, fontSize: 16, fontWeight: 700, color: qdbBoldInk, lineHeight: 1.1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{agentPrimary(agent)}</div>
                         <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: ".05em", textTransform: "uppercase" as const, color: qdbBoldMuted, marginTop: 3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{agentAgencyLine(agent)}</div>
                       </div>
                       {/* right — StatusDot over the date sent, stacked */}
@@ -2711,16 +2705,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     avatar beside name/agency, then email · genres · add-pills. Status chip pinned
                     top-right inside the box. ── */}
                 {(() => {
-                  const hasName = !!(activeAgent.name?.trim());
-                  const nameplate = (hasName ? activeAgent.name : activeAgent.agency) || "Unknown agent";
-                  // Initials: first + last initial of the agent name (or agency), single token → one.
-                  const initials = (() => {
-                    const src = (activeAgent.name?.trim() || activeAgent.agency?.trim() || "");
-                    const parts = src.split(/\s+/).filter(Boolean);
-                    if (parts.length === 0) return "?";
-                    if (parts.length === 1) return parts[0][0].toUpperCase();
-                    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-                  })();
+                  const nameplate = agentPrimary(activeAgent);
+                  const initials = agentInitials(activeAgent);
                   const email = activeAgent.email?.trim();
                   const mswl = activeAgent.mswlNotes?.trim();
                   const genres = (activeAgent.genres || []).filter(Boolean);
@@ -2737,7 +2723,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                         <span style={{ flexShrink: 0, width: 66, height: 66, borderRadius: "50%", background: "#1d1712", border: "none", color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_SERIF, fontSize: 22, fontWeight: 700 }}>{initials}</span>
                         <div style={{ flex: 1, minWidth: 0, paddingRight: 120 }}>
                           <div style={{ fontFamily: FONT_SERIF, fontSize: 33, fontWeight: 800, color: qdbBoldInk, lineHeight: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{nameplate}</div>
-                          {hasName && !!activeAgent.agency?.trim() && (
+                          {!!activeAgent.name?.trim() && !!activeAgent.agency?.trim() && (
                             <div style={{ fontFamily: FONT_SERIF, fontSize: 17, fontWeight: 600, color: "#4a423a", marginTop: 2 }}>{activeAgent.agency}</div>
                           )}
                           {/* real status — the accessible announcement (the watermark dot is aria-hidden) */}
@@ -3010,7 +2996,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         onClose={() => setIsRecordResponseModalOpen(false)}
         query={activeQuery}
         agent={{
-          name: activeAgent?.name || activeAgent?.agency || "the agent",
+          name: (activeAgent ? agentPrimary(activeAgent) : "") || "the agent",
           agency: activeAgent?.agency || "Agency",
           responseTimeWeeks: activeAgent?.responseTimeWeeks || 6,
           submissionMethod: activeAgent?.submissionMethod || "Email"
@@ -3058,7 +3044,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         agent={activeAgent}
         manuscript={{ title: activeMs?.title || "" }}
         onSuccessToast={(msg) => {
-          triggerToast({ queryId: activeQuery.id, agentName: activeAgent.name, manuscriptTitle: activeMs?.title || "", responseStyle: msg });
+          triggerToast({ queryId: activeQuery.id, agentName: agentPrimary(activeAgent), manuscriptTitle: activeMs?.title || "", responseStyle: msg });
         }}
       />
     )}

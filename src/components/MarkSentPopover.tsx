@@ -13,6 +13,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { Send, Bell, X } from "lucide-react";
 import { Agent, Query } from "../types";
+import { agentPrimary } from "../lib/agentDisplay";
 import { BrandDatePicker } from "./forms";
 import { formatQueryMaterial } from "../lib/materials";
 
@@ -197,7 +198,7 @@ export const MarkSentPopover: React.FC<MarkSentPopoverProps> = ({
             placeholder="Auto-filled from response time"
           />
           <p className="text-[10px] text-[#a08070] leading-snug mt-0.5">
-            We'll remind you to nudge {agent.name.split(" ")[0]} if you haven't heard back by then.
+            We'll remind you to nudge {agentPrimary(agent).split(" ")[0]} if you haven't heard back by then.
           </p>
         </div>
       )}

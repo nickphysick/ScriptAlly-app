@@ -58,6 +58,7 @@ import { OverToYou, buildOverToYouRows } from "./dashboard/OverToYou";
 // v37 consolidated dashboard pieces (BUILD-REPORT 4 Jul: layout = top bar → salutation greeting
 // with focus slot → stat row → Fortnight → What's live; timeline in the right-edge drawer).
 import { DashTopBar } from "./dashboard/DashTopBar";
+import { agentPrimary, AGENT_NOT_SPECIFIED } from "../lib/agentDisplay";
 import { FocusGreeting } from "./dashboard/FocusGreeting";
 import { TimelineDrawer } from "./dashboard/TimelineDrawer";
 import { StatCardFull, useStatDefs } from "./dashboard/DashboardStatsRow";
@@ -1041,7 +1042,7 @@ export const Dashboard: React.FC<{
     const binIndex = 7 - Math.floor((nowTime - new Date(q.dateSent).getTime()) / ONE_WEEK_MS);
     if (binIndex >= 0 && binIndex < 8) {
       const ag = agents.find(a => a.id === q.agentId);
-      sentWeekItems[binIndex].push({ agentName: ag?.name || "Unknown agent", agency: ag?.agency || "" });
+      sentWeekItems[binIndex].push({ agentName: ag ? agentPrimary(ag) : AGENT_NOT_SPECIFIED, agency: ag && ag.name?.trim() ? ag.agency || "" : "" });
     }
   });
   const fmtWeekCommencing = (binIdx: number) =>
@@ -2114,8 +2115,8 @@ export const Dashboard: React.FC<{
         const ag = agents.find(a => a.id === q.agentId);
         return (
           <NudgeModal
-            agentName={ag?.name || null}
-            agency={ag?.agency || ""}
+            agentName={ag ? agentPrimary(ag) : null}
+            agency={ag && ag.name?.trim() ? ag.agency || "" : ""}
             dateSent={q.dateSent}
             responseDeadline={q.responseDeadline}
             onClose={() => setNudgeTask(null)}

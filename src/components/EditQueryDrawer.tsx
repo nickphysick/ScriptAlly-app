@@ -23,6 +23,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { collection, onSnapshot, orderBy, query as fsQuery } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { useScriptAllyDb } from "../lib/db";
+import { agentPrimary, agentSecondary, AGENT_NOT_SPECIFIED } from "../lib/agentDisplay";
 import { Agent, Query, QueryStatus, SubmissionMethod } from "../types";
 import {
   Form11Drawer, Form11DrawerHandle, Form11Footer, Form11HeaderAvatar, Form11Select, RestingField,
@@ -125,8 +126,8 @@ export const EditQueryDrawer: React.FC<EditQueryDrawerProps> = ({ query, isOpen,
   const origAgent = agents.find((a) => a.id === query.agentId) || null;
   const effManuscriptId = draftManuscriptId ?? query.manuscriptId;
   const manuscript = manuscripts.find((m) => m.id === effManuscriptId) || null;
-  const agentName = effAgent?.name?.trim() || "Unknown agent";
-  const agency = effAgent?.agency?.trim() || "";
+  const agentName = effAgent ? agentPrimary(effAgent) : AGENT_NOT_SPECIFIED;
+  const agency = effAgent ? (agentSecondary(effAgent) === AGENT_NOT_SPECIFIED ? "" : agentSecondary(effAgent)) : "";
   const msTitle = manuscript?.title || "Untitled manuscript";
 
   // ── authoritative activity subcollection (the ledger) ──────────────────────────
@@ -372,8 +373,8 @@ export const EditQueryDrawer: React.FC<EditQueryDrawerProps> = ({ query, isOpen,
                   {agentMatches.length === 0 ? <div className="eq-reassign-empty">No other agents found.</div>
                     : agentMatches.map((a) => (
                       <button key={a.id} type="button" className="eq-reassign-row" onClick={() => pickAgent(a)}>
-                        <span className="eq-reassign-name">{a.name || "Unnamed agent"}</span>
-                        <span className="eq-reassign-agency">{a.agency || "—"}</span>
+                        <span className="eq-reassign-name">{agentPrimary(a)}</span>
+                        <span className="eq-reassign-agency">{agentSecondary(a) || "—"}</span>
                       </button>
                     ))}
                 </div>

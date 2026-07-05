@@ -308,7 +308,7 @@ describe("hover-panel selectors", () => {
     const rows = weekRecipients(queries, AGENTS2, weekStart);
     expect(rows.map((r) => r.id)).toEqual(["q2", "q3", "q1"]);
     expect(rows[0]).toMatchObject({ agentName: "Margaret Atwood", agency: "Pemberton Literary", day: "MON" });
-    expect(rows[1].agentName).toBe("Unknown agent");
+    expect(rows[1].agentName).toBe("Agent not specified"); // canonical missing-record string (agency-primary rule)
     expect(rows[2].day).toBe("THU");
   });
 

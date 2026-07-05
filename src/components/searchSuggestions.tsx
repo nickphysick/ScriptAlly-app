@@ -17,6 +17,7 @@
  */
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useScriptAllyDb } from "../lib/db";
+import { agentPrimary, AGENT_NOT_SPECIFIED } from "../lib/agentDisplay";
 import { Agent, Query } from "../types";
 import { StatusDot } from "./StatusDot";
 import { burgundy, bodyInk, parchment, mutedInk, sageText, FONT_SERIF, FONT_SANS, FONT_MONO } from "../lib/designTokens";
@@ -243,7 +244,7 @@ export const SearchSuggestionsList: React.FC<SearchSuggestionsListProps> = ({
               idx += 1;
               const i = idx;
               const active = i === highlight;
-              const agentName = r.agent?.name || "Unknown agent";
+              const agentName = r.agent ? agentPrimary(r.agent) : AGENT_NOT_SPECIFIED;
               return (
                 <button
                   key={r.query.id}

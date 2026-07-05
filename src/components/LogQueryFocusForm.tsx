@@ -8,6 +8,7 @@ import Lottie from "lottie-react";
 import { Send } from "lucide-react";
 import { useScriptAllyDb } from "../lib/db";
 import { pickableManuscripts } from "../lib/lifecycle";
+import { agentInitials } from "../lib/agentDisplay";
 import { resolveInitialManuscriptId } from "../lib/logQuerySeed";
 import { QueryStatus, Agent, SubmissionMethod, SubmissionStatus, QueryMaterial } from "../types";
 import { FormShell, BrandDropdown, BrandDatePicker, FormField } from "./forms";
@@ -34,14 +35,6 @@ interface LogQueryFocusFormProps {
    *  lock — and never part of the dirty-check baseline (manuscript choice isn't a dirty field). */
   initialManuscriptId?: string;
 }
-
-const getInitials = (name: string) =>
-  name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
 
 // Parse a "YYYY-MM-DD" as a LOCAL date (avoids the UTC-midnight off-by-one) and format it long.
 const formatExpectedDate = (d: string): string => {
@@ -354,7 +347,7 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
       preLabel="Logging a query to"
       name={selectedAgent ? selectedAgent.name : "Select an agent"}
       subLine={selectedAgent ? selectedAgent.agency : "Choose who you're querying"}
-      avatarInitials={selectedAgent ? getInitials(selectedAgent.name) : undefined}
+      avatarInitials={selectedAgent ? agentInitials(selectedAgent) : undefined}
       avatarIcon={selectedAgent ? undefined : <Send size={16} strokeWidth={2} />}
       cornerMotif={<Lottie animationData={planeAnimation} loop autoplay style={{ width: 84, height: 84 }} />}
       buttonLabel="Log this query"

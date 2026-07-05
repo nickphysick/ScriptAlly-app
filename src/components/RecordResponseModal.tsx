@@ -16,6 +16,7 @@ import {
 import { Query, QueryStatus, SubmissionMethod, QueryMaterial } from "../types";
 import { StatusPill } from "./StatusPill";
 import { formatQueryMaterial } from "../lib/materials";
+import { agentPrimary, agentSecondary } from "../lib/agentDisplay";
 import { FormShell, BrandDatePicker } from "./forms";
 
 export interface RecordResponseModalProps {
@@ -202,8 +203,8 @@ export const RecordResponseModal: React.FC<RecordResponseModalProps> = ({
   return (
     <FormShell
       preLabel="Recording a response"
-      name={agent.name}
-      subLine={agent.agency || "Independent agent"}
+      name={agentPrimary(agent)}
+      subLine={agentSecondary(agent) || "Independent agent"}
       cornerMotif={EnvelopeMotif}
       buttonLabel={cfg.label}
       onSubmit={cfg.advance}
@@ -224,8 +225,8 @@ export const RecordResponseModal: React.FC<RecordResponseModalProps> = ({
           </p>
           <div className="bg-[#fdf8f6] border-[0.5px] border-[#e8d5cc] rounded-[10px] p-[12px_14px] flex justify-between items-center mb-3">
             <div className="flex flex-col text-left">
-              <span className="font-serif text-[14px] font-bold text-[#3a1c14] leading-snug">{agent.name}</span>
-              <span className="text-[11px] text-[#a08070] leading-tight mt-0.5">{agent.agency || "Independent Agent"}</span>
+              <span className="font-serif text-[14px] font-bold text-[#3a1c14] leading-snug">{agentPrimary(agent)}</span>
+              <span className="text-[11px] text-[#a08070] leading-tight mt-0.5">{agentSecondary(agent) || "Independent Agent"}</span>
               <span className="text-[11px] italic text-[#7c3d3d] mt-1 font-medium leading-tight">{manuscript.title}</span>
             </div>
             <div className="flex flex-col items-end shrink-0">
@@ -247,7 +248,7 @@ export const RecordResponseModal: React.FC<RecordResponseModalProps> = ({
       {step === 2 && (
         <div>
           <div className="sa-step-cap">Step 1 of 3</div>
-          <h3 className="font-serif text-lg font-bold text-[#3a1c14] leading-tight mb-1">What did {agent.name} say?</h3>
+          <h3 className="font-serif text-lg font-bold text-[#3a1c14] leading-tight mb-1">What did {agentPrimary(agent)} say?</h3>
           <p className="text-xs text-[#a08070] leading-snug mb-3">Choose the response that best describes what you heard.</p>
           <div className="grid grid-cols-2 gap-2">
             {([
@@ -279,7 +280,7 @@ export const RecordResponseModal: React.FC<RecordResponseModalProps> = ({
       {step === 3 && (responseType === "partial" || responseType === "full") && (
         <div>
           <div className="sa-step-cap">Step 2 of 3 · {responseTypeLabel()}</div>
-          <h3 className="font-serif text-lg font-bold text-[#3a1c14] leading-tight mb-1">{agent.name} wants to read more.</h3>
+          <h3 className="font-serif text-lg font-bold text-[#3a1c14] leading-tight mb-1">{agentPrimary(agent)} wants to read more.</h3>
           <p className="text-xs font-sans text-[#a08070] leading-relaxed mb-3">Record exactly what they asked for, when it's due, and the date their reply arrived.</p>
 
           <label className="sa-label">What did they request?</label>
@@ -368,7 +369,7 @@ export const RecordResponseModal: React.FC<RecordResponseModalProps> = ({
             <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center mb-2">
               <Trophy className="w-7 h-7 text-[#7c3d3d]" />
             </div>
-            <h3 className="font-serif text-[20px] font-bold text-[#3a1c14] leading-tight mb-1">{agent.name} made an offer.</h3>
+            <h3 className="font-serif text-[20px] font-bold text-[#3a1c14] leading-tight mb-1">{agentPrimary(agent)} made an offer.</h3>
             <p className="text-xs text-[#a08070] leading-relaxed">This is the moment you've been working towards. Take a breath, then record the details.</p>
           </div>
 
@@ -406,7 +407,7 @@ export const RecordResponseModal: React.FC<RecordResponseModalProps> = ({
             </p>
           </div>
 
-          <label className="sa-label">Did {agent.name} give you any feedback?</label>
+          <label className="sa-label">Did {agentPrimary(agent)} give you any feedback?</label>
           <div className="flex gap-2 mb-3.5 font-sans">
             {([
               { v: "Yes", label: "Yes — a note" },
@@ -530,7 +531,7 @@ export const RecordResponseModal: React.FC<RecordResponseModalProps> = ({
           <p className="text-xs text-[#a08070] leading-normal mb-3 font-sans">Here's what we've saved. You can edit this any time from the query detail.</p>
 
           <div className="bg-[#fdf8f6] border-[0.5px] border-[#e8d5cc] rounded-lg p-3.5 mb-3 flex flex-col gap-2 font-sans text-xs">
-            <Row label="Agent" value={<span className="font-serif font-bold text-[#3a1c14]">{agent.name}</span>} />
+            <Row label="Agent" value={<span className="font-serif font-bold text-[#3a1c14]">{agentPrimary(agent)}</span>} />
             <Row label="New status" value={<StatusPill status={confirmStatusEnum()} size="sm" />} />
 
             {(responseType === "partial" || responseType === "full") && (

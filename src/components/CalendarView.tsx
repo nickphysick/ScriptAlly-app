@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useScriptAllyDb } from "../lib/db";
+import { agentPrimary, agentSecondary, AGENT_NOT_SPECIFIED } from "../lib/agentDisplay";
 import { QueryStatus } from "../types";
 import {
   Calendar,
@@ -119,8 +120,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ onNavigate, isDashbo
     queries.forEach((q) => {
       const agent = agents.find((a) => a.id === q.agentId);
       const ms = manuscripts.find((m) => m.id === q.manuscriptId);
-      const agentName = agent ? agent.name : "Unknown Agent";
-      const agentAgency = agent ? agent.agency : "Unknown Agency";
+      const agentName = agent ? agentPrimary(agent) : AGENT_NOT_SPECIFIED;
+      const agentAgency = agent ? (agentSecondary(agent) === AGENT_NOT_SPECIFIED ? "" : agentSecondary(agent)) : "";
       const agentEmail = agent ? agent.email : "No Email";
       const manuscriptTitle = ms ? ms.title : "Project";
       const msGenre = ms ? ms.genre : "Unknown Genre";

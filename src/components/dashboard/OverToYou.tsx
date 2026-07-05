@@ -20,6 +20,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { CheckCircle2, ListChecks, PlusCircle, Plus, Check, Calendar, X } from "lucide-react";
 import { Task, Query, Agent, Note, NoteColour } from "../../types";
 import { MountCard } from "../MountCard";
+import { agentPrimary } from "../../lib/agentDisplay";
 import {
   parchment,
   burgundy,
@@ -122,7 +123,7 @@ export const buildOverToYouRows = (tasks: Task[], queries: Query[], agents: Agen
       const type = task.taskType as UrgentType;
       const q = queries.find((item) => item.id === task.relatedRecordId);
       const agent = q ? agents.find((a) => a.id === q.agentId) : undefined;
-      const agentName = agent?.name || agent?.agency || "the agent";
+      const agentName = (agent ? agentPrimary(agent) : "") || "the agent";
       const title = task.manuscriptTitle || "your manuscript";
 
       const rawDeadline = q?.responseDeadline ? new Date(q.responseDeadline) : null;
@@ -197,11 +198,11 @@ const itemSubject = (type: HousekeepingType, task: Task, queries: Query[], agent
   if (type === "no_response_close") {
     const q = queries.find((x) => x.id === task.relatedRecordId);
     const ag = q ? agents.find((a) => a.id === q.agentId) : undefined;
-    return boldAgent(ag?.name || ag?.agency || "the agent");
+    return boldAgent((ag ? agentPrimary(ag) : "") || "the agent");
   }
   // dream_agent_unqueried / data_quality_poor → relatedRecordId is an agent id.
   const ag = agents.find((a) => a.id === task.relatedRecordId);
-  return boldAgent(ag?.name || ag?.agency || "the agent");
+  return boldAgent((ag ? agentPrimary(ag) : "") || "the agent");
 };
 
 /** Flattened housekeeping rows — one per recommended-family task, in HOUSEKEEPING_TYPES order. */

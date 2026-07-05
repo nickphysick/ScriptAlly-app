@@ -16,6 +16,7 @@ import { QueryStatus } from "../../types";
 import { SegmentedToggle, WeekSlider, GenreCombobox, FitStars } from "../forms";
 import { PREDEFINED_GENRES } from "../../lib/manuscripts";
 import { StatusDot } from "../StatusDot";
+import { agentPrimary, AGENT_NOT_SPECIFIED } from "../../lib/agentDisplay";
 import { statusBurgundy, statusSageRing, statusSageMark } from "../../lib/designTokens";
 import { PinkButton } from "../dashboard/HeroCard";
 import { SheenWave } from "./SheenWave";
@@ -2221,7 +2222,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
   // ── Queries side ────────────────────────────────────────────────────────────────────────────────
   const qActive = queries.filter((q) => !q.removed);
   const qDead = queries.filter((q) => q.removed);
-  const agentNameOf = (ref: string) => { const a = agents.find((x) => x.id === ref); return (a && (a.name || a.agency)) || "Unknown agent"; };
+  const agentNameOf = (ref: string) => { const a = agents.find((x) => x.id === ref); return (a ? agentPrimary(a) : "") || AGENT_NOT_SPECIFIED; };
   // Set-aside shelf contents: deleted agents + queries the user removed directly (queries removed by
   // an agent's cascade ride back with that agent's restore, so they're not listed twice).
   const setAsideItems: SetAsideItem[] = [
@@ -2230,7 +2231,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
     ...agents.filter((a) => a.deleted && a.setAsideStage !== "duplicates").map((a) => (
       a.setAsideStage === "unidentified"
         ? { kind: "agent" as const, id: a.id, name: "Couldn't tell who this was for", sub: "Set aside — name it any time", context: a.setAsideContext, unidentified: true }
-        : { kind: "agent" as const, id: a.id, name: a.name || a.agency || "Unnamed agent", sub: "Agent · set aside" }
+        : { kind: "agent" as const, id: a.id, name: agentPrimary(a) || AGENT_NOT_SPECIFIED, sub: "Agent · set aside" }
     )),
     ...queries.filter((q) => q.removed && q.removedReason === "Removed by you").map((q) => ({ kind: "query" as const, id: q.id, name: agentNameOf(q.agentRef), sub: `Query · ${q.status}` })),
   ];
@@ -2583,7 +2584,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
         tierOf={(id) => { const a = agents.find((x) => x.id === id); return a && agentTierOf(a) === "fix" ? "fix" : "sharpen"; }}
         headerFor={(id) => {
           const a = agents.find((x) => x.id === id);
-          const who = a?.name || a?.agency || "Unnamed agent";
+          const who = (a ? agentPrimary(a) : "") || AGENT_NOT_SPECIFIED;
           // needs-agency (the blocking fix) takes priority; otherwise it's the low-confidence mapping flag.
           const key = a && !a.agency.trim() && !a.agencyWaived ? "agent-needs-agency" : "agent-mapping";
           const { pill, headline } = focusReasonMeta(key);
