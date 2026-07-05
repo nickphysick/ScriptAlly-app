@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Hover-peek rail with pin + scrim (v2)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--desk:#f2ede7;--card:#fffefb;--parch:#fdfaf5;--hair:#e7ddd2;--bd:#ded3c2;
+  --head:#5d4037;--ink:#3a1c14;--label:#9c8878;--muted:#8a7a6c;--burg:#7c3a2a;--centre:#f6e4da;--pill:#f1e9df;
+  --railW:264px;--miniW:60px}
+body{font-family:'Inter',sans-serif;background:#efeae2;color:var(--ink);padding:34px 30px 60px}
+button{font-family:inherit;cursor:pointer;background:none;border:none;color:inherit;text-align:left}
+h1{font-family:'Playfair Display',serif;font-size:26px;font-weight:500;color:var(--head)}
+.sub{font-size:12.5px;font-weight:300;color:var(--muted);margin-top:6px;max-width:760px;line-height:1.6}
+
+.frame{position:relative;background:var(--desk);border:1px solid var(--hair);border-radius:18px;height:640px;margin-top:26px;
+  max-width:1020px;overflow:hidden;display:flex}
+.state{position:absolute;right:16px;top:14px;z-index:20;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--burg);background:var(--centre);border-radius:99px;padding:4px 11px}
+
+/* ===== rail wrapper: reserves layout space (mini normally, full when pinned) ===== */
+.pw{position:relative;flex:none;width:var(--miniW);height:100%;transition:width 300ms cubic-bezier(.22,.8,.3,1)}
+.pw.pinned{width:var(--railW)}
+
+/* ===== the rail itself: overlays when peeking ===== */
+.rail{position:absolute;left:0;top:0;bottom:0;width:var(--miniW);z-index:10;background:var(--card);
+  border-right:1px solid var(--hair);display:flex;flex-direction:column;overflow:hidden;
+  transition:width 280ms cubic-bezier(.22,.8,.3,1),box-shadow 280ms ease;
+  transition-delay:240ms} /* grace on leave */
+.pw:hover .rail{width:var(--railW);box-shadow:0 10px 30px rgba(58,28,20,0.16);transition-delay:120ms} /* intent on enter */
+.pw.pinned .rail{width:var(--railW);box-shadow:none;transition-delay:0ms}
+
+/* labels breathe in */
+.rail .t{opacity:0;transform:translateX(-4px);transition:opacity 160ms ease,transform 200ms ease;transition-delay:0ms;white-space:nowrap}
+.pw:hover .rail .t,.pw.pinned .rail .t{opacity:1;transform:none;transition-delay:160ms}
+.pw.pinned .rail .t{transition-delay:0ms}
+
+.brand{display:flex;align-items:center;gap:9px;padding:16px 16px 12px;white-space:nowrap;min-height:56px}
+.monogram{width:26px;height:26px;border-radius:50%;background:#dfe7ec;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:13px;color:#3a4650;flex:none}
+.wordmark{font-family:'Playfair Display',serif;font-size:16px;font-weight:500}
+.pin{margin-left:auto;width:24px;height:24px;border:1px solid var(--hair);border-radius:8px;display:flex;align-items:center;justify-content:center;flex:none}
+.pin svg{width:12px;height:12px;stroke:var(--muted);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:transform 200ms ease}
+.pin:hover{border-color:var(--bd)}
+.pin:hover svg{stroke:var(--burg)}
+.pw.pinned .pin{background:var(--centre);border-color:var(--bd)}
+.pw.pinned .pin svg{stroke:var(--burg);fill:var(--burg);transform:rotate(-38deg)}
+.pin.t2{opacity:0;transition:opacity 160ms ease}
+.pw:hover .pin.t2,.pw.pinned .pin.t2{opacity:1;transition-delay:160ms}
+
+.nav{padding:2px 11px;flex:1;overflow:hidden}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--label);padding:13px 9px 5px;white-space:nowrap;opacity:0;transition:opacity 160ms ease}
+.pw:hover .eyebrow,.pw.pinned .eyebrow{opacity:1;transition-delay:160ms}
+.eyeline{height:1px;background:var(--hair);margin:10px 10px;transition:opacity 160ms ease}
+.pw:hover .eyeline,.pw.pinned .eyeline{opacity:0;height:0;margin:0}
+.item{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border-radius:10px;font-size:13px;font-weight:500;color:#5a4a40;margin-bottom:1px;white-space:nowrap}
+.item svg{width:16px;height:16px;stroke:var(--burg);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.item:hover{background:#f7f3ed}
+.item.on{background:var(--pill);color:var(--head)}
+
+.caps{margin:0 11px 8px;display:flex;flex-direction:column;gap:7px}
+.capbtn{display:flex;align-items:center;gap:9px;width:100%;background:#fff;border:1px solid var(--bd);color:var(--head);border-radius:10px;padding:9px 10px;font-size:12.5px;font-weight:500;white-space:nowrap;box-shadow:0 1px 2px rgba(58,28,20,0.05)}
+.capbtn:hover{background:#f4f2ef}
+.capbtn svg{width:15px;height:15px;stroke:var(--burg);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.cap-pair{display:flex;gap:7px}
+.cap-pair button{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;background:#fff;border:1px solid var(--bd);border-radius:10px;padding:9px 3px 7px;box-shadow:0 1px 2px rgba(58,28,20,0.05)}
+.cap-pair button:hover{background:#f4f2ef}
+.cap-pair svg{width:15px;height:15px;stroke:var(--burg);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.cap-pair .l{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:var(--head);white-space:nowrap}
+/* collapsed: pair stacks */
+.pw:not(:hover):not(.pinned) .cap-pair{flex-direction:column}
+.pw:not(:hover):not(.pinned) .caps{margin:0 11px 8px}
+.pw:not(:hover):not(.pinned) .capbtn{justify-content:center;padding:9px 0}
+.pw:not(:hover):not(.pinned) .cap-pair button{padding:9px 0 7px}
+.pw:not(:hover):not(.pinned) .item{justify-content:center;padding:9px 0}
+.pw:not(:hover):not(.pinned) .brand{justify-content:center;padding:16px 8px 12px}
+.pw:not(:hover):not(.pinned) .foot{justify-content:center;padding:11px 6px}
+
+.util{padding:5px 11px 9px;border-top:1px solid var(--hair)}
+.util .item{font-size:12.5px;color:var(--label)}
+.util .item svg{stroke:var(--label)}
+.util .item:hover{color:var(--head)}
+.util .item:hover svg{stroke:var(--burg)}
+.foot{border-top:1px solid var(--hair);padding:11px 15px;display:flex;align-items:center;gap:9px;white-space:nowrap}
+.avatar{width:26px;height:26px;border-radius:50%;background:var(--parch);border:1px solid rgba(124,58,42,0.3);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:12px;color:var(--burg);flex:none}
+.un{font-size:11.5px;font-weight:500}
+
+/* ===== content stub: a two-pane page so overlay-vs-push reads ===== */
+.content{flex:1;padding:16px;min-width:0;display:flex;gap:14px}
+.list{width:240px;flex:none;background:var(--card);border:1px solid var(--hair);border-radius:12px;padding:12px}
+.lrow{display:flex;align-items:center;gap:9px;padding:9px 6px;border-bottom:1px solid #f2e9db}
+.lrow:last-child{border-bottom:none}
+.lmono{width:26px;height:26px;border-radius:50%;background:var(--centre);color:var(--burg);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:11px;flex:none}
+.lrow .n{font-family:'Playfair Display',serif;font-size:13px}
+.lrow .a{font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:.1em;text-transform:uppercase;color:var(--label)}
+.pane{flex:1;background:var(--card);border:1px solid var(--hair);border-radius:12px;padding:16px}
+.pane i{display:block;height:9px;border-radius:6px;background:#efe8de;margin-bottom:10px}
+.pane i:nth-child(1){width:34%}.pane i:nth-child(2){width:88%}.pane i:nth-child(3){width:74%}.pane i:nth-child(4){width:81%}.pane i:nth-child(5){width:46%}
+
+/* the page falls into gentle shadow while the rail peeks (never when pinned) */
+.scrim{position:absolute;inset:0;background:rgba(58,28,20,0.12);opacity:0;pointer-events:none;z-index:5;
+  transition:opacity 280ms ease;transition-delay:240ms}
+.pw:not(.pinned):hover ~ .scrim{opacity:1;transition-delay:120ms}
+
+@media (prefers-reduced-motion:reduce){
+  .rail,.pw,.rail .t,.eyebrow{transition:none !important}
+}
+</style>
+</head>
+<body>
+
+<h1>Hover-peek with pin</h1>
+<p class="sub">The rail rests at 60px. Breathe on it and it peeks — expanding <b>over</b> the content on a 120ms
+intent delay, retreating after a 240ms grace when you leave. The pin makes it permanent: pinned, the rail joins the
+layout and the content moves over to make room. Unpin and it retreats. Try both against the two-pane page.</p>
+
+<div class="frame">
+  <span class="state" id="stateLbl">Collapsed · hover to peek</span>
+  <div class="pw" id="pw">
+    <div class="rail">
+      <div class="brand"><span class="monogram">S</span><span class="wordmark t">ScriptAlly</span>
+        <button class="pin t2" id="pinBtn" title="Pin the sidebar open">
+          <svg viewBox="0 0 24 24"><path d="M9 4h6l1 7 3 3H5l3-3 1-7z"/><path d="M12 14v6"/></svg>
+        </button>
+      </div>
+      <div class="nav">
+        <button class="item on"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span class="t">Dashboard</span></button>
+        <div class="eyebrow">Querying</div><div class="eyeline"></div>
+        <button class="item"><svg viewBox="0 0 24 24"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4 18-7z"/></svg><span class="t">Queries Hub</span></button>
+        <div class="eyebrow">Agents</div><div class="eyeline"></div>
+        <button class="item"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17.5" cy="9" r="2.5"/><path d="M16 14.5c3 .3 5.5 2.3 5.5 5.5"/></svg><span class="t">Agents database</span></button>
+        <button class="item"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><span class="t">Discover new agents</span></button>
+        <div class="eyebrow">Manuscripts</div><div class="eyeline"></div>
+        <button class="item"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5v14z"/></svg><span class="t">Your manuscripts</span></button>
+        <button class="item"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg><span class="t">Submission packages</span></button>
+      </div>
+      <div class="caps">
+        <button class="capbtn"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 5 5v1"/></svg><span class="t">+ Record a response</span></button>
+        <div class="cap-pair">
+          <button><svg viewBox="0 0 24 24"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4 18-7z"/></svg><span class="l t">+ Query</span></button>
+          <button><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></svg><span class="l t">+ Agent</span></button>
+        </div>
+      </div>
+      <div class="util">
+        <button class="item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.5 1.5M16.9 16.9l1.5 1.5M18.4 5.6l-1.5 1.5M7.1 16.9l-1.5 1.5"/></svg><span class="t">Settings</span></button>
+        <button class="item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 4.9.8c0 1.7-2.4 2.2-2.4 3.7"/><path d="M12 17h.01"/></svg><span class="t">Help centre</span></button>
+      </div>
+      <div class="foot"><span class="avatar">W</span><span class="un t">Writer Querying</span></div>
+    </div>
+  </div>
+
+  <div class="scrim"></div>
+
+  <div class="content">
+    <div class="list">
+      <div class="lrow"><span class="lmono">CB</span><div><div class="n">Charlotte Bronte</div><div class="a">Highland &amp; Moor</div></div></div>
+      <div class="lrow"><span class="lmono">EV</span><div><div class="n">Eleanor Vance</div><div class="a">Vance and Co</div></div></div>
+      <div class="lrow"><span class="lmono">MS</span><div><div class="n">Mary Shelley</div><div class="a">Gothic Guild</div></div></div>
+      <div class="lrow"><span class="lmono">RI</span><div><div class="n">Rosa Imrie</div><div class="a">Imrie Agency</div></div></div>
+      <div class="lrow"><span class="lmono">AD</span><div><div class="n">Arthur Conan Doyle</div><div class="a">Baker Street</div></div></div>
+    </div>
+    <div class="pane"><i></i><i></i><i></i><i></i><i></i></div>
+  </div>
+</div>
+
+<script>
+var pw = document.getElementById('pw'), lbl = document.getElementById('stateLbl');
+function setLbl(){
+  if (pw.classList.contains('pinned')) lbl.textContent = 'Pinned · in the layout';
+  else lbl.textContent = 'Collapsed · hover to peek';
+}
+document.getElementById('pinBtn').addEventListener('click', function(e){
+  e.stopPropagation();
+  pw.classList.toggle('pinned');
+  setLbl();
+});
+pw.addEventListener('mouseenter', function(){ if(!pw.classList.contains('pinned')) lbl.textContent='Peeking · overlay'; });
+pw.addEventListener('mouseleave', setLbl);
+</script>
+</body>
+</html>
