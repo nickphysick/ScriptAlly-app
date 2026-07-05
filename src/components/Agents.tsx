@@ -49,7 +49,8 @@ import "./agents/agentsV2.css";
 
 interface AgentsProps {
   searchQuery?: string;
-  onNavigate?: (tab: string, subPageName?: string) => void;
+  /** App's handleNavigate bridge — opts.agentId preselects the Log-a-Query agent (additive). */
+  onNavigate?: (tab: string, subPageName?: string, opts?: { agentId?: string }) => void;
   /** True while /agents is the visible route — gates the page's keyboard bindings (⌘K, /, j/k). */
   active?: boolean;
 }
@@ -287,7 +288,9 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
 
   const sendQueryFlow = (agent?: Agent) => {
     if (agent) setSelectedAgentId(agent.id);
-    onNavigate?.("queries", "Log a query");
+    // The toolbar passes the selected agent, Up next its candidate, the row hover its row —
+    // all preselect the Log-a-Query form via the additive opts.agentId seam.
+    onNavigate?.("queries", "Log a query", agent ? { agentId: agent.id } : undefined);
   };
 
   // Flip the agent's OWN availability (Open ⇄ Closed). Unknown becomes Open on first flip.

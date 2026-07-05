@@ -342,6 +342,9 @@ function AppContent() {
   const [isBrandStudioOpen, setIsBrandStudioOpen] = useState<boolean>(false);
   const [successToast, setSuccessToast] = useState<string | null>(null);
   const [isLogQueryOpen, setIsLogQueryOpen] = useState<boolean>(false);
+  // Agent to preselect when the Log-a-Query overlay opens (the Agents page Send-query/Up-next
+  // seam — handleNavigate's opts.agentId). Cleared on close so the next plain open is unseeded.
+  const [logQueryAgentId, setLogQueryAgentId] = useState<string | null>(null);
   const [isAddAgentOpen, setIsAddAgentOpen] = useState<boolean>(false);
   const [isAddManuscriptOpen, setIsAddManuscriptOpen] = useState<boolean>(false);
 
@@ -355,9 +358,13 @@ function AppContent() {
   }, [successToast]);
 
   // The navigate bridge — same signature and interception contract as the old state setter, so no
-  // onNavigate call site needed touching. Interceptions open overlays and NEVER navigate.
-  const handleNavigate = (tab: string, subPageName?: string) => {
+  // onNavigate call site needed touching. Interceptions open overlays and NEVER navigate. The
+  // optional third param is additive: opts.agentId preselects the Log-a-Query agent (Agents page
+  // Send-query/Up-next; Discover's draft-query wiring will reuse it) — every existing two-arg
+  // call is untouched.
+  const handleNavigate = (tab: string, subPageName?: string, opts?: { agentId?: string }) => {
     if (subPageName === "Log a query" || subPageName === "Send a query") {
+      setLogQueryAgentId(opts?.agentId ?? null);
       setIsLogQueryOpen(true);
       return;
     }
@@ -613,9 +620,10 @@ function AppContent() {
       {/* Focus Mode Overlay Dialog Form */}
       <LogQueryFocusForm
         isOpen={isLogQueryOpen}
-        onClose={() => setIsLogQueryOpen(false)}
+        onClose={() => { setIsLogQueryOpen(false); setLogQueryAgentId(null); }}
         onSuccessToast={(msg) => setSuccessToast(msg)}
         onNavigate={handleNavigate}
+        initialAgentId={logQueryAgentId ?? undefined}
       />
 
       <AddAgentFocusForm

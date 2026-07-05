@@ -22,6 +22,10 @@ interface LogQueryFocusFormProps {
   onSuccessToast: (message: string) => void;
   /** Routing for the MaterialsField "Upgrade to Pro" / empty-state links (closes the form first). */
   onNavigate?: (tab: string, subPageName?: string) => void;
+  /** Open with this agent preselected (the Agents page Send-query/Up-next seam; Discover reuses it
+   *  later). Resolved against `agents` on open, mirroring handleAgentSelect's send-method default.
+   *  Absent (or unresolvable) → behaviour is unchanged: the form opens with no agent. */
+  initialAgentId?: string;
 }
 
 const getInitials = (name: string) =>
@@ -44,6 +48,7 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
   onClose,
   onSuccessToast,
   onNavigate,
+  initialAgentId,
 }) => {
   const { manuscripts, agents, queries, packages, addQuery, addAgent, currentUser } = useScriptAllyDb();
 
@@ -77,13 +82,19 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
   // they're just not query-able targets). lifecycle.ts.
   const pickable = useMemo(() => pickableManuscripts(manuscripts), [manuscripts]);
 
-  // Reset on open
+  // Reset on open (initialAgentId, when provided AND resolvable, preselects that agent with the
+  // same send-method default handleAgentSelect applies — otherwise byte-for-byte the old reset).
   useEffect(() => {
     if (isOpen) {
+      const preselected = initialAgentId ? agents.find((a) => a.id === initialAgentId) ?? null : null;
       setSelectedManuscriptId(pickable.length > 0 ? pickable[0].id : "");
-      setSelectedAgent(null);
+      setSelectedAgent(preselected);
       setDateSent(new Date().toISOString().split("T")[0]);
-      setSendMethod(SubmissionMethod.EMAIL);
+      setSendMethod(
+        preselected && preselected.submissionMethod === "Online Form"
+          ? SubmissionMethod.ONLINE_FORM
+          : SubmissionMethod.EMAIL
+      );
       setPersonalizationNotes("");
       setMaterialsSent([]);
       setSelectedPackageId("");
@@ -95,7 +106,7 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
       setIsSubmitting(false);
       setCompleteStubOpen(false);
     }
-  }, [isOpen, pickable]);
+  }, [isOpen, pickable, initialAgentId]);
 
   // Packages are per-manuscript. When the target manuscript changes (and on open), pre-fill the
   // attached package from that manuscript's chosen ACTIVE package — resolveActivePackage returns ""
@@ -139,12 +150,19 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
   if (!isOpen) return null;
 
   // The form holds real work once the user has picked an agent, ticked materials, written notes,
-  // or moved any field off its reset default — gates FormShell's discard confirm on close.
+  // or moved any field off its reset default — gates FormShell's discard confirm on close. When
+  // initialAgentId seeded the open, the SEEDED agent + its send-method default ARE the reset
+  // baseline (the user typed nothing), so only a change away from them counts as dirty.
+  const seededAgent = initialAgentId ? agents.find((a) => a.id === initialAgentId) ?? null : null;
+  const seededMethod =
+    seededAgent && seededAgent.submissionMethod === "Online Form"
+      ? SubmissionMethod.ONLINE_FORM
+      : SubmissionMethod.EMAIL;
   const isDirty =
-    selectedAgent !== null ||
+    (selectedAgent?.id ?? null) !== (seededAgent?.id ?? null) ||
     materialsSent.length > 0 ||
     personalizationNotes.trim() !== "" ||
-    sendMethod !== SubmissionMethod.EMAIL ||
+    sendMethod !== seededMethod ||
     ifNoResponseAction !== "nudge" ||
     nudgeReminderWhen !== "week_before" ||
     customNudgeDate !== "";
