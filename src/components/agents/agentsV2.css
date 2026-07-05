@@ -523,6 +523,15 @@
 .t-edn .agv2 .ag-lchip { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.04); }
 .agv2 .ag-lchip svg { width: 11px; height: 11px; stroke: var(--ag-muted); flex: none; }
 .agv2 .ag-lchip:hover { background: var(--abtn-hov, #f4f2ef); }
+/* Ghost prompt chip — the field is empty; clicking opens the Edit Agent drawer. */
+.agv2 .ag-lchip.ghost {
+  background: transparent;
+  border: 1px dashed var(--ag-line);
+  color: var(--ag-muted);
+  box-shadow: none;
+}
+.agv2 .ag-lchip.ghost svg { width: 10px; height: 10px; }
+.agv2 .ag-lchip.ghost:hover { background: var(--ag-selhover); color: var(--ag-ink); }
 .agv2 .ag-iright { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 9px; flex-shrink: 0; }
 .agv2 .ag-openpill {
   display: inline-flex;
@@ -587,7 +596,7 @@
 .agv2 .ag-menu .ag-danger { color: #a8442f; }
 .agv2 .ag-menu .ag-danger svg { stroke: #a8442f; }
 
-/* MSWL band */
+/* MSWL band — never hidden; the empty state is a thin clickable prompt variant. */
 .agv2 .ag-mswl {
   background: linear-gradient(180deg, var(--band-a, #ece5d8), var(--band-b, #e5ddcd));
 }
@@ -599,6 +608,73 @@
   color: var(--ag-ink);
   text-align: center;
 }
+.agv2 .ag-mswl.thin { padding-top: 12px; padding-bottom: 12px; }
+.agv2 .ag-mswl-add {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Playfair Display', serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ag-ink);
+  text-align: center;
+  padding: 0;
+}
+.agv2 .ag-mswl-add b { font-weight: 600; }
+.agv2 .ag-mswl-add:hover b { color: var(--ag-accent); }
+
+/* Genre tags beneath the MSWL — the locked per-theme wish-tag treatments from the design ref:
+   Cappuccino (and unthemed) = inline mono terms with accent interpuncts · Bold Pastille = filled
+   header-colour pills · Editorial = square accent-bordered stamps. */
+.agv2 .ag-wtags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 14px;
+}
+.agv2 .ag-mswl.thin .ag-wtags { margin-top: 10px; }
+.agv2 .ag-wtag {
+  position: relative;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ag-ink);
+}
+.agv2 .ag-wtag:not(:last-child)::after {
+  content: '·';
+  position: absolute;
+  right: -13px;
+  color: var(--ag-accent);
+}
+.t-bold .agv2 .ag-wtags { gap: 7px; }
+.t-bold .agv2 .ag-wtag {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
+  color: #fdf9f5;
+  background: var(--hdr, #000000);
+  padding: 5px 12px;
+  border-radius: 16px;
+}
+.t-bold .agv2 .ag-wtag:not(:last-child)::after { content: none; }
+.t-edn .agv2 .ag-wtags { gap: 7px; }
+.t-edn .agv2 .ag-wtag {
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  color: var(--ag-accent);
+  background: transparent;
+  border: 1px solid var(--ag-accent);
+  border-radius: 0;
+  padding: 6px 12px;
+}
+.t-edn .agv2 .ag-wtag:not(:last-child)::after { content: none; }
 
 /* Submission profile facts */
 .agv2 .ag-facts { display: grid; grid-template-columns: 1fr 1fr 1fr; }
@@ -774,6 +850,7 @@
 .agv2 .ag-openpill:focus-visible,
 .agv2 .ag-kebab:focus-visible,
 .agv2 .ag-lchip:focus-visible,
+.agv2 .ag-mswl-add:focus-visible,
 .agv2 .ag-sortsel:focus-visible,
 .agv2 .ag-hoveracts button:focus-visible,
 .agv2 .ag-note-send:focus-visible {

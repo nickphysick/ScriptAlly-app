@@ -18,6 +18,7 @@ import {
   Send,
   Pencil,
   Pin,
+  Plus,
   Sparkles,
   MoreHorizontal,
   Archive,
@@ -435,8 +436,33 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
 
     const isOpen = a.submissionStatus === SubmissionStatus.OPEN;
     const timeline = buildAgentTimeline(a.id, queries, manuscripts, activities);
-    const socials = displaySocials(a);
+    // The canonical link trio owns the X position, so the socials tail drops X/Twitter entries
+    // (Bluesky / Instagram / QueryTracker / Other still render as solid chips after the trio).
+    const socials = displaySocials(a).filter((s) => !/twitter|^x\b|^x\s*\//i.test(s.platform));
     const respKnown = (a.responseTimeWeeks || 0) > 0;
+    const hasMswl = !!a.mswlNotes?.trim();
+
+    // One chip of the canonical trio: solid (linked when the value is an URL/domain, titled text
+    // chip otherwise) when populated; a dashed ghost prompt opening the Edit drawer when empty.
+    const trioChip = (label: string, value: string | undefined) => {
+      const v = value?.trim();
+      if (!v) {
+        return (
+          <button type="button" className="ag-lchip ghost" onClick={() => openEditAgent(a.id)} title={`Add ${label}`}>
+            <Plus aria-hidden="true" /> {label}
+          </button>
+        );
+      }
+      return isLinkyHandle(v) ? (
+        <a className="ag-lchip" href={hrefFor(v)} target="_blank" rel="noopener noreferrer">
+          <LinkIcon aria-hidden="true" /> {label}
+        </a>
+      ) : (
+        <span className="ag-lchip" title={v} style={{ cursor: "default" }}>
+          <LinkIcon aria-hidden="true" /> {label}
+        </span>
+      );
+    };
 
     return (
       <div className="ag-panescroll">
@@ -453,26 +479,25 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
               <div className="ag-bstars" aria-label={`${a.starRating || 0} of 5 stars`}>
                 <Stars value={a.starRating || 0} />
               </div>
-              {(a.website?.trim() || socials.length > 0) && (
-                <div className="ag-ilinks">
-                  {a.website?.trim() && (
-                    <a className="ag-lchip" href={hrefFor(a.website)} target="_blank" rel="noopener noreferrer">
-                      <LinkIcon aria-hidden="true" /> Website
+              {/* Canonical trio — always present (ghost prompts when empty) — then any other socials.
+                  Interim sourcing until the dedicated URL fields land: X · MSWL reads `twitter`;
+                  Publishers Marketplace has no field yet, so it ghosts (opens the Edit drawer). */}
+              <div className="ag-ilinks">
+                {trioChip("Website", a.website)}
+                {trioChip("X · MSWL", a.twitter)}
+                {trioChip("Publishers Marketplace", undefined)}
+                {socials.map((s, i) =>
+                  isLinkyHandle(s.handle) ? (
+                    <a key={i} className="ag-lchip" href={hrefFor(s.handle)} target="_blank" rel="noopener noreferrer">
+                      <LinkIcon aria-hidden="true" /> {s.platform}
                     </a>
-                  )}
-                  {socials.map((s, i) =>
-                    isLinkyHandle(s.handle) ? (
-                      <a key={i} className="ag-lchip" href={hrefFor(s.handle)} target="_blank" rel="noopener noreferrer">
-                        <LinkIcon aria-hidden="true" /> {s.platform}
-                      </a>
-                    ) : (
-                      <span key={i} className="ag-lchip" title={s.handle} style={{ cursor: "default" }}>
-                        <LinkIcon aria-hidden="true" /> {s.platform}
-                      </span>
-                    ),
-                  )}
-                </div>
-              )}
+                  ) : (
+                    <span key={i} className="ag-lchip" title={s.handle} style={{ cursor: "default" }}>
+                      <LinkIcon aria-hidden="true" /> {s.platform}
+                    </span>
+                  ),
+                )}
+              </div>
             </div>
             <div className="ag-iright">
               <div style={{ display: "flex", alignItems: "center", gap: 7, position: "relative" }}>
@@ -512,12 +537,24 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
           </div>
         </div>
 
-        {/* 2 · MSWL band (free-text quote; wish tags arrive with structured MSWL data) */}
-        {a.mswlNotes?.trim() && (
-          <div className="ag-psec ag-mswl">
-            <div className="ag-mswl-quote">“{a.mswlNotes.trim()}”</div>
-          </div>
-        )}
+        {/* 2 · MSWL band — never hidden. Populated = the centred quote; empty = a thin clickable
+            prompt opening the Edit drawer. The agent's genres render beneath either variant. */}
+        <div className={`ag-psec ag-mswl${hasMswl ? "" : " thin"}`}>
+          {hasMswl ? (
+            <div className="ag-mswl-quote">“{a.mswlNotes!.trim()}”</div>
+          ) : (
+            <button type="button" className="ag-mswl-add" onClick={() => openEditAgent(a.id)}>
+              Add the agent's <b>manuscript wish list</b> and it will show here.
+            </button>
+          )}
+          {(a.genres?.length || 0) > 0 && (
+            <div className="ag-wtags">
+              {a.genres!.map((g) => (
+                <span className="ag-wtag" key={g}>{g}</span>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* 3 · Submission profile */}
         <div className="ag-psec">
