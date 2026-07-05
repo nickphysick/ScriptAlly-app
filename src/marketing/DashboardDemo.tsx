@@ -10,7 +10,8 @@
  * refs this component owns.
  */
 
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { runDemoLoop, applyStaticTableau, pointInReplica, DemoEffects, DEMO_TIMINGS, Point } from "./demoTimeline";
 
 export const REPLICA_WIDTH = 1180;
 export const REPLICA_HEIGHT = 478;
@@ -18,6 +19,18 @@ export const REPLICA_HEIGHT = 478;
 export const DashboardDemo: React.FC = () => {
   const panelRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.623); // the ref's desktop value; corrected on measure
+  const scaleRef = useRef(scale);
+  scaleRef.current = scale;
+
+  // Animated-element refs — the demo timeline drives these through the effects adapter.
+  const drzRef = useRef<HTMLDivElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const statsRef = useRef<HTMLDivElement>(null);
+  const chipRef = useRef<HTMLDivElement>(null);
+  const todoXRef = useRef<HTMLSpanElement>(null);
+  const sparkEndRef = useRef<SVGCircleElement>(null);
+  const mixpRef = useRef<HTMLDivElement>(null);
+  const cursorRef = useRef<SVGSVGElement>(null);
 
   useLayoutEffect(() => {
     const el = panelRef.current;
@@ -34,9 +47,89 @@ export const DashboardDemo: React.FC = () => {
     return () => { ro?.disconnect(); window.removeEventListener("resize", measure); };
   }, []);
 
+  // The two-act demo: element-anchored waypoints (recomputed on every read through the
+  // current scale), a cancellable timeline, and the reduced-motion static tableau.
+  useEffect(() => {
+    const drz = drzRef.current;
+    if (!drz) return;
+
+    // Anchor a target element as an unscaled replica-space point (the ref's pointOf).
+    const pointOf = (el: Element, dx = 0, dy = 0): Point =>
+      pointInReplica(el.getBoundingClientRect(), drz.getBoundingClientRect(), scaleRef.current, dx, dy);
+
+    const fx: DemoEffects = {
+      reset() {
+        wrapRef.current?.classList.remove("mk-split");
+        statsRef.current?.classList.remove("mk-collapsed");
+        mixpRef.current?.classList.remove("mk-show");
+        chipRef.current?.classList.remove("mk-hovered");
+        if (cursorRef.current) cursorRef.current.style.opacity = "0";
+      },
+      positionPopup(): Point {
+        const endEl = sparkEndRef.current;
+        const mixp = mixpRef.current;
+        if (!endEl || !mixp) return { x: 0, y: 0 };
+        const end = pointOf(endEl, 2, 2);
+        mixp.style.left = `${end.x - 108}px`;
+        mixp.style.top = `${end.y - 14 - mixp.offsetHeight}px`; // directly above, small gap
+        return end;
+      },
+      teleportCursor(pt) {
+        const cur = cursorRef.current;
+        if (!cur) return;
+        cur.style.transitionDuration = "0ms, 300ms";
+        cur.style.transform = `translate(${pt.x}px, ${pt.y}px)`;
+      },
+      setCursorVisible(visible) {
+        if (cursorRef.current) cursorRef.current.style.opacity = visible ? "1" : "0";
+      },
+      moveCursor(pt, ms) {
+        const cur = cursorRef.current;
+        if (!cur) return;
+        cur.style.transitionDuration = `${ms}ms, 300ms`;
+        cur.style.transform = `translate(${pt.x}px, ${pt.y}px)`;
+      },
+      setPopupShown(shown) {
+        mixpRef.current?.classList.toggle("mk-show", shown);
+      },
+      setChipHovered(hovered) {
+        chipRef.current?.classList.toggle("mk-hovered", hovered);
+      },
+      pressCursor() {
+        const cur = cursorRef.current;
+        if (!cur) return;
+        cur.classList.add("mk-press");
+        window.setTimeout(() => cur.classList.remove("mk-press"), DEMO_TIMINGS.pressClear);
+      },
+      setSplit(split) {
+        wrapRef.current?.classList.toggle("mk-split", split);
+        statsRef.current?.classList.toggle("mk-collapsed", split);
+      },
+      pointOfChip(): Point {
+        const chip = chipRef.current;
+        if (!chip) return { x: 0, y: 0 };
+        return pointOf(chip, chip.offsetWidth / 2, chip.offsetHeight - 2);
+      },
+      pointOfTodoX(): Point {
+        const x = todoXRef.current;
+        if (!x) return { x: 0, y: 0 };
+        return pointOf(x, 4, 8);
+      },
+    };
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      applyStaticTableau(fx); // no cursor, no loop — split open, popup shown
+      return;
+    }
+
+    const controller = new AbortController();
+    void runDemoLoop(fx, controller.signal);
+    return () => controller.abort();
+  }, []);
+
   return (
     <div className="mk-dashpanel" ref={panelRef} style={{ height: Math.round(REPLICA_HEIGHT * scale) }}>
-      <div className="mk-drz" style={{ transform: `scale(${scale})` }}>
+      <div className="mk-drz" ref={drzRef} style={{ transform: `scale(${scale})` }}>
         {/* replica top bar */}
         <div className="mk-dzbar">
           <span className="mk-dzbrand">
@@ -54,11 +147,11 @@ export const DashboardDemo: React.FC = () => {
         </div>
 
         {/* the greeting zone — the grid track is the split state machine */}
-        <div className="mk-dzwrap">
+        <div className="mk-dzwrap" ref={wrapRef}>
           <div className="mk-dzmain">
             <div className="mk-dzeyebrow">Sunday 5 July &middot; Week nine of querying</div>
             <div className="mk-dzhi">Good morning, Writer</div>
-            <div className="mk-dzchip"><span className="mk-dot" />3 things need your attention</div>
+            <div className="mk-dzchip" ref={chipRef}><span className="mk-dot" />3 things need your attention</div>
             <div className="mk-dzctas">
               <span className="mk-dzbtn">Send query</span>
               <span className="mk-dzbtn">Record a response</span>
@@ -74,7 +167,7 @@ export const DashboardDemo: React.FC = () => {
           </div>
           <div className="mk-dzside">
             <div className="mk-dztodo">
-              <div className="mk-todoband"><span className="mk-dot" /><h4>To-do list</h4><span className="mk-x">&times;</span></div>
+              <div className="mk-todoband"><span className="mk-dot" /><h4>To-do list</h4><span className="mk-x" ref={todoXRef}>&times;</span></div>
               <div className="mk-trows">
                 <div className="mk-trow">
                   <span className="mk-chip">Pages</span>
@@ -97,7 +190,7 @@ export const DashboardDemo: React.FC = () => {
         </div>
 
         {/* the four stat cards — exact data and visuals per the ref */}
-        <div className="mk-dzstats">
+        <div className="mk-dzstats" ref={statsRef}>
           <div className="mk-dzstat">
             <div className="mk-dzcap">
               <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round"><path d="M21 3L10 14" /><path d="M21 3l-7 18-4-7-7-4 18-7z" /></svg>
@@ -120,7 +213,7 @@ export const DashboardDemo: React.FC = () => {
             <svg className="mk-spark" width="100%" height="26" viewBox="0 0 220 26" preserveAspectRatio="none">
               <path d="M0,20 L30,19 L60,16 L90,17 L120,12 L150,10 L180,6 L214,3 L214,26 L0,26 Z" fill="rgba(124,58,42,0.14)" stroke="none" />
               <path d="M0,20 L30,19 L60,16 L90,17 L120,12 L150,10 L180,6 L214,3" fill="none" stroke="#7c3a2a" strokeWidth={2} />
-              <circle cx="214" cy="3" r="3" fill="#7c3a2a" stroke="none" />
+              <circle cx="214" cy="3" r="3" fill="#7c3a2a" stroke="none" ref={sparkEndRef} />
             </svg>
           </div>
           <div className="mk-dzstat">
@@ -145,7 +238,7 @@ export const DashboardDemo: React.FC = () => {
         </div>
 
         {/* mix-lens popup + cursor — idle until the Phase 4 timeline drives them */}
-        <div className="mk-mixp">
+        <div className="mk-mixp" ref={mixpRef}>
           <div className="mk-ph2"><span className="mk-cap">Right now</span><span className="mk-val">16 active</span></div>
           <div className="mk-mrow"><span className="mk-mi">→</span><span className="mk-ml">Queried</span><span className="mk-mv">8</span></div>
           <div className="mk-mrow"><span className="mk-mi">‹</span><span className="mk-ml">Partial requested</span><span className="mk-mv">3</span></div>
@@ -155,7 +248,7 @@ export const DashboardDemo: React.FC = () => {
           <div className="mk-mrow"><span className="mk-mi">✎</span><span className="mk-ml">Revise &amp; resubmit</span><span className="mk-mv">1</span></div>
           <div className="mk-pf2">10 with agents &middot; 6 waiting on you</div>
         </div>
-        <svg className="mk-cursor" width="17" height="20" viewBox="0 0 17 20" aria-hidden="true">
+        <svg className="mk-cursor" ref={cursorRef} width="17" height="20" viewBox="0 0 17 20" aria-hidden="true">
           <path d="M1 1l6.5 16 2.3-6.6 6.9-1.7z" fill="#2d2016" stroke="#fffefb" strokeWidth={1.4} />
         </svg>
       </div>
