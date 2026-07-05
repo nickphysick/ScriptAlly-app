@@ -34,7 +34,8 @@ const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 
 interface AllManuscriptsProps {
   searchQuery?: string;
-  onNavigate?: (tab: string, subPageName?: string) => void;
+  /** App's handleNavigate bridge — opts.manuscriptId preselects the Log-a-Query manuscript (additive). */
+  onNavigate?: (tab: string, subPageName?: string, opts?: { manuscriptId?: string }) => void;
 }
 
 export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) => {
@@ -272,7 +273,7 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
                     <button
                       type="button"
                       className="msv-btn"
-                      onClick={() => onNavigate?.("queries", "Send a query")}
+                      onClick={() => onNavigate?.("queries", "Send a query", { manuscriptId: activeMs.id })}
                     >
                       <Send />
                       Send a query
@@ -362,7 +363,7 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
                   queries={msQueries}
                   shelved={shelvedP}
                   onOpenHub={() => onNavigate?.("queries")}
-                  onSendFirst={() => onNavigate?.("queries", "Send a query")}
+                  onSendFirst={() => onNavigate?.("queries", "Send a query", { manuscriptId: activeMs.id })}
                 />
                 <MaterialsCard
                   versions={msVersions}

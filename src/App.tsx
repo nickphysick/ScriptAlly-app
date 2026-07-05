@@ -345,6 +345,9 @@ function AppContent() {
   // Agent to preselect when the Log-a-Query overlay opens (the Agents page Send-query/Up-next
   // seam — handleNavigate's opts.agentId). Cleared on close so the next plain open is unseeded.
   const [logQueryAgentId, setLogQueryAgentId] = useState<string | null>(null);
+  // Manuscript to preselect on the same overlay (the manuscripts-page Send-a-query seam —
+  // opts.manuscriptId, the mirror of the agent seam). Same stow/clear lifecycle.
+  const [logQueryManuscriptId, setLogQueryManuscriptId] = useState<string | null>(null);
   const [isAddAgentOpen, setIsAddAgentOpen] = useState<boolean>(false);
   const [isAddManuscriptOpen, setIsAddManuscriptOpen] = useState<boolean>(false);
 
@@ -360,11 +363,12 @@ function AppContent() {
   // The navigate bridge — same signature and interception contract as the old state setter, so no
   // onNavigate call site needed touching. Interceptions open overlays and NEVER navigate. The
   // optional third param is additive: opts.agentId preselects the Log-a-Query agent (Agents page
-  // Send-query/Up-next; Discover's draft-query wiring will reuse it) — every existing two-arg
-  // call is untouched.
-  const handleNavigate = (tab: string, subPageName?: string, opts?: { agentId?: string }) => {
+  // Send-query/Up-next; Discover's draft-query wiring will reuse it) and opts.manuscriptId the
+  // manuscript (the bookplate hero / Send-first) — every existing two-arg call is untouched.
+  const handleNavigate = (tab: string, subPageName?: string, opts?: { agentId?: string; manuscriptId?: string }) => {
     if (subPageName === "Log a query" || subPageName === "Send a query") {
       setLogQueryAgentId(opts?.agentId ?? null);
+      setLogQueryManuscriptId(opts?.manuscriptId ?? null);
       setIsLogQueryOpen(true);
       return;
     }
@@ -620,10 +624,11 @@ function AppContent() {
       {/* Focus Mode Overlay Dialog Form */}
       <LogQueryFocusForm
         isOpen={isLogQueryOpen}
-        onClose={() => { setIsLogQueryOpen(false); setLogQueryAgentId(null); }}
+        onClose={() => { setIsLogQueryOpen(false); setLogQueryAgentId(null); setLogQueryManuscriptId(null); }}
         onSuccessToast={(msg) => setSuccessToast(msg)}
         onNavigate={handleNavigate}
         initialAgentId={logQueryAgentId ?? undefined}
+        initialManuscriptId={logQueryManuscriptId ?? undefined}
       />
 
       <AddAgentFocusForm

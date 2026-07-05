@@ -8,6 +8,7 @@ import Lottie from "lottie-react";
 import { Send } from "lucide-react";
 import { useScriptAllyDb } from "../lib/db";
 import { pickableManuscripts } from "../lib/lifecycle";
+import { resolveInitialManuscriptId } from "../lib/logQuerySeed";
 import { QueryStatus, Agent, SubmissionMethod, SubmissionStatus, QueryMaterial } from "../types";
 import { FormShell, BrandDropdown, BrandDatePicker, FormField } from "./forms";
 import { MaterialsField } from "./MaterialsField";
@@ -26,6 +27,12 @@ interface LogQueryFocusFormProps {
    *  later). Resolved against `agents` on open, mirroring handleAgentSelect's send-method default.
    *  Absent (or unresolvable) → behaviour is unchanged: the form opens with no agent. */
   initialAgentId?: string;
+  /** Open with this manuscript preselected (the manuscripts-page Send-a-query seam — the mirror
+   *  of initialAgentId; the two coexist and neither interferes with the other). Seeds only when
+   *  the id is in the pickable set (overlay-shelved books aren't in the picker); otherwise falls
+   *  back silently to today's default, the first pickable manuscript. A starting value, not a
+   *  lock — and never part of the dirty-check baseline (manuscript choice isn't a dirty field). */
+  initialManuscriptId?: string;
 }
 
 const getInitials = (name: string) =>
@@ -49,6 +56,7 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
   onSuccessToast,
   onNavigate,
   initialAgentId,
+  initialManuscriptId,
 }) => {
   const { manuscripts, agents, queries, packages, addQuery, addAgent, currentUser } = useScriptAllyDb();
 
@@ -83,11 +91,12 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
   const pickable = useMemo(() => pickableManuscripts(manuscripts), [manuscripts]);
 
   // Reset on open (initialAgentId, when provided AND resolvable, preselects that agent with the
-  // same send-method default handleAgentSelect applies — otherwise byte-for-byte the old reset).
+  // same send-method default handleAgentSelect applies; initialManuscriptId, when pickable,
+  // preselects that manuscript — otherwise byte-for-byte the old reset).
   useEffect(() => {
     if (isOpen) {
       const preselected = initialAgentId ? agents.find((a) => a.id === initialAgentId) ?? null : null;
-      setSelectedManuscriptId(pickable.length > 0 ? pickable[0].id : "");
+      setSelectedManuscriptId(resolveInitialManuscriptId(initialManuscriptId, pickable));
       setSelectedAgent(preselected);
       setDateSent(new Date().toISOString().split("T")[0]);
       setSendMethod(
@@ -106,7 +115,7 @@ export const LogQueryFocusForm: React.FC<LogQueryFocusFormProps> = ({
       setIsSubmitting(false);
       setCompleteStubOpen(false);
     }
-  }, [isOpen, pickable, initialAgentId]);
+  }, [isOpen, pickable, initialAgentId, initialManuscriptId]);
 
   // Packages are per-manuscript. When the target manuscript changes (and on open), pre-fill the
   // attached package from that manuscript's chosen ACTIVE package — resolveActivePackage returns ""

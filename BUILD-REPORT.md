@@ -362,3 +362,21 @@ Files: `functions/src/suggestCompsCore.ts` (pure core) · `suggestComps.ts` (cal
   `communityMatch.ts` carries their updated doc comment (uncommitted, theirs) over my Phase-1
   change, and their `discoverAgents.ts` migration looked underway. The gate worktree was removed
   at close; every phase commit remains isolated-verified.
+
+## Follow-up — send-query manuscript preselect (`initialManuscriptId`), 5 Jul
+Closes pending action 3. A copy of the agents seam (`abd4d87`), one commit:
+- `LogQueryFocusForm` gains optional `initialManuscriptId`, coexisting with `initialAgentId`
+  (independent fields; neither touches the other). The manuscript seeds ONLY when pickable —
+  `resolveInitialManuscriptId` (`src/lib/logQuerySeed.ts`, unit-tested) checks the id against
+  `pickableManuscripts` and otherwise falls back to today's default (first pickable, "" when
+  the library is empty). Absent, the reset line is behaviourally identical to before. No
+  dirty-baseline change was needed: unlike the agent, the manuscript selection has never been
+  a dirty-check field.
+- `App.tsx`: `opts` widened to `{ agentId?, manuscriptId? }`; the interception stows
+  `logQueryManuscriptId` (cleared on close) and passes it to the form — the exact `abd4d87`
+  shape, nothing else moved.
+- Bookplate entry points: the hero's "Send a query" and the field card's "Send first query"
+  both pass the active manuscript's id (derived from the existing spine selection — no new
+  state). Tests: happy path · unpickable fallback · absent-prop unchanged · empty library
+  (coexistence with `initialAgentId` holds by construction — independent code paths — and no
+  component test harness exists in this repo to assert it end-to-end).
