@@ -45,6 +45,8 @@ import {
   formatTimelineDate,
   upNextMeta,
 } from "../lib/agentsPage";
+import { agentLocation, flagFor, isHomeMarket, getHomeCountry, countryName } from "../lib/territory";
+import "flag-icons/css/flag-icons.min.css";
 import "./agents/agentsV2.css";
 
 interface AgentsProps {
@@ -361,6 +363,8 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
     const sel = agent.id === selectedAgentId;
     const isOpen = agent.submissionStatus === SubmissionStatus.OPEN;
     const last = lastStatusForAgent(agent.id, queries, activities);
+    // Row territory marker: flag glyph only (no pill/text — rows stay calm); absent country ⇒ nothing.
+    const rowFlag = flagFor(agent.country);
     return (
       <button
         type="button"
@@ -378,7 +382,17 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
             {agent.pinned && <Pin className="ag-pin-ic" aria-label="Pinned" />}
             {agent.name || "Unnamed agent"}
           </span>
-          <span className="ag-agency">{agent.agency || "Independent"}</span>
+          <span className="ag-agency">
+            {agent.agency || "Independent"}
+            {rowFlag && (
+              <span
+                className={`ag-rowflag ${rowFlag}`}
+                role="img"
+                aria-label={agentLocation(agent)}
+                title={agentLocation(agent)}
+              />
+            )}
+          </span>
           <span className="ag-rstars" aria-label={`${agent.starRating || 0} of 5 stars`}>
             <Stars value={agent.starRating || 0} />
           </span>
@@ -444,6 +458,12 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
     const socials = displaySocials(a).filter((s) => !/twitter|^x\b|^x\s*\//i.test(s.platform));
     const respKnown = (a.responseTimeWeeks || 0) > 0;
     const hasMswl = !!a.mswlNotes?.trim();
+    // Territory marker (display-only): a resolvable country gates the whole marker — unset/unknown
+    // renders nothing. Home market = sage pill; foreign = flag + place name (titled — a flag alone
+    // is ambiguous). City rides along via agentLocation(); never fabricated.
+    const location = agentLocation(a);
+    const locFlag = flagFor(a.country);
+    const homeMarket = isHomeMarket(a.country, getHomeCountry(currentUser));
 
     // One chip of the canonical trio: solid (linked when the value is an URL/domain, titled text
     // chip otherwise) when populated; a dashed ghost prompt opening the Edit drawer when empty.
@@ -479,6 +499,16 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
                 {a.agency || "Independent"}
                 {a.email ? ` · ${a.email}` : ""}
               </div>
+              {location && locFlag && (
+                homeMarket ? (
+                  <span className="ag-loc home" title="In your home market">{location}</span>
+                ) : (
+                  <span className="ag-loc" title={countryName(a.country)}>
+                    <span className={locFlag} aria-hidden="true" />
+                    {location}
+                  </span>
+                )
+              )}
               <div className="ag-bstars" aria-label={`${a.starRating || 0} of 5 stars`}>
                 <Stars value={a.starRating || 0} />
               </div>

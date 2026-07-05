@@ -123,6 +123,15 @@ function toCode(value: string | null | undefined): string | undefined {
 }
 
 /**
+ * Public normaliser: any territory value (code or legacy full name) → its canonical ISO code, or
+ * `undefined` when unknown. The write-side counterpart of `countryName` — form save paths call
+ * this so every NEW write stores a code, whatever the picker displayed.
+ */
+export function normaliseCountry(value: string | null | undefined): string | undefined {
+  return toCode(value);
+}
+
+/**
  * Display name for a territory value. A code resolves to its English name; a legacy full name passes
  * through (it's already a display name). Returns `undefined` for unknown/absent values.
  */
@@ -132,6 +141,21 @@ export function countryName(value: string | null | undefined): string | undefine
   // Unresolvable but non-empty — preserve whatever was stored so a display never blanks out.
   const trimmed = value?.trim();
   return trimmed ? trimmed : undefined;
+}
+
+/**
+ * One-line location display for an agent-shaped record: "London, United Kingdom" when both parts
+ * are present, else whichever exists, else `undefined`. Country goes through `countryName` so codes
+ * and legacy stored names render identically. Never fabricates — absent stays absent.
+ */
+export function agentLocation(
+  a: { city?: string; country?: string } | null | undefined,
+): string | undefined {
+  if (!a) return undefined;
+  const city = a.city?.trim();
+  const name = countryName(a.country);
+  if (city && name) return `${city}, ${name}`;
+  return city || name || undefined;
 }
 
 /**

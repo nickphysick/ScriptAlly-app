@@ -167,7 +167,7 @@ service cloud.firestore {
         && (!data.keys().hasAll(['twitter']) || (data.twitter is string && data.twitter.size() <= 128))
         && (!data.keys().hasAll(['bluesky']) || (data.bluesky is string && data.bluesky.size() <= 128))
         && (!data.keys().hasAll(['instagram']) || (data.instagram is string && data.instagram.size() <= 128))
-        && (!data.keys().hasAll(['country']) || (data.country is string && data.country.size() <= 128))
+        && (!data.keys().hasAll(['country']) || (data.country is string && isKnownCountry(data.country)))
         && (!data.keys().hasAll(['city']) || (data.city is string && data.city.size() <= 128))
         && (!data.keys().hasAll(['agentNotes']) || (data.agentNotes is string && data.agentNotes.size() <= 4096))
         && (!data.keys().hasAll(['requeryPreference']) || (data.requeryPreference is string && (data.requeryPreference == 'yes' || data.requeryPreference == 'maybe' || data.requeryPreference == 'no')))
@@ -175,6 +175,41 @@ service cloud.firestore {
         && (!data.keys().hasAll(['importedNeedsReview']) || data.importedNeedsReview is bool)
         && (!data.keys().hasAll(['setAside']) || data.setAside is bool)
         && (!data.keys().hasAll(['pinned']) || data.pinned is bool);
+    }
+
+    // Country allowlist for agent/communityAgent `country` fields. Three tolerated shapes:
+    //   • '' — cleared by the Edit Agent drawer's select (read paths treat '' as unknown);
+    //   • a canonical ISO 3166-1 alpha-2 code — what every form writes since the ISO migration
+    //     (MUST stay in sync with ISO_CODES in src/lib/territory.ts — asserted by
+    //     src/lib/agentCountryRule.test.ts, the repo's rules-artefact pattern);
+    //   • a LEGACY full name from the retired agentOptions.COUNTRIES picker — still present on
+    //     pre-migration documents, and isValidAgent validates the whole merged doc on every
+    //     update, so rejecting these would wedge edits to any agent that stored one. Read paths
+    //     reverse-map them (territory.ts); new writes never produce them.
+    function isKnownCountry(c) {
+      return c == ''
+        || c in [
+          'AD', 'AE', 'AF', 'AG', 'AI', 'AL', 'AM', 'AO', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AW', 'AX', 'AZ',
+          'BA', 'BB', 'BD', 'BE', 'BF', 'BG', 'BH', 'BI', 'BJ', 'BL', 'BM', 'BN', 'BO', 'BQ', 'BR', 'BS',
+          'BT', 'BV', 'BW', 'BY', 'BZ', 'CA', 'CC', 'CD', 'CF', 'CG', 'CH', 'CI', 'CK', 'CL', 'CM', 'CN',
+          'CO', 'CR', 'CU', 'CV', 'CW', 'CX', 'CY', 'CZ', 'DE', 'DJ', 'DK', 'DM', 'DO', 'DZ', 'EC', 'EE',
+          'EG', 'EH', 'ER', 'ES', 'ET', 'FI', 'FJ', 'FK', 'FM', 'FO', 'FR', 'GA', 'GB', 'GD', 'GE', 'GF',
+          'GG', 'GH', 'GI', 'GL', 'GM', 'GN', 'GP', 'GQ', 'GR', 'GS', 'GT', 'GU', 'GW', 'GY', 'HK', 'HM',
+          'HN', 'HR', 'HT', 'HU', 'ID', 'IE', 'IL', 'IM', 'IN', 'IO', 'IQ', 'IR', 'IS', 'IT', 'JE', 'JM',
+          'JO', 'JP', 'KE', 'KG', 'KH', 'KI', 'KM', 'KN', 'KP', 'KR', 'KW', 'KY', 'KZ', 'LA', 'LB', 'LC',
+          'LI', 'LK', 'LR', 'LS', 'LT', 'LU', 'LV', 'LY', 'MA', 'MC', 'MD', 'ME', 'MF', 'MG', 'MH', 'MK',
+          'ML', 'MM', 'MN', 'MO', 'MP', 'MQ', 'MR', 'MS', 'MT', 'MU', 'MV', 'MW', 'MX', 'MY', 'MZ', 'NA',
+          'NC', 'NE', 'NF', 'NG', 'NI', 'NL', 'NO', 'NP', 'NR', 'NU', 'NZ', 'OM', 'PA', 'PE', 'PF', 'PG',
+          'PH', 'PK', 'PL', 'PM', 'PN', 'PR', 'PS', 'PT', 'PW', 'PY', 'QA', 'RE', 'RO', 'RS', 'RU', 'RW',
+          'SA', 'SB', 'SC', 'SD', 'SE', 'SG', 'SH', 'SI', 'SJ', 'SK', 'SL', 'SM', 'SN', 'SO', 'SR', 'SS',
+          'ST', 'SV', 'SX', 'SY', 'SZ', 'TC', 'TD', 'TF', 'TG', 'TH', 'TJ', 'TK', 'TL', 'TM', 'TN', 'TO',
+          'TR', 'TT', 'TV', 'TW', 'TZ', 'UA', 'UG', 'UM', 'US', 'UY', 'UZ', 'VA', 'VC', 'VE', 'VG', 'VI',
+          'VN', 'VU', 'WF', 'WS', 'YE', 'YT', 'ZA', 'ZM', 'ZW'
+        ]
+        || c in [
+          'United Kingdom', 'Ireland', 'United States', 'Canada', 'Australia', 'New Zealand',
+          'France', 'Germany', 'India', 'Italy', 'Netherlands', 'Spain', 'Sweden', 'Other'
+        ];
     }
 
     function isValidCommunityAgent(data) {
@@ -205,6 +240,8 @@ service cloud.firestore {
         && (!data.keys().hasAll(['twitter']) || (data.twitter is string && data.twitter.size() <= 128))
         && (!data.keys().hasAll(['bluesky']) || (data.bluesky is string && data.bluesky.size() <= 128))
         && (!data.keys().hasAll(['instagram']) || (data.instagram is string && data.instagram.size() <= 128))
+        && (!data.keys().hasAll(['country']) || (data.country is string && isKnownCountry(data.country)))
+        && (!data.keys().hasAll(['city']) || (data.city is string && data.city.size() <= 128))
         && (!data.keys().hasAll(['agentNotes']) || (data.agentNotes is string && data.agentNotes.size() <= 4096));
     }
 

@@ -4,8 +4,8 @@
  *
  * communityMatch — the single, shared community-agent ↔ manuscript scorer.
  *
- * The live home of the (now-removed) Discover engine — one engine, consumed by the manuscript-page
- * suggestion panel (ManuscriptAgentSuggestions). The score is out of 75, built from three signals —
+ * One engine — consumed by the Discover-page derivations (discoverAgents.ts). The score is out of
+ * 75, built from three signals —
  *   • MSWL keyword overlap  (0–40)  tokenised logline + comps against the agent's mswlNotes
  *   • genre alignment       (0–20)
  *   • age-category match     (0–15)
@@ -15,7 +15,7 @@
  * on the manuscript form is a separate, unrelated concern — see genreWordCountRange() in manuscripts.ts.)
  *
  * `calculateCommunityAgentMatch` returns the full breakdown — including `overlappingWords`, the
- * matched MSWL tokens, so callers can highlight them. `scoreCommunityAgent` adds the total.
+ * matched MSWL tokens, so callers can highlight them. `totalScore` sums it.
  */
 import { CommunityAgent, Manuscript } from "../types";
 import { compsSearchText } from "./comps";
@@ -170,12 +170,3 @@ export const calculateCommunityAgentMatch = (commAgent: CommunityAgent, ms: Manu
 /** Sum of the three sub-scores — the headline match score out of 75. */
 export const totalScore = (b: MatchBreakdown): number =>
   b.mswlScore + b.genreScore + b.ageScore;
-
-/** Convenience: score one community agent against a manuscript, returning total + breakdown. */
-export const scoreCommunityAgent = (
-  commAgent: CommunityAgent,
-  ms: Manuscript,
-): { score: number; breakdown: MatchBreakdown } => {
-  const breakdown = calculateCommunityAgentMatch(commAgent, ms);
-  return { score: totalScore(breakdown), breakdown };
-};

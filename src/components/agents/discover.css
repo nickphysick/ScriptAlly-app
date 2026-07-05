@@ -1,0 +1,356 @@
+/**
+ * Discover new agents — Phase 1 redesign (ranked cards + lenses + querying batch).
+ *
+ * Everything is scoped under .dv2. Shared theme vocabulary comes from the root-class tokens in
+ * index.css (--desk/--card/--pane/--bd/--bdw/--chromerad/--hdr/--band-a/--band-b/--band-bd/
+ * --band-meta/--band-strong/the --abtn set/--acc); every consumption carries a Cappuccino
+ * fallback, so the page renders correctly even on an unthemed surface and auto-upgrades where
+ * the theme classes reach (they're on the AppShell root, so this route IS themed). The --dv-*
+ * tokens below are this page's additions (ink/muted/line/fills/monogram), Cappuccino defaults
+ * with per-theme overrides — page-scoped so the shared index.css blocks stay untouched.
+ * All tints are pre-computed hexes: no color-mix(). No data-URIs (Tailwind v4 parser gotcha).
+ */
+
+/* ── Page-scoped theme tokens (Cappuccino defaults; unthemed surfaces read the same) ── */
+.dv2 {
+  --dv-ink: #2c2620;
+  --dv-muted: #93897b;
+  --dv-line: rgba(60, 50, 40, 0.12);
+  --dv-good: #6f7f68;
+  --dv-goodfill: #e9ede3;
+  --dv-goodbd: rgba(111, 127, 104, 0.32);
+  --dv-amber: #b98a4e;
+  --dv-amberfill: rgba(185, 138, 78, 0.13);
+  --dv-amberbd: rgba(185, 138, 78, 0.38);
+  --dv-neutralfill: #f3ede4;
+  --dv-bandflat: #e9e1d3;
+  --dv-monoa: #f5e2da;
+  --dv-monob: #efd5ca;
+  --dv-monoink: #7c3a2a;
+  --dv-monobd: #e8cabb;
+  --dv-cardshadow: none;
+  --dv-trayshadow: 0 10px 28px rgba(40, 28, 20, 0.16);
+  --dv-rad: var(--chromerad, 0px);
+}
+.t-bold .dv2 {
+  --dv-ink: #1d1712;
+  --dv-muted: #7d7772;
+  --dv-line: rgba(29, 23, 18, 0.14);
+  --dv-bandflat: #f4c7c2;
+  --dv-neutralfill: #f5efe9;
+  --dv-trayshadow: 4px 4px 0 rgba(29, 23, 18, 0.9);
+}
+.t-edn .dv2 {
+  --dv-ink: #1d1712;
+  --dv-muted: #84878c;
+  --dv-line: rgba(29, 23, 18, 0.09);
+  --dv-good: #555555;
+  --dv-goodfill: #f1f1ef;
+  --dv-goodbd: #e3e2e0;
+  --dv-neutralfill: #f4f4f5;
+  --dv-bandflat: #f4f4f5;
+  --dv-monoa: #f1f1ef;
+  --dv-monob: #f1f1ef;
+  --dv-monoink: #555555;
+  --dv-monobd: #e3e2e0;
+  --dv-cardshadow: 0 1px 2px rgba(20, 20, 20, 0.05), 0 12px 32px rgba(20, 20, 20, 0.07);
+  --dv-trayshadow: 0 12px 36px rgba(20, 20, 25, 0.14);
+}
+
+/* ── Page shell — fills the remaining agents-slot height; the STAGE scrolls (never 100vh) ── */
+.dv2 {
+  flex: 1 0 auto;
+  background: var(--desk, #e8ddd0);
+  color: var(--dv-ink);
+}
+.dv-wrap {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 26px 24px 120px; /* bottom clearance so the sticky batch tray never hides a card */
+}
+
+/* ── Trust banner (band grammar: gradient + bottom rule) ── */
+.dv-trust {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 16px;
+  background: linear-gradient(180deg, var(--band-a, #ece5d8), var(--band-b, #e5ddcd));
+  border: var(--bdw, 1px) solid var(--bd, #d8cebf);
+  border-bottom: var(--bdw, 1px) solid var(--band-bd, rgba(112, 94, 70, 0.25));
+  border-radius: var(--dv-rad);
+}
+.t-edn .dv2 .dv-trust {
+  border-color: transparent;
+  box-shadow: var(--dv-cardshadow);
+}
+
+/* ── Cards ── */
+.dv-card {
+  background: var(--card, #fffefb);
+  border: var(--bdw, 1px) solid var(--bd, #d8cebf);
+  border-radius: var(--dv-rad);
+  padding: 16px 18px 14px;
+}
+.t-edn .dv2 .dv-card {
+  border-color: transparent;
+  box-shadow: var(--dv-cardshadow);
+}
+.dv-card.held {
+  opacity: 0.82;
+}
+
+/* Monogram disc — pink band + burgundy initials (Editorial goes neutral, like .qmono). */
+.dv-mono {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--dv-monoa), var(--dv-monob));
+  border: 1px solid var(--dv-monobd);
+  color: var(--dv-monoink);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+}
+
+/* ── Why chips — sage by default; the chip matching the active lens leads in accent ── */
+.dv-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--dv-good);
+  background: var(--dv-goodfill);
+  border: 1px solid var(--dv-goodbd);
+  border-radius: 999px;
+  padding: 2.5px 9px;
+  white-space: nowrap;
+}
+.dv-chip.lead {
+  color: #ffffff;
+  background: var(--acc, #7c3a2a);
+  border-color: var(--acc, #7c3a2a);
+  font-weight: 600;
+}
+
+/* Fit-band pill tiers */
+.dv-band {
+  display: inline-flex;
+  align-items: center;
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 3px 9px;
+  white-space: nowrap;
+}
+.dv-band.strong { color: var(--dv-good); background: var(--dv-goodfill); border: 1px solid var(--dv-goodbd); }
+.dv-band.good { color: var(--dv-muted); background: var(--dv-neutralfill); border: 1px solid var(--dv-line); }
+.dv-band.possible { color: var(--dv-amber); background: var(--dv-amberfill); border: 1px solid var(--dv-amberbd); }
+
+/* ── Wish-list personalisation hook block ── */
+.dv-wish {
+  margin-top: 12px;
+  border: 1px solid var(--dv-line);
+  border-radius: 10px;
+  padding: 10px 13px 11px;
+  background: transparent;
+}
+.dv-wish-quote {
+  font-family: "Playfair Display", Georgia, serif;
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--dv-ink);
+  margin: 6px 0 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.dv-wish-hit {
+  color: var(--acc, #7c3a2a);
+  font-weight: 700;
+}
+.dv-wish-prompt {
+  margin: 9px 0 0;
+  padding-top: 8px;
+  border-top: 1px dashed var(--dv-line);
+  font-size: 12px;
+  color: var(--dv-ink);
+}
+
+/* ── Lens + filter controls (chip grammar shared with the Agents page) ── */
+.dv-lens,
+.dv-filter {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--dv-muted);
+  background: transparent;
+  border: 1px solid var(--dv-line);
+  border-radius: 999px;
+  padding: 5px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+.dv-lens:hover,
+.dv-filter:hover {
+  background: var(--abtn-hov, #f4f2ef);
+  color: var(--dv-ink);
+}
+.dv-lens.on,
+.dv-filter.on {
+  background: var(--dv-bandflat);
+  color: var(--dv-ink);
+  border-color: var(--dv-line);
+  font-weight: 600;
+}
+.dv-lens:focus-visible,
+.dv-filter:focus-visible,
+.dv-btn:focus-visible,
+.dv-quiet:focus-visible {
+  outline: 2px solid var(--acc, #7c3a2a);
+  outline-offset: 2px;
+}
+
+/* ── Buttons — shape only; colours come from the shared .sa-btn tokens (the ONE treatment) ── */
+.dv-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  border-style: solid;
+  border-radius: 9px;
+  padding: 7px 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.dv-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* Quiet text actions (Not a fit / Undo / Clear) */
+.dv-quiet {
+  appearance: none;
+  background: transparent;
+  border: none;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--dv-muted);
+  cursor: pointer;
+  padding: 4px 2px;
+  transition: color 0.15s;
+}
+.dv-quiet:hover {
+  color: var(--dv-ink);
+}
+
+/* ── Meta strip ── */
+.dv-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin-top: 12px;
+  font-size: 9.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--dv-muted);
+}
+.dv-meta .item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ── Manuscript selector pills ── */
+.dv-mspill {
+  appearance: none;
+  text-align: left;
+  padding: 7px 13px;
+  border-radius: 10px;
+  border: 1px solid var(--dv-line);
+  background: var(--card, #fffefb);
+  color: var(--dv-ink);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.dv-mspill:hover {
+  background: var(--abtn-hov, #f4f2ef);
+}
+.dv-mspill.on {
+  background: var(--acc, #7c3a2a);
+  border-color: var(--acc, #7c3a2a);
+  color: #ffffff;
+}
+
+/* ── Querying batch tray (sticky against the stage scrollport) ── */
+.dv-batch {
+  position: sticky;
+  bottom: 14px;
+  z-index: 30;
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--card, #fffefb);
+  border: var(--bdw, 1px) solid var(--bd, #d8cebf);
+  border-radius: var(--dv-rad);
+  box-shadow: var(--dv-trayshadow);
+}
+.t-edn .dv2 .dv-batch {
+  border-color: transparent;
+}
+.dv-batch-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--dv-ink);
+  background: var(--dv-neutralfill);
+  border: 1px solid var(--dv-line);
+  border-radius: 999px;
+  padding: 3px 6px 3px 10px;
+}
+.dv-batch-chip button {
+  appearance: none;
+  background: transparent;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  color: var(--dv-muted);
+  cursor: pointer;
+  padding: 1px;
+  border-radius: 999px;
+}
+.dv-batch-chip button:hover {
+  color: var(--dv-ink);
+}
+
+@media (max-width: 640px) {
+  .dv-wrap {
+    padding: 20px 14px 130px;
+  }
+  .dv-card {
+    padding: 14px 14px 12px;
+  }
+}

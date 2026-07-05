@@ -203,6 +203,10 @@ export interface CommunityAgent {
   agency: string;
   email: string;
   website: string;
+  // Optional location — ISO 3166-1 alpha-2 `country` (see src/lib/territory.ts) + display-only
+  // `city`. Absent === unknown (never null/""); populated during curation, never fabricated.
+  country?: string;
+  city?: string;
   twitter?: string;
   bluesky?: string;
   instagram?: string;

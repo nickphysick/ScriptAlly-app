@@ -21,6 +21,8 @@ import {
 import profileAnimation from "../assets/agent-profile-animation.json";
 import { AGENT_GENRES, SOCIAL_PLATFORMS, METHOD_OPTIONS as METHOD_LIST } from "../lib/agentOptions";
 import { buildAgentMaterials } from "../lib/agentMaterials";
+import { COUNTRIES_ISO, QUICK_PICKS, flagFor } from "../lib/territory";
+import "flag-icons/css/flag-icons.min.css";
 
 interface AddAgentFocusFormProps {
   isOpen: boolean;
@@ -30,6 +32,20 @@ interface AddAgentFocusFormProps {
 
 const platformOptions = SOCIAL_PLATFORMS.map((p) => ({ value: p, label: p }));
 const methodOptions = METHOD_LIST.map((m) => ({ value: m, label: m }));
+
+// Country picker: canonical ISO codes from territory.ts — core markets (QUICK_PICKS) first, the
+// rest alphabetically. The stored VALUE is the code; name + flag are read-time derivations.
+const countryOptions = [
+  { value: "", label: "Not set" },
+  ...[
+    ...QUICK_PICKS.flatMap((code) => COUNTRIES_ISO.filter((c) => c.code === code)),
+    ...COUNTRIES_ISO.filter((c) => !QUICK_PICKS.includes(c.code)),
+  ].map((c) => ({
+    value: c.code,
+    label: c.name,
+    icon: <span className={flagFor(c.code)} aria-hidden="true" />,
+  })),
+];
 
 const POLICY_OPTIONS = ["Responds to all", "Only responds if interested", "No response means pass"].map(
   (p) => ({ value: p, label: p })
@@ -67,6 +83,8 @@ export const AddAgentFocusForm: React.FC<AddAgentFocusFormProps> = ({
   const [agency, setAgency] = useState("");
   const [email, setEmail] = useState("");
   const [website, setWebsite] = useState("");
+  const [country, setCountry] = useState(""); // ISO alpha-2 code; "" === not set (key omitted on save)
+  const [city, setCity] = useState("");
   const [socials, setSocials] = useState<AgentSocial[]>(initialSocials);
 
   // What they want
@@ -94,6 +112,8 @@ export const AddAgentFocusForm: React.FC<AddAgentFocusFormProps> = ({
     setAgency("");
     setEmail("");
     setWebsite("");
+    setCountry("");
+    setCity("");
     setSocials(initialSocials());
     setMswlNotes("");
     setGenres([]);
@@ -115,6 +135,8 @@ export const AddAgentFocusForm: React.FC<AddAgentFocusFormProps> = ({
     agency !== "" ||
     email !== "" ||
     website !== "" ||
+    country !== "" ||
+    city !== "" ||
     mswlNotes !== "" ||
     notes !== "" ||
     genres.length > 0 ||
@@ -186,6 +208,9 @@ export const AddAgentFocusForm: React.FC<AddAgentFocusFormProps> = ({
       agency: agency.trim(),
       email: email.trim(),
       website: website.trim(),
+      // Location: the ISO code from the picker; both keys OMITTED when unset (never null/"").
+      country: country || undefined,
+      city: city.trim() || undefined,
       twitter: firstHandle("X / Twitter"),
       bluesky: firstHandle("Bluesky"),
       instagram: firstHandle("Instagram"),
@@ -280,6 +305,24 @@ export const AddAgentFocusForm: React.FC<AddAgentFocusFormProps> = ({
             value={website}
             onChange={(e) => setWebsite(e.target.value)}
             placeholder="agency.com"
+          />
+        </FormField>
+      </div>
+
+      <div className="sa-row2">
+        <FormField label={<>Country <span className="sa-opt">optional</span></>}>
+          <BrandDropdown
+            value={country}
+            options={countryOptions}
+            placeholder="Not set"
+            onChange={setCountry}
+          />
+        </FormField>
+        <FormField label={<>City <span className="sa-opt">optional</span></>}>
+          <BrandInput
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            placeholder="e.g. London"
           />
         </FormField>
       </div>

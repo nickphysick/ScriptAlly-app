@@ -27,6 +27,11 @@
   --ag-edge: var(--bd, #d8cebf);
   --ag-edgew: var(--bdw, 1px);
   --ag-rad: var(--chromerad, 0px);
+  /* Territory marker "home market" trio — mirrors the Discover why-chip sage (--dv-good*);
+     Bold inherits it (as Discover does); Editorial overrides to its grey below. */
+  --ag-home: #6f7f68;
+  --ag-homefill: #e9ede3;
+  --ag-homebd: rgba(111, 127, 104, 0.32);
 }
 .t-bold .agv2 {
   --ag-line: rgba(29, 23, 18, 0.14);
@@ -50,6 +55,9 @@
   --ag-accent: #44484d;
   --ag-star: #44484d;
   --ag-shadow: 0 8px 24px rgba(20, 20, 25, 0.07);
+  --ag-home: #555555;
+  --ag-homefill: #f1f1ef;
+  --ag-homebd: #e3e2e0;
 }
 
 /* ── Viewport-locked page shell (fills the AppShell agents slot; the stage never scrolls) ── */
@@ -382,6 +390,14 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* Row territory marker — a lone flag glyph after the agency (title carries the place name);
+   sized by the agency line's font, so it stays a calm ~12×9px. */
+.agv2 .ag-rowflag {
+  margin-left: 6px;
+  border-radius: 2px;
+  opacity: 0.85;
+  vertical-align: -1px;
+}
 .agv2 .ag-rstars { display: flex; gap: 1px; margin-top: 5px; }
 .agv2 .ag-rstars svg { width: 12px; height: 12px; }
 .agv2 .ag-st-on { fill: var(--ag-star); stroke: var(--ag-star); }
@@ -502,6 +518,27 @@
   color: var(--ag-muted);
   margin-top: 5px;
 }
+/* Pane territory marker — home market = sage pill (the --ag-home* trio), foreign = flag + place
+   name in the meta voice. Renders only when the country resolves; city rides along in the text. */
+.agv2 .ag-loc {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 7px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ag-muted);
+}
+.agv2 .ag-loc.home {
+  background: var(--ag-homefill);
+  color: var(--ag-home);
+  border: 1px solid var(--ag-homebd);
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+.agv2 .ag-loc .fi { border-radius: 2px; }
 .agv2 .ag-bstars { display: flex; gap: 2px; margin-top: 8px; }
 .agv2 .ag-bstars svg { width: 14px; height: 14px; }
 .agv2 .ag-ilinks { display: flex; gap: 7px; margin-top: 11px; flex-wrap: wrap; }

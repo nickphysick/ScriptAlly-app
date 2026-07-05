@@ -141,9 +141,11 @@ describe("firestore.rules · responseTimeWeeks relaxation (rule-text)", () => {
     expect(rules).toMatch(/hasOnly\(\[[\s\S]*'responseTimeWeeks'[\s\S]*\]\)/);
   });
 
-  it("isValidAgent admits optional country/city as strings (v12 location, optional-field idiom)", () => {
+  it("isValidAgent admits optional country/city (country allowlisted via isKnownCountry, city a bounded string)", () => {
+    // AMENDED by the location build: country tightened from any-string to the isKnownCountry
+    // allowlist (ISO codes + tolerated legacy names — full sync locks in agentCountryRule.test.ts).
     expect(agentBody).toMatch(
-      /!data\.keys\(\)\.hasAll\(\['country'\]\) \|\| \(data\.country is string && data\.country\.size\(\) <= 128\)/
+      /!data\.keys\(\)\.hasAll\(\['country'\]\) \|\| \(data\.country is string && isKnownCountry\(data\.country\)\)/
     );
     expect(agentBody).toMatch(
       /!data\.keys\(\)\.hasAll\(\['city'\]\) \|\| \(data\.city is string && data\.city\.size\(\) <= 128\)/
@@ -155,8 +157,12 @@ describe("firestore.rules · responseTimeWeeks relaxation (rule-text)", () => {
     expect(rules).toMatch(/hasOnly\(\[[\s\S]*'city'[\s\S]*\]\)/);
   });
 
-  it("isValidCommunityAgent does NOT add country/city (scoped to user agents only)", () => {
-    expect(communityBody).not.toMatch(/data\.country is string/);
-    expect(communityBody).not.toMatch(/data\.city is string/);
+  it("isValidCommunityAgent admits optional country/city with the same idiom (location build — supersedes the v12 user-agents-only scoping)", () => {
+    expect(communityBody).toMatch(
+      /!data\.keys\(\)\.hasAll\(\['country'\]\) \|\| \(data\.country is string && isKnownCountry\(data\.country\)\)/
+    );
+    expect(communityBody).toMatch(
+      /!data\.keys\(\)\.hasAll\(\['city'\]\) \|\| \(data\.city is string && data\.city\.size\(\) <= 128\)/
+    );
   });
 });

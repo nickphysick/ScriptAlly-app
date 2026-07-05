@@ -12,6 +12,8 @@ import {
   COUNTRIES_ISO,
   QUICK_PICKS,
   countryName,
+  normaliseCountry,
+  agentLocation,
   flagFor,
   isHomeMarket,
   detectHomeRegion,
@@ -57,6 +59,40 @@ describe("territory · countryName (code ↔ name, legacy pass-through)", () => 
     expect(countryName(null)).toBeUndefined();
     expect(countryName("")).toBeUndefined();
     expect(countryName("   ")).toBeUndefined();
+  });
+});
+
+describe("territory · normaliseCountry (write-side code canonicalisation)", () => {
+  it("canonicalises codes and legacy names to the ISO code", () => {
+    expect(normaliseCountry("GB")).toBe("GB");
+    expect(normaliseCountry("gb")).toBe("GB");
+    expect(normaliseCountry("United Kingdom")).toBe("GB");
+    expect(normaliseCountry("Ireland")).toBe("IE");
+  });
+
+  it("returns undefined for unknown/absent values (caller decides the fallback)", () => {
+    expect(normaliseCountry("Atlantis")).toBeUndefined();
+    expect(normaliseCountry("Other")).toBeUndefined();
+    expect(normaliseCountry("")).toBeUndefined();
+    expect(normaliseCountry(undefined)).toBeUndefined();
+  });
+});
+
+describe("territory · agentLocation (one-line display)", () => {
+  it("joins city and resolved country name", () => {
+    expect(agentLocation({ city: "London", country: "GB" })).toBe("London, United Kingdom");
+    expect(agentLocation({ city: "Dublin", country: "Ireland" })).toBe("Dublin, Ireland");
+  });
+
+  it("degrades to whichever part exists", () => {
+    expect(agentLocation({ country: "GB" })).toBe("United Kingdom");
+    expect(agentLocation({ city: "London" })).toBe("London");
+  });
+
+  it("never fabricates — absent stays absent", () => {
+    expect(agentLocation({})).toBeUndefined();
+    expect(agentLocation({ city: "  ", country: "" })).toBeUndefined();
+    expect(agentLocation(undefined)).toBeUndefined();
   });
 });
 

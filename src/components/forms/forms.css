@@ -394,6 +394,9 @@
   z-index: 30;
   display: none;
   animation: sa-popIn 0.15s ease;
+  /* Long lists (the country picker's full ISO set) scroll; short menus are unaffected. */
+  max-height: 300px;
+  overflow-y: auto;
 }
 .sa-dd.open .sa-dd-menu { display: block; }
 .sa-dd-opt {

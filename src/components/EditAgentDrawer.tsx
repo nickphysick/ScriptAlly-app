@@ -32,7 +32,8 @@ import { AgentEditPatch } from "../lib/saveAgentEdits";
 import {
   AgentMaterialsState, MAT_OPTS, MAT_QTY, buildAgentMaterials, parseAgentMaterials, materialsCountErrors,
 } from "../lib/agentMaterials";
-import { AGENT_GENRES, SOCIAL_PLATFORMS, METHOD_OPTIONS, COUNTRIES } from "../lib/agentOptions";
+import { AGENT_GENRES, SOCIAL_PLATFORMS, METHOD_OPTIONS } from "../lib/agentOptions";
+import { COUNTRIES_ISO, countryName, normaliseCountry } from "../lib/territory";
 import { agentDataQualityNeeds, AgentDataNeed } from "../lib/agentDataQuality";
 import {
   Form11Drawer, Form11DrawerHandle, Form11Footer, Form11HeaderAvatar, RestingField, Form11Select,
@@ -87,9 +88,14 @@ const seedSocials = (a: Agent): AgentSocial[] => {
   return out;
 };
 
+// Country select options: the full ISO display-name list (territory.ts), replacing the legacy
+// 14-name agentOptions.COUNTRIES. The select DISPLAYS names; the save path stores the ISO code
+// via normaliseCountry(), and draftFromAgent maps a stored code (or legacy name) to its name.
+const COUNTRY_NAME_OPTIONS = COUNTRIES_ISO.map((c) => c.name);
+
 const draftFromAgent = (a: Agent): Draft => ({
   name: a.name ?? "", agency: a.agency ?? "", email: a.email ?? "", website: a.website ?? "",
-  country: a.country ?? "", city: a.city ?? "", socials: seedSocials(a),
+  country: countryName(a.country) ?? "", city: a.city ?? "", socials: seedSocials(a),
   status: (a.submissionStatus as SubmissionStatus) ?? SubmissionStatus.UNKNOWN,
   method: a.submissionMethod ?? SubmissionMethod.EMAIL,
   noReply: !!a.noResponseMeansNo,
@@ -257,7 +263,9 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
     if (dirty.agency) patch.agency = S.agency.trim();
     if (dirty.email) patch.email = S.email.trim();
     if (dirty.website) patch.website = S.website.trim();
-    if (dirty.country) patch.country = S.country.trim();
+    // Store the ISO code for the picked display name (new writes always send codes; an empty
+    // pick clears to "" as before — read paths treat "" as unknown).
+    if (dirty.country) patch.country = normaliseCountry(S.country) ?? S.country.trim();
     if (dirty.city) patch.city = S.city.trim();
     if (dirty.status) patch.submissionStatus = S.status;
     if (dirty.method) patch.submissionMethod = S.method;
@@ -436,7 +444,7 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
                   <Field><Label on={dirty.rating}>Agent fit</Label><div style={{ minHeight: 38, display: "flex", alignItems: "center" }}><FitStars value={S.rating} size={20} showMeaning={false} onChange={(n) => set("rating", n)} /></div></Field>
                 </Two>
                 <Two>
-                  <Field><Label on={dirty.country}>Country</Label><EaSelect value={S.country} options={COUNTRIES} onChange={(v) => set("country", v)} placeholder="Select a country…" /></Field>
+                  <Field><Label on={dirty.country}>Country</Label><EaSelect value={S.country} options={COUNTRY_NAME_OPTIONS} onChange={(v) => set("country", v)} placeholder="Select a country…" /></Field>
                   <Field><Label on={dirty.city}>City</Label><TextField field="city" value={S.city} placeholder="Add city (optional)" /></Field>
                 </Two>
 
