@@ -31,6 +31,8 @@ import { AddAgentFocusForm } from "./components/AddAgentFocusForm";
 import { AddManuscriptFocusForm } from "./components/AddManuscriptFocusForm";
 import { HelpCentre } from "./components/HelpCentre";
 import { AccountSettings } from "./components/AccountSettings";
+// Rail "+ Record a response" host (the dashboard keeps its own independent instance).
+import { RecordResponseScreen } from "./components/RecordResponseScreen";
 // Route tiers (landing build): marketing chrome for "/" + /pricing, focus chrome for
 // /account · /plans · /help; the workspace keeps the AppShell below, untouched.
 import { MarketingShell } from "./marketing/MarketingShell";
@@ -354,6 +356,10 @@ function AppContent() {
   const [logQueryManuscriptId, setLogQueryManuscriptId] = useState<string | null>(null);
   const [isAddAgentOpen, setIsAddAgentOpen] = useState<boolean>(false);
   const [isAddManuscriptOpen, setIsAddManuscriptOpen] = useState<boolean>(false);
+  // Rail "+ Record a response": app-level host for the existing RecordResponseScreen (the
+  // dashboard keeps its own local instance — the component is self-contained, both hosts are
+  // independent). Interception, never a navigation — same contract as the other captures.
+  const [isRecordResponseOpen, setIsRecordResponseOpen] = useState<boolean>(false);
 
   useEffect(() => {
     if (successToast) {
@@ -378,6 +384,10 @@ function AppContent() {
     }
     if (subPageName === "Add an agent") {
       setIsAddAgentOpen(true);
+      return;
+    }
+    if (subPageName === "Record a response") {
+      setIsRecordResponseOpen(true);
       return;
     }
     if (subPageName === "Add a manuscript" || subPageName === "Add a Manuscript") {
@@ -673,6 +683,15 @@ function AppContent() {
       <AddManuscriptFocusForm
         isOpen={isAddManuscriptOpen}
         onClose={() => setIsAddManuscriptOpen(false)}
+        onSuccessToast={(msg) => setSuccessToast(msg)}
+      />
+
+      {/* Rail capture host — the existing RecordResponseScreen (same mount pattern as the
+          dashboard's own instance; both are self-contained and independent). */}
+      <RecordResponseScreen
+        isOpen={isRecordResponseOpen}
+        onClose={() => setIsRecordResponseOpen(false)}
+        onNavigate={handleNavigate}
         onSuccessToast={(msg) => setSuccessToast(msg)}
       />
 

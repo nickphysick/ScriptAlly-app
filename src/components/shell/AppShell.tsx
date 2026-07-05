@@ -21,7 +21,8 @@
  * colours in this codebase before). Tailwind is used for layout/breakpoints only.
  */
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { LayoutGrid, Send, Users, Book, ChevronLeft, Bell, Settings, User, Sparkles, BookOpen, HelpCircle, LogOut } from "lucide-react";
+import { useLocation } from "react-router-dom";
+import { LayoutGrid, Send, Users, Book, ChevronLeft, Bell, Settings, User, Sparkles, BookOpen, HelpCircle, LogOut, Search, Table, Reply } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useScriptAllyDb } from "../../lib/db";
 import { UserPlan } from "../../types";
@@ -43,22 +44,39 @@ import { NavSearch } from "../NavSearch";
 import { Nav } from "../Nav";
 import { BottomTabBar } from "../BottomTabBar";
 import { TasksDropdown, useTaskAlerts } from "../TasksDropdown";
+import { RAIL_GROUPS, RAIL_CAPTURES, railActiveKey, invokeCapture } from "./railNav";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
 
 // Collapse persistence — deliberately reuses the Queries-rail key so an existing collapsed
 // preference carries over to the global rail (the Queries rail is what this generalises).
 const COLLAPSE_KEY = "scriptally.queriesRailCollapsed";
 
-const NAV_ITEMS: { tab: string; label: string; Icon: React.ComponentType<{ style?: React.CSSProperties }> }[] = [
-  { tab: "dashboard", label: "Dashboard", Icon: LayoutGrid },
-  { tab: "queries", label: "Queries", Icon: Send },
-  { tab: "agents", label: "Agents", Icon: Users },
-  { tab: "manuscripts", label: "Manuscripts", Icon: Book },
-];
+// Grouped-index data lives in railNav.ts (pure, tested); icons stay here (React-free model).
+const RAIL_ICONS: Record<string, React.ComponentType<{ style?: React.CSSProperties }>> = {
+  dashboard: LayoutGrid,
+  "queries-hub": Send,
+  "agents-db": Users,
+  "agents-discover": Search,
+  manuscripts: Book,
+  packages: Table,
+};
 
 /* ── Rail pieces ─────────────────────────────────────────────────────────── */
 
-const RailNavItem: React.FC<{ label: string; Icon: React.ComponentType<{ style?: React.CSSProperties }>; active: boolean; onClick: () => void }> = ({ label, Icon, active, onClick }) => (
+/**
+ * A rail index/utility item per the grouped-v5 ref: 15px accent-stroke icon, 12.5px label,
+ * radius-10 row; active = theme pill + ink text. `muted` is the utility-group variant (label
+ * colour on text AND icon, warming to ink/accent on hover). `badge` renders the corner count
+ * bubble on the icon (survives collapse, where labels hide).
+ */
+const RailNavItem: React.FC<{
+  label: string;
+  Icon: React.ComponentType<{ style?: React.CSSProperties }>;
+  active?: boolean;
+  muted?: boolean;
+  badge?: string;
+  onClick: () => void;
+}> = ({ label, Icon, active = false, muted = false, badge, onClick }) => (
   <button
     type="button"
     className="arail-item"
@@ -68,73 +86,67 @@ const RailNavItem: React.FC<{ label: string; Icon: React.ComponentType<{ style?:
     style={{
       display: "flex",
       alignItems: "center",
-      gap: 11,
-      padding: "9px 11px",
-      borderRadius: 9,
+      gap: 10,
+      padding: muted ? "7px 10px" : "8px 10px",
+      borderRadius: 10,
       fontFamily: FONT_SANS,
-      fontSize: 13,
-      fontWeight: active ? 500 : 400,
-      // Active text is theme-driven (v37: capp mocha / bold ink / editorial graphite).
-      color: active ? `var(--navtext, ${burgundy})` : "#6a5a50",
-      background: active ? "var(--navpill)" : "transparent",
-      border: "1px solid transparent",
+      fontSize: muted ? 12 : 12.5,
+      fontWeight: 500,
+      color: active
+        ? `var(--rail-ink, ${bodyInk})`
+        : muted
+          ? "var(--rail-label, #9c8878)"
+          : "var(--rail-itemtx, #5a4a40)",
+      background: active ? "var(--rail-pill, #f1e9df)" : "transparent",
+      border: "none",
       cursor: "pointer",
       whiteSpace: "nowrap",
       textAlign: "left",
       width: "100%",
       transition: "background 0.14s, color 0.14s",
     }}
-    onMouseEnter={(e) => { if (!active) e.currentTarget.style.background = "rgba(124,58,42,0.05)"; }}
-    onMouseLeave={(e) => { if (!active) e.currentTarget.style.background = "transparent"; }}
-  >
-    <span style={{ display: "flex", flexShrink: 0 }}><Icon style={{ width: 17, height: 17 }} /></span>
-    <span className="arail-label">{label}</span>
-  </button>
-);
-
-const RailIconButton: React.FC<{ title: string; onClick: () => void; badge?: string; children: React.ReactNode }> = ({ title, onClick, badge, children }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    title={title}
-    aria-label={title}
-    style={{
-      position: "relative",
-      flex: 1,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      padding: "7px 0",
-      border: "var(--bdw) solid var(--bd)",
-      background: "#ffffff",
-      borderRadius: 9,
-      color: "#6a5a50",
-      cursor: "pointer",
-      transition: "color 0.14s",
+    onMouseEnter={(e) => {
+      if (!active) e.currentTarget.style.background = "var(--rail-hov, #f7f3ed)";
+      if (muted) {
+        e.currentTarget.style.color = `var(--rail-ink, ${bodyInk})`;
+        const icon = e.currentTarget.querySelector<HTMLElement>(".arail-item-icon");
+        if (icon) icon.style.color = `var(--rail-accent, ${burgundy})`;
+      }
     }}
-    onMouseEnter={(e) => { e.currentTarget.style.color = burgundy; }}
-    onMouseLeave={(e) => { e.currentTarget.style.color = "#6a5a50"; }}
+    onMouseLeave={(e) => {
+      if (!active) e.currentTarget.style.background = "transparent";
+      if (muted) {
+        e.currentTarget.style.color = "var(--rail-label, #9c8878)";
+        const icon = e.currentTarget.querySelector<HTMLElement>(".arail-item-icon");
+        if (icon) icon.style.color = "var(--rail-label, #9c8878)";
+      }
+    }}
   >
-    {children}
-    {badge && (
-      <span
-        style={{
-          position: "absolute",
-          top: -5,
-          right: -4,
-          background: burgundy,
-          color: parchment,
-          fontFamily: FONT_MONO,
-          fontSize: 7,
-          fontWeight: 700,
-          borderRadius: 99,
-          padding: "1px 4px",
-          lineHeight: "10px",
-        }}
-      >
-        {badge}
-      </span>
-    )}
+    <span
+      className="arail-item-icon"
+      style={{
+        display: "flex",
+        flexShrink: 0,
+        position: "relative",
+        color: muted ? "var(--rail-label, #9c8878)" : `var(--rail-accent, ${burgundy})`,
+        transition: "color 0.14s",
+      }}
+    >
+      <Icon style={{ width: 15, height: 15 }} />
+      {badge && (
+        <span
+          style={{
+            position: "absolute", top: -6, right: -7,
+            background: `var(--rail-accent, ${burgundy})`, color: parchment,
+            fontFamily: FONT_MONO, fontSize: 7, fontWeight: 700,
+            borderRadius: 99, padding: "1px 4px", lineHeight: "10px",
+          }}
+        >
+          {badge}
+        </span>
+      )}
+    </span>
+    <span className="arail-label">{label}</span>
   </button>
 );
 
@@ -172,6 +184,9 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
   const { currentUser, logout, updateUserProfile } = useScriptAllyDb();
   const { activeTasksCount, badgeText } = useTaskAlerts();
   const searchInputRef = useRef<HTMLInputElement>(null);
+  // Pathname-owned active state for the grouped index (?q= never unlights Queries Hub;
+  // /agents/discover lights Discover, not Agents database).
+  const activeRailKey = railActiveKey(useLocation().pathname);
 
   // The dashboard and the Agents page each host their own top-bar search (DashTopBar / the
   // Agents pill, both gated on route visibility), so the rail search hides on those routes
@@ -231,8 +246,12 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
         width: collapsed ? 60 : 216,
         minWidth: 0,
         flexShrink: 0,
-        background: "#fffefb",
-        borderRight: "var(--bdw) solid var(--bd)",
+        // Rail frame per the three-themes ref, flush-panel translation: the mockup's card
+        // border becomes the right edge; the shadow rides as-is. NO overflow:hidden here —
+        // the bell dropdown and account menu fly out past the edge.
+        background: "var(--rail-card, #fffefb)",
+        borderRight: "var(--rail-bdw, 1px) solid var(--rail-bd, #e7ddd2)",
+        boxShadow: "var(--rail-shadow, none)",
         flexDirection: "column",
         transition: "width 200ms ease",
         position: "relative",
@@ -256,7 +275,10 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
         .arail-collapsed .arail-acct-text { display: none !important; }
         .arail-collapsed .arail-item { justify-content: center !important; padding: 9px 0 !important; }
         .arail-collapsed .arail-head { justify-content: center !important; padding: 18px 8px 14px !important; }
-        .arail-collapsed .arail-iconrow { flex-direction: column !important; }
+        .arail-collapsed .arail-eyebrow { display: none !important; }
+        .arail-collapsed .arail-capbtn { justify-content: center !important; padding: 9px 0 !important; }
+        .arail-collapsed .arail-cappair { flex-direction: column !important; }
+        .arail-collapsed .arail-capmini { padding: 9px 0 !important; }
         .arail-collapsed .arail-acct { justify-content: center !important; padding: 6px 0 !important; }
         .arail-collapsed .arail-collapse svg { transform: rotate(180deg); }
       `}</style>
@@ -306,68 +328,156 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
         </div>
       )}
 
-      {/* Global page nav */}
-      <nav style={{ padding: "0 10px", display: "flex", flexDirection: "column", gap: 3 }}>
-        {NAV_ITEMS.map((item) => (
-          <RailNavItem
-            key={item.tab}
-            label={item.label}
-            Icon={item.Icon}
-            active={activeTab === item.tab}
-            onClick={() => { onNavigate(item.tab); closeAll(); }}
-          />
+      {/* Primary capture — Record a response, the most frequent capture, always first in
+          reach (grouped-v5). White/card-filled in EVERY theme (the Editorial exception: a
+          tinted fill would read as an active state beside the tinted nav pill). */}
+      <div style={{ margin: "2px 12px 8px" }}>
+        <button
+          type="button"
+          className="arail-item arail-capbtn"
+          onClick={() => { invokeCapture("record", onNavigate); closeAll(); }}
+          title={RAIL_CAPTURES.record.label}
+          style={{
+            display: "flex", alignItems: "center", gap: 9, width: "100%",
+            background: "var(--rail-btn-bg, #ffffff)",
+            border: "var(--rail-btn-bdw, 1px) solid var(--rail-btn-bd, #ded3c2)",
+            color: "var(--rail-btn-tx, #5d4037)",
+            borderRadius: 11, padding: "10px 13px",
+            fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500,
+            boxShadow: "var(--rail-btn-shadow, 0 1px 2px rgba(58,28,20,0.05))",
+            cursor: "pointer", whiteSpace: "nowrap", transition: "background 0.14s",
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = "var(--rail-btn-hov, #f4f2ef)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "var(--rail-btn-bg, #ffffff)"; }}
+        >
+          <span style={{ display: "flex", flexShrink: 0, color: `var(--rail-accent, ${burgundy})` }}>
+            <Reply style={{ width: 14, height: 14 }} />
+          </span>
+          <span className="arail-label">{RAIL_CAPTURES.record.label}</span>
+        </button>
+      </div>
+
+      {/* Grouped index — flat items under purely-visual mono eyebrows (no interaction).
+          Active state is PATHNAME-owned (railActiveKey): ?q= keeps Queries Hub lit; sub-routes
+          light their own entry. Rejection analytics is deliberately NOT rendered (no dead
+          links) — the QUERYING group is its future home. */}
+      <nav style={{ padding: "2px 12px", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+        {RAIL_GROUPS.map((group, gi) => (
+          <React.Fragment key={group.eyebrow ?? "top"}>
+            {group.eyebrow && (
+              <div
+                className="arail-eyebrow"
+                style={{
+                  fontFamily: FONT_MONO, fontSize: 7.5, letterSpacing: "0.18em",
+                  textTransform: "uppercase", color: "var(--rail-label, #9c8878)",
+                  padding: gi === 1 ? "12px 10px 6px" : "14px 10px 6px",
+                }}
+              >
+                {group.eyebrow}
+              </div>
+            )}
+            {group.items.map((item) => (
+              <RailNavItem
+                key={item.key}
+                label={item.label}
+                Icon={RAIL_ICONS[item.key]}
+                active={activeRailKey === item.key}
+                onClick={() => { onNavigate(item.tab, item.sub); closeAll(); }}
+              />
+            ))}
+          </React.Fragment>
         ))}
       </nav>
 
-      {/* Rail foot: bell + settings → theme switcher → account chip */}
-      <div style={{ marginTop: "auto", padding: 12 }}>
-        {/* The icon row is the positioning context for the tasks panel so it opens BESIDE the
-            rail: the row's right edge sits 12px inside the rail edge, so 100% + 26px clears the
-            border by 14px at both rail widths (216 and 60). */}
-        <div className="arail-iconrow" style={{ position: "relative", display: "flex", gap: 6, marginBottom: 10 }}>
-          <RailIconButton
-            title="Notifications"
-            onClick={() => { setShowBell((v) => !v); setShowAccount(false); }}
-            badge={activeTasksCount > 0 ? badgeText : undefined}
-          >
-            <Bell style={{ width: 14, height: 14 }} />
-          </RailIconButton>
-          <RailIconButton title="Settings" onClick={() => { onNavigate("account"); closeAll(); }}>
-            <Settings style={{ width: 14, height: 14 }} />
-          </RailIconButton>
-          <AnimatePresence>
-            {showBell && (
-              <TasksDropdown
-                onNavigate={onNavigate}
-                positionClassName="absolute left-[calc(100%+26px)] bottom-0 w-80"
-              />
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Theme segmented switcher — same Firestore field as the Settings radio group */}
-        <div
-          className="arail-themeseg"
-          role="radiogroup"
-          aria-label="Queries page theme"
-          style={{ display: "flex", border: "var(--bdw) solid var(--bd)", borderRadius: 9, overflow: "hidden", marginBottom: 12 }}
-        >
-          {([["cappuccino", "Capp"], ["bold", "Bold"], ["editorial", "Editorial"]] as const).map(([val, label]) => (
+      {/* Rail foot: + Query / + Agent pair → utility group (bell here now) → theme switcher
+          → account chip. The nav above is flex:1, so this block sits at the rail's foot. */}
+      <div>
+        {/* Compact capture pair — icon over mono label (grouped-v5 cap-a); collapse stacks it */}
+        <div className="arail-cappair" style={{ display: "flex", gap: 7, margin: "0 12px 10px" }}>
+          {(["query", "agent"] as const).map((key) => (
             <button
-              key={val}
+              key={key}
               type="button"
-              role="radio"
-              aria-checked={theme === val}
-              onClick={() => updateUserProfile({ queriesTheme: val })}
-              style={themeSegBtn(theme === val)}
+              className="arail-capmini"
+              title={RAIL_CAPTURES[key].label}
+              onClick={() => { invokeCapture(key, onNavigate); closeAll(); }}
+              style={{
+                flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+                background: "var(--rail-btn-bg, #ffffff)",
+                border: "var(--rail-btn-bdw, 1px) solid var(--rail-btn-bd, #ded3c2)",
+                borderRadius: 11, padding: "10px 4px 8px",
+                boxShadow: "var(--rail-btn-shadow, 0 1px 2px rgba(58,28,20,0.05))",
+                cursor: "pointer", transition: "background 0.14s",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "var(--rail-btn-hov, #f4f2ef)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "var(--rail-btn-bg, #ffffff)"; }}
             >
-              {label}
+              <span style={{ display: "flex", color: `var(--rail-accent, ${burgundy})` }}>
+                {key === "query" ? <Send style={{ width: 15, height: 15 }} /> : <User style={{ width: 15, height: 15 }} />}
+              </span>
+              <span
+                className="arail-label"
+                style={{
+                  fontFamily: FONT_MONO, fontSize: 6.8, letterSpacing: "0.1em",
+                  textTransform: "uppercase", color: "var(--rail-btn-tx, #5d4037)",
+                }}
+              >
+                {RAIL_CAPTURES[key].label}
+              </span>
             </button>
           ))}
         </div>
 
+        {/* Utility group — hairline-topped, muted items that warm on hover. The bell lives
+            here now; its wrapper is the positioning context, so the tasks panel opens beside
+            the rail exactly as it did from the old icon row (same 100% + 26px clearance). */}
+        <div style={{ borderTop: "1px solid var(--rail-hair, #e7ddd2)", padding: "6px 12px 8px" }}>
+          <div style={{ position: "relative" }}>
+            <RailNavItem
+              label="Notifications"
+              Icon={Bell}
+              muted
+              badge={activeTasksCount > 0 ? badgeText : undefined}
+              onClick={() => { setShowBell((v) => !v); setShowAccount(false); }}
+            />
+            <AnimatePresence>
+              {showBell && (
+                <TasksDropdown
+                  onNavigate={onNavigate}
+                  positionClassName="absolute left-[calc(100%+26px)] bottom-0 w-80"
+                />
+              )}
+            </AnimatePresence>
+          </div>
+          <RailNavItem label="Settings" Icon={Settings} muted onClick={() => { onNavigate("account"); closeAll(); }} />
+          <RailNavItem label="Help centre" Icon={HelpCircle} muted onClick={() => { onNavigate("help"); closeAll(); }} />
+        </div>
+
+        {/* Theme segmented switcher — same Firestore field as the Settings radio group */}
+        <div style={{ padding: "4px 12px 0" }}>
+          <div
+            className="arail-themeseg"
+            role="radiogroup"
+            aria-label="Queries page theme"
+            style={{ display: "flex", border: "var(--bdw) solid var(--bd)", borderRadius: 9, overflow: "hidden", marginBottom: 10 }}
+          >
+            {([["cappuccino", "Capp"], ["bold", "Bold"], ["editorial", "Editorial"]] as const).map(([val, label]) => (
+              <button
+                key={val}
+                type="button"
+                role="radio"
+                aria-checked={theme === val}
+                onClick={() => updateUserProfile({ queriesTheme: val })}
+                style={themeSegBtn(theme === val)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Account chip + user dropdown (the five actions from the old top-bar menu) */}
-        <div style={{ position: "relative" }}>
+        <div style={{ position: "relative", borderTop: "1px solid var(--rail-hair, #e7ddd2)", padding: 8 }}>
           <button
             type="button"
             className="arail-acct"

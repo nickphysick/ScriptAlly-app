@@ -99,6 +99,26 @@
   --btnH: #f7f2ea;
   --selBg: #f3ede2;  /* selected-row foam tint */
   --winBg: #f5f0e6;  /* result "win row" foam tint */
+  /* ── Rail rebuild tokens (grouped index + capture + utility; ref sidenav-three-themes-v2.html).
+     ADDITIVE — the rail consumes only the --rail set; existing tokens untouched. The capture
+     buttons are white/card-filled in EVERY theme (Editorial exception documented in CLAUDE.md). */
+  --rail-card: #fffefb;
+  --rail-bd: #e7ddd2;
+  --rail-bdw: 1px;
+  --rail-hair: #e7ddd2;
+  --rail-shadow: 0 1px 3px rgba(58, 28, 20, 0.05), 0 12px 30px rgba(58, 28, 20, 0.07);
+  --rail-ink: #3a1c14;
+  --rail-label: #9c8878;
+  --rail-accent: #7c3a2a;
+  --rail-itemtx: #5a4a40;
+  --rail-pill: #f1e9df;
+  --rail-hov: #f7f3ed;
+  --rail-btn-bg: #ffffff;
+  --rail-btn-bd: #ded3c2;
+  --rail-btn-bdw: 1px;
+  --rail-btn-tx: #5d4037;
+  --rail-btn-hov: #f4f2ef;
+  --rail-btn-shadow: 0 1px 2px rgba(58, 28, 20, 0.05);
 }
 .t-bold {
   --bd: #1d1712;   /* ink */
