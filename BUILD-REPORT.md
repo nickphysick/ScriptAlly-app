@@ -470,3 +470,20 @@ Closes pending action 3. A copy of the agents seam (`abd4d87`), one commit:
 ## Rail follow-up — capture regroup + notifications removal, 5 Jul
 
 `+ Record a response` moved from the top slot to lead the foot capture cluster (full width above the `+ Query`/`+ Agent` pair, styling untouched incl. the Editorial white-button exception); the index gains the freed space (the elastic nav region absorbs it — comfortable at 720px height, foot unchanged at 712). **Notifications removed from the rail.** Recon: the rail item was the only DESKTOP trigger for `TasksDropdown`; the below-`md` mobile slim bar (`Nav.tsx`) keeps its own bell trigger. So on desktop, task alerts now surface ONLY via the dashboard to-do/attention flow — **open product decision** whether they need a dedicated desktop surface again. `TasksDropdown` + `useTaskAlerts` are intact (mobile still consumes them); the rail simply no longer imports them. Rail tests needed no changes (they lock the grouped index + capture contracts, which are unchanged; no test asserted the utility-group contents).
+
+## Rail collapse rebuild — hover-peek + pin + scrim (`rail:` series), 5 Jul
+
+**Shipped:** `7b0060c` design ref → `d6f8412` mechanics → `0318a36` Bold/Editorial tokens → docs (this commit). Suite 586 → 603 (peek state/persistence/intent locks + token locks). Prereqs verified up front (width/type raise `4cb6241`, capture regroup `a89335c`).
+
+**Decisions / notes:**
+- **Overlay architecture:** wrapper `aside.arail` owns the FLOW width (60 rest / 240 pinned, 280ms); the absolute `.arail-panel` owns the VISUAL width (240 during peek) — verified live that the stage's left edge holds at 60px mid-peek (no content reflow).
+- **Scrim placement:** fixed inset-0 INSIDE the aside (z 0 vs the panel's z 1, aside at z 40) — keeps it inside the themed tree so `--rail-scrim` resolves per theme, under the drawer (45/46)/modals(50)/dropdowns(60) with no portal. Verified: timeline pull-tab renders above the scrim.
+- **Account-menu hold:** the menu flies past the panel, so the pointer legitimately leaves during use — the peek holds open while the menu is open (component-level `peeking || showAccount`, deliberately not part of the pure model).
+- **Search slot at rest** keeps its height via `visibility:hidden` so entering the peek never jumps the index vertically (the ref mock has no search; this is the translation).
+- **⌘K assist:** unpinned at rest the search is hidden, so ⌘K opens the peek first (`openNow`, no intent delay) then focuses — focus-within keeps it open.
+- **Unpin-under-cursor:** after unpinning (button or `[`), the rail retreats even though the pointer may still be over it; `onPointerMove` re-arms the intent so the next twitch of the mouse re-peeks. Deliberate, minor.
+- **Theme-seg at rest:** hidden (exactly its old collapsed handling — nothing awkward to report).
+- **Legacy key migration** verified LIVE (the walk profile carried the old chevron key: expanded→pinned mapped and wrote through on first read). The legacy key is left in place — the dev `#/shell-lab` SidebarNav still reads it.
+- **Coarse pointers** (`pointer: coarse`): permanently pinned, pin button not rendered. Static per session (pointer class doesn't change mid-session).
+
+**Verification (throwaway, deleted after):** fresh default = pinned; unpin → rest (60px, hairline dividers, icon rows); pointer-over → intent-delayed peek (still rest at 80ms, peek at 200ms) with scrim + flow-width hold; leave → grace collapse (still open at 150ms, closed after 240); focus-in/out parity (confirmed with throttle-proof waits — the harness clamps background timers, which corrupted the fast probes); `[` toggles + persists both ways; pin survives reload; peek shadow/scrim classes per theme (Bold/Edn scrim computed correctly; the SHADOW's computed value lagged the stylesheet in the throttled window — inline declaration + rule-text locks are correct; **flag for Nick's real-browser pass**, along with true hover feel, the 280ms glide and touch emulation).
