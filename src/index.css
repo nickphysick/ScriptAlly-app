@@ -119,6 +119,10 @@
   --rail-btn-tx: #5d4037;
   --rail-btn-hov: #f4f2ef;
   --rail-btn-shadow: 0 1px 2px rgba(58, 28, 20, 0.05);
+  /* Hover-peek additions (ref rail-hover-peek-v2.html): the overlay's deeper shadow and the
+     content scrim shown only during an unpinned peek. */
+  --rail-peek-shadow: 0 10px 30px rgba(58, 28, 20, 0.16);
+  --rail-scrim: rgba(58, 28, 20, 0.12);
 }
 .t-bold {
   --bd: #1d1712;   /* ink */

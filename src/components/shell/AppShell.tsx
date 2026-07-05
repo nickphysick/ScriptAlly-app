@@ -6,8 +6,8 @@
  * top-bar shell in src/components/AppShell.tsx and the Queries-only SidebarShell). Anatomy per
  * design-reference/appshell-journey-mockup-v4.html (normative for the SHELL only):
  *
- *   rail (216px ↔ 60px collapsed) · wordmark + monogram · search · nav items · foot
- *   (bell + settings icon row → theme segmented switcher → account chip) · edge collapse chevron
+ *   rail (hover-peek: 60px rest / 240px peek-overlay / 240px pinned-in-flow — railPeek.ts)
+ *   brand lockup + pin · search · grouped index · capture cluster · utility · theme seg · account
  *
  * The rail renders once and never remounts on navigation — the only motion it is allowed is the
  * 200ms collapse width transition. The content column holds the mobile slim bar (the old <Nav>,
@@ -20,9 +20,9 @@
  * are inline or var(--…) — never Tailwind utilities (they have silently overridden inline-critical
  * colours in this codebase before). Tailwind is used for layout/breakpoints only.
  */
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { LayoutGrid, Send, Users, Book, ChevronLeft, Settings, User, Sparkles, BookOpen, HelpCircle, LogOut, Search, Table, Reply } from "lucide-react";
+import { LayoutGrid, Send, Users, Book, Settings, User, Sparkles, BookOpen, HelpCircle, LogOut, Search, Table, Reply } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useScriptAllyDb } from "../../lib/db";
 import { UserPlan } from "../../types";
@@ -44,11 +44,8 @@ import { NavSearch } from "../NavSearch";
 import { Nav } from "../Nav";
 import { BottomTabBar } from "../BottomTabBar";
 import { RAIL_GROUPS, RAIL_CAPTURES, railActiveKey, invokeCapture } from "./railNav";
+import { railMode, scrimVisible, railFlowWidth, railPanelWidth, readRailPinned, writeRailPinned, makePeekIntent } from "./railPeek";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
-
-// Collapse persistence — deliberately reuses the Queries-rail key so an existing collapsed
-// preference carries over to the global rail (the Queries rail is what this generalises).
-const COLLAPSE_KEY = "scriptally.queriesRailCollapsed";
 
 // Grouped-index data lives in railNav.ts (pure, tested); icons stay here (React-free model).
 const RAIL_ICONS: Record<string, React.ComponentType<{ style?: React.CSSProperties }>> = {
@@ -186,6 +183,24 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
   // /agents/discover lights Discover, not Agents database).
   const activeRailKey = railActiveKey(useLocation().pathname);
 
+  // Hover-peek model (railPeek.ts): rest/peek are the unpinned pair, pinned stands alone.
+  // Default PINNED; the legacy chevron key migrates once inside readRailPinned. A coarse
+  // pointer (touch) is permanently pinned — no hover peek, pin button hidden.
+  const [pinned, setPinned] = useState<boolean>(() => readRailPinned());
+  const [peeking, setPeeking] = useState(false);
+  const [coarse] = useState<boolean>(() => {
+    try { return window.matchMedia("(pointer: coarse)").matches; } catch { return false; }
+  });
+  const [showAccount, setShowAccount] = useState(false);
+  // While the account menu is open the peek must hold (the menu flies out past the panel,
+  // so the pointer legitimately leaves it) — component-level hold, not part of the model.
+  const peekState = { pinned, peeking: peeking || showAccount, coarse };
+  const mode = railMode(peekState);
+  const intent = useMemo(() => makePeekIntent(setPeeking), []);
+  useEffect(() => () => intent.dispose(), [intent]);
+
+  const togglePin = () => setPinned((p) => { writeRailPinned(!p); return !p; });
+
   // The dashboard and the Agents page each host their own top-bar search (DashTopBar / the
   // Agents pill, both gated on route visibility), so the rail search hides on those routes
   // (the nav list simply starts higher). ⌘K/Ctrl+K focuses the RAIL search on every other
@@ -196,23 +211,28 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        searchInputRef.current?.focus();
+        // Unpinned at rest the search is hidden — open the peek first (focus-within then
+        // keeps it open), and focus once the field is interactable.
+        intent.openNow();
+        window.setTimeout(() => searchInputRef.current?.focus(), 30);
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [railSearchShown]);
+  }, [railSearchShown, intent]);
 
-  const [collapsed, setCollapsed] = useState<boolean>(() => {
-    try { return localStorage.getItem(COLLAPSE_KEY) === "1"; } catch { return false; }
-  });
-  const [showAccount, setShowAccount] = useState(false);
 
-  const toggle = () => setCollapsed((c) => {
-    const next = !c;
-    try { localStorage.setItem(COLLAPSE_KEY, next ? "1" : "0"); } catch { /* private mode — ignore */ }
-    return next;
-  });
+  // `[` toggles the pin when no editable element has focus (recon: the key is unclaimed).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "[" || e.metaKey || e.ctrlKey || e.altKey) return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+      setPinned((p) => { writeRailPinned(!p); return !p; });
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   const closeAll = () => { setShowAccount(false); };
   if (!currentUser) return null;
@@ -238,24 +258,51 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
 
   return (
     <aside
-      className={`arail${collapsed ? " arail-collapsed" : ""}`}
+      className={`arail arail-${mode}`}
       style={{
-        width: collapsed ? 60 : 240,
+        // The WRAPPER owns the layout-flow width: full when pinned, mini otherwise — a peek
+        // never reflows the content (the panel below overlays instead).
+        width: railFlowWidth(peekState),
         minWidth: 0,
         flexShrink: 0,
-        // Rail frame per the three-themes ref, flush-panel translation: the mockup's card
-        // border becomes the right edge; the shadow rides as-is. NO overflow:hidden here —
-        // the bell dropdown and account menu fly out past the edge.
-        background: "var(--rail-card, #fffefb)",
-        borderRight: "var(--rail-bdw, 1px) solid var(--rail-bd, #e7ddd2)",
-        boxShadow: "var(--rail-shadow, none)",
-        flexDirection: "column",
-        transition: "width 200ms ease",
+        transition: "width 280ms cubic-bezier(.22,.8,.3,1)",
         position: "relative",
-        zIndex: 20,
+        // Above content + scrim, below the timeline drawer (45/46), modals (50), dropdowns (60).
+        zIndex: 40,
         minHeight: 0,
       }}
     >
+      {/* Scrim — the page falls into gentle shadow while the rail peeks; never when pinned.
+          Fixed inset-0 INSIDE the themed tree (so var(--rail-scrim) resolves per theme);
+          z 0 within the aside's context keeps it under the panel, pointer-events none. */}
+      <div className={`arail-scrim${scrimVisible(peekState) ? " arail-scrim-on" : ""}`} aria-hidden="true" />
+
+      <div
+        className="arail-panel"
+        style={{
+          // The PANEL owns the visual width: overlays to full during a peek. Frame per the
+          // three-themes ref (border = right edge); peek swaps to the deeper peek shadow.
+          // NO overflow:hidden while open — the account menu flies out past the edge (the
+          // rest state clips via CSS so the retreat never shows stray labels).
+          position: "absolute",
+          top: 0,
+          bottom: 0,
+          left: 0,
+          width: railPanelWidth(peekState),
+          zIndex: 1,
+          display: "flex",
+          flexDirection: "column",
+          background: "var(--rail-card, #fffefb)",
+          borderRight: "var(--rail-bdw, 1px) solid var(--rail-bd, #e7ddd2)",
+          boxShadow: mode === "peek" ? "var(--rail-peek-shadow, 0 10px 30px rgba(58,28,20,0.16))" : "var(--rail-shadow, none)",
+          transition: "width 280ms cubic-bezier(.22,.8,.3,1), box-shadow 280ms ease",
+        }}
+        onPointerEnter={() => { if (!pinned && !coarse) intent.pointerEnter(); }}
+        onPointerLeave={() => { if (!pinned && !coarse) intent.pointerLeave(); }}
+        onPointerMove={() => { if (!pinned && !coarse && !peeking) intent.pointerEnter(); }}
+        onFocusCapture={() => { if (!pinned && !coarse) intent.focusEnter(); }}
+        onBlurCapture={() => { if (!pinned && !coarse) intent.focusLeave(); }}
+      >
       <style>{`
         /* The rail's display lives here (not inline) so the mobile media query can hide it —
            an inline display:flex would beat any breakpoint utility class. */
@@ -263,21 +310,53 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
         @media (max-width: 767.98px) {
           .arail { display: none !important; }
         }
-        /* !important throughout: several of these elements carry inline display/padding (the
+        /* Scrim — under the panel (z), over everything in the content area. */
+        .arail-scrim { position: fixed; inset: 0; z-index: 0; pointer-events: none;
+          background: var(--rail-scrim, rgba(58,28,20,0.12)); opacity: 0; transition: opacity 280ms ease; }
+        .arail-scrim-on { opacity: 1; }
+        /* REST (unpinned, no hover): 60px icon rail. Labels/wordmark/eyebrows/theme-seg gone,
+           search keeps its slot (visibility) so the peek never jumps the nav, rows centre.
+           !important throughout: these elements carry inline display/padding (the
            critical-styles-inline convention), which plain descendant rules cannot override. */
-        .arail-collapsed .arail-label,
-        .arail-collapsed .arail-wordmark,
-        .arail-collapsed .arail-search,
-        .arail-collapsed .arail-themeseg,
-        .arail-collapsed .arail-acct-text { display: none !important; }
-        .arail-collapsed .arail-item { justify-content: center !important; padding: 9px 0 !important; }
-        .arail-collapsed .arail-head { justify-content: center !important; padding: 18px 8px 14px !important; }
-        .arail-collapsed .arail-eyebrow { display: none !important; }
-        .arail-collapsed .arail-capbtn { justify-content: center !important; padding: 9px 0 !important; }
-        .arail-collapsed .arail-cappair { flex-direction: column !important; }
-        .arail-collapsed .arail-capmini { padding: 9px 0 !important; }
-        .arail-collapsed .arail-acct { justify-content: center !important; padding: 6px 0 !important; }
-        .arail-collapsed .arail-collapse svg { transform: rotate(180deg); }
+        .arail-rest .arail-panel-clip, .arail-rest .arail-panel { overflow: hidden; }
+        .arail-rest .arail-label,
+        .arail-rest .arail-wordmark,
+        .arail-rest .arail-themeseg,
+        .arail-rest .arail-eyebrow,
+        .arail-rest .arail-pin,
+        .arail-rest .arail-acct-text { display: none !important; }
+        .arail-rest .arail-search { visibility: hidden; }
+        .arail-rest .arail-item { justify-content: center !important; padding: 9px 0 !important; }
+        .arail-rest .arail-head { padding: 16px 8px 12px !important; }
+        .arail-rest .arail-capbtn { justify-content: center !important; padding: 9px 0 !important; }
+        .arail-rest .arail-cappair { flex-direction: column !important; }
+        .arail-rest .arail-capmini { padding: 9px 0 !important; }
+        .arail-rest .arail-acct { justify-content: center !important; padding: 6px 0 !important; }
+        /* Eyebrow ↔ hairline swap (ref .eyeline): dividers group the icons at rest only. */
+        .arail-eyeline { height: 1px; background: var(--rail-hair, #e7ddd2); margin: 10px 10px; }
+        .arail-peek .arail-eyeline, .arail-pinned .arail-eyeline { display: none; }
+        /* PEEK: labels breathe in after the panel has mostly widened (ref: ~160ms delay). */
+        @keyframes railLabelIn { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: none; } }
+        .arail-peek .arail-label,
+        .arail-peek .arail-wordmark,
+        .arail-peek .arail-acct-text,
+        .arail-peek .arail-pin,
+        .arail-peek .arail-eyebrow { animation: railLabelIn 200ms ease 160ms both; }
+        /* PIN affordance (ref): hairline chip; filled + rotated while pinned. */
+        .arail-pin { width: 24px; height: 24px; border: 1px solid var(--rail-hair, #e7ddd2); border-radius: 8px;
+          display: flex; align-items: center; justify-content: center; flex: none; background: transparent; cursor: pointer; }
+        .arail-pin svg { width: 12px; height: 12px; stroke: var(--rail-label, #9c8878); fill: none;
+          stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; transition: transform 200ms ease; }
+        .arail-pin:hover { border-color: var(--rail-bd, #ded3c2); }
+        .arail-pin:hover svg { stroke: var(--rail-accent, #7c3a2a); }
+        .arail-pinned .arail-pin { background: var(--sd-centre, #f6e4da); border-color: var(--rail-bd, #ded3c2); }
+        .arail-pinned .arail-pin svg { stroke: var(--rail-accent, #7c3a2a); fill: var(--rail-accent, #7c3a2a); transform: rotate(-38deg); }
+        @media (prefers-reduced-motion: reduce) {
+          .arail, .arail-panel, .arail-scrim { transition: none !important; }
+          .arail-peek .arail-label, .arail-peek .arail-wordmark, .arail-peek .arail-acct-text,
+          .arail-peek .arail-pin, .arail-peek .arail-eyebrow { animation: none !important; }
+          .arail-pin svg { transition: none !important; }
+        }
       `}</style>
 
       {/* Outside-click backdrop for the rail dropdowns */}
@@ -285,37 +364,33 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
         <div className="fixed inset-0 z-40 bg-transparent" onClick={closeAll} />
       )}
 
-      {/* Collapse toggle — straddles the rail's right edge */}
-      <button
-        type="button"
-        className="arail-collapse"
-        onClick={toggle}
-        aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        title={collapsed ? "Expand" : "Collapse"}
-        style={{
-          position: "absolute", top: 22, right: -11, width: 22, height: 22, borderRadius: "50%",
-          background: "#fffefb", border: "var(--bdw) solid var(--bd)", color: "#9a8c80",
-          display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", zIndex: 25,
-        }}
-        onMouseEnter={(e) => { e.currentTarget.style.color = burgundy; }}
-        onMouseLeave={(e) => { e.currentTarget.style.color = "#9a8c80"; }}
-      >
-        <ChevronLeft style={{ width: 12, height: 12, transition: "transform 200ms ease" }} />
-      </button>
-
-      {/* Brand lockup — the new mark sits tight against the wordmark, the pair centred as one */}
-      <button
-        type="button"
-        className="arail-head"
-        onClick={() => { onNavigate("dashboard"); closeAll(); }}
-        aria-label="ScriptAlly — go to dashboard"
-        style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4, padding: "16px 12px 12px", minHeight: 58, background: "transparent", border: "none", cursor: "pointer", width: "100%" }}
-      >
-        <img src="/scriptally-logo-new.png" alt="" aria-hidden="true" width={40} height={40} style={{ width: 40, height: 40, flexShrink: 0, display: "block" }} />
-        <span className="arail-wordmark" style={{ display: "flex", overflow: "hidden" }}>
-          <ScriptAllyLogo heightPx={48} textColor={burgundy} iconColor={burgundy} />
-        </span>
-      </button>
+      {/* Brand row — the centred lockup beside the pin (visible during peek + pinned only;
+          hidden entirely for coarse pointers, where the rail is permanently pinned). */}
+      <div className="arail-head" style={{ display: "flex", alignItems: "center", gap: 4, padding: "16px 12px 12px", minHeight: 58 }}>
+        <button
+          type="button"
+          onClick={() => { onNavigate("dashboard"); closeAll(); }}
+          aria-label="ScriptAlly — go to dashboard"
+          style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 4, background: "transparent", border: "none", cursor: "pointer", minWidth: 0 }}
+        >
+          <img src="/scriptally-logo-new.png" alt="" aria-hidden="true" width={40} height={40} style={{ width: 40, height: 40, flexShrink: 0, display: "block" }} />
+          <span className="arail-wordmark" style={{ display: "flex", overflow: "hidden" }}>
+            <ScriptAllyLogo heightPx={48} textColor={burgundy} iconColor={burgundy} />
+          </span>
+        </button>
+        {!coarse && (
+          <button
+            type="button"
+            className="arail-pin"
+            onClick={togglePin}
+            aria-pressed={pinned}
+            title={pinned ? "Unpin the sidebar" : "Pin the sidebar open"}
+            aria-label={pinned ? "Unpin the sidebar" : "Pin the sidebar open"}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4h6l1 7 3 3H5l3-3 1-7z" /><path d="M12 14v6" /></svg>
+          </button>
+        )}
+      </div>
 
       {/* Search — the existing NavSearch typeahead, rail presentation. Hidden on the dashboard
           (its top bar is the canonical search there). */}
@@ -344,6 +419,7 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
                 {group.eyebrow}
               </div>
             )}
+            {group.eyebrow && <div className="arail-eyeline" aria-hidden="true" />}
             {group.items.map((item) => (
               <RailNavItem
                 key={item.key}
@@ -529,6 +605,7 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
           </AnimatePresence>
         </div>
       </div>
+      </div>{/* closes .arail-panel */}
     </aside>
   );
 };
