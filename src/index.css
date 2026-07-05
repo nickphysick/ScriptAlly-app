@@ -178,6 +178,9 @@
   --rail-btn-tx: #1d1712;
   --rail-btn-hov: #f8dcd8;
   --rail-btn-shadow: 2px 2px 0 rgba(29, 23, 18, 0.85);
+  /* Hover-peek: the hard-offset language deepens on peek; ink-tinted scrim. */
+  --rail-peek-shadow: 7px 7px 0 rgba(29, 23, 18, 0.92);
+  --rail-scrim: rgba(29, 23, 18, 0.14);
 }
 /* Editorial — the consolidated-v37 "Graphite · Soft · Tinted" system (t-edn + es4 + eb2 locked).
    Neutral whites/greys; graphite #44484d is the single accent. Containers are "Soft": 16px
@@ -238,6 +241,9 @@
   --rail-btn-tx: #2c2f33;
   --rail-btn-hov: #f3f3f2;
   --rail-btn-shadow: 0 1px 2px rgba(20, 20, 20, 0.04);
+  /* Hover-peek: deepened layered shadow; neutral graphite scrim. */
+  --rail-peek-shadow: 0 2px 4px rgba(20, 20, 20, 0.06), 0 18px 44px rgba(20, 20, 20, 0.14);
+  --rail-scrim: rgba(20, 20, 20, 0.10);
 }
 /* Editorial "Soft" container: 16px radius, no border, layered shadow. Defined here so the
    dashboard rebuild + any Editorial container can share one class (theme-scoped). */

@@ -56,6 +56,29 @@ describe("rail tokens — Bold Pastille (.t-bold)", () => {
   });
 });
 
+describe("rail peek tokens — shadow + scrim per theme (ref rail-hover-peek-v2.html)", () => {
+  it("Cappuccino", () => {
+    expectTokens(themeBlock(".t-capp"), {
+      "--rail-peek-shadow": "0 10px 30px rgba(58, 28, 20, 0.16)",
+      "--rail-scrim": "rgba(58, 28, 20, 0.12)",
+    });
+  });
+
+  it("Bold Pastille keeps the hard-offset language", () => {
+    expectTokens(themeBlock(".t-bold"), {
+      "--rail-peek-shadow": "7px 7px 0 rgba(29, 23, 18, 0.92)",
+      "--rail-scrim": "rgba(29, 23, 18, 0.14)",
+    });
+  });
+
+  it("Editorial deepens its layered shadow", () => {
+    expectTokens(themeBlock(".t-edn"), {
+      "--rail-peek-shadow": "0 2px 4px rgba(20, 20, 20, 0.06), 0 18px 44px rgba(20, 20, 20, 0.14)",
+      "--rail-scrim": "rgba(20, 20, 20, 0.10)",
+    });
+  });
+});
+
 describe("rail tokens — Editorial (.t-edn)", () => {
   it("is borderless on layered shadows with the graphite set", () => {
     expectTokens(themeBlock(".t-edn"), {
