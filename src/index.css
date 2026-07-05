@@ -154,6 +154,26 @@
   --btnH: var(--pink-h);
   --selBg: #fdf1ec;
   --winBg: #fdf1ec;
+  /* Rail rebuild tokens — Bold Pastille (ref sidenav-three-themes-v2.html): 1.5px ink frame,
+     hard offset shadow, ink icons and text, pink active pill; buttons white with ink frames
+     and their own 2px offset shadow. */
+  --rail-card: #fffefb;
+  --rail-bd: #1d1712;
+  --rail-bdw: 1.5px;
+  --rail-hair: rgba(29, 23, 18, 0.18);
+  --rail-shadow: 5px 5px 0 rgba(29, 23, 18, 0.92);
+  --rail-ink: #1d1712;
+  --rail-label: #6a6560;
+  --rail-accent: #1d1712;
+  --rail-itemtx: #2b2622;
+  --rail-pill: #eec9c3;
+  --rail-hov: #f6efec;
+  --rail-btn-bg: #ffffff;
+  --rail-btn-bd: #1d1712;
+  --rail-btn-bdw: 1.5px;
+  --rail-btn-tx: #1d1712;
+  --rail-btn-hov: #f8dcd8;
+  --rail-btn-shadow: 2px 2px 0 rgba(29, 23, 18, 0.85);
 }
 /* Editorial — the consolidated-v37 "Graphite · Soft · Tinted" system (t-edn + es4 + eb2 locked).
    Neutral whites/greys; graphite #44484d is the single accent. Containers are "Soft": 16px
@@ -193,6 +213,27 @@
   --btnH: var(--abtn-hov);
   --selBg: var(--band);
   --winBg: var(--band);
+  /* Rail rebuild tokens — Editorial (ref sidenav-three-themes-v2.html): borderless rail on
+     layered shadows, graphite icons, near-black text. DELIBERATE EXCEPTION: the capture
+     buttons are WHITE with a hairline — not Tinted — because a tinted fill reads as an
+     active state beside the tinted nav pill (decision locked on the mockup). */
+  --rail-card: #ffffff;
+  --rail-bd: transparent;
+  --rail-bdw: 0px;
+  --rail-hair: #ececeb;
+  --rail-shadow: 0 1px 2px rgba(20, 20, 20, 0.05), 0 14px 36px rgba(20, 20, 20, 0.09);
+  --rail-ink: #1a1a1a;
+  --rail-label: #8a8d90;
+  --rail-accent: #44484d;
+  --rail-itemtx: #3c3f43;
+  --rail-pill: #e9eaeb;
+  --rail-hov: #f3f3f2;
+  --rail-btn-bg: #ffffff;
+  --rail-btn-bd: #dcdcdb;
+  --rail-btn-bdw: 1px;
+  --rail-btn-tx: #2c2f33;
+  --rail-btn-hov: #f3f3f2;
+  --rail-btn-shadow: 0 1px 2px rgba(20, 20, 20, 0.04);
 }
 /* Editorial "Soft" container: 16px radius, no border, layered shadow. Defined here so the
    dashboard rebuild + any Editorial container can share one class (theme-scoped). */
