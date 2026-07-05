@@ -90,8 +90,8 @@ const RailNavItem: React.FC<{
       padding: muted ? "8px 10px" : "9px 10px",
       borderRadius: 10,
       fontFamily: FONT_SANS,
-      fontSize: muted ? 13 : 13.5,
-      fontWeight: 500,
+      fontSize: muted ? 13 : 14,
+      fontWeight: active ? 700 : 500,
       color: active
         ? `var(--rail-ink, ${bodyInk})`
         : muted
@@ -343,7 +343,7 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
             border: "var(--rail-btn-bdw, 1px) solid var(--rail-btn-bd, #ded3c2)",
             color: "var(--rail-btn-tx, #5d4037)",
             borderRadius: 11, padding: "10px 13px",
-            fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 500,
+            fontFamily: FONT_SANS, fontSize: 14, fontWeight: 500,
             boxShadow: "var(--rail-btn-shadow, 0 1px 2px rgba(58,28,20,0.05))",
             cursor: "pointer", whiteSpace: "nowrap", transition: "background 0.14s",
           }}
@@ -368,7 +368,7 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
               <div
                 className="arail-eyebrow"
                 style={{
-                  fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: "0.18em",
+                  fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.18em",
                   textTransform: "uppercase", color: "var(--rail-label, #9c8878)",
                   padding: gi === 1 ? "12px 10px 6px" : "14px 10px 6px",
                 }}
