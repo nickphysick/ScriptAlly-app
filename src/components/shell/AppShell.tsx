@@ -22,7 +22,7 @@
  */
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { LayoutGrid, Send, Users, Book, ChevronLeft, Bell, Settings, User, Sparkles, BookOpen, HelpCircle, LogOut, Search, Table, Reply } from "lucide-react";
+import { LayoutGrid, Send, Users, Book, ChevronLeft, Settings, User, Sparkles, BookOpen, HelpCircle, LogOut, Search, Table, Reply } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useScriptAllyDb } from "../../lib/db";
 import { UserPlan } from "../../types";
@@ -43,7 +43,6 @@ import { ScriptAllyLogo } from "../ScriptAllyLogo";
 import { NavSearch } from "../NavSearch";
 import { Nav } from "../Nav";
 import { BottomTabBar } from "../BottomTabBar";
-import { TasksDropdown, useTaskAlerts } from "../TasksDropdown";
 import { RAIL_GROUPS, RAIL_CAPTURES, railActiveKey, invokeCapture } from "./railNav";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
 
@@ -182,7 +181,6 @@ interface RailProps {
 
 const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSearchQuery }) => {
   const { currentUser, logout, updateUserProfile } = useScriptAllyDb();
-  const { activeTasksCount, badgeText } = useTaskAlerts();
   const searchInputRef = useRef<HTMLInputElement>(null);
   // Pathname-owned active state for the grouped index (?q= never unlights Queries Hub;
   // /agents/discover lights Discover, not Agents database).
@@ -208,7 +206,6 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
   const [collapsed, setCollapsed] = useState<boolean>(() => {
     try { return localStorage.getItem(COLLAPSE_KEY) === "1"; } catch { return false; }
   });
-  const [showBell, setShowBell] = useState(false);
   const [showAccount, setShowAccount] = useState(false);
 
   const toggle = () => setCollapsed((c) => {
@@ -217,7 +214,7 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
     return next;
   });
 
-  const closeAll = () => { setShowBell(false); setShowAccount(false); };
+  const closeAll = () => { setShowAccount(false); };
   if (!currentUser) return null;
 
   const theme = currentUser.queriesTheme === "bold" || currentUser.queriesTheme === "editorial"
@@ -284,7 +281,7 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
       `}</style>
 
       {/* Outside-click backdrop for the rail dropdowns */}
-      {(showBell || showAccount) && (
+      {showAccount && (
         <div className="fixed inset-0 z-40 bg-transparent" onClick={closeAll} />
       )}
 
@@ -328,35 +325,6 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
         </div>
       )}
 
-      {/* Primary capture — Record a response, the most frequent capture, always first in
-          reach (grouped-v5). White/card-filled in EVERY theme (the Editorial exception: a
-          tinted fill would read as an active state beside the tinted nav pill). */}
-      <div style={{ margin: "2px 12px 8px" }}>
-        <button
-          type="button"
-          className="arail-item arail-capbtn"
-          onClick={() => { invokeCapture("record", onNavigate); closeAll(); }}
-          title={RAIL_CAPTURES.record.label}
-          style={{
-            display: "flex", alignItems: "center", gap: 9, width: "100%",
-            background: "var(--rail-btn-bg, #ffffff)",
-            border: "var(--rail-btn-bdw, 1px) solid var(--rail-btn-bd, #ded3c2)",
-            color: "var(--rail-btn-tx, #5d4037)",
-            borderRadius: 11, padding: "10px 13px",
-            fontFamily: FONT_SANS, fontSize: 15, fontWeight: 500,
-            boxShadow: "var(--rail-btn-shadow, 0 1px 2px rgba(58,28,20,0.05))",
-            cursor: "pointer", whiteSpace: "nowrap", transition: "background 0.14s",
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = "var(--rail-btn-hov, #f4f2ef)"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = "var(--rail-btn-bg, #ffffff)"; }}
-        >
-          <span style={{ display: "flex", flexShrink: 0, color: `var(--rail-accent, ${burgundy})` }}>
-            <Reply style={{ width: 14, height: 14 }} />
-          </span>
-          <span className="arail-label">{RAIL_CAPTURES.record.label}</span>
-        </button>
-      </div>
-
       {/* Grouped index — flat items under purely-visual mono eyebrows (no interaction).
           Active state is PATHNAME-owned (railActiveKey): ?q= keeps Queries Hub lit; sub-routes
           light their own entry. Rejection analytics is deliberately NOT rendered (no dead
@@ -392,6 +360,35 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
       {/* Rail foot: + Query / + Agent pair → utility group (bell here now) → theme switcher
           → account chip. The nav above is flex:1, so this block sits at the rail's foot. */}
       <div>
+        {/* Capture cluster — Record a response leads it, full width above the pair. White/
+            card-filled in EVERY theme (the Editorial exception: a tinted fill would read as
+            an active state beside the tinted nav pill). */}
+        <div style={{ margin: "0 12px 8px" }}>
+          <button
+            type="button"
+            className="arail-item arail-capbtn"
+            onClick={() => { invokeCapture("record", onNavigate); closeAll(); }}
+            title={RAIL_CAPTURES.record.label}
+            style={{
+              display: "flex", alignItems: "center", gap: 9, width: "100%",
+              background: "var(--rail-btn-bg, #ffffff)",
+              border: "var(--rail-btn-bdw, 1px) solid var(--rail-btn-bd, #ded3c2)",
+              color: "var(--rail-btn-tx, #5d4037)",
+              borderRadius: 11, padding: "10px 13px",
+              fontFamily: FONT_SANS, fontSize: 15, fontWeight: 500,
+              boxShadow: "var(--rail-btn-shadow, 0 1px 2px rgba(58,28,20,0.05))",
+              cursor: "pointer", whiteSpace: "nowrap", transition: "background 0.14s",
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "var(--rail-btn-hov, #f4f2ef)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "var(--rail-btn-bg, #ffffff)"; }}
+          >
+            <span style={{ display: "flex", flexShrink: 0, color: `var(--rail-accent, ${burgundy})` }}>
+              <Reply style={{ width: 14, height: 14 }} />
+            </span>
+            <span className="arail-label">{RAIL_CAPTURES.record.label}</span>
+          </button>
+        </div>
+
         {/* Compact capture pair — icon over mono label (grouped-v5 cap-a); collapse stacks it */}
         <div className="arail-cappair" style={{ display: "flex", gap: 7, margin: "0 12px 10px" }}>
           {(["query", "agent"] as const).map((key) => (
@@ -428,27 +425,12 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
           ))}
         </div>
 
-        {/* Utility group — hairline-topped, muted items that warm on hover. The bell lives
-            here now; its wrapper is the positioning context, so the tasks panel opens beside
-            the rail exactly as it did from the old icon row (same 100% + 26px clearance). */}
+        {/* Utility group — hairline-topped, muted items that warm on hover,
+            per grouped-v5. Notifications was removed from the rail (product call, 5 Jul):
+            on desktop, task alerts now surface only via the dashboard to-do/attention flow;
+            the mobile slim bar keeps its own bell trigger. The dropdown + alerts hook stay
+            intact in components/TasksDropdown.tsx. */}
         <div style={{ borderTop: "1px solid var(--rail-hair, #e7ddd2)", padding: "6px 12px 8px" }}>
-          <div style={{ position: "relative" }}>
-            <RailNavItem
-              label="Notifications"
-              Icon={Bell}
-              muted
-              badge={activeTasksCount > 0 ? badgeText : undefined}
-              onClick={() => { setShowBell((v) => !v); setShowAccount(false); }}
-            />
-            <AnimatePresence>
-              {showBell && (
-                <TasksDropdown
-                  onNavigate={onNavigate}
-                  positionClassName="absolute left-[calc(100%+26px)] bottom-0 w-80"
-                />
-              )}
-            </AnimatePresence>
-          </div>
           <RailNavItem label="Settings" Icon={Settings} muted onClick={() => { onNavigate("account"); closeAll(); }} />
           <RailNavItem label="Help centre" Icon={HelpCircle} muted onClick={() => { onNavigate("help"); closeAll(); }} />
         </div>
@@ -481,7 +463,7 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
           <button
             type="button"
             className="arail-acct"
-            onClick={() => { setShowAccount((v) => !v); setShowBell(false); }}
+            onClick={() => setShowAccount((v) => !v)}
             title="Account"
             style={{ display: "flex", alignItems: "center", gap: 9, padding: 6, borderRadius: 9, background: "transparent", border: "none", cursor: "pointer", width: "100%", textAlign: "left" }}
             onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(124,58,42,0.05)"; }}
