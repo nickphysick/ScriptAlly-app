@@ -186,3 +186,179 @@ needed; the pieces landed coherently in one gated pass)
   (port 3000 was held by the parallel packages session overnight).
 - The parallel packages stream was active during this run (`FirstVisitHome.tsx` WIP observed);
   every commit here used explicit `--only` paths and never touched its files.
+
+---
+
+# Manuscripts rebuild — bookplate hero + comp shelf + Pro suggestions (4 Jul 2026, afternoon unattended run)
+
+Separate build from the dashboard report above. Ground rules honoured: no deploys, no new deps,
+explicit-path `--only` commits, no touches to the no-touch set (App.tsx · Agents.tsx ·
+shell/AppShell.tsx · agents/** · recon docs · PNGs). Send-query preselection via
+`initialManuscriptId` is DEFERRED (needs App.tsx — named follow-up at the end).
+
+## ⚠️ Live-tree context — read this first
+- The parallel stream committed during this run (Agents v2 `1850afe`, Queries `44bd564`, Builder
+  Cappuccino retokens `2e6e5cf`/`01362ea`) and holds UNTRACKED WIP in the shared tree:
+  `src/lib/discoverAgents.ts` + `discoverAgents.test.ts`, `src/components/agents/discover.css`,
+  plus a modified `src/components/packages/PackagesHome.tsx`.
+- **Model collision — action for the agents stream:** their untracked `discoverAgents.ts` reads
+  `Manuscript.comparableTitles`, which Phase 1 (`7bd522e`) replaced with `comps: CompTitle[]`.
+  Repo-wide `tsc` is red on exactly those two untracked files until they migrate — helpers are
+  ready in `src/lib/comps.ts` (`manuscriptComps` / `compsSearchText`; `communityMatch.ts` shows
+  the one-line pattern). Until then their `hasComps` reads false at runtime. Their WIP was NOT
+  edited from this run (no-touch spirit + live lost-update risk).
+- **Gate protocol adapted for that collision:** every phase's gates (tsc + build + full Vitest)
+  run green in an ISOLATED worktree of HEAD + only this build's files (untracked WIP absent by
+  construction) before each commit; build + Vitest are also green in the shared tree (only tsc
+  is affected there, only by their two files). Worktree: scratchpad `gatecheck` (auto-cleaned).
+
+## Pre-flight
+- `design-refs/manuscripts-page-v1.html` committed byte-identical from ~/Downloads (`2b6b78e`).
+- Shared-tree baseline at run start: tsc clean · build clean · **452 tests / 33 files** (the
+  go-ahead's 444 predated the stream's `listRowDate` tests). This file is tracked (not
+  untracked as the go-ahead assumed) — this section is appended and left uncommitted.
+
+## Phase 1 — structured comps (`7bd522e`)
+Files: `types.ts` · `lib/comps.ts`+test (new) · `lib/manuscripts.ts` · `lib/seeds.ts` ·
+`lib/communityMatch.ts` · `lib/packageMetrics.test.ts` · `AddManuscriptFocusForm.tsx` ·
+`AllManuscripts.tsx` · `ImportCsv.tsx` · `firestore.rules` · `tests/rules` fixture.
+- `CompTitle { title, author?, year?, note?, source?: 'user'|'suggested' }`;
+  `Manuscript.comps: CompTitle[]`. Legacy `comparableTitles` strings parse at READ time only
+  (`parseLegacyComps`: " meets " then commas, titles only) — never written back.
+- Add-form tags write `{title, source:'user'}` (capture unchanged); edit modal's comps field
+  REMOVED — the shelf is the single editing home; CSV import maps the comps column through the
+  same parser; the seed manuscript is structured.
+- `communityMatch` matches on comp titles via `compsSearchText` (verdict 10).
+- Rules: `comps` validated as a list capped at 12 + allowlist swap (verdict 11). **STAGED, NOT
+  DEPLOYED.** Validated optional-when-present (not required) so pre-cut docs stay updatable —
+  avoiding the affectedKeys silent-denial trap.
+- Rules-test fixture updated but NOT executed here (emulator needs Java — unavailable in this
+  environment); verify on the next emulator run.
+
+## Phase 2 — page shell (`5a96086`)
+Files: `AllManuscripts.tsx` (interior replaced) · `components/manuscripts/{manuscripts.css,
+FieldCard.tsx, MaterialsCard.tsx}` (new) · `lib/manuscriptPage.ts`+test (new).
+- Control row (`YOUR MANUSCRIPTS · N`, spine switcher only when >1, shelved spines dimmed with
+  the SHELVED micro-label) · bookplate hero (grey pill reads "Shelved" under
+  shelved-presentation per verdict 1; word-count whisper; logline hue rule; corner motif;
+  Capp-only inset frame + card grain, both `.t-capp`-scoped) · In the field (zero-suppressed
+  stage rows in canonical pipeline order, real StatusDot at 15px, one aggregate Closed row on
+  the Rejected cross glyph; R&R and Offer are active rows, never folded) · Submission materials
+  (live per-type version counts from the Builder's versions collection, canonical TypeGlyph,
+  `N VERSIONS` / `—` per verdict 6).
+- Conservative adaptations (all logged):
+  - **Page CSS lives in `src/components/manuscripts/manuscripts.css`, NOT `index.css`** — the
+    parallel stream was actively committing `index.css` mid-run; theme scoping
+    (`.t-capp .msv1 …`) is identical from a page stylesheet and contention-free. Tokens are
+    `--msv-`-prefixed because the mockup's names (`--card`, `--band`) exist app-wide with
+    DIFFERENT values. The hue pair consumes the existing `--sd-hue`/`--sd-centre` (identical
+    hexes to the mockup's `--hue`/`--huec` in all three themes).
+  - Page background = the app's `--desk` token (the Bold mockup hex was 1-off the app token:
+    `#c3cfdb` vs `#c2cfda` — token wins).
+  - `genreWordCountRange` was ALREADY the shared util the prompt asked to extract — consumed
+    as-is; existing genre coverage sufficed. New tested builder `wordCountWhisper` composes the
+    phrase + compact range ("YA steampunk fantasy typically runs 50–80k").
+  - Queries-sent figure counts ALL the manuscript's queries (undated provisional imports
+    included); "N active" = non-closed statuses (Offer is active).
+  - Spine selection persists through the existing `scriptally_active_manuscript_id`
+    localStorage key — the Package Builder reads the same key, so OPEN PACKAGE BUILDER opens
+    scoped to the active book, and returning keeps context.
+  - Body font stays Source Sans Pro (the established app deviation from mockup Inter); button
+    icons are lucide (Plus/Send/Pencil) rather than the mockup's inline paths.
+  - VIEW IN QUERIES HUB → plain `onNavigate("queries")` (the hub's manuscript filter is
+    internal-only state — verdict 5).
+- **Dropped from the old interior per verdicts 3/4** — flagged prominently: the **jottings
+  feed UI is gone** (the `users/{uid}/manuscripts/{id}/notes` subcollection and its data are
+  untouched — it needs a future home), and the filter/search/sort panel died with the old
+  interior (the rail `searchQuery` prop is kept but currently unused by this page).
+- Empty states: zero-manuscript minimal panel in the page grammar (verdict 7); zero-query
+  "Still on the runway." card with Send-first hidden for shelved books.
+
+## Phase 3 — comp shelf + pitch line (`5474f70`)
+Files: `lib/comps.ts`+test (extended) · `components/manuscripts/CompShelf.tsx` (new) ·
+`manuscripts.css` · `AllManuscripts.tsx`.
+- Pitch block (2 comps → italic line + Copy→Copied ~1.4s; 1 → "one more comp completes the
+  line"; 0 → hint only, all per reference). Shelf grid `auto-fill minmax(235px,1fr)`: hue
+  spines, `AUTHOR · YEAR` mono with graceful omission, Caveat notes (Playfair italic under
+  Editorial), hover remove-×, derived gold `OLDER COMP · {year}` chip (`isOlderComp`,
+  year ≤ now−5 — never stored). Add-a-comp modal in the page's theme language writes
+  `{…, source:'user'}` with empty optionals OMITTED (Firestore rejects undefined in maps).
+- Adaptations: shelf cap 12 mirrors the rules cap — the add tile disables at capacity (the
+  mockup had no cap; rules verdict 11 implies one). Comp adds/removes go through pure
+  `withCompAdded`/`withCompRemoved` (tested, including the cap). A first shelf write on a
+  legacy-string doc converts it to `comps` (stray `comparableTitles` field remains inert).
+
+## Phase 4 — Suggestions UI + Pro gating (`bc0fcb7`)
+Files: `lib/suggestComps.ts`+test (new) · `components/manuscripts/SuggestionsSection.tsx` (new) ·
+`manuscripts.css` · `AllManuscripts.tsx`.
+- Free: section fully visible, button routes to `/plans` (the canonical upsell destination
+  found in recon) — no fake skeletons. Pro: ≥1s shimmer → callable → rows (Playfair title,
+  `AUTHOR · YEAR`, rationale, gold caution chips) → button becomes Refresh. Shelf +
+  session-dismissal dedupe is per manuscript and case-insensitive; dismissals are component
+  state only. Add to shelf writes `{title, author, year, source:'suggested'}`. Age caution
+  derived client-side from `year` via the SAME `isOlderComp` rule as the shelf chip. Footer
+  copy exact per spec. Quiet unavailable state + TRY AGAIN (until the function deploys, every
+  real click lands here by design — the window mock `__SA_SUGGEST_COMPS_MOCK` exercises the
+  loaded path).
+- Adaptation (verdict 9): the PRO chip replicates the Builder badge exactly (slate `#6A89A7`
+  on `#e7eef3`, 1px `#cfdde6`, mono 9px) rather than the original prompt's white-on-slate.
+- Client-side response re-validation (`validateSuggestionsPayload`) guards against function
+  version skew — malformed items drop, never throw.
+
+## Phase 5 — `suggestComps` Cloud Function (`ad04e4a`) — BUILT, NOT DEPLOYED
+Files: `functions/src/suggestCompsCore.ts` (pure core) · `suggestComps.ts` (callable) ·
+`suggestCompsCore.test.ts` (runs in the root Vitest suite, like assembleImport) · `index.ts`.
+- Mirrors `extractFromEmail`: onCall `europe-west2`, `defineSecret("ANTHROPIC_API_KEY")`,
+  `claude-sonnet-4-6`, timeoutSeconds 60 / 512MiB, auth → input validation (title/age/genre
+  required; logline optional; synopsis optional; shelfTitles ≤24) → SERVER-SIDE Pro check on
+  `users/{uid}.plan` → model call → parse (strip fences, JSON.parse, drop-malformed items,
+  caution allow-list, dedupe vs shelf + internal, cap 6, rationale ≤160) → `{suggestions}`.
+  Retry-once on malformed output; `internal` vs `unavailable` HttpsError split the client
+  understands. Per-call token usage logged to console.
+- Deliberate choices: temperature 0.7 (Refresh wants variety; extraction keeps 0);
+  `functions npm run build` (tsc) green — note tsc emits despite errors, so the gate checks
+  the exit code with pipefail (one real error caught and fixed this way: the structural
+  AnthropicLike client must type its param `any` like emailImportCore, not `unknown`).
+- Rate limiting beyond auth+Pro deliberately deferred (per spec). The client currently omits
+  `synopsis` (the Manuscript model has no synopsis field — the add-form's "synopsis" box
+  stores into `notes`); the callable accepts it for when a real source exists.
+
+## Phase 6 — docs + close-out
+- CLAUDE.md: new "Manuscripts page v1 — LOCKED SPECS" section (grammar, CompTitle model,
+  single-home comp editing, derived-never-stored rules, Pro-gate pattern, footnote copy,
+  pending actions) inserted after the agents-stream's v2 section; current suite figure noted
+  (~523 — the go-ahead's 444 and the historical 368 both predate parallel-stream tests).
+
+## Pending manual actions (Nick)
+1. **`firebase deploy --only firestore:rules`** — ships the comps list validation (cap 12)
+   together with the still-pending agent-location rules. Remember the dev dual-DB gotcha:
+   dev deploys need `--config firebase.dev.json --project dev`.
+2. **`firebase deploy --only functions`** for `suggestComps` once the Blaze/API-key gate opens
+   (same secret as Smart Import; deploy command in the function's header comment). Verify the
+   ANTHROPIC_API_KEY rotation noted in CLAUDE.md's Loose ends BEFORE any functions deploy.
+3. **Follow-up prompt:** send-query preselection — thread `initialManuscriptId` through
+   App.tsx's LogQueryFocusForm overlay state once the Agents stream has landed and App.tsx is
+   clean (deferred by the go-ahead; single-manuscript users already default correctly).
+4. **Jottings feed:** decide whether the manuscript notes subcollection gets a home in the new
+   page grammar — the UI was removed this run, the data is untouched.
+5. **Agents-stream handover:** their untracked `discoverAgents.ts`/`.test.ts` must migrate
+   `comparableTitles` → `manuscriptComps`/`compsSearchText` (repo-wide tsc is red on exactly
+   those two files until then).
+6. **Rules tests:** the manuscript fixture in `tests/rules/firestore.rules.test.ts` now uses
+   `comps: []` — run the emulator suite when Java is available (not runnable here).
+
+## Review pointers
+- Eyeball on a real account: /manuscripts in all three themes (rail seg) — hero inset frame is
+  Capp-only; spine switcher needs ≥2 manuscripts; shelved book (status or overlay) shows the
+  grey "Shelved" pill + hidden Send a query. Comp add/remove + Copy. Suggestions: Free routes
+  to /plans; Pro shows the quiet unavailable state until the function deploys (set
+  `window.__SA_SUGGEST_COMPS_MOCK = {suggestions:[…]}` in the console to preview the loaded
+  rows without a deploy).
+- The reduced-motion check: the suggestions shimmer stills under Reduce Motion (CSS guard).
+- **A dev server for this build is running at http://localhost:3040** (`scriptally-dev-manuscripts`
+  in `.claude/launch.json` — added; 3000/3010/3030 were held by the parallel sessions). Boot
+  verified signed-out: zero console errors, bundle loads all new modules.
+- Late live-tree note: by close-out the agents stream had picked up the comps model itself —
+  `communityMatch.ts` carries their updated doc comment (uncommitted, theirs) over my Phase-1
+  change, and their `discoverAgents.ts` migration looked underway. The gate worktree was removed
+  at close; every phase commit remains isolated-verified.
