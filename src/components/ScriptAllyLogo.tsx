@@ -9,9 +9,11 @@ import React from "react";
 export const ScriptAllyLogo: React.FC<{
   className?: string;
   size?: "sm" | "md" | "lg";
+  /** Exact pixel height — overrides `size` (additive escape; the rail lockup uses it). */
+  heightPx?: number;
   iconColor?: string;
   textColor?: string;
-}> = ({ className = "", size = "md" }) => {
+}> = ({ className = "", size = "md", heightPx }) => {
   // Heights match the previous SVG wordmark so every call site keeps its on-page size.
   const heights = {
     sm: "h-6",
@@ -20,7 +22,11 @@ export const ScriptAllyLogo: React.FC<{
   };
 
   return (
-    <div className={`flex items-center select-none ${heights[size]} ${className}`} id="scriptally-brand-logo-root">
+    <div
+      className={`flex items-center select-none ${heightPx == null ? heights[size] : ""} ${className}`}
+      style={heightPx != null ? { height: heightPx } : undefined}
+      id="scriptally-brand-logo-root"
+    >
       <img
         src="/scriptally-title-v2.png"
         alt="ScriptAlly"

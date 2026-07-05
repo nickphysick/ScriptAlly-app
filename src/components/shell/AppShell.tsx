@@ -316,7 +316,7 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
       >
         <img src="/scriptally-logo-new.png" alt="" aria-hidden="true" width={40} height={40} style={{ width: 40, height: 40, flexShrink: 0, display: "block" }} />
         <span className="arail-wordmark" style={{ display: "flex", overflow: "hidden" }}>
-          <ScriptAllyLogo size="sm" textColor={burgundy} iconColor={burgundy} />
+          <ScriptAllyLogo heightPx={48} textColor={burgundy} iconColor={burgundy} />
         </span>
       </button>
 
