@@ -429,3 +429,24 @@ Closes pending action 3. A copy of the agents seam (`abd4d87`), one commit:
   state). Tests: happy path · unpickable fallback · absent-prop unchanged · empty library
   (coexistence with `initialAgentId` holds by construction — independent code paths — and no
   component test harness exists in this repo to assert it end-to-end).
+
+## Landing page + route tiers (`landing:` series), 5 Jul
+
+**Shipped:** `f63fff8` design refs → `0f63ad5` route tiers + shells → `da1565f` static landing → `a7393c8` two-act demo → Phase 5 journeys/docs (this commit). Commit zero (`9879690`, the pending CLAUDE.md) was landed by its owning stream mid-recon — adopted, not duplicated. Gates green per commit; suite 542 → 566 across the build (tier locks + copy locks + timeline locks).
+
+**Route tiers:** `tierForPath` in `src/marketing/routeTiers.ts` is the one source (marketing `/` + `/pricing` · focus `/account /plans /help` · workspace = the old KNOWN_PATHS minus those, now `WORKSPACE_PATHS`). App.tsx branch order: dev labs → authReady splash → **marketing** (public, before the guard) → `!currentUser` guard (unchanged for app tiers) → onboarding gate → **focus** → unknown→dashboard → AppShell. `#/signup` joined `#/login`/`#/signin` as a recognised pre-auth hash on marketing routes only (elsewhere signup was already the default); once auth completes with a hash set, a `<Navigate to="/dashboard" replace>` finishes the journey (hash cleared by the router).
+
+**Deviations / decisions (all deliberate):**
+- **Body font = Source Sans Pro,** not the refs' Inter — the standing SidebarShell-era precedent; avoids a fourth webfont.
+- **Copy tests lock exported constants** (`landingCopy.ts`), not DOM renders — the repo has no component-test harness (node env, no testing-library). Components consume the same constants, so drift fails the locks.
+- **Privacy · Terms render inert** (styled spans) — no pages exist yet. Pending content decision.
+- **Feature-row text-links:** import row → the real xlsx template download; "See what Pro adds" → `/pricing`; the rest → `#/signup` (the app is the explainer). Revisit if real explainer anchors land.
+- **Phase 1 ran tsc-only** (two HTML files outside the build graph; the full trio had just run green for commit zero). Full gates on every code phase.
+- **Tier crossings unmount the AppShell** — visiting `/account` etc resets workspace page-local UI state (Queries filters/selection); Firestore data lives in DbProvider and survives. Workspace-internal navigation keeps the pages-stay-mounted behaviour untouched. This is the architectural cost of "the rail disappears" and matches pre-AppShell parity for those tabs.
+- **`AccountSettings` upgrade CTA retargeted** `pricing` → `plans` (one line + header comment) per the journeys table — the only workspace-page edit in the build.
+- **Demo fidelity fix over the ref port:** the × point is measured once while the split is open and reused for the depart glide (the ref reuses `xpt`; a post-close re-measure aims at a collapsed 0-width column — caught live in verification).
+- **StrictMode dev double-mount** is absorbed by the AbortController cleanup (first loop aborts mid-first-sleep; prod single-mounts).
+
+**Verification:** all table journeys walked in-browser on a throwaway account (deleted after, auth shell console-purgeable): logged-out landing/login/signup hashes; signup → onboarding gate; logged-in `/` no-redirect with authed nav; **un-onboarded `/` → Open dashboard → onboarding gate (explicit check, passed)**; rail Settings → `/account` FocusShell → back (only Dashboard highlighted — no active-tab coupling to the moved routes exists in Rail/Nav/BottomTabBar, verified by grep + eyeball); upgrade → `/plans`; wordmark → `/`; `/help`. Demo Act 1 witnessed live (cursor parked on the spark end at (557.4, 388.5); popup shown through its 4s hold, positioned end.x−108 / end.y−14−height); Act 2 split/×-aim/close verified by state sampling. **Harness caveats:** native scroll events, CSS animation playback and `prefers-reduced-motion` cannot fire in the preview — the nav hairline and fade/glide *rendering* were verified by synthetic dispatch + class/style state; the reduced-motion tableau is unit-tested (`applyStaticTableau`) but wants one real-device eyeball, same as the loader's.
+
+**Old landing retirement:** nothing to delete — `holding/` + `firebase.holding.json` (default-site coming-soon page + `/api/waitlist` fn rewrite) live outside the app build and deploy only when that config is explicitly invoked. Repointing `scriptally.ink` is Nick's console/DNS decision after dev review (out of scope). CLAUDE.md now records both facts.

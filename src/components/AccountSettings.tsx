@@ -15,7 +15,7 @@
  * trivially self-contained this pass). Everything else is rendered on-brand but clearly inert
  * and persists NOTHING (a dead stored pref is a desync trap).
  *   WIRED ........ display name (updateUserProfile), password reset (resetPassword),
- *                  plan + trial display, View plans (onNavigate "pricing"),
+ *                  plan + trial display, View plans (onNavigate "plans" — focus chrome),
  *                  data export (client-side JSON of the already-loaded data),
  *                  data import (onNavigate "import" → ImportCsv).
  *   COMING-SOON .. pen name, email change, two-factor, active sessions, manage billing,
@@ -718,7 +718,9 @@ export const AccountSettings: React.FC<{ onNavigate: (tab: string, subPageName?:
               : ""}
           </p>
         </div>
-        <button onClick={() => onNavigate("pricing")} style={primaryBtn}>
+        {/* In-app upgrade CTAs target /plans (focus chrome) — the public /pricing keeps the
+            marketing tier (route-tier journeys table, landing build). */}
+        <button onClick={() => onNavigate("plans")} style={primaryBtn}>
           View plans &amp; upgrade <ChevronRight style={{ width: 15, height: 15 }} aria-hidden="true" />
         </button>
       </div>
