@@ -305,6 +305,55 @@ Files: `lib/suggestComps.ts`+test (new) · `components/manuscripts/SuggestionsSe
 - Client-side response re-validation (`validateSuggestionsPayload`) guards against function
   version skew — malformed items drop, never throw.
 
+## Acceptance walk — PASSED (5 Jul, staged dev account, all three themes)
+Pre-flight: Phase 6 confirmed landed (`5812448`); rules deployed to dev via
+`firebase.dev.json` (compiled + released to the `(default)` DB — a parallel session also landed
+the whole rules file to prod the same day); account staged end-to-end through the real UI:
+`bookplate.walk.0705@example.com` (Pro), two manuscripts (Citadel querying w/ 3 comps + 1 query;
+Salt overlay-shelved), left in place on dev for Nick's own eyeball — localhost:3040.
+
+All eleven checks passed. Highlights and proofs:
+1. Hero — eyebrow/pill/title/`98,200 words` + live whisper ("YA fantasy typically runs 50–80k")
+   /logline rule/motif. Inset frame + grain computed-style verified PRESENT in Capp
+   (1px rgba(124,58,42,.3) + feTurbulence) and ABSENT in Bold/Editorial.
+2. Shelved — the verdict-1 amendment live: overlay-shelved-while-Drafting reads grey "Shelved";
+   SHELVED micro-label + dimmed spine; sends hidden; Shelve→undo toast and Reactivate→"back in
+   play" both fired; the shelve WRITE succeeded (deployed rules proven).
+3. Spines — absent at one book, present at two; selection persisted across saves and switches;
+   OPEN PACKAGE BUILDER wrote the shared active-manuscript key (the Builder's first-visit home
+   lists both books on a fresh account, so visual scoping there is inconclusive — key contract
+   verified, not a bookplate defect).
+4. Pitch line — 0-comp hint · 1-comp "meets …" · composed line with italics · Copy→Copied→Copy
+   (~1.4s cycle confirmed with fresh node reads).
+5. Shelf — themed add modal wrote {title, author, year, note, source:'user'} (rules accepted);
+   `V.E. SCHWAB · 2015` by-line; Caveat note (Playfair italic in Editorial — computed);
+   OLDER COMP derived on 2015 AND on the 2021 boundary; add-form tag arrived titles-only.
+6. Free gate — plan flipped to Free live: Find suggestions routed straight to /plans, no call;
+   PRO chip = the Builder badge (computed rgb(106,137,167) on rgb(231,238,243), constant across
+   all three themes).
+7. Pro — via `__SA_SUGGEST_COMPS_MOCK`: ≥1s shimmer (3 rows) → rows with rationale; shelf-dedupe
+   filtered an on-shelf title out of the response; derived age flags ("5 YEARS OLD", and
+   "MEGA-BESTSELLER"+"11 YEARS OLD" scale-first); Add to shelf grew the shelf to 3 (author+year
+   carried, source:'suggested') and the row left via dedupe; dismiss removed a row
+   (session-state only); footer copy exact; button → Refresh. Without the mock: the real call
+   fails pre-deploy into the quiet "Suggestions aren't available right now. TRY AGAIN" state.
+8. In the field — a real query logged through the form: figure 1 / "1 active" pill /
+   zero-suppressed "Queried · 1" with a real StatusDot; VIEW IN QUERIES HUB landed /queries
+   showing that query; "Still on the runway." on the unqueried book (send hidden while shelved).
+9. Materials — live "—" ×3 from the versions collection; builder link navigates + writes the
+   key. The populated `N VERSIONS` state wasn't exercised (fresh account, no versions authored)
+   — that derivation is unit-tested.
+10. Preselect (`a716cad`) — hero: Citadel pre-chosen; empty-state Send-first (after
+    reactivating Salt): Salt pre-chosen; both editable; the shelved book is absent from the
+    picker entirely, so it can never arrive pre-chosen.
+11. Console — ZERO errors across the entire walk, all themes (the deliberate failed callable is
+    caught and wrapped by design).
+
+Environment caveats: headless preview runs at dpr 1, so Bold's 1.5px ink borders compute to
+1px (device-pixel snapping — colour/radius prove the token block applies; retina renders true
+1.5px). The walk drove the real dev Firestore; the staged account is live test data, kept
+deliberately (it IS the staging the walk asked for).
+
 ## Phase 5 — `suggestComps` Cloud Function (`ad04e4a`) — BUILT, NOT DEPLOYED
 Files: `functions/src/suggestCompsCore.ts` (pure core) · `suggestComps.ts` (callable) ·
 `suggestCompsCore.test.ts` (runs in the root Vitest suite, like assembleImport) · `index.ts`.
