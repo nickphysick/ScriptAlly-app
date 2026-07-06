@@ -14,6 +14,11 @@
   --dc-card-bd: 1px solid #e8d5cc;
   --dc-card-rad: 14px;
   --dc-today-bd: 1.5px solid #5d423a;
+  --dc-body: #fffefc;
+  --dc-band: linear-gradient(#dce0d9, #d0d6cc);
+  --dc-band-ink: #3a1c14;
+  --dc-band-rule: rgba(124, 58, 42, 0.14);
+  --dc-today-body: #fffefc;
   --dc-muted: #9a8c80;
   --dc-label: #b08e80;
   --dc-rem-bd: #c9a89e;
@@ -36,6 +41,11 @@
   --dc-card-bd: 1.5px solid #1d1712;
   --dc-card-rad: 14px;
   --dc-today-bd: 1.5px solid #1d1712;
+  --dc-body: #ffffff;
+  --dc-band: #f4c7c2;
+  --dc-band-ink: #1d1712;
+  --dc-band-rule: rgba(29, 23, 18, 0.18);
+  --dc-today-body: #fdeeeb;
   --dc-muted: #6d645e;
   --dc-label: #8a7f78;
   --dc-rem-bd: #9a8f88;
@@ -58,6 +68,11 @@
   --dc-card-bd: none;
   --dc-card-rad: 16px;
   --dc-today-bd: none;
+  --dc-body: #ffffff;
+  --dc-band: #f4f4f5;
+  --dc-band-ink: #1a1a1a;
+  --dc-band-rule: #e3e2e0;
+  --dc-today-body: #ffffff;
   --dc-muted: #6b6b6b;
   --dc-label: #8b8b8b;
   --dc-rem-bd: #b3b5b8;
@@ -139,47 +154,60 @@
 .dc-strip::-webkit-scrollbar { display: none; }
 .dc-strip:focus-visible { outline: 2px solid var(--dc-accent); outline-offset: -3px; border-radius: 14px; }
 
+/* Band-over-body card: the card is a real overflow:hidden container (MountPanel grammar) so the
+   band fills to the rounded corners without an overlay border and never spills past them. */
 .dc-card {
   scroll-snap-align: center;
   flex: none;
   width: 244px;
-  min-height: 210px;
-  background: var(--dc-card);
+  min-height: 196px;
+  background: var(--dc-body);
   border: var(--dc-card-bd);
   border-radius: var(--dc-card-rad);
-  padding: 15px 16px;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 10px;
   will-change: transform, opacity, filter;
   cursor: pointer;
   box-shadow: var(--dc-shadow-float);
   transform-style: preserve-3d;
 }
 .dc-card.is-today { border: var(--dc-today-bd); }
-.t-bold .dc-card.is-today { background: #fdf0ee; }
-.t-edn .dc-card.is-today .dc-dh { border-bottom: 1.5px solid #1a1a1a; }
+.t-edn .dc-card.is-today .dc-band { border-bottom: 1.5px solid #1a1a1a; }
 
-/* ---------- day card interior ---------- */
-.dc-dh {
+/* ---------- header band ---------- */
+.dc-band {
+  background: var(--dc-band);
+  padding: 9px 15px;
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  border-bottom: 1px solid var(--dc-hair);
-  padding-bottom: 8px;
+  border-bottom: 1px solid var(--dc-band-rule);
 }
 .dc-dow {
   font-family: 'JetBrains Mono', monospace;
   font-size: 9px;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: var(--dc-muted);
+  color: var(--dc-band-ink);
+  opacity: 0.62;
 }
-.dc-card.is-today .dc-dow { color: var(--dc-accent); font-weight: 600; }
-.dc-dnum { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 500; color: var(--dc-head); }
+.dc-card.is-today .dc-dow { opacity: 1; font-weight: 600; color: var(--dc-accent); }
+.t-bold .dc-card.is-today .dc-dow, .t-edn .dc-card.is-today .dc-dow { color: var(--dc-band-ink); }
+.dc-dnum { font-family: 'Playfair Display', serif; font-size: 19px; font-weight: 500; color: var(--dc-band-ink); }
 
+/* ---------- white/parchment body ---------- */
+.dc-body {
+  background: var(--dc-body);
+  flex: 1;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.dc-card.is-today .dc-body { background: var(--dc-today-body); }
 .dc-evs { display: flex; flex-direction: column; gap: 9px; flex: 1; }
-.dc-qwrap { flex: 1; display: flex; align-items: center; justify-content: center; }
+.dc-qwrap { flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; }
 .dc-quiet { font-family: 'Playfair Display', serif; font-style: italic; font-size: 12px; color: var(--dc-muted); opacity: 0.8; }
 .dc-hint {
   font-family: 'JetBrains Mono', monospace;

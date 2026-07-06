@@ -44,14 +44,21 @@ const DAY_COUNT = FORTNIGHT_PAST_DAYS + 1 + FORTNIGHT_FUTURE_DAYS;
 /** The app scroll container (AppShell STAGE_SCROLL_ID) — the box the full-bleed strip spans. */
 const STAGE_ID = "app-stage-scroll";
 
-/* Falloff constants — "Clean gaps · focus +15%" mockup values, one source for the rAF pass. */
-const FOCUS_SCALE = 1.15;
-const EDGE_DROP = 0.55; // scale 1.15 − t·0.55 → edge cards ~0.6
+/* Falloff constants — "Snug density, header-band cards" mockup (scriptally-diary-spacing.html). */
+const FOCUS_SCALE = 1.14;
+const EDGE_DROP = 0.52; // scale 1.14 − t·0.52 → edge cards ~0.62
 const FALL_Z_PX = 190;
 const FALL_FADE = 0.72;
 const FALL_BLUR_PX = 2;
 const LIFT_T = 0.1;
 const T_SPAN = 0.5; // t normalises over half the strip width
+/* Constant-gap spacing: pull each receding card inward by exactly the empty space its shrink
+   created, so every rendered gap equals TARGET_GAP (replaces the uniform-gap model, whose fixed
+   layout gap + centre scaling gave tight gaps mid-strip and wide gaps at the edges). */
+const CARD_W = 244;
+const LAYOUT_GAP = 30; // the CSS flex gap between cards
+const HALF = CARD_W / 2; // 122
+const TARGET_GAP = 12; // Snug — the constant rendered gap between card edges
 
 const clockGlyph = (
   <svg viewBox="0 0 10 10" fill="none" strokeWidth={1.4} strokeLinecap="round" aria-hidden="true">
@@ -165,24 +172,54 @@ export const DiaryCarousel: React.FC<DiaryCarouselProps> = ({ queries, agents, m
     const rect = strip.getBoundingClientRect();
     if (rect.width <= 0) return; // unlaid-out (hidden slot / background tab) → avoid NaN transforms
     const mid = rect.left + rect.width / 2;
-    let nearest = 0, nearestDist = Infinity;
-    cardRefs.current.forEach((c, i) => {
-      if (!c) return;
+    const cards = cardRefs.current;
+    const n = cards.length;
+
+    // 1) scale + t per card from continuous distance; find the nearest-to-centre anchor.
+    const scale = new Array<number>(n).fill(1);
+    const tArr = new Array<number>(n).fill(0);
+    let anchor = 0, nearestDist = Infinity;
+    for (let i = 0; i < n; i++) {
+      const c = cards[i];
+      if (!c) continue;
       const r = c.getBoundingClientRect();
       const cx = r.left + r.width / 2;
       const dist = Math.abs(cx - mid);
-      if (dist < nearestDist) { nearestDist = dist; nearest = i; }
+      if (dist < nearestDist) { nearestDist = dist; anchor = i; }
       const t = Math.min(dist / (rect.width * T_SPAN), 1);
-      const scale = FOCUS_SCALE - t * EDGE_DROP;
-      const z = -t * FALL_Z_PX;
-      c.style.transform = `translateZ(${z}px) scale(${scale})`; // no horizontal drift
-      c.style.opacity = String(1 - t * FALL_FADE);
+      tArr[i] = t;
+      scale[i] = FOCUS_SCALE - t * EDGE_DROP;
+    }
+
+    // 2) constant-gap compensation: cumulatively pull each receding card toward the anchor by the
+    //    empty space its shrink created, so every rendered gap becomes TARGET_GAP. No extra drift.
+    const tx = new Array<number>(n).fill(0);
+    let cum = 0;
+    for (let i = anchor + 1; i < n; i++) {
+      const renderedGap = LAYOUT_GAP + HALF * (1 - scale[i - 1]) + HALF * (1 - scale[i]);
+      cum += renderedGap - TARGET_GAP;
+      tx[i] = -cum;
+    }
+    cum = 0;
+    for (let i = anchor - 1; i >= 0; i--) {
+      const renderedGap = LAYOUT_GAP + HALF * (1 - scale[i + 1]) + HALF * (1 - scale[i]);
+      cum += renderedGap - TARGET_GAP;
+      tx[i] = cum;
+    }
+
+    // 3) apply.
+    for (let i = 0; i < n; i++) {
+      const c = cards[i];
+      if (!c) continue;
+      const t = tArr[i];
+      c.style.transform = `translateX(${tx[i].toFixed(1)}px) translateZ(${(-t * FALL_Z_PX).toFixed(0)}px) scale(${scale[i].toFixed(3)})`;
+      c.style.opacity = (1 - t * FALL_FADE).toFixed(3);
       c.style.filter = reduce ? "" : `blur(${(t * t * FALL_BLUR_PX).toFixed(2)}px)`;
       c.style.boxShadow = t < LIFT_T ? "var(--dc-shadow-lift)" : "var(--dc-shadow-float)";
       c.style.zIndex = String(100 - Math.round(t * 90));
-    });
-    centredIdx.current = nearest;
-    backBtnRef.current?.classList.toggle("show", nearest !== FORTNIGHT_TODAY_IDX);
+    }
+    centredIdx.current = anchor;
+    backBtnRef.current?.classList.toggle("show", anchor !== FORTNIGHT_TODAY_IDX);
   }, [reduce]);
 
   const scheduleFalloff = useCallback(() => {
@@ -284,30 +321,32 @@ export const DiaryCarousel: React.FC<DiaryCarouselProps> = ({ queries, agents, m
                   aria-current={isToday ? "date" : undefined}
                   onClick={() => centreCard(i, true)}
                 >
-                  <div className="dc-dh">
+                  <div className="dc-band">
                     <span className="dc-dow">{isToday ? "Today" : DOWS[d.getDay()]}</span>
                     <span className="dc-dnum">{d.getDate()} {MONTHS[d.getMonth()]}</span>
                   </div>
-                  {evs.length > 0 ? (
-                    <div className="dc-evs">
-                      {evs.map((ev) => <EventRow key={ev.id} ev={ev} />)}
-                    </div>
-                  ) : isToday ? (
-                    <div className="dc-qwrap">
-                      <div style={{ textAlign: "center" }}>
-                        <div className="dc-quiet">Nothing due today.</div>
-                        {comingUpCount > 0 && (
-                          <div className="dc-hint" style={{ marginTop: 10 }}>
-                            {comingUpCount} event{comingUpCount === 1 ? "" : "s"} this week →
-                          </div>
-                        )}
+                  <div className="dc-body">
+                    {evs.length > 0 ? (
+                      <div className="dc-evs">
+                        {evs.map((ev) => <EventRow key={ev.id} ev={ev} />)}
                       </div>
-                    </div>
-                  ) : (
-                    <div className="dc-qwrap">
-                      <div className="dc-quiet">A quiet day.</div>
-                    </div>
-                  )}
+                    ) : isToday ? (
+                      <div className="dc-qwrap">
+                        <div>
+                          <div className="dc-quiet">Nothing due today.</div>
+                          {comingUpCount > 0 && (
+                            <div className="dc-hint" style={{ marginTop: 10 }}>
+                              {comingUpCount} event{comingUpCount === 1 ? "" : "s"} this week →
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="dc-qwrap">
+                        <div className="dc-quiet">A quiet day.</div>
+                      </div>
+                    )}
+                  </div>
                 </article>
               );
             })}
