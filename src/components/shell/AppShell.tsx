@@ -664,44 +664,6 @@ export const StagePage: React.FC<{
   );
 };
 
-/* ── Agents sub-nav (moved from the legacy top-bar AppShell; now sticks inside the stage) ── */
-
-const SUBTAB_PINK = "#f8e7dc"; // soft-pink pill fill — mirrors the primary NavLink (inline, not Tailwind)
-
-const SubTab: React.FC<{ label: string; active: boolean; onClick: () => void }> = ({ label, active, onClick }) => (
-  <button
-    onClick={onClick}
-    aria-current={active ? "page" : undefined}
-    className="cursor-pointer"
-    style={{
-      fontFamily: FONT_SANS,
-      fontSize: 12.5,
-      fontWeight: active ? 500 : 400,
-      whiteSpace: "nowrap",
-      padding: "5px 13px",
-      borderRadius: 16,
-      border: "none",
-      background: active ? SUBTAB_PINK : "transparent",
-      color: active ? burgundy : ghostButtonText,
-      transition: "background 0.15s, color 0.15s",
-    }}
-    onMouseEnter={(e) => { if (!active) { e.currentTarget.style.background = SUBTAB_PINK; e.currentTarget.style.color = burgundy; } }}
-    onMouseLeave={(e) => { if (!active) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = ghostButtonText; } }}
-  >
-    {label}
-  </button>
-);
-
-export const AgentsSubNav: React.FC<{ discover: boolean; onNavigate: (tab: string, subPageName?: string) => void }> = ({ discover, onNavigate }) => (
-  <div
-    className="sticky z-40 flex items-center gap-1 px-4 md:px-10 lg:px-14 xl:px-16"
-    style={{ top: 0, height: 44, flexShrink: 0, background: kraft, borderBottom: "1px solid rgba(124,58,42,0.10)" }}
-  >
-    <SubTab label="Agents database" active={!discover} onClick={() => onNavigate("agents", "Agents database")} />
-    <SubTab label="Discover new agents" active={discover} onClick={() => onNavigate("agents", "Discover new agents")} />
-  </div>
-);
-
 /* ── The shell ───────────────────────────────────────────────────────────── */
 
 interface AppShellProps {
@@ -740,9 +702,10 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
           <Nav activeTab={routeKey} onNavigate={onNavigate} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         </div>
 
-        {/* Workspace breadcrumb strip — crumb-only (variant A); renders null on the dashboard
-            (its floating top bar owns that band) and on routes the crumb table doesn't know. */}
-        <TopCrumbStrip onNavigate={onNavigate} />
+        {/* TEMP: the standalone crumb strip survives ONLY on /queries — every other workspace
+            page now carries the ChromeSlab (whose first row is the crumb). Remove with the
+            Queries Hub flattening once the parallel stream's Queries.tsx WIP lands. */}
+        {routeKey === "queries" && <TopCrumbStrip onNavigate={onNavigate} />}
 
         {/* THE STAGE — the app's scroll container. Bottom clearance below md reserves space for
             the fixed BottomTabBar (was on the legacy shell's <main>). */}

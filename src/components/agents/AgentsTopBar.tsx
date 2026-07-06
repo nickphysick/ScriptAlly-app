@@ -2,16 +2,19 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Agents-page editorial masthead (option A of the approved redesign — supersedes the floating
- * top pill): mono muted kicker "Your database" · big Playfair "Agents" with the search field +
- * solid Add-agent button aligned right of the title · a hairline rule · the live count beneath.
- * The search stays the LIST FILTER (name+agency, not the suggestions search) and keeps its ⌘K
- * chip — the page's single keyboard handler owns the binding via searchRef; the rail search is
- * hidden on /agents so this remains the only ⌘K registration live here.
+ * Agents-page header — now a ChromeSlab composition (Option A, ref
+ * design-refs/header-ground-fullpage-v1.html): the crumb strip + "Agents" title + live count
+ * share the unified slab surface, with the page's REAL tools (the list-filter search + its ⌘K
+ * chip, and Add agent) on the slab's right. The old editorial masthead's "Your database"
+ * kicker is superseded by the crumb; its rule and count line fold into the slab meta. The
+ * search stays the LIST FILTER (name+agency, not the suggestions search); the page's single
+ * keyboard handler owns the binding via searchRef. The slab bleeds out of the .agv2 desk
+ * padding (14px 22px) via negative margins — agentsV2.css is untouched.
  */
 import React from "react";
 import { Search, Plus } from "lucide-react";
 import { agentsCountLabel } from "../../lib/agentsPage";
+import { ChromeSlab } from "../shell/ChromeSlab";
 
 interface AgentsTopBarProps {
   /** TOTAL agents on file — deliberately independent of the live filters (Nick's call). */
@@ -24,12 +27,13 @@ interface AgentsTopBarProps {
 }
 
 export const AgentsTopBar: React.FC<AgentsTopBarProps> = ({ count, search, onSearch, onAddAgent, searchRef }) => (
-  <header className="ag-masthead">
-    <div className="ag-mh-kicker">Your database</div>
-    <div className="ag-mh-titlerow">
-      <h1 className="ag-mh-title">Agents</h1>
-      <div className="ag-mh-actions">
-        <div className="ag-searchpill">
+  <ChromeSlab
+    title="Agents"
+    meta={agentsCountLabel(count)}
+    style={{ margin: "-14px -22px 14px" }}
+    tools={
+      <>
+        <div className="ag-searchpill" style={{ minWidth: 220 }}>
           <Search aria-hidden="true" />
           <input
             ref={searchRef}
@@ -47,9 +51,7 @@ export const AgentsTopBar: React.FC<AgentsTopBarProps> = ({ count, search, onSea
           <Plus aria-hidden="true" />
           Add agent
         </button>
-      </div>
-    </div>
-    <div className="ag-mh-rule" aria-hidden="true" />
-    <div className="ag-mh-count">{agentsCountLabel(count)}</div>
-  </header>
+      </>
+    }
+  />
 );

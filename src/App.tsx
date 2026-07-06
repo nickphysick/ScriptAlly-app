@@ -8,7 +8,7 @@ import { BrowserRouter, Navigate, useLocation, useNavigate } from "react-router-
 import { DbProvider, useScriptAllyDb } from "./lib/db";
 import { BrandProvider } from "./lib/brand";
 import { Auth } from "./components/Auth";
-import { AppShell, StagePage, AgentsSubNav } from "./components/shell/AppShell";
+import { AppShell, StagePage } from "./components/shell/AppShell";
 // SidebarShell + QueriesRail are retired from the live path (the global AppShell absorbed the
 // Queries rail) but still power the dev-only #/shell-lab review surface.
 import { SidebarShell } from "./components/shell/SidebarShell";
@@ -604,7 +604,6 @@ function AppContent() {
         </StagePage>
 
         <StagePage active={routeKey === "agents"} layout="fillColumn">
-          <AgentsSubNav discover={agentsDiscover} onNavigate={handleNavigate} />
           {agentsDiscover ? (
             <DiscoverNewAgents onNavigate={handleNavigate} />
           ) : (

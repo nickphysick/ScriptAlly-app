@@ -55,6 +55,7 @@ import {
 } from "../lib/discoverAgents";
 import { getHomeCountry, flagFor, agentLocation } from "../lib/territory";
 import { FONT_SERIF, FONT_SANS, FONT_MONO } from "../lib/designTokens";
+import { ChromeSlab } from "./shell/ChromeSlab";
 import { BookOpen, ShieldCheck, Check, Plus, Bookmark, BookmarkCheck, X } from "lucide-react";
 import "flag-icons/css/flag-icons.min.css";
 import "./agents/discover.css";
@@ -300,34 +301,27 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
   return (
     <div className="dv2">
       <div className="dv-wrap">
-        {/* ── Page header ── */}
-        <header style={{ marginBottom: 16 }}>
-          <h1
-            style={{
-              fontFamily: FONT_SERIF,
-              fontSize: 26,
-              fontWeight: 600,
-              color: "var(--hdr, #5d4037)",
-              lineHeight: 1.15,
-              margin: 0,
-            }}
-          >
-            Discover new agents
-          </h1>
-          <p
-            style={{
-              fontFamily: FONT_SANS,
-              fontSize: 13.5,
-              fontWeight: 300,
-              color: "var(--dv-muted)",
-              margin: "6px 0 0",
-              lineHeight: 1.5,
-            }}
-          >
-            Ranked matches for your manuscript from the verified community catalogue — with the why
-            behind every suggestion.
-          </p>
-        </header>
+        {/* ── Page header — the unified ChromeSlab (crumb + title share one surface; the old
+              in-page h1 is superseded). Bleeds out of the .dv-wrap desk padding (26px 24px);
+              the explainer line stays as page content below. ── */}
+        <ChromeSlab
+          onNavigate={onNavigate}
+          title="Discover new agents"
+          style={{ margin: "-26px -24px 18px" }}
+        />
+        <p
+          style={{
+            fontFamily: FONT_SANS,
+            fontSize: 13.5,
+            fontWeight: 300,
+            color: "var(--dv-muted)",
+            margin: "0 0 16px",
+            lineHeight: 1.5,
+          }}
+        >
+          Ranked matches for your manuscript from the verified community catalogue — with the why
+          behind every suggestion.
+        </p>
 
         {/* ── Trust banner — the HONEST version: no legitimacy fields exist on the record yet,
               so no AAA/no-fee claims. Count + date are derived from real catalogue fields. ── */}
