@@ -16,6 +16,7 @@ import { PackagesHome } from "./PackagesHome";
 import { Composer } from "./Composer";
 import { MaterialsManager } from "./MaterialsManager";
 import { MaterialModal } from "./MaterialModal";
+import { JourneyStrip } from "./JourneyStrip";
 import { WorkedExample } from "./WorkedExample";
 import { HubHeaderBar } from "../shell/HubHeaderBar";
 import { emptySelection } from "./typeMeta";
@@ -116,27 +117,36 @@ export const PkgLab: React.FC = () => {
           <FirstVisitHome versions={versions.filter((v) => v.componentType === ComponentType.QUERY_LETTER)} onBuild={noop} onCreate={openMat} onEditMaterial={editMat} onExample={setExample} />
         </section>
       ) : view === "packages" ? (
-        <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", gap: 14, alignItems: "flex-start" }}>
-          <MaterialsRail versions={versions} onCreate={openMat} onManage={noop} />
-          <section style={{ flex: 1, minWidth: 0, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", padding: "16px 16px 20px" }}>
-            <PackagesHome packages={MOCK_PACKAGES} versions={versions} queries={MOCK_QUERIES} onNew={noop} onEdit={noop} onCopy={noop} />
-          </section>
-        </div>
+        <>
+          <div style={{ maxWidth: 1200, margin: "0 auto 14px" }}><JourneyStrip view="home" /></div>
+          <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", gap: 14, alignItems: "flex-start" }}>
+            <MaterialsRail versions={versions} onCreate={openMat} onManage={noop} />
+            <section style={{ flex: 1, minWidth: 0, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", padding: "16px 16px 20px" }}>
+              <PackagesHome packages={MOCK_PACKAGES} versions={versions} queries={MOCK_QUERIES} onNew={noop} onEdit={noop} onCopy={noop} />
+            </section>
+          </div>
+        </>
       ) : view === "composer" ? (
-        <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", gap: 14, alignItems: "flex-start" }}>
-          <MaterialsRail versions={versions} onCreate={openMat} onManage={noop} />
-          {/* Composer brings its own .c2 container — the section is bare. */}
-          <section style={{ flex: 1, minWidth: 0 }}>
-            <Composer versions={versions} packages={MOCK_PACKAGES} initialName="" initialSelection={emptySelection()} onSave={noop} onCancel={noop} onCreate={composerMat} autoPick={autoPick} />
-          </section>
-        </div>
+        <>
+          <div style={{ maxWidth: 1200, margin: "0 auto 14px" }}><JourneyStrip view="composer" /></div>
+          <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", gap: 14, alignItems: "flex-start" }}>
+            <MaterialsRail versions={versions} onCreate={openMat} onManage={noop} />
+            {/* Composer brings its own .c2 container — the section is bare. */}
+            <section style={{ flex: 1, minWidth: 0 }}>
+              <Composer versions={versions} packages={MOCK_PACKAGES} initialName="" initialSelection={emptySelection()} onSave={noop} onCancel={noop} onCreate={composerMat} autoPick={autoPick} />
+            </section>
+          </div>
+        </>
       ) : (
-        <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", gap: 14, alignItems: "flex-start" }}>
-          <MaterialsRail versions={versions} onCreate={openMat} onManage={noop} />
-          <section style={{ flex: 1, minWidth: 0, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", padding: "16px 16px 20px" }}>
-            <MaterialsManager versions={versions} packages={MOCK_PACKAGES} queries={MOCK_QUERIES} onBack={noop} onEdit={editMat} onCreate={openMat} />
-          </section>
-        </div>
+        <>
+          <div style={{ maxWidth: 1200, margin: "0 auto 14px" }}><JourneyStrip view="gallery" /></div>
+          <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", gap: 14, alignItems: "flex-start" }}>
+            <MaterialsRail versions={versions} onCreate={openMat} onManage={noop} />
+            <section style={{ flex: 1, minWidth: 0, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", padding: "16px 16px 20px" }}>
+              <MaterialsManager versions={versions} packages={MOCK_PACKAGES} queries={MOCK_QUERIES} onBack={noop} onEdit={editMat} onCreate={openMat} />
+            </section>
+          </div>
+        </>
       )}
 
       {matModal && (

@@ -26,6 +26,7 @@ import { MaterialsRail } from "./packages/MaterialsRail";
 import { PackagesHome } from "./packages/PackagesHome";
 import { Composer } from "./packages/Composer";
 import { MaterialsManager } from "./packages/MaterialsManager";
+import { JourneyStrip } from "./packages/JourneyStrip";
 import { MaterialModal } from "./packages/MaterialModal";
 import { WorkedExample } from "./packages/WorkedExample";
 import { emptySelection, selectionFromPackage, SlotSelection } from "./packages/typeMeta";
@@ -226,6 +227,11 @@ export const SubmissionPackages: React.FC = () => {
         </div>
       ) : (
         <>
+          {/* Journey strip — WORKING views only (the composer can open from first-visit, so the test is
+              "which view renders", not the gate alone). First-visit itself is the pitch: no strip. */}
+          {(composer || managerOpen || !firstVisit) && (
+            <JourneyStrip view={composer ? "composer" : managerOpen ? "gallery" : "home"} />
+          )}
           <div className="pkg-workspace" style={{ flex: 1, minHeight: 0, display: "flex", gap: 14 }}>
             {/* Materials rail — shown once the manuscript has any material or package (mockup .qlist). */}
             {!firstVisit && <MaterialsRail versions={msVersions} onCreate={openCreate} onManage={openManage} />}
