@@ -2134,7 +2134,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           />
 
           {/* Empty split — list placeholder (col 1) + welcome pane (col 2), both full desk height */}
-          <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "330px 1fr", columnGap: 20, flex: 1, minHeight: 0, alignItems: "stretch" }}>
+          <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "330px 1fr", gridTemplateRows: "minmax(0, 1fr)", columnGap: 20, flex: 1, minHeight: 0, alignItems: "stretch" }}>
 
             {/* List card — search + header (0 queries · Sort · Filter) + centred placeholder + disabled CSV */}
             <div style={{ alignSelf: "stretch", background: "var(--listbg)", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", overflow: "hidden", boxShadow: "0 8px 26px rgba(29,23,18,.12)", display: "flex", flexDirection: "column", minHeight: 0 }}>
@@ -2274,11 +2274,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         {/* ── Split — list card (furniture, col 1) beside the workspace reading pane (col 2). The
             old actions toolbar row is retired: every query action now lives in the pane's command
             bar (one home for actions). Single-row grid, both columns full height. ── */}
-        <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "330px 1fr", columnGap: 20, flex: 1, minHeight: 0, alignItems: "stretch" }}>
+        <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "330px 1fr", gridTemplateRows: "minmax(0, 1fr)", columnGap: 20, flex: 1, minHeight: 0, alignItems: "stretch" }}>
 
           {/* List card — furniture: search + header fixed, rows scroll, footer pinned (count ·
               Export CSV left · keyboard hints right). */}
-          <div style={{ gridColumn: 1, alignSelf: "stretch", background: "var(--listbg)", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", overflow: "hidden", boxShadow: "0 8px 26px rgba(29,23,18,.12)", display: "flex", flexDirection: "column", minHeight: 0 }}>
+          <div style={{ gridColumn: 1, gridRow: 1, alignSelf: "stretch", background: "var(--listbg)", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", overflow: "hidden", boxShadow: "0 8px 26px rgba(29,23,18,.12)", display: "flex", flexDirection: "column", minHeight: 0 }}>
 
               {/* Search — fixed at the top of the list card */}
               <div style={{ position: "relative", margin: "10px 6px 8px", flexShrink: 0 }}>
@@ -2666,7 +2666,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
               hugs). A flex column: agent band (flex:none) over three full-height columns that each
               scroll behind their own edge fade (flex:1). The command bar pins to the pane foot in
               Phase 2; the top action toolbar above still exists this phase. */}
-          <div className="qp-pane" style={{ gridColumn: 2, gridRow: 2, alignSelf: "stretch", minHeight: 0, height: "100%", border: "var(--bdw) solid var(--bd)", borderRadius: 22, background: "var(--pane)", boxShadow: "0 8px 26px rgba(29,23,18,.12)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          <div className="qp-pane" style={{ gridColumn: 2, gridRow: 1, alignSelf: "stretch", minHeight: 0, border: "var(--bdw) solid var(--bd)", borderRadius: 22, background: "var(--pane)", boxShadow: "0 8px 26px rgba(29,23,18,.12)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
             {activeQuery && activeAgent && activeMs ? (
               <>
                 <style>{`

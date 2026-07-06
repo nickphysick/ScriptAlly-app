@@ -78,9 +78,11 @@ describe("Queries.tsx artefacts — one home for actions + regressions", () => {
 
   it("the command bar exists and the old top action toolbar is gone", () => {
     expect(src.includes("qp-cmdbar")).toBe(true);
-    // the retired toolbar sat at gridRow 1 with a top-row Download button — both gone
-    expect(src.includes('gridColumn: 2, gridRow: 1')).toBe(false);
+    // The retired toolbar was a bare gridRow-1 flex strip (its comment + span-2 list are gone).
+    // NB: `gridColumn: 2, gridRow: 1` now legitimately belongs to the workspace pane (height-chain
+    // repair), so it is NOT a toolbar tell — use the toolbar's own markers instead.
     expect(src.includes("Actions toolbar")).toBe(false);
+    expect(src.includes('gridRow: "1 / span 2"')).toBe(false); // the old list span (2-row grid)
   });
 
   it("the mark-sent trigger ref lives in the command bar (single home for the popover)", () => {
@@ -125,6 +127,35 @@ describe("command-bar theming — per-theme token smoke (rule-text lock)", () =>
     expect(b).toContain("--cmd-bar-bd: #ececeb");
     expect(b).toContain("--cmd-bar-shadow: 0 -2px 10px rgba(20, 20, 20, 0.04)");
     expect(b).toContain("--cmd-primary-bg: #e9eaeb");
+  });
+});
+
+describe("Queries height chain — structural guards (jsdom cannot verify flex/grid sizing)", () => {
+  const src = readFileSync(resolve(__dirname, "../components/Queries.tsx"), "utf8");
+
+  it("the desk grid is a SINGLE full-height row (both panes side-by-side, not diagonally stacked)", () => {
+    // Every .queries-content-grid must template one row that fills the grid — the bug was a
+    // MISSING gridTemplateRows, so auto-rows split the two column-placed panes across rows.
+    const grids = src.match(/className="queries-content-grid" style=\{\{[^}]*\}\}/g) ?? [];
+    expect(grids.length).toBeGreaterThanOrEqual(2);
+    for (const g of grids) expect(g).toContain('gridTemplateRows: "minmax(0, 1fr)"');
+  });
+
+  it("the list and the workspace pane are both in gridRow 1 (tops flush beneath the slab)", () => {
+    // the workspace pane must NOT carry the stale gridRow: 2 that bottom-anchored it
+    expect(src.includes("gridColumn: 2, gridRow: 2")).toBe(false);
+    expect(src.includes('className="qp-pane" style={{ gridColumn: 2, gridRow: 1')).toBe(true);
+    expect(src.includes("gridColumn: 1, gridRow: 1")).toBe(true); // list card
+  });
+
+  it("no viewport-relative height or bottom-anchor in the workspace pane subtree", () => {
+    // The stage bounds are the only place the viewport is known — the pane tree stretches
+    // within the grid, never sizes to vh/dvh, and nothing margin-top:auto / flex-end pins it low.
+    const paneStart = src.indexOf('className="qp-pane"');
+    const paneEnd = src.indexOf("closes qp-pane", paneStart);
+    const paneTree = src.slice(paneStart, paneEnd);
+    expect(paneTree).not.toMatch(/100vh|100dvh|calc\(100v/);
+    expect(paneTree).not.toMatch(/marginTop:\s*"auto"|alignSelf:\s*"flex-end"|alignSelf:\s*"end"/);
   });
 });
 
