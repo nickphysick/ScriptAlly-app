@@ -487,3 +487,12 @@ Closes pending action 3. A copy of the agents seam (`abd4d87`), one commit:
 - **Coarse pointers** (`pointer: coarse`): permanently pinned, pin button not rendered. Static per session (pointer class doesn't change mid-session).
 
 **Verification (throwaway, deleted after):** fresh default = pinned; unpin → rest (60px, hairline dividers, icon rows); pointer-over → intent-delayed peek (still rest at 80ms, peek at 200ms) with scrim + flow-width hold; leave → grace collapse (still open at 150ms, closed after 240); focus-in/out parity (confirmed with throttle-proof waits — the harness clamps background timers, which corrupted the fast probes); `[` toggles + persists both ways; pin survives reload; peek shadow/scrim classes per theme (Bold/Edn scrim computed correctly; the SHADOW's computed value lagged the stylesheet in the throttled window — inline declaration + rule-text locks are correct; **flag for Nick's real-browser pass**, along with true hover feel, the 280ms glide and touch emulation).
+
+## Workspace top strip — TopCrumbStrip (crumb-only), 6 Jul
+
+**Shipped:** `80cb661` component + integration → docs (this commit). Suite 603 → 610 (crumb table + link-target + exemption + token locks). Variant A per the pack; the ref's other variants are rejected alternatives, committed for context only.
+
+**Notes:**
+- ONE mount point (AppShell content column, above the stage) serves all six routes — `crumbForPath` returns null on the dashboard (exemption), focus/marketing routes, the guarded `/email-import-dev`, and unknowns. Rendering above the stage means the strip never scrolls and viewport-locked pages simply get 38px less stage (stage-relative heights, per the standing invariant — no bar-offset maths anywhere).
+- The strip renders at ALL widths (the pack doesn't exempt mobile); it stacks under the mobile slim bar — flag if it reads as double chrome on small screens.
+- Verified live (throwaway, deleted): all six crumb strings; dashboard shows no strip; `AGENTS` from Discover → `/agents`; `SCRIPTALLY` → `/dashboard`; Agents tab pills untouched beneath the strip; during an unpinned peek the rail overlays the strip's left edge (screenshot-confirmed — the frozen-transition probe artefact is documented, target geometry wrapper 60 / panel 240 is correct).
