@@ -77,9 +77,11 @@ export const SubmissionPackages: React.FC = () => {
   const msVersions = useMemo(() => versions.filter((v) => v.manuscriptId === msId), [versions, msId]);
   const msPackages = useMemo(() => packages.filter((p) => p.manuscriptId === msId && p.status !== "Retired"), [packages, msId]);
   const msQueries = useMemo(() => queries.filter((q) => q.manuscriptId === msId), [queries, msId]);
-  // First-visit: no materials AND no (active) packages for this manuscript. The materials rail and the
-  // packages home appear once either count is non-zero.
-  const firstVisit = msVersions.length === 0 && msPackages.length === 0;
+  // First-visit: no (active) packages for this manuscript — materials are deliberately NOT part of
+  // the gate (a materials-only account was landing on an undesigned blank home). The page teaches
+  // until the first package exists; owned materials surface as live library cards inside it, and the
+  // materials rail appears with the packages home once the gate closes.
+  const firstVisit = msPackages.length === 0;
 
   if (!currentUser) return null;
 
@@ -246,7 +248,7 @@ export const SubmissionPackages: React.FC = () => {
               ) : managerOpen ? (
                 <MaterialsManager versions={msVersions} packages={msPackages} queries={msQueries} onBack={() => setManagerOpen(false)} onEdit={openEditMaterial} onCreate={openCreate} />
               ) : firstVisit ? (
-                <FirstVisitHome onBuild={openNew} onCreate={openCreate} onExample={openExample} />
+                <FirstVisitHome versions={msVersions} onBuild={openNew} onCreate={openCreate} onEditMaterial={openEditMaterial} onExample={openExample} />
               ) : (
                 <PackagesHome packages={msPackages} versions={msVersions} queries={msQueries} onNew={openNew} onEdit={openEdit} onCopy={openCopy} />
               )}

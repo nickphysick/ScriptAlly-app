@@ -2,18 +2,20 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * FirstVisitHome — the Package Builder's first-visit state (0 materials AND 0 packages for the active
- * manuscript). A split stage (headline + a cycling product-UI demo of three worked packages) over a
- * "Create a library of materials" divider and three illustrative library cards. Ported from the
- * approved mockup (design-refs/scriptally-package-builder-cappuccino.html #home-empty) — every colour
- * is a theme token or a mockup-sampled value.
+ * FirstVisitHome — the Package Builder's first-visit state (0 packages for the active manuscript;
+ * materials are deliberately NOT part of the gate). A split stage (headline + a cycling product-UI
+ * demo of three worked packages) over a "Create a library of materials" divider and three library
+ * cards. Ported from the approved mockup (design-refs/scriptally-package-builder-cappuccino.html
+ * #home-empty; live-card spec from scriptally-quiet-capp.html) — every colour is a theme token or a
+ * mockup-sampled value.
  *
- * The three library cards show illustrative example content (only ever seen at 0/0), clickable to
- * create the user's own; the carousel + CTA + "See this example in full" are wired to callbacks the
- * orchestrator fills in later phases (composer = P7, create-modal = P9, worked-examples = P10).
+ * Library cards are LIVE per type once the user owns a material of that type: the most recent one
+ * renders (real title, its file chip or a tap-to-edit chip, "SAVED — NOT YET IN A PACKAGE" — always
+ * true here, the gate guarantees zero packages) and opens the edit modal. Types with none keep the
+ * illustrative EXAMPLE card, which opens the create modal.
  */
 import React, { useState } from "react";
-import { ComponentType } from "../../types";
+import { ComponentType, ManuscriptVersion } from "../../types";
 import { TypeGlyph } from "./TypeGlyph";
 import { FONT_SERIF, FONT_MONO } from "../../lib/designTokens";
 
@@ -57,7 +59,7 @@ const CAR: Slide[] = [
   },
 ];
 
-/** Illustrative library cards (example content, shown only at 0/0; a click opens the create-modal). */
+/** Illustrative library cards — the per-type fallback when the user owns no material of that type. */
 const LIB_EXAMPLES: { type: ComponentType; head: "xl" | "xs" | "xp"; label: string; title: string; file: string; ver: string; used: React.ReactNode }[] = [
   { type: ComponentType.QUERY_LETTER, head: "xl", label: "Query letter", title: "Comp-led rework", file: "MDO_Query_compled.docx", ver: "v2", used: <>IN <b>2 PACKAGES</b> · 3 SENT QUERIES</> },
   { type: ComponentType.SYNOPSIS, head: "xs", label: "Synopsis", title: "One-page synopsis", file: "MDO_Synopsis.docx", ver: "v1", used: <>IN <b>1 PACKAGE</b></> },
@@ -72,15 +74,19 @@ const docIcon = (
 );
 
 export interface FirstVisitHomeProps {
+  /** The manuscript's materials — each type's most recent one renders as a live library card. */
+  versions: ManuscriptVersion[];
   /** Open the composer (Phase 7). */
   onBuild: () => void;
-  /** Open the create-modal for a material type (Phase 9). */
+  /** Open the create-modal for a material type (Phase 9) — example cards. */
   onCreate: (type: ComponentType) => void;
+  /** Open the edit-modal for an owned material — live cards. */
+  onEditMaterial: (version: ManuscriptVersion) => void;
   /** Open the worked-example popup for a demo slide (Phase 10). */
   onExample: (slideKey: string) => void;
 }
 
-export const FirstVisitHome: React.FC<FirstVisitHomeProps> = ({ onBuild, onCreate, onExample }) => {
+export const FirstVisitHome: React.FC<FirstVisitHomeProps> = ({ versions, onBuild, onCreate, onEditMaterial, onExample }) => {
   // Slide index. The 5s crossfade + auto-advance is driven ENTIRELY by a CSS animation (.rt below):
   // opacity dips to 0 at each loop trough and the slide advances on `animationiteration` there, so the
   // swap is invisible. This is deliberately NOT a JS setInterval+setTimeout crossfade — those get
@@ -90,6 +96,10 @@ export const FirstVisitHome: React.FC<FirstVisitHomeProps> = ({ onBuild, onCreat
   const nextSlide = () => setCarI((i) => (i + 1) % CAR.length);
 
   const d = CAR[carI];
+
+  // The user's most recent material of a type (createdDate is an ISO string, so string order = time order).
+  const latestOf = (type: ComponentType): ManuscriptVersion | undefined =>
+    versions.filter((v) => v.componentType === type).sort((a, b) => b.createdDate.localeCompare(a.createdDate))[0];
 
   return (
     <div className="pkgfv">
@@ -212,17 +222,34 @@ export const FirstVisitHome: React.FC<FirstVisitHomeProps> = ({ onBuild, onCreat
       <div className="contB">
         <div className="a2s">Name each component, pin the actual file so you never lose track, then re-use it across multiple packages.</div>
         <div className="librow">
-          {LIB_EXAMPLES.map((c) => (
-            <button type="button" key={c.type} className="lib" onClick={() => onCreate(c.type)}>
-              <div className={`lib-h ${c.head}`}><TypeGlyph type={c.type} size={14} />{c.label}<span className="extag">Example</span></div>
-              <div className="lib-b">
-                <div className="lt2">Title</div>
-                <div className="libti">{c.title}</div>
-                <span className="lfchip">{docIcon}{c.file}<span className="v">{c.ver}</span></span>
-                <div className="used">{c.used}</div>
-              </div>
-            </button>
-          ))}
+          {LIB_EXAMPLES.map((c) => {
+            const mine = latestOf(c.type);
+            if (mine) {
+              // Live card — the user's real material (no EXAMPLE tag; opens the edit modal).
+              return (
+                <button type="button" key={c.type} className="lib" onClick={() => onEditMaterial(mine)}>
+                  <div className={`lib-h ${c.head}`}><TypeGlyph type={c.type} size={14} />{c.label}</div>
+                  <div className="lib-b">
+                    <div className="lt2">Title</div>
+                    <div className="libti">{mine.versionName}</div>
+                    <span className="lfchip">{docIcon}{mine.fileName || "YOUR MATERIAL · TAP TO EDIT"}</span>
+                    <div className="used">SAVED — NOT YET IN A PACKAGE</div>
+                  </div>
+                </button>
+              );
+            }
+            return (
+              <button type="button" key={c.type} className="lib" onClick={() => onCreate(c.type)}>
+                <div className={`lib-h ${c.head}`}><TypeGlyph type={c.type} size={14} />{c.label}<span className="extag">Example</span></div>
+                <div className="lib-b">
+                  <div className="lt2">Title</div>
+                  <div className="libti">{c.title}</div>
+                  <span className="lfchip">{docIcon}{c.file}<span className="v">{c.ver}</span></span>
+                  <div className="used">{c.used}</div>
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>

@@ -112,7 +112,8 @@ export const PkgLab: React.FC = () => {
 
       {view === "first" ? (
         <section style={{ maxWidth: 1200, margin: "0 auto", background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", padding: "16px 16px 20px" }}>
-          <FirstVisitHome onBuild={noop} onCreate={openMat} onExample={setExample} />
+          {/* Mirrors Nick's dev fixture (1 letter, 0 packages): letters-only → one LIVE card + two examples. */}
+          <FirstVisitHome versions={versions.filter((v) => v.componentType === ComponentType.QUERY_LETTER)} onBuild={noop} onCreate={openMat} onEditMaterial={editMat} onExample={setExample} />
         </section>
       ) : view === "packages" ? (
         <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", gap: 14, alignItems: "flex-start" }}>
