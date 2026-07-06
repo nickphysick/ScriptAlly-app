@@ -66,7 +66,7 @@ import { useFocusSlot } from "./dashboard/focusSlot";
 import "./dashboard/dashboardV37.css";
 import { useOpenEditAgent } from "./EditAgentHost";
 import { StatCards } from "./dashboard/StatCards";
-import { FortnightInFocus } from "./dashboard/FortnightInFocus";
+import { FortnightCarousel } from "./dashboard/FortnightCarousel";
 import { WhatsLivePanel } from "./dashboard/WhatsLivePanel";
 import { DashboardSkeleton } from "./dashboard/DashboardSkeleton";
 import { replacePlaceholders, extractAgentFromText } from "../lib/activityUtils";
@@ -1645,14 +1645,11 @@ export const Dashboard: React.FC<{
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 20, marginTop: 20 }}>
-          <FortnightInFocus
+          <FortnightCarousel
             queries={queries}
             agents={agents}
             manuscripts={manuscripts}
             activities={mergedActivities}
-            isMagazineLayout={false}
-            onOpenQuery={(qid) => openEditQuery(qid)}
-            onOpenFullCalendar={() => setIsFullCalendarOpen(true)}
           />
           <WhatsLivePanel queries={queries} />
         </div>
