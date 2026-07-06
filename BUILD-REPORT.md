@@ -524,3 +524,12 @@ Closes pending action 3. A copy of the agents seam (`abd4d87`), one commit:
 ## Queries Hub slab completion, 6 Jul — deferred entry CLOSED
 
 The location stream landed its EdgeFadeScroll work (`9a246bb`) mid-run, clearing Queries.tsx; the flattening then landed clean with NO rider. Both branches (empty + populated) now render ChromeSlab (title · `Tracking {manuscript}` meta · Log a new query as the tool; frame + shadow deleted); the TEMP routeKey-gated crumb mount is removed and `TopCrumbStrip.tsx` is retired (artefact locks added: 2 slab mounts in Queries.tsx, zero qhbar, zero TopCrumbStrip references). `.t-capp .qhbar::after` in index.css is now a dead selector — left for a cleanup commit (the rule text is part of a locked convention note). Verified live: /queries empty state wears the slab full-bleed, exactly one crumb, CTA functional. 618/618 in isolation at the new HEAD.
+
+## Pane heights — the desk rule (Agents + Queries), 6 Jul
+
+**Shipped:** `a9435bd` desk rule on Agents → this commit (Queries floor + law docs). Suite 618 → 626 (clamp/provenance/artefact locks).
+
+- **Schema flag for Nick:** the provenance footer's right side (verification status) is ABSENT — user agent documents carry no verification/verified-at field (`dateAdded` is rules-required and renders; query count derives live). Decide whether a verification field should exist before any footer extension.
+- **Anatomy note:** the Agents pane's five always-present sections put its real content minimum ≈ 700px, so the 360px floor is a guard against stub records (the ref's no-floor failure case), not a height you see daily. Floor lives once: `READING_PANE_FLOOR_PX` ≡ `--ag-pane-floor`, artefact-locked.
+- **Verified live** (throwaway, deleted): hug at a 928px cell (sparse 806, rich 744 — its timeline self-caps at the pre-existing 320px inner scroll), cap + internal scroll at a 628px cell, list fills + scrolls with the pinned `30 AGENTS · ↑↓ ⌘K` footer at both sizes, compact strips in place of the skeleton tiles, provenance rendering real fields (`Added 14 Mar 2026 · 14 queries`). Bold/Editorial footers + hug probed. Queries: list already furniture (verified, no drift); pane already hugged+capped — floor added with the shared constant.
+- Seeding artefact noted during verification: the history timeline derives from ACTIVITY records (none seeded), so "clean slate" appeared beside a 14-query footer count — correct behaviour, mismatched fixture.

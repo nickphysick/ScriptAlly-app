@@ -29,6 +29,7 @@ import { QueryStatus, Agent, Manuscript, Query, SubmissionMethod, ActivityType, 
 import { StatusPill, getStatusLabel } from "./StatusPill";
 import { StatusDot, statusDirection } from "./StatusDot";
 import { ChromeSlab } from "./shell/ChromeSlab";
+import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
 import { EdgeFadeScroll } from "./EdgeFadeScroll";
 import { RecordResponseModal } from "./RecordResponseModal";
 import { RecordResponseFocusForm } from "./RecordResponseFocusForm";
@@ -2692,7 +2693,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
               with the shared edge fades on the fixed card frame (the chrome never moves). */}
           <EdgeFadeScroll
             outerClassName="qp-pane"
-            outerStyle={{ gridColumn: 2, gridRow: 2, alignSelf: "start", maxHeight: "100%", minHeight: 0, border: "var(--bdw) solid var(--bd)", borderRadius: 22, background: "var(--pane)", boxShadow: "0 8px 26px rgba(29,23,18,.12)", overflow: "hidden" }}
+            outerStyle={{ gridColumn: 2, gridRow: 2, alignSelf: "start", maxHeight: "100%", minHeight: READING_PANE_FLOOR_PX, border: "var(--bdw) solid var(--bd)", borderRadius: 22, background: "var(--pane)", boxShadow: "0 8px 26px rgba(29,23,18,.12)", overflow: "hidden" }}
             scrollStyle={{ overflowX: "hidden", display: "flex", flexDirection: "column" }}
             fade="var(--pane, #ffffff)"
           >
