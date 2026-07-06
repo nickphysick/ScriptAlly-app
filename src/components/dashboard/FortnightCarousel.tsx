@@ -135,6 +135,9 @@ export const FortnightCarousel: React.FC<FortnightCarouselProps> = ({ queries, a
     const strip = stripRef.current;
     if (!strip) return;
     const rect = strip.getBoundingClientRect();
+    // Zero-width = unlaid-out (hidden StagePage slot, background tab): dividing by it writes
+    // NaN transforms. Skip — the ResizeObserver re-runs this pass when real geometry arrives.
+    if (rect.width <= 0) return;
     const mid = rect.left + rect.width / 2;
     let nearest = 0, nearestDist = Infinity;
     cardRefs.current.forEach((c, i) => {
@@ -178,26 +181,41 @@ export const FortnightCarousel: React.FC<FortnightCarouselProps> = ({ queries, a
   }, [reduce]);
 
   // Mount: today centred instantly, falloff applied (second pass once layout fully settles).
-  useLayoutEffect(() => {
+  // A zero-width strip (hidden StagePage slot, background tab) can't centre yet — the resize
+  // observer below retries as soon as real geometry arrives.
+  const centredOnMount = useRef(false);
+  const centreTodayIfPossible = useCallback(() => {
+    if (centredOnMount.current) return;
+    const strip = stripRef.current;
+    if (!strip || strip.clientWidth <= 0) return;
+    centredOnMount.current = true;
     centreCard(FORTNIGHT_TODAY_IDX, false);
+  }, [centreCard]);
+
+  useLayoutEffect(() => {
+    centreTodayIfPossible();
     falloff();
     const t = window.setTimeout(falloff, 80);
     return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Recompute on any strip resize (window, rail pin/peek, column changes) + drop any pending frame.
+  // Recompute on any strip resize (window, rail pin/peek, column changes, hidden slot becoming
+  // visible) + drop any pending frame on unmount.
   useEffect(() => {
     const strip = stripRef.current;
     if (!strip) return;
-    const ro = new ResizeObserver(scheduleFalloff);
+    const ro = new ResizeObserver(() => {
+      centreTodayIfPossible();
+      scheduleFalloff();
+    });
     ro.observe(strip);
     return () => {
       ro.disconnect();
       cancelAnimationFrame(rafRef.current);
       rafRef.current = 0;
     };
-  }, [scheduleFalloff]);
+  }, [scheduleFalloff, centreTodayIfPossible]);
 
   const onStripKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowLeft") { e.preventDefault(); centreCard(centredIdx.current - 1, true); }

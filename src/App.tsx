@@ -22,6 +22,7 @@ import { Agents } from "./components/Agents";
 import { DiscoverNewAgents } from "./components/DiscoverNewAgents";
 import { SubmissionPackages } from "./components/SubmissionPackages";
 import { PkgLab } from "./components/packages/PkgLab";
+import { FortnightLab } from "./components/dashboard/FortnightLab";
 import { AllManuscripts } from "./components/AllManuscripts";
 import { Pricing } from "./components/Pricing";
 import { ImportCsv } from "./components/ImportCsv";
@@ -438,6 +439,10 @@ function AppContent() {
   // Dev-only Submission Package Builder review surface (theme-toggleable, no auth). TEMP.
   if (hash === "#/pkg-lab" && import.meta.env.DEV) {
     return <PkgLab />;
+  }
+  // Dev-only Fortnight depth-carousel review surface (theme-toggleable, no auth). TEMP.
+  if (hash === "#/fortnight-lab" && import.meta.env.DEV) {
+    return <FortnightLab />;
   }
   // Dev-only Form11Drawer review surface (Edit Agent over a mock record). DEV only.
   if (hash === "#/drawer-lab" && import.meta.env.DEV) {
