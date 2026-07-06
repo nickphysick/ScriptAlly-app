@@ -51,6 +51,7 @@ import {
   formatTimelineDate,
   upNextMeta,
   filterSentence,
+  agentIdleCount,
 } from "../lib/agentsPage";
 import { agentPrimary, agentSecondary, agentInitials } from "../lib/agentDisplay";
 import { agentLocation, flagFor, isHomeMarket, getHomeCountry, countryName } from "../lib/territory";
@@ -738,7 +739,9 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
   return (
     <div className="agv2">
       <AgentsTopBar
+        grand
         count={agents.length}
+        idleCount={agentIdleCount(agents, queries)}
         search={search}
         onSearch={setSearch}
         onAddAgent={() => onNavigate?.("agents", "Add an agent")}

@@ -19,6 +19,8 @@ import {
   buildAgentTimeline,
   formatTimelineDate,
   agentsCountLabel,
+  agentIdleCount,
+  agentsPulse,
   upNextMeta,
   filterSentence,
 } from "./agentsPage";
@@ -293,5 +295,23 @@ describe("desk rule — compact emptiness artefacts", () => {
     expect(agents.includes("ag-listfoot")).toBe(true);
     // The provenance footer was absorbed into the hub command bar (Agents migration).
     expect(agents.includes("ag-cmdbar")).toBe(true);
+  });
+});
+
+describe("masthead pulse line — Your database · N on file · I idle", () => {
+  it("idle = agents with no query (the Not-queried set), derived not stored", () => {
+    const agents = [{ id: "a" }, { id: "b" }, { id: "c" }];
+    const queries = [{ agentId: "a" }, { agentId: "a" }]; // a queried twice, b & c idle
+    expect(agentIdleCount(agents, queries)).toBe(2);
+  });
+
+  it("counts every agent idle when nothing has been queried", () => {
+    expect(agentIdleCount([{ id: "a" }, { id: "b" }], [])).toBe(2);
+    expect(agentIdleCount([], [])).toBe(0);
+  });
+
+  it("formats singular-safe: Your database · {label} · {i} idle", () => {
+    expect(agentsPulse(9, 4)).toBe("Your database · 9 agents on file · 4 idle");
+    expect(agentsPulse(1, 0)).toBe("Your database · 1 agent on file · 0 idle");
   });
 });

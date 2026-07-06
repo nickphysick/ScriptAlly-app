@@ -10,6 +10,7 @@ import { resolve } from "node:path";
 
 const tsx = readFileSync(resolve(__dirname, "../components/Agents.tsx"), "utf8");
 const css = readFileSync(resolve(__dirname, "../components/agents/agentsV2.css"), "utf8");
+const topbar = readFileSync(resolve(__dirname, "../components/agents/AgentsTopBar.tsx"), "utf8");
 const paneRule = css.slice(css.indexOf(".agv2 .ag-pane {"), css.indexOf("}", css.indexOf(".agv2 .ag-pane {")));
 
 describe("Agents pane — fills (hug retired)", () => {
@@ -48,6 +49,22 @@ describe("Agents command bar — single home for the actions", () => {
   it("the bar's open chip is a read-only mirror (no flip handler on it)", () => {
     const chip = tsx.slice(tsx.indexOf('className="ag-cmd-open"'), tsx.indexOf("</span>", tsx.indexOf('className="ag-cmd-open"') + 200));
     expect(chip).not.toContain("flipAvailability");
+  });
+});
+
+describe("Agents grand masthead", () => {
+  it("the top bar opts into the ChromeSlab grand variant with the pulse line", () => {
+    expect(topbar).toContain("grand={grand}");
+    expect(topbar).toContain("agentsPulse(count, idleCount)");
+  });
+
+  it("the page feeds the derived idle count (agentIdleCount over agents + queries)", () => {
+    expect(tsx).toContain("idleCount={agentIdleCount(agents, queries)}");
+    expect(tsx).toMatch(/<AgentsTopBar\s+grand/);
+  });
+
+  it("the masthead CTA is the hub primary (not the mocha ag-addbtn) when grand", () => {
+    expect(topbar).toContain("var(--hub-primary");
   });
 });
 

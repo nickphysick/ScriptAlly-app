@@ -194,6 +194,18 @@ export function buildAgentTimeline(
 /** Singular-safe live count for the top bar: "1 agent on file" / "12 agents on file". */
 export const agentsCountLabel = (n: number): string => `${n} ${n === 1 ? "agent" : "agents"} on file`;
 
+/** Idle = on file but never queried (the existing "not queried" terminology). Pure — the
+ *  masthead pulse line's `{i} idle` reads this, so it can't drift from the Not-queried filter. */
+export function agentIdleCount(agents: { id: string }[], queries: { agentId?: string }[]): number {
+  const queried = new Set(queries.map((q) => q.agentId).filter(Boolean));
+  return agents.filter((a) => !queried.has(a.id)).length;
+}
+
+/** Masthead pulse line — `Your database · {n} agents on file · {i} idle` (slab uppercases). */
+export function agentsPulse(count: number, idle: number): string {
+  return `Your database · ${agentsCountLabel(count)} · ${idle} idle`;
+}
+
 /** The Up-next meta line: "5★ fit · open · not yet queried". */
 export const upNextMeta = (agent: Agent): string => `${agent.starRating || 0}★ fit · open · not yet queried`;
 
