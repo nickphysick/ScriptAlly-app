@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Builder, guided &amp; illustrated</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{--bd:#d8cebf;--bdw:1px;--desk:#e8ddd0;--card:#fffefb;--burg:#7c3a2a;--ink:#241c15;--muted:#9a8c80;
+  --sage-d:#5a6e58;--gold:#a8842c;--hdr:#5d4037;--bandA:#ece5d8;--bandB:#e5ddcd;
+  --btnBg:#ffffff;--btnBd:#ded3c2;--btnT:#5d4037;--btnH:#f4f2ef;--selBg:#f3ede2;--winBg:#f5f0e6;
+  --tl:#f6ddd3;--ts:#e7ece4;--tp:#f3e6cf;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;color:var(--ink);background:var(--desk);padding:34px 20px 90px;}
+h1{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;text-align:center;}
+.sub{text-align:center;font-size:13px;color:#5a4f45;margin:8px auto 30px;max-width:760px;line-height:1.55;}
+.opt{max-width:1060px;margin:0 auto 60px;}
+.opt-name{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;margin-bottom:4px;}
+.opt-desc{font-size:12.5px;color:#5a4f45;margin-bottom:14px;line-height:1.6;max-width:960px;}
+.pane{background:var(--card);border:var(--bdw) solid var(--bd);border-radius:14px;overflow:hidden;}
+.tg{display:inline-flex;flex-shrink:0;}
+.band{background:linear-gradient(135deg,var(--bandA),var(--bandB));}
+.mono{font-family:'JetBrains Mono',monospace;}
+.btnw{font-family:'Playfair Display',serif;font-weight:700;color:var(--btnT);background:var(--btnBg);
+  border:1px solid var(--btnBd);border-radius:12px;cursor:pointer;}
+.btnw:hover{background:var(--btnH);}
+
+/* ================= JOURNEY STRIP ================= */
+.journey{display:flex;align-items:stretch;border-bottom:var(--bdw) solid var(--bd);background:linear-gradient(135deg,#f7f2ea,#f3ede2);}
+.jst{flex:1;display:flex;align-items:center;gap:13px;padding:15px 22px;position:relative;opacity:.55;}
+.jst.on{opacity:1;background:var(--card);box-shadow:inset 0 -3px 0 var(--burg);}
+.jst + .jst::before{content:'';position:absolute;left:-9px;top:50%;width:18px;height:18px;transform:translateY(-50%) rotate(45deg);
+  border-top:var(--bdw) solid var(--bd);border-right:var(--bdw) solid var(--bd);background:inherit;z-index:1;}
+.jic{width:44px;height:44px;flex-shrink:0;color:var(--burg);display:flex;align-items:center;justify-content:center;}
+.jst b{display:block;font-family:'Playfair Display',serif;font-size:16.5px;font-weight:700;color:var(--hdr);}
+.jst i{display:block;font-style:normal;font-size:11px;color:#8a7264;margin-top:2px;line-height:1.35;}
+.jnum{position:absolute;top:8px;right:12px;font-family:'JetBrains Mono',monospace;font-size:8px;color:#b3a291;}
+
+/* ================= OPTION 1: PACKAGES HOME ================= */
+.ph-head{display:flex;align-items:center;gap:30px;padding:30px 36px 26px;}
+.ph-head .illo{flex-shrink:0;}
+.ph-head h2{font-family:'Playfair Display',serif;font-size:38px;font-weight:800;color:var(--hdr);letter-spacing:-.5px;}
+.ph-head p{font-size:15px;color:#6a594d;line-height:1.6;margin-top:8px;max-width:560px;}
+.ph-head .btnw{margin-left:auto;font-size:16px;padding:15px 30px;flex-shrink:0;}
+.ph-body{display:flex;gap:20px;padding:0 36px 34px;}
+.lp-list{width:300px;flex-shrink:0;background:var(--card);border:var(--bdw) solid var(--bd);border-radius:12px;overflow:hidden;align-self:flex-start;}
+.lp-lh{padding:13px 18px;border-bottom:var(--bdw) solid var(--bd);}
+.lp-lh h4{font-family:'Playfair Display',serif;font-size:16.5px;font-weight:700;color:var(--hdr);}
+.lprow{padding:15px 18px;border-bottom:1px dashed #e7dbc9;cursor:pointer;}
+.lprow.on{background:var(--selBg);border-left:3px solid var(--burg);padding-left:15px;}
+.lprow .nm{font-family:'Playfair Display',serif;font-size:16.5px;font-weight:700;}
+.lprow .st{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--muted);margin-top:6px;}
+.lprow .st b{color:var(--sage-d);font-weight:500;}
+.lp-read{flex:1;background:var(--card);border:var(--bdw) solid var(--bd);border-radius:12px;overflow:hidden;}
+.lp-rh{padding:16px 24px;display:flex;align-items:center;gap:14px;}
+.lp-rh h3{font-family:'Playfair Display',serif;font-size:23px;font-weight:800;color:var(--hdr);}
+.lp-rh .acts{margin-left:auto;display:flex;gap:14px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--hdr);opacity:.8;}
+.lp-rb{padding:20px 24px;}
+.lp-sec{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:#a4937f;margin:2px 0 10px;}
+.matrow{display:flex;align-items:center;gap:14px;border:var(--bdw) solid var(--bd);border-radius:11px;padding:14px 17px;background:var(--card);margin-bottom:10px;}
+.matrow .mgl{width:34px;height:34px;border-radius:10px;background:var(--selBg);color:var(--burg);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.matrow .ti{font-family:'Playfair Display',serif;font-size:16.5px;font-weight:600;}
+.matrow .tk{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-top:2px;}
+.matrow .fn{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);}
+.resband{margin-top:16px;background:var(--winBg);border:var(--bdw) solid var(--bd);border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:28px;}
+.resband .rlab{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:#8a7264;width:120px;line-height:1.6;}
+.rstat .v{font-family:'Playfair Display',serif;font-size:30px;font-weight:800;color:var(--hdr);}
+.rstat.win .v{color:var(--sage-d);}
+.rstat .k{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:1px;}
+
+/* ================= OPTION 2: COMPOSER ================= */
+.cp-head{display:flex;align-items:flex-start;gap:26px;padding:28px 36px 22px;}
+.cp-head .illo{flex-shrink:0;margin-top:4px;}
+.cp-head h2{font-family:'Playfair Display',serif;font-size:34px;font-weight:800;color:var(--hdr);letter-spacing:-.4px;}
+.cp-head p{font-size:14.5px;color:#6a594d;line-height:1.6;margin-top:7px;max-width:620px;}
+.cp-name{display:flex;align-items:center;gap:14px;margin:0 36px;padding:18px 22px;border-radius:12px;}
+.cp-name input{border:0;outline:0;background:transparent;font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--hdr);
+  border-bottom:1.5px dashed rgba(93,64,55,.35);padding:2px 2px 5px;width:400px;}
+.cp-name input::placeholder{color:rgba(93,64,55,.5);font-style:italic;font-weight:500;}
+.cp-name .copyb{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--btnT);background:rgba(255,255,255,.6);border:1px solid var(--btnBd);border-radius:9px;padding:9px 14px;cursor:pointer;}
+.cp-body{display:flex;gap:22px;padding:24px 36px;}
+.cp-mani{flex:0 1 440px;display:flex;flex-direction:column;gap:14px;}
+.cp-guide{font-size:12.5px;color:#8a7264;font-style:italic;padding:0 2px 2px;}
+.crow{border:1.5px dotted #bfae9a;border-radius:11px;overflow:hidden;background:var(--card);}
+.crow.filled{border:var(--bdw) solid var(--bd);box-shadow:0 3px 10px rgba(58,28,20,.07);}
+.crow-h{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--bandA);
+  font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--hdr);}
+.crow-h .stepn{margin-left:auto;font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:#b3a291;text-transform:none;letter-spacing:0;}
+.crow-b{padding:16px 18px;display:flex;align-items:center;gap:12px;min-height:60px;}
+.crow-b .hint{font-size:13.5px;font-style:italic;color:var(--muted);}
+.crow-b .bti{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;}
+.cp-pick{flex:1;background:var(--card);border:var(--bdw) solid var(--bd);border-radius:12px;overflow:hidden;align-self:flex-start;}
+.cp-pick-h{padding:14px 20px;border-bottom:var(--bdw) solid var(--bd);display:flex;align-items:center;gap:10px;
+  font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--hdr);}
+.cp-pick-b{padding:18px;}
+.bigcard{background:var(--card);border:var(--bdw) solid var(--bd);border-radius:10px;padding:16px 18px;max-width:320px;cursor:pointer;}
+.bigcard:hover{background:var(--btnH);}
+.bigcard .nm{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;}
+.bigcard .fm{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin:4px 0 9px;}
+.bigcard .sn{font-family:'Playfair Display',serif;font-style:italic;font-size:12.5px;color:#6a5a4c;line-height:1.6;}
+.bigcard .use{margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--burg);}
+.cp-foot{display:flex;gap:16px;align-items:center;padding:0 36px 30px;}
+.cp-foot .btnw{font-size:17px;padding:14px 30px;}
+.cp-foot .cancel{font-size:13.5px;color:var(--muted);background:none;border:0;cursor:pointer;}
+.caveat{font-family:'Caveat',cursive;font-size:19px;color:var(--burg);}
+</style>
+</head>
+<body>
+
+<h1>Guided Builder — the journey stays on screen</h1>
+<div class="sub">The intuition fix is structural, not cosmetic: a persistent illustrated <b>journey strip</b> under the page header maps the whole feature (Write → Combine → Attach → See what wins) with the current step lit, so every screen locates itself in the story. Beneath it: chapter-scale headers with ink-line illustrations and one-sentence explainers, and everything a size up. Quiet-Capp palette throughout.</div>
+
+<!-- ================= OPTION 1 ================= -->
+<div class="opt">
+  <div class="opt-name">Packages home — with the journey strip &amp; chapter header</div>
+  <div class="opt-desc">The strip shows steps 3–4 lit (you're attaching and reading results here); hovering a step could reveal a one-line tip, clicking navigates (Write → materials gallery, Combine → composer). The chapter header states what this screen is for in plain words, with the parcel illustration. The reading pane grows: 34px material glyph tiles, "WHAT'S INSIDE" / results sections labelled, and the stats promoted to a foam result band with 30px figures — the payoff made unmissable.</div>
+  <div class="pane">
+    <div class="journey">
+      <div class="jst"><span class="jnum">1</span><span class="jic"><svg width="34" height="34" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M30 8l6 6L16 34l-8 2 2-8z"/><path d="M27 11l6 6"/><path d="M10 40h28" opacity=".4"/></svg></span><div><b>Write</b><i>letters, synopses &amp; pages</i></div></div>
+      <div class="jst"><span class="jnum">2</span><span class="jic"><svg width="34" height="34" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M24 6l16 9v18l-16 9-16-9V15z"/><path d="M24 42V24M8 15l16 9 16-9"/><path d="M16 10.5l16 9" opacity=".45"/></svg></span><div><b>Combine</b><i>into a named package</i></div></div>
+      <div class="jst on"><span class="jnum">3</span><span class="jic"><svg width="34" height="34" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M6 22L42 8l-16 34-4-14-16-6z"/><path d="M26 28L42 8" opacity=".45"/></svg></span><div><b>Attach</b><i>to the queries you send</i></div></div>
+      <div class="jst on"><span class="jnum">4</span><span class="jic"><svg width="34" height="34" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 34l10-10 8 8 14-14"/><path d="M30 18h8v8"/><circle cx="16" cy="24" r="1.4" fill="currentColor"/></svg></span><div><b>See what wins</b><i>which version pulls requests</i></div></div>
+    </div>
+    <div class="ph-head">
+      <span class="illo"><svg width="88" height="88" viewBox="0 0 96 96" fill="none" stroke="#7c3a2a" stroke-width="1.7" stroke-linejoin="round"><rect x="16" y="30" width="64" height="44" rx="3"/><path d="M16 42h64M42 30v44" opacity=".5"/><path d="M48 18v12M42 24l6-6 6 6" stroke-linecap="round"/><path d="M28 52h8M28 60h6" stroke-linecap="round" opacity=".55"/><path d="M56 52h14M56 60h10" stroke-linecap="round" opacity=".55"/><path d="M70 22c3 2 4 6 2 8" stroke="#a8842c" stroke-linecap="round"/><path d="M74 17c1 1 1 3 0 4" stroke="#a8842c" stroke-linecap="round"/></svg></span>
+      <div>
+        <h2>Your packages</h2>
+        <p>A package is one version of your submission — a letter, synopsis and pages travelling together. Attach one to each query you send, and the results column tells you which version agents ask to read more of.</p>
+      </div>
+      <button class="btnw">＋ New package</button>
+    </div>
+    <div class="ph-body">
+      <div class="lp-list">
+        <div class="lp-lh band"><h4>Packages · 2</h4></div>
+        <div class="lprow on"><div class="nm">Comp-led · v1</div><div class="st">3 SENT · <b>1 FULL REQUEST</b></div></div>
+        <div class="lprow"><div class="nm">Hartley bespoke</div><div class="st">1 SENT · AWAITING REPLY</div></div>
+      </div>
+      <div class="lp-read">
+        <div class="lp-rh band"><h3>Comp-led · v1</h3><div class="acts"><span>✎ EDIT</span><span>⧉ COPY</span><span>ATTACH →</span></div></div>
+        <div class="lp-rb">
+          <div class="lp-sec">What's inside</div>
+          <div class="matrow"><span class="mgl"><svg class="tg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M8.5 9a3.5 3.5 0 116 2.4c-1 .9-2.5 1.5-2.5 3.1"/><circle cx="12" cy="19" r="0.6" fill="currentColor"/></svg></span><div><div class="ti">Comp-led rework</div><div class="tk">Query letter</div></div><span class="fn">MDO_Query_v2.docx</span></div>
+          <div class="matrow"><span class="mgl"><svg class="tg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg></span><div><div class="ti">One-page synopsis</div><div class="tk">Synopsis</div></div><span class="fn">MDO_Synopsis.docx</span></div>
+          <div class="resband">
+            <div class="rlab">How this version is doing</div>
+            <div class="rstat"><div class="v">3</div><div class="k">Queries sent</div></div>
+            <div class="rstat win"><div class="v">1</div><div class="k">Full request</div></div>
+            <div class="rstat"><div class="v">2</div><div class="k">Awaiting</div></div>
+            <span class="caveat" style="margin-left:auto;">this one's working ↑</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= OPTION 2 ================= -->
+<div class="opt">
+  <div class="opt-name">Composer — journey strip on step 2, numbered slots, guide line</div>
+  <div class="opt-desc">Same strip, step 2 lit. Chapter header with the package illustration explains the task in one sentence. The manifest rows gain gentle step numbers ("first / then / optional" in italic Playfair) and a one-line guide above them, so the order of play is explicit. Picker unchanged in behaviour, a size up in type. The Caveat handwriting is used once per page at most — a margin note, not a theme.</div>
+  <div class="pane">
+    <div class="journey">
+      <div class="jst"><span class="jnum">1</span><span class="jic"><svg width="34" height="34" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M30 8l6 6L16 34l-8 2 2-8z"/><path d="M27 11l6 6"/></svg></span><div><b>Write</b><i>letters, synopses &amp; pages</i></div></div>
+      <div class="jst on"><span class="jnum">2</span><span class="jic"><svg width="34" height="34" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M24 6l16 9v18l-16 9-16-9V15z"/><path d="M24 42V24M8 15l16 9 16-9"/></svg></span><div><b>Combine</b><i>into a named package</i></div></div>
+      <div class="jst"><span class="jnum">3</span><span class="jic"><svg width="34" height="34" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M6 22L42 8l-16 34-4-14-16-6z"/></svg></span><div><b>Attach</b><i>to the queries you send</i></div></div>
+      <div class="jst"><span class="jnum">4</span><span class="jic"><svg width="34" height="34" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 34l10-10 8 8 14-14"/><path d="M30 18h8v8"/></svg></span><div><b>See what wins</b><i>which version pulls requests</i></div></div>
+    </div>
+    <div class="cp-head">
+      <span class="illo"><svg width="76" height="76" viewBox="0 0 96 96" fill="none" stroke="#7c3a2a" stroke-width="1.7" stroke-linejoin="round"><path d="M48 14l28 16v32L48 78 20 62V30z"/><path d="M48 78V46M20 30l28 16 28-16"/><path d="M34 22l28 16" opacity=".45"/><path d="M42 8c2-3 10-3 12 0" stroke="#a8842c" stroke-linecap="round"/></svg></span>
+      <div>
+        <h2>Build a package</h2>
+        <p>Pick one of each from your library — a letter first, a synopsis, pages if you have them — give the bundle a name you'll recognise, and save. You'll attach it to queries from the Queries Hub.</p>
+      </div>
+    </div>
+    <div class="cp-name band">
+      <input placeholder="Name this package…">
+      <button class="copyb">⧉ Copy existing</button>
+    </div>
+    <div class="cp-body">
+      <div class="cp-mani">
+        <div class="cp-guide">Fill the slots from the picker on the right — the letter's the only must-have.</div>
+        <div class="crow filled">
+          <div class="crow-h"><svg class="tg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M8.5 9a3.5 3.5 0 116 2.4c-1 .9-2.5 1.5-2.5 3.1"/><circle cx="12" cy="19" r="0.6" fill="currentColor"/></svg>Query letter<span class="stepn">first</span></div>
+          <div class="crow-b"><div><div class="bti">Comp-led rework</div><div class="mono" style="font-size:9px;color:var(--muted);margin-top:3px;">MDO_Query_v2.docx</div></div><div class="mono" style="margin-left:auto;font-size:9.5px;color:var(--muted);">⇄ SWAP&nbsp;&nbsp;✕</div></div>
+        </div>
+        <div class="crow">
+          <div class="crow-h"><svg class="tg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Synopsis<span class="stepn">then</span></div>
+          <div class="crow-b"><span class="hint">Choose from your materials →</span></div>
+        </div>
+        <div class="crow">
+          <div class="crow-h"><svg class="tg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M8 6h9a1 1 0 011 1v13a1 1 0 01-1 1H8a1 1 0 01-1-1V7a1 1 0 011-1z"/><path d="M6 17V4a1 1 0 011-1h8"/></svg>Sample pages<span class="stepn">optional</span></div>
+          <div class="crow-b"><span class="hint">Choose from your materials →</span></div>
+        </div>
+      </div>
+      <div class="cp-pick">
+        <div class="cp-pick-h band"><svg class="tg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Choose a synopsis</div>
+        <div class="cp-pick-b">
+          <div class="bigcard"><div class="nm">One-page synopsis</div><div class="fm">MDO_Synopsis.docx · IN 1 PACKAGE</div><div class="sn">Elspeth Marr, 63, has kept two things all her life: the Wick Point light, and a secret…</div><div class="use">＋ USE IN THIS PACKAGE</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="cp-foot"><button class="btnw">Save package</button><button class="cancel">Cancel</button></div>
+  </div>
+</div>
+
+</body>
+</html>
