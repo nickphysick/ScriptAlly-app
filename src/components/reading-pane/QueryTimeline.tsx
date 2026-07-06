@@ -15,6 +15,7 @@ import React from "react";
 import { StatusDot } from "../StatusDot";
 import { Query, QueryStatus, Agent, QueryMaterial } from "../../types";
 import { formatQueryMaterial } from "../../lib/materials";
+import { queryAmbientStatus } from "../../lib/queryAmbient";
 
 const FONT_MONO = "'JetBrains Mono', monospace";
 
@@ -30,13 +31,10 @@ const TL_TITLES: Record<QueryStatus, string> = {
   [QueryStatus.WITHDRAWN]: "Query withdrawn",
   [QueryStatus.NO_RESPONSE]: "Closed — no response",
 };
-const DAY = 86400000;
 const FONT_SERIF = "'Playfair Display', serif";
 
-/** Stage default response windows, in WEEKS — one tunable source of truth; never inline these.
- *  Used to project the expected-reply date from the relevant send date (NOT per-agent windows). */
-export const STAGE_RESPONSE_WINDOWS = { query: 8, partial: 12, full: 12 } as const;
-type SendStage = keyof typeof STAGE_RESPONSE_WINDOWS;
+// STAGE_RESPONSE_WINDOWS + the waiting/writer derivation moved to lib/queryAmbient.ts (one source
+// shared with the command bar). This file consumes it via queryAmbientStatus.
 
 const getTime = (val: any): number => {
   if (!val) return Date.now();
@@ -79,11 +77,9 @@ export interface QueryTimelineProps {
   events: any[];
   /** The open-state switch — from getPrimaryAction(query.status). Undefined ⇒ no trailing block. */
   primaryAction?: QueryTimelinePrimaryAction;
-  /** Opens the existing contextual Mark-sent flow (writer's turn). */
-  onMarkSent?: () => void;
 }
 
-export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, events, primaryAction, onMarkSent }) => {
+export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, events, primaryAction }) => {
   const validEnumValues = Object.values(QueryStatus);
 
   // Dedupe the activity log by status (keep the earliest of each), then order chronologically.
@@ -124,29 +120,12 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
     };
   });
 
-  // ── trailing open-state block — derived from getPrimaryAction(status).ballHolder (not stored) ──
+  // ── trailing open-state block — one shared derivation (lib/queryAmbient), the same numbers the
+  // command bar shows, so the two can't disagree. Ball-holder still comes from getPrimaryAction. ──
   const ballHolder = primaryAction?.ballHolder ?? null;
-  const now = Date.now();
-
-  // Agent's turn → waiting block. Expected reply = relevant send date + stage window (NOT per-agent).
-  let waiting: { nDays: number; widthPct: number; sentMs: number | null; expMs: number | null; overdue: boolean } | null = null;
-  if (ballHolder === "agent") {
-    const st = query.status as QueryStatus;
-    const stage: SendStage = st === QueryStatus.QUERIED ? "query" : st === QueryStatus.PARTIAL_SENT ? "partial" : "full";
-    const sendIso = st === QueryStatus.QUERIED ? query.dateSent : st === QueryStatus.PARTIAL_SENT ? query.partialSentDate : query.fullSentDate;
-    const mDays = STAGE_RESPONSE_WINDOWS[stage] * 7;
-    if (sendIso) {
-      const sentMs = getTime(sendIso);
-      const nDays = Math.max(0, Math.floor((now - sentMs) / DAY));
-      waiting = { nDays, widthPct: Math.max(0, Math.min(1, nDays / mDays)) * 100, sentMs, expMs: sentMs + mDays * DAY, overdue: nDays > mDays };
-    } else {
-      // Undated import — keep the pill (status still reads), no-op the bar + caption.
-      waiting = { nDays: 0, widthPct: 0, sentMs: null, expMs: null, overdue: false };
-    }
-  }
-
-  // Writer's turn → "send the {…}" prompt; the label comes from getPrimaryAction's markKind.
-  const sendWhat = primaryAction?.markKind === "partial" ? "partial" : primaryAction?.markKind === "full" ? "full" : "resubmission";
+  const ambient = queryAmbientStatus(query, ballHolder, primaryAction?.markKind);
+  const waiting = ambient.mode === "waiting" ? ambient : null;
+  const sendWhat = ambient.sendWhat;
 
   const sage = waiting ? !waiting.overdue : true; // sage within window, calm grey once past it
   const wcol = sage
@@ -205,17 +184,16 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
       )}
 
       {ballHolder === "writer" && (
+        /* Narrative only — the ACTION lives in the command bar now (one home for actions). The
+           yellow band keeps its "your move" prose; its old send-materials button was removed. */
         <div style={{ marginLeft: 4, marginTop: 16 }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10, background: "#f6edd6", border: "1px solid #e3d3a6", borderRadius: 11, padding: "12px 14px" }}>
+          <div style={{ background: "#f6edd6", border: "1px solid #e3d3a6", borderRadius: 11, padding: "12px 14px" }}>
             <span style={{ fontWeight: 600, fontSize: 12.5, color: "#7a5e1f" }}>Your move — send the {sendWhat}</span>
-            <button
-              type="button"
-              className="qcta-pink"
-              onClick={() => onMarkSent?.()}
-              style={{ alignSelf: "flex-start", fontFamily: FONT_SERIF, fontSize: 13, fontWeight: 700, color: "#7c3a2a", background: "#f5e2da", border: "1px solid #e8c8bc", borderRadius: 10, padding: "8px 16px", cursor: "pointer" }}
-            >
-              Mark sent
-            </button>
+            {ambient.writerDaysAgo != null && (
+              <small style={{ display: "block", fontWeight: 300, fontSize: 11, color: "#8a7a40", marginTop: 3 }}>
+                {agent?.name?.split(" ")[0] || "The agent"} asked for it {ambient.writerDaysAgo} {ambient.writerDaysAgo === 1 ? "day" : "days"} ago
+              </small>
+            )}
           </div>
           {/* nudge mount seam */}
         </div>

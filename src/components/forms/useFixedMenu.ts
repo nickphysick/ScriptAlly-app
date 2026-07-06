@@ -12,9 +12,13 @@ import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
  *
  * `attach the returned triggerRef to the trigger element, and spread menuStyle onto the menu.
  */
-export function useFixedMenu<T extends HTMLElement = HTMLDivElement>(open: boolean) {
+export function useFixedMenu<T extends HTMLElement = HTMLDivElement>(
+  open: boolean,
+  opts?: { placement?: "down" | "up" },
+) {
   const triggerRef = useRef<T>(null);
   const [menuStyle, setMenuStyle] = useState<CSSProperties>({});
+  const placement = opts?.placement ?? "down";
 
   useLayoutEffect(() => {
     if (!open) return;
@@ -22,7 +26,13 @@ export function useFixedMenu<T extends HTMLElement = HTMLDivElement>(open: boole
       const el = triggerRef.current;
       if (!el) return;
       const r = el.getBoundingClientRect();
-      setMenuStyle({ position: "fixed", top: r.bottom - 4, left: r.left, minWidth: r.width, right: "auto" });
+      // "up" anchors the menu's BOTTOM just above the trigger top, so it grows upward regardless
+      // of its own height — for triggers pinned low in the viewport (the Queries command bar).
+      setMenuStyle(
+        placement === "up"
+          ? { position: "fixed", bottom: window.innerHeight - r.top + 8, left: r.left, minWidth: r.width, top: "auto", right: "auto" }
+          : { position: "fixed", top: r.bottom - 4, left: r.left, minWidth: r.width, right: "auto" },
+      );
     };
     update();
     // capture: scroll events don't bubble, so catch them from the scrolling body too.
@@ -32,7 +42,7 @@ export function useFixedMenu<T extends HTMLElement = HTMLDivElement>(open: boole
       window.removeEventListener("scroll", update, true);
       window.removeEventListener("resize", update);
     };
-  }, [open]);
+  }, [open, placement]);
 
   return { triggerRef, menuStyle };
 }
