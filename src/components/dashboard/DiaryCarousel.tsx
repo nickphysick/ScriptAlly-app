@@ -134,35 +134,34 @@ export const DiaryCarousel: React.FC<DiaryCarouselProps> = ({ queries, agents, m
   const { byDay, comingUpCount } = useMemo(() => groupFortnightEvents(events, today), [events, today]);
   const eventsOn = useCallback((d: Date) => byDay.get(dayKey(d)) ?? [], [byDay]);
 
-  const wrapRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
   const stripRef = useRef<HTMLDivElement>(null);
-  const backBtnRef = useRef<HTMLButtonElement>(null);
   const cardRefs = useRef<(HTMLElement | null)[]>([]);
   const rafRef = useRef(0);
   const centredIdx = useRef(FORTNIGHT_TODAY_IDX);
 
-  // ── Full-bleed: size the wrap to the stage's content box, centred (= centred on the column) ──
-  const setBleed = useCallback(() => {
-    const wrap = wrapRef.current;
-    if (!wrap) return;
-    const parent = wrap.parentElement;
+  // ── Full-width tinted section: size it to the stage's content box, centred (= centred on the
+  //    column) so the tint spans the workspace edge-to-edge. A literal 100vw would overshoot the
+  //    stage (overflow-y:auto coerces overflow-x → a horizontal scrollbar), and would also ignore
+  //    the timeline drawer's padding-right; sizing to clientWidth (scrollbar-excluded) avoids both.
+  //    The heading + strip stay constrained by .dc-inner's max-width inside. ──
+  const setSectionBleed = useCallback(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    const parent = section.parentElement;
     const stage = document.getElementById(STAGE_ID);
-    if (!parent || !stage) { wrap.style.width = ""; wrap.style.marginLeft = ""; return; }
+    if (!parent || !stage) { section.style.width = ""; section.style.marginLeft = ""; return; }
     const s = stage.getBoundingClientRect();
     const cs = getComputedStyle(stage);
     const padL = parseFloat(cs.paddingLeft || "0");
     const padR = parseFloat(cs.paddingRight || "0"); // grows when the timeline drawer opens
     const borderL = parseFloat(cs.borderLeftWidth || "0");
-    // clientWidth (not rect.width) excludes the vertical scrollbar gutter — sizing to rect.width
-    // overshoots by the scrollbar and re-introduces a horizontal scrollbar.
-    const targetWidth = stage.clientWidth - padL - padR;
+    const targetWidth = stage.clientWidth - padL - padR; // clientWidth excludes the scrollbar gutter
     const contentLeft = s.left + borderL + padL;
     const p = parent.getBoundingClientRect();
     if (targetWidth <= 0) return;
-    // The wrap spans exactly the stage's content box, centred = the column centre; never wider than
-    // the content box, so no horizontal scrollbar.
-    wrap.style.width = `${targetWidth}px`;
-    wrap.style.marginLeft = `${contentLeft - p.left}px`;
+    section.style.width = `${targetWidth}px`;
+    section.style.marginLeft = `${contentLeft - p.left}px`;
   }, []);
 
   // ── Depth falloff (mockup maths; nearest index drives the pill) ──────────────
@@ -217,9 +216,10 @@ export const DiaryCarousel: React.FC<DiaryCarouselProps> = ({ queries, agents, m
       c.style.filter = reduce ? "" : `blur(${(t * t * FALL_BLUR_PX).toFixed(2)}px)`;
       c.style.boxShadow = t < LIFT_T ? "var(--dc-shadow-lift)" : "var(--dc-shadow-float)";
       c.style.zIndex = String(100 - Math.round(t * 90));
+      // in-card "back to today": only on the focused (anchor) card, and only when it isn't today
+      c.classList.toggle("showlink", i === anchor && i !== FORTNIGHT_TODAY_IDX);
     }
     centredIdx.current = anchor;
-    backBtnRef.current?.classList.toggle("show", anchor !== FORTNIGHT_TODAY_IDX);
   }, [reduce]);
 
   const scheduleFalloff = useCallback(() => {
@@ -245,13 +245,13 @@ export const DiaryCarousel: React.FC<DiaryCarouselProps> = ({ queries, agents, m
   // strip (hidden slot / background tab) can't centre yet — the ResizeObserver below retries.
   const centredOnMount = useRef(false);
   const initIfPossible = useCallback(() => {
-    setBleed();
+    setSectionBleed();
     if (centredOnMount.current) return;
     const strip = stripRef.current;
     if (!strip || strip.clientWidth <= 0) return;
     centredOnMount.current = true;
     centreCard(FORTNIGHT_TODAY_IDX, false);
-  }, [setBleed, centreCard]);
+  }, [setSectionBleed, centreCard]);
 
   useLayoutEffect(() => {
     initIfPossible();
@@ -288,68 +288,84 @@ export const DiaryCarousel: React.FC<DiaryCarouselProps> = ({ queries, agents, m
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
     <section className="dc" aria-labelledby="dc-heading">
-      <div className="dc-head">
-        <h2 className="dc-title" id="dc-heading">What’s in the diary?</h2>
-        <div className="dc-rule" aria-hidden="true" />
-      </div>
+      {/* Full-width tinted band (JS-sized to the stage in setSectionBleed); content constrained by .dc-inner. */}
+      <div className="dc-section" ref={sectionRef}>
+        <div className="dc-inner">
+          <div className="dc-head">
+            <h2 className="dc-title" id="dc-heading">What’s in the diary?</h2>
+            <div className="dc-rule" aria-hidden="true" />
+          </div>
 
-      <div className="dc-diary">
-        <button type="button" ref={backBtnRef} className="dc-backbtn" onClick={() => centreCard(FORTNIGHT_TODAY_IDX, true)}>
-          ↺ Back to today
-        </button>
-        <div className="dc-wrap" ref={wrapRef}>
-          <div
-            ref={stripRef}
-            className="dc-strip"
-            role="region"
-            aria-roledescription="carousel"
-            aria-label="Diary day carousel — use the left and right arrow keys to move by a day"
-            tabIndex={0}
-            onScroll={scheduleFalloff}
-            onKeyDown={onStripKeyDown}
-          >
-            {days.map((d, i) => {
-              const evs = eventsOn(d);
-              const isToday = i === FORTNIGHT_TODAY_IDX;
-              const aria = `${d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}${isToday ? ", today" : ""} — ${evs.length === 0 ? "no events" : `${evs.length} event${evs.length === 1 ? "" : "s"}`}`;
-              return (
-                <article
-                  key={dayKey(d)}
-                  ref={(el) => { cardRefs.current[i] = el; }}
-                  className={`dc-card${isToday ? " is-today" : ""}`}
-                  aria-label={aria}
-                  aria-current={isToday ? "date" : undefined}
-                  onClick={() => centreCard(i, true)}
-                >
-                  <div className="dc-band">
-                    <span className="dc-dow">{isToday ? "Today" : DOWS[d.getDay()]}</span>
-                    <span className="dc-dnum">{d.getDate()} {MONTHS[d.getMonth()]}</span>
-                  </div>
-                  <div className="dc-body">
-                    {evs.length > 0 ? (
-                      <div className="dc-evs">
-                        {evs.map((ev) => <EventRow key={ev.id} ev={ev} />)}
-                      </div>
-                    ) : isToday ? (
-                      <div className="dc-qwrap">
-                        <div>
-                          <div className="dc-quiet">Nothing due today.</div>
-                          {comingUpCount > 0 && (
-                            <div className="dc-hint" style={{ marginTop: 10 }}>
-                              {comingUpCount} event{comingUpCount === 1 ? "" : "s"} this week →
-                            </div>
-                          )}
+          <div className="dc-diary">
+            <div className="dc-wrap">
+              <div
+                ref={stripRef}
+                className="dc-strip"
+                role="region"
+                aria-roledescription="carousel"
+                aria-label="Diary day carousel — use the left and right arrow keys to move by a day"
+                tabIndex={0}
+                onScroll={scheduleFalloff}
+                onKeyDown={onStripKeyDown}
+              >
+                {days.map((d, i) => {
+                  const evs = eventsOn(d);
+                  const isToday = i === FORTNIGHT_TODAY_IDX;
+                  const aria = `${d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })}${isToday ? ", today" : ""} — ${evs.length === 0 ? "no events" : `${evs.length} event${evs.length === 1 ? "" : "s"}`}`;
+                  return (
+                    <article
+                      key={dayKey(d)}
+                      ref={(el) => { cardRefs.current[i] = el; }}
+                      className={`dc-card${isToday ? " is-today" : ""}`}
+                      aria-label={aria}
+                      aria-current={isToday ? "date" : undefined}
+                      onClick={() => centreCard(i, true)}
+                    >
+                      <div className="dc-band">
+                        {/* Reserved micro-row (constant height → no reflow); the link shows only on the
+                            focused non-today card via the .showlink class toggled in falloff. */}
+                        <div className="dc-cardlink">
+                          <button
+                            type="button"
+                            tabIndex={-1}
+                            className="dc-cardlink-a"
+                            onClick={(e) => { e.stopPropagation(); centreCard(FORTNIGHT_TODAY_IDX, true); }}
+                          >
+                            ↺ back to today
+                          </button>
+                        </div>
+                        <div className="dc-cband-row">
+                          <span className="dc-dow">{isToday ? "Today" : DOWS[d.getDay()]}</span>
+                          <span className="dc-dnum">{d.getDate()} {MONTHS[d.getMonth()]}</span>
                         </div>
                       </div>
-                    ) : (
-                      <div className="dc-qwrap">
-                        <div className="dc-quiet">A quiet day.</div>
+                      <div className="dc-body">
+                        {evs.length > 0 ? (
+                          <div className="dc-evs">
+                            {evs.map((ev) => <EventRow key={ev.id} ev={ev} />)}
+                          </div>
+                        ) : isToday ? (
+                          <div className="dc-qwrap">
+                            <div>
+                              <div className="dc-quiet">Nothing due today.</div>
+                              {comingUpCount > 0 && (
+                                <div className="dc-hint" style={{ marginTop: 10 }}>
+                                  {comingUpCount} event{comingUpCount === 1 ? "" : "s"} this week →
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="dc-qwrap">
+                            <div className="dc-quiet">A quiet day.</div>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                </article>
-              );
-            })}
+                    </article>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
       </div>

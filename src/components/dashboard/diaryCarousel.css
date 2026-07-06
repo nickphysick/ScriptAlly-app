@@ -19,6 +19,8 @@
   --dc-band-ink: #3a1c14;
   --dc-band-rule: rgba(124, 58, 42, 0.14);
   --dc-today-body: #fffefc;
+  --dc-section-bg: #efe9df;
+  --dc-link: #a89283;
   --dc-muted: #9a8c80;
   --dc-label: #b08e80;
   --dc-rem-bd: #c9a89e;
@@ -45,7 +47,9 @@
   --dc-band: #f4c7c2;
   --dc-band-ink: #1d1712;
   --dc-band-rule: rgba(29, 23, 18, 0.18);
-  --dc-today-body: #fdeeeb;
+  --dc-today-body: #ffffff;
+  --dc-section-bg: #cfdae4;
+  --dc-link: #6d645e;
   --dc-muted: #6d645e;
   --dc-label: #8a7f78;
   --dc-rem-bd: #9a8f88;
@@ -73,6 +77,8 @@
   --dc-band-ink: #1a1a1a;
   --dc-band-rule: #e3e2e0;
   --dc-today-body: #ffffff;
+  --dc-section-bg: #ececeb;
+  --dc-link: #7c7c7c;
   --dc-muted: #6b6b6b;
   --dc-label: #8b8b8b;
   --dc-rem-bd: #b3b5b8;
@@ -88,56 +94,39 @@
 }
 
 .dc {
-  position: relative;
   font-family: 'Source Sans Pro', system-ui, sans-serif; /* app body font — deliberate vs the ref's Inter (landing precedent) */
   color: var(--dc-ink);
-  padding-top: 32px; /* generous breathing room above the heading (owner request) */
 }
 
-/* ---------- heading (floating — no band, no container, no counts) ---------- */
+/* Full-width tinted band — JS-sized to the stage content box in setSectionBleed (width + margin-left)
+   so the tint spans the workspace edge-to-edge; a literal 100vw would scroll the stage (overflow-y:auto). */
+.dc-section {
+  background: var(--dc-section-bg);
+  padding: 28px 0 12px;
+  transition: background 0.25s;
+}
+/* Content constrained + centred; the tint (above) still spans full width behind it. */
+.dc-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 44px;
+  position: relative;
+}
+
+/* ---------- heading (floating — no band, no counts) ---------- */
 .dc-head { text-align: center; }
-.dc-title { font-family: 'Playfair Display', serif; font-size: 29px; font-weight: 500; color: var(--dc-head); margin: 0; }
-.dc-rule { width: 72px; height: 1px; background: rgba(0, 0, 0, 0.18); margin: 12px auto 0; }
+.dc-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 500; color: var(--dc-head); margin: 0; }
+.dc-rule { width: 70px; height: 1px; background: rgba(0, 0, 0, 0.18); margin: 11px auto 0; }
 
-/* ---------- diary section (anchors the floating back-to-today) ---------- */
-.dc-diary { position: relative; margin-top: 26px; }
+/* ---------- diary ---------- */
+.dc-diary { position: relative; margin-top: 10px; } /* rule sits just above the cards (Change 3) */
 
-/* floating back-to-today: sits ABOVE the cards, just under the heading rule, centred on the
-   content column; absolute so it reserves no layout height (no jump). Hidden at rest. */
-.dc-backbtn {
-  position: absolute;
-  left: 50%;
-  top: -4px;
-  transform: translate(-50%, -6px);
-  z-index: 200;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9.5px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  background: var(--dc-btn-bg);
-  border: var(--dc-btn-bd);
-  color: var(--dc-btn-ink);
-  padding: 6px 14px;
-  border-radius: 999px;
-  cursor: pointer;
-  -webkit-backdrop-filter: blur(3px);
-  backdrop-filter: blur(3px);
-  box-shadow: var(--dc-btn-shadow);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.25s, transform 0.25s;
-}
-.dc-backbtn:hover { color: var(--dc-btn-hov-ink); border-color: var(--dc-btn-hov-bd); }
-.dc-backbtn.show { opacity: 1; pointer-events: auto; transform: translate(-50%, 0); }
-
-/* ---------- full-bleed strip ---------- */
-/* .dc-wrap is widened to the stage content box in JS (setBleed) so the strip runs wider than the
-   content column while the focus card stays centred over it — a naive 100vw would scroll the stage. */
+/* ---------- strip ---------- */
 .dc-wrap {
   position: relative;
   perspective: 1000px;
-  mask-image: linear-gradient(90deg, transparent 0, #000 140px, #000 calc(100% - 140px), transparent 100%);
-  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 140px, #000 calc(100% - 140px), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 70px, #000 calc(100% - 70px), transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 70px, #000 calc(100% - 70px), transparent 100%);
 }
 .dc-strip {
   display: flex;
@@ -145,10 +134,12 @@
   gap: 30px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  /* overflow-x:auto forces overflow-y to clip, so the scaled focus card AND its lift shadow must
-     both fit inside this padding — bottom carries Editorial's ~68px shadow with margin (mockup's 66
-     clipped it: 66 − ~16px focus-card overflow left only ~50px, below Editorial's reach). */
-  padding: 60px calc(50% - 122px) 92px;
+  /* overflow-x:auto forces overflow-y to clip, so the scaled focus card AND its lift shadow must fit
+     inside this padding. Top 34 tightens heading→cards (Change 3) — top shadows are faint (offsets
+     point down) so 34 doesn't clip them. Bottom must clear Editorial's big `0 20px 48px` layered
+     shadow (~68px reach + ~14px focus-card overflow); the mockup's 52 (cappuccino-tuned) clips it,
+     so this is kept at 84 per the "shadows uncut" gate. */
+  padding: 34px calc(50% - 122px) 84px;
   scrollbar-width: none;
 }
 .dc-strip::-webkit-scrollbar { display: none; }
@@ -178,12 +169,31 @@
 /* ---------- header band ---------- */
 .dc-band {
   background: var(--dc-band);
-  padding: 9px 15px;
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
+  padding: 7px 15px 9px;
   border-bottom: 1px solid var(--dc-band-rule);
 }
+/* Reserved micro-row for the in-card back-to-today link — constant height so no card reflows when
+   the link shows/hides. Shown only on the focused non-today card (.showlink, toggled in falloff). */
+.dc-cardlink { height: 13px; display: flex; align-items: center; margin-bottom: 1px; }
+.dc-cardlink-a {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dc-link);
+  background: none;
+  border: none;
+  padding: 0;
+  line-height: 1;
+  text-decoration: none;
+  opacity: 0;
+  pointer-events: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.dc-cardlink-a:hover { text-decoration: underline; }
+.dc-card.showlink .dc-cardlink-a { opacity: 0.85; pointer-events: auto; }
+.dc-cband-row { display: flex; align-items: baseline; justify-content: space-between; }
 .dc-dow {
   font-family: 'JetBrains Mono', monospace;
   font-size: 9px;
@@ -241,10 +251,10 @@
 .dc-evrow .dc-entity { color: var(--dc-accent); flex: none; }
 
 @media (max-width: 640px) {
-  .dc-head { padding-left: 16px; padding-right: 16px; }
+  .dc-inner { padding-left: 16px; padding-right: 16px; } /* 44px is heavy on narrow screens */
 }
 
 @media (prefers-reduced-motion: reduce) {
   .dc-card { transition: none !important; filter: none !important; }
-  .dc-backbtn { transition: none !important; }
+  .dc-cardlink-a { transition: none !important; }
 }
