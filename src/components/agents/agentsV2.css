@@ -331,6 +331,7 @@
 
 /* ── Up next card ── */
 .agv2 .ag-upnext {
+  flex-shrink: 0; /* pinned above the list — only the list body scrolls */
   display: flex;
   align-items: center;
   gap: 12px;
@@ -369,10 +370,14 @@
 .agv2 .ag-upnext .ag-go { margin-left: auto; }
 
 /* ── List panel ── */
+/* The list panel is now a fixed frame (EdgeFadeScroll outer) — the inner .ag-listscroll owns the
+   scrolling + padding, so the panel chrome and the edge fades never move with the content. */
 .agv2 .ag-listbox {
   flex: 1;
-  overflow-y: auto;
   min-height: 0;
+  overflow: hidden;
+}
+.agv2 .ag-listscroll {
   padding: 5px;
   scrollbar-width: thin;
 }
@@ -530,6 +535,8 @@
   flex-direction: column;
   background: var(--ag-panebg);
 }
+/* EdgeFadeScroll frame between the pane shell and the scroller (hosts the edge-fade overlays). */
+.agv2 .ag-panewrap { flex: 1; min-height: 0; }
 .t-edn .agv2 .ag-pane { border: 1px solid #d8dadd; } /* the sole outlined container in Editorial */
 .agv2 .ag-panescroll { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: thin; }
 /* Form 11 inset frame — Cappuccino ONLY, on the outer shell, scoped (never the .qhbar leak) */

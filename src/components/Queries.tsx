@@ -28,6 +28,7 @@ import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { QueryStatus, Agent, Manuscript, Query, SubmissionMethod, ActivityType, QueryMaterial, UserPlan } from "../types";
 import { StatusPill, getStatusLabel } from "./StatusPill";
 import { StatusDot, statusDirection } from "./StatusDot";
+import { EdgeFadeScroll } from "./EdgeFadeScroll";
 import { RecordResponseModal } from "./RecordResponseModal";
 import { RecordResponseFocusForm } from "./RecordResponseFocusForm";
 import { recordQueryResponse } from "../lib/recordResponse";
@@ -2682,8 +2683,14 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           })()}
 
           {/* Reading pane — blush paper card (col 2, row 2). Fit: HUGS its content (blue desk shows
-              beneath); caps at the row height (maxHeight:100%) and scrolls internally if tall. */}
-          <div className="qp-pane" style={{ gridColumn: 2, gridRow: 2, position: "relative", alignSelf: "start", maxHeight: "100%", minHeight: 0, border: "var(--bdw) solid var(--bd)", borderRadius: 22, background: "var(--pane)", boxShadow: "0 8px 26px rgba(29,23,18,.12)", overflowY: "auto", overflowX: "hidden", display: "flex", flexDirection: "column" }}>
+              beneath); caps at the row height (maxHeight:100%) and scrolls internally if tall,
+              with the shared edge fades on the fixed card frame (the chrome never moves). */}
+          <EdgeFadeScroll
+            outerClassName="qp-pane"
+            outerStyle={{ gridColumn: 2, gridRow: 2, alignSelf: "start", maxHeight: "100%", minHeight: 0, border: "var(--bdw) solid var(--bd)", borderRadius: 22, background: "var(--pane)", boxShadow: "0 8px 26px rgba(29,23,18,.12)", overflow: "hidden" }}
+            scrollStyle={{ overflowX: "hidden", display: "flex", flexDirection: "column" }}
+            fade="var(--pane, #ffffff)"
+          >
             <div style={{ display: "contents" }}>
             {activeQuery && activeAgent && activeMs ? (
               <>
@@ -2979,7 +2986,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
               </div>
             )}
             </div>{/* closes display:contents */}
-          </div>{/* closes qp-pane */}
+          </EdgeFadeScroll>{/* closes qp-pane */}
 
         </div>{/* closes content grid */}
         </>

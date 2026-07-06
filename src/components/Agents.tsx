@@ -35,6 +35,7 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 import { useOpenEditAgent } from "./EditAgentHost";
 import { StatusDot } from "./StatusDot";
+import { EdgeFadeScroll } from "./EdgeFadeScroll";
 import { AgentsTopBar } from "./agents/AgentsTopBar";
 import {
   AgentsSubFilter,
@@ -492,7 +493,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
     };
 
     return (
-      <div className="ag-panescroll">
+      <EdgeFadeScroll outerClassName="ag-panewrap" scrollClassName="ag-panescroll" fade="var(--ag-panebg, #fffefb)">
         {/* 1 · Identity */}
         <div className="ag-psec">
           <div className="ag-ident">
@@ -715,7 +716,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
             ))}
           </div>
         </div>
-      </div>
+      </EdgeFadeScroll>
     );
   };
 
@@ -800,7 +801,14 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
               </span>
             </button>
           )}
-          <div className="ag-listbox ag-panel" ref={listRef} role="listbox" aria-label="Agents">
+          <EdgeFadeScroll
+            outerClassName="ag-listbox ag-panel"
+            scrollClassName="ag-listscroll"
+            scrollRef={listRef}
+            role="listbox"
+            aria-label="Agents"
+            fade="var(--card, #fffefb)"
+          >
             {flat.length ? (
               groups.map((g) => (
                 <React.Fragment key={g.key}>
@@ -818,7 +826,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
                 {agents.length ? "No agents match these filters." : "No agents yet — your list starts here."}
               </div>
             )}
-          </div>
+          </EdgeFadeScroll>
         </div>
 
         <div className="ag-pane ag-panel">{renderPane()}</div>
