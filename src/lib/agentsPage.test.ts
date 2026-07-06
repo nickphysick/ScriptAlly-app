@@ -20,6 +20,7 @@ import {
   formatTimelineDate,
   agentsCountLabel,
   upNextMeta,
+  filterSentence,
 } from "./agentsPage";
 import { Agent, Query, Manuscript, Activity, ActivityType, QueryStatus, SubmissionStatus, SubmissionMethod } from "../types";
 
@@ -227,5 +228,17 @@ describe("firestore.rules · agent pinned flag (rule-text lock, no emulator)", (
 
   it("the agent-update allowlist permits pinned", () => {
     expect(allowlist).toContain("'pinned'");
+  });
+});
+
+describe("agentsPage · filterSentence (contextual list sentence)", () => {
+  it("narrates the default lens", () => {
+    expect(filterSentence("all", "all", "rating")).toBe("All agents, both queried and unqueried, sorted by star rating.");
+  });
+  it("narrates a narrowed lens (the spec example)", () => {
+    expect(filterSentence("open", "no", "resp")).toBe("Agents open to submissions you haven't queried yet, sorted by response time.");
+  });
+  it("covers the remaining phrases", () => {
+    expect(filterSentence("closed", "yes", "az")).toBe("Agents closed to submissions you've already queried, sorted A to Z.");
   });
 });

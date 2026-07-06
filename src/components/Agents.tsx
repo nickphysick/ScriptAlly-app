@@ -19,6 +19,10 @@ import {
   Pencil,
   Pin,
   Plus,
+  BookOpen,
+  Clock,
+  Mail,
+  FileText,
   Sparkles,
   MoreHorizontal,
   Archive,
@@ -44,6 +48,7 @@ import {
   buildAgentTimeline,
   formatTimelineDate,
   upNextMeta,
+  filterSentence,
 } from "../lib/agentsPage";
 import { agentPrimary, agentSecondary, agentInitials } from "../lib/agentDisplay";
 import { agentLocation, flagFor, isHomeMarket, getHomeCountry, countryName } from "../lib/territory";
@@ -512,11 +517,11 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
                 <Stars value={a.starRating || 0} />
               </div>
               {/* Canonical trio — always present (ghost prompts when empty) — then any other socials.
-                  Interim sourcing until the dedicated URL fields land: X · MSWL reads `twitter`;
+                  Interim sourcing until the dedicated URL fields land: Socials reads `twitter`;
                   Publishers Marketplace has no field yet, so it ghosts (opens the Edit drawer). */}
               <div className="ag-ilinks">
                 {trioChip("Website", a.website)}
-                {trioChip("X · MSWL", a.twitter)}
+                {trioChip("Socials", a.twitter)}
                 {trioChip("Publishers Marketplace", undefined)}
                 {socials.map((s, i) =>
                   isLinkyHandle(s.handle) ? (
@@ -571,12 +576,15 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
 
         {/* 2 · MSWL band — never hidden. Populated = the centred quote; empty = a thin clickable
             prompt opening the Edit drawer. The agent's genres render beneath either variant. */}
-        <div className={`ag-psec ag-mswl${hasMswl ? "" : " thin"}`}>
+        <div className={`ag-psec${hasMswl ? " ag-mswl" : ""}`}>
           {hasMswl ? (
             <div className="ag-mswl-quote">“{a.mswlNotes!.trim()}”</div>
           ) : (
-            <button type="button" className="ag-mswl-add" onClick={() => openEditAgent(a.id)}>
-              Add the agent's <b>manuscript wish list</b> and it will show here.
+            <button type="button" className="ag-mswl-empty" onClick={() => openEditAgent(a.id)}>
+              <BookOpen aria-hidden="true" />
+              <span className="ag-mswl-empty-label">Manuscript wish list</span>
+              <span className="ag-mswl-empty-line">Add what this agent is looking for and it'll show here.</span>
+              <span className="ag-mswl-empty-action">+ Add wish list</span>
             </button>
           )}
           {(a.genres?.length || 0) > 0 && (
@@ -593,20 +601,32 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
           <div className="ag-eyebrow">Submission profile<span className="ag-rule" /></div>
           <div className="ag-facts">
             <div className="ag-fact">
-              <div className="ag-flbl">Response time</div>
-              <div className="ag-fval">{isOpen && respKnown ? `within ${a.responseTimeWeeks} weeks` : "—"}</div>
+              <div className="ag-flbl"><Clock aria-hidden="true" /> Response time</div>
+              {respKnown ? (
+                <div className="ag-fval">within {a.responseTimeWeeks} weeks</div>
+              ) : (
+                <div className="ag-fval empty">Not specified yet</div>
+              )}
               <div className="ag-fsub">
-                {isOpen ? (respKnown ? "based on recent replies" : "no response time recorded yet") : "closed to queries"}
+                {isOpen ? (respKnown ? "based on recent replies" : "add it in the Edit drawer") : "closed to queries"}
               </div>
             </div>
             <div className="ag-fact">
-              <div className="ag-flbl">Preferred method</div>
-              <div className="ag-fval">{a.submissionMethod || "—"}</div>
+              <div className="ag-flbl"><Mail aria-hidden="true" /> Preferred method</div>
+              {a.submissionMethod ? (
+                <div className="ag-fval">{a.submissionMethod}</div>
+              ) : (
+                <div className="ag-fval empty">Not specified yet</div>
+              )}
               <div className="ag-fsub">{methodSub(a.submissionMethod)}</div>
             </div>
             <div className="ag-fact">
-              <div className="ag-flbl">Wanted materials</div>
-              <div className="ag-fval soft">{a.materialsWanted?.length ? a.materialsWanted.join(", ") : "—"}</div>
+              <div className="ag-flbl"><FileText aria-hidden="true" /> Wanted materials</div>
+              {a.materialsWanted?.length ? (
+                <div className="ag-fval soft">{a.materialsWanted.join(", ")}</div>
+              ) : (
+                <div className="ag-fval empty">Not specified yet</div>
+              )}
             </div>
           </div>
         </div>
@@ -758,6 +778,9 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
       {/* Panes */}
       <div className="ag-panes">
         <div className="ag-listcol">
+          <div className="ag-listsentence" title={filterSentence(subFilter, queriedFilter, sortBy)}>
+            {filterSentence(subFilter, queriedFilter, sortBy)}
+          </div>
           {upNext && (
             <button type="button" className="ag-upnext ag-panel" onClick={() => setSelectedAgentId(upNext.id)}>
               <span className="ag-spark" aria-hidden="true"><Sparkles /></span>
@@ -796,7 +819,6 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
               </div>
             )}
           </div>
-          <div className="ag-hint" aria-hidden="true">↑ ↓ or J / K to move · / or ⌘K to search</div>
         </div>
 
         <div className="ag-pane ag-panel">{renderPane()}</div>

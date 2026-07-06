@@ -196,3 +196,18 @@ export const agentsCountLabel = (n: number): string => `${n} ${n === 1 ? "agent"
 
 /** The Up-next meta line: "5★ fit · open · not yet queried". */
 export const upNextMeta = (agent: Agent): string => `${agent.starRating || 0}★ fit · open · not yet queried`;
+
+/**
+ * The contextual filter sentence above the list — one plain-English line composed from
+ * Status × Queried × Sort, e.g. "All agents, both queried and unqueried, sorted by star rating."
+ * or "Agents open to submissions you haven't queried yet, sorted by response time." It narrates
+ * the CURRENT lens; the tier headers still label the groups (different jobs).
+ */
+export function filterSentence(sub: AgentsSubFilter, queried: AgentsQueriedFilter, sort: AgentsSort): string {
+  const subject =
+    sub === "open" ? "Agents open to submissions" : sub === "closed" ? "Agents closed to submissions" : "All agents";
+  const queriedClause =
+    queried === "yes" ? " you've already queried" : queried === "no" ? " you haven't queried yet" : ", both queried and unqueried";
+  const sortPhrase = sort === "az" ? "sorted A to Z" : sort === "resp" ? "sorted by response time" : "sorted by star rating";
+  return `${subject}${queriedClause}, ${sortPhrase}.`;
+}
