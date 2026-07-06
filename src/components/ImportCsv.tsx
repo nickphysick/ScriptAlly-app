@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from "react";
+import { ChromeSlab } from "./shell/ChromeSlab";
 import { useScriptAllyDb } from "../lib/db";
 import { agentPrimary, AGENT_NOT_SPECIFIED } from "../lib/agentDisplay";
 import { parseLegacyComps } from "../lib/comps";
@@ -655,21 +656,14 @@ export const ImportCsv: React.FC<{
 
   return (
     <div className="min-h-screen bg-[#FCFAF7] pb-16 font-sans text-[#3a1c14]">
+      {/* ── ChromeSlab (Option A): crumb + title on the unified surface — supersedes the old
+            centred "migration desk" branding block. ── */}
+      <ChromeSlab onNavigate={onNavigate} title="Import" meta="CSV MIGRATION DESK" />
       <div className="max-w-4xl mx-auto px-4 pt-8">
-        
-        {/* HEADER BRANDING */}
-        <div className="flex flex-col items-center justify-center text-center py-6 border-b border-[#7c3a2a]/10 mb-8">
-          <h1 className="text-3xl md:text-4xl font-serif text-[#3a1c14] tracking-tight flex items-center justify-center gap-2">
-            <span className="font-bold text-[#7c3a2a] relative inline-flex items-center gap-1.5">
-              ScriptAlly
-              <FileSpreadsheet className="w-6 h-6 text-[#7c3a2a]" />
-            </span>
-            <span className="font-light italic text-[#3a1c14]/90">migration desk</span>
-          </h1>
-          <p className="text-xs text-stone-500 mt-2 max-w-lg leading-relaxed">
-            Transition your legacy rows, agent tracker templates, or Zite export data CSV sheets straight into your synchronized database without losing historical pitch timelines.
-          </p>
-        </div>
+
+        <p className="text-xs text-stone-500 text-center max-w-lg mx-auto leading-relaxed mb-8">
+          Transition your legacy rows, agent tracker templates, or Zite export data CSV sheets straight into your synchronized database without losing historical pitch timelines.
+        </p>
 
         {/* SUBTAB SWITCHER */}
         <div className="flex justify-center gap-3 mb-8 border-b border-[#7c3a2a]/10 pb-4">

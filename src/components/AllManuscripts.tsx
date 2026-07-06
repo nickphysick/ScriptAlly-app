@@ -19,6 +19,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
 import { CompTitle, Manuscript, ManuscriptStatus } from "../types";
 import { motion, AnimatePresence } from "motion/react";
+import { ChromeSlab } from "./shell/ChromeSlab";
 import { Plus, Send, Pencil, MoreHorizontal, Archive, Trash2, X, Check } from "lucide-react";
 import { FieldCard } from "./manuscripts/FieldCard";
 import { MaterialsCard } from "./manuscripts/MaterialsCard";
@@ -187,13 +188,31 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
 
   return (
     <div className="msv1">
+      {/* ── ChromeSlab (Option A): crumb + title + count share the unified surface; the old
+            YOUR MANUSCRIPT(S) eyebrow is the meta now, Add manuscript is the slab tool. Bleeds
+            out of the .msv1 desk padding (18px 26px); the spine switcher stays below as page
+            furniture. ── */}
+      <ChromeSlab
+        onNavigate={onNavigate}
+        title="Your manuscripts"
+        meta={manuscripts.length > 1 ? `YOUR MANUSCRIPTS · ${manuscripts.length}` : "YOUR MANUSCRIPT"}
+        style={{ margin: "-18px -26px 18px" }}
+        tools={
+          <button
+            type="button"
+            className="msv-btn"
+            onClick={() => onNavigate?.("manuscripts", "Add a manuscript")}
+          >
+            <Plus />
+            Add manuscript
+          </button>
+        }
+      />
       <div className="msv-wrap">
-        {/* ── control row ── */}
+        {/* ── control row — the spine switcher only (the label + action moved onto the slab) ── */}
+        {manuscripts.length > 1 && (
         <div className="msv-controlrow">
           <div className="msv-crleft">
-            <span className="msv-lab">
-              {manuscripts.length > 1 ? `YOUR MANUSCRIPTS · ${manuscripts.length}` : "YOUR MANUSCRIPT"}
-            </span>
             {manuscripts.length > 1 && (
               <div className="msv-spines">
                 {ordered.map((m) => {
@@ -213,15 +232,8 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
               </div>
             )}
           </div>
-          <button
-            type="button"
-            className="msv-btn"
-            onClick={() => onNavigate?.("manuscripts", "Add a manuscript")}
-          >
-            <Plus />
-            Add manuscript
-          </button>
         </div>
+        )}
 
         {!activeMs ? (
           /* ── zero-manuscript state: minimal, in the page grammar ── */

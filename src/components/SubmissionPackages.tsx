@@ -21,7 +21,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
 import { ComponentType, SubmissionPackage, ManuscriptVersion } from "../types";
-import { HubHeaderBar } from "./shell/HubHeaderBar";
 import { FirstVisitHome } from "./packages/FirstVisitHome";
 import { MaterialsRail } from "./packages/MaterialsRail";
 import { PackagesHome } from "./packages/PackagesHome";
@@ -31,6 +30,7 @@ import { MaterialModal } from "./packages/MaterialModal";
 import { WorkedExample } from "./packages/WorkedExample";
 import { emptySelection, selectionFromPackage, SlotSelection } from "./packages/typeMeta";
 import { FONT_SERIF, FONT_MONO } from "../lib/designTokens";
+import { ChromeSlab } from "./shell/ChromeSlab";
 import { ChevronDown, Lock } from "lucide-react";
 
 export const SubmissionPackages: React.FC = () => {
@@ -201,6 +201,20 @@ export const SubmissionPackages: React.FC = () => {
         }
       `}</style>
 
+      {/* ── ChromeSlab (Option A): crumb + title + Pro pill on the unified surface; the
+            manuscript selector chip is the slab tool (it is the page's real scoping control).
+            Bleeds out of the pkg-root padding (16px); the root's flex gap spaces what follows. ── */}
+      <ChromeSlab
+        title={
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
+            {firstVisit || !activeMs ? "Submission Packages" : "Submission Package Builder"}
+            {firstVisit || !activeMs ? largerProPill : proPill}
+          </span>
+        }
+        tools={activeMs && !firstVisit ? msSelector : undefined}
+        style={{ margin: "-16px -16px 0" }}
+      />
+
       {!activeMs ? (
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 40, textAlign: "center" }}>
           <div>
@@ -210,13 +224,6 @@ export const SubmissionPackages: React.FC = () => {
         </div>
       ) : (
         <>
-          <HubHeaderBar
-            title={firstVisit ? "Submission Packages" : "Submission Package Builder"}
-            titleAfter={firstVisit ? largerProPill : proPill}
-            right={firstVisit ? undefined : msSelector}
-            style={{ padding: "20px 24px", gap: 14, boxShadow: "none" }}
-            titleStyle={{ fontWeight: 700, fontSize: 26, color: "var(--headT)" }}
-          />
           <div className="pkg-workspace" style={{ flex: 1, minHeight: 0, display: "flex", gap: 14 }}>
             {/* Materials rail — shown once the manuscript has any material or package (mockup .qlist). */}
             {!firstVisit && <MaterialsRail versions={msVersions} onCreate={openCreate} onManage={openManage} />}
