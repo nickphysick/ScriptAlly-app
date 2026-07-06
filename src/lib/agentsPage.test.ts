@@ -242,3 +242,55 @@ describe("agentsPage · filterSentence (contextual list sentence)", () => {
     expect(filterSentence("closed", "yes", "az")).toBe("Agents closed to submissions you've already queried, sorted A to Z.");
   });
 });
+
+/* ── Desk rule locks (ref pane-height-rules-v1.html, Rule 3) ──────────────────────────── */
+
+import { READING_PANE_FLOOR_PX, clampPaneHeight, paneProvenance } from "./agentsPage";
+import { readFileSync as readCss } from "node:fs";
+import { resolve as resolvePath } from "node:path";
+
+describe("desk rule — the document clamp", () => {
+  it("sparse content renders at the floor (never stunted)", () => {
+    expect(clampPaneHeight(220, 800)).toBe(READING_PANE_FLOOR_PX);
+  });
+
+  it("medium content hugs exactly", () => {
+    expect(clampPaneHeight(521, 800)).toBe(521);
+  });
+
+  it("rich content caps at the viewport line (internal scroll past it)", () => {
+    expect(clampPaneHeight(1400, 800)).toBe(800);
+  });
+
+  it("the floor constant matches the applied CSS variable (one source, two forms)", () => {
+    const css = readCss(resolvePath(__dirname, "../components/agents/agentsV2.css"), "utf8");
+    expect(css).toContain(`--ag-pane-floor: ${READING_PANE_FLOOR_PX}px`);
+  });
+});
+
+describe("desk rule — provenance footer", () => {
+  it("renders Added {date} · {n} queries from real fields", () => {
+    expect(paneProvenance({ dateAdded: "2026-03-14" }, 3)).toBe("Added 14 Mar 2026 · 3 queries");
+  });
+
+  it("is singular-safe and omits a zero count", () => {
+    expect(paneProvenance({ dateAdded: "2026-03-14" }, 1)).toBe("Added 14 Mar 2026 · 1 query");
+    expect(paneProvenance({ dateAdded: "2026-03-14" }, 0)).toBe("Added 14 Mar 2026");
+  });
+
+  it("never renders an invalid date (guarded, per the row-date lesson)", () => {
+    expect(paneProvenance({ dateAdded: "not-a-date" }, 2)).toBe("2 queries");
+    expect(paneProvenance({ dateAdded: "" }, 0)).toBe("");
+  });
+});
+
+describe("desk rule — compact emptiness artefacts", () => {
+  it("the community skeleton tiles are gone (compact strip only)", () => {
+    const agents = readCss(resolvePath(__dirname, "../components/Agents.tsx"), "utf8");
+    expect(agents.includes("ag-ph-tile")).toBe(false);
+    expect(agents.includes("ag-commstrip")).toBe(true);
+    expect(agents.includes("ag-colophon")).toBe(true);
+    expect(agents.includes("ag-listfoot")).toBe(true);
+    expect(agents.includes("ag-panefoot")).toBe(true);
+  });
+});

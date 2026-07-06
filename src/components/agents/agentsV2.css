@@ -32,6 +32,9 @@
   --ag-edge: var(--bd, #d8cebf);
   --ag-edgew: var(--bdw, 1px);
   --ag-rad: var(--chromerad, 0px);
+  /* Desk-rule floor for the reading-pane document (Rule 3) — eyeballed against the ref's
+     frame 3 at real scale; change HERE and in READING_PANE_FLOOR_PX together. */
+  --ag-pane-floor: 360px;
   /* Territory marker "home market" trio — mirrors the Discover why-chip sage (--dv-good*);
      Bold inherits it (as Discover does); Editorial overrides to its grey below. */
   --ag-home: #6f7f68;
@@ -526,17 +529,25 @@
   color: var(--ag-muted);
 }
 
-/* ── Reading pane: fixed outer shell + inner scroller (frames never move on scroll) ── */
+/* ── Reading pane: the DOCUMENT (desk rule, ref pane-height-rules-v1.html Rule 3) —
+   height = clamp(floor, content, viewport line). The floor keeps the sparsest record
+   composed (tunable; mirrored by READING_PANE_FLOOR_PX in lib/agentsPage.ts — an artefact
+   test keeps the two in step). Hug: exactly as tall as content, desk showing beneath.
+   Cap: the grid track (the viewport line) — past it the scroller inside takes over. ── */
 .agv2 .ag-pane {
-  height: 100%;
+  height: auto;
+  align-self: start;
+  min-height: var(--ag-pane-floor, 360px);
+  max-height: 100%;
   min-width: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   background: var(--ag-panebg);
 }
-/* EdgeFadeScroll frame between the pane shell and the scroller (hosts the edge-fade overlays). */
-.agv2 .ag-panewrap { flex: 1; min-height: 0; }
+/* EdgeFadeScroll frame between the pane shell and the scroller — shrinkable so the card can
+   HUG (never force-fills); the scroller engages only once the card hits its cap. */
+.agv2 .ag-panewrap { flex: 0 1 auto; min-height: 0; }
 .t-edn .agv2 .ag-pane { border: 1px solid #d8dadd; } /* the sole outlined container in Editorial */
 .agv2 .ag-panescroll { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: thin; }
 /* Form 11 inset frame — Cappuccino ONLY, on the outer shell, scoped (never the .qhbar leak) */
@@ -866,7 +877,6 @@
   margin-left: auto;
 }
 .agv2 .ag-tlnote { font-size: 12px; color: var(--ag-muted); margin-top: 3px; line-height: 1.5; }
-.agv2 .ag-tl-empty { font-size: 13.5px; color: var(--ag-muted); }
 .agv2 .ag-tl-scroll { max-height: 320px; overflow-y: auto; scrollbar-width: thin; padding-right: 6px; }
 
 /* Notes column — scroll region wraps content; input pins to the column base */
@@ -1005,6 +1015,58 @@
 /* ── Below ~1080px: stacked fallback — the page itself scrolls (stage-relative, no 100vh) ── */
 @media (max-width: 1080px) {
   .agv2 { overflow-y: auto; }
+}
+
+/* ── Desk-rule dressings (ref Rule 3): pinned pane/list footers, colophon, compact strips ── */
+.agv2 .ag-listfade { flex: 1; min-height: 0; }
+.agv2 .ag-listfoot,
+.agv2 .ag-panefoot {
+  flex: none;
+  border-top: 1px solid var(--ag-line);
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ag-muted);
+}
+.agv2 .ag-panefoot { margin-top: auto; } /* pins to the card base while the document sits at its floor */
+.agv2 .ag-footr { margin-left: auto; }
+.agv2 .ag-colophon {
+  text-align: center;
+  padding: 12px 0 10px;
+  color: #cbbca9; /* the ref's fixed mark colour — quiet on all three themes */
+  font-size: 13px;
+  letter-spacing: 6px;
+}
+.agv2 .ag-tl-empty {
+  border: 1px dashed var(--ag-line);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ag-muted);
+}
+.agv2 .ag-commstrip {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px dashed var(--ag-line);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ag-muted);
+}
+
+@media (max-width: 1080px) {
   .agv2 .ag-panes { grid-template-columns: 1fr; grid-template-rows: auto; flex: none; }
   .agv2 .ag-listbox { max-height: 50vh; flex: none; }
   .agv2 .ag-pane { height: auto; overflow: visible; }

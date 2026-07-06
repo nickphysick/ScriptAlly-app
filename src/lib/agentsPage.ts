@@ -211,3 +211,33 @@ export function filterSentence(sub: AgentsSubFilter, queried: AgentsQueriedFilte
   const sortPhrase = sort === "az" ? "sorted A to Z" : sort === "resp" ? "sorted by response time" : "sorted by star rating";
   return `${subject}${queriedClause}, ${sortPhrase}.`;
 }
+
+/* ── Desk rule (ref design-refs/pane-height-rules-v1.html, Rule 3) ─────────────────────── */
+
+/**
+ * The reading-pane document's floor in px — keeps the sparsest record composed (≈ header +
+ * wish-list band + submission-profile row; eyeballed against the ref's frame 3). Mirrored by
+ * `--ag-pane-floor` in agentsV2.css — an artefact test keeps the two in step. Change both.
+ */
+export const READING_PANE_FLOOR_PX = 360;
+
+/** The document clamp: height = clamp(floor, content, viewport line). */
+export function clampPaneHeight(contentPx: number, capPx: number, floorPx: number = READING_PANE_FLOOR_PX): number {
+  return Math.min(Math.max(contentPx, floorPx), capPx);
+}
+
+/**
+ * Provenance footer line — renders ONLY what exists on the record: `Added {date}` from the
+ * rules-required dateAdded (omitted if unparsable — never "Invalid Date"), `· {n} queries`
+ * when n > 0 (singular-safe). User agent docs carry no verification field, so there is no
+ * right-hand segment (schema decision flagged in BUILD-REPORT.md).
+ */
+export function paneProvenance(agent: Pick<Agent, "dateAdded">, queryCount: number): string {
+  const parts: string[] = [];
+  const d = agent.dateAdded ? new Date(agent.dateAdded) : null;
+  if (d && !Number.isNaN(d.getTime())) {
+    parts.push(`Added ${d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`);
+  }
+  if (queryCount > 0) parts.push(`${queryCount} ${queryCount === 1 ? "query" : "queries"}`);
+  return parts.join(" · ");
+}

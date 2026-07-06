@@ -38,6 +38,7 @@ import { StatusDot } from "./StatusDot";
 import { EdgeFadeScroll } from "./EdgeFadeScroll";
 import { AgentsTopBar } from "./agents/AgentsTopBar";
 import {
+  paneProvenance,
   AgentsSubFilter,
   AgentsQueriedFilter,
   AgentsSort,
@@ -493,6 +494,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
     };
 
     return (
+      <>
       <EdgeFadeScroll outerClassName="ag-panewrap" scrollClassName="ag-panescroll" fade="var(--ag-panebg, #fffefb)">
         {/* 1 · Identity */}
         <div className="ag-psec">
@@ -697,26 +699,23 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
           </div>
         </div>
 
-        {/* 5 · Community placeholder (static — no data wiring) */}
+        {/* 5 · Community placeholder — compact strip (desk rule: no skeleton voids) */}
         <div className="ag-psec">
-          <div className="ag-eyebrow">
+          <div className="ag-commstrip">
             Similar agents being queried in the ScriptAlly community
             <span className="ag-pill-soon">Coming soon</span>
-            <span className="ag-rule" />
-          </div>
-          <div className="ag-simrow">
-            {[["72%", "46%"], ["58%", "38%"], ["78%", "52%"]].map(([w1, w2], i) => (
-              <div className="ag-ph-tile" key={i} aria-hidden="true">
-                <span className="ag-ph-av" />
-                <span className="ag-ph-lines">
-                  <span className="ag-ph-line" style={{ width: w1 }} />
-                  <span className="ag-ph-line" style={{ width: w2 }} />
-                </span>
-              </div>
-            ))}
           </div>
         </div>
+        {/* Colophon — closes the CONTENT (the pinned footer below closes the card) */}
+        <div className="ag-colophon" aria-hidden="true">❦</div>
       </EdgeFadeScroll>
+      {/* Provenance footer (desk rule): what exists on the record — dateAdded is rules-required;
+          user agent docs carry NO verification field (schema decision flagged in the run
+          report), so the right side stays absent rather than invented. */}
+      <div className="ag-panefoot">
+        {paneProvenance(a, queries.filter((q) => q.agentId === a.id).length)}
+      </div>
+      </>
     );
   };
 
@@ -801,8 +800,9 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
               </span>
             </button>
           )}
+          <div className="ag-listbox ag-panel" style={{ display: "flex", flexDirection: "column", minHeight: 0, flex: 1 }}>
           <EdgeFadeScroll
-            outerClassName="ag-listbox ag-panel"
+            outerClassName="ag-listfade"
             scrollClassName="ag-listscroll"
             scrollRef={listRef}
             role="listbox"
@@ -827,6 +827,12 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
               </div>
             )}
           </EdgeFadeScroll>
+          {/* Furniture footer (desk rule): the drawer is drawer-sized — count + the key hints */}
+          <div className="ag-listfoot">
+            {flat.length} {flat.length === 1 ? "agent" : "agents"}
+            <span className="ag-footr">↑↓ · ⌘K</span>
+          </div>
+          </div>
         </div>
 
         <div className="ag-pane ag-panel">{renderPane()}</div>
