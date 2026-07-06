@@ -84,3 +84,34 @@ describe("crumb tokens — per-theme smoke (rule-text lock)", () => {
     expect(b).toContain("--crumb-sep: #c4c6c8");
   });
 });
+
+describe("ChromeSlab tokens — Option A surfaces (ref header-ground-fullpage-v1.html)", () => {
+  const css = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
+  const themeBlock = (selector: string) => {
+    const start = css.indexOf(`\n${selector} {`);
+    expect(start).toBeGreaterThan(-1);
+    return css.slice(start, css.indexOf("\n}", start));
+  };
+
+  it("Cappuccino: card slab + hairline", () => {
+    const b = themeBlock(".t-capp");
+    expect(b).toContain("--slab-bg: #fffefb");
+    expect(b).toContain("--slab-bd: #e7ddd2");
+    expect(b).toContain("--slab-bdw: 1px");
+    expect(b).toContain("--slab-shadow: none");
+  });
+
+  it("Bold Pastille: ink rule under the slab", () => {
+    const b = themeBlock(".t-bold");
+    expect(b).toContain("--slab-bg: #fffefb");
+    expect(b).toContain("--slab-bd: #1d1712");
+    expect(b).toContain("--slab-bdw: 1.5px");
+  });
+
+  it("Editorial: white slab + the SEPARATING SHADOW (its desk is near-white — deliberate)", () => {
+    const b = themeBlock(".t-edn");
+    expect(b).toContain("--slab-bg: #ffffff");
+    expect(b).toContain("--slab-bd: #ececeb");
+    expect(b).toContain("--slab-shadow: 0 3px 10px rgba(20, 20, 20, 0.04)");
+  });
+});

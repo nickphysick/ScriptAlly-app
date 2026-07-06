@@ -130,6 +130,13 @@
   --crumb-seg-hov: #5d4037;
   --crumb-cur: #7c3a2a;
   --crumb-sep: #c9bba9;
+  /* ChromeSlab (ref header-ground-fullpage-v1.html, Option A). */
+  --slab-bg: #fffefb;
+  --slab-bd: #e7ddd2;
+  --slab-bdw: 1px;
+  --slab-shadow: none;
+  --slab-ttl: #5d4037;
+  --slab-meta: #8a7a6c;
 }
 .t-bold {
   --bd: #1d1712;   /* ink */
@@ -195,6 +202,13 @@
   --crumb-seg-hov: #1d1712;
   --crumb-cur: #1d1712;
   --crumb-sep: #9a948e;
+  /* ChromeSlab — ink rule under the card slab. */
+  --slab-bg: #fffefb;
+  --slab-bd: #1d1712;
+  --slab-bdw: 1.5px;
+  --slab-shadow: none;
+  --slab-ttl: #1d1712;
+  --slab-meta: #5e5954;
 }
 /* Editorial — the consolidated-v37 "Graphite · Soft · Tinted" system (t-edn + es4 + eb2 locked).
    Neutral whites/greys; graphite #44484d is the single accent. Containers are "Soft": 16px
@@ -265,6 +279,13 @@
   --crumb-seg-hov: #1a1a1a;
   --crumb-cur: #44484d;
   --crumb-sep: #c4c6c8;
+  /* ChromeSlab — near-white desk, so the slab SHADOW does the separating (deliberate). */
+  --slab-bg: #ffffff;
+  --slab-bd: #ececeb;
+  --slab-bdw: 1px;
+  --slab-shadow: 0 3px 10px rgba(20, 20, 20, 0.04);
+  --slab-ttl: #1a1a1a;
+  --slab-meta: #7d8083;
 }
 /* Editorial "Soft" container: 16px radius, no border, layered shadow. Defined here so the
    dashboard rebuild + any Editorial container can share one class (theme-scoped). */
