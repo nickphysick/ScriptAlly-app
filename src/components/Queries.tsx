@@ -2103,7 +2103,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           .qrow{ position:relative; padding:12px 15px; cursor:pointer; border-bottom:1px solid #ece3d6; transition:background .14s ease; }
           .qrow:last-child{ border-bottom:none; }
           .qrow:hover:not(.sel){ background:#faf6f0; }
-          .qrow.sel{ background:#f1e7dd; }
+          .qrow.sel{ background:var(--hub-row-on); }
         `}</style>
         {/* Desk (bold theme) — a cool blue-grey full-bleed working panel on which the list + reading
             pane sit as cards. Sidebar stays outside (shell chrome, untouched). */}
@@ -2111,7 +2111,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             list rows scroll internally so the page never exceeds 100vh; the empty state fills the
             same way (centred placeholder + welcome pane). */}
         <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
-          <div className="qdesk" style={{ position: "relative", display: "flex", flexDirection: "column", border: "none", borderRadius: 0, background: "var(--desk)", overflow: "hidden", flex: 1, minHeight: 0 }}>
+          <div className="qdesk" style={{ position: "relative", display: "flex", flexDirection: "column", border: "none", borderRadius: 0, background: "var(--hub-desk)", overflow: "hidden", flex: 1, minHeight: 0 }}>
             {/* desk surface — full-bleed blue-grey working area, 22/28/30 content inset (mockup .desk) */}
             <div style={{ padding: "22px 28px 30px", display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
 
@@ -2137,7 +2137,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "330px 1fr", gridTemplateRows: "minmax(0, 1fr)", columnGap: 20, flex: 1, minHeight: 0, alignItems: "stretch" }}>
 
             {/* List card — search + header (0 queries · Sort · Filter) + centred placeholder + disabled CSV */}
-            <div style={{ alignSelf: "stretch", background: "var(--listbg)", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", overflow: "hidden", boxShadow: "0 8px 26px rgba(29,23,18,.12)", display: "flex", flexDirection: "column", minHeight: 0 }}>
+            <div style={{ alignSelf: "stretch", background: "var(--hub-list)", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", overflow: "hidden", boxShadow: "0 8px 26px rgba(29,23,18,.12)", display: "flex", flexDirection: "column", minHeight: 0 }}>
               <div style={{ position: "relative", margin: "10px 6px 8px", flexShrink: 0 }}>
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400 pointer-events-none" />
                 <input type="text" placeholder="Search..." value={listSearch} onChange={(e) => setListSearch(e.target.value)} style={{ width: "100%", background: "#fff", border: "1px solid var(--bd)", borderRadius: 13, padding: "10px 15px 10px 38px", fontSize: 13.5, color: "#8a7a6c", fontFamily: "inherit", outline: "none", boxShadow: "0 2px 8px rgba(29,23,18,.10)" }} />
@@ -2172,7 +2172,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             </div>
 
             {/* Welcome pane — blush, centred onboarding (mockup .emptypane) */}
-            <div className="qp-pane" style={{ alignSelf: "stretch", minHeight: 0, background: "var(--pane)", border: "var(--bdw) solid var(--bd)", borderRadius: 22, boxShadow: "0 8px 26px rgba(29,23,18,.12)", overflowY: "auto", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+            <div className="qp-pane" style={{ alignSelf: "stretch", minHeight: 0, background: "var(--hub-pane-process)", border: "var(--hub-pane-bd)", borderRadius: "var(--hub-radius)", boxShadow: "var(--hub-pane-sh)", overflowY: "auto", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
               <div style={{ maxWidth: 460, width: "100%", textAlign: "center" }}>
                 <div style={{ fontFamily: FONT_SERIF, fontWeight: 800, fontSize: 25, color: qdbBoldInk, marginBottom: 9 }}>No queries yet</div>
                 <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 13.5, color: "#5a5048", lineHeight: 1.55, maxWidth: 360, margin: "0 auto 20px" }}>This is where you'll track every agent you query — what you sent, when it went, and what came back.</div>
@@ -2278,7 +2278,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
           {/* List card — furniture: search + header fixed, rows scroll, footer pinned (count ·
               Export CSV left · keyboard hints right). */}
-          <div style={{ gridColumn: 1, gridRow: 1, alignSelf: "stretch", background: "var(--listbg)", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", overflow: "hidden", boxShadow: "0 8px 26px rgba(29,23,18,.12)", display: "flex", flexDirection: "column", minHeight: 0 }}>
+          <div style={{ gridColumn: 1, gridRow: 1, alignSelf: "stretch", background: "var(--hub-list)", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", overflow: "hidden", boxShadow: "0 8px 26px rgba(29,23,18,.12)", display: "flex", flexDirection: "column", minHeight: 0 }}>
 
               {/* Search — fixed at the top of the list card */}
               <div style={{ position: "relative", margin: "10px 6px 8px", flexShrink: 0 }}>
@@ -2481,7 +2481,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   >
                     <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
                       {/* monogram disc — pink gradient + burgundy initials, echoing the hero avatar */}
-                      <span className="qmono" style={{ flexShrink: 0, width: 38, height: 38, borderRadius: "50%", background: "linear-gradient(135deg,#f5e2da,#efd5ca)", border: "1px solid #e8c8bc", color: qdbBoldInk2, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_SERIF, fontSize: 13, fontWeight: 700 }}>{monoInitials}</span>
+                      <span className="qmono" style={{ flexShrink: 0, width: 38, height: 38, borderRadius: "50%", background: "var(--hub-monogram)", border: "none", color: "var(--hub-monogram-tx)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_SERIF, fontSize: 13, fontWeight: 700 }}>{monoInitials}</span>
                       {/* middle — name over agency */}
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontFamily: FONT_SERIF, fontSize: 16, fontWeight: 700, color: qdbBoldInk, lineHeight: 1.1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{agentPrimary(agent)}</div>
@@ -2666,7 +2666,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
               hugs). A flex column: agent band (flex:none) over three full-height columns that each
               scroll behind their own edge fade (flex:1). The command bar pins to the pane foot in
               Phase 2; the top action toolbar above still exists this phase. */}
-          <div className="qp-pane" style={{ gridColumn: 2, gridRow: 1, alignSelf: "stretch", minHeight: 0, border: "var(--bdw) solid var(--bd)", borderRadius: 22, background: "var(--pane)", boxShadow: "0 8px 26px rgba(29,23,18,.12)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          <div className="qp-pane" style={{ gridColumn: 2, gridRow: 1, alignSelf: "stretch", minHeight: 0, border: "var(--hub-pane-bd)", borderRadius: "var(--hub-radius)", background: "var(--hub-pane-process)", boxShadow: "var(--hub-pane-sh)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
             {activeQuery && activeAgent && activeMs ? (
               <>
                 <style>{`
@@ -2702,7 +2702,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                       {/* top row — avatar centred against the name + agency + status label */}
                       <div style={{ position: "relative", zIndex: 2, display: "flex", alignItems: "center", gap: 18 }}>
                         {/* avatar — solid ink disc + white initials (per the Queries Hub mockup) */}
-                        <span style={{ flexShrink: 0, width: 66, height: 66, borderRadius: "50%", background: "#1d1712", border: "none", color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_SERIF, fontSize: 22, fontWeight: 700 }}>{initials}</span>
+                        <span style={{ flexShrink: 0, width: 66, height: 66, borderRadius: "50%", background: "var(--hub-monogram)", border: "none", color: "var(--hub-monogram-tx)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_SERIF, fontSize: 22, fontWeight: 700 }}>{initials}</span>
                         <div style={{ flex: 1, minWidth: 0, paddingRight: 120 }}>
                           <div style={{ fontFamily: FONT_SERIF, fontSize: 27, fontWeight: 800, color: qdbBoldInk, lineHeight: 1.02, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{nameplate}</div>
                           {!!activeAgent.name?.trim() && !!activeAgent.agency?.trim() && (
@@ -2768,13 +2768,13 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 18, padding: "16px 18px 20px", flex: 1, minHeight: 0, alignItems: "stretch" }}>
 
                   {/* ── Sub-card 1: Tracking ── */}
-                  <div className="qp-card" style={{ minWidth: 0, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 0, boxShadow: "0 2px 7px rgba(29,23,18,.07)" }}>
+                  <div className="qp-card" style={{ minWidth: 0, background: "var(--hub-col)", border: "var(--hub-pane-bd)", borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 0, boxShadow: "0 2px 7px rgba(29,23,18,.07)" }}>
                       {/* pink header band */}
-                      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "var(--band)", borderBottom: "var(--bdw) solid var(--bd)", flexShrink: 0 }}>
+                      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "var(--hub-band-process)", borderBottom: "1px solid var(--hub-band-process-bd)", flexShrink: 0 }}>
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={qdbBoldInk2} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M3 12h4l3 8 4-16 3 8h4" /></svg>
                         <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 800, color: qdbBoldInk2 }}>Tracking</span>
                       </div>
-                      <EdgeFadeScroll outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ padding: "16px 16px 18px" }} fade="var(--qp-col-bg, #fffefb)">
+                      <EdgeFadeScroll outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ padding: "16px 16px 18px" }} fade="var(--hub-col, #fffefb)">
                         {(() => {
                           // Pass the same open-state fact the command bar uses, so the trailing block
                           // switches agent's-turn / writer's-turn / closed identically.
@@ -2792,14 +2792,14 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     </div>{/* ── end sub-card 1: Tracking ── */}
 
                   {/* ── Sub-card 2: What you sent ── */}
-                  <div className="qp-card" style={{ minWidth: 0, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 0, boxShadow: "0 2px 7px rgba(29,23,18,.07)" }}>
+                  <div className="qp-card" style={{ minWidth: 0, background: "var(--hub-col)", border: "var(--hub-pane-bd)", borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 0, boxShadow: "0 2px 7px rgba(29,23,18,.07)" }}>
                       {/* pink header band */}
-                      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "var(--band)", borderBottom: "var(--bdw) solid var(--bd)", flexShrink: 0 }}>
+                      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "var(--hub-band-process)", borderBottom: "1px solid var(--hub-band-process-bd)", flexShrink: 0 }}>
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={qdbBoldInk2} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>
                         <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 800, color: qdbBoldInk2 }}>What you sent</span>
                       </div>
                       {/* spec sheet */}
-                      <EdgeFadeScroll outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ padding: "16px 16px 18px" }} fade="var(--qp-col-bg, #fffefb)">
+                      <EdgeFadeScroll outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ padding: "16px 16px 18px" }} fade="var(--hub-col, #fffefb)">
                         {(() => {
                           const mats: (string | QueryMaterial)[] = Array.isArray((activeQuery as any).materialsWanted) && (activeQuery as any).materialsWanted.length
                             ? (activeQuery as any).materialsWanted
@@ -2884,9 +2884,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     </div>{/* ── end sub-card 2: What you sent ── */}
 
                   {/* ── Sub-card 3: Notes — journal pins to bottom via flex-1 on messages area ── */}
-                  <div className="qp-card" style={{ minWidth: 0, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 0, boxShadow: "0 2px 7px rgba(29,23,18,.07)" }}>
+                  <div className="qp-card" style={{ minWidth: 0, background: "var(--hub-col)", border: "var(--hub-pane-bd)", borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 0, boxShadow: "0 2px 7px rgba(29,23,18,.07)" }}>
                       {/* pink header band */}
-                      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "var(--band)", borderBottom: "var(--bdw) solid var(--bd)", flexShrink: 0 }}>
+                      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "var(--hub-band-process)", borderBottom: "1px solid var(--hub-band-process-bd)", flexShrink: 0 }}>
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={qdbBoldInk2} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H19v15H6a2 2 0 0 0-2 2z" /><path d="M4 19.5A1.5 1.5 0 0 1 5.5 18H19" /></svg>
                         <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 800, color: qdbBoldInk2 }}>Journal</span>
                       </div>
@@ -2899,7 +2899,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           const send = () => { const t = journalInput.trim(); if (!t) return; addJournalEntry(activeQuery.id, t); setJournalInput(""); };
                           return (
                             <>
-                              <EdgeFadeScroll outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ display: "flex", flexDirection: "column", paddingRight: 2 }} fade="var(--qp-col-bg, #fffefb)">
+                              <EdgeFadeScroll outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ display: "flex", flexDirection: "column", paddingRight: 2 }} fade="var(--hub-col, #fffefb)">
                                 {notes.length === 0 ? (
                                   /* ghost first entry — dashed, shaped like a real entry; replaced on first save */
                                   <div style={{ background: "#fdfbf7", border: "1px dashed #d8cebf", borderRadius: 11, padding: "11px 13px" }}>
@@ -2962,10 +2962,10 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   const ambient = queryAmbientStatus(activeQuery, ctrlAction.ballHolder, ctrlAction.kind === "mark-sent" ? ctrlAction.markKind : undefined);
                   const status = commandBarStatus(ambient);
                   const isMark = ctrlAction.kind === "mark-sent";
-                  const btn: React.CSSProperties = { display: "inline-flex", alignItems: "center", gap: 7, fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 500, color: qdbBoldInk, background: "var(--cmd-btn-bg, #ffffff)", border: "var(--cmd-btn-bdw, 1px) solid var(--cmd-btn-bd, var(--bd))", borderRadius: 10, padding: "8px 15px", whiteSpace: "nowrap", cursor: "pointer", boxShadow: "var(--cmd-btn-shadow, 0 1px 2px rgba(58,28,20,.05))" };
-                  const primaryBtn: React.CSSProperties = { ...btn, background: "var(--cmd-primary-bg, #f6e4da)", border: "1px solid var(--cmd-primary-bd, #ecd0c2)", color: "var(--cmd-primary-tx, #7c3a2a)", fontWeight: 600 };
+                  const btn: React.CSSProperties = { display: "inline-flex", alignItems: "center", gap: 7, fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 500, color: qdbBoldInk, background: "var(--hub-btn-bg)", border: "var(--hub-btn-bd)", borderRadius: "var(--hub-btn-rad)", padding: "8px 15px", whiteSpace: "nowrap", cursor: "pointer", boxShadow: "var(--hub-btn-sh)" };
+                  const primaryBtn: React.CSSProperties = { ...btn, background: "var(--hub-primary)", border: "1px solid var(--hub-primary-bd)", color: "var(--hub-primary-tx)", fontWeight: 600 };
                   return (
-                    <div className="qp-cmdbar" style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 12, background: "var(--cmd-bar-bg, #fffdf9)", borderTop: "var(--cmd-bar-bdw, 1px) solid var(--cmd-bar-bd, var(--bd))", boxShadow: "var(--cmd-bar-shadow, none)", padding: "11px 20px" }}>
+                    <div className="qp-cmdbar" style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 12, background: "var(--hub-cmd)", borderTop: "var(--hub-cmd-rule)", boxShadow: "var(--cmd-bar-shadow, none)", padding: "11px 20px" }}>
                       {/* Left — actions */}
                       <div style={{ display: "flex", gap: 9, alignItems: "center" }}>
                         {isMark ? (

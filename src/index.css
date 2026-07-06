@@ -150,6 +150,51 @@
   --cmd-primary-bg: #f6e4da;
   --cmd-primary-bd: #ecd0c2;
   --cmd-primary-tx: #7c3a2a;
+  /* ── Hub token sheet (ref design-refs/hub-token-sheet-v3.html; VALUES from Nick's tuner spec,
+     which WINS over v3 where they differ — Capp's espresso primaries/monograms + taupe toggle
+     are the spec, not v3's caramel/latte). The single source both hubs consume for named
+     surfaces; "paper per purpose" is a band-token choice, not a fork. HUB-SCOPED de-pinking —
+     the app-wide Cappuccino retoken is a separate future pass. ── */
+  --hub-desk: #e8ddd0;
+  --hub-slab: #fffefb;
+  --hub-slab-rule: 1px solid #e7ddd2;
+  --hub-list: #fffefb;
+  --hub-pane-process: #fffefb;
+  --hub-pane-reference: #fffefb;
+  --hub-col: #fffefb;
+  --hub-pane-bd: 1px solid #d8cebf;
+  --hub-radius: 6px;
+  --hub-pane-sh: 0 1px 3px rgba(58, 28, 20, 0.05);
+  --hub-hair: #e7ddd2;
+  --hub-row-hair: #f2e9db;
+  --hub-band-process: #f6f1e6;
+  --hub-band-process-bd: rgba(107, 74, 47, 0.22);
+  --hub-band-process-tx: #5d4037;
+  --hub-band-reference: #f6f1e6;
+  --hub-band-reference-tx: #5d4037;
+  --hub-toggle-on: #705e4c;      /* SPEC (v3 caramel #dcb588 superseded) */
+  --hub-toggle-on-tx: #ffffff;
+  --hub-pill-rail: #ffffff;
+  --hub-primary: #422701;        /* SPEC espresso (v3 latte #eee0c6 superseded) */
+  --hub-primary-bd: #422701;
+  --hub-primary-tx: #ffffff;
+  --hub-monogram: #422701;       /* SPEC espresso (v3 #705e46 superseded) */
+  --hub-monogram-tx: #fdfaf5;
+  --hub-row-on: #f6efe3;
+  --hub-cell: #fdfaf5;
+  --hub-cell-bd: #efe6d8;
+  --hub-cmd: #fffdf9;
+  --hub-cmd-rule: 1px solid #e7ddd2;
+  --hub-accent: #7c3a2a;
+  --hub-ink: #3a1c14;
+  --hub-head: #000000;
+  --hub-label: #9c8878;
+  --hub-item: #6a5a50;
+  --hub-body: #5d4037;
+  --hub-btn-bg: #ffffff;
+  --hub-btn-bd: 1px solid #d8cebf;
+  --hub-btn-sh: none;
+  --hub-btn-rad: 7px;
 }
 .t-bold {
   --bd: #1d1712;   /* ink */
@@ -235,6 +280,48 @@
   --cmd-primary-bg: #eec9c3;
   --cmd-primary-bd: #1d1712;
   --cmd-primary-tx: #1d1712;
+  /* ── Hub token sheet (spec values). Bold: BOTH reading panes white incl. the agent header band
+     — supersedes the previously-locked #ece2e0 pane. ── */
+  --hub-desk: #c2cfda;
+  --hub-slab: #fffefb;
+  --hub-slab-rule: 1.5px solid #1d1712;
+  --hub-list: #ffffff;
+  --hub-pane-process: #ffffff;   /* SUPERSEDES the locked #ece2e0 blush pane */
+  --hub-pane-reference: #ffffff;
+  --hub-col: #ffffff;
+  --hub-pane-bd: 1.5px solid #1d1712;
+  --hub-radius: 14px;
+  --hub-pane-sh: 4px 4px 0 rgba(29, 23, 18, 0.9);
+  --hub-hair: #4a443e;
+  --hub-row-hair: #d8d3cd;
+  --hub-band-process: #f4c7c2;
+  --hub-band-process-bd: #1d1712;
+  --hub-band-process-tx: #1d1712;
+  --hub-band-reference: #fbefef;  /* SPEC (v3 blue-grey #d9e3ec superseded) */
+  --hub-band-reference-tx: #1d1712;
+  --hub-toggle-on: #f4c7c2;
+  --hub-toggle-on-tx: #1d1712;
+  --hub-pill-rail: #ffffff;
+  --hub-primary: #f4c7c2;
+  --hub-primary-bd: #1d1712;
+  --hub-primary-tx: #1d1712;
+  --hub-monogram: #000000;        /* SPEC (v3 #f8dcd8 superseded) */
+  --hub-monogram-tx: #ffffff;
+  --hub-row-on: #f4e4e1;
+  --hub-cell: #fdfaf5;
+  --hub-cell-bd: rgba(29, 23, 18, 0.35);
+  --hub-cmd: #ffffff;
+  --hub-cmd-rule: 1.5px solid #1d1712;
+  --hub-accent: #1d1712;
+  --hub-ink: #1d1712;
+  --hub-head: #1d1712;
+  --hub-label: #6a6560;
+  --hub-item: #2b2622;
+  --hub-body: #2b2622;
+  --hub-btn-bg: #ffffff;
+  --hub-btn-bd: 1.5px solid #1d1712;
+  --hub-btn-sh: 2px 2px 0 rgba(29, 23, 18, 0.85);
+  --hub-btn-rad: 9px;
 }
 /* Editorial — the consolidated-v37 "Graphite · Soft · Tinted" system (t-edn + es4 + eb2 locked).
    Neutral whites/greys; graphite #44484d is the single accent. Containers are "Soft": 16px
@@ -325,6 +412,47 @@
   --cmd-primary-bg: #e9eaeb;
   --cmd-primary-bd: #dcdcdb;
   --cmd-primary-tx: #44484d;
+  /* ── Hub token sheet (spec values). Editorial: the two papers differ by TYPOGRAPHY only. ── */
+  --hub-desk: #f4f4f3;
+  --hub-slab: #ffffff;
+  --hub-slab-rule: 1px solid #ececeb;
+  --hub-list: #ffffff;
+  --hub-pane-process: #ffffff;
+  --hub-pane-reference: #ffffff;
+  --hub-col: #ffffff;
+  --hub-pane-bd: 1px solid #ececeb;
+  --hub-radius: 10px;
+  --hub-pane-sh: 0 1px 2px rgba(20, 20, 20, 0.05), 0 12px 30px rgba(20, 20, 20, 0.07);
+  --hub-hair: #ececeb;
+  --hub-row-hair: #f1f1f0;
+  --hub-band-process: #eceae6;
+  --hub-band-process-bd: #e0deda;
+  --hub-band-process-tx: #44484d;
+  --hub-band-reference: #f5f5f5;  /* SPEC (v3 white superseded) */
+  --hub-band-reference-tx: #44484d;
+  --hub-toggle-on: #e9eaeb;
+  --hub-toggle-on-tx: #1a1a1a;
+  --hub-pill-rail: #ffffff;
+  --hub-primary: #dedede;         /* SPEC (v3 #e9eaeb superseded) */
+  --hub-primary-bd: #dcdcdb;
+  --hub-primary-tx: #000000;
+  --hub-monogram: #e9eaeb;
+  --hub-monogram-tx: #44484d;
+  --hub-row-on: #f5fbff;          /* SPEC pale blue (v3 #f1f1f0 superseded) */
+  --hub-cell: #fafaf9;
+  --hub-cell-bd: #e6e6e5;
+  --hub-cmd: #fbfbfa;
+  --hub-cmd-rule: 1px solid #ececeb;
+  --hub-accent: #44484d;
+  --hub-ink: #1a1a1a;
+  --hub-head: #1a1a1a;
+  --hub-label: #8a8d90;
+  --hub-item: #3c3f43;
+  --hub-body: #3c3f43;
+  --hub-btn-bg: #ffffff;
+  --hub-btn-bd: 1px solid #dcdcdb;
+  --hub-btn-sh: 0 1px 2px rgba(20, 20, 20, 0.04);
+  --hub-btn-rad: 8px;
 }
 /* Editorial "Soft" container: 16px radius, no border, layered shadow. Defined here so the
    dashboard rebuild + any Editorial container can share one class (theme-scoped). */
