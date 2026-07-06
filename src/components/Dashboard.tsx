@@ -1644,8 +1644,8 @@ export const Dashboard: React.FC<{
           ))}
         </div>
 
-        {/* Generous breathing room: 84px above the diary masthead, 70px before "What's live" (Change 4) */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 70, marginTop: 84 }}>
+        {/* Section spacing: 48px above the diary panel, 56px before "What's live" */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 56, marginTop: 48 }}>
           <DiaryCarousel
             queries={queries}
             agents={agents}

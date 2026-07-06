@@ -42,21 +42,21 @@ import "./diaryCarousel.css";
 const DOWS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const DAY_COUNT = FORTNIGHT_PAST_DAYS + 1 + FORTNIGHT_FUTURE_DAYS;
 
-/* Falloff constants — mockup scriptally-diary-left-heading.html. */
-const FOCUS_SCALE = 1.14;
-const EDGE_DROP = 0.52; // scale 1.14 − t·0.52 → edge cards ~0.62
-const FALL_Z_PX = 190;
-const FALL_FADE = 0.72;
-const FALL_BLUR_PX = 1.1; // reduced from 2 so receding cards stay legible (Change 6)
+/* Falloff constants — mockup scriptally-diary-lightpanel-themes.html. */
+const FOCUS_SCALE = 1.16;
+const EDGE_DROP = 0.56; // scale 1.16 − t·0.56 → edge cards ~0.6 (focus +16%)
+const FALL_Z_PX = 180;
+const FALL_FADE = 0.6; // less fade so the set reads as a set
+const FALL_BLUR_PX = 1;
 const LIFT_T = 0.1;
 const T_SPAN = 0.5; // t normalises over half the strip width
 /* Constant-gap spacing: pull each receding card inward by exactly the empty space its shrink
    created, so every rendered gap equals TARGET_GAP (replaces the uniform-gap model, whose fixed
    layout gap + centre scaling gave tight gaps mid-strip and wide gaps at the edges). */
-const CARD_W = 244;
-const LAYOUT_GAP = 30; // the CSS flex gap between cards
-const HALF = CARD_W / 2; // 122
-const TARGET_GAP = 12; // Snug — the constant rendered gap between card edges
+const CARD_W = 248;
+const LAYOUT_GAP = 26; // the CSS flex gap between cards
+const HALF = CARD_W / 2; // 124
+const TARGET_GAP = 12; // the constant rendered gap between card edges
 
 const clockGlyph = (
   <svg viewBox="0 0 10 10" fill="none" strokeWidth={1.4} strokeLinecap="round" aria-hidden="true">
@@ -257,7 +257,8 @@ export const DiaryCarousel: React.FC<DiaryCarouselProps> = ({ queries, agents, m
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
     <section className="dc" aria-labelledby="dc-heading">
-      <div className="dc-colwide">
+      {/* Light panel: the whole feature (heading + carousel) sits on one raised per-theme surface. */}
+      <div className="dc-panel">
         <div className="dc-row">
           {/* Masthead heading column (1/3), left-aligned */}
           <div className="dc-headcol">
