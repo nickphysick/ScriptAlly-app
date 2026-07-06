@@ -10,6 +10,27 @@
 
 import { Query, QueryStatus } from "../types";
 
+/**
+ * Filter-bar STATUS bucket — the derived state the CTA engine (getPrimaryAction, Queries.tsx)
+ * distinguishes, as a pure status→bucket map: Waiting = agent's court, Your move = writer owes
+ * materials, Closed = terminal. Kept in step with getPrimaryAction's ball-holder switch.
+ */
+export type QueryBucket = "waiting" | "move" | "closed";
+export function queryBucket(status: QueryStatus): QueryBucket {
+  switch (status) {
+    case QueryStatus.PARTIAL_REQUESTED:
+    case QueryStatus.FULL_REQUESTED:
+    case QueryStatus.REVISE_RESUBMIT:
+      return "move";
+    case QueryStatus.QUERIED:
+    case QueryStatus.PARTIAL_SENT:
+    case QueryStatus.FULL_SENT:
+      return "waiting";
+    default:
+      return "closed";
+  }
+}
+
 export const DAY = 86400000;
 /** Stage response windows in WEEKS (not per-agent) — expected reply = send date + window. */
 export const STAGE_RESPONSE_WINDOWS = { query: 8, partial: 12, full: 12 } as const;

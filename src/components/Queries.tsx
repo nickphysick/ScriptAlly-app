@@ -30,7 +30,7 @@ import { StatusPill, getStatusLabel } from "./StatusPill";
 import { StatusDot, statusDirection } from "./StatusDot";
 import { ChromeSlab } from "./shell/ChromeSlab";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
-import { queryAmbientStatus, commandBarStatus } from "../lib/queryAmbient";
+import { queryAmbientStatus, commandBarStatus, queryBucket, QueryBucket } from "../lib/queryAmbient";
 import { EdgeFadeScroll } from "./EdgeFadeScroll";
 import { RecordResponseModal } from "./RecordResponseModal";
 import { RecordResponseFocusForm } from "./RecordResponseFocusForm";
@@ -547,6 +547,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   
   // Left Filters state (configured to always align with Agents-style)
   const [selectedStatusFilters, setSelectedStatusFilters] = useState<string[]>(["All"]);
+  // Filter-bar STATUS bucket (All + the three CTA-engine buckets). Replaces the old list-header
+  // per-exact-status multi-select as the primary status filter.
+  const [statusBucket, setStatusBucket] = useState<"all" | QueryBucket>("all");
   const [selectedManuscriptFilter, setSelectedManuscriptFilter] = useState<string>("All");
   const [selectedAgentFilter, setSelectedAgentFilter] = useState<string>("All");
   const [sortOption, setSortOption] = useState<string>("Newest first");
@@ -650,8 +653,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   // Quick list search
   const [listSearch, setListSearch] = useState("");
   // List-header dropdowns (Filter / Sort) — the menus themselves are built in a later phase.
-  const [filterMenuOpen, setFilterMenuOpen] = useState(false);
-  const [sortMenuOpen, setSortMenuOpen] = useState(false);
+  // (filterMenuOpen/sortMenuOpen retired with the list-header menus — filtering moved to the bar.)
 
   // Journal text input
   const [journalInput, setJournalInput] = useState("");
@@ -733,6 +735,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   const activeMs = activeQuery ? manuscripts.find(m => m.id === activeQuery.manuscriptId) : null;
   // Queries Hub subtitle — the manuscript currently in scope ("Tracking …").
   const trackedManuscript = selectedManuscriptFilter !== "All" ? manuscripts.find(m => m.id === selectedManuscriptFilter) : null;
+  // Manuscripts that actually have queries — the MANUSCRIPT pill group only shows these.
+  const manuscriptsWithQueries = manuscripts.filter(m => queries.some(q => q.manuscriptId === m.id));
   const hubSubtitle = trackedManuscript ? trackedManuscript.title : "all manuscripts";
 
   // Synchronise Agent Notes values when activeAgent changes
@@ -851,11 +855,10 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     
     if (!agent || !ms) return false;
 
-    // Status filter (supports multiple selection)
-    if (selectedStatusFilters && !selectedStatusFilters.includes("All") && selectedStatusFilters.length > 0) {
-      if (!selectedStatusFilters.includes(q.status)) {
-        return false;
-      }
+    // Status filter — the filter-bar bucket (All / Waiting / Your move / Closed), derived from
+    // the CTA engine's ball-holder so Waiting vs Your move match the command bar exactly.
+    if (statusBucket !== "all" && queryBucket(q.status as QueryStatus) !== statusBucket) {
+      return false;
     }
 
     // Manuscript filter
@@ -912,7 +915,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   });
 
   // Automatically select first element if currently selected is filtered out
-  const statusFiltersKey = selectedStatusFilters.join(",");
+  const statusFiltersKey = statusBucket;
   useEffect(() => {
     if (sortedList.length > 0) {
       const isStillInList = sortedList.some(q => q.id === selectedQueryId);
@@ -2238,6 +2241,42 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           }
         />
 
+        {/* ── Filter bar (hub grammar, ref hub-token-sheet-v3): STATUS buckets · MANUSCRIPT pills ·
+            Sort · Date sent. Replaces the retired list-header Sort/Filter icon-buttons. ── */}
+        {(() => {
+          const fkey: React.CSSProperties = { fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--hub-label)", flexShrink: 0 };
+          const rail: React.CSSProperties = { display: "inline-flex", gap: 2, background: "var(--hub-pill-rail)", border: "var(--hub-btn-bd)", borderRadius: 99, padding: 2 };
+          const pill = (on: boolean): React.CSSProperties => ({ fontFamily: "'Inter',sans-serif", fontSize: 11.5, fontWeight: 500, padding: "4px 12px", borderRadius: 99, border: "none", cursor: "pointer", whiteSpace: "nowrap", background: on ? "var(--hub-toggle-on)" : "transparent", color: on ? "var(--hub-toggle-on-tx)" : "var(--hub-item)" });
+          const sortSel: React.CSSProperties = { marginLeft: "auto", fontFamily: "'Inter',sans-serif", fontSize: 12, color: "var(--hub-item)", background: "var(--hub-btn-bg)", border: "var(--hub-btn-bd)", borderRadius: 8, padding: "6px 11px", boxShadow: "var(--hub-btn-sh)", cursor: "pointer" };
+          return (
+            <div className="qp-filterbar" style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", flexShrink: 0, marginBottom: 12 }}>
+              <span style={fkey}>Status</span>
+              <div style={rail} role="group" aria-label="Filter by status">
+                {([["all", "All"], ["waiting", "Waiting"], ["move", "Your move"], ["closed", "Closed"]] as [("all" | QueryBucket), string][]).map(([v, label]) => (
+                  <button key={v} type="button" onClick={() => setStatusBucket(v)} aria-pressed={statusBucket === v} style={pill(statusBucket === v)}>{label}</button>
+                ))}
+              </div>
+              {manuscriptsWithQueries.length > 1 && (
+                <>
+                  <span style={fkey}>Manuscript</span>
+                  <div style={rail} role="group" aria-label="Filter by manuscript">
+                    <button type="button" onClick={() => setSelectedManuscriptFilter("All")} aria-pressed={selectedManuscriptFilter === "All"} style={pill(selectedManuscriptFilter === "All")}>All</button>
+                    {manuscriptsWithQueries.map((m) => (
+                      <button key={m.id} type="button" onClick={() => setSelectedManuscriptFilter(m.id)} aria-pressed={selectedManuscriptFilter === m.id} style={{ ...pill(selectedManuscriptFilter === m.id), maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis" }} title={m.title}>{m.title}</button>
+                    ))}
+                  </div>
+                </>
+              )}
+              <select value={sortKey} onChange={(e) => setSortKey(e.target.value)} style={sortSel} aria-label="Sort queries">
+                <option value="date_queried">Sort · Date sent</option>
+                <option value="a_z">Sort · Agent A–Z</option>
+                <option value="status">Sort · Status</option>
+                <option value="last_updated">Sort · Last updated</option>
+              </select>
+            </div>
+          );
+        })()}
+
         {/* MarkSentPopover — anchored via useFixedMenu to the actions-toolbar CTA */}
         <AnimatePresence>
           {isMarkSentOpen && activeQuery && activeAgent && (() => {
@@ -2292,119 +2331,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 />
               </div>
 
-              {/* List head — count (Playfair) + Sort / Filter mono icon-buttons */}
-              <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "4px 6px 12px", flexShrink: 0 }}>
+              {/* List head — count only (Sort/Filter live in the floating filter bar now) */}
+              <div style={{ display: "flex", alignItems: "center", padding: "4px 6px 12px", flexShrink: 0 }}>
                 <span style={{ fontFamily: FONT_SERIF, fontSize: 18, fontWeight: 800, color: qdbBoldInk }}>
                   {sortedList.length} {sortedList.length === 1 ? "query" : "queries"}
                 </span>
-                <div style={{ display: "flex", gap: 14 }}>
-                  <button
-                    type="button"
-                    onClick={() => { setSortMenuOpen((o) => !o); setFilterMenuOpen(false); }}
-                    style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "transparent", border: "none", cursor: "pointer", fontFamily: FONT_MONO, fontSize: 10, fontWeight: 600, letterSpacing: ".03em", textTransform: "uppercase" as const, color: qdbBoldInk2 }}
-                  >
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M7 12h10M10 18h4" /></svg>
-                    Sort
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setFilterMenuOpen((o) => !o); setSortMenuOpen(false); }}
-                    style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "transparent", border: "none", cursor: "pointer", fontFamily: FONT_MONO, fontSize: 10, fontWeight: 600, letterSpacing: ".03em", textTransform: "uppercase" as const, color: qdbBoldInk2 }}
-                  >
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M3 5h18l-7 8v6l-4 2v-8z" /></svg>
-                    Filter
-                  </button>
-                </div>
-
-                {/* click-away backdrop for the Filter / Sort menus */}
-                {(filterMenuOpen || sortMenuOpen) && (
-                  <div onClick={() => { setFilterMenuOpen(false); setSortMenuOpen(false); }} style={{ position: "fixed", inset: 0, zIndex: 20 }} />
-                )}
-
-                {/* Sort menu */}
-                {sortMenuOpen && (
-                  <div style={{ position: "absolute", top: "100%", right: 2, marginTop: 8, width: 178, background: "#fff", border: "1px solid var(--bd)", borderRadius: 12, boxShadow: "0 12px 30px rgba(29,23,18,.22)", padding: 7, zIndex: 30 }}>
-                    <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: ".12em", textTransform: "uppercase" as const, color: qdbBoldMuted, padding: "4px 9px 7px" }}>Sort</div>
-                    {["Newest first", "Oldest first", "Agent name A-Z", "Agent name Z-A"].map((opt) => {
-                      const on = sortOption === opt;
-                      return (
-                        <button key={opt} type="button" onClick={() => { setSortOption(opt); setSortMenuOpen(false); }} style={{ display: "flex", alignItems: "center", width: "100%", textAlign: "left", border: "none", cursor: "pointer", padding: "7px 9px", borderRadius: 8, fontFamily: "'Inter',sans-serif", fontSize: 13, color: "#3a2c24", fontWeight: on ? 600 : 400, background: on ? "#f4ebe2" : "transparent" }}>
-                          {opt}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {/* Filter menu — status set with live counts + direction dots (+ manuscript scope) */}
-                {filterMenuOpen && (() => {
-                  const countOf = (s: QueryStatus) => queries.filter((q) => q.status === s).length;
-                  const activeSum = ACTIVE_STATUSES.reduce((a, s) => a + countOf(s), 0);
-                  const closedSum = CLOSED_STATUSES.reduce((a, s) => a + countOf(s), 0);
-                  const toggleStatus = (id: QueryStatus) => {
-                    let next = selectedStatusFilters.filter((f) => f !== "All");
-                    next = next.includes(id) ? next.filter((f) => f !== id) : [...next, id];
-                    setSelectedStatusFilters(next.length === 0 ? ["All"] : next);
-                  };
-                  const dot = (kind: "nul" | "out" | "in" | "closed"): React.CSSProperties => ({
-                    width: 12, height: 12, borderRadius: "50%", border: "2px solid", flexShrink: 0,
-                    ...(kind === "nul" ? { borderColor: "#7d7268" }
-                      : kind === "out" ? { borderColor: "#7c3a2a", background: "#f8e7dc" }
-                      : kind === "in" ? { borderColor: "#8a9e88", background: "#e9ede6" }
-                      : { borderColor: "#a89f92", background: "#efece7" }),
-                  });
-                  const rowStyle = (on: boolean): React.CSSProperties => ({ display: "flex", alignItems: "center", gap: 9, width: "100%", textAlign: "left", border: "none", cursor: "pointer", padding: "7px 9px", borderRadius: 8, fontSize: 13, background: on ? "#f4ebe2" : "transparent" });
-                  const lbl = (on: boolean): React.CSSProperties => ({ flex: 1, color: "#3a2c24", fontFamily: "'Inter',sans-serif", fontWeight: on ? 600 : 400 });
-                  const cnt: React.CSSProperties = { fontFamily: FONT_MONO, fontSize: 11, color: qdbBoldMuted };
-                  const STATUS_ROWS: { id: QueryStatus; label: string; kind: "out" | "in" }[] = [
-                    { id: QueryStatus.QUERIED, label: "Queried", kind: "out" },
-                    { id: QueryStatus.PARTIAL_REQUESTED, label: "Partial req.", kind: "in" },
-                    { id: QueryStatus.PARTIAL_SENT, label: "Partial sent", kind: "out" },
-                    { id: QueryStatus.FULL_REQUESTED, label: "Full req.", kind: "in" },
-                    { id: QueryStatus.FULL_SENT, label: "Full sent", kind: "out" },
-                    { id: QueryStatus.REVISE_RESUBMIT, label: "R&R", kind: "in" },
-                    { id: QueryStatus.OFFER, label: "Offers", kind: "out" },
-                  ];
-                  return (
-                    <div style={{ position: "absolute", top: "100%", right: 2, marginTop: 8, width: 216, background: "#fff", border: "1px solid var(--bd)", borderRadius: 12, boxShadow: "0 12px 30px rgba(29,23,18,.22)", padding: 7, zIndex: 30, maxHeight: 380, overflowY: "auto" }}>
-                      {/* Manuscript scope — only when tracking more than one book */}
-                      {manuscripts.length > 1 && (
-                        <>
-                          <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: ".12em", textTransform: "uppercase" as const, color: qdbBoldMuted, padding: "4px 9px 7px" }}>Manuscript</div>
-                          <button type="button" onClick={() => setSelectedManuscriptFilter("All")} style={rowStyle(selectedManuscriptFilter === "All")}>
-                            <span style={lbl(selectedManuscriptFilter === "All")}>All manuscripts</span>
-                            <span style={cnt}>{queries.length}</span>
-                          </button>
-                          {manuscripts.map((m) => {
-                            const on = selectedManuscriptFilter === m.id;
-                            return (
-                              <button key={m.id} type="button" onClick={() => setSelectedManuscriptFilter(m.id)} style={rowStyle(on)}>
-                                <span style={{ ...lbl(on), overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.title}</span>
-                                <span style={cnt}>{queries.filter((q) => q.manuscriptId === m.id).length}</span>
-                              </button>
-                            );
-                          })}
-                          <div style={{ height: 1, background: "#ece3d6", margin: "6px 4px" }} />
-                        </>
-                      )}
-                      <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: ".12em", textTransform: "uppercase" as const, color: qdbBoldMuted, padding: "4px 9px 7px" }}>Filter</div>
-                      <button type="button" onClick={() => setSelectedStatusFilters(allActiveHighlighted ? ["All"] : [...ACTIVE_STATUSES])} style={rowStyle(allActiveHighlighted)}>
-                        <span style={dot("nul")} /><span style={lbl(allActiveHighlighted)}>All active</span><span style={cnt}>{activeSum}</span>
-                      </button>
-                      {STATUS_ROWS.map((r) => {
-                        const on = selectedStatusFilters.includes(r.id);
-                        return (
-                          <button key={r.id} type="button" onClick={() => toggleStatus(r.id)} style={rowStyle(on)}>
-                            <span style={dot(r.kind)} /><span style={lbl(on)}>{r.label}</span><span style={cnt}>{countOf(r.id)}</span>
-                          </button>
-                        );
-                      })}
-                      <button type="button" onClick={() => setSelectedStatusFilters(allClosedHighlighted ? ["All"] : [...CLOSED_STATUSES])} style={rowStyle(allClosedHighlighted)}>
-                        <span style={dot("closed")} /><span style={lbl(allClosedHighlighted)}>All closed</span><span style={cnt}>{closedSum}</span>
-                      </button>
-                    </div>
-                  );
-                })()}
               </div>
               {/* thin inset grey rule beneath the header (doesn't reach the container edges) */}
               <div style={{ height: 1, background: "#cfc6ba", margin: "0 6px", flexShrink: 0 }} />
