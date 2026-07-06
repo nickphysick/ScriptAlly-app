@@ -2688,16 +2688,12 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             );
           })()}
 
-          {/* Reading pane — blush paper card (col 2, row 2). Fit: HUGS its content (blue desk shows
-              beneath); caps at the row height (maxHeight:100%) and scrolls internally if tall,
-              with the shared edge fades on the fixed card frame (the chrome never moves). */}
-          <EdgeFadeScroll
-            outerClassName="qp-pane"
-            outerStyle={{ gridColumn: 2, gridRow: 2, alignSelf: "start", maxHeight: "100%", minHeight: READING_PANE_FLOOR_PX, border: "var(--bdw) solid var(--bd)", borderRadius: 22, background: "var(--pane)", boxShadow: "0 8px 26px rgba(29,23,18,.12)", overflow: "hidden" }}
-            scrollStyle={{ overflowX: "hidden", display: "flex", flexDirection: "column" }}
-            fade="var(--pane, #ffffff)"
-          >
-            <div style={{ display: "contents" }}>
+          {/* Reading pane — the WORKSPACE (desk-rule second clause, ref queries-workspace-v2.html:
+              a live process you act on FILLS to the viewport line, unlike the Agents document which
+              hugs). A flex column: agent band (flex:none) over three full-height columns that each
+              scroll behind their own edge fade (flex:1). The command bar pins to the pane foot in
+              Phase 2; the top action toolbar above still exists this phase. */}
+          <div className="qp-pane" style={{ gridColumn: 2, gridRow: 2, alignSelf: "stretch", minHeight: 0, height: "100%", border: "var(--bdw) solid var(--bd)", borderRadius: 22, background: "var(--pane)", boxShadow: "0 8px 26px rgba(29,23,18,.12)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
             {activeQuery && activeAgent && activeMs ? (
               <>
                 <style>{`
@@ -2735,7 +2731,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                         {/* avatar — solid ink disc + white initials (per the Queries Hub mockup) */}
                         <span style={{ flexShrink: 0, width: 66, height: 66, borderRadius: "50%", background: "#1d1712", border: "none", color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_SERIF, fontSize: 22, fontWeight: 700 }}>{initials}</span>
                         <div style={{ flex: 1, minWidth: 0, paddingRight: 120 }}>
-                          <div style={{ fontFamily: FONT_SERIF, fontSize: 33, fontWeight: 800, color: qdbBoldInk, lineHeight: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{nameplate}</div>
+                          <div style={{ fontFamily: FONT_SERIF, fontSize: 27, fontWeight: 800, color: qdbBoldInk, lineHeight: 1.02, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{nameplate}</div>
                           {!!activeAgent.name?.trim() && !!activeAgent.agency?.trim() && (
                             <div style={{ fontFamily: FONT_SERIF, fontSize: 17, fontWeight: 600, color: "#4a423a", marginTop: 2 }}>{activeAgent.agency}</div>
                           )}
@@ -2793,20 +2789,21 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   );
                 })()}
 
-                {/* Columns — equal-height grid (rows size to the tallest column's content; the grid
-                    shrinks + the columns scroll internally only when the pane hits its ceiling) */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 18, padding: "16px 18px 20px", flex: "0 1 auto", minHeight: 0, alignItems: "stretch" }}>
+                {/* Columns — three FULL-HEIGHT equal columns (workspace fill): the row takes all the
+                    space below the agent band, each column scrolls independently behind its own edge
+                    fade, the Journal composer pins to its column foot. */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 18, padding: "16px 18px 20px", flex: 1, minHeight: 0, alignItems: "stretch" }}>
 
                   {/* ── Sub-card 1: Tracking ── */}
-                  <div className="qp-card" style={{ minWidth: 0, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 300, boxShadow: "0 2px 7px rgba(29,23,18,.07)" }}>
+                  <div className="qp-card" style={{ minWidth: 0, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 0, boxShadow: "0 2px 7px rgba(29,23,18,.07)" }}>
                       {/* pink header band */}
                       <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "var(--band)", borderBottom: "var(--bdw) solid var(--bd)", flexShrink: 0 }}>
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={qdbBoldInk2} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M3 12h4l3 8 4-16 3 8h4" /></svg>
                         <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 800, color: qdbBoldInk2 }}>Tracking</span>
                       </div>
-                      <div style={{ padding: "16px 16px 18px", flex: 1, minHeight: 0, overflowY: "auto" }}>
+                      <EdgeFadeScroll outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ padding: "16px 16px 18px" }} fade="var(--pane, #fffefb)">
                         {(() => {
-                          // Pass the same open-state fact the control bar uses, so the trailing block
+                          // Pass the same open-state fact the command bar uses, so the trailing block
                           // switches agent's-turn / writer's-turn / closed identically.
                           const ta = getPrimaryAction(activeQuery.status as QueryStatus);
                           return (
@@ -2819,18 +2816,18 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                             />
                           );
                         })()}
-                      </div>
+                      </EdgeFadeScroll>
                     </div>{/* ── end sub-card 1: Tracking ── */}
 
                   {/* ── Sub-card 2: What you sent ── */}
-                  <div className="qp-card" style={{ minWidth: 0, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 300, boxShadow: "0 2px 7px rgba(29,23,18,.07)" }}>
+                  <div className="qp-card" style={{ minWidth: 0, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 0, boxShadow: "0 2px 7px rgba(29,23,18,.07)" }}>
                       {/* pink header band */}
                       <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "var(--band)", borderBottom: "var(--bdw) solid var(--bd)", flexShrink: 0 }}>
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={qdbBoldInk2} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>
                         <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 800, color: qdbBoldInk2 }}>What you sent</span>
                       </div>
                       {/* spec sheet */}
-                      <div style={{ padding: "16px 16px 18px", flex: 1, minHeight: 0, overflowY: "auto" }}>
+                      <EdgeFadeScroll outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ padding: "16px 16px 18px" }} fade="var(--pane, #fffefb)">
                         {(() => {
                           const mats: (string | QueryMaterial)[] = Array.isArray((activeQuery as any).materialsWanted) && (activeQuery as any).materialsWanted.length
                             ? (activeQuery as any).materialsWanted
@@ -2911,11 +2908,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                             </>
                           );
                         })()}
-                      </div>
+                      </EdgeFadeScroll>
                     </div>{/* ── end sub-card 2: What you sent ── */}
 
                   {/* ── Sub-card 3: Notes — journal pins to bottom via flex-1 on messages area ── */}
-                  <div className="qp-card" style={{ minWidth: 0, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 300, boxShadow: "0 2px 7px rgba(29,23,18,.07)" }}>
+                  <div className="qp-card" style={{ minWidth: 0, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 0, boxShadow: "0 2px 7px rgba(29,23,18,.07)" }}>
                       {/* pink header band */}
                       <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "var(--band)", borderBottom: "var(--bdw) solid var(--bd)", flexShrink: 0 }}>
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={qdbBoldInk2} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H19v15H6a2 2 0 0 0-2 2z" /><path d="M4 19.5A1.5 1.5 0 0 1 5.5 18H19" /></svg>
@@ -2930,7 +2927,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           const send = () => { const t = journalInput.trim(); if (!t) return; addJournalEntry(activeQuery.id, t); setJournalInput(""); };
                           return (
                             <>
-                              <div style={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column", paddingRight: 2 }}>
+                              <EdgeFadeScroll outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ display: "flex", flexDirection: "column", paddingRight: 2 }} fade="var(--pane, #fffefb)">
                                 {notes.length === 0 ? (
                                   /* ghost first entry — dashed, shaped like a real entry; replaced on first save */
                                   <div style={{ background: "#fdfbf7", border: "1px dashed #d8cebf", borderRadius: 11, padding: "11px 13px" }}>
@@ -2964,7 +2961,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                                     </div>
                                   );
                                 })}
-                              </div>
+                              </EdgeFadeScroll>
                               {/* composer — pinned to the column foot */}
                               <div style={{ marginTop: 12, background: "#fffdf9", border: "1px solid #e6dccd", borderRadius: 10, padding: "9px 10px 9px 13px", display: "flex", alignItems: "flex-end", gap: 9, boxShadow: "0 1px 2px rgba(58,28,20,0.04)", flexShrink: 0 }}>
                                 <textarea
@@ -2986,13 +2983,13 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 </div>{/* end sub-cards row */}
               </>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: 32, color: "#9c8878" }}>
+              /* No selection — placeholder fills the pane; the command bar does NOT render (Phase 2). */
+              <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: 32, color: "#9c8878" }}>
                 <Notebook style={{ width: 48, height: 48, color: "rgba(124,58,42,.2)", marginBottom: 8 }} />
                 <span>Select a query to open the reading pane.</span>
               </div>
             )}
-            </div>{/* closes display:contents */}
-          </EdgeFadeScroll>{/* closes qp-pane */}
+          </div>{/* closes qp-pane */}
 
         </div>{/* closes content grid */}
         </>
