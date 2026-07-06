@@ -62,7 +62,9 @@ export interface MaterialsManagerProps {
 export const MaterialsManager: React.FC<MaterialsManagerProps> = ({ versions, packages, queries, onBack, onEdit, onCreate }) => (
   <div className="pkgmgr">
     <style>{`
-      .pkgmgr .backrow { display:flex; align-items:center; gap:12px; margin-bottom:18px; }
+      .pkgmgr .backrow { display:flex; align-items:center; gap:12px; margin-bottom:6px; }
+      /* Guided pass: one plain-English line under the heading — why this library exists. */
+      .pkgmgr .mgr-sub { font-size:14px; color:#6a594d; line-height:1.6; margin:0 0 18px 46px; }
       .pkgmgr .vh-ic { width:34px; height:34px; border-radius:10px; background:linear-gradient(135deg,var(--band-a),var(--band-b)); color:var(--burg); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
       .pkgmgr .view-title { font-family:${FONT_SERIF}; font-size:23px; font-weight:700; color:var(--headT); }
       .pkgmgr .backbtn { margin-left:auto; font-family:${FONT_MONO}; font-size:10px; letter-spacing:.08em; text-transform:uppercase; background:var(--card); border:var(--bdw) solid var(--bd); color:var(--burg); border-radius:9px; padding:9px 14px; cursor:pointer; }
@@ -99,6 +101,8 @@ export const MaterialsManager: React.FC<MaterialsManagerProps> = ({ versions, pa
       <span className="view-title">Your materials</span>
       <button type="button" className="backbtn" onClick={onBack}>← Builder home</button>
     </div>
+
+    <div className="mgr-sub">Everything here can be dropped into any package — write once, reuse everywhere.</div>
 
     <div className="shelfwrap">
       {BUILDER_TYPES.map((type) => {
