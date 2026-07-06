@@ -41,15 +41,13 @@ import "./diaryCarousel.css";
 
 const DOWS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const DAY_COUNT = FORTNIGHT_PAST_DAYS + 1 + FORTNIGHT_FUTURE_DAYS;
-/** The app scroll container (AppShell STAGE_SCROLL_ID) — the box the full-bleed strip spans. */
-const STAGE_ID = "app-stage-scroll";
 
-/* Falloff constants — "Snug density, header-band cards" mockup (scriptally-diary-spacing.html). */
+/* Falloff constants — mockup scriptally-diary-left-heading.html. */
 const FOCUS_SCALE = 1.14;
 const EDGE_DROP = 0.52; // scale 1.14 − t·0.52 → edge cards ~0.62
 const FALL_Z_PX = 190;
 const FALL_FADE = 0.72;
-const FALL_BLUR_PX = 2;
+const FALL_BLUR_PX = 1.1; // reduced from 2 so receding cards stay legible (Change 6)
 const LIFT_T = 0.1;
 const T_SPAN = 0.5; // t normalises over half the strip width
 /* Constant-gap spacing: pull each receding card inward by exactly the empty space its shrink
@@ -134,37 +132,13 @@ export const DiaryCarousel: React.FC<DiaryCarouselProps> = ({ queries, agents, m
   const { byDay, comingUpCount } = useMemo(() => groupFortnightEvents(events, today), [events, today]);
   const eventsOn = useCallback((d: Date) => byDay.get(dayKey(d)) ?? [], [byDay]);
 
-  const sectionRef = useRef<HTMLDivElement>(null);
   const stripRef = useRef<HTMLDivElement>(null);
+  const todayBtnRef = useRef<HTMLButtonElement>(null);
   const cardRefs = useRef<(HTMLElement | null)[]>([]);
   const rafRef = useRef(0);
   const centredIdx = useRef(FORTNIGHT_TODAY_IDX);
 
-  // ── Full-width tinted section: size it to the stage's content box, centred (= centred on the
-  //    column) so the tint spans the workspace edge-to-edge. A literal 100vw would overshoot the
-  //    stage (overflow-y:auto coerces overflow-x → a horizontal scrollbar), and would also ignore
-  //    the timeline drawer's padding-right; sizing to clientWidth (scrollbar-excluded) avoids both.
-  //    The heading + strip stay constrained by .dc-inner's max-width inside. ──
-  const setSectionBleed = useCallback(() => {
-    const section = sectionRef.current;
-    if (!section) return;
-    const parent = section.parentElement;
-    const stage = document.getElementById(STAGE_ID);
-    if (!parent || !stage) { section.style.width = ""; section.style.marginLeft = ""; return; }
-    const s = stage.getBoundingClientRect();
-    const cs = getComputedStyle(stage);
-    const padL = parseFloat(cs.paddingLeft || "0");
-    const padR = parseFloat(cs.paddingRight || "0"); // grows when the timeline drawer opens
-    const borderL = parseFloat(cs.borderLeftWidth || "0");
-    const targetWidth = stage.clientWidth - padL - padR; // clientWidth excludes the scrollbar gutter
-    const contentLeft = s.left + borderL + padL;
-    const p = parent.getBoundingClientRect();
-    if (targetWidth <= 0) return;
-    section.style.width = `${targetWidth}px`;
-    section.style.marginLeft = `${contentLeft - p.left}px`;
-  }, []);
-
-  // ── Depth falloff (mockup maths; nearest index drives the pill) ──────────────
+  // ── Depth falloff (mockup maths; nearest index drives the back-to-today button) ──────────────
   const falloff = useCallback(() => {
     const strip = stripRef.current;
     if (!strip) return;
@@ -216,10 +190,10 @@ export const DiaryCarousel: React.FC<DiaryCarouselProps> = ({ queries, agents, m
       c.style.filter = reduce ? "" : `blur(${(t * t * FALL_BLUR_PX).toFixed(2)}px)`;
       c.style.boxShadow = t < LIFT_T ? "var(--dc-shadow-lift)" : "var(--dc-shadow-float)";
       c.style.zIndex = String(100 - Math.round(t * 90));
-      // in-card "back to today": only on the focused (anchor) card, and only when it isn't today
-      c.classList.toggle("showlink", i === anchor && i !== FORTNIGHT_TODAY_IDX);
     }
     centredIdx.current = anchor;
+    // back-to-today button (under the feature column): shown only when the focus isn't today
+    todayBtnRef.current?.classList.toggle("show", anchor !== FORTNIGHT_TODAY_IDX);
   }, [reduce]);
 
   const scheduleFalloff = useCallback(() => {
@@ -230,47 +204,42 @@ export const DiaryCarousel: React.FC<DiaryCarouselProps> = ({ queries, agents, m
     });
   }, [falloff]);
 
-  /** Centre a card via scrollLeft arithmetic (not scrollIntoView — that could scroll the stage
-   *  vertically; offsetLeft also ignores the falloff transforms, so centring stays exact). */
+  /** Centre a card by measuring its TRUE rendered centre against the strip centre (Change 7):
+   *  offsetLeft ignores the constant-gap tx transforms, which landed the focus card slightly off
+   *  and made the reveal lopsided. Measuring getBoundingClientRect aligns the real midpoints, so
+   *  the reveal is symmetric on both sides; scroll-snap then holds it. On a non-smooth call, run
+   *  falloff() in the same frame so the new anchor's transforms are applied immediately. */
   const centreCard = useCallback((idx: number, smooth: boolean) => {
     const clamped = Math.max(0, Math.min(DAY_COUNT - 1, idx));
     const strip = stripRef.current;
     const card = cardRefs.current[clamped];
     if (!strip || !card) return;
-    const left = card.offsetLeft + card.offsetWidth / 2 - strip.clientWidth / 2;
-    strip.scrollTo({ left, behavior: smooth && !reduce ? "smooth" : "auto" });
-  }, [reduce]);
+    const sr = strip.getBoundingClientRect();
+    if (sr.width <= 0) return; // unlaid-out (hidden slot) → skip; the ResizeObserver retries
+    const cr = card.getBoundingClientRect();
+    const target = strip.scrollLeft + (cr.left + cr.width / 2) - (sr.left + sr.width / 2);
+    strip.scrollTo({ left: target, behavior: smooth && !reduce ? "smooth" : "auto" });
+    if (!smooth) falloff();
+  }, [reduce, falloff]);
 
-  // Mount: bleed, then centre today instantly + falloff (retry once layout settles). A zero-width
-  // strip (hidden slot / background tab) can't centre yet — the ResizeObserver below retries.
-  const centredOnMount = useRef(false);
-  const initIfPossible = useCallback(() => {
-    setSectionBleed();
-    if (centredOnMount.current) return;
-    const strip = stripRef.current;
-    if (!strip || strip.clientWidth <= 0) return;
-    centredOnMount.current = true;
-    centreCard(FORTNIGHT_TODAY_IDX, false);
-  }, [setSectionBleed, centreCard]);
-
+  // Mount: centre today (the measure-adjust runs falloff), once more after a short delay to settle
+  // a not-yet-laid-out strip (hidden StagePage slot / background tab → zero width, skipped until the
+  // ResizeObserver fires with real geometry).
   useLayoutEffect(() => {
-    initIfPossible();
-    falloff();
-    const t = window.setTimeout(() => { initIfPossible(); falloff(); }, 80);
+    centreCard(FORTNIGHT_TODAY_IDX, false);
+    const t = window.setTimeout(() => centreCard(FORTNIGHT_TODAY_IDX, false), 80);
     return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Recompute bleed + falloff on any strip OR stage resize (window, rail pin/peek, drawer padding,
-  // hidden slot becoming visible) + drop any pending frame on unmount.
+  // Re-centre today on any strip resize (window, rail pin, drawer, hidden slot becoming visible),
+  // per Change 7 — the feature column's width drives the centring; drop any pending frame on unmount.
   useEffect(() => {
     const strip = stripRef.current;
-    const stage = document.getElementById(STAGE_ID);
     if (!strip) return;
-    const onResize = () => { initIfPossible(); scheduleFalloff(); };
+    const onResize = () => centreCard(FORTNIGHT_TODAY_IDX, false);
     const ro = new ResizeObserver(onResize);
     ro.observe(strip);
-    if (stage) ro.observe(stage);
     window.addEventListener("resize", onResize);
     return () => {
       ro.disconnect();
@@ -278,7 +247,7 @@ export const DiaryCarousel: React.FC<DiaryCarouselProps> = ({ queries, agents, m
       cancelAnimationFrame(rafRef.current);
       rafRef.current = 0;
     };
-  }, [initIfPossible, scheduleFalloff]);
+  }, [centreCard]);
 
   const onStripKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowLeft") { e.preventDefault(); centreCard(centredIdx.current - 1, true); }
@@ -288,15 +257,17 @@ export const DiaryCarousel: React.FC<DiaryCarouselProps> = ({ queries, agents, m
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
     <section className="dc" aria-labelledby="dc-heading">
-      {/* Full-width tinted band (JS-sized to the stage in setSectionBleed); content constrained by .dc-inner. */}
-      <div className="dc-section" ref={sectionRef}>
-        <div className="dc-inner">
-          <div className="dc-head">
-            <h2 className="dc-title" id="dc-heading">What’s in the diary?</h2>
+      <div className="dc-colwide">
+        <div className="dc-row">
+          {/* Masthead heading column (1/3), left-aligned */}
+          <div className="dc-headcol">
+            <h2 className="dc-title" id="dc-heading">What’s going on?</h2>
             <div className="dc-rule" aria-hidden="true" />
+            <p className="dc-sub">The week just gone and the week that’s coming — your fortnight in focus.</p>
           </div>
 
-          <div className="dc-diary">
+          {/* Feature column (2/3): the carousel + its back-to-today footer */}
+          <div className="dc-featcol">
             <div className="dc-wrap">
               <div
                 ref={stripRef}
@@ -322,18 +293,6 @@ export const DiaryCarousel: React.FC<DiaryCarouselProps> = ({ queries, agents, m
                       onClick={() => centreCard(i, true)}
                     >
                       <div className="dc-band">
-                        {/* Reserved micro-row (constant height → no reflow); the link shows only on the
-                            focused non-today card via the .showlink class toggled in falloff. */}
-                        <div className="dc-cardlink">
-                          <button
-                            type="button"
-                            tabIndex={-1}
-                            className="dc-cardlink-a"
-                            onClick={(e) => { e.stopPropagation(); centreCard(FORTNIGHT_TODAY_IDX, true); }}
-                          >
-                            ↺ back to today
-                          </button>
-                        </div>
                         <div className="dc-cband-row">
                           <span className="dc-dow">{isToday ? "Today" : DOWS[d.getDay()]}</span>
                           <span className="dc-dnum">{d.getDate()} {MONTHS[d.getMonth()]}</span>
@@ -365,6 +324,12 @@ export const DiaryCarousel: React.FC<DiaryCarouselProps> = ({ queries, agents, m
                   );
                 })}
               </div>
+            </div>
+            {/* Reserved footer row → no jump/overlap whether or not the button shows */}
+            <div className="dc-featfoot">
+              <button type="button" ref={todayBtnRef} className="dc-todaybtn" onClick={() => centreCard(FORTNIGHT_TODAY_IDX, true)}>
+                ↺ Back to today
+              </button>
             </div>
           </div>
         </div>
