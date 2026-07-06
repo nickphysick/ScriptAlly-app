@@ -31,6 +31,17 @@ export function queryBucket(status: QueryStatus): QueryBucket {
   }
 }
 
+/**
+ * Masthead pulse line — `Tracking {scope} · {n} queries · {m} awaiting your move`. `m` reuses
+ * the CTA engine's writer's-turn bucket (`queryBucket === "move"`), never a fresh count, so the
+ * masthead and the filter bar's "Your move" pill can't disagree. Pure; the slab uppercases it.
+ */
+export function queriesPulse(queries: Pick<Query, "status">[], scope: string): string {
+  const n = queries.length;
+  const m = queries.filter((q) => queryBucket(q.status as QueryStatus) === "move").length;
+  return `Tracking ${scope} · ${n} ${n === 1 ? "query" : "queries"} · ${m} awaiting your move`;
+}
+
 export const DAY = 86400000;
 /** Stage response windows in WEEKS (not per-agent) — expected reply = send date + window. */
 export const STAGE_RESPONSE_WINDOWS = { query: 8, partial: 12, full: 12 } as const;

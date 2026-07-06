@@ -33,9 +33,13 @@ export const ChromeSlab: React.FC<{
   title: React.ReactNode;
   meta?: React.ReactNode;
   tools?: React.ReactNode;
+  /** GRAND MASTHEAD (hub-only, ref grand-masthead-fullpage-v1.html): crumb + 54px Playfair
+   *  title (--hub-head ink) + mono pulse-line meta stacked in one padded block, CTA bottom-
+   *  right baseline-aligned. Compact (default) keeps the 25px two-row slab for the other pages. */
+  grand?: boolean;
   /** Outer style escape — e.g. negative margins to bleed out of a padded page desk. */
   style?: React.CSSProperties;
-}> = ({ onNavigate, title, meta, tools, style }) => {
+}> = ({ onNavigate, title, meta, tools, grand, style }) => {
   const segments = crumbForPath(useLocation().pathname);
   const navigate = useNavigate();
   const go = (tab: string, sub?: string) => {
@@ -43,53 +47,83 @@ export const ChromeSlab: React.FC<{
     else navigate(CRUMB_PATHS[tab] ?? "/dashboard");
   };
 
-  return (
-    <header
-      className="sa-slab"
+  const crumbNav = segments && (
+    <nav
+      aria-label="Breadcrumb"
       style={{
-        flexShrink: 0,
-        background: "var(--slab-bg, #fffefb)",
-        borderBottom: "var(--slab-bdw, 1px) solid var(--slab-bd, #e7ddd2)",
-        boxShadow: "var(--slab-shadow, none)",
-        ...style,
+        display: "inline-flex", alignItems: "center",
+        fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.16em",
+        textTransform: "uppercase", whiteSpace: "nowrap",
       }}
     >
-      {segments && (
+      {segments.map((seg, i) => {
+        const last = i === segments.length - 1;
+        return (
+          <React.Fragment key={seg.label}>
+            {i > 0 && <span aria-hidden="true" style={{ margin: "0 8px", color: "var(--crumb-sep, #c9bba9)" }}>/</span>}
+            {last ? (
+              <b aria-current="page" style={{ color: "var(--crumb-cur, #7c3a2a)", fontWeight: 700 }}>{seg.label}</b>
+            ) : (
+              <button
+                type="button"
+                onClick={() => go(seg.tab!, seg.sub)}
+                style={{
+                  background: "none", border: "none", padding: 0, cursor: "pointer",
+                  font: "inherit", letterSpacing: "inherit", textTransform: "inherit",
+                  color: "var(--crumb-seg, #9c8878)", transition: "color 0.13s",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = "var(--crumb-seg-hov, #5d4037)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = "var(--crumb-seg, #9c8878)"; }}
+              >
+                {seg.label}
+              </button>
+            )}
+          </React.Fragment>
+        );
+      })}
+    </nav>
+  );
+
+  const shell: React.CSSProperties = {
+    flexShrink: 0,
+    background: "var(--slab-bg, #fffefb)",
+    borderBottom: "var(--slab-bdw, 1px) solid var(--slab-bd, #e7ddd2)",
+    boxShadow: "var(--slab-shadow, none)",
+    ...style,
+  };
+
+  // ── GRAND MASTHEAD ── crumb / big title / pulse-line meta stacked; CTA bottom-right.
+  if (grand) {
+    return (
+      <header className="sa-slab sa-slab-grand" style={shell}>
+        <div style={{ display: "flex", alignItems: "flex-end", gap: 20, padding: "var(--hub-mast-pad, 22px 30px 20px)", flexWrap: "nowrap" }}>
+          <div style={{ minWidth: 0, flex: "1 1 auto" }}>
+            {crumbNav}
+            <div style={{ fontFamily: FONT_SERIF, fontSize: "var(--hub-mast-title, 54px)", fontWeight: 500, color: "var(--hub-head, #000)", lineHeight: 1.0, letterSpacing: "-0.5px", marginTop: 10, whiteSpace: "nowrap" }}>
+              {title}
+            </div>
+            {meta && (
+              <div style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--slab-meta, #8a7a6c)", marginTop: 10, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {meta}
+              </div>
+            )}
+          </div>
+          {tools && (
+            <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 10, minWidth: 0, flexWrap: "nowrap" }}>
+              {tools}
+            </div>
+          )}
+        </div>
+      </header>
+    );
+  }
+
+  // ── COMPACT SLAB (default, every non-hub page) ──
+  return (
+    <header className="sa-slab" style={shell}>
+      {crumbNav && (
         <div style={{ display: "flex", alignItems: "center", minHeight: 34, padding: "6px 18px" }}>
-          <nav
-            aria-label="Breadcrumb"
-            style={{
-              display: "inline-flex", alignItems: "center",
-              fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.16em",
-              textTransform: "uppercase", whiteSpace: "nowrap",
-            }}
-          >
-            {segments.map((seg, i) => {
-              const last = i === segments.length - 1;
-              return (
-                <React.Fragment key={seg.label}>
-                  {i > 0 && <span aria-hidden="true" style={{ margin: "0 8px", color: "var(--crumb-sep, #c9bba9)" }}>/</span>}
-                  {last ? (
-                    <b aria-current="page" style={{ color: "var(--crumb-cur, #7c3a2a)", fontWeight: 700 }}>{seg.label}</b>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => go(seg.tab!, seg.sub)}
-                      style={{
-                        background: "none", border: "none", padding: 0, cursor: "pointer",
-                        font: "inherit", letterSpacing: "inherit", textTransform: "inherit",
-                        color: "var(--crumb-seg, #9c8878)", transition: "color 0.13s",
-                      }}
-                      onMouseEnter={(e) => { e.currentTarget.style.color = "var(--crumb-seg-hov, #5d4037)"; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.color = "var(--crumb-seg, #9c8878)"; }}
-                    >
-                      {seg.label}
-                    </button>
-                  )}
-                </React.Fragment>
-              );
-            })}
-          </nav>
+          {crumbNav}
         </div>
       )}
 

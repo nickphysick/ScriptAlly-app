@@ -454,6 +454,13 @@
   --hub-btn-sh: 0 1px 2px rgba(20, 20, 20, 0.04);
   --hub-btn-rad: 8px;
 }
+/* Grand masthead (hub-only ChromeSlab variant, ref grand-masthead-fullpage-v1.html) — title
+   size + padding are theme-independent (the title's INK is per-theme via --hub-head). The
+   title steps 54→40px on short viewports (the small-laptop honesty check) — one media query,
+   both values tunable here. Guarded on VIEWPORT HEIGHT so a tall pane keeps the grand set. */
+:root { --hub-mast-title: 54px; --hub-mast-pad: 22px 30px 20px; }
+@media (max-height: 819px) { :root { --hub-mast-title: 40px; --hub-mast-pad: 16px 30px 15px; } }
+
 /* Editorial "Soft" container: 16px radius, no border, layered shadow. Defined here so the
    dashboard rebuild + any Editorial container can share one class (theme-scoped). */
 .t-edn .sa-soft {

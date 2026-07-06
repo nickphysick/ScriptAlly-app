@@ -7,7 +7,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { queryBucket } from "./queryAmbient";
+import { queryBucket, queriesPulse } from "./queryAmbient";
 import { QueryStatus } from "../types";
 
 describe("queryBucket — STATUS pill membership", () => {
@@ -33,6 +33,29 @@ describe("queryBucket — STATUS pill membership", () => {
     for (const s of Object.values(QueryStatus)) {
       expect(["waiting", "move", "closed"]).toContain(queryBucket(s));
     }
+  });
+});
+
+describe("queriesPulse — masthead pulse line", () => {
+  const q = (status: QueryStatus) => ({ status });
+
+  it("reads Tracking {scope} · {n} queries · {m} awaiting your move", () => {
+    const list = [q(QueryStatus.QUERIED), q(QueryStatus.PARTIAL_REQUESTED), q(QueryStatus.FULL_SENT)];
+    expect(queriesPulse(list, "all manuscripts")).toBe("Tracking all manuscripts · 3 queries · 1 awaiting your move");
+  });
+
+  it("derives m from the CTA engine's writer's-turn bucket (queryBucket === move), not raw status", () => {
+    // two 'move' statuses, one 'waiting', one 'closed' → m = 2
+    const list = [
+      q(QueryStatus.PARTIAL_REQUESTED), q(QueryStatus.REVISE_RESUBMIT),
+      q(QueryStatus.QUERIED), q(QueryStatus.REJECTED),
+    ];
+    expect(queriesPulse(list, "Lost Clockworks")).toBe("Tracking Lost Clockworks · 4 queries · 2 awaiting your move");
+  });
+
+  it("is singular-safe and honest at zero", () => {
+    expect(queriesPulse([q(QueryStatus.QUERIED)], "x")).toContain("· 1 query ·");
+    expect(queriesPulse([], "all manuscripts")).toBe("Tracking all manuscripts · 0 queries · 0 awaiting your move");
   });
 });
 

@@ -30,7 +30,7 @@ import { StatusPill, getStatusLabel } from "./StatusPill";
 import { StatusDot, statusDirection } from "./StatusDot";
 import { ChromeSlab } from "./shell/ChromeSlab";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
-import { queryAmbientStatus, commandBarStatus, queryBucket, QueryBucket } from "../lib/queryAmbient";
+import { queryAmbientStatus, commandBarStatus, queryBucket, QueryBucket, queriesPulse } from "../lib/queryAmbient";
 import { EdgeFadeScroll } from "./EdgeFadeScroll";
 import { RecordResponseModal } from "./RecordResponseModal";
 import { RecordResponseFocusForm } from "./RecordResponseFocusForm";
@@ -738,6 +738,20 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   // Manuscripts that actually have queries — the MANUSCRIPT pill group only shows these.
   const manuscriptsWithQueries = manuscripts.filter(m => queries.some(q => q.manuscriptId === m.id));
   const hubSubtitle = trackedManuscript ? trackedManuscript.title : "all manuscripts";
+  // Masthead pulse line — counts over the manuscript-scoped set (not the status/search view);
+  // `queriesPulse` derives "awaiting your move" from the CTA engine's writer's-turn bucket.
+  const hubScopedQueries = trackedManuscript ? queries.filter(q => q.manuscriptId === trackedManuscript.id) : queries;
+  const hubPulse = queriesPulse(hubScopedQueries, hubSubtitle);
+  // Masthead CTA — the theme's primary button (espresso Capp / pink Bold / grey Editorial via
+  // the hub sheet), replacing the old hardcoded-pink raised pill so it reads as ONE grammar
+  // with the command-bar primary.
+  const mastCtaStyle: React.CSSProperties = {
+    display: "inline-flex", alignItems: "center", gap: 8, padding: "11px 19px",
+    borderRadius: "var(--hub-btn-rad, 8px)", fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700,
+    whiteSpace: "nowrap", cursor: "pointer", flexShrink: 0,
+    background: "var(--hub-primary, #422701)", color: "var(--hub-primary-tx, #fdfaf5)",
+    border: "1px solid var(--hub-primary-bd, transparent)",
+  };
 
   // Synchronise Agent Notes values when activeAgent changes
   useEffect(() => {
@@ -2122,14 +2136,15 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           /* ── Empty database — the Queries Hub header, a list card with a "No queries yet"
              placeholder (Export disabled), and a welcome pane with Smart Import + manual add. ── */
           <>
-          {/* Queries Hub header — the unified ChromeSlab (shared with the populated state) */}
+          {/* Queries Hub grand masthead — the unified ChromeSlab (shared with the populated state) */}
           <ChromeSlab
             onNavigate={onNavigate}
+            grand
             title="Queries Hub"
-            meta={`Tracking ${hubSubtitle}`}
+            meta={hubPulse}
             style={{ margin: "-22px -28px 14px" }}
             tools={
-              <button type="button" className="qcta-pink qcta-raised" onClick={() => onNavigate?.("queries", "Log a query")} onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.05)"; }} onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }} style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "10px 17px", borderRadius: 12, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, whiteSpace: "nowrap", cursor: "pointer", background: "#f5e2da", border: "1.5px solid #e8c8bc", color: "#7c3a2a", boxShadow: "0 3px 0 #e2c2b5", flexShrink: 0, transition: "transform .15s ease" }}>
+              <button type="button" onClick={() => onNavigate?.("queries", "Log a query")} style={mastCtaStyle}>
                 <Plus style={{ width: 15, height: 15 }} />
                 Log a new query
               </button>
@@ -2220,20 +2235,18 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         ) : (
         <>
 
-        {/* ── Queries Hub header — the unified ChromeSlab (Option A: frame + shadow retired) ── */}
+        {/* ── Queries Hub grand masthead — the unified ChromeSlab (Option A: frame + shadow retired) ── */}
         <ChromeSlab
           onNavigate={onNavigate}
+          grand
           title="Queries Hub"
-          meta={`Tracking ${hubSubtitle}`}
+          meta={hubPulse}
           style={{ margin: "-22px -28px 14px" }}
           tools={
             <button
               type="button"
-              className="qcta-pink qcta-raised"
               onClick={() => onNavigate?.("queries", "Log a query")}
-              onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.05)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
-              style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "10px 17px", borderRadius: 12, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, whiteSpace: "nowrap", cursor: "pointer", background: "#f5e2da", border: "1.5px solid #e8c8bc", color: "#7c3a2a", boxShadow: "0 3px 0 #e2c2b5", flexShrink: 0, transition: "transform .15s ease" }}
+              style={mastCtaStyle}
             >
               <Plus style={{ width: 15, height: 15 }} />
               Log a new query
