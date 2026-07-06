@@ -533,3 +533,22 @@ The location stream landed its EdgeFadeScroll work (`9a246bb`) mid-run, clearing
 - **Anatomy note:** the Agents pane's five always-present sections put its real content minimum ≈ 700px, so the 360px floor is a guard against stub records (the ref's no-floor failure case), not a height you see daily. Floor lives once: `READING_PANE_FLOOR_PX` ≡ `--ag-pane-floor`, artefact-locked.
 - **Verified live** (throwaway, deleted): hug at a 928px cell (sparse 806, rich 744 — its timeline self-caps at the pre-existing 320px inner scroll), cap + internal scroll at a 628px cell, list fills + scrolls with the pinned `30 AGENTS · ↑↓ ⌘K` footer at both sizes, compact strips in place of the skeleton tiles, provenance rendering real fields (`Added 14 Mar 2026 · 14 queries`). Bold/Editorial footers + hug probed. Queries: list already furniture (verified, no drift); pane already hugged+capped — floor added with the shared constant.
 - Seeding artefact noted during verification: the history timeline derives from ACTIVITY records (none seeded), so "clean slate" appeared beside a 14-query footer count — correct behaviour, mismatched fixture.
+
+## Queries workspace — filled pane + command bar (queries: series), 6 Jul
+
+**Shipped:** `d44298d` design ref → `1548b2d` workspace fill → `195df48` command bar → `3e2543e` theming → docs (this commit). Suite 626 → 640. Blast-radius file (`Queries.tsx`) touched in the smallest coherent diffs, one concern per commit; `Queries.tsx` was clean-of-WIP at start (the dirty tree was the location stream's disjoint dashboard diary-carousel — proceeded per the multi-stream protocol, isolated-worktree gates throughout).
+
+**The desk-rule amendment:** documents hug, workspaces fill. Agents pane stays a document (hug/floor); the Queries pane becomes a workspace (fills to the viewport line). Recorded in CLAUDE.md as the law's second clause.
+
+**One home for actions:** the top action toolbar (Record/Edit/Download) is deleted and the in-column yellow "your move" band lost its button (prose kept). Every query action now lives ONLY in the command bar. Artefact-locked (no `gridRow: 1` toolbar, no top Download, exactly one `markSentTriggerRef` and it's in the bar, `onMarkSent` handler gone from QueryTimeline).
+
+**Ambient status computed once:** `lib/queryAmbient.ts` (`queryAmbientStatus` + `commandBarStatus`) is the single derivation of days-waiting / expected-reply / days-since-request; both the Tracking trailing block and the command-bar centre consume it, so they can't disagree. Whose-turn still comes from `getPrimaryAction` (passed in, never re-derived). `STAGE_RESPONSE_WINDOWS`/`DAY` moved here from QueryTimeline.
+
+**Popover upward:** `useFixedMenu` gained an opt-in `{ placement: "up" }` (anchors the menu's bottom above the trigger, grows upward regardless of height). Additive — every other caller keeps the default downward. Verified live: from the bottom command bar the Mark-sent popover opens upward and stays on-screen (bottom 1013 above button top 1021).
+
+**Decisions / flags:**
+- **Agent band:** the pack said "presentation only, name ~24px" but the ref's flat band is *smaller* than the existing 33px status-tint hero. Treated "no content changes" as binding: kept the hero's content + functional add-pills + watermark, nudged the name 33→27 (a move toward the ref without stunting it beside the filled columns). A fuller reshape to the ref's flat band is available but was out of "presentation only" scope for a blast-radius file — Nick's call.
+- **Column-content type "up a notch":** the finer per-column type tuning is best done by eye across themes; the structural fill + the name nudge landed in Phase 1, the rest is available as a follow-up taste pass (not blocking).
+- **Column fade token:** the Phase-1 fade read `--pane` (blush in Bold) but the cards are `#fffefb` — fixed in Phase 3 with `--qp-col-bg` (#fffefb all themes) so no Bold seam.
+
+**Verified live (throwaway, deleted):** State 1 (Rosa, waiting) and State 2 (Charles, partial requested) match the ref — pane fills, three full-height columns, composer pinned, command bar with the right primary/secondaries + ambient status per state, upward popover, Export in the list footer, no bar without a selection. Bold (ink rule) + Editorial (hairline + soft upward shadow) command bars eyeballed. Bold's 1.5px bar rule computes as 1px in getComputedStyle (harness rounding) — declaration rule-text-locked; worth Nick's real-browser glance along with the finer column type.
