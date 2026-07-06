@@ -84,6 +84,9 @@ export const PackagesHome: React.FC<PackagesHomeProps> = ({ packages, versions, 
         .pkglp .gch { width:20px; height:20px; border-radius:6px; display:flex; align-items:center; justify-content:center; }
         .pkglp .gch.l { background:var(--tl); color:var(--burg); } .pkglp .gch.s { background:var(--ts); color:var(--sage-d); } .pkglp .gch.p { background:var(--tp); color:var(--gold); }
         .pkglp .gch.off { background:#f2ece2; color:#c9bda9; }
+        /* Quiet Cappuccino: list-row chips go foam + burgundy glyph (rule-derived — too small for an
+           accent; the glyph alone carries type). The .off grey is unchanged. Bold keeps tints. */
+        .t-capp .pkglp .gch.l, .t-capp .pkglp .gch.s, .t-capp .pkglp .gch.p { background:var(--selBg); color:var(--burg); }
         .pkglp .lprow .st { font-family:${FONT_MONO}; font-size:7.5px; letter-spacing:.05em; color:var(--muted); }
         .pkglp .lprow .st b { color:var(--sage-d); font-weight:500; }
         .pkglp .ghostrow { padding:13px 15px; cursor:pointer; text-align:center; background:none; width:100%; border:0; border-top:1px dashed #e7dbc9; font-family:${FONT_MONO}; font-size:9px; letter-spacing:.06em; text-transform:uppercase; color:#a4937f; margin-top:auto; }
@@ -105,6 +108,8 @@ export const PackagesHome: React.FC<PackagesHomeProps> = ({ packages, versions, 
         .pkglp .matrow.empty { border-style:dashed; }
         .pkglp .pill { font-family:${FONT_MONO}; font-size:7.5px; letter-spacing:.09em; text-transform:uppercase; border-radius:5px; padding:4px 9px; display:inline-flex; gap:6px; align-items:center; flex-shrink:0; }
         .pkglp .pill.l { background:var(--tl); color:var(--burg); } .pkglp .pill.s { background:var(--ts); color:var(--sage-d); } .pkglp .pill.p { background:var(--tp); color:var(--gold); }
+        /* Quiet Cappuccino: pills go white/mocha with a hairline; the glyph carries the type. Bold keeps tints. */
+        .t-capp .pkglp .pill.l, .t-capp .pkglp .pill.s, .t-capp .pkglp .pill.p { background:var(--btnBg); color:var(--btnT); border:1px solid var(--btnBd); }
         /* NOT ".ti" — that collides with Tabler Icons' global icon-font class (!important). */
         .pkglp .matrow .mrt { font-family:${FONT_SERIF}; font-size:15px; font-weight:600; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
         .pkglp .matrow .empty-t { font-style:italic; font-size:13px; color:var(--muted); }

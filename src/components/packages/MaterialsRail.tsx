@@ -14,6 +14,13 @@ import { TypeGlyph } from "./TypeGlyph";
 import { TYPE_META, BUILDER_TYPES } from "./typeMeta";
 import { FONT_SERIF, FONT_MONO } from "../../lib/designTokens";
 
+/** Per-type short class (accent bar + tile): l / s / p. */
+const ACC: Record<string, "l" | "s" | "p"> = {
+  [ComponentType.QUERY_LETTER]: "l",
+  [ComponentType.SYNOPSIS]: "s",
+  [ComponentType.SAMPLE_PAGES]: "p",
+};
+
 export interface MaterialsRailProps {
   versions: ManuscriptVersion[];
   /** Open the create-modal for a material type (Phase 9). */
@@ -33,6 +40,18 @@ export const MaterialsRail: React.FC<MaterialsRailProps> = ({ versions, onCreate
       .pkgrail .mat { display:flex; align-items:center; gap:11px; padding:12px; border:var(--bdw) solid var(--bd); border-radius:11px; background:var(--card); cursor:pointer; transition:background .15s ease; text-align:left; }
       .pkgrail .mat:hover { background:#faeee8; }
       .pkgrail .mi { width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+      /* Type tints moved from inline style to classes (same values — Bold/Editorial render unchanged). */
+      .pkgrail .mi-l { background:var(--tl); color:var(--burg); }
+      .pkgrail .mi-s { background:var(--ts); color:var(--sage-d); }
+      .pkgrail .mi-p { background:var(--tp); color:var(--gold); }
+      .pkgrail .acc { display:none; }
+      /* Quiet Cappuccino (ref scriptally-quiet-capp.html): tiles go foam + burgundy glyph; the type
+         tint survives only as a 3px bar on the row's left edge. Tints stay full in Bold. */
+      .t-capp .pkgrail .mi-l, .t-capp .pkgrail .mi-s, .t-capp .pkgrail .mi-p { background:var(--selBg); color:var(--burg); }
+      .t-capp .pkgrail .acc { display:block; width:3px; align-self:stretch; border-radius:2px; flex-shrink:0; }
+      .t-capp .pkgrail .acc.l { background:var(--tl); }
+      .t-capp .pkgrail .acc.s { background:var(--ts); }
+      .t-capp .pkgrail .acc.p { background:var(--tp); }
       .pkgrail .mt { flex:1; min-width:0; }
       .pkgrail .mt .nm { font-size:13.5px; font-weight:600; color:var(--ink); }
       .pkgrail .mt .sub { font-size:11px; color:var(--muted); margin-top:1px; }
@@ -55,7 +74,8 @@ export const MaterialsRail: React.FC<MaterialsRailProps> = ({ versions, onCreate
         const count = versions.filter((v) => v.componentType === type).length;
         return (
           <div key={type} className="mat" role="button" tabIndex={0} onClick={() => onCreate(type)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onCreate(type); } }}>
-            <span className="mi" style={{ background: m.tint, color: m.ink }}><TypeGlyph type={type} size={16} /></span>
+            <span className={`acc ${ACC[type]}`} aria-hidden="true" />
+            <span className={`mi mi-${ACC[type]}`}><TypeGlyph type={type} size={16} /></span>
             <div className="mt">
               <div className="nm">{m.plural}</div>
               <div className="sub">{count === 0 ? "none yet" : `${count} saved`}</div>

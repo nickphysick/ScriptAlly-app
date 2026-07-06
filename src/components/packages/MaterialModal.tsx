@@ -87,6 +87,11 @@ export const MaterialModal: React.FC<MaterialModalProps> = ({ type, editing, ini
         .pkgmatm .modal.m-letter .modal-band { background:var(--tl); }
         .pkgmatm .modal.m-syn .modal-band { background:var(--ts); }
         .pkgmatm .modal.m-pages .modal-band { background:var(--tp); }
+        /* Quiet Cappuccino: the modal band is chrome — foam + mocha; the glyph tile carries the type
+           (no dot: the ✕ owns the right edge). Bold keeps the tinted bands. */
+        .t-capp .pkgmatm .modal.m-letter .modal-band, .t-capp .pkgmatm .modal.m-syn .modal-band, .t-capp .pkgmatm .modal.m-pages .modal-band { background:var(--band-a); }
+        .t-capp .pkgmatm .modal-band h3 { color:var(--headT); }
+        .t-capp .pkgmatm .mb-ic { color:var(--headT); }
         .pkgmatm .mb-ic { width:32px; height:32px; border-radius:9px; background:rgba(255,254,251,.65); color:var(--ink); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
         .pkgmatm .modal-band h3 { font-family:${FONT_SERIF}; font-size:19px; font-weight:700; color:var(--ink); }
         .pkgmatm .modal-x { background:none; border:0; font-size:17px; color:var(--muted); cursor:pointer; position:relative; z-index:2; margin-left:auto; line-height:1; }
@@ -109,6 +114,8 @@ export const MaterialModal: React.FC<MaterialModalProps> = ({ type, editing, ini
         .pkgmatm .modal.m-letter .m-save:hover:not(:disabled) { background:var(--tl); }
         .pkgmatm .modal.m-syn .m-save:hover:not(:disabled) { background:var(--ts); }
         .pkgmatm .modal.m-pages .m-save:hover:not(:disabled) { background:var(--tp); }
+        /* Quiet Cappuccino: a type-tinted hover is chrome — Save hovers foam like every other button. */
+        .t-capp .pkgmatm .modal.m-letter .m-save:hover:not(:disabled), .t-capp .pkgmatm .modal.m-syn .m-save:hover:not(:disabled), .t-capp .pkgmatm .modal.m-pages .m-save:hover:not(:disabled) { background:var(--btnH); }
         .pkgmatm .m-save:disabled { opacity:.5; cursor:not-allowed; }
       `}</style>
 

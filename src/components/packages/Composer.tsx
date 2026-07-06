@@ -129,6 +129,14 @@ export const Composer: React.FC<ComposerProps> = ({ versions, packages, editingI
         .pkgcomp .brow.focus { outline:2px solid var(--sage-d); outline-offset:2px; }
         .pkgcomp .bhd { display:flex; align-items:center; gap:9px; font-family:${FONT_MONO}; font-size:10px; letter-spacing:.1em; text-transform:uppercase; padding:9px 15px; }
         .pkgcomp .bhd.hl { background:var(--tl); color:var(--burg); } .pkgcomp .bhd.hs { background:var(--ts); color:var(--sage-d); } .pkgcomp .bhd.hp { background:var(--tp); color:var(--gold); }
+        .pkgcomp .bhd .dotac { display:none; }
+        /* Quiet Cappuccino (ref .bhd): empty-slot headers go foam + mocha; the type tint survives as a
+           7px dot right-aligned in the header. Bold keeps the tinted headers (dot hidden). */
+        .t-capp .pkgcomp .bhd.hl, .t-capp .pkgcomp .bhd.hs, .t-capp .pkgcomp .bhd.hp { background:var(--band-a); color:var(--headT); }
+        .t-capp .pkgcomp .bhd .dotac { display:inline-block; width:7px; height:7px; border-radius:50%; margin-left:auto; }
+        .t-capp .pkgcomp .bhd.hl .dotac { background:var(--tl); }
+        .t-capp .pkgcomp .bhd.hs .dotac { background:var(--ts); }
+        .t-capp .pkgcomp .bhd.hp .dotac { background:var(--tp); }
         .pkgcomp .bbd { padding:17px 18px; font-size:13.5px; font-style:italic; color:var(--muted); }
         .pkgcomp .brow.focus .bbd { color:#7a6a5c; }
         .pkgcomp .bti { font-family:${FONT_SERIF}; font-size:16.5px; font-weight:600; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -141,6 +149,12 @@ export const Composer: React.FC<ComposerProps> = ({ versions, packages, editingI
         .t-bold .pkgcomp .pick { border:1.5px solid #1d1712; }
         .pkgcomp .pick-h { padding:13px 18px; border-bottom:var(--bdw) solid var(--bd); display:flex; align-items:center; gap:10px; font-family:${FONT_SERIF}; font-size:17px; font-weight:700; color:var(--ink); }
         .pkgcomp .pick-h.hl { background:var(--tl); } .pkgcomp .pick-h.hs { background:var(--ts); } .pkgcomp .pick-h.hp { background:var(--tp); }
+        /* Glyph ink moved from inline style to per-type classes (same values — Bold unchanged). */
+        .pkgcomp .pick-h.hl .pickg { color:var(--burg); } .pkgcomp .pick-h.hs .pickg { color:var(--sage-d); } .pkgcomp .pick-h.hp .pickg { color:var(--gold); }
+        /* Quiet Cappuccino: the picker header is chrome (same family as the slot headers) — foam +
+           mocha, no dot (the header names the type in text and the glyph carries it). Bold keeps tints. */
+        .t-capp .pkgcomp .pick-h.hl, .t-capp .pkgcomp .pick-h.hs, .t-capp .pkgcomp .pick-h.hp { background:var(--band-a); color:var(--headT); }
+        .t-capp .pkgcomp .pick-h .pickg { color:var(--headT); }
         .pkgcomp .pick-h .cnt { margin-left:auto; font-family:${FONT_MONO}; font-size:9px; color:#7a6a5c; }
         .pkgcomp .pick-b { padding:16px; display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:13px; align-content:start; flex:1; }
         .pkgcomp .bigcard { background:#fffefb; border:var(--bdw) solid var(--bd); border-radius:9px; padding:15px 17px; cursor:pointer; text-align:left; }
@@ -211,7 +225,7 @@ export const Composer: React.FC<ComposerProps> = ({ versions, packages, editingI
             }
             return (
               <div key={t} className={`brow empty${focus === t ? " focus" : ""}`} role="button" tabIndex={0} onClick={() => setFocus(t)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setFocus(t); } }}>
-                <div className={`bhd ${TINT_CLASS[t]}`}><TypeGlyph type={t} size={13} />{m.label}</div>
+                <div className={`bhd ${TINT_CLASS[t]}`}><TypeGlyph type={t} size={13} />{m.label}<span className="dotac" aria-hidden="true" /></div>
                 <div className="bbd">Choose from your materials →</div>
               </div>
             );
@@ -220,7 +234,7 @@ export const Composer: React.FC<ComposerProps> = ({ versions, packages, editingI
 
         <aside className="pick">
           <div className={`pick-h ${TINT_CLASS[focus]}`}>
-            <span style={{ color: fm.ink, display: "inline-flex" }}><TypeGlyph type={focus} size={15} /></span>
+            <span className="pickg" style={{ display: "inline-flex" }}><TypeGlyph type={focus} size={15} /></span>
             Choose a {fm.label.toLowerCase()}
             <span className="cnt">{focusVersions.length} SAVED</span>
           </div>

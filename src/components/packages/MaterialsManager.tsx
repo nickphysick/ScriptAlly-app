@@ -75,6 +75,8 @@ export const MaterialsManager: React.FC<MaterialsManagerProps> = ({ versions, pa
       .pkgmgr .pg-tag.tl { background:var(--tl); color:var(--burg); }
       .pkgmgr .pg-tag.ts { background:var(--ts); color:var(--sage-d); }
       .pkgmgr .pg-tag.tp { background:var(--tp); color:var(--gold); }
+      /* Quiet Cappuccino: shelf-header + sheet pills go white/mocha with a hairline (pill rule). Bold keeps tints. */
+      .t-capp .pkgmgr .pg-tag.tl, .t-capp .pkgmgr .pg-tag.ts, .t-capp .pkgmgr .pg-tag.tp { background:var(--btnBg); color:var(--btnT); border:1px solid var(--btnBd); }
       .pkgmgr .mini { width:196px; background:#fffefb; border:var(--bdw) solid var(--bd); border-radius:6px; padding:12px 13px 0; box-shadow:0 5px 14px rgba(58,28,20,.12); position:relative; cursor:pointer; transition:transform .14s; text-align:left; display:block; }
       .t-bold .pkgmgr .mini { border:1.5px solid #1d1712; }
       .pkgmgr .mini:hover { transform:translateY(-3px); }

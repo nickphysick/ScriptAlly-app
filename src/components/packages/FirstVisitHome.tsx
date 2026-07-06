@@ -120,10 +120,23 @@ export const FirstVisitHome: React.FC<FirstVisitHomeProps> = ({ onBuild, onCreat
         .pkgfv .pgui .tx { font-family:${FONT_SERIF}; font-size:11.5px; line-height:1.82; color:#4f4136; }
         .pkgfv .pgui .em { background:linear-gradient(transparent 60%, var(--hlc,var(--tl)) 60%); }
         .pkgfv .pkui { position:absolute; right:0; bottom:24px; z-index:2; transform:rotate(1.2deg); width:322px; background:#fffefb; border:var(--bdw) solid var(--bd); border-radius:12px; overflow:hidden; box-shadow:0 18px 44px rgba(58,28,20,.14); }
-        .pkgfv .pkui-h { padding:11px 16px; border-bottom:var(--bdw) solid var(--bd); display:flex; align-items:center; gap:9px; transition:background .5s; }
+        /* The slide's tint arrives as --slide-tint (custom prop, not a background) so Cappuccino can
+           quieten the band without fighting an inline style. Base = the tinted band, as before. */
+        .pkgfv .pkui-h { padding:11px 16px; border-bottom:var(--bdw) solid var(--bd); display:flex; align-items:center; gap:9px; transition:background .5s; background:var(--slide-tint); }
         .pkgfv .pkui-h .ic { display:flex; color:var(--ink); }
         .pkgfv .pkui-h .nm { font-family:${FONT_SERIF}; font-size:16.5px; font-weight:700; color:var(--ink); }
         .pkgfv .pkui-h .tagp { margin-left:auto; font-family:${FONT_MONO}; font-size:7px; letter-spacing:.1em; text-transform:uppercase; background:rgba(255,254,251,.75); border-radius:5px; padding:3px 7px; color:#6a5347; }
+        .pkgfv .tagp .d2 { display:none; }
+        /* Quiet Cappuccino (ref .pkui/.stbadge): the demo band goes foam + mocha; the strategy's tint
+           survives as a 6px dot in the Package badge, and the rotation story is carried by the strategy
+           name + the letter's highlight swipe (content — keeps its tint). Bold keeps the tinted band. */
+        .t-capp .pkgfv .pkui-h { background:var(--band-a); }
+        .t-capp .pkgfv .pkui-h .ic, .t-capp .pkgfv .pkui-h .nm { color:var(--headT); }
+        .t-capp .pkgfv .tagp { display:inline-flex; align-items:center; gap:6px; }
+        .t-capp .pkgfv .tagp .d2 { display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--slide-tint); }
+        /* Quiet Cappuccino: content dots in the package lines go single-hue burgundy (dashboard pipeline
+           rule); !important beats the per-line inline colour. Bold keeps per-type dots. */
+        .t-capp .pkgfv .pkln .d { background:var(--burg) !important; }
         .pkgfv .pkui-b { padding:13px 18px 16px; }
         .pkgfv .pkln { display:flex; align-items:center; gap:9px; font-size:12.5px; color:#5f5044; padding:4px 0; }
         .pkgfv .pkln .d { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
@@ -143,6 +156,8 @@ export const FirstVisitHome: React.FC<FirstVisitHomeProps> = ({ onBuild, onCreat
         .pkgfv .lib-h.xl { background:var(--tl); color:var(--burg); }
         .pkgfv .lib-h.xs { background:var(--ts); color:var(--sage-d); }
         .pkgfv .lib-h.xp { background:var(--tp); color:var(--gold); }
+        /* Quiet Cappuccino (ref .lib-h): library-card headers go foam + mocha. Bold keeps tints. */
+        .t-capp .pkgfv .lib-h.xl, .t-capp .pkgfv .lib-h.xs, .t-capp .pkgfv .lib-h.xp { background:var(--band-a); color:var(--headT); }
         .pkgfv .lib-b { padding:20px 18px 22px; }
         .pkgfv .lt2 { font-family:${FONT_MONO}; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:#b3a291; }
         /* NB: NOT ".ti" — that class is Tabler Icons (icon font, !important) and would mangle the title. */
@@ -176,10 +191,10 @@ export const FirstVisitHome: React.FC<FirstVisitHomeProps> = ({ onBuild, onCreat
             <div className="tx" dangerouslySetInnerHTML={{ __html: d.tx }} />
           </div>
           <div className="pkui">
-            <div className="pkui-h" style={{ background: d.tint }}>
+            <div className="pkui-h" style={{ ["--slide-tint" as string]: d.tint } as React.CSSProperties}>
               <span className="ic" dangerouslySetInnerHTML={{ __html: ICONS[d.key] }} />
               <span className="nm">{d.name}</span>
-              <span className="tagp">Package</span>
+              <span className="tagp"><span className="d2" aria-hidden="true" />Package</span>
             </div>
             <div className="pkui-b">
               {d.lines.map(([colour, label], i) => (
