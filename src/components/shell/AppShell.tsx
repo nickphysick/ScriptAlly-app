@@ -45,7 +45,6 @@ import { Nav } from "../Nav";
 import { BottomTabBar } from "../BottomTabBar";
 import { RAIL_GROUPS, RAIL_CAPTURES, railActiveKey, invokeCapture } from "./railNav";
 import { railMode, scrimVisible, railFlowWidth, railPanelWidth, readRailPinned, writeRailPinned, makePeekIntent } from "./railPeek";
-import { TopCrumbStrip } from "./TopCrumbStrip";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
 
 // Grouped-index data lives in railNav.ts (pure, tested); icons stay here (React-free model).
@@ -701,11 +700,6 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
         <div className="md:hidden" style={{ flexShrink: 0 }}>
           <Nav activeTab={routeKey} onNavigate={onNavigate} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         </div>
-
-        {/* TEMP: the standalone crumb strip survives ONLY on /queries — every other workspace
-            page now carries the ChromeSlab (whose first row is the crumb). Remove with the
-            Queries Hub flattening once the parallel stream's Queries.tsx WIP lands. */}
-        {routeKey === "queries" && <TopCrumbStrip onNavigate={onNavigate} />}
 
         {/* THE STAGE — the app's scroll container. Bottom clearance below md reserves space for
             the fixed BottomTabBar (was on the legacy shell's <main>). */}

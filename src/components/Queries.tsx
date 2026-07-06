@@ -28,6 +28,7 @@ import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { QueryStatus, Agent, Manuscript, Query, SubmissionMethod, ActivityType, QueryMaterial, UserPlan } from "../types";
 import { StatusPill, getStatusLabel } from "./StatusPill";
 import { StatusDot, statusDirection } from "./StatusDot";
+import { ChromeSlab } from "./shell/ChromeSlab";
 import { EdgeFadeScroll } from "./EdgeFadeScroll";
 import { RecordResponseModal } from "./RecordResponseModal";
 import { RecordResponseFocusForm } from "./RecordResponseFocusForm";
@@ -2114,17 +2115,19 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           /* ── Empty database — the Queries Hub header, a list card with a "No queries yet"
              placeholder (Export disabled), and a welcome pane with Smart Import + manual add. ── */
           <>
-          {/* Queries Hub header — shared look with the populated state */}
-          <div className="qhbar" style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", padding: "13px 22px", marginBottom: 14, boxShadow: "0 8px 20px rgba(29,23,18,.18)", flexShrink: 0 }}>
-            <div style={{ minWidth: 0 }}>
-              <div style={{ fontFamily: FONT_SERIF, fontWeight: 800, fontSize: 25, color: "#1d1712", lineHeight: 1 }}>Queries Hub</div>
-              <div style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".04em", textTransform: "uppercase" as const, color: "#5a6472", marginTop: 8, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Tracking {hubSubtitle}</div>
-            </div>
-            <button type="button" className="qcta-pink qcta-raised" onClick={() => onNavigate?.("queries", "Log a query")} onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.05)"; }} onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }} style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "10px 17px", borderRadius: 12, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, whiteSpace: "nowrap", cursor: "pointer", background: "#f5e2da", border: "1.5px solid #e8c8bc", color: "#7c3a2a", boxShadow: "0 3px 0 #e2c2b5", flexShrink: 0, transition: "transform .15s ease" }}>
-              <Plus style={{ width: 15, height: 15 }} />
-              Log a new query
-            </button>
-          </div>
+          {/* Queries Hub header — the unified ChromeSlab (shared with the populated state) */}
+          <ChromeSlab
+            onNavigate={onNavigate}
+            title="Queries Hub"
+            meta={`Tracking ${hubSubtitle}`}
+            style={{ margin: "-22px -28px 14px" }}
+            tools={
+              <button type="button" className="qcta-pink qcta-raised" onClick={() => onNavigate?.("queries", "Log a query")} onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.05)"; }} onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }} style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "10px 17px", borderRadius: 12, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, whiteSpace: "nowrap", cursor: "pointer", background: "#f5e2da", border: "1.5px solid #e8c8bc", color: "#7c3a2a", boxShadow: "0 3px 0 #e2c2b5", flexShrink: 0, transition: "transform .15s ease" }}>
+                <Plus style={{ width: 15, height: 15 }} />
+                Log a new query
+              </button>
+            }
+          />
 
           {/* Empty split — list placeholder (col 1) + welcome pane (col 2), both full desk height */}
           <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "330px 1fr", columnGap: 20, flex: 1, minHeight: 0, alignItems: "stretch" }}>
@@ -2210,24 +2213,26 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         ) : (
         <>
 
-        {/* ── Queries Hub header — white bar spanning the desk: title + subtitle · soft-pink Log CTA ── */}
-        <div className="qhbar" style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", padding: "13px 22px", marginBottom: 14, boxShadow: "0 8px 20px rgba(29,23,18,.18)", flexShrink: 0 }}>
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontFamily: FONT_SERIF, fontWeight: 800, fontSize: 25, color: "#1d1712", lineHeight: 1 }}>Queries Hub</div>
-            <div style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".04em", textTransform: "uppercase" as const, color: "#5a6472", marginTop: 8, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>Tracking {hubSubtitle}</div>
-          </div>
-          <button
-            type="button"
-            className="qcta-pink qcta-raised"
-            onClick={() => onNavigate?.("queries", "Log a query")}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.05)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
-            style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "10px 17px", borderRadius: 12, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, whiteSpace: "nowrap", cursor: "pointer", background: "#f5e2da", border: "1.5px solid #e8c8bc", color: "#7c3a2a", boxShadow: "0 3px 0 #e2c2b5", flexShrink: 0, transition: "transform .15s ease" }}
-          >
-            <Plus style={{ width: 15, height: 15 }} />
-            Log a new query
-          </button>
-        </div>
+        {/* ── Queries Hub header — the unified ChromeSlab (Option A: frame + shadow retired) ── */}
+        <ChromeSlab
+          onNavigate={onNavigate}
+          title="Queries Hub"
+          meta={`Tracking ${hubSubtitle}`}
+          style={{ margin: "-22px -28px 14px" }}
+          tools={
+            <button
+              type="button"
+              className="qcta-pink qcta-raised"
+              onClick={() => onNavigate?.("queries", "Log a query")}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.05)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+              style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "10px 17px", borderRadius: 12, fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700, whiteSpace: "nowrap", cursor: "pointer", background: "#f5e2da", border: "1.5px solid #e8c8bc", color: "#7c3a2a", boxShadow: "0 3px 0 #e2c2b5", flexShrink: 0, transition: "transform .15s ease" }}
+            >
+              <Plus style={{ width: 15, height: 15 }} />
+              Log a new query
+            </button>
+          }
+        />
 
         {/* MarkSentPopover — anchored via useFixedMenu to the actions-toolbar CTA */}
         <AnimatePresence>

@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { crumbForPath } from "./topCrumb";
 
@@ -82,6 +82,21 @@ describe("crumb tokens — per-theme smoke (rule-text lock)", () => {
     expect(b).toContain("--crumb-hair: #ececeb");
     expect(b).toContain("--crumb-cur: #44484d");
     expect(b).toContain("--crumb-sep: #c4c6c8");
+  });
+});
+
+describe("Queries Hub slab completion — artefact locks", () => {
+  it("renders the ChromeSlab in BOTH branches (empty + populated) and the qhbar frame is gone", () => {
+    const queries = readFileSync(resolve(__dirname, "../Queries.tsx"), "utf8");
+    const slabMounts = queries.match(/<ChromeSlab/g) ?? [];
+    expect(slabMounts.length).toBe(2);
+    expect(queries.includes('className="qhbar"')).toBe(false);
+  });
+
+  it("TopCrumbStrip is retired (the slab is the sole crumb chrome)", () => {
+    expect(existsSync(resolve(__dirname, "./TopCrumbStrip.tsx"))).toBe(false);
+    const appShell = readFileSync(resolve(__dirname, "./AppShell.tsx"), "utf8");
+    expect(appShell.includes("TopCrumbStrip")).toBe(false);
   });
 });
 
