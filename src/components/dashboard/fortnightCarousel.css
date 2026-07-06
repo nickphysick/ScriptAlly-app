@@ -76,35 +76,22 @@
   color: var(--fc-ink);
 }
 
-/* ---------- floating section header / foot (no band, no container) ---------- */
+/* ---------- floating heading / foot (no band, no container, no counts) ---------- */
 .fcar-head {
   max-width: 1104px;
   margin: 0 auto;
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  padding: 0 38px 4px;
+  text-align: center;
+  padding: 0 38px;
 }
-.fcar-head-left { display: flex; align-items: center; gap: 10px; }
-.fcar-bar { width: 3px; height: 18px; background: var(--fc-accent); border-radius: 2px; opacity: 0.9; align-self: center; }
-.fcar-title { font-family: 'Playfair Display', serif; font-size: 19px; font-weight: 500; color: var(--fc-head); margin: 0; }
-.fcar-meta {
-  display: flex;
-  align-items: baseline;
-  gap: 14px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9.5px;
-  letter-spacing: 0.05em;
-  color: var(--fc-muted);
-  text-transform: uppercase;
-}
-.fcar-meta b { color: var(--fc-accent); font-weight: 600; }
+.fcar-title { font-family: 'Playfair Display', serif; font-size: 29px; font-weight: 500; color: var(--fc-head); margin: 0; }
+.fcar-rule { width: 72px; height: 1px; background: rgba(0, 0, 0, 0.18); margin: 12px auto 0; }
 .fcar-foot {
   max-width: 1104px;
   margin: 0 auto;
   display: flex;
   justify-content: center;
-  padding: 2px 38px 0;
+  padding: 0 38px;
+  min-height: 30px; /* reserved — the pill fades in/out without moving the layout */
 }
 .fcar-todaybtn {
   font-family: 'JetBrains Mono', monospace;
@@ -117,8 +104,12 @@
   padding: 6px 14px;
   border-radius: 999px;
   cursor: pointer;
-  transition: all 0.18s;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity 0.25s, transform 0.25s, background 0.18s, color 0.18s, border-color 0.18s;
 }
+.fcar-todaybtn.show { opacity: 1; pointer-events: auto; transform: none; }
 .fcar-todaybtn:hover { color: var(--fc-btn-hov-ink); border: var(--fc-btn-hov-bd); background: var(--fc-btn-hov-bg); }
 .t-edn .fcar-todaybtn, .t-edn .fcar-todaybtn:hover { border: none; }
 
@@ -134,7 +125,7 @@
   gap: 16px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  padding: 34px calc(50% - 112px) 42px;
+  padding: 52px calc(50% - 112px) 40px; /* 52px top = headroom for the 1.25× focus card */
   scrollbar-width: none;
 }
 .fcar-strip::-webkit-scrollbar { display: none; }

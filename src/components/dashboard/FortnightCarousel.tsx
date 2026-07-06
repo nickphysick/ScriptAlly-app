@@ -9,8 +9,9 @@
  *
  * Mockup (single source of truth for visual values): scriptally-fortnight-depth-themes.html.
  * All falloff maths mirror it: t = normalised distance of card centre from strip centre, then
- * scale 1−t·0.34, drift −sign·t·46px, translateZ −t·220px (wrapper perspective 900px),
- * opacity 1−t·0.70, blur (t²·2.2)px, z-index descending, lift shadow at t < 0.10.
+ * scale 1.25−t·0.59 (focus card 25% larger), drift −sign·t·46px, translateZ −t·220px (wrapper
+ * perspective 900px), opacity 1−t·0.70, blur (t²·2.2)px, z-index descending, lift shadow at
+ * t < 0.10. The same pass toggles the Back-to-today pill, shown only while today is off-centre.
  *
  * Realised activities render the shared StatusDot (locked component); forward-looking reminders
  * (nudge due / materials due / response window closes) render the local dashed clock ring —
@@ -30,9 +31,7 @@ import {
   deriveFortnightEvents,
   groupFortnightEvents,
   startOfDay,
-  dayDiff,
   dayKey,
-  fmtDayMonth,
 } from "./fortnightEvents";
 import "./fortnightCarousel.css";
 
@@ -40,7 +39,8 @@ const DOWS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const DAY_COUNT = FORTNIGHT_PAST_DAYS + 1 + FORTNIGHT_FUTURE_DAYS;
 
 /* Falloff constants — mockup values, one source for the rAF pass below. */
-const FALL_SCALE = 0.34;
+const FOCUS_SCALE = 1.25; // in-focus card renders 25% larger; layout width stays 224px so snap spacing is unaffected
+const FALL_SCALE = 0.59;
 const FALL_DRIFT_PX = 46;
 const FALL_Z_PX = 220;
 const FALL_FADE = 0.7;
@@ -117,16 +117,13 @@ export const FortnightCarousel: React.FC<FortnightCarouselProps> = ({ queries, a
     () => deriveFortnightEvents(queries, agents, manuscripts, activities, today),
     [queries, agents, manuscripts, activities, today]
   );
-  const { byDay, lastWeekCount, comingUpCount } = useMemo(() => groupFortnightEvents(events, today), [events, today]);
+  // comingUpCount feeds the quiet-Today "N events this week →" hint (the heading carries no counts).
+  const { byDay, comingUpCount } = useMemo(() => groupFortnightEvents(events, today), [events, today]);
   const eventsOn = useCallback((d: Date) => byDay.get(dayKey(d)) ?? [], [byDay]);
-
-  // Compact within-month range ("9–23 Jun"); long form across a month boundary.
-  const rangeLabel = days[0].getMonth() === days[DAY_COUNT - 1].getMonth()
-    ? `${days[0].getDate()}–${days[DAY_COUNT - 1].getDate()} ${MONTHS[days[DAY_COUNT - 1].getMonth()]}`
-    : `${fmtDayMonth(days[0])} – ${fmtDayMonth(days[DAY_COUNT - 1])}`;
 
   // ── Depth falloff + centring ─────────────────────────────────────────────────
   const stripRef = useRef<HTMLDivElement>(null);
+  const todayBtnRef = useRef<HTMLButtonElement>(null);
   const cardRefs = useRef<(HTMLElement | null)[]>([]);
   const rafRef = useRef(0);
   const centredIdx = useRef(FORTNIGHT_TODAY_IDX);
@@ -148,7 +145,7 @@ export const FortnightCarousel: React.FC<FortnightCarouselProps> = ({ queries, a
       if (dist < nearestDist) { nearestDist = dist; nearest = i; }
       const t = Math.min(dist / (rect.width * 0.55), 1);
       const sign = Math.sign(cx - mid) || 1;
-      const scale = 1 - t * FALL_SCALE;
+      const scale = FOCUS_SCALE - t * FALL_SCALE;
       const pull = -sign * t * FALL_DRIFT_PX;
       const z = -t * FALL_Z_PX;
       c.style.transform = `translateX(${pull}px) translateZ(${z}px) scale(${scale})`;
@@ -158,6 +155,8 @@ export const FortnightCarousel: React.FC<FortnightCarouselProps> = ({ queries, a
       c.style.zIndex = String(100 - Math.round(t * 90));
     });
     centredIdx.current = nearest;
+    // The pill lives outside React's render loop like the card styles — shown only off-today.
+    todayBtnRef.current?.classList.toggle("show", nearest !== FORTNIGHT_TODAY_IDX);
   }, [reduce]);
 
   const scheduleFalloff = useCallback(() => {
@@ -224,19 +223,10 @@ export const FortnightCarousel: React.FC<FortnightCarouselProps> = ({ queries, a
 
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
-    <section className="fcar" aria-label="Fortnight in focus">
+    <section className="fcar" aria-labelledby="fcar-heading">
       <div className="fcar-head">
-        <div className="fcar-head-left">
-          <span className="fcar-bar" aria-hidden="true" />
-          <h2 className="fcar-title">Fortnight in focus</h2>
-        </div>
-        <div className="fcar-meta">
-          <span><b>{lastWeekCount}</b> event{lastWeekCount === 1 ? "" : "s"} last week</span>
-          <span aria-hidden="true">·</span>
-          <span><b>{comingUpCount}</b> coming up</span>
-          <span aria-hidden="true">·</span>
-          <span>{rangeLabel}</span>
-        </div>
+        <h2 className="fcar-title" id="fcar-heading">What’s in the diary?</h2>
+        <div className="fcar-rule" aria-hidden="true" />
       </div>
 
       <div className="fcar-wrap">
@@ -294,7 +284,7 @@ export const FortnightCarousel: React.FC<FortnightCarouselProps> = ({ queries, a
       </div>
 
       <div className="fcar-foot">
-        <button type="button" className="fcar-todaybtn" onClick={() => centreCard(FORTNIGHT_TODAY_IDX, true)}>
+        <button type="button" ref={todayBtnRef} className="fcar-todaybtn" onClick={() => centreCard(FORTNIGHT_TODAY_IDX, true)}>
           ↺ Back to today
         </button>
       </div>
