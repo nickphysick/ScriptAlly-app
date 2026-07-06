@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Top-strip breadcrumbs (four variants)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--desk:#f2ede7;--card:#fffefb;--parch:#fdfaf5;--hair:#e7ddd2;--bd:#ded3c2;
+  --head:#5d4037;--ink:#3a1c14;--label:#9c8878;--muted:#8a7a6c;--burg:#7c3a2a;--centre:#f6e4da;--pill:#f1e9df}
+body{font-family:'Inter',sans-serif;background:#efeae2;color:var(--ink);padding:34px 30px 70px}
+button{font-family:inherit;cursor:pointer;background:none;border:none;color:inherit}
+h1{font-family:'Playfair Display',serif;font-size:26px;font-weight:500;color:var(--head)}
+.sub{font-size:12.5px;font-weight:300;color:var(--muted);margin-top:6px;max-width:780px;line-height:1.6}
+.opt{margin-top:34px;max-width:1100px}
+.vlab{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--burg)}
+.vsub{font-size:11px;font-weight:300;color:var(--muted);line-height:1.55;margin:4px 0 12px;max-width:720px}
+
+/* app frame: rail sliver + strip + faded page beneath */
+.frame{display:flex;background:var(--desk);border:1px solid var(--hair);border-radius:14px;overflow:hidden;margin-bottom:12px}
+.railmini{width:54px;flex:none;background:var(--card);border-right:1px solid var(--hair);display:flex;flex-direction:column;align-items:center;gap:14px;padding:12px 0}
+.railmini .lg{width:24px;height:24px}
+.railmini i{width:16px;height:16px;border-radius:5px;background:#eadfce}
+.railmini i.on{background:var(--centre);outline:2px solid #f0dccd}
+.main{flex:1;min-width:0}
+
+/* the thin strip */
+.strip{display:flex;align-items:center;gap:14px;min-height:38px;padding:7px 20px;border-bottom:1px solid var(--hair);background:rgba(255,254,251,0.55)}
+.crumb{display:inline-flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--label);white-space:nowrap}
+.crumb .sep{margin:0 8px;color:#c9bba9}
+.crumb b{color:var(--burg);font-weight:700}
+.crumb a{color:var(--label);text-decoration:none}
+.crumb a:hover{color:var(--head)}
+.tabs{display:inline-flex;gap:4px}
+.tab{font-size:11.5px;font-weight:500;color:#6a5a50;padding:5px 13px;border-radius:99px}
+.tab.on{background:var(--centre);color:var(--burg)}
+.tab:hover:not(.on){background:#ece5da}
+.strip .right{margin-left:auto;display:flex;align-items:center;gap:10px}
+
+/* faded page-beneath stub */
+.pagestub{padding:16px 20px 22px;opacity:.45}
+.ttl{font-family:'Playfair Display',serif;font-size:26px;font-weight:500;color:var(--head)}
+.meta{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.stubrow{display:flex;gap:12px;margin-top:14px}
+.stub{background:var(--card);border:1px solid var(--hair);border-radius:10px;height:54px;flex:1}
+.stub.narrow{max-width:220px}
+
+/* D dropdown */
+.d-seg{display:inline-flex;align-items:center;gap:5px;padding:4px 7px;border-radius:7px}
+.d-seg.link:hover{background:#ece5da;color:var(--head)}
+.d-seg.here{color:var(--burg);font-weight:700}
+.d-seg .car{font-size:7px;color:#c9bba9}
+.d-hold{position:relative;display:inline-block}
+.d-menu{position:absolute;top:calc(100% + 7px);left:0;background:var(--card);border:1px solid var(--hair);border-radius:12px;box-shadow:0 6px 16px rgba(58,28,20,0.10),0 18px 40px rgba(58,28,20,0.12);padding:6px;min-width:200px;z-index:5}
+.d-mi{display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:8px;font-family:'Inter',sans-serif;font-size:12px;font-weight:500;color:#5a4a40;letter-spacing:0;text-transform:none;width:100%;text-align:left}
+.d-mi:hover{background:#f7f3ed}
+.d-mi.on{background:var(--pill);color:var(--head)}
+</style>
+</head>
+<body>
+
+<h1>The thin top strip</h1>
+<p class="sub">A consistent slim bar at the very top of every workspace page — above the page header — carrying the
+breadcrumb. Shown with the collapsed rail beside it (the strip now does the "where am I" work the icon rail can't).
+Agents' floating tab pills fold into this strip; Queries finally gets the same chrome.</p>
+
+<!-- ============ A ============ -->
+<div class="opt">
+  <div class="vlab">A · Crumb only — your spec</div>
+  <div class="vsub">Just the location string, left-aligned, on a faint card-tinted strip with a hairline base. On Agents,
+  the sibling tabs would remain wherever they live today.</div>
+  <div class="frame"><div class="railmini"><svg class="lg" viewBox="0 0 24 24"><path d="M21 3L10 14" stroke="#2d2016" stroke-width="1.5" fill="none"/><path d="M21 3l-7 18-4-7-7-4 18-7z" stroke="#2d2016" stroke-width="1.5" fill="none"/></svg><i></i><i class="on"></i><i></i><i></i><i></i></div>
+    <div class="main">
+      <div class="strip"><span class="crumb">ScriptAlly<span class="sep">/</span>Querying<span class="sep">/</span><b>Queries Hub</b></span></div>
+      <div class="pagestub"><div class="ttl">Queries Hub</div><div class="meta">Tracking all manuscripts</div>
+        <div class="stubrow"><div class="stub narrow"></div><div class="stub"></div></div></div>
+    </div>
+  </div>
+  <div class="frame"><div class="railmini"><svg class="lg" viewBox="0 0 24 24"><path d="M21 3L10 14" stroke="#2d2016" stroke-width="1.5" fill="none"/><path d="M21 3l-7 18-4-7-7-4 18-7z" stroke="#2d2016" stroke-width="1.5" fill="none"/></svg><i></i><i></i><i class="on"></i><i></i><i></i></div>
+    <div class="main">
+      <div class="strip"><span class="crumb">ScriptAlly<span class="sep">/</span>Agents<span class="sep">/</span><b>Database</b></span></div>
+      <div class="pagestub"><div class="ttl">Agents</div><div class="meta">16 agents on file</div>
+        <div class="stubrow"><div class="stub narrow"></div><div class="stub"></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ B ============ -->
+<div class="opt">
+  <div class="vlab">B · Crumb left · sibling tabs right</div>
+  <div class="vsub">The strip earns double duty: location on the left, the section's sibling pages as pills on the right —
+  Agents' floating tabs get a permanent home, and every section with siblings gets the same treatment.</div>
+  <div class="frame"><div class="railmini"><svg class="lg" viewBox="0 0 24 24"><path d="M21 3L10 14" stroke="#2d2016" stroke-width="1.5" fill="none"/><path d="M21 3l-7 18-4-7-7-4 18-7z" stroke="#2d2016" stroke-width="1.5" fill="none"/></svg><i></i><i></i><i class="on"></i><i></i><i></i></div>
+    <div class="main">
+      <div class="strip"><span class="crumb">ScriptAlly<span class="sep">/</span>Agents<span class="sep">/</span><b>Database</b></span>
+        <span class="right tabs"><span class="tab on">Database</span><span class="tab">Discover</span></span></div>
+      <div class="pagestub"><div class="ttl">Agents</div><div class="meta">16 agents on file</div>
+        <div class="stubrow"><div class="stub narrow"></div><div class="stub"></div></div></div>
+    </div>
+  </div>
+  <div class="frame"><div class="railmini"><svg class="lg" viewBox="0 0 24 24"><path d="M21 3L10 14" stroke="#2d2016" stroke-width="1.5" fill="none"/><path d="M21 3l-7 18-4-7-7-4 18-7z" stroke="#2d2016" stroke-width="1.5" fill="none"/></svg><i></i><i class="on"></i><i></i><i></i><i></i></div>
+    <div class="main">
+      <div class="strip"><span class="crumb">ScriptAlly<span class="sep">/</span>Querying<span class="sep">/</span><b>Queries Hub</b></span></div>
+      <div class="pagestub"><div class="ttl">Queries Hub</div><div class="meta">Tracking all manuscripts</div>
+        <div class="stubrow"><div class="stub narrow"></div><div class="stub"></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ C ============ -->
+<div class="opt">
+  <div class="vlab">C · The live tail — tabs ARE the last crumb</div>
+  <div class="vsub">The crumb walks you in, and its final segment is the sibling set itself: <i>ScriptAlly / Agents /</i>
+  then the pills. Location and section navigation become one continuous sentence. Sections without siblings just end in bold.</div>
+  <div class="frame"><div class="railmini"><svg class="lg" viewBox="0 0 24 24"><path d="M21 3L10 14" stroke="#2d2016" stroke-width="1.5" fill="none"/><path d="M21 3l-7 18-4-7-7-4 18-7z" stroke="#2d2016" stroke-width="1.5" fill="none"/></svg><i></i><i></i><i class="on"></i><i></i><i></i></div>
+    <div class="main">
+      <div class="strip"><span class="crumb">ScriptAlly<span class="sep">/</span>Agents<span class="sep">/</span></span>
+        <span class="tabs" style="margin-left:-4px"><span class="tab on">Database</span><span class="tab">Discover</span></span></div>
+      <div class="pagestub"><div class="ttl">Agents</div><div class="meta">16 agents on file</div>
+        <div class="stubrow"><div class="stub narrow"></div><div class="stub"></div></div></div>
+    </div>
+  </div>
+  <div class="frame"><div class="railmini"><svg class="lg" viewBox="0 0 24 24"><path d="M21 3L10 14" stroke="#2d2016" stroke-width="1.5" fill="none"/><path d="M21 3l-7 18-4-7-7-4 18-7z" stroke="#2d2016" stroke-width="1.5" fill="none"/></svg><i></i><i class="on"></i><i></i><i></i><i></i></div>
+    <div class="main">
+      <div class="strip"><span class="crumb">ScriptAlly<span class="sep">/</span>Querying<span class="sep">/</span><b>Queries Hub</b></span></div>
+      <div class="pagestub"><div class="ttl">Queries Hub</div><div class="meta">Tracking all manuscripts</div>
+        <div class="stubrow"><div class="stub narrow"></div><div class="stub"></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ D ============ -->
+<div class="opt">
+  <div class="vlab">D · Wayfinder — crumb segments are alive</div>
+  <div class="vsub">Same slim strip, but each segment navigates: the section segment jumps to the section, the page segment
+  drops a sibling menu (shown open). Most compact; siblings hidden behind one click.</div>
+  <div class="frame" style="overflow:visible"><div class="railmini"><svg class="lg" viewBox="0 0 24 24"><path d="M21 3L10 14" stroke="#2d2016" stroke-width="1.5" fill="none"/><path d="M21 3l-7 18-4-7-7-4 18-7z" stroke="#2d2016" stroke-width="1.5" fill="none"/></svg><i></i><i></i><i class="on"></i><i></i><i></i></div>
+    <div class="main">
+      <div class="strip" style="overflow:visible">
+        <span class="crumb">
+          <span class="d-seg link">ScriptAlly</span><span class="sep">/</span>
+          <span class="d-seg link">Agents</span><span class="sep">/</span>
+          <span class="d-hold">
+            <span class="d-seg here">Database<span class="car">▾</span></span>
+            <span class="d-menu">
+              <button class="d-mi on">Agents database</button>
+              <button class="d-mi">Discover new agents</button>
+            </span>
+          </span>
+        </span>
+      </div>
+      <div class="pagestub" style="padding-top:74px"><div class="ttl">Agents</div><div class="meta">16 agents on file</div>
+        <div class="stubrow"><div class="stub narrow"></div><div class="stub"></div></div></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

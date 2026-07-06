@@ -45,6 +45,7 @@ import { Nav } from "../Nav";
 import { BottomTabBar } from "../BottomTabBar";
 import { RAIL_GROUPS, RAIL_CAPTURES, railActiveKey, invokeCapture } from "./railNav";
 import { railMode, scrimVisible, railFlowWidth, railPanelWidth, readRailPinned, writeRailPinned, makePeekIntent } from "./railPeek";
+import { TopCrumbStrip } from "./TopCrumbStrip";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
 
 // Grouped-index data lives in railNav.ts (pure, tested); icons stay here (React-free model).
@@ -738,6 +739,10 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
         <div className="md:hidden" style={{ flexShrink: 0 }}>
           <Nav activeTab={routeKey} onNavigate={onNavigate} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         </div>
+
+        {/* Workspace breadcrumb strip — crumb-only (variant A); renders null on the dashboard
+            (its floating top bar owns that band) and on routes the crumb table doesn't know. */}
+        <TopCrumbStrip onNavigate={onNavigate} />
 
         {/* THE STAGE — the app's scroll container. Bottom clearance below md reserves space for
             the fixed BottomTabBar (was on the legacy shell's <main>). */}

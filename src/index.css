@@ -123,6 +123,13 @@
      content scrim shown only during an unpinned peek. */
   --rail-peek-shadow: 0 10px 30px rgba(58, 28, 20, 0.16);
   --rail-scrim: rgba(58, 28, 20, 0.12);
+  /* Workspace breadcrumb strip (ref topstrip-breadcrumbs-v1.html, variant A). */
+  --crumb-bg: rgba(255, 254, 251, 0.55);
+  --crumb-hair: #e7ddd2;
+  --crumb-seg: #9c8878;
+  --crumb-seg-hov: #5d4037;
+  --crumb-cur: #7c3a2a;
+  --crumb-sep: #c9bba9;
 }
 .t-bold {
   --bd: #1d1712;   /* ink */
@@ -181,6 +188,13 @@
   /* Hover-peek: the hard-offset language deepens on peek; ink-tinted scrim. */
   --rail-peek-shadow: 7px 7px 0 rgba(29, 23, 18, 0.92);
   --rail-scrim: rgba(29, 23, 18, 0.14);
+  /* Workspace breadcrumb strip. */
+  --crumb-bg: rgba(255, 255, 255, 0.6);
+  --crumb-hair: rgba(29, 23, 18, 0.18);
+  --crumb-seg: #6a6560;
+  --crumb-seg-hov: #1d1712;
+  --crumb-cur: #1d1712;
+  --crumb-sep: #9a948e;
 }
 /* Editorial — the consolidated-v37 "Graphite · Soft · Tinted" system (t-edn + es4 + eb2 locked).
    Neutral whites/greys; graphite #44484d is the single accent. Containers are "Soft": 16px
@@ -244,6 +258,13 @@
   /* Hover-peek: deepened layered shadow; neutral graphite scrim. */
   --rail-peek-shadow: 0 2px 4px rgba(20, 20, 20, 0.06), 0 18px 44px rgba(20, 20, 20, 0.14);
   --rail-scrim: rgba(20, 20, 20, 0.10);
+  /* Workspace breadcrumb strip. */
+  --crumb-bg: rgba(255, 255, 255, 0.6);
+  --crumb-hair: #ececeb;
+  --crumb-seg: #8a8d90;
+  --crumb-seg-hov: #1a1a1a;
+  --crumb-cur: #44484d;
+  --crumb-sep: #c4c6c8;
 }
 /* Editorial "Soft" container: 16px radius, no border, layered shadow. Defined here so the
    dashboard rebuild + any Editorial container can share one class (theme-scoped). */
