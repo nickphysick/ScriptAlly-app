@@ -17,16 +17,18 @@
   --ag-line: rgba(60, 50, 40, 0.12);
   --ag-muted: #93897b;
   --ag-ink: #2c2620;
-  --ag-bandflat: #e9e1d3;
-  --ag-panebg: #fffefb;
-  --ag-selbg: #f4efe7;
+  /* Reference-paper surfaces read the shared hub sheet (Capp de-pinking lands here — espresso
+     monograms, parchment reference band; hub-scoped, not the app-wide Capp retoken). */
+  --ag-bandflat: var(--hub-band-reference, #f6f1e6);
+  --ag-panebg: var(--hub-pane-reference, #fffefb);
+  --ag-selbg: var(--hub-row-on, #f4efe7);
   --ag-selhover: #f9f6f0;
   --ag-accent: #7c3a2a;
   --ag-star: #7c3a2a;
   --ag-shadow: none;
   --ag-sub: #f7f2ea;        /* subtle tint fill — search, stat tiles, awaiting-info panels */
-  --ag-av-bg: #dcc7b5;      /* dusty avatar */
-  --ag-av-ink: #5d4037;
+  --ag-av-bg: var(--hub-monogram, #422701);      /* monogram — hub sheet (espresso in Capp) */
+  --ag-av-ink: var(--hub-monogram-tx, #fdfaf5);
   --ag-solid: #5d4037;      /* solid primary (Add agent) */
   --ag-solid-ink: #fdf9f5;
   --ag-edge: var(--bd, #d8cebf);
@@ -45,15 +47,15 @@
   --ag-line: rgba(29, 23, 18, 0.14);
   --ag-muted: #7d7772;
   --ag-ink: #1d1712;
-  --ag-bandflat: #f4c7c2;
-  --ag-panebg: #ffffff; /* deliberate divergence from the Queries pane blush — Agents-page decision */
-  --ag-selbg: #fae5e1;
+  --ag-bandflat: var(--hub-band-reference, #fbefef);
+  --ag-panebg: var(--hub-pane-reference, #ffffff); /* both hub panes white — the Queries blush is retired here too */
+  --ag-selbg: var(--hub-row-on, #f4e4e1);
   --ag-selhover: #fcf0ec;
   --ag-accent: #7c3a2a;
   --ag-star: #1d1712;
   --ag-sub: #faf1ee;
-  --ag-av-bg: #eec9c3;
-  --ag-av-ink: #1d1712;
+  --ag-av-bg: var(--hub-monogram, #000000);
+  --ag-av-ink: var(--hub-monogram-tx, #ffffff);
   --ag-solid: #1d1712;
   --ag-solid-ink: #fdf9f5;
 }
@@ -61,16 +63,16 @@
   --ag-line: rgba(29, 23, 18, 0.09);
   --ag-muted: #84878c;
   --ag-ink: #1d1712;
-  --ag-bandflat: #f4f4f5;
-  --ag-panebg: #ffffff;
-  --ag-selbg: #f9f9fa;
+  --ag-bandflat: var(--hub-band-reference, #f5f5f5);
+  --ag-panebg: var(--hub-pane-reference, #ffffff);
+  --ag-selbg: var(--hub-row-on, #f5fbff);
   --ag-selhover: #f6f6f7;
   --ag-accent: #44484d;
   --ag-star: #44484d;
   --ag-shadow: 0 8px 24px rgba(20, 20, 25, 0.07);
   --ag-sub: #f4f4f5;
-  --ag-av-bg: #e3e5e7;
-  --ag-av-ink: #44484d;
+  --ag-av-bg: var(--hub-monogram, #e9eaeb);
+  --ag-av-ink: var(--hub-monogram-tx, #44484d);
   --ag-solid: #44484d;
   --ag-solid-ink: #ffffff;
   --ag-home: #555555;
@@ -286,8 +288,8 @@
   white-space: nowrap;
 }
 .agv2 .ag-seg button.on {
-  background: linear-gradient(180deg, var(--band-a, #ece5d8), var(--band-b, #e5ddcd));
-  color: var(--hdr, #5d4037);
+  background: var(--hub-toggle-on, #705e4c);
+  color: var(--hub-toggle-on-tx, #ffffff);
   font-weight: 600;
 }
 .t-capp .agv2 .ag-seg button.on { box-shadow: inset 0 0 0 1px var(--ag-line); }
@@ -535,19 +537,20 @@
    test keeps the two in step). Hug: exactly as tall as content, desk showing beneath.
    Cap: the grid track (the viewport line) — past it the scroller inside takes over. ── */
 .agv2 .ag-pane {
-  height: auto;
-  align-self: start;
-  min-height: var(--ag-pane-floor, 360px);
-  max-height: 100%;
+  height: 100%;
+  align-self: stretch;
+  min-height: 0;
   min-width: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   background: var(--ag-panebg);
 }
-/* EdgeFadeScroll frame between the pane shell and the scroller — shrinkable so the card can
-   HUG (never force-fills); the scroller engages only once the card hits its cap. */
-.agv2 .ag-panewrap { flex: 0 1 auto; min-height: 0; }
+/* Hub grammar: the reading pane FILLS its grid cell like the Queries workspace (the desk-rule
+   hug clause is retired — a command bar now anchors the base, so the pane is a two-part frame:
+   scroller + pinned bar). --ag-pane-floor is kept as the shared constant's CSS mirror (the
+   artefact test + READING_PANE_FLOOR_PX) but no longer drives the pane height. */
+.agv2 .ag-panewrap { flex: 1; min-height: 0; }
 .t-edn .agv2 .ag-pane { border: 1px solid #d8dadd; } /* the sole outlined container in Editorial */
 .agv2 .ag-panescroll { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: thin; }
 /* Form 11 inset frame — Cappuccino ONLY, on the outer shell, scoped (never the .qhbar leak) */
@@ -1035,6 +1038,66 @@
 }
 .agv2 .ag-panefoot { margin-top: auto; } /* pins to the card base while the document sits at its floor */
 .agv2 .ag-footr { margin-left: auto; }
+
+/* ── Command bar (hub grammar) — anchors the pane base like the Queries workspace bar:
+      primary Send query + secondary Edit profile · centre provenance · right open-to-queries
+      chip. The old provenance footer is absorbed into the centre; the toolbar Send/Edit retire. ── */
+.agv2 .ag-cmdbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-top: var(--hub-cmd-rule, 1px solid #e7ddd2);
+  background: var(--hub-cmd, #fffdf9);
+}
+.agv2 .ag-cmd-primary,
+.agv2 .ag-cmd-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  border-radius: var(--hub-btn-rad, 7px);
+  padding: 9px 15px;
+}
+.agv2 .ag-cmd-primary {
+  background: var(--hub-primary, #422701);
+  color: var(--hub-primary-tx, #ffffff);
+  border: var(--hub-primary-bd, 1px solid transparent);
+}
+.agv2 .ag-cmd-secondary {
+  background: var(--hub-btn-bg, #ffffff);
+  color: var(--hub-ink, #2c2620);
+  border: var(--hub-btn-bd, 1px solid #d8cebf);
+  box-shadow: var(--hub-btn-sh, none);
+}
+.agv2 .ag-cmd-primary svg,
+.agv2 .ag-cmd-secondary svg { width: 14px; height: 14px; }
+.agv2 .ag-cmd-prov {
+  margin: 0 auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ag-muted);
+  text-align: center;
+}
+.agv2 .ag-cmd-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ag-muted);
+  white-space: nowrap;
+}
+.agv2 .ag-cmd-open .ag-d { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 .agv2 .ag-colophon {
   text-align: center;
   padding: 12px 0 10px;

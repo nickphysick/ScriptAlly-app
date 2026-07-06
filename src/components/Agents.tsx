@@ -709,11 +709,27 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
         {/* Colophon — closes the CONTENT (the pinned footer below closes the card) */}
         <div className="ag-colophon" aria-hidden="true">❦</div>
       </EdgeFadeScroll>
-      {/* Provenance footer (desk rule): what exists on the record — dateAdded is rules-required;
-          user agent docs carry NO verification field (schema decision flagged in the run
-          report), so the right side stays absent rather than invented. */}
-      <div className="ag-panefoot">
-        {paneProvenance(a, queries.filter((q) => q.agentId === a.id).length)}
+      {/* Command bar (hub grammar) — anchors the pane base like the Queries workspace bar.
+          Primary Send query + secondary Edit profile (the toolbar copies retired); the
+          provenance footer is absorbed into the mono centre; right = the open-to-queries chip
+          (a read-only status mirror — the interactive flip stays the identity pill's locked job). */}
+      <div className="ag-cmdbar">
+        <button type="button" className="ag-cmd-primary" onClick={() => sendQueryFlow(a)}>
+          <Send aria-hidden="true" /> Send query
+        </button>
+        <button type="button" className="ag-cmd-secondary" onClick={() => openEditAgent(a.id)}>
+          <Pencil aria-hidden="true" /> Edit profile
+        </button>
+        <span className="ag-cmd-prov">
+          {paneProvenance(a, queries.filter((q) => q.agentId === a.id).length)}
+        </span>
+        <span
+          className="ag-cmd-open"
+          title={isOpen ? "Open to queries" : a.submissionStatus === SubmissionStatus.CLOSED ? "Closed to queries" : "Availability unknown"}
+        >
+          <span className="ag-d" style={{ background: isOpen ? "var(--sd-hue, #7c3a2a)" : "rgba(0,0,0,0.2)" }} />
+          {isOpen ? "Open" : a.submissionStatus === SubmissionStatus.CLOSED ? "Closed" : "Unknown"}
+        </span>
       </div>
       </>
     );
@@ -765,14 +781,8 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
           <option value="az">Sort · A to Z</option>
           <option value="resp">Sort · Response time</option>
         </select>
-        <div className="ag-chipacts">
-          <button type="button" className="ag-btn ag-btn-sm" disabled={!selectedAgent} onClick={() => selectedAgent && sendQueryFlow(selectedAgent)}>
-            <Send aria-hidden="true" /> Send query
-          </button>
-          <button type="button" className="ag-btn ag-btn-sm" disabled={!selectedAgent} onClick={() => selectedAgent && openEditAgent(selectedAgent.id)}>
-            <Pencil aria-hidden="true" /> Edit profile
-          </button>
-        </div>
+        {/* Send query / Edit profile retired from the control row — they now live once, on the
+            reading pane's command bar (hub grammar's single-home rule). */}
       </div>
 
       {/* Panes */}

@@ -291,6 +291,7 @@ describe("desk rule — compact emptiness artefacts", () => {
     expect(agents.includes("ag-commstrip")).toBe(true);
     expect(agents.includes("ag-colophon")).toBe(true);
     expect(agents.includes("ag-listfoot")).toBe(true);
-    expect(agents.includes("ag-panefoot")).toBe(true);
+    // The provenance footer was absorbed into the hub command bar (Agents migration).
+    expect(agents.includes("ag-cmdbar")).toBe(true);
   });
 });
