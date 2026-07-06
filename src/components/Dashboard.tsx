@@ -66,7 +66,7 @@ import { useFocusSlot } from "./dashboard/focusSlot";
 import "./dashboard/dashboardV37.css";
 import { useOpenEditAgent } from "./EditAgentHost";
 import { StatCards } from "./dashboard/StatCards";
-import { FortnightCarousel } from "./dashboard/FortnightCarousel";
+import { DiaryCarousel } from "./dashboard/DiaryCarousel";
 import { WhatsLivePanel } from "./dashboard/WhatsLivePanel";
 import { DashboardSkeleton } from "./dashboard/DashboardSkeleton";
 import { replacePlaceholders, extractAgentFromText } from "../lib/activityUtils";
@@ -1645,7 +1645,7 @@ export const Dashboard: React.FC<{
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 20, marginTop: 20 }}>
-          <FortnightCarousel
+          <DiaryCarousel
             queries={queries}
             agents={agents}
             manuscripts={manuscripts}
