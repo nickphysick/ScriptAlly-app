@@ -125,7 +125,7 @@
   gap: 16px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  padding: 52px calc(50% - 112px) 40px; /* 52px top = headroom for the 1.25× focus card */
+  padding: 64px calc(50% - 112px) 60px; /* headroom top+bottom for the enlarged (~1.56×) focus card */
   scrollbar-width: none;
 }
 .fcar-strip::-webkit-scrollbar { display: none; }

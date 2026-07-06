@@ -9,9 +9,11 @@
  *
  * Mockup (single source of truth for visual values): scriptally-fortnight-depth-themes.html.
  * All falloff maths mirror it: t = normalised distance of card centre from strip centre, then
- * scale 1.25−t·0.59 (focus card 25% larger), drift −sign·t·46px, translateZ −t·220px (wrapper
- * perspective 900px), opacity 1−t·0.70, blur (t²·2.2)px, z-index descending, lift shadow at
- * t < 0.10. The same pass toggles the Back-to-today pill, shown only while today is off-centre.
+ * base scale 1.25−t·0.59, drift −sign·t·46px, translateZ −t·220px (wrapper perspective 900px),
+ * opacity 1−t·0.70, blur (t²·2.2)px, z-index descending, lift shadow at t < 0.10. The centred
+ * card takes a further +25% that decays to 0 by t=0.18 — so ONLY the in-focus card grows and
+ * every background card keeps the mockup's size. The same pass toggles the Back-to-today pill,
+ * shown only while today is off-centre.
  *
  * Realised activities render the shared StatusDot (locked component); forward-looking reminders
  * (nudge due / materials due / response window closes) render the local dashed clock ring —
@@ -39,8 +41,10 @@ const DOWS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const DAY_COUNT = FORTNIGHT_PAST_DAYS + 1 + FORTNIGHT_FUTURE_DAYS;
 
 /* Falloff constants — mockup values, one source for the rAF pass below. */
-const FOCUS_SCALE = 1.25; // in-focus card renders 25% larger; layout width stays 224px so snap spacing is unaffected
-const FALL_SCALE = 0.59;
+const BASE_FOCUS = 1.25;    // mockup falloff peak — the size EVERY card is measured against
+const FALL_SCALE = 0.59;    // linear drop to 0.66 at the far edge; background sizes derive from this alone
+const FOCUS_BOOST = 0.25;   // the centred card renders a further 25% larger…
+const BOOST_FALLOFF = 0.18; // …decaying to 0 by this t (below the ±1 card's t at every strip width), so NO background card changes size
 const FALL_DRIFT_PX = 46;
 const FALL_Z_PX = 220;
 const FALL_FADE = 0.7;
@@ -145,7 +149,9 @@ export const FortnightCarousel: React.FC<FortnightCarouselProps> = ({ queries, a
       if (dist < nearestDist) { nearestDist = dist; nearest = i; }
       const t = Math.min(dist / (rect.width * 0.55), 1);
       const sign = Math.sign(cx - mid) || 1;
-      const scale = FOCUS_SCALE - t * FALL_SCALE;
+      // Boost ONLY the in-focus card; the factor is 1 by t = BOOST_FALLOFF, so every other
+      // card keeps the mockup's established size (background heights unchanged).
+      const scale = (BASE_FOCUS - t * FALL_SCALE) * (1 + FOCUS_BOOST * Math.max(0, 1 - t / BOOST_FALLOFF));
       const pull = -sign * t * FALL_DRIFT_PX;
       const z = -t * FALL_Z_PX;
       c.style.transform = `translateX(${pull}px) translateZ(${z}px) scale(${scale})`;
