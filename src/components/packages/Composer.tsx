@@ -2,12 +2,13 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Composer (v2) — build or edit a submission package. Ported from the composer-v2 design ref: scaled
- * up (23px name input, 72px manifest rows, 17px picker header, roomier padding), and the old fork
- * strip is replaced by a quiet "⧉ Copy existing" control in the band's top-right that slides open a
- * right-hand drawer of the existing packages — each a mini card with a "⧉ Copy into composer" that
- * clones its three version-id references into the composer, names it "Copy of <name>", closes the
- * drawer and re-runs slot focus. The control + drawer are hidden when zero packages exist.
+ * Composer (v2 + guided pass) — build or edit a submission package. The guided redesign adds a
+ * chapter header (parcel illustration + the task in one sentence), an inset rounded name band, a
+ * one-line order-of-play guide, headers on EVERY slot row carrying the first/then/optional step
+ * words, and a type scale-up (24px name, 18px picker header, 17px titles). The "⧉ Copy existing"
+ * control in the band's top-right slides open a right-hand drawer of the existing packages — each a
+ * mini card with a "⧉ Copy into composer" that clones its three version-id references, names it
+ * "Copy of <name>", closes the drawer and re-runs slot focus. Hidden when zero packages exist.
  *
  * Focus model (unchanged): auto-focus the first unfilled slot on open; clicking an empty row focuses
  * its type; ⇄ SWAP focuses that type; a choice advances focus to the first remaining unfilled slot.
@@ -43,6 +44,16 @@ const DOT_COLOUR: Record<string, string> = {
   [ComponentType.SYNOPSIS]: "var(--sage-d)",
   [ComponentType.SAMPLE_PAGES]: "var(--gold)",
 };
+/** The order-of-play step word per slot (guided ref .stepn): the letter's the only must-have. */
+const STEP_WORD: Record<string, string> = {
+  [ComponentType.QUERY_LETTER]: "first",
+  [ComponentType.SYNOPSIS]: "then",
+  [ComponentType.SAMPLE_PAGES]: "optional",
+};
+/** Chapter-header parcel illustration, ported verbatim from the ref (gold string accent included). */
+const parcelIllo = (
+  <svg width={76} height={76} viewBox="0 0 96 96" fill="none" stroke="#7c3a2a" strokeWidth={1.7} strokeLinejoin="round" aria-hidden="true"><path d="M48 14l28 16v32L48 78 20 62V30z" /><path d="M48 78V46M20 30l28 16 28-16" /><path d="M34 22l28 16" opacity={0.45} /><path d="M42 8c2-3 10-3 12 0" stroke="#a8842c" strokeLinecap="round" /></svg>
+);
 
 const firstUnfilled = (s: SlotSelection): ComponentType => BUILDER_TYPES.find((t) => !isSlotFilled(s[t])) ?? BUILDER_TYPES[0];
 
@@ -109,37 +120,50 @@ export const Composer: React.FC<ComposerProps> = ({ versions, packages, editingI
       <style>{`
         .pkgcomp { position:relative; overflow:hidden; border-radius:var(--chromerad); border:var(--bdw) solid var(--bd); background:var(--pane); }
         .t-bold .pkgcomp { background:var(--card); } /* white ground beneath the pink name band (matches the inner cards) */
-        .pkgcomp .c2-band { display:flex; align-items:center; gap:14px; padding:17px 22px; background:linear-gradient(135deg,var(--band-a),var(--band-b)); border-bottom:var(--bdw) solid var(--bd); }
+        /* Chapter header (guided ref .cp-head) — the task in one sentence, over the parcel illustration. */
+        .pkgcomp .cp-head { display:flex; align-items:flex-start; gap:26px; padding:28px 36px 22px; }
+        .pkgcomp .cp-head .illo { flex-shrink:0; margin-top:4px; }
+        .pkgcomp .cp-head h2 { font-family:${FONT_SERIF}; font-size:34px; font-weight:800; color:var(--headT); letter-spacing:-.4px; }
+        .pkgcomp .cp-head p { font-size:14.5px; color:#6a594d; line-height:1.6; margin-top:7px; max-width:620px; }
+        /* Name band is an inset rounded band beneath the header (ref .cp-name; was full-bleed with a rule). */
+        .pkgcomp .c2-band { display:flex; align-items:center; gap:14px; margin:0 36px; padding:18px 22px; border-radius:12px; background:linear-gradient(135deg,var(--band-a),var(--band-b)); }
         .pkgcomp .bic { color:var(--headT); display:flex; flex-shrink:0; }
-        .pkgcomp .hname input { border:0; outline:0; background:transparent; font-family:${FONT_SERIF}; font-size:23px; font-weight:700; color:var(--ink); border-bottom:1.5px dashed rgba(36,28,21,.3); padding:2px 2px 4px; width:360px; max-width:48vw; }
+        .pkgcomp .hname input { border:0; outline:0; background:transparent; font-family:${FONT_SERIF}; font-size:24px; font-weight:700; color:var(--ink); border-bottom:1.5px dashed rgba(36,28,21,.3); padding:2px 2px 5px; width:400px; max-width:48vw; }
         .pkgcomp .hname input::placeholder { color:rgba(36,28,21,.45); font-style:italic; font-weight:500; }
         /* New-capp only (ref .c2-band input): mocha name text + mocha-dashed underline; Bold keeps ink. */
         .t-capp .pkgcomp .hname input { color:var(--headT); border-bottom-color:rgba(93,64,55,.35); }
         .t-capp .pkgcomp .hname input::placeholder { color:rgba(93,64,55,.5); }
-        .pkgcomp .copybtn { margin-left:auto; display:inline-flex; align-items:center; gap:8px; font-family:${FONT_MONO}; font-size:9px; letter-spacing:.07em; text-transform:uppercase; color:#6a4436; background:rgba(255,254,251,.55); border:1px solid rgba(124,58,42,.18); border-radius:9px; padding:8px 13px; cursor:pointer; }
+        .pkgcomp .copybtn { margin-left:auto; display:inline-flex; align-items:center; gap:8px; font-family:${FONT_MONO}; font-size:9.5px; letter-spacing:.07em; text-transform:uppercase; color:#6a4436; background:rgba(255,254,251,.55); border:1px solid rgba(124,58,42,.18); border-radius:9px; padding:9px 14px; cursor:pointer; }
         .pkgcomp .copybtn:hover { background:#fffefb; color:var(--burg); }
         /* New-capp only (ref .copybtn): mocha text + taupe hairline on the translucent chip. */
         .t-capp .pkgcomp .copybtn { color:var(--btnT); border-color:var(--btnBd); }
-        .pkgcomp .c2-body { display:flex; gap:20px; padding:24px; }
-        .pkgcomp .mani { flex:0 1 430px; min-width:360px; display:flex; flex-direction:column; justify-content:center; gap:14px; }
-        .pkgcomp .brow { display:flex; align-items:center; gap:14px; background:#fffefb; border-radius:10px; padding:19px 18px; min-height:72px; }
+        .pkgcomp .c2-body { display:flex; gap:22px; padding:24px 36px; }
+        .pkgcomp .mani { flex:0 1 440px; min-width:360px; display:flex; flex-direction:column; justify-content:center; gap:14px; }
+        /* One-line order-of-play guide above the slots (ref .cp-guide). */
+        .pkgcomp .cp-guide { font-size:12.5px; color:#8a7264; font-style:italic; padding:0 2px 2px; }
+        /* Every slot row now carries a HEADER (type + step word) over its body — filled rows included
+           (guided ref .crow) — so the first/then/optional order reads at a glance. */
+        .pkgcomp .brow { display:flex; flex-direction:column; align-items:stretch; background:#fffefb; border-radius:11px; overflow:hidden; }
         .pkgcomp .brow.filled { border:var(--bdw) solid var(--bd); box-shadow:0 3px 10px rgba(58,28,20,.07); }
         .t-bold .pkgcomp .brow.filled { border:1.5px solid #1d1712; }
-        .pkgcomp .brow.empty { border:1.5px dotted #bfae9a; flex-direction:column; align-items:stretch; padding:0; gap:0; overflow:hidden; cursor:pointer; }
+        .pkgcomp .brow.empty { border:1.5px dotted #bfae9a; cursor:pointer; }
         .pkgcomp .brow.focus { outline:2px solid var(--sage-d); outline-offset:2px; }
-        .pkgcomp .bhd { display:flex; align-items:center; gap:9px; font-family:${FONT_MONO}; font-size:10px; letter-spacing:.1em; text-transform:uppercase; padding:9px 15px; }
+        .pkgcomp .bpad { display:flex; align-items:center; gap:12px; padding:16px 18px; min-height:60px; }
+        .pkgcomp .bhd { display:flex; align-items:center; gap:9px; font-family:${FONT_MONO}; font-size:10px; letter-spacing:.1em; text-transform:uppercase; padding:10px 16px; }
+        .pkgcomp .bhd .stepn { margin-left:auto; font-family:${FONT_SERIF}; font-style:italic; font-size:14px; color:#b3a291; text-transform:none; letter-spacing:0; }
         .pkgcomp .bhd.hl { background:var(--tl); color:var(--burg); } .pkgcomp .bhd.hs { background:var(--ts); color:var(--sage-d); } .pkgcomp .bhd.hp { background:var(--tp); color:var(--gold); }
         .pkgcomp .bhd .dotac { display:none; }
         /* Quiet Cappuccino (ref .bhd): empty-slot headers go foam + mocha; the type tint survives as a
            7px dot right-aligned in the header. Bold keeps the tinted headers (dot hidden). */
         .t-capp .pkgcomp .bhd.hl, .t-capp .pkgcomp .bhd.hs, .t-capp .pkgcomp .bhd.hp { background:var(--band-a); color:var(--headT); }
-        .t-capp .pkgcomp .bhd .dotac { display:inline-block; width:7px; height:7px; border-radius:50%; margin-left:auto; }
+        /* The step word owns the right edge now; the quiet-pass tint dot follows it at the header gap. */
+        .t-capp .pkgcomp .bhd .dotac { display:inline-block; width:7px; height:7px; border-radius:50%; }
         .t-capp .pkgcomp .bhd.hl .dotac { background:var(--tl); }
         .t-capp .pkgcomp .bhd.hs .dotac { background:var(--ts); }
         .t-capp .pkgcomp .bhd.hp .dotac { background:var(--tp); }
-        .pkgcomp .bbd { padding:17px 18px; font-size:13.5px; font-style:italic; color:var(--muted); }
+        .pkgcomp .bbd { font-size:13.5px; font-style:italic; color:var(--muted); }
         .pkgcomp .brow.focus .bbd { color:#7a6a5c; }
-        .pkgcomp .bti { font-family:${FONT_SERIF}; font-size:16.5px; font-weight:600; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .pkgcomp .bti { font-family:${FONT_SERIF}; font-size:17px; font-weight:600; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
         .pkgcomp .bmeta { font-family:${FONT_MONO}; font-size:9px; color:var(--muted); margin-top:3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
         .pkgcomp .bmid { min-width:0; flex:1; }
         .pkgcomp .bact { margin-left:auto; display:flex; gap:12px; font-family:${FONT_MONO}; font-size:9px; color:var(--muted); flex-shrink:0; }
@@ -147,7 +171,7 @@ export const Composer: React.FC<ComposerProps> = ({ versions, packages, editingI
         .pkgcomp .bact button:hover { color:var(--burg); }
         .pkgcomp .pick { flex:1; min-width:0; background:#fffefb; border:var(--bdw) solid var(--bd); border-radius:11px; overflow:hidden; display:flex; flex-direction:column; }
         .t-bold .pkgcomp .pick { border:1.5px solid #1d1712; }
-        .pkgcomp .pick-h { padding:13px 18px; border-bottom:var(--bdw) solid var(--bd); display:flex; align-items:center; gap:10px; font-family:${FONT_SERIF}; font-size:17px; font-weight:700; color:var(--ink); }
+        .pkgcomp .pick-h { padding:14px 20px; border-bottom:var(--bdw) solid var(--bd); display:flex; align-items:center; gap:10px; font-family:${FONT_SERIF}; font-size:18px; font-weight:700; color:var(--ink); }
         .pkgcomp .pick-h.hl { background:var(--tl); } .pkgcomp .pick-h.hs { background:var(--ts); } .pkgcomp .pick-h.hp { background:var(--tp); }
         /* Glyph ink moved from inline style to per-type classes (same values — Bold unchanged). */
         .pkgcomp .pick-h.hl .pickg { color:var(--burg); } .pkgcomp .pick-h.hs .pickg { color:var(--sage-d); } .pkgcomp .pick-h.hp .pickg { color:var(--gold); }
@@ -157,21 +181,21 @@ export const Composer: React.FC<ComposerProps> = ({ versions, packages, editingI
         .t-capp .pkgcomp .pick-h .pickg { color:var(--headT); }
         .pkgcomp .pick-h .cnt { margin-left:auto; font-family:${FONT_MONO}; font-size:9px; color:#7a6a5c; }
         .pkgcomp .pick-b { padding:16px; display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:13px; align-content:start; flex:1; }
-        .pkgcomp .bigcard { background:#fffefb; border:var(--bdw) solid var(--bd); border-radius:9px; padding:15px 17px; cursor:pointer; text-align:left; }
+        .pkgcomp .bigcard { background:#fffefb; border:var(--bdw) solid var(--bd); border-radius:10px; padding:16px 18px; cursor:pointer; text-align:left; }
         .t-bold .pkgcomp .bigcard { border:1.5px solid #1d1712; }
         .pkgcomp .bigcard:hover { background:#faeee8; }
         .pkgcomp .bigcard.current { opacity:.5; cursor:default; }
         .pkgcomp .bigcard.current:hover { background:#fffefb; }
-        .pkgcomp .bigcard .nm { font-family:${FONT_SERIF}; font-size:16px; font-weight:700; color:var(--ink); }
+        .pkgcomp .bigcard .nm { font-family:${FONT_SERIF}; font-size:17px; font-weight:700; color:var(--ink); }
         .pkgcomp .bigcard .fm { font-family:${FONT_MONO}; font-size:9px; color:var(--muted); margin:4px 0 8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-        .pkgcomp .bigcard .sn { font-family:${FONT_SERIF}; font-style:italic; font-size:12px; color:#6a5a4c; line-height:1.6; max-height:56px; overflow:hidden; -webkit-mask-image:linear-gradient(#000 45%,transparent 95%); mask-image:linear-gradient(#000 45%,transparent 95%); }
+        .pkgcomp .bigcard .sn { font-family:${FONT_SERIF}; font-style:italic; font-size:12.5px; color:#6a5a4c; line-height:1.6; max-height:56px; overflow:hidden; -webkit-mask-image:linear-gradient(#000 45%,transparent 95%); mask-image:linear-gradient(#000 45%,transparent 95%); }
         .pkgcomp .bigcard .use { margin-top:10px; font-family:${FONT_MONO}; font-size:9.5px; color:var(--burg); }
         .pkgcomp .bigcard.current .use { color:var(--sage-d); }
         .pkgcomp .pick-empty { padding:20px 16px; font-size:12.5px; font-style:italic; color:var(--muted); }
         .pkgcomp .pick-f { padding:12px 18px; border-top:1px dashed #e0d3c2; font-size:12px; color:var(--muted); }
         .pkgcomp .pick-f button { color:var(--burg); text-decoration:underline; text-underline-offset:2px; cursor:pointer; font-weight:500; background:none; border:0; padding:0; font-size:12px; }
-        .pkgcomp .c2-foot { display:flex; align-items:center; gap:16px; padding:0 24px 22px; }
-        .pkgcomp .save { font-family:${FONT_SERIF}; font-size:16.5px; font-weight:600; color:var(--ink); background:#fffefb; border:var(--bdw) solid var(--bd); border-radius:11px; padding:13px 28px; cursor:pointer; }
+        .pkgcomp .c2-foot { display:flex; align-items:center; gap:16px; padding:0 36px 30px; }
+        .pkgcomp .save { font-family:${FONT_SERIF}; font-size:17px; font-weight:600; color:var(--ink); background:#fffefb; border:var(--bdw) solid var(--bd); border-radius:11px; padding:14px 30px; cursor:pointer; }
         .t-bold .pkgcomp .save { border:1.5px solid #1d1712; }
         .pkgcomp .save:hover:not(:disabled) { background:#faeee8; }
         /* New-capp only (ref .btn): Save joins the white/taupe/mocha treatment; Bold stays white/ink. */
@@ -200,6 +224,15 @@ export const Composer: React.FC<ComposerProps> = ({ versions, packages, editingI
         @media (max-width: 820px) { .pkgcomp .c2-body { flex-direction:column; } .pkgcomp .drawer { width:100%; } }
       `}</style>
 
+      {/* Chapter header — the task in one sentence, over the parcel illustration (guided ref). */}
+      <div className="cp-head">
+        <span className="illo">{parcelIllo}</span>
+        <div>
+          <h2>Build a package</h2>
+          <p>Pick one of each from your library — a letter first, a synopsis, pages if you have them — give the bundle a name you&rsquo;ll recognise, and save. You&rsquo;ll attach it to queries from the Queries Hub.</p>
+        </div>
+      </div>
+
       <div className="c2-band">
         <span className="bic">{boxIcon}</span>
         <div className="hname"><input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name this package…" aria-label="Package name" /></div>
@@ -208,25 +241,34 @@ export const Composer: React.FC<ComposerProps> = ({ versions, packages, editingI
 
       <div className="c2-body">
         <div className="mani">
+          <div className="cp-guide">Fill the slots from the picker on the right — the letter&rsquo;s the only must-have.</div>
           {BUILDER_TYPES.map((t) => {
             const m = TYPE_META[t];
             const vid = sel[t];
             const v = isSlotFilled(vid) ? versions.find((x) => x.id === vid) : undefined;
+            // Every slot row carries the header (type + step word + quiet-pass tint dot); the body is
+            // the filled material or the choose hint.
+            const head = (
+              <div className={`bhd ${TINT_CLASS[t]}`}><TypeGlyph type={t} size={13} />{m.label}<span className="stepn">{STEP_WORD[t]}</span><span className="dotac" aria-hidden="true" /></div>
+            );
             if (v) {
               return (
                 <div key={t} className="brow filled">
-                  <div className="bmid"><div className="bti">{v.versionName}</div>{v.fileName && <div className="bmeta">{v.fileName}</div>}</div>
-                  <div className="bact">
-                    <button type="button" onClick={() => setFocus(t)}>⇄ SWAP</button>
-                    <button type="button" aria-label="Remove" onClick={() => clearSlot(t)}>✕</button>
+                  {head}
+                  <div className="bpad">
+                    <div className="bmid"><div className="bti">{v.versionName}</div>{v.fileName && <div className="bmeta">{v.fileName}</div>}</div>
+                    <div className="bact">
+                      <button type="button" onClick={() => setFocus(t)}>⇄ SWAP</button>
+                      <button type="button" aria-label="Remove" onClick={() => clearSlot(t)}>✕</button>
+                    </div>
                   </div>
                 </div>
               );
             }
             return (
               <div key={t} className={`brow empty${focus === t ? " focus" : ""}`} role="button" tabIndex={0} onClick={() => setFocus(t)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setFocus(t); } }}>
-                <div className={`bhd ${TINT_CLASS[t]}`}><TypeGlyph type={t} size={13} />{m.label}<span className="dotac" aria-hidden="true" /></div>
-                <div className="bbd">Choose from your materials →</div>
+                {head}
+                <div className="bpad"><span className="bbd">Choose from your materials →</span></div>
               </div>
             );
           })}
