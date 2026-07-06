@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Queries workspace, full fidelity (Option A, two states)</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--desk:#f2ede7;--card:#fffefb;--parch:#fdfaf5;--hair:#e7ddd2;--bd:#ded3c2;
+  --head:#5d4037;--ink:#3a1c14;--label:#9c8878;--muted:#8a7a6c;--burg:#7c3a2a;--centre:#f6e4da;
+  --pinkA:#f3ddd2;--pinkB:#eed2c5;--sage:#e9ede6;--sageT:#5a6e58;--move:#f7efc9}
+body{font-family:'Inter',sans-serif;background:#e9e3d9;color:var(--ink);padding:34px 30px 70px}
+button{font-family:inherit;cursor:pointer;background:none;border:none;color:inherit}
+h1{font-family:'Playfair Display',serif;font-size:26px;font-weight:500;color:var(--head)}
+.sub{font-size:12.5px;font-weight:300;color:var(--muted);margin-top:6px;max-width:820px;line-height:1.6}
+.vlab{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--burg);margin:30px 0 10px}
+
+.frame{background:var(--desk);border:1px solid var(--hair);border-radius:16px;max-width:1200px;height:640px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 2px 8px rgba(58,28,20,0.06)}
+.slab{background:var(--card);border-bottom:1px solid var(--hair);padding:9px 20px 11px;flex:none;display:flex;align-items:flex-end;gap:16px}
+.crumb{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--label)}
+.crumb b{color:var(--burg)}
+.slab .ttl{font-family:'Playfair Display',serif;font-size:20px;font-weight:500;color:var(--head);margin-top:3px}
+.slab .meta{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+.slab .right{margin-left:auto}
+.btn{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:500;padding:8px 15px;border-radius:10px;background:#fff;border:1px solid var(--bd);color:var(--head);white-space:nowrap;box-shadow:0 1px 2px rgba(58,28,20,0.04)}
+.btn.primary{background:var(--centre);border-color:#ecd0c2;color:var(--burg);font-weight:600}
+
+.stage{flex:1;min-height:0;display:flex;gap:12px;padding:12px 20px 14px}
+.plist{width:246px;flex:none;background:var(--card);border:1px solid var(--hair);border-radius:12px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.psearch{margin:10px 10px 6px;border:1px solid var(--hair);border-radius:9px;padding:7px 11px;font-size:11px;color:var(--label)}
+.lrow{display:flex;align-items:center;gap:9px;padding:9px 12px;border-bottom:1px solid #f2e9db}
+.lrow.on{background:#f8f1e9}
+.lmono{width:25px;height:25px;border-radius:50%;background:var(--centre);color:var(--burg);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:10px;flex:none}
+.lrow .n{font-family:'Playfair Display',serif;font-size:12.5px}
+.lrow .a{font-family:'JetBrains Mono',monospace;font-size:5.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--label);margin-top:1px}
+.lrow .d{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:6px;color:var(--label)}
+.grow{flex:1;min-height:0;overflow:hidden}
+.pfoot{flex:none;border-top:1px solid var(--hair);padding:7px 12px;font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:.12em;text-transform:uppercase;color:var(--label);display:flex}
+.pfoot .r{margin-left:auto}
+
+.work{flex:1;min-width:0;background:var(--card);border:1px solid var(--hair);border-radius:12px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.agent{display:flex;align-items:flex-start;gap:14px;padding:16px 22px 14px;background:linear-gradient(120deg,#fdf3ee,#fffefb 62%);border-bottom:1px solid var(--hair);flex:none}
+.amono{width:48px;height:48px;border-radius:50%;background:var(--ink);color:var(--card);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:18px;flex:none}
+.agent .nm{font-family:'Playfair Display',serif;font-size:24px;line-height:1.05}
+.agent .ag{font-size:13px;color:var(--muted);margin-top:2px}
+.agent .st{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.16em;text-transform:uppercase;color:var(--burg);margin-top:5px}
+.agent .wl{font-family:'Playfair Display',serif;font-style:italic;font-size:12.5px;color:#5a4a40;margin-top:7px;max-width:560px}
+.gchip{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--hair);border-radius:99px;padding:3px 8px;margin:7px 4px 0 0;color:var(--muted)}
+.cols{flex:1;min-height:0;display:flex;gap:12px;padding:12px 16px}
+.col{flex:1;border:1px solid var(--hair);border-radius:11px;display:flex;flex-direction:column;min-height:0;overflow:hidden;background:#fffefb}
+.colband{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--pinkA),var(--pinkB));border-bottom:1px solid rgba(124,58,42,0.15);padding:9px 15px;flex:none}
+.colband h5{font-family:'Playfair Display',serif;font-size:14.5px;font-weight:500;color:#6b2f20}
+.colbody{flex:1;min-height:0;padding:12px 15px;overflow:hidden;position:relative;font-size:13px}
+.tspine{position:relative}
+.tspine::before{content:'';position:absolute;left:11px;top:12px;bottom:14px;width:2px;background:var(--hair)}
+.tev{display:flex;gap:11px;align-items:flex-start;padding:7px 0;position:relative}
+.tic{width:23px;height:23px;border-radius:50%;background:var(--centre);color:var(--burg);display:flex;align-items:center;justify-content:center;font-size:10px;flex:none;box-shadow:0 0 0 3px #fffefb;z-index:1}
+.tn2{font-size:13px;font-weight:600}
+.ts{font-size:11px;font-weight:300;color:#7a6a5e;margin-top:2px}
+.tdate{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--label);padding-top:4px;flex:none}
+.matpill{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border:1px solid var(--hair);border-radius:5px;padding:2px 7px;margin:5px 4px 0 0}
+.waitchip{display:inline-flex;align-items:center;gap:7px;margin:10px 0 0 34px;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.08em;text-transform:uppercase;background:var(--sage);color:var(--sageT);border-radius:99px;padding:6px 11px}
+.moveband{margin:10px 0 0 34px;background:var(--move);border:1px solid #e8dca4;border-radius:9px;padding:8px 12px;font-size:12px;color:#6b5a20;font-weight:500}
+.moveband small{display:block;font-weight:300;font-size:10.5px;color:#8a7a40;margin-top:2px}
+.prog{margin:12px 0 0 34px}
+.prog .rail{height:4px;border-radius:4px;background:#eee3d3;overflow:hidden}
+.prog .rail i{display:block;height:100%;width:26%;background:#8aa584;border-radius:4px}
+.prog .lbl{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:5.5px;letter-spacing:.1em;color:var(--label);text-transform:uppercase;margin-top:5px}
+.mtitle{font-family:'Playfair Display',serif;font-size:17px}
+.mchip{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.08em;text-transform:uppercase;background:var(--sage);color:var(--sageT);border-radius:5px;padding:3px 8px;margin:6px 6px 0 0}
+.sentvia{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--label);margin-top:8px}
+.mathead{font-family:'Playfair Display',serif;font-size:13.5px;font-weight:600;margin-top:12px}
+.mat{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid #f5ede1;font-size:12.5px}
+.mat:last-of-type{border-bottom:none}
+.mat .tick{margin-left:auto;color:#7a9a72;font-size:11px}
+.upsell{font-size:10.5px;font-weight:300;color:var(--muted);margin-top:10px;line-height:1.5}
+.upsell a{color:var(--burg);font-weight:500;text-decoration:none;border-bottom:1px solid rgba(124,58,42,0.3)}
+.protag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:5.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#fdfaf5;background:#7089a5;border-radius:99px;padding:2px 6px;vertical-align:1px}
+.jnote{background:var(--parch);border:1px solid #efe6d8;border-radius:9px;padding:9px 12px;font-size:11.5px;font-weight:300;color:#5a4a40;margin-bottom:8px}
+.jnote .t{font-family:'JetBrains Mono',monospace;font-size:5.5px;letter-spacing:.12em;color:var(--label);text-transform:uppercase;margin-top:5px}
+.jempty{border:1px dashed #e4d9c9;border-radius:9px;padding:9px 12px;font-size:11px;font-weight:300;color:#b9a893}
+.composer{flex:none;margin:0 15px 13px;display:flex;gap:8px;align-items:center;border:1px solid var(--hair);border-radius:10px;padding:9px 13px;font-size:12px;color:var(--label);background:#fff}
+.composer .send{margin-left:auto;color:var(--burg)}
+
+.cmdbar{flex:none;display:flex;align-items:center;gap:12px;background:#fffdf9;border-top:1px solid var(--hair);padding:11px 20px}
+.cmdbar .status{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.cmdbar .status b{color:var(--burg);font-weight:700}
+.cmdbar .mid{margin:0 auto}
+.cmdbar .grp{display:flex;gap:9px;align-items:center}
+</style>
+</head>
+<body>
+<h1>The queries workspace — Option A at full fidelity</h1>
+<p class="sub">Two states of the same page, because the command bar's whole point is that it changes with the query:
+the contextual CTA engine finally gets a permanent home. Note the in-column "your move" band keeps its narrative but
+loses its button — the bar owns actions now, so nothing is duplicated.</p>
+<div class="vlab">State 1 · Waiting — Rosa Imrie, queried, agents\u2019 court</div><div class="frame">
+  <div class="slab"><div><div class="crumb">ScriptAlly / Querying / <b>Queries Hub</b></div><div class="ttl">Queries Hub</div><div class="meta">Tracking all manuscripts</div></div>
+    <div class="right"><span class="btn">+ Log a new query</span></div></div>
+  <div class="stage">
+    <div class="plist">
+      <div class="psearch">⌕ Search…</div>
+      <div class="grow"><div class="lrow on"><span class="lmono">RI</span><div><div class="n">Rosa Imrie</div><div class="a">Imrie Agency</div></div><span class="d">16 JUN</span></div>
+        <div class="lrow"><span class="lmono">CD</span><div><div class="n">Charles Dickens</div><div class="a">Pickwick Editorial</div></div><span class="d">11 JUN</span></div>
+        <div class="lrow"><span class="lmono">MS</span><div><div class="n">Mary Shelley</div><div class="a">Gothic Guild Agency</div></div><span class="d">12 MAY</span></div>
+        <div class="lrow"><span class="lmono">AD</span><div><div class="n">Arthur Conan Doyle</div><div class="a">Baker Street Associates</div></div><span class="d">2 MAY</span></div>
+        <div class="lrow"><span class="lmono">EV</span><div><div class="n">Eleanor Vance</div><div class="a">Vance and Co Literary</div></div><span class="d">28 APR</span></div>
+        <div class="lrow"><span class="lmono">CB</span><div><div class="n">Charlotte Bronte</div><div class="a">Highland &amp; Moor Literary</div></div><span class="d">16 APR</span></div>
+        <div class="lrow"><span class="lmono">BS</span><div><div class="n">Bram Stoker</div><div class="a">Transylvania Literary Hub</div></div><span class="d">14 APR</span></div>
+      </div>
+      <div class="pfoot">10 queries · Export CSV<span class="r">↑↓ · ⌘K</span></div>
+    </div>
+    <div class="work">
+      <div class="agent"><span class="amono">RI</span>
+        <div><div class="nm">Rosa Imrie</div><div class="ag">Imrie Agency · submissions@imrieagency.com</div>
+        <div class="st">Queried · 16 Jun</div>
+        <div class="wl">"Historical fantasy and literary fiction with real music to the prose."</div>
+        <div><span class="gchip">Historical fantasy</span><span class="gchip">Literary fiction</span></div></div></div>
+      <div class="cols">
+        <div class="col">
+          <div class="colband"><h5>Tracking</h5></div>
+          <div class="colbody"><div class="tspine">
+            <div class="tev"><span class="tic">→</span><div><div class="tn2">Query sent</div><div class="ts">via Email</div>
+              <div><span class="matpill">Query letter</span><span class="matpill">Synopsis</span><span class="matpill">First 10 chapters</span></div></div>
+              <span class="tdate">16 JUN</span></div>
+          </div>
+          <span class="waitchip">Waiting to hear back · 20 days</span>
+          <div class="prog"><div class="rail"><i></i></div><div class="lbl"><span>Sent 16 Jun</span><span>Expected by ~11 Aug</span></div></div></div>
+        </div>
+        <div class="col">
+          <div class="colband"><h5>What you sent</h5></div>
+          <div class="colbody">
+            <div class="mtitle">The Book of Lost Clockworks</div>
+            <div><span class="mchip">Historical fantasy</span><span class="mchip">92,400 words</span></div>
+            <div class="sentvia">Sent via email</div>
+            <div class="mathead">Materials</div>
+            <div class="mat">Query letter<span class="tick">✓</span></div>
+            <div class="mat">Synopsis<span class="tick">✓</span></div>
+            <div class="mat">First 10 chapters<span class="tick">✓</span></div>
+            <div class="upsell">Ready for serious insights? Attach a <a href="#">submission package</a> <span class="protag">Pro</span> and track performance across versions.</div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="colband"><h5>Journal</h5></div>
+          <div class="colbody"><div class="jempty">Your notes on this query appear here — first impressions, anything worth remembering.</div></div>
+          <div class="composer">Write a note…<span class="send">➤</span></div>
+        </div>
+      </div>
+      <div class="cmdbar"><div class="grp"><span class="btn primary">↩ Record response</span><span class="btn">✎ Edit</span></div>
+        <span class="status mid">Waiting to hear back · <b>20 days</b> · expected ~11 Aug</span>
+        <div class="grp"><span class="btn">⤓ Download as PDF</span></div></div>
+    </div>
+  </div>
+</div>
+<div class="vlab">State 2 · Your move — Charles Dickens, partial requested, writer\u2019s court</div><div class="frame">
+  <div class="slab"><div><div class="crumb">ScriptAlly / Querying / <b>Queries Hub</b></div><div class="ttl">Queries Hub</div><div class="meta">Tracking all manuscripts</div></div>
+    <div class="right"><span class="btn">+ Log a new query</span></div></div>
+  <div class="stage">
+    <div class="plist">
+      <div class="psearch">⌕ Search…</div>
+      <div class="grow"><div class="lrow"><span class="lmono">RI</span><div><div class="n">Rosa Imrie</div><div class="a">Imrie Agency</div></div><span class="d">16 JUN</span></div>
+        <div class="lrow on"><span class="lmono">CD</span><div><div class="n">Charles Dickens</div><div class="a">Pickwick Editorial</div></div><span class="d">11 JUN</span></div>
+        <div class="lrow"><span class="lmono">MS</span><div><div class="n">Mary Shelley</div><div class="a">Gothic Guild Agency</div></div><span class="d">12 MAY</span></div>
+        <div class="lrow"><span class="lmono">AD</span><div><div class="n">Arthur Conan Doyle</div><div class="a">Baker Street Associates</div></div><span class="d">2 MAY</span></div>
+        <div class="lrow"><span class="lmono">EV</span><div><div class="n">Eleanor Vance</div><div class="a">Vance and Co Literary</div></div><span class="d">28 APR</span></div>
+        <div class="lrow"><span class="lmono">CB</span><div><div class="n">Charlotte Bronte</div><div class="a">Highland &amp; Moor Literary</div></div><span class="d">16 APR</span></div>
+        <div class="lrow"><span class="lmono">BS</span><div><div class="n">Bram Stoker</div><div class="a">Transylvania Literary Hub</div></div><span class="d">14 APR</span></div>
+      </div>
+      <div class="pfoot">10 queries · Export CSV<span class="r">↑↓ · ⌘K</span></div>
+    </div>
+    <div class="work">
+      <div class="agent"><span class="amono">CD</span>
+        <div><div class="nm">Charles Dickens</div><div class="ag">Pickwick Editorial · queries_charles@pickwickagency.co.uk</div>
+        <div class="st">Partial requested · 12 Jun</div>
+        <div class="wl">"Enjoys rich, expansive ensembles, subversion of Victorian values, chimney sweeps, gears, clock towers."</div>
+        <div><span class="gchip">Historical fiction</span><span class="gchip">Social satire</span><span class="gchip">Gothic romance</span></div></div></div>
+      <div class="cols">
+        <div class="col">
+          <div class="colband"><h5>Tracking</h5></div>
+          <div class="colbody"><div class="tspine">
+            <div class="tev"><span class="tic">→</span><div><div class="tn2">Query sent</div><div class="ts">via Query Manager</div>
+              <div><span class="matpill">Query letter</span><span class="matpill">Synopsis</span><span class="matpill">First 50 pages</span></div></div>
+              <span class="tdate">11 JUN</span></div>
+            <div class="tev"><span class="tic">‹</span><div><div class="tn2">Partial requested</div><div class="ts">Charles asked for a partial</div></div>
+              <span class="tdate">12 JUN</span></div>
+          </div>
+          <div class="moveband">Your move — send the partial<small>Charles asked for it on 12 Jun · 24 days ago</small></div></div>
+        </div>
+        <div class="col">
+          <div class="colband"><h5>What you sent</h5></div>
+          <div class="colbody">
+            <div class="mtitle">The Book of Lost Clockworks</div>
+            <div><span class="mchip">Historical fantasy</span><span class="mchip">92,400 words</span></div>
+            <div class="sentvia">Sent via email</div>
+            <div class="mathead">Materials</div>
+            <div class="mat">Query letter<span class="tick">✓</span></div>
+            <div class="mat">Synopsis<span class="tick">✓</span></div>
+            <div class="mat">First 10 chapters<span class="tick">✓</span></div>
+            <div class="upsell">Ready for serious insights? Attach a <a href="#">submission package</a> <span class="protag">Pro</span> and track performance across versions.</div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="colband"><h5>Journal</h5></div>
+          <div class="colbody"><div class="jnote">"He signs his rejections personally, apparently. Good sign he requested."<span class="t">12 Jun, 21:40</span></div></div>
+          <div class="composer">Write a note…<span class="send">➤</span></div>
+        </div>
+      </div>
+      <div class="cmdbar"><div class="grp"><span class="btn primary">✈ Mark partial as sent</span><span class="btn">↩ Record response</span><span class="btn">✎ Edit</span></div>
+        <span class="status mid"><b>Your move</b> · partial requested 24 days ago</span>
+        <div class="grp"><span class="btn">⤓ Download as PDF</span></div></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
