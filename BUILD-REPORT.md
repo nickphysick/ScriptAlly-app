@@ -512,3 +512,11 @@ Closes pending action 3. A copy of the agents seam (`abd4d87`), one commit:
 - Discover's explainer sentence stays as page content below the slab (body copy, not mono meta).
 
 **Verification (throwaway, deleted):** visible-slab-per-route probes (hidden StagePage slots false-positive plain querySelector — probes are visibility-aware); crumbs correct on all five integrated routes; zero tab pills in the stage; dashboard exempt; /queries interim strip alive; theme probes — Capp/Bold surfaces + Editorial's separating shadow resolve live (Bold's computed border WIDTH read 1px vs the declared 1.5px in the throttled window — declaration rule-text-locked; eyeball on a real browser).
+
+## ChromeSlab fix pack — geometry, wrapping, Discover, 6 Jul
+
+**Items 1–3 shipped; item 4 (Queries Hub flattening) SKIPPED per Step 0** — Queries.tsx still carries the location stream's live WIP (EdgeFadeScroll threading; their fortnight-carousel commit landed mid-run but the tree stayed dirty on that file). The deferred-work entry from the slab build remains open.
+
+- **Geometry:** only Discover was actually inset (its slab was mounted inside the centred 880px `.dv-wrap`) — now mounted at the content-column level as `.dv2`'s first child. Manuscripts/Packages/Import audited: already column-level. Note on the earlier probe scare: slab right edges sit at the stage's clientWidth (15px short of the viewport when a scrollbar is present) — that IS the content column; Packages only reached the viewport edge because it has no page scrollbar.
+- **Wrapping:** slab header row hardened (title nowrap, META truncates with ellipsis, tools cluster nowrap with minWidth 0); Agents search pill is the flexible tool (flex 1 1 auto, floor 160px), Add agent + Add manuscript nowrap/flex-none. Verified single-line Add agent at 1180 AND 1280.
+- **Discover alignment:** `.dv-wrap` → max-width 1240, margin 0 (left-aligned to the standard gutter, ragged right); banner/explainer/cards share the left edge. No card-internal changes.

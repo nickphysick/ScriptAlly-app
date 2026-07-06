@@ -33,7 +33,7 @@ export const AgentsTopBar: React.FC<AgentsTopBarProps> = ({ count, search, onSea
     style={{ margin: "-14px -22px 14px" }}
     tools={
       <>
-        <div className="ag-searchpill" style={{ minWidth: 220 }}>
+        <div className="ag-searchpill" style={{ flex: "1 1 auto", minWidth: 160 }}>
           <Search aria-hidden="true" />
           <input
             ref={searchRef}
@@ -47,7 +47,7 @@ export const AgentsTopBar: React.FC<AgentsTopBarProps> = ({ count, search, onSea
           />
           <span className="ag-kbd" aria-hidden="true">⌘K</span>
         </div>
-        <button type="button" className="ag-addbtn" onClick={onAddAgent}>
+        <button type="button" className="ag-addbtn" onClick={onAddAgent} style={{ whiteSpace: "nowrap", flexShrink: 0 }}>
           <Plus aria-hidden="true" />
           Add agent
         </button>

@@ -64,8 +64,10 @@
   color: var(--dv-ink);
 }
 .dv-wrap {
-  max-width: 880px;
-  margin: 0 auto;
+  /* Left-aligned to the standard workspace gutter (ragged right), match column widened —
+     the centred 880px card read as an island next to the full-bleed slab. */
+  max-width: 1240px;
+  margin: 0;
   padding: 26px 24px 120px; /* bottom clearance so the sticky batch tray never hides a card */
 }
 

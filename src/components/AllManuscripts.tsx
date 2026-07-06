@@ -201,6 +201,7 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
           <button
             type="button"
             className="msv-btn"
+            style={{ whiteSpace: "nowrap", flexShrink: 0 }}
             onClick={() => onNavigate?.("manuscripts", "Add a manuscript")}
           >
             <Plus />

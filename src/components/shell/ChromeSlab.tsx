@@ -93,19 +93,22 @@ export const ChromeSlab: React.FC<{
         </div>
       )}
 
-      <div style={{ display: "flex", alignItems: "flex-end", gap: 14, padding: "6px 18px 12px" }}>
-        <div style={{ minWidth: 0 }}>
-          <div style={{ fontFamily: FONT_SERIF, fontSize: 25, fontWeight: 500, color: "var(--slab-ttl, #5d4037)", lineHeight: 1.05 }}>
+      {/* Header row — tools NEVER wrap: buttons are nowrap/flex-none (page-side), the search
+          pill is the flexible element (floor 160px, page-side), and below that the META line
+          truncates with an ellipsis before any button wraps. */}
+      <div style={{ display: "flex", alignItems: "flex-end", gap: 14, padding: "6px 18px 12px", flexWrap: "nowrap" }}>
+        <div style={{ minWidth: 0, flex: "1 1 auto" }}>
+          <div style={{ fontFamily: FONT_SERIF, fontSize: 25, fontWeight: 500, color: "var(--slab-ttl, #5d4037)", lineHeight: 1.05, whiteSpace: "nowrap" }}>
             {title}
           </div>
           {meta && (
-            <div style={{ fontFamily: FONT_MONO, fontSize: 7.5, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--slab-meta, #8a7a6c)", marginTop: 4 }}>
+            <div style={{ fontFamily: FONT_MONO, fontSize: 7.5, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--slab-meta, #8a7a6c)", marginTop: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {meta}
             </div>
           )}
         </div>
         {tools && (
-          <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 9, flexShrink: 0 }}>
+          <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 9, minWidth: 0, flexWrap: "nowrap" }}>
             {tools}
           </div>
         )}

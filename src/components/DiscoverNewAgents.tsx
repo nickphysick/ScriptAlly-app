@@ -300,15 +300,11 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
 
   return (
     <div className="dv2">
+      {/* ── Page header — the unified ChromeSlab, mounted at the CONTENT-COLUMN level (outside
+            the width-constrained .dv-wrap) so it spans rail edge to viewport edge like every
+            other slabbed page. ── */}
+      <ChromeSlab onNavigate={onNavigate} title="Discover new agents" />
       <div className="dv-wrap">
-        {/* ── Page header — the unified ChromeSlab (crumb + title share one surface; the old
-              in-page h1 is superseded). Bleeds out of the .dv-wrap desk padding (26px 24px);
-              the explainer line stays as page content below. ── */}
-        <ChromeSlab
-          onNavigate={onNavigate}
-          title="Discover new agents"
-          style={{ margin: "-26px -24px 18px" }}
-        />
         <p
           style={{
             fontFamily: FONT_SANS,
