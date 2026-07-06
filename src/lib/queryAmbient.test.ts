@@ -97,6 +97,37 @@ describe("Queries.tsx artefacts — one home for actions + regressions", () => {
   });
 });
 
+describe("command-bar theming — per-theme token smoke (rule-text lock)", () => {
+  const css = readFileSync(resolve(__dirname, "../index.css"), "utf8");
+  const themeBlock = (sel: string) => {
+    const start = css.indexOf(`\n${sel} {`);
+    expect(start).toBeGreaterThan(-1);
+    return css.slice(start, css.indexOf("\n}", start));
+  };
+
+  it("Cappuccino: warm bar + centre-fill primary", () => {
+    const b = themeBlock(".t-capp");
+    expect(b).toContain("--cmd-bar-bg: #fffdf9");
+    expect(b).toContain("--cmd-bar-bd: #e7ddd2");
+    expect(b).toContain("--cmd-primary-bg: #f6e4da");
+    expect(b).toContain("--qp-col-bg: #fffefb");
+  });
+
+  it("Bold Pastille: ink rule bar (1.5px)", () => {
+    const b = themeBlock(".t-bold");
+    expect(b).toContain("--cmd-bar-bd: #1d1712");
+    expect(b).toContain("--cmd-bar-bdw: 1.5px");
+    expect(b).toContain("--cmd-primary-bg: #eec9c3");
+  });
+
+  it("Editorial: hairline + soft shadow bar", () => {
+    const b = themeBlock(".t-edn");
+    expect(b).toContain("--cmd-bar-bd: #ececeb");
+    expect(b).toContain("--cmd-bar-shadow: 0 -2px 10px rgba(20, 20, 20, 0.04)");
+    expect(b).toContain("--cmd-primary-bg: #e9eaeb");
+  });
+});
+
 describe("QueryTimeline artefact — move band keeps prose, loses its button", () => {
   const tl = readFileSync(resolve(__dirname, "../components/reading-pane/QueryTimeline.tsx"), "utf8");
   it("no send-materials button in the writer band (handler gone); the narrative remains", () => {

@@ -137,6 +137,19 @@
   --slab-shadow: none;
   --slab-ttl: #5d4037;
   --slab-meta: #8a7a6c;
+  /* Queries command bar + column fade (ref queries-workspace-v2.html). */
+  --qp-col-bg: #fffefb;
+  --cmd-bar-bg: #fffdf9;
+  --cmd-bar-bd: #e7ddd2;
+  --cmd-bar-bdw: 1px;
+  --cmd-bar-shadow: none;
+  --cmd-btn-bg: #ffffff;
+  --cmd-btn-bd: #ded3c2;
+  --cmd-btn-bdw: 1px;
+  --cmd-btn-shadow: 0 1px 2px rgba(58, 28, 20, 0.04);
+  --cmd-primary-bg: #f6e4da;
+  --cmd-primary-bd: #ecd0c2;
+  --cmd-primary-tx: #7c3a2a;
 }
 .t-bold {
   --bd: #1d1712;   /* ink */
@@ -209,6 +222,19 @@
   --slab-shadow: none;
   --slab-ttl: #1d1712;
   --slab-meta: #5e5954;
+  /* Queries command bar — ink rule bar (Bold Pastille language). */
+  --qp-col-bg: #fffefb;
+  --cmd-bar-bg: #fffefb;
+  --cmd-bar-bd: #1d1712;
+  --cmd-bar-bdw: 1.5px;
+  --cmd-bar-shadow: none;
+  --cmd-btn-bg: #fffefb;
+  --cmd-btn-bd: #1d1712;
+  --cmd-btn-bdw: 1.5px;
+  --cmd-btn-shadow: none;
+  --cmd-primary-bg: #eec9c3;
+  --cmd-primary-bd: #1d1712;
+  --cmd-primary-tx: #1d1712;
 }
 /* Editorial — the consolidated-v37 "Graphite · Soft · Tinted" system (t-edn + es4 + eb2 locked).
    Neutral whites/greys; graphite #44484d is the single accent. Containers are "Soft": 16px
@@ -286,6 +312,19 @@
   --slab-shadow: 0 3px 10px rgba(20, 20, 20, 0.04);
   --slab-ttl: #1a1a1a;
   --slab-meta: #7d8083;
+  /* Queries command bar — hairline + soft shadow bar (near-white desk; the shadow separates). */
+  --qp-col-bg: #fffefb;
+  --cmd-bar-bg: #ffffff;
+  --cmd-bar-bd: #ececeb;
+  --cmd-bar-bdw: 1px;
+  --cmd-bar-shadow: 0 -2px 10px rgba(20, 20, 20, 0.04);
+  --cmd-btn-bg: #ffffff;
+  --cmd-btn-bd: #dcdcdb;
+  --cmd-btn-bdw: 1px;
+  --cmd-btn-shadow: 0 1px 2px rgba(20, 20, 20, 0.04);
+  --cmd-primary-bg: #e9eaeb;
+  --cmd-primary-bd: #dcdcdb;
+  --cmd-primary-tx: #44484d;
 }
 /* Editorial "Soft" container: 16px radius, no border, layered shadow. Defined here so the
    dashboard rebuild + any Editorial container can share one class (theme-scoped). */
