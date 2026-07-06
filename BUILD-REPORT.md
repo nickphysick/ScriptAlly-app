@@ -577,3 +577,21 @@ Run: unify the Queries and Agents hubs onto a shared grammar + a single `--hub-*
 - **Capp de-pinking is hub-scoped:** documented as such in CLAUDE.md — the app-wide Cappuccino retoken is a separate future pass; judge the hubs in isolation.
 
 **jsdom blind spot (again):** the pane-fills claims (688=688 etc.) are real-browser measurements via the preview MCP — jsdom returns zeros for `getBoundingClientRect` and does not compute grid/flex, so the artefact tests assert only source text (`.ag-pane` has `align-self:stretch`, `.ag-panewrap` `flex:1`, the command-bar classes exist). A real-browser eyeball of both hubs × three themes × sparse/rich is still Nick's to do.
+
+## Grand masthead (hub grammar v2) — 6 Jul
+
+Run: fold the grand masthead into both hubs (v2 supersedes the unrun v1 pack — but v1's substance was already built + deployed to dev, so this run is purely the masthead delta). Ref: `grand-masthead-fullpage-v1.html`. The token sheet needed NO reconciliation — v2's tuner spec matched the v1 index.css values verbatim across all three themes (confirmed by spot-check before building). Ground rules honoured: gates before every commit, explicit-path staging, no interleaving of Queries.tsx and Agents.tsx edits.
+
+**Design ref (`308253b`).** Committed `design-refs/grand-masthead-fullpage-v1.html`.
+
+**Phase 1 — masthead + Queries pulse (`aeec0f8`).** Added an opt-in `grand` variant to `ChromeSlab` (the crumb-render was extracted so both layouts share it): crumb → 54px Playfair title in `--hub-head` → mono pulse-line meta → CTA bottom-right. Masthead tokens `--hub-mast-title` (54px, stepping to 40px under `@media (max-height: 819px)`) + `--hub-mast-pad` live theme-independently in index.css. The Queries CTA moved off its hardcoded-pink raised pill onto `--hub-primary` (a shared `mastCtaStyle`), so it reads as one grammar with the command-bar primary. Pulse line = `queriesPulse(scopedQueries, scope)` in queryAmbient.ts — `m` ("awaiting your move") reuses `queryBucket === "move"`, never a fresh count, so it can't drift from the "Your move" filter pill; counts are over the manuscript-scoped set (not the status/search view). Both slab mounts (empty + populated) pass `grand` + `meta={hubPulse}`. Verified live (Capp): 54px black title, espresso CTA, pulse "Tracking all manuscripts · 2 queries · 1 awaiting your move" (Charles/Partial Requested = the 1 move); **step confirmed** — 54px at 860px viewport height, 40px at 720px. Locks: `mastheadHub.test.ts` + `queriesPulse` in `queryBucket.test.ts`.
+
+**Phase 2 — Agents masthead + pulse (`cced4ad`).** `AgentsTopBar` gained `grand` + `idleCount`; when grand its meta becomes `agentsPulse(count, idle)`, its CTA becomes the hub primary (same `mastCtaStyle`), and its search pill fixes to 210px so it never squeezes the 54px title. `agentIdleCount(agents, queries)` (idle = unqueried) + `agentsPulse` are pure in agentsPage.ts. Verified live across all three themes: titles 54px in each theme's heading ink (Capp `#000`, Bold `#1d1712`, Editorial `#1a1a1a`); CTAs the hub primary (Capp espresso `#422701`/white r7, Bold pink `#f4c7c2`/ink r9, Editorial grey `#dedede`/black r8); pulse "Your database · 2 agents on file · 0 idle". Locks: `agentsHub.test.ts` + idle/pulse in `agentsPage.test.ts`.
+
+**Decisions / flags:**
+- **Search stays in the masthead tools** (ref relocates it into the list) — the ⌘K/`searchRef` wiring is load-bearing; fixed 210px when grand. Relocation is a follow-up.
+- **Masthead scope = the two hubs only.** Manuscripts/Packages/Import keep the compact slab; masthead rollout there is a pending consistency decision (recorded in CLAUDE.md).
+- **Probe gotcha (recorded):** the first `<button>` inside the grand slab is a CRUMB segment (crumb segments render as buttons), so a naive `querySelector('button')` reads a transparent crumb button, not the CTA — target the CTA by its text. Also: pages stay mounted, so `.sa-slab-grand` matches BOTH hubs' (hidden) slabs — scope browser probes to the visible page container (`.agv2 .sa-slab-grand`).
+- **jsdom blind spot:** the 54→40 step is a viewport-height media query jsdom can't evaluate; the artefact test asserts the token + `@media (max-height: 819px)` rule text, and the real step was a browser resize check (860→54, 720→40).
+
+Suite 680 green at close (was 665 pre-masthead; +9 Phase 1, +6 Phase 2).
