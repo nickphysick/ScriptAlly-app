@@ -496,3 +496,19 @@ Closes pending action 3. A copy of the agents seam (`abd4d87`), one commit:
 - ONE mount point (AppShell content column, above the stage) serves all six routes — `crumbForPath` returns null on the dashboard (exemption), focus/marketing routes, the guarded `/email-import-dev`, and unknowns. Rendering above the stage means the strip never scrolls and viewport-locked pages simply get 38px less stage (stage-relative heights, per the standing invariant — no bar-offset maths anywhere).
 - The strip renders at ALL widths (the pack doesn't exempt mobile); it stacks under the mobile slim bar — flag if it reads as double chrome on small screens.
 - Verified live (throwaway, deleted): all six crumb strings; dashboard shows no strip; `AGENTS` from Discover → `/agents`; `SCRIPTALLY` → `/dashboard`; Agents tab pills untouched beneath the strip; during an unpinned peek the rail overlays the strip's left edge (screenshot-confirmed — the frozen-transition probe artefact is documented, target geometry wrapper 60 / panel 240 is correct).
+
+## Workspace chrome slab (Option A) + Agents tab-bar retirement, 6 Jul
+
+**Shipped:** `8916547` ChromeSlab + Agents/Discover + tab-bar retired → `b6c23de` Manuscripts/Packages/Import → `5d5c485` Bold/Editorial tokens → docs (this commit). Suite 613 → 616.
+
+**The Queries deviation (flagged, not silent):** the pack's commit 1 includes the Queries Hub flattening, but Queries.tsx carried a parallel stream's LIVE uncommitted WIP (EdgeFadeScroll threading, importing a then-untracked file) at build time — committing the file would have shipped their broken half-work. Per the multi-stream protocol the flattening is DEFERRED: `/queries` keeps the standalone TopCrumbStrip via a TEMP routeKey-gated AppShell mount. **Remaining when their WIP lands:** flatten the qhbar (title/meta/CTA onto a ChromeSlab, frame deleted, both empty+populated branches), remove the TEMP mount, delete TopCrumbStrip.tsx if then unused.
+
+**Decisions:**
+- Slab mounted BY EACH PAGE (tools are page state); padded desks bleed via negative margins in the `style` escape (agentsV2/discover/manuscripts CSS untouched — .ag-masthead styles are now dead selectors awaiting a cleanup commit).
+- `ChromeSlab.onNavigate` optional with a direct-router fallback (crumb targets are never interceptions). Divergence: the fallback skips the bridge's searchQuery-clear — wire the bridge where pages hold it (Discover, Manuscripts do; AgentsTopBar deliberately doesn't to avoid touching Agents.tsx while it carried WIP).
+- Agents: the landed "editorial masthead" (kicker/title/rule/count) became the slab composition inside the untouched-props AgentsTopBar — Agents.tsx itself never edited.
+- Import: the centred "ScriptAlly migration desk" branding block judged decoration (a framed-title-card equivalent) and superseded; its descriptive sentence survives as an intro line. Sub-tab switcher untouched.
+- Packages: slab renders on the zero-manuscript state too (crumb + title + Pro pill, no tools).
+- Discover's explainer sentence stays as page content below the slab (body copy, not mono meta).
+
+**Verification (throwaway, deleted):** visible-slab-per-route probes (hidden StagePage slots false-positive plain querySelector — probes are visibility-aware); crumbs correct on all five integrated routes; zero tab pills in the stage; dashboard exempt; /queries interim strip alive; theme probes — Capp/Bold surfaces + Editorial's separating shadow resolve live (Bold's computed border WIDTH read 1px vs the declared 1.5px in the throttled window — declaration rule-text-locked; eyeball on a real browser).
