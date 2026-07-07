@@ -56,16 +56,33 @@ export enum ManuscriptStatus {
   ON_SUBMISSION = "On Submission",
 }
 
+/** The kind of work a comp is — a book, or a screen/other title that can only carry tone. */
+export type CompMedia = "book" | "film" | "tv" | "other";
+
 /**
  * One comparable title on a manuscript's comp shelf. `source` records how it arrived —
- * 'user' (typed, imported or added by hand) or 'suggested' (accepted from Suggestions).
- * Presentation facts (the pitch line, the "older comp" chip) are derived at render — never stored.
+ * 'user' (typed, imported or added by hand) or 'suggested' (accepted from the Scout).
+ * Presentation facts (the derived role, the query line, the recency flag) are computed at render
+ * from these stored fields — never stored. See src/lib/compsPage.ts for the derivations.
+ *
+ * The comps-page v2 fields (publisher/media/matchAxis/inQuery) are ADDITIVE and read with defaults:
+ * an absent `media` reads as "book", an absent `inQuery` as false. Optional fields are OMITTED when
+ * empty (never written as undefined/null — Firestore rejects undefined inside a map). `inQuery` is
+ * the only stored intent; everything a writer sees about "role" or "health" is derived from it.
  */
 export interface CompTitle {
   title: string;
   author?: string;
+  /** Imprint / label / studio. Optional. */
+  publisher?: string;
   year?: number;
   note?: string;
+  /** Absent === "book". */
+  media?: CompMedia;
+  /** Free-text comp axis, e.g. "tone · atmosphere" — set by the writer or the Scout. */
+  matchAxis?: string;
+  /** The only stored intent: is this comp part of the query-letter line? Absent === false. */
+  inQuery?: boolean;
   source?: "user" | "suggested";
 }
 
