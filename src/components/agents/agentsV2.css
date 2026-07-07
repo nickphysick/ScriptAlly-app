@@ -644,7 +644,10 @@
    hug clause is retired — a command bar now anchors the base, so the pane is a two-part frame:
    scroller + pinned bar). --ag-pane-floor is kept as the shared constant's CSS mirror (the
    artefact test + READING_PANE_FLOOR_PX) but no longer drives the pane height. */
-.agv2 .ag-panewrap { flex: 1; min-height: 0; }
+/* Border crispness (reading pane): the border + radius live on the crisp .ag-pane outer
+   (overflow:hidden), and the scroll-fade layer is CLIPPED to the same rounded frame here — so
+   content softens as it scrolls off, but the fade can never overrun the border at the bottom. */
+.agv2 .ag-panewrap { flex: 1; min-height: 0; overflow: hidden; border-radius: inherit; }
 .t-edn .agv2 .ag-pane { border: 1px solid #d8dadd; } /* the sole outlined container in Editorial */
 .agv2 .ag-panescroll { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: thin; }
 /* Form 11 inset frame — Cappuccino ONLY, on the outer shell, scoped (never the .qhbar leak) */
@@ -1137,7 +1140,8 @@
 }
 
 /* ── Desk-rule dressings (ref Rule 3): pinned pane/list footers, colophon, compact strips ── */
-.agv2 .ag-listfade { flex: 1; min-height: 0; }
+/* Same border-crispness fix for the list: the fade layer clips to .ag-listbox's rounded frame. */
+.agv2 .ag-listfade { flex: 1; min-height: 0; overflow: hidden; border-radius: inherit; }
 .agv2 .ag-listfoot,
 .agv2 .ag-panefoot {
   flex: none;
