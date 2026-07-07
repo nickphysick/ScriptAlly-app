@@ -64,6 +64,44 @@ export function activeQueryCount(queries: Query[]): number {
   return queries.filter((q) => !CLOSED_STATUSES.includes(q.status)).length;
 }
 
+/** Coerce a Firestore Timestamp | Date | ISO string to epoch ms, or null. */
+function toMs(v: unknown): number | null {
+  if (v == null) return null;
+  if (typeof v === "string") {
+    const t = Date.parse(v);
+    return Number.isNaN(t) ? null : t;
+  }
+  if (typeof v === "object") {
+    const anyV = v as { toDate?: () => Date; seconds?: number };
+    if (typeof anyV.toDate === "function") {
+      try { return anyV.toDate().getTime(); } catch { return null; }
+    }
+    if (typeof anyV.seconds === "number") return anyV.seconds * 1000;
+  }
+  return null;
+}
+
+/**
+ * A query's "last activity" epoch ms — the most recent dated event across its status/response
+ * fields, falling back to when it was sent. Null when nothing is dated. Drives the reveal
+ * roster's ordering and its per-row date.
+ */
+export function lastActivityMs(q: Query): number | null {
+  const candidates = [
+    q.responseReceivedAt, q.lastStatusChange, q.offerDate, q.rejectedDate,
+    q.fullSentDate, q.fullRequestedDate, q.partialSentDate, q.partialRequestedDate,
+    q.dateSent,
+  ].map(toMs).filter((n): n is number => n != null);
+  return candidates.length ? Math.max(...candidates) : null;
+}
+
+/** The n most-recently-active queries, newest first (undated sink to the end). */
+export function recentQueries(queries: Query[], n: number): Query[] {
+  return [...queries]
+    .sort((a, b) => (lastActivityMs(b) ?? -Infinity) - (lastActivityMs(a) ?? -Infinity))
+    .slice(0, n);
+}
+
 /** "70,000 – 100,000" → "70–100k" · "300 – 800" → "300–800" · "5,000 – 10,000" → "5–10k". */
 export function compactRange(range: string): string {
   const nums = range.split("–").map((s) => parseInt(s.replace(/[^0-9]/g, ""), 10));

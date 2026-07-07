@@ -173,7 +173,90 @@
   .msv-expander svg { transition: none; }
 }
 
-/* reveal actions row (Edit details + lifecycle ⋯) — sits under the Phase-3 panels */
+/* reveal: three band panels + a stagger-in on open */
+.msv-rgrid {
+  display: grid; grid-template-columns: 1.15fr 1.15fr 0.9fr; gap: 16px; margin-top: 22px;
+}
+@media (max-width: 980px) { .msv-rgrid { grid-template-columns: 1fr; } }
+.msv-rpanel {
+  background: var(--msv-sub); border: var(--msv-subbd); border-radius: 10px; overflow: hidden;
+  min-width: 0; display: flex; flex-direction: column;
+}
+.msv-rband {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 14px;
+  background: linear-gradient(135deg, var(--msv-bandA), var(--msv-bandB)); border-bottom: var(--msv-bandrule);
+}
+.msv-rband h4 {
+  font-family: 'Playfair Display', serif; font-size: 13.5px; font-weight: 500; color: var(--msv-head); margin: 0;
+}
+.msv-rbody { padding: 12px 14px 13px; }
+.msv-rbody .msv-figrow { margin-bottom: 9px; }
+/* query roster */
+.msv-qrow {
+  display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--msv-hair);
+}
+.msv-qrow:last-of-type { border-bottom: none; }
+.msv-who {
+  flex: 1; min-width: 0; font-size: 12.5px; font-weight: 500; color: var(--msv-ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.msv-who .msv-ag { color: var(--msv-muted); font-weight: 400; }
+.msv-qrow .msv-d {
+  font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--msv-label); flex-shrink: 0;
+}
+.msv-emptyfield {
+  font-family: 'Playfair Display', serif; font-style: italic; font-size: 13.5px; color: var(--msv-muted);
+  padding: 4px 0;
+}
+/* package rows */
+.msv-pkgrow { display: block; padding: 9px 0 10px; border-bottom: 1px solid var(--msv-hair); }
+.msv-pkgrow:last-of-type { border-bottom: none; }
+.msv-pkgnm {
+  font-family: 'Playfair Display', serif; font-size: 14px; line-height: 1.35; color: var(--msv-ink);
+}
+.msv-pkgmeta { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 5px; }
+.msv-pkgparts { display: flex; gap: 4px; flex-shrink: 0; }
+.msv-pp {
+  width: 18px; height: 18px; border-radius: 6px; background: var(--msv-huec); color: var(--msv-hue);
+  display: flex; align-items: center; justify-content: center; opacity: 0.26;
+}
+.msv-pp.on { opacity: 1; }
+.msv-pkgdate {
+  display: inline-flex; align-items: baseline; gap: 5px; flex-shrink: 0;
+  font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--msv-label);
+}
+.msv-createdlab { font-size: 7.5px; letter-spacing: 0.13em; color: var(--msv-muted); }
+/* comp rows */
+.msv-comprow {
+  display: flex; align-items: baseline; gap: 10px; padding: 7.5px 0; border-bottom: 1px solid var(--msv-hair);
+}
+.msv-comprow:last-of-type { border-bottom: none; }
+.msv-comprow-t {
+  flex: 1; min-width: 0; font-family: 'Playfair Display', serif; font-style: italic; font-size: 14px;
+  color: var(--msv-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.msv-comprow-y {
+  font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--msv-label); flex-shrink: 0;
+}
+.msv-compsnudge {
+  font-family: 'Playfair Display', serif; font-style: italic; font-size: 13px; line-height: 1.55;
+  color: var(--msv-muted); padding: 2px 0;
+}
+
+/* stagger — panels + actions rise in once the plate opens */
+.msv-rpanel, .msv-actionsect {
+  opacity: 0; transform: translateY(7px); transition: opacity 0.26s ease, transform 0.26s ease;
+}
+.msv-plate.open .msv-rpanel, .msv-plate.open .msv-actionsect { opacity: 1; transform: none; }
+.msv-plate.open .msv-s1 { transition-delay: 0.10s; }
+.msv-plate.open .msv-s2 { transition-delay: 0.17s; }
+.msv-plate.open .msv-s3 { transition-delay: 0.24s; }
+.msv-plate.open .msv-s4 { transition-delay: 0.31s; }
+@media (prefers-reduced-motion: reduce) {
+  .msv-rpanel, .msv-actionsect { transition: none; }
+}
+
+/* reveal actions row (Edit details + lifecycle ⋯) — sits under the panels */
 .msv-actionsect {
   display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
   margin-top: 20px; padding: 4px 0 6px;

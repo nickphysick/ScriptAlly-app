@@ -22,7 +22,12 @@ import { motion, AnimatePresence } from "motion/react";
 import { ChromeSlab } from "./shell/ChromeSlab";
 import { Plus, Send, Pencil, MoreHorizontal, Archive, Trash2, X, Check, ChevronDown } from "lucide-react";
 import { isShelvedPresentation } from "../lib/manuscriptPage";
+import { manuscriptComps } from "../lib/comps";
+import { PlateReveal } from "./manuscripts/RevealPanels";
 import "./manuscripts/manuscripts.css";
+
+/** Shared with the comps + packages sub-pages — the section's single active-manuscript pointer. */
+const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 
 /**
  * Accordion reveal — animates its own height between 0 and content, then releases to `auto` so
@@ -62,7 +67,7 @@ interface AllManuscriptsProps {
 }
 
 export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) => {
-  const { currentUser, manuscripts, queries, updateManuscript, deleteManuscript, setManuscriptShelved } =
+  const { currentUser, manuscripts, queries, agents, packages, updateManuscript, deleteManuscript, setManuscriptShelved } =
     useScriptAllyDb();
 
   const [openId, setOpenId] = useState<string | null>(null);
@@ -243,9 +248,24 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
                     )}
                   </div>
 
-                  {/* accordion reveal — the three panels land in Phase 3; the actions row is here now */}
+                  {/* accordion reveal — three band panels + the lifecycle actions row */}
                   <Reveal open={open}>
-                      <div className="msv-actionsect">
+                      <PlateReveal
+                        queries={queries.filter((q) => q.manuscriptId === m.id)}
+                        agents={agents}
+                        packages={packages.filter((p) => p.manuscriptId === m.id && p.status !== "Retired")}
+                        comps={manuscriptComps(m)}
+                        onOpenHub={() => onNavigate?.("queries")}
+                        onOpenBuilder={() => {
+                          localStorage.setItem(ACTIVE_MS_KEY, m.id);
+                          onNavigate?.("manuscripts", "Submission packages");
+                        }}
+                        onManageComps={() => {
+                          localStorage.setItem(ACTIVE_MS_KEY, m.id);
+                          onNavigate?.("manuscripts", "Comparable titles");
+                        }}
+                      />
+                      <div className="msv-actionsect msv-s4">
                         <div className="msv-actions">
                           <button type="button" className="msv-btn sm" onClick={() => startEditMs(m)}>
                             <Pencil />

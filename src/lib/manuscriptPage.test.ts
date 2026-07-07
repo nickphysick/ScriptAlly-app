@@ -5,6 +5,8 @@ import {
   activeQueryCount,
   compactRange,
   wordCountWhisper,
+  lastActivityMs,
+  recentQueries,
 } from "./manuscriptPage";
 import { ManuscriptStatus, Query, QueryStatus } from "../types";
 
@@ -75,6 +77,55 @@ describe("activeQueryCount", () => {
         q(QueryStatus.WITHDRAWN),
       ])
     ).toBe(3);
+  });
+});
+
+describe("lastActivityMs", () => {
+  const iso = (s: string) => Date.parse(s);
+
+  it("returns the most recent dated event, not just dateSent", () => {
+    const query = {
+      dateSent: "2026-01-01",
+      partialRequestedDate: "2026-02-01",
+      responseReceivedAt: "2026-03-15",
+    } as Query;
+    expect(lastActivityMs(query)).toBe(iso("2026-03-15"));
+  });
+
+  it("coerces a Firestore Timestamp ({seconds}) and a .toDate()", () => {
+    expect(lastActivityMs({ dateSent: { seconds: 1_700_000_000 } } as unknown as Query)).toBe(
+      1_700_000_000 * 1000
+    );
+    const d = new Date("2026-05-05T00:00:00Z");
+    expect(lastActivityMs({ lastStatusChange: { toDate: () => d } } as unknown as Query)).toBe(
+      d.getTime()
+    );
+  });
+
+  it("is null when nothing is dated (provisional import)", () => {
+    expect(lastActivityMs({} as Query)).toBeNull();
+  });
+});
+
+describe("recentQueries", () => {
+  const mk = (id: string, date: string | null): Query =>
+    ({ id, ...(date ? { dateSent: date } : {}) }) as Query;
+
+  it("returns the n newest-active, newest first, undated last", () => {
+    const list = [
+      mk("a", "2026-01-01"),
+      mk("b", "2026-03-01"),
+      mk("c", null),
+      mk("d", "2026-02-01"),
+    ];
+    expect(recentQueries(list, 3).map((x) => x.id)).toEqual(["b", "d", "a"]);
+  });
+
+  it("does not mutate the input array", () => {
+    const list = [mk("a", "2026-01-01"), mk("b", "2026-03-01")];
+    const before = list.map((x) => x.id);
+    recentQueries(list, 1);
+    expect(list.map((x) => x.id)).toEqual(before);
   });
 });
 
