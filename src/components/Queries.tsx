@@ -2148,6 +2148,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           <ChromeSlab
             onNavigate={onNavigate}
             grand
+            crumbBar
             title="Queries Hub"
             meta={hubPulse}
             style={{ margin: "-22px -28px 14px" }}
@@ -2247,6 +2248,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         <ChromeSlab
           onNavigate={onNavigate}
           grand
+          crumbBar
           title="Queries Hub"
           meta={hubPulse}
           style={{ margin: "-22px -28px 14px" }}

@@ -137,6 +137,8 @@
   --slab-bg: #fffefb;
   --slab-bd: #e7ddd2;
   --slab-bdw: 1px;
+  --crumb-bar-bg: #F8FAF7;                    /* Queries crumb bar — light sage */
+  --crumb-bar-rule: var(--bdw) solid var(--bd);
   --slab-shadow: none;
   --slab-ttl: #5d4037;
   --slab-meta: #8a7a6c;
@@ -268,6 +270,8 @@
   --slab-bg: #fffefb;
   --slab-bd: #1d1712;
   --slab-bdw: 1.5px;
+  --crumb-bar-bg: #f7f1f0;                    /* Queries crumb bar — light blush */
+  --crumb-bar-rule: var(--bdw) solid var(--bd);
   --slab-shadow: none;
   --slab-ttl: #1d1712;
   --slab-meta: #5e5954;
@@ -411,6 +415,8 @@
   --slab-bg: #ffffff;
   --slab-bd: #ececeb;
   --slab-bdw: 1px;
+  --crumb-bar-bg: #f6f6f5;                    /* Queries crumb bar — faint neutral */
+  --crumb-bar-rule: 3px double var(--bd);     /* Editorial keeps the newspaper double-rule */
   --slab-shadow: 0 3px 10px rgba(20, 20, 20, 0.04);
   --slab-ttl: #1a1a1a;
   --slab-meta: #7d8083;
