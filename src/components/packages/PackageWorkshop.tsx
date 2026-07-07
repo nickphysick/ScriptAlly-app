@@ -22,11 +22,35 @@
  * hexes + charcoal masthead are NOT trusted — Editorial rides its real .t-edn values). No color-mix:
  * the two burgundy/graphite alpha tints are pre-computed rgba per the standing rule.
  */
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ManuscriptVersion, SubmissionPackage, Query, ComponentType } from "../../types";
 import { TypeGlyph } from "./TypeGlyph";
-import { TYPE_META, BUILDER_TYPES } from "./typeMeta";
+import { TYPE_META, BUILDER_TYPES, SLOT_FIELD, SlotSelection, emptySelection, selectionFromPackage } from "./typeMeta";
+import { isSlotFilled, UNFILLED_SLOT, reachedFull } from "../../lib/packageMetrics";
 import { FONT_SERIF, FONT_MONO } from "../../lib/designTokens";
+
+/** Persist payload for a package — all three slot ids ("" for empty; isValidPackage needs them present). */
+export interface PackageSaveFields {
+  packageName: string;
+  queryLetterVersionId: string;
+  synopsisVersionId: string;
+  samplePagesVersionId: string;
+}
+/** An in-memory bench draft (not persisted until Save). Keyed by package id (real) or a temp new id. */
+interface Draft {
+  name: string;
+  sel: SlotSelection;
+  isNew: boolean;
+  dirty: boolean;
+}
+const slotNoun = (t: ComponentType) => TYPE_META[t].label.toLowerCase();
+const toFields = (name: string, sel: SlotSelection): PackageSaveFields => ({
+  packageName: name.trim(),
+  queryLetterVersionId: sel[ComponentType.QUERY_LETTER] || UNFILLED_SLOT,
+  synopsisVersionId: sel[ComponentType.SYNOPSIS] || UNFILLED_SLOT,
+  samplePagesVersionId: sel[ComponentType.SAMPLE_PAGES] || UNFILLED_SLOT,
+});
+const sameSel = (a: SlotSelection, b: SlotSelection) => BUILDER_TYPES.every((t) => a[t] === b[t]);
 
 /** Workshop-window header icon (tool) + analytics-window header icon (bar chart), from the ref. */
 const toolIcon = (
@@ -47,18 +71,114 @@ export interface PackageWorkshopProps {
   onCreateVersion: (type: ComponentType, name: string) => void;
   /** Full text edit — host opens MaterialModal for the version. */
   onEditVersion: (version: ManuscriptVersion) => void;
+  /** Persist the bench: baseId set → updatePackage, null → addPackage. Returns the (new) package id. */
+  onSavePackage: (baseId: string | null, fields: PackageSaveFields) => Promise<string | undefined> | string | undefined;
 }
 
-export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, packages, onCreateVersion, onEditVersion }) => {
+export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, packages, queries, onCreateVersion, onEditVersion, onSavePackage }) => {
   // Inline-create state for the palette (P2): which group is showing its name input, and its value.
   const [newInType, setNewInType] = useState<ComponentType | null>(null);
   const [newName, setNewName] = useState("");
+
+  // Bench state (P3). ONE package is active + editable; edits live in `drafts` (an overlay on the saved
+  // packages) so an unsaved draft survives promotion + theme switch. A draft is keyed by package id
+  // (real) or a temp new id; presence + `dirty` mark it. dragMat/overSlot/flash drive DnD affordances.
+  const [drafts, setDrafts] = useState<Record<string, Draft>>({});
+  const [activeId, setActiveId] = useState<string | null>(() => packages[0]?.id ?? null);
+  const [dragMat, setDragMat] = useState<string | null>(null);
+  const [overSlot, setOverSlot] = useState<ComponentType | null>(null);
+  const [flash, setFlash] = useState<ComponentType | null>(null);
+
+  const versionById = (id: string) => versions.find((v) => v.id === id);
+  // The saved (prop) baseline for a package as a draft-shaped value.
+  const baseOf = (id: string): Draft | null => {
+    const p = packages.find((x) => x.id === id);
+    return p ? { name: p.packageName, sel: selectionFromPackage(p), isNew: false, dirty: false } : null;
+  };
+  const effOf = (id: string | null): Draft | null => (id ? drafts[id] ?? baseOf(id) : null);
+  const active = effOf(activeId);
+
+  // Keep a valid active package: if the current one vanished (or none yet), fall back to the first saved.
+  useEffect(() => {
+    if (activeId && (drafts[activeId] || packages.some((p) => p.id === activeId))) return;
+    setActiveId(packages[0]?.id ?? null);
+  }, [packages, activeId, drafts]);
+
+  // Prune clean drafts once the props reflect them (post-save reconcile) — avoids stale overlays.
+  useEffect(() => {
+    setDrafts((d) => {
+      let changed = false;
+      const next = { ...d };
+      for (const [id, e] of Object.entries(d)) {
+        if (e.dirty || e.isNew) continue;
+        const base = baseOf(id);
+        if (base && base.name === e.name && sameSel(base.sel, e.sel)) { delete next[id]; changed = true; }
+      }
+      return changed ? next : d;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [packages]);
 
   const commitNew = (type: ComponentType) => {
     const name = newName.trim();
     if (name) onCreateVersion(type, name);
     setNewInType(null);
     setNewName("");
+  };
+
+  // Write an edit to the active package's draft (creating the draft from its baseline on first touch).
+  const editActive = (mut: (d: Draft) => Draft) => {
+    if (!activeId) return;
+    setDrafts((prev) => {
+      const cur = prev[activeId] ?? baseOf(activeId) ?? { name: "", sel: emptySelection(), isNew: true, dirty: false };
+      return { ...prev, [activeId]: { ...mut(cur), dirty: true } };
+    });
+  };
+  const fillSlot = (type: ComponentType, matId: string) => {
+    editActive((d) => ({ ...d, sel: { ...d.sel, [type]: matId } }));
+    setFlash(type);
+  };
+  const clearSlot = (type: ComponentType) => editActive((d) => ({ ...d, sel: { ...d.sel, [type]: UNFILLED_SLOT } }));
+  const renameActive = (name: string) => editActive((d) => ({ ...d, name }));
+
+  const isDirty = !!(activeId && drafts[activeId]?.dirty);
+  // Save needs a name + a letter whose version still exists (mirrors the composer rule).
+  const canSave = !!active && active.name.trim().length > 0
+    && isSlotFilled(active.sel[ComponentType.QUERY_LETTER])
+    && !!versionById(active.sel[ComponentType.QUERY_LETTER]);
+
+  const save = async () => {
+    if (!active || !canSave || !activeId) return;
+    const baseId = drafts[activeId]?.isNew ? null : activeId;
+    const newId = await onSavePackage(baseId, toFields(active.name, active.sel));
+    setDrafts((prev) => {
+      const next = { ...prev };
+      delete next[activeId];
+      return next;
+    });
+    if (baseId === null && typeof newId === "string") setActiveId(newId);
+  };
+  const discard = () => {
+    if (!activeId) return;
+    const wasNew = drafts[activeId]?.isNew;
+    setDrafts((prev) => { const n = { ...prev }; delete n[activeId]; return n; });
+    if (wasNew) setActiveId(packages[0]?.id ?? null);
+  };
+  const duplicate = (pkg: Draft) => {
+    const id = `wk-new-${Date.now()}`;
+    setDrafts((prev) => ({ ...prev, [id]: { name: `Copy of ${pkg.name}`, sel: { ...pkg.sel }, isNew: true, dirty: true } }));
+    setActiveId(id);
+  };
+  const newPackage = () => {
+    const id = `wk-new-${Date.now()}`;
+    setDrafts((prev) => ({ ...prev, [id]: { name: "", sel: emptySelection(), isNew: true, dirty: true } }));
+    setActiveId(id);
+  };
+
+  /** Per-package sent / full for the bench + grid result line (derived, never stored). */
+  const pkgCounts = (id: string) => {
+    const mine = queries.filter((q) => q.packageId === id);
+    return { sent: mine.length, full: mine.filter(reachedFull).length };
   };
 
   return (
@@ -110,6 +230,37 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
         .pkgwk .newin::placeholder { color:var(--muted); font-style:italic; }
         .pkgwk .bench-lab { font-family:${FONT_MONO}; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--wk-burg); display:flex; align-items:center; gap:9px; margin-bottom:16px; }
         .pkgwk .bench-lab .dotp { width:9px; height:9px; border-radius:50%; background:var(--wk-burg); box-shadow:0 0 0 4px var(--wk-pulse); flex-shrink:0; }
+        /* Active bench (ref .pkg) — one editable package: name header, three slots, dirty foot. */
+        .pkgwk .pkg { background:var(--card); border:var(--bdw) solid var(--bd); border-radius:14px; overflow:hidden; max-width:760px; box-shadow:0 12px 30px rgba(58,28,20,.11); }
+        .pkgwk .pkg-h { display:flex; align-items:center; gap:11px; padding:16px 22px; background:linear-gradient(135deg,var(--band-a),var(--band-b)); border-bottom:var(--bdw) solid var(--bd); }
+        .pkgwk .pkg-h .name { flex:1; min-width:0; font-family:${FONT_SERIF}; font-size:20px; font-weight:700; color:var(--hdrOn); background:transparent; border:0; border-bottom:1.5px dashed transparent; outline:none; padding-bottom:2px; }
+        .pkgwk .pkg-h .name:focus { border-bottom-color:var(--wk-dash); }
+        .pkgwk .pkg-h .name::placeholder { color:var(--muted); font-style:italic; }
+        .pkgwk .pkg-h .pen { color:var(--hdrOn); opacity:.5; display:flex; flex-shrink:0; }
+        .pkgwk .pkg-slots { padding:18px 22px; display:flex; flex-direction:column; gap:12px; }
+        .pkgwk .slot { border:1.5px dashed var(--wk-dash); border-radius:11px; padding:16px 17px; display:flex; align-items:center; gap:13px; min-height:70px; transition:background .12s,border-color .12s; }
+        .pkgwk .slot.over { border-color:var(--wk-burg); background:var(--selBg); border-style:solid; }
+        .pkgwk .slot.filled { border-style:solid; border-color:var(--bd); background:var(--card); }
+        .pkgwk .slot.filled.flash { animation:wkFlash .5s ease; }
+        @keyframes wkFlash { 0% { background:var(--wk-flash); } 100% { background:var(--card); } }
+        .pkgwk .slot .sg { width:34px; height:34px; border-radius:9px; background:var(--selBg); color:var(--muted); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .pkgwk .slot.filled .sg { color:var(--wk-burg); }
+        .pkgwk .slot .stxt { font-size:13.5px; color:var(--muted); font-style:italic; }
+        .pkgwk .slot .sfill { min-width:0; flex:1; }
+        .pkgwk .slot .sfill .sn { font-family:${FONT_SERIF}; font-size:16px; font-weight:600; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .pkgwk .slot .sfill .sf { font-family:${FONT_MONO}; font-size:8.5px; color:var(--muted); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .pkgwk .slot .rm { margin-left:auto; color:var(--muted); cursor:pointer; background:none; border:0; padding:2px; display:flex; flex-shrink:0; font-size:15px; line-height:1; }
+        .pkgwk .slot .rm:hover { color:var(--wk-burg); }
+        .pkgwk .slot .kick { margin-left:auto; font-family:${FONT_MONO}; font-size:7.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); flex-shrink:0; }
+        .pkgwk .pkg-foot { border-top:var(--bdw) solid var(--bd); padding:14px 22px; display:flex; align-items:center; gap:12px; background:var(--card); }
+        .pkgwk .pkg-foot .res { font-family:${FONT_MONO}; font-size:9px; color:var(--muted); }
+        .pkgwk .pkg-foot .res b { color:var(--wk-acc); }
+        .pkgwk .pkg-foot .fa { margin-left:auto; display:flex; gap:14px; align-items:center; }
+        .pkgwk .pkg-foot .fa button { font-family:${FONT_MONO}; font-size:9px; letter-spacing:.06em; text-transform:uppercase; border:0; background:none; cursor:pointer; color:var(--muted); }
+        .pkgwk .pkg-foot .fa button:disabled { opacity:.45; cursor:not-allowed; }
+        .pkgwk .pkg-foot .fa .save { color:var(--wk-burg); font-weight:600; }
+        .pkgwk .pkg-foot .fa .discard { color:var(--wk-gold); }
+        .pkgwk .pkg-foot .fa .save:disabled { color:var(--muted); }
 
         /* Analytics body: scope toggle + panel */
         .pkgwk .wk-scope { display:flex; gap:3px; background:var(--wk-scopebg); border-radius:9px; padding:3px; margin:20px 22px 0; }
@@ -139,8 +290,21 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
                   <div key={t} className="palgroup">
                     <div className="palgroup-h"><span className="g"><TypeGlyph type={t} size={13} /></span>{TYPE_META[t].plural}</div>
                     {items.map((v) => (
-                      // Draggable (DnD wired in P3) + a hover edit pencil → MaterialModal. Click-to-use lands in P3.
-                      <div key={v.id} className="chip" draggable data-mat={v.id}>
+                      // Drag OR click OR Enter/Space fills the active package's matching slot (all first-class).
+                      // The hover edit pencil opens the full MaterialModal (its click stops propagation).
+                      <div
+                        key={v.id}
+                        className={`chip${dragMat === v.id ? " dragging" : ""}`}
+                        draggable
+                        data-mat={v.id}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`Add ${v.versionName} to the active package`}
+                        onClick={() => fillSlot(t, v.id)}
+                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fillSlot(t, v.id); } }}
+                        onDragStart={(e) => { setDragMat(v.id); e.dataTransfer.effectAllowed = "copy"; }}
+                        onDragEnd={() => { setDragMat(null); setOverSlot(null); }}
+                      >
                         <span className="cg"><TypeGlyph type={t} size={14} /></span>
                         <div className="cmid">
                           <div className="cn">{v.versionName}</div>
@@ -170,7 +334,70 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
             </div>
             <div className="wk-building">
               <div className="bench-lab"><span className="dotp" />Active package — drag materials from the left, or click to add</div>
-              <div className="wk-skel">The editable bench, save/discard and the other-packages grid land in Phases 3–4.</div>
+              {active && activeId ? (
+                <div className="pkg">
+                  <div className="pkg-h">
+                    <input className="name" value={active.name} placeholder="Untitled package" aria-label="Package name" onChange={(e) => renameActive(e.target.value)} />
+                    <span className="pen" aria-hidden="true">{pencilIcon}</span>
+                  </div>
+                  <div className="pkg-slots">
+                    {BUILDER_TYPES.map((t) => {
+                      const vid = active.sel[t];
+                      const v = isSlotFilled(vid) ? versionById(vid) : undefined;
+                      const canDrop = dragMat ? versionById(dragMat)?.componentType === t : false;
+                      return (
+                        <div
+                          key={t}
+                          className={`slot${v ? " filled" : ""}${overSlot === t ? " over" : ""}${flash === t && v ? " flash" : ""}`}
+                          onDragOver={(e) => { if (canDrop) { e.preventDefault(); setOverSlot(t); } }}
+                          onDragLeave={() => setOverSlot((s) => (s === t ? null : s))}
+                          onDrop={(e) => { if (canDrop && dragMat) { e.preventDefault(); fillSlot(t, dragMat); setOverSlot(null); } }}
+                          onAnimationEnd={() => setFlash((f) => (f === t ? null : f))}
+                        >
+                          <span className="sg"><TypeGlyph type={t} size={16} /></span>
+                          {v ? (
+                            <>
+                              <div className="sfill"><div className="sn">{v.versionName}</div>{v.fileName && <div className="sf">{v.fileName}</div>}</div>
+                              <button type="button" className="rm" aria-label={`Remove ${slotNoun(t)}`} onClick={() => clearSlot(t)}>✕</button>
+                            </>
+                          ) : (
+                            <>
+                              <span className="stxt">Drop a {slotNoun(t)} here{t === ComponentType.SAMPLE_PAGES ? " (optional)" : ""}</span>
+                              <span className="kick">{t === ComponentType.QUERY_LETTER ? "required" : slotNoun(t)}</span>
+                            </>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="pkg-foot">
+                    {(() => {
+                      const c = drafts[activeId]?.isNew ? { sent: 0, full: 0 } : pkgCounts(activeId);
+                      return (
+                        <span className="res">
+                          {c.sent > 0 ? (
+                            <>SENT WITH {c.sent} {c.sent === 1 ? "QUERY" : "QUERIES"}{c.full > 0 ? <> · <b>{c.full} FULL REQUEST{c.full === 1 ? "" : "S"}</b></> : null}</>
+                          ) : "NOT SENT YET"}
+                        </span>
+                      );
+                    })()}
+                    <span className="fa">
+                      {isDirty ? (
+                        <>
+                          <button type="button" className="save" disabled={!canSave} title={!canSave ? "Add a name and a query letter to save" : undefined} onClick={save}>✓ Save</button>
+                          <button type="button" className="discard" onClick={discard}>Discard</button>
+                        </>
+                      ) : (
+                        <button type="button" onClick={() => duplicate(active)}>⧉ Duplicate</button>
+                      )}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="wk-skel">No package on the bench yet.</div>
+              )}
+              {/* Other-packages grid + New-package ghost — Phase 4. */}
+              <div className="wk-skel" style={{ marginTop: 30 }}>Your other packages &amp; the ＋ New package ghost — Phase 4.</div>
             </div>
           </div>
         </section>

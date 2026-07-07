@@ -60,6 +60,7 @@ export const PkgLab: React.FC = () => {
   // Versions are STATEFUL so the modal round-trips: creates append, edits apply, and a composer-origin
   // create demonstrates the auto-slot (same seam the real host wires).
   const [versions, setVersions] = useState<ManuscriptVersion[]>(MOCK_VERSIONS);
+  const [pkgs, setPkgs] = useState<SubmissionPackage[]>(MOCK_PACKAGES); // stateful so the workshop's save round-trips
   const [matModal, setMatModal] = useState<{ type: ComponentType; version: ManuscriptVersion | null; fromComposer?: boolean; seedName?: string; seedContent?: string } | null>(null);
   const [autoPick, setAutoPick] = useState<{ type: ComponentType; versionId: string; token: number } | undefined>(undefined);
   const openMat = (type: ComponentType) => setMatModal({ type, version: null });
@@ -135,10 +136,19 @@ export const PkgLab: React.FC = () => {
           </div>
           <PackageWorkshop
             versions={versions}
-            packages={MOCK_PACKAGES}
+            packages={pkgs}
             queries={MOCK_QUERIES}
             onCreateVersion={(type, name) => setVersions((vs) => [...vs, { id: `v-lab-${vs.length}`, manuscriptId: "m", userId: "lab", componentType: type, versionName: name, fileAttached: false, createdDate: "2026-01-03T00:00:00.000Z", contentDraft: "" }])}
             onEditVersion={editMat}
+            onSavePackage={(baseId, f) => {
+              if (baseId) {
+                setPkgs((ps) => ps.map((p) => (p.id === baseId ? { ...p, packageName: f.packageName, queryLetterVersionId: f.queryLetterVersionId, synopsisVersionId: f.synopsisVersionId, samplePagesVersionId: f.samplePagesVersionId } : p)));
+                return baseId;
+              }
+              const id = `p-lab-${Date.now()}`;
+              setPkgs((ps) => [...ps, { id, manuscriptId: "m", userId: "lab", packageName: f.packageName, queryLetterVersionId: f.queryLetterVersionId, synopsisVersionId: f.synopsisVersionId, samplePagesVersionId: f.samplePagesVersionId, status: "Active", createdDate: "2026-01-04T00:00:00.000Z" }]);
+              return id;
+            }}
           />
         </div>
       ) : view === "first" ? (
