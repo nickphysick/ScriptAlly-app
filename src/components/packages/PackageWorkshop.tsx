@@ -114,10 +114,13 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
   const effOf = (id: string | null): Draft | null => (id ? drafts[id] ?? baseOf(id) : null);
   const active = effOf(activeId);
 
-  // Keep a valid active package: if the current one vanished (or none yet), fall back to the first saved.
+  // Keep a valid active package. If the manuscript has none and there's no draft yet, open a fresh
+  // empty one so the bench is always ready-to-fill (the no-packages empty state).
   useEffect(() => {
     if (activeId && (drafts[activeId] || packages.some((p) => p.id === activeId))) return;
+    if (packages.length === 0 && Object.keys(drafts).length === 0) { newPackage(); return; }
     setActiveId(packages[0]?.id ?? null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [packages, activeId, drafts]);
 
   // Prune clean drafts once the props reflect them (post-save reconcile) — avoids stale overlays.
@@ -424,6 +427,8 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
         .pkgwk .pal-toph .pl { font-family:${FONT_MONO}; font-size:8px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
         .pkgwk .pal-toph .em { margin-left:auto; font-family:${FONT_MONO}; font-size:8.5px; color:var(--wk-burg); cursor:pointer; border:1px solid var(--btnBd); border-radius:7px; padding:5px 9px; background:var(--card); }
         .pkgwk .pal-toph .em:hover { background:var(--btnH); }
+        .pkgwk .pal-teach { font-size:11.5px; font-style:italic; color:var(--muted); line-height:1.5; margin-bottom:16px; }
+        .pkgwk .pal-teach b { color:var(--wk-burg); font-style:normal; font-weight:600; }
         .pkgwk .palgroup { margin-bottom:22px; }
         .pkgwk .palgroup-h { display:flex; align-items:center; gap:8px; font-family:${FONT_MONO}; font-size:8.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--hdr); margin-bottom:11px; }
         .pkgwk .palgroup-h .g { color:var(--wk-burg); display:inline-flex; }
@@ -617,6 +622,9 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
                   {mode === "materials" ? "✓ Done" : "Edit materials →"}
                 </span>
               </div>
+              {versions.length === 0 && (
+                <div className="pal-teach">No materials yet — hit <b>Edit materials</b> to write your first letter, synopsis or pages.</div>
+              )}
               {BUILDER_TYPES.map((t) => {
                 const items = versions.filter((v) => v.componentType === t);
                 return (
