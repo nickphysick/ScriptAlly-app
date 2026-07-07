@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Manuscripts v10: three treatments, final</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@500&display=swap" rel="stylesheet">
+<style>
+body.t-capp{--desk:#e8ddd0;--card:#fdfaf5;--cardbd:1px solid #d8cebf;--crad:10px;
+  --cardshadow:0 1px 3px rgba(58,28,20,.07),0 6px 18px rgba(58,28,20,.09);
+  --bandA:#ece5d8;--bandB:#e5ddcd;--bandrule:none;--head:#5d4037;
+  --ink:#3a1c14;--muted:#8a7a6c;--label:#9c8878;--hair:#e7ddd2;
+  --btnbg:#fffefb;--btnbd:1px solid #d8c9b2;--btntx:#5d4037;--btnhov:#f7f2e9;
+  --hue:#7c3a2a;--huec:#f6e4da;--sub:#fffdf9;--subbd:1px solid #ece0d2;
+  --tile:#fffdf9;--tilebd:1px solid #ece0d2;--tileshadow:none;--gold:#a8842c;--grainop:.22}
+body.t-bold{--desk:#c3cfdb;--card:#fffefb;--cardbd:1.5px solid #1d1712;--crad:14px;
+  --cardshadow:0 2px 7px rgba(29,23,18,.07);
+  --bandA:#f4c7c2;--bandB:#f4c7c2;--bandrule:1.5px solid #1d1712;--head:#000;
+  --ink:#1d1712;--muted:#6a625c;--label:#7a726b;--hair:#e6ddd6;
+  --btnbg:#fffefb;--btnbd:1.5px solid #1d1712;--btntx:#1d1712;--btnhov:#f5e9e7;
+  --hue:#1d1712;--huec:#f8dcd8;--sub:#fdf6f4;--subbd:1.5px solid #1d1712;
+  --tile:#ffffff;--tilebd:1px solid #eee4df;--tileshadow:0 2px 7px rgba(29,23,18,.07);--gold:#a8842c;--grainop:.12}
+body.t-edn{--desk:#f4f4f3;--card:#fff;--cardbd:none;--crad:16px;
+  --cardshadow:0 1px 2px rgba(20,20,20,.05),0 12px 32px rgba(20,20,20,.07);
+  --bandA:#f4f4f5;--bandB:#f4f4f5;--bandrule:none;--head:#000;
+  --ink:#1a1a1a;--muted:#6b6b6b;--label:#8b8b8b;--hair:#e3e2e0;
+  --btnbg:#eeeff0;--btnbd:1px solid transparent;--btntx:#181a1d;--btnhov:#e4e5e7;
+  --hue:#44484d;--huec:#e9eaeb;--sub:#f7f7f8;--subbd:1px solid transparent;
+  --tile:#f4f4f5;--tilebd:1px solid transparent;--tileshadow:none;--gold:#8a7326;--grainop:.05}
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--desk);color:var(--ink);font-size:13px;-webkit-font-smoothing:antialiased;padding:36px 26px 100px}
+body::before{content:'';position:fixed;inset:0;opacity:var(--grainop);pointer-events:none;z-index:60;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.04'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.lab{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.17em;text-transform:uppercase;font-weight:500;color:var(--label)}
+button{cursor:pointer;font-family:inherit}
+.wrap{max-width:1150px;margin:0 auto}
+.btn{display:inline-flex;align-items:center;gap:7px;background:var(--btnbg);border:var(--btnbd);color:var(--btntx);
+  font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;
+  padding:9px 18px;border-radius:10px;white-space:nowrap}
+.btn:hover{background:var(--btnhov)}
+.btn.sm{padding:6.5px 13px;font-size:9.5px;border-radius:8px}
+.btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round}
+.linky{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;font-weight:500;color:var(--hue);background:none;border:none;padding:0}
+.linky:hover{text-decoration:underline}
+
+.pagehead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:6px}
+.pagehead h1{font-family:'Playfair Display',serif;font-size:27px;font-weight:500;color:var(--ink)}
+.subtabs{display:flex;gap:22px;border-bottom:1px solid var(--hair);margin-bottom:26px}
+.subtab{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;font-weight:500;
+  color:var(--label);background:none;border:none;padding:9px 1px 10px;border-bottom:2px solid transparent;margin-bottom:-1px}
+.subtab:hover{color:var(--ink)}
+.subtab.on{color:var(--hue);border-bottom-color:var(--hue)}
+
+/* ===== plates ===== */
+.tilegrid{display:flex;flex-direction:column;gap:26px}
+.mstile{background:var(--card);border:var(--cardbd);border-radius:var(--crad);box-shadow:var(--cardshadow);
+  overflow:hidden;position:relative;padding:0 44px}
+.t-capp .mstile{background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.03'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E")}
+.t-capp .mstile::after{content:'';position:absolute;inset:9px;border:1px solid rgba(124,58,42,.30);
+  border-radius:calc(var(--crad) - 4px);pointer-events:none;z-index:2}
+.mstile>*{position:relative;z-index:3}
+.mstile.shelved{opacity:.62}
+.head{cursor:pointer}
+.statuspill{display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:10px;
+  letter-spacing:.12em;text-transform:uppercase;font-weight:500;color:var(--hue);background:var(--huec);border-radius:99px;padding:6px 15px;white-space:nowrap}
+.platepill{position:absolute;top:20px;right:26px;z-index:4}
+.statuspill.grey{color:var(--muted);background:rgba(0,0,0,.05)}
+.statuspill .dt{width:6px;height:6px;border-radius:50%;background:currentColor}
+.wc{font-family:'JetBrains Mono',monospace;font-size:11.5px;font-weight:500;color:var(--ink)}
+.wcline{margin-top:9px}
+
+/* --- A · frontispiece --- */
+.fphead{padding:44px 30px 6px;text-align:center}
+.fphead .lab{display:block}
+.fphead h2{font-family:'Playfair Display',serif;font-size:42px;font-weight:500;line-height:1.12;margin-top:13px;color:var(--ink)}
+.orn{display:flex;align-items:center;justify-content:center;gap:11px;margin:17px 0 15px}
+.orn::before,.orn::after{content:'';height:1px;width:46px;background:var(--hue);opacity:.45}
+.orn i{width:6px;height:6px;background:var(--hue);opacity:.55;transform:rotate(45deg)}
+.fphead .logline{font-family:'Playfair Display',serif;font-style:italic;font-size:15.5px;line-height:1.6;color:var(--ink);max-width:580px;margin:0 auto}
+.fphead .wcline{margin-top:12px}
+.fphead .restsend{margin-top:19px}
+
+/* --- B · editorial --- */
+.edhead{display:grid;grid-template-columns:1fr 1fr;gap:0 56px;padding:38px 0 8px;align-items:start}
+.edhead .idcol .lab{display:block}
+.edhead h2{font-family:'Playfair Display',serif;font-size:36px;font-weight:500;line-height:1.13;margin-top:11px;color:var(--ink)}
+
+.edhead .restsend{margin-top:20px}
+.edquote{position:relative;padding:16px 4px 0 40px;border-left:1px solid var(--hair);min-height:100px}
+.edquote::before{content:'\201C';position:absolute;left:22px;top:-14px;font-family:'Playfair Display',serif;
+  font-size:74px;line-height:1;color:var(--hue);opacity:.18}
+.edquote .logline{font-family:'Playfair Display',serif;font-style:italic;font-size:18.5px;line-height:1.55;color:var(--ink)}
+.edquote .pillrow{margin-top:15px}
+@media(max-width:900px){.edhead{grid-template-columns:1fr}.edquote{border-left:none;padding-left:0;min-height:0}.edquote::before{display:none}}
+
+/* --- C · cover object --- */
+.cvhead{display:flex;gap:36px;align-items:stretch;padding:34px 0 8px}
+.cover{width:150px;min-height:214px;flex-shrink:0;background:var(--huec);border:1.5px solid var(--hue);
+  border-radius:5px 11px 11px 5px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:20px 15px;box-shadow:4px 5px 0 rgba(0,0,0,.05)}
+.cover::before{content:'';position:absolute;inset:7px;border:1px solid var(--hue);opacity:.4;border-radius:2px 6px 6px 2px;pointer-events:none}
+.cover::after{content:'';position:absolute;left:8px;top:0;bottom:0;width:1px;background:var(--hue);opacity:.3}
+.cover .ct{font-family:'Playfair Display',serif;font-size:15.5px;font-weight:500;line-height:1.3;text-align:center;color:var(--ink)}
+.cover .crule{width:26px;height:1px;background:var(--hue);opacity:.5;margin:11px 0}
+.cover .cg{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.16em;text-transform:uppercase;color:var(--hue);text-align:center;line-height:1.7}
+.cvhead .idcol{flex:1;min-width:0;padding-top:6px}
+.cvhead .toprow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.cvhead h2{font-family:'Playfair Display',serif;font-size:34px;font-weight:500;line-height:1.14;margin-top:10px;color:var(--ink)}
+
+.cvhead .logline{margin-top:14px;padding-left:14px;border-left:2px solid var(--hue);
+  font-family:'Playfair Display',serif;font-style:italic;font-size:15px;line-height:1.55;color:var(--ink);max-width:560px}
+.cvhead .restsend{margin-top:19px}
+@media(max-width:760px){.cover{display:none}}
+
+/* ===== reveal: shared three-column spread ===== */
+.reveal{display:grid;grid-template-rows:0fr;transition:grid-template-rows .34s cubic-bezier(.4,0,.2,1)}
+.mstile.open .reveal{grid-template-rows:1fr}
+.reveal>.inner{min-height:0;overflow:hidden}
+.sect,.rpanel{opacity:0;transform:translateY(7px);transition:opacity .26s ease,transform .26s ease}
+.mstile.open .sect,.mstile.open .rpanel{opacity:1;transform:none}
+.mstile.open .s1{transition-delay:.10s}
+.mstile.open .s2{transition-delay:.17s}
+.mstile.open .s3{transition-delay:.24s}
+.mstile.open .s4{transition-delay:.31s}
+.rgrid{display:grid;grid-template-columns:1.15fr 1.15fr .9fr;gap:16px;margin-top:22px}
+.rpanel{background:var(--sub);border:var(--subbd);border-radius:10px;overflow:hidden;min-width:0;display:flex;flex-direction:column}
+.rband{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 14px;
+  background:linear-gradient(135deg,var(--bandA),var(--bandB));border-bottom:var(--bandrule)}
+.rband h4{font-family:'Playfair Display',serif;font-size:13.5px;font-weight:500;color:var(--head)}
+.rbody{padding:12px 14px 13px}
+@media(max-width:980px){.rgrid{grid-template-columns:1fr}}
+.figrow{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.fig{font-family:'Playfair Display',serif;font-size:26px;font-weight:500;line-height:1}
+.figpill{font-family:'Inter',sans-serif;font-size:9.5px;font-weight:500;color:var(--hue);background:var(--huec);border-radius:99px;padding:3px 10px}
+.figpill.grey{color:var(--muted);background:rgba(0,0,0,.05)}
+.qrow{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--hair)}
+.qrow:last-of-type{border-bottom:none}
+.qrow .who{flex:1;min-width:0;font-size:12.5px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qrow .who .ag{color:var(--muted);font-weight:400}
+.qrow .d{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--label);flex-shrink:0}
+.emptyfield{font-family:'Playfair Display',serif;font-style:italic;font-size:13.5px;color:var(--muted);padding:4px 0}
+.pkgrow{display:block;padding:9px 0 10px;border-bottom:1px solid var(--hair)}
+.pkgrow:last-of-type{border-bottom:none}
+.pkgrow .nm{font-family:'Playfair Display',serif;font-size:14px;line-height:1.35;color:var(--ink)}
+.pkgmeta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:5px}
+.pkgparts{display:flex;gap:4px;flex-shrink:0}
+.pp{width:18px;height:18px;border-radius:6px;background:var(--huec);display:flex;align-items:center;justify-content:center;opacity:.26}
+.pp.on{opacity:1}
+.pp span{font-family:'Playfair Display',serif;font-size:10px;font-weight:600;color:var(--hue);line-height:1}
+.pp svg{width:9.5px;height:9.5px;stroke:var(--hue);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.pkgrow .d{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--label);flex-shrink:0}
+.pkgempty{font-family:'Playfair Display',serif;font-style:italic;font-size:13.5px;color:var(--muted);padding:4px 0 8px}
+.comprow{display:flex;align-items:baseline;gap:10px;padding:7.5px 0;border-bottom:1px solid var(--hair)}
+.comprow:last-of-type{border-bottom:none}
+.comprow .t{flex:1;min-width:0;font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.comprow .y{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--label);flex-shrink:0}
+.compsnudge{font-family:'Playfair Display',serif;font-style:italic;font-size:13px;line-height:1.55;color:var(--muted);padding:2px 0}
+.actionsect{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  margin-top:20px;padding:4px 0 6px}
+.actionsect .actions{display:flex;gap:8px;flex-wrap:wrap}
+
+/* expander */
+.expander{display:flex;align-items:center;gap:8px;width:fit-content;margin:20px auto 24px;
+  background:var(--btnbg);border:var(--btnbd);color:var(--btntx);border-radius:99px;padding:8px 19px;
+  font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;font-weight:500}
+.expander:hover{background:var(--btnhov)}
+.expander svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;transition:transform .3s ease}
+.mstile.open .expander svg{transform:rotate(180deg)}
+
+.ghost{border:1.5px dashed var(--hair);border-radius:var(--crad);background:transparent;
+  display:flex;align-items:center;justify-content:center;gap:12px;color:var(--muted);padding:20px 0}
+.ghost:hover{border-color:var(--hue);color:var(--hue)}
+.ghost .plus{font-size:19px;line-height:1;font-weight:300}
+.ghost .cap{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.15em;text-transform:uppercase}
+.ghost .sub{font-size:11.5px;font-style:italic}
+
+/* ===== comps page (unchanged, approved) ===== */
+.spines{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.spine{position:relative;display:flex;flex-direction:column;gap:2px;background:var(--tile);border:var(--tilebd);box-shadow:var(--tileshadow);
+  border-radius:8px;padding:7px 13px 7px 16px;text-align:left;max-width:190px;overflow:hidden}
+.spine::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--hue);opacity:.35}
+.spine .t{font-family:'Playfair Display',serif;font-size:13px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.spine .c{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--label)}
+.spine.on{background:var(--card);box-shadow:var(--cardshadow)}
+.spine.on::before{opacity:1}
+.spine.shelved{opacity:.55}
+.panelbox{background:var(--card);border:var(--cardbd);border-radius:var(--crad);box-shadow:var(--cardshadow);overflow:hidden;position:relative}
+.t-capp .panelbox{background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.03'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E")}
+.band{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 20px;
+  background:linear-gradient(135deg,var(--bandA),var(--bandB));border-bottom:var(--bandrule)}
+.band h3{font-family:'Playfair Display',serif;font-size:15px;font-weight:500;color:var(--head)}
+.pitchblock{margin:16px 20px 4px;background:var(--sub);border:var(--subbd);border-radius:10px;padding:13px 16px;
+  display:flex;align-items:center;justify-content:space-between;gap:14px}
+.pitchblock .line{font-family:'Playfair Display',serif;font-size:16.5px;color:var(--ink);line-height:1.4}
+.pitchblock .line .meets{color:var(--muted);font-style:normal;font-size:14px;padding:0 2px}
+.pitchblock .hint{font-size:11.5px;color:var(--muted);font-style:italic}
+.shelfgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:12px;padding:14px 20px 18px}
+.comp{position:relative;background:var(--tile);border:var(--tilebd);box-shadow:var(--tileshadow);border-radius:10px;
+  padding:13px 15px 12px 19px;overflow:hidden}
+.comp::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--hue);opacity:.85}
+.comp .t{font-family:'Playfair Display',serif;font-size:15px;color:var(--ink);line-height:1.25;padding-right:16px}
+.comp .by{margin-top:3px}
+.comp .note{margin-top:8px;font-family:'Caveat',cursive;font-size:15.5px;line-height:1.25;color:var(--muted)}
+.t-edn .comp .note{font-family:'Playfair Display',serif;font-style:italic;font-size:12.5px;color:#5a5650}
+.comp .rm{position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:6px;border:none;background:transparent;
+  color:var(--label);font-size:13px;line-height:1;opacity:0;display:flex;align-items:center;justify-content:center}
+.comp:hover .rm{opacity:1}
+.comp .rm:hover{background:rgba(0,0,0,.06);color:var(--hue)}
+.oldchip{display:inline-block;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--gold);border:1px solid currentColor;border-radius:99px;padding:2.5px 8px;opacity:.9}
+.addcomp{border:1.5px dashed var(--hair);border-radius:10px;background:transparent;min-height:96px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--muted)}
+.addcomp:hover{border-color:var(--hue);color:var(--hue)}
+.addcomp .plus{font-size:19px;line-height:1;font-weight:300}
+.addcomp .cap{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase}
+.shelfempty{padding:6px 20px 2px;font-size:12.5px;color:var(--muted);font-style:italic}
+.sugghead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px 4px;margin-top:6px;border-top:1px solid var(--hair)}
+.sugghead .tt{display:flex;align-items:center;gap:9px}
+.sugghead .tt svg{width:15px;height:15px;stroke:var(--hue);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.sugghead h4{font-family:'Playfair Display',serif;font-size:14px;font-weight:500;color:var(--head)}
+.prochip{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;font-weight:500;color:#6A89A7;background:#e7eef3;border-radius:99px;padding:3px 9px}
+.suggintro{padding:10px 20px 18px;font-size:12.5px;color:var(--muted);max-width:520px;line-height:1.55}
+.sugglist{padding:6px 20px 8px;display:flex;flex-direction:column}
+.suggrow{display:flex;align-items:flex-start;gap:14px;padding:13px 2px;border-bottom:1px solid var(--hair)}
+.suggrow:last-child{border-bottom:none}
+.suggrow .bk{flex:1;min-width:0}
+.suggrow .t{font-family:'Playfair Display',serif;font-size:14.5px;color:var(--ink)}
+.suggrow .why{margin-top:5px;font-size:12px;line-height:1.5;color:var(--muted)}
+.cautions{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.caution{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--gold);border:1px solid currentColor;border-radius:99px;padding:2.5px 8px}
+.suggrow .acts{display:flex;align-items:center;gap:6px;flex-shrink:0;padding-top:2px}
+.dismiss{width:28px;height:28px;border-radius:8px;border:var(--btnbd);background:var(--btnbg);color:var(--muted);
+  font-size:13px;display:flex;align-items:center;justify-content:center}
+.dismiss:hover{color:var(--hue);background:var(--btnhov)}
+.suggfoot{padding:10px 20px 16px;border-top:1px solid var(--hair)}
+.shimmer{height:52px;border-radius:9px;margin:8px 0;background:linear-gradient(100deg,rgba(0,0,0,.04) 30%,rgba(0,0,0,.09) 45%,rgba(0,0,0,.04) 60%);
+  background-size:220% 100%;animation:shm 1.1s linear infinite}
+@keyframes shm{to{background-position:-120% 0}}
+
+.demochip{position:fixed;right:16px;bottom:14px;z-index:70;background:#fff;border:1.5px dashed #b8a89a;border-radius:11px;
+  padding:9px 12px;display:flex;align-items:center;gap:8px;box-shadow:0 4px 14px rgba(0,0,0,.12);flex-wrap:wrap;max-width:520px;justify-content:flex-end}
+.demochip .lab{color:#8a7a6c}
+.demochip button{border:1px solid #d8c9b2;background:#fdfaf5;border-radius:7px;padding:4px 10px;
+  font-family:'JetBrains Mono',monospace;font-size:9px;color:#5d4037}
+.demochip button.on{background:#5d4037;color:#fff;border-color:#5d4037}
+.demochip .div{width:1px;height:16px;background:#e3d7c8}
+</style>
+</head>
+<body class="t-capp">
+<div class="wrap">
+  <div class="pagehead">
+    <h1>Your manuscripts</h1>
+    <button class="btn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add manuscript</button>
+  </div>
+  <div class="subtabs">
+    <button class="subtab on" data-view="overview">All manuscripts</button>
+    <button class="subtab" data-view="comps">Comparable titles</button>
+    <button class="subtab" data-view="pkg">Submission packages</button>
+  </div>
+
+  <div id="view-overview"><div class="tilegrid" id="tilegrid"></div></div>
+
+  <div id="view-comps" style="display:none">
+    <div class="spines" id="spines"></div>
+    <div class="panelbox">
+      <div class="band">
+        <h3 id="compsbandtitle">Comparable titles</h3>
+        <span class="lab">THE &lsquo;X MEETS Y&rsquo; OF YOUR PITCH</span>
+      </div>
+      <div id="pitchslot"></div>
+      <div id="shelfslot"></div>
+      <div class="sugghead">
+        <div class="tt">
+          <svg viewBox="0 0 24 24"><path d="M12 3l1.7 4.6L18 9.2l-4.3 1.6L12 15.5l-1.7-4.7L6 9.2l4.3-1.6L12 3z"/><path d="M18.5 14.5l.8 2.1 2.2.8-2.2.8-.8 2.1-.8-2.1-2.2-.8 2.2-.8.8-2.1z"/></svg>
+          <h4>Suggestions</h4><span class="prochip">PRO</span>
+        </div>
+        <button class="btn sm" id="suggbtn">Find suggestions</button>
+      </div>
+      <div id="suggslot"></div>
+    </div>
+  </div>
+</div>
+
+<div class="demochip">
+  <span class="lab">OPTION</span>
+  <button class="on" data-v="A">A</button>
+  <button data-v="B">B</button>
+  <button data-v="C">C</button>
+  <span class="div"></span>
+  <button class="on" data-lib="1">1 MS</button>
+  <button data-lib="3">3 MS</button>
+  <span class="div"></span>
+  <button class="on" data-th="t-capp">Capp</button>
+  <button data-th="t-bold">Bold</button>
+  <button data-th="t-edn">Editorial</button>
+</div>
+
+<script>
+const CURRENT_YEAR=2026;
+const MSS=[
+  { id:'ms1', title:'The Clockwork Citadel', age:'Young Adult', genre:'Steampunk fantasy',
+    wc:98200, range:'YA fantasy typically runs 75\u2013100k', status:'Querying',
+    logline:'In a city floating on oil, a guild clockmaker rebuilds her dying sibling into an engine \u2014 and the engine wants more.',
+    comps:[{t:'Gearbreakers',a:'Zoey Mikuta',y:2021,note:'sibling loyalty inside war machines'},
+           {t:'A Darker Shade of Magic',a:'V.E. Schwab',y:2015,note:'the layered-city feel, guild politics'}],
+    field:{sent:20,active:17},
+    packages:[
+      {name:'Greenhouse Literary \u2014 full request',parts:[1,1,1],d:'28 Jun'},
+      {name:'Standard UK query pack',parts:[1,1,1],d:'12 May'},
+      {name:'US agents \u2014 first ten pages',parts:[1,0,1],d:'02 May'}],
+    queries:[
+      {who:'Alexandra Cole',ag:'Greenhouse Literary',st:'fullreq',d:'28 Jun'},
+      {who:'Priya Nair',ag:'Nair & Byrne',st:'rr',d:'21 Jun'},
+      {who:'Tom Whitely',ag:'Whitely Assoc.',st:'partreq',d:'14 Jun'},
+      {who:'Josephine Marsh',ag:'Marsh Literary',st:'queried',d:'09 Jun'}],
+    suggestions:[
+      {t:'Gilded',a:'Marissa Meyer',y:2021,why:'YA fantasy built on a craft-guild magic system, with the same darkening-bargain arc at its core.',c:[]},
+      {t:'Iron Widow',a:'Xiran Jay Zhao',y:2021,why:'Mech-adjacent YA driven by a furious heroine and sibling grief \u2014 close tonal cousin to your logline.',c:[]},
+      {t:'Six of Crows',a:'Leigh Bardugo',y:2015,why:'The gearwork-heist energy and found-family crew map well \u2014 but the scale works against you.',c:['MEGA-BESTSELLER','11 YEARS OLD']},
+      {t:'Mortal Engines',a:'Philip Reeve',y:2001,why:'The obvious moving-city ancestor. Useful shorthand in conversation; too old to carry a query letter.',c:['25 YEARS OLD']}]
+  },
+  { id:'ms2', title:'Shadows on the Moors', age:'Adult', genre:'Gothic mystery',
+    wc:81000, range:'adult gothic typically runs 80\u2013100k', status:'Ready to query',
+    logline:'A botanist travelling to York discovers her host family claims to raise long-extinct ravens \u2014 and that the moor remembers every name it has taken.',
+    comps:[], field:{sent:0}, queries:[], packages:[],
+    suggestions:[
+      {t:'The Death of Jane Lawrence',a:'Caitlin Starling',y:2021,why:'Gothic dread anchored in a rational, scientific heroine \u2014 same push-pull between reason and the uncanny.',c:[]},
+      {t:'Starling House',a:'Alix E. Harrow',y:2023,why:'A house with its own agenda and a protagonist who can\u2019t leave it alone. Recent, well-positioned comp.',c:[]},
+      {t:'Rebecca',a:'Daphne du Maurier',y:1938,why:'The ancestral text for the whole shape of your book \u2014 name it in conversation, not in the letter.',c:['CLASSIC \u00b7 88 YEARS OLD']}]
+  },
+  { id:'ms3', title:'Salt in the Orchard', age:'Adult', genre:'Literary fiction',
+    wc:74500, range:'literary fiction typically runs 70\u2013100k', status:'Shelved',
+    shelved:'Resting until autumn \u2014 voice needs sharpening before it goes out again.',
+    logline:'Three summers after the flood, a cider-maker inherits the orchard that drowned her father.',
+    comps:[{t:'The Overstory',a:'Richard Powers',y:2018,note:'land as a character with its own memory'}],
+    field:{sent:22,active:0},
+    packages:[{name:'Final 2025 round',parts:[1,1,1],d:'11 Feb'}],
+    queries:[{who:'Maya Okafor',ag:'Okafor Books',st:'closed',d:'02 Apr'},
+             {who:'Daniel Frost',ag:'Frost Literary',st:'closed',d:'19 Mar'}],
+    suggestions:[
+      {t:'Unsettled Ground',a:'Claire Fuller',y:2021,why:'Rural British literary fiction where inheritance and landscape do the emotional work.',c:[]},
+      {t:'The Bass Rock',a:'Evie Wyld',y:2020,why:'Place-haunted literary novel with grief moving through generations.',c:[]}]
+  }
+];
+
+let lib=1, activeId='ms1', view='overview', openId=null, variant='A';
+let suggested={}, dismissed={};
+const $=s=>document.querySelector(s);
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+const list=()=>lib===1?[MSS[0]]:MSS;
+const ms=()=>MSS.find(m=>m.id===activeId);
+const gl=k=>k==='q'?`<span>?</span>`:k==='s'?`<svg viewBox="0 0 16 16"><path d="M3 5h10M3 8h10M3 11h7"/></svg>`
+  :`<svg viewBox="0 0 16 16"><rect x="5" y="2.5" width="8" height="10" rx="1"/><path d="M3 5.5v7.5a1 1 0 001 1h7"/></svg>`;
+
+/* StatusDot stand-in — locked geometry mimic; build consumes the real component */
+function dot(kind,size=13){
+  const R=5.5,C=2*Math.PI*R,grey=kind==='closed',hue=grey?'var(--label)':'var(--hue)';
+  const out=`<path d="M5.5 8h5M8.5 6l2 2-2 2" stroke="${hue}" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const inn=`<path d="M10.5 8h-5M7.5 6l-2 2 2 2" stroke="${hue}" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const empty=`<circle cx="8" cy="8" r="${R}" fill="var(--huec)" stroke="${hue}" stroke-width="1.6"/>`;
+  const half=`<circle cx="8" cy="8" r="${R}" fill="var(--huec)" stroke="${hue}" stroke-width="1.6" opacity=".35"/><circle cx="8" cy="8" r="${R}" fill="none" stroke="${hue}" stroke-width="1.6" stroke-dasharray="${C/2} ${C/2}" transform="rotate(90 8 8)"/>`;
+  const full=`<circle cx="8" cy="8" r="${R}" fill="var(--huec)" stroke="${hue}" stroke-width="2.2"/>`;
+  let ring='',glyph='';
+  if(kind==='queried'){ring=empty;glyph=out}
+  if(kind==='partreq'){ring=half;glyph=inn}
+  if(kind==='fullreq'){ring=full;glyph=inn}
+  if(kind==='rr'){ring=full;glyph=`<path d="M6 10.5l4.5-4.5M9.3 5.7l1 1" stroke="${hue}" stroke-width="1.4" fill="none" stroke-linecap="round"/>`}
+  if(kind==='closed'){ring=`<circle cx="8" cy="8" r="${R}" fill="none" stroke="${hue}" stroke-width="1.6"/>`;glyph=`<path d="M6 6l4 4M10 6l-4 4" stroke="${hue}" stroke-width="1.4" stroke-linecap="round"/>`}
+  return `<svg width="${size}" height="${size}" viewBox="0 0 16 16" style="flex-shrink:0">${ring}${glyph}</svg>`;
+}
+
+/* ---- shared section builders ---- */
+function fieldCol(m){
+  const band=l=>`<div class="rband"><h4>In the field</h4>${l||''}</div>`;
+  if(!m.field.sent) return band()+`<div class="rbody"><div class="emptyfield">Still on the runway \u2014 no queries yet.</div></div>`;
+  return band(`<button class="linky">ALL ${m.field.sent} \u2192</button>`)+`<div class="rbody">
+    <div class="figrow"><span class="fig">${m.field.sent}</span><span class="lab">SENT</span>
+      <span class="figpill ${m.field.active?'':'grey'}">${m.field.active?m.field.active+' active':'all closed'}</span></div>
+    ${m.queries.map(q=>`<div class="qrow">${dot(q.st)}<span class="who">${esc(q.who)} <span class="ag">\u00b7 ${esc(q.ag)}</span></span><span class="d">${q.d}</span></div>`).join('')}</div>`;
+}
+function pkgCol(m){
+  return `<div class="rband"><h4>Submission packages</h4><button class="linky">BUILDER \u2192</button></div>
+    <div class="rbody">${m.packages.length ? m.packages.map(pk=>`<div class="pkgrow">
+        <div class="nm">${esc(pk.name)}</div>
+        <div class="pkgmeta">
+          <span class="pkgparts">${pk.parts.map((on,i)=>`<span class="pp ${on?'on':''}" title="${['Query letter','Synopsis','Sample pages'][i]}">${gl(['q','s','p'][i])}</span>`).join('')}</span>
+          <span class="d">${pk.d}</span>
+        </div>
+      </div>`).join('')
+    : `<div class="pkgempty">No packages built yet.</div><button class="linky">BUILD ONE \u2192</button>`}</div>`;
+}
+function compsCol(m){
+  const body = m.comps.length
+    ? m.comps.map(c=>`<div class="comprow"><span class="t">${esc(c.t)}</span><span class="y">${c.y}</span></div>`).join('')
+    : `<div class="compsnudge">No comps attributed yet \u2014 most agents expect two or three, published in the last five years.</div>`;
+  return `<div class="rband"><h4>Comparable titles</h4><button class="linky" data-comps="${m.id}">MANAGE \u2192</button></div>
+    <div class="rbody">${body}</div>`;
+}
+function sendBtn(){
+  return `<button class="btn sm"><svg viewBox="0 0 24 24"><path d="M21 3L10.5 13.5"/><path d="M21 3l-6.5 18-4-7.5L3 9.5 21 3z"/></svg>Send a query</button>`;
+}
+
+/* ---- per-variant heads ---- */
+function headA(m,shel){
+  return `<div class="head fphead" data-toggle="${m.id}">
+    <span class="lab">${esc(m.age).toUpperCase()} \u00b7 ${esc(m.genre).toUpperCase()}</span>
+    <h2>${esc(m.title)}</h2>
+    <div class="wcline"><span class="wc">${m.wc.toLocaleString('en-GB')} words</span></div>
+    <div class="orn"><i></i></div>
+    <div class="logline">${esc(m.logline)}</div>
+    ${shel?'':`<div class="restsend">${sendBtn()}</div>`}
+  </div>`;
+}
+function headB(m,shel){
+  return `<div class="head edhead" data-toggle="${m.id}">
+    <div class="idcol">
+      <span class="lab">${esc(m.age).toUpperCase()} \u00b7 ${esc(m.genre).toUpperCase()}</span>
+      <h2>${esc(m.title)}</h2>
+      <div class="wcline"><span class="wc">${m.wc.toLocaleString('en-GB')} words</span></div>
+      ${shel?'':`<div class="restsend">${sendBtn()}</div>`}
+    </div>
+    <div class="edquote">
+      <div class="logline">${esc(m.logline)}</div>
+    </div>
+  </div>`;
+}
+function headC(m,shel){
+  return `<div class="head cvhead" data-toggle="${m.id}">
+    <div class="cover">
+      <div class="ct">${esc(m.title)}</div>
+      <div class="crule"></div>
+      <div class="cg">${esc(m.genre).toUpperCase()}<br>${esc(m.age).toUpperCase()}</div>
+    </div>
+    <div class="idcol">
+      <span class="lab">${esc(m.age).toUpperCase()} \u00b7 ${esc(m.genre).toUpperCase()}</span>
+      <h2>${esc(m.title)}</h2>
+      <div class="wcline"><span class="wc">${m.wc.toLocaleString('en-GB')} words</span></div>
+      <div class="logline">${esc(m.logline)}</div>
+      ${shel?'':`<div class="restsend">${sendBtn()}</div>`}
+    </div>
+  </div>`;
+}
+
+function renderTiles(){
+  $('#tilegrid').innerHTML = list().map(m=>{
+    const shel=m.status==='Shelved', open=openId===m.id;
+    const head = variant==='A'?headA(m,shel):variant==='B'?headB(m,shel):headC(m,shel);
+    return `<div class="mstile ${shel?'shelved':''} ${open?'open':''}" data-id="${m.id}">
+      <span class="statuspill platepill ${shel?'grey':''}"><span class="dt"></span>${esc(m.status)}</span>
+      ${head}
+      <div class="reveal"><div class="inner">
+        <div class="rgrid">
+          <div class="rpanel s1">${fieldCol(m)}</div>
+          <div class="rpanel s2">${pkgCol(m)}</div>
+          <div class="rpanel s3">${compsCol(m)}</div>
+        </div>
+        <div class="sect s4 actionsect">
+          <div class="actions"><button class="btn sm">Edit details</button><button class="btn sm" title="More">\u22ef</button></div>
+        </div>
+      </div></div>
+      <button class="expander" data-toggle="${m.id}">
+        <span>${open?'LESS':'MORE DETAILS'}</span>
+        <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+    </div>`;
+  }).join('') + `
+    <button class="ghost"><span class="plus">+</span><span class="cap">ADD A MANUSCRIPT</span><span class="sub">\u2014 the shelf holds more than one.</span></button>`;
+  document.querySelectorAll('[data-toggle]').forEach(el=>el.onclick=ev=>{
+    if(ev.target.closest('[data-comps]')||ev.target.closest('.btn'))return;
+    toggleTile(el.dataset.toggle);
+  });
+  document.querySelectorAll('[data-comps]').forEach(b=>b.onclick=()=>{activeId=b.dataset.comps;setView('comps');});
+}
+function toggleTile(id){
+  openId = openId===id ? null : id;
+  document.querySelectorAll('.mstile').forEach(t=>{
+    const isOpen=t.dataset.id===openId;
+    t.classList.toggle('open',isOpen);
+    const ex=t.querySelector('.expander span');
+    if(ex)ex.textContent=isOpen?'LESS':'MORE DETAILS';
+  });
+}
+
+/* ===== comps page (approved v2 content) ===== */
+function renderSpines(){
+  const box=$('#spines');
+  if(lib===1){box.style.display='none';return}
+  box.style.display='flex';
+  box.innerHTML=MSS.map(m=>`
+    <button class="spine ${m.id===activeId?'on':''} ${m.status==='Shelved'?'shelved':''}" data-ms="${m.id}">
+      <span class="t">${esc(m.title)}</span>
+      <span class="c">${m.status==='Shelved'?'SHELVED':m.comps.length+' COMPS'}</span>
+    </button>`).join('');
+  box.querySelectorAll('.spine').forEach(b=>b.onclick=()=>{activeId=b.dataset.ms;renderComps();});
+}
+function renderPitch(){
+  const m=ms();let inner;
+  if(m.comps.length>=2){inner=`<div class="line"><i>${esc(m.comps[0].t)}</i><span class="meets"> meets </span><i>${esc(m.comps[1].t)}</i></div><button class="btn sm" id="copybtn">Copy</button>`;}
+  else if(m.comps.length===1){inner=`<div class="line"><i>${esc(m.comps[0].t)}</i><span class="meets"> meets </span><span class="hint">&hellip; one more comp completes the line</span></div>`;}
+  else{inner=`<div class="hint">Your pitch line builds itself here once the shelf has two comps \u2014 the sentence agents scan for first.</div>`;}
+  $('#pitchslot').innerHTML=`<div class="pitchblock"><div style="min-width:0"><span class="lab" style="display:block;margin-bottom:5px">YOUR PITCH LINE</span>${inner}</div></div>`;
+  const cb=$('#copybtn');
+  if(cb)cb.onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(`${ms().comps[0].t} meets ${ms().comps[1].t}`);cb.textContent='Copied';setTimeout(()=>cb.textContent='Copy',1400);};
+}
+function renderShelf(){
+  const m=ms();let html='';
+  if(m.comps.length===0)html+=`<p class="shelfempty">No comps on the shelf yet \u2014 most agents expect two or three, published in the last five years.</p>`;
+  html+=`<div class="shelfgrid">`+m.comps.map((c,i)=>{
+    const old=c.y<=CURRENT_YEAR-5;
+    return `<div class="comp"><button class="rm" data-i="${i}" title="Remove">&times;</button>
+      <div class="t">${esc(c.t)}</div>
+      <div class="by lab">${esc(c.a).toUpperCase()} \u00b7 ${c.y}</div>
+      ${c.note?`<div class="note">${esc(c.note)}</div>`:''}
+      ${old?`<span class="oldchip">OLDER COMP \u00b7 ${c.y}</span>`:''}</div>`;
+  }).join('')+`<button class="addcomp"><span class="plus">+</span><span class="cap">ADD A COMP</span></button></div>`;
+  $('#shelfslot').innerHTML=html;
+  document.querySelectorAll('.comp .rm').forEach(b=>b.onclick=()=>{ms().comps.splice(+b.dataset.i,1);renderComps();renderTiles();});
+}
+function renderSuggestions(){
+  const m=ms(),slot=$('#suggslot'),btn=$('#suggbtn'),got=suggested[m.id];
+  $('#compsbandtitle').textContent=`Comparable titles \u2014 ${m.title}`;
+  if(!got){btn.textContent='Find suggestions';
+    slot.innerHTML=`<p class="suggintro">Two or three recent comps tell an agent where your book sits on the shelf. I\u2019ll suggest candidates from your genre, age category and logline \u2014 starting points to research, not a finished list.</p>`;return;}
+  btn.textContent='Refresh';
+  const dis=dismissed[m.id]||[],onShelf=new Set(m.comps.map(c=>c.t));
+  const rows=got.filter(s=>!dis.includes(s.t)&&!onShelf.has(s.t));
+  slot.innerHTML=`<div class="sugglist">${rows.length?rows.map(s=>`
+      <div class="suggrow"><div class="bk">
+        <div class="t">${esc(s.t)}</div>
+        <div class="lab" style="margin-top:3px">${esc(s.a).toUpperCase()} \u00b7 ${s.y}</div>
+        <div class="why">${esc(s.why)}</div>
+        ${s.c.length?`<div class="cautions">${s.c.map(x=>`<span class="caution">${esc(x)}</span>`).join('')}</div>`:''}
+      </div>
+      <div class="acts"><button class="btn sm" data-add="${esc(s.t)}">Add to shelf</button>
+      <button class="dismiss" data-dis="${esc(s.t)}" title="Dismiss">&times;</button></div></div>`).join('')
+    :`<p class="suggintro" style="padding:12px 2px">Nothing left in this round \u2014 refresh for another pass.</p>`}</div>
+    <div class="suggfoot"><span class="lab" style="letter-spacing:.12em">SUGGESTIONS ARE STARTING POINTS \u2014 VERIFY AUTHOR, YEAR AND CONTENT BEFORE THEY GO IN A LETTER.</span></div>`;
+  slot.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{
+    const s=got.find(x=>x.t===b.dataset.add);ms().comps.push({t:s.t,a:s.a,y:s.y,note:''});renderComps();renderTiles();});
+  slot.querySelectorAll('[data-dis]').forEach(b=>b.onclick=()=>{(dismissed[ms().id]=dismissed[ms().id]||[]).push(b.dataset.dis);renderSuggestions();});
+}
+$('#suggbtn').onclick=()=>{
+  const m=ms(),slot=$('#suggslot');
+  slot.innerHTML=`<div style="padding:4px 20px 14px">`+'<div class="shimmer"></div>'.repeat(3)+`</div>`;
+  setTimeout(()=>{suggested[m.id]=m.suggestions.slice();dismissed[m.id]=[];renderSuggestions();},950);
+};
+function renderComps(){renderSpines();renderPitch();renderShelf();renderSuggestions();}
+
+/* ===== wiring ===== */
+function setView(v){
+  view=v;
+  $('#view-overview').style.display=v==='overview'?'':'none';
+  $('#view-comps').style.display=v==='comps'?'':'none';
+  document.querySelectorAll('.subtab').forEach(t=>t.classList.toggle('on',t.dataset.view===v));
+  if(v==='comps')renderComps();
+}
+document.querySelectorAll('.subtab').forEach(t=>t.onclick=()=>{
+  if(t.dataset.view==='pkg'){t.blur();alert('Submission packages \u2014 existing page, stubbed in this sampler.');return;}
+  setView(t.dataset.view);
+});
+document.querySelectorAll('.demochip [data-v]').forEach(b=>b.onclick=()=>{
+  variant=b.dataset.v;openId=null;
+  document.querySelectorAll('.demochip [data-v]').forEach(x=>x.classList.toggle('on',x===b));
+  renderTiles();
+});
+document.querySelectorAll('.demochip [data-lib]').forEach(b=>b.onclick=()=>{
+  lib=+b.dataset.lib;activeId='ms1';openId=null;
+  document.querySelectorAll('.demochip [data-lib]').forEach(x=>x.classList.toggle('on',x===b));
+  renderTiles();if(view==='comps')renderComps();
+});
+document.querySelectorAll('.demochip [data-th]').forEach(b=>b.onclick=()=>{
+  document.body.className=b.dataset.th;
+  document.querySelectorAll('.demochip [data-th]').forEach(x=>x.classList.toggle('on',x===b));
+});
+
+renderTiles();
+</script>
+</body>
+</html>
