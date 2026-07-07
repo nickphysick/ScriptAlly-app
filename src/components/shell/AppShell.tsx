@@ -22,7 +22,7 @@
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { LayoutGrid, Send, Users, Book, Settings, User, Sparkles, BookOpen, HelpCircle, LogOut, Search, Table, Reply } from "lucide-react";
+import { LayoutGrid, Send, Users, Book, Settings, User, Sparkles, BookOpen, HelpCircle, LogOut, Search, Table, Reply, Library } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useScriptAllyDb } from "../../lib/db";
 import { UserPlan } from "../../types";
@@ -54,6 +54,7 @@ const RAIL_ICONS: Record<string, React.ComponentType<{ style?: React.CSSProperti
   "agents-db": Users,
   "agents-discover": Search,
   manuscripts: Book,
+  comps: Library,
   packages: Table,
 };
 
