@@ -181,6 +181,10 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
     return { sent: mine.length, full: mine.filter(reachedFull).length };
   };
 
+  // Every package except the active one → the read-only grid (saved packages + any unsaved new drafts).
+  const newDraftIds = Object.keys(drafts).filter((id) => drafts[id].isNew);
+  const otherIds = [...packages.map((p) => p.id), ...newDraftIds].filter((id) => id !== activeId);
+
   return (
     <div className="pkgwk">
       <style>{`
@@ -261,6 +265,32 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
         .pkgwk .pkg-foot .fa .save { color:var(--wk-burg); font-weight:600; }
         .pkgwk .pkg-foot .fa .discard { color:var(--wk-gold); }
         .pkgwk .pkg-foot .fa .save:disabled { color:var(--muted); }
+        /* Other-packages grid (ref .othergrid / .ocard) — read-only summary cards; click promotes to bench. */
+        .pkgwk .others-lab { font-family:${FONT_SERIF}; font-size:18px; font-weight:700; color:var(--hdr); margin:34px 0 16px; }
+        .pkgwk .othergrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(256px,1fr)); gap:18px; }
+        .pkgwk .ocard { background:var(--card); border:var(--bdw) solid var(--bd); border-radius:13px; overflow:hidden; cursor:pointer; transition:transform .12s,box-shadow .12s; box-shadow:0 2px 10px rgba(40,28,18,.06); text-align:left; width:100%; font:inherit; color:inherit; padding:0; }
+        .pkgwk .ocard:hover { transform:translateY(-2px); box-shadow:0 11px 26px rgba(58,28,20,.13); }
+        .pkgwk .oc-top { display:flex; gap:15px; padding:18px; align-items:flex-start; }
+        .pkgwk .ostack { position:relative; width:44px; height:56px; flex-shrink:0; }
+        .pkgwk .ostack .sh { position:absolute; width:34px; height:45px; border-radius:4px; border:var(--bdw) solid var(--bd); background:var(--card); }
+        .pkgwk .ostack .s1 { left:0; top:8px; transform:rotate(-8deg); }
+        .pkgwk .ostack .s2 { left:6px; top:4px; transform:rotate(4deg); background:var(--selBg); }
+        .pkgwk .ostack .s3 { left:10px; top:0; transform:rotate(-2deg); display:flex; align-items:center; justify-content:center; color:var(--wk-burg); }
+        .pkgwk .oc-top h5 { font-family:${FONT_SERIF}; font-size:16.5px; font-weight:800; color:var(--hdr); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .pkgwk .ocl { font-family:${FONT_MONO}; font-size:9px; line-height:1.75; margin-top:6px; }
+        .pkgwk .ocl .lit { color:var(--wk-burg); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .pkgwk .ocl .dim { color:var(--wk-dash); }
+        .pkgwk .oc-foot { border-top:var(--bdw) solid var(--bd); background:var(--card); padding:13px 18px; display:flex; align-items:center; gap:9px; }
+        .pkgwk .oc-foot .od { width:9px; height:9px; border-radius:50%; background:var(--wk-acc); flex-shrink:0; }
+        .pkgwk .oc-foot .od.gold { background:var(--wk-gold); }
+        .pkgwk .oc-foot .od.grey { background:var(--wk-dash); }
+        .pkgwk .oc-foot .om { font-size:13px; font-weight:600; color:var(--hdr); }
+        .pkgwk .oc-foot .om.flat { color:var(--muted); font-weight:400; font-style:italic; }
+        .pkgwk .oc-foot .os { margin-left:auto; font-family:${FONT_MONO}; font-size:8.5px; color:var(--muted); }
+        .pkgwk .newpkg-card { border:1.5px dashed var(--wk-dash); border-radius:13px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; color:var(--muted); cursor:pointer; min-height:136px; background:none; }
+        .pkgwk .newpkg-card:hover { border-color:var(--wk-burg); color:var(--wk-burg); }
+        .pkgwk .newpkg-card .pl { font-size:27px; font-weight:300; line-height:1; }
+        .pkgwk .newpkg-card .nl { font-family:${FONT_SERIF}; font-size:15px; font-weight:600; }
 
         /* Analytics body: scope toggle + panel */
         .pkgwk .wk-scope { display:flex; gap:3px; background:var(--wk-scopebg); border-radius:9px; padding:3px; margin:20px 22px 0; }
@@ -396,8 +426,44 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
               ) : (
                 <div className="wk-skel">No package on the bench yet.</div>
               )}
-              {/* Other-packages grid + New-package ghost — Phase 4. */}
-              <div className="wk-skel" style={{ marginTop: 30 }}>Your other packages &amp; the ＋ New package ghost — Phase 4.</div>
+              {/* Other-packages grid — read-only; click promotes to the bench. + New-package ghost. */}
+              <div className="others-lab">Your other packages · {otherIds.length}</div>
+              <div className="othergrid">
+                {otherIds.map((id) => {
+                  const d = effOf(id);
+                  if (!d) return null;
+                  const c = drafts[id]?.isNew ? { sent: 0, full: 0 } : pkgCounts(id);
+                  const dotCls = c.sent === 0 ? "grey" : c.full > 0 ? "" : "gold";
+                  const msg = c.sent === 0 ? "Draft — not sent" : c.full > 0 ? `${c.full} full request${c.full === 1 ? "" : "s"}` : "Awaiting reply";
+                  const flat = c.sent === 0 || c.full === 0;
+                  return (
+                    <button key={id} type="button" className="ocard" onClick={() => setActiveId(id)}>
+                      <div className="oc-top">
+                        <div className="ostack" aria-hidden="true">
+                          <span className="sh s1" /><span className="sh s2" />
+                          <span className="sh s3"><TypeGlyph type={ComponentType.QUERY_LETTER} size={13} /></span>
+                        </div>
+                        <div style={{ minWidth: 0 }}>
+                          <h5>{d.name || "Untitled package"}</h5>
+                          <div className="ocl">
+                            {BUILDER_TYPES.map((t) => {
+                              const vid = d.sel[t];
+                              const v = isSlotFilled(vid) ? versionById(vid) : undefined;
+                              return <div key={t} className={v ? "lit" : "dim"}>{v ? v.versionName : `— no ${slotNoun(t)}`}</div>;
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="oc-foot">
+                        <span className={`od ${dotCls}`} />
+                        <span className={`om${flat ? " flat" : ""}`}>{msg}</span>
+                        {c.sent > 0 && <span className="os">{c.sent} sent</span>}
+                      </div>
+                    </button>
+                  );
+                })}
+                <button type="button" className="newpkg-card" onClick={newPackage}><span className="pl">＋</span><span className="nl">New package</span></button>
+              </div>
             </div>
           </div>
         </section>
