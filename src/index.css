@@ -355,6 +355,14 @@
   --acc: #44484d;
   --sd-hue: #44484d;
   --sd-centre: #e9eaeb;
+  /* Editorial accent — one midnight-blue, applied through the colour-role map (see CLAUDE.md
+     "Editorial theme colour roles"). Accent is ONLY for interactive/active/selected states, primary
+     actions and status/territory indicators — NEVER headings, body, labels, structural borders or
+     stars (those stay the editorial neutrals). Scoped to .t-edn; must not leak to capp/bold. */
+  --a-ink: #233150;   /* midnight — primary actions, selected marks, status, emphasis */
+  --a-fill: #dbe1ec;  /* pale midnight — selected/marked fills */
+  --a-line: #8a97b2;  /* mid — borders on accented elements */
+  --a-soft: #eef1f6;  /* faint — hover / active-filter / selected-row backgrounds */
   /* Builder retokening — Editorial defined for completeness ("no component may reference an undefined
      variable"): headings + buttons alias the locked t-edn equivalents; tints ride --band. The Builder
      has never been designed for t-edn — these keep it coherent, nothing more. */

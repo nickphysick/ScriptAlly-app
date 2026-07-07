@@ -79,6 +79,29 @@
 - **Reports:** per-stream report files (the `LOCATION_BUILD_REPORT.md` / `DISCOVER_PHASE1_REPORT.md` pattern). `BUILD-REPORT.md` is the legacy shared file — append-only, and a run note rides the SAME commit as its code (no floating hunks left in shared tracked files).
 - **Test counts move several times a day across streams** (523 → 538 → 542 within 5 Jul alone) — record the suite figure fresh at commit time; never copy it from an earlier note or chat.
 
+## Editorial theme colour roles (midnight accent; ref = design-refs/editorial-agents-midnight-v2.html; tokens in `.t-edn`, index.css)
+- **The four accent tokens** live ONLY in the `.t-edn` block (never leaked to `.t-capp`/`.t-bold`): `--a-ink #233150` (midnight — primary actions, selected marks, status, emphasis) · `--a-fill #dbe1ec` (pale — selected/marked fills) · `--a-line #8a97b2` (mid — borders on accented elements) · `--a-soft #eef1f6` (faint — hover / active-filter / selected-row backgrounds).
+- **Governing principle:** accent is used **ONLY** for interactive/active/selected states, primary actions, and status/territory indicators. **Never** for headings, body text, labels, structural borders, or stars — those stay the editorial neutrals (ink `#1a1a1a`, greys `#6b6b6b`/`#9a9a9a`/`#a0a0a0`, borders `#e5e5e5`/`#ececec`/`#dcdcdc`, white bg; Playfair headings, JetBrains Mono labels, Inter body).
+- **Colour-role map — the reusable rule for EVERY Editorial page** (applied on Agents now; re-skin Queries / Dashboard / Manuscripts to THIS exact map in later passes, don't re-invent):
+
+  | Component / state | Token(s) |
+  |---|---|
+  | Primary button (Add agent, Send query) | bg `--a-ink`, text `#fff` |
+  | Secondary / ghost button | neutral (white, `#dcdcdc` border) — no accent |
+  | Filter/sort/group dropdown trigger — resting | neutral (white, `#dcdcdc` border) |
+  | Dropdown trigger — active (value ≠ All/None) | bg `--a-soft`, border `--a-line`, text `--a-ink` |
+  | Dropdown trigger — open | border `--a-ink`, ring `box-shadow 0 0 0 3px --a-fill` |
+  | Dropdown menu option — hover | bg `--a-soft` |
+  | Dropdown menu option — selected | bg `--a-fill`, text `--a-ink`, ✓ |
+  | List row — resting | neutral (white, `#ededed` border) |
+  | List row — selected | bg `--a-soft`, border `--a-line`, left-border 3px `--a-ink`; avatar bg `--a-fill` + text `--a-ink` |
+  | Status pill + dot | text/dot `--a-ink`, border `--a-line` |
+  | Territory (domestic/international) pill | bg `--a-fill`, text `--a-ink` |
+  | Summary-line values | `--a-ink` (bold); labels stay grey |
+  | Input / select focus ring | border `--a-ink`, ring `--a-fill` |
+  | Headings, crumbs, labels, body, stars, section rules | **neutral only** |
+- **Implementation note (Agents):** the base filter-dropdown + row/pill styles read page-scoped `--fd-*`/`--ag-*` vars that each theme fills; the `.t-edn .agv2` block repoints them to the `--a-*` tokens above. Summary values use `var(--a-ink, var(--ag-accent))` so midnight lands in Editorial and the neutral accent elsewhere — one class, no leak.
+
 ## Dashboard v37 + themes — LOCKED SPECS (overnight build 4 Jul; mockup = design-reference/dashboard-consolidated-v37.html)
 - **Theme tokens (index.css; the shared per-theme vocabulary is documented in the block comment there).** Key locks — Capp: header `--hdr #5d4037` mocha, foam bands `#ece5d8→#e5ddcd` w/ `rgba(112,94,70,.25)` rule, ONE button treatment `#fff`/`1px #ded3c2`/mocha, hover `#f4f2ef`, nav pill `#f0e8db`+mocha (pre-authorised contrast fallback). Bold: headers `#000`, pink bands kept w/ 1.5px ink rule, buttons `#fffefb`/`1.5px #1d1712`/ink, hover `#f5e9e7`. Editorial `t-edn`: desk `#f4f4f3`, white cards, hairline `#e3e2e0`, accent graphite `#44484d`, headers `#000`, Soft containers (16px, borderless, layered shadow — `.sa-soft`), Tinted buttons `#eeeff0`/no border/`#181a1d`, hover `#e4e5e7`, nav pill `#ececee`, chips `#f1f1ef`/`#555`. All tints pre-computed — NEVER runtime `color-mix()`. No primary/ghost button split anywhere the tokens reach.
 - **Dashboard layout (single column in the stage):** floating pill top bar (date · centred ⌘K search on the shared `searchQuery` · settings+account) → salutation greeting (mono `DATE · WEEK N OF QUERYING` eyebrow — ISO weeks from earliest `dateSent`, spelled ≤ twelve; `Good {daypart}, {firstName}` plain Playfair, NO italics/colour on the name) → attention chip → 4 CTAs → full-width stat row → Fortnight → What's live. Quote/corkboard/post-its NOT rendered (components kept). Magazine layout retired from render.
