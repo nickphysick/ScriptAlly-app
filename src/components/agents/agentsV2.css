@@ -334,28 +334,38 @@
 /* ── Filter bar — custom themable dropdowns (FilterDropdown), left-aligned, with hairline dividers.
       Colour rides the page-scoped --fd-* vars: neutral in Capp/Bold, the midnight --a-* map in
       Editorial (see CLAUDE.md "Editorial theme colour roles"). ── */
-.agv2 .ag-filters { display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap; margin-bottom: 0; flex: none; }
-.agv2 .agfd { display: flex; flex-direction: column; gap: 5px; }
-.agv2 .agfd-lbl {
-  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: 0.13em;
-  text-transform: uppercase; color: var(--ag-muted);
-}
-.agv2 .agfd-new {
-  color: var(--fd-actink); border: 1px solid var(--fd-actline); border-radius: 4px;
-  padding: 0 4px; margin-left: 5px; font-size: 7.5px; letter-spacing: 0.08em;
-}
+/* Structure D — in-field labels: the mono label sits INSIDE the box (above the value), the chevron
+   vertically centred on the right. No external label row (the bar drops a row of height); uniform
+   width, baseline-aligned; the hairline cluster dividers (.ag-fdiv) are preserved in the JSX. */
+.agv2 .ag-filters { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 0; flex: none; }
+.agv2 .agfd { display: flex; }
 .agv2 .agfd-dd { position: relative; }
 .agv2 .agfd-trig {
-  display: flex; align-items: center; gap: 10px; font-family: inherit; font-size: 13px; font-weight: 500;
-  color: var(--ag-ink); cursor: pointer; background: var(--card, #fffefb);
-  border: var(--ag-edgew) solid var(--ag-edge); border-radius: 9px; padding: 9px 12px;
+  display: flex; align-items: center; gap: 10px; width: 152px; text-align: left;
+  font-family: inherit; cursor: pointer; color: var(--ag-ink); background: var(--card, #fffefb);
+  border: var(--ag-edgew) solid var(--ag-edge); border-radius: 9px; padding: 7px 12px;
 }
 .agv2 .agfd-trig:hover:not(:disabled) { border-color: var(--ag-line); }
 .agv2 .agfd-trig:disabled { opacity: 0.5; cursor: not-allowed; }
-.agv2 .agfd-trig.act { background: var(--fd-actbg); border-color: var(--fd-actline); color: var(--fd-actink); font-weight: 600; }
+.agv2 .agfd-trig.act { background: var(--fd-actbg); border-color: var(--fd-actline); }
 .agv2 .agfd-dd.open .agfd-trig { border-color: var(--fd-openline); box-shadow: 0 0 0 3px var(--fd-ring); }
-.agv2 .agfd-val { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.agv2 .agfd-chev { margin-left: auto; display: flex; color: var(--ag-muted); transition: transform 0.16s; }
+.agv2 .agfd-field { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex: 1; }
+.agv2 .agfd-lbl {
+  display: flex; align-items: center; gap: 4px;
+  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--ag-muted); line-height: 1.3;
+}
+.agv2 .agfd-trig.act .agfd-lbl { color: var(--fd-actink); }
+.agv2 .agfd-new {
+  color: var(--fd-actink); border: 1px solid var(--fd-actline); border-radius: 3px;
+  padding: 0 3px; font-size: 7px; letter-spacing: 0.06em; line-height: 1.4;
+}
+.agv2 .agfd-val {
+  font-size: 13px; font-weight: 500; line-height: 1.25; color: var(--ag-ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.agv2 .agfd-trig.act .agfd-val { color: var(--fd-actink); font-weight: 600; }
+.agv2 .agfd-chev { display: flex; color: var(--ag-muted); transition: transform 0.16s; flex: none; }
 .agv2 .agfd-chev svg { width: 13px; height: 13px; }
 .agv2 .agfd-dd.open .agfd-chev { transform: rotate(180deg); }
 .agv2 .agfd-menu {
@@ -367,7 +377,7 @@
 .agv2 .agfd-opt.hl { background: var(--fd-opthover); }
 .agv2 .agfd-opt.sel { background: var(--fd-optselbg); color: var(--fd-optselink); font-weight: 600; }
 .agv2 .agfd-opt.sel::after { content: '✓'; margin-left: 18px; font-size: 11px; }
-.agv2 .ag-fdiv { width: 1px; height: 38px; background: var(--ag-line); margin: 0 6px; align-self: flex-end; flex: none; }
+.agv2 .ag-fdiv { width: 1px; height: 42px; background: var(--ag-line); margin: 0 4px; align-self: center; flex: none; }
 
 /* Summary line — `N agents · filtered by … · sorted by … · grouped by …`. Lives at the TOP of the
    list container (before the first card): small, muted, centred; values still take the accent. */

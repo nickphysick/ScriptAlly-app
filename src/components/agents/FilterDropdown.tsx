@@ -32,7 +32,6 @@ export interface FilterDropdownProps {
   disabledHint?: string;
   /** A small "New" chip beside the label. */
   newFlag?: boolean;
-  minWidth?: number;
 }
 
 export const FilterDropdown: React.FC<FilterDropdownProps> = ({
@@ -44,7 +43,6 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
   disabled = false,
   disabledHint,
   newFlag = false,
-  minWidth = 132,
 }) => {
   const [open, setOpen] = useState(false);
   const [hi, setHi] = useState(0); // roving highlight index
@@ -109,16 +107,11 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
 
   return (
     <div className="agfd">
-      <span className="agfd-lbl">
-        {label}
-        {newFlag && <span className="agfd-new">New</span>}
-      </span>
       <div className={`agfd-dd${open ? " open" : ""}`} ref={wrapRef}>
         <button
           ref={trigRef}
           type="button"
           className={`agfd-trig${isActive ? " act" : ""}`}
-          style={{ minWidth }}
           disabled={disabled}
           title={disabled ? disabledHint : undefined}
           aria-haspopup="listbox"
@@ -127,7 +120,14 @@ export const FilterDropdown: React.FC<FilterDropdownProps> = ({
           onClick={() => (open ? setOpen(false) : openMenu())}
           onKeyDown={onKey}
         >
-          <span className="agfd-val">{current?.label}</span>
+          {/* Structure D: the mono label sits INSIDE the box, above the value; chevron centred right. */}
+          <span className="agfd-field">
+            <span className="agfd-lbl">
+              {label}
+              {newFlag && <span className="agfd-new">New</span>}
+            </span>
+            <span className="agfd-val">{current?.label}</span>
+          </span>
           <span className="agfd-chev" aria-hidden="true"><ChevronDown /></span>
         </button>
         {open && (
