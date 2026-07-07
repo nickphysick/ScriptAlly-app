@@ -9,7 +9,7 @@
  * remove when the feature ships.
  */
 import React, { useState } from "react";
-import { ManuscriptVersion, SubmissionPackage, Query, ComponentType, QueryStatus } from "../../types";
+import { ManuscriptVersion, SubmissionPackage, Query, Agent, ComponentType, QueryStatus } from "../../types";
 import { FirstVisitHome } from "./FirstVisitHome";
 import { MaterialsRail } from "./MaterialsRail";
 import { PackagesHome } from "./PackagesHome";
@@ -42,7 +42,9 @@ const MOCK_PACKAGES: SubmissionPackage[] = [
   PK("p1", "Comp-led · v1", "v-ql1", "v-syn1", ""),
   PK("p2", "Hartley bespoke", "v-ql1", "v-syn1", "v-pg1"),
 ];
-const Q = (packageId: string, i: number, status: QueryStatus): Query => ({ id: `q-${packageId}-${i}`, manuscriptId: "m", packageId, status } as unknown as Query);
+const AG = (id: string, name: string, agency: string): Agent => ({ id, name, agency } as unknown as Agent);
+const MOCK_AGENTS: Agent[] = [AG("a1", "Hartley Books", "Hartley Lit"), AG("a2", "Vane & Co", ""), AG("a3", "Marsh Literary", ""), AG("a4", "Ash & Quill", "")];
+const Q = (packageId: string, i: number, status: QueryStatus): Query => ({ id: `q-${packageId}-${i}`, manuscriptId: "m", packageId, agentId: MOCK_AGENTS[i % MOCK_AGENTS.length].id, status } as unknown as Query);
 // n sends for a package, the first r of which reached a full request — enough for the stats page to
 // cross MIN_SENDS_FOR_CLAIM and show its full layout (winner + ranked bars + best-by-type).
 const sends = (packageId: string, n: number, r: number): Query[] =>
@@ -138,6 +140,7 @@ export const PkgLab: React.FC = () => {
             versions={versions}
             packages={pkgs}
             queries={MOCK_QUERIES}
+            agents={MOCK_AGENTS}
             onCreateVersion={(type, name) => setVersions((vs) => [...vs, { id: `v-lab-${vs.length}`, manuscriptId: "m", userId: "lab", componentType: type, versionName: name, fileAttached: false, createdDate: "2026-01-03T00:00:00.000Z", contentDraft: "" }])}
             onEditVersion={editMat}
             onSavePackage={(baseId, f) => {

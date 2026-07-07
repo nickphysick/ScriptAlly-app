@@ -23,10 +23,11 @@
  * the two burgundy/graphite alpha tints are pre-computed rgba per the standing rule.
  */
 import React, { useState, useEffect } from "react";
-import { ManuscriptVersion, SubmissionPackage, Query, ComponentType } from "../../types";
+import { ManuscriptVersion, SubmissionPackage, Query, Agent, ComponentType } from "../../types";
 import { TypeGlyph } from "./TypeGlyph";
-import { TYPE_META, BUILDER_TYPES, SLOT_FIELD, SlotSelection, emptySelection, selectionFromPackage } from "./typeMeta";
-import { isSlotFilled, UNFILLED_SLOT, reachedFull } from "../../lib/packageMetrics";
+import { TYPE_META, BUILDER_TYPES, SlotSelection, emptySelection, selectionFromPackage } from "./typeMeta";
+import { isSlotFilled, UNFILLED_SLOT, reachedFull, overallAttachStats, rankPackagesByRequests, strongestPackage, packagesUsingVersion, meetsSampleThreshold, MIN_SENDS_FOR_CLAIM } from "../../lib/packageMetrics";
+import { agentPrimary, AGENT_NOT_SPECIFIED } from "../../lib/agentDisplay";
 import { FONT_SERIF, FONT_MONO } from "../../lib/designTokens";
 
 /** Persist payload for a package — all three slot ids ("" for empty; isValidPackage needs them present). */
@@ -67,6 +68,8 @@ export interface PackageWorkshopProps {
   versions: ManuscriptVersion[];
   packages: SubmissionPackage[];
   queries: Query[];
+  /** Agents for the "Sent to" list (resolving a package's linked queries to names). */
+  agents: Agent[];
   /** Inline create from the palette — host calls addVersion (fileAttached:false, contentType:'text'). */
   onCreateVersion: (type: ComponentType, name: string) => void;
   /** Full text edit — host opens MaterialModal for the version. */
@@ -75,10 +78,12 @@ export interface PackageWorkshopProps {
   onSavePackage: (baseId: string | null, fields: PackageSaveFields) => Promise<string | undefined> | string | undefined;
 }
 
-export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, packages, queries, onCreateVersion, onEditVersion, onSavePackage }) => {
+export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, packages, queries, agents, onCreateVersion, onEditVersion, onSavePackage }) => {
   // Inline-create state for the palette (P2): which group is showing its name input, and its value.
   const [newInType, setNewInType] = useState<ComponentType | null>(null);
   const [newName, setNewName] = useState("");
+  // Analytics scope (P5): "package" (the active one — always relevant, even pre-send) or "all".
+  const [anScope, setAnScope] = useState<"package" | "all">("package");
 
   // Bench state (P3). ONE package is active + editable; edits live in `drafts` (an overlay on the saved
   // packages) so an unsaved draft survives promotion + theme switch. A draft is keyed by package id
@@ -184,6 +189,91 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
   // Every package except the active one → the read-only grid (saved packages + any unsaved new drafts).
   const newDraftIds = Object.keys(drafts).filter((id) => drafts[id].isNew);
   const otherIds = [...packages.map((p) => p.id), ...newDraftIds].filter((id) => id !== activeId);
+
+  // ── Analytics (P5). This-package figures are per-active; the All view reuses the packageMetrics
+  // engine (overallAttachStats / rankPackagesByRequests / strongestPackage) exactly as the shipped
+  // PackageStats does. Honest below MIN_SENDS_FOR_CLAIM — a raw count is a fact; a ranking is caveated.
+  const renderThisPackage = () => {
+    if (!active || !activeId) return <div className="an-hero flat"><span className="big">No package selected</span></div>;
+    const isNew = !!drafts[activeId]?.isNew;
+    const aq = isNew ? [] : queries.filter((q) => q.packageId === activeId);
+    const sent = aq.length;
+    const full = aq.filter(reachedFull).length;
+    const sentTo = [...new Set(aq.map((q) => { const a = agents.find((x) => x.id === q.agentId); return a ? agentPrimary(a) : AGENT_NOT_SPECIFIED; }))];
+    return (
+      <>
+        <div className="an-title">{active.name || "Untitled package"}</div>
+        <div className="an-sub">Active package</div>
+        <div className="an-sec">Result so far</div>
+        {sent > 0 ? (
+          full > 0 ? (
+            <div className="an-hero"><span className="big">{full}</span><span className="lab"><b>Full request{full === 1 ? "" : "s"} ✓</b><span>from {sent} sent</span></span></div>
+          ) : (
+            <div className="an-hero flat"><span className="big">Awaiting reply</span></div>
+          )
+        ) : (
+          <div className="an-hero flat"><span className="big">Not sent yet</span></div>
+        )}
+        {sent > 0 && sent < MIN_SENDS_FOR_CLAIM ? (
+          <div className="annote">Sent to {sent} so far — a couple more will give a fair read on whether this version pulls requests.</div>
+        ) : sent === 0 ? (
+          <div className="annote">Attach it to a query from the Queries Hub to start tracking how it does.</div>
+        ) : null}
+        <div className="an-sec">Ready to send?</div>
+        {BUILDER_TYPES.map((t) => {
+          const has = isSlotFilled(active.sel[t]);
+          return <div key={t} className="ck"><span className={`cb ${has ? "yes" : "no"}`}>{has ? "✓" : "–"}</span>{TYPE_META[t].label}{t === ComponentType.SAMPLE_PAGES && <span className="cd">optional</span>}</div>;
+        })}
+        <div className="an-sec">Sent to</div>
+        {sentTo.length ? <div className="agc">{sentTo.map((n, i) => <span key={i}>{n}</span>)}</div> : <div className="ck"><span className="cd">Not attached to any query yet</span></div>}
+      </>
+    );
+  };
+
+  const renderAllPackages = () => {
+    const overall = overallAttachStats(packages, queries);
+    const ranked = rankPackagesByRequests(packages, queries).filter((r) => r.stat.sent > 0);
+    const winner = strongestPackage(packages, queries);
+    const attribution = versions
+      .map((v) => {
+        const inPkgs = packagesUsingVersion(v.id, packages);
+        const requested = inPkgs.filter((p) => queries.some((q) => q.packageId === p.id && reachedFull(q))).length;
+        return { v, inCount: inPkgs.length, requested };
+      })
+      .filter((x) => x.inCount > 0);
+    return (
+      <>
+        <div className="anfig">
+          <div><div className="v">{packages.length}</div><div className="k">Packages</div></div>
+          <div><div className="v">{overall.sent}</div><div className="k">Sent</div></div>
+          <div><div className="v win">{overall.requests}</div><div className="k">Requests</div></div>
+        </div>
+        <div className="an-sec">Best at winning requests</div>
+        {ranked.length ? ranked.map((r, i) => {
+          const isBest = winner?.pkg.id === r.pkg.id;
+          return (
+            <div key={r.pkg.id} className={`lb${isBest ? " best" : ""}`}>
+              <span className="rank">{i + 1}</span>
+              <div className="ln">
+                <div className="lnm">{r.pkg.packageName}{isBest && <span className="star"> ★</span>}{!r.ranked && <span className="early">early</span>}</div>
+                <div className="bar"><i style={{ width: `${Math.max(Math.round((r.stat.requestRate ?? 0) * 100), 4)}%` }} /></div>
+              </div>
+              <div className="lv"><b>{r.stat.requests}</b>/{r.stat.sent}</div>
+            </div>
+          );
+        }) : <div className="ck"><span className="cd">Send a few to see rankings</span></div>}
+        <div className="annote">Early days — rankings firm up once each package has gone to {MIN_SENDS_FOR_CLAIM} or more agents.</div>
+        <div className="an-sec">Materials that show up in requests</div>
+        {attribution.length ? attribution.map(({ v, inCount, requested }) => (
+          <div key={v.id} className="mrow">
+            <span className="mg"><TypeGlyph type={v.componentType} size={13} /></span>
+            <div style={{ minWidth: 0 }}><div className="mn">{v.versionName}</div><div className="mm">IN {inCount} PACKAGE{inCount === 1 ? "" : "S"}</div></div>
+            {requested > 0 && <span className="mx">{requested} REQUESTED ✓</span>}
+          </div>
+        )) : <div className="ck"><span className="cd">No materials in a package yet</span></div>}
+      </>
+    );
+  };
 
   return (
     <div className="pkgwk">
@@ -298,6 +388,44 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
         .pkgwk .wk-scope button.on { background:var(--card); color:var(--wk-burg); font-weight:600; box-shadow:0 1px 2px rgba(58,28,20,.1); }
         .t-edn .pkgwk .wk-scope button.on { color:var(--wk-acc); }
         .pkgwk .wk-anbody { padding:22px 24px; overflow-y:auto; flex:1; }
+        /* Analytics panel (ref .an-*) — accent is --wk-acc (sage in Capp/Bold, graphite in Editorial). */
+        .pkgwk .an-title { font-family:${FONT_SERIF}; font-size:20px; font-weight:800; color:var(--hdr); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .pkgwk .an-sub { font-family:${FONT_MONO}; font-size:8px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-top:3px; }
+        .pkgwk .an-sec { font-family:${FONT_MONO}; font-size:8.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin:24px 0 12px; }
+        .pkgwk .an-hero { background:var(--card); border:var(--bdw) solid var(--bd); border-radius:13px; padding:20px 22px; display:flex; align-items:center; gap:17px; }
+        .pkgwk .an-hero .big { font-family:${FONT_SERIF}; font-size:50px; font-weight:800; color:var(--wk-acc); line-height:.82; }
+        .pkgwk .an-hero .lab b { display:block; font-size:15px; font-weight:700; color:var(--hdr); }
+        .pkgwk .an-hero .lab span { font-family:${FONT_MONO}; font-size:8.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); margin-top:3px; display:block; }
+        .pkgwk .an-hero.flat .big { color:var(--muted); font-size:16px; font-family:${FONT_MONO}; font-weight:500; text-transform:uppercase; letter-spacing:.04em; align-self:center; }
+        .pkgwk .ck { display:flex; align-items:center; gap:10px; font-size:13.5px; padding:6px 0; color:var(--ink); }
+        .pkgwk .ck .cb { width:20px; height:20px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; }
+        .pkgwk .ck .cb.yes { background:var(--selBg); color:var(--wk-acc); }
+        .pkgwk .ck .cb.no { background:var(--selBg); color:var(--wk-dash); }
+        .pkgwk .ck .cd { color:var(--muted); font-style:italic; font-size:12.5px; }
+        .pkgwk .agc { display:flex; flex-wrap:wrap; gap:7px; }
+        .pkgwk .agc span { font-family:${FONT_MONO}; font-size:9.5px; background:var(--selBg); color:var(--hdr); border-radius:7px; padding:6px 11px; }
+        .pkgwk .anfig { display:flex; gap:22px; background:var(--card); border:var(--bdw) solid var(--bd); border-radius:13px; padding:18px 20px; }
+        .pkgwk .anfig .v { font-family:${FONT_SERIF}; font-size:29px; font-weight:800; color:var(--hdr); line-height:1; }
+        .pkgwk .anfig .v.win { color:var(--wk-acc); }
+        .pkgwk .anfig .k { font-family:${FONT_MONO}; font-size:7.5px; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); margin-top:5px; }
+        .pkgwk .annote { margin-top:14px; font-size:12px; font-style:italic; color:var(--muted); line-height:1.55; background:var(--card); border:var(--bdw) solid var(--bd); border-left:3px solid var(--wk-acc); border-radius:0 10px 10px 0; padding:13px 15px; }
+        .pkgwk .lb { display:flex; align-items:center; gap:11px; padding:11px 0; border-bottom:1px dashed var(--wk-dashd); }
+        .pkgwk .lb:last-child { border-bottom:0; }
+        .pkgwk .lb .rank { font-family:${FONT_MONO}; font-size:9.5px; color:var(--muted); width:13px; flex-shrink:0; }
+        .pkgwk .lb .ln { flex:1; min-width:0; }
+        .pkgwk .lb .lnm { font-family:${FONT_SERIF}; font-size:14.5px; font-weight:700; color:var(--hdr); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .pkgwk .lb .lnm .early { font-family:${FONT_MONO}; font-size:7px; font-weight:500; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); border:1px solid var(--bd); border-radius:4px; padding:1px 5px; margin-left:8px; vertical-align:middle; }
+        .pkgwk .lb .bar { height:6px; border-radius:3px; background:var(--wk-bar); margin-top:6px; overflow:hidden; }
+        .pkgwk .lb .bar i { display:block; height:100%; background:var(--wk-acc); border-radius:3px; }
+        .pkgwk .lb .lv { font-family:${FONT_MONO}; font-size:9.5px; color:var(--muted); text-align:right; flex-shrink:0; }
+        .pkgwk .lb .lv b { color:var(--wk-acc); font-size:13px; }
+        .pkgwk .lb.best .lnm .star { color:var(--wk-gold); }
+        .pkgwk .mrow { display:flex; align-items:center; gap:11px; padding:10px 0; border-bottom:1px dashed var(--wk-dashd); }
+        .pkgwk .mrow:last-child { border-bottom:0; }
+        .pkgwk .mrow .mg { width:26px; height:26px; border-radius:8px; background:var(--selBg); color:var(--wk-burg); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .pkgwk .mrow .mn { font-size:13px; font-weight:600; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .pkgwk .mrow .mm { font-family:${FONT_MONO}; font-size:8px; color:var(--muted); margin-top:2px; }
+        .pkgwk .mrow .mx { margin-left:auto; font-family:${FONT_MONO}; font-size:9px; color:var(--wk-acc); flex-shrink:0; }
 
         /* Phase-1 skeletal placeholder (removed as each zone is built out) */
         .pkgwk .wk-skel { font-family:${FONT_SERIF}; font-style:italic; font-size:13px; color:var(--muted); line-height:1.6; }
@@ -472,11 +600,11 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
         <section className="wk-win wk-analytics">
           <div className="wk-h"><span className="wk-ri">{chartIcon}</span><h3>Package analytics</h3></div>
           <div className="wk-scope">
-            <button type="button" className="on">This package</button>
-            <button type="button">All packages</button>
+            <button type="button" className={anScope === "package" ? "on" : ""} onClick={() => setAnScope("package")}>This package</button>
+            <button type="button" className={anScope === "all" ? "on" : ""} onClick={() => setAnScope("all")}>All packages</button>
           </div>
           <div className="wk-anbody">
-            <div className="wk-skel">Result hero, readiness checklist and the cross-package leaderboard ({packages.length} package{packages.length === 1 ? "" : "s"}) arrive in Phase 5 — reusing the packageMetrics engine.</div>
+            {anScope === "package" ? renderThisPackage() : renderAllPackages()}
           </div>
         </section>
       </div>
