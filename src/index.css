@@ -139,6 +139,14 @@
   --slab-bdw: 1px;
   --crumb-bar-bg: #F8FAF7;                    /* Queries crumb bar — light sage */
   --crumb-bar-rule: var(--bdw) solid var(--bd);
+  /* Phase 3 — coffee & sage accents (Cappuccino sage; neutral in Bold/Editorial) */
+  --qp-genre-bg: #EAF1E7; --qp-genre-bd: #D3E3CC; --qp-genre-tx: #42543B;
+  --qp-listfoot-bg: #F8FAF7;                  /* Export-CSV foot — light sage */
+  --qp-cmd-bg: #F8FAF7;                       /* reading-pane action row — rounded --bd-bordered sage bar */
+  --qp-cmd-frame: var(--bdw) solid var(--bd);
+  --qp-cmd-toprule: var(--bdw) solid var(--bd);
+  --qp-cmd-radius: 12px;
+  --qp-cmd-margin: 0 12px 12px;
   --slab-shadow: none;
   --slab-ttl: #5d4037;
   --slab-meta: #8a7a6c;
@@ -272,6 +280,14 @@
   --slab-bdw: 1.5px;
   --crumb-bar-bg: #f7f1f0;                    /* Queries crumb bar — light blush */
   --crumb-bar-rule: var(--bdw) solid var(--bd);
+  /* Phase 3 — neutral (no sage in Bold) */
+  --qp-genre-bg: #fdfaf5; --qp-genre-bd: #cdddc7; --qp-genre-tx: #5a6e58;
+  --qp-listfoot-bg: transparent;
+  --qp-cmd-bg: var(--hub-cmd);
+  --qp-cmd-frame: none;
+  --qp-cmd-toprule: var(--hub-cmd-rule);
+  --qp-cmd-radius: 0;
+  --qp-cmd-margin: 0;
   --slab-shadow: none;
   --slab-ttl: #1d1712;
   --slab-meta: #5e5954;
@@ -417,6 +433,14 @@
   --slab-bdw: 1px;
   --crumb-bar-bg: #f6f6f5;                    /* Queries crumb bar — faint neutral */
   --crumb-bar-rule: 3px double var(--bd);     /* Editorial keeps the newspaper double-rule */
+  /* Phase 3 — neutral (no sage in Editorial) */
+  --qp-genre-bg: #fdfaf5; --qp-genre-bd: #cdddc7; --qp-genre-tx: #5a6e58;
+  --qp-listfoot-bg: transparent;
+  --qp-cmd-bg: var(--hub-cmd);
+  --qp-cmd-frame: none;
+  --qp-cmd-toprule: var(--hub-cmd-rule);
+  --qp-cmd-radius: 0;
+  --qp-cmd-margin: 0;
   --slab-shadow: 0 3px 10px rgba(20, 20, 20, 0.04);
   --slab-ttl: #1a1a1a;
   --slab-meta: #7d8083;
