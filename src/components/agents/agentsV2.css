@@ -337,7 +337,10 @@
 /* Structure D — in-field labels: the mono label sits INSIDE the box (above the value), the chevron
    vertically centred on the right. No external label row (the bar drops a row of height); uniform
    width, baseline-aligned; the hairline cluster dividers (.ag-fdiv) are preserved in the JSX. */
-.agv2 .ag-filters { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 0; flex: none; }
+/* Thin hairline rule under the header block, above the filter bar (the divider that never landed). */
+.agv2 .ag-headrule { height: 1px; background: var(--ag-line); margin: 2px 0 16px; flex: none; }
+/* Filter bar — margin-bottom gives clear breathing room before the summary/list below (was too tight). */
+.agv2 .ag-filters { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; flex: none; }
 .agv2 .agfd { display: flex; }
 .agv2 .agfd-dd { position: relative; }
 .agv2 .agfd-trig {

@@ -758,6 +758,9 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
         searchRef={searchRef}
       />
 
+      {/* Hairline rule under the header, above the filter bar (per-theme --ag-line). */}
+      <div className="ag-headrule" aria-hidden="true" />
+
       {/* Filter bar — custom themable dropdowns (Status · Queried · Location | Sort | Group by),
           left-aligned (ref editorial-agents-midnight-v2.html). Location + Group-by-Location run on
           the DEPLOYED territory foundation (agent.country vs homeCountry); the list is flat by
