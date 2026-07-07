@@ -30,7 +30,7 @@ import { StatusPill, getStatusLabel } from "./StatusPill";
 import { StatusDot, statusDirection } from "./StatusDot";
 import { ChromeSlab } from "./shell/ChromeSlab";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
-import { queryAmbientStatus, commandBarStatus, queryBucket, QueryBucket, queriesPulse } from "../lib/queryAmbient";
+import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse } from "../lib/queryAmbient";
 import { EdgeFadeScroll } from "./EdgeFadeScroll";
 import { RecordResponseModal } from "./RecordResponseModal";
 import { RecordResponseFocusForm } from "./RecordResponseFocusForm";
@@ -549,9 +549,14 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   const [selectedStatusFilters, setSelectedStatusFilters] = useState<string[]>(["All"]);
   // Filter-bar STATUS bucket (All + the three CTA-engine buckets). Replaces the old list-header
   // per-exact-status multi-select as the primary status filter.
-  const [statusBucket, setStatusBucket] = useState<"all" | QueryBucket>("all");
+  // Filter bar: Action outstanding (writer's-move toggle) + a Status multi-select (exact QueryStatus
+  // strings) + Manuscript dropdown. Action outstanding: Yes = queryBucket "move"; No = ¬move.
+  const [actionOut, setActionOut] = useState<"all" | "yes" | "no">("all");
+  const [statusSel, setStatusSel] = useState<QueryStatus[]>([]);     // committed; empty OR full = All (no filter)
+  const [statusDraft, setStatusDraft] = useState<QueryStatus[]>([]); // in-popover draft, committed on Apply
+  const [statusMenuOpen, setStatusMenuOpen] = useState(false);
   const [selectedManuscriptFilter, setSelectedManuscriptFilter] = useState<string>("All");
-  const [selectedAgentFilter, setSelectedAgentFilter] = useState<string>("All");
+  const [manuscriptMenuOpen, setManuscriptMenuOpen] = useState(false);
   const [sortOption, setSortOption] = useState<string>("Newest first");
   const [groupOption, setGroupOption] = useState<"None" | "Status" | "Action Required" | "Manuscript" | "Agent Fit Rating">("None");
   const [sortKey, setSortKey] = useState<string>("date_queried");
@@ -862,6 +867,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   const allActiveHighlighted = nonZeroActiveStatuses.length > 0 && !selectedStatusFilters.includes("All") && nonZeroActiveStatuses.every(s => selectedStatusFilters.includes(s)) && !CLOSED_STATUSES.some(s => selectedStatusFilters.includes(s));
   const allClosedHighlighted = nonZeroClosedStatuses.length > 0 && !selectedStatusFilters.includes("All") && nonZeroClosedStatuses.every(s => selectedStatusFilters.includes(s)) && !ACTIVE_STATUSES.some(s => selectedStatusFilters.includes(s));
 
+  // Status multi-select is "active" (a real filter) only on a proper partial selection —
+  // an empty OR complete selection means "All" (no status filtering).
+  const ALL_QUERY_STATUSES = Object.values(QueryStatus) as QueryStatus[];
+  const statusFilterActive = statusSel.length > 0 && statusSel.length < ALL_QUERY_STATUSES.length;
+
   // Filter queries matching Left Panel filters + Search Query
   const filteredList = queries.filter(q => {
     const agent = agents.find(a => a.id === q.agentId);
@@ -869,19 +879,17 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     
     if (!agent || !ms) return false;
 
-    // Status filter — the filter-bar bucket (All / Waiting / Your move / Closed), derived from
-    // the CTA engine's ball-holder so Waiting vs Your move match the command bar exactly.
-    if (statusBucket !== "all" && queryBucket(q.status as QueryStatus) !== statusBucket) {
-      return false;
-    }
+    // Action outstanding — Yes = writer's move (queryBucket "move"); No = everything else
+    // (waiting + closed), so All = Yes ∪ No with nothing stranded.
+    const bkt = queryBucket(q.status as QueryStatus);
+    if (actionOut === "yes" && bkt !== "move") return false;
+    if (actionOut === "no" && bkt === "move") return false;
+
+    // Status multi-select — the exact QueryStatus strings; only a partial selection filters.
+    if (statusFilterActive && !statusSel.includes(q.status as QueryStatus)) return false;
 
     // Manuscript filter
     if (selectedManuscriptFilter !== "All" && q.manuscriptId !== selectedManuscriptFilter) {
-      return false;
-    }
-
-    // Agent dropdown filter
-    if (selectedAgentFilter !== "All" && q.agentId !== selectedAgentFilter) {
       return false;
     }
 
@@ -929,7 +937,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   });
 
   // Automatically select first element if currently selected is filtered out
-  const statusFiltersKey = statusBucket;
+  const statusFiltersKey = `${actionOut}|${statusSel.join(",")}`;
   useEffect(() => {
     if (sortedList.length > 0) {
       const isStillInList = sortedList.some(q => q.id === selectedQueryId);
@@ -2254,38 +2262,96 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           }
         />
 
-        {/* ── Filter bar (hub grammar, ref hub-token-sheet-v3): STATUS buckets · MANUSCRIPT pills ·
-            Sort · Date sent. Replaces the retired list-header Sort/Filter icon-buttons. ── */}
+        {/* ── Filter bar (hub grammar): left-aligned — Action outstanding · Status ▾ · Manuscript ▾
+            · | · Sort ▾. Action outstanding + Status split the retired bucket segmented control. ── */}
         {(() => {
           const fkey: React.CSSProperties = { fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--hub-label)", flexShrink: 0 };
           const rail: React.CSSProperties = { display: "inline-flex", gap: 2, background: "var(--hub-pill-rail)", border: "var(--hub-btn-bd)", borderRadius: 99, padding: 2 };
           const pill = (on: boolean): React.CSSProperties => ({ fontFamily: "'Inter',sans-serif", fontSize: 11.5, fontWeight: 500, padding: "4px 12px", borderRadius: 99, border: "none", cursor: "pointer", whiteSpace: "nowrap", background: on ? "var(--hub-toggle-on)" : "transparent", color: on ? "var(--hub-toggle-on-tx)" : "var(--hub-item)" });
-          const sortSel: React.CSSProperties = { marginLeft: "auto", fontFamily: "'Inter',sans-serif", fontSize: 12, color: "var(--hub-item)", background: "var(--hub-btn-bg)", border: "var(--hub-btn-bd)", borderRadius: 8, padding: "6px 11px", boxShadow: "var(--hub-btn-sh)", cursor: "pointer" };
+          // Left-aligned Sort (no marginLeft:auto) — everything sits on the left.
+          const sortSel: React.CSSProperties = { fontFamily: "'Inter',sans-serif", fontSize: 12, color: "var(--hub-item)", background: "var(--hub-btn-bg)", border: "var(--hub-btn-bd)", borderRadius: 8, padding: "6px 11px", boxShadow: "var(--hub-btn-sh)", cursor: "pointer" };
+          const trig = (on: boolean): React.CSSProperties => ({ display: "inline-flex", alignItems: "center", gap: 7, fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 500, padding: "6px 11px", borderRadius: 8, cursor: "pointer", whiteSpace: "nowrap", boxShadow: "var(--hub-btn-sh)", border: "var(--hub-btn-bd)", background: on ? "var(--hub-toggle-on)" : "var(--hub-btn-bg)", color: on ? "var(--hub-toggle-on-tx)" : "var(--hub-item)" });
+          const menu: React.CSSProperties = { position: "absolute", top: "100%", left: 0, marginTop: 6, zIndex: 41, background: "var(--card, #fffefb)", border: "var(--bdw) solid var(--bd)", borderRadius: 10, boxShadow: "0 12px 30px rgba(29,23,18,.20)", padding: 7, minWidth: 214 };
+          const optRow: React.CSSProperties = { display: "flex", alignItems: "center", gap: 9, width: "100%", textAlign: "left", border: "none", background: "transparent", cursor: "pointer", padding: "6px 8px", borderRadius: 7, fontFamily: "'Inter',sans-serif", fontSize: 12.5, color: "var(--hub-item)" };
+          const box = (on: boolean): React.CSSProperties => ({ width: 15, height: 15, borderRadius: 4, flexShrink: 0, border: "1.5px solid var(--bd)", background: on ? "var(--hub-accent, #7c3a2a)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" });
+          const subhead: React.CSSProperties = { ...fkey, padding: "8px 8px 4px" };
+          const chev = <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>;
+          const check = <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>;
+
+          const statusCount = statusSel.length;
+          const statusLabel = (statusCount === 0 || statusCount === ALL_QUERY_STATUSES.length) ? "All" : `${statusCount} selected`;
+          const manuscriptLabel = selectedManuscriptFilter === "All" ? "All" : (manuscriptsWithQueries.find((m) => m.id === selectedManuscriptFilter)?.title ?? "All");
+          const ACTIVE_ROWS: QueryStatus[] = [QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_REQUESTED, QueryStatus.FULL_SENT, QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER];
+          const CLOSED_ROWS: QueryStatus[] = [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE];
+          const toggleDraft = (s: QueryStatus) => setStatusDraft((d) => d.includes(s) ? d.filter((x) => x !== s) : [...d, s]);
+          const openStatus = () => { setStatusDraft([...statusSel]); setManuscriptMenuOpen(false); setStatusMenuOpen(true); };
+          const statusRow = (s: QueryStatus) => { const on = statusDraft.includes(s); return (<button key={s} type="button" role="checkbox" aria-checked={on} onClick={() => toggleDraft(s)} style={optRow}><span style={box(on)}>{on && check}</span>{s}</button>); };
+          const miniBtn: React.CSSProperties = { ...fkey, background: "transparent", border: "none", cursor: "pointer", padding: "4px 4px" };
+
           return (
             <div className="qp-filterbar" style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", flexShrink: 0, marginBottom: 12 }}>
-              <span style={fkey}>Status</span>
-              <div style={rail} role="group" aria-label="Filter by status">
-                {([["all", "All"], ["waiting", "Waiting"], ["move", "Your move"], ["closed", "Closed"]] as [("all" | QueryBucket), string][]).map(([v, label]) => (
-                  <button key={v} type="button" onClick={() => setStatusBucket(v)} aria-pressed={statusBucket === v} style={pill(statusBucket === v)}>{label}</button>
+              {/* Action outstanding */}
+              <span style={fkey}>Action outstanding</span>
+              <div style={rail} role="group" aria-label="Filter by action outstanding">
+                {([["all", "All"], ["yes", "Yes"], ["no", "No"]] as ["all" | "yes" | "no", string][]).map(([v, label]) => (
+                  <button key={v} type="button" onClick={() => setActionOut(v)} aria-pressed={actionOut === v} style={pill(actionOut === v)}>{label}</button>
                 ))}
               </div>
-              {manuscriptsWithQueries.length > 1 && (
-                <>
-                  <span style={fkey}>Manuscript</span>
-                  <div style={rail} role="group" aria-label="Filter by manuscript">
-                    <button type="button" onClick={() => setSelectedManuscriptFilter("All")} aria-pressed={selectedManuscriptFilter === "All"} style={pill(selectedManuscriptFilter === "All")}>All</button>
-                    {manuscriptsWithQueries.map((m) => (
-                      <button key={m.id} type="button" onClick={() => setSelectedManuscriptFilter(m.id)} aria-pressed={selectedManuscriptFilter === m.id} style={{ ...pill(selectedManuscriptFilter === m.id), maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis" }} title={m.title}>{m.title}</button>
-                    ))}
+
+              {/* Status multi-select */}
+              <div style={{ position: "relative" }}>
+                <button type="button" onClick={() => (statusMenuOpen ? setStatusMenuOpen(false) : openStatus())} aria-haspopup="dialog" aria-expanded={statusMenuOpen} style={trig(statusFilterActive)}>
+                  Status: {statusLabel}<span style={{ display: "flex", color: "var(--hub-label)" }}>{chev}</span>
+                </button>
+                {statusMenuOpen && (
+                  <div style={menu} role="dialog" aria-label="Filter by status">
+                    {ACTIVE_ROWS.map(statusRow)}
+                    <div style={subhead}>Closed</div>
+                    {CLOSED_ROWS.map(statusRow)}
+                    <div style={{ height: 1, background: "var(--bd)", margin: "7px 4px" }} />
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "0 4px" }}>
+                      <button type="button" onClick={() => setStatusDraft([])} style={miniBtn}>Clear</button>
+                      <button type="button" onClick={() => setStatusDraft([...ALL_QUERY_STATUSES])} style={miniBtn}>Select all</button>
+                      <button type="button" onClick={() => { setStatusSel(statusDraft); setStatusMenuOpen(false); }} style={{ marginLeft: "auto", fontFamily: "'Inter',sans-serif", fontSize: 11.5, fontWeight: 600, padding: "6px 15px", borderRadius: 8, border: "1px solid var(--hub-primary-bd, #422701)", background: "var(--hub-primary, #422701)", color: "var(--hub-primary-tx, #fff)", cursor: "pointer" }}>Apply</button>
+                    </div>
                   </div>
-                </>
+                )}
+              </div>
+
+              {/* Manuscript dropdown — only when tracking more than one book */}
+              {manuscriptsWithQueries.length > 1 && (
+                <div style={{ position: "relative" }}>
+                  <button type="button" onClick={() => { setManuscriptMenuOpen((o) => !o); setStatusMenuOpen(false); }} aria-haspopup="listbox" aria-expanded={manuscriptMenuOpen} style={trig(selectedManuscriptFilter !== "All")}>
+                    <span style={{ maxWidth: 170, overflow: "hidden", textOverflow: "ellipsis" }}>Manuscript: {manuscriptLabel}</span><span style={{ display: "flex", color: "var(--hub-label)" }}>{chev}</span>
+                  </button>
+                  {manuscriptMenuOpen && (
+                    <div style={{ ...menu, minWidth: 200 }} role="listbox" aria-label="Filter by manuscript">
+                      <button type="button" role="option" aria-selected={selectedManuscriptFilter === "All"} onClick={() => { setSelectedManuscriptFilter("All"); setManuscriptMenuOpen(false); }} style={{ ...optRow, fontWeight: selectedManuscriptFilter === "All" ? 700 : 500 }}>All manuscripts</button>
+                      {manuscriptsWithQueries.map((m) => (
+                        <button key={m.id} type="button" role="option" aria-selected={selectedManuscriptFilter === m.id} onClick={() => { setSelectedManuscriptFilter(m.id); setManuscriptMenuOpen(false); }} title={m.title} style={{ ...optRow, fontWeight: selectedManuscriptFilter === m.id ? 700 : 500 }}>
+                          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.title}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               )}
+
+              {/* divider before Sort */}
+              <div style={{ width: 1, height: 22, background: "var(--bd)", margin: "0 4px", flexShrink: 0 }} aria-hidden="true" />
+
+              {/* Sort */}
               <select value={sortKey} onChange={(e) => setSortKey(e.target.value)} style={sortSel} aria-label="Sort queries">
                 <option value="date_queried">Sort · Date sent</option>
                 <option value="a_z">Sort · Agent A–Z</option>
                 <option value="status">Sort · Status</option>
                 <option value="last_updated">Sort · Last updated</option>
               </select>
+
+              {/* click-away backdrop for the Status / Manuscript menus */}
+              {(statusMenuOpen || manuscriptMenuOpen) && (
+                <div onClick={() => { setStatusMenuOpen(false); setManuscriptMenuOpen(false); }} style={{ position: "fixed", inset: 0, zIndex: 40 }} aria-hidden="true" />
+              )}
             </div>
           );
         })()}
@@ -2344,14 +2410,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 />
               </div>
 
-              {/* List head — count only (Sort/Filter live in the floating filter bar now) */}
-              <div style={{ display: "flex", alignItems: "center", padding: "4px 6px 12px", flexShrink: 0 }}>
-                <span style={{ fontFamily: FONT_SERIF, fontSize: 18, fontWeight: 800, color: qdbBoldInk }}>
-                  {sortedList.length} {sortedList.length === 1 ? "query" : "queries"}
-                </span>
-              </div>
-              {/* thin inset grey rule beneath the header (doesn't reach the container edges) */}
-              <div style={{ height: 1, background: "#cfc6ba", margin: "0 6px", flexShrink: 0 }} />
+              {/* (The above-list count was removed — the masthead pulse line already shows "N queries".) */}
+              {/* thin inset grey rule beneath the search (doesn't reach the container edges) */}
+              <div style={{ height: 1, background: "#cfc6ba", margin: "2px 6px 0", flexShrink: 0 }} />
 
               {/* Rows area — flex:1 so it fills the list card below the fixed header; the inner scroll
                   keeps the list within one screen and reactivates the top/bottom fade overlays. */}

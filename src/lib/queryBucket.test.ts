@@ -62,18 +62,24 @@ describe("queriesPulse — masthead pulse line", () => {
 describe("Queries filter bar — artefacts", () => {
   const src = readFileSync(resolve(__dirname, "../components/Queries.tsx"), "utf8");
 
-  it("the floating filter bar exists with STATUS + Sort · Date sent, driven by the bucket", () => {
+  it("the floating filter bar exists — Action outstanding + Status multi-select + Sort", () => {
     expect(src).toContain("qp-filterbar");
     expect(src).toContain("Sort · Date sent");
-    expect(src).toContain("statusBucket");
-    expect(src).toContain("queryBucket(q.status as QueryStatus) !== statusBucket");
+    expect(src).toContain("Action outstanding");
+    expect(src).toContain("actionOut");
+    expect(src).toContain("statusSel"); // the Status multi-select's committed selection
   });
 
-  it("the list-header Sort/Filter icon-buttons + their menus retired", () => {
-    expect(src.includes("List head — count only")).toBe(true);
+  it("Action outstanding reuses the writer's-move bucket (Yes = move, No = ¬move)", () => {
+    expect(src).toContain("queryBucket(q.status as QueryStatus)");
+    expect(src).toContain('actionOut === "yes"');
+    expect(src).toContain('actionOut === "no"');
+  });
+
+  it("the above-list count is removed + the list-header menus stay retired", () => {
+    expect(src.includes("List head — count only")).toBe(false); // above-list count removed
     expect(src.includes("setSortMenuOpen")).toBe(false);
     expect(src.includes("setFilterMenuOpen")).toBe(false);
-    expect(src.includes("Filter menu — status set")).toBe(false);
   });
 
   it("the Sort dropdown wires to setSortKey (the actual sort driver)", () => {
