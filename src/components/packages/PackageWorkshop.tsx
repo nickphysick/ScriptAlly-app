@@ -79,9 +79,11 @@ export interface PackageWorkshopProps {
 }
 
 export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, packages, queries, agents, onCreateVersion, onEditVersion, onSavePackage }) => {
-  // Inline-create state for the palette (P2): which group is showing its name input, and its value.
-  const [newInType, setNewInType] = useState<ComponentType | null>(null);
-  const [newName, setNewName] = useState("");
+  // Mode (Phase A): "packages" (build/assemble) or "materials" (edit the library). The palette + the
+  // middle + the right window all follow it; the breadcrumb reflects it. selMat = the material being
+  // edited in materials mode. Palette inline-create is GONE — creation now lives in the editor (Phase B).
+  const [mode, setMode] = useState<"packages" | "materials">("packages");
+  const [selMat, setSelMat] = useState<string | null>(null);
   // Analytics scope (P5): "package" (the active one — always relevant, even pre-send) or "all".
   const [anScope, setAnScope] = useState<"package" | "all">("package");
 
@@ -124,11 +126,12 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [packages]);
 
-  const commitNew = (type: ComponentType) => {
-    const name = newName.trim();
-    if (name) onCreateVersion(type, name);
-    setNewInType(null);
-    setNewName("");
+  // Entering materials mode clears any package DnD affordance; leaving it clears the selection.
+  const enterMode = (m: "packages" | "materials") => {
+    setMode(m);
+    setDragMat(null);
+    setOverSlot(null);
+    if (m === "packages") setSelMat(null);
   };
 
   // Write an edit to the active package's draft (creating the draft from its baseline on first touch).
@@ -276,7 +279,7 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
   };
 
   return (
-    <div className="pkgwk">
+    <div className={`pkgwk mode-${mode}`}>
       <style>{`
         /* ── Workshop-local tokens. Cappuccino sampled from the ref; Bold sampled; Editorial rides its
            REAL .t-edn tokens (graphite single accent — no burgundy/sage/gold in its system). ── */
@@ -288,6 +291,12 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
           --wk-bar:var(--abtn-bg); --wk-dash:var(--bd); --wk-dashd:var(--bd);
           --wk-pulse:rgba(68,72,77,.16); --wk-scopebg:rgba(68,72,77,.07); --wk-flash:#eef0f2; }
 
+        /* ── Materials-mode breadcrumb (ref .crumb) — reflects the mode; sits above the windows in the
+           header zone. Root class .mode-packages / .mode-materials drives the palette + middle switch. */
+        .pkgwk .wk-crumb { display:flex; align-items:center; gap:8px; font-family:${FONT_MONO}; font-size:11px; letter-spacing:.08em; color:var(--hdr); padding:2px 4px 16px; }
+        .pkgwk .wk-crumb .root { opacity:.55; }
+        .pkgwk .wk-crumb .sep { opacity:.4; }
+        .pkgwk .wk-crumb .cur { font-weight:600; }
         /* ── Two-window shell ── */
         .pkgwk .wk-windows { display:flex; gap:24px; align-items:stretch; min-height:640px; }
         .pkgwk .wk-win { background:var(--card); border:var(--bdw) solid var(--bd); border-radius:16px; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 8px 26px rgba(40,28,18,.10); }
@@ -303,6 +312,11 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
         .pkgwk .wk-palette { background:var(--card); border-right:var(--bdw) solid var(--bd); padding:22px; width:258px; flex-shrink:0; overflow-y:auto; }
         .pkgwk .wk-building { flex:1; min-width:0; padding:28px 32px; overflow-y:auto; background:var(--card); }
         .pkgwk .pal-lab { font-family:${FONT_MONO}; font-size:8px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:15px; }
+        /* Palette top header — label + the single mode toggle (Edit materials → / ✓ Done). */
+        .pkgwk .pal-toph { display:flex; align-items:center; margin-bottom:14px; }
+        .pkgwk .pal-toph .pl { font-family:${FONT_MONO}; font-size:8px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+        .pkgwk .pal-toph .em { margin-left:auto; font-family:${FONT_MONO}; font-size:8.5px; color:var(--wk-burg); cursor:pointer; border:1px solid var(--btnBd); border-radius:7px; padding:5px 9px; background:var(--card); }
+        .pkgwk .pal-toph .em:hover { background:var(--btnH); }
         .pkgwk .palgroup { margin-bottom:22px; }
         .pkgwk .palgroup-h { display:flex; align-items:center; gap:8px; font-family:${FONT_MONO}; font-size:8.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--hdr); margin-bottom:11px; }
         .pkgwk .palgroup-h .g { color:var(--wk-burg); display:inline-flex; }
@@ -318,6 +332,14 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
         .pkgwk .chip:hover .cedit, .pkgwk .chip:focus-within .cedit { opacity:1; }
         .pkgwk .chip .cedit:hover { color:var(--wk-burg); }
         .pkgwk .chip .grip { color:var(--wk-dash); font-size:13px; letter-spacing:-2px; flex-shrink:0; }
+        /* Materials mode: chips become a selectable list — no drag, grip hidden, an "edit ›" affordance,
+           the selected chip ringed (ref .mode-materials .chip). */
+        .pkgwk.mode-materials .chip { cursor:pointer; }
+        .pkgwk.mode-materials .chip .grip { display:none; }
+        .pkgwk.mode-materials .chip .cedit { display:none; }
+        .pkgwk.mode-materials .chip .edita { display:flex; margin-left:auto; font-family:${FONT_MONO}; font-size:8px; color:var(--muted); flex-shrink:0; }
+        .pkgwk .chip .edita { display:none; }
+        .pkgwk.mode-materials .chip.sel { border-color:var(--wk-burg); box-shadow:0 0 0 2px var(--wk-pulse); }
         .pkgwk .newchip { display:flex; align-items:center; gap:8px; border:1.5px dashed var(--wk-dash); border-radius:10px; padding:11px 13px; color:var(--muted); cursor:pointer; font-size:12px; font-style:italic; background:none; width:100%; text-align:left; }
         .pkgwk .newchip:hover { border-color:var(--wk-burg); color:var(--wk-burg); }
         .pkgwk .newin { width:100%; border:1.5px solid var(--wk-burg); border-radius:10px; padding:10px 12px; font-family:${FONT_SERIF}; font-size:13.5px; outline:none; background:var(--card); color:var(--ink); }
@@ -430,67 +452,75 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
         /* Phase-1 skeletal placeholder (removed as each zone is built out) */
         .pkgwk .wk-skel { font-family:${FONT_SERIF}; font-style:italic; font-size:13px; color:var(--muted); line-height:1.6; }
 
+        /* Materials-mode middle (ref .med / .edcard / .edpick) — the editor shell + empty state.
+           The editor FORM (type picker, fields, footer) lands in Phase B. */
+        .pkgwk .med { max-width:720px; }
+        .pkgwk .med-lab { font-family:${FONT_MONO}; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--wk-burg); display:flex; align-items:center; gap:9px; margin-bottom:16px; }
+        .pkgwk .med-lab .dotp { width:9px; height:9px; border-radius:50%; background:var(--wk-burg); box-shadow:0 0 0 4px var(--wk-pulse); flex-shrink:0; }
+        .pkgwk .edcard { background:var(--card); border:var(--bdw) solid var(--bd); border-radius:14px; overflow:hidden; box-shadow:0 12px 30px rgba(58,28,20,.11); }
+        .pkgwk .edcard-h { padding:15px 22px; background:linear-gradient(135deg,var(--band-a),var(--band-b)); border-bottom:var(--bdw) solid var(--bd); display:flex; align-items:center; gap:10px; }
+        .pkgwk .edcard-h h4 { font-family:${FONT_SERIF}; font-size:18px; font-weight:800; color:var(--hdrOn); }
+        .pkgwk .edpick { display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; color:var(--muted); gap:9px; padding:70px 30px; }
+        .pkgwk .edpick .mi { font-size:34px; opacity:.4; }
+        .pkgwk .edpick .mt { font-family:${FONT_SERIF}; font-size:18px; color:var(--hdr); }
+        .pkgwk .edpick .ms { font-size:12.5px; line-height:1.55; max-width:280px; }
         @media (max-width: 1040px) { .pkgwk .wk-windows { flex-direction:column; } .pkgwk .wk-analytics { width:auto; } }
         @media (max-width: 720px) { .pkgwk .wk-body { flex-direction:column; } .pkgwk .wk-palette { width:auto; border-right:0; border-bottom:var(--bdw) solid var(--bd); } }
       `}</style>
 
+      <div className="wk-crumb"><span className="root">Builder</span><span className="sep">/</span><span className="cur">{mode === "materials" ? "Materials" : "Packages"}</span></div>
       <div className="wk-windows">
         {/* WORKSHOP window */}
         <section className="wk-win wk-workshop">
           <div className="wk-h"><span className="wk-ri">{toolIcon}</span><h3>Workshop</h3><span className="wk-tag">build &amp; assemble</span></div>
           <div className="wk-body">
             <div className="wk-palette">
-              <div className="pal-lab">Your materials — drag or click to use</div>
+              <div className="pal-toph">
+                <span className="pl">Your materials</span>
+                <span className="em" role="button" tabIndex={0} onClick={() => enterMode(mode === "materials" ? "packages" : "materials")} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); enterMode(mode === "materials" ? "packages" : "materials"); } }}>
+                  {mode === "materials" ? "✓ Done" : "Edit materials →"}
+                </span>
+              </div>
               {BUILDER_TYPES.map((t) => {
                 const items = versions.filter((v) => v.componentType === t);
-                const noun = TYPE_META[t].label.toLowerCase();
                 return (
                   <div key={t} className="palgroup">
                     <div className="palgroup-h"><span className="g"><TypeGlyph type={t} size={13} /></span>{TYPE_META[t].plural}</div>
-                    {items.map((v) => (
-                      // Drag OR click OR Enter/Space fills the active package's matching slot (all first-class).
-                      // The hover edit pencil opens the full MaterialModal (its click stops propagation).
-                      <div
-                        key={v.id}
-                        className={`chip${dragMat === v.id ? " dragging" : ""}`}
-                        draggable
-                        data-mat={v.id}
-                        role="button"
-                        tabIndex={0}
-                        aria-label={`Add ${v.versionName} to the active package`}
-                        onClick={() => fillSlot(t, v.id)}
-                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fillSlot(t, v.id); } }}
-                        onDragStart={(e) => { setDragMat(v.id); e.dataTransfer.effectAllowed = "copy"; }}
-                        onDragEnd={() => { setDragMat(null); setOverSlot(null); }}
-                      >
-                        <span className="cg"><TypeGlyph type={t} size={14} /></span>
-                        <div className="cmid">
-                          <div className="cn">{v.versionName}</div>
-                          {v.fileName && <div className="cf">{v.fileName}</div>}
+                    {items.map((v) => {
+                      // Packages mode: drag / click / Enter fills the active slot. Materials mode: click selects
+                      // for editing (no drag, grip hidden, "edit ›" affordance, selected chip ringed).
+                      const useMat = () => (mode === "materials" ? setSelMat(v.id) : fillSlot(t, v.id));
+                      return (
+                        <div
+                          key={v.id}
+                          className={`chip${dragMat === v.id ? " dragging" : ""}${mode === "materials" && selMat === v.id ? " sel" : ""}`}
+                          draggable={mode === "packages"}
+                          data-mat={v.id}
+                          role="button"
+                          tabIndex={0}
+                          aria-label={mode === "materials" ? `Edit ${v.versionName}` : `Add ${v.versionName} to the active package`}
+                          onClick={useMat}
+                          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); useMat(); } }}
+                          onDragStart={mode === "packages" ? (e) => { setDragMat(v.id); e.dataTransfer.effectAllowed = "copy"; } : undefined}
+                          onDragEnd={mode === "packages" ? () => { setDragMat(null); setOverSlot(null); } : undefined}
+                        >
+                          <span className="cg"><TypeGlyph type={t} size={14} /></span>
+                          <div className="cmid">
+                            <div className="cn">{v.versionName}</div>
+                            {v.fileName && <div className="cf">{v.fileName}</div>}
+                          </div>
+                          <span className="edita" aria-hidden="true">edit ›</span>
+                          <span className="grip" aria-hidden="true">⋮⋮</span>
                         </div>
-                        <button type="button" className="cedit" aria-label={`Edit ${v.versionName}`} onClick={(e) => { e.stopPropagation(); onEditVersion(v); }}>{pencilIcon}</button>
-                        <span className="grip" aria-hidden="true">⋮⋮</span>
-                      </div>
-                    ))}
-                    {newInType === t ? (
-                      <input
-                        className="newin"
-                        autoFocus
-                        value={newName}
-                        placeholder={`Name your ${noun}…`}
-                        aria-label={`Name your new ${noun}`}
-                        onChange={(e) => setNewName(e.target.value)}
-                        onKeyDown={(e) => { if (e.key === "Enter") commitNew(t); if (e.key === "Escape") { setNewInType(null); setNewName(""); } }}
-                        onBlur={() => { setNewInType(null); setNewName(""); }}
-                      />
-                    ) : (
-                      <button type="button" className="newchip" onClick={() => { setNewInType(t); setNewName(""); }}>＋ New {noun}</button>
-                    )}
+                      );
+                    })}
                   </div>
                 );
               })}
             </div>
             <div className="wk-building">
+              {mode === "packages" ? (
+                <>
               <div className="bench-lab"><span className="dotp" />Active package — drag materials from the left, or click to add</div>
               {active && activeId ? (
                 <div className="pkg">
@@ -592,6 +622,16 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
                 })}
                 <button type="button" className="newpkg-card" onClick={newPackage}><span className="pl">＋</span><span className="nl">New package</span></button>
               </div>
+                </>
+              ) : (
+                <div className="med">
+                  <div className="med-lab"><span className="dotp" />Editing materials — pick from the left, or start new</div>
+                  <div className="edcard">
+                    <div className="edcard-h"><h4>Materials</h4></div>
+                    <div className="edpick"><div className="mi" aria-hidden="true">✎</div><div className="mt">Edit your materials</div><div className="ms">Pick a material from the list on the left, or start a new one — the editor opens here (Phase B).</div></div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </section>
