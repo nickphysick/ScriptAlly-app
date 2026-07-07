@@ -22,7 +22,7 @@
  * hexes + charcoal masthead are NOT trusted — Editorial rides its real .t-edn values). No color-mix:
  * the two burgundy/graphite alpha tints are pre-computed rgba per the standing rule.
  */
-import React from "react";
+import React, { useState } from "react";
 import { ManuscriptVersion, SubmissionPackage, Query, ComponentType } from "../../types";
 import { TypeGlyph } from "./TypeGlyph";
 import { TYPE_META, BUILDER_TYPES } from "./typeMeta";
@@ -35,14 +35,32 @@ const toolIcon = (
 const chartIcon = (
   <svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M4 20h16" /></svg>
 );
+const pencilIcon = (
+  <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 20h4L18 10l-4-4L4 16z" /><path d="M13 7l4 4" /></svg>
+);
 
 export interface PackageWorkshopProps {
   versions: ManuscriptVersion[];
   packages: SubmissionPackage[];
   queries: Query[];
+  /** Inline create from the palette — host calls addVersion (fileAttached:false, contentType:'text'). */
+  onCreateVersion: (type: ComponentType, name: string) => void;
+  /** Full text edit — host opens MaterialModal for the version. */
+  onEditVersion: (version: ManuscriptVersion) => void;
 }
 
-export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, packages }) => {
+export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, packages, onCreateVersion, onEditVersion }) => {
+  // Inline-create state for the palette (P2): which group is showing its name input, and its value.
+  const [newInType, setNewInType] = useState<ComponentType | null>(null);
+  const [newName, setNewName] = useState("");
+
+  const commitNew = (type: ComponentType) => {
+    const name = newName.trim();
+    if (name) onCreateVersion(type, name);
+    setNewInType(null);
+    setNewName("");
+  };
+
   return (
     <div className="pkgwk">
       <style>{`
@@ -74,6 +92,22 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
         .pkgwk .palgroup { margin-bottom:22px; }
         .pkgwk .palgroup-h { display:flex; align-items:center; gap:8px; font-family:${FONT_MONO}; font-size:8.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--hdr); margin-bottom:11px; }
         .pkgwk .palgroup-h .g { color:var(--wk-burg); display:inline-flex; }
+        /* Palette chips (draggable + clickable) + inline create (ref .chip / .newchip / .newin) */
+        .pkgwk .chip { display:flex; align-items:center; gap:11px; background:var(--card); border:var(--bdw) solid var(--bd); border-radius:10px; padding:12px 13px; margin-bottom:9px; cursor:grab; transition:box-shadow .12s,transform .12s; box-shadow:0 1px 2px rgba(40,28,18,.04); text-align:left; width:100%; font:inherit; color:inherit; }
+        .pkgwk .chip:hover { box-shadow:0 5px 14px rgba(58,28,20,.12); transform:translateY(-1px); }
+        .pkgwk .chip.dragging { opacity:.4; }
+        .pkgwk .chip .cg { width:28px; height:28px; border-radius:8px; background:var(--selBg); color:var(--wk-burg); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .pkgwk .chip .cmid { min-width:0; flex:1; }
+        .pkgwk .chip .cn { font-family:${FONT_SERIF}; font-size:14.5px; font-weight:600; line-height:1.12; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .pkgwk .chip .cf { font-family:${FONT_MONO}; font-size:7.5px; color:var(--muted); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .pkgwk .chip .cedit { color:var(--wk-dash); cursor:pointer; background:none; border:0; padding:2px; display:flex; opacity:0; transition:opacity .12s,color .12s; flex-shrink:0; }
+        .pkgwk .chip:hover .cedit, .pkgwk .chip:focus-within .cedit { opacity:1; }
+        .pkgwk .chip .cedit:hover { color:var(--wk-burg); }
+        .pkgwk .chip .grip { color:var(--wk-dash); font-size:13px; letter-spacing:-2px; flex-shrink:0; }
+        .pkgwk .newchip { display:flex; align-items:center; gap:8px; border:1.5px dashed var(--wk-dash); border-radius:10px; padding:11px 13px; color:var(--muted); cursor:pointer; font-size:12px; font-style:italic; background:none; width:100%; text-align:left; }
+        .pkgwk .newchip:hover { border-color:var(--wk-burg); color:var(--wk-burg); }
+        .pkgwk .newin { width:100%; border:1.5px solid var(--wk-burg); border-radius:10px; padding:10px 12px; font-family:${FONT_SERIF}; font-size:13.5px; outline:none; background:var(--card); color:var(--ink); }
+        .pkgwk .newin::placeholder { color:var(--muted); font-style:italic; }
         .pkgwk .bench-lab { font-family:${FONT_MONO}; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--wk-burg); display:flex; align-items:center; gap:9px; margin-bottom:16px; }
         .pkgwk .bench-lab .dotp { width:9px; height:9px; border-radius:50%; background:var(--wk-burg); box-shadow:0 0 0 4px var(--wk-pulse); flex-shrink:0; }
 
@@ -99,11 +133,37 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
             <div className="wk-palette">
               <div className="pal-lab">Your materials — drag or click to use</div>
               {BUILDER_TYPES.map((t) => {
-                const count = versions.filter((v) => v.componentType === t).length;
+                const items = versions.filter((v) => v.componentType === t);
+                const noun = TYPE_META[t].label.toLowerCase();
                 return (
                   <div key={t} className="palgroup">
-                    <div className="palgroup-h"><span className="g"><TypeGlyph type={t} size={13} /></span>{TYPE_META[t].plural} · {count}</div>
-                    <div className="wk-skel">Chips &amp; inline create — Phase 2</div>
+                    <div className="palgroup-h"><span className="g"><TypeGlyph type={t} size={13} /></span>{TYPE_META[t].plural}</div>
+                    {items.map((v) => (
+                      // Draggable (DnD wired in P3) + a hover edit pencil → MaterialModal. Click-to-use lands in P3.
+                      <div key={v.id} className="chip" draggable data-mat={v.id}>
+                        <span className="cg"><TypeGlyph type={t} size={14} /></span>
+                        <div className="cmid">
+                          <div className="cn">{v.versionName}</div>
+                          {v.fileName && <div className="cf">{v.fileName}</div>}
+                        </div>
+                        <button type="button" className="cedit" aria-label={`Edit ${v.versionName}`} onClick={(e) => { e.stopPropagation(); onEditVersion(v); }}>{pencilIcon}</button>
+                        <span className="grip" aria-hidden="true">⋮⋮</span>
+                      </div>
+                    ))}
+                    {newInType === t ? (
+                      <input
+                        className="newin"
+                        autoFocus
+                        value={newName}
+                        placeholder={`Name your ${noun}…`}
+                        aria-label={`Name your new ${noun}`}
+                        onChange={(e) => setNewName(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter") commitNew(t); if (e.key === "Escape") { setNewInType(null); setNewName(""); } }}
+                        onBlur={() => { setNewInType(null); setNewName(""); }}
+                      />
+                    ) : (
+                      <button type="button" className="newchip" onClick={() => { setNewInType(t); setNewName(""); }}>＋ New {noun}</button>
+                    )}
                   </div>
                 );
               })}

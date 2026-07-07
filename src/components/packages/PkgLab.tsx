@@ -133,7 +133,13 @@ export const PkgLab: React.FC = () => {
             </div>
             <span style={{ marginLeft: "auto" }}>{msChip}</span>
           </div>
-          <PackageWorkshop versions={versions} packages={MOCK_PACKAGES} queries={MOCK_QUERIES} />
+          <PackageWorkshop
+            versions={versions}
+            packages={MOCK_PACKAGES}
+            queries={MOCK_QUERIES}
+            onCreateVersion={(type, name) => setVersions((vs) => [...vs, { id: `v-lab-${vs.length}`, manuscriptId: "m", userId: "lab", componentType: type, versionName: name, fileAttached: false, createdDate: "2026-01-03T00:00:00.000Z", contentDraft: "" }])}
+            onEditVersion={editMat}
+          />
         </div>
       ) : view === "first" ? (
         <section style={{ maxWidth: 1200, margin: "0 auto", background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", padding: "16px 16px 20px" }}>
