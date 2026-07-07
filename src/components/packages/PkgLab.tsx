@@ -13,6 +13,7 @@ import { ManuscriptVersion, SubmissionPackage, Query, ComponentType, QueryStatus
 import { FirstVisitHome } from "./FirstVisitHome";
 import { MaterialsRail } from "./MaterialsRail";
 import { PackagesHome } from "./PackagesHome";
+import { PackageStats } from "./PackageStats";
 import { Composer } from "./Composer";
 import { MaterialsManager } from "./MaterialsManager";
 import { MaterialModal } from "./MaterialModal";
@@ -23,7 +24,7 @@ import { emptySelection } from "./typeMeta";
 import { FONT_MONO } from "../../lib/designTokens";
 
 type Theme = "t-capp" | "t-bold";
-type View = "first" | "packages" | "composer" | "manager";
+type View = "first" | "packages" | "composer" | "manager" | "wins";
 
 const V = (id: string, componentType: ComponentType, versionName: string, fileName: string, contentDraft?: string): ManuscriptVersion => ({
   id, manuscriptId: "m", userId: "lab", componentType, versionName, fileAttached: true, fileName, createdDate: "2026-01-01T00:00:00.000Z", contentDraft,
@@ -40,10 +41,14 @@ const MOCK_PACKAGES: SubmissionPackage[] = [
   PK("p1", "Comp-led · v1", "v-ql1", "v-syn1", ""),
   PK("p2", "Hartley bespoke", "v-ql1", "v-syn1", "v-pg1"),
 ];
-const Q = (packageId: string, status: QueryStatus): Query => ({ id: `q-${Math.round(status.length + packageId.length)}-${packageId}-${status}`, manuscriptId: "m", packageId, status } as unknown as Query);
+const Q = (packageId: string, i: number, status: QueryStatus): Query => ({ id: `q-${packageId}-${i}`, manuscriptId: "m", packageId, status } as unknown as Query);
+// n sends for a package, the first r of which reached a full request — enough for the stats page to
+// cross MIN_SENDS_FOR_CLAIM and show its full layout (winner + ranked bars + best-by-type).
+const sends = (packageId: string, n: number, r: number): Query[] =>
+  Array.from({ length: n }, (_, i) => Q(packageId, i, i < r ? QueryStatus.FULL_REQUESTED : QueryStatus.REJECTED));
 const MOCK_QUERIES: Query[] = [
-  Q("p1", QueryStatus.FULL_REQUESTED), Q("p1", QueryStatus.QUERIED), Q("p1", QueryStatus.REJECTED),
-  Q("p2", QueryStatus.QUERIED),
+  ...sends("p1", 5, 2), // 40% request rate
+  ...sends("p2", 6, 4), // 67% — the winner (shares v-ql1/v-syn1 with p1; owns v-pg1)
 ];
 
 export const PkgLab: React.FC = () => {
@@ -54,11 +59,12 @@ export const PkgLab: React.FC = () => {
   // Versions are STATEFUL so the modal round-trips: creates append, edits apply, and a composer-origin
   // create demonstrates the auto-slot (same seam the real host wires).
   const [versions, setVersions] = useState<ManuscriptVersion[]>(MOCK_VERSIONS);
-  const [matModal, setMatModal] = useState<{ type: ComponentType; version: ManuscriptVersion | null; fromComposer?: boolean } | null>(null);
+  const [matModal, setMatModal] = useState<{ type: ComponentType; version: ManuscriptVersion | null; fromComposer?: boolean; seedName?: string; seedContent?: string } | null>(null);
   const [autoPick, setAutoPick] = useState<{ type: ComponentType; versionId: string; token: number } | undefined>(undefined);
   const openMat = (type: ComponentType) => setMatModal({ type, version: null });
   const composerMat = (type: ComponentType) => setMatModal({ type, version: null, fromComposer: true });
   const editMat = (v: ManuscriptVersion) => setMatModal({ type: v.componentType, version: v });
+  const dupMat = (v: ManuscriptVersion) => setMatModal({ type: v.componentType, version: null, seedName: `Copy of ${v.versionName}`, seedContent: v.contentDraft ?? "" });
   // Worked-examples popup (Phase 10) — opened from the first-visit "See this example in full →".
   const [example, setExample] = useState<string | null>(null);
   const saveMat = (name: string, content: string) => {
@@ -92,9 +98,9 @@ export const PkgLab: React.FC = () => {
       <div style={{ display: "flex", alignItems: "center", gap: 10, maxWidth: 1200, margin: "0 auto 18px", flexWrap: "wrap" }}>
         <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--muted)" }}>#/pkg-lab</span>
         <div style={{ display: "flex", gap: 6 }}>
-          {(["first", "packages", "composer", "manager"] as View[]).map((v) => (
+          {(["first", "packages", "composer", "manager", "wins"] as View[]).map((v) => (
             <button key={v} type="button" onClick={() => { setView(v); setAutoPick(undefined); /* a remounting Composer must not re-apply a stale pick */ }} style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".04em", textTransform: "uppercase", padding: "7px 13px", borderRadius: 8, cursor: "pointer", border: "1px solid var(--bd)", background: view === v ? "var(--band)" : "#fffefb", color: view === v ? "var(--burg)" : "var(--ink)" }}>
-              {v === "first" ? "First-visit" : v === "packages" ? "Packages" : v === "composer" ? "Composer" : "Manager"}
+              {v === "first" ? "First-visit" : v === "packages" ? "Packages" : v === "composer" ? "Composer" : v === "manager" ? "Manager" : "See what wins"}
             </button>
           ))}
         </div>
@@ -122,7 +128,17 @@ export const PkgLab: React.FC = () => {
           <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", gap: 14, alignItems: "flex-start" }}>
             <MaterialsRail versions={versions} onCreate={openMat} onManage={noop} />
             <section style={{ flex: 1, minWidth: 0, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", padding: "16px 16px 20px" }}>
-              <PackagesHome packages={MOCK_PACKAGES} versions={versions} queries={MOCK_QUERIES} onNew={noop} onEdit={noop} onCopy={noop} />
+              <PackagesHome packages={MOCK_PACKAGES} versions={versions} queries={MOCK_QUERIES} onNew={noop} onEdit={noop} onCopy={noop} onSeeWins={() => setView("wins")} />
+            </section>
+          </div>
+        </>
+      ) : view === "wins" ? (
+        <>
+          <div style={{ maxWidth: 1200, margin: "0 auto 14px" }}><JourneyStrip view="wins" /></div>
+          <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", gap: 14, alignItems: "flex-start" }}>
+            <MaterialsRail versions={versions} onCreate={openMat} onManage={noop} />
+            <section style={{ flex: 1, minWidth: 0, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", padding: "16px 16px 20px" }}>
+              <PackageStats packages={MOCK_PACKAGES} versions={versions} queries={MOCK_QUERIES} onBack={() => setView("packages")} />
             </section>
           </div>
         </>
@@ -143,7 +159,7 @@ export const PkgLab: React.FC = () => {
           <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", gap: 14, alignItems: "flex-start" }}>
             <MaterialsRail versions={versions} onCreate={openMat} onManage={noop} />
             <section style={{ flex: 1, minWidth: 0, background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", padding: "16px 16px 20px" }}>
-              <MaterialsManager versions={versions} packages={MOCK_PACKAGES} queries={MOCK_QUERIES} onBack={noop} onEdit={editMat} onCreate={openMat} />
+              <MaterialsManager versions={versions} packages={MOCK_PACKAGES} queries={MOCK_QUERIES} onBack={noop} onEdit={editMat} onCreate={openMat} onDuplicate={dupMat} />
             </section>
           </div>
         </>
@@ -153,8 +169,8 @@ export const PkgLab: React.FC = () => {
         <MaterialModal
           type={matModal.type}
           editing={matModal.version !== null}
-          initialName={matModal.version?.versionName ?? ""}
-          initialContent={matModal.version?.contentDraft ?? ""}
+          initialName={matModal.version?.versionName ?? matModal.seedName ?? ""}
+          initialContent={matModal.version?.contentDraft ?? matModal.seedContent ?? ""}
           onCancel={() => setMatModal(null)}
           onSave={saveMat}
         />

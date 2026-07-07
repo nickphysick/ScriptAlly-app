@@ -23,6 +23,11 @@ import {
   materialsLinkWrites,
   editMaterialsUpdate,
   resolveActivePackage,
+  overallAttachStats,
+  rankPackagesByRequests,
+  strongestPackage,
+  bestVersionOfType,
+  mostUsedVersionOfType,
 } from "./packageMetrics";
 import { Query, QueryStatus, SubmissionMethod, SubmissionPackage, ManuscriptVersion, ComponentType, QueryMaterial, Manuscript, ManuscriptStatus } from "../types";
 
@@ -357,5 +362,104 @@ describe("versionSnippet / versionMeta (derived, never stored)", () => {
     expect(versionMeta(ver({ contentDraft: "solo" }))).toBe("~1 word");
     expect(versionMeta(ver({ fileAttached: true, fileName: "draft.docx" }))).toBe("draft.docx");
     expect(versionMeta(ver({}))).toBeNull();
+  });
+});
+
+// A package with N sends, of which R reached a request — the leaderboard's raw material.
+const sends = (packageId: string, n: number, r: number): Query[] =>
+  Array.from({ length: n }, (_, i) =>
+    q({ id: `${packageId}-${i}`, packageId, status: i < r ? QueryStatus.FULL_REQUESTED : QueryStatus.REJECTED, hasAgentResponded: true }),
+  );
+
+describe("overallAttachStats (See what wins — page headline over all attached queries)", () => {
+  it("aggregates every query attached to any of the packages; ignores unattached/other", () => {
+    const packages = [pkg({ id: "A" }), pkg({ id: "B" })];
+    const queries = [
+      ...sends("A", 4, 2), // 4 sent, 2 requests
+      ...sends("B", 2, 1), // 2 sent, 1 request
+      q({ id: "loose", packageId: "" }), // unattached — excluded
+      q({ id: "other", packageId: "Z" }), // different package — excluded
+    ];
+    const s = overallAttachStats(packages, queries);
+    expect(s.sent).toBe(6);
+    expect(s.requests).toBe(3);
+    expect(s.requestRate).toBe(0.5);
+  });
+});
+
+describe("rankPackagesByRequests (leaderboard order + ranked flag)", () => {
+  it("orders by request rate desc; below-threshold packages carry ranked:false; no-send sinks last", () => {
+    const packages = [pkg({ id: "low" }), pkg({ id: "high" }), pkg({ id: "empty" })];
+    const queries = [
+      ...sends("low", 4, 1), // 25%, ranked
+      ...sends("high", 4, 3), // 75%, ranked
+      ...sends("empty", 0, 0), // no sends
+    ];
+    const ranked = rankPackagesByRequests(packages, queries);
+    expect(ranked.map((r) => r.pkg.id)).toEqual(["high", "low", "empty"]);
+    expect(ranked[0].ranked).toBe(true);
+    expect(ranked[2].stat.requestRate).toBeNull();
+    expect(ranked[2].ranked).toBe(false);
+  });
+  it("a lucky 1-of-1 (100%) is NOT ranked — below the sample threshold", () => {
+    const packages = [pkg({ id: "lucky" })];
+    const ranked = rankPackagesByRequests(packages, sends("lucky", 1, 1));
+    expect(ranked[0].stat.requestRate).toBe(1);
+    expect(ranked[0].ranked).toBe(false);
+  });
+});
+
+describe("strongestPackage (crowns only a threshold-meeting leader)", () => {
+  it("returns the top ranked package by request rate", () => {
+    const packages = [pkg({ id: "a" }), pkg({ id: "b" })];
+    const queries = [...sends("a", 4, 1), ...sends("b", 5, 4)];
+    expect(strongestPackage(packages, queries)!.pkg.id).toBe("b");
+  });
+  it("returns null when no package meets the sample threshold (no false crown on thin data)", () => {
+    const packages = [pkg({ id: "a" }), pkg({ id: "b" })];
+    const queries = [...sends("a", 3, 3), ...sends("b", 2, 2)]; // both 100% but < MIN_SENDS_FOR_CLAIM
+    expect(strongestPackage(packages, queries)).toBeNull();
+    expect(MIN_SENDS_FOR_CLAIM).toBe(4);
+  });
+});
+
+describe("bestVersionOfType (best material of a type by request rate, threshold-gated)", () => {
+  const versions = [
+    ver({ id: "QL1", componentType: ComponentType.QUERY_LETTER }),
+    ver({ id: "QL2", componentType: ComponentType.QUERY_LETTER }),
+    ver({ id: "SY1", componentType: ComponentType.SYNOPSIS }),
+  ];
+  const packages = [
+    pkg({ id: "p1", queryLetterVersionId: "QL1", synopsisVersionId: "SY1" }),
+    pkg({ id: "p2", queryLetterVersionId: "QL2" }),
+  ];
+  it("picks the higher-rate version once both clear the threshold", () => {
+    const queries = [...sends("p1", 4, 3), ...sends("p2", 4, 1)]; // QL1 75% vs QL2 25%
+    expect(bestVersionOfType(ComponentType.QUERY_LETTER, versions, packages, queries)!.version.id).toBe("QL1");
+  });
+  it("returns null for a type whose versions are all below threshold", () => {
+    const queries = [...sends("p1", 2, 2), ...sends("p2", 1, 1)];
+    expect(bestVersionOfType(ComponentType.QUERY_LETTER, versions, packages, queries)).toBeNull();
+    expect(bestVersionOfType(ComponentType.SAMPLE_PAGES, versions, packages, queries)).toBeNull();
+  });
+});
+
+describe("mostUsedVersionOfType (the de-facto default material — derived from package membership)", () => {
+  const versions = [
+    ver({ id: "QL1", componentType: ComponentType.QUERY_LETTER }),
+    ver({ id: "QL2", componentType: ComponentType.QUERY_LETTER }),
+  ];
+  it("returns the version used in the most packages", () => {
+    const packages = [
+      pkg({ id: "p1", queryLetterVersionId: "QL1" }),
+      pkg({ id: "p2", queryLetterVersionId: "QL1" }),
+      pkg({ id: "p3", queryLetterVersionId: "QL2" }),
+    ];
+    expect(mostUsedVersionOfType(ComponentType.QUERY_LETTER, versions, packages)!.id).toBe("QL1");
+  });
+  it("returns null on a usage tie (no single default to star) and when unused", () => {
+    const tie = [pkg({ id: "p1", queryLetterVersionId: "QL1" }), pkg({ id: "p2", queryLetterVersionId: "QL2" })];
+    expect(mostUsedVersionOfType(ComponentType.QUERY_LETTER, versions, tie)).toBeNull();
+    expect(mostUsedVersionOfType(ComponentType.SYNOPSIS, versions, tie)).toBeNull();
   });
 });

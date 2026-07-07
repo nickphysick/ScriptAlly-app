@@ -2,12 +2,17 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * PackagesHome — the Package Builder home once the manuscript has ≥1 package. Treatment "1 · List +
- * reading pane" from design-refs/scriptally-packages-composer-v2.html: a compact package list on the
- * left (name, three filled/empty type chips, one stat line) and a full reading pane on the right for
- * the selected package (a roomy row per material + big derived stat figures along the foot). Selection
- * is view state only; the first package is auto-selected. All stats derive at read time from the
- * queries via packageMetrics — nothing stored. Attach-to-query stays a stub this build.
+ * PackagesHome — the Package Builder home (JourneyStrip station 3, Attach) once the manuscript has ≥1
+ * package. Treatment "1 · List + reading pane" from design-refs/scriptally-packages-composer-v2.html:
+ * a compact package list on the left (name, three filled/empty type chips, one stat line) and a full
+ * reading pane on the right for the selected package (a roomy row per material + the selected
+ * package's own derived counts along the foot). Selection is view state only; the first package is
+ * auto-selected. All figures derive at read time from the queries via packageMetrics — nothing stored.
+ * Attach-to-query stays a stub this build.
+ *
+ * See what wins is now a SEPARATE destination (its own cross-package analytics page) — reached via the
+ * `onSeeWins` CTA here, not welded into this home. This view keeps the per-package attach context; the
+ * full leaderboard / winner / best-by-type read lives on PackageStats.
  */
 import React, { useState } from "react";
 import { SubmissionPackage, ManuscriptVersion, Query, ComponentType } from "../../types";
@@ -50,9 +55,11 @@ export interface PackagesHomeProps {
   onNew: () => void;
   onEdit: (pkg: SubmissionPackage) => void;
   onCopy: (pkg: SubmissionPackage) => void;
+  /** Open the "See what wins" analytics page (station 4) — the de-welded results destination. */
+  onSeeWins: () => void;
 }
 
-export const PackagesHome: React.FC<PackagesHomeProps> = ({ packages, versions, queries, onNew, onEdit, onCopy }) => {
+export const PackagesHome: React.FC<PackagesHomeProps> = ({ packages, versions, queries, onNew, onEdit, onCopy, onSeeWins }) => {
   const [selectedId, setSelectedId] = useState<string | null>(packages[0]?.id ?? null);
   const selected = packages.find((p) => p.id === selectedId) ?? packages[0];
 
@@ -65,8 +72,12 @@ export const PackagesHome: React.FC<PackagesHomeProps> = ({ packages, versions, 
         .pkglp .ph-head .illo { flex-shrink:0; }
         .pkglp .ph-head h2 { font-family:${FONT_SERIF}; font-size:38px; font-weight:800; color:var(--headT); letter-spacing:-.5px; }
         .pkglp .ph-head p { font-size:15px; color:#6a594d; line-height:1.6; margin-top:8px; max-width:560px; }
-        .pkglp .newpkg { margin-left:auto; flex-shrink:0; font-family:${FONT_SERIF}; font-size:16px; font-weight:700; color:var(--btnT); background:var(--btnBg); border:1px solid var(--btnBd); border-radius:12px; padding:15px 30px; cursor:pointer; }
+        .pkglp .ph-acts { margin-left:auto; flex-shrink:0; display:flex; flex-direction:column; align-items:stretch; gap:9px; }
+        .pkglp .newpkg { font-family:${FONT_SERIF}; font-size:16px; font-weight:700; color:var(--btnT); background:var(--btnBg); border:1px solid var(--btnBd); border-radius:12px; padding:15px 30px; cursor:pointer; }
         .pkglp .newpkg:hover { background:var(--btnH); }
+        /* See what wins — the de-welded results destination; positive/accent link (--sage-d). */
+        .pkglp .seewins { display:inline-flex; align-items:center; justify-content:center; gap:7px; font-family:${FONT_MONO}; font-size:10px; letter-spacing:.08em; text-transform:uppercase; font-weight:600; color:var(--sage-d); background:none; border:0; padding:2px; cursor:pointer; }
+        .pkglp .seewins:hover { text-decoration:underline; }
         .pkglp .lp { display:flex; gap:16px; min-height:340px; }
         .pkglp .lp-list { width:300px; flex-shrink:0; background:var(--card); border:var(--bdw) solid var(--bd); border-radius:11px; overflow:hidden; display:flex; flex-direction:column; }
         .t-bold .pkglp .lp-list { border:1.5px solid #1d1712; }
@@ -132,7 +143,10 @@ export const PackagesHome: React.FC<PackagesHomeProps> = ({ packages, versions, 
           <h2>Your packages</h2>
           <p>A package is one version of your submission — a letter, synopsis and pages travelling together. Attach one to each query you send, and the results column tells you which version agents ask to read more of.</p>
         </div>
-        <button type="button" className="newpkg" onClick={onNew}>＋ New package</button>
+        <div className="ph-acts">
+          <button type="button" className="newpkg" onClick={onNew}>＋ New package</button>
+          <button type="button" className="seewins" onClick={onSeeWins}>See what wins →</button>
+        </div>
       </div>
 
       <div className="lp">

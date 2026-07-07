@@ -21,7 +21,7 @@
  *   requestRate  = requests / sent   (null when sent === 0 → rendered as "—")
  *   responseRate = responses / sent  (null when sent === 0 → rendered as "—")
  */
-import { Manuscript, ManuscriptVersion, SubmissionPackage, Query, QueryStatus, QueryMaterial } from "../types";
+import { Manuscript, ManuscriptVersion, SubmissionPackage, Query, QueryStatus, QueryMaterial, ComponentType } from "../types";
 
 /** Request-or-beyond statuses: the agent asked for materials (or went further). Exact enum strings. */
 const REQUEST_OR_BEYOND: ReadonlySet<QueryStatus> = new Set<QueryStatus>([
@@ -203,6 +203,93 @@ export const formatRate = (r: number | null): string => (r === null ? "—" : `$
 
 /** Bar width as a CSS percentage string; a 0%/null bar still shows a sliver so the track reads. */
 export const barWidth = (r: number | null): string => (r === null ? "0%" : `${Math.max(2, Math.round(r * 100))}%`);
+
+// ── Cross-package leaderboard — the "See what wins" analytics. All derived at read time from the
+//    same queries/packages/versions; nothing here is stored, and MIN_SENDS_FOR_CLAIM gates every claim.
+
+/** Aggregate performance over every query attached to ANY of the given packages — the page headline. */
+export function overallAttachStats(packages: SubmissionPackage[], queries: Query[]): RateStat {
+  const ids = new Set(packages.map((p) => p.id));
+  return statsFor(queries.filter((q) => !!q.packageId && ids.has(q.packageId)));
+}
+
+export interface RankedPackage {
+  pkg: SubmissionPackage;
+  stat: RateStat;
+  /** True once this package has enough sends (MIN_SENDS_FOR_CLAIM) to carry a "best" claim. */
+  ranked: boolean;
+}
+
+/**
+ * Packages ordered by request rate (desc), then sent (desc), then name — the leaderboard. A package
+ * with no sends (null rate) sinks below any that has data. `ranked` flags whether each meets the
+ * sample threshold so the view can crown only trustworthy leaders. Pure — never mutates the input.
+ */
+export function rankPackagesByRequests(packages: SubmissionPackage[], queries: Query[]): RankedPackage[] {
+  return packages
+    .map((pkg) => {
+      const stat = packageMetrics(pkg.id, queries);
+      return { pkg, stat, ranked: meetsSampleThreshold(stat.sent) };
+    })
+    .sort((a, b) => {
+      const ra = a.stat.requestRate;
+      const rb = b.stat.requestRate;
+      const byRate = ra === null && rb === null ? 0 : ra === null ? 1 : rb === null ? -1 : rb - ra;
+      return byRate || b.stat.sent - a.stat.sent || a.pkg.packageName.localeCompare(b.pkg.packageName);
+    });
+}
+
+/** The strongest package: the highest-request-rate package that MEETS the sample threshold. Null when
+ *  none has enough sends to crown — the view then stays in its "keep attaching" state. */
+export function strongestPackage(packages: SubmissionPackage[], queries: Query[]): RankedPackage | null {
+  const top = rankPackagesByRequests(packages, queries).find((r) => r.ranked && r.stat.requestRate !== null);
+  return top ?? null;
+}
+
+export interface BestOfType {
+  version: ManuscriptVersion;
+  stat: RateStat;
+}
+
+/** The best-performing version of one type by request rate, among versions with enough sends. Null
+ *  when the type has no threshold-meeting version yet (so the view shows "not enough sends" for it). */
+export function bestVersionOfType(
+  type: ComponentType,
+  versions: ManuscriptVersion[],
+  packages: SubmissionPackage[],
+  queries: Query[],
+): BestOfType | null {
+  let best: BestOfType | null = null;
+  let bestRate = -1;
+  for (const v of versions) {
+    if (v.componentType !== type) continue;
+    const stat = componentMetrics(v.id, packages, queries);
+    if (!meetsSampleThreshold(stat.sent) || stat.requestRate === null) continue;
+    if (stat.requestRate > bestRate || (best !== null && stat.requestRate === bestRate && stat.sent > best.stat.sent)) {
+      best = { version: v, stat };
+      bestRate = stat.requestRate;
+    }
+  }
+  return best;
+}
+
+/** The version of a type used in the most packages — the de-facto "default" material (the one reached
+ *  for most). Null when no version of the type is used anywhere, or when the top usage is TIED (no
+ *  single default to star). Derived from package membership, not a stored flag. */
+export function mostUsedVersionOfType(
+  type: ComponentType,
+  versions: ManuscriptVersion[],
+  packages: SubmissionPackage[],
+): ManuscriptVersion | null {
+  const scored = versions
+    .filter((v) => v.componentType === type)
+    .map((v) => ({ v, n: packagesUsingVersion(v.id, packages).length }))
+    .filter((x) => x.n > 0)
+    .sort((a, b) => b.n - a.n);
+  if (!scored.length) return null;
+  if (scored.length > 1 && scored[1].n === scored[0].n) return null; // tie → no single default
+  return scored[0].v;
+}
 
 // ── Derived display strings — snippet/meta come from the version's own content, never stored ──
 

@@ -24,6 +24,7 @@ import { ComponentType, SubmissionPackage, ManuscriptVersion } from "../types";
 import { FirstVisitHome } from "./packages/FirstVisitHome";
 import { MaterialsRail } from "./packages/MaterialsRail";
 import { PackagesHome } from "./packages/PackagesHome";
+import { PackageStats } from "./packages/PackageStats";
 import { Composer } from "./packages/Composer";
 import { MaterialsManager } from "./packages/MaterialsManager";
 import { JourneyStrip } from "./packages/JourneyStrip";
@@ -45,9 +46,11 @@ export const SubmissionPackages: React.FC = () => {
   // Composer working state (Phase 7): null = home; set = building/editing a package in the pane.
   const [composer, setComposer] = useState<{ name: string; sel: SlotSelection; editId: string | null } | null>(null);
   const [managerOpen, setManagerOpen] = useState(false); // materials manager (Phase 8)
+  const [statsOpen, setStatsOpen] = useState(false); // "See what wins" analytics page (de-welded from home)
   // Material create/edit modal (Phase 9): null = closed; version=null → create for `type`, else edit it.
   // fromComposer marks a create opened from the composer's own "Add a new …" — that one slots on save.
-  const [matModal, setMatModal] = useState<{ type: ComponentType; version: ManuscriptVersion | null; fromComposer?: boolean } | null>(null);
+  // seedName/seedContent pre-fill a CREATE (Duplicate → "Copy of …" + the same text) without touching MaterialModal.
+  const [matModal, setMatModal] = useState<{ type: ComponentType; version: ManuscriptVersion | null; fromComposer?: boolean; seedName?: string; seedContent?: string } | null>(null);
   // The pending composer-origin pick (fresh version id → its slot), handed to the Composer as a prop.
   const [autoPick, setAutoPick] = useState<{ type: ComponentType; versionId: string; token: number } | undefined>(undefined);
   // Worked-examples popup (Phase 10): the carousel slide key being viewed, or null.
@@ -118,6 +121,8 @@ export const SubmissionPackages: React.FC = () => {
   // itself on save. Creates from the rail / manager / first-visit just save to the library.
   const openCreateFromComposer = (type: ComponentType) => setMatModal({ type, version: null, fromComposer: true });
   const openEditMaterial = (v: ManuscriptVersion) => setMatModal({ type: v.componentType, version: v });
+  // Duplicate — a CREATE seeded from the source material ("Copy of …" + its text); saves as a new version.
+  const openDuplicateMaterial = (v: ManuscriptVersion) => setMatModal({ type: v.componentType, version: null, seedName: `Copy of ${v.versionName}`, seedContent: v.contentDraft ?? "" });
   const saveMaterial = (name: string, content: string) => {
     if (!msId || !matModal) return;
     const trimmed = name.trim();
@@ -229,8 +234,8 @@ export const SubmissionPackages: React.FC = () => {
         <>
           {/* Journey strip — WORKING views only (the composer can open from first-visit, so the test is
               "which view renders", not the gate alone). First-visit itself is the pitch: no strip. */}
-          {(composer || managerOpen || !firstVisit) && (
-            <JourneyStrip view={composer ? "composer" : managerOpen ? "gallery" : "home"} />
+          {(composer || managerOpen || statsOpen || !firstVisit) && (
+            <JourneyStrip view={composer ? "composer" : managerOpen ? "gallery" : statsOpen ? "wins" : "home"} />
           )}
           <div className="pkg-workspace" style={{ flex: 1, minHeight: 0, display: "flex", gap: 14 }}>
             {/* Materials rail — shown once the manuscript has any material or package (mockup .qlist). */}
@@ -252,11 +257,13 @@ export const SubmissionPackages: React.FC = () => {
                   autoPick={autoPick}
                 />
               ) : managerOpen ? (
-                <MaterialsManager versions={msVersions} packages={msPackages} queries={msQueries} onBack={() => setManagerOpen(false)} onEdit={openEditMaterial} onCreate={openCreate} />
+                <MaterialsManager versions={msVersions} packages={msPackages} queries={msQueries} onBack={() => setManagerOpen(false)} onEdit={openEditMaterial} onCreate={openCreate} onDuplicate={openDuplicateMaterial} />
+              ) : statsOpen ? (
+                <PackageStats packages={msPackages} versions={msVersions} queries={msQueries} onBack={() => setStatsOpen(false)} />
               ) : firstVisit ? (
                 <FirstVisitHome versions={msVersions} onBuild={openNew} onCreate={openCreate} onEditMaterial={openEditMaterial} onExample={openExample} />
               ) : (
-                <PackagesHome packages={msPackages} versions={msVersions} queries={msQueries} onNew={openNew} onEdit={openEdit} onCopy={openCopy} />
+                <PackagesHome packages={msPackages} versions={msVersions} queries={msQueries} onNew={openNew} onEdit={openEdit} onCopy={openCopy} onSeeWins={() => setStatsOpen(true)} />
               )}
             </section>
           </div>
@@ -267,8 +274,8 @@ export const SubmissionPackages: React.FC = () => {
         <MaterialModal
           type={matModal.type}
           editing={matModal.version !== null}
-          initialName={matModal.version?.versionName ?? ""}
-          initialContent={matModal.version?.contentDraft ?? ""}
+          initialName={matModal.version?.versionName ?? matModal.seedName ?? ""}
+          initialContent={matModal.version?.contentDraft ?? matModal.seedContent ?? ""}
           onCancel={() => setMatModal(null)}
           onSave={saveMaterial}
         />

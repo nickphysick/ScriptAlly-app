@@ -15,7 +15,10 @@ import React from "react";
 import { ManuscriptVersion, SubmissionPackage, Query, ComponentType } from "../../types";
 import { TypeGlyph } from "./TypeGlyph";
 import { TYPE_META, BUILDER_TYPES } from "./typeMeta";
-import { packagesUsingVersion, componentMetrics, versionSnippet } from "../../lib/packageMetrics";
+import {
+  packagesUsingVersion, componentMetrics, versionSnippet, versionMeta, formatRate,
+  bestVersionOfType, mostUsedVersionOfType, meetsSampleThreshold,
+} from "../../lib/packageMetrics";
 import { FONT_SERIF, FONT_MONO } from "../../lib/designTokens";
 
 const SHORT: Record<string, "tl" | "ts" | "tp"> = {
@@ -37,17 +40,6 @@ const GHOST_TEACH: Record<string, string> = {
 const fileIcon = (
   <svg width={19} height={19} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M6 3h9l5 5v13a1 1 0 01-1 1H6a1 1 0 01-1-1V4a1 1 0 011-1z" /><path d="M15 3v5h5M9 13h6M9 17h4" /></svg>
 );
-const docIcon = (
-  <svg width={11} height={11} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinejoin="round"><path d="M14 3H6a1 1 0 00-1 1v16a1 1 0 001 1h12a1 1 0 001-1V8z" /><path d="M14 3v5h5" /></svg>
-);
-
-const usedInText = (v: ManuscriptVersion, packages: SubmissionPackage[], queries: Query[]): React.ReactNode => {
-  const inPkgs = packagesUsingVersion(v.id, packages).length;
-  if (inPkgs === 0) return "UNUSED";
-  const sent = componentMetrics(v.id, packages, queries).sent;
-  return <>IN <b>{inPkgs} PACKAGE{inPkgs === 1 ? "" : "S"}</b>{sent > 0 ? ` · ${sent} SENT QUER${sent === 1 ? "Y" : "IES"}` : ""}</>;
-};
-
 export interface MaterialsManagerProps {
   versions: ManuscriptVersion[];
   packages: SubmissionPackage[];
@@ -57,9 +49,11 @@ export interface MaterialsManagerProps {
   onEdit: (version: ManuscriptVersion) => void;
   /** Open the create modal for a type (Phase 9). */
   onCreate: (type: ComponentType) => void;
+  /** Duplicate a material — opens the create modal seeded with "Copy of …" + the same text. */
+  onDuplicate: (version: ManuscriptVersion) => void;
 }
 
-export const MaterialsManager: React.FC<MaterialsManagerProps> = ({ versions, packages, queries, onBack, onEdit, onCreate }) => (
+export const MaterialsManager: React.FC<MaterialsManagerProps> = ({ versions, packages, queries, onBack, onEdit, onCreate, onDuplicate }) => (
   <div className="pkgmgr">
     <style>{`
       .pkgmgr .backrow { display:flex; align-items:center; gap:12px; margin-bottom:6px; }
@@ -79,18 +73,36 @@ export const MaterialsManager: React.FC<MaterialsManagerProps> = ({ versions, pa
       .pkgmgr .pg-tag.tp { background:var(--tp); color:var(--gold); }
       /* Quiet Cappuccino: shelf-header + sheet pills go white/mocha with a hairline (pill rule). Bold keeps tints. */
       .t-capp .pkgmgr .pg-tag.tl, .t-capp .pkgmgr .pg-tag.ts, .t-capp .pkgmgr .pg-tag.tp { background:var(--btnBg); color:var(--btnT); border:1px solid var(--btnBd); }
-      .pkgmgr .mini { width:196px; background:#fffefb; border:var(--bdw) solid var(--bd); border-radius:6px; padding:12px 13px 0; box-shadow:0 5px 14px rgba(58,28,20,.12); position:relative; cursor:pointer; transition:transform .14s; text-align:left; display:block; }
-      .t-bold .pkgmgr .mini { border:1.5px solid #1d1712; }
-      .pkgmgr .mini:hover { transform:translateY(-3px); }
-      .pkgmgr .mti { font-family:${FONT_SERIF}; font-size:13px; font-weight:600; color:var(--ink); margin:7px 0 5px; }
-      .pkgmgr .filechip { display:inline-flex; align-items:center; gap:7px; max-width:100%; background:#fffefb; border:var(--bdw) solid var(--bd); border-radius:7px; padding:5px 9px; font-family:${FONT_MONO}; font-size:8.5px; color:#5d5247; margin:0 0 8px; }
-      .t-bold .pkgmgr .filechip { border:1.5px solid #1d1712; }
-      .pkgmgr .filechip svg { flex-shrink:0; }
-      .pkgmgr .filechip .fn { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-      .pkgmgr .mtx { font-family:${FONT_SERIF}; font-size:9.4px; line-height:1.65; color:#5a4a3e; max-height:64px; overflow:hidden; -webkit-mask-image:linear-gradient(#000 45%,transparent 88%); mask-image:linear-gradient(#000 45%,transparent 88%); }
-      .pkgmgr .mtx.none { font-style:italic; color:var(--muted); }
-      .pkgmgr .musd { font-family:${FONT_MONO}; font-size:7.5px; letter-spacing:.06em; color:var(--muted); padding:7px 0 9px; position:relative; z-index:2; }
-      .pkgmgr .musd b { color:var(--burg); font-weight:500; }
+      /* Richer material card (a size up from the old .mini sheet): a type-tinted header (glyph + type
+         label + default star) over a body — Playfair title, snippet, on-brand pills, Edit + Duplicate.
+         Header fill = the type tint in Bold/Editorial; Quiet Cappuccino retreats it to foam + burgundy,
+         matching the established .pg-tag/.gch chrome decision. */
+      .pkgmgr .mcard { width:266px; background:var(--card); border:var(--bdw) solid var(--bd); border-radius:11px; overflow:hidden; box-shadow:0 5px 14px rgba(58,28,20,.10); display:flex; flex-direction:column; }
+      .t-bold .pkgmgr .mcard { box-shadow:none; }
+      .pkgmgr .mc-head { display:flex; align-items:center; gap:9px; padding:11px 14px; }
+      .pkgmgr .mc-head.tl { background:var(--tl); color:var(--burg); }
+      .pkgmgr .mc-head.ts { background:var(--ts); color:var(--sage-d); }
+      .pkgmgr .mc-head.tp { background:var(--tp); color:var(--gold); }
+      .t-capp .pkgmgr .mc-head.tl, .t-capp .pkgmgr .mc-head.ts, .t-capp .pkgmgr .mc-head.tp { background:linear-gradient(135deg,var(--band-a),var(--band-b)); color:var(--burg); }
+      .pkgmgr .mc-glyph { display:inline-flex; flex-shrink:0; }
+      .pkgmgr .mc-type { font-family:${FONT_MONO}; font-size:8.5px; letter-spacing:.11em; text-transform:uppercase; font-weight:600; }
+      .pkgmgr .mc-star { margin-left:auto; font-size:13px; line-height:1; color:var(--gold); flex-shrink:0; }
+      .pkgmgr .mc-body { padding:13px 15px 15px; display:flex; flex-direction:column; gap:9px; flex:1; }
+      .pkgmgr .mc-title { font-family:${FONT_SERIF}; font-size:16.5px; font-weight:700; color:var(--ink); line-height:1.25; }
+      .pkgmgr .mc-snip { font-family:${FONT_SERIF}; font-size:11.5px; line-height:1.6; color:var(--ink); opacity:.72; max-height:56px; overflow:hidden; -webkit-mask-image:linear-gradient(#000 55%,transparent 92%); mask-image:linear-gradient(#000 55%,transparent 92%); }
+      .pkgmgr .mc-snip.none { font-style:italic; opacity:1; color:var(--muted); -webkit-mask-image:none; mask-image:none; }
+      .pkgmgr .mc-pills { display:flex; flex-wrap:wrap; gap:6px; }
+      .pkgmgr .mc-pill { display:inline-flex; align-items:center; gap:4px; font-family:${FONT_MONO}; font-size:8px; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); background:var(--selBg); border-radius:6px; padding:3px 8px; }
+      .pkgmgr .mc-pill b { color:var(--headT); font-weight:700; }
+      /* The best request rate of its type wears the accent (--sage-d, the builder's "this is working" colour). */
+      .pkgmgr .mc-pill.best { color:var(--card); background:var(--sage-d); font-weight:600; }
+      .pkgmgr .mc-pill.best b { color:var(--card); }
+      .pkgmgr .mc-acts { display:flex; gap:8px; margin-top:2px; }
+      /* Edit = the theme solid button; Duplicate = quiet ghost. */
+      .pkgmgr .mc-edit { flex:1; font-family:${FONT_SERIF}; font-size:13px; font-weight:600; color:var(--btnT); background:var(--btnBg); border:var(--bdw) solid var(--btnBd); border-radius:9px; padding:8px 0; cursor:pointer; }
+      .pkgmgr .mc-edit:hover { background:var(--btnH); }
+      .pkgmgr .mc-dupe { font-family:${FONT_MONO}; font-size:9px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); background:none; border:var(--bdw) solid var(--bd); border-radius:9px; padding:8px 12px; cursor:pointer; }
+      .pkgmgr .mc-dupe:hover { color:var(--burg); border-color:var(--burg); }
       .pkgmgr .mini-add { width:196px; min-height:158px; border:1.5px dashed #cbb9a6; border-radius:6px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px; color:#a4937f; cursor:pointer; font-size:12px; text-align:center; padding:0 14px; background:none; }
       .pkgmgr .mini-add.wide { width:250px; }
       .pkgmgr .mini-add:hover { border-color:var(--burg); color:var(--burg); background:rgba(124,58,42,.03); }
@@ -109,6 +121,10 @@ export const MaterialsManager: React.FC<MaterialsManagerProps> = ({ versions, pa
         const m = TYPE_META[type];
         const tint = SHORT[type];
         const shelf = versions.filter((v) => v.componentType === type);
+        // Per-shelf derivations: the best-performing version of this type (accent pill) and the
+        // de-facto default (most-used → the star). Both null-safe on thin/tied data.
+        const best = bestVersionOfType(type, versions, packages, queries);
+        const dflt = mostUsedVersionOfType(type, versions, packages);
         return (
           <div key={type}>
             <div className="shelf-h">
@@ -117,14 +133,35 @@ export const MaterialsManager: React.FC<MaterialsManagerProps> = ({ versions, pa
             <div className="shelf">
               {shelf.map((v) => {
                 const snip = versionSnippet(v);
+                const cm = componentMetrics(v.id, packages, queries);
+                const inPkgs = packagesUsingVersion(v.id, packages).length;
+                const meta = versionMeta(v);
+                const enough = meetsSampleThreshold(cm.sent);
                 return (
-                  <button type="button" key={v.id} className="mini" onClick={() => onEdit(v)}>
-                    <span className={`pg-tag ${tint}`}>{m.label}</span>
-                    <div className="mti">{v.versionName}</div>
-                    <div className="filechip">{docIcon}<span className="fn">{v.fileName || "No file attached"}</span></div>
-                    <div className={`mtx${snip ? "" : " none"}`}>{snip || "No preview yet — add the text in the editor."}</div>
-                    <div className="musd">{usedInText(v, packages, queries)}</div>
-                  </button>
+                  <div key={v.id} className="mcard">
+                    <div className={`mc-head ${tint}`}>
+                      <span className="mc-glyph"><TypeGlyph type={type} size={15} /></span>
+                      <span className="mc-type">{m.label}</span>
+                      {dflt?.id === v.id && <span className="mc-star" title="Your most-used — the default across your packages" aria-label="Most used">★</span>}
+                    </div>
+                    <div className="mc-body">
+                      <div className="mc-title">{v.versionName}</div>
+                      <div className={`mc-snip${snip ? "" : " none"}`}>{snip || "No preview yet — add the text in the editor."}</div>
+                      <div className="mc-pills">
+                        {cm.sent > 0 && (
+                          <span className={`mc-pill${best?.version.id === v.id ? " best" : ""}`} title={enough ? "Attributed request rate" : "Early — a few more sends and this rate settles"}>
+                            <b>{formatRate(cm.requestRate)}</b> req{enough ? "" : " · early"}
+                          </span>
+                        )}
+                        <span className="mc-pill">{inPkgs > 0 ? <>in <b>{inPkgs}</b> pkg{inPkgs === 1 ? "" : "s"}</> : "unused"}</span>
+                        {meta && <span className="mc-pill">{meta}</span>}
+                      </div>
+                      <div className="mc-acts">
+                        <button type="button" className="mc-edit" onClick={() => onEdit(v)}>Edit</button>
+                        <button type="button" className="mc-dupe" onClick={() => onDuplicate(v)} title={`Duplicate ${v.versionName}`}>Duplicate</button>
+                      </div>
+                    </div>
+                  </div>
                 );
               })}
               {shelf.length === 0 ? (

@@ -4,9 +4,11 @@
  *
  * JourneyStrip — the persistent four-station orientation band under the Builder's page header
  * (mockup .journey in design-refs/scriptally-guided-builder.html): 1 Write → 2 Combine → 3 Attach →
- * 4 See what wins, with the current view's station(s) lit (gallery → 1, composer → 2, packages home
- * → 3 + 4). Rendered on the WORKING views only — never on first-visit, whose page is the pitch; the
- * strip takes over the teaching once the user is inside.
+ * 4 See what wins, with the current view's station lit (gallery → 1, composer → 2, packages home →
+ * 3 Attach, stats page → 4 See what wins). Attach and See-what-wins are now DISTINCT destinations —
+ * the home is the attach surface; the stats page is its own analytics view. Rendered on the WORKING
+ * views only — never on first-visit, whose page is the pitch; the strip takes over the teaching once
+ * the user is inside.
  *
  * Display-only THIS pass: no navigation on click (a mid-composer click navigating away is a
  * data-loss trap) — station navigation is a flagged follow-up. Cursor stays default.
@@ -23,10 +25,10 @@
 import React from "react";
 import { FONT_SERIF, FONT_MONO } from "../../lib/designTokens";
 
-export type JourneyView = "gallery" | "composer" | "home";
+export type JourneyView = "gallery" | "composer" | "home" | "wins";
 
-/** Which stations light per view — home lights both halves of the payoff (attach + results). */
-const LIT: Record<JourneyView, number[]> = { gallery: [1], composer: [2], home: [3, 4] };
+/** Which station lights per view — Attach (home) and See what wins (stats) are now separate. */
+const LIT: Record<JourneyView, number[]> = { gallery: [1], composer: [2], home: [3], wins: [4] };
 
 /** Station icon SVGs, ported verbatim from the ref (44px box, 34px ink-line art, currentColor). */
 const ICONS: React.ReactNode[] = [
