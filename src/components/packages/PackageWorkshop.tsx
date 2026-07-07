@@ -60,6 +60,9 @@ const toolIcon = (
 const chartIcon = (
   <svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M4 20h16" /></svg>
 );
+const materialIcon = (
+  <svg width={17} height={17} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinejoin="round" aria-hidden="true"><path d="M4 5h11l5 5v9H4z" /><path d="M15 5v5h5" /><path d="M8 14h8M8 17h5" strokeLinecap="round" /></svg>
+);
 const pencilIcon = (
   <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 20h4L18 10l-4-4L4 16z" /><path d="M13 7l4 4" /></svg>
 );
@@ -321,6 +324,63 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
             {requested > 0 && <span className="mx">{requested} REQUESTED ✓</span>}
           </div>
         )) : <div className="ck"><span className="cd">No materials in a package yet</span></div>}
+      </>
+    );
+  };
+
+  // Material analytics (Phase C) — the right window in materials mode. Usage is derived from the engine
+  // (packagesUsingVersion) + reachedFull for the "full request" count that matches the rest of the workshop.
+  const materialUsage = (id: string) => {
+    const inP = packagesUsingVersion(id, packages);
+    const ids = new Set(inP.map((p) => p.id));
+    const mine = queries.filter((q) => ids.has(q.packageId));
+    return { n: inP.length, sent: mine.length, full: mine.filter(reachedFull).length, names: inP.map((p) => p.packageName) };
+  };
+  const renderMaterialAnalytics = () => {
+    if (!selMat) {
+      const surfaced = versions.filter((v) => (BUILDER_TYPES as ComponentType[]).includes(v.componentType));
+      const unused = surfaced.filter((v) => packagesUsingVersion(v.id, packages).length === 0).length;
+      return (
+        <>
+          <div className="an-title">Your materials</div>
+          <div className="an-sub">Overview</div>
+          <div className="an-sec">Library</div>
+          <div className="anfig">
+            <div><div className="v">{surfaced.length}</div><div className="k">Materials</div></div>
+            <div><div className="v">{unused}</div><div className="k">Unused</div></div>
+          </div>
+          <div className="annote">Pick a material on the left to see where it&rsquo;s used and how it&rsquo;s performing.</div>
+        </>
+      );
+    }
+    const v = versionById(selMat);
+    if (!v) return null;
+    const u = materialUsage(selMat);
+    const typeLabel = TYPE_META[v.componentType].label;
+    if (u.n === 0) {
+      return (
+        <>
+          <div className="an-title">{v.versionName}</div>
+          <div className="an-sub">{typeLabel}</div>
+          <div className="an-sec">Where it&rsquo;s used</div>
+          <div className="an-hero flat"><span className="big">Not in any package yet</span></div>
+          <div className="annote">Add this to a package in Packages mode to start tracking how it does with agents.</div>
+        </>
+      );
+    }
+    return (
+      <>
+        <div className="an-title">{v.versionName}</div>
+        <div className="an-sub">{typeLabel}</div>
+        <div className="an-sec">How it&rsquo;s doing</div>
+        <div className="anfig">
+          <div><div className="v">{u.n}</div><div className="k">In packages</div></div>
+          <div><div className="v">{u.sent}</div><div className="k">Sent</div></div>
+          <div><div className="v win">{u.full}</div><div className="k">Full req&rsquo;s</div></div>
+        </div>
+        <div className="an-sec">Used in</div>
+        <div className="agc">{u.names.map((n, i) => <span key={i}>{n}</span>)}</div>
+        {u.sent < MIN_SENDS_FOR_CLAIM && <div className="annote">Only {u.sent} send{u.sent === 1 ? "" : "s"} so far across its packages — too early to say if this piece is pulling requests.</div>}
       </>
     );
   };
@@ -756,15 +816,17 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
           </div>
         </section>
 
-        {/* ANALYTICS window */}
+        {/* ANALYTICS window — follows the mode: package stats while building, material stats while editing. */}
         <section className="wk-win wk-analytics">
-          <div className="wk-h"><span className="wk-ri">{chartIcon}</span><h3>Package analytics</h3></div>
-          <div className="wk-scope">
-            <button type="button" className={anScope === "package" ? "on" : ""} onClick={() => setAnScope("package")}>This package</button>
-            <button type="button" className={anScope === "all" ? "on" : ""} onClick={() => setAnScope("all")}>All packages</button>
-          </div>
+          <div className="wk-h"><span className="wk-ri">{mode === "materials" ? materialIcon : chartIcon}</span><h3>{mode === "materials" ? "Material analytics" : "Package analytics"}</h3></div>
+          {mode === "packages" && (
+            <div className="wk-scope">
+              <button type="button" className={anScope === "package" ? "on" : ""} onClick={() => setAnScope("package")}>This package</button>
+              <button type="button" className={anScope === "all" ? "on" : ""} onClick={() => setAnScope("all")}>All packages</button>
+            </div>
+          )}
           <div className="wk-anbody">
-            {anScope === "package" ? renderThisPackage() : renderAllPackages()}
+            {mode === "materials" ? renderMaterialAnalytics() : anScope === "package" ? renderThisPackage() : renderAllPackages()}
           </div>
         </section>
       </div>
