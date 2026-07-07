@@ -2,32 +2,58 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Manuscripts page v1 — bookplate hero + comp shelf. Reference:
- * design-refs/manuscripts-page-v1.html (the visual source of truth).
+ * Manuscripts overview v2 — frontispiece plates. Reference:
+ * design-refs/manuscripts-page-v2.html, variant A (Frontispiece).
  *
- * Page grammar: a control row (YOUR MANUSCRIPT(S) label · spine switcher only when >1 ·
- * Add manuscript), the bookplate hero for the active manuscript, then the lower grid —
- * comparable titles (the shelf is the ONLY comp-editing surface) beside the "In the field"
- * and "Submission materials" cards. Everything on the page is derived at read time from
- * manuscripts/queries/versions — nothing page-specific is stored.
+ * Each manuscript is a full-width plate: a corner status pill, a centred stack (AGE · GENRE label,
+ * Playfair title, word-count line — NO genre-range whisper here — ornament rule, logline epigraph,
+ * Send a query), and an expander that opens an accordion reveal. The reveal's three mini-panels
+ * land in v2 Phase 3; this phase carries the rest state + the actions row (Edit details + the
+ * lifecycle ⋯ menu, moved wholesale from v1). Comps left for their own sub-page (Phase 1).
  *
- * The shelved treatment (grey "Shelved" pill, dimmed spine, hidden send affordances) keys off
+ * The shelved treatment (grey "Shelved" pill, plate dimmed, Send hidden) keys off
  * isShelvedPresentation — Shelved status OR the reversible `shelved` overlay. Lifecycle
- * (shelve/reactivate/delete + undo) and the edit modal carry over from the previous interior.
+ * (shelve/reactivate/deferred-delete + undo) and the edit modal carry over unchanged.
  */
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
 import { Manuscript, ManuscriptStatus } from "../types";
 import { motion, AnimatePresence } from "motion/react";
 import { ChromeSlab } from "./shell/ChromeSlab";
-import { Plus, Send, Pencil, MoreHorizontal, Archive, Trash2, X, Check } from "lucide-react";
-import { FieldCard } from "./manuscripts/FieldCard";
-import { MaterialsCard } from "./manuscripts/MaterialsCard";
-import { isShelvedPresentation, wordCountWhisper } from "../lib/manuscriptPage";
+import { Plus, Send, Pencil, MoreHorizontal, Archive, Trash2, X, Check, ChevronDown } from "lucide-react";
+import { isShelvedPresentation } from "../lib/manuscriptPage";
 import "./manuscripts/manuscripts.css";
 
-/** Shared with the Submission Packages page — it reads this key to scope itself on open. */
-const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
+/**
+ * Accordion reveal — animates its own height between 0 and content, then releases to `auto` so
+ * late content growth isn't clipped. Replaces the mockup's `grid-template-rows: 0fr→1fr` trick,
+ * which collapses to 0px inside the stage's definite-height scroll context. Reduced motion still
+ * measures/toggles; the CSS transition is disabled by media query, so it snaps.
+ */
+const Reveal: React.FC<{ open: boolean; children: React.ReactNode }> = ({ open, children }) => {
+  const innerRef = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState<number | "auto">(open ? "auto" : 0);
+
+  useLayoutEffect(() => {
+    const inner = innerRef.current;
+    if (!inner) return;
+    if (open) {
+      setHeight(inner.scrollHeight);
+      const t = setTimeout(() => setHeight("auto"), 360); // release after the transition
+      return () => clearTimeout(t);
+    }
+    // From auto → an explicit px, then next frame → 0 so the height transition has two keyframes.
+    setHeight(inner.scrollHeight);
+    const raf = requestAnimationFrame(() => setHeight(0));
+    return () => cancelAnimationFrame(raf);
+  }, [open]);
+
+  return (
+    <div className="msv-reveal" style={{ height }}>
+      <div ref={innerRef} className="msv-reveal-inner">{children}</div>
+    </div>
+  );
+};
 
 interface AllManuscriptsProps {
   searchQuery?: string;
@@ -36,44 +62,23 @@ interface AllManuscriptsProps {
 }
 
 export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) => {
-  const {
-    currentUser,
-    manuscripts,
-    versions,
-    queries,
-    updateManuscript,
-    deleteManuscript,
-    setManuscriptShelved,
-  } = useScriptAllyDb();
+  const { currentUser, manuscripts, queries, updateManuscript, deleteManuscript, setManuscriptShelved } =
+    useScriptAllyDb();
 
-  const [selectedMsId, setSelectedMsId] = useState<string | null>(
-    () => localStorage.getItem(ACTIVE_MS_KEY)
-  );
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [deleteModalMs, setDeleteModalMs] = useState<Manuscript | null>(null);
-  const [detailMenuOpen, setDetailMenuOpen] = useState(false);
   const [undoToast, setUndoToast] = useState<{ msg: string; undo: () => void } | null>(null);
   const [pendingDelete, setPendingDelete] = useState<{ ms: Manuscript } | null>(null);
   const deleteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingDeleteRef = useRef<Manuscript | null>(null);
   const [editingMs, setEditingMs] = useState<Manuscript | null>(null);
 
-  // Spines: active books first, shelved-presentation books sink to the end (stable within groups);
-  // a book mid-deferred-delete is optimistically hidden.
+  // Plates: active books first, shelved sink to the end; a book mid-deferred-delete is hidden.
   const ordered = [...manuscripts]
     .sort((a, b) => Number(isShelvedPresentation(a)) - Number(isShelvedPresentation(b)))
     .filter((m) => !(pendingDelete && m.id === pendingDelete.ms.id));
-
-  // Keep the selection valid: fall back to the first spine when the stored/previous id is gone.
-  useEffect(() => {
-    if (ordered.length === 0) {
-      if (selectedMsId !== null) setSelectedMsId(null);
-      return;
-    }
-    if (!selectedMsId || !ordered.some((m) => m.id === selectedMsId)) {
-      setSelectedMsId(ordered[0].id);
-    }
-  }, [manuscripts, pendingDelete]);
 
   // Commit a still-pending delete if the page unmounts — never leave it dangling.
   useEffect(() => {
@@ -89,20 +94,11 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
 
   if (!currentUser) return null;
 
-  const selectMs = (id: string) => {
-    setSelectedMsId(id);
-    localStorage.setItem(ACTIVE_MS_KEY, id);
-  };
-
-  const activeMs = selectedMsId ? manuscripts.find((m) => m.id === selectedMsId) : null;
-  const msVersions = activeMs ? versions.filter((v) => v.manuscriptId === activeMs.id) : [];
-  const msQueries = activeMs ? queries.filter((q) => q.manuscriptId === activeMs.id) : [];
-  const shelvedP = activeMs ? isShelvedPresentation(activeMs) : false;
-  const whisper = activeMs ? wordCountWhisper(activeMs.ageCategory, activeMs.genre) : null;
+  const toggle = (id: string) => setOpenId((o) => (o === id ? null : id));
 
   // ── lifecycle (carried over: reversible shelve flag-flip with Undo; deferred delete) ──
   const toggleShelved = async (ms: Manuscript) => {
-    setDetailMenuOpen(false);
+    setMenuOpenId(null);
     const next = !ms.shelved;
     await setManuscriptShelved(ms.id, next);
     if (next) {
@@ -128,9 +124,8 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
 
   const requestDeleteMs = (ms: Manuscript) => {
     setDeleteModalMs(null);
-    setDetailMenuOpen(false);
-    const remaining = ordered.filter((m) => m.id !== ms.id);
-    setSelectedMsId(remaining.length ? remaining[0].id : null);
+    setMenuOpenId(null);
+    if (openId === ms.id) setOpenId(null);
     pendingDeleteRef.current = ms;
     setPendingDelete({ ms });
     if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current);
@@ -139,14 +134,12 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
 
   const undoPendingDelete = () => {
     if (deleteTimerRef.current) { clearTimeout(deleteTimerRef.current); deleteTimerRef.current = null; }
-    const p = pendingDeleteRef.current;
     pendingDeleteRef.current = null;
     setPendingDelete(null);
-    if (p) setSelectedMsId(p.id);
   };
 
-  // ── edit modal (carried over; comps deliberately absent — the shelf is the single home) ──
-  const startEditMs = (m: Manuscript) => setEditingMs({ ...m });
+  // ── edit modal (carried over; comps deliberately absent — the shelf sub-page is the single home) ──
+  const startEditMs = (m: Manuscript) => { setMenuOpenId(null); setEditingMs({ ...m }); };
 
   const handleSaveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -172,14 +165,10 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
 
   return (
     <div className="msv1">
-      {/* ── ChromeSlab (Option A): crumb + title + count share the unified surface; the old
-            YOUR MANUSCRIPT(S) eyebrow is the meta now, Add manuscript is the slab tool. Bleeds
-            out of the .msv1 desk padding (18px 26px); the spine switcher stays below as page
-            furniture. ── */}
       <ChromeSlab
         onNavigate={onNavigate}
         title="Your manuscripts"
-        meta={manuscripts.length > 1 ? `YOUR MANUSCRIPTS · ${manuscripts.length}` : "YOUR MANUSCRIPT"}
+        meta={manuscripts.length === 1 ? "1 MANUSCRIPT" : `${manuscripts.length} MANUSCRIPTS`}
         style={{ margin: "-18px -26px 18px" }}
         tools={
           <button
@@ -194,34 +183,8 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
         }
       />
       <div className="msv-wrap">
-        {/* ── control row — the spine switcher only (the label + action moved onto the slab) ── */}
-        {manuscripts.length > 1 && (
-        <div className="msv-controlrow">
-          <div className="msv-crleft">
-            {manuscripts.length > 1 && (
-              <div className="msv-spines">
-                {ordered.map((m) => {
-                  const sp = isShelvedPresentation(m);
-                  return (
-                    <button
-                      key={m.id}
-                      type="button"
-                      className={`msv-spine${m.id === selectedMsId ? " on" : ""}${sp ? " shelved" : ""}`}
-                      onClick={() => selectMs(m.id)}
-                    >
-                      <span className="msv-spine-t">{m.title}</span>
-                      <span className="msv-spine-c">{sp ? "SHELVED" : m.genre}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
-        )}
-
-        {!activeMs ? (
-          /* ── zero-manuscript state: minimal, in the page grammar ── */
+        {ordered.length === 0 ? (
+          /* ── zero-manuscript state: minimal, in the plate grammar ── */
           <div className="msv-panel">
             <div className="msv-empty">
               <div className="msv-qm">Your library is empty.</div>
@@ -239,119 +202,116 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
             </div>
           </div>
         ) : (
-          <>
-            {/* ── bookplate hero ── */}
-            <div className="msv-panel">
-              <div className="msv-hero">
-                <div className="msv-toprow">
-                  <span className="msv-lab">
-                    {(activeMs.ageCategory || "").toUpperCase()} · {(activeMs.genre || "").toUpperCase()}
-                  </span>
-                  <span className={`msv-statuspill${shelvedP ? " grey" : ""}`}>
+          <div className="msv-tilegrid">
+            {ordered.map((m) => {
+              const shel = isShelvedPresentation(m);
+              const open = openId === m.id;
+              return (
+                <div key={m.id} className={`msv-plate${shel ? " shelved" : ""}${open ? " open" : ""}`}>
+                  <span className={`msv-statuspill msv-platepill${shel ? " grey" : ""}`}>
                     <span className="msv-dt" />
-                    {shelvedP ? "Shelved" : activeMs.status}
+                    {shel ? "Shelved" : m.status}
                   </span>
-                </div>
-                <h1 className="msv-title">{activeMs.title}</h1>
-                <div className="msv-metaline">
-                  <span className="msv-wc">{(activeMs.wordCount ?? 0).toLocaleString("en-GB")} words</span>
-                  {whisper && <span className="msv-wcnote">· {whisper}</span>}
-                </div>
-                {activeMs.logline ? (
-                  <div className="msv-logline">{activeMs.logline}</div>
-                ) : (
-                  <div className="msv-logline empty">No logline yet — add one in Edit details.</div>
-                )}
-                {shelvedP && activeMs.shelvedReason && (
-                  <div className="msv-shelvednote">{activeMs.shelvedReason}</div>
-                )}
-                <div className="msv-actions">
-                  {!shelvedP && (
-                    <button
-                      type="button"
-                      className="msv-btn"
-                      onClick={() => onNavigate?.("queries", "Send a query", { manuscriptId: activeMs.id })}
-                    >
-                      <Send />
-                      Send a query
-                    </button>
-                  )}
-                  <button type="button" className="msv-btn" onClick={() => startEditMs(activeMs)}>
-                    <Pencil />
-                    Edit details
-                  </button>
-                  {/* quiet ⋯ lifecycle menu — shelve/reactivate · delete (existing flows) */}
-                  <div style={{ position: "relative" }}>
-                    <button
-                      type="button"
-                      className="msv-btn sm"
-                      title="More actions"
-                      aria-label="More actions"
-                      aria-expanded={detailMenuOpen}
-                      onClick={(e) => { e.stopPropagation(); setDetailMenuOpen((o) => !o); }}
-                      style={{ padding: "8px 9px" }}
-                    >
-                      <MoreHorizontal />
-                    </button>
-                    {detailMenuOpen && (
-                      <>
-                        <div className="fixed inset-0 z-30" onClick={() => setDetailMenuOpen(false)} />
-                        <div className="absolute left-0 top-[36px] z-40 bg-white border border-[#e8e0d8] rounded-[11px] shadow-[0_12px_30px_rgba(58,28,20,0.16)] p-1.5 min-w-[186px]">
-                          <button
-                            onClick={() => toggleShelved(activeMs)}
-                            className="flex items-center gap-2.5 w-full text-left px-2.5 py-2 rounded-[7px] text-[13px] text-[#3a1c14] hover:bg-[rgba(138,158,136,0.14)] cursor-pointer"
-                          >
-                            <Archive className="w-3.5 h-3.5 text-stone-500 shrink-0" />
-                            {activeMs.shelved ? "Reactivate" : "Shelve"}
-                          </button>
-                          <div className="h-px bg-[#f0eae2] my-1 mx-1" />
-                          <button
-                            onClick={() => { setDetailMenuOpen(false); setDeleteModalMs(activeMs); }}
-                            className="flex items-center gap-2.5 w-full text-left px-2.5 py-2 rounded-[7px] text-[13px] text-[#a8442f] hover:bg-[rgba(168,68,47,0.08)] cursor-pointer"
-                          >
-                            <Trash2 className="w-3.5 h-3.5 shrink-0" />
-                            Delete…
-                          </button>
-                        </div>
-                      </>
+
+                  {/* head — click toggles the reveal (buttons inside stop propagation) */}
+                  <div className="msv-plate-head msv-fphead" onClick={() => toggle(m.id)}>
+                    <span className="msv-lab">
+                      {(m.ageCategory || "").toUpperCase()} · {(m.genre || "").toUpperCase()}
+                    </span>
+                    <h2 className="msv-fptitle">{m.title}</h2>
+                    <div className="msv-wcline">
+                      <span className="msv-wc">{(m.wordCount ?? 0).toLocaleString("en-GB")} words</span>
+                    </div>
+                    <div className="msv-orn"><i /></div>
+                    <div className={`msv-fplogline${m.logline ? "" : " empty"}`}>
+                      {m.logline || "No logline yet — add one in Edit details."}
+                    </div>
+                    {!shel && (
+                      <div className="msv-restsend">
+                        <button
+                          type="button"
+                          className="msv-btn sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onNavigate?.("queries", "Send a query", { manuscriptId: m.id });
+                          }}
+                        >
+                          <Send />
+                          Send a query
+                        </button>
+                      </div>
                     )}
                   </div>
-                </div>
-                {/* corner motif — open book + plane, behind content */}
-                <svg className="msv-heromotif" viewBox="0 0 150 96" aria-hidden="true">
-                  <path d="M20 78c18-8 36-8 55-1 19-7 37-7 55 1" />
-                  <path d="M20 78v-40c18-8 36-8 55-1v40c-19-7-37-7-55 1z" opacity=".7" />
-                  <path d="M130 78v-40c-18-8-36-8-55-1" opacity=".7" />
-                  <path d="M75 37v40" opacity=".6" />
-                  <path d="M96 18l22-8-7 20-6-5-9-7z" opacity=".9" />
-                  <path d="M64 26c8-4 17-7 25-9" strokeDasharray="3 5" opacity=".8" />
-                </svg>
-              </div>
-            </div>
 
-            {/* ── right column — comps moved to its own sub-page (/manuscripts/comps) ── */}
-            <div className="msv-lower msv-lower-solo">
-              <div className="msv-rightcol">
-                <FieldCard
-                  queries={msQueries}
-                  shelved={shelvedP}
-                  onOpenHub={() => onNavigate?.("queries")}
-                  onSendFirst={() => onNavigate?.("queries", "Send a query", { manuscriptId: activeMs.id })}
-                />
-                <MaterialsCard
-                  versions={msVersions}
-                  onOpenBuilder={() => {
-                    localStorage.setItem(ACTIVE_MS_KEY, activeMs.id);
-                    onNavigate?.("manuscripts", "Submission packages");
-                  }}
-                />
-              </div>
-            </div>
-          </>
+                  {/* accordion reveal — the three panels land in Phase 3; the actions row is here now */}
+                  <Reveal open={open}>
+                      <div className="msv-actionsect">
+                        <div className="msv-actions">
+                          <button type="button" className="msv-btn sm" onClick={() => startEditMs(m)}>
+                            <Pencil />
+                            Edit details
+                          </button>
+                          <div style={{ position: "relative" }}>
+                            <button
+                              type="button"
+                              className="msv-btn sm"
+                              title="More actions"
+                              aria-label="More actions"
+                              aria-expanded={menuOpenId === m.id}
+                              onClick={() => setMenuOpenId((o) => (o === m.id ? null : m.id))}
+                              style={{ padding: "6.5px 9px" }}
+                            >
+                              <MoreHorizontal />
+                            </button>
+                            {menuOpenId === m.id && (
+                              <>
+                                <div className="fixed inset-0 z-30" onClick={() => setMenuOpenId(null)} />
+                                <div className="absolute left-0 top-[34px] z-40 bg-white border border-[#e8e0d8] rounded-[11px] shadow-[0_12px_30px_rgba(58,28,20,0.16)] p-1.5 min-w-[186px]">
+                                  <button
+                                    onClick={() => toggleShelved(m)}
+                                    className="flex items-center gap-2.5 w-full text-left px-2.5 py-2 rounded-[7px] text-[13px] text-[#3a1c14] hover:bg-[rgba(138,158,136,0.14)] cursor-pointer"
+                                  >
+                                    <Archive className="w-3.5 h-3.5 text-stone-500 shrink-0" />
+                                    {m.shelved ? "Reactivate" : "Shelve"}
+                                  </button>
+                                  <div className="h-px bg-[#f0eae2] my-1 mx-1" />
+                                  <button
+                                    onClick={() => { setMenuOpenId(null); setDeleteModalMs(m); }}
+                                    className="flex items-center gap-2.5 w-full text-left px-2.5 py-2 rounded-[7px] text-[13px] text-[#a8442f] hover:bg-[rgba(168,68,47,0.08)] cursor-pointer"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5 shrink-0" />
+                                    Delete…
+                                  </button>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                  </Reveal>
+
+                  <button type="button" className="msv-expander" onClick={() => toggle(m.id)}>
+                    <span>{open ? "LESS" : "MORE DETAILS"}</span>
+                    <ChevronDown />
+                  </button>
+                </div>
+              );
+            })}
+
+            <button
+              type="button"
+              className="msv-ghost"
+              onClick={() => onNavigate?.("manuscripts", "Add a manuscript")}
+            >
+              <span className="msv-plus">+</span>
+              <span className="msv-cap">ADD A MANUSCRIPT</span>
+              <span className="msv-ghost-sub">— the shelf holds more than one.</span>
+            </button>
+          </div>
         )}
       </div>
 
-      {/* ── edit modal (comps field deliberately absent — managed on the shelf) ── */}
+      {/* ── edit modal (comps field deliberately absent — managed on the shelf sub-page) ── */}
       <AnimatePresence>
         {editingMs && (
           <div className="fixed inset-0 bg-[#3a1c14]/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">

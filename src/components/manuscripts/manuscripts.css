@@ -1,13 +1,14 @@
 /*
- * Manuscripts page v1 (bookplate hero + comp shelf) — page-scoped styles.
- * Reference: design-refs/manuscripts-page-v1.html (locked theme tokens, 4 Jul).
+ * Manuscripts page v2 (frontispiece plates + comps sub-page) — page-scoped styles.
+ * Reference: design-refs/manuscripts-page-v2.html, variant A (Frontispiece).
  *
- * Everything is scoped under the page root `.msv1`; per-theme values are scoped under the
- * theme classes (`.t-capp` / `.t-bold` / `.t-edn`) so nothing leaks app-wide. Tokens use the
- * `--msv-` prefix — same-named app-wide vars (e.g. --card, --band) hold DIFFERENT values, so
- * the mockup's names are deliberately not reused. The status hue pair is consumed from the
- * existing StatusDot theme tokens (--sd-hue / --sd-centre — identical hexes to the mockup's
- * --hue / --huec in all three themes). All hexes precomputed; no color-mix().
+ * Everything is scoped under the page root `.msv1`; per-theme values live under the theme classes
+ * (`.t-capp` / `.t-bold` / `.t-edn`) so nothing leaks app-wide. Tokens use the `--msv-` prefix —
+ * same-named app-wide vars (--card, --band) hold DIFFERENT values, so the mockup's names are
+ * deliberately not reused. The hue pair consumes the StatusDot theme tokens (--sd-hue / --sd-centre
+ * — identical hexes to the mockup's --hue / --huec in all three themes). All hexes precomputed; no
+ * color-mix(). The reveal-panel classes (rgrid / rpanel / qrow / pkgrow / comprow …) are added in
+ * v2 Phase 3; figrow / figpill / linky are shared between the shelf and that reveal.
  */
 
 .msv1 {
@@ -65,16 +66,27 @@
   white-space: nowrap;
 }
 .msv-btn:hover { background: var(--msv-btnhov); }
-.msv-btn.sm { padding: 6px 12px; font-size: 9.5px; border-radius: 8px; }
+.msv-btn.sm { padding: 6.5px 13px; font-size: 9.5px; border-radius: 8px; }
 .msv-btn svg { width: 12px; height: 12px; flex-shrink: 0; }
-
-/* ── control row + spine switcher ── */
-.msv-controlrow {
-  display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;
-  margin-bottom: 14px; min-height: 34px;
+.msv-linky {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.15em;
+  text-transform: uppercase; font-weight: 500; color: var(--msv-hue); background: none;
+  border: none; padding: 0; cursor: pointer;
 }
-.msv-crleft { display: flex; align-items: flex-end; gap: 16px; min-width: 0; }
-.msv-spines { display: flex; gap: 8px; flex-wrap: wrap; }
+.msv-linky:hover { text-decoration: underline; }
+.msv-statuspill {
+  display: inline-flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 500;
+  color: var(--msv-hue); background: var(--msv-huec); border-radius: 99px; padding: 4px 11px;
+}
+.msv-statuspill.grey { color: var(--msv-muted); background: rgba(0, 0, 0, 0.05); }
+.msv-statuspill .msv-dt { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.msv-wc {
+  font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 500; color: var(--msv-ink);
+}
+
+/* ── spine switcher (Comparable-titles page navigator) ── */
+.msv-spines { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
 .msv-spine {
   position: relative; display: flex; flex-direction: column; gap: 2px; background: var(--msv-tile);
   border: var(--msv-tilebd); box-shadow: var(--msv-tileshadow); border-radius: 8px;
@@ -97,12 +109,96 @@
 .msv-spine.shelved { opacity: 0.55; }
 .msv-spine:hover { transform: translateY(-1px); }
 
-/* ── panels ── */
+/* ── frontispiece plates (overview) ── */
+.msv-tilegrid { display: flex; flex-direction: column; gap: 26px; }
+.msv-plate {
+  background: var(--msv-card); border: var(--msv-cardbd); border-radius: var(--msv-crad);
+  box-shadow: var(--msv-cardshadow); overflow: hidden; position: relative; padding: 0 44px;
+}
+/* Card grain — Cappuccino only. */
+.t-capp .msv1 .msv-plate {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.03'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
+}
+/* Cappuccino inset frame — theme-scoped, inset 9px per the v2 plate. */
+.t-capp .msv1 .msv-plate::after {
+  content: ''; position: absolute; inset: 9px; border: 1px solid rgba(124, 58, 42, 0.30);
+  border-radius: calc(var(--msv-crad) - 4px); pointer-events: none; z-index: 2;
+}
+.msv-plate > * { position: relative; z-index: 3; }
+.msv-plate.shelved { opacity: 0.62; }
+.msv-platepill {
+  position: absolute; top: 20px; right: 26px; z-index: 4;
+  font-size: 10px; letter-spacing: 0.12em; padding: 6px 15px;
+}
+.msv-plate-head { cursor: pointer; }
+.msv-fphead { padding: 44px 30px 6px; text-align: center; }
+.msv-fphead .msv-lab { display: block; }
+.msv-fptitle {
+  font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 500; line-height: 1.12;
+  margin: 13px 0 0; color: var(--msv-ink);
+}
+.msv-wcline { margin-top: 12px; }
+.msv-orn { display: flex; align-items: center; justify-content: center; gap: 11px; margin: 17px 0 15px; }
+.msv-orn::before, .msv-orn::after {
+  content: ''; height: 1px; width: 46px; background: var(--msv-hue); opacity: 0.45;
+}
+.msv-orn i { width: 6px; height: 6px; background: var(--msv-hue); opacity: 0.55; transform: rotate(45deg); }
+.msv-fplogline {
+  font-family: 'Playfair Display', serif; font-style: italic; font-size: 15.5px; line-height: 1.6;
+  color: var(--msv-ink); max-width: 580px; margin: 0 auto;
+}
+.msv-fplogline.empty { color: var(--msv-muted); }
+.msv-restsend { margin-top: 19px; }
+
+/* expander pill */
+.msv-expander {
+  display: flex; align-items: center; gap: 8px; width: fit-content; margin: 20px auto 24px;
+  background: var(--msv-btnbg); border: var(--msv-btnbd); color: var(--msv-btntx); cursor: pointer;
+  border-radius: 99px; padding: 8px 19px; font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  letter-spacing: 0.18em; text-transform: uppercase; font-weight: 500;
+}
+.msv-expander:hover { background: var(--msv-btnhov); }
+.msv-expander svg {
+  width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 1.8;
+  stroke-linecap: round; stroke-linejoin: round; transition: transform 0.3s ease;
+}
+.msv-plate.open .msv-expander svg { transform: rotate(180deg); }
+
+/* accordion reveal container — height is JS-measured (the pure grid-rows 0fr→1fr technique
+   collapses to 0 inside the stage's definite-height scroll context; see the Reveal component).
+   The panels stagger in via the .msv-plate.open .rpanel delays (Phase 3), independent of height. */
+.msv-reveal { overflow: hidden; transition: height 0.34s cubic-bezier(0.4, 0, 0.2, 1); }
+@media (prefers-reduced-motion: reduce) {
+  .msv-reveal { transition: none; }
+  .msv-expander svg { transition: none; }
+}
+
+/* reveal actions row (Edit details + lifecycle ⋯) — sits under the Phase-3 panels */
+.msv-actionsect {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+  margin-top: 20px; padding: 4px 0 6px;
+}
+.msv-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ghost add bar */
+.msv-ghost {
+  border: 1.5px dashed var(--msv-hair); border-radius: var(--msv-crad); background: transparent;
+  display: flex; align-items: center; justify-content: center; gap: 12px; color: var(--msv-muted);
+  padding: 20px 0; cursor: pointer; width: 100%;
+}
+.msv-ghost:hover { border-color: var(--msv-hue); color: var(--msv-hue); }
+.msv-ghost .msv-plus { font-size: 19px; line-height: 1; font-weight: 300; }
+.msv-ghost .msv-cap {
+  font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+.msv-ghost-sub { font-size: 11.5px; font-style: italic; }
+
+/* ── panels (shared: comps page band + reveal panels) ── */
 .msv-panel {
   background: var(--msv-card); border: var(--msv-cardbd); border-radius: var(--msv-crad);
   box-shadow: var(--msv-cardshadow); overflow: hidden; position: relative;
 }
-/* Card grain — Cappuccino only. */
 .t-capp .msv1 .msv-panel {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.03'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
 }
@@ -116,114 +212,19 @@
   color: var(--msv-head); margin: 0;
 }
 
-/* ── bookplate hero ── */
-.msv-hero { padding: 26px 30px 24px; position: relative; }
-/* Cappuccino inset frame — theme-scoped, sits above the grain and below content. */
-.t-capp .msv1 .msv-hero::after {
-  content: ''; position: absolute; inset: 8px; border: 1px solid rgba(124, 58, 42, 0.30);
-  border-radius: calc(var(--msv-crad) - 4px); pointer-events: none; z-index: 2;
-}
-.msv-hero > * { position: relative; z-index: 3; }
-.msv-toprow {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px;
-}
-.msv-statuspill {
-  display: inline-flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace;
-  font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 500;
-  color: var(--msv-hue); background: var(--msv-huec); border-radius: 99px; padding: 4px 11px;
-}
-.msv-statuspill.grey { color: var(--msv-muted); background: rgba(0, 0, 0, 0.05); }
-.msv-statuspill .msv-dt { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-.msv-title {
-  font-family: 'Playfair Display', serif; font-size: 37px; font-weight: 500; color: var(--msv-ink);
-  line-height: 1.12; letter-spacing: 0.002em; margin: 0;
-}
-.msv-metaline { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-top: 9px; }
-.msv-wc {
-  font-family: 'JetBrains Mono', monospace; font-size: 12.5px; font-weight: 500; color: var(--msv-ink);
-}
-.msv-wcnote { font-size: 11.5px; color: var(--msv-muted); font-style: italic; }
-.msv-logline {
-  margin-top: 16px; padding-left: 14px; border-left: 2px solid var(--msv-hue); max-width: 640px;
-  font-family: 'Playfair Display', serif; font-style: italic; font-size: 15px; line-height: 1.55;
-  color: var(--msv-ink);
-}
-.msv-logline.empty { color: var(--msv-muted); border-left-color: var(--msv-hair); }
-.msv-shelvednote {
-  margin-top: 12px; font-size: 12px; color: var(--msv-muted); font-style: italic; max-width: 560px;
-}
-.msv-actions { display: flex; align-items: center; gap: 9px; margin-top: 20px; }
-.msv-heromotif {
-  position: absolute; right: 26px; bottom: 18px; width: 150px; height: 96px;
-  opacity: 0.5; z-index: 1; pointer-events: none;
-}
-.msv-heromotif * {
-  stroke: var(--msv-hue); stroke-width: 1.4; fill: none; stroke-linecap: round; stroke-linejoin: round;
-}
-
-/* ── lower grid + right column ── */
-.msv-lower {
-  display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; margin-top: 16px;
-  align-items: start;
-}
-.msv-rightcol { display: flex; flex-direction: column; gap: 16px; }
-/* Transient (Phase 1→2): comps moved to its own page, so the overview shows the right column
-   alone — centre it at its natural width until the plate rebuild replaces this interior. */
-.msv-lower-solo { grid-template-columns: 400px; justify-content: center; }
-.msv-fieldbody { padding: 16px 20px 14px; }
+/* figure row (shelf pitch + Phase-3 in-field figure) */
 .msv-figrow { display: flex; align-items: center; gap: 10px; }
 .msv-fig {
-  font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 500;
+  font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 500;
   color: var(--msv-ink); line-height: 1;
 }
 .msv-figpill {
-  font-size: 10px; font-weight: 500; color: var(--msv-hue); background: var(--msv-huec);
-  border-radius: 99px; padding: 3.5px 10px; margin-left: auto;
+  font-size: 9.5px; font-weight: 500; color: var(--msv-hue); background: var(--msv-huec);
+  border-radius: 99px; padding: 3px 10px;
 }
 .msv-figpill.grey { color: var(--msv-muted); background: rgba(0, 0, 0, 0.05); }
-.msv-stagerows { margin-top: 14px; display: flex; flex-direction: column; }
-.msv-stagerow {
-  display: flex; align-items: center; gap: 10px; padding: 7.5px 0;
-  border-bottom: 1px solid var(--msv-hair);
-}
-.msv-stagerow:last-child { border-bottom: none; }
-.msv-stagerow .msv-nm { flex: 1; font-size: 12.5px; color: var(--msv-ink); }
-.msv-stagerow .msv-ct {
-  font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500; color: var(--msv-ink);
-}
-.msv-fieldfoot {
-  padding: 11px 20px; border-top: 1px solid var(--msv-hair); display: flex; justify-content: flex-end;
-}
-.msv-linky {
-  font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.15em;
-  text-transform: uppercase; font-weight: 500; color: var(--msv-hue); background: none;
-  border: none; padding: 0; cursor: pointer;
-}
-.msv-linky:hover { text-decoration: underline; }
-.msv-fieldempty { padding: 26px 20px; text-align: center; }
-.msv-qm {
-  font-family: 'Playfair Display', serif; font-style: italic; font-size: 15px; color: var(--msv-ink);
-}
-.msv-fieldempty .msv-lab { display: block; margin-top: 7px; }
-.msv-fieldempty .msv-btn { margin-top: 14px; }
-.msv-matbody { padding: 8px 20px 6px; }
-.msv-matrow {
-  display: flex; align-items: center; gap: 12px; padding: 10px 0;
-  border-bottom: 1px solid var(--msv-hair);
-}
-.msv-matrow:last-child { border-bottom: none; }
-.msv-matglyph {
-  width: 26px; height: 26px; border-radius: 8px; background: var(--msv-huec); color: var(--msv-hue);
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-}
-.msv-matrow .msv-nm { flex: 1; font-size: 12.5px; color: var(--msv-ink); }
-.msv-matrow .msv-st {
-  font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--msv-muted);
-}
-.msv-matrow .msv-st.ok { color: var(--msv-hue); }
 
-/* ── comp shelf + pitch line ── */
+/* ── comp shelf + pitch line (Comparable-titles page) ── */
 .msv-pitchblock {
   margin: 16px 20px 4px; background: var(--msv-sub); border: var(--msv-subbd);
   border-radius: 10px; padding: 13px 16px; display: flex; align-items: center;
@@ -311,7 +312,7 @@
 .msv-input:focus { border-color: var(--msv-hue); }
 .msv-modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
 
-/* ── suggestions ── */
+/* ── suggestions (Comparable-titles page) ── */
 .msv-sugghead {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
   padding: 14px 20px 4px; margin-top: 6px; border-top: 1px solid var(--msv-hair);
@@ -369,11 +370,10 @@
   .msv-shimmer { animation: none; }
 }
 
-/* ── zero-manuscript empty state ── */
+/* ── empty states ── */
 .msv-empty { padding: 46px 20px; text-align: center; }
 .msv-empty .msv-lab { display: block; margin-top: 7px; }
 .msv-empty .msv-btn { margin-top: 16px; }
-
-@media (max-width: 1080px) {
-  .msv1 .msv-lower { grid-template-columns: 1fr; }
+.msv-qm {
+  font-family: 'Playfair Display', serif; font-style: italic; font-size: 15px; color: var(--msv-ink);
 }
