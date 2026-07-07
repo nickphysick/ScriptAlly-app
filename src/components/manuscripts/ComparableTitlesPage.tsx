@@ -2,27 +2,27 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Comparable titles — the single editing home for a manuscript's comps, promoted to its own
- * sub-page under Manuscripts (route /manuscripts/comps; reached from the rail and from each
- * plate's MANAGE → link). Reference: design-refs/manuscripts-page-v2.html (the "view-comps" panel).
+ * Comparable titles — a manuscript-scoped workspace where a writer curates a single FLAT list of
+ * comps (free), alongside "The Scout" (Pro), which will surface verified, web-scoured comps.
+ * Route /manuscripts/comps; reached from the rail and each plate's MANAGE → link.
+ * Single visual source of truth: design-refs/comparable-titles-flat.html.
  *
- * Move-and-recompose, not rewrite: the panel (pitch block + shelf grid + suggestions) is the v1
- * comps panel lifted wholesale — CompShelf and SuggestionsSection are unchanged, and the add/remove
- * writes go through the same updateManuscript path (a first write on a legacy-string doc converts
- * it to the structured array). The active manuscript is the shared scriptally_active_manuscript_id
- * key, so navigating in from a plate lands on the right book.
+ * Workspace-fills layout (masthead flex-none over a two-panel split that fills the stage and scrolls
+ * internally). The masthead is the locked HubHeaderBar with the manuscript selector in its right
+ * slot. Store only facts + one intent (`inQuery`); role / query line / health / recency are derived
+ * at render (src/lib/compsPage.ts). Comp writes go through the shared updateManuscript path (a first
+ * write on a legacy-string doc converts it to the structured array).
  */
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { ChevronDown } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
-import { CompTitle } from "../../types";
-import { Plus } from "lucide-react";
-import { ChromeSlab } from "../shell/ChromeSlab";
-import { CompShelf } from "./CompShelf";
-import { SuggestionsSection } from "./SuggestionsSection";
+import { Manuscript } from "../../types";
+import { HubHeaderBar } from "../shell/HubHeaderBar";
 import { isShelvedPresentation } from "../../lib/manuscriptPage";
-import { manuscriptComps, withCompAdded, withCompRemoved } from "../../lib/comps";
-import { isProUser } from "../../lib/suggestComps";
-import "./manuscripts.css";
+import { manuscriptComps } from "../../lib/comps";
+import { compCounts, currentYear } from "../../lib/compsPage";
+import { FONT_SERIF } from "../../lib/designTokens";
+import "./comps.css";
 
 /** Shared with the overview + the Package Builder — the section's single active-manuscript pointer. */
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
@@ -31,14 +31,88 @@ interface ComparableTitlesPageProps {
   onNavigate?: (tab: string, subPageName?: string, opts?: { manuscriptId?: string }) => void;
 }
 
+/** First glyph of a title for the selector monogram. */
+function monogram(title: string): string {
+  return (title.trim()[0] || "·").toUpperCase();
+}
+
+/** The right-of-masthead manuscript selector (design-ref .ms-header). Outside-click closes. */
+const CompsMsSelect: React.FC<{
+  active: Manuscript;
+  manuscripts: Manuscript[];
+  onSelect: (id: string) => void;
+}> = ({ active, manuscripts, onSelect }) => {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  return (
+    <div className="ct-mssel-wrap" ref={wrapRef}>
+      <button
+        type="button"
+        className="ct-mssel"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span className="mono">{monogram(active.title)}</span>
+        <span>
+          <span className="lab">Working on</span>
+          <span className="val" style={{ display: "block" }}>{active.title}</span>
+        </span>
+        <ChevronDown size={15} />
+      </button>
+      {open && (
+        <div className="ct-msmenu" role="listbox">
+          {manuscripts.map((m) => {
+            const shelved = isShelvedPresentation(m);
+            const n = manuscriptComps(m).length;
+            return (
+              <button
+                key={m.id}
+                type="button"
+                role="option"
+                aria-selected={m.id === active.id}
+                className={`ct-msopt${m.id === active.id ? " on" : ""}${shelved ? " shelved" : ""}`}
+                onClick={() => {
+                  onSelect(m.id);
+                  setOpen(false);
+                }}
+              >
+                <span className="t">{m.title}</span>
+                <span className="c">{shelved ? "SHELVED" : `${n} ${n === 1 ? "COMP" : "COMPS"}`}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const ComparableTitlesPage: React.FC<ComparableTitlesPageProps> = ({ onNavigate }) => {
-  const { currentUser, manuscripts, updateManuscript } = useScriptAllyDb();
+  const { currentUser, manuscripts } = useScriptAllyDb();
 
   const [selectedMsId, setSelectedMsId] = useState<string | null>(
     () => localStorage.getItem(ACTIVE_MS_KEY)
   );
 
-  // Active books first, shelved sink to the end — the same spine ordering the overview uses.
+  // Active books first, shelved sink to the end — the spine ordering the overview uses.
   const ordered = [...manuscripts].sort(
     (a, b) => Number(isShelvedPresentation(a)) - Number(isShelvedPresentation(b))
   );
@@ -52,6 +126,7 @@ export const ComparableTitlesPage: React.FC<ComparableTitlesPageProps> = ({ onNa
     if (!selectedMsId || !ordered.some((m) => m.id === selectedMsId)) {
       setSelectedMsId(ordered[0].id);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [manuscripts]);
 
   if (!currentUser) return null;
@@ -62,108 +137,62 @@ export const ComparableTitlesPage: React.FC<ComparableTitlesPageProps> = ({ onNa
   };
 
   const activeMs = selectedMsId ? manuscripts.find((m) => m.id === selectedMsId) : null;
-  const msComps = activeMs ? manuscriptComps(activeMs) : [];
+  const comps = activeMs ? manuscriptComps(activeMs) : [];
+  const now = currentYear();
+  const counts = compCounts(comps);
 
-  // Comp writes — the ONLY comp-editing path (byte-identical to the v1 overview handlers).
-  const addComp = async (c: CompTitle) => {
-    if (!activeMs) return;
-    await updateManuscript(activeMs.id, { comps: withCompAdded(msComps, c) });
-  };
-  const removeComp = async (index: number) => {
-    if (!activeMs) return;
-    await updateManuscript(activeMs.id, { comps: withCompRemoved(msComps, index) });
-  };
+  const pulse = activeMs ? (
+    <span className="ct-pulse">
+      {[activeMs.ageCategory, activeMs.genre].filter(Boolean).join(" ")} · <b>{counts.total}</b>{" "}
+      {counts.total === 1 ? "comp" : "comps"} · <b>{counts.inQuery}</b> in your query
+    </span>
+  ) : (
+    manuscripts.length === 0 ? "No manuscripts yet" : ""
+  );
 
   return (
-    <div className="msv1">
-      <ChromeSlab
-        onNavigate={onNavigate}
-        title="Comparable titles"
-        meta={
-          activeMs
-            ? `THE ‘X MEETS Y’ OF YOUR PITCH`
-            : manuscripts.length === 0
-              ? "NO MANUSCRIPTS YET"
-              : ""
-        }
-        style={{ margin: "-18px -26px 18px" }}
-        tools={
-          <button
-            type="button"
-            className="msv-btn"
-            style={{ whiteSpace: "nowrap", flexShrink: 0 }}
-            onClick={() => onNavigate?.("manuscripts", "Add a manuscript")}
-          >
-            <Plus />
-            Add manuscript
-          </button>
-        }
-      />
-      <div className="msv-wrap">
-        {/* spine switcher — comps page navigator; only when >1 manuscript */}
-        {manuscripts.length > 1 && (
-          <div className="msv-spines">
-            {ordered.map((m) => {
-              const sp = isShelvedPresentation(m);
-              const n = manuscriptComps(m).length;
-              return (
-                <button
-                  key={m.id}
-                  type="button"
-                  className={`msv-spine${m.id === selectedMsId ? " on" : ""}${sp ? " shelved" : ""}`}
-                  onClick={() => selectMs(m.id)}
-                >
-                  <span className="msv-spine-t">{m.title}</span>
-                  <span className="msv-spine-c">
-                    {sp ? "SHELVED" : `${n} ${n === 1 ? "COMP" : "COMPS"}`}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        )}
+    <div className="ctpage">
+      <div className="ct-mast">
+        <HubHeaderBar
+          title="Comparable titles"
+          titleStyle={{ fontFamily: FONT_SERIF, fontWeight: 600, fontSize: 30, color: "var(--ct-ink)" }}
+          subtitle={pulse}
+          right={
+            activeMs ? (
+              <CompsMsSelect active={activeMs} manuscripts={ordered} onSelect={selectMs} />
+            ) : undefined
+          }
+        />
+      </div>
 
+      <div className="ct-desk">
         {!activeMs ? (
-          <div className="msv-panel">
-            <div className="msv-empty">
-              <div className="msv-qm">No manuscript to compare yet.</div>
-              <span className="msv-lab">ADD A MANUSCRIPT TO BUILD ITS COMP SHELF</span>
-              <div>
-                <button
-                  type="button"
-                  className="msv-btn"
-                  onClick={() => onNavigate?.("manuscripts", "Add a manuscript")}
-                >
-                  <Plus />
-                  Add manuscript
-                </button>
-              </div>
+          <div className="ct-panel" style={{ height: "100%" }}>
+            <div className="ct-blank">
+              <div className="q">No manuscript to compare yet.</div>
+              <span className="lab">Add a manuscript to build its comp list</span>
             </div>
           </div>
         ) : (
-          <div className="msv-panel">
-            <div className="msv-band">
-              <h3>Comparable titles — {activeMs.title}</h3>
-              <span className="msv-lab">THE &lsquo;X MEETS Y&rsquo; OF YOUR PITCH</span>
-            </div>
-            <CompShelf
-              comps={msComps}
-              currentYear={new Date().getFullYear()}
-              onAdd={addComp}
-              onRemove={removeComp}
-            />
-            <SuggestionsSection
-              msId={activeMs.id}
-              manuscriptTitle={activeMs.title}
-              ageCategory={activeMs.ageCategory}
-              genre={activeMs.genre}
-              logline={activeMs.logline || ""}
-              shelfTitles={msComps.map((c) => c.title)}
-              isPro={isProUser(currentUser)}
-              currentYear={new Date().getFullYear()}
-              onAddToShelf={addComp}
-              onUpgrade={() => onNavigate?.("plans")}
-            />
+          <div className="ct-split">
+            {/* ── Your comps (Phase 3) ── */}
+            <section className="ct-panel">
+              <div className="ct-band">
+                <span className="bt">Your comps</span>
+                <span className="ct-tag free">Free</span>
+                <span className="bmeta">{counts.total} saved</span>
+              </div>
+              <div className="ct-body" />
+            </section>
+
+            {/* ── The Scout (Phase 4) ── */}
+            <section className="ct-panel">
+              <div className="ct-band">
+                <span className="bt">The Scout</span>
+                <span className="ct-tag pro">Pro</span>
+              </div>
+              <div className="ct-body" />
+            </section>
           </div>
         )}
       </div>

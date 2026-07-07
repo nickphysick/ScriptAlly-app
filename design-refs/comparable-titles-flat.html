@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Comparable Titles · flat list</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{font-family:'Inter',sans-serif;overflow:hidden;}
+
+.shell.t-capp{
+  --desk:#e8ddd0;--rail:#fffefb;--rail-hair:#e7ddd2;--rail-pill:#f1e9df;--rail-shadow:none;
+  --card:#fffefb;--bd:#e6ddd0;--bdw:1px;--band-a:#dce0d9;--band-b:#d0d6cc;--band-hair:rgba(90,110,88,.2);
+  --ink:#3a1c14;--ink-soft:#8a7868;--label:#9c8878;--accent:#7c3a2a;--mocha:#5d4037;--hdrtx:#2e3a2c;--hdrsub:#6a7e68;
+  --pink:#f5e2da;--pink-bd:#e8c8bc;--pink-hover:#efd5ca;--taupe-bd:#ded3c2;
+  --sect:#f6f0e8;--chromerad:12px;--cardrad:13px;--hard:none;
+  --frame-show:block;--frame:1px solid rgba(124,58,42,.28);--paper:.03;
+  --warn:#BA7517;--warn-bg:#f9efdc;--warn-bd:#ecd6a8;
+  --pro:#6A89A7;--pro-deep:#557191;--pro-bg:#eef2f5;--pro-bd:#d3e0e8;--pro-ink:#33475a;--pro-tile:#e6edf2;
+}
+.shell.t-bold{
+  --desk:#c3cfdb;--rail:#fffefb;--rail-hair:#1d1712;--rail-pill:#eec9c3;--rail-shadow:5px 5px 0 rgba(29,23,18,.9);
+  --card:#ffffff;--bd:#1d1712;--bdw:1.5px;--band-a:#f5c7c2;--band-b:#f2bdb7;--band-hair:rgba(29,23,18,.26);
+  --ink:#1d1712;--ink-soft:#6a5f56;--label:#8a7d70;--accent:#1d1712;--mocha:#1d1712;--hdrtx:#1d1712;--hdrsub:#6a5f56;
+  --pink:#f5e2da;--pink-bd:#1d1712;--pink-hover:#f8dcd8;--taupe-bd:#1d1712;
+  --sect:#f4ece2;--chromerad:14px;--cardrad:14px;--hard:3px 3px 0 #1d1712;
+  --frame-show:none;--frame:none;--paper:0;
+  --warn:#a3453a;--warn-bg:#f7e2df;--warn-bd:#1d1712;
+  --pro:#6A89A7;--pro-deep:#557191;--pro-bg:#dbe7ef;--pro-bd:#1d1712;--pro-ink:#2c4356;--pro-tile:#cfe0ec;
+}
+.shell.t-edn{
+  --desk:#edeeec;--rail:#ffffff;--rail-hair:transparent;--rail-pill:#e9eaeb;--rail-shadow:0 1px 2px rgba(20,20,20,.05),0 14px 36px rgba(20,20,20,.09);
+  --card:#ffffff;--bd:#e6e5e3;--bdw:1px;--band-a:#eef0f0;--band-b:#e7ebec;--band-hair:rgba(20,20,20,.08);
+  --ink:#20211f;--ink-soft:#6b6d6a;--label:#9a9b98;--accent:#44484d;--mocha:#44484d;--hdrtx:#20211f;--hdrsub:#6b6d6a;
+  --pink:#eef1f3;--pink-bd:#d7dee3;--pink-hover:#e6ebee;--taupe-bd:#dcdcdb;
+  --sect:#f5f6f4;--chromerad:10px;--cardrad:11px;--hard:none;
+  --frame-show:none;--frame:none;--paper:0;
+  --warn:#a35648;--warn-bg:#f4ebe9;--warn-bd:#e6d6d2;
+  --pro:#6A89A7;--pro-deep:#557191;--pro-bg:#eef2f5;--pro-bd:#d7dee3;--pro-ink:#33475a;--pro-tile:#e6edf2;
+}
+
+.shell{display:grid;grid-template-columns:262px 1fr;height:100vh;background:var(--desk);color:var(--ink);position:relative;}
+.shell::before{content:'';position:fixed;inset:0;opacity:var(--paper);pointer-events:none;z-index:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='5'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");}
+.rail{background:var(--rail);border-right:var(--bdw) solid var(--rail-hair);box-shadow:var(--rail-shadow);display:flex;flex-direction:column;padding:20px 16px;position:relative;z-index:2;}
+.t-edn .rail{border-right:none;}
+.t-bold .rail{margin:10px 0 10px 10px;border-radius:14px;border:1.5px solid #1d1712;}
+.wordmark{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--accent);padding:4px 8px 18px;}
+.wordmark .ink{color:var(--ink);}
+.navitem{display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;font-size:14px;font-weight:500;color:var(--ink);cursor:pointer;text-decoration:none;transition:background .15s;}
+.navitem:hover{background:var(--rail-pill);}.navitem.active{background:var(--rail-pill);font-weight:600;}
+.navitem svg{color:var(--accent);flex-shrink:0;}.t-edn .navitem svg{color:#44484d;}
+.divider{height:1px;background:var(--rail-hair);margin:16px 4px;}.t-edn .divider{background:#eceeed;}
+.ms-select{background:var(--card);border:var(--bdw) solid var(--taupe-bd);border-radius:10px;padding:9px 11px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;box-shadow:var(--hard);}
+.ms-select .lab{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--label);}
+.ms-select .val{font-family:'Playfair Display',serif;font-size:13.5px;color:var(--ink);margin-top:2px;}
+.ms-select svg{color:var(--accent);}
+.subnav{display:flex;flex-direction:column;gap:1px;margin-top:12px;}
+.subitem{font-size:12.5px;color:var(--ink-soft);padding:7px 11px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:9px;transition:all .14s;}
+.subitem:hover{background:var(--rail-pill);color:var(--ink);}
+.subitem.active{color:var(--ink);font-weight:600;background:var(--rail-pill);}
+.subitem .bull{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.5;}
+.subitem.active .bull{opacity:1;background:var(--accent);}
+.rail-foot{margin-top:auto;padding-top:16px;}
+.themesw{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+.themesw .lbl{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--label);padding:0 4px 2px;}
+.swbtns{display:flex;gap:4px;}
+.swbtn{flex:1;border:1px solid var(--rail-hair);background:transparent;border-radius:8px;padding:7px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.03em;text-transform:uppercase;color:var(--ink-soft);transition:all .15s;}
+.swbtn:hover{background:var(--rail-pill);}.swbtn.on{border-color:var(--accent);color:var(--ink);font-weight:600;}
+.t-edn .swbtn{border-color:#e0e0df;}.t-edn .swbtn.on{border-color:#44484d;}
+.swd{width:16px;height:16px;border-radius:5px;border:1px solid rgba(0,0,0,.12);}
+.acct{display:flex;align-items:center;gap:9px;padding:8px;border-top:1px solid var(--rail-hair);}
+.acct .av{width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:12px;}
+.t-edn .acct .av{background:#44484d;}
+.acct .nm{font-size:12px;font-weight:500;}.acct .pl{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--pro);letter-spacing:.05em;}
+
+.main{overflow:hidden;display:flex;flex-direction:column;position:relative;z-index:1;}
+.ctrls{background:#2e2620;color:#f0e6dc;padding:8px 34px;display:flex;align-items:center;gap:14px;flex-shrink:0;font-size:11.5px;}
+.ctrls .glab{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;opacity:.55;}
+.ctrls button{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#f0e6dc;border-radius:7px;padding:5px 12px;font-size:11px;cursor:pointer;font-family:'JetBrains Mono',monospace;letter-spacing:.03em;}
+.ctrls button.on{background:#f0e6dc;color:#2e2620;font-weight:600;}
+.ctrls .spacer{flex:1;}.ctrls .note{opacity:.5;font-size:10.5px;font-style:italic;}
+
+.masthead{padding:14px 34px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-shrink:0;border-bottom:1px solid var(--band-hair);}
+.mh-title{font-family:'Playfair Display',serif;font-size:36px;font-weight:600;line-height:1.02;letter-spacing:-.015em;}
+.mh-pulse{margin-top:7px;font-size:12px;color:var(--ink-soft);display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
+.mh-pulse b{color:var(--ink);font-weight:600;}.mh-pulse .dot{width:4px;height:4px;border-radius:50%;background:var(--ink-soft);opacity:.5;}
+.ms-chip{display:inline-flex;align-items:center;gap:7px;background:var(--card);border:var(--bdw) solid var(--bd);border-radius:20px;padding:5px 12px 5px 6px;font-size:11.5px;box-shadow:var(--hard);}
+.ms-chip .mono{width:22px;height:22px;border-radius:50%;background:var(--pink);color:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:10px;}
+.t-edn .ms-chip .mono{color:#44484d;}
+.ms-header{display:flex;align-items:center;gap:11px;background:var(--card);border:var(--bdw) solid var(--bd);border-radius:12px;padding:8px 13px 8px 8px;cursor:pointer;box-shadow:var(--hard);transition:all .15s;flex-shrink:0;}
+.ms-header:hover{border-color:var(--accent);}
+.ms-header .mono{width:34px;height:34px;border-radius:8px;background:var(--pink);color:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:15px;flex-shrink:0;}
+.t-edn .ms-header .mono{color:#44484d;}
+.ms-header .lab{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.09em;text-transform:uppercase;color:var(--label);}
+.ms-header .val{font-family:'Playfair Display',serif;font-size:15px;color:var(--ink);line-height:1.15;margin-top:1px;}
+.ms-header svg{color:var(--accent);flex-shrink:0;}
+.t-edn .ms-header svg{color:#44484d;}
+
+.desk{flex:1;overflow:hidden;padding:20px 34px;}
+.split{display:grid;grid-template-columns:1fr 396px;gap:22px;height:100%;}
+@media(max-width:1180px){.split{grid-template-columns:1fr;overflow-y:auto;}}
+
+.panel{background:var(--card);border:var(--bdw) solid var(--bd);border-radius:var(--cardrad);position:relative;box-shadow:var(--hard);display:flex;flex-direction:column;min-height:0;}
+.t-capp .panel{box-shadow:0 1px 2px rgba(58,28,20,.05),0 6px 22px rgba(58,28,20,.07);}
+.t-edn .panel{box-shadow:0 1px 2px rgba(20,20,20,.04),0 16px 38px rgba(20,20,20,.07);}
+.panel::before{content:'';display:var(--frame-show);position:absolute;inset:6px;border:var(--frame);border-radius:calc(var(--cardrad) - 5px);pointer-events:none;z-index:4;}
+.p-band{background:linear-gradient(135deg,var(--band-a),var(--band-b));padding:13px 18px;position:relative;display:flex;align-items:center;gap:11px;flex-shrink:0;border-radius:calc(var(--cardrad) - 1px) calc(var(--cardrad) - 1px) 0 0;}
+.t-capp .p-band{margin:6px 6px 0;border-radius:8px 8px 0 0;}
+.p-band::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:var(--band-hair);}
+.p-band .bt{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;color:var(--hdrtx);}
+.tag{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;padding:4px 9px;border-radius:20px;font-weight:500;}
+.tag.free{background:var(--card);color:var(--mocha);border:1px solid var(--taupe-bd);}
+.tag.pro{background:var(--pro);color:#fff;}
+.p-band .bmeta{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:var(--hdrsub);}
+.p-body{padding:16px 18px;overflow-y:auto;flex:1;min-height:0;}
+.t-capp .p-body{margin:0 6px 6px;}
+
+/* strategy strip */
+.strat{background:var(--sect);border:1px solid var(--band-hair);border-radius:10px;padding:13px 15px;margin-bottom:18px;}
+.strat .cap{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:8px;display:flex;align-items:center;gap:7px;}
+.strat .cap .n{background:var(--pink);color:var(--mocha);border-radius:20px;padding:2px 8px;letter-spacing:.03em;}
+.qtxt{font-family:'Playfair Display',serif;font-size:14.5px;font-style:italic;line-height:1.55;}
+.qtxt b{font-style:normal;font-weight:600;color:var(--accent);}
+.t-edn .qtxt b{color:#44484d;}
+.qtxt.empty{color:var(--ink-soft);font-style:normal;font-family:'Inter',sans-serif;font-size:12.5px;}
+.hnote{font-size:11.5px;color:var(--ink-soft);margin-top:9px;display:flex;align-items:center;gap:6px;line-height:1.45;}
+.hnote svg{flex-shrink:0;}
+.hnote.ok svg{color:#5a6e58;}.t-edn .hnote.ok svg{color:#44484d;}
+.hnote.tip{color:var(--warn);}
+.qcopy{margin-top:12px;background:var(--pink);border:1px solid var(--pink-bd);color:var(--mocha);border-radius:9px;padding:9px 14px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;display:inline-flex;align-items:center;gap:7px;box-shadow:var(--hard);}
+.qcopy:hover{background:var(--pink-hover);}
+
+.listcap{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--label);margin-bottom:11px;display:flex;align-items:center;gap:8px;}
+.listcap .ln{flex:1;height:1px;background:var(--band-hair);}
+
+/* comp card */
+.ccard{background:var(--card);border:var(--bdw) solid var(--bd);border-left:3px solid var(--taupe-bd);border-radius:11px;padding:14px 16px;display:flex;gap:14px;align-items:flex-start;margin-bottom:10px;transition:all .18s;box-shadow:var(--hard);}
+.t-capp .ccard{box-shadow:none;}
+.ccard:hover{border-color:var(--accent);}
+.ccard.inq{border-left-color:var(--accent);background:linear-gradient(90deg,var(--sect),var(--card) 60%);}
+.t-edn .ccard.inq{border-left-color:#44484d;}
+.cc-main{flex:1;min-width:0;}
+.cc-titlerow{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+.cc-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;line-height:1.15;}
+.cc-year{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.03em;background:var(--sect);color:var(--mocha);padding:2px 8px;border-radius:20px;flex-shrink:0;border:1px solid var(--band-hair);}
+.cc-role{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);}
+.cc-meta{font-size:11.5px;color:var(--ink-soft);margin-top:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.cc-role-line{margin-top:6px;font-size:11px;color:var(--ink-soft);font-style:italic;line-height:1.4;}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px;}
+.chip{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.04em;text-transform:uppercase;padding:3px 9px;border-radius:20px;font-weight:500;display:inline-flex;align-items:center;gap:4px;}
+.chip.axis{background:var(--sect);color:var(--ink-soft);text-transform:none;letter-spacing:.02em;border:1px solid var(--band-hair);}
+.chip.media{background:var(--pro-bg);color:var(--pro-ink);border:1px solid var(--pro-bd);}
+.chip.warn{background:var(--warn-bg);color:var(--warn);border:1px solid var(--warn-bd);}
+.chip .dot{width:5px;height:5px;border-radius:50%;background:currentColor;}
+.cc-side{display:flex;flex-direction:column;align-items:flex-end;gap:9px;flex-shrink:0;}
+.inqbtn{display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.03em;text-transform:uppercase;padding:6px 11px 6px 8px;border-radius:20px;border:1px solid var(--taupe-bd);background:var(--card);color:var(--ink-soft);cursor:pointer;transition:all .16s;white-space:nowrap;}
+.inqbtn:hover{border-color:var(--accent);color:var(--accent);}
+.inqbtn .box{width:14px;height:14px;border-radius:4px;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;}
+.inqbtn .box svg{opacity:0;}
+.inqbtn.on{background:var(--pink);border-color:var(--pink-bd);color:var(--mocha);font-weight:600;}
+.inqbtn.on .box{background:var(--mocha);border-color:var(--mocha);color:var(--card);}
+.inqbtn.on .box svg{opacity:1;}
+.xbtn{width:24px;height:24px;border-radius:7px;border:none;background:transparent;color:var(--ink-soft);opacity:.5;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .16s;}
+.xbtn:hover{background:var(--warn-bg);color:var(--warn);opacity:1;}
+.addman{width:100%;background:transparent;border:1px dashed var(--taupe-bd);border-radius:10px;padding:11px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--mocha);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .16s;margin-top:4px;}
+.addman:hover{border-color:var(--accent);color:var(--accent);border-style:solid;}
+
+/* SCOUT (unchanged) */
+.scout{overflow:hidden;}
+.scout-what{font-size:12px;color:var(--ink-soft);line-height:1.55;margin-bottom:14px;}
+.scout-what b{color:var(--ink);}
+.how{background:var(--pro-bg);border:1px solid var(--pro-bd);border-radius:11px;padding:13px 14px;margin-bottom:14px;}
+.how .ht{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--pro);margin-bottom:10px;}
+.step{display:flex;gap:11px;align-items:flex-start;margin-bottom:11px;}.step:last-child{margin-bottom:0;}
+.step .num{width:22px;height:22px;border-radius:50%;background:var(--pro);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:10px;flex-shrink:0;}
+.step .st{font-size:12px;font-weight:600;color:var(--ink);}.step .sd{font-size:11px;color:var(--ink-soft);line-height:1.45;margin-top:1px;}
+.btn-pro{width:100%;background:var(--pro);border:none;color:#fff;border-radius:10px;padding:12px;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .18s;box-shadow:0 2px 10px rgba(106,137,167,.28);}
+.btn-pro:hover{background:var(--pro-deep);}.btn-pro:disabled{opacity:.7;cursor:default;}
+.btn-pro .spin{width:13px;height:13px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.scan{display:none;flex-direction:column;gap:6px;margin:14px 0;}.scan.show{display:flex;}
+.scanline{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--pro-ink);display:flex;gap:8px;opacity:0;animation:fadeUp .35s forwards;}
+.scanline .tick{color:var(--pro);}
+@keyframes fadeUp{from{opacity:0;transform:translateY(3px);}to{opacity:1;transform:none;}}
+.results{margin-top:14px;display:flex;flex-direction:column;gap:12px;}
+.rcard{background:var(--card);border:var(--bdw) solid var(--bd);border-radius:12px;padding:14px;opacity:0;animation:fadeUp .45s forwards;box-shadow:var(--hard);}
+.rc-top{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;}
+.rc-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;line-height:1.15;}
+.rc-year{font-family:'JetBrains Mono',monospace;font-size:9px;background:var(--sect);color:var(--mocha);padding:2px 7px;border-radius:20px;border:1px solid var(--band-hair);}
+.rc-meta{font-size:11px;color:var(--ink-soft);margin-top:3px;}
+.verified{display:inline-flex;align-items:center;gap:4px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.04em;text-transform:uppercase;color:var(--pro);margin-top:7px;}
+.why{margin-top:10px;background:var(--pro-bg);border-radius:8px;padding:9px 11px;}
+.why-cap{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:var(--pro);margin-bottom:4px;}
+.why-txt{font-size:11.5px;line-height:1.5;color:var(--ink);}.why-txt b{color:var(--pro-ink);}
+.agent-hook{margin-top:9px;display:flex;align-items:center;gap:7px;font-size:11px;color:var(--pro-ink);background:var(--pro-tile);border-radius:8px;padding:8px 10px;}
+.agent-hook svg{color:var(--pro);flex-shrink:0;}.agent-hook b{font-weight:600;}
+.rc-foot{margin-top:11px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:10px;border-top:1px solid var(--band-hair);}
+.links{display:flex;gap:9px;}
+.links a{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink-soft);text-decoration:none;display:inline-flex;align-items:center;gap:4px;}
+.links a:hover{color:var(--pro);}
+.addshelf{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.04em;text-transform:uppercase;background:var(--pro);border:none;color:#fff;border-radius:9px;padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:all .16s;}
+.addshelf:hover{background:var(--pro-deep);}.addshelf.done{background:var(--pro-bg);color:var(--pro-ink);border:1px solid var(--pro-bd);cursor:default;}
+.foot-note{margin-top:12px;font-size:10px;line-height:1.5;color:var(--label);font-style:italic;text-align:center;}
+.upsell{text-align:center;padding-top:6px;}
+.upsell .ghost{filter:blur(3px);opacity:.45;pointer-events:none;margin-bottom:-40px;}
+.upsell .lockwrap{position:relative;z-index:2;background:linear-gradient(180deg,transparent,var(--card) 30%);padding-top:30px;}
+.upsell .lock{width:44px;height:44px;border-radius:50%;background:var(--pro);color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:0 4px 14px rgba(106,137,167,.3);}
+.upsell h3{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;margin-bottom:8px;}
+.upsell p{font-size:11.5px;color:var(--pro-ink);line-height:1.55;margin-bottom:16px;}
+body[data-tier="free"] .pro-live{display:none;}
+body[data-tier="pro"] .pro-locked{display:none;}
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--accent);color:#fff;padding:11px 20px;border-radius:11px;font-size:12px;font-weight:500;box-shadow:0 8px 26px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:all .3s;z-index:60;display:flex;align-items:center;gap:8px;}
+.t-edn .toast{background:#2a2d31;}.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body data-tier="pro">
+<div class="shell t-capp" id="shell">
+
+  <aside class="rail">
+    <div class="wordmark">Script<span class="ink">Ally</span></div>
+    <a class="navitem"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg> Dashboard</a>
+    <a class="navitem"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg> Queries</a>
+    <a class="navitem"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> Agents</a>
+    <a class="navitem active"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Manuscripts</a>
+    <div class="divider"></div>
+    <div class="subnav">
+      <div class="subitem"><span class="bull"></span> Overview</div>
+      <div class="subitem"><span class="bull"></span> In the field</div>
+      <div class="subitem"><span class="bull"></span> Submission packages</div>
+      <div class="subitem active"><span class="bull"></span> Comparable titles</div>
+    </div>
+    <div class="rail-foot">
+      <div class="themesw"><span class="lbl">Theme</span><div class="swbtns">
+        <button class="swbtn on" onclick="setTheme('t-capp',this)"><span class="swd" style="background:#e8ddd0"></span>Capp</button>
+        <button class="swbtn" onclick="setTheme('t-bold',this)"><span class="swd" style="background:#f4c7c2"></span>Bold</button>
+        <button class="swbtn" onclick="setTheme('t-edn',this)"><span class="swd" style="background:#44484d"></span>Edit</button>
+      </div></div>
+      <div class="acct"><div class="av">NP</div><div><div class="nm">Nick Physick</div><div class="pl">Pro</div></div></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="ctrls">
+      <span class="glab">Viewing as</span>
+      <button id="tFree" onclick="setTier('free',this)">Free user</button>
+      <button id="tPro" class="on" onclick="setTier('pro',this)">Pro user</button>
+      <div class="spacer"></div>
+      <span class="note">Tick "In query" on a comp to build the line · roles are derived, not filed</span>
+    </div>
+
+    <div class="masthead">
+      <div>
+        <div class="mh-title">Comparable titles</div>
+        <div class="mh-pulse">
+          <span>YA Steampunk fantasy</span>
+          <span class="dot"></span><span><b id="totCount">4</b> comps · <b id="inqCount">2</b> in your query</span>
+        </div>
+      </div>
+      <div class="ms-header">
+        <div class="mono">B</div>
+        <div><div class="lab">Working on</div><div class="val">The Book of Lost Clockworks</div></div>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+    </div>
+
+    <div class="desk">
+      <div class="split">
+
+        <!-- ============ YOUR COMPS — single flat list ============ -->
+        <section class="panel">
+          <div class="p-band"><span class="bt">Your comps</span><span class="tag free">Free</span><span class="bmeta" id="savedMeta">4 saved</span></div>
+          <div class="p-body">
+
+            <div class="strat">
+              <div class="cap"><span class="n" id="inqPill">2 in query</span> Query letter line · years verified</div>
+              <div class="qtxt" id="qtext"></div>
+              <div class="hnote" id="hnote"></div>
+              <button class="qcopy" onclick="toast('Query line copied')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy for query letter</button>
+            </div>
+
+            <div class="listcap">All comps <span class="ln"></span> tick the ones for your query</div>
+            <div id="list"></div>
+
+            <button class="addman"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add a comp manually</button>
+          </div>
+        </section>
+
+        <!-- ============ THE SCOUT ============ -->
+        <section class="panel scout">
+          <div class="p-band"><span class="bt">The Scout</span><span class="tag pro">Pro</span></div>
+          <div class="p-body">
+            <div class="pro-live">
+              <div class="scout-what">Your standing research assistant. It hunts down <b>verified, recent comps</b> matched to this manuscript — so you find books you'd never surface alone.</div>
+              <div class="how">
+                <div class="ht">How it works</div>
+                <div class="step"><span class="num">1</span><div><div class="st">Reads your book</div><div class="sd">Your genre, logline &amp; synopsis — not just keywords.</div></div></div>
+                <div class="step"><span class="num">2</span><div><div class="st">Searches the web</div><div class="sd">Recent titles, best-of lists &amp; debuts in your exact space.</div></div></div>
+                <div class="step"><span class="num">3</span><div><div class="st">Verifies every title</div><div class="sd">Checked against a real catalogue — nothing invented.</div></div></div>
+              </div>
+              <button class="btn-pro" id="discBtn" onclick="runDiscover()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8L20 10.5l-6.1 1.7L12 18l-1.9-5.8L4 10.5l6.1-1.7z"/></svg> Send the Scout out</button>
+              <div class="scan" id="scan"></div>
+              <div class="results" id="results"></div>
+            </div>
+            <div class="pro-locked">
+              <div class="scout-what">Your standing research assistant — finds verified, recent comps matched to your book.</div>
+              <div class="how">
+                <div class="ht">What the Scout does</div>
+                <div class="step"><span class="num">1</span><div><div class="st">Reads your book</div><div class="sd">Genre, logline &amp; synopsis.</div></div></div>
+                <div class="step"><span class="num">2</span><div><div class="st">Searches the web</div><div class="sd">Recent titles in your exact space.</div></div></div>
+                <div class="step"><span class="num">3</span><div><div class="st">Verifies every title</div><div class="sd">Real book, real year — never invented.</div></div></div>
+              </div>
+              <div class="upsell">
+                <div class="ghost"><div class="rcard" style="opacity:1;animation:none"><div class="rc-top"><span class="rc-title">A Marvellous Light</span><span class="rc-year">2021</span></div><div class="rc-meta">Freya Marske · Tor</div><div class="why"><div class="why-txt">Recent, magic-as-machinery, strong voice…</div></div></div></div>
+                <div class="lockwrap">
+                  <div class="lock"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+                  <h3>Unlock the Scout</h3>
+                  <p>Let ScriptAlly find verified comps you'd never surface alone — and add them straight to your list.</p>
+                  <button class="btn-pro" onclick="toast('→ Upgrade flow')">Upgrade to Pro</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const NOW=2026;
+let comps=[
+  {id:1,title:'A Marvellous Light',by:'Freya Marske',pub:'Tor',sur:'Marske',year:2021,media:'book',axis:'premise · voice',inq:true},
+  {id:2,title:'Piranesi',by:'Susanna Clarke',pub:'Bloomsbury',sur:'Clarke',year:2020,media:'book',axis:'tone · atmosphere',inq:true},
+  {id:3,title:'The Night Circus',by:'Erin Morgenstern',pub:'Harvill Secker',sur:'Morgenstern',year:2011,media:'book',axis:'tone · whimsy',inq:false},
+  {id:4,title:"Pan's Labyrinth",by:'Guillermo del Toro',pub:'dir.',sur:'del Toro',year:2006,media:'film',axis:'dark fairytale · mood',inq:false}
+];
+
+// DERIVED role: films/TV & older books read as tone comps; recent books can carry the market case
+function role(c){
+  if(c.media!=='book') return {label:'Tone comp',line:'A '+c.media+' comp — perfect for signalling mood, not the market case.'};
+  const age=NOW-c.year;
+  if(age<=5) return {label:'Market comp',line:'Recent enough to show agents there\u2019s a live audience.'};
+  return {label:'Tone comp',line:'Older — leans on voice &amp; feel rather than proving a current market.'};
+}
+function tick(){return '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';}
+
+function render(){
+  const list=document.getElementById('list');
+  list.innerHTML=comps.map(c=>{
+    const r=role(c);
+    const media=c.media!=='book'?'<span class="chip media">'+c.media.charAt(0).toUpperCase()+c.media.slice(1)+'</span>':'';
+    // recency flag ONLY when an old book is ticked into the query (asked to do market work it can't)
+    const flag=(c.inq && c.media==='book' && (NOW-c.year)>5)?'<span class="chip warn"><span class="dot"></span>Old for a market comp</span>':'';
+    return '<div class="ccard'+(c.inq?' inq':'')+'">'+
+      '<div class="cc-main"><div class="cc-titlerow"><span class="cc-title">'+c.title+'</span><span class="cc-year">'+c.year+'</span><span class="cc-role">'+r.label+'</span></div>'+
+      '<div class="cc-meta">'+c.by+' · '+c.pub+'</div>'+
+      '<div class="cc-role-line">'+r.line+'</div>'+
+      '<div class="chips">'+media+'<span class="chip axis">'+c.axis+'</span>'+flag+'</div></div>'+
+      '<div class="cc-side"><button class="inqbtn'+(c.inq?' on':'')+'" onclick="toggleInq('+c.id+')"><span class="box">'+tick()+'</span>In query</button>'+
+      '<button class="xbtn" onclick="removeComp('+c.id+')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div></div>';
+  }).join('');
+  recompute();
+}
+function recompute(){
+  const inq=comps.filter(c=>c.inq);
+  document.getElementById('totCount').textContent=comps.length;
+  document.getElementById('inqCount').textContent=inq.length;
+  document.getElementById('savedMeta').textContent=comps.length+' saved';
+  document.getElementById('inqPill').textContent=inq.length+' in query';
+  const qt=document.getElementById('qtext'),hn=document.getElementById('hnote');
+  if(inq.length===0){qt.className='qtxt empty';qt.textContent='Tick a comp below to start building your query line.';hn.innerHTML='';return;}
+  qt.className='qtxt';
+  const parts=inq.map(c=>'<b>'+c.title+'</b> ('+c.sur+', '+c.year+')');
+  let line = parts.length===1?parts[0]:parts.slice(0,-1).join(', ')+' and '+parts[parts.length-1];
+  qt.innerHTML='For readers of '+line+'.';
+  const recent=inq.filter(c=>c.media==='book'&&(NOW-c.year)<=5).length;
+  const oldBooks=inq.filter(c=>c.media==='book'&&(NOW-c.year)>5).length;
+  if(recent>=2){hn.className='hnote ok';hn.innerHTML=okSvg()+' Two recent market comps — a strong, current case.';}
+  else if(recent===1){hn.className='hnote ok';hn.innerHTML=okSvg()+' One recent comp anchoring the market — solid.';}
+  else{hn.className='hnote tip';hn.innerHTML=tipSvg()+' No recent book in your query — add one so agents see a live market.';}
+}
+function okSvg(){return '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';}
+function tipSvg(){return '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>';}
+function toggleInq(id){const c=comps.find(x=>x.id===id);c.inq=!c.inq;render();}
+function removeComp(id){comps=comps.filter(x=>x.id!==id);render();}
+
+function setTheme(t,btn){document.getElementById('shell').className='shell '+t;document.querySelectorAll('.swbtn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
+function setTier(t,btn){document.body.dataset.tier=t;document.getElementById('tFree').classList.toggle('on',t==='free');document.getElementById('tPro').classList.toggle('on',t==='pro');}
+function toast(m){const t=document.getElementById('toast');t.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>'+m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800);}
+
+const RES=[
+  {t:'The Watchmaker of Filigree Street',m:'Natasha Pulley · Bloomsbury',y:'2015',why:'Clockwork-and-craft premise, wistful character-led tone. Close <b>premise + atmosphere</b> match.',agents:2},
+  {t:'The Midnight Bargain',m:'C. L. Polk · Erewhon',y:'2020',why:'Magic as currency, craft as control. Matches your <b>audience &amp; stakes</b> — a positioning comp.',agents:0},
+  {t:'The Bone Shard Daughter',m:'Andrea Stewart · Orbit',y:'2020',why:'Bio-mechanical magic and a puzzle-box world. <b>Recent</b> and well-reviewed without being a phenomenon.',agents:1}
+];
+function rcardHTML(r,i){
+  const hook=r.agents>0?'<div class="agent-hook"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.2L12 16.6 5.7 21l2.3-7.2-6-4.4h7.6z"/></svg><span><b>'+r.agents+' agent'+(r.agents>1?'s':'')+'</b> on your list wishlist books like this</span></div>':'';
+  return '<div class="rcard" style="animation-delay:'+(i*.12)+'s"><div class="rc-top"><span class="rc-title">'+r.t+'</span><span class="rc-year">'+r.y+'</span></div>'+
+  '<div class="rc-meta">'+r.m+'</div><div class="verified"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Verified · catalogue</div>'+
+  '<div class="why"><div class="why-cap">Why this fits</div><div class="why-txt">'+r.why+'</div></div>'+hook+
+  '<div class="rc-foot"><div class="links"><a href="#" onclick="return false"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Bookshop</a></div>'+
+  '<button class="addshelf" onclick="addFromScout(this,\''+r.t.replace(/'/g,"\\'")+'\','+r.y+')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add to list</button></div></div>';
+}
+function addFromScout(b,title,year){
+  if(b.classList.contains('done'))return;b.classList.add('done');
+  b.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Added';
+  comps.push({id:Date.now(),title:title,by:'—',pub:'',sur:title.split(' ')[0],year:year,media:'book',axis:'from Scout',inq:false});
+  render();toast(title+' added to your list');
+}
+const steps=['Reading logline &amp; synopsis…','Searching recent titles &amp; best-of lists…','Verifying candidates against catalogue…','Cross-checking your agents\' wishlists…','Ranking by fit — ready'];
+function runDiscover(){
+  const btn=document.getElementById('discBtn'),scan=document.getElementById('scan'),res=document.getElementById('results');
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span> Scouring &amp; verifying…';scan.innerHTML='';scan.classList.add('show');res.innerHTML='';let i=0;
+  const iv=setInterval(()=>{
+    if(i<steps.length){const e=document.createElement('div');e.className='scanline';e.innerHTML=(i===steps.length-1?'<span class="tick">✓</span>':'<span style="opacity:.5">◇</span>')+' '+steps[i];scan.appendChild(e);i++;}
+    else{clearInterval(iv);setTimeout(()=>{scan.classList.remove('show');res.innerHTML=RES.map(rcardHTML).join('')+'<div class="foot-note">Starting points to research — read them before you pitch them.</div>';btn.disabled=false;btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M20.5 15a9 9 0 1 1-2.1-9.4L23 10"/></svg> Send out again';},500);}
+  },560);
+}
+render();
+</script>
+</body>
+</html>
