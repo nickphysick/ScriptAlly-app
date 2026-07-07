@@ -17,17 +17,13 @@
  */
 import React, { useState, useEffect, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
-import { CompTitle, Manuscript, ManuscriptStatus } from "../types";
+import { Manuscript, ManuscriptStatus } from "../types";
 import { motion, AnimatePresence } from "motion/react";
 import { ChromeSlab } from "./shell/ChromeSlab";
 import { Plus, Send, Pencil, MoreHorizontal, Archive, Trash2, X, Check } from "lucide-react";
 import { FieldCard } from "./manuscripts/FieldCard";
 import { MaterialsCard } from "./manuscripts/MaterialsCard";
-import { CompShelf } from "./manuscripts/CompShelf";
-import { SuggestionsSection } from "./manuscripts/SuggestionsSection";
 import { isShelvedPresentation, wordCountWhisper } from "../lib/manuscriptPage";
-import { manuscriptComps, withCompAdded, withCompRemoved } from "../lib/comps";
-import { isProUser } from "../lib/suggestComps";
 import "./manuscripts/manuscripts.css";
 
 /** Shared with the Submission Packages page — it reads this key to scope itself on open. */
@@ -101,20 +97,8 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
   const activeMs = selectedMsId ? manuscripts.find((m) => m.id === selectedMsId) : null;
   const msVersions = activeMs ? versions.filter((v) => v.manuscriptId === activeMs.id) : [];
   const msQueries = activeMs ? queries.filter((q) => q.manuscriptId === activeMs.id) : [];
-  const msComps = activeMs ? manuscriptComps(activeMs) : [];
   const shelvedP = activeMs ? isShelvedPresentation(activeMs) : false;
   const whisper = activeMs ? wordCountWhisper(activeMs.ageCategory, activeMs.genre) : null;
-
-  // Shelf writes — the ONLY comp-editing path. A first write on a legacy-string doc converts it
-  // to the structured array (the stray comparableTitles field is left behind, never written).
-  const addComp = async (c: CompTitle) => {
-    if (!activeMs) return;
-    await updateManuscript(activeMs.id, { comps: withCompAdded(msComps, c) });
-  };
-  const removeComp = async (index: number) => {
-    if (!activeMs) return;
-    await updateManuscript(activeMs.id, { comps: withCompRemoved(msComps, index) });
-  };
 
   // ── lifecycle (carried over: reversible shelve flag-flip with Undo; deferred delete) ──
   const toggleShelved = async (ms: Manuscript) => {
@@ -345,32 +329,8 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
               </div>
             </div>
 
-            {/* ── lower grid: comps + right column ── */}
-            <div className="msv-lower">
-              <div className="msv-panel">
-                <div className="msv-band">
-                  <h3>Comparable titles</h3>
-                  <span className="msv-lab">THE &lsquo;X MEETS Y&rsquo; OF YOUR PITCH</span>
-                </div>
-                <CompShelf
-                  comps={msComps}
-                  currentYear={new Date().getFullYear()}
-                  onAdd={addComp}
-                  onRemove={removeComp}
-                />
-                <SuggestionsSection
-                  msId={activeMs.id}
-                  manuscriptTitle={activeMs.title}
-                  ageCategory={activeMs.ageCategory}
-                  genre={activeMs.genre}
-                  logline={activeMs.logline || ""}
-                  shelfTitles={msComps.map((c) => c.title)}
-                  isPro={isProUser(currentUser)}
-                  currentYear={new Date().getFullYear()}
-                  onAddToShelf={addComp}
-                  onUpgrade={() => onNavigate?.("plans")}
-                />
-              </div>
+            {/* ── right column — comps moved to its own sub-page (/manuscripts/comps) ── */}
+            <div className="msv-lower msv-lower-solo">
               <div className="msv-rightcol">
                 <FieldCard
                   queries={msQueries}

@@ -24,6 +24,7 @@ const CRUMB_TABLE: Record<string, CrumbSegment[]> = {
   "/agents": [ROOT, { label: "AGENTS", tab: "agents" }, { label: "DATABASE" }],
   "/agents/discover": [ROOT, { label: "AGENTS", tab: "agents" }, { label: "DISCOVER" }],
   "/manuscripts": [ROOT, { label: "MANUSCRIPTS", tab: "manuscripts" }, { label: "YOUR MANUSCRIPTS" }],
+  "/manuscripts/comps": [ROOT, { label: "MANUSCRIPTS", tab: "manuscripts" }, { label: "COMPARABLE TITLES" }],
   "/manuscripts/packages": [ROOT, { label: "MANUSCRIPTS", tab: "manuscripts" }, { label: "SUBMISSION PACKAGES" }],
   "/import": [ROOT, { label: "IMPORT" }],
 };

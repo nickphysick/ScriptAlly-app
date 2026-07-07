@@ -19,7 +19,7 @@ export const FOCUS_PATHS = new Set(["/account", "/plans", "/help"]);
 /** The workspace route set — the AppShell tier (was App.tsx's KNOWN_PATHS before the tiers). */
 export const WORKSPACE_PATHS = new Set([
   "/dashboard", "/queries", "/agents", "/agents/discover",
-  "/manuscripts", "/manuscripts/packages", "/import",
+  "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/import",
   "/email-import-dev",
 ]);
 

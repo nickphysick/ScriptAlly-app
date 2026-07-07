@@ -15,6 +15,7 @@ describe("railActiveKey — route-aware active state", () => {
     expect(railActiveKey("/agents")).toBe("agents-db");
     expect(railActiveKey("/agents/discover")).toBe("agents-discover");
     expect(railActiveKey("/manuscripts")).toBe("manuscripts");
+    expect(railActiveKey("/manuscripts/comps")).toBe("comps");
     expect(railActiveKey("/manuscripts/packages")).toBe("packages");
   });
 
@@ -25,6 +26,7 @@ describe("railActiveKey — route-aware active state", () => {
 
   it("sub-routes light their own entry, never the parent's", () => {
     expect(railActiveKey("/agents/discover")).not.toBe("agents-db");
+    expect(railActiveKey("/manuscripts/comps")).not.toBe("manuscripts");
     expect(railActiveKey("/manuscripts/packages")).not.toBe("manuscripts");
   });
 
@@ -47,7 +49,7 @@ describe("RAIL_GROUPS — the grouped index shape", () => {
       ["Dashboard"],
       ["Queries Hub"],
       ["Agents database", "Discover new agents"],
-      ["Your manuscripts", "Submission packages"],
+      ["Your manuscripts", "Comparable titles", "Submission packages"],
     ]);
   });
 
@@ -60,6 +62,7 @@ describe("RAIL_GROUPS — the grouped index shape", () => {
     const byKey = Object.fromEntries(RAIL_GROUPS.flatMap((g) => g.items.map((i) => [i.key, i])));
     expect([byKey["queries-hub"].tab, byKey["queries-hub"].sub]).toEqual(["queries", undefined]);
     expect([byKey["agents-discover"].tab, byKey["agents-discover"].sub]).toEqual(["agents", "Discover new agents"]);
+    expect([byKey["comps"].tab, byKey["comps"].sub]).toEqual(["manuscripts", "Comparable titles"]);
     expect([byKey["packages"].tab, byKey["packages"].sub]).toEqual(["manuscripts", "Submission packages"]);
   });
 });

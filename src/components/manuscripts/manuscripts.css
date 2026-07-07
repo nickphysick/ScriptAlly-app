@@ -167,6 +167,9 @@
   align-items: start;
 }
 .msv-rightcol { display: flex; flex-direction: column; gap: 16px; }
+/* Transient (Phase 1→2): comps moved to its own page, so the overview shows the right column
+   alone — centre it at its natural width until the plate rebuild replaces this interior. */
+.msv-lower-solo { grid-template-columns: 400px; justify-content: center; }
 .msv-fieldbody { padding: 16px 20px 14px; }
 .msv-figrow { display: flex; align-items: center; gap: 10px; }
 .msv-fig {

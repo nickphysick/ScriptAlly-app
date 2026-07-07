@@ -24,6 +24,7 @@ import { SubmissionPackages } from "./components/SubmissionPackages";
 import { PkgLab } from "./components/packages/PkgLab";
 import { DiaryLab } from "./components/dashboard/DiaryLab";
 import { AllManuscripts } from "./components/AllManuscripts";
+import { ComparableTitlesPage } from "./components/manuscripts/ComparableTitlesPage";
 import { Pricing } from "./components/Pricing";
 import { ImportCsv } from "./components/ImportCsv";
 import { BrandStudio } from "./components/BrandStudio";
@@ -317,7 +318,11 @@ function pathFor(tab: string, subPageName?: string): string {
       return "/queries";
     }
     case "agents": return subPageName === "Discover new agents" ? "/agents/discover" : "/agents";
-    case "manuscripts": return subPageName === "Submission packages" ? "/manuscripts/packages" : "/manuscripts";
+    case "manuscripts": {
+      if (subPageName === "Submission packages") return "/manuscripts/packages";
+      if (subPageName === "Comparable titles") return "/manuscripts/comps";
+      return "/manuscripts";
+    }
     // Two distinct pricing surfaces, exactly as before the router: the "pricing" tab renders
     // Pricing; "plans" (user-menu Plans/Upgrade, MaterialsField Pro gate) renders the
     // presentational PlansPage. Consolidating them is a separate decision — not this commit.
@@ -569,6 +574,7 @@ function AppContent() {
   const queriesSub = params.get("view") === "landing" ? "Landing" : (params.get("q") ?? "Query database");
   const agentsDiscover = path === "/agents/discover";
   const manuscriptsPackages = path === "/manuscripts/packages";
+  const manuscriptsComps = path === "/manuscripts/comps";
   const showFooter = routeKey !== "queries" && !manuscriptsPackages;
 
   return (
@@ -619,6 +625,8 @@ function AppContent() {
         <StagePage active={routeKey === "manuscripts"} layout="fill">
           {manuscriptsPackages ? (
             <SubmissionPackages />
+          ) : manuscriptsComps ? (
+            <ComparableTitlesPage onNavigate={handleNavigate} />
           ) : (
             <AllManuscripts
               searchQuery={searchQuery}
