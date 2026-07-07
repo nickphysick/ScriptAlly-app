@@ -2869,8 +2869,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                                     </>
                                   ) : (
                                     <>
-                                      {/* empty — pink materials tile · or · neutral package tile (matched pair) */}
-                                      <span role="button" tabIndex={0} onClick={() => openEditQuery(activeQuery.id)} style={{ display: "flex", alignItems: "center", gap: 8, background: "#fcf1ec", border: "1.5px dashed #e0b3a4", borderRadius: 10, padding: "9px 12px", fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 500, color: "#7c3a2a", cursor: "pointer" }}>
+                                      {/* empty — matched dashed / no-fill materials + package tiles either side of "or"
+                                          (materials mirrors the submission-package field; the package keeps its PRO badge) */}
+                                      <span role="button" tabIndex={0} onClick={() => openEditQuery(activeQuery.id)} style={{ display: "flex", alignItems: "center", gap: 8, background: "transparent", border: "1.5px dashed #cbb6a6", borderRadius: 10, padding: "9px 12px", fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 500, color: "#6a5f52", cursor: "pointer" }}>
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M15.5 3.5 7 12a3 3 0 0 0 4.2 4.2l8-8a5 5 0 0 0-7-7l-8.2 8.2a7 7 0 0 0 9.9 9.9l7.3-7.3" /></svg>
                                         Add the materials you sent
                                       </span>
