@@ -99,6 +99,9 @@
   --btnH: #f7f2ea;
   --selBg: #f3ede2;  /* selected-row foam tint */
   --winBg: #f5f0e6;  /* result "win row" foam tint */
+  /* Package Workshop: header text/icons ON a band fill. A distinct token from --hdr so a future
+     Editorial charcoal-masthead pass flips one value; today all three bands are light so it = --hdr. */
+  --hdrOn: var(--hdr);  /* mocha on the foam band */
   /* ── Rail rebuild tokens (grouped index + capture + utility; ref sidenav-three-themes-v2.html).
      ADDITIVE — the rail consumes only the --rail set; existing tokens untouched. The capture
      buttons are white/card-filled in EVERY theme (Editorial exception documented in CLAUDE.md). */
@@ -230,6 +233,7 @@
   --btnH: var(--pink-h);
   --selBg: #fdf1ec;
   --winBg: #fdf1ec;
+  --hdrOn: var(--ink);  /* Package Workshop: ink on the pink band (matches the mock's #241c15) */
   /* Rail rebuild tokens — Bold Pastille (ref sidenav-three-themes-v2.html): 1.5px ink frame,
      hard offset shadow, ink icons and text, pink active pill; buttons white with ink frames
      and their own 2px offset shadow. */
@@ -361,6 +365,9 @@
   --btnH: var(--abtn-hov);
   --selBg: var(--band);
   --winBg: var(--band);
+  /* Package Workshop: black on Editorial's REAL near-white band — deliberately NOT the mock's
+     cream-on-charcoal masthead (Nick's call: build Editorial from real .t-edn tokens, flag if weak). */
+  --hdrOn: var(--hdr);
   /* Rail rebuild tokens — Editorial (ref sidenav-three-themes-v2.html): borderless rail on
      layered shadows, graphite icons, near-black text. DELIBERATE EXCEPTION: the capture
      buttons are WHITE with a hairline — not Tinted — because a tinted fill reads as an

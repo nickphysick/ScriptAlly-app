@@ -19,12 +19,13 @@ import { MaterialsManager } from "./MaterialsManager";
 import { MaterialModal } from "./MaterialModal";
 import { JourneyStrip } from "./JourneyStrip";
 import { WorkedExample } from "./WorkedExample";
+import { PackageWorkshop } from "./PackageWorkshop";
 import { HubHeaderBar } from "../shell/HubHeaderBar";
 import { emptySelection } from "./typeMeta";
-import { FONT_MONO } from "../../lib/designTokens";
+import { FONT_MONO, FONT_SERIF } from "../../lib/designTokens";
 
-type Theme = "t-capp" | "t-bold";
-type View = "first" | "packages" | "composer" | "manager" | "wins";
+type Theme = "t-capp" | "t-bold" | "t-edn";
+type View = "workshop" | "first" | "packages" | "composer" | "manager" | "wins";
 
 const V = (id: string, componentType: ComponentType, versionName: string, fileName: string, contentDraft?: string): ManuscriptVersion => ({
   id, manuscriptId: "m", userId: "lab", componentType, versionName, fileAttached: true, fileName, createdDate: "2026-01-01T00:00:00.000Z", contentDraft,
@@ -98,26 +99,43 @@ export const PkgLab: React.FC = () => {
       <div style={{ display: "flex", alignItems: "center", gap: 10, maxWidth: 1200, margin: "0 auto 18px", flexWrap: "wrap" }}>
         <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--muted)" }}>#/pkg-lab</span>
         <div style={{ display: "flex", gap: 6 }}>
-          {(["first", "packages", "composer", "manager", "wins"] as View[]).map((v) => (
+          {(["workshop", "first", "packages", "composer", "manager", "wins"] as View[]).map((v) => (
             <button key={v} type="button" onClick={() => { setView(v); setAutoPick(undefined); /* a remounting Composer must not re-apply a stale pick */ }} style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".04em", textTransform: "uppercase", padding: "7px 13px", borderRadius: 8, cursor: "pointer", border: "1px solid var(--bd)", background: view === v ? "var(--band)" : "#fffefb", color: view === v ? "var(--burg)" : "var(--ink)" }}>
-              {v === "first" ? "First-visit" : v === "packages" ? "Packages" : v === "composer" ? "Composer" : v === "manager" ? "Manager" : "See what wins"}
+              {v === "workshop" ? "Workshop" : v === "first" ? "First-visit" : v === "packages" ? "Packages" : v === "composer" ? "Composer" : v === "manager" ? "Manager" : "See what wins"}
             </button>
           ))}
         </div>
         <div style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
-          {(["t-capp", "t-bold"] as Theme[]).map((t) => (
+          {(["t-capp", "t-bold", "t-edn"] as Theme[]).map((t) => (
             <button key={t} type="button" onClick={() => setTheme(t)} style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".04em", textTransform: "uppercase", padding: "7px 13px", borderRadius: 8, cursor: "pointer", border: "1px solid var(--bd)", background: theme === t ? "var(--band)" : "#fffefb", color: theme === t ? "var(--burg)" : "var(--ink)" }}>
-              {t === "t-capp" ? "Cappuccino" : "Bold Pastille"}
+              {t === "t-capp" ? "Cappuccino" : t === "t-bold" ? "Bold Pastille" : "Editorial"}
             </button>
           ))}
         </div>
       </div>
 
-      <div style={{ maxWidth: 1200, margin: "0 auto 14px" }}>
-        <HubHeaderBar title={view === "first" ? "Submission Packages" : "Submission Package Builder"} titleAfter={view === "first" ? largerProPill : proPill} right={view === "first" ? undefined : msChip} style={{ padding: "20px 24px", gap: 14, boxShadow: "none" }} titleStyle={{ fontWeight: 700, fontSize: 26, color: "var(--ink)" }} />
-      </div>
+      {view !== "workshop" && (
+        <div style={{ maxWidth: 1200, margin: "0 auto 14px" }}>
+          <HubHeaderBar title={view === "first" ? "Submission Packages" : "Submission Package Builder"} titleAfter={view === "first" ? largerProPill : proPill} right={view === "first" ? undefined : msChip} style={{ padding: "20px 24px", gap: 14, boxShadow: "none" }} titleStyle={{ fontWeight: 700, fontSize: 26, color: "var(--ink)" }} />
+        </div>
+      )}
 
-      {view === "first" ? (
+      {view === "workshop" ? (
+        <div style={{ maxWidth: 1480, margin: "0 auto" }}>
+          {/* Mock qhbar for the workshop (the real host mounts ChromeSlab): crumb + title + Pro + chip. */}
+          <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "4px 8px 22px" }}>
+            <div>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--hdr)", opacity: 0.6 }}>Scriptally / Manuscripts / Submission Packages</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 4 }}>
+                <span style={{ fontFamily: FONT_SERIF, fontSize: 25, fontWeight: 800, color: "var(--hdr)" }}>Package Workshop</span>
+                {proPill}
+              </div>
+            </div>
+            <span style={{ marginLeft: "auto" }}>{msChip}</span>
+          </div>
+          <PackageWorkshop versions={versions} packages={MOCK_PACKAGES} queries={MOCK_QUERIES} />
+        </div>
+      ) : view === "first" ? (
         <section style={{ maxWidth: 1200, margin: "0 auto", background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", padding: "16px 16px 20px" }}>
           {/* Mirrors Nick's dev fixture (1 letter, 0 packages): letters-only → one LIVE card + two examples. */}
           <FirstVisitHome versions={versions.filter((v) => v.componentType === ComponentType.QUERY_LETTER)} onBuild={noop} onCreate={openMat} onEditMaterial={editMat} onExample={setExample} />
