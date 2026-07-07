@@ -42,6 +42,8 @@ import {
   AgentsSubFilter,
   AgentsQueriedFilter,
   AgentsSort,
+  AgentsLocationFilter,
+  AgentsGroupBy,
   filterAgents,
   groupAgents,
   flattenGroups,
@@ -50,11 +52,12 @@ import {
   buildAgentTimeline,
   formatTimelineDate,
   upNextMeta,
-  filterSentence,
+  agentsSummary,
   agentIdleCount,
 } from "../lib/agentsPage";
 import { agentPrimary, agentSecondary, agentInitials } from "../lib/agentDisplay";
 import { agentLocation, flagFor, isHomeMarket, getHomeCountry, countryName } from "../lib/territory";
+import { FilterDropdown } from "./agents/FilterDropdown";
 import "flag-icons/css/flag-icons.min.css";
 import "./agents/agentsV2.css";
 
@@ -132,7 +135,9 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
   const [search, setSearch] = useState("");
   const [subFilter, setSubFilter] = useState<AgentsSubFilter>("all");
   const [queriedFilter, setQueriedFilter] = useState<AgentsQueriedFilter>("all");
+  const [locationFilter, setLocationFilter] = useState<AgentsLocationFilter>("all");
   const [sortBy, setSortBy] = useState<AgentsSort>("rating");
+  const [groupBy, setGroupBy] = useState<AgentsGroupBy>("none"); // default flat — grouping only when chosen
   const searchRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -208,9 +213,12 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
   }, []);
 
   // ── Derived list state (all client-side, from agentsPage.ts) ──
+  // "local" = the user's home market (stored homeCountry → browser guess → GB); the deployed
+  // territory foundation (agent.country vs homeCountry) powers the Location filter + grouping.
+  const homeCountry = getHomeCountry(currentUser);
   const visibleAgents = pendingDelete ? agents.filter((a) => a.id !== pendingDelete.agent.id) : agents;
-  const filtered = filterAgents(visibleAgents, queries, subFilter, queriedFilter, search);
-  const groups = groupAgents(filtered, sortBy);
+  const filtered = filterAgents(visibleAgents, queries, subFilter, queriedFilter, search, locationFilter, homeCountry);
+  const groups = groupAgents(filtered, sortBy, groupBy, queries, homeCountry);
   const flat = flattenGroups(groups);
   const upNext = upNextCandidate(filtered, queries);
   const selectedAgent = flat.find((a) => a.id === selectedAgentId) ?? null;
@@ -548,7 +556,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
                   onClick={() => void flipAvailability(a)}
                   title="Click to flip — the agent's own availability"
                 >
-                  <span className="ag-d" style={{ background: isOpen ? "var(--sd-hue, #7c3a2a)" : "rgba(0,0,0,0.2)" }} />
+                  <span className="ag-d" style={{ background: isOpen ? "var(--a-ink, var(--sd-hue, #7c3a2a))" : "rgba(0,0,0,0.2)" }} />
                   {isOpen ? "Open to queries" : a.submissionStatus === SubmissionStatus.CLOSED ? "Closed to queries" : "Availability unknown"}
                 </button>
                 <button
@@ -728,7 +736,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
           className="ag-cmd-open"
           title={isOpen ? "Open to queries" : a.submissionStatus === SubmissionStatus.CLOSED ? "Closed to queries" : "Availability unknown"}
         >
-          <span className="ag-d" style={{ background: isOpen ? "var(--sd-hue, #7c3a2a)" : "rgba(0,0,0,0.2)" }} />
+          <span className="ag-d" style={{ background: isOpen ? "var(--a-ink, var(--sd-hue, #7c3a2a))" : "rgba(0,0,0,0.2)" }} />
           {isOpen ? "Open" : a.submissionStatus === SubmissionStatus.CLOSED ? "Closed" : "Unknown"}
         </span>
       </div>
@@ -748,52 +756,56 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
         searchRef={searchRef}
       />
 
-      {/* Control row: segmented filter toggles · sort · selected-agent actions */}
-      <div className="ag-chips">
-        <div className="ag-seggrp">
-          <span className="ag-seglbl" aria-hidden="true">Status</span>
-          <div className="ag-seg" role="group" aria-label="Filter by availability">
-            {([["all", "All"], ["open", "Open"], ["closed", "Closed"]] as [AgentsSubFilter, string][]).map(([v, label]) => (
-              <button type="button" key={v} className={subFilter === v ? "on" : undefined} aria-pressed={subFilter === v} onClick={() => setSubFilter(v)}>
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-        <span className="ag-chipdiv" aria-hidden="true" />
-        <div className="ag-seggrp">
-          <span className="ag-seglbl" aria-hidden="true">Queried</span>
-          <div className="ag-seg" role="group" aria-label="Filter by queried">
-            {([["all", "All"], ["yes", "Queried"], ["no", "Not queried"]] as [AgentsQueriedFilter, string][]).map(([v, label]) => (
-              <button type="button" key={v} className={queriedFilter === v ? "on" : undefined} aria-pressed={queriedFilter === v} onClick={() => setQueriedFilter(v)}>
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-        <span className="ag-chipdiv" aria-hidden="true" />
-        <select
-          className="ag-sortsel"
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value as AgentsSort)}
-          aria-label="Sort agents"
-          // Chevron lives here, not in agentsV2.css — the Tailwind v4 CSS parser rejects this data-URI.
-          style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%2384878c' stroke-width='2'%3E%3Cpath d='M3 5l4 4 4-4'/%3E%3C/svg%3E")` }}
-        >
-          <option value="rating">Sort · Star rating</option>
-          <option value="az">Sort · A to Z</option>
-          <option value="resp">Sort · Response time</option>
-        </select>
-        {/* Send query / Edit profile retired from the control row — they now live once, on the
-            reading pane's command bar (hub grammar's single-home rule). */}
+      {/* Filter bar — custom themable dropdowns (Status · Queried · Location | Sort | Group by),
+          left-aligned (ref editorial-agents-midnight-v2.html). Location + Group-by-Location run on
+          the DEPLOYED territory foundation (agent.country vs homeCountry); the list is flat by
+          default — grouping only sections it when a Group-by option is chosen. */}
+      <div className="ag-filters">
+        <FilterDropdown
+          label="Status" value={subFilter} isActive={subFilter !== "all"}
+          onChange={(v) => setSubFilter(v as AgentsSubFilter)}
+          options={[{ value: "all", label: "All" }, { value: "open", label: "Open" }, { value: "closed", label: "Closed" }]}
+        />
+        <FilterDropdown
+          label="Queried" value={queriedFilter} isActive={queriedFilter !== "all"}
+          onChange={(v) => setQueriedFilter(v as AgentsQueriedFilter)}
+          options={[{ value: "all", label: "All" }, { value: "yes", label: "Queried" }, { value: "no", label: "Not queried" }]}
+        />
+        <FilterDropdown
+          label="Location" newFlag value={locationFilter} isActive={locationFilter !== "all"}
+          onChange={(v) => setLocationFilter(v as AgentsLocationFilter)}
+          options={[{ value: "all", label: "All" }, { value: "domestic", label: "Domestic" }, { value: "international", label: "International" }]}
+        />
+        <span className="ag-fdiv" aria-hidden="true" />
+        <FilterDropdown
+          label="Sort" value={sortBy} isActive={sortBy !== "rating"}
+          onChange={(v) => setSortBy(v as AgentsSort)}
+          options={[{ value: "rating", label: "Star rating" }, { value: "az", label: "A to Z" }, { value: "resp", label: "Response time" }]}
+        />
+        <span className="ag-fdiv" aria-hidden="true" />
+        <FilterDropdown
+          label="Group by" newFlag value={groupBy} isActive={groupBy !== "none"}
+          onChange={(v) => setGroupBy(v as AgentsGroupBy)}
+          options={[{ value: "none", label: "None" }, { value: "rating", label: "Rating" }, { value: "location", label: "Location" }, { value: "queried", label: "Queried status" }]}
+        />
       </div>
+
+      {/* Summary line — replaces the descriptive sentence; only the clauses that apply are shown. */}
+      {(() => {
+        const s = agentsSummary(filtered.length, subFilter, queriedFilter, locationFilter, sortBy, groupBy);
+        return (
+          <div className="ag-summary">
+            <b>{s.count}</b>
+            {s.clauses.map((c, i) => (
+              <React.Fragment key={i}> &middot; {c.label} <b>{c.value}</b></React.Fragment>
+            ))}
+          </div>
+        );
+      })()}
 
       {/* Panes */}
       <div className="ag-panes">
         <div className="ag-listcol">
-          <div className="ag-listsentence" title={filterSentence(subFilter, queriedFilter, sortBy)}>
-            {filterSentence(subFilter, queriedFilter, sortBy)}
-          </div>
           {upNext && (
             <button type="button" className="ag-upnext ag-panel" onClick={() => setSelectedAgentId(upNext.id)}>
               <span className="ag-spark" aria-hidden="true"><Sparkles /></span>

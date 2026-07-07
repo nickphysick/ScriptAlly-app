@@ -23,6 +23,8 @@ import {
   agentsPulse,
   upNextMeta,
   filterSentence,
+  agentTerritory,
+  agentsSummary,
 } from "./agentsPage";
 import { Agent, Query, Manuscript, Activity, ActivityType, QueryStatus, SubmissionStatus, SubmissionMethod } from "../types";
 
@@ -109,34 +111,89 @@ describe("agentsPage · sortAgents", () => {
   });
 });
 
-describe("agentsPage · groupAgents", () => {
+describe("agentsPage · groupAgents (grouping driven by groupBy, not the sort)", () => {
   const pin = mkAgent({ id: "p", name: "Pinned Pat", starRating: 2, pinned: true });
   const five = mkAgent({ id: "f5", name: "Five Star", starRating: 5 });
   const one = mkAgent({ id: "f1", name: "One Star", starRating: 1 as 1 });
   const aside = mkAgent({ id: "sa", name: "Aside Al", starRating: 5, setAside: true });
 
-  it("rating sort: Pinned on top, tiers with labels, 1★ folds into Long shots, set-aside sinks", () => {
-    const groups = groupAgents([five, one, pin, aside], "rating");
-    expect(groups.map((g) => g.key)).toEqual(["pinned", "tier-5", "tier-2", "aside"]);
-    expect(groups[0].rows.map((a) => a.id)).toEqual(["p"]);
-    expect(groups[1].label).toBe("Top picks");
-    expect(groups[1].stars).toBe("★★★★★");
-    expect(groups[2].label).toBe("Long shots");
-    expect(groups[2].rows.map((a) => a.id)).toEqual(["f1"]); // 1★ retained
-    expect(groups[3].rows.map((a) => a.id)).toEqual(["sa"]);
-  });
-
-  it("az / resp sorts render flat (no tier headers) but keep Pinned + set-aside groups", () => {
-    const groups = groupAgents([five, one, pin, aside], "az");
+  it("groupBy none: ONE flat run even under the rating sort; Pinned + set-aside groups kept", () => {
+    const groups = groupAgents([five, one, pin, aside], "rating", "none", [], "");
     expect(groups.map((g) => g.key)).toEqual(["pinned", "flat", "aside"]);
     expect(groups[1].label).toBeNull();
     expect(flattenGroups(groups).map((a) => a.id)).toEqual(["p", "f5", "f1", "sa"]);
   });
 
+  it("groupBy rating: star tiers with labels, 1★ folds into Long shots, set-aside sinks", () => {
+    const groups = groupAgents([five, one, pin, aside], "rating", "rating", [], "");
+    expect(groups.map((g) => g.key)).toEqual(["pinned", "tier-5", "tier-2", "aside"]);
+    expect(groups[1].label).toBe("Top picks");
+    expect(groups[1].stars).toBe("★★★★★");
+    expect(groups[2].label).toBe("Long shots");
+    expect(groups[2].rows.map((a) => a.id)).toEqual(["f1"]); // 1★ retained
+  });
+
+  it("groupBy location: Domestic / International / No location vs the home market", () => {
+    const gb = mkAgent({ id: "gb", country: "GB" });
+    const us = mkAgent({ id: "us", country: "US" });
+    const none = mkAgent({ id: "nn" });
+    const groups = groupAgents([gb, us, none], "az", "location", [], "GB");
+    expect(groups.map((g) => g.label)).toEqual(["Domestic", "International", "No location"]);
+    expect(groups[0].rows.map((a) => a.id)).toEqual(["gb"]);
+    expect(groups[1].rows.map((a) => a.id)).toEqual(["us"]);
+    expect(groups[2].rows.map((a) => a.id)).toEqual(["nn"]);
+  });
+
+  it("groupBy queried: Queried / Not queried sections", () => {
+    const q = mkAgent({ id: "q" });
+    const nq = mkAgent({ id: "nq" });
+    const groups = groupAgents([q, nq], "az", "queried", [mkQuery({ agentId: "q" })], "");
+    expect(groups.map((g) => g.label)).toEqual(["Queried", "Not queried"]);
+    expect(groups[0].rows.map((a) => a.id)).toEqual(["q"]);
+  });
+
   it("a pinned agent that is also set aside sinks (set-aside wins)", () => {
     const both = mkAgent({ id: "b", pinned: true, setAside: true });
-    const groups = groupAgents([both, five], "rating");
+    const groups = groupAgents([both, five], "rating", "rating", [], "");
     expect(groups.map((g) => g.key)).toEqual(["tier-5", "aside"]);
+  });
+});
+
+describe("agentsPage · agentTerritory + location filter (deployed location foundation)", () => {
+  it("classifies domestic / international / none vs the home market (legacy names resolve)", () => {
+    expect(agentTerritory({ country: "GB" }, "GB")).toBe("domestic");
+    expect(agentTerritory({ country: "US" }, "GB")).toBe("international");
+    expect(agentTerritory({ country: "United Kingdom" }, "GB")).toBe("domestic");
+    expect(agentTerritory({ country: undefined }, "GB")).toBe("none");
+    expect(agentTerritory({ country: "" }, "GB")).toBe("none");
+  });
+  it("location filter keeps only the matching territory; no-country agents match neither", () => {
+    const gb = mkAgent({ id: "gb", country: "GB" });
+    const us = mkAgent({ id: "us", country: "US" });
+    const none = mkAgent({ id: "nn" });
+    const all = [gb, us, none];
+    expect(filterAgents(all, [], "all", "all", "", "domestic", "GB").map((a) => a.id)).toEqual(["gb"]);
+    expect(filterAgents(all, [], "all", "all", "", "international", "GB").map((a) => a.id)).toEqual(["us"]);
+    expect(filterAgents(all, [], "all", "all", "", "all", "GB").map((a) => a.id)).toEqual(["gb", "us", "nn"]);
+  });
+});
+
+describe("agentsPage · agentsSummary (only the clauses that apply)", () => {
+  it("no filters, no group → count + sorted-by only", () => {
+    const s = agentsSummary(12, "all", "all", "all", "rating", "none");
+    expect(s.count).toBe("12 agents");
+    expect(s.clauses).toEqual([{ label: "sorted by", value: "star rating" }]);
+  });
+  it("singular count", () => {
+    expect(agentsSummary(1, "all", "all", "all", "az", "none").count).toBe("1 agent");
+  });
+  it("active filters join; grouped-by appears only when not None", () => {
+    const s = agentsSummary(4, "open", "no", "international", "resp", "location");
+    expect(s.clauses).toEqual([
+      { label: "filtered by", value: "open, not queried, international" },
+      { label: "sorted by", value: "response time" },
+      { label: "grouped by", value: "location" },
+    ]);
   });
 });
 

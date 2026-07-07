@@ -11,10 +11,25 @@
  * (the repo's lib-level vitest pattern — no component-test infra).
  */
 import { Agent, Query, Manuscript, Activity, QueryStatus, SubmissionStatus } from "../types";
+import { isHomeMarket, normaliseCountry } from "./territory";
 
 export type AgentsSubFilter = "all" | "open" | "closed";
 export type AgentsQueriedFilter = "all" | "yes" | "no";
 export type AgentsSort = "rating" | "az" | "resp";
+export type AgentsLocationFilter = "all" | "domestic" | "international";
+export type AgentsGroupBy = "none" | "rating" | "location" | "queried";
+
+/**
+ * An agent's territory relative to the user's home market — DERIVED from `agent.country` vs the
+ * user's resolved `homeCountry` (the deployed location foundation: territory.ts + ISO codes). Never
+ * stored. `none` = no resolvable country, so such an agent matches neither the Domestic nor the
+ * International filter (it only appears under "All") and groups under "No location".
+ */
+export type AgentTerritory = "domestic" | "international" | "none";
+export function agentTerritory(agent: Pick<Agent, "country">, homeCountry: string): AgentTerritory {
+  if (!normaliseCountry(agent.country)) return "none";
+  return isHomeMarket(agent.country, homeCountry) ? "domestic" : "international";
+}
 
 /** Query ids belonging to an agent — the join used by every activity-derived value. */
 const queryIdsFor = (agentId: string, queries: Query[]): Set<string> =>
@@ -24,13 +39,17 @@ const queryIdsFor = (agentId: string, queries: Query[]): Set<string> =>
 export const agentQueried = (agentId: string, queries: Query[]): boolean =>
   queries.some((q) => q.agentId === agentId);
 
-/** Live filter: availability chip group + queried chip group + name/agency search. */
+/** Live filter: availability + queried + name/agency search + location (domestic/international vs
+ *  the user's home market). `location`/`homeCountry` are optional so existing 5-arg callers/tests
+ *  keep the pre-location behaviour; the Agents page passes both. */
 export function filterAgents(
   agents: Agent[],
   queries: Query[],
   sub: AgentsSubFilter,
   queried: AgentsQueriedFilter,
   search: string,
+  location: AgentsLocationFilter = "all",
+  homeCountry: string = "",
 ): Agent[] {
   const term = search.trim().toLowerCase();
   return agents.filter((a) => {
@@ -39,6 +58,7 @@ export function filterAgents(
     const q = agentQueried(a.id, queries);
     if (queried === "yes" && !q) return false;
     if (queried === "no" && q) return false;
+    if (location !== "all" && agentTerritory(a, homeCountry) !== location) return false;
     if (term && !(a.name || "").toLowerCase().includes(term) && !(a.agency || "").toLowerCase().includes(term))
       return false;
     return true;
@@ -66,12 +86,20 @@ export interface AgentListGroup {
 }
 
 /**
- * The rendered list order. A Pinned group always sits on top across all sorts; set-aside agents
- * always sink to a muted bottom group (existing lifecycle semantics — hidden from suggestions,
- * never interleaved). Tier headers appear ONLY under the star-rating sort; A–Z and Response-time
- * render flat. Ratings of 1 fold into "Long shots" so no agent can vanish from a grouped list.
+ * The rendered list order. A Pinned group always sits on top; set-aside agents always sink to a
+ * muted bottom group (existing lifecycle semantics — hidden from suggestions, never interleaved).
+ * The MIDDLE is sectioned by the chosen `groupBy` (NOT by the sort): "none" → one flat run;
+ * "rating" → star tiers (1★ folds into Long shots so no agent vanishes); "location" → Domestic /
+ * International / No location; "queried" → Queried / Not queried. Rows within every section keep the
+ * active sort order.
  */
-export function groupAgents(filtered: Agent[], sort: AgentsSort): AgentListGroup[] {
+export function groupAgents(
+  filtered: Agent[],
+  sort: AgentsSort,
+  groupBy: AgentsGroupBy,
+  queries: Query[],
+  homeCountry: string,
+): AgentListGroup[] {
   const pinned = filtered.filter((a) => a.pinned && !a.setAside);
   const aside = filtered.filter((a) => a.setAside);
   const rest = filtered.filter((a) => !a.pinned && !a.setAside);
@@ -79,8 +107,8 @@ export function groupAgents(filtered: Agent[], sort: AgentsSort): AgentListGroup
 
   if (pinned.length) groups.push({ key: "pinned", label: "Pinned", stars: null, rows: sortAgents(pinned, sort) });
 
-  if (sort === "rating") {
-    const sorted = sortAgents(rest, sort);
+  const sorted = sortAgents(rest, sort);
+  if (groupBy === "rating") {
     const tiers: [number, string, string][] = [
       [5, "Top picks", "★★★★★"],
       [4, "Strong fits", "★★★★"],
@@ -91,8 +119,23 @@ export function groupAgents(filtered: Agent[], sort: AgentsSort): AgentListGroup
       const rows = sorted.filter((a) => (r === 2 ? (a.starRating || 0) <= 2 : a.starRating === r));
       if (rows.length) groups.push({ key: `tier-${r}`, label, stars, rows });
     }
+  } else if (groupBy === "location") {
+    const sections: [AgentTerritory, string][] = [
+      ["domestic", "Domestic"],
+      ["international", "International"],
+      ["none", "No location"],
+    ];
+    for (const [terr, label] of sections) {
+      const rows = sorted.filter((a) => agentTerritory(a, homeCountry) === terr);
+      if (rows.length) groups.push({ key: `loc-${terr}`, label, stars: null, rows });
+    }
+  } else if (groupBy === "queried") {
+    const yes = sorted.filter((a) => agentQueried(a.id, queries));
+    const no = sorted.filter((a) => !agentQueried(a.id, queries));
+    if (yes.length) groups.push({ key: "q-yes", label: "Queried", stars: null, rows: yes });
+    if (no.length) groups.push({ key: "q-no", label: "Not queried", stars: null, rows: no });
   } else if (rest.length) {
-    groups.push({ key: "flat", label: null, stars: null, rows: sortAgents(rest, sort) });
+    groups.push({ key: "flat", label: null, stars: null, rows: sorted });
   }
 
   if (aside.length)
@@ -222,6 +265,48 @@ export function filterSentence(sub: AgentsSubFilter, queried: AgentsQueriedFilte
     queried === "yes" ? " you've already queried" : queried === "no" ? " you haven't queried yet" : ", both queried and unqueried";
   const sortPhrase = sort === "az" ? "sorted A to Z" : sort === "resp" ? "sorted by response time" : "sorted by star rating";
   return `${subject}${queriedClause}, ${sortPhrase}.`;
+}
+
+/**
+ * The summary line that replaces the descriptive sentence: `N agents · filtered by … · sorted by …
+ * · grouped by …`. Returns structured clauses (label + value) so the component can style the values
+ * in the accent; only the clauses that APPLY are emitted — no "filtered by" with no active filters,
+ * no "grouped by" when None. `N` is the filtered count.
+ */
+export interface AgentsSummaryClause {
+  label: string;
+  value: string;
+}
+export interface AgentsSummaryModel {
+  count: string;
+  clauses: AgentsSummaryClause[];
+}
+export function agentsSummary(
+  n: number,
+  sub: AgentsSubFilter,
+  queried: AgentsQueriedFilter,
+  location: AgentsLocationFilter,
+  sort: AgentsSort,
+  groupBy: AgentsGroupBy,
+): AgentsSummaryModel {
+  const count = `${n} ${n === 1 ? "agent" : "agents"}`;
+  const clauses: AgentsSummaryClause[] = [];
+
+  const active: string[] = [];
+  if (sub === "open") active.push("open");
+  else if (sub === "closed") active.push("closed");
+  if (queried === "yes") active.push("queried");
+  else if (queried === "no") active.push("not queried");
+  if (location === "domestic") active.push("domestic");
+  else if (location === "international") active.push("international");
+  if (active.length) clauses.push({ label: "filtered by", value: active.join(", ") });
+
+  clauses.push({ label: "sorted by", value: sort === "az" ? "a to z" : sort === "resp" ? "response time" : "star rating" });
+
+  if (groupBy !== "none") {
+    clauses.push({ label: "grouped by", value: groupBy === "rating" ? "rating" : groupBy === "location" ? "location" : "queried status" });
+  }
+  return { count, clauses };
 }
 
 /* ── Desk rule (ref design-refs/pane-height-rules-v1.html, Rule 3) ─────────────────────── */

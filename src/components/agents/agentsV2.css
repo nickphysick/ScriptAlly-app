@@ -42,6 +42,16 @@
   --ag-home: #6f7f68;
   --ag-homefill: #e9ede3;
   --ag-homebd: rgba(111, 127, 104, 0.32);
+  /* Filter-dropdown + summary accent — neutral in Capp/Bold (the page's own --ag-* accent); the
+     .t-edn override below repoints these to the midnight --a-* colour-role map. */
+  --fd-actbg: var(--ag-selbg);
+  --fd-actline: var(--ag-line);
+  --fd-actink: var(--ag-accent);
+  --fd-openline: var(--ag-accent);
+  --fd-ring: var(--ag-selbg);
+  --fd-opthover: var(--ag-selhover);
+  --fd-optselbg: var(--ag-selbg);
+  --fd-optselink: var(--ag-accent);
 }
 .t-bold .agv2 {
   --ag-line: rgba(29, 23, 18, 0.14);
@@ -73,11 +83,20 @@
   --ag-sub: #f4f4f5;
   --ag-av-bg: var(--hub-monogram, #e9eaeb);
   --ag-av-ink: var(--hub-monogram-tx, #44484d);
-  --ag-solid: #44484d;
+  --ag-solid: var(--a-ink);       /* primary buttons (Add agent) → midnight, per the colour-role map */
   --ag-solid-ink: #ffffff;
   --ag-home: #555555;
   --ag-homefill: #f1f1ef;
   --ag-homebd: #e3e2e0;
+  /* Editorial colour-role map — the filter dropdowns + summary ride the midnight --a-* accent. */
+  --fd-actbg: var(--a-soft);
+  --fd-actline: var(--a-line);
+  --fd-actink: var(--a-ink);
+  --fd-openline: var(--a-ink);
+  --fd-ring: var(--a-fill);
+  --fd-opthover: var(--a-soft);
+  --fd-optselbg: var(--a-fill);
+  --fd-optselink: var(--a-ink);
 }
 
 /* ── Viewport-locked page shell (fills the AppShell agents slot; the stage never scrolls) ── */
@@ -311,6 +330,67 @@
 }
 .t-edn .agv2 .ag-sortsel { border-color: transparent; box-shadow: 0 2px 8px rgba(20, 20, 25, 0.05); }
 .agv2 .ag-chipacts { margin-left: auto; display: flex; gap: 8px; }
+
+/* ── Filter bar — custom themable dropdowns (FilterDropdown), left-aligned, with hairline dividers.
+      Colour rides the page-scoped --fd-* vars: neutral in Capp/Bold, the midnight --a-* map in
+      Editorial (see CLAUDE.md "Editorial theme colour roles"). ── */
+.agv2 .ag-filters { display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap; margin-bottom: 0; flex: none; }
+.agv2 .agfd { display: flex; flex-direction: column; gap: 5px; }
+.agv2 .agfd-lbl {
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: 0.13em;
+  text-transform: uppercase; color: var(--ag-muted);
+}
+.agv2 .agfd-new {
+  color: var(--fd-actink); border: 1px solid var(--fd-actline); border-radius: 4px;
+  padding: 0 4px; margin-left: 5px; font-size: 7.5px; letter-spacing: 0.08em;
+}
+.agv2 .agfd-dd { position: relative; }
+.agv2 .agfd-trig {
+  display: flex; align-items: center; gap: 10px; font-family: inherit; font-size: 13px; font-weight: 500;
+  color: var(--ag-ink); cursor: pointer; background: var(--card, #fffefb);
+  border: var(--ag-edgew) solid var(--ag-edge); border-radius: 9px; padding: 9px 12px;
+}
+.agv2 .agfd-trig:hover:not(:disabled) { border-color: var(--ag-line); }
+.agv2 .agfd-trig:disabled { opacity: 0.5; cursor: not-allowed; }
+.agv2 .agfd-trig.act { background: var(--fd-actbg); border-color: var(--fd-actline); color: var(--fd-actink); font-weight: 600; }
+.agv2 .agfd-dd.open .agfd-trig { border-color: var(--fd-openline); box-shadow: 0 0 0 3px var(--fd-ring); }
+.agv2 .agfd-val { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.agv2 .agfd-chev { margin-left: auto; display: flex; color: var(--ag-muted); transition: transform 0.16s; }
+.agv2 .agfd-chev svg { width: 13px; height: 13px; }
+.agv2 .agfd-dd.open .agfd-chev { transform: rotate(180deg); }
+.agv2 .agfd-menu {
+  position: absolute; top: calc(100% + 6px); left: 0; min-width: 100%; list-style: none; margin: 0; padding: 5px;
+  background: var(--card, #ffffff); border: var(--ag-edgew) solid var(--ag-edge); border-radius: 10px;
+  box-shadow: 0 14px 30px rgba(30, 25, 20, 0.16); z-index: 30;
+}
+.agv2 .agfd-opt { font-size: 13px; color: var(--ag-ink); padding: 9px 12px; border-radius: 7px; cursor: pointer; white-space: nowrap; display: flex; align-items: center; }
+.agv2 .agfd-opt.hl { background: var(--fd-opthover); }
+.agv2 .agfd-opt.sel { background: var(--fd-optselbg); color: var(--fd-optselink); font-weight: 600; }
+.agv2 .agfd-opt.sel::after { content: '✓'; margin-left: 18px; font-size: 11px; }
+.agv2 .ag-fdiv { width: 1px; height: 38px; background: var(--ag-line); margin: 0 6px; align-self: flex-end; flex: none; }
+
+/* Summary line — `N agents · filtered by … · sorted by … · grouped by …`; values take the accent. */
+.agv2 .ag-summary {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--ag-muted); padding: 14px 3px 16px; border-bottom: 1px solid var(--ag-line); margin: 12px 0; flex: none;
+}
+.agv2 .ag-summary b { color: var(--fd-actink); font-weight: 600; }
+
+/* ── Editorial colour-role map applied on Agents (Part 1's map; scoped to .t-edn, no leak). ── */
+/* Selected row: soft fill + accent border + 3px midnight edge + accent avatar (replaces the lifted card). */
+.t-edn .agv2 .ag-row.sel {
+  background: var(--a-soft); border-color: var(--a-line); border-left: 3px solid var(--a-ink);
+  box-shadow: none; transform: none;
+}
+.t-edn .agv2 .ag-row.sel .ag-mono-av { background: var(--a-fill); color: var(--a-ink); }
+/* Territory pill (domestic/international) → pale-midnight fill + midnight text (both states). */
+.t-edn .agv2 .ag-loc, .t-edn .agv2 .ag-loc.home {
+  background: var(--a-fill); color: var(--a-ink); border: none; border-radius: 6px; padding: 4px 9px;
+}
+/* Status pill → midnight text + accent border (the dot's open colour is set inline to --a-ink). */
+.t-edn .agv2 .ag-openpill { color: var(--a-ink); border-color: var(--a-line); }
+/* Send query (command bar) → midnight primary (Add agent rides the repointed --ag-solid above). */
+.t-edn .agv2 .ag-cmd-primary { background: var(--a-ink); border-color: var(--a-ink); color: #ffffff; }
 
 /* ── Panes grid ── */
 .agv2 .ag-panes {
