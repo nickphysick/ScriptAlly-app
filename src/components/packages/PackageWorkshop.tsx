@@ -28,7 +28,7 @@ import { TypeGlyph } from "./TypeGlyph";
 import { TYPE_META, BUILDER_TYPES, SlotSelection, emptySelection, selectionFromPackage } from "./typeMeta";
 import { isSlotFilled, UNFILLED_SLOT, reachedFull, overallAttachStats, rankPackagesByRequests, strongestPackage, packagesUsingVersion, meetsSampleThreshold, MIN_SENDS_FOR_CLAIM } from "../../lib/packageMetrics";
 import { agentPrimary, AGENT_NOT_SPECIFIED } from "../../lib/agentDisplay";
-import { FONT_SERIF, FONT_MONO } from "../../lib/designTokens";
+import { FONT_SERIF, FONT_MONO, FONT_SANS } from "../../lib/designTokens";
 
 /** Persist payload for a package — all three slot ids ("" for empty; isValidPackage needs them present). */
 export interface PackageSaveFields {
@@ -63,6 +63,9 @@ const chartIcon = (
 const pencilIcon = (
   <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 20h4L18 10l-4-4L4 16z" /><path d="M13 7l4 4" /></svg>
 );
+const fileIcon = (
+  <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinejoin="round" aria-hidden="true"><path d="M14 3H6a1 1 0 00-1 1v16a1 1 0 001 1h12a1 1 0 001-1V8z" /><path d="M14 3v5h5" /></svg>
+);
 
 export interface PackageWorkshopProps {
   versions: ManuscriptVersion[];
@@ -70,15 +73,18 @@ export interface PackageWorkshopProps {
   queries: Query[];
   /** Agents for the "Sent to" list (resolving a package's linked queries to names). */
   agents: Agent[];
-  /** Inline create from the palette — host calls addVersion (fileAttached:false, contentType:'text'). */
-  onCreateVersion: (type: ComponentType, name: string) => void;
-  /** Full text edit — host opens MaterialModal for the version. */
-  onEditVersion: (version: ManuscriptVersion) => void;
+  /** Create a material from the inline editor (host addVersion, fileAttached:false, contentType:'text').
+   *  Returns the new id so the editor can re-select it. */
+  onCreateVersion: (type: ComponentType, name: string, contentDraft: string) => Promise<string | undefined> | string | undefined;
+  /** Update a material's name + body text (host updateVersion). */
+  onUpdateVersion: (id: string, fields: { versionName: string; contentDraft: string }) => void;
+  /** Delete a material (host deleteVersion). The workshop guards orphaning before calling this. */
+  onDeleteVersion: (id: string) => void;
   /** Persist the bench: baseId set → updatePackage, null → addPackage. Returns the (new) package id. */
   onSavePackage: (baseId: string | null, fields: PackageSaveFields) => Promise<string | undefined> | string | undefined;
 }
 
-export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, packages, queries, agents, onCreateVersion, onEditVersion, onSavePackage }) => {
+export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, packages, queries, agents, onCreateVersion, onUpdateVersion, onDeleteVersion, onSavePackage }) => {
   // Mode (Phase A): "packages" (build/assemble) or "materials" (edit the library). The palette + the
   // middle + the right window all follow it; the breadcrumb reflects it. selMat = the material being
   // edited in materials mode. Palette inline-create is GONE — creation now lives in the editor (Phase B).
@@ -126,12 +132,53 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [packages]);
 
-  // Entering materials mode clears any package DnD affordance; leaving it clears the selection.
+  // Materials editor state (Phase B). newType set = creating a new material of that type; selMat set =
+  // editing an existing one. edName/edText are the live form fields; pendingDelete drives the orphan guard.
+  const [newType, setNewType] = useState<ComponentType | null>(null);
+  const [edName, setEdName] = useState("");
+  const [edText, setEdText] = useState("");
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; usedIn: string[] } | null>(null);
+
+  // Sync the form fields when the editing target changes (select a material, or start a new one).
+  useEffect(() => {
+    if (selMat) { const v = versions.find((x) => x.id === selMat); setEdName(v?.versionName ?? ""); setEdText(v?.contentDraft ?? ""); }
+    else if (newType) { setEdName(""); setEdText(""); }
+    setPendingDelete(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selMat, newType]);
+
+  // Entering materials mode clears any package DnD affordance; leaving it clears the selection + editor.
   const enterMode = (m: "packages" | "materials") => {
     setMode(m);
     setDragMat(null);
     setOverSlot(null);
-    if (m === "packages") setSelMat(null);
+    if (m === "packages") { setSelMat(null); setNewType(null); }
+  };
+  const selectMat = (id: string) => { setNewType(null); setSelMat(id); };
+  const startNew = () => { setSelMat(null); setNewType(BUILDER_TYPES[0]); };
+  const canSaveMat = edName.trim().length > 0;
+  const saveMat = async () => {
+    if (!canSaveMat) return;
+    if (selMat) {
+      onUpdateVersion(selMat, { versionName: edName.trim(), contentDraft: edText });
+    } else if (newType) {
+      const id = await onCreateVersion(newType, edName.trim(), edText);
+      if (typeof id === "string") { setNewType(null); setSelMat(id); }
+    }
+    // Stays in materials mode (Done is the explicit exit) — a deliberate deviation from the mock's
+    // save→packages kick, so you can edit several materials in one pass.
+  };
+  const requestDelete = () => {
+    if (!selMat) return;
+    const usedIn = packagesUsingVersion(selMat, packages).map((p) => p.packageName);
+    setPendingDelete({ id: selMat, usedIn });
+  };
+  const confirmDelete = () => {
+    if (!pendingDelete) return;
+    onDeleteVersion(pendingDelete.id);
+    setPendingDelete(null);
+    setSelMat(null);
+    setNewType(null);
   };
 
   // Write an edit to the active package's draft (creating the draft from its baseline on first touch).
@@ -464,6 +511,35 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
         .pkgwk .edpick .mi { font-size:34px; opacity:.4; }
         .pkgwk .edpick .mt { font-family:${FONT_SERIF}; font-size:18px; color:var(--hdr); }
         .pkgwk .edpick .ms { font-size:12.5px; line-height:1.55; max-width:280px; }
+        /* Editor form (ref .edcard-h .newbtn / .typepick / .flabel / .finput / .ftext / .ffile / .med-foot) */
+        .pkgwk .edcard-h .newbtn { margin-left:auto; font-family:${FONT_MONO}; font-size:8.5px; text-transform:uppercase; color:var(--btnT); background:rgba(255,255,255,.6); border:1px solid var(--btnBd); border-radius:8px; padding:8px 12px; cursor:pointer; }
+        .pkgwk .edcard-h .newbtn:hover { background:var(--btnH); }
+        .pkgwk .edcard-b { padding:22px; }
+        .pkgwk .typepick { display:flex; gap:9px; margin-bottom:18px; }
+        .pkgwk .typepick button { flex:1; font-family:${FONT_MONO}; font-size:8.5px; text-transform:uppercase; border:1px solid var(--btnBd); background:var(--card); color:var(--muted); border-radius:9px; padding:12px 4px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:6px; }
+        .pkgwk .typepick button.on { border-color:var(--wk-burg); color:var(--wk-burg); background:var(--selBg); }
+        .pkgwk .flabel { font-family:${FONT_MONO}; font-size:8px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:16px 0 7px; }
+        .pkgwk .flabel.first { margin-top:0; }
+        .pkgwk .finput { width:100%; border:var(--bdw) solid var(--bd); border-radius:10px; padding:12px 14px; font-family:${FONT_SERIF}; font-size:16px; color:var(--ink); outline:none; background:var(--card); }
+        .pkgwk .finput:focus { border-color:var(--wk-burg); }
+        .pkgwk .ftext { width:100%; border:var(--bdw) solid var(--bd); border-radius:10px; padding:13px 14px; font-size:13.5px; line-height:1.65; color:var(--ink); outline:none; min-height:200px; resize:vertical; background:var(--card); font-family:${FONT_SANS}; }
+        .pkgwk .ftext:focus { border-color:var(--wk-burg); }
+        .pkgwk .ffile { display:flex; align-items:center; gap:9px; border:1.5px dashed var(--wk-dash); border-radius:10px; padding:12px 14px; color:var(--muted); font-size:12.5px; font-style:italic; }
+        .pkgwk .ffile .soon { margin-left:auto; font-family:${FONT_MONO}; font-size:7.5px; letter-spacing:.08em; text-transform:uppercase; background:var(--tp); color:var(--gold); border-radius:5px; padding:3px 7px; font-style:normal; }
+        .t-edn .pkgwk .ffile .soon { background:var(--selBg); color:var(--muted); }
+        .pkgwk .med-foot { margin-top:20px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+        .pkgwk .med-foot .save { font-family:${FONT_SERIF}; font-size:16px; font-weight:700; color:var(--btnT); background:var(--btnBg); border:1px solid var(--btnBd); border-radius:11px; padding:13px 28px; cursor:pointer; }
+        .pkgwk .med-foot .save:hover:not(:disabled) { background:var(--btnH); }
+        .pkgwk .med-foot .save:disabled { opacity:.5; cursor:not-allowed; }
+        .pkgwk .med-foot .del { margin-left:auto; font-family:${FONT_MONO}; font-size:8.5px; text-transform:uppercase; color:var(--muted); background:none; border:0; cursor:pointer; }
+        .pkgwk .med-foot .del:hover { color:var(--wk-burg); }
+        /* Delete orphan guard (warn-and-confirm — don't silently empty package slots). */
+        .pkgwk .delwarn { margin-top:16px; border:var(--bdw) solid var(--bd); border-left:3px solid var(--wk-burg); border-radius:0 10px 10px 0; padding:14px 16px; background:var(--card); }
+        .pkgwk .delwarn p { font-size:12.5px; color:var(--ink); line-height:1.55; }
+        .pkgwk .delwarn .used { font-family:${FONT_MONO}; font-size:9px; color:var(--wk-burg); margin-top:6px; }
+        .pkgwk .delwarn .row { display:flex; gap:12px; margin-top:12px; align-items:center; }
+        .pkgwk .delwarn .yes { font-family:${FONT_MONO}; font-size:9px; letter-spacing:.06em; text-transform:uppercase; color:#fff; background:var(--wk-burg); border:0; border-radius:8px; padding:9px 14px; cursor:pointer; }
+        .pkgwk .delwarn .no { font-family:${FONT_MONO}; font-size:9px; text-transform:uppercase; color:var(--muted); background:none; border:0; cursor:pointer; }
         @media (max-width: 1040px) { .pkgwk .wk-windows { flex-direction:column; } .pkgwk .wk-analytics { width:auto; } }
         @media (max-width: 720px) { .pkgwk .wk-body { flex-direction:column; } .pkgwk .wk-palette { width:auto; border-right:0; border-bottom:var(--bdw) solid var(--bd); } }
       `}</style>
@@ -489,7 +565,7 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
                     {items.map((v) => {
                       // Packages mode: drag / click / Enter fills the active slot. Materials mode: click selects
                       // for editing (no drag, grip hidden, "edit ›" affordance, selected chip ringed).
-                      const useMat = () => (mode === "materials" ? setSelMat(v.id) : fillSlot(t, v.id));
+                      const useMat = () => (mode === "materials" ? selectMat(v.id) : fillSlot(t, v.id));
                       return (
                         <div
                           key={v.id}
@@ -627,8 +703,52 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
                 <div className="med">
                   <div className="med-lab"><span className="dotp" />Editing materials — pick from the left, or start new</div>
                   <div className="edcard">
-                    <div className="edcard-h"><h4>Materials</h4></div>
-                    <div className="edpick"><div className="mi" aria-hidden="true">✎</div><div className="mt">Edit your materials</div><div className="ms">Pick a material from the list on the left, or start a new one — the editor opens here (Phase B).</div></div>
+                    <div className="edcard-h">
+                      <h4>{selMat ? (versionById(selMat)?.versionName || "Material") : newType ? "New material" : "Materials"}</h4>
+                      <button type="button" className="newbtn" onClick={startNew}>＋ New material</button>
+                    </div>
+                    {selMat || newType ? (
+                      (() => {
+                        const editType = selMat ? versionById(selMat)?.componentType ?? BUILDER_TYPES[0] : newType ?? BUILDER_TYPES[0];
+                        const noun = TYPE_META[editType].label.toLowerCase();
+                        const file = selMat ? versionById(selMat)?.fileName : undefined;
+                        return (
+                          <div className="edcard-b">
+                            {newType && !selMat && (
+                              <div className="typepick">
+                                {BUILDER_TYPES.map((t) => (
+                                  <button key={t} type="button" className={newType === t ? "on" : ""} onClick={() => setNewType(t)}>
+                                    <TypeGlyph type={t} size={15} /><span>{TYPE_META[t].label}</span>
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                            <div className="flabel first">Title</div>
+                            <input className="finput" value={edName} onChange={(e) => setEdName(e.target.value)} placeholder={`Name this ${noun}…`} aria-label="Material title" />
+                            <div className="flabel">The text</div>
+                            <textarea className="ftext" value={edText} onChange={(e) => setEdText(e.target.value)} placeholder={`Paste or write the full ${noun}…`} aria-label="Material text" />
+                            <div className="flabel">Attached file</div>
+                            <div className="ffile" aria-disabled="true" title="File attachments are coming soon">{fileIcon}{file || "Upload a file"}<span className="soon">Coming soon</span></div>
+                            <div className="med-foot">
+                              <button type="button" className="save" disabled={!canSaveMat} title={!canSaveMat ? "Give the material a title first" : undefined} onClick={saveMat}>{selMat ? "Save changes" : "Create material"}</button>
+                              {selMat && <button type="button" className="del" onClick={requestDelete}>Delete material</button>}
+                            </div>
+                            {pendingDelete && (
+                              <div className="delwarn">
+                                <p>{pendingDelete.usedIn.length ? "This material is used in a package — deleting it will empty those slots." : "Delete this material? This can’t be undone."}</p>
+                                {pendingDelete.usedIn.length > 0 && <div className="used">USED IN: {pendingDelete.usedIn.join(" · ")}</div>}
+                                <div className="row">
+                                  <button type="button" className="yes" onClick={confirmDelete}>{pendingDelete.usedIn.length ? "Delete anyway" : "Delete"}</button>
+                                  <button type="button" className="no" onClick={() => setPendingDelete(null)}>Cancel</button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()
+                    ) : (
+                      <div className="edpick"><div className="mi" aria-hidden="true">✎</div><div className="mt">Edit your materials</div><div className="ms">Pick a material from the list on the left, or start a new one.</div></div>
+                    )}
                   </div>
                 </div>
               )}

@@ -141,8 +141,9 @@ export const PkgLab: React.FC = () => {
             packages={pkgs}
             queries={MOCK_QUERIES}
             agents={MOCK_AGENTS}
-            onCreateVersion={(type, name) => setVersions((vs) => [...vs, { id: `v-lab-${vs.length}`, manuscriptId: "m", userId: "lab", componentType: type, versionName: name, fileAttached: false, createdDate: "2026-01-03T00:00:00.000Z", contentDraft: "" }])}
-            onEditVersion={editMat}
+            onCreateVersion={(type, name, contentDraft) => { const id = `v-lab-${Date.now()}`; setVersions((vs) => [...vs, { id, manuscriptId: "m", userId: "lab", componentType: type, versionName: name, fileAttached: false, createdDate: "2026-01-03T00:00:00.000Z", contentDraft }]); return id; }}
+            onUpdateVersion={(id, f) => setVersions((vs) => vs.map((v) => (v.id === id ? { ...v, versionName: f.versionName, contentDraft: f.contentDraft } : v)))}
+            onDeleteVersion={(id) => setVersions((vs) => vs.filter((v) => v.id !== id))}
             onSavePackage={(baseId, f) => {
               if (baseId) {
                 setPkgs((ps) => ps.map((p) => (p.id === baseId ? { ...p, packageName: f.packageName, queryLetterVersionId: f.queryLetterVersionId, synopsisVersionId: f.synopsisVersionId, samplePagesVersionId: f.samplePagesVersionId } : p)));
