@@ -369,10 +369,11 @@
 .agv2 .agfd-opt.sel::after { content: '✓'; margin-left: 18px; font-size: 11px; }
 .agv2 .ag-fdiv { width: 1px; height: 38px; background: var(--ag-line); margin: 0 6px; align-self: flex-end; flex: none; }
 
-/* Summary line — `N agents · filtered by … · sorted by … · grouped by …`; values take the accent. */
+/* Summary line — `N agents · filtered by … · sorted by … · grouped by …`. Lives at the TOP of the
+   list container (before the first card): small, muted, centred; values still take the accent. */
 .agv2 .ag-summary {
-  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase;
-  color: var(--ag-muted); padding: 14px 3px 16px; border-bottom: 1px solid var(--ag-line); margin: 12px 0; flex: none;
+  font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ag-muted); text-align: center; padding: 4px 8px 11px; flex: none;
 }
 .agv2 .ag-summary b { color: var(--fd-actink); font-weight: 600; }
 
@@ -742,23 +743,24 @@
 .agv2 .ag-lchip.ghost svg { width: 10px; height: 10px; }
 .agv2 .ag-lchip.ghost:hover { background: var(--ag-selhover); color: var(--ag-ink); }
 .agv2 .ag-iright { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 9px; flex-shrink: 0; }
+/* Availability pill (identity top-right) — enlarged ~2× so the agent's status reads at a glance. */
 .agv2 .ag-openpill {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 9px;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 9px;
+  font-size: 13px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   font-weight: 500;
-  padding: 6px 12px;
-  border-radius: 16px;
+  padding: 12px 22px;
+  border-radius: 22px;
   border: 1px solid var(--ag-line);
   color: var(--ag-ink);
   background: none;
   cursor: pointer;
 }
-.agv2 .ag-openpill .ag-d { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+.agv2 .ag-openpill .ag-d { width: 13px; height: 13px; border-radius: 50%; flex: none; }
 .agv2 .ag-kebab {
   width: 26px;
   height: 26px;
@@ -785,6 +787,8 @@
   box-shadow: 0 12px 30px rgba(45, 42, 38, 0.16);
   padding: 6px;
 }
+/* Command-bar kebab sits at the pane FOOT — its menu opens upward so it can't overflow below. */
+.agv2 .ag-menu.ag-menu-up { top: auto; bottom: 36px; }
 .agv2 .ag-menu button {
   display: flex;
   align-items: center;

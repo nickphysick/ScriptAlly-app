@@ -549,39 +549,16 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
               </div>
             </div>
             <div className="ag-iright">
-              <div style={{ display: "flex", alignItems: "center", gap: 7, position: "relative" }}>
-                <button
-                  type="button"
-                  className="ag-openpill"
-                  onClick={() => void flipAvailability(a)}
-                  title="Click to flip — the agent's own availability"
-                >
-                  <span className="ag-d" style={{ background: isOpen ? "var(--a-ink, var(--sd-hue, #7c3a2a))" : "rgba(0,0,0,0.2)" }} />
-                  {isOpen ? "Open to queries" : a.submissionStatus === SubmissionStatus.CLOSED ? "Closed to queries" : "Availability unknown"}
-                </button>
-                <button
-                  type="button"
-                  className="ag-kebab"
-                  aria-label="More actions"
-                  aria-expanded={menuOpen}
-                  onClick={(e) => { e.stopPropagation(); setMenuOpen((o) => !o); }}
-                >
-                  <MoreHorizontal />
-                </button>
-                {menuOpen && (
-                  <>
-                    <div style={{ position: "fixed", inset: 0, zIndex: 30 }} onClick={() => setMenuOpen(false)} />
-                    <div className="ag-menu">
-                      <button type="button" onClick={() => void toggleSetAside(a)}>
-                        <Archive /> {a.setAside ? "Bring back" : "Set aside"}
-                      </button>
-                      <button type="button" className="ag-danger" onClick={() => { setMenuOpen(false); setDeleteModalAgent(a); }}>
-                        <Trash2 /> Delete…
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
+              {/* Availability pill only — the ⋯ lifecycle menu moved to the command bar (next to Edit profile). */}
+              <button
+                type="button"
+                className="ag-openpill"
+                onClick={() => void flipAvailability(a)}
+                title="Click to flip — the agent's own availability"
+              >
+                <span className="ag-d" style={{ background: isOpen ? "var(--a-ink, var(--sd-hue, #7c3a2a))" : "rgba(0,0,0,0.2)" }} />
+                {isOpen ? "Open to queries" : a.submissionStatus === SubmissionStatus.CLOSED ? "Closed to queries" : "Availability unknown"}
+              </button>
             </div>
           </div>
         </div>
@@ -729,6 +706,31 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
         <button type="button" className="ag-cmd-secondary" onClick={() => openEditAgent(a.id)}>
           <Pencil aria-hidden="true" /> Edit profile
         </button>
+        {/* ⋯ lifecycle menu (Set aside / Delete) — moved here from the identity, next to Edit profile. */}
+        <div style={{ position: "relative", flexShrink: 0 }}>
+          <button
+            type="button"
+            className="ag-kebab"
+            aria-label="More actions"
+            aria-expanded={menuOpen}
+            onClick={(e) => { e.stopPropagation(); setMenuOpen((o) => !o); }}
+          >
+            <MoreHorizontal />
+          </button>
+          {menuOpen && (
+            <>
+              <div style={{ position: "fixed", inset: 0, zIndex: 30 }} onClick={() => setMenuOpen(false)} />
+              <div className="ag-menu ag-menu-up">
+                <button type="button" onClick={() => void toggleSetAside(a)}>
+                  <Archive /> {a.setAside ? "Bring back" : "Set aside"}
+                </button>
+                <button type="button" className="ag-danger" onClick={() => { setMenuOpen(false); setDeleteModalAgent(a); }}>
+                  <Trash2 /> Delete…
+                </button>
+              </div>
+            </>
+          )}
+        </div>
         <span className="ag-cmd-prov">
           {paneProvenance(a, queries.filter((q) => q.agentId === a.id).length)}
         </span>
@@ -790,19 +792,6 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
         />
       </div>
 
-      {/* Summary line — replaces the descriptive sentence; only the clauses that apply are shown. */}
-      {(() => {
-        const s = agentsSummary(filtered.length, subFilter, queriedFilter, locationFilter, sortBy, groupBy);
-        return (
-          <div className="ag-summary">
-            <b>{s.count}</b>
-            {s.clauses.map((c, i) => (
-              <React.Fragment key={i}> &middot; {c.label} <b>{c.value}</b></React.Fragment>
-            ))}
-          </div>
-        );
-      })()}
-
       {/* Panes */}
       <div className="ag-panes">
         <div className="ag-listcol">
@@ -834,6 +823,18 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
             aria-label="Agents"
             fade="var(--card, #fffefb)"
           >
+            {/* Summary line — at the top of the list, before the first card; small, muted, centred. */}
+            {(() => {
+              const s = agentsSummary(filtered.length, subFilter, queriedFilter, locationFilter, sortBy, groupBy);
+              return (
+                <div className="ag-summary">
+                  <b>{s.count}</b>
+                  {s.clauses.map((c, i) => (
+                    <React.Fragment key={i}> &middot; {c.label} <b>{c.value}</b></React.Fragment>
+                  ))}
+                </div>
+              );
+            })()}
             {flat.length ? (
               groups.map((g) => (
                 <React.Fragment key={g.key}>
