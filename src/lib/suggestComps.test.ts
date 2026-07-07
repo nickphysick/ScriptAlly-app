@@ -1,8 +1,9 @@
 import { describe, it, expect } from "vitest";
 import {
   isProUser,
+  scoutLive,
+  SCOUT_LIVE,
   validateSuggestionsPayload,
-  suggestionCautions,
   visibleSuggestions,
   suggestionToComp,
   CompSuggestion,
@@ -13,12 +14,13 @@ const sugg = (over: Partial<CompSuggestion> = {}): CompSuggestion => ({
   title: "Gilded",
   author: "Marissa Meyer",
   year: 2021,
-  rationale: "Craft-guild magic with a darkening bargain.",
-  cautions: [],
+  media: "book",
+  why: "Craft-guild magic with a darkening bargain.",
+  verified: true,
   ...over,
 });
 
-describe("isProUser (the Suggestions gate)", () => {
+describe("isProUser (the Scout gate)", () => {
   it("passes Pro, blocks Free and signed-out", () => {
     expect(isProUser({ plan: UserPlan.PRO })).toBe(true);
     expect(isProUser({ plan: UserPlan.FREE })).toBe(false);
@@ -27,20 +29,63 @@ describe("isProUser (the Suggestions gate)", () => {
   });
 });
 
+describe("SCOUT_LIVE flag", () => {
+  it("defaults OFF", () => {
+    expect(SCOUT_LIVE).toBe(false);
+  });
+  it("scoutLive() reflects the default without an override", () => {
+    delete (globalThis as { __SA_SCOUT_LIVE?: boolean }).__SA_SCOUT_LIVE;
+    expect(scoutLive()).toBe(false);
+  });
+  it("scoutLive() honours the global override, then restores", () => {
+    (globalThis as { __SA_SCOUT_LIVE?: boolean }).__SA_SCOUT_LIVE = true;
+    expect(scoutLive()).toBe(true);
+    delete (globalThis as { __SA_SCOUT_LIVE?: boolean }).__SA_SCOUT_LIVE;
+  });
+});
+
 describe("validateSuggestionsPayload", () => {
-  it("accepts well-formed items", () => {
+  it("accepts well-formed items with the full Scout shape", () => {
     const out = validateSuggestionsPayload({
-      suggestions: [sugg(), sugg({ title: "Iron Widow", cautions: ["MEGA-BESTSELLER"] })],
+      suggestions: [
+        sugg(),
+        sugg({
+          title: "The Bone Shard Daughter",
+          publisher: "Orbit",
+          matchAxis: "bio-mechanical magic",
+          links: { bookshop: "https://bookshop.org/x", googleBooks: "https://books.google/x" },
+          agentMatch: 2,
+        }),
+      ],
     });
     expect(out).toHaveLength(2);
-    expect(out[1].cautions).toEqual(["MEGA-BESTSELLER"]);
+    expect(out[1].publisher).toBe("Orbit");
+    expect(out[1].links).toEqual({ bookshop: "https://bookshop.org/x", googleBooks: "https://books.google/x" });
+    expect(out[1].agentMatch).toBe(2);
   });
 
-  it("drops items missing title/author or with a nonsense year", () => {
+  it("defaults media to book and verified to false", () => {
+    const out = validateSuggestionsPayload({
+      suggestions: [{ title: "T", author: "A", year: 2020, why: "w" }],
+    });
+    expect(out[0].media).toBe("book");
+    expect(out[0].verified).toBe(false);
+  });
+
+  it("keeps a valid non-book media and a true verified", () => {
+    const out = validateSuggestionsPayload({
+      suggestions: [{ title: "T", author: "A", year: 2006, why: "w", media: "film", verified: true }],
+    });
+    expect(out[0].media).toBe("film");
+    expect(out[0].verified).toBe(true);
+  });
+
+  it("drops items missing title/author/why or with a nonsense year", () => {
     const out = validateSuggestionsPayload({
       suggestions: [
         sugg({ title: "" }),
         sugg({ author: "" }),
+        sugg({ why: "" }),
         sugg({ year: 12 }),
         sugg({ year: 2021.5 as unknown as number }),
         sugg({ title: "Keeper" }),
@@ -49,30 +94,18 @@ describe("validateSuggestionsPayload", () => {
     expect(out.map((s) => s.title)).toEqual(["Keeper"]);
   });
 
-  it("filters caution values outside the allow-list", () => {
+  it("omits agentMatch when absent or non-positive", () => {
     const out = validateSuggestionsPayload({
-      suggestions: [sugg({ cautions: ["MEGA-BESTSELLER", "SELF-PUBLISHED", "FRANCHISE-SCALE"] as string[] })],
+      suggestions: [sugg(), sugg({ title: "Z", agentMatch: 0 })],
     });
-    expect(out[0].cautions).toEqual(["MEGA-BESTSELLER", "FRANCHISE-SCALE"]);
+    expect("agentMatch" in out[0]).toBe(false);
+    expect("agentMatch" in out[1]).toBe(false);
   });
 
   it("returns [] for a missing or non-array payload", () => {
     expect(validateSuggestionsPayload(undefined)).toEqual([]);
     expect(validateSuggestionsPayload({})).toEqual([]);
     expect(validateSuggestionsPayload({ suggestions: "nope" })).toEqual([]);
-  });
-});
-
-describe("suggestionCautions", () => {
-  it("appends the derived age flag past five years, after the scale flags", () => {
-    expect(suggestionCautions(sugg({ year: 2021, cautions: ["MEGA-BESTSELLER"] }), 2026)).toEqual([
-      "MEGA-BESTSELLER",
-      "5 YEARS OLD",
-    ]);
-    expect(suggestionCautions(sugg({ year: 2001 }), 2026)).toEqual(["25 YEARS OLD"]);
-  });
-  it("adds nothing for a recent title", () => {
-    expect(suggestionCautions(sugg({ year: 2024 }), 2026)).toEqual([]);
   });
 });
 
@@ -85,15 +118,21 @@ describe("visibleSuggestions", () => {
 });
 
 describe("suggestionToComp", () => {
-  it("writes a suggested-source comp with no undefined values", () => {
-    const comp = suggestionToComp(sugg());
+  it("writes an unticked suggested-source comp with no undefined values", () => {
+    const comp = suggestionToComp(sugg({ publisher: "Feiwel", matchAxis: "premise · voice" }));
     expect(comp).toEqual({
       title: "Gilded",
       source: "suggested",
       author: "Marissa Meyer",
       year: 2021,
+      publisher: "Feiwel",
+      matchAxis: "premise · voice",
     });
+    expect("inQuery" in comp).toBe(false);
     expect(Object.values(comp).some((v) => v === undefined)).toBe(false);
-    expect("note" in comp).toBe(false);
+  });
+  it("omits media when the suggestion is a book, keeps it otherwise", () => {
+    expect("media" in suggestionToComp(sugg({ media: "book" }))).toBe(false);
+    expect(suggestionToComp(sugg({ media: "film" })).media).toBe("film");
   });
 });

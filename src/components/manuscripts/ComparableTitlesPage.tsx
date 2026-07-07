@@ -15,7 +15,7 @@
  * normalizeComp so optional fields stay omit-empty (Firestore maps reject undefined).
  */
 import React, { useState, useEffect, useRef } from "react";
-import { ChevronDown, Plus, Copy, Check, Pencil, X, AlertTriangle } from "lucide-react";
+import { ChevronDown, Plus, Copy, Check, Pencil, X, AlertTriangle, Sparkles, Lock, RefreshCw, BookOpen, Star } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
 import { CompMedia, CompTitle, Manuscript } from "../../types";
 import { HubHeaderBar } from "../shell/HubHeaderBar";
@@ -24,8 +24,26 @@ import { BrandDropdown } from "../forms/BrandDropdown";
 import { isShelvedPresentation } from "../../lib/manuscriptPage";
 import { manuscriptComps, withCompAdded, withCompRemoved, MAX_COMPS } from "../../lib/comps";
 import { compCounts, compMedia, compRole, currentYear, queryHealth, queryLine, recencyFlag } from "../../lib/compsPage";
+import {
+  CompSuggestion,
+  SuggestCompsInput,
+  fetchCompSuggestions,
+  isProUser,
+  scoutLive,
+  suggestionToComp,
+} from "../../lib/suggestComps";
 import { FONT_SERIF } from "../../lib/designTokens";
 import "./comps.css";
+
+/** The Scout's scan narration — shown while the live discovery runs (dev/preview until the fn ships). */
+const SCAN_STEPS = [
+  "Reading logline & synopsis…",
+  "Searching recent titles & best-of lists…",
+  "Verifying candidates against catalogue…",
+  "Cross-checking your agents’ wishlists…",
+  "Ranking by fit — ready",
+];
+const sleep = (ms: number) => new Promise<void>((r) => window.setTimeout(r, ms));
 
 /** Shared with the overview + the Package Builder — the section's single active-manuscript pointer. */
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
@@ -226,6 +244,235 @@ const CompForm: React.FC<{
       <label className="sa-label" htmlFor="ct-comp-axis">Match axis</label>
       <input id="ct-comp-axis" className="sa-input" value={axis} onChange={(e) => setAxis(e.target.value)} placeholder="e.g. tone · atmosphere" />
     </FormShell>
+  );
+};
+
+// ── The Scout (Pro; flagged) ──
+const HowItWorks: React.FC<{ heading: string }> = ({ heading }) => (
+  <div className="ct-how">
+    <div className="ht">{heading}</div>
+    <div className="ct-step">
+      <span className="num">1</span>
+      <div>
+        <div className="st">Reads your book</div>
+        <div className="sd">Your genre, logline &amp; synopsis — not just keywords.</div>
+      </div>
+    </div>
+    <div className="ct-step">
+      <span className="num">2</span>
+      <div>
+        <div className="st">Searches the web</div>
+        <div className="sd">Recent titles, best-of lists &amp; debuts in your exact space.</div>
+      </div>
+    </div>
+    <div className="ct-step">
+      <span className="num">3</span>
+      <div>
+        <div className="st">Verifies every title</div>
+        <div className="sd">Checked against a real catalogue — nothing invented.</div>
+      </div>
+    </div>
+  </div>
+);
+
+const ScoutResultCard: React.FC<{
+  s: CompSuggestion;
+  onShelf: boolean;
+  onAdd: () => void;
+}> = ({ s, onShelf, onAdd }) => {
+  const meta = [s.author, s.publisher].filter(Boolean).join(" · ");
+  return (
+    <div className="ct-rcard">
+      <div className="ct-rc-top">
+        <span className="ct-rc-title">{s.title}</span>
+        <span className="ct-rc-year">{s.year}</span>
+      </div>
+      {meta && <div className="ct-rc-meta">{meta}</div>}
+      {s.verified && (
+        <div className="ct-verified">
+          <Check size={11} /> Verified · catalogue
+        </div>
+      )}
+      <div className="ct-why">
+        <div className="ct-why-cap">Why this fits</div>
+        <div className="ct-why-txt">{s.why}</div>
+      </div>
+      {s.agentMatch != null && s.agentMatch > 0 && (
+        <div className="ct-agent-hook">
+          <Star size={13} />
+          <span>
+            <b>
+              {s.agentMatch} agent{s.agentMatch > 1 ? "s" : ""}
+            </b>{" "}
+            on your list wishlist books like this
+          </span>
+        </div>
+      )}
+      <div className="ct-rc-foot">
+        <div className="ct-links">
+          {s.links?.bookshop && (
+            <a href={s.links.bookshop} target="_blank" rel="noreferrer">
+              <BookOpen size={11} /> Bookshop
+            </a>
+          )}
+          {s.links?.googleBooks && (
+            <a href={s.links.googleBooks} target="_blank" rel="noreferrer">
+              <BookOpen size={11} /> Google Books
+            </a>
+          )}
+        </div>
+        <button type="button" className="ct-addshelf" disabled={onShelf} onClick={onAdd}>
+          {onShelf ? <Check size={12} /> : <Plus size={12} />}
+          {onShelf ? "Added" : "Add to list"}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+type ScoutPhase = "idle" | "scanning" | "done" | "empty" | "notyet" | "error";
+
+const ScoutPanel: React.FC<{
+  isPro: boolean;
+  input: SuggestCompsInput;
+  shelfTitles: string[];
+  onAddToShelf: (comp: CompTitle) => void;
+  onUpgrade: () => void;
+}> = ({ isPro, input, shelfTitles, onAddToShelf, onUpgrade }) => {
+  const [phase, setPhase] = useState<ScoutPhase>("idle");
+  const [results, setResults] = useState<CompSuggestion[]>([]);
+  const [added, setAdded] = useState<Set<string>>(new Set());
+  const shelf = new Set(shelfTitles.map((t) => t.trim().toLowerCase()));
+
+  const runScout = async () => {
+    if (!scoutLive()) {
+      setPhase("notyet");
+      return;
+    }
+    setPhase("scanning");
+    setResults([]);
+    try {
+      const [data] = await Promise.all([fetchCompSuggestions(input), sleep(1500)]);
+      setResults(data);
+      setPhase(data.length ? "done" : "empty");
+    } catch {
+      setPhase("error");
+    }
+  };
+
+  const addOne = (s: CompSuggestion) => {
+    onAddToShelf(suggestionToComp(s));
+    setAdded((prev) => new Set(prev).add(s.title.trim().toLowerCase()));
+  };
+
+  // Free tier — how-it-works + the Pro lock/upsell.
+  if (!isPro) {
+    return (
+      <div className="ct-body">
+        <div className="ct-scout-what">
+          Your standing research assistant — finds verified, recent comps matched to your book.
+        </div>
+        <HowItWorks heading="What the Scout does" />
+        <div className="ct-upsell">
+          <div className="ghost">
+            <div className="ct-rcard" style={{ opacity: 1, animation: "none" }}>
+              <div className="ct-rc-top">
+                <span className="ct-rc-title">A Marvellous Light</span>
+                <span className="ct-rc-year">2021</span>
+              </div>
+              <div className="ct-rc-meta">Freya Marske · Tor</div>
+              <div className="ct-why">
+                <div className="ct-why-txt">Recent, magic-as-machinery, strong voice…</div>
+              </div>
+            </div>
+          </div>
+          <div className="lockwrap">
+            <div className="lock">
+              <Lock size={19} />
+            </div>
+            <h3>Unlock the Scout</h3>
+            <p>
+              Let ScriptAlly find verified comps you’d never surface alone — and add them straight to
+              your list.
+            </p>
+            <button type="button" className="ct-btn-pro" onClick={onUpgrade}>
+              Upgrade to Pro
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Pro tier — the live discovery (behind SCOUT_LIVE).
+  return (
+    <div className="ct-body">
+      <div className="ct-scout-what">
+        Your standing research assistant. It hunts down <b>verified, recent comps</b> matched to this
+        manuscript — so you find books you’d never surface alone.
+      </div>
+      <HowItWorks heading="How it works" />
+
+      <button type="button" className="ct-btn-pro" onClick={runScout} disabled={phase === "scanning"}>
+        {phase === "scanning" ? (
+          <>
+            <span className="spin" /> Scouring &amp; verifying…
+          </>
+        ) : phase === "idle" || phase === "notyet" ? (
+          <>
+            <Sparkles size={15} /> Send the Scout out
+          </>
+        ) : (
+          <>
+            <RefreshCw size={15} /> Send out again
+          </>
+        )}
+      </button>
+
+      {phase === "scanning" && (
+        <div className="ct-scan">
+          {SCAN_STEPS.map((step, i) => (
+            <div key={i} className="ct-scanline" style={{ animationDelay: `${i * 0.12}s` }}>
+              <span className="tick">{i === SCAN_STEPS.length - 1 ? "✓" : "◇"}</span> {step}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {phase === "notyet" && (
+        <div className="ct-notyet">
+          <b>The Scout goes live soon.</b> We’re finishing its catalogue checks so every title it
+          brings back is a real book with a real year — never invented. Until then, add your own comps
+          on the left.
+        </div>
+      )}
+
+      {phase === "error" && (
+        <div className="ct-scout-err">The Scout couldn’t be reached just now — try again in a moment.</div>
+      )}
+
+      {phase === "empty" && (
+        <div className="ct-notyet">No fresh comps this time — your list may already cover the space.</div>
+      )}
+
+      {phase === "done" && (
+        <>
+          <div className="ct-results">
+            {results.map((s, i) => (
+              <ScoutResultCard
+                key={i}
+                s={s}
+                onShelf={shelf.has(s.title.trim().toLowerCase()) || added.has(s.title.trim().toLowerCase())}
+                onAdd={() => addOne(s)}
+              />
+            ))}
+          </div>
+          <div className="ct-foot-note">
+            Starting points to research — read them before you pitch them.
+          </div>
+        </>
+      )}
+    </div>
   );
 };
 
@@ -463,13 +710,26 @@ export const ComparableTitlesPage: React.FC<{
               </div>
             </section>
 
-            {/* ── The Scout (Phase 4) ── */}
+            {/* ── The Scout ── */}
             <section className="ct-panel">
               <div className="ct-band">
                 <span className="bt">The Scout</span>
                 <span className="ct-tag pro">Pro</span>
               </div>
-              <div className="ct-body" />
+              <ScoutPanel
+                isPro={isProUser(currentUser)}
+                input={{
+                  manuscriptId: activeMs.id,
+                  manuscriptTitle: activeMs.title,
+                  ageCategory: activeMs.ageCategory,
+                  genre: activeMs.genre,
+                  logline: activeMs.logline || "",
+                  shelfTitles: comps.map((c) => c.title),
+                }}
+                shelfTitles={comps.map((c) => c.title)}
+                onAddToShelf={(comp) => writeComps(withCompAdded(comps, comp))}
+                onUpgrade={() => onNavigate?.("plans")}
+              />
             </section>
           </div>
         )}

@@ -82,9 +82,11 @@ service cloud.firestore {
         && data.ageCategory is string && data.ageCategory.size() <= 128
         && data.wordCount is int && data.wordCount >= 0
         && data.logline is string && data.logline.size() <= 2048
-        // Structured comps — a list of maps {title, author?, year?, note?, source?}. Per-item
-        // shape is client-enforced (rules can't iterate a list); optional-when-present so docs
-        // written before the hard cut stay updatable. Capped at 12 entries.
+        // Structured comps — a list of maps {title, author?, publisher?, year?, note?, media?,
+        // matchAxis?, inQuery?, source?}. Per-item shape is client-enforced (rules can't iterate a
+        // list); optional-when-present so docs written before any field was added stay updatable.
+        // The comps-page v2 fields (publisher/media/matchAxis/inQuery) needed NO rule change — the
+        // list is only size-capped, and `comps` is already in the update allowlist. Capped at 12.
         && (!data.keys().hasAll(['comps']) || (data.comps is list && data.comps.size() <= 12))
         && data.status is string && (
           data.status == 'Drafting' ||
