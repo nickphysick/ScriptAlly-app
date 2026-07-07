@@ -2,59 +2,32 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Submission Package Builder — a per-manuscript Pro page (Manuscripts → "Submission packages", route
- * /manuscripts/packages), rebuilt into the Queries-Hub Cappuccino / Bold themed system. It renders
- * inside the global AppShell stage (no nav of its own) and is scoped to the active manuscript via
- * localStorage["scriptally_active_manuscript_id"] (the existing convention).
+ * Submission Package Builder → the single-page Package Workshop (route /manuscripts/packages, Pro).
+ * Renders inside the global AppShell stage (no nav of its own), scoped to the active manuscript via
+ * localStorage["scriptally_active_manuscript_id"]. This host provides the qhbar chrome (ChromeSlab:
+ * crumb + title + Pro pill + the manuscript switcher) + the manuscript-scoped data and persistence,
+ * and mounts <PackageWorkshop> for everything else.
  *
- * Design source of truth: design-refs/scriptally-package-builder-cappuccino.html — sample it for
- * every colour; theme surfaces come from var(--…) tokens (index.css). This REUSES the existing data
- * model (ManuscriptVersion = "materials" in UI vocabulary, SubmissionPackage) and the packageMetrics
- * engine unchanged — no new collections, no renamed fields. The builder UI surfaces only the three
- * types (Query Letter / Synopsis / Sample Pages); Full Manuscript stays in the data but gets no shelf,
- * slot or modal here (reserved for the future full-request flow).
- *
- * Phase 2 (this file): route + AppShell-stage shell + the Hub-style header (title + Pro pill +
- * manuscript selector) + the empty content pane. The materials rail, first-visit home, packages home,
- * composer, materials gallery, material modal and worked-examples popup arrive in later phases.
+ * The old multi-view builder (FirstVisitHome / PackagesHome / Composer / MaterialsManager /
+ * MaterialsRail / JourneyStrip / PackageStats view / WorkedExample / the MaterialModal popup) was
+ * retired for the workshop; the packageMetrics engine + TypeGlyph + HubHeaderBar/ChromeSlab stay.
  */
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
-import { ComponentType, SubmissionPackage, ManuscriptVersion } from "../types";
-import { FirstVisitHome } from "./packages/FirstVisitHome";
-import { MaterialsRail } from "./packages/MaterialsRail";
-import { PackagesHome } from "./packages/PackagesHome";
-import { PackageStats } from "./packages/PackageStats";
-import { Composer } from "./packages/Composer";
-import { MaterialsManager } from "./packages/MaterialsManager";
-import { JourneyStrip } from "./packages/JourneyStrip";
-import { MaterialModal } from "./packages/MaterialModal";
-import { WorkedExample } from "./packages/WorkedExample";
-import { emptySelection, selectionFromPackage, SlotSelection } from "./packages/typeMeta";
+import { ComponentType } from "../types";
+import { PackageWorkshop, PackageSaveFields } from "./packages/PackageWorkshop";
 import { FONT_SERIF, FONT_MONO } from "../lib/designTokens";
 import { ChromeSlab } from "./shell/ChromeSlab";
 import { ChevronDown, Lock } from "lucide-react";
 
 export const SubmissionPackages: React.FC = () => {
-  const { currentUser, manuscripts, versions, packages, queries, addPackage, updatePackage, addVersion, updateVersion } = useScriptAllyDb();
+  const { currentUser, manuscripts, versions, packages, queries, agents, addVersion, updateVersion, deleteVersion, addPackage, updatePackage } = useScriptAllyDb();
 
   const [activeMsId, setActiveMsId] = useState<string | null>(() =>
     typeof window !== "undefined" ? localStorage.getItem("scriptally_active_manuscript_id") : null,
   );
   const [msMenuOpen, setMsMenuOpen] = useState(false);
   const msMenuRef = useRef<HTMLDivElement>(null);
-  // Composer working state (Phase 7): null = home; set = building/editing a package in the pane.
-  const [composer, setComposer] = useState<{ name: string; sel: SlotSelection; editId: string | null } | null>(null);
-  const [managerOpen, setManagerOpen] = useState(false); // materials manager (Phase 8)
-  const [statsOpen, setStatsOpen] = useState(false); // "See what wins" analytics page (de-welded from home)
-  // Material create/edit modal (Phase 9): null = closed; version=null → create for `type`, else edit it.
-  // fromComposer marks a create opened from the composer's own "Add a new …" — that one slots on save.
-  // seedName/seedContent pre-fill a CREATE (Duplicate → "Copy of …" + the same text) without touching MaterialModal.
-  const [matModal, setMatModal] = useState<{ type: ComponentType; version: ManuscriptVersion | null; fromComposer?: boolean; seedName?: string; seedContent?: string } | null>(null);
-  // The pending composer-origin pick (fresh version id → its slot), handed to the Composer as a prop.
-  const [autoPick, setAutoPick] = useState<{ type: ComponentType; versionId: string; token: number } | undefined>(undefined);
-  // Worked-examples popup (Phase 10): the carousel slide key being viewed, or null.
-  const [example, setExample] = useState<string | null>(null);
 
   // Default to the first manuscript when none is selected / the saved one is gone.
   useEffect(() => {
@@ -81,11 +54,6 @@ export const SubmissionPackages: React.FC = () => {
   const msVersions = useMemo(() => versions.filter((v) => v.manuscriptId === msId), [versions, msId]);
   const msPackages = useMemo(() => packages.filter((p) => p.manuscriptId === msId && p.status !== "Retired"), [packages, msId]);
   const msQueries = useMemo(() => queries.filter((q) => q.manuscriptId === msId), [queries, msId]);
-  // First-visit: no (active) packages for this manuscript — materials are deliberately NOT part of
-  // the gate (a materials-only account was landing on an undesigned blank home). The page teaches
-  // until the first package exists; owned materials surface as live library cards inside it, and the
-  // materials rail appears with the packages home once the gate closes.
-  const firstVisit = msPackages.length === 0;
 
   if (!currentUser) return null;
 
@@ -96,54 +64,19 @@ export const SubmissionPackages: React.FC = () => {
   };
   const multiMs = manuscripts.length > 1;
 
-  // Composer (Phase 7) — new / edit / copy all open the same view; save does the add or update.
-  // Each open clears any stale composer-origin pick: a create whose write resolved after its composer
-  // closed must not slot itself into a later, unrelated draft.
-  const openNew = () => { setAutoPick(undefined); setComposer({ name: "", sel: emptySelection(), editId: null }); };
-  const openEdit = (pkg: SubmissionPackage) => { setAutoPick(undefined); setComposer({ name: pkg.packageName, sel: selectionFromPackage(pkg), editId: pkg.id }); };
-  const openCopy = (pkg: SubmissionPackage) => { setAutoPick(undefined); setComposer({ name: `Copy of ${pkg.packageName}`, sel: selectionFromPackage(pkg), editId: null }); };
-  const saveComposer = (name: string, sel: SlotSelection) => {
-    if (!msId) return;
-    const slots = {
-      queryLetterVersionId: sel[ComponentType.QUERY_LETTER],
-      synopsisVersionId: sel[ComponentType.SYNOPSIS],
-      samplePagesVersionId: sel[ComponentType.SAMPLE_PAGES],
-    };
-    if (composer?.editId) updatePackage(composer.editId, { packageName: name, ...slots });
-    else addPackage({ manuscriptId: msId, packageName: name, ...slots });
-    setComposer(null);
+  // ── Workshop persistence — all scoped to the active manuscript. ──
+  const createVersion = async (type: ComponentType, name: string, contentDraft: string): Promise<string | undefined> => {
+    if (!msId) return undefined;
+    return addVersion({ manuscriptId: msId, componentType: type, versionName: name, fileAttached: false, contentDraft, contentType: "text" });
   };
-  const openManage = () => setManagerOpen(true);
-
-  // Material create/edit modal (Phase 9). Create is invoked with a type; edit with an existing version.
-  const openCreate = (type: ComponentType) => setMatModal({ type, version: null });
-  // The composer's own "Add a new …" — that material was created FOR the slot that asked, so it slots
-  // itself on save. Creates from the rail / manager / first-visit just save to the library.
-  const openCreateFromComposer = (type: ComponentType) => setMatModal({ type, version: null, fromComposer: true });
-  const openEditMaterial = (v: ManuscriptVersion) => setMatModal({ type: v.componentType, version: v });
-  // Duplicate — a CREATE seeded from the source material ("Copy of …" + its text); saves as a new version.
-  const openDuplicateMaterial = (v: ManuscriptVersion) => setMatModal({ type: v.componentType, version: null, seedName: `Copy of ${v.versionName}`, seedContent: v.contentDraft ?? "" });
-  const saveMaterial = (name: string, content: string) => {
-    if (!msId || !matModal) return;
-    const trimmed = name.trim();
-    if (!trimmed) return;
-    if (matModal.version) {
-      // Edit — only the two fields the dialog owns (versionName + the body text).
-      updateVersion(matModal.version.id, { versionName: trimmed, contentDraft: content });
-    } else {
-      // Create — text mode (the only content channel in v1); fileAttached:false is required by the rules.
-      const { type, fromComposer } = matModal;
-      addVersion({ manuscriptId: msId, componentType: type, versionName: trimmed, fileAttached: false, contentDraft: content, contentType: "text" }).then((id) => {
-        if (id && fromComposer) setAutoPick((p) => ({ type, versionId: id, token: (p?.token ?? 0) + 1 }));
-      });
-    }
-    setMatModal(null);
+  const savePackage = async (baseId: string | null, fields: PackageSaveFields): Promise<string | undefined> => {
+    if (!msId) return undefined;
+    if (baseId) { await updatePackage(baseId, fields); return baseId; }
+    const res = await addPackage({ manuscriptId: msId, ...fields });
+    return res.success ? res.id : undefined;
   };
 
-  // Worked-examples popup (Phase 10) — the first-visit demo stack's "See this example in full →".
-  const openExample = (key: string) => setExample(key);
-
-  // Book glyph for the manuscript selector — burgundy strokes, sampled from the mockup .msel.
+  // Book glyph for the manuscript selector — burgundy strokes.
   const bookIcon = (
     <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinejoin="round" style={{ color: "var(--burg)", flexShrink: 0 }} aria-hidden="true">
       <path d="M4 4h13a2 2 0 012 2v14H6a2 2 0 01-2-2z" />
@@ -151,21 +84,14 @@ export const SubmissionPackages: React.FC = () => {
     </svg>
   );
 
-  // Slate Pro pill — mockup .pro (slate text on a slate-tint pill). Lock icon per the app convention.
+  // Slate Pro pill (app convention: slate text on a slate-tint pill + lock).
   const proPill = (
     <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: FONT_MONO, fontSize: 9, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--slate)", background: "#e7eef3", border: "1px solid #cfdde6", borderRadius: 999, padding: "4px 10px" }}>
       <Lock style={{ width: 9, height: 9 }} strokeWidth={2.4} aria-hidden="true" /> Pro
     </span>
   );
-  // First-visit shows a larger Pro badge (and no manuscript chip) — a leaner header for that state.
-  const largerProPill = (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: FONT_MONO, fontSize: 11, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--slate)", background: "#e7eef3", border: "1px solid #cfdde6", borderRadius: 999, padding: "6px 14px" }}>
-      <Lock style={{ width: 11, height: 11 }} strokeWidth={2.4} aria-hidden="true" /> Pro
-    </span>
-  );
 
-  // Right slot of the header: the manuscript selector chip. One manuscript = plain, non-interactive;
-  // 2+ = a button with a chevron that opens the switcher and re-scopes the builder's context.
+  // Header right slot: the manuscript selector chip. One manuscript = plain; 2+ = a switcher menu.
   const chipShell: React.CSSProperties = {
     display: "inline-flex", alignItems: "center", gap: 9, fontFamily: FONT_SERIF, fontSize: 15, fontWeight: 600,
     color: "var(--ink)", background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: 10,
@@ -203,23 +129,16 @@ export const SubmissionPackages: React.FC = () => {
     <div className="pkg-root" style={{ height: "100%", display: "flex", flexDirection: "column", padding: 16, gap: 14, overflow: "hidden", background: "var(--desk)" }}>
       <style>{`
         .pkg-msopt:hover { background: linear-gradient(135deg, var(--band-a), var(--band-b)) !important; }
-        @media (max-width: 768px) {
-          .pkg-root { height: auto; min-height: 100%; overflow: visible; }
-          .pkg-workspace { flex-direction: column; }
-        }
+        @media (max-width: 768px) { .pkg-root { height: auto; min-height: 100%; overflow: visible; } }
       `}</style>
 
-      {/* ── ChromeSlab (Option A): crumb + title + Pro pill on the unified surface; the
-            manuscript selector chip is the slab tool (it is the page's real scoping control).
-            Bleeds out of the pkg-root padding (16px); the root's flex gap spaces what follows. ── */}
       <ChromeSlab
         title={
           <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
-            {firstVisit || !activeMs ? "Submission Packages" : "Submission Package Builder"}
-            {firstVisit || !activeMs ? largerProPill : proPill}
+            Package Workshop{proPill}
           </span>
         }
-        tools={activeMs && !firstVisit ? msSelector : undefined}
+        tools={activeMs ? msSelector : undefined}
         style={{ margin: "-16px -16px 0" }}
       />
 
@@ -231,61 +150,15 @@ export const SubmissionPackages: React.FC = () => {
           </div>
         </div>
       ) : (
-        <>
-          {/* Journey strip — WORKING views only (the composer can open from first-visit, so the test is
-              "which view renders", not the gate alone). First-visit itself is the pitch: no strip. */}
-          {(composer || managerOpen || statsOpen || !firstVisit) && (
-            <JourneyStrip view={composer ? "composer" : managerOpen ? "gallery" : statsOpen ? "wins" : "home"} />
-          )}
-          <div className="pkg-workspace" style={{ flex: 1, minHeight: 0, display: "flex", gap: 14 }}>
-            {/* Materials rail — shown once the manuscript has any material or package (mockup .qlist). */}
-            {!firstVisit && <MaterialsRail versions={msVersions} onCreate={openCreate} onManage={openManage} />}
-            {/* Content pane — hugs content height and scrolls internally (mockup .pane). First-visit is
-                white in both themes; the packages home sits on the themed pane surface. */}
-            {/* Composer supplies its own bordered container (.c2), so the pane goes bare for it. */}
-            <section className="pkg-pane" style={{ flex: 1, minWidth: 0, background: composer ? "transparent" : "#fffefb", border: composer ? "none" : "var(--bdw) solid var(--bd)", borderRadius: composer ? 0 : "var(--chromerad)", alignSelf: "flex-start", maxHeight: "100%", overflowY: "auto", padding: composer ? 0 : "16px 16px 20px" }}>
-              {composer ? (
-                <Composer
-                  versions={msVersions}
-                  packages={msPackages}
-                  editingId={composer.editId ?? undefined}
-                  initialName={composer.name}
-                  initialSelection={composer.sel}
-                  onSave={saveComposer}
-                  onCancel={() => setComposer(null)}
-                  onCreate={openCreateFromComposer}
-                  autoPick={autoPick}
-                />
-              ) : managerOpen ? (
-                <MaterialsManager versions={msVersions} packages={msPackages} queries={msQueries} onBack={() => setManagerOpen(false)} onEdit={openEditMaterial} onCreate={openCreate} onDuplicate={openDuplicateMaterial} />
-              ) : statsOpen ? (
-                <PackageStats packages={msPackages} versions={msVersions} queries={msQueries} onBack={() => setStatsOpen(false)} />
-              ) : firstVisit ? (
-                <FirstVisitHome versions={msVersions} onBuild={openNew} onCreate={openCreate} onEditMaterial={openEditMaterial} onExample={openExample} />
-              ) : (
-                <PackagesHome packages={msPackages} versions={msVersions} queries={msQueries} onNew={openNew} onEdit={openEdit} onCopy={openCopy} onSeeWins={() => setStatsOpen(true)} />
-              )}
-            </section>
-          </div>
-        </>
-      )}
-
-      {matModal && (
-        <MaterialModal
-          type={matModal.type}
-          editing={matModal.version !== null}
-          initialName={matModal.version?.versionName ?? matModal.seedName ?? ""}
-          initialContent={matModal.version?.contentDraft ?? matModal.seedContent ?? ""}
-          onCancel={() => setMatModal(null)}
-          onSave={saveMaterial}
-        />
-      )}
-
-      {example && (
-        <WorkedExample
-          exKey={example}
-          onClose={() => setExample(null)}
-          onUse={() => { setExample(null); openNew(); }}
+        <PackageWorkshop
+          versions={msVersions}
+          packages={msPackages}
+          queries={msQueries}
+          agents={agents}
+          onCreateVersion={createVersion}
+          onUpdateVersion={(id, f) => updateVersion(id, f)}
+          onDeleteVersion={(id) => deleteVersion(id)}
+          onSavePackage={savePackage}
         />
       )}
     </div>

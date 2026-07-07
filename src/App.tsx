@@ -21,7 +21,6 @@ import { QueriesLanding } from "./components/QueriesLanding";
 import { Agents } from "./components/Agents";
 import { DiscoverNewAgents } from "./components/DiscoverNewAgents";
 import { SubmissionPackages } from "./components/SubmissionPackages";
-import { PkgLab } from "./components/packages/PkgLab";
 import { DiaryLab } from "./components/dashboard/DiaryLab";
 import { AllManuscripts } from "./components/AllManuscripts";
 import { ComparableTitlesPage } from "./components/manuscripts/ComparableTitlesPage";
@@ -440,10 +439,6 @@ function AppContent() {
   // Dev-only notes review surface (PostIt / quick-add / editor) — local state, no persistence.
   if (hash === "#/notes-lab" && import.meta.env.DEV) {
     return <NotesLab />;
-  }
-  // Dev-only Submission Package Builder review surface (theme-toggleable, no auth). TEMP.
-  if (hash === "#/pkg-lab" && import.meta.env.DEV) {
-    return <PkgLab />;
   }
   // Dev-only diary depth-carousel review surface (theme-toggleable, no auth, stage-replicating). TEMP.
   if (hash === "#/diary-lab" && import.meta.env.DEV) {
