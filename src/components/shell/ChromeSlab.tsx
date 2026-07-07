@@ -102,11 +102,11 @@ export const ChromeSlab: React.FC<{
       <header className="sa-slab sa-slab-grand" style={shell}>
         {/* Route-scoped crumb BAR — full-width, per-theme tint + hairline lower edge. */}
         {crumbBar && crumbNav && (
-          <div className="sa-crumbbar" style={{ background: "var(--crumb-bar-bg, var(--slab-bg, #fffefb))", borderBottom: "var(--crumb-bar-rule, var(--slab-bdw, 1px) solid var(--slab-bd, #e7ddd2))", padding: "7px 30px" }}>
+          <div className="sa-crumbbar" style={{ background: "var(--crumb-bar-bg, var(--slab-bg, #fffefb))", borderBottom: "var(--crumb-bar-rule, var(--slab-bdw, 1px) solid var(--slab-bd, #e7ddd2))", padding: "14px 30px" }}>
             {crumbNav}
           </div>
         )}
-        <div style={{ display: "flex", alignItems: "flex-end", gap: 20, padding: crumbBar ? "14px 30px 20px" : "var(--hub-mast-pad, 22px 30px 20px)", flexWrap: "nowrap" }}>
+        <div style={{ display: "flex", alignItems: "flex-end", gap: 20, padding: crumbBar ? "20px 30px 20px" : "var(--hub-mast-pad, 22px 30px 20px)", flexWrap: "nowrap" }}>
           <div style={{ minWidth: 0, flex: "1 1 auto" }}>
             {!crumbBar && crumbNav}
             <div style={{ fontFamily: FONT_SERIF, fontSize: "var(--hub-mast-title, 54px)", fontWeight: 500, color: "var(--hub-head, #000)", lineHeight: 1.0, letterSpacing: "-0.5px", marginTop: crumbBar ? 0 : 10, whiteSpace: "nowrap" }}>

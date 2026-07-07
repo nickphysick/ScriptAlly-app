@@ -145,8 +145,9 @@
   --qp-cmd-bg: #F8FAF7;                       /* reading-pane action row — rounded --bd-bordered sage bar */
   --qp-cmd-frame: var(--bdw) solid var(--bd);
   --qp-cmd-toprule: var(--bdw) solid var(--bd);
-  --qp-cmd-radius: 12px;
-  --qp-cmd-margin: 0 12px 12px;
+  --qp-cmd-radius: 14px;                      /* mockup .t-capp .actionbar */
+  --qp-cmd-margin: 0;                         /* full-width in the pane flow — no inset */
+  --qp-cmd-pad: 14px 18px;                    /* Bold/Editorial keep 11px 20px via the inline fallback */
   --slab-shadow: none;
   --slab-ttl: #5d4037;
   --slab-meta: #8a7a6c;
@@ -278,7 +279,7 @@
   --slab-bg: #fffefb;
   --slab-bd: #1d1712;
   --slab-bdw: 1.5px;
-  --crumb-bar-bg: #f7f1f0;                    /* Queries crumb bar — light blush */
+  --crumb-bar-bg: #f6e9e4;                    /* Queries crumb bar — light blush (mockup .t-bold) */
   --crumb-bar-rule: var(--bdw) solid var(--bd);
   /* Phase 3 — neutral (no sage in Bold) */
   --qp-genre-bg: #fdfaf5; --qp-genre-bd: #cdddc7; --qp-genre-tx: #5a6e58;
@@ -431,7 +432,7 @@
   --slab-bg: #ffffff;
   --slab-bd: #ececeb;
   --slab-bdw: 1px;
-  --crumb-bar-bg: #f6f6f5;                    /* Queries crumb bar — faint neutral */
+  --crumb-bar-bg: #ecebe3;                    /* Queries crumb bar — faint neutral (mockup .t-edit) */
   --crumb-bar-rule: 3px double var(--bd);     /* Editorial keeps the newspaper double-rule */
   /* Phase 3 — neutral (no sage in Editorial) */
   --qp-genre-bg: #fdfaf5; --qp-genre-bd: #cdddc7; --qp-genre-tx: #5a6e58;

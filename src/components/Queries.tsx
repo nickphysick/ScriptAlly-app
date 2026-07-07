@@ -2973,7 +2973,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   const btn: React.CSSProperties = { display: "inline-flex", alignItems: "center", gap: 7, fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 500, color: qdbBoldInk, background: "var(--hub-btn-bg)", border: "var(--hub-btn-bd)", borderRadius: "var(--hub-btn-rad)", padding: "8px 15px", whiteSpace: "nowrap", cursor: "pointer", boxShadow: "var(--hub-btn-sh)" };
                   const primaryBtn: React.CSSProperties = { ...btn, background: "var(--hub-primary)", border: "1px solid var(--hub-primary-bd)", color: "var(--hub-primary-tx)", fontWeight: 600 };
                   return (
-                    <div className="qp-cmdbar" style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 12, background: "var(--qp-cmd-bg, var(--hub-cmd))", border: "var(--qp-cmd-frame, none)", borderTop: "var(--qp-cmd-toprule, var(--hub-cmd-rule))", borderRadius: "var(--qp-cmd-radius, 0)", margin: "var(--qp-cmd-margin, 0)", boxShadow: "var(--cmd-bar-shadow, none)", padding: "11px 20px" }}>
+                    <div className="qp-cmdbar" style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 12, background: "var(--qp-cmd-bg, var(--hub-cmd))", border: "var(--qp-cmd-frame, none)", borderTop: "var(--qp-cmd-toprule, var(--hub-cmd-rule))", borderRadius: "var(--qp-cmd-radius, 0)", margin: "var(--qp-cmd-margin, 0)", boxShadow: "var(--cmd-bar-shadow, none)", padding: "var(--qp-cmd-pad, 11px 20px)" }}>
                       {/* Left — actions */}
                       <div style={{ display: "flex", gap: 9, alignItems: "center" }}>
                         {isMark ? (
