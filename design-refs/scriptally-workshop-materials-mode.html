@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Workshop, materials mode (middle swaps, analytics dynamic)</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--desk:#e8ddd0;--card:#fffefb;--bd:#d8cebf;--bdw:1px;--band-a:#ece5d8;--band-b:#e5ddcd;
+  --hdr:#5d4037;--hdrOn:#5d4037;--ink:#241c15;--muted:#9a8c80;--burg:#7c3a2a;--acc2:#5a6e58;--gold:#a8842c;
+  --sel:#f3ede2;--btnBg:#fff;--btnBd:#ded3c2;--btnT:#5d4037;--btnH:#f4f2ef;--dash:#c9bca8;--dashd:#e7dbc9;--tp:#f3e6cf;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;color:#241c15;background:#efeae4;padding:28px 18px 90px;}
+h1{font-family:'Playfair Display',serif;font-size:25px;font-weight:700;text-align:center;}
+.subx{text-align:center;font-size:12.5px;color:#5a4f45;margin:8px auto 22px;max-width:840px;line-height:1.5;}
+.wrap{max-width:1480px;margin:0 auto;}
+.tg{display:inline-flex;flex-shrink:0;}
+.stage{background:var(--desk);border-radius:18px;padding:26px;}
+.topbar{display:flex;align-items:center;gap:14px;padding:4px 8px 22px;}
+.crumb{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:var(--hdr);display:flex;align-items:center;gap:8px;}
+.crumb .root{opacity:.55;} .crumb .sep{opacity:.4;} .crumb .cur{font-weight:600;}
+.mschip{margin-left:auto;display:inline-flex;align-items:center;gap:9px;background:var(--card);border:var(--bdw) solid var(--bd);border-radius:10px;padding:10px 16px;font-weight:600;font-size:13.5px;color:var(--hdr);}
+.windows{display:flex;gap:24px;align-items:stretch;min-height:620px;}
+.window{background:var(--card);border:var(--bdw) solid var(--bd);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 8px 26px rgba(40,28,18,.10);}
+.window.left{flex:1;min-width:0;}
+.window.right{width:392px;flex-shrink:0;}
+.win-h{display:flex;align-items:center;gap:12px;padding:16px 24px;background:linear-gradient(135deg,var(--band-a),var(--band-b));border-bottom:var(--bdw) solid var(--bd);}
+.win-h .ri{color:var(--hdrOn);display:flex;flex-shrink:0;}
+.win-h h3{font-family:'Playfair Display',serif;font-size:18px;font-weight:800;color:var(--hdrOn);}
+.win-h .act{margin-left:auto;}
+.hbtn{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--btnT);background:var(--btnBg);border:1px solid var(--btnBd);border-radius:9px;padding:9px 13px;cursor:pointer;font-weight:600;}
+.hbtn:hover{background:var(--btnH);}
+.hbtn.solid{background:var(--burg);color:#fff;border-color:var(--burg);}
+
+.wbody{display:flex;flex:1;min-height:0;}
+.palette{background:var(--card);border-right:var(--bdw) solid var(--bd);padding:20px;width:262px;flex-shrink:0;}
+.pal-toph{display:flex;align-items:center;margin-bottom:14px;}
+.pal-toph .pl{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.pal-toph .em{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--burg);cursor:pointer;border:1px solid var(--btnBd);border-radius:7px;padding:5px 9px;background:var(--card);}
+.pal-toph .em:hover{background:var(--btnH);}
+.palgroup{margin-bottom:20px;}
+.palgroup-h{display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--hdr);margin-bottom:10px;}
+.palgroup-h .g{color:var(--burg);}
+.chip{display:flex;align-items:center;gap:11px;background:var(--card);border:var(--bdw) solid var(--bd);border-radius:10px;padding:12px 13px;margin-bottom:9px;cursor:grab;box-shadow:0 1px 2px rgba(40,28,18,.04);transition:box-shadow .12s,border-color .12s;}
+.chip:hover{box-shadow:0 5px 14px rgba(58,28,20,.12);}
+.chip .cg{width:28px;height:28px;border-radius:8px;background:var(--sel);color:var(--burg);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.chip .cn{font-family:'Playfair Display',serif;font-size:14.5px;font-weight:600;color:var(--ink);line-height:1.1;}
+.chip .cf{font-family:'JetBrains Mono',monospace;font-size:7.5px;color:var(--muted);margin-top:2px;}
+.chip .grip{margin-left:auto;color:var(--dash);font-size:13px;letter-spacing:-2px;}
+.mode-materials .chip{cursor:pointer;}
+.mode-materials .chip .grip{display:none;}
+.mode-materials .chip.sel{border-color:var(--burg);box-shadow:0 0 0 2px color-mix(in srgb,var(--burg) 16%,transparent);}
+.mode-materials .chip::after{content:'edit \203a';margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);}
+
+/* MIDDLE */
+.middle{flex:1;min-width:0;padding:26px 30px;overflow-y:auto;background:var(--card);}
+.bench-lab{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--burg);display:flex;align-items:center;gap:9px;margin-bottom:16px;}
+.bench-lab .dotp{width:9px;height:9px;border-radius:50%;background:var(--burg);box-shadow:0 0 0 4px color-mix(in srgb,var(--burg) 16%,transparent);}
+.pkg{background:var(--card);border:var(--bdw) solid var(--bd);border-radius:14px;overflow:hidden;max-width:720px;box-shadow:0 12px 30px rgba(58,28,20,.11);}
+.pkg-h{display:flex;align-items:center;gap:11px;padding:16px 22px;background:linear-gradient(135deg,var(--band-a),var(--band-b));border-bottom:var(--bdw) solid var(--bd);}
+.pkg-h .name{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--hdrOn);}
+.pkg-slots{padding:18px 22px;display:flex;flex-direction:column;gap:12px;}
+.slot{border:1.5px solid var(--bd);border-radius:11px;padding:16px 17px;display:flex;align-items:center;gap:13px;min-height:70px;background:var(--card);}
+.slot.empty{border-style:dashed;border-color:var(--dash);}
+.slot .sg{width:34px;height:34px;border-radius:9px;background:var(--sel);color:var(--burg);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.slot.empty .sg{color:var(--muted);}
+.slot .sn{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;color:var(--ink);}
+.slot .sf{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--muted);margin-top:2px;}
+.slot .stxt{font-size:13.5px;color:var(--muted);font-style:italic;}
+.slot .kick{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.pkg-foot{border-top:var(--bdw) solid var(--bd);padding:14px 22px;display:flex;align-items:center;background:var(--card);}
+.pkg-foot .res{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);}
+.pkg-foot .res b{color:var(--acc2);}
+.pkg-foot .dup{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;color:var(--muted);cursor:pointer;}
+.others-lab{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--hdr);margin:34px 0 16px;}
+.othergrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;}
+.ocard{background:var(--card);border:var(--bdw) solid var(--bd);border-radius:13px;padding:16px;box-shadow:0 2px 10px rgba(40,28,18,.06);cursor:pointer;}
+.ocard h5{font-family:'Playfair Display',serif;font-size:16px;font-weight:800;color:var(--hdr);}
+.ocard .ol{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--muted);margin-top:6px;line-height:1.7;}
+.ocard .of{margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--acc2);}
+.newpkg{border:1.5px dashed var(--dash);border-radius:13px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;color:var(--muted);cursor:pointer;min-height:120px;}
+
+/* MIDDLE — materials editor */
+.med{max-width:720px;}
+.med-lab{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--burg);display:flex;align-items:center;gap:9px;margin-bottom:16px;}
+.med-lab .dotp{width:9px;height:9px;border-radius:50%;background:var(--burg);box-shadow:0 0 0 4px color-mix(in srgb,var(--burg) 16%,transparent);}
+.edcard{background:var(--card);border:var(--bdw) solid var(--bd);border-radius:14px;overflow:hidden;box-shadow:0 12px 30px rgba(58,28,20,.11);}
+.edcard-h{padding:15px 22px;background:linear-gradient(135deg,var(--band-a),var(--band-b));border-bottom:var(--bdw) solid var(--bd);display:flex;align-items:center;gap:10px;}
+.edcard-h h4{font-family:'Playfair Display',serif;font-size:18px;font-weight:800;color:var(--hdrOn);}
+.edcard-h .newbtn{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8.5px;text-transform:uppercase;color:var(--btnT);background:rgba(255,255,255,.6);border:1px solid var(--btnBd);border-radius:8px;padding:8px 12px;cursor:pointer;}
+.edcard-b{padding:22px;}
+.typepick{display:flex;gap:9px;margin-bottom:18px;}
+.typepick button{flex:1;font-family:'JetBrains Mono',monospace;font-size:8.5px;text-transform:uppercase;border:1px solid var(--btnBd);background:var(--card);color:var(--muted);border-radius:9px;padding:12px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.typepick button.on{border-color:var(--burg);color:var(--burg);background:var(--sel);}
+.flabel{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:16px 0 7px;}
+.flabel:first-child{margin-top:0;}
+.finput{width:100%;border:var(--bdw) solid var(--bd);border-radius:10px;padding:12px 14px;font-family:'Playfair Display',serif;font-size:16px;color:var(--ink);outline:none;background:var(--card);}
+.finput:focus{border-color:var(--burg);}
+.ftext{width:100%;border:var(--bdw) solid var(--bd);border-radius:10px;padding:13px 14px;font-size:13.5px;line-height:1.65;color:var(--ink);outline:none;min-height:200px;resize:vertical;background:var(--card);font-family:'Inter',sans-serif;}
+.ftext:focus{border-color:var(--burg);}
+.ffile{display:flex;align-items:center;gap:9px;border:1.5px dashed var(--dash);border-radius:10px;padding:12px 14px;color:var(--muted);font-size:12.5px;font-style:italic;}
+.ffile .soon{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.08em;text-transform:uppercase;background:var(--tp);color:var(--gold);border-radius:5px;padding:3px 7px;font-style:normal;}
+.med-foot{margin-top:20px;display:flex;align-items:center;gap:12px;}
+.med-foot .save{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--btnT);background:var(--btnBg);border:1px solid var(--btnBd);border-radius:11px;padding:13px 28px;cursor:pointer;}
+.med-foot .save:hover{background:var(--btnH);}
+.med-foot .del{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8.5px;text-transform:uppercase;color:var(--muted);background:none;border:0;cursor:pointer;}
+.med-foot .del:hover{color:var(--burg);}
+.edpick{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--muted);gap:9px;padding:70px 30px;}
+.edpick .mi{font-size:34px;opacity:.4;}
+.edpick .mt{font-family:'Playfair Display',serif;font-size:18px;color:var(--hdr);}
+.edpick .ms{font-size:12.5px;line-height:1.55;max-width:280px;}
+
+/* RIGHT — dynamic analytics */
+.an-b{padding:22px 24px;overflow-y:auto;flex:1;}
+.an-title{font-family:'Playfair Display',serif;font-size:19px;font-weight:800;color:var(--hdr);}
+.an-sub{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:3px;}
+.an-sec{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:22px 0 12px;}
+.an-sec:first-child{margin-top:0;}
+.an-hero{background:var(--card);border:var(--bdw) solid var(--bd);border-radius:13px;padding:20px 22px;display:flex;align-items:center;gap:17px;}
+.an-hero .big{font-family:'Playfair Display',serif;font-size:50px;font-weight:800;color:var(--acc2);line-height:.82;}
+.an-hero.flat .big{color:var(--muted);font-size:15px;font-family:'JetBrains Mono',monospace;font-weight:500;text-transform:uppercase;letter-spacing:.04em;align-self:center;}
+.an-hero .lab b{display:block;font-size:15px;font-weight:700;color:var(--hdr);}
+.an-hero .lab span{font-family:'JetBrains Mono',monospace;font-size:8.5px;text-transform:uppercase;color:var(--muted);margin-top:3px;display:block;}
+.anfig{display:flex;gap:22px;background:var(--card);border:var(--bdw) solid var(--bd);border-radius:13px;padding:18px 20px;}
+.anfig .v{font-family:'Playfair Display',serif;font-size:29px;font-weight:800;color:var(--hdr);line-height:1;}
+.anfig .v.win{color:var(--acc2);}
+.anfig .k{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-top:5px;}
+.ck{display:flex;align-items:center;gap:10px;font-size:13.5px;padding:6px 0;}
+.ck .cb{width:20px;height:20px;border-radius:6px;background:var(--sel);color:var(--acc2);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+.ck .cb.no{color:var(--dash);}
+.agc{display:flex;flex-wrap:wrap;gap:7px;}
+.agc span{font-family:'JetBrains Mono',monospace;font-size:9.5px;background:var(--sel);color:var(--hdr);border-radius:7px;padding:6px 11px;}
+.annote{margin-top:14px;font-size:12px;font-style:italic;color:var(--muted);line-height:1.55;background:var(--card);border:var(--bdw) solid var(--bd);border-left:3px solid var(--acc2);border-radius:0 10px 10px 0;padding:13px 15px;}
+</style>
+</head>
+<body>
+
+<h1>Middle = builder, right analytics = dynamic</h1>
+<div class="subx">"Edit materials" swaps the MIDDLE (package bench \u2192 material editor); the RIGHT analytics window follows suit \u2014 package stats while building, material stats while editing. Breadcrumb shows the mode. Click "Edit materials", pick or create a material, watch the right panel change, then "Done".</div>
+
+<div class="wrap">
+  <div class="stage mode-packages" id="stage">
+    <div class="topbar">
+      <div class="crumb"><span class="root">Builder</span><span class="sep">/</span><span class="cur" id="crumbCur">Packages</span></div>
+      <span class="mschip"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v6l2-1.5L12 10V4"/></svg>Murphy's Day Out</span>
+    </div>
+    <div class="windows">
+      <div class="window left">
+        <div class="win-h">
+          <span class="ri"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 00-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 005.4-5.4l-2.5 2.5-2.1-.4-.4-2.1z"/></svg></span>
+          <h3>Workshop</h3>
+        </div>
+        <div class="wbody">
+          <div class="palette">
+            <div class="pal-toph"><span class="pl">Your materials</span><span class="em" id="editMat" onclick="setMode(mode==='materials'?'packages':'materials')">Edit materials \u2192</span></div>
+            <div id="palgroups"></div>
+          </div>
+          <div class="middle" id="middle"></div>
+        </div>
+      </div>
+
+      <div class="window right">
+        <div class="win-h"><span class="ri" id="rightIcon"></span><h3 id="rightTitle">Package analytics</h3></div>
+        <div id="rightBody"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const TYPES={letter:{label:'Query letters',cap:'Query letter',g:'<svg class="tg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M8.5 9a3.5 3.5 0 116 2.4c-1 .9-2.5 1.5-2.5 3.1"/><circle cx="12" cy="19" r="0.6" fill="currentColor"/></svg>'},
+  synopsis:{label:'Synopses',cap:'Synopsis',g:'<svg class="tg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>'},
+  pages:{label:'Sample pages',cap:'Sample pages',g:'<svg class="tg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M8 6h9a1 1 0 011 1v13a1 1 0 01-1 1H8a1 1 0 01-1-1V7a1 1 0 011-1z"/><path d="M6 17V4a1 1 0 011-1h8"/></svg>'}};
+const ORDER=['letter','synopsis','pages'];
+let MATS=[{id:'m1',type:'letter',name:'Comp-led rework',file:'MDO_Query_v2.docx',text:'Dear Ms Hartley,\nTHE LIGHTHOUSE AT WICK POINT is an 82,000-word literary mystery in the vein of The Lamplighters...'},
+  {id:'m2',type:'letter',name:'Character-led letter',file:'MDO_Query_char.docx',text:'Dear Ms Hartley,\nElspeth Marr has kept two things all her life: the Wick Point light, and a secret...'},
+  {id:'m3',type:'synopsis',name:'One-page synopsis',file:'MDO_Synopsis.docx',text:'Elspeth Marr, 63, keeper of the Wick Point light, hauls a drowned stranger from the rocks...'},
+  {id:'m4',type:'pages',name:'Chapters 1-3',file:'MDO_Pages_1-3.docx',text:'Chapter One. The light had failed twice that winter...'}];
+const PKGS=[{name:'Comp-led \u00b7 v1',slots:{letter:'m1',synopsis:'m3',pages:null},sent:3,full:1},{name:'Hartley bespoke',slots:{letter:'m1',synopsis:'m3',pages:'m4'},sent:1,full:0}];
+let mode='packages', selMat=null, newType=null;
+const usage=id=>{const inP=PKGS.filter(p=>Object.values(p.slots).includes(id));return{n:inP.length,sent:inP.reduce((a,p)=>a+p.sent,0),full:inP.reduce((a,p)=>a+p.full,0),names:inP.map(p=>p.name)};};
+
+function paletteHTML(){return ORDER.map(t=>{const items=MATS.filter(m=>m.type===t);return '<div class="palgroup"><div class="palgroup-h"><span class="g">'+TYPES[t].g+'</span>'+TYPES[t].label+'</div>'+items.map(m=>'<div class="chip'+(mode==='materials'&&selMat===m.id?' sel':'')+'" data-mat="'+m.id+'" '+(mode==='packages'?'draggable="true"':'')+'><span class="cg">'+TYPES[t].g+'</span><div><div class="cn">'+m.name+'</div><div class="cf">'+m.file+'</div></div><span class="grip">\u22ee\u22ee</span></div>').join('')+'</div>';}).join('');}
+
+function packagesMiddle(){return '<div class="bench-lab"><span class="dotp"></span>Active package \u2014 drag materials from the left</div>'+
+  '<div class="pkg"><div class="pkg-h"><span class="name">Comp-led \u00b7 v1</span></div><div class="pkg-slots">'+
+  '<div class="slot"><span class="sg">'+TYPES.letter.g+'</span><div><div class="sn">Comp-led rework</div><div class="sf">MDO_Query_v2.docx</div></div></div>'+
+  '<div class="slot"><span class="sg">'+TYPES.synopsis.g+'</span><div><div class="sn">One-page synopsis</div><div class="sf">MDO_Synopsis.docx</div></div></div>'+
+  '<div class="slot empty"><span class="sg">'+TYPES.pages.g+'</span><span class="stxt">Drop a sample pages here (optional)</span><span class="kick">pages</span></div>'+
+  '</div><div class="pkg-foot"><span class="res">SENT WITH 3 QUERIES \u00b7 <b>1 FULL REQUEST</b></span><span class="dup">\u29c9 Duplicate</span></div></div>'+
+  '<div class="others-lab">Your other packages \u00b7 1</div><div class="othergrid">'+
+  '<div class="ocard"><h5>Hartley bespoke</h5><div class="ol">Comp-led rework<br>One-page synopsis<br>Chapters 1\u20133</div><div class="of">\u25cf Awaiting reply \u00b7 1 sent</div></div>'+
+  '<div class="newpkg"><span style="font-size:24px;font-weight:300">\uff0b</span><span style="font-family:\'Playfair Display\',serif;font-size:15px;font-weight:600">New package</span></div></div>';}
+
+function materialsMiddle(){
+  const editing=selMat||newType;
+  let inner;
+  if(!editing){inner='<div class="edpick"><div class="mi">\u270e</div><div class="mt">Edit your materials</div><div class="ms">Pick a material from the list on the left, or start a new one, and it opens here.</div></div>';}
+  else{const m=selMat?MATS.find(x=>x.id===selMat):{type:newType,name:'',text:''};
+    const typeRow=newType?'<div class="typepick">'+ORDER.map(t=>'<button class="'+(newType===t?'on':'')+'" onclick="newType=\''+t+'\';renderMiddle()">'+TYPES[t].g+'<span>'+TYPES[t].cap+'</span></button>').join('')+'</div>':'';
+    inner='<div class="edcard-b">'+typeRow+
+      '<div class="flabel">Title</div><input class="finput" value="'+(m.name||'')+'" placeholder="Name this '+TYPES[m.type].cap.toLowerCase()+'\u2026">'+
+      '<div class="flabel">The text</div><textarea class="ftext" placeholder="Paste or write the full '+TYPES[m.type].cap.toLowerCase()+'\u2026">'+(m.text||'')+'</textarea>'+
+      '<div class="flabel">Attached file</div><div class="ffile"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M14 3H6a1 1 0 00-1 1v16a1 1 0 001 1h12a1 1 0 001-1V8z"/><path d="M14 3v5h5"/></svg>'+(m.file||'Upload a file')+'<span class="soon">Coming soon</span></div>'+
+      '<div class="med-foot"><button class="save" onclick="saveMat()">'+(selMat?'Save changes':'Create material')+'</button>'+(selMat?'<button class="del" onclick="delMat()">Delete material</button>':'')+'</div></div>';}
+  return '<div class="med"><div class="med-lab"><span class="dotp"></span>Editing materials \u2014 pick from the left, or start new</div>'+
+    '<div class="edcard"><div class="edcard-h"><h4>'+(selMat?MATS.find(x=>x.id===selMat).name:(newType?'New material':'Materials'))+'</h4><span class="newbtn" onclick="startNew()">\uff0b New material</span></div>'+inner+'</div></div>';
+}
+
+function packageAnalytics(){return '<div class="an-b"><div class="an-title">Comp-led \u00b7 v1</div><div class="an-sub">Active package</div>'+
+  '<div class="an-sec">Result so far</div><div class="an-hero"><span class="big">1</span><span class="lab"><b>Full request \u2713</b><span>from 3 sent</span></span></div>'+
+  '<div class="an-sec">Ready to send?</div><div class="ck"><span class="cb">\u2713</span>Query letter</div><div class="ck"><span class="cb">\u2713</span>Synopsis</div><div class="ck"><span class="cb no">\u2013</span>Sample pages</div>'+
+  '<div class="an-sec">Sent to</div><div class="agc"><span>Hartley Books</span><span>Vane & Co</span><span>Marsh Literary</span></div></div>';}
+
+function materialAnalytics(){
+  if(!selMat){return '<div class="an-b"><div class="an-title">Your materials</div><div class="an-sub">Overview</div>'+
+    '<div class="an-sec">Library</div><div class="anfig"><div><div class="v">'+MATS.length+'</div><div class="k">Materials</div></div><div><div class="v">'+MATS.filter(m=>usage(m.id).n===0).length+'</div><div class="k">Unused</div></div></div>'+
+    '<div class="annote">Pick a material on the left to see where it\u2019s used and how it\u2019s performing.</div></div>';}
+  const m=MATS.find(x=>x.id===selMat), u=usage(m.id);
+  if(u.n===0){return '<div class="an-b"><div class="an-title">'+m.name+'</div><div class="an-sub">'+TYPES[m.type].cap+'</div>'+
+    '<div class="an-sec">Where it\u2019s used</div><div class="an-hero flat"><span class="big">Not in any package yet</span></div>'+
+    '<div class="annote">Add this to a package in Packages mode to start tracking how it does with agents.</div></div>';}
+  return '<div class="an-b"><div class="an-title">'+m.name+'</div><div class="an-sub">'+TYPES[m.type].cap+'</div>'+
+    '<div class="an-sec">How it\u2019s doing</div><div class="anfig"><div><div class="v">'+u.n+'</div><div class="k">In packages</div></div><div><div class="v">'+u.sent+'</div><div class="k">Sent</div></div><div><div class="v win">'+u.full+'</div><div class="k">Full req\u2019s</div></div></div>'+
+    '<div class="an-sec">Used in</div><div class="agc">'+u.names.map(n=>'<span>'+n+'</span>').join('')+'</div>'+
+    (u.sent<4?'<div class="annote">Only '+u.sent+' sends so far across its packages \u2014 too early to say if this piece is pulling requests.</div>':'')+'</div>';
+}
+
+function renderMiddle(){document.getElementById('middle').innerHTML=mode==='materials'?materialsMiddle():packagesMiddle();}
+function renderRight(){
+  const icon=document.getElementById('rightIcon'),title=document.getElementById('rightTitle'),body=document.getElementById('rightBody');
+  if(mode==='materials'){icon.innerHTML='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 5h11l5 5v9H4z"/><path d="M15 5v5h5"/><path d="M8 14h8M8 17h5" stroke-linecap="round"/></svg>';title.textContent='Material analytics';body.innerHTML=materialAnalytics();}
+  else{icon.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M4 20h16"/></svg>';title.textContent='Package analytics';body.innerHTML=packageAnalytics();}
+}
+function renderLeft(){document.getElementById('palgroups').innerHTML=paletteHTML();document.getElementById('editMat').innerHTML=mode==='materials'?'\u2713 Done':'Edit materials \u2192';document.getElementById('editMat').className=mode==='materials'?'em':'em';document.querySelectorAll('.chip').forEach(c=>{c.onclick=()=>{if(mode==='materials'){selMat=c.dataset.mat;newType=null;render();}};});}
+function render(){document.getElementById('stage').className='stage mode-'+mode;document.getElementById('crumbCur').textContent=mode==='materials'?'Materials':'Packages';renderLeft();renderMiddle();renderRight();}
+function setMode(m){mode=m;if(m==='packages'){selMat=null;newType=null;}render();}
+function startNew(){selMat=null;newType='letter';renderMiddle();renderRight();}
+function saveMat(){setMode('packages');}
+function delMat(){if(selMat){MATS=MATS.filter(x=>x.id!==selMat);selMat=null;render();}}
+render();
+</script>
+</body>
+</html>
