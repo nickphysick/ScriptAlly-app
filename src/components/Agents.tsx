@@ -58,6 +58,7 @@ import {
 import { agentPrimary, agentSecondary, agentInitials } from "../lib/agentDisplay";
 import { agentLocation, flagFor, isHomeMarket, getHomeCountry, countryName } from "../lib/territory";
 import { FilterDropdown } from "./agents/FilterDropdown";
+import { SegmentedToggle } from "./forms";
 import "flag-icons/css/flag-icons.min.css";
 import "./agents/agentsV2.css";
 
@@ -311,8 +312,10 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
   };
 
   // Flip the agent's OWN availability (Open ⇄ Closed). Unknown becomes Open on first flip.
-  const flipAvailability = async (agent: Agent) => {
-    const next = agent.submissionStatus === SubmissionStatus.OPEN ? SubmissionStatus.CLOSED : SubmissionStatus.OPEN;
+  // Set an agent's availability (Open/Closed) through the existing updateAgent path — the same
+  // writer the pill used; now driven by the reading-pane's canonical SegmentedToggle.
+  const setAvailability = async (agent: Agent, next: SubmissionStatus) => {
+    if (next === agent.submissionStatus) return;
     await updateAgent(agent.id, { submissionStatus: next });
     setToastMessage(`${firstName(agentPrimary(agent))} marked ${next === SubmissionStatus.OPEN ? "open" : "closed"} to queries`);
     setTimeout(() => setToastMessage(null), 2500);
@@ -549,16 +552,21 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
               </div>
             </div>
             <div className="ag-iright">
-              {/* Availability pill only — the ⋯ lifecycle menu moved to the command bar (next to Edit profile). */}
-              <button
-                type="button"
-                className="ag-openpill"
-                onClick={() => void flipAvailability(a)}
-                title="Click to flip — the agent's own availability"
+              {/* Compact availability toggle — the canonical SegmentedToggle (reused from the Edit
+                  drawer), writing submissionStatus through the existing updateAgent path. Unknown →
+                  neither side lit. The ⋯ lifecycle menu lives in the command bar. */}
+              <span
+                className="ag-availtoggle"
+                data-status={a.submissionStatus === SubmissionStatus.OPEN ? "open" : a.submissionStatus === SubmissionStatus.CLOSED ? "closed" : "unknown"}
               >
-                <span className="ag-d" style={{ background: isOpen ? "var(--a-ink, var(--sd-hue, #7c3a2a))" : "rgba(0,0,0,0.2)" }} />
-                {isOpen ? "Open to queries" : a.submissionStatus === SubmissionStatus.CLOSED ? "Closed to queries" : "Availability unknown"}
-              </button>
+                <span className="ag-availdot" aria-hidden="true" />
+                <SegmentedToggle<SubmissionStatus>
+                  ariaLabel="Submission status"
+                  value={(a.submissionStatus as SubmissionStatus) ?? SubmissionStatus.UNKNOWN}
+                  options={[{ value: SubmissionStatus.OPEN, label: "Open" }, { value: SubmissionStatus.CLOSED, label: "Closed" }]}
+                  onChange={(v) => void setAvailability(a, v)}
+                />
+              </span>
             </div>
           </div>
         </div>

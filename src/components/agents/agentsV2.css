@@ -756,7 +756,26 @@
 .agv2 .ag-lchip.ghost svg { width: 10px; height: 10px; }
 .agv2 .ag-lchip.ghost:hover { background: var(--ag-selhover); color: var(--ag-ink); }
 .agv2 .ag-iright { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 9px; flex-shrink: 0; }
-/* Availability pill (identity top-right) — enlarged ~2× so the agent's status reads at a glance. */
+
+/* ── Availability toggle (identity top-right) — the canonical SegmentedToggle, compact + per-theme.
+      Track/segments read the page tokens; the active segment colours per theme (Capp sage-Open /
+      pink-Closed · Editorial midnight per the colour-role map · Bold its own pink). A small status
+      dot leads. Scoped to .agv2 so the Form-11 drawers/modals keep the full-size SegmentedToggle. ── */
+.agv2 .ag-availtoggle { display: inline-flex; align-items: center; gap: 9px; }
+.agv2 .ag-availtoggle .ag-availdot { width: 10px; height: 10px; border-radius: 50%; flex: none; background: var(--ag-muted); }
+.agv2 .ag-availtoggle[data-status="open"] .ag-availdot { background: var(--sage-d); }
+.agv2 .ag-availtoggle[data-status="closed"] .ag-availdot { background: var(--burg); }
+.t-edn .agv2 .ag-availtoggle[data-status="open"] .ag-availdot,
+.t-edn .agv2 .ag-availtoggle[data-status="closed"] .ag-availdot { background: var(--a-ink); }
+.agv2 .ag-availtoggle .sa-seg { background: var(--ag-sub, #f7f2ea); border: var(--ag-edgew) solid var(--ag-edge); border-radius: 9px; padding: 2px; gap: 2px; }
+.agv2 .ag-availtoggle .sa-seg-b { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.06em; padding: 6px 15px; color: var(--ag-muted); border-radius: 7px; font-weight: 500; }
+.agv2 .ag-availtoggle .sa-seg-b.on { box-shadow: none; }
+.t-capp .agv2 .ag-availtoggle .sa-seg-b.on:first-child { background: var(--ts); color: var(--sage-d); }
+.t-capp .agv2 .ag-availtoggle .sa-seg-b.on:last-child { background: var(--pink); color: var(--burg); }
+.t-bold .agv2 .ag-availtoggle .sa-seg-b.on { background: var(--band); color: var(--ink); }
+.t-edn .agv2 .ag-availtoggle .sa-seg-b.on { background: var(--a-fill); color: var(--a-ink); }
+
+/* Availability pill (identity top-right) — LEGACY, replaced by .ag-availtoggle (kept for now). */
 .agv2 .ag-openpill {
   display: inline-flex;
   align-items: center;
