@@ -2685,7 +2685,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   const heroTint = heroDir === "out" ? "#f9efe9" : heroDir === "in" ? "#eef3ec" : "#f0ece7";
                   const heroStatColour = heroDir === "out" ? "#7c3a2a" : heroDir === "in" ? "#5a6e58" : "#8a7d6c";
                   return (
-                    <div className="qp-hero" style={{ position: "relative", overflow: "hidden", margin: "16px 18px 0", padding: "22px 26px", border: "var(--bdw) solid var(--bd)", borderRadius: 20, background: `linear-gradient(90deg, #ffffff 36%, ${heroTint} 100%)`, boxShadow: "0 8px 20px rgba(29,23,18,.18)", flexShrink: 0 }}>
+                    <div className="qp-hero" style={{ position: "relative", overflow: "hidden", margin: "16px 18px 0", padding: "22px 26px", border: "var(--bdw) solid var(--bd)", borderRadius: 20, background: `linear-gradient(90deg, #ffffff 36%, ${heroTint} 100%)`, boxShadow: "inset 0 3px 0 var(--acc), 0 8px 20px rgba(29,23,18,.18)", flexShrink: 0 }}>
                       {/* top row — avatar centred against the name + agency + status label */}
                       <div style={{ position: "relative", zIndex: 2, display: "flex", alignItems: "center", gap: 18 }}>
                         {/* avatar — solid ink disc + white initials (per the Queries Hub mockup) */}
