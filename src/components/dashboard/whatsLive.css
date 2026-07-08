@@ -2,51 +2,53 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Motion for the "What's live right now?" panel (WhatsLivePanel). Scoped under .wl-row.
- * The sequence (dotted connector line drawn dot-by-dot, pausing on active stages) is driven
- * in JS; here we define the on-dwell dot pulse (and matching hover), the zero-stage faint
- * rest + bloom, the caption fade, and the panel-local dot sizing. Geometry/colours are inline.
+ * "What's live right now?" — the coverflow feature. Scoped under .wl-cf. No card/panel surface;
+ * it sits directly on the dashboard ground with a single hairline divider between its columns.
+ * Structure, masks, tile transitions and the scoped StatusDot sizing live here; text colours and
+ * fonts are set inline in the component (design tokens).
  */
 
-.wl-row { position: relative; }
+.wl-cf { position: relative; }
 
-/* This panel shows the dots large (50px). StatusDot is otherwise locked to 30px app-wide and
-   exposes no size prop here, so its inline width/height are overridden in this scope only. */
-.wl-row .wl-dot { width: 50px !important; height: 50px !important; max-width: none !important; }
+/* carousel window with a soft horizontal edge-fade */
+.wl-cf-carwin {
+  position: relative; overflow: hidden; height: 118px;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 13%, #000 87%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 13%, #000 87%, transparent);
+}
+.wl-cf-track { display: flex; height: 100%; align-items: center; will-change: transform; }
 
-/* representative-dot cluster; pulses 50% larger as the line reaches the stage */
-.wl-row .wl-dotwrap { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; will-change: transform; }
-.wl-row .wl-dotwrap.pulsing { animation: wl-dotpulse 1.6s ease-out; }
-@keyframes wl-dotpulse {
-  0%   { transform: scale(1); }
-  22%  { transform: scale(1.5); }
-  100% { transform: scale(1); }
+/* tiles default to the peeked state; the focused one is lit imperatively */
+.wl-cf-tile {
+  flex: 0 0 190px; width: 190px; display: flex; flex-direction: column; align-items: center; gap: 10px;
+  opacity: 0.34; transform: scale(0.78); transform-origin: center; cursor: pointer;
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+.wl-cf-dotwrap { position: relative; width: 50px; height: 50px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }
+.wl-cf-tile.foc .wl-cf-dotwrap.pop { animation: wl-cf-ring 2.6s ease-in-out infinite; }
+@keyframes wl-cf-ring {
+  0%, 100% { box-shadow: 0 0 0 5px rgba(124, 58, 42, 0.10); }
+  50%      { box-shadow: 0 0 0 9px rgba(124, 58, 42, 0.05); }
 }
 
-/* zero-count stages pulse only very slightly as the line passes (no opacity change, no halo) */
-.wl-row .wl-dotwrap.pulsing-faint { animation: wl-dotpulse-faint 1.6s ease-out; }
-@keyframes wl-dotpulse-faint {
-  0%   { transform: scale(1); }
-  22%  { transform: scale(1.08); }
-  100% { transform: scale(1); }
+/* StatusDot is locked to 30px app-wide (no size prop); scope-force the coverflow sizes. */
+.wl-cf-tiledot  { width: 50px !important; height: 50px !important; max-width: none !important; }
+.wl-cf-rowdot   { width: 34px !important; height: 34px !important; max-width: none !important; }
+.wl-cf-emptydot { width: 44px !important; height: 44px !important; max-width: none !important; }
+
+/* focused stage's list — fixed height, hidden scrollbar, soft top/bottom fade */
+.wl-cf-splist {
+  height: 158px; overflow-y: auto; scrollbar-width: none;
+  display: flex; flex-direction: column; justify-content: center;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 8%, #000 90%, transparent);
+  mask-image: linear-gradient(180deg, transparent, #000 8%, #000 90%, transparent);
 }
+.wl-cf-splist::-webkit-scrollbar { display: none; }
+.wl-cf-qrow { display: flex; align-items: center; gap: 14px; padding: 9px 2px; border-bottom: 1px solid #e6ddce; flex-shrink: 0; }
+.wl-cf-qrow:last-child { border-bottom: none; }
 
-/* zero-count StatusDot: stays faint at 20% (the line passes behind it; no bloom). Hover reveals it. */
-.wl-row .wl-ghost { opacity: 0.2; transition: opacity 1s ease-in-out; will-change: opacity; }
-.wl-row .wl-node:hover .wl-ghost { opacity: 1; }
-
-/* caption below a node — opacity fade only; stays visible once shown until the cycle resets */
-.wl-row .wl-capt { opacity: 0; transition: opacity 1s ease-in-out; pointer-events: none; }
-.wl-row .wl-node.show .wl-capt,
-.wl-row .wl-node:hover .wl-capt { opacity: 1; }
-
-/* hover lifts a cluster to the same 50%-larger size as the active pulse */
-.wl-row .wl-node:hover .wl-dotwrap { transform: scale(1.5); transition: transform 0.2s; }
-
-/* Reduced motion: no sequence; JS pins every caption + a fully-drawn line, zeros faint. */
+/* Reduced motion: static — no tile glide, no focus-ring pulse (JS also skips auto-advance/scroll). */
 @media (prefers-reduced-motion: reduce) {
-  .wl-row .wl-dotwrap.pulsing,
-  .wl-row .wl-dotwrap.pulsing-faint { animation: none; }
-  .wl-row .wl-capt { transition: none; }
-  .wl-row .wl-ghost { transition: none; }
+  .wl-cf-track, .wl-cf-tile { transition: none !important; }
+  .wl-cf-tile.foc .wl-cf-dotwrap.pop { animation: none; }
 }

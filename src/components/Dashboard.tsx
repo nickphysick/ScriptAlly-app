@@ -1652,7 +1652,12 @@ export const Dashboard: React.FC<{
             manuscripts={manuscripts}
             activities={mergedActivities}
           />
-          <WhatsLivePanel queries={queries} />
+          <WhatsLivePanel
+            queries={queries}
+            agents={agents}
+            manuscripts={manuscripts}
+            onSendQuery={() => onNavigate("queries", "Send a query")}
+          />
         </div>
 
         {/* Timeline — "The story so far", relocated into the right-edge floating drawer (v37).

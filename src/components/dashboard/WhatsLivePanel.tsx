@@ -2,319 +2,345 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * "What's live right now?" — a standalone Form-11 dashboard panel (parchment surface, inset
- * burgundy frame, sage gradient header band) matching Fortnight in focus / The story so far.
- * It shows only the LIVE stages of the journey as a single centred row of canonical StatusDots;
- * the settled outcomes appear as minimal "Not shown here:" text in the header.
+ * "What's live right now?" — the coverflow feature (no card surface; sits on the dashboard
+ * ground with a single hairline divider). Two columns, 2fr / 1fr:
+ *   · Left: a focus-and-peek pipeline carousel of the six live stages over the focused stage's
+ *     query list.
+ *   · Right: a text billboard (large Playfair heading + subtitle), vertically centred.
  *
- * Live row (each query maps by its current QueryStatus):
- *   Queried · Partial Requested · Partial Sent · Full Requested · Full Sent · R&R
- * Header "Not shown here:" buckets the settled (inactive) queries:
- *   offers → Offer; rejections → Rejected; closed → Withdrawn + No Response.
- * Counts are aggregate across all manuscripts.
+ * In-flight only — the six live stages in journey order (Queried · Partial Requested ·
+ * Partial Sent · Full Requested · Full Sent · R&R). Queries in a terminal outcome (Offer /
+ * Rejected / Withdrawn / No Response) are excluded entirely; there is no settled summary.
  *
- * Animation: after Queried plays, a dotted connector line is drawn dot-by-dot along the row.
- * Every stage pulses (50% larger) with its caption as the line reaches it — the line PAUSES on
- * populated stages and passes straight over the zero-count ones (which still pulse + show a grey
- * "no …" caption in passing, sitting in front of the line). Captions stay visible once shown and
- * all reset when the line finishes and the cycle restarts. Disabled under prefers-reduced-motion.
+ * Motion (behaviour source: scriptally-whats-live-glide-slow.html): auto-advance rests ~4.6s on
+ * each populated stage then glides to the next populated one; the glide duration scales with the
+ * distance travelled so it eases slowly across empty stages (which always appear, ghosted with a
+ * "0" badge). Hover pauses auto-advance + list auto-scroll; hovering a tile jumps focus to it
+ * (an empty tile shows a per-stage empty message). The strip is a seamless infinite loop (the
+ * tile set is duplicated and position resets with no transition at the loop point). Disabled
+ * under prefers-reduced-motion (statically focused on the first populated stage).
  *
- * StatusDot is locked to 30px app-wide on this branch (no size prop); the panel's larger 50px
- * icons are sized by the scoped `.wl-dot` override in whatsLive.css (the shared component is
- * left untouched).
+ * StatusDot is locked to 30px app-wide (no size prop); the tile (50px), row (34px) and empty
+ * (44px) sizes are forced via scoped overrides in whatsLive.css — the shared component is left
+ * untouched.
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Query, QueryStatus } from "../../types";
+import { Query, Agent, Manuscript, QueryStatus } from "../../types";
 import { StatusDot } from "../StatusDot";
-import {
-  parchment,
-  PAPER_TEXTURE,
-  mountShadow,
-  insetBorder,
-  sageBandGradient,
-  sageBandRule,
-  headingInk,
-  burgundy,
-  mutedInk,
-  FONT_SERIF,
-  FONT_MONO,
-} from "../../lib/designTokens";
+import { burgundy, headingInk, mutedInk, labelColor, FONT_SERIF, FONT_SANS, FONT_MONO, buttonPinkBg, buttonPinkBorder } from "../../lib/designTokens";
 import "./whatsLive.css";
 
-interface Stage {
-  status: QueryStatus; // representative status drawn as the stage's dot
-  agg: QueryStatus[];
-  sing: string; // count === 1
-  plur: string; // count > 1
-  zero: string; // count === 0 (grammatically sound "no …" phrase)
+interface StageDef {
+  status: QueryStatus; // the stage's canonical status (drives the StatusDot glyph)
+  name: string; // tile label (capitalised via CSS)
+  stamp: string; // the row stamp verb, e.g. "partial sent 1 Jul"
 }
 
-/* Six live stages, journey order. R&R is its own live node (renders the sage pencil mark). */
-const LIVE: Stage[] = [
-  { status: QueryStatus.QUERIED, agg: [QueryStatus.QUERIED], sing: "queried", plur: "queried", zero: "no queries" },
-  { status: QueryStatus.PARTIAL_REQUESTED, agg: [QueryStatus.PARTIAL_REQUESTED], sing: "partial requested", plur: "partials requested", zero: "no partials requested" },
-  { status: QueryStatus.PARTIAL_SENT, agg: [QueryStatus.PARTIAL_SENT], sing: "partial sent", plur: "partials sent", zero: "no partials sent" },
-  { status: QueryStatus.FULL_REQUESTED, agg: [QueryStatus.FULL_REQUESTED], sing: "full requested", plur: "fulls requested", zero: "no fulls requested" },
-  { status: QueryStatus.FULL_SENT, agg: [QueryStatus.FULL_SENT], sing: "full sent", plur: "fulls sent", zero: "no fulls sent" },
-  { status: QueryStatus.REVISE_RESUBMIT, agg: [QueryStatus.REVISE_RESUBMIT], sing: "in revision", plur: "in revision", zero: "none in revision" },
+/* Six live stages, journey order. R&R is its own live stage (never folded into any closed bucket). */
+const STAGES: StageDef[] = [
+  { status: QueryStatus.QUERIED, name: "queried", stamp: "queried" },
+  { status: QueryStatus.PARTIAL_REQUESTED, name: "partial requested", stamp: "partial requested" },
+  { status: QueryStatus.PARTIAL_SENT, name: "partial sent", stamp: "partial sent" },
+  { status: QueryStatus.FULL_REQUESTED, name: "full requested", stamp: "full requested" },
+  { status: QueryStatus.FULL_SENT, name: "full sent", stamp: "full sent" },
+  { status: QueryStatus.REVISE_RESUBMIT, name: "in revision", stamp: "R&R" },
 ];
-const N = LIVE.length; // 6
-const LAST = N - 1;
+const RL = STAGES.length; // 6
+const TILE_W = 190;
+const REST_MS = 4600;
 
-const caption = (count: number, s: Stage) => (count === 0 ? s.zero : `${count} ${count === 1 ? s.sing : s.plur}`);
+const HAIR = "#e0d5c5";
+const GROUND = "#F5F0EA"; // the dashboard ground (badge border cuts the badge from it)
 
-// Timing.
-const DWELL = 700; // brief pause of the line at an active stage while its pulse plays
-const LINE_PER_COL = 1400; // ms to draw the dotted line across one inter-stage gap (deliberately slow)
-const QUERIED_BEAT = 400; // brief beat after Queried shows before the line starts
-
-// Geometry (proportions of the row width W, recomputed on resize).
-const DOT = 50; // resting icon size (matches the .wl-dot CSS override)
-const R = DOT / 2;
-const CGAP = 8; // dot → caption gap (caption sits directly beneath)
-const CAP_H = 16; // caption line reserve (smaller serif) — used to vertically centre the block
-const PAD_L = 70; // first node centre x — room for the leftmost centred caption + a gap
-const PAD_R = 70; // last node centre at W − 70 — room for the rightmost centred caption
-const H_STRIP = 83; // body row height (~20% shorter); fits the icon, its pulse, and the caption
-const SPINE_Y = Math.round((H_STRIP - (DOT + CGAP + CAP_H)) / 2 + R); // centre the icon+caption block
-
-const INACTIVE_INK = "#9a948a"; // grey for the zero-count "no …" captions (matches the faded icons)
-
-/** Caption: serif (as the "More room for the journey" line), but smaller; centred beneath. */
-const captStyle = (populated: boolean): React.CSSProperties => ({
-  position: "absolute",
-  left: R,
-  top: DOT + CGAP,
-  transform: "translateX(-50%)",
-  textAlign: "center",
-  fontFamily: FONT_SERIF,
-  fontSize: 13,
-  fontWeight: 500,
-  color: populated ? headingInk : INACTIVE_INK,
-  whiteSpace: "nowrap",
-  pointerEvents: "none",
-});
-
-const LINE_STYLE: React.CSSProperties = {
-  position: "absolute",
-  top: SPINE_Y,
-  transform: "translateY(-50%)",
-  height: 2,
-  width: 0,
-  zIndex: 1, // behind the icons (which carry an opaque disc, §"in front of the line")
-  pointerEvents: "none",
-  background: "radial-gradient(circle, rgba(124,58,42,0.5) 1.3px, transparent 1.7px)",
-  backgroundSize: "10px 2px",
-  backgroundRepeat: "repeat-x",
-  backgroundPosition: "left center",
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const coerceMs = (v: any): number | null => {
+  if (!v) return null;
+  if (typeof v === "string") { const t = Date.parse(v); return isNaN(t) ? null : t; }
+  if (typeof v === "number") return v;
+  if (v instanceof Date) return isNaN(v.getTime()) ? null : v.getTime();
+  if (typeof v.seconds === "number") return v.seconds * 1000;
+  if (typeof v.toDate === "function") { try { return v.toDate().getTime(); } catch { return null; } }
+  return null;
 };
+/** Date a query entered its current (live) status — the per-stage field, R&R falling back to the
+ *  response/last-change timestamp (no dedicated R&R date field exists — flagged in the report). */
+const statusDateMs = (q: Query, status: QueryStatus): number | null => {
+  switch (status) {
+    case QueryStatus.QUERIED: return coerceMs(q.dateSent);
+    case QueryStatus.PARTIAL_REQUESTED: return coerceMs(q.partialRequestedDate);
+    case QueryStatus.PARTIAL_SENT: return coerceMs(q.partialSentDate);
+    case QueryStatus.FULL_REQUESTED: return coerceMs(q.fullRequestedDate);
+    case QueryStatus.FULL_SENT: return coerceMs(q.fullSentDate);
+    case QueryStatus.REVISE_RESUBMIT: return coerceMs(q.responseReceivedAt) ?? coerceMs(q.lastStatusChange) ?? coerceMs(q.dateSent);
+    default: return null;
+  }
+};
+const fmtDate = (ms: number | null): string => {
+  if (ms == null) return "";
+  const d = new Date(ms);
+  const now = new Date();
+  return `${d.getDate()} ${MONTHS[d.getMonth()]}${d.getFullYear() !== now.getFullYear() ? ` ${d.getFullYear()}` : ""}`;
+};
+
+interface Row { id: string; status: QueryStatus; name: string; agency: string; manuscript: string; dateMs: number | null; dateLabel: string; }
+interface StageData extends StageDef { rows: Row[]; count: number; }
+
+const rightBillboard = (
+  <div style={{ position: "relative", display: "flex", flexDirection: "column", justifyContent: "center", gap: 14, padding: "8px 0 8px 38px", borderLeft: `1px solid ${HAIR}` }}>
+    <div style={{ fontFamily: FONT_SERIF, fontSize: 33, fontWeight: 500, color: headingInk, lineHeight: 1.08 }}>What&rsquo;s live right now?</div>
+    <div style={{ fontFamily: FONT_SANS, fontSize: 13.5, lineHeight: 1.55, color: mutedInk, maxWidth: "34ch" }}>
+      Maintaining a healthy pipeline is key. Here&rsquo;s a snapshot of all your in-flight queries.
+    </div>
+  </div>
+);
 
 export interface WhatsLivePanelProps {
   queries: Query[];
+  agents: Agent[];
+  manuscripts: Manuscript[];
+  onSendQuery: () => void;
 }
 
-export const WhatsLivePanel: React.FC<WhatsLivePanelProps> = ({ queries }) => {
-  const rowRef = useRef<HTMLDivElement>(null);
+export const WhatsLivePanel: React.FC<WhatsLivePanelProps> = ({ queries, agents, manuscripts, onSendQuery }) => {
+  // Derived per-stage data (in-flight only), most-recent-first.
+  const stages: StageData[] = useMemo(() => {
+    const agentById = new Map(agents.map((a) => [a.id, a]));
+    const msById = new Map(manuscripts.map((m) => [m.id, m]));
+    return STAGES.map((s) => {
+      const rows: Row[] = queries
+        .filter((q) => q.status === s.status)
+        .map((q) => {
+          const agent = agentById.get(q.agentId);
+          const ms = msById.get(q.manuscriptId);
+          const dateMs = statusDateMs(q, s.status);
+          return {
+            id: q.id,
+            status: s.status,
+            name: agent?.name || "Unknown agent",
+            agency: agent?.agency || "Independent",
+            manuscript: ms?.title || "Untitled manuscript",
+            dateMs,
+            dateLabel: fmtDate(dateMs),
+          };
+        })
+        .sort((a, b) => (b.dateMs ?? 0) - (a.dateMs ?? 0));
+      return { ...s, rows, count: rows.length };
+    });
+  }, [queries, agents, manuscripts]);
+
+  const populated = useMemo(() => stages.map((_, i) => i).filter((i) => stages[i].count > 0), [stages]);
+  const isEmpty = populated.length === 0;
+  const countsKey = stages.map((s) => s.count).join(",");
+  const firstPop = populated[0] ?? 0;
+
+  const carwinRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const listElRef = useRef<HTMLDivElement | null>(null);
+  const focusRef = useRef<number>(firstPop);
+  const pausedRef = useRef(false);
+  const accRef = useRef(0);
+  const holdRef = useRef(0);
+  const swapTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const [W, setW] = useState(0);
-  const playedRef = useRef(false); // the tour plays once per mount — no replay until refresh / nav back
+  const [listStage, setListStage] = useState<number>(firstPop);
+  const [swapping, setSwapping] = useState(false);
 
-  const counts = useMemo(
-    () => LIVE.map((s) => queries.filter((q) => s.agg.includes(q.status)).length),
-    [queries]
-  );
-  const isZeroLive = counts.reduce((a, b) => a + b, 0) === 0;
-  const countsKey = counts.join(",");
+  // keep focus/list valid if the populated set changes (data update)
+  useEffect(() => { focusRef.current = firstPop; setListStage(firstPop); }, [firstPop]);
 
-  // Settled (inactive) buckets for the header "Not shown here:" line.
-  const offers = useMemo(() => queries.filter((q) => q.status === QueryStatus.OFFER).length, [queries]);
-  const rejections = useMemo(() => queries.filter((q) => q.status === QueryStatus.REJECTED).length, [queries]);
-  const closed = useMemo(() => queries.filter((q) => q.status === QueryStatus.WITHDRAWN || q.status === QueryStatus.NO_RESPONSE).length, [queries]);
-  const inactiveParts: string[] = [];
-  if (offers) inactiveParts.push(`${offers} offer${offers === 1 ? "" : "s"}`);
-  if (rejections) inactiveParts.push(`${rejections} rejection${rejections === 1 ? "" : "s"}`);
-  if (closed) inactiveParts.push(`${closed} closed`);
-
-  // Measure the row width and track resizes (geometry is proportional to it).
+  // measure the carousel width (resize → re-centre via the main effect's W dep)
   useLayoutEffect(() => {
-    const el = rowRef.current;
+    const el = carwinRef.current;
     if (!el) return;
     const measure = () => setW(el.clientWidth);
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
-  }, []);
+  }, [isEmpty]);
 
-  // Node centre x's: six evenly from PAD_L to W − PAD_R.
-  const xs = useMemo(() => {
-    if (!W) return null;
-    return LIVE.map((_, i) => PAD_L + (W - PAD_R - PAD_L) * (i / LAST));
-  }, [W]);
+  // list overflow → auto-scroll (top-aligned) vs. short → vertically centred; reset the drift
+  useLayoutEffect(() => {
+    const el = listElRef.current;
+    accRef.current = 0; holdRef.current = 0;
+    if (el) {
+      el.scrollTop = 0;
+      el.style.justifyContent = el.scrollHeight > el.clientHeight + 2 ? "flex-start" : "center";
+    }
+  }, [listStage, swapping, W]);
 
+  // main coverflow engine (imperative — transforms/opacity per frame, list crossfade via state)
   useEffect(() => {
-    if (isZeroLive || !xs) return; // zero-state: quiet faint row, no sequence
-    const row = rowRef.current;
-    if (!row) return;
-    const nodes = Array.from(row.querySelectorAll<HTMLElement>(".wl-node"));
-    const line = row.querySelector<HTMLElement>(".wl-line");
-    if (nodes.length < N || !line) return;
-
-    const full = xs[LAST] - xs[0];
-
-    // End-state: line fully drawn, every caption shown (zeros stay faint, no pulses).
-    const showStatic = () => {
-      nodes.forEach((node) => node.classList.add("show"));
-      line.style.transition = "none";
-      line.style.width = `${full}px`;
-    };
-    // Reduced-motion, or a re-render after the tour already ran this mount (e.g. a resize) →
-    // jump straight to the end-state. The tour itself never replays until the panel re-mounts.
+    if (isEmpty) return;
+    const carwin = carwinRef.current, track = trackRef.current;
+    if (!carwin || !track) return;
+    const tiles = Array.from(track.querySelectorAll<HTMLElement>(".wl-cf-tile"));
+    if (tiles.length < RL * 2) return;
+    const root = (track.closest(".wl-cf") as HTMLElement) || carwin;
+    const popSet = new Set(populated);
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce || playedRef.current) { showStatic(); return; }
 
-    let cancelled = false;
-    let visible = true;
-    const timers = new Set<ReturnType<typeof setTimeout>>();
-    const wait = (ms: number) =>
-      new Promise<void>((res) => {
-        const id = setTimeout(() => { timers.delete(id); res(); }, ms);
-        timers.add(id);
+    const centre = (anim: boolean, dur: number) => {
+      track.style.transition = anim ? `transform ${dur}s cubic-bezier(.4,.05,.25,1)` : "none";
+      const vp = carwin.clientWidth;
+      track.style.transform = `translateX(${vp / 2 - (focusRef.current * TILE_W + TILE_W / 2)}px)`;
+      tiles.forEach((t, ti) => {
+        const foc = ti === focusRef.current;
+        t.style.opacity = foc ? "1" : "0.34";
+        t.style.transform = `scale(${foc ? 1 : 0.78})`;
+        t.classList.toggle("foc", foc);
       });
-    let resumeWaiters: Array<() => void> = [];
-    const waitVisible = () => (visible ? Promise.resolve() : new Promise<void>((res) => resumeWaiters.push(res)));
+    };
+    const nextPop = (from: number) => { let j = from + 1; while (j < tiles.length) { if (popSet.has(j % RL)) return j; j++; } return from; };
+    const durFor = (dist: number) => Math.min(1.9, 0.6 + 0.75 * (dist - 1));
+    const setListFocus = (stageIdx: number) => {
+      setSwapping(true);
+      clearTimeout(swapTimerRef.current);
+      swapTimerRef.current = setTimeout(() => { setListStage(stageIdx); setSwapping(false); }, 250);
+    };
 
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          visible = e.isIntersecting;
-          if (visible && resumeWaiters.length) {
-            const w = resumeWaiters;
-            resumeWaiters = [];
-            w.forEach((r) => r());
-          }
+    centre(false, 0); // initial / post-resize position
+
+    if (reduce) return; // static — no auto-advance, no auto-scroll
+
+    let timer: ReturnType<typeof setInterval>;
+    const step = () => {
+      const j = nextPop(focusRef.current);
+      if (j <= focusRef.current) { focusRef.current = firstPop; centre(false, 0); return; } // safety wrap
+      const dur = durFor(j - focusRef.current);
+      focusRef.current = j;
+      centre(true, dur);
+      setListFocus(j % RL);
+      if (j >= RL) setTimeout(() => { focusRef.current -= RL; centre(false, 0); }, dur * 1000 + 40);
+    };
+    const start = () => { clearInterval(timer); timer = setInterval(step, REST_MS); };
+
+    const tileEnter = tiles.map((t, ti) => {
+      const h = () => {
+        pausedRef.current = true; clearInterval(timer);
+        if (ti !== focusRef.current) {
+          const dist = Math.abs(ti - focusRef.current);
+          focusRef.current = ti; centre(true, durFor(Math.max(1, dist))); setListFocus(ti % RL);
         }
-      },
-      { threshold: 0 }
-    );
-    io.observe(row);
+      };
+      t.addEventListener("mouseenter", h);
+      return h;
+    });
+    const onRootEnter = () => { pausedRef.current = true; clearInterval(timer); };
+    const onRootLeave = () => { pausedRef.current = false; start(); };
+    root.addEventListener("mouseenter", onRootEnter);
+    root.addEventListener("mouseleave", onRootLeave);
 
-    const speed = (xs[1] - xs[0]) / LINE_PER_COL; // px per ms
-
-    let curX = xs[0];
-    // Draw the dotted line up to target x (dots appear as the revealed width crosses them).
-    const drawTo = async (tx: number) => {
-      if (tx <= curX + 0.5) return;
-      const dur = (tx - curX) / speed;
-      line.style.transition = `width ${dur}ms linear`;
-      line.style.width = `${tx - xs[0]}px`;
-      curX = tx;
-      await wait(dur);
-    };
-
-    // The line reaches a stage → its caption appears (and stays) and the icon pulses: active
-    // stages pulse 50% larger; zero-count stages pulse only very slightly (no opacity change).
-    const pulseLabel = (i: number) => {
-      nodes[i].classList.add("show");
-      const wrap = nodes[i].querySelector<HTMLElement>(".wl-dotwrap");
-      if (wrap) {
-        const cls = counts[i] > 0 ? "pulsing" : "pulsing-faint";
-        wrap.classList.remove("pulsing", "pulsing-faint");
-        void wrap.offsetWidth;
-        wrap.classList.add(cls);
+    let raf = 0;
+    const tick = () => {
+      const el = listElRef.current;
+      if (!pausedRef.current && el) {
+        const max = el.scrollHeight - el.clientHeight;
+        if (max > 2) {
+          if (accRef.current < max) { accRef.current += 0.26; el.scrollTop = accRef.current; }
+          else { holdRef.current++; if (holdRef.current > 150) { accRef.current = 0; holdRef.current = 0; el.scrollTop = 0; } }
+        }
       }
+      raf = requestAnimationFrame(tick);
     };
-
-    (async () => {
-      await waitVisible();
-      if (cancelled || full <= 0) return;
-      playedRef.current = true; // it begins playing now — re-renders this mount won't replay it
-
-      await wait(500); // settle
-      // Queried plays first; then the line draws ONCE, pausing briefly on active stages and
-      // passing straight over the inactive ones, and stops at the end (no replay this mount).
-      pulseLabel(0);
-      await wait(counts[0] > 0 ? DWELL : QUERIED_BEAT);
-      if (cancelled) return;
-      for (let i = 1; i <= LAST; i++) {
-        await drawTo(xs[i]);
-        if (cancelled) return;
-        pulseLabel(i);
-        if (counts[i] > 0) { await wait(DWELL); if (cancelled) return; } // brief pause on active
-      }
-    })();
+    raf = requestAnimationFrame(tick);
+    start();
 
     return () => {
-      cancelled = true;
-      timers.forEach((id) => clearTimeout(id));
-      io.disconnect();
-      resumeWaiters = [];
+      clearInterval(timer);
+      clearTimeout(swapTimerRef.current);
+      cancelAnimationFrame(raf);
+      tiles.forEach((t, ti) => t.removeEventListener("mouseenter", tileEnter[ti]));
+      root.removeEventListener("mouseenter", onRootEnter);
+      root.removeEventListener("mouseleave", onRootLeave);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [countsKey, W, isZeroLive]);
+  }, [countsKey, W, isEmpty]);
+
+  // ── render ──────────────────────────────────────────────────────────────────
+  const badgeBase: React.CSSProperties = {
+    position: "absolute", top: -6, right: -9, minWidth: 18, height: 18, padding: "0 4px", borderRadius: 9,
+    border: `1.5px solid ${GROUND}`, fontFamily: FONT_MONO, fontSize: 9, display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 1,
+  };
+
+  const renderList = (s: StageData) => {
+    if (s.count === 0) {
+      return (
+        <div className="wl-cf-splist" key={`e-${s.status}`} style={{ justifyContent: "center" }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 11, textAlign: "center" }}>
+            <StatusDot status={s.status} ghost className="wl-cf-emptydot" />
+            <div style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 15, color: mutedInk }}>Nothing at this stage right now.</div>
+          </div>
+        </div>
+      );
+    }
+    return (
+      <div className="wl-cf-splist" key={`l-${s.status}`} ref={listElRef}>
+        {s.rows.map((r) => (
+          <div className="wl-cf-qrow" key={r.id}>
+            <StatusDot status={r.status} className="wl-cf-rowdot" />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontFamily: FONT_SERIF, fontSize: 14.5, color: headingInk }}>{r.name}</div>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 7.5, letterSpacing: "0.05em", textTransform: "uppercase", color: labelColor, marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {r.agency} · {r.manuscript}
+              </div>
+            </div>
+            <span style={{ fontFamily: FONT_MONO, fontSize: 8.5, color: mutedInk, whiteSpace: "nowrap", flexShrink: 0 }}>{s.stamp} {r.dateLabel}</span>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const tilesData = [...stages, ...stages]; // duplicated for the seamless loop
 
   return (
-    <div
-      id="whats-live-container"
-      className="flex flex-col w-full relative"
-      style={{ background: parchment, backgroundImage: PAPER_TEXTURE, borderRadius: 14, boxShadow: mountShadow }}
-    >
-      {/* signature inset mount frame */}
-      <div aria-hidden="true" style={{ position: "absolute", inset: 6, border: insetBorder, borderRadius: 10, pointerEvents: "none", zIndex: 3 }} />
-
-      {/* sage header band: keyline + title (left) · "Not shown here:" outcomes (right) */}
-      <div
-        className="flex items-center justify-between flex-wrap"
-        style={{ position: "relative", zIndex: 2, margin: "6px 6px 0", borderRadius: "8px 8px 0 0", padding: "12px 18px 10px", background: "linear-gradient(135deg, var(--band-a, #ece5d8), var(--band-b, #e5ddcd))", borderBottom: "var(--bdw, 1px) solid var(--band-bd, rgba(112,94,70,0.25))", gap: 10 }}
-      >
-        <span className="flex items-center">
-          <span aria-hidden="true" style={{ width: 3, height: 18, borderRadius: 2, background: burgundy, marginRight: 12, flexShrink: 0, display: "inline-block" }} />
-          <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 500, color: "var(--hdr, #5d4037)", lineHeight: 1.1 }}>What&rsquo;s live right now?</span>
-        </span>
-        <span style={{ fontFamily: FONT_MONO, fontSize: 11, letterSpacing: "0.04em", color: mutedInk, whiteSpace: "nowrap" }}>
-          {inactiveParts.length > 0 ? (
-            <>
-              Not shown here: <span style={{ color: burgundy, fontWeight: 500 }}>{inactiveParts.join(", ")}</span>
-            </>
-          ) : (
-            <>You have no inactive queries. Everything is shown below.</>
-          )}
-        </span>
-      </div>
-
-      {/* body: the single centred live row */}
-      <div style={{ position: "relative", zIndex: 2, margin: "0 6px 6px", padding: "14px 16px" }}>
-        <div ref={rowRef} className="wl-row" style={{ position: "relative", width: "100%", height: H_STRIP }}>
-          {xs && (
-            <>
-              {/* dotted connector line (drawn dot-by-dot in JS); behind the icons' discs */}
-              <div className="wl-line" style={{ ...LINE_STYLE, left: xs[0] }} />
-
-              {LIVE.map((s, i) => {
-                const x = xs[i];
-                const populated = counts[i] > 0;
-                return (
-                  <div
-                    key={i}
-                    className={`wl-node${populated ? "" : " empty"}`}
-                    // opaque parchment disc so the dotted line never shows through (icon in front)
-                    style={{ position: "absolute", left: x - R, top: SPINE_Y - R, width: DOT, height: DOT, zIndex: 2, background: parchment, borderRadius: "50%" }}
-                  >
-                    <span className="wl-dotwrap">
-                      {/* StatusDot is locked to 30px app-wide (no size prop); .wl-dot forces 50px here. */}
-                      <StatusDot status={s.status} ghost={!populated} className={`wl-dot${populated ? "" : " wl-ghost"}`} />
-                    </span>
-                    {!isZeroLive && (
-                      <span className="wl-capt" style={captStyle(populated)}>
-                        {caption(counts[i], s)}
+    <div className="wl-cf" style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 0, width: "100%" }}>
+      {/* Left 2fr */}
+      <div style={{ minWidth: 0, paddingRight: 34 }}>
+        {isEmpty ? (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, minHeight: 282, textAlign: "center" }}>
+            <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
+              {STAGES.map((s) => <StatusDot key={s.status} status={s.status} ghost className="wl-cf-emptydot" />)}
+            </div>
+            <div style={{ fontFamily: FONT_SERIF, fontSize: 21, fontWeight: 500, color: headingInk }}>Nothing in flight right now.</div>
+            <div style={{ fontFamily: FONT_SANS, fontSize: 13, lineHeight: 1.55, color: mutedInk, maxWidth: 400 }}>
+              When you send a query, it&rsquo;ll appear here and move through these stages as agents reply.
+            </div>
+            <button
+              onClick={onSendQuery}
+              style={{ marginTop: 4, cursor: "pointer", fontFamily: FONT_MONO, fontSize: 10.5, fontWeight: 500, letterSpacing: "0.07em", color: burgundy, background: buttonPinkBg, border: `0.5px solid ${buttonPinkBorder}`, borderRadius: 10, padding: "10px 18px" }}
+            >
+              Send your first query
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="wl-cf-carwin" ref={carwinRef}>
+              <div className="wl-cf-track" ref={trackRef}>
+                {tilesData.map((s, ti) => {
+                  const zero = s.count === 0;
+                  return (
+                    <div className="wl-cf-tile" key={ti}>
+                      <span className={`wl-cf-dotwrap${zero ? "" : " pop"}`}>
+                        <StatusDot status={s.status} ghost={zero} className="wl-cf-tiledot" />
+                        <span className="wl-cf-badge" style={{ ...badgeBase, background: zero ? "#c2b8ab" : burgundy, color: zero ? "#f6ede3" : "#f6ede3" }}>{s.count}</span>
                       </span>
-                    )}
-                  </div>
-                );
-              })}
-            </>
-          )}
-        </div>
+                      <span style={{ fontFamily: FONT_SERIF, fontSize: 16, color: headingInk, textTransform: "capitalize", whiteSpace: "nowrap" }}>{s.name}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="wl-cf-spot" style={{ marginTop: 6, opacity: swapping ? 0 : 1, transform: swapping ? "translateY(-10px)" : "none", transition: "opacity 0.25s ease, transform 0.25s ease" }}>
+              {renderList(stages[listStage] ?? stages[firstPop])}
+            </div>
+          </>
+        )}
       </div>
+
+      {/* Right 1fr billboard */}
+      {rightBillboard}
     </div>
   );
 };
