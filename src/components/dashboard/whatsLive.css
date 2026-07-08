@@ -37,11 +37,11 @@
 .wl-cf-emptydot { width: 44px !important; height: 44px !important; max-width: none !important; }
 
 /* focused stage's list — fixed height, hidden scrollbar, soft top/bottom fade */
+/* No fade mask — it clipped the last row/dot under the bottom fade. The list clips cleanly at
+   the card edges, so at rest the final entry is completely visible. */
 .wl-cf-splist {
   height: 158px; overflow-y: auto; scrollbar-width: none;
   display: flex; flex-direction: column; justify-content: center;
-  -webkit-mask-image: linear-gradient(180deg, transparent, #000 8%, #000 90%, transparent);
-  mask-image: linear-gradient(180deg, transparent, #000 8%, #000 90%, transparent);
 }
 .wl-cf-splist::-webkit-scrollbar { display: none; }
 /* rows are spaced by padding only — no separator lines */

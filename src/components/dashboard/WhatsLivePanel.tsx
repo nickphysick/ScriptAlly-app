@@ -49,6 +49,8 @@ const STAGES: StageDef[] = [
 const RL = STAGES.length; // 6
 const TILE_W = 190;
 const REST_MS = 5000; // dwell on each populated stage
+const FADE_MS = 550; // list crossfade (opacity only) on stage change
+const SCROLL_DUR = REST_MS - FADE_MS - 700; // list reaches the bottom before the next fade-out (~3.75s)
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const coerceMs = (v: any): number | null => {
@@ -86,10 +88,10 @@ interface StageData extends StageDef { rows: Row[]; count: number; }
 // Reuses the fortnight heading-block classes (.dc-title/.dc-rule/.dc-sub) so the two section
 // headings stay typographically identical and theme-synced (the coverflow is wrapped in .dc).
 const rightBillboard = (
-  <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: "8px 0" }}>
-    <h2 className="dc-title">Live pipeline</h2>
+  <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-end", textAlign: "right", padding: "8px 0" }}>
+    <h2 className="dc-title" style={{ textAlign: "right" }}>Live pipeline</h2>
     <div className="dc-rule" aria-hidden="true" />
-    <p className="dc-sub">Maintaining a healthy pipeline is key. Here&rsquo;s a snapshot of all your in-flight queries.</p>
+    <p className="dc-sub" style={{ textAlign: "right" }}>A snapshot of your in-flight queries.</p>
   </div>
 );
 
@@ -137,7 +139,8 @@ export const WhatsLivePanel: React.FC<WhatsLivePanelProps> = ({ queries, agents,
   const listElRef = useRef<HTMLDivElement | null>(null);
   const focusRef = useRef<number>(firstPop);
   const pausedRef = useRef(false);
-  const accRef = useRef(0);
+  const elapsedRef = useRef(0); // active (non-paused) ms the current stage's list has scrolled
+  const maxRef = useRef(0); // the list's overflow in px (measured top-aligned)
   const swapTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const [W, setW] = useState(0);
   const [listStage, setListStage] = useState<number>(firstPop);
@@ -160,12 +163,19 @@ export const WhatsLivePanel: React.FC<WhatsLivePanelProps> = ({ queries, agents,
   // list overflow → auto-scroll (top-aligned) vs. short → vertically centred; reset the drift
   useLayoutEffect(() => {
     const el = listElRef.current;
-    accRef.current = 0; // each stage starts at the top for its single pass
+    elapsedRef.current = 0; // each stage starts a fresh single pass from the top
     if (el) {
       el.scrollTop = 0;
-      el.style.justifyContent = el.scrollHeight > el.clientHeight + 2 ? "flex-start" : "center";
+      // Measure overflow TOP-ALIGNED: reading scrollHeight while justify-content:center under-reports
+      // it (~half the overflow is clipped above the top), which would stop the scroll halfway down.
+      el.style.justifyContent = "flex-start";
+      const max = el.scrollHeight - el.clientHeight;
+      maxRef.current = Math.max(0, max);
+      if (max <= 2) el.style.justifyContent = "center"; // fits → centre, no scroll
+    } else {
+      maxRef.current = 0;
     }
-  }, [listStage, swapping, W]);
+  }, [listStage, W]);
 
   // main coverflow engine (imperative — transforms/opacity per frame, list crossfade via state)
   useEffect(() => {
@@ -194,7 +204,7 @@ export const WhatsLivePanel: React.FC<WhatsLivePanelProps> = ({ queries, agents,
     const setListFocus = (stageIdx: number) => {
       setSwapping(true);
       clearTimeout(swapTimerRef.current);
-      swapTimerRef.current = setTimeout(() => { setListStage(stageIdx); setSwapping(false); }, 250);
+      swapTimerRef.current = setTimeout(() => { setListStage(stageIdx); setSwapping(false); }, FADE_MS);
     };
 
     centre(false, 0); // initial / post-resize position
@@ -229,19 +239,17 @@ export const WhatsLivePanel: React.FC<WhatsLivePanelProps> = ({ queries, agents,
     root.addEventListener("mouseenter", onRootEnter);
     root.addEventListener("mouseleave", onRootLeave);
 
-    let raf = 0;
-    const tick = () => {
+    let raf = 0, last = 0;
+    const tick = (now: number) => {
       const el = listElRef.current;
-      if (!pausedRef.current && el) {
-        const max = el.scrollHeight - el.clientHeight;
-        if (max > 2 && accRef.current < max) {
-          // single pass: drift down once, timed to reach the bottom ~1s before the carousel
-          // advances (dwell REST_MS), then rest at the bottom — no reset, no repeat this stage.
-          const perFrame = max / Math.max(1, (REST_MS - 1000) / 16.67);
-          accRef.current = Math.min(max, accRef.current + perFrame);
-          el.scrollTop = accRef.current;
-        }
+      // Time-based single pass: accumulate active (non-paused) ms and map to scrollTop, so it
+      // reaches the true bottom in SCROLL_DUR regardless of frame rate, then rests. Hover pauses
+      // (no ms accumulated) and resumes without losing its place; it still completes.
+      if (!pausedRef.current && el && maxRef.current > 2 && elapsedRef.current < SCROLL_DUR) {
+        if (last) elapsedRef.current += now - last;
+        el.scrollTop = maxRef.current * Math.min(1, elapsedRef.current / SCROLL_DUR);
       }
+      last = now;
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
@@ -337,7 +345,7 @@ export const WhatsLivePanel: React.FC<WhatsLivePanelProps> = ({ queries, agents,
             </div>
             {/* list in its own inner card — reuse the day-card token (var --dc-body / --dc-card-*) */}
             <div className="wl-cf-listcard" style={{ marginTop: 16, background: "var(--dc-body)", border: "var(--dc-card-bd)", borderRadius: "var(--dc-card-rad)", padding: "12px 16px" }}>
-              <div className="wl-cf-spot" style={{ opacity: swapping ? 0 : 1, transform: swapping ? "translateY(-10px)" : "none", transition: "opacity 0.25s ease, transform 0.25s ease" }}>
+              <div className="wl-cf-spot" style={{ opacity: swapping ? 0 : 1, transition: "opacity 0.55s ease" }}>
                 {renderList(stages[listStage] ?? stages[firstPop])}
               </div>
             </div>
