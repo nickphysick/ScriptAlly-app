@@ -32,6 +32,10 @@ export interface User {
   // Absent === Cappuccino. NOTE: prod firestore.rules still enum-restrict this to the first two —
   // "editorial" persists only once the parked rules edit ships (see BUILD-REPORT.md).
   queriesTheme?: "cappuccino" | "bold" | "editorial";
+  // Cadence stamp for the To-do "Clear the Desk" focus ritual — written once when the ritual is
+  // completed or left (ISO String). The ONLY reader is the entry check (shouldOpenFocus); nothing
+  // derives from it, so it doesn't offend derived-over-stored. Absent === never focused.
+  todoLastFocusedAt?: string;
 }
 
 /**

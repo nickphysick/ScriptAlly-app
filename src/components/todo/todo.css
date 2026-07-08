@@ -129,3 +129,215 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ── masthead re-entry control (ledger mode) ─────────────────────────────── */
+.todo-reenter {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 9px 14px;
+  border-radius: var(--hub-btn-rad, 8px);
+  cursor: pointer;
+  background: var(--hub-primary);
+  color: var(--hub-primary-tx);
+  border: 1px solid var(--hub-primary-bd, transparent);
+  white-space: nowrap;
+}
+.todo-reenter:hover {
+  filter: brightness(0.96);
+}
+
+/* ── Clear the Desk (focus) ──────────────────────────────────────────────── */
+.todo-focuswrap {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  max-width: 660px;
+  width: 100%;
+  margin: 10px auto 0;
+  text-align: center;
+  position: relative;
+}
+.todo-skiplist {
+  position: absolute;
+  top: -4px;
+  right: 0;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--hub-label);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 6px 8px;
+}
+.todo-skiplist:hover {
+  color: var(--hub-accent);
+}
+.todo-fcount {
+  font-size: 10px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--hub-label);
+  margin-bottom: 7px;
+}
+.todo-fmeter {
+  height: 5px;
+  width: 210px;
+  margin: 0 auto 24px;
+  background: var(--hub-hair);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.todo-fmeter i {
+  display: block;
+  height: 100%;
+  background: var(--hub-primary);
+  transition: width 0.5s;
+}
+.todo-fcard {
+  position: relative;
+  background: var(--hub-pane-process);
+  border: var(--bdw) solid var(--hub-pane-bd);
+  border-radius: var(--hub-radius);
+  padding: 40px 38px;
+  box-shadow: var(--hub-pane-sh, 0 3px 8px rgba(58, 28, 20, 0.09));
+  text-align: center;
+}
+/* Cappuccino-only Form-11 inset frame (shared burgundy constant, never on Bold/Editorial). */
+.t-capp .todo-fcard::after,
+.t-capp .todo-pane::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(124, 58, 42, 0.28);
+  border-radius: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+.todo-ptag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 9px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  padding: 5px 12px 5px 6px;
+  border-radius: 99px;
+  margin-bottom: 16px;
+  background: var(--hub-band-process);
+  color: var(--hub-band-process-tx);
+}
+.todo-fbig {
+  font-size: 32px;
+  line-height: 1.12;
+  color: var(--hub-head);
+  margin-bottom: 11px;
+}
+.todo-fbig .w {
+  font-style: italic;
+  color: var(--hub-accent);
+}
+.todo-fsub {
+  font-size: 14px;
+  color: var(--hub-body);
+  line-height: 1.6;
+  margin: 0 auto 14px;
+  max-width: 470px;
+}
+.todo-fsub b {
+  color: var(--hub-head);
+  font-weight: 500;
+}
+.todo-dline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--hub-hair);
+  border-radius: 99px;
+  padding: 7px 15px;
+  margin: 2px auto 26px;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--hub-label);
+}
+.todo-factions {
+  display: flex;
+  gap: 11px;
+  justify-content: center;
+  align-items: center;
+}
+.todo-fbtn {
+  font-size: 15px;
+  padding: 13px 24px;
+  border-radius: 11px;
+  cursor: pointer;
+  border: 1px solid;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+.todo-fbtn.p {
+  background: var(--hub-primary);
+  color: var(--hub-primary-tx);
+  border-color: var(--hub-primary-bd, var(--hub-primary));
+}
+.todo-fbtn.g {
+  background: var(--hub-btn-bg);
+  border-color: var(--hub-btn-bd);
+  color: var(--hub-item);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 14px 16px;
+}
+.todo-fbtn.p:hover {
+  filter: brightness(0.96);
+}
+.todo-fbtn.g:hover {
+  color: var(--hub-accent);
+}
+.todo-fkey {
+  font-size: 9px;
+  color: var(--hub-label);
+  margin-top: 19px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+.todo-fdone {
+  padding: 56px 20px;
+  text-align: center;
+}
+.todo-fdone h2 {
+  font-style: italic;
+  font-weight: 500;
+  font-size: 28px;
+  color: var(--hub-label);
+  margin: 12px 0 8px;
+}
+.todo-fdone p {
+  font-size: 10px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--hub-label);
+}
+.todo-primary {
+  margin-top: 22px;
+  background: var(--hub-primary);
+  color: var(--hub-primary-tx);
+  border: 1px solid var(--hub-primary-bd, var(--hub-primary));
+  font-size: 16px;
+  padding: 12px 20px;
+  border-radius: var(--hub-btn-rad, 9px);
+  cursor: pointer;
+}
+.todo-primary:hover {
+  filter: brightness(0.96);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .todo-fmeter i {
+    transition: none;
+  }
+}

@@ -31,6 +31,7 @@ import { StatusDot, statusDirection } from "./StatusDot";
 import { ChromeSlab, MASTHEAD_CTA_STYLE } from "./shell/ChromeSlab";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
 import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse } from "../lib/queryAmbient";
+import { getPrimaryAction } from "../lib/queryPrimaryAction";
 import { EdgeFadeScroll } from "./EdgeFadeScroll";
 import { RecordResponseModal } from "./RecordResponseModal";
 import { RecordResponseFocusForm } from "./RecordResponseFocusForm";
@@ -38,7 +39,7 @@ import { recordQueryResponse } from "../lib/recordResponse";
 import { agentLabel, agentAgencyLine, agentPrimary, agentInitials } from "../lib/agentDisplay";
 import { formatQueryMaterial } from "../lib/materials";
 import { formatListRowDate } from "../lib/listRowDate";
-import { MarkSentPopover, MarkSentKind } from "./MarkSentPopover";
+import { MarkSentPopover } from "./MarkSentPopover";
 import { useFixedMenu } from "./forms/useFixedMenu";
 import { useOpenEditQuery } from "./EditQueryHost";
 import { useOpenEditAgent } from "./EditAgentHost";
@@ -65,31 +66,8 @@ const normalizeStatus = (status: string | QueryStatus): QueryStatus => {
 };
 
 // ── Contextual primary CTA ──────────────────────────────────────────────────
-// Whose turn is it? The agent's-turn states record a response; the writer's-turn states
-// (the agent asked, the writer owes materials) open the Mark-Sent popover instead. Terminal
-// states keep the existing "Record response" behaviour untouched.
-type BallHolder = "writer" | "agent";
-type PrimaryAction =
-  | { kind: "record"; label: string; ballHolder: BallHolder | null }
-  | { kind: "mark-sent"; markKind: MarkSentKind; target: QueryStatus; label: string; ballHolder: "writer" };
-
-const getPrimaryAction = (status: QueryStatus): PrimaryAction => {
-  switch (status) {
-    case QueryStatus.PARTIAL_REQUESTED:
-      return { kind: "mark-sent", markKind: "partial", target: QueryStatus.PARTIAL_SENT, label: "Mark partial as sent", ballHolder: "writer" };
-    case QueryStatus.FULL_REQUESTED:
-      return { kind: "mark-sent", markKind: "full", target: QueryStatus.FULL_SENT, label: "Mark full as sent", ballHolder: "writer" };
-    case QueryStatus.REVISE_RESUBMIT:
-      return { kind: "mark-sent", markKind: "resubmit", target: QueryStatus.FULL_SENT, label: "Record your resubmission", ballHolder: "writer" };
-    case QueryStatus.QUERIED:
-    case QueryStatus.PARTIAL_SENT:
-    case QueryStatus.FULL_SENT:
-      return { kind: "record", label: "Record response", ballHolder: "agent" };
-    default:
-      // OFFER / REJECTED / WITHDRAWN / NO_RESPONSE — unchanged, no ball-holder chip.
-      return { kind: "record", label: "Record response", ballHolder: null };
-  }
-};
+// The status→primary-action map (the "CTA engine") now lives in src/lib/queryPrimaryAction.ts so
+// the To-do focus/ledger flows share ONE source with this command bar — behaviour here is unchanged.
 
 // Display-only label: appends a revision marker once a query has been resubmitted as a full (v2+).
 // Renders from revisionRound and never enters `status`, so every status === comparison is safe.
