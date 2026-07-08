@@ -262,7 +262,7 @@ export const DiaryCarousel: React.FC<DiaryCarouselProps> = ({ queries, agents, m
         <div className="dc-row">
           {/* Masthead heading column (1/3), left-aligned */}
           <div className="dc-headcol">
-            <h2 className="dc-title" id="dc-heading">What’s going on?</h2>
+            <h2 className="dc-title" id="dc-heading">Dates for the diary</h2>
             <div className="dc-rule" aria-hidden="true" />
             <p className="dc-sub">The week just gone and the week that’s coming — your fortnight in focus.</p>
           </div>

@@ -83,12 +83,13 @@ const fmtDate = (ms: number | null): string => {
 interface Row { id: string; status: QueryStatus; name: string; agency: string; manuscript: string; dateMs: number | null; dateLabel: string; }
 interface StageData extends StageDef { rows: Row[]; count: number; }
 
+// Reuses the fortnight heading-block classes (.dc-title/.dc-rule/.dc-sub) so the two section
+// headings stay typographically identical and theme-synced (the coverflow is wrapped in .dc).
 const rightBillboard = (
-  <div style={{ position: "relative", display: "flex", flexDirection: "column", justifyContent: "center", gap: 14, padding: "8px 0" }}>
-    <div style={{ fontFamily: FONT_SERIF, fontSize: 33, fontWeight: 500, color: headingInk, lineHeight: 1.08 }}>What&rsquo;s live right now?</div>
-    <div style={{ fontFamily: FONT_SANS, fontSize: 13.5, lineHeight: 1.55, color: mutedInk, maxWidth: "34ch" }}>
-      Maintaining a healthy pipeline is key. Here&rsquo;s a snapshot of all your in-flight queries.
-    </div>
+  <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: "8px 0" }}>
+    <h2 className="dc-title">Live pipeline</h2>
+    <div className="dc-rule" aria-hidden="true" />
+    <p className="dc-sub">Maintaining a healthy pipeline is key. Here&rsquo;s a snapshot of all your in-flight queries.</p>
   </div>
 );
 
@@ -137,7 +138,6 @@ export const WhatsLivePanel: React.FC<WhatsLivePanelProps> = ({ queries, agents,
   const focusRef = useRef<number>(firstPop);
   const pausedRef = useRef(false);
   const accRef = useRef(0);
-  const holdRef = useRef(0);
   const swapTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const [W, setW] = useState(0);
   const [listStage, setListStage] = useState<number>(firstPop);
@@ -160,7 +160,7 @@ export const WhatsLivePanel: React.FC<WhatsLivePanelProps> = ({ queries, agents,
   // list overflow → auto-scroll (top-aligned) vs. short → vertically centred; reset the drift
   useLayoutEffect(() => {
     const el = listElRef.current;
-    accRef.current = 0; holdRef.current = 0;
+    accRef.current = 0; // each stage starts at the top for its single pass
     if (el) {
       el.scrollTop = 0;
       el.style.justifyContent = el.scrollHeight > el.clientHeight + 2 ? "flex-start" : "center";
@@ -234,9 +234,12 @@ export const WhatsLivePanel: React.FC<WhatsLivePanelProps> = ({ queries, agents,
       const el = listElRef.current;
       if (!pausedRef.current && el) {
         const max = el.scrollHeight - el.clientHeight;
-        if (max > 2) {
-          if (accRef.current < max) { accRef.current += 0.22; el.scrollTop = accRef.current; }
-          else { holdRef.current++; if (holdRef.current > 150) { accRef.current = 0; holdRef.current = 0; el.scrollTop = 0; } }
+        if (max > 2 && accRef.current < max) {
+          // single pass: drift down once, timed to reach the bottom ~1s before the carousel
+          // advances (dwell REST_MS), then rest at the bottom — no reset, no repeat this stage.
+          const perFrame = max / Math.max(1, (REST_MS - 1000) / 16.67);
+          accRef.current = Math.min(max, accRef.current + perFrame);
+          el.scrollTop = accRef.current;
         }
       }
       raf = requestAnimationFrame(tick);
