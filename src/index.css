@@ -193,12 +193,13 @@
   --hub-band-process-bd: rgba(107, 74, 47, 0.22);
   --hub-band-process-tx: #5d4037;
   /* Reading-pane column headers (Tracking / What you sent / Journal) — dedicated tokens, decoupled
-     from the crumb; espresso fill + cream text + no bottom rule. Read directly on the header element
-     (literals here, not a :root var(--acc) alias — so no freeze; Bold/Editorial fall back to the
-     --hub-band-process band via the inline fallback). --acc is the same espresso #422701. */
-  --qh-colhead-bg: #422701;
-  --qh-colhead-tx: #f2e8d8;
-  --qh-colhead-rule: none;
+     from the crumb. STRIP-BACK: faint warm whisper fill + black Playfair title + a 1px hairline base
+     (no espresso band, no cream text). Read directly on the header element (literals here, not a
+     :root var(--acc) alias — so no freeze; Bold/Editorial fall back to the --hub-band-process band
+     via the inline fallback). */
+  --qh-colhead-bg: #f6f1e8;      /* strip-back — faint warm whisper (was espresso band #422701) */
+  --qh-colhead-tx: #1a1512;      /* black Playfair title (was cream #f2e8d8) */
+  --qh-colhead-rule: 1px solid var(--bd);   /* hairline base, no fill band */
   /* Strip-back recolour (Cappuccino-only, Queries-hub-scoped; read on Queries elements via
      var(--qh-*, var(--hub-*)) so Agents + Bold/Editorial fall back to the shared --hub-* values).
      Mostly-black-on-white — warmth lives in --hub-desk + a few details only. */

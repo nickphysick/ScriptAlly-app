@@ -2654,10 +2654,10 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   // Status-tint hero: white → a soft tint of the query's status-direction colour, with
                   // an enlarged StatusDot watermark on the right. Real status announced via the label.
                   const heroDir = statusDirection(activeQuery.status);
-                  const heroTint = heroDir === "out" ? "#f9efe9" : heroDir === "in" ? "#eef3ec" : "#f0ece7";
                   const heroStatColour = heroDir === "out" ? "#7c3a2a" : heroDir === "in" ? "#5a6e58" : "#8a7d6c";
                   return (
-                    <div className="qp-hero" style={{ position: "relative", overflow: "hidden", margin: "16px 18px 0", padding: "22px 26px", border: "var(--bdw) solid var(--bd)", borderRadius: 20, background: `linear-gradient(90deg, #ffffff 36%, ${heroTint} 100%)`, boxShadow: "inset 0 3px 0 var(--acc), 0 8px 20px rgba(29,23,18,.18)", flexShrink: 0 }}>
+                    // Strip-back: plain card surface (no status-tint gradient, no espresso top-accent) + soft shadow — matches the mockup .hero.
+                    <div className="qp-hero" style={{ position: "relative", overflow: "hidden", margin: "16px 18px 0", padding: "22px 26px", border: "var(--bdw) solid var(--bd)", borderRadius: 20, background: "var(--hub-pane-process, #fffefb)", boxShadow: "0 10px 30px rgba(58,44,31,.09)", flexShrink: 0 }}>
                       {/* top row — avatar centred against the name + agency + status label */}
                       <div style={{ position: "relative", zIndex: 2, display: "flex", alignItems: "center", gap: 18 }}>
                         {/* avatar — solid ink disc + white initials (per the Queries Hub mockup) */}
