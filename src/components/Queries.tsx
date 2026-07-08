@@ -2928,7 +2928,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
               BOTH columns at the workspace foot. `subgrid` makes the left zone track the real list
               column width (no fixed px); the divider sits at the list / reading-pane gap. Colours
               unchanged — same --qp-cmd-* surface + --cmdbar-* buttons as before. ── */}
-          <div className="qp-controlbar" style={{ gridColumn: "1 / -1", gridRow: 2, display: "grid", gridTemplateColumns: "subgrid", background: "var(--qp-cmd-bg, var(--hub-cmd))", borderTop: "var(--qp-cmd-toprule, var(--hub-cmd-rule))", boxShadow: "var(--cmd-bar-shadow, none)" }}>
+          <div className="qp-controlbar" style={{ gridColumn: "1 / -1", gridRow: 2, display: "grid", gridTemplateColumns: "subgrid", background: "var(--qp-cmd-bg, var(--hub-cmd))", border: "var(--qp-cmd-frame, none)", borderTop: "var(--qp-cmd-toprule, var(--hub-cmd-rule))", borderRadius: "var(--qp-cmd-radius, 0)", margin: "var(--qp-cmd-margin, 0)", boxShadow: "var(--cmd-bar-shadow, none)" }}>
             {/* Left zone — list-aligned furniture (count · Export CSV · key hints) */}
             <div style={{ gridColumn: 1, display: "flex", alignItems: "center", gap: 8, borderRight: "1px solid var(--bd)", padding: "11px 16px", fontFamily: FONT_MONO, fontSize: 9.5, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase" as const, color: `var(--cmdbar-meta, ${qdbBoldMuted})` }}>
               <span>{sortedList.length} {sortedList.length === 1 ? "query" : "queries"}</span>

@@ -146,15 +146,15 @@
   /* Phase 3 — coffee & sage accents (Cappuccino sage; neutral in Bold/Editorial) */
   --qp-genre-bg: #EAF1E7; --qp-genre-bd: #D3E3CC; --qp-genre-tx: #42543B;
   --qp-listfoot-bg: #F8FAF7;                  /* Export-CSV foot — light sage */
-  --qp-cmd-bg: #ddc0b6;                       /* control bar — clay (theme editor 2026-07-08; was #d0917c) */
-  --qp-cmd-frame: var(--bdw) solid var(--bd);
-  --qp-cmd-toprule: var(--bdw) solid #5d4037;
+  --qp-cmd-bg: #fffefb;                       /* strip-back — floating card surface (was clay #ddc0b6) */
+  --qp-cmd-frame: var(--bdw) solid var(--bd); /* full border for the floating card */
+  --qp-cmd-toprule: var(--bdw) solid var(--bd);   /* top edge matches the frame (was espresso #5d4037) */
   /* control-bar primary — strip-back near-black on the card-coloured bar (was espresso #422701) */
   --cmdbar-prime-bg: #1a1512; --cmdbar-prime-tx: #faf7f1; --cmdbar-prime-bd: #1a1512;
   --cmdbar-btn-bg: transparent; --cmdbar-btn-bd: #422701; --cmdbar-btn-tx: #422701;
   --cmdbar-meta: #5d4037;
   --qp-cmd-radius: 14px;                      /* mockup .t-capp .actionbar */
-  --qp-cmd-margin: 0;                         /* full-width in the pane flow — no inset */
+  --qp-cmd-margin: 14px 0 9px;                /* strip-back — float: gap above + a few px off the bottom */
   --qp-cmd-pad: 14px 18px;                    /* Bold/Editorial keep 11px 20px via the inline fallback */
   --slab-shadow: none;
   --slab-ttl: #000000;
@@ -164,7 +164,7 @@
   --cmd-bar-bg: #fffefb;
   --cmd-bar-bd: #e7ddd2;
   --cmd-bar-bdw: 1px;
-  --cmd-bar-shadow: none;
+  --cmd-bar-shadow: 0 10px 30px rgba(58, 44, 31, 0.09);   /* strip-back — soft shadow on the floating control bar */
   --cmd-btn-bg: #ffffff;
   --cmd-btn-bd: #ded3c2;
   --cmd-btn-bdw: 1px;
