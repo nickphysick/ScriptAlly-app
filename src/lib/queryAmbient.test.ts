@@ -76,22 +76,22 @@ describe("commandBarStatus — the bar's centre text", () => {
 describe("Queries.tsx artefacts — one home for actions + regressions", () => {
   const src = readFileSync(resolve(__dirname, "../components/Queries.tsx"), "utf8");
 
-  it("the command bar exists (unified full-width bar) and the old top action toolbar is gone", () => {
-    expect(src.includes("qp-controlbar")).toBe(true);
-    // The unified control bar spans BOTH columns at the workspace foot via a two-zone subgrid,
-    // not a pane-only strip. The retired toolbar's own markers must still be absent.
-    expect(src.includes('gridColumn: "1 / -1"')).toBe(true);
-    expect(src.includes('gridTemplateColumns: "subgrid"')).toBe(true);
+  it("the control row is two floating cards (list card + query ribbon); the single subgrid bar is retired", () => {
+    // The workspace foot is now two cards sharing the column-gap: a centred list card (col 1 / row 2)
+    // beside the query action ribbon (col 2 / row 2). The old unified subgrid bar + top toolbar are gone.
+    expect(src.includes("gridColumn: 1, gridRow: 2")).toBe(true);  // list card
+    expect(src.includes("gridColumn: 2, gridRow: 2")).toBe(true);  // query ribbon card
+    expect(src.includes("qp-controlbar")).toBe(false);             // the single bar is retired
+    expect(src.includes('gridColumn: "1 / -1"')).toBe(false);
     expect(src.includes("Actions toolbar")).toBe(false);
     expect(src.includes('gridRow: "1 / span 2"')).toBe(false); // the old list span (2-row grid)
   });
 
-  it("the mark-sent trigger ref lives in the command bar (single home for the popover)", () => {
-    // exactly one markSentTriggerRef attachment, and it's inside the command-bar IIFE region
-    const attaches = src.match(/ref=\{markSentTriggerRef\}/g) ?? [];
-    expect(attaches.length).toBe(1);
-    const barIdx = src.indexOf("qp-controlbar");
-    expect(src.indexOf("ref={markSentTriggerRef}")).toBeGreaterThan(barIdx);
+  it("the mark-sent popover is anchored to the primary ribbon tile (single home)", () => {
+    // The primary tile routes markSentTriggerRef through primaryRef only on the writer's turn.
+    expect(src).toContain("const primaryRef = (sel && isMark && !isClosed) ? markSentTriggerRef : undefined");
+    expect(src).toContain("ref={primaryRef}");
+    expect(src).toContain("triggerRef={markSentTriggerRef}"); // the popover consumes the same ref
   });
 
   it("the ?q= deep-link scroll-into-view is untouched (regression)", () => {
@@ -143,11 +143,14 @@ describe("Queries height chain — structural guards (jsdom cannot verify flex/g
     for (const g of grids) expect(g).toContain('gridTemplateRows: "minmax(0, 1fr)');
   });
 
-  it("the list and the workspace pane are both in gridRow 1 (tops flush beneath the slab)", () => {
+  it("the reading pane stays in gridRow 1 (never bottom-anchored); the control row is row 2", () => {
     // the workspace pane must NOT carry the stale gridRow: 2 that bottom-anchored it
-    expect(src.includes("gridColumn: 2, gridRow: 2")).toBe(false);
+    expect(src.includes('className="qp-pane" style={{ gridColumn: 2, gridRow: 2')).toBe(false);
     expect(src.includes('className="qp-pane" style={{ gridColumn: 2, gridRow: 1')).toBe(true);
-    expect(src.includes("gridColumn: 1, gridRow: 1")).toBe(true); // list card
+    expect(src.includes("gridColumn: 1, gridRow: 1")).toBe(true); // list panel (row 1)
+    // the two control-row cards live in row 2
+    expect(src.includes("gridColumn: 1, gridRow: 2")).toBe(true); // list card
+    expect(src.includes("gridColumn: 2, gridRow: 2")).toBe(true); // query ribbon
   });
 
   it("no viewport-relative height or bottom-anchor in the workspace pane subtree", () => {

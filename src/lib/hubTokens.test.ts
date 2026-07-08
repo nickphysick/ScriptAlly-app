@@ -96,7 +96,9 @@ describe("Queries consumes the hub layer for its named surfaces", () => {
     expect(q).toContain("var(--hub-pane-process)");
     expect(q).toContain("var(--hub-col");
     expect(q).toContain("var(--hub-cmd)");
-    expect(q).toContain("var(--hub-primary)");
+    // The two-card ribbon's primary is a flat coffee-accent tile (no fill), so --hub-primary is no
+    // longer read for a command-bar button; it still backs the masthead CTA + Status Apply button.
+    expect(q).toContain("var(--hub-primary");
     expect(q).toContain("var(--hub-monogram)");
     expect(q).toContain("var(--hub-row-on)");
   });

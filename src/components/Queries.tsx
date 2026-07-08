@@ -40,6 +40,8 @@ import { agentLabel, agentAgencyLine, agentPrimary, agentInitials } from "../lib
 import { formatQueryMaterial } from "../lib/materials";
 import { formatListRowDate } from "../lib/listRowDate";
 import { MarkSentPopover } from "./MarkSentPopover";
+import { NudgeModal } from "./NudgeModal";
+import { queryTaskBadge } from "../lib/queryTaskBadge";
 import { useFixedMenu } from "./forms/useFixedMenu";
 import { useOpenEditQuery } from "./EditQueryHost";
 import { QueryTimeline } from "./reading-pane/QueryTimeline";
@@ -102,7 +104,15 @@ import {
   Camera,
   Trash2,
   Move,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Bell,
+  XCircle,
+  User,
+  ListChecks,
+  MoreHorizontal,
+  RotateCcw,
+  Copy,
+  UserPlus
 } from "lucide-react";
 
 // Materials are rendered through the single formatQueryMaterial helper (src/lib/materials.ts) —
@@ -115,6 +125,68 @@ function formatWhatsAppDate(dateString: string): string {
   const time = d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
   return `${day} ${month}, ${time}`;
 }
+
+/* ── Control-ribbon tile — Fluent-style icon-over-label, flat (no fill), faint hover. Greyed (not
+   hidden) when disabled so the bar keeps its shape between queries. The primary (Record response /
+   Mark sent / Reopen) passes `accent` for the coffee icon + heavier label. ── */
+const RibbonTile = React.forwardRef<HTMLButtonElement, {
+  icon: React.ReactNode;
+  label: string;
+  onClick?: () => void;
+  disabled?: boolean;
+  accent?: boolean;
+  title?: string;
+  badge?: React.ReactNode;
+}>(({ icon, label, onClick, disabled, accent, title, badge }, ref) => (
+  <button
+    ref={ref}
+    type="button"
+    title={title}
+    onClick={disabled ? undefined : onClick}
+    disabled={disabled}
+    className="qp-tile"
+    style={{
+      position: "relative", display: "flex", flexDirection: "column", alignItems: "center",
+      justifyContent: "center", gap: 4, flex: "0 0 auto", minWidth: 60, padding: "7px 9px 6px",
+      background: "transparent", border: "none", borderRadius: 9,
+      cursor: disabled ? "default" : "pointer",
+      fontFamily: "'Inter',sans-serif", fontSize: 10.5, lineHeight: 1.05,
+      fontWeight: accent ? 700 : 500,
+      color: disabled ? "#b7ab99" : (accent ? "#3a2a1e" : "var(--cmdbar-btn-tx, #2c2017)"),
+      opacity: disabled ? 0.6 : 1, whiteSpace: "nowrap",
+    }}
+  >
+    <span aria-hidden="true" style={{ display: "flex", alignItems: "center", justifyContent: "center", color: disabled ? "#c4b9a8" : (accent ? "#6f4e37" : "currentColor") }}>{icon}</span>
+    <span>{label}</span>
+    {badge}
+  </button>
+));
+RibbonTile.displayName = "RibbonTile";
+
+/* ── Overflow-menu row (Close reasons + More). Left-aligned icon + label; greyed when a feature is
+   stubbed this pass; destructive tint for Delete. ── */
+const RibbonMenuItem: React.FC<{
+  icon?: React.ReactNode; label: string; onClick?: () => void; disabled?: boolean; destructive?: boolean; title?: string;
+}> = ({ icon, label, onClick, disabled, destructive, title }) => (
+  <button
+    type="button"
+    title={title}
+    onClick={disabled ? undefined : onClick}
+    disabled={disabled}
+    className="qp-menuitem"
+    style={{
+      display: "flex", alignItems: "center", gap: 9, width: "100%", textAlign: "left",
+      background: "transparent", border: "none", borderRadius: 7, padding: "8px 10px",
+      fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 500,
+      color: disabled ? "#b7ab99" : (destructive ? "#9a3b2a" : "#2c2017"),
+      cursor: disabled ? "default" : "pointer", opacity: disabled ? 0.7 : 1, whiteSpace: "nowrap",
+    }}
+  >
+    {icon && <span aria-hidden="true" style={{ display: "flex", flexShrink: 0 }}>{icon}</span>}
+    <span>{label}</span>
+  </button>
+);
+RibbonMenuItem.displayName = "RibbonMenuItem";
 
 export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string, subPageName?: string) => void; activeSubPage?: string; inShell?: boolean }> = ({ searchQuery, onNavigate, activeSubPage, inShell = false }) => {
   const {
@@ -133,7 +205,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     deleteJournalEntry,
     updateJournalEntry,
     deleteActivity,
-    updateAgent
+    updateAgent,
+    updateQueryStatus,
+    logNudge
   } = useScriptAllyDb();
   // Query editing is the app-level Edit Query drawer (the inline isEditMode editor is retired).
   const openEditQuery = useOpenEditQuery();
@@ -158,8 +232,15 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   // The Mark-sent trigger now lives in the pane's command bar (pinned low), so the popover opens
   // UPWARD from it (additive placement — every other useFixedMenu caller keeps the default).
   const { triggerRef: markSentTriggerRef, menuStyle: markSentMenuStyle } = useFixedMenu<HTMLButtonElement>(isMarkSentOpen, { placement: "up" });
-  // Close the popover whenever the reader moves to a different query.
-  useEffect(() => { setIsMarkSentOpen(false); }, [selectedQueryId]);
+  // Control-ribbon secondary menus — Nudge (modal), Close reasons + More both anchored upward off
+  // their ribbon tiles (the bar sits at the workspace foot).
+  const [isNudgeOpen, setIsNudgeOpen] = useState(false);
+  const [isCloseMenuOpen, setIsCloseMenuOpen] = useState(false);
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const { triggerRef: closeTriggerRef, menuStyle: closeMenuStyle } = useFixedMenu<HTMLButtonElement>(isCloseMenuOpen, { placement: "up" });
+  const { triggerRef: moreTriggerRef, menuStyle: moreMenuStyle } = useFixedMenu<HTMLButtonElement>(isMoreMenuOpen, { placement: "up" });
+  // Close every ribbon popover/modal whenever the reader moves to a different query.
+  useEffect(() => { setIsMarkSentOpen(false); setIsNudgeOpen(false); setIsCloseMenuOpen(false); setIsMoreMenuOpen(false); }, [selectedQueryId]);
 
   // Toast state for Undo
   const [undoToast, setUndoToast] = useState<{
@@ -2357,6 +2438,45 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           })()}
         </AnimatePresence>
 
+        {/* Close-reasons menu — anchored upward off the Close ribbon tile */}
+        {isCloseMenuOpen && activeQuery && (
+          <>
+            <div onClick={() => setIsCloseMenuOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 59 }} aria-hidden="true" />
+            <div style={{ ...closeMenuStyle, zIndex: 60, background: "#fffefb", border: "1px solid var(--bd)", borderRadius: 12, boxShadow: "0 12px 34px rgba(58,44,31,.18)", padding: 6, minWidth: 198 }}>
+              <div style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".12em", textTransform: "uppercase", color: "#b7ab99", padding: "6px 10px 5px" }}>Close this query as…</div>
+              {[QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE].map((reason) => (
+                <RibbonMenuItem
+                  key={reason}
+                  icon={<StatusDot status={reason} overrideSize={15} decorative />}
+                  label={reason}
+                  onClick={() => { setIsCloseMenuOpen(false); updateQueryStatus(activeQuery.id, reason); }}
+                />
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* More menu — anchored upward off the More ribbon tile. Reopen is wired (closed-only); the
+            rest are next-features stubs (rendered disabled, never a dead link). */}
+        {isMoreMenuOpen && activeQuery && (() => {
+          const st = activeQuery.status as QueryStatus;
+          const closed = st === QueryStatus.REJECTED || st === QueryStatus.WITHDRAWN || st === QueryStatus.NO_RESPONSE;
+          return (
+            <>
+              <div onClick={() => setIsMoreMenuOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 59 }} aria-hidden="true" />
+              <div style={{ ...moreMenuStyle, zIndex: 60, background: "#fffefb", border: "1px solid var(--bd)", borderRadius: 12, boxShadow: "0 12px 34px rgba(58,44,31,.18)", padding: 6, minWidth: 214 }}>
+                <RibbonMenuItem icon={<Clock style={{ width: 15, height: 15 }} />} label="Set a reminder" disabled title="Coming soon" />
+                <RibbonMenuItem icon={<UserPlus style={{ width: 15, height: 15 }} />} label="Query another agent" disabled title="Coming soon" />
+                <RibbonMenuItem icon={<Activity style={{ width: 15, height: 15 }} />} label="View full timeline" disabled title="Coming soon" />
+                <RibbonMenuItem icon={<Copy style={{ width: 15, height: 15 }} />} label="Copy summary" disabled title="Coming soon" />
+                {closed && <RibbonMenuItem icon={<RotateCcw style={{ width: 15, height: 15 }} />} label="Reopen" onClick={() => { setIsMoreMenuOpen(false); updateQueryStatus(activeQuery.id, QueryStatus.QUERIED); }} />}
+                <div aria-hidden="true" style={{ height: 1, background: "var(--bd)", opacity: .7, margin: "5px 8px" }} />
+                <RibbonMenuItem icon={<Trash2 style={{ width: 15, height: 15 }} />} label="Delete query" disabled destructive title="Coming soon — deleting a query isn't wired yet" />
+              </div>
+            </>
+          );
+        })()}
+
         {/* ── Split — list card (furniture, col 1) beside the workspace reading pane (col 2). The
             old actions toolbar row is retired: every query action now lives in the pane's command
             bar (one home for actions). Single-row grid, both columns full height. ── */}
@@ -2875,80 +2995,105 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             )}
           </div>{/* closes qp-pane */}
 
-          {/* ── Unified workspace control bar (ref queries-hub-controlbar.html): ONE bar spanning
-              BOTH columns at the workspace foot. `subgrid` makes the left zone track the real list
-              column width (no fixed px); the divider sits at the list / reading-pane gap. Colours
-              unchanged — same --qp-cmd-* surface + --cmdbar-* buttons as before. ── */}
-          <div className="qp-controlbar" style={{ gridColumn: "1 / -1", gridRow: 2, display: "grid", gridTemplateColumns: "subgrid", background: "var(--qp-cmd-bg, var(--hub-cmd))", border: "var(--qp-cmd-frame, none)", borderTop: "var(--qp-cmd-toprule, var(--hub-cmd-rule))", borderRadius: "var(--qp-cmd-radius, 0)", margin: "var(--qp-cmd-margin, 0)", boxShadow: "var(--cmd-bar-shadow, none)" }}>
-            {/* Left zone — list-aligned furniture (count · Export CSV · key hints) */}
-            <div style={{ gridColumn: 1, display: "flex", alignItems: "center", gap: 8, borderRight: "1px solid var(--bd)", padding: "11px 16px", fontFamily: FONT_MONO, fontSize: 9.5, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase" as const, color: `var(--cmdbar-meta, ${qdbBoldMuted})` }}>
-              <span>{sortedList.length} {sortedList.length === 1 ? "query" : "queries"}</span>
-              <span aria-hidden="true" style={{ opacity: .5 }}>·</span>
-              <button
-                type="button"
-                onClick={() => sortedList.length > 0 && handleExportFilteredCSV()}
-                disabled={sortedList.length === 0}
-                style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "transparent", border: "none", padding: 0, fontFamily: "inherit", fontSize: "inherit", fontWeight: "inherit", letterSpacing: "inherit", textTransform: "inherit", color: `var(--cmdbar-meta, ${qdbBoldMuted})`, opacity: sortedList.length === 0 ? .5 : 1, cursor: sortedList.length === 0 ? "default" : "pointer" }}
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v11M7 9l5 5 5-5M5 21h14" /></svg>
-                Export CSV
-              </button>
-              <span style={{ marginLeft: "auto", opacity: .6 }} aria-hidden="true">↑↓ · ⌘K</span>
-            </div>
-            {/* Right zone — reading-pane actions (only when a query is selected) */}
-            <div style={{ gridColumn: 2, display: "flex", alignItems: "center", gap: 12, padding: "11px 20px", minWidth: 0 }}>
-              {activeQuery && activeAgent && activeMs ? (() => {
-                const ctrlAction = getPrimaryAction(activeQuery.status as QueryStatus);
-                const ambient = queryAmbientStatus(activeQuery, ctrlAction.ballHolder, ctrlAction.kind === "mark-sent" ? ctrlAction.markKind : undefined);
-                const status = commandBarStatus(ambient);
-                const isMark = ctrlAction.kind === "mark-sent";
-                const btn: React.CSSProperties = { display: "inline-flex", alignItems: "center", gap: 7, fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 500, color: `var(--cmdbar-btn-tx, ${qdbBoldInk})`, background: "var(--cmdbar-btn-bg, var(--hub-btn-bg))", border: "var(--cmdbar-btn-bd, var(--hub-btn-bd))", borderRadius: "var(--hub-btn-rad)", padding: "8px 15px", whiteSpace: "nowrap", cursor: "pointer", boxShadow: "var(--hub-btn-sh)" };
-                const primaryBtn: React.CSSProperties = { ...btn, background: "var(--cmdbar-prime-bg, var(--hub-primary))", border: "1px solid var(--cmdbar-prime-bd, var(--hub-primary-bd))", color: "var(--cmdbar-prime-tx, var(--hub-primary-tx))", fontWeight: 600 };
-                return (
-                  <>
-                    {/* Left — actions */}
-                    <div style={{ display: "flex", gap: 9, alignItems: "center" }}>
-                      {isMark ? (
-                        <button ref={markSentTriggerRef} type="button" onClick={() => setIsMarkSentOpen(o => !o)} style={primaryBtn}>
-                          <Send style={{ width: 14, height: 14, strokeWidth: 1.8 } as any} />
-                          {ctrlAction.label}
-                        </button>
-                      ) : (
-                        <button type="button" onClick={() => setIsRecordResponseFocusFormOpen(true)} style={primaryBtn}>
-                          <Send style={{ width: 14, height: 14, strokeWidth: 1.8 } as any} />
-                          {ctrlAction.label}
-                        </button>
-                      )}
-                      {/* secondary "Record response" only when it isn't already the primary */}
-                      {isMark && (
-                        <button type="button" onClick={() => setIsRecordResponseFocusFormOpen(true)} style={btn}>
-                          <Send style={{ width: 13, height: 13, strokeWidth: 1.8 } as any} />
-                          Record response
-                        </button>
-                      )}
-                      <button type="button" onClick={() => openEditQuery(activeQuery.id)} style={btn}>
-                        <Pencil style={{ width: 13, height: 13 }} />
-                        Edit
-                      </button>
+          {/* ── Control ROW — two floating cards sharing the workspace column-gap (ref
+              queries-hub-stripped.html): a centred LIST card (col 1) beside the QUERY action ribbon
+              (col 2). Both keep the strip-back floating-card treatment (--qp-cmd-* surface / border /
+              radius / margin / shadow). The single subgrid bar is retired. ── */}
+          <style>{`
+            .qp-tile:hover:not(:disabled){ background: rgba(58,44,31,.06); }
+            .qp-menuitem:hover:not(:disabled){ background: rgba(58,44,31,.06); }
+          `}</style>
+
+          {/* List card — count · Export CSV, centred (no keyboard hint) */}
+          <div style={{ gridColumn: 1, gridRow: 2, display: "flex", alignItems: "center", justifyContent: "center", gap: 12, background: "var(--qp-cmd-bg, var(--hub-cmd))", border: "var(--qp-cmd-frame, none)", borderTop: "var(--qp-cmd-toprule, var(--hub-cmd-rule))", borderRadius: "var(--qp-cmd-radius, 0)", margin: "var(--qp-cmd-margin, 0)", boxShadow: "var(--cmd-bar-shadow, none)", padding: "11px 16px", fontFamily: FONT_MONO, fontSize: 9.5, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase" as const, color: `var(--cmdbar-meta, ${qdbBoldMuted})` }}>
+            <span>{sortedList.length} {sortedList.length === 1 ? "query" : "queries"}</span>
+            <span aria-hidden="true" style={{ width: 1, height: 12, background: "var(--bd)", opacity: .85 }} />
+            <button
+              type="button"
+              onClick={() => sortedList.length > 0 && handleExportFilteredCSV()}
+              disabled={sortedList.length === 0}
+              style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "transparent", border: "none", padding: 0, fontFamily: "inherit", fontSize: "inherit", fontWeight: "inherit", letterSpacing: "inherit", textTransform: "inherit", color: `var(--cmdbar-meta, ${qdbBoldMuted})`, opacity: sortedList.length === 0 ? .5 : 1, cursor: sortedList.length === 0 ? "default" : "pointer" }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v11M7 9l5 5 5-5M5 21h14" /></svg>
+              Export CSV
+            </button>
+          </div>
+
+          {/* Query card — the action ribbon: three equal sections (Actions · Go to · utility),
+              tiles centred in each, dividers between. Tiles stay greyed-not-hidden with no selection. */}
+          <div style={{ gridColumn: 2, gridRow: 2, display: "flex", alignItems: "stretch", background: "var(--qp-cmd-bg, var(--hub-cmd))", border: "var(--qp-cmd-frame, none)", borderTop: "var(--qp-cmd-toprule, var(--hub-cmd-rule))", borderRadius: "var(--qp-cmd-radius, 0)", margin: "var(--qp-cmd-margin, 0)", boxShadow: "var(--cmd-bar-shadow, none)", padding: "5px 6px", minWidth: 0 }}>
+            {(() => {
+              const sel = !!(activeQuery && activeAgent && activeMs);
+              const status = activeQuery ? (activeQuery.status as QueryStatus) : null;
+              const ctrlAction = status ? getPrimaryAction(status) : null;
+              const isMark = ctrlAction?.kind === "mark-sent";
+              const isClosed = status === QueryStatus.REJECTED || status === QueryStatus.WITHDRAWN || status === QueryStatus.NO_RESPONSE;
+              const waitingOnAgent = ctrlAction?.ballHolder === "agent";
+              const badge = sel && activeQuery ? queryTaskBadge(tasks, activeQuery.id) : { count: 0, tier: null as null };
+
+              // Primary tile — contextual: Reopen (closed) / Mark sent · Record resubmission (writer's turn) / Record response.
+              const primaryLabel = isClosed ? "Reopen"
+                : (isMark && ctrlAction?.kind === "mark-sent") ? (ctrlAction.markKind === "resubmit" ? "Record resubmission" : "Mark sent")
+                : "Record response";
+              const primaryIcon = isClosed
+                ? <RotateCcw style={{ width: 17, height: 17 }} />
+                : <Send style={{ width: 17, height: 17, strokeWidth: 1.9 } as any} />;
+              const primaryRef = (sel && isMark && !isClosed) ? markSentTriggerRef : undefined;
+              const onPrimary = !sel ? undefined
+                : isClosed ? () => activeQuery && updateQueryStatus(activeQuery.id, QueryStatus.QUERIED)
+                : isMark ? () => setIsMarkSentOpen(o => !o)
+                : () => setIsRecordResponseFocusFormOpen(true);
+
+              const sectionStyle: React.CSSProperties = { flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2, minWidth: 0 };
+              const rowStyle: React.CSSProperties = { display: "flex", alignItems: "center", justifyContent: "center", gap: 2 };
+              const sectionLabel = (text: string, hidden?: boolean) => (
+                <span aria-hidden={hidden || undefined} style={{ fontFamily: FONT_MONO, fontSize: 7.5, letterSpacing: ".14em", textTransform: "uppercase" as const, color: "#b7ab99", fontWeight: 600, ...(hidden ? { visibility: "hidden" as const } : {}) }}>{text}</span>
+              );
+              const divider = <div aria-hidden="true" style={{ width: 1, alignSelf: "stretch", background: "var(--bd)", opacity: .55, margin: "7px 0" }} />;
+
+              return (
+                <>
+                  {/* Actions */}
+                  <div style={sectionStyle}>
+                    <div style={rowStyle}>
+                      <RibbonTile ref={primaryRef} icon={primaryIcon} label={primaryLabel} accent disabled={!sel} onClick={onPrimary} />
+                      <RibbonTile icon={<Bell style={{ width: 17, height: 17 }} />} label="Nudge" disabled={!sel || !waitingOnAgent} onClick={() => setIsNudgeOpen(true)} title={sel && !waitingOnAgent ? "Available while you're waiting on the agent" : undefined} />
+                      <RibbonTile ref={closeTriggerRef} icon={<XCircle style={{ width: 17, height: 17 }} />} label="Close" disabled={!sel || isClosed} onClick={() => setIsCloseMenuOpen(o => !o)} title={sel && isClosed ? "Already closed" : undefined} />
+                      <RibbonTile icon={<Pencil style={{ width: 16, height: 16 }} />} label="Edit" disabled={!sel} onClick={() => activeQuery && openEditQuery(activeQuery.id)} />
                     </div>
-                    {/* Centre — ambient status (mono uppercase; writer's move flags its burgundy fragment) */}
-                    {status && (
-                      <span style={{ margin: "0 auto", fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: ".1em", textTransform: "uppercase" as const, color: `var(--cmdbar-meta, ${qdbBoldMuted})` }}>
-                        {status.bold && <b style={{ color: burgundy, fontWeight: 700 }}>{status.bold}</b>}{status.bold ? " " : ""}{status.text}
-                      </span>
-                    )}
-                    {/* Right — utilities */}
-                    <div style={{ display: "flex", gap: 9, alignItems: "center", marginLeft: status ? 0 : "auto" }}>
-                      <button type="button" onClick={() => !isGeneratingPDF && handleDownloadPDF()} style={{ ...btn, cursor: isGeneratingPDF ? "default" : "pointer", opacity: isGeneratingPDF ? 0.6 : 1 }}>
-                        <Download style={{ width: 13, height: 13 }} />
-                        {isGeneratingPDF ? "Generating…" : "Download as PDF"}
-                      </button>
+                    {sectionLabel("Actions")}
+                  </div>
+                  {divider}
+                  {/* Go to */}
+                  <div style={sectionStyle}>
+                    <div style={rowStyle}>
+                      <RibbonTile icon={<User style={{ width: 17, height: 17 }} />} label="Agent" disabled title="Coming soon — jump to the agent's record" />
+                      <RibbonTile icon={<Book style={{ width: 17, height: 17 }} />} label="Manuscript" disabled title="Coming soon — jump to the manuscript" />
+                      <RibbonTile
+                        icon={<ListChecks style={{ width: 17, height: 17 }} />}
+                        label="Tasks"
+                        disabled={!sel}
+                        onClick={() => onNavigate?.("todo")}
+                        badge={badge.count > 0 ? (
+                          <span style={{ position: "absolute", top: 1, right: 5, minWidth: 15, height: 15, padding: "0 4px", borderRadius: 999, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_MONO, fontSize: 8.5, fontWeight: 700, color: "#fff", background: badge.tier === "urgent" ? "#9a3b2a" : "#b7ab99", lineHeight: 1 }}>{badge.count}</span>
+                        ) : undefined}
+                      />
                     </div>
-                  </>
-                );
-              })() : null}
-            </div>
-          </div>{/* closes qp-controlbar */}
+                    {sectionLabel("Go to")}
+                  </div>
+                  {divider}
+                  {/* Utility (unlabelled) */}
+                  <div style={sectionStyle}>
+                    <div style={rowStyle}>
+                      <RibbonTile icon={<Download style={{ width: 16, height: 16 }} />} label={isGeneratingPDF ? "Generating…" : "Download"} disabled={!sel || isGeneratingPDF} onClick={() => handleDownloadPDF()} />
+                      <RibbonTile ref={moreTriggerRef} icon={<MoreHorizontal style={{ width: 18, height: 18 }} />} label="More" disabled={!sel} onClick={() => setIsMoreMenuOpen(o => !o)} />
+                    </div>
+                    {sectionLabel("·", true)}
+                  </div>
+                </>
+              );
+            })()}
+          </div>{/* closes query card */}
 
         </div>{/* closes content grid */}
         </>
@@ -3015,6 +3160,23 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         onSuccessToast={(msg) => {
           triggerToast({ queryId: activeQuery.id, agentName: agentPrimary(activeAgent), manuscriptTitle: activeMs?.title || "", responseStyle: msg });
         }}
+      />
+    )}
+
+    {/* Nudge — the ribbon's Nudge tile (writer waiting on the agent). Mirrors the dashboard mount:
+        NudgeModal collects the check-back + note and logs via the isolated logNudge path. */}
+    {isNudgeOpen && activeQuery && activeAgent && (
+      <NudgeModal
+        agentName={agentPrimary(activeAgent) || null}
+        agency={activeAgent.name?.trim() ? activeAgent.agency || "" : ""}
+        dateSent={activeQuery.dateSent}
+        responseDeadline={activeQuery.responseDeadline}
+        onClose={() => setIsNudgeOpen(false)}
+        onConfirm={async ({ checkBackDate, note }) => {
+          await logNudge(activeQuery.id, { checkBackDate, note });
+          setIsNudgeOpen(false);
+        }}
+        onCloseInstead={() => { setIsNudgeOpen(false); setIsCloseMenuOpen(true); }}
       />
     )}
 
