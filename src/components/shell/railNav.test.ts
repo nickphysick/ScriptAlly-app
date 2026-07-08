@@ -12,6 +12,7 @@ describe("railActiveKey — route-aware active state", () => {
   it("lights each entry on its own pathname", () => {
     expect(railActiveKey("/dashboard")).toBe("dashboard");
     expect(railActiveKey("/queries")).toBe("queries-hub");
+    expect(railActiveKey("/todo")).toBe("todo");
     expect(railActiveKey("/agents")).toBe("agents-db");
     expect(railActiveKey("/agents/discover")).toBe("agents-discover");
     expect(railActiveKey("/manuscripts")).toBe("manuscripts");
@@ -47,7 +48,7 @@ describe("RAIL_GROUPS — the grouped index shape", () => {
     expect(RAIL_GROUPS.map((g) => g.eyebrow)).toEqual([null, "Querying", "Agents", "Manuscripts"]);
     expect(RAIL_GROUPS.map((g) => g.items.map((i) => i.label))).toEqual([
       ["Dashboard"],
-      ["Queries Hub"],
+      ["Queries Hub", "To-do"],
       ["Agents database", "Discover new agents"],
       ["Your manuscripts", "Comparable titles", "Submission packages"],
     ]);
@@ -61,6 +62,7 @@ describe("RAIL_GROUPS — the grouped index shape", () => {
   it("navigates through the existing bridge contract (tab + sub match pathFor's vocabulary)", () => {
     const byKey = Object.fromEntries(RAIL_GROUPS.flatMap((g) => g.items.map((i) => [i.key, i])));
     expect([byKey["queries-hub"].tab, byKey["queries-hub"].sub]).toEqual(["queries", undefined]);
+    expect([byKey["todo"].tab, byKey["todo"].sub]).toEqual(["todo", undefined]);
     expect([byKey["agents-discover"].tab, byKey["agents-discover"].sub]).toEqual(["agents", "Discover new agents"]);
     expect([byKey["comps"].tab, byKey["comps"].sub]).toEqual(["manuscripts", "Comparable titles"]);
     expect([byKey["packages"].tab, byKey["packages"].sub]).toEqual(["manuscripts", "Submission packages"]);

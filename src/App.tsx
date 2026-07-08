@@ -18,6 +18,7 @@ import { EditQueryHost } from "./components/EditQueryHost";
 import { Dashboard } from "./components/Dashboard";
 import { Queries } from "./components/Queries";
 import { QueriesLanding } from "./components/QueriesLanding";
+import { ToDoPage } from "./components/todo/ToDoPage";
 import { Agents } from "./components/Agents";
 import { DiscoverNewAgents } from "./components/DiscoverNewAgents";
 import { SubmissionPackages } from "./components/SubmissionPackages";
@@ -316,6 +317,7 @@ function pathFor(tab: string, subPageName?: string): string {
       if (subPageName && !dbAliases.includes(subPageName)) return `/queries?q=${encodeURIComponent(subPageName)}`;
       return "/queries";
     }
+    case "todo": return "/todo";
     case "agents": return subPageName === "Discover new agents" ? "/agents/discover" : "/agents";
     case "manuscripts": {
       if (subPageName === "Submission packages") return "/manuscripts/packages";
@@ -607,6 +609,12 @@ function AppContent() {
           ) : (
             <Queries searchQuery={searchQuery} onNavigate={handleNavigate} activeSubPage={queriesSub} inShell />
           )}
+        </StagePage>
+
+        {/* To-do — a workspace sibling under Querying. Owns its internal scroll (no page
+            scrollbar) like the Queries desk; stays mounted so its mode/filter/selection survive. */}
+        <StagePage active={routeKey === "todo"} layout="fill" clip contentVariant="work">
+          <ToDoPage onNavigate={handleNavigate} />
         </StagePage>
 
         <StagePage active={routeKey === "agents"} layout="fillColumn" contentVariant="work">

@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — To-do · Clear the Desk → Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* fixed brand */
+    --parch:#fdfaf5; --burg:#7c3a2a; --burg-deep:#6b3023; --ink:#3a1c14; --head:#2e3a2c;
+    --sage:#8a9e88; --sage-text:#5a6e58; --pink-tray:#fff3ed; --pink-tray-bd:#eed6c8;
+    --gold:#a8842c; --gold-soft:#f6efdd; --gold-bd:#e7d9b8; --muted:#8a7a6c; --label:#9c8878; --hair:#ece0d2;
+    --ghost-bd:#e0d5c8; --ghost-text:#6a5a50;
+    /* theme-driven (Cappuccino defaults) */
+    --desk:#e8ddd0; --card:#fffefb; --list:#fffefb; --band:linear-gradient(135deg,#f2ddd5,#eecfc6);
+    --bd:#d8cebf; --bdw:1px; --rad:0px; --accent:#7c3a2a; --accent-ink:#fdf4ee;
+    --inset:1; /* cappuccino inset frame on */
+  }
+  .t-bold{ --desk:#c2cfda; --card:#ece2e0; --list:#ffffff; --band:linear-gradient(135deg,#f4c7c2,#efbdb7);
+    --bd:#1d1712; --bdw:1.5px; --rad:14px; --accent:#7c3a2a; --inset:0; }
+  .t-edn{ --desk:#e7e6e3; --card:#ffffff; --list:#ffffff; --band:linear-gradient(135deg,#ededed,#e5e5e5);
+    --bd:#d3d0cb; --bdw:1px; --rad:4px; --accent:#232323; --head:#1a1a1a; --ink:#222; --muted:#777; --label:#8c8880; --sage-text:#5b5b5b; --inset:0; }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{ font-family:'Inter',sans-serif; color:var(--ink); background:#241812; -webkit-font-smoothing:antialiased; }
+
+  /* scaffold (mockup control, not app) */
+  .scaffold{ position:sticky; top:0; z-index:60; display:flex; align-items:center; gap:12px; padding:8px 16px; background:#241812; color:#e9ddd0; flex-wrap:wrap; }
+  .scaffold .lab{ font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.15em; text-transform:uppercase; color:#b79a86; }
+  .sbtn{ font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.04em; padding:6px 11px; border-radius:6px; cursor:pointer; color:#e2d0c0; border:1px solid #4a3a30; }
+  .sbtn:hover{ background:#33241c; }
+  .themepick{ margin-left:auto; display:flex; gap:4px; }
+  .th{ font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.04em; padding:6px 10px; border-radius:6px; cursor:pointer; color:#cbb6a4; border:1px solid #4a3a30; }
+  .th.on{ background:#f2ddd5; color:#5a2418; }
+
+  .app{ display:flex; min-height:calc(100vh - 38px); }
+
+  /* rail (faithful, locked) */
+  .rail{ width:64px; background:#fff; flex:none; display:flex; flex-direction:column; align-items:center; padding:15px 0; border-right:1px solid #eee5da; position:relative; }
+  .rail::after{ content:""; position:absolute; left:7px; top:120px; bottom:120px; width:6px; background:radial-gradient(circle, var(--desk) 2.4px, transparent 3px); background-size:6px 42px; opacity:.75; }
+  .wm{ color:var(--burg); margin-bottom:20px; }
+  .ri{ width:38px; height:38px; border-radius:9px; display:flex; align-items:center; justify-content:center; color:#a89a8a; margin-bottom:3px; }
+  .ri.on{ background:#f2e7de; color:var(--burg); }
+  .ri.sep{ height:1px; width:24px; background:#eee5da; margin:7px 0; }
+  .rail .btm{ margin-top:auto; display:flex; flex-direction:column; align-items:center; gap:2px; }
+  .av{ width:33px; height:33px; border-radius:50%; background:#241812; color:#f0e5d8; display:flex; align-items:center; justify-content:center; font-family:'Playfair Display',serif; font-size:14px; margin-top:9px; }
+
+  .page{ flex:1; background:var(--desk); min-width:0; display:flex; flex-direction:column; transition:background .3s; }
+  .crumb{ font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.15em; text-transform:uppercase; color:var(--label); padding:13px 30px 0; }
+  .crumb b{ color:var(--head); font-weight:500; }
+  .content{ padding:6px 30px 26px; flex:1; }
+
+  /* card base w/ optional Cappuccino inset frame */
+  .card{ background:var(--card); border-radius:var(--rad); position:relative; box-shadow:0 1px 3px rgba(58,28,20,.06),0 7px 22px rgba(58,28,20,.09); }
+  .t-bold .card,.t-edn .card{ border:var(--bdw) solid var(--bd); }
+  .card.frame::before{ content:""; position:absolute; inset:6px; border:1px solid rgba(124,58,42,0.28); border-radius:calc(var(--rad) + 0px); pointer-events:none; z-index:4; display:var(--fshow,block); }
+
+  /* masthead */
+  .mast{ padding:26px 30px; margin:12px 0 16px; }
+  .mrow{ display:flex; justify-content:space-between; align-items:flex-start; gap:22px; position:relative; z-index:5; }
+  .mtitle{ font-family:'Playfair Display',serif; font-weight:600; font-size:48px; line-height:.98; color:var(--head); }
+  .mtitle .em{ font-style:italic; color:var(--burg); }
+  .msub{ font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:0.09em; text-transform:uppercase; color:var(--sage-text); margin-top:13px; }
+  .primary{ background:var(--accent); color:var(--accent-ink); border:none; font-family:'Playfair Display',serif; font-size:16px; padding:13px 20px; border-radius:calc(var(--rad) - 2px); cursor:pointer; display:inline-flex; gap:8px; align-items:center; box-shadow:0 2px 6px rgba(58,28,20,.16); white-space:nowrap; }
+  .t-edn .primary,.t-bold .primary{ border-radius:9px; }
+  .primary:hover{ filter:brightness(.94); }
+
+  /* ===== FOCUS (Clear the Desk) ===== */
+  .focuswrap{ max-width:660px; margin:22px auto 0; text-align:center; position:relative; }
+  .skiplist{ position:absolute; top:-6px; right:0; font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--muted); cursor:pointer; padding:6px 8px; }
+  .skiplist:hover{ color:var(--burg); }
+  .fcount{ font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.13em; text-transform:uppercase; color:var(--label); margin-bottom:7px; }
+  .fmeter{ height:5px; width:210px; margin:0 auto 24px; background:rgba(124,58,42,.12); border-radius:99px; overflow:hidden; }
+  .fmeter i{ display:block; height:100%; background:var(--sage); transition:width .5s; }
+  .fcard{ background:var(--card); border-radius:16px; padding:42px 38px; box-shadow:0 3px 8px rgba(58,28,20,.09),0 18px 44px rgba(58,28,20,.15); position:relative; }
+  .t-bold .fcard,.t-edn .fcard{ border:var(--bdw) solid var(--bd); }
+  .fcard::after{ content:""; position:absolute; left:14px; right:14px; bottom:-9px; height:16px; background:var(--card); border-radius:0 0 14px 14px; box-shadow:0 8px 18px rgba(58,28,20,.10); z-index:-1; opacity:.6; }
+  .ptag{ display:inline-flex; align-items:center; gap:7px; font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.13em; text-transform:uppercase; padding:5px 11px; border-radius:99px; margin-bottom:18px; }
+  .ptag.d{ background:#f5e2da; color:var(--burg-deep); } .t-edn .ptag.d{ background:#eef; color:#334; }
+  .ptag.h{ background:var(--gold-soft); color:#8a6d1f; }
+  .ptag.n{ background:#eef1e9; color:var(--sage-text); }
+  .fbig{ font-family:'Playfair Display',serif; font-size:33px; line-height:1.12; color:var(--head); margin-bottom:11px; }
+  .fbig .w{ font-style:italic; color:var(--burg); }
+  .fsub{ font-size:14px; color:#4a382e; line-height:1.62; margin:0 auto 12px; max-width:470px; } .t-edn .fsub{ color:#444; }
+  .dline{ display:inline-flex; align-items:center; gap:8px; background:var(--pink-tray); border:0.5px solid var(--pink-tray-bd); border-radius:99px; padding:7px 15px; margin:6px auto 26px; font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.05em; text-transform:uppercase; color:var(--burg); }
+  .t-edn .dline{ background:#f3f3f3; border-color:#e2e2e2; color:#444; }
+  .factions{ display:flex; gap:11px; justify-content:center; align-items:center; }
+  .fbtn{ font-family:'Playfair Display',serif; font-size:16px; padding:13px 26px; border-radius:11px; cursor:pointer; border:1px solid; display:inline-flex; gap:9px; align-items:center; }
+  .fbtn.p{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+  .fbtn.g{ background:var(--card); border-color:var(--ghost-bd); color:var(--ghost-text); font-family:'JetBrains Mono',monospace; font-size:12px; text-transform:uppercase; letter-spacing:0.04em; padding:14px 16px; }
+  .fbtn.g:hover{ border-color:#c9a89e; color:var(--burg); }
+  .fkey{ font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--label); margin-top:19px; letter-spacing:0.07em; text-transform:uppercase; }
+  .fdone{ padding:56px 20px; }
+  .fdone h2{ font-family:'Playfair Display',serif; font-style:italic; font-weight:500; font-size:29px; color:var(--sage-text); margin:12px 0 8px; }
+  .fdone p{ font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.07em; text-transform:uppercase; color:var(--label); }
+  .fdone .cont{ margin-top:22px; }
+
+  /* ===== LEDGER ===== */
+  .filter{ display:flex; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
+  .segl{ font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.13em; text-transform:uppercase; color:var(--label); }
+  .segs{ display:flex; background:var(--card); border:var(--bdw) solid var(--bd); border-radius:99px; padding:3px; }
+  .t-capp .segs{ border-width:1px; }
+  .seg{ font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.03em; text-transform:uppercase; padding:6px 13px; border-radius:99px; cursor:pointer; color:var(--ghost-text); display:flex; gap:6px; align-items:center; }
+  .seg.on{ background:var(--accent); color:var(--accent-ink); }
+  .seg .n{ font-size:9px; opacity:.7; }
+  .drop{ font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.03em; text-transform:uppercase; color:var(--ghost-text); background:var(--card); border:var(--bdw) solid var(--bd); border-radius:8px; padding:8px 12px; }
+  .t-capp .drop{ border-width:1px; }
+
+  .ledger{ display:grid; grid-template-columns:380px 1fr; gap:14px; }
+  .list{ background:var(--list); border:var(--bdw) solid var(--bd); border-radius:var(--rad); overflow:hidden; align-self:start; }
+  .t-capp .list{ border-width:1px; }
+  .grp{ font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.13em; text-transform:uppercase; color:var(--label); padding:14px 17px 7px; display:flex; align-items:center; gap:9px; }
+  .grp .gl{ flex:1; height:0.5px; background:var(--hair); } .t-edn .grp .gl{ background:#e4e2de; }
+  .lrow{ display:flex; gap:11px; padding:11px 15px 11px 17px; cursor:pointer; border-left:2px solid transparent; align-items:flex-start; }
+  .lrow:hover{ background:rgba(124,58,42,.04); } .t-edn .lrow:hover{ background:#f4f4f2; }
+  .lrow.sel{ background:rgba(124,58,42,.07); border-left-color:var(--accent); }
+  .lrow.gone{ animation:gone .4s forwards; }
+  @keyframes gone{ to{opacity:0;transform:translateX(12px);max-height:0;padding-top:0;padding-bottom:0;} }
+  .lh{ font-family:'Playfair Display',serif; font-size:14px; color:var(--ink); line-height:1.25; }
+  .lh .w{ color:var(--burg); font-style:italic; }
+  .lc{ font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.03em; text-transform:uppercase; color:var(--muted); margin-top:4px; }
+  .lc.warn{ color:var(--burg); font-weight:500; }
+  .ln{ font-family:'Caveat',cursive; font-size:15.5px; color:#5a4a40; line-height:1.15; } .t-edn .ln{ color:#555; }
+  .skipbadge{ font-family:'JetBrains Mono',monospace; font-size:8px; letter-spacing:0.05em; text-transform:uppercase; color:var(--gold); border:0.5px solid var(--gold-bd); border-radius:4px; padding:1px 5px; margin-left:6px; }
+
+  .pane{ background:var(--card); border:var(--bdw) solid var(--bd); border-radius:var(--rad); padding:24px 26px; display:flex; flex-direction:column; min-height:430px; position:relative; }
+  .t-capp .pane{ border-width:1px; }
+  .pane.frame::before{ content:""; position:absolute; inset:6px; border:1px solid rgba(124,58,42,0.28); border-radius:0; pointer-events:none; }
+  .paneinner{ position:relative; z-index:2; display:flex; flex-direction:column; flex:1; }
+  .ptitle{ font-family:'Playfair Display',serif; font-size:26px; color:var(--head); line-height:1.12; margin-bottom:5px; }
+  .ptitle .w{ font-style:italic; color:var(--burg); }
+  .pmeta{ font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.04em; text-transform:uppercase; color:var(--muted); margin-bottom:17px; }
+  .pctx{ font-size:13.5px; line-height:1.6; color:#4a382e; margin-bottom:15px; } .t-edn .pctx{ color:#444; }
+  .pctx b{ color:var(--ink); font-weight:500; }
+  .tray{ background:var(--pink-tray); border:0.5px solid var(--pink-tray-bd); border-radius:10px; padding:15px 17px; } .t-edn .tray{ background:#f4f4f2; border-color:#e4e2de; }
+  .tray .tl{ font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.1em; text-transform:uppercase; color:var(--burg); margin-bottom:8px; display:flex; gap:7px; align-items:center; } .t-edn .tray .tl{ color:#555; }
+  .tray .dl{ font-family:'Playfair Display',serif; font-size:20px; color:var(--burg-deep); } .t-edn .tray .dl{ color:#222; }
+  .tray .dl small{ display:block; font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--muted); letter-spacing:0.03em; text-transform:uppercase; margin-top:3px; }
+  .fix{ background:#fffdf8; border:0.5px solid var(--gold-bd); border-radius:10px; padding:15px 17px; } .t-edn .fix{ background:#f7f7f5; border-color:#e4e2de; }
+  .fix .why{ font-size:12.5px; color:var(--muted); line-height:1.5; margin-bottom:12px; }
+  .fixrow{ display:flex; gap:8px; }
+  .fixrow input{ flex:1; font-size:13px; padding:9px 12px; border:0.5px solid var(--ghost-bd); border-radius:8px; background:#fff; }
+  .fixrow input:focus{ outline:none; border-color:var(--sage); }
+  .noteed{ background:#fbf7ec; border:0.5px solid #ece2cf; border-radius:10px; padding:16px 18px 16px 34px; position:relative; min-height:130px; } .t-edn .noteed{ background:#f7f7f5; border-color:#e4e2de; }
+  .noteed::before{ content:""; position:absolute; left:26px; top:14px; bottom:14px; width:1px; background:rgba(168,132,44,.25); } .t-edn .noteed::before{ background:#dcdcd8; }
+  .noteed textarea{ width:100%; min-height:100px; border:none; background:transparent; resize:vertical; font-family:'Caveat',cursive; font-size:21px; line-height:1.5; color:#4a382e; } .t-edn .noteed textarea{ color:#444; }
+  .noteed textarea:focus{ outline:none; }
+
+  .cmd{ margin-top:auto; display:flex; align-items:center; gap:10px; padding-top:15px; border-top:0.5px solid var(--hair); } .t-edn .cmd{ border-color:#e4e2de; }
+  .cmd .sp{ flex:1; }
+  .btn{ font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:500; letter-spacing:0.04em; text-transform:uppercase; padding:10px 16px; border-radius:9px; cursor:pointer; border:1px solid; display:inline-flex; gap:7px; align-items:center; }
+  .btn.p{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+  .btn.g{ background:var(--card); border-color:var(--ghost-bd); color:var(--ghost-text); }
+  .btn.g:hover{ border-color:#c9a89e; color:var(--burg); }
+  .emptyp{ margin:auto; text-align:center; }
+  .emptyp h3{ font-family:'Playfair Display',serif; font-style:italic; font-weight:500; font-size:24px; color:var(--sage-text); margin-top:12px; }
+
+  .sd{ flex:none; width:24px; height:24px; }
+  @media(max-width:980px){ .ledger{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="scaffold">
+  <span class="lab">Prototype</span>
+  <span class="sbtn" id="restart">↻ Replay from Clear-the-Desk</span>
+  <div class="themepick">
+    <span class="lab" style="align-self:center">Style:</span>
+    <div class="th on" data-t="t-capp">Cappuccino</div>
+    <div class="th" data-t="t-bold">Bold Pastille</div>
+    <div class="th" data-t="t-edn">Editorial</div>
+  </div>
+</div>
+
+<div class="app t-capp" id="app">
+  <div class="rail">
+    <div class="wm"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg></div>
+    <div class="ri"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+    <div class="ri on"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg></div>
+    <div class="ri"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5"/><circle cx="17" cy="9" r="2.5"/><path d="M15 20c0-2 1.5-4 5-4"/></svg></div>
+    <div class="ri"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3" stroke-linecap="round"/></svg></div>
+    <div class="ri sep"></div>
+    <div class="ri"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2z"/><path d="M8 3v18"/></svg></div>
+    <div class="ri"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4v16M9 4v16M14 5l4 15"/></svg></div>
+    <div class="btm">
+      <div class="ri"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg></div>
+      <div class="av">B</div>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="crumb">Scriptally / Querying / <b>To-do</b> &nbsp;<span style="color:#bfae9e">— nav & header shown as-is (locked)</span></div>
+    <div class="content" id="content"></div>
+  </div>
+</div>
+
+<script>
+const G={
+  planeArrow:`<svg class="sd" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#f8e7dc" stroke="#7c3a2a" stroke-width="1.4"/><path d="M16 8 8.5 15M16 8l-2.5 8-1.8-3.4L8 11z" fill="none" stroke="#7c3a2a" stroke-width="1.3" stroke-linejoin="round"/></svg>`,
+  sage:`<svg class="sd" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#e9ede6" stroke="#8a9e88" stroke-width="1.4"/><path d="M13.5 8 8 12l5.5 4" fill="none" stroke="#5a6e58" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 12h-6" stroke="#5a6e58" stroke-width="1.3" stroke-linecap="round"/></svg>`,
+  hk:`<svg class="sd" viewBox="0 0 24 24" fill="none" stroke="#a8842c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4l6 6"/><path d="M11 7l6 6"/><path d="M4 20l6-9 3 3-9 6z"/></svg>`,
+  note:`<svg class="sd" viewBox="0 0 24 24" fill="none" stroke="#7c3a2a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v5h5"/><path d="M18 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M9 13h6M9 17h4"/></svg>`,
+  pin:`<svg width="13" height="13" viewBox="0 0 24 24" fill="#a8842c"><path d="M14 3l7 7-4 1-3 6-2-2-4 4-1-1 4-4-2-2 6-3z"/></svg>`,
+  tick:`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#5a6e58" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 6"/></svg>`,
+  clock:`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7c3a2a" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round"/></svg>`,
+  quill:`<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#8a9e88" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4c-6 1-11 6-13 12l-2 4 4-2c6-2 11-7 12-13z"/><path d="M14 7l3 3"/></svg>`
+};
+
+function seed(){ return [
+  {id:1,stream:'do',urgent:true,glyph:'planeArrow',verb:'Send your full',who:'Juliet Mushens',cap:'3 days left · due 11 Jul',warn:true,
+   ctx:`Juliet requested your full manuscript of Lost Clockworks on 27 June after reading the partial. This is a writer's-turn state — Full Requested — so the next move is yours.`,
+   dl:'3 days left · due 11 Jul'},
+  {id:2,stream:'do',urgent:true,glyph:'planeArrow',verb:'Send your partial',who:'Felicity Blunt',cap:'9 days left · due 17 Jul',
+   ctx:`Felicity requested a partial (first 50 pages) of The Tin Sky on 3 July. Status is Partial Requested — over to you.`,
+   dl:'9 days left · due 17 Jul'},
+  {id:3,stream:'do',urgent:true,glyph:'sage',verb:'Resubmit your R&R',who:'Nelle Andrew',cap:'21 days left · due 29 Jul',
+   ctx:`Nelle sent an R&R on Lost Clockworks on 8 June. You're in an active working state — resubmit when the revision's ready.`,
+   dl:'21 days left · due 29 Jul'},
+  {id:4,stream:'hk',glyph:'hk',head:'Set a word count for <span class="w">Lost Clockworks</span>',cap:'Data hygiene · low',
+   fixPh:'e.g. 82,000', why:`Word count powers the typical-range hints on your query forms and the completeness read on this manuscript. It's the only field left blank.`},
+  {id:5,stream:'hk',glyph:'hk',head:'<span class="w">David Higham</span> has sat at Full Sent for 96 days',cap:'Stale query · review',warn:true,
+   choices:['Mark as CNR','Still waiting'], why:`You sent the full on 3 April with no response in 96 days. Marking CNR (assumed no response) closes it and keeps your Responses figure honest — distinct from an explicit rejection.`},
+  {id:6,stream:'note',glyph:'note',pinned:true,body:`Ask the writing group about the Mushens submission — do I mention the competition shortlisting in the covering email, or let the pages speak?`,created:'Created 6 Jul'},
+  {id:7,stream:'note',glyph:'note',body:`Redraft the opening line — "The morning the river turned" is too close to the image in Ch.3. Find something colder.`,created:'Created 2 Jul'}
+];}
+
+let items=seed(); let cleared=0; let theme='t-capp';
+let mode='focus'; let focusQueue=[]; let focusTotal=0; let skipped=new Set();
+let selId=null; let stream='all';
+const meta={do:'Do next',hk:'Housekeeping',note:'Notes'};
+const order=[['do','Do next'],['hk','Housekeeping'],['note','Notes']];
+
+function frameClass(){ return theme==='t-capp'?' frame':''; }
+function count(s){ return items.filter(i=>i.stream===s).length; }
+function visible(){ return items.filter(i=>stream==='all'||i.stream===stream); }
+
+/* ---------- FOCUS ---------- */
+function startFocus(){
+  focusQueue = items.filter(i=>i.stream==='do' && !skipped.has(i.id)).sort((a,b)=>a.id-b.id);
+  focusTotal = focusQueue.length; mode='focus'; renderFocus();
+}
+function renderFocus(){
+  const c=document.getElementById('content');
+  focusQueue = focusQueue.filter(i=>items.find(x=>x.id===i.id) && !skipped.has(i.id));
+  if(!focusQueue.length){
+    c.innerHTML = `<div class="card mast${frameClass()}"><div class="mrow"><div>
+        <div class="mtitle">Clear the <span class="em">Desk</span></div>
+        <div class="msub">Wednesday 8 July · the pressing items, one at a time</div></div></div></div>
+      <div class="focuswrap"><div class="fdone">${G.quill}
+        <h2>${cleared? 'Desk cleared.':'Nothing pressing.'}</h2>
+        <p>${cleared? cleared+' urgent items done today':'no items need you right now'}</p>
+        <div class="cont"><button class="primary" id="toLedger">Go to your list →</button></div>
+      </div></div>`;
+    document.getElementById('toLedger').addEventListener('click',()=>{ mode='ledger'; stream='all'; selId=firstVisible(); renderLedger(); });
+    return;
+  }
+  const it=focusQueue[0];
+  const done=focusTotal-focusQueue.length;
+  const pct=Math.round(done/focusTotal*100);
+  c.innerHTML = `<div class="card mast${frameClass()}"><div class="mrow"><div>
+      <div class="mtitle">Clear the <span class="em">Desk</span></div>
+      <div class="msub">Wednesday 8 July · the pressing items, one at a time</div></div></div></div>
+    <div class="focuswrap">
+      <div class="skiplist" id="skipAll">Skip to the list →</div>
+      <div class="fcount">${done+1} of ${focusTotal} &nbsp;·&nbsp; ${cleared} cleared today</div>
+      <div class="fmeter"><i style="width:${pct}%"></i></div>
+      <div class="fcard">
+        <div class="ptag d">${it.glyph==='sage'?G.sage:G.planeArrow}<span>Do next · your move</span></div>
+        <div class="fbig">${it.verb} to <span class="w">${it.who}</span></div>
+        <div class="fsub">${it.ctx}</div>
+        <div class="dline">${G.clock} ${it.dl}</div>
+        <div class="factions">
+          <div class="fbtn g" data-a="snooze">Snooze</div>
+          <div class="fbtn p" data-a="do">${it.verb} →</div>
+          <div class="fbtn g" data-a="skip">Skip</div>
+        </div>
+        <div class="fkey">Enter — do it &nbsp;·&nbsp; S — snooze &nbsp;·&nbsp; → — skip</div>
+      </div>
+    </div>`;
+  document.getElementById('skipAll').addEventListener('click',()=>{ mode='ledger'; stream='all'; selId=firstVisible(); renderLedger(); });
+  c.querySelectorAll('[data-a]').forEach(b=>b.addEventListener('click',()=>{
+    const a=b.dataset.a;
+    if(a==='do'){ items=items.filter(x=>x.id!==it.id); cleared++; }
+    else if(a==='snooze'){ items=items.filter(x=>x.id!==it.id); }
+    else if(a==='skip'){ skipped.add(it.id); }
+    renderFocus();
+  }));
+}
+function firstVisible(){ const p=visible(); return p.length?p[0].id:null; }
+
+/* ---------- LEDGER ---------- */
+function renderLedger(){
+  const c=document.getElementById('content');
+  let listInner=''; const vis=visible();
+  if(stream==='all'){
+    order.forEach(([k,l])=>{ const g=vis.filter(i=>i.stream===k); if(!g.length)return;
+      listInner+=`<div class="grp">${l}<span class="gl"></span></div>`; g.forEach(i=>listInner+=lrow(i)); });
+  } else vis.forEach(i=>listInner+=lrow(i));
+  if(!vis.length) listInner=`<div style="text-align:center;padding:54px 20px">${G.quill}<div style="font-family:'Playfair Display',serif;font-style:italic;font-size:18px;color:var(--sage-text);margin-top:10px">This stream is clear.</div></div>`;
+
+  c.innerHTML = `<div class="card mast${frameClass()}"><div class="mrow"><div>
+      <div class="mtitle">The <span class="em">Docket</span></div>
+      <div class="msub">Your writing desk · ${items.length} outstanding · ${cleared} cleared today</div></div>
+      <button class="primary">＋ Add a note</button></div></div>`
+    + `<div class="filter"><span class="segl">Show</span>
+        <div class="segs" id="segs">
+          <div class="seg ${stream==='all'?'on':''}" data-s="all">All <span class="n">${items.length}</span></div>
+          <div class="seg ${stream==='do'?'on':''}" data-s="do">Do next <span class="n">${count('do')}</span></div>
+          <div class="seg ${stream==='hk'?'on':''}" data-s="hk">Housekeeping <span class="n">${count('hk')}</span></div>
+          <div class="seg ${stream==='note'?'on':''}" data-s="note">Notes <span class="n">${count('note')}</span></div>
+        </div>
+        <div class="drop">Sort · Due date ▾</div></div>`
+    + `<div class="ledger"><div class="list">${listInner}</div><div id="paneSlot"></div></div>`;
+
+  const segs=document.getElementById('segs');
+  segs.addEventListener('click',e=>{ const s=e.target.closest('.seg'); if(!s)return; stream=s.dataset.s;
+    const p=visible(); if(p.length&&!p.find(i=>i.id===selId))selId=p[0].id; renderLedger(); });
+  c.querySelectorAll('.lrow').forEach(r=>r.addEventListener('click',()=>{ selId=+r.dataset.id; renderLedger(); }));
+  if(!selId||!items.find(i=>i.id===selId)) selId=firstVisible();
+  renderPane();
+}
+function lrow(i){
+  const badge = skipped.has(i.id)? `<span class="skipbadge">skipped</span>`:'';
+  const mid = i.stream==='note'
+    ? `<div class="ln">${clamp(i.body)}</div>`
+    : `<div class="lh">${i.head||(i.verb+' to <span class="w">'+i.who+'</span>')}${badge}</div><div class="lc ${i.warn?'warn':''}">${i.cap}</div>`;
+  return `<div class="lrow ${i.id===selId?'sel':''}" data-id="${i.id}">${G[i.glyph]}<div style="flex:1;min-width:0">${mid}</div>${i.pinned?G.pin:''}</div>`;
+}
+function clamp(t){ return t.length>74?t.slice(0,74)+'…':t; }
+function renderPane(){
+  const slot=document.getElementById('paneSlot'); if(!slot)return;
+  const it=items.find(i=>i.id===selId)||visible()[0];
+  const fc = theme==='t-capp'?' frame':'';
+  if(!it){ slot.innerHTML=`<div class="pane${fc}"><div class="paneinner"><div class="emptyp">${G.quill}<h3>Your desk is clear.</h3></div></div></div>`; return; }
+  selId=it.id;
+  let body,cmd;
+  if(it.stream==='do'){
+    body=`<div class="ptag d" style="margin-bottom:15px">Do next · your move</div>
+      <div class="ptitle">${it.verb} to <span class="w">${it.who}</span></div>
+      <div class="pmeta">${it.cap}${skipped.has(it.id)?' · skipped earlier':''}</div><div class="pctx">${it.ctx}</div>
+      <div class="tray"><div class="tl">${G.clock} Deadline</div><div class="dl">${it.dl.split(' · ')[0]}<small>${it.dl.split(' · ')[1]||''}</small></div></div>`;
+    cmd=`<div class="btn p" data-a="do">${it.verb} →</div><div class="btn g" data-a="snooze">Snooze</div><div class="sp"></div><div class="btn g" data-a="skip2">Not now</div>`;
+  } else if(it.stream==='hk'){
+    const fx=it.choices
+      ? `<div class="fixrow"><div class="btn p" data-a="do">${it.choices[0]}</div><div class="btn g" data-a="dismiss">${it.choices[1]}</div></div>`
+      : `<div class="fixrow"><input placeholder="${it.fixPh}"><div class="btn p" data-a="do">Save</div></div>`;
+    body=`<div class="ptag h" style="margin-bottom:15px">Housekeeping · ${it.warn?'review':'data hygiene'}</div>
+      <div class="ptitle">${it.head}</div><div class="pmeta">${it.cap}</div>
+      <div class="fix"><div class="why">${it.why}</div>${fx}</div>`;
+    cmd=`<div class="btn g" data-a="snooze">Snooze 7 days</div><div class="sp"></div><div class="btn g" data-a="dismiss">Not now</div>`;
+  } else {
+    body=`<div class="ptag n" style="margin-bottom:15px">Note · yours</div>
+      <div class="ptitle" style="font-size:19px;color:var(--muted);font-style:normal">${it.created||'New note'}</div>
+      <div class="noteed"><textarea>${it.body||''}</textarea></div>`;
+    cmd=`<div class="btn p" data-a="do">Mark done ${G.tick}</div><div class="btn g" data-a="pin">${it.pinned?'Unpin':'Pin'}</div><div class="sp"></div><div class="btn g" data-a="dismiss">Delete</div>`;
+  }
+  slot.innerHTML=`<div class="pane${fc}"><div class="paneinner">${body}<div class="cmd">${cmd}</div></div></div>`;
+  slot.querySelectorAll('[data-a]').forEach(b=>b.addEventListener('click',()=>{
+    const a=b.dataset.a;
+    if(a==='pin'){ it.pinned=!it.pinned; renderLedger(); return; }
+    if(a==='skip2'){ skipped.add(it.id); renderLedger(); return; }
+    const counts=(a==='do'); const el=b.closest('.pane');
+    items=items.filter(x=>x.id!==it.id); if(counts)cleared++;
+    selId=firstVisible(); renderLedger();
+  }));
+}
+
+/* ---------- controls ---------- */
+document.querySelector('.themepick').addEventListener('click',e=>{ const t=e.target.closest('.th'); if(!t)return;
+  document.querySelectorAll('.th').forEach(x=>x.classList.remove('on')); t.classList.add('on');
+  theme=t.dataset.t; document.getElementById('app').className='app '+theme;
+  mode==='focus'?renderFocus():renderLedger(); });
+document.getElementById('restart').addEventListener('click',()=>{ items=seed(); cleared=0; skipped=new Set(); selId=null; stream='all'; startFocus(); });
+
+/* init */
+document.getElementById('app').className='app '+theme;
+startFocus();
+</script>
+</body>
+</html>

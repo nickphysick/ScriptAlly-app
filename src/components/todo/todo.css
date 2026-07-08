@@ -1,0 +1,131 @@
+/**
+ * To-do page layout (design ref: design-refs/todo-desk-to-ledger.html).
+ *
+ * Structural layout + the responsive breakpoint live here (a CSS media query can't be beaten by
+ * an inline grid-template, so the grid columns stay in CSS); critical colours/borders are inline
+ * theme tokens in ToDoPage.tsx per the repo's Tailwind-inline-style convention.
+ *
+ * The Cappuccino-only inset frame on the working pane mirrors `.t-capp .qhbar::after` and
+ * `.t-capp .agv2 .ag-pane::after` — the frame colour is the shared Form-11 burgundy constant,
+ * not a theme value, and it never renders under .t-bold / .t-edn.
+ */
+
+/* ── filter bar ─────────────────────────────────────────────────────────── */
+.todo-filter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  flex: none;
+}
+.todo-segl {
+  font-size: 9px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+.todo-segs {
+  display: flex;
+  border-radius: 99px;
+  padding: 3px;
+}
+.todo-seg {
+  border: none;
+  cursor: pointer;
+  font-size: 10px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 6px 13px;
+  border-radius: 99px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.todo-sort {
+  font-size: 10px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+/* ── ledger grid: list (furniture) + working pane (document) ─────────────── */
+.todo-ledger {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 14px;
+}
+
+/* LIST — furniture: fills the column height, scrolls internally. */
+.todo-list {
+  align-self: stretch;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.todo-list-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 14px 17px;
+}
+.todo-list-empty {
+  font-size: 9px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  padding: 8px 0;
+}
+
+/* PANE — document: hugs content but clamps to [floor, viewport line], footer-closed. */
+.todo-pane {
+  align-self: start;
+  max-height: 100%;
+  overflow: hidden;
+  padding: 24px 26px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.todo-pane-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+.todo-pane-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.todo-pane-empty {
+  font-style: italic;
+  font-size: 22px;
+  text-align: center;
+}
+
+/* Cappuccino-only Form-11 inset frame on the working pane. */
+.t-capp .todo-pane::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(124, 58, 42, 0.28);
+  border-radius: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+
+@media (max-width: 980px) {
+  .todo-ledger {
+    grid-template-columns: 1fr;
+  }
+}

@@ -34,7 +34,10 @@ export const RAIL_GROUPS: RailGroup[] = [
   },
   {
     eyebrow: "Querying",
-    items: [{ key: "queries-hub", label: "Queries Hub", tab: "queries", path: "/queries" }],
+    items: [
+      { key: "queries-hub", label: "Queries Hub", tab: "queries", path: "/queries" },
+      { key: "todo", label: "To-do", tab: "todo", path: "/todo" },
+    ],
   },
   {
     eyebrow: "Agents",
