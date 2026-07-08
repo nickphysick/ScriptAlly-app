@@ -595,3 +595,20 @@ Run: fold the grand masthead into both hubs (v2 supersedes the unrun v1 pack —
 - **jsdom blind spot:** the 54→40 step is a viewport-height media query jsdom can't evaluate; the artefact test asserts the token + `@media (max-height: 819px)` rule text, and the real step was a browser resize check (860→54, 720→40).
 
 Suite 680 green at close (was 665 pre-masthead; +9 Phase 1, +6 Phase 2).
+
+## Content max-width caps (ultrawide) — 8 Jul
+
+Run: stop workspace content stretching edge-to-edge on wide monitors — one shared wrapper in the AppShell content column, capped + centred, per-route variant. Ref `maxwidth-ultrawide-v1.html` was NOT supplied (absent from Downloads + design-refs), so built from the spec text (caps/gutter fully specified).
+
+**Halt-then-proceed:** the working tree was dirty in the pack's files at open — `index.css` mid theme-editor retoken (2026-07-07) + `DiscoverNewAgents.tsx`/`discover.css` reworked (+176/+85), all uncommitted. Per the pack's halt rule + the no-touch-other-WIP protocol I stopped and surfaced it; Nick chose "I'll land it" then said build anyway without landing it. Resolved by working ONLY in clean/new files and routing around the dirty ones: cap tokens went to a NEW file (not the dirty index.css), and Discover's bespoke max-width removal was deferred (dirty file). No other stream's WIP was edited or staged.
+
+**The build (`454d95b`):** a new `src/components/shell/contentColumn.css` (tokens `--content-max-work:1600` / `--content-max-read:1200` + `.sa-content-col` classes) + `StagePage` gaining `contentVariant?: "work"|"read"` — it paints `var(--desk)` on the full-width slot and centres the page in a capped column, with a `--fill` modifier that passes `height:100%` through so the viewport-locked hubs keep their internal scroll. App.tsx wires the four slots (queries/agents = work; manuscripts/import = read); the dashboard stays unwrapped. Manuscripts' bespoke `.msv-wrap { max-width:1150 }` folded into the read cap. FocusShell left as-is (already 860px, tighter than read).
+
+**Why it's seamless:** recon found `--desk` ≡ `--hub-desk` in every theme (Capp #e8ddd0 · Bold #c2cfda · Editorial #f4f4f3), so the slot's `--desk` margins meet each page's own desk with no seam. Gutter reconciled (not doubled): every page already insets its content ≥ the spec's 16/24px via its own edge padding, so the wrapper adds no competing padding — keeping the ≤1440 render byte-identical.
+
+**Verified in a real browser (jsdom can't lay out):**
+- 2300px wide, Cappuccino: rail left 0 / w 240 (uncapped); Queries `work` col 1600, margins 223=223 (true-centre), desk #e8ddd0 in the margins; Agents `work` 1600 (.agv2 fills), margins 223=223; Manuscripts `read` 1200, margins 423=423. Bold: desk margins #c2cfda, 1600, 230=230.
+- 1440px: nothing caps — Queries fills 1200, Manuscripts fills 1185, both 0 margins → looks unchanged, exactly the spec.
+- Height locks intact: Queries workspace stage overflow 0 (no page scroll); Agents' 105px overflow is the pre-existing dark footer (a stage sibling shown on agents/manuscripts by design), NOT the cap.
+
+**Deferred / flagged:** Discover's inner max-width still constrains it below the 1600 work cap until its WIP lands (then delete it). The two cap tokens live in contentColumn.css rather than index.css (dirty at build time) — fold into index.css when convenient. Suite 737 green (isolated-worktree gate from HEAD + only my files; the dirty theme/Discover WIP excluded from the gate).
