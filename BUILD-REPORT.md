@@ -612,3 +612,18 @@ Run: stop workspace content stretching edge-to-edge on wide monitors — one sha
 - Height locks intact: Queries workspace stage overflow 0 (no page scroll); Agents' 105px overflow is the pre-existing dark footer (a stage sibling shown on agents/manuscripts by design), NOT the cap.
 
 **Deferred / flagged:** Discover's inner max-width still constrains it below the 1600 work cap until its WIP lands (then delete it). The two cap tokens live in contentColumn.css rather than index.css (dirty at build time) — fold into index.css when convenient. Suite 737 green (isolated-worktree gate from HEAD + only my files; the dirty theme/Discover WIP excluded from the gate).
+
+## Full-bleed crumb + floating masthead (ultrawide amendment) — 8 Jul
+
+Run: the amendment to the max-width caps — detach the crumb to full-bleed window chrome and demote the masthead to a floating card (ref `crumb-fullwidth-v1.html`, variant A).
+
+**Halt → snapshot → build.** The amendment's core files (`ChromeSlab.tsx`, `App.tsx`, `Queries.tsx`, `index.css`) were dirty with another stream's ACTIVE crumb work — a `crumbBar` prop + `--crumb-bar-*` theme tokens (terracotta/blush/black, dated today) building the *opposite* structure (a tinted crumb bar INSIDE the capped slab). Unlike the caps, this couldn't be routed around — the amendment IS a restructure of those files. Flagged the collision; Nick chose "amendment supersedes it" and authorised parking the WIP. Committed the in-flight tracked WIP as one reversible snapshot (`06bb6ea`, verified buildable first) to clean the tree, then built the amendment as clean commits on top.
+
+**The build (`24ffd97`):** new `CrumbStrip` (shell/) draws the crumb full-bleed — a translucent wash + hairline strip spanning the whole content column, rendered by `StagePage` OUTSIDE `.sa-content-col` (a flex-column slot: crumb `flex:none` above the `flex:1` capped column). `ChromeSlab` dropped its own crumb entirely and became a floating card — theme card treatment via `--bd`/`--bdw` + `--hub-radius` + a new per-theme `--mast-sh` (Capp soft / Bold `4px 4px 0` hard / Editorial soft), a 14px gap below, inset by the page's padding. The negative-margin bleed was removed from all 7 slab mounts (Queries ×2, Agents, Manuscripts, Packages — Discover/Import had none). `crumbBar` + `--crumb-bar-*` superseded (inert).
+
+**Verified in a real browser (jsdom can't lay out), 2300px:**
+- Crumb: `crumbOutsideCap` true, width 2060 (rail edge 240 → viewport edge 2300) — full-bleed on both grand (Queries) and compact (Manuscripts) pages.
+- Card: width 1544, inset 28px within the 1600 cap; borders/shadows per theme — Capp #d8cebf/r6/soft, Bold #1d1712/r14/`4px 4px 0` hard, Editorial hairline/r10/soft.
+- Stage overflow 0 (workspace still height-locked); caps + true-centre from the base pack intact.
+
+Suite 742 green (isolated-worktree gate from the snapshot HEAD + only my files). Lock: `crumbStrip.test.ts`. **Reminder for whoever owns the parked WIP:** `06bb6ea` holds your theme-editor + crumb-bar + discover/comps changes — reconcile or `git reset` as needed; the `crumbBar`/`--crumb-bar-*` bits are now superseded by this amendment.
