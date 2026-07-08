@@ -69,11 +69,11 @@
   --card: #fffefb; /* card/container surface */
   --chromerad: 0px;   /* chrome corners (Queries-Hub bar, list panel) — square */
   --listbg: #ffffff;  /* query-list panel bg */
-  --hdr: #5d4037;         /* Mocha — replaces the green #2e3a2c family in chrome */
+  --hdr: #000000;         /* Headings black (theme editor 2026-07-07; was mocha #5d4037) */
   --band-a: #ece5d8;      /* Foam gradient start */
   --band-b: #e5ddcd;      /* Foam gradient end */
   --band-bd: rgba(112,94,70,0.25);
-  --band-meta: #705e46;
+  --band-meta: #9c8878;
   --band-strong: #4a4036;
   --abtn-bg: #ffffff;
   --abtn-bd: #ded3c2;
@@ -82,9 +82,9 @@
   --abtn-hov: #f4f2ef;    /* pre-computed ~4% toward black over white (no runtime color-mix) */
   /* Mockup resolves the nav pill to the button surface (#ffffff) — white-on-white in the white
      rail fails contrast, so the brief's pre-authorised fallback applies: foam pill, mocha text. */
-  --navpill: #f0e8db;
+  --navpill: #dce8d7;
   --navtext: #5d4037;
-  --acc: #7c3a2a;
+  --acc: #422701;
   /* StatusDot amended lock: one hue per theme (ring/glyph) + centre disc. Shapes carry stage. */
   --sd-hue: #7c3a2a;
   --sd-centre: #f6e4da;
@@ -97,7 +97,7 @@
   --btnBd: #e0d5c8;
   --btnT: var(--hdr);
   --btnH: #f7f2ea;
-  --selBg: #f3ede2;  /* selected-row foam tint */
+  --selBg: #dce8d7;  /* selected-row tint (theme editor 2026-07-07; was foam #f3ede2) */
   --winBg: #f5f0e6;  /* result "win row" foam tint */
   /* Package Workshop: header text/icons ON a band fill. A distinct token from --hdr so a future
      Editorial charcoal-masthead pass flips one value; today all three bands are light so it = --hdr. */
@@ -112,14 +112,14 @@
   --rail-shadow: 0 1px 3px rgba(58, 28, 20, 0.05), 0 12px 30px rgba(58, 28, 20, 0.07);
   --rail-ink: #3a1c14;
   --rail-label: #9c8878;
-  --rail-accent: #7c3a2a;
+  --rail-accent: #422701;
   --rail-itemtx: #5a4a40;
-  --rail-pill: #f1e9df;
+  --rail-pill: #e9ece4;      /* active nav pill — sage (theme editor 2026-07-08; was #dce8d7) */
   --rail-hov: #f7f3ed;
-  --rail-btn-bg: #ffffff;
+  --rail-btn-bg: #ddc0b6;      /* capture buttons — clay (theme editor 2026-07-08; was #ffffff) */
   --rail-btn-bd: #ded3c2;
   --rail-btn-bdw: 1px;
-  --rail-btn-tx: #5d4037;
+  --rail-btn-tx: #000000;      /* capture button text — black (theme editor 2026-07-08; was #5d4037) */
   --rail-btn-hov: #f4f2ef;
   --rail-btn-shadow: 0 1px 2px rgba(58, 28, 20, 0.05);
   /* Hover-peek additions (ref rail-hover-peek-v2.html): the overlay's deeper shadow and the
@@ -131,29 +131,35 @@
   --crumb-hair: #e7ddd2;
   --crumb-seg: #9c8878;
   --crumb-seg-hov: #5d4037;
-  --crumb-cur: #7c3a2a;
+  --crumb-cur: #422701;
   --crumb-sep: #c9bba9;
   /* ChromeSlab (ref header-ground-fullpage-v1.html, Option A). */
   --slab-bg: #fffefb;
   --slab-bd: #e7ddd2;
   --slab-bdw: 1px;
-  --crumb-bar-bg: #F8FAF7;                    /* Queries crumb bar — light sage */
+  --crumb-bar-bg: #ddc0b6;                    /* Queries crumb bar — clay (theme editor 2026-07-08; was #d0917c) */
+  --crumb-bar-tx: #422701;                    /* crumb active segment on the bar */
+  --crumb-bar-mut: #5d4037;                   /* crumb label on the bar */
   --crumb-bar-rule: var(--bdw) solid var(--bd);
   /* Phase 3 — coffee & sage accents (Cappuccino sage; neutral in Bold/Editorial) */
   --qp-genre-bg: #EAF1E7; --qp-genre-bd: #D3E3CC; --qp-genre-tx: #42543B;
   --qp-listfoot-bg: #F8FAF7;                  /* Export-CSV foot — light sage */
-  --qp-cmd-bg: #F8FAF7;                       /* reading-pane action row — rounded --bd-bordered sage bar */
+  --qp-cmd-bg: #ddc0b6;                       /* control bar — clay (theme editor 2026-07-08; was #d0917c) */
   --qp-cmd-frame: var(--bdw) solid var(--bd);
-  --qp-cmd-toprule: var(--bdw) solid var(--bd);
+  --qp-cmd-toprule: var(--bdw) solid #5d4037;
+  /* control-bar buttons/meta — pre-computed inverted for the terracotta bar (theme editor 2026-07-08) */
+  --cmdbar-prime-bg: #422701; --cmdbar-prime-tx: #ffffff; --cmdbar-prime-bd: #422701;
+  --cmdbar-btn-bg: transparent; --cmdbar-btn-bd: #422701; --cmdbar-btn-tx: #422701;
+  --cmdbar-meta: #5d4037;
   --qp-cmd-radius: 14px;                      /* mockup .t-capp .actionbar */
   --qp-cmd-margin: 0;                         /* full-width in the pane flow — no inset */
   --qp-cmd-pad: 14px 18px;                    /* Bold/Editorial keep 11px 20px via the inline fallback */
   --slab-shadow: none;
-  --slab-ttl: #5d4037;
-  --slab-meta: #8a7a6c;
+  --slab-ttl: #000000;
+  --slab-meta: #9c8878;
   /* Queries command bar + column fade (ref queries-workspace-v2.html). */
   --qp-col-bg: #fffefb;
-  --cmd-bar-bg: #fffdf9;
+  --cmd-bar-bg: #fffefb;
   --cmd-bar-bd: #e7ddd2;
   --cmd-bar-bdw: 1px;
   --cmd-bar-shadow: none;
@@ -161,9 +167,9 @@
   --cmd-btn-bd: #ded3c2;
   --cmd-btn-bdw: 1px;
   --cmd-btn-shadow: 0 1px 2px rgba(58, 28, 20, 0.04);
-  --cmd-primary-bg: #f6e4da;
+  --cmd-primary-bg: #5d4037;
   --cmd-primary-bd: #ecd0c2;
-  --cmd-primary-tx: #7c3a2a;
+  --cmd-primary-tx: #ffffff;
   /* ── Hub token sheet (ref design-refs/hub-token-sheet-v3.html; VALUES from Nick's tuner spec,
      which WINS over v3 where they differ — Capp's espresso primaries/monograms + taupe toggle
      are the spec, not v3's caramel/latte). The single source both hubs consume for named
@@ -181,7 +187,7 @@
   --hub-pane-sh: 0 1px 3px rgba(58, 28, 20, 0.05);
   --hub-hair: #e7ddd2;
   --hub-row-hair: #f2e9db;
-  --hub-band-process: #f6f1e6;
+  --hub-band-process: #eaf1e7;   /* column header band — sage (theme editor 2026-07-08; was #f6f1e6) */
   --hub-band-process-bd: rgba(107, 74, 47, 0.22);
   --hub-band-process-tx: #5d4037;
   --hub-band-reference: #f6f1e6;
@@ -189,21 +195,21 @@
   --hub-toggle-on: #705e4c;      /* SPEC (v3 caramel #dcb588 superseded) */
   --hub-toggle-on-tx: #ffffff;
   --hub-pill-rail: #ffffff;
-  --hub-primary: #422701;        /* SPEC espresso (v3 latte #eee0c6 superseded) */
-  --hub-primary-bd: #422701;
+  --hub-primary: #5d4037;        /* mocha (theme editor 2026-07-07; was espresso #422701) */
+  --hub-primary-bd: #5d4037;
   --hub-primary-tx: #ffffff;
-  --hub-monogram: #422701;       /* SPEC espresso (v3 #705e46 superseded) */
+  --hub-monogram: #261603;       /* near-espresso (theme editor 2026-07-08; was taupe #ad9f8a) */
   --hub-monogram-tx: #fdfaf5;
-  --hub-row-on: #f6efe3;
+  --hub-row-on: #dce8d7;
   --hub-cell: #fdfaf5;
   --hub-cell-bd: #efe6d8;
-  --hub-cmd: #fffdf9;
+  --hub-cmd: #fffefb;
   --hub-cmd-rule: 1px solid #e7ddd2;
-  --hub-accent: #7c3a2a;
+  --hub-accent: #422701;
   --hub-ink: #3a1c14;
   --hub-head: #000000;
   --hub-label: #9c8878;
-  --hub-item: #6a5a50;
+  --hub-item: #5d4037;
   --hub-body: #5d4037;
   --hub-btn-bg: #ffffff;
   --hub-btn-bd: 1px solid #d8cebf;
@@ -230,7 +236,7 @@
   --abtn-bdw: 1.5px;
   --abtn-ink: #1d1712;
   --abtn-hov: #f5e9e7;
-  --navpill: #eec9c3;     /* unchanged */
+  --navpill: #c1d3e1;     /* blue-grey (theme editor 2026-07-08; was pink #eec9c3) */
   --navtext: #1d1712;
   --acc: #1d1712;
   --sd-hue: #1d1712;
@@ -242,7 +248,7 @@
   --btnBd: var(--pink-b);
   --btnT: var(--ink);
   --btnH: var(--pink-h);
-  --selBg: #fdf1ec;
+  --selBg: #c1d3e1;
   --winBg: #fdf1ec;
   --hdrOn: var(--ink);  /* Package Workshop: ink on the pink band (matches the mock's #241c15) */
   /* Rail rebuild tokens — Bold Pastille (ref sidenav-three-themes-v2.html): 1.5px ink frame,
@@ -257,7 +263,7 @@
   --rail-label: #6a6560;
   --rail-accent: #1d1712;
   --rail-itemtx: #2b2622;
-  --rail-pill: #eec9c3;
+  --rail-pill: #c1d3e1;
   --rail-hov: #f6efec;
   --rail-btn-bg: #ffffff;
   --rail-btn-bd: #1d1712;
@@ -332,7 +338,7 @@
   --hub-primary-tx: #1d1712;
   --hub-monogram: #000000;        /* SPEC (v3 #f8dcd8 superseded) */
   --hub-monogram-tx: #ffffff;
-  --hub-row-on: #f4e4e1;
+  --hub-row-on: #c1d3e1;
   --hub-cell: #fdfaf5;
   --hub-cell-bd: rgba(29, 23, 18, 0.35);
   --hub-cmd: #ffffff;
@@ -432,12 +438,16 @@
   --slab-bg: #ffffff;
   --slab-bd: #ececeb;
   --slab-bdw: 1px;
-  --crumb-bar-bg: #ecebe3;                    /* Queries crumb bar — faint neutral (mockup .t-edit) */
+  --crumb-bar-bg: #000000;                    /* Queries crumb bar — black (theme editor 2026-07-08) */
   --crumb-bar-rule: 3px double var(--bd);     /* Editorial keeps the newspaper double-rule */
   /* Phase 3 — neutral (no sage in Editorial) */
   --qp-genre-bg: #fdfaf5; --qp-genre-bd: #cdddc7; --qp-genre-tx: #5a6e58;
   --qp-listfoot-bg: transparent;
-  --qp-cmd-bg: var(--hub-cmd);
+  --qp-cmd-bg: #44484d;                       /* control bar — graphite (theme editor 2026-07-08) */
+  /* control-bar buttons/meta — pre-computed inverted for the graphite bar (theme editor 2026-07-08) */
+  --cmdbar-prime-bg: #ffffff; --cmdbar-prime-tx: #44484d; --cmdbar-prime-bd: #ffffff;
+  --cmdbar-btn-bg: transparent; --cmdbar-btn-bd: #ffffff; --cmdbar-btn-tx: #ffffff;
+  --cmdbar-meta: #8a8d90;
   --qp-cmd-frame: none;
   --qp-cmd-toprule: var(--hub-cmd-rule);
   --qp-cmd-radius: 0;
@@ -577,3 +587,9 @@
   border-radius: 0;
   pointer-events: none;
 }
+
+/* ── Theme-editor paint overrides — CAPPUCCINO ONLY (2026-07-08). Narrow, per-component colours
+   picked on-page; scoped under .t-capp so they never touch Bold/Editorial. Most paint picks landed
+   on capp tokens above; these two need finer scope than any single token. ── */
+.t-capp .qrow.sel { background: #e8ece4; }              /* selected query-list row */
+.t-capp .qp-note { background: #e9ece4 !important; }    /* journal note bubble (overrides inline bg) */

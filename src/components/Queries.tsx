@@ -2394,10 +2394,10 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         {/* ── Split — list card (furniture, col 1) beside the workspace reading pane (col 2). The
             old actions toolbar row is retired: every query action now lives in the pane's command
             bar (one home for actions). Single-row grid, both columns full height. ── */}
-        <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "330px 1fr", gridTemplateRows: "minmax(0, 1fr)", columnGap: 20, flex: 1, minHeight: 0, alignItems: "stretch" }}>
+        <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "330px 1fr", gridTemplateRows: "minmax(0, 1fr) auto", columnGap: 20, flex: 1, minHeight: 0, alignItems: "stretch" }}>
 
-          {/* List card — furniture: search + header fixed, rows scroll, footer pinned (count ·
-              Export CSV left · keyboard hints right). */}
+          {/* List card — furniture: search + header fixed, rows scroll to the control bar's top
+              edge (count · Export CSV · key hints moved into the shared bar's left zone). */}
           <div style={{ gridColumn: 1, gridRow: 1, alignSelf: "stretch", background: "var(--hub-list)", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", overflow: "hidden", boxShadow: "0 8px 26px rgba(29,23,18,.12)", display: "flex", flexDirection: "column", minHeight: 0 }}>
 
               {/* Search — fixed at the top of the list card */}
@@ -2650,22 +2650,6 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 <div aria-hidden="true" style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 28, pointerEvents: "none", zIndex: 2, background: "linear-gradient(to top, var(--listbg, #ffffff), transparent)", opacity: listFade.bottom ? 1 : 0, transition: "opacity .16s ease" }} />
               </div>{/* closes scroll-area wrapper */}
 
-              {/* Furniture footer (ref queries-workspace-v2): count · Export CSV (left), key hints
-                  (right). Export relocated here from its old centred row. */}
-              <div style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 8, background: "var(--qp-listfoot-bg, transparent)", borderTop: "1px solid #ece3d6", padding: "9px 14px", fontFamily: FONT_MONO, fontSize: 9.5, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase" as const, color: qdbBoldMuted }}>
-                <span>{sortedList.length} {sortedList.length === 1 ? "query" : "queries"}</span>
-                <span aria-hidden="true" style={{ color: "#c9bba9" }}>·</span>
-                <button
-                  type="button"
-                  onClick={() => sortedList.length > 0 && handleExportFilteredCSV()}
-                  disabled={sortedList.length === 0}
-                  style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "transparent", border: "none", padding: 0, fontFamily: "inherit", fontSize: "inherit", fontWeight: "inherit", letterSpacing: "inherit", textTransform: "inherit", color: sortedList.length === 0 ? "#c3b8a8" : qdbBoldMuted, cursor: sortedList.length === 0 ? "default" : "pointer" }}
-                >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v11M7 9l5 5 5-5M5 21h14" /></svg>
-                  Export CSV
-                </button>
-                <span style={{ marginLeft: "auto", color: "#b3a596" }} aria-hidden="true">↑↓ · ⌘K</span>
-              </div>
           </div>{/* closes list card */}
 
           {/* Reading pane — the WORKSPACE (desk-rule second clause, ref queries-workspace-v2.html:
@@ -2962,59 +2946,6 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
                 </div>{/* end sub-cards row */}
 
-                {/* ── Command bar (ref queries-workspace-v2.html) — the ONE home for query actions,
-                    pinned to the pane foot. Left: primary CTA (+ secondaries) from the CTA engine.
-                    Centre: ambient status from the shared queryAmbient derivation. Right: PDF. ── */}
-                {(() => {
-                  const ctrlAction = getPrimaryAction(activeQuery.status as QueryStatus);
-                  const ambient = queryAmbientStatus(activeQuery, ctrlAction.ballHolder, ctrlAction.kind === "mark-sent" ? ctrlAction.markKind : undefined);
-                  const status = commandBarStatus(ambient);
-                  const isMark = ctrlAction.kind === "mark-sent";
-                  const btn: React.CSSProperties = { display: "inline-flex", alignItems: "center", gap: 7, fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 500, color: qdbBoldInk, background: "var(--hub-btn-bg)", border: "var(--hub-btn-bd)", borderRadius: "var(--hub-btn-rad)", padding: "8px 15px", whiteSpace: "nowrap", cursor: "pointer", boxShadow: "var(--hub-btn-sh)" };
-                  const primaryBtn: React.CSSProperties = { ...btn, background: "var(--hub-primary)", border: "1px solid var(--hub-primary-bd)", color: "var(--hub-primary-tx)", fontWeight: 600 };
-                  return (
-                    <div className="qp-cmdbar" style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 12, background: "var(--qp-cmd-bg, var(--hub-cmd))", border: "var(--qp-cmd-frame, none)", borderTop: "var(--qp-cmd-toprule, var(--hub-cmd-rule))", borderRadius: "var(--qp-cmd-radius, 0)", margin: "var(--qp-cmd-margin, 0)", boxShadow: "var(--cmd-bar-shadow, none)", padding: "var(--qp-cmd-pad, 11px 20px)" }}>
-                      {/* Left — actions */}
-                      <div style={{ display: "flex", gap: 9, alignItems: "center" }}>
-                        {isMark ? (
-                          <button ref={markSentTriggerRef} type="button" onClick={() => setIsMarkSentOpen(o => !o)} style={primaryBtn}>
-                            <Send style={{ width: 14, height: 14, strokeWidth: 1.8 } as any} />
-                            {ctrlAction.label}
-                          </button>
-                        ) : (
-                          <button type="button" onClick={() => setIsRecordResponseFocusFormOpen(true)} style={primaryBtn}>
-                            <Send style={{ width: 14, height: 14, strokeWidth: 1.8 } as any} />
-                            {ctrlAction.label}
-                          </button>
-                        )}
-                        {/* secondary "Record response" only when it isn't already the primary */}
-                        {isMark && (
-                          <button type="button" onClick={() => setIsRecordResponseFocusFormOpen(true)} style={btn}>
-                            <Send style={{ width: 13, height: 13, strokeWidth: 1.8 } as any} />
-                            Record response
-                          </button>
-                        )}
-                        <button type="button" onClick={() => openEditQuery(activeQuery.id)} style={btn}>
-                          <Pencil style={{ width: 13, height: 13 }} />
-                          Edit
-                        </button>
-                      </div>
-                      {/* Centre — ambient status (mono uppercase; writer's move flags its burgundy fragment) */}
-                      {status && (
-                        <span style={{ margin: "0 auto", fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: ".1em", textTransform: "uppercase" as const, color: qdbBoldMuted }}>
-                          {status.bold && <b style={{ color: burgundy, fontWeight: 700 }}>{status.bold}</b>}{status.bold ? " " : ""}{status.text}
-                        </span>
-                      )}
-                      {/* Right — utilities */}
-                      <div style={{ display: "flex", gap: 9, alignItems: "center", marginLeft: status ? 0 : "auto" }}>
-                        <button type="button" onClick={() => !isGeneratingPDF && handleDownloadPDF()} style={{ ...btn, cursor: isGeneratingPDF ? "default" : "pointer", opacity: isGeneratingPDF ? 0.6 : 1 }}>
-                          <Download style={{ width: 13, height: 13 }} />
-                          {isGeneratingPDF ? "Generating…" : "Download as PDF"}
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })()}
               </>
             ) : (
               /* No selection — placeholder fills the pane; the command bar does NOT render (Phase 2). */
@@ -3024,6 +2955,81 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
               </div>
             )}
           </div>{/* closes qp-pane */}
+
+          {/* ── Unified workspace control bar (ref queries-hub-controlbar.html): ONE bar spanning
+              BOTH columns at the workspace foot. `subgrid` makes the left zone track the real list
+              column width (no fixed px); the divider sits at the list / reading-pane gap. Colours
+              unchanged — same --qp-cmd-* surface + --cmdbar-* buttons as before. ── */}
+          <div className="qp-controlbar" style={{ gridColumn: "1 / -1", gridRow: 2, display: "grid", gridTemplateColumns: "subgrid", background: "var(--qp-cmd-bg, var(--hub-cmd))", borderTop: "var(--qp-cmd-toprule, var(--hub-cmd-rule))", boxShadow: "var(--cmd-bar-shadow, none)" }}>
+            {/* Left zone — list-aligned furniture (count · Export CSV · key hints) */}
+            <div style={{ gridColumn: 1, display: "flex", alignItems: "center", gap: 8, borderRight: "1px solid var(--bd)", padding: "11px 16px", fontFamily: FONT_MONO, fontSize: 9.5, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase" as const, color: `var(--cmdbar-meta, ${qdbBoldMuted})` }}>
+              <span>{sortedList.length} {sortedList.length === 1 ? "query" : "queries"}</span>
+              <span aria-hidden="true" style={{ opacity: .5 }}>·</span>
+              <button
+                type="button"
+                onClick={() => sortedList.length > 0 && handleExportFilteredCSV()}
+                disabled={sortedList.length === 0}
+                style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "transparent", border: "none", padding: 0, fontFamily: "inherit", fontSize: "inherit", fontWeight: "inherit", letterSpacing: "inherit", textTransform: "inherit", color: `var(--cmdbar-meta, ${qdbBoldMuted})`, opacity: sortedList.length === 0 ? .5 : 1, cursor: sortedList.length === 0 ? "default" : "pointer" }}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v11M7 9l5 5 5-5M5 21h14" /></svg>
+                Export CSV
+              </button>
+              <span style={{ marginLeft: "auto", opacity: .6 }} aria-hidden="true">↑↓ · ⌘K</span>
+            </div>
+            {/* Right zone — reading-pane actions (only when a query is selected) */}
+            <div style={{ gridColumn: 2, display: "flex", alignItems: "center", gap: 12, padding: "11px 20px", minWidth: 0 }}>
+              {activeQuery && activeAgent && activeMs ? (() => {
+                const ctrlAction = getPrimaryAction(activeQuery.status as QueryStatus);
+                const ambient = queryAmbientStatus(activeQuery, ctrlAction.ballHolder, ctrlAction.kind === "mark-sent" ? ctrlAction.markKind : undefined);
+                const status = commandBarStatus(ambient);
+                const isMark = ctrlAction.kind === "mark-sent";
+                const btn: React.CSSProperties = { display: "inline-flex", alignItems: "center", gap: 7, fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 500, color: `var(--cmdbar-btn-tx, ${qdbBoldInk})`, background: "var(--cmdbar-btn-bg, var(--hub-btn-bg))", border: "var(--cmdbar-btn-bd, var(--hub-btn-bd))", borderRadius: "var(--hub-btn-rad)", padding: "8px 15px", whiteSpace: "nowrap", cursor: "pointer", boxShadow: "var(--hub-btn-sh)" };
+                const primaryBtn: React.CSSProperties = { ...btn, background: "var(--cmdbar-prime-bg, var(--hub-primary))", border: "1px solid var(--cmdbar-prime-bd, var(--hub-primary-bd))", color: "var(--cmdbar-prime-tx, var(--hub-primary-tx))", fontWeight: 600 };
+                return (
+                  <>
+                    {/* Left — actions */}
+                    <div style={{ display: "flex", gap: 9, alignItems: "center" }}>
+                      {isMark ? (
+                        <button ref={markSentTriggerRef} type="button" onClick={() => setIsMarkSentOpen(o => !o)} style={primaryBtn}>
+                          <Send style={{ width: 14, height: 14, strokeWidth: 1.8 } as any} />
+                          {ctrlAction.label}
+                        </button>
+                      ) : (
+                        <button type="button" onClick={() => setIsRecordResponseFocusFormOpen(true)} style={primaryBtn}>
+                          <Send style={{ width: 14, height: 14, strokeWidth: 1.8 } as any} />
+                          {ctrlAction.label}
+                        </button>
+                      )}
+                      {/* secondary "Record response" only when it isn't already the primary */}
+                      {isMark && (
+                        <button type="button" onClick={() => setIsRecordResponseFocusFormOpen(true)} style={btn}>
+                          <Send style={{ width: 13, height: 13, strokeWidth: 1.8 } as any} />
+                          Record response
+                        </button>
+                      )}
+                      <button type="button" onClick={() => openEditQuery(activeQuery.id)} style={btn}>
+                        <Pencil style={{ width: 13, height: 13 }} />
+                        Edit
+                      </button>
+                    </div>
+                    {/* Centre — ambient status (mono uppercase; writer's move flags its burgundy fragment) */}
+                    {status && (
+                      <span style={{ margin: "0 auto", fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: ".1em", textTransform: "uppercase" as const, color: `var(--cmdbar-meta, ${qdbBoldMuted})` }}>
+                        {status.bold && <b style={{ color: burgundy, fontWeight: 700 }}>{status.bold}</b>}{status.bold ? " " : ""}{status.text}
+                      </span>
+                    )}
+                    {/* Right — utilities */}
+                    <div style={{ display: "flex", gap: 9, alignItems: "center", marginLeft: status ? 0 : "auto" }}>
+                      <button type="button" onClick={() => !isGeneratingPDF && handleDownloadPDF()} style={{ ...btn, cursor: isGeneratingPDF ? "default" : "pointer", opacity: isGeneratingPDF ? 0.6 : 1 }}>
+                        <Download style={{ width: 13, height: 13 }} />
+                        {isGeneratingPDF ? "Generating…" : "Download as PDF"}
+                      </button>
+                    </div>
+                  </>
+                );
+              })() : null}
+            </div>
+          </div>{/* closes qp-controlbar */}
 
         </div>{/* closes content grid */}
         </>

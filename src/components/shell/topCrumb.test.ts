@@ -66,7 +66,7 @@ describe("crumb tokens — per-theme smoke (rule-text lock)", () => {
     const b = themeBlock(".t-capp");
     expect(b).toContain("--crumb-bg: rgba(255, 254, 251, 0.55)");
     expect(b).toContain("--crumb-hair: #e7ddd2");
-    expect(b).toContain("--crumb-cur: #7c3a2a");
+    expect(b).toContain("--crumb-cur: #422701");
     expect(b).toContain("--crumb-sep: #c9bba9");
   });
 

@@ -56,7 +56,7 @@ import {
 import { getHomeCountry, flagFor, agentLocation } from "../lib/territory";
 import { FONT_SERIF, FONT_SANS, FONT_MONO } from "../lib/designTokens";
 import { ChromeSlab } from "./shell/ChromeSlab";
-import { BookOpen, ShieldCheck, Check, Plus, Bookmark, BookmarkCheck, X } from "lucide-react";
+import { BookOpen, ShieldCheck, Check, Plus, Bookmark, BookmarkCheck, X, Send } from "lucide-react";
 import "flag-icons/css/flag-icons.min.css";
 import "./agents/discover.css";
 
@@ -157,6 +157,16 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
     if (hideHeld) v = v.filter((e) => added.has(e.agent.id) || !heldIds.has(e.agent.id));
     return rankEntries(v, activeLens, homeCountry);
   }, [entries, dismissed, openOnly, ukiOnly, hideHeld, heldIds, added, activeLens, homeCountry]);
+
+  // First-run / zero-matches sell: no manuscripts at all, or a ZERO candidate set for the selected
+  // one (entries is threshold-gated and pre-filter — matches merely hidden by filters/dismissals
+  // keep the results view and its existing "hidden by your filters" affordance).
+  const firstRun = pickable.length === 0 || entries.length === 0;
+  const tryNextManuscript = () => {
+    if (pickable.length < 2 || !selected) return;
+    const i = pickable.findIndex((m) => m.id === selected.id);
+    setSelectedId(pickable[(i + 1) % pickable.length].id);
+  };
 
   const readiness = useMemo(
     () =>
@@ -305,6 +315,134 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
             other slabbed page. ── */}
       <ChromeSlab onNavigate={onNavigate} title="Discover new agents" />
       <div className="dv-wrap">
+        {firstRun ? (
+          /* ── First-run / zero-matches feature sell — hero + benefits + adaptive action strip +
+                inert example card. Results chrome (trust banner, readiness, lenses, filters) is
+                hidden here; the hero carries the vetting message. ── */
+          <div className="dv-fr" style={{ fontFamily: FONT_SANS }}>
+            <div>
+              <div className="dv-fr-eyebrow">
+                <span className="dv-pro">Pro</span>
+                Discover new agents
+              </div>
+              <h2 className="dv-fr-title">
+                Find the agents your book was <em>written for</em>.
+              </h2>
+              <p className="dv-fr-lead">
+                ScriptAlly scores every agent in its hand-checked catalogue against your manuscript
+                — genre, age category and wish-list overlap — and shows you why each one fits
+                before you query.
+              </p>
+            </div>
+
+            <div className="dv-fr-benefits">
+              <div className="dv-card dv-fr-bcard">
+                <span className="dv-fr-icon"><BookOpen aria-hidden="true" strokeWidth={1.8} /></span>
+                <h3 className="dv-fr-btitle">Matched to your book</h3>
+                <p className="dv-fr-bline">
+                  Suggestions are ranked by real overlap with your genre, age category and themes —
+                  not an alphabetical directory.
+                </p>
+              </div>
+              <div className="dv-card dv-fr-bcard">
+                <span className="dv-fr-icon"><ShieldCheck aria-hidden="true" strokeWidth={1.8} /></span>
+                <h3 className="dv-fr-btitle">Every agent vetted</h3>
+                <p className="dv-fr-bline">
+                  Real agencies, hand-checked and kept current by ScriptAlly — and never one that
+                  charges a reading fee.
+                </p>
+              </div>
+              <div className="dv-card dv-fr-bcard">
+                <span className="dv-fr-icon"><Send aria-hidden="true" strokeWidth={1.8} /></span>
+                <h3 className="dv-fr-btitle">A head start on your query</h3>
+                <p className="dv-fr-bline">
+                  Each match pulls out the wish-list line to lead your letter with — the
+                  personalisation already found for you.
+                </p>
+              </div>
+            </div>
+
+            <div className="dv-fr-strip">
+              {pickable.length === 0 ? (
+                <>
+                  <p className="dv-fr-msg">Add a manuscript to discover agents who fit it.</p>
+                  <button type="button" className="dv-fr-cta" onClick={() => onNavigate?.("manuscripts", "Add a manuscript")}>
+                    <Plus aria-hidden="true" strokeWidth={2.2} /> Add a manuscript
+                  </button>
+                </>
+              ) : pickable.length === 1 ? (
+                <p className="dv-fr-msg">
+                  No matches for <strong>{selected?.title}</strong> yet — we'll surface fits here
+                  as we add agents in {selected?.genre || "your genre"}. Check back soon.
+                </p>
+              ) : (
+                <>
+                  <p className="dv-fr-msg">
+                    No matches for <strong>{selected?.title}</strong> yet — the catalogue's still
+                    growing in {selected?.genre || "your genre"}.
+                  </p>
+                  <div className="flex flex-wrap" style={{ gap: 8 }}>
+                    {pickable.map((m) => {
+                      const isSel = selected?.id === m.id;
+                      return (
+                        <button key={m.id} type="button" className={`dv-mspill${isSel ? " on" : ""}`} onClick={() => setSelectedId(m.id)} aria-pressed={isSel}>
+                          <div style={{ fontFamily: FONT_SERIF, fontSize: 13.5, fontWeight: 600, lineHeight: 1.1 }}>{m.title}</div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <button type="button" className="dv-fr-cta" onClick={tryNextManuscript}>
+                    Try another manuscript
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Example match — what a real suggestion looks like. Illustrative and inert; only
+                real card capabilities shown (fit band, chips, wish-list hook, verified date, the
+                real add/dismiss actions) — nothing fabricated. */}
+            <div className="dv-fr-exwrap">
+              <span className="dv-fr-exflag">Example</span>
+              <div className="dv-card dv-fr-example" aria-label="Example of a match card">
+                <div className="flex items-start justify-between" style={{ gap: 12 }}>
+                  <div className="flex items-center" style={{ gap: 12, minWidth: 0 }}>
+                    <span className="dv-fr-av" aria-hidden="true">EW</span>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontFamily: FONT_SERIF, fontSize: 17, fontWeight: 600, color: "var(--dv-ink)", lineHeight: 1.2 }}>
+                        Eleanor Whitcombe
+                      </div>
+                      <div style={{ ...mono(10), color: "var(--dv-muted)", marginTop: 2 }}>Marsh &amp; Tide Literary</div>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end" style={{ gap: 5, flexShrink: 0 }}>
+                    <span className="dv-band strong" style={{ fontFamily: FONT_MONO }}>{BAND_LABEL.strong}</span>
+                    <span className="dv-fr-vbadge">Verified Jun 2026</span>
+                  </div>
+                </div>
+                <div className="flex flex-wrap" style={{ gap: 6, marginTop: 11 }}>
+                  <span className="dv-chip">Literary Fiction</span>
+                  <span className="dv-chip">Matches your wish list</span>
+                </div>
+                <p style={{ fontFamily: FONT_SERIF, fontSize: 13, color: "var(--dv-ink)", lineHeight: 1.6, margin: "11px 0 0" }}>
+                  "Quiet, voice-led stories about <span className="dv-fr-mark">family</span>,{" "}
+                  <span className="dv-fr-mark">memory</span> and{" "}
+                  <span className="dv-fr-mark">coastal communities</span> — I want prose with real
+                  rhythm."
+                </p>
+                <p style={{ ...mono(9.5), color: "var(--dv-muted)", margin: "10px 0 0" }}>
+                  Open to queries · Replies in ~8 wk
+                </p>
+                <div className="flex" style={{ gap: 9, marginTop: 13 }} aria-hidden="true">
+                  <span className="sa-btn dv-btn" style={{ fontFamily: FONT_SANS }}>
+                    <Plus style={{ width: 14, height: 14 }} strokeWidth={2.4} aria-hidden="true" /> Add to my agents
+                  </span>
+                  <span className="dv-quiet" style={{ fontFamily: FONT_SANS }}>Dismiss</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <>
         <p
           style={{
             fontFamily: FONT_SANS,
@@ -341,41 +479,7 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
           </span>
         </div>
 
-        {pickable.length === 0 ? (
-          /* ── 0 manuscripts → calm empty state (behaviour kept) ── */
-          <div className="dv-card" style={{ padding: "40px 28px", textAlign: "center" }}>
-            <BookOpen
-              aria-hidden="true"
-              style={{ width: 30, height: 30, color: "var(--acc, #7c3a2a)", opacity: 0.55, margin: "0 auto 12px" }}
-              strokeWidth={1.6}
-            />
-            <div style={{ fontFamily: FONT_SERIF, fontSize: 18, fontWeight: 600, color: "var(--dv-ink)" }}>
-              Add a manuscript to discover agents
-            </div>
-            <p
-              style={{
-                fontFamily: FONT_SANS,
-                fontSize: 13,
-                color: "var(--dv-muted)",
-                lineHeight: 1.5,
-                margin: "8px auto 18px",
-                maxWidth: 420,
-              }}
-            >
-              Once you've added a manuscript, ScriptAlly will rank verified agents from the community
-              catalogue whose genre and wish list fit it.
-            </p>
-            <button
-              type="button"
-              className="sa-btn dv-btn"
-              style={{ fontFamily: FONT_SANS }}
-              onClick={() => onNavigate?.("manuscripts", "Add a manuscript")}
-            >
-              Add a manuscript
-            </button>
-          </div>
-        ) : (
-          <>
+        {/* ── Results view — first-run (zero matches / no manuscripts) never reaches here ── */}
             {/* ── Manuscript selector — only when there's a real choice ── */}
             {pickable.length >= 2 && (
               <div style={{ marginBottom: 14 }}>

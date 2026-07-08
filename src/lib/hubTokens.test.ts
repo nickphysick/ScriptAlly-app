@@ -25,14 +25,14 @@ describe("hub tokens — Cappuccino (spec, espresso primaries/monograms/taupe to
       "--hub-desk": "#e8ddd0",
       "--hub-pane-process": "#fffefb",
       "--hub-radius": "6px",
-      "--hub-band-process": "#f6f1e6",
+      "--hub-band-process": "#eaf1e7",
       "--hub-band-reference": "#f6f1e6",
       "--hub-toggle-on": "#705e4c",   // NOT v3 #dcb588
-      "--hub-primary": "#422701",     // NOT v3 #eee0c6
+      "--hub-primary": "#5d4037",     // mocha (theme editor 2026-07-07; was espresso #422701)
       "--hub-primary-tx": "#ffffff",
-      "--hub-monogram": "#422701",    // NOT v3 #705e46
+      "--hub-monogram": "#261603",    // near-espresso (theme editor 2026-07-08; was taupe #ad9f8a)
       "--hub-monogram-tx": "#fdfaf5",
-      "--hub-cmd": "#fffdf9",
+      "--hub-cmd": "#fffefb",
       "--hub-head": "#000000",
     });
   });

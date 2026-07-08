@@ -31,6 +31,11 @@
   --dv-cardshadow: none;
   --dv-trayshadow: 0 10px 28px rgba(40, 28, 20, 0.16);
   --dv-rad: var(--chromerad, 0px);
+  /* Solid/primary CTA pair — MIRRORS the approved --ag-solid values (agentsV2.css "Add agent"
+     solid: mocha/ink/graphite). --ag-* is .agv2-scoped so it can't cascade here; same values,
+     page-scoped, per the --dv-* pattern. Never burgundy. */
+  --dv-solid: #5d4037;
+  --dv-solid-ink: #fdf9f5;
 }
 .t-bold .dv2 {
   --dv-ink: #1d1712;
@@ -39,6 +44,8 @@
   --dv-bandflat: #f4c7c2;
   --dv-neutralfill: #f5efe9;
   --dv-trayshadow: 4px 4px 0 rgba(29, 23, 18, 0.9);
+  --dv-solid: #1d1712;
+  --dv-solid-ink: #fdf9f5;
 }
 .t-edn .dv2 {
   --dv-ink: #1d1712;
@@ -55,6 +62,8 @@
   --dv-monobd: #e3e2e0;
   --dv-cardshadow: 0 1px 2px rgba(20, 20, 20, 0.05), 0 12px 32px rgba(20, 20, 20, 0.07);
   --dv-trayshadow: 0 12px 36px rgba(20, 20, 25, 0.14);
+  --dv-solid: #44484d;
+  --dv-solid-ink: #ffffff;
 }
 
 /* ── Page shell — fills the remaining agents-slot height; the STAGE scrolls (never 100vh) ── */
@@ -356,3 +365,79 @@
     padding: 14px 14px 12px;
   }
 }
+
+/* ── First-run / zero-matches feature sell — renders ONLY when the candidate set is empty.
+      Tokens reused, none invented: --dv-solid (the Agents "Add agent" solid, mirrored above),
+      --hub-row-on (root hub sheet — warm Capp / blush Bold / the REAL Editorial selector pale
+      blue, replacing the mockup's #dce8f5 stand-in) for icon tiles + the marker highlight,
+      --hub-monogram/--hub-monogram-tx for the example avatar, --dv-good* sage for verified/fit.
+      No burgundy italics, no burgundy buttons. ── */
+.dv-fr { display: flex; flex-direction: column; gap: 20px; }
+.dv-fr-eyebrow {
+  display: flex; align-items: center; gap: 9px;
+  font-family: 'JetBrains Mono', monospace; font-size: 9.5px; font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--dv-muted);
+}
+/* The locked Builder/Packages PRO chip, verbatim (slate on ice — same across themes). */
+.dv-pro {
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; font-weight: 700;
+  letter-spacing: 0.1em; color: #6A89A7; background: #e7eef3; border: 1px solid #cfdde6;
+  border-radius: 5px; padding: 2px 6px;
+}
+.dv-fr-title {
+  font-family: 'Playfair Display', serif; font-size: 31px; font-weight: 600;
+  color: var(--dv-ink); line-height: 1.14; margin: 9px 0 0; max-width: 620px;
+}
+.dv-fr-title em { font-style: normal; color: var(--dv-solid, #5d4037); } /* emphasis = solid, never burgundy italic */
+.dv-fr-lead { font-size: 13.5px; color: var(--dv-muted); line-height: 1.55; margin: 9px 0 0; max-width: 560px; }
+.dv-fr-benefits { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+@media (max-width: 860px) { .dv-fr-benefits { grid-template-columns: 1fr; } }
+.dv-fr-bcard { padding: 16px 16px 14px; }
+.dv-fr-icon {
+  width: 34px; height: 34px; border-radius: 9px;
+  background: var(--hub-row-on, #f6efe3);
+  display: flex; align-items: center; justify-content: center; margin-bottom: 10px;
+}
+.dv-fr-icon svg { width: 16px; height: 16px; stroke: var(--dv-solid, #5d4037); }
+.dv-fr-btitle { font-family: 'Playfair Display', serif; font-size: 15.5px; font-weight: 600; color: var(--dv-ink); margin: 0 0 5px; }
+.dv-fr-bline { font-size: 12px; color: var(--dv-muted); line-height: 1.5; margin: 0; }
+.dv-fr-strip {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 14px;
+  padding: 14px 16px; border: 1px dashed var(--dv-line); border-radius: 12px;
+  background: var(--card, #fffefb);
+}
+.dv-fr-msg { font-size: 13px; color: var(--dv-ink); line-height: 1.5; flex: 1 1 280px; margin: 0; }
+.dv-fr-msg strong { font-family: 'Playfair Display', serif; font-weight: 600; }
+.dv-fr-cta {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 12.5px; font-weight: 600; font-family: inherit; cursor: pointer;
+  background: var(--dv-solid, #5d4037); color: var(--dv-solid-ink, #fdf9f5);
+  border: 1px solid var(--dv-solid, #5d4037); border-radius: 11px; padding: 9px 16px;
+}
+.dv-fr-cta:hover { opacity: 0.92; }
+.dv-fr-cta svg { width: 14px; height: 14px; stroke: currentColor; flex: none; }
+/* Example match card — illustrative, inert (the flag says so; pseudo-actions are aria-hidden). */
+.dv-fr-exwrap { position: relative; margin-top: 2px; }
+.dv-fr-exflag {
+  position: absolute; top: -9px; left: 14px; z-index: 1;
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--dv-muted);
+  background: var(--dv-neutralfill, #f3ede4); border: 1px solid var(--dv-line);
+  border-radius: 5px; padding: 2px 8px;
+}
+.dv-fr-example { pointer-events: none; }
+.dv-fr-av {
+  width: 38px; height: 38px; border-radius: 50%; flex: none;
+  background: var(--hub-monogram, #422701); color: var(--hub-monogram-tx, #fdfaf5);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Playfair Display', serif; font-size: 13px; font-weight: 700;
+}
+.dv-fr-vbadge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--dv-good, #6f7f68); background: var(--dv-goodfill, #e9ede3);
+  border: 1px solid var(--dv-goodbd, rgba(111, 127, 104, 0.32));
+  border-radius: 5px; padding: 2px 7px;
+}
+.dv-fr-mark { background: var(--hub-row-on, #f6efe3); border-radius: 3px; padding: 0 3px; }

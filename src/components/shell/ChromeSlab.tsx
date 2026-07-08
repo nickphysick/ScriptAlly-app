@@ -102,7 +102,7 @@ export const ChromeSlab: React.FC<{
       <header className="sa-slab sa-slab-grand" style={shell}>
         {/* Route-scoped crumb BAR — full-width, per-theme tint + hairline lower edge. */}
         {crumbBar && crumbNav && (
-          <div className="sa-crumbbar" style={{ background: "var(--crumb-bar-bg, var(--slab-bg, #fffefb))", borderBottom: "var(--crumb-bar-rule, var(--slab-bdw, 1px) solid var(--slab-bd, #e7ddd2))", padding: "14px 30px" }}>
+          <div className="sa-crumbbar" style={{ background: "var(--crumb-bar-bg, var(--slab-bg, #fffefb))", borderBottom: "var(--crumb-bar-rule, var(--slab-bdw, 1px) solid var(--slab-bd, #e7ddd2))", padding: "14px 30px", ["--crumb-seg" as any]: "var(--crumb-bar-mut, var(--crumb-seg, #9c8878))", ["--crumb-cur" as any]: "var(--crumb-bar-tx, var(--crumb-cur, #7c3a2a))" } as React.CSSProperties}>
             {crumbNav}
           </div>
         )}

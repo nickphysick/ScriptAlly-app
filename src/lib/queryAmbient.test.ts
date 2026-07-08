@@ -76,11 +76,12 @@ describe("commandBarStatus — the bar's centre text", () => {
 describe("Queries.tsx artefacts — one home for actions + regressions", () => {
   const src = readFileSync(resolve(__dirname, "../components/Queries.tsx"), "utf8");
 
-  it("the command bar exists and the old top action toolbar is gone", () => {
-    expect(src.includes("qp-cmdbar")).toBe(true);
-    // The retired toolbar was a bare gridRow-1 flex strip (its comment + span-2 list are gone).
-    // NB: `gridColumn: 2, gridRow: 1` now legitimately belongs to the workspace pane (height-chain
-    // repair), so it is NOT a toolbar tell — use the toolbar's own markers instead.
+  it("the command bar exists (unified full-width bar) and the old top action toolbar is gone", () => {
+    expect(src.includes("qp-controlbar")).toBe(true);
+    // The unified control bar spans BOTH columns at the workspace foot via a two-zone subgrid,
+    // not a pane-only strip. The retired toolbar's own markers must still be absent.
+    expect(src.includes('gridColumn: "1 / -1"')).toBe(true);
+    expect(src.includes('gridTemplateColumns: "subgrid"')).toBe(true);
     expect(src.includes("Actions toolbar")).toBe(false);
     expect(src.includes('gridRow: "1 / span 2"')).toBe(false); // the old list span (2-row grid)
   });
@@ -89,7 +90,7 @@ describe("Queries.tsx artefacts — one home for actions + regressions", () => {
     // exactly one markSentTriggerRef attachment, and it's inside the command-bar IIFE region
     const attaches = src.match(/ref=\{markSentTriggerRef\}/g) ?? [];
     expect(attaches.length).toBe(1);
-    const barIdx = src.indexOf("qp-cmdbar");
+    const barIdx = src.indexOf("qp-controlbar");
     expect(src.indexOf("ref={markSentTriggerRef}")).toBeGreaterThan(barIdx);
   });
 
@@ -109,9 +110,9 @@ describe("command-bar theming — per-theme token smoke (rule-text lock)", () =>
 
   it("Cappuccino: warm bar + centre-fill primary", () => {
     const b = themeBlock(".t-capp");
-    expect(b).toContain("--cmd-bar-bg: #fffdf9");
+    expect(b).toContain("--cmd-bar-bg: #fffefb");
     expect(b).toContain("--cmd-bar-bd: #e7ddd2");
-    expect(b).toContain("--cmd-primary-bg: #f6e4da");
+    expect(b).toContain("--cmd-primary-bg: #5d4037");
     expect(b).toContain("--qp-col-bg: #fffefb");
   });
 
@@ -133,12 +134,13 @@ describe("command-bar theming — per-theme token smoke (rule-text lock)", () =>
 describe("Queries height chain — structural guards (jsdom cannot verify flex/grid sizing)", () => {
   const src = readFileSync(resolve(__dirname, "../components/Queries.tsx"), "utf8");
 
-  it("the desk grid is a SINGLE full-height row (both panes side-by-side, not diagonally stacked)", () => {
-    // Every .queries-content-grid must template one row that fills the grid — the bug was a
-    // MISSING gridTemplateRows, so auto-rows split the two column-placed panes across rows.
+  it("the desk grid fills its first row; the populated grid appends a control-bar row", () => {
+    // Every .queries-content-grid must template its rows explicitly — the bug was a MISSING
+    // gridTemplateRows, so auto-rows split the two column-placed panes across rows. The first
+    // row always fills (minmax(0,1fr)); the populated grid appends `auto` for the control bar.
     const grids = src.match(/className="queries-content-grid" style=\{\{[^}]*\}\}/g) ?? [];
     expect(grids.length).toBeGreaterThanOrEqual(2);
-    for (const g of grids) expect(g).toContain('gridTemplateRows: "minmax(0, 1fr)"');
+    for (const g of grids) expect(g).toContain('gridTemplateRows: "minmax(0, 1fr)');
   });
 
   it("the list and the workspace pane are both in gridRow 1 (tops flush beneath the slab)", () => {
