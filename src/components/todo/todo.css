@@ -341,3 +341,149 @@
     transition: none;
   }
 }
+
+/* ── Ledger: list rows + groups ──────────────────────────────────────────── */
+.todo-seg-n {
+  font-size: 9px;
+  opacity: 0.7;
+  margin-left: 2px;
+}
+.todo-grp {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 9px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  padding: 14px 17px 7px;
+}
+.todo-grp .todo-gl {
+  flex: 1;
+  height: 0.5px;
+  background: var(--hub-hair);
+}
+.todo-lrow {
+  display: flex;
+  gap: 11px;
+  width: 100%;
+  text-align: left;
+  padding: 11px 15px 11px 17px;
+  cursor: pointer;
+  border: none;
+  border-left: 2px solid transparent;
+  background: none;
+  align-items: flex-start;
+}
+.todo-lrow:hover {
+  background: var(--hub-row-on);
+}
+.todo-lrow.sel {
+  background: var(--hub-row-on);
+  border-left-color: var(--hub-accent);
+}
+.todo-lrow-glyph {
+  flex: none;
+  margin-top: 1px;
+}
+.todo-lrow-mid {
+  flex: 1;
+  min-width: 0;
+  display: block;
+}
+.todo-lh {
+  display: block;
+  font-size: 14px;
+  line-height: 1.25;
+  color: var(--hub-head);
+}
+.todo-lh .w {
+  color: var(--hub-accent);
+  font-style: italic;
+}
+.todo-lc {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--hub-label);
+  margin-top: 4px;
+}
+.todo-skipbadge {
+  font-size: 8px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--hub-label);
+  border: 0.5px solid var(--hub-hair);
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-left: 6px;
+  white-space: nowrap;
+}
+
+/* ── Ledger: working pane (document, footer-closed) ──────────────────────── */
+.todo-pane-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+.todo-ptitle {
+  font-size: 24px;
+  line-height: 1.12;
+  color: var(--hub-head);
+  margin-bottom: 6px;
+}
+.todo-ptitle .w {
+  font-style: italic;
+  color: var(--hub-accent);
+}
+.todo-pctx {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--hub-body);
+  margin-top: 4px;
+}
+.todo-pctx b {
+  color: var(--hub-head);
+  font-weight: 500;
+}
+.todo-ptag.hk {
+  background: var(--hub-cell);
+  color: var(--hub-label);
+}
+.todo-cmd {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 15px;
+  border-top: 0.5px solid var(--hub-cmd-rule);
+}
+.todo-cmdbtn {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 10px 16px;
+  border-radius: 9px;
+  cursor: pointer;
+  border: 1px solid;
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+}
+.todo-cmdbtn.p {
+  background: var(--hub-primary);
+  border-color: var(--hub-primary-bd, var(--hub-primary));
+  color: var(--hub-primary-tx);
+}
+.todo-cmdbtn.g {
+  background: var(--hub-btn-bg);
+  border-color: var(--hub-btn-bd);
+  color: var(--hub-item);
+}
+.todo-cmdbtn.g:hover {
+  color: var(--hub-accent);
+}
+.todo-cmdbtn.p:hover {
+  filter: brightness(0.96);
+}
