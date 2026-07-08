@@ -627,3 +627,16 @@ Run: the amendment to the max-width caps — detach the crumb to full-bleed wind
 - Stage overflow 0 (workspace still height-locked); caps + true-centre from the base pack intact.
 
 Suite 742 green (isolated-worktree gate from the snapshot HEAD + only my files). Lock: `crumbStrip.test.ts`. **Reminder for whoever owns the parked WIP:** `06bb6ea` holds your theme-editor + crumb-bar + discover/comps changes — reconcile or `git reset` as needed; the `crumbBar`/`--crumb-bar-*` bits are now superseded by this amendment.
+
+---
+
+## Masthead rollout — the grand masthead is now the universal workspace header (2026-07-08, `b85ba7b`→`7874f56`)
+Resolved the "pending masthead rollout" from the hub-grammar ship. The `ChromeSlab grand` masthead (54px title + mono pulse + CTA-right, with the full-bleed `CrumbStrip` above from the amendment) now covers **all six workspace pages**; only Import keeps the compact slab.
+
+- **Recon:** the masthead was ALREADY shared (ChromeSlab grand + CrumbStrip) — no component extraction needed. Queries used it directly; Agents via the `AgentsTopBar` wrapper; Discover/Manuscripts/Packages already imported ChromeSlab (compact); **Comps used a different `HubHeaderBar`** (migrated). Comps crumb entry already in `topCrumb`. Cap variants already correct (Discover `work`; the three manuscripts pages `read`).
+- **P1 `b85ba7b`** — single-sourced the duplicated `mastCtaStyle` → `MASTHEAD_CTA_STYLE` (exported from ChromeSlab), re-pointed Queries + AgentsTopBar (byte-identical, no visual change; `agentsHub` test updated to check the shared source).
+- **P2 `2da1f64`** — Discover onto grand: pulse `RANKED MATCHES · {n} AGENTS · LAST CHECKED {date}` (`visible.length` + `trust.lastCheckedLabel`, hidden on the first-run sell), no CTA (adds live on cards + batch tray). Explainer / verification banner / readiness line untouched below.
+- **P3 `7874f56`** — the three manuscripts pages: Manuscripts (`{n} MANUSCRIPTS · {m} IN SUBMISSION`, m = `activeQueryCount>0`, Add-manuscript CTA), Comps (MIGRATED HubHeaderBar → ChromeSlab grand; `{genre} · {n} COMPS · {m} IN YOUR QUERY`; manuscript selector in the tools slot; dead `.ct-mast`/`.ct-pulse`/`FONT_SERIF` removed), Packages (grand; keeps "Package Workshop" + Pro pill on the title node; `{n} PACKAGES`; manuscript chip as the tool).
+- **P4** — this report + CLAUDE.md (pending note resolved; per-page config recorded).
+
+Decisions (Nick): Manuscripts `{m}` = active-query count; Discover no masthead CTA; Comps slot = manuscript selector (context switcher), Add-a-comp stays in the panel. No content deleted anywhere. Gates green each commit (tsc + build + 742 tests). Explicit-path staged; **no deploy** (the PaintMode dev tool + untracked assets stayed out of every commit). Eyeball: six pages × three themes — identical masthead scale/card, full-bleed crumb, pulse counts vs reality, no lost content (Discover banner, Packages Pro affordance).
