@@ -310,10 +310,17 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
 
   return (
     <div className="dv2">
-      {/* ── Page header — the unified ChromeSlab, mounted at the CONTENT-COLUMN level (outside
-            the width-constrained .dv-wrap) so it spans rail edge to viewport edge like every
-            other slabbed page. ── */}
-      <ChromeSlab onNavigate={onNavigate} title="Discover new agents" />
+      {/* ── Page header — the unified GRAND ChromeSlab masthead (matches Queries/Agents): 54px
+            title + a mono pulse line; the full-bleed crumb is drawn by CrumbStrip above. No CTA
+            (add actions live on the cards + the batch tray). Pulse hidden on the first-run sell. ── */}
+      <ChromeSlab
+        onNavigate={onNavigate}
+        grand
+        title="Discover new agents"
+        meta={!firstRun
+          ? `Ranked matches · ${visible.length} ${visible.length === 1 ? "agent" : "agents"}${trust.lastCheckedLabel ? ` · Last checked ${trust.lastCheckedLabel}` : ""}`
+          : undefined}
+      />
       <div className="dv-wrap">
         {firstRun ? (
           /* ── First-run / zero-matches feature sell — hero + benefits + adaptive action strip +
