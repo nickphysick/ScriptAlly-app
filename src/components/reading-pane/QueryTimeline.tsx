@@ -162,7 +162,8 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
       {/* ── trailing open-state block — only marginally inset so the pill keeps width on one line ── */}
       {ballHolder === "agent" && waiting && (
         <div style={{ marginLeft: 4, marginTop: 16 }}>
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 9, borderRadius: 999, padding: "8px 15px", fontWeight: 600, fontSize: 13, background: wcol.pillBg, border: `1px solid ${wcol.pillBd}`, color: wcol.pillTx }}>
+          {/* strip-back: plain text, no pill chrome, not bold */}
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 9, fontWeight: 400, fontSize: 13, color: "#3a1c14" }}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M5 22h14M5 2h14M17 22v-4.2a2 2 0 0 0-.6-1.4L12 12l-4.4 4.4a2 2 0 0 0-.6 1.4V22M7 2v4.2a2 2 0 0 0 .6 1.4L12 12l4.4-4.4A2 2 0 0 0 17 6.2V2" /></svg>
             Waiting to hear back
             {waiting.sentMs != null && <span style={{ fontFamily: FONT_MONO, fontWeight: 600, fontSize: 12, color: wcol.dim }}>· {waiting.nDays} days</span>}

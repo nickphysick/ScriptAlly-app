@@ -42,7 +42,6 @@ import { formatListRowDate } from "../lib/listRowDate";
 import { MarkSentPopover } from "./MarkSentPopover";
 import { useFixedMenu } from "./forms/useFixedMenu";
 import { useOpenEditQuery } from "./EditQueryHost";
-import { useOpenEditAgent } from "./EditAgentHost";
 import { QueryTimeline } from "./reading-pane/QueryTimeline";
 import { MountCard } from "./MountCard";
 import { ScriptAllyLogo } from "./ScriptAllyLogo";
@@ -138,7 +137,6 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   } = useScriptAllyDb();
   // Query editing is the app-level Edit Query drawer (the inline isEditMode editor is retired).
   const openEditQuery = useOpenEditQuery();
-  const openEditAgent = useOpenEditAgent();
 
   const [selectedQueryId, setSelectedQueryId] = useState<string | null>(null);
   const [selectedQuery, setSelectedQuery] = useState<any | null>(null);
@@ -2636,23 +2634,15 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   /* column swell on hover */
                   .qp-card{ transition:transform .18s ease, box-shadow .18s ease; }
                   .qp-card:hover{ transform:scale(1.02); box-shadow:0 16px 30px rgba(29,23,18,.24); z-index:2; }
-                  /* empty-state "add" pills — dashed, tappable, open the Edit Agent drawer */
-                  .qaddpill{ display:inline-flex; align-items:center; gap:6px; font-family:'Inter',sans-serif; font-size:12px; font-weight:500; color:#6a5f54; background:#ffffff; border:1.5px dashed #c2b6a6; border-radius:999px; padding:6px 13px; cursor:pointer; transition:color .14s, border-color .14s, background .14s; }
-                  .qaddpill:hover{ color:#3a5066; border-color:#6A89A7; background:#fff; }
-                  .qaddpill svg{ flex-shrink:0; opacity:.85; }
                   @media (prefers-reduced-motion: reduce){ .qp-card:hover{ transform:none; } }
                 `}</style>
-                {/* ── Masthead — a bordered card inset to the columns' width, content centred:
-                    avatar beside name/agency, then email · genres · add-pills. Status chip pinned
-                    top-right inside the box. ── */}
+                {/* ── Hero — a plain bordered card inset to the columns' width, content centred:
+                    avatar beside name / agency / status only (strip-back). ── */}
                 {(() => {
                   const nameplate = agentPrimary(activeAgent);
                   const initials = agentInitials(activeAgent);
-                  const email = activeAgent.email?.trim();
-                  const mswl = activeAgent.mswlNotes?.trim();
-                  const genres = (activeAgent.genres || []).filter(Boolean);
-                  // Status-tint hero: white → a soft tint of the query's status-direction colour, with
-                  // an enlarged StatusDot watermark on the right. Real status announced via the label.
+                  // Strip-back hero: plain card, name / agency / status only. An enlarged StatusDot
+                  // watermark sits low-opacity on the right; the real status is announced via the label.
                   const heroDir = statusDirection(activeQuery.status);
                   const heroStatColour = heroDir === "out" ? "#7c3a2a" : heroDir === "in" ? "#5a6e58" : "#8a7d6c";
                   return (
@@ -2671,47 +2661,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           <div style={{ fontFamily: FONT_MONO, fontSize: 9.5, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase" as const, color: heroStatColour, marginTop: 8 }}>{statusDisplayLabel(activeQuery)}</div>
                         </div>
                       </div>
-                      {/* meta — email / wish list / genres, indented to align under the name (avatar 66 + gap 18) */}
-                      <div style={{ position: "relative", zIndex: 2, marginTop: 12, marginLeft: 84, display: "flex", flexDirection: "column", gap: 8 }}>
-                          {email && (
-                            <div style={{ display: "flex", alignItems: "center", gap: 7, fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 500, color: qdbBoldInk }}>
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" style={{ opacity: .85, flexShrink: 0 }}><rect x="2.5" y="4.5" width="19" height="15" rx="2.5" /><path d="M3 6l9 6.5L21 6" /></svg>
-                              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{email}</span>
-                            </div>
-                          )}
-                          {mswl && (
-                            <div style={{ fontFamily: "'Inter',sans-serif", fontStyle: "italic", fontSize: 12, lineHeight: 1.45, color: "#5a5048", maxWidth: 560 }}>“{mswl}”</div>
-                          )}
-                          {genres.length > 0 && (
-                            <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6 }}>
-                              {genres.map((genre, gIdx) => (
-                                <span key={gIdx} style={{ fontFamily: FONT_MONO, fontSize: 8, letterSpacing: ".12em", textTransform: "uppercase" as const, color: "var(--qp-genre-tx, #5a6e58)", background: "var(--qp-genre-bg, #fdfaf5)", border: "1px solid var(--qp-genre-bd, #cdddc7)", borderRadius: 999, padding: "3px 10px" }}>{genre}</span>
-                              ))}
-                            </div>
-                          )}
-                          {(!email || !mswl || genres.length === 0) && (
-                          <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8 }}>
-                            {!email && (
-                              <span role="button" tabIndex={0} onClick={() => openEditAgent(activeAgent.id)} className="qaddpill">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5" /><path d="M3 6l9 6.5L21 6" /></svg>
-                                Add an email address
-                              </span>
-                            )}
-                            {!mswl && (
-                              <span role="button" tabIndex={0} onClick={() => openEditAgent(activeAgent.id)} className="qaddpill">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
-                                Add their wish list
-                              </span>
-                            )}
-                            {genres.length === 0 && (
-                              <span role="button" tabIndex={0} onClick={() => openEditAgent(activeAgent.id)} className="qaddpill">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
-                                Add the genres they represent
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      </div>{/* meta */}
+                      {/* strip-back: hero shows name / agency / status only — email · wish list · genres
+                          removed, the reclaimed height goes to the three columns below. */}
                       {/* status watermark — enlarged StatusDot, low-opacity, inset right so it isn't
                           clipped; aria-hidden (the real status is announced by the label above). */}
                       <div aria-hidden="true" style={{ position: "absolute", top: "50%", right: 16, transform: "translateY(-50%)", zIndex: 1, opacity: 0.22, pointerEvents: "none", display: "flex" }}>
@@ -2869,7 +2820,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                                 ) : notes.map((entry) => {
                                   const isEditing = editingJournalId === entry.id;
                                   return (
-                                    <div key={entry.id} className="qp-note" style={{ background: "#fffdf9", borderRadius: 11, padding: "11px 13px", marginBottom: 9, boxShadow: "0 1px 2px rgba(58,28,20,.05), 0 4px 12px rgba(58,28,20,.07)" }}>
+                                    <div key={entry.id} className="qp-note" style={{ background: "#ffffff", border: "1px solid var(--bd)", borderRadius: 12, padding: "11px 13px", marginBottom: 9 }}>
                                       {isEditing ? (
                                         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                                           <textarea value={editingJournalText} onChange={(e) => setEditingJournalText(e.target.value)} autoFocus rows={2} style={{ width: "100%", fontFamily: "'Inter',sans-serif", fontSize: 12.5, color: "#3a1c14", border: "1px solid #e6dccd", borderRadius: 7, padding: "6px 8px", outline: "none", resize: "vertical", background: "#fff" }} />
