@@ -64,7 +64,12 @@ describe("Agents grand masthead", () => {
   });
 
   it("the masthead CTA is the hub primary (not the mocha ag-addbtn) when grand", () => {
-    expect(topbar).toContain("var(--hub-primary");
+    // The CTA style is single-sourced as MASTHEAD_CTA_STYLE in ChromeSlab (shared by all six
+    // workspace mastheads); the grand branch spreads it. Verify the reference + the token.
+    expect(topbar).toContain("MASTHEAD_CTA_STYLE");
+    const slab = readFileSync(resolve(__dirname, "../components/shell/ChromeSlab.tsx"), "utf8");
+    expect(slab).toContain("MASTHEAD_CTA_STYLE");
+    expect(slab).toContain("var(--hub-primary");
   });
 });
 

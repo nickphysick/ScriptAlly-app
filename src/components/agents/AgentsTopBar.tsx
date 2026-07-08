@@ -14,8 +14,7 @@
 import React from "react";
 import { Search, Plus } from "lucide-react";
 import { agentsCountLabel, agentsPulse } from "../../lib/agentsPage";
-import { FONT_SERIF } from "../../lib/designTokens";
-import { ChromeSlab } from "../shell/ChromeSlab";
+import { ChromeSlab, MASTHEAD_CTA_STYLE } from "../shell/ChromeSlab";
 
 interface AgentsTopBarProps {
   /** TOTAL agents on file — deliberately independent of the live filters (Nick's call). */
@@ -30,16 +29,6 @@ interface AgentsTopBarProps {
   grand?: boolean;
   idleCount?: number;
 }
-
-// Masthead CTA — the theme's primary button (espresso Capp / pink Bold / grey Editorial via the
-// hub sheet), matching the Queries masthead CTA + the command-bar primary. One grammar.
-const mastCtaStyle: React.CSSProperties = {
-  display: "inline-flex", alignItems: "center", gap: 8, padding: "11px 19px",
-  borderRadius: "var(--hub-btn-rad, 8px)", fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700,
-  whiteSpace: "nowrap", cursor: "pointer", flexShrink: 0,
-  background: "var(--hub-primary, #422701)", color: "var(--hub-primary-tx, #fdfaf5)",
-  border: "1px solid var(--hub-primary-bd, transparent)",
-};
 
 export const AgentsTopBar: React.FC<AgentsTopBarProps> = ({ count, search, onSearch, onAddAgent, searchRef, grand, idleCount = 0 }) => (
   <ChromeSlab
@@ -66,7 +55,7 @@ export const AgentsTopBar: React.FC<AgentsTopBarProps> = ({ count, search, onSea
           <span className="ag-kbd" aria-hidden="true">⌘K</span>
         </div>
         {grand ? (
-          <button type="button" onClick={onAddAgent} style={mastCtaStyle}>
+          <button type="button" onClick={onAddAgent} style={MASTHEAD_CTA_STYLE}>
             <Plus aria-hidden="true" style={{ width: 15, height: 15 }} />
             Add agent
           </button>

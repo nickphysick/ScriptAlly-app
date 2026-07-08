@@ -14,6 +14,20 @@
 import React from "react";
 import { FONT_SERIF, FONT_MONO } from "../../lib/designTokens";
 
+/**
+ * Shared masthead CTA style — the theme's primary button (espresso Capp / pink Bold / grey
+ * Editorial via the hub sheet). ONE definition, consumed by every workspace masthead's CTA
+ * (Queries, Agents, Manuscripts, …) so all six pages read as one grammar. Pages keep their own
+ * label / icon / onClick and just spread this onto the button.
+ */
+export const MASTHEAD_CTA_STYLE: React.CSSProperties = {
+  display: "inline-flex", alignItems: "center", gap: 8, padding: "11px 19px",
+  borderRadius: "var(--hub-btn-rad, 8px)", fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700,
+  whiteSpace: "nowrap", cursor: "pointer", flexShrink: 0,
+  background: "var(--hub-primary, #422701)", color: "var(--hub-primary-tx, #fdfaf5)",
+  border: "1px solid var(--hub-primary-bd, transparent)",
+};
+
 export const ChromeSlab: React.FC<{
   /** Retained for API compatibility with the mounts; the crumb is now CrumbStrip's job. */
   onNavigate?: (tab: string, subPageName?: string) => void;

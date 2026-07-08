@@ -28,7 +28,7 @@ import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { QueryStatus, Agent, Manuscript, Query, SubmissionMethod, ActivityType, QueryMaterial, UserPlan } from "../types";
 import { StatusPill, getStatusLabel } from "./StatusPill";
 import { StatusDot, statusDirection } from "./StatusDot";
-import { ChromeSlab } from "./shell/ChromeSlab";
+import { ChromeSlab, MASTHEAD_CTA_STYLE } from "./shell/ChromeSlab";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
 import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse } from "../lib/queryAmbient";
 import { EdgeFadeScroll } from "./EdgeFadeScroll";
@@ -750,13 +750,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   // Masthead CTA — the theme's primary button (espresso Capp / pink Bold / grey Editorial via
   // the hub sheet), replacing the old hardcoded-pink raised pill so it reads as ONE grammar
   // with the command-bar primary.
-  const mastCtaStyle: React.CSSProperties = {
-    display: "inline-flex", alignItems: "center", gap: 8, padding: "11px 19px",
-    borderRadius: "var(--hub-btn-rad, 8px)", fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 700,
-    whiteSpace: "nowrap", cursor: "pointer", flexShrink: 0,
-    background: "var(--hub-primary, #422701)", color: "var(--hub-primary-tx, #fdfaf5)",
-    border: "1px solid var(--hub-primary-bd, transparent)",
-  };
+  const mastCtaStyle = MASTHEAD_CTA_STYLE; // shared, single-sourced from ChromeSlab
 
   // Synchronise Agent Notes values when activeAgent changes
   useEffect(() => {
