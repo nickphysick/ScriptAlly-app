@@ -1,115 +1,50 @@
 /**
- * ChromeSlab — the unified workspace header surface (design ref:
- * design-refs/header-ground-fullpage-v1.html, OPTION A "card slab"; Option B in the same file
- * is the rejected alternative). One card-coloured slab carrying the crumb strip (row 1 —
- * absorbing TopCrumbStrip's behaviour; the crumb table stays topCrumb.ts, unchanged) and the
- * page header row (row 2: Playfair title + mono meta left, the page's REAL tools right).
- * Section eyebrows and framed title cards are superseded — the crumb does that job now.
+ * ChromeSlab — the workspace masthead, now a FLOATING CARD (ref crumb-fullwidth-v1.html,
+ * variant A). The crumb detached: it is drawn full-bleed by CrumbStrip (StagePage), OUTSIDE the
+ * max-width cap, as window chrome. This component is just the masthead — title + mono meta left,
+ * the page's REAL tools right — as a bordered, rounded card in each theme's card treatment
+ * (`--bd`/`--bdw` + `--hub-radius` + `--mast-sh`: Capp soft · Bold ink + hard shadow · Editorial
+ * hairline + soft shadow). `grand` keeps the 54px hub masthead; compact is the 25px default.
  *
- * Mounted by each workspace page (the dashboard stays exempt — its floating top bar owns that
- * band). Pages inside padded desks bleed to full width via the `style` escape (negative
- * margins) rather than editing their page-scoped CSS. Themed by the additive --slab tokens;
- * Editorial adds a slab shadow (its desk is near-white, so the shadow does the separating).
+ * Mounted inside the capped `.sa-content-col`; it no longer bleeds (the card is inset with the
+ * page's own edge padding, sharing left/right edges with the stage below). The dashboard is
+ * exempt (its floating top bar owns that band).
  */
 
 import React from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import { FONT_SERIF, FONT_MONO } from "../../lib/designTokens";
-import { crumbForPath } from "./topCrumb";
-
-/** Crumb targets are all plain routes (never interceptions), so a direct-router fallback is
- *  behaviourally safe where a page has no bridge handy. NOTE the one divergence: the bridge
- *  also clears the global searchQuery on navigation — the fallback doesn't (flagged in the
- *  run report; wire `onNavigate` where the page already holds the bridge). */
-const CRUMB_PATHS: Record<string, string> = {
-  dashboard: "/dashboard",
-  queries: "/queries",
-  agents: "/agents",
-  manuscripts: "/manuscripts",
-};
 
 export const ChromeSlab: React.FC<{
+  /** Retained for API compatibility with the mounts; the crumb is now CrumbStrip's job. */
   onNavigate?: (tab: string, subPageName?: string) => void;
   title: React.ReactNode;
   meta?: React.ReactNode;
   tools?: React.ReactNode;
-  /** GRAND MASTHEAD (hub-only, ref grand-masthead-fullpage-v1.html): crumb + 54px Playfair
-   *  title (--hub-head ink) + mono pulse-line meta stacked in one padded block, CTA bottom-
-   *  right baseline-aligned. Compact (default) keeps the 25px two-row slab for the other pages. */
+  /** GRAND MASTHEAD (hub-only): 54px Playfair title (--hub-head ink) + mono pulse-line meta,
+   *  CTA bottom-right baseline-aligned. Compact (default) is the 25px two-row header. */
   grand?: boolean;
-  /** Route-scoped (Queries passes it): render the crumb as a full-width tinted bar with a hairline
-   *  lower edge (per-theme `--crumb-bar-*` tokens), instead of inline above the title. Additive —
-   *  other pages omit it and keep the inline crumb. */
-  crumbBar?: boolean;
-  /** Outer style escape — e.g. negative margins to bleed out of a padded page desk. */
+  /** Outer style escape (merged last). Mounts no longer pass a negative-margin bleed. */
   style?: React.CSSProperties;
-}> = ({ onNavigate, title, meta, tools, grand, crumbBar, style }) => {
-  const segments = crumbForPath(useLocation().pathname);
-  const navigate = useNavigate();
-  const go = (tab: string, sub?: string) => {
-    if (onNavigate) onNavigate(tab, sub);
-    else navigate(CRUMB_PATHS[tab] ?? "/dashboard");
-  };
-
-  const crumbNav = segments && (
-    <nav
-      aria-label="Breadcrumb"
-      style={{
-        display: "inline-flex", alignItems: "center",
-        fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.16em",
-        textTransform: "uppercase", whiteSpace: "nowrap",
-      }}
-    >
-      {segments.map((seg, i) => {
-        const last = i === segments.length - 1;
-        return (
-          <React.Fragment key={seg.label}>
-            {i > 0 && <span aria-hidden="true" style={{ margin: "0 8px", color: "var(--crumb-sep, #c9bba9)" }}>/</span>}
-            {last ? (
-              <b aria-current="page" style={{ color: "var(--crumb-cur, #7c3a2a)", fontWeight: 700 }}>{seg.label}</b>
-            ) : (
-              <button
-                type="button"
-                onClick={() => go(seg.tab!, seg.sub)}
-                style={{
-                  background: "none", border: "none", padding: 0, cursor: "pointer",
-                  font: "inherit", letterSpacing: "inherit", textTransform: "inherit",
-                  color: "var(--crumb-seg, #9c8878)", transition: "color 0.13s",
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = "var(--crumb-seg-hov, #5d4037)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = "var(--crumb-seg, #9c8878)"; }}
-              >
-                {seg.label}
-              </button>
-            )}
-          </React.Fragment>
-        );
-      })}
-    </nav>
-  );
-
+}> = ({ title, meta, tools, grand, style }) => {
+  // Floating card — theme card treatment, a 14px desk gap below (to the filter bar / stage). The
+  // desk gap ABOVE comes from the page's own top padding (the crumb sits above that, in StagePage).
   const shell: React.CSSProperties = {
     flexShrink: 0,
     background: "var(--slab-bg, #fffefb)",
-    borderBottom: "var(--slab-bdw, 1px) solid var(--slab-bd, #e7ddd2)",
-    boxShadow: "var(--slab-shadow, none)",
+    border: "var(--bdw, 1px) solid var(--bd, #d8cebf)",
+    borderRadius: "var(--hub-radius, 12px)",
+    boxShadow: "var(--mast-sh, 0 1px 3px rgba(58,28,20,0.05))",
+    marginBottom: 14,
     ...style,
   };
 
-  // ── GRAND MASTHEAD ── crumb / big title / pulse-line meta stacked; CTA bottom-right.
+  // ── GRAND MASTHEAD ── big title + pulse-line meta left; CTA bottom-right.
   if (grand) {
     return (
-      <header className="sa-slab sa-slab-grand" style={shell}>
-        {/* Route-scoped crumb BAR — full-width, per-theme tint + hairline lower edge. */}
-        {crumbBar && crumbNav && (
-          <div className="sa-crumbbar" style={{ background: "var(--crumb-bar-bg, var(--slab-bg, #fffefb))", borderBottom: "var(--crumb-bar-rule, var(--slab-bdw, 1px) solid var(--slab-bd, #e7ddd2))", padding: "14px 30px", ["--crumb-seg" as any]: "var(--crumb-bar-mut, var(--crumb-seg, #9c8878))", ["--crumb-cur" as any]: "var(--crumb-bar-tx, var(--crumb-cur, #7c3a2a))" } as React.CSSProperties}>
-            {crumbNav}
-          </div>
-        )}
-        <div style={{ display: "flex", alignItems: "flex-end", gap: 20, padding: crumbBar ? "20px 30px 20px" : "var(--hub-mast-pad, 22px 30px 20px)", flexWrap: "nowrap" }}>
+      <header className="sa-slab sa-slab-grand sa-mast-card" style={shell}>
+        <div style={{ display: "flex", alignItems: "flex-end", gap: 20, padding: "var(--hub-mast-pad, 22px 30px 20px)", flexWrap: "nowrap" }}>
           <div style={{ minWidth: 0, flex: "1 1 auto" }}>
-            {!crumbBar && crumbNav}
-            <div style={{ fontFamily: FONT_SERIF, fontSize: "var(--hub-mast-title, 54px)", fontWeight: 500, color: "var(--hub-head, #000)", lineHeight: 1.0, letterSpacing: "-0.5px", marginTop: crumbBar ? 0 : 10, whiteSpace: "nowrap" }}>
+            <div style={{ fontFamily: FONT_SERIF, fontSize: "var(--hub-mast-title, 54px)", fontWeight: 500, color: "var(--hub-head, #000)", lineHeight: 1.0, letterSpacing: "-0.5px", whiteSpace: "nowrap" }}>
               {title}
             </div>
             {meta && (
@@ -128,19 +63,13 @@ export const ChromeSlab: React.FC<{
     );
   }
 
-  // ── COMPACT SLAB (default, every non-hub page) ──
+  // ── COMPACT MASTHEAD (default, every non-hub page) ──
   return (
-    <header className="sa-slab" style={shell}>
-      {crumbNav && (
-        <div style={{ display: "flex", alignItems: "center", minHeight: 34, padding: "6px 18px" }}>
-          {crumbNav}
-        </div>
-      )}
-
+    <header className="sa-slab sa-mast-card" style={shell}>
       {/* Header row — tools NEVER wrap: buttons are nowrap/flex-none (page-side), the search
           pill is the flexible element (floor 160px, page-side), and below that the META line
           truncates with an ellipsis before any button wraps. */}
-      <div style={{ display: "flex", alignItems: "flex-end", gap: 14, padding: "6px 18px 12px", flexWrap: "nowrap" }}>
+      <div style={{ display: "flex", alignItems: "flex-end", gap: 14, padding: "12px 18px", flexWrap: "nowrap" }}>
         <div style={{ minWidth: 0, flex: "1 1 auto" }}>
           <div style={{ fontFamily: FONT_SERIF, fontSize: 25, fontWeight: 500, color: "var(--slab-ttl, #5d4037)", lineHeight: 1.05, whiteSpace: "nowrap" }}>
             {title}

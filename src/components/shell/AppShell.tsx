@@ -46,6 +46,7 @@ import { BottomTabBar } from "../BottomTabBar";
 import { RAIL_GROUPS, RAIL_CAPTURES, railActiveKey, invokeCapture } from "./railNav";
 import { railMode, scrimVisible, railFlowWidth, railPanelWidth, readRailPinned, writeRailPinned, makePeekIntent } from "./railPeek";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
+import { CrumbStrip } from "./CrumbStrip";
 import "./contentColumn.css";
 
 // Grouped-index data lives in railNav.ts (pure, tested); icons stay here (React-free model).
@@ -651,12 +652,19 @@ export const StagePage: React.FC<{
     const id = window.setTimeout(() => setEntering(false), 250);
     return () => window.clearTimeout(id);
   }, [entering]);
-  // Ultrawide cap: paint the theme desk on the full-width slot, centre the page in a capped
-  // column. --fill passes height:100% through for viewport-locked (fill/fillColumn) pages.
+  // Ultrawide cap + full-bleed crumb (ref crumb-fullwidth-v1.html, variant A): the theme desk
+  // fills the slot; the crumb strip spans it edge-to-edge (window chrome, OUTSIDE the cap); the
+  // page centres in the capped column below. --fill passes height:100% through for viewport-
+  // locked (fill/fillColumn) pages. A crumbed contentVariant slot is a flex column so the crumb
+  // is flex:none above the flex:1 capped column; flow slots stack as blocks (content-height).
+  const isFillCol = layout === "fillColumn" || (contentVariant && layout === "fill");
   const body = contentVariant ? (
-    <div className={`sa-content-col sa-content-col--${contentVariant}${layout !== "flow" ? " sa-content-col--fill" : ""}`}>
-      {children}
-    </div>
+    <>
+      <CrumbStrip />
+      <div className={`sa-content-col sa-content-col--${contentVariant}${layout !== "flow" ? " sa-content-col--fill" : ""}`}>
+        {children}
+      </div>
+    </>
   ) : (
     children
   );
@@ -665,9 +673,9 @@ export const StagePage: React.FC<{
       className={active && entering ? "stage-page-on" : undefined}
       onAnimationEnd={(e) => { if (e.animationName === "pageIn") setEntering(false); }}
       style={{
-        display: active ? (layout === "fillColumn" ? "flex" : "block") : "none",
+        display: active ? (isFillCol ? "flex" : "block") : "none",
         ...(layout !== "flow" ? { height: "100%" } : {}),
-        ...(layout === "fillColumn" ? { flexDirection: "column" as const } : {}),
+        ...(isFillCol ? { flexDirection: "column" as const } : {}),
         ...(clip ? { overflow: "hidden" } : {}),
         // contentVariant → the desk fills the margins; else the page's own background prop.
         ...(contentVariant ? { background: "var(--desk)" } : background ? { background } : {}),

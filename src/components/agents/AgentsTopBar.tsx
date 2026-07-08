@@ -46,7 +46,6 @@ export const AgentsTopBar: React.FC<AgentsTopBarProps> = ({ count, search, onSea
     grand={grand}
     title="Agents"
     meta={grand ? agentsPulse(count, idleCount) : agentsCountLabel(count)}
-    style={{ margin: "-14px -22px 14px" }}
     tools={
       <>
         {/* Search stays in the masthead tools (the ref relocates it into the list — a follow-up;

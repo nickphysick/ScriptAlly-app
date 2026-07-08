@@ -137,6 +137,8 @@
   --slab-bg: #fffefb;
   --slab-bd: #e7ddd2;
   --slab-bdw: 1px;
+  --mast-sh: 0 1px 3px rgba(58, 28, 20, 0.06);   /* floating masthead card — soft (crumb-fullwidth A) */
+  /* --crumb-bar-* now INERT: the crumb detached to the full-bleed CrumbStrip (crumb-fullwidth A). */
   --crumb-bar-bg: #ddc0b6;                    /* Queries crumb bar — clay (theme editor 2026-07-08; was #d0917c) */
   --crumb-bar-tx: #422701;                    /* crumb active segment on the bar */
   --crumb-bar-mut: #5d4037;                   /* crumb label on the bar */
@@ -285,6 +287,7 @@
   --slab-bg: #fffefb;
   --slab-bd: #1d1712;
   --slab-bdw: 1.5px;
+  --mast-sh: 4px 4px 0 #1d1712;               /* floating masthead card — Bold hard shadow */
   --crumb-bar-bg: #f6e9e4;                    /* Queries crumb bar — light blush (mockup .t-bold) */
   --crumb-bar-rule: var(--bdw) solid var(--bd);
   /* Phase 3 — neutral (no sage in Bold) */
@@ -438,6 +441,7 @@
   --slab-bg: #ffffff;
   --slab-bd: #ececeb;
   --slab-bdw: 1px;
+  --mast-sh: 0 8px 24px rgba(20, 20, 25, 0.07);  /* floating masthead card — Editorial soft */
   --crumb-bar-bg: #000000;                    /* Queries crumb bar — black (theme editor 2026-07-08) */
   --crumb-bar-rule: 3px double var(--bd);     /* Editorial keeps the newspaper double-rule */
   /* Phase 3 — neutral (no sage in Editorial) */

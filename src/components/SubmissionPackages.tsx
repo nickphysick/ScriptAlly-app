@@ -139,7 +139,6 @@ export const SubmissionPackages: React.FC = () => {
           </span>
         }
         tools={activeMs ? msSelector : undefined}
-        style={{ margin: "-16px -16px 0" }}
       />
 
       {!activeMs ? (

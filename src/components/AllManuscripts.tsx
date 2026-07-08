@@ -174,7 +174,6 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
         onNavigate={onNavigate}
         title="Your manuscripts"
         meta={manuscripts.length === 1 ? "1 MANUSCRIPT" : `${manuscripts.length} MANUSCRIPTS`}
-        style={{ margin: "-18px -26px 18px" }}
         tools={
           <button
             type="button"

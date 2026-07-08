@@ -2148,10 +2148,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           <ChromeSlab
             onNavigate={onNavigate}
             grand
-            crumbBar
             title="Queries Hub"
             meta={hubPulse}
-            style={{ margin: "-22px -28px 14px" }}
             tools={
               <button type="button" onClick={() => onNavigate?.("queries", "Log a query")} style={mastCtaStyle}>
                 <Plus style={{ width: 15, height: 15 }} />
@@ -2248,10 +2246,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         <ChromeSlab
           onNavigate={onNavigate}
           grand
-          crumbBar
           title="Queries Hub"
           meta={hubPulse}
-          style={{ margin: "-22px -28px 14px" }}
           tools={
             <button
               type="button"
