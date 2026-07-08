@@ -42,6 +42,10 @@
 .wl-cf-splist {
   height: 158px; overflow-y: auto; scrollbar-width: none;
   display: flex; flex-direction: column; justify-content: center;
+  /* Pad to the row status-dots' pulse-ring extent so overflow doesn't slice the ring (most
+     visible on the left, where the dots sit against the edge). The list card's side padding is
+     reduced to compensate so the rows don't shift too far in. */
+  padding: 9px 14px;
 }
 .wl-cf-splist::-webkit-scrollbar { display: none; }
 /* rows are spaced by padding only — no separator lines */

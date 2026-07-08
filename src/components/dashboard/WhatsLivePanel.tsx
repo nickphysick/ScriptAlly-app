@@ -344,7 +344,7 @@ export const WhatsLivePanel: React.FC<WhatsLivePanelProps> = ({ queries, agents,
               </div>
             </div>
             {/* list in its own inner card — reuse the day-card token (var --dc-body / --dc-card-*) */}
-            <div className="wl-cf-listcard" style={{ marginTop: 16, background: "var(--dc-body)", border: "var(--dc-card-bd)", borderRadius: "var(--dc-card-rad)", padding: "12px 16px" }}>
+            <div className="wl-cf-listcard" style={{ marginTop: 16, background: "var(--dc-body)", border: "var(--dc-card-bd)", borderRadius: "var(--dc-card-rad)", padding: "12px 2px" }}>
               <div className="wl-cf-spot" style={{ opacity: swapping ? 0 : 1, transition: "opacity 0.55s ease" }}>
                 {renderList(stages[listStage] ?? stages[firstPop])}
               </div>
