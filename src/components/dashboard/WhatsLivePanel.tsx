@@ -28,6 +28,7 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "re
 import { Query, Agent, Manuscript, QueryStatus } from "../../types";
 import { StatusDot } from "../StatusDot";
 import { burgundy, headingInk, mutedInk, labelColor, FONT_SERIF, FONT_SANS, FONT_MONO, buttonPinkBg, buttonPinkBorder } from "../../lib/designTokens";
+import "./diaryCarousel.css"; // reuse the shared card tokens/treatment (.dc / .dc-panel, --dc-*)
 import "./whatsLive.css";
 
 interface StageDef {
@@ -47,10 +48,7 @@ const STAGES: StageDef[] = [
 ];
 const RL = STAGES.length; // 6
 const TILE_W = 190;
-const REST_MS = 4600;
-
-const HAIR = "#e0d5c5";
-const GROUND = "#F5F0EA"; // the dashboard ground (badge border cuts the badge from it)
+const REST_MS = 5000; // dwell on each populated stage
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const coerceMs = (v: any): number | null => {
@@ -86,7 +84,7 @@ interface Row { id: string; status: QueryStatus; name: string; agency: string; m
 interface StageData extends StageDef { rows: Row[]; count: number; }
 
 const rightBillboard = (
-  <div style={{ position: "relative", display: "flex", flexDirection: "column", justifyContent: "center", gap: 14, padding: "8px 0 8px 38px", borderLeft: `1px solid ${HAIR}` }}>
+  <div style={{ position: "relative", display: "flex", flexDirection: "column", justifyContent: "center", gap: 14, padding: "8px 0" }}>
     <div style={{ fontFamily: FONT_SERIF, fontSize: 33, fontWeight: 500, color: headingInk, lineHeight: 1.08 }}>What&rsquo;s live right now?</div>
     <div style={{ fontFamily: FONT_SANS, fontSize: 13.5, lineHeight: 1.55, color: mutedInk, maxWidth: "34ch" }}>
       Maintaining a healthy pipeline is key. Here&rsquo;s a snapshot of all your in-flight queries.
@@ -181,7 +179,7 @@ export const WhatsLivePanel: React.FC<WhatsLivePanelProps> = ({ queries, agents,
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const centre = (anim: boolean, dur: number) => {
-      track.style.transition = anim ? `transform ${dur}s cubic-bezier(.4,.05,.25,1)` : "none";
+      track.style.transition = anim ? `transform ${dur}s cubic-bezier(.4,0,.2,1)` : "none";
       const vp = carwin.clientWidth;
       track.style.transform = `translateX(${vp / 2 - (focusRef.current * TILE_W + TILE_W / 2)}px)`;
       tiles.forEach((t, ti) => {
@@ -192,7 +190,7 @@ export const WhatsLivePanel: React.FC<WhatsLivePanelProps> = ({ queries, agents,
       });
     };
     const nextPop = (from: number) => { let j = from + 1; while (j < tiles.length) { if (popSet.has(j % RL)) return j; j++; } return from; };
-    const durFor = (dist: number) => Math.min(1.9, 0.6 + 0.75 * (dist - 1));
+    const durFor = (dist: number) => Math.min(2.7, 1.15 + 0.85 * (dist - 1)); // slower single step; scales across empties
     const setListFocus = (stageIdx: number) => {
       setSwapping(true);
       clearTimeout(swapTimerRef.current);
@@ -237,7 +235,7 @@ export const WhatsLivePanel: React.FC<WhatsLivePanelProps> = ({ queries, agents,
       if (!pausedRef.current && el) {
         const max = el.scrollHeight - el.clientHeight;
         if (max > 2) {
-          if (accRef.current < max) { accRef.current += 0.26; el.scrollTop = accRef.current; }
+          if (accRef.current < max) { accRef.current += 0.22; el.scrollTop = accRef.current; }
           else { holdRef.current++; if (holdRef.current > 150) { accRef.current = 0; holdRef.current = 0; el.scrollTop = 0; } }
         }
       }
@@ -260,7 +258,7 @@ export const WhatsLivePanel: React.FC<WhatsLivePanelProps> = ({ queries, agents,
   // ── render ──────────────────────────────────────────────────────────────────
   const badgeBase: React.CSSProperties = {
     position: "absolute", top: -6, right: -9, minWidth: 18, height: 18, padding: "0 4px", borderRadius: 9,
-    border: `1.5px solid ${GROUND}`, fontFamily: FONT_MONO, fontSize: 9, display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 1,
+    border: "1.5px solid var(--dc-panel-bg)", fontFamily: FONT_MONO, fontSize: 9, display: "flex", alignItems: "center", justifyContent: "center", lineHeight: 1,
   };
 
   const renderList = (s: StageData) => {
@@ -295,9 +293,11 @@ export const WhatsLivePanel: React.FC<WhatsLivePanelProps> = ({ queries, agents,
   const tilesData = [...stages, ...stages]; // duplicated for the seamless loop
 
   return (
-    <div className="wl-cf" style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 0, width: "100%" }}>
+    <div style={{ margin: "36px 0" }}>
+    <div className="dc dc-panel">
+    <div className="wl-cf" style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 40, width: "100%", alignItems: "center" }}>
       {/* Left 2fr */}
-      <div style={{ minWidth: 0, paddingRight: 34 }}>
+      <div style={{ minWidth: 0 }}>
         {isEmpty ? (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16, minHeight: 282, textAlign: "center" }}>
             <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
@@ -332,8 +332,11 @@ export const WhatsLivePanel: React.FC<WhatsLivePanelProps> = ({ queries, agents,
                 })}
               </div>
             </div>
-            <div className="wl-cf-spot" style={{ marginTop: 6, opacity: swapping ? 0 : 1, transform: swapping ? "translateY(-10px)" : "none", transition: "opacity 0.25s ease, transform 0.25s ease" }}>
-              {renderList(stages[listStage] ?? stages[firstPop])}
+            {/* list in its own inner card — reuse the day-card token (var --dc-body / --dc-card-*) */}
+            <div className="wl-cf-listcard" style={{ marginTop: 16, background: "var(--dc-body)", border: "var(--dc-card-bd)", borderRadius: "var(--dc-card-rad)", padding: "12px 16px" }}>
+              <div className="wl-cf-spot" style={{ opacity: swapping ? 0 : 1, transform: swapping ? "translateY(-10px)" : "none", transition: "opacity 0.25s ease, transform 0.25s ease" }}>
+                {renderList(stages[listStage] ?? stages[firstPop])}
+              </div>
             </div>
           </>
         )}
@@ -341,6 +344,8 @@ export const WhatsLivePanel: React.FC<WhatsLivePanelProps> = ({ queries, agents,
 
       {/* Right 1fr billboard */}
       {rightBillboard}
+    </div>
+    </div>
     </div>
   );
 };
