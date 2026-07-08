@@ -2757,9 +2757,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   {/* ── Sub-card 1: Tracking ── */}
                   <div className="qp-card" style={{ minWidth: 0, background: "var(--hub-col)", border: "var(--hub-pane-bd)", borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 0, boxShadow: "0 2px 7px rgba(29,23,18,.07)" }}>
                       {/* pink header band */}
-                      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "var(--hub-band-process)", borderBottom: "1px solid var(--hub-band-process-bd)", flexShrink: 0 }}>
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={qdbBoldInk2} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M3 12h4l3 8 4-16 3 8h4" /></svg>
-                        <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 800, color: qdbBoldInk2 }}>Tracking</span>
+                      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "var(--qh-colhead-bg, var(--hub-band-process))", borderBottom: "var(--qh-colhead-rule, 1px solid var(--hub-band-process-bd))", flexShrink: 0 }}>
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, stroke: "var(--qh-colhead-tx, #2c2017)" }}><path d="M3 12h4l3 8 4-16 3 8h4" /></svg>
+                        <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 800, color: "var(--qh-colhead-tx, #2c2017)" }}>Tracking</span>
                       </div>
                       <EdgeFadeScroll outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ padding: "16px 16px 18px" }} fade="var(--hub-col, #fffefb)">
                         {(() => {
@@ -2781,9 +2781,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   {/* ── Sub-card 2: What you sent ── */}
                   <div className="qp-card" style={{ minWidth: 0, background: "var(--hub-col)", border: "var(--hub-pane-bd)", borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 0, boxShadow: "0 2px 7px rgba(29,23,18,.07)" }}>
                       {/* pink header band */}
-                      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "var(--hub-band-process)", borderBottom: "1px solid var(--hub-band-process-bd)", flexShrink: 0 }}>
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={qdbBoldInk2} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>
-                        <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 800, color: qdbBoldInk2 }}>What you sent</span>
+                      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "var(--qh-colhead-bg, var(--hub-band-process))", borderBottom: "var(--qh-colhead-rule, 1px solid var(--hub-band-process-bd))", flexShrink: 0 }}>
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, stroke: "var(--qh-colhead-tx, #2c2017)" }}><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>
+                        <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 800, color: "var(--qh-colhead-tx, #2c2017)" }}>What you sent</span>
                       </div>
                       {/* spec sheet */}
                       <EdgeFadeScroll outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ padding: "16px 16px 18px" }} fade="var(--hub-col, #fffefb)">
@@ -2874,9 +2874,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   {/* ── Sub-card 3: Notes — journal pins to bottom via flex-1 on messages area ── */}
                   <div className="qp-card" style={{ minWidth: 0, background: "var(--hub-col)", border: "var(--hub-pane-bd)", borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 0, boxShadow: "0 2px 7px rgba(29,23,18,.07)" }}>
                       {/* pink header band */}
-                      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "var(--hub-band-process)", borderBottom: "1px solid var(--hub-band-process-bd)", flexShrink: 0 }}>
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={qdbBoldInk2} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H19v15H6a2 2 0 0 0-2 2z" /><path d="M4 19.5A1.5 1.5 0 0 1 5.5 18H19" /></svg>
-                        <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 800, color: qdbBoldInk2 }}>Journal</span>
+                      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "var(--qh-colhead-bg, var(--hub-band-process))", borderBottom: "var(--qh-colhead-rule, 1px solid var(--hub-band-process-bd))", flexShrink: 0 }}>
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, stroke: "var(--qh-colhead-tx, #2c2017)" }}><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H19v15H6a2 2 0 0 0-2 2z" /><path d="M4 19.5A1.5 1.5 0 0 1 5.5 18H19" /></svg>
+                        <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 800, color: "var(--qh-colhead-tx, #2c2017)" }}>Journal</span>
                       </div>
                       {/* notes body — list (scrolls) + bottom-pinned composer */}
                       <div style={{ padding: "16px 16px 18px", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>

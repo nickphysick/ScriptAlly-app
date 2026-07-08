@@ -192,6 +192,13 @@
   --hub-band-process: #eaf1e7;   /* column header band — sage (theme editor 2026-07-08; was #f6f1e6) */
   --hub-band-process-bd: rgba(107, 74, 47, 0.22);
   --hub-band-process-tx: #5d4037;
+  /* Reading-pane column headers (Tracking / What you sent / Journal) — dedicated tokens, decoupled
+     from the crumb; espresso fill + cream text + no bottom rule. Read directly on the header element
+     (literals here, not a :root var(--acc) alias — so no freeze; Bold/Editorial fall back to the
+     --hub-band-process band via the inline fallback). --acc is the same espresso #422701. */
+  --qh-colhead-bg: #422701;
+  --qh-colhead-tx: #f2e8d8;
+  --qh-colhead-rule: none;
   --hub-band-reference: #f6f1e6;
   --hub-band-reference-tx: #5d4037;
   --hub-toggle-on: #705e4c;      /* SPEC (v3 caramel #dcb588 superseded) */
