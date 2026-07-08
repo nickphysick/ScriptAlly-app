@@ -2288,9 +2288,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
           return (
             <div className="qp-filterbar" style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", flexShrink: 0, marginBottom: 12 }}>
-              {/* Action outstanding */}
-              <span style={fkey}>Action outstanding</span>
+              {/* Action outstanding — the label sits INSIDE the pill (mockup .seg .stag), not to its left */}
               <div style={rail} role="group" aria-label="Filter by action outstanding">
+                <span style={{ ...fkey, alignSelf: "center", padding: "0 8px 0 6px" }}>Action outstanding</span>
                 {([["all", "All"], ["yes", "Yes"], ["no", "No"]] as ["all" | "yes" | "no", string][]).map(([v, label]) => (
                   <button key={v} type="button" onClick={() => setActionOut(v)} aria-pressed={actionOut === v} style={pill(actionOut === v)}>{label}</button>
                 ))}
