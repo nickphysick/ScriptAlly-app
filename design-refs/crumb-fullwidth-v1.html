@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Full-width crumb + floating masthead (three readings)</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--desk:#e8ddd0;--slab:#fffefb;--hair:#e7ddd2;--bd:#d8cebf;--headink:#000;--ink:#3a1c14;
+  --label:#9c8878;--muted:#8a7a6c;--accent:#7c3a2a;--band:#f6f1e6;--esp:#422701;--pillon:#705e4c;
+  --cell:#fdfaf5;--cmd:#fffdf9;--rowon:#f6efe3;--mono:#422701;--monotx:#fdfaf5;--sage:#e9ede6;--sageT:#5a6e58;
+  --work:1600px;--gutter:24px}
+body{font-family:'Inter',sans-serif;background:#d7d0c4;color:var(--ink);padding:26px 22px 70px}
+h1{font-family:'Playfair Display',serif;font-size:24px;font-weight:500;color:#5d4037}
+.sub{font-size:12px;font-weight:300;color:var(--muted);margin-top:5px;max-width:900px;line-height:1.6}
+.vlab{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin:28px 0 3px}
+.vsub{font-size:10.5px;font-weight:300;color:var(--muted);margin-bottom:10px;max-width:860px;line-height:1.5}
+
+.monitor{width:1280px;background:#fbf8f2;border:1px solid #cabfad;border-radius:12px;overflow:hidden;position:relative}
+.mtag{position:absolute;top:6px;left:50%;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.14em;text-transform:uppercase;color:#c0ae94;z-index:5}
+.viewport{display:flex;min-height:400px}
+.rail{width:112px;flex:none;background:var(--slab);border-right:1px solid var(--hair);display:flex;flex-direction:column;padding:9px 0;gap:2px}
+.rail .brand{display:flex;align-items:center;gap:6px;padding:2px 12px 10px}
+.rail .brand svg{width:16px;height:16px}
+.rail .brand b{font-family:'Playfair Display',serif;font-size:11px;color:#2d2016}
+.rkey{font-family:'JetBrains Mono',monospace;font-size:5px;letter-spacing:.14em;text-transform:uppercase;color:#b9a893;padding:8px 12px 2px}
+.ritem{display:flex;align-items:center;gap:7px;padding:5px 12px;font-size:9px;color:#5a4a40}
+.ritem.on{background:var(--rowon);color:var(--accent);font-weight:600}
+.ritem .dot{width:11px;height:11px;border-radius:3px;background:#eadfce;flex:none}
+.contentcol{flex:1;min-width:0;background:var(--desk);display:flex;flex-direction:column}
+
+/* full-width crumb strip */
+.crumbstrip{background:rgba(255,254,251,0.6);border-bottom:1px solid var(--hair);padding:8px 24px}
+.crumbstrip.capd{display:flex;justify-content:center}
+.crumbstrip .inner{width:100%;max-width:var(--work)}
+.crumb{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--label)}
+.crumb b{color:var(--accent)}
+
+/* capped zone */
+.capzone{width:100%;max-width:var(--work);margin-inline:auto;padding:0 var(--gutter)}
+
+/* floating masthead card */
+.mast{background:var(--slab);border:1px solid var(--bd);border-radius:12px;padding:16px 22px 14px;display:flex;align-items:flex-end;gap:14px;margin-top:14px;box-shadow:0 1px 3px rgba(58,28,20,0.05)}
+.mast .ttl{font-family:'Playfair Display',serif;font-size:32px;font-weight:500;color:var(--headink);line-height:1;margin-top:2px}
+.mast .meta{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.mast .btn{margin-left:auto;background:var(--esp);color:#fff;font-size:9px;font-weight:600;padding:8px 13px;border-radius:8px}
+
+.filterbar{display:flex;align-items:center;gap:10px;padding:12px 0 2px}
+.fkey{font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:.16em;text-transform:uppercase;color:var(--label)}
+.fgrp{display:inline-flex;gap:2px;background:#fff;border:1px solid var(--bd);border-radius:99px;padding:2px}
+.fpill{font-size:8px;font-weight:500;padding:3px 9px;border-radius:99px;color:#6a5a50}
+.fpill.on{background:var(--pillon);color:#fff}
+.fsort{margin-left:auto;font-size:8px;color:#6a5a50;background:#fff;border:1px solid var(--bd);border-radius:8px;padding:4px 9px}
+
+.stage{display:flex;gap:9px;padding:10px 0 14px}
+.plist{width:150px;flex:none;background:#fffefb;border:1px solid var(--bd);border-radius:6px;overflow:hidden}
+.lrow{display:flex;align-items:center;gap:6px;padding:6px 8px;border-bottom:1px solid #f2e9db}
+.lrow.on{background:var(--rowon)}
+.lmono{width:16px;height:16px;border-radius:50%;background:var(--mono);color:var(--monotx);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:6px;flex:none}
+.lrow .n{font-family:'Playfair Display',serif;font-size:8px}
+.work{flex:1;min-width:0;background:#fffefb;border:1px solid var(--bd);border-radius:6px;overflow:hidden;display:flex;flex-direction:column}
+.aband{padding:9px 13px;border-bottom:1px solid var(--hair);display:flex;gap:8px;align-items:center}
+.amono{width:24px;height:24px;border-radius:50%;background:var(--mono);color:var(--monotx);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:9px}
+.aband .nm{font-family:'Playfair Display',serif;font-size:13px}
+.cols{display:flex;gap:8px;padding:9px}
+.col{flex:1;border:1px solid var(--hair);border-radius:6px;overflow:hidden;min-height:130px}
+.colband{background:var(--band);border-bottom:1px solid var(--hair);padding:5px 9px;font-family:'Playfair Display',serif;font-size:9px;color:#5d4037}
+.colbody{padding:8px 9px;font-size:8px;color:#5a4a40;font-weight:300;line-height:1.5}
+</style>
+</head>
+<body>
+<h1>Full-width crumb + floating masthead</h1>
+<p class="sub">Three readings of your idea on a 2560px ultrawide (drawn at 50%). In all three the crumb detaches from
+the masthead; they differ in how far the crumb runs and whether the masthead floats or sits flush.</p>
+<div class="vlab">A · Crumb full-bleed · masthead floats (recommended)</div>
+<div class="vsub">The crumb strip spans the entire content column edge-to-edge (ignoring the cap); a gap of desk; then the
+masthead as a rounded card centred within the 1600 cap, with everything below it. The crumb belongs to the window, the
+page belongs to the column.</div>
+<div class="monitor"><div class="mtag">2560 — 50%</div><div class="viewport"><div class="rail">
+      <div class="brand"><svg viewBox="0 0 24 24"><path d="M21 3l-7 18-4-7-7-4 18-7z" stroke="#2d2016" stroke-width="1.5" fill="none"/></svg><b>ScriptAlly</b></div>
+      <div class="ritem"><span class="dot"></span>Dashboard</div><div class="rkey">Querying</div><div class="ritem on"><span class="dot"></span>Queries Hub</div>
+      <div class="rkey">Agents</div><div class="ritem"><span class="dot"></span>Agents database</div><div class="ritem"><span class="dot"></span>Discover</div></div>
+  <div class="contentcol">
+    <div class="crumbstrip"><span class="crumb">ScriptAlly / Querying / <b>Queries Hub</b></span></div>
+    <div class="capzone"><div class="mast"><div><div class="ttl">Queries Hub</div><div class="meta">Tracking all manuscripts · 10 queries · 3 awaiting your move</div></div><span class="btn">+ Log a new query</span></div><div class="filterbar"><span class="fkey">Status</span><span class="fgrp"><span class="fpill on">All</span><span class="fpill">Waiting</span><span class="fpill">Your move</span></span><span class="fsort">Sort · Date sent ▾</span></div><div class="stage">
+        <div class="plist">
+          <div class="lrow on"><span class="lmono">RI</span><span class="n">Rosa Imrie</span></div>
+          <div class="lrow"><span class="lmono">MS</span><span class="n">Mary Shelley</span></div>
+          <div class="lrow"><span class="lmono">AD</span><span class="n">Conan Doyle</span></div>
+        </div>
+        <div class="work">
+          <div class="aband"><span class="amono">RI</span><div><div class="nm">Rosa Imrie</div></div></div>
+          <div class="cols">
+            <div class="col"><div class="colband">Tracking</div><div class="colbody">Query sent · 16 Jun</div></div>
+            <div class="col"><div class="colband">What you sent</div><div class="colbody">Lost Clockworks</div></div>
+            <div class="col"><div class="colband">Journal</div><div class="colbody">Write a note…</div></div>
+          </div>
+        </div>
+      </div></div>
+  </div>
+</div></div>
+<div class="vlab">B · Crumb bar full-bleed · crumb text aligned to the cap</div>
+<div class="vsub">The bar\u2019s background runs edge-to-edge, but the crumb text starts at the same left edge as the masthead
+below it (aligned to the capped column). Tidier vertical alignment; the text doesn\u2019t drift left of everything else on
+an ultrawide.</div>
+<div class="monitor"><div class="mtag">2560 — 50%</div><div class="viewport"><div class="rail">
+      <div class="brand"><svg viewBox="0 0 24 24"><path d="M21 3l-7 18-4-7-7-4 18-7z" stroke="#2d2016" stroke-width="1.5" fill="none"/></svg><b>ScriptAlly</b></div>
+      <div class="ritem"><span class="dot"></span>Dashboard</div><div class="rkey">Querying</div><div class="ritem on"><span class="dot"></span>Queries Hub</div>
+      <div class="rkey">Agents</div><div class="ritem"><span class="dot"></span>Agents database</div><div class="ritem"><span class="dot"></span>Discover</div></div>
+  <div class="contentcol">
+    <div class="crumbstrip capd"><div class="inner" style="padding:0 24px"><span class="crumb">ScriptAlly / Querying / <b>Queries Hub</b></span></div></div>
+    <div class="capzone"><div class="mast"><div><div class="ttl">Queries Hub</div><div class="meta">Tracking all manuscripts · 10 queries · 3 awaiting your move</div></div><span class="btn">+ Log a new query</span></div><div class="filterbar"><span class="fkey">Status</span><span class="fgrp"><span class="fpill on">All</span><span class="fpill">Waiting</span><span class="fpill">Your move</span></span><span class="fsort">Sort · Date sent ▾</span></div><div class="stage">
+        <div class="plist">
+          <div class="lrow on"><span class="lmono">RI</span><span class="n">Rosa Imrie</span></div>
+          <div class="lrow"><span class="lmono">MS</span><span class="n">Mary Shelley</span></div>
+          <div class="lrow"><span class="lmono">AD</span><span class="n">Conan Doyle</span></div>
+        </div>
+        <div class="work">
+          <div class="aband"><span class="amono">RI</span><div><div class="nm">Rosa Imrie</div></div></div>
+          <div class="cols">
+            <div class="col"><div class="colband">Tracking</div><div class="colbody">Query sent · 16 Jun</div></div>
+            <div class="col"><div class="colband">What you sent</div><div class="colbody">Lost Clockworks</div></div>
+            <div class="col"><div class="colband">Journal</div><div class="colbody">Write a note…</div></div>
+          </div>
+        </div>
+      </div></div>
+  </div>
+</div></div>
+<div class="vlab">C · For contrast · crumb inside the cap (what we just built)</div>
+<div class="vsub">The crumb sits inside the capped column with the masthead — no full-width bar. Shown so the difference
+is visible: A and B give the top a window-wide anchor line; C leaves the top edge floating with everything else.</div>
+<div class="monitor"><div class="mtag">2560 — 50%</div><div class="viewport"><div class="rail">
+      <div class="brand"><svg viewBox="0 0 24 24"><path d="M21 3l-7 18-4-7-7-4 18-7z" stroke="#2d2016" stroke-width="1.5" fill="none"/></svg><b>ScriptAlly</b></div>
+      <div class="ritem"><span class="dot"></span>Dashboard</div><div class="rkey">Querying</div><div class="ritem on"><span class="dot"></span>Queries Hub</div>
+      <div class="rkey">Agents</div><div class="ritem"><span class="dot"></span>Agents database</div><div class="ritem"><span class="dot"></span>Discover</div></div>
+  <div class="contentcol">
+    <div class="capzone">
+      <div class="crumbstrip" style="background:none;border:none;padding:12px 0 0"><span class="crumb">ScriptAlly / Querying / <b>Queries Hub</b></span></div>
+      <div class="mast"><div><div class="ttl">Queries Hub</div><div class="meta">Tracking all manuscripts · 10 queries · 3 awaiting your move</div></div><span class="btn">+ Log a new query</span></div><div class="filterbar"><span class="fkey">Status</span><span class="fgrp"><span class="fpill on">All</span><span class="fpill">Waiting</span><span class="fpill">Your move</span></span><span class="fsort">Sort · Date sent ▾</span></div><div class="stage">
+        <div class="plist">
+          <div class="lrow on"><span class="lmono">RI</span><span class="n">Rosa Imrie</span></div>
+          <div class="lrow"><span class="lmono">MS</span><span class="n">Mary Shelley</span></div>
+          <div class="lrow"><span class="lmono">AD</span><span class="n">Conan Doyle</span></div>
+        </div>
+        <div class="work">
+          <div class="aband"><span class="amono">RI</span><div><div class="nm">Rosa Imrie</div></div></div>
+          <div class="cols">
+            <div class="col"><div class="colband">Tracking</div><div class="colbody">Query sent · 16 Jun</div></div>
+            <div class="col"><div class="colband">What you sent</div><div class="colbody">Lost Clockworks</div></div>
+            <div class="col"><div class="colband">Journal</div><div class="colbody">Write a note…</div></div>
+          </div>
+        </div>
+      </div></div>
+  </div>
+</div></div>
+</body>
+</html>
