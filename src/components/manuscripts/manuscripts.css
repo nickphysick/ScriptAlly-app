@@ -53,7 +53,9 @@
 }
 
 /* ── shared primitives ── */
-.msv-wrap { max-width: 1150px; margin: 0 auto; }
+/* max-width retired → the shell's content-column cap (read = 1200px) now centres this page;
+   see contentColumn.css. Kept as a hook (full-width) so the markup/selector is undisturbed. */
+.msv-wrap { width: 100%; }
 .msv-lab {
   font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.17em;
   text-transform: uppercase; font-weight: 500; color: var(--msv-label);

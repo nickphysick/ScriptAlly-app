@@ -601,7 +601,7 @@ function AppContent() {
 
         {/* The Queries desk owns its internal scroll (no page scrollbar) — its slot is the same
             box the retired SidebarShell content column gave it: full height, clipped, white. */}
-        <StagePage active={routeKey === "queries"} layout="fill" clip background="#ffffff">
+        <StagePage active={routeKey === "queries"} layout="fill" clip contentVariant="work">
           {queriesSub === "Landing" ? (
             <QueriesLanding onNavigate={handleNavigate} />
           ) : (
@@ -609,7 +609,7 @@ function AppContent() {
           )}
         </StagePage>
 
-        <StagePage active={routeKey === "agents"} layout="fillColumn">
+        <StagePage active={routeKey === "agents"} layout="fillColumn" contentVariant="work">
           {agentsDiscover ? (
             <DiscoverNewAgents onNavigate={handleNavigate} />
           ) : (
@@ -617,7 +617,7 @@ function AppContent() {
           )}
         </StagePage>
 
-        <StagePage active={routeKey === "manuscripts"} layout="fill">
+        <StagePage active={routeKey === "manuscripts"} layout="fill" contentVariant="read">
           {manuscriptsPackages ? (
             <SubmissionPackages />
           ) : manuscriptsComps ? (
@@ -638,7 +638,7 @@ function AppContent() {
           <StagePage active><EmailImportDevPage onNavigate={handleNavigate} onSuccessToast={(msg) => setSuccessToast(msg)} /></StagePage>
         )}
         {routeKey === "import" && (
-          <StagePage active><ImportCsv onNavigate={handleNavigate} /></StagePage>
+          <StagePage active contentVariant="read"><ImportCsv onNavigate={handleNavigate} /></StagePage>
         )}
 
         {/* Footer copyright stamp block — in stage flow; hidden on the Queries workspace and the

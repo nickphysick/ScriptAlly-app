@@ -1,0 +1,42 @@
+/**
+ * Content max-width caps (ultrawide) — ref design-refs/maxwidth-ultrawide-v1.html.
+ *
+ * The RAIL stays pinned hard-left, full height, UNCAPPED. Only the CONTENT COLUMN caps: it fills
+ * the available width on normal screens and, past the cap, stops growing and TRUE-CENTRES — the
+ * surplus pools as symmetric side margin on the theme desk. Two caps, declared per route via
+ * StagePage's `contentVariant` (never scattered onto individual pages):
+ *   - work: multi-pane workspace pages (the hubs, any future two-pane page)
+ *   - read: single-column / prose / reference pages
+ *
+ * The desk sits on the StagePage OUTER (full width, var(--desk)); this capped column is
+ * transparent and centres the page on top — because --desk ≡ every page's own desk token
+ * (--desk / --hub-desk are the same value in all three themes), the cap edge is seamless.
+ *
+ * Gutter: reconciled to the pages' EXISTING edge padding (Queries qdesk 28px, Agents .agv2 22px,
+ * manuscripts content padding) — all already ≥ the spec's 16/24px inset, so we do NOT add a
+ * competing wrapper gutter (that would double the inset and change the ≤1440 render). The caps
+ * are the feature; the "content never touches the edge" requirement is already met by page padding.
+ */
+
+:root {
+  --content-max-work: 1600px;
+  --content-max-read: 1200px;
+}
+
+.sa-content-col {
+  width: 100%;
+  margin-inline: auto;
+  min-width: 0;
+}
+.sa-content-col--work { max-width: var(--content-max-work); }
+.sa-content-col--read { max-width: var(--content-max-read); }
+
+/* Fill-aware: viewport-locked pages (fill / fillColumn) must pass height:100% through the cap so
+   their internal scroll still works. Flow pages omit this and stay content-height. */
+.sa-content-col--fill {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}

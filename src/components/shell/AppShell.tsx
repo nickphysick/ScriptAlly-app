@@ -46,6 +46,7 @@ import { BottomTabBar } from "../BottomTabBar";
 import { RAIL_GROUPS, RAIL_CAPTURES, railActiveKey, invokeCapture } from "./railNav";
 import { railMode, scrimVisible, railFlowWidth, railPanelWidth, readRailPinned, writeRailPinned, makePeekIntent } from "./railPeek";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
+import "./contentColumn.css";
 
 // Grouped-index data lives in railNav.ts (pure, tested); icons stay here (React-free model).
 const RAIL_ICONS: Record<string, React.ComponentType<{ style?: React.CSSProperties }>> = {
@@ -631,8 +632,12 @@ export const StagePage: React.FC<{
   background?: string;
   /** Clip overflow (the Queries desk expects a non-scrolling, overflow-hidden host). */
   clip?: boolean;
+  /** Content max-width cap (ultrawide). When set, the slot paints the theme desk full-width and
+   *  centres the page inside a capped column (work 1600 / read 1200) — the ONE place a route
+   *  declares its width kind. Omit → uncapped (the dashboard's exemption). See contentColumn.css. */
+  contentVariant?: "work" | "read";
   children: React.ReactNode;
-}> = ({ active, layout = "flow", background, clip = false, children }) => {
+}> = ({ active, layout = "flow", background, clip = false, contentVariant, children }) => {
   const [entering, setEntering] = useState(false);
   const prevActive = useRef(false);
   React.useEffect(() => {
@@ -646,6 +651,15 @@ export const StagePage: React.FC<{
     const id = window.setTimeout(() => setEntering(false), 250);
     return () => window.clearTimeout(id);
   }, [entering]);
+  // Ultrawide cap: paint the theme desk on the full-width slot, centre the page in a capped
+  // column. --fill passes height:100% through for viewport-locked (fill/fillColumn) pages.
+  const body = contentVariant ? (
+    <div className={`sa-content-col sa-content-col--${contentVariant}${layout !== "flow" ? " sa-content-col--fill" : ""}`}>
+      {children}
+    </div>
+  ) : (
+    children
+  );
   return (
     <div
       className={active && entering ? "stage-page-on" : undefined}
@@ -655,11 +669,12 @@ export const StagePage: React.FC<{
         ...(layout !== "flow" ? { height: "100%" } : {}),
         ...(layout === "fillColumn" ? { flexDirection: "column" as const } : {}),
         ...(clip ? { overflow: "hidden" } : {}),
-        ...(background ? { background } : {}),
+        // contentVariant → the desk fills the margins; else the page's own background prop.
+        ...(contentVariant ? { background: "var(--desk)" } : background ? { background } : {}),
         minWidth: 0,
       }}
     >
-      {children}
+      {body}
     </div>
   );
 };
