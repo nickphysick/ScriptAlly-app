@@ -19,9 +19,9 @@ import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
 import { Manuscript, ManuscriptStatus } from "../types";
 import { motion, AnimatePresence } from "motion/react";
-import { ChromeSlab } from "./shell/ChromeSlab";
+import { ChromeSlab, MASTHEAD_CTA_STYLE } from "./shell/ChromeSlab";
 import { Plus, Send, Pencil, MoreHorizontal, Archive, Trash2, X, Check, ChevronDown } from "lucide-react";
-import { isShelvedPresentation } from "../lib/manuscriptPage";
+import { isShelvedPresentation, activeQueryCount } from "../lib/manuscriptPage";
 import { manuscriptComps } from "../lib/comps";
 import { PlateReveal } from "./manuscripts/RevealPanels";
 import "./manuscripts/manuscripts.css";
@@ -168,20 +168,24 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
     }
   };
 
+  // "In submission" = manuscripts with ≥1 active (non-closed) query — activeQueryCount over each
+  // manuscript's scoped queries (the same pipeline predicate the field roster uses).
+  const inSubmission = manuscripts.filter((m) => activeQueryCount(queries.filter((q) => q.manuscriptId === m.id)) > 0).length;
+
   return (
     <div className="msv1">
       <ChromeSlab
         onNavigate={onNavigate}
+        grand
         title="Your manuscripts"
-        meta={manuscripts.length === 1 ? "1 MANUSCRIPT" : `${manuscripts.length} MANUSCRIPTS`}
+        meta={`${manuscripts.length} ${manuscripts.length === 1 ? "manuscript" : "manuscripts"} · ${inSubmission} in submission`}
         tools={
           <button
             type="button"
-            className="msv-btn"
-            style={{ whiteSpace: "nowrap", flexShrink: 0 }}
+            style={MASTHEAD_CTA_STYLE}
             onClick={() => onNavigate?.("manuscripts", "Add a manuscript")}
           >
-            <Plus />
+            <Plus style={{ width: 15, height: 15 }} />
             Add manuscript
           </button>
         }

@@ -18,7 +18,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { ChevronDown, Plus, Copy, Check, Pencil, X, AlertTriangle, Sparkles, Lock, RefreshCw, BookOpen, Star } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
 import { CompMedia, CompTitle, Manuscript } from "../../types";
-import { HubHeaderBar } from "../shell/HubHeaderBar";
+import { ChromeSlab } from "../shell/ChromeSlab";
 import { FormShell } from "../forms/FormShell";
 import { BrandDropdown } from "../forms/BrandDropdown";
 import { isShelvedPresentation } from "../../lib/manuscriptPage";
@@ -32,7 +32,6 @@ import {
   scoutLive,
   suggestionToComp,
 } from "../../lib/suggestComps";
-import { FONT_SERIF } from "../../lib/designTokens";
 import "./comps.css";
 
 /** The Scout's scan narration — shown while the live discovery runs (dev/preview until the fn ships). */
@@ -561,29 +560,18 @@ export const ComparableTitlesPage: React.FC<{
 
   const editingComp = formState && formState.index != null ? comps[formState.index] : undefined;
 
-  const pulse = activeMs ? (
-    <span className="ct-pulse">
-      {[activeMs.ageCategory, activeMs.genre].filter(Boolean).join(" ")} · <b>{counts.total}</b>{" "}
-      {counts.total === 1 ? "comp" : "comps"} · <b>{counts.inQuery}</b> in your query
-    </span>
-  ) : (
-    manuscripts.length === 0 ? "No manuscripts yet" : ""
-  );
+  const pulse = activeMs
+    ? `${[activeMs.ageCategory, activeMs.genre].filter(Boolean).join(" ")} · ${counts.total} ${counts.total === 1 ? "comp" : "comps"} · ${counts.inQuery} in your query`
+    : (manuscripts.length === 0 ? "No manuscripts yet" : undefined);
 
   return (
     <div className="ctpage">
-      <div className="ct-mast">
-        <HubHeaderBar
-          title="Comparable titles"
-          titleStyle={{ fontFamily: FONT_SERIF, fontWeight: 600, fontSize: 30, color: "var(--ct-ink)" }}
-          subtitle={pulse}
-          right={
-            activeMs ? (
-              <CompsMsSelect active={activeMs} manuscripts={ordered} onSelect={selectMs} />
-            ) : undefined
-          }
-        />
-      </div>
+      <ChromeSlab
+        grand
+        title="Comparable titles"
+        meta={pulse}
+        tools={activeMs ? <CompsMsSelect active={activeMs} manuscripts={ordered} onSelect={selectMs} /> : undefined}
+      />
 
       <div className="ct-desk">
         {!activeMs ? (

@@ -58,16 +58,12 @@
   background: var(--ct-desk); color: var(--ct-ink); padding: 16px 26px 20px;
   font-family: 'Inter', 'Source Sans Pro', sans-serif;
 }
-.ct-mast { flex-shrink: 0; margin-bottom: 16px; }
 .ct-desk { flex: 1; min-height: 0; }
 .ct-split { display: grid; grid-template-columns: 1fr 396px; gap: 22px; height: 100%; }
 @media (max-width: 1180px) {
   .ct-desk { overflow-y: auto; }
   .ct-split { grid-template-columns: 1fr; height: auto; }
 }
-
-/* masthead pulse line (mono-uppercase via HubHeaderBar's subtitle slot) */
-.ct-pulse b { color: var(--ct-ink); font-weight: 600; }
 
 /* manuscript selector on the right of the masthead */
 .ct-mssel-wrap { position: relative; }

@@ -133,11 +133,13 @@ export const SubmissionPackages: React.FC = () => {
       `}</style>
 
       <ChromeSlab
+        grand
         title={
           <span style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
             Package Workshop{proPill}
           </span>
         }
+        meta={activeMs ? `${msPackages.length} ${msPackages.length === 1 ? "package" : "packages"}` : undefined}
         tools={activeMs ? msSelector : undefined}
       />
 
