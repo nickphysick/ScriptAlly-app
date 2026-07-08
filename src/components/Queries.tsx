@@ -2100,7 +2100,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           .qrow{ position:relative; padding:12px 15px; cursor:pointer; border-bottom:1px solid #ece3d6; transition:background .14s ease; }
           .qrow:last-child{ border-bottom:none; }
           .qrow:hover:not(.sel){ background:#faf6f0; }
-          .qrow.sel{ background:var(--hub-row-on); }
+          .qrow.sel{ background:var(--qh-row-on, var(--hub-row-on)); }
         `}</style>
         {/* Desk (bold theme) — a cool blue-grey full-bleed working panel on which the list + reading
             pane sit as cards. Sidebar stays outside (shell chrome, untouched). */}
@@ -2282,7 +2282,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "0 4px" }}>
                       <button type="button" onClick={() => setStatusDraft([])} style={miniBtn}>Clear</button>
                       <button type="button" onClick={() => setStatusDraft([...ALL_QUERY_STATUSES])} style={miniBtn}>Select all</button>
-                      <button type="button" onClick={() => { setStatusSel(statusDraft); setStatusMenuOpen(false); }} style={{ marginLeft: "auto", fontFamily: "'Inter',sans-serif", fontSize: 11.5, fontWeight: 600, padding: "6px 15px", borderRadius: 8, border: "1px solid var(--hub-primary-bd, #422701)", background: "var(--hub-primary, #422701)", color: "var(--hub-primary-tx, #fff)", cursor: "pointer" }}>Apply</button>
+                      <button type="button" onClick={() => { setStatusSel(statusDraft); setStatusMenuOpen(false); }} style={{ marginLeft: "auto", fontFamily: "'Inter',sans-serif", fontSize: 11.5, fontWeight: 600, padding: "6px 15px", borderRadius: 8, border: "1px solid var(--qh-primary-bd, var(--hub-primary-bd, #422701))", background: "var(--qh-primary, var(--hub-primary, #422701))", color: "var(--qh-primary-tx, var(--hub-primary-tx, #fff))", cursor: "pointer" }}>Apply</button>
                     </div>
                   </div>
                 )}
@@ -2456,7 +2456,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   >
                     <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
                       {/* monogram disc — pink gradient + burgundy initials, echoing the hero avatar */}
-                      <span className="qmono" style={{ flexShrink: 0, width: 38, height: 38, borderRadius: "50%", background: "var(--hub-monogram)", border: "none", color: "var(--hub-monogram-tx)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_SERIF, fontSize: 13, fontWeight: 700 }}>{monoInitials}</span>
+                      <span className="qmono" style={{ flexShrink: 0, width: 38, height: 38, borderRadius: "50%", background: "var(--qh-mono-bg, var(--hub-monogram))", border: "none", color: "var(--qh-mono-tx, var(--hub-monogram-tx))", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_SERIF, fontSize: 13, fontWeight: 700 }}>{monoInitials}</span>
                       {/* middle — name over agency */}
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontFamily: FONT_SERIF, fontSize: 16, fontWeight: 700, color: qdbBoldInk, lineHeight: 1.1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{agentPrimary(agent)}</div>
@@ -2661,7 +2661,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                       {/* top row — avatar centred against the name + agency + status label */}
                       <div style={{ position: "relative", zIndex: 2, display: "flex", alignItems: "center", gap: 18 }}>
                         {/* avatar — solid ink disc + white initials (per the Queries Hub mockup) */}
-                        <span style={{ flexShrink: 0, width: 66, height: 66, borderRadius: "50%", background: "var(--hub-monogram)", border: "none", color: "var(--hub-monogram-tx)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_SERIF, fontSize: 22, fontWeight: 700 }}>{initials}</span>
+                        <span style={{ flexShrink: 0, width: 66, height: 66, borderRadius: "50%", background: "var(--qh-mono-bg, var(--hub-monogram))", border: "none", color: "var(--qh-mono-tx, var(--hub-monogram-tx))", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_SERIF, fontSize: 22, fontWeight: 700 }}>{initials}</span>
                         <div style={{ flex: 1, minWidth: 0, paddingRight: 120 }}>
                           <div style={{ fontFamily: FONT_SERIF, fontSize: 27, fontWeight: 800, color: qdbBoldInk, lineHeight: 1.02, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{nameplate}</div>
                           {!!activeAgent.name?.trim() && !!activeAgent.agency?.trim() && (

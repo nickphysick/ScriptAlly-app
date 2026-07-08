@@ -27,7 +27,7 @@ const expectTokens = (block: string, pairs: Record<string, string>) => {
 describe("rail tokens — Cappuccino (.t-capp)", () => {
   it("carries the ref values", () => {
     expectTokens(themeBlock(".t-capp"), {
-      "--rail-card": "#fffefb",
+      "--rail-card": "#faf9f6",   /* strip-back neutral side-nav (Cappuccino-only; Nick's call) */
       "--rail-bd": "#e7ddd2",
       "--rail-bdw": "1px",
       "--rail-pill": "#e9ece4",

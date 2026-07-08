@@ -105,7 +105,7 @@
   /* ── Rail rebuild tokens (grouped index + capture + utility; ref sidenav-three-themes-v2.html).
      ADDITIVE — the rail consumes only the --rail set; existing tokens untouched. The capture
      buttons are white/card-filled in EVERY theme (Editorial exception documented in CLAUDE.md). */
-  --rail-card: #fffefb;
+  --rail-card: #faf9f6;          /* strip-back — neutral side-nav (Cappuccino-only; Nick's call) */
   --rail-bd: #e7ddd2;
   --rail-bdw: 1px;
   --rail-hair: #e7ddd2;
@@ -149,8 +149,8 @@
   --qp-cmd-bg: #ddc0b6;                       /* control bar — clay (theme editor 2026-07-08; was #d0917c) */
   --qp-cmd-frame: var(--bdw) solid var(--bd);
   --qp-cmd-toprule: var(--bdw) solid #5d4037;
-  /* control-bar buttons/meta — pre-computed inverted for the terracotta bar (theme editor 2026-07-08) */
-  --cmdbar-prime-bg: #422701; --cmdbar-prime-tx: #ffffff; --cmdbar-prime-bd: #422701;
+  /* control-bar primary — strip-back near-black on the card-coloured bar (was espresso #422701) */
+  --cmdbar-prime-bg: #1a1512; --cmdbar-prime-tx: #faf7f1; --cmdbar-prime-bd: #1a1512;
   --cmdbar-btn-bg: transparent; --cmdbar-btn-bd: #422701; --cmdbar-btn-tx: #422701;
   --cmdbar-meta: #5d4037;
   --qp-cmd-radius: 14px;                      /* mockup .t-capp .actionbar */
@@ -177,7 +177,7 @@
      are the spec, not v3's caramel/latte). The single source both hubs consume for named
      surfaces; "paper per purpose" is a band-token choice, not a fork. HUB-SCOPED de-pinking —
      the app-wide Cappuccino retoken is a separate future pass. ── */
-  --hub-desk: #e8ddd0;
+  --hub-desk: #e8ded0;           /* strip-back — the ONE warm surface (page/desk cappuccino cream) */
   --hub-slab: #fffefb;
   --hub-slab-rule: 1px solid #e7ddd2;
   --hub-list: #fffefb;
@@ -199,6 +199,15 @@
   --qh-colhead-bg: #422701;
   --qh-colhead-tx: #f2e8d8;
   --qh-colhead-rule: none;
+  /* Strip-back recolour (Cappuccino-only, Queries-hub-scoped; read on Queries elements via
+     var(--qh-*, var(--hub-*)) so Agents + Bold/Editorial fall back to the shared --hub-* values).
+     Mostly-black-on-white — warmth lives in --hub-desk + a few details only. */
+  --qh-row-on: #eee5d7;          /* selected list row — quiet warm tint (replaces sage --hub-row-on) */
+  --qh-mono-bg: #1e1913;         /* agent initials disc — near-black, cream lettering */
+  --qh-mono-tx: #faf7f1;
+  --qh-primary: #1a1512;         /* primary buttons — near-black + near-white label */
+  --qh-primary-tx: #faf7f1;
+  --qh-primary-bd: #1a1512;
   --hub-band-reference: #f6f1e6;
   --hub-band-reference-tx: #5d4037;
   --hub-toggle-on: #705e4c;      /* SPEC (v3 caramel #dcb588 superseded) */
@@ -218,8 +227,8 @@
   --hub-ink: #3a1c14;
   --hub-head: #000000;
   --hub-label: #9c8878;
-  --hub-item: #5d4037;
-  --hub-body: #5d4037;
+  --hub-item: #1a1512;           /* strip-back — item/body text → near-black (Queries-only token) */
+  --hub-body: #1a1512;
   --hub-btn-bg: #ffffff;
   --hub-btn-bd: 1px solid #d8cebf;
   --hub-btn-sh: none;

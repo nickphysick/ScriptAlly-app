@@ -22,7 +22,7 @@ const has = (sel: string, pairs: Record<string, string>) => {
 describe("hub tokens — Cappuccino (spec, espresso primaries/monograms/taupe toggle)", () => {
   it("surfaces + espresso (spec wins over v3's caramel/latte)", () => {
     has(".t-capp", {
-      "--hub-desk": "#e8ddd0",
+      "--hub-desk": "#e8ded0",   // strip-back — the ONE warm surface (was #e8ddd0)
       "--hub-pane-process": "#fffefb",
       "--hub-radius": "6px",
       "--hub-band-process": "#eaf1e7",
