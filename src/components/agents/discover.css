@@ -71,13 +71,14 @@
   flex: 1 0 auto;
   background: var(--desk, #e8ddd0);
   color: var(--dv-ink);
+  padding: 22px 28px 0; /* masthead gutter mirrors the Queries hub (22px top / 28px sides) */
 }
 .dv-wrap {
-  /* Left-aligned to the standard workspace gutter (ragged right), match column widened —
-     the centred 880px card read as an island next to the full-bleed slab. */
+  /* Left-aligned (ragged right). The horizontal + top gutter now lives on .dv2 (shared with the
+     masthead, mirroring Queries); the masthead's 14px bottom margin sets the gap to the content. */
   max-width: 1240px;
   margin: 0;
-  padding: 26px 24px 120px; /* bottom clearance so the sticky batch tray never hides a card */
+  padding: 0 0 120px; /* bottom clearance so the sticky batch tray never hides a card */
 }
 
 /* ── Trust banner (band grammar: gradient + bottom rule) ── */

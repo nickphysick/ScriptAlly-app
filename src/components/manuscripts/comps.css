@@ -55,7 +55,7 @@
 /* ── page shell (workspace-fills: masthead flex-none, split fills, panels scroll) ── */
 .ctpage {
   height: 100%; display: flex; flex-direction: column; overflow: hidden;
-  background: var(--ct-desk); color: var(--ct-ink); padding: 16px 26px 20px;
+  background: var(--ct-desk); color: var(--ct-ink); padding: 22px 28px 20px; /* masthead gutter mirrors the Queries hub */
   font-family: 'Inter', 'Source Sans Pro', sans-serif;
 }
 .ct-desk { flex: 1; min-height: 0; }

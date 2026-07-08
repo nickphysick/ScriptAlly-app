@@ -18,7 +18,7 @@
   overflow-y: auto;
   background: var(--desk);
   color: var(--msv-ink);
-  padding: 18px 26px 48px;
+  padding: 22px 28px 48px; /* masthead gutter mirrors the Queries hub (22px top / 28px sides) */
 }
 
 .t-capp .msv1 {
