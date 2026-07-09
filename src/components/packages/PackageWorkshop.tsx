@@ -395,7 +395,10 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
            REAL .t-edn tokens (graphite single accent — no burgundy/sage/gold in its system). ── */
         .pkgwk { --wk-burg:var(--burg); --wk-acc:var(--sage-d); --wk-gold:var(--gold);
           --wk-bar:#eee2d2; --wk-dash:#c9bca8; --wk-dashd:#e7dbc9;
-          --wk-pulse:rgba(124,58,42,.16); --wk-scopebg:rgba(124,58,42,.07); --wk-flash:#e9f0e9; }
+          --wk-pulse:rgba(124,58,42,.16); --wk-scopebg:rgba(124,58,42,.07); --wk-flash:#e9f0e9;
+          /* FR2: fill the stage (pkg-root, a height-bounded flex column) so the two windows size to
+             the viewport and their inner regions scroll — never the page. */
+          display:flex; flex-direction:column; flex:1; min-height:0; }
         .t-bold .pkgwk { --wk-bar:#e7d3cc; --wk-dash:#caa99f; --wk-dashd:#e3cfc9; }
         .t-edn .pkgwk { --wk-burg:var(--acc); --wk-acc:var(--acc); --wk-gold:var(--muted);
           --wk-bar:var(--abtn-bg); --wk-dash:var(--bd); --wk-dashd:var(--bd);
@@ -408,7 +411,7 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
         .pkgwk .wk-crumb .sep { opacity:.4; }
         .pkgwk .wk-crumb .cur { font-weight:600; }
         /* ── Two-window shell ── */
-        .pkgwk .wk-windows { display:flex; gap:24px; align-items:stretch; min-height:640px; }
+        .pkgwk .wk-windows { display:flex; gap:24px; align-items:stretch; flex:1; min-height:0; }
         .pkgwk .wk-win { background:var(--card); border:var(--bdw) solid var(--bd); border-radius:16px; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 8px 26px rgba(40,28,18,.10); }
         .pkgwk .wk-workshop { flex:1; min-width:0; }
         .pkgwk .wk-analytics { width:376px; flex-shrink:0; }
