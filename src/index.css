@@ -311,10 +311,10 @@
   --qp-genre-bg: #fdfaf5; --qp-genre-bd: #cdddc7; --qp-genre-tx: #5a6e58;
   --qp-listfoot-bg: transparent;
   --qp-cmd-bg: var(--hub-cmd);
-  --qp-cmd-frame: none;
-  --qp-cmd-toprule: var(--hub-cmd-rule);
-  --qp-cmd-radius: 0;
-  --qp-cmd-margin: 0;
+  --qp-cmd-frame: var(--bdw) solid var(--bd);       /* v2 — float the control cards like Cappuccino */
+  --qp-cmd-toprule: var(--bdw) solid var(--bd);
+  --qp-cmd-radius: 14px;
+  --qp-cmd-margin: 14px 0 9px;
   --slab-shadow: none;
   --slab-ttl: #1d1712;
   --slab-meta: #5e5954;
@@ -323,7 +323,7 @@
   --cmd-bar-bg: #fffefb;
   --cmd-bar-bd: #1d1712;
   --cmd-bar-bdw: 1.5px;
-  --cmd-bar-shadow: none;
+  --cmd-bar-shadow: 0 10px 30px rgba(20, 20, 20, 0.08);   /* v2 — soft float shadow (matches Cappuccino) */
   --cmd-btn-bg: #fffefb;
   --cmd-btn-bd: #1d1712;
   --cmd-btn-bdw: 1.5px;
@@ -464,15 +464,12 @@
   /* Phase 3 — neutral (no sage in Editorial) */
   --qp-genre-bg: #fdfaf5; --qp-genre-bd: #cdddc7; --qp-genre-tx: #5a6e58;
   --qp-listfoot-bg: transparent;
-  --qp-cmd-bg: #44484d;                       /* control bar — graphite (theme editor 2026-07-08) */
-  /* control-bar buttons/meta — pre-computed inverted for the graphite bar (theme editor 2026-07-08) */
-  --cmdbar-prime-bg: #ffffff; --cmdbar-prime-tx: #44484d; --cmdbar-prime-bd: #ffffff;
-  --cmdbar-btn-bg: transparent; --cmdbar-btn-bd: #ffffff; --cmdbar-btn-tx: #ffffff;
-  --cmdbar-meta: #8a8d90;
-  --qp-cmd-frame: none;
-  --qp-cmd-toprule: var(--hub-cmd-rule);
-  --qp-cmd-radius: 0;
-  --qp-cmd-margin: 0;
+  --qp-cmd-bg: var(--hub-cmd);                /* v2 — white floating card (was graphite #44484d) */
+  --cmdbar-meta: #8a8d90;                      /* list-card count · Export CSV text */
+  --qp-cmd-frame: var(--bdw) solid var(--bd); /* v2 — float the control cards like Cappuccino */
+  --qp-cmd-toprule: var(--bdw) solid var(--bd);
+  --qp-cmd-radius: 14px;
+  --qp-cmd-margin: 14px 0 9px;
   --slab-shadow: 0 3px 10px rgba(20, 20, 20, 0.04);
   --slab-ttl: #1a1a1a;
   --slab-meta: #7d8083;
@@ -481,7 +478,7 @@
   --cmd-bar-bg: #ffffff;
   --cmd-bar-bd: #ececeb;
   --cmd-bar-bdw: 1px;
-  --cmd-bar-shadow: 0 -2px 10px rgba(20, 20, 20, 0.04);
+  --cmd-bar-shadow: 0 10px 30px rgba(20, 20, 20, 0.08);   /* v2 — soft float shadow (matches Cappuccino) */
   --cmd-btn-bg: #ffffff;
   --cmd-btn-bd: #dcdcdb;
   --cmd-btn-bdw: 1px;
@@ -611,6 +608,6 @@
 
 /* ── Theme-editor paint overrides — CAPPUCCINO ONLY (2026-07-08). Narrow, per-component colours
    picked on-page; scoped under .t-capp so they never touch Bold/Editorial. Most paint picks landed
-   on capp tokens above; these two need finer scope than any single token. ── */
+   on capp tokens above; this one needs finer scope than any single token. ── */
 .t-capp .qrow.sel { background: #e8ece4; }              /* selected query-list row */
-.t-capp .qp-note { background: #e9ece4 !important; }    /* journal note bubble (overrides inline bg) */
+/* (journal note bubble override removed — the entries read WHITE (their inline #ffffff) per the v2 tidy) */

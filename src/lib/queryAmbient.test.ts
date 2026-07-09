@@ -123,10 +123,11 @@ describe("command-bar theming — per-theme token smoke (rule-text lock)", () =>
     expect(b).toContain("--cmd-primary-bg: #eec9c3");
   });
 
-  it("Editorial: hairline + soft shadow bar", () => {
+  it("Editorial: hairline + soft float shadow bar", () => {
     const b = themeBlock(".t-edn");
     expect(b).toContain("--cmd-bar-bd: #ececeb");
-    expect(b).toContain("--cmd-bar-shadow: 0 -2px 10px rgba(20, 20, 20, 0.04)");
+    // v2 — the control cards float in every theme, so the bar carries a soft downward shadow like Cappuccino
+    expect(b).toContain("--cmd-bar-shadow: 0 10px 30px rgba(20, 20, 20, 0.08)");
     expect(b).toContain("--cmd-primary-bg: #e9eaeb");
   });
 });
