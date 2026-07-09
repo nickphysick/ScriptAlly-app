@@ -204,8 +204,8 @@
      var(--qh-*, var(--hub-*)) so Agents + Bold/Editorial fall back to the shared --hub-* values).
      Mostly-black-on-white — warmth lives in --hub-desk + a few details only. */
   --qh-row-on: #eee5d7;          /* selected list row — quiet warm tint (replaces sage --hub-row-on) */
-  --qh-mono-bg: #1e1913;         /* agent initials disc — near-black, cream lettering */
-  --qh-mono-tx: #faf7f1;
+  --qh-mono-bg: #4e3628;         /* agent initials disc — dark coffee (not black), cream lettering (v2) */
+  --qh-mono-tx: #f6efe6;
   --qh-primary: #1a1512;         /* primary buttons — near-black + near-white label */
   --qh-primary-tx: #faf7f1;
   --qh-primary-bd: #1a1512;

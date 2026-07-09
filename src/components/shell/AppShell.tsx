@@ -22,7 +22,7 @@
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { LayoutGrid, Send, Users, Book, Settings, User, Sparkles, BookOpen, HelpCircle, LogOut, Search, Table, Reply, Library, ListTodo } from "lucide-react";
+import { LayoutGrid, Send, Users, Book, Settings, User, Sparkles, BookOpen, HelpCircle, LogOut, Search, Table, Library, ListTodo } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useScriptAllyDb } from "../../lib/db";
 import { UserPlan } from "../../types";
@@ -43,7 +43,7 @@ import { ScriptAllyLogo } from "../ScriptAllyLogo";
 import { NavSearch } from "../NavSearch";
 import { Nav } from "../Nav";
 import { BottomTabBar } from "../BottomTabBar";
-import { RAIL_GROUPS, RAIL_CAPTURES, railActiveKey, invokeCapture } from "./railNav";
+import { RAIL_GROUPS, railActiveKey } from "./railNav";
 import { railMode, scrimVisible, railFlowWidth, railPanelWidth, readRailPinned, writeRailPinned, makePeekIntent } from "./railPeek";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
 import { CrumbStrip } from "./CrumbStrip";
@@ -437,74 +437,13 @@ const Rail: React.FC<RailProps> = ({ activeTab, onNavigate, searchQuery, setSear
         ))}
       </nav>
 
-      {/* Rail foot: + Query / + Agent pair → utility group (bell here now) → theme switcher
-          → account chip. The nav above is flex:1, so this block sits at the rail's foot. */}
+      {/* Rail foot: utility group (Settings · Help) → theme switcher → account chip. The nav above
+          is flex:1, so this block sits at the rail's foot. v2: the + Record a response / + Query /
+          + Agent capture cluster was REMOVED — those flows live in the masthead "Log a new query"
+          CTA, the Agents page "Add agent", the per-query ribbon + the dashboard's own Record-a-
+          response instance; nothing routed exclusively through the rail buttons. The rail search
+          stays (its ⌘K / global-search role is unchanged; rehoming it is a separate follow-up). */}
       <div>
-        {/* Capture cluster — Record a response leads it, full width above the pair. White/
-            card-filled in EVERY theme (the Editorial exception: a tinted fill would read as
-            an active state beside the tinted nav pill). */}
-        <div style={{ margin: "0 12px 8px" }}>
-          <button
-            type="button"
-            className="arail-item arail-capbtn"
-            onClick={() => { invokeCapture("record", onNavigate); closeAll(); }}
-            title={RAIL_CAPTURES.record.label}
-            style={{
-              display: "flex", alignItems: "center", gap: 9, width: "100%",
-              background: "var(--rail-btn-bg, #ffffff)",
-              border: "var(--rail-btn-bdw, 1px) solid var(--rail-btn-bd, #ded3c2)",
-              color: "var(--rail-btn-tx, #5d4037)",
-              borderRadius: 11, padding: "10px 13px",
-              fontFamily: FONT_SANS, fontSize: 15, fontWeight: 500,
-              boxShadow: "var(--rail-btn-shadow, 0 1px 2px rgba(58,28,20,0.05))",
-              cursor: "pointer", whiteSpace: "nowrap", transition: "background 0.14s",
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = "var(--rail-btn-hov, #f4f2ef)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = "var(--rail-btn-bg, #ffffff)"; }}
-          >
-            <span style={{ display: "flex", flexShrink: 0, color: `var(--rail-accent, ${burgundy})` }}>
-              <Reply style={{ width: 14, height: 14 }} />
-            </span>
-            <span className="arail-label">{RAIL_CAPTURES.record.label}</span>
-          </button>
-        </div>
-
-        {/* Compact capture pair — icon over mono label (grouped-v5 cap-a); collapse stacks it */}
-        <div className="arail-cappair" style={{ display: "flex", gap: 7, margin: "0 12px 10px" }}>
-          {(["query", "agent"] as const).map((key) => (
-            <button
-              key={key}
-              type="button"
-              className="arail-capmini"
-              title={RAIL_CAPTURES[key].label}
-              onClick={() => { invokeCapture(key, onNavigate); closeAll(); }}
-              style={{
-                flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
-                background: "var(--rail-btn-bg, #ffffff)",
-                border: "var(--rail-btn-bdw, 1px) solid var(--rail-btn-bd, #ded3c2)",
-                borderRadius: 11, padding: "10px 4px 8px",
-                boxShadow: "var(--rail-btn-shadow, 0 1px 2px rgba(58,28,20,0.05))",
-                cursor: "pointer", transition: "background 0.14s",
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "var(--rail-btn-hov, #f4f2ef)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "var(--rail-btn-bg, #ffffff)"; }}
-            >
-              <span style={{ display: "flex", color: `var(--rail-accent, ${burgundy})` }}>
-                {key === "query" ? <Send style={{ width: 16, height: 16 }} /> : <User style={{ width: 16, height: 16 }} />}
-              </span>
-              <span
-                className="arail-label"
-                style={{
-                  fontFamily: FONT_MONO, fontSize: 7.5, letterSpacing: "0.1em",
-                  textTransform: "uppercase", color: "var(--rail-btn-tx, #5d4037)",
-                }}
-              >
-                {RAIL_CAPTURES[key].label}
-              </span>
-            </button>
-          ))}
-        </div>
-
         {/* Utility group — hairline-topped, muted items that warm on hover,
             per grouped-v5. Notifications was removed from the rail (product call, 5 Jul):
             on desktop, task alerts now surface only via the dashboard to-do/attention flow;

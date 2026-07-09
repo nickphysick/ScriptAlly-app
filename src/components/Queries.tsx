@@ -2810,7 +2810,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                       {/* status watermark — enlarged StatusDot, low-opacity, inset right so it isn't
                           clipped; aria-hidden (the real status is announced by the label above). */}
                       <div aria-hidden="true" style={{ position: "absolute", top: "50%", right: 16, transform: "translateY(-50%)", zIndex: 1, opacity: 0.22, pointerEvents: "none", display: "flex" }}>
-                        <StatusDot status={activeQuery.status} overrideSize={124} decorative />
+                        <StatusDot status={activeQuery.status} overrideSize={74} decorative />
                       </div>
                     </div>
                   );
