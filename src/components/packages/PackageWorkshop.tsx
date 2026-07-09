@@ -85,9 +85,11 @@ export interface PackageWorkshopProps {
   onDeleteVersion: (id: string) => void;
   /** Persist the bench: baseId set → updatePackage, null → addPackage. Returns the (new) package id. */
   onSavePackage: (baseId: string | null, fields: PackageSaveFields) => Promise<string | undefined> | string | undefined;
+  /** Re-run the guided tour (the workshop-header "?" chip). Absent → the chip is hidden. */
+  onStartTour?: () => void;
 }
 
-export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, packages, queries, agents, onCreateVersion, onUpdateVersion, onDeleteVersion, onSavePackage }) => {
+export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, packages, queries, agents, onCreateVersion, onUpdateVersion, onDeleteVersion, onSavePackage, onStartTour }) => {
   // Mode (Phase A): "packages" (build/assemble) or "materials" (edit the library). The palette + the
   // middle + the right window all follow it; the breadcrumb reflects it. selMat = the material being
   // edited in materials mode. Palette inline-create is GONE — creation now lives in the editor (Phase B).
@@ -419,6 +421,8 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
         .pkgwk .wk-ri { color:var(--hdrOn); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
         .pkgwk .wk-h h3 { font-family:${FONT_SERIF}; font-size:19px; font-weight:800; color:var(--hdrOn); }
         .pkgwk .wk-tag { margin-left:auto; font-family:${FONT_MONO}; font-size:8.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--hdrOn); opacity:.55; }
+        .pkgwk .wk-help { margin-left:12px; width:24px; height:24px; border-radius:50%; border:var(--bdw) solid var(--bd); background:var(--card); color:var(--hdrOn); font-family:${FONT_MONO}; font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; line-height:1; }
+        .pkgwk .wk-help:hover { background:var(--btnH); }
 
         /* Workshop body: palette | building split */
         .pkgwk .wk-body { display:flex; flex:1; min-height:0; }
@@ -616,12 +620,16 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
       <div className="wk-windows">
         {/* WORKSHOP window */}
         <section className="wk-win wk-workshop">
-          <div className="wk-h"><span className="wk-ri">{toolIcon}</span><h3>Workshop</h3><span className="wk-tag">build &amp; assemble</span></div>
+          <div className="wk-h">
+            <span className="wk-ri">{toolIcon}</span><h3>Workshop</h3>
+            <span className="wk-tag">build &amp; assemble</span>
+            {onStartTour && <button type="button" className="wk-help" onClick={onStartTour} aria-label="Show me around" title="Show me around">?</button>}
+          </div>
           <div className="wk-body">
-            <div className="wk-palette">
+            <div className="wk-palette" id="tgt-palette">
               <div className="pal-toph">
                 <span className="pl">Your materials</span>
-                <span className="em" role="button" tabIndex={0} onClick={() => enterMode(mode === "materials" ? "packages" : "materials")} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); enterMode(mode === "materials" ? "packages" : "materials"); } }}>
+                <span className="em" id="tgt-editmat" role="button" tabIndex={0} onClick={() => enterMode(mode === "materials" ? "packages" : "materials")} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); enterMode(mode === "materials" ? "packages" : "materials"); } }}>
                   {mode === "materials" ? "✓ Done" : "Edit materials →"}
                 </span>
               </div>
@@ -670,7 +678,7 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
                 <>
               <div className="bench-lab"><span className="dotp" />Active package — drag materials from the left, or click to add</div>
               {active && activeId ? (
-                <div className="pkg">
+                <div className="pkg" id="tgt-bench">
                   <div className="pkg-h">
                     <input className="name" value={active.name} placeholder="Untitled package" aria-label="Package name" onChange={(e) => renameActive(e.target.value)} />
                     <span className="pen" aria-hidden="true">{pencilIcon}</span>
@@ -828,7 +836,7 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
         </section>
 
         {/* ANALYTICS window — follows the mode: package stats while building, material stats while editing. */}
-        <section className="wk-win wk-analytics">
+        <section className="wk-win wk-analytics" id="tgt-analytics">
           <div className="wk-h"><span className="wk-ri">{mode === "materials" ? materialIcon : chartIcon}</span><h3>{mode === "materials" ? "Material analytics" : "Package analytics"}</h3></div>
           {mode === "packages" && (
             <div className="wk-scope">

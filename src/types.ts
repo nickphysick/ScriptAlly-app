@@ -36,6 +36,11 @@ export interface User {
   // completed or left (ISO String). The ONLY reader is the entry check (shouldOpenFocus); nothing
   // derives from it, so it doesn't offend derived-over-stored. Absent === never focused.
   todoLastFocusedAt?: string;
+  // The Package Workshop guided tour has been offered once. Set true when the tour ends (finish OR
+  // skip) so it never auto-runs again; the help "?" re-runs it regardless. Absent === never seen.
+  // NOTE: rides the parked firestore.rules user-update allowlist edit — silently denied (graceful)
+  // until that deploy lands, exactly like the agent `pinned` flag.
+  hasSeenTour?: boolean;
 }
 
 /**

@@ -14,6 +14,8 @@ import React, { useState } from "react";
 import { ManuscriptVersion, SubmissionPackage, Query, Agent, ComponentType, QueryStatus } from "../../types";
 import { FirstVisitHome } from "./FirstVisitHome";
 import { PackageWorkshop } from "./PackageWorkshop";
+import { Tour } from "../Tour";
+import { EXAMPLE_VERSIONS, EXAMPLE_PACKAGES, EXAMPLE_QUERIES, EXAMPLE_AGENTS, WORKSHOP_TOUR_STEPS } from "./tourExample";
 import { FONT_MONO, FONT_SERIF } from "../../lib/designTokens";
 
 type Theme = "t-capp" | "t-bold" | "t-edn";
@@ -58,10 +60,12 @@ const msChip = (
 export const PkgLab: React.FC = () => {
   const [theme, setTheme] = useState<Theme>("t-capp");
   const [view, setView] = useState<View>("landing");
+  const [tour, setTour] = useState(false);
   // Stateful so the workshop's create/save round-trips in the lab.
   const [versions, setVersions] = useState<ManuscriptVersion[]>(MOCK_VERSIONS);
   const [pkgs, setPkgs] = useState<SubmissionPackage[]>(MOCK_PACKAGES);
   const noop = () => {};
+  const startTour = () => { setView("full"); setTour(true); };
 
   // The empty view starts materials-clear so the FR4 middle + analytics empty states show.
   const emptyVersions: ManuscriptVersion[] = [];
@@ -92,6 +96,7 @@ export const PkgLab: React.FC = () => {
               {v === "landing" ? "Landing" : v === "empty" ? "Empty workshop" : "Full workshop"}
             </button>
           ))}
+          <button type="button" onClick={startTour} style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".04em", textTransform: "uppercase", padding: "7px 13px", borderRadius: 8, cursor: "pointer", border: "1px solid var(--burg)", background: tour ? "var(--band)" : "#fffefb", color: "var(--burg)" }}>▶ Run tour</button>
         </div>
         <div style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
           {(["t-capp", "t-bold", "t-edn"] as Theme[]).map((t) => (
@@ -106,7 +111,7 @@ export const PkgLab: React.FC = () => {
       <div className="pkg-root" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", padding: "18px 28px 16px", gap: 12, overflow: "hidden", background: "var(--desk)" }}>
         {mockSlab}
         {view === "landing" ? (
-          <FirstVisitHome onBuild={() => setView("empty")} onTour={() => setView("empty")} />
+          <FirstVisitHome onBuild={() => setView("empty")} onTour={startTour} />
         ) : view === "empty" ? (
           <PackageWorkshop
             versions={emptyVersions}
@@ -117,17 +122,18 @@ export const PkgLab: React.FC = () => {
             onUpdateVersion={noop}
             onDeleteVersion={noop}
             onSavePackage={() => `p-lab-${pkgs.length}`}
+            onStartTour={startTour}
           />
         ) : (
           <PackageWorkshop
-            versions={versions}
-            packages={pkgs}
-            queries={MOCK_QUERIES}
-            agents={MOCK_AGENTS}
-            onCreateVersion={(type, name, contentDraft) => { const id = `v-lab-${versions.length}`; setVersions((vs) => [...vs, { id, manuscriptId: "m", userId: "lab", componentType: type, versionName: name, fileAttached: false, createdDate: "2026-01-03T00:00:00.000Z", contentDraft }]); return id; }}
-            onUpdateVersion={(id, f) => setVersions((vs) => vs.map((v) => (v.id === id ? { ...v, versionName: f.versionName, contentDraft: f.contentDraft } : v)))}
-            onDeleteVersion={(id) => setVersions((vs) => vs.filter((v) => v.id !== id))}
-            onSavePackage={(baseId, f) => {
+            versions={tour ? EXAMPLE_VERSIONS : versions}
+            packages={tour ? EXAMPLE_PACKAGES : pkgs}
+            queries={tour ? EXAMPLE_QUERIES : MOCK_QUERIES}
+            agents={tour ? EXAMPLE_AGENTS : MOCK_AGENTS}
+            onCreateVersion={tour ? () => undefined : (type, name, contentDraft) => { const id = `v-lab-${versions.length}`; setVersions((vs) => [...vs, { id, manuscriptId: "m", userId: "lab", componentType: type, versionName: name, fileAttached: false, createdDate: "2026-01-03T00:00:00.000Z", contentDraft }]); return id; }}
+            onUpdateVersion={tour ? noop : (id, f) => setVersions((vs) => vs.map((v) => (v.id === id ? { ...v, versionName: f.versionName, contentDraft: f.contentDraft } : v)))}
+            onDeleteVersion={tour ? noop : (id) => setVersions((vs) => vs.filter((v) => v.id !== id))}
+            onSavePackage={tour ? () => undefined : (baseId, f) => {
               if (baseId) {
                 setPkgs((ps) => ps.map((p) => (p.id === baseId ? { ...p, packageName: f.packageName, queryLetterVersionId: f.queryLetterVersionId, synopsisVersionId: f.synopsisVersionId, samplePagesVersionId: f.samplePagesVersionId } : p)));
                 return baseId;
@@ -136,9 +142,11 @@ export const PkgLab: React.FC = () => {
               setPkgs((ps) => [...ps, { id, manuscriptId: "m", userId: "lab", packageName: f.packageName, queryLetterVersionId: f.queryLetterVersionId, synopsisVersionId: f.synopsisVersionId, samplePagesVersionId: f.samplePagesVersionId, status: "Active", createdDate: "2026-01-04T00:00:00.000Z" }]);
               return id;
             }}
+            onStartTour={startTour}
           />
         )}
       </div>
+      {tour && <Tour steps={WORKSHOP_TOUR_STEPS} onDone={() => setTour(false)} badge="Example data — cleared when the tour ends" />}
     </div>
   );
 };

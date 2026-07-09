@@ -73,7 +73,9 @@ service cloud.firestore {
         // App theme — optional; "cappuccino" | "bold" | "editorial". Absent-or-one-of-three.
         && (!data.keys().hasAny(['queriesTheme']) || (data.queriesTheme is string && (data.queriesTheme == 'cappuccino' || data.queriesTheme == 'bold' || data.queriesTheme == 'editorial')))
         // To-do focus-ritual cadence stamp — optional ISO string; absent-or-string (rejects null).
-        && (!data.keys().hasAny(['todoLastFocusedAt']) || (data.todoLastFocusedAt is string && data.todoLastFocusedAt.size() <= 64));
+        && (!data.keys().hasAny(['todoLastFocusedAt']) || (data.todoLastFocusedAt is string && data.todoLastFocusedAt.size() <= 64))
+        // Package Workshop tour-seen flag — optional bool; absent-or-bool (rejects null).
+        && (!data.keys().hasAny(['hasSeenTour']) || data.hasSeenTour is bool);
     }
 
     function isValidManuscript(data, userId) {
@@ -430,7 +432,7 @@ service cloud.firestore {
       allow read, delete: if isOwner(userId);
       allow create: if isOwner(userId) && isValidUser(incoming());
       allow update: if isOwner(userId) && isValidUser(incoming()) && (
-        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus', 'onboardingComplete', 'queryingStage', 'journeyStage', 'homeCountry', 'queriesTheme', 'todoLastFocusedAt'])
+        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus', 'onboardingComplete', 'queryingStage', 'journeyStage', 'homeCountry', 'queriesTheme', 'todoLastFocusedAt', 'hasSeenTour'])
       );
 
       // ROUTE: Manuscripts

@@ -17,12 +17,14 @@ import { useScriptAllyDb } from "../lib/db";
 import { ComponentType } from "../types";
 import { PackageWorkshop, PackageSaveFields } from "./packages/PackageWorkshop";
 import { FirstVisitHome } from "./packages/FirstVisitHome";
+import { Tour } from "./Tour";
+import { EXAMPLE_VERSIONS, EXAMPLE_PACKAGES, EXAMPLE_QUERIES, EXAMPLE_AGENTS, WORKSHOP_TOUR_STEPS } from "./packages/tourExample";
 import { FONT_SERIF, FONT_MONO } from "../lib/designTokens";
 import { ChromeSlab } from "./shell/ChromeSlab";
 import { ChevronDown, Lock } from "lucide-react";
 
 export const SubmissionPackages: React.FC = () => {
-  const { currentUser, manuscripts, versions, packages, queries, agents, addVersion, updateVersion, deleteVersion, addPackage, updatePackage } = useScriptAllyDb();
+  const { currentUser, manuscripts, versions, packages, queries, agents, addVersion, updateVersion, deleteVersion, addPackage, updatePackage, updateUserProfile } = useScriptAllyDb();
 
   const [activeMsId, setActiveMsId] = useState<string | null>(() =>
     typeof window !== "undefined" ? localStorage.getItem("scriptally_active_manuscript_id") : null,
@@ -33,6 +35,9 @@ export const SubmissionPackages: React.FC = () => {
   // workshop once the user clicks Build / the tour link. Reset on manuscript switch so a fresh book
   // shows its own landing. Irrelevant once a manuscript has ≥1 package (the workshop always renders).
   const [entered, setEntered] = useState(false);
+  // The guided tour. While active the workshop renders the PURE example fixture (never persisted) and
+  // the gold badge; on end we clear it and stamp hasSeenTour so it never auto-runs again.
+  const [tourActive, setTourActive] = useState(false);
 
   // Default to the first manuscript when none is selected / the saved one is gone.
   useEffect(() => {
@@ -81,6 +86,28 @@ export const SubmissionPackages: React.FC = () => {
     const res = await addPackage({ manuscriptId: msId, ...fields });
     return res.success ? res.id : undefined;
   };
+
+  // ── Guided tour ──
+  const hasSeenTour = !!currentUser.hasSeenTour;
+  // End (finish OR skip): drop the example data + stamp hasSeenTour so it never auto-runs again. The
+  // write rides the parked user-update rules allowlist — silently denied (graceful) until it deploys.
+  const endTour = () => {
+    setTourActive(false);
+    if (!hasSeenTour) void updateUserProfile({ hasSeenTour: true });
+  };
+  // Landing CTAs: Build enters + auto-offers the tour on a first visit (hasSeenTour unset); the "New
+  // here?" link enters + starts the tour unconditionally. The workshop "?" re-runs it any time.
+  const startTour = () => setTourActive(true);
+  const enterViaBuild = () => { setEntered(true); if (!hasSeenTour) setTourActive(true); };
+  const enterViaTour = () => { setEntered(true); setTourActive(true); };
+
+  // While the tour runs the workshop shows the PURE example fixture (never persisted); otherwise the
+  // real manuscript-scoped data. The example writes are no-ops (host handlers ignore them).
+  const noop = () => undefined;
+  const wsVersions = tourActive ? EXAMPLE_VERSIONS : msVersions;
+  const wsPackages = tourActive ? EXAMPLE_PACKAGES : msPackages;
+  const wsQueries = tourActive ? EXAMPLE_QUERIES : msQueries;
+  const wsAgents = tourActive ? EXAMPLE_AGENTS : agents;
 
   // Book glyph for the manuscript selector — burgundy strokes.
   const bookIcon = (
@@ -157,18 +184,23 @@ export const SubmissionPackages: React.FC = () => {
           </div>
         </div>
       ) : msPackages.length === 0 && !entered ? (
-        <FirstVisitHome onBuild={() => setEntered(true)} onTour={() => setEntered(true)} />
+        <FirstVisitHome onBuild={enterViaBuild} onTour={enterViaTour} />
       ) : (
         <PackageWorkshop
-          versions={msVersions}
-          packages={msPackages}
-          queries={msQueries}
-          agents={agents}
-          onCreateVersion={createVersion}
-          onUpdateVersion={(id, f) => updateVersion(id, f)}
-          onDeleteVersion={(id) => deleteVersion(id)}
-          onSavePackage={savePackage}
+          versions={wsVersions}
+          packages={wsPackages}
+          queries={wsQueries}
+          agents={wsAgents}
+          onCreateVersion={tourActive ? noop : createVersion}
+          onUpdateVersion={tourActive ? noop : (id, f) => updateVersion(id, f)}
+          onDeleteVersion={tourActive ? noop : (id) => deleteVersion(id)}
+          onSavePackage={tourActive ? noop : savePackage}
+          onStartTour={startTour}
         />
+      )}
+
+      {tourActive && (
+        <Tour steps={WORKSHOP_TOUR_STEPS} onDone={endTour} badge="Example data — cleared when the tour ends" />
       )}
     </div>
   );
