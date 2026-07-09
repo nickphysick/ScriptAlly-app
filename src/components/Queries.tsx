@@ -131,6 +131,16 @@ function formatWhatsAppDate(dateString: string): string {
    token cascades to ChromeSlab's inner row, so no shared internals are edited. Queries route only. */
 const QUERIES_PLAIN_MASTHEAD = { background: "transparent", border: "none", boxShadow: "none", "--hub-mast-pad": "6px 2px" } as React.CSSProperties;
 
+/* Send-method label for the What-you-sent "Sent by {method}" line (ref shows lower-case forms). */
+const sentViaLabel = (method?: string): string => {
+  if (!method) return "";
+  const m = method.toLowerCase().trim();
+  if (m === "email") return "email";
+  if (m === "online form" || m === "online_form") return "online form";
+  if (m === "querymanager" || m === "query manager") return "QueryManager";
+  return method;
+};
+
 /* ── Command-bar button (v2, ref queries-hub-v2.html .c) — icon+label SIDE-BY-SIDE, flat (no fill),
    faint hover; greyed-not-hidden when disabled so the bar keeps its shape. `primary` = coffee icon
    (#6f4e37) + semibold label; `dim`/`iconOnly` = the muted PDF · ⋯ pair. Badge renders inline after
@@ -2850,77 +2860,70 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                             : (Array.isArray(activeAgent.materialsWanted) ? activeAgent.materialsWanted : []);
                           const materials = mats.map(formatQueryMaterial).filter(Boolean);
                           const linkedPackage = activeQuery.packageId ? packages.find(p => p.id === activeQuery.packageId) : null;
-                          const minilabel: React.CSSProperties = { fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: "0.15em", textTransform: "uppercase", color: "#a89a8a" };
-                          const pillStyle: React.CSSProperties = { display: "inline-flex", alignItems: "center", fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 500, color: "#6a5b4c", background: "#fdfaf5", border: "1px solid #ddcdbb", borderRadius: 999, padding: "4px 11px" };
                           const pkgComponents = linkedPackage
                             ? [["Query letter", linkedPackage.queryLetterVersionId], ["Synopsis", linkedPackage.synopsisVersionId], ["Sample pages", linkedPackage.samplePagesVersionId]].filter(([, v]) => !!v).map(([l]) => l as string)
                             : [];
                           const isPro = currentUser?.plan === UserPlan.PRO;
-                          const proBadge = (ml: number) => (<span style={{ display: "inline-block", fontFamily: FONT_MONO, fontSize: 7, fontWeight: 500, letterSpacing: ".1em", textTransform: "uppercase" as const, color: "#fff", background: "#6A89A7", border: "1px solid #4f6e8a", borderRadius: 999, padding: "2px 7px", marginLeft: ml, verticalAlign: "middle" }}>Pro</span>);
                           const openPackages = () => onNavigate?.("manuscripts", "Submission packages");
+                          const method = sentViaLabel(activeQuery.sendMethod || activeAgent.submissionMethod);
+                          // dateSent is optional (undated imports) — render the date only when present, never invent one.
+                          const sentDate = activeQuery.dateSent ? new Date(activeQuery.dateSent).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "";
+                          const EXPECTED = ["Query letter", "Synopsis", "Sample chapters"];
+
+                          const proChip = (auto?: boolean) => (<span style={{ ...(auto ? { marginLeft: "auto" } : { marginLeft: 6 }), fontFamily: FONT_MONO, fontSize: 7.5, letterSpacing: ".1em", textTransform: "uppercase" as const, color: "#fff", background: "#6A89A7", borderRadius: 6, padding: "3px 7px", whiteSpace: "nowrap" as const }}>PRO</span>);
+                          const addlinkStyle: React.CSSProperties = { display: "inline-flex", alignItems: "center", gap: 7, fontFamily: "'Inter',sans-serif", fontSize: 12, color: "#8f877b", marginTop: 14, cursor: "pointer" };
+                          const matRow = (label: string, miss: boolean, last: boolean, k: React.Key) => (
+                            <div key={k} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 0", borderBottom: last ? "none" : "1px solid var(--bd)", fontFamily: "'Inter',sans-serif", fontSize: 13.5, color: miss ? "#8f877b" : "var(--hub-item, #1a1512)" }}>
+                              <span style={{ width: 17, height: 17, borderRadius: "50%", flexShrink: 0, display: "grid", placeItems: "center", fontSize: 9, ...(miss ? { background: "transparent", border: "1.5px dashed #cfc3b1", color: "transparent" } : { background: "#eef3eb", color: "#4a5d45" }) }}>✓</span>
+                              {label}
+                            </div>
+                          );
+                          const sentLine = method ? (
+                            <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: ".07em", textTransform: "uppercase" as const, color: "#8f877b", marginTop: 14 }}>
+                              Sent by <span style={{ color: "var(--hub-item, #1a1512)" }}>{method}</span>{sentDate && <>&nbsp;·&nbsp;<span style={{ color: "var(--hub-item, #1a1512)" }}>{sentDate}</span></>}
+                            </div>
+                          ) : null;
+
                           return (
                             <>
-                              {/* title + book icon */}
-                              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#7c3a2a" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H19v15H6a2 2 0 0 0-2 2z" /><path d="M4 19.5A1.5 1.5 0 0 1 5.5 18H19" /></svg>
-                                <span style={{ fontFamily: FONT_SERIF, fontSize: 18, fontWeight: 600, color: "#241c15", lineHeight: 1.15 }}>{activeMs.title}</span>
+                              {/* shared skeleton — book icon + manuscript title */}
+                              <div style={{ display: "flex", alignItems: "center", gap: 9, fontFamily: FONT_SERIF, fontWeight: 700, fontSize: 18, color: "var(--hub-item, #1a1512)", lineHeight: 1.15 }}>
+                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#6f4e37" strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M5 3h11l3 3v15H5zM9 3v6l2-1 2 1V3" /></svg>
+                                <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{activeMs.title}</span>
                               </div>
-                              {/* meta line — sage genre tag + muted word count */}
-                              <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 10 }}>
-                                {activeMs.genre && <span style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".1em", textTransform: "uppercase" as const, color: "#5a6e58", background: "#eef2ec", border: "1px solid #d8e0d4", borderRadius: 999, padding: "3px 10px" }}>{activeMs.genre}</span>}
-                                {!!activeMs.wordCount && <span style={{ fontFamily: FONT_MONO, fontSize: 10.5, color: "#a89a8a", letterSpacing: ".03em" }}>{activeMs.wordCount.toLocaleString()} words</span>}
-                              </div>
-                              {/* Sent via {method} — no date (that lives in Tracking) */}
-                              {activeQuery.sendMethod && (
-                                <div style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".08em", textTransform: "uppercase" as const, color: "#8a7d6c", marginBottom: 15 }}>Sent via {activeQuery.sendMethod}</div>
-                              )}
+
                               {linkedPackage ? (
-                                /* Package attached — show its contents, no upsell */
-                                <div>
-                                  <div style={{ ...minilabel, display: "block", marginBottom: 8 }}>Submission package{proBadge(6)}</div>
-                                  <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 600, color: "#241c15", marginBottom: 7 }}>{linkedPackage.packageName}</div>
-                                  {pkgComponents.length > 0 && <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>{pkgComponents.map((c, i) => <span key={i} style={pillStyle}>{c}</span>)}</div>}
-                                </div>
+                                /* PRO — slate bundle card (no package-level version field exists; name only). */
+                                <>
+                                  <div style={{ border: "1px solid #cfd9e2", background: "#f4f7fa", borderRadius: 11, padding: "12px 14px", marginTop: 12 }}>
+                                    <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 13.5, color: "#2e4257" }}>
+                                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2e4257" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18M9 21V9" /></svg>
+                                      <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{linkedPackage.packageName}</span>
+                                      {proChip(true)}
+                                    </div>
+                                    {pkgComponents.length > 0 && <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 11.5, color: "#5a6e80", marginTop: 5 }}>{pkgComponents.join(" · ")}</div>}
+                                  </div>
+                                  {sentLine}
+                                  <div role="button" tabIndex={0} onClick={openPackages} style={addlinkStyle}>✎ Edit package</div>
+                                </>
+                              ) : materials.length > 0 ? (
+                                /* FREE, materials added — ticked checklist (names only, no detail column). */
+                                <>
+                                  <div style={{ marginTop: 10 }}>
+                                    {materials.map((m, i) => matRow(m, false, i === materials.length - 1, i))}
+                                  </div>
+                                  {sentLine}
+                                  <div role="button" tabIndex={0} onClick={openPackages} style={addlinkStyle}>＋ Attach a submission package{!isPro && proChip()}</div>
+                                </>
                               ) : (
-                                <div>
-                                  <div style={{ fontFamily: FONT_SERIF, fontWeight: 700, fontSize: 14, color: "#2c2017", marginBottom: 9 }}>Materials:</div>
-                                  {materials.length > 0 ? (
-                                    <>
-                                      {/* recorded — ticked checklist */}
-                                      <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-                                        {materials.map((m, i) => (
-                                          <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "'Inter',sans-serif", fontSize: 12.5, color: "#2c2017" }}>
-                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8a7d6c" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M14 3v5h5" /><path d="M6 3h9l5 5v11a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 19V4.5A1.5 1.5 0 0 1 6.5 3" /></svg>
-                                            <span style={{ flex: 1, minWidth: 0 }}>{m}</span>
-                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5a6e58" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M20 6 9 17l-5-5" /></svg>
-                                          </div>
-                                        ))}
-                                      </div>
-                                      {/* non-Pro upsell (only when no package attached) */}
-                                      {!isPro && (
-                                        <div style={{ marginTop: 15, fontFamily: "'Inter',sans-serif", fontSize: 12, lineHeight: 1.5, color: "#8a7d6c" }}>
-                                          <span style={{ fontWeight: 700, color: "#3a2c24" }}>Ready for serious insights?</span><br />
-                                          Attach a <span role="button" tabIndex={0} onClick={openPackages} style={{ color: "#42637e", fontWeight: 600, cursor: "pointer", borderBottom: "1px solid #c2d2de" }}>submission package</span>{proBadge(4)} and track performance across versions
-                                        </div>
-                                      )}
-                                    </>
-                                  ) : (
-                                    <>
-                                      {/* empty — matched dashed / no-fill materials + package tiles either side of "or"
-                                          (materials mirrors the submission-package field; the package keeps its PRO badge) */}
-                                      <span role="button" tabIndex={0} onClick={() => openEditQuery(activeQuery.id)} style={{ display: "flex", alignItems: "center", gap: 8, background: "transparent", border: "1.5px dashed #cbb6a6", borderRadius: 10, padding: "9px 12px", fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 500, color: "#6a5f52", cursor: "pointer" }}>
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M15.5 3.5 7 12a3 3 0 0 0 4.2 4.2l8-8a5 5 0 0 0-7-7l-8.2 8.2a7 7 0 0 0 9.9 9.9l7.3-7.3" /></svg>
-                                        Add the materials you sent
-                                      </span>
-                                      <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, color: "#9a8e80", margin: "8px 0" }}>or</div>
-                                      <div role="button" tabIndex={0} onClick={openPackages} style={{ position: "relative", display: "flex", alignItems: "center", gap: 8, background: "transparent", border: "1.5px dashed #cbb6a6", borderRadius: 10, padding: "9px 12px", fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 500, color: "#6a5f52", cursor: "pointer" }}>
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" style={{ flexShrink: 0 }}><path d="M12 5v14M5 12h14" /></svg>
-                                        Add a submission package
-                                        <span style={{ position: "absolute", top: -8, right: 10, fontFamily: FONT_MONO, fontSize: 7, fontWeight: 500, letterSpacing: ".1em", textTransform: "uppercase" as const, color: "#fff", background: "#6A89A7", border: "1px solid #4f6e8a", borderRadius: 999, padding: "2px 7px" }}>Pro</span>
-                                      </div>
-                                    </>
-                                  )}
-                                </div>
+                                /* EMPTY — dashed add button ABOVE the hollow-dashed expected list (generic labels). */
+                                <>
+                                  <div role="button" tabIndex={0} onClick={() => openEditQuery(activeQuery.id)} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 9, border: "1.5px dashed #d3c5b0", borderRadius: 11, padding: 12, color: "#5f4f3c", fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 13, margin: "12px 0 4px", cursor: "pointer" }}>❏ Add the materials you sent</div>
+                                  <div>
+                                    {EXPECTED.map((l, i) => matRow(l, true, i === EXPECTED.length - 1, l))}
+                                  </div>
+                                  <div role="button" tabIndex={0} onClick={openPackages} style={{ ...addlinkStyle, marginTop: 12 }}>＋ Attach a submission package{!isPro && proChip()}</div>
+                                </>
                               )}
                             </>
                           );
