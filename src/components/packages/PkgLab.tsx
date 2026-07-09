@@ -61,11 +61,14 @@ export const PkgLab: React.FC = () => {
   const [theme, setTheme] = useState<Theme>("t-capp");
   const [view, setView] = useState<View>("landing");
   const [tour, setTour] = useState(false);
+  const [pulseAdd, setPulseAdd] = useState(false);
   // Stateful so the workshop's create/save round-trips in the lab.
   const [versions, setVersions] = useState<ManuscriptVersion[]>(MOCK_VERSIONS);
   const [pkgs, setPkgs] = useState<SubmissionPackage[]>(MOCK_PACKAGES);
   const noop = () => {};
-  const startTour = () => { setView("full"); setTour(true); };
+  const startTour = () => { setView("full"); setTour(true); setPulseAdd(false); };
+  // Mirror the real flow: the tour ends into the (empty) workshop with the Add-materials pulse.
+  const endTour = () => { setTour(false); setView("empty"); setPulseAdd(true); };
 
   // The empty view starts materials-clear so the FR4 middle + analytics empty states show.
   const emptyVersions: ManuscriptVersion[] = [];
@@ -92,7 +95,7 @@ export const PkgLab: React.FC = () => {
         <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--muted)" }}>#/pkg-lab</span>
         <div style={{ display: "flex", gap: 6 }}>
           {(["landing", "empty", "full"] as View[]).map((v) => (
-            <button key={v} type="button" onClick={() => setView(v)} style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".04em", textTransform: "uppercase", padding: "7px 13px", borderRadius: 8, cursor: "pointer", border: "1px solid var(--bd)", background: view === v ? "var(--band)" : "#fffefb", color: view === v ? "var(--burg)" : "var(--ink)" }}>
+            <button key={v} type="button" onClick={() => { setView(v); setTour(false); setPulseAdd(false); }} style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".04em", textTransform: "uppercase", padding: "7px 13px", borderRadius: 8, cursor: "pointer", border: "1px solid var(--bd)", background: view === v ? "var(--band)" : "#fffefb", color: view === v ? "var(--burg)" : "var(--ink)" }}>
               {v === "landing" ? "Landing" : v === "empty" ? "Empty workshop" : "Full workshop"}
             </button>
           ))}
@@ -123,6 +126,8 @@ export const PkgLab: React.FC = () => {
             onDeleteVersion={noop}
             onSavePackage={() => `p-lab-${pkgs.length}`}
             onStartTour={startTour}
+            pulseAddMaterials={pulseAdd}
+            onDismissPulse={() => setPulseAdd(false)}
           />
         ) : (
           <PackageWorkshop
@@ -146,7 +151,7 @@ export const PkgLab: React.FC = () => {
           />
         )}
       </div>
-      {tour && <Tour steps={WORKSHOP_TOUR_STEPS} onDone={() => setTour(false)} badge="Example data — cleared when the tour ends" />}
+      {tour && <Tour steps={WORKSHOP_TOUR_STEPS} onDone={endTour} badge="Example data — cleared when the tour ends" />}
     </div>
   );
 };

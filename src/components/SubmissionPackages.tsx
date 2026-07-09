@@ -38,6 +38,8 @@ export const SubmissionPackages: React.FC = () => {
   // The guided tour. While active the workshop renders the PURE example fixture (never persisted) and
   // the gold badge; on end we clear it and stamp hasSeenTour so it never auto-runs again.
   const [tourActive, setTourActive] = useState(false);
+  // Pulse the "＋ Add materials" affordance after the tour ends with no materials yet (FR4).
+  const [pulseAdd, setPulseAdd] = useState(false);
 
   // Default to the first manuscript when none is selected / the saved one is gone.
   useEffect(() => {
@@ -94,6 +96,8 @@ export const SubmissionPackages: React.FC = () => {
   const endTour = () => {
     setTourActive(false);
     if (!hasSeenTour) void updateUserProfile({ hasSeenTour: true });
+    // The tour ends on the empty workshop — nudge the writer to their first real action.
+    if (msVersions.length === 0) setPulseAdd(true);
   };
   // Landing CTAs: Build enters + auto-offers the tour on a first visit (hasSeenTour unset); the "New
   // here?" link enters + starts the tour unconditionally. The workshop "?" re-runs it any time.
@@ -196,6 +200,8 @@ export const SubmissionPackages: React.FC = () => {
           onDeleteVersion={tourActive ? noop : (id) => deleteVersion(id)}
           onSavePackage={tourActive ? noop : savePackage}
           onStartTour={startTour}
+          pulseAddMaterials={pulseAdd && !tourActive}
+          onDismissPulse={() => setPulseAdd(false)}
         />
       )}
 

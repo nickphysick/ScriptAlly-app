@@ -87,9 +87,14 @@ export interface PackageWorkshopProps {
   onSavePackage: (baseId: string | null, fields: PackageSaveFields) => Promise<string | undefined> | string | undefined;
   /** Re-run the guided tour (the workshop-header "?" chip). Absent → the chip is hidden. */
   onStartTour?: () => void;
+  /** Pulse the "＋ Add materials" affordance (set by the host when the tour ends with 0 materials).
+   *  Only shown while materials are still empty; cleared via onDismissPulse on the first click. */
+  pulseAddMaterials?: boolean;
+  /** Clear the add-materials pulse (called on the first Add-materials click). */
+  onDismissPulse?: () => void;
 }
 
-export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, packages, queries, agents, onCreateVersion, onUpdateVersion, onDeleteVersion, onSavePackage, onStartTour }) => {
+export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, packages, queries, agents, onCreateVersion, onUpdateVersion, onDeleteVersion, onSavePackage, onStartTour, pulseAddMaterials, onDismissPulse }) => {
   // Mode (Phase A): "packages" (build/assemble) or "materials" (edit the library). The palette + the
   // middle + the right window all follow it; the breadcrumb reflects it. selMat = the material being
   // edited in materials mode. Palette inline-create is GONE — creation now lives in the editor (Phase B).
@@ -523,6 +528,23 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
         .pkgwk .newpkg-card .pl { font-size:27px; font-weight:300; line-height:1; }
         .pkgwk .newpkg-card .nl { font-family:${FONT_SERIF}; font-size:15px; font-weight:600; }
 
+        /* FR4 — pre-materials empty states (ref .mid-empty / .an-empty) + the add-materials pulse. */
+        .pkgwk .mid-empty { height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:6px; padding:30px; }
+        .pkgwk .me-illo { width:120px; height:96px; opacity:.85; margin-bottom:6px; }
+        .pkgwk .me-title { font-family:${FONT_SERIF}; font-size:22px; font-weight:800; color:var(--hdr); }
+        .pkgwk .me-sub { font-size:12.5px; color:var(--muted); line-height:1.6; max-width:340px; }
+        .pkgwk .me-cta { margin-top:14px; font-family:${FONT_SERIF}; font-size:15px; font-weight:700; color:var(--btnT); background:var(--btnBg); border:1px solid var(--btnBd); border-radius:11px; padding:12px 26px; cursor:pointer; }
+        .pkgwk .me-cta:hover { background:var(--btnH); }
+        .pkgwk .an-empty { height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:6px; padding:20px; }
+        .pkgwk .ae-illo { width:110px; height:84px; opacity:.7; margin-bottom:8px; }
+        .pkgwk .ae-title { font-family:${FONT_SERIF}; font-size:17px; font-weight:800; color:var(--hdr); }
+        .pkgwk .ae-sub { font-size:12px; color:var(--muted); line-height:1.6; max-width:280px; }
+        @keyframes wkMatPulse { 0%,100% { box-shadow:0 0 0 0 var(--wk-pulse-ring); } 50% { box-shadow:0 0 0 9px rgba(124,58,42,0); } }
+        .pkgwk { --wk-pulse-ring:rgba(124,58,42,.35); }
+        .t-edn .pkgwk { --wk-pulse-ring:rgba(68,72,77,.35); }
+        .pkgwk .pal-toph .em.pulse { animation:wkMatPulse 1.8s ease-out infinite; border-color:var(--wk-burg); color:var(--wk-burg); font-weight:600; }
+        @media (prefers-reduced-motion: reduce) { .pkgwk .pal-toph .em.pulse { animation:none; box-shadow:0 0 0 3px var(--wk-pulse-ring); } }
+
         /* Analytics body: scope toggle + panel */
         .pkgwk .wk-scope { display:flex; gap:3px; background:var(--wk-scopebg); border-radius:9px; padding:3px; margin:20px 22px 0; }
         .pkgwk .wk-scope button { flex:1; font-family:${FONT_MONO}; font-size:9px; border:0; background:transparent; color:var(--muted); padding:10px 4px; border-radius:7px; cursor:pointer; text-transform:uppercase; }
@@ -629,12 +651,12 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
             <div className="wk-palette" id="tgt-palette">
               <div className="pal-toph">
                 <span className="pl">Your materials</span>
-                <span className="em" id="tgt-editmat" role="button" tabIndex={0} onClick={() => enterMode(mode === "materials" ? "packages" : "materials")} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); enterMode(mode === "materials" ? "packages" : "materials"); } }}>
-                  {mode === "materials" ? "✓ Done" : "Edit materials →"}
+                <span className={`em${pulseAddMaterials && versions.length === 0 && mode !== "materials" ? " pulse" : ""}`} id="tgt-editmat" role="button" tabIndex={0} onClick={() => { onDismissPulse?.(); enterMode(mode === "materials" ? "packages" : "materials"); }} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onDismissPulse?.(); enterMode(mode === "materials" ? "packages" : "materials"); } }}>
+                  {mode === "materials" ? "✓ Done" : versions.length === 0 ? "＋ Add materials" : "Edit materials →"}
                 </span>
               </div>
               {versions.length === 0 && (
-                <div className="pal-teach">No materials yet — hit <b>Edit materials</b> to write your first letter, synopsis or pages.</div>
+                <div className="pal-teach">No materials yet — hit <b>Add materials</b> to write your first letter, synopsis or pages.</div>
               )}
               {BUILDER_TYPES.map((t) => {
                 const items = versions.filter((v) => v.componentType === t);
@@ -675,6 +697,21 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
             </div>
             <div className="wk-building">
               {mode === "packages" ? (
+                versions.length === 0 ? (
+                  <div className="mid-empty">
+                    <svg className="me-illo" viewBox="0 0 120 96" fill="none" stroke="var(--wk-burg)" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M34 20h38a2 2 0 012 2v50a2 2 0 01-2 2H34a2 2 0 01-2-2V22a2 2 0 012-2z" />
+                      <path d="M40 32h26M40 40h26M40 48h18" opacity=".45" />
+                      <path d="M84 34l10 10L64 74l-13 3 3-13z" />
+                      <path d="M81 37l10 10" />
+                      <path d="M97 22c3 2 4 6 2 8" stroke="var(--wk-gold)" />
+                      <path d="M102 17c1 1 1 3 0 4" stroke="var(--wk-gold)" />
+                    </svg>
+                    <div className="me-title">First, add your materials</div>
+                    <div className="me-sub">Write or paste your query letter, synopsis and sample pages. Once they&rsquo;re in your library, you&rsquo;ll build them into packages right here.</div>
+                    <button type="button" className="me-cta" onClick={() => { onDismissPulse?.(); enterMode("materials"); }}>＋ Add materials</button>
+                  </div>
+                ) : (
                 <>
               <div className="bench-lab"><span className="dotp" />Active package — drag materials from the left, or click to add</div>
               {active && activeId ? (
@@ -778,6 +815,7 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
                 <button type="button" className="newpkg-card" onClick={newPackage}><span className="pl">＋</span><span className="nl">New package</span></button>
               </div>
                 </>
+                )
               ) : (
                 <div className="med">
                   <div className="med-lab"><span className="dotp" />Editing materials — pick from the left, or start new</div>
@@ -838,14 +876,32 @@ export const PackageWorkshop: React.FC<PackageWorkshopProps> = ({ versions, pack
         {/* ANALYTICS window — follows the mode: package stats while building, material stats while editing. */}
         <section className="wk-win wk-analytics" id="tgt-analytics">
           <div className="wk-h"><span className="wk-ri">{mode === "materials" ? materialIcon : chartIcon}</span><h3>{mode === "materials" ? "Material analytics" : "Package analytics"}</h3></div>
-          {mode === "packages" && (
+          {mode === "packages" && packages.length > 0 && (
             <div className="wk-scope">
               <button type="button" className={anScope === "package" ? "on" : ""} onClick={() => setAnScope("package")}>This package</button>
               <button type="button" className={anScope === "all" ? "on" : ""} onClick={() => setAnScope("all")}>All packages</button>
             </div>
           )}
           <div className="wk-anbody">
-            {mode === "materials" ? renderMaterialAnalytics() : anScope === "package" ? renderThisPackage() : renderAllPackages()}
+            {mode === "materials" ? (
+              renderMaterialAnalytics()
+            ) : packages.length === 0 ? (
+              <div className="an-empty">
+                <svg className="ae-illo" viewBox="0 0 110 84" fill="none" stroke="var(--wk-acc)" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M18 70V44M38 70V28M58 70V52M78 70V36" opacity=".4" strokeDasharray="3 5" />
+                  <path d="M12 70h86" />
+                  <path d="M14 58l20-16 18 12 26-22" />
+                  <path d="M70 32h8v8" />
+                  <circle cx="34" cy="42" r="1.6" fill="var(--wk-acc)" />
+                </svg>
+                <div className="ae-title">Nothing to measure yet</div>
+                <div className="ae-sub">Build a package and attach it to a query in the Queries Hub — its results appear here, and you&rsquo;ll see which version wins requests.</div>
+              </div>
+            ) : anScope === "package" ? (
+              renderThisPackage()
+            ) : (
+              renderAllPackages()
+            )}
           </div>
         </section>
       </div>
