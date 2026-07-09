@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Workshop first-run: empty state + walkthrough</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--desk:#e8ddd0;--card:#fffefb;--bd:#d8cebf;--bdw:1px;--band-a:#ece5d8;--band-b:#e5ddcd;
+  --hdr:#5d4037;--ink:#241c15;--muted:#9a8c80;--burg:#7c3a2a;--acc2:#5a6e58;--gold:#a8842c;
+  --sel:#f3ede2;--btnBg:#fff;--btnBd:#ded3c2;--btnT:#5d4037;--btnH:#f4f2ef;--dash:#c9bca8;
+  --pink:#f5e2da;--pink-b:#e8c8bc;--pink-h:#efd5ca;--tl:#f6ddd3;--ts:#e7ece4;--tp:#f3e6cf;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;color:#241c15;background:#efeae4;padding:24px 16px 70px;}
+h1{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;text-align:center;}
+.subx{text-align:center;font-size:12.5px;color:#5a4f45;margin:8px auto 16px;max-width:860px;line-height:1.5;}
+.vsw{display:flex;justify-content:center;gap:3px;background:rgba(90,70,55,.1);border-radius:9px;padding:3px;width:430px;margin:0 auto 22px;}
+.vsw button{flex:1;font-family:'JetBrains Mono',monospace;font-size:9px;border:0;background:transparent;color:#7a6b5e;padding:9px 4px;border-radius:6px;cursor:pointer;text-transform:uppercase;}
+.vsw button.on{background:#fff;color:var(--burg);box-shadow:0 1px 2px rgba(58,28,20,.14);font-weight:600;}
+.wrap{max-width:1440px;margin:0 auto;}
+.tg{display:inline-flex;flex-shrink:0;}
+.frame{background:var(--desk);border-radius:18px;overflow:hidden;height:calc(100vh - 190px);min-height:560px;display:flex;flex-direction:column;position:relative;}
+.topbar{display:flex;align-items:center;gap:14px;padding:16px 26px 12px;flex-shrink:0;}
+.crumb{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:var(--hdr);}
+.crumb .root{opacity:.55;} .crumb b{font-weight:600;}
+.mschip{margin-left:auto;display:inline-flex;align-items:center;gap:9px;background:var(--card);border:var(--bdw) solid var(--bd);border-radius:10px;padding:9px 15px;font-weight:600;font-size:13px;color:var(--hdr);}
+
+/* ========== VIEW 1: landing (0 packages) ========== */
+.landing{flex:1;margin:0 26px 24px;background:#fffefb;border:var(--bdw) solid var(--bd);border-radius:16px;overflow-y:auto;padding:34px 40px 30px;}
+.st2{display:flex;align-items:center;justify-content:center;gap:40px;}
+.st2 h2{font-family:'Playfair Display',serif;font-size:42px;font-weight:800;line-height:1.08;letter-spacing:-.7px;color:var(--ink);}
+.st2 .sl{font-size:14px;color:#6a594d;line-height:1.6;max-width:380px;margin-top:14px;}
+.buildp{display:inline-flex;align-items:center;gap:8px;margin-top:22px;font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--ink);background:var(--pink);border:1px solid var(--pink-b);border-radius:12px;padding:15px 30px;cursor:pointer;}
+.buildp:hover{background:var(--pink-h);}
+.tourlink{display:block;margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;color:var(--burg);text-decoration:underline;text-underline-offset:3px;cursor:pointer;}
+.pkui{width:296px;background:#fffefb;border:var(--bdw) solid var(--bd);border-radius:12px;overflow:hidden;box-shadow:0 16px 40px rgba(58,28,20,.13);transform:rotate(1.2deg);flex-shrink:0;}
+.pkui-h{padding:11px 16px;border-bottom:var(--bdw) solid var(--bd);display:flex;align-items:center;gap:9px;background:var(--ts);}
+.pkui-h .nm{font-family:'Playfair Display',serif;font-size:15.5px;font-weight:700;}
+.pkln{display:flex;align-items:center;gap:9px;font-size:12px;color:#5f5044;padding:3.5px 0;}
+.dd{width:7px;height:7px;border-radius:50%;background:var(--burg);flex-shrink:0;}
+.winrow{margin-top:10px;background:#fffefb;border:var(--bdw) solid var(--bd);border-left:4px solid var(--burg);border-radius:0 8px 8px 0;padding:8px 12px;}
+.winrow .wl{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--burg);}
+.winrow .wv{font-size:13px;font-weight:600;margin-top:2px;}
+.divrule{display:flex;align-items:center;gap:14px;margin:30px 10px 0;}
+.divrule::before,.divrule::after{content:'';flex:1;height:1px;background:#e6dac8;}
+.divrule span{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--hdr);}
+.a2s{text-align:center;font-size:12.5px;color:#7a685a;margin:10px auto 0;max-width:520px;}
+.librow{display:flex;justify-content:center;gap:16px;margin-top:18px;flex-wrap:wrap;}
+.lib{flex:0 1 250px;background:#fffefb;border:var(--bdw) solid var(--bd);border-radius:11px;overflow:hidden;box-shadow:0 8px 20px rgba(58,28,20,.09);cursor:pointer;text-align:left;}
+.lib:hover{transform:translateY(-3px);}
+.lib-h{display:flex;align-items:center;gap:8px;padding:8px 14px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;border-bottom:var(--bdw) solid var(--bd);}
+.lib-h.xl{background:var(--tl);color:var(--burg);} .lib-h.xs{background:var(--ts);color:var(--acc2);} .lib-h.xp{background:var(--tp);color:var(--gold);}
+.lib-h .ex{margin-left:auto;background:rgba(255,254,251,.8);border-radius:4px;padding:2px 6px;font-size:6.5px;}
+.lib-b{padding:11px 14px 13px;}
+.lt2{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.14em;text-transform:uppercase;color:#b3a291;}
+.lib .ti{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;margin:2px 0 8px;}
+.lfchip{display:inline-flex;align-items:center;gap:6px;background:#fdfaf5;border:1px solid #e4d8c6;border-radius:7px;padding:5px 9px;font-family:'JetBrains Mono',monospace;font-size:8px;color:#5d5247;}
+
+/* ========== VIEW 2/3: workshop ========== */
+.shopwrap{flex:1;display:flex;gap:20px;margin:0 26px 24px;min-height:0;}
+.window{background:var(--card);border:var(--bdw) solid var(--bd);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 8px 26px rgba(40,28,18,.10);min-height:0;}
+.window.left{flex:1;min-width:0;}
+.window.right{width:360px;flex-shrink:0;}
+.win-h{display:flex;align-items:center;gap:12px;padding:14px 22px;background:linear-gradient(135deg,var(--band-a),var(--band-b));border-bottom:var(--bdw) solid var(--bd);flex-shrink:0;}
+.win-h .ri{color:var(--hdr);display:flex;}
+.win-h h3{font-family:'Playfair Display',serif;font-size:17px;font-weight:800;color:var(--hdr);}
+.wbody{display:flex;flex:1;min-height:0;}
+.palette{background:var(--card);border-right:var(--bdw) solid var(--bd);padding:18px;width:246px;flex-shrink:0;overflow-y:auto;}
+.pal-toph{display:flex;align-items:center;margin-bottom:12px;}
+.pal-toph .pl{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.pal-toph .em{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--burg);cursor:pointer;border:1px solid var(--btnBd);border-radius:7px;padding:5px 9px;background:var(--card);}
+.pal-teach{font-size:12px;font-style:italic;color:var(--muted);line-height:1.55;margin-bottom:14px;}
+.dchip{display:flex;align-items:center;gap:10px;background:var(--card);border:var(--bdw) solid var(--bd);border-radius:10px;padding:10px 12px;margin-bottom:8px;box-shadow:0 1px 2px rgba(40,28,18,.04);}
+.dchip .cg{width:26px;height:26px;border-radius:7px;background:var(--sel);color:var(--burg);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;}
+.dchip .cn{font-family:'Playfair Display',serif;font-size:13.5px;font-weight:600;color:var(--ink);line-height:1.1;}
+.dchip .cf{font-family:'JetBrains Mono',monospace;font-size:7px;color:var(--muted);margin-top:1px;}
+.dchip .grip{margin-left:auto;color:var(--dash);font-size:12px;letter-spacing:-2px;}
+.pal-teach b{color:var(--burg);font-style:normal;}
+.palgroup-h{display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--hdr);margin:14px 0 8px;}
+.palgroup-h .g{color:var(--burg);}
+.middle{flex:1;min-width:0;padding:20px 24px;overflow-y:auto;}
+.bench-lab{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--burg);display:flex;align-items:center;gap:9px;margin-bottom:12px;}
+.bench-lab .dotp{width:9px;height:9px;border-radius:50%;background:var(--burg);box-shadow:0 0 0 4px rgba(124,58,42,.14);}
+.mid-empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;padding:30px;}
+.me-illo{width:120px;height:96px;opacity:.85;margin-bottom:6px;}
+.me-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:800;color:var(--hdr);}
+.me-sub{font-size:13px;color:var(--muted);line-height:1.6;max-width:340px;}
+.me-cta{margin-top:14px;font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--ink);background:var(--pink);border:1px solid var(--pink-b);border-radius:11px;padding:12px 26px;cursor:pointer;}
+.me-cta:hover{background:var(--pink-h);}
+.pkg{background:var(--card);border:var(--bdw) solid var(--bd);border-radius:14px;overflow:hidden;max-width:640px;box-shadow:0 10px 26px rgba(58,28,20,.10);}
+.pkg-h{display:flex;align-items:center;padding:13px 20px;background:linear-gradient(135deg,var(--band-a),var(--band-b));border-bottom:var(--bdw) solid var(--bd);}
+.pkg-h .name{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--muted);font-style:italic;}
+.pkg-slots{padding:15px 20px;display:flex;flex-direction:column;gap:10px;}
+.slot{border:1.5px dashed var(--dash);border-radius:11px;padding:14px 15px;display:flex;align-items:center;gap:12px;min-height:60px;}
+.slot .sg{width:30px;height:30px;border-radius:8px;background:var(--sel);color:var(--muted);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.slot .stxt{font-size:13px;color:var(--muted);font-style:italic;}
+.slot .kick{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.slot.filled{border-style:solid;border-color:var(--bd);}
+.fsn{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--ink);}
+.fsf{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);margin-top:2px;}
+.others-lab2{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--hdr);margin:20px 0 10px;}
+.ocard2{display:flex;flex-direction:column;gap:4px;background:var(--card);border:var(--bdw) solid var(--bd);border-radius:12px;padding:13px 15px;max-width:300px;box-shadow:0 2px 8px rgba(40,28,18,.05);}
+.ocard2 b{font-family:'Playfair Display',serif;font-size:15px;color:var(--hdr);}
+.ocard2 span{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);}
+.ocard2 i{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--gold);font-style:normal;margin-top:3px;}
+.pkg-foot{border-top:var(--bdw) solid var(--bd);padding:11px 20px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);}
+.an-b{padding:20px 22px;overflow-y:auto;flex:1;}
+.an-sec{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 11px;}
+.an-hero{background:var(--card);border:var(--bdw) solid var(--bd);border-radius:13px;padding:18px 20px;font-family:'JetBrains Mono',monospace;font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);}
+.an-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;}
+.ae-illo{width:110px;height:84px;opacity:.7;margin-bottom:8px;}
+.ae-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:800;color:var(--hdr);}
+.ae-sub{font-size:12px;color:var(--muted);line-height:1.6;max-width:250px;}
+.agchip{font-family:'JetBrains Mono',monospace;font-size:9px;background:var(--sel);color:var(--hdr);border-radius:7px;padding:5px 10px;}
+.annote{margin-top:13px;font-size:12px;font-style:italic;color:var(--muted);line-height:1.55;background:var(--card);border:var(--bdw) solid var(--bd);border-left:3px solid var(--acc2);border-radius:0 10px 10px 0;padding:12px 14px;}
+
+/* ========== TOUR ========== */
+.demobadge{position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:23;display:none;
+  font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;
+  background:var(--tp);color:var(--gold);border:1px solid #e2cf9f;border-radius:7px;padding:7px 13px;box-shadow:0 4px 12px rgba(40,28,18,.12);}
+.demobadge.on{display:block;}
+.tour-scrim{position:absolute;inset:0;background:rgba(36,28,21,.45);z-index:20;opacity:0;pointer-events:none;transition:opacity .25s;}
+.tour-scrim.on{opacity:1;pointer-events:auto;}
+.tour-ring{position:absolute;border:2.5px solid var(--pink-b);border-radius:16px;box-shadow:0 0 0 6px rgba(245,226,218,.35),0 0 0 3000px rgba(36,28,21,.45);z-index:21;pointer-events:none;transition:all .35s ease;display:none;}
+.tour-ring.on{display:block;}
+.tour-card{position:absolute;z-index:22;width:320px;background:var(--card);border:var(--bdw) solid var(--bd);border-radius:14px;box-shadow:0 18px 44px rgba(30,20,12,.3);overflow:hidden;display:none;transition:all .35s ease;}
+.tour-card.on{display:block;}
+.tc-h{display:flex;align-items:center;gap:10px;padding:12px 17px;background:linear-gradient(135deg,var(--band-a),var(--band-b));border-bottom:var(--bdw) solid var(--bd);}
+.tc-h .stepn{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.08em;color:var(--burg);background:rgba(255,254,251,.75);border-radius:5px;padding:3px 8px;}
+.tc-h h5{font-family:'Playfair Display',serif;font-size:15.5px;font-weight:800;color:var(--hdr);}
+.tc-h .x{margin-left:auto;cursor:pointer;color:var(--hdr);opacity:.55;font-size:14px;}
+.tc-b{padding:14px 17px;font-size:13px;line-height:1.6;color:#4f4136;}
+.tc-b b{color:var(--burg);}
+.tc-f{display:flex;align-items:center;padding:0 17px 14px;gap:10px;}
+.tc-f .skip{font-family:'JetBrains Mono',monospace;font-size:8.5px;text-transform:uppercase;color:var(--muted);cursor:pointer;background:none;border:0;}
+.tc-f .nav{margin-left:auto;display:flex;gap:8px;}
+.tc-f .back{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--btnT);background:var(--btnBg);border:1px solid var(--btnBd);border-radius:8px;padding:8px 13px;cursor:pointer;}
+.tc-f .next{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:var(--ink);background:var(--pink);border:1px solid var(--pink-b);border-radius:9px;padding:8px 18px;cursor:pointer;}
+.tc-f .next:hover{background:var(--pink-h);}
+@keyframes matpulse{0%,100%{box-shadow:0 0 0 0 rgba(124,58,42,.35);}50%{box-shadow:0 0 0 9px rgba(124,58,42,0);}}
+.em.pulse{animation:matpulse 1.8s ease-out infinite;border-color:var(--burg);color:var(--burg);font-weight:600;}
+@media (prefers-reduced-motion: reduce){.em.pulse{animation:none;box-shadow:0 0 0 3px rgba(124,58,42,.25);}}
+</style>
+</head>
+<body>
+
+<h1>First-run system: empty state → workshop → tour</h1>
+<div class="subx">Three states, one flow. <b>0 packages</b> shows the designed landing (headline, demo card, library act) — its CTA opens the workshop and offers the tour. The workshop frame is <b>viewport-fit</b>: windows fill the screen height and scroll inside, never cut off. The <b>tour</b> spotlights each region with brand-styled coach cards. Try: view 1 → "Build your first package" → tour runs.</div>
+<div class="vsw">
+  <button class="on" onclick="setView(1,this)">1 · Landing (0 pkgs)</button>
+  <button onclick="setView(2,this)">2 · Workshop empty</button>
+  <button onclick="setView(3,this)">3 · Workshop + tour</button>
+</div>
+
+<div class="wrap">
+  <div class="frame" id="frame">
+    <div class="topbar">
+      <div class="crumb"><span class="root">Builder</span> / <b>Packages</b></div>
+      <span class="mschip"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v6l2-1.5L12 10V4"/></svg>Murphy's Day Out</span>
+    </div>
+
+    <!-- VIEW 1 -->
+    <div class="landing" id="v1">
+      <div class="st2">
+        <div>
+          <h2>Find out what<br>wins requests</h2>
+          <div class="sl">Send different versions of your submission. ScriptAlly tracks which one gets agents asking for more.</div>
+          <button class="buildp" onclick="enterWorkshop()">＋ Build your first package</button>
+          <span class="tourlink" onclick="enterWorkshop()">New here? We'll show you around →</span>
+        </div>
+        <div class="pkui">
+          <div class="pkui-h"><span class="nm">Character-led · v2</span></div>
+          <div style="padding:12px 16px 14px;">
+            <div class="pkln"><span class="dd"></span>Character-led letter</div>
+            <div class="pkln"><span class="dd"></span>One-page synopsis</div>
+            <div class="pkln"><span class="dd"></span>Chapters 1–3</div>
+            <div class="winrow"><div class="wl">Sent with 4 queries</div><div class="wv">Full manuscript requested ✓</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="divrule"><span>Curate your library of materials</span></div>
+      <div class="a2s">Name each component, pin the actual file so you never lose track, then re-use it across multiple packages.</div>
+      <div class="librow">
+        <div class="lib"><div class="lib-h xl">? Query letter<span class="ex">EXAMPLE</span></div><div class="lib-b"><div class="lt2">Title</div><div class="ti">Comp-led rework</div><span class="lfchip">MDO_Query_v2.docx</span></div></div>
+        <div class="lib"><div class="lib-h xs">≡ Synopsis<span class="ex">EXAMPLE</span></div><div class="lib-b"><div class="lt2">Title</div><div class="ti">One-page synopsis</div><span class="lfchip">MDO_Synopsis.docx</span></div></div>
+        <div class="lib"><div class="lib-h xp">▤ Sample pages<span class="ex">EXAMPLE</span></div><div class="lib-b"><div class="lt2">Title</div><div class="ti">Chapters 1–3</div><span class="lfchip">MDO_Pages_1-3.docx</span></div></div>
+      </div>
+    </div>
+
+    <!-- VIEW 2/3 -->
+    <div class="shopwrap" id="v2" style="display:none;">
+      <div class="window left" id="tgt-workshop">
+        <div class="win-h"><span class="ri"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 00-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 005.4-5.4l-2.5 2.5-2.1-.4-.4-2.1z"/></svg></span><h3>Workshop</h3></div>
+        <div class="wbody">
+          <div class="palette" id="tgt-palette">
+            <div class="pal-toph"><span class="pl">Your materials</span><span class="em" id="tgt-editmat">＋ Add materials</span></div>
+            <div id="palEmpty">
+              <div class="pal-teach">No materials yet — hit <b>Add materials</b> to write your first letter, synopsis or pages.</div>
+              <div class="palgroup-h"><span class="g">?</span>Query letters</div>
+              <div class="palgroup-h"><span class="g">≡</span>Synopses</div>
+              <div class="palgroup-h"><span class="g">▤</span>Sample pages</div>
+            </div>
+            <div id="palDemo" style="display:none;">
+              <div class="palgroup-h"><span class="g">?</span>Query letters</div>
+              <div class="dchip"><span class="cg">?</span><div><div class="cn">Comp-led rework</div><div class="cf">MDO_Query_v2.docx</div></div><span class="grip">⋮⋮</span></div>
+              <div class="dchip"><span class="cg">?</span><div><div class="cn">Character-led letter</div><div class="cf">MDO_Query_char.docx</div></div><span class="grip">⋮⋮</span></div>
+              <div class="palgroup-h"><span class="g">≡</span>Synopses</div>
+              <div class="dchip"><span class="cg">≡</span><div><div class="cn">One-page synopsis</div><div class="cf">MDO_Synopsis.docx</div></div><span class="grip">⋮⋮</span></div>
+              <div class="palgroup-h"><span class="g">▤</span>Sample pages</div>
+              <div class="dchip"><span class="cg">▤</span><div><div class="cn">Chapters 1–3</div><div class="cf">MDO_Pages_1-3.docx</div></div><span class="grip">⋮⋮</span></div>
+            </div>
+          </div>
+          <div class="middle">
+            <div id="benchBlock" style="display:none;height:100%;">
+              <div class="bench-lab"><span class="dotp"></span>Active package — drag materials from the left, or click to add</div>
+              <div class="pkg" id="tgt-bench">
+                <div class="pkg-h"><span class="name" style="color:var(--hdr);font-style:normal;">Character-led · v2</span></div>
+                <div class="pkg-slots">
+                  <div class="slot filled"><span class="sg" style="color:var(--burg);">?</span><div><div class="fsn">Character-led letter</div><div class="fsf">MDO_Query_char.docx</div></div><span class="kick">⇄ SWAP&nbsp;&nbsp;✕</span></div>
+                  <div class="slot filled"><span class="sg" style="color:var(--burg);">≡</span><div><div class="fsn">One-page synopsis</div><div class="fsf">MDO_Synopsis.docx</div></div><span class="kick">⇄ SWAP&nbsp;&nbsp;✕</span></div>
+                  <div class="slot filled"><span class="sg" style="color:var(--burg);">▤</span><div><div class="fsn">Chapters 1–3</div><div class="fsf">MDO_Pages_1-3.docx</div></div><span class="kick">⇄ SWAP&nbsp;&nbsp;✕</span></div>
+                </div>
+                <div class="pkg-foot">SENT WITH 4 QUERIES · <b style="color:var(--acc2);">1 FULL REQUEST</b></div>
+              </div>
+              <div class="others-lab2">Your other packages · 1</div>
+              <div class="ocard2"><b>Comp-led · v1</b><span>Comp-led rework · One-page synopsis</span><i>● Awaiting reply · 3 sent</i></div>
+            </div>
+            <div class="mid-empty" id="midEmpty">
+              <svg class="me-illo" viewBox="0 0 120 96" fill="none" stroke="#7c3a2a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M34 20h38a2 2 0 012 2v50a2 2 0 01-2 2H34a2 2 0 01-2-2V22a2 2 0 012-2z"/>
+                <path d="M40 32h26M40 40h26M40 48h18" opacity=".45"/>
+                <path d="M84 34l10 10L64 74l-13 3 3-13z"/>
+                <path d="M81 37l10 10"/>
+                <path d="M97 22c3 2 4 6 2 8" stroke="#a8842c"/>
+                <path d="M102 17c1 1 1 3 0 4" stroke="#a8842c"/>
+              </svg>
+              <div class="me-title">First, add your materials</div>
+              <div class="me-sub">Write or paste your query letter, synopsis and sample pages. Once they're in your library, you'll build them into packages right here.</div>
+              <button class="me-cta" onclick="document.getElementById('tgt-editmat').click()">＋ Add materials</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="window right" id="tgt-analytics">
+        <div class="win-h"><span class="ri"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M4 20h16"/></svg></span><h3>Package analytics</h3></div>
+        <div class="an-b an-empty" id="anEmpty">
+          <svg class="ae-illo" viewBox="0 0 110 84" fill="none" stroke="#5a6e58" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 70V44M38 70V28M58 70V52M78 70V36" opacity=".4" stroke-dasharray="3 5"/>
+            <path d="M12 70h86"/>
+            <path d="M14 58l20-16 18 12 26-22"/>
+            <path d="M70 32h8v8"/>
+            <circle cx="34" cy="42" r="1.6" fill="#5a6e58"/>
+          </svg>
+          <div class="ae-title">Nothing to measure yet</div>
+          <div class="ae-sub">Build a package and attach it to a query in the Queries Hub — its results appear here, and you'll see which version wins requests.</div>
+        </div>
+        <div class="an-b" id="anDemo" style="display:none;">
+          <div class="an-title" style="font-family:'Playfair Display',serif;font-size:18px;font-weight:800;color:var(--hdr);">Character-led · v2</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:3px;">Active package</div>
+          <div class="an-sec" style="margin-top:20px;">Result so far</div>
+          <div style="background:var(--card);border:var(--bdw) solid var(--bd);border-radius:13px;padding:16px 18px;display:flex;align-items:center;gap:15px;">
+            <span style="font-family:'Playfair Display',serif;font-size:44px;font-weight:800;color:var(--acc2);line-height:.85;">1</span>
+            <span><b style="display:block;font-size:14px;color:var(--hdr);">Full request ✓</b><span style="font-family:'JetBrains Mono',monospace;font-size:8px;text-transform:uppercase;color:var(--muted);">from 4 sent</span></span>
+          </div>
+          <div class="an-sec" style="margin-top:20px;">Sent to</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <span class="agchip">Hartley Books</span><span class="agchip">Vane &amp; Co</span><span class="agchip">Marsh Literary</span><span class="agchip">Ash &amp; Quill</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demobadge" id="demoBadge">EXAMPLE DATA — cleared when the tour ends</div>
+    <!-- TOUR overlay -->
+    <div class="tour-ring" id="ring"></div>
+    <div class="tour-card" id="tcard">
+      <div class="tc-h"><span class="stepn" id="tcStep">1 / 4</span><h5 id="tcTitle"></h5><span class="x" onclick="endTour()">✕</span></div>
+      <div class="tc-b" id="tcBody"></div>
+      <div class="tc-f"><button class="skip" onclick="endTour()">Skip tour</button><span class="nav"><button class="back" id="tcBack" onclick="tourStep(-1)">‹ Back</button><button class="next" id="tcNext" onclick="tourStep(1)">Next ›</button></span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const STEPS=[
+ {t:'tgt-palette',title:'Your materials',body:'The pieces of your submission live here — <b>letters, synopses and sample pages</b>. We’ve filled it with an example library so you can see how yours will look: every piece is a draggable card.'},
+ {t:'tgt-bench',title:'The active package',body:'A package is one version of your submission. This example \u2014 <b>Character-led \u00b7 v2</b> \u2014 was built by dragging three materials into these slots. The letter\u2019s the only must-have. Name it, hit Save.'},
+ {t:'tgt-analytics',title:'See what wins',body:'This example went to <b>four agents — and one asked for the full manuscript</b>. Attach your packages to queries in the Queries Hub and this panel tracks exactly that: which version wins requests.'},
+ {t:'tgt-editmat',title:'Start here',body:'That’s the loop: write → build → send → see what wins. The example data clears now — <b>Add materials</b> is where your real story starts.'}];
+let view=1, ti=0;
+function midState(tourOn){
+  document.getElementById('benchBlock').style.display=tourOn?'':'none';
+  document.getElementById('midEmpty').style.display=tourOn?'none':'flex';
+  document.getElementById('palDemo').style.display=tourOn?'':'none';
+  document.getElementById('palEmpty').style.display=tourOn?'none':'';
+  document.getElementById('anDemo').style.display=tourOn?'':'none';
+  document.getElementById('anEmpty').style.display=tourOn?'none':'flex';
+  document.getElementById('demoBadge').classList.toggle('on',tourOn);
+  var em=document.getElementById('tgt-editmat');
+  em.textContent=tourOn?'Edit materials \u2192':'\uff0b Add materials';
+}
+function setView(v,btn){view=v;
+  if(btn){document.querySelectorAll('.vsw button').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
+  document.getElementById('v1').style.display=v===1?'':'none';
+  document.getElementById('v2').style.display=v===1?'none':'flex';
+  midState(v===3);
+  if(v===3){startTour();}else{endTour(true);}
+}
+function enterWorkshop(){setView(3,document.querySelectorAll('.vsw button')[2]);}
+function startTour(){ti=0;paintTour();}
+function endTour(silent){document.getElementById('ring').classList.remove('on');document.getElementById('tcard').classList.remove('on');
+  if(!silent){document.getElementById('tgt-editmat').classList.add('pulse');midState(false);}
+  if(!silent&&view===3){document.querySelectorAll('.vsw button').forEach(b=>b.classList.remove('on'));document.querySelectorAll('.vsw button')[1].classList.add('on');view=2;}}
+document.getElementById('tgt-editmat').addEventListener('click',function(){this.classList.remove('pulse');});
+function tourStep(d){ti+=d;if(ti<0)ti=0;if(ti>=STEPS.length){endTour();return;}paintTour();}
+function paintTour(){
+  const s=STEPS[ti], el=document.getElementById(s.t), frame=document.getElementById('frame');
+  const fr=frame.getBoundingClientRect(), er=el.getBoundingClientRect();
+  const pad=8;
+  const ring=document.getElementById('ring');
+  ring.style.left=(er.left-fr.left-pad)+'px'; ring.style.top=(er.top-fr.top-pad)+'px';
+  ring.style.width=(er.width+pad*2)+'px'; ring.style.height=(er.height+pad*2)+'px';
+  ring.classList.add('on');
+  const card=document.getElementById('tcard');
+  document.getElementById('tcStep').textContent=(ti+1)+' / '+STEPS.length;
+  document.getElementById('tcTitle').textContent=s.title;
+  document.getElementById('tcBody').innerHTML=s.body;
+  document.getElementById('tcBack').style.visibility=ti===0?'hidden':'visible';
+  document.getElementById('tcNext').textContent=ti===STEPS.length-1?'Let\u2019s go ✓':'Next \u203a';
+  card.classList.add('on');
+  // place card beside the ring, kept in frame
+  let cl=er.right-fr.left+18, ct=er.top-fr.top;
+  if(cl+330>fr.width){cl=er.left-fr.left-338;}
+  if(cl<10){cl=Math.min(er.left-fr.left, fr.width-340);ct=er.bottom-fr.top+16;}
+  if(ct+230>fr.height){ct=fr.height-240;}
+  if(ct<10)ct=10;
+  card.style.left=cl+'px'; card.style.top=ct+'px';
+}
+window.addEventListener('resize',()=>{if(document.getElementById('tcard').classList.contains('on'))paintTour();});
+setView(1,document.querySelector('.vsw button.on'));
+</script>
+</body>
+</html>
