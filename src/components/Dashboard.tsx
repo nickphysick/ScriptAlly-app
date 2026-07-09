@@ -1635,7 +1635,7 @@ export const Dashboard: React.FC<{
         />
 
         {/* Full-width stat row — collapses while a focus is open (.split-open above) */}
-        <div className="sa-stats" style={{ marginTop: 20 }}>
+        <div className="sa-stats" style={{ marginTop: 48 }}>
           {statDefs.map((d) => (
             <StatCardFull key={d.key} def={d} onPin={() => { if (!slot.animating) slot.request(d.key); }} />
           ))}

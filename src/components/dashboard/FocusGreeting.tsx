@@ -119,6 +119,9 @@ export const FocusGreeting: React.FC<FocusGreetingProps> = ({
             <StatMini key={d.key} def={d} onPin={() => { if (!slot.animating) slot.request(d.key); }} />
           ))}
         </div>
+
+        {/* Hero closing rule (ref: dashboard-bigger-cards) — centred, replaces the old full-width border. */}
+        <div className="sa-greet-div" aria-hidden="true" />
       </div>
 
       {/* The focus track — panels are absolute so the left column alone sets the row height. */}

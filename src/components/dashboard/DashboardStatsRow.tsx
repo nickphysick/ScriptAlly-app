@@ -437,7 +437,7 @@ export const StatCardFull: React.FC<{ def: StatDef; onPin: () => void }> = ({ de
   >
     <div className="sa-cap">{ICONS[def.key]}{def.label}</div>
     <div className="sa-numrow"><span className="sa-num">{def.num}</span><span className="sa-pill">{def.pill}</span></div>
-    <div className={`sa-foot${def.fillFoot ? " sa-foot-fill" : ""}`}>{def.visual(26)}</div>
+    <div className={`sa-foot${def.fillFoot ? " sa-foot-fill" : ""}`}>{def.visual(46)}</div>
   </div>
 );
 

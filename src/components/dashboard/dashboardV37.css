@@ -53,8 +53,7 @@
 /* ---------- salutation greeting (hv-o1) + focus slot track ---------- */
 .sa-greet {
   display: grid; grid-template-columns: 1fr 0px; gap: 0;
-  border-bottom: 1px solid var(--bd, #d8cebf);
-  padding: 36px 0 34px; margin-bottom: 4px; text-align: center;
+  padding: 52px 0 0; margin-bottom: 4px; text-align: center;
   transition: grid-template-columns 360ms cubic-bezier(.22,.8,.3,1), gap 360ms cubic-bezier(.22,.8,.3,1);
 }
 .sa-greet.split { grid-template-columns: 1fr 380px; gap: 20px; }
@@ -62,14 +61,17 @@
 .sa-greet-eyebrow {
   font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
   color: var(--band-meta, #9c8878); display: flex; gap: 10px; align-items: center; justify-content: center;
+  margin-bottom: 20px;
 }
 .sa-greet-hi {
-  font-family: var(--font-serif); font-size: 49px; font-weight: 500;
-  color: var(--hdr, #5d4037); line-height: 1.08; margin-top: 10px;
+  font-family: var(--font-serif); font-size: 66px; font-weight: 600;
+  color: var(--hdr, #5d4037); line-height: 1.03; margin: 0 0 22px;
 }
 /* the name keeps the heading's own voice — no italics, no colour */
 .sa-greet-hi em { font-style: normal; color: inherit; }
-.sa-greet-ctas { display: flex; gap: 10px; align-items: center; margin-top: 18px; flex-wrap: wrap; justify-content: center; }
+.sa-greet-ctas { display: flex; gap: 10px; align-items: center; margin-top: 24px; flex-wrap: wrap; justify-content: center; }
+/* hero closing rule — centred, replacing the old full-width greet border-bottom (ref: dashboard-bigger-cards) */
+.sa-greet-div { height: 1px; background: var(--bd, #ece0d2); max-width: 720px; margin: 34px auto 0; }
 .sa-cta {
   display: inline-flex; align-items: center; gap: 7px;
   font-family: var(--font-mono); font-size: 11px; font-weight: 500; letter-spacing: 0.03em;
@@ -84,10 +86,10 @@
 
 /* ---------- attention chip ---------- */
 .sa-chip {
-  display: inline-flex; align-items: center; gap: 10px; margin: 16px 0 0;
+  display: inline-flex; align-items: center; gap: 10px; margin: 0;
   background: transparent; border: none; cursor: pointer;
   color: var(--chip-ink, #3b2a20);
-  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
   padding: 6px 2px; transition: opacity 260ms ease;
 }
 .t-capp .sa-chip { --chip-ink: #3b2a20; }
@@ -174,32 +176,39 @@
 
 /* ---------- full-width stat row ---------- */
 .sa-stats {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px;
   /* clip-margin 260 lets the hover panels escape upward while expanded; the collapsed state
-     below restores the tight margin so the fold animation still clips. */
-  max-height: 260px; margin-bottom: 0; overflow: clip; overflow-clip-margin: 260px;
+     below restores the tight margin so the fold animation still clips. Resting max-height raised
+     to 360 to clear the enlarged cards (ref: dashboard-bigger-cards). */
+  max-height: 360px; margin-bottom: 0; overflow: clip; overflow-clip-margin: 260px;
   transition: max-height 360ms cubic-bezier(.22,.8,.3,1), opacity 240ms ease 100ms, margin-bottom 360ms cubic-bezier(.22,.8,.3,1);
 }
 .sa-dash.split-open .sa-stats { max-height: 0; opacity: 0; margin-bottom: -20px; overflow-clip-margin: 28px; transition: max-height 360ms cubic-bezier(.22,.8,.3,1), opacity 200ms ease, margin-bottom 360ms cubic-bezier(.22,.8,.3,1); }
 .sa-stat {
   /* clip (not hidden) + clip-margin so StatTooltips above the chart are never cut.
-     min-height 190 = the original 158 + 20% (owner request, 4 Jul). */
-  position: relative; overflow: clip; overflow-clip-margin: 240px; padding: 18px 20px 16px; min-height: 190px;
+     Enlarged container (ref: dashboard-bigger-cards) — padding/min-height/shadow bumped for presence;
+     only the box grows, each card keeps its own data-driven visual + source. */
+  position: relative; overflow: clip; overflow-clip-margin: 240px; padding: 24px 22px 22px; min-height: 224px;
   display: flex; flex-direction: column; text-align: left;
   background: var(--card, #fffefb);
   border: var(--bdw, 1px) solid var(--bd, #e7ddd2);
   border-radius: 16px;
-  box-shadow: 0 1px 2px rgba(58,28,20,0.03), 0 4px 14px rgba(58,28,20,0.04);
+  box-shadow: 0 1px 3px rgba(58,28,20,0.07), 0 10px 28px rgba(58,28,20,0.12);
   cursor: pointer; transition: transform 160ms ease, box-shadow 160ms ease;
+}
+/* Cappuccino Form 11 inset frame — theme-scoped (Bold keeps its ink border, Editorial its soft shadow). */
+.t-capp .sa-stat::before {
+  content: ''; position: absolute; inset: 7px; border: 1px solid rgba(124, 58, 42, 0.28);
+  border-radius: 11px; pointer-events: none;
 }
 .sa-stat:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(58,28,20,0.10); }
 .t-bold .sa-stat { border: 1.5px solid #1d1712; border-radius: 14px; box-shadow: none; }
 .t-edn .sa-stat { border-color: transparent; border-radius: 16px; box-shadow: 0 1px 2px rgba(20,20,20,0.05), 0 12px 32px rgba(20,20,20,0.07); }
-.sa-stat .sa-cap { display: flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: #8a7a6c; }
+.sa-stat .sa-cap { display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: #8a7a6c; margin-bottom: 15px; }
 .t-edn .sa-stat .sa-cap { color: #8b8b8b; }
-.sa-stat .sa-cap svg { stroke: var(--sd-hue, #7c3a2a); }
-.sa-stat .sa-numrow { display: flex; align-items: baseline; gap: 10px; margin-top: 12px; }
-.sa-stat .sa-num { font-family: var(--font-serif); font-size: 38px; font-weight: 500; color: var(--ink, #3a1c14); line-height: 1; }
+.sa-stat .sa-cap svg { width: 15px; height: 15px; stroke: var(--sd-hue, #7c3a2a); }
+.sa-stat .sa-numrow { display: flex; align-items: baseline; gap: 10px; margin-top: 0; }
+.sa-stat .sa-num { font-family: var(--font-serif); font-size: 44px; font-weight: 600; color: var(--ink, #3a1c14); line-height: 1; }
 .sa-stat .sa-pill {
   font-family: var(--font-sans); font-size: 10px; color: #6a5a50;
   background: #faf6f0; border: 1px solid var(--bd, #e7ddd2); border-radius: 99px;
@@ -207,7 +216,7 @@
 }
 .t-bold .sa-stat .sa-pill { background: #fff; border: 1px solid #1d1712; color: #1d1712; }
 .t-edn .sa-stat .sa-pill { background: transparent; border: 1px solid #e3e2e0; color: #6b6b6b; }
-.sa-stat .sa-foot { margin-top: auto; padding-top: 14px; }
+.sa-stat .sa-foot { margin-top: auto; padding-top: 18px; }
 /* the agents card's visual fills the remaining height (the grid measures this box) */
 .sa-foot-fill { flex: 1; min-height: 0; display: flex; margin-top: 0; }
 .sa-foot-fill > * { flex: 1; min-width: 0; }
