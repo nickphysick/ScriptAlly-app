@@ -126,6 +126,11 @@ function formatWhatsAppDate(dateString: string): string {
   return `${day} ${month}, ${time}`;
 }
 
+/* ── v2 PLAIN masthead — dropped card surface + tightened padding, passed to the Queries ChromeSlab
+   grand mounts via its existing `style` escape (merged last over the shell). The --hub-mast-pad
+   token cascades to ChromeSlab's inner row, so no shared internals are edited. Queries route only. */
+const QUERIES_PLAIN_MASTHEAD = { background: "transparent", border: "none", boxShadow: "none", "--hub-mast-pad": "6px 2px" } as React.CSSProperties;
+
 /* ── Control-ribbon tile — Fluent-style icon-over-label, flat (no fill), faint hover. Greyed (not
    hidden) when disabled so the bar keeps its shape between queries. The primary (Record response /
    Mark sent / Reopen) passes `accent` for the coffee icon + heavier label. ── */
@@ -2195,12 +2200,16 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           /* ── Empty database — the Queries Hub header, a list card with a "No queries yet"
              placeholder (Export disabled), and a welcome pane with Smart Import + manual add. ── */
           <>
-          {/* Queries Hub grand masthead — the unified ChromeSlab (shared with the populated state) */}
+          {/* Queries Hub grand masthead — the unified ChromeSlab (shared with the populated state).
+              v2 PLAIN: the card surface is dropped via the existing `style` escape (merged last) +
+              a tightened --hub-mast-pad token so the title/meta sit directly on the desk. No
+              ChromeSlab internals touched; CTA (tools) unchanged. Queries route only. */}
           <ChromeSlab
             onNavigate={onNavigate}
             grand
             title="Queries Hub"
             meta={hubPulse}
+            style={QUERIES_PLAIN_MASTHEAD}
             tools={
               <button type="button" onClick={() => onNavigate?.("queries", "Log a query")} style={mastCtaStyle}>
                 <Plus style={{ width: 15, height: 15 }} />
@@ -2299,6 +2308,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           grand
           title="Queries Hub"
           meta={hubPulse}
+          style={QUERIES_PLAIN_MASTHEAD}
           tools={
             <button
               type="button"
