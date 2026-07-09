@@ -25,7 +25,6 @@ import { RecordResponseModal } from "./RecordResponseModal";
 import { RecordResponseScreen } from "./RecordResponseScreen";
 import { NudgeModal } from "./NudgeModal";
 import { recordQueryResponse } from "../lib/recordResponse";
-import { CalendarView } from "./CalendarView";
 import { StatusDot } from "./StatusDot";
 import { getPillLabelAndDot, renderTimelineDot } from "./TimelineDot";
 import { getTimelineFamily, FAMILY_CARD_STYLE } from "../lib/timelineEvent";
@@ -84,7 +83,6 @@ import {
   ChevronRight,
   ChevronLeft,
   Bookmark,
-  Calendar,
   Footprints,
   AlertCircle,
   HelpCircle,
@@ -583,7 +581,6 @@ export const Dashboard: React.FC<{
 
   // Undo Toast + calendar states (the query slide-in panel is retired — query editing is the
   // app-level Edit Query drawer, opened via openEditQuery).
-  const [isFullCalendarOpen, setIsFullCalendarOpen] = useState(false);
   const [undoToastInfo, setUndoToastInfo] = useState<{
     queryId: string;
     previousStatus: QueryStatus;
@@ -2247,30 +2244,6 @@ export const Dashboard: React.FC<{
             document.body
           )
         : null}
-
-      {/* Full Calendar Modal Lightbox Overlay */}
-      {isFullCalendarOpen && (
-        <div className="fixed inset-0 bg-[#3a1c14]/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-[#FCFAF7] rounded-2xl border border-[#e8d5cc] p-6 shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative flex flex-col gap-4 animate-fade-in">
-            <button 
-              className="absolute top-4 right-4 text-stone-500 hover:text-stone-800 p-1 rounded-full hover:bg-[#FAF1EF] transition-colors"
-              onClick={() => setIsFullCalendarOpen(false)}
-            >
-              <X className="w-5 h-5 text-[#3a1c14]" />
-            </button>
-            <div className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-[#7c3d3d]" />
-              <h3 className="text-sm font-bold uppercase font-mono tracking-wider text-[#3a1c14]">Full Query Calendar</h3>
-            </div>
-            <div className="overflow-hidden rounded-xl border border-[#e8d5cc] bg-white p-2">
-              <CalendarView onNavigate={(tab, sub) => {
-                setIsFullCalendarOpen(false);
-                onNavigate(tab, sub);
-              }} isDashboard={false} />
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
