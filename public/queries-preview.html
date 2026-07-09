@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ScriptAlly — Queries Hub (Cappuccino preview)</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Source+Sans+Pro:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+/* ── Applied Cappuccino tokens (from src/index.css .t-capp, theme editor 2026-07-07) ── */
+:root{
+  --serif:"Playfair Display",Georgia,serif; --ui:"Source Sans Pro",system-ui,sans-serif; --mono:"JetBrains Mono",monospace;
+  --desk:#e8ddd0; --card:#fffefb; --band:#f6f1e6; --selRow:#dce8d7;
+  --paneBd:#d8cebf; --hair:#e7ddd2; --head:#000000; --body:#5d4037; --muted:#9c8878;
+  --priBg:#5d4037; --priTx:#ffffff; --secBg:#ffffff; --secBd:#d8cebf; --secTx:#5d4037;
+  --accent:#422701; --monoBg:#ad9f8a; --monoTx:#fdfaf5; --sdHue:#7c3a2a; --sdCentre:#f6e4da;
+  --rad:6px; --bw:1px; --paneSh:0 1px 3px rgba(58,28,20,.06);
+  /* rail */
+  --railCard:#fffefb; --railHair:#e7ddd2; --railInk:#3a1c14; --railLabel:#9c8878;
+  --railItem:#5a4a40; --railPill:#dce8d7; --railAccent:#422701; --railHov:#f7f3ed;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{font-family:var(--ui);background:var(--desk);color:var(--body);display:flex;overflow:hidden;}
+
+/* ── Rail ── */
+.rail{width:230px;flex:none;height:100vh;background:var(--railCard);border-right:1px solid var(--railHair);display:flex;flex-direction:column;padding:18px 14px;gap:4px;}
+.brand{display:flex;align-items:center;gap:10px;padding:4px 8px 16px;}
+.brand .mk{width:34px;height:34px;border-radius:8px;background:var(--priBg);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:700;font-size:17px;}
+.brand .wm{font-family:var(--serif);font-weight:600;font-size:19px;color:var(--head);}
+.reyebrow{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--railLabel);padding:14px 10px 5px;}
+.ritem{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;font-size:14px;color:var(--railItem);cursor:default;}
+.ritem .ic{width:16px;height:16px;border-radius:4px;border:1.6px solid currentColor;opacity:.7;flex:none;}
+.ritem:hover{background:var(--railHov);}
+.ritem.on{background:var(--railPill);color:var(--railAccent);font-weight:600;}
+.ritem.on .ic{opacity:1;border-color:var(--railAccent);}
+.rspace{margin-top:auto;}
+.rcap{display:flex;flex-direction:column;gap:7px;padding:6px 4px 10px;}
+.rcapbtn{font-family:var(--ui);font-size:13px;font-weight:600;padding:9px;border-radius:7px;background:var(--secBg);border:1px solid var(--secBd);color:var(--secTx);text-align:center;cursor:default;}
+.rcapbtn.wide{background:var(--priBg);border-color:var(--priBg);color:#fff;}
+.racct{display:flex;align-items:center;gap:9px;padding-top:12px;border-top:1px solid var(--railHair);}
+.racct .av{width:30px;height:30px;border-radius:50%;background:var(--priBg);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:13px;}
+.racct .nm{font-size:13px;color:var(--body);font-weight:600;}
+
+/* ── Stage ── */
+.stage{flex:1;height:100vh;overflow-y:auto;}
+.wrap{max-width:1220px;margin:0 auto;padding:0 26px 40px;}
+
+/* Crumb */
+.crumb{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:16px 4px 0;}
+.crumb b{color:var(--accent);}
+.crumb span{margin:0 8px;color:#c9bba9;}
+
+/* Grand masthead */
+.mast{background:var(--card);border:var(--bw) solid var(--paneBd);border-radius:var(--rad);box-shadow:var(--paneSh);padding:22px 30px 20px;margin-top:12px;position:relative;}
+.mast .t{font-family:var(--serif);font-size:54px;font-weight:500;letter-spacing:-.5px;line-height:1;color:var(--head);}
+.mast .pulse{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:10px;}
+.mast .cta{position:absolute;right:30px;bottom:22px;}
+
+.btn{font-family:var(--ui);font-size:12.5px;font-weight:600;padding:9px 16px;border-radius:7px;border:var(--bw) solid;cursor:default;white-space:nowrap;}
+.btn.primary{background:var(--priBg);border-color:var(--priBg);color:var(--priTx);}
+.btn.secondary{background:var(--secBg);border-color:var(--secBd);color:var(--secTx);}
+
+/* Filter bar */
+.filter{display:flex;align-items:center;gap:14px;margin:16px 0 4px;flex-wrap:wrap;}
+.pillgrp{display:flex;gap:6px;background:var(--card);border:1px solid var(--hair);border-radius:999px;padding:4px;}
+.pill{font-size:11.5px;font-weight:600;padding:6px 13px;border-radius:999px;color:var(--body);display:flex;align-items:center;gap:7px;cursor:default;}
+.pill.on{background:var(--accent);color:#fff;}
+.pill .cdot{width:7px;height:7px;border-radius:50%;background:var(--sdHue);}
+.pill.on .cdot{background:#fff;opacity:.85;}
+.flabel{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.sort{margin-left:auto;font-size:12px;font-weight:600;color:var(--body);background:var(--card);border:1px solid var(--hair);border-radius:7px;padding:7px 12px;display:flex;gap:8px;align-items:center;}
+.sort .chev{width:7px;height:7px;border-right:1.6px solid var(--muted);border-bottom:1.6px solid var(--muted);transform:rotate(45deg);margin-top:-3px;}
+
+/* Two-column */
+.cols{display:grid;grid-template-columns:342px 1fr;gap:16px;margin-top:14px;align-items:start;}
+.card{background:var(--card);border:var(--bw) solid var(--paneBd);border-radius:var(--rad);box-shadow:var(--paneSh);overflow:hidden;}
+
+/* Up next */
+.upnext{padding:13px 15px;border-bottom:1px solid var(--hair);background:var(--band);}
+.upnext .lab{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);}
+.upnext .row{display:flex;align-items:center;gap:10px;margin-top:8px;}
+
+/* List */
+.listhead{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:11px 15px;border-bottom:1px solid var(--hair);display:flex;justify-content:space-between;}
+.grouphd{font-family:var(--mono);font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);padding:11px 15px 5px;}
+.row{display:flex;align-items:center;gap:11px;padding:11px 15px;border-bottom:1px solid var(--hair);cursor:default;}
+.row:hover{background:#faf6f0;}
+.row.sel{background:var(--selRow);box-shadow:inset 3px 0 0 var(--accent);}
+.mono{width:38px;height:38px;flex:none;border-radius:8px;background:var(--monoBg);color:var(--monoTx);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:600;font-size:14px;}
+.rmid{flex:1;min-width:0;}
+.rname{font-family:var(--serif);font-size:15px;color:var(--head);line-height:1.15;}
+.ragcy{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-top:2px;}
+.rright{display:flex;flex-direction:column;align-items:flex-end;gap:5px;}
+.rdate{font-family:var(--mono);font-size:9px;color:var(--muted);}
+.listfoot{padding:10px 15px;border-top:1px solid var(--hair);display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+
+/* StatusDot approximations — one theme hue; shape carries stage (lock-respecting) */
+.sd{width:20px;height:20px;flex:none;border-radius:50%;background:var(--sdCentre);border:3px solid var(--sdHue);position:relative;}
+.sd.filled::after{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--sdHue);}
+.sd.half::after{content:"";position:absolute;inset:4px;border-radius:50%;background:linear-gradient(90deg,var(--sdHue) 50%,transparent 50%);}
+.sd.ring{border-style:double;border-width:4px;}
+.sd.closed{opacity:.42;}
+
+/* Reading pane */
+.pane{display:flex;flex-direction:column;min-height:560px;}
+.panebody{padding:22px 24px;flex:1;}
+.idrow{display:flex;align-items:center;gap:15px;}
+.idrow .mono{width:56px;height:56px;font-size:22px;}
+.idname{font-family:var(--serif);font-size:27px;color:var(--head);line-height:1;}
+.idagcy{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-top:6px;}
+.openpill{margin-left:auto;font-size:11px;font-weight:600;color:var(--accent);border:1px solid var(--paneBd);border-radius:999px;padding:5px 12px;display:flex;align-items:center;gap:7px;}
+.openpill .d{width:7px;height:7px;border-radius:50%;background:var(--sdHue);}
+.mswl{margin:18px 0;padding:16px 22px;background:var(--band);border:1px solid var(--hair);border-radius:var(--rad);text-align:center;}
+.mswl .q{font-family:var(--serif);font-style:italic;font-size:16px;color:var(--body);}
+.mswl .tags{margin-top:9px;font-family:var(--mono);font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);}
+
+.trk{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:6px;}
+.trkcol .h{font-family:var(--serif);font-size:15px;color:var(--head);padding-bottom:8px;border-bottom:1px solid var(--hair);margin-bottom:10px;}
+.evt{display:flex;gap:9px;margin-bottom:12px;}
+.evt .sd{width:16px;height:16px;border-width:2.5px;margin-top:1px;}
+.evt .tx{font-size:12px;color:var(--body);line-height:1.35;}
+.evt .tx .dt{font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:block;margin-top:2px;}
+.matrow{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--body);margin-bottom:9px;}
+.matrow .ck{width:15px;height:15px;border-radius:4px;background:var(--sdCentre);border:1px solid var(--sdHue);flex:none;}
+.jrnl{background:var(--band);border:1px solid var(--hair);border-radius:var(--rad);padding:11px 13px;font-family:var(--serif);font-style:italic;font-size:13px;color:var(--body);margin-bottom:9px;}
+.jrnl .dt{font-family:var(--mono);font-style:normal;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:4px;}
+.composer{border:1px dashed var(--paneBd);border-radius:var(--rad);padding:10px 12px;font-size:12px;color:var(--muted);}
+
+/* Command bar */
+.cmd{display:flex;align-items:center;gap:10px;padding:14px 22px;background:var(--card);border-top:var(--bw) solid var(--hair);}
+.cmd .stat{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 auto;}
+.cmd .stat b{color:var(--accent);}
+
+.note{max-width:1220px;margin:14px auto 0;padding:0 26px;font-size:11px;color:#8a7a6c;font-family:var(--mono);letter-spacing:.03em;}
+</style>
+</head>
+<body>
+  <aside class="rail">
+    <div class="brand"><span class="mk">S</span><span class="wm">ScriptAlly</span></div>
+    <div class="ritem"><span class="ic"></span>Dashboard</div>
+    <div class="reyebrow">Querying</div>
+    <div class="ritem on"><span class="ic"></span>Queries Hub</div>
+    <div class="reyebrow">Agents</div>
+    <div class="ritem"><span class="ic"></span>Agents database</div>
+    <div class="ritem"><span class="ic"></span>Discover new agents</div>
+    <div class="reyebrow">Manuscripts</div>
+    <div class="ritem"><span class="ic"></span>Your manuscripts</div>
+    <div class="ritem"><span class="ic"></span>Submission packages</div>
+    <div class="rspace"></div>
+    <div class="rcap">
+      <div class="rcapbtn wide">+ Record a response</div>
+      <div style="display:flex;gap:7px;"><div class="rcapbtn" style="flex:1">+ Query</div><div class="rcapbtn" style="flex:1">+ Agent</div></div>
+    </div>
+    <div class="racct"><span class="av">N</span><span class="nm">Nick Physick</span></div>
+  </aside>
+
+  <main class="stage">
+    <div class="wrap">
+      <div class="crumb">SCRIPTALLY<span>/</span>QUERYING<span>/</span><b>QUERIES HUB</b></div>
+
+      <div class="mast">
+        <div class="t">Queries</div>
+        <div class="pulse">TRACKING THE SILK ROAD · 14 QUERIES · 3 AWAITING YOUR MOVE</div>
+        <div class="cta"><span class="btn primary">Log a new query</span></div>
+      </div>
+
+      <div class="filter">
+        <div class="pillgrp">
+          <span class="pill on">All</span>
+          <span class="pill"><span class="cdot"></span>Waiting</span>
+          <span class="pill"><span class="cdot"></span>Your move</span>
+          <span class="pill"><span class="cdot"></span>Closed</span>
+        </div>
+        <span class="flabel">Manuscript</span>
+        <div class="pillgrp">
+          <span class="pill on">All</span>
+          <span class="pill">The Silk Road</span>
+          <span class="pill">Nightjar</span>
+        </div>
+        <div class="sort">Sort · Date sent <span class="chev"></span></div>
+      </div>
+
+      <div class="cols">
+        <!-- LIST -->
+        <div class="card">
+          <div class="upnext">
+            <div class="lab">↑ Up next</div>
+            <div class="row" style="padding:0;border:none;background:none;">
+              <span class="mono">EK</span>
+              <div class="rmid"><div class="rname">Elena Kaur</div><div class="ragcy">Madeleine Milburn</div></div>
+              <span class="btn secondary" style="padding:6px 11px;">Send</span>
+            </div>
+          </div>
+          <div class="listhead"><span>14 Queries</span><span>Export CSV</span></div>
+
+          <div class="grouphd">Waiting to hear back</div>
+          <div class="row sel">
+            <span class="mono">AJ</span>
+            <div class="rmid"><div class="rname">Anna Jones</div><div class="ragcy">Curtis Brown</div></div>
+            <div class="rright"><span class="sd filled"></span><span class="rdate">14 Mar</span></div>
+          </div>
+          <div class="row">
+            <span class="mono">MP</span>
+            <div class="rmid"><div class="rname">Marcus Patel</div><div class="ragcy">The Blair Partnership</div></div>
+            <div class="rright"><span class="sd half"></span><span class="rdate">2 Mar</span></div>
+          </div>
+          <div class="row">
+            <span class="mono">SR</span>
+            <div class="rmid"><div class="rname">Sofia Reyes</div><div class="ragcy">Aitken Alexander</div></div>
+            <div class="rright"><span class="sd filled"></span><span class="rdate">28 Feb</span></div>
+          </div>
+
+          <div class="grouphd">Your move</div>
+          <div class="row">
+            <span class="mono">TN</span>
+            <div class="rmid"><div class="rname">Tom Nguyen</div><div class="ragcy">United Agents</div></div>
+            <div class="rright"><span class="sd ring"></span><span class="rdate">9 Feb</span></div>
+          </div>
+          <div class="row">
+            <span class="mono">HB</span>
+            <div class="rmid"><div class="rname">Hannah Böhm</div><div class="ragcy">RCW Literary</div></div>
+            <div class="rright"><span class="sd ring"></span><span class="rdate">3 Feb</span></div>
+          </div>
+
+          <div class="grouphd">Closed</div>
+          <div class="row">
+            <span class="mono">DF</span>
+            <div class="rmid"><div class="rname">David Fry</div><div class="ragcy">Greene &amp; Heaton</div></div>
+            <div class="rright"><span class="sd closed filled"></span><span class="rdate">12 Jan</span></div>
+          </div>
+          <div class="listfoot"><span>14 queries · Export CSV</span><span>↑↓ · ⌘K</span></div>
+        </div>
+
+        <!-- READING PANE -->
+        <div class="card pane">
+          <div class="panebody">
+            <div class="idrow">
+              <span class="mono">AJ</span>
+              <div><div class="idname">Anna Jones</div><div class="idagcy">Curtis Brown · London</div></div>
+              <span class="openpill"><span class="d"></span>Open to queries</span>
+            </div>
+            <div class="mswl">
+              <div class="q">“Voice-driven literary fiction with a sharp hook and a world I can taste.”</div>
+              <div class="tags">Literary · Book club · Historical</div>
+            </div>
+
+            <div class="trk">
+              <div class="trkcol">
+                <div class="h">Tracking</div>
+                <div class="evt"><span class="sd filled"></span><div class="tx">Query sent<span class="dt">14 Mar 2026</span></div></div>
+                <div class="evt"><span class="sd half"></span><div class="tx">Partial requested<span class="dt">21 Mar 2026</span></div></div>
+                <div class="evt"><span class="sd filled"></span><div class="tx">Partial sent<span class="dt">22 Mar 2026</span></div></div>
+              </div>
+              <div class="trkcol">
+                <div class="h">What you sent</div>
+                <div class="matrow"><span class="ck"></span>Query letter — v3</div>
+                <div class="matrow"><span class="ck"></span>Synopsis — v2</div>
+                <div class="matrow"><span class="ck"></span>First 50 pages</div>
+                <div class="matrow" style="color:var(--muted)">Sent via Curtis Brown portal</div>
+              </div>
+              <div class="trkcol">
+                <div class="h">Journal</div>
+                <div class="jrnl"><span class="dt">21 Mar</span>Lovely note back — asked for the partial within a week. Good sign.</div>
+                <div class="composer">Add a journal note…</div>
+              </div>
+            </div>
+          </div>
+          <div class="cmd">
+            <span class="btn primary">Record response</span>
+            <span class="btn secondary">Edit</span>
+            <span class="stat">WAITING TO HEAR BACK · 12 DAYS · EXPECTED ~28 MAR</span>
+            <span class="btn secondary">Download as PDF</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note">Static preview · Cappuccino theme as applied to src/index.css (theme editor 2026-07-07) · not the live app</div>
+  </main>
+</body>
+</html>
