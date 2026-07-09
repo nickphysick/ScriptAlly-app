@@ -399,6 +399,18 @@ export interface Note {
   updatedAt: string; // full ISO datetime
 }
 
+// A To-do page "Notes" record — the ONLY stored to-do object (Do next / Housekeeping are derived).
+// Distinct from Note (the dashboard desk post-its): a note here is a plain body + pin + soft-archive.
+export interface TodoNote {
+  id: string;
+  userId: string;
+  body: string;
+  pinned: boolean;
+  done: boolean; // soft archive (reversible) — marking done feeds "cleared today"
+  createdAt: string; // full ISO datetime
+  updatedAt: string; // full ISO datetime
+}
+
 export interface DismissedTask {
   id: string;
   userId: string;

@@ -487,3 +487,73 @@
 .todo-cmdbtn.p:hover {
   filter: brightness(0.96);
 }
+
+/* ── Notes stream ────────────────────────────────────────────────────────── */
+.todo-mast-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.todo-addnote {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 9px 14px;
+  border-radius: var(--hub-btn-rad, 8px);
+  cursor: pointer;
+  background: var(--hub-primary);
+  color: var(--hub-primary-tx);
+  border: 1px solid var(--hub-primary-bd, transparent);
+  white-space: nowrap;
+}
+.todo-addnote:hover {
+  filter: brightness(0.96);
+}
+/* Beside "Add a note" the re-entry reads secondary. */
+.todo-mast-actions .todo-reenter {
+  background: var(--hub-btn-bg);
+  color: var(--hub-item);
+  border-color: var(--hub-btn-bd);
+}
+.todo-ln {
+  display: block;
+  font-family: "Caveat", cursive;
+  font-size: 16px;
+  line-height: 1.2;
+  color: var(--hub-body);
+}
+.todo-lrow-pin {
+  flex: none;
+  margin-top: 2px;
+}
+.todo-ptag.n {
+  background: var(--hub-cell);
+  color: var(--hub-label);
+}
+.todo-note-date {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 2px 0 12px;
+}
+.todo-noteed {
+  background: var(--hub-cell);
+  border: 0.5px solid var(--hub-hair);
+  border-radius: 10px;
+  padding: 16px 18px;
+  min-height: 150px;
+}
+.todo-note-ta {
+  width: 100%;
+  min-height: 120px;
+  border: none;
+  background: transparent;
+  resize: vertical;
+  font-family: "Caveat", cursive;
+  font-size: 20px;
+  line-height: 1.5;
+  color: var(--hub-body);
+}
+.todo-note-ta:focus {
+  outline: none;
+}

@@ -38,7 +38,7 @@ import { queryAmbientStatus } from "../../lib/queryAmbient";
 import { agentDataQualityNeeds } from "../../lib/agentDataQuality";
 import { agentPrimary } from "../../lib/agentDisplay";
 import { FONT_SERIF, FONT_MONO } from "../../lib/designTokens";
-import { QueryStatus, Task, Query, Agent } from "../../types";
+import { QueryStatus, Task, Query, Agent, TodoNote } from "../../types";
 import "./todo.css";
 
 type Mode = "focus" | "ledger";
@@ -68,8 +68,30 @@ const Wrench: React.FC = () => (
   </svg>
 );
 
+const NoteGlyph: React.FC = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--hub-label)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M14 3v5h5" /><path d="M18 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z" /><path d="M9 13h6M9 17h4" />
+  </svg>
+);
+const PinGlyph: React.FC = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="var(--hub-accent)" aria-hidden>
+    <path d="M14 3l7 7-4 1-3 6-2-2-4 4-1-1 4-4-2-2 6-3z" />
+  </svg>
+);
+
 function focusVerb(markKind: "partial" | "full" | "resubmit"): string {
   return markKind === "partial" ? "Send your partial" : markKind === "full" ? "Send your full" : "Resubmit your revision";
+}
+/** List snippet for a note body (empty → placeholder). */
+function noteSnippet(body: string): string {
+  const b = body.trim();
+  if (!b) return "New note";
+  return b.length > 74 ? b.slice(0, 74) + "…" : b;
+}
+function formatNoteDate(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "New note";
+  return "Created " + d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 }
 
 export interface ToDoPageProps {
@@ -77,7 +99,7 @@ export interface ToDoPageProps {
 }
 
 export const ToDoPage: React.FC<ToDoPageProps> = () => {
-  const { tasks, queries, agents, manuscripts, currentUser, dismissTask, updateUserProfile, recordMaterialsSent, updateQueryStatus, logNudge } = useScriptAllyDb();
+  const { tasks, queries, agents, manuscripts, currentUser, dismissTask, updateUserProfile, recordMaterialsSent, updateQueryStatus, logNudge, todoNotes, addTodoNote, updateTodoNote, deleteTodoNote } = useScriptAllyDb();
   const openEditAgent = useOpenEditAgent();
 
   const location = useLocation();
@@ -100,7 +122,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = () => {
   // ── Derived streams ──
   const doNext = useMemo(() => doNextTasks(tasks, queries), [tasks, queries]);
   const housekeeping = useMemo(() => housekeepingTasks(tasks), [tasks]);
-  const counts = { all: doNext.length + housekeeping.length, do: doNext.length, hk: housekeeping.length, note: 0 };
+  // Notes stream — pinned first, then most-recently-updated; done notes are soft-archived (hidden).
+  const notesList = useMemo(
+    () => todoNotes.filter((n) => !n.done).sort((a, b) => Number(b.pinned) - Number(a.pinned) || b.updatedAt.localeCompare(a.updatedAt)),
+    [todoNotes],
+  );
+  const notesVisible = stream === "all" || stream === "note" ? notesList : [];
+  const counts = { all: doNext.length + housekeeping.length + notesList.length, do: doNext.length, hk: housekeeping.length, note: notesList.length };
 
   const groups = useMemo<{ key: Exclude<Stream, "all">; label: string; items: Task[] }[]>(() => {
     if (stream === "do") return [{ key: "do", label: "Do next", items: doNext }];
@@ -112,12 +140,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = () => {
     ];
   }, [stream, doNext, housekeeping]);
   const flatVisible = useMemo(() => groups.flatMap((g) => g.items), [groups]);
+  // Selection spans tasks AND notes (both live in the list).
+  const allVisibleIds = useMemo(() => [...flatVisible.map((t) => t.id), ...notesVisible.map((n) => n.id)], [flatVisible, notesVisible]);
 
   // Keep the Ledger selection valid — default to the first visible item.
   useEffect(() => {
     if (mode !== "ledger") return;
-    if (!selId || !flatVisible.some((t) => t.id === selId)) setSelId(flatVisible[0]?.id ?? null);
-  }, [mode, flatVisible, selId]);
+    if (!selId || !allVisibleIds.includes(selId)) setSelId(allVisibleIds[0] ?? null);
+  }, [mode, allVisibleIds, selId]);
 
   // ── Focus queue ──
   const queue = useMemo(() => focusQueue(tasks, queries, skipped).filter((t) => !resolved.has(t.id)), [tasks, queries, skipped, resolved]);
@@ -191,6 +221,16 @@ export const ToDoPage: React.FC<ToDoPageProps> = () => {
     setSkipped((prev) => new Set(prev).add(t.id));
     setIsMarkSentOpen(false);
   }
+  // Notes CRUD helpers.
+  async function addNoteAndSelect() {
+    const id = await addTodoNote({ body: "" });
+    if (id) { setMode("ledger"); setStream("note"); setSelId(id); }
+  }
+  function markNoteDone(n: TodoNote) {
+    updateTodoNote(n.id, { done: true }).catch(() => {});
+    setCleared((c) => c + 1); // soft archive feeds "cleared today"
+    setSelId(null);
+  }
 
   // Dispatch a command-bar action. mark-sent/record/nudge open the shared surfaces (anchored/mounted
   // once); edit-agent/cnr/still-waiting/snooze act directly through the existing db paths.
@@ -241,9 +281,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = () => {
         subtitle="Your writing desk"
         style={{ padding: "24px 28px", margin: "12px 0 16px", boxShadow: "0 8px 20px rgba(29,23,18,.14)" }}
         titleStyle={{ fontFamily: FONT_SERIF, fontWeight: 600, fontSize: 40, color: "var(--hub-head, #1d1712)" }}
-        right={pendingFocus > 0 ? (
-          <button type="button" className="todo-reenter" onClick={() => startRitual(pendingFocus)} style={{ fontFamily: FONT_MONO }}>✦ Clear the desk</button>
-        ) : undefined}
+        right={
+          <div className="todo-mast-actions">
+            {pendingFocus > 0 && (
+              <button type="button" className="todo-reenter" onClick={() => startRitual(pendingFocus)} style={{ fontFamily: FONT_MONO }}>✦ Clear the desk</button>
+            )}
+            <button type="button" className="todo-addnote" onClick={addNoteAndSelect} style={{ fontFamily: FONT_MONO }}>＋ Add a note</button>
+          </div>
+        }
       />
     );
 
@@ -399,7 +444,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = () => {
             {seg("all", "All", counts.all)}
             {seg("do", "Do next", counts.do)}
             {seg("hk", "Housekeeping", counts.hk)}
-            {seg("note", "Notes", counts.note, true)}
+            {seg("note", "Notes", counts.note)}
           </div>
           <div className="todo-sort" style={{ fontFamily: FONT_MONO, background: "var(--hub-list)", border: "var(--bdw) solid var(--bd)", color: "var(--hub-item)" }}>Sort · Due date ▾</div>
         </div>
@@ -408,19 +453,29 @@ export const ToDoPage: React.FC<ToDoPageProps> = () => {
           {/* LIST — furniture */}
           <div className="todo-list" style={{ background: "var(--hub-list)", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--hub-radius)" }}>
             <div className="todo-list-scroll">
-              {flatVisible.length === 0 ? (
+              {flatVisible.length === 0 && notesVisible.length === 0 ? (
                 <div className="todo-list-empty" style={{ fontFamily: FONT_MONO, color: "var(--hub-label)" }}>This stream is clear.</div>
               ) : (
-                groups.map((g) =>
-                  g.items.length === 0 ? null : (
-                    <div key={g.key}>
+                <>
+                  {groups.map((g) =>
+                    g.items.length === 0 ? null : (
+                      <div key={g.key}>
+                        {stream === "all" && (
+                          <div className="todo-grp" style={{ fontFamily: FONT_MONO, color: "var(--hub-label)" }}>{g.label}<span className="todo-gl" /></div>
+                        )}
+                        {g.items.map((t) => renderRow(t))}
+                      </div>
+                    ),
+                  )}
+                  {notesVisible.length > 0 && (
+                    <div key="notes">
                       {stream === "all" && (
-                        <div className="todo-grp" style={{ fontFamily: FONT_MONO, color: "var(--hub-label)" }}>{g.label}<span className="todo-gl" /></div>
+                        <div className="todo-grp" style={{ fontFamily: FONT_MONO, color: "var(--hub-label)" }}>Notes<span className="todo-gl" /></div>
                       )}
-                      {g.items.map((t) => renderRow(t))}
+                      {notesVisible.map((n) => renderNoteRow(n))}
                     </div>
-                  ),
-                )
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -480,6 +535,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = () => {
 
   // The working pane reshapes per selected item; ALL action controls live in the command bar.
   function renderPane() {
+    const selectedNote = mode === "ledger" ? todoNotes.find((n) => n.id === selId && !n.done) : undefined;
+    if (selectedNote) return renderNotePane(selectedNote);
+    if (stream === "note" && notesVisible.length === 0) return renderNotesEmptyPane();
     const t = actionTask && mode === "ledger" ? actionTask : undefined;
     const q = t ? actionQuery : undefined;
     const ag = t ? actionAgent : undefined;
@@ -553,6 +611,61 @@ export const ToDoPage: React.FC<ToDoPageProps> = () => {
       default:
         return t.description;
     }
+  }
+
+  // ── Notes stream ──
+  function renderNoteRow(n: TodoNote) {
+    const sel = n.id === selId;
+    return (
+      <button key={n.id} type="button" className={`todo-lrow${sel ? " sel" : ""}`} onClick={() => setSelId(n.id)}>
+        <span className="todo-lrow-glyph"><NoteGlyph /></span>
+        <span className="todo-lrow-mid"><span className="todo-ln">{noteSnippet(n.body)}</span></span>
+        {n.pinned && <span className="todo-lrow-pin"><PinGlyph /></span>}
+      </button>
+    );
+  }
+
+  function renderNotePane(n: TodoNote) {
+    return (
+      <div className="todo-pane" style={paneStyle}>
+        <div className="todo-pane-inner">
+          <div className="todo-pane-scroll">
+            <div className="todo-ptag n" style={{ fontFamily: FONT_MONO }}>Note · yours</div>
+            <div className="todo-note-date" style={{ fontFamily: FONT_MONO, color: "var(--hub-label)" }}>{formatNoteDate(n.createdAt)}</div>
+            <div className="todo-noteed">
+              <textarea
+                key={n.id}
+                autoFocus
+                className="todo-note-ta"
+                defaultValue={n.body}
+                placeholder="Jot it down…"
+                onBlur={(e) => { const v = e.target.value; if (v !== n.body) updateTodoNote(n.id, { body: v }).catch(() => {}); }}
+              />
+            </div>
+          </div>
+          <div className="todo-cmd">
+            <button type="button" className="todo-cmdbtn p" onClick={() => markNoteDone(n)} style={{ fontFamily: FONT_MONO }}>Mark done</button>
+            <button type="button" className="todo-cmdbtn g" onClick={() => updateTodoNote(n.id, { pinned: !n.pinned }).catch(() => {})} style={{ fontFamily: FONT_MONO }}>{n.pinned ? "Unpin" : "Pin"}</button>
+            <span style={{ flex: 1 }} />
+            <button type="button" className="todo-cmdbtn g" onClick={() => { deleteTodoNote(n.id).catch(() => {}); setSelId(null); }} style={{ fontFamily: FONT_MONO }}>Delete</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  function renderNotesEmptyPane() {
+    return (
+      <div className="todo-pane" style={paneStyle}>
+        <div className="todo-pane-inner">
+          <div className="todo-pane-body">
+            <Quill />
+            <div className="todo-pane-empty" style={{ fontFamily: FONT_SERIF, color: "var(--hub-label)" }}>No notes yet</div>
+            <button type="button" className="todo-cmdbtn p" onClick={addNoteAndSelect} style={{ fontFamily: FONT_MONO }}>＋ Add a note</button>
+          </div>
+        </div>
+      </div>
+    );
   }
 };
 
