@@ -131,42 +131,44 @@ function formatWhatsAppDate(dateString: string): string {
    token cascades to ChromeSlab's inner row, so no shared internals are edited. Queries route only. */
 const QUERIES_PLAIN_MASTHEAD = { background: "transparent", border: "none", boxShadow: "none", "--hub-mast-pad": "6px 2px" } as React.CSSProperties;
 
-/* ── Control-ribbon tile — Fluent-style icon-over-label, flat (no fill), faint hover. Greyed (not
-   hidden) when disabled so the bar keeps its shape between queries. The primary (Record response /
-   Mark sent / Reopen) passes `accent` for the coffee icon + heavier label. ── */
-const RibbonTile = React.forwardRef<HTMLButtonElement, {
+/* ── Command-bar button (v2, ref queries-hub-v2.html .c) — icon+label SIDE-BY-SIDE, flat (no fill),
+   faint hover; greyed-not-hidden when disabled so the bar keeps its shape. `primary` = coffee icon
+   (#6f4e37) + semibold label; `dim`/`iconOnly` = the muted PDF · ⋯ pair. Badge renders inline after
+   the label. ── */
+const CmdBtn = React.forwardRef<HTMLButtonElement, {
   icon: React.ReactNode;
-  label: string;
+  label?: string;
   onClick?: () => void;
   disabled?: boolean;
-  accent?: boolean;
+  primary?: boolean;
+  dim?: boolean;
+  iconOnly?: boolean;
   title?: string;
   badge?: React.ReactNode;
-}>(({ icon, label, onClick, disabled, accent, title, badge }, ref) => (
+}>(({ icon, label, onClick, disabled, primary, dim, iconOnly, title, badge }, ref) => (
   <button
     ref={ref}
     type="button"
     title={title}
     onClick={disabled ? undefined : onClick}
     disabled={disabled}
-    className="qp-tile"
+    className="qp-c"
     style={{
-      position: "relative", display: "flex", flexDirection: "column", alignItems: "center",
-      justifyContent: "center", gap: 4, flex: "0 0 auto", minWidth: 60, padding: "7px 9px 6px",
-      background: "transparent", border: "none", borderRadius: 9,
-      cursor: disabled ? "default" : "pointer",
-      fontFamily: "'Inter',sans-serif", fontSize: 10.5, lineHeight: 1.05,
-      fontWeight: accent ? 700 : 500,
-      color: disabled ? "#b7ab99" : (accent ? "#3a2a1e" : "var(--cmdbar-btn-tx, #2c2017)"),
-      opacity: disabled ? 0.6 : 1, whiteSpace: "nowrap",
+      position: "relative", display: "inline-flex", alignItems: "center", gap: 8, flexShrink: 0,
+      fontFamily: "'Inter',sans-serif", fontWeight: primary ? 600 : 500, fontSize: 13,
+      color: disabled ? "#b7ab99" : (dim ? "var(--hub-label, #8f877b)" : "var(--hub-item, #1a1512)"),
+      background: "none", border: "none", borderRadius: 9,
+      padding: iconOnly ? "9px 10px" : "9px 13px",
+      cursor: disabled ? "default" : "pointer", whiteSpace: "nowrap",
+      opacity: disabled ? 0.35 : 1,
     }}
   >
-    <span aria-hidden="true" style={{ display: "flex", alignItems: "center", justifyContent: "center", color: disabled ? "#c4b9a8" : (accent ? "#6f4e37" : "currentColor") }}>{icon}</span>
-    <span>{label}</span>
+    <span aria-hidden="true" style={{ display: "flex", alignItems: "center", color: disabled || dim ? "currentColor" : (primary ? "#6f4e37" : "#7a6f61") }}>{icon}</span>
+    {label && <span>{label}</span>}
     {badge}
   </button>
 ));
-RibbonTile.displayName = "RibbonTile";
+CmdBtn.displayName = "CmdBtn";
 
 /* ── Overflow-menu row (Close reasons + More). Left-aligned icon + label; greyed when a feature is
    stubbed this pass; destructive tint for Delete. ── */
@@ -3012,7 +3014,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
               (col 2). Both keep the strip-back floating-card treatment (--qp-cmd-* surface / border /
               radius / margin / shadow). The single subgrid bar is retired. ── */}
           <style>{`
-            .qp-tile:hover:not(:disabled){ background: rgba(58,44,31,.06); }
+            .qp-c:hover:not(:disabled){ background: #f3ede4; }
             .qp-menuitem:hover:not(:disabled){ background: rgba(58,44,31,.06); }
           `}</style>
 
@@ -3033,7 +3035,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
           {/* Query card — the action ribbon: three equal sections (Actions · Go to · utility),
               tiles centred in each, dividers between. Tiles stay greyed-not-hidden with no selection. */}
-          <div style={{ gridColumn: 2, gridRow: 2, display: "flex", alignItems: "stretch", background: "var(--qp-cmd-bg, var(--hub-cmd))", border: "var(--qp-cmd-frame, none)", borderTop: "var(--qp-cmd-toprule, var(--hub-cmd-rule))", borderRadius: "var(--qp-cmd-radius, 0)", margin: "var(--qp-cmd-margin, 0)", boxShadow: "var(--cmd-bar-shadow, none)", padding: "5px 6px", minWidth: 0 }}>
+          <div style={{ gridColumn: 2, gridRow: 2, display: "flex", alignItems: "center", gap: 4, background: "var(--qp-cmd-bg, var(--hub-cmd))", border: "var(--qp-cmd-frame, none)", borderTop: "var(--qp-cmd-toprule, var(--hub-cmd-rule))", borderRadius: "var(--qp-cmd-radius, 0)", margin: "var(--qp-cmd-margin, 0)", boxShadow: "var(--cmd-bar-shadow, none)", padding: "9px 14px", minWidth: 0 }}>
             {(() => {
               const sel = !!(activeQuery && activeAgent && activeMs);
               const status = activeQuery ? (activeQuery.status as QueryStatus) : null;
@@ -3043,65 +3045,39 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
               const waitingOnAgent = ctrlAction?.ballHolder === "agent";
               const badge = sel && activeQuery ? queryTaskBadge(tasks, activeQuery.id) : { count: 0, tier: null as null };
 
-              // Primary tile — contextual: Reopen (closed) / Mark sent · Record resubmission (writer's turn) / Record response.
+              // Primary — contextual: Reopen (closed) / Mark sent · Record resubmission (writer's turn) / Record response.
               const primaryLabel = isClosed ? "Reopen"
                 : (isMark && ctrlAction?.kind === "mark-sent") ? (ctrlAction.markKind === "resubmit" ? "Record resubmission" : "Mark sent")
                 : "Record response";
               const primaryIcon = isClosed
-                ? <RotateCcw style={{ width: 17, height: 17 }} />
-                : <Send style={{ width: 17, height: 17, strokeWidth: 1.9 } as any} />;
+                ? <RotateCcw style={{ width: 16, height: 16 }} />
+                : <Send style={{ width: 16, height: 16, strokeWidth: 1.9 } as any} />;
               const primaryRef = (sel && isMark && !isClosed) ? markSentTriggerRef : undefined;
               const onPrimary = !sel ? undefined
                 : isClosed ? () => activeQuery && updateQueryStatus(activeQuery.id, QueryStatus.QUERIED)
                 : isMark ? () => setIsMarkSentOpen(o => !o)
                 : () => setIsRecordResponseFocusFormOpen(true);
 
-              const sectionStyle: React.CSSProperties = { flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 2, minWidth: 0 };
-              const rowStyle: React.CSSProperties = { display: "flex", alignItems: "center", justifyContent: "center", gap: 2 };
-              const sectionLabel = (text: string, hidden?: boolean) => (
-                <span aria-hidden={hidden || undefined} style={{ fontFamily: FONT_MONO, fontSize: 7.5, letterSpacing: ".14em", textTransform: "uppercase" as const, color: "#b7ab99", fontWeight: 600, ...(hidden ? { visibility: "hidden" as const } : {}) }}>{text}</span>
-              );
-              const divider = <div aria-hidden="true" style={{ width: 1, alignSelf: "stretch", background: "var(--bd)", opacity: .55, margin: "7px 0" }} />;
+              const csep = <span aria-hidden="true" style={{ width: 1, height: 22, background: "var(--bd)", margin: "0 10px", flexShrink: 0 }} />;
+              const taskBadge = badge.count > 0 ? (
+                <span style={{ minWidth: 16, height: 16, borderRadius: 8, background: badge.tier === "urgent" ? "#9a3b2a" : "#b7ab99", color: "#faf3ef", fontFamily: FONT_MONO, fontSize: 9, fontWeight: 600, display: "inline-grid", placeItems: "center", padding: "0 4px", marginLeft: 2 }}>{badge.count}</span>
+              ) : undefined;
 
+              // Slim inline command bar (ref queries-hub-v2.html .cb-query): actions | divider | go-to |
+              // spring | icon-only PDF · ⋯. Same handlers/refs/stubs as before — re-skin only.
               return (
                 <>
-                  {/* Actions */}
-                  <div style={sectionStyle}>
-                    <div style={rowStyle}>
-                      <RibbonTile ref={primaryRef} icon={primaryIcon} label={primaryLabel} accent disabled={!sel} onClick={onPrimary} />
-                      <RibbonTile icon={<Bell style={{ width: 17, height: 17 }} />} label="Nudge" disabled={!sel || !waitingOnAgent} onClick={() => setIsNudgeOpen(true)} title={sel && !waitingOnAgent ? "Available while you're waiting on the agent" : undefined} />
-                      <RibbonTile ref={closeTriggerRef} icon={<XCircle style={{ width: 17, height: 17 }} />} label="Close" disabled={!sel || isClosed} onClick={() => setIsCloseMenuOpen(o => !o)} title={sel && isClosed ? "Already closed" : undefined} />
-                      <RibbonTile icon={<Pencil style={{ width: 16, height: 16 }} />} label="Edit" disabled={!sel} onClick={() => activeQuery && openEditQuery(activeQuery.id)} />
-                    </div>
-                    {sectionLabel("Actions")}
-                  </div>
-                  {divider}
-                  {/* Go to */}
-                  <div style={sectionStyle}>
-                    <div style={rowStyle}>
-                      <RibbonTile icon={<User style={{ width: 17, height: 17 }} />} label="Agent" disabled title="Coming soon — jump to the agent's record" />
-                      <RibbonTile icon={<Book style={{ width: 17, height: 17 }} />} label="Manuscript" disabled title="Coming soon — jump to the manuscript" />
-                      <RibbonTile
-                        icon={<ListChecks style={{ width: 17, height: 17 }} />}
-                        label="Tasks"
-                        disabled={!sel}
-                        onClick={() => onNavigate?.("todo")}
-                        badge={badge.count > 0 ? (
-                          <span style={{ position: "absolute", top: 1, right: 5, minWidth: 15, height: 15, padding: "0 4px", borderRadius: 999, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_MONO, fontSize: 8.5, fontWeight: 700, color: "#fff", background: badge.tier === "urgent" ? "#9a3b2a" : "#b7ab99", lineHeight: 1 }}>{badge.count}</span>
-                        ) : undefined}
-                      />
-                    </div>
-                    {sectionLabel("Go to")}
-                  </div>
-                  {divider}
-                  {/* Utility (unlabelled) */}
-                  <div style={sectionStyle}>
-                    <div style={rowStyle}>
-                      <RibbonTile icon={<Download style={{ width: 16, height: 16 }} />} label={isGeneratingPDF ? "Generating…" : "Download"} disabled={!sel || isGeneratingPDF} onClick={() => handleDownloadPDF()} />
-                      <RibbonTile ref={moreTriggerRef} icon={<MoreHorizontal style={{ width: 18, height: 18 }} />} label="More" disabled={!sel} onClick={() => setIsMoreMenuOpen(o => !o)} />
-                    </div>
-                    {sectionLabel("·", true)}
-                  </div>
+                  <CmdBtn ref={primaryRef} icon={primaryIcon} label={primaryLabel} primary disabled={!sel} onClick={onPrimary} />
+                  <CmdBtn icon={<Bell style={{ width: 16, height: 16 }} />} label="Nudge" disabled={!sel || !waitingOnAgent} onClick={() => setIsNudgeOpen(true)} title={sel && !waitingOnAgent ? "Available while you're waiting on the agent" : undefined} />
+                  <CmdBtn ref={closeTriggerRef} icon={<XCircle style={{ width: 16, height: 16 }} />} label="Close" disabled={!sel || isClosed} onClick={() => setIsCloseMenuOpen(o => !o)} title={sel && isClosed ? "Already closed" : undefined} />
+                  <CmdBtn icon={<Pencil style={{ width: 15, height: 15 }} />} label="Edit" disabled={!sel} onClick={() => activeQuery && openEditQuery(activeQuery.id)} />
+                  {csep}
+                  <CmdBtn icon={<User style={{ width: 16, height: 16 }} />} label="Agent" disabled title="Coming soon — jump to the agent's record" />
+                  <CmdBtn icon={<Book style={{ width: 16, height: 16 }} />} label="Manuscript" disabled title="Coming soon — jump to the manuscript" />
+                  <CmdBtn icon={<ListChecks style={{ width: 16, height: 16 }} />} label="Tasks" disabled={!sel} onClick={() => onNavigate?.("todo")} badge={taskBadge} />
+                  <span aria-hidden="true" style={{ flex: 1 }} />
+                  <CmdBtn iconOnly dim icon={<Download style={{ width: 16, height: 16 }} />} disabled={!sel || isGeneratingPDF} onClick={() => handleDownloadPDF()} title={isGeneratingPDF ? "Generating…" : "Download PDF"} />
+                  <CmdBtn ref={moreTriggerRef} iconOnly dim icon={<MoreHorizontal style={{ width: 18, height: 18 }} />} disabled={!sel} onClick={() => setIsMoreMenuOpen(o => !o)} title="More" />
                 </>
               );
             })()}
