@@ -16,6 +16,7 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
 import { ComponentType } from "../types";
 import { PackageWorkshop, PackageSaveFields } from "./packages/PackageWorkshop";
+import { FirstVisitHome } from "./packages/FirstVisitHome";
 import { FONT_SERIF, FONT_MONO } from "../lib/designTokens";
 import { ChromeSlab } from "./shell/ChromeSlab";
 import { ChevronDown, Lock } from "lucide-react";
@@ -28,6 +29,10 @@ export const SubmissionPackages: React.FC = () => {
   );
   const [msMenuOpen, setMsMenuOpen] = useState(false);
   const msMenuRef = useRef<HTMLDivElement>(null);
+  // At zero packages the route shows the FirstVisitHome landing; "entered" flips it to the (empty)
+  // workshop once the user clicks Build / the tour link. Reset on manuscript switch so a fresh book
+  // shows its own landing. Irrelevant once a manuscript has ≥1 package (the workshop always renders).
+  const [entered, setEntered] = useState(false);
 
   // Default to the first manuscript when none is selected / the saved one is gone.
   useEffect(() => {
@@ -61,6 +66,7 @@ export const SubmissionPackages: React.FC = () => {
     setActiveMsId(id);
     localStorage.setItem("scriptally_active_manuscript_id", id);
     setMsMenuOpen(false);
+    setEntered(false);
   };
   const multiMs = manuscripts.length > 1;
 
@@ -150,6 +156,8 @@ export const SubmissionPackages: React.FC = () => {
             <div style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 14, color: "var(--muted)", maxWidth: 420, lineHeight: 1.5, margin: "0 auto" }}>Add a manuscript from the Manuscripts list first — packages are built per manuscript.</div>
           </div>
         </div>
+      ) : msPackages.length === 0 && !entered ? (
+        <FirstVisitHome onBuild={() => setEntered(true)} onTour={() => setEntered(true)} />
       ) : (
         <PackageWorkshop
           versions={msVersions}

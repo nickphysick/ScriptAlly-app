@@ -65,6 +65,8 @@ import { EditQueryDrawer } from "./components/EditQueryDrawer";
 import { QueryTimeline } from "./components/reading-pane/QueryTimeline";
 // Dev review surface for the notes pieces (PostIt / quick-add / editor) — #/notes-lab, DEV only.
 import { NotesLab } from "./components/notes/NotesLab";
+// Dev review surface for the Package Workshop landing + workshop (over stubs, no auth) — #/pkg-lab, DEV only.
+import { PkgLab } from "./components/packages/PkgLab";
 import { Palette, X, Check, HelpCircle, Bell, Settings, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -458,6 +460,10 @@ function AppContent() {
   // Queries context stub around a placeholder well. TEMP: remove when the shell migration lands.
   if (hash === "#/shell-lab" && import.meta.env.DEV) {
     return <ShellLab />;
+  }
+  // Dev-only Package Workshop review surface (landing + empty/full workshop over stubs, no auth). TEMP.
+  if (hash === "#/pkg-lab" && import.meta.env.DEV) {
+    return <PkgLab />;
   }
 
   // Boot: while Firebase Auth is still resolving the session, show a neutral splash — never a
