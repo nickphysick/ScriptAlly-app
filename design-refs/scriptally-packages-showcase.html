@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Submission Packages showcase (Pro sell)</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ground:#f2ede7;--card:#fdfaf5;--bd:#d8cebf;--ink:#241c15;--hdr:#5d4037;--muted:#9a8c80;
+  --burg:#7c3a2a;--sage:#8a9e88;--sage-d:#5a6e58;--sage-l:#e9ede6;--gold:#a8842c;
+  --pink:#f5e2da;--pink-b:#e8c8bc;--pink-h:#efd5ca;--pink-l:#fbf0eb;
+  --slate:#6A89A7;--slate-d:#55708c;--sel:#f3ede2;--dash:#c9bca8;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;color:var(--ink);background:var(--ground);padding:0 0 90px;}
+.page{max-width:1280px;margin:0 auto;padding:34px 40px 0;}
+
+/* ===== header — Queries Hub style: Playfair on the ground, no card ===== */
+.crumb{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#a4937f;}
+.hubrow{display:flex;align-items:baseline;gap:16px;margin-top:8px;}
+.hubrow h1{font-family:'Playfair Display',serif;font-size:46px;font-weight:800;letter-spacing:-.8px;color:var(--ink);}
+.propill{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;background:#e7edf3;color:var(--slate-d);border:1px solid #cfdae4;border-radius:8px;padding:5px 10px;transform:translateY(-6px);}
+.mschip{margin-left:auto;display:inline-flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:10px 16px;font-weight:600;font-size:13.5px;color:var(--hdr);align-self:center;}
+
+/* ===== hero ===== */
+.hero{display:flex;align-items:center;gap:44px;margin-top:44px;}
+.hcopy{flex:0 0 380px;min-width:0;}
+.hcopy h2{font-family:'Playfair Display',serif;font-size:44px;font-weight:800;line-height:1.06;letter-spacing:-.8px;}
+.hcopy h2 em{font-style:italic;color:var(--burg);}
+.hcopy .hl{font-size:14.5px;color:#6a594d;line-height:1.65;margin-top:16px;}
+.ctarow{display:flex;align-items:center;gap:13px;margin-top:26px;flex-wrap:wrap;}
+.cta-pro{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:#fff;background:var(--slate);border:1px solid var(--slate-d);border-radius:12px;padding:14px 28px;cursor:pointer;box-shadow:0 8px 22px rgba(85,112,140,.28);}
+.cta-pro:hover{background:var(--slate-d);}
+.cta-tour{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--burg);background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:13px 17px;cursor:pointer;}
+.cta-tour:hover{background:var(--sel);}
+.trust{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:#b3a291;margin-top:16px;}
+
+/* ===== the living demo ===== */
+.demo{position:relative;flex:1;min-width:0;height:580px;}
+.dwin{position:absolute;background:var(--card);border:1px solid var(--bd);border-radius:13px;box-shadow:0 12px 30px rgba(58,28,20,.11);overflow:hidden;}
+.dhead{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--hdr);background:linear-gradient(135deg,#ece5d8,#e5ddcd);border-bottom:1px solid var(--bd);padding:10px 15px;white-space:nowrap;display:flex;align-items:center;gap:9px;}
+/* materials */
+.d-pal{left:0;top:0;width:214px;height:580px;z-index:3;}
+.pchip{display:flex;align-items:center;gap:8px;margin:7px 10px 0;background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:6px 9px;}
+.pchip .g{width:19px;height:19px;border-radius:6px;background:var(--sel);color:var(--burg);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;}
+.pchip .n{font-family:'Playfair Display',serif;font-size:11.5px;font-weight:600;line-height:1.05;}
+.pchip.nw{border-color:var(--slate);opacity:0;animation:x 24s linear infinite;}
+/* explorer */
+.d-exp{left:300px;top:24px;width:340px;z-index:9;animation:expFade 24s linear infinite;}
+.d-exp .dhead{background:#e9e5df;color:#494439;}
+.d-exp .dots{display:flex;gap:5px;}
+.d-exp .dots i{width:8px;height:8px;border-radius:50%;background:#d5cfc6;}
+.fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:13px;}
+.fdoc{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;border-radius:8px;}
+.fdoc.hot{background:#eef2f6;outline:1.4px dashed var(--slate);}
+.fdoc .ic{width:32px;height:40px;background:#fff;border:1.4px solid var(--slate);border-radius:4px;position:relative;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;color:var(--slate-d);}
+.fdoc .ic::before{content:'';position:absolute;top:-1.4px;right:-1.4px;width:10px;height:10px;background:var(--ground);border-left:1.4px solid var(--slate);border-bottom:1.4px solid var(--slate);border-radius:0 0 0 4px;}
+.fdoc .fn{font-family:'JetBrains Mono',monospace;font-size:6.5px;color:#5d5247;text-align:center;line-height:1.35;}
+/* packages */
+.mpkg{position:absolute;width:168px;background:var(--card);border:1px solid var(--bd);border-radius:10px;overflow:hidden;box-shadow:0 8px 20px rgba(58,28,20,.09);opacity:0;animation:x 24s ease infinite;}
+.mpkg .mh{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:var(--hdr);border-bottom:1px solid var(--bd);padding:8px 12px;white-space:nowrap;}
+.mpkg.hcap .mh{background:linear-gradient(135deg,#ece5d8,#e5ddcd);}
+.mpkg.hpink .mh{background:var(--pink);}
+.mpkg.hsage .mh{background:var(--sage-l);}
+.mpkg .pips{padding:8px 12px 10px;display:flex;flex-direction:column;gap:6px;}
+.pip{display:flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:6.8px;color:var(--muted);}
+.pip .dot{width:9px;height:9px;border-radius:50%;border:1.4px dashed var(--dash);flex-shrink:0;position:relative;}
+.pip .dot::after{content:'';position:absolute;inset:-1.4px;border-radius:50%;background:var(--burg);opacity:0;animation:x 24s linear infinite;animation-name:inherit;}
+.pip .dot[style] ::after{}
+.pip .pn{opacity:.5;animation:x 24s linear infinite;animation-name:inherit;}
+.pip .dot.still::after{display:none;}
+.pip .dot.still + .pn{animation:none;}
+/* ghosts */
+.ghost{position:absolute;z-index:12;display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--burg);border-radius:8px;padding:7px 9px;box-shadow:0 12px 26px rgba(124,58,42,.22);opacity:0;pointer-events:none;animation:x 24s ease-in-out infinite;}
+.ghost .g{width:18px;height:18px;border-radius:6px;background:var(--pink);color:var(--burg);display:flex;align-items:center;justify-content:center;font-size:9px;}
+.ghost .n{font-family:'Playfair Display',serif;font-size:11px;font-weight:600;white-space:nowrap;}
+.ghost.file{border-color:var(--slate);box-shadow:0 12px 26px rgba(85,112,140,.25);}
+.ghost.file .g{background:#e7edf3;color:var(--slate-d);border-radius:4px;font-size:8px;font-family:'JetBrains Mono',monospace;font-weight:600;}
+/* analytics — "The Works" */
+.d-dash{left:230px;top:296px;width:532px;height:254px;z-index:4;overflow:visible;animation:breath 24s ease infinite;}
+@keyframes breath{0%,52%{box-shadow:0 12px 30px rgba(58,28,20,.11);}62%{box-shadow:0 16px 42px rgba(58,28,20,.2);}70%{box-shadow:0 13px 34px rgba(58,28,20,.14);}78%{box-shadow:0 16px 42px rgba(58,28,20,.2);}84%,100%{box-shadow:0 12px 30px rgba(58,28,20,.11);}}
+.d-dash .dhead{border-radius:12px 12px 0 0;}
+.d-dash .ct{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);opacity:0;animation:ctIn 24s linear infinite;}
+@keyframes ctIn{0%,51%{opacity:0;}53%,80%{opacity:1;}83%,100%{opacity:0;}}
+.dbody{position:relative;padding:14px 20px 0;height:190px;}
+.cogbox{position:absolute;right:-24px;top:-26px;z-index:8;}
+.cog{position:absolute;transform-origin:center;opacity:0;display:inline-flex;}
+.cog.big{color:var(--burg);animation:spinA 24s linear infinite;}
+.cog.mid{left:32px;top:28px;color:var(--sage-d);animation:spinB 24s linear infinite;}
+.cog.sml{left:-15px;top:35px;color:var(--gold);animation:spinC 24s linear infinite;}
+@keyframes spinA{0%,51%{opacity:0;transform:rotate(0);}52.5%{opacity:1;}81%{opacity:1;transform:rotate(660deg);}84%,100%{opacity:0;transform:rotate(700deg);}}
+@keyframes spinB{0%,51%{opacity:0;transform:rotate(0);}52.5%{opacity:1;}81%{opacity:1;transform:rotate(-500deg);}84%,100%{opacity:0;}}
+@keyframes spinC{0%,51.5%{opacity:0;transform:rotate(15deg);}53%{opacity:1;}81%{opacity:1;transform:rotate(890deg);}84%,100%{opacity:0;}}
+.in-svg{width:100%;height:132px;}
+.in-grid line{stroke:#efe6d8;stroke-width:1;}
+.in-base{stroke:var(--pink-b);stroke-width:2;fill:none;stroke-linecap:round;}
+.in-line{stroke:var(--burg);stroke-width:2.3;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:540;stroke-dashoffset:540;animation:inkDraw 24s ease-in-out infinite;}
+@keyframes inkDraw{0%,53%{stroke-dashoffset:540;}79%,96%{stroke-dashoffset:0;}99%,100%{stroke-dashoffset:540;}}
+.nib{position:absolute;width:24px;height:24px;color:var(--hdr);z-index:6;offset-path:path('M20 112 C 80 104, 110 66, 160 74 S 260 38, 310 46 S 410 10, 468 18');offset-rotate:38deg;animation:nibRide 24s ease-in-out infinite;opacity:0;}
+@keyframes nibRide{0%,53%{offset-distance:0%;opacity:0;}54.5%{opacity:1;}78%{opacity:1;offset-distance:100%;}81%,100%{opacity:0;offset-distance:100%;}}
+.blm{position:absolute;width:9px;height:9px;border-radius:50%;background:var(--pink-b);border:1.6px solid var(--burg);transform:scale(0);z-index:5;}
+.wpop{position:absolute;z-index:9;display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:6px 9px;box-shadow:0 10px 24px rgba(58,28,20,.16);opacity:0;pointer-events:none;}
+.wpop .g{width:16px;height:16px;border-radius:5px;background:var(--sel);color:var(--burg);display:flex;align-items:center;justify-content:center;font-size:8px;flex-shrink:0;}
+.wpop .n{font-family:'Playfair Display',serif;font-size:10.5px;font-weight:600;white-space:nowrap;}
+.stamp{position:absolute;right:24px;bottom:14px;width:74px;height:74px;border-radius:50%;border:2.5px solid var(--sage-d);color:var(--sage-d);background:rgba(233,237,230,.55);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;transform:rotate(-11deg) scale(2.1);opacity:0;animation:stampIn 24s cubic-bezier(.2,1.6,.4,1) infinite;z-index:10;}
+.stamp .tk{font-size:23px;line-height:1;}
+.stamp .tx{font-family:'JetBrains Mono',monospace;font-size:5px;letter-spacing:.14em;}
+@keyframes stampIn{0%,81%{opacity:0;transform:rotate(-11deg) scale(2.1);}84.5%,96%{opacity:1;transform:rotate(-11deg) scale(1);}99%,100%{opacity:0;}}
+.rec{position:absolute;left:230px;bottom:-8px;width:532px;z-index:14;background:var(--card);border:1px solid var(--sage);border-radius:12px;box-shadow:0 16px 38px rgba(90,110,88,.22);padding:12px 16px;display:flex;align-items:center;gap:12px;opacity:0;transform:translateY(16px);animation:recIn 24s ease infinite;}
+.rec .rst{color:var(--gold);font-size:17px;flex-shrink:0;}
+.rec .rt{font-size:11px;line-height:1.55;color:var(--ink);}
+.rec .rt b{color:var(--ink);font-weight:600;}
+.rec .rbtn{margin-left:auto;flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.05em;text-transform:uppercase;background:var(--pink);border:1px solid var(--pink-b);color:var(--ink);border-radius:8px;padding:9px 12px;white-space:nowrap;}
+@keyframes recIn{0%,86%{opacity:0;transform:translateY(16px);}89%,97%{opacity:1;transform:translateY(0);}99.5%,100%{opacity:0;transform:translateY(16px);}}
+@keyframes gf1{0%,3%{opacity:0;transform:translate(0,0);}4.2%{opacity:1;}8%{opacity:1;transform:translate(-308px,80px) rotate(-2deg);}9.2%,100%{opacity:0;transform:translate(-308px,80px);}}
+@keyframes gf2{0%,7%{opacity:0;transform:translate(0,0);}8.2%{opacity:1;}12%{opacity:1;transform:translate(-422px,111px) rotate(-2deg);}13.2%,100%{opacity:0;transform:translate(-422px,111px);}}
+@keyframes gf3{0%,11%{opacity:0;transform:translate(0,0);}12.2%{opacity:1;}16%{opacity:1;transform:translate(-308px,68px) rotate(-2deg);}17.2%,100%{opacity:0;transform:translate(-308px,68px);}}
+@keyframes ci1{0%,8%{opacity:0;transform:scale(.85);}9%,95%{opacity:1;transform:scale(1);}98%,100%{opacity:0;}}
+@keyframes ci2{0%,12%{opacity:0;transform:scale(.85);}13%,95%{opacity:1;transform:scale(1);}98%,100%{opacity:0;}}
+@keyframes ci3{0%,16%{opacity:0;transform:scale(.85);}17%,95%{opacity:1;transform:scale(1);}98%,100%{opacity:0;}}
+@keyframes expFade{0%,17%{opacity:1;}20.5%,96%{opacity:0;}99.5%,100%{opacity:1;}}
+@keyframes pk1{0%,18%{opacity:0;transform:translateY(8px);}19.5%,96%{opacity:1;transform:translateY(0);}99%,100%{opacity:0;}}
+@keyframes pk2{0%,19%{opacity:0;transform:translateY(8px);}20.5%,96%{opacity:1;transform:translateY(0);}99%,100%{opacity:0;}}
+@keyframes pk3{0%,20%{opacity:0;transform:translateY(8px);}21.5%,96%{opacity:1;transform:translateY(0);}99%,100%{opacity:0;}}
+@keyframes pk4{0%,21%{opacity:0;transform:translateY(8px);}22.5%,96%{opacity:1;transform:translateY(0);}99%,100%{opacity:0;}}
+@keyframes pk5{0%,22%{opacity:0;transform:translateY(8px);}23.5%,96%{opacity:1;transform:translateY(0);}99%,100%{opacity:0;}}
+@keyframes pk6{0%,23%{opacity:0;transform:translateY(8px);}24.5%,96%{opacity:1;transform:translateY(0);}99%,100%{opacity:0;}}
+@keyframes m1{0%,26%{opacity:0;transform:translate(0,0);}26.9%{opacity:1;}28.6%{opacity:1;transform:translate(230px,16px) rotate(-2deg);}29.5%,100%{opacity:0;transform:translate(230px,16px);}}
+@keyframes m2{0%,29%{opacity:0;transform:translate(0,0);}29.9%{opacity:1;}31.6%{opacity:1;transform:translate(412px,123px) rotate(2deg);}32.5%,100%{opacity:0;transform:translate(412px,123px);}}
+@keyframes m3{0%,32%{opacity:0;transform:translate(0,0);}32.9%{opacity:1;}34.6%{opacity:1;transform:translate(412px,-46px) rotate(-2deg);}35.5%,100%{opacity:0;transform:translate(412px,-46px);}}
+@keyframes m4{0%,35%{opacity:0;transform:translate(0,0);}35.9%{opacity:1;}37.6%{opacity:1;transform:translate(230px,-86px) rotate(2deg);}38.5%,100%{opacity:0;transform:translate(230px,-86px);}}
+@keyframes m5{0%,38%{opacity:0;transform:translate(0,0);}38.9%{opacity:1;}40.6%{opacity:1;transform:translate(594px,-108px) rotate(-2deg);}41.5%,100%{opacity:0;transform:translate(594px,-108px);}}
+@keyframes m6{0%,41%{opacity:0;transform:translate(0,0);}41.9%{opacity:1;}43.6%{opacity:1;transform:translate(230px,-1px) rotate(2deg);}44.5%,100%{opacity:0;transform:translate(230px,-1px);}}
+@keyframes m7{0%,44%{opacity:0;transform:translate(0,0);}44.9%{opacity:1;}46.6%{opacity:1;transform:translate(594px,-32px) rotate(-2deg);}47.5%,100%{opacity:0;transform:translate(594px,-32px);}}
+@keyframes m8{0%,47%{opacity:0;transform:translate(0,0);}47.9%{opacity:1;}49.6%{opacity:1;transform:translate(412px,-41px) rotate(2deg);}50.5%,100%{opacity:0;transform:translate(412px,-41px);}}
+@keyframes dtA1{0%,28.6%{opacity:0;transform:scale(.3);}29.6%,95%{opacity:1;transform:scale(1);}98%,100%{opacity:0;}}
+@keyframes plA1{0%,28.6%{opacity:.5;}29.6%,95%{opacity:1;}98%,100%{opacity:.5;}}
+@keyframes dtE1{0%,31.6%{opacity:0;transform:scale(.3);}32.6%,95%{opacity:1;transform:scale(1);}98%,100%{opacity:0;}}
+@keyframes plE1{0%,31.6%{opacity:.5;}32.6%,95%{opacity:1;}98%,100%{opacity:.5;}}
+@keyframes dtB1{0%,34.6%{opacity:0;transform:scale(.3);}35.6%,95%{opacity:1;transform:scale(1);}98%,100%{opacity:0;}}
+@keyframes plB1{0%,34.6%{opacity:.5;}35.6%,95%{opacity:1;}98%,100%{opacity:.5;}}
+@keyframes dtA2{0%,37.6%{opacity:0;transform:scale(.3);}38.6%,95%{opacity:1;transform:scale(1);}98%,100%{opacity:0;}}
+@keyframes plA2{0%,37.6%{opacity:.5;}38.6%,95%{opacity:1;}98%,100%{opacity:.5;}}
+@keyframes dtC1{0%,40.6%{opacity:0;transform:scale(.3);}41.6%,95%{opacity:1;transform:scale(1);}98%,100%{opacity:0;}}
+@keyframes plC1{0%,40.6%{opacity:.5;}41.6%,95%{opacity:1;}98%,100%{opacity:.5;}}
+@keyframes dtD1{0%,43.6%{opacity:0;transform:scale(.3);}44.6%,95%{opacity:1;transform:scale(1);}98%,100%{opacity:0;}}
+@keyframes plD1{0%,43.6%{opacity:.5;}44.6%,95%{opacity:1;}98%,100%{opacity:.5;}}
+@keyframes dtF1{0%,46.6%{opacity:0;transform:scale(.3);}47.6%,95%{opacity:1;transform:scale(1);}98%,100%{opacity:0;}}
+@keyframes plF1{0%,46.6%{opacity:.5;}47.6%,95%{opacity:1;}98%,100%{opacity:.5;}}
+@keyframes dtE2{0%,49.6%{opacity:0;transform:scale(.3);}50.6%,95%{opacity:1;transform:scale(1);}98%,100%{opacity:0;}}
+@keyframes plE2{0%,49.6%{opacity:.5;}50.6%,95%{opacity:1;}98%,100%{opacity:.5;}}
+
+55%{height:45%;}60%{height:72%;}65%{height:54%;}70%{height:82%;}76%,95%{height:90%;}99%,100%{height:0;}}
+56%{height:62%;}61%{height:30%;}66%{height:50%;}71%{height:24%;}76%,95%{height:34%;}99%,100%{height:0;}}
+57%{height:26%;}62%{height:58%;}67%{height:36%;}72%{height:62%;}76%,95%{height:54%;}99%,100%{height:0;}}
+58%{height:42%;}63%{height:16%;}68%{height:36%;}73%{height:12%;}76%,95%{height:22%;}99%,100%{height:0;}}
+59%{height:20%;}64%{height:46%;}69%{height:24%;}74%{height:52%;}76%,95%{height:44%;}99%,100%{height:0;}}
+@media (prefers-reduced-motion: reduce){
+  .demo *{animation:none!important;}
+  .demo .wpop,.demo .nib,.demo .cogbox{display:none!important;}
+  .demo .in-line{stroke-dashoffset:0!important;}
+  .demo .stamp{opacity:1!important;transform:rotate(-11deg) scale(1)!important;}
+  .demo .blm{transform:scale(1)!important;}
+  .demo .d-dash .ct{display:none!important;}
+  .demo .d-exp,.demo .ghost{display:none!important;}
+  .demo .pchip.nw,.demo .mpkg,.demo .rec{opacity:1!important;transform:none!important;}
+  .demo .pip .dot:not(.still)::after{opacity:1!important;animation:none!important;}
+  .demo .pip .pn{opacity:1!important;}
+  .demo .d-dash .cogs{display:none!important;}
+}
+
+
+/* ===== race section ===== */
+
+.race{margin-top:100px;text-align:center;}
+.sect-k{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--burg);}
+.race h3,.acts h3{font-family:'Playfair Display',serif;font-size:34px;font-weight:800;margin-top:10px;letter-spacing:-.5px;}
+.race .rs{font-size:14px;color:#6a594d;max-width:520px;margin:12px auto 0;line-height:1.6;}
+.lanes{max-width:720px;margin:36px auto 0;display:flex;flex-direction:column;gap:16px;text-align:left;}
+.lane{display:flex;align-items:center;gap:18px;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:18px 22px;}
+.lane.win{border-color:var(--sage);box-shadow:0 10px 28px rgba(90,110,88,.14);}
+.lane .ln{width:190px;flex-shrink:0;}
+.lane .ln b{font-family:'Playfair Display',serif;font-size:17px;font-weight:800;color:var(--hdr);}
+.lane.win .ln b::after{content:' ★';color:var(--gold);}
+.lane .ln span{display:block;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:3px;}
+.lane .track{flex:1;height:10px;border-radius:5px;background:var(--sage-l);overflow:hidden;}
+.lane .track i{display:block;height:100%;border-radius:5px;background:var(--sage);width:0;}
+.lane.win .track i{background:var(--sage-d);}
+.lane .val{width:96px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);flex-shrink:0;}
+.lane .val b{font-family:'Playfair Display',serif;font-size:20px;color:var(--sage-d);}
+.lanes.play .l1 i{animation:lane1 1.6s .2s ease-out forwards;}
+.lanes.play .l2 i{animation:lane2 1.6s .2s ease-out forwards;}
+.lanes.play .l3 i{animation:lane3 1.6s .2s ease-out forwards;}
+@keyframes lane1{to{width:75%;}}
+@keyframes lane2{to{width:20%;}}
+@keyframes lane3{to{width:0%;}}
+.rec2{max-width:720px;margin:24px auto 0;background:var(--card);border:1px solid var(--sage);border-radius:13px;box-shadow:0 12px 30px rgba(90,110,88,.16);padding:15px 20px;display:flex;align-items:center;gap:13px;text-align:left;}
+.rec2 .rst{color:var(--gold);font-size:18px;flex-shrink:0;}
+.rec2 .rt{font-size:13px;line-height:1.5;color:var(--ink);}
+.rec2 .rt b{color:var(--ink);font-weight:600;}
+.rec2 .rbtn{margin-left:auto;flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;background:var(--pink);border:1px solid var(--pink-b);color:var(--ink);border-radius:9px;padding:10px 14px;cursor:pointer;white-space:nowrap;}
+.rec2 .rbtn:hover{background:var(--pink-h);}
+
+/* ===== acts (library trio) ===== */
+.acts{margin-top:100px;text-align:center;}
+.acts .as{font-size:14px;color:#6a594d;max-width:560px;margin:12px auto 0;line-height:1.6;}
+.trio{display:flex;justify-content:center;gap:20px;margin-top:34px;flex-wrap:wrap;}
+.lib{flex:0 1 280px;background:var(--card);border:1px solid var(--bd);border-radius:13px;overflow:hidden;text-align:left;box-shadow:0 8px 22px rgba(58,28,20,.08);transition:transform .18s,box-shadow .18s;}
+.lib:hover{transform:translateY(-5px) rotate(-.4deg);box-shadow:0 16px 34px rgba(58,28,20,.14);}
+.lib-h{display:flex;align-items:center;gap:8px;padding:9px 15px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid var(--bd);}
+.lib-h.xl{background:var(--pink);color:var(--burg);} .lib-h.xs{background:var(--sage-l);color:var(--sage-d);} .lib-h.xp{background:#f3e6cf;color:var(--gold);}
+.lib-h .ex{margin-left:auto;background:rgba(253,250,245,.85);border-radius:4px;padding:2px 6px;font-size:6.5px;}
+.lib-b{padding:13px 15px 15px;}
+.lt{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.14em;text-transform:uppercase;color:#b3a291;}
+.lib .ti{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;margin:3px 0 9px;}
+.lfchip{display:inline-flex;align-items:center;gap:6px;background:#fdfaf5;border:1px solid #e4d8c6;border-radius:7px;padding:5px 10px;font-family:'JetBrains Mono',monospace;font-size:8px;color:#5d5247;}
+.lib .use{margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:7.5px;color:var(--sage-d);}
+
+/* ===== final CTA band ===== */
+.band{margin-top:110px;background:linear-gradient(135deg,var(--pink-l),#fdfaf5 60%);border:1px solid var(--pink-b);border-radius:20px;padding:56px 40px;text-align:center;position:relative;overflow:hidden;}
+.band::before{content:'';position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(138,158,136,.16),transparent 70%);}
+.band h3{font-family:'Playfair Display',serif;font-size:38px;font-weight:800;letter-spacing:-.6px;}
+.band h3 em{font-style:italic;color:var(--burg);}
+.band p{font-size:14px;color:#6a594d;margin-top:12px;}
+.band .ctarow{justify-content:center;}
+@keyframes wp_w1{0%,54%{opacity:0;transform:scale(.3) rotate(-5deg);}55.2%{opacity:1;transform:scale(1.06) rotate(1.5deg);}56%{transform:scale(1) rotate(0);}58.2%{opacity:1;transform:scale(1);}60.5%,100%{opacity:0;transform:translate(110px,70px) scale(.12) rotate(6deg);}}
+.wpop.w1{animation:wp_w1 24s cubic-bezier(.3,1.4,.5,1) infinite;}
+@keyframes wp_w2{0%,58%{opacity:0;transform:scale(.3) rotate(-5deg);}59.2%{opacity:1;transform:scale(1.06) rotate(1.5deg);}60%{transform:scale(1) rotate(0);}62.2%{opacity:1;transform:scale(1);}64.5%,100%{opacity:0;transform:translate(-120px,10px) scale(.12) rotate(6deg);}}
+.wpop.w2{animation:wp_w2 24s cubic-bezier(.3,1.4,.5,1) infinite;}
+@keyframes wp_w3{0%,62%{opacity:0;transform:scale(.3) rotate(-5deg);}63.2%{opacity:1;transform:scale(1.06) rotate(1.5deg);}64%{transform:scale(1) rotate(0);}66.2%{opacity:1;transform:scale(1);}68.5%,100%{opacity:0;transform:translate(130px,-40px) scale(.12) rotate(6deg);}}
+.wpop.w3{animation:wp_w3 24s cubic-bezier(.3,1.4,.5,1) infinite;}
+@keyframes wp_w4{0%,66%{opacity:0;transform:scale(.3) rotate(-5deg);}67.2%{opacity:1;transform:scale(1.06) rotate(1.5deg);}68%{transform:scale(1) rotate(0);}70.2%{opacity:1;transform:scale(1);}72.5%,100%{opacity:0;transform:translate(50px,90px) scale(.12) rotate(6deg);}}
+.wpop.w4{animation:wp_w4 24s cubic-bezier(.3,1.4,.5,1) infinite;}
+@keyframes wp_w5{0%,70%{opacity:0;transform:scale(.3) rotate(-5deg);}71.2%{opacity:1;transform:scale(1.06) rotate(1.5deg);}72%{transform:scale(1) rotate(0);}74.2%{opacity:1;transform:scale(1);}76.5%,100%{opacity:0;transform:translate(-110px,-30px) scale(.12) rotate(6deg);}}
+.wpop.w5{animation:wp_w5 24s cubic-bezier(.3,1.4,.5,1) infinite;}
+@keyframes wp_w6{0%,74%{opacity:0;transform:scale(.3) rotate(-5deg);}75.2%{opacity:1;transform:scale(1.06) rotate(1.5deg);}76%{transform:scale(1) rotate(0);}78.2%{opacity:1;transform:scale(1);}80.5%,100%{opacity:0;transform:translate(-30px,-60px) scale(.12) rotate(6deg);}}
+.wpop.w6{animation:wp_w6 24s cubic-bezier(.3,1.4,.5,1) infinite;}
+@keyframes wbl_wb1{0%,55.5%{transform:scale(0);}57.0%{transform:scale(1.55);}58.0%,96%{transform:scale(1);}99%,100%{transform:scale(0);}}
+.blm.wb1{animation:wbl_wb1 24s ease infinite;}
+@keyframes wbl_wb2{0%,60%{transform:scale(0);}61.5%{transform:scale(1.55);}62.5%,96%{transform:scale(1);}99%,100%{transform:scale(0);}}
+.blm.wb2{animation:wbl_wb2 24s ease infinite;}
+@keyframes wbl_wb3{0%,65%{transform:scale(0);}66.5%{transform:scale(1.55);}67.5%,96%{transform:scale(1);}99%,100%{transform:scale(0);}}
+.blm.wb3{animation:wbl_wb3 24s ease infinite;}
+@keyframes wbl_wb4{0%,70%{transform:scale(0);}71.5%{transform:scale(1.55);}72.5%,96%{transform:scale(1);}99%,100%{transform:scale(0);}}
+.blm.wb4{animation:wbl_wb4 24s ease infinite;}
+@keyframes wbl_wb5{0%,75%{transform:scale(0);}76.5%{transform:scale(1.55);}77.5%,96%{transform:scale(1);}99%,100%{transform:scale(0);}}
+.blm.wb5{animation:wbl_wb5 24s ease infinite;}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- header: Queries Hub idiom -->
+  <div class="crumb">Scriptally / Manuscripts / Submission Packages</div>
+  <div class="hubrow">
+    <h1>Package Workshop</h1>
+    <span class="propill">🔒 PRO</span>
+    <span class="mschip"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v6l2-1.5L12 10V4"/></svg>Murphy's Day Out</span>
+  </div>
+
+    <!-- hero -->
+  <div class="hero">
+    <div class="hcopy">
+      <h2>Find out what<br><em>wins requests</em></h2>
+      <div class="hl">Build different versions of your submission from the same materials. Send them. ScriptAlly tracks which one gets agents asking for the full manuscript.</div>
+      <div class="ctarow">
+        <button class="cta-pro">Unlock with Pro</button>
+        <button class="cta-tour">Try it with example data →</button>
+      </div>
+      <div class="trust">Built for UK querying · Your materials stay yours</div>
+    </div>
+    <div class="demo" aria-label="Animated demo: dragging Word documents in, building six packages, analytics crunching, and a recommendation appearing">
+      <div class="dwin d-pal">
+        <div class="dhead">Your materials</div>
+        <div class="pchip"><span class="g">?</span><span class="n">Character-led letter</span></div>
+        <div class="pchip"><span class="g">?</span><span class="n">Comp-led letter</span></div>
+        <div class="pchip"><span class="g">≡</span><span class="n">One-page synopsis</span></div>
+        <div class="pchip"><span class="g">≡</span><span class="n">Full synopsis · 2pp</span></div>
+        <div class="pchip nw" style="animation-name:ci1;"><span class="g">≡</span><span class="n">Character-led synopsis</span></div>
+        <div class="pchip nw" style="animation-name:ci2;"><span class="g">▤</span><span class="n">Chapters 1–3</span></div>
+        <div class="pchip nw" style="animation-name:ci3;"><span class="g">▤</span><span class="n">Prologue + Ch 1</span></div>
+        <div class="pchip"><span class="g">▤</span><span class="n">First 50 pages</span></div>
+        <div class="pchip"><span class="g">≡</span><span class="n">Bio &amp; credits</span></div>
+      </div>
+<div class="mpkg hcap" style="left:230px;top:10px;animation-name:pk1;"><div class="mh">Character-led · v2</div><div class="pips"><div class="pip"><span class="dot" style="animation-name:dtA1;"></span><span class="pn" style="animation-name:plA1;">Character-led letter</span></div><div class="pip"><span class="dot" style="animation-name:dtA2;"></span><span class="pn" style="animation-name:plA2;">Character-led synopsis</span></div></div></div>
+      <div class="mpkg hpink" style="left:412px;top:10px;animation-name:pk2;"><div class="mh">Comp-led · v1</div><div class="pips"><div class="pip"><span class="dot" style="animation-name:dtB1;"></span><span class="pn" style="animation-name:plB1;">One-page synopsis</span></div><div class="pip"><span class="dot still"></span><span class="pn">Comp-led letter</span></div></div></div>
+      <div class="mpkg hsage" style="left:594px;top:10px;animation-name:pk3;"><div class="mh">Hartley bespoke</div><div class="pips"><div class="pip"><span class="dot" style="animation-name:dtC1;"></span><span class="pn" style="animation-name:plC1;">Character-led synopsis</span></div><div class="pip"><span class="dot still"></span><span class="pn">Chapters 1–3</span></div></div></div>
+      <div class="mpkg hpink" style="left:230px;top:148px;animation-name:pk4;"><div class="mh">Short & sharp</div><div class="pips"><div class="pip"><span class="dot" style="animation-name:dtD1;"></span><span class="pn" style="animation-name:plD1;">Chapters 1–3</span></div><div class="pip"><span class="dot still"></span><span class="pn">One-page synopsis</span></div></div></div>
+      <div class="mpkg hsage" style="left:412px;top:148px;animation-name:pk5;"><div class="mh">First attempt</div><div class="pips"><div class="pip"><span class="dot" style="animation-name:dtE1;"></span><span class="pn" style="animation-name:plE1;">Comp-led letter</span></div><div class="pip"><span class="dot" style="animation-name:dtE2;"></span><span class="pn" style="animation-name:plE2;">First 50 pages</span></div></div></div>
+      <div class="mpkg hcap" style="left:594px;top:148px;animation-name:pk6;"><div class="mh">Prologue-first</div><div class="pips"><div class="pip"><span class="dot" style="animation-name:dtF1;"></span><span class="pn" style="animation-name:plF1;">Prologue + Ch 1</span></div><div class="pip"><span class="dot still"></span><span class="pn">Bio & credits</span></div></div></div>
+      <div class="dwin d-exp">
+        <div class="dhead"><span class="dots"><i></i><i></i><i></i></span>Documents</div>
+        <div class="fgrid">
+          <div class="fdoc hot"><span class="ic">W</span><span class="fn">MDO_Synopsis_char.docx</span></div>
+          <div class="fdoc hot"><span class="ic">W</span><span class="fn">MDO_Pages_1-3.docx</span></div>
+          <div class="fdoc"><span class="ic">W</span><span class="fn">MDO_Full_MS.docx</span></div>
+          <div class="fdoc hot"><span class="ic">W</span><span class="fn">MDO_Prologue.docx</span></div>
+          <div class="fdoc"><span class="ic">W</span><span class="fn">MDO_Notes_old.docx</span></div>
+          <div class="fdoc"><span class="ic">W</span><span class="fn">Agent_list.docx</span></div>
+        </div>
+      </div>
+      <div class="ghost file" style="left:320px;top:84px;animation-name:gf1;"><span class="g">W</span><span class="n">MDO_Synopsis_char.docx</span></div>
+      <div class="ghost file" style="left:434px;top:84px;animation-name:gf2;"><span class="g">W</span><span class="n">MDO_Pages_1-3.docx</span></div>
+      <div class="ghost file" style="left:320px;top:158px;animation-name:gf3;"><span class="g">W</span><span class="n">MDO_Prologue.docx</span></div>
+      <div class="ghost" style="left:12px;top:40px;animation-name:m1;"><span class="g">?</span><span class="n">Character-led letter</span></div>
+      <div class="ghost" style="left:12px;top:71px;animation-name:m2;"><span class="g">?</span><span class="n">Comp-led letter</span></div>
+      <div class="ghost" style="left:12px;top:102px;animation-name:m3;"><span class="g">≡</span><span class="n">One-page synopsis</span></div>
+      <div class="ghost" style="left:12px;top:164px;animation-name:m4;"><span class="g">≡</span><span class="n">Character-led synopsis</span></div>
+      <div class="ghost" style="left:12px;top:164px;animation-name:m5;"><span class="g">≡</span><span class="n">Character-led synopsis</span></div>
+      <div class="ghost" style="left:12px;top:195px;animation-name:m6;"><span class="g">▤</span><span class="n">Chapters 1–3</span></div>
+      <div class="ghost" style="left:12px;top:226px;animation-name:m7;"><span class="g">▤</span><span class="n">Prologue + Ch 1</span></div>
+      <div class="ghost" style="left:12px;top:257px;animation-name:m8;"><span class="g">▤</span><span class="n">First 50 pages</span></div>
+      <div class="dwin d-dash">
+        <div class="dhead">Package analytics<span class="ct">CRUNCHING YOUR RESULTS…</span></div>
+        <div class="dbody">
+          <svg class="in-svg" viewBox="0 0 492 132" fill="none">
+            <g class="in-grid"><line x1="20" y1="20" x2="472" y2="20"/><line x1="20" y1="52" x2="472" y2="52"/><line x1="20" y1="84" x2="472" y2="84"/><line x1="20" y1="116" x2="472" y2="116"/></g>
+            <path class="in-base" d="M20 120 C 120 118, 300 114, 468 108"/>
+            <path class="in-line" d="M20 112 C 80 104, 110 66, 160 74 S 260 38, 310 46 S 410 10, 468 18"/>
+          </svg>
+          <span class="blm wb1" style="left:36px;top:66px;"></span>
+          <span class="blm wb2" style="left:152px;top:86px;"></span>
+          <span class="blm wb3" style="left:256px;top:58px;"></span>
+          <span class="blm wb4" style="left:352px;top:56px;"></span>
+          <span class="blm wb5" style="left:452px;top:30px;"></span>
+          <svg class="nib" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M4 20l2.5-7L17 2.5a2.1 2.1 0 013 3L9.5 16z"/><path d="M13 6l4.5 4.5"/><circle cx="7.6" cy="15.9" r="1" fill="currentColor"/></svg>
+          <div class="stamp"><span class="tk">✓</span><span class="tx">WINNER FOUND</span></div>
+        </div>
+        <div class="cogbox">
+          <span class="cog big"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3.4"/><path d="M12 1.6v3M12 19.4v3M1.6 12h3M19.4 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M19.4 4.6L17.3 6.7M6.7 17.3l-2.1 2.1"/></svg></span>
+          <span class="cog mid"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3.2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg></span>
+          <span class="cog sml"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg></span>
+        </div>
+        <div class="wpop w1" style="left:-54px;top:-18px;"><span class="g">?</span><span class="n">Character-led letter</span></div>
+        <div class="wpop w2" style="right:-44px;top:60px;"><span class="g">≡</span><span class="n">One-page synopsis</span></div>
+        <div class="wpop w3" style="left:-58px;top:130px;"><span class="g">▤</span><span class="n">Chapters 1–3</span></div>
+        <div class="wpop w4" style="left:150px;top:-30px;"><span class="g">◫</span><span class="n">Comp-led · v1</span></div>
+        <div class="wpop w5" style="right:-48px;bottom:26px;"><span class="g">≡</span><span class="n">Character-led synopsis</span></div>
+        <div class="wpop w6" style="right:150px;bottom:-26px;"><span class="g">◫</span><span class="n">Character-led · v2</span></div>
+      </div>
+      <div class="rec"><span class="rst">★</span><span class="rt">Your <b>character-led</b> package has a significantly higher response rate than other packages and has resulted in <b>2 partial requests</b>. Make this your active package for future queries?</span><button class="rbtn">Make active</button></div>
+    </div>
+  </div>
+
+  <!-- race -->
+  <div class="race">
+    <div class="sect-k">Version compare</div>
+    <h3>Stop guessing which letter works</h3>
+    <div class="rs">Every package keeps its own scorecard. Keep an eye on the stats and find your winner.</div>
+    <div class="lanes" id="lanes">
+      <div class="lane win"><span class="ln"><b>Character-led · v2</b><span>character-led letter · character-led synopsis</span></span><span class="track l1"><i></i></span><span class="val"><b>3</b>/4 requests</span></div>
+      <div class="lane"><span class="ln"><b>Comp-led · v1</b><span>letter A · synopsis</span></span><span class="track l2"><i></i></span><span class="val"><b>1</b>/5 requests</span></div>
+      <div class="lane"><span class="ln"><b>First attempt</b><span>letter A · long synopsis</span></span><span class="track l3"><i></i></span><span class="val"><b>0</b>/6 requests</span></div>
+    </div>
+    <div class="rec2"><span class="rst">★</span><span class="rt">Your <b>character-led</b> package has a significantly higher response rate than other packages and has resulted in <b>2 partial requests</b>. Make this your active package for future queries?</span><button class="rbtn">Make active</button></div>
+  </div>
+
+  <!-- library -->
+  <div class="acts">
+    <div class="sect-k">Your library</div>
+    <h3>Curate your materials once, reuse them everywhere</h3>
+    <div class="as">Name each component, pin the actual file so you never lose track, and mix them into as many packages as you like.</div>
+    <div class="trio">
+      <div class="lib"><div class="lib-h xl">? Query letter<span class="ex">EXAMPLE</span></div><div class="lib-b"><div class="lt">Title</div><div class="ti">Character-led letter</div><span class="lfchip">MDO_Query_char.docx</span><div class="use">● IN 2 PACKAGES · 3 REQUESTS</div></div></div>
+      <div class="lib"><div class="lib-h xs">≡ Synopsis<span class="ex">EXAMPLE</span></div><div class="lib-b"><div class="lt">Title</div><div class="ti">One-page synopsis</div><span class="lfchip">MDO_Synopsis.docx</span><div class="use">● IN 3 PACKAGES</div></div></div>
+      <div class="lib"><div class="lib-h xp">▤ Sample pages<span class="ex">EXAMPLE</span></div><div class="lib-b"><div class="lt">Title</div><div class="ti">Chapters 1–3</div><span class="lfchip">MDO_Pages_1-3.docx</span><div class="use">● IN 1 PACKAGE · 1 REQUEST</div></div></div>
+    </div>
+  </div>
+
+  <!-- final CTA -->
+  <div class="band">
+    <h3>Your next letter could be <em>the one</em></h3>
+    <p>Build it, send it, and know for certain. Submission Packages is part of ScriptAlly Pro.</p>
+    <div class="ctarow"><button class="cta-pro">Unlock with Pro</button><button class="cta-tour">Try it with example data →</button></div>
+  </div>
+
+</div>
+<script>
+// race bars animate when scrolled into view (once)
+const lanes=document.getElementById('lanes');
+new IntersectionObserver((es,o)=>{es.forEach(e=>{if(e.isIntersecting){lanes.classList.add('play');o.disconnect();}});},{threshold:.4}).observe(lanes);
+</script>
+</body>
+</html>
