@@ -82,7 +82,6 @@ const statusDisplayLabel = (q: { status: QueryStatus; revisionRound?: number }):
 
 import {
   Search,
-  Clock,
   Star,
   ChevronRight,
   ChevronLeft,
@@ -109,10 +108,7 @@ import {
   XCircle,
   User,
   ListChecks,
-  MoreHorizontal,
-  RotateCcw,
-  Copy,
-  UserPlus
+  RotateCcw
 } from "lucide-react";
 
 // Materials are rendered through the single formatQueryMaterial helper (src/lib/materials.ts) —
@@ -153,9 +149,10 @@ const CmdBtn = React.forwardRef<HTMLButtonElement, {
   primary?: boolean;
   dim?: boolean;
   iconOnly?: boolean;
+  destructive?: boolean;
   title?: string;
   badge?: React.ReactNode;
-}>(({ icon, label, onClick, disabled, primary, dim, iconOnly, title, badge }, ref) => (
+}>(({ icon, label, onClick, disabled, primary, dim, iconOnly, destructive, title, badge }, ref) => (
   <button
     ref={ref}
     type="button"
@@ -166,14 +163,14 @@ const CmdBtn = React.forwardRef<HTMLButtonElement, {
     style={{
       position: "relative", display: "inline-flex", alignItems: "center", gap: 8, flexShrink: 0,
       fontFamily: "'Inter',sans-serif", fontWeight: primary ? 600 : 500, fontSize: 13,
-      color: disabled ? "#b7ab99" : (dim ? "var(--hub-label, #8f877b)" : "var(--hub-item, #1a1512)"),
+      color: disabled ? "#b7ab99" : (destructive ? "#9a3b2a" : (dim ? "var(--hub-label, #8f877b)" : "var(--hub-item, #1a1512)")),
       background: "none", border: "none", borderRadius: 9,
       padding: iconOnly ? "9px 10px" : "9px 13px",
       cursor: disabled ? "default" : "pointer", whiteSpace: "nowrap",
       opacity: disabled ? 0.35 : 1,
     }}
   >
-    <span aria-hidden="true" style={{ display: "flex", alignItems: "center", color: disabled || dim ? "currentColor" : (primary ? "#6f4e37" : "#7a6f61") }}>{icon}</span>
+    <span aria-hidden="true" style={{ display: "flex", alignItems: "center", color: disabled || dim || destructive ? "currentColor" : (primary ? "#6f4e37" : "#7a6f61") }}>{icon}</span>
     {label && <span>{label}</span>}
     {badge}
   </button>
@@ -249,15 +246,23 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   // The Mark-sent trigger now lives in the pane's command bar (pinned low), so the popover opens
   // UPWARD from it (additive placement — every other useFixedMenu caller keeps the default).
   const { triggerRef: markSentTriggerRef, menuStyle: markSentMenuStyle } = useFixedMenu<HTMLButtonElement>(isMarkSentOpen, { placement: "up" });
-  // Control-ribbon secondary menus — Nudge (modal), Close reasons + More both anchored upward off
-  // their ribbon tiles (the bar sits at the workspace foot).
+  // Control-ribbon secondary surfaces — Nudge (modal), Close-reasons menu (anchored upward off its
+  // ribbon tile), and the Delete confirmation dialog. (v3: the More ⋯ menu was removed.)
   const [isNudgeOpen, setIsNudgeOpen] = useState(false);
   const [isCloseMenuOpen, setIsCloseMenuOpen] = useState(false);
-  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const { triggerRef: closeTriggerRef, menuStyle: closeMenuStyle } = useFixedMenu<HTMLButtonElement>(isCloseMenuOpen, { placement: "up" });
-  const { triggerRef: moreTriggerRef, menuStyle: moreMenuStyle } = useFixedMenu<HTMLButtonElement>(isMoreMenuOpen, { placement: "up" });
   // Close every ribbon popover/modal whenever the reader moves to a different query.
-  useEffect(() => { setIsMarkSentOpen(false); setIsNudgeOpen(false); setIsCloseMenuOpen(false); setIsMoreMenuOpen(false); }, [selectedQueryId]);
+  useEffect(() => { setIsMarkSentOpen(false); setIsNudgeOpen(false); setIsCloseMenuOpen(false); setIsDeleteConfirmOpen(false); }, [selectedQueryId]);
+  // ⚠️ STUB — v3 promoted Delete to the command bar, but the data layer has NO deleteQuery handler
+  // yet (recon: only deleteManuscript/Version/Agent/JournalEntry/Note/Activity exist). Per the task
+  // we render the full confirm flow, but the final deletion is intentionally NOT wired — do not
+  // invent Firestore deletion semantics here. Wire this to a real db.deleteQuery (+ activity/
+  // subcollection cleanup) in a follow-up. See the run report.
+  const handleDeleteQuery = () => {
+    console.warn("[Queries] Delete query is not wired yet — no deleteQuery handler in the data layer (stubbed).");
+    setIsDeleteConfirmOpen(false);
+  };
 
   // Toast state for Undo
   const [undoToast, setUndoToast] = useState<{
@@ -2480,24 +2485,24 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           </>
         )}
 
-        {/* More menu — anchored upward off the More ribbon tile. Reopen is wired (closed-only); the
-            rest are next-features stubs (rendered disabled, never a dead link). */}
-        {isMoreMenuOpen && activeQuery && (() => {
-          const st = activeQuery.status as QueryStatus;
-          const closed = st === QueryStatus.REJECTED || st === QueryStatus.WITHDRAWN || st === QueryStatus.NO_RESPONSE;
+        {/* Delete confirmation — destructive, no undo. v3 promoted Delete to the bar (the ⋯ More menu
+            was removed). The final deletion is a flagged STUB (no deleteQuery handler yet — see the
+            handleDeleteQuery note above); the confirm flow itself is real. */}
+        {isDeleteConfirmOpen && activeQuery && activeAgent && (() => {
+          const agentName = agentPrimary(activeAgent) || "this agent";
           return (
-            <>
-              <div onClick={() => setIsMoreMenuOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 59 }} aria-hidden="true" />
-              <div style={{ ...moreMenuStyle, zIndex: 60, background: "#fffefb", border: "1px solid var(--bd)", borderRadius: 12, boxShadow: "0 12px 34px rgba(58,44,31,.18)", padding: 6, minWidth: 214 }}>
-                <RibbonMenuItem icon={<Clock style={{ width: 15, height: 15 }} />} label="Set a reminder" disabled title="Coming soon" />
-                <RibbonMenuItem icon={<UserPlus style={{ width: 15, height: 15 }} />} label="Query another agent" disabled title="Coming soon" />
-                <RibbonMenuItem icon={<Activity style={{ width: 15, height: 15 }} />} label="View full timeline" disabled title="Coming soon" />
-                <RibbonMenuItem icon={<Copy style={{ width: 15, height: 15 }} />} label="Copy summary" disabled title="Coming soon" />
-                {closed && <RibbonMenuItem icon={<RotateCcw style={{ width: 15, height: 15 }} />} label="Reopen" onClick={() => { setIsMoreMenuOpen(false); updateQueryStatus(activeQuery.id, QueryStatus.QUERIED); }} />}
-                <div aria-hidden="true" style={{ height: 1, background: "var(--bd)", opacity: .7, margin: "5px 8px" }} />
-                <RibbonMenuItem icon={<Trash2 style={{ width: 15, height: 15 }} />} label="Delete query" disabled destructive title="Coming soon — deleting a query isn't wired yet" />
+            <div role="dialog" aria-modal="true" aria-label="Delete query" onClick={() => setIsDeleteConfirmOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 70, background: "rgba(29,23,18,.42)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+              <div onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: 420, background: "#fffefb", border: "1px solid var(--bd)", borderRadius: 16, boxShadow: "0 24px 60px rgba(29,23,18,.28)", padding: "22px 24px" }}>
+                <div style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 700, color: "#1a1512", marginBottom: 9 }}>Delete this query?</div>
+                <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 13.5, lineHeight: 1.5, color: "#5a5048" }}>
+                  This permanently deletes your query to <b style={{ color: "#1a1512" }}>{agentName}</b>{activeMs?.title ? <> for <b style={{ color: "#1a1512" }}>{activeMs.title}</b></> : null}, along with its tracking history. <b style={{ color: "#9a3b2a" }}>This can’t be undone.</b>
+                </div>
+                <div style={{ display: "flex", justifyContent: "flex-end", gap: 9, marginTop: 20 }}>
+                  <button type="button" onClick={() => setIsDeleteConfirmOpen(false)} style={{ fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 500, color: "#5a5048", background: "#ffffff", border: "1px solid var(--bd)", borderRadius: 9, padding: "9px 16px", cursor: "pointer" }}>Cancel</button>
+                  <button type="button" onClick={handleDeleteQuery} style={{ fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 600, color: "#fff", background: "#9a3b2a", border: "1px solid #9a3b2a", borderRadius: 9, padding: "9px 16px", cursor: "pointer" }}>Delete query</button>
+                </div>
               </div>
-            </>
+            </div>
           );
         })()}
 
@@ -3066,21 +3071,22 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 <span style={{ minWidth: 16, height: 16, borderRadius: 8, background: badge.tier === "urgent" ? "#9a3b2a" : "#b7ab99", color: "#faf3ef", fontFamily: FONT_MONO, fontSize: 9, fontWeight: 600, display: "inline-grid", placeItems: "center", padding: "0 4px", marginLeft: 2 }}>{badge.count}</span>
               ) : undefined;
 
-              // Slim inline command bar (ref queries-hub-v2.html .cb-query): actions | divider | go-to |
-              // spring | icon-only PDF · ⋯. Same handlers/refs/stubs as before — re-skin only.
+              // Slim inline command bar (ref queries-hub-v3.html .bar): Record · Edit · Nudge · Close |
+              // gap | Agent · Manuscript · Tasks | spring | PDF · Delete. Same handlers/refs/stubs as
+              // before — v3 reorders, drops the ⋯ More button, and promotes Delete (destructive) last.
               return (
                 <>
                   <CmdBtn ref={primaryRef} icon={primaryIcon} label={primaryLabel} primary disabled={!sel} onClick={onPrimary} />
+                  <CmdBtn icon={<Pencil style={{ width: 15, height: 15 }} />} label="Edit" disabled={!sel} onClick={() => activeQuery && openEditQuery(activeQuery.id)} />
                   <CmdBtn icon={<Bell style={{ width: 16, height: 16 }} />} label="Nudge" disabled={!sel || !waitingOnAgent} onClick={() => setIsNudgeOpen(true)} title={sel && !waitingOnAgent ? "Available while you're waiting on the agent" : undefined} />
                   <CmdBtn ref={closeTriggerRef} icon={<XCircle style={{ width: 16, height: 16 }} />} label="Close" disabled={!sel || isClosed} onClick={() => setIsCloseMenuOpen(o => !o)} title={sel && isClosed ? "Already closed" : undefined} />
-                  <CmdBtn icon={<Pencil style={{ width: 15, height: 15 }} />} label="Edit" disabled={!sel} onClick={() => activeQuery && openEditQuery(activeQuery.id)} />
                   {csep}
                   <CmdBtn icon={<User style={{ width: 16, height: 16 }} />} label="Agent" disabled title="Coming soon — jump to the agent's record" />
                   <CmdBtn icon={<Book style={{ width: 16, height: 16 }} />} label="Manuscript" disabled title="Coming soon — jump to the manuscript" />
                   <CmdBtn icon={<ListChecks style={{ width: 16, height: 16 }} />} label="Tasks" disabled={!sel} onClick={() => onNavigate?.("todo")} badge={taskBadge} />
                   <span aria-hidden="true" style={{ flex: 1 }} />
-                  <CmdBtn iconOnly dim icon={<Download style={{ width: 16, height: 16 }} />} disabled={!sel || isGeneratingPDF} onClick={() => handleDownloadPDF()} title={isGeneratingPDF ? "Generating…" : "Download PDF"} />
-                  <CmdBtn ref={moreTriggerRef} iconOnly dim icon={<MoreHorizontal style={{ width: 18, height: 18 }} />} disabled={!sel} onClick={() => setIsMoreMenuOpen(o => !o)} title="More" />
+                  <CmdBtn dim icon={<Download style={{ width: 16, height: 16 }} />} label="PDF" disabled={!sel || isGeneratingPDF} onClick={() => handleDownloadPDF()} title={isGeneratingPDF ? "Generating…" : "Download PDF"} />
+                  <CmdBtn destructive icon={<Trash2 style={{ width: 15, height: 15 }} />} label="Delete" disabled={!sel} onClick={() => setIsDeleteConfirmOpen(true)} title="Delete this query" />
                 </>
               );
             })()}
