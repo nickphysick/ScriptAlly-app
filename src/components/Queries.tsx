@@ -2791,7 +2791,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   const heroStatColour = heroDir === "out" ? "#7c3a2a" : heroDir === "in" ? "#5a6e58" : "#8a7d6c";
                   return (
                     // Strip-back: plain card surface (no status-tint gradient, no espresso top-accent) + soft shadow — matches the mockup .hero.
-                    <div className="qp-hero" style={{ position: "relative", overflow: "hidden", margin: "16px 18px 0", padding: "22px 26px", border: "var(--bdw) solid var(--bd)", borderRadius: 20, background: "var(--hub-pane-process, #fffefb)", boxShadow: "0 10px 30px rgba(58,44,31,.09)", flexShrink: 0 }}>
+                    <div className="qp-hero" style={{ position: "relative", overflow: "hidden", margin: "16px 18px 0", padding: "22px 26px", border: "var(--bdw) solid var(--bd)", borderTop: "4px solid var(--hub-primary)", borderRadius: 20, background: "var(--hub-pane-process, #fffefb)", boxShadow: "0 10px 30px rgba(58,44,31,.09)", flexShrink: 0 }}>
                       {/* top row — avatar centred against the name + agency + status label */}
                       <div style={{ position: "relative", zIndex: 2, display: "flex", alignItems: "center", gap: 18 }}>
                         {/* avatar — solid ink disc + white initials (per the Queries Hub mockup) */}
@@ -3022,7 +3022,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           `}</style>
 
           {/* List card — count · Export CSV, centred (no keyboard hint) */}
-          <div style={{ gridColumn: 1, gridRow: 2, display: "flex", alignItems: "center", justifyContent: "center", gap: 12, background: "var(--qp-cmd-bg, var(--hub-cmd))", border: "var(--qp-cmd-frame, none)", borderTop: "var(--qp-cmd-toprule, var(--hub-cmd-rule))", borderRadius: "var(--qp-cmd-radius, 0)", margin: "var(--qp-cmd-margin, 0)", boxShadow: "var(--cmd-bar-shadow, none)", padding: "11px 16px", fontFamily: FONT_MONO, fontSize: 9.5, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase" as const, color: `var(--cmdbar-meta, ${qdbBoldMuted})` }}>
+          <div style={{ gridColumn: 1, gridRow: 2, display: "flex", alignItems: "center", justifyContent: "center", gap: 12, background: "var(--qp-cmd-bg, var(--hub-cmd))", border: "var(--qp-cmd-frame, none)", borderTop: "var(--qp-cmd-toprule, var(--hub-cmd-rule))", borderBottom: "4px solid var(--hub-primary)", borderRadius: "var(--qp-cmd-radius, 0)", margin: "var(--qp-cmd-margin, 0)", boxShadow: "var(--cmd-bar-shadow, none)", padding: "11px 16px", fontFamily: FONT_MONO, fontSize: 9.5, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase" as const, color: `var(--cmdbar-meta, ${qdbBoldMuted})` }}>
             <span>{sortedList.length} {sortedList.length === 1 ? "query" : "queries"}</span>
             <span aria-hidden="true" style={{ width: 1, height: 12, background: "var(--bd)", opacity: .85 }} />
             <button
@@ -3038,7 +3038,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
           {/* Query card — the action ribbon: three equal sections (Actions · Go to · utility),
               tiles centred in each, dividers between. Tiles stay greyed-not-hidden with no selection. */}
-          <div style={{ gridColumn: 2, gridRow: 2, display: "flex", alignItems: "center", gap: 4, background: "var(--qp-cmd-bg, var(--hub-cmd))", border: "var(--qp-cmd-frame, none)", borderTop: "var(--qp-cmd-toprule, var(--hub-cmd-rule))", borderRadius: "var(--qp-cmd-radius, 0)", margin: "var(--qp-cmd-margin, 0)", boxShadow: "var(--cmd-bar-shadow, none)", padding: "9px 14px", minWidth: 0 }}>
+          <div style={{ gridColumn: 2, gridRow: 2, display: "flex", alignItems: "center", gap: 4, background: "var(--qp-cmd-bg, var(--hub-cmd))", border: "var(--qp-cmd-frame, none)", borderTop: "var(--qp-cmd-toprule, var(--hub-cmd-rule))", borderBottom: "4px solid var(--hub-primary)", borderRadius: "var(--qp-cmd-radius, 0)", margin: "var(--qp-cmd-margin, 0)", boxShadow: "var(--cmd-bar-shadow, none)", padding: "9px 14px", minWidth: 0 }}>
             {(() => {
               const sel = !!(activeQuery && activeAgent && activeMs);
               const status = activeQuery ? (activeQuery.status as QueryStatus) : null;
