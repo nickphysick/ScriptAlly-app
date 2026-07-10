@@ -2231,7 +2231,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           />
 
           {/* Empty split — list placeholder (col 1) + welcome pane (col 2), both full desk height */}
-          <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "330px 1fr", gridTemplateRows: "minmax(0, 1fr)", columnGap: 20, flex: 1, minHeight: 0, alignItems: "stretch" }}>
+          <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "363px 1fr", gridTemplateRows: "minmax(0, 1fr)", columnGap: 20, flex: 1, minHeight: 0, alignItems: "stretch" }}>
 
             {/* List card — search + header (0 queries · Sort · Filter) + centred placeholder + disabled CSV */}
             <div style={{ alignSelf: "stretch", background: "var(--hub-list)", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", overflow: "hidden", boxShadow: "0 8px 26px rgba(29,23,18,.12)", display: "flex", flexDirection: "column", minHeight: 0 }}>
@@ -2504,7 +2504,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         {/* ── Split — list card (furniture, col 1) beside the workspace reading pane (col 2). The
             old actions toolbar row is retired: every query action now lives in the pane's command
             bar (one home for actions). Single-row grid, both columns full height. ── */}
-        <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "330px 1fr", gridTemplateRows: "minmax(0, 1fr) auto", columnGap: 20, flex: 1, minHeight: 0, alignItems: "stretch" }}>
+        <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "363px 1fr", gridTemplateRows: "minmax(0, 1fr) auto", columnGap: 20, flex: 1, minHeight: 0, alignItems: "stretch" }}>
 
           {/* List card — furniture: search + header fixed, rows scroll to the control bar's top
               edge (count · Export CSV · key hints moved into the shared bar's left zone). */}
