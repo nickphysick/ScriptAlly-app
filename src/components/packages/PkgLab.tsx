@@ -13,13 +13,14 @@
 import React, { useState } from "react";
 import { ManuscriptVersion, SubmissionPackage, Query, Agent, ComponentType, QueryStatus } from "../../types";
 import { FirstVisitHome } from "./FirstVisitHome";
+import { PackageShowcase } from "./PackageShowcase";
 import { PackageWorkshop } from "./PackageWorkshop";
 import { Tour } from "../Tour";
 import { EXAMPLE_VERSIONS, EXAMPLE_PACKAGES, EXAMPLE_QUERIES, EXAMPLE_AGENTS, WORKSHOP_TOUR_STEPS } from "./tourExample";
 import { FONT_MONO, FONT_SERIF } from "../../lib/designTokens";
 
 type Theme = "t-capp" | "t-bold" | "t-edn";
-type View = "landing" | "empty" | "full";
+type View = "showcase" | "landing" | "empty" | "full";
 
 const V = (id: string, componentType: ComponentType, versionName: string, fileName: string, contentDraft?: string): ManuscriptVersion => ({
   id, manuscriptId: "m", userId: "lab", componentType, versionName, fileAttached: true, fileName, createdDate: "2026-01-01T00:00:00.000Z", contentDraft,
@@ -94,9 +95,9 @@ export const PkgLab: React.FC = () => {
       <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", borderBottom: "1px solid var(--bd)", flexWrap: "wrap", flexShrink: 0 }}>
         <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--muted)" }}>#/pkg-lab</span>
         <div style={{ display: "flex", gap: 6 }}>
-          {(["landing", "empty", "full"] as View[]).map((v) => (
+          {(["showcase", "landing", "empty", "full"] as View[]).map((v) => (
             <button key={v} type="button" onClick={() => { setView(v); setTour(false); setPulseAdd(false); }} style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".04em", textTransform: "uppercase", padding: "7px 13px", borderRadius: 8, cursor: "pointer", border: "1px solid var(--bd)", background: view === v ? "var(--band)" : "#fffefb", color: view === v ? "var(--burg)" : "var(--ink)" }}>
-              {v === "landing" ? "Landing" : v === "empty" ? "Empty workshop" : "Full workshop"}
+              {v === "showcase" ? "Showcase" : v === "landing" ? "Landing" : v === "empty" ? "Empty workshop" : "Full workshop"}
             </button>
           ))}
           <button type="button" onClick={startTour} style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".04em", textTransform: "uppercase", padding: "7px 13px", borderRadius: 8, cursor: "pointer", border: "1px solid var(--burg)", background: tour ? "var(--band)" : "#fffefb", color: "var(--burg)" }}>▶ Run tour</button>
@@ -110,7 +111,13 @@ export const PkgLab: React.FC = () => {
         </div>
       </div>
 
-      {/* Stage — sized to the viewport minus the toolbar, mirroring the real pkg-root (host). */}
+      {/* Stage — sized to the viewport minus the toolbar, mirroring the real pkg-root (host). The
+          showcase is full-bleed (its own ground + internal scroll), so it bypasses the padded slab. */}
+      {view === "showcase" ? (
+        <div style={{ flex: 1, minHeight: 0 }}>
+          <PackageShowcase manuscriptTitle="Murphy's Day Out" onUnlockPro={() => window.alert("Unlock with Pro → /plans")} onTryExample={startTour} />
+        </div>
+      ) : (
       <div className="pkg-root" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", padding: "18px 28px 16px", gap: 12, overflow: "hidden", background: "var(--desk)" }}>
         {mockSlab}
         {view === "landing" ? (
@@ -151,6 +158,7 @@ export const PkgLab: React.FC = () => {
           />
         )}
       </div>
+      )}
       {tour && <Tour steps={WORKSHOP_TOUR_STEPS} onDone={endTour} badge="Example data — cleared when the tour ends" />}
     </div>
   );
