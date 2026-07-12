@@ -29,6 +29,9 @@ export interface PackageShowcaseProps {
   onUnlockPro: () => void;
   /** "Try it with example data →" — enter the workshop + start the FR3 tour (same hook as the old landing). */
   onTryExample: () => void;
+  /** Optional LIVE manuscript switcher (multi-manuscript users) — replaces the ref's static chip so
+   *  switching isn't lost on the landing. Omitted = the ref-faithful static chip. */
+  msSelector?: React.ReactNode;
 }
 
 const SHOWCASE_CSS = `
@@ -289,7 +292,7 @@ const recText = (
   <span className="rt">Your <b>character-led</b> package has a significantly higher response rate than other packages and has resulted in <b>2 partial requests</b>. Make this your active package for future queries?</span>
 );
 
-export const PackageShowcase: React.FC<PackageShowcaseProps> = ({ manuscriptTitle, onUnlockPro, onTryExample }) => {
+export const PackageShowcase: React.FC<PackageShowcaseProps> = ({ manuscriptTitle, onUnlockPro, onTryExample, msSelector }) => {
   // The one permitted piece of JS motion wiring (per the ref's script): the Version-compare bars
   // animate ONCE when the lanes scroll into view. Threshold .4, disconnect after firing.
   const lanesRef = useRef<HTMLDivElement>(null);
@@ -315,7 +318,7 @@ export const PackageShowcase: React.FC<PackageShowcaseProps> = ({ manuscriptTitl
         <div className="hubrow">
           <h1>Package Workshop</h1>
           <span className="propill">{lockGlyph} PRO</span>
-          <span className="mschip">{bookGlyph}{manuscriptTitle}</span>
+          {msSelector ? <span style={{ marginLeft: "auto", alignSelf: "center" }}>{msSelector}</span> : <span className="mschip">{bookGlyph}{manuscriptTitle}</span>}
         </div>
 
         {/* hero */}

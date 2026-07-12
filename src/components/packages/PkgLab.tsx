@@ -3,16 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * PkgLab — DEV-only review harness for the Package Workshop (#/pkg-lab). Renders the surviving
- * presentational surfaces — the FirstVisitHome LANDING and the PackageWorkshop — over local stubs so
- * they can be eyeballed WITHOUT signing in (the real route is Pro + auth-gated). A theme toggle
- * (.t-capp / .t-bold / .t-edn) proves the var(--…) tokens; a view toggle switches Landing vs an empty
- * workshop (0 materials → FR4 middle/analytics empties) vs a populated workshop. The stage is sized to
- * the viewport (minus this toolbar) so the FR2 viewport-fit + internal-scroll behaviour is real here.
- * TEMP — remove when the workshop ships.
+ * presentational surfaces — the PackageShowcase LANDING (Pro sell) and the PackageWorkshop — over
+ * local stubs so they can be eyeballed WITHOUT signing in (the real route is Pro + auth-gated). A
+ * theme toggle (.t-capp / .t-bold / .t-edn) proves the var(--…) tokens (the showcase is deliberately
+ * Cappuccino-only); a view toggle switches the Showcase vs an empty workshop (0 materials → FR4
+ * middle/analytics empties) vs a populated workshop. The stage is sized to the viewport (minus this
+ * toolbar) so the FR2 viewport-fit + internal-scroll behaviour is real here. TEMP — remove when the
+ * workshop ships.
  */
 import React, { useState } from "react";
 import { ManuscriptVersion, SubmissionPackage, Query, Agent, ComponentType, QueryStatus } from "../../types";
-import { FirstVisitHome } from "./FirstVisitHome";
 import { PackageShowcase } from "./PackageShowcase";
 import { PackageWorkshop } from "./PackageWorkshop";
 import { Tour } from "../Tour";
@@ -20,7 +20,7 @@ import { EXAMPLE_VERSIONS, EXAMPLE_PACKAGES, EXAMPLE_QUERIES, EXAMPLE_AGENTS, WO
 import { FONT_MONO, FONT_SERIF } from "../../lib/designTokens";
 
 type Theme = "t-capp" | "t-bold" | "t-edn";
-type View = "showcase" | "landing" | "empty" | "full";
+type View = "showcase" | "empty" | "full";
 
 const V = (id: string, componentType: ComponentType, versionName: string, fileName: string, contentDraft?: string): ManuscriptVersion => ({
   id, manuscriptId: "m", userId: "lab", componentType, versionName, fileAttached: true, fileName, createdDate: "2026-01-01T00:00:00.000Z", contentDraft,
@@ -60,7 +60,7 @@ const msChip = (
 
 export const PkgLab: React.FC = () => {
   const [theme, setTheme] = useState<Theme>("t-capp");
-  const [view, setView] = useState<View>("landing");
+  const [view, setView] = useState<View>("showcase");
   const [tour, setTour] = useState(false);
   const [pulseAdd, setPulseAdd] = useState(false);
   // Stateful so the workshop's create/save round-trips in the lab.
@@ -95,9 +95,9 @@ export const PkgLab: React.FC = () => {
       <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 16px", borderBottom: "1px solid var(--bd)", flexWrap: "wrap", flexShrink: 0 }}>
         <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".1em", textTransform: "uppercase", color: "var(--muted)" }}>#/pkg-lab</span>
         <div style={{ display: "flex", gap: 6 }}>
-          {(["showcase", "landing", "empty", "full"] as View[]).map((v) => (
+          {(["showcase", "empty", "full"] as View[]).map((v) => (
             <button key={v} type="button" onClick={() => { setView(v); setTour(false); setPulseAdd(false); }} style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".04em", textTransform: "uppercase", padding: "7px 13px", borderRadius: 8, cursor: "pointer", border: "1px solid var(--bd)", background: view === v ? "var(--band)" : "#fffefb", color: view === v ? "var(--burg)" : "var(--ink)" }}>
-              {v === "showcase" ? "Showcase" : v === "landing" ? "Landing" : v === "empty" ? "Empty workshop" : "Full workshop"}
+              {v === "showcase" ? "Showcase" : v === "empty" ? "Empty workshop" : "Full workshop"}
             </button>
           ))}
           <button type="button" onClick={startTour} style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".04em", textTransform: "uppercase", padding: "7px 13px", borderRadius: 8, cursor: "pointer", border: "1px solid var(--burg)", background: tour ? "var(--band)" : "#fffefb", color: "var(--burg)" }}>▶ Run tour</button>
@@ -115,14 +115,12 @@ export const PkgLab: React.FC = () => {
           showcase is full-bleed (its own ground + internal scroll), so it bypasses the padded slab. */}
       {view === "showcase" ? (
         <div style={{ flex: 1, minHeight: 0 }}>
-          <PackageShowcase manuscriptTitle="Murphy's Day Out" onUnlockPro={() => window.alert("Unlock with Pro → /plans")} onTryExample={startTour} />
+          <PackageShowcase manuscriptTitle="Murphy's Day Out" onUnlockPro={() => window.alert("Unlock with Pro → /plans")} onTryExample={() => { setView("empty"); startTour(); }} />
         </div>
       ) : (
       <div className="pkg-root" style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", padding: "18px 28px 16px", gap: 12, overflow: "hidden", background: "var(--desk)" }}>
         {mockSlab}
-        {view === "landing" ? (
-          <FirstVisitHome onBuild={() => setView("empty")} onTour={startTour} />
-        ) : view === "empty" ? (
+        {view === "empty" ? (
           <PackageWorkshop
             versions={emptyVersions}
             packages={emptyPackages}

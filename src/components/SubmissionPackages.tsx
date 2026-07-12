@@ -6,7 +6,10 @@
  * Renders inside the global AppShell stage (no nav of its own), scoped to the active manuscript via
  * localStorage["scriptally_active_manuscript_id"]. This host provides the qhbar chrome (ChromeSlab:
  * crumb + title + Pro pill + the manuscript switcher) + the manuscript-scoped data and persistence,
- * and mounts <PackageWorkshop> for everything else.
+ * and mounts <PackageWorkshop> for everything else. At ZERO packages it renders the PackageShowcase
+ * Pro-selling landing instead — full-bleed, with its own bare Queries-Hub-idiom header (the
+ * ChromeSlab card deliberately does not render on that branch); "Unlock with Pro" → /plans, "Try it
+ * with example data →" enters the workshop + starts the tour.
  *
  * The old multi-view builder (FirstVisitHome / PackagesHome / Composer / MaterialsManager /
  * MaterialsRail / JourneyStrip / PackageStats view / WorkedExample / the MaterialModal popup) was
@@ -15,8 +18,9 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
 import { ComponentType } from "../types";
+import { useNavigate } from "react-router-dom";
 import { PackageWorkshop, PackageSaveFields } from "./packages/PackageWorkshop";
-import { FirstVisitHome } from "./packages/FirstVisitHome";
+import { PackageShowcase } from "./packages/PackageShowcase";
 import { Tour } from "./Tour";
 import { EXAMPLE_VERSIONS, EXAMPLE_PACKAGES, EXAMPLE_QUERIES, EXAMPLE_AGENTS, WORKSHOP_TOUR_STEPS } from "./packages/tourExample";
 import { FONT_SERIF, FONT_MONO } from "../lib/designTokens";
@@ -25,15 +29,16 @@ import { ChevronDown, Lock } from "lucide-react";
 
 export const SubmissionPackages: React.FC = () => {
   const { currentUser, manuscripts, versions, packages, queries, agents, addVersion, updateVersion, deleteVersion, addPackage, updatePackage, updateUserProfile } = useScriptAllyDb();
+  const navigate = useNavigate();
 
   const [activeMsId, setActiveMsId] = useState<string | null>(() =>
     typeof window !== "undefined" ? localStorage.getItem("scriptally_active_manuscript_id") : null,
   );
   const [msMenuOpen, setMsMenuOpen] = useState(false);
   const msMenuRef = useRef<HTMLDivElement>(null);
-  // At zero packages the route shows the FirstVisitHome landing; "entered" flips it to the (empty)
-  // workshop once the user clicks Build / the tour link. Reset on manuscript switch so a fresh book
-  // shows its own landing. Irrelevant once a manuscript has ≥1 package (the workshop always renders).
+  // At zero packages the route shows the PackageShowcase landing; "entered" flips it to the (empty)
+  // workshop once the user takes the example-data tour link. Reset on manuscript switch so a fresh
+  // book shows its own landing. Irrelevant once a manuscript has ≥1 package (the workshop renders).
   const [entered, setEntered] = useState(false);
   // The guided tour. While active the workshop renders the PURE example fixture (never persisted) and
   // the gold badge; on end we clear it and stamp hasSeenTour so it never auto-runs again.
@@ -99,10 +104,10 @@ export const SubmissionPackages: React.FC = () => {
     // The tour ends on the empty workshop — nudge the writer to their first real action.
     if (msVersions.length === 0) setPulseAdd(true);
   };
-  // Landing CTAs: Build enters + auto-offers the tour on a first visit (hasSeenTour unset); the "New
-  // here?" link enters + starts the tour unconditionally. The workshop "?" re-runs it any time.
+  // The showcase's "Try it with example data →" enters the workshop + starts the tour (the sole
+  // workshop entry from the landing — the old Build-CTA auto-offer retired with the FR1 landing).
+  // The workshop "?" re-runs the tour any time. hasSeenTour still stamps on end.
   const startTour = () => setTourActive(true);
-  const enterViaBuild = () => { setEntered(true); if (!hasSeenTour) setTourActive(true); };
   const enterViaTour = () => { setEntered(true); setTourActive(true); };
 
   // While the tour runs the workshop shows the PURE example fixture (never persisted); otherwise the
@@ -162,6 +167,20 @@ export const SubmissionPackages: React.FC = () => {
     </div>
   ) : null;
 
+  // Zero packages → the Pro showcase landing, full-bleed (it paints its own Cappuccino ground and
+  // carries its own Queries-Hub-idiom header — the ChromeSlab card deliberately does NOT render on
+  // this branch; the workshop keeps it). "Unlock with Pro" → /plans (the in-app upgrade route).
+  if (activeMs && msPackages.length === 0 && !entered) {
+    return (
+      <PackageShowcase
+        manuscriptTitle={activeMs.title}
+        msSelector={multiMs ? msSelector : undefined}
+        onUnlockPro={() => navigate("/plans")}
+        onTryExample={enterViaTour}
+      />
+    );
+  }
+
   return (
     <div className="pkg-root" style={{ height: "100%", display: "flex", flexDirection: "column", padding: "22px 28px 16px", gap: 14, overflow: "hidden", background: "var(--desk)" }}>
       <style>{`
@@ -187,8 +206,6 @@ export const SubmissionPackages: React.FC = () => {
             <div style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 14, color: "var(--muted)", maxWidth: 420, lineHeight: 1.5, margin: "0 auto" }}>Add a manuscript from the Manuscripts list first — packages are built per manuscript.</div>
           </div>
         </div>
-      ) : msPackages.length === 0 && !entered ? (
-        <FirstVisitHome onBuild={enterViaBuild} onTour={enterViaTour} />
       ) : (
         <PackageWorkshop
           versions={wsVersions}
