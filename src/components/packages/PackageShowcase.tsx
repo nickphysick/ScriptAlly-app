@@ -19,7 +19,7 @@
  * data; the demo + "Make active" buttons are fiction. `prefers-reduced-motion` renders the end-state.
  * (The ref's lines 152–156 are orphaned/truncated bar keyframes with no target element — omitted.)
  */
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FONT_SANS, FONT_SERIF, FONT_MONO } from "../../lib/designTokens";
 
 export interface PackageShowcaseProps {
@@ -193,6 +193,62 @@ const SHOWCASE_CSS = `
   @keyframes pswWblWb4 { 0%,70%{transform:scale(0);} 71.5%{transform:scale(1.55);} 72.5%,96%{transform:scale(1);} 99%,100%{transform:scale(0);} }
   .pkgshow .blm.wb5 { animation:pswWblWb5 24s ease infinite; }
   @keyframes pswWblWb5 { 0%,75%{transform:scale(0);} 76.5%{transform:scale(1.55);} 77.5%,96%{transform:scale(1);} 99%,100%{transform:scale(0);} }
+
+  /* ===== race section (Version compare) ===== */
+  .pkgshow .race { margin-top:100px; text-align:center; }
+  .pkgshow .sect-k { font-family:${FONT_MONO}; font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--burg); }
+  .pkgshow .race h3, .pkgshow .acts h3 { font-family:${FONT_SERIF}; font-size:34px; font-weight:800; margin-top:10px; letter-spacing:-.5px; }
+  .pkgshow .race .rs { font-size:14px; color:#6a594d; max-width:520px; margin:12px auto 0; line-height:1.6; }
+  .pkgshow .lanes { max-width:720px; margin:36px auto 0; display:flex; flex-direction:column; gap:16px; text-align:left; }
+  .pkgshow .lane { display:flex; align-items:center; gap:18px; background:var(--card); border:1px solid var(--bd); border-radius:14px; padding:18px 22px; }
+  .pkgshow .lane.win { border-color:var(--sage); box-shadow:0 10px 28px rgba(90,110,88,.14); }
+  .pkgshow .lane .ln { width:190px; flex-shrink:0; }
+  .pkgshow .lane .ln b { font-family:${FONT_SERIF}; font-size:17px; font-weight:800; color:var(--hdr); }
+  .pkgshow .lane.win .ln b::after { content:' ★'; color:var(--gold); }
+  .pkgshow .lane .ln span { display:block; font-family:${FONT_MONO}; font-size:7.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-top:3px; }
+  .pkgshow .lane .track { flex:1; height:10px; border-radius:5px; background:var(--sage-l); overflow:hidden; }
+  .pkgshow .lane .track i { display:block; height:100%; border-radius:5px; background:var(--sage); width:0; }
+  .pkgshow .lane.win .track i { background:var(--sage-d); }
+  .pkgshow .lane .val { width:96px; text-align:right; font-family:${FONT_MONO}; font-size:9px; color:var(--muted); flex-shrink:0; }
+  .pkgshow .lane .val b { font-family:${FONT_SERIF}; font-size:20px; color:var(--sage-d); }
+  .pkgshow .lanes.play .l1 i { animation:pswLane1 1.6s .2s ease-out forwards; }
+  .pkgshow .lanes.play .l2 i { animation:pswLane2 1.6s .2s ease-out forwards; }
+  .pkgshow .lanes.play .l3 i { animation:pswLane3 1.6s .2s ease-out forwards; }
+  @keyframes pswLane1 { to{width:75%;} }
+  @keyframes pswLane2 { to{width:20%;} }
+  @keyframes pswLane3 { to{width:0%;} }
+  .pkgshow .rec2 { max-width:720px; margin:24px auto 0; background:var(--card); border:1px solid var(--sage); border-radius:13px; box-shadow:0 12px 30px rgba(90,110,88,.16); padding:15px 20px; display:flex; align-items:center; gap:13px; text-align:left; }
+  .pkgshow .rec2 .rst { color:var(--gold); font-size:18px; flex-shrink:0; }
+  .pkgshow .rec2 .rt { font-size:13px; line-height:1.5; color:var(--ink); }
+  .pkgshow .rec2 .rt b { color:var(--ink); font-weight:600; }
+  .pkgshow .rec2 .rbtn { margin-left:auto; flex-shrink:0; font-family:${FONT_MONO}; font-size:8.5px; letter-spacing:.05em; text-transform:uppercase; background:var(--pink); border:1px solid var(--pink-b); color:var(--ink); border-radius:9px; padding:10px 14px; cursor:pointer; white-space:nowrap; }
+  .pkgshow .rec2 .rbtn:hover { background:var(--pink-h); }
+
+  /* ===== acts (library trio) ===== */
+  .pkgshow .acts { margin-top:100px; text-align:center; }
+  .pkgshow .acts .as { font-size:14px; color:#6a594d; max-width:560px; margin:12px auto 0; line-height:1.6; }
+  .pkgshow .trio { display:flex; justify-content:center; gap:20px; margin-top:34px; flex-wrap:wrap; }
+  .pkgshow .lib { flex:0 1 280px; background:var(--card); border:1px solid var(--bd); border-radius:13px; overflow:hidden; text-align:left; box-shadow:0 8px 22px rgba(58,28,20,.08); transition:transform .18s, box-shadow .18s; }
+  .pkgshow .lib:hover { transform:translateY(-5px) rotate(-.4deg); box-shadow:0 16px 34px rgba(58,28,20,.14); }
+  .pkgshow .lib-h { display:flex; align-items:center; gap:8px; padding:9px 15px; font-family:${FONT_MONO}; font-size:8px; letter-spacing:.1em; text-transform:uppercase; border-bottom:1px solid var(--bd); }
+  .pkgshow .lib-h.xl { background:var(--pink); color:var(--burg); }
+  .pkgshow .lib-h.xs { background:var(--sage-l); color:var(--sage-d); }
+  .pkgshow .lib-h.xp { background:#f3e6cf; color:var(--gold); }
+  .pkgshow .lib-h .ex { margin-left:auto; background:rgba(253,250,245,.85); border-radius:4px; padding:2px 6px; font-size:6.5px; }
+  .pkgshow .lib-b { padding:13px 15px 15px; }
+  .pkgshow .lt { font-family:${FONT_MONO}; font-size:6.5px; letter-spacing:.14em; text-transform:uppercase; color:#b3a291; }
+  /* .libti, NOT the ref's .ti — Tabler Icons' global .ti class would mangle the title. */
+  .pkgshow .libti { font-family:${FONT_SERIF}; font-size:17px; font-weight:700; margin:3px 0 9px; }
+  .pkgshow .lfchip { display:inline-flex; align-items:center; gap:6px; background:#fdfaf5; border:1px solid #e4d8c6; border-radius:7px; padding:5px 10px; font-family:${FONT_MONO}; font-size:8px; color:#5d5247; }
+  .pkgshow .lib .use { margin-top:10px; font-family:${FONT_MONO}; font-size:7.5px; color:var(--sage-d); }
+
+  /* ===== final CTA band ===== */
+  .pkgshow .band { margin-top:110px; background:linear-gradient(135deg,var(--pink-l),#fdfaf5 60%); border:1px solid var(--pink-b); border-radius:20px; padding:56px 40px; text-align:center; position:relative; overflow:hidden; }
+  .pkgshow .band::before { content:''; position:absolute; right:-60px; top:-60px; width:220px; height:220px; border-radius:50%; background:radial-gradient(circle,rgba(138,158,136,.16),transparent 70%); }
+  .pkgshow .band h3 { font-family:${FONT_SERIF}; font-size:38px; font-weight:800; letter-spacing:-.6px; }
+  .pkgshow .band h3 em { font-style:italic; color:var(--burg); }
+  .pkgshow .band p { font-size:14px; color:#6a594d; margin-top:12px; }
+  .pkgshow .band .ctarow { justify-content:center; }
   /* In-app fit (beyond the fixed-canvas ref, flagged): the demo's absolute stage spans 762px; inside
      the route's 1200 read cap the hero offers ~696px, so the demo scales down a notch; on genuinely
      narrow panes it hides and the hero is copy-only. The hero is an inline-size container for this. */
@@ -234,6 +290,22 @@ const recText = (
 );
 
 export const PackageShowcase: React.FC<PackageShowcaseProps> = ({ manuscriptTitle, onUnlockPro, onTryExample }) => {
+  // The one permitted piece of JS motion wiring (per the ref's script): the Version-compare bars
+  // animate ONCE when the lanes scroll into view. Threshold .4, disconnect after firing.
+  const lanesRef = useRef<HTMLDivElement>(null);
+  const [lanesPlay, setLanesPlay] = useState(false);
+  useEffect(() => {
+    const el = lanesRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver((entries, obs) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { setLanesPlay(true); obs.disconnect(); }
+      });
+    }, { threshold: 0.4 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   return (
     <div className="pkgshow">
       <style>{SHOWCASE_CSS}</style>
@@ -334,6 +406,41 @@ export const PackageShowcase: React.FC<PackageShowcaseProps> = ({ manuscriptTitl
             </div>
             {/* recommendation card */}
             <div className="rec"><span className="rst">★</span>{recText}<button type="button" className="rbtn">Make active</button></div>
+          </div>
+        </div>
+
+        {/* race — Version compare */}
+        <div className="race">
+          <div className="sect-k">Version compare</div>
+          <h3>Stop guessing which letter works</h3>
+          <div className="rs">Every package keeps its own scorecard. Keep an eye on the stats and find your winner.</div>
+          <div ref={lanesRef} className={`lanes${lanesPlay ? " play" : ""}`}>
+            <div className="lane win"><span className="ln"><b>Character-led · v2</b><span>character-led letter · character-led synopsis</span></span><span className="track l1"><i /></span><span className="val"><b>3</b>/4 requests</span></div>
+            <div className="lane"><span className="ln"><b>Comp-led · v1</b><span>letter A · synopsis</span></span><span className="track l2"><i /></span><span className="val"><b>1</b>/5 requests</span></div>
+            <div className="lane"><span className="ln"><b>First attempt</b><span>letter A · long synopsis</span></span><span className="track l3"><i /></span><span className="val"><b>0</b>/6 requests</span></div>
+          </div>
+          <div className="rec2"><span className="rst">★</span>{recText}<button type="button" className="rbtn">Make active</button></div>
+        </div>
+
+        {/* library trio */}
+        <div className="acts">
+          <div className="sect-k">Your library</div>
+          <h3>Curate your materials once, reuse them everywhere</h3>
+          <div className="as">Name each component, pin the actual file so you never lose track, and mix them into as many packages as you like.</div>
+          <div className="trio">
+            <div className="lib"><div className="lib-h xl">? Query letter<span className="ex">EXAMPLE</span></div><div className="lib-b"><div className="lt">Title</div><div className="libti">Character-led letter</div><span className="lfchip">MDO_Query_char.docx</span><div className="use">● IN 2 PACKAGES · 3 REQUESTS</div></div></div>
+            <div className="lib"><div className="lib-h xs">≡ Synopsis<span className="ex">EXAMPLE</span></div><div className="lib-b"><div className="lt">Title</div><div className="libti">One-page synopsis</div><span className="lfchip">MDO_Synopsis.docx</span><div className="use">● IN 3 PACKAGES</div></div></div>
+            <div className="lib"><div className="lib-h xp">▤ Sample pages<span className="ex">EXAMPLE</span></div><div className="lib-b"><div className="lt">Title</div><div className="libti">Chapters 1–3</div><span className="lfchip">MDO_Pages_1-3.docx</span><div className="use">● IN 1 PACKAGE · 1 REQUEST</div></div></div>
+          </div>
+        </div>
+
+        {/* final CTA band */}
+        <div className="band">
+          <h3>Your next letter could be <em>the one</em></h3>
+          <p>Build it, send it, and know for certain. Submission Packages is part of ScriptAlly Pro.</p>
+          <div className="ctarow">
+            <button type="button" className="cta-pro" onClick={onUnlockPro}>Unlock with Pro</button>
+            <button type="button" className="cta-tour" onClick={onTryExample}>Try it with example data →</button>
           </div>
         </div>
       </div>
