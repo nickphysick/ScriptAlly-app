@@ -49,7 +49,7 @@ describe("RAIL_GROUPS — the grouped index shape", () => {
     expect(RAIL_GROUPS.map((g) => g.items.map((i) => i.label))).toEqual([
       ["Dashboard"],
       ["Queries Hub", "To-do"],
-      ["Agents database", "Discover new agents"],
+      ["Contact List", "Discover new agents"], // renamed from "Agents database" (overnight run)
       ["Your manuscripts", "Comparable titles", "Submission packages"],
     ]);
   });

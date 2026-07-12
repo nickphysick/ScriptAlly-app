@@ -15,19 +15,22 @@ export interface CrumbSegment {
   /** handleNavigate tab for navigable segments; absent = the current page (bold, inert). */
   tab?: string;
   sub?: string;
+  /** Proper-case display name for the current-page segment — the Playfair page name in the
+   *  header strip. Absent on parent segments (they render as mono small caps). */
+  title?: string;
 }
 
 const ROOT: CrumbSegment = { label: "SCRIPTALLY", tab: "dashboard" };
 
 const CRUMB_TABLE: Record<string, CrumbSegment[]> = {
-  "/queries": [ROOT, { label: "QUERYING", tab: "queries" }, { label: "QUERIES HUB" }],
-  "/todo": [ROOT, { label: "QUERYING", tab: "queries" }, { label: "TO-DO" }],
-  "/agents": [ROOT, { label: "AGENTS", tab: "agents" }, { label: "DATABASE" }],
-  "/agents/discover": [ROOT, { label: "AGENTS", tab: "agents" }, { label: "DISCOVER" }],
-  "/manuscripts": [ROOT, { label: "MANUSCRIPTS", tab: "manuscripts" }, { label: "YOUR MANUSCRIPTS" }],
-  "/manuscripts/comps": [ROOT, { label: "MANUSCRIPTS", tab: "manuscripts" }, { label: "COMPARABLE TITLES" }],
-  "/manuscripts/packages": [ROOT, { label: "MANUSCRIPTS", tab: "manuscripts" }, { label: "SUBMISSION PACKAGES" }],
-  "/import": [ROOT, { label: "IMPORT" }],
+  "/queries": [ROOT, { label: "QUERYING", tab: "queries" }, { label: "QUERIES HUB", title: "Queries Hub" }],
+  "/todo": [ROOT, { label: "QUERYING", tab: "queries" }, { label: "TO-DO", title: "To-do" }],
+  "/agents": [ROOT, { label: "AGENTS", tab: "agents" }, { label: "CONTACT LIST", title: "Contact List" }],
+  "/agents/discover": [ROOT, { label: "AGENTS", tab: "agents" }, { label: "DISCOVER", title: "Discover" }],
+  "/manuscripts": [ROOT, { label: "MANUSCRIPTS", tab: "manuscripts" }, { label: "YOUR MANUSCRIPTS", title: "Your Manuscripts" }],
+  "/manuscripts/comps": [ROOT, { label: "MANUSCRIPTS", tab: "manuscripts" }, { label: "COMPARABLE TITLES", title: "Comparable Titles" }],
+  "/manuscripts/packages": [ROOT, { label: "MANUSCRIPTS", tab: "manuscripts" }, { label: "SUBMISSION PACKAGES", title: "Submission Packages" }],
+  "/import": [ROOT, { label: "IMPORT", title: "Import" }],
 };
 
 /**

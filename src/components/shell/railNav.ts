@@ -42,7 +42,7 @@ export const RAIL_GROUPS: RailGroup[] = [
   {
     eyebrow: "Agents",
     items: [
-      { key: "agents-db", label: "Agents database", tab: "agents", path: "/agents" },
+      { key: "agents-db", label: "Contact List", tab: "agents", path: "/agents" },
       { key: "agents-discover", label: "Discover new agents", tab: "agents", sub: "Discover new agents", path: "/agents/discover" },
     ],
   },

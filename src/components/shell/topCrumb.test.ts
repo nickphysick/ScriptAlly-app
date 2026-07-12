@@ -16,7 +16,7 @@ describe("crumbForPath — the route table", () => {
   it("renders the pack's crumb string per route", () => {
     expect(labels("/queries")).toBe("SCRIPTALLY / QUERYING / QUERIES HUB");
     expect(labels("/todo")).toBe("SCRIPTALLY / QUERYING / TO-DO");
-    expect(labels("/agents")).toBe("SCRIPTALLY / AGENTS / DATABASE");
+    expect(labels("/agents")).toBe("SCRIPTALLY / AGENTS / CONTACT LIST"); // renamed from DATABASE (overnight run)
     expect(labels("/agents/discover")).toBe("SCRIPTALLY / AGENTS / DISCOVER");
     expect(labels("/manuscripts")).toBe("SCRIPTALLY / MANUSCRIPTS / YOUR MANUSCRIPTS");
     expect(labels("/manuscripts/comps")).toBe("SCRIPTALLY / MANUSCRIPTS / COMPARABLE TITLES");

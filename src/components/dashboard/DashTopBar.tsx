@@ -13,10 +13,11 @@
  * route, so the ⌘K registration here is the only one live on the dashboard.
  */
 import React, { useEffect, useRef } from "react";
-import { Search, Settings } from "lucide-react";
+import { Search, Settings, Menu } from "lucide-react";
 import { FONT_SERIF } from "../../lib/designTokens";
 import { longDate } from "../../lib/dashboardStats";
 import { useSearchSuggestions, SearchSuggestionsList } from "../searchSuggestions";
+import { useNavDrawer, NAV_DRAWER_ID } from "../shell/NavDrawer";
 
 interface DashTopBarProps {
   userName: string;
@@ -40,6 +41,7 @@ export const DashTopBar: React.FC<DashTopBarProps> = ({
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const drawer = useNavDrawer();
 
   const suggestions = useSearchSuggestions({ searchQuery, setSearchQuery, onNavigate, wrapRef });
   const { showDropdown, onKeyDown, onChange, onFocus } = suggestions;
@@ -58,7 +60,22 @@ export const DashTopBar: React.FC<DashTopBarProps> = ({
 
   return (
     <div className="sa-dtop">
-      <div className="sa-dtop-left">
+      <div className="sa-dtop-left" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        {/* Menu — opens the app-wide nav drawer (leftmost, per the drawer rollout). */}
+        {drawer && (
+          <button
+            type="button"
+            onClick={drawer.toggle}
+            aria-expanded={drawer.open}
+            aria-controls={NAV_DRAWER_ID}
+            aria-label="Open navigation"
+            title="Menu"
+            className="sa-dtop-icon"
+            style={{ flexShrink: 0 }}
+          >
+            <Menu width={16} height={16} />
+          </button>
+        )}
         <span className="sa-dtop-date">{longDate(new Date())}</span>
       </div>
       <div ref={wrapRef} className="sa-dtop-searchwrap" style={{ position: "relative" }}>
