@@ -47,6 +47,7 @@ import { RAIL_GROUPS, railActiveKey } from "./railNav";
 import { railMode, scrimVisible, railFlowWidth, railPanelWidth, readRailPinned, writeRailPinned, makePeekIntent } from "./railPeek";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
 import { CrumbStrip } from "./CrumbStrip";
+import { NavDrawer, NavDrawerProvider } from "./NavDrawer";
 import { BackgroundLab } from "../dev/BackgroundLab";
 import "./contentColumn.css";
 
@@ -653,7 +654,16 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
     if (el) el.scrollTop = scrollMemo.current[routeKey] ?? 0;
   }, [routeKey]);
 
+  // App-wide nav drawer — AppShell owns the open state; triggers (CrumbStrip / DashTopBar
+  // menu buttons) and the drawer itself consume it through NavDrawerProvider.
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const drawerCtx = useMemo(
+    () => ({ open: drawerOpen, setOpen: setDrawerOpen, toggle: () => setDrawerOpen((v) => !v) }),
+    [drawerOpen]
+  );
+
   return (
+    <NavDrawerProvider value={drawerCtx}>
     <div
       className={THEME_CLASS[theme]}
       data-sa-ground=""
@@ -708,9 +718,13 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
 
       <BottomTabBar activeTab={routeKey} onNavigate={onNavigate} />
 
+      {/* App-wide nav drawer — closed by default; opens from the header menu buttons (1b). */}
+      <NavDrawer onNavigate={onNavigate} />
+
       {/* DEV-only page-colour lab (local + scriptally-dev builds; statically false → tree-shaken
           from prod). Overrides ride an injected <style>; the root's data-sa-ground is its hook. */}
       {import.meta.env.DEV && <BackgroundLab theme={theme} />}
     </div>
+    </NavDrawerProvider>
   );
 };
