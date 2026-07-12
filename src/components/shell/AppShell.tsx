@@ -47,6 +47,7 @@ import { RAIL_GROUPS, railActiveKey } from "./railNav";
 import { railMode, scrimVisible, railFlowWidth, railPanelWidth, readRailPinned, writeRailPinned, makePeekIntent } from "./railPeek";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
 import { CrumbStrip } from "./CrumbStrip";
+import { BackgroundLab } from "../dev/BackgroundLab";
 import "./contentColumn.css";
 
 // Grouped-index data lives in railNav.ts (pure, tested); icons stay here (React-free model).
@@ -655,6 +656,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
   return (
     <div
       className={THEME_CLASS[theme]}
+      data-sa-ground=""
       style={{ display: "flex", height: "100vh", overflow: "hidden", background: "#F5F0EA" }}
     >
       <Rail activeTab={routeKey} onNavigate={onNavigate} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
@@ -705,6 +707,10 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
       </button>
 
       <BottomTabBar activeTab={routeKey} onNavigate={onNavigate} />
+
+      {/* DEV-only page-colour lab (local + scriptally-dev builds; statically false → tree-shaken
+          from prod). Overrides ride an injected <style>; the root's data-sa-ground is its hook. */}
+      {import.meta.env.DEV && <BackgroundLab theme={theme} />}
     </div>
   );
 };
