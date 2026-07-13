@@ -106,11 +106,68 @@ was `28689b2`.
 
 | Stage | Commit | Status |
 |---|---|---|
-| 0 — recon | (this file) | done |
-| 1 — prototypes committed | `62c5f2a` | done |
-| 2 — toast + undo | — | in progress |
-| 3 — genre taxonomy | — | pending |
-| 4 — Queries interactions | — | pending |
-| 5 — Contact List interactions | — | pending |
+| 0 — recon | `0f9450b` | ✅ done |
+| 1 — prototypes committed | `62c5f2a` | ✅ done |
+| 2 — toast + undo (+ confirm dialog) | `d894654` | ✅ done |
+| 3a — genre taxonomy foundation (pure module + 20 tests) | `8971a1a` | ✅ done |
+| 3b — creation guardrails wiring | — | ⏳ not started |
+| 3c — promotion queue + Nick-only admin view + rules | — | ⏳ not started |
+| 3d — picker UI (adapt GenreCombobox to the taxonomy) | — | ⏳ not started |
+| 3e — migration (labels → IDs, report unmappable) | — | ⏳ not started |
+| 3f — personal word-count fallback wiring | — | ⏳ not started (primitive built in 3a) |
+| 4 — Queries Hub interactions | — | ⏳ not started |
+| 5 — Contact List interactions | — | ⏳ not started |
+
+Also shipped this session (a fix to the already-live chrome, ahead of this task): `28689b2`
+— control-bar buttons pink/white at rest (a CSS-specificity regression in the shell's button
+reset), and distinct Sort (up/down arrows) / Group (2×2 grid) icons per Nick.
+
+## ⏸ Where I stopped, and why
+
+Stopped at a clean commit boundary after **3a** — the pure taxonomy keystone (standing decision
+#1) is in and locked. The remaining Session-1 work is a large, higher-risk body I'm deliberately
+NOT cramming at the tail of a long session:
+
+- **The genre ID migration (3b–3e) is a breaking data-model change** — `Agent.genres` and
+  `Manuscript.genre` move from label strings to canonical/personal **IDs**, which ripples through
+  every write path (`AddAgentFocusForm`, `EditAgentDrawer`, `AddManuscriptFocusForm`, onboarding,
+  Smart Import commit), every read/display site, and the word-count logic; it needs **new
+  Firestore rules** (`genreSuggestions` + a home for personal genres on the user doc) and a
+  migration that must not orphan existing label data. That "riskiest kind of change" wants a fresh,
+  careful pass — not the last hour of a session that also did the chrome fix + recon + toast + 3a.
+- **Stages 4 and 5** are the full interaction rebuilds of `Queries.tsx` and `Agents.tsx`
+  (composer state machine, corrections, three popovers, click-to-pick; stars/door/method/genres/
+  response-guidelines/wanted-materials/query-history/notes/delete-agent/send-query). Each is
+  multi-sub-stage and each depends on the taxonomy + toast that are now in place.
+
+Everything committed is green (tsc + build + **811** Vitest) and individually revertible; tree
+clean on `main` at `8971a1a`.
+
+## Flags for Nick (decisions surfaced by recon, to confirm before I build on them)
+
+1. **Personal-genre storage location.** Recon found no home for user-scoped genres. Plan: a
+   `genrePreferences` / `personalGenres` array on the **user doc** (cheapest, already loaded, no
+   new page-load read) rather than a subcollection. Needs a one-line rules allowlist addition.
+   Confirm the user-doc home is acceptable.
+2. **Tasks are single-scope.** A `Task` can't be dual-scoped to a query AND an agent today (only
+   `relatedRecordId`). The "Remind me in 2 weeks / check back in 1 month" reminders (4c/5a) will
+   therefore create a dated **`Note`** (the existing user-task primitive) carrying context in its
+   text. Genuine query+agent scoping would be a schema+rules change — flag, not silently added.
+3. **Wanted-materials vocabulary gap (5d).** `ComponentType` = Query Letter / Synopsis / Sample
+   Pages / Full Manuscript. The prototype also wants **Author bio** (no enum member) and **sample
+   words / sample chapters** (both would be `SAMPLE_PAGES` differentiated only by `unit`). Plan:
+   extend the *wanted-materials* value type (NOT `ComponentType`, NOT `packageMetrics` — both
+   locked) with an `"author-bio"` kind and a `unit ∈ {pages, chapters, words}`; report the
+   divergence rather than bending the Builder enum. Confirm.
+4. **Session 2 (AI) is untouched and gated on your go-ahead** — but recon confirms it's cheap to
+   build: `suggestComps` is the deploy-ready reuse target, `smartImportMap`'s
+   `users/{uid}/private/entitlement` counter is the entitlement pattern to copy, and **no function
+   does web search yet** (Stage 8's MSWL lookup is the first — a net-new capability + a functions
+   deploy you'll run).
+
+## Carried-over reminders (from the chrome revision, still true)
+- **`#/pkg-lab` must be removed before any prod deploy.**
+- Agent record **PRIYA RAMAN** renders shoutily (all-caps stored name) — a data fix, not a code
+  one.
 
 Session 2 (6–9) not started.
