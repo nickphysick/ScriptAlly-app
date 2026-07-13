@@ -346,7 +346,7 @@ service cloud.firestore {
     // (nullable), the stamps are full ISO datetimes (doneAt nullable). Every field is validated —
     // any field absent from this shape is silently dropped on write.
     function isValidUserNote(data, userId) {
-      return data.keys().hasOnly(['id', 'userId', 'text', 'colour', 'dueDate', 'done', 'doneAt', 'createdAt', 'updatedAt', 'queryId', 'agentId'])
+      return data.keys().hasOnly(['id', 'userId', 'text', 'colour', 'dueDate', 'done', 'doneAt', 'createdAt', 'updatedAt'])
         && data.id is string && data.id.size() <= 128
         && data.userId == userId
         && data.text is string && data.text.size() >= 1 && data.text.size() <= 16384
@@ -354,10 +354,6 @@ service cloud.firestore {
         && (data.dueDate == null || (data.dueDate is string && data.dueDate.size() <= 16))
         && data.done is bool
         && (data.doneAt == null || (data.doneAt is string && data.doneAt.size() <= 64))
-        // Record scope (interaction layer 5c/6) — the task is ABOUT a query/agent. Optional, string
-        // when present (rejects null); scope is user INPUT, not derived state.
-        && (!data.keys().hasAny(['queryId']) || (data.queryId is string && data.queryId.size() <= 128))
-        && (!data.keys().hasAny(['agentId']) || (data.agentId is string && data.agentId.size() <= 128))
         && data.createdAt is string && data.createdAt.size() <= 64
         && data.updatedAt is string && data.updatedAt.size() <= 64;
     }

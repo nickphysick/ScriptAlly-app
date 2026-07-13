@@ -425,12 +425,6 @@ export interface Note {
   doneAt: string | null; // full ISO datetime, stamped on completion
   createdAt: string; // full ISO datetime
   updatedAt: string; // full ISO datetime
-  // Record scope (interaction layer 5c/6) — the task is ABOUT a specific query and/or agent, set
-  // when created from that record's "View tasks" / check-back / nudge flows. Optional; absent for
-  // free-standing desk notes. Scope is INPUT (like manuscriptId on a query), not derived state —
-  // the "N tasks" badge counts stay derived. NOTE: rides the parked note-rules deploy.
-  queryId?: string;
-  agentId?: string;
 }
 
 // A To-do page "Notes" record — the ONLY stored to-do object (Do next / Housekeeping are derived).

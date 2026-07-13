@@ -20,17 +20,12 @@ import "./shell/f12.css";
 
 export type TasksScope = { queryId: string } | { agentId: string };
 
-const fmtDue = (iso: string): string => {
-  const d = new Date(iso);
-  return isNaN(d.getTime()) ? "" : d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }).toUpperCase();
-};
-
 export const TasksPopover: React.FC<{
   scope: TasksScope;
   style?: React.CSSProperties;
   onClose: () => void;
 }> = ({ scope, style, onClose }) => {
-  const { tasks, notes, dismissTask, updateNote, addNote } = useScriptAllyDb();
+  const { tasks, userTasks, dismissTask, updateUserTask, addUserTask } = useScriptAllyDb();
   const { showToast } = useToast();
   const ref = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -41,7 +36,8 @@ export const TasksPopover: React.FC<{
 
   // Derived suggestions exist only for queries (Task.relatedRecordId is a query id).
   const suggestions = queryId ? tasks.filter((t) => t.relatedRecordId === queryId) : [];
-  const stored = notes.filter((n) => !n.done && (queryId ? n.queryId === queryId : n.agentId === agentId));
+  // Stored tasks — the canonical UserTask store, scoped to this record.
+  const stored = userTasks.filter((t) => !t.done && (queryId ? t.queryId === queryId : t.agentId === agentId));
 
   useEffect(() => {
     const onDown = (e: MouseEvent) => {
@@ -59,13 +55,13 @@ export const TasksPopover: React.FC<{
     const text = draft.trim();
     if (!text) return;
     setDraft("");
-    await addNote({ text, ...(queryId ? { queryId } : { agentId: agentId! }) });
+    await addUserTask({ text, ...(queryId ? { queryId } : { agentId: agentId! }) });
     inputRef.current?.focus();
   };
 
   const completeStored = (id: string) => {
-    void updateNote(id, { done: true, doneAt: new Date().toISOString() });
-    showToast({ message: "Task done", undo: () => updateNote(id, { done: false, doneAt: null }) });
+    void updateUserTask(id, { done: true, completedAt: new Date().toISOString() });
+    showToast({ message: "Task done", undo: () => updateUserTask(id, { done: false }) });
   };
 
   return createPortal(
@@ -84,12 +80,12 @@ export const TasksPopover: React.FC<{
               <span className="f12-task-txt">{t.title}<span className="f12-task-tag">SUGGESTED</span></span>
             </div>
           ))}
-          {stored.map((n) => (
-            <div key={n.id} className="f12-task">
-              <button type="button" className="f12-task-tick" aria-label="Mark done" title="Mark done" onClick={() => completeStored(n.id)}>
+          {stored.map((t) => (
+            <div key={t.id} className="f12-task">
+              <button type="button" className="f12-task-tick" aria-label="Mark done" title="Mark done" onClick={() => completeStored(t.id)}>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /></svg>
               </button>
-              <span className="f12-task-txt">{n.text}{n.dueDate && <span className="f12-task-due">{fmtDue(n.dueDate)}</span>}</span>
+              <span className="f12-task-txt">{t.text}</span>
             </div>
           ))}
         </div>

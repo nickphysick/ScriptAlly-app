@@ -230,7 +230,7 @@ interface DbContextType {
   updateJournalEntry: (id: string, entryText: string) => Promise<void>;
 
   // Note Actions (user-authored desk notes / dated tasks)
-  addNote: (fields: { text: string; colour?: Note["colour"]; dueDate?: string | null; queryId?: string; agentId?: string }) => Promise<void>;
+  addNote: (fields: { text: string; colour?: Note["colour"]; dueDate?: string | null }) => Promise<void>;
   // Genre taxonomy (src/lib/genres.ts): resolve a typed genre to a stored id, creating a personal
   // genre (on the user doc) + a promotion-queue entry only when nothing canonical/personal matches.
   addPersonalGenre: (rawLabel: string) => Promise<{ ok: true; id: string; label: string } | { ok: false; reason: string }>;
@@ -2041,7 +2041,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
   // Notes — user-authored desk notes / dated tasks. Owner-scoped subcollection; isolated path,
   // never denormalised onto query/agent records. Dates are ISO strings (dueDate date-only).
-  const addNote = async (fields: { text: string; colour?: Note["colour"]; dueDate?: string | null; queryId?: string; agentId?: string }) => {
+  const addNote = async (fields: { text: string; colour?: Note["colour"]; dueDate?: string | null }) => {
     if (!currentUser) return;
     const id = "note-" + Math.random().toString(36).substr(2, 9);
     const now = new Date().toISOString();
@@ -2054,10 +2054,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       done: false,
       doneAt: null,
       createdAt: now,
-      updatedAt: now,
-      // Scope — omit when absent (Firestore rejects undefined; the rules allow the key to be missing).
-      ...(fields.queryId ? { queryId: fields.queryId } : {}),
-      ...(fields.agentId ? { agentId: fields.agentId } : {}),
+      updatedAt: now
     };
     try {
       await setDoc(doc(db, "users", currentUser.id, "notes", id), newNote);
