@@ -36,6 +36,7 @@ import { EdgeFadeScroll } from "./EdgeFadeScroll";
 import { F12Page, F12Account, IconTrig, F12Popover, F12Menu, PopSection, PRow, Chip } from "./shell/F12Shell";
 import { useFixedMenu } from "./forms/useFixedMenu";
 import { TasksPopover } from "./TasksPopover";
+import { useToast } from "./toast/ToastProvider";
 import {
   paneProvenance,
   agentQueried,
@@ -119,7 +120,12 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
     updateAgent,
     deleteAgent,
     setAgentSetAside,
+    addUserTask,
+    deleteUserTask,
   } = useScriptAllyDb();
+  const { showToast } = useToast();
+  // Door check-back reveal (6a) — the agent id whose door just closed; offers a dated reminder.
+  const [checkBackFor, setCheckBackFor] = useState<string | null>(null);
 
   // Selection + controls
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
@@ -444,6 +450,25 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
     await updateAgent(agent.id, { submissionStatus: next });
     setToastMessage(`${firstName(agentPrimary(agent))} marked ${next === SubmissionStatus.OPEN ? "open" : "closed"} to queries`);
     setTimeout(() => setToastMessage(null), 2500);
+    // Closing the door reveals a dated check-back reminder (6a); reopening clears any pending offer.
+    setCheckBackFor(next === SubmissionStatus.CLOSED ? agent.id : null);
+  };
+
+  // Create the check-back reminder — a stored, agent-scoped, DATED UserTask (surfaces on the day;
+  // never auto-fires). Default one month out.
+  const createCheckBack = async (agent: Agent, months: number) => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setMonth(d.getMonth() + months);
+    const dueDate = d.toISOString().slice(0, 10);
+    setCheckBackFor(null);
+    const id = await addUserTask({
+      text: `Check back with ${agentPrimary(agent)} — open to queries again?`,
+      agentId: agent.id,
+      dueDate,
+    });
+    // Undo deletes the just-created task (never a compensating record) and re-offers the prompt.
+    if (id) showToast({ message: "Reminder set", undo: () => { void deleteUserTask(id); setCheckBackFor(agent.id); } });
   };
 
   // Set aside / bring back — reversible, with an Undo on the set-aside direction.
@@ -663,6 +688,14 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
                   onChange={(v) => void setAvailability(a, v)}
                 />
               </span>
+              {/* 6a — closing the door offers a dated check-back reminder (never auto-fires). */}
+              {checkBackFor === a.id && (
+                <div className="ag-checkback">
+                  <span>Remind me to check back in</span>
+                  <button type="button" className="ag-cb-go" onClick={() => void createCheckBack(a, 1)}>1 month</button>
+                  <button type="button" className="ag-cb-x" aria-label="No reminder" onClick={() => setCheckBackFor(null)}>✕</button>
+                </div>
+              )}
             </div>
         </div>
 
