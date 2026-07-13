@@ -377,7 +377,8 @@ service cloud.firestore {
       return data.keys().hasOnly(['id', 'userId', 'text', 'done', 'completedAt', 'createdAt', 'updatedAt', 'queryId', 'agentId', 'manuscriptId', 'dueDate'])
         && data.id is string && data.id.size() <= 128
         && data.userId == userId
-        && data.text is string && data.text.size() >= 1 && data.text.size() <= 16384
+        // No min length — the To-do board's blank-note flow creates an empty task then fills it.
+        && data.text is string && data.text.size() <= 16384
         && data.done is bool
         && (data.completedAt == null || (data.completedAt is string && data.completedAt.size() <= 64))
         && (!data.keys().hasAny(['queryId']) || (data.queryId is string && data.queryId.size() <= 128))
@@ -465,20 +466,6 @@ service cloud.firestore {
 
     // UserTask — a task the writer wrote (the only stored to-do object). Nullable owner: at most one
     // of queryId/agentId/manuscriptId. body/text may be empty; done is a bool; stamps are ISO strings.
-    function isValidUserTask(data, userId) {
-      return data.keys().hasOnly(['id', 'userId', 'text', 'done', 'completedAt', 'createdAt', 'updatedAt', 'queryId', 'agentId', 'manuscriptId'])
-        && data.id is string && data.id.size() <= 128
-        && data.userId == userId
-        && data.text is string && data.text.size() <= 16384
-        && data.done is bool
-        && data.createdAt is string && data.createdAt.size() <= 64
-        && data.updatedAt is string && data.updatedAt.size() <= 64
-        && (!data.keys().hasAny(['completedAt']) || (data.completedAt is string && data.completedAt.size() <= 64))
-        && (!data.keys().hasAny(['queryId']) || (data.queryId is string && data.queryId.size() <= 128))
-        && (!data.keys().hasAny(['agentId']) || (data.agentId is string && data.agentId.size() <= 128))
-        && (!data.keys().hasAny(['manuscriptId']) || (data.manuscriptId is string && data.manuscriptId.size() <= 128));
-    }
-
     // ----------------------------------------------------
     // FIRESTORE ENDPOINTS INTEGRATIONS
     // ----------------------------------------------------
@@ -655,12 +642,6 @@ service cloud.firestore {
 
       // ROUTE: tasks — the writer's own to-do items (owner-only). Read by the To-do "Your tasks"
       // column AND the per-record "View tasks" popover — one store, many views.
-      match /tasks/{taskId} {
-        allow get, delete: if isOwner(userId) && isValidId(taskId);
-        allow list: if isOwner(userId);
-        allow create, update: if isOwner(userId) && isValidId(taskId) && isValidUserTask(incoming(), userId);
-      }
-
       // ROUTE: private — server-only entitlement state (Smart Import usage). The owner may READ it,
       // but NO client may write or delete it (write is admin-SDK only, which bypasses rules). Living
       // in a subcollection means it survives a delete-recreate of the user doc — Firestore never
