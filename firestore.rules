@@ -159,7 +159,7 @@ service cloud.firestore {
         && data.website is string && data.website.size() <= 512
         && data.genres is list && data.genres.size() <= 50
         && data.mswlNotes is string && data.mswlNotes.size() <= 4096
-        && data.starRating is int && data.starRating >= 1 && data.starRating <= 5
+        && (!data.keys().hasAny(['starRating']) || (data.starRating is int && data.starRating >= 1 && data.starRating <= 5))
         && data.submissionStatus is string && (
           data.submissionStatus == 'Open' ||
           data.submissionStatus == 'Closed' ||

@@ -13,7 +13,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
 import { Agent, AgentSocial, SubmissionStatus, SubmissionMethod, QueryStatus } from "../types";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
-import { collection, setDoc, doc, onSnapshot } from "firebase/firestore";
+import { collection, setDoc, doc, onSnapshot, deleteField } from "firebase/firestore";
 import {
   Send,
   Plus,
@@ -475,9 +475,18 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
   // (the starRating rule requires 1–5; unrated would need a rule + type change — flagged).
   const setStar = async (agent: Agent, n: number) => {
     const prev = agent.starRating;
-    if (n === prev) return;
+    // Restore = re-write the previous rating, or CLEAR the field when it was unrated (never write
+    // undefined — Firestore rejects it, and "unrated" is the ABSENCE of a value, not a zero).
+    const restore = () => void updateAgent(agent.id, prev ? { starRating: prev } : { starRating: deleteField() as unknown as undefined });
+    if (n === prev) {
+      // Clicking the current rating clears it — deleteField, so the "Unrated" filter stays
+      // "no value" rather than becoming "value 0".
+      await updateAgent(agent.id, { starRating: deleteField() as unknown as undefined });
+      showToast({ message: "Rating cleared", undo: restore });
+      return;
+    }
     await updateAgent(agent.id, { starRating: n as Agent["starRating"] });
-    showToast({ message: `${firstName(agentPrimary(agent))} rated ${n}★`, undo: () => void updateAgent(agent.id, { starRating: prev }) });
+    showToast({ message: `${firstName(agentPrimary(agent))} rated ${n}★`, undo: restore });
   };
 
   // Create the check-back reminder — a stored, agent-scoped, DATED UserTask (surfaces on the day;

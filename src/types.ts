@@ -223,7 +223,7 @@ export interface Agent {
   socials?: AgentSocial[];
   genres: string[]; // multi-select genres
   mswlNotes: string;
-  starRating: 1 | 2 | 3 | 4 | 5;
+  starRating?: 1 | 2 | 3 | 4 | 5; // absent = UNRATED — a distinct fact from any rating; never store 0
   submissionStatus: SubmissionStatus;
   responseTimeWeeks: number;
   noResponseMeansNo: boolean; // True: no response means rejection/close

@@ -582,6 +582,9 @@ export const localSeedCommunityAgents: CommunityAgent[] = [
     const { userId, ...rest } = agent;
     return {
       ...rest,
+      // Community seeds are curated + always rated; ?? keeps the type definite now Agent.starRating
+      // is optional (the fallback is never hit — every seed literal carries a real rating).
+      starRating: agent.starRating ?? 5,
       contributedByCount: 1,
       lastVerifiedDate: new Date().toISOString(),
       dataSource: "seed" as const,
