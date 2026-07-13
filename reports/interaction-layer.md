@@ -163,6 +163,39 @@ Polish landed (`faaf24f`, per Nick): the prompt is ALWAYS "What happened next?";
 next POSITIVE step is the soft-pink chip (still getPrimaryAction's target on writer's-turn, so no
 disagreement), Rejection is ALWAYS grey and last, and every chip carries a real StatusDot.
 
+## ⚠️ COLLISION — record-scoped tasks built twice (needs reconciliation before Stage 6)
+
+Nick chose (B) — record-scoped stored tasks — and it was implemented **twice, concurrently, in
+the same checkout**:
+- **This stream:** `Note.queryId/agentId` + `addNote({queryId,agentId})` + `TasksPopover` reading
+  `notes` (`ac13b4f` foundation, `d13cefd` popover). Works today.
+- **Nick's todo-board stream:** a new **`UserTask`** type (`types.ts:498`) in `users/{uid}/tasks`,
+  whose docstring names it "the only stored, user-originated to-do object" that BOTH the To-do
+  "Your tasks" column AND the per-record "View tasks" popover read — i.e. it is the canonical home
+  for exactly this feature, with `queryId/agentId/manuscriptId`.
+
+**`UserTask` wins** — one store for the To-do board + both popovers, by Nick's design. My `Note`-
+based version is the same feature on the wrong store. State right now: `UserTask` is DEFINED but
+`db.tsx` is NOT yet migrated (still `todoNotes`/`addTodoNote`; no `addUserTask`/`userTasks`), so I
+can't re-point to it yet.
+
+**Reconciliation (once `db.tsx` exposes `userTasks`/`addUserTask`/`updateUserTask`):**
+1. `TasksPopover` reads `userTasks` (scoped by queryId/agentId) + adds via `addUserTask`, completes
+   via `updateUserTask`. The popover UI + the whole feature stay — only the store swaps.
+2. Revert the now-redundant `Note.queryId/agentId` (`types.ts`), the `addNote` scope (`db.tsx`), and
+   the `isValidUserNote` queryId/agentId rule (`firestore.rules`). `users/{uid}/tasks` gets its own
+   rules instead (part of the todo-board work).
+3. Stage 6's three agent-scoped task creators (Contact-List View-tasks, door check-back, Nudge
+   remind-me) all use `addUserTask({agentId})` — no `Note` scope.
+
+**HELD:** 5d / 5e / Stage 6 are paused until the store is reconciled — building three more
+agent-scoped task creators on the soon-superseded `Note` model would be the wrong thing thrice.
+
+**⚠️ Concurrency:** this is the "one active session per working tree" hazard from CLAUDE.md —
+`db.tsx`/`index.css`/`themes.md` were changing under me mid-gate (I verified my Nudge commit in an
+isolated HEAD worktree to get a clean signal). Recommend we serialise: either the UserTask
+migration lands first, or I take a worktree for Stage 6.
+
 ## ⏸ Stage 5c — the "View tasks" decision (Mark closed + Nudge already exist)
 
 Two of the three popovers are already built from earlier work and just need a light check:
