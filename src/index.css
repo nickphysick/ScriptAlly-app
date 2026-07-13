@@ -551,6 +551,9 @@
   --blue-t: #e7eef6; --blue-b: #d3e0ee; --blue-i: #2b4a6b;   /* you-are-here */
   --pink-t: #f7e3dd; --pink-b: #eecdc3; --pink-i: #8a4030;   /* needs-you */
   --pink-av: #f6d7cf;
+  /* primary-button pink (chrome revision; v14/v3 omitted these — an undefined var() renders
+     as NOTHING, which silently made the mockups' primary button transparent) */
+  --pink-btn: #f6cfc9; --pink-btn-h: #f0bfb8;
 
   /* sage — card header bands + the agent-header spine (LIVE diary values, see block comment) */
   --sage-band: #dce0d9; --sage-band-2: #d0d6cc; --sage-edge: #c8d0c5;

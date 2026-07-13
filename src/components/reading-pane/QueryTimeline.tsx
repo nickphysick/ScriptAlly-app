@@ -147,10 +147,10 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
             </div>
             <div style={{ paddingTop: 4 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
-                <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, fontWeight: 600, color: "#3a1c14" }}>{row.title}</span>
+                <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 600, color: "#3a1c14" }}>{row.title}</span>
                 {row.date && <span style={{ fontFamily: FONT_MONO, fontSize: 9, color: "#a89a8a", whiteSpace: "nowrap" }}>{row.date}</span>}
               </div>
-              {row.sub && <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 11, color: "#9a8d7e", marginTop: 2 }}>{row.sub}</div>}
+              {row.sub && <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, color: "#9a8d7e", marginTop: 2 }}>{row.sub}</div>}
               {row.pills && row.pills.length > 0 && (
                 <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 8 }}>{row.pills.map((p, pi) => <MatPill key={pi}>{p}</MatPill>)}</div>
               )}

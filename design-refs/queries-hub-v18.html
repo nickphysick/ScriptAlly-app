@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Queries Hub — v14</title>
+<title>Queries Hub — v18</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Inter:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -21,6 +21,7 @@
   --blue-t:#e7eef6; --blue-b:#d3e0ee; --blue-i:#2b4a6b;
   --pink-t:#f7e3dd; --pink-b:#eecdc3; --pink-i:#8a4030;
   --pink-av:#f6d7cf;
+  --pink-btn:#f6cfc9; --pink-btn-h:#f0bfb8;
 
   --sage-band:#d7ddd5; --sage-band-2:#d5dbd3; --sage-edge:#c8d0c5;
 
@@ -54,7 +55,7 @@ body.nav-open .rail{transform:translateX(0)}
 .ritem:hover{background:var(--paper)}
 .ritem.on{background:var(--blue-t);color:var(--blue-i)}
 .ritem.on .rl{font-weight:600}
-.ritem .badge{margin-left:auto;font-family:var(--mono);font-size:8.5px;font-weight:600;background:var(--pink-t);color:var(--pink-i);border-radius:99px;padding:1.5px 6px}
+
 .rsep{height:1px;background:var(--hairline);margin:10px 7px}
 .rail .spacer{flex:1}
 .rail .me{display:flex;align-items:center;gap:10px;padding:6px 7px}
@@ -102,13 +103,13 @@ body.nav-open .rail{transform:translateX(0)}
 .act{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;font-size:12.5px;font-weight:450;color:var(--ink-2);padding:8px 11px;border-radius:var(--r-md);transition:background .12s,color .12s}
 .act:hover{background:rgba(255,253,251,.95);color:var(--ink);box-shadow:var(--sh-1)}
 .act svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-.act .cnt{font-family:var(--mono);font-size:8.5px;font-weight:600;background:var(--pink-t);color:var(--pink-i);border-radius:99px;padding:1px 6px}
+.act .cnt{font-family:var(--mono);font-size:9px;font-weight:700;background:#ffffff;color:var(--ink);border:1px solid var(--line);border-radius:99px;padding:1.5px 7px;box-shadow:var(--sh-btn)}
 .act.del:hover{color:var(--pink-i);background:var(--pink-t);box-shadow:none}
 .ctl .divv{width:1px;height:20px;background:var(--oatline);margin:0 9px;align-self:center}
 .ctl .right{margin-left:auto;display:flex;align-items:center;gap:2px}
 
 /* ================= POPOVERS (on-brand) ================= */
-.popwrap{position:relative;display:flex;align-items:center}
+.popwrap{position:relative;display:flex;align-items:center;overflow:visible}
 .pop{
   position:absolute;top:calc(100% + 7px);left:0;z-index:30;
   background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);
@@ -167,7 +168,12 @@ body.nav-open .rail{transform:translateX(0)}
 
 /* ================= PANES ================= */
 .body{flex:1;display:flex;gap:var(--gut);min-height:0;width:100%;max-width:var(--maxw);margin:0 auto;padding:0 var(--gut) var(--gut)}
-.pane{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-xl);box-shadow:var(--sh-2);display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.pane{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-xl);box-shadow:var(--sh-2);display:flex;flex-direction:column;min-height:0}
+.pane>*:first-child{border-radius:var(--r-xl) var(--r-xl) 0 0}
+.pane>*:last-child{border-radius:0 0 var(--r-xl) var(--r-xl)}
+.list{overflow:visible}
+.rows{overflow-y:auto;overflow-x:hidden}
+.detail{overflow:hidden}
 .list{flex:none;width:var(--listw)}
 .l-search{flex:none;display:flex;align-items:center;gap:8px;margin:11px 12px;height:34px;padding:0 12px;border-radius:99px;background:var(--paper);border:1px solid transparent;color:var(--muted);font-size:12px;transition:border-color .12s}
 .l-search:hover{border-color:var(--line)}
@@ -252,6 +258,61 @@ body.nav-open .rail{transform:translateX(0)}
 .notein .send{margin-left:auto;color:var(--ink)}
 .notein .send svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
 
+
+/* ===== white chrome ===== */
+.hd{background:#fffdfb;border-bottom:1px solid #e6dccd}
+.who{display:flex;align-items:center;gap:9px;margin-left:6px;padding:4px 12px 4px 4px;border-radius:99px;transition:background .12s}
+.who:hover{background:var(--paper)}
+.who .av2{flex:none;width:30px;height:30px;border-radius:50%;background:var(--pink-av);color:var(--ink);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:600}
+.who .nm2{font-size:13px;font-weight:500;color:var(--ink-2);white-space:nowrap}
+
+/* ===== control bar: 56px, inset 20 ===== */
+body{--inset:20px}
+.ctl{height:56px}
+.ctl .zone-list{display:flex;align-items:center;gap:8px;padding-left:0;padding-right:var(--gut)}
+.ctl .zone-read{display:flex;align-items:center;gap:2px;padding-left:var(--inset);padding-right:var(--inset)}
+
+/* primary + secondary buttons in the control bar */
+.btn-pri{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;font-size:13px;font-weight:600;padding:8px 15px;border-radius:var(--r-md);background:var(--pink-btn);border:none;color:var(--ink);box-shadow:var(--sh-btn);transition:background .12s,transform .06s}
+.btn-pri:hover{background:var(--pink-btn-h)}
+.btn-pri:active{transform:translateY(.5px)}
+.btn-pri svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round}
+.btn-sec{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;font-size:13px;font-weight:500;padding:8px 14px;border-radius:var(--r-md);background:var(--panel);border:1px solid var(--line);color:var(--ink-2);box-shadow:var(--sh-btn);transition:background .12s,border-color .12s,color .12s}
+.btn-sec:hover{border-color:var(--muted);color:var(--ink)}
+.btn-sec svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+/* ===== arrangement B: verbs left / nouns + danger right ===== */
+.ctl .zone-read .divv{display:none}
+.ctl .grp-links{display:flex;align-items:center;gap:2px;margin-left:auto}
+.ctl .divv2{display:block;width:1px;height:20px;background:var(--oatline);margin:0 10px;align-self:center}
+.ctl .grp-danger{display:flex;align-items:center;gap:2px;margin-left:0}
+
+/* ===== list pane: search + icon-only filter/sort ===== */
+.l-head{position:relative;z-index:20;flex:none;display:flex;align-items:center;gap:6px;margin:11px 12px;overflow:visible}
+.l-search{flex:1;min-width:0;margin:0;height:36px}
+.iconctl{position:relative;flex:none;display:inline-flex;align-items:center;justify-content:center;gap:4px;height:36px;padding:0 10px;border-radius:var(--r-md);border:1px solid var(--line);background:var(--panel);color:var(--ink-2);transition:background .12s,border-color .12s}
+.iconctl:hover{background:var(--paper);border-color:var(--muted)}
+.iconctl.active{background:var(--ink);border-color:var(--ink);color:var(--panel)}
+.iconctl svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.iconctl .fcount{position:absolute;top:-5px;right:-5px;font-family:var(--mono);font-size:8px;font-weight:600;background:var(--pink-t);border:1px solid var(--pink-b);color:var(--pink-i);border-radius:99px;padding:1px 5px;display:none}
+.iconctl .fcount.show{display:inline}
+.iconctl .tip{position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:8px;letter-spacing:.1em;background:var(--ink);color:var(--panel);padding:4px 7px;border-radius:5px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s;z-index:5}
+.iconctl:hover .tip{opacity:1}
+
+/* ===== type bump ===== */
+.row .nm{font-size:14px}
+.row .ag{font-size:9.5px}
+.row .d2{font-size:9.5px}
+.l-foot{font-size:9.5px}
+.mat{font-size:13.5px}
+.note .nt{font-size:13px}
+.ev .lab{font-size:14px}
+.ev .via{font-size:12px}
+.wait{font-size:13px}
+.act{font-size:13px}
+.prow{font-size:13px}
+.l-search{font-size:12.5px}
+
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -266,8 +327,8 @@ body.nav-open .rail{transform:translateX(0)}
   </div>
   <nav>
     <button class="ritem"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></svg><span class="rl">Dashboard</span></button>
-    <button class="ritem on"><svg viewBox="0 0 24 24"><path d="M21 3 3 10.5l6.5 2.6L12 20l3-5.5L21 3z"/></svg><span class="rl">Queries Hub</span><span class="badge">6</span></button>
-    <button class="ritem"><svg viewBox="0 0 24 24"><path d="M4 6h10M4 12h10M4 18h10"/><path d="m17 6 1.5 1.5L21.5 4"/><path d="m17 12 1.5 1.5L21.5 10"/></svg><span class="rl">To-do</span><span class="badge">1</span></button>
+    <button class="ritem on"><svg viewBox="0 0 24 24"><path d="M21 3 3 10.5l6.5 2.6L12 20l3-5.5L21 3z"/></svg><span class="rl">Queries Hub</span></button>
+    <button class="ritem"><svg viewBox="0 0 24 24"><path d="M4 6h10M4 12h10M4 18h10"/><path d="m17 6 1.5 1.5L21.5 4"/><path d="m17 12 1.5 1.5L21.5 10"/></svg><span class="rl">To-do</span></button>
     <div class="rsep"></div>
     <button class="ritem"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.4"/><path d="M3.5 20c.6-3.4 2.9-5.3 5.5-5.3S13.9 16.6 14.5 20"/><path d="M15.5 5.3a3.4 3.4 0 0 1 0 5.4M17.8 14.9c1.5.8 2.4 2.6 2.7 5.1"/></svg><span class="rl">Agents</span></button>
     <button class="ritem"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2z"/></svg><span class="rl">Discover</span></button>
@@ -295,9 +356,7 @@ body.nav-open .rail{transform:translateX(0)}
   </div>
   <div class="crumb"><span class="up">QUERYING</span><span class="sl">/</span><span class="here">Queries Hub</span></div>
   <div class="right">
-    <button class="icirc" title="Export CSV"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 21h16"/></svg></button>
-    <button class="icirc" title="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.4 2.33c-.7.27-.9.87-.9 1.67"/><path d="M12 17h.01"/></svg></button>
-    <button class="btn-primary"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Log a new query</button>
+    <button class="who"><span class="av2">NP</span><span class="nm2">Nick Physick</span></button>
   </div>
  </div>
 </header>
@@ -305,15 +364,46 @@ body.nav-open .rail{transform:translateX(0)}
 <div class="ctl">
 
   <div class="zone-list">
-    <!-- FILTER -->
-    <div class="popwrap">
-      <button class="trig" id="ftrig" onclick="togglePop('fpop')">
-        <svg viewBox="0 0 24 24"><path d="M3 5h18l-7 8v6l-4-2v-4L3 5z"/></svg>
-        FILTER
-        <span class="fcount" id="fcount"></span>
-        <svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-      </button>
-      <div class="pop" id="fpop" style="width:288px">
+    <button class="btn-pri"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Log a query</button>
+    <button class="btn-sec"><svg viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 20h16"/></svg>Import data</button>
+  </div>
+
+  <div class="zone-read">
+    <button class="act"><svg viewBox="0 0 24 24"><path d="M21 3 3 10.5l6.5 2.6L12 20l3-5.5L21 3z"/></svg>Record response</button>
+    <button class="act"><svg viewBox="0 0 24 24"><path d="M4 6h10M4 12h10M4 18h10"/><path d="m17 6 1.5 1.5L21.5 4"/></svg>View tasks <span class="cnt">1</span></button>
+    <button class="act"><svg viewBox="0 0 24 24"><path d="M17 3.5 20.5 7 8 19.5 3.5 20.5 4.5 16 17 3.5z"/></svg>Edit</button>
+    <button class="act"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-2.5 8-2.5 8h17S18 15 18 8z"/><path d="M10 21a2.3 2.3 0 0 0 4 0"/></svg>Nudge</button>
+    <button class="act"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>Mark closed</button>
+
+    <div class="grp-links">
+      <button class="act"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 20c.7-3.6 3.3-5.6 6.5-5.6s5.8 2 6.5 5.6"/></svg>Agent</button>
+      <button class="act"><svg viewBox="0 0 24 24"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17.5H6.5A2.5 2.5 0 0 0 4 22V4.5z"/></svg>Manuscript</button>
+    </div>
+    <span class="divv2"></span>
+    <div class="grp-danger">
+      <button class="act"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>PDF</button>
+      <button class="act del"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6.5 7l1 13h9l1-13"/></svg>Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="chips" id="chips"></div>
+
+<div class="body">
+  <section class="pane list">
+    <div class="l-head">
+      <div class="l-search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        Search <span class="kbd">⌘K</span>
+      </div>
+
+      <div class="popwrap">
+        <button class="iconctl" id="ftrig" onclick="togglePop('fpop')" aria-label="Filter">
+          <svg viewBox="0 0 24 24"><path d="M3 5h18l-7 8v6l-4-2v-4L3 5z"/></svg>
+          <span class="fcount" id="fcount"></span>
+          <span class="tip">FILTER</span>
+        </button>
+        <div class="pop" id="fpop" style="width:288px">
         <div class="pop-head">
           <span class="t">Filter</span>
           <button class="reset" onclick="clearAll()">RESET ALL</button>
@@ -365,16 +455,14 @@ body.nav-open .rail{transform:translateX(0)}
           <button class="done" onclick="togglePop('fpop')">DONE</button>
         </div>
       </div>
-    </div>
+      </div>
 
-    <!-- SORT -->
-    <div class="popwrap">
-      <button class="trig" id="strig" onclick="togglePop('spop')">
-        <svg viewBox="0 0 24 24"><path d="M7 4v14M7 18l-3-3M7 18l3-3M17 20V6M17 6l-3 3M17 6l3 3"/></svg>
-        <span id="sortLab">LAST ACTIVITY</span>
-        <svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-      </button>
-      <div class="pop" id="spop" style="width:276px">
+      <div class="popwrap">
+        <button class="iconctl" id="strig" onclick="togglePop('spop')" aria-label="Sort">
+          <svg viewBox="0 0 24 24"><path d="M7 4v14M7 18l-3-3M7 18l3-3M17 20V6M17 6l-3 3M17 6l3 3"/></svg>
+          <span class="tip">SORT · <span id="sortLab">LAST ACTIVITY</span></span>
+        </button>
+        <div class="pop" id="spop" style="width:276px">
         <div class="pop-head"><span class="t">Sort</span></div>
         <div class="pop-body">
           <div class="sect">
@@ -399,32 +487,7 @@ body.nav-open .rail{transform:translateX(0)}
           <button class="done" onclick="togglePop('spop')">DONE</button>
         </div>
       </div>
-    </div>
-  </div>
-
-  <div class="zone-read">
-    <button class="act"><svg viewBox="0 0 24 24"><path d="M21 3 3 10.5l6.5 2.6L12 20l3-5.5L21 3z"/></svg>Record response</button>
-    <button class="act"><svg viewBox="0 0 24 24"><path d="M4 6h10M4 12h10M4 18h10"/><path d="m17 6 1.5 1.5L21.5 4"/></svg>View tasks <span class="cnt">1</span></button>
-    <button class="act"><svg viewBox="0 0 24 24"><path d="M17 3.5 20.5 7 8 19.5 3.5 20.5 4.5 16 17 3.5z"/></svg>Edit</button>
-    <button class="act"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-2.5 8-2.5 8h17S18 15 18 8z"/><path d="M10 21a2.3 2.3 0 0 0 4 0"/></svg>Nudge</button>
-    <button class="act"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>Mark closed</button>
-    <span class="divv"></span>
-    <button class="act"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 20c.7-3.6 3.3-5.6 6.5-5.6s5.8 2 6.5 5.6"/></svg>Agent</button>
-    <button class="act"><svg viewBox="0 0 24 24"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17.5H6.5A2.5 2.5 0 0 0 4 22V4.5z"/></svg>Manuscript</button>
-    <div class="right">
-      <button class="act"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>PDF</button>
-      <button class="act del"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6.5 7l1 13h9l1-13"/></svg>Delete</button>
-    </div>
-  </div>
-</div>
-
-<div class="chips" id="chips"></div>
-
-<div class="body">
-  <section class="pane list">
-    <div class="l-search">
-      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      Search queries… <span class="kbd">⌘K</span>
+      </div>
     </div>
     <div class="rows" id="rows">
       <div class="row sel" data-turn="wait" data-status="Queried" data-ms="murphy" data-overdue="1" data-tasks="1"><span class="av">FS</span><div class="mid"><span class="nm">Fenella Str</span><span class="ag">Brightwater Books</span></div><div class="end"><span class="dot q"></span><span class="d2">14 MAR</span></div></div>
@@ -441,7 +504,7 @@ body.nav-open .rail{transform:translateX(0)}
       <div class="row" data-turn="closed" data-status="No Response" data-ms="murphy" data-overdue="0" data-tasks="0"><span class="av">DP</span><div class="mid"><span class="nm">Dev Patel</span><span class="ag">The Bright Agency</span></div><div class="end"><span class="dot cl"></span><span class="d2">18 FEB</span></div></div>
       <div class="row" data-turn="wait" data-status="Queried" data-ms="salt" data-overdue="0" data-tasks="0"><span class="av">RD</span><div class="mid"><span class="nm">Rosa Delgado</span><span class="ag">Delgado Literary</span></div><div class="end"><span class="dot q"></span><span class="d2">30 JUN</span></div></div>
     </div>
-    <div class="l-foot"><span>SHOWING <b id="shown">13</b> OF 13</span><button>EXPORT CSV</button><span>↑↓ · ⏎</span></div>
+    <div class="l-foot"><span>SHOWING <b id="shown">13</b> OF 13</span><button>⭳ EXPORT CSV</button></div>
   </section>
 
   <section class="pane detail">

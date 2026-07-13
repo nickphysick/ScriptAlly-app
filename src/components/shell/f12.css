@@ -54,7 +54,7 @@
 .f12-trig.f12-active .f12-fcount { background: var(--pink-av); }
 
 /* quiet action buttons (the right zone — no filled button in this bar) */
-.f12-act { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; font-size: 12.5px; font-weight: 450; color: var(--ink-2); padding: 8px 11px; border-radius: var(--r-md); transition: background 0.12s, color 0.12s; }
+.f12-act { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; font-size: 13px; font-weight: 450; color: var(--ink-2); padding: 8px 11px; border-radius: var(--r-md); transition: background 0.12s, color 0.12s; }
 .f12-act:hover { background: rgba(255, 253, 251, 0.95); color: var(--ink); box-shadow: var(--sh-1); }
 .f12-act svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .f12-act .f12-cnt { font-family: var(--f12-mono); font-size: 8.5px; font-weight: 600; background: var(--pink-t); color: var(--pink-i); border-radius: 99px; padding: 1px 6px; }
@@ -81,7 +81,7 @@
 .f12-sect-h .f12-lbl { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.16em; color: var(--faint); text-transform: uppercase; font-weight: 600; }
 .f12-sect-h .f12-rule { flex: 1; height: 1px; background: var(--hairline); }
 
-.f12-prow { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 11px; border-radius: var(--r-md); font-size: 12.5px; color: var(--ink-2); transition: background 0.1s; }
+.f12-prow { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 11px; border-radius: var(--r-md); font-size: 13px; color: var(--ink-2); transition: background 0.1s; }
 .f12-prow:hover { background: var(--paper); }
 .f12-prow.f12-on { color: var(--ink); font-weight: 500; background: var(--paper); }
 .f12-prow .f12-sub { display: block; font-size: 10.5px; color: var(--faint); font-weight: 400; margin-top: 1px; }
@@ -108,7 +108,7 @@
 .f12-body { flex: 1; display: flex; gap: var(--gut); min-height: 0; width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 var(--gut) var(--gut); }
 .f12-pane { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-xl); box-shadow: var(--sh-2); display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
 .f12-list { flex: none; width: var(--listw); }
-.f12-lsearch { flex: none; display: flex; align-items: center; gap: 8px; margin: 11px 12px; height: 34px; padding: 0 12px; border-radius: 99px; background: var(--paper); border: 1px solid transparent; color: var(--muted); font-size: 12px; transition: border-color 0.12s; }
+.f12-lsearch { flex: none; display: flex; align-items: center; gap: 8px; margin: 11px 12px; height: 34px; padding: 0 12px; border-radius: 99px; background: var(--paper); border: 1px solid transparent; color: var(--muted); font-size: 12.5px; transition: border-color 0.12s; }
 .f12-lsearch:hover, .f12-lsearch:focus-within { border-color: var(--line); }
 .f12-lsearch svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; }
 .f12-lsearch input { flex: 1; min-width: 0; background: transparent; border: none; outline: none; font: inherit; color: var(--ink); }
@@ -120,11 +120,11 @@
 .f12-row.f12-sel { background: var(--blue-t); box-shadow: inset 3px 0 0 var(--ink); }
 .f12-row .f12-av { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--pink-av); color: var(--ink); display: flex; align-items: center; justify-content: center; font-family: var(--f12-mono); font-size: 9.5px; font-weight: 600; }
 .f12-row .f12-mid { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.f12-row .f12-nm { font-weight: 500; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
-.f12-row .f12-ag { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.09em; color: var(--faint); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.f12-row .f12-nm { font-weight: 500; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
+.f12-row .f12-ag { font-family: var(--f12-mono); font-size: 9.5px; letter-spacing: 0.09em; color: var(--faint); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .f12-row .f12-end { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
-.f12-row .f12-d2 { font-family: var(--f12-mono); font-size: 8.5px; color: var(--faint); font-feature-settings: "tnum" 1; }
-.f12-lfoot { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-top: 1px solid var(--hairline); font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.09em; color: var(--faint); }
+.f12-row .f12-d2 { font-family: var(--f12-mono); font-size: 9.5px; color: var(--faint); font-feature-settings: "tnum" 1; }
+.f12-lfoot { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-top: 1px solid var(--hairline); font-family: var(--f12-mono); font-size: 9.5px; letter-spacing: 0.09em; color: var(--faint); }
 .f12-lfoot b { color: var(--muted); font-weight: 600; }
 .f12-lfoot button { color: var(--muted); letter-spacing: 0.09em; padding: 2px 4px; border-radius: 4px; }
 .f12-lfoot button:hover { color: var(--ink); background: var(--paper); }
@@ -150,7 +150,7 @@
 /* journal empty state — dotted outline, NO fill (a placeholder that looks like one) */
 .f12-note { border: 1.5px dotted #d2c8ba; background: transparent; border-radius: var(--r-md); padding: 13px 15px; }
 .f12-note .f12-nd { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.13em; color: var(--faint); margin-bottom: 6px; }
-.f12-note .f12-nt { font-size: 12.5px; line-height: 1.55; color: var(--muted); }
+.f12-note .f12-nt { font-size: 13px; line-height: 1.55; color: var(--muted); }
 /* dashed add-affordances */
 .f12-addmat { border: 1.5px dashed #ded4c6; border-radius: var(--r-md); padding: 11px; text-align: center; font-size: 12.5px; color: var(--muted); transition: border-color 0.12s, color 0.12s, background 0.12s; width: 100%; }
 .f12-addmat:hover { border-color: var(--ink-2); color: var(--ink); background: var(--paper); }
@@ -166,7 +166,7 @@
 .t-f12 .sa-seg-b.on { background: var(--sageC) !important; color: var(--sageD) !important; font-weight: 600; }
 /* Wish-list EMPTY state — a single-row strip: dotted outline, no fill, icon + label + copy on
    one line, the add pill on the right (~a third of the old block's height). */
-.f12-wishrow { display: flex; align-items: center; gap: 10px; width: 100%; border: 1.5px dotted #d2c8ba; background: transparent; border-radius: var(--r-md); padding: 10px 14px; color: var(--muted); font-size: 12.5px; text-align: left; }
+.f12-wishrow { display: flex; align-items: center; gap: 10px; width: 100%; border: 1.5px dotted #d2c8ba; background: transparent; border-radius: var(--r-md); padding: 10px 14px; color: var(--muted); font-size: 13px; text-align: left; }
 .f12-wishrow svg { width: 15px; height: 15px; stroke: var(--faint); fill: none; stroke-width: 1.5; flex-shrink: 0; }
 .f12-wishrow .f12-wl { font-weight: 600; color: var(--ink-2); white-space: nowrap; }
 .f12-wishrow .f12-wc { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

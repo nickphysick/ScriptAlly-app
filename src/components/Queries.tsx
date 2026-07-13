@@ -2807,7 +2807,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                                     <div key={entry.id} className="qp-note" style={{ background: "#ffffff", border: "1px solid var(--bd)", borderRadius: 12, padding: "11px 13px", marginBottom: 9 }}>
                                       {isEditing ? (
                                         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                                          <textarea value={editingJournalText} onChange={(e) => setEditingJournalText(e.target.value)} autoFocus rows={2} style={{ width: "100%", fontFamily: "'Inter',sans-serif", fontSize: 12.5, color: "#3a1c14", border: "1px solid #e6dccd", borderRadius: 7, padding: "6px 8px", outline: "none", resize: "vertical", background: "#fff" }} />
+                                          <textarea value={editingJournalText} onChange={(e) => setEditingJournalText(e.target.value)} autoFocus rows={2} style={{ width: "100%", fontFamily: "'Inter',sans-serif", fontSize: 13, color: "#3a1c14", border: "1px solid #e6dccd", borderRadius: 7, padding: "6px 8px", outline: "none", resize: "vertical", background: "#fff" }} />
                                           <div style={{ display: "flex", justifyContent: "flex-end", gap: 6 }}>
                                             <button type="button" onClick={() => setEditingJournalId(null)} style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase" as const, letterSpacing: ".04em", background: "transparent", border: "none", color: "#a89a8a", cursor: "pointer" }}>Cancel</button>
                                             <button type="button" onClick={async () => { if (!editingJournalText.trim()) return; await updateJournalEntry(entry.id, editingJournalText.trim()); setEditingJournalId(null); }} style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase" as const, letterSpacing: ".04em", background: burgundy, color: "#fff", border: "none", borderRadius: 6, padding: "5px 11px", cursor: "pointer" }}>Save</button>
@@ -2815,7 +2815,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                                         </div>
                                       ) : (
                                         <>
-                                          <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 12.5, color: "#4a3c30", lineHeight: 1.48, whiteSpace: "pre-wrap" }}>{entry.entryText}</div>
+                                          <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, color: "#4a3c30", lineHeight: 1.48, whiteSpace: "pre-wrap" }}>{entry.entryText}</div>
                                           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 9 }}>
                                             <span style={{ fontFamily: FONT_MONO, fontSize: 8, color: "#b3a596", letterSpacing: ".08em", textTransform: "uppercase" as const }}>{formatWhatsAppDate(entry.createdAt)}</span>
                                             <div className="qp-noteacts" style={{ display: "flex", gap: 4 }}>
@@ -2835,7 +2835,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                                   value={journalInput} rows={1} placeholder="Write a note…"
                                   onChange={(e) => { setJournalInput(e.target.value); e.target.style.height = "auto"; e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px"; }}
                                   onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); (e.target as HTMLTextAreaElement).style.height = "auto"; } }}
-                                  style={{ flex: 1, border: "none", outline: "none", background: "transparent", resize: "none", fontFamily: "'Inter',sans-serif", fontSize: 12.5, color: "#3a1c14", lineHeight: 1.4, minHeight: 20, maxHeight: 120, padding: "4px 0", overflowY: "auto" }}
+                                  style={{ flex: 1, border: "none", outline: "none", background: "transparent", resize: "none", fontFamily: "'Inter',sans-serif", fontSize: 13, color: "#3a1c14", lineHeight: 1.4, minHeight: 20, maxHeight: 120, padding: "4px 0", overflowY: "auto" }}
                                 />
                                 <button type="button" onClick={send} disabled={!journalInput.trim()} style={{ flexShrink: 0, width: 32, height: 32, border: "1px solid #e8c8bc", background: journalInput.trim() ? "#f5e2da" : "#f1f1f0", borderRadius: 8, color: journalInput.trim() ? burgundy : "#c5b9b0", display: "flex", alignItems: "center", justifyContent: "center", cursor: journalInput.trim() ? "pointer" : "not-allowed" }}>
                                   <svg viewBox="0 0 24 24" width={14} height={14} fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>
