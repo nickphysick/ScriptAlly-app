@@ -16,6 +16,7 @@ import { MountCard } from "../MountCard";
 import { StatusDot } from "../StatusDot";
 import { QueryStatus } from "../../types";
 import { STATUS_ORDER } from "../../lib/statusOrder";
+import { genreDisplay } from "../../lib/genres";
 import {
   burgundy,
   bodyInk,
@@ -444,7 +445,7 @@ const agentPopup = (a: AgentDatum): React.ReactNode => {
   if (a.queried) {
     return (
       <PopupCard title={a.name} subtitle={a.agency || undefined} chip="Queried" chipVariant="sage">
-        {a.genres.length > 0 && <PStat k="Seeking" v={a.genres.join(", ")} />}
+        {a.genres.length > 0 && <PStat k="Seeking" v={a.genres.map((g) => genreDisplay(g)).join(", ")} />}
         {a.fit > 0 && <PStat k="Your fit" v={<FitStars fit={a.fit} />} />}
         {a.mswl.trim() && (
           <div style={{ fontFamily: FONT_SERIF, fontStyle: "italic", fontSize: 12, color: "#6a5a50", borderLeft: "2px solid #d8c2b6", paddingLeft: 9, marginTop: 9, lineHeight: 1.45 }}>

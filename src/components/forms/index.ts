@@ -26,6 +26,7 @@ export type { WeekSliderProps } from "./WeekSlider";
 
 export { GenreCombobox } from "./GenreCombobox";
 export type { GenreComboboxProps } from "./GenreCombobox";
+export { GenrePicker } from "./GenrePicker";
 
 export { CountryCombobox } from "./CountryCombobox";
 export type { CountryComboboxProps } from "./CountryCombobox";

@@ -44,6 +44,7 @@ import {
 } from "../lib/agentsPage";
 import { agentPrimary, agentSecondary, agentInitials } from "../lib/agentDisplay";
 import { agentLocation, flagFor, isHomeMarket, getHomeCountry, countryName } from "../lib/territory";
+import { genreDisplay } from "../lib/genres";
 import { SegmentedToggle } from "./forms";
 import "flag-icons/css/flag-icons.min.css";
 import "./agents/agentsV2.css";
@@ -673,7 +674,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
           {(a.genres?.length || 0) > 0 && (
             <div className="ag-wtags">
               {a.genres!.map((g) => (
-                <span className="ag-wtag" key={g}>{g}</span>
+                <span className="ag-wtag" key={g}>{genreDisplay(g, currentUser?.personalGenres ?? [])}</span>
               ))}
             </div>
           )}

@@ -25,14 +25,14 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useScriptAllyDb } from "../lib/db";
 import { Agent, AgentSocial, Query, QueryStatus, SubmissionStatus, SubmissionMethod } from "../types";
-import { BrandDropdown, WeekSlider, GenreCombobox, CountryCombobox, FitStars, SegmentedToggle } from "./forms";
+import { BrandDropdown, WeekSlider, GenrePicker, CountryCombobox, FitStars, SegmentedToggle } from "./forms";
 import { StatusDot } from "./StatusDot";
 import { getStatusLabel } from "./StatusPill";
 import { AgentEditPatch } from "../lib/saveAgentEdits";
 import {
   AgentMaterialsState, MAT_OPTS, MAT_QTY, buildAgentMaterials, parseAgentMaterials, materialsCountErrors,
 } from "../lib/agentMaterials";
-import { AGENT_GENRES, SOCIAL_PLATFORMS, METHOD_OPTIONS } from "../lib/agentOptions";
+import { SOCIAL_PLATFORMS, METHOD_OPTIONS } from "../lib/agentOptions";
 import { normaliseCountry } from "../lib/territory";
 import { agentDataQualityNeeds, AgentDataNeed } from "../lib/agentDataQuality";
 import {
@@ -139,7 +139,7 @@ const NEED_INFO: Record<AgentDataNeed, { label: string; why: string; where: stri
 };
 
 export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen, onClose, lockScroll, highlightNeeds, onOpenQuery, onSavedToast }) => {
-  const { queries, manuscripts, saveAgentEdits } = useScriptAllyDb();
+  const { queries, manuscripts, saveAgentEdits, currentUser, addPersonalGenre } = useScriptAllyDb();
 
   const orig = useMemo(() => draftFromAgent(agent), [agent]);
   const [S, setS] = useState<Draft>(orig);
@@ -490,7 +490,7 @@ export const EditAgentDrawer: React.FC<EditAgentDrawerProps> = ({ agent, isOpen,
                 <Field active={currentField === "materials"}><Label on={dirty.materials}>Materials wanted</Label><NeedWrap ring={fieldHighlight("materials")} innerRef={(el) => { fieldRefs.current.materials = el; }}><MaterialsControl state={S.materials} bad={materialsBad} onChange={(v) => set("materials", v)} /></NeedWrap></Field>
 
                 <Sec top>Genres &amp; wishlist</Sec>
-                <Field><Label on={dirty.genres}>Genres</Label><div style={{ marginTop: 2 }}><GenreCombobox options={AGENT_GENRES} value={S.genres} onChange={(v) => set("genres", v)} placeholder="Type a genre…" /></div></Field>
+                <Field><Label on={dirty.genres}>Genres</Label><div style={{ marginTop: 2 }}><GenrePicker value={S.genres} onChange={(v) => set("genres", v)} personal={currentUser?.personalGenres ?? []} onCreatePersonal={addPersonalGenre} /></div></Field>
                 <Field active={currentField === "mswl"}><Label on={dirty.mswl}>Manuscript wishlist (MSWL)</Label><NeedWrap ring={fieldHighlight("mswl")} innerRef={(el) => { fieldRefs.current.mswl = el; }}><TextField field="mswl" value={S.mswl} placeholder="Add a manuscript wishlist" multiline quoted /></NeedWrap></Field>
 
                 <Sec top>Notes</Sec>

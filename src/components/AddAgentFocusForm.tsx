@@ -14,13 +14,13 @@ import {
   BrandDropdown,
   SegmentedToggle,
   WeekSlider,
-  GenreCombobox,
+  GenrePicker,
   CountryCombobox,
   FitStars,
   Em,
 } from "./forms";
 import profileAnimation from "../assets/agent-profile-animation.json";
-import { AGENT_GENRES, SOCIAL_PLATFORMS, METHOD_OPTIONS as METHOD_LIST } from "../lib/agentOptions";
+import { SOCIAL_PLATFORMS, METHOD_OPTIONS as METHOD_LIST } from "../lib/agentOptions";
 import { buildAgentMaterials } from "../lib/agentMaterials";
 
 interface AddAgentFocusFormProps {
@@ -61,7 +61,7 @@ export const AddAgentFocusForm: React.FC<AddAgentFocusFormProps> = ({
   onClose,
   onSuccessToast,
 }) => {
-  const { addAgent } = useScriptAllyDb();
+  const { addAgent, currentUser, addPersonalGenre } = useScriptAllyDb();
 
   // Who are they?
   const [name, setName] = useState("");
@@ -356,7 +356,12 @@ export const AddAgentFocusForm: React.FC<AddAgentFocusFormProps> = ({
       </FormField>
 
       <FormField label="Genres">
-        <GenreCombobox options={AGENT_GENRES} value={genres} onChange={setGenres} />
+        <GenrePicker
+          value={genres}
+          onChange={setGenres}
+          personal={currentUser?.personalGenres ?? []}
+          onCreatePersonal={addPersonalGenre}
+        />
       </FormField>
 
       {/* ── How they submit ─────────────────────────────────────────── */}
