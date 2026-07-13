@@ -624,12 +624,13 @@ function AppContent() {
           <ToDoPage onNavigate={handleNavigate} />
         </StagePage>
 
-        <StagePage active={routeKey === "agents"} layout="fillColumn" contentVariant="work">
-          {agentsDiscover ? (
-            <DiscoverNewAgents onNavigate={handleNavigate} />
-          ) : (
-            <Agents searchQuery={searchQuery} onNavigate={handleNavigate} active={routeKey === "agents" && !agentsDiscover} />
-          )}
+        {/* The agents slot is SPLIT (F12): Discover keeps the capped work column + CrumbStrip;
+            the Contact List page renders the F12 shell (its own chrome), so its slot is bare. */}
+        <StagePage active={routeKey === "agents" && agentsDiscover} layout="fillColumn" contentVariant="work">
+          <DiscoverNewAgents onNavigate={handleNavigate} />
+        </StagePage>
+        <StagePage active={routeKey === "agents" && !agentsDiscover} layout="fill" clip>
+          <Agents searchQuery={searchQuery} onNavigate={handleNavigate} active={routeKey === "agents" && !agentsDiscover} />
         </StagePage>
 
         <StagePage active={routeKey === "manuscripts"} layout="fill" contentVariant="read">

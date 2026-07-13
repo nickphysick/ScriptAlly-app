@@ -58,9 +58,10 @@ describe("Agents grand masthead", () => {
     expect(topbar).toContain("agentsPulse(count, idleCount)");
   });
 
-  it("the page feeds the derived idle count (agentIdleCount over agents + queries)", () => {
-    expect(tsx).toContain("idleCount={agentIdleCount(agents, queries)}");
-    expect(tsx).toMatch(/<AgentsTopBar\s+grand/);
+  it("the idle count is derived in the list footer (the AgentsTopBar masthead is retired — F12 shell)", () => {
+    expect(tsx.includes("<AgentsTopBar")).toBe(false);
+    expect(tsx).toContain("<F12Page");
+    expect(tsx).toContain("{idleCount} IDLE"); // derived: agents with no query, never stored
   });
 
   it("the masthead CTA is the hub primary (not the mocha ag-addbtn) when grand", () => {

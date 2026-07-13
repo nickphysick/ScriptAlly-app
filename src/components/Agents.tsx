@@ -17,13 +17,11 @@ import { collection, setDoc, doc, onSnapshot } from "firebase/firestore";
 import {
   Send,
   Pencil,
-  Pin,
   Plus,
   BookOpen,
   Clock,
   Mail,
   FileText,
-  Sparkles,
   MoreHorizontal,
   Archive,
   Trash2,
@@ -36,28 +34,16 @@ import { motion, AnimatePresence } from "motion/react";
 import { useOpenEditAgent } from "./EditAgentHost";
 import { StatusDot } from "./StatusDot";
 import { EdgeFadeScroll } from "./EdgeFadeScroll";
-import { AgentsTopBar } from "./agents/AgentsTopBar";
+import { F12Page, Icirc, F12Primary, Trig, F12Popover, PopSection, PRow, Chip } from "./shell/F12Shell";
 import {
   paneProvenance,
-  AgentsSubFilter,
-  AgentsQueriedFilter,
-  AgentsSort,
-  AgentsLocationFilter,
-  AgentsGroupBy,
-  filterAgents,
-  groupAgents,
-  flattenGroups,
-  upNextCandidate,
+  agentQueried,
   lastStatusForAgent,
   buildAgentTimeline,
   formatTimelineDate,
-  upNextMeta,
-  agentsSummary,
-  agentIdleCount,
 } from "../lib/agentsPage";
 import { agentPrimary, agentSecondary, agentInitials } from "../lib/agentDisplay";
 import { agentLocation, flagFor, isHomeMarket, getHomeCountry, countryName } from "../lib/territory";
-import { FilterDropdown } from "./agents/FilterDropdown";
 import { SegmentedToggle } from "./forms";
 import "flag-icons/css/flag-icons.min.css";
 import "./agents/agentsV2.css";
@@ -126,6 +112,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
     queries,
     manuscripts,
     activities,
+    tasks,
     updateAgent,
     deleteAgent,
     setAgentSetAside,
@@ -134,11 +121,24 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
   // Selection + controls
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [subFilter, setSubFilter] = useState<AgentsSubFilter>("all");
-  const [queriedFilter, setQueriedFilter] = useState<AgentsQueriedFilter>("all");
-  const [locationFilter, setLocationFilter] = useState<AgentsLocationFilter>("all");
-  const [sortBy, setSortBy] = useState<AgentsSort>("rating");
-  const [groupBy, setGroupBy] = useState<AgentsGroupBy>("none"); // default flat — grouping only when chosen
+  /* ── F12 Contact List model (ref agents-contact-list-v3.html) ──
+     openFilter — OPEN TO QUERIES radio · queriedFilter — YOUR HISTORY radio (Queried / Idle) ·
+     starFilter — STAR RATING checkboxes (4-and-up / 3-and-up / Unrated, OR-combined) ·
+     countryFilter — LOCATION radio over the REAL agent.country field (ISO; options are the
+     distinct countries on file — there is no `location` field; country IS the location model) ·
+     needsNoMswl / needsNoSub — NEEDS ATTENTION checkboxes, both derived. */
+  const [openFilter, setOpenFilter] = useState<"all" | "open" | "closed">("all");
+  const [queriedFilter, setQueriedFilter] = useState<"all" | "yes" | "no">("all");
+  const [starFilter, setStarFilter] = useState<("4up" | "3up" | "unrated")[]>([]);
+  const [countryFilter, setCountryFilter] = useState<string>("all");
+  const [needsNoMswl, setNeedsNoMswl] = useState(false);
+  const [needsNoSub, setNeedsNoSub] = useState(false);
+  /* Sort (grouped Fit / Your activity / Alphabetical; default star rating) + Group by. */
+  const [agSort, setAgSort] = useState<string>("rating");
+  const [agGroup, setAgGroup] = useState<"none" | "agency" | "status" | "queried">("none");
+  const [agFilterOpen, setAgFilterOpen] = useState(false);
+  const [agSortOpen, setAgSortOpen] = useState(false);
+  const [agGroupOpen, setAgGroupOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -213,16 +213,97 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
     };
   }, []);
 
-  // ── Derived list state (all client-side, from agentsPage.ts) ──
-  // "local" = the user's home market (stored homeCountry → browser guess → GB); the deployed
-  // territory foundation (agent.country vs homeCountry) powers the Location filter + grouping.
+  // ── Derived list state (all client-side; no new reads) ──
   const homeCountry = getHomeCountry(currentUser);
   const visibleAgents = pendingDelete ? agents.filter((a) => a.id !== pendingDelete.agent.id) : agents;
-  const filtered = filterAgents(visibleAgents, queries, subFilter, queriedFilter, search, locationFilter, homeCountry);
-  const groups = groupAgents(filtered, sortBy, groupBy, queries, homeCountry);
-  const flat = flattenGroups(groups);
-  const upNext = upNextCandidate(filtered, queries);
+  const queryCountFor = (id: string) => queries.filter((q) => q.agentId === id).length;
+  const lastQueriedMs = (id: string) =>
+    queries.filter((q) => q.agentId === id && q.dateSent).reduce((m, q) => Math.max(m, new Date(q.dateSent!).getTime() || 0), 0);
+  /* "No submission details" = neither a preferred method nor wanted materials on file (derived). */
+  const noSubDetails = (a: Agent) => !a.submissionMethod && !(a.materialsWanted?.length);
+
+  const filtered = visibleAgents.filter((a) => {
+    if (openFilter === "open" && a.submissionStatus !== SubmissionStatus.OPEN) return false;
+    if (openFilter === "closed" && a.submissionStatus !== SubmissionStatus.CLOSED) return false;
+    const q = agentQueried(a.id, queries);
+    if (queriedFilter === "yes" && !q) return false;
+    if (queriedFilter === "no" && q) return false;
+    if (starFilter.length) {
+      const r = a.starRating || 0;
+      const hit = (starFilter.includes("4up") && r >= 4) || (starFilter.includes("3up") && r >= 3) || (starFilter.includes("unrated") && r === 0);
+      if (!hit) return false;
+    }
+    if (countryFilter !== "all" && a.country !== countryFilter) return false;
+    if (needsNoMswl && !!a.mswlNotes?.trim()) return false;
+    if (needsNoSub && !noSubDetails(a)) return false;
+    const term = search.trim().toLowerCase();
+    if (term) {
+      const hay = `${agentPrimary(a)} ${agentSecondary(a) || ""} ${a.agency || ""}`.toLowerCase();
+      if (!hay.includes(term)) return false;
+    }
+    return true;
+  });
+
+  const sorted = [...filtered].sort((a, b) => {
+    switch (agSort) {
+      case "last_queried": return lastQueriedMs(b.id) - lastQueriedMs(a.id);
+      case "most_queried": return queryCountFor(b.id) - queryCountFor(a.id);
+      case "idle_first": {
+        const ai = agentQueried(a.id, queries) ? 1 : 0;
+        const bi = agentQueried(b.id, queries) ? 1 : 0;
+        return ai - bi || (b.starRating || 0) - (a.starRating || 0);
+      }
+      case "agent_az": return agentPrimary(a).localeCompare(agentPrimary(b));
+      case "agency_az": return (a.agency || "").localeCompare(b.agency || "");
+      case "recent": return (new Date(b.dateAdded || 0).getTime() || 0) - (new Date(a.dateAdded || 0).getTime() || 0);
+      case "rating":
+      default: return (b.starRating || 0) - (a.starRating || 0) || agentPrimary(a).localeCompare(agentPrimary(b));
+    }
+  });
+
+  /* Group by — sticky mono section headers in the list (None / Agency / Open–closed / Queried–idle). */
+  const groups: { key: string; label: string | null; rows: Agent[] }[] = (() => {
+    if (agGroup === "agency") {
+      const by = new Map<string, Agent[]>();
+      for (const a of sorted) {
+        const k = agentSecondary(a) || a.agency || "Independent";
+        by.set(k, [...(by.get(k) || []), a]);
+      }
+      return [...by.entries()].sort((x, y) => x[0].localeCompare(y[0])).map(([k, rows]) => ({ key: k, label: k, rows }));
+    }
+    if (agGroup === "status") {
+      const open = sorted.filter((a) => a.submissionStatus === SubmissionStatus.OPEN);
+      const closed = sorted.filter((a) => a.submissionStatus === SubmissionStatus.CLOSED);
+      const unknown = sorted.filter((a) => a.submissionStatus !== SubmissionStatus.OPEN && a.submissionStatus !== SubmissionStatus.CLOSED);
+      return [
+        { key: "open", label: "Open to queries", rows: open },
+        { key: "closed", label: "Closed", rows: closed },
+        { key: "unknown", label: "Unknown", rows: unknown },
+      ].filter((g) => g.rows.length);
+    }
+    if (agGroup === "queried") {
+      const yes = sorted.filter((a) => agentQueried(a.id, queries));
+      const no = sorted.filter((a) => !agentQueried(a.id, queries));
+      return [
+        { key: "queried", label: "Queried", rows: yes },
+        { key: "idle", label: "Idle", rows: no },
+      ].filter((g) => g.rows.length);
+    }
+    return [{ key: "all", label: null, rows: sorted }];
+  })();
+  const flat = groups.flatMap((g) => g.rows);
+  const idleCount = flat.filter((a) => !agentQueried(a.id, queries)).length;
+  /* Distinct countries on file (real data) → the LOCATION radio options. */
+  const countriesOnFile = [...new Set(visibleAgents.map((a) => a.country).filter(Boolean) as string[])]
+    .sort((x, y) => (countryName(x) || x).localeCompare(countryName(y) || y));
   const selectedAgent = flat.find((a) => a.id === selectedAgentId) ?? null;
+  /* Tasks touching the selected agent — the agent's own tasks + tasks on their queries (derived,
+     from the tasks array already in DbProvider; no new reads). */
+  const agentTaskCount = (() => {
+    if (!selectedAgent) return 0;
+    const qids = new Set(queries.filter((q) => q.agentId === selectedAgent.id).map((q) => q.id));
+    return tasks.filter((t) => t.relatedRecordId === selectedAgent.id || qids.has(t.relatedRecordId)).length;
+  })();
 
   // Default selection = first list item; selection persists where possible, re-anchors when the
   // selected agent drops out of the filtered list.
@@ -304,6 +385,27 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
     await updateAgent(agent.id, { pinned: !agent.pinned });
   };
 
+  /* Client-side CSV of the CURRENT filtered list — pure frontend, no new reads. */
+  const exportAgentsCSV = () => {
+    if (!flat.length) return;
+    const esc = (v: string | number | undefined | null) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const rows = [
+      ["Name", "Agency", "Open to queries", "Star rating", "Country", "Queries sent"].map(esc).join(","),
+      ...flat.map((a) => [
+        esc(agentPrimary(a)), esc(agentSecondary(a) || a.agency || ""),
+        esc(a.submissionStatus === SubmissionStatus.OPEN ? "Open" : a.submissionStatus === SubmissionStatus.CLOSED ? "Closed" : "Unknown"),
+        esc(a.starRating || ""), esc(countryName(a.country) || a.country || ""), esc(queryCountFor(a.id)),
+      ].join(",")),
+    ].join("\n");
+    const blob = new Blob([rows], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "scriptally-contact-list.csv";
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   const sendQueryFlow = (agent?: Agent) => {
     if (agent) setSelectedAgentId(agent.id);
     // The toolbar passes the selected agent, Up next its candidate, the row hover its row —
@@ -380,72 +482,35 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
   const renderRow = (agent: Agent) => {
     const sel = agent.id === selectedAgentId;
     const isOpen = agent.submissionStatus === SubmissionStatus.OPEN;
-    const last = lastStatusForAgent(agent.id, queries, activities);
-    // Row territory marker: flag glyph only (no pill/text — rows stay calm); absent country ⇒ nothing.
-    const rowFlag = flagFor(agent.country);
+    const qn = queryCountFor(agent.id);
     return (
       <button
         type="button"
         key={agent.id}
         data-agid={agent.id}
-        className={`ag-row${sel ? " sel" : ""}`}
+        className={`f12-row${sel ? " f12-sel" : ""}`}
         role="option"
         aria-selected={sel}
         onClick={() => setSelectedAgentId(agent.id)}
         style={agent.setAside ? { opacity: 0.62 } : undefined}
       >
-        <span className="ag-mono-av" aria-hidden="true">{agentInitials(agent)}</span>
-        <span className="ag-who">
-          <span className="ag-name">
-            {agent.pinned && <Pin className="ag-pin-ic" aria-label="Pinned" />}
-            {agentPrimary(agent)}
-          </span>
-          <span className="ag-agency">
-            {agentSecondary(agent) || "Independent"}
-            {rowFlag && (
-              <span
-                className={`ag-rowflag ${rowFlag}`}
-                role="img"
-                aria-label={agentLocation(agent)}
-                title={agentLocation(agent)}
-              />
-            )}
-          </span>
-          <span className="ag-rstars" aria-label={`${agent.starRating || 0} of 5 stars`}>
-            <Stars value={agent.starRating || 0} />
-          </span>
+        <span className="f12-av" aria-hidden="true">{agentInitials(agent)}</span>
+        <span className="f12-mid">
+          <span className="f12-nm">{agentPrimary(agent)}</span>
+          <span className="f12-ag">{agentSecondary(agent) || "Independent"}</span>
         </span>
-        <span className="ag-rmeta">
-          {last && <StatusDot status={last} overrideSize={20} />}
+        <span className="f12-end">
+          {/* open/closed dot — sage fill = open, hollow grey ring = closed/unknown */}
           <span
-            className="ag-odot"
-            style={{ background: isOpen ? "var(--sd-hue, #7c3a2a)" : "rgba(0,0,0,0.18)" }}
+            aria-hidden="true"
             title={isOpen ? "Open to queries" : "Closed"}
+            style={{
+              width: 9, height: 9, borderRadius: "50%",
+              background: isOpen ? "var(--sage)" : "transparent",
+              border: isOpen ? "1.5px solid var(--sage)" : "1.5px solid #c9beb0",
+            }}
           />
-        </span>
-        <span className="ag-hoveracts">
-          <span
-            role="button"
-            tabIndex={0}
-            title={agent.pinned ? "Unpin" : "Pin"}
-            aria-label={agent.pinned ? `Unpin ${agent.name}` : `Pin ${agent.name}`}
-            onClick={(e) => { e.stopPropagation(); void togglePinned(agent); }}
-            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.stopPropagation(); void togglePinned(agent); } }}
-            style={{ width: 25, height: 25, borderRadius: 6, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
-          >
-            <Pin style={agent.pinned ? { fill: "currentColor" } : undefined} />
-          </span>
-          <span
-            role="button"
-            tabIndex={0}
-            title="Send query"
-            aria-label={`Send query to ${agent.name}`}
-            onClick={(e) => { e.stopPropagation(); sendQueryFlow(agent); }}
-            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.stopPropagation(); sendQueryFlow(agent); } }}
-            style={{ width: 25, height: 25, borderRadius: 6, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
-          >
-            <Send />
-          </span>
+          <span className="f12-d2">{qn === 0 ? "IDLE" : qn === 1 ? "1 QUERY" : `${qn} QUERIES`}</span>
         </span>
       </button>
     );
@@ -754,125 +819,226 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
     );
   };
 
+  /* ── F12 active-filter chips ── */
+  const resetAgFilters = () => {
+    setOpenFilter("all"); setQueriedFilter("all"); setStarFilter([]); setCountryFilter("all");
+    setNeedsNoMswl(false); setNeedsNoSub(false);
+  };
+  const agChips: { key: string; label: string; remove: () => void }[] = [
+    ...(openFilter !== "all" ? [{ key: "open", label: openFilter.toUpperCase(), remove: () => setOpenFilter("all") }] : []),
+    ...(queriedFilter !== "all" ? [{ key: "qd", label: queriedFilter === "yes" ? "QUERIED" : "IDLE", remove: () => setQueriedFilter("all") }] : []),
+    ...starFilter.map((sf) => ({ key: `st:${sf}`, label: sf === "4up" ? "4★ AND UP" : sf === "3up" ? "3★ AND UP" : "UNRATED", remove: () => setStarFilter((prev) => prev.filter((x) => x !== sf)) })),
+    ...(countryFilter !== "all" ? [{ key: "loc", label: (countryName(countryFilter) || countryFilter).toUpperCase(), remove: () => setCountryFilter("all") }] : []),
+    ...(needsNoMswl ? [{ key: "nomswl", label: "NO WISH LIST", remove: () => setNeedsNoMswl(false) }] : []),
+    ...(needsNoSub ? [{ key: "nosub", label: "NO SUBMISSION DETAILS", remove: () => setNeedsNoSub(false) }] : []),
+  ];
+
+  const AG_SORTS: { group: string; items: { key: string; label: string; sub?: string }[] }[] = [
+    { group: "Fit", items: [{ key: "rating", label: "Star rating", sub: "Your best fits first" }] },
+    { group: "Your activity", items: [
+      { key: "last_queried", label: "Last queried", sub: "Most recent submission first" },
+      { key: "most_queried", label: "Most queried" },
+      { key: "idle_first", label: "Idle first", sub: "Agents you haven't approached yet" },
+    ]},
+    { group: "Alphabetical", items: [
+      { key: "agent_az", label: "Agent · A to Z" },
+      { key: "agency_az", label: "Agency · A to Z" },
+      { key: "recent", label: "Recently added" },
+    ]},
+  ];
+  const toggleStar = (v: "4up" | "3up" | "unrated") =>
+    setStarFilter((prev) => (prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]));
+
   return (
-    <div className="agv2">
-      <AgentsTopBar
-        grand
-        count={agents.length}
-        idleCount={agentIdleCount(agents, queries)}
-        search={search}
-        onSearch={setSearch}
-        onAddAgent={() => onNavigate?.("agents", "Add an agent")}
-        searchRef={searchRef}
-      />
+    <F12Page
+      tools={
+        <>
+          <Icirc title="Export CSV" onClick={() => exportAgentsCSV()}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5" /><path d="M4 21h16" /></svg>
+          </Icirc>
+          <Icirc title="Help" onClick={() => onNavigate?.("help")}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M9.5 9a2.5 2.5 0 1 1 3.4 2.33c-.7.27-.9.87-.9 1.67" /><path d="M12 17h.01" /></svg>
+          </Icirc>
+          <F12Primary onClick={() => onNavigate?.("agents", "Add an agent")}>Add agent</F12Primary>
+        </>
+      }
+    >
+      {/* ── F12 CONTROL BAR — left zone (list width): FILTER · SORT · GROUP BY pills; right zone:
+          Send query · Edit profile · View tasks (count) │ PDF · Delete right-aligned. Quiet
+          buttons only. The old masthead + subtitle and the pane-foot command bar are retired —
+          the breadcrumb and the list footer carry that. ── */}
+      <div className="f12-ctl">
+        <div className="f12-zone-list">
+          <div className="f12-popwrap">
+            <Trig
+              label="FILTER"
+              open={agFilterOpen}
+              count={agChips.length}
+              onClick={() => { setAgSortOpen(false); setAgGroupOpen(false); setAgFilterOpen((o) => !o); }}
+              icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4-2v-4L3 5z" /></svg>}
+            />
+            {agFilterOpen && (
+              <F12Popover
+                width={288}
+                title="Filter"
+                onClose={() => setAgFilterOpen(false)}
+                headAction={<button type="button" className="f12-reset" onClick={resetAgFilters}>RESET ALL</button>}
+                footText={<><b>{filtered.length}</b>&nbsp;OF {visibleAgents.length} AGENTS</>}
+              >
+                <PopSection label="Open to queries">
+                  <PRow kind="rad" on={openFilter === "all"} label="All agents" onClick={() => setOpenFilter("all")} />
+                  <PRow kind="rad" on={openFilter === "open"} label="Open" sub="Currently accepting submissions" onClick={() => setOpenFilter("open")} />
+                  <PRow kind="rad" on={openFilter === "closed"} label="Closed" onClick={() => setOpenFilter("closed")} />
+                </PopSection>
+                <PopSection label="Your history">
+                  <PRow kind="rad" on={queriedFilter === "all"} label="Queried or not" onClick={() => setQueriedFilter("all")} />
+                  <PRow kind="rad" on={queriedFilter === "yes"} label="Queried" sub="You've sent at least one query" onClick={() => setQueriedFilter("yes")} />
+                  <PRow kind="rad" on={queriedFilter === "no"} label="Idle" sub="On file, never queried" onClick={() => setQueriedFilter("no")} />
+                </PopSection>
+                <PopSection label="Star rating">
+                  <PRow kind="box" on={starFilter.includes("4up")} label="4 and up" onClick={() => toggleStar("4up")} />
+                  <PRow kind="box" on={starFilter.includes("3up")} label="3 and up" onClick={() => toggleStar("3up")} />
+                  <PRow kind="box" on={starFilter.includes("unrated")} label="Unrated" onClick={() => toggleStar("unrated")} />
+                </PopSection>
+                {countriesOnFile.length > 0 && (
+                  <PopSection label="Location">
+                    <PRow kind="rad" on={countryFilter === "all"} label="Anywhere" onClick={() => setCountryFilter("all")} />
+                    {countriesOnFile.map((c) => (
+                      <PRow key={c} kind="rad" on={countryFilter === c} label={countryName(c) || c} onClick={() => setCountryFilter(c)} />
+                    ))}
+                  </PopSection>
+                )}
+                <PopSection label="Needs attention">
+                  <PRow kind="box" on={needsNoMswl} label="No wish list on file" onClick={() => setNeedsNoMswl((v) => !v)} />
+                  <PRow kind="box" on={needsNoSub} label="No submission details" onClick={() => setNeedsNoSub((v) => !v)} />
+                </PopSection>
+              </F12Popover>
+            )}
+          </div>
+          <div className="f12-popwrap">
+            <Trig
+              label="SORT"
+              open={agSortOpen}
+              onClick={() => { setAgFilterOpen(false); setAgGroupOpen(false); setAgSortOpen((o) => !o); }}
+              icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M7 12h10M10 18h4" /></svg>}
+            />
+            {agSortOpen && (
+              <F12Popover
+                width={276}
+                title="Sort"
+                onClose={() => setAgSortOpen(false)}
+                footText={(AG_SORTS.flatMap((g) => g.items).find((i) => i.key === agSort)?.label || "Star rating").toUpperCase()}
+              >
+                {AG_SORTS.map((g) => (
+                  <PopSection key={g.group} label={g.group}>
+                    {g.items.map((i) => (
+                      <PRow key={i.key} kind="rad" on={agSort === i.key} label={i.label} sub={i.sub} onClick={() => setAgSort(i.key)} />
+                    ))}
+                  </PopSection>
+                ))}
+              </F12Popover>
+            )}
+          </div>
+          <div className="f12-popwrap">
+            <Trig
+              label={agGroup === "none" ? "NO GROUPS" : agGroup === "agency" ? "BY AGENCY" : agGroup === "status" ? "BY STATUS" : "BY HISTORY"}
+              open={agGroupOpen}
+              onClick={() => { setAgFilterOpen(false); setAgSortOpen(false); setAgGroupOpen((o) => !o); }}
+              icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10" /></svg>}
+            />
+            {agGroupOpen && (
+              <F12Popover width={250} title="Group by" onClose={() => setAgGroupOpen(false)} footText="">
+                <PopSection label="Group rows">
+                  <PRow kind="rad" on={agGroup === "none"} label="None" onClick={() => setAgGroup("none")} />
+                  <PRow kind="rad" on={agGroup === "agency"} label="Agency" onClick={() => setAgGroup("agency")} />
+                  <PRow kind="rad" on={agGroup === "status"} label="Open / closed" onClick={() => setAgGroup("status")} />
+                  <PRow kind="rad" on={agGroup === "queried"} label="Queried / idle" onClick={() => setAgGroup("queried")} />
+                </PopSection>
+              </F12Popover>
+            )}
+          </div>
+        </div>
 
-      {/* Hairline rule under the header, above the filter bar (per-theme --ag-line). */}
-      <div className="ag-headrule" aria-hidden="true" />
-
-      {/* Filter bar — custom themable dropdowns (Status · Queried · Location | Sort | Group by),
-          left-aligned (ref editorial-agents-midnight-v2.html). Location + Group-by-Location run on
-          the DEPLOYED territory foundation (agent.country vs homeCountry); the list is flat by
-          default — grouping only sections it when a Group-by option is chosen. */}
-      <div className="ag-filters">
-        <FilterDropdown
-          label="Status" value={subFilter} isActive={subFilter !== "all"}
-          onChange={(v) => setSubFilter(v as AgentsSubFilter)}
-          options={[{ value: "all", label: "All" }, { value: "open", label: "Open" }, { value: "closed", label: "Closed" }]}
-        />
-        <FilterDropdown
-          label="Queried" value={queriedFilter} isActive={queriedFilter !== "all"}
-          onChange={(v) => setQueriedFilter(v as AgentsQueriedFilter)}
-          options={[{ value: "all", label: "All" }, { value: "yes", label: "Queried" }, { value: "no", label: "Not queried" }]}
-        />
-        <FilterDropdown
-          label="Location" newFlag value={locationFilter} isActive={locationFilter !== "all"}
-          onChange={(v) => setLocationFilter(v as AgentsLocationFilter)}
-          options={[{ value: "all", label: "All" }, { value: "domestic", label: "Domestic" }, { value: "international", label: "International" }]}
-        />
-        <span className="ag-fdiv" aria-hidden="true" />
-        <FilterDropdown
-          label="Sort" value={sortBy} isActive={sortBy !== "rating"}
-          onChange={(v) => setSortBy(v as AgentsSort)}
-          options={[{ value: "rating", label: "Star rating" }, { value: "az", label: "A to Z" }, { value: "resp", label: "Response time" }]}
-        />
-        <span className="ag-fdiv" aria-hidden="true" />
-        <FilterDropdown
-          label="Group by" newFlag value={groupBy} isActive={groupBy !== "none"}
-          onChange={(v) => setGroupBy(v as AgentsGroupBy)}
-          options={[{ value: "none", label: "None" }, { value: "rating", label: "Rating" }, { value: "location", label: "Location" }, { value: "queried", label: "Queried status" }]}
-        />
+        <div className="f12-zone-read">
+          <button type="button" className="f12-act" disabled={!selectedAgent} onClick={() => selectedAgent && sendQueryFlow(selectedAgent)}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
+            Send query
+          </button>
+          <button type="button" className="f12-act" disabled={!selectedAgent} onClick={() => selectedAgent && openEditAgent(selectedAgent.id)}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+            Edit profile
+          </button>
+          <button type="button" className="f12-act" disabled={!selectedAgent} onClick={() => onNavigate?.("todo")}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M4 12h10M4 18h10" /><path d="m17 6 1.5 1.5L21.5 4" /><path d="m17 12 1.5 1.5L21.5 10" /></svg>
+            View tasks
+            {agentTaskCount > 0 && <span className="f12-cnt">{agentTaskCount}</span>}
+          </button>
+          <div className="f12-right">
+            <button type="button" className="f12-act" disabled title="Coming soon — agent record PDF">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></svg>
+              PDF
+            </button>
+            <button type="button" className="f12-act f12-del" disabled={!selectedAgent} onClick={() => selectedAgent && setDeleteModalAgent(selectedAgent)}>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /></svg>
+              Delete
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Panes */}
-      <div className="ag-panes">
-        <div className="ag-listcol">
-          {upNext && (
-            <button type="button" className="ag-upnext ag-panel" onClick={() => setSelectedAgentId(upNext.id)}>
-              <span className="ag-spark" aria-hidden="true"><Sparkles /></span>
-              <span style={{ minWidth: 0 }}>
-                <span className="ag-ut" style={{ display: "block" }}>Up next</span>
-                <span className="ag-un" style={{ display: "block" }}>{upNext.name}</span>
-                <span className="ag-um" style={{ display: "block" }}>{upNextMeta(upNext)}</span>
-              </span>
-              <span
-                className="ag-btn ag-btn-sm ag-go"
-                role="button"
-                tabIndex={0}
-                onClick={(e) => { e.stopPropagation(); sendQueryFlow(upNext); }}
-                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.stopPropagation(); sendQueryFlow(upNext); } }}
-              >
-                Send query
-              </span>
-            </button>
-          )}
-          <div className="ag-listbox ag-panel" style={{ display: "flex", flexDirection: "column", minHeight: 0, flex: 1 }}>
-          <EdgeFadeScroll
-            outerClassName="ag-listfade"
-            scrollClassName="ag-listscroll"
-            scrollRef={listRef}
-            role="listbox"
-            aria-label="Agents"
-            fade="var(--card, #fffefb)"
-          >
-            {/* Summary line — at the top of the list, before the first card; small, muted, centred. */}
-            {(() => {
-              const s = agentsSummary(filtered.length, subFilter, queriedFilter, locationFilter, sortBy, groupBy);
-              return (
-                <div className="ag-summary">
-                  <b>{s.count}</b>
-                  {s.clauses.map((c, i) => (
-                    <React.Fragment key={i}> &middot; {c.label} <b>{c.value}</b></React.Fragment>
-                  ))}
-                </div>
-              );
-            })()}
+      {/* Active filters — removable pink chips beneath the bar (the panes never resize). */}
+      {agChips.length > 0 && (
+        <div className="f12-chips">
+          {agChips.map((c) => (
+            <Chip key={c.key} onRemove={c.remove}>{c.label}</Chip>
+          ))}
+          <button type="button" className="f12-clear" onClick={resetAgFilters}>CLEAR ALL</button>
+        </div>
+      )}
+
+      {/* ── Panes — the F12 list beside the reading pane, in the centred column ── */}
+      <div className="f12-body" style={{ paddingTop: agChips.length ? 0 : "var(--gut)" }}>
+        <div className="f12-pane f12-list">
+          <div className="f12-lsearch">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+            <input
+              ref={searchRef}
+              type="text"
+              placeholder="Find agent or agency…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              aria-label="Find agent or agency"
+            />
+          </div>
+          <div ref={listRef} className="f12-rows" role="listbox" aria-label="Agents">
             {flat.length ? (
               groups.map((g) => (
                 <React.Fragment key={g.key}>
-                  {g.label && (
-                    <div className="ag-grp" role="presentation">
-                      <span>{g.label}</span>
-                      {g.stars && <span className="ag-gstars">{g.stars}</span>}
-                    </div>
-                  )}
+                  {g.label && <div className="f12-ghead">{g.label}</div>}
                   {g.rows.map(renderRow)}
                 </React.Fragment>
               ))
             ) : (
-              <div className="ag-listempty">
+              <div style={{ textAlign: "center", padding: "48px 16px", color: "var(--faint)", fontSize: 12, fontStyle: "italic" }}>
                 {agents.length ? "No agents match these filters." : "No agents yet — your list starts here."}
               </div>
             )}
-          </EdgeFadeScroll>
-          {/* Furniture footer (desk rule): the drawer is drawer-sized — count + the key hints */}
-          <div className="ag-listfoot">
-            {flat.length} {flat.length === 1 ? "agent" : "agents"}
-            <span className="ag-footr">↑↓ · ⌘K</span>
           </div>
+          <div className="f12-lfoot">
+            <span>SHOWING <b>{flat.length}</b> OF {visibleAgents.length} · {idleCount} IDLE</span>
+            <button type="button" onClick={() => exportAgentsCSV()}>EXPORT CSV</button>
+            <span className="f12-kbd">↑↓ · ⏎</span>
           </div>
         </div>
 
-        <div className="ag-pane ag-panel">{renderPane()}</div>
+        {/* Reading pane — its OWN content (identity / wish list / submission profile / history +
+            notes), reskinned in 4d. The .agv2 wrapper keeps the pane's page-scoped CSS resolving;
+            its desk paint + padding are neutralised inline (the F12 shell owns the ground). */}
+        <div className="f12-pane f12-detail">
+          <div className="agv2 ag-pane" style={{ padding: 0, background: "transparent", overflow: "hidden", flex: 1, minHeight: 0, minWidth: 0, display: "flex", flexDirection: "column" }}>
+            {renderPane()}
+          </div>
+        </div>
       </div>
 
       {/* ---------------- TOAST hud ---------------- */}
@@ -972,6 +1138,6 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
           </div>
         );
       })()}
-    </div>
+    </F12Page>
   );
 };
