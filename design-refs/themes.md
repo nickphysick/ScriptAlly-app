@@ -578,3 +578,35 @@ These flourishes matter as much as the hexes — they are the difference between
 - **Cappuccino de-pinking is hub-scoped only** — an app-wide Capp retoken is a separate future pass; judge the hubs in isolation.
 - **`queriesTheme: "editorial"`** only persists once the parked rules edit ships (per `src/types.ts`); until then Editorial is selectable but may not survive a write.
 - **Route-scoped Query-DB palettes** (`qdb*` in designTokens.ts) are a *separate* system from these three themes and are intentionally not covered here.
+
+
+---
+
+## `.t-f12` — the F12 master theme (overnight nav/hub/agents run, 2026-07-13)
+
+Applied ONLY to the Queries Hub and Contact List page roots (via `F12Page` in
+`src/components/shell/F12Shell.tsx`); never app-wide. `.t-capp`/`.t-bold`/`.t-edn` are
+untouched — consolidation is a separate, later job. Tokens live in `src/index.css`
+(`.t-f12` block); shared shell classes in `src/components/shell/f12.css`. Values are the
+mockups' `:root` (`design-refs/queries-hub-v14.html` ≡ `agents-contact-list-v3.html`).
+
+- **Warm neutral ramp:** `--oat #f1e8dc` (chrome + ground; line `--oatline #e0d3c1`) →
+  `--paper #faf6f0` (recessed canvas, hovers) → `--panel #fffdfb` (raised panes/cards) →
+  `--white #ffffff` (popovers only).
+- **Two line weights:** `--line #e6dccd` (structural) · `--hairline #f0eae1` (internal).
+- **Warm ink ramp:** `--ink #1e1a16` · `--ink-2 #4a443c` · `--muted #7d7469` · `--faint #a89e91`.
+- **Three warm shadows:** `--sh-1` cards · `--sh-2` panes · `--sh-3` popovers/drawer (+ `--sh-btn`).
+- **Semantic accents:** blue = you-are-here (`--blue-t #e7eef6` / `--blue-b #d3e0ee` /
+  `--blue-i #2b4a6b` — nav active, selected row); pink = needs-you (`--pink-t #f7e3dd` /
+  `--pink-b #eecdc3` / `--pink-i #8a4030`, avatar `--pink-av #f6d7cf` — badges, chips, task
+  counts, status pill, avatars); sage = the card header bands + the agent-header spine.
+- **⚠️ SAGE CORRECTION (standing decision):** the band pair is the LIVE dashboard diary band —
+  `--sage-band: #dce0d9; --sage-band-2: #d0d6cc` (from `diaryCarousel.css`), which WINS over
+  the mockups' `#d7ddd5 → #d5dbd3`, so hub, agents and dashboard match. Edge `--sage-edge
+  #c8d0c5` (mockup value, nothing live contradicts); dark-sage icon `--sageD #5a6e58` (agreed).
+- **Radii:** 6 / 9 / 12 / 16 (`--r-sm/md/lg/xl`). **Layout:** `--listw 334px` · `--gut 12px` ·
+  `--maxw 1520px`. **Fonts:** `--f12-mono/serif/body` (Inter added to the font links this run).
+- The `.t-f12` block also carries `--crumb-*` literals so the app-wide CrumbStrip reads as the
+  full-bleed oat header inside these pages (a token repaint — the component is untouched).
+- House rules honoured: literals only (no `:root` aliasing — known freeze bug), no
+  `color-mix()`, reduced-motion end-states in f12.css.
