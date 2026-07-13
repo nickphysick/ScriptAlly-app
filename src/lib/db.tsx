@@ -24,6 +24,7 @@ import {
   Note,
   TodoNote,
   DismissedTask,
+  TaskFlag,
   Task,
   CommunityAgent
 } from "../types";
@@ -74,6 +75,8 @@ import { resolveGenre, matchKey } from "./genres";
 import { commitAgentEdits, AgentEditPatch, AgentExtraWrite, SaveAgentResult } from "./saveAgentEdits";
 import { computeAgentDeadlineWrites } from "./computeAgentDeadlineWrites";
 import { computeResponseDeadline } from "./responseDeadline";
+import { replyTask } from "./taskPrecedence";
+import { TaskFlagKey, taskFlagId, flagKeyForTask, flagMatchesTask, isFlagSuppressing, buildTaskFlagFromDismissed } from "./taskFlags";
 import { homeCountrySeed } from "./territory";
 import { agentDataQualityNeeds } from "./agentDataQuality";
 
@@ -158,6 +161,12 @@ interface DbContextType {
   journalEntries: JournalEntry[];
   notes: Note[];
   dismissedTasks: DismissedTask[];
+  // The user's stance on derived tasks (snooze/commit/skip/resolve). Absorbs dismissedTasks.
+  taskFlags: TaskFlag[];
+  upsertTaskFlag: (key: TaskFlagKey, patch: { snoozedUntil?: string | null; committedDate?: string | null; skippedAt?: string | null; resolvedAt?: string | null; bumpSnooze?: boolean }) => Promise<void>;
+  snoozeTaskFlag: (key: TaskFlagKey, days: number) => Promise<void>;
+  resolveTaskFlag: (key: TaskFlagKey) => Promise<void>;
+  migrateDismissedTasks: () => Promise<number>;
   tasks: Task[];
   login: (email: string, password?: string) => Promise<boolean>;
   signup: (name: string, email: string, password?: string) => Promise<boolean>;
@@ -285,6 +294,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [notes, setNotes] = useState<Note[]>([]);
   const [todoNotes, setTodoNotes] = useState<TodoNote[]>([]);
   const [dismissedTasks, setDismissedTasks] = useState<DismissedTask[]>([]);
+  const [taskFlags, setTaskFlags] = useState<TaskFlag[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
 
   // Temporary buffer to retain signup pen names
@@ -340,6 +350,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     let unsubNotes: () => void = () => {};
     let unsubTodoNotes: () => void = () => {};
     let unsubDismissed: () => void = () => {};
+    let unsubTaskFlags: () => void = () => {};
 
     const unsubAuth = onAuthStateChanged(auth, async (firebaseUser) => {
       if (!firebaseUser) {
@@ -362,6 +373,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         unsubJournal();
         unsubNotes();
         unsubDismissed();
+        unsubTaskFlags();
         return;
       }
 
@@ -550,6 +562,15 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           handleFirestoreError(error, OperationType.GET, `users/${uid}/dismissedTasks`);
         });
 
+        // Task-flags snap (the user's stance on derived tasks — absorbs dismissedTasks)
+        unsubTaskFlags = onSnapshot(collection(db, "users", uid, "taskFlags"), (snap) => {
+          const arr: TaskFlag[] = [];
+          snap.forEach(d => arr.push(d.data() as TaskFlag));
+          setTaskFlags(arr);
+        }, (error) => {
+          handleFirestoreError(error, OperationType.GET, `users/${uid}/taskFlags`);
+        });
+
       } catch (err) {
         console.error("Bootstrapping/authentication loading failures:", err);
         setAuthReady(true);          // never strand the app on the boot splash
@@ -571,6 +592,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       unsubNotes();
       unsubTodoNotes();
       unsubDismissed();
+      unsubTaskFlags();
     };
   }, []);
 
@@ -674,40 +696,43 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         });
       }
 
-      if (q.responseDeadline) {
-        const deadline = new Date(q.responseDeadline);
-        const hasPassed = deadline < now;
-        const isAwaiting = q.status === QueryStatus.QUERIED || q.status === QueryStatus.PARTIAL_SENT || q.status === QueryStatus.FULL_SENT;
-
-        if (hasPassed && isAwaiting) {
-          if (agent.noResponseMeansNo) {
-            calculatedTasks.push({
-              id: `task-no-res-close-${q.id}`,
-              priority: "suggested",
-              title: `No response limit hit: ${aName}`,
-              description: `Response deadline passed. Under guidelines, this is a soft pass. Consider archiving.`,
-              manuscriptTitle: mTitle,
-              context: `Archiving recommendation`,
-              relatedRecordId: q.id,
-              taskType: "no_response_close",
-              actionLabel: "Close Query",
-              actionPath: "queries"
-            });
-          } else {
-            calculatedTasks.push({
-              id: `task-nudge-${q.id}`,
-              priority: "overdue",
-              title: `Nudge due: ${aName}`,
-              description: `It's been ${agent.responseTimeWeeks} weeks since submission. Time to send a polite nudge letter!`,
-              manuscriptTitle: mTitle,
-              context: `Follow-up needed`,
-              relatedRecordId: q.id,
-              taskType: "nudge_overdue",
-              actionLabel: "Log Nudge",
-              actionPath: "queries"
-            });
-          }
-        }
+      // Nudge/close precedence: one decision, one task (close SUCCEEDS nudge, never competes).
+      // No reply window → neither fires; the data_quality_poor "set a window" item does instead.
+      const reply = replyTask({
+        status: q.status,
+        dateSent: q.dateSent,
+        responseDeadline: q.responseDeadline,
+        responseTimeWeeks: agent.responseTimeWeeks,
+        noResponseMeansNo: agent.noResponseMeansNo,
+        lastNudgeSentDate: q.lastNudgeSentDate,
+        now: now.getTime(),
+      });
+      if (reply === "close") {
+        calculatedTasks.push({
+          id: `task-no-res-close-${q.id}`,
+          priority: "suggested",
+          title: `No response limit hit: ${aName}`,
+          description: `Response deadline passed. Under guidelines, this is a soft pass. Consider archiving.`,
+          manuscriptTitle: mTitle,
+          context: `Archiving recommendation`,
+          relatedRecordId: q.id,
+          taskType: "no_response_close",
+          actionLabel: "Close Query",
+          actionPath: "queries"
+        });
+      } else if (reply === "nudge") {
+        calculatedTasks.push({
+          id: `task-nudge-${q.id}`,
+          priority: "overdue",
+          title: `Nudge due: ${aName}`,
+          description: `It's been ${agent.responseTimeWeeks} weeks since submission. Time to send a polite nudge letter!`,
+          manuscriptTitle: mTitle,
+          context: `Follow-up needed`,
+          relatedRecordId: q.id,
+          taskType: "nudge_overdue",
+          actionLabel: "Log Nudge",
+          actionPath: "queries"
+        });
       }
     });
 
@@ -766,18 +791,16 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       }
     });
 
+    // Suppression is now taskFlags-based (dismissedTasks absorbed): a derived task is hidden while a
+    // matching flag is snoozed into the future (a far-future snooze reads as an indefinite mute).
+    const nowMs = now.getTime();
     const activeTasks = calculatedTasks.filter(t => {
-      const match = dismissedTasks.find(d => d.taskType === t.taskType && d.relatedRecordId === t.relatedRecordId);
-      if (!match) return true;
-      if (match.dismissType === "permanent") return false;
-      if (match.resurfaceDate) {
-        return new Date(match.resurfaceDate) <= now;
-      }
-      return false;
+      const flag = taskFlags.find(f => flagMatchesTask(f, t.taskType, t.relatedRecordId));
+      return !flag || !isFlagSuppressing(flag, nowMs);
     });
 
     setTasks(activeTasks);
-  }, [queries, manuscripts, agents, dismissedTasks, currentUser]);
+  }, [queries, manuscripts, agents, taskFlags, currentUser]);
 
   // Self-healing backfill routine to auto-create missing creation activities for existing agents and manuscripts.
   // This gracefully heals objects that were successfully added but whose activities were rejected by past Firestore rules.
@@ -2222,7 +2245,47 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
-  // Task dismissal and snoozing
+  // ── Task flags — the user's STANCE on a derived task (snooze / commit / skip / resolve). ──
+  const DAY_MS = 86400000;
+  const upsertTaskFlag = async (
+    key: TaskFlagKey,
+    patch: { snoozedUntil?: string | null; committedDate?: string | null; skippedAt?: string | null; resolvedAt?: string | null; bumpSnooze?: boolean },
+  ) => {
+    if (!currentUser) return;
+    const id = taskFlagId(key);
+    const existing = taskFlags.find(f => f.id === id);
+    // `null` in a patch CLEARS the field (full-overwrite write); `undefined` keeps the existing value.
+    const resolve = (p: string | null | undefined, cur: string | undefined): string | undefined =>
+      p === null ? undefined : p !== undefined ? p : cur;
+    const next: TaskFlag = { id, userId: currentUser.id, taskType: key.taskType, snoozeCount: (existing?.snoozeCount ?? 0) + (patch.bumpSnooze ? 1 : 0) };
+    const qid = key.queryId ?? existing?.queryId; if (qid) next.queryId = qid;
+    const aid = key.agentId ?? existing?.agentId; if (aid) next.agentId = aid;
+    const rule = key.rule ?? existing?.rule; if (rule) next.rule = rule;
+    const su = resolve(patch.snoozedUntil, existing?.snoozedUntil); if (su) next.snoozedUntil = su;
+    const cd = resolve(patch.committedDate, existing?.committedDate); if (cd) next.committedDate = cd;
+    const sk = resolve(patch.skippedAt, existing?.skippedAt); if (sk) next.skippedAt = sk;
+    const ra = resolve(patch.resolvedAt, existing?.resolvedAt); if (ra) next.resolvedAt = ra;
+    try {
+      await setDoc(doc(db, "users", currentUser.id, "taskFlags", id), next);
+    } catch (e) {
+      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/taskFlags/${id}`);
+    }
+  };
+  const snoozeTaskFlag = (key: TaskFlagKey, days: number) =>
+    upsertTaskFlag(key, { snoozedUntil: new Date(Date.now() + days * DAY_MS).toISOString(), bumpSnooze: true });
+  const resolveTaskFlag = (key: TaskFlagKey) => upsertTaskFlag(key, { resolvedAt: new Date().toISOString() });
+  /** One-shot backfill of the legacy dismissedTasks collection into taskFlags. Nick runs once. */
+  const migrateDismissedTasks = async (): Promise<number> => {
+    if (!currentUser) return 0;
+    let n = 0;
+    for (const d of dismissedTasks) {
+      const flag = buildTaskFlagFromDismissed(d, currentUser.id);
+      try { await setDoc(doc(db, "users", currentUser.id, "taskFlags", flag.id), flag); n++; } catch { /* best-effort */ }
+    }
+    return n;
+  };
+
+  // Task dismissal and snoozing — now writes a taskFlag (dismissedTasks absorbed).
   const dismissTask = async (taskType: string, relatedRecordId: string, dismissType: "permanent" | "fixed snooze" | "custom date", snoozeDays?: number) => {
     if (!currentUser) return;
 
@@ -2260,29 +2323,14 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       }
     }
 
-    let resurfaceDate: string | undefined = undefined;
-    if (dismissType === "fixed snooze" && snoozeDays) {
-      const d = new Date();
-      d.setDate(d.getDate() + snoozeDays);
-      resurfaceDate = d.toISOString();
-    }
-
-    const id = "dsm-" + Math.random().toString(36).substr(2, 9);
-    const newDismiss: DismissedTask = {
-      id,
-      userId: currentUser.id,
-      taskType,
-      relatedRecordId,
-      dismissedDate: new Date().toISOString(),
-      ...(resurfaceDate !== undefined ? { resurfaceDate } : {}),
-      dismissType
-    };
-
-    try {
-      await setDoc(doc(db, "users", currentUser.id, "dismissedTasks", id), newDismiss);
-    } catch (e) {
-      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/dismissedTasks/${id}`);
-    }
+    // Persist the stance as a taskFlag: fixed snooze → snoozedUntil in N days; permanent → an
+    // indefinite mute (MUTED_UNTIL). ("custom date" flows through logNudge, not here.)
+    const key = flagKeyForTask(taskType, relatedRecordId);
+    const snoozedUntil =
+      dismissType === "fixed snooze" && snoozeDays ? new Date(Date.now() + snoozeDays * DAY_MS).toISOString()
+      : dismissType === "permanent" ? "3000-01-01T00:00:00.000Z"
+      : undefined;
+    await upsertTaskFlag(key, { snoozedUntil, bumpSnooze: true });
   };
 
   // Log a nudge — the smallest-blast-radius write set (see lib/logNudge.ts). Does NOT piggyback on
@@ -2306,22 +2354,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       // 2) Set the next-nudge field + bookkeeping. updateQuery never touches status/responseDeadline.
       await updateQuery(queryId, writes.queryUpdates);
 
-      // 3) Hide-and-resurface the nudge_overdue task on the check-back date. Upsert the dismissal so a
-      //    repeat nudge updates the existing one instead of stacking duplicates (the Tasks filter
-      //    finds the first match by key, so one canonical doc per task keeps resurfacing deterministic).
-      const existing = dismissedTasks.find(
-        d => d.taskType === "nudge_overdue" && d.relatedRecordId === queryId
-      );
-      if (existing) {
-        await updateDoc(doc(db, "users", currentUser.id, "dismissedTasks", existing.id), {
-          dismissType: writes.dismissal.dismissType,
-          resurfaceDate: writes.dismissal.resurfaceDate,
-        });
-      } else {
-        const dismissId = "dsm-" + Math.random().toString(36).substr(2, 9);
-        const newDismiss: DismissedTask = { id: dismissId, userId: currentUser.id, ...writes.dismissal };
-        await setDoc(doc(db, "users", currentUser.id, "dismissedTasks", dismissId), newDismiss);
-      }
+      // 3) Hide-and-resurface the nudge_overdue task on the check-back date — a taskFlag snooze.
+      //    The deterministic key means a repeat nudge updates the same flag (no stacked duplicates).
+      await upsertTaskFlag(flagKeyForTask("nudge_overdue", queryId), { snoozedUntil: writes.dismissal.resurfaceDate });
       return { success: true };
     } catch (e) {
       handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/queries/${queryId} [logNudge]`);
@@ -2530,6 +2565,11 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         journalEntries,
         notes,
         dismissedTasks,
+        taskFlags,
+        upsertTaskFlag,
+        snoozeTaskFlag,
+        resolveTaskFlag,
+        migrateDismissedTasks,
         tasks,
         login,
         signup,

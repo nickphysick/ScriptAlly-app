@@ -47,6 +47,9 @@ export interface User {
   // already-loaded user doc — no new page-load read. NOTE: rides the parked user-update allowlist
   // edit — silently denied (graceful) until that deploy lands.
   personalGenres?: { id: string; label: string }[];
+  // Housekeeping rules the writer has muted app-wide ("Don't ask again → All of them"). Per-item
+  // mutes live on a TaskFlag instead. Muting stops the reminder; it never deletes the underlying gap.
+  mutedTaskRules?: string[];
 }
 
 /**
@@ -457,4 +460,44 @@ export interface Task {
   taskType: string;
   actionLabel: string;
   actionPath: string; // routing state context
+}
+
+/**
+ * TaskFlag — the user's STANCE on a DERIVED task (snooze / commit / skip / resolve). Never a task
+ * itself (that's `UserTask`); never a copy of the derived task — it points at one by its components.
+ * The doc id is a deterministic composite of {taskType, queryId|agentId, rule}, but those stay
+ * FIELDS too, so a future change to id-derivation is a migration, not an extinction. Absorbs the
+ * old `dismissedTasks` collection. Dates are ISO strings (codebase convention).
+ */
+export interface TaskFlag {
+  id: string;
+  userId: string;
+  taskType: string;
+  queryId?: string;
+  agentId?: string;
+  rule?: string; // housekeeping rule key (batch fixes)
+  snoozedUntil?: string; // ISO — hidden until this instant (a far-future value = muted indefinitely)
+  snoozeCount: number;
+  committedDate?: string; // "YYYY-MM-DD" — Today's list. A POINTER, never a copy.
+  skippedAt?: string; // ISO
+  resolvedAt?: string; // ISO — when the gap was closed (feeds "cleared today")
+}
+
+/**
+ * UserTask — a task the WRITER wrote (the only stored, user-originated to-do object). Lives in the
+ * generic `users/{uid}/tasks` collection so the To-do "Your tasks" column AND the per-record
+ * "View tasks" popover (Queries Hub / Contact List) read ONE store. Owner is nullable — an
+ * unattached task floats — so at most one of queryId/agentId/manuscriptId is set (all optional).
+ */
+export interface UserTask {
+  id: string;
+  userId: string;
+  text: string;
+  done: boolean;
+  completedAt?: string; // ISO — stamped when done
+  createdAt: string; // ISO
+  updatedAt: string; // ISO
+  queryId?: string;
+  agentId?: string;
+  manuscriptId?: string;
 }

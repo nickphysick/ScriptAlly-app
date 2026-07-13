@@ -78,7 +78,9 @@ service cloud.firestore {
         && (!data.keys().hasAny(['hasSeenTour']) || data.hasSeenTour is bool)
         // Personal genres (taxonomy Tier 2) — optional list, capped at the client's MAX_PERSONAL_GENRES.
         // Shape (id/label maps) is validated client-side; rules just bound presence + count.
-        && (!data.keys().hasAny(['personalGenres']) || (data.personalGenres is list && data.personalGenres.size() <= 10));
+        && (!data.keys().hasAny(['personalGenres']) || (data.personalGenres is list && data.personalGenres.size() <= 10))
+        // Muted housekeeping rules — optional list of rule keys, bounded.
+        && (!data.keys().hasAny(['mutedTaskRules']) || (data.mutedTaskRules is list && data.mutedTaskRules.size() <= 64));
     }
 
     function isValidManuscript(data, userId) {
@@ -426,6 +428,39 @@ service cloud.firestore {
         && (!data.keys().hasAll(['snoozeDays']) || (data.snoozeDays is int && data.snoozeDays >= 0 && data.snoozeDays <= 3650));
     }
 
+    // TaskFlag — the user's stance on a derived task. Deterministic id; components stored as fields.
+    // All optional dates are ISO strings; snoozeCount is a non-negative int.
+    function isValidTaskFlag(data, userId) {
+      return data.keys().hasOnly(['id', 'userId', 'taskType', 'queryId', 'agentId', 'rule', 'snoozedUntil', 'snoozeCount', 'committedDate', 'skippedAt', 'resolvedAt'])
+        && data.id is string && data.id.size() <= 400
+        && data.userId == userId
+        && data.taskType is string && data.taskType.size() <= 128
+        && data.snoozeCount is int && data.snoozeCount >= 0 && data.snoozeCount <= 100000
+        && (!data.keys().hasAny(['queryId']) || (data.queryId is string && data.queryId.size() <= 128))
+        && (!data.keys().hasAny(['agentId']) || (data.agentId is string && data.agentId.size() <= 128))
+        && (!data.keys().hasAny(['rule']) || (data.rule is string && data.rule.size() <= 128))
+        && (!data.keys().hasAny(['snoozedUntil']) || (data.snoozedUntil is string && data.snoozedUntil.size() <= 64))
+        && (!data.keys().hasAny(['committedDate']) || (data.committedDate is string && data.committedDate.size() <= 16))
+        && (!data.keys().hasAny(['skippedAt']) || (data.skippedAt is string && data.skippedAt.size() <= 64))
+        && (!data.keys().hasAny(['resolvedAt']) || (data.resolvedAt is string && data.resolvedAt.size() <= 64));
+    }
+
+    // UserTask — a task the writer wrote (the only stored to-do object). Nullable owner: at most one
+    // of queryId/agentId/manuscriptId. body/text may be empty; done is a bool; stamps are ISO strings.
+    function isValidUserTask(data, userId) {
+      return data.keys().hasOnly(['id', 'userId', 'text', 'done', 'completedAt', 'createdAt', 'updatedAt', 'queryId', 'agentId', 'manuscriptId'])
+        && data.id is string && data.id.size() <= 128
+        && data.userId == userId
+        && data.text is string && data.text.size() <= 16384
+        && data.done is bool
+        && data.createdAt is string && data.createdAt.size() <= 64
+        && data.updatedAt is string && data.updatedAt.size() <= 64
+        && (!data.keys().hasAny(['completedAt']) || (data.completedAt is string && data.completedAt.size() <= 64))
+        && (!data.keys().hasAny(['queryId']) || (data.queryId is string && data.queryId.size() <= 128))
+        && (!data.keys().hasAny(['agentId']) || (data.agentId is string && data.agentId.size() <= 128))
+        && (!data.keys().hasAny(['manuscriptId']) || (data.manuscriptId is string && data.manuscriptId.size() <= 128));
+    }
+
     // ----------------------------------------------------
     // FIRESTORE ENDPOINTS INTEGRATIONS
     // ----------------------------------------------------
@@ -435,7 +470,7 @@ service cloud.firestore {
       allow read, delete: if isOwner(userId);
       allow create: if isOwner(userId) && isValidUser(incoming());
       allow update: if isOwner(userId) && isValidUser(incoming()) && (
-        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus', 'onboardingComplete', 'queryingStage', 'journeyStage', 'homeCountry', 'queriesTheme', 'todoLastFocusedAt', 'hasSeenTour', 'personalGenres'])
+        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus', 'onboardingComplete', 'queryingStage', 'journeyStage', 'homeCountry', 'queriesTheme', 'todoLastFocusedAt', 'hasSeenTour', 'personalGenres', 'mutedTaskRules'])
       );
 
       // ROUTE: Manuscripts
@@ -579,6 +614,21 @@ service cloud.firestore {
         allow update: if isOwner(userId) && isValidId(dismissedId) && isValidDismissedTask(incoming(), userId) && (
           incoming().diff(existing()).affectedKeys().hasOnly(['snoozeDays', 'dismissType', 'resurfaceDate'])
         );
+      }
+
+      // ROUTE: taskFlags — the user's stance on derived tasks (owner-only). Deterministic-id docs.
+      match /taskFlags/{flagId} {
+        allow get, delete: if isOwner(userId);
+        allow list: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidTaskFlag(incoming(), userId);
+      }
+
+      // ROUTE: tasks — the writer's own to-do items (owner-only). Read by the To-do "Your tasks"
+      // column AND the per-record "View tasks" popover — one store, many views.
+      match /tasks/{taskId} {
+        allow get, delete: if isOwner(userId) && isValidId(taskId);
+        allow list: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidId(taskId) && isValidUserTask(incoming(), userId);
       }
 
       // ROUTE: private — server-only entitlement state (Smart Import usage). The owner may READ it,
