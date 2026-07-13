@@ -11,11 +11,15 @@
  * timeline style rather than diverging. The dashboard "Story so far" is a separate global card-feed,
  * intentionally not this pipeline presentation.
  */
-import React from "react";
+import React, { useState } from "react";
 import { StatusDot } from "../StatusDot";
 import { Query, QueryStatus, Agent, QueryMaterial } from "../../types";
 import { formatQueryMaterial } from "../../lib/materials";
 import { queryAmbientStatus } from "../../lib/queryAmbient";
+import { F12Menu } from "../shell/F12Shell";
+
+/** A correctable timeline entry (5b) — passed to the ⋯ Edit / Delete handlers. */
+export interface TimelineEntryRef { activityId: string; status: QueryStatus; label: string; dateISO: string; note: string; }
 
 const FONT_MONO = "'JetBrains Mono', monospace";
 
@@ -62,7 +66,16 @@ interface RowSpec {
   date?: string;
   sub?: string;
   pills?: string[];
+  /** Present only on rows backed by a real activity (the synthesised "Query sent" root has none). */
+  activityId?: string;
+  dateISO?: string;
+  note?: string;
 }
+
+const isoDay = (ms: number): string => {
+  const d = new Date(ms);
+  return isNaN(d.getTime()) ? "" : d.toISOString().slice(0, 10);
+};
 
 /** Mirrors the relevant fields of getPrimaryAction(status) in Queries.tsx — passed in so the
  *  trailing open-state block reads the same agent's-turn/writer's-turn fact as the control bar. */
@@ -77,9 +90,13 @@ export interface QueryTimelineProps {
   events: any[];
   /** The open-state switch — from getPrimaryAction(query.status). Undefined ⇒ no trailing block. */
   primaryAction?: QueryTimelinePrimaryAction;
+  /** 5b — correction handlers for the hover ⋯ on activity-backed rows. */
+  onEditEntry?: (entry: TimelineEntryRef) => void;
+  onDeleteEntry?: (entry: TimelineEntryRef) => void;
 }
 
-export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, events, primaryAction }) => {
+export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry }) => {
+  const [menu, setMenu] = useState<{ entry: TimelineEntryRef; style: React.CSSProperties } | null>(null);
   const validEnumValues = Object.values(QueryStatus);
 
   // Dedupe the activity log by status (keep the earliest of each), then order chronologically.
@@ -117,6 +134,9 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
       date: fmtShort(getTime(evt.createdAt)),
       sub,
       pills: status === QueryStatus.QUERIED && queryMaterials.length ? queryMaterials : undefined,
+      activityId: typeof evt.id === "string" ? evt.id : undefined, // synthesised root has no id
+      dateISO: isoDay(getTime(evt.createdAt)),
+      note: typeof evt.note === "string" ? evt.note : "",
     };
   });
 
@@ -145,10 +165,29 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
                 <div style={{ position: "absolute", top: 29, bottom: -24, left: "50%", transform: "translateX(-50%)", width: 1.6, background: "#e8dcd0" }} />
               )}
             </div>
-            <div style={{ paddingTop: 4 }}>
+            <div className="tl-rowbody" style={{ paddingTop: 4 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
                 <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 600, color: "#3a1c14" }}>{row.title}</span>
-                {row.date && <span style={{ fontFamily: FONT_MONO, fontSize: 9, color: "#a89a8a", whiteSpace: "nowrap" }}>{row.date}</span>}
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" }}>
+                  {row.date && <span style={{ fontFamily: FONT_MONO, fontSize: 9, color: "#a89a8a" }}>{row.date}</span>}
+                  {row.activityId && (onEditEntry || onDeleteEntry) && (
+                    <span className="f12-popwrap" style={{ display: "inline-flex" }}>
+                      <button
+                        type="button"
+                        className="tl-more"
+                        aria-label="Correct this entry"
+                        title="Correct this entry"
+                        onClick={(e) => {
+                          const r = e.currentTarget.getBoundingClientRect();
+                          setMenu({
+                            entry: { activityId: row.activityId!, status: row.status, label: row.title, dateISO: row.dateISO || "", note: row.note || "" },
+                            style: { position: "fixed", top: r.bottom + 4, left: Math.max(8, r.right - 184) },
+                          });
+                        }}
+                      >⋯</button>
+                    </span>
+                  )}
+                </span>
               </div>
               {row.sub && <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, color: "#9a8d7e", marginTop: 2 }}>{row.sub}</div>}
               {row.pills && row.pills.length > 0 && (
@@ -200,6 +239,20 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
         </div>
       )}
       {/* ballHolder === null (closed / Offer): no trailing block — history only. */}
+
+      {/* 5b — the correction menu for the hovered entry (portalled; not clipped by the card scroll) */}
+      {menu && (
+        <F12Menu
+          open
+          onClose={() => setMenu(null)}
+          style={menu.style}
+          ariaLabel="Correct entry"
+          items={[
+            { label: "Edit", icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>, onClick: () => onEditEntry?.(menu.entry) },
+            { label: "Delete…", danger: true, icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /></svg>, onClick: () => onDeleteEntry?.(menu.entry) },
+          ]}
+        />
+      )}
     </div>
   );
 };

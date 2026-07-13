@@ -74,7 +74,12 @@ function quickData(
   };
 }
 
-export interface TimelineComposerHandle { focus: () => void; }
+export interface ComposerEditEntry { activityId: string; status: QueryStatus; label: string; dateISO: string; note: string; }
+export interface TimelineComposerHandle {
+  focus: () => void;
+  /** Open the composer in correct-in-place edit mode for an existing timeline entry (5b). */
+  startEdit: (entry: ComposerEditEntry) => void;
+}
 
 export interface TimelineComposerProps {
   query: Query;
@@ -95,7 +100,7 @@ const METHOD_OPTIONS: SubmissionMethod[] = [
 
 export const TimelineComposer = React.forwardRef<TimelineComposerHandle, TimelineComposerProps>(
   ({ query, agent, manuscript, onOpenRichForm, onMarkSent }, ref) => {
-    const { currentUser } = useScriptAllyDb();
+    const { currentUser, editActivity } = useScriptAllyDb();
     const { showToast } = useToast();
     const rootRef = useRef<HTMLDivElement>(null);
     const firstChipRef = useRef<HTMLButtonElement>(null);
@@ -113,21 +118,32 @@ export const TimelineComposer = React.forwardRef<TimelineComposerHandle, Timelin
     const model = useMemo(() => composerChips(status, { canCloseNoResponse }), [status, canCloseNoResponse]);
 
     const [openChip, setOpenChip] = useState<ComposerChip | null>(null);
+    const [editing, setEditing] = useState<ComposerEditEntry | null>(null);
     const [date, setDate] = useState(todayISO());
     const [method, setMethod] = useState<string>(agent.submissionMethod || "");
     const [note, setNote] = useState("");
     const [expectedBy, setExpectedBy] = useState("");
     const [saving, setSaving] = useState(false);
 
-    // The CTA button in the command bar scrolls here + focuses the first chip (one flow, two doors).
+    // The CTA button in the command bar scrolls here + focuses the first chip (one flow, two doors);
+    // the timeline ⋯ → Edit opens this same surface in correct-in-place mode (5b).
     useImperativeHandle(ref, () => ({
       focus: () => {
         rootRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
         firstChipRef.current?.focus();
       },
+      startEdit: (entry) => {
+        setOpenChip(null);
+        setDate(entry.dateISO || todayISO());
+        setMethod("");
+        setNote(entry.note || "");
+        setExpectedBy("");
+        setEditing(entry);
+        rootRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      },
     }));
 
-    const closeForm = () => setOpenChip(null);
+    const closeForm = () => { setOpenChip(null); setEditing(null); };
 
     const onChip = (chip: ComposerChip) => {
       const a = chip.action;
@@ -184,15 +200,36 @@ export const TimelineComposer = React.forwardRef<TimelineComposerHandle, Timelin
       }
     }
 
+    // 5b — correct an existing entry in place (editActivity patches date + note; never a new record).
+    async function saveEdit() {
+      if (!currentUser || !editing || saving) return;
+      setSaving(true);
+      try {
+        await editActivity(query.id, editing.activityId, { date, description: note });
+        closeForm();
+        showToast({ message: "Entry updated" });
+      } catch {
+        showToast({ message: "Couldn’t update that — please try again." });
+      } finally {
+        setSaving(false);
+      }
+    }
+
     const save = () => {
-      if (!openChip || dateError) return;
+      if (dateError) return;
+      if (editing) { void saveEdit(); return; }
+      if (!openChip) return;
       void record(responseTypeOf(openChip), openChip);
     };
+
+    const formOpen = !!(openChip || editing);
+    const formTitle = editing ? `Edit — ${editing.label}` : openChip?.label ?? "";
+    const showExpectedBy = !editing && openChip?.action.kind === "record" && (openChip.action.responseType === "partial" || openChip.action.responseType === "full");
 
     return (
       <div className="tc-root" ref={rootRef}>
         <div className="tc-q">{model.question}</div>
-        {!openChip ? (
+        {!formOpen ? (
           <div className="tc-chips">
             {model.chips.map((c, i) => (
               <button
@@ -208,8 +245,8 @@ export const TimelineComposer = React.forwardRef<TimelineComposerHandle, Timelin
             ))}
           </div>
         ) : (
-          <div className="tc-form" role="group" aria-label={openChip.label}>
-            <div className="tc-fh">{openChip.label}</div>
+          <div className="tc-form" role="group" aria-label={formTitle}>
+            <div className="tc-fh">{formTitle}</div>
             <div className="tc-frow">
               <label className="tc-field">
                 <span className="tc-lb">When</span>
@@ -223,7 +260,7 @@ export const TimelineComposer = React.forwardRef<TimelineComposerHandle, Timelin
                 </select>
               </label>
             </div>
-            {openChip.action.kind === "record" && (openChip.action.responseType === "partial" || openChip.action.responseType === "full") && (
+            {showExpectedBy && (
               <label className="tc-field tc-full">
                 <span className="tc-lb">Expected reply by <span className="tc-hint">— from their usual turnaround</span></span>
                 <input type="date" value={expectedBy} min={date || undefined} onChange={(e) => setExpectedBy(e.target.value)} />
@@ -237,13 +274,15 @@ export const TimelineComposer = React.forwardRef<TimelineComposerHandle, Timelin
             <div className="tc-fa">
               <button type="button" className="tc-save" disabled={!!dateError || saving} onClick={save}>{saving ? "Saving…" : "Save"}</button>
               <button type="button" className="tc-cancel" onClick={closeForm}>Cancel</button>
-              <button
-                type="button"
-                className="tc-detail"
-                onClick={() => { const rt = statusForChip(openChip); if (rt) onOpenRichForm(rt, { dateReceived: date, note }); }}
-              >
-                Add more detail
-              </button>
+              {!editing && openChip && (
+                <button
+                  type="button"
+                  className="tc-detail"
+                  onClick={() => { const rt = statusForChip(openChip); if (rt) onOpenRichForm(rt, { dateReceived: date, note }); }}
+                >
+                  Add more detail
+                </button>
+              )}
             </div>
           </div>
         )}

@@ -46,6 +46,10 @@ import { useFixedMenu } from "./forms/useFixedMenu";
 import { useOpenEditQuery } from "./EditQueryHost";
 import { QueryTimeline } from "./reading-pane/QueryTimeline";
 import { TimelineComposer, type TimelineComposerHandle } from "./reading-pane/TimelineComposer";
+import type { TimelineEntryRef } from "./reading-pane/QueryTimeline";
+import { useToast } from "./toast/ToastProvider";
+import { deriveQueryFields } from "../lib/queryDerivation";
+import { subcollectionDocToDerivable } from "../lib/recomputeQuery";
 import { MountCard } from "./MountCard";
 import { ScriptAllyLogo } from "./ScriptAllyLogo";
 import {
@@ -215,10 +219,12 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     deleteJournalEntry,
     updateJournalEntry,
     deleteActivity,
+    editActivity,
     updateAgent,
     updateQueryStatus,
     logNudge
   } = useScriptAllyDb();
+  const { showConfirm, showToast } = useToast();
   // Query editing is the app-level Edit Query drawer (the inline isEditMode editor is retired).
   const openEditQuery = useOpenEditQuery();
 
@@ -257,6 +263,37 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   const [richInitialDraft, setRichInitialDraft] = useState<{ dateReceived?: string; note?: string } | undefined>(undefined);
   const openRichForm = (rt: QueryStatus, draft?: { dateReceived?: string; note?: string }) => {
     setRichInitialType(rt); setRichInitialDraft(draft); setIsRecordResponseFocusFormOpen(true);
+  };
+  // 5b — timeline corrections. Edit reopens the composer in place; Delete confirms with the DERIVED
+  // consequence (the status the query recomputes to once this entry is gone) — never a bare "sure?".
+  const onEditEntry = (entry: TimelineEntryRef) => composerRef.current?.startEdit(entry);
+  const onDeleteEntry = (entry: TimelineEntryRef) => {
+    const remaining = trackingEvents
+      .filter((e) => e.id !== entry.activityId)
+      .map((e) => subcollectionDocToDerivable(e.id, e));
+    const derived = remaining.length ? deriveQueryFields(remaining).status : "Not yet sent";
+    const current = (activeQuery?.status as string) || "";
+    const changes = derived !== current;
+    showConfirm({
+      title: "Delete this entry?",
+      danger: true,
+      confirmLabel: "Delete entry",
+      body: (
+        <>
+          {changes ? (
+            <p style={{ margin: "0 0 8px" }}>
+              This query will move <b style={{ textTransform: "uppercase", letterSpacing: "0.04em" }}>{current}</b> → <b style={{ textTransform: "uppercase", letterSpacing: "0.04em" }}>{derived}</b>.
+            </p>
+          ) : (
+            <p style={{ margin: "0 0 8px" }}>This won’t change the query’s status.</p>
+          )}
+          <p style={{ margin: 0, color: "var(--muted, #7d7469)" }}>
+            Use this only if the entry was logged by mistake. If something genuinely changed, record a new entry instead.
+          </p>
+        </>
+      ),
+      onConfirm: async () => { await deleteActivity(entry.activityId); showToast({ message: "Entry deleted" }); },
+    });
   };
   const { triggerRef: closeTriggerRef, menuStyle: closeMenuStyle } = useFixedMenu<HTMLButtonElement>(isCloseMenuOpen); // F12: downward
   // Close every ribbon popover/modal whenever the reader moves to a different query.
@@ -2718,6 +2755,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                               agent={activeAgent}
                               events={trackingEvents}
                               primaryAction={{ ballHolder: ta.ballHolder, markKind: ta.kind === "mark-sent" ? ta.markKind : undefined }}
+                              onEditEntry={onEditEntry}
+                              onDeleteEntry={onDeleteEntry}
                             />
                           );
                         })()}
