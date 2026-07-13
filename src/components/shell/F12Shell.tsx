@@ -175,6 +175,61 @@ export const F12Popover: React.FC<{
   );
 };
 
+/**
+ * F12Menu — a lightweight portalled action menu (chrome revision / interactions): the ⋯ overflow
+ * on the control bar, the corrections ⋯ on timeline rows, etc. Unlike F12Popover (titled filter
+ * dialog), this is a bare list of actions. Portalled to document.body inside a .t-f12 wrapper
+ * (tokens resolve, no clip), positioned via the caller's useFixedMenu `style`. Keep the trigger in
+ * an .f12-popwrap so its own onClick owns the toggle. Escape + outside-click close.
+ */
+export type F12MenuItem = "divider" | { label: string; icon?: React.ReactNode; onClick: () => void; danger?: boolean; disabled?: boolean };
+export const F12Menu: React.FC<{
+  open: boolean;
+  onClose: () => void;
+  style?: React.CSSProperties;
+  items: F12MenuItem[];
+  ariaLabel?: string;
+}> = ({ open, onClose, style, items, ariaLabel }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (ref.current?.contains(t) || (t instanceof Element && t.closest(".f12-popwrap"))) return;
+      onClose();
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("mousedown", onDown); document.removeEventListener("keydown", onKey); };
+  }, [open, onClose]);
+  if (!open) return null;
+  return createPortal(
+    <div className="t-f12">
+      <div ref={ref} className="f12-menu" style={{ zIndex: 60, ...style }} role="menu" aria-label={ariaLabel}>
+        {items.map((it, i) =>
+          it === "divider" ? (
+            <div key={i} className="f12-menu-sep" aria-hidden="true" />
+          ) : (
+            <button
+              key={i}
+              type="button"
+              role="menuitem"
+              className={`f12-menu-item${it.danger ? " f12-danger" : ""}`}
+              disabled={it.disabled}
+              onClick={() => { it.onClick(); onClose(); }}
+            >
+              {it.icon}
+              {it.label}
+            </button>
+          )
+        )}
+      </div>
+    </div>,
+    document.body
+  );
+};
+
 export const PopSection: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
   <div className="f12-sect">
     <div className="f12-sect-h"><span className="f12-lbl">{label}</span><span className="f12-rule" /></div>

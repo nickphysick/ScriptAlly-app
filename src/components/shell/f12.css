@@ -82,6 +82,16 @@
 .f12-iconctl .f12-tip { position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%); font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.1em; background: var(--ink); color: var(--panel); padding: 4px 7px; border-radius: 5px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.12s; z-index: 5; }
 .f12-iconctl:hover .f12-tip, .f12-iconctl:focus-visible .f12-tip { opacity: 1; }
 
+/* F12Menu — the ⋯ overflow / correction action menu (portalled inside .t-f12) */
+.f12-menu { min-width: 180px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--sh-3); padding: 5px; display: flex; flex-direction: column; gap: 1px; }
+.f12-menu-item { display: flex; align-items: center; gap: 9px; width: 100%; padding: 8px 10px; border-radius: var(--r-sm); font-family: var(--f12-body); font-size: 13px; color: var(--ink-2); text-align: left; cursor: pointer; }
+.f12-menu-item:hover:not(:disabled) { background: var(--paper); color: var(--ink); }
+.f12-menu-item:disabled { opacity: 0.45; cursor: default; }
+.f12-menu-item.f12-danger { color: #a5342a; }
+.f12-menu-item.f12-danger:hover:not(:disabled) { background: var(--pink-t); color: #a5342a; }
+.f12-menu-item svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.f12-menu-sep { height: 1px; background: var(--hairline); margin: 4px 2px; }
+
 /* quiet action buttons (the right zone — no filled button in this bar) */
 .f12-act { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; font-size: 14px; font-weight: 450; color: var(--ink-2); padding: 8px 11px; border-radius: var(--r-md); transition: background 0.12s, color 0.12s; }
 .f12-act:hover { background: rgba(255, 253, 251, 0.95); color: var(--ink); box-shadow: var(--sh-1); }

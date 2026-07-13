@@ -28,7 +28,7 @@ import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { QueryStatus, Agent, Manuscript, Query, SubmissionMethod, ActivityType, QueryMaterial, UserPlan } from "../types";
 import { StatusPill, getStatusLabel } from "./StatusPill";
 import { StatusDot } from "./StatusDot";
-import { F12Page, F12Account, IconTrig, F12Popover, PopSection, PRow, Chip } from "./shell/F12Shell";
+import { F12Page, F12Account, IconTrig, F12Popover, F12Menu, PopSection, PRow, Chip } from "./shell/F12Shell";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
 import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse } from "../lib/queryAmbient";
 import { getPrimaryAction } from "../lib/queryPrimaryAction";
@@ -246,6 +246,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   const [isNudgeOpen, setIsNudgeOpen] = useState(false);
   const [isCloseMenuOpen, setIsCloseMenuOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  // ⋯ overflow menu on the command bar (PDF demoted here — a rare action, chrome tidy).
+  const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const { triggerRef: moreTrigRef, menuStyle: moreMenuStyle } = useFixedMenu<HTMLButtonElement>(isMoreOpen);
   const { triggerRef: closeTriggerRef, menuStyle: closeMenuStyle } = useFixedMenu<HTMLButtonElement>(isCloseMenuOpen); // F12: downward
   // Close every ribbon popover/modal whenever the reader moves to a different query.
   useEffect(() => { setIsMarkSentOpen(false); setIsNudgeOpen(false); setIsCloseMenuOpen(false); setIsDeleteConfirmOpen(false); }, [selectedQueryId]);
@@ -2446,10 +2449,23 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   </button>
                 </div>
                 <span className="f12-divv2" aria-hidden="true" />
-                <button type="button" className="f12-act" disabled={!sel || isGeneratingPDF} onClick={() => handleDownloadPDF()} title={isGeneratingPDF ? "Generating…" : "Download PDF"}>
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></svg>
-                  PDF
-                </button>
+                <div className="f12-popwrap">
+                  <button ref={moreTrigRef} type="button" className="f12-act" disabled={!sel} aria-haspopup="menu" aria-expanded={isMoreOpen} onClick={() => setIsMoreOpen(o => !o)} title="More actions">⋯</button>
+                  <F12Menu
+                    open={isMoreOpen}
+                    onClose={() => setIsMoreOpen(false)}
+                    style={moreMenuStyle}
+                    ariaLabel="More query actions"
+                    items={[
+                      {
+                        label: isGeneratingPDF ? "Generating…" : "Download as PDF",
+                        disabled: isGeneratingPDF,
+                        icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></svg>,
+                        onClick: () => handleDownloadPDF(),
+                      },
+                    ]}
+                  />
+                </div>
                 <button type="button" className="f12-act f12-del" disabled={!sel} onClick={() => setIsDeleteConfirmOpen(true)} title="Delete this query">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /></svg>
                   Delete

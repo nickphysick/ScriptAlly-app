@@ -33,7 +33,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { useOpenEditAgent } from "./EditAgentHost";
 import { StatusDot } from "./StatusDot";
 import { EdgeFadeScroll } from "./EdgeFadeScroll";
-import { F12Page, F12Account, IconTrig, F12Popover, PopSection, PRow, Chip } from "./shell/F12Shell";
+import { F12Page, F12Account, IconTrig, F12Popover, F12Menu, PopSection, PRow, Chip } from "./shell/F12Shell";
 import { useFixedMenu } from "./forms/useFixedMenu";
 import {
   paneProvenance,
@@ -144,6 +144,9 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
   const { triggerRef: agFilterTrigRef, menuStyle: agFilterMenuStyle } = useFixedMenu<HTMLButtonElement>(agFilterOpen);
   const { triggerRef: agSortTrigRef, menuStyle: agSortMenuStyle } = useFixedMenu<HTMLButtonElement>(agSortOpen);
   const { triggerRef: agGroupTrigRef, menuStyle: agGroupMenuStyle } = useFixedMenu<HTMLButtonElement>(agGroupOpen);
+  // ⋯ overflow menu on the command bar (PDF demoted here — chrome tidy).
+  const [agMoreOpen, setAgMoreOpen] = useState(false);
+  const { triggerRef: agMoreTrigRef, menuStyle: agMoreMenuStyle } = useFixedMenu<HTMLButtonElement>(agMoreOpen);
   const searchRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -920,10 +923,23 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
           </div>
           <span className="f12-divv2" aria-hidden="true" />
           <>
-            <button type="button" className="f12-act" disabled title="Coming soon — agent record PDF">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></svg>
-              PDF
-            </button>
+            <div className="f12-popwrap">
+              <button ref={agMoreTrigRef} type="button" className="f12-act" disabled={!selectedAgent} aria-haspopup="menu" aria-expanded={agMoreOpen} onClick={() => setAgMoreOpen(o => !o)} title="More actions">⋯</button>
+              <F12Menu
+                open={agMoreOpen}
+                onClose={() => setAgMoreOpen(false)}
+                style={agMoreMenuStyle}
+                ariaLabel="More agent actions"
+                items={[
+                  {
+                    label: "Download as PDF",
+                    disabled: true,
+                    icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></svg>,
+                    onClick: () => {},
+                  },
+                ]}
+              />
+            </div>
             <button type="button" className="f12-act f12-del" disabled={!selectedAgent} onClick={() => selectedAgent && setDeleteModalAgent(selectedAgent)}>
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /></svg>
               Delete
