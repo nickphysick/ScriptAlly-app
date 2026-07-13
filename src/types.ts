@@ -225,8 +225,11 @@ export interface Agent {
   mswlNotes: string;
   starRating?: 1 | 2 | 3 | 4 | 5; // absent = UNRATED — a distinct fact from any rating; never store 0
   submissionStatus: SubmissionStatus;
-  responseTimeWeeks: number;
-  noResponseMeansNo: boolean; // True: no response means rejection/close
+  // Absent = NOT STATED (a distinct fact from any number; the === 0 convention is retired —
+  // absence, like starRating). Stored unit is weeks; a units picker is a follow-up.
+  responseTimeWeeks?: number;
+  // Absent = not stated; true = no response means rejection/close; false = they reply either way.
+  noResponseMeansNo?: boolean;
   submissionMethod: SubmissionMethod;
   materialsWanted: string[]; // e.g. ["Query Letter", "Synopsis", "First 10 pages"]
   dateAdded: string; // ISO String

@@ -11,7 +11,8 @@
  */
 import React, { useState, useEffect, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
-import { Agent, AgentSocial, SubmissionStatus, SubmissionMethod, QueryStatus } from "../types";
+import { Agent, AgentSocial, SubmissionStatus, SubmissionMethod, QueryStatus, UserPlan } from "../types";
+import { AgentResponseGuidelines } from "./agents/AgentResponseGuidelines";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { collection, setDoc, doc, onSnapshot, deleteField } from "firebase/firestore";
 import {
@@ -806,40 +807,22 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
         {/* 3 · Submission profile — three cards with SAGE gradient header bands + 19px dark-sage
             icons (the eyebrow + hairline-cell layout is retired; contents unchanged). */}
         <div className="ag-psec">
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
-            <div className="f12-card" style={{ minWidth: 0 }}>
-              <div className="f12-chh"><Clock aria-hidden="true" /><span>Response time</span></div>
-              <div className="f12-cbb" style={{ padding: 14 }}>
-                {respKnown ? (
-                  <div className="ag-fval">within {a.responseTimeWeeks} weeks</div>
-                ) : (
-                  <div className="ag-fval empty">Not specified yet</div>
-                )}
-                <div className="ag-fsub">
-                  {isOpen ? (respKnown ? "based on recent replies" : "add it in the Edit drawer") : "closed to queries"}
-                </div>
-              </div>
+          {/* 6c — Response guidelines card (method moved to the hero meta line in 6a; response time
+              folds into this card with the reply policy). */}
+          <div className="f12-card" style={{ minWidth: 0, marginBottom: 12 }}>
+            <div className="f12-chh"><Clock aria-hidden="true" /><span>Response guidelines</span></div>
+            <div className="f12-cbb" style={{ padding: 14 }}>
+              <AgentResponseGuidelines agent={a} isPro={currentUser?.plan === UserPlan.PRO} updateAgent={updateAgent} showToast={showToast} />
             </div>
-            <div className="f12-card" style={{ minWidth: 0 }}>
-              <div className="f12-chh"><Mail aria-hidden="true" /><span>Method</span></div>
-              <div className="f12-cbb" style={{ padding: 14 }}>
-                {a.submissionMethod ? (
-                  <div className="ag-fval">{a.submissionMethod}</div>
-                ) : (
-                  <div className="ag-fval empty">Not specified yet</div>
-                )}
-                <div className="ag-fsub">{methodSub(a.submissionMethod)}</div>
-              </div>
-            </div>
-            <div className="f12-card" style={{ minWidth: 0 }}>
-              <div className="f12-chh"><FileText aria-hidden="true" /><span>Materials</span></div>
-              <div className="f12-cbb" style={{ padding: 14 }}>
-                {a.materialsWanted?.length ? (
-                  <div className="ag-fval soft">{a.materialsWanted.join(", ")}</div>
-                ) : (
-                  <div className="ag-fval empty">Not specified yet</div>
-                )}
-              </div>
+          </div>
+          <div className="f12-card" style={{ minWidth: 0 }}>
+            <div className="f12-chh"><FileText aria-hidden="true" /><span>Materials</span></div>
+            <div className="f12-cbb" style={{ padding: 14 }}>
+              {a.materialsWanted?.length ? (
+                <div className="ag-fval soft">{a.materialsWanted.join(", ")}</div>
+              ) : (
+                <div className="ag-fval empty">Not specified yet</div>
+              )}
             </div>
           </div>
         </div>

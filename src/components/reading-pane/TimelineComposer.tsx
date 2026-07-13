@@ -108,12 +108,15 @@ export const TimelineComposer = React.forwardRef<TimelineComposerHandle, Timelin
     const status = query.status as QueryStatus;
     const sentISO = isoOf(query.dateSent);
 
-    // The close chip appears only once the agent's stated window has passed (never auto-closes).
+    // The close chip is OFFERED (never fired) only when the agent's policy is "no response means no"
+    // (6c) AND their stated window has passed. Replies-either-way / not-stated never surface it —
+    // the app has done the thinking; the user still commits. It never auto-closes anything.
     const canCloseNoResponse = useMemo(() => {
       if (queryBucket(status) !== "waiting") return false;
+      if (agent.noResponseMeansNo !== true) return false;
       const deadline = toMs((query as any).responseDeadline);
       return Number.isFinite(deadline) && Date.now() > deadline;
-    }, [status, query]);
+    }, [status, query, agent.noResponseMeansNo]);
 
     const model = useMemo(() => composerChips(status, { canCloseNoResponse }), [status, canCloseNoResponse]);
 

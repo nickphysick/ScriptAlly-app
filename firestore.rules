@@ -169,7 +169,7 @@ service cloud.firestore {
         // deadline falls back to live-compute) OR a non-negative int. Mirrors the optional-field idiom
         // below (twitter/socials/...). NOTE: isValidCommunityAgent keeps the strict int form.
         && (!data.keys().hasAll(['responseTimeWeeks']) || (data.responseTimeWeeks is int && data.responseTimeWeeks >= 0))
-        && data.noResponseMeansNo is bool
+        && (!data.keys().hasAny(['noResponseMeansNo']) || data.noResponseMeansNo is bool)
         && data.submissionMethod is string && data.submissionMethod.size() <= 128
         && (data.materialsWanted is list || data.materialsWanted is map) && data.materialsWanted.size() <= 20
         && data.dateAdded is string && data.dateAdded.size() <= 64

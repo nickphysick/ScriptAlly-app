@@ -765,6 +765,26 @@
       pink-Closed · Editorial midnight per the colour-role map · Bold its own pink). A small status
       dot leads. Scoped to .agv2 so the Form-11 drawers/modals keep the full-size SegmentedToggle. ── */
 .agv2 .ag-availtoggle { display: inline-flex; align-items: center; gap: 9px; }
+/* 6c — response guidelines card */
+.agv2 .ag-rg { display: flex; flex-direction: column; gap: 13px; }
+.agv2 .ag-rg-row { display: flex; flex-direction: column; gap: 6px; }
+.agv2 .ag-rg-lbl { font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ag-muted); }
+.agv2 .ag-rg-val { align-self: flex-start; font-size: 14px; color: var(--ag-ink); background: none; border: none; border-bottom: 1px dashed var(--ag-line); padding: 1px 0; cursor: pointer; }
+.agv2 .ag-rg-val:hover { border-bottom-color: var(--ag-accent); }
+.agv2 .ag-rg-val.unset { color: var(--ag-muted); font-style: italic; }
+.agv2 .ag-rg-edit { display: inline-flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.agv2 .ag-rg-edit input { width: 64px; border: 1px solid var(--ag-line); border-radius: 6px; padding: 5px 8px; font: inherit; font-size: 13px; color: var(--ag-ink); background: var(--card, #fffefb); }
+.agv2 .ag-rg-unit { font-size: 12.5px; color: var(--ag-muted); }
+.agv2 .ag-rg-save { padding: 5px 12px; border-radius: 7px; border: none; background: var(--ag-solid, #5d4037); color: var(--ag-solid-ink, #fff); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+.agv2 .ag-rg-save:disabled { opacity: 0.4; cursor: default; }
+.agv2 .ag-rg-ns { background: none; border: none; font: inherit; font-size: 12px; color: var(--ag-muted); cursor: pointer; text-decoration: underline; }
+.agv2 .ag-rg-seg { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+.agv2 .ag-rg-seg button { font: inherit; font-size: 12.5px; padding: 6px 12px; border-radius: 99px; border: 1px solid var(--ag-line); background: var(--card, #fffefb); color: var(--ag-muted); cursor: pointer; }
+.agv2 .ag-rg-seg button:hover { border-color: var(--ag-muted); color: var(--ag-ink); }
+.agv2 .ag-rg-seg button.on { background: var(--ag-selbg); border-color: var(--ag-accent); color: var(--ag-accent); font-weight: 600; }
+.agv2 .ag-rg-pro { display: flex; align-items: center; gap: 8px; font-size: 11.5px; line-height: 1.4; color: var(--ag-muted); background: var(--ag-sub, #f7f2ea); border-radius: 8px; padding: 9px 11px; }
+.agv2 .ag-rg-pro-badge { flex: none; font-family: 'JetBrains Mono', monospace; font-size: 8px; font-weight: 700; letter-spacing: 0.08em; color: #5e7e9c; background: #eef2f5; border: 1px solid #cfdde6; border-radius: 99px; padding: 2px 7px; }
+
 /* 6a — method click-to-pick on the hero meta line */
 .agv2 .ag-method-pick { font: inherit; letter-spacing: inherit; text-transform: inherit; color: var(--ag-accent, #7c3a2a); background: none; border: none; padding: 0; cursor: pointer; }
 .agv2 .ag-method-pick:hover { text-decoration: underline; }
