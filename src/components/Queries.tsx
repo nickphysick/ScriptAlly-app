@@ -45,6 +45,7 @@ import { queryTaskBadge } from "../lib/queryTaskBadge";
 import { useFixedMenu } from "./forms/useFixedMenu";
 import { useOpenEditQuery } from "./EditQueryHost";
 import { QueryTimeline } from "./reading-pane/QueryTimeline";
+import { TimelineComposer, type TimelineComposerHandle } from "./reading-pane/TimelineComposer";
 import { MountCard } from "./MountCard";
 import { ScriptAllyLogo } from "./ScriptAllyLogo";
 import {
@@ -249,6 +250,14 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   // ⋯ overflow menu on the command bar (PDF demoted here — a rare action, chrome tidy).
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const { triggerRef: moreTrigRef, menuStyle: moreMenuStyle } = useFixedMenu<HTMLButtonElement>(isMoreOpen);
+  // Timeline composer (5a): the CTA button scrolls + focuses this; Offer/R&R + "Add more detail"
+  // open the rich form pre-set via these seam props.
+  const composerRef = useRef<TimelineComposerHandle>(null);
+  const [richInitialType, setRichInitialType] = useState<QueryStatus | undefined>(undefined);
+  const [richInitialDraft, setRichInitialDraft] = useState<{ dateReceived?: string; note?: string } | undefined>(undefined);
+  const openRichForm = (rt: QueryStatus, draft?: { dateReceived?: string; note?: string }) => {
+    setRichInitialType(rt); setRichInitialDraft(draft); setIsRecordResponseFocusFormOpen(true);
+  };
   const { triggerRef: closeTriggerRef, menuStyle: closeMenuStyle } = useFixedMenu<HTMLButtonElement>(isCloseMenuOpen); // F12: downward
   // Close every ribbon popover/modal whenever the reader moves to a different query.
   useEffect(() => { setIsMarkSentOpen(false); setIsNudgeOpen(false); setIsCloseMenuOpen(false); setIsDeleteConfirmOpen(false); }, [selectedQueryId]);
@@ -2394,10 +2403,10 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             : (isMark && ctrlAction?.kind === "mark-sent") ? (ctrlAction.markKind === "resubmit" ? "Record resubmission" : "Mark sent")
             : "Record response";
           const primaryRef = (sel && isMark && !isClosed) ? markSentTriggerRef : undefined;
-          const onPrimary = !sel ? undefined
-            : isClosed ? () => activeQuery && updateQueryStatus(activeQuery.id, QueryStatus.QUERIED)
-            : isMark ? () => setIsMarkSentOpen(o => !o)
-            : () => setIsRecordResponseFocusFormOpen(true);
+          // Demoted to a shortcut (5a): the contextual CTA keeps its label but now scrolls to the
+          // composer + focuses it — one recording flow, two entrances. The composer's chips carry
+          // the actual writes (mark-sent → MarkSentPopover, Offer/R&R → rich form, etc.).
+          const onPrimary = !sel ? undefined : () => composerRef.current?.focus();
 
           return (
             <div className="f12-ctl">
@@ -2713,6 +2722,16 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           );
                         })()}
                       </EdgeFadeScroll>
+                      {/* 5a — the contextual composer, pinned to the card foot. Chips derive from
+                          composerChips (built on the CTA engine); it never auto-writes. */}
+                      <TimelineComposer
+                        ref={composerRef}
+                        query={activeQuery}
+                        agent={activeAgent}
+                        manuscript={{ title: activeMs?.title || "" }}
+                        onOpenRichForm={openRichForm}
+                        onMarkSent={() => setIsMarkSentOpen(true)}
+                      />
                     </div>{/* ── end sub-card 1: Tracking ── */}
 
                   {/* ── Sub-card 2: What you sent ── */}
@@ -2951,10 +2970,12 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
       <RecordResponseFocusForm
         key={activeQuery.id}
         isOpen={isRecordResponseFocusFormOpen}
-        onClose={() => setIsRecordResponseFocusFormOpen(false)}
+        onClose={() => { setIsRecordResponseFocusFormOpen(false); setRichInitialType(undefined); setRichInitialDraft(undefined); }}
         query={activeQuery}
         agent={activeAgent}
         manuscript={{ title: activeMs?.title || "" }}
+        initialResponseType={richInitialType}
+        initialDraft={richInitialDraft}
         onSuccessToast={(msg) => {
           triggerToast({ queryId: activeQuery.id, agentName: agentPrimary(activeAgent), manuscriptTitle: activeMs?.title || "", responseStyle: msg });
         }}
