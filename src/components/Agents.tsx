@@ -860,6 +860,82 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
           the breadcrumb and the list footer carry that. ── */}
       <div className="f12-ctl">
         <div className="f12-zone-list">
+          <button type="button" className="f12-btn-pri" onClick={() => onNavigate?.("agents", "Add an agent")}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+            Add agent
+          </button>
+          <button type="button" className="f12-btn-sec" onClick={() => onNavigate?.("import")} title="Smart Import — bring in your existing spreadsheet">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5" /><path d="M4 20h16" /></svg>
+            Import data
+          </button>
+        </div>
+
+        <div className="f12-zone-read">
+          <button type="button" className="f12-act" disabled={!selectedAgent} onClick={() => selectedAgent && sendQueryFlow(selectedAgent)}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
+            Send query
+          </button>
+          <button type="button" className="f12-act" disabled={!selectedAgent} onClick={() => selectedAgent && openEditAgent(selectedAgent.id)}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+            Edit profile
+          </button>
+          <button type="button" className="f12-act" disabled={!selectedAgent} onClick={() => onNavigate?.("todo")}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M4 12h10M4 18h10" /><path d="m17 6 1.5 1.5L21.5 4" /><path d="m17 12 1.5 1.5L21.5 10" /></svg>
+            View tasks
+            {agentTaskCount > 0 && <span className="f12-cnt">{agentTaskCount}</span>}
+          </button>
+          {/* link group — pushed right by margin-left:auto */}
+          <div className="f12-grp-links">
+            <button
+              type="button"
+              className="f12-act"
+              disabled={!selectedAgent?.website?.trim()}
+              onClick={() => selectedAgent?.website?.trim() && window.open(hrefFor(selectedAgent.website), "_blank", "noopener,noreferrer")}
+              title={selectedAgent?.website?.trim() ? "Open the agent's website" : "No website on file"}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.5 2.6 3.9 5.6 3.9 9S14.5 18.4 12 21c-2.5-2.6-3.9-5.6-3.9-9S9.5 5.6 12 3z" /></svg>
+              Website
+            </button>
+          </div>
+          <span className="f12-divv2" aria-hidden="true" />
+          <>
+            <button type="button" className="f12-act" disabled title="Coming soon — agent record PDF">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></svg>
+              PDF
+            </button>
+            <button type="button" className="f12-act f12-del" disabled={!selectedAgent} onClick={() => selectedAgent && setDeleteModalAgent(selectedAgent)}>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /></svg>
+              Delete
+            </button>
+          </>
+        </div>
+      </div>
+
+      {/* Active filters — removable pink chips beneath the bar (the panes never resize). */}
+      {agChips.length > 0 && (
+        <div className="f12-chips">
+          {agChips.map((c) => (
+            <Chip key={c.key} onRemove={c.remove}>{c.label}</Chip>
+          ))}
+          <button type="button" className="f12-clear" onClick={resetAgFilters}>CLEAR ALL</button>
+        </div>
+      )}
+
+      {/* ── Panes — the F12 list beside the reading pane, in the centred column ── */}
+      <div className="f12-body" style={{ paddingTop: agChips.length ? 0 : "var(--gut)" }}>
+        <div className="f12-pane f12-list">
+          <div className="f12-lhead">
+          <div className="f12-lsearch">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+            <input
+              ref={searchRef}
+              type="text"
+              placeholder="Search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              aria-label="Find agent or agency"
+            />
+          </div>
           <div className="f12-popwrap">
             <Trig
               label="FILTER"
@@ -948,58 +1024,6 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
               </F12Popover>
             )}
           </div>
-        </div>
-
-        <div className="f12-zone-read">
-          <button type="button" className="f12-act" disabled={!selectedAgent} onClick={() => selectedAgent && sendQueryFlow(selectedAgent)}>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
-            Send query
-          </button>
-          <button type="button" className="f12-act" disabled={!selectedAgent} onClick={() => selectedAgent && openEditAgent(selectedAgent.id)}>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
-            Edit profile
-          </button>
-          <button type="button" className="f12-act" disabled={!selectedAgent} onClick={() => onNavigate?.("todo")}>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M4 12h10M4 18h10" /><path d="m17 6 1.5 1.5L21.5 4" /><path d="m17 12 1.5 1.5L21.5 10" /></svg>
-            View tasks
-            {agentTaskCount > 0 && <span className="f12-cnt">{agentTaskCount}</span>}
-          </button>
-          <div className="f12-right">
-            <button type="button" className="f12-act" disabled title="Coming soon — agent record PDF">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></svg>
-              PDF
-            </button>
-            <button type="button" className="f12-act f12-del" disabled={!selectedAgent} onClick={() => selectedAgent && setDeleteModalAgent(selectedAgent)}>
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /></svg>
-              Delete
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Active filters — removable pink chips beneath the bar (the panes never resize). */}
-      {agChips.length > 0 && (
-        <div className="f12-chips">
-          {agChips.map((c) => (
-            <Chip key={c.key} onRemove={c.remove}>{c.label}</Chip>
-          ))}
-          <button type="button" className="f12-clear" onClick={resetAgFilters}>CLEAR ALL</button>
-        </div>
-      )}
-
-      {/* ── Panes — the F12 list beside the reading pane, in the centred column ── */}
-      <div className="f12-body" style={{ paddingTop: agChips.length ? 0 : "var(--gut)" }}>
-        <div className="f12-pane f12-list">
-          <div className="f12-lsearch">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
-            <input
-              ref={searchRef}
-              type="text"
-              placeholder="Find agent or agency…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              aria-label="Find agent or agency"
-            />
           </div>
           <div ref={listRef} className="f12-rows" role="listbox" aria-label="Agents">
             {flat.length ? (

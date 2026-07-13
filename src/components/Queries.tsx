@@ -2393,30 +2393,20 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
           return (
             <div className="f12-ctl">
-              {/* Left zone — exactly the list-pane width: FILTER + SORT, nothing else. */}
+              {/* Left zone — flush with the list pane's left edge: the pink CTA + Import data.
+                  (Filter/Sort moved into the list-pane head as icon triggers — phase 4.) */}
               <div className="f12-zone-list">
-                <div className="f12-popwrap">
-                  <Trig
-                    label="FILTER"
-                    open={filterPopOpen}
-                    count={activeFilterCount}
-                    onClick={() => { setSortPopOpen(false); setFilterPopOpen(o => !o); }}
-                    icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4-2v-4L3 5z" /></svg>}
-                  />
-                  {filterPopOpen && renderFilterPopover()}
-                </div>
-                <div className="f12-popwrap">
-                  <Trig
-                    label="SORT"
-                    open={sortPopOpen}
-                    onClick={() => { setFilterPopOpen(false); setSortPopOpen(o => !o); }}
-                    icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M7 12h10M10 18h4" /></svg>}
-                  />
-                  {sortPopOpen && renderSortPopover()}
-                </div>
+                <button type="button" className="f12-btn-pri" onClick={() => onNavigate?.("queries", "Log a query")}>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+                  Log a query
+                </button>
+                <button type="button" className="f12-btn-sec" onClick={() => onNavigate?.("import")} title="Smart Import — bring in your existing spreadsheet">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5" /><path d="M4 20h16" /></svg>
+                  Import data
+                </button>
               </div>
 
-              {/* Right zone — begins at the reading pane's left edge; all quiet buttons. */}
+              {/* Right zone — inset 20px from both pane edges; verbs, then the link group, then danger. */}
               <div className="f12-zone-read">
                 <button ref={primaryRef} type="button" className="f12-act" disabled={!sel} onClick={onPrimary}>
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
@@ -2439,25 +2429,26 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="4" rx="1" /><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M9 12h6" /></svg>
                   Mark closed
                 </button>
-                <span className="f12-divv" aria-hidden="true" />
-                <button type="button" className="f12-act" disabled title="Coming soon — jump to the agent's record">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 4-6 8-6s8 2 8 6" /></svg>
-                  Agent
-                </button>
-                <button type="button" className="f12-act" disabled title="Coming soon — jump to the manuscript">
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h11l3 3v15H5zM9 3v6l2-1 2 1V3" /></svg>
-                  Manuscript
-                </button>
-                <div className="f12-right">
-                  <button type="button" className="f12-act" disabled={!sel || isGeneratingPDF} onClick={() => handleDownloadPDF()} title={isGeneratingPDF ? "Generating…" : "Download PDF"}>
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></svg>
-                    PDF
+                {/* link group — pushed right by margin-left:auto */}
+                <div className="f12-grp-links">
+                  <button type="button" className="f12-act" disabled title="Coming soon — jump to the agent's record">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5" /><path d="M5.5 20c.7-3.6 3.3-5.6 6.5-5.6s5.8 2 6.5 5.6" /></svg>
+                    Agent
                   </button>
-                  <button type="button" className="f12-act f12-del" disabled={!sel} onClick={() => setIsDeleteConfirmOpen(true)} title="Delete this query">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /></svg>
-                    Delete
+                  <button type="button" className="f12-act" disabled title="Coming soon — jump to the manuscript">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17.5H6.5A2.5 2.5 0 0 0 4 22V4.5z" /></svg>
+                    Manuscript
                   </button>
                 </div>
+                <span className="f12-divv2" aria-hidden="true" />
+                <button type="button" className="f12-act" disabled={!sel || isGeneratingPDF} onClick={() => handleDownloadPDF()} title={isGeneratingPDF ? "Generating…" : "Download PDF"}>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></svg>
+                  PDF
+                </button>
+                <button type="button" className="f12-act f12-del" disabled={!sel} onClick={() => setIsDeleteConfirmOpen(true)} title="Delete this query">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /></svg>
+                  Delete
+                </button>
               </div>
             </div>
           );
@@ -2554,15 +2545,36 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
               56px rows, slim footer (SHOWING n OF m · EXPORT CSV · key hints). No "your move"
               pills, no manuscript spine — the row is avatar · name/agency · StatusDot + date. ── */}
           <div className="f12-pane f12-list">
-            <div className="f12-lsearch">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
-              <input
-                type="text"
-                placeholder="Search queries…"
-                value={listSearch}
-                onChange={(e) => setListSearch(e.target.value)}
-                aria-label="Search queries"
-              />
+            <div className="f12-lhead">
+              <div className="f12-lsearch">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+                <input
+                  type="text"
+                  placeholder="Search"
+                  value={listSearch}
+                  onChange={(e) => setListSearch(e.target.value)}
+                  aria-label="Search queries"
+                />
+              </div>
+              <div className="f12-popwrap">
+                <Trig
+                  label="FILTER"
+                  open={filterPopOpen}
+                  count={activeFilterCount}
+                  onClick={() => { setSortPopOpen(false); setFilterPopOpen(o => !o); }}
+                  icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4-2v-4L3 5z" /></svg>}
+                />
+                {filterPopOpen && renderFilterPopover()}
+              </div>
+              <div className="f12-popwrap">
+                <Trig
+                  label="SORT"
+                  open={sortPopOpen}
+                  onClick={() => { setFilterPopOpen(false); setSortPopOpen(o => !o); }}
+                  icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M7 12h10M10 18h4" /></svg>}
+                />
+                {sortPopOpen && renderSortPopover()}
+              </div>
             </div>
             <div ref={listScrollRef} onScroll={scheduleListFades} className="f12-rows" role="listbox" aria-label="Queries">
               {sortedList.map((q) => {
