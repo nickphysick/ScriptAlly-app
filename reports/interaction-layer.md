@@ -111,14 +111,22 @@ was `28689b2`.
 | 2 — toast + undo (+ confirm dialog) | `d894654` | ✅ done |
 | 3a — genre taxonomy foundation (pure module + 20 tests) | `8971a1a` | ✅ done |
 | 3b — personal-genre storage + promotion-queue write + rules | `70fa018` | ✅ done |
-| 3c — Nick-only admin promotion view | — | ⏳ not started (rules for the queue already in 3b) |
-| 3d — picker UI (taxonomy picker) | — | ⏳ not started |
-| 3e — migration (labels → IDs across the forms, read-time tolerance) | — | ⏳ not started |
-| 3f — personal word-count fallback wiring | — | ⏳ not started (primitive built in 3a) |
+| 3d — taxonomy picker + read-time tolerance layer | `d38bfbf` | ✅ built (not yet wired — 3e) |
+| 3c — Nick-only admin promotion view | — | ⏳ not started (queue rules already in 3b) |
+| 3e — adopt the picker in the agent + manuscript genre fields; make genre-matching consumers tolerant | — | ⏳ not started |
+| 3f — personal word-count fallback wiring (manuscript whisper reads wordCountRangeForGenre) | — | ⏳ not started (primitive in 3a) |
 | 4 — Queries Hub interactions | — | ⏳ not started |
 | 5 — Contact List interactions | — | ⏳ not started |
 
-**Dev redeploy:** the button fix (`28689b2`) is live on https://scriptally-dev.web.app (hosting-only).
+**Dev:** button fix (`28689b2`) + control-bar polish (`2983258`, 14px labels, buttons dropped
+toward content) both live on https://scriptally-dev.web.app (hosting-only).
+
+**Next focused pass = 3e** (the flagged data-model migration): swap `GenreCombobox` → `GenrePicker`
+in `AddAgentFocusForm` / `EditAgentDrawer` / the manuscript genre field so writes store IDs, and
+make the genre-matching consumer (`communityMatch.ts`) resolve through `genreDisplay`/
+`normaliseStoredGenre` so a stored id matches. Read-time tolerance (`d38bfbf`) means no bulk
+Firestore rewrite is needed — legacy label records keep working and upgrade on next edit; the
+migration reports (not guesses) anything unmappable. Then 3c/3f, then Stages 4 & 5.
 
 Also shipped this session (a fix to the already-live chrome, ahead of this task): `28689b2`
 — control-bar buttons pink/white at rest (a CSS-specificity regression in the shell's button
