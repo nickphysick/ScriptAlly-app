@@ -128,7 +128,8 @@ was `28689b2`.
 | UserTask store + dueDate | `a2cfa6d` · `ca11d3e` · `3abc277` | ✅ done (rules parked) |
 | 6 · View tasks (agent-scoped) | `b81480f` | ✅ done |
 | 6a · door check-back reminder (dated) | `3f3d60c` | ✅ done — first UserTask.dueDate use |
-| 6a · interactive stars (hover/set/undo) | `56a57d9` | ✅ done (clear-to-unrated flagged) |
+| 6a · interactive stars (hover/set/undo) | `56a57d9` | ✅ done |
+| 6a · star clear → UNRATED (absence, not 0; deleteField) | `7234b7b` | ✅ done (rule parked) |
 | 6a rest · method click-to-pick · link pills | — | ⏳ next |
 | 6c response guidelines · 6d wanted materials · 6e query history · 6g delete+mark-closed | — | ⏳ not started |
 | 5d click-to-pick + Edit fate · 5e counted delete + Import | — | ⏳ not started |
@@ -169,6 +170,18 @@ the CTA button. **Round-trip confirmed working on dev by Nick.**
 Polish landed (`faaf24f`, per Nick): the prompt is ALWAYS "What happened next?"; each state's likely
 next POSITIVE step is the soft-pink chip (still getPrimaryAction's target on writer's-turn, so no
 disagreement), Rejection is ALWAYS grey and last, and every chip carries a real StatusDot.
+
+## Workflow (from the two concurrency collisions)
+
+- **Worktree:** this stream now works in `/Users/nickphysick/ScriptAlly-il` on branch `claude-il`
+  (Nick keeps the primary checkout on `main`). I edit in isolation, then **ff-merge `claude-il`
+  → `main` only when my changed files don't overlap Nick's uncommitted WIP** (checked each time)
+  — so `main` stays current for Nick's review + deploy-from-main, without our edits colliding in
+  one working tree. If a future commit touches a file Nick is mid-editing, I hold + coordinate.
+- **Gate now compiles rules:** whenever a commit touches `firestore.rules`, the gate runs
+  `firebase deploy --only firestore:rules --config firebase.dev.json --project dev --dry-run`
+  (compiles + validates, no release). This catches a non-compiling rules file at commit time —
+  the exact gap that let the duplicate-`isValidUserTask` reach deploy.
 
 ## ✅ COLLISION RESOLVED — UserTask is the canonical store (reconciled)
 
