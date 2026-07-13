@@ -23,6 +23,7 @@ import {
   JournalEntry,
   Note,
   TodoNote,
+  UserTask,
   DismissedTask,
   TaskFlag,
   Task,
@@ -240,6 +241,12 @@ interface DbContextType {
   addTodoNote: (fields: { body?: string }) => Promise<string | undefined>;
   updateTodoNote: (id: string, fields: Partial<Pick<TodoNote, "body" | "pinned" | "done">>) => Promise<void>;
   deleteTodoNote: (id: string) => Promise<void>;
+  // User tasks — the canonical stored to-do object (record-scoped; read by the To-do board + the
+  // per-record "View tasks" popovers). Badge counts stay derived.
+  userTasks: UserTask[];
+  addUserTask: (fields: { text?: string; queryId?: string; agentId?: string; manuscriptId?: string }) => Promise<string | undefined>;
+  updateUserTask: (id: string, fields: Partial<Pick<UserTask, "text" | "done" | "completedAt">>) => Promise<void>;
+  deleteUserTask: (id: string) => Promise<void>;
 
   // Activity Actions
   addActivity: (act: Omit<Activity, "id" | "userId"> & { id?: string }) => Promise<{ success: boolean; error?: string }>;
@@ -293,6 +300,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
   const [todoNotes, setTodoNotes] = useState<TodoNote[]>([]);
+  const [userTasks, setUserTasks] = useState<UserTask[]>([]);
   const [dismissedTasks, setDismissedTasks] = useState<DismissedTask[]>([]);
   const [taskFlags, setTaskFlags] = useState<TaskFlag[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -349,6 +357,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     let unsubJournal: () => void = () => {};
     let unsubNotes: () => void = () => {};
     let unsubTodoNotes: () => void = () => {};
+    let unsubUserTasks: () => void = () => {};
     let unsubDismissed: () => void = () => {};
     let unsubTaskFlags: () => void = () => {};
 
@@ -553,6 +562,17 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           handleFirestoreError(error, OperationType.GET, `users/${uid}/todoNotes`);
         });
 
+        // User tasks snap (users/{uid}/tasks) — the canonical stored, user-authored to-do object
+        // (interaction layer): the To-do board AND the per-record "View tasks" popovers read this
+        // ONE store. Record scope (queryId/agentId/manuscriptId) is set at creation.
+        unsubUserTasks = onSnapshot(collection(db, "users", uid, "tasks"), (snap) => {
+          const arr: UserTask[] = [];
+          snap.forEach(d => arr.push(d.data() as UserTask));
+          setUserTasks(arr);
+        }, (error) => {
+          handleFirestoreError(error, OperationType.GET, `users/${uid}/tasks`);
+        });
+
         // Dismissed snap
         unsubDismissed = onSnapshot(collection(db, "users", uid, "dismissedTasks"), (snap) => {
           const arr: DismissedTask[] = [];
@@ -591,6 +611,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       unsubJournal();
       unsubNotes();
       unsubTodoNotes();
+      unsubUserTasks();
       unsubDismissed();
       unsubTaskFlags();
     };
@@ -2137,6 +2158,48 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
+  // ── User tasks (users/{uid}/tasks) — the canonical stored to-do object. Record scope is INPUT
+  //    (queryId/agentId/manuscriptId), not derived state; omitted when absent (Firestore rejects
+  //    undefined). The "N tasks" badge count stays DERIVED — nothing counts is cached here. ──
+  const addUserTask = async (fields: { text?: string; queryId?: string; agentId?: string; manuscriptId?: string }): Promise<string | undefined> => {
+    if (!currentUser) return undefined;
+    const text = (fields.text ?? "").trim();
+    if (!text) return undefined; // never create an empty task
+    const id = "task-" + Math.random().toString(36).substr(2, 9);
+    const now = new Date().toISOString();
+    const newTask: UserTask = {
+      id, userId: currentUser.id, text, done: false, createdAt: now, updatedAt: now,
+      ...(fields.queryId ? { queryId: fields.queryId } : {}),
+      ...(fields.agentId ? { agentId: fields.agentId } : {}),
+      ...(fields.manuscriptId ? { manuscriptId: fields.manuscriptId } : {}),
+    };
+    try {
+      await setDoc(doc(db, "users", currentUser.id, "tasks", id), newTask);
+      return id;
+    } catch (e) {
+      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/tasks/${id}`);
+      return undefined;
+    }
+  };
+
+  const updateUserTask = async (id: string, fields: Partial<Pick<UserTask, "text" | "done" | "completedAt">>) => {
+    if (!currentUser) return;
+    try {
+      await updateDoc(doc(db, "users", currentUser.id, "tasks", id), { ...fields, updatedAt: new Date().toISOString() });
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/tasks/${id}`);
+    }
+  };
+
+  const deleteUserTask = async (id: string) => {
+    if (!currentUser) return;
+    try {
+      await deleteDoc(doc(db, "users", currentUser.id, "tasks", id));
+    } catch (e) {
+      handleFirestoreError(e, OperationType.DELETE, `users/${currentUser.id}/tasks/${id}`);
+    }
+  };
+
   const updateQuery = async (queryId: string, fields: Partial<Query>) => {
     if (!currentUser) return;
     const targetQ = queries.find(q => q.id === queryId);
@@ -2612,6 +2675,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         addTodoNote,
         updateTodoNote,
         deleteTodoNote,
+        userTasks,
+        addUserTask,
+        updateUserTask,
+        deleteUserTask,
         addActivity,
         deleteActivity,
         editActivity,

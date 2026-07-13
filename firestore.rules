@@ -375,6 +375,22 @@ service cloud.firestore {
         && data.updatedAt is string && data.updatedAt.size() <= 64;
     }
 
+    // Canonical stored user task. Record scope (queryId/agentId/manuscriptId) is optional user
+    // input — string when present, rejecting a literal null.
+    function isValidUserTask(data, userId) {
+      return data.keys().hasOnly(['id', 'userId', 'text', 'done', 'completedAt', 'createdAt', 'updatedAt', 'queryId', 'agentId', 'manuscriptId'])
+        && data.id is string && data.id.size() <= 128
+        && data.userId == userId
+        && data.text is string && data.text.size() >= 1 && data.text.size() <= 16384
+        && data.done is bool
+        && (data.completedAt == null || (data.completedAt is string && data.completedAt.size() <= 64))
+        && (!data.keys().hasAny(['queryId']) || (data.queryId is string && data.queryId.size() <= 128))
+        && (!data.keys().hasAny(['agentId']) || (data.agentId is string && data.agentId.size() <= 128))
+        && (!data.keys().hasAny(['manuscriptId']) || (data.manuscriptId is string && data.manuscriptId.size() <= 128))
+        && data.createdAt is string && data.createdAt.size() <= 64
+        && data.updatedAt is string && data.updatedAt.size() <= 64;
+    }
+
     function isValidActivity(data, userId) {
       return data.id is string && data.id.size() <= 128
         && data.userId == userId
@@ -597,6 +613,18 @@ service cloud.firestore {
         allow create: if isOwner(userId) && isValidId(noteId) && isValidUserNote(incoming(), userId);
         allow update: if isOwner(userId) && isValidId(noteId) && isValidUserNote(incoming(), userId) && (
           incoming().diff(existing()).affectedKeys().hasOnly(['text', 'colour', 'dueDate', 'done', 'doneAt', 'updatedAt'])
+        );
+      }
+
+      // ROUTE: User tasks (users/{uid}/tasks) — the canonical stored to-do object. Owner-only;
+      // optional record scope (queryId/agentId/manuscriptId) is user INPUT. EDITED, NOT DEPLOYED —
+      // rides the parked deploy with personalGenres / genreSuggestions / note-scope.
+      match /tasks/{taskId} {
+        allow get, delete: if isOwner(userId) && isValidId(taskId);
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(taskId) && isValidUserTask(incoming(), userId);
+        allow update: if isOwner(userId) && isValidId(taskId) && isValidUserTask(incoming(), userId) && (
+          incoming().diff(existing()).affectedKeys().hasOnly(['text', 'done', 'completedAt', 'updatedAt'])
         );
       }
 
