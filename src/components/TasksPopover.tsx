@@ -20,6 +20,12 @@ import "./shell/f12.css";
 
 export type TasksScope = { queryId: string } | { agentId: string };
 
+const todayISO = () => new Date().toISOString().slice(0, 10);
+const fmtDue = (iso: string): string => {
+  const d = new Date(iso);
+  return isNaN(d.getTime()) ? "" : d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }).toUpperCase();
+};
+
 export const TasksPopover: React.FC<{
   scope: TasksScope;
   style?: React.CSSProperties;
@@ -85,7 +91,10 @@ export const TasksPopover: React.FC<{
               <button type="button" className="f12-task-tick" aria-label="Mark done" title="Mark done" onClick={() => completeStored(t.id)}>
                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /></svg>
               </button>
-              <span className="f12-task-txt">{t.text}</span>
+              <span className="f12-task-txt">
+                {t.text}
+                {t.dueDate && <span className={`f12-task-due${t.dueDate < todayISO() ? " overdue" : ""}`}>{fmtDue(t.dueDate)}</span>}
+              </span>
             </div>
           ))}
         </div>

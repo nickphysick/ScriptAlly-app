@@ -244,8 +244,8 @@ interface DbContextType {
   // User tasks — the canonical stored to-do object (record-scoped; read by the To-do board + the
   // per-record "View tasks" popovers). Badge counts stay derived.
   userTasks: UserTask[];
-  addUserTask: (fields: { text?: string; queryId?: string; agentId?: string; manuscriptId?: string }) => Promise<string | undefined>;
-  updateUserTask: (id: string, fields: Partial<Pick<UserTask, "text" | "done" | "completedAt">>) => Promise<void>;
+  addUserTask: (fields: { text?: string; queryId?: string; agentId?: string; manuscriptId?: string; dueDate?: string }) => Promise<string | undefined>;
+  updateUserTask: (id: string, fields: Partial<Pick<UserTask, "text" | "done" | "completedAt" | "dueDate">>) => Promise<void>;
   deleteUserTask: (id: string) => Promise<void>;
 
   // Activity Actions
@@ -2158,7 +2158,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   // ── User tasks (users/{uid}/tasks) — the canonical stored to-do object. Record scope is INPUT
   //    (queryId/agentId/manuscriptId), not derived state; omitted when absent (Firestore rejects
   //    undefined). The "N tasks" badge count stays DERIVED — nothing counts is cached here. ──
-  const addUserTask = async (fields: { text?: string; queryId?: string; agentId?: string; manuscriptId?: string }): Promise<string | undefined> => {
+  const addUserTask = async (fields: { text?: string; queryId?: string; agentId?: string; manuscriptId?: string; dueDate?: string }): Promise<string | undefined> => {
     if (!currentUser) return undefined;
     const text = (fields.text ?? "").trim();
     if (!text) return undefined; // never create an empty task
@@ -2169,6 +2169,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       ...(fields.queryId ? { queryId: fields.queryId } : {}),
       ...(fields.agentId ? { agentId: fields.agentId } : {}),
       ...(fields.manuscriptId ? { manuscriptId: fields.manuscriptId } : {}),
+      ...(fields.dueDate ? { dueDate: fields.dueDate } : {}),
     };
     try {
       await setDoc(doc(db, "users", currentUser.id, "tasks", id), newTask);
@@ -2179,7 +2180,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
-  const updateUserTask = async (id: string, fields: Partial<Pick<UserTask, "text" | "done" | "completedAt">>) => {
+  const updateUserTask = async (id: string, fields: Partial<Pick<UserTask, "text" | "done" | "completedAt" | "dueDate">>) => {
     if (!currentUser) return;
     try {
       await updateDoc(doc(db, "users", currentUser.id, "tasks", id), { ...fields, updatedAt: new Date().toISOString() });

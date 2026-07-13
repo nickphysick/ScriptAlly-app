@@ -500,4 +500,9 @@ export interface UserTask {
   queryId?: string;
   agentId?: string;
   manuscriptId?: string;
+  // The day a reminder resurfaces — ISO date, NO time ("YYYY-MM-DD"). Every Stage-6 reminder (door
+  // check-back, nudge remind-me, response-window) is a date-triggered task, so this is load-bearing,
+  // not decoration: unset = a plain to-do; set = surfaces (and renders overdue) on that day. Dates
+  // are INPUT, not derived state — nothing auto-fires; a due date only surfaces, never writes.
+  dueDate?: string;
 }

@@ -95,7 +95,8 @@
 .f12-task-txt { font-size: 13px; color: var(--ink-2); line-height: 1.35; }
 .f12-task-sug .f12-task-txt { color: var(--muted); }
 .f12-task-tag { display: inline-block; margin-left: 7px; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.1em; color: var(--faint); border: 1px solid var(--line); border-radius: 99px; padding: 1px 6px; vertical-align: middle; }
-.f12-task-due { display: inline-block; margin-left: 7px; font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.06em; color: var(--pink-i); }
+.f12-task-due { display: inline-block; margin-left: 7px; font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.06em; color: var(--faint); }
+.f12-task-due.overdue { color: var(--pink-i); font-weight: 600; } /* needs-you pink, consistent with the app */
 .f12-tasks-add { border-top: 1px solid var(--hairline); padding: 8px; }
 .f12-tasks-add input { width: 100%; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 7px 9px; font-family: var(--f12-body); font-size: 12.5px; color: var(--ink); background: var(--paper); }
 .f12-tasks-add input:focus { outline: none; border-color: var(--ink); background: var(--panel); }
