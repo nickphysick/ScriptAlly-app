@@ -19,6 +19,7 @@
  */
 import { CommunityAgent, Manuscript } from "../types";
 import { compsSearchText } from "./comps";
+import { genreDisplay } from "./genres";
 
 /** The minimum total score (out of 75) for an agent to be surfaced as a suggestion. */
 export const MATCH_THRESHOLD = 42;
@@ -123,7 +124,9 @@ export const calculateCommunityAgentMatch = (commAgent: CommunityAgent, ms: Manu
 
   const mswlScore = Math.min(overlapping.length * 8, 40);
 
-  const msGenreRaw = (ms.genre || "").trim();
+  // Tolerant of the stored form: ms.genre may be a canonical/personal id or a legacy label —
+  // genreDisplay folds either to its label so it matches the curated community-agent labels.
+  const msGenreRaw = genreDisplay((ms.genre || "").trim()).trim();
   const msGenreLower = msGenreRaw.toLowerCase();
   const genresClean = (commAgent.genres || []).map(g => g.trim().toLowerCase());
 

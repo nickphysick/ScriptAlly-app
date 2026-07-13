@@ -16,6 +16,7 @@
  */
 import { Manuscript, ManuscriptStatus, Query, QueryStatus } from "../types";
 import { genreWordCountRange } from "./manuscripts";
+import { genreDisplay } from "./genres";
 
 export function isShelvedPresentation(m: Pick<Manuscript, "status" | "shelved">): boolean {
   return m.status === ManuscriptStatus.SHELVED || m.shelved === true;
@@ -129,10 +130,12 @@ const AGE_SHORT: Record<string, string> = {
  * Null when the shared range lookup has nothing sensible to say.
  */
 export function wordCountWhisper(ageCategory?: string, genre?: string): string | null {
-  const range = genreWordCountRange(ageCategory, genre);
+  // Tolerant of the stored form: a genre id / legacy label both resolve to a display label, so
+  // the range lookup (substring-keyed on the label) and the phrase read naturally either way.
+  const g = genre ? genreDisplay(genre).trim() : "";
+  const range = genreWordCountRange(ageCategory, g);
   if (!range) return null;
   const a = (ageCategory || "").trim();
-  const g = (genre || "").trim();
   let phrase: string;
   if (!g) {
     phrase = AGE_SHORT[a] ?? a.toLowerCase();
