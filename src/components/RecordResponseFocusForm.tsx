@@ -131,6 +131,11 @@ export interface RecordResponseFocusFormProps {
   agent: Agent;
   manuscript: { title: string };
   onSuccessToast: (message: string) => void;
+  /** Composer seam (5a): open pre-set to a response type — Offer / R&R (the rich-form outcomes) and
+   *  "Add more detail" on an inline row. Absent === legacy behaviour (pre-fill from query status). */
+  initialResponseType?: QueryStatus;
+  /** Seeds the date/note the composer already captured inline, so "Add more detail" continues it. */
+  initialDraft?: { dateReceived?: string; note?: string };
 }
 
 // ── Component ─────────────────────────────────────────────────────────────
@@ -142,6 +147,8 @@ export const RecordResponseFocusForm: React.FC<RecordResponseFocusFormProps> = (
   agent,
   manuscript,
   onSuccessToast,
+  initialResponseType,
+  initialDraft,
 }) => {
   const { currentUser } = useScriptAllyDb();
 
@@ -233,6 +240,15 @@ export const RecordResponseFocusForm: React.FC<RecordResponseFocusFormProps> = (
         setRrNotes((query as any).rrNotes);
       }
     }
+    // Composer seam (5a): an explicit initialResponseType WINS over the status pre-fill above —
+    // the Timeline composer opens this form pre-set to Offer / R&R, or continues an inline row via
+    // "Add more detail" (seeding the captured date/note). Absent → byte-identical legacy behaviour.
+    if (initialResponseType) {
+      setResponseType(initialResponseType);
+      if (initialDraft?.dateReceived) setDateReceived(initialDraft.dateReceived);
+      if (initialDraft?.note) setRejectionNote(initialDraft.note);
+    }
+
     // The host remounts this component per query (key={query.id}), so a reset on each open is
     // enough — no cross-query state can survive the remount.
   }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
