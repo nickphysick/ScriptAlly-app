@@ -50,6 +50,7 @@ import type { TimelineEntryRef } from "./reading-pane/QueryTimeline";
 import { useToast } from "./toast/ToastProvider";
 import { deriveQueryFields } from "../lib/queryDerivation";
 import { subcollectionDocToDerivable } from "../lib/recomputeQuery";
+import { TasksPopover } from "./TasksPopover";
 import { MountCard } from "./MountCard";
 import { ScriptAllyLogo } from "./ScriptAllyLogo";
 import {
@@ -256,6 +257,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   // ⋯ overflow menu on the command bar (PDF demoted here — a rare action, chrome tidy).
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const { triggerRef: moreTrigRef, menuStyle: moreMenuStyle } = useFixedMenu<HTMLButtonElement>(isMoreOpen);
+  // View tasks — the record-scoped popover (5c), anchored to the command-bar button.
+  const [isTasksOpen, setIsTasksOpen] = useState(false);
+  const { triggerRef: tasksTrigRef, menuStyle: tasksMenuStyle } = useFixedMenu<HTMLButtonElement>(isTasksOpen);
   // Timeline composer (5a): the CTA button scrolls + focuses this; Offer/R&R + "Add more detail"
   // open the rich form pre-set via these seam props.
   const composerRef = useRef<TimelineComposerHandle>(null);
@@ -297,7 +301,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   };
   const { triggerRef: closeTriggerRef, menuStyle: closeMenuStyle } = useFixedMenu<HTMLButtonElement>(isCloseMenuOpen); // F12: downward
   // Close every ribbon popover/modal whenever the reader moves to a different query.
-  useEffect(() => { setIsMarkSentOpen(false); setIsNudgeOpen(false); setIsCloseMenuOpen(false); setIsDeleteConfirmOpen(false); }, [selectedQueryId]);
+  useEffect(() => { setIsMarkSentOpen(false); setIsNudgeOpen(false); setIsCloseMenuOpen(false); setIsDeleteConfirmOpen(false); setIsTasksOpen(false); setIsMoreOpen(false); }, [selectedQueryId]);
   // ⚠️ STUB — v3 promoted Delete to the command bar, but the data layer has NO deleteQuery handler
   // yet (recon: only deleteManuscript/Version/Agent/JournalEntry/Note/Activity exist). Per the task
   // we render the full confirm flow, but the final deletion is intentionally NOT wired — do not
@@ -2466,11 +2470,16 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
                   {primaryLabel}
                 </button>
-                <button type="button" className="f12-act" disabled={!sel} onClick={() => onNavigate?.("todo")}>
-                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M4 12h10M4 18h10" /><path d="m17 6 1.5 1.5L21.5 4" /><path d="m17 12 1.5 1.5L21.5 10" /></svg>
-                  View tasks
-                  {taskCount > 0 && <span className="f12-cnt">{taskCount}</span>}
-                </button>
+                <span className="f12-popwrap" style={{ display: "inline-flex" }}>
+                  <button ref={tasksTrigRef} type="button" className="f12-act" disabled={!sel} aria-haspopup="dialog" aria-expanded={isTasksOpen} onClick={() => setIsTasksOpen(o => !o)}>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M4 12h10M4 18h10" /><path d="m17 6 1.5 1.5L21.5 4" /><path d="m17 12 1.5 1.5L21.5 10" /></svg>
+                    View tasks
+                    {taskCount > 0 && <span className="f12-cnt">{taskCount}</span>}
+                  </button>
+                  {isTasksOpen && activeQuery && (
+                    <TasksPopover scope={{ queryId: activeQuery.id }} style={tasksMenuStyle} onClose={() => setIsTasksOpen(false)} />
+                  )}
+                </span>
                 <button type="button" className="f12-act" disabled={!sel} onClick={() => activeQuery && openEditQuery(activeQuery.id)}>
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
                   Edit
