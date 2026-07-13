@@ -33,7 +33,8 @@ import { motion, AnimatePresence } from "motion/react";
 import { useOpenEditAgent } from "./EditAgentHost";
 import { StatusDot } from "./StatusDot";
 import { EdgeFadeScroll } from "./EdgeFadeScroll";
-import { F12Page, F12Account, Trig, F12Popover, PopSection, PRow, Chip } from "./shell/F12Shell";
+import { F12Page, F12Account, IconTrig, F12Popover, PopSection, PRow, Chip } from "./shell/F12Shell";
+import { useFixedMenu } from "./forms/useFixedMenu";
 import {
   paneProvenance,
   agentQueried,
@@ -138,6 +139,10 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
   const [agFilterOpen, setAgFilterOpen] = useState(false);
   const [agSortOpen, setAgSortOpen] = useState(false);
   const [agGroupOpen, setAgGroupOpen] = useState(false);
+  // Portalled popovers anchor to their icon triggers (chrome revision — the pane keeps its clip).
+  const { triggerRef: agFilterTrigRef, menuStyle: agFilterMenuStyle } = useFixedMenu<HTMLButtonElement>(agFilterOpen);
+  const { triggerRef: agSortTrigRef, menuStyle: agSortMenuStyle } = useFixedMenu<HTMLButtonElement>(agSortOpen);
+  const { triggerRef: agGroupTrigRef, menuStyle: agGroupMenuStyle } = useFixedMenu<HTMLButtonElement>(agGroupOpen);
   const searchRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -937,8 +942,9 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
             />
           </div>
           <div className="f12-popwrap">
-            <Trig
-              label="FILTER"
+            <IconTrig
+              ref={agFilterTrigRef}
+              tip="FILTER"
               open={agFilterOpen}
               count={agChips.length}
               onClick={() => { setAgSortOpen(false); setAgGroupOpen(false); setAgFilterOpen((o) => !o); }}
@@ -948,6 +954,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
               <F12Popover
                 width={288}
                 title="Filter"
+                style={agFilterMenuStyle}
                 onClose={() => setAgFilterOpen(false)}
                 headAction={<button type="button" className="f12-reset" onClick={resetAgFilters}>RESET ALL</button>}
                 footText={<><b>{filtered.length}</b>&nbsp;OF {visibleAgents.length} AGENTS</>}
@@ -983,8 +990,9 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
             )}
           </div>
           <div className="f12-popwrap">
-            <Trig
-              label="SORT"
+            <IconTrig
+              ref={agSortTrigRef}
+              tip={`SORT · ${(AG_SORTS.flatMap((g) => g.items).find((i) => i.key === agSort)?.label || "Star rating").toUpperCase()}`}
               open={agSortOpen}
               onClick={() => { setAgFilterOpen(false); setAgGroupOpen(false); setAgSortOpen((o) => !o); }}
               icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M7 12h10M10 18h4" /></svg>}
@@ -993,6 +1001,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
               <F12Popover
                 width={276}
                 title="Sort"
+                style={agSortMenuStyle}
                 onClose={() => setAgSortOpen(false)}
                 footText={(AG_SORTS.flatMap((g) => g.items).find((i) => i.key === agSort)?.label || "Star rating").toUpperCase()}
               >
@@ -1007,14 +1016,15 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
             )}
           </div>
           <div className="f12-popwrap">
-            <Trig
-              label={agGroup === "none" ? "NO GROUPS" : agGroup === "agency" ? "BY AGENCY" : agGroup === "status" ? "BY STATUS" : "BY HISTORY"}
+            <IconTrig
+              ref={agGroupTrigRef}
+              tip={`GROUP · ${agGroup === "none" ? "NO GROUPS" : agGroup === "agency" ? "BY AGENCY" : agGroup === "status" ? "BY STATUS" : "BY HISTORY"}`}
               open={agGroupOpen}
               onClick={() => { setAgFilterOpen(false); setAgSortOpen(false); setAgGroupOpen((o) => !o); }}
               icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10" /></svg>}
             />
             {agGroupOpen && (
-              <F12Popover width={250} title="Group by" onClose={() => setAgGroupOpen(false)} footText="">
+              <F12Popover width={250} title="Group by" style={agGroupMenuStyle} onClose={() => setAgGroupOpen(false)} footText="">
                 <PopSection label="Group rows">
                   <PRow kind="rad" on={agGroup === "none"} label="None" onClick={() => setAgGroup("none")} />
                   <PRow kind="rad" on={agGroup === "agency"} label="Agency" onClick={() => setAgGroup("agency")} />

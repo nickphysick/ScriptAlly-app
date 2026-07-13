@@ -64,14 +64,16 @@
 .f12-btn-sec:hover { border-color: var(--muted); color: var(--ink); }
 .f12-btn-sec svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 
-/* filter / sort / group triggers — spacious pills; invert to ink while their popover is open */
-.f12-trig { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 13px; border: 1px solid var(--oatline); border-radius: 99px; background: rgba(255, 253, 251, 0.7); font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.1em; color: var(--ink-2); transition: background 0.12s, border-color 0.12s, box-shadow 0.12s; }
-.f12-trig:hover { background: var(--panel); border-color: var(--muted); box-shadow: var(--sh-1); }
-.f12-trig.f12-active { background: var(--ink); border-color: var(--ink); color: var(--panel); }
-.f12-trig svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-.f12-trig .f12-chev { width: 10px; height: 10px; opacity: 0.6; }
-.f12-trig .f12-fcount { font-size: 8px; font-weight: 600; background: var(--pink-t); color: var(--pink-i); border-radius: 99px; padding: 1px 6px; }
-.f12-trig.f12-active .f12-fcount { background: var(--pink-av); }
+/* filter / sort / group triggers — 36px icon buttons in the list-pane head (chrome revision;
+   ref .iconctl). Tooltip below on hover carries the current value; corner pink count on Filter;
+   invert to solid ink while the popover is open. */
+.f12-iconctl { position: relative; flex: none; display: inline-flex; align-items: center; justify-content: center; gap: 4px; height: 36px; padding: 0 10px; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--panel); color: var(--ink-2); transition: background 0.12s, border-color 0.12s; }
+.f12-iconctl:hover { background: var(--paper); border-color: var(--muted); }
+.f12-iconctl.f12-active { background: var(--ink); border-color: var(--ink); color: var(--panel); }
+.f12-iconctl svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.f12-iconctl .f12-fcorner { position: absolute; top: -5px; right: -5px; font-family: var(--f12-mono); font-size: 8px; font-weight: 600; background: var(--pink-t); border: 1px solid var(--pink-b); color: var(--pink-i); border-radius: 99px; padding: 1px 5px; }
+.f12-iconctl .f12-tip { position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%); font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.1em; background: var(--ink); color: var(--panel); padding: 4px 7px; border-radius: 5px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 0.12s; z-index: 5; }
+.f12-iconctl:hover .f12-tip, .f12-iconctl:focus-visible .f12-tip { opacity: 1; }
 
 /* quiet action buttons (the right zone — no filled button in this bar) */
 .f12-act { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; font-size: 13px; font-weight: 450; color: var(--ink-2); padding: 8px 11px; border-radius: var(--r-md); transition: background 0.12s, color 0.12s; }

@@ -28,7 +28,7 @@ import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { QueryStatus, Agent, Manuscript, Query, SubmissionMethod, ActivityType, QueryMaterial, UserPlan } from "../types";
 import { StatusPill, getStatusLabel } from "./StatusPill";
 import { StatusDot } from "./StatusDot";
-import { F12Page, F12Account, Trig, F12Popover, PopSection, PRow, Chip } from "./shell/F12Shell";
+import { F12Page, F12Account, IconTrig, F12Popover, PopSection, PRow, Chip } from "./shell/F12Shell";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
 import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse } from "../lib/queryAmbient";
 import { getPrimaryAction } from "../lib/queryPrimaryAction";
@@ -634,6 +634,10 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   const [needsTasks, setNeedsTasks] = useState(false);
   const [filterPopOpen, setFilterPopOpen] = useState(false);
   const [sortPopOpen, setSortPopOpen] = useState(false);
+  // Portalled popovers anchor to their icon triggers via the codebase's fixed-position utility
+  // (chrome revision — the list pane keeps overflow:hidden; the portal escapes the clip).
+  const { triggerRef: filterTrigRef, menuStyle: filterMenuStyle } = useFixedMenu<HTMLButtonElement>(filterPopOpen);
+  const { triggerRef: sortTrigRef, menuStyle: sortMenuStyle } = useFixedMenu<HTMLButtonElement>(sortPopOpen);
   /* F12 sort — grouped Activity / Dates / Pipeline (ref sort popover). Default: last activity. */
   const [sortKey, setSortKey] = useState<string>("last_activity");
   /* Legacy shim — the hidden (display:none) mobile filter region still references this;
@@ -1050,6 +1054,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     <F12Popover
       width={288}
       title="Filter"
+      style={filterMenuStyle}
       onClose={() => setFilterPopOpen(false)}
       headAction={<button type="button" className="f12-reset" onClick={resetAllFilters}>RESET ALL</button>}
       footText={<><b>{filteredList.length}</b>&nbsp;OF {queries.length} QUERIES</>}
@@ -1108,6 +1113,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     <F12Popover
       width={276}
       title="Sort"
+      style={sortMenuStyle}
       onClose={() => setSortPopOpen(false)}
       footText={(F12_SORT_GROUPS.flatMap(g => g.items).find(i => i.key === sortKey)?.label || "Last activity").toUpperCase()}
     >
@@ -2557,8 +2563,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 />
               </div>
               <div className="f12-popwrap">
-                <Trig
-                  label="FILTER"
+                <IconTrig
+                  ref={filterTrigRef}
+                  tip="FILTER"
                   open={filterPopOpen}
                   count={activeFilterCount}
                   onClick={() => { setSortPopOpen(false); setFilterPopOpen(o => !o); }}
@@ -2567,8 +2574,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 {filterPopOpen && renderFilterPopover()}
               </div>
               <div className="f12-popwrap">
-                <Trig
-                  label="SORT"
+                <IconTrig
+                  ref={sortTrigRef}
+                  tip={`SORT · ${(F12_SORT_GROUPS.flatMap(g => g.items).find(i => i.key === sortKey)?.label || "Last activity").toUpperCase()}`}
                   open={sortPopOpen}
                   onClick={() => { setFilterPopOpen(false); setSortPopOpen(o => !o); }}
                   icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M7 12h10M10 18h4" /></svg>}

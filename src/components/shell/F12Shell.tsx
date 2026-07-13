@@ -9,7 +9,7 @@
  *                  that component), then the page's own bands/panes below (children).
  *   Icirc        — circular hover icon button (header export/help etc.).
  *   F12Primary   — the single filled ink CTA (header only — never in the control bar).
- *   Trig         — FILTER/SORT/GROUP pill trigger; inverts to ink while its popover is open.
+ *   IconTrig     — FILTER/SORT/GROUP 36px icon trigger (value tooltip); inverts while open.
  *   F12Popover   — shared popover shell (paper Playfair head · sectioned body · paper foot
  *                  with live count + DONE): closes on outside click and Escape.
  *   PopSection   — mono small-caps label + trailing hairline rule section.
@@ -20,6 +20,7 @@
  * reduced-motion honoured in f12.css.
  */
 import React, { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { CrumbStrip } from "./CrumbStrip";
 import { useScriptAllyDb } from "../../lib/db";
 import "./f12.css";
@@ -77,51 +78,64 @@ export const F12Primary: React.FC<{ onClick?: () => void; children: React.ReactN
 
 /* ── control-bar trigger + popover ── */
 
-export const Trig = React.forwardRef<HTMLButtonElement, {
-  label: string;
+/**
+ * Icon-only trigger (chrome revision; ref .iconctl): 36px bordered icon button in the list-pane
+ * head. `tip` doubles as the aria-label AND the hover tooltip — it must carry the CURRENT value
+ * (e.g. "SORT · LAST ACTIVITY") so the icon is never the only clue. Filter passes `count` for
+ * the corner pink badge. Inverts to solid ink while its popover is open.
+ */
+export const IconTrig = React.forwardRef<HTMLButtonElement, {
+  tip: string;
   icon: React.ReactNode;
   open: boolean;
   count?: number;
   onClick: () => void;
-}>(({ label, icon, open, count, onClick }, ref) => (
+}>(({ tip, icon, open, count, onClick }, ref) => (
   <button
     ref={ref}
     type="button"
-    className={`f12-trig${open ? " f12-active" : ""}`}
+    className={`f12-iconctl${open ? " f12-active" : ""}`}
     aria-expanded={open}
     aria-haspopup="dialog"
+    aria-label={tip}
     onClick={onClick}
   >
     {icon}
-    {label}
-    {count != null && count > 0 && <span className="f12-fcount">{count}</span>}
-    <svg className="f12-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+    {count != null && count > 0 && <span className="f12-fcorner">{count}</span>}
+    <span className="f12-tip" aria-hidden="true">{tip}</span>
   </button>
 ));
-Trig.displayName = "Trig";
+IconTrig.displayName = "IconTrig";
 
 /**
- * Popover shell. Mount INSIDE an .f12-popwrap alongside its trigger; handles outside-click +
- * Escape (returning focus to the wrap's trigger button). Rendered only while open — the
- * caller owns the state.
+ * Popover shell — PORTALLED to document.body (chrome revision) so the list pane's
+ * overflow:hidden can never clip it; positioned against its trigger via the caller's
+ * useFixedMenu `menuStyle` (the codebase's anchored-fixed utility). The portal wrapper
+ * carries .t-f12 so every token still resolves outside the page root. Keep the trigger
+ * inside an .f12-popwrap — outside-click treats clicks there as "not outside" (the
+ * trigger's own onClick owns the toggle). Escape closes; first row is focused on open.
  */
 export const F12Popover: React.FC<{
   width: number;
   title: string;
   onClose: () => void;
+  /** Anchored position from useFixedMenu(open) — REQUIRED for the portalled placement. */
+  style?: React.CSSProperties;
   /** Header-right action, e.g. RESET ALL. */
   headAction?: React.ReactNode;
   /** Footer-left live text, e.g. "6 of 20 queries". */
   footText?: React.ReactNode;
   children: React.ReactNode;
-}> = ({ width, title, onClose, headAction, footText, children }) => {
+}> = ({ width, title, onClose, style, headAction, footText, children }) => {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const onDown = (e: MouseEvent) => {
       const el = ref.current;
+      const t = e.target as Node;
       if (!el) return;
-      const wrap = el.closest(".f12-popwrap");
-      if (wrap && !wrap.contains(e.target as Node)) onClose();
+      // Not outside: clicks in the popover itself, or on any trigger wrap (its onClick toggles).
+      if (el.contains(t) || (t instanceof Element && t.closest(".f12-popwrap"))) return;
+      onClose();
     };
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     document.addEventListener("mousedown", onDown);
@@ -132,18 +146,32 @@ export const F12Popover: React.FC<{
     };
   }, [onClose]);
 
-  return (
-    <div ref={ref} className="f12-pop" style={{ width, display: "block" }} role="dialog" aria-label={title}>
-      <div className="f12-pop-head">
-        <span className="f12-pt">{title}</span>
-        {headAction}
+  // Keyboard entry: focus the first option so Tab/Space work immediately from the trigger.
+  useEffect(() => {
+    ref.current?.querySelector<HTMLElement>("button, [href], input")?.focus();
+  }, []);
+
+  return createPortal(
+    <div className="t-f12">
+      <div
+        ref={ref}
+        className="f12-pop"
+        style={{ width, display: "block", zIndex: 60, ...style }}
+        role="dialog"
+        aria-label={title}
+      >
+        <div className="f12-pop-head">
+          <span className="f12-pt">{title}</span>
+          {headAction}
+        </div>
+        <div className="f12-pop-body">{children}</div>
+        <div className="f12-pop-foot">
+          <span>{footText}</span>
+          <button type="button" className="f12-done" onClick={onClose}>DONE</button>
+        </div>
       </div>
-      <div className="f12-pop-body">{children}</div>
-      <div className="f12-pop-foot">
-        <span>{footText}</span>
-        <button type="button" className="f12-done" onClick={onClose}>DONE</button>
-      </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
