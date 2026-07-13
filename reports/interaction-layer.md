@@ -131,7 +131,8 @@ was `28689b2`.
 | 6a · interactive stars (hover/set/undo) | `56a57d9` | ✅ done |
 | 6a · star clear → UNRATED (absence, not 0; deleteField) | `7234b7b` | ✅ done (rule parked) |
 | 6a rest · method click-to-pick + editable link pills | `53c9d4d` | ✅ done |
-| 6c · response guidelines | — | ⏳ next (model note below) |
+| 6c · response guidelines (time + reply policy; both now optional) | `73a3e84` | ✅ done — never auto-closes |
+| 6d · wanted materials | — | ⏳ next (report componentType gap; materialsWanted → structured) |
 | 6d · wanted materials | — | ⏳ (report componentType gap) |
 | 6e · query history · 6g delete+mark-closed · 6f/6h · 5d · 5e · Nudge→addUserTask | — | ⏳ |
 | 6a rest · method click-to-pick · link pills | — | ⏳ next |
