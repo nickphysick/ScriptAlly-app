@@ -51,7 +51,9 @@
 /* ── control bar — two zones locked to the panes by --listw (chrome revision: 56px; the left
    zone sits flush with the list pane's left edge, the right zone is inset 20px from both of
    the reading pane's edges) ── */
-.f12-ctl { flex: none; display: flex; align-items: stretch; height: 56px; width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 var(--gut); }
+/* asymmetric vertical padding (more on top) drops the buttons toward the content below rather
+   than centring them mid-bar — they were reading closer to the breadcrumb than the panes. */
+.f12-ctl { flex: none; display: flex; align-items: stretch; height: 56px; width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 15px var(--gut) 3px; }
 .f12-zone-list { flex: none; width: var(--listw); display: flex; align-items: center; gap: 8px; padding-left: 0; padding-right: var(--gut); }
 .f12-zone-read { flex: 1; display: flex; align-items: center; gap: 2px; min-width: 0; padding-left: 20px; padding-right: 20px; }
 .f12-ctl .f12-divv { width: 1px; height: 20px; background: var(--oatline); margin: 0 9px; align-self: center; }
@@ -61,11 +63,11 @@
 .f12-divv2 { display: block; width: 1px; height: 20px; background: var(--oatline); margin: 0 10px; align-self: center; }
 
 /* the left zone's pair — the ONLY filled button in the chrome (pink CTA) + the white import */
-.f12-btn-pri { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; font-size: 13px; font-weight: 600; padding: 8px 15px; border-radius: var(--r-md); background: var(--pink-btn); border: none; color: var(--ink); box-shadow: var(--sh-btn); transition: background 0.12s, transform 0.06s; }
+.f12-btn-pri { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; font-size: 14px; font-weight: 600; padding: 8px 15px; border-radius: var(--r-md); background: var(--pink-btn); border: none; color: var(--ink); box-shadow: var(--sh-btn); transition: background 0.12s, transform 0.06s; }
 .f12-btn-pri:hover { background: var(--pink-btn-h); }
 .f12-btn-pri:active { transform: translateY(0.5px); }
 .f12-btn-pri svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.9; stroke-linecap: round; }
-.f12-btn-sec { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; font-size: 13px; font-weight: 500; padding: 8px 14px; border-radius: var(--r-md); background: var(--panel); border: 1px solid var(--line); color: var(--ink-2); box-shadow: var(--sh-btn); transition: border-color 0.12s, color 0.12s; }
+.f12-btn-sec { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; font-size: 14px; font-weight: 500; padding: 8px 14px; border-radius: var(--r-md); background: var(--panel); border: 1px solid var(--line); color: var(--ink-2); box-shadow: var(--sh-btn); transition: border-color 0.12s, color 0.12s; }
 .f12-btn-sec:hover { border-color: var(--muted); color: var(--ink); }
 .f12-btn-sec svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 
@@ -81,7 +83,7 @@
 .f12-iconctl:hover .f12-tip, .f12-iconctl:focus-visible .f12-tip { opacity: 1; }
 
 /* quiet action buttons (the right zone — no filled button in this bar) */
-.f12-act { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; font-size: 13px; font-weight: 450; color: var(--ink-2); padding: 8px 11px; border-radius: var(--r-md); transition: background 0.12s, color 0.12s; }
+.f12-act { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; font-size: 14px; font-weight: 450; color: var(--ink-2); padding: 8px 11px; border-radius: var(--r-md); transition: background 0.12s, color 0.12s; }
 .f12-act:hover { background: rgba(255, 253, 251, 0.95); color: var(--ink); box-shadow: var(--sh-1); }
 .f12-act svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 /* View-tasks count — white badge (chrome revision: NOT a pink tint) */
