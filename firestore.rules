@@ -75,7 +75,10 @@ service cloud.firestore {
         // To-do focus-ritual cadence stamp — optional ISO string; absent-or-string (rejects null).
         && (!data.keys().hasAny(['todoLastFocusedAt']) || (data.todoLastFocusedAt is string && data.todoLastFocusedAt.size() <= 64))
         // Package Workshop tour-seen flag — optional bool; absent-or-bool (rejects null).
-        && (!data.keys().hasAny(['hasSeenTour']) || data.hasSeenTour is bool);
+        && (!data.keys().hasAny(['hasSeenTour']) || data.hasSeenTour is bool)
+        // Personal genres (taxonomy Tier 2) — optional list, capped at the client's MAX_PERSONAL_GENRES.
+        // Shape (id/label maps) is validated client-side; rules just bound presence + count.
+        && (!data.keys().hasAny(['personalGenres']) || (data.personalGenres is list && data.personalGenres.size() <= 10));
     }
 
     function isValidManuscript(data, userId) {
@@ -432,7 +435,7 @@ service cloud.firestore {
       allow read, delete: if isOwner(userId);
       allow create: if isOwner(userId) && isValidUser(incoming());
       allow update: if isOwner(userId) && isValidUser(incoming()) && (
-        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus', 'onboardingComplete', 'queryingStage', 'journeyStage', 'homeCountry', 'queriesTheme', 'todoLastFocusedAt', 'hasSeenTour'])
+        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus', 'onboardingComplete', 'queryingStage', 'journeyStage', 'homeCountry', 'queriesTheme', 'todoLastFocusedAt', 'hasSeenTour', 'personalGenres'])
       );
 
       // ROUTE: Manuscripts
@@ -608,6 +611,21 @@ service cloud.firestore {
         && incoming().contributedByCount is int
         && incoming().contributedByCount == existing().contributedByCount + 1;
       allow delete: if isAdmin();
+    }
+
+    // ROUTE: Genre promotion queue (taxonomy Tier 3). One doc per (user, normalised label) — a
+    // signal that several writers independently invented the same genre. A user may only create
+    // their OWN suggestion (never read others' — privacy); only the admin reads the queue and
+    // promotes/dismisses. Distinct-user count is derived admin-side by grouping on normalisedLabel.
+    match /genreSuggestions/{suggestionId} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn()
+        && incoming().userId == request.auth.uid
+        && incoming().keys().hasOnly(['id', 'normalisedLabel', 'label', 'userId', 'createdAt'])
+        && incoming().normalisedLabel is string && incoming().normalisedLabel.size() <= 64
+        && incoming().label is string && incoming().label.size() <= 64
+        && incoming().createdAt is string && incoming().createdAt.size() <= 64;
+      allow update, delete: if isAdmin();
     }
 
     // ROUTE: Founding-writer waitlist (holding page) — NO client access.

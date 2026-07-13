@@ -41,6 +41,26 @@ export interface User {
   // NOTE: rides the parked firestore.rules user-update allowlist edit — silently denied (graceful)
   // until that deploy lands, exactly like the agent `pinned` flag.
   hasSeenTour?: boolean;
+  // The user's own invented genres (the taxonomy's Personal tier — see src/lib/genres.ts). Each is
+  // { id: "u:{uid}:{slug}", label }. Created only when a typed genre matches nothing canonical or
+  // personal; capped at MAX_PERSONAL_GENRES. Stored here (not a subcollection) so it rides the
+  // already-loaded user doc — no new page-load read. NOTE: rides the parked user-update allowlist
+  // edit — silently denied (graceful) until that deploy lands.
+  personalGenres?: { id: string; label: string }[];
+}
+
+/**
+ * The genre promotion queue (taxonomy Tier 3, src/lib/genres.ts). One doc per (user, normalised
+ * label) — several users independently inventing the same genre is the signal to promote it to
+ * canonical; a single typo is not. Nick-only read (the admin queue ranks by distinct-user count);
+ * a user may only create their own. Written when a personal genre is first created.
+ */
+export interface GenreSuggestion {
+  id: string;
+  normalisedLabel: string; // matchKey form — the grouping key
+  label: string;           // the user's display spelling (first writer's)
+  userId: string;
+  createdAt: string;       // ISO
 }
 
 /**

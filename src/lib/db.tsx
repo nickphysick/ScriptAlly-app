@@ -70,6 +70,7 @@ import { deriveQueryFields, getActivityTime, normalizeResultingStatus } from "./
 import { queriesForManuscript, queriesForAgent, activityIdsForQueries } from "./cascade";
 import { recomputeQuery as recomputeQueryOnline, subcollectionDocToDerivable, monotonicEventTime } from "./recomputeQuery";
 import { buildNudgeWrites } from "./logNudge";
+import { resolveGenre, matchKey } from "./genres";
 import { commitAgentEdits, AgentEditPatch, AgentExtraWrite, SaveAgentResult } from "./saveAgentEdits";
 import { computeAgentDeadlineWrites } from "./computeAgentDeadlineWrites";
 import { computeResponseDeadline } from "./responseDeadline";
@@ -220,6 +221,9 @@ interface DbContextType {
 
   // Note Actions (user-authored desk notes / dated tasks)
   addNote: (fields: { text: string; colour?: Note["colour"]; dueDate?: string | null }) => Promise<void>;
+  // Genre taxonomy (src/lib/genres.ts): resolve a typed genre to a stored id, creating a personal
+  // genre (on the user doc) + a promotion-queue entry only when nothing canonical/personal matches.
+  addPersonalGenre: (rawLabel: string) => Promise<{ ok: true; id: string; label: string } | { ok: false; reason: string }>;
   updateNote: (id: string, fields: Partial<Pick<Note, "text" | "colour" | "dueDate" | "done" | "doneAt">>) => Promise<void>;
   deleteNote: (id: string) => Promise<void>;
   // To-do page Notes stream — the only stored to-do records.
@@ -2015,6 +2019,40 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
+  /**
+   * Resolve a typed genre to a stored id (taxonomy guardrails, Stage 3b). Canonical / existing
+   * personal → return that id, no write. A genuinely new label → append it to the user's
+   * personalGenres (the user doc — no new read) AND write an idempotent genreSuggestions entry
+   * (the promotion signal). Junk / at-the-cap → { ok:false, reason } for the picker to surface.
+   */
+  const addPersonalGenre = async (
+    rawLabel: string
+  ): Promise<{ ok: true; id: string; label: string } | { ok: false; reason: string }> => {
+    if (!currentUser) return { ok: false, reason: "You need to be signed in." };
+    const personal = currentUser.personalGenres ?? [];
+    const r = resolveGenre(rawLabel, currentUser.id, personal);
+    if (r.status === "rejected" || r.status === "at-limit") return { ok: false, reason: r.reason };
+    if (r.status === "canonical" || r.status === "personal") return { ok: true, id: r.id, label: r.label };
+
+    // new-personal: persist on the user doc + record the promotion signal.
+    const next = [...personal, { id: r.id, label: r.label }];
+    await updateUserProfile({ personalGenres: next });
+    try {
+      const key = matchKey(rawLabel);
+      const suggId = `${currentUser.id}__${key.replace(/\s+/g, "-")}`;
+      await setDoc(doc(db, "genreSuggestions", suggId), {
+        id: suggId,
+        normalisedLabel: key,
+        label: r.label,
+        userId: currentUser.id,
+        createdAt: new Date().toISOString(),
+      });
+    } catch {
+      // The suggestion is a nice-to-have signal, not load-bearing — never block the genre add on it.
+    }
+    return { ok: true, id: r.id, label: r.label };
+  };
+
   const updateNote = async (
     id: string,
     fields: Partial<Pick<Note, "text" | "colour" | "dueDate" | "done" | "doneAt">>
@@ -2524,6 +2562,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         deleteJournalEntry,
         updateJournalEntry,
         addNote,
+        addPersonalGenre,
         updateNote,
         deleteNote,
         todoNotes,
