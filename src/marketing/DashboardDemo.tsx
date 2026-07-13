@@ -161,7 +161,7 @@ export const DashboardDemo: React.FC = () => {
             <div className="mk-dzminis">
               <div className="mk-dzmini"><div className="mk-dzcap">Queries sent</div><div className="mk-n">23</div><div className="mk-p">+3 this week</div></div>
               <div className="mk-dzmini"><div className="mk-dzcap">Active queries</div><div className="mk-n">16</div><div className="mk-p">10 awaiting a reply</div></div>
-              <div className="mk-dzmini"><div className="mk-dzcap">Agents</div><div className="mk-n">16</div><div className="mk-p">2 idle</div></div>
+              <div className="mk-dzmini"><div className="mk-dzcap">Agents</div><div className="mk-n">16</div><div className="mk-p">2 not queried</div></div>
               <div className="mk-dzmini"><div className="mk-dzcap">Responses</div><div className="mk-n">11</div><div className="mk-p">55% rate</div></div>
             </div>
           </div>
@@ -221,7 +221,7 @@ export const DashboardDemo: React.FC = () => {
               <svg viewBox="0 0 24 24" fill="none" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6" /><circle cx="17.5" cy="9" r="2.5" /><path d="M16 14.5c3 .3 5.5 2.3 5.5 5.5" /></svg>
               Agents
             </div>
-            <div className="mk-dznum">16</div><div className="mk-dzsub">2 idle</div>
+            <div className="mk-dznum">16</div><div className="mk-dzsub">2 not queried</div>
             <div className="mk-dzpeople">
               {Array.from({ length: 14 }, (_, i) => <i key={i} />)}
               <i className="mk-idle" /><i className="mk-idle" />

@@ -588,7 +588,8 @@ Applied ONLY to the Queries Hub and Contact List page roots (via `F12Page` in
 `src/components/shell/F12Shell.tsx`); never app-wide. `.t-capp`/`.t-bold`/`.t-edn` are
 untouched — consolidation is a separate, later job. Tokens live in `src/index.css`
 (`.t-f12` block); shared shell classes in `src/components/shell/f12.css`. Values are the
-mockups' `:root` (`design-refs/queries-hub-v14.html` ≡ `agents-contact-list-v3.html`).
+mockups' `:root` (`design-refs/queries-hub-v18.html` ≡ `agents-contact-list-v7.html` — the
+chrome revision replaced v14/v3).
 
 - **Warm neutral ramp:** `--oat #f1e8dc` (chrome + ground; line `--oatline #e0d3c1`) →
   `--paper #faf6f0` (recessed canvas, hovers) → `--panel #fffdfb` (raised panes/cards) →
@@ -600,6 +601,10 @@ mockups' `:root` (`design-refs/queries-hub-v14.html` ≡ `agents-contact-list-v3
   `--blue-i #2b4a6b` — nav active, selected row); pink = needs-you (`--pink-t #f7e3dd` /
   `--pink-b #eecdc3` / `--pink-i #8a4030`, avatar `--pink-av #f6d7cf` — badges, chips, task
   counts, status pill, avatars); sage = the card header bands + the agent-header spine.
+- **Primary-button pink (chrome revision):** `--pink-btn #f6cfc9` · `--pink-btn-h #f0bfb8` —
+  the control bar's ONE filled CTA (Log a query / Add agent). ⚠️ v14/v3 OMITTED these two
+  tokens; an undefined `var()` renders as nothing, which silently made the mockups' primary
+  button transparent. Always define every token you reference.
 - **⚠️ SAGE CORRECTION (standing decision):** the band pair is the LIVE dashboard diary band —
   `--sage-band: #dce0d9; --sage-band-2: #d0d6cc` (from `diaryCarousel.css`), which WINS over
   the mockups' `#d7ddd5 → #d5dbd3`, so hub, agents and dashboard match. Edge `--sage-edge
@@ -607,6 +612,8 @@ mockups' `:root` (`design-refs/queries-hub-v14.html` ≡ `agents-contact-list-v3
 - **Radii:** 6 / 9 / 12 / 16 (`--r-sm/md/lg/xl`). **Layout:** `--listw 334px` · `--gut 12px` ·
   `--maxw 1520px`. **Fonts:** `--f12-mono/serif/body` (Inter added to the font links this run).
 - The `.t-f12` block also carries `--crumb-*` literals so the app-wide CrumbStrip reads as the
-  full-bleed oat header inside these pages (a token repaint — the component is untouched).
+  full-bleed header inside these pages (a token repaint — the component is untouched). Chrome
+  revision: the header went WHITE — `--crumb-strip-bg #fffdfb` (--panel) with a `--crumb-strip-rule
+  #e6dccd` (--line) base, replacing the original oat.
 - House rules honoured: literals only (no `:root` aliasing — known freeze bug), no
   `color-mix()`, reduced-motion end-states in f12.css.

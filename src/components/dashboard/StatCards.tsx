@@ -455,7 +455,7 @@ const agentPopup = (a: AgentDatum): React.ReactNode => {
     );
   }
   return (
-    <PopupCard title={a.agency || "Idle agent"} chip="Idle" chipVariant="muted">
+    <PopupCard title={a.agency || "Independent"} chip="Not queried" chipVariant="muted">
       <div style={{ fontSize: 12, color: mutedInk }}>Not yet queried</div>
     </PopupCard>
   );
@@ -528,7 +528,7 @@ const AgentsCard: React.FC<{ total: number; idle: number; agents: AgentDatum[]; 
     watermark={<Users size={64} strokeWidth={1.5} />}
     caption="Agents"
     value={total}
-    pill={<span style={pillMuted}>{idle} idle</span>}
+    pill={<span style={pillMuted}>{idle} not queried</span>}
     fillChildren
   >
     <AgentGlyphRow agents={agents} pop={pop} />
