@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact List — interactions prototype v8</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Inter:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --oat:#f1e8dc; --oatline:#e0d3c1; --paper:#faf6f0; --panel:#fffdfb; --white:#fff;
+  --line:#e6dccd; --hairline:#f0eae1;
+  --ink:#1e1a16; --ink-2:#4a443c; --muted:#7d7469; --faint:#a89e91;
+  --sh-1:0 1px 2px rgba(58,42,26,.05);
+  --sh-2:0 1px 2px rgba(58,42,26,.05),0 4px 10px -2px rgba(58,42,26,.06);
+  --sh-3:0 3px 6px rgba(58,42,26,.07),0 16px 40px -8px rgba(58,42,26,.18);
+  --sh-btn:0 1px 2px rgba(58,42,26,.10);
+  --blue-t:#e7eef6;
+  --pink-t:#f7e3dd; --pink-b:#eecdc3; --pink-i:#8a4030; --pink-av:#f6d7cf;
+  --pink-btn:#f6cfc9; --pink-btn-h:#f0bfb8;
+  --sage-band:#dce0d9; --sage-band-2:#d0d6cc; --sage-edge:#c8d0c5;
+  --sage:#8a9e88; --sageC:#e9ede6; --sageD:#5a6e58;
+  --burg:#7c3a2a; --pinkC:#f8e7dc; --pro:#6A89A7;
+  --r-sm:6px; --r-md:9px; --r-lg:12px; --r-xl:16px;
+  --mono:'JetBrains Mono',monospace; --serif:'Playfair Display',serif; --body:'Inter',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--body);background:var(--oat);color:var(--ink);font-size:13px;line-height:1.45;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+button{font:inherit;cursor:pointer;background:none;border:none;color:inherit;text-align:left}
+svg{display:block}
+input,select,textarea{font:inherit;color:inherit}
+
+.hd{flex:none;height:56px;background:var(--panel);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 16px 0 10px;gap:10px}
+.hd .up{font-family:var(--mono);font-size:9px;letter-spacing:.11em;color:#9d8f80}
+.hd .here{font-family:var(--serif);font-size:19px;font-weight:600}
+.who{margin-left:auto;display:flex;align-items:center;gap:9px;padding:4px 12px 4px 4px;border-radius:99px}
+.who:hover{background:var(--paper)}
+.av2{width:30px;height:30px;border-radius:50%;background:var(--pink-av);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:600}
+
+.ctl{flex:none;height:56px;display:flex;align-items:center;width:100%;max-width:1520px;margin:0 auto;padding:0 12px}
+.zone-list{flex:none;width:334px;display:flex;align-items:center;gap:8px;padding-right:12px}
+.zone-read{flex:1;display:flex;align-items:center;gap:2px;padding:0 20px}
+.btn-pri{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;padding:8px 15px;border-radius:var(--r-md);background:var(--pink-btn);box-shadow:var(--sh-btn)}
+.btn-pri:hover{background:var(--pink-btn-h)}
+.btn-sec{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:500;padding:8px 14px;border-radius:var(--r-md);background:var(--panel);border:1px solid var(--line);box-shadow:var(--sh-btn);color:var(--ink-2)}
+.act{position:relative;display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--ink-2);padding:8px 11px;border-radius:var(--r-md);white-space:nowrap}
+.act:hover{background:var(--panel);color:var(--ink);box-shadow:var(--sh-1)}
+.act.on{background:var(--ink);color:var(--panel)}
+.act svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.act .cnt{font-family:var(--mono);font-size:9px;font-weight:700;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:99px;padding:1.5px 7px;box-shadow:var(--sh-btn)}
+.grp{margin-left:auto;display:flex;gap:2px}
+.act.del:hover{background:var(--pink-t);color:var(--pink-i)}
+.relwrap{position:relative;display:inline-flex}
+
+.body{flex:1;display:flex;gap:12px;min-height:0;width:100%;max-width:1520px;margin:0 auto;padding:0 12px 12px}
+.pane{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-xl);box-shadow:var(--sh-2);display:flex;flex-direction:column;min-height:0}
+.list{flex:none;width:334px;overflow:hidden}
+.l-head{padding:11px 12px;border-bottom:1px solid var(--hairline)}
+.l-search{display:flex;align-items:center;gap:8px;height:34px;padding:0 12px;border-radius:99px;background:var(--paper);color:var(--muted);font-size:12.5px}
+.rows{flex:1;overflow-y:auto}
+.row{display:flex;align-items:center;gap:11px;height:56px;padding:0 14px;border-bottom:1px solid var(--hairline);cursor:pointer}
+.row:hover{background:var(--paper)}
+.row.sel{background:var(--blue-t);box-shadow:inset 3px 0 0 var(--ink)}
+.row .av{width:30px;height:30px;border-radius:50%;background:var(--pink-av);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9.5px;font-weight:600}
+.row .mid{flex:1;min-width:0}
+.row .nm{font-weight:500;font-size:14px;display:block}
+.row .ag{font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;color:var(--faint);text-transform:uppercase}
+.row.shut .av{background:#eceae6;color:#a49a8d}
+.row.shut .nm{color:#a49a8d;font-weight:450}
+.row.shut .ag{color:#c3b9ac}
+.row.shut .dot,.row.shut .nq{opacity:.45}
+.qdots{display:flex;gap:4px}
+.nq{font-family:var(--mono);font-size:8.5px;letter-spacing:.09em;color:#bdb3a6}
+.l-foot{padding:10px 14px;border-top:1px solid var(--hairline);display:flex;justify-content:space-between;font-family:var(--mono);font-size:9.5px;letter-spacing:.09em;color:var(--faint)}
+.dot{position:relative;width:13px;height:13px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:8px;flex:none}
+.dot.q{border:1.5px solid var(--burg);background:var(--pinkC);color:var(--burg)}
+.dot.q::after{content:"→";font-weight:700}
+.dot.freq{border:2.5px solid var(--sage);background:var(--sageC);color:var(--sageD)}
+.dot.freq::after{content:"←";font-weight:700}
+.dot.cl{border:1.5px solid #cfc6ba;background:#f2ede6;color:#a89e91}
+.dot.cl::after{content:"×";font-weight:700}
+
+.detail{flex:1;min-width:0;overflow:hidden}
+.d-scroll{flex:1;overflow-y:auto;overflow-x:clip;background:var(--paper);padding:20px}
+
+/* HERO */
+.hero{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:22px 24px 22px 32px;box-shadow:var(--sh-1);overflow:visible}
+.hero::before{content:"";position:absolute;top:-1px;bottom:-1px;left:-1px;width:5px;background:linear-gradient(180deg,var(--sage-band),var(--sage-band-2));border-radius:var(--r-lg) 0 0 var(--r-lg)}
+.hero-top{display:flex;align-items:flex-start;gap:20px}
+.bigav{flex:none;width:72px;height:72px;border-radius:50%;background:var(--pink-av);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:24px;font-weight:600}
+.hero .n{font-family:var(--serif);font-size:29px;font-weight:600;line-height:1.08}
+.hero .a{font-family:var(--mono);font-size:9px;letter-spacing:.13em;color:var(--faint);text-transform:uppercase;margin-top:6px}
+
+/* STARS — inline write */
+.stars{display:inline-flex;gap:3px;margin-top:9px;cursor:pointer}
+.stars svg{width:17px;height:17px;fill:#e6dccd;stroke:none;transition:fill .08s}
+.stars svg.on{fill:var(--burg)}
+.stars svg.hov{fill:#c98d7c}
+.starwrap{display:flex;align-items:center;gap:10px}
+.clearstar{font-family:var(--mono);font-size:8px;letter-spacing:.1em;color:var(--faint);opacity:0;transition:opacity .12s}
+.starwrap:hover .clearstar{opacity:1}
+.clearstar:hover{color:var(--ink)}
+
+/* DOOR toggle */
+.oc{margin-left:auto}
+.seg{display:flex;background:var(--paper);border:1px solid var(--line);border-radius:99px;padding:2px}
+.seg button{font-family:var(--mono);font-size:8.5px;letter-spacing:.09em;padding:6px 14px;border-radius:99px;color:var(--muted)}
+.seg button.open-on{background:var(--sageC);color:var(--sageD);font-weight:600;box-shadow:inset 0 0 0 1px var(--sage-edge)}
+.seg button.shut-on{background:var(--pink-t);color:var(--pink-i);font-weight:600;box-shadow:inset 0 0 0 1px var(--pink-b)}
+.reopen{display:none;align-items:center;gap:7px;margin-top:12px;padding:9px 12px;background:var(--pink-t);border:1px solid var(--pink-b);border-radius:var(--r-md);font-size:12.5px;color:var(--pink-i)}
+.reopen.show{display:flex}
+.reopen select{border:1px solid var(--pink-b);background:var(--panel);border-radius:6px;padding:4px 7px;font-size:12px;color:var(--ink-2)}
+.reopen .go{margin-left:auto;font-family:var(--mono);font-size:8.5px;font-weight:600;letter-spacing:.09em;background:var(--ink);color:var(--panel);padding:6px 11px;border-radius:99px}
+
+/* LINK PILLS */
+.links{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.linkpill{position:relative;display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted);border:1px dashed var(--line);border-radius:99px;padding:7px 14px}
+.linkpill:hover{border-color:var(--ink-2);color:var(--ink)}
+.linkpill.set{border-style:solid;color:var(--ink-2);background:var(--panel);box-shadow:var(--sh-btn)}
+.linkpill.set:hover{border-color:var(--ink-2)}
+.linkpill .x{opacity:0;color:var(--faint);font-size:11px}
+.linkpill.set:hover .x{opacity:1}
+.linkpop{position:absolute;top:calc(100% + 6px);left:0;z-index:100;width:300px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:var(--sh-3);padding:11px;display:none}
+.linkpop.open{display:block}
+.linkpop .lb{font-family:var(--mono);font-size:8px;letter-spacing:.13em;color:var(--faint);text-transform:uppercase;display:block;margin-bottom:5px}
+.linkpop input{width:100%;border:1px solid var(--line);border-radius:var(--r-sm);padding:8px 9px;font-size:12.5px;background:var(--panel)}
+.linkpop input.bad{border-color:var(--pink-b);background:#fdf6f4}
+.linkpop .err{display:none;margin-top:6px;font-size:11.5px;color:var(--pink-i)}
+.linkpop .err.show{display:block}
+.linkpop .fa{display:flex;gap:7px;margin-top:10px}
+.save{background:var(--ink);color:var(--panel);font-size:12.5px;font-weight:600;padding:8px 15px;border-radius:var(--r-sm)}
+.save[disabled]{opacity:.4;pointer-events:none}
+.cancel{font-size:12.5px;color:var(--muted);padding:8px 12px;border-radius:var(--r-sm)}
+.cancel:hover{background:var(--paper);color:var(--ink)}
+
+/* WISH LIST */
+.mswl{margin-top:16px;border:1.5px dotted #d2c8ba;border-radius:var(--r-lg);padding:14px 18px;display:flex;align-items:center;gap:12px;background:transparent}
+.mswl.filled{border:1px solid var(--line);background:var(--panel);box-shadow:var(--sh-1);display:block;padding:16px 18px}
+.mswl svg{flex:none;width:18px;height:18px;stroke:var(--faint);fill:none;stroke-width:1.4}
+.mswl .lbl{font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;color:var(--faint);font-weight:600;text-transform:uppercase}
+.mswl .cp{font-size:13px;color:var(--muted);margin-top:2px}
+.mswl .cta{margin-left:auto;flex:none;font-size:12.5px;font-weight:500;border:1px solid var(--line);border-radius:99px;padding:6px 13px;background:var(--panel);box-shadow:var(--sh-btn)}
+.mswl textarea{width:100%;margin-top:9px;border:1px solid var(--line);border-radius:var(--r-sm);padding:10px;font-size:13px;min-height:80px;resize:vertical;background:var(--panel)}
+.mswl .body2{font-size:13.5px;color:var(--ink-2);line-height:1.6;margin-top:7px}
+.mswl .fa{display:flex;gap:7px;margin-top:10px;align-items:center}
+.mswl .hint{margin-left:auto;font-family:var(--mono);font-size:8.5px;color:var(--faint)}
+
+/* SUBMISSION PROFILE */
+.sec-lbl{display:flex;align-items:center;gap:8px;margin:22px 0 12px}
+.sec-lbl .lbl{font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;color:var(--faint);font-weight:600;text-transform:uppercase}
+.sec-lbl .rule{flex:1;height:1px;background:var(--line)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);display:flex;flex-direction:column;overflow:visible;box-shadow:var(--sh-1)}
+.card .ch{display:flex;align-items:center;justify-content:center;gap:9px;padding:12px;background:linear-gradient(180deg,var(--sage-band),var(--sage-band-2));border-bottom:1px solid var(--sage-edge);border-radius:var(--r-lg) var(--r-lg) 0 0;font-family:var(--serif);font-size:15px;font-weight:600;color:#2f3a30}
+.card .ch svg{width:19px;height:19px;stroke:var(--sageD);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.card .cb{position:relative;flex:1;padding:18px;min-height:96px}
+.card .big{font-family:var(--serif);font-size:20px;font-weight:600;line-height:1.15}
+.card .sub{font-size:12px;color:var(--faint);margin-top:5px}
+.card .empty{font-family:var(--serif);font-size:16px;font-style:italic;color:var(--faint)}
+.editable{cursor:pointer;border-radius:var(--r-sm);padding:4px 6px;margin:-4px -6px}
+.editable:hover{background:var(--paper);box-shadow:inset 0 0 0 1px var(--line)}
+.editable .chev{display:inline-block;width:11px;height:11px;opacity:0;vertical-align:middle;margin-left:5px;stroke:var(--faint);fill:none;stroke-width:1.8}
+.editable:hover .chev{opacity:1}
+.derived{position:absolute;top:12px;right:12px;width:17px;height:17px;border-radius:50%;border:1px solid var(--line);color:var(--faint);display:flex;align-items:center;justify-content:center;font-size:9px;font-family:var(--mono)}
+.derived:hover{border-color:var(--ink-2);color:var(--ink)}
+.tipbox{position:absolute;top:32px;right:6px;z-index:110;width:230px;background:var(--ink);color:var(--panel);border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.5;display:none;box-shadow:var(--sh-3)}
+.tipbox.show{display:block}
+.editpop{position:absolute;top:38px;left:14px;z-index:110;width:230px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:var(--sh-3);padding:5px;display:none}
+.editpop.open{display:block}
+.editpop .eh{font-family:var(--mono);font-size:8px;letter-spacing:.14em;color:var(--faint);padding:7px 9px 4px;text-transform:uppercase}
+.eopt{display:flex;align-items:center;gap:9px;width:100%;padding:8px 9px;border-radius:var(--r-sm);font-size:13px;color:var(--ink-2)}
+.eopt:hover{background:var(--paper);color:var(--ink)}
+.eopt.on{background:var(--paper);font-weight:600;color:var(--ink)}
+.eopt .tick{margin-left:auto;opacity:0}
+.eopt.on .tick{opacity:1}
+.chk{flex:none;width:14px;height:14px;border:1.5px solid #d9cfc0;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff}
+.eopt.on .chk{background:var(--ink);border-color:var(--ink)}
+.eopt.on .chk::after{content:"✓"}
+
+/* tabs */
+.tabsrow{display:flex;gap:2px;margin:22px 0 0;border-bottom:1px solid var(--line)}
+.tabsrow button{position:relative;font-family:var(--mono);font-size:9px;letter-spacing:.12em;padding:10px 14px;color:var(--muted);text-transform:uppercase}
+.tabsrow button.on{color:var(--ink);font-weight:600}
+.tabsrow button.on::after{content:"";position:absolute;left:12px;right:12px;bottom:-1px;height:2px;background:var(--ink)}
+.tabpane{display:none;padding:14px 2px}
+.tabpane.on{display:block}
+.hrow{display:flex;align-items:center;gap:11px;padding:11px 8px;border-bottom:1px solid var(--hairline);border-radius:var(--r-sm);cursor:pointer}
+.hrow:hover{background:var(--panel)}
+.hrow .t{font-weight:500;font-size:13.5px}
+.hrow .m{font-size:12px;color:var(--muted);margin-top:1px}
+.hrow .d{margin-left:auto;font-family:var(--mono);font-size:9px;color:var(--faint)}
+.hrow .goto{opacity:0;font-family:var(--mono);font-size:8px;letter-spacing:.09em;color:var(--muted)}
+.hrow:hover .goto{opacity:1}
+.notein{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--panel);padding:10px 12px;margin-top:10px}
+.notein input{flex:1;border:none;outline:none;background:transparent;font-size:13px}
+
+.d-foot{flex:none;display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-top:1px solid var(--hairline);background:var(--panel);font-family:var(--mono);font-size:8.5px;letter-spacing:.09em;color:var(--faint)}
+.door{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.09em;padding:3px 9px;border-radius:99px}
+.door.open{background:var(--sageC);border:1px solid var(--sage-edge);color:var(--sageD)}
+.door.shut{background:var(--pink-t);border:1px solid var(--pink-b);color:var(--pink-i)}
+.door .pip{width:5px;height:5px;border-radius:50%;background:currentColor}
+
+/* popovers / modals / toasts */
+.pop{position:absolute;top:calc(100% + 6px);left:0;z-index:120;width:300px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-3);display:none;overflow:hidden}
+.pop.open{display:block}
+.pop-h{padding:12px 14px;background:var(--paper);border-bottom:1px solid var(--line);font-family:var(--serif);font-size:15px;font-weight:600}
+.pop-b{padding:8px}
+.task{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--r-sm);font-size:13px}
+.task:hover{background:var(--paper)}
+.task .box{flex:none;width:15px;height:15px;border:1.5px solid #d9cfc0;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;cursor:pointer}
+.task.done .box{background:var(--ink);border-color:var(--ink)}
+.task.done .box::after{content:"✓"}
+.task.done .tt{text-decoration:line-through;color:var(--faint)}
+.addtask{display:flex;align-items:center;gap:9px;padding:8px 10px;margin-top:2px;border-top:1px solid var(--hairline)}
+.addtask input{flex:1;border:none;outline:none;background:transparent;font-size:13px}
+
+.scrim{position:fixed;inset:0;background:rgba(30,26,22,.32);z-index:200;display:none;align-items:center;justify-content:center}
+.scrim.open{display:flex}
+.modal{width:560px;max-width:92vw;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-xl);box-shadow:var(--sh-3);overflow:hidden}
+.modal .mh{padding:18px 22px;border-bottom:1px solid var(--line);background:var(--paper)}
+.modal .mh .t{font-family:var(--serif);font-size:21px;font-weight:600}
+.modal .mh .s{font-size:12.5px;color:var(--muted);margin-top:2px}
+.modal .mb{padding:20px 22px}
+.modal .mf{padding:14px 22px;background:var(--paper);border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}
+.danger{background:var(--pink-i);color:#fff;font-size:12.5px;font-weight:600;padding:9px 16px;border-radius:var(--r-sm)}
+.warnbox{display:flex;gap:10px;background:var(--pink-t);border:1px solid var(--pink-b);border-radius:var(--r-md);padding:12px 14px;font-size:13px;color:var(--pink-i);line-height:1.55;margin-top:12px}
+
+.toasts{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:300;display:flex;flex-direction:column;gap:8px;align-items:center}
+.toast{display:flex;align-items:center;gap:14px;background:var(--ink);color:var(--panel);border-radius:99px;padding:10px 12px 10px 18px;box-shadow:var(--sh-3);font-size:13px;animation:rise .18s ease}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.toast .undo{font-family:var(--mono);font-size:9px;letter-spacing:.1em;font-weight:600;color:var(--ink);background:var(--pink-btn);padding:6px 12px;border-radius:99px}
+.toast .x{color:#8d857a;padding:0 4px}
+
+/* ===== genre pills ===== */
+.genres{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:11px}
+.gpill{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:8.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:4px 5px 4px 10px;border-radius:99px;background:var(--paper);border:1px solid var(--line);color:var(--ink-2)}
+.gpill .x{opacity:0;font-size:10px;color:var(--faint);width:13px;height:13px;display:flex;align-items:center;justify-content:center;border-radius:50%}
+.gpill:hover .x{opacity:1}
+.gpill .x:hover{background:var(--pink-t);color:var(--pink-i)}
+.gadd{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:8.5px;letter-spacing:.09em;padding:4px 10px;border-radius:99px;border:1px dashed var(--line);color:var(--muted)}
+.gadd:hover{border-color:var(--ink-2);color:var(--ink)}
+
+.gpop.open{display:block}
+
+.gwrap{display:flex;flex-wrap:wrap;gap:5px}
+.gopt{font-family:var(--mono);font-size:8.5px;letter-spacing:.07em;text-transform:uppercase;padding:5px 10px;border-radius:99px;border:1px solid var(--line);color:var(--muted);background:var(--panel)}
+.gopt:hover{border-color:var(--ink-2);color:var(--ink)}
+.gopt.on{background:var(--ink);border-color:var(--ink);color:var(--panel);font-weight:600}
+
+
+
+/* ===== response time ===== */
+.mini{font-size:11.5px;color:var(--pink-i);margin-top:6px;display:none}
+.mini.show{display:block}
+
+/* pro coming-soon strip */
+.pro-strip{margin-top:auto;padding-top:12px;border-top:1px dashed var(--line);display:flex;align-items:center;gap:8px}
+.pro-strip .txt{font-size:11.5px;color:var(--faint);line-height:1.4}
+.pro-tag{flex:none;font-family:var(--mono);font-size:7.5px;font-weight:600;letter-spacing:.1em;background:var(--pro);color:#fff;padding:2px 6px;border-radius:99px}
+
+/* ===== materials ===== */
+.matlist{display:flex;flex-direction:column;gap:6px}
+.matrow{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2)}
+.matrow .tick{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--sage);background:var(--sageC);display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--sageD);flex:none}
+.matrow .tick::after{content:"✓"}
+.matrow .amt{font-family:var(--mono);font-size:9px;color:var(--muted);background:var(--paper);border:1px solid var(--hairline);border-radius:99px;padding:2px 7px}
+.matrow .x{margin-left:auto;opacity:0;color:var(--faint);font-size:11px}
+.matrow:hover .x{opacity:1}
+.matpop{position:absolute;top:38px;left:14px;right:14px;z-index:130;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:var(--sh-3);padding:9px;display:none}
+.matpop.open{display:block}
+.matpop .lb{font-family:var(--mono);font-size:8px;letter-spacing:.13em;color:var(--faint);text-transform:uppercase;display:block;margin-bottom:5px}
+.matpop select,.matpop input{width:100%;border:1px solid var(--line);border-radius:var(--r-sm);padding:7px 9px;font-size:12.5px;background:var(--panel)}
+.matpop input.bad{border-color:var(--pink-b);background:#fdf6f4}
+.qtyrow{display:none;gap:7px;margin-top:8px}
+.qtyrow.show{display:flex}
+.qtyrow label{flex:1}
+
+
+/* selected-but-closed keeps its grey avatar */
+.row.sel.shut .av{background:#eceae6;color:#a49a8d}
+.row.sel.shut .nm{color:#8b8377}
+
+/* hero meta line: agency · method (method is click-to-pick) */
+.metaline{display:flex;align-items:center;gap:8px;margin-top:6px;font-family:var(--mono);font-size:9px;letter-spacing:.13em;color:var(--faint);text-transform:uppercase}
+.metaline .sep{color:#d8cec0}
+.mpick{position:relative;display:inline-flex;align-items:center;gap:5px;color:var(--muted);border-radius:5px;padding:2px 5px;margin:-2px -5px;cursor:pointer}
+.mpick:hover{background:var(--paper);box-shadow:inset 0 0 0 1px var(--line);color:var(--ink-2)}
+.mpick .chev{width:9px;height:9px;opacity:0;stroke:currentColor;fill:none;stroke-width:2}
+.mpick:hover .chev{opacity:1}
+
+/* genre typeahead */
+
+
+
+
+
+
+/* query history card */
+.qh{display:flex;flex-direction:column;gap:2px}
+.qhrow{display:flex;align-items:center;gap:10px;padding:8px 6px;border-radius:var(--r-sm);cursor:pointer;margin:0 -6px}
+.qhrow:hover{background:var(--paper)}
+.qhrow .t{font-weight:500;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qhrow .m{font-size:11px;color:var(--faint);margin-top:1px}
+.qhrow .d{margin-left:auto;font-family:var(--mono);font-size:8.5px;color:var(--faint);white-space:nowrap}
+.qhrow .go{opacity:0;font-family:var(--mono);font-size:8px;color:var(--muted)}
+.qhrow:hover .go{opacity:1}
+.qhempty{font-family:var(--serif);font-size:16px;font-style:italic;color:var(--faint)}
+.qhfoot{margin-top:auto;padding-top:12px;border-top:1px dashed var(--line);font-size:12px;color:var(--muted)}
+.qhfoot button{color:var(--ink);font-weight:500;text-decoration:underline;text-underline-offset:2px}
+
+/* notes: full width */
+.notes-panel{margin-top:16px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-1);overflow:hidden}
+.notes-head{display:flex;align-items:center;gap:9px;padding:12px 18px;background:linear-gradient(180deg,var(--sage-band),var(--sage-band-2));border-bottom:1px solid var(--sage-edge);font-family:var(--serif);font-size:15px;font-weight:600;color:#2f3a30}
+.notes-head svg{width:19px;height:19px;stroke:var(--sageD);fill:none;stroke-width:1.5}
+.notes-head .n{margin-left:auto;font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;color:#4a5a48;font-weight:600}
+.notes-body{padding:16px 18px}
+.notegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-bottom:12px}
+.notecard{background:var(--paper);border:1px solid var(--hairline);border-radius:var(--r-md);padding:12px 14px}
+.notecard .nd{font-family:var(--mono);font-size:8px;letter-spacing:.13em;color:var(--faint);margin-bottom:5px;display:flex;align-items:center}
+.notecard .nd .x{margin-left:auto;opacity:0;cursor:pointer}
+.notecard:hover .nd .x{opacity:1}
+.notecard .nt{font-size:13px;color:var(--ink-2);line-height:1.55}
+.noteempty{border:1.5px dotted #d2c8ba;border-radius:var(--r-md);padding:16px 18px;margin-bottom:12px;text-align:center}
+.noteempty .t{font-size:13px;color:var(--muted)}
+.bigin{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--panel);padding:12px 14px}
+.bigin input{flex:1;border:none;outline:none;background:transparent;font-size:13.5px}
+.bigin .k{font-family:var(--mono);font-size:8px;color:var(--faint);border:1px solid var(--line);border-radius:4px;padding:2px 5px}
+
+
+
+/* ===== nothing in the reading pane may clip a popover ===== */
+.hero,.hero *,.card,.card .cb{overflow:visible}
+.gbody{overflow-y:auto}   /* the one intentional scroll: the genre list itself */
+
+/* ===== genre popover (search-first, clip-safe) ===== */
+.gpop{position:absolute;top:calc(100% + 6px);left:0;z-index:130;width:300px;max-width:calc(100vw - 40px);background:var(--panel);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:var(--sh-3);display:none;overflow:hidden}
+.gpop.open{display:block}
+.gsearch{padding:10px;border-bottom:1px solid var(--hairline);background:var(--paper)}
+.gsearch .field{position:relative;display:block;width:100%}
+.gsearch input{display:block;width:100%;box-sizing:border-box;min-width:0;border:1px solid var(--line);border-radius:var(--r-sm);padding:9px 11px;font-size:13px;background:var(--panel);position:relative;z-index:2}
+.gsearch input:focus{outline:none;border-color:var(--ink)}
+.gsearch input.bad{border-color:var(--pink-b);background:#fdf6f4}
+.ghost{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:13px;color:#cfc5b7;pointer-events:none;white-space:nowrap;z-index:1;overflow:hidden;max-width:calc(100% - 24px)}
+.ghost b{color:transparent}
+.ghint{display:flex;gap:12px;margin-top:7px;font-family:var(--mono);font-size:7.5px;letter-spacing:.1em;color:var(--faint)}
+.ghint kbd{border:1px solid var(--line);border-radius:3px;padding:1px 4px;background:var(--panel);margin-right:4px}
+.gbody{padding:10px;max-height:210px;overflow-y:auto}
+.gbody .lb{font-family:var(--mono);font-size:8px;letter-spacing:.13em;color:var(--faint);text-transform:uppercase;display:block;margin-bottom:8px}
+.gnone{display:none;font-size:12.5px;color:var(--pink-i);background:var(--pink-t);border:1px solid var(--pink-b);border-radius:var(--r-sm);padding:8px 10px}
+
+/* ===== response guidelines card ===== */
+.rg{display:flex;flex-direction:column;gap:2px}
+.rgrow{position:relative;display:flex;align-items:flex-start;gap:9px;padding:9px 7px;border-radius:var(--r-sm);margin:0 -7px;cursor:pointer}
+.rgrow:hover{background:var(--paper)}
+.rgrow .ic{flex:none;width:15px;height:15px;margin-top:2px;stroke:var(--faint);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.rgrow .lb2{font-family:var(--mono);font-size:8px;letter-spacing:.13em;color:var(--faint);text-transform:uppercase}
+.rgrow .val{font-size:14px;font-weight:500;color:var(--ink);margin-top:2px;line-height:1.35}
+.rgrow .val.unset{font-family:var(--serif);font-style:italic;font-weight:400;color:var(--faint);font-size:14.5px}
+.rgrow .chev{position:absolute;right:6px;top:11px;width:11px;height:11px;opacity:0;stroke:var(--faint);fill:none;stroke-width:1.8}
+.rgrow:hover .chev{opacity:1}
+.rgpop{position:absolute;top:calc(100% - 2px);left:0;right:0;z-index:140;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:var(--sh-3);padding:9px;display:none}
+.rgpop.open{display:block}
+.rgpop .lb{font-family:var(--mono);font-size:8px;letter-spacing:.13em;color:var(--faint);text-transform:uppercase;display:block;margin-bottom:5px}
+.rgpop .row2{display:flex;gap:6px}
+.rgpop input{width:70px;border:1px solid var(--line);border-radius:var(--r-sm);padding:7px 9px;font-size:13px;background:var(--panel)}
+.rgpop input.bad{border-color:var(--pink-b);background:#fdf6f4}
+.rgpop select{flex:1;border:1px solid var(--line);border-radius:var(--r-sm);padding:7px 8px;font-size:13px;background:var(--panel)}
+.rgpop .fa{display:flex;gap:7px;margin-top:9px}
+.rgopt{display:flex;align-items:flex-start;gap:9px;width:100%;padding:9px 9px;border-radius:var(--r-sm);font-size:12.5px;color:var(--ink-2);line-height:1.4}
+.rgopt:hover{background:var(--paper);color:var(--ink)}
+.rgopt.on{background:var(--paper);color:var(--ink);font-weight:500}
+.rgopt .rad{flex:none;width:14px;height:14px;margin-top:1px;border:1.5px solid #d9cfc0;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.rgopt.on .rad{border-color:var(--ink)}
+.rgopt.on .rad::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--ink)}
+.rgopt .sub2{display:block;font-size:11px;color:var(--faint);font-weight:400;margin-top:2px}
+
+
+/* ===== genre suggestion highlight ===== */
+.gopt.sug{border-color:var(--ink);box-shadow:0 0 0 3px rgba(30,26,22,.10);color:var(--ink)}
+.gopt.on.sug{box-shadow:0 0 0 3px rgba(246,207,201,.55)}
+.gnote{display:none;font-size:12.5px;padding:8px 10px;border-radius:var(--r-sm);margin-top:2px}
+.gnote.show{display:block}
+.gnote.warn{color:var(--pink-i);background:var(--pink-t);border:1px solid var(--pink-b)}
+.gnote.info{color:var(--muted);background:var(--paper);border:1px solid var(--hairline)}
+.gnote b{color:var(--ink)}
+
+/* ===== MSWL find & update ===== */
+.mswl .pro-find{margin-left:auto;display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:500;border:1px solid var(--line);border-radius:99px;padding:6px 13px;background:var(--panel);box-shadow:var(--sh-btn);color:var(--ink-2)}
+.mswl .pro-find:hover{border-color:var(--ink-2);color:var(--ink)}
+.mswl .pro-find .tag{font-family:var(--mono);font-size:7.5px;font-weight:600;letter-spacing:.1em;background:var(--pro);color:#fff;padding:2px 6px;border-radius:99px}
+
+/* proposal review */
+.prop{margin-top:16px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-2);overflow:hidden;display:none}
+.prop.show{display:block}
+.prop-h{display:flex;align-items:center;gap:10px;padding:13px 18px;background:var(--paper);border-bottom:1px solid var(--line)}
+.prop-h .t{font-family:var(--serif);font-size:16px;font-weight:600}
+.prop-h .tag{font-family:var(--mono);font-size:7.5px;font-weight:600;letter-spacing:.1em;background:var(--pro);color:#fff;padding:2px 6px;border-radius:99px}
+.prop-h .close{margin-left:auto;color:var(--faint);padding:2px 6px}
+.prop-b{padding:16px 18px}
+.prop .lead{font-size:12.5px;color:var(--muted);margin-bottom:12px}
+.found{background:var(--paper);border:1px solid var(--hairline);border-radius:var(--r-md);padding:14px 16px;font-size:13.5px;line-height:1.65;color:var(--ink-2)}
+.found b{color:var(--ink)}
+.conflict{display:flex;gap:10px;margin-top:12px;background:var(--pink-t);border:1px solid var(--pink-b);border-radius:var(--r-md);padding:12px 14px;font-size:13px;color:var(--pink-i);line-height:1.55}
+.conflict b{color:#6d2f22}
+.conflict .fix{margin-top:8px;display:flex;gap:7px}
+.chipbtn{font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;font-weight:600;padding:6px 11px;border-radius:99px;border:1px solid var(--pink-b);background:var(--panel);color:var(--pink-i)}
+.chipbtn:hover{background:#fff}
+.srcs{margin-top:14px}
+.srcs .lb{font-family:var(--mono);font-size:8px;letter-spacing:.13em;color:var(--faint);text-transform:uppercase;display:block;margin-bottom:7px}
+.src{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid var(--hairline);border-radius:var(--r-sm);margin-bottom:6px;background:var(--panel)}
+.src .nm3{font-size:12.5px;font-weight:500;color:var(--ink-2)}
+.src .u{font-size:11px;color:var(--faint);margin-top:1px;word-break:break-all}
+.src .dt3{margin-left:auto;font-family:var(--mono);font-size:8.5px;color:var(--faint);white-space:nowrap;text-align:right}
+.src .dt3 .stale{color:var(--pink-i)}
+.gsug{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.gsug .gs{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:8.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:5px 10px;border-radius:99px;border:1px dashed var(--line);color:var(--muted);background:var(--panel)}
+.gsug .gs:hover{border-color:var(--ink-2);color:var(--ink);border-style:solid}
+.gsug .gs.added{border-style:solid;background:var(--ink);border-color:var(--ink);color:var(--panel)}
+.prop-f{display:flex;align-items:center;gap:8px;padding:13px 18px;background:var(--paper);border-top:1px solid var(--line)}
+.prop-f .note2{margin-left:auto;font-family:var(--mono);font-size:8px;letter-spacing:.09em;color:var(--faint)}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="hd">
+  <button class="act" style="padding:8px"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1e1a16" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 3 10.5l6.5 2.6L12 20l3-5.5L21 3z"/></svg>
+  <span style="font-family:var(--serif);font-size:17px;font-weight:600">ScriptAlly</span>
+  <div style="display:flex;align-items:baseline;gap:8px;margin-left:13px;padding-left:15px;border-left:1px solid var(--line)">
+    <span class="up">AGENTS /</span><span class="here">Contact List</span>
+  </div>
+  <button class="who"><span class="av2">NP</span><span>Nick Physick</span></button>
+</header>
+
+<div class="ctl">
+  <div class="zone-list">
+    <button class="btn-pri" onclick="openModal('addagent')">＋ Add agent</button>
+    <button class="btn-sec" onclick="openModal('import')">⭱ Import data</button>
+  </div>
+  <div class="zone-read">
+    <button class="act" onclick="openModal('sendquery')"><svg viewBox="0 0 24 24"><path d="M21 3 3 10.5l6.5 2.6L12 20l3-5.5L21 3z"/></svg>Send query</button>
+
+    <div class="relwrap">
+      <button class="act" id="tk-t" onclick="pop('tasks')"><svg viewBox="0 0 24 24"><path d="M4 6h10M4 12h10M4 18h10"/><path d="m17 6 1.5 1.5L21.5 4"/></svg>View tasks <span class="cnt" id="tcount">2</span></button>
+      <div class="pop" id="p-tasks">
+        <div class="pop-h">Tasks · Aisha Kapoor</div>
+        <div class="pop-b" id="tasklist">
+          <div class="task"><span class="box" onclick="tick(this)"></span><span class="tt">Find her MSWL — check agency site</span></div>
+          <div class="task"><span class="box" onclick="tick(this)"></span><span class="tt">Confirm she's still at The Lantern</span></div>
+          <div class="addtask"><span style="color:var(--faint)">＋</span><input placeholder="Add a task…" onkeydown="addTask(event)"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grp">
+      <button class="act">⋯</button>
+      <button class="act del" onclick="openModal('del')"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6.5 7l1 13h9l1-13"/></svg>Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="body">
+  <section class="pane list">
+    <div class="l-head"><div class="l-search">⌕ Search</div></div>
+    <div class="rows">
+      <div class="row sel"><span class="av">AK</span><div class="mid"><span class="nm">Aisha Kapoor</span><span class="ag">The Lantern Agency</span></div><span class="qdots"><span class="dot q"></span></span></div>
+      <div class="row shut" title="Closed to queries"><span class="av">DO</span><div class="mid"><span class="nm">Daniel O'Rourke</span><span class="ag">Inkwell &amp; Stone</span></div><span class="nq">NOT QUERIED</span></div>
+      <div class="row"><span class="av">FS</span><div class="mid"><span class="nm">Fenella Str</span><span class="ag">Brightwater Books</span></div><span class="qdots"><span class="dot freq"></span><span class="dot q"></span></span></div>
+      <div class="row"><span class="av">JM</span><div class="mid"><span class="nm">Jonathan Marsh</span><span class="ag">The Marsh Agency</span></div><span class="qdots"><span class="dot cl"></span></span></div>
+    </div>
+    <div class="l-foot"><span>SHOWING 4 OF 4 · 1 NOT QUERIED</span><button style="color:var(--muted)">⭳ EXPORT CSV</button></div>
+  </section>
+
+  <section class="pane detail">
+    <div class="d-scroll">
+
+      <div class="hero">
+        <div class="hero-top">
+          <span class="bigav">AK</span>
+          <div>
+            <div class="n">Aisha Kapoor</div>
+            <div class="metaline">
+              <span>The Lantern Agency</span>
+              <span class="sep">·</span>
+              <span class="mpick" onclick="editMethod()">
+                <span id="v-method">Email submissions</span>
+                <svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+                <div class="editpop" id="ep-method" style="top:calc(100% + 6px);left:-6px;width:210px">
+                  <div class="eh">How she takes submissions</div>
+                  <button class="eopt on" onclick="pickMethod(this,'Email submissions')">Email<span class="tick">✓</span></button>
+                  <button class="eopt" onclick="pickMethod(this,'Agency form')">Agency form<span class="tick">✓</span></button>
+                  <button class="eopt" onclick="pickMethod(this,'QueryManager')">QueryManager<span class="tick">✓</span></button>
+                  <button class="eopt" onclick="pickMethod(this,'Postal submissions')">Post<span class="tick">✓</span></button>
+                  <button class="eopt" onclick="pickMethod(this,'Method not known')">Not known<span class="tick">✓</span></button>
+                </div>
+              </span>
+            </div>
+            <div style="position:relative">
+              <div class="genres" id="genres">
+                <span class="gpill">Literary fiction<button class="x" onclick="delGenre(this)">✕</button></span>
+                <span class="gpill">Book club<button class="x" onclick="delGenre(this)">✕</button></span>
+                <button class="gadd" onclick="openGenres()">＋ GENRE</button>
+              </div>
+              <div class="gpop" id="gpop">
+
+                <div class="gsearch">
+                  <span class="field">
+                    <span class="ghost" id="ghost"></span>
+                    <input id="gnew" placeholder="Search genres…" oninput="predict()" onkeydown="gkey(event)" maxlength="30" autocomplete="off">
+                  </span>
+                  <div class="ghint"><span><kbd>⏎</kbd>ADD THE MATCH</span><span><kbd>ESC</kbd>CLOSE</span></div>
+                </div>
+
+                <div class="gbody">
+                  <span class="lb">What she represents</span>
+                  <div class="gwrap" id="gwrap">
+                    <button class="gopt on" onclick="tg(this)">Literary fiction</button>
+                    <button class="gopt on" onclick="tg(this)">Book club</button>
+                    <button class="gopt" onclick="tg(this)">Upmarket</button>
+                    <button class="gopt" onclick="tg(this)">Commercial</button>
+                    <button class="gopt" onclick="tg(this)">Crime</button>
+                    <button class="gopt" onclick="tg(this)">Thriller</button>
+                    <button class="gopt" onclick="tg(this)">Historical</button>
+                    <button class="gopt" onclick="tg(this)">Romance</button>
+                    <button class="gopt" onclick="tg(this)">Fantasy</button>
+                    <button class="gopt" onclick="tg(this)">Sci-fi</button>
+                    <button class="gopt" onclick="tg(this)">Speculative</button>
+                    <button class="gopt" onclick="tg(this)">Horror</button>
+                    <button class="gopt" onclick="tg(this)">YA</button>
+                    <button class="gopt" onclick="tg(this)">Middle grade</button>
+                    <button class="gopt" onclick="tg(this)">Children's</button>
+                    <button class="gopt" onclick="tg(this)">Non-fiction</button>
+                    <button class="gopt" onclick="tg(this)">Memoir</button>
+                    <button class="gopt" onclick="tg(this)">Narrative non-fiction</button>
+                  </div>
+                  <div class="gnone" id="gnone"></div>
+                </div>
+
+              </div>
+            </div>
+
+            <div class="starwrap">
+              <div class="stars" id="stars"
+                   onmouseleave="starHover(0)">
+                <svg class="on" data-i="1" onmouseenter="starHover(1)" onclick="setStars(1)" viewBox="0 0 24 24"><path d="m12 3 2.6 5.5 6 .9-4.3 4.2 1 6-5.3-2.8-5.3 2.8 1-6L3.4 9.4l6-.9z"/></svg>
+                <svg class="on" data-i="2" onmouseenter="starHover(2)" onclick="setStars(2)" viewBox="0 0 24 24"><path d="m12 3 2.6 5.5 6 .9-4.3 4.2 1 6-5.3-2.8-5.3 2.8 1-6L3.4 9.4l6-.9z"/></svg>
+                <svg class="on" data-i="3" onmouseenter="starHover(3)" onclick="setStars(3)" viewBox="0 0 24 24"><path d="m12 3 2.6 5.5 6 .9-4.3 4.2 1 6-5.3-2.8-5.3 2.8 1-6L3.4 9.4l6-.9z"/></svg>
+                <svg data-i="4" onmouseenter="starHover(4)" onclick="setStars(4)" viewBox="0 0 24 24"><path d="m12 3 2.6 5.5 6 .9-4.3 4.2 1 6-5.3-2.8-5.3 2.8 1-6L3.4 9.4l6-.9z"/></svg>
+                <svg data-i="5" onmouseenter="starHover(5)" onclick="setStars(5)" viewBox="0 0 24 24"><path d="m12 3 2.6 5.5 6 .9-4.3 4.2 1 6-5.3-2.8-5.3 2.8 1-6L3.4 9.4l6-.9z"/></svg>
+              </div>
+              <button class="clearstar" onclick="setStars(0)">CLEAR</button>
+            </div>
+          </div>
+          <div class="oc">
+            <div class="seg" id="doorseg">
+              <button class="open-on" onclick="setDoor(true)">OPEN</button>
+              <button onclick="setDoor(false)">CLOSED</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="reopen" id="reopen">
+          <span>Closed for now. Remind me to check back in</span>
+          <select><option>1 month</option><option>3 months</option><option>6 months</option></select>
+          <button class="go" onclick="toast('Reminder task created',true)">SET</button>
+        </div>
+
+        <div class="links">
+          <div style="position:relative">
+            <button class="linkpill set" id="pill-web" onclick="openLink('web')">
+              <svg style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg>
+              <span id="v-web">lanternagency.co.uk</span>
+              <span class="x" onclick="clearLink(event,'web')">✕</span>
+            </button>
+            <div class="linkpop" id="lp-web">
+              <span class="lb">Website</span>
+              <input id="i-web" value="https://lanternagency.co.uk" oninput="valLink('web')">
+              <div class="err" id="e-web">That doesn't look like a web address.</div>
+              <div class="fa"><button class="save" id="s-web" onclick="saveLink('web')">Save</button><button class="cancel" onclick="closeLink('web')">Cancel</button></div>
+            </div>
+          </div>
+
+          <div style="position:relative">
+            <button class="linkpill" id="pill-soc" onclick="openLink('soc')">＋ Socials</button>
+            <div class="linkpop" id="lp-soc">
+              <span class="lb">Socials</span>
+              <input id="i-soc" placeholder="https://…" oninput="valLink('soc')">
+              <div class="err" id="e-soc">That doesn't look like a web address.</div>
+              <div class="fa"><button class="save" id="s-soc" disabled onclick="saveLink('soc')">Save</button><button class="cancel" onclick="closeLink('soc')">Cancel</button></div>
+            </div>
+          </div>
+
+          <div style="position:relative">
+            <button class="linkpill" id="pill-pm" onclick="openLink('pm')">＋ Publishers Marketplace</button>
+            <div class="linkpop" id="lp-pm">
+              <span class="lb">Publishers Marketplace</span>
+              <input id="i-pm" placeholder="https://…" oninput="valLink('pm')">
+              <div class="err" id="e-pm">That doesn't look like a web address.</div>
+              <div class="fa"><button class="save" id="s-pm" disabled onclick="saveLink('pm')">Save</button><button class="cancel" onclick="closeLink('pm')">Cancel</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WISH LIST -->
+      <div class="mswl" id="mswl">
+        <svg viewBox="0 0 24 24"><path d="M3 5.5A2.5 2.5 0 0 1 5.5 3H11v17H5.5A2.5 2.5 0 0 0 3 22V5.5zM21 5.5A2.5 2.5 0 0 0 18.5 3H13v17h5.5A2.5 2.5 0 0 1 21 22V5.5z"/></svg>
+        <div>
+          <div class="lbl">Manuscript wish list</div>
+          <div class="cp">Add what this agent is looking for and it'll show here.</div>
+        </div>
+        <button class="cta" onclick="editWish()">＋ Add wish list</button>
+        <button class="pro-find" onclick="findMSWL()"><span class="tag">PRO</span>Find &amp; update</button>
+      </div>
+
+      <!-- PROPOSAL REVIEW -->
+      <div class="prop" id="prop">
+        <div class="prop-h">
+          <span class="tag">PRO</span>
+          <span class="t">Here's what we found</span>
+          <button class="close" onclick="document.getElementById('prop').classList.remove('show')">✕</button>
+        </div>
+        <div class="prop-b">
+          <div class="lead">Nothing has been saved. Read it, check the sources, then decide.</div>
+
+          <div class="found" id="foundtext">
+            Building a list in <b>adult fiction and non-fiction</b>, leaning commercial. Wants <b>book club fiction with speculative elements</b>, <b>grounded, accessible science fiction</b> (clones, time travel, near-future space), and <b>approachable fantasy</b> — alternate history or contemporary second worlds. Also seeking <b>gothic horror</b>, <b>mysteries and thrillers</b> (MG and YA), and <b>intricate, inventive fantasy</b>. Actively looking for work from <b>BIPOC and queer writers</b>. Drawn to big, messy feelings and characters who fail before they succeed.
+          </div>
+
+          <div class="conflict">
+            <span>⚠</span>
+            <div>
+              <b>Her agency may have changed.</b> You have her at <b>Corvisiero Literary</b>. Two recent sources list her at <b>P.S. Literary</b>. We haven't changed anything — worth checking before you query.
+              <div class="fix">
+                <button class="chipbtn" onclick="fixAgency()">UPDATE TO P.S. LITERARY</button>
+                <button class="chipbtn" onclick="toast('Left as Corvisiero Literary')">KEEP AS IS</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="srcs">
+            <span class="lb">Where this came from</span>
+            <div class="src">
+              <div><div class="nm3">Manuscript Wish List — her own profile</div><div class="u">manuscriptwishlist.com/mswl-post/alex-grana</div></div>
+              <div class="dt3">PRIMARY<br>SOURCE</div>
+            </div>
+            <div class="src">
+              <div><div class="nm3">MsWishList — her posts</div><div class="u">mswishlist.com/agent/alexmgrana</div></div>
+              <div class="dt3">AUG 2025</div>
+            </div>
+            <div class="src">
+              <div><div class="nm3">QueryTracker listing</div><div class="u">querytracker.net/agent/20138</div></div>
+              <div class="dt3"><span class="stale">AGENCY<br>CONFLICT</span></div>
+            </div>
+          </div>
+
+          <div class="srcs">
+            <span class="lb">Genres we can add for you</span>
+            <div class="gsug" id="gsug">
+              <button class="gs" onclick="addSug(this,'Horror')">＋ Horror</button>
+              <button class="gs" onclick="addSug(this,'Fantasy')">＋ Fantasy</button>
+              <button class="gs" onclick="addSug(this,'Sci-fi')">＋ Sci-fi</button>
+              <button class="gs" onclick="addSug(this,'Thriller')">＋ Thriller</button>
+              <button class="gs" onclick="addSug(this,'YA')">＋ YA</button>
+              <button class="gs" onclick="addSug(this,'Middle grade')">＋ Middle grade</button>
+            </div>
+          </div>
+        </div>
+        <div class="prop-f">
+          <button class="save" onclick="acceptMSWL()">Save to her wish list</button>
+          <button class="cancel" onclick="document.getElementById('prop').classList.remove('show')">Discard</button>
+          <span class="note2">WE NEVER WRITE WITHOUT YOUR SAY-SO</span>
+        </div>
+      </div>
+
+      <!-- SUBMISSION PROFILE -->
+      <div class="sec-lbl"><span class="lbl">Submission profile</span><span class="rule"></span></div>
+      <div class="grid3">
+
+        <div class="card">
+          <div class="ch"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Response guidelines</div>
+          <div class="cb" style="display:flex;flex-direction:column">
+            <div class="rg">
+
+              <div class="rgrow" onclick="openRT()">
+                <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                <div style="min-width:0">
+                  <div class="lb2">Usual response time</div>
+                  <div class="val" id="v-rt">Within 6 weeks</div>
+                </div>
+                <svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+
+                <div class="rgpop" id="rgp-rt" onclick="event.stopPropagation()">
+                  <span class="lb">How long they say they take</span>
+                  <div class="row2">
+                    <input id="rtn" type="text" inputmode="numeric" value="6" oninput="valRT()">
+                    <select id="rtu" onchange="valRT()">
+                      <option>days</option><option selected>weeks</option><option>months</option>
+                    </select>
+                  </div>
+                  <div class="mini" id="rterr"></div>
+                  <div class="fa">
+                    <button class="save" id="rtsave" onclick="saveRT()">Save</button>
+                    <button class="cancel" onclick="closeAll()">Cancel</button>
+                    <button class="cancel" style="margin-left:auto" onclick="clearRT()">Not stated</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="rgrow" onclick="openNR()">
+                <svg class="ic" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v9a2.5 2.5 0 0 1-2.5 2.5H9l-5 4z"/><path d="M12 8v3M12 13.5h.01"/></svg>
+                <div style="min-width:0">
+                  <div class="lb2">If they don't reply</div>
+                  <div class="val" id="v-nr">No response means no</div>
+                </div>
+                <svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+
+                <div class="rgpop" id="rgp-nr" onclick="event.stopPropagation()">
+                  <span class="lb">What silence means</span>
+                  <button class="rgopt on" onclick="pickNR(this,'No response means no')">
+                    <span class="rad"></span>
+                    <span>No response means no<span class="sub2">We'll close the query once their window has passed</span></span>
+                  </button>
+                  <button class="rgopt" onclick="pickNR(this,'They reply either way')">
+                    <span class="rad"></span>
+                    <span>They reply either way<span class="sub2">We'll keep it open and nudge you instead</span></span>
+                  </button>
+                  <button class="rgopt" onclick="pickNR(this,'Not stated')">
+                    <span class="rad"></span>
+                    <span>Not stated<span class="sub2">We won't assume anything</span></span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="pro-strip">
+              <span class="pro-tag">PRO</span>
+              <span class="txt">Community average response times — how long she <i>actually</i> takes. <b style="color:var(--muted)">Coming soon.</b></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="ch"><svg viewBox="0 0 24 24"><path d="M21 3 3 10.5l6.5 2.6L12 20l3-5.5L21 3z"/></svg>Query history</div>
+          <div class="cb" style="display:flex;flex-direction:column">
+            <div class="qh">
+              <div class="qhrow" onclick="toast('Opens this query in the Queries Hub')">
+                <span class="dot q"></span>
+                <div style="min-width:0"><div class="t">Murphy's Day Out</div><div class="m">Waiting · 101 days</div></div>
+                <span class="go">↗</span>
+                <span class="d">3 APR</span>
+              </div>
+              <div class="qhrow" onclick="toast('Opens this query in the Queries Hub')">
+                <span class="dot cl"></span>
+                <div style="min-width:0"><div class="t">The Salt Houses</div><div class="m">Rejected</div></div>
+                <span class="go">↗</span>
+                <span class="d">12 JAN</span>
+              </div>
+            </div>
+            <div class="qhfoot">2 queries · <button onclick="openModal('sendquery')">Send another</button></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="ch"><svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 12h6M9 16h4"/></svg>Wanted materials</div>
+          <div class="cb">
+            <div class="matlist" id="matlist">
+              <div class="matrow"><span class="tick"></span>Query letter<button class="x" onclick="delMat(this)">✕</button></div>
+              <div class="matrow"><span class="tick"></span>Synopsis<span class="amt">1 PAGE</span><button class="x" onclick="delMat(this)">✕</button></div>
+              <div class="matrow"><span class="tick"></span>Sample chapters<span class="amt">3 CHAPTERS</span><button class="x" onclick="delMat(this)">✕</button></div>
+            </div>
+            <button class="gadd" style="margin-top:10px;align-self:flex-start" onclick="openMat()">＋ ADD MATERIAL</button>
+
+            <div class="matpop" id="matpop">
+              <label><span class="lb">What she asks for</span>
+                <select id="mtype" onchange="mtypeChanged()">
+                  <option value="">Choose…</option>
+                  <option data-q="none">Query letter</option>
+                  <option data-q="pages">Synopsis</option>
+                  <option data-q="none">Author bio</option>
+                  <option data-q="chapters">Sample chapters</option>
+                  <option data-q="pages">Sample pages</option>
+                  <option data-q="words">Sample words</option>
+                  <option data-q="none">Full manuscript</option>
+                </select>
+              </label>
+              <div class="qtyrow" id="qtyrow">
+                <label><span class="lb">How many</span><input id="mqty" type="text" inputmode="numeric" placeholder="3" oninput="valMat()"></label>
+                <label style="flex:none;width:96px"><span class="lb">Unit</span><input id="munit" value="" readonly style="background:var(--paper);color:var(--muted)"></label>
+              </div>
+              <div class="mini" id="materr"></div>
+              <div style="display:flex;gap:7px;margin-top:10px">
+                <button class="save" id="matsave" disabled onclick="saveMat()">Add</button>
+                <button class="cancel" onclick="closeAll()">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- NOTES, full width -->
+      <div class="notes-panel">
+        <div class="notes-head">
+          <svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg>
+          Notes on Aisha
+          <span class="n" id="notecount">2 NOTES</span>
+        </div>
+        <div class="notes-body">
+          <div class="notegrid" id="notes">
+            <div class="notecard">
+              <div class="nd">3 APR<span class="x" onclick="delNote(this)">✕</span></div>
+              <div class="nt">Said at the Bath festival that she's "hungry for northern voices" — worth leaning into the setting in the letter.</div>
+            </div>
+            <div class="notecard">
+              <div class="nd">28 MAR<span class="x" onclick="delNote(this)">✕</span></div>
+              <div class="nt">Agency site says no simultaneous submissions. Check before sending anything else.</div>
+            </div>
+          </div>
+          <div class="noteempty" id="noteEmpty" style="display:none">
+            <div class="t">Notes on this agent appear here — what they said, what they like, anything worth remembering.</div>
+          </div>
+          <div class="bigin">
+            <input placeholder="Write a note about Aisha…" onkeydown="addNote(event)">
+            <span class="k">⏎</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="d-foot">
+      <span>ADDED 25 JUN 2026 · QUERIED · ACTIVE</span>
+      <span id="doorfoot"><span class="door open"><span class="pip"></span>OPEN TO QUERIES</span></span>
+    </div>
+  </section>
+</div>
+
+<!-- MODALS -->
+<div class="scrim" id="scrim" onclick="if(event.target===this)closeModal()">
+
+  <div class="modal" id="m-del">
+    <div class="mh"><div class="t">Delete Aisha Kapoor?</div><div class="s">The Lantern Agency</div></div>
+    <div class="mb" style="font-size:13.5px;color:var(--ink-2);line-height:1.6">
+      This agent has <b>1 query</b> attached to her.
+      <div class="warnbox">
+        <span>⚠</span>
+        <div>Deleting her will also delete that query and its history. Your response stats will change.<br><br>If she's simply not taking submissions, <b>mark her closed</b> instead — she'll grey out in the list and stay on file.</div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-sec" onclick="closeModal();setDoor(false);toast('Marked closed to queries',true)">Mark closed instead</button>
+      <button class="danger" onclick="closeModal();toast('Agent deleted')">Delete anyway</button>
+    </div>
+  </div>
+
+  <div class="modal" id="m-sendquery" style="display:none">
+    <div class="mh"><div class="t">Log a query</div><div class="s">To Aisha Kapoor · The Lantern Agency</div></div>
+    <div class="mb">
+      <div style="display:flex;gap:10px;margin-bottom:11px">
+        <label style="flex:1"><span style="font-family:var(--mono);font-size:8px;letter-spacing:.13em;color:var(--faint);display:block;margin-bottom:5px">MANUSCRIPT</span>
+          <select style="width:100%;border:1px solid var(--line);border-radius:6px;padding:8px 9px;background:var(--panel)"><option>Murphy's Day Out</option><option>The Salt Houses</option></select>
+        </label>
+        <label style="flex:1"><span style="font-family:var(--mono);font-size:8px;letter-spacing:.13em;color:var(--faint);display:block;margin-bottom:5px">SENT</span>
+          <input type="date" value="2026-07-13" max="2026-07-13" style="width:100%;border:1px solid var(--line);border-radius:6px;padding:8px 9px;background:var(--panel)">
+        </label>
+        <label style="flex:1"><span style="font-family:var(--mono);font-size:8px;letter-spacing:.13em;color:var(--faint);display:block;margin-bottom:5px">HOW</span>
+          <select style="width:100%;border:1px solid var(--line);border-radius:6px;padding:8px 9px;background:var(--panel)"><option>Email</option><option>Agency form</option><option>QueryManager</option><option>Post</option></select>
+        </label>
+      </div>
+      <span style="font-family:var(--mono);font-size:8px;letter-spacing:.13em;color:var(--faint);display:block;margin-bottom:6px">WHAT YOU SENT</span>
+      <div style="display:flex;gap:7px">
+        <button class="linkpill set">Query letter</button>
+        <button class="linkpill">＋ Synopsis</button>
+        <button class="linkpill">＋ Sample chapters</button>
+      </div>
+      <div style="margin-top:14px;font-size:12.5px;color:var(--muted);background:var(--paper);border:1px solid var(--hairline);border-radius:8px;padding:10px 12px">
+        She's <b style="color:var(--sageD)">open to queries</b> and asks for <b>email</b> submissions.
+      </div>
+    </div>
+    <div class="mf"><button class="cancel" onclick="closeModal()">Cancel</button><button class="save" onclick="closeModal();toast('Query logged',true)">Log query</button></div>
+  </div>
+
+  <div class="modal" id="m-addagent" style="display:none">
+    <div class="mh"><div class="t">Add an agent</div><div class="s">You can fill in the rest later</div></div>
+    <div class="mb" style="font-size:13px;color:var(--muted)">Name · Agency · Contact · Door state · Star rating · <b style="color:var(--ink)">Manuscript wish list</b> · Submission details.<br><br>Only the name is required — everything else can wait.</div>
+    <div class="mf"><button class="cancel" onclick="closeModal()">Cancel</button><button class="save" onclick="closeModal();toast('Agent added',true)">Add agent</button></div>
+  </div>
+
+  <div class="modal" id="m-import" style="display:none;width:600px">
+    <div class="mh"><div class="t">Bring your agents in</div><div class="s">Two ways, depending on what you've got</div></div>
+    <div class="mb">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <button class="linkpill" style="display:block;border-radius:12px;border-style:solid;padding:18px;text-align:left" onclick="closeModal();toast('Smart Import')">
+          <div style="font-family:var(--serif);font-size:17px;font-weight:600;color:var(--ink)">Smart Import</div>
+          <div style="font-size:12.5px;color:var(--muted);margin-top:5px;line-height:1.5">Drop in a spreadsheet, a table, even a messy list — we'll read it and lay it out for you to check before anything is saved.</div>
+          <div style="margin-top:14px;padding-top:11px;border-top:1px solid var(--hairline);font-family:var(--mono);font-size:8.5px;letter-spacing:.09em;color:var(--faint)">INCLUDED · READY TO USE</div>
+        </button>
+        <button class="linkpill" style="display:block;border-radius:12px;border-style:solid;padding:18px;text-align:left" onclick="closeModal();toast('Template downloaded')">
+          <div style="font-family:var(--serif);font-size:17px;font-weight:600;color:var(--ink)">Use a template</div>
+          <div style="font-size:12.5px;color:var(--muted);margin-top:5px;line-height:1.5">Download our spreadsheet, fill in your agents, and upload it back. Reliable, and yours to keep.</div>
+          <div style="margin-top:14px;padding-top:11px;border-top:1px solid var(--hairline);font-family:var(--mono);font-size:8.5px;letter-spacing:.09em;color:var(--faint)">CSV · ALWAYS AVAILABLE</div>
+        </button>
+      </div>
+      <div style="margin-top:14px;font-size:12px;color:var(--faint);text-align:center">Nothing is saved until you've seen it and said yes.</div>
+    </div>
+    <div class="mf"><button class="cancel" onclick="closeModal()">Cancel</button></div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+/* toasts */
+function toast(msg,undo){
+  const t=document.createElement('div');t.className='toast';
+  t.innerHTML=`<span>${msg}</span>${undo?'<button class="undo">UNDO</button>':''}<button class="x">✕</button>`;
+  t.querySelector('.x').onclick=()=>t.remove();
+  if(undo)t.querySelector('.undo').onclick=()=>{t.remove();toast('Undone')};
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(()=>t.remove(),6000);
+}
+/* popovers */
+function pop(id){
+  const el=document.getElementById('p-'+id),was=el.classList.contains('open');
+  closeAll();
+  if(!was){el.classList.add('open');document.getElementById('tk-t').classList.add('on')}
+  event.stopPropagation();
+}
+function closeAll(){
+  document.querySelectorAll('.pop,.linkpop,.editpop,.tipbox,.gpop,.matpop,.rgpop').forEach(p=>p.classList.remove('open','show'));
+  document.querySelectorAll('.act').forEach(a=>a.classList.remove('on'));
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.pop,.linkpop,.editpop,.tipbox,.gpop,.matpop,.rgpop,.relwrap,.linkpill,.editable,.derived,.gadd,.gpill,.rgrow'))closeAll();
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeAll();closeModal()}});
+
+/* STARS */
+let rating=3;
+function starHover(n){
+  document.querySelectorAll('#stars svg').forEach(s=>{
+    s.classList.toggle('hov', n>0 && +s.dataset.i<=n);
+  });
+}
+function setStars(n){
+  if(n===rating)n=0;                     // click the same star to clear
+  rating=n;
+  document.querySelectorAll('#stars svg').forEach(s=>{
+    s.classList.toggle('on', +s.dataset.i<=n);
+    s.classList.remove('hov');
+  });
+  toast(n?`Rated ${n} star${n>1?'s':''}`:'Rating cleared', true);
+}
+
+/* DOOR */
+function setDoor(open){
+  const b=document.querySelectorAll('#doorseg button');
+  b[0].classList.toggle('open-on',open); b[1].classList.toggle('shut-on',!open);
+  document.getElementById('reopen').classList.toggle('show',!open);
+  document.getElementById('doorfoot').innerHTML = open
+    ? '<span class="door open"><span class="pip"></span>OPEN TO QUERIES</span>'
+    : '<span class="door shut"><span class="pip"></span>CLOSED TO QUERIES</span>';
+  toast(open?'Open to queries':'Closed to queries', true);
+}
+
+/* LINKS — validated */
+const LBL={web:'Website',soc:'Socials',pm:'Publishers Marketplace'};
+function openLink(k){
+  const p=document.getElementById('lp-'+k),was=p.classList.contains('open');
+  closeAll(); if(!was){p.classList.add('open');document.getElementById('i-'+k).focus();valLink(k)}
+  event.stopPropagation();
+}
+function closeLink(k){document.getElementById('lp-'+k).classList.remove('open')}
+function valLink(k){
+  const i=document.getElementById('i-'+k),e=document.getElementById('e-'+k),s=document.getElementById('s-'+k);
+  const v=i.value.trim();
+  const ok = v==='' ? false : /^https?:\/\/[^\s.]+\.[^\s]{2,}$/i.test(v);
+  if(v!=='' && !ok){e.classList.add('show');i.classList.add('bad');s.setAttribute('disabled','')}
+  else{e.classList.remove('show');i.classList.remove('bad');ok?s.removeAttribute('disabled'):s.setAttribute('disabled','')}
+  return ok;
+}
+function saveLink(k){
+  if(!valLink(k))return;
+  const v=document.getElementById('i-'+k).value.trim();
+  const nice=v.replace(/^https?:\/\//,'').replace(/\/$/,'');
+  const pill=document.getElementById('pill-'+k);
+  pill.classList.add('set');
+  pill.innerHTML=`<span>${nice}</span><span class="x" onclick="clearLink(event,'${k}')">✕</span>`;
+  pill.onclick=()=>openLink(k);
+  closeLink(k);
+  toast(LBL[k]+' saved',true);
+}
+function clearLink(e,k){
+  e.stopPropagation();
+  const pill=document.getElementById('pill-'+k);
+  pill.classList.remove('set');
+  pill.innerHTML='＋ '+LBL[k];
+  document.getElementById('i-'+k).value='';
+  toast(LBL[k]+' removed',true);
+}
+
+/* WISH LIST */
+function editWish(){
+  const m=document.getElementById('mswl');
+  m.classList.add('filled');
+  m.innerHTML=`<div class="lbl">Manuscript wish list</div>
+    <textarea id="wish" placeholder="What is she looking for? Genres, themes, the kind of voice she likes…"></textarea>
+    <div class="fa"><button class="save" onclick="saveWish()">Save</button><button class="cancel" onclick="cancelWish()">Cancel</button><span class="hint">⌘⏎ TO SAVE</span></div>`;
+  document.getElementById('wish').focus();
+}
+function saveWish(){
+  const v=document.getElementById('wish').value.trim();
+  if(!v){cancelWish();return}
+  const m=document.getElementById('mswl');
+  m.innerHTML=`<div class="lbl">Manuscript wish list</div><div class="body2">${v}</div>`;
+  toast('Wish list saved',true);
+}
+function cancelWish(){
+  const m=document.getElementById('mswl');
+  m.classList.remove('filled');
+  m.innerHTML=`<svg viewBox="0 0 24 24"><path d="M3 5.5A2.5 2.5 0 0 1 5.5 3H11v17H5.5A2.5 2.5 0 0 0 3 22V5.5zM21 5.5A2.5 2.5 0 0 0 18.5 3H13v17h5.5A2.5 2.5 0 0 1 21 22V5.5z"/></svg>
+    <div><div class="lbl">Manuscript wish list</div><div class="cp">Add what this agent is looking for and it'll show here.</div></div>
+    <button class="cta" onclick="editWish()">＋ Add wish list</button>`;
+}
+
+/* PROFILE CARDS */
+function tip(id){
+  const t=document.getElementById('tip-'+id),was=t.classList.contains('show');
+  closeAll(); if(!was)t.classList.add('show');
+  event.stopPropagation();
+}
+function editMethod(){
+  const p=document.getElementById('ep-method'),was=p.classList.contains('open');
+  closeAll(); if(!was)p.classList.add('open');
+  event.stopPropagation();
+}
+function pickMethod(el,v){
+  el.parentElement.querySelectorAll('.eopt').forEach(x=>x.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('v-method').textContent=v;
+  closeAll();toast('Preferred method: '+v,true);
+  event.stopPropagation();
+}
+
+/* ===== GENRES ===== */
+function openGenres(){
+  const p=document.getElementById('gpop'),was=p.classList.contains('open');
+  closeAll();
+  if(!was){p.classList.add('open');const i=document.getElementById('gnew');i.value='';predict();i.focus();}
+  event.stopPropagation();
+}
+function tg(el){
+  el.classList.toggle('on');
+  renderGenres();
+  event.stopPropagation();
+}
+function opts(){return [...document.querySelectorAll('.gopt')]}
+function suggest(v){
+  if(!v.trim())return null;
+  const l=v.trim().toLowerCase();
+  const pool=opts().filter(o=>!o.classList.contains('on')).map(o=>o.textContent);
+  return pool.find(t=>t.toLowerCase().startsWith(l)) || pool.find(t=>t.toLowerCase().includes(l)) || null;
+}
+function predict(){
+  const i=document.getElementById('gnew'), g=document.getElementById('ghost'), none=document.getElementById('gnone');
+  const v=i.value, l=v.trim().toLowerCase();
+
+  opts().forEach(o=>o.classList.remove('sug'));
+
+  // what will ⏎ do? match against the WHOLE list, added or not.
+  const all=opts();
+  const match = l ? (all.find(o=>o.textContent.toLowerCase().startsWith(l)) || all.find(o=>o.textContent.toLowerCase().includes(l))) : null;
+
+  // filter the visible chips
+  let shown=0;
+  all.forEach(o=>{
+    const hit = !l || o.textContent.toLowerCase().includes(l);
+    o.style.display = hit ? '' : 'none';
+    if(hit)shown++;
+  });
+
+  // ghost completion
+  g.innerHTML = (v && match && match.textContent.toLowerCase().startsWith(l))
+    ? `<b>${v}</b>${match.textContent.slice(v.length)}` : '';
+
+  none.className='gnote';
+  i.classList.remove('bad');
+
+  if(!l){ return; }
+
+  if(!match){
+    i.classList.add('bad');
+    none.className='gnote warn show';
+    none.innerHTML = `No genre matches “${v.trim()}”. Pick one from the list.`;
+    return;
+  }
+
+  match.classList.add('sug');                       // ← highlight exactly what ⏎ will pick
+  if(match.classList.contains('on')){
+    none.className='gnote info show';
+    none.innerHTML = `<b>${match.textContent}</b> is already added.`;
+  }else{
+    none.className='gnote info show';
+    none.innerHTML = `⏎ adds <b>${match.textContent}</b>.`;
+  }
+}
+function gkey(e){
+  const i=document.getElementById('gnew');
+  if(e.key!=='Enter')return;
+  e.preventDefault();
+  const sug=document.querySelector('.gopt.sug');
+  if(!sug){ i.classList.add('bad'); toast('That genre isn\'t on the list'); return; }
+  if(sug.classList.contains('on')){ toast(sug.textContent+' is already added'); return; }
+  pickGenre(sug.textContent);
+}
+function pickGenre(name){
+  const el=opts().find(o=>o.textContent.toLowerCase()===name.toLowerCase());
+  if(!el)return;                       // never create a genre that isn't in the list
+  if(el.classList.contains('on')){toast('Already added');}
+  else{el.classList.add('on');renderGenres();}
+  const i=document.getElementById('gnew');
+  i.value=''; i.classList.remove('bad');
+  document.getElementById('ghost').innerHTML='';
+  const n=document.getElementById('gnone'); n.className='gnote';
+  opts().forEach(o=>{o.style.display='';o.classList.remove('sug')});
+  i.focus();
+}
+function renderGenres(){
+  const on=[...document.querySelectorAll('.gopt.on')].map(e=>e.textContent);
+  const g=document.getElementById('genres');
+  g.innerHTML = on.map(t=>`<span class="gpill">${t}<button class="x" onclick="delGenre(this)">✕</button></span>`).join('')
+    + `<button class="gadd" onclick="openGenres()">＋ GENRE</button>`;
+  toast('Genres updated',true);
+}
+function delGenre(el){
+  const t=el.parentElement.textContent.replace('✕','').trim();
+  [...document.querySelectorAll('.gopt')].forEach(o=>{if(o.textContent===t)o.classList.remove('on')});
+  el.parentElement.remove();
+  toast('Genre removed',true);
+  event.stopPropagation();
+}
+
+/* ===== RESPONSE GUIDELINES ===== */
+function openRT(){
+  const p=document.getElementById('rgp-rt'),was=p.classList.contains('open');
+  closeAll(); if(!was){p.classList.add('open');document.getElementById('rtn').focus();valRT()}
+  event.stopPropagation();
+}
+function openNR(){
+  const p=document.getElementById('rgp-nr'),was=p.classList.contains('open');
+  closeAll(); if(!was)p.classList.add('open');
+  event.stopPropagation();
+}
+function valRT(){
+  const i=document.getElementById('rtn'), e=document.getElementById('rterr'), b=document.getElementById('rtsave');
+  const u=document.getElementById('rtu').value, v=i.value.trim(), n=Number(v);
+  let msg='';
+  if(v==='') msg='Enter a number, or choose “Not stated”.';
+  else if(!/^\d+$/.test(v)) msg='Numbers only.';
+  else if(n===0) msg='Has to be at least 1.';
+  else if(u==='days'&&n>180) msg='Over 6 months — switch the unit.';
+  else if(u==='weeks'&&n>52) msg='Over a year — switch the unit.';
+  else if(u==='months'&&n>24) msg='Over two years? Check that.';
+  if(msg){e.textContent=msg;e.classList.add('show');i.classList.add('bad');b.setAttribute('disabled','');return false}
+  e.classList.remove('show');i.classList.remove('bad');b.removeAttribute('disabled');return true;
+}
+function saveRT(){
+  if(!valRT())return;
+  const n=document.getElementById('rtn').value.trim();
+  let u=document.getElementById('rtu').value;
+  if(n==='1')u=u.slice(0,-1);
+  const el=document.getElementById('v-rt');
+  el.textContent='Within '+n+' '+u;
+  el.classList.remove('unset');
+  closeAll();toast('Response time saved',true);
+}
+function clearRT(){
+  const el=document.getElementById('v-rt');
+  el.textContent='Not stated';
+  el.classList.add('unset');
+  closeAll();toast('Response time cleared',true);
+}
+function pickNR(el,v){
+  el.parentElement.querySelectorAll('.rgopt').forEach(x=>x.classList.remove('on'));
+  el.classList.add('on');
+  const t=document.getElementById('v-nr');
+  t.textContent=v;
+  t.classList.toggle('unset', v==='Not stated');
+  closeAll();
+  toast(v==='No response means no'
+    ? 'Set — we\'ll close the query when their window passes'
+    : v==='They reply either way'
+      ? 'Set — we\'ll nudge you rather than close it'
+      : 'Set — we won\'t assume anything', true);
+  event.stopPropagation();
+}
+
+/* ===== WANTED MATERIALS: type + validated quantity ===== */
+function openMat(){
+  const p=document.getElementById('matpop'),was=p.classList.contains('open');
+  closeAll();
+  if(!was){
+    p.classList.add('open');
+    document.getElementById('mtype').value='';
+    document.getElementById('mqty').value='';
+    document.getElementById('qtyrow').classList.remove('show');
+    document.getElementById('matsave').setAttribute('disabled','');
+    document.getElementById('materr').classList.remove('show');
+  }
+  event.stopPropagation();
+}
+const LIMITS={pages:[1,500],chapters:[1,60],words:[100,150000]};
+function mtypeChanged(){
+  const sel=document.getElementById('mtype');
+  const q=sel.selectedOptions[0]?.dataset.q||'';
+  const row=document.getElementById('qtyrow');
+  if(q&&q!=='none'){
+    row.classList.add('show');
+    document.getElementById('munit').value=q;
+    document.getElementById('mqty').focus();
+  }else{
+    row.classList.remove('show');
+  }
+  valMat();
+}
+function valMat(){
+  const sel=document.getElementById('mtype');
+  const q=sel.selectedOptions[0]?.dataset.q||'';
+  const i=document.getElementById('mqty'), e=document.getElementById('materr'), b=document.getElementById('matsave');
+  if(!sel.value){b.setAttribute('disabled','');e.classList.remove('show');return false}
+  if(q==='none'){b.removeAttribute('disabled');e.classList.remove('show');i.classList.remove('bad');return true}
+  const v=i.value.trim(), n=Number(v), [lo,hi]=LIMITS[q];
+  let msg='';
+  if(v==='') msg='How many '+q+'?';
+  else if(!/^\d+$/.test(v)) msg='Numbers only — no "three" or "3-5".';
+  else if(n<lo||n>hi) msg=`${q} should be between ${lo.toLocaleString()} and ${hi.toLocaleString()}.`;
+  if(msg){e.textContent=msg;e.classList.add('show');i.classList.add('bad');b.setAttribute('disabled','');return false}
+  e.classList.remove('show');i.classList.remove('bad');b.removeAttribute('disabled');return true;
+}
+function saveMat(){
+  if(!valMat())return;
+  const sel=document.getElementById('mtype');
+  const label=sel.value, q=sel.selectedOptions[0].dataset.q;
+  const n=document.getElementById('mqty').value.trim();
+  let amt='';
+  if(q!=='none'){
+    let unit=q;
+    if(n==='1')unit=unit.slice(0,-1);
+    amt=`<span class="amt">${Number(n).toLocaleString()} ${unit.toUpperCase()}</span>`;
+  }
+  const d=document.createElement('div');
+  d.className='matrow';
+  d.innerHTML=`<span class="tick"></span>${label}${amt}<button class="x" onclick="delMat(this)">✕</button>`;
+  document.getElementById('matlist').appendChild(d);
+  closeAll();
+  toast(label+' added',true);
+  event.stopPropagation();
+}
+function delMat(el){el.parentElement.remove();toast('Material removed',true);event.stopPropagation()}
+
+/* ===== MSWL: FIND & UPDATE (Pro) ===== */
+function findMSWL(){
+  toast('Searching the web for her wish list…');
+  setTimeout(()=>{ document.getElementById('prop').classList.add('show'); }, 900);
+}
+function fixAgency(){
+  document.querySelector('.metaline span').textContent='P.S. Literary';
+  document.querySelector('.conflict').style.display='none';
+  toast('Agency updated to P.S. Literary', true);
+}
+function addSug(el,name){
+  if(el.classList.contains('added'))return;
+  const o=opts().find(x=>x.textContent.toLowerCase()===name.toLowerCase());
+  if(o&&!o.classList.contains('on')){o.classList.add('on');renderGenres();}
+  el.classList.add('added');
+  el.textContent='✓ '+name;
+}
+function acceptMSWL(){
+  const txt=document.getElementById('foundtext').innerHTML;
+  const m=document.getElementById('mswl');
+  m.classList.add('filled');
+  m.innerHTML=`<div class="lbl">Manuscript wish list</div>
+    <div class="body2">${txt}</div>
+    <div style="margin-top:11px;padding-top:10px;border-top:1px solid var(--hairline);font-family:var(--mono);font-size:8px;letter-spacing:.1em;color:var(--faint)">
+      FOUND FOR YOU · 13 JUL 2026 · <span style="color:var(--muted)">MANUSCRIPTWISHLIST.COM</span>
+    </div>`;
+  document.getElementById('prop').classList.remove('show');
+  toast('Wish list saved', true);
+}
+
+/* TASKS */
+function tick(el){el.parentElement.classList.toggle('done');count();toast('Task updated',true);event.stopPropagation()}
+function addTask(e){
+  if(e.key!=='Enter'||!e.target.value.trim())return;
+  const d=document.createElement('div');d.className='task';
+  d.innerHTML=`<span class="box" onclick="tick(this)"></span><span class="tt">${e.target.value}</span>`;
+  e.target.closest('.addtask').before(d);e.target.value='';count();toast('Task added',true);
+}
+function count(){document.getElementById('tcount').textContent=document.querySelectorAll('#tasklist .task:not(.done)').length}
+
+/* NOTES */
+function addNote(e){
+  if(e.key!=='Enter'||!e.target.value.trim())return;
+  const d=document.createElement('div');
+  d.className='notecard';
+  d.innerHTML=`<div class="nd">TODAY<span class="x" onclick="delNote(this)">✕</span></div><div class="nt">${e.target.value}</div>`;
+  document.getElementById('notes').prepend(d);
+  e.target.value='';
+  noteCount();toast('Note saved',true);
+}
+function delNote(el){el.closest('.notecard').remove();noteCount();toast('Note deleted',true)}
+function noteCount(){
+  const n=document.querySelectorAll('#notes .notecard').length;
+  document.getElementById('notecount').textContent=n+' NOTE'+(n===1?'':'S');
+  document.getElementById('noteEmpty').style.display=n?'none':'block';
+}
+
+/* MODALS */
+function openModal(w){
+  document.querySelectorAll('.modal').forEach(m=>m.style.display='none');
+  document.getElementById('m-'+w).style.display='block';
+  document.getElementById('scrim').classList.add('open');
+  closeAll();
+}
+function closeModal(){document.getElementById('scrim').classList.remove('open')}
+</script>
+</body>
+</html>
