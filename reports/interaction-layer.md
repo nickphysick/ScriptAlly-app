@@ -130,6 +130,10 @@ was `28689b2`.
 | 6a · door check-back reminder (dated) | `3f3d60c` | ✅ done — first UserTask.dueDate use |
 | 6a · interactive stars (hover/set/undo) | `56a57d9` | ✅ done |
 | 6a · star clear → UNRATED (absence, not 0; deleteField) | `7234b7b` | ✅ done (rule parked) |
+| 6a rest · method click-to-pick + editable link pills | `53c9d4d` | ✅ done |
+| 6c · response guidelines | — | ⏳ next (model note below) |
+| 6d · wanted materials | — | ⏳ (report componentType gap) |
+| 6e · query history · 6g delete+mark-closed · 6f/6h · 5d · 5e · Nudge→addUserTask | — | ⏳ |
 | 6a rest · method click-to-pick · link pills | — | ⏳ next |
 | 6c response guidelines · 6d wanted materials · 6e query history · 6g delete+mark-closed | — | ⏳ not started |
 | 5d click-to-pick + Edit fate · 5e counted delete + Import | — | ⏳ not started |
@@ -170,6 +174,18 @@ the CTA button. **Round-trip confirmed working on dev by Nick.**
 Polish landed (`faaf24f`, per Nick): the prompt is ALWAYS "What happened next?"; each state's likely
 next POSITIVE step is the soft-pink chip (still getPrimaryAction's target on writer's-turn, so no
 disagreement), Rejection is ALWAYS grey and last, and every chip carries a real StatusDot.
+
+## 6c — the "If they don't reply" model note (before I build it)
+
+The card needs THREE states for *If they don't reply* — **No response means no / They reply either
+way / Not stated** — but `Agent.noResponseMeansNo` is a required **boolean** (2 states). Consistent
+with the starRating decision ("absence = the not-stated fact, not a magic value"), I'll make it
+**optional**: `true` = means-no, `false` = replies-either-way, **absent = Not stated**. That's a
+parked rule + type change (+ a small cascade like starRating: seeds/forms that set it stay valid).
+*Usual response time* keeps its existing `responseTimeWeeks === 0 = not stated` convention (weeks
+unit; a units picker would be a bigger model change — flagged, not taken). And I'll PROVE in the
+sweep that the not-stated / means-no signal only *feeds* expected-by + the composer's close chip
+and never sits on an auto-close path.
 
 ## Workflow (from the two concurrency collisions)
 
