@@ -117,8 +117,39 @@ was `28689b2`.
 | 3 (new) — PDF demoted into a ⋯ overflow menu, both pages (+ shared F12Menu) | `b6774f9` | ✅ done |
 | 4e (manuscript) — picker in the manuscript genre input (write side; stores ID) | `122153f` | ✅ done |
 | 4c — Nick-only admin promotion view | — | ⏳ not started (queue rules already in 3b) |
-| 5 — Queries Hub interactions (composer / corrections / popovers / click-to-pick / delete+import) | — | ⏳ not started |
+| 5a keystone — composerChips (pure, derived from getPrimaryAction/queryBucket) | `e2031f7` | ✅ done |
+| 5a component — the inline composer + recordQueryResponse wiring | — | ⏸ needs a capture-depth decision (below) |
+| 5b–5e — corrections / popovers / click-to-pick / delete+import | — | ⏳ not started |
 | 6 — Contact List interactions (stars/door/method/response-guidelines/materials/history/notes/delete/send) | — | ⏳ not started |
+
+**Dev:** Firestore rules deployed (`personalGenres` allowlist + `genreSuggestions` block are LIVE
+on dev) — personal-genre creation + the promotion-queue write now persist there.
+
+## ⏸ Stage 5a — the decision that shapes the composer component
+
+The composer's logic keystone is done and locked. Building the component surfaced a real fork,
+because two things the prompt states are in tension:
+
+- The prototype's inline composer collects **date · method · optional note** ("an inline form, not
+  a modal").
+- The **canonical recorder** — `recordQueryResponse` (the single-writer path we must reuse, not
+  fork) — takes a rich `RecordResponseData`: materials sent, expected-by, feedback type/text,
+  received date, R&R notes, offer details, closing reason, etc. Today's `RecordResponseFocusForm`
+  collects all of it.
+
+So: when a chip records via the inline composer, **how much does it capture?**
+- **(A) Inline-light (prototype-faithful):** date + method + note; sensible defaults for the rest
+  (expected-by computed from the new status's window; materials/feedback left blank, refined later
+  via Edit). Fast, matches the prototype — but a "record" captures less than today's form does.
+- **(B) Inline + the one key field per outcome:** date + method + note **plus** the single
+  load-bearing field for that response (Full-requested → expected-by; Offer → offer date/deadline;
+  R&R → revision notes). Slightly bigger inline form; loses less.
+- **(C) Keep `RecordResponseFocusForm` as a "more detail" path** behind the inline quick-capture.
+
+The prototype points at **(A)**, and "prototype wins" — so **absent a steer I'll build (A)**:
+inline date/method/note → `recordQueryResponse` with computed/blank defaults, `RecordResponseFocusForm`
+demoted to the Edit-affordance path. Flagging because it changes what a recorded response captures
+vs today, and it decides the fate of the existing rich form. **Tell me if you'd rather (B) or (C).**
 
 **Genre migration — COMPLETE.** Both write sides store IDs (agents `2e24b07`, manuscripts
 `122153f`); every reader tolerates legacy labels (`d38bfbf` + `922058c`); no bulk Firestore
