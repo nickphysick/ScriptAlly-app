@@ -14,11 +14,10 @@
  *    over the scrim.
  *
  * Contents: the rail's grouped index verbatim from railNav.ts (same items, order and
- * pathname-owned active logic), labels always visible, count badges wired ONLY from data
- * already in DbProvider (awaiting-your-move via queryBucket === "move" — the exact logic
- * queriesPulse uses — and the open-task count from the derived tasks array; no new reads),
- * then Settings / Help / the account block pinned to the foot. The rail's theme segmented
- * switcher is NOT carried over — the Settings page radio writes the same field.
+ * pathname-owned active logic), labels always visible — LABELS ONLY (the count badges were
+ * removed in the chrome revision) — then Settings / Help / the account block pinned to the
+ * foot. The rail's theme segmented switcher is NOT carried over — the Settings page radio
+ * writes the same field.
  */
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
@@ -27,8 +26,7 @@ import {
   LogOut, Search, Table, Library, ListTodo,
 } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
-import { UserPlan, QueryStatus } from "../../types";
-import { queryBucket } from "../../lib/queryAmbient";
+import { UserPlan } from "../../types";
 import { burgundy, bodyInk, parchment, FONT_SERIF, FONT_SANS, FONT_MONO, labelColor, mutedInk, hairline } from "../../lib/designTokens";
 import { ScriptAllyLogo } from "../ScriptAllyLogo";
 import { RAIL_GROUPS, railActiveKey } from "./railNav";
@@ -72,9 +70,8 @@ const DrawerItem: React.FC<{
   Icon?: React.ComponentType<{ style?: React.CSSProperties }>;
   active?: boolean;
   muted?: boolean;
-  badge?: number;
   onClick: () => void;
-}> = ({ label, Icon, active, muted, badge, onClick }) => (
+}> = ({ label, Icon, active, muted, onClick }) => (
   <button
     type="button"
     className="sa-drawer-item"
@@ -97,17 +94,6 @@ const DrawerItem: React.FC<{
       </span>
     )}
     <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>{label}</span>
-    {badge != null && badge > 0 && (
-      <span
-        style={{
-          marginLeft: "auto", fontFamily: FONT_MONO, fontSize: 8.5, fontWeight: 600,
-          background: "var(--band, #f2ddd5)", color: `var(--rail-accent, ${burgundy})`,
-          borderRadius: 99, padding: "1.5px 7px", flexShrink: 0,
-        }}
-      >
-        {badge}
-      </span>
-    )}
   </button>
 );
 
@@ -115,7 +101,7 @@ const DrawerItem: React.FC<{
 
 export const NavDrawer: React.FC<{ onNavigate: (tab: string, subPageName?: string) => void }> = ({ onNavigate }) => {
   const ctx = useNavDrawer();
-  const { currentUser, logout, queries, tasks } = useScriptAllyDb();
+  const { currentUser, logout } = useScriptAllyDb();
   const activeKey = railActiveKey(useLocation().pathname);
   const panelRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
@@ -123,16 +109,6 @@ export const NavDrawer: React.FC<{ onNavigate: (tab: string, subPageName?: strin
 
   const open = ctx?.open ?? false;
   const close = useMemo(() => () => ctx?.setOpen(false), [ctx]);
-
-  /* Count badges — derived from data already in DbProvider (Standing decision 5; no new reads).
-     awaiting-your-move reuses the CTA engine's writer's-turn bucket, exactly as queriesPulse does. */
-  const moveCount = useMemo(
-    () => queries.filter((q) => queryBucket(q.status as QueryStatus) === "move").length,
-    [queries]
-  );
-  const taskCount = tasks.length;
-  const badgeFor = (key: string): number | undefined =>
-    key === "queries-hub" ? moveCount : key === "todo" ? taskCount : undefined;
 
   /* Open/close side-effects: focus trap in, body scroll lock, restore focus out. */
   useEffect(() => {
@@ -255,7 +231,6 @@ export const NavDrawer: React.FC<{ onNavigate: (tab: string, subPageName?: strin
                   label={item.label}
                   Icon={DRAWER_ICONS[item.key]}
                   active={activeKey === item.key}
-                  badge={badgeFor(item.key)}
                   onClick={() => go(item.tab, item.sub)}
                 />
               ))}
