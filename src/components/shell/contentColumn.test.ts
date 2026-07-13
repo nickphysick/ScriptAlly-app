@@ -50,9 +50,10 @@ describe("StagePage — the ONE wrapper (not scattered per page)", () => {
 });
 
 describe("route variants — declared once at the mount", () => {
-  it("workspace hubs are work; reference/prose pages are read", () => {
-    expect(app).toMatch(/routeKey === "queries"[^>]*contentVariant="work"/s);
-    expect(app).toMatch(/routeKey === "agents"[^>]*contentVariant="work"/s);
+  it("workspace hubs declare their width kind; the F12 pages self-chrome (no cap)", () => {
+    // Queries (and, from Stage 4, Agents) render the F12 shell — their own full-bleed header
+    // + centred --maxw column — so their slots carry NO contentVariant. Other routes keep theirs.
+    expect(app).not.toMatch(/routeKey === "queries"[^>]*contentVariant/s);
     expect(app).toMatch(/routeKey === "manuscripts"[^>]*contentVariant="read"/s);
     expect(app).toContain('<StagePage active contentVariant="read"><ImportCsv');
   });

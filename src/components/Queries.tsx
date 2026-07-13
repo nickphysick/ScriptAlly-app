@@ -28,7 +28,7 @@ import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { QueryStatus, Agent, Manuscript, Query, SubmissionMethod, ActivityType, QueryMaterial, UserPlan } from "../types";
 import { StatusPill, getStatusLabel } from "./StatusPill";
 import { StatusDot, statusDirection } from "./StatusDot";
-import { ChromeSlab, MASTHEAD_CTA_STYLE } from "./shell/ChromeSlab";
+import { F12Page, Icirc, F12Primary, Trig, F12Popover, PopSection, PRow, Chip } from "./shell/F12Shell";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
 import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse } from "../lib/queryAmbient";
 import { getPrimaryAction } from "../lib/queryPrimaryAction";
@@ -121,11 +121,6 @@ function formatWhatsAppDate(dateString: string): string {
   const time = d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
   return `${day} ${month}, ${time}`;
 }
-
-/* ── v2 PLAIN masthead — dropped card surface + tightened padding, passed to the Queries ChromeSlab
-   grand mounts via its existing `style` escape (merged last over the shell). The --hub-mast-pad
-   token cascades to ChromeSlab's inner row, so no shared internals are edited. Queries route only. */
-const QUERIES_PLAIN_MASTHEAD = { background: "transparent", border: "none", boxShadow: "none", "--hub-mast-pad": "6px 2px" } as React.CSSProperties;
 
 /* Send-method label for the What-you-sent "Sent by {method}" line (ref shows lower-case forms). */
 const sentViaLabel = (method?: string): string => {
@@ -245,13 +240,13 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   const [isMarkSentOpen, setIsMarkSentOpen] = useState(false);
   // The Mark-sent trigger now lives in the pane's command bar (pinned low), so the popover opens
   // UPWARD from it (additive placement — every other useFixedMenu caller keeps the default).
-  const { triggerRef: markSentTriggerRef, menuStyle: markSentMenuStyle } = useFixedMenu<HTMLButtonElement>(isMarkSentOpen, { placement: "up" });
+  const { triggerRef: markSentTriggerRef, menuStyle: markSentMenuStyle } = useFixedMenu<HTMLButtonElement>(isMarkSentOpen); // F12: the bar sits at the TOP — menus open downward
   // Control-ribbon secondary surfaces — Nudge (modal), Close-reasons menu (anchored upward off its
   // ribbon tile), and the Delete confirmation dialog. (v3: the More ⋯ menu was removed.)
   const [isNudgeOpen, setIsNudgeOpen] = useState(false);
   const [isCloseMenuOpen, setIsCloseMenuOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  const { triggerRef: closeTriggerRef, menuStyle: closeMenuStyle } = useFixedMenu<HTMLButtonElement>(isCloseMenuOpen, { placement: "up" });
+  const { triggerRef: closeTriggerRef, menuStyle: closeMenuStyle } = useFixedMenu<HTMLButtonElement>(isCloseMenuOpen); // F12: downward
   // Close every ribbon popover/modal whenever the reader moves to a different query.
   useEffect(() => { setIsMarkSentOpen(false); setIsNudgeOpen(false); setIsCloseMenuOpen(false); setIsDeleteConfirmOpen(false); }, [selectedQueryId]);
   // ⚠️ STUB — v3 promoted Delete to the command bar, but the data layer has NO deleteQuery handler
@@ -626,20 +621,25 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   
   // Left Filters state (configured to always align with Agents-style)
   const [selectedStatusFilters, setSelectedStatusFilters] = useState<string[]>(["All"]);
-  // Filter-bar STATUS bucket (All + the three CTA-engine buckets). Replaces the old list-header
-  // per-exact-status multi-select as the primary status filter.
-  // Filter bar: Action outstanding (writer's-move toggle) + a Status multi-select (exact QueryStatus
-  // strings) + Manuscript dropdown. Action outstanding: Yes = queryBucket "move"; No = ¬move.
-  const [actionOut, setActionOut] = useState<"all" | "yes" | "no">("all");
-  const [statusSel, setStatusSel] = useState<QueryStatus[]>([]);     // committed; empty OR full = All (no filter)
-  const [statusDraft, setStatusDraft] = useState<QueryStatus[]>([]); // in-popover draft, committed on Apply
-  const [statusMenuOpen, setStatusMenuOpen] = useState(false);
+  /* ── F12 filter model (ref queries-hub-v14.html filter popover) ──
+     turn — WHOSE TURN radio, derived from the CTA engine's queryBucket (the ONE source of
+     truth): "move" = writer's turn, "wait" = agent's court; never a second derivation.
+     statusSel — exact QueryStatus enum strings, multi-select (empty OR full set = no filter).
+     needsOverdue / needsTasks — the NEEDS ATTENTION checkboxes, both derived (reply overdue
+     from responseDeadline while waiting; open tasks from the derived tasks array). */
+  const [turnFilter, setTurnFilter] = useState<"all" | "move" | "wait">("all");
+  const [statusSel, setStatusSel] = useState<QueryStatus[]>([]);     // committed live (no draft/Apply)
   const [selectedManuscriptFilter, setSelectedManuscriptFilter] = useState<string>("All");
-  const [manuscriptMenuOpen, setManuscriptMenuOpen] = useState(false);
+  const [needsOverdue, setNeedsOverdue] = useState(false);
+  const [needsTasks, setNeedsTasks] = useState(false);
+  const [filterPopOpen, setFilterPopOpen] = useState(false);
+  const [sortPopOpen, setSortPopOpen] = useState(false);
+  /* F12 sort — grouped Activity / Dates / Pipeline (ref sort popover). Default: last activity. */
+  const [sortKey, setSortKey] = useState<string>("last_activity");
+  /* Legacy shims — the hidden (display:none) mobile filter region + the old grouped-list
+     branches still reference these; nothing in the F12 chrome drives them. Cleanup candidate. */
   const [sortOption, setSortOption] = useState<string>("Newest first");
-  const [groupOption, setGroupOption] = useState<"None" | "Status" | "Action Required" | "Manuscript" | "Agent Fit Rating">("None");
-  const [sortKey, setSortKey] = useState<string>("date_queried");
-  const [sortDirs, setSortDirs] = useState<Record<string, number>>({});
+  const [groupOption] = useState<string>("None");
   const [devTheme, setDevTheme] = useState<"burgundy" | "slate" | "emerald">("burgundy");
   const [filterAccordionOpen, setFilterAccordionOpen] = useState(true);
   const [groupAccordionOpen, setGroupAccordionOpen] = useState(false);
@@ -822,14 +822,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   // Manuscripts that actually have queries — the MANUSCRIPT pill group only shows these.
   const manuscriptsWithQueries = manuscripts.filter(m => queries.some(q => q.manuscriptId === m.id));
   const hubSubtitle = trackedManuscript ? trackedManuscript.title : "all manuscripts";
-  // Masthead pulse line — counts over the manuscript-scoped set (not the status/search view);
-  // `queriesPulse` derives "awaiting your move" from the CTA engine's writer's-turn bucket.
-  const hubScopedQueries = trackedManuscript ? queries.filter(q => q.manuscriptId === trackedManuscript.id) : queries;
-  const hubPulse = queriesPulse(hubScopedQueries, hubSubtitle);
-  // Masthead CTA — the theme's primary button (espresso Capp / pink Bold / grey Editorial via
-  // the hub sheet), replacing the old hardcoded-pink raised pill so it reads as ONE grammar
-  // with the command-bar primary.
-  const mastCtaStyle = MASTHEAD_CTA_STYLE; // shared, single-sourced from ChromeSlab
+  // (The grand masthead + its pulse line are RETIRED with the F12 shell — the breadcrumb and
+  // the list footer carry the page name and counts now; queriesPulse remains a lib for others.)
 
   // Synchronise Agent Notes values when activeAgent changes
   useEffect(() => {
@@ -945,18 +939,24 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   const ALL_QUERY_STATUSES = Object.values(QueryStatus) as QueryStatus[];
   const statusFilterActive = statusSel.length > 0 && statusSel.length < ALL_QUERY_STATUSES.length;
 
-  // Filter queries matching Left Panel filters + Search Query
+  // ── F12 filter pipeline (ref queries-hub-v14.html filter popover) ──
+  const nowMs = Date.now();
+  /** Derived, never stored: still waiting on the agent with the reply expectation in the past. */
+  const isOverdueForReply = (q: Query): boolean =>
+    queryBucket(q.status as QueryStatus) === "waiting" &&
+    !!q.responseDeadline && new Date(q.responseDeadline).getTime() < nowMs;
+
   const filteredList = queries.filter(q => {
     const agent = agents.find(a => a.id === q.agentId);
     const ms = manuscripts.find(m => m.id === q.manuscriptId);
-    
+
     if (!agent || !ms) return false;
 
-    // Action outstanding — Yes = writer's move (queryBucket "move"); No = everything else
-    // (waiting + closed), so All = Yes ∪ No with nothing stranded.
+    // Whose turn — the CTA engine's queryBucket is the ONE source of truth (never re-derived):
+    // "move" = the agent replied, over to you; "waiting" = ball in the agent's court.
     const bkt = queryBucket(q.status as QueryStatus);
-    if (actionOut === "yes" && bkt !== "move") return false;
-    if (actionOut === "no" && bkt === "move") return false;
+    if (turnFilter === "move" && bkt !== "move") return false;
+    if (turnFilter === "wait" && bkt !== "waiting") return false;
 
     // Status multi-select — the exact QueryStatus strings; only a partial selection filters.
     if (statusFilterActive && !statusSel.includes(q.status as QueryStatus)) return false;
@@ -965,6 +965,10 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     if (selectedManuscriptFilter !== "All" && q.manuscriptId !== selectedManuscriptFilter) {
       return false;
     }
+
+    // Needs attention — both derived (reply overdue; open tasks via the derived Task[]).
+    if (needsOverdue && !isOverdueForReply(q)) return false;
+    if (needsTasks && queryTaskBadge(tasks, q.id).count === 0) return false;
 
     // Search bar filters
     const term = (listSearch || searchQuery).toLowerCase();
@@ -979,38 +983,147 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     return true;
   });
 
-  // Sort queries matching Sort selector
+  // ── F12 sort (ref sort popover: Activity / Dates / Pipeline) — all derived from fields
+  // already on the query; no reads. MAXT stands in for "missing" so undated rows sink.
   const STATUS_SORT_ORDER = [
     QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT,
     QueryStatus.FULL_REQUESTED, QueryStatus.FULL_SENT, QueryStatus.REVISE_RESUBMIT,
     QueryStatus.OFFER, QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE,
   ];
-  const sortDir = sortDirs[sortKey] ?? 0;
+  const MAXT = Number.MAX_SAFE_INTEGER;
+  const toMs = (v: any): number => !v ? 0 : typeof v === "string" ? (new Date(v).getTime() || 0) : (v?.toDate?.()?.getTime?.() ?? 0);
+  /** Latest of the query's own date fields — the "last activity" anchor. */
+  const lastActivityMs = (q: any): number => Math.max(
+    toMs(q.lastStatusChange), toMs(q.responseReceivedAt), toMs(q.dateSent),
+    toMs(q.partialSentDate), toMs(q.fullSentDate), toMs(q.nudgeDate), toMs(q.lastNudgeSentDate)
+  );
+  /** The send the agent is sitting on (latest send date) — the "waiting since" anchor. */
+  const waitAnchorMs = (q: any): number => Math.max(toMs(q.dateSent), toMs(q.partialSentDate), toMs(q.fullSentDate));
+  /** Pipeline depth rank — deepest active first (Offer → … → Queried), closed statuses last. */
+  const journeyRank = (q: Query): number => {
+    const idx = STATUS_SORT_ORDER.indexOf(q.status as QueryStatus);
+    return idx <= 6 ? 6 - idx : 10 + idx;
+  };
+
   const sortedList = [...filteredList].sort((a, b) => {
     const agA = agents.find(ag => ag.id === a.agentId)?.name || "";
     const agB = agents.find(ag => ag.id === b.agentId)?.name || "";
-    let cmp = 0;
-    if (sortKey === "a_z") {
-      cmp = agA.localeCompare(agB);
-    } else if (sortKey === "status") {
-      cmp = STATUS_SORT_ORDER.indexOf(a.status as QueryStatus) - STATUS_SORT_ORDER.indexOf(b.status as QueryStatus);
-    } else if (sortKey === "date_queried") {
-      const tA = a.dateSent ? new Date(a.dateSent).getTime() : 0;
-      const tB = b.dateSent ? new Date(b.dateSent).getTime() : 0;
-      cmp = tB - tA;
-    } else if (sortKey === "last_updated") {
-      const toMs = (v: any) => !v ? 0 : typeof v === "string" ? new Date(v).getTime() : (v?.toDate?.()?.getTime?.() ?? 0);
-      cmp = toMs(b.lastStatusChange) - toMs(a.lastStatusChange);
-    } else if (sortKey === "next_response_due") {
-      const dA = a.responseDeadline ? new Date(a.responseDeadline).getTime() : Infinity;
-      const dB = b.responseDeadline ? new Date(b.responseDeadline).getTime() : Infinity;
-      cmp = dA - dB;
+    switch (sortKey) {
+      case "agent_az": return agA.localeCompare(agB);
+      case "date_newest": return toMs(b.dateSent) - toMs(a.dateSent);
+      case "date_oldest": return (toMs(a.dateSent) || MAXT) - (toMs(b.dateSent) || MAXT);
+      case "waiting_longest": {
+        const aW = queryBucket(a.status as QueryStatus) === "waiting" ? (waitAnchorMs(a) || MAXT) : MAXT;
+        const bW = queryBucket(b.status as QueryStatus) === "waiting" ? (waitAnchorMs(b) || MAXT) : MAXT;
+        return aW - bW;
+      }
+      case "due_soonest": {
+        const aD = a.responseDeadline ? new Date(a.responseDeadline).getTime() : MAXT;
+        const bD = b.responseDeadline ? new Date(b.responseDeadline).getTime() : MAXT;
+        return aD - bD;
+      }
+      case "journey_depth": return journeyRank(a) - journeyRank(b);
+      case "last_activity":
+      default: return lastActivityMs(b) - lastActivityMs(a);
     }
-    return sortDir === 1 ? -cmp : cmp;
   });
 
+  // ── F12 active-filter chips + the FILTER / SORT popovers (ref queries-hub-v14.html) ──
+  const resetAllFilters = () => {
+    setTurnFilter("all"); setStatusSel([]); setSelectedManuscriptFilter("All");
+    setNeedsOverdue(false); setNeedsTasks(false);
+  };
+  const activeFilterChips: { key: string; label: string; remove: () => void }[] = [
+    ...(turnFilter !== "all" ? [{ key: "turn", label: turnFilter === "move" ? "YOUR MOVE" : "WAITING", remove: () => setTurnFilter("all") }] : []),
+    ...(selectedManuscriptFilter !== "All" ? [{ key: "ms", label: (manuscriptsWithQueries.find(m => m.id === selectedManuscriptFilter)?.title || "MANUSCRIPT").toUpperCase(), remove: () => setSelectedManuscriptFilter("All") }] : []),
+    ...(statusFilterActive ? statusSel.map(s => ({ key: `st:${s}`, label: (s === QueryStatus.REVISE_RESUBMIT ? "R&R" : s).toUpperCase(), remove: () => setStatusSel(prev => prev.filter(x => x !== s)) })) : []),
+    ...(needsOverdue ? [{ key: "overdue", label: "OVERDUE FOR A REPLY", remove: () => setNeedsOverdue(false) }] : []),
+    ...(needsTasks ? [{ key: "tasks", label: "HAS OPEN TASKS", remove: () => setNeedsTasks(false) }] : []),
+  ];
+  const activeFilterCount = activeFilterChips.length;
+
+  const OPEN_STATUSES_F12 = STATUS_SORT_ORDER.slice(0, 7);
+  const CLOSED_STATUSES_F12 = STATUS_SORT_ORDER.slice(7);
+  /* The mockup labels Revise & Resubmit "R&R" — the FILTER VALUE stays the exact enum string. */
+  const statusDisplay = (s: QueryStatus) => (s === QueryStatus.REVISE_RESUBMIT ? "R&R" : s);
+
+  const renderFilterPopover = () => (
+    <F12Popover
+      width={288}
+      title="Filter"
+      onClose={() => setFilterPopOpen(false)}
+      headAction={<button type="button" className="f12-reset" onClick={resetAllFilters}>RESET ALL</button>}
+      footText={<><b>{filteredList.length}</b>&nbsp;OF {queries.length} QUERIES</>}
+    >
+      <PopSection label="Whose turn">
+        <PRow kind="rad" on={turnFilter === "all"} label="All queries" sub="Everything, open and closed" onClick={() => setTurnFilter("all")} />
+        <PRow kind="rad" on={turnFilter === "move"} label="Your move" sub="The agent has replied — over to you" onClick={() => setTurnFilter("move")} />
+        <PRow kind="rad" on={turnFilter === "wait"} label="Waiting" sub="Ball is in the agent's court" onClick={() => setTurnFilter("wait")} />
+      </PopSection>
+      <PopSection label="Manuscript">
+        <PRow kind="rad" on={selectedManuscriptFilter === "All"} label="All manuscripts" onClick={() => setSelectedManuscriptFilter("All")} />
+        {manuscriptsWithQueries.map(m => (
+          <PRow key={m.id} kind="rad" on={selectedManuscriptFilter === m.id} label={m.title} onClick={() => setSelectedManuscriptFilter(m.id)} />
+        ))}
+      </PopSection>
+      <PopSection label="Status">
+        <div className="f12-quick">
+          <button type="button" onClick={() => setStatusSel([...OPEN_STATUSES_F12])}>OPEN ONLY</button>
+          <button type="button" onClick={() => setStatusSel([...CLOSED_STATUSES_F12])}>CLOSED ONLY</button>
+          <button type="button" onClick={() => setStatusSel([])}>CLEAR</button>
+        </div>
+        {STATUS_SORT_ORDER.map(s => (
+          <PRow
+            key={s}
+            kind="box"
+            on={statusSel.includes(s)}
+            label={statusDisplay(s)}
+            lead={<StatusDot status={s} overrideSize={15} decorative />}
+            onClick={() => setStatusSel(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])}
+          />
+        ))}
+      </PopSection>
+      <PopSection label="Needs attention">
+        <PRow kind="box" on={needsOverdue} label="Overdue for a reply" onClick={() => setNeedsOverdue(v => !v)} />
+        <PRow kind="box" on={needsTasks} label="Has open tasks" onClick={() => setNeedsTasks(v => !v)} />
+      </PopSection>
+    </F12Popover>
+  );
+
+  const F12_SORT_GROUPS: { group: string; items: { key: string; label: string; sub?: string }[] }[] = [
+    { group: "Activity", items: [
+      { key: "last_activity", label: "Last activity", sub: "Most recently moved first" },
+    ]},
+    { group: "Dates", items: [
+      { key: "date_newest", label: "Date sent · newest", sub: "Your latest queries first" },
+      { key: "date_oldest", label: "Date sent · oldest" },
+      { key: "waiting_longest", label: "Waiting longest", sub: "Silence, longest first" },
+      { key: "due_soonest", label: "Reply due soonest", sub: "Floats overdue queries to the top" },
+    ]},
+    { group: "Pipeline", items: [
+      { key: "journey_depth", label: "Journey depth", sub: "Offers and fulls above fresh queries" },
+      { key: "agent_az", label: "Agent · A to Z" },
+    ]},
+  ];
+  const renderSortPopover = () => (
+    <F12Popover
+      width={276}
+      title="Sort"
+      onClose={() => setSortPopOpen(false)}
+      footText={(F12_SORT_GROUPS.flatMap(g => g.items).find(i => i.key === sortKey)?.label || "Last activity").toUpperCase()}
+    >
+      {F12_SORT_GROUPS.map(g => (
+        <PopSection key={g.group} label={g.group}>
+          {g.items.map(i => (
+            <PRow key={i.key} kind="rad" on={sortKey === i.key} label={i.label} sub={i.sub} onClick={() => setSortKey(i.key)} />
+          ))}
+        </PopSection>
+      ))}
+    </F12Popover>
+  );
+
   // Automatically select first element if currently selected is filtered out
-  const statusFiltersKey = `${actionOut}|${statusSel.join(",")}`;
+  const statusFiltersKey = `${turnFilter}|${statusSel.join(",")}|${needsOverdue}|${needsTasks}`;
   useEffect(() => {
     if (sortedList.length > 0) {
       const isStillInList = sortedList.some(q => q.id === selectedQueryId);
@@ -1609,9 +1722,25 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   selectedQueryIdRef.current = selectedQueryId;
 
   return (
+    /* ── F12 shell (ref queries-hub-v14.html): oat root + full-bleed header (CrumbStrip repainted
+       by the .t-f12 tokens) with the page tools overlaid right — export + help icirc + the ONE
+       filled ink CTA. No search field in the header (the list pane owns search). ── */
+    <F12Page
+      tools={
+        <>
+          <Icirc title="Export CSV" onClick={() => sortedList.length > 0 && handleExportFilteredCSV()}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5" /><path d="M4 21h16" /></svg>
+          </Icirc>
+          <Icirc title="Help" onClick={() => onNavigate?.("help")}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M9.5 9a2.5 2.5 0 1 1 3.4 2.33c-.7.27-.9.87-.9 1.67" /><path d="M12 17h.01" /></svg>
+          </Icirc>
+          <F12Primary onClick={() => onNavigate?.("queries", "Log a query")}>Log a new query</F12Primary>
+        </>
+      }
+    >
     <div
-      className="w-full flex flex-col overflow-hidden text-[#3a1c14] font-sans relative queries-container-theme"
-      style={{ height: "100%", backgroundColor: "#faf5ee" }}
+      className="w-full flex flex-col overflow-hidden font-sans relative queries-container-theme"
+      style={{ flex: 1, minHeight: 0 }}
     >
       <style>{`
         .custom-query-list-scrollbar::-webkit-scrollbar {
@@ -2193,88 +2322,41 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
 
       </div>
 
-        {/* ── The desk — control bar over a list card + reading pane on the shell's cream well.
-            (The legacy black .qdesk frame + rail/glint is retired; the chrome frame is the shell.) ── */}
-        <style>{`
-          /* list rows (ledger + monogram, Design A) — hairline-divided, no card/border/spine/lift.
-             Selected = muted warm fill (not pink); hover = faint warm tint. */
-          .qrow{ position:relative; padding:12px 15px; cursor:pointer; border-bottom:1px solid #ece3d6; transition:background .14s ease; }
-          .qrow:last-child{ border-bottom:none; }
-          .qrow:hover:not(.sel){ background:#faf6f0; }
-          .qrow.sel{ background:var(--qh-row-on, var(--hub-row-on)); }
-        `}</style>
-        {/* Desk (bold theme) — a cool blue-grey full-bleed working panel on which the list + reading
-            pane sit as cards. Sidebar stays outside (shell chrome, untouched). */}
-        {/* Fit-to-screen: the desk FILLS the height below the header (flex:1) in BOTH states — the
-            list rows scroll internally so the page never exceeds 100vh; the empty state fills the
-            same way (centred placeholder + welcome pane). */}
+        {/* ── The F12 work area — control bar + chips + panes stack directly in the oat column
+            (the old qdesk/deskpad wrappers are retired with the hub-token paint). Each branch
+            renders its own bands; everything below the header sits in the centred --maxw column
+            via the f12-ctl / f12-chips / f12-body classes. ── */}
         <div style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
-          <div className="qdesk" style={{ position: "relative", display: "flex", flexDirection: "column", border: "none", borderRadius: 0, background: "var(--hub-desk)", overflow: "hidden", flex: 1, minHeight: 0 }}>
-            {/* desk surface — full-bleed blue-grey working area, 22/28/30 content inset (mockup .desk) */}
-            <div style={{ padding: "22px 28px 30px", display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
 
         {queries.length === 0 ? (
-          /* ── Empty database — the Queries Hub header, a list card with a "No queries yet"
-             placeholder (Export disabled), and a welcome pane with Smart Import + manual add. ── */
+          /* ── Empty database — F12 shell: a list pane with a "No queries yet" placeholder
+             (Export disabled) beside the welcome pane (Smart Import + manual add). ── */
           <>
-          {/* Queries Hub grand masthead — the unified ChromeSlab (shared with the populated state).
-              v2 PLAIN: the card surface is dropped via the existing `style` escape (merged last) +
-              a tightened --hub-mast-pad token so the title/meta sit directly on the desk. No
-              ChromeSlab internals touched; CTA (tools) unchanged. Queries route only. */}
-          <ChromeSlab
-            onNavigate={onNavigate}
-            grand
-            title="Queries Hub"
-            meta={hubPulse}
-            style={QUERIES_PLAIN_MASTHEAD}
-            tools={
-              <button type="button" onClick={() => onNavigate?.("queries", "Log a query")} style={mastCtaStyle}>
-                <Plus style={{ width: 15, height: 15 }} />
-                Log a new query
-              </button>
-            }
-          />
+          {/* Empty split — list placeholder + welcome pane in the centred column */}
+          <div className="f12-body" style={{ paddingTop: "var(--gut)" }}>
 
-          {/* Empty split — list placeholder (col 1) + welcome pane (col 2), both full desk height */}
-          <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "363px 1fr", gridTemplateRows: "minmax(0, 1fr)", columnGap: 20, flex: 1, minHeight: 0, alignItems: "stretch" }}>
-
-            {/* List card — search + header (0 queries · Sort · Filter) + centred placeholder + disabled CSV */}
-            <div style={{ alignSelf: "stretch", background: "var(--hub-list)", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", overflow: "hidden", boxShadow: "0 8px 26px rgba(29,23,18,.12)", display: "flex", flexDirection: "column", minHeight: 0 }}>
-              <div style={{ position: "relative", margin: "10px 6px 8px", flexShrink: 0 }}>
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400 pointer-events-none" />
-                <input type="text" placeholder="Search..." value={listSearch} onChange={(e) => setListSearch(e.target.value)} style={{ width: "100%", background: "#fff", border: "1px solid var(--bd)", borderRadius: 13, padding: "10px 15px 10px 38px", fontSize: 13.5, color: "#8a7a6c", fontFamily: "inherit", outline: "none", boxShadow: "0 2px 8px rgba(29,23,18,.10)" }} />
+            {/* List pane — search + centred placeholder + disabled CSV foot */}
+            <div className="f12-pane f12-list">
+              <div className="f12-lsearch">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+                <input type="text" placeholder="Search queries…" value={listSearch} onChange={(e) => setListSearch(e.target.value)} aria-label="Search queries" />
               </div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "4px 6px 12px", flexShrink: 0 }}>
-                <span style={{ fontFamily: FONT_SERIF, fontSize: 18, fontWeight: 800, color: qdbBoldInk }}>0 queries</span>
-                <div style={{ display: "flex", gap: 14 }}>
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: FONT_MONO, fontSize: 10, fontWeight: 600, letterSpacing: ".03em", textTransform: "uppercase" as const, color: "#c3b8a8" }}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M7 12h10M10 18h4" /></svg>
-                    Sort
-                  </span>
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: FONT_MONO, fontSize: 10, fontWeight: 600, letterSpacing: ".03em", textTransform: "uppercase" as const, color: "#c3b8a8" }}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M3 5h18l-7 8v6l-4 2v-8z" /></svg>
-                    Filter
-                  </span>
-                </div>
-              </div>
-              <div style={{ height: 1, background: "#cfc6ba", margin: "0 6px", flexShrink: 0 }} />
-              {/* centred placeholder */}
-              <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: 24, gap: 8 }}>
-                <span style={{ color: "#c9bcab", display: "flex" }}>
+              <div className="f12-rows" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: 24, gap: 8 }}>
+                <span style={{ color: "var(--faint)", display: "flex" }}>
                   <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>
                 </span>
-                <span style={{ fontFamily: FONT_SERIF, fontWeight: 700, fontSize: 15, color: "#5a5048" }}>No queries yet</span>
-                <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, lineHeight: 1.5, color: "#7d7268", maxWidth: 200 }}>Your queries will appear here once you log or import them.</span>
+                <span style={{ fontFamily: "var(--f12-serif)", fontWeight: 600, fontSize: 15, color: "var(--ink)" }}>No queries yet</span>
+                <span style={{ fontSize: 12, lineHeight: 1.5, color: "var(--muted)", maxWidth: 200 }}>Your queries will appear here once you log or import them.</span>
               </div>
-              {/* CSV export — disabled (nothing to export) */}
-              <div style={{ flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, borderTop: "1px solid #ece3d6", padding: 11, fontFamily: FONT_MONO, fontSize: 9.5, fontWeight: 600, letterSpacing: ".06em", textTransform: "uppercase" as const, color: "#c3b8a8" }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v11M7 9l5 5 5-5M5 21h14" /></svg>
-                Export as CSV
+              <div className="f12-lfoot">
+                <span><b>SHOWING 0 OF 0</b></span>
+                <span style={{ opacity: 0.5 }}>EXPORT CSV</span>
+                <span className="f12-kbd">↑↓ · ⏎</span>
               </div>
             </div>
 
-            {/* Welcome pane — blush, centred onboarding (mockup .emptypane) */}
-            <div className="qp-pane" style={{ alignSelf: "stretch", minHeight: 0, background: "var(--hub-pane-process)", border: "var(--hub-pane-bd)", borderRadius: "var(--hub-radius)", boxShadow: "var(--hub-pane-sh)", overflowY: "auto", display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+            {/* Welcome pane — centred onboarding */}
+            <div className="f12-pane f12-detail" style={{ overflowY: "auto", alignItems: "center", justifyContent: "center", padding: 24, display: "flex" }}>
               <div style={{ maxWidth: 460, width: "100%", textAlign: "center" }}>
                 <div style={{ fontFamily: FONT_SERIF, fontWeight: 800, fontSize: 25, color: qdbBoldInk, marginBottom: 9 }}>No queries yet</div>
                 <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 13.5, color: "#5a5048", lineHeight: 1.55, maxWidth: 360, margin: "0 auto 20px" }}>This is where you'll track every agent you query — what you sent, when it went, and what came back.</div>
@@ -2319,120 +2401,108 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         ) : (
         <>
 
-        {/* ── Queries Hub grand masthead — the unified ChromeSlab (Option A: frame + shadow retired) ── */}
-        <ChromeSlab
-          onNavigate={onNavigate}
-          grand
-          title="Queries Hub"
-          meta={hubPulse}
-          style={QUERIES_PLAIN_MASTHEAD}
-          tools={
-            <button
-              type="button"
-              onClick={() => onNavigate?.("queries", "Log a query")}
-              style={mastCtaStyle}
-            >
-              <Plus style={{ width: 15, height: 15 }} />
-              Log a new query
-            </button>
-          }
-        />
-
-        {/* ── Filter bar (hub grammar): left-aligned — Action outstanding · Status ▾ · Manuscript ▾
-            · | · Sort ▾. Action outstanding + Status split the retired bucket segmented control. ── */}
+        {/* ── F12 CONTROL BAR (ref queries-hub-v14.html .ctl): two zones locked by --listw —
+            left = FILTER + SORT pill triggers (nothing else); right = the query actions as
+            QUIET buttons (no filled button in this bar), PDF + Delete right-aligned. The old
+            masthead + hub-grammar filter bar and the foot control-row cards are retired. ── */}
         {(() => {
-          const fkey: React.CSSProperties = { fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--hub-label)", flexShrink: 0 };
-          // v2 — ONE control language: every toolbar control is a 40px-high, 999px white pill with
-          // the same 1px --bd border and Inter type (ref queries-hub-v2.html .fdrop). No mixed radii.
-          const rail: React.CSSProperties = { display: "inline-flex", alignItems: "center", gap: 2, height: 40, background: "var(--hub-btn-bg, #fffefb)", border: "var(--bdw, 1px) solid var(--bd)", borderRadius: 999, padding: "0 5px 0 2px" };
-          const pill = (on: boolean): React.CSSProperties => ({ fontFamily: "'Inter',sans-serif", fontSize: 11.5, fontWeight: 500, padding: "5px 12px", borderRadius: 999, border: "none", cursor: "pointer", whiteSpace: "nowrap", background: on ? "var(--hub-toggle-on)" : "transparent", color: on ? "var(--hub-toggle-on-tx)" : "var(--hub-item)" });
-          // Left-aligned Sort (no marginLeft:auto) — everything sits on the left.
-          const sortSel: React.CSSProperties = { fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 500, color: "var(--hub-item)", background: "var(--hub-btn-bg, #fffefb)", border: "var(--bdw, 1px) solid var(--bd)", borderRadius: 999, height: 40, padding: "0 16px", cursor: "pointer" };
-          const trig = (on: boolean): React.CSSProperties => ({ display: "inline-flex", alignItems: "center", gap: 7, height: 40, fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 500, padding: "0 16px", borderRadius: 999, cursor: "pointer", whiteSpace: "nowrap", border: "var(--bdw, 1px) solid var(--bd)", background: on ? "var(--qh-row-on, var(--hub-row-on))" : "var(--hub-btn-bg, #fffefb)", color: "var(--hub-item)" });
-          const menu: React.CSSProperties = { position: "absolute", top: "100%", left: 0, marginTop: 6, zIndex: 41, background: "var(--card, #fffefb)", border: "var(--bdw) solid var(--bd)", borderRadius: 10, boxShadow: "0 12px 30px rgba(29,23,18,.20)", padding: 7, minWidth: 214 };
-          const optRow: React.CSSProperties = { display: "flex", alignItems: "center", gap: 9, width: "100%", textAlign: "left", border: "none", background: "transparent", cursor: "pointer", padding: "6px 8px", borderRadius: 7, fontFamily: "'Inter',sans-serif", fontSize: 12.5, color: "var(--hub-item)" };
-          const box = (on: boolean): React.CSSProperties => ({ width: 15, height: 15, borderRadius: 4, flexShrink: 0, border: "1.5px solid var(--bd)", background: on ? "var(--hub-accent, #7c3a2a)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" });
-          const subhead: React.CSSProperties = { ...fkey, padding: "8px 8px 4px" };
-          const chev = <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>;
-          const check = <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>;
-
-          const statusCount = statusSel.length;
-          const statusLabel = (statusCount === 0 || statusCount === ALL_QUERY_STATUSES.length) ? "All" : `${statusCount} selected`;
-          const manuscriptLabel = selectedManuscriptFilter === "All" ? "All" : (manuscriptsWithQueries.find((m) => m.id === selectedManuscriptFilter)?.title ?? "All");
-          const ACTIVE_ROWS: QueryStatus[] = [QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_REQUESTED, QueryStatus.FULL_SENT, QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER];
-          const CLOSED_ROWS: QueryStatus[] = [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE];
-          const toggleDraft = (s: QueryStatus) => setStatusDraft((d) => d.includes(s) ? d.filter((x) => x !== s) : [...d, s]);
-          const openStatus = () => { setStatusDraft([...statusSel]); setManuscriptMenuOpen(false); setStatusMenuOpen(true); };
-          const statusRow = (s: QueryStatus) => { const on = statusDraft.includes(s); return (<button key={s} type="button" role="checkbox" aria-checked={on} onClick={() => toggleDraft(s)} style={optRow}><span style={box(on)}>{on && check}</span>{s}</button>); };
-          const miniBtn: React.CSSProperties = { ...fkey, background: "transparent", border: "none", cursor: "pointer", padding: "4px 4px" };
+          const sel = !!(activeQuery && activeAgent && activeMs);
+          const status = activeQuery ? (activeQuery.status as QueryStatus) : null;
+          const ctrlAction = status ? getPrimaryAction(status) : null;
+          const isMark = ctrlAction?.kind === "mark-sent";
+          const isClosed = status === QueryStatus.REJECTED || status === QueryStatus.WITHDRAWN || status === QueryStatus.NO_RESPONSE;
+          const waitingOnAgent = ctrlAction?.ballHolder === "agent";
+          const taskCount = sel && activeQuery ? queryTaskBadge(tasks, activeQuery.id).count : 0;
+          const primaryLabel = isClosed ? "Reopen"
+            : (isMark && ctrlAction?.kind === "mark-sent") ? (ctrlAction.markKind === "resubmit" ? "Record resubmission" : "Mark sent")
+            : "Record response";
+          const primaryRef = (sel && isMark && !isClosed) ? markSentTriggerRef : undefined;
+          const onPrimary = !sel ? undefined
+            : isClosed ? () => activeQuery && updateQueryStatus(activeQuery.id, QueryStatus.QUERIED)
+            : isMark ? () => setIsMarkSentOpen(o => !o)
+            : () => setIsRecordResponseFocusFormOpen(true);
 
           return (
-            <div className="qp-filterbar" style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", flexShrink: 0, marginBottom: 12 }}>
-              {/* Action outstanding — the label sits INSIDE the pill (mockup .seg .stag), not to its left */}
-              <div style={rail} role="group" aria-label="Filter by action outstanding">
-                <span style={{ ...fkey, alignSelf: "center", padding: "0 8px 0 6px" }}>Action outstanding</span>
-                {([["all", "All"], ["yes", "Yes"], ["no", "No"]] as ["all" | "yes" | "no", string][]).map(([v, label]) => (
-                  <button key={v} type="button" onClick={() => setActionOut(v)} aria-pressed={actionOut === v} style={pill(actionOut === v)}>{label}</button>
-                ))}
-              </div>
-
-              {/* Status multi-select */}
-              <div style={{ position: "relative" }}>
-                <button type="button" onClick={() => (statusMenuOpen ? setStatusMenuOpen(false) : openStatus())} aria-haspopup="dialog" aria-expanded={statusMenuOpen} style={trig(statusFilterActive)}>
-                  Status: {statusLabel}<span style={{ display: "flex", color: "var(--hub-label)" }}>{chev}</span>
-                </button>
-                {statusMenuOpen && (
-                  <div style={menu} role="dialog" aria-label="Filter by status">
-                    {ACTIVE_ROWS.map(statusRow)}
-                    <div style={subhead}>Closed</div>
-                    {CLOSED_ROWS.map(statusRow)}
-                    <div style={{ height: 1, background: "var(--bd)", margin: "7px 4px" }} />
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "0 4px" }}>
-                      <button type="button" onClick={() => setStatusDraft([])} style={miniBtn}>Clear</button>
-                      <button type="button" onClick={() => setStatusDraft([...ALL_QUERY_STATUSES])} style={miniBtn}>Select all</button>
-                      <button type="button" onClick={() => { setStatusSel(statusDraft); setStatusMenuOpen(false); }} style={{ marginLeft: "auto", fontFamily: "'Inter',sans-serif", fontSize: 11.5, fontWeight: 600, padding: "6px 15px", borderRadius: 8, border: "1px solid var(--qh-primary-bd, var(--hub-primary-bd, #422701))", background: "var(--qh-primary, var(--hub-primary, #422701))", color: "var(--qh-primary-tx, var(--hub-primary-tx, #fff))", cursor: "pointer" }}>Apply</button>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Manuscript dropdown — only when tracking more than one book */}
-              {manuscriptsWithQueries.length > 1 && (
-                <div style={{ position: "relative" }}>
-                  <button type="button" onClick={() => { setManuscriptMenuOpen((o) => !o); setStatusMenuOpen(false); }} aria-haspopup="listbox" aria-expanded={manuscriptMenuOpen} style={trig(selectedManuscriptFilter !== "All")}>
-                    <span style={{ maxWidth: 170, overflow: "hidden", textOverflow: "ellipsis" }}>Manuscript: {manuscriptLabel}</span><span style={{ display: "flex", color: "var(--hub-label)" }}>{chev}</span>
-                  </button>
-                  {manuscriptMenuOpen && (
-                    <div style={{ ...menu, minWidth: 200 }} role="listbox" aria-label="Filter by manuscript">
-                      <button type="button" role="option" aria-selected={selectedManuscriptFilter === "All"} onClick={() => { setSelectedManuscriptFilter("All"); setManuscriptMenuOpen(false); }} style={{ ...optRow, fontWeight: selectedManuscriptFilter === "All" ? 700 : 500 }}>All manuscripts</button>
-                      {manuscriptsWithQueries.map((m) => (
-                        <button key={m.id} type="button" role="option" aria-selected={selectedManuscriptFilter === m.id} onClick={() => { setSelectedManuscriptFilter(m.id); setManuscriptMenuOpen(false); }} title={m.title} style={{ ...optRow, fontWeight: selectedManuscriptFilter === m.id ? 700 : 500 }}>
-                          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.title}</span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
+            <div className="f12-ctl">
+              {/* Left zone — exactly the list-pane width: FILTER + SORT, nothing else. */}
+              <div className="f12-zone-list">
+                <div className="f12-popwrap">
+                  <Trig
+                    label="FILTER"
+                    open={filterPopOpen}
+                    count={activeFilterCount}
+                    onClick={() => { setSortPopOpen(false); setFilterPopOpen(o => !o); }}
+                    icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4-2v-4L3 5z" /></svg>}
+                  />
+                  {filterPopOpen && renderFilterPopover()}
                 </div>
-              )}
+                <div className="f12-popwrap">
+                  <Trig
+                    label="SORT"
+                    open={sortPopOpen}
+                    onClick={() => { setFilterPopOpen(false); setSortPopOpen(o => !o); }}
+                    icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M7 12h10M10 18h4" /></svg>}
+                  />
+                  {sortPopOpen && renderSortPopover()}
+                </div>
+              </div>
 
-              {/* divider before Sort */}
-              <div style={{ width: 1, height: 22, background: "var(--bd)", margin: "0 4px", flexShrink: 0 }} aria-hidden="true" />
-
-              {/* Sort */}
-              <select value={sortKey} onChange={(e) => setSortKey(e.target.value)} style={sortSel} aria-label="Sort queries">
-                <option value="date_queried">Sort · Date sent</option>
-                <option value="a_z">Sort · Agent A–Z</option>
-                <option value="status">Sort · Status</option>
-                <option value="last_updated">Sort · Last updated</option>
-              </select>
-
-              {/* click-away backdrop for the Status / Manuscript menus */}
-              {(statusMenuOpen || manuscriptMenuOpen) && (
-                <div onClick={() => { setStatusMenuOpen(false); setManuscriptMenuOpen(false); }} style={{ position: "fixed", inset: 0, zIndex: 40 }} aria-hidden="true" />
-              )}
+              {/* Right zone — begins at the reading pane's left edge; all quiet buttons. */}
+              <div className="f12-zone-read">
+                <button ref={primaryRef} type="button" className="f12-act" disabled={!sel} onClick={onPrimary}>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
+                  {primaryLabel}
+                </button>
+                <button type="button" className="f12-act" disabled={!sel} onClick={() => onNavigate?.("todo")}>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M4 12h10M4 18h10" /><path d="m17 6 1.5 1.5L21.5 4" /><path d="m17 12 1.5 1.5L21.5 10" /></svg>
+                  View tasks
+                  {taskCount > 0 && <span className="f12-cnt">{taskCount}</span>}
+                </button>
+                <button type="button" className="f12-act" disabled={!sel} onClick={() => activeQuery && openEditQuery(activeQuery.id)}>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+                  Edit
+                </button>
+                <button type="button" className="f12-act" disabled={!sel || !waitingOnAgent} onClick={() => setIsNudgeOpen(true)} title={sel && !waitingOnAgent ? "Available while you're waiting on the agent" : undefined}>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" /></svg>
+                  Nudge
+                </button>
+                <button ref={closeTriggerRef} type="button" className="f12-act" disabled={!sel || isClosed} onClick={() => setIsCloseMenuOpen(o => !o)} title={sel && isClosed ? "Already closed" : undefined}>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="4" rx="1" /><path d="M5 8v11a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8M9 12h6" /></svg>
+                  Mark closed
+                </button>
+                <span className="f12-divv" aria-hidden="true" />
+                <button type="button" className="f12-act" disabled title="Coming soon — jump to the agent's record">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 4-6 8-6s8 2 8 6" /></svg>
+                  Agent
+                </button>
+                <button type="button" className="f12-act" disabled title="Coming soon — jump to the manuscript">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h11l3 3v15H5zM9 3v6l2-1 2 1V3" /></svg>
+                  Manuscript
+                </button>
+                <div className="f12-right">
+                  <button type="button" className="f12-act" disabled={!sel || isGeneratingPDF} onClick={() => handleDownloadPDF()} title={isGeneratingPDF ? "Generating…" : "Download PDF"}>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></svg>
+                    PDF
+                  </button>
+                  <button type="button" className="f12-act f12-del" disabled={!sel} onClick={() => setIsDeleteConfirmOpen(true)} title="Delete this query">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /></svg>
+                    Delete
+                  </button>
+                </div>
+              </div>
             </div>
           );
         })()}
+
+        {/* Active filters — removable pink chips on the oat beneath the bar (panes never resize). */}
+        {activeFilterChips.length > 0 && (
+          <div className="f12-chips">
+            {activeFilterChips.map((c) => (
+              <Chip key={c.key} onRemove={c.remove}>{c.label}</Chip>
+            ))}
+            <button type="button" className="f12-clear" onClick={resetAllFilters}>CLEAR ALL</button>
+          </div>
+        )}
 
         {/* MarkSentPopover — anchored via useFixedMenu to the actions-toolbar CTA */}
         <AnimatePresence>
@@ -2509,7 +2579,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         {/* ── Split — list card (furniture, col 1) beside the workspace reading pane (col 2). The
             old actions toolbar row is retired: every query action now lives in the pane's command
             bar (one home for actions). Single-row grid, both columns full height. ── */}
-        <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "363px 1fr", gridTemplateRows: "minmax(0, 1fr) auto", columnGap: 20, flex: 1, minHeight: 0, alignItems: "stretch" }}>
+        <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "363px 1fr", gridTemplateRows: "minmax(0, 1fr)", columnGap: 20, flex: 1, minHeight: 0, alignItems: "stretch" }}>
 
           {/* List card — furniture: search + header fixed, rows scroll to the control bar's top
               edge (count · Export CSV · key hints moved into the shared bar's left zone). */}
@@ -3026,79 +3096,14 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             .qp-menuitem:hover:not(:disabled){ background: rgba(58,44,31,.06); }
           `}</style>
 
-          {/* List card — count · Export CSV, centred (no keyboard hint) */}
-          <div style={{ gridColumn: 1, gridRow: 2, display: "flex", alignItems: "center", justifyContent: "center", gap: 12, background: "var(--qp-cmd-bg, var(--hub-cmd))", border: "var(--qp-cmd-frame, none)", borderTop: "var(--qp-cmd-toprule, var(--hub-cmd-rule))", borderBottom: "4px solid var(--hub-primary)", borderRadius: "var(--qp-cmd-radius, 0)", margin: "var(--qp-cmd-margin, 0)", boxShadow: "var(--cmd-bar-shadow, none)", padding: "11px 16px", fontFamily: FONT_MONO, fontSize: 9.5, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase" as const, color: `var(--cmdbar-meta, ${qdbBoldMuted})` }}>
-            <span>{sortedList.length} {sortedList.length === 1 ? "query" : "queries"}</span>
-            <span aria-hidden="true" style={{ width: 1, height: 12, background: "var(--bd)", opacity: .85 }} />
-            <button
-              type="button"
-              onClick={() => sortedList.length > 0 && handleExportFilteredCSV()}
-              disabled={sortedList.length === 0}
-              style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "transparent", border: "none", padding: 0, fontFamily: "inherit", fontSize: "inherit", fontWeight: "inherit", letterSpacing: "inherit", textTransform: "inherit", color: `var(--cmdbar-meta, ${qdbBoldMuted})`, opacity: sortedList.length === 0 ? .5 : 1, cursor: sortedList.length === 0 ? "default" : "pointer" }}
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v11M7 9l5 5 5-5M5 21h14" /></svg>
-              Export CSV
-            </button>
-          </div>
-
-          {/* Query card — the action ribbon: three equal sections (Actions · Go to · utility),
-              tiles centred in each, dividers between. Tiles stay greyed-not-hidden with no selection. */}
-          <div style={{ gridColumn: 2, gridRow: 2, display: "flex", alignItems: "center", gap: 4, background: "var(--qp-cmd-bg, var(--hub-cmd))", border: "var(--qp-cmd-frame, none)", borderTop: "var(--qp-cmd-toprule, var(--hub-cmd-rule))", borderBottom: "4px solid var(--hub-primary)", borderRadius: "var(--qp-cmd-radius, 0)", margin: "var(--qp-cmd-margin, 0)", boxShadow: "var(--cmd-bar-shadow, none)", padding: "9px 14px", minWidth: 0 }}>
-            {(() => {
-              const sel = !!(activeQuery && activeAgent && activeMs);
-              const status = activeQuery ? (activeQuery.status as QueryStatus) : null;
-              const ctrlAction = status ? getPrimaryAction(status) : null;
-              const isMark = ctrlAction?.kind === "mark-sent";
-              const isClosed = status === QueryStatus.REJECTED || status === QueryStatus.WITHDRAWN || status === QueryStatus.NO_RESPONSE;
-              const waitingOnAgent = ctrlAction?.ballHolder === "agent";
-              const badge = sel && activeQuery ? queryTaskBadge(tasks, activeQuery.id) : { count: 0, tier: null as null };
-
-              // Primary — contextual: Reopen (closed) / Mark sent · Record resubmission (writer's turn) / Record response.
-              const primaryLabel = isClosed ? "Reopen"
-                : (isMark && ctrlAction?.kind === "mark-sent") ? (ctrlAction.markKind === "resubmit" ? "Record resubmission" : "Mark sent")
-                : "Record response";
-              const primaryIcon = isClosed
-                ? <RotateCcw style={{ width: 16, height: 16 }} />
-                : <Send style={{ width: 16, height: 16, strokeWidth: 1.9 } as any} />;
-              const primaryRef = (sel && isMark && !isClosed) ? markSentTriggerRef : undefined;
-              const onPrimary = !sel ? undefined
-                : isClosed ? () => activeQuery && updateQueryStatus(activeQuery.id, QueryStatus.QUERIED)
-                : isMark ? () => setIsMarkSentOpen(o => !o)
-                : () => setIsRecordResponseFocusFormOpen(true);
-
-              const csep = <span aria-hidden="true" style={{ width: 1, height: 22, background: "var(--bd)", margin: "0 10px", flexShrink: 0 }} />;
-              const taskBadge = badge.count > 0 ? (
-                <span style={{ minWidth: 16, height: 16, borderRadius: 8, background: badge.tier === "urgent" ? "#9a3b2a" : "#b7ab99", color: "#faf3ef", fontFamily: FONT_MONO, fontSize: 9, fontWeight: 600, display: "inline-grid", placeItems: "center", padding: "0 4px", marginLeft: 2 }}>{badge.count}</span>
-              ) : undefined;
-
-              // Slim inline command bar (ref queries-hub-v3.html .bar): Record · Edit · Nudge · Close |
-              // gap | Agent · Manuscript · Tasks | spring | PDF · Delete. Same handlers/refs/stubs as
-              // before — v3 reorders, drops the ⋯ More button, and promotes Delete (destructive) last.
-              return (
-                <>
-                  <CmdBtn ref={primaryRef} icon={primaryIcon} label={primaryLabel} primary disabled={!sel} onClick={onPrimary} />
-                  <CmdBtn icon={<Pencil style={{ width: 15, height: 15 }} />} label="Edit" disabled={!sel} onClick={() => activeQuery && openEditQuery(activeQuery.id)} />
-                  <CmdBtn icon={<Bell style={{ width: 16, height: 16 }} />} label="Nudge" disabled={!sel || !waitingOnAgent} onClick={() => setIsNudgeOpen(true)} title={sel && !waitingOnAgent ? "Available while you're waiting on the agent" : undefined} />
-                  <CmdBtn ref={closeTriggerRef} icon={<XCircle style={{ width: 16, height: 16 }} />} label="Close" disabled={!sel || isClosed} onClick={() => setIsCloseMenuOpen(o => !o)} title={sel && isClosed ? "Already closed" : undefined} />
-                  {csep}
-                  <CmdBtn icon={<User style={{ width: 16, height: 16 }} />} label="Agent" disabled title="Coming soon — jump to the agent's record" />
-                  <CmdBtn icon={<Book style={{ width: 16, height: 16 }} />} label="Manuscript" disabled title="Coming soon — jump to the manuscript" />
-                  <CmdBtn icon={<ListChecks style={{ width: 16, height: 16 }} />} label="Tasks" disabled={!sel} onClick={() => onNavigate?.("todo")} badge={taskBadge} />
-                  <span aria-hidden="true" style={{ flex: 1 }} />
-                  <CmdBtn dim icon={<Download style={{ width: 16, height: 16 }} />} label="PDF" disabled={!sel || isGeneratingPDF} onClick={() => handleDownloadPDF()} title={isGeneratingPDF ? "Generating…" : "Download PDF"} />
-                  <CmdBtn destructive icon={<Trash2 style={{ width: 15, height: 15 }} />} label="Delete" disabled={!sel} onClick={() => setIsDeleteConfirmOpen(true)} title="Delete this query" />
-                </>
-              );
-            })()}
-          </div>{/* closes query card */}
+          {/* (The foot control-row cards are retired — the F12 control bar at the top of the
+              page carries every action; the list pane's own footer carries count + Export CSV.) */}
 
         </div>{/* closes content grid */}
         </>
         )}
 
-            </div>{/* closes deskpad */}
-          </div>{/* closes qdesk frame */}
-        </div>{/* closes worktable outer wrapper */}
+        </div>{/* closes the F12 work-area column */}
       </div>{/* closes main container */}
 
     {activeQuery && (
@@ -3295,5 +3300,6 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
       </AnimatePresence>
     </div>
     </div>
+    </F12Page>
   );
 };

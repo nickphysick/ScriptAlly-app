@@ -89,11 +89,11 @@ describe("crumb tokens — per-theme smoke (rule-text lock)", () => {
   });
 });
 
-describe("Queries Hub slab completion — artefact locks", () => {
-  it("renders the ChromeSlab in BOTH branches (empty + populated) and the qhbar frame is gone", () => {
+describe("Queries Hub chrome — artefact locks (F12 shell, overnight run)", () => {
+  it("the ChromeSlab is retired from Queries; the F12Page shell (CrumbStrip header) replaces it", () => {
     const queries = readFileSync(resolve(__dirname, "../Queries.tsx"), "utf8");
-    const slabMounts = queries.match(/<ChromeSlab/g) ?? [];
-    expect(slabMounts.length).toBe(2);
+    expect(queries.includes("<ChromeSlab")).toBe(false);
+    expect(queries).toContain("<F12Page");
     expect(queries.includes('className="qhbar"')).toBe(false);
   });
 

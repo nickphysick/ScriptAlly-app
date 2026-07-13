@@ -43,12 +43,10 @@ describe("ChromeSlab — the grand variant", () => {
   });
 });
 
-describe("Queries hub opts into the masthead with the pulse line", () => {
-  it("both slab mounts pass grand + the derived pulse (not the old plain Tracking meta)", () => {
-    // grand appears on the ChromeSlab mounts, and the pulse feeds meta
-    const grandCount = (queries.match(/\bgrand\b/g) || []).length;
-    expect(grandCount).toBeGreaterThanOrEqual(2);
-    expect(queries).toContain("meta={hubPulse}");
-    expect(queries).toContain("queriesPulse(hubScopedQueries, hubSubtitle)");
+describe("Queries hub — the grand masthead is RETIRED (F12 shell, overnight run)", () => {
+  it("Queries mounts no ChromeSlab; the F12 header (CrumbStrip via F12Page) carries the page name", () => {
+    // The breadcrumb + list footer carry what the masthead + pulse line used to say.
+    expect(queries.includes("<ChromeSlab")).toBe(false);
+    expect(queries).toContain("<F12Page");
   });
 });

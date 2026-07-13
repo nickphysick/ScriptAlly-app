@@ -76,15 +76,16 @@ describe("commandBarStatus — the bar's centre text", () => {
 describe("Queries.tsx artefacts — one home for actions + regressions", () => {
   const src = readFileSync(resolve(__dirname, "../components/Queries.tsx"), "utf8");
 
-  it("the control row is two floating cards (list card + query ribbon); the single subgrid bar is retired", () => {
-    // The workspace foot is now two cards sharing the column-gap: a centred list card (col 1 / row 2)
-    // beside the query action ribbon (col 2 / row 2). The old unified subgrid bar + top toolbar are gone.
-    expect(src.includes("gridColumn: 1, gridRow: 2")).toBe(true);  // list card
-    expect(src.includes("gridColumn: 2, gridRow: 2")).toBe(true);  // query ribbon card
-    expect(src.includes("qp-controlbar")).toBe(false);             // the single bar is retired
-    expect(src.includes('gridColumn: "1 / -1"')).toBe(false);
+  it("the F12 control bar sits at the TOP — two zones locked by --listw; the foot cards are retired", () => {
+    // One bar above the panes (ref queries-hub-v14.html .ctl): FILTER + SORT in the list-width
+    // left zone, the quiet query actions in the right zone. No foot control-row cards remain.
+    expect(src).toContain('className="f12-ctl"');
+    expect(src).toContain('className="f12-zone-list"');
+    expect(src).toContain('className="f12-zone-read"');
+    expect(src.includes("gridColumn: 1, gridRow: 2")).toBe(false); // foot list card gone
+    expect(src.includes("gridColumn: 2, gridRow: 2")).toBe(false); // foot ribbon card gone
+    expect(src.includes("qp-controlbar")).toBe(false);
     expect(src.includes("Actions toolbar")).toBe(false);
-    expect(src.includes('gridRow: "1 / span 2"')).toBe(false); // the old list span (2-row grid)
   });
 
   it("the mark-sent popover is anchored to the primary ribbon tile (single home)", () => {
@@ -135,23 +136,19 @@ describe("command-bar theming — per-theme token smoke (rule-text lock)", () =>
 describe("Queries height chain — structural guards (jsdom cannot verify flex/grid sizing)", () => {
   const src = readFileSync(resolve(__dirname, "../components/Queries.tsx"), "utf8");
 
-  it("the desk grid fills its first row; the populated grid appends a control-bar row", () => {
-    // Every .queries-content-grid must template its rows explicitly — the bug was a MISSING
-    // gridTemplateRows, so auto-rows split the two column-placed panes across rows. The first
-    // row always fills (minmax(0,1fr)); the populated grid appends `auto` for the control bar.
+  it("the populated grid is single-row (the control bar moved to the top of the page)", () => {
+    // Explicit row templating stays (the missing-gridTemplateRows bug), but there is no
+    // control-bar row any more — the F12 bar renders above the grid.
     const grids = src.match(/className="queries-content-grid" style=\{\{[^}]*\}\}/g) ?? [];
-    expect(grids.length).toBeGreaterThanOrEqual(2);
-    for (const g of grids) expect(g).toContain('gridTemplateRows: "minmax(0, 1fr)');
+    expect(grids.length).toBeGreaterThanOrEqual(1);
+    for (const g of grids) expect(g).toContain('gridTemplateRows: "minmax(0, 1fr)"');
   });
 
-  it("the reading pane stays in gridRow 1 (never bottom-anchored); the control row is row 2", () => {
+  it("the reading pane stays in gridRow 1 (never bottom-anchored); no row-2 furniture remains", () => {
     // the workspace pane must NOT carry the stale gridRow: 2 that bottom-anchored it
     expect(src.includes('className="qp-pane" style={{ gridColumn: 2, gridRow: 2')).toBe(false);
     expect(src.includes('className="qp-pane" style={{ gridColumn: 2, gridRow: 1')).toBe(true);
     expect(src.includes("gridColumn: 1, gridRow: 1")).toBe(true); // list panel (row 1)
-    // the two control-row cards live in row 2
-    expect(src.includes("gridColumn: 1, gridRow: 2")).toBe(true); // list card
-    expect(src.includes("gridColumn: 2, gridRow: 2")).toBe(true); // query ribbon
   });
 
   it("no viewport-relative height or bottom-anchor in the workspace pane subtree", () => {

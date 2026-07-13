@@ -62,18 +62,17 @@ describe("queriesPulse — masthead pulse line", () => {
 describe("Queries filter bar — artefacts", () => {
   const src = readFileSync(resolve(__dirname, "../components/Queries.tsx"), "utf8");
 
-  it("the floating filter bar exists — Action outstanding + Status multi-select + Sort", () => {
-    expect(src).toContain("qp-filterbar");
-    expect(src).toContain("Sort · Date sent");
-    expect(src).toContain("Action outstanding");
-    expect(src).toContain("actionOut");
+  it("the F12 FILTER popover exists — Whose turn + Manuscript + Status + Needs attention", () => {
+    expect(src).toContain("renderFilterPopover");
+    expect(src).toContain("Whose turn");
+    expect(src).toContain("Needs attention");
     expect(src).toContain("statusSel"); // the Status multi-select's committed selection
   });
 
-  it("Action outstanding reuses the writer's-move bucket (Yes = move, No = ¬move)", () => {
+  it("Whose turn reuses the CTA engine's bucket (move / waiting) — never a second derivation", () => {
     expect(src).toContain("queryBucket(q.status as QueryStatus)");
-    expect(src).toContain('actionOut === "yes"');
-    expect(src).toContain('actionOut === "no"');
+    expect(src).toContain('turnFilter === "move" && bkt !== "move"');
+    expect(src).toContain('turnFilter === "wait" && bkt !== "waiting"');
   });
 
   it("the above-list count is removed + the list-header menus stay retired", () => {
@@ -82,7 +81,9 @@ describe("Queries filter bar — artefacts", () => {
     expect(src.includes("setFilterMenuOpen")).toBe(false);
   });
 
-  it("the Sort dropdown wires to setSortKey (the actual sort driver)", () => {
-    expect(src).toContain("onChange={(e) => setSortKey(e.target.value)}");
+  it("the SORT popover drives setSortKey (the actual sort driver), defaulting to last activity", () => {
+    expect(src).toContain("renderSortPopover");
+    expect(src).toContain("onClick={() => setSortKey(i.key)}");
+    expect(src).toContain('useState<string>("last_activity")');
   });
 });

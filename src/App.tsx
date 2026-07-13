@@ -607,9 +607,10 @@ function AppContent() {
           />
         </StagePage>
 
-        {/* The Queries desk owns its internal scroll (no page scrollbar) — its slot is the same
-            box the retired SidebarShell content column gave it: full height, clipped, white. */}
-        <StagePage active={routeKey === "queries"} layout="fill" clip contentVariant="work">
+        {/* The Queries desk owns its internal scroll (no page scrollbar). F12: the page renders
+            its OWN chrome (F12Page — CrumbStrip header + centred --maxw column), so the slot has
+            no contentVariant cap; the .t-f12 root paints the oat ground edge-to-edge. */}
+        <StagePage active={routeKey === "queries"} layout="fill" clip>
           {queriesSub === "Landing" ? (
             <QueriesLanding onNavigate={handleNavigate} />
           ) : (

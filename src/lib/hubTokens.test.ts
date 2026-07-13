@@ -90,16 +90,11 @@ describe("hub token completeness — every theme defines the full set", () => {
   }
 });
 
-describe("Queries consumes the hub layer for its named surfaces", () => {
+describe("Queries left the hub layer for the F12 master theme (overnight run)", () => {
   const q = readFileSync(resolve(__dirname, "../components/Queries.tsx"), "utf8");
-  it("pane, columns, command bar, monogram read --hub-*", () => {
-    expect(q).toContain("var(--hub-pane-process)");
-    expect(q).toContain("var(--hub-col");
-    expect(q).toContain("var(--hub-cmd)");
-    // The two-card ribbon's primary is a flat coffee-accent tile (no fill), so --hub-primary is no
-    // longer read for a command-bar button; it still backs the masthead CTA + Status Apply button.
-    expect(q).toContain("var(--hub-primary");
-    expect(q).toContain("var(--hub-monogram)");
-    expect(q).toContain("var(--hub-row-on)");
+  it("the page renders the .t-f12 shell (F12Page + f12 control bar); the --hub-* sheet stays for other pages", () => {
+    expect(q).toContain("<F12Page");
+    expect(q).toContain("f12-ctl");
+    // The sheet itself remains locked above — To-do (and others) still consume it.
   });
 });
