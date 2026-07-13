@@ -136,19 +136,20 @@ describe("command-bar theming — per-theme token smoke (rule-text lock)", () =>
 describe("Queries height chain — structural guards (jsdom cannot verify flex/grid sizing)", () => {
   const src = readFileSync(resolve(__dirname, "../components/Queries.tsx"), "utf8");
 
-  it("the populated grid is single-row (the control bar moved to the top of the page)", () => {
-    // Explicit row templating stays (the missing-gridTemplateRows bug), but there is no
-    // control-bar row any more — the F12 bar renders above the grid.
-    const grids = src.match(/className="queries-content-grid" style=\{\{[^}]*\}\}/g) ?? [];
-    expect(grids.length).toBeGreaterThanOrEqual(1);
-    for (const g of grids) expect(g).toContain('gridTemplateRows: "minmax(0, 1fr)"');
+  it("both branches share the centred .f12-body column (the old queries-content-grid is retired)", () => {
+    // The panes live in the SAME centred column as the Contact List page — .f12-body caps at
+    // --maxw with auto margins and the --gut bottom gap; the old page-specific grid is gone.
+    expect(src.includes('className="queries-content-grid"')).toBe(false);
+    const bodies = src.match(/className="f12-body"/g) ?? [];
+    expect(bodies.length).toBeGreaterThanOrEqual(2); // empty + populated branches
   });
 
-  it("the reading pane stays in gridRow 1 (never bottom-anchored); no row-2 furniture remains", () => {
-    // the workspace pane must NOT carry the stale gridRow: 2 that bottom-anchored it
-    expect(src.includes('className="qp-pane f12-pane f12-detail" style={{ gridColumn: 2, gridRow: 2')).toBe(false);
-    expect(src.includes('className="qp-pane f12-pane f12-detail" style={{ gridColumn: 2, gridRow: 1')).toBe(true);
-    expect(src.includes("gridColumn: 1, gridRow: 1")).toBe(true); // list panel (row 1)
+  it("the panes are the f12 pair (list --listw / detail flex:1), never grid-cell-anchored", () => {
+    // No stale gridColumn/gridRow cell styles remain on the panes — the flex column owns layout.
+    expect(src.includes('className="f12-pane f12-list"')).toBe(true);
+    expect(src.includes('className="qp-pane f12-pane f12-detail"')).toBe(true);
+    expect(src.includes("gridColumn: 2, gridRow:")).toBe(false);
+    expect(src.includes("gridColumn: 1, gridRow:")).toBe(false);
   });
 
   it("no viewport-relative height or bottom-anchor in the workspace pane subtree", () => {

@@ -1872,28 +1872,8 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
         .queries-cursor-blink {
           animation: queriesCursorBlink 1s steps(1, end) infinite;
         }
-        /* Short-screen fallback: below 620px viewport height the fit-to-screen clamp would crush
-           the desk, so the desk chain is released (auto height, no clip) with a 560px grid floor
-           and the main panel (overflow-y auto) scrolls internally. !important because the desk
-           heights are inline styles. The old release-to-window-scroll form (height:auto +
-           min-height:100vh on the page root) is gone: the AppShell stage clips its slots, so a
-           grown page was cut off, not scrollable. */
-        @media (max-height: 620px) {
-          .qdesk {
-            flex: 0 0 auto !important;
-            overflow: visible !important;
-          }
-          /* Fixed height (not just a floor): with the desk released to auto, a free grid sizes to
-             its content and the list re-expands to every row. Pinned via flex-basis — the grid is
-             a flex item with inline flex:1 1 0%, so in the main axis the height property alone
-             would lose to flex sizing. 560px keeps the tracks definite so the list keeps its
-             internal scroll. */
-          .queries-content-grid {
-            flex: 0 0 560px !important;
-            height: 560px !important;
-            min-height: 560px !important;
-          }
-        }
+        /* (The old .qdesk / .queries-content-grid short-screen fallback is retired — both panes
+           now live in the shared .f12-body column, same as the Contact List page.) */
       `}</style>
 
       {/* QUICK INLINE LOG DIALOG PORTAL */}
@@ -2575,15 +2555,15 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           );
         })()}
 
-        {/* ── Split — list card (furniture, col 1) beside the workspace reading pane (col 2). The
-            old actions toolbar row is retired: every query action now lives in the pane's command
-            bar (one home for actions). Single-row grid, both columns full height. ── */}
-        <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "363px 1fr", gridTemplateRows: "minmax(0, 1fr)", columnGap: 20, flex: 1, minHeight: 0, alignItems: "stretch" }}>
+        {/* ── Split — list pane beside the reading pane, in the SAME centred column as the
+            Contact List page (.f12-body: max-width --maxw, auto margins, --gut bottom gap;
+            the two panes are --listw / flex:1, locked to the control-bar zones above). ── */}
+        <div className="f12-body" style={{ paddingTop: activeFilterChips.length ? 0 : "var(--gut)" }}>
 
           {/* ── List pane (F12, ref queries-hub-v14.html .list): search field only at the top,
               56px rows, slim footer (SHOWING n OF m · EXPORT CSV · key hints). No "your move"
               pills, no manuscript spine — the row is avatar · name/agency · StatusDot + date. ── */}
-          <div className="f12-pane f12-list" style={{ gridColumn: 1, gridRow: 1, alignSelf: "stretch" }}>
+          <div className="f12-pane f12-list">
             <div className="f12-lsearch">
               <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
               <input
@@ -2650,7 +2630,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
               hugs). A flex column: agent band (flex:none) over three full-height columns that each
               scroll behind their own edge fade (flex:1). The command bar pins to the pane foot in
               Phase 2; the top action toolbar above still exists this phase. */}
-          <div className="qp-pane f12-pane f12-detail" style={{ gridColumn: 2, gridRow: 1, alignSelf: "stretch", minHeight: 0, background: "var(--paper)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          <div className="qp-pane f12-pane f12-detail" style={{ minHeight: 0, background: "var(--paper)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
             {activeQuery && activeAgent && activeMs ? (
               <>
                 <style>{`
@@ -2891,7 +2871,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
           {/* (The foot control-row cards are retired — the F12 control bar at the top of the
               page carries every action; the list pane's own footer carries count + Export CSV.) */}
 
-        </div>{/* closes content grid */}
+        </div>{/* closes f12-body */}
         </>
         )}
 
