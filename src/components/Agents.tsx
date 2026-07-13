@@ -35,6 +35,7 @@ import { StatusDot } from "./StatusDot";
 import { EdgeFadeScroll } from "./EdgeFadeScroll";
 import { F12Page, F12Account, IconTrig, F12Popover, F12Menu, PopSection, PRow, Chip } from "./shell/F12Shell";
 import { useFixedMenu } from "./forms/useFixedMenu";
+import { TasksPopover } from "./TasksPopover";
 import {
   paneProvenance,
   agentQueried,
@@ -114,6 +115,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
     manuscripts,
     activities,
     tasks,
+    userTasks,
     updateAgent,
     deleteAgent,
     setAgentSetAside,
@@ -147,6 +149,9 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
   // ⋯ overflow menu on the command bar (PDF demoted here — chrome tidy).
   const [agMoreOpen, setAgMoreOpen] = useState(false);
   const { triggerRef: agMoreTrigRef, menuStyle: agMoreMenuStyle } = useFixedMenu<HTMLButtonElement>(agMoreOpen);
+  // Agent-scoped View tasks (Stage 6) — the shared record-scoped popover, anchored to the button.
+  const [agTasksOpen, setAgTasksOpen] = useState(false);
+  const { triggerRef: agTasksTrigRef, menuStyle: agTasksMenuStyle } = useFixedMenu<HTMLButtonElement>(agTasksOpen);
   const searchRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -318,7 +323,9 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
   const agentTaskCount = (() => {
     if (!selectedAgent) return 0;
     const qids = new Set(queries.filter((q) => q.agentId === selectedAgent.id).map((q) => q.id));
-    return tasks.filter((t) => t.relatedRecordId === selectedAgent.id || qids.has(t.relatedRecordId)).length;
+    const derived = tasks.filter((t) => t.relatedRecordId === selectedAgent.id || qids.has(t.relatedRecordId)).length;
+    const stored = userTasks.filter((t) => !t.done && t.agentId === selectedAgent.id).length;
+    return derived + stored;
   })();
 
   // Default selection = first list item; selection persists where possible, re-anchors when the
@@ -334,7 +341,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
   }, [flat.map((a) => a.id).join("|")]);
 
   // Close the identity ⋯ menu whenever the selection changes.
-  useEffect(() => setMenuOpen(false), [selectedAgentId]);
+  useEffect(() => { setMenuOpen(false); setAgTasksOpen(false); }, [selectedAgentId]);
 
   const moveSelection = (dir: 1 | -1) => {
     if (!flat.length) return;
@@ -903,11 +910,16 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
             Edit profile
           </button>
-          <button type="button" className="f12-act" disabled={!selectedAgent} onClick={() => onNavigate?.("todo")}>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M4 12h10M4 18h10" /><path d="m17 6 1.5 1.5L21.5 4" /><path d="m17 12 1.5 1.5L21.5 10" /></svg>
-            View tasks
-            {agentTaskCount > 0 && <span className="f12-cnt">{agentTaskCount}</span>}
-          </button>
+          <span className="f12-popwrap" style={{ display: "inline-flex" }}>
+            <button ref={agTasksTrigRef} type="button" className="f12-act" disabled={!selectedAgent} aria-haspopup="dialog" aria-expanded={agTasksOpen} onClick={() => setAgTasksOpen((o) => !o)}>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M4 12h10M4 18h10" /><path d="m17 6 1.5 1.5L21.5 4" /><path d="m17 12 1.5 1.5L21.5 10" /></svg>
+              View tasks
+              {agentTaskCount > 0 && <span className="f12-cnt">{agentTaskCount}</span>}
+            </button>
+            {agTasksOpen && selectedAgent && (
+              <TasksPopover scope={{ agentId: selectedAgent.id }} style={agTasksMenuStyle} onClose={() => setAgTasksOpen(false)} />
+            )}
+          </span>
           {/* link group — pushed right by margin-left:auto */}
           <div className="f12-grp-links">
             <button
