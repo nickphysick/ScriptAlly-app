@@ -125,7 +125,13 @@ was `28689b2`.
 | 5c — popovers (View tasks / Nudge / Mark closed↔Reopen) | — | ⏸ decision on "View tasks" (below) |
 | 5d — click-to-pick manuscript + method; Edit-button fate | — | ⏳ not started |
 | 5e — delete (counted) + Import two-doors | — | ⏳ not started |
-| 6 — Contact List interactions (stars/door/method/response-guidelines/materials/history/notes/delete/send) | — | ⏳ not started |
+| UserTask store + dueDate | `a2cfa6d` · `ca11d3e` · `3abc277` | ✅ done (rules parked) |
+| 6 · View tasks (agent-scoped) | `b81480f` | ✅ done |
+| 6a · door check-back reminder (dated) | `3f3d60c` | ✅ done — first UserTask.dueDate use |
+| 6a rest · stars interactive · method click-to-pick · link pills | — | ⏳ next |
+| 6c response guidelines · 6d wanted materials · 6e query history · 6g delete+mark-closed | — | ⏳ not started |
+| 5d click-to-pick + Edit fate · 5e counted delete + Import | — | ⏳ not started |
+| Nudge remind-me → migrate to addUserTask (currently logNudge) | — | ⏳ not started |
 
 **Dev:** Firestore rules deployed (`personalGenres` allowlist + `genreSuggestions` block are LIVE
 on dev) — personal-genre creation + the promotion-queue write now persist there.
