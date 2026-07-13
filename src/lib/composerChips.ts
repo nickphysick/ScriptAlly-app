@@ -29,8 +29,10 @@ export interface ComposerChip {
   key: string;
   label: string;
   action: ComposerChipAction;
-  /** primary = mirrors getPrimaryAction; outcome = a possible agent response; terminal = always-
-   *  available close; reopen. Drives chip styling only. */
+  /** The status this chip records — drives the StatusDot shown beside its label. */
+  dotStatus: QueryStatus;
+  /** primary = the likely next POSITIVE step (soft pink); outcome = another possible response
+   *  (neutral); terminal = Rejection (always grey); reopen = dashed. Styling only. */
   tone: "primary" | "outcome" | "terminal" | "reopen";
 }
 
@@ -39,14 +41,21 @@ export interface ComposerModel {
   chips: ComposerChip[];
 }
 
-const REJECTION: ComposerChip = { key: "rejected", label: "Rejection", action: { kind: "record", responseType: "rejected" }, tone: "terminal" };
-const OFFER: ComposerChip = { key: "offer", label: "Offer", action: { kind: "record", responseType: "offer" }, tone: "outcome" };
-const PARTIAL_REQ: ComposerChip = { key: "partial-req", label: "Partial requested", action: { kind: "record", responseType: "partial" }, tone: "outcome" };
-const FULL_REQ: ComposerChip = { key: "full-req", label: "Full requested", action: { kind: "record", responseType: "full" }, tone: "outcome" };
-const RR: ComposerChip = { key: "rr", label: "Revise & resubmit", action: { kind: "record", responseType: "rr" }, tone: "outcome" };
-const REOPEN: ComposerChip = { key: "reopen", label: "Reopen this query", action: { kind: "reopen" }, tone: "reopen" };
+// Base chips (no tone — tone is assigned per state below, since which chip is the "positive step"
+// depends on the status). dotStatus drives the StatusDot beside each label.
+type BaseChip = Omit<ComposerChip, "tone">;
+const REJECTION: BaseChip = { key: "rejected", label: "Rejection", action: { kind: "record", responseType: "rejected" }, dotStatus: QueryStatus.REJECTED };
+const OFFER: BaseChip = { key: "offer", label: "Offer", action: { kind: "record", responseType: "offer" }, dotStatus: QueryStatus.OFFER };
+const PARTIAL_REQ: BaseChip = { key: "partial-req", label: "Partial requested", action: { kind: "record", responseType: "partial" }, dotStatus: QueryStatus.PARTIAL_REQUESTED };
+const FULL_REQ: BaseChip = { key: "full-req", label: "Full requested", action: { kind: "record", responseType: "full" }, dotStatus: QueryStatus.FULL_REQUESTED };
+const RR: BaseChip = { key: "rr", label: "Revise & resubmit", action: { kind: "record", responseType: "rr" }, dotStatus: QueryStatus.REVISE_RESUBMIT };
+const REOPEN: BaseChip = { key: "reopen", label: "Reopen this query", action: { kind: "reopen" }, dotStatus: QueryStatus.QUERIED };
+const tone = (c: BaseChip, t: ComposerChip["tone"]): ComposerChip => ({ ...c, tone: t });
 
 const MARK_SENT_LABEL: Record<PrimaryMarkKind, string> = { partial: "Partial sent", full: "Full sent", resubmit: "Resubmitted" };
+
+/** Always the same prompt — the composer asks one question and the chips carry the branching. */
+const QUESTION = "What happened next?";
 
 /**
  * @param status  the query's current status
@@ -58,40 +67,38 @@ export function composerChips(status: QueryStatus, opts: { canCloseNoResponse?: 
   const bucket = queryBucket(status);
 
   if (bucket === "closed") {
-    return { question: "This query is closed.", chips: [REOPEN] };
+    return { question: "This query is closed.", chips: [tone(REOPEN, "reopen")] };
   }
 
   if (bucket === "move") {
-    // The primary chip IS getPrimaryAction's mark-sent target — the composer can't diverge from the CTA.
+    // The pink/primary chip IS getPrimaryAction's mark-sent target — the composer can't diverge
+    // from the CTA. It's also the "positive step" here (the writer moving the query forward).
     const pa = getPrimaryAction(status);
     const chips: ComposerChip[] = [];
     if (pa.kind === "mark-sent") {
-      chips.push({ key: "mark-sent", label: MARK_SENT_LABEL[pa.markKind], action: { kind: "mark-sent", markKind: pa.markKind }, tone: "primary" });
+      chips.push({ key: "mark-sent", label: MARK_SENT_LABEL[pa.markKind], action: { kind: "mark-sent", markKind: pa.markKind }, dotStatus: pa.target, tone: "primary" });
     }
-    chips.push(REJECTION);
-    const q =
-      status === QueryStatus.PARTIAL_REQUESTED ? "They’ve asked for a partial — what did you do?"
-      : status === QueryStatus.FULL_REQUESTED ? "They’ve asked for the full — what did you do?"
-      : "They’ve asked for a revise & resubmit — what did you do?";
-    return { question: q, chips };
+    chips.push(tone(REJECTION, "terminal"));
+    return { question: QUESTION, chips };
   }
 
-  // bucket === "waiting" — the agent holds it; offer the responses that can follow.
+  // bucket === "waiting" — the agent holds it. Positive step (the next rung up) is PINK, then the
+  // other possible response (neutral), then Rejection (always grey), last.
   let chips: ComposerChip[];
   switch (status) {
     case QueryStatus.QUERIED:
-      chips = [PARTIAL_REQ, FULL_REQ, REJECTION];
+      chips = [tone(PARTIAL_REQ, "primary"), tone(FULL_REQ, "outcome"), tone(REJECTION, "terminal")];
       break;
     case QueryStatus.PARTIAL_SENT:
-      chips = [FULL_REQ, OFFER, REJECTION];
+      chips = [tone(FULL_REQ, "primary"), tone(OFFER, "outcome"), tone(REJECTION, "terminal")];
       break;
     case QueryStatus.FULL_SENT:
     default:
-      chips = [RR, OFFER, REJECTION];
+      chips = [tone(OFFER, "primary"), tone(RR, "outcome"), tone(REJECTION, "terminal")];
       break;
   }
   if (opts.canCloseNoResponse) {
-    chips = [...chips, { key: "no-response", label: "No response — close it", action: { kind: "close" }, tone: "terminal" }];
+    chips = [...chips, { key: "no-response", label: "No response — close it", action: { kind: "close" }, dotStatus: QueryStatus.NO_RESPONSE, tone: "terminal" }];
   }
-  return { question: "What happened next?", chips };
+  return { question: QUESTION, chips };
 }

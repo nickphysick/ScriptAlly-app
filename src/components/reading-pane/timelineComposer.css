@@ -7,8 +7,13 @@
 .tc-chips { display: flex; flex-wrap: wrap; gap: 7px; }
 .tc-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 99px; border: 1px solid var(--line, #e6dccd); background: var(--panel, #fffdfb); font-family: var(--f12-body, "Inter", system-ui, sans-serif); font-size: 13px; color: var(--ink-2, #4a443c); cursor: pointer; transition: background 0.12s, border-color 0.12s; }
 .tc-chip:hover { background: var(--paper, #faf6f0); border-color: var(--muted, #7d7469); }
+.tc-chip svg { flex: none; }
+/* the likely next positive step — soft pink */
 .tc-chip.tc-primary { background: var(--pink-btn, #f6cfc9); border-color: transparent; color: var(--ink, #1e1a16); font-weight: 600; }
 .tc-chip.tc-primary:hover { background: var(--pink-btn-h, #f0bfb8); }
+/* Rejection — always grey/muted, never emphasised */
+.tc-chip.tc-terminal { background: var(--paper, #faf6f0); border-color: var(--line, #e6dccd); color: var(--muted, #7d7469); }
+.tc-chip.tc-terminal:hover { background: var(--oat, #f1e8dc); color: var(--ink-2, #4a443c); }
 .tc-chip.tc-reopen { border-style: dashed; }
 
 /* inline form */

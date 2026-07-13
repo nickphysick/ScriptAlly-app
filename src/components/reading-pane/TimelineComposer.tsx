@@ -21,6 +21,7 @@ import React, { useImperativeHandle, useMemo, useRef, useState } from "react";
 import { Agent, Query, QueryStatus, SubmissionMethod } from "../../types";
 import { composerChips, type ComposerChip } from "../../lib/composerChips";
 import { queryBucket } from "../../lib/queryAmbient";
+import { StatusDot } from "../StatusDot";
 import { recordQueryResponse, type RecordResponseData } from "../../lib/recordResponse";
 import { useScriptAllyDb } from "../../lib/db";
 import { useToast } from "../toast/ToastProvider";
@@ -201,6 +202,7 @@ export const TimelineComposer = React.forwardRef<TimelineComposerHandle, Timelin
                 className={`tc-chip tc-${c.tone}`}
                 onClick={() => onChip(c)}
               >
+                <StatusDot status={c.dotStatus} overrideSize={15} decorative />
                 {c.label}
               </button>
             ))}
