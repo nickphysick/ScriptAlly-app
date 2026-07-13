@@ -7,14 +7,15 @@ import React, { useState, useEffect, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
 import { getStageScrollEl } from "../lib/stageScroll";
 import { ManuscriptStatus, UserPlan } from "../types";
-import { PREDEFINED_GENRES, AGE_CATEGORIES, genreWordCountRange } from "../lib/manuscripts";
+import { AGE_CATEGORIES, genreWordCountRange } from "../lib/manuscripts";
+import { GenrePicker } from "./forms";
+import { genreDisplay } from "../lib/genres";
 import { 
   X, 
   Check, 
   ChevronRight, 
   ArrowLeft, 
   Book, 
-  ChevronDown, 
   AlertTriangle 
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -33,7 +34,8 @@ export const AddManuscriptFocusForm: React.FC<AddManuscriptFocusFormProps> = ({
   const {
     currentUser,
     manuscripts,
-    addManuscript
+    addManuscript,
+    addPersonalGenre
   } = useScriptAllyDb();
 
   // Wizard Tab Step (1, 2, 3)
@@ -43,8 +45,6 @@ export const AddManuscriptFocusForm: React.FC<AddManuscriptFocusFormProps> = ({
   // Step 1: Basics States
   const [title, setTitle] = useState<string>("");
   const [genre, setGenre] = useState<string>("");
-  const [genreInput, setGenreInput] = useState<string>("");
-  const [showGenreSuggestions, setShowGenreSuggestions] = useState<boolean>(false);
   const [ageCategory, setAgeCategory] = useState<string>("Adult");
   const [wordCount, setWordCount] = useState<number>(80000);
 
@@ -65,7 +65,6 @@ export const AddManuscriptFocusForm: React.FC<AddManuscriptFocusFormProps> = ({
 
   // Scroll preservation
   const scrollPositionRef = useRef<number>(0);
-  const genreDropdownRef = useRef<HTMLDivElement>(null);
 
   // Reset form state on open
   useEffect(() => {
@@ -76,7 +75,6 @@ export const AddManuscriptFocusForm: React.FC<AddManuscriptFocusFormProps> = ({
       setVisitedSteps({ 1: true });
       setTitle("");
       setGenre("");
-      setGenreInput("");
       setAgeCategory("Adult");
       setWordCount(80000);
       setLogline("");
@@ -90,17 +88,6 @@ export const AddManuscriptFocusForm: React.FC<AddManuscriptFocusFormProps> = ({
       setShowDiscardConfirm(false);
     }
   }, [isOpen]);
-
-  // Click outside to close genre dropdown
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (genreDropdownRef.current && !genreDropdownRef.current.contains(e.target as Node)) {
-        setShowGenreSuggestions(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   // Escape key handler to close or show discard dialog
   useEffect(() => {
@@ -119,7 +106,7 @@ export const AddManuscriptFocusForm: React.FC<AddManuscriptFocusFormProps> = ({
   }, [
     isOpen,
     title,
-    genreInput,
+    genre,
     ageCategory,
     wordCount,
     logline,
@@ -134,7 +121,7 @@ export const AddManuscriptFocusForm: React.FC<AddManuscriptFocusFormProps> = ({
   // Check if any fields have been modified for discard confirmation
   const isDirty = 
     title !== "" ||
-    genreInput !== "" ||
+    genre !== "" ||
     ageCategory !== "Adult" ||
     wordCount !== 80000 ||
     logline !== "" ||
@@ -162,12 +149,10 @@ export const AddManuscriptFocusForm: React.FC<AddManuscriptFocusFormProps> = ({
         setFormError("A manuscript title is required to continue.");
         return;
       }
-      const activeGenre = genreInput.trim();
-      if (!activeGenre) {
-        setFormError("Please enter or select a genre.");
+      if (!genre.trim()) {
+        setFormError("Please select a genre.");
         return;
       }
-      setGenre(activeGenre);
       setFormError(null);
     }
     const next = step + 1;
@@ -191,18 +176,6 @@ export const AddManuscriptFocusForm: React.FC<AddManuscriptFocusFormProps> = ({
     }
   };
 
-  // Genre filtering and selection
-  const filteredGenres = PREDEFINED_GENRES.filter(g => 
-    g.toLowerCase().includes(genreInput.toLowerCase())
-  );
-
-  const selectGenreOption = (selectedGenre: string) => {
-    setGenreInput(selectedGenre);
-    setGenre(selectedGenre);
-    setShowGenreSuggestions(false);
-    setFormError(null);
-  };
-
   // Comparable titles Tags additions
   const handleCompKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" || e.key === ",") {
@@ -224,7 +197,7 @@ export const AddManuscriptFocusForm: React.FC<AddManuscriptFocusFormProps> = ({
 
   // Calculate dynamic feedback notes for step 1 word count
   const wordCountFeedback = (() => {
-    if (!genreInput.trim()) {
+    if (!genre.trim()) {
       return {
         text: "Please select a genre to evaluate standard length expectations.",
         style: "text-stone-400 font-normal py-0.5 text-[11px]"
@@ -239,7 +212,7 @@ export const AddManuscriptFocusForm: React.FC<AddManuscriptFocusFormProps> = ({
     }
 
     const isAdult = ageCategory === "Adult";
-    const selectedGenreLower = genreInput.toLowerCase();
+    const selectedGenreLower = genreDisplay(genre).toLowerCase();
     const isFiction = !selectedGenreLower.includes("non-fiction") && !selectedGenreLower.includes("memoir");
 
     if (isAdult && isFiction) {
@@ -290,7 +263,7 @@ export const AddManuscriptFocusForm: React.FC<AddManuscriptFocusFormProps> = ({
       return;
     }
 
-    const finalGenre = genreInput.trim() || genre;
+    const finalGenre = genre.trim();
     if (!finalGenre) {
       setFormError("Genre is a required field.");
       setStep(1);
@@ -456,64 +429,17 @@ export const AddManuscriptFocusForm: React.FC<AddManuscriptFocusFormProps> = ({
                   />
                 </div>
 
-                {/* Genre Row as described */}
-                <div className="grid grid-cols-1 gap-4" ref={genreDropdownRef}>
-                  <div className="space-y-1 relative">
+                {/* Genre Row — the shared taxonomy picker (single-select; stores a genre id). */}
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="space-y-1">
                     <label className="block text-xs font-bold text-stone-700">Cohesive Genre <span className="text-red-500">*</span></label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={genreInput}
-                        onChange={(e) => {
-                          setGenreInput(e.target.value);
-                          setGenre(e.target.value);
-                          setShowGenreSuggestions(true);
-                          if (formError) setFormError(null);
-                        }}
-                        onFocus={() => setShowGenreSuggestions(true)}
-                        placeholder="Search standard genre or enter custom..."
-                        className="w-full text-xs p-2.5 pr-10 bg-white border border-stone-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#7c3a2a]"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowGenreSuggestions(!showGenreSuggestions)}
-                        className="absolute right-3.5 top-3.5 text-stone-400 hover:text-[#7c3a2a]"
-                      >
-                        <ChevronDown className="w-4 h-4" />
-                      </button>
-                    </div>
-
-                    <AnimatePresence>
-                      {showGenreSuggestions && (
-                        <motion.div 
-                          initial={{ opacity: 0, y: -4 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -4 }}
-                          className="absolute left-0 right-0 mt-1 max-h-48 overflow-y-auto bg-white border border-stone-200 rounded-xl shadow-xl z-20"
-                        >
-                          {filteredGenres.length === 0 ? (
-                            <div 
-                              onClick={() => {
-                                setShowGenreSuggestions(false);
-                              }}
-                              className="p-2.5 text-xs text-stone-500 italic hover:bg-stone-50 cursor-pointer"
-                            >
-                              Using custom genre: "{genreInput}"
-                            </div>
-                          ) : (
-                            filteredGenres.map((g) => (
-                              <div
-                                key={g}
-                                onClick={() => selectGenreOption(g)}
-                                className="p-2.5 hover:bg-[#FAF1EF] hover:text-[#7c3a2a] cursor-pointer text-xs font-medium border-b border-stone-50 last:border-0"
-                              >
-                                {g}
-                              </div>
-                            ))
-                          )}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                    <GenrePicker
+                      value={genre ? [genre] : []}
+                      onChange={(ids) => { setGenre(ids[0] ?? ""); if (formError) setFormError(null); }}
+                      personal={currentUser?.personalGenres ?? []}
+                      onCreatePersonal={addPersonalGenre}
+                      multi={false}
+                    />
                   </div>
                 </div>
 
@@ -547,7 +473,7 @@ export const AddManuscriptFocusForm: React.FC<AddManuscriptFocusFormProps> = ({
                   <div className="relative">
                     <input
                       type="number"
-                      placeholder={genreWordCountRange(ageCategory, genreInput || genre) ?? "80,000"}
+                      placeholder={genreWordCountRange(ageCategory, genre ? genreDisplay(genre) : "") ?? "80,000"}
                       value={wordCount === 0 ? "" : wordCount}
                       onChange={(e) => {
                         const val = parseInt(e.target.value);
@@ -757,9 +683,9 @@ export const AddManuscriptFocusForm: React.FC<AddManuscriptFocusFormProps> = ({
                     </h3>
                     
                     <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                      {genreInput && (
+                      {genre && (
                         <span className="text-[9px] font-bold bg-[#7c3a2a]/5 text-[#7c3a2a] py-0.5 px-2 rounded-full border border-[#7c3a2a]/10">
-                          {genreInput}
+                          {genreDisplay(genre)}
                         </span>
                       )}
                       
