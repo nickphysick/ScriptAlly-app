@@ -110,13 +110,15 @@ was `28689b2`.
 | 1 — prototypes committed | `62c5f2a` | ✅ done |
 | 2 — toast + undo (+ confirm dialog) | `d894654` | ✅ done |
 | 3a — genre taxonomy foundation (pure module + 20 tests) | `8971a1a` | ✅ done |
-| 3b — creation guardrails wiring | — | ⏳ not started |
-| 3c — promotion queue + Nick-only admin view + rules | — | ⏳ not started |
-| 3d — picker UI (adapt GenreCombobox to the taxonomy) | — | ⏳ not started |
-| 3e — migration (labels → IDs, report unmappable) | — | ⏳ not started |
+| 3b — personal-genre storage + promotion-queue write + rules | `70fa018` | ✅ done |
+| 3c — Nick-only admin promotion view | — | ⏳ not started (rules for the queue already in 3b) |
+| 3d — picker UI (taxonomy picker) | — | ⏳ not started |
+| 3e — migration (labels → IDs across the forms, read-time tolerance) | — | ⏳ not started |
 | 3f — personal word-count fallback wiring | — | ⏳ not started (primitive built in 3a) |
 | 4 — Queries Hub interactions | — | ⏳ not started |
 | 5 — Contact List interactions | — | ⏳ not started |
+
+**Dev redeploy:** the button fix (`28689b2`) is live on https://scriptally-dev.web.app (hosting-only).
 
 Also shipped this session (a fix to the already-live chrome, ahead of this task): `28689b2`
 — control-bar buttons pink/white at rest (a CSS-specificity regression in the shell's button
