@@ -636,10 +636,9 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   const [sortPopOpen, setSortPopOpen] = useState(false);
   /* F12 sort — grouped Activity / Dates / Pipeline (ref sort popover). Default: last activity. */
   const [sortKey, setSortKey] = useState<string>("last_activity");
-  /* Legacy shims — the hidden (display:none) mobile filter region + the old grouped-list
-     branches still reference these; nothing in the F12 chrome drives them. Cleanup candidate. */
+  /* Legacy shim — the hidden (display:none) mobile filter region still references this;
+     nothing in the F12 chrome drives it. Cleanup candidate. */
   const [sortOption, setSortOption] = useState<string>("Newest first");
-  const [groupOption] = useState<string>("None");
   const [devTheme, setDevTheme] = useState<"burgundy" | "slate" | "emerald">("burgundy");
   const [filterAccordionOpen, setFilterAccordionOpen] = useState(true);
   const [groupAccordionOpen, setGroupAccordionOpen] = useState(false);
@@ -1150,7 +1149,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     }
     window.addEventListener("resize", scheduleListFades);
     return () => { ro?.disconnect(); window.removeEventListener("resize", scheduleListFades); };
-  }, [recomputeListFades, scheduleListFades, sortedList.length, selectedQueryId, groupOption]);
+  }, [recomputeListFades, scheduleListFades, sortedList.length, selectedQueryId]);
 
   // Reactive date sent change handler that automatically projects response due expectations
   // Query-field editing (manuscript, dates, method, materials/package, personalisation, deadline,
@@ -2581,261 +2580,70 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             bar (one home for actions). Single-row grid, both columns full height. ── */}
         <div className="queries-content-grid" style={{ display: "grid", gridTemplateColumns: "363px 1fr", gridTemplateRows: "minmax(0, 1fr)", columnGap: 20, flex: 1, minHeight: 0, alignItems: "stretch" }}>
 
-          {/* List card — furniture: search + header fixed, rows scroll to the control bar's top
-              edge (count · Export CSV · key hints moved into the shared bar's left zone). */}
-          <div style={{ gridColumn: 1, gridRow: 1, alignSelf: "stretch", background: "var(--hub-list)", border: "var(--bdw) solid var(--bd)", borderRadius: "var(--chromerad)", overflow: "hidden", boxShadow: "0 8px 26px rgba(29,23,18,.12)", display: "flex", flexDirection: "column", minHeight: 0 }}>
-
-              {/* Search — fixed at the top of the list card */}
-              <div style={{ position: "relative", margin: "10px 6px 8px", flexShrink: 0 }}>
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-400 pointer-events-none" />
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  value={listSearch}
-                  onChange={(e) => setListSearch(e.target.value)}
-                  style={{ width: "100%", background: "#fff", border: "1px solid var(--bd)", borderRadius: 13, padding: "10px 15px 10px 38px", fontSize: 13.5, color: "#8a7a6c", fontFamily: "inherit", outline: "none", boxShadow: "0 2px 8px rgba(29,23,18,.10)" }}
-                />
-              </div>
-
-              {/* (The above-list count was removed — the masthead pulse line already shows "N queries".) */}
-              {/* thin inset grey rule beneath the search (doesn't reach the container edges) */}
-              <div style={{ height: 1, background: "#cfc6ba", margin: "2px 6px 0", flexShrink: 0 }} />
-
-              {/* Rows area — flex:1 so it fills the list card below the fixed header; the inner scroll
-                  keeps the list within one screen and reactivates the top/bottom fade overlays. */}
-              <div style={{ position: "relative", flex: 1, minHeight: 0 }}>
-                <div aria-hidden="true" style={{ position: "absolute", left: 0, right: 0, top: 0, height: 28, pointerEvents: "none", zIndex: 2, background: "linear-gradient(to bottom, var(--listbg, #ffffff), transparent)", opacity: listFade.top ? 1 : 0, transition: "opacity .16s ease" }} />
-                <div ref={listScrollRef} onScroll={scheduleListFades} style={{ height: "100%", overflowY: "auto", overflowX: "hidden", padding: "2px 0 4px" }} className="custom-query-list-scrollbar">
-                  <div>
-            {(() => {
-              const statusOrder = [
-                QueryStatus.QUERIED,
-                QueryStatus.PARTIAL_REQUESTED,
-                QueryStatus.PARTIAL_SENT,
-                QueryStatus.FULL_REQUESTED,
-                QueryStatus.FULL_SENT,
-                QueryStatus.REVISE_RESUBMIT,
-                QueryStatus.OFFER,
-                QueryStatus.REJECTED,
-                QueryStatus.WITHDRAWN,
-                QueryStatus.NO_RESPONSE
-              ];
-
-              const getStatusHeaderLabel = (status: QueryStatus) => {
-                switch (status) {
-                  case QueryStatus.QUERIED: return "Sent / Queried";
-                  case QueryStatus.PARTIAL_REQUESTED: return "Partial Requested";
-                  case QueryStatus.PARTIAL_SENT: return "Partial Sent";
-                  case QueryStatus.FULL_REQUESTED: return "Full Requested";
-                  case QueryStatus.FULL_SENT: return "Full Sent";
-                  case QueryStatus.REVISE_RESUBMIT: return "Revise & Resubmit";
-                  case QueryStatus.OFFER: return "Offers of Representation";
-                  case QueryStatus.REJECTED: return "Rejected";
-                  case QueryStatus.WITHDRAWN: return "Withdrawn";
-                  case QueryStatus.NO_RESPONSE: return "No Response";
-                  default: return status;
-                }
-              };
-
-              const renderQueryCard = (q: Query) => {
+          {/* ── List pane (F12, ref queries-hub-v14.html .list): search field only at the top,
+              56px rows, slim footer (SHOWING n OF m · EXPORT CSV · key hints). No "your move"
+              pills, no manuscript spine — the row is avatar · name/agency · StatusDot + date. ── */}
+          <div className="f12-pane f12-list" style={{ gridColumn: 1, gridRow: 1, alignSelf: "stretch" }}>
+            <div className="f12-lsearch">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+              <input
+                type="text"
+                placeholder="Search queries…"
+                value={listSearch}
+                onChange={(e) => setListSearch(e.target.value)}
+                aria-label="Search queries"
+              />
+            </div>
+            <div ref={listScrollRef} onScroll={scheduleListFades} className="f12-rows" role="listbox" aria-label="Queries">
+              {sortedList.map((q) => {
                 const agent = agents.find(a => a.id === q.agentId);
                 const ms = manuscripts.find(m => m.id === q.manuscriptId);
                 if (!agent || !ms) return null;
-
                 const isSelected = selectedQueryId === q.id;
-                
-                // Queried date — bare, quiet "14 Mar" (UK day-month); the year shows only when it
-                // isn't the current year ("30 Jun 2024"). No "Queried" label; it sits in the corner.
-                // Null (absent/unparseable dateSent — provisional imports) renders a muted em-dash.
+                // Bare quiet date ("14 Mar"; year only when not current); em-dash for undated imports.
                 const queriedDate = formatListRowDate(q.dateSent) ?? "—";
-
-                const statusChip = undoingQueryIds.has(q.id) ? (
-                  <div className="animate-pulse flex items-center gap-1 min-h-[20px]">
-                    <span className="w-1.5 h-1.5 bg-[#7c3a2a] rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                    <span className="w-1.5 h-1.5 bg-[#7c3a2a] rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                    <span className="w-1.5 h-1.5 bg-[#7c3a2a] rounded-full animate-bounce"></span>
-                  </div>
-                ) : (
-                  <span style={{ display: "inline-flex", flexShrink: 0 }}>
-                    <StatusDot status={q.status} overrideSize={20} />
-                  </span>
-                );
-
-                // Monogram initials — first + last initial of the agent name (or agency); echoes the hero.
-                const monoInitials = agentInitials(agent);
-
                 return (
-                  <div
+                  <button
                     key={q.id}
+                    type="button"
                     id={`query-row-${q.id}`}
+                    role="option"
+                    aria-selected={isSelected}
                     onClick={() => setSelectedQueryId(q.id)}
-                    className={`qrow ${isSelected ? "sel" : ""}`}
+                    className={`f12-row${isSelected ? " f12-sel" : ""}`}
                   >
-                    <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
-                      {/* monogram disc — pink gradient + burgundy initials, echoing the hero avatar */}
-                      <span className="qmono" style={{ flexShrink: 0, width: 38, height: 38, borderRadius: "50%", background: "var(--qh-mono-bg, var(--hub-monogram))", border: "none", color: "var(--qh-mono-tx, var(--hub-monogram-tx))", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_SERIF, fontSize: 13, fontWeight: 700 }}>{monoInitials}</span>
-                      {/* middle — name over agency */}
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontFamily: FONT_SERIF, fontSize: 16, fontWeight: 700, color: qdbBoldInk, lineHeight: 1.1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{agentPrimary(agent)}</div>
-                        <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: ".05em", textTransform: "uppercase" as const, color: qdbBoldMuted, marginTop: 3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{agentAgencyLine(agent)}</div>
-                      </div>
-                      {/* right — StatusDot over the date sent, stacked */}
-                      <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
-                        {statusChip}
-                        <span style={{ fontFamily: FONT_MONO, fontSize: 9, fontWeight: 600, color: "#8a8076", whiteSpace: "nowrap" }}>{queriedDate}</span>
-                      </div>
-                    </div>
-                  </div>
+                    <span className="f12-av" aria-hidden="true">{agentInitials(agent)}</span>
+                    <span className="f12-mid">
+                      <span className="f12-nm">{agentPrimary(agent)}</span>
+                      <span className="f12-ag">{agentAgencyLine(agent)}</span>
+                    </span>
+                    <span className="f12-end">
+                      {undoingQueryIds.has(q.id) ? (
+                        <span className="animate-pulse" style={{ display: "inline-flex", gap: 3 }} aria-hidden="true">
+                          <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--burg)" }} />
+                          <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--burg)" }} />
+                          <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--burg)" }} />
+                        </span>
+                      ) : (
+                        <StatusDot status={q.status} overrideSize={15} />
+                      )}
+                      <span className="f12-d2">{queriedDate}</span>
+                    </span>
+                  </button>
                 );
-              };
-
-              const queryHasActionRequired = (qId: string) => {
-                const q = queries.find(qi => qi.id === qId);
-                if (!q) return false;
-                const statusNeedsAction = [QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER].includes(q.status);
-                const hasMatchingTask = tasks ? tasks.some(t => t.relatedRecordId === qId) : false;
-                return statusNeedsAction || hasMatchingTask;
-              };
-
-              if (groupOption === "Status") {
-                const statusGroups = [
-                  { label: "Queried", statuses: [QueryStatus.QUERIED] },
-                  { label: "Partial Requested", statuses: [QueryStatus.PARTIAL_REQUESTED] },
-                  { label: "Partial Sent", statuses: [QueryStatus.PARTIAL_SENT] },
-                  { label: "Full Requested", statuses: [QueryStatus.FULL_REQUESTED] },
-                  { label: "Full Sent", statuses: [QueryStatus.FULL_SENT] },
-                  { label: "Revise & Resubmit", statuses: [QueryStatus.REVISE_RESUBMIT] },
-                  { label: "Offers of Representation", statuses: [QueryStatus.OFFER] },
-                  { label: "Closed", statuses: [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE] },
-                ];
-
-                return statusGroups.map((group, grpIdx) => {
-                  const grpQueries = sortedList.filter(q => group.statuses.includes(q.status));
-                  if (grpQueries.length === 0) return null;
-                  return (
-                    <div key={grpIdx} className="py-2">
-                      <div className="px-2.5 py-1.5 bg-[#FAF8F5] border border-[#EBDCD3]/65 rounded-lg mb-1 flex items-center justify-between select-none">
-                        <span className="text-[11px] font-sans text-[#7c3a2a] font-bold">
-                          {group.label}
-                        </span>
-                        <span className="text-[10px] font-mono font-bold text-stone-400">
-                          {grpQueries.length}
-                        </span>
-                      </div>
-                      <div>
-                        {grpQueries.map(q => renderQueryCard(q))}
-                      </div>
-                    </div>
-                  );
-                });
-              }
-
-              if (groupOption === "Action Required") {
-                const groups = [
-                  { label: "Action Required: Yes", value: true },
-                  { label: "Action Required: No", value: false }
-                ];
-                return groups.map(grp => {
-                  const grpQueries = sortedList.filter(q => queryHasActionRequired(q.id) === grp.value);
-                  if (grpQueries.length === 0) return null;
-                  return (
-                    <div key={grp.label} className="py-2">
-                      <div className="px-2.5 py-1 bg-[#FAF8F5] border border-[#EBDCD3]/65 rounded-lg mb-1 flex items-center justify-between select-none">
-                        <span className="text-[10px] font-mono uppercase tracking-wider text-[#7c3a2a] font-bold">
-                          {grp.label}
-                        </span>
-                        <span className="text-[10px] font-mono font-bold text-stone-400">
-                          {grpQueries.length}
-                        </span>
-                      </div>
-                      <div>
-                        {grpQueries.map(q => renderQueryCard(q))}
-                      </div>
-                    </div>
-                  );
-                });
-              }
-
-              if (groupOption === "Manuscript") {
-                return [
-                  ...manuscripts.map(m => ({ id: m.id, label: m.title })),
-                  { id: "unknown", label: "Other Manuscript" }
-                ].map(grp => {
-                  const grpQueries = sortedList.filter(q => {
-                    if (grp.id === "unknown") {
-                      return !manuscripts.some(m => m.id === q.manuscriptId);
-                    }
-                    return q.manuscriptId === grp.id;
-                  });
-                  if (grpQueries.length === 0) return null;
-                  return (
-                    <div key={grp.id} className="py-2">
-                      <div className="px-2.5 py-1 bg-[#FAF8F5] border border-[#EBDCD3]/65 rounded-lg mb-1 flex items-center justify-between select-none">
-                        <span className="text-[10px] font-mono uppercase tracking-wider text-[#7c3a2a] font-bold truncate max-w-[150px]">
-                          {grp.label}
-                        </span>
-                        <span className="text-[10px] font-mono font-bold text-stone-400">
-                          {grpQueries.length}
-                        </span>
-                      </div>
-                      <div>
-                        {grpQueries.map(q => renderQueryCard(q))}
-                      </div>
-                    </div>
-                  );
-                });
-              }
-
-              if (groupOption === "Agent Fit Rating") {
-                const stars = [5, 4, 3, 2, 1] as const;
-                const getRatingLabel = (star: number) => {
-                  switch (star) {
-                    case 5: return "⭐⭐⭐⭐⭐ Excellent Fit";
-                    case 4: return "⭐⭐⭐⭐ Great Fit";
-                    case 3: return "⭐⭐⭐ Good Fit";
-                    case 2: return "⭐⭐ Balanced Fit";
-                    case 1: return "⭐ Standard Fit";
-                    default: return `${star} Star Fit`;
-                  }
-                };
-                return stars.map(star => {
-                  const starQueries = sortedList.filter(q => {
-                    const agent = agents.find(a => a.id === q.agentId);
-                    return agent?.starRating === star;
-                  });
-                  if (starQueries.length === 0) return null;
-                  return (
-                    <div key={star} className="py-2">
-                      <div className="px-2.5 py-1 bg-[#FAF8F5] border border-[#EBDCD3]/65 rounded-lg mb-1 flex items-center justify-between select-none">
-                        <span className="text-[10px] font-mono uppercase tracking-wider text-[#7c3a2a] font-bold">
-                          {getRatingLabel(star)}
-                        </span>
-                        <span className="text-[10px] font-mono font-bold text-stone-400">
-                          {starQueries.length}
-                        </span>
-                      </div>
-                      <div>
-                        {starQueries.map(q => renderQueryCard(q))}
-                      </div>
-                    </div>
-                  );
-                });
-              }
-
-              return sortedList.map(q => renderQueryCard(q));
-            })()}
-
-            {sortedList.length === 0 && (
-              <div className="text-center py-12 px-4 text-[#3a1c14]/40 text-xs italic select-none">
-                No matching queries found.
-              </div>
-            )}
-                  </div>{/* closes rows wrapper */}
-                </div>{/* closes scroll container */}
-                <div aria-hidden="true" style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 28, pointerEvents: "none", zIndex: 2, background: "linear-gradient(to top, var(--listbg, #ffffff), transparent)", opacity: listFade.bottom ? 1 : 0, transition: "opacity .16s ease" }} />
-              </div>{/* closes scroll-area wrapper */}
-
-          </div>{/* closes list card */}
+              })}
+              {sortedList.length === 0 && (
+                <div style={{ textAlign: "center", padding: "48px 16px", color: "var(--faint)", fontSize: 12, fontStyle: "italic" }}>
+                  No queries match these filters.
+                </div>
+              )}
+            </div>
+            <div className="f12-lfoot">
+              <span>SHOWING <b>{sortedList.length}</b> OF {queries.length}</span>
+              <button type="button" onClick={() => sortedList.length > 0 && handleExportFilteredCSV()}>EXPORT CSV</button>
+              <span className="f12-kbd">↑↓ · ⏎</span>
+            </div>
+          </div>{/* closes list pane */}
 
           {/* Reading pane — the WORKSPACE (desk-rule second clause, ref queries-workspace-v2.html:
               a live process you act on FILLS to the viewport line, unlike the Agents document which
