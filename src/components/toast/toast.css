@@ -1,0 +1,67 @@
+/* ── Global toast + confirm (interaction layer, Stage 2) ──
+   Portalled to document.body inside a .t-f12 wrapper so the master-theme tokens
+   (--ink / --panel / --pink-btn / --sh-3 / --f12-*) resolve anywhere in the app; every
+   var() also carries a literal fallback so the chrome degrades even out of theme scope.
+   Ref design-refs/queries-interactions.html .toasts/.toast. No color-mix(); no var() in a
+   keyframe selector; reduced motion honoured. */
+
+.sa-toasts {
+  position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%);
+  z-index: 300; display: flex; flex-direction: column; gap: 8px; align-items: center;
+  pointer-events: none;
+}
+.sa-toast {
+  pointer-events: auto; display: flex; align-items: center; gap: 14px;
+  background: var(--ink, #1e1a16); color: var(--panel, #fffdfb);
+  border-radius: 99px; padding: 10px 12px 10px 18px;
+  box-shadow: var(--sh-3, 0 14px 34px rgba(20, 15, 10, 0.22));
+  font-family: var(--f12-body, "Inter", system-ui, sans-serif); font-size: 13px;
+  animation: sa-toast-rise 0.18s ease;
+}
+.sa-toast > span { line-height: 1.3; }
+.sa-toast .sa-toast-undo {
+  font-family: var(--f12-mono, ui-monospace, monospace); font-size: 9px; letter-spacing: 0.1em;
+  font-weight: 600; color: var(--ink, #1e1a16); background: var(--pink-btn, #f6cfc9);
+  padding: 6px 12px; border-radius: 99px; border: none; cursor: pointer;
+}
+.sa-toast .sa-toast-undo:hover { background: var(--pink-btn-h, #f0bfb8); }
+.sa-toast .sa-toast-x {
+  color: #8d857a; padding: 0 4px; background: none; border: none; cursor: pointer;
+  font-size: 13px; line-height: 1;
+}
+.sa-toast .sa-toast-x:hover { color: var(--panel, #fffdfb); }
+
+@keyframes sa-toast-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* ── confirm dialog — the "cannot be cleanly undone" path (never a toast AND a confirm) ── */
+.sa-confirm-scrim {
+  position: fixed; inset: 0; z-index: 320; background: rgba(30, 20, 14, 0.34);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+  animation: sa-confirm-fade 0.14s ease;
+}
+.sa-confirm {
+  width: 100%; max-width: 420px; background: var(--panel, #fffdfb); color: var(--ink, #1e1a16);
+  border-radius: var(--r-lg, 12px); box-shadow: var(--sh-3, 0 22px 54px rgba(20, 15, 10, 0.3));
+  padding: 22px 22px 18px; font-family: var(--f12-body, "Inter", system-ui, sans-serif);
+  animation: sa-confirm-pop 0.16s ease;
+}
+.sa-confirm h2 { font-family: var(--f12-serif, Georgia, serif); font-size: 19px; font-weight: 600; margin: 0 0 8px; }
+.sa-confirm .sa-confirm-body { font-size: 13.5px; line-height: 1.5; color: var(--ink-2, #4a443c); margin-bottom: 18px; }
+.sa-confirm-actions { display: flex; justify-content: flex-end; gap: 10px; }
+.sa-confirm-actions button {
+  font-family: var(--f12-body, "Inter", system-ui, sans-serif); font-size: 13px; font-weight: 500;
+  padding: 8px 15px; border-radius: var(--r-md, 9px); cursor: pointer; border: 1px solid transparent;
+}
+.sa-confirm-cancel { background: var(--panel, #fffdfb); border-color: var(--line, #e6dccd); color: var(--ink-2, #4a443c); }
+.sa-confirm-cancel:hover { border-color: var(--muted, #7d7469); color: var(--ink, #1e1a16); }
+.sa-confirm-ok { background: var(--ink, #1e1a16); color: var(--panel, #fffdfb); }
+.sa-confirm-ok:hover { background: #000000; }
+.sa-confirm-ok.sa-danger { background: #a5342a; }
+.sa-confirm-ok.sa-danger:hover { background: #8f2c23; }
+
+@keyframes sa-confirm-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sa-confirm-pop { from { opacity: 0; transform: translateY(6px) scale(0.98); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .sa-toast, .sa-confirm-scrim, .sa-confirm { animation: none; }
+}

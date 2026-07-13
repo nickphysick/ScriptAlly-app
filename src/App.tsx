@@ -6,6 +6,7 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { DbProvider, useScriptAllyDb } from "./lib/db";
+import { ToastProvider } from "./components/toast/ToastProvider";
 import { BrandProvider } from "./lib/brand";
 import { Auth } from "./components/Auth";
 import { AppShell, StagePage } from "./components/shell/AppShell";
@@ -781,7 +782,9 @@ export default function App() {
               #/login / #/signin / #/plans deep links read window.location.hash directly and coexist
               with it (a hash is never part of the pathname). */}
           <BrowserRouter>
-            <AppContent />
+            <ToastProvider>
+              <AppContent />
+            </ToastProvider>
           </BrowserRouter>
         </BrandProvider>
       </DbProvider>
