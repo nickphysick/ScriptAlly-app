@@ -128,7 +128,8 @@ was `28689b2`.
 | UserTask store + dueDate | `a2cfa6d` · `ca11d3e` · `3abc277` | ✅ done (rules parked) |
 | 6 · View tasks (agent-scoped) | `b81480f` | ✅ done |
 | 6a · door check-back reminder (dated) | `3f3d60c` | ✅ done — first UserTask.dueDate use |
-| 6a rest · stars interactive · method click-to-pick · link pills | — | ⏳ next |
+| 6a · interactive stars (hover/set/undo) | `56a57d9` | ✅ done (clear-to-unrated flagged) |
+| 6a rest · method click-to-pick · link pills | — | ⏳ next |
 | 6c response guidelines · 6d wanted materials · 6e query history · 6g delete+mark-closed | — | ⏳ not started |
 | 5d click-to-pick + Edit fate · 5e counted delete + Import | — | ⏳ not started |
 | Nudge remind-me → migrate to addUserTask (currently logNudge) | — | ⏳ not started |
@@ -190,6 +191,19 @@ text; if they need to actually resurface on a date, that's a `dueDate?` on Nick'
 
 Parked rules pile now = personalGenres · genreSuggestions · `/tasks` (isValidUserTask). Deploy
 all together to dev.
+
+**DEPLOYED to dev** (rules + hosting) after reconciling a SECOND concurrent collision: the
+todo-board stream (`6a50ae0`) and this stream (`a2cfa6d`) both added `isValidUserTask` + a
+`/tasks` match to firestore.rules, so the rules failed to compile (the JS gate doesn't run the
+rules compiler — it surfaced only at deploy). `2def065` keeps the dueDate-aware version + its
+narrowed update allowlist, relaxes text-min to preserve the To-do board's blank-note flow, and
+drops the duplicate. **Two concurrency collisions now (UserTask, rules-dedup) — the shared
+checkout is biting; a worktree for one of us would stop it.**
+
+**Open decision — star clear-to-unrated:** 6a's "click the same star to clear" is NOT built. The
+starRating rule requires 1–5 (firestore.rules:162/234) and `Agent.starRating` is typed 1|2|3|4|5,
+so clearing to 0 is silently denied. Needs `starRating >= 0` in the rule + `0|…|5` in the type.
+Reported, not shipped (a silent-fail clear is worse than none).
 
 ## (superseded) COLLISION — record-scoped tasks built twice
 
