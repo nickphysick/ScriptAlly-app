@@ -113,9 +113,24 @@ was `28689b2`.
 | 3b — personal-genre storage + promotion-queue write + rules | `70fa018` | ✅ done |
 | 3d — taxonomy picker + read-time tolerance layer | `d38bfbf` | ✅ done |
 | 3e (agents) — picker wired in Add/Edit-agent (writes IDs); tolerant display on Contact List + dashboard | `2e24b07` | ✅ done |
-| 3f / matching — communityMatch + wordCountWhisper made ID-tolerant (read side) | `922058c` | ✅ done |
-| 3e (manuscript) — picker in the manuscript genre input (write side) | — | ⏸ HELD — see note |
-| 3c — Nick-only admin promotion view | — | ⏳ not started (queue rules already in 3b) |
+| 4f / matching — communityMatch + wordCountWhisper made ID-tolerant (read side) | `922058c` | ✅ done |
+| 3 (new) — PDF demoted into a ⋯ overflow menu, both pages (+ shared F12Menu) | `b6774f9` | ✅ done |
+| 4e (manuscript) — picker in the manuscript genre input (write side; stores ID) | `122153f` | ✅ done |
+| 4c — Nick-only admin promotion view | — | ⏳ not started (queue rules already in 3b) |
+| 5 — Queries Hub interactions (composer / corrections / popovers / click-to-pick / delete+import) | — | ⏳ not started |
+| 6 — Contact List interactions (stars/door/method/response-guidelines/materials/history/notes/delete/send) | — | ⏳ not started |
+
+**Genre migration — COMPLETE.** Both write sides store IDs (agents `2e24b07`, manuscripts
+`122153f`); every reader tolerates legacy labels (`d38bfbf` + `922058c`); no bulk Firestore
+rewrite (upgrade-on-edit). Free-text genre entry on manuscripts is retired — standing decision #6
+now holds exactly (free text only in journal/agent notes, wish list, task titles). Remaining Stage-4
+item is 4c (the Nick-only promotion view — low-frequency, code-completed via CANONICAL_GENRES +
+the read-time personal-id auto-upgrade). Onboarding `ManuscriptFields` (BrandDropdown) +
+SmartImportReview still store parsed labels — tolerated, converted on a later pass.
+
+**Renumbering note:** this refined prompt makes genre taxonomy Stage 4 (was 3), adds a new Stage 3
+(PDF→overflow), and pushes Queries/Contact-List to Stages 5/6 and the AI feature to 7–10. The
+already-done sub-stages map cleanly (old 3a/3b/3d/3e/3f = new 4a/4b/4d/4e/4f).
 | 4 — Queries Hub interactions | — | ⏳ not started |
 | 5 — Contact List interactions | — | ⏳ not started |
 
