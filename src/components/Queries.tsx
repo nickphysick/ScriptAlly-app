@@ -27,7 +27,7 @@ import {
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { QueryStatus, Agent, Manuscript, Query, SubmissionMethod, ActivityType, QueryMaterial, UserPlan } from "../types";
 import { StatusPill, getStatusLabel } from "./StatusPill";
-import { StatusDot, statusDirection } from "./StatusDot";
+import { StatusDot } from "./StatusDot";
 import { F12Page, Icirc, F12Primary, Trig, F12Popover, PopSection, PRow, Chip } from "./shell/F12Shell";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
 import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse } from "../lib/queryAmbient";
@@ -2650,7 +2650,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
               hugs). A flex column: agent band (flex:none) over three full-height columns that each
               scroll behind their own edge fade (flex:1). The command bar pins to the pane foot in
               Phase 2; the top action toolbar above still exists this phase. */}
-          <div className="qp-pane" style={{ gridColumn: 2, gridRow: 1, alignSelf: "stretch", minHeight: 0, border: "var(--hub-pane-bd)", borderRadius: "var(--hub-radius)", background: "var(--hub-pane-process)", boxShadow: "var(--hub-pane-sh)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          <div className="qp-pane f12-pane f12-detail" style={{ gridColumn: 2, gridRow: 1, alignSelf: "stretch", minHeight: 0, background: "var(--paper)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
             {activeQuery && activeAgent && activeMs ? (
               <>
                 <style>{`
@@ -2658,43 +2658,26 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   .qp-note:hover .qp-noteacts{ opacity:1; }
                   .qp-noteact{ width:22px; height:22px; border:none; background:transparent; border-radius:5px; color:#bcae9e; display:flex; align-items:center; justify-content:center; cursor:pointer; }
                   .qp-noteact:hover{ background:#f3ebe0; color:#7c3a2a; }
-                  /* column swell on hover */
-                  .qp-card{ transition:transform .18s ease, box-shadow .18s ease; }
-                  .qp-card:hover{ transform:scale(1.02); box-shadow:0 16px 30px rgba(29,23,18,.24); z-index:2; }
-                  @media (prefers-reduced-motion: reduce){ .qp-card:hover{ transform:none; } }
                 `}</style>
-                {/* ── Hero — a plain bordered card inset to the columns' width, content centred:
-                    avatar beside name / agency / status only (strip-back). ── */}
+                {/* ── Agent header (F12, ref .hero) — SAGE LEFT SPINE (::before in f12.css, clipped
+                    by the card radius via overflow:hidden; there is NO top accent rule), pink avatar
+                    with black initials, Playfair name, agency, pink status pill, plane ornament. ── */}
                 {(() => {
                   const nameplate = agentPrimary(activeAgent);
                   const initials = agentInitials(activeAgent);
-                  // Strip-back hero: plain card, name / agency / status only. An enlarged StatusDot
-                  // watermark sits low-opacity on the right; the real status is announced via the label.
-                  const heroDir = statusDirection(activeQuery.status);
-                  const heroStatColour = heroDir === "out" ? "#7c3a2a" : heroDir === "in" ? "#5a6e58" : "#8a7d6c";
                   return (
-                    // Strip-back: plain card surface (no status-tint gradient, no espresso top-accent) + soft shadow — matches the mockup .hero.
-                    <div className="qp-hero" style={{ position: "relative", overflow: "hidden", margin: "16px 18px 0", padding: "22px 26px", border: "var(--bdw) solid var(--bd)", borderTop: "4px solid var(--hub-primary)", borderRadius: 20, background: "var(--hub-pane-process, #fffefb)", boxShadow: "0 10px 30px rgba(58,44,31,.09)", flexShrink: 0 }}>
-                      {/* top row — avatar centred against the name + agency + status label */}
-                      <div style={{ position: "relative", zIndex: 2, display: "flex", alignItems: "center", gap: 18 }}>
-                        {/* avatar — solid ink disc + white initials (per the Queries Hub mockup) */}
-                        <span style={{ flexShrink: 0, width: 66, height: 66, borderRadius: "50%", background: "var(--qh-mono-bg, var(--hub-monogram))", border: "none", color: "var(--qh-mono-tx, var(--hub-monogram-tx))", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: FONT_SERIF, fontSize: 22, fontWeight: 700 }}>{initials}</span>
-                        <div style={{ flex: 1, minWidth: 0, paddingRight: 120 }}>
-                          <div style={{ fontFamily: FONT_SERIF, fontSize: 27, fontWeight: 800, color: qdbBoldInk, lineHeight: 1.02, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{nameplate}</div>
-                          {!!activeAgent.name?.trim() && !!activeAgent.agency?.trim() && (
-                            <div style={{ fontFamily: FONT_SERIF, fontSize: 17, fontWeight: 600, color: "#4a423a", marginTop: 2 }}>{activeAgent.agency}</div>
-                          )}
-                          {/* real status — the accessible announcement (the watermark dot is aria-hidden) */}
-                          <div style={{ fontFamily: FONT_MONO, fontSize: 9.5, fontWeight: 600, letterSpacing: ".1em", textTransform: "uppercase" as const, color: heroStatColour, marginTop: 8 }}>{statusDisplayLabel(activeQuery)}</div>
-                        </div>
+                    <div className="f12-hero" style={{ margin: "20px 20px 0", flexShrink: 0 }}>
+                      <span className="f12-bigav" aria-hidden="true">{initials}</span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div className="f12-hn" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{nameplate}</div>
+                        {!!activeAgent.name?.trim() && !!activeAgent.agency?.trim() && (
+                          <div className="f12-ha">{activeAgent.agency}</div>
+                        )}
+                        <span className="f12-hs">{statusDisplayLabel(activeQuery)}</span>
                       </div>
-                      {/* strip-back: hero shows name / agency / status only — email · wish list · genres
-                          removed, the reclaimed height goes to the three columns below. */}
-                      {/* status watermark — enlarged StatusDot, low-opacity, inset right so it isn't
-                          clipped; aria-hidden (the real status is announced by the label above). */}
-                      <div aria-hidden="true" style={{ position: "absolute", top: "50%", right: 16, transform: "translateY(-50%)", zIndex: 1, opacity: 0.22, pointerEvents: "none", display: "flex" }}>
-                        <StatusDot status={activeQuery.status} overrideSize={74} decorative />
-                      </div>
+                      <span aria-hidden="true" style={{ marginLeft: "auto", flexShrink: 0, width: 52, height: 52, borderRadius: "50%", background: "var(--paper)", border: "1px solid var(--hairline)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--faint)" }}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round"><path d="M21 3 3 10.5l6.5 2.6L12 20l3-5.5L21 3z" /></svg>
+                      </span>
                     </div>
                   );
                 })()}
@@ -2702,16 +2685,16 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                 {/* Columns — three FULL-HEIGHT equal columns (workspace fill): the row takes all the
                     space below the agent band, each column scrolls independently behind its own edge
                     fade, the Journal composer pins to its column foot. */}
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 18, padding: "16px 18px 20px", flex: 1, minHeight: 0, alignItems: "stretch" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, padding: "16px 20px 20px", flex: 1, minHeight: 0, alignItems: "stretch" }}>
 
                   {/* ── Sub-card 1: Tracking ── */}
-                  <div className="qp-card" style={{ minWidth: 0, background: "var(--hub-col)", border: "var(--hub-pane-bd)", borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 0, boxShadow: "0 2px 7px rgba(29,23,18,.07)" }}>
-                      {/* pink header band */}
-                      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "var(--qh-colhead-bg, var(--hub-band-process))", borderBottom: "var(--qh-colhead-rule, 1px solid var(--hub-band-process-bd))", flexShrink: 0 }}>
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, stroke: "var(--qh-colhead-tx, #2c2017)" }}><path d="M3 12h4l3 8 4-16 3 8h4" /></svg>
-                        <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 800, color: "var(--qh-colhead-tx, #2c2017)" }}>Tracking</span>
+                  <div className="f12-card" style={{ minWidth: 0, minHeight: 0 }}>
+                      {/* sage gradient header band (matches the dashboard diary bands) */}
+                      <div className="f12-chh">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3 8 4-16 3 8h4" /></svg>
+                        <span>Tracking</span>
                       </div>
-                      <EdgeFadeScroll outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ padding: "16px 16px 18px" }} fade="var(--hub-col, #fffefb)">
+                      <EdgeFadeScroll outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ padding: "16px 16px 18px" }} fade="var(--panel, #fffdfb)">
                         {(() => {
                           // Pass the same open-state fact the command bar uses, so the trailing block
                           // switches agent's-turn / writer's-turn / closed identically.
@@ -2729,14 +2712,14 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     </div>{/* ── end sub-card 1: Tracking ── */}
 
                   {/* ── Sub-card 2: What you sent ── */}
-                  <div className="qp-card" style={{ minWidth: 0, background: "var(--hub-col)", border: "var(--hub-pane-bd)", borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 0, boxShadow: "0 2px 7px rgba(29,23,18,.07)" }}>
+                  <div className="f12-card" style={{ minWidth: 0, minHeight: 0 }}>
                       {/* pink header band */}
-                      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "var(--qh-colhead-bg, var(--hub-band-process))", borderBottom: "var(--qh-colhead-rule, 1px solid var(--hub-band-process-bd))", flexShrink: 0 }}>
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, stroke: "var(--qh-colhead-tx, #2c2017)" }}><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>
-                        <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 800, color: "var(--qh-colhead-tx, #2c2017)" }}>What you sent</span>
+                      <div className="f12-chh">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>
+                        <span>What you sent</span>
                       </div>
                       {/* spec sheet */}
-                      <EdgeFadeScroll outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ padding: "16px 16px 18px" }} fade="var(--hub-col, #fffefb)">
+                      <EdgeFadeScroll outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ padding: "16px 16px 18px" }} fade="var(--panel, #fffdfb)">
                         {(() => {
                           const mats: (string | QueryMaterial)[] = Array.isArray((activeQuery as any).materialsWanted) && (activeQuery as any).materialsWanted.length
                             ? (activeQuery as any).materialsWanted
@@ -2815,11 +2798,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     </div>{/* ── end sub-card 2: What you sent ── */}
 
                   {/* ── Sub-card 3: Notes — journal pins to bottom via flex-1 on messages area ── */}
-                  <div className="qp-card" style={{ minWidth: 0, background: "var(--hub-col)", border: "var(--hub-pane-bd)", borderRadius: 18, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 0, boxShadow: "0 2px 7px rgba(29,23,18,.07)" }}>
+                  <div className="f12-card" style={{ minWidth: 0, minHeight: 0 }}>
                       {/* pink header band */}
-                      <div style={{ padding: "12px 16px", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "var(--qh-colhead-bg, var(--hub-band-process))", borderBottom: "var(--qh-colhead-rule, 1px solid var(--hub-band-process-bd))", flexShrink: 0 }}>
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, stroke: "var(--qh-colhead-tx, #2c2017)" }}><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H19v15H6a2 2 0 0 0-2 2z" /><path d="M4 19.5A1.5 1.5 0 0 1 5.5 18H19" /></svg>
-                        <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 800, color: "var(--qh-colhead-tx, #2c2017)" }}>Journal</span>
+                      <div className="f12-chh">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H19v15H6a2 2 0 0 0-2 2z" /><path d="M4 19.5A1.5 1.5 0 0 1 5.5 18H19" /></svg>
+                        <span>Journal</span>
                       </div>
                       {/* notes body — list (scrolls) + bottom-pinned composer */}
                       <div style={{ padding: "16px 16px 18px", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
@@ -2830,12 +2813,13 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           const send = () => { const t = journalInput.trim(); if (!t) return; addJournalEntry(activeQuery.id, t); setJournalInput(""); };
                           return (
                             <>
-                              <EdgeFadeScroll outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ display: "flex", flexDirection: "column", paddingRight: 2 }} fade="var(--hub-col, #fffefb)">
+                              <EdgeFadeScroll outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ display: "flex", flexDirection: "column", paddingRight: 2 }} fade="var(--panel, #fffdfb)">
                                 {notes.length === 0 ? (
-                                  /* ghost first entry — dashed, shaped like a real entry; replaced on first save */
-                                  <div style={{ background: "#fdfbf7", border: "1px dashed #d8cebf", borderRadius: 11, padding: "11px 13px" }}>
-                                    <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: ".06em", textTransform: "uppercase" as const, color: "#bcae9d", marginBottom: 5 }}>Today</div>
-                                    <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 12.5, lineHeight: 1.5, color: "#9a8d7d" }}>Your notes on this agent appear here — first impressions, things they said, anything worth remembering.</div>
+                                  /* ghost first entry — DOTTED outline, no fill (a placeholder that looks
+                                     like one; ref .note); replaced on first save */
+                                  <div className="f12-note">
+                                    <div className="f12-nd">TODAY</div>
+                                    <div className="f12-nt">Your notes on this agent appear here — first impressions, things they said, anything worth remembering.</div>
                                   </div>
                                 ) : notes.map((entry) => {
                                   const isEditing = editingJournalId === entry.id;

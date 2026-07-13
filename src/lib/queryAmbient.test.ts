@@ -146,8 +146,8 @@ describe("Queries height chain — structural guards (jsdom cannot verify flex/g
 
   it("the reading pane stays in gridRow 1 (never bottom-anchored); no row-2 furniture remains", () => {
     // the workspace pane must NOT carry the stale gridRow: 2 that bottom-anchored it
-    expect(src.includes('className="qp-pane" style={{ gridColumn: 2, gridRow: 2')).toBe(false);
-    expect(src.includes('className="qp-pane" style={{ gridColumn: 2, gridRow: 1')).toBe(true);
+    expect(src.includes('className="qp-pane f12-pane f12-detail" style={{ gridColumn: 2, gridRow: 2')).toBe(false);
+    expect(src.includes('className="qp-pane f12-pane f12-detail" style={{ gridColumn: 2, gridRow: 1')).toBe(true);
     expect(src.includes("gridColumn: 1, gridRow: 1")).toBe(true); // list panel (row 1)
   });
 
