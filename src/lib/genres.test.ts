@@ -13,6 +13,8 @@ import {
   wordCountRangeForGenre,
   mapLegacyGenre,
   canonicalGenreById,
+  normaliseStoredGenre,
+  genreDisplay,
   type PersonalGenre,
 } from "./genres";
 import { PREDEFINED_GENRES } from "./manuscripts";
@@ -137,6 +139,32 @@ describe("mapLegacyGenre — never invents", () => {
   });
   it("junk is unmapped, not crashed", () => {
     expect(mapLegacyGenre("")).toHaveProperty("unmapped");
+  });
+});
+
+describe("read-time tolerance (3e) — ids and legacy labels both resolve", () => {
+  const personal: PersonalGenre[] = [{ id: "u:user123:northern-gothic", label: "Northern gothic" }];
+
+  it("normaliseStoredGenre passes canonical + personal ids through", () => {
+    expect(normaliseStoredGenre("fantasy")).toBe("fantasy");
+    expect(normaliseStoredGenre("u:user123:northern-gothic", personal)).toBe("u:user123:northern-gothic");
+  });
+  it("normaliseStoredGenre folds a legacy label to its canonical id", () => {
+    expect(normaliseStoredGenre("Science Fiction")).toBe("science-fiction");
+    expect(normaliseStoredGenre("Sci-Fi")).toBe("science-fiction");
+  });
+  it("auto-upgrades a personal id once its slug matches a (promoted) canonical genre", () => {
+    // a personal 'u:*:horror' resolves to canonical 'horror' — the promotion path, no re-tagging
+    expect(normaliseStoredGenre("u:user123:horror")).toBe("horror");
+  });
+  it("keeps an unmapped legacy label verbatim (never dropped, never invented)", () => {
+    expect(normaliseStoredGenre("Steampunk pirate saga")).toBe("Steampunk pirate saga");
+  });
+  it("genreDisplay renders a label for every form", () => {
+    expect(genreDisplay("fantasy")).toBe("Fantasy");
+    expect(genreDisplay("Sci-Fi")).toBe("Science fiction");
+    expect(genreDisplay("u:user123:northern-gothic", personal)).toBe("Northern gothic");
+    expect(genreDisplay("Steampunk pirate saga")).toBe("Steampunk pirate saga");
   });
 });
 

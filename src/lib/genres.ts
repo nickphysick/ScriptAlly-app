@@ -180,6 +180,36 @@ export function genresForUser(personal: PersonalGenre[] = []): Array<CanonicalGe
 }
 
 /**
+ * Read-time tolerance (3e) — the effective id for a STORED value, whatever form it's in. New writes
+ * store canonical/personal ids; legacy records still hold label strings. This folds all three:
+ *  - already a canonical id → itself.
+ *  - a personal id → itself, EXCEPT a personal id whose slug now matches a promoted canonical genre,
+ *    which auto-upgrades (3c — "no user ever re-tags anything").
+ *  - a legacy label → its canonical id via the alias table, else a matching personal id, else the
+ *    label verbatim (never dropped, never invented).
+ */
+export function normaliseStoredGenre(value: string, personal: PersonalGenre[] = []): string {
+  if (CANON_BY_ID.has(value)) return value;
+  if (isPersonalId(value)) {
+    const slug = value.slice(value.lastIndexOf(":") + 1).replace(/-/g, " ");
+    return CANON_INDEX.get(matchKey(slug)) ?? value;
+  }
+  const canon = CANON_INDEX.get(matchKey(value));
+  if (canon) return canon;
+  const p = personal.find((x) => matchKey(x.label) === matchKey(value));
+  return p ? p.id : value;
+}
+
+/** Display label for ANY stored value — canonical id, personal id, or a legacy label string. */
+export function genreDisplay(value: string, personal: PersonalGenre[] = []): string {
+  const id = normaliseStoredGenre(value, personal);
+  const canon = CANON_BY_ID.get(id);
+  if (canon) return canon.label;
+  if (isPersonalId(id)) return genreLabel(id, personal);
+  return cleanGenreLabel(id); // unmapped legacy label — shown as-is, honestly
+}
+
+/**
  * Migration helper (3e): map a legacy free-text genre label to a stored id WITHOUT inventing.
  * Canonical/alias hit → that id. A miss returns `unmapped` (the caller REPORTS it; it does not
  * guess). Personal creation during migration is the caller's decision, not this function's.
