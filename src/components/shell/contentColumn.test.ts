@@ -38,13 +38,13 @@ describe("StagePage — the ONE wrapper (not scattered per page)", () => {
     expect(shell).toContain('background: "var(--desk)"');
   });
 
-  it("the rail is OUTSIDE the cap — rendered as a sibling of the content column, never wrapped", () => {
-    // The <Rail/> sits directly in the AppShell flex root, before the content column div; the cap
-    // wrapper lives only inside StagePage. So the rail can never inherit the max-width.
-    const railAt = shell.indexOf("<Rail ");
-    const colAt = shell.indexOf("flex: 1, minWidth: 0, minHeight: 0, display: \"flex\"");
-    expect(railAt).toBeGreaterThan(-1);
-    expect(colAt).toBeGreaterThan(railAt); // content column comes after the rail
+  it("nav chrome is OUTSIDE the cap — the rail is retired and the drawer overlays, never wrapped", () => {
+    // The persistent rail was retired (overnight nav run): the content column is the flex root's
+    // first child, and navigation is the fixed-position NavDrawer overlay — so no nav chrome can
+    // inherit the max-width. The cap wrapper lives only inside StagePage.
+    expect(shell.includes("<Rail ")).toBe(false); // the in-flow rail is gone
+    expect(shell).toContain("<NavDrawer"); // the drawer overlay replaces it
+    expect(shell).toContain("flex: 1, minWidth: 0, minHeight: 0, display: \"flex\"");
     expect(shell.slice(0, shell.indexOf("StagePage")).includes("sa-content-col")).toBe(false);
   });
 });
