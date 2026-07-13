@@ -566,9 +566,10 @@
   --r-sm: 6px; --r-md: 9px; --r-lg: 12px; --r-xl: 16px;
   --f12-mono: 'JetBrains Mono', monospace; --f12-serif: 'Playfair Display', serif; --f12-body: 'Inter', sans-serif;
 
-  /* CrumbStrip repaint inside the F12 pages — the strip becomes the full-bleed oat header bar. */
-  --crumb-strip-bg: #f1e8dc;
-  --crumb-strip-rule: #e0d3c1;
+  /* CrumbStrip repaint inside the F12 pages — the strip is the full-bleed WHITE header bar
+     (chrome revision: --panel #fffdfb over the old oat, --line rule). Literals, no aliasing. */
+  --crumb-strip-bg: #fffdfb;
+  --crumb-strip-rule: #e6dccd;
   --crumb-cur: #1e1a16;
   --crumb-seg: #9d8f80;
   --crumb-seg-hov: #4a443c;

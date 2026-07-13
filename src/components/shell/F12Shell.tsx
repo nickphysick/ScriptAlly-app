@@ -21,6 +21,7 @@
  */
 import React, { useEffect, useRef } from "react";
 import { CrumbStrip } from "./CrumbStrip";
+import { useScriptAllyDb } from "../../lib/db";
 import "./f12.css";
 
 /* ── page scaffold ── */
@@ -46,6 +47,26 @@ export const Icirc: React.FC<{ title: string; onClick?: () => void; children: Re
     {children}
   </button>
 );
+
+/** The header's only right-side item (chrome revision): pink initials avatar + the user's full
+ *  name, one link to their account. Renders nothing signed-out. */
+export const F12Account: React.FC<{ onClick: () => void }> = ({ onClick }) => {
+  const { currentUser } = useScriptAllyDb();
+  if (!currentUser) return null;
+  const initials = currentUser.name
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+  return (
+    <button type="button" className="f12-who" onClick={onClick} title="Account settings" aria-label="Account settings">
+      <span className="f12-av2" aria-hidden="true">{initials}</span>
+      <span className="f12-nm2">{currentUser.name}</span>
+    </button>
+  );
+};
 
 export const F12Primary: React.FC<{ onClick?: () => void; children: React.ReactNode }> = ({ onClick, children }) => (
   <button type="button" className="f12-primary" onClick={onClick}>

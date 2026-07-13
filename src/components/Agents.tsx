@@ -33,7 +33,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { useOpenEditAgent } from "./EditAgentHost";
 import { StatusDot } from "./StatusDot";
 import { EdgeFadeScroll } from "./EdgeFadeScroll";
-import { F12Page, Icirc, F12Primary, Trig, F12Popover, PopSection, PRow, Chip } from "./shell/F12Shell";
+import { F12Page, F12Account, Trig, F12Popover, PopSection, PRow, Chip } from "./shell/F12Shell";
 import {
   paneProvenance,
   agentQueried,
@@ -849,18 +849,10 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
     setStarFilter((prev) => (prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]));
 
   return (
+    /* White header (chrome revision): the account cluster is the only right-side item —
+       export/help/the CTA all left this bar (the CTA moved to the control bar's left zone). */
     <F12Page
-      tools={
-        <>
-          <Icirc title="Export CSV" onClick={() => exportAgentsCSV()}>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5" /><path d="M4 21h16" /></svg>
-          </Icirc>
-          <Icirc title="Help" onClick={() => onNavigate?.("help")}>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M9.5 9a2.5 2.5 0 1 1 3.4 2.33c-.7.27-.9.87-.9 1.67" /><path d="M12 17h.01" /></svg>
-          </Icirc>
-          <F12Primary onClick={() => onNavigate?.("agents", "Add an agent")}>Add agent</F12Primary>
-        </>
-      }
+      tools={<F12Account onClick={() => onNavigate?.("account")} />}
     >
       {/* ── F12 CONTROL BAR — left zone (list width): FILTER · SORT · GROUP BY pills; right zone:
           Send query · Edit profile · View tasks (count) │ PDF · Delete right-aligned. Quiet

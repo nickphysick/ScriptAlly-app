@@ -28,7 +28,7 @@ import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { QueryStatus, Agent, Manuscript, Query, SubmissionMethod, ActivityType, QueryMaterial, UserPlan } from "../types";
 import { StatusPill, getStatusLabel } from "./StatusPill";
 import { StatusDot } from "./StatusDot";
-import { F12Page, Icirc, F12Primary, Trig, F12Popover, PopSection, PRow, Chip } from "./shell/F12Shell";
+import { F12Page, F12Account, Trig, F12Popover, PopSection, PRow, Chip } from "./shell/F12Shell";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
 import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse } from "../lib/queryAmbient";
 import { getPrimaryAction } from "../lib/queryPrimaryAction";
@@ -1721,21 +1721,11 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   selectedQueryIdRef.current = selectedQueryId;
 
   return (
-    /* ── F12 shell (ref queries-hub-v14.html): oat root + full-bleed header (CrumbStrip repainted
-       by the .t-f12 tokens) with the page tools overlaid right — export + help icirc + the ONE
-       filled ink CTA. No search field in the header (the list pane owns search). ── */
+    /* ── F12 shell (ref queries-hub-v18.html): white full-bleed header (CrumbStrip repainted by
+       the .t-f12 tokens); the only right-side item is the account cluster — export/help/the CTA
+       all left this bar (chrome revision; the CTA moved to the control bar's left zone). ── */
     <F12Page
-      tools={
-        <>
-          <Icirc title="Export CSV" onClick={() => sortedList.length > 0 && handleExportFilteredCSV()}>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5" /><path d="M4 21h16" /></svg>
-          </Icirc>
-          <Icirc title="Help" onClick={() => onNavigate?.("help")}>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M9.5 9a2.5 2.5 0 1 1 3.4 2.33c-.7.27-.9.87-.9 1.67" /><path d="M12 17h.01" /></svg>
-          </Icirc>
-          <F12Primary onClick={() => onNavigate?.("queries", "Log a query")}>Log a new query</F12Primary>
-        </>
-      }
+      tools={<F12Account onClick={() => onNavigate?.("account")} />}
     >
     <div
       className="w-full flex flex-col overflow-hidden font-sans relative queries-container-theme"

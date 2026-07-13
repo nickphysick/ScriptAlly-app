@@ -28,6 +28,12 @@
 .f12-hdwrap { position: relative; flex-shrink: 0; }
 .f12-hdtools { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 2px; }
 
+/* account cluster — the header's ONLY right-side item (chrome revision; ref .who) */
+.f12-who { display: flex; align-items: center; gap: 9px; margin-left: 6px; padding: 4px 12px 4px 4px; border-radius: 99px; transition: background 0.12s; }
+.f12-who:hover { background: var(--paper); }
+.f12-who .f12-av2 { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--pink-av); color: var(--ink); display: flex; align-items: center; justify-content: center; font-family: var(--f12-mono); font-size: 10px; font-weight: 600; }
+.f12-who .f12-nm2 { font-size: 13px; font-weight: 500; color: var(--ink-2); white-space: nowrap; }
+
 .f12-icirc { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; color: var(--ink-2); transition: background 0.12s; }
 .f12-icirc:hover { background: rgba(30, 26, 22, 0.07); }
 .f12-icirc svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
