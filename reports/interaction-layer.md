@@ -163,7 +163,29 @@ Polish landed (`faaf24f`, per Nick): the prompt is ALWAYS "What happened next?";
 next POSITIVE step is the soft-pink chip (still getPrimaryAction's target on writer's-turn, so no
 disagreement), Rejection is ALWAYS grey and last, and every chip carries a real StatusDot.
 
-## ⚠️ COLLISION — record-scoped tasks built twice (needs reconciliation before Stage 6)
+## ✅ COLLISION RESOLVED — UserTask is the canonical store (reconciled)
+
+Per Nick's call (option 2), I owned the reconciliation:
+- **`a2cfa6d`** — wired the canonical `UserTask` store into `db.tsx` (its own commit): `userTasks`
+  state + the `users/{uid}/tasks` listener + `addUserTask({text,queryId?,agentId?,manuscriptId?})`
+  / `updateUserTask` / `deleteUserTask`, on the context interface + value. Additive — sits beside
+  the existing `todoNotes` (ToDoPage still uses it) so nothing breaks; the todo-board stream
+  migrates that UI + drops `TodoNote` separately. Scope is INPUT; no count/status cached. Parked
+  rules: `isValidUserTask` + the `/tasks` match block (rides the parked deploy).
+- **`ca11d3e`** — re-pointed `TasksPopover` to `userTasks`/`addUserTask`/`updateUserTask`, and
+  REVERTED the interim `Note`-scope workaround (Note.queryId/agentId, the addNote params, the
+  isValidUserNote rule). Notes are plain desk notes again; tasks live in `UserTask`.
+
+Stage 6's three agent-scoped task creators (Contact-List View-tasks, door check-back, Nudge
+remind-me) now all use `addUserTask({ agentId })`. **Note:** `UserTask` has no dueDate/resurface
+field — the "remind me in 1 month / 2 weeks" tasks are created as scoped to-dos with descriptive
+text; if they need to actually resurface on a date, that's a `dueDate?` on Nick's UserTask model
+(flagged, not added).
+
+Parked rules pile now = personalGenres · genreSuggestions · `/tasks` (isValidUserTask). Deploy
+all together to dev.
+
+## (superseded) COLLISION — record-scoped tasks built twice
 
 Nick chose (B) — record-scoped stored tasks — and it was implemented **twice, concurrently, in
 the same checkout**:
