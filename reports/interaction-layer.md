@@ -120,7 +120,8 @@ was `28689b2`.
 | 5a keystone — composerChips (pure, derived from getPrimaryAction/queryBucket) | `e2031f7` | ✅ done |
 | 5a seam — RecordResponseFocusForm initialResponseType/initialDraft | `ae01126` | ✅ done |
 | 5a component — the contextual composer (inline capture + recording + CTA demote) | `c17d0e2` | ✅ done |
-| 5b — corrections (timeline ⋯ → Edit/Delete, derived-consequence confirm) | — | ⏳ not started |
+| 5a polish — one question, positive=pink / rejection=grey, StatusDots (Nick's steer) | `faaf24f` | ✅ done · round-trip confirmed on dev |
+| 5b — corrections (timeline ⋯ → Edit/Delete, derived-consequence confirm) | — | ⏳ next |
 | 5c — popovers (View tasks / Nudge / Mark closed↔Reopen) | — | ⏳ not started |
 | 5d — click-to-pick manuscript + method; Edit-button fate | — | ⏳ not started |
 | 5e — delete (counted) + Import two-doors | — | ⏳ not started |
@@ -156,7 +157,19 @@ on Partial/Full requested (the one load-bearing field, seeded from the agent's w
 open the rich form; an "Add more detail" link everywhere → the rich form pre-filled. The CTA
 demotes to scroll+focus. Two flagged deviations: the inline "How" folds into the recorded note
 (recordQueryResponse has no response-method field — nothing lost); the mark-sent popover anchors to
-the CTA button. **Auth-gated — the recording flow wants a dev eyeball before more is built on it.**
+the CTA button. **Round-trip confirmed working on dev by Nick.**
+
+Polish landed (`faaf24f`, per Nick): the prompt is ALWAYS "What happened next?"; each state's likely
+next POSITIVE step is the soft-pink chip (still getPrimaryAction's target on writer's-turn, so no
+disagreement), Rejection is ALWAYS grey and last, and every chip carries a real StatusDot.
+
+## 5b groundwork (confirmed feasible, for the next pass)
+- Timeline events carry `id` (the activity id) — the hover ⋯ can target editActivity/deleteActivity.
+  Only activity-backed rows get a ⋯ (the synthesised "Query sent" root has no id).
+- The delete **consequence** (`QUERIED → NOT YET SENT`) is derivable: `deriveQueryFields(events
+  minus the deleted id)` gives the post-delete status — the confirm shows current → derived.
+- Edit = correct-in-place via `editActivity` (a small pre-filled inline edit form on the composer),
+  NOT a new record. Reuse `showConfirm` (Stage-2 dialog) for the delete guard + `F12Menu` for the ⋯.
 
 **Genre migration — COMPLETE.** Both write sides store IDs (agents `2e24b07`, manuscripts
 `122153f`); every reader tolerates legacy labels (`d38bfbf` + `922058c`); no bulk Firestore
