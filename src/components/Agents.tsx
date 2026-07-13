@@ -1050,9 +1050,8 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
             )}
           </div>
           <div className="f12-lfoot">
-            <span>SHOWING <b>{flat.length}</b> OF {visibleAgents.length} · {idleCount} IDLE</span>
+            <span>SHOWING <b>{flat.length}</b> OF {visibleAgents.length} · {idleCount} NOT QUERIED</span>
             <button type="button" onClick={() => exportAgentsCSV()}>EXPORT CSV</button>
-            <span className="f12-kbd">↑↓ · ⏎</span>
           </div>
         </div>
 

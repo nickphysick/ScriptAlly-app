@@ -2326,7 +2326,6 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
               <div className="f12-lfoot">
                 <span><b>SHOWING 0 OF 0</b></span>
                 <span style={{ opacity: 0.5 }}>EXPORT CSV</span>
-                <span className="f12-kbd">↑↓ · ⏎</span>
               </div>
             </div>
 
@@ -2631,7 +2630,6 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             <div className="f12-lfoot">
               <span>SHOWING <b>{sortedList.length}</b> OF {queries.length}</span>
               <button type="button" onClick={() => sortedList.length > 0 && handleExportFilteredCSV()}>EXPORT CSV</button>
-              <span className="f12-kbd">↑↓ · ⏎</span>
             </div>
           </div>{/* closes list pane */}
 
