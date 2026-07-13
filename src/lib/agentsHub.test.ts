@@ -27,19 +27,16 @@ describe("Agents pane — fills (hug retired)", () => {
 });
 
 describe("Agents command bar — single home for the actions", () => {
-  it("the pane carries the command bar (Send query + Edit profile + provenance + open chip)", () => {
-    expect(tsx).toContain("ag-cmdbar");
-    expect(tsx).toContain("ag-cmd-primary");
-    expect(tsx).toContain("ag-cmd-secondary");
-    expect(tsx).toContain("ag-cmd-prov");
-    expect(tsx).toContain("ag-cmd-open");
+  it("the pane-foot command bar is RETIRED (F12): actions live in the top control bar, the slim meta footer carries provenance + open state", () => {
+    expect(tsx.includes("ag-cmdbar")).toBe(false);
+    expect(tsx).toContain("f12-panefoot");
+    expect(tsx).toContain("Send query");   // in the control bar's right zone
+    expect(tsx).toContain("Edit profile"); // in the control bar's right zone
   });
 
-  it("provenance is the bar's centre (the standalone footer retired)", () => {
-    expect(tsx).not.toContain('className="ag-panefoot"');
-    // the provenance builder now lives inside the command bar
-    const bar = tsx.slice(tsx.indexOf("ag-cmdbar"), tsx.indexOf("ag-cmd-open"));
-    expect(bar).toContain("paneProvenance(a,");
+  it("provenance renders in the meta footer (derived, never stored)", () => {
+    const foot = tsx.slice(tsx.indexOf("f12-panefoot"));
+    expect(foot).toContain("paneProvenance(a,");
   });
 
   it("Send query / Edit profile no longer sit in the control-row toolbar", () => {

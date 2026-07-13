@@ -16,7 +16,6 @@ import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { collection, setDoc, doc, onSnapshot } from "firebase/firestore";
 import {
   Send,
-  Pencil,
   Plus,
   BookOpen,
   Clock,
@@ -156,6 +155,8 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
   // Notes (per-agent subcollection)
   const [agentNotesList, setAgentNotesList] = useState<{ id: string; text: string; createdAt: string }[]>([]);
   const [noteInput, setNoteInput] = useState("");
+  /* 4d — History / Notes render as underline tabs (was 50/50 columns). */
+  const [paneTab, setPaneTab] = useState<"history" | "notes">("history");
 
   // A global search navigation lands here with the term — adopt it into the page filter once.
   useEffect(() => {
@@ -572,14 +573,14 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
 
     return (
       <>
-      <EdgeFadeScroll outerClassName="ag-panewrap" scrollClassName="ag-panescroll" fade="var(--ag-panebg, #fffefb)">
-        {/* 1 · Identity */}
-        <div className="ag-psec">
-          <div className="ag-ident">
-            <span className="ag-hero-av" aria-hidden="true">{agentInitials(a)}</span>
-            <div style={{ minWidth: 0 }}>
-              <div className="ag-iname">{agentPrimary(a)}</div>
-              <div className="ag-iag">
+      <EdgeFadeScroll outerClassName="ag-panewrap" scrollClassName="ag-panescroll" fade="var(--paper, #faf6f0)">
+        {/* 1 · Identity — the F12 hero: sage LEFT spine (::before, clipped by the radius; NO top
+            rule), pink avatar + black initials, Playfair name, mono-caps agency, burgundy stars. */}
+        <div className="f12-hero" style={{ margin: "16px 16px 0" }}>
+            <span className="f12-bigav" aria-hidden="true">{agentInitials(a)}</span>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div className="f12-hn" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{agentPrimary(a)}</div>
+              <div style={{ fontFamily: "var(--f12-mono)", fontSize: 9, letterSpacing: "0.11em", textTransform: "uppercase", color: "var(--muted)", marginTop: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {agentSecondary(a) || "Independent"}
                 {a.email ? ` · ${a.email}` : ""}
               </div>
@@ -616,10 +617,9 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
                 )}
               </div>
             </div>
-            <div className="ag-iright">
-              {/* Compact availability toggle — the canonical SegmentedToggle (reused from the Edit
-                  drawer), writing submissionStatus through the existing updateAgent path. Unknown →
-                  neither side lit. The ⋯ lifecycle menu lives in the command bar. */}
+            <div className="ag-iright" style={{ alignSelf: "flex-start" }}>
+              {/* Open/Closed segmented pill — the canonical SegmentedToggle (untouched), its active
+                  segment SAGE via the .t-f12 scoped override in f12.css. Unknown → neither side lit. */}
               <span
                 className="ag-availtoggle"
                 data-status={a.submissionStatus === SubmissionStatus.OPEN ? "open" : a.submissionStatus === SubmissionStatus.CLOSED ? "closed" : "unknown"}
@@ -633,7 +633,6 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
                 />
               </span>
             </div>
-          </div>
         </div>
 
         {/* 2 · MSWL band — never hidden. Populated = the centred quote; empty = a thin clickable
@@ -642,11 +641,13 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
           {hasMswl ? (
             <div className="ag-mswl-quote">“{a.mswlNotes!.trim()}”</div>
           ) : (
-            <button type="button" className="ag-mswl-empty" onClick={() => openEditAgent(a.id)}>
+            /* 4d — SINGLE-ROW empty strip: dotted outline, no fill, icon + label + copy on one
+               line, the add pill on the right (~a third of the old block's height). */
+            <button type="button" className="f12-wishrow" onClick={() => openEditAgent(a.id)}>
               <BookOpen aria-hidden="true" />
-              <span className="ag-mswl-empty-label">Manuscript wish list</span>
-              <span className="ag-mswl-empty-line">Add what this agent is looking for and it'll show here.</span>
-              <span className="ag-mswl-empty-action">+ Add wish list</span>
+              <span className="f12-wl">Manuscript wish list</span>
+              <span className="f12-wc">Add what this agent is looking for and it'll show here.</span>
+              <span className="f12-wa">+ Add wish list</span>
             </button>
           )}
           {(a.genres?.length || 0) > 0 && (
@@ -658,70 +659,81 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
           )}
         </div>
 
-        {/* 3 · Submission profile */}
+        {/* 3 · Submission profile — three cards with SAGE gradient header bands + 19px dark-sage
+            icons (the eyebrow + hairline-cell layout is retired; contents unchanged). */}
         <div className="ag-psec">
-          <div className="ag-eyebrow">Submission profile<span className="ag-rule" /></div>
-          <div className="ag-facts">
-            <div className="ag-fact">
-              <div className="ag-flbl"><Clock aria-hidden="true" /> Response time</div>
-              {respKnown ? (
-                <div className="ag-fval">within {a.responseTimeWeeks} weeks</div>
-              ) : (
-                <div className="ag-fval empty">Not specified yet</div>
-              )}
-              <div className="ag-fsub">
-                {isOpen ? (respKnown ? "based on recent replies" : "add it in the Edit drawer") : "closed to queries"}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+            <div className="f12-card" style={{ minWidth: 0 }}>
+              <div className="f12-chh"><Clock aria-hidden="true" /><span>Response time</span></div>
+              <div className="f12-cbb" style={{ padding: 14 }}>
+                {respKnown ? (
+                  <div className="ag-fval">within {a.responseTimeWeeks} weeks</div>
+                ) : (
+                  <div className="ag-fval empty">Not specified yet</div>
+                )}
+                <div className="ag-fsub">
+                  {isOpen ? (respKnown ? "based on recent replies" : "add it in the Edit drawer") : "closed to queries"}
+                </div>
               </div>
             </div>
-            <div className="ag-fact">
-              <div className="ag-flbl"><Mail aria-hidden="true" /> Preferred method</div>
-              {a.submissionMethod ? (
-                <div className="ag-fval">{a.submissionMethod}</div>
-              ) : (
-                <div className="ag-fval empty">Not specified yet</div>
-              )}
-              <div className="ag-fsub">{methodSub(a.submissionMethod)}</div>
+            <div className="f12-card" style={{ minWidth: 0 }}>
+              <div className="f12-chh"><Mail aria-hidden="true" /><span>Method</span></div>
+              <div className="f12-cbb" style={{ padding: 14 }}>
+                {a.submissionMethod ? (
+                  <div className="ag-fval">{a.submissionMethod}</div>
+                ) : (
+                  <div className="ag-fval empty">Not specified yet</div>
+                )}
+                <div className="ag-fsub">{methodSub(a.submissionMethod)}</div>
+              </div>
             </div>
-            <div className="ag-fact">
-              <div className="ag-flbl"><FileText aria-hidden="true" /> Wanted materials</div>
-              {a.materialsWanted?.length ? (
-                <div className="ag-fval soft">{a.materialsWanted.join(", ")}</div>
-              ) : (
-                <div className="ag-fval empty">Not specified yet</div>
-              )}
+            <div className="f12-card" style={{ minWidth: 0 }}>
+              <div className="f12-chh"><FileText aria-hidden="true" /><span>Materials</span></div>
+              <div className="f12-cbb" style={{ padding: 14 }}>
+                {a.materialsWanted?.length ? (
+                  <div className="ag-fval soft">{a.materialsWanted.join(", ")}</div>
+                ) : (
+                  <div className="ag-fval empty">Not specified yet</div>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* 4 · History + Notes */}
+        {/* 4 · History / Notes — UNDERLINE TABS (4d; was 50/50 columns). Contents unchanged. */}
         <div className="ag-psec">
-          <div className="ag-twocol">
-            <div className="ag-col">
-              <div className="ag-eyebrow">Your history with {firstName(agentPrimary(a) || "them")}<span className="ag-rule" /></div>
-              {timeline.length ? (
-                <div className="ag-tl-scroll">
-                  <div className="ag-tl">
-                    {timeline.map((e) => (
-                      <div className="ag-tle" key={e.id}>
-                        <span className="ag-tldot">
-                          <StatusDot status={e.status} overrideSize={19} decorative />
-                        </span>
-                        <div className="ag-tlrow">
-                          <span className="ag-tls">{e.label}</span>
-                          <span className="ag-tlm">{e.manuscriptTitle}</span>
-                          <span className="ag-tld">{e.dateLabel}</span>
-                        </div>
-                        {e.note && <div className="ag-tlnote">{e.note}</div>}
+          <div className="f12-tabs" role="tablist" aria-label="History and notes">
+            <button type="button" role="tab" aria-selected={paneTab === "history"} className={`f12-tab${paneTab === "history" ? " f12-on" : ""}`} onClick={() => setPaneTab("history")}>
+              Your history
+            </button>
+            <button type="button" role="tab" aria-selected={paneTab === "notes"} className={`f12-tab${paneTab === "notes" ? " f12-on" : ""}`} onClick={() => setPaneTab("notes")}>
+              Notes{agentNotesList.length ? ` · ${agentNotesList.length}` : ""}
+            </button>
+          </div>
+          {paneTab === "history" ? (
+            timeline.length ? (
+              <div className="ag-tl-scroll">
+                <div className="ag-tl">
+                  {timeline.map((e) => (
+                    <div className="ag-tle" key={e.id}>
+                      <span className="ag-tldot">
+                        <StatusDot status={e.status} overrideSize={19} decorative />
+                      </span>
+                      <div className="ag-tlrow">
+                        <span className="ag-tls">{e.label}</span>
+                        <span className="ag-tlm">{e.manuscriptTitle}</span>
+                        <span className="ag-tld">{e.dateLabel}</span>
                       </div>
-                    ))}
-                  </div>
+                      {e.note && <div className="ag-tlnote">{e.note}</div>}
+                    </div>
+                  ))}
                 </div>
-              ) : (
-                <div className="ag-tl-empty">No queries sent yet — a clean slate.</div>
-              )}
-            </div>
-            <div className="ag-col ag-notes-col">
-              <div className="ag-eyebrow">Notes<span className="ag-rule" /></div>
+              </div>
+            ) : (
+              <div className="ag-tl-empty">No queries sent yet — a clean slate.</div>
+            )
+          ) : (
+            <div className="ag-notes-col" style={{ display: "flex", flexDirection: "column", minHeight: 0 }}>
               <div className="ag-notes-scroll">
                 {agentNotesList.length ? (
                   agentNotesList.map((n) => (
@@ -755,7 +767,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
                 </button>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* 5 · Community placeholder — compact strip (desk rule: no skeleton voids) */}
@@ -768,51 +780,38 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
         {/* Colophon — closes the CONTENT (the pinned footer below closes the card) */}
         <div className="ag-colophon" aria-hidden="true">❦</div>
       </EdgeFadeScroll>
-      {/* Command bar (hub grammar) — anchors the pane base like the Queries workspace bar.
-          Primary Send query + secondary Edit profile (the toolbar copies retired); the
-          provenance footer is absorbed into the mono centre; right = the open-to-queries chip
-          (a read-only status mirror — the interactive flip stays the identity pill's locked job). */}
-      <div className="ag-cmdbar">
-        <button type="button" className="ag-cmd-primary" onClick={() => sendQueryFlow(a)}>
-          <Send aria-hidden="true" /> Send query
-        </button>
-        <button type="button" className="ag-cmd-secondary" onClick={() => openEditAgent(a.id)}>
-          <Pencil aria-hidden="true" /> Edit profile
-        </button>
-        {/* ⋯ lifecycle menu (Set aside / Delete) — moved here from the identity, next to Edit profile. */}
-        <div style={{ position: "relative", flexShrink: 0 }}>
-          <button
-            type="button"
-            className="ag-kebab"
-            aria-label="More actions"
-            aria-expanded={menuOpen}
-            onClick={(e) => { e.stopPropagation(); setMenuOpen((o) => !o); }}
-          >
-            <MoreHorizontal />
-          </button>
-          {menuOpen && (
-            <>
-              <div style={{ position: "fixed", inset: 0, zIndex: 30 }} onClick={() => setMenuOpen(false)} />
-              <div className="ag-menu ag-menu-up">
-                <button type="button" onClick={() => void toggleSetAside(a)}>
-                  <Archive /> {a.setAside ? "Bring back" : "Set aside"}
-                </button>
-                <button type="button" className="ag-danger" onClick={() => { setMenuOpen(false); setDeleteModalAgent(a); }}>
-                  <Trash2 /> Delete…
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-        <span className="ag-cmd-prov">
-          {paneProvenance(a, queries.filter((q) => q.agentId === a.id).length)}
-        </span>
-        <span
-          className="ag-cmd-open"
-          title={isOpen ? "Open to queries" : a.submissionStatus === SubmissionStatus.CLOSED ? "Closed to queries" : "Availability unknown"}
-        >
-          <span className="ag-d" style={{ background: isOpen ? "var(--a-ink, var(--sd-hue, #7c3a2a))" : "rgba(0,0,0,0.2)" }} />
-          {isOpen ? "Open" : a.submissionStatus === SubmissionStatus.CLOSED ? "Closed" : "Unknown"}
+      {/* 4d — slim pane meta footer (replaces the pane-foot command bar; Send query + Edit
+          profile live in the control bar now): ADDED <date> · n QUERIES left, the ⋯ lifecycle
+          menu (Set aside — kept so it doesn't lose its only surface; deliberate deviation from
+          the ref) + the open/closed state right. */}
+      <div className="f12-panefoot">
+        <span>{paneProvenance(a, queries.filter((q) => q.agentId === a.id).length)}</span>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+          <span style={{ position: "relative", display: "inline-flex" }}>
+            <button
+              type="button"
+              aria-label="More actions"
+              aria-expanded={menuOpen}
+              onClick={(e) => { e.stopPropagation(); setMenuOpen((o) => !o); }}
+              style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 22, height: 22, borderRadius: 6, color: "var(--muted)" }}
+            >
+              <MoreHorizontal style={{ width: 14, height: 14 }} />
+            </button>
+            {menuOpen && (
+              <>
+                <div style={{ position: "fixed", inset: 0, zIndex: 30 }} onClick={() => setMenuOpen(false)} />
+                <div style={{ position: "absolute", right: 0, bottom: "calc(100% + 6px)", zIndex: 31, background: "var(--panel)", border: "1px solid var(--line)", borderRadius: 10, boxShadow: "var(--sh-3)", padding: 4, minWidth: 170, textTransform: "none", letterSpacing: 0 }}>
+                  <button type="button" style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "7px 10px", borderRadius: 7, fontFamily: "var(--f12-body)", fontSize: 12.5, color: "var(--ink-2)" }} onClick={() => void toggleSetAside(a)}>
+                    <Archive style={{ width: 14, height: 14 }} /> {a.setAside ? "Bring back" : "Set aside"}
+                  </button>
+                </div>
+              </>
+            )}
+          </span>
+          <span className="f12-open">
+            <i style={{ background: isOpen ? "var(--sage)" : "transparent", border: isOpen ? "1.5px solid var(--sage)" : "1.5px solid #c9beb0" }} />
+            {isOpen ? "Open" : a.submissionStatus === SubmissionStatus.CLOSED ? "Closed" : "Unknown"}
+          </span>
         </span>
       </div>
       </>

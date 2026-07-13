@@ -159,3 +159,25 @@
 @media (prefers-reduced-motion: reduce) {
   .f12-root *, .f12-root { transition: none !important; animation: none !important; }
 }
+
+/* ── Contact List reading pane (4d) ── */
+/* Open/Closed segmented pill — SAGE active state (scoped override of the shared SegmentedToggle;
+   the component itself is untouched). */
+.t-f12 .sa-seg-b.on { background: var(--sageC) !important; color: var(--sageD) !important; font-weight: 600; }
+/* Wish-list EMPTY state — a single-row strip: dotted outline, no fill, icon + label + copy on
+   one line, the add pill on the right (~a third of the old block's height). */
+.f12-wishrow { display: flex; align-items: center; gap: 10px; width: 100%; border: 1.5px dotted #d2c8ba; background: transparent; border-radius: var(--r-md); padding: 10px 14px; color: var(--muted); font-size: 12.5px; text-align: left; }
+.f12-wishrow svg { width: 15px; height: 15px; stroke: var(--faint); fill: none; stroke-width: 1.5; flex-shrink: 0; }
+.f12-wishrow .f12-wl { font-weight: 600; color: var(--ink-2); white-space: nowrap; }
+.f12-wishrow .f12-wc { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.f12-wishrow .f12-wa { margin-left: auto; flex-shrink: 0; font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.08em; border: 1px solid var(--line); border-radius: 99px; padding: 5px 11px; color: var(--ink-2); background: var(--panel); transition: border-color 0.12s, color 0.12s; }
+.f12-wishrow:hover .f12-wa { border-color: var(--muted); color: var(--ink); }
+/* History / Notes — underline tabs */
+.f12-tabs { display: flex; gap: 18px; border-bottom: 1px solid var(--hairline); margin-bottom: 12px; }
+.f12-tab { font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); padding: 7px 2px 8px; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.12s, border-color 0.12s; }
+.f12-tab:hover { color: var(--ink-2); }
+.f12-tab.f12-on { color: var(--ink); border-bottom-color: var(--ink); font-weight: 600; }
+/* Slim pane meta footer */
+.f12-panefoot { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 16px; border-top: 1px solid var(--hairline); background: var(--panel); font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--faint); }
+.f12-panefoot .f12-open { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-2); }
+.f12-panefoot .f12-open i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
