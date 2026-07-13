@@ -4,6 +4,50 @@ Running report. Session 1 = Stages 0–5 (interactions, no AI). Session 2 = Stag
 feature) — **not started; awaiting Nick's go-ahead.** Refs: `design-refs/queries-interactions.html`
 + `design-refs/contact-list-interactions.html` (chrome refs v18/v7 unchanged).
 
+## ⏸ CHECKPOINT — resume here (new session)
+
+**State:** Stage 6 in progress on the interaction layer. `main` @ `4734323`, all green (tsc + build
++ 860 Vitest + rules compiler). Nick's WIP (index.css, themes.md) is uncommitted in the primary
+checkout — leave it. **Session 2 (Stage 7, AI) NOT started — do not begin without a fresh go-ahead.**
+
+**Where work happens (concurrency — IMPORTANT):** Nick edits the PRIMARY checkout
+`/Users/nickphysick/ScriptAlly-app` (his todo-board stream). Claude works in the WORKTREE
+`/Users/nickphysick/ScriptAlly-il` on branch `claude-il` (node_modules symlinked), and **ff-merges
+to `main` only after checking changed files don't overlap Nick's WIP**: `comm -12` of
+`git status --short` paths vs `git diff --name-only main claude-il`. Never edit the primary tree's
+files; if a needed file overlaps Nick's WIP, hold + coordinate.
+
+**Gate, per commit:** `tsc --noEmit` + `npm run build` + `npx vitest run` (860) — AND when the commit
+touches firestore.rules, `firebase deploy --only firestore:rules --config firebase.dev.json
+--project dev --dry-run` (compiles, no release). Explicit-path staging; `git commit --only`.
+
+**NEXT = 6d** (wanted materials), then 6e → 6g → 6f/6h → 5d → 5e → Nudge→addUserTask. Each its own
+commit, rules PARKED. **Stop at the end of 5e.**
+- 6d: `Agent.materialsWanted` string[] → structured `{componentType, quantity, unit}`. Binary:
+  Query letter / Author bio / Full manuscript. Units: synopsis + sample pages→pages; sample
+  chapters→chapters; sample words→words. Integer-validated per unit, sane bounds. **REPORT the
+  componentType gap** (expect Author bio + sample-words have NO ComponentType member) — do not fork
+  the vocab; `packageMetrics` stays LOCKED.
+- 5d: decide the Edit button's fate (retire if click-to-pick covers manuscript + method; reason in
+  the report either way).
+- Nudge remind-me → `addUserTask({ queryId, dueDate })` (currently `logNudge`).
+
+**Parked rules (build, don't deploy PROD — Nick deploys):** personalGenres · genreSuggestions ·
+/tasks (isValidUserTask) · UserTask.dueDate · **starRating optional** · **noResponseMeansNo
+optional**. DEV has the first four; the last two are NOT on dev yet — clear-to-unrated + reply-"not
+stated" won't persist on dev until deployed.
+
+**Locked model decisions (Nick):** absence = "not stated" everywhere, never a magic 0/false
+(`starRating?` / `responseTimeWeeks?` / `noResponseMeansNo?` optional; cleared via `deleteField`).
+`UserTask` (`users/{uid}/tasks`) is the canonical stored-task store — `TasksPopover` reads it,
+Note-scope was reverted. Reminders are dated (`UserTask.dueDate`, overdue renders pink). Composer
+chips derive from `getPrimaryAction` (can't disagree with the CTA). Nothing auto-writes/auto-closes.
+
+**Cleanup owed:** dead `respKnown` / `methodSub` / `Mail` import in Agents.tsx (from 6c). `#/pkg-lab`
+must be removed before any PROD deploy. Agent "PRIYA RAMAN" renders all-caps (a data fix, not code).
+
+---
+
 ---
 
 ## Step 0 — Recon (read-only; the findings that shape the build)
