@@ -765,6 +765,26 @@
       pink-Closed · Editorial midnight per the colour-role map · Bold its own pink). A small status
       dot leads. Scoped to .agv2 so the Form-11 drawers/modals keep the full-size SegmentedToggle. ── */
 .agv2 .ag-availtoggle { display: inline-flex; align-items: center; gap: 9px; }
+/* 6a — method click-to-pick on the hero meta line */
+.agv2 .ag-method-pick { font: inherit; letter-spacing: inherit; text-transform: inherit; color: var(--ag-accent, #7c3a2a); background: none; border: none; padding: 0; cursor: pointer; }
+.agv2 .ag-method-pick:hover { text-decoration: underline; }
+
+/* 6a — editable link pill (saved = domain link + ✕ remove) */
+.agv2 .ag-lchip-set { display: inline-flex; align-items: center; gap: 4px; padding-right: 4px; }
+.agv2 .ag-lchip-link { display: inline-flex; align-items: center; gap: 5px; }
+.agv2 .ag-lchip-x { background: none; border: none; padding: 0 2px; cursor: pointer; color: var(--ag-muted); font-size: 11px; line-height: 1; }
+.agv2 .ag-lchip-x:hover { color: var(--ag-accent, #7c3a2a); }
+
+/* 6a — the inline link URL editor (portalled inside .t-f12) */
+.ag-linkpop { width: 268px; background: var(--panel, #fffdfb); border: 1px solid var(--line, #e6dccd); border-radius: var(--r-lg, 12px); box-shadow: var(--sh-3, 0 14px 34px rgba(20,15,10,0.22)); padding: 12px; font-family: var(--f12-body, "Inter", system-ui, sans-serif); }
+.ag-linkpop-h { font-size: 12.5px; font-weight: 600; color: var(--ink, #1e1a16); margin-bottom: 8px; }
+.ag-linkpop input { width: 100%; border: 1px solid var(--line, #e6dccd); border-radius: var(--r-sm, 6px); padding: 8px 9px; font-family: inherit; font-size: 12.5px; color: var(--ink, #1e1a16); background: var(--paper, #faf6f0); }
+.ag-linkpop input:focus { outline: none; border-color: var(--ink, #1e1a16); background: var(--panel, #fffdfb); }
+.ag-linkpop-fa { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+.ag-linkpop-rm { background: none; border: none; padding: 0; font-size: 12px; color: #a5342a; cursor: pointer; }
+.ag-linkpop-save { padding: 7px 15px; border-radius: var(--r-md, 9px); border: none; background: var(--ink, #1e1a16); color: var(--panel, #fffdfb); font-family: inherit; font-size: 12.5px; font-weight: 500; cursor: pointer; }
+.ag-linkpop-save:disabled { opacity: 0.4; cursor: default; }
+
 /* 6a — interactive hero stars (hover preview + click to set) */
 .agv2 .ag-stars-set { display: inline-flex; align-items: center; }
 .agv2 .ag-star-btn { background: none; border: none; padding: 0 1px; margin: 0; cursor: pointer; line-height: 0; display: inline-flex; }

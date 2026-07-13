@@ -37,6 +37,7 @@ import { F12Page, F12Account, IconTrig, F12Popover, F12Menu, PopSection, PRow, C
 import { useFixedMenu } from "./forms/useFixedMenu";
 import { TasksPopover } from "./TasksPopover";
 import { useToast } from "./toast/ToastProvider";
+import { AgentLinkPopover, linkDomain } from "./agents/AgentLinkPopover";
 import {
   paneProvenance,
   agentQueried,
@@ -143,6 +144,10 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
   const { showToast } = useToast();
   // Door check-back reveal (6a) — the agent id whose door just closed; offers a dated reminder.
   const [checkBackFor, setCheckBackFor] = useState<string | null>(null);
+  // 6a — inline link-pill editor (Website / Socials) + method click-to-pick, positioned from the
+  // clicked element's rect (like the timeline ⋯). field maps to the agent property written.
+  const [linkEdit, setLinkEdit] = useState<{ field: "website" | "twitter"; label: string; value?: string; style: React.CSSProperties } | null>(null);
+  const [methodPick, setMethodPick] = useState<React.CSSProperties | null>(null);
 
   // Selection + controls
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
@@ -364,7 +369,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
   }, [flat.map((a) => a.id).join("|")]);
 
   // Close the identity ⋯ menu whenever the selection changes.
-  useEffect(() => { setMenuOpen(false); setAgTasksOpen(false); }, [selectedAgentId]);
+  useEffect(() => { setMenuOpen(false); setAgTasksOpen(false); setLinkEdit(null); setMethodPick(null); setCheckBackFor(null); }, [selectedAgentId]);
 
   const moveSelection = (dir: 1 | -1) => {
     if (!flat.length) return;
@@ -643,28 +648,65 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
 
     // One chip of the canonical trio: solid (linked when the value is an URL/domain, titled text
     // chip otherwise) when populated; a dashed ghost prompt opening the Edit drawer when empty.
-    const trioChip = (label: string, value: string | undefined) => {
+    const openLink = (field: "website" | "twitter", label: string, value: string | undefined, el: HTMLElement) => {
+      const r = el.getBoundingClientRect();
+      setLinkEdit({ field, label, value, style: { position: "fixed", top: r.bottom + 6, left: Math.max(8, r.left) } });
+    };
+    const removeLink = (field: "website" | "twitter", label: string, prev: string) => {
+      void updateAgent(a.id, { [field]: deleteField() as unknown as string } as Partial<Agent>);
+      showToast({ message: `${label} removed`, undo: () => void updateAgent(a.id, { [field]: prev } as Partial<Agent>) });
+    };
+    // 6a — editable link pill. Website / Socials open the inline URL editor (validated); empty =
+    // ghost prompt, populated = domain link + ✕ to remove. Publishers Marketplace has no dedicated
+    // field yet (deferred), so it keeps the ghost → Edit-drawer behaviour.
+    const trioChip = (label: string, value: string | undefined, editField?: "website" | "twitter") => {
       const v = value?.trim();
+      if (!editField) {
+        return v ? (
+          <span className="ag-lchip" title={v} style={{ cursor: "default" }}><LinkIcon aria-hidden="true" /> {label}</span>
+        ) : (
+          <button type="button" className="ag-lchip ghost" onClick={() => openEditAgent(a.id)} title={`Add ${label}`}><Plus aria-hidden="true" /> {label}</button>
+        );
+      }
       if (!v) {
         return (
-          <button type="button" className="ag-lchip ghost" onClick={() => openEditAgent(a.id)} title={`Add ${label}`}>
+          <button type="button" className="ag-lchip ghost" onClick={(e) => openLink(editField, label, undefined, e.currentTarget)} title={`Add ${label}`}>
             <Plus aria-hidden="true" /> {label}
           </button>
         );
       }
-      return isLinkyHandle(v) ? (
-        <a className="ag-lchip" href={hrefFor(v)} target="_blank" rel="noopener noreferrer">
-          <LinkIcon aria-hidden="true" /> {label}
-        </a>
-      ) : (
-        <span className="ag-lchip" title={v} style={{ cursor: "default" }}>
-          <LinkIcon aria-hidden="true" /> {label}
+      return (
+        <span className="ag-lchip ag-lchip-set">
+          <a href={hrefFor(v)} target="_blank" rel="noopener noreferrer" title={v} className="ag-lchip-link"><LinkIcon aria-hidden="true" /> {linkDomain(v)}</a>
+          <button type="button" className="ag-lchip-x" aria-label={`Remove ${label}`} title={`Remove ${label}`} onClick={() => removeLink(editField, label, v)}>✕</button>
         </span>
       );
     };
 
     return (
       <>
+      {linkEdit && (
+        <AgentLinkPopover
+          label={linkEdit.label}
+          value={linkEdit.value}
+          style={linkEdit.style}
+          onSave={(url) => { setLinkEdit(null); void updateAgent(a.id, { [linkEdit.field]: url } as Partial<Agent>); showToast({ message: `${linkEdit.label} saved` }); }}
+          onRemove={() => { const prev = linkEdit.value; setLinkEdit(null); void updateAgent(a.id, { [linkEdit.field]: deleteField() as unknown as string } as Partial<Agent>); showToast({ message: `${linkEdit.label} removed`, undo: () => prev != null && void updateAgent(a.id, { [linkEdit.field]: prev } as Partial<Agent>) }); }}
+          onClose={() => setLinkEdit(null)}
+        />
+      )}
+      {methodPick && (
+        <F12Menu
+          open
+          style={methodPick}
+          ariaLabel="Submission method"
+          onClose={() => setMethodPick(null)}
+          items={Object.values(SubmissionMethod).map((m) => ({
+            label: m,
+            onClick: () => { setMethodPick(null); const prev = a.submissionMethod; void updateAgent(a.id, { submissionMethod: m }); showToast({ message: `Method set to ${m}`, undo: () => void updateAgent(a.id, prev ? { submissionMethod: prev } : { submissionMethod: deleteField() as unknown as SubmissionMethod }) }); },
+          }))}
+        />
+      )}
       <EdgeFadeScroll outerClassName="ag-panewrap" scrollClassName="ag-panescroll" fade="var(--paper, #faf6f0)">
         {/* 1 · Identity — the F12 hero: sage LEFT spine (::before, clipped by the radius; NO top
             rule), pink avatar + black initials, Playfair name, mono-caps agency, burgundy stars. */}
@@ -675,6 +717,11 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
               <div style={{ fontFamily: "var(--f12-mono)", fontSize: 9, letterSpacing: "0.11em", textTransform: "uppercase", color: "var(--muted)", marginTop: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {agentSecondary(a) || "Independent"}
                 {a.email ? ` · ${a.email}` : ""}
+                {" · "}
+                {/* 6a — method as a click-to-pick on the hero meta line */}
+                <button type="button" className="ag-method-pick" onClick={(e) => { const r = e.currentTarget.getBoundingClientRect(); setMethodPick({ position: "fixed", top: r.bottom + 6, left: Math.max(8, r.left) }); }}>
+                  {a.submissionMethod ? `${a.submissionMethod} submissions` : "Add method"} ▾
+                </button>
               </div>
               {location && locFlag && (
                 homeMarket ? (
@@ -691,8 +738,8 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
                   Interim sourcing until the dedicated URL fields land: Socials reads `twitter`;
                   Publishers Marketplace has no field yet, so it ghosts (opens the Edit drawer). */}
               <div className="ag-ilinks">
-                {trioChip("Website", a.website)}
-                {trioChip("Socials", a.twitter)}
+                {trioChip("Website", a.website, "website")}
+                {trioChip("Socials", a.twitter, "twitter")}
                 {trioChip("Publishers Marketplace", undefined)}
                 {socials.map((s, i) =>
                   isLinkyHandle(s.handle) ? (
