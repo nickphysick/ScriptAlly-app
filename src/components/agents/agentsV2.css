@@ -765,6 +765,10 @@
       pink-Closed · Editorial midnight per the colour-role map · Bold its own pink). A small status
       dot leads. Scoped to .agv2 so the Form-11 drawers/modals keep the full-size SegmentedToggle. ── */
 .agv2 .ag-availtoggle { display: inline-flex; align-items: center; gap: 9px; }
+/* 6a — interactive hero stars (hover preview + click to set) */
+.agv2 .ag-stars-set { display: inline-flex; align-items: center; }
+.agv2 .ag-star-btn { background: none; border: none; padding: 0 1px; margin: 0; cursor: pointer; line-height: 0; display: inline-flex; }
+
 /* 6a — the dated check-back reveal after closing the door */
 .agv2 .ag-checkback { display: flex; align-items: center; justify-content: flex-end; gap: 8px; margin-top: 9px; font-family: 'Inter', system-ui, sans-serif; font-size: 12px; color: var(--ag-muted); }
 .agv2 .ag-cb-go { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600; color: var(--pink-i, #8a4030); background: var(--pink-t, #f7e3dd); border: 1px solid var(--pink-b, #eecdc3); border-radius: 99px; padding: 5px 11px; cursor: pointer; }

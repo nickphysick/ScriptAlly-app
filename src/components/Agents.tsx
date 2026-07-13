@@ -87,15 +87,32 @@ function displaySocials(agent: Agent): AgentSocial[] {
 const firstName = (n: string) => n.split(" ")[0];
 
 /** Five stars in the theme star colour (12px rows / 14px identity). */
+const STAR_PATH = "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z";
 const Stars: React.FC<{ value: number }> = ({ value }) => (
   <>
     {[1, 2, 3, 4, 5].map((n) => (
       <svg key={n} viewBox="0 0 24 24" className={n <= value ? "ag-st-on" : "ag-st-off"} strokeWidth={1.6} aria-hidden="true">
-        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+        <path d={STAR_PATH} />
       </svg>
     ))}
   </>
 );
+
+/** Interactive hero stars (6a): hover previews, click sets the rating (optimistic + undo in the
+ *  caller). Clearing to unrated is NOT offered — the starRating rule requires 1–5 (flagged). */
+const StarsInput: React.FC<{ value: number; label: string; onSet: (n: number) => void }> = ({ value, label, onSet }) => {
+  const [hover, setHover] = useState(0);
+  const shown = hover || value;
+  return (
+    <div className="ag-bstars ag-stars-set" role="radiogroup" aria-label={label} onMouseLeave={() => setHover(0)}>
+      {[1, 2, 3, 4, 5].map((n) => (
+        <button key={n} type="button" className="ag-star-btn" role="radio" aria-checked={n === value} aria-label={`${n} star${n > 1 ? "s" : ""}`} onMouseEnter={() => setHover(n)} onClick={() => onSet(n)}>
+          <svg viewBox="0 0 24 24" className={n <= shown ? "ag-st-on" : "ag-st-off"} strokeWidth={1.6} aria-hidden="true"><path d={STAR_PATH} /></svg>
+        </button>
+      ))}
+    </div>
+  );
+};
 
 /** The submission-method sub-line on the facts row. */
 const methodSub = (m: SubmissionMethod | string): string => {
@@ -454,6 +471,15 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
     setCheckBackFor(next === SubmissionStatus.CLOSED ? agent.id : null);
   };
 
+  // Star rating (6a) — click to set (1–5), optimistic + undo. Clearing to unrated is not offered
+  // (the starRating rule requires 1–5; unrated would need a rule + type change — flagged).
+  const setStar = async (agent: Agent, n: number) => {
+    const prev = agent.starRating;
+    if (n === prev) return;
+    await updateAgent(agent.id, { starRating: n as Agent["starRating"] });
+    showToast({ message: `${firstName(agentPrimary(agent))} rated ${n}★`, undo: () => void updateAgent(agent.id, { starRating: prev }) });
+  };
+
   // Create the check-back reminder — a stored, agent-scoped, DATED UserTask (surfaces on the day;
   // never auto-fires). Default one month out.
   const createCheckBack = async (agent: Agent, months: number) => {
@@ -651,9 +677,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
                   </span>
                 )
               )}
-              <div className="ag-bstars" aria-label={`${a.starRating || 0} of 5 stars`}>
-                <Stars value={a.starRating || 0} />
-              </div>
+              <StarsInput value={a.starRating || 0} label={`${a.starRating || 0} of 5 stars`} onSet={(n) => void setStar(a, n)} />
               {/* Canonical trio — always present (ghost prompts when empty) — then any other socials.
                   Interim sourcing until the dedicated URL fields land: Socials reads `twitter`;
                   Publishers Marketplace has no field yet, so it ghosts (opens the Edit drawer). */}
