@@ -37,6 +37,7 @@ export const NudgeModal: React.FC<NudgeModalProps> = ({
   const [note, setNote] = useState("");
   const [days, setDays] = useState(14); // default "2 weeks"
   const [submitting, setSubmitting] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const firstName = agentName ? agentName.split(" ")[0] : null;
   const subjectClause = firstName ? `${firstName} has` : "They've";
@@ -59,6 +60,23 @@ export const NudgeModal: React.FC<NudgeModalProps> = ({
     sentenceParts.push(`Their response is ${plural(overdueDays, "day")} overdue.`);
   }
   const sentence = sentenceParts.join(" ");
+
+  // A copyable follow-up draft — the user pastes it into their own email client (5c). Deliberately
+  // brief and warm; built from what we know (agent first name + send date). We never send it.
+  const followUpDraft = [
+    `Dear ${firstName || "there"},`,
+    "",
+    `I hope this finds you well. I'm writing to gently follow up on my query${dateSent ? `, sent on ${new Date(dateSent).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}` : ""}. I remain very enthusiastic about the possibility of working together, and would be grateful for any update when you have a moment.`,
+    "",
+    "With thanks for your time,",
+  ].join("\n");
+  const copyDraft = async () => {
+    try {
+      await navigator.clipboard.writeText(followUpDraft);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch { /* clipboard blocked — the draft is still visible to select manually */ }
+  };
 
   const handleSubmit = async () => {
     if (submitting) return;
@@ -85,9 +103,20 @@ export const NudgeModal: React.FC<NudgeModalProps> = ({
       onClose={onClose}
       dirty={note.trim().length > 0}
     >
-      <p style={{ fontFamily: "'Source Sans Pro', sans-serif", fontSize: 13, lineHeight: 1.5, color: "#5a4034", marginBottom: 16 }}>
+      <p style={{ fontFamily: "'Source Sans Pro', sans-serif", fontSize: 13, lineHeight: 1.5, color: "#5a4034", marginBottom: 14 }}>
         {sentence}
       </p>
+
+      {/* Copyable follow-up draft — a starting point to paste into your own email (5c). */}
+      <div style={{ border: "1px solid #e6dccd", borderRadius: 10, background: "#fdfaf5", padding: "11px 13px", marginBottom: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 7 }}>
+          <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8.5, letterSpacing: "0.1em", textTransform: "uppercase", color: "#a89a8a" }}>Follow-up draft</span>
+          <button type="button" onClick={copyDraft} style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, letterSpacing: "0.06em", textTransform: "uppercase", fontWeight: 600, color: copied ? "#3f5340" : "#7c3a2a", background: copied ? "#eef2ec" : "#f6cfc9", border: "none", borderRadius: 99, padding: "5px 12px", cursor: "pointer" }}>
+            {copied ? "Copied ✓" : "Copy"}
+          </button>
+        </div>
+        <pre style={{ fontFamily: "'Source Sans Pro', sans-serif", fontSize: 12.5, lineHeight: 1.5, color: "#5a4034", whiteSpace: "pre-wrap", margin: 0 }}>{followUpDraft}</pre>
+      </div>
 
       <label className="sa-label" htmlFor="nudge-note">
         Add a note <span className="sa-opt">optional</span>
