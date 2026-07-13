@@ -378,7 +378,7 @@ export const activeTooltip = (weekStart: Date, n: number): string =>
   `${wcLabel(weekStart)} · ${n} ACTIVE`;
 
 export const agentTooltip = (name: string, status: QueryStatus | null): string =>
-  `${name.toUpperCase()} · ${status ? String(status).toUpperCase() : "IDLE"}`;
+  `${name.toUpperCase()} · ${status ? String(status).toUpperCase() : "NO ACTIVE QUERIES"}`;
 
 export const overflowTooltip = (n: number): string =>
   `+${n} MORE ${n === 1 ? "AGENT" : "AGENTS"}`;

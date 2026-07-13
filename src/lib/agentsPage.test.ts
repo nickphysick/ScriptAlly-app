@@ -369,7 +369,7 @@ describe("masthead pulse line — Your database · N on file · I idle", () => {
   });
 
   it("formats singular-safe: Your database · {label} · {i} idle", () => {
-    expect(agentsPulse(9, 4)).toBe("Your database · 9 agents on file · 4 idle");
-    expect(agentsPulse(1, 0)).toBe("Your database · 1 agent on file · 0 idle");
+    expect(agentsPulse(9, 4)).toBe("Your database · 9 agents on file · 4 not queried");
+    expect(agentsPulse(1, 0)).toBe("Your database · 1 agent on file · 0 not queried");
   });
 });

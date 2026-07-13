@@ -190,6 +190,23 @@
 /* Open/Closed segmented pill — SAGE active state (scoped override of the shared SegmentedToggle;
    the component itself is untouched). */
 .t-f12 .sa-seg-b.on { background: var(--sageC) !important; color: var(--sageD) !important; font-weight: 600; }
+/* 7b — the door toggle speaks in tone: sage while open, PINK while closed */
+.t-f12 .ag-availtoggle[data-status="closed"] .sa-seg-b.on { background: var(--pink-t) !important; color: var(--pink-i) !important; }
+
+/* ── 7a — the two-systems rule. YOUR HISTORY = StatusDots; THEIR DOOR = tone. Closed-door rows
+   recede (~45% grey) but stay fully clickable; the SELECTED row returns to full contrast. ── */
+.f12-qdots { display: flex; align-items: center; gap: 4px; }
+.f12-qdots .f12-qmore { font-family: var(--f12-mono); font-size: 8.5px; color: var(--faint); margin-left: 1px; }
+.f12-nq { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.09em; color: #bdb3a6; white-space: nowrap; }
+.f12-row.f12-shut .f12-av { background: #eceae6; color: #a49a8d; }
+.f12-row.f12-shut .f12-nm { color: #a49a8d; font-weight: 450; }
+.f12-row.f12-shut .f12-ag { color: #c3b9ac; }
+.f12-row.f12-shut .f12-qdots { opacity: 0.45; }
+.f12-row.f12-shut .f12-nq { color: #cfc6ba; }
+.f12-row.f12-shut.f12-sel .f12-av { background: var(--pink-av); color: var(--ink); }
+.f12-row.f12-shut.f12-sel .f12-nm { color: var(--ink); font-weight: 500; }
+.f12-row.f12-shut.f12-sel .f12-ag { color: var(--faint); }
+.f12-row.f12-shut.f12-sel .f12-qdots { opacity: 1; }
 /* Wish-list EMPTY state — a single-row strip: dotted outline, no fill, icon + label + copy on
    one line, the add pill on the right (~a third of the old block's height). */
 .f12-wishrow { display: flex; align-items: center; gap: 10px; width: 100%; border: 1.5px dotted #d2c8ba; background: transparent; border-radius: var(--r-md); padding: 10px 14px; color: var(--muted); font-size: 13px; text-align: left; }

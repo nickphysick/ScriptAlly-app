@@ -281,7 +281,7 @@ describe("tooltip label builders", () => {
   });
   it("formats agent + overflow + responses labels", () => {
     expect(agentTooltip("Margaret Atwood", QueryStatus.PARTIAL_REQUESTED)).toBe("MARGARET ATWOOD · PARTIAL REQUESTED");
-    expect(agentTooltip("Idle Ivy", null)).toBe("IDLE IVY · IDLE");
+    expect(agentTooltip("Idle Ivy", null)).toBe("IDLE IVY · NO ACTIVE QUERIES");
     expect(overflowTooltip(4)).toBe("+4 MORE AGENTS");
     expect(overflowTooltip(1)).toBe("+1 MORE AGENT");
     expect(responsesTooltip(9, 10, 90)).toBe("9 OF 10 QUERIES ANSWERED · 90%");

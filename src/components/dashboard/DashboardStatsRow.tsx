@@ -135,7 +135,7 @@ const AgentProfilePanel: React.FC<{ s: AgentStatusSummary }> = ({ s }) => (
       {s.status && <StatusDot status={s.status} overrideSize={12} decorative />}
       {s.status
         ? `${String(s.status).toUpperCase()}${s.respondBy ? ` · RESPOND BY ${new Date(s.respondBy).toLocaleDateString("en-GB", { day: "numeric", month: "short" }).toUpperCase()}` : ""}`
-        : "IDLE · NO ACTIVE QUERIES"}
+        : "NO ACTIVE QUERIES"}
     </span>
   </>
 );

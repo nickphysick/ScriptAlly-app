@@ -244,9 +244,9 @@ export function agentIdleCount(agents: { id: string }[], queries: { agentId?: st
   return agents.filter((a) => !queried.has(a.id)).length;
 }
 
-/** Masthead pulse line — `Your database · {n} agents on file · {i} idle` (slab uppercases). */
+/** Masthead pulse line — `Your database · {n} agents on file · {i} not queried` ("idle" is retired vocabulary). */
 export function agentsPulse(count: number, idle: number): string {
-  return `Your database · ${agentsCountLabel(count)} · ${idle} idle`;
+  return `Your database · ${agentsCountLabel(count)} · ${idle} not queried`;
 }
 
 /** The Up-next meta line: "5★ fit · open · not yet queried". */

@@ -11,7 +11,7 @@
  */
 import React, { useState, useEffect, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
-import { Agent, AgentSocial, SubmissionStatus, SubmissionMethod } from "../types";
+import { Agent, AgentSocial, SubmissionStatus, SubmissionMethod, QueryStatus } from "../types";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { collection, setDoc, doc, onSnapshot } from "firebase/firestore";
 import {
@@ -122,13 +122,13 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
   const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   /* ── F12 Contact List model (ref agents-contact-list-v3.html) ──
-     openFilter — OPEN TO QUERIES radio · queriedFilter — YOUR HISTORY radio (Queried / Idle) ·
+     openFilter — THEIR-DOOR radio · queriedFilter — YOUR-HISTORY radio (active/closed/never) ·
      starFilter — STAR RATING checkboxes (4-and-up / 3-and-up / Unrated, OR-combined) ·
      countryFilter — LOCATION radio over the REAL agent.country field (ISO; options are the
      distinct countries on file — there is no `location` field; country IS the location model) ·
      needsNoMswl / needsNoSub — NEEDS ATTENTION checkboxes, both derived. */
   const [openFilter, setOpenFilter] = useState<"all" | "open" | "closed">("all");
-  const [queriedFilter, setQueriedFilter] = useState<"all" | "yes" | "no">("all");
+  const [queriedFilter, setQueriedFilter] = useState<"all" | "active" | "closed" | "never">("all");
   const [starFilter, setStarFilter] = useState<("4up" | "3up" | "unrated")[]>([]);
   const [countryFilter, setCountryFilter] = useState<string>("all");
   const [needsNoMswl, setNeedsNoMswl] = useState(false);
@@ -227,13 +227,19 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
     queries.filter((q) => q.agentId === id && q.dateSent).reduce((m, q) => Math.max(m, new Date(q.dateSent!).getTime() || 0), 0);
   /* "No submission details" = neither a preferred method nor wanted materials on file (derived). */
   const noSubDetails = (a: Agent) => !a.submissionMethod && !(a.materialsWanted?.length);
+  /* The terminal set — YOUR-HISTORY "closed" means every query on file ended here. */
+  const CLOSED_QUERY_STATUSES = [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE];
 
   const filtered = visibleAgents.filter((a) => {
     if (openFilter === "open" && a.submissionStatus !== SubmissionStatus.OPEN) return false;
     if (openFilter === "closed" && a.submissionStatus !== SubmissionStatus.CLOSED) return false;
-    const q = agentQueried(a.id, queries);
-    if (queriedFilter === "yes" && !q) return false;
-    if (queriedFilter === "no" && q) return false;
+    if (queriedFilter !== "all") {
+      const aq = queries.filter((qq) => qq.agentId === a.id);
+      const liveN = aq.filter((qq) => !CLOSED_QUERY_STATUSES.includes(qq.status as QueryStatus)).length;
+      if (queriedFilter === "active" && liveN === 0) return false;
+      if (queriedFilter === "closed" && !(aq.length > 0 && liveN === 0)) return false;
+      if (queriedFilter === "never" && aq.length > 0) return false;
+    }
     if (starFilter.length) {
       const r = a.starRating || 0;
       const hit = (starFilter.includes("4up") && r >= 4) || (starFilter.includes("3up") && r >= 3) || (starFilter.includes("unrated") && r === 0);
@@ -292,7 +298,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
       const no = sorted.filter((a) => !agentQueried(a.id, queries));
       return [
         { key: "queried", label: "Queried", rows: yes },
-        { key: "idle", label: "Idle", rows: no },
+        { key: "idle", label: "Not queried", rows: no },
       ].filter((g) => g.rows.length);
     }
     return [{ key: "all", label: null, rows: sorted }];
@@ -485,18 +491,29 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
   if (!currentUser) return null;
 
   // ── Render helpers ──
+  /* 7a — the two-systems rule. YOUR HISTORY renders as the queries' real StatusDots (live
+     before closed so meaningful state survives the ≤3 truncation, then +N); only never-queried
+     agents get text (faint NOT QUERIED). THEIR DOOR is tone: closed-door rows recede to muted
+     grey (f12-shut — a recede, not a deactivate: still clickable, full contrast when selected). */
   const renderRow = (agent: Agent) => {
     const sel = agent.id === selectedAgentId;
-    const isOpen = agent.submissionStatus === SubmissionStatus.OPEN;
-    const qn = queryCountFor(agent.id);
+    const doorClosed = agent.submissionStatus === SubmissionStatus.CLOSED;
+    const agentQs = queries.filter((q) => q.agentId === agent.id);
+    const ms = (q: { dateSent?: string }) => (q.dateSent ? new Date(q.dateSent).getTime() : 0);
+    const live = agentQs.filter((q) => !CLOSED_QUERY_STATUSES.includes(q.status as QueryStatus)).sort((a, b) => ms(b) - ms(a));
+    const done = agentQs.filter((q) => CLOSED_QUERY_STATUSES.includes(q.status as QueryStatus)).sort((a, b) => ms(b) - ms(a));
+    const ordered = [...live, ...done];
+    const shown = ordered.slice(0, 3);
+    const extra = ordered.length - shown.length;
     return (
       <button
         type="button"
         key={agent.id}
         data-agid={agent.id}
-        className={`f12-row${sel ? " f12-sel" : ""}`}
+        className={`f12-row${sel ? " f12-sel" : ""}${doorClosed ? " f12-shut" : ""}`}
         role="option"
         aria-selected={sel}
+        title={doorClosed ? "Closed to queries" : undefined}
         onClick={() => setSelectedAgentId(agent.id)}
         style={agent.setAside ? { opacity: 0.62 } : undefined}
       >
@@ -506,17 +523,16 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
           <span className="f12-ag">{agentSecondary(agent) || "Independent"}</span>
         </span>
         <span className="f12-end">
-          {/* open/closed dot — sage fill = open, hollow grey ring = closed/unknown */}
-          <span
-            aria-hidden="true"
-            title={isOpen ? "Open to queries" : "Closed"}
-            style={{
-              width: 9, height: 9, borderRadius: "50%",
-              background: isOpen ? "var(--sage)" : "transparent",
-              border: isOpen ? "1.5px solid var(--sage)" : "1.5px solid #c9beb0",
-            }}
-          />
-          <span className="f12-d2">{qn === 0 ? "IDLE" : qn === 1 ? "1 QUERY" : `${qn} QUERIES`}</span>
+          {ordered.length === 0 ? (
+            <span className="f12-nq">NOT QUERIED</span>
+          ) : (
+            <span className="f12-qdots">
+              {shown.map((q) => (
+                <StatusDot key={q.id} status={q.status} overrideSize={14} decorative />
+              ))}
+              {extra > 0 && <span className="f12-qmore">+{extra}</span>}
+            </span>
+          )}
         </span>
       </button>
     );
@@ -629,7 +645,6 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
                 className="ag-availtoggle"
                 data-status={a.submissionStatus === SubmissionStatus.OPEN ? "open" : a.submissionStatus === SubmissionStatus.CLOSED ? "closed" : "unknown"}
               >
-                <span className="ag-availdot" aria-hidden="true" />
                 <SegmentedToggle<SubmissionStatus>
                   ariaLabel="Submission status"
                   value={(a.submissionStatus as SubmissionStatus) ?? SubmissionStatus.UNKNOWN}
@@ -815,7 +830,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
           </span>
           <span className="f12-open">
             <i style={{ background: isOpen ? "var(--sage)" : "transparent", border: isOpen ? "1.5px solid var(--sage)" : "1.5px solid #c9beb0" }} />
-            {isOpen ? "Open" : a.submissionStatus === SubmissionStatus.CLOSED ? "Closed" : "Unknown"}
+            {isOpen ? "OPEN TO QUERIES" : a.submissionStatus === SubmissionStatus.CLOSED ? "CLOSED TO QUERIES" : "UNKNOWN"}
           </span>
         </span>
       </div>
@@ -829,8 +844,8 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
     setNeedsNoMswl(false); setNeedsNoSub(false);
   };
   const agChips: { key: string; label: string; remove: () => void }[] = [
-    ...(openFilter !== "all" ? [{ key: "open", label: openFilter.toUpperCase(), remove: () => setOpenFilter("all") }] : []),
-    ...(queriedFilter !== "all" ? [{ key: "qd", label: queriedFilter === "yes" ? "QUERIED" : "IDLE", remove: () => setQueriedFilter("all") }] : []),
+    ...(openFilter !== "all" ? [{ key: "open", label: openFilter === "open" ? "OPEN TO QUERIES" : "CLOSED TO QUERIES", remove: () => setOpenFilter("all") }] : []),
+    ...(queriedFilter !== "all" ? [{ key: "qd", label: queriedFilter === "active" ? "QUERIED · ACTIVE" : queriedFilter === "closed" ? "QUERIED · CLOSED" : "NOT QUERIED", remove: () => setQueriedFilter("all") }] : []),
     ...starFilter.map((sf) => ({ key: `st:${sf}`, label: sf === "4up" ? "4★ AND UP" : sf === "3up" ? "3★ AND UP" : "UNRATED", remove: () => setStarFilter((prev) => prev.filter((x) => x !== sf)) })),
     ...(countryFilter !== "all" ? [{ key: "loc", label: (countryName(countryFilter) || countryFilter).toUpperCase(), remove: () => setCountryFilter("all") }] : []),
     ...(needsNoMswl ? [{ key: "nomswl", label: "NO WISH LIST", remove: () => setNeedsNoMswl(false) }] : []),
@@ -842,7 +857,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
     { group: "Your activity", items: [
       { key: "last_queried", label: "Last queried", sub: "Most recent submission first" },
       { key: "most_queried", label: "Most queried" },
-      { key: "idle_first", label: "Idle first", sub: "Agents you haven't approached yet" },
+      { key: "idle_first", label: "Not queried first", sub: "Agents you haven't approached yet" },
     ]},
     { group: "Alphabetical", items: [
       { key: "agent_az", label: "Agent · A to Z" },
@@ -959,15 +974,16 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
                 headAction={<button type="button" className="f12-reset" onClick={resetAgFilters}>RESET ALL</button>}
                 footText={<><b>{filtered.length}</b>&nbsp;OF {visibleAgents.length} AGENTS</>}
               >
-                <PopSection label="Open to queries">
+                <PopSection label="Their door">
                   <PRow kind="rad" on={openFilter === "all"} label="All agents" onClick={() => setOpenFilter("all")} />
-                  <PRow kind="rad" on={openFilter === "open"} label="Open" sub="Currently accepting submissions" onClick={() => setOpenFilter("open")} />
-                  <PRow kind="rad" on={openFilter === "closed"} label="Closed" onClick={() => setOpenFilter("closed")} />
+                  <PRow kind="rad" on={openFilter === "open"} label="Open to queries" sub="Currently accepting submissions" onClick={() => setOpenFilter("open")} />
+                  <PRow kind="rad" on={openFilter === "closed"} label="Closed to queries" onClick={() => setOpenFilter("closed")} />
                 </PopSection>
-                <PopSection label="Your history">
-                  <PRow kind="rad" on={queriedFilter === "all"} label="Queried or not" onClick={() => setQueriedFilter("all")} />
-                  <PRow kind="rad" on={queriedFilter === "yes"} label="Queried" sub="You've sent at least one query" onClick={() => setQueriedFilter("yes")} />
-                  <PRow kind="rad" on={queriedFilter === "no"} label="Idle" sub="On file, never queried" onClick={() => setQueriedFilter("no")} />
+                <PopSection label="Your history with them">
+                  <PRow kind="rad" on={queriedFilter === "all"} label="Any history" onClick={() => setQueriedFilter("all")} />
+                  <PRow kind="rad" on={queriedFilter === "active"} label="Queried · active" sub="Something is still in play" onClick={() => setQueriedFilter("active")} />
+                  <PRow kind="rad" on={queriedFilter === "closed"} label="Queried · closed" sub="Rejected, withdrawn or no reply" onClick={() => setQueriedFilter("closed")} />
+                  <PRow kind="rad" on={queriedFilter === "never"} label="Not queried" sub="On file, never approached" onClick={() => setQueriedFilter("never")} />
                 </PopSection>
                 <PopSection label="Star rating">
                   <PRow kind="box" on={starFilter.includes("4up")} label="4 and up" onClick={() => toggleStar("4up")} />
@@ -1029,7 +1045,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
                   <PRow kind="rad" on={agGroup === "none"} label="None" onClick={() => setAgGroup("none")} />
                   <PRow kind="rad" on={agGroup === "agency"} label="Agency" onClick={() => setAgGroup("agency")} />
                   <PRow kind="rad" on={agGroup === "status"} label="Open / closed" onClick={() => setAgGroup("status")} />
-                  <PRow kind="rad" on={agGroup === "queried"} label="Queried / idle" onClick={() => setAgGroup("queried")} />
+                  <PRow kind="rad" on={agGroup === "queried"} label="Queried / not queried" onClick={() => setAgGroup("queried")} />
                 </PopSection>
               </F12Popover>
             )}
