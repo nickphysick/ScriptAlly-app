@@ -118,8 +118,12 @@ was `28689b2`.
 | 4e (manuscript) — picker in the manuscript genre input (write side; stores ID) | `122153f` | ✅ done |
 | 4c — Nick-only admin promotion view | — | ⏳ not started (queue rules already in 3b) |
 | 5a keystone — composerChips (pure, derived from getPrimaryAction/queryBucket) | `e2031f7` | ✅ done |
-| 5a component — the inline composer + recordQueryResponse wiring | — | ⏸ needs a capture-depth decision (below) |
-| 5b–5e — corrections / popovers / click-to-pick / delete+import | — | ⏳ not started |
+| 5a seam — RecordResponseFocusForm initialResponseType/initialDraft | `ae01126` | ✅ done |
+| 5a component — the contextual composer (inline capture + recording + CTA demote) | `c17d0e2` | ✅ done |
+| 5b — corrections (timeline ⋯ → Edit/Delete, derived-consequence confirm) | — | ⏳ not started |
+| 5c — popovers (View tasks / Nudge / Mark closed↔Reopen) | — | ⏳ not started |
+| 5d — click-to-pick manuscript + method; Edit-button fate | — | ⏳ not started |
+| 5e — delete (counted) + Import two-doors | — | ⏳ not started |
 | 6 — Contact List interactions (stars/door/method/response-guidelines/materials/history/notes/delete/send) | — | ⏳ not started |
 
 **Dev:** Firestore rules deployed (`personalGenres` allowlist + `genreSuggestions` block are LIVE
@@ -146,10 +150,13 @@ So: when a chip records via the inline composer, **how much does it capture?**
   R&R → revision notes). Slightly bigger inline form; loses less.
 - **(C) Keep `RecordResponseFocusForm` as a "more detail" path** behind the inline quick-capture.
 
-The prototype points at **(A)**, and "prototype wins" — so **absent a steer I'll build (A)**:
-inline date/method/note → `recordQueryResponse` with computed/blank defaults, `RecordResponseFocusForm`
-demoted to the Edit-affordance path. Flagging because it changes what a recorded response captures
-vs today, and it decides the fate of the existing rich form. **Tell me if you'd rather (B) or (C).**
+**Resolved — Nick chose (B) with (C) as the escape hatch** ("friction scales with rarity"), and it's
+built (`c17d0e2`): inline `when · how · note` for the common outcomes; a **defaulted expected-by**
+on Partial/Full requested (the one load-bearing field, seeded from the agent's window); Offer & R&R
+open the rich form; an "Add more detail" link everywhere → the rich form pre-filled. The CTA
+demotes to scroll+focus. Two flagged deviations: the inline "How" folds into the recorded note
+(recordQueryResponse has no response-method field — nothing lost); the mark-sent popover anchors to
+the CTA button. **Auth-gated — the recording flow wants a dev eyeball before more is built on it.**
 
 **Genre migration — COMPLETE.** Both write sides store IDs (agents `2e24b07`, manuscripts
 `122153f`); every reader tolerates legacy labels (`d38bfbf` + `922058c`); no bulk Firestore
