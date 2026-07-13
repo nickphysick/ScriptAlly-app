@@ -1011,7 +1011,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
               tip={`SORT · ${(AG_SORTS.flatMap((g) => g.items).find((i) => i.key === agSort)?.label || "Star rating").toUpperCase()}`}
               open={agSortOpen}
               onClick={() => { setAgFilterOpen(false); setAgGroupOpen(false); setAgSortOpen((o) => !o); }}
-              icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M7 12h10M10 18h4" /></svg>}
+              icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v14M7 18l-3-3M7 18l3-3M17 20V6M17 6l-3 3M17 6l3 3" /></svg>}
             />
             {agSortOpen && (
               <F12Popover
@@ -1037,7 +1037,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
               tip={`GROUP · ${agGroup === "none" ? "NO GROUPS" : agGroup === "agency" ? "BY AGENCY" : agGroup === "status" ? "BY STATUS" : "BY HISTORY"}`}
               open={agGroupOpen}
               onClick={() => { setAgFilterOpen(false); setAgSortOpen(false); setAgGroupOpen((o) => !o); }}
-              icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10" /></svg>}
+              icon={<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.2" /><rect x="13" y="4" width="7" height="7" rx="1.2" /><rect x="4" y="13" width="7" height="7" rx="1.2" /><rect x="13" y="13" width="7" height="7" rx="1.2" /></svg>}
             />
             {agGroupOpen && (
               <F12Popover width={250} title="Group by" style={agGroupMenuStyle} onClose={() => setAgGroupOpen(false)} footText="">

@@ -2578,7 +2578,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                   tip={`SORT · ${(F12_SORT_GROUPS.flatMap(g => g.items).find(i => i.key === sortKey)?.label || "Last activity").toUpperCase()}`}
                   open={sortPopOpen}
                   onClick={() => { setFilterPopOpen(false); setSortPopOpen(o => !o); }}
-                  icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M7 12h10M10 18h4" /></svg>}
+                  icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v14M7 18l-3-3M7 18l3-3M17 20V6M17 6l-3 3M17 6l3 3" /></svg>}
                 />
                 {sortPopOpen && renderSortPopover()}
               </div>

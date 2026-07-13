@@ -18,7 +18,12 @@
   line-height: 1.45;
   -webkit-font-smoothing: antialiased;
 }
-.f12-root button { font: inherit; cursor: pointer; background: none; border: none; color: inherit; text-align: left; }
+/* Button reset — wrapped in :where() so it carries ZERO specificity (like the mockup's bare
+   `button {}` reset). Without this the reset's `background:none`/`border:none` outranks the
+   single-class .f12-btn-pri / .f12-btn-sec / .f12-iconctl rules and strips their fill + border
+   at rest (they only "worked" on hover, where :hover added a class). :where() lets every
+   class-based button surface win at rest, exactly as the mockup intends. */
+:where(.f12-root button) { font: inherit; cursor: pointer; background: none; border: none; color: inherit; text-align: left; }
 .f12-root button:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; border-radius: var(--r-sm); }
 .f12-root svg { display: block; }
 .f12-kbd { font-family: var(--f12-mono); font-size: 9px; color: var(--faint); border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px; background: var(--panel); }
