@@ -1,0 +1,161 @@
+/* ── F12 shared shell (overnight run; refs design-refs/queries-hub-v14.html +
+   agents-contact-list-v3.html — the two :roots are identical, so ONE shell serves both).
+   Class-for-class port of the mockups' shared CSS, `f12-` prefixed against collisions;
+   every colour reads the .t-f12 tokens (index.css) so the sage correction lands once.
+   Structure: full-bleed header (the CrumbStrip, repainted by .t-f12 tokens) → control bar,
+   chips and panes in a centred column (max-width var(--maxw), margin-inline auto). ── */
+
+/* page root — oat ground, viewport-locked column (lives in a fill StagePage slot) */
+.f12-root {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--oat);
+  color: var(--ink);
+  font-family: var(--f12-body);
+  font-size: 13px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+.f12-root button { font: inherit; cursor: pointer; background: none; border: none; color: inherit; text-align: left; }
+.f12-root button:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; border-radius: var(--r-sm); }
+.f12-root svg { display: block; }
+.f12-kbd { font-family: var(--f12-mono); font-size: 9px; color: var(--faint); border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px; background: var(--panel); }
+
+/* header right cluster — absolutely overlaid on the CrumbStrip row (composition, not a
+   CrumbStrip edit; Stage-1 owns that component) */
+.f12-hdwrap { position: relative; flex-shrink: 0; }
+.f12-hdtools { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 2px; }
+
+.f12-icirc { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; color: var(--ink-2); transition: background 0.12s; }
+.f12-icirc:hover { background: rgba(30, 26, 22, 0.07); }
+.f12-icirc svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+.f12-primary { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; font-size: 12.5px; font-weight: 500; padding: 8px 15px; margin-left: 8px; border-radius: var(--r-md); background: var(--ink); color: var(--panel); box-shadow: var(--sh-btn); transition: background 0.12s, transform 0.06s; }
+.f12-primary:hover { background: #000000; }
+.f12-primary:active { transform: translateY(0.5px); }
+.f12-primary svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; }
+
+/* ── control bar — two zones locked to the panes by --listw ── */
+.f12-ctl { flex: none; display: flex; align-items: stretch; height: 54px; width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 var(--gut); }
+.f12-zone-list { flex: none; width: var(--listw); display: flex; align-items: center; gap: 8px; padding-right: var(--gut); }
+.f12-zone-read { flex: 1; display: flex; align-items: center; gap: 2px; min-width: 0; }
+.f12-ctl .f12-divv { width: 1px; height: 20px; background: var(--oatline); margin: 0 9px; align-self: center; }
+.f12-ctl .f12-right { margin-left: auto; display: flex; align-items: center; gap: 2px; }
+
+/* filter / sort / group triggers — spacious pills; invert to ink while their popover is open */
+.f12-trig { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 13px; border: 1px solid var(--oatline); border-radius: 99px; background: rgba(255, 253, 251, 0.7); font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.1em; color: var(--ink-2); transition: background 0.12s, border-color 0.12s, box-shadow 0.12s; }
+.f12-trig:hover { background: var(--panel); border-color: var(--muted); box-shadow: var(--sh-1); }
+.f12-trig.f12-active { background: var(--ink); border-color: var(--ink); color: var(--panel); }
+.f12-trig svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.f12-trig .f12-chev { width: 10px; height: 10px; opacity: 0.6; }
+.f12-trig .f12-fcount { font-size: 8px; font-weight: 600; background: var(--pink-t); color: var(--pink-i); border-radius: 99px; padding: 1px 6px; }
+.f12-trig.f12-active .f12-fcount { background: var(--pink-av); }
+
+/* quiet action buttons (the right zone — no filled button in this bar) */
+.f12-act { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; font-size: 12.5px; font-weight: 450; color: var(--ink-2); padding: 8px 11px; border-radius: var(--r-md); transition: background 0.12s, color 0.12s; }
+.f12-act:hover { background: rgba(255, 253, 251, 0.95); color: var(--ink); box-shadow: var(--sh-1); }
+.f12-act svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.f12-act .f12-cnt { font-family: var(--f12-mono); font-size: 8.5px; font-weight: 600; background: var(--pink-t); color: var(--pink-i); border-radius: 99px; padding: 1px 6px; }
+.f12-act.f12-del:hover { color: var(--pink-i); background: var(--pink-t); box-shadow: none; }
+.f12-act:disabled { opacity: 0.35; cursor: default; }
+.f12-act:disabled:hover { background: none; color: var(--ink-2); box-shadow: none; }
+
+/* ── popovers — shared anatomy: paper Playfair head · sectioned body · paper foot ── */
+.f12-popwrap { position: relative; display: flex; align-items: center; }
+.f12-pop { position: absolute; top: calc(100% + 7px); left: 0; z-index: 30; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--sh-3); overflow: hidden; }
+.f12-pop-head { display: flex; align-items: center; gap: 9px; padding: 13px 15px; background: var(--paper); border-bottom: 1px solid var(--line); }
+.f12-pop-head .f12-pt { font-family: var(--f12-serif); font-size: 15.5px; font-weight: 600; }
+.f12-pop-head .f12-reset { margin-left: auto; font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.09em; color: var(--muted); padding: 4px 8px; border-radius: 99px; transition: background 0.12s, color 0.12s; }
+.f12-pop-head .f12-reset:hover { background: var(--panel); color: var(--ink); }
+.f12-pop-body { max-height: min(520px, 70vh); overflow-y: auto; padding: 5px; }
+.f12-pop-foot { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; background: var(--paper); border-top: 1px solid var(--line); font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.09em; color: var(--faint); }
+.f12-pop-foot b { color: var(--ink); font-weight: 600; }
+.f12-pop-foot .f12-done { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.09em; font-weight: 600; color: var(--panel); background: var(--ink); padding: 6px 12px; border-radius: 99px; }
+.f12-pop-foot .f12-done:hover { background: #000000; }
+
+.f12-sect { padding: 4px 0 6px; }
+.f12-sect + .f12-sect { border-top: 1px solid var(--hairline); margin-top: 4px; }
+.f12-sect-h { display: flex; align-items: center; gap: 8px; padding: 9px 11px 6px; }
+.f12-sect-h .f12-lbl { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.16em; color: var(--faint); text-transform: uppercase; font-weight: 600; }
+.f12-sect-h .f12-rule { flex: 1; height: 1px; background: var(--hairline); }
+
+.f12-prow { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 11px; border-radius: var(--r-md); font-size: 12.5px; color: var(--ink-2); transition: background 0.1s; }
+.f12-prow:hover { background: var(--paper); }
+.f12-prow.f12-on { color: var(--ink); font-weight: 500; background: var(--paper); }
+.f12-prow .f12-sub { display: block; font-size: 10.5px; color: var(--faint); font-weight: 400; margin-top: 1px; }
+.f12-prow .f12-txt { flex: 1; min-width: 0; }
+.f12-rad { flex: none; width: 15px; height: 15px; border: 1.5px solid #d9cfc0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; transition: border-color 0.12s; }
+.f12-prow.f12-on .f12-rad { border-color: var(--ink); }
+.f12-prow.f12-on .f12-rad::after { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--ink); }
+.f12-box { flex: none; width: 15px; height: 15px; border: 1.5px solid #d9cfc0; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; color: var(--panel); transition: background 0.12s, border-color 0.12s; }
+.f12-prow.f12-on .f12-box { background: var(--ink); border-color: var(--ink); }
+.f12-prow.f12-on .f12-box::after { content: "✓"; }
+.f12-quick { display: flex; gap: 5px; padding: 0 11px 8px; }
+.f12-quick button { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.09em; padding: 5px 10px; border: 1px solid var(--line); border-radius: 99px; color: var(--muted); transition: border-color 0.12s, color 0.12s, background 0.12s; }
+.f12-quick button:hover { color: var(--ink); border-color: var(--muted); background: var(--paper); }
+
+/* active-filter chips — beneath the control bar, on the oat (the panes never resize) */
+.f12-chips { flex: none; display: flex; flex-wrap: wrap; gap: 5px; width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 var(--gut) 9px; }
+.f12-chip { display: inline-flex; align-items: center; gap: 6px; font-family: var(--f12-mono); font-size: 8.5px; font-weight: 600; letter-spacing: 0.07em; padding: 4px 5px 4px 10px; background: var(--pink-t); border: 1px solid var(--pink-b); color: var(--pink-i); border-radius: 99px; }
+.f12-chip button { display: flex; align-items: center; justify-content: center; width: 14px; height: 14px; border-radius: 50%; font-size: 10px; color: inherit; opacity: 0.6; }
+.f12-chip button:hover { opacity: 1; background: rgba(138, 64, 48, 0.12); }
+.f12-chips .f12-clear { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.08em; color: var(--faint); padding: 4px 6px; }
+.f12-chips .f12-clear:hover { color: var(--ink); }
+
+/* ── panes — list + reading, floating cards in the centred column ── */
+.f12-body { flex: 1; display: flex; gap: var(--gut); min-height: 0; width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 var(--gut) var(--gut); }
+.f12-pane { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-xl); box-shadow: var(--sh-2); display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.f12-list { flex: none; width: var(--listw); }
+.f12-lsearch { flex: none; display: flex; align-items: center; gap: 8px; margin: 11px 12px; height: 34px; padding: 0 12px; border-radius: 99px; background: var(--paper); border: 1px solid transparent; color: var(--muted); font-size: 12px; transition: border-color 0.12s; }
+.f12-lsearch:hover, .f12-lsearch:focus-within { border-color: var(--line); }
+.f12-lsearch svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; }
+.f12-lsearch input { flex: 1; min-width: 0; background: transparent; border: none; outline: none; font: inherit; color: var(--ink); }
+.f12-lsearch input::placeholder { color: var(--muted); }
+.f12-lsearch .f12-kbd { margin-left: auto; }
+.f12-rows { flex: 1; overflow-y: auto; min-height: 0; border-top: 1px solid var(--hairline); }
+.f12-row { position: relative; display: flex; align-items: center; gap: 11px; width: 100%; height: 56px; padding: 0 14px; border-bottom: 1px solid var(--hairline); cursor: pointer; transition: background 0.1s; }
+.f12-row:hover { background: var(--paper); }
+.f12-row.f12-sel { background: var(--blue-t); box-shadow: inset 3px 0 0 var(--ink); }
+.f12-row .f12-av { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--pink-av); color: var(--ink); display: flex; align-items: center; justify-content: center; font-family: var(--f12-mono); font-size: 9.5px; font-weight: 600; }
+.f12-row .f12-mid { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.f12-row .f12-nm { font-weight: 500; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
+.f12-row .f12-ag { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.09em; color: var(--faint); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.f12-row .f12-end { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+.f12-row .f12-d2 { font-family: var(--f12-mono); font-size: 8.5px; color: var(--faint); font-feature-settings: "tnum" 1; }
+.f12-lfoot { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-top: 1px solid var(--hairline); font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.09em; color: var(--faint); }
+.f12-lfoot b { color: var(--muted); font-weight: 600; }
+.f12-lfoot button { color: var(--muted); letter-spacing: 0.09em; padding: 2px 4px; border-radius: 4px; }
+.f12-lfoot button:hover { color: var(--ink); background: var(--paper); }
+/* sticky group headers (Contact List group-by) */
+.f12-ghead { position: sticky; top: 0; z-index: 1; background: var(--paper); border-bottom: 1px solid var(--hairline); padding: 6px 14px; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); font-weight: 600; }
+
+/* ── reading pane ── */
+.f12-detail { flex: 1; min-width: 0; }
+.f12-dscroll { flex: 1; overflow-y: auto; min-height: 0; background: var(--paper); padding: 20px; }
+/* agent header — sage LEFT SPINE (::before clipped by the card radius; no top rule) */
+.f12-hero { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 24px 26px 24px 32px; display: flex; align-items: center; gap: 22px; box-shadow: var(--sh-1); overflow: hidden; }
+.f12-hero::before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 5px; background: linear-gradient(180deg, var(--sage-band), var(--sage-band-2)); }
+.f12-hero .f12-bigav { flex: none; width: 76px; height: 76px; border-radius: 50%; background: var(--pink-av); color: var(--ink); display: flex; align-items: center; justify-content: center; font-family: var(--f12-serif); font-size: 25px; font-weight: 600; }
+.f12-hero .f12-hn { font-family: var(--f12-serif); font-size: 30px; font-weight: 600; line-height: 1.08; color: var(--ink); }
+.f12-hero .f12-ha { font-family: var(--f12-serif); font-size: 16px; font-weight: 500; color: var(--muted); margin-top: 3px; }
+.f12-hero .f12-hs { display: inline-block; font-family: var(--f12-mono); font-size: 8.5px; font-weight: 600; letter-spacing: 0.14em; color: var(--pink-i); background: var(--pink-t); border: 1px solid var(--pink-b); border-radius: 99px; padding: 3px 10px; margin-top: 11px; }
+/* content cards — pale sage gradient header bands, dark-sage 19px icons */
+.f12-grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
+.f12-card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--sh-1); }
+.f12-card .f12-chh { flex: none; display: flex; align-items: center; justify-content: center; gap: 9px; padding: 13px; background: linear-gradient(180deg, var(--sage-band), var(--sage-band-2)); border-bottom: 1px solid var(--sage-edge); font-family: var(--f12-serif); font-size: 15.5px; font-weight: 600; color: #2f3a30; }
+.f12-card .f12-chh svg { width: 19px; height: 19px; stroke: #5a6e58; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.f12-card .f12-cbb { flex: 1; padding: 18px; display: flex; flex-direction: column; min-height: 0; }
+/* journal empty state — dotted outline, NO fill (a placeholder that looks like one) */
+.f12-note { border: 1.5px dotted #d2c8ba; background: transparent; border-radius: var(--r-md); padding: 13px 15px; }
+.f12-note .f12-nd { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.13em; color: var(--faint); margin-bottom: 6px; }
+.f12-note .f12-nt { font-size: 12.5px; line-height: 1.55; color: var(--muted); }
+/* dashed add-affordances */
+.f12-addmat { border: 1.5px dashed #ded4c6; border-radius: var(--r-md); padding: 11px; text-align: center; font-size: 12.5px; color: var(--muted); transition: border-color 0.12s, color 0.12s, background 0.12s; width: 100%; }
+.f12-addmat:hover { border-color: var(--ink-2); color: var(--ink); background: var(--paper); }
+.f12-pro { font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.1em; background: var(--pro); color: #ffffff; padding: 2px 7px; border-radius: 99px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .f12-root *, .f12-root { transition: none !important; animation: none !important; }
+}

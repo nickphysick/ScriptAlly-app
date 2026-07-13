@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Source+Sans+Pro:ital,wght@0,300;0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Source+Sans+Pro:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Inter:wght@400..700&family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -527,6 +527,49 @@
   --hub-btn-bd: 1px solid #dcdcdb;
   --hub-btn-sh: 0 1px 2px rgba(20, 20, 20, 0.04);
   --hub-btn-rad: 8px;
+}
+
+/* ── .t-f12 — the F12 MASTER THEME (overnight nav/hub/agents run). Applied ONLY to the Queries
+   Hub and Contact List page roots — never app-wide; .t-capp/.t-bold/.t-edn are untouched.
+   Values copied from the mockups' :root (design-refs/queries-hub-v14.html ≡
+   agents-contact-list-v3.html), with ONE correction: the sage band pair is the LIVE dashboard
+   diary band (diaryCarousel.css #dce0d9→#d0d6cc), which WINS over the mockups' #d7ddd5→#d5dbd3
+   (standing decision) so hub, agents and dashboard match. All literals — no :root aliasing
+   (known freeze bug), no color-mix(). The --crumb-* values restyle the CrumbStrip rendered
+   inside these pages (token repaint, not a component edit). ── */
+.t-f12 {
+  --oat: #f1e8dc; --oatline: #e0d3c1;
+  --paper: #faf6f0; --panel: #fffdfb; --white: #ffffff;
+  --line: #e6dccd; --hairline: #f0eae1;
+  --ink: #1e1a16; --ink-2: #4a443c; --muted: #7d7469; --faint: #a89e91;
+
+  --sh-1: 0 1px 2px rgba(58, 42, 26, 0.05);
+  --sh-2: 0 1px 2px rgba(58, 42, 26, 0.05), 0 4px 10px -2px rgba(58, 42, 26, 0.06);
+  --sh-3: 0 3px 6px rgba(58, 42, 26, 0.07), 0 16px 40px -8px rgba(58, 42, 26, 0.18);
+  --sh-btn: 0 1px 2px rgba(58, 42, 26, 0.10);
+
+  --blue-t: #e7eef6; --blue-b: #d3e0ee; --blue-i: #2b4a6b;   /* you-are-here */
+  --pink-t: #f7e3dd; --pink-b: #eecdc3; --pink-i: #8a4030;   /* needs-you */
+  --pink-av: #f6d7cf;
+
+  /* sage — card header bands + the agent-header spine (LIVE diary values, see block comment) */
+  --sage-band: #dce0d9; --sage-band-2: #d0d6cc; --sage-edge: #c8d0c5;
+  --sage: #8a9e88; --sageC: #e9ede6; --sageD: #5a6e58;
+
+  --burg: #7c3a2a; --pinkC: #f8e7dc;
+  --pro: #6A89A7;
+
+  --listw: 334px; --gut: 12px; --maxw: 1520px;
+  --r-sm: 6px; --r-md: 9px; --r-lg: 12px; --r-xl: 16px;
+  --f12-mono: 'JetBrains Mono', monospace; --f12-serif: 'Playfair Display', serif; --f12-body: 'Inter', sans-serif;
+
+  /* CrumbStrip repaint inside the F12 pages — the strip becomes the full-bleed oat header bar. */
+  --crumb-strip-bg: #f1e8dc;
+  --crumb-strip-rule: #e0d3c1;
+  --crumb-cur: #1e1a16;
+  --crumb-seg: #9d8f80;
+  --crumb-seg-hov: #4a443c;
+  --crumb-sep: #c8bba9;
 }
 /* Grand masthead (hub-only ChromeSlab variant, ref grand-masthead-fullpage-v1.html) — title
    size + padding are theme-independent (the title's INK is per-theme via --hub-head). The

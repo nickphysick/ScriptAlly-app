@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Queries Hub — v14</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Inter:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --oat:#f1e8dc; --oatline:#e0d3c1;
+  --paper:#faf6f0; --panel:#fffdfb; --white:#ffffff;
+  --line:#e6dccd; --hairline:#f0eae1;
+  --ink:#1e1a16; --ink-2:#4a443c; --muted:#7d7469; --faint:#a89e91;
+
+  --sh-1:0 1px 2px rgba(58,42,26,.05);
+  --sh-2:0 1px 2px rgba(58,42,26,.05), 0 4px 10px -2px rgba(58,42,26,.06);
+  --sh-3:0 3px 6px rgba(58,42,26,.07), 0 16px 40px -8px rgba(58,42,26,.18);
+  --sh-btn:0 1px 2px rgba(58,42,26,.10);
+
+  --blue-t:#e7eef6; --blue-b:#d3e0ee; --blue-i:#2b4a6b;
+  --pink-t:#f7e3dd; --pink-b:#eecdc3; --pink-i:#8a4030;
+  --pink-av:#f6d7cf;
+
+  --sage-band:#d7ddd5; --sage-band-2:#d5dbd3; --sage-edge:#c8d0c5;
+
+  --burg:#7c3a2a; --pinkC:#f8e7dc;
+  --sage:#8a9e88; --sageC:#e9ede6; --sageD:#5a6e58;
+  --pro:#6A89A7;
+
+  --listw:334px; --gut:12px; --maxw:1520px;
+  --r-sm:6px; --r-md:9px; --r-lg:12px; --r-xl:16px;
+  --mono:'JetBrains Mono',monospace; --serif:'Playfair Display',serif; --body:'Inter',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--body);background:var(--oat);color:var(--ink);font-size:13px;line-height:1.45;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+button{font:inherit;cursor:pointer;background:none;border:none;color:inherit;text-align:left}
+button:focus-visible{outline:2px solid var(--ink);outline-offset:1px;border-radius:var(--r-sm)}
+svg{display:block}
+.kbd{font-family:var(--mono);font-size:9px;color:var(--faint);border:1px solid var(--line);border-radius:5px;padding:1px 5px;background:var(--panel)}
+
+/* ================= DRAWER ================= */
+.scrim{position:fixed;inset:0;background:rgba(30,26,22,.28);z-index:40;opacity:0;pointer-events:none;transition:opacity .18s}
+body.nav-open .scrim{opacity:1;pointer-events:auto}
+.rail{position:fixed;top:0;left:0;bottom:0;width:238px;z-index:41;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:14px 11px;transform:translateX(-100%);transition:transform .22s cubic-bezier(.32,.72,0,1);box-shadow:var(--sh-3)}
+body.nav-open .rail{transform:translateX(0)}
+.rail .logo{display:flex;align-items:center;gap:10px;padding:5px 7px 18px}
+.rail .logo .word{font-family:var(--serif);font-size:16.5px;font-weight:600}
+.rail nav{display:flex;flex-direction:column;gap:1px}
+.ritem{display:flex;align-items:center;gap:12px;height:35px;padding:0 10px;border-radius:var(--r-md);color:var(--ink-2);white-space:nowrap;transition:background .12s}
+.ritem svg{flex:none;width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;opacity:.75}
+.ritem .rl{font-size:12.5px;font-weight:450}
+.ritem:hover{background:var(--paper)}
+.ritem.on{background:var(--blue-t);color:var(--blue-i)}
+.ritem.on .rl{font-weight:600}
+.ritem .badge{margin-left:auto;font-family:var(--mono);font-size:8.5px;font-weight:600;background:var(--pink-t);color:var(--pink-i);border-radius:99px;padding:1.5px 6px}
+.rsep{height:1px;background:var(--hairline);margin:10px 7px}
+.rail .spacer{flex:1}
+.rail .me{display:flex;align-items:center;gap:10px;padding:6px 7px}
+.rail .me .av{flex:none;width:28px;height:28px;border-radius:50%;background:var(--pink-av);color:var(--ink);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:600}
+.rail .me .n{font-size:12px;font-weight:600}
+.rail .me .p{font-family:var(--mono);font-size:8.5px;color:var(--faint);letter-spacing:.09em}
+
+/* ================= HEADER ================= */
+.hd{flex:none;height:56px;background:var(--oat);border-bottom:1px solid var(--oatline)}
+.hd-in{display:flex;align-items:center;gap:4px;height:100%;padding:0 16px 0 10px}
+.icirc{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;color:var(--ink-2);transition:background .12s}
+.icirc:hover{background:rgba(30,26,22,.07)}
+.icirc svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.hd .brand{display:flex;align-items:center;gap:9px;margin:0 2px}
+.hd .brand svg{width:22px;height:22px}
+.hd .brand .word{font-family:var(--serif);font-size:17px;font-weight:600}
+.hd .crumb{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;color:#9d8f80;margin-left:13px;padding-left:15px;border-left:1px solid var(--oatline)}
+.hd .crumb .here{color:var(--ink-2);font-weight:600}
+.hd .right{margin-left:auto;display:flex;align-items:center;gap:2px}
+.btn-primary{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;font-size:12.5px;font-weight:500;padding:8px 15px;margin-left:8px;border-radius:var(--r-md);background:var(--ink);color:var(--panel);box-shadow:var(--sh-btn);transition:background .12s,transform .06s}
+.btn-primary:hover{background:#000}
+.btn-primary:active{transform:translateY(.5px)}
+.btn-primary svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round}
+
+/* ================= CONTROL BAR ================= */
+.ctl{flex:none;display:flex;align-items:stretch;height:56px;width:100%;max-width:var(--maxw);margin:0 auto;padding:0 var(--gut)}
+.ctl .zone-list{flex:none;width:var(--listw);display:flex;align-items:center;gap:8px;padding-right:var(--gut)}
+.ctl .zone-read{flex:1;display:flex;align-items:center;gap:2px;min-width:0}
+
+/* filter / sort trigger buttons — spacious pills */
+.trig{
+  display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 13px;
+  border:1px solid var(--oatline);border-radius:99px;background:rgba(255,253,251,.7);
+  font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--ink-2);
+  transition:background .12s,border-color .12s,box-shadow .12s;
+}
+.trig:hover{background:var(--panel);border-color:var(--muted);box-shadow:var(--sh-1)}
+.trig.active{background:var(--ink);border-color:var(--ink);color:var(--panel)}
+.trig svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.trig .chev{width:10px;height:10px;opacity:.6}
+.trig .fcount{font-size:8px;font-weight:600;background:var(--pink-t);color:var(--pink-i);border-radius:99px;padding:1px 6px;display:none}
+.trig .fcount.show{display:inline}
+.trig.active .fcount{background:var(--pink-av);color:var(--pink-i)}
+
+.act{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;font-size:12.5px;font-weight:450;color:var(--ink-2);padding:8px 11px;border-radius:var(--r-md);transition:background .12s,color .12s}
+.act:hover{background:rgba(255,253,251,.95);color:var(--ink);box-shadow:var(--sh-1)}
+.act svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.act .cnt{font-family:var(--mono);font-size:8.5px;font-weight:600;background:var(--pink-t);color:var(--pink-i);border-radius:99px;padding:1px 6px}
+.act.del:hover{color:var(--pink-i);background:var(--pink-t);box-shadow:none}
+.ctl .divv{width:1px;height:20px;background:var(--oatline);margin:0 9px;align-self:center}
+.ctl .right{margin-left:auto;display:flex;align-items:center;gap:2px}
+
+/* ================= POPOVERS (on-brand) ================= */
+.popwrap{position:relative;display:flex;align-items:center}
+.pop{
+  position:absolute;top:calc(100% + 7px);left:0;z-index:30;
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);
+  box-shadow:var(--sh-3);display:none;overflow:hidden;
+}
+.pop.open{display:block}
+.pop-head{
+  display:flex;align-items:center;gap:9px;padding:13px 15px;
+  background:var(--paper);border-bottom:1px solid var(--line);
+}
+.pop-head .t{font-family:var(--serif);font-size:15.5px;font-weight:600}
+.pop-head .reset{margin-left:auto;font-family:var(--mono);font-size:8.5px;letter-spacing:.09em;color:var(--muted);padding:4px 8px;border-radius:99px;transition:background .12s,color .12s}
+.pop-head .reset:hover{background:var(--panel);color:var(--ink)}
+.pop-body{max-height:min(520px,70vh);overflow-y:auto;padding:5px}
+.pop-foot{
+  display:flex;align-items:center;justify-content:space-between;padding:10px 15px;
+  background:var(--paper);border-top:1px solid var(--line);
+  font-family:var(--mono);font-size:8.5px;letter-spacing:.09em;color:var(--faint);
+}
+.pop-foot b{color:var(--ink);font-weight:600}
+.pop-foot .done{font-family:var(--mono);font-size:8.5px;letter-spacing:.09em;font-weight:600;color:var(--panel);background:var(--ink);padding:6px 12px;border-radius:99px}
+.pop-foot .done:hover{background:#000}
+
+.sect{padding:4px 0 6px}
+.sect + .sect{border-top:1px solid var(--hairline);margin-top:4px}
+.sect-h{display:flex;align-items:center;gap:8px;padding:9px 11px 6px}
+.sect-h .lbl{font-family:var(--mono);font-size:8px;letter-spacing:.16em;color:var(--faint);text-transform:uppercase;font-weight:600}
+.sect-h .rule{flex:1;height:1px;background:var(--hairline)}
+
+.prow{display:flex;align-items:center;gap:10px;width:100%;padding:8px 11px;border-radius:var(--r-md);font-size:12.5px;color:var(--ink-2);transition:background .1s}
+.prow:hover{background:var(--paper)}
+.prow.on{color:var(--ink);font-weight:500;background:var(--paper)}
+.prow .sub{display:block;font-size:10.5px;color:var(--faint);font-weight:400;margin-top:1px}
+.prow .txt{flex:1;min-width:0}
+/* radio */
+.rad{flex:none;width:15px;height:15px;border:1.5px solid #d9cfc0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;transition:border-color .12s}
+.prow.on .rad{border-color:var(--ink);border-width:1.5px}
+.prow.on .rad::after{content:"";width:7px;height:7px;border-radius:50%;background:var(--ink)}
+/* checkbox */
+.box{flex:none;width:15px;height:15px;border:1.5px solid #d9cfc0;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:var(--panel);transition:background .12s,border-color .12s}
+.prow.on .box{background:var(--ink);border-color:var(--ink)}
+.prow.on .box::after{content:"✓"}
+/* quick pills */
+.quick{display:flex;gap:5px;padding:0 11px 8px}
+.quick button{font-family:var(--mono);font-size:8px;letter-spacing:.09em;padding:5px 10px;border:1px solid var(--line);border-radius:99px;color:var(--muted);transition:border-color .12s,color .12s,background .12s}
+.quick button:hover{color:var(--ink);border-color:var(--muted);background:var(--paper)}
+
+/* chips */
+.chips{flex:none;display:none;flex-wrap:wrap;gap:5px;width:100%;max-width:var(--maxw);margin:0 auto;padding:0 var(--gut) 9px}
+.chips.show{display:flex}
+.chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:8.5px;font-weight:600;letter-spacing:.07em;padding:4px 5px 4px 10px;background:var(--pink-t);border:1px solid var(--pink-b);color:var(--pink-i);border-radius:99px}
+.chip button{display:flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;font-size:10px;color:inherit;opacity:.6}
+.chip button:hover{opacity:1;background:rgba(138,64,48,.12)}
+.chips .clear{font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;color:var(--faint);padding:4px 6px}
+.chips .clear:hover{color:var(--ink)}
+
+/* ================= PANES ================= */
+.body{flex:1;display:flex;gap:var(--gut);min-height:0;width:100%;max-width:var(--maxw);margin:0 auto;padding:0 var(--gut) var(--gut)}
+.pane{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-xl);box-shadow:var(--sh-2);display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.list{flex:none;width:var(--listw)}
+.l-search{flex:none;display:flex;align-items:center;gap:8px;margin:11px 12px;height:34px;padding:0 12px;border-radius:99px;background:var(--paper);border:1px solid transparent;color:var(--muted);font-size:12px;transition:border-color .12s}
+.l-search:hover{border-color:var(--line)}
+.l-search svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round}
+.l-search .kbd{margin-left:auto;background:var(--panel)}
+.rows{flex:1;overflow-y:auto;min-height:0;border-top:1px solid var(--hairline)}
+.row{position:relative;display:flex;align-items:center;gap:11px;height:56px;padding:0 14px;border-bottom:1px solid var(--hairline);cursor:pointer;transition:background .1s}
+.row:hover{background:var(--paper)}
+.row.sel{background:var(--blue-t);box-shadow:inset 3px 0 0 var(--ink)}
+.row.hide{display:none}
+.row .av{flex:none;width:30px;height:30px;border-radius:50%;background:var(--pink-av);color:var(--ink);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9.5px;font-weight:600}
+.row .mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.row .nm{font-weight:500;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .ag{font-family:var(--mono);font-size:8.5px;letter-spacing:.09em;color:var(--faint);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .end{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+.row .d2{font-family:var(--mono);font-size:8.5px;color:var(--faint);font-feature-settings:"tnum" 1}
+.l-foot{flex:none;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-top:1px solid var(--hairline);font-family:var(--mono);font-size:8.5px;letter-spacing:.09em;color:var(--faint)}
+.l-foot b{color:var(--muted);font-weight:600}
+.l-foot button{color:var(--muted);letter-spacing:.09em;padding:2px 4px;border-radius:4px}
+.l-foot button:hover{color:var(--ink);background:var(--paper)}
+
+.dot{position:relative;flex:none;width:13px;height:13px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:8px;line-height:1}
+.dot.q{border:1.5px solid var(--burg);background:var(--pinkC);color:var(--burg)}
+.dot.q::after{content:"→";font-weight:700}
+.dot.preq{border:1.5px solid var(--sage);background:var(--sageC);color:var(--sageD);box-shadow:inset 0 -6px 0 -3px var(--sage)}
+.dot.preq::after{content:"←";font-weight:700}
+.dot.psent{border:1.5px solid var(--burg);background:var(--pinkC);color:var(--burg);box-shadow:inset 0 -6px 0 -3px rgba(124,58,42,.35)}
+.dot.psent::after{content:"→";font-weight:700}
+.dot.freq{border:2.5px solid var(--sage);background:var(--sageC);color:var(--sageD)}
+.dot.freq::after{content:"←";font-weight:700}
+.dot.fsent{border:2.5px solid var(--burg);background:var(--pinkC);color:var(--burg)}
+.dot.fsent::after{content:"→";font-weight:700}
+.dot.rr{border:2.5px solid var(--sage);background:var(--sageC);color:var(--sageD)}
+.dot.rr::after{content:"✎";font-size:7px}
+.dot.off{background:var(--burg);border:1.5px solid var(--burg);color:var(--panel)}
+.dot.off::after{content:"✓";font-weight:700}
+.dot.cl{border:1.5px solid #cfc6ba;background:#f2ede6;color:#a89e91}
+.dot.cl::after{content:"×";font-weight:700}
+
+/* reading pane */
+.detail{flex:1;min-width:0}
+.d-scroll{flex:1;overflow-y:auto;min-height:0;background:var(--paper);padding:20px}
+.hero{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:24px 26px 24px 32px;display:flex;align-items:center;gap:22px;box-shadow:var(--sh-1);overflow:hidden}
+.hero::before{content:"";position:absolute;top:0;bottom:0;left:0;width:5px;background:linear-gradient(180deg,var(--sage-band),var(--sage-band-2))}
+.hero .bigav{flex:none;width:76px;height:76px;border-radius:50%;background:var(--pink-av);color:var(--ink);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:25px;font-weight:600}
+.hero .n{font-family:var(--serif);font-size:30px;font-weight:600;line-height:1.08}
+.hero .a{font-family:var(--serif);font-size:16px;font-weight:500;color:var(--muted);margin-top:3px}
+.hero .s{display:inline-block;font-family:var(--mono);font-size:8.5px;font-weight:600;letter-spacing:.14em;color:var(--pink-i);background:var(--pink-t);border:1px solid var(--pink-b);border-radius:99px;padding:3px 10px;margin-top:11px}
+.hero .plane{margin-left:auto;flex:none;width:52px;height:52px;border-radius:50%;background:var(--paper);border:1px solid var(--hairline);display:flex;align-items:center;justify-content:center;color:var(--faint)}
+.hero .plane svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);display:flex;flex-direction:column;overflow:hidden;box-shadow:var(--sh-1)}
+.card .ch{flex:none;display:flex;align-items:center;justify-content:center;gap:9px;padding:13px;background:linear-gradient(180deg,var(--sage-band),var(--sage-band-2));border-bottom:1px solid var(--sage-edge);font-family:var(--serif);font-size:15.5px;font-weight:600;color:#2f3a30}
+.card .ch svg{width:19px;height:19px;stroke:#5a6e58;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.card .cb{flex:1;padding:18px;display:flex;flex-direction:column;min-height:0}
+.ev{display:flex;align-items:center;gap:11px}
+.ev .dot{width:15px;height:15px}
+.ev .lab{font-weight:600;font-size:13.5px}
+.ev .via{font-size:11.5px;color:var(--muted);margin-top:1px}
+.ev .dt{margin-left:auto;font-family:var(--mono);font-size:9px;color:var(--faint);font-feature-settings:"tnum" 1}
+.wait{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12.5px;margin-top:18px}
+.wait svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.wait b{color:var(--ink);font-weight:600}
+.bar{margin-top:12px;height:4px;border-radius:99px;background:var(--paper);border:1px solid var(--hairline);overflow:hidden}
+.bar i{display:block;height:100%;width:72%;background:var(--ink);border-radius:99px}
+.caps{display:flex;justify-content:space-between;font-family:var(--mono);font-size:8.5px;letter-spacing:.09em;color:var(--faint);margin-top:8px}
+.msline{display:flex;align-items:center;gap:9px;font-weight:600;font-size:13.5px;margin-bottom:12px}
+.msline svg{width:15px;height:15px;stroke:var(--faint);fill:none;stroke-width:1.5}
+.addmat{border:1.5px dashed #ded4c6;border-radius:var(--r-md);padding:11px;text-align:center;font-size:12.5px;color:var(--muted);transition:border-color .12s,color .12s,background .12s}
+.addmat:hover{border-color:var(--ink-2);color:var(--ink);background:var(--paper)}
+.mat{display:flex;align-items:center;gap:10px;padding:11px 2px;border-bottom:1px solid var(--hairline);font-size:13px;color:var(--ink-2)}
+.mat:last-of-type{border-bottom:none}
+.mat .ring{flex:none;width:14px;height:14px;border:1.5px dashed #d2c8ba;border-radius:50%}
+.attach{display:flex;align-items:center;gap:8px;margin-top:auto;padding-top:14px;font-size:12.5px;color:var(--muted)}
+.attach:hover{color:var(--ink)}
+.pro{font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.1em;background:var(--pro);color:#fff;padding:2px 7px;border-radius:99px}
+.note{border:1.5px dotted #d2c8ba;background:transparent;border-radius:var(--r-md);padding:13px 15px}
+.note .nd{font-family:var(--mono);font-size:8.5px;letter-spacing:.13em;color:var(--faint);margin-bottom:6px}
+.note .nt{font-size:12.5px;line-height:1.55;color:var(--muted)}
+.notein{margin-top:auto;display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--panel);padding:10px 12px;color:var(--faint);font-size:12.5px}
+.notein:hover{border-color:var(--muted)}
+.notein .send{margin-left:auto;color:var(--ink)}
+.notein .send svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div class="scrim" onclick="toggleNav(false)"></div>
+
+<aside class="rail">
+  <div class="logo">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1e1a16" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 3 10.5l6.5 2.6L12 20l3-5.5L21 3z"/></svg>
+    <span class="word">ScriptAlly</span>
+  </div>
+  <nav>
+    <button class="ritem"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></svg><span class="rl">Dashboard</span></button>
+    <button class="ritem on"><svg viewBox="0 0 24 24"><path d="M21 3 3 10.5l6.5 2.6L12 20l3-5.5L21 3z"/></svg><span class="rl">Queries Hub</span><span class="badge">6</span></button>
+    <button class="ritem"><svg viewBox="0 0 24 24"><path d="M4 6h10M4 12h10M4 18h10"/><path d="m17 6 1.5 1.5L21.5 4"/><path d="m17 12 1.5 1.5L21.5 10"/></svg><span class="rl">To-do</span><span class="badge">1</span></button>
+    <div class="rsep"></div>
+    <button class="ritem"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.4"/><path d="M3.5 20c.6-3.4 2.9-5.3 5.5-5.3S13.9 16.6 14.5 20"/><path d="M15.5 5.3a3.4 3.4 0 0 1 0 5.4M17.8 14.9c1.5.8 2.4 2.6 2.7 5.1"/></svg><span class="rl">Agents</span></button>
+    <button class="ritem"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2z"/></svg><span class="rl">Discover</span></button>
+    <button class="ritem"><svg viewBox="0 0 24 24"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17.5H6.5A2.5 2.5 0 0 0 4 22V4.5z"/><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/></svg><span class="rl">Manuscripts</span></button>
+    <button class="ritem"><svg viewBox="0 0 24 24"><path d="M4 20V9M10 20V4M16 20v-9M21 20H3"/></svg><span class="rl">Analytics</span></button>
+  </nav>
+  <div class="spacer"></div>
+  <nav>
+    <button class="ritem"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.14-1.4l2-1.55-2-3.46-2.36.95A7 7 0 0 0 14.06 5L13.7 2.5h-3.4L9.94 5a7 7 0 0 0-2.44 1.54L5.14 5.6l-2 3.46 2 1.55A7 7 0 0 0 5 12c0 .48.05.95.14 1.4l-2 1.55 2 3.46 2.36-.95c.72.66 1.55 1.19 2.44 1.54l.36 2.5h3.4l.36-2.5a7 7 0 0 0 2.44-1.54l2.36.95 2-3.46-2-1.55c.09-.45.14-.92.14-1.4z"/></svg><span class="rl">Settings</span></button>
+    <button class="ritem"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.4 2.33c-.7.27-.9.87-.9 1.67"/><path d="M12 17h.01"/></svg><span class="rl">Help</span></button>
+  </nav>
+  <div class="rsep"></div>
+  <div class="me">
+    <span class="av">NP</span>
+    <span><div class="n">Nick</div><div class="p">FREE PLAN</div></span>
+  </div>
+</aside>
+
+<header class="hd">
+ <div class="hd-in">
+  <button class="icirc" title="Menu" onclick="toggleNav()"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  <div class="brand">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#1e1a16" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 3 10.5l6.5 2.6L12 20l3-5.5L21 3z"/></svg>
+    <span class="word">ScriptAlly</span>
+  </div>
+  <div class="crumb"><span class="up">QUERYING</span><span class="sl">/</span><span class="here">Queries Hub</span></div>
+  <div class="right">
+    <button class="icirc" title="Export CSV"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 21h16"/></svg></button>
+    <button class="icirc" title="Help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.4 2.33c-.7.27-.9.87-.9 1.67"/><path d="M12 17h.01"/></svg></button>
+    <button class="btn-primary"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Log a new query</button>
+  </div>
+ </div>
+</header>
+
+<div class="ctl">
+
+  <div class="zone-list">
+    <!-- FILTER -->
+    <div class="popwrap">
+      <button class="trig" id="ftrig" onclick="togglePop('fpop')">
+        <svg viewBox="0 0 24 24"><path d="M3 5h18l-7 8v6l-4-2v-4L3 5z"/></svg>
+        FILTER
+        <span class="fcount" id="fcount"></span>
+        <svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <div class="pop" id="fpop" style="width:288px">
+        <div class="pop-head">
+          <span class="t">Filter</span>
+          <button class="reset" onclick="clearAll()">RESET ALL</button>
+        </div>
+        <div class="pop-body">
+
+          <div class="sect">
+            <div class="sect-h"><span class="lbl">Whose turn</span><span class="rule"></span></div>
+            <button class="prow on" data-turn="all" onclick="setTurn(this)"><span class="rad"></span><span class="txt">All queries<span class="sub">Everything, open and closed</span></span></button>
+            <button class="prow" data-turn="move" onclick="setTurn(this)"><span class="rad"></span><span class="txt">Your move<span class="sub">The agent has replied — over to you</span></span></button>
+            <button class="prow" data-turn="wait" onclick="setTurn(this)"><span class="rad"></span><span class="txt">Waiting<span class="sub">Ball is in the agent's court</span></span></button>
+          </div>
+
+          <div class="sect">
+            <div class="sect-h"><span class="lbl">Manuscript</span><span class="rule"></span></div>
+            <button class="prow on" data-ms="all" onclick="setMs(this)"><span class="rad"></span><span class="txt">All manuscripts</span></button>
+            <button class="prow" data-ms="murphy" onclick="setMs(this)"><span class="rad"></span><span class="txt">Murphy's Day Out</span></button>
+            <button class="prow" data-ms="salt" onclick="setMs(this)"><span class="rad"></span><span class="txt">The Salt Houses</span></button>
+          </div>
+
+          <div class="sect">
+            <div class="sect-h"><span class="lbl">Status</span><span class="rule"></span></div>
+            <div class="quick">
+              <button onclick="statusShortcut('open')">OPEN ONLY</button>
+              <button onclick="statusShortcut('closed')">CLOSED ONLY</button>
+              <button onclick="statusShortcut('all')">CLEAR</button>
+            </div>
+            <button class="prow" data-st="Queried" onclick="toggleStatus(this)"><span class="box"></span><span class="dot q"></span><span class="txt">Queried</span></button>
+            <button class="prow" data-st="Partial Requested" onclick="toggleStatus(this)"><span class="box"></span><span class="dot preq"></span><span class="txt">Partial Requested</span></button>
+            <button class="prow" data-st="Partial Sent" onclick="toggleStatus(this)"><span class="box"></span><span class="dot psent"></span><span class="txt">Partial Sent</span></button>
+            <button class="prow" data-st="Full Requested" onclick="toggleStatus(this)"><span class="box"></span><span class="dot freq"></span><span class="txt">Full Requested</span></button>
+            <button class="prow" data-st="Full Sent" onclick="toggleStatus(this)"><span class="box"></span><span class="dot fsent"></span><span class="txt">Full Sent</span></button>
+            <button class="prow" data-st="R&R" onclick="toggleStatus(this)"><span class="box"></span><span class="dot rr"></span><span class="txt">R&amp;R</span></button>
+            <button class="prow" data-st="Offer" onclick="toggleStatus(this)"><span class="box"></span><span class="dot off"></span><span class="txt">Offer</span></button>
+            <button class="prow" data-st="Rejected" onclick="toggleStatus(this)"><span class="box"></span><span class="dot cl"></span><span class="txt">Rejected</span></button>
+            <button class="prow" data-st="Withdrawn" onclick="toggleStatus(this)"><span class="box"></span><span class="dot cl"></span><span class="txt">Withdrawn</span></button>
+            <button class="prow" data-st="No Response" onclick="toggleStatus(this)"><span class="box"></span><span class="dot cl"></span><span class="txt">No Response</span></button>
+          </div>
+
+          <div class="sect">
+            <div class="sect-h"><span class="lbl">Needs attention</span><span class="rule"></span></div>
+            <button class="prow" data-att="overdue" onclick="toggleAtt(this)"><span class="box"></span><span class="txt">Overdue for a reply</span></button>
+            <button class="prow" data-att="tasks" onclick="toggleAtt(this)"><span class="box"></span><span class="txt">Has open tasks</span></button>
+          </div>
+
+        </div>
+        <div class="pop-foot">
+          <span><b id="popcount">13</b> OF 13 QUERIES</span>
+          <button class="done" onclick="togglePop('fpop')">DONE</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SORT -->
+    <div class="popwrap">
+      <button class="trig" id="strig" onclick="togglePop('spop')">
+        <svg viewBox="0 0 24 24"><path d="M7 4v14M7 18l-3-3M7 18l3-3M17 20V6M17 6l-3 3M17 6l3 3"/></svg>
+        <span id="sortLab">LAST ACTIVITY</span>
+        <svg class="chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <div class="pop" id="spop" style="width:276px">
+        <div class="pop-head"><span class="t">Sort</span></div>
+        <div class="pop-body">
+          <div class="sect">
+            <div class="sect-h"><span class="lbl">Activity</span><span class="rule"></span></div>
+            <button class="prow on" onclick="setSort(this,'LAST ACTIVITY')"><span class="rad"></span><span class="txt">Last activity<span class="sub">Most recently moved first</span></span></button>
+          </div>
+          <div class="sect">
+            <div class="sect-h"><span class="lbl">Dates</span><span class="rule"></span></div>
+            <button class="prow" onclick="setSort(this,'SENT · NEWEST')"><span class="rad"></span><span class="txt">Date sent · newest<span class="sub">Your latest queries first</span></span></button>
+            <button class="prow" onclick="setSort(this,'SENT · OLDEST')"><span class="rad"></span><span class="txt">Date sent · oldest</span></button>
+            <button class="prow" onclick="setSort(this,'WAITING LONGEST')"><span class="rad"></span><span class="txt">Waiting longest<span class="sub">Silence, longest first</span></span></button>
+            <button class="prow" onclick="setSort(this,'REPLY DUE')"><span class="rad"></span><span class="txt">Reply due soonest<span class="sub">Floats overdue queries to the top</span></span></button>
+          </div>
+          <div class="sect">
+            <div class="sect-h"><span class="lbl">Pipeline</span><span class="rule"></span></div>
+            <button class="prow" onclick="setSort(this,'PIPELINE')"><span class="rad"></span><span class="txt">Journey depth<span class="sub">Offers and fulls above fresh queries</span></span></button>
+            <button class="prow" onclick="setSort(this,'AGENT A–Z')"><span class="rad"></span><span class="txt">Agent · A to Z</span></button>
+          </div>
+        </div>
+        <div class="pop-foot">
+          <span>NEWEST FIRST</span>
+          <button class="done" onclick="togglePop('spop')">DONE</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="zone-read">
+    <button class="act"><svg viewBox="0 0 24 24"><path d="M21 3 3 10.5l6.5 2.6L12 20l3-5.5L21 3z"/></svg>Record response</button>
+    <button class="act"><svg viewBox="0 0 24 24"><path d="M4 6h10M4 12h10M4 18h10"/><path d="m17 6 1.5 1.5L21.5 4"/></svg>View tasks <span class="cnt">1</span></button>
+    <button class="act"><svg viewBox="0 0 24 24"><path d="M17 3.5 20.5 7 8 19.5 3.5 20.5 4.5 16 17 3.5z"/></svg>Edit</button>
+    <button class="act"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-2.5 8-2.5 8h17S18 15 18 8z"/><path d="M10 21a2.3 2.3 0 0 0 4 0"/></svg>Nudge</button>
+    <button class="act"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>Mark closed</button>
+    <span class="divv"></span>
+    <button class="act"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 20c.7-3.6 3.3-5.6 6.5-5.6s5.8 2 6.5 5.6"/></svg>Agent</button>
+    <button class="act"><svg viewBox="0 0 24 24"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17.5H6.5A2.5 2.5 0 0 0 4 22V4.5z"/></svg>Manuscript</button>
+    <div class="right">
+      <button class="act"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>PDF</button>
+      <button class="act del"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6.5 7l1 13h9l1-13"/></svg>Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="chips" id="chips"></div>
+
+<div class="body">
+  <section class="pane list">
+    <div class="l-search">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      Search queries… <span class="kbd">⌘K</span>
+    </div>
+    <div class="rows" id="rows">
+      <div class="row sel" data-turn="wait" data-status="Queried" data-ms="murphy" data-overdue="1" data-tasks="1"><span class="av">FS</span><div class="mid"><span class="nm">Fenella Str</span><span class="ag">Brightwater Books</span></div><div class="end"><span class="dot q"></span><span class="d2">14 MAR</span></div></div>
+      <div class="row" data-turn="move" data-status="Full Requested" data-ms="murphy" data-overdue="0" data-tasks="0"><span class="av">WT</span><div class="mid"><span class="nm">William Tan</span><span class="ag">Foxglove Literary</span></div><div class="end"><span class="dot freq"></span><span class="d2">30 JUN</span></div></div>
+      <div class="row" data-turn="wait" data-status="Partial Sent" data-ms="murphy" data-overdue="0" data-tasks="0"><span class="av">MR</span><div class="mid"><span class="nm">Marcus Reed</span><span class="ag">Bloomsbury Quill</span></div><div class="end"><span class="dot psent"></span><span class="d2">11 JUN</span></div></div>
+      <div class="row" data-turn="wait" data-status="Queried" data-ms="salt" data-overdue="0" data-tasks="0"><span class="av">MR</span><div class="mid"><span class="nm">Marcus Reed</span><span class="ag">Bloomsbury Quill</span></div><div class="end"><span class="dot q"></span><span class="d2">11 JUN</span></div></div>
+      <div class="row" data-turn="wait" data-status="Queried" data-ms="murphy" data-overdue="1" data-tasks="0"><span class="av">PR</span><div class="mid"><span class="nm">Priya Raman</span><span class="ag">No agency</span></div><div class="end"><span class="dot q"></span><span class="d2">1 MAY</span></div></div>
+      <div class="row" data-turn="move" data-status="R&R" data-ms="murphy" data-overdue="0" data-tasks="1"><span class="av">JM</span><div class="mid"><span class="nm">Jonathan Marsh</span><span class="ag">The Marsh Agency</span></div><div class="end"><span class="dot rr"></span><span class="d2">9 APR</span></div></div>
+      <div class="row" data-turn="wait" data-status="Queried" data-ms="murphy" data-overdue="1" data-tasks="0"><span class="av">AK</span><div class="mid"><span class="nm">Aisha Kapoor</span><span class="ag">The Lantern Agency</span></div><div class="end"><span class="dot q"></span><span class="d2">3 APR</span></div></div>
+      <div class="row" data-turn="move" data-status="Partial Requested" data-ms="salt" data-overdue="0" data-tasks="0"><span class="av">EF</span><div class="mid"><span class="nm">Eleanor Finch</span><span class="ag">The Finch Literary Agency</span></div><div class="end"><span class="dot preq"></span><span class="d2">28 MAR</span></div></div>
+      <div class="row" data-turn="wait" data-status="Full Sent" data-ms="salt" data-overdue="0" data-tasks="0"><span class="av">SM</span><div class="mid"><span class="nm">Sofia Marchetti</span><span class="ag">Marchetti &amp; Rowe</span></div><div class="end"><span class="dot fsent"></span><span class="d2">15 MAY</span></div></div>
+      <div class="row" data-turn="move" data-status="Offer" data-ms="salt" data-overdue="0" data-tasks="1"><span class="av">HL</span><div class="mid"><span class="nm">Harriet Lowe</span><span class="ag">Lowe &amp; Partners</span></div><div class="end"><span class="dot off"></span><span class="d2">2 JUL</span></div></div>
+      <div class="row" data-turn="closed" data-status="Rejected" data-ms="murphy" data-overdue="0" data-tasks="0"><span class="av">TO</span><div class="mid"><span class="nm">Tom Okafor</span><span class="ag">Okafor Represents</span></div><div class="end"><span class="dot cl"></span><span class="d2">22 FEB</span></div></div>
+      <div class="row" data-turn="closed" data-status="No Response" data-ms="murphy" data-overdue="0" data-tasks="0"><span class="av">DP</span><div class="mid"><span class="nm">Dev Patel</span><span class="ag">The Bright Agency</span></div><div class="end"><span class="dot cl"></span><span class="d2">18 FEB</span></div></div>
+      <div class="row" data-turn="wait" data-status="Queried" data-ms="salt" data-overdue="0" data-tasks="0"><span class="av">RD</span><div class="mid"><span class="nm">Rosa Delgado</span><span class="ag">Delgado Literary</span></div><div class="end"><span class="dot q"></span><span class="d2">30 JUN</span></div></div>
+    </div>
+    <div class="l-foot"><span>SHOWING <b id="shown">13</b> OF 13</span><button>EXPORT CSV</button><span>↑↓ · ⏎</span></div>
+  </section>
+
+  <section class="pane detail">
+    <div class="d-scroll">
+      <div class="hero">
+        <span class="bigav">FS</span>
+        <div>
+          <div class="n">Fenella Str</div>
+          <div class="a">Brightwater Books</div>
+          <div><span class="s">QUERIED</span></div>
+        </div>
+        <span class="plane"><svg viewBox="0 0 24 24"><path d="M21 3 3 10.5l6.5 2.6L12 20l3-5.5L21 3z"/></svg></span>
+      </div>
+      <div class="grid3">
+        <div class="card">
+          <div class="ch"><svg viewBox="0 0 24 24"><path d="M3 12h4l2.5-7 4 14 2.5-7H21"/></svg>Tracking</div>
+          <div class="cb">
+            <div class="ev"><span class="dot q"></span><div><div class="lab">Query sent</div><div class="via">via Email</div></div><span class="dt">14 MAR</span></div>
+            <div class="wait"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Waiting to hear back · <b>120 days</b></div>
+            <div class="bar"><i></i></div>
+            <div class="caps"><span>SENT 14 MAR</span><span>EXPECTED BY ~9 MAY</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><svg viewBox="0 0 24 24"><path d="M21 3 3 10.5l6.5 2.6L12 20l3-5.5L21 3z"/></svg>What you sent</div>
+          <div class="cb">
+            <div class="msline"><svg viewBox="0 0 24 24"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17.5H6.5A2.5 2.5 0 0 0 4 22V4.5z"/></svg>Murphy's Day Out</div>
+            <button class="addmat">Add the materials you sent</button>
+            <div style="margin-top:10px">
+              <div class="mat"><span class="ring"></span>Query letter</div>
+              <div class="mat"><span class="ring"></span>Synopsis</div>
+              <div class="mat"><span class="ring"></span>Sample chapters</div>
+            </div>
+            <button class="attach">+ Attach a submission package <span class="pro">PRO</span></button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/></svg>Journal</div>
+          <div class="cb">
+            <div class="note">
+              <div class="nd">TODAY</div>
+              <div class="nt">Your notes on this agent appear here — first impressions, things they said, anything worth remembering.</div>
+            </div>
+            <div class="notein">Write a note…
+              <span class="send"><svg viewBox="0 0 24 24"><path d="M21 3 3 10.5l6.5 2.6L12 20l3-5.5L21 3z"/></svg></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+function toggleNav(force){
+  const open=force!==undefined?force:!document.body.classList.contains('nav-open');
+  document.body.classList.toggle('nav-open',open);
+}
+const state={turn:'all',ms:'all',statuses:new Set(),att:new Set()};
+const CLOSED=new Set(['Rejected','Withdrawn','No Response']);
+const ALLST=['Queried','Partial Requested','Partial Sent','Full Requested','Full Sent','R&R','Offer','Rejected','Withdrawn','No Response'];
+
+function togglePop(id){
+  const p=document.getElementById(id);
+  const wasOpen=p.classList.contains('open');
+  document.querySelectorAll('.pop').forEach(x=>x.classList.remove('open'));
+  if(!wasOpen)p.classList.add('open');
+  syncTrigs();
+}
+function syncTrigs(){
+  document.getElementById('ftrig').classList.toggle('active',document.getElementById('fpop').classList.contains('open'));
+  document.getElementById('strig').classList.toggle('active',document.getElementById('spop').classList.contains('open'));
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.popwrap')){document.querySelectorAll('.pop').forEach(p=>p.classList.remove('open'));syncTrigs();}
+});
+
+function setTurn(el){
+  document.querySelectorAll('.prow[data-turn]').forEach(x=>x.classList.remove('on'));
+  el.classList.add('on');state.turn=el.dataset.turn;apply();
+}
+function setMs(el){
+  document.querySelectorAll('.prow[data-ms]').forEach(x=>x.classList.remove('on'));
+  el.classList.add('on');state.ms=el.dataset.ms;apply();
+}
+function toggleStatus(el){
+  el.classList.toggle('on');
+  const s=el.dataset.st;
+  state.statuses.has(s)?state.statuses.delete(s):state.statuses.add(s);
+  apply();
+}
+function statusShortcut(kind){
+  document.querySelectorAll('[data-st]').forEach(x=>x.classList.remove('on'));
+  state.statuses.clear();
+  if(kind==='open')ALLST.filter(s=>!CLOSED.has(s)).forEach(s=>{state.statuses.add(s);mark(s)});
+  if(kind==='closed')[...CLOSED].forEach(s=>{state.statuses.add(s);mark(s)});
+  apply();
+}
+function mark(s){document.querySelector('[data-st="'+s+'"]')?.classList.add('on')}
+function toggleAtt(el){
+  el.classList.toggle('on');
+  const a=el.dataset.att;
+  state.att.has(a)?state.att.delete(a):state.att.add(a);
+  apply();
+}
+function setSort(el,label){
+  document.querySelectorAll('#spop .prow').forEach(x=>x.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('sortLab').textContent=label;
+}
+function clearAll(){
+  state.turn='all';state.ms='all';state.statuses.clear();state.att.clear();
+  document.querySelectorAll('.prow[data-st],.prow[data-att]').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.prow[data-turn]').forEach(x=>x.classList.toggle('on',x.dataset.turn==='all'));
+  document.querySelectorAll('.prow[data-ms]').forEach(x=>x.classList.toggle('on',x.dataset.ms==='all'));
+  apply();
+}
+function apply(){
+  let shown=0;
+  document.querySelectorAll('#rows .row').forEach(r=>{
+    let ok=true;
+    if(state.turn==='move'&&r.dataset.turn!=='move')ok=false;
+    if(state.turn==='wait'&&r.dataset.turn!=='wait')ok=false;
+    if(state.ms!=='all'&&r.dataset.ms!==state.ms)ok=false;
+    if(state.statuses.size&&!state.statuses.has(r.dataset.status))ok=false;
+    if(state.att.has('overdue')&&r.dataset.overdue!=='1')ok=false;
+    if(state.att.has('tasks')&&r.dataset.tasks!=='1')ok=false;
+    r.classList.toggle('hide',!ok);
+    if(ok)shown++;
+  });
+  document.getElementById('shown').textContent=shown;
+  document.getElementById('popcount').textContent=shown;
+  renderChips();
+}
+function renderChips(){
+  const c=document.getElementById('chips');c.innerHTML='';
+  const chips=[];
+  if(state.turn!=='all')chips.push({t:state.turn==='move'?'YOUR MOVE':'WAITING',clear:()=>{state.turn='all';document.querySelectorAll('.prow[data-turn]').forEach(x=>x.classList.toggle('on',x.dataset.turn==='all'))}});
+  if(state.ms!=='all')chips.push({t:state.ms==='murphy'?"MURPHY'S DAY OUT":'THE SALT HOUSES',clear:()=>{state.ms='all';document.querySelectorAll('.prow[data-ms]').forEach(x=>x.classList.toggle('on',x.dataset.ms==='all'))}});
+  state.statuses.forEach(s=>chips.push({t:s.toUpperCase(),clear:()=>{state.statuses.delete(s);document.querySelector('[data-st="'+s+'"]')?.classList.remove('on')}}));
+  state.att.forEach(a=>chips.push({t:a==='overdue'?'OVERDUE':'HAS TASKS',clear:()=>{state.att.delete(a);document.querySelector('[data-att="'+a+'"]')?.classList.remove('on')}}));
+  const n=chips.length;
+  const fc=document.getElementById('fcount');
+  fc.textContent=n;fc.classList.toggle('show',n>0);
+  c.classList.toggle('show',n>0);
+  chips.forEach(ch=>{
+    const el=document.createElement('span');el.className='chip';
+    el.innerHTML=ch.t+' <button>×</button>';
+    el.querySelector('button').onclick=()=>{ch.clear();apply()};
+    c.appendChild(el);
+  });
+  if(n){
+    const cl=document.createElement('button');cl.className='clear';cl.textContent='CLEAR ALL';
+    cl.onclick=clearAll;
+    c.appendChild(cl);
+  }
+}
+</script>
+</body>
+</html>
