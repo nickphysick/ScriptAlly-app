@@ -121,8 +121,8 @@ was `28689b2`.
 | 5a seam — RecordResponseFocusForm initialResponseType/initialDraft | `ae01126` | ✅ done |
 | 5a component — the contextual composer (inline capture + recording + CTA demote) | `c17d0e2` | ✅ done |
 | 5a polish — one question, positive=pink / rejection=grey, StatusDots (Nick's steer) | `faaf24f` | ✅ done · round-trip confirmed on dev |
-| 5b — corrections (timeline ⋯ → Edit/Delete, derived-consequence confirm) | — | ⏳ next |
-| 5c — popovers (View tasks / Nudge / Mark closed↔Reopen) | — | ⏳ not started |
+| 5b — corrections (timeline ⋯ → Edit/Delete, derived-consequence confirm) | `ac479fe` | ✅ done |
+| 5c — popovers (View tasks / Nudge / Mark closed↔Reopen) | — | ⏸ decision on "View tasks" (below) |
 | 5d — click-to-pick manuscript + method; Edit-button fate | — | ⏳ not started |
 | 5e — delete (counted) + Import two-doors | — | ⏳ not started |
 | 6 — Contact List interactions (stars/door/method/response-guidelines/materials/history/notes/delete/send) | — | ⏳ not started |
@@ -162,6 +162,31 @@ the CTA button. **Round-trip confirmed working on dev by Nick.**
 Polish landed (`faaf24f`, per Nick): the prompt is ALWAYS "What happened next?"; each state's likely
 next POSITIVE step is the soft-pink chip (still getPrimaryAction's target on writer's-turn, so no
 disagreement), Rejection is ALWAYS grey and last, and every chip carries a real StatusDot.
+
+## ⏸ Stage 5c — the "View tasks" decision (Mark closed + Nudge already exist)
+
+Two of the three popovers are already built from earlier work and just need a light check:
+- **Mark closed** — a "Close this query as… Rejected / Withdrawn / No response" popover →
+  `updateQueryStatus`. (The prototype also lists "Agent closed"; there's no distinct QueryStatus
+  for it — it'd fold into No response. Minor; flagging.) On a closed query the command-bar CTA
+  already becomes **Reopen** (via the composer's reopen chip), so Mark-closed↔Reopen is covered.
+- **Nudge** — `NudgeModal` + `logNudge` + the check-back slider ("Remind me in…") exist. The one
+  prototype gap is the **copyable follow-up draft** — a small add.
+
+**"View tasks" is the real fork.** The prompt wants a **checklist scoped to the query** (inline
+add, tick-completes). But recon Q5 stands: **a task can't be scoped to a query today** — the
+derived `Task[]` is keyed on `relatedRecordId`, and stored user tasks are `Note`s with `dueDate`
+and no query/agent scope. So "View tasks" needs a model decision:
+- **(A) Read-only-ish popover over the DERIVED tasks for this query** (`tasks.filter(relatedRecordId === query.id)`), tick = `dismissTask`; "inline add" creates a dated `Note` (NOT query-scoped, so it won't reappear in this query's list — honest but limited).
+- **(B) Add a `queryId?` (and `agentId?`) to the stored task/`Note` model** — a schema + rules
+  change — so inline-added tasks are genuinely query-scoped and tick-complete round-trips. This is
+  the "real" version and what the prototype implies.
+- **(C) Keep "View tasks" navigating to the /todo board** (today's behaviour), pre-filtered to
+  this query — no new model, but not a popover.
+
+Currently it navigates to /todo (C-ish). **Which model?** (B) is the faithful one but is a stored-
+schema change (+ rules); (A) ships now with a caveat. I'll wire Nudge's copyable draft + confirm
+Mark-closed regardless, but "View tasks" waits on this.
 
 ## 5b groundwork (confirmed feasible, for the next pass)
 - Timeline events carry `id` (the activity id) — the hover ⋯ can target editActivity/deleteActivity.
