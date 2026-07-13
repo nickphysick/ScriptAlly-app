@@ -113,20 +113,30 @@ was `28689b2`.
 | 3b — personal-genre storage + promotion-queue write + rules | `70fa018` | ✅ done |
 | 3d — taxonomy picker + read-time tolerance layer | `d38bfbf` | ✅ done |
 | 3e (agents) — picker wired in Add/Edit-agent (writes IDs); tolerant display on Contact List + dashboard | `2e24b07` | ✅ done |
-| 3e (manuscript) — picker in the manuscript genre field + make `communityMatch` tolerant | — | ⏳ not started (coupled to 3f) |
+| 3f / matching — communityMatch + wordCountWhisper made ID-tolerant (read side) | `922058c` | ✅ done |
+| 3e (manuscript) — picker in the manuscript genre input (write side) | — | ⏸ HELD — see note |
 | 3c — Nick-only admin promotion view | — | ⏳ not started (queue rules already in 3b) |
-| 3f — manuscript word-count whisper reads wordCountRangeForGenre | — | ⏳ not started (primitive in 3a; coupled to the manuscript-genre conversion) |
 | 4 — Queries Hub interactions | — | ⏳ not started |
 | 5 — Contact List interactions | — | ⏳ not started |
 
-**Where 3e stands:** agent genres are fully migrated (write canonical/personal IDs; legacy label
-arrays tolerated and upgraded-on-edit; no bulk rewrite). The manuscript primary genre is NOT yet
-converted — it's the coupled-risk slice: `AddManuscriptFocusForm` has a bespoke free-text-with-
-suggestions genre input, and `ms.genre` feeds `communityMatch` (lowercase-label matching) + the
-word-count whisper (3f). Those three move together in the next pass: wrap `ms.genre` in
-`genreDisplay()` inside communityMatch, swap the manuscript input to the single-select picker, and
-point the whisper at `wordCountRangeForGenre(id)`. SmartImportReview + the legacy ImportCsv keep
-storing/showing parsed labels (tolerated).
+**Where the genre migration stands:**
+- **Agents — fully migrated** (write IDs; legacy labels tolerated + upgraded-on-edit; tolerant
+  display on Contact List + dashboard). Live on dev.
+- **Read side of the manuscript slice — done** (`922058c`): `communityMatch` + `wordCountWhisper`
+  resolve `ms.genre` through `genreDisplay()`, so Discover matching + the hero whisper work whether
+  the stored value is an id or a legacy label. The app is fully correct with manuscripts still
+  storing free-text labels.
+- **HELD — the manuscript genre INPUT swap** (`AddManuscriptFocusForm` free-text → single-select
+  `GenrePicker`). Two reasons, both about doing it right: (1) it's a **visual-fit decision** — the
+  GenrePicker is f12-styled (pink pills, dashed mono trigger) and now lives in the app-theme AGENT
+  forms too; it should be eyeballed there (on dev) before being threaded through a third, more
+  complex form, since restyling it for app-theme is one shared change. (2) `genreInput` threads
+  through **12 sites** in this multi-step form (step-validation, word-count placeholder, review
+  card, dirty-check, submit) that I can't visually verify (auth-gated). Functionally nothing is
+  blocked — tolerance covers label storage. **Decision for Nick: is the GenrePicker's look
+  acceptable in the app-theme forms, or should it get an app-theme skin first?**
+
+SmartImportReview + the legacy ImportCsv keep storing/showing parsed labels (tolerated).
 
 **Dev:** button fix (`28689b2`) + control-bar polish (`2983258`, 14px labels, buttons dropped
 toward content) both live on https://scriptally-dev.web.app (hosting-only).
