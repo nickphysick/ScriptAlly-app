@@ -6,12 +6,13 @@ feature) — **not started; awaiting Nick's go-ahead.** Refs: `design-refs/queri
 
 ## ⏸ CHECKPOINT — resume here (new session)
 
-**State:** Stage 6 DONE (6a–6h). **Stage 5 in progress — 5d landed.** So far this session: 6d, 6e, 6g,
-6f/6h, **5d** all landed; `main` @ the 5d commit, all green (tsc + build + 871 Vitest; no rules change
-any stage). Nick's WIP (index.css, themes.md) is uncommitted in the primary checkout — leave it. (6e
-was built in the PRIMARY by a slip, explicit-path so Nick's WIP was untouched; both trees resynced;
-6g/6f/5d in the WORKTREE.) **NEXT = 5e then the Nudge migration. Session 2 (Stage 7, AI) NOT started —
-do not begin without a fresh go-ahead.**
+**State:** Stage 6 DONE (6a–6h). **Stage 5 — 5d + 5e-delete landed.** This session: 6d, 6e, 6g, 6f/6h,
+5d, **5e (delete half)** all landed; `main` @ the 5e-delete commit, all green (tsc + build + 871 Vitest;
+no rules change any stage). Nick's WIP (index.css, themes.md) is uncommitted in the primary checkout —
+leave it. (6e was built in the PRIMARY by a slip, explicit-path so Nick's WIP was untouched; both trees
+resynced; 6g/6f/5d/5e in the WORKTREE.) **NEXT = 5e's import half + the Nudge migration — both DEFERRED
+to a fresh session (see "Deferred — pick up cold" below). Session 2 (Stage 7, AI) NOT started — do not
+begin without a fresh go-ahead.**
 
 **Where work happens (concurrency — IMPORTANT):** Nick edits the PRIMARY checkout
 `/Users/nickphysick/ScriptAlly-app` (his todo-board stream). Claude works in the WORKTREE
@@ -24,9 +25,35 @@ files; if a needed file overlaps Nick's WIP, hold + coordinate.
 touches firestore.rules, `firebase deploy --only firestore:rules --config firebase.dev.json
 --project dev --dry-run` (compiles, no release). Explicit-path staging; `git commit --only`.
 
-**NEXT = 5e** (counted delete confirm + Import = two doors [Smart Import + template], NO column-map),
-then Nudge→addUserTask. Each its own commit, rules PARKED. **Stop at the end of 5e.**
-- Nudge remind-me → `addUserTask({ queryId, dueDate })` (currently `logNudge`).
+**Deferred — pick up cold (fresh session; Nick's call, Option 1):**
+
+**(A) 5e's IMPORT half — Import page = two doors, no column-mapping.**
+- **What it does TODAY:** `src/components/ImportCsv.tsx` (~1504 lines) is a full CSV importer with a
+  fuzzy **column-mapping UI** — it parses the pasted/uploaded headers, guesses a `mapping` per target
+  field (`guessMapping`, ~line 82/276), then makes the user confirm "which source column populates
+  each ScriptAlly field" (the mapping grid, ~lines 988–1050) before importing agents/queries/
+  manuscripts. It renders under the OLD `ChromeSlab` ("Import" · "CSV MIGRATION DESK", line 661), NOT
+  the f12 shell (per CLAUDE.md, "Import alone keeps the compact slab").
+- **What the two doors REPLACE it with:** a simple landing offering **(1) Smart Import** (the AI/paste
+  path — route to the existing Smart Import / `#/scatter-loader` or email-import flow) and **(2) Use a
+  template** (download the fixed-column template `/ScriptAlly-pipeline-import-template.xlsx`, then a
+  plain upload that trusts the template's columns — **NO fuzzy column-mapping UI at all**). Delete/skip
+  the mapping grid + `guessMapping`. Keep the actual parse→write import logic; only the front-door +
+  the mapping step change. Substantial (a ~1500-line file), hence deferred.
+
+**(B) Nudge → `addUserTask`.**
+- **Where remind-me WRITES today:** `logNudge` (isolated path — `src/lib/db.tsx` + the pure
+  `src/lib/logNudge.ts`). It writes a **non-status `NUDGE_SENT` activity** to the global feed
+  (description starts `"Nudge sent to {agent} at {agency}"`), sets `nudgeDate` + `lastNudgeSentDate` on
+  the query, and hides-then-resurfaces the task via a **custom-date `DismissedTask`** (`resurfaceDate`
+  = the check-back). It never touches status/deadline and never counts as a response.
+- **The change:** the remind-me part becomes a DATED `addUserTask({ text, queryId, dueDate })` (the
+  same canonical UserTask store 6a/5c use — surfaces on the day, overdue renders pink), instead of the
+  `DismissedTask` resurface hack. Decide whether the `NUDGE_SENT` activity + `nudgeDate` bookkeeping
+  stays (probably yes — it drives the timeline's "Follow-up reminder" node) or also moves. Small,
+  bounded — but sequenced after the import, so deferred with it.
+
+Each its own commit, rules PARKED.
 
 **Parked rules (build, don't deploy PROD — Nick deploys):** personalGenres · genreSuggestions ·
 /tasks (isValidUserTask) · UserTask.dueDate · **starRating optional** · **noResponseMeansNo
@@ -173,6 +200,30 @@ change than 5d.)
 **Files:** `Queries.tsx` (2 `useFixedMenu` hooks + `pickSendMethod`/`pickManuscript` + the two inline
 triggers), `f12.css` (`.qce-pick` dotted-underline affordance). **UNVERIFIED visually** (auth-gated) —
 Nick to eyeball both pickers + undo on dev, three themes.
+
+---
+
+## Stage 5e (delete half) — counted delete confirm + real deleteQuery (DONE)
+
+**The query Delete is no longer a stub.** New `db.deleteQuery(id)` (`db.tsx`, right after
+`deleteAgent`) cascades the delete exactly like `deleteAgent`: the per-query `activity` subcollection +
+the global-feed twins (`activityIdsForQueries`) + the query doc, via `commitDeletesInBatches`. **No
+rules change** — query + activity deletes are already permitted (`firestore.rules:544/561`). No
+recompute needed (the query is gone → response stats re-derive over what remains). **No undo** (a
+cascade restore isn't offered; the counted confirm is the safety, mirroring `deleteAgent`). No durable
+"query deleted" log (would need a new `ActivityType` + rules — deliberately skipped; the delete itself
+is silent, unlike the agent's `AGENT_DELETED` record).
+
+**Counted confirm:** the modal now names the impact — "along with its **{n} tracking event(s)**" (count
+of the query's activities) and, when `hasAgentResponded`, "**your response stats will change**" — before
+the irreversible "This can't be undone." `handleDeleteQuery` clears the selection then calls
+`deleteQuery`. Wired through the DbContext interface + provider value.
+
+**Files:** `db.tsx` (`deleteQuery` + interface + provider), `Queries.tsx` (destructure + wired handler +
+counted copy). **UNVERIFIED visually** (auth-gated) — Nick to eyeball the counted confirm + an actual
+delete (verify the row + its history vanish, stats update) on dev.
+
+**5e's IMPORT half is DEFERRED** — see "Deferred — pick up cold" at the top.
 
 ---
 

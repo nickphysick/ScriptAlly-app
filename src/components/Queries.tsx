@@ -216,6 +216,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     addJournalEntry,
     addQuery,
     updateQuery,
+    deleteQuery,
     recordMaterialsSent,
     deleteJournalEntry,
     updateJournalEntry,
@@ -302,14 +303,15 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   const { triggerRef: closeTriggerRef, menuStyle: closeMenuStyle } = useFixedMenu<HTMLButtonElement>(isCloseMenuOpen); // F12: downward
   // Close every ribbon popover/modal whenever the reader moves to a different query.
   useEffect(() => { setIsMarkSentOpen(false); setIsNudgeOpen(false); setIsCloseMenuOpen(false); setIsDeleteConfirmOpen(false); setIsTasksOpen(false); setIsMoreOpen(false); }, [selectedQueryId]);
-  // ⚠️ STUB — v3 promoted Delete to the command bar, but the data layer has NO deleteQuery handler
-  // yet (recon: only deleteManuscript/Version/Agent/JournalEntry/Note/Activity exist). Per the task
-  // we render the full confirm flow, but the final deletion is intentionally NOT wired — do not
-  // invent Firestore deletion semantics here. Wire this to a real db.deleteQuery (+ activity/
-  // subcollection cleanup) in a follow-up. See the run report.
+  // 5e — the delete is now WIRED to db.deleteQuery (cascades the per-query activity log + the
+  // global-feed twins; models deleteAgent). No undo — a cascade restore isn't offered; the counted
+  // confirm below is the safety. Clear the selection so the pane doesn't dangle on a deleted id.
   const handleDeleteQuery = () => {
-    console.warn("[Queries] Delete query is not wired yet — no deleteQuery handler in the data layer (stubbed).");
+    if (!activeQuery) return;
+    const id = activeQuery.id;
     setIsDeleteConfirmOpen(false);
+    setSelectedQueryId(null);
+    void deleteQuery(id);
   };
 
   // Toast state for Undo
@@ -2622,12 +2624,15 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
             handleDeleteQuery note above); the confirm flow itself is real. */}
         {isDeleteConfirmOpen && activeQuery && activeAgent && (() => {
           const agentName = agentPrimary(activeAgent) || "this agent";
+          // 5e — counted confirm: the tracking events this delete erases + the stat consequence.
+          const evCount = activities.filter(a => a.queryId === activeQuery.id).length;
+          const responded = activeQuery.hasAgentResponded === true;
           return (
             <div role="dialog" aria-modal="true" aria-label="Delete query" onClick={() => setIsDeleteConfirmOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 70, background: "rgba(29,23,18,.42)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
               <div onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: 420, background: "#fffefb", border: "1px solid var(--bd)", borderRadius: 16, boxShadow: "0 24px 60px rgba(29,23,18,.28)", padding: "22px 24px" }}>
                 <div style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 700, color: "#1a1512", marginBottom: 9 }}>Delete this query?</div>
                 <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 13.5, lineHeight: 1.5, color: "#5a5048" }}>
-                  This permanently deletes your query to <b style={{ color: "#1a1512" }}>{agentName}</b>{activeMs?.title ? <> for <b style={{ color: "#1a1512" }}>{activeMs.title}</b></> : null}, along with its tracking history. <b style={{ color: "#9a3b2a" }}>This can’t be undone.</b>
+                  This permanently deletes your query to <b style={{ color: "#1a1512" }}>{agentName}</b>{activeMs?.title ? <> for <b style={{ color: "#1a1512" }}>{activeMs.title}</b></> : null}{evCount > 0 ? <>, along with its <b style={{ color: "#1a1512" }}>{evCount} tracking event{evCount > 1 ? "s" : ""}</b></> : <>, along with its tracking history</>}.{responded ? <> Your <b style={{ color: "#1a1512" }}>response stats</b> will change.</> : null} <b style={{ color: "#9a3b2a" }}>This can’t be undone.</b>
                 </div>
                 <div style={{ display: "flex", justifyContent: "flex-end", gap: 9, marginTop: 20 }}>
                   <button type="button" onClick={() => setIsDeleteConfirmOpen(false)} style={{ fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 500, color: "#5a5048", background: "#ffffff", border: "1px solid var(--bd)", borderRadius: 9, padding: "9px 16px", cursor: "pointer" }}>Cancel</button>

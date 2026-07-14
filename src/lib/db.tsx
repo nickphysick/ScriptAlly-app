@@ -223,6 +223,7 @@ interface DbContextType {
   }) => Promise<void>;
   undoQueryStatus: (id: string, previousStatus: QueryStatus, newStatus: QueryStatus) => Promise<void>;
   updateQuery: (id: string, fields: Partial<Query>) => Promise<void>;
+  deleteQuery: (id: string) => Promise<void>;
   
   // Journal Actions
   addJournalEntry: (queryId: string, entryText: string) => Promise<void>;
@@ -1543,6 +1544,27 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
+  // 5e — permanently delete ONE query + its whole tracking history (the per-query activity
+  // subcollection AND the global-feed twins). Models deleteAgent's cascade so no docs are orphaned;
+  // no recompute needed (the query is gone → response stats simply re-derive over what remains). No
+  // undo (a cascade restore isn't offered — the counted confirm is the safety, mirroring deleteAgent).
+  const deleteQuery = async (queryId: string) => {
+    if (!currentUser) return;
+    const uid = currentUser.id;
+    if (!queries.find(q => q.id === queryId)) return;
+    try {
+      const refs: DocumentReference[] = [];
+      const actSnap = await getDocs(collection(db, "users", uid, "queries", queryId, "activity"));
+      actSnap.forEach(a => refs.push(a.ref));
+      for (const aid of activityIdsForQueries(activities, [queryId])) refs.push(doc(db, "users", uid, "activities", aid));
+      // The query doc last, so a mid-way failure leaves it (and a retry) intact.
+      refs.push(doc(db, "users", uid, "queries", queryId));
+      await commitDeletesInBatches(refs);
+    } catch (e) {
+      handleFirestoreError(e, OperationType.DELETE, `users/${uid}/queries/${queryId}`);
+    }
+  };
+
   // Set aside / bring back — writes the single `setAside` overlay flag (reversible). Queries + history
   // kept; the agent just drops out of "who to query next" and the idle bucket / Agents stat card.
   const setAgentSetAside = async (id: string, setAside: boolean) => {
@@ -2662,6 +2684,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         recordMaterialsSent,
         undoQueryStatus,
         updateQuery,
+        deleteQuery,
         addJournalEntry,
         deleteJournalEntry,
         updateJournalEntry,
