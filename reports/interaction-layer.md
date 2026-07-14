@@ -6,9 +6,10 @@ feature) — **not started; awaiting Nick's go-ahead.** Refs: `design-refs/queri
 
 ## ⏸ CHECKPOINT — resume here (new session)
 
-**State:** Stage 6 in progress on the interaction layer. `main` @ `4734323`, all green (tsc + build
-+ 860 Vitest + rules compiler). Nick's WIP (index.css, themes.md) is uncommitted in the primary
-checkout — leave it. **Session 2 (Stage 7, AI) NOT started — do not begin without a fresh go-ahead.**
+**State:** Stage 6 in progress on the interaction layer. **6d landed** (this commit); `main` @ the 6d
+commit, all green (tsc + build + 868 Vitest; no rules change this stage). Nick's WIP (index.css,
+themes.md) is uncommitted in the primary checkout — leave it. **Session 2 (Stage 7, AI) NOT started —
+do not begin without a fresh go-ahead.**
 
 **Where work happens (concurrency — IMPORTANT):** Nick edits the PRIMARY checkout
 `/Users/nickphysick/ScriptAlly-app` (his todo-board stream). Claude works in the WORKTREE
@@ -17,17 +18,12 @@ to `main` only after checking changed files don't overlap Nick's WIP**: `comm -1
 `git status --short` paths vs `git diff --name-only main claude-il`. Never edit the primary tree's
 files; if a needed file overlaps Nick's WIP, hold + coordinate.
 
-**Gate, per commit:** `tsc --noEmit` + `npm run build` + `npx vitest run` (860) — AND when the commit
+**Gate, per commit:** `tsc --noEmit` + `npm run build` + `npx vitest run` (868) — AND when the commit
 touches firestore.rules, `firebase deploy --only firestore:rules --config firebase.dev.json
 --project dev --dry-run` (compiles, no release). Explicit-path staging; `git commit --only`.
 
-**NEXT = 6d** (wanted materials), then 6e → 6g → 6f/6h → 5d → 5e → Nudge→addUserTask. Each its own
+**NEXT = 6e** (query history card), then 6g → 6f/6h → 5d → 5e → Nudge→addUserTask. Each its own
 commit, rules PARKED. **Stop at the end of 5e.**
-- 6d: `Agent.materialsWanted` string[] → structured `{componentType, quantity, unit}`. Binary:
-  Query letter / Author bio / Full manuscript. Units: synopsis + sample pages→pages; sample
-  chapters→chapters; sample words→words. Integer-validated per unit, sane bounds. **REPORT the
-  componentType gap** (expect Author bio + sample-words have NO ComponentType member) — do not fork
-  the vocab; `packageMetrics` stays LOCKED.
 - 5d: decide the Edit button's fate (retire if click-to-pick covers manuscript + method; reason in
   the report either way).
 - Nudge remind-me → `addUserTask({ queryId, dueDate })` (currently `logNudge`).
@@ -45,6 +41,49 @@ chips derive from `getPrimaryAction` (can't disagree with the CTA). Nothing auto
 
 **Cleanup owed:** dead `respKnown` / `methodSub` / `Mail` import in Agents.tsx (from 6c). `#/pkg-lab`
 must be removed before any PROD deploy. Agent "PRIYA RAMAN" renders all-caps (a data fix, not code).
+
+---
+
+## Stage 6d — wanted materials, structured editor (DONE)
+
+**Decision (Nick, Option 1): evolve the ONE model — no fork, no migration, no cascade.** The agent's
+`materialsWanted` keeps its **`string[]` storage** (every reader in the app already treats these as
+display strings; a typed `{componentType,quantity,unit}` storage would have cascaded ~10 consumers +
+risked a two-editor split with the Add/Edit forms). The structured editor round-trips through the one
+canonical model `lib/agentMaterials.ts` (`parseAgentMaterials` → state → edit → `buildAgentMaterials`).
+
+**Vocabulary evolved** (was: Query letter · Synopsis · Pages · Chapters · Word count · Other):
+`MAT_OPTS` = **Query letter · Author bio · Synopsis · Sample pages · Sample chapters · Sample words ·
+Full manuscript · Other**. Binary: Query letter, Author bio, Full manuscript. Quantified (`MAT_QTY`,
+integer-validated): Synopsis→pages (1–20), Sample pages→pages (1–9999), Sample chapters→chapters
+(1–999), Sample words→words (1–999999). A blank count emits the no-count variant. Other = the ★1
+catch-all (unknown strings never dropped).
+
+**Legacy tolerance (read-time, no backfill):** old stored strings still parse — `"Chapters"`→Sample
+chapters, `"Word count"`→Sample words, `"Pages"`/`"Sample pages"`→Sample pages, the old binary
+`"Synopsis"`→Synopsis. They **normalise on re-save** (`"Chapters"` → `"Sample chapters"`); content is
+never lost. Locked in `agentMaterials.test.ts` (round-trips + legacy + case-insensitive).
+
+**⚠️ componentType gap — REPORTED, deliberately NOT forked** (`materialComponentType` in
+`agentMaterials.ts`; `packageMetrics` untouched). The map reuses the Package Builder `ComponentType`
+enum where a member exists:
+- `Query letter → QUERY_LETTER`, `Synopsis → SYNOPSIS`, `Full manuscript → FULL_MANUSCRIPT`.
+- **GAP 1 — "Author bio" has NO enum member** → maps to `undefined`. (Also "Other" — free text.)
+- **GAP 2 — Sample pages / Sample chapters / Sample words ALL collapse to `SAMPLE_PAGES`.** They are
+  differentiated only by *unit*, which the enum does not carry.
+- **Follow-up (noted, not a blocker):** if a package↔requirement matcher is ever built, it will need
+  the structured `{componentType, quantity, unit}` shape to tell those three apart and to place Author
+  bio. The reference map makes that a **later refactor**, not a re-model now.
+
+**Files:** `lib/agentMaterials.ts` (+`.test.ts`) — vocabulary + componentType map; `AddAgentFocusForm`
+— bespoke boolean state grew Author bio + Full manuscript + Synopsis page-count, output re-mapped
+(counts now optional → out-of-range-only guard); `EditAgentDrawer` `MaterialsControl` is data-driven
+(auto-adapts; label now leads with the material name so "Synopsis pages" ≠ "Sample pages"); NEW
+`agents/AgentMaterialsEditor.tsx` — the f12-themed editable Materials card on the Contact List (parse
+→ pill editor → one optimistic write per Save + undo toast; empty selection clears via `deleteField`,
+per absence=not-stated). **No rules change** (the `materialsWanted is list, size<=20` rule already
+tolerates it). **UNVERIFIED visually** — Contact List is auth-gated; Nick to eyeball the editable
+Materials card + the Add-Agent form's new pills on dev, three themes.
 
 ---
 

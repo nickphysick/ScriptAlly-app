@@ -570,7 +570,7 @@ const MaterialsControl: React.FC<{ state: AgentMaterialsState; bad: Set<string>;
             const q = MAT_QTY[opt];
             return (
               <label key={opt} className="ea-matrow">
-                First
+                {opt}
                 <input className={bad.has(opt) ? "bad" : ""} inputMode="numeric" placeholder={q.placeholder}
                   value={state.counts[opt] || ""} onChange={(e) => setCount(opt, e.target.value)} />
                 {q.unit}

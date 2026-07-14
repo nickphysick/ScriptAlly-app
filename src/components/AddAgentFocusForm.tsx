@@ -21,7 +21,7 @@ import {
 } from "./forms";
 import profileAnimation from "../assets/agent-profile-animation.json";
 import { SOCIAL_PLATFORMS, METHOD_OPTIONS as METHOD_LIST } from "../lib/agentOptions";
-import { buildAgentMaterials } from "../lib/agentMaterials";
+import { buildAgentMaterials, materialsCountErrors, type AgentMaterialsState } from "../lib/agentMaterials";
 
 interface AddAgentFocusFormProps {
   isOpen: boolean;
@@ -38,19 +38,23 @@ const POLICY_OPTIONS = ["Responds to all", "Only responds if interested", "No re
 
 interface MaterialsState {
   queryLetter: boolean;
-  synopsis: boolean;
+  authorBio: boolean;
+  synopsis: { on: boolean; count: string };
   pages: { on: boolean; count: string };
   chapters: { on: boolean; count: string };
   words: { on: boolean; count: string };
+  fullManuscript: boolean;
   other: { on: boolean; text: string };
 }
 
 const initialMaterials = (): MaterialsState => ({
   queryLetter: true,
-  synopsis: false,
+  authorBio: false,
+  synopsis: { on: false, count: "" },
   pages: { on: true, count: "10" },
   chapters: { on: false, count: "3" },
   words: { on: false, count: "" },
+  fullManuscript: false,
   other: { on: false, text: "" },
 });
 
@@ -139,21 +143,29 @@ export const AddAgentFocusForm: React.FC<AddAgentFocusFormProps> = ({
   const addSocialRow = () => setSocials((prev) => [...prev, { platform: "", handle: "" }]);
   const removeSocialRow = (i: number) => setSocials((prev) => prev.filter((_, idx) => idx !== i));
 
-  // Build the display-friendly materialsWanted string[] from the chip selections, through the shared
-  // canonical encoder (single source of truth with the Edit Agent drawer's round-trip).
-  const buildMaterials = (): string[] =>
-    buildAgentMaterials({
-      selected: [
-        ...(materials.queryLetter ? ["Query letter"] : []),
-        ...(materials.synopsis ? ["Synopsis"] : []),
-        ...(materials.pages.on ? ["Pages"] : []),
-        ...(materials.chapters.on ? ["Chapters"] : []),
-        ...(materials.words.on ? ["Word count"] : []),
-        ...(materials.other.on ? ["Other"] : []),
-      ],
-      counts: { Pages: materials.pages.count, Chapters: materials.chapters.count, "Word count": materials.words.count },
-      otherText: materials.other.text,
-    });
+  // The structured materials state, in the shared AgentMaterialsState shape (6d vocabulary). Single
+  // source of truth with the Edit Agent drawer's round-trip; buildMaterials + validation both read it.
+  const materialsState = (): AgentMaterialsState => ({
+    selected: [
+      ...(materials.queryLetter ? ["Query letter"] : []),
+      ...(materials.authorBio ? ["Author bio"] : []),
+      ...(materials.synopsis.on ? ["Synopsis"] : []),
+      ...(materials.pages.on ? ["Sample pages"] : []),
+      ...(materials.chapters.on ? ["Sample chapters"] : []),
+      ...(materials.words.on ? ["Sample words"] : []),
+      ...(materials.fullManuscript ? ["Full manuscript"] : []),
+      ...(materials.other.on ? ["Other"] : []),
+    ],
+    counts: {
+      "Synopsis": materials.synopsis.count,
+      "Sample pages": materials.pages.count,
+      "Sample chapters": materials.chapters.count,
+      "Sample words": materials.words.count,
+    },
+    otherText: materials.other.text,
+  });
+  // Build the display-friendly materialsWanted string[] through the shared canonical encoder.
+  const buildMaterials = (): string[] => buildAgentMaterials(materialsState());
 
   const handleSubmit = async () => {
     if (!name.trim()) {
@@ -162,16 +174,10 @@ export const AddAgentFocusForm: React.FC<AddAgentFocusFormProps> = ({
     }
     // Agency is optional (empty-and-valid): a named agent whose agency you don't know yet is a complete,
     // valid record. The identity anchor (name) is required above; the rule admits name-or-agency.
-    if (materials.pages.on && !materials.pages.count.trim()) {
-      setFormError("Enter how many sample pages they want.");
-      return;
-    }
-    if (materials.chapters.on && !materials.chapters.count.trim()) {
-      setFormError("Enter how many chapters they want.");
-      return;
-    }
-    if (materials.words.on && !materials.words.count.replace(/\D/g, "")) {
-      setFormError("Enter the word count they want.");
+    // Materials counts are optional (6d): a blank count emits the no-count variant ("Sample pages"),
+    // matching the Edit Agent drawer — only an out-of-range number blocks Save.
+    if (materialsCountErrors(materialsState()).size > 0) {
+      setFormError("A materials count is out of range — check the numbers.");
       return;
     }
     if (materials.other.on && !materials.other.text.trim()) {
@@ -388,14 +394,27 @@ export const AddAgentFocusForm: React.FC<AddAgentFocusFormProps> = ({
       <FormField label="Materials wanted">
         <div className="sa-aa-chips">
           <div className={`sa-aa-chip${materials.queryLetter ? " on" : ""}`} onClick={() => toggleMat("queryLetter")} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleMat("queryLetter"); } }}>Query letter</div>
-          <div className={`sa-aa-chip${materials.synopsis ? " on" : ""}`} onClick={() => toggleMat("synopsis")} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleMat("synopsis"); } }}>Synopsis</div>
+          <div className={`sa-aa-chip${materials.authorBio ? " on" : ""}`} onClick={() => toggleMat("authorBio")} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleMat("authorBio"); } }}>Author bio</div>
+          <div className={`sa-aa-chip${materials.synopsis.on ? " on" : ""}`} onClick={() => toggleMat("synopsis")} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleMat("synopsis"); } }}>Synopsis</div>
           <div className={`sa-aa-chip${materials.pages.on ? " on" : ""}`} onClick={() => toggleMat("pages")} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleMat("pages"); } }}>Sample pages</div>
-          <div className={`sa-aa-chip${materials.chapters.on ? " on" : ""}`} onClick={() => toggleMat("chapters")} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleMat("chapters"); } }}>Chapters</div>
-          <div className={`sa-aa-chip${materials.words.on ? " on" : ""}`} onClick={() => toggleMat("words")} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleMat("words"); } }}>Word count</div>
+          <div className={`sa-aa-chip${materials.chapters.on ? " on" : ""}`} onClick={() => toggleMat("chapters")} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleMat("chapters"); } }}>Sample chapters</div>
+          <div className={`sa-aa-chip${materials.words.on ? " on" : ""}`} onClick={() => toggleMat("words")} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleMat("words"); } }}>Sample words</div>
+          <div className={`sa-aa-chip${materials.fullManuscript ? " on" : ""}`} onClick={() => toggleMat("fullManuscript")} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleMat("fullManuscript"); } }}>Full manuscript</div>
           <div className={`sa-aa-chip${materials.other.on ? " on" : ""}`} onClick={() => toggleMat("other")} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleMat("other"); } }}>Other</div>
         </div>
-        {(materials.pages.on || materials.chapters.on || materials.words.on || materials.other.on) && (
+        {(materials.synopsis.on || materials.pages.on || materials.chapters.on || materials.words.on || materials.other.on) && (
           <div className="sa-aa-mat-details">
+            {materials.synopsis.on && (
+              <label className="sa-aa-mat-d">
+                <input
+                  inputMode="numeric"
+                  placeholder="2"
+                  value={materials.synopsis.count}
+                  onChange={(e) => setMaterials((p) => ({ ...p, synopsis: { ...p.synopsis, count: e.target.value.replace(/\D/g, "") } }))}
+                />
+                synopsis pages <span className="sa-aa-mat-opt">(optional)</span>
+              </label>
+            )}
             {materials.pages.on && (
               <label className="sa-aa-mat-d">
                 First

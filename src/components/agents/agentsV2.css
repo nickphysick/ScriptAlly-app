@@ -785,6 +785,29 @@
 .agv2 .ag-rg-pro { display: flex; align-items: center; gap: 8px; font-size: 11.5px; line-height: 1.4; color: var(--ag-muted); background: var(--ag-sub, #f7f2ea); border-radius: 8px; padding: 9px 11px; }
 .agv2 .ag-rg-pro-badge { flex: none; font-family: 'JetBrains Mono', monospace; font-size: 8px; font-weight: 700; letter-spacing: 0.08em; color: #5e7e9c; background: #eef2f5; border: 1px solid #cfdde6; border-radius: 99px; padding: 2px 7px; }
 
+/* 6d — editable Materials card (structured wanted-materials, f12-themed) */
+.agv2 .agm { display: flex; flex-direction: column; gap: 10px; }
+.agv2 .agm-current { font-size: 14px; line-height: 1.5; color: var(--ag-ink); }
+.agv2 .agm-current.unset { color: var(--ag-muted); font-style: italic; }
+.agv2 .agm-edit { align-self: flex-start; font-size: 12px; color: var(--ag-accent, #7c3a2a); background: none; border: none; border-bottom: 1px dashed var(--ag-line); padding: 1px 0; cursor: pointer; }
+.agv2 .agm-edit:hover { border-bottom-color: var(--ag-accent); }
+.agv2 .agm-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.agv2 .agm-pill { font: inherit; font-size: 12.5px; padding: 6px 12px; border-radius: 99px; border: 1px solid var(--ag-line); background: var(--card, #fffefb); color: var(--ag-muted); cursor: pointer; }
+.agv2 .agm-pill:hover { border-color: var(--ag-muted); color: var(--ag-ink); }
+.agv2 .agm-pill.on { background: var(--ag-selbg); border-color: var(--ag-accent); color: var(--ag-accent); font-weight: 600; }
+.agv2 .agm-rows { display: flex; flex-direction: column; gap: 7px; margin-top: 2px; }
+.agv2 .agm-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--ag-muted); }
+.agv2 .agm-row-lbl { min-width: 104px; color: var(--ag-ink); }
+.agv2 .agm-row input { width: 74px; border: 1px solid var(--ag-line); border-radius: 6px; padding: 5px 8px; font: inherit; font-size: 13px; color: var(--ag-ink); background: var(--card, #fffefb); outline: none; }
+.agv2 .agm-row input:focus { border-color: var(--ag-accent); }
+.agv2 .agm-row input.bad { border-color: #e6bdb0; box-shadow: 0 0 0 2px rgba(168,58,42,.12); }
+.agv2 .agm-row.other { display: block; }
+.agv2 .agm-row.other input { width: 100%; }
+.agv2 .agm-actions { display: flex; align-items: center; gap: 10px; margin-top: 2px; }
+.agv2 .agm-save { padding: 6px 15px; border-radius: 7px; border: none; background: var(--ag-solid, #5d4037); color: var(--ag-solid-ink, #fff); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+.agv2 .agm-save:disabled { opacity: 0.4; cursor: default; }
+.agv2 .agm-cancel { background: none; border: none; font: inherit; font-size: 12px; color: var(--ag-muted); cursor: pointer; text-decoration: underline; }
+
 /* 6a — method click-to-pick on the hero meta line */
 .agv2 .ag-method-pick { font: inherit; letter-spacing: inherit; text-transform: inherit; color: var(--ag-accent, #7c3a2a); background: none; border: none; padding: 0; cursor: pointer; }
 .agv2 .ag-method-pick:hover { text-decoration: underline; }

@@ -641,6 +641,7 @@
 .sa-aa-mat-d input.wide { width: 92px; text-align: left; }
 .sa-aa-mat-d input.other-in { width: 248px; max-width: 100%; text-align: left; }
 .sa-aa-mat-d input:focus { border-color: #8a9e88; }
+.sa-aa-mat-opt { color: #bcae9e; font-style: italic; }
 
 /* genre combobox — chips inside the control + filtering menu */
 .sa-aa-combo { position: relative; }

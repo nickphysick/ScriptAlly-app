@@ -13,6 +13,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
 import { Agent, AgentSocial, SubmissionStatus, SubmissionMethod, QueryStatus, UserPlan } from "../types";
 import { AgentResponseGuidelines } from "./agents/AgentResponseGuidelines";
+import { AgentMaterialsEditor } from "./agents/AgentMaterialsEditor";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 import { collection, setDoc, doc, onSnapshot, deleteField } from "firebase/firestore";
 import {
@@ -818,11 +819,8 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
           <div className="f12-card" style={{ minWidth: 0 }}>
             <div className="f12-chh"><FileText aria-hidden="true" /><span>Materials</span></div>
             <div className="f12-cbb" style={{ padding: 14 }}>
-              {a.materialsWanted?.length ? (
-                <div className="ag-fval soft">{a.materialsWanted.join(", ")}</div>
-              ) : (
-                <div className="ag-fval empty">Not specified yet</div>
-              )}
+              {/* 6d — structured wanted-materials editor (one model, string[] storage; see agentMaterials.ts) */}
+              <AgentMaterialsEditor agent={a} updateAgent={updateAgent} showToast={showToast} />
             </div>
           </div>
         </div>
