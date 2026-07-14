@@ -15,7 +15,7 @@ import { Agent, AgentSocial, SubmissionStatus, SubmissionMethod, QueryStatus, Us
 import { AgentResponseGuidelines } from "./agents/AgentResponseGuidelines";
 import { AgentMaterialsEditor } from "./agents/AgentMaterialsEditor";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
-import { collection, setDoc, doc, onSnapshot, deleteField } from "firebase/firestore";
+import { collection, setDoc, doc, deleteDoc, onSnapshot, deleteField } from "firebase/firestore";
 import {
   Send,
   Plus,
@@ -30,6 +30,7 @@ import {
   X,
   PauseCircle,
   Link as LinkIcon,
+  StickyNote,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useOpenEditAgent } from "./EditAgentHost";
@@ -200,7 +201,6 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
   const [agentNotesList, setAgentNotesList] = useState<{ id: string; text: string; createdAt: string }[]>([]);
   const [noteInput, setNoteInput] = useState("");
   /* 4d — History / Notes render as underline tabs (was 50/50 columns). */
-  const [paneTab, setPaneTab] = useState<"history" | "notes">("history");
 
   // A global search navigation lands here with the term — adopt it into the page filter once.
   useEffect(() => {
@@ -432,6 +432,24 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
       handleFirestoreError(err, OperationType.WRITE, `users/${currentUser.id}/agents/${selectedAgentId}/notes/${noteId}`);
     }
     setNoteInput("");
+  };
+
+  // 6f — delete an agent note; undo RE-CREATES the exact record (same id + createdAt), never a
+  // compensating new note. The subcollection already permits delete (firestore.rules).
+  const handleDeleteAgentNote = async (note: { id: string; text: string; createdAt: string }) => {
+    if (!selectedAgentId || !currentUser) return;
+    const uid = currentUser.id;
+    const agentId = selectedAgentId;
+    try {
+      await deleteDoc(doc(db, "users", uid, "agents", agentId, "notes", note.id));
+    } catch (err) {
+      handleFirestoreError(err, OperationType.WRITE, `users/${uid}/agents/${agentId}/notes/${note.id}`);
+      return;
+    }
+    showToast({
+      message: "Note deleted",
+      undo: () => void setDoc(doc(db, "users", uid, "agents", agentId, "notes", note.id), { text: note.text, createdAt: note.createdAt }),
+    });
   };
 
   const togglePinned = async (agent: Agent) => {
@@ -827,84 +845,91 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
           </div>
         </div>
 
-        {/* 4 · History / Notes — UNDERLINE TABS (4d; was 50/50 columns). Contents unchanged. */}
+        {/* 4 · Query history — one row per query, routes to the Hub (6e). Its own card now; the old
+            History/Notes tabs are dissolved (6f). */}
         <div className="ag-psec">
-          <div className="f12-tabs" role="tablist" aria-label="History and notes">
-            <button type="button" role="tab" aria-selected={paneTab === "history"} className={`f12-tab${paneTab === "history" ? " f12-on" : ""}`} onClick={() => setPaneTab("history")}>
-              Query history{queryHistory.length ? ` · ${queryHistory.length}` : ""}
-            </button>
-            <button type="button" role="tab" aria-selected={paneTab === "notes"} className={`f12-tab${paneTab === "notes" ? " f12-on" : ""}`} onClick={() => setPaneTab("notes")}>
-              Notes{agentNotesList.length ? ` · ${agentNotesList.length}` : ""}
-            </button>
+          <div className="f12-card" style={{ minWidth: 0 }}>
+            <div className="f12-chh"><Send aria-hidden="true" /><span>Query history{queryHistory.length ? ` · ${queryHistory.length}` : ""}</span></div>
+            <div className="f12-cbb" style={{ padding: 14 }}>
+              {queryHistory.length ? (
+                <div className="ag-qhwrap">
+                  <div className="ag-qh">
+                    {queryHistory.map((q) => (
+                      <button
+                        type="button"
+                        className="ag-qhrow"
+                        key={q.queryId}
+                        onClick={() => onNavigate?.("queries", q.queryId)}
+                        title={`Open “${q.manuscriptTitle}” in the Queries Hub`}
+                      >
+                        <span className="ag-qhdot"><StatusDot status={q.status} overrideSize={19} decorative /></span>
+                        <span className="ag-qhbody">
+                          <span className="ag-qht">{q.manuscriptTitle}</span>
+                          <span className="ag-qhm">{q.statusLine}</span>
+                        </span>
+                        <span className="ag-qhgo" aria-hidden="true">↗</span>
+                        {q.dateLabel && <span className="ag-qhd">{q.dateLabel}</span>}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="ag-qhfoot">
+                    {queryHistory.length} {queryHistory.length === 1 ? "query" : "queries"}
+                    {" · "}
+                    <button type="button" onClick={() => sendQueryFlow(a)}>Send another</button>
+                  </div>
+                </div>
+              ) : (
+                <div className="ag-qh-empty">No queries sent yet — a clean slate.</div>
+              )}
+            </div>
           </div>
-          {paneTab === "history" ? (
-            queryHistory.length ? (
-              /* 6e — one row per query, newest first; each routes to the query in the Hub. */
-              <div className="ag-qhwrap">
-                <div className="ag-qh">
-                  {queryHistory.map((q) => (
-                    <button
-                      type="button"
-                      className="ag-qhrow"
-                      key={q.queryId}
-                      onClick={() => onNavigate?.("queries", q.queryId)}
-                      title={`Open “${q.manuscriptTitle}” in the Queries Hub`}
-                    >
-                      <span className="ag-qhdot"><StatusDot status={q.status} overrideSize={19} decorative /></span>
-                      <span className="ag-qhbody">
-                        <span className="ag-qht">{q.manuscriptTitle}</span>
-                        <span className="ag-qhm">{q.statusLine}</span>
-                      </span>
-                      <span className="ag-qhgo" aria-hidden="true">↗</span>
-                      {q.dateLabel && <span className="ag-qhd">{q.dateLabel}</span>}
-                    </button>
-                  ))}
-                </div>
-                <div className="ag-qhfoot">
-                  {queryHistory.length} {queryHistory.length === 1 ? "query" : "queries"}
-                  {" · "}
-                  <button type="button" onClick={() => sendQueryFlow(a)}>Send another</button>
-                </div>
+        </div>
+
+        {/* 5 · Notes — FULL-WIDTH panel (6f; tabs gone). Dated cards, delete ✕ (undo restores the
+            exact record), pinned composer. */}
+        <div className="ag-psec">
+          <div className="ag-notes-panel">
+            <div className="ag-notes-phead">
+              <StickyNote aria-hidden="true" />
+              <span>Notes on {firstName(agentPrimary(a))}</span>
+              {agentNotesList.length > 0 && (
+                <span className="ag-notes-count">{agentNotesList.length} {agentNotesList.length === 1 ? "note" : "notes"}</span>
+              )}
+            </div>
+            {agentNotesList.length ? (
+              <div className="ag-notes-grid">
+                {agentNotesList.map((n) => (
+                  <div className="ag-notecard" key={n.id}>
+                    <div className="ag-notecard-d">
+                      <span>{formatTimelineDate(n.createdAt)}</span>
+                      <button type="button" className="ag-notecard-x" aria-label="Delete note" onClick={() => void handleDeleteAgentNote(n)}><X /></button>
+                    </div>
+                    <div className="ag-notecard-t">{n.text}</div>
+                  </div>
+                ))}
               </div>
             ) : (
-              <div className="ag-tl-empty">No queries sent yet — a clean slate.</div>
-            )
-          ) : (
-            <div className="ag-notes-col" style={{ display: "flex", flexDirection: "column", minHeight: 0 }}>
-              <div className="ag-notes-scroll">
-                {agentNotesList.length ? (
-                  agentNotesList.map((n) => (
-                    <div className="ag-nbubble" key={n.id}>
-                      <div className="ag-ntext">{n.text}</div>
-                      <div className="ag-ndate">{formatTimelineDate(n.createdAt)}</div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="ag-notes-empty">
-                    Updates, comments, private research — write anything here. It stays attached to this agent.
-                  </div>
-                )}
-              </div>
-              <div className="ag-note-in">
-                <input
-                  value={noteInput}
-                  onChange={(e) => setNoteInput(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter") void handleAddAgentNote(noteInput); }}
-                  placeholder="Write a note…"
-                  aria-label="Write a note"
-                />
-                <button
-                  type="button"
-                  className="ag-note-send"
-                  aria-label="Save note"
-                  disabled={!noteInput.trim()}
-                  onClick={() => void handleAddAgentNote(noteInput)}
-                >
-                  <Send />
-                </button>
-              </div>
+              <div className="ag-notes-empty">Updates, comments, private research — write anything here. It stays attached to this agent.</div>
+            )}
+            <div className="ag-note-in">
+              <input
+                value={noteInput}
+                onChange={(e) => setNoteInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") void handleAddAgentNote(noteInput); }}
+                placeholder={`Write a note about ${firstName(agentPrimary(a))}…`}
+                aria-label="Write a note"
+              />
+              <button
+                type="button"
+                className="ag-note-send"
+                aria-label="Save note"
+                disabled={!noteInput.trim()}
+                onClick={() => void handleAddAgentNote(noteInput)}
+              >
+                <Send />
+              </button>
             </div>
-          )}
+          </div>
         </div>
 
         {/* 5 · Community placeholder — compact strip (desk rule: no skeleton voids) */}

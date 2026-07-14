@@ -6,11 +6,12 @@ feature) — **not started; awaiting Nick's go-ahead.** Refs: `design-refs/queri
 
 ## ⏸ CHECKPOINT — resume here (new session)
 
-**State:** Stage 6 in progress on the interaction layer. **6d + 6e + 6g landed**; `main` @ the 6g
-commit, all green (tsc + build + 871 Vitest; no rules change any stage). Nick's WIP (index.css,
-themes.md) is uncommitted in the primary checkout — leave it. (6e was built + committed in the PRIMARY
-by a slip, explicit-path so Nick's WIP was untouched; both trees resynced. 6g back in the WORKTREE.)
-**Session 2 (Stage 7, AI) NOT started — do not begin without a fresh go-ahead.**
+**State:** Stage 6 DONE on the interaction layer (6a–6h all landed). **6d + 6e + 6g + 6f/6h landed**;
+`main` @ the 6f/6h commit, all green (tsc + build + 871 Vitest; no rules change any stage). Nick's WIP
+(index.css, themes.md) is uncommitted in the primary checkout — leave it. (6e was built in the PRIMARY
+by a slip, explicit-path so Nick's WIP was untouched; both trees resynced; 6g/6f back in the WORKTREE.)
+**NEXT is Stage 5 (5d → 5e) then the Nudge migration. Session 2 (Stage 7, AI) NOT started — do not
+begin without a fresh go-ahead.**
 
 **Where work happens (concurrency — IMPORTANT):** Nick edits the PRIMARY checkout
 `/Users/nickphysick/ScriptAlly-app` (his todo-board stream). Claude works in the WORKTREE
@@ -23,7 +24,7 @@ files; if a needed file overlaps Nick's WIP, hold + coordinate.
 touches firestore.rules, `firebase deploy --only firestore:rules --config firebase.dev.json
 --project dev --dry-run` (compiles, no release). Explicit-path staging; `git commit --only`.
 
-**NEXT = 6f/6h** (notes full-width + Send query opens the shared modal prefilled), then 5d → 5e →
+**NEXT = 5d** (Queries click-to-pick manuscript + method; Edit button's fate), then 5e →
 Nudge→addUserTask. Each its own commit, rules PARKED. **Stop at the end of 5e.**
 - 5d: decide the Edit button's fate (retire if click-to-pick covers manuscript + method; reason in
   the report either way).
@@ -122,6 +123,27 @@ file, reveals the 6a dated check-back) when the agent isn't already closed; if t
 falls back to **"Set aside instead"** (`toggleSetAside`, still reachable via the ⋯ menu regardless).
 `Delete anyway` stays as the de-emphasised destructive fallback; the clean (no-query) branch is
 unchanged. UI-only (`Agents.tsx`), no new lib/rules/tests. **UNVERIFIED visually** (auth-gated).
+
+---
+
+## Stage 6f / 6h — notes full-width + Send query modal (DONE)
+
+**6h was already satisfied** — the pane-foot "Send query" and the 6e "Send another" both call
+`sendQueryFlow(agent)` → the shared Log-a-query form prefilled with the agent (via the `initialAgentId`
+seam landed earlier). No code needed; confirmed + noted.
+
+**6f — the History/Notes tabs are DISSOLVED.** The reading pane now shows two always-open sections:
+- **Query history** — the 6e rows promoted to their own `f12-card` (no longer behind a tab).
+- **Notes** — a **full-width panel** below (sage header band "Notes on {first} · {n} notes", a
+  responsive grid of dated note cards, a pinned composer). Each note card gained a **delete ✕** (hover,
+  always-shown on touch) via the new `handleDeleteAgentNote` — `deleteDoc` + an undo toast that
+  RE-CREATES the exact record (same id + `createdAt`), never a compensating note. The subcollection
+  already permits delete (`firestore.rules:533`), so **no rules change**. `paneTab` state removed; the
+  old `.ag-nbubble` column CSS is now dead-but-present (cleanup owed).
+
+**Files:** `Agents.tsx` (delete handler + section restructure + `deleteDoc`/`StickyNote` imports),
+`agentsV2.css` (`.ag-notes-panel`/`.ag-notecard` + `.ag-qh-empty`). **UNVERIFIED visually** (auth-gated)
+— Nick to eyeball the two sections + note delete/undo on dev, three themes.
 
 ---
 
