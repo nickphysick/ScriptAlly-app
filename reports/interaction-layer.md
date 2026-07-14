@@ -6,12 +6,11 @@ feature) — **not started; awaiting Nick's go-ahead.** Refs: `design-refs/queri
 
 ## ⏸ CHECKPOINT — resume here (new session)
 
-**State:** Stage 6 in progress on the interaction layer. **6d + 6e landed**; `main` @ the 6e commit,
-all green (tsc + build + 871 Vitest; no rules change either stage). Nick's WIP (index.css, themes.md)
-is uncommitted in the primary checkout — leave it. **Both trees resynced at the 6e commit** (6e was
-built + committed in the PRIMARY by a slip, explicit-path so Nick's WIP was untouched; worktree
-fast-forwarded — resume editing in the WORKTREE for 6g+). **Session 2 (Stage 7, AI) NOT started — do
-not begin without a fresh go-ahead.**
+**State:** Stage 6 in progress on the interaction layer. **6d + 6e + 6g landed**; `main` @ the 6g
+commit, all green (tsc + build + 871 Vitest; no rules change any stage). Nick's WIP (index.css,
+themes.md) is uncommitted in the primary checkout — leave it. (6e was built + committed in the PRIMARY
+by a slip, explicit-path so Nick's WIP was untouched; both trees resynced. 6g back in the WORKTREE.)
+**Session 2 (Stage 7, AI) NOT started — do not begin without a fresh go-ahead.**
 
 **Where work happens (concurrency — IMPORTANT):** Nick edits the PRIMARY checkout
 `/Users/nickphysick/ScriptAlly-app` (his todo-board stream). Claude works in the WORKTREE
@@ -24,7 +23,7 @@ files; if a needed file overlaps Nick's WIP, hold + coordinate.
 touches firestore.rules, `firebase deploy --only firestore:rules --config firebase.dev.json
 --project dev --dry-run` (compiles, no release). Explicit-path staging; `git commit --only`.
 
-**NEXT = 6g** (delete-agent confirm + "Mark closed instead"), then 6f/6h → 5d → 5e →
+**NEXT = 6f/6h** (notes full-width + Send query opens the shared modal prefilled), then 5d → 5e →
 Nudge→addUserTask. Each its own commit, rules PARKED. **Stop at the end of 5e.**
 - 5d: decide the Edit button's fate (retire if click-to-pick covers manuscript + method; reason in
   the report either way).
@@ -110,6 +109,19 @@ were already unused imports before this stage (so no `noUnusedLocals`) — left 
 
 **No rules change.** f12-themed (`.ag-qh*` in agentsV2.css, `--ag-*` tokens). **UNVERIFIED visually**
 (auth-gated) — Nick to eyeball the rows + Hub routing on dev, three themes.
+
+---
+
+## Stage 6g — delete-agent: "Mark closed instead" (DONE)
+
+**Closes the deleteAgent hole.** The guarded delete modal (agent with ≥1 query) already counted the
+queries + hid-then-committed with a 7s undo; 6g adds the design ref's non-destructive steer. The
+warning now says **"your response stats will change"** explicitly, and the recommended button is
+**"Mark closed instead"** (reuses the existing `setAvailability(a, CLOSED)` — greys out, stays on
+file, reveals the 6a dated check-back) when the agent isn't already closed; if they ARE closed it
+falls back to **"Set aside instead"** (`toggleSetAside`, still reachable via the ⋯ menu regardless).
+`Delete anyway` stays as the de-emphasised destructive fallback; the clean (no-query) branch is
+unchanged. UI-only (`Agents.tsx`), no new lib/rules/tests. **UNVERIFIED visually** (auth-gated).
 
 ---
 

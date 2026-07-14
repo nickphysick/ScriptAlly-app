@@ -1268,6 +1268,9 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
         const a = deleteModalAgent;
         const qn = queries.filter((q) => q.agentId === a.id).length;
         const guarded = qn > 0;
+        // 6g — the non-destructive escape from the delete cascade. "Mark closed" (the ref's steer for
+        // "not taking submissions") when they aren't already closed; otherwise fall back to Set aside.
+        const canClose = a.submissionStatus !== SubmissionStatus.CLOSED;
         return (
           <div className="fixed inset-0 bg-stone-950/40 backdrop-blur-sm flex items-center justify-center p-5 z-[999]" onClick={() => setDeleteModalAgent(null)}>
             <motion.div
@@ -1285,10 +1288,19 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
                       {agentPrimary(a)} has {qn} quer{qn > 1 ? "ies" : "y"} in your pipeline
                     </h3>
                     <p className="text-[13.5px] font-light leading-relaxed text-[rgba(58,28,20,0.72)]">
-                      Deleting {firstName(agentPrimary(a))} would also erase those <b className="text-[#7c3a2a] font-medium">{qn} quer{qn > 1 ? "ies" : "y"}</b> from the manuscripts they belong to — losing that part of your record. <b className="text-[#7c3a2a] font-medium">Set them aside</b> instead: they vanish from suggestions but the history stays, and you can bring them back.
+                      Deleting {firstName(agentPrimary(a))} would also erase those <b className="text-[#7c3a2a] font-medium">{qn} quer{qn > 1 ? "ies" : "y"}</b> from the manuscripts they belong to, and <b className="text-[#7c3a2a] font-medium">your response stats will change</b>.{" "}
+                      {canClose ? (
+                        <>If they’re simply not taking submissions, <b className="text-[#7c3a2a] font-medium">mark them closed</b> instead — they grey out in the list and stay on file.</>
+                      ) : (
+                        <><b className="text-[#7c3a2a] font-medium">Set them aside</b> instead: they leave your suggestions but the history stays, and you can bring them back.</>
+                      )}
                     </p>
                     <div className="flex items-center gap-2.5 mt-5 flex-wrap">
-                      <button onClick={() => { setDeleteModalAgent(null); void toggleSetAside(a); }} className="font-mono text-[11px] rounded-[9px] py-2.5 px-4 bg-[#f5e2da] text-[#7c3a2a] border-[0.5px] border-[#e8c8bc] hover:bg-[#efd5ca] cursor-pointer">Set aside</button>
+                      {canClose ? (
+                        <button onClick={() => { setDeleteModalAgent(null); void setAvailability(a, SubmissionStatus.CLOSED); }} className="font-mono text-[11px] rounded-[9px] py-2.5 px-4 bg-[#f5e2da] text-[#7c3a2a] border-[0.5px] border-[#e8c8bc] hover:bg-[#efd5ca] cursor-pointer">Mark closed instead</button>
+                      ) : (
+                        <button onClick={() => { setDeleteModalAgent(null); void toggleSetAside(a); }} className="font-mono text-[11px] rounded-[9px] py-2.5 px-4 bg-[#f5e2da] text-[#7c3a2a] border-[0.5px] border-[#e8c8bc] hover:bg-[#efd5ca] cursor-pointer">Set aside instead</button>
+                      )}
                       <button onClick={() => setDeleteModalAgent(null)} className="font-mono text-[11px] rounded-[9px] py-2.5 px-4 text-stone-500 hover:text-[#3a1c14] cursor-pointer">Cancel</button>
                       <button onClick={() => requestDeleteAgent(a)} className="ml-auto font-mono text-[10.5px] text-[#a8442f] opacity-80 hover:opacity-100 hover:underline cursor-pointer p-2">Delete anyway</button>
                     </div>
