@@ -12,6 +12,7 @@
  */
 import { Agent, Query, Manuscript, Activity, QueryStatus, SubmissionStatus } from "../types";
 import { isHomeMarket, normaliseCountry } from "./territory";
+import { queryBucket } from "./queryAmbient";
 
 export type AgentsSubFilter = "all" | "open" | "closed";
 export type AgentsQueriedFilter = "all" | "yes" | "no";
@@ -232,6 +233,59 @@ export function buildAgentTimeline(
       dateLabel: formatTimelineDate(a.date),
       note: a.details?.trim() ? a.details.trim() : undefined,
     }));
+}
+
+export interface AgentQueryRow {
+  queryId: string;
+  manuscriptTitle: string;
+  status: QueryStatus;
+  statusLine: string;
+  dateLabel: string;
+  sortMs: number;
+}
+
+/**
+ * The agent's queries as compact history rows (6e) — ONE row per query, newest first, each routing to
+ * the query in the Hub. Status line follows the CTA buckets (never raw status vs. our language):
+ * waiting → "Waiting · N days" (days from dateSent), writer's-turn → "Your move", terminal → the
+ * status label. Derived, never stored. `nowMs` is injected so the days-count stays pure/testable.
+ */
+export function agentQueryHistory(
+  agentId: string,
+  queries: Query[],
+  manuscripts: Manuscript[],
+  nowMs: number,
+): AgentQueryRow[] {
+  const DAY = 86_400_000;
+  const titleOf = (msId: string): string => manuscripts.find((m) => m.id === msId)?.title ?? "Untitled manuscript";
+  return queries
+    .filter((q) => q.agentId === agentId)
+    .map((q) => {
+      const sentMs = q.dateSent ? new Date(q.dateSent).getTime() : NaN;
+      const bucket = queryBucket(q.status);
+      let statusLine: string;
+      if (bucket === "waiting") {
+        if (Number.isFinite(sentMs)) {
+          const days = Math.max(0, Math.floor((nowMs - sentMs) / DAY));
+          statusLine = `Waiting · ${days} ${days === 1 ? "day" : "days"}`;
+        } else {
+          statusLine = "Waiting";
+        }
+      } else if (bucket === "move") {
+        statusLine = "Your move";
+      } else {
+        statusLine = q.status;
+      }
+      return {
+        queryId: q.id,
+        manuscriptTitle: titleOf(q.manuscriptId),
+        status: q.status,
+        statusLine,
+        dateLabel: Number.isFinite(sentMs) ? formatTimelineDate(q.dateSent!) : "",
+        sortMs: Number.isFinite(sentMs) ? sentMs : 0,
+      };
+    })
+    .sort((a, b) => b.sortMs - a.sortMs);
 }
 
 /** Singular-safe live count for the top bar: "1 agent on file" / "12 agents on file". */

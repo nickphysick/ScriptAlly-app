@@ -44,7 +44,7 @@ import {
   paneProvenance,
   agentQueried,
   lastStatusForAgent,
-  buildAgentTimeline,
+  agentQueryHistory,
   formatTimelineDate,
 } from "../lib/agentsPage";
 import { agentPrimary, agentSecondary, agentInitials } from "../lib/agentDisplay";
@@ -635,7 +635,9 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
     if (!a) return <div className="ag-pane-empty">Select an agent to see their profile.</div>;
 
     const isOpen = a.submissionStatus === SubmissionStatus.OPEN;
-    const timeline = buildAgentTimeline(a.id, queries, manuscripts, activities);
+    // 6e — query history (one row per query, newest first, each routing to the Hub) supersedes the
+    // old activity-derived timeline.
+    const queryHistory = agentQueryHistory(a.id, queries, manuscripts, Date.now());
     // The canonical link trio owns the X position, so the socials tail drops X/Twitter entries
     // (Bluesky / Instagram / QueryTracker / Other still render as solid chips after the trio).
     const socials = displaySocials(a).filter((s) => !/twitter|^x\b|^x\s*\//i.test(s.platform));
@@ -829,29 +831,39 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
         <div className="ag-psec">
           <div className="f12-tabs" role="tablist" aria-label="History and notes">
             <button type="button" role="tab" aria-selected={paneTab === "history"} className={`f12-tab${paneTab === "history" ? " f12-on" : ""}`} onClick={() => setPaneTab("history")}>
-              Your history
+              Query history{queryHistory.length ? ` · ${queryHistory.length}` : ""}
             </button>
             <button type="button" role="tab" aria-selected={paneTab === "notes"} className={`f12-tab${paneTab === "notes" ? " f12-on" : ""}`} onClick={() => setPaneTab("notes")}>
               Notes{agentNotesList.length ? ` · ${agentNotesList.length}` : ""}
             </button>
           </div>
           {paneTab === "history" ? (
-            timeline.length ? (
-              <div className="ag-tl-scroll">
-                <div className="ag-tl">
-                  {timeline.map((e) => (
-                    <div className="ag-tle" key={e.id}>
-                      <span className="ag-tldot">
-                        <StatusDot status={e.status} overrideSize={19} decorative />
+            queryHistory.length ? (
+              /* 6e — one row per query, newest first; each routes to the query in the Hub. */
+              <div className="ag-qhwrap">
+                <div className="ag-qh">
+                  {queryHistory.map((q) => (
+                    <button
+                      type="button"
+                      className="ag-qhrow"
+                      key={q.queryId}
+                      onClick={() => onNavigate?.("queries", q.queryId)}
+                      title={`Open “${q.manuscriptTitle}” in the Queries Hub`}
+                    >
+                      <span className="ag-qhdot"><StatusDot status={q.status} overrideSize={19} decorative /></span>
+                      <span className="ag-qhbody">
+                        <span className="ag-qht">{q.manuscriptTitle}</span>
+                        <span className="ag-qhm">{q.statusLine}</span>
                       </span>
-                      <div className="ag-tlrow">
-                        <span className="ag-tls">{e.label}</span>
-                        <span className="ag-tlm">{e.manuscriptTitle}</span>
-                        <span className="ag-tld">{e.dateLabel}</span>
-                      </div>
-                      {e.note && <div className="ag-tlnote">{e.note}</div>}
-                    </div>
+                      <span className="ag-qhgo" aria-hidden="true">↗</span>
+                      {q.dateLabel && <span className="ag-qhd">{q.dateLabel}</span>}
+                    </button>
                   ))}
+                </div>
+                <div className="ag-qhfoot">
+                  {queryHistory.length} {queryHistory.length === 1 ? "query" : "queries"}
+                  {" · "}
+                  <button type="button" onClick={() => sendQueryFlow(a)}>Send another</button>
                 </div>
               </div>
             ) : (

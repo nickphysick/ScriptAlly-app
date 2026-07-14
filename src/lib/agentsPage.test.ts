@@ -17,6 +17,7 @@ import {
   upNextCandidate,
   lastStatusForAgent,
   buildAgentTimeline,
+  agentQueryHistory,
   formatTimelineDate,
   agentsCountLabel,
   agentIdleCount,
@@ -257,6 +258,48 @@ describe("agentsPage · buildAgentTimeline", () => {
 
   it("empty for a never-queried agent", () => {
     expect(buildAgentTimeline("nobody", queries, manuscripts, [])).toEqual([]);
+  });
+});
+
+describe("agentsPage · agentQueryHistory (6e — one row per query, routes to the Hub)", () => {
+  const ms = [
+    { id: "m1", title: "Murphy's Day Out" } as Manuscript,
+    { id: "m2", title: "The Salt Houses" } as Manuscript,
+  ];
+  const NOW = new Date("2026-07-13T00:00:00.000Z").getTime();
+
+  it("one row per query for THIS agent, newest first, ids routable to the Hub", () => {
+    const qs = [
+      mkQuery({ id: "q1", manuscriptId: "m1", status: QueryStatus.QUERIED, dateSent: "2026-04-03T00:00:00.000Z" }),
+      mkQuery({ id: "q2", manuscriptId: "m2", status: QueryStatus.REJECTED, dateSent: "2026-01-12T00:00:00.000Z" }),
+      mkQuery({ id: "q3", agentId: "OTHER", manuscriptId: "m1", status: QueryStatus.QUERIED }),
+    ];
+    const rows = agentQueryHistory("a1", qs, ms, NOW);
+    expect(rows.map((r) => r.queryId)).toEqual(["q1", "q2"]); // q3 (other agent) excluded; newest first
+    expect(rows[0].manuscriptTitle).toBe("Murphy's Day Out");
+  });
+
+  it("status line follows the CTA buckets, not raw status", () => {
+    const qs = [
+      mkQuery({ id: "q1", status: QueryStatus.QUERIED, dateSent: "2026-04-03T00:00:00.000Z" }),
+      mkQuery({ id: "q2", status: QueryStatus.PARTIAL_REQUESTED, dateSent: "2026-04-03T00:00:00.000Z" }),
+      mkQuery({ id: "q3", status: QueryStatus.REJECTED, dateSent: "2026-01-12T00:00:00.000Z" }),
+    ];
+    const byId = Object.fromEntries(agentQueryHistory("a1", qs, ms, NOW).map((r) => [r.queryId, r.statusLine]));
+    expect(byId.q1).toBe("Waiting · 101 days");
+    expect(byId.q2).toBe("Your move");
+    expect(byId.q3).toBe(QueryStatus.REJECTED);
+  });
+
+  it("an undated query renders (no days), sorts last, blank date label", () => {
+    const qs = [
+      mkQuery({ id: "q1", status: QueryStatus.QUERIED, dateSent: "2026-04-03T00:00:00.000Z" }),
+      mkQuery({ id: "q2", status: QueryStatus.QUERIED, dateSent: undefined }),
+    ];
+    const rows = agentQueryHistory("a1", qs, ms, NOW);
+    expect(rows.map((r) => r.queryId)).toEqual(["q1", "q2"]);
+    expect(rows[1].statusLine).toBe("Waiting");
+    expect(rows[1].dateLabel).toBe("");
   });
 });
 

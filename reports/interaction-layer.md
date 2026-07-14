@@ -6,10 +6,12 @@ feature) — **not started; awaiting Nick's go-ahead.** Refs: `design-refs/queri
 
 ## ⏸ CHECKPOINT — resume here (new session)
 
-**State:** Stage 6 in progress on the interaction layer. **6d landed** (this commit); `main` @ the 6d
-commit, all green (tsc + build + 868 Vitest; no rules change this stage). Nick's WIP (index.css,
-themes.md) is uncommitted in the primary checkout — leave it. **Session 2 (Stage 7, AI) NOT started —
-do not begin without a fresh go-ahead.**
+**State:** Stage 6 in progress on the interaction layer. **6d + 6e landed**; `main` @ the 6e commit,
+all green (tsc + build + 871 Vitest; no rules change either stage). Nick's WIP (index.css, themes.md)
+is uncommitted in the primary checkout — leave it. **Both trees resynced at the 6e commit** (6e was
+built + committed in the PRIMARY by a slip, explicit-path so Nick's WIP was untouched; worktree
+fast-forwarded — resume editing in the WORKTREE for 6g+). **Session 2 (Stage 7, AI) NOT started — do
+not begin without a fresh go-ahead.**
 
 **Where work happens (concurrency — IMPORTANT):** Nick edits the PRIMARY checkout
 `/Users/nickphysick/ScriptAlly-app` (his todo-board stream). Claude works in the WORKTREE
@@ -18,12 +20,12 @@ to `main` only after checking changed files don't overlap Nick's WIP**: `comm -1
 `git status --short` paths vs `git diff --name-only main claude-il`. Never edit the primary tree's
 files; if a needed file overlaps Nick's WIP, hold + coordinate.
 
-**Gate, per commit:** `tsc --noEmit` + `npm run build` + `npx vitest run` (868) — AND when the commit
+**Gate, per commit:** `tsc --noEmit` + `npm run build` + `npx vitest run` (871) — AND when the commit
 touches firestore.rules, `firebase deploy --only firestore:rules --config firebase.dev.json
 --project dev --dry-run` (compiles, no release). Explicit-path staging; `git commit --only`.
 
-**NEXT = 6e** (query history card), then 6g → 6f/6h → 5d → 5e → Nudge→addUserTask. Each its own
-commit, rules PARKED. **Stop at the end of 5e.**
+**NEXT = 6g** (delete-agent confirm + "Mark closed instead"), then 6f/6h → 5d → 5e →
+Nudge→addUserTask. Each its own commit, rules PARKED. **Stop at the end of 5e.**
 - 5d: decide the Edit button's fate (retire if click-to-pick covers manuscript + method; reason in
   the report either way).
 - Nudge remind-me → `addUserTask({ queryId, dueDate })` (currently `logNudge`).
@@ -84,6 +86,30 @@ enum where a member exists:
 per absence=not-stated). **No rules change** (the `materialsWanted is list, size<=20` rule already
 tolerates it). **UNVERIFIED visually** — Contact List is auth-gated; Nick to eyeball the editable
 Materials card + the Add-Agent form's new pills on dev, three themes.
+
+---
+
+## Stage 6e — query history card (DONE)
+
+**What:** the Contact List reading pane's "history" tab now shows **one row per query** (not the old
+activity-derived event timeline): real `StatusDot` · manuscript title · a status line · `↗` on hover
+· date sent; footer `{n} queries · Send another`. Each row **routes to the query in the Queries Hub**
+via the existing seam `onNavigate("queries", queryId)` → `pathFor` → `/queries?q=<id>` (unrecognised
+subpage = query id). "Send another" reuses `sendQueryFlow(agent)` (preselects the agent). Tab renamed
+"Your history" → "Query history · {n}".
+
+**Status line = the CTA buckets, never raw status** (so it can't disagree with the Hub): waiting →
+`Waiting · N days` (days from `dateSent`), writer's-turn → `Your move`, terminal → the status label.
+Derivation is the pure `agentQueryHistory(agentId, queries, manuscripts, nowMs)` in `agentsPage.ts`
+(newest first; undated queries render with no days + sort last), reusing `queryBucket` — unit-locked
+in `agentsPage.test.ts` (+3 → 871).
+
+**The old activity timeline is superseded** — `buildAgentTimeline` import dropped from `Agents.tsx`
+(the fn + its tests stay in the lib, dead-but-covered, like `stageRows`). `activities`/`lastStatusForAgent`
+were already unused imports before this stage (so no `noUnusedLocals`) — left as pre-existing cleanup.
+
+**No rules change.** f12-themed (`.ag-qh*` in agentsV2.css, `--ag-*` tokens). **UNVERIFIED visually**
+(auth-gated) — Nick to eyeball the rows + Hub routing on dev, three themes.
 
 ---
 
