@@ -6,12 +6,12 @@ feature) — **not started; awaiting Nick's go-ahead.** Refs: `design-refs/queri
 
 ## ⏸ CHECKPOINT — resume here (new session)
 
-**State:** Stage 6 DONE on the interaction layer (6a–6h all landed). **6d + 6e + 6g + 6f/6h landed**;
-`main` @ the 6f/6h commit, all green (tsc + build + 871 Vitest; no rules change any stage). Nick's WIP
-(index.css, themes.md) is uncommitted in the primary checkout — leave it. (6e was built in the PRIMARY
-by a slip, explicit-path so Nick's WIP was untouched; both trees resynced; 6g/6f back in the WORKTREE.)
-**NEXT is Stage 5 (5d → 5e) then the Nudge migration. Session 2 (Stage 7, AI) NOT started — do not
-begin without a fresh go-ahead.**
+**State:** Stage 6 DONE (6a–6h). **Stage 5 in progress — 5d landed.** So far this session: 6d, 6e, 6g,
+6f/6h, **5d** all landed; `main` @ the 5d commit, all green (tsc + build + 871 Vitest; no rules change
+any stage). Nick's WIP (index.css, themes.md) is uncommitted in the primary checkout — leave it. (6e
+was built in the PRIMARY by a slip, explicit-path so Nick's WIP was untouched; both trees resynced;
+6g/6f/5d in the WORKTREE.) **NEXT = 5e then the Nudge migration. Session 2 (Stage 7, AI) NOT started —
+do not begin without a fresh go-ahead.**
 
 **Where work happens (concurrency — IMPORTANT):** Nick edits the PRIMARY checkout
 `/Users/nickphysick/ScriptAlly-app` (his todo-board stream). Claude works in the WORKTREE
@@ -24,10 +24,8 @@ files; if a needed file overlaps Nick's WIP, hold + coordinate.
 touches firestore.rules, `firebase deploy --only firestore:rules --config firebase.dev.json
 --project dev --dry-run` (compiles, no release). Explicit-path staging; `git commit --only`.
 
-**NEXT = 5d** (Queries click-to-pick manuscript + method; Edit button's fate), then 5e →
-Nudge→addUserTask. Each its own commit, rules PARKED. **Stop at the end of 5e.**
-- 5d: decide the Edit button's fate (retire if click-to-pick covers manuscript + method; reason in
-  the report either way).
+**NEXT = 5e** (counted delete confirm + Import = two doors [Smart Import + template], NO column-map),
+then Nudge→addUserTask. Each its own commit, rules PARKED. **Stop at the end of 5e.**
 - Nudge remind-me → `addUserTask({ queryId, dueDate })` (currently `logNudge`).
 
 **Parked rules (build, don't deploy PROD — Nick deploys):** personalGenres · genreSuggestions ·
@@ -144,6 +142,37 @@ seam landed earlier). No code needed; confirmed + noted.
 **Files:** `Agents.tsx` (delete handler + section restructure + `deleteDoc`/`StickyNote` imports),
 `agentsV2.css` (`.ag-notes-panel`/`.ag-notecard` + `.ag-qh-empty`). **UNVERIFIED visually** (auth-gated)
 — Nick to eyeball the two sections + note delete/undo on dev, three themes.
+
+---
+
+## Stage 5d — Queries reading-pane click-to-pick + the Edit button's fate (DONE)
+
+**Two click-to-pick shortcuts** on the "What you sent" block (constrained values, F12Menu popovers,
+matching the Contact List's 6a method-pick):
+- **Send method** — the "Sent by {method}" value opens a picker (Email / Online Form / Query Manager /
+  Post — the exact `SubmissionMethod` enum, which is also what `firestore.rules` validates). Empty →
+  "set method". Current value gets a ✓.
+- **Manuscript** — the manuscript title opens a picker of all manuscripts (✓ on current) + "＋ Add a
+  manuscript" (routes to the add flow).
+
+**Both write via plain `updateQuery` + an undo toast** — safe because `updateQuery` is a bare
+`updateDoc` (no recompute/cascade), `sendMethod` is a display field, and **both keys are already in the
+query update allowlist** (`firestore.rules:549–550`) so **no rules change**. Manuscript reassignment is
+a plain patch: the query moves manuscripts correctly; historical activities keep their own
+`manuscriptId` (the same derived-over-stored limitation the Edit drawer's reassignment has — not a new
+defect). Undo restores the prior value exactly (or `deleteField` when method was unset).
+
+**⚖️ Edit-button decision: KEEP IT (reasoned).** Click-to-pick covers only the two most-common quick
+fixes (method + manuscript). The Edit Query drawer (`openEditQuery` / `saveQueryEdits`) remains the sole
+home for everything else — **agent reassignment, response deadline, if-no-response, materials,
+personalisation, package attach, rejection details, dateSent, journal CRUD, and timeline corrections.**
+Retiring it would strand those. So the pickers are ADDITIVE convenience, not a replacement; the command
+bar's "Edit" stays. (If a later pass ever moves ALL of those inline, revisit — but that is a much larger
+change than 5d.)
+
+**Files:** `Queries.tsx` (2 `useFixedMenu` hooks + `pickSendMethod`/`pickManuscript` + the two inline
+triggers), `f12.css` (`.qce-pick` dotted-underline affordance). **UNVERIFIED visually** (auth-gated) —
+Nick to eyeball both pickers + undo on dev, three themes.
 
 ---
 

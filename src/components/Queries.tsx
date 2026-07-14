@@ -691,6 +691,13 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
   // (chrome revision — the list pane keeps overflow:hidden; the portal escapes the clip).
   const { triggerRef: filterTrigRef, menuStyle: filterMenuStyle } = useFixedMenu<HTMLButtonElement>(filterPopOpen);
   const { triggerRef: sortTrigRef, menuStyle: sortMenuStyle } = useFixedMenu<HTMLButtonElement>(sortPopOpen);
+  // 5d — reading-pane click-to-pick: send method + manuscript, constrained to valid values, written
+  // straight to the query (updateQuery is a plain patch; both keys are in the query update allowlist)
+  // with an undo. The Edit drawer stays the home for everything else (agent, dates, materials…).
+  const [methodPickOpen, setMethodPickOpen] = useState(false);
+  const [msPickOpen, setMsPickOpen] = useState(false);
+  const { triggerRef: methodPickTrigRef, menuStyle: methodPickMenuStyle } = useFixedMenu<HTMLButtonElement>(methodPickOpen);
+  const { triggerRef: msPickTrigRef, menuStyle: msPickMenuStyle } = useFixedMenu<HTMLButtonElement>(msPickOpen);
   /* F12 sort — grouped Activity / Dates / Pipeline (ref sort popover). Default: last activity. */
   const [sortKey, setSortKey] = useState<string>("last_activity");
   /* Legacy shim — the hidden (display:none) mobile filter region still references this;
@@ -867,12 +874,31 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
     if (agents.length > 0 && !logAgId) setLogAgId(agents[0].id);
   }, [manuscripts, packages, agents, logMsId, logAgId, logPkgId]);
 
-  // The active query + its agent/manuscript, resolved live. The reading pane is view-only — editing
-  // is the Edit Query drawer (openEditQuery).
+  // The active query + its agent/manuscript, resolved live. The reading pane is view-only EXCEPT the
+  // 5d click-to-pick shortcuts (send method + manuscript); everything else edits via the Edit Query
+  // drawer (openEditQuery) — agent, dates, materials, journal, corrections.
   const activeQuery = selectedQueryId ? (selectedQuery || queries.find(q => q.id === selectedQueryId)) : null;
   const currentStatus = activeQuery?.status ?? selectedQuery?.status;
   const activeAgent = activeQuery ? agents.find(a => a.id === activeQuery.agentId) : null;
   const activeMs = activeQuery ? manuscripts.find(m => m.id === activeQuery.manuscriptId) : null;
+  // 5d — click-to-pick writers (constrained values, plain updateQuery + undo). No cascade needed:
+  // sendMethod is a display field; manuscriptId reassignment is a plain patch (historical activities
+  // keep their own manuscriptId — the same derived-over-stored limitation the drawer has).
+  const pickSendMethod = (m: SubmissionMethod) => {
+    setMethodPickOpen(false);
+    if (!activeQuery || m === activeQuery.sendMethod) return;
+    const id = activeQuery.id, prev = activeQuery.sendMethod;
+    void updateQuery(id, { sendMethod: m });
+    showToast({ message: `Sent by ${sentViaLabel(m)}`, undo: () => void updateQuery(id, prev ? { sendMethod: prev } : { sendMethod: deleteField() as unknown as string }) });
+  };
+  const pickManuscript = (msId: string) => {
+    setMsPickOpen(false);
+    if (!activeQuery || msId === activeQuery.manuscriptId) return;
+    const id = activeQuery.id, prev = activeQuery.manuscriptId;
+    void updateQuery(id, { manuscriptId: msId });
+    const to = manuscripts.find(m => m.id === msId)?.title || "another manuscript";
+    showToast({ message: `Moved to ${to}`, undo: () => void updateQuery(id, { manuscriptId: prev }) });
+  };
   // Queries Hub subtitle — the manuscript currently in scope ("Tracking …").
   const trackedManuscript = selectedManuscriptFilter !== "All" ? manuscripts.find(m => m.id === selectedManuscriptFilter) : null;
   // Manuscripts that actually have queries — the MANUSCRIPT pill group only shows these.
@@ -2815,18 +2841,43 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                               {label}
                             </div>
                           );
-                          const sentLine = method ? (
+                          const sentLine = (
                             <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: ".07em", textTransform: "uppercase" as const, color: "#8f877b", marginTop: 14 }}>
-                              Sent by <span style={{ color: "var(--hub-item, #1a1512)" }}>{method}</span>{sentDate && <>&nbsp;·&nbsp;<span style={{ color: "var(--hub-item, #1a1512)" }}>{sentDate}</span></>}
+                              {/* 5d — method click-to-pick */}
+                              Sent by
+                              <span className="f12-popwrap" style={{ display: "inline-flex" }}>
+                                <button ref={methodPickTrigRef} type="button" className="qce-pick" aria-haspopup="menu" aria-expanded={methodPickOpen} title="Change how this query was sent" onClick={() => setMethodPickOpen(o => !o)} style={{ font: "inherit", letterSpacing: "inherit", textTransform: "inherit", color: method ? "var(--hub-item, #1a1512)" : "#8f877b", background: "none", border: "none", padding: 0, cursor: "pointer" }}>
+                                  {method || "set method"}
+                                </button>
+                                <F12Menu open={methodPickOpen} onClose={() => setMethodPickOpen(false)} style={methodPickMenuStyle} ariaLabel="Change send method"
+                                  items={[SubmissionMethod.EMAIL, SubmissionMethod.ONLINE_FORM, SubmissionMethod.QUERY_MANAGER, SubmissionMethod.POST].map((m) => ({
+                                    label: sentViaLabel(m),
+                                    icon: activeQuery.sendMethod === m ? <span aria-hidden="true">✓</span> : undefined,
+                                    onClick: () => pickSendMethod(m),
+                                  }))}
+                                />
+                              </span>
+                              {sentDate && <>&nbsp;·&nbsp;<span style={{ color: "var(--hub-item, #1a1512)" }}>{sentDate}</span></>}
                             </div>
-                          ) : null;
+                          );
 
                           return (
                             <>
-                              {/* shared skeleton — book icon + manuscript title */}
+                              {/* shared skeleton — book icon + manuscript title (5d: click-to-reassign) */}
                               <div style={{ display: "flex", alignItems: "center", gap: 9, fontFamily: FONT_SERIF, fontWeight: 700, fontSize: 18, color: "var(--hub-item, #1a1512)", lineHeight: 1.15 }}>
                                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#6f4e37" strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M5 3h11l3 3v15H5zM9 3v6l2-1 2 1V3" /></svg>
-                                <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{activeMs.title}</span>
+                                <span className="f12-popwrap" style={{ minWidth: 0, display: "inline-flex" }}>
+                                  <button ref={msPickTrigRef} type="button" className="qce-pick" aria-haspopup="menu" aria-expanded={msPickOpen} title="Move this query to a different manuscript" onClick={() => setMsPickOpen(o => !o)} style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", font: "inherit", color: "inherit", background: "none", border: "none", padding: 0, cursor: "pointer", textAlign: "left" }}>
+                                    {activeMs.title}
+                                  </button>
+                                  <F12Menu open={msPickOpen} onClose={() => setMsPickOpen(false)} style={msPickMenuStyle} ariaLabel="Reassign manuscript"
+                                    items={[
+                                      ...manuscripts.map((m) => ({ label: m.title, icon: m.id === activeQuery.manuscriptId ? <span aria-hidden="true">✓</span> : undefined, onClick: () => pickManuscript(m.id) })),
+                                      "divider" as const,
+                                      { label: "＋ Add a manuscript", onClick: () => onNavigate?.("manuscripts", "Add a manuscript") },
+                                    ]}
+                                  />
+                                </span>
                               </div>
 
                               {linkedPackage ? (
