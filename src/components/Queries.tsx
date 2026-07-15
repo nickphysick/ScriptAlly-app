@@ -2909,12 +2909,14 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                                   <div role="button" tabIndex={0} onClick={openPackages} style={addlinkStyle}>＋ Attach a submission package{!isPro && proChip()}</div>
                                 </>
                               ) : (
-                                /* EMPTY — dashed add button ABOVE the hollow-dashed expected list (generic labels). */
+                                /* EMPTY (P4) — the hollow expected checklist IS the prompt; a quiet link
+                                   opens the Edit drawer to record what was sent. The big dashed tile that
+                                   stacked above the checklist is retired (one control, not two). */
                                 <>
-                                  <div role="button" tabIndex={0} onClick={() => openEditQuery(activeQuery.id)} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 9, border: "1.5px dashed #d3c5b0", borderRadius: 11, padding: 12, color: "#5f4f3c", fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 13, margin: "12px 0 4px", cursor: "pointer" }}>❏ Add the materials you sent</div>
                                   <div>
                                     {EXPECTED.map((l, i) => matRow(l, true, i === EXPECTED.length - 1, l))}
                                   </div>
+                                  <div role="button" tabIndex={0} onClick={() => openEditQuery(activeQuery.id)} style={addlinkStyle}>✎ Add the materials you sent</div>
                                   <div role="button" tabIndex={0} onClick={openPackages} style={{ ...addlinkStyle, marginTop: 12 }}>＋ Attach a submission package{!isPro && proChip()}</div>
                                 </>
                               )}
