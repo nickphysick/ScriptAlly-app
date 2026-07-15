@@ -45,7 +45,8 @@ export interface BoardCard {
   hk: boolean; // housekeeping glyph (no status dot)
   initials: string;
   record: string; // meta line — agency / "On {manuscript}"
-  committed: boolean;
+  committed: boolean; // committedDate === today
+  committedDate?: string; // raw "YYYY-MM-DD" — set even when it's a prior day (rollover detection)
   done: boolean;
   // action wiring
   taskType?: string;
@@ -132,6 +133,7 @@ function derivedCard(task: Task, input: BoardInput): BoardCard | null {
     initials: ag ? agentInitials(ag) : "•",
     record: ag ? [agentPrimary(ag), ag.agency].filter(Boolean).join(" · ") : "",
     committed: flag?.committedDate === input.today,
+    committedDate: flag?.committedDate,
     done: false,
     taskType: task.taskType,
     relatedRecordId: task.relatedRecordId,
@@ -157,6 +159,7 @@ function userCard(t: UserTask, input: BoardInput): BoardCard {
     initials: "✎",
     record,
     committed: t.committedDate === input.today,
+    committedDate: t.committedDate,
     done: false,
     userTaskId: t.id,
   };

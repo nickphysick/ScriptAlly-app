@@ -23,11 +23,12 @@ import { StatusDot } from "../StatusDot";
 import { useScriptAllyDb } from "../../lib/db";
 import { assembleBoard, BoardCard, BoardColumns } from "../../lib/todoBoard";
 import { flagKeyForTask } from "../../lib/taskFlags";
+import { choosePicks, rolledOverCards, MAX_TODAY } from "../../lib/todoWalk";
 import { QueryStatus } from "../../types";
 import { TaskDetail } from "./TaskDetail";
 import "./todo.css";
 
-const MAX_TODAY = 5;
+const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const localYMD = (ms: number): string => {
   const d = new Date(ms);
@@ -52,6 +53,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // Phase-3 seam: the card whose drawer is open. Phase 2 renders a marked placeholder; Phase 3
   // swaps in the real TaskDetail.
   const [drawerCard, setDrawerCard] = useState<BoardCard | null>(null);
+  const [rollDismissed, setRollDismissed] = useState(false);
+  const [pulsing, setPulsing] = useState<string | null>(null);
 
   const now = Date.now();
   const today = localYMD(now);
@@ -65,15 +68,39 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
 
   const flash = (msg: string) => { setToast(msg); window.setTimeout(() => setToast((t) => (t === msg ? null : t)), 2600); };
 
-  const todayCards = [...columns.do, ...columns.hk, ...columns.nt].filter((c) => c.committed);
+  // "On today" = it has a committedDate at all (today OR a rolled-over prior day).
+  const onList = (c: BoardCard) => c.committedDate != null;
+  const todayCards = [...columns.do, ...columns.hk, ...columns.nt].filter(onList);
+  const rolled = rollDismissed ? [] : rolledOverCards(todayCards, today);
 
-  function toggleToday(card: BoardCard) {
-    const committing = !card.committed;
-    if (committing && todayCards.length >= MAX_TODAY) { flash(`Today’s list is full (${MAX_TODAY} max)`); return; }
-    const val = committing ? today : null;
+  function setCommitted(card: BoardCard, on: boolean) {
+    const val = on ? today : null;
     if (card.userTaskId) updateUserTask(card.userTaskId, { committedDate: val });
     else if (card.taskType && card.relatedRecordId) upsertTaskFlag(flagKeyForTask(card.taskType, card.relatedRecordId), { committedDate: val });
   }
+  function toggleToday(card: BoardCard) {
+    if (!onList(card) && todayCards.length >= MAX_TODAY) { flash(`Today’s list is full (${MAX_TODAY} max)`); return; }
+    setCommitted(card, !onList(card));
+  }
+  // Help me pick — a selection gesture: pulse-and-fade, card by card, then commit each.
+  async function helpMePick() {
+    const picks = choosePicks({ doCards: columns.do, hkCards: columns.hk, committedCount: todayCards.length });
+    if (!picks.length) { flash(`Today’s list is full (${MAX_TODAY} max)`); return; }
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const pool = [...columns.do, ...columns.hk];
+    for (const key of picks) {
+      const card = pool.find((c) => c.key === key);
+      if (!card) continue;
+      if (!reduce) { setPulsing(key); await wait(440); }
+      setCommitted(card, true);
+      if (!reduce) await wait(120);
+    }
+    setPulsing(null);
+    flash(`Picked ${picks.length} for today`);
+  }
+  function keepRolled() { rolled.forEach((c) => setCommitted(c, true)); setRollDismissed(true); flash("Kept on today’s list"); }
+  function dropRolled() { rolled.forEach((c) => setCommitted(c, false)); setRollDismissed(true); flash("Cleared — still on the board"); }
+
   function markDone(card: BoardCard) {
     if (card.userTaskId) {
       // A user's own task ticks immediately — nothing to record.
@@ -178,6 +205,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     return (
       <div className="tdb-today">
         <div className="tdb-th"><span className="tdb-t">Today’s list</span><span className="tdb-c">{items.length} / {MAX_TODAY}</span></div>
+        {rolled.length > 0 && (
+          <div className="tdb-rollbar">
+            <span className="tdb-rolltx"><b>{rolled.length}</b> {rolled.length === 1 ? "item" : "items"} rolled over from a previous day.</span>
+            <button type="button" onClick={keepRolled}>Keep</button>
+            <button type="button" className="drop" onClick={dropRolled}>Clear</button>
+          </div>
+        )}
         <div className="tdb-tb">
           {items.length === 0 ? (
             <div className="tdb-tempty">
@@ -196,7 +230,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <div className="tdb-tbar" style={{ visibility: total ? "visible" : "hidden" }}><i style={{ width: `${pct}%` }} /></div>
           <div className="tdb-tfr">
             <span className="tdb-pc">{total ? `${clearedN} OF ${total} DONE` : "NOTHING COMMITTED"}</span>
-            <button type="button" className="tdb-pick" onClick={() => flash("Help me pick — Phase 4")}>{items.length ? "Add more" : "Help me pick"}</button>
+            <button type="button" className="tdb-pick" onClick={helpMePick}>{items.length ? "Add more" : "Help me pick"}</button>
             <button type="button" className="tdb-walk" disabled={!items.length} onClick={() => flash("Work the list — Phase 4")}>Work the list</button>
           </div>
         </div>
@@ -209,8 +243,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     const titleNode = c.who && c.title.includes(c.who)
       ? <>{c.title.split(c.who)[0]}<em>{c.who}</em>{c.title.split(c.who).slice(1).join(c.who)}</>
       : c.title;
+    const committed = onList(c);
     return (
-      <div key={c.key} className={`tdb-tile${c.committed ? " today" : ""}`} onClick={() => setDrawerCard(c)}>
+      <div key={c.key} className={`tdb-tile${committed ? " today" : ""}${pulsing === c.key ? " pulse" : ""}`} onClick={() => setDrawerCard(c)}>
         <div className="tdb-tags">
           <span className={`tdb-tag due${c.warn ? " warn" : ""}`}>{c.due}</span>
           {c.snoozes > 0 && <span className="tdb-tag snz">Snoozed ×{c.snoozes}</span>}
@@ -223,8 +258,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <span className="tdb-who">{c.record}</span>
         </div>
         <div className="tdb-tacts">
-          <button type="button" className={`tdb-pill today-p${c.committed ? " on" : ""}`} onClick={(e) => { e.stopPropagation(); toggleToday(c); }}>
-            {c.committed ? "✓ On today" : "＋ Today’s list"}
+          <button type="button" className={`tdb-pill today-p${committed ? " on" : ""}`} onClick={(e) => { e.stopPropagation(); toggleToday(c); }}>
+            {committed ? "✓ On today" : "＋ Today’s list"}
           </button>
           <button type="button" className="tdb-pill done-p" onClick={(e) => { e.stopPropagation(); markDone(c); }}>
             <span className="tdb-tk" />Mark done

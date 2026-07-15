@@ -50,3 +50,52 @@ Retirement targets confirmed safe (only self/old-page consumers): `todoFocus*`, 
 **Stub reported:** no reusable nudge-**draft generator** exists (Step 0). `TaskDetail` uses a marked `TODO(nudge-draft)` placeholder draft; wire the real generator when it lands. The draft is display-only — nothing is sent.
 
 **Commit:** `feat(todo): TaskDetail drawer with on-page capture`.
+
+## Phase 4 (partial) — Today's-list rollover + Help me pick
+
+**Gates:** `tsc` clean · `vite build` OK · full Vitest **940** green.
+
+Built the two **pre-answered** pieces of Phase 4:
+- **Rollover** — `BoardCard` now carries the raw `committedDate`; a committed item whose day has passed surfaces once in a gold **Keep / Clear** bar in the Today's-list box (`rolledOverCards`, `src/lib/todoWalk.ts`). Keep bumps `committedDate` to today; Clear uncommits (still on the board). "On today's list" is now `committedDate != null` (today *or* rolled), so the cap of 5 and the pill/spine count rolled items too.
+- **Help me pick** (`choosePicks`, unit-tested) — the exact standing rule: ≤4 Do-next (the column is already pressing-first) + 1–2 Housekeeping, cap 5; ≤3 Housekeeping if nothing urgent; **never a UserTask**. Pulse-and-fade, card by card (ring→scale→fade, then commit), reduced-motion aware. No flying elements.
+- Commit cap 5 (from Phase 2) and the drag path remain; the pill is the primary commit gesture.
+
+## ⛔ STOP — the staged walkthroughs (remaining Phase 4)
+
+Halted here rather than guess, per the run's prime directive. The walkthroughs (Urgent / Work the list) require **staging** — nothing writes until Save — but the pack's spec ("the Do-it step embeds the same `TaskDetail` capture") only cleanly covers the **stageable query captures** (mark-sent → `recordMaterialsSent`, nudge → `logNudge`, whose payloads are `{date, method, materials}` / `{checkBack, note}`). It does **not** say how the other card types get staged, and they can't stage as built:
+
+- **Offer / record** — the record path is `RecordResponseFocusForm`, which **writes immediately**; there's no staged-payload variant.
+- **Housekeeping** (`data_quality_poor` / `no_response_close`) — the fixes write immediately (`updateAgent` / `updateQueryStatus`); the pack itself says stale queries "stay individual… cannot be batched".
+- **User tasks** — a committed user task in "Work the list" has no capture to stage.
+
+**The question for Nick (un-pre-answered judgement call, RED-GATE #6):** should the walkthrough queue be **mark-sent + nudge only** (offer/housekeeping/user handled via the drawer, which already works), or should staging be extended to those types (requiring a staged variant of `RecordResponseFocusForm` + the housekeeping fixes)? Options:
+- **(A)** Walkthrough = the stageable query captures only (mark-sent + nudge). Cleanest; offer/hk/user stay on the immediate-write drawer. *(My lean — matches "stale queries can't be batched" and keeps the "never invent history" guarantee.)*
+- **(B)** Extend staging to every card type — larger; needs `RecordResponseFocusForm` and the housekeeping fixes to grow a "return payload, don't write" mode.
+
+`TaskDetail` was deliberately built body-first so a staged mode drops in once this is answered.
+
+---
+
+## Finalise
+
+**Phases completed this run + commit SHAs:**
+- Phase 2 — `5693f74` — F12 board shell, tasks store, retire Ledger.
+- Phase 3 — `ce8d33c` — TaskDetail drawer with on-page capture.
+- Phase 4 (partial) — *this commit* — Today's-list rollover + Help me pick. Staged walkthroughs NOT built (stop above).
+
+**Firestore rules to deploy (NOT deployed — Nick runs):** `firebase deploy --only firestore:rules --config firebase.dev.json --project dev` then prod. This run's rule changes: `isValidUserTask` gains `committedDate`; **removed** `isValidTodoNote` + the `/todoNotes/` route + the two `todoLastFocusedAt` clauses. (Plus the still-pending Phase-1 `taskFlags`/`tasks`/`mutedTaskRules` block if not yet on prod.)
+
+**Token decision:** ADDED (additive extension), not consumed-existing — `.t-f12` gained `--pink-hero`, `--gold-t/b/i`, `--note-t/b/i` (values from the mockup `:root`). `themes.md` regenerated (the `.t-f12` section documents them). Approved deviation from "no theme changes" — extension, zero blast radius, not a retokening.
+
+**NudgeModal / draft generator:** `NudgeModal.tsx` present; **no reusable nudge-draft generator exists**. `TaskDetail` uses a marked `TODO(nudge-draft)` placeholder draft (display-only — nothing is sent). Wire the real generator when it lands.
+
+**Vestigial `dismissedTasks` (unchanged this run):** still-open debt from Phase 1 — the old collection + its state + listener remain live while `taskFlags` is the store. Once `migrateDismissedTasks()` is run + verified on dev, delete the collection, its `dismissedTasks` state, and its onSnapshot listener. Do not let it become permanent.
+
+**Felt-off but didn't red-gate (for morning review):**
+- Writer's-turn cards have **no real deadline** in the model, so the "due" chip reads `OVER TO YOU` rather than the mockup's "3 DAYS LEFT" (honest, not invented).
+- The Do-next capture reuses the **proven write handlers** rather than a bespoke re-implementation (safety over pixel-fidelity to the mockup's tick-list). The materials tick-list is a Save-gate, not stored.
+- `addTask` uses a `window.prompt` placeholder (the drawer's inline compose is a later refinement).
+- Housekeeping renders **individually** (grouping/batch/mute + assisted-fill are Phase 5, out of scope tonight).
+- The concurrent "interactions" stream had already built the `users/{uid}/tasks` store CRUD (with `dueDate`) — consumed, not duplicated.
+
+**⚠ Layout is UNVERIFIED (jsdom-blind).** Nick must eyeball, logged in on dev, before trusting: the board in all four columns (empty + populated), the fixed 344px shelf, the Today's-list box (commit, cap-5 toast, rollover Keep/Clear, Help-me-pick pulse), and the drawer for every card type (mark-sent capture, nudge draft/copy, offer→RecordResponse, both housekeeping fixes, user-task edit) across sparse/rich data.

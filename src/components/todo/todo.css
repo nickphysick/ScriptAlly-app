@@ -170,4 +170,20 @@
 .tdb-threeway { display: flex; flex-direction: column; gap: 9px; }
 .tdb-threeway button { width: 100%; }
 
+/* ── rollover gold bar ── */
+.tdb-rollbar { display: flex; align-items: center; gap: 8px; padding: 9px 13px; background: var(--gold-t); border-bottom: 1px solid var(--gold-b); font-size: 12px; color: var(--gold-i); flex: none; }
+.tdb-rolltx { flex: 1; }
+.tdb-rolltx b { font-weight: 600; }
+.tdb-rollbar button { font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 9px; border-radius: 99px; border: 1px solid var(--gold-b); background: var(--panel); color: var(--gold-i); }
+.tdb-rollbar button.drop { border-color: var(--line); color: var(--muted); }
+
+/* ── Help-me-pick pulse-and-fade ── */
+.tdb-tile.pulse { animation: tdbPick 0.44s cubic-bezier(0.3, 0.8, 0.4, 1) both; }
+@keyframes tdbPick {
+  0% { box-shadow: var(--sh-1); }
+  38% { box-shadow: 0 0 0 4px var(--pink-t), var(--sh-2); border-color: var(--pink-i); transform: scale(1.03); }
+  100% { opacity: 0.18; transform: scale(0.96); }
+}
+@media (prefers-reduced-motion: reduce) { .tdb-tile.pulse { animation: none; } }
+
 @media (max-width: 1120px) { .tdb-toprow { grid-template-columns: 1fr; height: auto; } .tdb-today { height: 344px; } }
