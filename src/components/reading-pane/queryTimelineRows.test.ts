@@ -41,9 +41,9 @@ describe("buildTimelineRows — the nudge node (P2)", () => {
     expect(rows.filter((r) => r.kind === "nudge")).toHaveLength(2);
   });
 
-  it("nudge rows carry NO activityId — the correction ⋯ never offers on them", () => {
+  it("TWS P5 — nudge rows carry their activityId so the ⋯ edit/delete menu offers (row alignment + delete gap)", () => {
     const rows = buildTimelineRows([queried, nudge("n1", "2026-06-20T00:00:00.000Z")], q(), null);
-    expect(rows.find((r) => r.kind === "nudge")!.activityId).toBeUndefined();
+    expect(rows.find((r) => r.kind === "nudge")!.activityId).toBe("n1");
   });
 
   it("the status dedupe is untouched: duplicate status events still collapse, unknown types still drop", () => {

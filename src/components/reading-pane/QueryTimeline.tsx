@@ -169,7 +169,9 @@ export function buildTimelineRows(events: any[], query: Query, agent: Agent | nu
 
   // P2 — the nudge nodes: outgoing writer-side touches, one row per nudge, merged by time. The dot
   // reuses the OUTGOING glyph (QUERIED — burgundy ring, → arrow) decoratively via the locked
-  // StatusDot; the node claims no status (kind: "nudge", no activityId → no correction ⋯).
+  // StatusDot; the node claims no status (kind: "nudge"). TWS P5 — it now carries its activityId so
+  // the ⋯ edit/delete menu offers (aligning the row + closing the delete gap); deleting a nudge is
+  // non-status, so the delete confirm correctly reads "won't change the query's status".
   const nudgeRows: RowSpec[] = (events || [])
     .filter((evt) => evt.type === NUDGE_NESTED_TYPE)
     .map((evt, i) => ({
@@ -179,6 +181,7 @@ export function buildTimelineRows(events: any[], query: Query, agent: Agent | nu
       title: "Nudged",
       date: fmtShort(getTime(evt.createdAt)),
       sub: `via ${query.sendMethod || "Email"}`,
+      activityId: typeof evt.id === "string" ? evt.id : undefined,
       dateISO: isoDay(getTime(evt.createdAt)),
       note: typeof evt.note === "string" ? evt.note : "",
       timeMs: getTime(evt.createdAt),
