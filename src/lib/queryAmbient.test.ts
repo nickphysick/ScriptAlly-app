@@ -8,7 +8,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { queryAmbientStatus, commandBarStatus, deriveEscalation, trackingBar, nudgeCount, elapsedLabel } from "./queryAmbient";
+import { queryAmbientStatus, commandBarStatus, deriveEscalation, trackingBar, nudgeCount, elapsedLabel, suggestedAction, isHugelyOverdue, HUGELY_OVERDUE_WINDOW_MULT, HUGELY_OVERDUE_FLOOR_WEEKS } from "./queryAmbient";
 import { QueryStatus } from "../types";
 
 const NOW = new Date("2026-07-06T00:00:00Z").getTime();
@@ -424,3 +424,56 @@ describe("elapsedLabel — days→weeks at 28 (P4, page-wide)", () => {
     expect(elapsedLabel(-5)).toBe("0 days");
   });
 })
+
+describe("suggestedAction — the ONE pulsing fork chip, derived (nothing stored)", () => {
+  const WEEK = 7;
+  it("overdue, not hugely overdue → nudge", () => {
+    // agent window 8 weeks → hugely threshold = max(3×8, 12) = 24 weeks. Overdue by 10 weeks → nudge.
+    expect(suggestedAction("overdue", 10 * WEEK, 8)).toBe("nudge");
+  });
+  it("overdue AND hugely overdue → close", () => {
+    // 24-week threshold; overdue by 25 weeks → close.
+    expect(suggestedAction("overdue", 25 * WEEK, 8)).toBe("close");
+  });
+  it("grace → nothing pulses (waiting on the agent)", () => {
+    expect(suggestedAction("grace", 30 * WEEK, 8)).toBeNull();
+  });
+  it("within window → nothing pulses", () => {
+    expect(suggestedAction("within", 0, 8)).toBeNull();
+  });
+  it("a tiny/unstated agent window is floored at 12 weeks (no premature 'close')", () => {
+    // window absent → floor 12 weeks. Overdue by 10 weeks → still nudge; by 13 → close.
+    expect(suggestedAction("overdue", 10 * WEEK, undefined)).toBe("nudge");
+    expect(suggestedAction("overdue", 13 * WEEK, undefined)).toBe("close");
+    // tiny window (1 week) → 3×1=3 < 12 floor → floor wins.
+    expect(isHugelyOverdue(10 * WEEK, 1)).toBe(false);
+    expect(isHugelyOverdue(13 * WEEK, 1)).toBe(true);
+  });
+  it("the threshold constant is > 3× the window, floored at 12 weeks", () => {
+    expect(HUGELY_OVERDUE_WINDOW_MULT).toBe(3);
+    expect(HUGELY_OVERDUE_FLOOR_WEEKS).toBe(12);
+    // A large window drives the threshold above the floor: 10-week window → 30-week threshold.
+    expect(isHugelyOverdue(29 * WEEK, 10)).toBe(false);
+    expect(isHugelyOverdue(31 * WEEK, 10)).toBe(true);
+  });
+});
+
+describe("Fork pulse — the composer applies tc-suggested to exactly one chip; no chip is filled", () => {
+  const tc = readFileSync(resolve(__dirname, "../components/reading-pane/TimelineComposer.tsx"), "utf8");
+  const css = readFileSync(resolve(__dirname, "../components/reading-pane/timelineComposer.css"), "utf8");
+  it("the suggested action drives a single tc-suggested chip (matched by action.kind)", () => {
+    expect(tc.includes("suggestedAction(")).toBe(true);
+    expect(tc.includes("c.action.kind === suggested")).toBe(true);
+    expect(tc.includes("tc-suggested")).toBe(true);
+  });
+  it("the pulse is CSS-only with NO var() in the % selectors (the silent-failure trap)", () => {
+    const kf = css.slice(css.indexOf("@keyframes tc-suggest"), css.indexOf("}", css.indexOf("@keyframes tc-suggest") + 60) + 1);
+    expect(kf.includes("box-shadow")).toBe(true);
+    expect(kf.includes("var(")).toBe(false);
+    expect(css.includes("prefers-reduced-motion") && css.includes(".tc-chip.tc-suggested { animation: none; }")).toBe(true);
+  });
+  it("no fork chip carries a pink fill any more (the 'primary' fill is gone)", () => {
+    expect(css.includes("--pink-btn")).toBe(false);
+    expect(/\.tc-chip\.tc-primary\s*\{[^}]*background/.test(css)).toBe(false);
+  });
+});

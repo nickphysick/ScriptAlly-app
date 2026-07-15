@@ -1,0 +1,75 @@
+<!doctype html>
+<!--
+  Fork chips + pulse-only suggested action. ⚠️ SPEC-DERIVED and DELIBERATELY SCOPED: this ref covers
+  ONLY the fork-chip styling and the suggested-action pulse. Its readout/bar treatment is STALE and
+  superseded on dev (old black pill, warning glyph, different timeline nodes) — ignore it entirely;
+  DEV is the source of truth for the readout and bar. Colours resolve from .t-f12 tokens in the app.
+
+  Rules shown:
+   • Every fork chip = ONE outlined style (no fill, no bold "primary"); told apart by its
+     direction-coloured dot (and the close chip's × glyph).
+   • Exactly ONE chip is the SUGGESTED action, distinguished ONLY by a subtle burgundy halo pulse —
+     identical border/background/weight to the others. Chosen by rule (nothing stored):
+       overdue → Nudge · hugely overdue → Close query · grace / within window → nothing pulses.
+     "Hugely overdue" = overdue by > 3× the agent's window, floored at 12 weeks.
+-->
+<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Fork chips — one style + pulse-only suggested</title>
+<style>
+  :root{--panel:#fffdfb;--line:#e6dccd;--paper:#faf6f0;--ink:#1e1a16;--ink-2:#4a443c;--muted:#7d7469;--burg:#7c3a2a;
+    --body:'Inter',system-ui,sans-serif;--out:#c98a5e;--in:#7a9e6a;--rej:#9b8c7a;}
+  *{box-sizing:border-box}body{margin:0;padding:24px;background:#f3ece2;font-family:var(--body);color:#3a1c14}
+  h1{font-size:15px;margin:0 0 4px}p.note{font-size:12px;color:#8a7d6c;margin:0 0 18px;max-width:560px}
+  .lbl{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:#a89a8a;margin:16px 0 8px}
+  .fork{max-width:520px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 6px 20px rgba(40,28,20,.08);padding:14px}
+  .fq{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;margin-bottom:9px}
+  .chips{display:flex;gap:7px;flex-wrap:wrap}
+  /* ONE outlined style for every chip — no fill, no bold */
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:99px;border:1px solid var(--line);background:var(--panel);font-size:13px;color:var(--ink-2);cursor:pointer}
+  .chip .d{width:9px;height:9px;border-radius:50%;flex:none}
+  .chip .x{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;border:1.3px solid currentColor;font-size:11px;font-weight:600}
+  /* the ONE suggested chip: identical style + a gentle burgundy halo (no var() in the % selectors) */
+  .chip.suggested{animation:pulse 2.1s ease-in-out infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(124,58,42,0)}50%{box-shadow:0 0 0 4px rgba(124,58,42,.16)}}
+  @media (prefers-reduced-motion:reduce){.chip.suggested{animation:none}}
+  .other{margin-top:10px;font-size:12px;font-weight:600;color:var(--muted)}
+</style></head><body>
+<h1>Fork chips — one style, pulse-only suggested action</h1>
+<p class="note">Fork only. Ignore any readout/bar here — dev is the source of truth for those.</p>
+
+<div class="lbl">overdue (not hugely) — Nudge suggested</div>
+<div class="fork">
+  <div class="fq">What happened next?</div>
+  <div class="chips">
+    <span class="chip"><span class="d" style="background:var(--out)"></span>Partial requested</span>
+    <span class="chip"><span class="d" style="background:var(--rej)"></span>Rejection</span>
+    <span class="chip suggested"><span class="d" style="background:var(--burg)"></span>Nudge</span>
+    <span class="chip"><span class="x">×</span>Close query</span>
+  </div>
+  <div class="other">Other…</div>
+</div>
+
+<div class="lbl">hugely overdue — Close query suggested</div>
+<div class="fork">
+  <div class="fq">What happened next?</div>
+  <div class="chips">
+    <span class="chip"><span class="d" style="background:var(--out)"></span>Partial requested</span>
+    <span class="chip"><span class="d" style="background:var(--rej)"></span>Rejection</span>
+    <span class="chip"><span class="d" style="background:var(--burg)"></span>Nudge again</span>
+    <span class="chip suggested"><span class="x">×</span>Close query</span>
+  </div>
+  <div class="other">Other…</div>
+</div>
+
+<div class="lbl">grace / within window — nothing pulses</div>
+<div class="fork">
+  <div class="fq">What happened next?</div>
+  <div class="chips">
+    <span class="chip"><span class="d" style="background:var(--out)"></span>Partial requested</span>
+    <span class="chip"><span class="d" style="background:var(--rej)"></span>Rejection</span>
+    <span class="chip"><span class="d" style="background:var(--burg)"></span>Nudge again</span>
+    <span class="chip"><span class="x">×</span>Close query</span>
+  </div>
+  <div class="other">Other…</div>
+</div>
+</body></html>

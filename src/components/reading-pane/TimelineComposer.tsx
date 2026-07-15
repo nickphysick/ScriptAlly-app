@@ -20,7 +20,7 @@
 import React, { useImperativeHandle, useMemo, useRef, useState } from "react";
 import { Agent, Query, QueryStatus, SubmissionMethod } from "../../types";
 import { composerChips, type ComposerChip } from "../../lib/composerChips";
-import { queryBucket, queryAmbientStatus, deriveEscalation } from "../../lib/queryAmbient";
+import { queryBucket, queryAmbientStatus, deriveEscalation, suggestedAction, type SuggestedAction } from "../../lib/queryAmbient";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
 import { StatusDot } from "../StatusDot";
 import { recordQueryResponse, type RecordResponseData } from "../../lib/recordResponse";
@@ -111,15 +111,14 @@ export const TimelineComposer = React.forwardRef<TimelineComposerHandle, Timelin
     const status = query.status as QueryStatus;
     const sentISO = isoOf(query.dateSent);
 
-    // TR P5 — the give-up "Close query" chip is OFFERED (never fired) in overdue/grace (a waiting
-    // query past its expected reply) and on any your-move status. within-window waiting never shows
-    // it (nothing's late yet). Derived live from the SAME escalation machine the readout reads, so
-    // the chip and the pane's escalation can't disagree. It never auto-closes anything.
+    // The give-up "Close query" chip is OFFERED (never fired) in overdue/grace + your-move; and exactly
+    // ONE chip may be the SUGGESTED action (pulse), chosen by rule from the same escalation the readout
+    // reads — overdue→nudge, hugely overdue→close, grace/within→none. Nothing stored; can't disagree.
     const reminderMs = query.nudgeDate ? toMs(query.nudgeDate) : null;
-    const canClose = useMemo(() => {
+    const { canClose, suggested } = useMemo<{ canClose: boolean; suggested: SuggestedAction }>(() => {
       const bucket = queryBucket(status);
-      if (bucket === "move") return true;
-      if (bucket !== "waiting") return false;
+      if (bucket === "move") return { canClose: true, suggested: null };
+      if (bucket !== "waiting") return { canClose: false, suggested: null };
       const pa = getPrimaryAction(status);
       const ambient = queryAmbientStatus(query, pa.kind === "record" ? pa.ballHolder : "writer", pa.kind === "mark-sent" ? pa.markKind : undefined);
       const escal = deriveEscalation(ambient, {
@@ -127,8 +126,8 @@ export const TimelineComposer = React.forwardRef<TimelineComposerHandle, Timelin
         lastNudgeMs: query.lastNudgeSentDate ? toMs(query.lastNudgeSentDate) : null,
         now: Date.now(),
       });
-      return escal === "overdue" || escal === "grace";
-    }, [status, query, reminderMs]);
+      return { canClose: escal === "overdue" || escal === "grace", suggested: suggestedAction(escal, ambient.daysOverdue, agent.responseTimeWeeks) };
+    }, [status, query, reminderMs, agent.responseTimeWeeks]);
     // "Nudge again" once a future follow-up reminder is already set (you're chasing, not first-nudging).
     const hasFutureReminder = Number.isFinite(reminderMs as number) && (reminderMs as number) > Date.now();
 
@@ -255,20 +254,25 @@ export const TimelineComposer = React.forwardRef<TimelineComposerHandle, Timelin
         {!formOpen ? (
           <>
             <div className="tc-chips">
-              {model.chips.map((c, i) => (
-                <button
-                  key={c.key}
-                  ref={i === 0 ? firstChipRef : undefined}
-                  type="button"
-                  className={`tc-chip tc-${c.tone}`}
-                  onClick={() => onChip(c)}
-                >
-                  {c.tone === "close"
-                    ? <span className="tc-x" aria-hidden="true">×</span>
-                    : <StatusDot status={c.dotStatus} overrideSize={15} decorative />}
-                  {c.label}
-                </button>
-              ))}
+              {model.chips.map((c, i) => {
+                // Exactly one chip pulses — the derived suggested action (nudge / close), or none.
+                const isSuggested = !!suggested && c.action.kind === suggested;
+                return (
+                  <button
+                    key={c.key}
+                    ref={i === 0 ? firstChipRef : undefined}
+                    type="button"
+                    className={`tc-chip tc-${c.tone}${isSuggested ? " tc-suggested" : ""}`}
+                    title={isSuggested ? "Suggested next step" : undefined}
+                    onClick={() => onChip(c)}
+                  >
+                    {c.tone === "close"
+                      ? <span className="tc-x" aria-hidden="true">×</span>
+                      : <StatusDot status={c.dotStatus} overrideSize={15} decorative />}
+                    {c.label}
+                  </button>
+                );
+              })}
             </div>
             {model.otherChips.length > 0 && (
               /* TWS P3 — implausible-from-here steps tucked behind an expander. */

@@ -210,6 +210,42 @@ export function nudgeCount(events: { type?: unknown }[] | null | undefined, nudg
   return (events || []).filter((e) => e.type === nudgeType).length;
 }
 
+// ── Suggested fork action (the single pulsing chip) — derived, never stored. ─────────────────────
+
+/**
+ * "Hugely overdue" threshold, in ONE clearly-named place so it's tunable without hunting: overdue by
+ * more than HUGELY_OVERDUE_WINDOW_MULT× the agent's stated response window, floored at
+ * HUGELY_OVERDUE_FLOOR_WEEKS so a tiny or unstated window doesn't flip a query to "close" prematurely.
+ */
+export const HUGELY_OVERDUE_WINDOW_MULT = 3;
+export const HUGELY_OVERDUE_FLOOR_WEEKS = 12;
+
+/**
+ * True when a waiting query is "hugely" overdue — more than max(mult × window, floor) weeks BEYOND its
+ * expected reply. `agentWindowWeeks` is the per-agent `responseTimeWeeks` (readable per query); when
+ * absent or tiny the floor guards, so agents with no stated window fall back to the 12-week floor.
+ */
+export function isHugelyOverdue(daysOverdue: number, agentWindowWeeks: number | null | undefined): boolean {
+  const weeks = agentWindowWeeks && agentWindowWeeks > 0
+    ? Math.max(HUGELY_OVERDUE_WINDOW_MULT * agentWindowWeeks, HUGELY_OVERDUE_FLOOR_WEEKS)
+    : HUGELY_OVERDUE_FLOOR_WEEKS;
+  return daysOverdue > weeks * 7;
+}
+
+export type SuggestedAction = "nudge" | "close" | null;
+
+/**
+ * The ONE fork chip that pulses, chosen by rule (nothing stored):
+ *  - overdue, not hugely overdue → "nudge" (chase it).
+ *  - overdue AND hugely overdue → "close" (time to let go).
+ *  - grace (nudged, reminder ahead) → null (you're waiting on the agent).
+ *  - within window → null.
+ */
+export function suggestedAction(escal: Escalation, daysOverdue: number, agentWindowWeeks: number | null | undefined): SuggestedAction {
+  if (escal !== "overdue") return null;
+  return isHugelyOverdue(daysOverdue, agentWindowWeeks) ? "close" : "nudge";
+}
+
 /**
  * TWS P4 — the ONE elapsed-time label, applied to every elapsed value on the Tracking pane (overdue
  * badge, "waiting {n}", "asked {n} ago"): ≤28 days → "{n} days"; beyond → "{round(n/7)} weeks".
