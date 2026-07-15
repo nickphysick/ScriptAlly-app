@@ -32,3 +32,13 @@ export function choosePicks(opts: { doCards: BoardCard[]; hkCards: BoardCard[]; 
 export function rolledOverCards(cards: BoardCard[], today: string): BoardCard[] {
   return cards.filter((c) => c.committedDate != null && c.committedDate < today);
 }
+
+/**
+ * Today's-list progress: N = items committed to today's list (still-on-list + completed-from-list);
+ * M = the completed ones. A globally-cleared item that was NEVER committed to Today does not enter
+ * this ratio. Empty list → total 0 (no "done" claim). Logic only — the component renders it.
+ */
+export function todayProgress(committedOnList: number, doneFromList: number): { total: number; done: number; pct: number; empty: boolean } {
+  const total = committedOnList + doneFromList;
+  return { total, done: doneFromList, pct: total ? Math.round((doneFromList / total) * 100) : 0, empty: total === 0 };
+}

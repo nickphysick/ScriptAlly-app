@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { BoardCard } from "./todoBoard";
-import { choosePicks, rolledOverCards } from "./todoWalk";
+import { choosePicks, rolledOverCards, todayProgress } from "./todoWalk";
 
 const card = (key: string, over: Partial<BoardCard> = {}): BoardCard =>
   ({ key, stream: "do", title: "", who: "", subtitle: "", due: "", warn: false, snoozes: 0, hk: false, initials: "", record: "", committed: false, done: false, ...over } as BoardCard);
@@ -22,6 +22,20 @@ describe("choosePicks — the Help-me-pick rule", () => {
   it("never picks already-committed cards", () => {
     const someCommitted = [card("d1", { committed: true }), card("d2"), card("d3")];
     expect(choosePicks({ doCards: someCommitted, hkCards: [], committedCount: 1 })).toEqual(["d2", "d3"]);
+  });
+});
+
+describe("todayProgress — empty list never claims done", () => {
+  it("empty list → 0/0, no done, not filled", () => {
+    expect(todayProgress(0, 0)).toEqual({ total: 0, done: 0, pct: 0, empty: true });
+  });
+  it("a globally-cleared item that wasn't committed to Today does not enter the ratio", () => {
+    // 0 committed on the list, 0 completed FROM the list → still empty even though something cleared globally.
+    expect(todayProgress(0, 0).empty).toBe(true);
+  });
+  it("N committed, M done → M/N", () => {
+    expect(todayProgress(2, 1)).toEqual({ total: 3, done: 1, pct: 33, empty: false });
+    expect(todayProgress(0, 2)).toEqual({ total: 2, done: 2, pct: 100, empty: false });
   });
 });
 

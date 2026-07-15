@@ -99,3 +99,38 @@ Halted here rather than guess, per the run's prime directive. The walkthroughs (
 - The concurrent "interactions" stream had already built the `users/{uid}/tasks` store CRUD (with `dueDate`) — consumed, not duplicated.
 
 **⚠ Layout is UNVERIFIED (jsdom-blind).** Nick must eyeball, logged in on dev, before trusting: the board in all four columns (empty + populated), the fixed 344px shelf, the Today's-list box (commit, cap-5 toast, rollover Keep/Clear, Help-me-pick pulse), and the drawer for every card type (mark-sent capture, nudge draft/copy, offer→RecordResponse, both housekeeping fixes, user-task edit) across sparse/rich data.
+
+## Fix pass — board polish (partial; Fix 1 red-gated)
+
+**Gates:** `tsc` clean · `vite build` OK · full Vitest **943** green. One fix landed (Fix 3); the rest are findings, not guesses.
+
+### Step 0 — chrome ownership
+`git status` clean (no PaintMode). The Queries Hub does **NOT** follow a content-only pattern — it renders `<F12Page>` (which draws its own `CrumbStrip` + `F12Account`). `ToDoPage` uses the **same** `F12Page`. So the fix pass's premise ("`ToDoPage` renders its own header row + footer") is **incorrect** — `ToDoPage` renders neither.
+
+### ⛔ FIX 1 — RED-GATE (root cause is in `App.tsx`, which is out of bounds)
+The double breadcrumb + the footer are **both produced by `App.tsx`**, not the page:
+- **Footer** — `App.tsx:663` renders `<footer>…Crafted for fiction authors…` gated by `showFooter = routeKey !== "queries" && !manuscriptsPackages` (`App.tsx:582`). `/todo` isn't excluded → it shows. It is **NOT** a page-local component and **NOT** a mis-import — it's a literal `<footer>` in `App.tsx`.
+- **Double crumb** — `ToDoPage`'s `<StagePage>` has **`contentVariant="work"`** (`App.tsx:624`), and `StagePage` renders a `CrumbStrip` whenever `contentVariant` is set (`AppShell.tsx:75-77`). Plus `F12Page` renders a second `CrumbStrip`. The Queries Hub's `<StagePage>` has **no** `contentVariant`, so it shows only `F12Page`'s crumb — that's why it looks right.
+
+**The correct fix is two lines in `App.tsx`** — make `/todo` match `/queries`: (1) drop `contentVariant="work"` from the To-do `<StagePage>` (line 624), (2) add `"todo"` to the `showFooter` exclusion (line 582). Both are in `App.tsx`, which this pass forbids (RED-GATE). A page-side workaround (drop `F12Page` from `ToDoPage`) would remove one crumb but leaves the footer, drops the user cluster, and diverges from the Queries-Hub pattern — a guess at the intended architecture, so not taken.
+
+### FIX 2 — stray "0 / 5" in the hero: layout escape, tied to Fix 1
+The page renders **no** `0/5` node in the hero (only the Today-box header renders `{items.length} / {MAX_TODAY}`). So it's the Today-box pill escaping its container — a **layout** symptom, and the top-shelf grid is being disrupted by the Fix-1 chrome duplication (the extra `contentVariant` wrapper + `F12Page`). Not safely page-fixable before Fix 1; expected to resolve once Fix 1 lands. No change made (would be guessing).
+
+### FIX 3 — Today's-list empty-state progress: FIXED
+Real logic bug: `renderTodayBox` computed `total = items.length + clearedN` (global cleared-count in the denominator) → an empty list read "1 OF 1 DONE" with a full bar. Now a pure `todayProgress(committedOnList, doneFromList)` selector (`src/lib/todoWalk.ts`, unit-tested): denominator = items committed to **today's** list (still-on-list + completed-from-list); numerator = those completed; a globally-cleared item never committed to Today is excluded; empty → `total 0`, "NOTHING COMMITTED", bar hidden. `doneFromList` counts cleared items whose `committedDate === today`.
+
+### FIX 4 — "Cleared today" hero vs column: already one source (no reproduction)
+In the code the hero stat is `clearedN = columns.done.length` and the Cleared column renders that **same** `columns.done` array — they cannot disagree; there is no separate count. The `clearedToday` union also can't double-count a single completion (a nudge writes one `NUDGE_SENT` activity and does **not** set `resolvedAt`). The reported "hero 1 / column 2" doesn't reproduce from the current code — likely a stale screenshot or a specific data case. **Verify on the live board**; no change made (nothing to fix without a reproduction).
+
+### FIX 5 — offer card's green ringed star: correct StatusDot, off-palette (judgement call)
+The star **is** the real `StatusDot` for `OFFER` status (a star glyph), rendered on the offer card correctly. It shows off-palette (green) because **`.t-f12` does not define `--sd-hue` / `--sd-centre`**, so every board `StatusDot` falls back to the un-themed per-status spectrum — not just the offer's. It's neither a stray marker someone added nor a mis-selection (OFFER is the correct status), so **neither of Fix 5's two options applies** → judgement call, not covered. Options for Nick: **(a)** add `--sd-hue`/`--sd-centre` to `.t-f12` (a token add like the board bands, so all board dots read the F12 palette) — my lean; **(b)** a product decision to suppress the dot on offer cards (deviates from the StatusDot-everywhere invariant + inconsistent with the other cards' dots). Not guessed.
+
+### Finalise
+- **Landed:** Fix 3 only. Commit: `fix(todo): Today's-list progress ignores globally-cleared items`.
+- **Fix 1:** footer is an `App.tsx` `<footer>` (not page-local, not a mis-import); the page already matches the Queries-Hub mount (both use `F12Page`) — the divergence is the `contentVariant`/`showFooter` wiring in `App.tsx`. 2-line `App.tsx` fix listed above.
+- **Fix 2:** stray node vs escape → **escape** (no duplicate node; Today-box pill), tied to Fix 1.
+- **Fix 4:** double-count vs under-count → **neither** — already single-source; doesn't reproduce in code.
+- **Fix 5:** stray glyph vs StatusDot selection → **neither** — correct OFFER StatusDot, off-palette because `.t-f12` lacks `--sd-hue`.
+- **Rules:** none changed this pass.
+- **⚠ Layout unverified (jsdom-blind):** after Nick applies the 2-line `App.tsx` fix, re-eyeball — no double breadcrumb, no footer, single `0/5` in the Today header, empty Today reads empty (Fix 3), cleared count agrees hero↔column, and decide the offer-card dot (Fix 5).

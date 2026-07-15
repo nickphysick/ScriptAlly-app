@@ -23,7 +23,8 @@ import { StatusDot } from "../StatusDot";
 import { useScriptAllyDb } from "../../lib/db";
 import { assembleBoard, BoardCard, BoardColumns } from "../../lib/todoBoard";
 import { flagKeyForTask } from "../../lib/taskFlags";
-import { choosePicks, rolledOverCards, MAX_TODAY } from "../../lib/todoWalk";
+import { choosePicks, rolledOverCards, todayProgress, MAX_TODAY } from "../../lib/todoWalk";
+import { clearedTodayItems } from "../../lib/clearedToday";
 import { QueryStatus } from "../../types";
 import { TaskDetail } from "./TaskDetail";
 import "./todo.css";
@@ -72,6 +73,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const onList = (c: BoardCard) => c.committedDate != null;
   const todayCards = [...columns.do, ...columns.hk, ...columns.nt].filter(onList);
   const rolled = rollDismissed ? [] : rolledOverCards(todayCards, today);
+  // Items completed FROM today's list (committed to today AND cleared today) — feeds the progress
+  // bar. Globally-cleared items that were never committed to Today are deliberately excluded.
+  const clearedItems = clearedTodayItems({ activities, userTasks, taskFlags, now });
+  const doneFromList = clearedItems.userTasks.filter((t) => t.committedDate === today).length + clearedItems.flags.filter((f) => f.committedDate === today).length;
 
   function setCommitted(card: BoardCard, on: boolean) {
     const val = on ? today : null;
@@ -200,8 +205,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // ── Today's list box (fixed shelf; body scrolls behind a fade at ~4 rows; footer always shown) ──
   function renderTodayBox() {
     const items = todayCards;
-    const total = items.length + clearedN; // committed + already-cleared today
-    const pct = total ? Math.round((clearedN / total) * 100) : 0;
+    // Progress is about TODAY'S list only — a globally-cleared item never committed to Today must not
+    // inflate it (that produced the "1 OF 1 DONE" on an empty list).
+    const prog = todayProgress(items.length, doneFromList);
     return (
       <div className="tdb-today">
         <div className="tdb-th"><span className="tdb-t">Today’s list</span><span className="tdb-c">{items.length} / {MAX_TODAY}</span></div>
@@ -227,9 +233,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           ))}
         </div>
         <div className="tdb-tf">
-          <div className="tdb-tbar" style={{ visibility: total ? "visible" : "hidden" }}><i style={{ width: `${pct}%` }} /></div>
+          <div className="tdb-tbar" style={{ visibility: prog.empty ? "hidden" : "visible" }}><i style={{ width: `${prog.pct}%` }} /></div>
           <div className="tdb-tfr">
-            <span className="tdb-pc">{total ? `${clearedN} OF ${total} DONE` : "NOTHING COMMITTED"}</span>
+            <span className="tdb-pc">{prog.empty ? "NOTHING COMMITTED" : `${prog.done} OF ${prog.total} DONE`}</span>
             <button type="button" className="tdb-pick" onClick={helpMePick}>{items.length ? "Add more" : "Help me pick"}</button>
             <button type="button" className="tdb-walk" disabled={!items.length} onClick={() => flash("Work the list — Phase 4")}>Work the list</button>
           </div>
