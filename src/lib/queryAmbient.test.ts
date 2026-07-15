@@ -211,6 +211,12 @@ describe("P6 artefacts — one escalation signal per pane (readout escalates, fo
   it("P3 tidy — no strikethrough anywhere (the expectation lapsed, it wasn't withdrawn)", () => {
     expect(tl.includes("line-through")).toBe(false);
   });
+
+  it("grace P3 — a re-escalated overdue badge acknowledges the prior chase (nudged N×), not a fresh overdue", () => {
+    expect(tl.includes("nudged once")).toBe(true);
+    expect(tl.includes("nudged ${nudges}×")).toBe(true);
+    expect(tl.includes("· no reply`")).toBe(true);
+  });
   it("the 'What happened next?' composer (the fork) carries NO needs-you tokens — stays neutral", () => {
     expect(composer.includes("--pink-i")).toBe(false);
     expect(composer.includes("--pink-t")).toBe(false);

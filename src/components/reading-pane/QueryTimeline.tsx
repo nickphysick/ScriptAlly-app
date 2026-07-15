@@ -325,8 +325,13 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
               <div style={{ background: "var(--pink-t)", border: "1px solid var(--pink-b)", borderRadius: 11, padding: "11px 13px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 9, flexWrap: "wrap", color: "var(--pink-i)" }}>
                   {clockIcon}
+                  {/* P3 — when a prior chase has lapsed back to overdue, the badge ACKNOWLEDGES it
+                      ("nudged N× · no reply") rather than reading as a fresh overdue; standard copy
+                      when never nudged. */}
                   <span style={{ fontFamily: FONT_MONO, fontSize: 8.5, fontWeight: 700, letterSpacing: ".06em", textTransform: "uppercase", color: "#fff", background: "var(--pink-i)", borderRadius: 6, padding: "3px 8px", whiteSpace: "nowrap" }}>
-                    Overdue · {waiting.daysOverdue} {waiting.daysOverdue === 1 ? "day" : "days"} past expected
+                    {nudges > 0
+                      ? `Overdue · ${nudges === 1 ? "nudged once" : `nudged ${nudges}×`} · no reply`
+                      : `Overdue · ${waiting.daysOverdue} ${waiting.daysOverdue === 1 ? "day" : "days"} past expected`}
                   </span>
                 </div>
                 {bar}
