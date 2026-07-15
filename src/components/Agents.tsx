@@ -970,10 +970,8 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
               </>
             )}
           </span>
-          <span className="f12-open">
-            <i style={{ background: isOpen ? "var(--sage)" : "transparent", border: isOpen ? "1.5px solid var(--sage)" : "1.5px solid #c9beb0" }} />
-            {isOpen ? "OPEN TO QUERIES" : a.submissionStatus === SubmissionStatus.CLOSED ? "CLOSED TO QUERIES" : "UNKNOWN"}
-          </span>
+          {/* P2 — footer door pill removed: the top-right SegmentedToggle is the single door readout
+              (two-systems rule — the door is expressed once, as the control's tone, not restated). */}
         </span>
       </div>
       </>
@@ -1051,19 +1049,10 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
               <TasksPopover scope={{ agentId: selectedAgent.id }} style={agTasksMenuStyle} onClose={() => setAgTasksOpen(false)} />
             )}
           </span>
-          {/* link group — pushed right by margin-left:auto */}
-          <div className="f12-grp-links">
-            <button
-              type="button"
-              className="f12-act"
-              disabled={!selectedAgent?.website?.trim()}
-              onClick={() => selectedAgent?.website?.trim() && window.open(hrefFor(selectedAgent.website), "_blank", "noopener,noreferrer")}
-              title={selectedAgent?.website?.trim() ? "Open the agent's website" : "No website on file"}
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.5 2.6 3.9 5.6 3.9 9S14.5 18.4 12 21c-2.5-2.6-3.9-5.6-3.9-9S9.5 5.6 12 3z" /></svg>
-              Website
-            </button>
-          </div>
+          {/* P2 — Website launcher removed: the header chip cluster ("+ Website" / launch) is the
+              single home for links; the command bar carries only record verbs. Spacer keeps the
+              ⋯ / Delete cluster right-aligned (was grp-links' margin-left:auto). */}
+          <div style={{ marginLeft: "auto" }} aria-hidden="true" />
           <span className="f12-divv2" aria-hidden="true" />
           <>
             <div className="f12-popwrap">
