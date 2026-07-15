@@ -2895,15 +2895,17 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           const addlinkStyle: React.CSSProperties = { display: "inline-flex", alignItems: "center", gap: 7, fontFamily: "'Inter',sans-serif", fontSize: 12, color: "#8f877b", marginTop: 14, cursor: "pointer" };
                           const eyebrow: React.CSSProperties = { fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".12em", textTransform: "uppercase" as const, color: "#8f877b", margin: "18px 0 2px" };
 
-                          // A material a query either did or didn't send — the pip toggles it (writes materialsWanted).
+                          // A material a query either did or didn't send — the whole row toggles it (writes
+                          // materialsWanted). Un-marking is a CORRECTION to a factual record: a plain field
+                          // patch, never a timeline-log entry (consistent with the corrections model).
                           const sentPip = (sent: boolean) => (
-                            <span style={{ display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".06em", textTransform: "uppercase" as const, color: sent ? "#4a5d45" : "#b3a596" }}>
-                              {sent ? "Sent" : "Not sent"}
+                            <span style={{ display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".06em", textTransform: "uppercase" as const, color: sent ? "#4a5d45" : burgundy }}>
+                              {sent ? "Sent" : "Mark sent"}
                               <span style={{ width: 16, height: 16, borderRadius: "50%", display: "grid", placeItems: "center", fontSize: 9, flexShrink: 0, ...(sent ? { background: "#eef3eb", color: "#4a5d45" } : { border: "1.5px dashed #cfc3b1", color: "transparent" }) }}>✓</span>
                             </span>
                           );
                           const docRow = (kind: "query" | "synopsis", label: string, sent: boolean, gtype: ComponentType) => (
-                            <button type="button" onClick={() => toggleDocMaterial(activeQuery, activeAgent, kind)} title={sent ? `Mark ${label.toLowerCase()} as not sent` : `Mark ${label.toLowerCase()} as sent`}
+                            <button type="button" onClick={() => toggleDocMaterial(activeQuery, activeAgent, kind)} title={sent ? `Un-mark ${label.toLowerCase()} as sent` : `Mark ${label.toLowerCase()} as sent`}
                               style={{ display: "flex", alignItems: "center", gap: 11, width: "100%", textAlign: "left", padding: "11px 0", background: "none", border: "none", borderBottom: "1px solid var(--bd)", cursor: "pointer", fontFamily: "'Inter',sans-serif", fontSize: 13.5, color: sent ? "var(--hub-item, #1a1512)" : "#8f877b" }}>
                               <TypeGlyph type={gtype} size={16} style={{ flexShrink: 0, color: sent ? "#6f4e37" : "#b3a596" }} />
                               <span style={{ flex: 1, minWidth: 0 }}>{label}</span>
@@ -2920,25 +2922,32 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                             <div style={{ padding: "11px 0", borderBottom: "1px solid var(--bd)", fontFamily: "'Inter',sans-serif", fontSize: 13.5 }}>
                               <div style={{ display: "flex", alignItems: "center", gap: 11, color: sampleItem ? "var(--hub-item, #1a1512)" : "#8f877b" }}>
                                 <TypeGlyph type={ComponentType.SAMPLE_PAGES} size={16} style={{ flexShrink: 0, color: sampleItem ? "#6f4e37" : "#b3a596" }} />
-                                <span style={{ flex: 1, minWidth: 0 }}>Sample materials{sampleItem && <span style={{ color: "#8f877b" }}> — {sampleMaterialText(sampleItem)}</span>}</span>
-                                <button type="button" onClick={openSampleEditor} title="Set the sample you sent" style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".06em", textTransform: "uppercase" as const, color: burgundy, background: "none", border: "none", cursor: "pointer" }}>{sampleItem ? "Change" : "＋ Add"}</button>
+                                <span style={{ flex: 1, minWidth: 0 }}>Sample materials<span style={{ color: "#8f877b" }}> — {sampleItem ? sampleMaterialText(sampleItem) : "Not included"}</span></span>
+                                {sampleItem ? (
+                                  <span style={{ display: "inline-flex", gap: 13 }}>
+                                    <button type="button" onClick={openSampleEditor} title="Change the sample you sent" style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".06em", textTransform: "uppercase" as const, color: burgundy, background: "none", border: "none", cursor: "pointer", padding: 0 }}>Change</button>
+                                    <button type="button" onClick={() => removeSampleMaterial(activeQuery, activeAgent)} title="Clear the sample materials" style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".06em", textTransform: "uppercase" as const, color: "#8f877b", background: "none", border: "none", cursor: "pointer", padding: 0 }}>Remove</button>
+                                  </span>
+                                ) : (
+                                  <button type="button" onClick={openSampleEditor} title="Set the sample you sent" style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".06em", textTransform: "uppercase" as const, color: burgundy, background: "none", border: "none", cursor: "pointer", padding: 0 }}>＋ Add</button>
+                                )}
                               </div>
                               {sampleEditorOpen && (
                                 <div style={{ marginTop: 11 }}>
-                                  {/* unit toggle — Pages / Chapters / Words (→ QueryMaterial.type) */}
+                                  {/* unit toggle — Pages / Chapters / Words (→ QueryMaterial.type). Selected =
+                                      inset ink ring, no fill; unselected stay plain/muted. */}
                                   <div role="group" aria-label="Sample unit" style={{ display: "flex", borderRadius: 8, overflow: "hidden", border: "1px solid var(--bd)" }}>
                                     {(["pages", "chapters", "words"] as const).map((u) => (
                                       <button key={u} type="button" onClick={() => setSampleUnit(u)} aria-pressed={sampleUnit === u}
-                                        style={{ flex: 1, padding: "6px 0", fontFamily: "'Inter',sans-serif", fontSize: 12, textTransform: "capitalize" as const, cursor: "pointer", border: "none", borderLeft: u === "pages" ? "none" : "1px solid var(--bd)", background: sampleUnit === u ? "var(--hub-item, #1a1512)" : "var(--panel, #fffdfb)", color: sampleUnit === u ? "#fff" : "#6b6257" }}>{u}</button>
+                                        style={{ flex: 1, padding: "6px 0", fontFamily: "'Inter',sans-serif", fontSize: 12, textTransform: "capitalize" as const, cursor: "pointer", border: "none", borderLeft: u === "pages" ? "none" : "1px solid var(--bd)", background: "var(--panel, #fffdfb)", boxShadow: sampleUnit === u ? "inset 0 0 0 1.5px var(--ink, #1e1a16)" : "none", color: sampleUnit === u ? "var(--ink, #1e1a16)" : "#6b6257", fontWeight: sampleUnit === u ? 600 : 400 }}>{u}</button>
                                     ))}
                                   </div>
                                   <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-                                    <input type="text" inputMode="numeric" value={sampleQty} onChange={(e) => setSampleQty(e.target.value)} placeholder={sampleUnit === "words" ? "e.g. 10,000" : "e.g. 3"} aria-label="Quantity"
+                                    <input type="text" inputMode="numeric" value={sampleQty} onChange={(e) => setSampleQty(e.target.value)} aria-label="Quantity"
                                       style={{ flex: 1, minWidth: 0, padding: "7px 10px", fontFamily: "'Inter',sans-serif", fontSize: 13, border: "1px solid var(--bd)", borderRadius: 8, background: "var(--panel, #fffdfb)", color: "var(--hub-item, #1a1512)" }} />
-                                    <button type="button" onClick={() => saveSampleMaterial(activeQuery, activeAgent)} disabled={!sampleQty.trim()} style={{ padding: "7px 15px", fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 600, color: "#fff", background: burgundy, border: "none", borderRadius: 8, cursor: sampleQty.trim() ? "pointer" : "default", opacity: sampleQty.trim() ? 1 : 0.5 }}>Save</button>
+                                    <button type="button" onClick={() => saveSampleMaterial(activeQuery, activeAgent)} disabled={!sampleQty.trim()} style={{ padding: "7px 16px", fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 600, color: burgundy, background: "#f5e2da", border: "1px solid #e8c8bc", borderRadius: 8, cursor: sampleQty.trim() ? "pointer" : "default", opacity: sampleQty.trim() ? 1 : 0.5 }}>Save</button>
                                     <button type="button" onClick={() => setSampleEditorOpen(false)} style={{ padding: "7px 10px", fontFamily: "'Inter',sans-serif", fontSize: 12.5, color: "#8f877b", background: "none", border: "none", cursor: "pointer" }}>Cancel</button>
                                   </div>
-                                  {sampleItem && <button type="button" onClick={() => removeSampleMaterial(activeQuery, activeAgent)} style={{ marginTop: 9, fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".06em", textTransform: "uppercase" as const, color: "#b0655a", background: "none", border: "none", cursor: "pointer", padding: 0 }}>Remove sample materials</button>}
                                 </div>
                               )}
                             </div>
