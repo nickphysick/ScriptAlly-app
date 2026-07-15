@@ -18,9 +18,6 @@ import { formatQueryMaterial } from "../../lib/materials";
 import { queryAmbientStatus, deriveEscalation, trackingBar, nudgeCount } from "../../lib/queryAmbient";
 import { NUDGE_NESTED_TYPE } from "../../lib/logNudge";
 
-/** "1 May" — sentence-case day for the grace prose lines. */
-const fmtDay = (ms: number): string => new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
-
 /** P5 — inter-event vertical spacing (px). One constant so reuse of the timeline stays consistent;
  *  the connector hairline's length is derived from it, never a per-instance number. */
 const TL_EVENT_GAP = 24;
@@ -106,8 +103,10 @@ export interface QueryTimelineProps {
   /** 5b — correction handlers for the hover ⋯ on activity-backed rows. */
   onEditEntry?: (entry: TimelineEntryRef) => void;
   onDeleteEntry?: (entry: TimelineEntryRef) => void;
-  /** P6 — open the Nudge flow; surfaced inline in the readout when the wait is overdue. */
+  /** Open the Nudge flow (now the fork's nudge chip; kept for the fork wiring). */
   onNudge?: () => void;
+  /** TWS P4 — open the "set an expected date" flow (writes responseDeadline) when none is derivable. */
+  onSetExpectedDate?: () => void;
 }
 
 /**
@@ -188,7 +187,7 @@ export function buildTimelineRows(events: any[], query: Query, agent: Agent | nu
   return [...statusRows, ...nudgeRows].sort((a, b) => (a.timeMs ?? 0) - (b.timeMs ?? 0));
 }
 
-export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry, onNudge }) => {
+export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry, onNudge, onSetExpectedDate }) => {
   const [menu, setMenu] = useState<{ entry: TimelineEntryRef; style: React.CSSProperties } | null>(null);
 
   const rows = buildTimelineRows(events, query, agent);
@@ -265,7 +264,6 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
         const escal = deriveEscalation(waiting, { reminderMs, lastNudgeMs, now: Date.now() });
         const nudges = nudgeCount(events, NUDGE_NESTED_TYPE); // P3 — re-escalation "nudged N×" copy
         const dated = waiting.sentMs != null && waiting.expMs != null;
-        const agentFirst = agent?.name?.split(" ")[0] || "the agent";
         // P4 — derived bar geometry (no magic percentages): within ends at expected (no marker);
         // overdue spans sent→now with the expected marker + hatch; grace spans sent→reminder with a
         // faded original-expected tick.
@@ -302,49 +300,58 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
                 <div style={{ position: "absolute", left: `${geo.graceTickPct}%`, top: 0, bottom: 0, width: 2, transform: "translateX(-1px)", background: "#b7a48f", opacity: 0.6 }} />
               )}
             </div>
+            {/* This shared bar serves within-window + overdue only (grace has its own pulse bar). No
+                strikethrough: the expectation LAPSED, it wasn't withdrawn — burgundy tone + marker say so. */}
             <div style={{ display: "flex", justifyContent: "space-between", fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.04em", color: "#7d7268", marginTop: 7 }}>
               <span>SENT {fmtShort(waiting.sentMs!)}</span>
-              {escal === "grace"
-                ? <span style={{ color: "var(--grace-ink)" }}>REMINDER {reminderMs != null ? fmtShort(reminderMs) : "—"}</span>
-                /* P3 — no strikethrough: the expectation LAPSED, it wasn't withdrawn; the crossed
-                   meaning rides the bar marker + burgundy tone only. */
-                : <span style={{ color: escal === "overdue" ? "var(--pink-i)" : "#7d7268" }}>EXPECTED BY ~{fmtShort(waiting.expMs!)}</span>}
+              <span style={{ color: escal === "overdue" ? "var(--pink-i)" : "#7d7268" }}>EXPECTED BY ~{fmtShort(waiting.expMs!)}</span>
             </div>
           </>
         ) : null;
 
         return (
           <div style={{ marginLeft: 4, marginTop: 16 }}>
-            {escal === "grace" ? (
-              /* GRACE (P2, warm) — nudged with a reminder still pending: the escalation STANDS DOWN.
-                 No badge, no hatch, no "N days past" line; a quiet "Nudge again" replaces the primary
-                 CTA. The overdue clock keeps counting underneath (unchanged) — only the readout calms. */
-              <div style={{ background: "var(--grace-bg)", border: "1px solid var(--grace-bd)", borderRadius: 11, padding: "11px 13px" }}>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 9, fontSize: 13, fontWeight: 500, color: "var(--grace-ink)" }}>
+            {!dated ? (
+              /* NO EXPECTED DATE (P2) — undated send, nothing derivable + no override. Dashed section
+                 + a burgundy "Set an expected date" link (writes responseDeadline; wired in P4). */
+              <div style={{ border: "1px dashed var(--line, #e6dccd)", borderRadius: 11, padding: "12px 14px" }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 9, fontSize: 13, color: "var(--muted, #8a7d6c)" }}>
                   {clockIcon}
-                  Awaiting response{lastNudgeMs != null && <> · followed up {fmtDay(lastNudgeMs)}</>}
+                  Awaiting response — no expected date set
                 </span>
-                {reminderMs != null && (
-                  <div style={{ fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: ".04em", color: "var(--grace-ink)", opacity: 0.78, marginTop: 8 }}>
-                    FOLLOW-UP REMINDER SET FOR {fmtShort(reminderMs)}
-                  </div>
-                )}
-                {bar}
-                {onNudge && (
-                  <button type="button" onClick={onNudge} style={{ marginTop: 11, background: "none", border: "none", padding: 0, fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 600, color: "var(--grace-ink)", textDecoration: "underline", textUnderlineOffset: 3, cursor: "pointer" }}>
-                    Nudge again
+                {onSetExpectedDate && (
+                  <button type="button" onClick={onSetExpectedDate} style={{ display: "block", marginTop: 9, background: "none", border: "none", padding: 0, fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 600, color: "var(--burg, #7c3a2a)", cursor: "pointer" }}>
+                    Set an expected date →
                   </button>
                 )}
               </div>
+            ) : escal === "grace" ? (
+              /* GRACE (P2) — DASHED, no fill; a sage bar that pulses left→right (CSS-only sweep). No
+                 badge, no nudge CTA (nudge is a fork chip now). The overdue clock keeps counting. */
+              <div style={{ border: "1px dashed var(--sage, #8a9e88)", borderRadius: 11, padding: "11px 13px" }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 9, fontSize: 13, fontWeight: 500, color: "var(--sageD, #5a6e58)" }}>
+                  {clockIcon}
+                  Awaiting response
+                </span>
+                <div style={{ fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: ".04em", color: "var(--sageD, #5a6e58)", opacity: 0.85, marginTop: 8 }}>
+                  {lastNudgeMs != null && <>FOLLOWED UP {fmtShort(lastNudgeMs)} · </>}REMINDER {reminderMs != null ? fmtShort(reminderMs) : "—"}
+                </div>
+                <div className="tl-gracebar" style={{ position: "relative", height: 6, borderRadius: 6, marginTop: 11, overflow: "hidden", background: "var(--sageC, #e9ede6)" }}>
+                  <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${geo.fillPct}%`, background: "var(--sage, #8a9e88)", opacity: 0.55 }} />
+                  <div className="tl-sweep" aria-hidden="true" />
+                  {geo.graceTickPct != null && <div style={{ position: "absolute", left: `${geo.graceTickPct}%`, top: 0, bottom: 0, width: 2, transform: "translateX(-1px)", background: "#b7a48f", opacity: 0.6 }} />}
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.04em", color: "#7d7268", marginTop: 7 }}>
+                  <span>SENT {fmtShort(waiting.sentMs!)}</span>
+                  <span style={{ color: "var(--sageD, #5a6e58)" }}>REMINDER {reminderMs != null ? fmtShort(reminderMs) : "—"}</span>
+                </div>
+              </div>
             ) : escal === "overdue" ? (
-              /* ESCALATED — the Overdue badge is the SINGLE headline (P3 dropped the parallel
-                 "Waiting · N days" counter); tinted card + inline Nudge (action where the user reads) */
+              /* OVERDUE (P2) — pink-tint card + badge. NO nudge CTA (nudge is a fork chip now, P3);
+                 re-escalation badge acknowledges the prior chase ("nudged N× · no reply"). */
               <div style={{ background: "var(--pink-t)", border: "1px solid var(--pink-b)", borderRadius: 11, padding: "11px 13px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 9, flexWrap: "wrap", color: "var(--pink-i)" }}>
                   {clockIcon}
-                  {/* P3 — when a prior chase has lapsed back to overdue, the badge ACKNOWLEDGES it
-                      ("nudged N× · no reply") rather than reading as a fresh overdue; standard copy
-                      when never nudged. */}
                   <span style={{ fontFamily: FONT_MONO, fontSize: 8.5, fontWeight: 700, letterSpacing: ".06em", textTransform: "uppercase", color: "#fff", background: "var(--pink-i)", borderRadius: 6, padding: "3px 8px", whiteSpace: "nowrap" }}>
                     {nudges > 0
                       ? `Overdue · ${nudges === 1 ? "nudged once" : `nudged ${nudges}×`} · no reply`
@@ -352,37 +359,30 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
                   </span>
                 </div>
                 {bar}
-                {onNudge && (
-                  <button type="button" onClick={onNudge} style={{ marginTop: 12, display: "inline-flex", alignItems: "center", gap: 7, fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 600, color: "#fff", background: "var(--pink-i)", border: "none", borderRadius: 8, padding: "7px 13px", cursor: "pointer" }}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" /></svg>
-                    Nudge {agentFirst}
-                  </button>
-                )}
               </div>
             ) : (
-              /* CALM — plain text + bar; the marker sits ahead of the fill within the window */
-              <>
+              /* WITHIN-WINDOW (P2) — soft-neutral card + hairline; lead text, mono data (the bar). */
+              <div style={{ background: "var(--paper, #faf7f2)", border: "1px solid var(--hairline, #f0eae1)", borderRadius: 11, padding: "11px 13px" }}>
                 {waitingLine}
                 {bar}
-              </>
+              </div>
             )}
           </div>
         );
       })()}
 
       {ballHolder === "writer" && (
-        /* Narrative only — the ACTION lives in the command bar now (one home for actions). The
-           yellow band keeps its "your move" prose; its old send-materials button was removed. */
+        /* YOUR MOVE (P2) — soft-pink fill + ink border, no divider beneath; Playfair title + burgundy
+           sub. The ACTION lives in the fork/command bar (one home for actions). */
         <div style={{ marginLeft: 4, marginTop: 16 }}>
-          <div style={{ background: "#f6edd6", border: "1px solid #e3d3a6", borderRadius: 11, padding: "12px 14px" }}>
-            <span style={{ fontWeight: 600, fontSize: 12.5, color: "#7a5e1f" }}>Your move — send the {sendWhat}</span>
+          <div style={{ background: "var(--pink, #f5e2da)", border: "1px solid var(--ink, #1e1a16)", borderRadius: 11, padding: "12px 14px" }}>
+            <span style={{ fontFamily: FONT_SERIF, fontWeight: 600, fontSize: 15, color: "var(--ink, #1e1a16)" }}>Your move — send the {sendWhat}</span>
             {ambient.writerDaysAgo != null && (
-              <small style={{ display: "block", fontWeight: 300, fontSize: 11, color: "#8a7a40", marginTop: 3 }}>
+              <small style={{ display: "block", fontWeight: 500, fontSize: 11.5, color: "var(--burg, #7c3a2a)", marginTop: 3 }}>
                 {agent?.name?.split(" ")[0] || "The agent"} asked for it {ambient.writerDaysAgo} {ambient.writerDaysAgo === 1 ? "day" : "days"} ago
               </small>
             )}
           </div>
-          {/* nudge mount seam */}
         </div>
       )}
       {/* ballHolder === null (closed / Offer): no trailing block — history only. */}

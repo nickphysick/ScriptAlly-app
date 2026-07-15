@@ -5,11 +5,16 @@
    Structure: full-bleed header (the CrumbStrip, repainted by .t-f12 tokens) → control bar,
    chips and panes in a centred column (max-width var(--maxw), margin-inline auto). ── */
 
-/* Grace tokens (Tracking pane — the de-escalated "nudged, reminder pending" treatment). Warm +
-   soft, deliberately NOT the loud --pink-* needs-you set: no badge, no hatch. Defined HERE (the f12
-   theme's own CSS) rather than the index.css .t-f12 block, which had an uncommitted theme-editor
-   retoken at build time — same precedent as contentColumn.css; fold into index.css when that lands. */
-.t-f12 { --grace-bg: #f5ece2; --grace-bd: #e7d6c4; --grace-ink: #7c3a2a; }
+/* Grace bar sage pulse (TWS P2) — a light sheen sweeps left→right. CSS-only; transform-only keyframes
+   (NO var() inside % selectors — the recurring silent-failure trap here). Honours reduced motion. */
+.t-f12 .tl-gracebar .tl-sweep {
+  position: absolute; top: 0; bottom: 0; left: 0; width: 38%;
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.55) 50%, rgba(255,255,255,0) 100%);
+  transform: translateX(-120%);
+  animation: tl-sweep 2.4s ease-in-out infinite;
+}
+@keyframes tl-sweep { 0% { transform: translateX(-120%); } 100% { transform: translateX(320%); } }
+@media (prefers-reduced-motion: reduce) { .t-f12 .tl-gracebar .tl-sweep { animation: none; } }
 
 /* page root — oat ground, viewport-locked column (lives in a fill StagePage slot) */
 .f12-root {

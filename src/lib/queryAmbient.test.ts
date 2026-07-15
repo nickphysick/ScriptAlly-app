@@ -297,3 +297,37 @@ describe("nudgeCount", () => {
     expect(nudgeCount(null, "Nudge sent")).toBe(0);
   });
 });
+
+describe("TWS P2 artefacts — five readout treatments + CSS-only sage pulse", () => {
+  const tl = readFileSync(resolve(__dirname, "../components/reading-pane/QueryTimeline.tsx"), "utf8");
+  const css = readFileSync(resolve(__dirname, "../components/shell/f12.css"), "utf8");
+
+  it("grace is DASHED + sage-pulse (the Warm --grace-* treatment is gone)", () => {
+    expect(tl.includes('"1px dashed var(--sage')).toBe(true);
+    expect(tl.includes("tl-gracebar")).toBe(true);
+    expect(tl.includes("tl-sweep")).toBe(true);
+    expect(tl.includes("var(--grace-bg")).toBe(false); // Warm treatment removed
+    expect(tl.includes("Nudge again")).toBe(false);     // the grace nudge link removed
+  });
+  it("overdue carries NO nudge CTA in the readout (nudge is a fork chip now)", () => {
+    expect(tl.includes("Nudge {agentFirst}")).toBe(false);
+    expect(tl.includes("agentFirst")).toBe(false);
+  });
+  it("the no-expected-date state + Set-an-expected-date link exist", () => {
+    expect(tl.includes("no expected date set")).toBe(true);
+    expect(tl.includes("Set an expected date")).toBe(true);
+    expect(tl.includes("onSetExpectedDate")).toBe(true);
+  });
+  it("your-move is soft-pink fill + ink border (was amber)", () => {
+    expect(tl.includes("Your move — send the")).toBe(true);
+    expect(tl.includes("var(--pink, #f5e2da)")).toBe(true);
+    expect(tl.includes("#f6edd6")).toBe(false); // old amber gone
+  });
+  it("the pulse keyframe is transform-only — NO var() inside the keyframe (silent-failure trap)", () => {
+    const kf = css.slice(css.indexOf("@keyframes tl-sweep"), css.indexOf("}", css.indexOf("@keyframes tl-sweep") + 40) + 1);
+    expect(kf.length).toBeGreaterThan(0);
+    expect(kf.includes("transform")).toBe(true);
+    expect(kf.includes("var(")).toBe(false);
+    expect(css.includes("prefers-reduced-motion")).toBe(true);
+  });
+});
