@@ -15,8 +15,11 @@ import React, { useState } from "react";
 import { StatusDot } from "../StatusDot";
 import { Query, QueryStatus, Agent, QueryMaterial } from "../../types";
 import { formatQueryMaterial } from "../../lib/materials";
-import { queryAmbientStatus, DAY } from "../../lib/queryAmbient";
+import { queryAmbientStatus, DAY, deriveEscalation, nudgeCount } from "../../lib/queryAmbient";
 import { NUDGE_NESTED_TYPE } from "../../lib/logNudge";
+
+/** "1 May" — sentence-case day for the grace prose lines. */
+const fmtDay = (ms: number): string => new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 import { F12Menu } from "../shell/F12Shell";
 
 /** A correctable timeline entry (5b) — passed to the ⋯ Edit / Delete handlers. */
@@ -247,6 +250,12 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
       {/* ── trailing open-state block — calm within window, ESCALATED to needs-you once overdue.
           The escalation is the pane's ONLY needs-you signal (the fork below stays neutral). ── */}
       {ballHolder === "agent" && waiting && (() => {
+        // P1/P2 — the escalation state (within/overdue/grace), derived from the overdue clock + the
+        // latest nudge's reminder (Query.nudgeDate) + when it fired (Query.lastNudgeSentDate).
+        const reminderMs = query.nudgeDate ? getTime(query.nudgeDate) : null;
+        const lastNudgeMs = query.lastNudgeSentDate ? getTime(query.lastNudgeSentDate) : null;
+        const escal = deriveEscalation(waiting, { reminderMs, lastNudgeMs, now: Date.now() });
+        const nudges = nudgeCount(events, NUDGE_NESTED_TYPE); // P3 — re-escalation "nudged N×" copy
         const overdue = waiting.overdue;
         const dated = waiting.sentMs != null && waiting.expMs != null;
         const windowDays = dated ? Math.max(1, Math.round((waiting.expMs! - waiting.sentMs!) / DAY)) : 0;
@@ -289,7 +298,28 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
 
         return (
           <div style={{ marginLeft: 4, marginTop: 16 }}>
-            {overdue ? (
+            {escal === "grace" ? (
+              /* GRACE (P2, warm) — nudged with a reminder still pending: the escalation STANDS DOWN.
+                 No badge, no hatch, no "N days past" line; a quiet "Nudge again" replaces the primary
+                 CTA. The overdue clock keeps counting underneath (unchanged) — only the readout calms. */
+              <div style={{ background: "var(--grace-bg)", border: "1px solid var(--grace-bd)", borderRadius: 11, padding: "11px 13px" }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 9, fontSize: 13, fontWeight: 500, color: "var(--grace-ink)" }}>
+                  {clockIcon}
+                  Awaiting response{lastNudgeMs != null && <> · followed up {fmtDay(lastNudgeMs)}</>}
+                </span>
+                {reminderMs != null && (
+                  <div style={{ fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: ".04em", color: "var(--grace-ink)", opacity: 0.78, marginTop: 8 }}>
+                    FOLLOW-UP REMINDER SET FOR {fmtShort(reminderMs)}
+                  </div>
+                )}
+                {/* grace progress bar lands in P4 */}
+                {onNudge && (
+                  <button type="button" onClick={onNudge} style={{ marginTop: 11, background: "none", border: "none", padding: 0, fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 600, color: "var(--grace-ink)", textDecoration: "underline", textUnderlineOffset: 3, cursor: "pointer" }}>
+                    Nudge again
+                  </button>
+                )}
+              </div>
+            ) : escal === "overdue" ? (
               /* ESCALATED — the Overdue badge is the SINGLE headline (P3 dropped the parallel
                  "Waiting · N days" counter); tinted card + inline Nudge (action where the user reads) */
               <div style={{ background: "var(--pink-t)", border: "1px solid var(--pink-b)", borderRadius: 11, padding: "11px 13px" }}>

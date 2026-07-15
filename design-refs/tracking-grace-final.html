@@ -1,0 +1,105 @@
+<!doctype html>
+<!--
+  Tracking pane — grace state + bar behaviour + connector.
+  ⚠️ SPEC-DERIVED: the approved mockup was not supplied to the build session; reconstructed from the
+  brief's prose (structure/behaviour reference only — colours come from .t-f12 tokens, not this file's
+  literal hex). Shows the three agent-waiting states + the derived bar geometry + the event connector.
+-->
+<html lang="en"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tracking — grace / overdue / within + connector</title>
+<style>
+  :root{
+    --panel:#fffdfb;--line:#e6dccd;--hair:#f0eae1;--ink:#3a1c14;--mono:'JetBrains Mono',ui-monospace,monospace;
+    --sage-bg:#eef2ec;--sage-fill:linear-gradient(90deg,#a9c0a4,#8aa886);--sage-dim:#5a6e58;--bar-bg:#e6ece4;
+    --pink-t:#f7e3dd;--pink-b:#eecdc3;--pink-i:#8a4030;                 /* overdue: loud needs-you */
+    --grace-bg:#f5ece2;--grace-bd:#e7d6c4;--grace-ink:#7c3a2a;          /* grace: warm de-escalated */
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:26px;background:#f3ece2;font-family:'Inter',system-ui,sans-serif;color:var(--ink)}
+  h1{font-size:15px;font-weight:600;margin:0 0 4px}p.n{font-size:12px;color:#7d7268;margin:0 0 20px;max-width:720px;line-height:1.5}
+  .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:start}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .lbl{font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:#a89a8a;margin-bottom:12px}
+  /* event timeline + connector (P5) */
+  .tl{position:relative}
+  .ev{position:relative;display:grid;grid-template-columns:30px 1fr;gap:11px;padding-bottom:22px}
+  .ev:last-child{padding-bottom:0}
+  .dotcol{position:relative;display:flex;justify-content:center}
+  .dot{width:26px;height:26px;border-radius:50%;border:3px solid var(--pink-i);background:#fff;z-index:1}
+  .dot.nudge{border-style:solid}
+  /* connector: drawn by the container behind the dots, stops at the last event */
+  .ev:not(:last-child) .dotcol::after{content:"";position:absolute;top:28px;bottom:-22px;left:50%;transform:translateX(-.8px);width:1.6px;background:var(--hair)}
+  .et{font-weight:600;font-size:14px}.es{font-size:12px;color:#9a8d7e;margin-top:2px}
+  .stamp{font-family:var(--mono);font-size:9px;color:#a89a8a}
+  /* readouts */
+  .readout{margin-top:16px}
+  .row{display:inline-flex;align-items:center;gap:9px;font-size:13px}
+  .row svg{width:15px;height:15px}
+  .bar{position:relative;height:6px;border-radius:6px;margin-top:11px;overflow:hidden;background:var(--bar-bg)}
+  .bar .fill{position:absolute;left:0;top:0;bottom:0}.bar .sage{background:var(--sage-fill)}
+  .bar .zone{background:linear-gradient(90deg,var(--pink-b),var(--pink-i))}
+  .bar .mark{position:absolute;top:0;bottom:0;width:2px;transform:translateX(-1px)}
+  .bar .tick{position:absolute;top:0;bottom:0;width:2px;transform:translateX(-1px);background:#b7a48f;opacity:.6}
+  .cap{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9.5px;color:#7d7268;margin-top:7px}
+  /* within */
+  .within .row{color:var(--ink)}
+  /* overdue */
+  .overdue .box{background:var(--pink-t);border:1px solid var(--pink-b);border-radius:11px;padding:11px 13px}
+  .badge{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--pink-i);border-radius:6px;padding:3px 8px}
+  .cta{margin-top:12px;display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:#fff;background:var(--pink-i);border:none;border-radius:8px;padding:7px 13px}
+  /* grace (warm) */
+  .grace .box{background:var(--grace-bg);border:1px solid var(--grace-bd);border-radius:11px;padding:11px 13px}
+  .grace .row{color:var(--grace-ink);font-weight:500}
+  .grace .rem{font-family:var(--mono);font-size:9.5px;letter-spacing:.04em;color:var(--grace-ink);opacity:.78;margin-top:8px}
+  .grace .again{margin-top:11px;background:none;border:none;padding:0;font-size:12px;font-weight:600;color:var(--grace-ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+</style></head><body>
+<h1>Tracking readout — within · overdue · grace (all agent-waiting; derived, no stored flag)</h1>
+<p class="n">Connector (P5): a faint <code>--hair</code> hairline joins consecutive event dots, drawn by the container behind the locked StatusDot, stopping at the last event (2+ events only). Bars (P4) are derived geometry. Grace (P2, warm) stands the escalation down while a nudge's follow-up reminder is pending; a lapsed reminder re-escalates to overdue with "nudged N×" copy (P3).</p>
+
+<div class="cols">
+  <!-- WITHIN -->
+  <div class="card within">
+    <div class="lbl">Within window</div>
+    <div class="tl">
+      <div class="ev"><div class="dotcol"><div class="dot" style="border-color:#7c3a2a"></div></div><div><div class="et">Query sent</div><div class="es">via Email</div></div></div>
+    </div>
+    <div class="readout">
+      <span class="row">◷ Waiting to hear back <b style="font-family:var(--mono);font-size:12px;color:var(--sage-dim)">· 20 days</b></span>
+      <div class="bar"><div class="fill sage" style="width:36%"></div></div>
+      <div class="cap"><span>SENT 16 JUN</span><span>EXPECTED BY ~11 AUG</span></div>
+      <p class="n" style="margin:10px 0 0">Bar ends AT expected — no mid-bar marker.</p>
+    </div>
+  </div>
+
+  <!-- OVERDUE (re-escalated) -->
+  <div class="card overdue">
+    <div class="lbl">Overdue (reminder lapsed → re-escalated)</div>
+    <div class="tl">
+      <div class="ev"><div class="dotcol"><div class="dot" style="border-color:#7c3a2a"></div></div><div><div class="et">Query sent</div><div class="es">via Email</div></div></div>
+      <div class="ev"><div class="dotcol"><div class="dot nudge"></div></div><div><div class="et">Nudged</div><div class="es">via Email</div></div></div>
+    </div>
+    <div class="readout"><div class="box">
+      <div style="display:flex;align-items:center;gap:9px;color:var(--pink-i)">◷ <span class="badge">Overdue · nudged 2× · no reply</span></div>
+      <div class="bar"><div class="fill sage" style="width:82%"></div><div class="fill zone" style="left:82%;width:18%"></div><div class="mark" style="left:82%;background:var(--pink-i)"></div></div>
+      <div class="cap"><span>SENT 1 MAY</span><span style="color:var(--pink-i)">EXPECTED BY ~26 JUN</span></div>
+      <button class="cta">🔔 Nudge Aisha</button>
+    </div></div>
+  </div>
+
+  <!-- GRACE -->
+  <div class="card grace">
+    <div class="lbl">Grace (nudged, reminder pending)</div>
+    <div class="tl">
+      <div class="ev"><div class="dotcol"><div class="dot" style="border-color:#7c3a2a"></div></div><div><div class="et">Query sent</div><div class="es">via Email</div></div></div>
+      <div class="ev"><div class="dotcol"><div class="dot nudge"></div></div><div><div class="et">Nudged</div><div class="es">via Email</div></div></div>
+    </div>
+    <div class="readout"><div class="box">
+      <span class="row">◷ Awaiting response · followed up 8 Jul</span>
+      <div class="rem">FOLLOW-UP REMINDER SET FOR 29 JUL</div>
+      <div class="bar"><div class="fill sage" style="width:78%;background:linear-gradient(90deg,#d9c3ac,#c9a988)"></div><div class="tick" style="left:66%"></div></div>
+      <div class="cap"><span>SENT 1 MAY</span><span>REMINDER 29 JUL</span></div>
+      <button class="again">Nudge again</button>
+    </div></div>
+  </div>
+</div>
+</body></html>
