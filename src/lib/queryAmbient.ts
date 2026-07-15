@@ -126,6 +126,83 @@ export function queryAmbientStatus(
   return base;
 }
 
+// ── Escalation state machine (grace/overdue) — derived, never stored (no isGrace/isCalm flag). ──
+
+export type Escalation = "within" | "overdue" | "grace";
+
+export interface EscalationInput {
+  /** Query.nudgeDate — the follow-up reminder (check-back) date the last nudge set. */
+  reminderMs: number | null;
+  /** Query.lastNudgeSentDate — when the last nudge actually fired. */
+  lastNudgeMs: number | null;
+  now: number;
+}
+
+/**
+ * The Tracking readout's escalation for an agent-waiting query:
+ *  - within  — inside the response window (calm; unchanged).
+ *  - overdue — past expected-by AND (never nudged since it lapsed, OR the latest nudge's reminder
+ *              has itself lapsed). The loud treatment.
+ *  - grace   — past expected-by, a nudge fired SINCE it lapsed, and that nudge's follow-up reminder
+ *              is still in the FUTURE — a horizon to wait on, so the escalation stands down (warm).
+ *
+ * A nudge with no future reminder grants no grace (nothing to wait on). All live-derived from
+ * expected-by, now, the latest nudge + its reminder — no stored flag; a nudge never moves this via
+ * status/response (it doesn't touch the overdue clock, which reads dateSent + window).
+ */
+export function deriveEscalation(a: AmbientStatus, input: EscalationInput): Escalation {
+  if (a.mode !== "waiting" || !a.overdue) return "within";
+  const { reminderMs, lastNudgeMs, now } = input;
+  const nudgedSinceExpected = lastNudgeMs != null && a.expMs != null && lastNudgeMs >= a.expMs;
+  const reminderFuture = reminderMs != null && reminderMs > now;
+  return nudgedSinceExpected && reminderFuture ? "grace" : "overdue";
+}
+
+export interface TrackingBar {
+  /** Elapsed-position fill, 0–100. */
+  fillPct: number;
+  /** Expected-by marker position, or null when the bar END is the expected date (within-window). */
+  markerPct: number | null;
+  /** Whether a hatch/overdue zone renders beyond the marker (overdue only). */
+  overdueZone: boolean;
+  /** Grace only: a faded tick where the ORIGINAL expected lapsed (bar end = the reminder horizon). */
+  graceTickPct: number | null;
+}
+
+/**
+ * Derived bar geometry — no magic percentages. within: 0→expected, fill = elapsed/window, no marker.
+ * overdue: 0→now, expected marker at window/(window+daysPast), hatch beyond. grace: 0→reminder
+ * (the new horizon), faded tick where expected lapsed. Undated → an empty (hidden) bar.
+ */
+export function trackingBar(state: Escalation, a: AmbientStatus, reminderMs: number | null, now: number): TrackingBar {
+  const empty: TrackingBar = { fillPct: 0, markerPct: null, overdueZone: false, graceTickPct: null };
+  if (a.sentMs == null || a.expMs == null) return empty;
+  const windowMs = a.expMs - a.sentMs;
+  if (windowMs <= 0) return empty;
+  const pct = (n: number) => Math.max(0, Math.min(100, n * 100));
+
+  if (state === "grace" && reminderMs != null && reminderMs > a.sentMs) {
+    const span = reminderMs - a.sentMs;
+    return {
+      fillPct: pct((now - a.sentMs) / span),
+      markerPct: null,
+      overdueZone: false,
+      graceTickPct: pct(windowMs / span), // original expected, faded
+    };
+  }
+  if (state === "overdue") {
+    const span = Math.max(now - a.sentMs, windowMs); // sent→now
+    return { fillPct: 100, markerPct: pct(windowMs / span), overdueZone: true, graceTickPct: null };
+  }
+  // within — the bar IS the window; the end is the expected date, so no mid-bar marker.
+  return { fillPct: pct((now - a.sentMs) / windowMs), markerPct: null, overdueZone: false, graceTickPct: null };
+}
+
+/** Count the nudge activities in the per-query log (drives the re-escalation "nudged N×" copy). */
+export function nudgeCount(events: { type?: unknown }[] | null | undefined, nudgeType: string): number {
+  return (events || []).filter((e) => e.type === nudgeType).length;
+}
+
 /** Command-bar centre text — mono uppercase; `bold` is the burgundy fragment (writer's move). */
 export function commandBarStatus(a: AmbientStatus): { bold?: string; text: string } | null {
   if (a.mode === "waiting") {

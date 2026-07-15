@@ -8,7 +8,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { queryAmbientStatus, commandBarStatus } from "./queryAmbient";
+import { queryAmbientStatus, commandBarStatus, deriveEscalation, trackingBar, nudgeCount } from "./queryAmbient";
 import { QueryStatus } from "../types";
 
 const NOW = new Date("2026-07-06T00:00:00Z").getTime();
@@ -215,5 +215,69 @@ describe("P6 artefacts — one escalation signal per pane (readout escalates, fo
     expect(composer.includes("--pink-i")).toBe(false);
     expect(composer.includes("--pink-t")).toBe(false);
     expect(composer.includes("--pink-b")).toBe(false);
+  });
+});
+
+const DAY = 86400000;
+const overdueAt = (daysAgo: number) =>
+  queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: new Date(NOW - daysAgo * DAY).toISOString() }), "agent", undefined, NOW);
+
+describe("deriveEscalation — grace vs overdue (P1; live-derived, no stored flag)", () => {
+  const a = overdueAt(57); // window 56d → overdue by 1; expMs = NOW − 1 day
+  const nudgedSince = NOW - 0.5 * DAY; // fired after expected lapsed
+
+  it("nudge since lapse + reminder in the FUTURE → grace", () => {
+    expect(deriveEscalation(a, { reminderMs: NOW + 3 * DAY, lastNudgeMs: nudgedSince, now: NOW })).toBe("grace");
+  });
+  it("reminder in the PAST (lapsed) → re-escalated overdue", () => {
+    expect(deriveEscalation(a, { reminderMs: NOW - 1 * DAY, lastNudgeMs: nudgedSince, now: NOW })).toBe("overdue");
+  });
+  it("nudge but NO reminder → overdue (no horizon to wait on)", () => {
+    expect(deriveEscalation(a, { reminderMs: null, lastNudgeMs: nudgedSince, now: NOW })).toBe("overdue");
+  });
+  it("nudge fired BEFORE expected lapsed → overdue (not 'since lapse')", () => {
+    expect(deriveEscalation(a, { reminderMs: NOW + 3 * DAY, lastNudgeMs: a.expMs! - 2 * DAY, now: NOW })).toBe("overdue");
+  });
+  it("within the window → 'within' regardless of nudge fields", () => {
+    expect(deriveEscalation(overdueAt(10), { reminderMs: NOW + 3 * DAY, lastNudgeMs: NOW - DAY, now: NOW })).toBe("within");
+  });
+  it("response-safe: grace de-escalates the READOUT; the overdue CLOCK is untouched", () => {
+    expect(a.overdue).toBe(true);
+    expect(a.daysOverdue).toBe(1);
+    deriveEscalation(a, { reminderMs: NOW + 3 * DAY, lastNudgeMs: nudgedSince, now: NOW });
+    expect(a.overdue).toBe(true); // deriveEscalation reads reminder/nudge only — never rewrites it
+    expect(a.daysOverdue).toBe(1);
+  });
+});
+
+describe("trackingBar — derived geometry, no magic percentages (P4)", () => {
+  const a = overdueAt(57);
+  it("within-window: bar ends at expected, NO marker", () => {
+    const bar = trackingBar("within", overdueAt(14), null, NOW);
+    expect(bar.markerPct).toBeNull();
+    expect(bar.overdueZone).toBe(false);
+    expect(bar.fillPct).toBeCloseTo((14 / 56) * 100, 1);
+  });
+  it("overdue: full fill, expected marker at window/(window+daysPast), hatch beyond", () => {
+    const bar = trackingBar("overdue", a, null, NOW);
+    expect(bar.fillPct).toBe(100);
+    expect(bar.markerPct).toBeCloseTo((56 / 57) * 100, 1);
+    expect(bar.overdueZone).toBe(true);
+  });
+  it("grace: bar spans sent→reminder (horizon), faded expected tick, no loud marker", () => {
+    const bar = trackingBar("grace", a, NOW + 7 * DAY, NOW);
+    const span = 57 + 7; // sent 57d ago → reminder +7d
+    expect(bar.markerPct).toBeNull();
+    expect(bar.overdueZone).toBe(false);
+    expect(bar.graceTickPct).toBeCloseTo((56 / span) * 100, 1);
+    expect(bar.fillPct).toBeCloseTo((57 / span) * 100, 1);
+  });
+});
+
+describe("nudgeCount", () => {
+  it("counts only nudge-typed events; null-safe", () => {
+    expect(nudgeCount([{ type: "Nudge sent" }, { type: "Queried" }, { type: "Nudge sent" }], "Nudge sent")).toBe(2);
+    expect(nudgeCount([], "Nudge sent")).toBe(0);
+    expect(nudgeCount(null, "Nudge sent")).toBe(0);
   });
 });
