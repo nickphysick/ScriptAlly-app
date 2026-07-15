@@ -2747,7 +2747,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                     onClick={() => setSelectedQueryId(q.id)}
                     className={`f12-row${isSelected ? " f12-sel" : ""}`}
                   >
-                    <span className="f12-av" aria-hidden="true">{agentInitials(agent)}</span>
+                    <span className="f12-av f12-av--sm" aria-hidden="true">{agentInitials(agent)}</span>
                     <span className="f12-mid">
                       <span className="f12-nm">{agentPrimary(agent)}</span>
                       <span className="f12-ag">{agentAgencyLine(agent)}</span>

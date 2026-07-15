@@ -1,0 +1,54 @@
+<!doctype html>
+<!--
+  Query-list agent monograms — CHOSEN: "smaller tonal". ⚠️ SPEC-DERIVED: the approved mockup was not
+  supplied to the build session — reconstructed from the prose. Structure/behaviour only; the app
+  resolves colours from .t-f12 tokens, not this file's hex.
+
+  Decision: the query-list monogram becomes ~32px, a warm-grey TONAL fill (--mono-tonal ≈ #ece5db),
+  ink initials, no border. Rationale — keep colour reserved for the semantic StatusDots and stop the
+  monogram column dominating the left edge. Scope: the QUERY-LIST instance only (an additive
+  .f12-av--sm modifier); the shared .f12-av (Contact List) and the large reading-pane header monogram
+  (.f12-bigav) are unchanged.
+-->
+<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Query-list monograms — smaller tonal</title>
+<style>
+  :root{--panel:#fffdfb;--bd:#e7ddce;--ink:#1e1a16;--faint:#a89e91;--mono:'JetBrains Mono',monospace;
+    --pink-av:#f6d7cf;--mono-tonal:#ece5db;--burg:#7c3a2a;--sage:#8a9e88;}
+  *{box-sizing:border-box}body{margin:0;padding:24px;background:#f3ece2;font-family:'Inter',system-ui,sans-serif;color:#3a1c14}
+  h1{font-size:15px;margin:0 0 4px}p.note{font-size:12px;color:#8a7d6c;margin:0 0 18px}
+  .cols{display:flex;gap:22px;flex-wrap:wrap}
+  .col{flex:1;min-width:260px}
+  .lbl{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:#a89a8a;margin-bottom:8px}
+  .chosen{color:var(--sage);font-weight:700}
+  .list{background:var(--panel);border:1px solid var(--bd);border-radius:12px;overflow:hidden}
+  .row{display:flex;align-items:center;gap:11px;padding:11px 13px;border-bottom:1px solid #f0eae1}
+  .row:last-child{border-bottom:none}
+  .row.sel{background:#eef2f7;box-shadow:inset 3px 0 0 var(--ink)}
+  .mid{flex:1;min-width:0}.nm{font-weight:500;font-size:14px;color:var(--ink)}
+  .ag{font-family:var(--mono);font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint)}
+  .dot{width:12px;height:12px;border-radius:50%;flex:none}
+  /* current: 30px pink monogram */
+  .av-old{flex:none;width:30px;height:30px;border-radius:50%;background:var(--pink-av);color:var(--ink);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9.5px;font-weight:600}
+  /* chosen: 32px warm-grey tonal, ink initials, no border */
+  .av-sm{flex:none;width:32px;height:32px;border-radius:50%;background:var(--mono-tonal);color:var(--ink);border:none;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10.5px;font-weight:600}
+</style></head><body>
+<h1>Query-list monograms</h1>
+<p class="note">Spec-derived — colour lives in the StatusDots (right), not the monogram column.</p>
+<div class="cols">
+  <div class="col">
+    <div class="lbl">before — 30px pink</div>
+    <div class="list">
+      <div class="row"><span class="av-old">MH</span><span class="mid"><div class="nm">Margaret Holloway</div><div class="ag">Pemberton Literary</div></span><span class="dot" style="background:var(--burg)"></span></div>
+      <div class="row"><span class="av-old">AK</span><span class="mid"><div class="nm">Aisha Khan</div><div class="ag">Northbank Agency</div></span><span class="dot" style="background:var(--sage)"></span></div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="lbl chosen">chosen — 32px warm-grey tonal</div>
+    <div class="list">
+      <div class="row"><span class="av-sm">MH</span><span class="mid"><div class="nm">Margaret Holloway</div><div class="ag">Pemberton Literary</div></span><span class="dot" style="background:var(--burg)"></span></div>
+      <div class="row sel"><span class="av-sm">AK</span><span class="mid"><div class="nm">Aisha Khan</div><div class="ag">Northbank Agency</div></span><span class="dot" style="background:var(--sage)"></span></div>
+    </div>
+  </div>
+</div>
+</body></html>
