@@ -207,6 +207,10 @@ describe("P6 artefacts — one escalation signal per pane (readout escalates, fo
     expect(tl.includes("past expected")).toBe(true);           // the Overdue badge
     expect(tl.includes("onNudge")).toBe(true);                 // inline nudge seam
   });
+
+  it("P3 tidy — no strikethrough anywhere (the expectation lapsed, it wasn't withdrawn)", () => {
+    expect(tl.includes("line-through")).toBe(false);
+  });
   it("the 'What happened next?' composer (the fork) carries NO needs-you tokens — stays neutral", () => {
     expect(composer.includes("--pink-i")).toBe(false);
     expect(composer.includes("--pink-t")).toBe(false);

@@ -259,11 +259,13 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
         const clockIcon = (
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M5 22h14M5 2h14M17 22v-4.2a2 2 0 0 0-.6-1.4L12 12l-4.4 4.4a2 2 0 0 0-.6 1.4V22M7 2v4.2a2 2 0 0 0 .6 1.4L12 12l4.4-4.4A2 2 0 0 0 17 6.2V2" /></svg>
         );
-        const waitingLine = (tint?: boolean) => (
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 9, fontWeight: tint ? 500 : 400, fontSize: 13, color: tint ? "var(--pink-i)" : "#3a1c14" }}>
+        // Calm-only readout line (P3 dropped it from the overdue branch — the badge is the single
+        // headline there; two counters off the same send date were pure redundancy).
+        const waitingLine = (
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 9, fontWeight: 400, fontSize: 13, color: "#3a1c14" }}>
             {clockIcon}
             Waiting to hear back
-            {waiting.sentMs != null && <span style={{ fontFamily: FONT_MONO, fontWeight: 600, fontSize: 12, color: tint ? "var(--pink-i)" : wcol.dim }}>· {waiting.nDays} days</span>}
+            {waiting.sentMs != null && <span style={{ fontFamily: FONT_MONO, fontWeight: 600, fontSize: 12, color: wcol.dim }}>· {waiting.nDays} days</span>}
           </span>
         );
         const bar = dated ? (
@@ -278,7 +280,9 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.04em", color: "#7d7268", marginTop: 7 }}>
               <span>SENT {fmtShort(waiting.sentMs!)}</span>
-              <span style={{ color: overdue ? "var(--pink-i)" : "#7d7268", textDecoration: overdue ? "line-through" : "none" }}>EXPECTED BY ~{fmtShort(waiting.expMs!)}</span>
+              {/* P3 — no strikethrough: the expectation LAPSED, it wasn't withdrawn. The crossed
+                  meaning rides the bar marker + the burgundy tone only. */}
+              <span style={{ color: overdue ? "var(--pink-i)" : "#7d7268" }}>EXPECTED BY ~{fmtShort(waiting.expMs!)}</span>
             </div>
           </>
         ) : null;
@@ -286,10 +290,11 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
         return (
           <div style={{ marginLeft: 4, marginTop: 16 }}>
             {overdue ? (
-              /* ESCALATED — tinted readout + Overdue badge + inline Nudge (action where the user reads) */
+              /* ESCALATED — the Overdue badge is the SINGLE headline (P3 dropped the parallel
+                 "Waiting · N days" counter); tinted card + inline Nudge (action where the user reads) */
               <div style={{ background: "var(--pink-t)", border: "1px solid var(--pink-b)", borderRadius: 11, padding: "11px 13px" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
-                  {waitingLine(true)}
+                <div style={{ display: "flex", alignItems: "center", gap: 9, flexWrap: "wrap", color: "var(--pink-i)" }}>
+                  {clockIcon}
                   <span style={{ fontFamily: FONT_MONO, fontSize: 8.5, fontWeight: 700, letterSpacing: ".06em", textTransform: "uppercase", color: "#fff", background: "var(--pink-i)", borderRadius: 6, padding: "3px 8px", whiteSpace: "nowrap" }}>
                     Overdue · {waiting.daysOverdue} {waiting.daysOverdue === 1 ? "day" : "days"} past expected
                   </span>
@@ -305,7 +310,7 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
             ) : (
               /* CALM — plain text + bar; the marker sits ahead of the fill within the window */
               <>
-                {waitingLine(false)}
+                {waitingLine}
                 {bar}
               </>
             )}
