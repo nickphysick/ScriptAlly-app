@@ -31,3 +31,22 @@ Retirement targets confirmed safe (only self/old-page consumers): `todoFocus*`, 
 **Stubbed for later phases (clearly marked in code):** the drawer body (`renderDrawerStub` → Phase 3), the Urgent / Work-the-list / Help-me-pick walkthroughs (→ Phase 4 toasts), Filter/Sort tools, and `addTask` uses a `window.prompt` placeholder (Phase 3's drawer replaces it). Housekeeping grouping is Phase 5 (cards render individually for now).
 
 **Commit:** `feat(todo): F12 board shell, tasks store, retire Ledger` — see SHA in the final summary.
+
+## Phase 3 — TaskDetail drawer (on-page capture)
+
+**Gates:** `tsc` clean · `vite build` OK · full Vitest **935** green.
+
+**What landed:** `src/components/todo/TaskDetail.tsx` — one component, drawer shell (Phase 4 reuses the same body for the walkthrough step). Right slide-over (~500px, scrim, Escape closes, `‹ ›` steps through the card's column). Card body-click and derived Mark-done open it.
+
+- **Do next — Why → Do it → Done** (step rail): Why shows the reason + the agent's tracking timeline (real `StatusDot`s via `buildAgentTimeline`) + "Open the full query →". Do-it:
+  - **mark-sent** (partial/full/rr): date + method + a materials tick-list (Save disabled until one ticked) + optional note → **`recordMaterialsSent`** (target/isResubmit derived from `queryPrimaryAction` — the shared map, no per-type re-branch).
+  - **nudge**: the "ScriptAlly never sends for you" line + the draft + Copy + a check-back date + note → **`logNudge`**.
+  - **offer / record**: reuses the proven **`RecordResponseFocusForm`**.
+- **Housekeeping — fixed in the drawer (no bounce to EditAgent):** `data_quality_poor` → wish-list textarea / reply-window (weeks + "no reply means no") / materials ticks → **`updateAgent`** + `resolveTaskFlag` (feeds cleared-today). `no_response_close` → three-way: Close as no response (**`updateQueryStatus`** → `NO_RESPONSE`) / Still waiting (**`dismissTask`**) / Stop asking (`upsertTaskFlag` snoozed to `MUTED_UNTIL`).
+- **Your task**: editable text + attached record + Save / Mark done / Delete (**`updateUserTask`** / **`deleteUserTask`**).
+
+**Deliberate safety choice (for morning review):** every capture WRITE goes through the existing proven handlers rather than a re-implementation — so query history can't be invented. The mark-sent materials tick-list is a Save-gate (confirmation), not stored (`recordMaterialsSent` takes no materials list); it marks the query sent on the chosen date exactly as `MarkSentPopover` does.
+
+**Stub reported:** no reusable nudge-**draft generator** exists (Step 0). `TaskDetail` uses a marked `TODO(nudge-draft)` placeholder draft; wire the real generator when it lands. The draft is display-only — nothing is sent.
+
+**Commit:** `feat(todo): TaskDetail drawer with on-page capture`.

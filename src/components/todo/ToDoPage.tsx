@@ -24,6 +24,7 @@ import { useScriptAllyDb } from "../../lib/db";
 import { assembleBoard, BoardCard, BoardColumns } from "../../lib/todoBoard";
 import { flagKeyForTask } from "../../lib/taskFlags";
 import { QueryStatus } from "../../types";
+import { TaskDetail } from "./TaskDetail";
 import "./todo.css";
 
 const MAX_TODAY = 5;
@@ -153,7 +154,19 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       </div>
 
       {toast && <div className="tdb-toast">{toast}</div>}
-      {drawerCard && renderDrawerStub(drawerCard)}
+      {drawerCard && (() => {
+        const streamCards = columns[drawerCard.stream];
+        const idx = streamCards.findIndex((c) => c.key === drawerCard.key);
+        return (
+          <TaskDetail
+            card={drawerCard}
+            onClose={() => setDrawerCard(null)}
+            onPrev={idx > 0 ? () => setDrawerCard(streamCards[idx - 1]) : undefined}
+            onNext={idx >= 0 && idx < streamCards.length - 1 ? () => setDrawerCard(streamCards[idx + 1]) : undefined}
+            onNavigate={onNavigate}
+          />
+        );
+      })()}
     </F12Page>
   );
 
@@ -230,23 +243,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     );
   }
 
-  // Phase-3 seam — a clearly-marked placeholder. Phase 3 replaces this with the real TaskDetail.
-  function renderDrawerStub(c: BoardCard) {
-    return (
-      <div className="tdb-scrim" onClick={() => setDrawerCard(null)}>
-        <div className="tdb-drawer" onClick={(e) => e.stopPropagation()}>
-          <div className="tdb-drawer-h">
-            <span className="tdb-drawer-title">{c.title}</span>
-            <button type="button" className="tdb-drawer-x" onClick={() => setDrawerCard(null)} aria-label="Close">✕</button>
-          </div>
-          <div className="tdb-drawer-body">
-            <p className="tdb-drawer-todo">The on-page capture drawer arrives in Phase 3.</p>
-            {c.record && <p className="tdb-drawer-meta">{c.record}</p>}
-          </div>
-        </div>
-      </div>
-    );
-  }
 };
 
 export default ToDoPage;
