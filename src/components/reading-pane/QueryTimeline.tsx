@@ -433,8 +433,9 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
             ) : escal === "overdue" ? (
               /* OVERDUE (revised) — pink card. Plain ink Playfair "Response overdue by {elapsed}[ · nudged
                  N×]" text (no pill) + ink hourglass, no nudge CTA. Bar fully filled sent→today
-                 (rose→burgundy), warning glyph at the end (the end-anchor). Axis = SENT only; the
-                 "response expected" date rides a hollow-circle milestone (hover/tap pop-up). */
+                 (rose→burgundy) to the full end of the track — no warning glyph (redundant with the
+                 headline). Axis = SENT only; the "response expected" date rides a hollow-circle
+                 milestone (hover/tap pop-up). */
               (() => {
                 const now = Date.now();
                 const expectedPct = dated ? Math.max(0, Math.min(100, ((waiting.expMs! - waiting.sentMs!) / Math.max(1, now - waiting.sentMs!)) * 100)) : 0;
@@ -448,14 +449,14 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
                     </div>
                     {dated && (
                       <>
+                        {/* the fill runs to the full end of the track — no warning glyph (redundant with
+                            the headline), so no gap where it sat */}
                         <div style={{ position: "relative", height: 6, borderRadius: 6, marginTop: 11, background: "var(--pink-b)" }}>
                           <div style={{ position: "absolute", inset: 0, borderRadius: 6, background: "linear-gradient(90deg, #e6a99b, var(--pink-i))" }} />
                           {/* response-expected milestone — bare hollow circle; its date shows on hover/tap */}
                           <BarMilestone pct={expectedPct} label={`RESPONSE EXPECTED ${fmtShort(waiting.expMs!)}`} />
-                          {/* warning glyph at the end (today) — the bar's end-anchor, so no end label */}
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--pink-i)" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" style={{ position: "absolute", right: -6, top: "50%", transform: "translateY(-50%)", background: "var(--pink-t)", borderRadius: "50%" }}><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" /></svg>
                         </div>
-                        {/* end-anchor label only — SENT at the start (the warning glyph is the end anchor) */}
+                        {/* end-anchor label only — SENT at the start (no end label; the fill IS the end) */}
                         <div style={{ fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.04em", color: "#7d7268", marginTop: 7 }}>
                           <span>SENT {fmtShort(waiting.sentMs!)}</span>
                         </div>
