@@ -87,3 +87,21 @@ export function formatQueryMaterial(item: string | QueryMaterial): string {
   // render identically (commas for words, "First N pages/chapters", etc.).
   return formatLegacyMaterial(`${quantity} ${type}`);
 }
+
+/**
+ * The bare "quantity unit" readback for the What-you-sent sample-materials row — "50 pages",
+ * "3 chapters", "10,000 words" (comma-grouped), the free text for an "other" item, or "Included"
+ * when the unit/quantity is unspecified (legacy back-compat — a bare item never loses its "was sent"
+ * meaning). Deliberately WITHOUT formatQueryMaterial's "First " prefix; kept in this one module so
+ * material display never diverges. Pure — never mutates its input.
+ */
+export function sampleMaterialText(item: string | QueryMaterial): string {
+  if (typeof item === "string") return formatLegacyMaterial(item); // legacy string keeps its display
+  const { type, quantity } = item;
+  const hasQty = quantity !== undefined && quantity !== null && String(quantity).trim() !== "";
+  if (!type || !hasQty) return "Included"; // unit/quantity unspecified — historic data preserved
+  if (type === "other") return String(quantity);
+  const n = typeof quantity === "number" ? quantity : parseInt(String(quantity).replace(/[^0-9]/g, ""), 10);
+  const num = Number.isFinite(n) ? n.toLocaleString("en-GB") : String(quantity);
+  return `${num} ${type}`;
+}
