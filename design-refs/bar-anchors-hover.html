@@ -1,0 +1,110 @@
+<!doctype html>
+<!--
+  Tracking readout + bar — FINAL (no pill · no warning glyph · end-anchors + hover/tap markers).
+  ⚠️ SPEC-DERIVED: the approved mockup was not supplied to the build session — reconstructed from the
+  prose so the intent is on record. Structure/behaviour only; the app resolves colours from .t-f12
+  tokens (--ink, --pink-i, --panel, --faint), not this file's hex. Supersedes tracking-revised.html.
+
+  Rules shown:
+   • Overdue readout — plain ink Playfair "Response overdue by {elapsed}" (NO pill) + ink hourglass.
+     Bar fills sent→today (rose→burgundy) to the FULL end of the track — no warning glyph.
+   • Grace — "Response {elapsed} overdue — nudge sent {date}"; two-tone bar to today.
+   • Bar labels (robust rule): the only persistent labels are the two END-ANCHORS. Every mid-bar
+     milestone is a bare HOLLOW CIRCLE (~13px, --panel fill, thin grey --faint outline) whose date
+     shows only on HOVER or TAP, in a pop-up ABOVE the bar, anchored inward near an edge so it can't
+     overflow. Overlap is impossible by construction. (The tap demo below is illustrative only.)
+-->
+<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Tracking bar — end-anchors + hover/tap markers</title>
+<style>
+  :root{--panel:#fffdfb;--paper:#faf7f2;--line:#e6dccd;--hair:#f0eae1;--ink:#1e1a16;--muted:#7d7469;--faint:#b3a596;--mono:'JetBrains Mono',monospace;
+    --serif:'Playfair Display',serif;--pink-t:#f7e3dd;--pink-b:#eecdc3;--pink-i:#8a4030;--sage:#8a9e88;--sageC:#e9ede6;--sageD:#5a6e58;}
+  *{box-sizing:border-box}body{margin:0;padding:24px;background:#f3ece2;font-family:'Inter',system-ui,sans-serif;color:#3a1c14}
+  h1{font-size:15px;font-weight:600;margin:0 0 4px}p.note{font-size:12px;color:#8a7d6c;margin:0 0 18px}
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start;max-width:760px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px}
+  .lbl{font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:#a89a8a;margin-bottom:11px}
+  /* overdue readout */
+  .overdue{background:var(--pink-t);border:1px solid var(--pink-b);border-radius:11px;padding:11px 13px}
+  .head{display:flex;align-items:center;gap:9px;color:var(--ink)}
+  .head .amt{font-family:var(--serif);font-size:14px;font-weight:600;color:var(--ink)} /* NO pill */
+  .head svg{stroke:var(--ink)}
+  /* grace readout */
+  .grace{border:1px dashed var(--sage);border-radius:11px;padding:11px 13px}
+  .grace .h{font-family:'Inter',sans-serif;font-size:13.5px;font-weight:500;color:var(--ink)}
+  .grace .m{font-size:12px;color:var(--muted);margin-top:4px}
+  /* bars */
+  .barwrap{position:relative;margin-top:11px}
+  .bar{position:relative;height:6px;border-radius:6px;overflow:hidden}
+  .bar.od{background:var(--pink-b)}.bar.gr{background:var(--sageC)}
+  .f{position:absolute;top:0;bottom:0}
+  .cap{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9.5px;letter-spacing:.04em;color:#7d7268;margin-top:7px}
+  .cap.one{justify-content:flex-start}
+  /* the hollow-circle milestone + its hover/tap pop-up */
+  .mk{position:absolute;top:50%;transform:translate(-50%,-50%);width:13px;height:13px;border-radius:50%;
+      background:var(--panel);border:1.5px solid var(--faint);padding:0;cursor:pointer;z-index:2}
+  .pop{position:absolute;bottom:calc(100% + 8px);z-index:3;pointer-events:none;white-space:nowrap;
+       font-family:var(--mono);font-size:9.5px;letter-spacing:.04em;color:var(--panel);background:var(--ink);
+       border-radius:6px;padding:3px 7px;opacity:0;transition:opacity .12s}
+  .mkwrap:hover .pop,.mkwrap.tap .pop{opacity:1}   /* hover on desktop; .tap toggled on touch */
+  .hint{font-size:10px;color:#a89a8a;margin-top:9px;font-style:italic}
+</style></head><body>
+<h1>Tracking bar — final (no pill · no glyph · end-anchors + hover/tap markers)</h1>
+<p class="note">Spec-derived reconstruction — behaviour/structure only; hover OR tap the hollow circle.</p>
+<div class="grid">
+
+  <div class="card"><div class="lbl">overdue — plain text, no pill, no glyph</div>
+    <div class="overdue">
+      <div class="head">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14M5 2h14M17 22v-4.2a2 2 0 0 0-.6-1.4L12 12l-4.4 4.4a2 2 0 0 0-.6 1.4V22M7 2v4.2a2 2 0 0 0 .6 1.4L12 12l4.4-4.4A2 2 0 0 0 17 6.2V2"/></svg>
+        <span class="amt">Response overdue by 3 weeks · nudged 2×</span>
+      </div>
+      <div class="barwrap mkwrap" onclick="this.classList.toggle('tap')">
+        <div class="bar od"><div class="f" style="left:0;right:0;border-radius:6px;background:linear-gradient(90deg,#e6a99b,var(--pink-i))"></div></div>
+        <button class="mk" style="left:44%" aria-label="Response expected 26 Jun"></button>
+        <div class="pop" style="left:44%;transform:translateX(-50%)">RESPONSE EXPECTED 26 JUN</div>
+      </div>
+      <div class="cap one"><span>SENT 1 MAY</span></div>
+      <div class="hint">Fill runs to the full end — the marker's date is hover/tap only.</div>
+    </div></div>
+
+  <div class="card"><div class="lbl">grace — nudged, reminder ahead</div>
+    <div class="grace">
+      <div class="h">Response 3 weeks overdue — nudge sent 8th July</div>
+      <div class="m">Scheduled follow-up set for 29th July</div>
+      <div class="barwrap mkwrap" onclick="this.classList.toggle('tap')">
+        <div class="bar gr">
+          <div class="f" style="left:0;width:62%;background:var(--sage)"></div>
+          <div class="f" style="left:62%;width:19%;background:linear-gradient(90deg,var(--pink-b),var(--pink-i))"></div>
+        </div>
+        <button class="mk" style="left:62%" aria-label="Deadline 26 Jun"></button>
+        <div class="pop" style="left:62%;transform:translateX(-50%)">DEADLINE 26 JUN</div>
+      </div>
+      <div class="cap"><span>SENT 1 MAY</span><span style="color:var(--sageD)">FOLLOW-UP 29 JUL</span></div>
+    </div></div>
+
+  <div class="card"><div class="lbl">edge anchoring — marker near the start</div>
+    <div class="overdue">
+      <div class="head"><span class="amt">Response overdue by 2 weeks</span></div>
+      <div class="barwrap mkwrap" onclick="this.classList.toggle('tap')">
+        <div class="bar od"><div class="f" style="left:0;right:0;border-radius:6px;background:linear-gradient(90deg,#e6a99b,var(--pink-i))"></div></div>
+        <button class="mk" style="left:12%" aria-label="Response expected 8 Jun"></button>
+        <!-- near the start → pop-up anchors its LEFT edge to the marker (extends right, no overflow) -->
+        <div class="pop" style="left:12%">RESPONSE EXPECTED 8 JUN</div>
+      </div>
+      <div class="cap one"><span>SENT 1 MAY</span></div>
+    </div></div>
+
+  <div class="card"><div class="lbl">edge anchoring — marker near the end</div>
+    <div class="overdue">
+      <div class="head"><span class="amt">Response overdue by 6 days</span></div>
+      <div class="barwrap mkwrap" onclick="this.classList.toggle('tap')">
+        <div class="bar od"><div class="f" style="left:0;right:0;border-radius:6px;background:linear-gradient(90deg,#e6a99b,var(--pink-i))"></div></div>
+        <button class="mk" style="left:88%" aria-label="Response expected 24 Jun"></button>
+        <!-- near the end → pop-up anchors its RIGHT edge to the marker (extends left, no overflow) -->
+        <div class="pop" style="right:12%">RESPONSE EXPECTED 24 JUN</div>
+      </div>
+      <div class="cap one"><span>SENT 1 MAY</span></div>
+    </div></div>
+
+</div></body></html>
