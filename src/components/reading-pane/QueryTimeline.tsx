@@ -382,17 +382,17 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
                 );
               })()
             ) : escal === "overdue" ? (
-              /* OVERDUE (P3, revised) — pink card, "Response overdue by {elapsed}[ · nudged N×]" badge,
-                 no nudge CTA. Bar fully filled sent→today (rose→burgundy) with a warning icon at the
-                 end + a labelled "response expected" marker; axis Sent / Today. */
+              /* OVERDUE (P3, revised) — pink card. Ink Playfair "Response overdue by {elapsed}[ · nudged
+                 N×]" pill + ink hourglass, no nudge CTA. Bar fully filled sent→today (rose→burgundy)
+                 with a warning glyph at the end + a marker-anchored "response expected" label; axis Sent. */
               (() => {
                 const now = Date.now();
                 const expectedPct = dated ? Math.max(0, Math.min(100, ((waiting.expMs! - waiting.sentMs!) / Math.max(1, now - waiting.sentMs!)) * 100)) : 0;
                 return (
                   <div style={{ background: "var(--pink-t)", border: "1px solid var(--pink-b)", borderRadius: 11, padding: "11px 13px" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 9, flexWrap: "wrap", color: "var(--pink-i)" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 9, flexWrap: "wrap", color: "var(--ink, #1e1a16)" }}>
                       {clockIcon}
-                      <span style={{ fontFamily: FONT_MONO, fontSize: 8.5, fontWeight: 700, letterSpacing: ".06em", textTransform: "uppercase", color: "#fff", background: "var(--pink-i)", borderRadius: 6, padding: "3px 8px", whiteSpace: "nowrap" }}>
+                      <span style={{ fontFamily: FONT_SERIF, fontSize: 12.5, fontWeight: 600, color: "#fff", background: "var(--ink, #1e1a16)", borderRadius: 6, padding: "2px 10px", whiteSpace: "nowrap" }}>
                         Response overdue by {elapsedLabel(waiting.daysOverdue)}{nudges > 0 ? ` · nudged ${nudges === 1 ? "once" : `${nudges}×`}` : ""}
                       </span>
                     </div>
@@ -405,10 +405,11 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
                           {/* warning icon at the end (today) */}
                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--pink-i)" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" style={{ position: "absolute", right: -6, top: "50%", transform: "translateY(-50%)", background: "var(--pink-t)", borderRadius: "50%" }}><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" /></svg>
                         </div>
-                        <div style={{ display: "flex", justifyContent: "space-between", fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.04em", color: "#7d7268", marginTop: 7 }}>
+                        {/* Axis keeps SENT only — the warning glyph at the bar end already signifies today.
+                            The expected date rides its own marker (clamped so the label never overflows). */}
+                        <div style={{ position: "relative", fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.04em", color: "#7d7268", marginTop: 7, minHeight: 12 }}>
                           <span>SENT {fmtShort(waiting.sentMs!)}</span>
-                          <span style={{ color: "var(--pink-i)" }}>RESPONSE EXPECTED {fmtShort(waiting.expMs!)}</span>
-                          <span>TODAY</span>
+                          <span style={{ position: "absolute", left: `${Math.max(16, Math.min(84, expectedPct))}%`, transform: "translateX(-50%)", whiteSpace: "nowrap", color: "var(--pink-i)" }}>RESPONSE EXPECTED {fmtShort(waiting.expMs!)}</span>
                         </div>
                       </>
                     )}
