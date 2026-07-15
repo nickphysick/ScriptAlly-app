@@ -15,7 +15,7 @@ import React, { useState } from "react";
 import { StatusDot } from "../StatusDot";
 import { Query, QueryStatus, Agent, QueryMaterial } from "../../types";
 import { formatQueryMaterial } from "../../lib/materials";
-import { queryAmbientStatus } from "../../lib/queryAmbient";
+import { queryAmbientStatus, DAY } from "../../lib/queryAmbient";
 import { F12Menu } from "../shell/F12Shell";
 
 /** A correctable timeline entry (5b) — passed to the ⋯ Edit / Delete handlers. */
@@ -93,9 +93,11 @@ export interface QueryTimelineProps {
   /** 5b — correction handlers for the hover ⋯ on activity-backed rows. */
   onEditEntry?: (entry: TimelineEntryRef) => void;
   onDeleteEntry?: (entry: TimelineEntryRef) => void;
+  /** P6 — open the Nudge flow; surfaced inline in the readout when the wait is overdue. */
+  onNudge?: () => void;
 }
 
-export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry }) => {
+export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry, onNudge }) => {
   const [menu, setMenu] = useState<{ entry: TimelineEntryRef; style: React.CSSProperties } | null>(null);
   const validEnumValues = Object.values(QueryStatus);
 
@@ -198,30 +200,74 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
         );
       })}
 
-      {/* ── trailing open-state block — only marginally inset so the pill keeps width on one line ── */}
-      {ballHolder === "agent" && waiting && (
-        <div style={{ marginLeft: 4, marginTop: 16 }}>
-          {/* strip-back: plain text, no pill chrome, not bold */}
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 9, fontWeight: 400, fontSize: 13, color: "#3a1c14" }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M5 22h14M5 2h14M17 22v-4.2a2 2 0 0 0-.6-1.4L12 12l-4.4 4.4a2 2 0 0 0-.6 1.4V22M7 2v4.2a2 2 0 0 0 .6 1.4L12 12l4.4-4.4A2 2 0 0 0 17 6.2V2" /></svg>
+      {/* ── trailing open-state block — calm within window, ESCALATED to needs-you once overdue.
+          The escalation is the pane's ONLY needs-you signal (the fork below stays neutral). ── */}
+      {ballHolder === "agent" && waiting && (() => {
+        const overdue = waiting.overdue;
+        const dated = waiting.sentMs != null && waiting.expMs != null;
+        const windowDays = dated ? Math.max(1, Math.round((waiting.expMs! - waiting.sentMs!) / DAY)) : 0;
+        const MARK = 68; // the EXPECTED marker's position on the bar (%); the tail past it is the overdue zone
+        const fillPct = !dated ? 0
+          : overdue ? MARK + Math.min(1, waiting.daysOverdue / windowDays) * (100 - MARK)
+          : Math.min(1, waiting.nDays / windowDays) * MARK;
+        const agentFirst = agent?.name?.split(" ")[0] || "the agent";
+
+        const clockIcon = (
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M5 22h14M5 2h14M17 22v-4.2a2 2 0 0 0-.6-1.4L12 12l-4.4 4.4a2 2 0 0 0-.6 1.4V22M7 2v4.2a2 2 0 0 0 .6 1.4L12 12l4.4-4.4A2 2 0 0 0 17 6.2V2" /></svg>
+        );
+        const waitingLine = (tint?: boolean) => (
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 9, fontWeight: tint ? 500 : 400, fontSize: 13, color: tint ? "var(--pink-i)" : "#3a1c14" }}>
+            {clockIcon}
             Waiting to hear back
-            {waiting.sentMs != null && <span style={{ fontFamily: FONT_MONO, fontWeight: 600, fontSize: 12, color: wcol.dim }}>· {waiting.nDays} days</span>}
+            {waiting.sentMs != null && <span style={{ fontFamily: FONT_MONO, fontWeight: 600, fontSize: 12, color: tint ? "var(--pink-i)" : wcol.dim }}>· {waiting.nDays} days</span>}
           </span>
-          {/* bar + caption only when a send date is on record */}
-          {waiting.sentMs != null && waiting.expMs != null && (
-            <>
-              <div style={{ height: 6, borderRadius: 6, marginTop: 11, overflow: "hidden", background: wcol.barBg }}>
-                <div style={{ height: "100%", borderRadius: 6, width: `${waiting.widthPct}%`, background: wcol.barFill }} />
+        );
+        const bar = dated ? (
+          <>
+            <div style={{ position: "relative", height: 6, borderRadius: 6, marginTop: 11, overflow: "hidden", background: wcol.barBg }}>
+              <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${Math.min(fillPct, MARK)}%`, background: wcol.barFill }} />
+              {overdue && fillPct > MARK && (
+                <div style={{ position: "absolute", left: `${MARK}%`, top: 0, bottom: 0, width: `${fillPct - MARK}%`, background: "linear-gradient(90deg, var(--pink-b), var(--pink-i))" }} />
+              )}
+              {/* EXPECTED marker — reads as crossed (needs-you) once overdue */}
+              <div style={{ position: "absolute", left: `${MARK}%`, top: 0, bottom: 0, width: 2, transform: "translateX(-1px)", background: overdue ? "var(--pink-i)" : "#8a7d6c" }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.04em", color: "#7d7268", marginTop: 7 }}>
+              <span>SENT {fmtShort(waiting.sentMs!)}</span>
+              <span style={{ color: overdue ? "var(--pink-i)" : "#7d7268", textDecoration: overdue ? "line-through" : "none" }}>EXPECTED BY ~{fmtShort(waiting.expMs!)}</span>
+            </div>
+          </>
+        ) : null;
+
+        return (
+          <div style={{ marginLeft: 4, marginTop: 16 }}>
+            {overdue ? (
+              /* ESCALATED — tinted readout + Overdue badge + inline Nudge (action where the user reads) */
+              <div style={{ background: "var(--pink-t)", border: "1px solid var(--pink-b)", borderRadius: 11, padding: "11px 13px" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
+                  {waitingLine(true)}
+                  <span style={{ fontFamily: FONT_MONO, fontSize: 8.5, fontWeight: 700, letterSpacing: ".06em", textTransform: "uppercase", color: "#fff", background: "var(--pink-i)", borderRadius: 6, padding: "3px 8px", whiteSpace: "nowrap" }}>
+                    Overdue · {waiting.daysOverdue} {waiting.daysOverdue === 1 ? "day" : "days"} past expected
+                  </span>
+                </div>
+                {bar}
+                {onNudge && (
+                  <button type="button" onClick={onNudge} style={{ marginTop: 12, display: "inline-flex", alignItems: "center", gap: 7, fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 600, color: "#fff", background: "var(--pink-i)", border: "none", borderRadius: 8, padding: "7px 13px", cursor: "pointer" }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" /></svg>
+                    Nudge {agentFirst}
+                  </button>
+                )}
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.04em", color: "#7d7268", marginTop: 7 }}>
-                <span>SENT {fmtShort(waiting.sentMs)}</span>
-                <span>EXPECTED BY ~{fmtShort(waiting.expMs)}</span>
-              </div>
-            </>
-          )}
-          {/* nudge mount seam — the nudge line mounts here in a later phase; nothing else here now. */}
-        </div>
-      )}
+            ) : (
+              /* CALM — plain text + bar; the marker sits ahead of the fill within the window */
+              <>
+                {waitingLine(false)}
+                {bar}
+              </>
+            )}
+          </div>
+        );
+      })()}
 
       {ballHolder === "writer" && (
         /* Narrative only — the ACTION lives in the command bar now (one home for actions). The

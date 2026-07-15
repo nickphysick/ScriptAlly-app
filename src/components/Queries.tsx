@@ -2797,20 +2797,24 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                               primaryAction={{ ballHolder: ta.ballHolder, markKind: ta.kind === "mark-sent" ? ta.markKind : undefined }}
                               onEditEntry={onEditEntry}
                               onDeleteEntry={onDeleteEntry}
+                              onNudge={() => setIsNudgeOpen(true)}
                             />
                           );
                         })()}
+                        {/* P6 (Layout A) — the "What happened next?" composer FLOWS directly under the
+                            tracking readout, in normal document order (un-pinned from the card foot);
+                            any leftover column height falls as whitespace below it. Chips derive from
+                            composerChips (the CTA engine); it never auto-writes and stays NEUTRAL — the
+                            overdue readout is the pane's only needs-you signal. */}
+                        <TimelineComposer
+                          ref={composerRef}
+                          query={activeQuery}
+                          agent={activeAgent}
+                          manuscript={{ title: activeMs?.title || "" }}
+                          onOpenRichForm={openRichForm}
+                          onMarkSent={() => setIsMarkSentOpen(true)}
+                        />
                       </EdgeFadeScroll>
-                      {/* 5a — the contextual composer, pinned to the card foot. Chips derive from
-                          composerChips (built on the CTA engine); it never auto-writes. */}
-                      <TimelineComposer
-                        ref={composerRef}
-                        query={activeQuery}
-                        agent={activeAgent}
-                        manuscript={{ title: activeMs?.title || "" }}
-                        onOpenRichForm={openRichForm}
-                        onMarkSent={() => setIsMarkSentOpen(true)}
-                      />
                     </div>{/* ── end sub-card 1: Tracking ── */}
 
                   {/* ── Sub-card 2: What you sent ── */}

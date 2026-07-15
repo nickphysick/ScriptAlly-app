@@ -170,3 +170,46 @@ describe("QueryTimeline artefact — move band keeps prose, loses its button", (
     expect(tl.includes("Your move — send the")).toBe(true);
   });
 });
+
+describe("queryAmbientStatus — overdue boundary (P6; derived from now vs expected-by, no stored field)", () => {
+  const DAY = 86400000;
+  const WINDOW = 56; // QUERIED = STAGE_RESPONSE_WINDOWS.query (8) × 7
+  const sentDaysAgo = (d: number) => new Date(NOW - d * DAY).toISOString();
+  const at = (daysAgo: number) => queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: sentDaysAgo(daysAgo) }), "agent", undefined, NOW);
+
+  it("expected-by YESTERDAY → overdue (daysOverdue = 1)", () => {
+    const a = at(WINDOW + 1);
+    expect(a.overdue).toBe(true);
+    expect(a.daysOverdue).toBe(1);
+  });
+  it("expected-by TODAY → calm (the boundary itself is not overdue)", () => {
+    const a = at(WINDOW);
+    expect(a.overdue).toBe(false);
+    expect(a.daysOverdue).toBe(0);
+  });
+  it("expected-by TOMORROW → calm", () => {
+    const a = at(WINDOW - 1);
+    expect(a.overdue).toBe(false);
+    expect(a.daysOverdue).toBe(0);
+  });
+  it("well within the window → calm, daysOverdue 0", () => {
+    const a = at(10);
+    expect(a.overdue).toBe(false);
+    expect(a.daysOverdue).toBe(0);
+  });
+});
+
+describe("P6 artefacts — one escalation signal per pane (readout escalates, fork stays neutral)", () => {
+  const tl = readFileSync(resolve(__dirname, "../components/reading-pane/QueryTimeline.tsx"), "utf8");
+  const composer = readFileSync(resolve(__dirname, "../components/reading-pane/TimelineComposer.tsx"), "utf8");
+  it("the overdue readout escalates to the needs-you token + badge + inline nudge", () => {
+    expect(tl.includes("var(--pink-i)")).toBe(true);           // needs-you escalation colour
+    expect(tl.includes("past expected")).toBe(true);           // the Overdue badge
+    expect(tl.includes("onNudge")).toBe(true);                 // inline nudge seam
+  });
+  it("the 'What happened next?' composer (the fork) carries NO needs-you tokens — stays neutral", () => {
+    expect(composer.includes("--pink-i")).toBe(false);
+    expect(composer.includes("--pink-t")).toBe(false);
+    expect(composer.includes("--pink-b")).toBe(false);
+  });
+});

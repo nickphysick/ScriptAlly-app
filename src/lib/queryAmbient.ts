@@ -73,6 +73,8 @@ export interface AmbientStatus {
   /** 0–100 progress toward the expected-reply date. */
   widthPct: number;
   overdue: boolean;
+  /** Days elapsed BEYOND the expected-reply date (0 within window). Derived; no stored field. */
+  daysOverdue: number;
   /** Writer: what's owed ("partial" | "full" | "resubmission"). */
   sendWhat: "partial" | "full" | "resubmission";
   /** Writer: the agent's request in words ("partial requested" etc.). */
@@ -89,7 +91,7 @@ export function queryAmbientStatus(
   now: number = Date.now(),
 ): AmbientStatus {
   const base: AmbientStatus = {
-    mode: "closed", nDays: 0, sentMs: null, expMs: null, widthPct: 0, overdue: false,
+    mode: "closed", nDays: 0, sentMs: null, expMs: null, widthPct: 0, overdue: false, daysOverdue: 0,
     sendWhat: "resubmission", eventLabel: "", writerDaysAgo: null,
   };
 
@@ -101,7 +103,7 @@ export function queryAmbientStatus(
     const sentMs = sendIso ? getTime(sendIso) : NaN;
     if (!Number.isNaN(sentMs)) {
       const nDays = Math.max(0, Math.floor((now - sentMs) / DAY));
-      return { ...base, mode: "waiting", nDays, sentMs, expMs: sentMs + mDays * DAY, widthPct: Math.max(0, Math.min(1, nDays / mDays)) * 100, overdue: nDays > mDays };
+      return { ...base, mode: "waiting", nDays, sentMs, expMs: sentMs + mDays * DAY, widthPct: Math.max(0, Math.min(1, nDays / mDays)) * 100, overdue: nDays > mDays, daysOverdue: Math.max(0, nDays - mDays) };
     }
     // Undated import — the pill still reads "waiting" but there is no bar/date.
     return { ...base, mode: "waiting", sentMs: null, expMs: null };

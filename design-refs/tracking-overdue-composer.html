@@ -1,0 +1,124 @@
+<!doctype html>
+<!--
+  Tracking pane — overdue escalation + composer placement (Layout A).
+  ⚠️ SPEC-DERIVED: the original approved mockup was not supplied to the build session, so this file
+  was reconstructed from the Phase-6 prose (structure + behaviour reference only — colours in the app
+  come from the .t-f12 theme tokens: sage = calm/positive, --pink-* = needs-you; Editorial resolves
+  needs-you to its own alert treatment). Two states shown side by side, plus the flowing composer.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tracking — overdue + composer (Layout A)</title>
+<style>
+  :root {
+    --panel:#fffdfb; --line:#e6dccd; --ink:#3a1c14; --mono:'JetBrains Mono',ui-monospace,monospace;
+    --sage-bg:#eef2ec; --sage-fill:linear-gradient(90deg,#a9c0a4,#8aa886); --sage-tx:#3f5340; --sage-dim:#5a6e58;
+    --pink-t:#f7e3dd; --pink-b:#eecdc3; --pink-i:#8a4030; /* needs-you */
+    --bar-bg:#e6ece4;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:28px; background:#f3ece2; font-family:'Inter',system-ui,sans-serif; color:var(--ink); }
+  h1 { font-size:15px; font-weight:600; margin:0 0 4px; }
+  p.note { font-size:12px; color:#7d7268; margin:0 0 22px; max-width:640px; line-height:1.5; }
+  .cols { display:grid; grid-template-columns:1fr 1fr; gap:22px; align-items:start; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:14px; overflow:hidden; display:flex; flex-direction:column; min-height:420px; }
+  .chh { padding:12px 16px; font-family:'Playfair Display',serif; font-weight:600; font-size:15px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:8px; }
+  .chh.calm { background:linear-gradient(180deg,#eef2ec,#e7ede4); color:#2f3a30; }
+  .chh.hot  { background:linear-gradient(180deg,#f7e3dd,#f2d7cf); color:var(--pink-i); }
+  .body { padding:16px; flex:1; display:flex; flex-direction:column; }
+  .stamp { font-family:var(--mono); font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:#a89a8a; }
+  .row { display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:14px; }
+  .rowtitle { font-weight:600; font-size:14px; }
+
+  /* readout — calm */
+  .readout { margin-top:6px; }
+  .waiting { display:inline-flex; align-items:center; gap:9px; font-size:13px; }
+  .waiting .d { font-family:var(--mono); font-weight:600; font-size:12px; color:var(--sage-dim); }
+
+  /* readout — escalated */
+  .escal { background:var(--pink-t); border:1px solid var(--pink-b); border-radius:11px; padding:11px 13px; }
+  .escal .waiting { color:var(--pink-i); font-weight:500; }
+  .escal .waiting .d { color:var(--pink-i); }
+  .escal .top { display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+  .badge { font-family:var(--mono); font-size:8.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#fff; background:var(--pink-i); border-radius:6px; padding:3px 8px; white-space:nowrap; }
+  .nudge { margin-top:12px; display:inline-flex; align-items:center; gap:7px; font-size:12px; font-weight:600; color:#fff; background:var(--pink-i); border:none; border-radius:8px; padding:7px 13px; cursor:pointer; }
+
+  /* progress bar — marker at 68%, overdue zone beyond */
+  .bar { position:relative; height:6px; border-radius:6px; margin-top:11px; overflow:hidden; background:var(--bar-bg); }
+  .bar .fill { position:absolute; left:0; top:0; bottom:0; }
+  .bar .sage { background:var(--sage-fill); }
+  .bar .zone { background:linear-gradient(90deg,var(--pink-b),var(--pink-i)); }
+  .bar .mark { position:absolute; top:0; bottom:0; width:2px; transform:translateX(-1px); }
+  .cap { display:flex; justify-content:space-between; font-family:var(--mono); font-size:9.5px; letter-spacing:.04em; color:#7d7268; margin-top:7px; }
+  .cap .crossed { color:var(--pink-i); text-decoration:line-through; }
+
+  /* composer — Layout A: flows under the readout, in normal order; whitespace falls BELOW */
+  .composer { margin-top:18px; border:1px solid var(--line); border-radius:12px; padding:12px; background:#fffdf9; }
+  .composer .q { font-family:'Playfair Display',serif; font-weight:600; font-size:15px; margin-bottom:9px; }
+  .chips { display:flex; gap:7px; flex-wrap:wrap; }
+  .chip { font-size:12px; border:1px solid var(--line); border-radius:999px; padding:6px 12px; background:#fff; color:#5a4a3a; }
+  .chip.pos { background:#f3e6de; border-color:#e5c9bd; } /* likely-positive step (soft, NOT needs-you) */
+  .flexfill { flex:1; } /* Layout A whitespace */
+  .tag { font-family:var(--mono); font-size:8px; letter-spacing:.1em; text-transform:uppercase; color:#b3a596; margin-top:10px; }
+</style>
+</head>
+<body>
+  <h1>Tracking pane — within-window vs overdue, with the flowing composer (Layout A)</h1>
+  <p class="note">Left: within the response window — calm sage readout, the EXPECTED marker sits ahead of the fill. Right: overdue — the readout escalates to a needs-you tint with an <b>Overdue · N days past expected</b> badge, the fill crosses the marker into an overdue zone, and Nudge is promoted inline. In BOTH, the “What happened next?” composer is the same neutral fork — one escalation signal per pane. The composer flows directly under the readout; leftover height is whitespace below it.</p>
+
+  <div class="cols">
+    <!-- CALM -->
+    <div class="card">
+      <div class="chh calm">◷ Tracking</div>
+      <div class="body">
+        <div class="row"><span class="rowtitle">Query sent</span><span class="stamp">16 Jun</span></div>
+        <div class="readout">
+          <span class="waiting">◷ Waiting to hear back <span class="d">· 20 days</span></span>
+          <div class="bar">
+            <div class="fill sage" style="width:24%"></div>
+            <div class="mark" style="left:68%; background:#8a7d6c"></div>
+          </div>
+          <div class="cap"><span>SENT 16 JUN</span><span>EXPECTED BY ~11 AUG</span></div>
+        </div>
+        <div class="composer">
+          <div class="q">What happened next?</div>
+          <div class="chips"><span class="chip pos">Partial requested</span><span class="chip">No response yet</span><span class="chip">Rejected</span></div>
+          <div class="tag">Neutral · flows under the readout</div>
+        </div>
+        <div class="flexfill"></div>
+      </div>
+    </div>
+
+    <!-- OVERDUE -->
+    <div class="card">
+      <div class="chh hot">◷ Tracking</div>
+      <div class="body">
+        <div class="row"><span class="rowtitle">Query sent</span><span class="stamp">1 May</span></div>
+        <div class="readout">
+          <div class="escal">
+            <div class="top">
+              <span class="waiting">◷ Waiting to hear back <span class="d">· 66 days</span></span>
+              <span class="badge">Overdue · 10 days past expected</span>
+            </div>
+            <div class="bar">
+              <div class="fill sage" style="width:68%"></div>
+              <div class="fill zone" style="left:68%; width:18%"></div>
+              <div class="mark" style="left:68%; background:var(--pink-i)"></div>
+            </div>
+            <div class="cap"><span>SENT 1 MAY</span><span class="crossed">EXPECTED BY ~26 JUN</span></div>
+            <button class="nudge">🔔 Nudge Aisha</button>
+          </div>
+        </div>
+        <div class="composer">
+          <div class="q">What happened next?</div>
+          <div class="chips"><span class="chip pos">Partial requested</span><span class="chip">No response yet</span><span class="chip">Rejected</span></div>
+          <div class="tag">Still neutral · unchanged by the escalation</div>
+        </div>
+        <div class="flexfill"></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
