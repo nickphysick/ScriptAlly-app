@@ -15,7 +15,7 @@ import React, { useState } from "react";
 import { StatusDot } from "../StatusDot";
 import { Query, QueryStatus, Agent, QueryMaterial } from "../../types";
 import { formatQueryMaterial } from "../../lib/materials";
-import { queryAmbientStatus, DAY, deriveEscalation, nudgeCount } from "../../lib/queryAmbient";
+import { queryAmbientStatus, deriveEscalation, trackingBar, nudgeCount } from "../../lib/queryAmbient";
 import { NUDGE_NESTED_TYPE } from "../../lib/logNudge";
 
 /** "1 May" — sentence-case day for the grace prose lines. */
@@ -256,14 +256,13 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
         const lastNudgeMs = query.lastNudgeSentDate ? getTime(query.lastNudgeSentDate) : null;
         const escal = deriveEscalation(waiting, { reminderMs, lastNudgeMs, now: Date.now() });
         const nudges = nudgeCount(events, NUDGE_NESTED_TYPE); // P3 — re-escalation "nudged N×" copy
-        const overdue = waiting.overdue;
         const dated = waiting.sentMs != null && waiting.expMs != null;
-        const windowDays = dated ? Math.max(1, Math.round((waiting.expMs! - waiting.sentMs!) / DAY)) : 0;
-        const MARK = 68; // the EXPECTED marker's position on the bar (%); the tail past it is the overdue zone
-        const fillPct = !dated ? 0
-          : overdue ? MARK + Math.min(1, waiting.daysOverdue / windowDays) * (100 - MARK)
-          : Math.min(1, waiting.nDays / windowDays) * MARK;
         const agentFirst = agent?.name?.split(" ")[0] || "the agent";
+        // P4 — derived bar geometry (no magic percentages): within ends at expected (no marker);
+        // overdue spans sent→now with the expected marker + hatch; grace spans sent→reminder with a
+        // faded original-expected tick.
+        const geo = trackingBar(escal, waiting, reminderMs, Date.now());
+        const baseFillPct = geo.overdueZone && geo.markerPct != null ? geo.markerPct : geo.fillPct;
 
         const clockIcon = (
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M5 22h14M5 2h14M17 22v-4.2a2 2 0 0 0-.6-1.4L12 12l-4.4 4.4a2 2 0 0 0-.6 1.4V22M7 2v4.2a2 2 0 0 0 .6 1.4L12 12l4.4-4.4A2 2 0 0 0 17 6.2V2" /></svg>
@@ -280,18 +279,28 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
         const bar = dated ? (
           <>
             <div style={{ position: "relative", height: 6, borderRadius: 6, marginTop: 11, overflow: "hidden", background: wcol.barBg }}>
-              <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${Math.min(fillPct, MARK)}%`, background: wcol.barFill }} />
-              {overdue && fillPct > MARK && (
-                <div style={{ position: "absolute", left: `${MARK}%`, top: 0, bottom: 0, width: `${fillPct - MARK}%`, background: "linear-gradient(90deg, var(--pink-b), var(--pink-i))" }} />
+              {/* base fill — warm in grace, sage otherwise; stops at the marker when there's a hatch */}
+              <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${baseFillPct}%`, background: escal === "grace" ? "linear-gradient(90deg,#d9c3ac,#c9a988)" : wcol.barFill }} />
+              {/* overdue hatch zone beyond the expected marker */}
+              {geo.overdueZone && geo.markerPct != null && (
+                <div style={{ position: "absolute", left: `${geo.markerPct}%`, top: 0, bottom: 0, width: `${Math.max(0, geo.fillPct - geo.markerPct)}%`, background: "linear-gradient(90deg, var(--pink-b), var(--pink-i))" }} />
               )}
-              {/* EXPECTED marker — reads as crossed (needs-you) once overdue */}
-              <div style={{ position: "absolute", left: `${MARK}%`, top: 0, bottom: 0, width: 2, transform: "translateX(-1px)", background: overdue ? "var(--pink-i)" : "#8a7d6c" }} />
+              {/* EXPECTED marker (overdue only — within-window the bar END is expected, no marker) */}
+              {geo.markerPct != null && (
+                <div style={{ position: "absolute", left: `${geo.markerPct}%`, top: 0, bottom: 0, width: 2, transform: "translateX(-1px)", background: "var(--pink-i)" }} />
+              )}
+              {/* grace — faded tick where the ORIGINAL expected lapsed (bar end is the reminder horizon) */}
+              {geo.graceTickPct != null && (
+                <div style={{ position: "absolute", left: `${geo.graceTickPct}%`, top: 0, bottom: 0, width: 2, transform: "translateX(-1px)", background: "#b7a48f", opacity: 0.6 }} />
+              )}
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.04em", color: "#7d7268", marginTop: 7 }}>
               <span>SENT {fmtShort(waiting.sentMs!)}</span>
-              {/* P3 — no strikethrough: the expectation LAPSED, it wasn't withdrawn. The crossed
-                  meaning rides the bar marker + the burgundy tone only. */}
-              <span style={{ color: overdue ? "var(--pink-i)" : "#7d7268" }}>EXPECTED BY ~{fmtShort(waiting.expMs!)}</span>
+              {escal === "grace"
+                ? <span style={{ color: "var(--grace-ink)" }}>REMINDER {reminderMs != null ? fmtShort(reminderMs) : "—"}</span>
+                /* P3 — no strikethrough: the expectation LAPSED, it wasn't withdrawn; the crossed
+                   meaning rides the bar marker + burgundy tone only. */
+                : <span style={{ color: escal === "overdue" ? "var(--pink-i)" : "#7d7268" }}>EXPECTED BY ~{fmtShort(waiting.expMs!)}</span>}
             </div>
           </>
         ) : null;
@@ -312,7 +321,7 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
                     FOLLOW-UP REMINDER SET FOR {fmtShort(reminderMs)}
                   </div>
                 )}
-                {/* grace progress bar lands in P4 */}
+                {bar}
                 {onNudge && (
                   <button type="button" onClick={onNudge} style={{ marginTop: 11, background: "none", border: "none", padding: 0, fontFamily: "'Inter',sans-serif", fontSize: 12, fontWeight: 600, color: "var(--grace-ink)", textDecoration: "underline", textUnderlineOffset: 3, cursor: "pointer" }}>
                     Nudge again
