@@ -18,6 +18,15 @@ import { formatQueryMaterial } from "../../lib/materials";
 import { queryAmbientStatus, deriveEscalation, trackingBar, nudgeCount, elapsedLabel } from "../../lib/queryAmbient";
 import { NUDGE_NESTED_TYPE } from "../../lib/logNudge";
 
+/** TWS-revised — natural-language date for the grace header ("15th July"), the header's own font. */
+const fmtNatural = (ms: number): string => {
+  const d = new Date(ms);
+  if (isNaN(d.getTime())) return "";
+  const day = d.getDate();
+  const ord = day % 10 === 1 && day !== 11 ? "st" : day % 10 === 2 && day !== 12 ? "nd" : day % 10 === 3 && day !== 13 ? "rd" : "th";
+  return `${day}${ord} ${d.toLocaleDateString("en-GB", { month: "long" })}`;
+};
+
 /** P5 — inter-event vertical spacing (px). One constant so reuse of the timeline stays consistent;
  *  the connector hairline's length is derived from it, never a per-instance number. */
 const TL_EVENT_GAP = 24;
@@ -330,40 +339,82 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
                 )}
               </div>
             ) : escal === "grace" ? (
-              /* GRACE (P2) — DASHED, no fill; a sage bar that pulses left→right (CSS-only sweep). No
-                 badge, no nudge CTA (nudge is a fork chip now). The overdue clock keeps counting. */
-              <div style={{ border: "1px dashed var(--sage, #8a9e88)", borderRadius: 11, padding: "11px 13px" }}>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 9, fontSize: 13, fontWeight: 500, color: "var(--sageD, #5a6e58)" }}>
-                  {clockIcon}
-                  Awaiting response
-                </span>
-                <div style={{ fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: ".04em", color: "var(--sageD, #5a6e58)", opacity: 0.85, marginTop: 8 }}>
-                  {lastNudgeMs != null && <>FOLLOWED UP {fmtShort(lastNudgeMs)} · </>}REMINDER {reminderMs != null ? fmtShort(reminderMs) : "—"}
-                </div>
-                <div className="tl-gracebar" style={{ position: "relative", height: 6, borderRadius: 6, marginTop: 11, overflow: "hidden", background: "var(--sageC, #e9ede6)" }}>
-                  <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${geo.fillPct}%`, background: "var(--sage, #8a9e88)", opacity: 0.55 }} />
-                  <div className="tl-sweep" aria-hidden="true" />
-                  {geo.graceTickPct != null && <div style={{ position: "absolute", left: `${geo.graceTickPct}%`, top: 0, bottom: 0, width: 2, transform: "translateX(-1px)", background: "#b7a48f", opacity: 0.6 }} />}
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.04em", color: "#7d7268", marginTop: 7 }}>
-                  <span>SENT {fmtShort(waiting.sentMs!)}</span>
-                  <span style={{ color: "var(--sageD, #5a6e58)" }}>REMINDER {reminderMs != null ? fmtShort(reminderMs) : "—"}</span>
-                </div>
-              </div>
+              /* GRACE (P2, revised) — DASHED box, no fill. Natural-language header in the header font,
+                 single ink (no burgundy split). Two-tone bar (sage sent→deadline, red deadline→today),
+                 the fill ends at TODAY; deadline marker only; the shimmer sweeps within the fill. */
+              (() => {
+                const now = Date.now();
+                const graceDated = dated && reminderMs != null && reminderMs > waiting.sentMs!;
+                const span = graceDated ? reminderMs! - waiting.sentMs! : 0;
+                const pct = (n: number) => Math.max(0, Math.min(100, (n / span) * 100));
+                const deadlinePct = graceDated ? pct(waiting.expMs! - waiting.sentMs!) : 0;
+                const todayPct = graceDated ? pct(now - waiting.sentMs!) : 0;
+                const sageEnd = Math.min(deadlinePct, todayPct);
+                return (
+                  <div style={{ border: "1px dashed var(--sage, #8a9e88)", borderRadius: 11, padding: "11px 13px" }}>
+                    <div style={{ fontSize: 13.5, fontWeight: 500, color: "var(--ink, #1e1a16)" }}>
+                      Response overdue — nudge sent {lastNudgeMs != null ? fmtNatural(lastNudgeMs) : "recently"}
+                    </div>
+                    <div style={{ fontSize: 12, color: "var(--muted, #7d7469)", marginTop: 4 }}>
+                      Scheduled follow-up set for {reminderMs != null ? fmtNatural(reminderMs) : "—"}
+                    </div>
+                    {graceDated && (
+                      <>
+                        <div className="tl-gracebar" style={{ position: "relative", height: 6, borderRadius: 6, marginTop: 11, overflow: "hidden", background: "var(--sageC, #e9ede6)" }}>
+                          {/* sage: sent → deadline (capped at today) */}
+                          <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${sageEnd}%`, background: "var(--sage, #8a9e88)" }} />
+                          {/* overdue red: deadline → today */}
+                          {todayPct > deadlinePct && (
+                            <div style={{ position: "absolute", left: `${deadlinePct}%`, top: 0, bottom: 0, width: `${todayPct - deadlinePct}%`, background: "linear-gradient(90deg, var(--pink-b), var(--pink-i))" }} />
+                          )}
+                          {/* shimmer confined to the fill (0 → today) */}
+                          <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${todayPct}%`, overflow: "hidden" }}><div className="tl-sweep" aria-hidden="true" /></div>
+                          {/* deadline marker only (the fill edge is today — no today marker) */}
+                          <div style={{ position: "absolute", left: `${deadlinePct}%`, top: 0, bottom: 0, width: 2, transform: "translateX(-1px)", background: "var(--pink-i)" }} />
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.04em", color: "#7d7268", marginTop: 7 }}>
+                          <span>SENT {fmtShort(waiting.sentMs!)}</span>
+                          <span style={{ color: "var(--sageD, #5a6e58)" }}>FOLLOW-UP {fmtShort(reminderMs!)}</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              })()
             ) : escal === "overdue" ? (
-              /* OVERDUE (P2) — pink-tint card + badge. NO nudge CTA (nudge is a fork chip now, P3);
-                 re-escalation badge acknowledges the prior chase ("nudged N× · no reply"). */
-              <div style={{ background: "var(--pink-t)", border: "1px solid var(--pink-b)", borderRadius: 11, padding: "11px 13px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 9, flexWrap: "wrap", color: "var(--pink-i)" }}>
-                  {clockIcon}
-                  <span style={{ fontFamily: FONT_MONO, fontSize: 8.5, fontWeight: 700, letterSpacing: ".06em", textTransform: "uppercase", color: "#fff", background: "var(--pink-i)", borderRadius: 6, padding: "3px 8px", whiteSpace: "nowrap" }}>
-                    {nudges > 0
-                      ? `Overdue · ${nudges === 1 ? "nudged once" : `nudged ${nudges}×`} · no reply`
-                      : `Overdue · ${waiting.daysOverdue} ${waiting.daysOverdue === 1 ? "day" : "days"} past expected`}
-                  </span>
-                </div>
-                {bar}
-              </div>
+              /* OVERDUE (P3, revised) — pink card, "Response overdue by {elapsed}[ · nudged N×]" badge,
+                 no nudge CTA. Bar fully filled sent→today (rose→burgundy) with a warning icon at the
+                 end + a labelled "response expected" marker; axis Sent / Today. */
+              (() => {
+                const now = Date.now();
+                const expectedPct = dated ? Math.max(0, Math.min(100, ((waiting.expMs! - waiting.sentMs!) / Math.max(1, now - waiting.sentMs!)) * 100)) : 0;
+                return (
+                  <div style={{ background: "var(--pink-t)", border: "1px solid var(--pink-b)", borderRadius: 11, padding: "11px 13px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 9, flexWrap: "wrap", color: "var(--pink-i)" }}>
+                      {clockIcon}
+                      <span style={{ fontFamily: FONT_MONO, fontSize: 8.5, fontWeight: 700, letterSpacing: ".06em", textTransform: "uppercase", color: "#fff", background: "var(--pink-i)", borderRadius: 6, padding: "3px 8px", whiteSpace: "nowrap" }}>
+                        Response overdue by {elapsedLabel(waiting.daysOverdue)}{nudges > 0 ? ` · nudged ${nudges === 1 ? "once" : `${nudges}×`}` : ""}
+                      </span>
+                    </div>
+                    {dated && (
+                      <>
+                        <div style={{ position: "relative", height: 6, borderRadius: 6, marginTop: 11, background: "var(--pink-b)" }}>
+                          <div style={{ position: "absolute", inset: 0, borderRadius: 6, background: "linear-gradient(90deg, #e6a99b, var(--pink-i))" }} />
+                          {/* "response expected" marker at the expected position */}
+                          <div style={{ position: "absolute", left: `${expectedPct}%`, top: -2, bottom: -2, width: 2, transform: "translateX(-1px)", background: "#7a2d20" }} />
+                          {/* warning icon at the end (today) */}
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--pink-i)" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" style={{ position: "absolute", right: -6, top: "50%", transform: "translateY(-50%)", background: "var(--pink-t)", borderRadius: "50%" }}><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" /></svg>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.04em", color: "#7d7268", marginTop: 7 }}>
+                          <span>SENT {fmtShort(waiting.sentMs!)}</span>
+                          <span style={{ color: "var(--pink-i)" }}>RESPONSE EXPECTED {fmtShort(waiting.expMs!)}</span>
+                          <span>TODAY</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              })()
             ) : (
               /* WITHIN-WINDOW (P2) — soft-neutral card + hairline; lead text, mono data (the bar). */
               <div style={{ background: "var(--paper, #faf7f2)", border: "1px solid var(--hairline, #f0eae1)", borderRadius: 11, padding: "11px 13px" }}>

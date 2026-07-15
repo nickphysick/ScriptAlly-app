@@ -202,20 +202,21 @@ describe("queryAmbientStatus — overdue boundary (P6; derived from now vs expec
 describe("P6 artefacts — one escalation signal per pane (readout escalates, fork stays neutral)", () => {
   const tl = readFileSync(resolve(__dirname, "../components/reading-pane/QueryTimeline.tsx"), "utf8");
   const composer = readFileSync(resolve(__dirname, "../components/reading-pane/TimelineComposer.tsx"), "utf8");
-  it("the overdue readout escalates to the needs-you token + badge + inline nudge", () => {
+  it("the overdue readout escalates to the needs-you token + badge (no inline nudge CTA — TR P3)", () => {
     expect(tl.includes("var(--pink-i)")).toBe(true);           // needs-you escalation colour
-    expect(tl.includes("past expected")).toBe(true);           // the Overdue badge
-    expect(tl.includes("onNudge")).toBe(true);                 // inline nudge seam
+    expect(tl.includes("Response overdue by")).toBe(true);     // the revised badge (elapsed-labelled)
+    expect(tl.includes("RESPONSE EXPECTED")).toBe(true);       // labelled expected marker on the bar axis
   });
 
   it("P3 tidy — no strikethrough anywhere (the expectation lapsed, it wasn't withdrawn)", () => {
     expect(tl.includes("line-through")).toBe(false);
   });
 
-  it("grace P3 — a re-escalated overdue badge acknowledges the prior chase (nudged N×), not a fresh overdue", () => {
-    expect(tl.includes("nudged once")).toBe(true);
-    expect(tl.includes("nudged ${nudges}×")).toBe(true);
-    expect(tl.includes("· no reply`")).toBe(true);
+  it("TR P3 re-escalation copy — the overdue badge appends 'nudged N×' when chased, omits it when never", () => {
+    expect(tl.includes("· nudged ")).toBe(true);   // the append fragment
+    expect(tl.includes('"once"')).toBe(true);      // a single chase reads 'once'
+    expect(tl.includes("${nudges}×")).toBe(true);  // repeats read 'N×'
+    expect(tl.includes("nudges > 0 ?")).toBe(true); // omitted entirely when never nudged
   });
 
   it("P5 connector — container-drawn hairline, gated on !isLast (2+ events), spacing via a constant", () => {
