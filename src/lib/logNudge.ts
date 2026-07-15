@@ -41,13 +41,22 @@ export interface NudgeDismissalWrite {
 }
 
 export interface NudgeWrites {
-  /** Non-status NUDGE_SENT activity for the top-level feed (id/userId added by the caller). */
+  /** AUTHORITATIVE row for the per-query subcollection (users/{uid}/queries/{qid}/activity) — what
+   *  the Tracking timeline reads. `type` is deliberately NOT a QueryStatus enum member, so
+   *  recomputeQuery's normalisation ignores it (non-status by construction). */
+  nested: { type: typeof NUDGE_NESTED_TYPE; createdAt: string; note: string; queryId: string; agentName: string };
+  /** The global-feed PROJECTION twin (users/{uid}/activities) — what the dashboard timeline reads.
+   *  Derived from the same build as `nested`; the caller writes both under ONE shared id (the
+   *  saveQueryEdits same-id-twin convention), never as an independent parallel write. */
   activity: Omit<Activity, "id" | "userId">;
   /** The ONLY query fields touched — never status or responseDeadline. */
   queryUpdates: { nudgeDate: string; lastNudgeSentDate: string };
   /** The hide-and-resurface dismissal (id/userId added by the caller). */
   dismissal: NudgeDismissalWrite;
 }
+
+/** The nested row's `type` — the Tracking timeline keys its nudge node on this exact string. */
+export const NUDGE_NESTED_TYPE = "Nudge sent" as const;
 
 /** Human-readable check-back date for the timeline `details` line. */
 export const formatCheckBack = (dateISO: string): string =>
@@ -79,6 +88,14 @@ export const buildNudgeWrites = (
   if (details.length > DETAILS_MAX) details = details.slice(0, DETAILS_MAX);
 
   return {
+    // ONE build feeds BOTH stores: `nested` is the authoritative row, `activity` its projection twin.
+    nested: {
+      type: NUDGE_NESTED_TYPE, // non-enum → recomputeQuery ignores it (never status-bearing)
+      createdAt: nowISO,
+      note: details, // the follow-up line (+ optional writer note) renders beneath the node
+      queryId: query.id,
+      agentName,
+    },
     activity: {
       queryId: query.id,
       manuscriptId: query.manuscriptId,

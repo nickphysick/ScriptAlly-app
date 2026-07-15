@@ -16,6 +16,7 @@ import { StatusDot } from "../StatusDot";
 import { Query, QueryStatus, Agent, QueryMaterial } from "../../types";
 import { formatQueryMaterial } from "../../lib/materials";
 import { queryAmbientStatus, DAY } from "../../lib/queryAmbient";
+import { NUDGE_NESTED_TYPE } from "../../lib/logNudge";
 import { F12Menu } from "../shell/F12Shell";
 
 /** A correctable timeline entry (5b) — passed to the ⋯ Edit / Delete handlers. */
@@ -59,8 +60,11 @@ const MatPill: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <span style={{ display: "inline-flex", alignItems: "center", fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 500, color: "#6a5b4c", background: "#fdfaf5", border: "1px solid #ddcdbb", borderRadius: 999, padding: "4px 11px" }}>{children}</span>
 );
 
-interface RowSpec {
+export interface RowSpec {
   key: string;
+  /** "nudge" = a non-status outgoing touch (P2): the dot reuses the outgoing QUERIED glyph
+   *  decoratively, and the row never carries an activityId (corrections are for status entries). */
+  kind?: "nudge";
   status: QueryStatus;
   title: string;
   date?: string;
@@ -70,6 +74,8 @@ interface RowSpec {
   activityId?: string;
   dateISO?: string;
   note?: string;
+  /** Event time for the merged chronological sort. */
+  timeMs?: number;
 }
 
 const isoDay = (ms: number): string => {
@@ -97,8 +103,20 @@ export interface QueryTimelineProps {
   onNudge?: () => void;
 }
 
-export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry, onNudge }) => {
-  const [menu, setMenu] = useState<{ entry: TimelineEntryRef; style: React.CSSProperties } | null>(null);
+/**
+ * Build the timeline rows from the AUTHORITATIVE per-query activity docs. Pure + exported so the
+ * nudge-node behaviour is unit-testable (the repo's lib-level vitest pattern).
+ *
+ * Two row families:
+ *  - STATUS rows — enum-typed events, deduped by status (keep the earliest of each). Unknown
+ *    non-enum types are deliberately excluded here (the guard against garbage), with ONE explicit
+ *    exception below.
+ *  - NUDGE rows (P2) — `type === NUDGE_NESTED_TYPE`. Every nudge renders (repeat nudges are
+ *    distinct outgoing touches — never deduped). A nudge is non-status: it carries no correction ⋯
+ *    (corrections operate on status entries) and never enters the status dedupe.
+ * Both merge chronologically.
+ */
+export function buildTimelineRows(events: any[], query: Query, agent: Agent | null): RowSpec[] {
   const validEnumValues = Object.values(QueryStatus);
 
   // Dedupe the activity log by status (keep the earliest of each), then order chronologically.
@@ -122,7 +140,7 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
     ? (query.materialsWanted as (string | QueryMaterial)[]).map(formatQueryMaterial).filter(Boolean)
     : [];
 
-  const rows: RowSpec[] = statusEvents.map((evt, i) => {
+  const statusRows: RowSpec[] = statusEvents.map((evt, i) => {
     const status = evt.type as QueryStatus;
     const baseTitle = TL_TITLES[status] || status;
     const title = status === QueryStatus.FULL_SENT && (query.revisionRound ?? 1) >= 2 ? `${baseTitle} (v${query.revisionRound})` : baseTitle;
@@ -139,8 +157,34 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
       activityId: typeof evt.id === "string" ? evt.id : undefined, // synthesised root has no id
       dateISO: isoDay(getTime(evt.createdAt)),
       note: typeof evt.note === "string" ? evt.note : "",
+      timeMs: getTime(evt.createdAt),
     };
   });
+
+  // P2 — the nudge nodes: outgoing writer-side touches, one row per nudge, merged by time. The dot
+  // reuses the OUTGOING glyph (QUERIED — burgundy ring, → arrow) decoratively via the locked
+  // StatusDot; the node claims no status (kind: "nudge", no activityId → no correction ⋯).
+  const nudgeRows: RowSpec[] = (events || [])
+    .filter((evt) => evt.type === NUDGE_NESTED_TYPE)
+    .map((evt, i) => ({
+      key: `n-${typeof evt.id === "string" ? evt.id : i}`,
+      kind: "nudge" as const,
+      status: QueryStatus.QUERIED,
+      title: "Nudged",
+      date: fmtShort(getTime(evt.createdAt)),
+      sub: `via ${query.sendMethod || "Email"}`,
+      dateISO: isoDay(getTime(evt.createdAt)),
+      note: typeof evt.note === "string" ? evt.note : "",
+      timeMs: getTime(evt.createdAt),
+    }));
+
+  return [...statusRows, ...nudgeRows].sort((a, b) => (a.timeMs ?? 0) - (b.timeMs ?? 0));
+}
+
+export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry, onNudge }) => {
+  const [menu, setMenu] = useState<{ entry: TimelineEntryRef; style: React.CSSProperties } | null>(null);
+
+  const rows = buildTimelineRows(events, query, agent);
 
   // ── trailing open-state block — one shared derivation (lib/queryAmbient), the same numbers the
   // command bar shows, so the two can't disagree. Ball-holder still comes from getPrimaryAction. ──
@@ -162,7 +206,7 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
         return (
           <div key={row.key} style={{ display: "grid", gridTemplateColumns: "30px 1fr", gap: 11, position: "relative", paddingBottom: isLast ? 0 : 24 }}>
             <div style={{ position: "relative", display: "flex", justifyContent: "center" }}>
-              <StatusDot status={row.status} overrideSize={28} />
+              <StatusDot status={row.status} overrideSize={28} decorative={row.kind === "nudge"} />
               {!isLast && (
                 <div style={{ position: "absolute", top: 29, bottom: -24, left: "50%", transform: "translateX(-50%)", width: 1.6, background: "#e8dcd0" }} />
               )}

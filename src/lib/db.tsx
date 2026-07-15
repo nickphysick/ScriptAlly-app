@@ -2432,9 +2432,20 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
     const writes = buildNudgeWrites(q, agent, args, new Date());
 
-    // 1) Non-status NUDGE_SENT activity → top-level feed (where the timeline reads nudges from).
-    const actRes = await addActivity(writes.activity);
-    if (!actRes.success) return actRes;
+    // 1) ONE event id for both stores (the saveQueryEdits same-id-twin convention).
+    //    1a — AUTHORITATIVE: the per-query subcollection the Tracking timeline reads. A failure
+    //    here aborts the nudge (nothing else may land without the source-of-truth row).
+    const actId = "act-" + Math.random().toString(36).substr(2, 9);
+    try {
+      await setDoc(doc(db, "users", currentUser.id, "queries", queryId, "activity", actId), writes.nested);
+    } catch (e) {
+      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/queries/${queryId}/activity/${actId}`);
+      return { success: false, error: "Failed to log nudge." };
+    }
+    //    1b — PROJECTION twin: the global feed the dashboard reads, derived from the SAME build +
+    //    id (never an independent parallel write). Best-effort: a missing twin must never fail the
+    //    nudge — the authoritative row already landed. (Pending the parked store consolidation.)
+    await addActivity({ ...writes.activity, id: actId });
 
     try {
       // 2) Set the next-nudge field + bookkeeping. updateQuery never touches status/responseDeadline.
