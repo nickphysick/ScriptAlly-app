@@ -1,0 +1,118 @@
+<!doctype html>
+<!--
+  Tracking pane — revised (TR P2/P3/P5). ⚠️ SPEC-DERIVED: the approved mockup this pass named
+  ("tracking-revised.html") was NOT supplied to the build session — this file is reconstructed from
+  the prose so the intent is on record. Structure/behaviour only; colours resolve from .t-f12 tokens
+  in the app, not this file's hex. Revises design-refs/tracking-reworked-v2.html:
+    • GRACE  — natural-language header in the header font ("Response overdue — nudge sent 15th July"),
+               single ink (no burgundy split); meta "Scheduled follow-up set for {date}". Two-tone bar
+               spanning sent→follow-up: sage sent→deadline, overdue red deadline→today, the fill ends
+               at TODAY, deadline marker only, shimmer confined to the fill. Axis SENT / FOLLOW-UP.
+    • OVERDUE — badge "Response overdue by {elapsed}" (+ "· nudged N×" only when nudged); NO nudge CTA.
+               Bar fully filled sent→today (rose→burgundy) + a warning glyph at the end + a labelled
+               RESPONSE EXPECTED marker. Axis SENT / RESPONSE EXPECTED / TODAY.
+    • FORK   — one positive primary + Nudge (→"Nudge again" when a reminder is set) + Close query
+               (grey ringed ×); everything else, incl. Rejection, under "Other…" (no "less likely" tag).
+    • Elapsed values page-wide read as "{n} days" ≤28, else "{round(n/7)} weeks" (elapsedLabel).
+-->
+<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Tracking — revised (grace + overdue + fork)</title>
+<style>
+  :root{--panel:#fffdfb;--paper:#faf7f2;--line:#e6dccd;--hair:#f0eae1;--ink:#1e1a16;--muted:#7d7469;--burg:#7c3a2a;--mono:'JetBrains Mono',monospace;
+    --pink:#f5e2da;--pink-t:#f7e3dd;--pink-b:#eecdc3;--pink-i:#8a4030;--sage:#8a9e88;--sageC:#e9ede6;--sageD:#5a6e58;--bar-bg:#e6ece4;--oat:#f1e8dc;}
+  *{box-sizing:border-box}body{margin:0;padding:24px;background:#f3ece2;font-family:'Inter',system-ui,sans-serif;color:#3a1c14}
+  h1{font-size:15px;font-weight:600;margin:0 0 6px}p.note{font-size:12px;color:#8a7d6c;margin:0 0 18px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:start}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px}
+  .lbl{font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:#a89a8a;margin-bottom:11px}
+  .row{display:inline-flex;align-items:center;gap:9px;font-size:13px}
+  .bar{position:relative;height:6px;border-radius:6px;margin-top:11px;overflow:hidden;background:var(--bar-bg)}
+  .bar .f{position:absolute;left:0;top:0;bottom:0}
+  .mark,.tick{position:absolute;top:0;bottom:0;width:2px;transform:translateX(-1px)}
+  .cap{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9.5px;color:#7d7268;margin-top:7px}
+  /* within window */
+  .within{background:var(--paper);border:1px solid var(--hair);border-radius:11px;padding:11px 13px}
+  /* grace — DASHED, natural-language header in the header font, single ink; two-tone bar to today */
+  .grace{border:1px dashed var(--sage);border-radius:11px;padding:11px 13px}
+  .grace .h{font-size:13.5px;font-weight:500;color:var(--ink)}
+  .grace .m{font-size:12px;color:var(--muted);margin-top:4px}
+  .gracebar{position:relative;height:6px;border-radius:6px;margin-top:11px;overflow:hidden;background:var(--sageC)}
+  .gracebar .sweep{position:absolute;top:0;bottom:0;left:0;width:38%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);animation:sweep 2.4s ease-in-out infinite}
+  @keyframes sweep{0%{transform:translateX(-120%)}100%{transform:translateX(320%)}}
+  /* overdue — pink card, elapsed badge, full rose→burgundy bar + warning + expected marker */
+  .overdue{background:var(--pink-t);border:1px solid var(--pink-b);border-radius:11px;padding:11px 13px}
+  .badge{font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--pink-i);border-radius:6px;padding:3px 8px}
+  .warn{position:absolute;right:-6px;top:50%;transform:translateY(-50%);width:12px;height:12px;border-radius:50%;background:var(--pink-t);color:var(--pink-i);font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center}
+  /* no expected date */
+  .nodate{border:1px dashed var(--line);border-radius:11px;padding:12px 14px;color:var(--muted)}
+  .nodate a{display:block;margin-top:9px;color:var(--burg);font-weight:600;font-size:12.5px;text-decoration:none}
+  /* your move (writer) */
+  .move{background:var(--pink);border:1px solid var(--ink);border-radius:11px;padding:12px 14px}
+  .move .t{font-family:'Playfair Display',serif;font-weight:600;font-size:15px;color:var(--ink)}
+  .move .s{display:block;font-size:11.5px;color:var(--burg);margin-top:3px;font-weight:500}
+  /* fork — lifted shadowed card; one positive primary + Nudge again + Close query; rest under Other */
+  .fork{margin-top:16px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 6px 20px rgba(40,28,20,.08);padding:14px}
+  .fq{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;margin-bottom:9px}
+  .chips{display:flex;gap:7px;flex-wrap:wrap}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;border:1px solid var(--line);border-radius:999px;padding:6px 12px;background:#fff;color:#4a443c}
+  .chip .d{width:8px;height:8px;border-radius:50%}
+  .chip.pos{background:#f6cfc9;border-color:transparent;color:var(--ink);font-weight:600}
+  .chip.nudge{border-color:var(--burg);color:var(--burg)}
+  .chip.close{background:var(--paper);color:var(--muted)}
+  .chip.close .x{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;border:1.3px solid currentColor;font-size:11px;font-weight:600}
+  .othertoggle{margin-top:10px;font-size:12px;font-weight:600;color:var(--muted);cursor:default}
+  .otherchips{margin-top:9px}
+</style></head><body>
+<h1>Tracking — revised (TR P2/P3/P5)</h1>
+<p class="note">Spec-derived reconstruction — behaviour/structure only; the app resolves colours from .t-f12 tokens.</p>
+<div class="grid">
+
+  <div class="card"><div class="lbl">within window</div>
+    <div class="within"><span class="row">◷ Waiting to hear back <b style="font-family:var(--mono);font-size:12px;color:var(--sageD)">· 20 days</b></span>
+      <div class="bar"><div class="f" style="width:36%;background:linear-gradient(90deg,#a9c0a4,#8aa886)"></div></div>
+      <div class="cap"><span>SENT 16 JUN</span><span>EXPECTED BY ~11 AUG</span></div></div></div>
+
+  <div class="card"><div class="lbl">grace — nudged, reminder ahead</div>
+    <div class="grace">
+      <div class="h">Response overdue — nudge sent 8th July</div>
+      <div class="m">Scheduled follow-up set for 29th July</div>
+      <!-- sage sent→deadline, red deadline→today; fill ends at TODAY; deadline marker only; shimmer in fill -->
+      <div class="gracebar">
+        <div class="f" style="width:62%;background:var(--sage)"></div>
+        <div class="f" style="left:62%;width:19%;background:linear-gradient(90deg,var(--pink-b),var(--pink-i))"></div>
+        <div style="position:absolute;left:0;top:0;bottom:0;width:81%;overflow:hidden"><div class="sweep"></div></div>
+        <div class="mark" style="left:62%;background:var(--pink-i)"></div>
+      </div>
+      <div class="cap"><span>SENT 1 MAY</span><span style="color:var(--sageD)">FOLLOW-UP 29 JUL</span></div></div></div>
+
+  <div class="card"><div class="lbl">overdue (re-escalated) — no CTA here</div>
+    <div class="overdue"><div style="display:flex;align-items:center;gap:9px;color:var(--pink-i)">◷ <span class="badge">Response overdue by 3 weeks · nudged 2×</span></div>
+      <!-- full fill sent→today (rose→burgundy) + warning glyph at end + labelled RESPONSE EXPECTED marker -->
+      <div class="bar" style="background:var(--pink-b)"><div class="f" style="inset:0;border-radius:6px;background:linear-gradient(90deg,#e6a99b,var(--pink-i))"></div>
+        <div class="mark" style="left:44%;background:#7a2d20;top:-2px;bottom:-2px"></div><span class="warn">!</span></div>
+      <div class="cap"><span>SENT 1 MAY</span><span style="color:var(--pink-i)">RESPONSE EXPECTED 26 JUN</span><span>TODAY</span></div></div></div>
+
+  <div class="card"><div class="lbl">no expected date</div>
+    <div class="nodate"><span class="row">◷ Awaiting response — no expected date set</span><a href="#">Set an expected date →</a></div></div>
+
+  <div class="card"><div class="lbl">your move (writer)</div>
+    <div class="move"><span class="t">Your move — send the full</span><small class="s">Aisha asked for it 4 days ago</small></div></div>
+
+  <div class="card" style="grid-column:span 2"><div class="lbl">fork — waiting on the agent (overdue/grace), reminder set</div>
+    <div class="fork">
+      <div class="fq">What happened next?</div>
+      <div class="chips">
+        <span class="chip pos"><span class="d" style="background:#c98a5e"></span>Partial requested</span>
+        <span class="chip nudge"><span class="d" style="background:var(--burg)"></span>Nudge again</span>
+        <span class="chip close"><span class="x">×</span>Close query</span>
+      </div>
+      <div class="othertoggle">Other…</div>
+      <div class="otherchips chips">
+        <span class="chip"><span class="d" style="background:#b98a45"></span>Full requested</span>
+        <span class="chip"><span class="d" style="background:#7a9e6a"></span>Offer</span>
+        <span class="chip"><span class="d" style="background:#8a7d6c"></span>Revise &amp; resubmit</span>
+        <span class="chip" style="color:var(--muted)"><span class="d" style="background:#9b8c7a"></span>Rejection</span>
+      </div>
+    </div></div>
+
+</div></body></html>
