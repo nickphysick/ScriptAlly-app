@@ -382,9 +382,10 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
                 );
               })()
             ) : escal === "overdue" ? (
-              /* OVERDUE (P3, revised) — pink card. Ink Playfair "Response overdue by {elapsed}[ · nudged
-                 N×]" pill + ink hourglass, no nudge CTA. Bar fully filled sent→today (rose→burgundy)
-                 with a warning glyph at the end + a marker-anchored "response expected" label; axis Sent. */
+              /* OVERDUE (revised) — pink card. Plain ink Playfair "Response overdue by {elapsed}[ · nudged
+                 N×]" text (no pill) + ink hourglass, no nudge CTA. Bar fully filled sent→today
+                 (rose→burgundy) with a warning glyph at the end + a marker-anchored "response expected"
+                 label; axis Sent. */
               (() => {
                 const now = Date.now();
                 const expectedPct = dated ? Math.max(0, Math.min(100, ((waiting.expMs! - waiting.sentMs!) / Math.max(1, now - waiting.sentMs!)) * 100)) : 0;
@@ -392,7 +393,7 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
                   <div style={{ background: "var(--pink-t)", border: "1px solid var(--pink-b)", borderRadius: 11, padding: "11px 13px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 9, flexWrap: "wrap", color: "var(--ink, #1e1a16)" }}>
                       {clockIcon}
-                      <span style={{ fontFamily: FONT_SERIF, fontSize: 12.5, fontWeight: 600, color: "#fff", background: "var(--ink, #1e1a16)", borderRadius: 6, padding: "2px 10px", whiteSpace: "nowrap" }}>
+                      <span style={{ fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 600, color: "var(--ink, #1e1a16)" }}>
                         Response overdue by {elapsedLabel(waiting.daysOverdue)}{nudges > 0 ? ` · nudged ${nudges === 1 ? "once" : `${nudges}×`}` : ""}
                       </span>
                     </div>
