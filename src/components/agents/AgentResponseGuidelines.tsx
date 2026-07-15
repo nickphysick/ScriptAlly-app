@@ -13,6 +13,7 @@
 import React, { useState } from "react";
 import { deleteField } from "firebase/firestore";
 import { Agent } from "../../types";
+import { replyPolicyOf, replyPolicyWrite, type ReplyPolicy } from "../../lib/agentReplyPolicy";
 
 const WEEKS_MIN = 1;
 const WEEKS_MAX = 52;
@@ -43,11 +44,13 @@ export const AgentResponseGuidelines: React.FC<{
   };
   const clearTime = () => { setEditing(false); write({ responseTimeWeeks: deleteField() as unknown as number }, "Set to not stated", prevTime()); };
 
-  const policy: "no" | "either" | "unstated" =
-    agent.noResponseMeansNo === true ? "no" : agent.noResponseMeansNo === false ? "either" : "unstated";
-  const setPolicy = (next: "no" | "either" | "unstated") => {
+  // Read/write through the pure mapping (agentReplyPolicy) so "Not stated" always CLEARS the field
+  // (deleteField) — never writes undefined/false — and absent always reads back as "Not stated".
+  const policy = replyPolicyOf(agent.noResponseMeansNo);
+  const setPolicy = (next: ReplyPolicy) => {
     if (next === policy) return;
-    const fields: Partial<Agent> = next === "no" ? { noResponseMeansNo: true } : next === "either" ? { noResponseMeansNo: false } : { noResponseMeansNo: deleteField() as unknown as boolean };
+    const w = replyPolicyWrite(next);
+    const fields: Partial<Agent> = "clear" in w ? { noResponseMeansNo: deleteField() as unknown as boolean } : { noResponseMeansNo: w.value };
     write(fields, "Reply policy updated", prevPolicy());
   };
 
