@@ -205,7 +205,7 @@ describe("P6 artefacts — one escalation signal per pane (readout escalates, fo
   it("the overdue readout escalates to the needs-you token + badge (no inline nudge CTA — TR P3)", () => {
     expect(tl.includes("var(--pink-i)")).toBe(true);           // needs-you escalation colour
     expect(tl.includes("Response overdue by")).toBe(true);     // the revised badge (elapsed-labelled)
-    expect(tl.includes("RESPONSE EXPECTED")).toBe(true);       // labelled expected marker on the bar axis
+    expect(tl.includes("RESPONSE EXPECTED")).toBe(true);       // the expected-marker date (now a hover/tap pop-up)
   });
 
   it("P3 tidy — no strikethrough anywhere (the expectation lapsed, it wasn't withdrawn)", () => {
@@ -232,6 +232,44 @@ describe("P6 artefacts — one escalation signal per pane (readout escalates, fo
     expect(composer.includes("--pink-i")).toBe(false);
     expect(composer.includes("--pink-t")).toBe(false);
     expect(composer.includes("--pink-b")).toBe(false);
+  });
+});
+
+describe("Bar P3 artefacts — end-anchors + hollow-circle milestones + hover/tap pop-ups", () => {
+  // jsdom can't verify the tap/hover pop-up firing or the bar's pixel geometry — these lock the
+  // structural rule (marker + anchors present, derived positions, touch-wiring). The interaction
+  // itself is flagged for Nick's in-browser check on dev.
+  const tl = readFileSync(resolve(__dirname, "../components/reading-pane/QueryTimeline.tsx"), "utf8");
+
+  it("a reusable BarMilestone renders a hollow circle — --panel fill, thin grey (--faint) outline", () => {
+    expect(tl.includes("const BarMilestone")).toBe(true);
+    expect(tl.includes('borderRadius: "50%"')).toBe(true);
+    expect(tl.includes("var(--faint, #b3a596)")).toBe(true); // thin grey outline (#b3a596-equivalent token)
+  });
+
+  it("the milestone is touch-wired — pointerType-guarded hover AND an onClick pin (not hover-only)", () => {
+    expect(tl.includes('e.pointerType === "mouse"')).toBe(true); // hover only fires for a real mouse
+    expect(tl.includes("setPinned")).toBe(true);                 // tap toggles the pop-up on touch
+  });
+
+  it("the pop-up renders ABOVE the bar (anchors sit below) and anchors inward near an edge", () => {
+    expect(tl.includes('bottom: "calc(100% + 8px)"')).toBe(true); // above the bar
+    expect(tl.includes('p < 22 ? "start"') && tl.includes('p > 78 ? "end"')).toBe(true); // inward near edges
+  });
+
+  it("both bars mount a milestone at its DERIVED position (expected for overdue, deadline for grace)", () => {
+    expect(tl.includes("<BarMilestone pct={expectedPct}")).toBe(true);
+    expect(tl.includes("<BarMilestone pct={deadlinePct}")).toBe(true);
+  });
+
+  it("mid-bar persistent labels are gone — the old clamped inline expected label is removed", () => {
+    // The overlapping clamped label (Math.max(16, Math.min(84, expectedPct))) must not return.
+    expect(tl.includes("Math.min(84, expectedPct")).toBe(false);
+  });
+
+  it("end-anchors only: overdue = SENT (no end label — the glyph is the end); grace = SENT + FOLLOW-UP", () => {
+    expect(tl.includes("SENT ")).toBe(true);
+    expect(tl.includes("FOLLOW-UP ")).toBe(true);
   });
 });
 

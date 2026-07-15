@@ -51,6 +51,50 @@ const TL_TITLES: Record<QueryStatus, string> = {
 };
 const FONT_SERIF = "'Playfair Display', serif";
 
+/**
+ * A bare bar milestone (bar-anchors-hover rule): a hollow-circle marker at `pct` on the bar whose
+ * date label appears ONLY on hover (fine pointers) or tap (touch). The pop-up renders ABOVE the bar
+ * (the end-anchor labels sit below), and anchors inward near an edge so it can't overflow — overlap
+ * is impossible by construction. Touch-wired: hover is pointerType-guarded (hover doesn't exist on
+ * touch), and an onClick pin drives it on tap. One pop-up per marker; each bar carries exactly one.
+ */
+const BarMilestone: React.FC<{ pct: number; label: string }> = ({ pct, label }) => {
+  const [hover, setHover] = useState(false);
+  const [pinned, setPinned] = useState(false);
+  const open = hover || pinned;
+  const p = Math.max(0, Math.min(100, pct));
+  const edge = p < 22 ? "start" : p > 78 ? "end" : "mid";
+  return (
+    <>
+      <button
+        type="button"
+        aria-label={label}
+        aria-expanded={open}
+        onPointerEnter={(e) => { if (e.pointerType === "mouse") setHover(true); }}
+        onPointerLeave={(e) => { if (e.pointerType === "mouse") setHover(false); }}
+        onClick={() => setPinned((v) => !v)}
+        style={{
+          position: "absolute", left: `${p}%`, top: "50%", transform: "translate(-50%, -50%)",
+          width: 13, height: 13, borderRadius: "50%", background: "var(--panel, #fffdfb)",
+          border: "1.5px solid var(--faint, #b3a596)", padding: 0, cursor: "pointer", zIndex: 2,
+        }}
+      />
+      {open && (
+        <div
+          role="tooltip"
+          style={{
+            position: "absolute", bottom: "calc(100% + 8px)", zIndex: 3, pointerEvents: "none",
+            ...(edge === "end" ? { right: `${100 - p}%` } : { left: `${p}%` }),
+            transform: edge === "mid" ? "translateX(-50%)" : "none",
+            whiteSpace: "nowrap", fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.04em",
+            color: "var(--panel, #fffdfb)", background: "var(--ink, #1e1a16)", borderRadius: 6, padding: "3px 7px",
+          }}
+        >{label}</div>
+      )}
+    </>
+  );
+};
+
 // STAGE_RESPONSE_WINDOWS + the waiting/writer derivation moved to lib/queryAmbient.ts (one source
 // shared with the command bar). This file consumes it via queryAmbientStatus.
 
@@ -360,18 +404,23 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
                     </div>
                     {graceDated && (
                       <>
-                        <div className="tl-gracebar" style={{ position: "relative", height: 6, borderRadius: 6, marginTop: 11, overflow: "hidden", background: "var(--sageC, #e9ede6)" }}>
-                          {/* sage: sent → deadline (capped at today) */}
-                          <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${sageEnd}%`, background: "var(--sage, #8a9e88)" }} />
-                          {/* overdue red: deadline → today */}
-                          {todayPct > deadlinePct && (
-                            <div style={{ position: "absolute", left: `${deadlinePct}%`, top: 0, bottom: 0, width: `${todayPct - deadlinePct}%`, background: "linear-gradient(90deg, var(--pink-b), var(--pink-i))" }} />
-                          )}
-                          {/* shimmer confined to the fill (0 → today) */}
-                          <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${todayPct}%`, overflow: "hidden" }}><div className="tl-sweep" aria-hidden="true" /></div>
-                          {/* deadline marker only (the fill edge is today — no today marker) */}
-                          <div style={{ position: "absolute", left: `${deadlinePct}%`, top: 0, bottom: 0, width: 2, transform: "translateX(-1px)", background: "var(--pink-i)" }} />
+                        {/* outer wrapper = the positioned context for the milestone + its pop-up, kept
+                            OUTSIDE the overflow:hidden fill layer so the pop-up can escape above the bar */}
+                        <div style={{ position: "relative", marginTop: 11 }}>
+                          <div className="tl-gracebar" style={{ position: "relative", height: 6, borderRadius: 6, overflow: "hidden", background: "var(--sageC, #e9ede6)" }}>
+                            {/* sage: sent → deadline (capped at today) */}
+                            <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${sageEnd}%`, background: "var(--sage, #8a9e88)" }} />
+                            {/* overdue red: deadline → today */}
+                            {todayPct > deadlinePct && (
+                              <div style={{ position: "absolute", left: `${deadlinePct}%`, top: 0, bottom: 0, width: `${todayPct - deadlinePct}%`, background: "linear-gradient(90deg, var(--pink-b), var(--pink-i))" }} />
+                            )}
+                            {/* shimmer confined to the fill (0 → today) */}
+                            <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${todayPct}%`, overflow: "hidden" }}><div className="tl-sweep" aria-hidden="true" /></div>
+                          </div>
+                          {/* original-deadline milestone — bare hollow circle; its date shows on hover/tap */}
+                          <BarMilestone pct={deadlinePct} label={`DEADLINE ${fmtShort(waiting.expMs!)}`} />
                         </div>
+                        {/* end-anchor labels only */}
                         <div style={{ display: "flex", justifyContent: "space-between", fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.04em", color: "#7d7268", marginTop: 7 }}>
                           <span>SENT {fmtShort(waiting.sentMs!)}</span>
                           <span style={{ color: "var(--sageD, #5a6e58)" }}>FOLLOW-UP {fmtShort(reminderMs!)}</span>
@@ -384,8 +433,8 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
             ) : escal === "overdue" ? (
               /* OVERDUE (revised) — pink card. Plain ink Playfair "Response overdue by {elapsed}[ · nudged
                  N×]" text (no pill) + ink hourglass, no nudge CTA. Bar fully filled sent→today
-                 (rose→burgundy) with a warning glyph at the end + a marker-anchored "response expected"
-                 label; axis Sent. */
+                 (rose→burgundy), warning glyph at the end (the end-anchor). Axis = SENT only; the
+                 "response expected" date rides a hollow-circle milestone (hover/tap pop-up). */
               (() => {
                 const now = Date.now();
                 const expectedPct = dated ? Math.max(0, Math.min(100, ((waiting.expMs! - waiting.sentMs!) / Math.max(1, now - waiting.sentMs!)) * 100)) : 0;
@@ -401,16 +450,14 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
                       <>
                         <div style={{ position: "relative", height: 6, borderRadius: 6, marginTop: 11, background: "var(--pink-b)" }}>
                           <div style={{ position: "absolute", inset: 0, borderRadius: 6, background: "linear-gradient(90deg, #e6a99b, var(--pink-i))" }} />
-                          {/* "response expected" marker at the expected position */}
-                          <div style={{ position: "absolute", left: `${expectedPct}%`, top: -2, bottom: -2, width: 2, transform: "translateX(-1px)", background: "#7a2d20" }} />
-                          {/* warning icon at the end (today) */}
+                          {/* response-expected milestone — bare hollow circle; its date shows on hover/tap */}
+                          <BarMilestone pct={expectedPct} label={`RESPONSE EXPECTED ${fmtShort(waiting.expMs!)}`} />
+                          {/* warning glyph at the end (today) — the bar's end-anchor, so no end label */}
                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--pink-i)" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" style={{ position: "absolute", right: -6, top: "50%", transform: "translateY(-50%)", background: "var(--pink-t)", borderRadius: "50%" }}><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" /></svg>
                         </div>
-                        {/* Axis keeps SENT only — the warning glyph at the bar end already signifies today.
-                            The expected date rides its own marker (clamped so the label never overflows). */}
-                        <div style={{ position: "relative", fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.04em", color: "#7d7268", marginTop: 7, minHeight: 12 }}>
+                        {/* end-anchor label only — SENT at the start (the warning glyph is the end anchor) */}
+                        <div style={{ fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.04em", color: "#7d7268", marginTop: 7 }}>
                           <span>SENT {fmtShort(waiting.sentMs!)}</span>
-                          <span style={{ position: "absolute", left: `${Math.max(16, Math.min(84, expectedPct))}%`, transform: "translateX(-50%)", whiteSpace: "nowrap", color: "var(--pink-i)" }}>RESPONSE EXPECTED {fmtShort(waiting.expMs!)}</span>
                         </div>
                       </>
                     )}
