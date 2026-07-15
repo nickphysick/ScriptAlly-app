@@ -21,12 +21,15 @@
    the outgoing colour). Fires the nudge flow, not a status change. */
 .tc-chip.tc-nudge { border-color: var(--burg, #7c3a2a); color: var(--burg, #7c3a2a); }
 .tc-chip.tc-nudge:hover { background: var(--pink-t, #f7e3dd); border-color: var(--burg, #7c3a2a); }
+/* TR P5 — the give-up "Close query" chip: grey, a ringed × glyph instead of a StatusDot. */
+.tc-chip.tc-close { background: var(--paper, #faf6f0); border-color: var(--line, #e6dccd); color: var(--muted, #7d7469); }
+.tc-chip.tc-close:hover { background: var(--oat, #f1e8dc); color: var(--ink-2, #4a443c); }
+.tc-x { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border-radius: 50%; border: 1.3px solid currentColor; font-size: 11px; line-height: 1; font-weight: 600; flex: none; }
 
-/* TWS P3 — the "Other…" expander (implausible-from-here steps). */
+/* TWS P3 — the "Other…" expander (the status's other possible outcomes). */
 .tc-other { margin-top: 10px; }
 .tc-othertoggle { display: inline-flex; align-items: center; gap: 8px; background: none; border: none; padding: 0; font-family: var(--f12-body, "Inter", system-ui, sans-serif); font-size: 12px; font-weight: 600; color: var(--muted, #7d7469); cursor: pointer; }
 .tc-othertoggle:hover { color: var(--ink, #1e1a16); }
-.tc-otherhint { font-family: "JetBrains Mono", monospace; font-size: 8px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint, #a89a8a); }
 .tc-otherchips { margin-top: 9px; }
 
 /* inline form */

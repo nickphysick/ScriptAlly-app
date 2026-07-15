@@ -20,7 +20,8 @@
 import React, { useImperativeHandle, useMemo, useRef, useState } from "react";
 import { Agent, Query, QueryStatus, SubmissionMethod } from "../../types";
 import { composerChips, type ComposerChip } from "../../lib/composerChips";
-import { queryBucket } from "../../lib/queryAmbient";
+import { queryBucket, queryAmbientStatus, deriveEscalation } from "../../lib/queryAmbient";
+import { getPrimaryAction } from "../../lib/queryPrimaryAction";
 import { StatusDot } from "../StatusDot";
 import { recordQueryResponse, type RecordResponseData } from "../../lib/recordResponse";
 import { useScriptAllyDb } from "../../lib/db";
@@ -48,7 +49,7 @@ const addDaysISO = (iso: string, days: number) => {
  *  builds, with sensible defaults for the fields the quick path doesn't ask for. */
 function quickData(
   responseType: RecordResponseData["responseType"],
-  o: { date: string; note: string; method: string; expectedBy: string }
+  o: { date: string; note: string; method: string; expectedBy: string; closingReason?: RecordResponseData["closingReason"] }
 ): RecordResponseData {
   const feedbackText = [o.note.trim(), o.method ? `Received via ${o.method}` : ""].filter(Boolean).join(o.note.trim() ? " · " : "");
   return {
@@ -69,7 +70,7 @@ function quickData(
     offerDate: "",
     offerDeadline: "",
     offerNotes: "",
-    closingReason: "No response after expected window",
+    closingReason: o.closingReason ?? "No response after expected window",
     closingNotes: "",
   };
 }
@@ -110,17 +111,28 @@ export const TimelineComposer = React.forwardRef<TimelineComposerHandle, Timelin
     const status = query.status as QueryStatus;
     const sentISO = isoOf(query.dateSent);
 
-    // The close chip is OFFERED (never fired) only when the agent's policy is "no response means no"
-    // (6c) AND their stated window has passed. Replies-either-way / not-stated never surface it —
-    // the app has done the thinking; the user still commits. It never auto-closes anything.
-    const canCloseNoResponse = useMemo(() => {
-      if (queryBucket(status) !== "waiting") return false;
-      if (agent.noResponseMeansNo !== true) return false;
-      const deadline = toMs((query as any).responseDeadline);
-      return Number.isFinite(deadline) && Date.now() > deadline;
-    }, [status, query, agent.noResponseMeansNo]);
+    // TR P5 — the give-up "Close query" chip is OFFERED (never fired) in overdue/grace (a waiting
+    // query past its expected reply) and on any your-move status. within-window waiting never shows
+    // it (nothing's late yet). Derived live from the SAME escalation machine the readout reads, so
+    // the chip and the pane's escalation can't disagree. It never auto-closes anything.
+    const reminderMs = query.nudgeDate ? toMs(query.nudgeDate) : null;
+    const canClose = useMemo(() => {
+      const bucket = queryBucket(status);
+      if (bucket === "move") return true;
+      if (bucket !== "waiting") return false;
+      const pa = getPrimaryAction(status);
+      const ambient = queryAmbientStatus(query, pa.kind === "record" ? pa.ballHolder : "writer", pa.kind === "mark-sent" ? pa.markKind : undefined);
+      const escal = deriveEscalation(ambient, {
+        reminderMs: Number.isFinite(reminderMs as number) ? (reminderMs as number) : null,
+        lastNudgeMs: query.lastNudgeSentDate ? toMs(query.lastNudgeSentDate) : null,
+        now: Date.now(),
+      });
+      return escal === "overdue" || escal === "grace";
+    }, [status, query, reminderMs]);
+    // "Nudge again" once a future follow-up reminder is already set (you're chasing, not first-nudging).
+    const hasFutureReminder = Number.isFinite(reminderMs as number) && (reminderMs as number) > Date.now();
 
-    const model = useMemo(() => composerChips(status, { canCloseNoResponse }), [status, canCloseNoResponse]);
+    const model = useMemo(() => composerChips(status, { canClose, hasFutureReminder }), [status, canClose, hasFutureReminder]);
 
     const [openChip, setOpenChip] = useState<ComposerChip | null>(null);
     const [editing, setEditing] = useState<ComposerEditEntry | null>(null);
@@ -192,11 +204,15 @@ export const TimelineComposer = React.forwardRef<TimelineComposerHandle, Timelin
       if (!currentUser || saving) return;
       setSaving(true);
       try {
+        // Close query — pick the reason by whose court it's in: your-move = the writer withdrawing
+        // (→ Withdrawn), waiting overdue/grace = no reply in the window (→ No response). TR P5.
+        const closingReason: RecordResponseData["closingReason"] | undefined =
+          rt === "close" ? (queryBucket(status) === "move" ? "Withdrew my submission" : "No response after expected window") : undefined;
         const result = await recordQueryResponse(
           { userId: currentUser.id, query, agent, manuscript },
           rt === "queried" && chip.action.kind === "reopen"
             ? quickData("queried", { date: todayISO(), note: "", method: "", expectedBy: "" })
-            : quickData(rt, { date, note, method, expectedBy })
+            : quickData(rt, { date, note, method, expectedBy, closingReason })
         );
         closeForm();
         showToast({ message: `Logged — ${chip.label.toLowerCase()}`, undo: () => result.undo() });
@@ -247,7 +263,9 @@ export const TimelineComposer = React.forwardRef<TimelineComposerHandle, Timelin
                   className={`tc-chip tc-${c.tone}`}
                   onClick={() => onChip(c)}
                 >
-                  <StatusDot status={c.dotStatus} overrideSize={15} decorative />
+                  {c.tone === "close"
+                    ? <span className="tc-x" aria-hidden="true">×</span>
+                    : <StatusDot status={c.dotStatus} overrideSize={15} decorative />}
                   {c.label}
                 </button>
               ))}
@@ -256,13 +274,15 @@ export const TimelineComposer = React.forwardRef<TimelineComposerHandle, Timelin
               /* TWS P3 — implausible-from-here steps tucked behind an expander. */
               <div className="tc-other">
                 <button type="button" className="tc-othertoggle" aria-expanded={showOther} onClick={() => setShowOther((o) => !o)}>
-                  {showOther ? "Less" : "Other…"}<span className="tc-otherhint">less likely from here</span>
+                  {showOther ? "Less" : "Other…"}
                 </button>
                 {showOther && (
                   <div className="tc-chips tc-otherchips">
                     {model.otherChips.map((c) => (
                       <button key={c.key} type="button" className={`tc-chip tc-${c.tone}`} onClick={() => onChip(c)}>
-                        <StatusDot status={c.dotStatus} overrideSize={15} decorative />
+                        {c.tone === "close"
+                          ? <span className="tc-x" aria-hidden="true">×</span>
+                          : <StatusDot status={c.dotStatus} overrideSize={15} decorative />}
                         {c.label}
                       </button>
                     ))}

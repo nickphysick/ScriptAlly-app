@@ -6,7 +6,7 @@
  *   • If they don't reply — No response means no / They reply either way / Not stated. Backed by
  *     the now-optional `noResponseMeansNo` (true / false / absent).
  *
- * These feed the expected-by logic and the composer's [No response — close it] chip — but this card
+ * These feed the expected-by logic (and read as context when a query is closed) — but this card
  * only STORES the writer's input; it NEVER closes a query. (Proven in the Stage-10 sweep grep.)
  * The Pro "community average" strip is static copy — nothing is wired behind it.
  */

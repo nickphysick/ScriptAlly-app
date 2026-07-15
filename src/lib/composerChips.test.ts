@@ -24,30 +24,56 @@ describe("composerChips — derived from the CTA engine, cannot disagree", () =>
     }
   });
 
-  it("Full Requested → [Full sent (primary/pink), Rejection (terminal/grey)]", () => {
-    const { chips } = composerChips(QS.FULL_REQUESTED);
-    expect(chips.map((c) => c.label)).toEqual(["Full sent", "Rejection"]);
+  // ── TR P5 mappings ──────────────────────────────────────────────────────────────────────────
+  it("your-move (Full Requested) → [Full sent (primary)]; Rejection under Other; Close query on canClose", () => {
+    const { chips, otherChips } = composerChips(QS.FULL_REQUESTED);
+    expect(chips.map((c) => c.label)).toEqual(["Full sent"]);
     expect(chips[0].tone).toBe("primary");
-    expect(chips[1].tone).toBe("terminal");
+    // Rejection is no longer a primary chip — it tucks under Other.
+    expect(otherChips.map((c) => c.label)).toEqual(["Rejection"]);
+    expect(otherChips[0].tone).toBe("terminal");
+    // Close query joins the primary row only when the caller offers it (your-move always can).
+    const withClose = composerChips(QS.FULL_REQUESTED, { canClose: true });
+    expect(withClose.chips.map((c) => c.label)).toEqual(["Full sent", "Close query"]);
+    expect(withClose.chips[1].tone).toBe("close");
+    expect(withClose.chips[1].action).toEqual({ kind: "close" });
   });
 
-  it("Queried → Partial requested (pink) + Rejection (grey) + Nudge; Full requested demoted to Other", () => {
+  it("Queried (waiting) → [Partial requested (primary), Nudge]; the rest incl. Rejection under Other", () => {
     const { chips, otherChips } = composerChips(QS.QUERIED);
-    expect(chips.map((c) => c.label)).toEqual(["Partial requested", "Rejection", "Nudge"]);
-    expect(chips.map((c) => c.tone)).toEqual(["primary", "terminal", "nudge"]);
+    expect(chips.map((c) => c.label)).toEqual(["Partial requested", "Nudge"]);
+    expect(chips.map((c) => c.tone)).toEqual(["primary", "nudge"]);
     expect(chips[0].dotStatus).toBe(QS.PARTIAL_REQUESTED);
-    // The implausible jump lives under "Other… (less likely from here)".
-    expect(otherChips.map((c) => c.label)).toEqual(["Full requested"]);
+    expect(otherChips.map((c) => c.label)).toEqual(["Full requested", "Offer", "Revise & resubmit", "Rejection"]);
+    // Rejection stays the grey terminal chip wherever it lives.
+    expect(otherChips.find((c) => c.key === "rejected")!.tone).toBe("terminal");
   });
 
-  it("Full Sent → Offer (pink), R&R, Rejection, then the Nudge chip; nothing under Other", () => {
+  it("Queried + canClose → the Close query chip trails Partial requested · Nudge", () => {
+    const { chips } = composerChips(QS.QUERIED, { canClose: true });
+    expect(chips.map((c) => c.label)).toEqual(["Partial requested", "Nudge", "Close query"]);
+    expect(chips[2].tone).toBe("close");
+  });
+
+  it("Partial Sent → [Full requested (primary), Nudge]; Offer · R&R · Rejection under Other", () => {
+    const { chips, otherChips } = composerChips(QS.PARTIAL_SENT);
+    expect(chips.map((c) => c.label)).toEqual(["Full requested", "Nudge"]);
+    expect(otherChips.map((c) => c.label)).toEqual(["Offer", "Revise & resubmit", "Rejection"]);
+  });
+
+  it("Full Sent → [Offer (primary), Nudge]; R&R · Rejection under Other", () => {
     const { chips, otherChips } = composerChips(QS.FULL_SENT);
-    expect(chips.map((c) => c.label)).toEqual(["Offer", "Revise & resubmit", "Rejection", "Nudge"]);
-    expect(chips.slice(0, 3).map((c) => c.tone)).toEqual(["primary", "outcome", "terminal"]);
-    expect(otherChips).toEqual([]);
+    expect(chips.map((c) => c.label)).toEqual(["Offer", "Nudge"]);
+    expect(chips.map((c) => c.tone)).toEqual(["primary", "nudge"]);
+    expect(otherChips.map((c) => c.label)).toEqual(["Revise & resubmit", "Rejection"]);
   });
 
-  it("the Nudge chip appears ONLY while waiting on the agent — never on a move/closed status, and it's not a status change", () => {
+  it("the Nudge chip reads 'Nudge' by default and 'Nudge again' once a future reminder is set", () => {
+    expect(composerChips(QS.QUERIED).chips.find((c) => c.key === "nudge")!.label).toBe("Nudge");
+    expect(composerChips(QS.QUERIED, { hasFutureReminder: true }).chips.find((c) => c.key === "nudge")!.label).toBe("Nudge again");
+  });
+
+  it("the Nudge chip appears ONLY while waiting on the agent — never move/closed, and it's not a status change", () => {
     for (const status of Object.values(QS)) {
       const has = composerChips(status).chips.some((c) => c.key === "nudge");
       expect(has).toBe(queryBucket(status) === "waiting");
@@ -57,9 +83,23 @@ describe("composerChips — derived from the CTA engine, cannot disagree", () =>
     expect(nudge.tone).toBe("nudge");
   });
 
-  it("Rejection is ALWAYS the grey terminal chip, wherever it appears", () => {
+  it("the Close query chip appears ONLY when the caller passes canClose (offered on move + overdue/grace)", () => {
+    // waiting without the flag → no close chip (within-window has nothing late to close)
+    expect(composerChips(QS.QUERIED).chips.some((c) => c.key === "close")).toBe(false);
+    // waiting with the flag (overdue/grace) → the give-up close chip appears
+    expect(composerChips(QS.QUERIED, { canClose: true }).chips.some((c) => c.key === "close")).toBe(true);
+    // move with the flag → close chip appears (your-move offers it)
+    expect(composerChips(QS.FULL_REQUESTED, { canClose: true }).chips.some((c) => c.key === "close")).toBe(true);
+    // the close chip always carries the close action + the closed 'close' tone
+    const close = composerChips(QS.QUERIED, { canClose: true }).chips.find((c) => c.key === "close")!;
+    expect(close.action).toEqual({ kind: "close" });
+    expect(close.tone).toBe("close");
+  });
+
+  it("Rejection is ALWAYS the grey terminal chip, wherever it appears (primary row or Other)", () => {
     for (const status of Object.values(QS)) {
-      const rej = composerChips(status, { canCloseNoResponse: true }).chips.find((c) => c.key === "rejected");
+      const m = composerChips(status, { canClose: true });
+      const rej = [...m.chips, ...m.otherChips].find((c) => c.key === "rejected");
       if (rej) expect(rej.tone).toBe("terminal");
     }
   });
@@ -72,21 +112,11 @@ describe("composerChips — derived from the CTA engine, cannot disagree", () =>
     }
   });
 
-  it("the No-response-close chip appears ONLY when the caller passes canCloseNoResponse", () => {
-    const without = composerChips(QS.QUERIED).chips.map((c) => c.key);
-    expect(without).not.toContain("no-response");
-    const withFlag = composerChips(QS.QUERIED, { canCloseNoResponse: true }).chips.map((c) => c.key);
-    expect(withFlag).toContain("no-response");
-    // ...and never on a writer's-turn status (the writer owes materials, not a close decision)
-    const move = composerChips(QS.FULL_REQUESTED, { canCloseNoResponse: true }).chips.map((c) => c.key);
-    expect(move).not.toContain("no-response");
-  });
-
-  it("offers a sane chip count (1–5 incl. the nudge + optional no-response chips)", () => {
+  it("offers a sane chip count (1–3 in the primary row: primary + nudge + close)", () => {
     for (const status of Object.values(QS)) {
-      const n = composerChips(status, { canCloseNoResponse: true }).chips.length;
+      const n = composerChips(status, { canClose: true, hasFutureReminder: true }).chips.length;
       expect(n).toBeGreaterThanOrEqual(1);
-      expect(n).toBeLessThanOrEqual(5);
+      expect(n).toBeLessThanOrEqual(3);
     }
   });
 });
