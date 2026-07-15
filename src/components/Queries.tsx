@@ -2939,7 +2939,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                                   <div role="group" aria-label="Sample unit" style={{ display: "flex", borderRadius: 8, overflow: "hidden", border: "1px solid var(--bd)" }}>
                                     {(["pages", "chapters", "words"] as const).map((u) => (
                                       <button key={u} type="button" onClick={() => setSampleUnit(u)} aria-pressed={sampleUnit === u}
-                                        style={{ flex: 1, padding: "6px 0", fontFamily: "'Inter',sans-serif", fontSize: 12, textTransform: "capitalize" as const, cursor: "pointer", border: "none", borderLeft: u === "pages" ? "none" : "1px solid var(--bd)", background: "var(--panel, #fffdfb)", boxShadow: sampleUnit === u ? "inset 0 0 0 1.5px var(--ink, #1e1a16)" : "none", color: sampleUnit === u ? "var(--ink, #1e1a16)" : "#6b6257", fontWeight: sampleUnit === u ? 600 : 400 }}>{u}</button>
+                                        style={{ flex: 1, padding: "6px 0", fontFamily: "'Inter',sans-serif", fontSize: 12, textTransform: "capitalize" as const, cursor: "pointer", border: "none", background: "var(--panel, #fffdfb)", boxShadow: sampleUnit === u ? "inset 0 0 0 1.5px var(--ink, #1e1a16)" : "none", color: sampleUnit === u ? "var(--ink, #1e1a16)" : "#6b6257", fontWeight: sampleUnit === u ? 600 : 400 }}>{u}</button>
                                     ))}
                                   </div>
                                   <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
