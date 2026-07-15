@@ -8,7 +8,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { queryAmbientStatus, commandBarStatus, deriveEscalation, trackingBar, nudgeCount } from "./queryAmbient";
+import { queryAmbientStatus, commandBarStatus, deriveEscalation, trackingBar, nudgeCount, elapsedLabel } from "./queryAmbient";
 import { QueryStatus } from "../types";
 
 const NOW = new Date("2026-07-06T00:00:00Z").getTime();
@@ -368,3 +368,20 @@ describe("TWS P4 artefacts — no-date gate + set-date wiring", () => {
     expect(qsrc.includes("onSetExpectedDate={() => openEditQuery(activeQuery.id)}")).toBe(true);
   });
 });
+
+describe("elapsedLabel — days→weeks at 28 (P4, page-wide)", () => {
+  it("≤28 days stays in days (singular-safe)", () => {
+    expect(elapsedLabel(0)).toBe("0 days");
+    expect(elapsedLabel(1)).toBe("1 day");
+    expect(elapsedLabel(27)).toBe("27 days");
+    expect(elapsedLabel(28)).toBe("28 days"); // boundary is inclusive
+  });
+  it(">28 days switches to rounded weeks", () => {
+    expect(elapsedLabel(29)).toBe("4 weeks");   // 29/7 = 4.14 → 4
+    expect(elapsedLabel(35)).toBe("5 weeks");
+    expect(elapsedLabel(80)).toBe("11 weeks");  // large values yield large weeks — per spec
+  });
+  it("never negative", () => {
+    expect(elapsedLabel(-5)).toBe("0 days");
+  });
+})

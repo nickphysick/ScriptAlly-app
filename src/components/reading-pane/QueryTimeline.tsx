@@ -15,7 +15,7 @@ import React, { useState } from "react";
 import { StatusDot } from "../StatusDot";
 import { Query, QueryStatus, Agent, QueryMaterial } from "../../types";
 import { formatQueryMaterial } from "../../lib/materials";
-import { queryAmbientStatus, deriveEscalation, trackingBar, nudgeCount } from "../../lib/queryAmbient";
+import { queryAmbientStatus, deriveEscalation, trackingBar, nudgeCount, elapsedLabel } from "../../lib/queryAmbient";
 import { NUDGE_NESTED_TYPE } from "../../lib/logNudge";
 
 /** P5 — inter-event vertical spacing (px). One constant so reuse of the timeline stays consistent;
@@ -283,7 +283,7 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
           <span style={{ display: "inline-flex", alignItems: "center", gap: 9, fontWeight: 400, fontSize: 13, color: "#3a1c14" }}>
             {clockIcon}
             Waiting to hear back
-            {waiting.sentMs != null && <span style={{ fontFamily: FONT_MONO, fontWeight: 600, fontSize: 12, color: wcol.dim }}>· {waiting.nDays} days</span>}
+            {waiting.sentMs != null && <span style={{ fontFamily: FONT_MONO, fontWeight: 600, fontSize: 12, color: wcol.dim }}>· {elapsedLabel(waiting.nDays)}</span>}
           </span>
         );
         const bar = dated ? (
@@ -383,7 +383,7 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
             <span style={{ fontFamily: FONT_SERIF, fontWeight: 600, fontSize: 15, color: "var(--ink, #1e1a16)" }}>Your move — send the {sendWhat}</span>
             {ambient.writerDaysAgo != null && (
               <small style={{ display: "block", fontWeight: 500, fontSize: 11.5, color: "var(--burg, #7c3a2a)", marginTop: 3 }}>
-                {agent?.name?.split(" ")[0] || "The agent"} asked for it {ambient.writerDaysAgo} {ambient.writerDaysAgo === 1 ? "day" : "days"} ago
+                {agent?.name?.split(" ")[0] || "The agent"} asked for it {elapsedLabel(ambient.writerDaysAgo)} ago
               </small>
             )}
           </div>

@@ -210,6 +210,18 @@ export function nudgeCount(events: { type?: unknown }[] | null | undefined, nudg
   return (events || []).filter((e) => e.type === nudgeType).length;
 }
 
+/**
+ * TWS P4 — the ONE elapsed-time label, applied to every elapsed value on the Tracking pane (overdue
+ * badge, "waiting {n}", "asked {n} ago"): ≤28 days → "{n} days"; beyond → "{round(n/7)} weeks".
+ * (Large values yield large week counts — acceptable per spec; a months tier is a future option.)
+ */
+export function elapsedLabel(days: number): string {
+  const n = Math.max(0, Math.round(days));
+  if (n <= 28) return `${n} ${n === 1 ? "day" : "days"}`;
+  const w = Math.round(n / 7);
+  return `${w} ${w === 1 ? "week" : "weeks"}`;
+}
+
 /** Command-bar centre text — mono uppercase; `bold` is the burgundy fragment (writer's move). */
 export function commandBarStatus(a: AmbientStatus): { bold?: string; text: string } | null {
   if (a.mode === "waiting") {
