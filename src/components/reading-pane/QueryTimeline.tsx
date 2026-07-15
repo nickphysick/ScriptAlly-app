@@ -353,7 +353,7 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
                 return (
                   <div style={{ border: "1px dashed var(--sage, #8a9e88)", borderRadius: 11, padding: "11px 13px" }}>
                     <div style={{ fontSize: 13.5, fontWeight: 500, color: "var(--ink, #1e1a16)" }}>
-                      Response overdue — nudge sent {lastNudgeMs != null ? fmtNatural(lastNudgeMs) : "recently"}
+                      Response {elapsedLabel(waiting.daysOverdue)} overdue — nudge sent {lastNudgeMs != null ? fmtNatural(lastNudgeMs) : "recently"}
                     </div>
                     <div style={{ fontSize: 12, color: "var(--muted, #7d7469)", marginTop: 4 }}>
                       Scheduled follow-up set for {reminderMs != null ? fmtNatural(reminderMs) : "—"}
