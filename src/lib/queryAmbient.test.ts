@@ -217,6 +217,16 @@ describe("P6 artefacts — one escalation signal per pane (readout escalates, fo
     expect(tl.includes("nudged ${nudges}×")).toBe(true);
     expect(tl.includes("· no reply`")).toBe(true);
   });
+
+  it("P5 connector — container-drawn hairline, gated on !isLast (2+ events), spacing via a constant", () => {
+    expect(tl.includes("const TL_EVENT_GAP")).toBe(true);
+    expect(tl.includes("var(--hairline")).toBe(true);      // theme token, not a scattered hex
+    expect(tl.includes("bottom: -TL_EVENT_GAP")).toBe(true);
+    // The connector is inside the `{!isLast && (` guard — no orphan line on a single-event query.
+    expect(/\{!isLast && \(\s*[\s\S]{0,220}var\(--hairline/.test(tl)).toBe(true);
+    // Drawn by the row container, never by editing the locked StatusDot.
+    expect(tl.includes("<StatusDot") && !tl.includes("StatusDot connector")).toBe(true);
+  });
   it("the 'What happened next?' composer (the fork) carries NO needs-you tokens — stays neutral", () => {
     expect(composer.includes("--pink-i")).toBe(false);
     expect(composer.includes("--pink-t")).toBe(false);

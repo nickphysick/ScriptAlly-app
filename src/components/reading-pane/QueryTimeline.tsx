@@ -20,6 +20,10 @@ import { NUDGE_NESTED_TYPE } from "../../lib/logNudge";
 
 /** "1 May" — sentence-case day for the grace prose lines. */
 const fmtDay = (ms: number): string => new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+
+/** P5 — inter-event vertical spacing (px). One constant so reuse of the timeline stays consistent;
+ *  the connector hairline's length is derived from it, never a per-instance number. */
+const TL_EVENT_GAP = 24;
 import { F12Menu } from "../shell/F12Shell";
 
 /** A correctable timeline entry (5b) — passed to the ⋯ Edit / Delete handlers. */
@@ -207,11 +211,15 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
       {rows.map((row, i) => {
         const isLast = i === rows.length - 1;
         return (
-          <div key={row.key} style={{ display: "grid", gridTemplateColumns: "30px 1fr", gap: 11, position: "relative", paddingBottom: isLast ? 0 : 24 }}>
+          <div key={row.key} style={{ display: "grid", gridTemplateColumns: "30px 1fr", gap: 11, position: "relative", paddingBottom: isLast ? 0 : TL_EVENT_GAP }}>
             <div style={{ position: "relative", display: "flex", justifyContent: "center" }}>
               <StatusDot status={row.status} overrideSize={28} decorative={row.kind === "nudge"} />
+              {/* P5 — the connector hairline: drawn by the CONTAINER behind the locked StatusDot (never
+                  by editing it), on event nodes only, joining consecutive events and stopping at the
+                  last (so it draws only with 2+ events; a single-event query gets no orphan line).
+                  Colour = the theme --hairline token; length derived from TL_EVENT_GAP. */}
               {!isLast && (
-                <div style={{ position: "absolute", top: 29, bottom: -24, left: "50%", transform: "translateX(-50%)", width: 1.6, background: "#e8dcd0" }} />
+                <div style={{ position: "absolute", top: 29, bottom: -TL_EVENT_GAP, left: "50%", transform: "translateX(-50%)", width: 1.6, background: "var(--hairline, #e8dcd0)" }} />
               )}
             </div>
             <div className="tl-rowbody" style={{ paddingTop: 4 }}>
