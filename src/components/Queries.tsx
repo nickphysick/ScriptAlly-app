@@ -3021,8 +3021,12 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                                   </div>
                                   <div role="button" tabIndex={0} onClick={openPackages} style={addlinkStyle}>✎ Edit package</div>
                                 </div>
+                              ) : isPro ? (
+                                <div role="button" tabIndex={0} onClick={openPackages} style={addlinkStyle}>＋ Attach a submission package</div>
                               ) : (
-                                <div role="button" tabIndex={0} onClick={openPackages} style={addlinkStyle}>＋ Attach a submission package{!isPro && proChip()}</div>
+                                /* Free — attaching stays Pro-gated; the action reads Upgrade (slate) and routes
+                                   to the plans/upgrade flow, the same plan check the rest of the app uses. */
+                                <div role="button" tabIndex={0} onClick={() => onNavigate?.("plans")} style={{ ...addlinkStyle, color: "#6A89A7" }}>Upgrade to attach a submission package{proChip()}</div>
                               )}
                             </>
                           );
