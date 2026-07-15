@@ -2948,7 +2948,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                                      like one; ref .note); replaced on first save */
                                   <div className="f12-note">
                                     <div className="f12-nd">TODAY</div>
-                                    <div className="f12-nt">Your notes on this agent appear here — first impressions, things they said, anything worth remembering.</div>
+                                    <div className="f12-nt">Your notes on this query appear here — first impressions, things they said, anything worth remembering.</div>
                                   </div>
                                 ) : notes.map((entry) => {
                                   const isEditing = editingJournalId === entry.id;
