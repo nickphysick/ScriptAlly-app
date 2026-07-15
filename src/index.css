@@ -567,6 +567,11 @@
 
   --burg: #7c3a2a; --pinkC: #f8e7dc;
   --pro: #6A89A7;
+  /* StatusDot palette (ADDITIVE — .t-f12 previously lacked these, so board dots fell back off-theme).
+     One hue per theme: ring/glyph read --sd-hue, centre disc reads --sd-centre; DIRECTION is carried
+     by the dot's SHAPE, not colour (StatusDot lock). Burgundy ring + pale-pink centre = the F12
+     --burg/--pinkC status pair (literals — no :root aliasing, the .t-f12 freeze-bug rule). */
+  --sd-hue: #7c3a2a; --sd-centre: #f8e7dc;
 
   --listw: 334px; --gut: 12px; --maxw: 1520px;
   --r-sm: 6px; --r-md: 9px; --r-lg: 12px; --r-xl: 16px;

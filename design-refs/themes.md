@@ -612,6 +612,11 @@ chrome revision replaced v14/v3).
   existing value changed; values copied from `design-refs/todo-workspace-v10.html`'s `:root`
   (continuing the "copy the mockup `:root` into `.t-f12`" pattern). Consume these for any future
   F12 advisory/note surface rather than reinventing a gold or yellow.
+- **StatusDot palette (added 2026-07-15, To-do board):** `--sd-hue #7c3a2a` (burgundy ring/glyph) ·
+  `--sd-centre #f8e7dc` (pale-pink centre disc) — the `--burg`/`--pinkC` pair as literals. ADDITIVE:
+  `.t-f12` previously defined neither, so `StatusDot` fell back to its un-themed per-status spectrum
+  (off-palette on the oat board). One hue per theme; direction/stage is carried by the dot's SHAPE,
+  not colour (the StatusDot lock — the component is untouched, this is a token add).
 - **⚠️ SAGE CORRECTION (standing decision):** the band pair is the LIVE dashboard diary band —
   `--sage-band: #dce0d9; --sage-band-2: #d0d6cc` (from `diaryCarousel.css`), which WINS over
   the mockups' `#d7ddd5 → #d5dbd3`, so hub, agents and dashboard match. Edge `--sage-edge

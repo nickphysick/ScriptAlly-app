@@ -134,3 +134,16 @@ The star **is** the real `StatusDot` for `OFFER` status (a star glyph), rendered
 - **Fix 5:** stray glyph vs StatusDot selection → **neither** — correct OFFER StatusDot, off-palette because `.t-f12` lacks `--sd-hue`.
 - **Rules:** none changed this pass.
 - **⚠ Layout unverified (jsdom-blind):** after Nick applies the 2-line `App.tsx` fix, re-eyeball — no double breadcrumb, no footer, single `0/5` in the Today header, empty Today reads empty (Fix 3), cleared count agrees hero↔column, and decide the offer-card dot (Fix 5).
+
+## Chrome fix (App.tsx-safe) + StatusDot F12 tokens
+
+**Gates:** `tsc` clean · `vite build` OK · full Vitest **943** green. Fixes A, B, C landed; D verified (no change).
+
+**Step 0:** `git status` **clean** — no PaintMode in `App.tsx` this run (and `src/dev/PaintMode.tsx` absent), so the PaintMode-safe `-p` dance wasn't needed; `git diff src/App.tsx` was verified to contain **only** the two To-do edits before staging (no PaintMode lines). Targets confirmed by behaviour: `showFooter` at App.tsx:582; the To-do `<StagePage>` (line 624, `contentVariant="work"`) vs Queries (line 614, none); `.t-f12` lacked `--sd-hue`/`--sd-centre`; `StatusDot` reads `var(--sd-hue …)` (ring/glyph/pulse) + `var(--sd-centre …)` (fill) — a single pair.
+
+- **FIX A — footer off To-do:** `showFooter = routeKey !== "queries" && routeKey !== "todo" && !manuscriptsPackages`. The `<footer>` no longer renders on `/todo`.
+- **FIX B — double breadcrumb:** removed `contentVariant="work"` from the To-do `<StagePage>` so it matches the Queries mount. `StagePage` only renders its own `CrumbStrip` in the `contentVariant` branch (`AppShell.tsx`), so with it gone the crumb comes solely from `F12Page` → **single** `QUERYING / To-do`. Removing the `contentVariant` grid wrapper also removes the top-shelf grid disruption that let the Today-box pill escape into the hero: the only `0/5` in the render path is the Today-box header (`{items.length} / {MAX_TODAY}`) — the hero has no `0/5` node → **single `0/5`**. (Layout jsdom-unverified — Nick eyeballs.)
+- **FIX C — StatusDot F12 palette:** added to `.t-f12` (ADDITIVE, no existing value changed) — `--sd-hue: #7c3a2a` (burgundy ring/glyph) · `--sd-centre: #f8e7dc` (pale-pink centre) = the F12 `--burg`/`--pinkC` pair as literals. `StatusDot` is one-hue-per-theme (direction by SHAPE, per its lock), so this is a single pair, not per-direction — the mockup's "sage for incoming" isn't a StatusDot capability without editing the locked component, so it's honoured as shape, not colour. `themes.md` updated (the `.t-f12` section). The component is untouched.
+- **FIX D — cleared hero vs column (report only):** **same source.** Hero: `const clearedN = columns.done.length` (ToDoPage:126) → `<b>{clearedN}</b> cleared today` (145). Column: `const cards = columns[key]` (167), `key === "done"` → the same `columns.done`. They cannot disagree; the `clearedToday` union is the single upstream source. Consistent in code — any hero≠column Nick sees is live-data/stale-render and needs a live screenshot. No change made.
+
+**Reminder — layout jsdom-unverified:** Nick must eyeball on dev: single breadcrumb, no footer on To-do, one `0/5` (Today header), and the offer-card dot now in the F12 burgundy/pale-pink palette.
