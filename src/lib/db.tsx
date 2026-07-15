@@ -71,7 +71,7 @@ import { db, auth, handleFirestoreError, OperationType } from "./firebase";
 import { deriveQueryFields, getActivityTime, normalizeResultingStatus } from "./queryDerivation";
 import { queriesForManuscript, queriesForAgent, activityIdsForQueries } from "./cascade";
 import { recomputeQuery as recomputeQueryOnline, subcollectionDocToDerivable, monotonicEventTime } from "./recomputeQuery";
-import { buildNudgeWrites } from "./logNudge";
+import { buildNudgeWrites, reconcileNudge, NUDGE_NESTED_TYPE, type StoredNudge } from "./logNudge";
 import { resolveGenre, matchKey } from "./genres";
 import { commitAgentEdits, AgentEditPatch, AgentExtraWrite, SaveAgentResult } from "./saveAgentEdits";
 import { computeAgentDeadlineWrites } from "./computeAgentDeadlineWrites";
@@ -2270,6 +2270,24 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           // No same-id twin in the authoritative log — nothing status-bearing to remove.
         }
         await recompute(target.queryId);
+        // A deleted NUDGE must FULLY undo (the delete-desync fix): recompute derives status/dates but
+        // never touches nudgeDate/lastNudgeSentDate, which grace + tasks read. Re-derive that snapshot
+        // from the REMAINING nudge activities (or clear it), and release the snoozed reminder flag when
+        // none remain — so the query drops out of grace and behaves as never-nudged.
+        if (target.activityType === ActivityType.NUDGE_SENT) {
+          try {
+            const snap = await getDocs(collection(db, "users", currentUser.id, "queries", target.queryId, "activity"));
+            const remaining = snap.docs.map((d) => d.data()).filter((d) => (d as any).type === NUDGE_NESTED_TYPE) as StoredNudge[];
+            const rec = reconcileNudge(remaining);
+            await updateDoc(doc(db, "users", currentUser.id, "queries", target.queryId), {
+              nudgeDate: rec.nudgeDate ?? (deleteField() as unknown as string),
+              lastNudgeSentDate: rec.lastNudgeSentDate ?? (deleteField() as unknown as string),
+            });
+            if (!rec.hasNudges) await resolveTaskFlag(flagKeyForTask("nudge_overdue", target.queryId));
+          } catch {
+            // Best-effort: the activity delete already committed; a failed reconcile must not surface.
+          }
+        }
       }
     } catch (e) {
       handleFirestoreError(e, OperationType.DELETE, `users/${currentUser.id}/activities/${id}`);

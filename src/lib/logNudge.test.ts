@@ -13,10 +13,14 @@ vi.mock("./firebase", () => ({
   OperationType: { UPDATE: "update" },
 }));
 
-import { buildNudgeWrites, NUDGE_NESTED_TYPE } from "./logNudge";
+import { buildNudgeWrites, NUDGE_NESTED_TYPE, reconcileNudge } from "./logNudge";
 import { subcollectionDocToDerivable } from "./recomputeQuery";
 import { deriveQueryFields } from "./queryDerivation";
+import { queryAmbientStatus, deriveEscalation } from "./queryAmbient";
 import { ActivityType, QueryStatus, type Query, type Agent } from "../types";
+
+const q = (over: Record<string, any> = {}): Query =>
+  ({ id: "q1", userId: "u1", manuscriptId: "m1", agentId: "a1", packageId: "", sendMethod: "Email", status: QueryStatus.QUERIED, ...over }) as unknown as Query;
 
 // Minimal fixtures — only the fields buildNudgeWrites reads.
 const query = {
@@ -116,5 +120,36 @@ describe("P2 — the nudge reaches the AUTHORITATIVE store (and only once)", () 
     // … so every derived field — status, response flag, revision round, pipeline dates — is
     // identical with and without it. Overdue derives from dateSent + window, untouched by nudgeDate.
     expect(deriveQueryFields([queried, nudge])).toEqual(deriveQueryFields([queried]));
+  });
+});
+
+describe("reconcileNudge — re-derive the query nudge snapshot after a delete (the desync fix)", () => {
+  it("no nudges left → BOTH fields clear (query behaves as never-nudged → drops grace)", () => {
+    expect(reconcileNudge([])).toEqual({ nudgeDate: null, lastNudgeSentDate: null, hasNudges: false });
+  });
+  it("nudges remain → the LATEST supplies lastNudgeSentDate (createdAt) + nudgeDate (reminderDate)", () => {
+    const older = { type: NUDGE_NESTED_TYPE, createdAt: "2026-06-01T00:00:00.000Z", reminderDate: "2026-06-15T00:00:00.000Z" };
+    const newer = { type: NUDGE_NESTED_TYPE, createdAt: "2026-07-01T00:00:00.000Z", reminderDate: "2026-07-20T00:00:00.000Z" };
+    expect(reconcileNudge([older, newer])).toEqual({ nudgeDate: "2026-07-20T00:00:00.000Z", lastNudgeSentDate: "2026-07-01T00:00:00.000Z", hasNudges: true });
+  });
+  it("a legacy nudge with no structured reminderDate → nudgeDate clears (can't recover text-only), still hasNudges", () => {
+    const legacy = { type: NUDGE_NESTED_TYPE, createdAt: "2026-06-01T00:00:00.000Z", note: "Follow-up reminder set for 15 Jun 2026" };
+    expect(reconcileNudge([legacy])).toEqual({ nudgeDate: null, lastNudgeSentDate: "2026-06-01T00:00:00.000Z", hasNudges: true });
+  });
+  it("touches ONLY nudgeDate/lastNudgeSentDate — never status/response fields", () => {
+    expect(Object.keys(reconcileNudge([])).sort()).toEqual(["hasNudges", "lastNudgeSentDate", "nudgeDate"]);
+  });
+});
+
+describe("delete → un-grace, at the derivation level", () => {
+  it("clearing the nudge snapshot (reconcile after deleting the only nudge) drops grace back to overdue", () => {
+    const DAY = 86400000;
+    const now = new Date("2026-07-06T00:00:00Z").getTime();
+    const overdueAmbient = queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: new Date(now - 57 * DAY).toISOString() }), "agent", undefined, now);
+    // With the nudge present (future reminder) it's grace …
+    expect(deriveEscalation(overdueAmbient, { reminderMs: now + 3 * DAY, lastNudgeMs: now - DAY, now })).toBe("grace");
+    // … after delete, reconcile clears both → deriveEscalation reads null → back to overdue.
+    const rec = reconcileNudge([]);
+    expect(deriveEscalation(overdueAmbient, { reminderMs: rec.nudgeDate ? new Date(rec.nudgeDate).getTime() : null, lastNudgeMs: rec.lastNudgeSentDate ? new Date(rec.lastNudgeSentDate).getTime() : null, now })).toBe("overdue");
   });
 });

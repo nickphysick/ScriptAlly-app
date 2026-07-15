@@ -44,7 +44,7 @@ export interface NudgeWrites {
   /** AUTHORITATIVE row for the per-query subcollection (users/{uid}/queries/{qid}/activity) — what
    *  the Tracking timeline reads. `type` is deliberately NOT a QueryStatus enum member, so
    *  recomputeQuery's normalisation ignores it (non-status by construction). */
-  nested: { type: typeof NUDGE_NESTED_TYPE; createdAt: string; note: string; queryId: string; agentName: string };
+  nested: { type: typeof NUDGE_NESTED_TYPE; createdAt: string; note: string; queryId: string; agentName: string; reminderDate: string };
   /** The global-feed PROJECTION twin (users/{uid}/activities) — what the dashboard timeline reads.
    *  Derived from the same build as `nested`; the caller writes both under ONE shared id (the
    *  saveQueryEdits same-id-twin convention), never as an independent parallel write. */
@@ -95,6 +95,9 @@ export const buildNudgeWrites = (
       note: details, // the follow-up line (+ optional writer note) renders beneath the node
       queryId: query.id,
       agentName,
+      // Structured reminder date ON the authoritative activity → the query's nudgeDate snapshot can be
+      // faithfully re-derived from the remaining nudges when one is deleted (the delete-desync fix).
+      reminderDate: checkBackISO,
     },
     activity: {
       queryId: query.id,
@@ -115,3 +118,26 @@ export const buildNudgeWrites = (
     },
   };
 };
+
+/** A per-query nudge activity as read back from the authoritative store (the fields reconcile needs). */
+export interface StoredNudge { createdAt?: unknown; reminderDate?: unknown; note?: unknown }
+
+/**
+ * Re-derive the query's nudge snapshot (nudgeDate + lastNudgeSentDate) from the REMAINING nudge
+ * activities after one is deleted. Pure + clock-free so the delete-desync fix is unit-testable.
+ *
+ *  - No nudges left → both fields CLEAR (null) so the query behaves as never-nudged (drops grace).
+ *  - Nudges remain → the LATEST (by createdAt) supplies lastNudgeSentDate = its createdAt, and
+ *    nudgeDate = its reminderDate (legacy rows without a structured reminderDate → nudgeDate clears,
+ *    since we can't faithfully recover a text-only reminder; the delete still drops that nudge).
+ */
+export function reconcileNudge(remaining: StoredNudge[]): { nudgeDate: string | null; lastNudgeSentDate: string | null; hasNudges: boolean } {
+  const asMs = (v: unknown) => (typeof v === "string" ? new Date(v).getTime() : NaN);
+  const nudges = (remaining || [])
+    .map((n) => ({ createdAt: typeof n.createdAt === "string" ? n.createdAt : null, reminderDate: typeof n.reminderDate === "string" ? n.reminderDate : null, t: asMs(n.createdAt) }))
+    .filter((n) => n.createdAt != null && Number.isFinite(n.t))
+    .sort((a, b) => b.t - a.t);
+  if (!nudges.length) return { nudgeDate: null, lastNudgeSentDate: null, hasNudges: false };
+  const latest = nudges[0];
+  return { nudgeDate: latest.reminderDate, lastNudgeSentDate: latest.createdAt, hasNudges: true };
+}
