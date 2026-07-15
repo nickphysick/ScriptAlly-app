@@ -72,8 +72,6 @@ service cloud.firestore {
         && (!data.keys().hasAny(['homeCountry']) || (data.homeCountry is string && data.homeCountry.size() <= 64))
         // App theme — optional; "cappuccino" | "bold" | "editorial". Absent-or-one-of-three.
         && (!data.keys().hasAny(['queriesTheme']) || (data.queriesTheme is string && (data.queriesTheme == 'cappuccino' || data.queriesTheme == 'bold' || data.queriesTheme == 'editorial')))
-        // To-do focus-ritual cadence stamp — optional ISO string; absent-or-string (rejects null).
-        && (!data.keys().hasAny(['todoLastFocusedAt']) || (data.todoLastFocusedAt is string && data.todoLastFocusedAt.size() <= 64))
         // Package Workshop tour-seen flag — optional bool; absent-or-bool (rejects null).
         && (!data.keys().hasAny(['hasSeenTour']) || data.hasSeenTour is bool)
         // Personal genres (taxonomy Tier 2) — optional list, capped at the client's MAX_PERSONAL_GENRES.
@@ -358,23 +356,10 @@ service cloud.firestore {
         && data.updatedAt is string && data.updatedAt.size() <= 64;
     }
 
-    // To-do page Notes — the only stored to-do records. body may be empty (a fresh note starts
-    // blank); pinned + done are the pin / soft-archive flags. Stamps are full ISO datetimes.
-    function isValidTodoNote(data, userId) {
-      return data.keys().hasOnly(['id', 'userId', 'body', 'pinned', 'done', 'createdAt', 'updatedAt'])
-        && data.id is string && data.id.size() <= 128
-        && data.userId == userId
-        && data.body is string && data.body.size() <= 16384
-        && data.pinned is bool
-        && data.done is bool
-        && data.createdAt is string && data.createdAt.size() <= 64
-        && data.updatedAt is string && data.updatedAt.size() <= 64;
-    }
-
     // Canonical stored user task. Record scope (queryId/agentId/manuscriptId) is optional user
     // input — string when present, rejecting a literal null.
     function isValidUserTask(data, userId) {
-      return data.keys().hasOnly(['id', 'userId', 'text', 'done', 'completedAt', 'createdAt', 'updatedAt', 'queryId', 'agentId', 'manuscriptId', 'dueDate'])
+      return data.keys().hasOnly(['id', 'userId', 'text', 'done', 'completedAt', 'createdAt', 'updatedAt', 'queryId', 'agentId', 'manuscriptId', 'dueDate', 'committedDate'])
         && data.id is string && data.id.size() <= 128
         && data.userId == userId
         // No min length — the To-do board's blank-note flow creates an empty task then fills it.
@@ -386,6 +371,8 @@ service cloud.firestore {
         && (!data.keys().hasAny(['manuscriptId']) || (data.manuscriptId is string && data.manuscriptId.size() <= 128))
         // Reminder day — ISO date-only "YYYY-MM-DD"; optional, string when present (rejects null).
         && (!data.keys().hasAny(['dueDate']) || (data.dueDate is string && data.dueDate.size() <= 16))
+        // Today's-list commitment — ISO date-only "YYYY-MM-DD"; optional, string when present.
+        && (!data.keys().hasAny(['committedDate']) || (data.committedDate is string && data.committedDate.size() <= 16))
         && data.createdAt is string && data.createdAt.size() <= 64
         && data.updatedAt is string && data.updatedAt.size() <= 64;
     }
@@ -475,7 +462,7 @@ service cloud.firestore {
       allow read, delete: if isOwner(userId);
       allow create: if isOwner(userId) && isValidUser(incoming());
       allow update: if isOwner(userId) && isValidUser(incoming()) && (
-        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus', 'onboardingComplete', 'queryingStage', 'journeyStage', 'homeCountry', 'queriesTheme', 'todoLastFocusedAt', 'hasSeenTour', 'personalGenres', 'mutedTaskRules'])
+        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus', 'onboardingComplete', 'queryingStage', 'journeyStage', 'homeCountry', 'queriesTheme', 'hasSeenTour', 'personalGenres', 'mutedTaskRules'])
       );
 
       // ROUTE: Manuscripts
@@ -610,16 +597,6 @@ service cloud.firestore {
         allow create: if isOwner(userId) && isValidId(taskId) && isValidUserTask(incoming(), userId);
         allow update: if isOwner(userId) && isValidId(taskId) && isValidUserTask(incoming(), userId) && (
           incoming().diff(existing()).affectedKeys().hasOnly(['text', 'done', 'completedAt', 'updatedAt', 'dueDate'])
-        );
-      }
-
-      // ROUTE: To-do Notes (users/{uid}/todoNotes) — owner-only; the To-do page's Notes stream.
-      match /todoNotes/{noteId} {
-        allow get, delete: if isOwner(userId) && isValidId(noteId);
-        allow list: if isOwner(userId);
-        allow create: if isOwner(userId) && isValidId(noteId) && isValidTodoNote(incoming(), userId);
-        allow update: if isOwner(userId) && isValidId(noteId) && isValidTodoNote(incoming(), userId) && (
-          incoming().diff(existing()).affectedKeys().hasOnly(['body', 'pinned', 'done', 'updatedAt'])
         );
       }
 

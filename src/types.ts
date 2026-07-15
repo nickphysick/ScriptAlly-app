@@ -32,10 +32,6 @@ export interface User {
   // Absent === Cappuccino. NOTE: prod firestore.rules still enum-restrict this to the first two —
   // "editorial" persists only once the parked rules edit ships (see BUILD-REPORT.md).
   queriesTheme?: "cappuccino" | "bold" | "editorial";
-  // Cadence stamp for the To-do "Clear the Desk" focus ritual — written once when the ritual is
-  // completed or left (ISO String). The ONLY reader is the entry check (shouldOpenFocus); nothing
-  // derives from it, so it doesn't offend derived-over-stored. Absent === never focused.
-  todoLastFocusedAt?: string;
   // The Package Workshop guided tour has been offered once. Set true when the tour ends (finish OR
   // skip) so it never auto-runs again; the help "?" re-runs it regardless. Absent === never seen.
   // NOTE: rides the parked firestore.rules user-update allowlist edit — silently denied (graceful)
@@ -430,18 +426,6 @@ export interface Note {
   updatedAt: string; // full ISO datetime
 }
 
-// A To-do page "Notes" record — the ONLY stored to-do object (Do next / Housekeeping are derived).
-// Distinct from Note (the dashboard desk post-its): a note here is a plain body + pin + soft-archive.
-export interface TodoNote {
-  id: string;
-  userId: string;
-  body: string;
-  pinned: boolean;
-  done: boolean; // soft archive (reversible) — marking done feeds "cleared today"
-  createdAt: string; // full ISO datetime
-  updatedAt: string; // full ISO datetime
-}
-
 export interface DismissedTask {
   id: string;
   userId: string;
@@ -508,4 +492,8 @@ export interface UserTask {
   // not decoration: unset = a plain to-do; set = surfaces (and renders overdue) on that day. Dates
   // are INPUT, not derived state — nothing auto-fires; a due date only surfaces, never writes.
   dueDate?: string;
+  // Today's-list commitment — ISO date-only "YYYY-MM-DD". The task's OWN scheduling on its own
+  // document (never a taskFlag — those are stances on DERIVED tasks). Set = committed to that day's
+  // list (rolls over once if the day passes); absent = not committed. Input, never derived.
+  committedDate?: string;
 }

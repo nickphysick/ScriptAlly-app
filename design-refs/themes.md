@@ -605,6 +605,13 @@ chrome revision replaced v14/v3).
   the control bar's ONE filled CTA (Log a query / Add agent). ⚠️ v14/v3 OMITTED these two
   tokens; an undefined `var()` renders as nothing, which silently made the mockups' primary
   button transparent. Always define every token you reference.
+- **To-do board bands (added 2026-07-13, board rebuild):** `--pink-hero #f9e8e2` (the Do-next
+  hero gradient start) · gold advisory band for Housekeeping — `--gold-t #f6efdd` / `--gold-b
+  #e7d9b8` / `--gold-i #7d621d` (with the shared `--gold #a8842c` ink) · post-it band for the
+  Your-tasks column — `--note-t #faf0c8` / `--note-b #ecdda4` / `--note-i #7a6420`. ADDITIVE — no
+  existing value changed; values copied from `design-refs/todo-workspace-v10.html`'s `:root`
+  (continuing the "copy the mockup `:root` into `.t-f12`" pattern). Consume these for any future
+  F12 advisory/note surface rather than reinventing a gold or yellow.
 - **⚠️ SAGE CORRECTION (standing decision):** the band pair is the LIVE dashboard diary band —
   `--sage-band: #dce0d9; --sage-band-2: #d0d6cc` (from `diaryCarousel.css`), which WINS over
   the mockups' `#d7ddd5 → #d5dbd3`, so hub, agents and dashboard match. Edge `--sage-edge
