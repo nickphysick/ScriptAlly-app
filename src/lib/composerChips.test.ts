@@ -31,18 +31,30 @@ describe("composerChips — derived from the CTA engine, cannot disagree", () =>
     expect(chips[1].tone).toBe("terminal");
   });
 
-  it("Queried → Partial requested is the pink positive step; Rejection is grey; dots present", () => {
-    const { chips } = composerChips(QS.QUERIED);
-    expect(chips.map((c) => c.label)).toEqual(["Partial requested", "Full requested", "Rejection"]);
-    expect(chips.map((c) => c.tone)).toEqual(["primary", "outcome", "terminal"]);
+  it("Queried → Partial requested (pink) + Rejection (grey) + Nudge; Full requested demoted to Other", () => {
+    const { chips, otherChips } = composerChips(QS.QUERIED);
+    expect(chips.map((c) => c.label)).toEqual(["Partial requested", "Rejection", "Nudge"]);
+    expect(chips.map((c) => c.tone)).toEqual(["primary", "terminal", "nudge"]);
     expect(chips[0].dotStatus).toBe(QS.PARTIAL_REQUESTED);
-    expect(chips[2].dotStatus).toBe(QS.REJECTED);
+    // The implausible jump lives under "Other… (less likely from here)".
+    expect(otherChips.map((c) => c.label)).toEqual(["Full requested"]);
   });
 
-  it("Full Sent → Offer is the pink positive step, then R&R, then Rejection", () => {
-    const { chips } = composerChips(QS.FULL_SENT);
-    expect(chips.map((c) => c.label)).toEqual(["Offer", "Revise & resubmit", "Rejection"]);
-    expect(chips.map((c) => c.tone)).toEqual(["primary", "outcome", "terminal"]);
+  it("Full Sent → Offer (pink), R&R, Rejection, then the Nudge chip; nothing under Other", () => {
+    const { chips, otherChips } = composerChips(QS.FULL_SENT);
+    expect(chips.map((c) => c.label)).toEqual(["Offer", "Revise & resubmit", "Rejection", "Nudge"]);
+    expect(chips.slice(0, 3).map((c) => c.tone)).toEqual(["primary", "outcome", "terminal"]);
+    expect(otherChips).toEqual([]);
+  });
+
+  it("the Nudge chip appears ONLY while waiting on the agent — never on a move/closed status, and it's not a status change", () => {
+    for (const status of Object.values(QS)) {
+      const has = composerChips(status).chips.some((c) => c.key === "nudge");
+      expect(has).toBe(queryBucket(status) === "waiting");
+    }
+    const nudge = composerChips(QS.QUERIED).chips.find((c) => c.key === "nudge")!;
+    expect(nudge.action).toEqual({ kind: "nudge" }); // fires the nudge flow, NOT a QueryStatus change
+    expect(nudge.tone).toBe("nudge");
   });
 
   it("Rejection is ALWAYS the grey terminal chip, wherever it appears", () => {
@@ -70,11 +82,11 @@ describe("composerChips — derived from the CTA engine, cannot disagree", () =>
     expect(move).not.toContain("no-response");
   });
 
-  it("offers 2–4 chips for every status", () => {
+  it("offers a sane chip count (1–5 incl. the nudge + optional no-response chips)", () => {
     for (const status of Object.values(QS)) {
       const n = composerChips(status, { canCloseNoResponse: true }).chips.length;
       expect(n).toBeGreaterThanOrEqual(1);
-      expect(n).toBeLessThanOrEqual(4);
+      expect(n).toBeLessThanOrEqual(5);
     }
   });
 });

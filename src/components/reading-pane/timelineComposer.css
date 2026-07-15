@@ -1,7 +1,9 @@
 /* TimelineComposer (interaction layer 5a) — pinned at the Tracking card foot. Lives inside .t-f12
    so the master tokens resolve; every var() also carries a literal fallback. No color-mix();
    reduced motion honoured. */
-.tc-root { flex: none; border-top: 1px solid var(--hairline, #f0eae1); padding: 12px 16px 14px; background: var(--panel, #fffdfb); }
+/* TWS P3 — the fork is a LIFTED shadowed card with a min-gap above so it never collides with the
+   last event on long histories (true vertical-centring is approximated — the pane scroll flows). */
+.tc-root { flex: none; margin: 22px 4px 6px; border: 1px solid var(--line, #e6dccd); border-radius: 12px; box-shadow: 0 6px 20px rgba(40, 28, 20, 0.08); padding: 14px 16px; background: var(--panel, #fffdfb); }
 .tc-q { font-family: var(--f12-body, "Inter", system-ui, sans-serif); font-size: 13px; font-weight: 600; color: var(--ink, #1e1a16); margin-bottom: 9px; }
 
 .tc-chips { display: flex; flex-wrap: wrap; gap: 7px; }
@@ -15,6 +17,17 @@
 .tc-chip.tc-terminal { background: var(--paper, #faf6f0); border-color: var(--line, #e6dccd); color: var(--muted, #7d7469); }
 .tc-chip.tc-terminal:hover { background: var(--oat, #f1e8dc); color: var(--ink-2, #4a443c); }
 .tc-chip.tc-reopen { border-style: dashed; }
+/* TWS P3 — the outgoing Nudge chip: burgundy outline, styled like the others (its StatusDot carries
+   the outgoing colour). Fires the nudge flow, not a status change. */
+.tc-chip.tc-nudge { border-color: var(--burg, #7c3a2a); color: var(--burg, #7c3a2a); }
+.tc-chip.tc-nudge:hover { background: var(--pink-t, #f7e3dd); border-color: var(--burg, #7c3a2a); }
+
+/* TWS P3 — the "Other…" expander (implausible-from-here steps). */
+.tc-other { margin-top: 10px; }
+.tc-othertoggle { display: inline-flex; align-items: center; gap: 8px; background: none; border: none; padding: 0; font-family: var(--f12-body, "Inter", system-ui, sans-serif); font-size: 12px; font-weight: 600; color: var(--muted, #7d7469); cursor: pointer; }
+.tc-othertoggle:hover { color: var(--ink, #1e1a16); }
+.tc-otherhint { font-family: "JetBrains Mono", monospace; font-size: 8px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint, #a89a8a); }
+.tc-otherchips { margin-top: 9px; }
 
 /* inline form */
 .tc-form { display: flex; flex-direction: column; gap: 9px; }

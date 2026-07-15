@@ -2813,6 +2813,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                           manuscript={{ title: activeMs?.title || "" }}
                           onOpenRichForm={openRichForm}
                           onMarkSent={() => setIsMarkSentOpen(true)}
+                          onNudge={() => setIsNudgeOpen(true)}
                         />
                       </EdgeFadeScroll>
                     </div>{/* ── end sub-card 1: Tracking ── */}

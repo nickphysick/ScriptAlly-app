@@ -89,6 +89,8 @@ export interface TimelineComposerProps {
   onOpenRichForm: (responseType: QueryStatus, draft?: { dateReceived?: string; note?: string }) => void;
   /** Open the existing MarkSentPopover (writer's-turn mark-sent chips). */
   onMarkSent: () => void;
+  /** TWS P3 — fire the nudge + reminder flow (the nudge fork chip; not a status change). */
+  onNudge?: () => void;
 }
 
 const METHOD_OPTIONS: SubmissionMethod[] = [
@@ -99,7 +101,7 @@ const METHOD_OPTIONS: SubmissionMethod[] = [
 ];
 
 export const TimelineComposer = React.forwardRef<TimelineComposerHandle, TimelineComposerProps>(
-  ({ query, agent, manuscript, onOpenRichForm, onMarkSent }, ref) => {
+  ({ query, agent, manuscript, onOpenRichForm, onMarkSent, onNudge }, ref) => {
     const { currentUser, editActivity } = useScriptAllyDb();
     const { showToast } = useToast();
     const rootRef = useRef<HTMLDivElement>(null);
@@ -122,6 +124,7 @@ export const TimelineComposer = React.forwardRef<TimelineComposerHandle, Timelin
 
     const [openChip, setOpenChip] = useState<ComposerChip | null>(null);
     const [editing, setEditing] = useState<ComposerEditEntry | null>(null);
+    const [showOther, setShowOther] = useState(false); // TWS P3 — the "Other…" expander
     const [date, setDate] = useState(todayISO());
     const [method, setMethod] = useState<string>(agent.submissionMethod || "");
     const [note, setNote] = useState("");
@@ -150,6 +153,7 @@ export const TimelineComposer = React.forwardRef<TimelineComposerHandle, Timelin
 
     const onChip = (chip: ComposerChip) => {
       const a = chip.action;
+      if (a.kind === "nudge") { onNudge?.(); return; } // fires the nudge flow, never a status change
       if (a.kind === "mark-sent") { onMarkSent(); return; }
       if (a.kind === "record" && (a.responseType === "offer" || a.responseType === "rr")) {
         onOpenRichForm(a.responseType === "offer" ? QueryStatus.OFFER : QueryStatus.REVISE_RESUBMIT);
@@ -233,20 +237,40 @@ export const TimelineComposer = React.forwardRef<TimelineComposerHandle, Timelin
       <div className="tc-root" ref={rootRef}>
         <div className="tc-q">{model.question}</div>
         {!formOpen ? (
-          <div className="tc-chips">
-            {model.chips.map((c, i) => (
-              <button
-                key={c.key}
-                ref={i === 0 ? firstChipRef : undefined}
-                type="button"
-                className={`tc-chip tc-${c.tone}`}
-                onClick={() => onChip(c)}
-              >
-                <StatusDot status={c.dotStatus} overrideSize={15} decorative />
-                {c.label}
-              </button>
-            ))}
-          </div>
+          <>
+            <div className="tc-chips">
+              {model.chips.map((c, i) => (
+                <button
+                  key={c.key}
+                  ref={i === 0 ? firstChipRef : undefined}
+                  type="button"
+                  className={`tc-chip tc-${c.tone}`}
+                  onClick={() => onChip(c)}
+                >
+                  <StatusDot status={c.dotStatus} overrideSize={15} decorative />
+                  {c.label}
+                </button>
+              ))}
+            </div>
+            {model.otherChips.length > 0 && (
+              /* TWS P3 — implausible-from-here steps tucked behind an expander. */
+              <div className="tc-other">
+                <button type="button" className="tc-othertoggle" aria-expanded={showOther} onClick={() => setShowOther((o) => !o)}>
+                  {showOther ? "Less" : "Other…"}<span className="tc-otherhint">less likely from here</span>
+                </button>
+                {showOther && (
+                  <div className="tc-chips tc-otherchips">
+                    {model.otherChips.map((c) => (
+                      <button key={c.key} type="button" className={`tc-chip tc-${c.tone}`} onClick={() => onChip(c)}>
+                        <StatusDot status={c.dotStatus} overrideSize={15} decorative />
+                        {c.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </>
         ) : (
           <div className="tc-form" role="group" aria-label={formTitle}>
             <div className="tc-fh">{formTitle}</div>

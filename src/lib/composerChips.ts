@@ -18,11 +18,12 @@ import { QueryStatus } from "../types";
 import { getPrimaryAction, type PrimaryMarkKind } from "./queryPrimaryAction";
 import { queryBucket } from "./queryAmbient";
 
-/** How a chip records — each maps to an EXISTING canonical write path. */
+/** How a chip records — each maps to an EXISTING canonical write path (or the nudge flow). */
 export type ComposerChipAction =
   | { kind: "record"; responseType: "partial" | "full" | "rr" | "offer" | "rejected" }
   | { kind: "mark-sent"; markKind: PrimaryMarkKind }
   | { kind: "close" } // No response — close it (responseType "close", closingReason set by the caller)
+  | { kind: "nudge" } // TWS P3 — fires the nudge + reminder flow, NOT a QueryStatus transition
   | { kind: "reopen" };
 
 export interface ComposerChip {
@@ -31,14 +32,16 @@ export interface ComposerChip {
   action: ComposerChipAction;
   /** The status this chip records — drives the StatusDot shown beside its label. */
   dotStatus: QueryStatus;
-  /** primary = the likely next POSITIVE step (soft pink); outcome = another possible response
-   *  (neutral); terminal = Rejection (always grey); reopen = dashed. Styling only. */
-  tone: "primary" | "outcome" | "terminal" | "reopen";
+  /** primary = likely next POSITIVE step (soft pink); outcome = another possible response (neutral);
+   *  terminal = Rejection (grey); reopen = dashed; nudge = the outgoing nudge chip. Styling only. */
+  tone: "primary" | "outcome" | "terminal" | "reopen" | "nudge";
 }
 
 export interface ComposerModel {
   question: string;
   chips: ComposerChip[];
+  /** TWS P3 — "less likely from here" steps, tucked behind an "Other…" expander. */
+  otherChips: ComposerChip[];
 }
 
 // Base chips (no tone — tone is assigned per state below, since which chip is the "positive step"
@@ -50,6 +53,9 @@ const PARTIAL_REQ: BaseChip = { key: "partial-req", label: "Partial requested", 
 const FULL_REQ: BaseChip = { key: "full-req", label: "Full requested", action: { kind: "record", responseType: "full" }, dotStatus: QueryStatus.FULL_REQUESTED };
 const RR: BaseChip = { key: "rr", label: "Revise & resubmit", action: { kind: "record", responseType: "rr" }, dotStatus: QueryStatus.REVISE_RESUBMIT };
 const REOPEN: BaseChip = { key: "reopen", label: "Reopen this query", action: { kind: "reopen" }, dotStatus: QueryStatus.QUERIED };
+// TWS P3 — the nudge chip: an outgoing touch, offered only while waiting on the agent. dotStatus =
+// QUERIED so its StatusDot reads outgoing; the action fires the nudge flow, never a status change.
+const NUDGE: BaseChip = { key: "nudge", label: "Nudge", action: { kind: "nudge" }, dotStatus: QueryStatus.QUERIED };
 const tone = (c: BaseChip, t: ComposerChip["tone"]): ComposerChip => ({ ...c, tone: t });
 
 const MARK_SENT_LABEL: Record<PrimaryMarkKind, string> = { partial: "Partial sent", full: "Full sent", resubmit: "Resubmitted" };
@@ -67,7 +73,7 @@ export function composerChips(status: QueryStatus, opts: { canCloseNoResponse?: 
   const bucket = queryBucket(status);
 
   if (bucket === "closed") {
-    return { question: "This query is closed.", chips: [tone(REOPEN, "reopen")] };
+    return { question: "This query is closed.", chips: [tone(REOPEN, "reopen")], otherChips: [] };
   }
 
   if (bucket === "move") {
@@ -79,15 +85,18 @@ export function composerChips(status: QueryStatus, opts: { canCloseNoResponse?: 
       chips.push({ key: "mark-sent", label: MARK_SENT_LABEL[pa.markKind], action: { kind: "mark-sent", markKind: pa.markKind }, dotStatus: pa.target, tone: "primary" });
     }
     chips.push(tone(REJECTION, "terminal"));
-    return { question: QUESTION, chips };
+    return { question: QUESTION, chips, otherChips: [] };
   }
 
-  // bucket === "waiting" — the agent holds it. Positive step (the next rung up) is PINK, then the
-  // other possible response (neutral), then Rejection (always grey), last.
+  // bucket === "waiting" — the agent holds it. Likely steps shown; the implausible jump tucked under
+  // "Other…"; the outgoing Nudge chip trails. Rejection always renders (grey).
   let chips: ComposerChip[];
+  let otherChips: ComposerChip[] = [];
   switch (status) {
     case QueryStatus.QUERIED:
-      chips = [tone(PARTIAL_REQ, "primary"), tone(FULL_REQ, "outcome"), tone(REJECTION, "terminal")];
+      // Full requested straight from Queried is an implausible jump → demoted under "Other".
+      chips = [tone(PARTIAL_REQ, "primary"), tone(REJECTION, "terminal")];
+      otherChips = [tone(FULL_REQ, "outcome")];
       break;
     case QueryStatus.PARTIAL_SENT:
       chips = [tone(FULL_REQ, "primary"), tone(OFFER, "outcome"), tone(REJECTION, "terminal")];
@@ -100,5 +109,7 @@ export function composerChips(status: QueryStatus, opts: { canCloseNoResponse?: 
   if (opts.canCloseNoResponse) {
     chips = [...chips, { key: "no-response", label: "No response — close it", action: { kind: "close" }, dotStatus: QueryStatus.NO_RESPONSE, tone: "terminal" }];
   }
-  return { question: QUESTION, chips };
+  // The nudge chip trails the response chips (waiting bucket only — you nudge the agent, not yourself).
+  chips = [...chips, tone(NUDGE, "nudge")];
+  return { question: QUESTION, chips, otherChips };
 }
