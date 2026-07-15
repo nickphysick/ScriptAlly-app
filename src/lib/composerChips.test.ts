@@ -39,33 +39,33 @@ describe("composerChips — derived from the CTA engine, cannot disagree", () =>
     expect(withClose.chips[1].action).toEqual({ kind: "close" });
   });
 
-  it("Queried (waiting) → [Partial requested (primary), Nudge]; the rest incl. Rejection under Other", () => {
+  it("Queried (waiting) → [Partial requested, Rejection, Nudge]; Rejection is now a visible primary", () => {
     const { chips, otherChips } = composerChips(QS.QUERIED);
-    expect(chips.map((c) => c.label)).toEqual(["Partial requested", "Nudge"]);
-    expect(chips.map((c) => c.tone)).toEqual(["primary", "nudge"]);
+    expect(chips.map((c) => c.label)).toEqual(["Partial requested", "Rejection", "Nudge"]);
+    expect(chips.map((c) => c.tone)).toEqual(["primary", "terminal", "nudge"]);
     expect(chips[0].dotStatus).toBe(QS.PARTIAL_REQUESTED);
-    expect(otherChips.map((c) => c.label)).toEqual(["Full requested", "Offer", "Revise & resubmit", "Rejection"]);
-    // Rejection stays the grey terminal chip wherever it lives.
-    expect(otherChips.find((c) => c.key === "rejected")!.tone).toBe("terminal");
+    // Full requested stays under Other (from Queried); Rejection is NO LONGER buried there.
+    expect(otherChips.map((c) => c.label)).toEqual(["Full requested", "Offer", "Revise & resubmit"]);
+    expect(otherChips.some((c) => c.key === "rejected")).toBe(false);
   });
 
-  it("Queried + canClose → the Close query chip trails Partial requested · Nudge", () => {
+  it("Queried + canClose → the Close query chip trails Partial requested · Rejection · Nudge", () => {
     const { chips } = composerChips(QS.QUERIED, { canClose: true });
-    expect(chips.map((c) => c.label)).toEqual(["Partial requested", "Nudge", "Close query"]);
-    expect(chips[2].tone).toBe("close");
+    expect(chips.map((c) => c.label)).toEqual(["Partial requested", "Rejection", "Nudge", "Close query"]);
+    expect(chips[3].tone).toBe("close");
   });
 
-  it("Partial Sent → [Full requested (primary), Nudge]; Offer · R&R · Rejection under Other", () => {
+  it("Partial Sent → [Full requested, Rejection, Nudge]; Offer · R&R under Other", () => {
     const { chips, otherChips } = composerChips(QS.PARTIAL_SENT);
-    expect(chips.map((c) => c.label)).toEqual(["Full requested", "Nudge"]);
-    expect(otherChips.map((c) => c.label)).toEqual(["Offer", "Revise & resubmit", "Rejection"]);
+    expect(chips.map((c) => c.label)).toEqual(["Full requested", "Rejection", "Nudge"]);
+    expect(otherChips.map((c) => c.label)).toEqual(["Offer", "Revise & resubmit"]);
   });
 
-  it("Full Sent → [Offer (primary), Nudge]; R&R · Rejection under Other", () => {
+  it("Full Sent → [Offer, Rejection, Nudge]; R&R under Other", () => {
     const { chips, otherChips } = composerChips(QS.FULL_SENT);
-    expect(chips.map((c) => c.label)).toEqual(["Offer", "Nudge"]);
-    expect(chips.map((c) => c.tone)).toEqual(["primary", "nudge"]);
-    expect(otherChips.map((c) => c.label)).toEqual(["Revise & resubmit", "Rejection"]);
+    expect(chips.map((c) => c.label)).toEqual(["Offer", "Rejection", "Nudge"]);
+    expect(chips.map((c) => c.tone)).toEqual(["primary", "terminal", "nudge"]);
+    expect(otherChips.map((c) => c.label)).toEqual(["Revise & resubmit"]);
   });
 
   it("the Nudge chip reads 'Nudge' by default and 'Nudge again' once a future reminder is set", () => {
@@ -112,11 +112,21 @@ describe("composerChips — derived from the CTA engine, cannot disagree", () =>
     }
   });
 
-  it("offers a sane chip count (1–3 in the primary row: primary + nudge + close)", () => {
+  it("offers a sane chip count (waiting max 4: positive + Rejection + Nudge + Close)", () => {
     for (const status of Object.values(QS)) {
       const n = composerChips(status, { canClose: true, hasFutureReminder: true }).chips.length;
       expect(n).toBeGreaterThanOrEqual(1);
-      expect(n).toBeLessThanOrEqual(3);
+      expect(n).toBeLessThanOrEqual(4);
+    }
+  });
+
+  it("no chip is styled as a filled 'primary' — the tone drives the dot/semantics, not a fill", () => {
+    // The CSS gives every tone the same outlined look; this locks that the fork emits no bespoke
+    // 'filled' tone beyond the shared set (primary/terminal/nudge/close/outcome/reopen).
+    const allowed = new Set(["primary", "terminal", "nudge", "close", "outcome", "reopen"]);
+    for (const status of Object.values(QS)) {
+      const m = composerChips(status, { canClose: true });
+      for (const c of [...m.chips, ...m.otherChips]) expect(allowed.has(c.tone)).toBe(true);
     }
   });
 });

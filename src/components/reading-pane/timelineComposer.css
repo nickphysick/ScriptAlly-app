@@ -10,20 +10,16 @@
 .tc-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 99px; border: 1px solid var(--line, #e6dccd); background: var(--panel, #fffdfb); font-family: var(--f12-body, "Inter", system-ui, sans-serif); font-size: 13px; color: var(--ink-2, #4a443c); cursor: pointer; transition: background 0.12s, border-color 0.12s; }
 .tc-chip:hover { background: var(--paper, #faf6f0); border-color: var(--muted, #7d7469); }
 .tc-chip svg { flex: none; }
-/* the likely next positive step — soft pink */
-.tc-chip.tc-primary { background: var(--pink-btn, #f6cfc9); border-color: transparent; color: var(--ink, #1e1a16); font-weight: 600; }
-.tc-chip.tc-primary:hover { background: var(--pink-btn-h, #f0bfb8); }
-/* Rejection — always grey/muted, never emphasised */
-.tc-chip.tc-terminal { background: var(--paper, #faf6f0); border-color: var(--line, #e6dccd); color: var(--muted, #7d7469); }
-.tc-chip.tc-terminal:hover { background: var(--oat, #f1e8dc); color: var(--ink-2, #4a443c); }
+/* Fork reshape — ONE outlined style for every chip: no fill, no bold, no "primary". Each chip is told
+   apart by its direction-coloured StatusDot (and the close chip's × glyph), never by a filled tone.
+   tc-primary / tc-terminal / tc-nudge / tc-close all fall through to the base .tc-chip look. */
 .tc-chip.tc-reopen { border-style: dashed; }
-/* TWS P3 — the outgoing Nudge chip: burgundy outline, styled like the others (its StatusDot carries
-   the outgoing colour). Fires the nudge flow, not a status change. */
-.tc-chip.tc-nudge { border-color: var(--burg, #7c3a2a); color: var(--burg, #7c3a2a); }
-.tc-chip.tc-nudge:hover { background: var(--pink-t, #f7e3dd); border-color: var(--burg, #7c3a2a); }
-/* TR P5 — the give-up "Close query" chip: grey, a ringed × glyph instead of a StatusDot. */
-.tc-chip.tc-close { background: var(--paper, #faf6f0); border-color: var(--line, #e6dccd); color: var(--muted, #7d7469); }
-.tc-chip.tc-close:hover { background: var(--oat, #f1e8dc); color: var(--ink-2, #4a443c); }
+/* The single SUGGESTED action is distinguished ONLY by a subtle pulse — identical border/background/
+   weight to the others, plus a gentle burgundy halo. CSS-only; NO var() inside the % selectors (the
+   recurring silent-failure trap); reduced motion honoured. Applied to exactly one chip (Phase 3). */
+.tc-chip.tc-suggested { animation: tc-suggest 2.1s ease-in-out infinite; }
+@keyframes tc-suggest { 0%, 100% { box-shadow: 0 0 0 0 rgba(124, 58, 42, 0); } 50% { box-shadow: 0 0 0 4px rgba(124, 58, 42, 0.16); } }
+@media (prefers-reduced-motion: reduce) { .tc-chip.tc-suggested { animation: none; } }
 .tc-x { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border-radius: 50%; border: 1.3px solid currentColor; font-size: 11px; line-height: 1; font-weight: 600; flex: none; }
 
 /* TWS P3 — the "Other…" expander (the status's other possible outcomes). */

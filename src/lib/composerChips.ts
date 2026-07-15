@@ -70,9 +70,12 @@ const MARK_SENT_LABEL: Record<PrimaryMarkKind, string> = { partial: "Partial sen
 const QUESTION = "What happened next?";
 
 /**
- * TR P5 — a tidier fork: one positive primary step, then the outgoing Nudge, then (when offered) the
- * give-up Close query. Everything else the status *could* become — including Rejection — tucks under
- * "Other…". Waiting statuses all follow the one shape (Queried is the worked example in the spec).
+ * The fork's chip set. Every chip renders in ONE outlined style (no fill/bold "primary"); the single
+ * suggested action is distinguished only by a pulse, applied by the caller from a derived rule.
+ *
+ * With-agent (waiting) states show the positive next step + Rejection (the agent may pass) + the
+ * outgoing Nudge + (when offered) Close query; the remaining outcomes tuck under "Other…". Your-move
+ * keeps its mark-sent + Close, Rejection under "Other" (the agent isn't evaluating there).
  *
  * @param status  the query's current status
  * @param opts.canClose  offer the give-up "Close query" chip — the caller passes it in overdue/grace
@@ -101,27 +104,28 @@ export function composerChips(status: QueryStatus, opts: { canClose?: boolean; h
     return { question: QUESTION, chips, otherChips: [tone(REJECTION, "terminal")] };
   }
 
-  // bucket === "waiting" — the agent holds it. ONE positive primary + Nudge(/again) + optional Close
-  // query; every other possible outcome (incl. Rejection) tucks under "Other…".
+  // bucket === "waiting" — the agent holds it. The positive next step + Rejection (a visible primary:
+  // the agent is evaluating, so passing is a real outcome) + Nudge(/again) + optional Close query; the
+  // remaining outcomes tuck under "Other…" (from Queried, Full requested stays there).
   const nudgeChip = tone({ ...NUDGE, label: opts.hasFutureReminder ? "Nudge again" : "Nudge" }, "nudge");
   let primary: BaseChip;
   let otherChips: ComposerChip[];
   switch (status) {
     case QueryStatus.QUERIED:
       primary = PARTIAL_REQ;
-      otherChips = [tone(FULL_REQ, "outcome"), tone(OFFER, "outcome"), tone(RR, "outcome"), tone(REJECTION, "terminal")];
+      otherChips = [tone(FULL_REQ, "outcome"), tone(OFFER, "outcome"), tone(RR, "outcome")];
       break;
     case QueryStatus.PARTIAL_SENT:
       primary = FULL_REQ;
-      otherChips = [tone(OFFER, "outcome"), tone(RR, "outcome"), tone(REJECTION, "terminal")];
+      otherChips = [tone(OFFER, "outcome"), tone(RR, "outcome")];
       break;
     case QueryStatus.FULL_SENT:
     default:
       primary = OFFER;
-      otherChips = [tone(RR, "outcome"), tone(REJECTION, "terminal")];
+      otherChips = [tone(RR, "outcome")];
       break;
   }
-  const chips: ComposerChip[] = [tone(primary, "primary"), nudgeChip];
+  const chips: ComposerChip[] = [tone(primary, "primary"), tone(REJECTION, "terminal"), nudgeChip];
   if (opts.canClose) chips.push(closeChip);
   return { question: QUESTION, chips, otherChips };
 }
