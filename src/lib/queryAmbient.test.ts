@@ -331,3 +331,40 @@ describe("TWS P2 artefacts — five readout treatments + CSS-only sage pulse", (
     expect(css.includes("prefers-reduced-motion")).toBe(true);
   });
 });
+
+describe("queryAmbientStatus — responseDeadline override (P4; undated stage)", () => {
+  it("undated + FUTURE responseDeadline → expMs = the override, no send anchor (no bar)", () => {
+    const future = new Date(NOW + 5 * DAY).toISOString();
+    const a = queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: undefined, responseDeadline: future }), "agent", undefined, NOW);
+    expect(a.expMs).toBe(new Date(future).getTime());
+    expect(a.sentMs).toBeNull();
+    expect(a.overdue).toBe(false);
+  });
+  it("undated + PAST responseDeadline → overdue by the override", () => {
+    const past = new Date(NOW - 3 * DAY).toISOString();
+    const a = queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: undefined, responseDeadline: past }), "agent", undefined, NOW);
+    expect(a.overdue).toBe(true);
+    expect(a.daysOverdue).toBe(3);
+  });
+  it("undated + NO override → no expected date (expMs null)", () => {
+    expect(queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: undefined }), "agent", undefined, NOW).expMs).toBeNull();
+  });
+  it("a real stage send date WINS over the override (derived stays primary)", () => {
+    const sent = new Date(NOW - 10 * DAY).toISOString();
+    const a = queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: sent, responseDeadline: new Date(NOW).toISOString() }), "agent", undefined, NOW);
+    expect(a.sentMs).toBe(new Date(sent).getTime());
+    expect(a.expMs).toBe(new Date(sent).getTime() + 56 * DAY); // derived, not the override
+  });
+});
+
+describe("TWS P4 artefacts — no-date gate + set-date wiring", () => {
+  const tl = readFileSync(resolve(__dirname, "../components/reading-pane/QueryTimeline.tsx"), "utf8");
+  const qsrc = readFileSync(resolve(__dirname, "../components/Queries.tsx"), "utf8");
+  it("the no-expected-date branch gates on hasExpected (expMs), not merely a send date", () => {
+    expect(tl.includes("const hasExpected = waiting.expMs != null")).toBe(true);
+    expect(tl.includes("{!hasExpected ? (")).toBe(true);
+  });
+  it("Set an expected date opens the Edit drawer (which edits responseDeadline)", () => {
+    expect(qsrc.includes("onSetExpectedDate={() => openEditQuery(activeQuery.id)}")).toBe(true);
+  });
+});

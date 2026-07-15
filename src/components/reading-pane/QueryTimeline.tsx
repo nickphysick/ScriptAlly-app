@@ -263,7 +263,8 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
         const lastNudgeMs = query.lastNudgeSentDate ? getTime(query.lastNudgeSentDate) : null;
         const escal = deriveEscalation(waiting, { reminderMs, lastNudgeMs, now: Date.now() });
         const nudges = nudgeCount(events, NUDGE_NESTED_TYPE); // P3 — re-escalation "nudged N×" copy
-        const dated = waiting.sentMs != null && waiting.expMs != null;
+        const dated = waiting.sentMs != null && waiting.expMs != null; // both present → a progress bar
+        const hasExpected = waiting.expMs != null;                     // P4 — derived OR overridden
         // P4 — derived bar geometry (no magic percentages): within ends at expected (no marker);
         // overdue spans sent→now with the expected marker + hatch; grace spans sent→reminder with a
         // faded original-expected tick.
@@ -311,9 +312,9 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
 
         return (
           <div style={{ marginLeft: 4, marginTop: 16 }}>
-            {!dated ? (
-              /* NO EXPECTED DATE (P2) — undated send, nothing derivable + no override. Dashed section
-                 + a burgundy "Set an expected date" link (writes responseDeadline; wired in P4). */
+            {!hasExpected ? (
+              /* NO EXPECTED DATE (P2/P4) — nothing derivable AND no responseDeadline override. Dashed
+                 section + a burgundy "Set an expected date" link (opens the Edit drawer, P4). */
               <div style={{ border: "1px dashed var(--line, #e6dccd)", borderRadius: 11, padding: "12px 14px" }}>
                 <span style={{ display: "inline-flex", alignItems: "center", gap: 9, fontSize: 13, color: "var(--muted, #8a7d6c)" }}>
                   {clockIcon}

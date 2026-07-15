@@ -2798,6 +2798,7 @@ export const Queries: React.FC<{ searchQuery: string; onNavigate?: (tab: string,
                               onEditEntry={onEditEntry}
                               onDeleteEntry={onDeleteEntry}
                               onNudge={() => setIsNudgeOpen(true)}
+                              onSetExpectedDate={() => openEditQuery(activeQuery.id)}
                             />
                           );
                         })()}

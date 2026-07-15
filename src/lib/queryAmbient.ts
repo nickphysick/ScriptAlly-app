@@ -105,7 +105,14 @@ export function queryAmbientStatus(
       const nDays = Math.max(0, Math.floor((now - sentMs) / DAY));
       return { ...base, mode: "waiting", nDays, sentMs, expMs: sentMs + mDays * DAY, widthPct: Math.max(0, Math.min(1, nDays / mDays)) * 100, overdue: nDays > mDays, daysOverdue: Math.max(0, nDays - mDays) };
     }
-    // Undated import — the pill still reads "waiting" but there is no bar/date.
+    // P4 — no stage send date to derive from: fall back to the stored responseDeadline OVERRIDE (a
+    // legitimate user input — "Set an expected date"). Drives the readout's overdue/expected; without
+    // a send anchor there is still no progress bar (sentMs null).
+    const overrideMs = query.responseDeadline ? getTime(query.responseDeadline) : NaN;
+    if (!Number.isNaN(overrideMs)) {
+      return { ...base, mode: "waiting", sentMs: null, expMs: overrideMs, overdue: now > overrideMs, daysOverdue: Math.max(0, Math.floor((now - overrideMs) / DAY)) };
+    }
+    // Undated import, no override — the pill reads "waiting" but there is no bar/date.
     return { ...base, mode: "waiting", sentMs: null, expMs: null };
   }
 
