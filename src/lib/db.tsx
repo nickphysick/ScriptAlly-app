@@ -79,6 +79,7 @@ import { replyTask } from "./taskPrecedence";
 import { TaskFlagKey, taskFlagId, flagKeyForTask, flagMatchesTask, isFlagSuppressing, buildTaskFlagFromDismissed } from "./taskFlags";
 import { homeCountrySeed } from "./territory";
 import { agentDataQualityNeeds } from "./agentDataQuality";
+import { taskSurvivesMute } from "./todoHousekeeping";
 
 // Connection validation test on boot as requested by skill
 async function testConnection() {
@@ -799,9 +800,14 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     // Suppression is now taskFlags-based (dismissedTasks absorbed): a derived task is hidden while a
     // matching flag is snoozed into the future (a far-future snooze reads as an indefinite mute).
     const nowMs = now.getTime();
+    const mutedRules = currentUser?.mutedTaskRules ?? [];
     const activeTasks = calculatedTasks.filter(t => {
       const flag = taskFlags.find(f => flagMatchesTask(f, t.taskType, t.relatedRecordId));
-      return !flag || !isFlagSuppressing(flag, nowMs);
+      if (flag && isFlagSuppressing(flag, nowMs)) return false;
+      // Rule-scope mute ("Stop asking → All of them"): silence the reminder everywhere from this one
+      // point. data_quality_poor dies only when ALL its remaining gaps are muted (todoHousekeeping).
+      const ag = t.taskType === "data_quality_poor" ? agents.find(a => a.id === t.relatedRecordId) : undefined;
+      return taskSurvivesMute(t.taskType, ag, mutedRules);
     });
 
     setTasks(activeTasks);

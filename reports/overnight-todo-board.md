@@ -221,3 +221,50 @@ NEW: `src/lib/nudgeDraft.ts` (+ `.test.ts`), `src/components/todo/TaskCaptureFor
 **Layout jsdom-unverified** — Nick eyeballs: the Urgent / Work-the-list buttons open the centred walkthrough; Stage → advances, ← Back un-stages, Open → launches the drawer and resumes on close, Review lists staged-only, Save reports honestly.
 
 **Commit:** `feat(todo): staged walkthroughs + nudge draft`. **STOP for review** before Phase 5.
+
+## PHASE 5 — housekeeping at scale (grouping · batch · mute · Pro assisted fill)
+
+**Gates:** app `tsc` clean · **functions `tsc` clean** · `vite build` OK (targets `scriptally-dev`) · full Vitest **993** green (up from 952; +41 across three new suites). `git status` = 13 Phase-5 files; **`App.tsx` untouched**, **no PaintMode**.
+
+### The rule model — finer than the task type
+A "rule" is a single fixable gap, one level below the engine task type. The `data_quality_poor` task (one per agent) spans up to THREE rules; `no_response_close` is its own. Four total, in `src/lib/todoHousekeeping.ts` (`HK_RULES`):
+
+| rule | from | agent/query field | assistable |
+|---|---|---|---|
+| `dq_responseTime` | data_quality gap | `responseTimeWeeks` | ✓ |
+| `dq_materials` | data_quality gap | `materialsWanted` | ✓ |
+| `dq_mswl` | data_quality gap | `mswlNotes` | ✓ |
+| `no_response_close` | stale-query task | `updateQueryStatus(NO_RESPONSE)` | ✗ (a decision, not a fact) |
+
+Grouping by the fine gap (not the task type) is what makes a batch homogeneous — every row in a pile needs the SAME field — which is also what makes assisted fill coherent (one field type per call).
+
+### Grouping — expand, don't partition
+`groupHousekeeping(hkCards, agents, muted)` expands each flat per-record card into per-RULE groups: a triple-gap agent joins all three `dq_*` groups; a no_response card joins the stale-query group. **`assembleBoard`/`todoBoard.ts` are UNCHANGED** — `columns.hk` stays the flat per-record list (so Today's-list + Help-me-pick keep working on individual items); grouping is a pure view computed on top and consumed only by the Housekeeping COLUMN, which now renders one card per pile (headline + member faces + "Fix these →").
+
+### Two mute scopes, matching the two stores
+- **Item** — "mute just this one" (per row in the batch drawer) → a `TaskFlag` snoozed to `MUTED_UNTIL` via the existing `upsertTaskFlag` (per-agent / per-query). Unchanged machinery.
+- **Rule** — "Stop asking" (drawer footer) → the rule key appended to `User.mutedTaskRules` via `updateUserProfile`. Applied at ONE point — the engine's `activeTasks` filter in `db.tsx` (`taskSurvivesMute`) — so muting silences the reminder **everywhere** (board + dashboard attention chip read the same `tasks`). `data_quality_poor` dies only when ALL its remaining gaps are muted; every non-housekeeping task type is untouched. **Zero behaviour change when `mutedTaskRules` is empty** (the guard short-circuits).
+
+### Batch-fix drawer (`HousekeepingBatch.tsx`)
+One rule → all its records, one homogeneous field per row, one Save. Writes go through the EXISTING paths (`updateAgent` / `updateQueryStatus`) with **per-row error isolation** — a partial failure is reported (`Saved N; M failed — check those rows.`), never swallowed. Field editors per rule: weeks input · the four-material tick set · MSWL textarea · (no_response) a per-query "Close as no response" tick.
+
+### ⚠️ Pro assisted fill — BUILT LIVE, gated OFF (the one deviation)
+"Find these for me" is fully wired end-to-end: free → the Pro affordance (button reads "(Pro)", click → `/plans`); Pro → `fetchAssistedFill` → pre-fills each row's value AND shows its **provenance** ("✨ via web · {source}" + confidence). Assisted fill PROPOSES; the writer reviews every value before Save — it never writes.
+
+- **Function BUILT:** `functions/src/assistAgentData.ts` (callable, europe-west2, **server-side Pro gate**, writes nothing) + pure core `assistAgentDataCore.ts` (web-search prompt, per-rule value shaping, provenance-mandatory validation, retry-once) + exported in `index.ts`. Mirrors `suggestComps` exactly. Anti-hallucination is hard-wired: the prompt insists omitting an agent beats inventing a value, and both the function core AND the client `validateAssistPayload` **drop any value with no `source`**.
+- **NOT DEPLOYED, gated OFF (`ASSIST_LIVE=false`, `src/lib/assistFill.ts`).** This is the deliverable I could not make live, by two hard constraints: (1) **prod function deploys are Nick's only** — a brand-new callable can't exist server-side until Nick deploys it, so "Pro→runs" is impossible from here; (2) the **`ANTHROPIC_API_KEY` rotation is still unverified** (CLAUDE.md loose end) and must be confirmed before any Functions work. Until then a real Pro click lands on a graceful "Assisted fill isn't switched on yet" — never a fabricated value.
+- **Go-live (Nick, in order):** ① confirm the `ANTHROPIC_API_KEY` rotation; ② `cd functions && npm install && npm run build && firebase deploy --only functions:assistAgentData`; ③ confirm the `web_search_20250305` tool version string is current for the SDK (the one thing I couldn't verify against the live API); ④ flip `ASSIST_LIVE` to `true` (or ship with the `__SA_ASSIST_LIVE` override). **Dev demo without deploying:** set `window.__SA_ASSIST_FILL_MOCK = { found: [{ agentId: "<id>", value: "6", source: "agency site", confidence: "high" }] }` in the console, then click — the prefill + provenance UX renders from canned data.
+
+### Rules — NONE new
+Everything Phase 5 writes is already in `firestore.rules` and **dev-deployed** (per memory, To-do rules landed on dev 9 Jul; **prod still pending — Nick's call**): `mutedTaskRules` in the user-update allowlist (line 465), `taskFlags.rule` (line 440), and the agent fields `responseTimeWeeks`/`materialsWanted`/`mswlNotes` (lines 513–515). The `assistAgentData` function writes nothing, so it needs no rule. No `firestore:rules` deploy is required for this phase.
+
+### Files (13)
+NEW: `src/lib/todoHousekeeping.ts` (+ `.test.ts`), `src/lib/assistFill.ts` (+ `.test.ts`), `src/components/todo/HousekeepingBatch.tsx`, `functions/src/assistAgentDataCore.ts` (+ `.test.ts`), `functions/src/assistAgentData.ts`. EDITED: `src/lib/db.tsx` (one-point rule-mute filter), `src/components/todo/ToDoPage.tsx` (Housekeeping column → groups + batch drawer), `src/components/todo/todo.css`, `functions/src/index.ts`.
+
+### Known follow-ups (out of scope, flagged)
+- **Help-me-pick still operates per-record on housekeeping** (it reads the flat `columns.hk`), so a picked hk item shows individually in Today and opens the per-record drawer — coherent, but a future pass could let it pick a whole pile.
+- **Hero strip vs column badge:** the hero "N housekeeping" counts records; the column badge counts piles — locally consistent, deliberately not reconciled.
+
+**Layout jsdom-unverified** — Nick eyeballs on dev: the Housekeeping column shows one card per rule with member faces; "Fix these →" opens the batch drawer; weeks/materials/MSWL editors save through the existing paths; "Mute" (row) and "Stop asking" (footer) both silence correctly; free users get the Pro affordance on "Find these for me".
+
+**Commit:** `feat(todo): housekeeping grouping + batch + Pro assisted fill`.

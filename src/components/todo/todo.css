@@ -191,6 +191,38 @@
 .tdb-review-x { color: var(--faint); font-size: 13px; padding: 2px 6px; }
 .tdb-review-x:hover { color: var(--pink-i); }
 
+/* ── housekeeping: grouped column card ── */
+.tdb-tile.hkgroup { cursor: pointer; }
+.tdb-tag.cnt { background: var(--oat, #efe9dd); color: var(--muted); font-variant-numeric: tabular-nums; }
+.tdb-hkfaces { display: flex; align-items: center; gap: 5px; margin: 10px 0 4px; }
+.tdb-hkfaces .tdb-miniav { width: 24px; height: 24px; font-size: 9px; }
+.tdb-hkmore { font-family: var(--f12-mono); font-size: 10px; color: var(--faint); margin-left: 2px; }
+.tdb-hkassist { font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.06em; color: var(--pink-i); text-transform: uppercase; }
+
+/* ── housekeeping: batch-fix drawer (centred modal) ── */
+.tdb-batch { margin: auto; width: 620px; max-width: 94vw; max-height: 90vh; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-xl); box-shadow: var(--sh-3); display: flex; flex-direction: column; }
+.tdb-batch-h { display: flex; align-items: flex-start; gap: 10px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
+.tdb-batch-h > div:first-child { flex: 1; }
+.tdb-batch-eyebrow { font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--faint); }
+.tdb-batch-title { font-family: var(--f12-serif); font-size: 19px; font-weight: 600; margin-top: 3px; }
+.tdb-batch-body { padding: 8px 20px; overflow-y: auto; flex: 1; min-height: 0; }
+.tdb-batch-row { padding: 13px 0; border-bottom: 1px solid var(--hairline); }
+.tdb-batch-row:last-child { border-bottom: none; }
+.tdb-batch-who { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.tdb-batch-name { font-family: var(--f12-serif); font-size: 15px; font-weight: 500; flex: 1; }
+.tdb-batch-mute { font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--faint); padding: 3px 7px; border: 1px solid var(--hairline); border-radius: 999px; }
+.tdb-batch-mute:hover { color: var(--ink); border-color: var(--line); }
+.tdb-batch-field { display: flex; align-items: center; gap: 8px; }
+.tdb-batch-field input { width: 90px; padding: 7px 9px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--paper, #fff); font-size: 13px; }
+.tdb-batch-unit { font-family: var(--f12-mono); font-size: 10px; color: var(--muted); }
+.tdb-batch-textarea { width: 100%; min-height: 58px; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--paper, #fff); font-size: 13px; resize: vertical; font-family: inherit; }
+.tdb-batch-prov { display: flex; align-items: center; gap: 6px; margin-top: 7px; font-family: var(--f12-mono); font-size: 9.5px; letter-spacing: 0.03em; color: var(--pink-i); }
+.tdb-batch-conf { color: var(--faint); letter-spacing: 1px; }
+.tdb-batch-f { display: flex; align-items: center; gap: 9px; padding: 13px 20px; border-top: 1px solid var(--line); flex-wrap: wrap; }
+.tdb-assist-msg { font-family: var(--f12-mono); font-size: 10px; color: var(--muted); }
+.tdb-batch-stop { font-family: var(--f12-mono); font-size: 10px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--faint); padding: 6px 10px; border: 1px solid var(--hairline); border-radius: 999px; }
+.tdb-batch-stop:hover { color: var(--ink); border-color: var(--line); }
+
 /* ── rollover gold bar ── */
 .tdb-rollbar { display: flex; align-items: center; gap: 8px; padding: 9px 13px; background: var(--gold-t); border-bottom: 1px solid var(--gold-b); font-size: 12px; color: var(--gold-i); flex: none; }
 .tdb-rolltx { flex: 1; }

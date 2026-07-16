@@ -24,10 +24,12 @@ import { useScriptAllyDb } from "../../lib/db";
 import { assembleBoard, BoardCard, BoardColumns } from "../../lib/todoBoard";
 import { flagKeyForTask } from "../../lib/taskFlags";
 import { choosePicks, rolledOverCards, todayProgress, MAX_TODAY } from "../../lib/todoWalk";
+import { groupHousekeeping, HkGroup } from "../../lib/todoHousekeeping";
 import { clearedTodayItems } from "../../lib/clearedToday";
 import { QueryStatus } from "../../types";
 import { TaskDetail } from "./TaskDetail";
 import { Walkthrough } from "./Walkthrough";
+import { HousekeepingBatch } from "./HousekeepingBatch";
 import "./todo.css";
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -58,6 +60,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [rollDismissed, setRollDismissed] = useState(false);
   const [pulsing, setPulsing] = useState<string | null>(null);
   const [walk, setWalk] = useState<{ title: string; cards: BoardCard[] } | null>(null);
+  const [batchGroup, setBatchGroup] = useState<HkGroup | null>(null);
 
   const now = Date.now();
   const today = localYMD(now);
@@ -67,6 +70,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     // now/today are session-stable enough; recomputing on the data arrays is what matters.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [tasks, userTasks, queries, agents, manuscripts, taskFlags, today],
+  );
+  // Housekeeping renders GROUPED by rule (one card per rule, not per record); the flat columns.hk
+  // still feeds Today's-list + Help-me-pick unchanged. Rule-muted groups drop out here too.
+  const hkGroups = useMemo(
+    () => groupHousekeeping(columns.hk, agents, currentUser?.mutedTaskRules),
+    [columns.hk, agents, currentUser],
   );
 
   const flash = (msg: string) => { setToast(msg); window.setTimeout(() => setToast((t) => (t === msg ? null : t)), 2600); };
@@ -166,17 +175,23 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         {/* ── board ── */}
         <div className="tdb-board">
           {COLS.map(({ key, label, cls }) => {
+            const isHk = key === "hk";
             const cards = columns[key];
+            const count = isHk ? hkGroups.length : cards.length;
             return (
               <div key={key} className={`tdb-col ${cls}`}>
-                <div className="tdb-colh"><span className="tdb-ct">{label}</span><span className="tdb-cn">{cards.length}</span>
+                <div className="tdb-colh"><span className="tdb-ct">{label}</span><span className="tdb-cn">{count}</span>
                   {key === "nt" && <button type="button" className="tdb-cadd" onClick={addTask} aria-label="Add a task">＋</button>}
                 </div>
                 <div className="tdb-colb">
-                  {cards.length === 0 ? (
+                  {isHk ? (
+                    hkGroups.length === 0
+                      ? <div className="tdb-colempty">Nothing to tidy.</div>
+                      : hkGroups.map((g) => renderGroupCard(g))
+                  ) : cards.length === 0 ? (
                     key === "nt"
                       ? <button type="button" className="tdb-ghostadd" onClick={addTask}>＋ Add a task</button>
-                      : <div className="tdb-colempty">{key === "done" ? "Nothing cleared yet." : key === "hk" ? "Nothing to tidy." : "Nothing here."}</div>
+                      : <div className="tdb-colempty">{key === "done" ? "Nothing cleared yet." : "Nothing here."}</div>
                   ) : (
                     cards.map((c) => (key === "done" ? renderDoneCard(c) : renderCard(c)))
                   )}
@@ -189,6 +204,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
 
       {toast && <div className="tdb-toast">{toast}</div>}
       {walk && <Walkthrough title={walk.title} cards={walk.cards} onClose={() => setWalk(null)} onNavigate={onNavigate} onToast={flash} />}
+      {batchGroup && <HousekeepingBatch group={batchGroup} onClose={() => setBatchGroup(null)} onToast={flash} onNavigate={onNavigate} />}
       {drawerCard && (() => {
         const streamCards = columns[drawerCard.stream];
         const idx = streamCards.findIndex((c) => c.key === drawerCard.key);
@@ -273,6 +289,28 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <button type="button" className="tdb-pill done-p" onClick={(e) => { e.stopPropagation(); markDone(c); }}>
             <span className="tdb-tk" />Mark done
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  // A grouped housekeeping card — one pile per rule; opens the batch drawer.
+  function renderGroupCard(g: HkGroup) {
+    const faces = g.members.slice(0, 5);
+    return (
+      <div key={g.rule} className="tdb-tile hkgroup" onClick={() => setBatchGroup(g)}>
+        <div className="tdb-tags">
+          <span className="tdb-tag due">{g.meta.label}</span>
+          <span className="tdb-tag cnt">{g.members.length}</span>
+        </div>
+        <div className="tdb-tt">{g.meta.title(g.members.length)}</div>
+        <div className="tdb-hkfaces">
+          {faces.map((m) => <span key={m.card.key} className="tdb-miniav hk" title={m.agentName}>{m.card.initials}</span>)}
+          {g.members.length > faces.length && <span className="tdb-hkmore">+{g.members.length - faces.length}</span>}
+        </div>
+        <div className="tdb-tacts">
+          <button type="button" className="tdb-pill today-p" onClick={(e) => { e.stopPropagation(); setBatchGroup(g); }}>Fix these →</button>
+          {g.meta.assistable && <span className="tdb-hkassist" aria-hidden>✨ Assist</span>}
         </div>
       </div>
     );
