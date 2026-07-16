@@ -174,6 +174,23 @@
 .tdb-threeway { display: flex; flex-direction: column; gap: 9px; }
 .tdb-threeway button { width: 100%; }
 
+/* ── walkthrough (centred staged flow) ── */
+.tdb-scrim { align-items: stretch; }
+.tdb-walk { margin: auto; width: 560px; max-width: 94vw; max-height: 90vh; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-xl); box-shadow: var(--sh-3); display: flex; flex-direction: column; }
+.tdb-walk-h { display: flex; align-items: center; gap: 10px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
+.tdb-walk-title { font-family: var(--f12-serif); font-size: 18px; font-weight: 600; flex: 1; }
+.tdb-walk-count { font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.08em; color: var(--faint); }
+.tdb-walk-body { padding: 20px; overflow-y: auto; flex: 1; min-height: 0; }
+.tdb-walk-cardtitle { font-family: var(--f12-serif); font-size: 20px; font-weight: 600; line-height: 1.25; margin-bottom: 4px; }
+.tdb-walk-cardsub { font-size: 12.5px; color: var(--muted); margin-bottom: 16px; }
+.tdb-walk-f { display: flex; align-items: center; gap: 8px; padding: 14px 20px; border-top: 1px solid var(--line); }
+.tdb-review-row { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border: 1px solid var(--hairline); border-radius: var(--r-sm); margin-bottom: 8px; }
+.tdb-review-mid { flex: 1; min-width: 0; }
+.tdb-review-t { font-size: 13px; font-weight: 500; }
+.tdb-review-m { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--faint); margin-top: 3px; }
+.tdb-review-x { color: var(--faint); font-size: 13px; padding: 2px 6px; }
+.tdb-review-x:hover { color: var(--pink-i); }
+
 /* ── rollover gold bar ── */
 .tdb-rollbar { display: flex; align-items: center; gap: 8px; padding: 9px 13px; background: var(--gold-t); border-bottom: 1px solid var(--gold-b); font-size: 12px; color: var(--gold-i); flex: none; }
 .tdb-rolltx { flex: 1; }

@@ -10,6 +10,7 @@
  */
 
 import { BoardCard } from "./todoBoard";
+import { QueryStatus } from "../types";
 
 export const MAX_TODAY = 5;
 const MAX_DO = 4;
@@ -41,4 +42,48 @@ export function rolledOverCards(cards: BoardCard[], today: string): BoardCard[] 
 export function todayProgress(committedOnList: number, doneFromList: number): { total: number; done: number; pct: number; empty: boolean } {
   const total = committedOnList + doneFromList;
   return { total, done: doneFromList, pct: total ? Math.round((doneFromList / total) * 100) : 0, empty: total === 0 };
+}
+
+/**
+ * A walkthrough step is STAGEABLE only where its write is deferrable (Back genuinely un-does it):
+ * mark-sent (partial/full/R&R → recordMaterialsSent) and nudge (→ logNudge). Every other type —
+ * offer (record), housekeeping, a UserTask — performs an immediate side-effecting write, so it gets
+ * an "open" step (launches the drawer, which writes immediately) and never enters the staged set.
+ */
+const MARK_SENT_TASK_TYPES: ReadonlySet<string> = new Set(["partial_requested", "full_requested", "revise_resubmit"]);
+export type WalkStepKind = "mark-sent" | "nudge" | "open";
+export function walkStepKind(card: BoardCard): WalkStepKind {
+  if (card.taskType === "nudge_overdue") return "nudge";
+  if (card.taskType && MARK_SENT_TASK_TYPES.has(card.taskType)) return "mark-sent";
+  return "open";
+}
+export const isStageable = (card: BoardCard): boolean => walkStepKind(card) !== "open";
+
+/** A staged (not-yet-written) walkthrough change. Carries everything apply() needs to write later. */
+export type StagedPayload =
+  | { kind: "mark-sent"; cardKey: string; queryId: string; targetStatus: QueryStatus; sentDate: string; isResubmit: boolean }
+  | { kind: "nudge"; cardKey: string; queryId: string; checkBackDate: string; note?: string };
+
+export interface StagedHandlers {
+  markSent: (p: Extract<StagedPayload, { kind: "mark-sent" }>) => Promise<void>;
+  nudge: (p: Extract<StagedPayload, { kind: "nudge" }>) => Promise<void>;
+}
+
+/**
+ * Write each staged change through the existing handlers, ISOLATING per-item failure — one throw
+ * never aborts the rest, and the caller reports partial failures (never a silent partial success).
+ */
+export async function applyStaged(items: StagedPayload[], h: StagedHandlers): Promise<{ ok: string[]; failed: string[] }> {
+  const ok: string[] = [];
+  const failed: string[] = [];
+  for (const item of items) {
+    try {
+      if (item.kind === "mark-sent") await h.markSent(item);
+      else await h.nudge(item);
+      ok.push(item.cardKey);
+    } catch {
+      failed.push(item.cardKey);
+    }
+  }
+  return { ok, failed };
 }

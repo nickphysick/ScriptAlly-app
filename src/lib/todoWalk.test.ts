@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { BoardCard } from "./todoBoard";
-import { choosePicks, rolledOverCards, todayProgress } from "./todoWalk";
+import { choosePicks, rolledOverCards, todayProgress, walkStepKind, isStageable, applyStaged, StagedPayload } from "./todoWalk";
+import { QueryStatus } from "../types";
 
 const card = (key: string, over: Partial<BoardCard> = {}): BoardCard =>
   ({ key, stream: "do", title: "", who: "", subtitle: "", due: "", warn: false, snoozes: 0, hk: false, initials: "", record: "", committed: false, done: false, ...over } as BoardCard);
@@ -36,6 +37,45 @@ describe("todayProgress — empty list never claims done", () => {
   it("N committed, M done → M/N", () => {
     expect(todayProgress(2, 1)).toEqual({ total: 3, done: 1, pct: 33, empty: false });
     expect(todayProgress(0, 2)).toEqual({ total: 2, done: 2, pct: 100, empty: false });
+  });
+});
+
+describe("walkStepKind — staged (deferrable) vs open (immediate write)", () => {
+  const c = (taskType?: string, userTaskId?: string): BoardCard =>
+    ({ key: "k", stream: "do", title: "", who: "", subtitle: "", due: "", warn: false, snoozes: 0, hk: false, initials: "", record: "", committed: false, done: false, taskType, userTaskId } as BoardCard);
+  it("mark-sent types (partial/full/R&R) stage", () => {
+    expect(walkStepKind(c("partial_requested"))).toBe("mark-sent");
+    expect(walkStepKind(c("full_requested"))).toBe("mark-sent");
+    expect(walkStepKind(c("revise_resubmit"))).toBe("mark-sent");
+  });
+  it("nudge stages", () => expect(walkStepKind(c("nudge_overdue"))).toBe("nudge"));
+  it("offer, housekeeping and user tasks OPEN (never staged)", () => {
+    expect(walkStepKind(c("offer_received"))).toBe("open");
+    expect(walkStepKind(c("data_quality_poor"))).toBe("open");
+    expect(walkStepKind(c("no_response_close"))).toBe("open");
+    expect(walkStepKind(c(undefined, "u1"))).toBe("open");
+    expect(isStageable(c("offer_received"))).toBe(false);
+    expect(isStageable(c("partial_requested"))).toBe(true);
+  });
+});
+
+describe("applyStaged — per-item failure isolation", () => {
+  const mk = (cardKey: string): StagedPayload => ({ kind: "mark-sent", cardKey, queryId: "q", targetStatus: QueryStatus.FULL_SENT, sentDate: "2026-07-16", isResubmit: false });
+  it("one failure doesn't abort the rest; reports ok + failed", async () => {
+    const res = await applyStaged([mk("a"), mk("b"), mk("c")], {
+      markSent: async (p) => { if (p.cardKey === "b") throw new Error("boom"); },
+      nudge: async () => {},
+    });
+    expect(res.ok).toEqual(["a", "c"]);
+    expect(res.failed).toEqual(["b"]);
+  });
+  it("routes each kind to its handler", async () => {
+    const seen: string[] = [];
+    await applyStaged(
+      [mk("a"), { kind: "nudge", cardKey: "n", queryId: "q", checkBackDate: "2026-08-01" }],
+      { markSent: async () => { seen.push("mark"); }, nudge: async () => { seen.push("nudge"); } },
+    );
+    expect(seen).toEqual(["mark", "nudge"]);
   });
 });
 

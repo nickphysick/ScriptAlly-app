@@ -27,6 +27,7 @@ import { choosePicks, rolledOverCards, todayProgress, MAX_TODAY } from "../../li
 import { clearedTodayItems } from "../../lib/clearedToday";
 import { QueryStatus } from "../../types";
 import { TaskDetail } from "./TaskDetail";
+import { Walkthrough } from "./Walkthrough";
 import "./todo.css";
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -56,6 +57,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [drawerCard, setDrawerCard] = useState<BoardCard | null>(null);
   const [rollDismissed, setRollDismissed] = useState(false);
   const [pulsing, setPulsing] = useState<string | null>(null);
+  const [walk, setWalk] = useState<{ title: string; cards: BoardCard[] } | null>(null);
 
   const now = Date.now();
   const today = localYMD(now);
@@ -145,7 +147,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               <span><b>{clearedN}</b> cleared today</span>
             </div>
             <div className="tdb-hact">
-              <button type="button" className="tdb-btn-pri" disabled={!doN} onClick={() => flash("Walkthrough — Phase 4")}>Urgent</button>
+              <button type="button" className="tdb-btn-pri" disabled={!doN} onClick={() => setWalk({ title: "Urgent", cards: columns.do })}>Urgent</button>
               <button type="button" className="tdb-btn-sec" onClick={() => onNavigate("queries")}>See all queries</button>
             </div>
           </div>
@@ -186,6 +188,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       </div>
 
       {toast && <div className="tdb-toast">{toast}</div>}
+      {walk && <Walkthrough title={walk.title} cards={walk.cards} onClose={() => setWalk(null)} onNavigate={onNavigate} onToast={flash} />}
       {drawerCard && (() => {
         const streamCards = columns[drawerCard.stream];
         const idx = streamCards.findIndex((c) => c.key === drawerCard.key);
@@ -237,7 +240,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <div className="tdb-tfr">
             <span className="tdb-pc">{prog.empty ? "NOTHING COMMITTED" : `${prog.done} OF ${prog.total} DONE`}</span>
             <button type="button" className="tdb-pick" onClick={helpMePick}>{items.length ? "Add more" : "Help me pick"}</button>
-            <button type="button" className="tdb-walk" disabled={!items.length} onClick={() => flash("Work the list — Phase 4")}>Work the list</button>
+            <button type="button" className="tdb-walk" disabled={!items.length} onClick={() => setWalk({ title: "Work the list", cards: items })}>Work the list</button>
           </div>
         </div>
       </div>

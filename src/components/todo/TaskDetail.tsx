@@ -25,6 +25,7 @@ import { agentDataQualityNeeds } from "../../lib/agentDataQuality";
 import { agentPrimary } from "../../lib/agentDisplay";
 import { flagKeyForTask, MUTED_UNTIL } from "../../lib/taskFlags";
 import { BoardCard } from "../../lib/todoBoard";
+import { TaskCaptureForm } from "./TaskCaptureForm";
 import { QueryStatus } from "../../types";
 
 const localISODate = (): string => new Date().toISOString().slice(0, 10);
@@ -75,41 +76,11 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({ card, onClose, onPrev, o
   );
 };
 
-/* ── Do next: Why → Do it → Done ── */
-const DoNextBody: React.FC<any> = ({ card, query, agent, queries, manuscripts, activities, recordMaterialsSent, logNudge, onNavigate, onDone }) => {
+/* ── Do next: Why → Do it → Done. The Do-it capture is the SHARED TaskCaptureForm (write mode). ── */
+const DoNextBody: React.FC<any> = ({ card, query, agent, queries, manuscripts, activities, onNavigate, onDone }) => {
   const [step, setStep] = useState<"why" | "doit" | "done">("why");
   const [recordOpen, setRecordOpen] = useState(false);
   const timeline = useMemo(() => (agent ? buildAgentTimeline(agent.id, queries, manuscripts, activities) : []), [agent, queries, manuscripts, activities]);
-  const action = query ? getPrimaryAction(query.status as QueryStatus) : null;
-  const isNudge = card.taskType === "nudge_overdue";
-  const isMarkSent = action?.kind === "mark-sent";
-
-  // mark-sent capture state
-  const [sentDate, setSentDate] = useState(localISODate());
-  const [method, setMethod] = useState("Email");
-  const [materials, setMaterials] = useState<Record<string, boolean>>({});
-  const [note, setNote] = useState("");
-  const materialOpts = card.taskType === "partial_requested" ? ["First pages", "Synopsis", "Covering email"]
-    : card.taskType === "revise_resubmit" ? ["Revised manuscript", "Revision letter"]
-      : ["Full manuscript", "Synopsis", "Covering email"];
-  const anyTicked = Object.values(materials).some(Boolean);
-
-  // nudge capture state
-  const [checkBack, setCheckBack] = useState(new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10));
-  // TODO(nudge-draft): no reusable nudge-draft generator exists in the codebase (Step 0). This is a
-  // placeholder; wire the real generator when it lands. ScriptAlly never sends anything itself.
-  const draft = agent ? `Dear ${agentPrimary(agent).split(" ")[0]},\n\nI wondered whether you'd had a chance to consider my submission. I'd be glad to resend the materials if helpful.\n\nWith thanks` : "";
-
-  async function saveMarkSent() {
-    if (!query || !action || action.kind !== "mark-sent") return;
-    await recordMaterialsSent({ queryId: query.id, targetStatus: action.target as QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT, sentDate: new Date(sentDate).toISOString(), isResubmit: action.markKind === "resubmit" });
-    setStep("done");
-  }
-  async function saveNudge() {
-    if (!query) return;
-    await logNudge(query.id, { checkBackDate: new Date(checkBack).toISOString(), note: note || undefined });
-    setStep("done");
-  }
 
   if (recordOpen && query && agent) {
     const ms = manuscripts.find((m: any) => m.id === query.manuscriptId);
@@ -137,36 +108,8 @@ const DoNextBody: React.FC<any> = ({ card, query, agent, queries, manuscripts, a
         </>
       )}
 
-      {step === "doit" && isMarkSent && (
-        <>
-          <label className="tdb-fld"><span>Date sent</span><input type="date" value={sentDate} onChange={(e) => setSentDate(e.target.value)} /></label>
-          <label className="tdb-fld"><span>Method</span>
-            <select value={method} onChange={(e) => setMethod(e.target.value)}>{["Email", "QueryManager", "Post", "Other"].map((m) => <option key={m}>{m}</option>)}</select>
-          </label>
-          <div className="tdb-fld"><span>What you sent</span>
-            <div className="tdb-ticks">{materialOpts.map((m) => (
-              <label key={m} className="tdb-tick"><input type="checkbox" checked={!!materials[m]} onChange={(e) => setMaterials((prev) => ({ ...prev, [m]: e.target.checked }))} />{m}</label>
-            ))}</div>
-          </div>
-          <label className="tdb-fld"><span>Note (optional)</span><textarea value={note} onChange={(e) => setNote(e.target.value)} /></label>
-          <div className="tdb-drawer-cmd">
-            <button type="button" className="tdb-btn-sec" onClick={() => setStep("why")}>← Back</button>
-            <button type="button" className="tdb-btn-pri" disabled={!anyTicked} onClick={saveMarkSent}>Mark sent</button>
-          </div>
-        </>
-      )}
-
-      {step === "doit" && isNudge && (
-        <>
-          <div className="tdb-nudgenote">ScriptAlly never sends anything for you. Copy this, send it yourself, then log it below.</div>
-          <div className="tdb-draft">{draft}<button type="button" className="tdb-copy" onClick={() => navigator.clipboard?.writeText(draft)}>Copy</button></div>
-          <label className="tdb-fld"><span>Check back on</span><input type="date" value={checkBack} onChange={(e) => setCheckBack(e.target.value)} /></label>
-          <label className="tdb-fld"><span>Note (optional)</span><textarea value={note} onChange={(e) => setNote(e.target.value)} /></label>
-          <div className="tdb-drawer-cmd">
-            <button type="button" className="tdb-btn-sec" onClick={() => setStep("why")}>← Back</button>
-            <button type="button" className="tdb-btn-pri" onClick={saveNudge}>Log the nudge</button>
-          </div>
-        </>
+      {step === "doit" && query && (
+        <TaskCaptureForm card={card} query={query} agent={agent} mode="write" onDone={() => setStep("done")} onBack={() => setStep("why")} />
       )}
 
       {step === "done" && (

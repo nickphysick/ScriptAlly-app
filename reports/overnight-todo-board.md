@@ -189,3 +189,35 @@ Nick chose **option B**: reuse the diary container's **real** material (it's a s
 - Hero content styling (serif headline, burgundy italic emphasis, mono stat strip, the two buttons) unchanged.
 
 **Commit:** `feat(todo): hero as diary raised-panel material, pink-filled`. Layout jsdom-unverified — Nick eyeballs the hero reads as a soft raised pink panel (not a gradient), legible.
+
+## PHASE 4 completion — staged walkthroughs + nudge draft
+
+**Gates:** `tsc` clean · `vite build` OK (targets `scriptally-dev`) · full Vitest **952** green (up from 943; +9 across the two new lib test files). `git status` shows only the ten Phase-4 files; **`App.tsx` untouched** (no bridge edit needed — the Urgent/Work-the-list buttons already lived in `ToDoPage`), **no PaintMode**.
+
+### The settled principle — "stage only what can be un-staged"
+The walkthrough queue is one-at-a-time. A step either **stages** (a deferrable payload; nothing persists until Save, so **← Back genuinely reverses it**) or **Opens** (an immediate side-effecting write, handled in the real drawer with its own undo toast, never entering the staged set). The split is pure and unit-locked:
+- **`walkStepKind(card)`** (`src/lib/todoWalk.ts`) → `"mark-sent" | "nudge" | "open"`. `nudge_overdue` → nudge; `partial_requested`/`full_requested`/`revise_resubmit` → mark-sent; **everything else → open** (offer_received, housekeeping `data_quality_poor`/`no_response_close`, UserTask). `isStageable = kind !== "open"`.
+- Rationale: mark-sent and nudge are the only cards whose write is a *fresh* record with no prior history to corrupt — safe to hold and batch. Offer/housekeeping/task all mutate existing state (status recompute, agent fields, task done/delete) where a staged-then-abandoned write would be a lie; those go through the proven drawer immediately.
+
+### apply — per-item error isolation
+**`applyStaged(items, handlers)`** loops the staged payloads, `try/catch` **per item**, returns `{ ok: string[]; failed: string[] }` (card keys). The walkthrough's `save()` wires `markSent → recordMaterialsSent` (throws on failure) and `nudge → logNudge(...).then(r => { if (!r.success) throw })` (logNudge resolves `{success}` rather than throwing, so the handler converts a `false` into a throw — otherwise a failed nudge would be miscounted as saved). Partial failure is reported honestly: `Saved N; M failed — check those items.` — never a silent partial success.
+
+### One capture form, two shells (no drift)
+**`src/components/todo/TaskCaptureForm.tsx`** (NEW) is the single mark-sent/nudge capture, `mode: "write" | "stage"`:
+- **write** (drawer): calls `recordMaterialsSent` / `logNudge` immediately, then `onDone`. Buttons: "Mark sent" / "Log the nudge".
+- **stage** (walkthrough): calls `onStage(payload)` — nothing persists. Buttons: "Stage →" / "Stage nudge →".
+- Target status + `isResubmit` come from `getPrimaryAction(query.status)` (the shared `queryPrimaryAction` map — no per-type re-branching). mark-sent Save gated on `anyTicked`.
+- `TaskDetail`'s Do-it step was rewritten to render this same form in write mode (dropped its own inline capture/`saveMarkSent`/`saveNudge`/draft state) — so the drawer and the walkthrough physically share one form.
+
+### Nudge draft — shared helper (real de-dup, not a new copy)
+Recon confirmed `NudgeModal.tsx` carried a **real inline draft**. Extracted verbatim to **`src/lib/nudgeDraft.ts`** (`nudgeDraft({ agentName?, dateSent? })` → the follow-up letter string, en-GB long date, "Dear {firstName}"/"Dear there" fallback). `NudgeModal` now imports it (inline draft deleted; `firstName` still used elsewhere). `TaskCaptureForm` uses the same helper. Draft is **display-only** — copy-to-clipboard; ScriptAlly never sends. Locked in `nudgeDraft.test.ts` (4 tests).
+
+### The shell
+**`src/components/todo/Walkthrough.tsx`** (NEW): centred modal (`.tdb-walk`, reuses `.tdb-scrim`). `index` cursor over `cards`; `staged` keyed by `cardKey`; `phase` walk→review. `goPrev` un-stages the previous step. An **Open** step renders the real `<TaskDetail>` (writes immediately, advances on close). A **stage** step renders `<TaskCaptureForm mode="stage">`. **Review** lists only staged rows (each ✕-removable) + one `Save N changes`. Close with staged items → `window.confirm` guard. `ToDoPage` wires **Urgent → `columns.do`** and **Work the list → today's cards**; CSS added under `todo.css` (`.tdb-walk*`, `.tdb-review*`).
+
+### Files (10)
+NEW: `src/lib/nudgeDraft.ts` (+ `.test.ts`), `src/components/todo/TaskCaptureForm.tsx`, `src/components/todo/Walkthrough.tsx`. EDITED: `src/lib/todoWalk.ts` (+ `.test.ts`), `src/components/NudgeModal.tsx`, `src/components/todo/TaskDetail.tsx`, `src/components/todo/ToDoPage.tsx`, `src/components/todo/todo.css`.
+
+**Layout jsdom-unverified** — Nick eyeballs: the Urgent / Work-the-list buttons open the centred walkthrough; Stage → advances, ← Back un-stages, Open → launches the drawer and resumes on close, Review lists staged-only, Save reports honestly.
+
+**Commit:** `feat(todo): staged walkthroughs + nudge draft`. **STOP for review** before Phase 5.
