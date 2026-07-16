@@ -243,6 +243,12 @@ export interface Agent {
   // Pinned to the top of the agents list (a "Pinned" group above every sort). Pure list ordering —
   // no effect on suggestions, stats or Up next. Absent === not pinned (never null).
   pinned?: boolean;
+  // Provenance for ASSISTED-FILL values, keyed by the agent field they describe (mswlNotes /
+  // responseTimeWeeks / materialsWanted): where the value was found + when. Written ONLY when a
+  // found value is saved unedited, so a found fact is never indistinguishable from one the writer
+  // verified/typed. NOTE: rides a parked firestore.rules edit (isValidAgent + the agent-update
+  // allowlist) — saves carrying it are silently denied until that deploy lands (Nick's).
+  fieldSources?: Record<string, { source: string; foundAt: string }>;
 }
 
 export interface CommunityAgent {

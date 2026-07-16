@@ -2,86 +2,108 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * HousekeepingBatch — the Phase 5 batch-fix drawer. Opens for ONE housekeeping rule (a group of
- * records sharing the same gap) and fixes them together: one homogeneous field per row, one "Save
- * all" that writes each record through the EXISTING path (updateAgent / updateQueryStatus) with
- * per-row error isolation — a partial failure is reported, never silently swallowed.
+ * HousekeepingBatch — the batch-fix drawer for ONE data-quality rule (a group of agents sharing the
+ * same gap). Stale queries (`no_response_close`) NEVER open this drawer — closing a query is a
+ * one-off decision, handled individually via the card → TaskDetail three-way.
  *
- * Two mute scopes, matching the stores: per-row "mute this one" → a TaskFlag snoozed to MUTED_UNTIL;
- * footer "stop asking about all of these" → the rule key in User.mutedTaskRules (updateUserProfile).
+ * Rapid rows: monogram · name · agency · (queried pip — queried agents sort first) · ONE field.
+ * Chip pickers where the answer is a small set (reply window; materials ticks); text where it isn't
+ * (wish list). Filled rows dim; a counter tracks progress; ✕ skips a row for the session; nothing is
+ * required. Save writes ONLY filled rows through the existing `updateAgent`, per-row error
+ * isolation, and offers a single "Undo all" (restores the captured previous values).
  *
- * Pro-gated assisted fill ("Find these for me"): free → the upgrade affordance (→ /plans); Pro →
- * fetchAssistedFill, which pre-fills each row's value AND shows its provenance. The writer reviews
- * every value before Save — assisted fill proposes, it never saves. The live callable is undeployed
- * (ASSIST_LIVE OFF), so a real Pro click lands on a graceful "not switched on yet" until Nick deploys.
+ * Mute — two scopes, stated plainly (muting stops the reminder; the gap stays on the profile):
+ * per-row "Mute" → a TaskFlag snoozed to MUTED_UNTIL (just this one); footer "Stop asking" → the
+ * rule key in `User.mutedTaskRules` (all of them). After 2 snoozes a row proactively offers to stop
+ * asking. Item-muted agents sit behind an "n muted — show" link, each with Unmute (clears the
+ * snooze; the engine resurfaces them).
  *
- * Theme: F12 only (rendered inside the board). StatusDot not needed here.
+ * Assisted fill — "Find these for me" — Pro-gated, LIVE: free users get the Pro-pill affordance
+ * (routes to /plans; manual entry stays fully free); Pro users call the real `assistAgentData`
+ * callable (timeout-raced — a hang never blocks the manual path). Found values pre-fill WITH
+ * provenance ("Found · {source} · {date} — check before saving"); agents the look-up couldn't
+ * source show "Not found — enter manually", never a fabrication. On save, a found value kept
+ * UNEDITED persists its provenance to `Agent.fieldSources` (withProvenance) so a found fact is
+ * never indistinguishable from a verified one. ⚠️ fieldSources rides a parked firestore.rules
+ * edit — assisted saves are denied (reported as failed rows) until Nick deploys rules.
+ *
+ * Theme: F12 only (rendered inside the board).
  */
 import React, { useMemo, useState } from "react";
 import { useScriptAllyDb } from "../../lib/db";
-import { HkGroup, HkMember } from "../../lib/todoHousekeeping";
-import { isProUser, fetchAssistedFill, AssistFillError, AssistFound, AssistConfidence } from "../../lib/assistFill";
+import { HkGroup, HkMember, mutedMembersForRule } from "../../lib/todoHousekeeping";
+import { isProUser, fetchAssistedFill, withProvenance, AssistFillError, AssistFound, AssistConfidence } from "../../lib/assistFill";
 import { flagKeyForTask, MUTED_UNTIL } from "../../lib/taskFlags";
-import { Agent, QueryStatus } from "../../types";
+import { Agent } from "../../types";
 
 const MATERIAL_OPTS = ["Query Letter", "Synopsis", "Sample Pages", "Full Manuscript"];
+const WEEK_CHIPS = [4, 6, 8, 12, 16];
 
 const asSet = (v: string) => new Set(v.split(",").map((s) => s.trim()).filter(Boolean));
 const confDot = (c?: AssistConfidence) => (c === "high" ? "●●●" : c === "medium" ? "●●" : "●");
+const shortDate = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 
 export interface HousekeepingBatchProps {
   group: HkGroup;
   onClose: () => void;
-  onToast: (msg: string) => void;
+  onToast: (msg: string, action?: { label: string; fn: () => void }) => void;
   onNavigate: (tab: string, subPageName?: string, opts?: { agentId?: string; manuscriptId?: string }) => void;
 }
 
 export const HousekeepingBatch: React.FC<HousekeepingBatchProps> = ({ group, onClose, onToast, onNavigate }) => {
-  const { currentUser, updateAgent, updateQueryStatus, upsertTaskFlag, updateUserProfile } = useScriptAllyDb();
-  const { rule, meta, members } = group;
+  const { currentUser, agents, taskFlags, updateAgent, upsertTaskFlag, updateUserProfile } = useScriptAllyDb();
+  const { rule, meta } = group;
   const pro = isProUser(currentUser);
-  const isClose = rule === "no_response_close";
 
-  const [draft, setDraft] = useState<Record<string, string>>({}); // dq rows, keyed by agentId
-  const [toClose, setToClose] = useState<Record<string, boolean>>({}); // no_response rows, keyed by queryId
+  const [draft, setDraft] = useState<Record<string, string>>({}); // keyed by agentId
+  const [noMeansNo, setNoMeansNo] = useState<Record<string, boolean>>({});
   const [found, setFound] = useState<Record<string, AssistFound>>({});
-  const [muted, setMuted] = useState<Set<string>>(new Set()); // member keys hidden after a per-row mute
+  const [notFound, setNotFound] = useState<Set<string>>(new Set()); // asked, nothing sourced
+  const [mutedLocal, setMutedLocal] = useState<Set<string>>(new Set()); // card keys hidden after a row mute
+  const [skipped, setSkipped] = useState<Set<string>>(new Set()); // agentIds ✕-skipped this session
+  const [showMuted, setShowMuted] = useState(false);
   const [assisting, setAssisting] = useState(false);
+  const [assistAt, setAssistAt] = useState<string | null>(null); // when the look-up ran — the chip's date
   const [assistMsg, setAssistMsg] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const live = members.filter((m) => !muted.has(m.card.key));
-  const memberKey = (m: HkMember) => m.card.key;
+  const live = group.members.filter((m) => !mutedLocal.has(m.card.key) && !skipped.has(m.agentId ?? ""));
+  const mutedList = useMemo(() => mutedMembersForRule(rule, agents, taskFlags, Date.now()), [rule, agents, taskFlags]);
 
-  const fieldPatch = (v: string): Partial<Agent> => {
-    if (rule === "dq_responseTime") return { responseTimeWeeks: Number(v) };
+  const rowId = (m: HkMember) => m.agentId ?? m.card.key;
+  const isFilled = (m: HkMember) => !!(draft[rowId(m)] ?? "").trim();
+  const filledCount = live.filter(isFilled).length;
+
+  const fieldPatch = (id: string, v: string): Partial<Agent> => {
+    if (rule === "dq_responseTime") return { responseTimeWeeks: Number(v), noResponseMeansNo: !!noMeansNo[id] };
     if (rule === "dq_materials") return { materialsWanted: v.split(",").map((s) => s.trim()).filter(Boolean) };
     return { mswlNotes: v };
   };
 
-  const pending = useMemo(() => {
-    if (isClose) return live.filter((m) => toClose[m.queryId ?? ""]).length;
-    return live.filter((m) => (draft[m.agentId ?? ""] ?? "").trim()).length;
-  }, [isClose, live, toClose, draft]);
-
   async function runAssist() {
     if (!meta.assistable) return;
-    if (!pro) { onNavigate("plans"); return; }
+    if (!pro) { onNavigate("plans"); return; } // the Pro affordance routes to upgrade — never a dead button
     setAssisting(true);
     setAssistMsg(null);
+    const targets = live.filter((m) => m.agentId);
     try {
       const rows = await fetchAssistedFill({
         rule: rule as "dq_responseTime" | "dq_materials" | "dq_mswl",
-        agents: live.filter((m) => m.agentId).map((m) => ({ agentId: m.agentId!, name: m.agentName })),
+        agents: targets.map((m) => ({ agentId: m.agentId!, name: m.agentName, ...(m.agency ? { agency: m.agency } : {}) })),
       });
       const byId: Record<string, AssistFound> = {};
       const nextDraft = { ...draft };
       for (const r of rows) { byId[r.agentId] = r; nextDraft[r.agentId] = r.value; }
       setFound((f) => ({ ...f, ...byId }));
       setDraft(nextDraft);
-      setAssistMsg(rows.length ? `Found ${rows.length} — review each before saving.` : "Couldn’t find any this time.");
+      setAssistAt(new Date().toISOString());
+      // Honest empties: anyone asked-about with no sourced value is "not found", never fabricated.
+      setNotFound(new Set(targets.map((m) => m.agentId!).filter((id) => !byId[id] && !(draft[id] ?? "").trim())));
+      setAssistMsg(rows.length ? `Found ${rows.length} of ${targets.length} — check each before saving.` : "Nothing sourced this time — enter them manually.");
     } catch (e) {
-      setAssistMsg(e instanceof AssistFillError ? "Assisted fill isn’t switched on yet." : "Couldn’t run assisted fill.");
+      setAssistMsg(e instanceof AssistFillError && e.code === "deadline-exceeded"
+        ? "Took too long — enter these manually."
+        : "Couldn’t reach assisted fill — enter these manually.");
     } finally {
       setAssisting(false);
     }
@@ -90,38 +112,59 @@ export const HousekeepingBatch: React.FC<HousekeepingBatchProps> = ({ group, onC
   async function save() {
     if (saving) return;
     setSaving(true);
+    const nowIso = new Date().toISOString();
     const ok: string[] = [];
     const failed: string[] = [];
+    const prevs: { agentId: string; patch: Partial<Agent> }[] = [];
     for (const m of live) {
+      const id = rowId(m);
+      const v = (draft[id] ?? "").trim();
+      if (!v || !m.agentId) continue; // Save writes ONLY filled rows
+      const agent = agents.find((a) => a.id === m.agentId);
       try {
-        if (isClose) {
-          if (!toClose[m.queryId ?? ""]) continue;
-          await updateQueryStatus(m.queryId!, QueryStatus.NO_RESPONSE, "Marked as no response from the To-do board");
-        } else {
-          const v = (draft[m.agentId ?? ""] ?? "").trim();
-          if (!v) continue;
-          await updateAgent(m.agentId!, fieldPatch(v));
+        let patch = fieldPatch(id, v);
+        // Provenance persists ONLY when the found value is saved unedited — an edited value is the
+        // writer's own, so it stays provenance-free.
+        const f = found[id];
+        if (f && v === f.value) patch = withProvenance(patch, meta.field!, f, agent?.fieldSources, nowIso);
+        // Capture the previous values for the single "Undo all" (closest restorable values).
+        if (agent) {
+          const prev: Partial<Agent> = {};
+          if (rule === "dq_responseTime") { prev.responseTimeWeeks = agent.responseTimeWeeks ?? 0; prev.noResponseMeansNo = agent.noResponseMeansNo ?? false; }
+          else if (rule === "dq_materials") prev.materialsWanted = (agent.materialsWanted ?? []) as Agent["materialsWanted"];
+          else prev.mswlNotes = agent.mswlNotes ?? "";
+          if (patch.fieldSources) prev.fieldSources = agent.fieldSources ?? {};
+          prevs.push({ agentId: m.agentId, patch: prev });
         }
-        ok.push(memberKey(m));
+        await updateAgent(m.agentId, patch);
+        ok.push(id);
       } catch {
-        failed.push(memberKey(m));
+        failed.push(id);
       }
     }
     setSaving(false);
-    onToast(failed.length ? `Saved ${ok.length}; ${failed.length} failed — check those rows.` : ok.length ? `Saved ${ok.length}.` : "Nothing to save.");
+    const undo = prevs.length
+      ? { label: "Undo all", fn: async () => { for (const u of prevs) { try { await updateAgent(u.agentId, u.patch); } catch { /* best effort */ } } } }
+      : undefined;
+    if (failed.length) onToast(`Saved ${ok.length}; ${failed.length} failed — check those rows.`, undo);
+    else if (ok.length) onToast(`Saved ${ok.length}.`, undo);
+    else onToast("Nothing to save.");
     onClose();
   }
 
   function muteOne(m: HkMember) {
     if (m.agentId) upsertTaskFlag(flagKeyForTask("data_quality_poor", m.agentId), { snoozedUntil: MUTED_UNTIL });
-    else if (m.queryId) upsertTaskFlag(flagKeyForTask("no_response_close", m.queryId), { snoozedUntil: MUTED_UNTIL });
-    setMuted((s) => new Set(s).add(m.card.key));
-    onToast("Muted this one.");
+    setMutedLocal((s) => new Set(s).add(m.card.key));
+    onToast("Muted this one — the gap stays on the profile.");
+  }
+  function unmuteOne(agentId: string) {
+    upsertTaskFlag(flagKeyForTask("data_quality_poor", agentId), { snoozedUntil: null });
+    onToast("Unmuted — it’ll come back to the board.");
   }
   function muteRule() {
     const next = Array.from(new Set([...(currentUser?.mutedTaskRules ?? []), rule]));
     updateUserProfile({ mutedTaskRules: next });
-    onToast(`Stopped asking about ${meta.label.toLowerCase()}.`);
+    onToast(`Stopped asking about ${meta.label.toLowerCase()} — the gaps stay on the profiles. Unmute from the lane header.`);
     onClose();
   }
 
@@ -132,31 +175,72 @@ export const HousekeepingBatch: React.FC<HousekeepingBatchProps> = ({ group, onC
           <div>
             <div className="tdb-batch-eyebrow">Housekeeping · {meta.label}</div>
             <div className="tdb-batch-title">{meta.title(live.length)}</div>
+            <div className="tdb-batch-note">
+              Nothing here is required — fill what you know. Muting stops the reminder; the gap stays on the profile.
+              {mutedList.length > 0 && (
+                <button type="button" className="tdb-mutedlink" onClick={() => setShowMuted((s) => !s)}>
+                  {mutedList.length} muted — {showMuted ? "hide" : "show"}
+                </button>
+              )}
+            </div>
           </div>
+          <span className="tdb-batch-count">{filledCount} of {live.length} filled</span>
           <button type="button" className="tdb-drawer-x" onClick={onClose} aria-label="Close">✕</button>
         </div>
 
         <div className="tdb-batch-body">
+          {showMuted && mutedList.length > 0 && (
+            <div className="tdb-muted-sec">
+              {mutedList.map((mm) => (
+                <div key={mm.agentId} className="tdb-muted-row">
+                  <span className="tdb-muted-name">{mm.agentName}</span>
+                  <button type="button" className="tdb-batch-mute" onClick={() => unmuteOne(mm.agentId)}>Unmute</button>
+                </div>
+              ))}
+            </div>
+          )}
+
           {live.length === 0 ? (
             <p className="tdb-why">All sorted — nothing left in this pile.</p>
           ) : (
             live.map((m) => {
-              const id = m.agentId ?? m.queryId ?? m.card.key;
+              const id = rowId(m);
               const prov = m.agentId ? found[m.agentId] : undefined;
+              const filled = isFilled(m);
               return (
-                <div key={m.card.key} className="tdb-batch-row">
+                <div key={m.card.key} className={`tdb-batch-row${filled ? " filled" : ""}`}>
                   <div className="tdb-batch-who">
                     <span className="tdb-miniav hk">{m.card.initials}</span>
-                    <span className="tdb-batch-name">{m.agentName}</span>
-                    <button type="button" className="tdb-batch-mute" title="Mute just this one" onClick={() => muteOne(m)}>Mute</button>
+                    <div className="tdb-batch-id">
+                      <span className="tdb-batch-name">
+                        {m.agentName}
+                        {m.queried && <span className="tdb-pip" title="You’ve queried this agent" />}
+                      </span>
+                      {m.agency && <span className="tdb-batch-agency">{m.agency}</span>}
+                    </div>
+                    <button type="button" className="tdb-batch-skip" title="Skip this row for now" onClick={() => setSkipped((s) => new Set(s).add(id))}>✕</button>
+                    <button type="button" className="tdb-batch-mute" title="Stop asking about this one" onClick={() => muteOne(m)}>Mute</button>
                   </div>
 
-                  {isClose ? (
-                    <label className="tdb-tick"><input type="checkbox" checked={!!toClose[m.queryId ?? ""]} onChange={(e) => setToClose((p) => ({ ...p, [m.queryId!]: e.target.checked }))} />Close as no response</label>
-                  ) : rule === "dq_responseTime" ? (
-                    <div className="tdb-batch-field"><input type="number" min={1} placeholder="weeks" value={draft[id] ?? ""} onChange={(e) => setDraft((p) => ({ ...p, [id]: e.target.value }))} /><span className="tdb-batch-unit">weeks</span></div>
+                  {m.card.snoozes >= 2 && (
+                    <div className="tdb-batch-snz">
+                      Snoozed ×{m.card.snoozes} — stop asking about this one?
+                      <button type="button" className="tdb-batch-mute" onClick={() => muteOne(m)}>Stop asking</button>
+                    </div>
+                  )}
+
+                  {rule === "dq_responseTime" ? (
+                    <div className="tdb-batch-field">
+                      <span className="tdb-chips">
+                        {WEEK_CHIPS.map((w) => (
+                          <button key={w} type="button" className={`tdb-chip${draft[id] === String(w) ? " on" : ""}`} onClick={() => setDraft((p) => ({ ...p, [id]: String(w) }))}>{w}w</button>
+                        ))}
+                      </span>
+                      <input type="number" min={1} placeholder="other" value={WEEK_CHIPS.includes(Number(draft[id])) ? "" : draft[id] ?? ""} onChange={(e) => setDraft((p) => ({ ...p, [id]: e.target.value }))} />
+                      <label className="tdb-tick tdb-tick-inline"><input type="checkbox" checked={!!noMeansNo[id]} onChange={(e) => setNoMeansNo((p) => ({ ...p, [id]: e.target.checked }))} />No reply = no</label>
+                    </div>
                   ) : rule === "dq_materials" ? (
-                    <div className="tdb-ticks">{MATERIAL_OPTS.map((mat) => {
+                    <div className="tdb-ticks tdb-ticks-row">{MATERIAL_OPTS.map((mat) => {
                       const set = asSet(draft[id] ?? "");
                       return <label key={mat} className="tdb-tick"><input type="checkbox" checked={set.has(mat)} onChange={() => { set.has(mat) ? set.delete(mat) : set.add(mat); setDraft((p) => ({ ...p, [id]: Array.from(set).join(", ") })); }} />{mat}</label>;
                     })}</div>
@@ -164,7 +248,8 @@ export const HousekeepingBatch: React.FC<HousekeepingBatchProps> = ({ group, onC
                     <textarea className="tdb-batch-textarea" placeholder="What are they looking for?" value={draft[id] ?? ""} onChange={(e) => setDraft((p) => ({ ...p, [id]: e.target.value }))} />
                   )}
 
-                  {prov && <div className="tdb-batch-prov" title={prov.source}>✨ via web · {prov.source}<span className="tdb-batch-conf" aria-hidden>{confDot(prov.confidence)}</span></div>}
+                  {prov && <div className="tdb-batch-prov" title={prov.source}>✨ Found · {prov.source} · {shortDate(assistAt ?? new Date().toISOString())} — check before saving<span className="tdb-batch-conf" aria-hidden>{confDot(prov.confidence)}</span></div>}
+                  {!prov && m.agentId && notFound.has(m.agentId) && !filled && <div className="tdb-batch-nf">Not found — enter manually</div>}
                 </div>
               );
             })
@@ -174,13 +259,13 @@ export const HousekeepingBatch: React.FC<HousekeepingBatchProps> = ({ group, onC
         <div className="tdb-batch-f">
           {meta.assistable && (
             <button type="button" className="tdb-btn-sec tdb-assist" disabled={assisting || live.length === 0} onClick={runAssist}>
-              {assisting ? "Searching…" : pro ? "✨ Find these for me" : "✨ Find these for me (Pro)"}
+              {assisting ? "Searching…" : <>✨ Find these for me{!pro && <span className="tdb-propill">Pro</span>}</>}
             </button>
           )}
           {assistMsg && <span className="tdb-assist-msg">{assistMsg}</span>}
           <span className="tdb-sp" />
           <button type="button" className="tdb-batch-stop" onClick={muteRule}>Stop asking</button>
-          <button type="button" className="tdb-btn-pri" disabled={saving || pending === 0} onClick={save}>{isClose ? `Close ${pending || ""}`.trim() : `Save ${pending || ""}`.trim()}</button>
+          <button type="button" className="tdb-btn-pri" disabled={saving || filledCount === 0} onClick={save}>{`Save ${filledCount || ""}`.trim()}</button>
         </div>
       </div>
     </div>

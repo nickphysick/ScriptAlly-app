@@ -27,7 +27,7 @@ import { useScriptAllyDb } from "../../lib/db";
 import { assembleBoard, todaySplit, ribbonTiles, BoardCard } from "../../lib/todoBoard";
 import { flagKeyForTask } from "../../lib/taskFlags";
 import { choosePicks, rolledOverCards, todayProgress, MAX_TODAY } from "../../lib/todoWalk";
-import { groupHousekeeping, hkGapCount, HkGroup } from "../../lib/todoHousekeeping";
+import { groupHousekeeping, hkGapCount, HkGroup, HkRule, HK_RULES } from "../../lib/todoHousekeeping";
 import { QueryStatus } from "../../types";
 import { TaskDetail } from "./TaskDetail";
 import { Walkthrough } from "./Walkthrough";
@@ -50,13 +50,12 @@ const fmtTime = (ms?: number): string => {
   return `${h}:${String(d.getMinutes()).padStart(2, "0")}${ap}`;
 };
 
-// Per-rule blurb for the grouped housekeeping card (presentation copy — the rule catalogue itself
-// lives in todoHousekeeping.ts and is untouched by this presentation pass).
+// Per-rule blurb for the grouped housekeeping card — payoff-first copy (the rule catalogue itself
+// lives in todoHousekeeping.ts). Stale queries never group, so they carry no blurb here.
 const GROUP_BLURB: Record<string, string> = {
   dq_responseTime: "Without a reply window we can’t tell you when a nudge is fair — so they never surface in your chase list.",
   dq_materials: "We don’t know what to tell you to send — so your package check can’t run for them.",
   dq_mswl: "Their wish list is how we tell you who’s worth querying — worth most before you query.",
-  no_response_close: "Silent past their stated window. Closing keeps your response rate honest.",
 };
 
 /** One lane: coloured header band + a horizontal card scroller with an overflow fade + scroll-right
@@ -68,8 +67,9 @@ const Lane: React.FC<{
   isEmpty: boolean;
   onAdd?: () => void;
   emptyNode?: React.ReactNode;
+  strip?: React.ReactNode; // rendered between the header and the track (e.g. muted-rules recovery chips)
   children?: React.ReactNode;
-}> = ({ cls, label, count, isEmpty, onAdd, emptyNode, children }) => {
+}> = ({ cls, label, count, isEmpty, onAdd, emptyNode, strip, children }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [more, setMore] = useState(false);
   useLayoutEffect(() => {
@@ -92,6 +92,7 @@ const Lane: React.FC<{
         {onAdd && <button type="button" className="tdb-cadd" onClick={onAdd} aria-label="Add a note">＋</button>}
         {!isEmpty && more && <button type="button" className="tdb-chev" onClick={scrollRight} aria-label="Scroll right">›</button>}
       </div>
+      {strip}
       {isEmpty ? (
         <div className="tdb-laneempty">{emptyNode}</div>
       ) : (
@@ -107,9 +108,11 @@ export interface ToDoPageProps {
   onNavigate: (tab: string, subPageName?: string, opts?: { agentId?: string; manuscriptId?: string }) => void;
 }
 
+type ToastAction = { label: string; fn: () => void };
+
 export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
-  const { tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser, addUserTask, updateUserTask, upsertTaskFlag } = useScriptAllyDb();
-  const [toast, setToast] = useState<string | null>(null);
+  const { tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser, addUserTask, updateUserTask, upsertTaskFlag, updateUserProfile } = useScriptAllyDb();
+  const [toast, setToast] = useState<{ msg: string; action?: ToastAction } | null>(null);
   const [drawerCard, setDrawerCard] = useState<BoardCard | null>(null);
   const [rollDismissed, setRollDismissed] = useState(false);
   const [pulsing, setPulsing] = useState<string | null>(null);
@@ -126,17 +129,32 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [tasks, userTasks, queries, agents, manuscripts, taskFlags, today],
   );
-  // The Housekeeping lane renders GROUPED by rule (one card per rule); the flat board.hk still feeds
-  // Today's-list + Help-me-pick unchanged. Rule-muted groups drop out here too.
+  // The Housekeeping lane renders the dq rules GROUPED (one card per rule, queried-first members) +
+  // STALE queries as INDIVIDUAL cards (real one-off decisions, never batched). The flat board.hk
+  // still feeds Today's-list + Help-me-pick unchanged. Rule-muted groups drop out here too.
   const hkGroups = useMemo(
-    () => groupHousekeeping(board.hk, agents, currentUser?.mutedTaskRules),
-    [board.hk, agents, currentUser],
+    () => groupHousekeeping(board.hk, agents, currentUser?.mutedTaskRules, queries),
+    [board.hk, agents, currentUser, queries],
   );
+  const staleCards = useMemo(() => board.hk.filter((c) => c.taskType === "no_response_close"), [board.hk]);
+  const mutedRules = (currentUser?.mutedTaskRules ?? []).filter((r): r is HkRule => r in HK_RULES);
   // ONE counts object read by BOTH the ribbon tiles and the lane headers (equality by construction).
-  // Housekeeping = the gap count (12+9+4 = 25), never the pile count.
-  const tiles = ribbonTiles(board, hkGapCount(hkGroups));
+  // Housekeeping = the gap count + the individual stale cards (12+9 gaps + 4 stale = 25), never piles.
+  const tiles = ribbonTiles(board, hkGapCount(hkGroups) + staleCards.length);
 
-  const flash = (msg: string) => { setToast(msg); window.setTimeout(() => setToast((t) => (t === msg ? null : t)), 2600); };
+  const flash = (msg: string, action?: ToastAction) => {
+    const t = { msg, action };
+    setToast(t);
+    window.setTimeout(() => setToast((cur) => (cur === t ? null : cur)), action ? 6000 : 2600);
+  };
+  function unmuteRule(rule: HkRule) {
+    updateUserProfile({ mutedTaskRules: (currentUser?.mutedTaskRules ?? []).filter((r) => r !== rule) });
+    flash("Unmuted — those reminders are back.");
+  }
+  function muteRuleFromCard(g: HkGroup) {
+    updateUserProfile({ mutedTaskRules: Array.from(new Set([...(currentUser?.mutedTaskRules ?? []), g.rule])) });
+    flash(`Stopped asking about ${g.meta.label.toLowerCase()} — the gaps stay on the profiles. Unmute from the lane header.`);
+  }
 
   // Today's list: committed band (committedDate === today, the 5-cap set) + done band (the cleared
   // union, uncapped). Rolled-over commitments (a prior day) surface once in the gold Keep/Clear bar.
@@ -218,8 +236,25 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <Lane cls="do" label="Urgent" count={tiles.urgent} isEmpty={board.do.length === 0} emptyNode={<span className="e">Nothing needs you right now.</span>}>
             {board.do.map(renderCard)}
           </Lane>
-          <Lane cls="hk" label="Housekeeping" count={tiles.housekeeping} isEmpty={hkGroups.length === 0} emptyNode={<span className="e">Nothing to tidy.</span>}>
+          <Lane
+            cls="hk"
+            label="Housekeeping"
+            count={tiles.housekeeping}
+            isEmpty={hkGroups.length === 0 && staleCards.length === 0}
+            emptyNode={<span className="e">Nothing to tidy.</span>}
+            strip={mutedRules.length > 0 && (
+              <div className="tdb-rulestrip">
+                <span className="tdb-rulestrip-l">Muted:</span>
+                {mutedRules.map((r) => (
+                  <button key={r} type="button" className="tdb-rulechip" title="Unmute — bring these reminders back" onClick={() => unmuteRule(r)}>
+                    {HK_RULES[r].label} ✕
+                  </button>
+                ))}
+              </div>
+            )}
+          >
             {hkGroups.map(renderGroupCard)}
+            {staleCards.map(renderCard)}
           </Lane>
           <Lane cls="nt" label="Notes to self" count={tiles.notes} onAdd={addTask} isEmpty={board.nt.length === 0}
             emptyNode={<><span className="e">Nothing jotted yet.</span><button type="button" className="tdb-ghost" onClick={addTask}>＋ Add a note</button></>}>
@@ -245,7 +280,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       )}
       {todayOpen && renderTodayPop()}
 
-      {toast && <div className="tdb-toast">{toast}</div>}
+      {toast && (
+        <div className="tdb-toast">
+          {toast.msg}
+          {toast.action && <button type="button" className="tdb-toast-act" onClick={() => { toast.action!.fn(); setToast(null); }}>{toast.action.label}</button>}
+        </div>
+      )}
       {walk && <Walkthrough title={walk.title} cards={walk.cards} onClose={() => setWalk(null)} onNavigate={onNavigate} onToast={flash} />}
       {batchGroup && <HousekeepingBatch group={batchGroup} onClose={() => setBatchGroup(null)} onToast={flash} onNavigate={onNavigate} />}
       {drawerCard && (() => {
@@ -348,20 +388,20 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     );
   }
 
-  // ── grouped housekeeping card (fixed height, clip-safe; big count + blurb + monogram stack) ──
+  // ── grouped housekeeping card (dq rules only — stale renders individually; fixed height, clip-safe) ──
   function renderGroupCard(g: HkGroup) {
     const faces = g.members.slice(0, 5);
     const suffix = g.meta.title(g.members.length).replace(/^\d+\s+/, "");
-    const isClose = g.rule === "no_response_close";
     return (
-      <div key={g.rule} className={`tdb-gcard${isClose ? " close" : ""}`} onClick={() => setBatchGroup(g)}>
+      <div key={g.rule} className="tdb-gcard" onClick={() => setBatchGroup(g)}>
         <div className="tdb-gn">{g.members.length}</div>
         <div className="tdb-gt">{suffix}</div>
         <div className="tdb-gs">{GROUP_BLURB[g.rule] ?? ""}</div>
         <div className="tdb-gstack">
           {faces.map((m) => <span key={m.card.key} className="tdb-gsav" title={m.agentName}>{m.card.initials}</span>)}
           {g.members.length > faces.length && <span className="tdb-gmore">+{g.members.length - faces.length}</span>}
-          <span className="tdb-gfix">{isClose ? "Review →" : "Fix together →"}</span>
+          <span className="tdb-gfix">Fix together →</span>
+          <button type="button" className="tdb-gnever" title="Stop asking about these — the gaps stay on the profiles" onClick={(e) => { e.stopPropagation(); muteRuleFromCard(g); }}>Never</button>
         </div>
       </div>
     );

@@ -12,20 +12,23 @@
  * error the quiet "unavailable" state understands, and client-side re-validation (drop malformed,
  * never throw). `isProUser` is REUSED from suggestComps — one Pro predicate, never re-defined.
  *
- * ⚠️ The callable is BUILT (functions/src/assistAgentData.ts) but NOT DEPLOYED — a new function can't
- * exist server-side until Nick deploys it (prod is Nick-only), and the ANTHROPIC_API_KEY rotation is
- * unverified. So ASSIST_LIVE defaults OFF: a Pro user's click reaches a graceful "not switched on
- * yet" state, never a fabricated value. Flip ASSIST_LIVE (or set window.__SA_ASSIST_LIVE) once the
- * function is deployed; `__SA_ASSIST_FILL_MOCK` supplies canned results for a dev walk-through.
+ * LIVE (P5 re-issue, 16 Jul — Nick's pack asserts Blaze + the API key are in place, superseding the
+ * earlier hold): ASSIST_LIVE defaults ON and Pro clicks call the real `assistAgentData` callable.
+ * The function code ships in functions/src/assistAgentData.ts but ITS DEPLOY IS NICK'S
+ * (`firebase deploy --only functions:assistAgentData`) — until it lands, calls fail fast into the
+ * graceful "couldn't reach" state (the manual path is never blocked). A hang can't block either:
+ * the call races a timeout. `window.__SA_ASSIST_LIVE = false` force-disables;
+ * `__SA_ASSIST_FILL_MOCK` supplies canned results for a dev walk-through.
  */
 import { getFunctions, httpsCallable } from "firebase/functions";
+import { Agent } from "../types";
 import { HkRule } from "./todoHousekeeping";
 
 // Re-export the single Pro predicate so callers import Pro-gating from one obvious place.
 export { isProUser } from "./suggestComps";
 
-/** Live discovery stays dark until `assistAgentData` is deployed. Default OFF. */
-export const ASSIST_LIVE = false;
+/** Live by default (see header). The window override wins in both directions. */
+export const ASSIST_LIVE = true;
 
 /** Effective flag: the window/global override wins (dev/preview), else the compile-time default.
  *  Reads globalThis (not `window`) so it's safe in the node test env too. */
@@ -83,15 +86,50 @@ export function validateAssistPayload(data: unknown): AssistFound[] {
   return out;
 }
 
-export async function fetchAssistedFill(input: AssistFillInput): Promise<AssistFound[]> {
+/** Default look-up deadline — partial results are fine, a hang is not (never blocks the manual path). */
+export const ASSIST_TIMEOUT_MS = 25_000;
+
+/** Race a promise against a deadline; on expiry throw the typed error the UI's quiet state understands. */
+export async function raceTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      p,
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(new AssistFillError("deadline-exceeded", "Assisted fill took too long — enter the rest manually.")), ms);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+/**
+ * Attach provenance to an agent patch — ONLY when a found value is being saved (the caller checks
+ * the draft still equals the found value; an edited value is the writer's, not the look-up's).
+ * Merges into the agent's existing fieldSources map so other fields' provenance survives.
+ */
+export function withProvenance(
+  patch: Partial<Agent>,
+  field: string,
+  found: AssistFound | undefined,
+  existingSources: Agent["fieldSources"],
+  nowIso: string,
+): Partial<Agent> {
+  if (!found) return patch;
+  return { ...patch, fieldSources: { ...(existingSources ?? {}), [field]: { source: found.source, foundAt: nowIso } } };
+}
+
+export async function fetchAssistedFill(input: AssistFillInput, opts?: { timeoutMs?: number }): Promise<AssistFound[]> {
   const mock = (globalThis as { __SA_ASSIST_FILL_MOCK?: unknown }).__SA_ASSIST_FILL_MOCK;
   if (mock) return validateAssistPayload(mock);
-  if (!assistLive()) throw new AssistFillError("unavailable", "Assisted fill isn’t switched on yet.");
+  if (!assistLive()) throw new AssistFillError("unavailable", "Assisted fill isn’t switched on right now.");
   const fn = httpsCallable(getFunctions(undefined, "europe-west2"), "assistAgentData");
   try {
-    const res = await fn(input);
+    const res = await raceTimeout(fn(input), opts?.timeoutMs ?? ASSIST_TIMEOUT_MS);
     return validateAssistPayload(res.data);
   } catch (e: unknown) {
+    if (e instanceof AssistFillError) throw e; // the timeout, already typed
     const err = e as { code?: string; message?: string };
     const code = String(err?.code || "").replace(/^functions\//, "") || "unknown";
     throw new AssistFillError(code, err?.message || "Couldn’t reach assisted fill.");

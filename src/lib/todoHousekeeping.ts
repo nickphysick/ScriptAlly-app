@@ -20,8 +20,9 @@
  *
  * Nothing here is stored; unit-locked in todoHousekeeping.test.ts.
  */
-import { Agent } from "../types";
+import { Agent, Query, TaskFlag } from "../types";
 import { AgentDataNeed, agentDataQualityNeeds, AgentDataQualityInput } from "./agentDataQuality";
+import { isFlagSuppressing } from "./taskFlags";
 import { BoardCard } from "./todoBoard";
 
 /** A fixable housekeeping gap. The three `dq_*` map 1:1 to an AgentDataNeed; the fourth is a query decision. */
@@ -121,8 +122,9 @@ export function taskSurvivesMute(taskType: string, agent: Agent | undefined, mut
 export interface HkMember {
   card: BoardCard;
   agentName: string;
-  agentId?: string; // set for dq_* rules (the write target)
-  queryId?: string; // set for no_response_close (the write target)
+  agency?: string; // batch-row second line
+  agentId?: string; // the write target (dq_* rules)
+  queried: boolean; // has ≥1 query — sorts first in a group (burgundy pip)
 }
 
 export interface HkGroup {
@@ -132,11 +134,14 @@ export interface HkGroup {
 }
 
 /**
- * Expand the flat per-record housekeeping cards into per-RULE groups. One data-quality agent-card
- * joins one group per un-muted gap it has (so a triple-gap agent appears in three groups); one
- * no_response card joins the stale-query group. Muted rules produce no group. Order is HK_RULE_ORDER.
+ * Expand the flat per-record housekeeping cards into per-RULE groups — DATA-QUALITY RULES ONLY. One
+ * agent-card joins one group per un-muted gap it has (a triple-gap agent appears in three groups).
+ * `no_response_close` (stale) is DELIBERATELY NOT GROUPED — closing a query is a real one-off
+ * decision, never batched; stale cards render individually in the lane. Muted rules produce no
+ * group. Every agent is included, queried or not (good data on an unqueried agent decides whether
+ * to query them); QUERIED agents sort first within each group (stable). Order is HK_RULE_ORDER.
  */
-export function groupHousekeeping(hkCards: BoardCard[], agents: Agent[], muted?: string[] | null): HkGroup[] {
+export function groupHousekeeping(hkCards: BoardCard[], agents: Agent[], muted?: string[] | null, queries?: Query[]): HkGroup[] {
   const byRule = new Map<HkRule, HkMember[]>();
   const push = (rule: HkRule, m: HkMember) => {
     const list = byRule.get(rule) ?? [];
@@ -144,27 +149,59 @@ export function groupHousekeeping(hkCards: BoardCard[], agents: Agent[], muted?:
     byRule.set(rule, list);
   };
 
+  const queriedIds = new Set((queries ?? []).map((q) => q.agentId));
   for (const card of hkCards) {
-    if (card.taskType === "data_quality_poor") {
-      const agent = agents.find((a) => a.id === card.relatedRecordId);
-      if (!agent) continue;
-      for (const need of visibleAgentNeeds(agent, muted)) {
-        push(ruleForNeed(need), { card, agentName: card.who || agent.name || "an agent", agentId: agent.id });
-      }
-    } else if (card.taskType === "no_response_close") {
-      if (isRuleMuted("no_response_close", muted)) continue;
-      push("no_response_close", { card, agentName: card.who || "an agent", queryId: card.relatedRecordId });
+    if (card.taskType !== "data_quality_poor") continue; // stale (no_response_close) stays individual
+    const agent = agents.find((a) => a.id === card.relatedRecordId);
+    if (!agent) continue;
+    for (const need of visibleAgentNeeds(agent, muted)) {
+      push(ruleForNeed(need), {
+        card,
+        agentName: card.who || agent.name || "an agent",
+        ...(agent.agency ? { agency: agent.agency } : {}),
+        agentId: agent.id,
+        queried: queriedIds.has(agent.id),
+      });
     }
   }
 
-  return HK_RULE_ORDER.filter((r) => byRule.has(r)).map((r) => ({ rule: r, meta: HK_RULES[r], members: byRule.get(r)! }));
+  return HK_RULE_ORDER.filter((r) => byRule.has(r)).map((r) => ({
+    rule: r,
+    meta: HK_RULES[r],
+    members: byRule.get(r)!.slice().sort((a, b) => Number(b.queried) - Number(a.queried)), // queried-first, stable
+  }));
 }
 
 /**
  * The total GAP count across groups — the number the ribbon tile + Housekeeping lane badge show
- * (the underlying workload: sum of members, never the pile count; the mockup's 25 = 12 + 9 + 4).
- * Muted rules/needs are already excluded by groupHousekeeping, so this is the un-muted gap count.
+ * (the underlying workload: sum of members, never the pile count). Stale queries left grouping
+ * (individual cards), so the lane/tile total = hkGapCount(groups) + the stale-card count — the page
+ * adds them; the mockup's 25 = 12 + 9 (gaps) + 4 (stale).
  */
 export function hkGapCount(groups: HkGroup[]): number {
   return groups.reduce((n, g) => n + g.members.length, 0);
+}
+
+export interface MutedMember {
+  agentId: string;
+  agentName: string;
+}
+
+/**
+ * Item-MUTED members for one data-quality rule — agents that still have the gap but whose
+ * `data_quality_poor` flag is snoozed (incl. the far-future indefinite mute), so the engine filtered
+ * them out of the live board. Feeds the batch drawer's "n muted — show" link; Unmute clears the
+ * snooze (`upsertTaskFlag(…, { snoozedUntil: null })`) and the engine resurfaces them. Muting never
+ * deleted anything — the gap was on the profile all along.
+ */
+export function mutedMembersForRule(rule: HkRule, agents: Agent[], taskFlags: TaskFlag[], now: number): MutedMember[] {
+  const need = HK_RULES[rule].need;
+  if (!need) return []; // stale is never batched, so it has no batch-drawer muted list
+  return agents
+    .filter((a) => agentDataQualityNeeds(a).includes(need))
+    .filter((a) => {
+      const f = taskFlags.find((fl) => fl.taskType === "data_quality_poor" && fl.agentId === a.id);
+      return !!f && isFlagSuppressing(f, now);
+    })
+    .map((a) => ({ agentId: a.id, agentName: a.name || a.agency || "an agent" }));
 }

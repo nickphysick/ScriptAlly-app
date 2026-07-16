@@ -12,8 +12,10 @@ import {
   taskSurvivesMute,
   groupHousekeeping,
   hkGapCount,
+  mutedMembersForRule,
 } from "./todoHousekeeping";
-import { Agent } from "../types";
+import { MUTED_UNTIL } from "./taskFlags";
+import { Agent, Query, TaskFlag } from "../types";
 import { BoardCard } from "./todoBoard";
 
 const agent = (over: Partial<Agent>): Agent =>
@@ -119,10 +121,10 @@ describe("taskSurvivesMute", () => {
   });
 });
 
-describe("groupHousekeeping", () => {
+describe("groupHousekeeping — dq rules only; stale stays individual", () => {
   const agents = [
-    agent({ id: "a1", name: "Ann", responseTimeWeeks: 0, materialsWanted: [], mswlNotes: "" }), // all three
-    agent({ id: "a2", name: "Bo", responseTimeWeeks: 0, materialsWanted: ["Query Letter"], mswlNotes: "has one" }), // only reply window
+    agent({ id: "a1", name: "Ann", agency: "Ann Lit", responseTimeWeeks: 0, materialsWanted: [], mswlNotes: "" }), // all three
+    agent({ id: "a2", name: "Bo", agency: "Bo Co", responseTimeWeeks: 0, materialsWanted: ["Query Letter"], mswlNotes: "has one" }), // only reply window
   ];
   const cards = [
     hkCard({ key: "task-dq-a1", relatedRecordId: "a1", who: "Ann" }),
@@ -137,23 +139,29 @@ describe("groupHousekeeping", () => {
     expect(byRule.dq_responseTime).toEqual(["Ann", "Bo"]);
     expect(byRule.dq_materials).toEqual(["Ann"]);
     expect(byRule.dq_mswl).toEqual(["Ann"]);
-    expect(byRule.no_response_close).toEqual(["Cy"]);
   });
-  it("orders groups by HK_RULE_ORDER", () => {
+  it("NEVER groups stale queries — closing is a one-off decision, not a batch", () => {
     const groups = groupHousekeeping(cards, agents);
-    expect(groups.map((g) => g.rule)).toEqual(["no_response_close", "dq_responseTime", "dq_materials", "dq_mswl"]);
+    expect(groups.some((g) => g.rule === "no_response_close")).toBe(false);
+    expect(groups.map((g) => g.rule)).toEqual(["dq_responseTime", "dq_materials", "dq_mswl"]);
   });
-  it("sets the write target: agentId for dq, queryId for no_response", () => {
+  it("QUERIED agents sort first within a group (stable)", () => {
+    // Bo has a query; Ann doesn't — Bo leads the reply-window group despite Ann's card coming first.
+    const queries = [{ id: "q1", agentId: "a2" } as Query];
+    const groups = groupHousekeeping(cards, agents, undefined, queries);
+    const rt = groups.find((g) => g.rule === "dq_responseTime")!;
+    expect(rt.members.map((m) => m.agentName)).toEqual(["Bo", "Ann"]);
+    expect(rt.members[0].queried).toBe(true);
+    expect(rt.members[1].queried).toBe(false);
+  });
+  it("carries the agency for the batch row + the agentId write target", () => {
     const groups = groupHousekeeping(cards, agents);
-    const dq = groups.find((g) => g.rule === "dq_responseTime")!;
-    expect(dq.members[0].agentId).toBe("a1");
-    expect(dq.members[0].queryId).toBeUndefined();
-    const nrc = groups.find((g) => g.rule === "no_response_close")!;
-    expect(nrc.members[0].queryId).toBe("q9");
-    expect(nrc.members[0].agentId).toBeUndefined();
+    const rt = groups.find((g) => g.rule === "dq_responseTime")!;
+    expect(rt.members[0].agentId).toBe("a1");
+    expect(rt.members[0].agency).toBe("Ann Lit");
   });
   it("a muted rule produces no group", () => {
-    const groups = groupHousekeeping(cards, agents, ["dq_mswl", "no_response_close"]);
+    const groups = groupHousekeeping(cards, agents, ["dq_mswl"]);
     expect(groups.map((g) => g.rule)).toEqual(["dq_responseTime", "dq_materials"]);
   });
   it("skips a card whose agent is missing", () => {
@@ -162,7 +170,7 @@ describe("groupHousekeeping", () => {
   });
 });
 
-describe("hkGapCount — the ribbon/lane number is gaps, not piles", () => {
+describe("hkGapCount — the ribbon/lane number is gaps, not piles (stale added separately by the page)", () => {
   const agents2 = [
     agent({ id: "a1", name: "Ann", responseTimeWeeks: 0, materialsWanted: [], mswlNotes: "" }), // 3 gaps
     agent({ id: "a2", name: "Bo", responseTimeWeeks: 0, materialsWanted: ["Query Letter"], mswlNotes: "has one" }), // 1 gap
@@ -170,18 +178,46 @@ describe("hkGapCount — the ribbon/lane number is gaps, not piles", () => {
   const cards = [
     hkCard({ key: "task-dq-a1", relatedRecordId: "a1", who: "Ann" }),
     hkCard({ key: "task-dq-a2", relatedRecordId: "a2", who: "Bo" }),
-    hkCard({ key: "task-nrc-q9", taskType: "no_response_close", relatedRecordId: "q9", who: "Cy", hk: false }), // 1 gap
+    hkCard({ key: "task-nrc-q9", taskType: "no_response_close", relatedRecordId: "q9", who: "Cy", hk: false }), // individual, NOT in groups
   ];
 
-  it("sums members across groups (Ann 3 + Bo 1 + stale 1 = 5, over 4 piles... 4 groups)", () => {
+  it("sums dq members across groups (Ann 3 + Bo 1 = 4 gaps over 3 piles; stale excluded)", () => {
     const groups = groupHousekeeping(cards, agents2);
-    expect(groups.length).toBe(4); // piles
-    expect(hkGapCount(groups)).toBe(5); // gaps
+    expect(groups.length).toBe(3); // piles
+    expect(hkGapCount(groups)).toBe(4); // gaps
   });
 
   it("muted rules reduce the gap count (already excluded by grouping)", () => {
-    expect(hkGapCount(groupHousekeeping(cards, agents2, ["dq_mswl"]))).toBe(4);
-    expect(hkGapCount(groupHousekeeping(cards, agents2, ["no_response_close", "dq_responseTime"]))).toBe(2);
+    expect(hkGapCount(groupHousekeeping(cards, agents2, ["dq_mswl"]))).toBe(3);
+    expect(hkGapCount(groupHousekeeping(cards, agents2, ["dq_responseTime"]))).toBe(2);
     expect(hkGapCount([])).toBe(0);
+  });
+});
+
+describe("mutedMembersForRule — item-muted agents listed for the 'n muted — show' link", () => {
+  const NOW = Date.parse("2026-07-16T12:00:00Z");
+  const agents3 = [
+    agent({ id: "a1", name: "Ann", responseTimeWeeks: 0, materialsWanted: [], mswlNotes: "" }),
+    agent({ id: "a2", name: "Bo", responseTimeWeeks: 0, materialsWanted: ["Query Letter"], mswlNotes: "has one" }),
+  ];
+  const mutedFlag: TaskFlag = { id: "f1", userId: "u", taskType: "data_quality_poor", agentId: "a1", snoozeCount: 1, snoozedUntil: MUTED_UNTIL };
+
+  it("lists an item-muted agent that still has the gap", () => {
+    const out = mutedMembersForRule("dq_responseTime", agents3, [mutedFlag], NOW);
+    expect(out).toEqual([{ agentId: "a1", agentName: "Ann" }]);
+  });
+  it("an un-muted agent is not listed (it's live on the board instead)", () => {
+    expect(mutedMembersForRule("dq_responseTime", agents3, [], NOW)).toEqual([]);
+  });
+  it("an expired snooze no longer counts as muted", () => {
+    const expired: TaskFlag = { ...mutedFlag, snoozedUntil: "2026-07-01T00:00:00.000Z" };
+    expect(mutedMembersForRule("dq_responseTime", agents3, [expired], NOW)).toEqual([]);
+  });
+  it("only lists agents with THAT rule's gap; stale has no batch muted list", () => {
+    expect(mutedMembersForRule("dq_materials", agents3, [mutedFlag], NOW)).toEqual([{ agentId: "a1", agentName: "Ann" }]);
+    // Bo has materials → not listed even if muted
+    const boMuted: TaskFlag = { ...mutedFlag, id: "f2", agentId: "a2" };
+    expect(mutedMembersForRule("dq_materials", agents3, [boMuted], NOW)).toEqual([]);
+    expect(mutedMembersForRule("no_response_close", agents3, [mutedFlag], NOW)).toEqual([]);
   });
 });

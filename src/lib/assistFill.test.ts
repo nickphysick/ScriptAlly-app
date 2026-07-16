@@ -8,8 +8,11 @@ import {
   assistLive,
   validateAssistPayload,
   fetchAssistedFill,
+  raceTimeout,
+  withProvenance,
   isProUser,
   AssistFillError,
+  AssistFound,
 } from "./assistFill";
 import { UserPlan } from "../types";
 
@@ -24,19 +27,19 @@ afterEach(() => {
 });
 
 describe("assistLive flag", () => {
-  it("defaults OFF (function undeployed)", () => {
-    expect(ASSIST_LIVE).toBe(false);
-    expect(assistLive()).toBe(false);
+  it("defaults ON (P5 re-issue: Blaze + API key in place; the function deploy is Nick's)", () => {
+    expect(ASSIST_LIVE).toBe(true);
+    expect(assistLive()).toBe(true);
   });
   it("honours the global override in both directions", () => {
-    G.__SA_ASSIST_LIVE = true;
-    expect(assistLive()).toBe(true);
     G.__SA_ASSIST_LIVE = false;
     expect(assistLive()).toBe(false);
+    G.__SA_ASSIST_LIVE = true;
+    expect(assistLive()).toBe(true);
   });
 });
 
-describe("isProUser (re-exported, one predicate)", () => {
+describe("isProUser (re-exported, one predicate — the free→gated / Pro→live fork)", () => {
   it("gates on the Pro plan", () => {
     expect(isProUser({ plan: UserPlan.PRO })).toBe(true);
     expect(isProUser({ plan: UserPlan.FREE })).toBe(false);
@@ -82,12 +85,49 @@ describe("fetchAssistedFill", () => {
     const out = await fetchAssistedFill({ rule: "dq_responseTime", agents: [{ agentId: "a1", name: "Jo" }] });
     expect(out).toEqual([{ agentId: "a1", value: "8", source: "MSWL" }]);
   });
-  it("throws a graceful unavailable when not live and no mock", async () => {
-    await expect(
-      fetchAssistedFill({ rule: "dq_mswl", agents: [{ agentId: "a1", name: "Jo" }] }),
-    ).rejects.toBeInstanceOf(AssistFillError);
+  it("throws the graceful unavailable when force-disabled and no mock", async () => {
+    G.__SA_ASSIST_LIVE = false;
     await expect(
       fetchAssistedFill({ rule: "dq_mswl", agents: [{ agentId: "a1", name: "Jo" }] }),
     ).rejects.toMatchObject({ code: "unavailable" });
+  });
+});
+
+describe("raceTimeout — a hang never blocks the manual path", () => {
+  it("passes a resolving promise through", async () => {
+    await expect(raceTimeout(Promise.resolve("ok"), 1000)).resolves.toBe("ok");
+  });
+  it("throws the typed deadline error when the promise hangs", async () => {
+    const hang = new Promise<never>(() => {});
+    const p = raceTimeout(hang, 10);
+    await expect(p).rejects.toBeInstanceOf(AssistFillError);
+    await expect(p).rejects.toMatchObject({ code: "deadline-exceeded" });
+  });
+  it("propagates the underlying rejection unchanged", async () => {
+    await expect(raceTimeout(Promise.reject(new Error("boom")), 1000)).rejects.toThrow("boom");
+  });
+});
+
+describe("withProvenance — a found fact is never indistinguishable from a verified one", () => {
+  const found: AssistFound = { agentId: "a1", value: "6", source: "agency page", confidence: "high" };
+
+  it("attaches {source, foundAt} keyed by the field", () => {
+    const out = withProvenance({ responseTimeWeeks: 6 }, "responseTimeWeeks", found, undefined, "2026-07-16T10:00:00.000Z");
+    expect(out).toEqual({
+      responseTimeWeeks: 6,
+      fieldSources: { responseTimeWeeks: { source: "agency page", foundAt: "2026-07-16T10:00:00.000Z" } },
+    });
+  });
+  it("merges into existing provenance (other fields survive)", () => {
+    const existing = { mswlNotes: { source: "MSWL", foundAt: "2026-07-01T00:00:00.000Z" } };
+    const out = withProvenance({ responseTimeWeeks: 6 }, "responseTimeWeeks", found, existing, "2026-07-16T10:00:00.000Z");
+    expect(out.fieldSources).toEqual({
+      mswlNotes: { source: "MSWL", foundAt: "2026-07-01T00:00:00.000Z" },
+      responseTimeWeeks: { source: "agency page", foundAt: "2026-07-16T10:00:00.000Z" },
+    });
+  });
+  it("returns the patch untouched when there is no found value (manual entry stays provenance-free)", () => {
+    const patch = { mswlNotes: "typed by hand" };
+    expect(withProvenance(patch, "mswlNotes", undefined, undefined, "2026-07-16T10:00:00.000Z")).toBe(patch);
   });
 });

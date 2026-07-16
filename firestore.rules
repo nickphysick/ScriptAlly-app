@@ -183,7 +183,10 @@ service cloud.firestore {
         && (!data.keys().hasAll(['socials']) || (data.socials is list && data.socials.size() <= 30))
         && (!data.keys().hasAll(['importedNeedsReview']) || data.importedNeedsReview is bool)
         && (!data.keys().hasAll(['setAside']) || data.setAside is bool)
-        && (!data.keys().hasAll(['pinned']) || data.pinned is bool);
+        && (!data.keys().hasAll(['pinned']) || data.pinned is bool)
+        // Assisted-fill provenance — a small map keyed by agent field name ({source, foundAt} per
+        // entry). Written only when a found value is saved unedited (To-do housekeeping batch).
+        && (!data.keys().hasAll(['fieldSources']) || (data.fieldSources is map && data.fieldSources.size() <= 12));
     }
 
     // Country allowlist for agent/communityAgent `country` fields. Three tolerated shapes:
@@ -512,7 +515,7 @@ service cloud.firestore {
           incoming().diff(existing()).affectedKeys().hasOnly([
             'name', 'agency', 'email', 'website', 'country', 'city', 'twitter', 'bluesky', 'instagram', 'socials', 'genres', 'mswlNotes',
             'starRating', 'submissionStatus', 'responseTimeWeeks', 'noResponseMeansNo', 'submissionMethod',
-            'materialsWanted', 'lastCheckedDate', 'notes', 'agentNotes', 'requeryPreference', 'importedNeedsReview', 'setAside', 'pinned'
+            'materialsWanted', 'lastCheckedDate', 'notes', 'agentNotes', 'requeryPreference', 'importedNeedsReview', 'setAside', 'pinned', 'fieldSources'
           ])
         );
 

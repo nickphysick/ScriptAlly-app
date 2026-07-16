@@ -93,18 +93,21 @@
 /* ── grouped housekeeping card (fixed height, clip-safe: big count + blurb clip; stack + fix pinned) ── */
 .tdb-gcard { flex: none; width: 322px; height: 174px; background: var(--panel); border: 1px solid var(--gold-b); border-radius: var(--r-md); padding: 14px 15px; box-shadow: var(--sh-1); cursor: pointer; transition: border-color 0.15s; display: flex; flex-direction: column; overflow: hidden; }
 .tdb-gcard:hover { border-color: var(--gold-i); }
-.tdb-gcard.close { border-color: var(--pink-b); }
-.tdb-gcard.close:hover { border-color: var(--pink-i); }
 .tdb-gn { flex: none; font-family: var(--f12-serif); font-size: 29px; font-weight: 600; color: var(--gold-i); line-height: 1; }
-.tdb-gcard.close .tdb-gn { color: var(--pink-i); }
 .tdb-gt { flex: none; font-weight: 600; font-size: 13.5px; margin-top: 5px; line-height: 1.3; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .tdb-gs { flex: 1 1 auto; min-height: 0; font-size: 12px; color: var(--muted); margin-top: 5px; line-height: 1.45; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .tdb-gstack { flex: none; display: flex; align-items: center; margin-top: 9px; padding-top: 10px; border-top: 1px solid var(--hairline); }
 .tdb-gsav { width: 21px; height: 21px; border-radius: 50%; background: var(--gold-t); border: 1.5px solid var(--panel); display: flex; align-items: center; justify-content: center; font-family: var(--f12-mono); font-size: 7.5px; font-weight: 600; color: var(--gold-i); margin-right: -6px; flex: none; }
-.tdb-gcard.close .tdb-gsav { background: var(--pink-t); color: var(--pink-i); }
 .tdb-gmore { font-family: var(--f12-mono); font-size: 9px; color: var(--faint); margin-left: 12px; }
 .tdb-gfix { margin-left: auto; font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--gold-i); }
-.tdb-gcard.close .tdb-gfix { color: var(--pink-i); }
+.tdb-gnever { margin-left: 10px; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--faint); flex: none; }
+.tdb-gnever:hover { color: var(--ink); }
+
+/* muted-rules recovery strip (between the Housekeeping lane header and its cards) */
+.tdb-rulestrip { display: flex; align-items: center; gap: 7px; padding: 7px 14px; border-bottom: 1px solid var(--hairline); background: var(--paper); flex-wrap: wrap; }
+.tdb-rulestrip-l { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--faint); }
+.tdb-rulechip { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--gold-i); background: var(--gold-t); border: 1px solid var(--gold-b); border-radius: 99px; padding: 3px 9px; }
+.tdb-rulechip:hover { border-color: var(--gold-i); }
 
 /* ── Today's list — corner FAB (collapsed) ── */
 /* right:70 sits LEFT of the AppShell's global help "?" (fixed bottom:20 right:20, 38px, z-30). */
@@ -154,8 +157,10 @@
 .tdb-worklist:hover:not(:disabled) { background: var(--pink-btn-h); }
 .tdb-worklist:disabled { opacity: 0.4; cursor: default; }
 
-/* ── toast ── */
-.tdb-toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 60; background: var(--ink); color: var(--panel); font-size: 12.5px; padding: 10px 16px; border-radius: var(--r-md); box-shadow: var(--sh-3); }
+/* ── toast (optionally carries one action, e.g. "Undo all") ── */
+.tdb-toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 60; background: var(--ink); color: var(--panel); font-size: 12.5px; padding: 10px 16px; border-radius: var(--r-md); box-shadow: var(--sh-3); display: flex; align-items: center; gap: 12px; max-width: min(560px, 90vw); }
+.tdb-toast-act { font-family: var(--f12-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--panel); border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 99px; padding: 4px 11px; white-space: nowrap; }
+.tdb-toast-act:hover { background: rgba(255, 255, 255, 0.14); }
 
 /* ── drawer (TaskDetail) ── */
 .tdb-scrim { position: fixed; inset: 0; z-index: 50; background: rgba(30, 26, 22, 0.28); display: flex; justify-content: flex-end; }
@@ -233,11 +238,34 @@
 .tdb-batch-h > div:first-child { flex: 1; }
 .tdb-batch-eyebrow { font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--faint); }
 .tdb-batch-title { font-family: var(--f12-serif); font-size: 19px; font-weight: 600; margin-top: 3px; }
+.tdb-batch-note { font-size: 11.5px; color: var(--muted); margin-top: 5px; line-height: 1.5; }
+.tdb-mutedlink { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--gold-i); margin-left: 8px; text-decoration: underline; text-underline-offset: 2px; }
+.tdb-mutedlink:hover { color: var(--ink); }
+.tdb-batch-count { font-family: var(--f12-mono); font-size: 8.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); background: var(--paper); border: 1px solid var(--hairline); border-radius: 99px; padding: 3px 9px; white-space: nowrap; margin-top: 3px; }
 .tdb-batch-body { padding: 8px 20px; overflow-y: auto; flex: 1; min-height: 0; }
-.tdb-batch-row { padding: 13px 0; border-bottom: 1px solid var(--hairline); }
+.tdb-batch-row { padding: 13px 0; border-bottom: 1px solid var(--hairline); transition: opacity 0.15s; }
 .tdb-batch-row:last-child { border-bottom: none; }
+.tdb-batch-row.filled { opacity: 0.55; }
+.tdb-batch-row.filled:hover, .tdb-batch-row.filled:focus-within { opacity: 1; }
 .tdb-batch-who { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-.tdb-batch-name { font-family: var(--f12-serif); font-size: 15px; font-weight: 500; flex: 1; }
+.tdb-batch-id { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 9px; }
+.tdb-batch-name { font-family: var(--f12-serif); font-size: 15px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
+.tdb-batch-agency { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--faint); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tdb-pip { width: 7px; height: 7px; border-radius: 50%; background: var(--burg); flex: none; }
+.tdb-batch-skip { color: var(--faint); font-size: 11px; padding: 2px 6px; }
+.tdb-batch-skip:hover { color: var(--ink); }
+.tdb-batch-snz { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--gold-i); background: var(--gold-t); border: 1px solid var(--gold-b); border-radius: var(--r-sm); padding: 6px 10px; margin-bottom: 8px; }
+.tdb-chips { display: inline-flex; gap: 5px; }
+.tdb-chip { font-family: var(--f12-mono); font-size: 9px; font-weight: 600; letter-spacing: 0.04em; padding: 5px 10px; border-radius: 99px; border: 1px solid var(--line); background: var(--panel); color: var(--ink-2); }
+.tdb-chip:hover { border-color: var(--ink-2); }
+.tdb-chip.on { background: var(--gold-t); border-color: var(--gold-i); color: var(--gold-i); }
+.tdb-tick-inline { margin-left: 6px; white-space: nowrap; }
+.tdb-ticks-row { flex-direction: row; flex-wrap: wrap; gap: 5px 14px; }
+.tdb-muted-sec { padding: 8px 0 4px; border-bottom: 1px solid var(--hairline); margin-bottom: 4px; }
+.tdb-muted-row { display: flex; align-items: center; gap: 8px; padding: 5px 0; }
+.tdb-muted-name { flex: 1; font-size: 12.5px; color: var(--muted); }
+.tdb-batch-nf { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--faint); margin-top: 7px; }
+.tdb-propill { font-family: var(--f12-mono); font-size: 8px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #6A89A7; background: #e7eef3; border: 1px solid #cfdde6; border-radius: 99px; padding: 1.5px 7px; margin-left: 7px; }
 .tdb-batch-mute { font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--faint); padding: 3px 7px; border: 1px solid var(--hairline); border-radius: 999px; }
 .tdb-batch-mute:hover { color: var(--ink); border-color: var(--line); }
 .tdb-batch-field { display: flex; align-items: center; gap: 8px; }
