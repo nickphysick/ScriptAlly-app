@@ -17,6 +17,8 @@
  */
 import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
+import { destroyManifest } from "../lib/cascade";
+import { ConfirmDestroy } from "./ConfirmDestroy";
 import { Manuscript, ManuscriptStatus } from "../types";
 import { motion, AnimatePresence } from "motion/react";
 import { ChromeSlab, MASTHEAD_CTA_STYLE } from "./shell/ChromeSlab";
@@ -67,7 +69,7 @@ interface AllManuscriptsProps {
 }
 
 export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) => {
-  const { currentUser, manuscripts, queries, agents, packages, updateManuscript, deleteManuscript, setManuscriptShelved } =
+  const { currentUser, manuscripts, queries, agents, packages, versions, activities, taskFlags, updateManuscript, deleteManuscript, setManuscriptShelved } =
     useScriptAllyDb();
 
   const [openId, setOpenId] = useState<string | null>(null);
@@ -75,27 +77,11 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [deleteModalMs, setDeleteModalMs] = useState<Manuscript | null>(null);
   const [undoToast, setUndoToast] = useState<{ msg: string; undo: () => void } | null>(null);
-  const [pendingDelete, setPendingDelete] = useState<{ ms: Manuscript } | null>(null);
-  const deleteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingDeleteRef = useRef<Manuscript | null>(null);
   const [editingMs, setEditingMs] = useState<Manuscript | null>(null);
 
-  // Plates: active books first, shelved sink to the end; a book mid-deferred-delete is hidden.
+  // Plates: active books first, shelved sink to the end.
   const ordered = [...manuscripts]
-    .sort((a, b) => Number(isShelvedPresentation(a)) - Number(isShelvedPresentation(b)))
-    .filter((m) => !(pendingDelete && m.id === pendingDelete.ms.id));
-
-  // Commit a still-pending delete if the page unmounts — never leave it dangling.
-  useEffect(() => {
-    return () => {
-      if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current);
-      const p = pendingDeleteRef.current;
-      if (p) {
-        pendingDeleteRef.current = null;
-        void deleteManuscript(p.id);
-      }
-    };
-  }, []);
+    .sort((a, b) => Number(isShelvedPresentation(a)) - Number(isShelvedPresentation(b)));
 
   if (!currentUser) return null;
 
@@ -118,29 +104,15 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
     }
   };
 
-  const commitPendingDelete = async () => {
-    const p = pendingDeleteRef.current;
-    if (!p) return;
-    pendingDeleteRef.current = null;
-    if (deleteTimerRef.current) { clearTimeout(deleteTimerRef.current); deleteTimerRef.current = null; }
-    setPendingDelete(null);
-    await deleteManuscript(p.id);
-  };
-
-  const requestDeleteMs = (ms: Manuscript) => {
-    setDeleteModalMs(null);
+  // 6A: type-to-confirm IS the safety — the delete runs immediately on confirm; no undo window
+  // (the guard's dialog says so). The cascade + durable log live in db.deleteManuscript.
+  const confirmDestroyMs = async (ms: Manuscript) => {
     setMenuOpenId(null);
     if (openId === ms.id) setOpenId(null);
-    pendingDeleteRef.current = ms;
-    setPendingDelete({ ms });
-    if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current);
-    deleteTimerRef.current = setTimeout(() => { void commitPendingDelete(); }, 7000);
-  };
-
-  const undoPendingDelete = () => {
-    if (deleteTimerRef.current) { clearTimeout(deleteTimerRef.current); deleteTimerRef.current = null; }
-    pendingDeleteRef.current = null;
-    setPendingDelete(null);
+    await deleteManuscript(ms.id);
+    setDeleteModalMs(null);
+    setToastMessage(`“${ms.title}” deleted`);
+    setTimeout(() => setToastMessage(null), 3000);
   };
 
   // ── edit modal (carried over; comps deliberately absent — the shelf sub-page is the single home) ──
@@ -510,55 +482,21 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
         )}
       </AnimatePresence>
 
-      {/* deferred-delete toast */}
-      <AnimatePresence>
-        {pendingDelete && (
-          <motion.div
-            initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] bg-stone-900 text-white rounded-lg py-3 px-5 text-xs font-medium shadow-lg flex items-center gap-3"
-          >
-            <span>Manuscript deleted</span>
-            <button onClick={undoPendingDelete} className="text-[#e8c89a] underline font-mono text-[11px] cursor-pointer">Undo</button>
-            <button onClick={() => { void commitPendingDelete(); }} title="Dismiss now" aria-label="Dismiss now" className="text-stone-400 hover:text-white cursor-pointer shrink-0"><X className="w-3.5 h-3.5" /></button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* delete modal — names the consequence, offers Shelve instead */}
+      {/* 6A hard-delete guard — type-to-confirm + the "Goes with it" manifest (cascade.ts, one
+          source with the delete plan). Light mode when nothing depends on the manuscript. */}
       {deleteModalMs && (() => {
         const m = deleteModalMs;
-        const relatedQ = queries.filter((q) => q.manuscriptId === m.id);
-        const qn = relatedQ.length;
-        const agentCount = new Set(relatedQ.map((q) => q.agentId)).size;
+        const manifest = destroyManifest("manuscript", m.id, { queries, activities, taskFlags, versions, packages });
+        const light = manifest.queries === 0 && manifest.packages === 0 && manifest.versions === 0 && manifest.activityRecords === 0;
         return (
-          <div className="fixed inset-0 bg-stone-950/40 backdrop-blur-sm flex items-center justify-center p-5 z-[60]" onClick={() => setDeleteModalMs(null)}>
-            <motion.div
-              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-[#fdfaf5] rounded-[15px] w-[min(460px,94vw)] shadow-2xl overflow-hidden relative"
-            >
-              <div className="p-6">
-                <div className="w-[42px] h-[42px] rounded-[11px] bg-[rgba(168,68,47,0.12)] text-[#a8442f] flex items-center justify-center mb-3.5">
-                  <Trash2 className="w-5 h-5" />
-                </div>
-                <h3 className="font-serif text-[19px] leading-tight mb-2.5 text-[#3a1c14]">Delete “{m.title}”?</h3>
-                <p className="text-[13.5px] font-light leading-relaxed text-[rgba(58,28,20,0.72)]">
-                  {qn > 0 ? (
-                    <>This permanently removes the manuscript and its <b className="text-[#7c3a2a] font-medium">{qn} quer{qn > 1 ? "ies" : "y"}</b>{agentCount > 0 ? <> — and clears those from <b className="text-[#7c3a2a] font-medium">{agentCount} agent{agentCount > 1 ? "s’" : "’s"} histor{agentCount > 1 ? "ies" : "y"}</b></> : null}. Can’t be undone. To keep the record, shelve it instead.</>
-                  ) : (
-                    <>This permanently removes the manuscript. It has no queries, so nothing else is affected. To keep it, shelve it instead.</>
-                  )}
-                </p>
-                <div className="flex items-center gap-2.5 mt-5 flex-wrap">
-                  <button onClick={() => requestDeleteMs(m)} className="font-mono text-[11px] rounded-[9px] py-2.5 px-4 bg-[#a8442f] text-white hover:brightness-110 cursor-pointer">Delete everything</button>
-                  <button onClick={() => setDeleteModalMs(null)} className="font-mono text-[11px] rounded-[9px] py-2.5 px-4 text-stone-500 hover:text-[#3a1c14] cursor-pointer">Cancel</button>
-                  {!m.shelved && (
-                    <button onClick={() => { setDeleteModalMs(null); toggleShelved(m); }} className="ml-auto font-mono text-[10.5px] text-[#7c3a2a] opacity-80 hover:opacity-100 hover:underline cursor-pointer p-2">Shelve instead</button>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          </div>
+          <ConfirmDestroy
+            kind="manuscript"
+            name={m.title}
+            manifest={manifest}
+            light={light}
+            onConfirm={() => confirmDestroyMs(m)}
+            onCancel={() => setDeleteModalMs(null)}
+          />
         );
       })()}
     </div>

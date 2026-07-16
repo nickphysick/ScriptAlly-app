@@ -68,7 +68,7 @@ import {
 
 import { db, auth, handleFirestoreError, OperationType } from "./firebase";
 import { deriveQueryFields, getActivityTime, normalizeResultingStatus } from "./queryDerivation";
-import { queriesForManuscript, queriesForAgent, activityIdsForQueries } from "./cascade";
+import { queriesForManuscript, queriesForAgent, activityIdsForQueries, flagIdsForCascade, cascadePlan, chunkArray } from "./cascade";
 import { recomputeQuery as recomputeQueryOnline, subcollectionDocToDerivable, monotonicEventTime } from "./recomputeQuery";
 import { buildNudgeWrites, reconcileNudge, NUDGE_NESTED_TYPE, type StoredNudge } from "./logNudge";
 import { resolveGenre, matchKey } from "./genres";
@@ -1146,10 +1146,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   // split). Callers order the PARENT ref LAST so a mid-way failure leaves the parent — and a clean
   // retry — intact rather than half-deleting it (D2: no un-batched sequential half-deletes).
   const commitDeletesInBatches = async (refs: DocumentReference[]) => {
-    const CHUNK = 450;
-    for (let i = 0; i < refs.length; i += CHUNK) {
+    for (const chunk of chunkArray(refs, 450)) {
       const batch = writeBatch(db);
-      for (const ref of refs.slice(i, i + CHUNK)) batch.delete(ref);
+      for (const ref of chunk) batch.delete(ref);
       await batch.commit();
     }
   };
@@ -1159,29 +1158,27 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     const uid = currentUser.id;
     // Capture title + query count BEFORE the cascade removes them — for the durable delete record.
     const msTitle = manuscripts.find(m => m.id === id)?.title || "a manuscript";
-    const qIds = queriesForManuscript(queries, id);
+    // The ordered plan (cascade.ts, unit-locked): versions + packages → queries (each preceded by its
+    // live-fetched activity subcollection) → global-feed projections → taskFlag stances (6A: stances
+    // die with their records) → THE MANUSCRIPT LAST, so a mid-way failure leaves it (and a retry)
+    // intact — children can be stranded but never orphaned.
+    const plan = cascadePlan("manuscript", id, { queries, activities, taskFlags, versions, packages });
+    const qIds = plan.queryIds;
     try {
       const refs: DocumentReference[] = [];
-      // Records meaningless without the manuscript: versions, submission packages, notes.
-      for (const v of versions.filter(ver => ver.manuscriptId === id)) refs.push(doc(db, "users", uid, "versions", v.id));
-      for (const p of packages.filter(pkg => pkg.manuscriptId === id)) refs.push(doc(db, "users", uid, "packages", p.id));
       try {
         const notesSnap = await getDocs(collection(db, "users", uid, "manuscripts", id, "notes"));
         notesSnap.forEach(n => refs.push(n.ref));
       } catch {
         // Best-effort: an unreadable notes subcollection must not block the delete itself.
       }
-      // Cascade the dependent queries + their per-query activity log + global-feed projections.
-      // (Previously ORPHANED — invisible in the UI yet still counting toward the free-tier limit
-      // and unrecoverable. D1/D2.)
-      for (const qid of qIds) {
-        const actSnap = await getDocs(collection(db, "users", uid, "queries", qid, "activity"));
-        actSnap.forEach(a => refs.push(a.ref));
-        refs.push(doc(db, "users", uid, "queries", qid));
+      for (const d of plan.docs) {
+        if (d.col === "queries") {
+          const actSnap = await getDocs(collection(db, "users", uid, "queries", d.id, "activity"));
+          actSnap.forEach(a => refs.push(a.ref));
+        }
+        refs.push(doc(db, "users", uid, d.col, d.id));
       }
-      for (const aid of activityIdsForQueries(activities, qIds)) refs.push(doc(db, "users", uid, "activities", aid));
-      // The manuscript itself — last, so a mid-way failure leaves it (and a retry) intact.
-      refs.push(doc(db, "users", uid, "manuscripts", id));
       await commitDeletesInBatches(refs);
 
       // Durable record of the permanent delete (parity with deleteAgent): global activities feed with
@@ -1493,7 +1490,11 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     const uid = currentUser.id;
     // Capture name + query count BEFORE the cascade removes them — for the durable delete record.
     const agentName = agents.find(a => a.id === id)?.name || "an agent";
-    const qIds = queriesForAgent(queries, id);
+    // The ordered plan (cascade.ts, unit-locked): queries (each preceded by its live-fetched activity
+    // subcollection) → global-feed projections → taskFlag stances (query-keyed AND the agent's own
+    // dq stance — 6A) → THE AGENT LAST, so a mid-way failure leaves it (and a retry) intact.
+    const plan = cascadePlan("agent", id, { queries, activities, taskFlags });
+    const qIds = plan.queryIds;
     try {
       const refs: DocumentReference[] = [];
       // Agent notes subcollection.
@@ -1503,16 +1504,13 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       } catch {
         // Best-effort: an unreadable notes subcollection must not block the delete.
       }
-      // Cascade the dependent queries + their per-query activity log + global-feed projections
-      // (previously ORPHANED — invisible yet quota-consuming and unrecoverable. D1/D2).
-      for (const qid of qIds) {
-        const actSnap = await getDocs(collection(db, "users", uid, "queries", qid, "activity"));
-        actSnap.forEach(a => refs.push(a.ref));
-        refs.push(doc(db, "users", uid, "queries", qid));
+      for (const d of plan.docs) {
+        if (d.col === "queries") {
+          const actSnap = await getDocs(collection(db, "users", uid, "queries", d.id, "activity"));
+          actSnap.forEach(a => refs.push(a.ref));
+        }
+        refs.push(doc(db, "users", uid, d.col, d.id));
       }
-      for (const aid of activityIdsForQueries(activities, qIds)) refs.push(doc(db, "users", uid, "activities", aid));
-      // The agent itself — last, so a mid-way failure leaves it (and a retry) intact.
-      refs.push(doc(db, "users", uid, "agents", id));
       await commitDeletesInBatches(refs);
 
       // Durable record of the permanent delete: lives in the global activities feed with NO queryId,
@@ -1546,6 +1544,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const actSnap = await getDocs(collection(db, "users", uid, "queries", queryId, "activity"));
       actSnap.forEach(a => refs.push(a.ref));
       for (const aid of activityIdsForQueries(activities, [queryId])) refs.push(doc(db, "users", uid, "activities", aid));
+      // 6A: the query's taskFlag stances die with it (same principle as the big cascades).
+      for (const fid of flagIdsForCascade(taskFlags, { queryIds: [queryId] })) refs.push(doc(db, "users", uid, "taskFlags", fid));
       // The query doc last, so a mid-way failure leaves it (and a retry) intact.
       refs.push(doc(db, "users", uid, "queries", queryId));
       await commitDeletesInBatches(refs);

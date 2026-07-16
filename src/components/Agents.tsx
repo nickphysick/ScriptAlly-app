@@ -11,6 +11,8 @@
  */
 import React, { useState, useEffect, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
+import { destroyManifest } from "../lib/cascade";
+import { ConfirmDestroy } from "./ConfirmDestroy";
 import { Agent, AgentSocial, SubmissionStatus, SubmissionMethod, QueryStatus, UserPlan } from "../types";
 import { AgentResponseGuidelines } from "./agents/AgentResponseGuidelines";
 import { AgentMaterialsEditor } from "./agents/AgentMaterialsEditor";
@@ -136,6 +138,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
     queries,
     manuscripts,
     activities,
+    taskFlags,
     tasks,
     userTasks,
     updateAgent,
@@ -193,9 +196,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
   const [undoToast, setUndoToast] = useState<{ msg: string; undo: () => void } | null>(null);
   // Deferred delete: on confirm we DON'T delete immediately — we hold it for an undo window, then
   // commit (timeout / ✕ dismiss / navigate-away). Undo cancels with nothing deleted to restore.
-  const [pendingDelete, setPendingDelete] = useState<{ agent: Agent; qn: number } | null>(null);
-  const deleteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingDeleteRef = useRef<{ agent: Agent; qn: number } | null>(null);
+  const [confirmAgent, setConfirmAgent] = useState<Agent | null>(null); // the 6A hard-delete guard
 
   // Notes (per-agent subcollection)
   const [agentNotesList, setAgentNotesList] = useState<{ id: string; text: string; createdAt: string }[]>([]);
@@ -245,22 +246,9 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
     return () => unsub();
   }, [selectedAgentId, currentUser?.id]);
 
-  // If the user navigates away (this page unmounts) with a delete still pending, commit it —
-  // don't leave it dangling. Uses refs so the cleanup doesn't depend on stale state.
-  useEffect(() => {
-    return () => {
-      if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current);
-      const p = pendingDeleteRef.current;
-      if (p) {
-        pendingDeleteRef.current = null;
-        void deleteAgent(p.agent.id);
-      }
-    };
-  }, []);
-
   // ── Derived list state (all client-side; no new reads) ──
   const homeCountry = getHomeCountry(currentUser);
-  const visibleAgents = pendingDelete ? agents.filter((a) => a.id !== pendingDelete.agent.id) : agents;
+  const visibleAgents = agents;
   const queryCountFor = (id: string) => queries.filter((q) => q.agentId === id).length;
   const lastQueriedMs = (id: string) =>
     queries.filter((q) => q.agentId === id && q.dateSent).reduce((m, q) => Math.max(m, new Date(q.dateSent!).getTime() || 0), 0);
@@ -548,40 +536,18 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
     }
   };
 
-  // ── Deferred delete (undo window) ──
-  // Commit for real — the cascade + the durable AGENT_DELETED log both live in db.deleteAgent,
-  // so they only ever run here, at commit time (never on click).
-  const commitPendingDelete = async () => {
-    const p = pendingDeleteRef.current;
-    if (!p) return;
-    pendingDeleteRef.current = null;
-    if (deleteTimerRef.current) { clearTimeout(deleteTimerRef.current); deleteTimerRef.current = null; }
-    setPendingDelete(null);
-    await deleteAgent(p.agent.id);
-  };
-
-  // Confirm pressed (clean Delete / Delete anyway): DON'T delete yet — optimistically hide the
-  // agent, reselect a neighbour, and open the undo window.
-  const requestDeleteAgent = (agent: Agent) => {
-    setDeleteModalAgent(null);
+  // ── 6A hard delete: the type-to-confirm guard replaced the undo window (type-to-confirm IS the
+  // safety; the dialog says it can't be undone). Reselect a neighbour BEFORE the cascade commits so
+  // the pane never points at a ghost. The cascade + durable AGENT_DELETED log live in db.deleteAgent.
+  const confirmDestroyAgent = async (agent: Agent) => {
     setMenuOpen(false);
-    const qn = queries.filter((q) => q.agentId === agent.id).length;
     const idx = flat.findIndex((a) => a.id === agent.id);
     const remaining = flat.filter((a) => a.id !== agent.id);
     setSelectedAgentId(remaining.length ? (remaining[Math.min(idx, remaining.length - 1)]?.id ?? remaining[0].id) : null);
-    pendingDeleteRef.current = { agent, qn };
-    setPendingDelete({ agent, qn });
-    if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current);
-    deleteTimerRef.current = setTimeout(() => { void commitPendingDelete(); }, 7000);
-  };
-
-  // Undo: cancel the pending delete — nothing was deleted, so nothing to restore; just un-hide.
-  const undoPendingDelete = () => {
-    if (deleteTimerRef.current) { clearTimeout(deleteTimerRef.current); deleteTimerRef.current = null; }
-    const p = pendingDeleteRef.current;
-    pendingDeleteRef.current = null;
-    setPendingDelete(null);
-    if (p) setSelectedAgentId(p.agent.id);
+    await deleteAgent(agent.id);
+    setConfirmAgent(null);
+    setToastMessage(`${agentPrimary(agent)} deleted`);
+    setTimeout(() => setToastMessage(null), 3000);
   };
 
   if (!currentUser) return null;
@@ -1261,22 +1227,6 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
         )}
       </AnimatePresence>
 
-      {/* ---------------- DEFERRED-DELETE TOAST (Agent deleted · Undo · ✕) ---------------- */}
-      <AnimatePresence>
-        {pendingDelete && (
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[1000] bg-stone-900 text-white rounded-lg py-3 px-5 text-xs font-medium shadow-lg flex items-center gap-3"
-          >
-            <span>Agent deleted</span>
-            <button onClick={undoPendingDelete} className="text-[#e8c89a] underline font-mono text-[11px] cursor-pointer">Undo</button>
-            <button onClick={() => { void commitPendingDelete(); }} title="Dismiss now" aria-label="Dismiss now" className="text-stone-400 hover:text-white cursor-pointer shrink-0"><X className="w-3.5 h-3.5" /></button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* ---------------- GUARDED DELETE MODAL ---------------- */}
       {deleteModalAgent && (() => {
         const a = deleteModalAgent;
@@ -1316,7 +1266,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
                         <button onClick={() => { setDeleteModalAgent(null); void toggleSetAside(a); }} className="font-mono text-[11px] rounded-[9px] py-2.5 px-4 bg-[#f5e2da] text-[#7c3a2a] border-[0.5px] border-[#e8c8bc] hover:bg-[#efd5ca] cursor-pointer">Set aside instead</button>
                       )}
                       <button onClick={() => setDeleteModalAgent(null)} className="font-mono text-[11px] rounded-[9px] py-2.5 px-4 text-stone-500 hover:text-[#3a1c14] cursor-pointer">Cancel</button>
-                      <button onClick={() => requestDeleteAgent(a)} className="ml-auto font-mono text-[10.5px] text-[#a8442f] opacity-80 hover:opacity-100 hover:underline cursor-pointer p-2">Delete anyway</button>
+                      <button onClick={() => { setDeleteModalAgent(null); setConfirmAgent(a); }} className="ml-auto font-mono text-[10.5px] text-[#a8442f] opacity-80 hover:opacity-100 hover:underline cursor-pointer p-2">Delete anyway</button>
                     </div>
                   </>
                 ) : (
@@ -1329,7 +1279,7 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
                       They have <b className="text-[#7c3a2a] font-medium">no queries</b>, so nothing else is affected — this just removes them from your agent database.
                     </p>
                     <div className="flex items-center gap-2.5 mt-5">
-                      <button onClick={() => requestDeleteAgent(a)} className="font-mono text-[11px] rounded-[9px] py-2.5 px-4 bg-[#a8442f] text-white hover:brightness-110 cursor-pointer">Delete</button>
+                      <button onClick={() => { setDeleteModalAgent(null); setConfirmAgent(a); }} className="font-mono text-[11px] rounded-[9px] py-2.5 px-4 bg-[#a8442f] text-white hover:brightness-110 cursor-pointer">Delete</button>
                       <button onClick={() => setDeleteModalAgent(null)} className="font-mono text-[11px] rounded-[9px] py-2.5 px-4 text-stone-500 hover:text-[#3a1c14] cursor-pointer">Cancel</button>
                     </div>
                   </>
@@ -1337,6 +1287,24 @@ export const Agents: React.FC<AgentsProps> = ({ searchQuery, onNavigate, active 
               </div>
             </motion.div>
           </div>
+        );
+      })()}
+
+      {/* 6A hard-delete guard — the "Goes with it" manifest + type-to-confirm; LIGHT for a
+          zero-query agent (deleting an unused contact isn't decommissioning a reactor). */}
+      {confirmAgent && (() => {
+        const a = confirmAgent;
+        const manifest = destroyManifest("agent", a.id, { queries, activities, taskFlags });
+        const light = manifest.queries === 0 && manifest.activityRecords === 0 && manifest.taskFlags === 0;
+        return (
+          <ConfirmDestroy
+            kind="agent"
+            name={agentPrimary(a)}
+            manifest={manifest}
+            light={light}
+            onConfirm={() => confirmDestroyAgent(a)}
+            onCancel={() => setConfirmAgent(null)}
+          />
         );
       })()}
     </F12Page>
