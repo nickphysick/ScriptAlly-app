@@ -39,7 +39,8 @@ import { HkGroup, HkRule, HK_RULES, HK_PAYOFF, mutedMembersForRule } from "../..
 import {
   StagedPayload, applyStaged, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, DEFAULT_CHECKBACK_DAYS,
 } from "../../lib/todoWalk";
-import { isProUser, fetchAssistedFill, withProvenance, AssistFillError, AssistFound } from "../../lib/assistFill";
+import { saveHkRows } from "../../lib/hkSave";
+import { isProUser, fetchAssistedFill, AssistFillError, AssistFound } from "../../lib/assistFill";
 import { Agent, Query, QueryStatus } from "../../types";
 
 export type FocusItem = { kind: "card"; card: BoardCard } | { kind: "group"; group: HkGroup };
@@ -76,9 +77,12 @@ export interface FocusFlowProps {
   onClose: () => void;
   onNavigate: (tab: string, subPageName?: string, opts?: { agentId?: string; manuscriptId?: string }) => void;
   onToast: (msg: string, action?: { label: string; fn: () => void }) => void;
+  /** Seed the send capture (a receipt's "Edit details" re-opens the journey pre-filled with what
+   *  the quick-✓ logged; the quick write is undone first so Save never double-writes). */
+  prefill?: { sentDate?: string; method?: string; materials?: string[] };
 }
 
-export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate, onToast }) => {
+export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate, onToast, prefill }) => {
   const {
     queries, agents, manuscripts, activities, taskFlags, currentUser,
     recordMaterialsSent, logNudge, dismissTask, upsertTaskFlag, updateUserProfile, updateAgent, updateUserTask, updateQueryStatus, undoQueryStatus, resolveTaskFlag,
@@ -91,10 +95,10 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
   const [offerFormOpen, setOfferFormOpen] = useState(false);
   const [savedN, setSavedN] = useState<number | null>(null); // the "Desk cleared" screen
   const [saving, setSaving] = useState(false);
-  // per-item scratch (reset on advance)
-  const [mats, setMats] = useState<Record<string, boolean>>({});
-  const [sentDate, setSentDate] = useState(todayISO());
-  const [method, setMethod] = useState("Email");
+  // per-item scratch (reset on advance; the initial values honour a receipt-edit prefill)
+  const [mats, setMats] = useState<Record<string, boolean>>(() => Object.fromEntries((prefill?.materials ?? []).map((m) => [m, true])));
+  const [sentDate, setSentDate] = useState(prefill?.sentDate ?? todayISO());
+  const [method, setMethod] = useState(prefill?.method ?? "Email");
   const [note, setNote] = useState("");
   const [copied, setCopied] = useState(false);
   const [rows, setRows] = useState<Record<string, string>>({}); // batch/dq drafts keyed by agentId (+need for dq)
@@ -573,37 +577,9 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
         <span className="tdb-sp" />
         <button type="button" className="tdb-ffskip" onClick={advance}>Skip the rest</button>
         <button type="button" className="tdb-ffpri" disabled={!filledIds.length || saving} onClick={async () => {
-          const nowIso = new Date().toISOString();
-          const prevs: { agentId: string; patch: Partial<Agent> }[] = [];
-          let ok = 0; let failed = 0;
-          for (const m of g.members) {
-            const id = m.agentId ?? "";
-            const v = (rows[id] ?? "").trim();
-            if (!v || !m.agentId) continue;
-            const agent = agents.find((a) => a.id === m.agentId);
-            try {
-              let patch: Partial<Agent> =
-                g.rule === "dq_responseTime" ? { responseTimeWeeks: Number(v), noResponseMeansNo: !!noMeansNo[id] }
-                : g.rule === "dq_materials" ? { materialsWanted: v.split(",").map((s) => s.trim()).filter(Boolean) }
-                : { mswlNotes: v };
-              const f = found[id];
-              if (f && v === f.value) patch = withProvenance(patch, HK_RULES[g.rule].field!, f, agent?.fieldSources, nowIso);
-              if (agent) {
-                const prev: Partial<Agent> = {};
-                if (g.rule === "dq_responseTime") { prev.responseTimeWeeks = agent.responseTimeWeeks ?? 0; prev.noResponseMeansNo = agent.noResponseMeansNo ?? false; }
-                else if (g.rule === "dq_materials") prev.materialsWanted = (agent.materialsWanted ?? []) as Agent["materialsWanted"];
-                else prev.mswlNotes = agent.mswlNotes ?? "";
-                if (patch.fieldSources) prev.fieldSources = agent.fieldSources ?? {};
-                prevs.push({ agentId: m.agentId, patch: prev });
-              }
-              await updateAgent(m.agentId, patch);
-              // Fully-fixed agent (this was their last gap) → resolvedAt feeds "cleared today".
-              if (agent && agentDataQualityNeeds(agent).length === 1) resolveTaskFlag(flagKeyForTask("data_quality_poor", m.agentId));
-              ok++;
-            } catch { failed++; }
-          }
-          const undo = prevs.length ? { label: "Undo all", fn: async () => { for (const u of prevs) { try { await updateAgent(u.agentId, u.patch); } catch { /* best effort */ } } } } : undefined;
-          onToast(failed ? `Saved ${ok}; ${failed} failed.` : `Saved ${ok}.`, undo);
+          // THE batch save — shared with the quick rail's card-flip (hkSave.saveHkRows).
+          const res = await saveHkRows(g, rows, noMeansNo, found, new Date().toISOString(), { agents, updateAgent, resolveTaskFlag });
+          onToast(res.failed ? `Saved ${res.ok}; ${res.failed} failed.` : `Saved ${res.ok}.`, res.undo ? { label: "Undo all", fn: res.undo } : undefined);
           advance();
         }}>Save {filledIds.length || ""} & continue →</button>
       </>,

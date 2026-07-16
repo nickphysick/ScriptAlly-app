@@ -154,3 +154,46 @@ committed-row click, the grouped card. All the retired components' CSS blocks we
 (`tdb-drawer-x`/`tdb-pip`/`tdb-propill` kept — the pop-up ✕, the queried pip, the Pro pill).
 
 **Commit:** `feat(todo): focus flow replaces drawer + walkthrough`.
+
+## PHASE C — quick rail + Mark-done retirement
+
+**Gates:** `tsc` clean · `vite build` OK · Vitest **1027** green (+8). Engine untouched; no PaintMode.
+
+**The rail** (per `todo-quick-actions-v2.html`): hover top-right of every card AND grouped card —
+two 30px shadowed buttons ✓/⏸, keyboard-reachable (`:focus-within` shows the rail). **Offers get
+no rail** (they always take the moment).
+
+**✓ per type — one write path, stated defaults:** send/nudge quick-✓ builds
+`quickSendPayload`/`quickNudgePayload` (today · the query's own `sendMethod` else Email ·
+everything they asked for · check-back +14d) and writes through the SAME
+`markSentWriteArgs → recordMaterialsSent` / `nudgeWriteArgs → logNudge` as the journey —
+**byte-identical write args unit-locked**. The card flips to a sage RECEIPT whose line derives
+from the actual payload (`receiptLine`, unit-locked: "Logged: today (16 Jul) · via email ·
+everything they asked for." — a subset lists what was really logged) + "Wrong? Fix it before you
+move on." + **Edit details** (undoes the quick write, re-opens the focus sheet PRE-FILLED with
+what was logged — save writes once, honestly) + **Undo**; the toast carries Undo too. Stale-query
+✓ → "closed — no response" receipt ("not a rejection, so your response rate stays honest").
+Grouped ✓ → the card flips to the inline rapid chip-fill (rows × chips · "X OF N" · Cancel /
+Save N) — **the SAME batch save as the sheet**: both call the new `saveHkRows` (`src/lib/hkSave.ts`,
+extracted from the Phase-B sheet — no third write path). Note ✓ ticks immediately + receipt.
+**Undos are deletions/unwinds, never compensating entries:** send/stale → `undoQueryStatus` (the
+existing delete-the-activity path); nudge → `deleteActivity` on the created NUDGE_SENT (recon:
+that primitive already fully unwinds a nudge — twins, `nudgeDate` re-derive with `deleteField`,
+flag release); note → `done:false`; batch → the captured previous values.
+
+**⏸ per type:** Urgent cards → snooze 7 days (`dismissTask`); **Notes** → the stance store covers
+them too — a `user_task` TaskFlag (NEW: `USER_TASK_FLAG_TYPE`; `assembleBoard` now filters
+suppressed notes, unit-locked — no schema change, the flag store is the stance store). Dismissed
+card state: "Snoozed — back in a week." + Undo + **Never ask** (→ MUTED_UNTIL). Housekeeping ⏸
+**forks in-card**: Not now (a week) / Never — this one (item flags) / Never — any agent missing
+this (`mutedTaskRules`); the muted toast states plainly "nothing deleted, the gap still shows on
+the profile", and the lane's muted-rules strip remains the rule-unmute recovery.
+
+**Receipts/dismissed render as STANDALONE cards** — a quick write makes the live derived card
+vanish on recompute, so the receipt persists independently in its lane (the mockup's flip,
+translated to a live-derived board). Fork/flip replace a still-live card's body.
+
+**Card face:** the **Mark-done pill is GONE everywhere**; ＋ Today's list is full-width.
+Completion = rail or sheet; committing = the visible button.
+
+**Commit:** `feat(todo): quick rail; retire Mark done pill`.

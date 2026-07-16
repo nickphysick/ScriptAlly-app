@@ -17,8 +17,13 @@ import { Task, Query, Agent, Manuscript, UserTask, TaskFlag, QueryStatus, Activi
 import { queryAmbientStatus } from "./queryAmbient";
 import { agentDataQualityNeeds } from "./agentDataQuality";
 import { agentPrimary, agentInitials } from "./agentDisplay";
-import { flagMatchesTask } from "./taskFlags";
+import { flagMatchesTask, isFlagSuppressing } from "./taskFlags";
 import { clearedTodayItems } from "./clearedToday";
+
+/** The stance-store taskType for a note (UserTask) snooze/mute — the quick rail's ⏸ writes a
+ *  TaskFlag with this type + the task id in queryId. Notes have no engine task, so the lane filters
+ *  them here (the same suppress-while-snoozed rule the engine applies to derived tasks). */
+export const USER_TASK_FLAG_TYPE = "user_task";
 
 export type BoardStream = "do" | "hk" | "nt" | "done";
 
@@ -191,9 +196,14 @@ export function assembleBoard(input: BoardInput): AssembledBoard {
   const doCards = orderDoNext(derived.filter((c) => c.stream === "do"));
   const hkCards = derived.filter((c) => c.stream === "hk");
 
-  // Your tasks — open (not done) user tasks, most-recent first.
+  // Notes to self — open (not done) user tasks, most-recent first, minus snoozed/muted ones
+  // (the quick rail's ⏸ writes a `user_task` TaskFlag stance; nothing is deleted).
   const ntCards = input.userTasks
     .filter((t) => !t.done)
+    .filter((t) => {
+      const flag = input.taskFlags.find((f) => flagMatchesTask(f, USER_TASK_FLAG_TYPE, t.id));
+      return !flag || !isFlagSuppressing(flag, input.now);
+    })
     .sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""))
     .map((t) => userCard(t, input));
 

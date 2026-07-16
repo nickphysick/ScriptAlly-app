@@ -71,6 +71,15 @@ describe("assembleBoard — three lanes (no cleared lane)", () => {
   });
 });
 
+describe("assembleBoard — note snooze (the ⏸ stance suppresses, never deletes)", () => {
+  it("a snoozed user_task flag hides the note; an expired one doesn't", () => {
+    const snoozed: TaskFlag = { id: "f", userId: "u", taskType: "user_task", queryId: "u1", snoozeCount: 1, snoozedUntil: "2026-07-16T00:00:00Z" }; // future of NOW (9 Jul)
+    const expired: TaskFlag = { id: "f2", userId: "u", taskType: "user_task", queryId: "u2", snoozeCount: 1, snoozedUntil: "2026-07-01T00:00:00Z" };
+    const b = assembleBoard(base({ userTasks: [utask("u1"), utask("u2")], taskFlags: [snoozed, expired] }));
+    expect(b.nt.map((c) => c.userTaskId)).toEqual(["u2"]); // u1 suppressed, u2 back
+  });
+});
+
 describe("assembleBoard — commit state", () => {
   it("derived card is committed when a matching taskFlag has committedDate === today", () => {
     const flag: TaskFlag = { id: "f", userId: "u", taskType: "full_requested", queryId: "q1", snoozeCount: 0, committedDate: TODAY };

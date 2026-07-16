@@ -97,6 +97,53 @@ export function nudgeWriteArgs(p: Extract<StagedPayload, { kind: "nudge" }>): [s
   return [p.queryId, { checkBackDate: p.checkBackDate, ...(p.note ? { note: p.note } : {}) }];
 }
 
+/**
+ * Quick-✓'s stated defaults for a send card — "the honest fastest version of actually doing it":
+ * today · the query's own method (else Email) · EVERYTHING they asked for. The result is a normal
+ * StagedPayload, so the write goes through markSentWriteArgs → recordMaterialsSent — byte-identical
+ * to the journey with the same inputs (unit-locked). Defaults are stated, never silent: the receipt
+ * derives from this payload.
+ */
+export function quickSendPayload(a: { cardKey: string; label?: string; taskType?: string; queryId: string; targetStatus: QueryStatus; isResubmit: boolean; method?: string | null; nowIso: string }): Extract<StagedPayload, { kind: "mark-sent" }> {
+  return {
+    kind: "mark-sent", cardKey: a.cardKey, ...(a.label ? { label: a.label } : {}),
+    queryId: a.queryId, targetStatus: a.targetStatus, sentDate: a.nowIso, isResubmit: a.isResubmit,
+    method: a.method || "Email", materials: materialOptsForTask(a.taskType),
+  };
+}
+
+/** Quick-✓ nudge defaults — today · the query's method (else Email) · check back in 14 days. */
+export function quickNudgePayload(a: { cardKey: string; label?: string; queryId: string; method?: string | null; nowIso: string }): Extract<StagedPayload, { kind: "nudge" }> {
+  return {
+    kind: "nudge", cardKey: a.cardKey, ...(a.label ? { label: a.label } : {}),
+    queryId: a.queryId, checkBackDate: new Date(new Date(a.nowIso).getTime() + DEFAULT_CHECKBACK_DAYS * 86400000).toISOString(),
+    nudgeDate: a.nowIso.slice(0, 10), method: a.method || "Email",
+  };
+}
+
+const receiptDate = (iso: string): string => {
+  const ms = new Date(iso).getTime();
+  return Number.isNaN(ms) ? "" : new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+};
+
+/**
+ * The receipt's log line, derived from the ACTUAL payload — never a hardcoded claim. "everything
+ * they asked for" only when the materials really are the request's full set (`allMaterials`).
+ */
+export function receiptLine(p: StagedPayload, todayYmd: string, allMaterials?: string[]): string {
+  if (p.kind === "mark-sent") {
+    const day = p.sentDate.slice(0, 10) === todayYmd ? `today (${receiptDate(p.sentDate)})` : receiptDate(p.sentDate);
+    const mats = p.materials ?? [];
+    const everything = !!allMaterials && allMaterials.length > 0 && mats.length === allMaterials.length && allMaterials.every((m) => mats.includes(m));
+    return `Logged: ${day} · via ${(p.method || "email").toLowerCase()} · ${everything ? "everything they asked for" : mats.join(", ") || "no materials listed"}.`;
+  }
+  if (p.kind === "nudge") {
+    const day = (p.nudgeDate ?? "") === todayYmd ? `today (${receiptDate(p.nudgeDate!)})` : p.nudgeDate ? receiptDate(p.nudgeDate) : "today";
+    return `Logged: ${day} · via ${(p.method || "email").toLowerCase()} · check back ${receiptDate(p.checkBackDate)}.`;
+  }
+  return "";
+}
+
 export interface StagedHandlers {
   markSent: (p: Extract<StagedPayload, { kind: "mark-sent" }>) => Promise<void>;
   nudge: (p: Extract<StagedPayload, { kind: "nudge" }>) => Promise<void>;

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { BoardCard } from "./todoBoard";
-import { choosePicks, rolledOverCards, todayProgress, walkStepKind, isStageable, applyStaged, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, StagedPayload, StagedHandlers } from "./todoWalk";
+import { choosePicks, rolledOverCards, todayProgress, walkStepKind, isStageable, applyStaged, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, quickSendPayload, quickNudgePayload, receiptLine, DEFAULT_CHECKBACK_DAYS, StagedPayload, StagedHandlers } from "./todoWalk";
 import { QueryStatus } from "../types";
 
 const card = (key: string, over: Partial<BoardCard> = {}): BoardCard =>
@@ -123,6 +123,53 @@ describe("materialOptsForTask — the request's tick-list", () => {
     expect(materialOptsForTask("partial_requested")).toEqual(["First pages", "Synopsis", "Covering email"]);
     expect(materialOptsForTask("revise_resubmit")).toEqual(["Revised manuscript", "Revision letter"]);
     expect(materialOptsForTask("full_requested")).toEqual(["Full manuscript", "Synopsis", "Covering email"]);
+  });
+});
+
+describe("quick-✓ — one write path, stated defaults", () => {
+  const NOW = "2026-07-16T09:00:00.000Z";
+
+  it("quick send = today · the query's method (else Email) · everything they asked for", () => {
+    const p = quickSendPayload({ cardKey: "k", taskType: "full_requested", queryId: "q1", targetStatus: QueryStatus.FULL_SENT, isResubmit: false, method: null, nowIso: NOW });
+    expect(p.sentDate).toBe(NOW);
+    expect(p.method).toBe("Email");
+    expect(p.materials).toEqual(materialOptsForTask("full_requested"));
+    expect(quickSendPayload({ cardKey: "k", taskType: "full_requested", queryId: "q1", targetStatus: QueryStatus.FULL_SENT, isResubmit: false, method: "QueryManager", nowIso: NOW }).method).toBe("QueryManager");
+  });
+
+  it("quick-✓ writes BYTE-IDENTICAL args to the journey with the same inputs", () => {
+    const quick = quickSendPayload({ cardKey: "k", taskType: "full_requested", queryId: "q1", targetStatus: QueryStatus.FULL_SENT, isResubmit: false, method: "Email", nowIso: NOW });
+    const journey: StagedPayload = { kind: "mark-sent", cardKey: "k", queryId: "q1", targetStatus: QueryStatus.FULL_SENT, sentDate: NOW, isResubmit: false, method: "Email", materials: ["Full manuscript", "Synopsis", "Covering email"] };
+    expect(markSentWriteArgs(quick)).toEqual(markSentWriteArgs(journey as Extract<StagedPayload, { kind: "mark-sent" }>));
+  });
+
+  it("quick nudge defaults: check-back +14 days, today's date, Email", () => {
+    const p = quickNudgePayload({ cardKey: "k", queryId: "q1", nowIso: NOW });
+    expect(new Date(p.checkBackDate).getTime() - new Date(NOW).getTime()).toBe(DEFAULT_CHECKBACK_DAYS * 86400000);
+    expect(p.nudgeDate).toBe("2026-07-16");
+    expect(p.method).toBe("Email");
+    expect(nudgeWriteArgs(p)).toEqual(["q1", { checkBackDate: p.checkBackDate }]);
+  });
+});
+
+describe("receiptLine — the receipt derives from the actual payload", () => {
+  const TODAY = "2026-07-16";
+  const send = quickSendPayload({ cardKey: "k", taskType: "full_requested", queryId: "q1", targetStatus: QueryStatus.FULL_SENT, isResubmit: false, method: "Email", nowIso: "2026-07-16T09:00:00.000Z" });
+
+  it("full set → 'everything they asked for'; today reads as today", () => {
+    expect(receiptLine(send, TODAY, materialOptsForTask("full_requested"))).toBe("Logged: today (16 Jul) · via email · everything they asked for.");
+  });
+  it("a subset lists what was actually logged", () => {
+    const partial = { ...send, materials: ["Synopsis"] };
+    expect(receiptLine(partial, TODAY, materialOptsForTask("full_requested"))).toBe("Logged: today (16 Jul) · via email · Synopsis.");
+  });
+  it("a changed method changes the line (never a hardcoded claim)", () => {
+    const qm = { ...send, method: "QueryManager" };
+    expect(receiptLine(qm, TODAY, materialOptsForTask("full_requested"))).toContain("via querymanager");
+  });
+  it("nudge line carries the check-back", () => {
+    const n = quickNudgePayload({ cardKey: "k", queryId: "q1", nowIso: "2026-07-16T09:00:00.000Z" });
+    expect(receiptLine(n, TODAY)).toBe("Logged: today (16 Jul) · via email · check back 30 Jul.");
   });
 });
 

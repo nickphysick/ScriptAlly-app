@@ -24,11 +24,16 @@ import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { F12Page, F12Account } from "../shell/F12Shell";
 import { StatusDot } from "../StatusDot";
 import { useScriptAllyDb } from "../../lib/db";
-import { assembleBoard, todaySplit, ribbonTiles, BoardCard } from "../../lib/todoBoard";
-import { flagKeyForTask } from "../../lib/taskFlags";
-import { choosePicks, rolledOverCards, todayProgress, MAX_TODAY } from "../../lib/todoWalk";
+import { getPrimaryAction } from "../../lib/queryPrimaryAction";
+import { assembleBoard, todaySplit, ribbonTiles, BoardCard, USER_TASK_FLAG_TYPE } from "../../lib/todoBoard";
+import { flagKeyForTask, MUTED_UNTIL } from "../../lib/taskFlags";
+import {
+  choosePicks, rolledOverCards, todayProgress, MAX_TODAY,
+  quickSendPayload, quickNudgePayload, receiptLine, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask,
+} from "../../lib/todoWalk";
+import { saveHkRows } from "../../lib/hkSave";
 import { groupHousekeeping, hkGapCount, HkGroup, HkRule, HK_RULES, HK_PAYOFF } from "../../lib/todoHousekeeping";
-import { QueryStatus } from "../../types";
+import { ActivityType, QueryStatus } from "../../types";
 import { FocusFlow, FocusItem } from "./FocusFlow";
 import "./todo.css";
 
@@ -49,6 +54,58 @@ const fmtTime = (ms?: number): string => {
   const ap = h < 12 ? "am" : "pm";
   h = h % 12 || 12;
   return `${h}:${String(d.getMinutes()).padStart(2, "0")}${ap}`;
+};
+
+type Overlay =
+  | { kind: "receipt"; lane: "do" | "hk" | "nt"; title: string; line: string; undo?: () => void | Promise<void>; edit?: () => void }
+  | { kind: "dismissed"; lane: "do" | "hk" | "nt"; text: string; undo: () => void | Promise<void>; never?: () => void }
+  | { kind: "fork"; single: boolean }
+  | { kind: "flip" };
+
+/** The grouped card's quick-✓ target: an inline rapid chip-fill — the SAME batch save as the focus
+ *  sheet (hkSave.saveHkRows), never a third write path. Compact chips; skipping rows is fine. */
+const GroupFlip: React.FC<{
+  group: HkGroup;
+  onCancel: () => void;
+  onSaved: (ok: number, undo?: () => Promise<void>) => void;
+  deps: Parameters<typeof saveHkRows>[5];
+}> = ({ group, onCancel, onSaved, deps }) => {
+  const [rows, setRows] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
+  const filled = group.members.filter((m) => (rows[m.agentId ?? ""] ?? "").trim()).length;
+  const MATERIAL_VOCAB = ["Query Letter", "Synopsis", "Sample Pages", "Full Manuscript"];
+  return (
+    <div className="tdb-batchflip" onClick={(e) => e.stopPropagation()}>
+      <div className="tdb-bfh">{group.rule === "dq_responseTime" ? "Replies within…" : group.rule === "dq_materials" ? "They ask for…" : "Looking for…"}<span className="tdb-bfp">{filled} OF {group.members.length}</span></div>
+      <div className="tdb-bfrows">{group.members.map((m) => {
+        const id = m.agentId ?? m.card.key;
+        return (
+          <div key={m.card.key} className="tdb-bfrow">
+            <span className="tdb-bfn">{m.agentName}</span>
+            <span className="tdb-bfchips">
+              {group.rule === "dq_responseTime" && [4, 6, 8, 12].map((w) => (
+                <button key={w} type="button" className={`tdb-bfc${rows[id] === String(w) ? " on" : ""}`} onClick={() => setRows((p) => ({ ...p, [id]: String(w) }))}>{w}wk</button>
+              ))}
+              {group.rule === "dq_materials" && MATERIAL_VOCAB.map((mv) => {
+                const set = new Set((rows[id] ?? "").split(",").map((x) => x.trim()).filter(Boolean));
+                return <button key={mv} type="button" className={`tdb-bfc${set.has(mv) ? " on" : ""}`} onClick={() => { set.has(mv) ? set.delete(mv) : set.add(mv); setRows((p) => ({ ...p, [id]: Array.from(set).join(", ") })); }}>{mv.replace("Full Manuscript", "Full MS").replace("Query Letter", "Letter").replace("Sample Pages", "Pages")}</button>;
+              })}
+              {group.rule === "dq_mswl" && <input className="tdb-bfin" type="text" placeholder="wish list…" value={rows[id] ?? ""} onChange={(e) => setRows((p) => ({ ...p, [id]: e.target.value }))} />}
+            </span>
+          </div>
+        );
+      })}</div>
+      <div className="tdb-bffoot">
+        <button type="button" className="tdb-ra" onClick={onCancel}>Cancel</button>
+        <button type="button" className="tdb-ra save" disabled={!filled || saving} onClick={async () => {
+          setSaving(true);
+          const res = await saveHkRows(group, rows, {}, {}, new Date().toISOString(), deps);
+          setSaving(false);
+          onSaved(res.ok, res.undo);
+        }}>Save {filled || ""}</button>
+      </div>
+    </div>
+  );
 };
 
 /** One lane: coloured header band + a horizontal card scroller with an overflow fade + scroll-right
@@ -104,14 +161,27 @@ export interface ToDoPageProps {
 type ToastAction = { label: string; fn: () => void };
 
 export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
-  const { tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser, addUserTask, updateUserTask, upsertTaskFlag, updateUserProfile } = useScriptAllyDb();
+  const {
+    tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser,
+    addUserTask, updateUserTask, upsertTaskFlag, updateUserProfile,
+    recordMaterialsSent, logNudge, dismissTask, undoQueryStatus, updateQueryStatus, deleteActivity, resolveTaskFlag, updateAgent,
+  } = useScriptAllyDb();
   const [toast, setToast] = useState<{ msg: string; action?: ToastAction } | null>(null);
   const [rollDismissed, setRollDismissed] = useState(false);
   const [pulsing, setPulsing] = useState<string | null>(null);
   // THE completion surface — the focus flow (queue of one for a card click; a set for the two walks).
   const [flow, setFlow] = useState<FocusItem[] | null>(null);
+  const [flowPrefill, setFlowPrefill] = useState<{ sentDate?: string; method?: string; materials?: string[] } | undefined>(undefined);
   const [todayOpen, setTodayOpen] = useState(false);
   const openFlowCards = (cards: BoardCard[]) => setFlow(cards.map((card) => ({ kind: "card", card })));
+  // Quick-rail card states. Receipts/dismissed render as STANDALONE cards (the live card vanishes the
+  // moment the write lands — the board is derived); fork/flip replace a still-live card's body.
+  const [overlays, setOverlays] = useState<Record<string, Overlay>>({});
+  const setOverlay = (key: string, o: Overlay) => setOverlays((s) => ({ ...s, [key]: o }));
+  const clearOverlay = (key: string) => setOverlays((s) => { const n = { ...s }; delete n[key]; return n; });
+  // Fresh activities for late undo closures (the created nudge row lands AFTER the click's snapshot).
+  const activitiesRef = useRef(activities);
+  activitiesRef.current = activities;
 
   const now = Date.now();
   const today = localYMD(now);
@@ -187,13 +257,119 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   function keepRolled() { rolled.forEach((c) => setCommitted(c, true)); setRollDismissed(true); flash("Kept on today’s list"); }
   function dropRolled() { rolled.forEach((c) => setCommitted(c, false)); setRollDismissed(true); flash("Cleared — still on the board"); }
 
-  function markDone(card: BoardCard) {
-    if (card.userTaskId) {
-      // A note ticks immediately — nothing to record.
-      updateUserTask(card.userTaskId, { done: true, completedAt: new Date().toISOString() });
+  // ── quick rail — "the honest fastest version of actually doing it". Every ✓ funnels through the
+  // SAME write paths as the journey (quick*Payload → markSentWriteArgs/nudgeWriteArgs); defaults are
+  // stated on the receipt, and Undo deletes/unwinds the created record via the existing primitives.
+  async function quickDone(c: BoardCard) {
+    const nowIso = new Date().toISOString();
+    if (c.userTaskId) {
+      await updateUserTask(c.userTaskId, { done: true, completedAt: nowIso });
+      const undo = () => updateUserTask(c.userTaskId!, { done: false });
+      setOverlay(c.key, { kind: "receipt", lane: "nt", title: "Note done", line: `${c.title} — struck through on today’s list.`, undo });
+      flash("Note done", { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); } });
+      return;
+    }
+    const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
+    if (!q) return;
+    if (c.taskType === "no_response_close") {
+      const prev = q.status as QueryStatus;
+      await updateQueryStatus(q.id, QueryStatus.NO_RESPONSE, "Closed as no response from the quick rail");
+      const undo = () => undoQueryStatus(q.id, prev, QueryStatus.NO_RESPONSE);
+      setOverlay(c.key, { kind: "receipt", lane: "hk", title: `${c.who || "Query"} — closed`, line: "Logged as no response — not a rejection, so your response rate stays honest." , undo });
+      flash("Closed as no response", { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); } });
+      return;
+    }
+    if (c.taskType === "nudge_overdue") {
+      const p = quickNudgePayload({ cardKey: c.key, label: c.title, queryId: q.id, method: q.sendMethod, nowIso });
+      const r = await logNudge(...nudgeWriteArgs(p));
+      if (!r.success) { flash(r.error || "Couldn’t log the nudge."); return; }
+      // deleteActivity on a NUDGE_SENT fully unwinds it (twins + nudgeDate fields + the flag).
+      const undo = async () => {
+        const acts = activitiesRef.current
+          .filter((a) => a.queryId === q.id && a.activityType === ActivityType.NUDGE_SENT)
+          .sort((x, y) => new Date(y.date).getTime() - new Date(x.date).getTime());
+        if (acts[0]?.id) await deleteActivity(acts[0].id);
+      };
+      setOverlay(c.key, { kind: "receipt", lane: "do", title: c.title, line: receiptLine(p, today), undo });
+      flash(`${c.title} — logged with defaults`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); } });
+      return;
+    }
+    const action = getPrimaryAction(q.status as QueryStatus);
+    if (action.kind !== "mark-sent") return;
+    const p = quickSendPayload({ cardKey: c.key, label: c.title, taskType: c.taskType, queryId: q.id, targetStatus: action.target as QueryStatus, isResubmit: action.markKind === "resubmit", method: q.sendMethod, nowIso });
+    const prev = q.status as QueryStatus;
+    await recordMaterialsSent(markSentWriteArgs(p)); // the ONE mark-sent write path
+    const line = receiptLine(p, today, materialOptsForTask(c.taskType));
+    const undo = () => undoQueryStatus(q.id, prev, p.targetStatus);
+    const edit = async () => {
+      // "Edit details" = undo the quick write, then re-open the journey PRE-FILLED with what was
+      // logged — saving again writes once, honestly.
+      await undo();
+      clearOverlay(c.key);
+      setFlowPrefill({ sentDate: p.sentDate.slice(0, 10), method: p.method, materials: p.materials });
+      openFlowCards([c]);
+    };
+    setOverlay(c.key, { kind: "receipt", lane: "do", title: c.title, line, undo, edit });
+    flash(`${c.title} — logged with defaults`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); } });
+  }
+
+  function quickPause(c: BoardCard) {
+    if (c.taskType === "no_response_close") { setOverlay(c.key, { kind: "fork", single: true }); return; }
+    const lane = (c.stream === "nt" ? "nt" : c.stream === "hk" ? "hk" : "do") as "do" | "hk" | "nt";
+    const plus7 = new Date(Date.now() + 7 * 86400000).toISOString();
+    if (c.userTaskId) {
+      const key = { taskType: USER_TASK_FLAG_TYPE, queryId: c.userTaskId };
+      upsertTaskFlag(key, { snoozedUntil: plus7, bumpSnooze: true });
+      const undo = () => upsertTaskFlag(key, { snoozedUntil: null });
+      setOverlay(c.key, {
+        kind: "dismissed", lane, text: "Snoozed — back in a week.", undo,
+        never: () => { upsertTaskFlag(key, { snoozedUntil: MUTED_UNTIL }); setOverlay(c.key, { kind: "dismissed", lane, text: "Muted — we won’t ask again.", undo }); flash("Muted — nothing deleted."); },
+      });
+      flash("Snoozed for 7 days", { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); } });
+      return;
+    }
+    if (!c.taskType || !c.relatedRecordId) return;
+    dismissTask(c.taskType, c.relatedRecordId, "fixed snooze", 7);
+    const key = flagKeyForTask(c.taskType, c.relatedRecordId);
+    const undo = () => upsertTaskFlag(key, { snoozedUntil: null });
+    setOverlay(c.key, {
+      kind: "dismissed", lane, text: "Snoozed — back in a week.", undo,
+      never: () => { upsertTaskFlag(key, { snoozedUntil: MUTED_UNTIL }); setOverlay(c.key, { kind: "dismissed", lane, text: "Muted — we won’t ask again.", undo }); flash("Muted — nothing deleted, the gap still shows on the record."); },
+    });
+    flash("Snoozed for 7 days", { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); } });
+  }
+
+  // Grouped-card ⏸ fork actions — mute scopes, stated plainly. Nothing is ever deleted.
+  function forkNotNowGroup(g: HkGroup) {
+    g.members.forEach((m) => m.agentId && dismissTask("data_quality_poor", m.agentId, "fixed snooze", 7));
+    const undo = async () => { g.members.forEach((m) => m.agentId && upsertTaskFlag(flagKeyForTask("data_quality_poor", m.agentId), { snoozedUntil: null })); };
+    const key = `group-${g.rule}`;
+    setOverlay(key, { kind: "dismissed", lane: "hk", text: "Snoozed — back in a week.", undo });
+    flash("Snoozed for 7 days", { label: "Undo", fn: async () => { await undo(); clearOverlay(key); } });
+  }
+  function forkNeverThese(g: HkGroup) {
+    g.members.forEach((m) => m.agentId && upsertTaskFlag(flagKeyForTask("data_quality_poor", m.agentId), { snoozedUntil: MUTED_UNTIL }));
+    const undo = async () => { g.members.forEach((m) => m.agentId && upsertTaskFlag(flagKeyForTask("data_quality_poor", m.agentId), { snoozedUntil: null })); };
+    const key = `group-${g.rule}`;
+    setOverlay(key, { kind: "dismissed", lane: "hk", text: "Muted — we won’t ask about these agents again.", undo });
+    flash("Muted — nothing deleted, the gap still shows on the profile.", { label: "Undo", fn: async () => { await undo(); clearOverlay(key); } });
+  }
+  function forkNeverRule(g: HkGroup) {
+    muteRuleFromCard(g);
+    clearOverlay(`group-${g.rule}`); // the group vanishes; the lane's muted-rules strip is the recovery surface
+  }
+  function forkStale(c: BoardCard, mode: "notNow" | "neverThis") {
+    if (!c.taskType || !c.relatedRecordId) return;
+    const key = flagKeyForTask(c.taskType, c.relatedRecordId);
+    const undo = () => upsertTaskFlag(key, { snoozedUntil: null });
+    if (mode === "notNow") {
+      dismissTask(c.taskType, c.relatedRecordId, "fixed snooze", 7);
+      setOverlay(c.key, { kind: "dismissed", lane: "hk", text: "Snoozed — back in a week.", undo });
+      flash("Snoozed for 7 days", { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); } });
     } else {
-      // A derived task can't be silently ticked — the app needs the date/materials. Open the drawer.
-      openFlowCards([card]);
+      upsertTaskFlag(key, { snoozedUntil: MUTED_UNTIL });
+      setOverlay(c.key, { kind: "dismissed", lane: "hk", text: "Muted — we won’t ask about this query again.", undo });
+      flash("Muted — nothing deleted, the gap still shows on the record.", { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); } });
     }
   }
   async function addTask() {
@@ -230,14 +406,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
 
         {/* ── lanes (page scrolls vertically if three lanes exceed the viewport; Urgent on top) ── */}
         <div className="tdb-lanes">
-          <Lane cls="do" label="Urgent" count={tiles.urgent} isEmpty={board.do.length === 0} emptyNode={<span className="e">Nothing needs you right now.</span>}>
+          <Lane cls="do" label="Urgent" count={tiles.urgent} isEmpty={board.do.length === 0 && overlayCards("do").length === 0} emptyNode={<span className="e">Nothing needs you right now.</span>}>
+            {overlayCards("do")}
             {board.do.map(renderCard)}
           </Lane>
           <Lane
             cls="hk"
             label="Housekeeping"
             count={tiles.housekeeping}
-            isEmpty={hkGroups.length === 0 && staleCards.length === 0}
+            isEmpty={hkGroups.length === 0 && staleCards.length === 0 && overlayCards("hk").length === 0}
             emptyNode={<span className="e">Nothing to tidy.</span>}
             strip={mutedRules.length > 0 && (
               <div className="tdb-rulestrip">
@@ -250,11 +427,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               </div>
             )}
           >
+            {overlayCards("hk")}
             {hkGroups.map(renderGroupCard)}
             {staleCards.map(renderCard)}
           </Lane>
-          <Lane cls="nt" label="Notes to self" count={tiles.notes} onAdd={addTask} isEmpty={board.nt.length === 0}
+          <Lane cls="nt" label="Notes to self" count={tiles.notes} onAdd={addTask} isEmpty={board.nt.length === 0 && overlayCards("nt").length === 0}
             emptyNode={<><span className="e">Nothing jotted yet.</span><button type="button" className="tdb-ghost" onClick={addTask}>＋ Add a note</button></>}>
+            {overlayCards("nt")}
             {board.nt.map(renderCard)}
           </Lane>
         </div>
@@ -283,7 +462,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           {toast.action && <button type="button" className="tdb-toast-act" onClick={() => { toast.action!.fn(); setToast(null); }}>{toast.action.label}</button>}
         </div>
       )}
-      {flow && <FocusFlow items={flow} onClose={() => setFlow(null)} onNavigate={onNavigate} onToast={flash} />}
+      {flow && <FocusFlow items={flow} onClose={() => { setFlow(null); setFlowPrefill(undefined); }} onNavigate={onNavigate} onToast={flash} prefill={flowPrefill} />}
     </F12Page>
   );
 
@@ -340,14 +519,78 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     );
   }
 
-  // ── full-detail lane card (fixed height, clip-safe: the subtitle absorbs overflow, pills never spill) ──
+  // ── the quick rail (hover / :focus-within, top-right). Offers get NO rail — they need the moment. ──
+  function rail(onDone: () => void, onPause: () => void, gold?: boolean) {
+    return (
+      <div className="tdb-qrail">
+        <button type="button" className={`tdb-qbtn done${gold ? " gold" : ""}`} title="Quick done — logs with stated defaults" aria-label="Quick done" onClick={(e) => { e.stopPropagation(); onDone(); }}>✓</button>
+        <button type="button" className="tdb-qbtn dis" title="Snooze / stop asking" aria-label="Snooze or stop asking" onClick={(e) => { e.stopPropagation(); onPause(); }}>⏸</button>
+      </div>
+    );
+  }
+
+  // Standalone receipt/dismissed cards — the live card vanished with the write; the receipt persists.
+  function overlayCards(lane: "do" | "hk" | "nt") {
+    return Object.entries(overlays)
+      .filter(([, o]) => (o.kind === "receipt" || o.kind === "dismissed") && o.lane === lane)
+      .map(([key, o]) => {
+        if (o.kind === "receipt") return (
+          <div key={`ov-${key}`} className="tdb-tile receipt">
+            <div className="tdb-receiptbody">
+              <div className="tdb-rk"><span className="tdb-rtick">✓</span><span className="tdb-rt">{o.title}</span></div>
+              <div className="tdb-rlog">{o.line}<br />Wrong? Fix it before you move on.</div>
+              <div className="tdb-racts">
+                {o.edit && <button type="button" className="tdb-ra" onClick={o.edit}>Edit details</button>}
+                {o.undo && <button type="button" className="tdb-ra" onClick={async () => { await o.undo!(); clearOverlay(key); }}>Undo</button>}
+              </div>
+            </div>
+          </div>
+        );
+        if (o.kind !== "dismissed") return null;
+        return (
+          <div key={`ov-${key}`} className="tdb-tile dismissed">
+            <div className="tdb-dismissbody">
+              <div className="tdb-dt">{o.text}</div>
+              <div className="tdb-dact">
+                <button type="button" className="tdb-ra" onClick={async () => { await o.undo(); clearOverlay(key); }}>Undo</button>
+                {o.never && <button type="button" className="tdb-ra" onClick={o.never}>Never ask</button>}
+              </div>
+            </div>
+          </div>
+        );
+      });
+  }
+
+  function renderFork(key: string, single: boolean, acts: { notNow: () => void; neverThis: () => void; neverRule?: () => void }) {
+    return (
+      <div className="tdb-neverfork" onClick={(e) => e.stopPropagation()}>
+        <div className="tdb-nt2">Stop asking — for how long?</div>
+        <button type="button" className="tdb-nb" onClick={acts.notNow}><b>Not now</b>&nbsp;— back in a week</button>
+        <button type="button" className="tdb-nb" onClick={acts.neverThis}><b>Never</b>&nbsp;— just {single ? "this query" : "these agents"}</button>
+        {acts.neverRule && <button type="button" className="tdb-nb" onClick={acts.neverRule}><b>Never</b>&nbsp;— any agent missing this</button>}
+        <button type="button" className="tdb-ncancel" onClick={() => clearOverlay(key)}>Cancel</button>
+      </div>
+    );
+  }
+
+  // ── full-detail lane card (fixed height, clip-safe). Completion = the rail or the sheet; the
+  // Mark-done pill is RETIRED and ＋ Today's list goes full-width (committing = the visible button). ──
   function renderCard(c: BoardCard) {
     const titleNode = c.who && c.title.includes(c.who)
       ? <>{c.title.split(c.who)[0]}<em>{c.who}</em>{c.title.split(c.who).slice(1).join(c.who)}</>
       : c.title;
     const committed = onList(c);
+    const ov = overlays[c.key];
+    if (ov?.kind === "fork") {
+      return (
+        <div key={c.key} className={`tdb-tile ${c.stream}`}>
+          {renderFork(c.key, true, { notNow: () => forkStale(c, "notNow"), neverThis: () => forkStale(c, "neverThis") })}
+        </div>
+      );
+    }
     return (
       <div key={c.key} className={`tdb-tile ${c.stream}${committed ? " today" : ""}${pulsing === c.key ? " pulse" : ""}`} onClick={() => openFlowCards([c])}>
+        {c.taskType !== "offer_received" && rail(() => quickDone(c), () => quickPause(c))}
         <div className="tdb-tags">
           <span className={`tdb-tag due${c.warn ? " warn" : ""}`}>{c.due}</span>
           {c.snoozes > 0 && <span className="tdb-tag snz">Snoozed ×{c.snoozes}</span>}
@@ -363,20 +606,44 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <button type="button" className={`tdb-pill today-p${committed ? " on" : ""}`} onClick={(e) => { e.stopPropagation(); toggleToday(c); }}>
             {committed ? "✓ On today" : "＋ Today’s list"}
           </button>
-          <button type="button" className="tdb-pill done-p" onClick={(e) => { e.stopPropagation(); markDone(c); }}>
-            <span className="tdb-tk" />Mark done
-          </button>
         </div>
       </div>
     );
   }
 
-  // ── grouped housekeeping card (dq rules only — stale renders individually; fixed height, clip-safe) ──
+  // ── grouped housekeeping card (dq rules only — stale renders individually; fixed height, clip-safe).
+  // ✓ flips the card into the rapid chip-fill (the SAME hkSave batch save as the sheet); ⏸ forks. ──
   function renderGroupCard(g: HkGroup) {
+    const key = `group-${g.rule}`;
+    const ov = overlays[key];
+    if (ov?.kind === "flip") {
+      return (
+        <div key={g.rule} className="tdb-gcard flip">
+          <GroupFlip
+            group={g}
+            onCancel={() => clearOverlay(key)}
+            onSaved={(ok, undo) => {
+              clearOverlay(key);
+              setOverlay(`${key}-r`, { kind: "receipt", lane: "hk", title: `${ok} ${g.meta.label.toLowerCase()} set`, line: "Saved to their profiles. The rest stay on the card — skipping is fine.", undo });
+              flash(`${ok} saved`, undo ? { label: "Undo all", fn: async () => { await undo(); clearOverlay(`${key}-r`); } } : undefined);
+            }}
+            deps={{ agents, updateAgent, resolveTaskFlag }}
+          />
+        </div>
+      );
+    }
+    if (ov?.kind === "fork") {
+      return (
+        <div key={g.rule} className="tdb-gcard">
+          {renderFork(key, false, { notNow: () => forkNotNowGroup(g), neverThis: () => forkNeverThese(g), neverRule: () => forkNeverRule(g) })}
+        </div>
+      );
+    }
     const faces = g.members.slice(0, 5);
     const suffix = g.meta.title(g.members.length).replace(/^\d+\s+/, "");
     return (
       <div key={g.rule} className="tdb-gcard" onClick={() => setFlow([{ kind: "group", group: g }])}>
+        {rail(() => setOverlay(key, { kind: "flip" }), () => setOverlay(key, { kind: "fork", single: false }), true)}
         <div className="tdb-gn">{g.members.length}</div>
         <div className="tdb-gt">{suffix}</div>
         <div className="tdb-gs">{HK_PAYOFF[g.rule] ?? ""}</div>
