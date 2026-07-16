@@ -12,6 +12,7 @@ import {
   taskSurvivesMute,
   groupHousekeeping,
   hkGapCount,
+  hkGroupProgress,
   mutedMembersForRule,
 } from "./todoHousekeeping";
 import { MUTED_UNTIL } from "./taskFlags";
@@ -219,5 +220,16 @@ describe("mutedMembersForRule — item-muted agents listed for the 'n muted — 
     const boMuted: TaskFlag = { ...mutedFlag, id: "f2", agentId: "a2" };
     expect(mutedMembersForRule("dq_materials", agents3, [boMuted], NOW)).toEqual([]);
     expect(mutedMembersForRule("no_response_close", agents3, [mutedFlag], NOW)).toEqual([]);
+  });
+});
+
+describe("hkGroupProgress — the G3 card's bar (complete = total − gaps)", () => {
+  it("computes complete/pct/caption from real counts", () => {
+    expect(hkGroupProgress(56, 16)).toEqual({ complete: 40, total: 56, pct: 71, caption: "40 of 56 agents complete" });
+    expect(hkGroupProgress(56, 15)).toEqual({ complete: 41, total: 56, pct: 73, caption: "41 of 56 agents complete" });
+  });
+  it("never divides by zero or goes negative", () => {
+    expect(hkGroupProgress(0, 0)).toEqual({ complete: 0, total: 0, pct: 0, caption: "0 of 0 agents complete" });
+    expect(hkGroupProgress(3, 5).complete).toBe(0); // more gaps than agents (multi-gap agents) floors at 0
   });
 });

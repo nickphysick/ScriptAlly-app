@@ -190,6 +190,18 @@ export function hkGapCount(groups: HkGroup[]): number {
   return groups.reduce((n, g) => n + g.members.length, 0);
 }
 
+/**
+ * The G3 grouped-card progress line — pure arithmetic over counts the view-model already has:
+ * complete = total agents − gap count (every agent is in the denominator; the group's members are
+ * the gaps). Caption per the retoken ref: "40 OF 56 AGENTS COMPLETE" (CSS uppercases) + "71%".
+ */
+export function hkGroupProgress(totalAgents: number, gapCount: number): { complete: number; total: number; pct: number; caption: string } {
+  const total = Math.max(0, totalAgents);
+  const complete = Math.max(0, total - Math.max(0, gapCount));
+  const pct = total > 0 ? Math.round((complete / total) * 100) : 0;
+  return { complete, total, pct, caption: `${complete} of ${total} agents complete` };
+}
+
 export interface MutedMember {
   agentId: string;
   agentName: string;

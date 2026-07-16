@@ -57,3 +57,24 @@ boxed empty state; Urgent/Housekeeping empties are quiet italics on the desk. Th
 recovery strip floats de-containered between the heading and the track.
 
 **Gates:** tsc clean · build OK · Vitest **1040** green.
+
+## PHASE C — option-A cards + spines + G3 grouped
+
+Type (all cards): title **Playfair 17/600 ink**, 1.28 lh, 2-line clamp — the burgundy-italic agent
+emphasis is GONE (names ink roman, per the law); sub Inter 12 `--sub` 1.55 with **manuscript titles
+serif-italic `--ink-2`** (`.tdb-ms`, detected by title match); meta mono 8.5 unchanged. **Clip-safety
+relaxed but intact:** `min-height: 190px` (not fixed) — tag/meta/pill rows `flex:none`, only the new
+`.tdb-mid` flexes and clips (subs clamp 2 / grouped 1) — the pills-can-never-spill invariant stands
+structurally (the overlay bodies swapped `height:100%` → `flex:1` to survive the min-height change).
+**Spines:** 3px `::before` per lane (pink-btn / hk-spine / note-b) — receipts/fork/flip inherit them
+by sitting in the same card shells. **Tags:** neutral outline default · **burgundy FILL = live
+deadline** · **ink fill ★ = offer**. **Neutral monograms** (paper + hairline) everywhere.
+**G3 grouped card:** mono kicker + sage dot ("MISSING MATERIALS"…), serif title with the inline
+21px numeral, one-line sub (**rule-accurate copy — the approved sent-materials line is red-gated**,
+see STEP 0.4; `G3_COPY` is a one-line swap when decided), **sage progress bar + mono caption from
+REAL counts** (`hkGroupProgress(agents.length, gapCount)` — complete = total − gaps, unit-locked),
+neutral stack + "+N", **"Fix together →" as an ink-outline button (fills ink on hover)**. The quiet
+"Never" stays (dropping it would delete an affordance — behaviour is locked this pass; flagged as a
+mockup deviation). ✓-flip / ⏸-fork behaviours unchanged.
+
+**Gates:** tsc clean · build OK · Vitest **1042** green (+2: the progress arithmetic).

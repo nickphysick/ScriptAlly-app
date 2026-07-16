@@ -33,7 +33,7 @@ import {
 } from "../../lib/todoWalk";
 import { saveHkRows } from "../../lib/hkSave";
 import { isProUser, fetchAssistedFill, AssistFound } from "../../lib/assistFill";
-import { groupHousekeeping, hkGapCount, HkGroup, HkRule, HK_RULES, HK_PAYOFF } from "../../lib/todoHousekeeping";
+import { groupHousekeeping, hkGapCount, hkGroupProgress, HkGroup, HkRule, HK_RULES } from "../../lib/todoHousekeeping";
 import { ActivityType, QueryStatus } from "../../types";
 import { FocusFlow, FocusItem } from "./FocusFlow";
 import "./todo.css";
@@ -55,6 +55,15 @@ const fmtTime = (ms?: number): string => {
   const ap = h < 12 ? "am" : "pm";
   h = h % 12 || 12;
   return `${h}:${String(d.getMinutes()).padStart(2, "0")}${ap}`;
+};
+
+/** G3 grouped-card copy (retoken ref) — RULE-ACCURATE: the approved "Add details of what you sent"
+ *  materials line is red-gated (the rule checks the agent's REQUIREMENTS, not query sent-materials);
+ *  this copy says what the rule actually checks. Swap one line here if Nick approves new wording. */
+const G3_COPY: Record<string, { kick: string; rest: (n: number) => string; sub: string }> = {
+  dq_responseTime: { kick: "Missing reply windows", rest: (n) => ` agent${n === 1 ? "" : "s"} missing a reply window`, sub: "Without one we can’t tell you when a nudge is fair." },
+  dq_materials: { kick: "Missing materials", rest: (n) => ` agent${n === 1 ? "" : "s"} missing a materials list`, sub: "Add what they ask to receive so your package check can run." },
+  dq_mswl: { kick: "Missing wish list", rest: (n) => ` agent${n === 1 ? "" : "s"} missing a wish list`, sub: "Their wish list is how we tell you who’s worth querying." },
 };
 
 type Overlay =
@@ -631,11 +640,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // ── full-detail lane card (fixed height, clip-safe). Completion = the rail or the sheet; the
   // Mark-done pill is RETIRED and ＋ Today's list goes full-width (committing = the visible button). ──
   function renderCard(c: BoardCard) {
-    const titleNode = c.who && c.title.includes(c.who)
-      ? <>{c.title.split(c.who)[0]}<em>{c.who}</em>{c.title.split(c.who).slice(1).join(c.who)}</>
-      : c.title;
     const committed = onList(c);
     const ov = overlays[c.key];
+    const isOffer = c.taskType === "offer_received";
+    // Option-A sub: a manuscript title inside the sub renders serif-italic (--ink-2).
+    const subIsMs = !!c.subtitle && manuscripts.some((m) => m.title === c.subtitle);
     if (ov?.kind === "fork") {
       return (
         <div key={c.key} className={`tdb-tile ${c.stream}`}>
@@ -645,16 +654,18 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     }
     return (
       <div key={c.key} className={`tdb-tile ${c.stream}${committed ? " today" : ""}${pulsing === c.key ? " pulse" : ""}`} onClick={() => openFlowCards([c])}>
-        {c.taskType !== "offer_received" && rail(() => quickDone(c), () => quickPause(c))}
+        {!isOffer && rail(() => quickDone(c), () => quickPause(c))}
         <div className="tdb-tags">
-          <span className={`tdb-tag due${c.warn ? " warn" : ""}`}>{c.due}</span>
+          <span className={`tdb-tag due${isOffer ? " offer" : c.warn ? " warn" : ""}`}>{isOffer ? `★ ${c.due}` : c.due}</span>
           {c.snoozes > 0 && <span className="tdb-tag snz">Snoozed ×{c.snoozes}</span>}
         </div>
-        <div className="tdb-tt">{titleNode}</div>
-        <div className="tdb-tsub">{c.subtitle}</div>
+        <div className="tdb-mid">
+          <div className="tdb-tt">{c.title}</div>
+          {c.subtitle && <div className="tdb-tsub">{subIsMs ? <span className="tdb-ms">{c.subtitle}</span> : c.subtitle}</div>}
+        </div>
         <div className="tdb-tmeta">
           {c.hk ? <span className="tdb-hkdot" aria-hidden>!</span> : c.status ? <StatusDot status={c.status as QueryStatus} overrideSize={14} /> : <span className="tdb-tdot" />}
-          <span className={`tdb-miniav ${c.stream}`}>{c.initials}</span>
+          <span className="tdb-miniav">{c.initials}</span>
           <span className="tdb-who">{c.record}</span>
         </div>
         <div className="tdb-tacts">
@@ -666,8 +677,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     );
   }
 
-  // ── grouped housekeeping card (dq rules only — stale renders individually; fixed height, clip-safe).
-  // ✓ flips the card into the rapid chip-fill (the SAME hkSave batch save as the sheet); ⏸ forks. ──
+  // ── G3 grouped card (retoken): kicker + serif title w/ inline numeral + one-line sub + REAL-count
+  // progress bar + neutral stack + ink-outline Fix-together (+ the quiet Never — behaviour kept).
+  // ✓ still flips to the rapid chip-fill; ⏸ still forks. ──
   function renderGroupCard(g: HkGroup) {
     const key = `group-${g.rule}`;
     const ov = overlays[key];
@@ -696,18 +708,25 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         </div>
       );
     }
-    const faces = g.members.slice(0, 5);
-    const suffix = g.meta.title(g.members.length).replace(/^\d+\s+/, "");
+    const faces = g.members.slice(0, 4);
+    const copy = G3_COPY[g.rule] ?? { kick: g.meta.label, rest: () => ` ${g.meta.label.toLowerCase()}`, sub: "" };
+    const prog = hkGroupProgress(agents.length, g.members.length);
     return (
       <div key={g.rule} className="tdb-gcard" onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}>
         {rail(() => setOverlay(key, { kind: "flip" }), () => setOverlay(key, { kind: "fork", single: false }), true)}
-        <div className="tdb-gn">{g.members.length}</div>
-        <div className="tdb-gt">{suffix}</div>
-        <div className="tdb-gs">{HK_PAYOFF[g.rule] ?? ""}</div>
+        <div className="tdb-kick"><span className="tdb-kd" aria-hidden />{copy.kick}</div>
+        <div className="tdb-mid">
+          <div className="tdb-gtt"><span className="tdb-gn">{g.members.length}</span>{copy.rest(g.members.length)}</div>
+          <div className="tdb-gsub">{copy.sub}</div>
+        </div>
+        <div className="tdb-gprog">
+          <div className="tdb-pbar"><i style={{ width: `${prog.pct}%` }} /></div>
+          <div className="tdb-pcap"><span>{prog.caption}</span><span>{prog.pct}%</span></div>
+        </div>
         <div className="tdb-gstack">
           {faces.map((m) => <span key={m.card.key} className="tdb-gsav" title={m.agentName}>{m.card.initials}</span>)}
           {g.members.length > faces.length && <span className="tdb-gmore">+{g.members.length - faces.length}</span>}
-          <span className="tdb-gfix">Fix together →</span>
+          <button type="button" className="tdb-gfix" onClick={(e) => { e.stopPropagation(); setFlow({ items: [{ kind: "group", group: g }] }); }}>Fix together →</button>
           <button type="button" className="tdb-gnever" title="Stop asking about these — the gaps stay on the profiles" onClick={(e) => { e.stopPropagation(); muteRuleFromCard(g); }}>Never</button>
         </div>
       </div>
