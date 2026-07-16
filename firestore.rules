@@ -78,7 +78,9 @@ service cloud.firestore {
         // Shape (id/label maps) is validated client-side; rules just bound presence + count.
         && (!data.keys().hasAny(['personalGenres']) || (data.personalGenres is list && data.personalGenres.size() <= 10))
         // Muted housekeeping rules — optional list of rule keys, bounded.
-        && (!data.keys().hasAny(['mutedTaskRules']) || (data.mutedTaskRules is list && data.mutedTaskRules.size() <= 64));
+        && (!data.keys().hasAny(['mutedTaskRules']) || (data.mutedTaskRules is list && data.mutedTaskRules.size() <= 64))
+        // The To-do board tour's seen-stamp (ISO timestamp; the hasSeenTour pattern).
+        && (!data.keys().hasAny(['tourSeenAt']) || (data.tourSeenAt is string && data.tourSeenAt.size() <= 64));
     }
 
     function isValidManuscript(data, userId) {
@@ -465,7 +467,7 @@ service cloud.firestore {
       allow read, delete: if isOwner(userId);
       allow create: if isOwner(userId) && isValidUser(incoming());
       allow update: if isOwner(userId) && isValidUser(incoming()) && (
-        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus', 'onboardingComplete', 'queryingStage', 'journeyStage', 'homeCountry', 'queriesTheme', 'hasSeenTour', 'personalGenres', 'mutedTaskRules'])
+        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus', 'onboardingComplete', 'queryingStage', 'journeyStage', 'homeCountry', 'queriesTheme', 'hasSeenTour', 'personalGenres', 'mutedTaskRules', 'tourSeenAt'])
       );
 
       // ROUTE: Manuscripts

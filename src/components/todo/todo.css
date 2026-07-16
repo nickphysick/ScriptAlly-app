@@ -335,6 +335,28 @@
 .tdb-smore { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--faint); margin-top: 2px; }
 .tdb-clrhand.big { margin: 14px 0 0; font-size: 22px; color: var(--coffee-ink); display: inline-block; }
 
+/* ══ SPOTLIGHT TOUR (design-refs/todo-onboarding-tour.html, Act 1) — a scrim with a moving rounded
+   cutout (the box-shadow hole) + the coach card in the header's grammar. 450ms glide between
+   stops; reduced-motion removes the transitions. Sits above the FAB/pop-up (40) and toasts (60). ══ */
+.tdb-tourscrim { position: fixed; inset: 0; z-index: 80; overflow: hidden; }
+.tdb-tourhole { position: absolute; border-radius: 16px; box-shadow: 0 0 0 9999px rgba(30, 26, 22, 0.55); outline: 2px solid rgba(255, 255, 255, 0.65); outline-offset: 3px; transition: all 0.45s cubic-bezier(0.3, 0.8, 0.3, 1); }
+.tdb-coach { position: fixed; z-index: 81; width: 320px; background: var(--white, #fff); border: 1.5px solid var(--ink); border-radius: 14px; box-shadow: var(--sh-3); padding: 16px 18px; transition: all 0.45s cubic-bezier(0.3, 0.8, 0.3, 1); }
+.tdb-coachstep { font-family: var(--f12-mono); font-size: 7.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.tdb-coachdots { display: flex; gap: 4px; margin-left: auto; }
+.tdb-cd { width: 6px; height: 6px; border-radius: 50%; background: #ddd2c1; }
+.tdb-cd.on { background: var(--burg); }
+.tdb-cd.dn { background: var(--hk-spine); }
+.tdb-coach h3 { font-family: var(--f12-serif); font-size: 17px; font-weight: 600; line-height: 1.25; margin-bottom: 6px; color: var(--ink); }
+.tdb-coach p { font-size: 12.5px; color: var(--sub); line-height: 1.55; }
+.tdb-coachacts { display: flex; gap: 8px; margin-top: 13px; align-items: center; }
+.tdb-coachskip { font-size: 11.5px; color: var(--muted); }
+.tdb-coachskip:hover { color: var(--ink); }
+.tdb-coachbk { font-size: 12px; font-weight: 500; padding: 8px 13px; border-radius: 8px; border: 1px solid var(--line); background: var(--white, #fff); color: var(--ink-2); }
+.tdb-coachbk:hover { border-color: var(--ink); color: var(--ink); }
+.tdb-coachnx { font-size: 12.5px; font-weight: 600; padding: 8px 16px; border-radius: 8px; background: var(--ink); color: var(--panel); }
+.tdb-coachnx:hover { filter: brightness(1.3); }
+@media (prefers-reduced-motion: reduce) { .tdb-tourhole, .tdb-coach { transition: none; } }
+
 /* ══ FOCUS FLOW (design-refs/todo-focus-flow.html) — one task, one sheet, one question at a time.
    The full-viewport takeover on the oat ground; sheet-on-desk metaphor with 1–2 queue sheets peeking
    behind. CSS-only animations, killed under prefers-reduced-motion. ══ */

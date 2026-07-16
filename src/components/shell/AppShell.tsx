@@ -129,6 +129,9 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
   // App-wide nav drawer — AppShell owns the open state; triggers (CrumbStrip / DashTopBar
   // menu buttons) and the drawer itself consume it through NavDrawerProvider.
   const [drawerOpen, setDrawerOpen] = useState(false);
+  // The help "?" popover — only /todo gets the menu (Help centre + Replay the tour); every other
+  // route keeps the direct navigate. The replay item dispatches sa:todo-replay-tour for the board.
+  const [helpMenuOpen, setHelpMenuOpen] = useState(false);
   const drawerCtx = useMemo(
     () => ({ open: drawerOpen, setOpen: setDrawerOpen, toggle: () => setDrawerOpen((v) => !v) }),
     [drawerOpen]
@@ -174,7 +177,13 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
       <button
         type="button"
         className="ashell-help-fab"
-        onClick={() => onNavigate("help")}
+        onClick={() => {
+          // On the To-do board the ? opens a two-item menu (the tour replay lives here); the
+          // existing direct-navigate behaviour is KEPT as the menu's first item — and stays the
+          // click action itself on every other route.
+          if (routeKey === "todo") setHelpMenuOpen((v) => !v);
+          else onNavigate("help");
+        }}
         title="Help"
         aria-label="Help"
         style={{
@@ -187,6 +196,33 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
       >
         ?
       </button>
+      {helpMenuOpen && (
+        <>
+          <div style={{ position: "fixed", inset: 0, zIndex: 39 }} onClick={() => setHelpMenuOpen(false)} />
+          <div
+            role="menu"
+            aria-label="Help"
+            style={{
+              position: "fixed", bottom: 66, right: 20, zIndex: 41, minWidth: 176,
+              background: parchment, border: "var(--bdw) solid var(--bd)", borderRadius: 12,
+              boxShadow: "0 6px 24px rgba(58,28,20,0.16)", padding: 6, fontSize: 13,
+            }}
+          >
+            <button type="button" role="menuitem" style={{ display: "block", width: "100%", textAlign: "left", padding: "9px 12px", borderRadius: 8, color: "inherit" }}
+              onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(124,58,42,0.08)"; }}
+              onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
+              onClick={() => { setHelpMenuOpen(false); onNavigate("help"); }}>
+              Help centre
+            </button>
+            <button type="button" role="menuitem" style={{ display: "block", width: "100%", textAlign: "left", padding: "9px 12px", borderRadius: 8, color: "inherit" }}
+              onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(124,58,42,0.08)"; }}
+              onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
+              onClick={() => { setHelpMenuOpen(false); window.dispatchEvent(new CustomEvent("sa:todo-replay-tour")); }}>
+              Replay the tour
+            </button>
+          </div>
+        </>
+      )}
 
       <BottomTabBar activeTab={routeKey} onNavigate={onNavigate} />
 

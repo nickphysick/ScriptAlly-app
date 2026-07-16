@@ -46,6 +46,11 @@ export interface User {
   // Housekeeping rules the writer has muted app-wide ("Don't ask again → All of them"). Per-item
   // mutes live on a TaskFlag instead. Muting stops the reminder; it never deletes the underlying gap.
   mutedTaskRules?: string[];
+  // The To-do board's first-visit spotlight tour has run (ISO timestamp; set on Done OR skip — the
+  // hasSeenTour pattern). Absent === never seen; the ? popover's "Replay the tour" ignores it.
+  // NOTE: rides the parked firestore.rules user-update allowlist edit — silently denied (graceful,
+  // the tour just re-offers) until that deploy lands.
+  tourSeenAt?: string;
 }
 
 /**

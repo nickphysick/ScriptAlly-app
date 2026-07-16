@@ -59,3 +59,60 @@ Precedence: **A beats everything; E beats B+C+D; otherwise per-lane** — locked
 (9 tests: precedence, E-requires-cleared, live-count lines incl. singular, the list cap).
 
 **Gates:** tsc clean · build OK · Vitest **1051** green (+9).
+
+## PHASE C — spotlight tour (Act 1 only)
+
+**Act 2 (the desk-walk sheets) is DROPPED per the pack — not built.** Stop 5's button reads
+**"Done"** (not the ref's "Try it →") and ends the tour.
+
+**The overlay** (`TodoTour.tsx` + `todoTour.ts`): a fixed scrim (rgba ink .55) with a moving
+rounded cutout (the box-shadow-hole technique), soft white outline, **450ms ease between stops**
+(`prefers-reduced-motion` → no transition); the coach card in the header's grammar (white, 1.5px
+ink border) — mono "N OF 5" + progress dots (done = hk-spine, current = burgundy), Playfair
+heading, ≤25-word body, **Skip the tour** (always), **Back** (from stop 2), **Next → / Done**.
+**The five stops, copy VERBATIM from the ref** (snapshot-locked in `todoTour.test.ts`): the
+post-its → the Urgent reel → the first urgent card's ＋ Today's-list pill → the corner FAB →
+"Work through priorities now". Targets are located by selector at open, scrolled into view before
+measuring, recomputed on resize; **missing targets are filtered and the count renumbers** (a
+replay on an urgent-empty board simply skips the pill stop). **Esc ends the tour (counts as
+skip).** The scrim blocks board interaction for the duration.
+
+**The flag — the one schema addition (pre-answered):** `User.tourSeenAt` (ISO timestamp) via the
+established `hasSeenTour` pattern — types + `updateUserProfile` + the `firestore.rules`
+`isValidUser` clause + the user-update allowlist entry (the rules diff is exactly those two
+hunks). **Auto-run predicate** (`shouldAutoRunTour`, unit-locked): `tourSeenAt` absent ∧ NOT the
+new-desk state — so it only auto-runs when the board has data. **The flag is stamped on Done AND
+on skip/Esc**; never localStorage. ⚠️ Until the rules deploy lands, the stamp write is silently
+denied (affectedKeys) and the tour re-offers per visit — dev rules deploy rides the next
+"deploy to dev"; prod is Nick's.
+
+**Replay — the ? popover:** recon found the corner ? NAVIGATES to /help globally (not inert), so
+per the pack the popover ADDS rather than replaces: **on `/todo` only**, the ? opens a two-item
+menu — "Help centre" (the existing action) + **"Replay the tour"** (dispatches
+`sa:todo-replay-tour`; the board listens and opens the tour regardless of the flag). Every other
+route keeps the direct navigate, byte-identical.
+
+**Gates:** tsc clean · build OK · Vitest **1057** green (+6). `App.tsx` untouched (the popover
+lives in AppShell.tsx); no PaintMode.
+
+## FINALISE
+
+- **SHAs:** A `3e2f190` (inert grammar) · B `4a4bb0e` (empty states + done-band rule) · C `<this>`.
+- **Done-band rule applies POP-UP-WIDE** ✓ — the divider + band render only when `clearedToday`
+  is non-empty, in every state, not just empties.
+- **Disabled inventory → the grammar** ✓ — ribbon priorities button, pop-up Work-the-list, the
+  focus-flow primaries/Back/Copy/Find, receipt + flip buttons: one shared `:disabled` block; the
+  old opacity disables deleted.
+- **Tour flag semantics** ✓ — auto-run = absent-flag ∧ not-new-desk; set on complete AND skip;
+  cross-device (user doc, never localStorage).
+- **? popover** ✓ — additive, /todo-scoped; Help centre preserved.
+- **Deploys for Nick:** dev rules (`tourSeenAt`) ride the next dev deploy I run on request; prod
+  hosting/rules/functions remain Nick's list.
+- **Mobile note for the proper pass:** spotlight targets shift on mobile (the postits wrap, the
+  FAB moves) — the hole/coach maths already recompute, but stop framing needs a mobile eye; flagged,
+  not built.
+
+**Nick eyeballs:** the new-desk state on a fresh dev account (welcome card + faded zeros + inert
+button + both doorways) · B/C with seeded data (real counts in the lines) · E after clearing a
+seeded desk · the pop-up morning state ("NOTHING YET", no done band, the new prompt) · a disabled
+"Work the list" · the tour end-to-end (glide, Back, Done) + Esc-skip + replay from the ? popover.

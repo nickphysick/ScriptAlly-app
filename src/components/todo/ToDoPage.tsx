@@ -20,7 +20,7 @@
  * The FAB sits at right:70 — LEFT of the AppShell's global help "?" (fixed bottom:20 right:20,
  * 38px, z-30), so the two corner controls never collide.
  */
-import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { F12Page, F12Account } from "../shell/F12Shell";
 import { StatusDot } from "../StatusDot";
 import { useScriptAllyDb } from "../../lib/db";
@@ -35,6 +35,8 @@ import { saveHkRows } from "../../lib/hkSave";
 import { isProUser, fetchAssistedFill, AssistFound } from "../../lib/assistFill";
 import { groupHousekeeping, hkGapCount, hkGroupProgress, HkGroup, HkRule, HK_RULES } from "../../lib/todoHousekeeping";
 import { deskState, liveQueryCount, liveQueriesLine, clearedListCap } from "../../lib/todoEmpty";
+import { shouldAutoRunTour } from "../../lib/todoTour";
+import { TodoTour } from "./TodoTour";
 import { ActivityType, QueryStatus } from "../../types";
 import { FocusFlow, FocusItem } from "./FocusFlow";
 import "./todo.css";
@@ -283,6 +285,28 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const { committed: committedCards, done: doneCards } = todaySplit(board, today);
   const doneN = doneCards.length;
   const desk = deskState({ queryCount: queries.length, agentCount: agents.length, urgent: board.do.length, hkItems: hkItemCount, notes: board.nt.length, clearedToday: doneN });
+
+  // ── first-visit spotlight tour (Act 1). Auto-runs ONCE: `tourSeenAt` absent ∧ not the new desk;
+  // the flag is stamped on Done AND on skip/Esc (never localStorage — it follows the user). The
+  // corner ?'s "Replay the tour" re-opens it regardless of the flag via a CustomEvent. ──
+  const [tourOpen, setTourOpen] = useState(false);
+  const tourRanRef = useRef(false);
+  useEffect(() => {
+    if (tourRanRef.current || tourOpen) return;
+    if (currentUser && shouldAutoRunTour(currentUser.tourSeenAt, desk)) {
+      tourRanRef.current = true;
+      setTourOpen(true);
+    }
+  }, [currentUser, desk, tourOpen]);
+  useEffect(() => {
+    const onReplay = () => setTourOpen(true);
+    window.addEventListener("sa:todo-replay-tour", onReplay);
+    return () => window.removeEventListener("sa:todo-replay-tour", onReplay);
+  }, []);
+  const endTour = () => {
+    setTourOpen(false);
+    if (!currentUser?.tourSeenAt) void updateUserProfile({ tourSeenAt: new Date().toISOString() });
+  };
   const onList = (c: BoardCard) => c.committedDate === today;
   const allCommitted = [...board.do, ...board.hk, ...board.nt].filter((c) => c.committedDate != null);
   const rolled = rollDismissed ? [] : rolledOverCards(allCommitted, today);
@@ -545,6 +569,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       )}
       {todayOpen && renderTodayPop()}
 
+      {tourOpen && <TodoTour onEnd={endTour} />}
       {toast && (
         <div className="tdb-toast">
           {toast.msg}
