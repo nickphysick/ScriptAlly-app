@@ -103,3 +103,22 @@ burgundy-warn); this phase applies it, corroborated visually by `todo-task-setti
   existed to update (logic-only Vitest policy).
 - **`design-refs/themes.md` regenerated:** the retoken law line amended (burgundy no longer a tag
   fill) + a dated "Polish v3 amendments" subsection documenting the law and the new token.
+
+## PHASE 3 — "Sweep" → "Focused session" (Option C pill)
+
+Copy + weight only; the handler (the focus flow's SWEEP MODE — the per-lane walkthrough's
+successor, per the confirmed rebase) is untouched, same position in the lane header.
+
+- **Markup:** `.tdb-sw` ghost text-button → the `.tdb-fs` pill: white, 1px hairline, radius 99,
+  padding 7px 16px (9px leading, snug to the disc); 20px `.tdb-fsd` disc (gradient
+  `--pink-t → --pink-btn`, 1px `--pink-btn-h` border) carrying a solid ink play triangle (~9px,
+  +1px right optical); label "Focused session", 12.5px/600 body sans, ink. No arrow. The keyboard
+  hint moved into the title attribute ("Focused session — D done · S snooze · → skip").
+- **Hover:** border → `--pink-btn-h`, fill → `--paper` (the warm near-white token), 0.15s.
+- **`aria-label`:** `Start a focused session on {lane label}` (Urgent / Housekeeping / Notes to
+  self).
+- **Rename decision (the pack's either/or):** identifiers renamed WHERE LOCAL — the Lane prop
+  `onSweep` → `onFocusedSession` and the class `.tdb-sw` → `.tdb-fs` (both live only in
+  ToDoPage.tsx/todo.css, in scope). FocusFlow's `mode: "sweep"` API + sweep-mode internals KEEP
+  the sweep name (exported/consumed across FocusFlow.tsx + its tests — flow internals are out of
+  this pack's scope). No tests asserted the old copy.

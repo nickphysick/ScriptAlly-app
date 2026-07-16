@@ -165,11 +165,11 @@ const Lane: React.FC<{
   count: number;
   isEmpty: boolean;
   onAdd?: () => void;
-  onSweep?: () => void; // the quiet "Sweep" affordance (Phase D — the focus flow's speed grammar)
+  onFocusedSession?: () => void; // the "Focused session" pill (polish v3 P3 — launches the focus flow's sweep mode, the walkthrough's successor; handler unchanged)
   emptyNode?: React.ReactNode;
   strip?: React.ReactNode; // rendered between the header and the track (e.g. muted-rules recovery chips)
   children?: React.ReactNode;
-}> = ({ cls, label, count, isEmpty, onAdd, onSweep, emptyNode, strip, children }) => {
+}> = ({ cls, label, count, isEmpty, onAdd, onFocusedSession, emptyNode, strip, children }) => {
   const ref = useRef<HTMLDivElement>(null);
   // Polish P1 — both-edge fade state (pure machine in todoBoard.laneFadeState; 4px thresholds).
   // Functional update bails out when neither boolean changed, so scroll ticks don't re-render.
@@ -195,7 +195,11 @@ const Lane: React.FC<{
         <span className="tdb-lt">{label}</span>
         <span className="tdb-ln">{count}</span>
         <span className="tdb-rule" aria-hidden />
-        {onSweep && !isEmpty && <button type="button" className="tdb-sw" title="Sweep the lane — D done · S snooze · → skip" onClick={onSweep}>Sweep →</button>}
+        {onFocusedSession && !isEmpty && (
+          <button type="button" className="tdb-fs" title="Focused session — D done · S snooze · → skip" aria-label={`Start a focused session on ${label}`} onClick={onFocusedSession}>
+            <span className="tdb-fsd" aria-hidden />Focused session
+          </button>
+        )}
         {onAdd && <button type="button" className="tdb-cadd" onClick={onAdd} aria-label="Add a note">＋</button>}
         {!isEmpty && fade.right && <button type="button" className="tdb-chev" onClick={scrollRight} aria-label="Scroll right">›</button>}
       </div>
@@ -504,7 +508,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         {desk === "new-desk" ? renderNewDesk() : desk === "desk-cleared" ? renderDeskCleared() : (
         <div className="tdb-lanes">
           <Lane cls="do" label="Urgent" count={tiles.urgent} isEmpty={board.do.length === 0 && overlayCards("do").length === 0}
-            onSweep={() => setFlow({ items: board.do.map((card) => ({ kind: "card", card })), mode: "sweep" })}
+            onFocusedSession={() => setFlow({ items: board.do.map((card) => ({ kind: "card", card })), mode: "sweep" })}
             emptyNode={
               <div className="tdb-clear do">
                 <span className="tdb-clric" aria-hidden>✓</span>
@@ -521,7 +525,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             label="Housekeeping"
             count={tiles.housekeeping}
             isEmpty={hkGroups.length === 0 && staleCards.length === 0 && overlayCards("hk").length === 0}
-            onSweep={() => setFlow({ items: [...hkGroups.map((g) => ({ kind: "group" as const, group: g })), ...staleCards.map((card) => ({ kind: "card" as const, card }))], mode: "sweep" })}
+            onFocusedSession={() => setFlow({ items: [...hkGroups.map((g) => ({ kind: "group" as const, group: g })), ...staleCards.map((card) => ({ kind: "card" as const, card }))], mode: "sweep" })}
             emptyNode={
               <div className="tdb-clear hk">
                 <div><div className="tdb-clrt">Spotless.</div>
@@ -548,7 +552,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             {staleCards.map(renderCard)}
           </Lane>
           <Lane cls="nt" label="Notes to self" count={tiles.notes} onAdd={addTask} isEmpty={board.nt.length === 0 && overlayCards("nt").length === 0}
-            onSweep={() => setFlow({ items: board.nt.map((card) => ({ kind: "card", card })), mode: "sweep" })}
+            onFocusedSession={() => setFlow({ items: board.nt.map((card) => ({ kind: "card", card })), mode: "sweep" })}
             emptyNode={<button type="button" className="tdb-ghostcard" onClick={addTask}><span className="tdb-ge">Nothing jotted yet.</span><span className="tdb-gg">＋ Add a note</span></button>}>
             {overlayCards("nt")}
             {board.nt.map(renderCard)}
