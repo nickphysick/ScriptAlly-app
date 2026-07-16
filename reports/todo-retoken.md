@@ -43,3 +43,17 @@ are `aria-hidden`). Post-it counts = lane counts by construction — both read t
 `ribbonTiles` object (already unit-locked).
 
 **Gates:** tsc clean · build OK · Vitest **1040** green (no behavioural test moved).
+
+## PHASE B — open reels (de-containering)
+
+The white lane containers are GONE. Each lane is a reel: heading row straight on the oat —
+10px lane dot (pink-btn / hk-sage-2 / note-b, hairline outlines) · Playfair 19 lane title ·
+white/hairline count chip · a 1px rule stretching to fill · the SWEEP text-button (replaces the
+pill affordance; same handler) · chevron (＋ on Notes). Cards sit straight on the oat with the
+deeper desk shadows (`--sh-card`/`--sh-card-h`, hover lifts 1px); the scroller right-edge fade now
+fades to OAT (70px); horizontal scroll behaviour unchanged (same ref/ResizeObserver machinery).
+Empty Notes reel = the dashed GHOST CARD (330px, serif-italic line + mono "＋ Add a note"), not a
+boxed empty state; Urgent/Housekeeping empties are quiet italics on the desk. The muted-rules
+recovery strip floats de-containered between the heading and the track.
+
+**Gates:** tsc clean · build OK · Vitest **1040** green.

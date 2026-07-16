@@ -43,34 +43,38 @@
 .tdb-tool:hover { border-color: var(--ink-2); }
 .tdb-sp { flex: 1; }
 
-/* ── lanes (three stacked horizontal lanes; page scrolls vertically if they exceed the viewport) ── */
-.tdb-lanes { display: flex; flex-direction: column; gap: 12px; }
-.tdb-lane { display: flex; flex-direction: column; background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
-.tdb-lane.do { border-color: var(--pink-b); }
-.tdb-laneh { flex: none; display: flex; align-items: center; gap: 9px; padding: 9px 14px; border-bottom: 1px solid; }
-.tdb-lane.do .tdb-laneh { background: var(--pink-t); border-color: var(--pink-b); color: var(--pink-i); }
-.tdb-lane.hk .tdb-laneh { background: var(--gold-t); border-color: var(--gold-b); color: var(--gold-i); }
-.tdb-lane.nt .tdb-laneh { background: var(--note-t); border-color: var(--note-b); color: var(--note-i); }
-.tdb-lt { font-weight: 600; font-size: 13px; }
-.tdb-ln { font-family: var(--f12-mono); font-size: 8.5px; font-weight: 700; border-radius: 99px; padding: 2px 8px; background: rgba(255, 255, 255, 0.7); }
-.tdb-laneh .tdb-sp { flex: 1; }
-.tdb-cadd { font-size: 15px; padding: 0 4px; opacity: 0.7; }
-.tdb-cadd:hover { opacity: 1; }
-.tdb-lanesweep { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.07em; text-transform: uppercase; opacity: 0.65; padding: 4px 8px; border-radius: 99px; border: 1px solid transparent; }
-.tdb-lanesweep:hover { opacity: 1; background: rgba(255, 255, 255, 0.6); border-color: rgba(0, 0, 0, 0.06); }
-.tdb-chev { width: 24px; height: 24px; border-radius: 7px; display: flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(0, 0, 0, 0.06); font-size: 13px; opacity: 0.8; }
-.tdb-chev:hover { opacity: 1; background: #fff; }
+/* ── REELS (retoken Phase B — de-containered): the heading row sits straight on the oat; cards sit
+   straight on the oat with the deeper desk shadow; the fade fades to OAT. Scroll behaviour and the
+   overflow chevron are unchanged. ── */
+.tdb-lanes { display: flex; flex-direction: column; }
+.tdb-reel { margin-bottom: 26px; }
+.tdb-reelh { display: flex; align-items: center; gap: 11px; margin-bottom: 12px; padding: 0 2px; }
+.tdb-lanedot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.tdb-lanedot.do { background: var(--pink-btn); outline: 1px solid var(--pink-b); }
+.tdb-lanedot.hk { background: var(--hk-sage-2); outline: 1px solid var(--hk-spine); }
+.tdb-lanedot.nt { background: var(--note-b); outline: 1px solid #dcc98a; }
+.tdb-lt { font-family: var(--f12-serif); font-size: 19px; font-weight: 600; color: var(--ink); }
+.tdb-ln { font-family: var(--f12-mono); font-size: 8.5px; font-weight: 700; border-radius: 99px; padding: 2.5px 9px; background: var(--white, #fff); border: 1px solid var(--line); color: var(--ink-2); }
+.tdb-rule { flex: 1; height: 1px; background: var(--line); margin: 0 4px; }
+.tdb-sw { font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); padding: 4px 6px; }
+.tdb-sw:hover { color: var(--ink); }
+.tdb-cadd { font-size: 16px; color: var(--ink-2); padding: 0 4px; }
+.tdb-cadd:hover { color: var(--ink); }
+.tdb-chev { width: 26px; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: var(--white, #fff); border: 1px solid var(--line); font-size: 13px; color: var(--ink-2); }
+.tdb-chev:hover { color: var(--ink); border-color: var(--ink-2); }
 .tdb-track { position: relative; }
-.tdb-scroller { display: flex; gap: 11px; padding: 12px; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; align-items: stretch; }
-.tdb-track.more::after { content: ""; position: absolute; top: 0; bottom: 0; right: 0; width: 46px; pointer-events: none; background: linear-gradient(90deg, transparent, var(--paper)); }
-.tdb-laneempty { display: flex; align-items: center; gap: 12px; padding: 20px 16px; }
-.tdb-laneempty .e { font-family: var(--f12-serif); font-style: italic; font-size: 14px; color: var(--muted); }
-.tdb-ghost { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.09em; text-transform: uppercase; border: 1px dashed var(--note-b); color: var(--note-i); border-radius: 8px; padding: 9px 13px; }
-.tdb-ghost:hover { background: var(--note-t); }
+.tdb-scroller { display: flex; gap: 14px; padding: 2px 2px 6px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; align-items: stretch; }
+.tdb-track.more::after { content: ""; position: absolute; top: 0; bottom: 0; right: 0; width: 70px; pointer-events: none; background: linear-gradient(90deg, transparent, var(--oat, #f1e8dc)); }
+.tdb-emptyreel { display: flex; align-items: center; }
+.tdb-emptyreel .e { font-family: var(--f12-serif); font-style: italic; font-size: 14px; color: var(--muted); padding: 14px 4px; }
+.tdb-ghostcard { width: 330px; min-height: 74px; border: 1.5px dashed var(--note-b); border-radius: 11px; display: flex; align-items: center; justify-content: center; gap: 10px; background: none; }
+.tdb-ghostcard:hover { background: rgba(255, 255, 255, 0.45); }
+.tdb-ge { font-family: var(--f12-serif); font-style: italic; font-size: 14px; color: var(--muted); }
+.tdb-gg { font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--note-i); }
 
 /* ── full-detail lane card (fixed height, clip-safe: subtitle absorbs overflow, pills never spill) ── */
-.tdb-tile { position: relative; flex: none; width: 322px; height: 174px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); padding: 13px 15px; box-shadow: var(--sh-1); cursor: pointer; transition: box-shadow 0.2s, border-color 0.2s; display: flex; flex-direction: column; overflow: hidden; }
-.tdb-tile:hover { border-color: var(--ink-2); box-shadow: var(--sh-2); }
+.tdb-tile { position: relative; flex: none; width: 322px; height: 174px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); padding: 13px 15px; box-shadow: var(--sh-card); cursor: pointer; transition: box-shadow 0.2s, border-color 0.2s, transform 0.16s; display: flex; flex-direction: column; overflow: hidden; }
+.tdb-tile:hover { border-color: var(--ink); box-shadow: var(--sh-card-h); transform: translateY(-1px); }
 /* note-card tint (before .today so a committed note still shows the pink committed edge) */
 .tdb-tile.nt { border-color: var(--note-b); }
 .tdb-tile.nt .tdb-tag.due { background: var(--note-t); border-color: var(--note-b); color: var(--note-i); }
@@ -100,8 +104,8 @@
 .tdb-tk { width: 12px; height: 12px; border: 1.4px solid currentColor; border-radius: 3px; flex: none; opacity: 0.75; }
 
 /* ── grouped housekeeping card (fixed height, clip-safe: big count + blurb clip; stack + fix pinned) ── */
-.tdb-gcard { position: relative; flex: none; width: 322px; height: 174px; background: var(--panel); border: 1px solid var(--gold-b); border-radius: var(--r-md); padding: 14px 15px; box-shadow: var(--sh-1); cursor: pointer; transition: border-color 0.15s; display: flex; flex-direction: column; overflow: hidden; }
-.tdb-gcard:hover { border-color: var(--gold-i); }
+.tdb-gcard { position: relative; flex: none; width: 322px; height: 174px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); padding: 14px 15px; box-shadow: var(--sh-card); cursor: pointer; transition: border-color 0.15s, box-shadow 0.16s, transform 0.16s; display: flex; flex-direction: column; overflow: hidden; }
+.tdb-gcard:hover { border-color: var(--ink); box-shadow: var(--sh-card-h); transform: translateY(-1px); }
 .tdb-gn { flex: none; font-family: var(--f12-serif); font-size: 29px; font-weight: 600; color: var(--gold-i); line-height: 1; }
 .tdb-gt { flex: none; font-weight: 600; font-size: 13.5px; margin-top: 5px; line-height: 1.3; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .tdb-gs { flex: 1 1 auto; min-height: 0; font-size: 12px; color: var(--muted); margin-top: 5px; line-height: 1.45; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
@@ -113,7 +117,7 @@
 .tdb-gnever:hover { color: var(--ink); }
 
 /* muted-rules recovery strip (between the Housekeeping lane header and its cards) */
-.tdb-rulestrip { display: flex; align-items: center; gap: 7px; padding: 7px 14px; border-bottom: 1px solid var(--hairline); background: var(--paper); flex-wrap: wrap; }
+.tdb-rulestrip { display: flex; align-items: center; gap: 7px; padding: 0 2px 10px; flex-wrap: wrap; }
 .tdb-rulestrip-l { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--faint); }
 .tdb-rulechip { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--gold-i); background: var(--gold-t); border: 1px solid var(--gold-b); border-radius: 99px; padding: 3px 9px; }
 .tdb-rulechip:hover { border-color: var(--gold-i); }

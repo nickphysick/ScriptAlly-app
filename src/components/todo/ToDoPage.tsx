@@ -172,18 +172,19 @@ const Lane: React.FC<{
   }, [children]);
   const scrollRight = () => ref.current?.scrollBy({ left: 340, behavior: "smooth" });
   return (
-    <div className={`tdb-lane ${cls}`} id={`tdb-lane-${cls}`}>
-      <div className="tdb-laneh">
+    <div className={`tdb-reel ${cls}`} id={`tdb-lane-${cls}`}>
+      <div className="tdb-reelh">
+        <span className={`tdb-lanedot ${cls}`} aria-hidden />
         <span className="tdb-lt">{label}</span>
         <span className="tdb-ln">{count}</span>
-        <span className="tdb-sp" />
+        <span className="tdb-rule" aria-hidden />
+        {onSweep && !isEmpty && <button type="button" className="tdb-sw" title="Sweep the lane — D done · S snooze · → skip" onClick={onSweep}>Sweep →</button>}
         {onAdd && <button type="button" className="tdb-cadd" onClick={onAdd} aria-label="Add a note">＋</button>}
-        {onSweep && !isEmpty && <button type="button" className="tdb-lanesweep" title="Sweep the lane — D done · S snooze · → skip" onClick={onSweep}>Sweep ⇥</button>}
         {!isEmpty && more && <button type="button" className="tdb-chev" onClick={scrollRight} aria-label="Scroll right">›</button>}
       </div>
       {strip}
       {isEmpty ? (
-        <div className="tdb-laneempty">{emptyNode}</div>
+        <div className="tdb-emptyreel">{emptyNode}</div>
       ) : (
         <div className={`tdb-track${more ? " more" : ""}`}>
           <div className="tdb-scroller" ref={ref}>{children}</div>
@@ -486,7 +487,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           </Lane>
           <Lane cls="nt" label="Notes to self" count={tiles.notes} onAdd={addTask} isEmpty={board.nt.length === 0 && overlayCards("nt").length === 0}
             onSweep={() => setFlow({ items: board.nt.map((card) => ({ kind: "card", card })), mode: "sweep" })}
-            emptyNode={<><span className="e">Nothing jotted yet.</span><button type="button" className="tdb-ghost" onClick={addTask}>＋ Add a note</button></>}>
+            emptyNode={<button type="button" className="tdb-ghostcard" onClick={addTask}><span className="tdb-ge">Nothing jotted yet.</span><span className="tdb-gg">＋ Add a note</span></button>}>
             {overlayCards("nt")}
             {board.nt.map(renderCard)}
           </Lane>
