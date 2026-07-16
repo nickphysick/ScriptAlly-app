@@ -268,3 +268,39 @@ NEW: `src/lib/todoHousekeeping.ts` (+ `.test.ts`), `src/lib/assistFill.ts` (+ `.
 **Layout jsdom-unverified** — Nick eyeballs on dev: the Housekeeping column shows one card per rule with member faces; "Fix these →" opens the batch drawer; weeks/materials/MSWL editors save through the existing paths; "Mute" (row) and "Stop asking" (footer) both silence correctly; free users get the Pro affordance on "Find these for me".
 
 **Commit:** `feat(todo): housekeeping grouping + batch + Pro assisted fill`.
+
+## RE-LAYOUT — columns → three horizontal lanes (design ref: todo-lanes-full-cards.html)
+
+**Gates:** `tsc` clean · `vite build` OK (targets `scriptally-dev`) · full Vitest **997** green (+4 view-model cases). **Presentation + `todoBoard.ts` view-model only** — the task engine, `taskFlags`, `recomputeQuery` and every write path are UNTOUCHED (`git status` = design-ref + `todoBoard.ts` (+`.test`) + `ToDoPage.tsx` + `todo.css`; no `db.tsx`, no rules, no functions). **`App.tsx` untouched → no PaintMode risk; `git diff --cached` carried no PaintMode.**
+
+### ⚠️ Sequencing — this ran AFTER Phases 4 & 5, not before
+The pack was written to run *before* `todo-phase-4-5.md`, but those already shipped (`c7175da`, `b3885a8`). Not a blocker — the pack pre-answers it: grouped housekeeping renders grouped cards into the **Housekeeping lane** (done — `renderGroupCard` now draws the mockup's `.gcard`: big count + blurb + monogram stack + "Fix together →"/"Review →"), and the Phase-4 walkthroughs are modals, unaffected. I adapted the already-built Phase 5 cards into the lane rather than the reverse.
+
+### Board — three lanes, cleared-lane removed
+Four-column grid → three stacked horizontal lanes (`Do next` pink · `Housekeeping` gold · `Your tasks` note-yellow, in that order — Do-next on top at load). Each lane = coloured header band (title + count, `＋` on Your tasks) over a horizontal card scroller. A module-level `Lane` component owns the scroller ref + a `ResizeObserver`/scroll-listener overflow check that toggles the right-edge fade (`.tdb-track.more`) and a header **chevron** that scrolls the lane right. The **"Cleared today" column is gone** — completions now live in the Today's-list done-band.
+
+### Card — full detail, clip-safe (the recurring spill bug, called out)
+The full-detail card is restored (tags → serif-italic-burgundy title → subtitle → StatusDot+monogram+record meta → two pills). **Clip-safety is structural, not hopeful:** `.tdb-tile` is a fixed 176px `overflow:hidden` flex column where **`.tdb-tags`/`.tdb-tt`/`.tdb-tmeta`/`.tdb-tacts` are all `flex:none` and only `.tdb-tsub` is `flex:1 1 auto; min-height:0` (2-line clamp)** — the subtitle is the sole flexible element, so it absorbs and clips any overflow. The pills (`.tdb-tacts` `flex:none`, each pill `flex:1`, `white-space:nowrap`) are structurally unable to be pushed out or wrapped. **Same treatment on `.tdb-gcard`** (count/`.tdb-gt` `flex:none`, `.tdb-gs` blurb `flex:1` clamp, `.tdb-gstack` pinned). The two pills still do exactly what they did — commit / mark-done; body-click still opens the drawer. No behaviour change.
+
+### Today's list — committed band + done band (the day's record)
+Header carries two pills: **`N committed`** (pink) + **`N done`** (sage) — independent counts. **Committed band** = lane cards with `committedDate === today` (internal scroll, capped; a dashed "commit up to 5" prompt when there's room; each row has its StatusDot/dot + record + ✕ release). **Done band** = the existing `clearedToday` union, **struck-through, newest-first**, each row showing what-it-was + source + time (`fmtTime`, "just now"/"9:12am"), the full log with internal scroll. Footer keeps **Help me pick** + **Work the list** (disabled with nothing committed). The panel is fixed-height with internal scroll in *both* bands — it never grows the shelf. The 5-cap governs committed only; done is uncapped.
+
+### Scroll model (not regressed)
+`.tdb-wrap` keeps `flex:1; min-height:0; overflow-y:auto` — the page scrolls **vertically** in the shell when three lanes exceed the viewport, Do-next pinned on top. **No `height:100vh`/`overflow:hidden` clamp** was reintroduced (the earlier bug). Lane scrollers are `overflow-x:auto; overflow-y:hidden` (horizontal only) — different axis from the page, so no nested/trapped vertical scroll. The Today panel's two internal vertical scrollers are bounded by the fixed shelf.
+
+### View-model reshape (`todoBoard.ts`)
+`assembleBoard` now returns `{ do, hk, nt, cleared }` (renamed from `BoardColumns.done` → `AssembledBoard.cleared`) — three lanes + the cleared union re-projected (same reads, no new store, no write), newest-first, each cleared card carrying a `whenMs` for the done-band. New pure `todaySplit(board, today)` → `{ committed, done }` (committed = lane cards `committedDate === today`, the 5-cap set; done = the cleared union) so the two bands + counts are testable data. **Tests (logic, not pixels):** three lanes + `cleared` is not a lane; the cleared union equals the prior union (one completion → one item) and is whenMs-stamped newest-first; committed = today-only (excludes rolled-over + uncommitted); the two counts are independent.
+
+### Bonus fix — a CSS collision I introduced in Phase 4
+`.tdb-walk` was doing double duty: the Today-footer **"Work the list" button** AND the **walkthrough modal** (added in `c7175da`) — so the button silently inherited modal styles (`width:560px; display:flex`…). Renamed the button to **`.tdb-worklist`** (component + CSS); the modal keeps `.tdb-walk` (Walkthrough.tsx untouched). Collision gone.
+
+### Judgement calls (flagged, not silently taken)
+- **Hero:** kept the **solid pink option-B material** (`--pink-hero` + `--float-*`), slimmed for the 280px shelf. Did NOT reintroduce the mockup's `backdrop-filter` glass — a prior RED-GATE locked the hero to solid-not-glass ("no glass recipe to reuse"). "Keep the pink-glass hero" read as "keep the existing pink hero". Say the word if you want the glass back.
+- **Shelf height 214 → 280px:** the mockup's 214px only fits its shown state (1 committed row). With a full committed band (5) capped + the done band, 214 squeezes done to nothing. 280 keeps both bands usable while still slimming from the old 344. Flagged.
+
+### Note for Phase 6 (mobile — do NOT build here)
+The parked mobile plan was a segmented control designed for *columns*. With lanes, reconsider: lanes could collapse to a stacked single-column carousel per lane, or the segmented control could still apply. **Nick's call** — not built.
+
+**Layout jsdom-unverified** (auth-gated F12 board; the preview harness can't log in) — **Nick eyeballs:** three lanes with Do-next on top, full-detail cards with pills sitting cleanly inside, horizontal lane scroll with the fade+chevron on overflow, the Today's-list committed/done bands, and that the page scrolls vertically without the old clamp.
+
+**Commit:** `refactor(todo): board columns → three horizontal lanes + Today done-band`.

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { QueryStatus, Task, Query, Agent, Manuscript, UserTask, TaskFlag, Activity, ActivityType } from "../types";
-import { assembleBoard, boardStreamForTaskType, BoardInput } from "./todoBoard";
+import { assembleBoard, boardStreamForTaskType, todaySplit, BoardInput } from "./todoBoard";
 
 const TODAY = "2026-07-09";
 const NOW = Date.parse("2026-07-09T12:00:00Z");
@@ -29,7 +29,7 @@ describe("boardStreamForTaskType", () => {
   });
 });
 
-describe("assembleBoard — columns", () => {
+describe("assembleBoard — three lanes (no cleared lane)", () => {
   const input = base({
     tasks: [
       task("t-full", "full_requested", "q1"),
@@ -40,6 +40,11 @@ describe("assembleBoard — columns", () => {
     queries: [query("q1", "a1", QueryStatus.FULL_REQUESTED), query("q2", "a2", QueryStatus.OFFER)],
     agents: [agent("a1", "Juliet Mushens"), agent("a2", "Ivor Penn"), agent("a3", "Rowan Blake")],
     userTasks: [utask("u1"), utask("u2", { done: true, completedAt: "2026-07-09T09:00:00Z" })],
+  });
+
+  it("exposes exactly three lanes + the cleared union (cleared is NOT a lane)", () => {
+    const b = assembleBoard(input);
+    expect(Object.keys(b).sort()).toEqual(["cleared", "do", "hk", "nt"]);
   });
 
   it("splits Do next / Housekeeping and excludes out-of-scope task types", () => {
@@ -53,10 +58,10 @@ describe("assembleBoard — columns", () => {
     expect(assembleBoard(input).do[0].taskType).toBe("offer_received");
   });
 
-  it("Your tasks = open user tasks only (done ones move to Cleared)", () => {
+  it("Your tasks = open user tasks only (done ones move to the cleared union)", () => {
     const b = assembleBoard(input);
     expect(b.nt.map((c) => c.userTaskId)).toEqual(["u1"]);
-    expect(b.done.some((c) => c.title === "Redraft opening")).toBe(true); // u2 done today
+    expect(b.cleared.some((c) => c.title === "Redraft opening")).toBe(true); // u2 done today
   });
 
   it("housekeeping card carries no status dot (hk glyph)", () => {
@@ -80,17 +85,60 @@ describe("assembleBoard — commit state", () => {
   });
 });
 
-describe("assembleBoard — cleared union", () => {
-  it("Cleared column = done-today tasks + today's clearing activities", () => {
-    const b = assembleBoard(base({
-      userTasks: [utask("u1", { done: true, completedAt: "2026-07-09T08:00:00Z" })],
-      activities: [
-        { id: "act1", activityType: ActivityType.QUERY_SENT, date: "2026-07-09T10:00:00Z", queryId: "q1" } as Activity,
-        { id: "act2", activityType: ActivityType.AGENT_ADDED, date: "2026-07-09T10:00:00Z" } as Activity, // not a clearing type
-      ],
-      queries: [query("q1", "a1", QueryStatus.QUERIED)],
-      agents: [agent("a1", "JM")],
-    }));
-    expect(b.done.length).toBe(2); // 1 done task + 1 clearing activity (AGENT_ADDED excluded)
+describe("assembleBoard — cleared union (feeds the done-band, not a lane)", () => {
+  const clearedInput = base({
+    userTasks: [utask("u1", { done: true, completedAt: "2026-07-09T08:00:00Z" })],
+    activities: [
+      { id: "act1", activityType: ActivityType.QUERY_SENT, date: "2026-07-09T10:00:00Z", queryId: "q1" } as Activity,
+      { id: "act2", activityType: ActivityType.AGENT_ADDED, date: "2026-07-09T10:00:00Z" } as Activity, // not a clearing type
+    ],
+    queries: [query("q1", "a1", QueryStatus.QUERIED)],
+    agents: [agent("a1", "JM")],
+  });
+
+  it("cleared = done-today tasks + today's clearing activities (one completion → one item)", () => {
+    const b = assembleBoard(clearedInput);
+    expect(b.cleared.length).toBe(2); // 1 done task + 1 clearing activity (AGENT_ADDED excluded)
+  });
+
+  it("cleared cards carry a whenMs and are newest-first", () => {
+    const b = assembleBoard(clearedInput);
+    expect(b.cleared.every((c) => typeof c.whenMs === "number")).toBe(true);
+    const times = b.cleared.map((c) => c.whenMs as number);
+    expect(times).toEqual([...times].sort((a, z) => z - a)); // descending
+    expect(b.cleared[0].title).not.toBe("Redraft opening"); // 10:00 activity beats the 08:00 task
+  });
+});
+
+describe("todaySplit — committed band (today only) vs done band (uncapped)", () => {
+  const flagToday: TaskFlag = { id: "f1", userId: "u", taskType: "full_requested", queryId: "q1", snoozeCount: 0, committedDate: TODAY };
+  const input = base({
+    tasks: [task("t-full", "full_requested", "q1"), task("t-part", "partial_requested", "q2")],
+    queries: [query("q1", "a1", QueryStatus.FULL_REQUESTED), query("q2", "a2", QueryStatus.PARTIAL_REQUESTED)],
+    agents: [agent("a1", "JM"), agent("a2", "IP")],
+    userTasks: [
+      utask("u-roll", { committedDate: "2026-07-01" }), // rolled over — NOT committed-today
+      utask("u-today", { committedDate: TODAY }),
+      utask("u-done", { done: true, completedAt: "2026-07-09T09:00:00Z" }), // done → in cleared, not committed
+    ],
+    taskFlags: [flagToday],
+  });
+
+  it("committed = committedDate === today only (excludes rolled-over + uncommitted)", () => {
+    const b = assembleBoard(input);
+    const split = todaySplit(b, TODAY);
+    const ids = split.committed.map((c) => c.userTaskId ?? c.taskType).sort();
+    expect(ids).toEqual(["full_requested", "u-today"]); // the today flag + the today user task
+    expect(split.committed.some((c) => c.userTaskId === "u-roll")).toBe(false);
+    expect(split.committed.some((c) => c.taskType === "partial_requested")).toBe(false); // uncommitted
+  });
+
+  it("done band = the cleared union; the two counts are independent", () => {
+    const b = assembleBoard(input);
+    const split = todaySplit(b, TODAY);
+    expect(split.done).toBe(b.cleared);
+    expect(split.done.length).toBe(1); // u-done
+    expect(split.committed.length).toBe(2);
+    expect(split.committed.length).not.toBe(split.done.length);
   });
 });

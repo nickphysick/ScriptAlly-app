@@ -1,115 +1,127 @@
 /**
- * To-do board (F12) — design ref: design-refs/todo-workspace-v10.html.
+ * To-do board (F12) — design ref: design-refs/todo-lanes-full-cards.html (layout, cards, Today's-list
+ * done-band). Drawer / walkthrough / housekeeping-fix internals follow todo-workspace-v10.html.
  * Renders inside `F12Page` (`.t-f12 f12-root`), so every colour is a `.t-f12` token — NO capp/bold/edn.
- * Classes are `tdb-` prefixed (to-do board). Layout in CSS; the mockup's own class shapes translated.
+ * Classes are `tdb-` prefixed (to-do board).
  */
 
 /* The page's scroll region: fills f12-root's remaining height (below the fixed crumb header) and
-   scrolls when the shelf + four columns exceed it — the outer page scroll the standalone-mockup port
-   lost. `flex: 1` because .tdb-wrap is a flex child of .f12-root (a flex column); min-height:0 lets it
-   shrink so overflow-y can engage. Page-scoped — no change to f12-root/StagePage/other pages. */
+   scrolls VERTICALLY when the shelf + three lanes exceed it. `flex: 1` because .tdb-wrap is a flex
+   child of .f12-root (a flex column); min-height:0 lets it shrink so overflow-y can engage. No
+   100vh/overflow-hidden clamp anywhere — that was the earlier scroll bug. Page-scoped. */
 .tdb-wrap { flex: 1; min-height: 0; overflow-y: auto; width: 100%; max-width: var(--maxw, 1520px); margin: 0 auto; padding: 16px 12px 26px; }
 
-/* ── top shelf (fixed 344px: header 44 + ~4 rows + footer) ── */
-.tdb-toprow { display: grid; grid-template-columns: 1fr 400px; gap: 12px; height: 344px; }
+/* ── top shelf (compact fixed height: hero + Today panel side by side) ── */
+.tdb-toprow { display: grid; grid-template-columns: 1fr 400px; gap: 12px; height: 280px; }
 .tdb-toprow > * { height: 100%; min-height: 0; }
 
-/* Hero = the diary's raised-panel material (--float-* from .t-f12), filled PINK (--pink-hero solid).
-   The diary panel is a clean flat surface, so the old decorative corner circle is dropped. */
+/* Hero = the diary's raised-panel material (--float-* from .t-f12), filled PINK (--pink-hero solid,
+   per the locked option-B decision — NOT backdrop-filter glass). Slimmed type for the compact shelf. */
 .tdb-hero {
   position: relative; display: flex; flex-direction: column; justify-content: center;
   background: var(--pink-hero);
-  border: 1px solid var(--float-hairline); border-radius: var(--float-rad); padding: 24px 28px; box-shadow: var(--float-sh); min-height: 0;
+  border: 1px solid var(--float-hairline); border-radius: var(--float-rad); padding: 20px 26px; box-shadow: var(--float-sh); min-height: 0;
 }
-.tdb-kick { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--pink-i); opacity: 0.85; }
-.tdb-h1 { font-family: var(--f12-serif); font-size: 30px; font-weight: 600; line-height: 1.18; margin-top: 8px; color: var(--ink); max-width: 510px; }
+.tdb-kick { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--pink-i); opacity: 0.85; }
+.tdb-h1 { font-family: var(--f12-serif); font-size: 26px; font-weight: 600; line-height: 1.15; margin-top: 6px; color: var(--ink); max-width: 520px; }
 .tdb-h1 em { font-style: italic; color: var(--pink-i); }
-.tdb-sub { font-size: 13px; color: var(--ink-2); margin-top: 8px; max-width: 480px; line-height: 1.55; }
-.tdb-hstrip { display: flex; margin-top: 14px; font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--pink-i); }
-.tdb-hstrip span { padding-right: 14px; margin-right: 14px; border-right: 1px solid var(--pink-b); opacity: 0.9; }
+.tdb-sub { font-size: 12.5px; color: var(--ink-2); margin-top: 7px; max-width: 470px; line-height: 1.5; }
+.tdb-hstrip { display: flex; margin-top: 12px; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--pink-i); }
+.tdb-hstrip span { padding-right: 13px; margin-right: 13px; border-right: 1px solid var(--pink-b); opacity: 0.9; }
 .tdb-hstrip span:last-child { border: none; margin: 0; padding: 0; }
-.tdb-hstrip b { font-family: var(--f12-serif); font-size: 14px; font-weight: 600; color: var(--ink); letter-spacing: 0; }
-.tdb-hact { display: flex; gap: 8px; margin-top: 16px; }
-.tdb-btn-pri { font-size: 13px; font-weight: 600; padding: 10px 18px; border-radius: var(--r-md); background: var(--ink); color: var(--panel); box-shadow: var(--sh-btn); white-space: nowrap; line-height: 1.2; }
+.tdb-hstrip b { font-family: var(--f12-serif); font-size: 13px; font-weight: 600; color: var(--ink); letter-spacing: 0; }
+.tdb-hact { display: flex; gap: 8px; margin-top: 14px; }
+.tdb-btn-pri { font-size: 12.5px; font-weight: 600; padding: 9px 17px; border-radius: var(--r-md); background: var(--ink); color: var(--panel); box-shadow: var(--sh-btn); white-space: nowrap; line-height: 1.2; }
 .tdb-btn-pri:hover:not(:disabled) { filter: brightness(1.35); }
 .tdb-btn-pri:disabled { opacity: 0.4; cursor: default; }
-.tdb-btn-sec { font-size: 13px; font-weight: 500; padding: 10px 17px; border-radius: var(--r-md); background: var(--panel); border: 1px solid var(--pink-b); box-shadow: var(--sh-btn); color: var(--pink-i); white-space: nowrap; line-height: 1.2; }
+.tdb-btn-sec { font-size: 12.5px; font-weight: 500; padding: 9px 16px; border-radius: var(--r-md); background: var(--panel); border: 1px solid var(--pink-b); box-shadow: var(--sh-btn); color: var(--pink-i); white-space: nowrap; line-height: 1.2; }
 .tdb-btn-sec:hover { background: var(--white); }
 
-/* ── Today box (fixed shelf; ~4 rows then fade-scroll; footer always shown) ── */
+/* ── Today panel: committed band + done band (the day's record), self-contained fixed height ── */
 .tdb-today { background: var(--panel); border: 1px solid var(--pink-b); border-radius: var(--r-xl); box-shadow: var(--sh-2); display: flex; flex-direction: column; overflow: hidden; }
-.tdb-th { display: flex; align-items: center; gap: 9px; padding: 13px 15px; background: var(--pink-t); border-bottom: 1px solid var(--pink-b); flex: none; }
-.tdb-th .tdb-t { font-family: var(--f12-serif); font-size: 16px; font-weight: 600; color: var(--ink); }
-.tdb-th .tdb-c { margin-left: auto; font-family: var(--f12-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.08em; color: var(--pink-i); background: var(--panel); border: 1px solid var(--pink-b); border-radius: 99px; padding: 2px 8px; }
-.tdb-tb { flex: 1; min-height: 0; padding: 9px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; -webkit-mask-image: linear-gradient(180deg, #000 0, #000 calc(100% - 22px), transparent 100%); mask-image: linear-gradient(180deg, #000 0, #000 calc(100% - 22px), transparent 100%); }
-.tdb-trow { display: flex; align-items: center; gap: 9px; padding: 8px 9px; border-radius: var(--r-sm); border: 1px solid var(--hairline); background: var(--panel); cursor: pointer; flex: none; }
+.tdb-th { flex: none; display: flex; align-items: center; gap: 7px; padding: 11px 14px; background: var(--pink-t); border-bottom: 1px solid var(--pink-b); }
+.tdb-th .tdb-t { font-family: var(--f12-serif); font-size: 15px; font-weight: 600; color: var(--ink); flex: 1; }
+.tdb-th .tdb-cc { font-family: var(--f12-mono); font-size: 8px; font-weight: 700; letter-spacing: 0.05em; color: var(--pink-i); background: var(--panel); border: 1px solid var(--pink-b); border-radius: 99px; padding: 2px 8px; }
+.tdb-th .tdb-cd { font-family: var(--f12-mono); font-size: 8px; font-weight: 700; letter-spacing: 0.05em; color: var(--sageD); background: var(--sageC); border: 1px solid var(--sage-edge); border-radius: 99px; padding: 2px 8px; }
+/* committed band (top) — internal scroll, capped so the done band always shows */
+.tdb-tcommit { flex: none; padding: 8px 10px; display: flex; flex-direction: column; gap: 5px; max-height: 108px; overflow-y: auto; }
+.tdb-trow { display: flex; align-items: center; gap: 8px; padding: 7px 9px; border: 1px solid var(--hairline); border-radius: 8px; background: var(--panel); cursor: pointer; flex: none; }
 .tdb-trow:hover { border-color: var(--pink-b); }
 .tdb-tmid { flex: 1; min-width: 0; }
-.tdb-trow .tdb-tx { font-size: 12.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tdb-trow .tdb-tm { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--faint); margin-top: 2px; }
-.tdb-trow .tdb-x { color: var(--faint); font-size: 12px; padding: 0 3px; background: none; border: none; }
+.tdb-trow .tdb-tx { font-size: 12px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tdb-trow .tdb-tm { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--faint); margin-top: 1px; }
+.tdb-trow .tdb-x { margin-left: auto; color: var(--faint); font-size: 11px; padding: 0 3px; background: none; border: none; }
 .tdb-trow .tdb-x:hover { color: var(--pink-i); }
 .tdb-tdot { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--faint); flex: none; }
-.tdb-tempty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 9px; padding: 14px; color: var(--muted); }
-.tdb-tempty .tdb-e1 { font-family: var(--f12-serif); font-style: italic; font-size: 15px; }
-.tdb-tempty .tdb-e2 { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); }
-.tdb-tf { padding: 11px 13px; border-top: 1px solid var(--hairline); background: var(--paper); display: flex; flex-direction: column; gap: 9px; flex: none; }
-.tdb-tbar { height: 4px; border-radius: 99px; background: var(--panel); border: 1px solid var(--hairline); overflow: hidden; }
-.tdb-tbar i { display: block; height: 100%; background: var(--sageD); transition: width 0.4s; }
-.tdb-tfr { display: flex; align-items: center; gap: 8px; }
-.tdb-tfr .tdb-pc { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.08em; color: var(--faint); flex: 1; }
-.tdb-walk { font-size: 12.5px; font-weight: 600; padding: 8px 14px; border-radius: var(--r-md); background: var(--pink-btn); box-shadow: var(--sh-btn); white-space: nowrap; }
-.tdb-walk:hover:not(:disabled) { background: var(--pink-btn-h); }
-.tdb-walk:disabled { opacity: 0.35; cursor: default; }
-.tdb-pick { font-size: 12.5px; font-weight: 600; padding: 8px 14px; border-radius: var(--r-md); background: var(--ink); color: var(--panel); white-space: nowrap; }
+.tdb-tempty { border: 1px dashed var(--pink-b); border-radius: 8px; padding: 9px; text-align: center; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--pink-i); opacity: 0.8; flex: none; }
+.tdb-tdiv { flex: none; display: flex; align-items: center; gap: 9px; padding: 4px 14px 5px; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.13em; text-transform: uppercase; color: var(--faint); }
+.tdb-tdiv .l { flex: 1; height: 1px; background: var(--hairline); }
+/* done band (below) — internal scroll, the day's full log newest-first */
+.tdb-tdone { flex: 1; min-height: 0; overflow-y: auto; padding: 2px 10px 8px; display: flex; flex-direction: column; gap: 3px; }
+.tdb-drow { display: flex; align-items: center; gap: 8px; padding: 5px 9px; border-radius: 7px; }
+.tdb-drow .tdb-dx { font-size: 11.5px; color: var(--muted); text-decoration: line-through; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tdb-drow .tdb-dm2 { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--faint); margin-top: 1px; }
+.tdb-tick { width: 14px; height: 14px; border-radius: 4px; background: var(--sageD); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 8px; flex: none; }
+.tdb-donenil { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); text-align: center; padding: 16px 10px; }
+.tdb-tf { flex: none; padding: 9px 12px; border-top: 1px solid var(--hairline); background: var(--paper); display: flex; gap: 7px; align-items: center; }
+.tdb-tf .tdb-pc { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.08em; color: var(--faint); flex: 1; text-transform: uppercase; }
+.tdb-pick { font-size: 11.5px; font-weight: 600; padding: 7px 12px; border-radius: 8px; background: var(--ink); color: var(--panel); white-space: nowrap; }
 .tdb-pick:hover { filter: brightness(1.35); }
+/* "Work the list" — its OWN class (was .tdb-walk, which collided with the walkthrough MODAL below) */
+.tdb-worklist { font-size: 11.5px; font-weight: 600; padding: 7px 12px; border-radius: 8px; background: var(--pink-btn); color: #5a2b20; white-space: nowrap; }
+.tdb-worklist:hover:not(:disabled) { background: var(--pink-btn-h); }
+.tdb-worklist:disabled { opacity: 0.4; cursor: default; }
 
 /* ── tools row ── */
-.tdb-tools { display: flex; align-items: center; gap: 8px; margin: 16px 0 11px; }
+.tdb-tools { display: flex; align-items: center; gap: 8px; margin: 14px 0 11px; }
 .tdb-tool { font-size: 12.5px; padding: 8px 13px; border-radius: var(--r-md); background: var(--panel); border: 1px solid var(--line); box-shadow: var(--sh-btn); color: var(--ink-2); }
 .tdb-tool:hover { border-color: var(--ink-2); }
 .tdb-sp { flex: 1; }
 .tdb-add-pri { font-size: 13px; font-weight: 600; padding: 9px 16px; border-radius: var(--r-md); background: var(--pink-btn); box-shadow: var(--sh-btn); }
 .tdb-add-pri:hover { background: var(--pink-btn-h); }
 
-/* ── board ── */
-.tdb-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-.tdb-col { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-lg); display: flex; flex-direction: column; min-height: 300px; overflow: hidden; }
-.tdb-colh { display: flex; align-items: center; gap: 9px; padding: 12px 13px; border-bottom: 1px solid; flex-wrap: wrap; }
-.tdb-ct { font-weight: 600; font-size: 13px; }
-.tdb-cn { font-family: var(--f12-mono); font-size: 9px; font-weight: 700; border-radius: 99px; padding: 2px 8px; margin-left: auto; background: rgba(255, 255, 255, 0.75); }
-.tdb-cadd { font-size: 15px; padding: 0 3px; opacity: 0.65; }
+/* ── lanes (three stacked horizontal lanes; page scrolls vertically if they exceed the viewport) ── */
+.tdb-lanes { display: flex; flex-direction: column; gap: 12px; }
+.tdb-lane { display: flex; flex-direction: column; background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
+.tdb-lane.do { border-color: var(--pink-b); }
+.tdb-laneh { flex: none; display: flex; align-items: center; gap: 9px; padding: 9px 14px; border-bottom: 1px solid; }
+.tdb-lane.do .tdb-laneh { background: var(--pink-t); border-color: var(--pink-b); color: var(--pink-i); }
+.tdb-lane.hk .tdb-laneh { background: var(--gold-t); border-color: var(--gold-b); color: var(--gold-i); }
+.tdb-lane.nt .tdb-laneh { background: var(--note-t); border-color: var(--note-b); color: var(--note-i); }
+.tdb-lt { font-weight: 600; font-size: 13px; }
+.tdb-ln { font-family: var(--f12-mono); font-size: 8.5px; font-weight: 700; border-radius: 99px; padding: 2px 8px; background: rgba(255, 255, 255, 0.7); }
+.tdb-laneh .tdb-sp { flex: 1; }
+.tdb-cadd { font-size: 15px; padding: 0 4px; opacity: 0.7; }
 .tdb-cadd:hover { opacity: 1; }
-.tdb-col.do .tdb-colh { background: var(--pink-t); border-color: var(--pink-b); color: var(--pink-i); }
-.tdb-col.hk .tdb-colh { background: var(--gold-t); border-color: var(--gold-b); color: var(--gold-i); }
-.tdb-col.nt .tdb-colh { background: var(--note-t); border-color: var(--note-b); color: var(--note-i); }
-.tdb-col.done .tdb-colh { background: var(--sageC); border-color: var(--sage-edge); color: var(--sageD); }
-.tdb-colb { flex: 1; padding: 9px; display: flex; flex-direction: column; gap: 9px; overflow-y: auto; }
-.tdb-colempty { text-align: center; padding: 22px 8px; font-family: var(--f12-serif); font-style: italic; font-size: 13px; color: var(--faint); }
-.tdb-ghostadd { border: 1.5px dashed var(--note-b); border-radius: var(--r-md); padding: 10px; text-align: center; font-size: 12.5px; color: var(--note-i); }
-.tdb-ghostadd:hover { background: var(--note-t); }
+.tdb-chev { width: 24px; height: 24px; border-radius: 7px; display: flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(0, 0, 0, 0.06); font-size: 13px; opacity: 0.8; }
+.tdb-chev:hover { opacity: 1; background: #fff; }
+.tdb-track { position: relative; }
+.tdb-scroller { display: flex; gap: 11px; padding: 12px; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; align-items: stretch; }
+.tdb-track.more::after { content: ""; position: absolute; top: 0; bottom: 0; right: 0; width: 46px; pointer-events: none; background: linear-gradient(90deg, transparent, var(--paper)); }
+.tdb-laneempty { display: flex; align-items: center; gap: 12px; padding: 20px 16px; }
+.tdb-laneempty .e { font-family: var(--f12-serif); font-style: italic; font-size: 14px; color: var(--muted); }
+.tdb-ghost { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.09em; text-transform: uppercase; border: 1px dashed var(--note-b); color: var(--note-i); border-radius: 8px; padding: 9px 13px; }
+.tdb-ghost:hover { background: var(--note-t); }
 
-/* ── card ── */
-.tdb-tile { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); padding: 12px; box-shadow: var(--sh-1); cursor: pointer; transition: box-shadow 0.2s, border-color 0.2s; }
+/* ── full-detail lane card (fixed height, clip-safe: subtitle absorbs overflow, pills never spill) ── */
+.tdb-tile { flex: none; width: 326px; height: 176px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); padding: 13px 15px; box-shadow: var(--sh-1); cursor: pointer; transition: box-shadow 0.2s, border-color 0.2s; display: flex; flex-direction: column; overflow: hidden; }
 .tdb-tile:hover { border-color: var(--ink-2); box-shadow: var(--sh-2); }
 .tdb-tile.today { border-color: var(--pink-b); box-shadow: inset 3px 0 0 var(--pink-btn), var(--sh-1); }
-.tdb-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
-.tdb-tag { font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; border-radius: 99px; padding: 2.5px 8px; border: 1px solid; }
+.tdb-tags { flex: none; display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
+.tdb-tag { font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; border-radius: 99px; padding: 2.5px 8px; border: 1px solid; white-space: nowrap; }
 .tdb-tag.due { background: var(--panel); border-color: var(--line); color: var(--muted); }
 .tdb-tag.due.warn { background: var(--pink-t); border-color: var(--pink-b); color: var(--pink-i); }
 .tdb-tag.snz { background: var(--paper); border-color: var(--line); color: var(--faint); }
-.tdb-tt { font-weight: 600; font-size: 13.5px; line-height: 1.35; }
+.tdb-tt { flex: none; font-weight: 600; font-size: 13.5px; line-height: 1.3; color: var(--ink); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .tdb-tt em { font-family: var(--f12-serif); font-style: italic; color: var(--burg); font-weight: 600; }
-.tdb-tt.done { text-decoration: line-through; color: var(--faint); font-weight: 500; }
-.tdb-tsub { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.45; }
-.tdb-tmeta { display: flex; align-items: center; gap: 8px; margin-top: 11px; padding-top: 10px; border-top: 1px solid var(--hairline); }
+.tdb-tsub { flex: 1 1 auto; min-height: 0; font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.45; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.tdb-tmeta { flex: none; display: flex; align-items: center; gap: 8px; margin-top: 9px; padding-top: 9px; border-top: 1px solid var(--hairline); }
 .tdb-hkdot { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--gold); background: var(--gold-t); color: var(--gold); display: inline-flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; flex: none; }
 .tdb-miniav { width: 20px; height: 20px; border-radius: 50%; background: var(--pink-av); display: inline-flex; align-items: center; justify-content: center; font-family: var(--f12-mono); font-size: 8px; font-weight: 600; color: var(--pink-i); flex: none; }
 .tdb-miniav.hk { background: var(--gold-t); border: 1px solid var(--gold-b); color: var(--gold-i); }
 .tdb-miniav.nt { background: var(--note-t); border: 1px solid var(--note-b); color: var(--note-i); }
 .tdb-who { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--faint); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tdb-donebox { width: 15px; height: 15px; background: var(--sageD); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; flex: none; }
-.tdb-tacts { display: flex; gap: 6px; margin-top: 9px; }
+.tdb-tacts { flex: none; display: flex; gap: 6px; margin-top: 9px; }
 .tdb-pill { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--f12-mono); font-size: 8.5px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; border-radius: 99px; padding: 7px 6px; border: 1px solid; white-space: nowrap; transition: 0.13s; }
 .tdb-pill.today-p { background: var(--pink-t); border-color: var(--pink-b); color: var(--pink-i); }
 .tdb-pill.today-p:hover { background: var(--pink-btn); }
@@ -118,10 +130,26 @@
 .tdb-pill.done-p:hover { background: var(--sageC); border-color: var(--sage-edge); color: var(--sageD); }
 .tdb-tk { width: 12px; height: 12px; border: 1.4px solid currentColor; border-radius: 3px; flex: none; opacity: 0.75; }
 
+/* ── grouped housekeeping card (fixed height, clip-safe: big count + blurb clip; stack + fix pinned) ── */
+.tdb-gcard { flex: none; width: 326px; height: 176px; background: var(--panel); border: 1px solid var(--gold-b); border-radius: var(--r-md); padding: 14px 15px; box-shadow: var(--sh-1); cursor: pointer; transition: border-color 0.15s; display: flex; flex-direction: column; overflow: hidden; }
+.tdb-gcard:hover { border-color: var(--gold-i); }
+.tdb-gcard.close { border-color: var(--pink-b); }
+.tdb-gcard.close:hover { border-color: var(--pink-i); }
+.tdb-gn { flex: none; font-family: var(--f12-serif); font-size: 30px; font-weight: 600; color: var(--gold-i); line-height: 1; }
+.tdb-gcard.close .tdb-gn { color: var(--pink-i); }
+.tdb-gt { flex: none; font-weight: 600; font-size: 13.5px; margin-top: 5px; line-height: 1.3; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.tdb-gs { flex: 1 1 auto; min-height: 0; font-size: 12px; color: var(--muted); margin-top: 5px; line-height: 1.45; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.tdb-gstack { flex: none; display: flex; align-items: center; margin-top: 9px; padding-top: 10px; border-top: 1px solid var(--hairline); }
+.tdb-gsav { width: 21px; height: 21px; border-radius: 50%; background: var(--gold-t); border: 1.5px solid var(--panel); display: flex; align-items: center; justify-content: center; font-family: var(--f12-mono); font-size: 7.5px; font-weight: 600; color: var(--gold-i); margin-right: -6px; flex: none; }
+.tdb-gcard.close .tdb-gsav { background: var(--pink-t); color: var(--pink-i); }
+.tdb-gmore { font-family: var(--f12-mono); font-size: 9px; color: var(--faint); margin-left: 12px; }
+.tdb-gfix { margin-left: auto; font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--gold-i); }
+.tdb-gcard.close .tdb-gfix { color: var(--pink-i); }
+
 /* ── toast ── */
 .tdb-toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 60; background: var(--ink); color: var(--panel); font-size: 12.5px; padding: 10px 16px; border-radius: var(--r-md); box-shadow: var(--sh-3); }
 
-/* ── drawer stub (Phase 3 replaces the body) ── */
+/* ── drawer (TaskDetail) ── */
 .tdb-scrim { position: fixed; inset: 0; z-index: 50; background: rgba(30, 26, 22, 0.28); display: flex; justify-content: flex-end; }
 .tdb-drawer { width: 500px; max-width: 92vw; height: 100%; background: var(--panel); border-left: 1px solid var(--line); box-shadow: var(--sh-3); display: flex; flex-direction: column; }
 .tdb-drawer-h { display: flex; align-items: center; gap: 10px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
@@ -174,7 +202,7 @@
 .tdb-threeway { display: flex; flex-direction: column; gap: 9px; }
 .tdb-threeway button { width: 100%; }
 
-/* ── walkthrough (centred staged flow) ── */
+/* ── walkthrough (centred staged flow) — the MODAL .tdb-walk (distinct from the footer .tdb-worklist) ── */
 .tdb-scrim { align-items: stretch; }
 .tdb-walk { margin: auto; width: 560px; max-width: 94vw; max-height: 90vh; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-xl); box-shadow: var(--sh-3); display: flex; flex-direction: column; }
 .tdb-walk-h { display: flex; align-items: center; gap: 10px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
@@ -190,14 +218,6 @@
 .tdb-review-m { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--faint); margin-top: 3px; }
 .tdb-review-x { color: var(--faint); font-size: 13px; padding: 2px 6px; }
 .tdb-review-x:hover { color: var(--pink-i); }
-
-/* ── housekeeping: grouped column card ── */
-.tdb-tile.hkgroup { cursor: pointer; }
-.tdb-tag.cnt { background: var(--oat, #efe9dd); color: var(--muted); font-variant-numeric: tabular-nums; }
-.tdb-hkfaces { display: flex; align-items: center; gap: 5px; margin: 10px 0 4px; }
-.tdb-hkfaces .tdb-miniav { width: 24px; height: 24px; font-size: 9px; }
-.tdb-hkmore { font-family: var(--f12-mono); font-size: 10px; color: var(--faint); margin-left: 2px; }
-.tdb-hkassist { font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.06em; color: var(--pink-i); text-transform: uppercase; }
 
 /* ── housekeeping: batch-fix drawer (centred modal) ── */
 .tdb-batch { margin: auto; width: 620px; max-width: 94vw; max-height: 90vh; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-xl); box-shadow: var(--sh-3); display: flex; flex-direction: column; }
@@ -239,4 +259,5 @@
 }
 @media (prefers-reduced-motion: reduce) { .tdb-tile.pulse { animation: none; } }
 
-@media (max-width: 1120px) { .tdb-toprow { grid-template-columns: 1fr; height: auto; } .tdb-today { height: 344px; } }
+/* ── responsive: stack the shelf below the lanes' comfortable width ── */
+@media (max-width: 1120px) { .tdb-toprow { grid-template-columns: 1fr; height: auto; } .tdb-today { height: 320px; } }

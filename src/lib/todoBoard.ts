@@ -48,17 +48,23 @@ export interface BoardCard {
   committed: boolean; // committedDate === today
   committedDate?: string; // raw "YYYY-MM-DD" — set even when it's a prior day (rollover detection)
   done: boolean;
+  whenMs?: number; // cleared-today cards only — the completion instant, for the done-band time + newest-first order
   // action wiring
   taskType?: string;
   relatedRecordId?: string;
   userTaskId?: string;
 }
 
-export interface BoardColumns {
+/**
+ * Three lanes (do / hk / nt) + the cleared-today union. `cleared` is NOT a lane — the "Cleared today"
+ * column was retired; it feeds the Today's-list DONE-BAND (the day's record). Same union as before,
+ * just re-projected: one completion → one done item. Sorted newest-first for the band.
+ */
+export interface AssembledBoard {
   do: BoardCard[];
   hk: BoardCard[];
   nt: BoardCard[];
-  done: BoardCard[];
+  cleared: BoardCard[];
 }
 
 export interface BoardInput {
@@ -171,7 +177,7 @@ function orderDoNext(cards: BoardCard[]): BoardCard[] {
   return [...cards].sort((a, b) => rank(a) - rank(b));
 }
 
-export function assembleBoard(input: BoardInput): BoardColumns {
+export function assembleBoard(input: BoardInput): AssembledBoard {
   const derived = input.tasks.map((t) => derivedCard(t, input)).filter((c): c is BoardCard => c != null);
   const doCards = orderDoNext(derived.filter((c) => c.stream === "do"));
   const hkCards = derived.filter((c) => c.stream === "hk");
@@ -183,14 +189,33 @@ export function assembleBoard(input: BoardInput): BoardColumns {
     .map((t) => userCard(t, input));
 
   // Cleared today — the union (activities today · user tasks done today · flags resolved today).
+  // Retired as a lane; re-projected here (newest-first) for the Today's-list done-band.
   const cleared = clearedTodayItems({ activities: input.activities, userTasks: input.userTasks, taskFlags: input.taskFlags, now: input.now });
-  const doneCards: BoardCard[] = [
-    ...cleared.userTasks.map((t) => ({ ...blankDone(`done-task-${t.id}`), title: t.text || "Task", record: "Your task" })),
+  const clearedCards: BoardCard[] = [
+    ...cleared.userTasks.map((t) => ({ ...blankDone(`done-task-${t.id}`), title: t.text || "Task", record: "Your task", whenMs: msOf(t.completedAt) })),
     ...cleared.activities.map((a, i) => clearedActivityCard(a, i, input)),
     ...cleared.flags.map((f, i) => clearedFlagCard(f, i, input)),
-  ];
+  ].sort((a, b) => (b.whenMs ?? 0) - (a.whenMs ?? 0));
 
-  return { do: doCards, hk: hkCards, nt: ntCards, done: doneCards };
+  return { do: doCards, hk: hkCards, nt: ntCards, cleared: clearedCards };
+}
+
+const msOf = (iso?: string): number | undefined => {
+  if (!iso) return undefined;
+  const ms = new Date(iso).getTime();
+  return Number.isNaN(ms) ? undefined : ms;
+};
+
+/**
+ * The Today's-list split, for the shelf panel's two bands. `committed` = lane cards committed to
+ * TODAY (committedDate === today) — the committed band, and the set the 5-cap governs; lane cards are
+ * inherently open (a done user task leaves `nt`, an actioned derived task leaves the engine). `done` =
+ * the cleared-today union (the done-band, uncapped). Rolled-over items (a prior committedDate) are
+ * NOT committed-today — they surface via `rolledOverCards`, not here. The two counts are independent.
+ */
+export function todaySplit(board: AssembledBoard, today: string): { committed: BoardCard[]; done: BoardCard[] } {
+  const laneCards = [...board.do, ...board.hk, ...board.nt];
+  return { committed: laneCards.filter((c) => c.committedDate === today), done: board.cleared };
 }
 
 function blankDone(key: string): BoardCard {
@@ -199,11 +224,11 @@ function blankDone(key: string): BoardCard {
 function clearedActivityCard(a: Activity, i: number, input: BoardInput): BoardCard {
   const q = input.queries.find((x) => x.id === a.queryId);
   const ag = q ? input.agents.find((x) => x.id === q.agentId) : undefined;
-  return { ...blankDone(`done-act-${a.id ?? i}`), title: a.activityType, record: ag ? agentPrimary(ag) : "" };
+  return { ...blankDone(`done-act-${a.id ?? i}`), title: a.description || a.activityType, record: ag ? agentPrimary(ag) : "Query", whenMs: msOf(a.date) };
 }
 function clearedFlagCard(f: TaskFlag, i: number, input: BoardInput): BoardCard {
   const ag = f.agentId ? input.agents.find((x) => x.id === f.agentId) : undefined;
   const q = f.queryId ? input.queries.find((x) => x.id === f.queryId) : undefined;
   const agent2 = q ? input.agents.find((x) => x.id === q.agentId) : ag;
-  return { ...blankDone(`done-flag-${f.id ?? i}`), title: "Sorted", record: agent2 ? agentPrimary(agent2) : "Housekeeping" };
+  return { ...blankDone(`done-flag-${f.id ?? i}`), title: agent2 ? `${agentPrimary(agent2)} — sorted` : "Sorted", record: "Housekeeping", whenMs: msOf(f.resolvedAt) };
 }
