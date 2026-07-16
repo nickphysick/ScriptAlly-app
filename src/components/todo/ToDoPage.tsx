@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * ToDoPage — the To-do WORKSPACE as an F12 board. Layout (design ref:
- * design-refs/todo-board-final.html): a slim STAT-RIBBON header ("What's on your desk?" + three
- * lane-coloured metric tiles + "Work through priorities now") over THREE horizontal LANES —
+ * design-refs/todo-board-final.html): a slim STAT-RIBBON header ("What's on your desk?" + the
+ * three post-it counters + "Walk me through", polish v3) over THREE horizontal LANES —
  * Urgent · Housekeeping · Notes to self (Urgent pinned top; page scrolls vertically when the lanes
  * exceed the viewport). The Today's list lives in a CORNER POP-UP (fixed bottom-right FAB with a
  * progress ring → a panel with the committed band + done band; the pop-up anatomy follows the
@@ -25,7 +25,7 @@ import { F12Page, F12Account } from "../shell/F12Shell";
 import { StatusDot } from "../StatusDot";
 import { useScriptAllyDb } from "../../lib/db";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
-import { assembleBoard, todaySplit, ribbonTiles, laneFadeState, BoardCard, USER_TASK_FLAG_TYPE } from "../../lib/todoBoard";
+import { assembleBoard, todaySplit, ribbonTiles, laneFadeState, walkSublabel, walkAria, BoardCard, USER_TASK_FLAG_TYPE } from "../../lib/todoBoard";
 import { flagKeyForTask, MUTED_UNTIL } from "../../lib/taskFlags";
 import {
   choosePicks, rolledOverCards, todayProgress, MAX_TODAY,
@@ -492,8 +492,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             </button>
           </span>
           <span className="tdb-sp" />
-          <button type="button" className="tdb-btn-pri" disabled={!tiles.urgent} onClick={() => openFlowCards(board.do)}>
-            Work through priorities now
+          <button type="button" className="tdb-btn-pri" disabled={!tiles.urgent} aria-label={walkAria(tiles.urgent)} onClick={() => openFlowCards(board.do)}>
+            <span className="tdb-wdisc" aria-hidden />
+            <span className="tdb-wtxt">
+              <span className="tdb-wt1">Walk me through</span>
+              <span className="tdb-wt2">{walkSublabel(tiles.urgent)}</span>
+            </span>
           </button>
         </div>
 

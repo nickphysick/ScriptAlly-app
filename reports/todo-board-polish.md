@@ -122,3 +122,25 @@ successor, per the confirmed rebase) is untouched, same position in the lane hea
   ToDoPage.tsx/todo.css, in scope). FocusFlow's `mode: "sweep"` API + sweep-mode internals KEEP
   the sweep name (exported/consumed across FocusFlow.tsx + its tests — flow internals are out of
   this pack's scope). No tests asserted the old copy.
+
+## PHASE 4 — "Work through priorities now" → "Walk me through" (Option C)
+
+- **Markup:** the ink-filled button became the white pill — radius 99, padding 13px 27px 13px
+  14px, 1px hairline, `--sh-btn`; 38px `.tdb-wdisc` (gradient `--pink-t → --pink-btn`, 1px
+  `--pink-btn-h`) carrying the 15px ink play triangle (+2px right optical); two-line block —
+  "Walk me through" (Playfair 19/600, ink) over the mono 9px letter-spaced sublabel at ink@55%.
+  No burgundy anywhere on the button.
+- **One count source:** the sublabel + aria read `tiles.urgent` (= `ribbonTiles().urgent` =
+  `board.do.length` — the same number the Urgent post-it and lane chip draw). Builders
+  `walkSublabel(n)` / `walkAria(n)` in `lib/todoBoard.ts`, singular-safe, unit-locked
+  (`5 URGENT ITEMS` / `1 URGENT ITEM` / `GUIDED · NOTHING URGENT`).
+- **n = 0 (Nick's decision):** the follow-up pack's disabled-at-zero inert grammar STANDS — the
+  55%-clickable clause is dropped. The shared `:disabled` block flattens the pill; companions mute
+  the disc (paper fill, faint triangle) and lift the sublabel's 55% opacity so faint isn't
+  double-dimmed. Disabled sublabel reads `GUIDED · NOTHING URGENT`; disabled aria "Walk me
+  through — nothing urgent right now".
+- **Hover:** lift 1px, shadow deepens to `--sh-card-h`, border warms to `--pink-btn-h`, 0.12s.
+- **Handler + selector unchanged:** same `openFlowCards(board.do)` (the focus flow review walk —
+  the confirmed rebase target); the class stays `.tdb-btn-pri`, so tour stop 5's
+  `.tdb-ribbon .tdb-btn-pri` selector holds without touching `todoTour.ts`.
+- No tests asserted the old copy; the page doc-comment updated.

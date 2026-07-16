@@ -34,8 +34,22 @@
 .tdb-postit:hover, .tdb-postit:focus-visible { transform: rotate(0) scale(1.05); }
 .tdb-postit.zero .tdb-pv { opacity: 0.45; }
 @media (prefers-reduced-motion: reduce) { .tdb-postit { transition: none; } }
-.tdb-btn-pri { font-size: 12.5px; font-weight: 600; padding: 9px 18px; border-radius: var(--r-md); background: var(--ink); color: var(--panel); box-shadow: var(--sh-btn); white-space: nowrap; line-height: 1.2; }
-.tdb-btn-pri:hover:not(:disabled) { filter: brightness(1.35); }
+/* Polish v3 P4 — "Walk me through" (Option C; replaces the ink "Work through priorities now").
+   White pill, 38px pink gradient disc + 15px ink play triangle (+2px right optical), two-line
+   block: Playfair 19 over the mono GUIDED sublabel (ink @55%). Same handler, same disabled gate
+   (!tiles.urgent — the follow-up pack's inert grammar stands; sublabel reads NOTHING URGENT).
+   Class name kept: tour stop 5 targets `.tdb-ribbon .tdb-btn-pri`. */
+.tdb-btn-pri { display: inline-flex; align-items: center; gap: 13px; padding: 13px 27px 13px 14px; border-radius: 99px; background: var(--white, #fff); border: 1px solid var(--hairline); color: var(--ink); box-shadow: var(--sh-btn); text-align: left; transition: transform 0.12s, box-shadow 0.12s, border-color 0.12s; }
+.tdb-btn-pri:hover:not(:disabled) { transform: translateY(-1px); box-shadow: var(--sh-card-h); border-color: var(--pink-btn-h); }
+.tdb-wdisc { position: relative; width: 38px; height: 38px; border-radius: 50%; flex: none; background: linear-gradient(135deg, var(--pink-t), var(--pink-btn)); border: 1px solid var(--pink-btn-h); }
+.tdb-wdisc::after { content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) translateX(2px); border-left: 11px solid var(--ink); border-top: 7.5px solid transparent; border-bottom: 7.5px solid transparent; }
+.tdb-wtxt { display: flex; flex-direction: column; gap: 3px; }
+.tdb-wt1 { font-family: var(--f12-serif); font-size: 19px; font-weight: 600; line-height: 1.05; color: inherit; white-space: nowrap; }
+.tdb-wt2 { font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: inherit; opacity: 0.55; white-space: nowrap; }
+/* disabled companions — the shared inert block below flattens the button; these mute its parts */
+.tdb-btn-pri:disabled .tdb-wdisc { background: var(--paper); border-color: var(--hairline); }
+.tdb-btn-pri:disabled .tdb-wdisc::after { border-left-color: var(--faint); }
+.tdb-btn-pri:disabled .tdb-wt2 { opacity: 1; }
 
 
 /* ── THE INERT GRAMMAR (empty-states ref §G) — one treatment for every unavailable control on

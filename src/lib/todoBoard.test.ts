@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { QueryStatus, Task, Query, Agent, Manuscript, UserTask, TaskFlag, Activity, ActivityType } from "../types";
-import { assembleBoard, boardStreamForTaskType, todaySplit, ribbonTiles, laneFadeState, BoardInput } from "./todoBoard";
+import { assembleBoard, boardStreamForTaskType, todaySplit, ribbonTiles, laneFadeState, walkSublabel, walkAria, BoardInput } from "./todoBoard";
 
 const TODAY = "2026-07-09";
 const NOW = Date.parse("2026-07-09T12:00:00Z");
@@ -191,5 +191,18 @@ describe("laneFadeState — the polish P1 both-edge fade machine (4px thresholds
   });
   it("a non-overflowing reel shows neither", () => {
     expect(laneFadeState(0, 600, 600)).toEqual({ left: false, right: false });
+  });
+});
+
+describe("walkSublabel / walkAria — the Walk-me-through button reads the ONE urgent count", () => {
+  it("plural, singular, zero sublabels", () => {
+    expect(walkSublabel(5)).toBe("GUIDED · 5 URGENT ITEMS");
+    expect(walkSublabel(1)).toBe("GUIDED · 1 URGENT ITEM");
+    expect(walkSublabel(0)).toBe("GUIDED · NOTHING URGENT");
+  });
+  it("aria mirrors the same grammar", () => {
+    expect(walkAria(3)).toBe("Walk me through — guided pass through 3 urgent items");
+    expect(walkAria(1)).toBe("Walk me through — guided pass through 1 urgent item");
+    expect(walkAria(0)).toBe("Walk me through — nothing urgent right now");
   });
 });
