@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { BoardCard } from "./todoBoard";
-import { choosePicks, rolledOverCards, todayProgress, walkStepKind, isStageable, applyStaged, StagedPayload } from "./todoWalk";
+import { choosePicks, rolledOverCards, todayProgress, walkStepKind, isStageable, applyStaged, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, StagedPayload, StagedHandlers } from "./todoWalk";
 import { QueryStatus } from "../types";
 
 const card = (key: string, over: Partial<BoardCard> = {}): BoardCard =>
@@ -59,30 +59,70 @@ describe("walkStepKind — staged (deferrable) vs open (immediate write)", () =>
   });
 });
 
+const HANDLERS = (over: Partial<StagedHandlers> = {}): StagedHandlers => ({
+  markSent: async () => {},
+  nudge: async () => {},
+  snooze: async () => {},
+  muteItem: async () => {},
+  muteRule: async () => {},
+  ...over,
+});
+
 describe("applyStaged — per-item failure isolation", () => {
   const mk = (cardKey: string): StagedPayload => ({ kind: "mark-sent", cardKey, queryId: "q", targetStatus: QueryStatus.FULL_SENT, sentDate: "2026-07-16", isResubmit: false });
   it("one failure doesn't abort the rest; reports ok + failed", async () => {
-    const res = await applyStaged([mk("a"), mk("b"), mk("c")], {
+    const res = await applyStaged([mk("a"), mk("b"), mk("c")], HANDLERS({
       markSent: async (p) => { if (p.cardKey === "b") throw new Error("boom"); },
-      nudge: async () => {},
-    });
+    }));
     expect(res.ok).toEqual(["a", "c"]);
     expect(res.failed).toEqual(["b"]);
   });
-  it("routes each kind to its handler", async () => {
+  it("routes every kind to its handler — captures AND stances", async () => {
     const seen: string[] = [];
     await applyStaged(
-      [mk("a"), { kind: "nudge", cardKey: "n", queryId: "q", checkBackDate: "2026-08-01" }],
-      { markSent: async () => { seen.push("mark"); }, nudge: async () => { seen.push("nudge"); } },
+      [
+        mk("a"),
+        { kind: "nudge", cardKey: "n", queryId: "q", checkBackDate: "2026-08-01" },
+        { kind: "snooze", cardKey: "s", taskType: "full_requested", relatedRecordId: "q", days: 7 },
+        { kind: "mute-item", cardKey: "mi", taskType: "no_response_close", relatedRecordId: "q9" },
+        { kind: "mute-rule", cardKey: "mr", rule: "dq_mswl" },
+      ],
+      HANDLERS({
+        markSent: async () => { seen.push("mark"); },
+        nudge: async () => { seen.push("nudge"); },
+        snooze: async (p) => { seen.push(`snooze${p.days}`); },
+        muteItem: async () => { seen.push("mute-item"); },
+        muteRule: async (p) => { seen.push(`mute-rule:${p.rule}`); },
+      }),
     );
-    expect(seen).toEqual(["mark", "nudge"]);
+    expect(seen).toEqual(["mark", "nudge", "snooze7", "mute-item", "mute-rule:dq_mswl"]);
   });
   it("hands the FULL payload to the handler — method + materials survive staging (review display)", async () => {
     const got: StagedPayload[] = [];
     const staged: StagedPayload = { kind: "mark-sent", cardKey: "a", queryId: "q", targetStatus: QueryStatus.PARTIAL_SENT, sentDate: "2026-07-16", isResubmit: false, method: "QueryManager", materials: ["First pages", "Synopsis"] };
-    await applyStaged([staged], { markSent: async (p) => { got.push(p); }, nudge: async () => {} });
+    await applyStaged([staged], HANDLERS({ markSent: async (p) => { got.push(p); } }));
     expect(got[0]).toEqual(staged); // verbatim — nothing stripped between stage and apply
     expect((got[0] as Extract<StagedPayload, { kind: "mark-sent" }>).materials).toEqual(["First pages", "Synopsis"]);
+  });
+});
+
+describe("one write path — the write-args builders strip audit fields identically for every caller", () => {
+  it("markSentWriteArgs yields EXACTLY the recordMaterialsSent args (audit fields dropped)", () => {
+    const p: Extract<StagedPayload, { kind: "mark-sent" }> = { kind: "mark-sent", cardKey: "a", label: "x", queryId: "q1", targetStatus: QueryStatus.FULL_SENT, sentDate: "2026-07-16T00:00:00.000Z", isResubmit: true, method: "Email", materials: ["Full manuscript"] };
+    expect(markSentWriteArgs(p)).toEqual({ queryId: "q1", targetStatus: QueryStatus.FULL_SENT, sentDate: "2026-07-16T00:00:00.000Z", isResubmit: true });
+  });
+  it("nudgeWriteArgs yields EXACTLY the logNudge args (nudgeDate/method are display-only)", () => {
+    const p: Extract<StagedPayload, { kind: "nudge" }> = { kind: "nudge", cardKey: "n", queryId: "q1", checkBackDate: "2026-08-01T00:00:00.000Z", note: "hi", nudgeDate: "2026-07-16", method: "Email" };
+    expect(nudgeWriteArgs(p)).toEqual(["q1", { checkBackDate: "2026-08-01T00:00:00.000Z", note: "hi" }]);
+    expect(nudgeWriteArgs({ kind: "nudge", cardKey: "n", queryId: "q1", checkBackDate: "2026-08-01" })).toEqual(["q1", { checkBackDate: "2026-08-01" }]);
+  });
+});
+
+describe("materialOptsForTask — the request's tick-list", () => {
+  it("maps each request type", () => {
+    expect(materialOptsForTask("partial_requested")).toEqual(["First pages", "Synopsis", "Covering email"]);
+    expect(materialOptsForTask("revise_resubmit")).toEqual(["Revised manuscript", "Revision letter"]);
+    expect(materialOptsForTask("full_requested")).toEqual(["Full manuscript", "Synopsis", "Covering email"]);
   });
 });
 

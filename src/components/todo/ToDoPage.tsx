@@ -27,11 +27,9 @@ import { useScriptAllyDb } from "../../lib/db";
 import { assembleBoard, todaySplit, ribbonTiles, BoardCard } from "../../lib/todoBoard";
 import { flagKeyForTask } from "../../lib/taskFlags";
 import { choosePicks, rolledOverCards, todayProgress, MAX_TODAY } from "../../lib/todoWalk";
-import { groupHousekeeping, hkGapCount, HkGroup, HkRule, HK_RULES } from "../../lib/todoHousekeeping";
+import { groupHousekeeping, hkGapCount, HkGroup, HkRule, HK_RULES, HK_PAYOFF } from "../../lib/todoHousekeeping";
 import { QueryStatus } from "../../types";
-import { TaskDetail } from "./TaskDetail";
-import { Walkthrough } from "./Walkthrough";
-import { HousekeepingBatch } from "./HousekeepingBatch";
+import { FocusFlow, FocusItem } from "./FocusFlow";
 import "./todo.css";
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -51,14 +49,6 @@ const fmtTime = (ms?: number): string => {
   const ap = h < 12 ? "am" : "pm";
   h = h % 12 || 12;
   return `${h}:${String(d.getMinutes()).padStart(2, "0")}${ap}`;
-};
-
-// Per-rule blurb for the grouped housekeeping card — payoff-first copy (the rule catalogue itself
-// lives in todoHousekeeping.ts). Stale queries never group, so they carry no blurb here.
-const GROUP_BLURB: Record<string, string> = {
-  dq_responseTime: "Without a reply window we can’t tell you when a nudge is fair — so they never surface in your chase list.",
-  dq_materials: "We don’t know what to tell you to send — so your package check can’t run for them.",
-  dq_mswl: "Their wish list is how we tell you who’s worth querying — worth most before you query.",
 };
 
 /** One lane: coloured header band + a horizontal card scroller with an overflow fade + scroll-right
@@ -116,12 +106,12 @@ type ToastAction = { label: string; fn: () => void };
 export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const { tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser, addUserTask, updateUserTask, upsertTaskFlag, updateUserProfile } = useScriptAllyDb();
   const [toast, setToast] = useState<{ msg: string; action?: ToastAction } | null>(null);
-  const [drawerCard, setDrawerCard] = useState<BoardCard | null>(null);
   const [rollDismissed, setRollDismissed] = useState(false);
   const [pulsing, setPulsing] = useState<string | null>(null);
-  const [walk, setWalk] = useState<{ title: string; cards: BoardCard[] } | null>(null);
-  const [batchGroup, setBatchGroup] = useState<HkGroup | null>(null);
+  // THE completion surface — the focus flow (queue of one for a card click; a set for the two walks).
+  const [flow, setFlow] = useState<FocusItem[] | null>(null);
   const [todayOpen, setTodayOpen] = useState(false);
+  const openFlowCards = (cards: BoardCard[]) => setFlow(cards.map((card) => ({ kind: "card", card })));
 
   const now = Date.now();
   const today = localYMD(now);
@@ -203,7 +193,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       updateUserTask(card.userTaskId, { done: true, completedAt: new Date().toISOString() });
     } else {
       // A derived task can't be silently ticked — the app needs the date/materials. Open the drawer.
-      setDrawerCard(card);
+      openFlowCards([card]);
     }
   }
   async function addTask() {
@@ -227,7 +217,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             <span className="tdb-m nt"><b>{tiles.notes}</b><i>notes to self</i></span>
           </span>
           <span className="tdb-sp" />
-          <button type="button" className="tdb-btn-pri" disabled={!tiles.urgent} onClick={() => setWalk({ title: "Urgent", cards: board.do })}>
+          <button type="button" className="tdb-btn-pri" disabled={!tiles.urgent} onClick={() => openFlowCards(board.do)}>
             Work through priorities now
           </button>
         </div>
@@ -293,21 +283,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           {toast.action && <button type="button" className="tdb-toast-act" onClick={() => { toast.action!.fn(); setToast(null); }}>{toast.action.label}</button>}
         </div>
       )}
-      {walk && <Walkthrough title={walk.title} cards={walk.cards} onClose={() => setWalk(null)} onNavigate={onNavigate} onToast={flash} />}
-      {batchGroup && <HousekeepingBatch group={batchGroup} onClose={() => setBatchGroup(null)} onToast={flash} onNavigate={onNavigate} />}
-      {drawerCard && (() => {
-        const streamCards = drawerCard.stream === "done" ? [] : board[drawerCard.stream];
-        const idx = streamCards.findIndex((c) => c.key === drawerCard.key);
-        return (
-          <TaskDetail
-            card={drawerCard}
-            onClose={() => setDrawerCard(null)}
-            onPrev={idx > 0 ? () => setDrawerCard(streamCards[idx - 1]) : undefined}
-            onNext={idx >= 0 && idx < streamCards.length - 1 ? () => setDrawerCard(streamCards[idx + 1]) : undefined}
-            onNavigate={onNavigate}
-          />
-        );
-      })()}
+      {flow && <FocusFlow items={flow} onClose={() => setFlow(null)} onNavigate={onNavigate} onToast={flash} />}
     </F12Page>
   );
 
@@ -333,7 +309,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         {/* committed band */}
         <div className="tdb-tcommit">
           {committedCards.map((c) => (
-            <div key={c.key} className="tdb-trow" onClick={() => (c.userTaskId ? undefined : setDrawerCard(c))}>
+            <div key={c.key} className="tdb-trow" onClick={() => openFlowCards([c])}>
               {c.hk || c.userTaskId ? <span className="tdb-tdot" /> : c.status ? <StatusDot status={c.status as QueryStatus} overrideSize={14} /> : <span className="tdb-tdot" />}
               <div className="tdb-tmid"><div className="tdb-tx">{c.title}</div><div className="tdb-tm">{c.record}</div></div>
               <button type="button" className="tdb-x" title="Take off today" onClick={(e) => { e.stopPropagation(); toggleToday(c); }}>✕</button>
@@ -358,7 +334,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         <div className="tdb-tf">
           <span className="tdb-pc">{prog.empty ? "NOTHING COMMITTED" : `${prog.done} of ${prog.total} done today`}</span>
           <button type="button" className="tdb-pick" onClick={helpMePick}>{committedCards.length ? "Add more" : "Help me pick"}</button>
-          <button type="button" className="tdb-worklist" disabled={!committedCards.length} onClick={() => setWalk({ title: "Work the list", cards: committedCards })}>Work the list</button>
+          <button type="button" className="tdb-worklist" disabled={!committedCards.length} onClick={() => openFlowCards(committedCards)}>Work the list</button>
         </div>
       </div>
     );
@@ -371,7 +347,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       : c.title;
     const committed = onList(c);
     return (
-      <div key={c.key} className={`tdb-tile ${c.stream}${committed ? " today" : ""}${pulsing === c.key ? " pulse" : ""}`} onClick={() => setDrawerCard(c)}>
+      <div key={c.key} className={`tdb-tile ${c.stream}${committed ? " today" : ""}${pulsing === c.key ? " pulse" : ""}`} onClick={() => openFlowCards([c])}>
         <div className="tdb-tags">
           <span className={`tdb-tag due${c.warn ? " warn" : ""}`}>{c.due}</span>
           {c.snoozes > 0 && <span className="tdb-tag snz">Snoozed ×{c.snoozes}</span>}
@@ -400,10 +376,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     const faces = g.members.slice(0, 5);
     const suffix = g.meta.title(g.members.length).replace(/^\d+\s+/, "");
     return (
-      <div key={g.rule} className="tdb-gcard" onClick={() => setBatchGroup(g)}>
+      <div key={g.rule} className="tdb-gcard" onClick={() => setFlow([{ kind: "group", group: g }])}>
         <div className="tdb-gn">{g.members.length}</div>
         <div className="tdb-gt">{suffix}</div>
-        <div className="tdb-gs">{GROUP_BLURB[g.rule] ?? ""}</div>
+        <div className="tdb-gs">{HK_PAYOFF[g.rule] ?? ""}</div>
         <div className="tdb-gstack">
           {faces.map((m) => <span key={m.card.key} className="tdb-gsav" title={m.agentName}>{m.card.initials}</span>)}
           {g.members.length > faces.length && <span className="tdb-gmore">+{g.members.length - faces.length}</span>}

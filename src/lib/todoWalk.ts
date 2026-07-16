@@ -59,20 +59,50 @@ export function walkStepKind(card: BoardCard): WalkStepKind {
 }
 export const isStageable = (card: BoardCard): boolean => walkStepKind(card) !== "open";
 
+/** The focus flow's material tick-list per request type (was TaskCaptureForm's inline map). */
+export function materialOptsForTask(taskType?: string): string[] {
+  if (taskType === "partial_requested") return ["First pages", "Synopsis", "Covering email"];
+  if (taskType === "revise_resubmit") return ["Revised manuscript", "Revision letter"];
+  return ["Full manuscript", "Synopsis", "Covering email"];
+}
+
+/** The nudge's default check-back window (days) when the flow doesn't surface the field. */
+export const DEFAULT_CHECKBACK_DAYS = 14;
+
 /**
- * A staged (not-yet-written) walkthrough change. Carries everything apply() needs to write later,
- * PLUS the capture's method + materials for the review screen. Those two are DISPLAY/AUDIT only —
- * the proven write path (recordMaterialsSent, shared with MarkSentPopover) takes neither; the
- * materials tick-list is the Save-gate, exactly as in the popover. Extending the write path to
- * persist them would be a write-path change, which this pack bars.
+ * A staged (not-yet-written) focus-flow change. Two families:
+ *  · CAPTURES (mark-sent, nudge) — carry everything apply() needs to write, PLUS display/audit
+ *    fields (method/materials/nudgeDate) the review screen shows. The proven write paths
+ *    (recordMaterialsSent / logNudge) take none of the audit fields — extending them would be a
+ *    write-path change, which the pack bars.
+ *  · STANCES (snooze, mute-item, mute-rule) — deferrable taskFlags/mutedTaskRules writes. Staging
+ *    them keeps Back honest: a staged stance un-stages; nothing persists before review-Save.
+ * `label` is display-only (the review row's text), set at stage time.
  */
 export type StagedPayload =
-  | { kind: "mark-sent"; cardKey: string; queryId: string; targetStatus: QueryStatus; sentDate: string; isResubmit: boolean; method?: string; materials?: string[] }
-  | { kind: "nudge"; cardKey: string; queryId: string; checkBackDate: string; note?: string };
+  | { kind: "mark-sent"; cardKey: string; label?: string; queryId: string; targetStatus: QueryStatus; sentDate: string; isResubmit: boolean; method?: string; materials?: string[] }
+  | { kind: "nudge"; cardKey: string; label?: string; queryId: string; checkBackDate: string; note?: string; nudgeDate?: string; method?: string }
+  | { kind: "snooze"; cardKey: string; label?: string; taskType: string; relatedRecordId: string; days: number }
+  | { kind: "mute-item"; cardKey: string; label?: string; taskType: string; relatedRecordId: string }
+  | { kind: "mute-rule"; cardKey: string; label?: string; rule: string };
+
+/** The EXACT args the one mark-sent write path takes — quick-✓ and the journey both build their
+ *  payload then pass through here, so the two can never write differently. */
+export function markSentWriteArgs(p: Extract<StagedPayload, { kind: "mark-sent" }>): { queryId: string; targetStatus: QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT; sentDate: string; isResubmit: boolean } {
+  return { queryId: p.queryId, targetStatus: p.targetStatus as QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT, sentDate: p.sentDate, isResubmit: p.isResubmit };
+}
+
+/** The EXACT args the one nudge write path (logNudge) takes. */
+export function nudgeWriteArgs(p: Extract<StagedPayload, { kind: "nudge" }>): [string, { checkBackDate: string; note?: string }] {
+  return [p.queryId, { checkBackDate: p.checkBackDate, ...(p.note ? { note: p.note } : {}) }];
+}
 
 export interface StagedHandlers {
   markSent: (p: Extract<StagedPayload, { kind: "mark-sent" }>) => Promise<void>;
   nudge: (p: Extract<StagedPayload, { kind: "nudge" }>) => Promise<void>;
+  snooze: (p: Extract<StagedPayload, { kind: "snooze" }>) => Promise<void>;
+  muteItem: (p: Extract<StagedPayload, { kind: "mute-item" }>) => Promise<void>;
+  muteRule: (p: Extract<StagedPayload, { kind: "mute-rule" }>) => Promise<void>;
 }
 
 /**
@@ -85,7 +115,10 @@ export async function applyStaged(items: StagedPayload[], h: StagedHandlers): Pr
   for (const item of items) {
     try {
       if (item.kind === "mark-sent") await h.markSent(item);
-      else await h.nudge(item);
+      else if (item.kind === "nudge") await h.nudge(item);
+      else if (item.kind === "snooze") await h.snooze(item);
+      else if (item.kind === "mute-item") await h.muteItem(item);
+      else await h.muteRule(item);
       ok.push(item.cardKey);
     } catch {
       failed.push(item.cardKey);

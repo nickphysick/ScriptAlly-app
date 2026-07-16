@@ -83,6 +83,14 @@ export const HK_RULES: Record<HkRule, HkRuleMeta> = {
 /** Stable render order — the query decision first (most consequential), then the data gaps. */
 export const HK_RULE_ORDER: HkRule[] = ["no_response_close", "dq_responseTime", "dq_materials", "dq_mswl"];
 
+/** Payoff-first copy per rule — shared by the lane's grouped card and the focus flow's payoff sheet. */
+export const HK_PAYOFF: Record<HkRule, string> = {
+  dq_responseTime: "Without a reply window we can’t tell you when a nudge is fair — so they never surface in your chase list.",
+  dq_materials: "We don’t know what to tell you to send — so your package check can’t run for them.",
+  dq_mswl: "Their wish list is how we tell you who’s worth querying — worth most before you query.",
+  no_response_close: "Silent past their stated window. Closing keeps your response rate honest.",
+};
+
 const NEED_TO_RULE: Record<AgentDataNeed, HkRule> = {
   responseTime: "dq_responseTime",
   materials: "dq_materials",
