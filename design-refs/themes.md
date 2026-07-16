@@ -651,10 +651,25 @@ chrome revision replaced v14/v3).
   #d3c2a6` (borders) · `--coffee-ink #6b5a41` (text) · `--coffee-deep #8a755a` (reserve). Applies:
   pop-up header + committed chip + dashed prompt + rollover bar, the card "✓ ON TODAY" pill, the
   FAB ring.
-- **Burgundy = deadline signal ONLY** (filled warn tags/chips). **Ink = offer tag + primaries.**
+- **Burgundy = deadline signal ONLY — and no longer a TAG fill** (amended by polish v3, see below;
+  it survives in the focus flow's warn stream chip + micro-accents). **Ink = offer tag + primaries.**
 - **GOLD IS RETIRED from the To-do page** (the `--gold-*` tokens remain defined for any other
   consumer; nothing on `/todo` reads them).
 - **StatusDot LOCK unchanged:** `--sage/--sageC/--sageD/--sage-edge` (the `#8a9e88` family) are
   STATUS colours — on the To-do page they appear ONLY inside the real `StatusDot` component.
 - Supporting: `--sub #5c554b` (option-A card sub-ink) · shadows `--sh-card` / `--sh-card-h`
   (cards straight on the oat) · `--sh-postit` (the 88px header post-its).
+
+## `.t-f12` — Polish v3 amendments (2026-07-16, board polish pass; visual ref `todo-task-settings.html` §3)
+
+- **THE TWO-DEPTH PINK TAG LAW (amends the retoken's tag clause):** card tags trade burgundy for
+  depth-of-pink — **standard status tags** (OVER TO YOU, STALE QUERY, SNOOZED ×n and kin) = soft
+  pink `--pink-t` fill / `--pink-b` border / `--pink-i` text; **urgency tags** (deadline
+  countdowns, N-days-no-reply — the `warn` class) = the DEEPER pink `--pink-btn` fill / `--pink-b`
+  border / **`--pink-deep #6e3325`** text (NEW token, minted this pass) / weight 700 — urgency
+  outranks status by depth, not hue. **Offer keeps the ink ★** (rarest thing, rarest colour);
+  **note cards keep note-yellow** (`--note-t/-b/-i` scoped via `.tdb-tile.nt`). Burgundy fills no
+  tag anywhere on the page; it survives in StatusDots (locked), the focus flow's warn stream chip
+  (flow internals — retoken Phase E grammar, out of the polish pack's scope) and micro-accents
+  (pips, progress dots, italic emphasis). Rule-text-locked in `todoTagLaw.test.ts`.
+- The Urgent post-it's ink now reads `var(--pink-deep)` (was the same hex inline) — one source.

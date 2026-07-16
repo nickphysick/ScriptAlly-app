@@ -28,7 +28,7 @@
 .tdb-postit::before { content: ""; position: absolute; top: -9px; left: 50%; transform: translateX(-50%) rotate(-1.5deg); width: 40px; height: 14px; background: rgba(255, 255, 255, 0.55); border: 1px solid rgba(58, 42, 26, 0.05); }
 .tdb-pv { font-family: Caveat, cursive; font-size: 40px; font-weight: 600; line-height: 1; }
 .tdb-pk { font-family: var(--f12-mono); font-size: 7px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.75; }
-.tdb-postit.ug { background: var(--postit-pink); transform: rotate(-2.4deg); color: #6e3325; }
+.tdb-postit.ug { background: var(--postit-pink); transform: rotate(-2.4deg); color: var(--pink-deep); }
 .tdb-postit.hk { background: var(--postit-sage); transform: rotate(1.8deg); color: var(--hk-ink); }
 .tdb-postit.nt { background: var(--postit-note); transform: rotate(-1.2deg); color: #6b5a17; }
 .tdb-postit:hover, .tdb-postit:focus-visible { transform: rotate(0) scale(1.05); }
@@ -101,10 +101,14 @@
 .tdb-ge { font-family: var(--f12-serif); font-style: italic; font-size: 14px; color: var(--muted); }
 .tdb-gg { font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--note-i); }
 
-/* ── OPTION-A CARD (retoken Phase C): serif titles, lane spines, min-height 190 with the middle
-   block flex-clipping — the pills-can-never-spill invariant stands (tag/foot/pill are flex:none;
-   only .tdb-mid flexes and clips). Neutral monograms; tags neutral outline / burgundy warn fill /
-   ink offer fill. ── */
+/* ── OPTION-A CARD (retoken Phase C; tag colours re-lawed by polish v3 Phase 2): serif titles,
+   lane spines, min-height 190 with the middle block flex-clipping — the pills-can-never-spill
+   invariant stands (tag/foot/pill are flex:none; only .tdb-mid flexes and clips). Neutral
+   monograms. TAGS = the two-depth pink law (todo-task-settings.html §3, amending the retoken):
+   standard status tags soft pink (pink-t/pink-b/pink-i, SNOOZED ×n included) · urgency tags the
+   DEEPER pink (pink-btn fill, pink-deep text, 700 — urgency outranks status by depth, not hue) ·
+   offer keeps the ink ★ (rarest thing, rarest colour) · note cards keep note-yellow. Burgundy
+   survives only in StatusDots (locked) and micro-accents — never a tag fill. ── */
 .tdb-tile { position: relative; flex: none; width: 330px; min-height: 190px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 11px; padding: 16px 18px 15px 20px; box-shadow: var(--sh-card); cursor: pointer; transition: box-shadow 0.16s, border-color 0.16s, transform 0.16s; display: flex; flex-direction: column; overflow: hidden; }
 .tdb-tile::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
 .tdb-tile.do::before { background: var(--pink-btn); }
@@ -113,10 +117,10 @@
 .tdb-tile:hover { border-color: var(--ink); box-shadow: var(--sh-card-h); transform: translateY(-1px); }
 .tdb-tile.today { border-color: var(--coffee-edge); }
 .tdb-tags { flex: none; display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
-.tdb-tag { display: inline-flex; align-items: center; gap: 5px; font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 99px; padding: 3.5px 10px; border: 1px solid var(--line); background: var(--white, #fff); color: var(--ink-2); white-space: nowrap; }
-.tdb-tag.due.warn { background: var(--burg); border-color: var(--burg); color: #fff; }
+.tdb-tag { display: inline-flex; align-items: center; gap: 5px; font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 99px; padding: 3.5px 10px; border: 1px solid var(--pink-b); background: var(--pink-t); color: var(--pink-i); white-space: nowrap; }
+.tdb-tile.nt .tdb-tag { background: var(--note-t); border-color: var(--note-b); color: var(--note-i); }
+.tdb-tag.due.warn { background: var(--pink-btn); border-color: var(--pink-b); color: var(--pink-deep); font-weight: 700; }
 .tdb-tag.offer { background: var(--ink); border-color: var(--ink); color: #fff; }
-.tdb-tag.snz { color: var(--faint); }
 .tdb-mid { flex: 1 1 auto; min-height: 0; overflow: hidden; }
 .tdb-tt { font-family: var(--f12-serif); font-size: 17px; font-weight: 600; line-height: 1.28; color: var(--ink); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .tdb-tsub { font-size: 12px; color: var(--sub); margin-top: 6px; line-height: 1.55; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }

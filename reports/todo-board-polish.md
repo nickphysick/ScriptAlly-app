@@ -76,3 +76,30 @@ Downloads and it gets committed + reconciled as a follow-up.
 - Classes live on `.tdb-track` (the scroller's immediate wrapper — the "lane wrapper" in the
   pack's terms; the overlays must anchor to the same box the scroller fills).
 - The design ref could NOT ride this commit (missing — see STEP 0).
+
+## PHASE 2 — card tags → the two-depth pink law
+
+Step 0 found the law NOT landed (the executed retoken deliberately kept neutral-outline +
+burgundy-warn); this phase applies it, corroborated visually by `todo-task-settings.html` §3
+(which names the token and calls the change "a colour-law amendment to the retoken pack").
+
+- **Minted `--pink-deep: #6e3325`** on the `.t-f12` pink line (index.css) — the mockup's own token
+  name; literals-only house rule honoured.
+- **`todo.css`:** base `.tdb-tag` → soft pink (`--pink-t`/`--pink-b`/`--pink-i`); `.due.warn` →
+  deeper pink (`--pink-btn` fill, `--pink-b` border, `--pink-deep` text, 700); `.offer` unchanged
+  (ink ★); the `.snz` faint override DELETED (SNOOZED ×n is a standard tag — base pink; the class
+  stays in markup as a semantic hook); NEW `.tdb-tile.nt .tdb-tag` → note-yellow
+  (`--note-t/-b/-i`). Type treatment untouched (mono 8px small-caps, radius 99).
+- **Burgundy audit:** no tag fill remains. Survivors, all deliberate: StatusDots (locked), the
+  focus flow's warn STREAM CHIP `.tdb-ffstream.warn` (flow internals — retoken Phase E's approved
+  grammar and explicitly OUT of this pack's scope), and micro-accents (`.tdb-pip`, progress/coach
+  dots, italic emphasis in the flow question + new-desk heading).
+- **Gold:** nothing to fix — already fully retired by the retoken (re-verified; the lock test now
+  asserts the stylesheet stays gold-free).
+- **Micro-cleanup:** the Urgent post-it's ink literal `#6e3325` → `var(--pink-deep)` (same value,
+  one source).
+- **Locks:** NEW `todoTagLaw.test.ts` (rule-text over todo.css — base pink, warn depth+700+dark
+  text, offer ink, nt note-yellow, no `--burg` in any tag rule, no gold). No snapshot/markup tests
+  existed to update (logic-only Vitest policy).
+- **`design-refs/themes.md` regenerated:** the retoken law line amended (burgundy no longer a tag
+  fill) + a dated "Polish v3 amendments" subsection documenting the law and the new token.

@@ -549,7 +549,7 @@
   --sh-btn: 0 1px 2px rgba(58, 42, 26, 0.10);
 
   --blue-t: #e7eef6; --blue-b: #d3e0ee; --blue-i: #2b4a6b;   /* you-are-here */
-  --pink-t: #f7e3dd; --pink-b: #eecdc3; --pink-i: #8a4030;   /* needs-you */
+  --pink-t: #f7e3dd; --pink-b: #eecdc3; --pink-i: #8a4030; --pink-deep: #6e3325;   /* needs-you; pink-deep = urgency-tag text (polish v3 two-depth tag law) */
   --pink-av: #f6d7cf;
   /* primary-button pink (chrome revision; v14/v3 omitted these — an undefined var() renders
      as NOTHING, which silently made the mockups' primary button transparent) */
