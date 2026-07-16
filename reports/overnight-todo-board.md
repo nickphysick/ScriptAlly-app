@@ -147,3 +147,32 @@ The star **is** the real `StatusDot` for `OFFER` status (a star glyph), rendered
 - **FIX D — cleared hero vs column (report only):** **same source.** Hero: `const clearedN = columns.done.length` (ToDoPage:126) → `<b>{clearedN}</b> cleared today` (145). Column: `const cards = columns[key]` (167), `key === "done"` → the same `columns.done`. They cannot disagree; the `clearedToday` union is the single upstream source. Consistent in code — any hero≠column Nick sees is live-data/stale-render and needs a live screenshot. No change made.
 
 **Reminder — layout jsdom-unverified:** Nick must eyeball on dev: single breadcrumb, no footer on To-do, one `0/5` (Today header), and the offer-card dot now in the F12 burgundy/pale-pink palette.
+
+## Scroll fix (Fix A landed) + glassy hero (Fix B RED-GATE)
+
+**Gates:** `tsc` clean · `vite build` OK · full Vitest **943** green. `git status` clean (no PaintMode); `App.tsx` untouched this pass.
+
+### Step 0 — scroll model + glass source
+- **Scroll ownership:** `.f12-root` is a flex **column** (`height:100%`, no overflow) — header (`.f12-hdwrap`, `flex-shrink:0`) above the page content; whichever child is the content must be its own `flex:1; min-height:0; overflow-y:auto` scroller. The Queries Hub's F12Page child is exactly that shape (`className="… flex flex-col overflow-hidden" style={{flex:1, minHeight:0}}`), with its **panes** scrolling internally (`.f12-rows`, `.f12-dscroll`). `StagePage` for both `/queries` and `/todo` is `layout="fill" clip` → `height:100%; overflow:hidden`.
+- **The bug:** `.tdb-wrap` was a plain block (`width/max-width/margin/padding`, no `flex`/overflow). So it grew past `.f12-root`'s bounded height and `StagePage`'s `overflow:hidden` clipped everything below the fold — no scroll. (No `100vh`/`overflow:hidden` clamp survived at the wrapper; the miss was the *absent* scroller, not a present clamp.)
+
+### FIX A — the board scrolls (landed)
+Made `.tdb-wrap` the page scroll region: added `flex: 1; min-height: 0; overflow-y: auto` (kept `max-width`/`margin:0 auto`/padding). Now it fills `.f12-root`'s remaining height below the crumb header and scrolls when the shelf + four columns exceed it. **Page-scoped** — a single `todo.css` rule; `.f12-root`/`StagePage`/other pages untouched (the clamp was never shared; the fix is purely additive to the To-do wrapper). The **~344px shelf** (`.tdb-toprow height:344px`) and the **Today-box internal fade-scroll** (`.tdb-tb overflow-y:auto` + mask) are inside `.tdb-wrap` and unchanged, so both survive; the whole page now scrolls to reach the columns. (Layout jsdom-unverified — Nick eyeballs.)
+
+### ⛔ FIX B — RED-GATE: the diary container is NOT glassy
+The "Dates for the diary / Fortnight in Focus" container is `.dc-panel` (`src/components/dashboard/diaryCarousel.css`), and it is a **solid, opaque raised panel** — **not** frosted glass:
+- Cappuccino: `--dc-panel-bg: #f4efe7` (opaque hex, **no alpha**), `--dc-panel-bd: 1px solid #e9ded0`, `--dc-panel-rad: 22px`, `--dc-panel-sh: 0 10px 34px rgba(58,28,20,0.09)`.
+- **No `backdrop-filter`, no translucency** — and there is **no `backdrop-filter` anywhere** in the app (only a decorative `blur(4px)` rim in `heroRim.css`, unrelated).
+
+Fix B's core instruction — "reuse the diary's translucency + `backdrop-filter`/blur… **do not invent a new glass recipe**" — is impossible: there's no glass recipe on the diary (or anywhere) to reuse, and inventing the blur/translucency values is explicitly forbidden. So I stopped rather than guess a glass recipe.
+
+**For Nick — pick one:**
+- **(A)** Approve **inventing** a frosted-glass recipe for the hero (e.g. translucent pink fill + `backdrop-filter: blur(…) saturate(…)` + the diary's hairline/shadow/22px radius). This is new material, needs your sign-off on the blur/alpha values.
+- **(B)** Reuse the diary's **actual** material — the solid raised-panel treatment (`--dc-panel-*`: hairline + `0 10px 34px …09` shadow + 22px radius), **pink-tinted** (a pink fill instead of `#f4efe7`). No glass, but it's the real "diary container surface" reused, no invention. *(My lean — it honours "reuse the diary's material, don't invent" literally.)*
+- **(C)** Something else.
+
+Either way it's a small `todo.css` (+ maybe a `.t-f12` token) change once you choose.
+
+**Reminder — layout jsdom-unverified:** Nick eyeballs — the page now scrolls to the bottom of all four columns, the ~344px shelf stays put at the top of the scroll, and the Today box still scrolls internally.
+
+**Commit (Fix A):** `fix(todo): board scrolls — .tdb-wrap owns the page scroll region`.

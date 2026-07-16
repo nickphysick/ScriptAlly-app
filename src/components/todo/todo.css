@@ -4,7 +4,11 @@
  * Classes are `tdb-` prefixed (to-do board). Layout in CSS; the mockup's own class shapes translated.
  */
 
-.tdb-wrap { width: 100%; max-width: var(--maxw, 1520px); margin: 0 auto; padding: 16px 12px 26px; }
+/* The page's scroll region: fills f12-root's remaining height (below the fixed crumb header) and
+   scrolls when the shelf + four columns exceed it — the outer page scroll the standalone-mockup port
+   lost. `flex: 1` because .tdb-wrap is a flex child of .f12-root (a flex column); min-height:0 lets it
+   shrink so overflow-y can engage. Page-scoped — no change to f12-root/StagePage/other pages. */
+.tdb-wrap { flex: 1; min-height: 0; overflow-y: auto; width: 100%; max-width: var(--maxw, 1520px); margin: 0 auto; padding: 16px 12px 26px; }
 
 /* ── top shelf (fixed 344px: header 44 + ~4 rows + footer) ── */
 .tdb-toprow { display: grid; grid-template-columns: 1fr 400px; gap: 12px; height: 344px; }
