@@ -34,6 +34,7 @@ import {
 import { saveHkRows } from "../../lib/hkSave";
 import { isProUser, fetchAssistedFill, AssistFound } from "../../lib/assistFill";
 import { groupHousekeeping, hkGapCount, hkGroupProgress, HkGroup, HkRule, HK_RULES } from "../../lib/todoHousekeeping";
+import { deskState, liveQueryCount, liveQueriesLine, clearedListCap } from "../../lib/todoEmpty";
 import { ActivityType, QueryStatus } from "../../types";
 import { FocusFlow, FocusItem } from "./FocusFlow";
 import "./todo.css";
@@ -253,6 +254,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // ONE counts object read by BOTH the ribbon tiles and the lane headers (equality by construction).
   // Housekeeping = the gap count + the individual stale cards (12+9 gaps + 4 stale = 25), never piles.
   const tiles = ribbonTiles(board, hkGapCount(hkGroups) + staleCards.length);
+  // Empty-state derivation (todo-empty-states.html): A = new desk (zero queries AND agents);
+  // E = desk cleared (all three sets empty AND a non-empty done-log — earned, never default);
+  // otherwise each reel handles its own clear. All pure views; nothing stored.
+  const hkItemCount = hkGroups.length + staleCards.length;
 
   // Post-it tap → the lane (the 6B tile-tap behaviour, built here — 6B itself is red-gated).
   const scrollToLane = (cls: "do" | "hk" | "nt") => {
@@ -277,6 +282,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // union, uncapped). Rolled-over commitments (a prior day) surface once in the coffee Keep/Clear bar.
   const { committed: committedCards, done: doneCards } = todaySplit(board, today);
   const doneN = doneCards.length;
+  const desk = deskState({ queryCount: queries.length, agentCount: agents.length, urgent: board.do.length, hkItems: hkItemCount, notes: board.nt.length, clearedToday: doneN });
   const onList = (c: BoardCard) => c.committedDate === today;
   const allCommitted = [...board.do, ...board.hk, ...board.nt].filter((c) => c.committedDate != null);
   const rolled = rollDismissed ? [] : rolledOverCards(allCommitted, today);
@@ -442,13 +448,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             <span className="tdb-ask">What’s on your desk?</span>
           </span>
           <span className="tdb-postits">
-            <button type="button" className="tdb-postit ug" aria-label={`${tiles.urgent} urgent — jump to the Urgent lane`} onClick={() => scrollToLane("do")}>
+            <button type="button" className={`tdb-postit ug${tiles.urgent === 0 ? " zero" : ""}`} aria-label={`${tiles.urgent} urgent — jump to the Urgent lane`} onClick={() => scrollToLane("do")}>
               <span className="tdb-pv" aria-hidden>{tiles.urgent}</span><span className="tdb-pk" aria-hidden>urgent</span>
             </button>
-            <button type="button" className="tdb-postit hk" aria-label={`${tiles.housekeeping} housekeeping — jump to the Housekeeping lane`} onClick={() => scrollToLane("hk")}>
+            <button type="button" className={`tdb-postit hk${tiles.housekeeping === 0 ? " zero" : ""}`} aria-label={`${tiles.housekeeping} housekeeping — jump to the Housekeeping lane`} onClick={() => scrollToLane("hk")}>
               <span className="tdb-pv" aria-hidden>{tiles.housekeeping}</span><span className="tdb-pk" aria-hidden>housekpg</span>
             </button>
-            <button type="button" className="tdb-postit nt" aria-label={`${tiles.notes} notes to self — jump to the Notes lane`} onClick={() => scrollToLane("nt")}>
+            <button type="button" className={`tdb-postit nt${tiles.notes === 0 ? " zero" : ""}`} aria-label={`${tiles.notes} notes to self — jump to the Notes lane`} onClick={() => scrollToLane("nt")}>
               <span className="tdb-pv" aria-hidden>{tiles.notes}</span><span className="tdb-pk" aria-hidden>notes</span>
             </button>
           </span>
@@ -464,11 +470,20 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <button type="button" className="tdb-tool" onClick={() => flash("Sort — later")}>Sort</button>
         </div>
 
-        {/* ── lanes (page scrolls vertically if three lanes exceed the viewport; Urgent on top) ── */}
+        {/* ── lanes — or, when derivation says so, the new-desk welcome (A) / the earned "Desk
+            cleared." moment (E) in their place. Copy verbatim from todo-empty-states.html. ── */}
+        {desk === "new-desk" ? renderNewDesk() : desk === "desk-cleared" ? renderDeskCleared() : (
         <div className="tdb-lanes">
           <Lane cls="do" label="Urgent" count={tiles.urgent} isEmpty={board.do.length === 0 && overlayCards("do").length === 0}
             onSweep={() => setFlow({ items: board.do.map((card) => ({ kind: "card", card })), mode: "sweep" })}
-            emptyNode={<span className="e">Nothing needs you right now.</span>}>
+            emptyNode={
+              <div className="tdb-clear do">
+                <span className="tdb-clric" aria-hidden>✓</span>
+                <div><div className="tdb-clrt">Nothing needs you.</div>
+                <div className="tdb-clrs">{liveQueriesLine(liveQueryCount(queries))}</div></div>
+                <span className="tdb-clrhand" aria-hidden>— go write something</span>
+              </div>
+            }>
             {overlayCards("do")}
             {board.do.map(renderCard)}
           </Lane>
@@ -478,7 +493,16 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             count={tiles.housekeeping}
             isEmpty={hkGroups.length === 0 && staleCards.length === 0 && overlayCards("hk").length === 0}
             onSweep={() => setFlow({ items: [...hkGroups.map((g) => ({ kind: "group" as const, group: g })), ...staleCards.map((card) => ({ kind: "card" as const, card }))], mode: "sweep" })}
-            emptyNode={<span className="e">Nothing to tidy.</span>}
+            emptyNode={
+              <div className="tdb-clear hk">
+                <div><div className="tdb-clrt">Spotless.</div>
+                <div className="tdb-clrs">Every agent record is complete and nothing has gone stale.</div></div>
+                <div className="tdb-clrbar">
+                  <div className="tdb-pbar"><i style={{ width: "100%" }} /></div>
+                  <div className="tdb-pcap"><span>{hkGroupProgress(agents.length, 0).caption}</span><span>100%</span></div>
+                </div>
+              </div>
+            }
             strip={mutedRules.length > 0 && (
               <div className="tdb-rulestrip">
                 <span className="tdb-rulestrip-l">Muted:</span>
@@ -501,6 +525,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             {board.nt.map(renderCard)}
           </Lane>
         </div>
+        )}
       </div>
 
       {/* ── Today's list — corner pop-up (fixed; FAB collapsed / panel expanded) ── */}
@@ -512,7 +537,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <span className="tdb-fabl">
             <span className="tdb-fab-a">Today’s list</span>
             <span className="tdb-fab-b">
-              {committedCards.length} committed · {doneN} done
+              {committedCards.length === 0 && doneN === 0 ? "Nothing yet" : `${committedCards.length} committed · ${doneN} done`}
               {rolled.length > 0 && <em className="tdb-fab-roll" title={`${rolled.length} rolled over from a previous day`}> ●</em>}
             </span>
           </span>
@@ -530,15 +555,57 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     </F12Page>
   );
 
+  // ── State A: the new desk (zero queries AND zero agents) — one welcome card replaces the three
+  // reels; the two real doorways in; the ghost stack is decoration (CSS only). Copy verbatim. ──
+  function renderNewDesk() {
+    return (
+      <div className="tdb-newdesk">
+        <div className="tdb-ndtxt">
+          <h2>A clean desk — <em>for now.</em></h2>
+          <p>Once you’re querying, this page fills itself: requests and deadlines land in <b>Urgent</b>, record tidy-ups gather in <b>Housekeeping</b>, and your own reminders live in <b>Notes to self</b>. Nothing to track by hand.</p>
+          <div className="tdb-ndacts">
+            <button type="button" className="tdb-ndpri" onClick={() => onNavigate("queries", "Log a query")}>Start your first query →</button>
+            <button type="button" className="tdb-ndsec" onClick={() => onNavigate("agents")}>Add agents to your contact list</button>
+          </div>
+        </div>
+        <div className="tdb-ghoststack" aria-hidden>
+          <div className="tdb-gc g1"><div className="tdb-gl gtag" /><div className="tdb-gl w85" /><div className="tdb-gl w60" /></div>
+          <div className="tdb-gc g2"><div className="tdb-gl gtag" /><div className="tdb-gl w85" /><div className="tdb-gl w40" /></div>
+          <div className="tdb-handnote">— your future to-dos</div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── State E: "Desk cleared." — all three sets empty AND the done-log is non-empty (earned,
+  // never default: with nothing cleared today the per-reel states render instead). ──
+  function renderDeskCleared() {
+    const { visible, more } = clearedListCap(doneCards);
+    return (
+      <div className="tdb-walked">
+        <div className="tdb-clric big" aria-hidden>✓</div>
+        <h2>Desk cleared.</h2>
+        <p>Nothing needs you, the records are spotless, and today you cleared:</p>
+        <span className="tdb-strike">
+          {visible.map((c) => (
+            <span key={c.key} className="tdb-strow"><span className="tdb-stick" aria-hidden>✓</span><span className="tdb-sdx">{c.title}</span></span>
+          ))}
+          {more > 0 && <span className="tdb-smore">and {more} more</span>}
+        </span>
+        <br />
+        <span className="tdb-clrhand big" aria-hidden>— the waiting is the work. Go write.</span>
+      </div>
+    );
+  }
+
   // ── the expanded pop-up: committed band + done band + footer (rises from the corner) ──
   function renderTodayPop() {
-    const room = MAX_TODAY - committedCards.length;
     return (
       <div className="tdb-pop" role="dialog" aria-label="Today’s list">
         <div className="tdb-th">
           <span className="tdb-t">Today’s list</span>
-          <span className="tdb-cc">{committedCards.length} committed</span>
-          <span className="tdb-cd">{doneN} done</span>
+          <span className="tdb-cc">{committedCards.length === 0 ? "Nothing yet" : `${committedCards.length} committed`}</span>
+          {doneN > 0 && <span className="tdb-cd">{doneN} done</span>}
           <button type="button" className="tdb-drawer-x" onClick={() => setTodayOpen(false)} aria-label="Close">✕</button>
         </div>
         {rolled.length > 0 && (
@@ -558,21 +625,30 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               <button type="button" className="tdb-x" title="Take off today" onClick={(e) => { e.stopPropagation(); toggleToday(c); }}>✕</button>
             </div>
           ))}
-          {room > 0 && <div className="tdb-tempty">Press ＋ on a card to commit — up to {MAX_TODAY}</div>}
+          {committedCards.length === 0 && (
+            <div className="tdb-tempty">
+              <div className="tdb-tea">What’s on the list today?</div>
+              <div className="tdb-teb">Commit up to {MAX_TODAY} from the board — or let us pick</div>
+            </div>
+          )}
         </div>
 
-        {/* done band */}
-        <div className="tdb-tdiv"><span>Done today</span><span className="l" /></div>
-        <div className="tdb-tdone">
-          {doneCards.length === 0 ? (
-            <div className="tdb-donenil">Nothing cleared yet today.</div>
-          ) : doneCards.map((c) => (
-            <div key={c.key} className="tdb-drow">
-              <span className="tdb-tick">✓</span>
-              <div className="tdb-tmid"><div className="tdb-dx">{c.title}</div><div className="tdb-dm2">{[c.record, fmtTime(c.whenMs)].filter(Boolean).join(" · ")}</div></div>
+        {/* done band — the divider + strikethrough log appear WITH the first completion, not before
+            (the rule applies to the pop-up always, not just in empty states) */}
+        {doneN > 0 && (
+          <>
+            <div className="tdb-tdiv"><span>Done today</span><span className="l" /></div>
+            <div className="tdb-tdone">
+              {doneCards.map((c) => (
+                <div key={c.key} className="tdb-drow">
+                  <span className="tdb-tick">✓</span>
+                  <div className="tdb-tmid"><div className="tdb-dx">{c.title}</div><div className="tdb-dm2">{[c.record, fmtTime(c.whenMs)].filter(Boolean).join(" · ")}</div></div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </>
+        )}
+        {doneN === 0 && <div className="tdb-tdone" />}
 
         <div className="tdb-tf">
           <span className="tdb-pc">{prog.empty ? "NOTHING COMMITTED" : `${prog.done} of ${prog.total} done today`}</span>
