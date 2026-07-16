@@ -176,3 +176,16 @@ Either way it's a small `todo.css` (+ maybe a `.t-f12` token) change once you ch
 **Reminder — layout jsdom-unverified:** Nick eyeballs — the page now scrolls to the bottom of all four columns, the ~344px shelf stays put at the top of the scroll, and the Today box still scrolls internally.
 
 **Commit (Fix A):** `fix(todo): board scrolls — .tdb-wrap owns the page scroll region`.
+
+## FIX B — glassy hero resolved as option B (diary panel material, pink-filled)
+
+**Gates:** `tsc` clean · `vite build` OK · full Vitest **943** green. `App.tsx` untouched.
+
+Nick chose **option B**: reuse the diary container's **real** material (it's a solid raised panel, not glass), pink-tinted.
+- **Lifted the diary panel material into `.t-f12` tokens** (`--float-hairline #e9ded0` · `--float-rad 22px` · `--float-sh 0 10px 34px rgba(58,28,20,0.09)`) — the `.dc-panel` values from `diaryCarousel.css`, as tokens so the hexes aren't duplicated in `todo.css` and any F12 raised panel can reuse them. `themes.md` documents them. **Additive** — no existing value changed.
+- **`.tdb-hero`** now: `background: var(--pink-hero)` (solid pale-pink fill, replacing the `linear-gradient` + `#f4dcd4`), `border: 1px solid var(--float-hairline)`, `border-radius: var(--float-rad)`, `box-shadow: var(--float-sh)`. The diary's material, the hero's pink.
+- **Corner circle: DROPPED.** The diary panel is a clean flat surface, so the decorative white corner circle (`.tdb-hero::after`) is removed (it was a gradient-era flourish; no translucency to read through). The `.tdb-hero > *` z-index lift went with it (no longer needed).
+- **Contrast:** the ink/burgundy content (`--ink`, `--pink-i`) over the light `--pink-hero` (#f9e8e2) stays legible — no need to deepen the tint.
+- Hero content styling (serif headline, burgundy italic emphasis, mono stat strip, the two buttons) unchanged.
+
+**Commit:** `feat(todo): hero as diary raised-panel material, pink-filled`. Layout jsdom-unverified — Nick eyeballs the hero reads as a soft raised pink panel (not a gradient), legible.

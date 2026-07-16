@@ -14,13 +14,13 @@
 .tdb-toprow { display: grid; grid-template-columns: 1fr 400px; gap: 12px; height: 344px; }
 .tdb-toprow > * { height: 100%; min-height: 0; }
 
+/* Hero = the diary's raised-panel material (--float-* from .t-f12), filled PINK (--pink-hero solid).
+   The diary panel is a clean flat surface, so the old decorative corner circle is dropped. */
 .tdb-hero {
-  position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: center;
-  background: linear-gradient(135deg, var(--pink-hero), var(--pink-b));
-  border: 1px solid var(--pink-b); border-radius: var(--r-xl); padding: 24px 28px; box-shadow: var(--sh-1); min-height: 0;
+  position: relative; display: flex; flex-direction: column; justify-content: center;
+  background: var(--pink-hero);
+  border: 1px solid var(--float-hairline); border-radius: var(--float-rad); padding: 24px 28px; box-shadow: var(--float-sh); min-height: 0;
 }
-.tdb-hero::after { content: ""; position: absolute; right: -40px; bottom: -50px; width: 210px; height: 210px; border-radius: 50%; background: rgba(255, 255, 255, 0.32); }
-.tdb-hero > * { position: relative; z-index: 2; }
 .tdb-kick { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--pink-i); opacity: 0.85; }
 .tdb-h1 { font-family: var(--f12-serif); font-size: 30px; font-weight: 600; line-height: 1.18; margin-top: 8px; color: var(--ink); max-width: 510px; }
 .tdb-h1 em { font-style: italic; color: var(--pink-i); }

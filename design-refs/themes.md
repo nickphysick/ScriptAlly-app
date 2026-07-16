@@ -617,6 +617,11 @@ chrome revision replaced v14/v3).
   `.t-f12` previously defined neither, so `StatusDot` fell back to its un-themed per-status spectrum
   (off-palette on the oat board). One hue per theme; direction/stage is carried by the dot's SHAPE,
   not colour (the StatusDot lock — the component is untouched, this is a token add).
+- **Raised "diary" panel material (added 2026-07-16, To-do hero):** `--float-hairline #e9ded0` ·
+  `--float-rad 22px` · `--float-sh 0 10px 34px rgba(58,28,20,0.09)` — the dashboard Dates-for-the-diary
+  container (`.dc-panel` in `diaryCarousel.css`, Cappuccino values) lifted as tokens so F12 raised
+  panels reuse it rather than duplicating the hexes. ADDITIVE. The To-do hero fills this material with
+  `--pink-hero` (solid pale-pink) — the diary's material, the hero's colour (owner call: panel, not glass).
 - **⚠️ SAGE CORRECTION (standing decision):** the band pair is the LIVE dashboard diary band —
   `--sage-band: #dce0d9; --sage-band-2: #d0d6cc` (from `diaryCarousel.css`), which WINS over
   the mockups' `#d7ddd5 → #d5dbd3`, so hub, agents and dashboard match. Edge `--sage-edge
