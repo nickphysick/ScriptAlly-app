@@ -40,6 +40,9 @@ const localYMD = (ms: number): string => {
   const d = new Date(ms);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 };
+/** The ink header's date line — "Thu 16 Jul" (design-refs/todo-header-ink.html). */
+const shortHeaderDate = (ms: number): string =>
+  new Date(ms).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
 const fmtTime = (ms?: number): string => {
   if (ms == null) return "";
   if (Date.now() - ms < 120000) return "just now";
@@ -211,9 +214,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   return (
     <F12Page tools={<F12Account onClick={() => onNavigate("account")} />}>
       <div className="tdb-wrap">
-        {/* ── stat-ribbon header (replaces the old tall hero) ── */}
+        {/* ── stat-ribbon header — INK spec (design-refs/todo-header-ink.html): white, 1.5px ink
+            border, flat, ~86px, date line over the question; the ink border is THIS BAR ONLY ── */}
         <div className="tdb-ribbon">
-          <span className="tdb-ask">What’s on your desk?</span>
+          <span className="tdb-askwrap">
+            <span className="tdb-rdate">{shortHeaderDate(now)}</span>
+            <span className="tdb-ask">What’s on your desk?</span>
+          </span>
           <span className="tdb-metrics">
             <span className="tdb-m ug"><b>{tiles.urgent}</b><i>urgent</i></span>
             <span className="tdb-m hk"><b>{tiles.housekeeping}</b><i>housekeeping</i></span>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>To-do header — FINAL: white, ink border, tall</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --oat:#f1e8dc; --paper:#faf6f0; --panel:#fffdfb; --white:#ffffff;
+  --line:#e6dccd; --hairline:#f0eae1;
+  --ink:#1e1a16; --ink-2:#4a443c; --muted:#7d7469; --faint:#a89e91;
+  --burg:#6b3023; --pink-t:#f7e3dd; --pink-b:#eecdc3; --pink-i:#8a4030;
+  --gold-t:#f6efdd; --gold-b:#e7d9b8; --gold-i:#7d621d;
+  --note-t:#faf0c8; --note-b:#ecdda4; --note-i:#7a6420;
+  --sh-1:0 1px 2px rgba(58,42,26,.05);
+  --mono:'JetBrains Mono',monospace; --serif:'Playfair Display',serif; --body:'Inter',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--body);color:var(--ink);font-size:13px;-webkit-font-smoothing:antialiased;
+  background:radial-gradient(120% 120% at 78% -8%, rgba(255,250,242,.6) 0%, transparent 46%), var(--oat);min-height:100vh;padding:20px 24px}
+.scaf{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:12px;max-width:1560px;margin-inline:auto}
+.scaf b{color:var(--burg)}
+.wrap{max-width:1560px;margin:0 auto}
+
+/* ===== FINAL HEADER: white · 1.5px ink border · ~86px · no shadow ===== */
+.bar{display:flex;align-items:center;gap:16px;background:var(--white);
+  border:1.5px solid var(--ink);border-radius:14px;padding:17px 24px}
+.askwrap{display:flex;flex-direction:column;gap:3px}
+.date{font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.ask{font-family:var(--serif);font-size:23px;font-weight:600;color:var(--ink);white-space:nowrap;line-height:1.1}
+.metrics{display:flex;gap:9px;margin-left:8px}
+.m{display:flex;align-items:baseline;gap:6px;border-radius:9px;padding:8px 14px;white-space:nowrap;border:1px solid}
+.m .v{font-family:var(--serif);font-size:17px;font-weight:600;line-height:1}
+.m .k{font-family:var(--mono);font-size:7.5px;letter-spacing:.08em;text-transform:uppercase}
+.m.ug{background:var(--pink-t);border-color:var(--pink-b)} .m.ug .v,.m.ug .k{color:var(--pink-i)}
+.m.hk{background:var(--gold-t);border-color:var(--gold-b)} .m.hk .v,.m.hk .k{color:var(--gold-i)}
+.m.nt{background:var(--note-t);border-color:var(--note-b)} .m.nt .v,.m.nt .k{color:var(--note-i)}
+.sp{flex:1}
+.go{font:inherit;border:none;cursor:pointer;font-size:13px;font-weight:600;padding:11px 20px;border-radius:10px;background:var(--ink);color:var(--panel);white-space:nowrap}
+.go:hover{background:#332c25}
+
+/* proportion hints */
+.tools{display:flex;gap:8px;margin:11px 0}
+.tool{font:inherit;border:1px solid var(--line);background:var(--panel);box-shadow:var(--sh-1);font-size:12px;padding:7px 12px;border-radius:9px;color:var(--ink-2)}
+.hlane{height:44px;border-radius:12px;border:1px solid var(--pink-b);background:var(--pink-t);display:flex;align-items:center;padding:0 14px;gap:8px;font-size:12.5px;font-weight:600;color:var(--pink-i);margin-bottom:9px}
+.hlane.hk{background:var(--gold-t);border-color:var(--gold-b);color:var(--gold-i)}
+.hlane.nt{background:var(--note-t);border-color:var(--note-b);color:var(--note-i)}
+.hlane .n2{margin-left:auto;font-family:var(--mono);font-size:8px;font-weight:700;background:rgba(255,255,255,.7);border-radius:99px;padding:2px 7px}
+.note{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-top:14px;line-height:2}
+.note b{color:var(--burg)}
+</style>
+</head>
+<body>
+<div class="scaf"><b>FINAL header ref</b> · white ground · 1.5px ink border · flat (no shadow) · ~86px · date line + question at 23px</div>
+<div class="wrap">
+  <div class="bar">
+    <span class="askwrap"><span class="date">Thu 16 Jul</span><span class="ask">What's on your desk?</span></span>
+    <span class="metrics">
+      <span class="m ug"><span class="v">6</span><span class="k">urgent</span></span>
+      <span class="m hk"><span class="v">25</span><span class="k">housekeeping</span></span>
+      <span class="m nt"><span class="v">2</span><span class="k">notes to self</span></span>
+    </span>
+    <span class="sp"></span>
+    <button class="go">Work through priorities now</button>
+  </div>
+
+  <div class="tools"><button class="tool">Filter</button><button class="tool">Sort</button></div>
+  <div class="hlane">Urgent<span class="n2">6</span></div>
+  <div class="hlane hk">Housekeeping<span class="n2">25</span></div>
+  <div class="hlane nt">Notes to self<span class="n2">2</span></div>
+
+  <div class="note">
+    spec — bg <b>#ffffff</b> · border <b>1.5px solid var(--ink)</b> · radius 14px · padding 17px 24px · <b>no shadow</b> (flat) ·
+    date mono 8px tracked / question playfair 23px/600 · tiles: soft lane fills (pink-t / gold-t / note-t) with matching 1px borders, serif values 17px ·
+    button: ink fill, 13px/600 · the ink border is <b>this bar only</b> — lanes/cards keep the F12 hairline grammar
+  </div>
+</div>
+</body>
+</html>
