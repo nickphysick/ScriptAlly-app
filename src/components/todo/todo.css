@@ -85,7 +85,15 @@
 .tdb-chev:hover { color: var(--ink); border-color: var(--ink-2); }
 .tdb-track { position: relative; }
 .tdb-scroller { display: flex; gap: 14px; padding: 2px 2px 6px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; align-items: stretch; }
-.tdb-track.more::after { content: ""; position: absolute; top: 0; bottom: 0; right: 0; width: 70px; pointer-events: none; background: linear-gradient(90deg, transparent, var(--oat, #f1e8dc)); }
+/* Polish P1 — scroll-aware edge fades, BOTH edges (state machine: todoBoard.laneFadeState, 4px
+   thresholds; classes set by the Lane component). Overlays fade to the OAT ground token, sit above
+   card content (z-index 1) and below the fixed corner chrome, and cross-fade on opacity so
+   appearing/disappearing never pops. */
+.tdb-track::before, .tdb-track::after { content: ""; position: absolute; top: 0; bottom: 0; width: 64px; pointer-events: none; z-index: 1; opacity: 0; transition: opacity 0.25s ease; }
+.tdb-track::before { left: 0; background: linear-gradient(90deg, var(--oat, #f1e8dc), transparent); }
+.tdb-track::after { right: 0; background: linear-gradient(90deg, transparent, var(--oat, #f1e8dc)); }
+.tdb-track.can-scroll-left::before { opacity: 1; }
+.tdb-track.can-scroll-right::after { opacity: 1; }
 .tdb-emptyreel { display: flex; align-items: center; }
 .tdb-emptyreel .e { font-family: var(--f12-serif); font-style: italic; font-size: 14px; color: var(--muted); padding: 14px 4px; }
 .tdb-ghostcard { width: 330px; min-height: 74px; border: 1.5px dashed var(--note-b); border-radius: 11px; display: flex; align-items: center; justify-content: center; gap: 10px; background: none; }

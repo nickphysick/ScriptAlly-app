@@ -248,6 +248,16 @@ export function ribbonTiles(board: AssembledBoard, housekeepingGaps: number): { 
   return { urgent: board.do.length, housekeeping: housekeepingGaps, notes: board.nt.length };
 }
 
+/**
+ * Polish P1 — the lane-fade state machine (both edges, scroll-aware). Pure so jsdom can lock the
+ * class-toggling logic without pixels: `left` shows the left fade once the reel has scrolled past
+ * the 4px threshold; `right` shows the right fade while more than 4px is still off-screen to the
+ * right. A non-overflowing reel (scrollWidth ≈ clientWidth) yields neither.
+ */
+export function laneFadeState(scrollLeft: number, scrollWidth: number, clientWidth: number): { left: boolean; right: boolean } {
+  return { left: scrollLeft > 4, right: scrollLeft < scrollWidth - clientWidth - 4 };
+}
+
 function blankDone(key: string): BoardCard {
   return { key, stream: "done", title: "", who: "", subtitle: "", due: "", warn: false, snoozes: 0, hk: false, initials: "", record: "", committed: false, done: true };
 }

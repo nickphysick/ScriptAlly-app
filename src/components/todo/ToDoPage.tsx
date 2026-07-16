@@ -25,7 +25,7 @@ import { F12Page, F12Account } from "../shell/F12Shell";
 import { StatusDot } from "../StatusDot";
 import { useScriptAllyDb } from "../../lib/db";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
-import { assembleBoard, todaySplit, ribbonTiles, BoardCard, USER_TASK_FLAG_TYPE } from "../../lib/todoBoard";
+import { assembleBoard, todaySplit, ribbonTiles, laneFadeState, BoardCard, USER_TASK_FLAG_TYPE } from "../../lib/todoBoard";
 import { flagKeyForTask, MUTED_UNTIL } from "../../lib/taskFlags";
 import {
   choosePicks, rolledOverCards, todayProgress, MAX_TODAY,
@@ -171,11 +171,16 @@ const Lane: React.FC<{
   children?: React.ReactNode;
 }> = ({ cls, label, count, isEmpty, onAdd, onSweep, emptyNode, strip, children }) => {
   const ref = useRef<HTMLDivElement>(null);
-  const [more, setMore] = useState(false);
+  // Polish P1 — both-edge fade state (pure machine in todoBoard.laneFadeState; 4px thresholds).
+  // Functional update bails out when neither boolean changed, so scroll ticks don't re-render.
+  const [fade, setFade] = useState({ left: false, right: false });
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const check = () => setMore(el.scrollWidth - el.clientWidth - el.scrollLeft > 8);
+    const check = () => setFade((prev) => {
+      const next = laneFadeState(el.scrollLeft, el.scrollWidth, el.clientWidth);
+      return next.left === prev.left && next.right === prev.right ? prev : next;
+    });
     check();
     el.addEventListener("scroll", check, { passive: true });
     const ro = new ResizeObserver(check);
@@ -192,13 +197,13 @@ const Lane: React.FC<{
         <span className="tdb-rule" aria-hidden />
         {onSweep && !isEmpty && <button type="button" className="tdb-sw" title="Sweep the lane — D done · S snooze · → skip" onClick={onSweep}>Sweep →</button>}
         {onAdd && <button type="button" className="tdb-cadd" onClick={onAdd} aria-label="Add a note">＋</button>}
-        {!isEmpty && more && <button type="button" className="tdb-chev" onClick={scrollRight} aria-label="Scroll right">›</button>}
+        {!isEmpty && fade.right && <button type="button" className="tdb-chev" onClick={scrollRight} aria-label="Scroll right">›</button>}
       </div>
       {strip}
       {isEmpty ? (
         <div className="tdb-emptyreel">{emptyNode}</div>
       ) : (
-        <div className={`tdb-track${more ? " more" : ""}`}>
+        <div className={`tdb-track${fade.left ? " can-scroll-left" : ""}${fade.right ? " can-scroll-right" : ""}`}>
           <div className="tdb-scroller" ref={ref}>{children}</div>
         </div>
       )}
