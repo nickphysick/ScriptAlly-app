@@ -220,7 +220,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     const any = opts.some((m) => mats[m]);
     if (step === 0) return sheet(
       <>
-        <div className="tdb-ffstream do">Over to you{c.due ? ` · ${c.due}` : ""}</div>
+        <div className={`tdb-ffstream${c.warn ? " warn" : ""}`}>Over to you{c.due ? ` · ${c.due}` : ""}</div>
         <div className="tdb-ffq">{emTitle(c)}</div>
         {c.subtitle && <div className="tdb-ffqsub">{c.subtitle}</div>}
         {whoRow(ag, c.initials)}
@@ -237,7 +237,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     );
     if (step === 1) return sheet(
       <>
-        <div className="tdb-ffstream do">{c.who || "Logging"} · logging the send</div>
+        <div className="tdb-ffstream">{c.who || "Logging"} · logging the send</div>
         <div className="tdb-ffq">What went out?</div>
         <div className="tdb-ffqsub">Tick what you actually sent — it’s what we check against later.</div>
         <div className="tdb-ffchoices">{opts.map((m) => (
@@ -254,7 +254,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     );
     return sheet(
       <>
-        <div className="tdb-ffstream do">{c.who || "Logging"} · logging the send</div>
+        <div className="tdb-ffstream">{c.who || "Logging"} · logging the send</div>
         <div className="tdb-ffq">When, and how?</div>
         <div className="tdb-ffrow">
           <div className="tdb-fff"><label>Date sent</label><input type="date" value={sentDate} onChange={(e) => setSentDate(e.target.value)} /></div>
@@ -284,7 +284,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     const ag = cardAgent(c, q);
     if (step === 0) return sheet(
       <>
-        <div className="tdb-ffstream do">{c.due || "No reply yet"}</div>
+        <div className={`tdb-ffstream${c.warn ? " warn" : ""}`}>{c.due || "No reply yet"}</div>
         <div className="tdb-ffq">Time to nudge {c.who ? <em>{c.who}</em> : "them"}?</div>
         <div className="tdb-ffqsub">
           {c.subtitle ? `${c.subtitle}. ` : ""}
@@ -310,7 +310,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     });
     return sheet(
       <>
-        <div className="tdb-ffstream do">Nudging {c.who || "them"}</div>
+        <div className="tdb-ffstream">Nudging {c.who || "them"}</div>
         <div className="tdb-ffq">Here’s a note you could send.</div>
         <div className="tdb-ffdraft">{draft}</div>
         <button type="button" className="tdb-ffcopy" onClick={() => { navigator.clipboard?.writeText(draft); setCopied(true); window.setTimeout(() => setCopied(false), 1400); }}>
@@ -786,11 +786,11 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     }
     const q = cardQuery(c);
     const ag = cardAgent(c, q);
-    const streamCls = c.stream === "hk" ? "hk" : c.stream === "nt" ? "nt" : "do";
+    const streamCls = c.stream === "hk" ? " hk" : c.stream === "nt" ? " nt" : c.warn ? " warn" : "";
     const doneLabel = j === "stale" ? "Close — no response" : j === "nudge" ? "Log the nudge (defaults)" : j === "note" ? "Mark it done" : "Done — log with defaults";
     return sheet(
       <>
-        <div className={`tdb-ffstream ${streamCls}`}>{c.due || "On your desk"}</div>
+        <div className={`tdb-ffstream${streamCls}`}>{c.due || "On your desk"}</div>
         <div className="tdb-ffq">{emTitle(c)}</div>
         {c.subtitle && <div className="tdb-ffqsub">{c.subtitle}</div>}
         {whoRow(ag, c.initials)}

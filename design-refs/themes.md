@@ -634,3 +634,27 @@ chrome revision replaced v14/v3).
   #e6dccd` (--line) base, replacing the original oat.
 - House rules honoured: literals only (no `:root` aliasing — known freeze bug), no
   `color-mix()`, reduced-motion end-states in f12.css.
+
+## `.t-f12` — To-do retoken additions (2026-07-16, `design-refs/todo-board-final-retoken.html`)
+
+**The To-do page colour law** (encoded as tokens, enforced by the retoken pass):
+- **Pink = Urgent identity** — lane spine `--pink-btn`, post-it `--postit-pink #f9d9d2`.
+- **HK-SAGE = Housekeeping identity AND the page's ONE "done" family** — `--hk-sage #dce0d9` ·
+  `--hk-sage-2 #d0d6cc` (= the LIVE dashboard diary band, verified at source against
+  `--dc-band`/`--sage-band`; the dashboard wins over any mockup) · `--hk-spine #b9c3b3` (spines,
+  bars, dots) · `--hk-ink #54614f` (text + deep fills: done ticks, done pill, receipt ticks) ·
+  post-it `--postit-sage`. Receipts, review "Done" verbs, choice-selected states, the staged pill,
+  progress-dot "done", the big-tick circles and the sweep inline receipt ALL read this family.
+- **Note-yellow = Notes identity** (`--note-*`, unchanged) — post-it `--postit-note #f8ecb0`.
+- **COFFEE = Today's list** (a darker patch of the desk itself, never a Pro surface) —
+  `--coffee #e7dbc9` (bands) · `--coffee-2 #dccdb5` (FAB ring, rolled-over dot) · `--coffee-edge
+  #d3c2a6` (borders) · `--coffee-ink #6b5a41` (text) · `--coffee-deep #8a755a` (reserve). Applies:
+  pop-up header + committed chip + dashed prompt + rollover bar, the card "✓ ON TODAY" pill, the
+  FAB ring.
+- **Burgundy = deadline signal ONLY** (filled warn tags/chips). **Ink = offer tag + primaries.**
+- **GOLD IS RETIRED from the To-do page** (the `--gold-*` tokens remain defined for any other
+  consumer; nothing on `/todo` reads them).
+- **StatusDot LOCK unchanged:** `--sage/--sageC/--sageD/--sage-edge` (the `#8a9e88` family) are
+  STATUS colours — on the To-do page they appear ONLY inside the real `StatusDot` component.
+- Supporting: `--sub #5c554b` (option-A card sub-ink) · shadows `--sh-card` / `--sh-card-h`
+  (cards straight on the oat) · `--sh-postit` (the 88px header post-its).

@@ -97,3 +97,60 @@ StatusDot family, which Phase E's sanity rule forbids outside StatusDots, so the
 family wins; flagged.) Dismissed/fork states stay neutral.
 
 **Gates:** tsc clean · build OK · Vitest **1042** green.
+
+## PHASE E — flow follow-through + themes.md
+
+**The focus flow + sweep adopt the grammar:** stream chips are **neutral outline by default**, with
+**burgundy fill = live deadline** (send/nudge why-screens + sweep summaries pick it up from
+`card.warn`), **ink fill = offer**, **hk-sage = housekeeping**, note = notes; the review sheet's
+"Ready to save" chip is done-sage. **Choice-card selected state → done-sage** (`--hk-sage` fill,
+`--hk-ink` tick). **Review verb chips: Done = done-sage · Snoozed = neutral · Noted = note.** The
+staged pill, progress-dot "done", both big-tick circles, the sweep inline receipt, the batch-flip
+selected chips/header/save chips, the ✨ Find button, the unmute chips and the muted-rules strip
+all moved off gold/StatusDot-sage onto the hk/coffee families. **The celebration screen keeps its
+moment** — confetti + the Caveat aside untouched in spirit (the aside's INK moved from `--sageD`
+to `--hk-ink`: the ref itself used the locked StatusDot hue there, which the sanity rule forbids).
+
+**Sanity sweep confirmed:** `todo.css` contains **zero `gold`** and **zero `--sage`-family**
+references (the one "gold" hit left in components was a stale comment — fixed); StatusDot sage now
+renders ONLY through the real `StatusDot`. The rail's "gold" class modifier was renamed `hk`
+(behaviour identical). No orphaned pink-glass styles remain (`--pink-hero`/`--float-*` have no
+consumers on this page; tokens stay defined for other surfaces).
+
+**`design-refs/themes.md` REGENERATED** — the new `.t-f12` section documents the post-it, hk-sage
+(incl. the dashboard-wins verification), coffee, and done-sage law + the StatusDot lock note +
+gold's retirement from this page.
+
+**Gates:** tsc clean · build OK · Vitest **1042** green.
+
+## FINALISE — the pack's confirmations
+
+- **Per-phase SHAs:** A `bf9dd74` (tokens + post-it header) · B `a023be1` (open reels) ·
+  C `a0125c2` (option-A cards + G3) · D `3af7abe` (coffee + done-sage) · E `<this commit>`.
+- **Sampled dashboard sage:** `#dce0d9 → #d0d6cc` (from `--dc-band`, `diaryCarousel.css`; matches
+  `--sage-band/-2` in index.css) — **identical to the pack's tokens; the dashboard and the tokens
+  agree.**
+- **Copy/rule reconciliation:** ⛔ **MISMATCH — the approved materials copy did NOT ship.**
+  `dq_materials` is REQUIREMENTS-based (`agent.materialsWanted` — what the agent asks to receive;
+  the batch surfaces write that field), while "Add details of what you sent so you never lose
+  track" describes query SENT-materials. Shipped rule-accurate copy instead ("N agents missing a
+  materials list / Add what they ask to receive so your package check can run") — a one-line
+  `G3_COPY` swap when Nick either approves new wording or commissions a sent-materials task type
+  (an engine change, out of scope here).
+- **StatusDots untouched** — the component consumed verbatim throughout; its sage family now
+  appears nowhere else on the page.
+- **Gold fully retired** from `/todo` (tokens remain defined for other consumers; zero usages).
+- **Done-sage unified** — pop-up ticks + done pill + quick-✓/batch/sweep receipts all read
+  `--hk-sage`/`--hk-ink`.
+- **Behavioural tests:** none changed, none broken (1042 green throughout — the pack's
+  "presentational pass broke behaviour" red-gate never fired). The one behavioural ADDITION the
+  pack presumed already existed: post-it tap-to-lane (6B's tile-tap was red-gated, never built) —
+  three lines, flagged in Phase A.
+- **Mockup deviations flagged:** the grouped card keeps its quiet "Never" (dropping it would
+  delete an affordance — behaviour is locked); the pop-up tick/pill use `#54614f` not the ref's
+  `--sageD` (StatusDot-lock compliance).
+
+**Nick eyeballs (after a deploy):** the post-its (tilt/tape/hover-straighten, Caveat numerals),
+reels on the open oat, option-A cards at real data (serif titles, spines, warn/offer tag fills),
+the G3 grouped card's bar with real counts, the coffee pop-up with the sage done band, a quick-✓
+receipt in the new sage, and the flow's chips/choices/review verbs.

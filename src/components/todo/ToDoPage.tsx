@@ -274,7 +274,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   }
 
   // Today's list: committed band (committedDate === today, the 5-cap set) + done band (the cleared
-  // union, uncapped). Rolled-over commitments (a prior day) surface once in the gold Keep/Clear bar.
+  // union, uncapped). Rolled-over commitments (a prior day) surface once in the coffee Keep/Clear bar.
   const { committed: committedCards, done: doneCards } = todaySplit(board, today);
   const doneN = doneCards.length;
   const onList = (c: BoardCard) => c.committedDate === today;
@@ -584,10 +584,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   }
 
   // ── the quick rail (hover / :focus-within, top-right). Offers get NO rail — they need the moment. ──
-  function rail(onDone: () => void, onPause: () => void, gold?: boolean) {
+  function rail(onDone: () => void, onPause: () => void, hk?: boolean) {
     return (
       <div className="tdb-qrail">
-        <button type="button" className={`tdb-qbtn done${gold ? " gold" : ""}`} title="Quick done — logs with stated defaults" aria-label="Quick done" onClick={(e) => { e.stopPropagation(); onDone(); }}>✓</button>
+        <button type="button" className={`tdb-qbtn done${hk ? " hk" : ""}`} title="Quick done — logs with stated defaults" aria-label="Quick done" onClick={(e) => { e.stopPropagation(); onDone(); }}>✓</button>
         <button type="button" className="tdb-qbtn dis" title="Snooze / stop asking" aria-label="Snooze or stop asking" onClick={(e) => { e.stopPropagation(); onPause(); }}>⏸</button>
       </div>
     );
