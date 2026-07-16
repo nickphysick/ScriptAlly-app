@@ -236,6 +236,10 @@
 .tdb-batchflip { display: flex; flex-direction: column; height: 100%; animation: tdbRin 0.25s ease; }
 .tdb-bfh { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 12.5px; color: var(--gold-i); }
 .tdb-bfp { margin-left: auto; font-family: var(--f12-mono); font-size: 7.5px; color: var(--faint); }
+.tdb-bffind { font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.04em; padding: 3px 8px; border-radius: 99px; border: 1px solid var(--gold-b); background: var(--panel); color: var(--gold-i); margin-left: 8px; }
+.tdb-bffind:hover:not(:disabled) { border-color: var(--gold-i); }
+.tdb-bffind:disabled { opacity: 0.5; }
+.tdb-bffind .tdb-propill { margin-left: 4px; padding: 0.5px 5px; }
 .tdb-bfrows { flex: 1; min-height: 0; overflow-y: auto; margin-top: 7px; }
 .tdb-bfrow { display: flex; align-items: center; gap: 7px; padding: 5px 0; border-bottom: 1px solid var(--hairline); }
 .tdb-bfrow:last-child { border: none; }

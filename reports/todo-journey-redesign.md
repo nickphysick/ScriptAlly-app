@@ -221,3 +221,63 @@ Urgent sweeps `board.do`; Housekeeping sweeps the grouped piles + individual sta
 sweeps the notes.
 
 **Commit:** `feat(todo): sweep mode`.
+
+## PHASE E — housekeeping at scale (absorbed from old Phase 5)
+
+**Gates:** `tsc` clean · `vite build` OK · Vitest **1027** green. Engine untouched; no PaintMode.
+
+Most of E was already live and carried through B/C (this pack's E was written before the P5
+re-issue shipped): **grouping by rule** into the Housekeeping lane (one grouped card per gap-kind,
+count + monogram stack, payoff-first copy) with **every relevant agent included, queried-first**
+(burgundy pip) and **lane/tile counts = number of gaps** — all pre-existing and unit-locked.
+**Batch fill is the Phase B sheet + the Phase C card-flip, both through ONE `saveHkRows`** — no
+third surface was built. **Mute scopes** (item flags / `mutedTaskRules`) are the Phase-C ⏸ fork on
+the grouped card + the lane-header unmute strip.
+
+**Built now — assisted fill on the FLIP** (the sheet had it from B): a compact **"✨ Find"** in the
+flip header — **free → the Pro pill + the upgrade path** (no look-up call); **Pro → the real
+`assistAgentData` callable** (LIVE client, 25s timeout). **Found values land in the chips/fields
+UNSAVED**; a ✨ marks each found row with provenance (source + date) in its tooltip — the 174px
+flip can't carry the full chip, so the SHEET remains the full-provenance surface (flagged);
+un-sourced agents simply stay empty (never fabricated). **Save passes `found` through `saveHkRows`,
+so an unedited found value persists `Agent.fieldSources` provenance** — identical to the sheet.
+
+**Commit:** `feat(todo): housekeeping grouping + Pro assisted fill` (the E delta — the absorbed
+bulk shipped in B/C, as reported above).
+
+## FINALISE — the pack's confirmations
+
+- **Per-phase SHAs:** A `f286b06` (ink header) · B `14fc04f` (focus flow) · C `cbd6608` (quick
+  rail) · D `9a56974` (sweep) · E `<this commit>` (flip assist + confirmations).
+- **Drawer + modal DELETED; every launch site on the focus flow** ✓ — `src/components/todo/` now
+  holds exactly FocusFlow.tsx + ToDoPage.tsx + todo.css (TaskDetail, Walkthrough, TaskCaptureForm
+  AND HousekeepingBatch removed); 11 flow-launch call sites (card click, ribbon walk, pop-up walk,
+  committed-row, grouped card, three lane sweeps, receipt-edit) and no other completion surface.
+  The clipped-checkbox bug died with the modal.
+- **Mark-done pill GONE; ＋ Today's list full-width** ✓ (one `tdb-pill` reference remains — the
+  Today pill).
+- **One-write-path assertion PASSED** ✓ — `markSentWriteArgs(quickSendPayload(...)) ===
+  markSentWriteArgs(journeyPayload)` byte-identical (unit-locked); receipts derive from the actual
+  payload (`receiptLine`, unit-locked); undo deletes/unwinds created records via existing
+  primitives (`undoQueryStatus`, `deleteActivity` full-nudge-unwind, `done:false`, captured batch
+  prevs) — never compensating entries; snooze/mute are `taskFlags`/`mutedTaskRules` stance writes
+  (notes via the new `user_task` flag type — the stance store, no schema change).
+- **Offer exemptions HOLD** ✓ — no rail on offer cards; sweep renders "needs the moment — press
+  Enter"; `walkStepKind` keeps offers un-staged (unit-locked); the journey's capture is the
+  existing `RecordResponseFocusForm`, immediate.
+- **Header ink border scoped to the bar only** ✓ — exactly one `1.5px solid var(--ink)` rule in
+  todo.css (the ribbon).
+- **Nudge generator REAL** ✓ — `nudgeDraft` builds from query data (agent name, sent date,
+  manuscript title, requested material), UK-voiced, base case byte-locked.
+- **`themes.md` NOT regenerated** — no token changes anywhere in the pack (as predicted).
+- **Phase 6 notes:** the quick rail needs an always-visible/swipe treatment on touch (hover doesn't
+  exist); sweep needs a touch grammar (large targets exist, keys don't); the corner FAB +
+  (desktop-only) help "?" interplay folds into the mobile pass; sweep receipts' 900ms pause may
+  want a reduced-motion/skip preference; the stale-close undo depends on `undoQueryStatus`'s
+  newest-match heuristic — fine solo, worth a look if bulk closes ever batch.
+
+**Nick eyeballs (dev, after a deploy):** the ink header · card→flow queue-of-one incl. "Open the
+full query" · all five journeys (send staging + Back un-staging, nudge draft + Copy, offer
+celebration→capture, grouped batch + assisted fill, note) · review ✕/Save/"Desk cleared" · the
+quick rail on all three lanes incl. receipt wording, batch flip, never-fork · sweep keys D/S/→/F/N
+/Enter · **no drawer anywhere**.

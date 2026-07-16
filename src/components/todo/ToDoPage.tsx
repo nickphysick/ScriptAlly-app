@@ -32,6 +32,7 @@ import {
   quickSendPayload, quickNudgePayload, receiptLine, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask,
 } from "../../lib/todoWalk";
 import { saveHkRows } from "../../lib/hkSave";
+import { isProUser, fetchAssistedFill, AssistFound } from "../../lib/assistFill";
 import { groupHousekeeping, hkGapCount, HkGroup, HkRule, HK_RULES, HK_PAYOFF } from "../../lib/todoHousekeeping";
 import { ActivityType, QueryStatus } from "../../types";
 import { FocusFlow, FocusItem } from "./FocusFlow";
@@ -63,25 +64,61 @@ type Overlay =
   | { kind: "flip" };
 
 /** The grouped card's quick-✓ target: an inline rapid chip-fill — the SAME batch save as the focus
- *  sheet (hkSave.saveHkRows), never a third write path. Compact chips; skipping rows is fine. */
+ *  sheet (hkSave.saveHkRows), never a third write path. Compact chips; skipping rows is fine.
+ *  Assisted fill (Pro, LIVE) rides the header: found values land in the chips/fields UNSAVED, a ✨
+ *  marks each found row (provenance in its tooltip — the sheet is the full-provenance surface), and
+ *  un-sourced agents simply stay empty. Free users get the Pro pill → the upgrade path. */
 const GroupFlip: React.FC<{
   group: HkGroup;
+  pro: boolean;
+  onUpgrade: () => void;
   onCancel: () => void;
   onSaved: (ok: number, undo?: () => Promise<void>) => void;
   deps: Parameters<typeof saveHkRows>[5];
-}> = ({ group, onCancel, onSaved, deps }) => {
+}> = ({ group, pro, onUpgrade, onCancel, onSaved, deps }) => {
   const [rows, setRows] = useState<Record<string, string>>({});
+  const [found, setFound] = useState<Record<string, AssistFound>>({});
+  const [assistAt, setAssistAt] = useState<string | null>(null);
+  const [assisting, setAssisting] = useState(false);
   const [saving, setSaving] = useState(false);
   const filled = group.members.filter((m) => (rows[m.agentId ?? ""] ?? "").trim()).length;
   const MATERIAL_VOCAB = ["Query Letter", "Synopsis", "Sample Pages", "Full Manuscript"];
+  async function runAssist() {
+    if (!pro) { onUpgrade(); return; }
+    setAssisting(true);
+    try {
+      const targets = group.members.filter((m) => m.agentId);
+      const rs = await fetchAssistedFill({ rule: group.rule as "dq_responseTime" | "dq_materials" | "dq_mswl", agents: targets.map((m) => ({ agentId: m.agentId!, name: m.agentName, ...(m.agency ? { agency: m.agency } : {}) })) });
+      const byId: Record<string, AssistFound> = {};
+      const next = { ...rows };
+      for (const r of rs) { byId[r.agentId] = r; next[r.agentId] = r.value; }
+      setFound((f) => ({ ...f, ...byId }));
+      setRows(next);
+      setAssistAt(new Date().toISOString());
+    } catch {
+      /* quiet — the manual path is never blocked */
+    } finally {
+      setAssisting(false);
+    }
+  }
   return (
     <div className="tdb-batchflip" onClick={(e) => e.stopPropagation()}>
-      <div className="tdb-bfh">{group.rule === "dq_responseTime" ? "Replies within…" : group.rule === "dq_materials" ? "They ask for…" : "Looking for…"}<span className="tdb-bfp">{filled} OF {group.members.length}</span></div>
+      <div className="tdb-bfh">
+        {group.rule === "dq_responseTime" ? "Replies within…" : group.rule === "dq_materials" ? "They ask for…" : "Looking for…"}
+        {group.meta.assistable && (
+          <button type="button" className="tdb-bffind" disabled={assisting} title={pro ? "Find these for me — found values land unsaved; check before saving" : "Assisted fill is a Pro feature"} onClick={runAssist}>
+            {assisting ? "…" : "✨ Find"}{!pro && <span className="tdb-propill">Pro</span>}
+          </button>
+        )}
+        <span className="tdb-bfp">{filled} OF {group.members.length}</span>
+      </div>
       <div className="tdb-bfrows">{group.members.map((m) => {
         const id = m.agentId ?? m.card.key;
         return (
           <div key={m.card.key} className="tdb-bfrow">
-            <span className="tdb-bfn">{m.agentName}</span>
+            <span className="tdb-bfn" title={m.agentId && found[m.agentId] ? `✨ Found · ${found[m.agentId].source}${assistAt ? ` · ${new Date(assistAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` : ""} — check before saving` : undefined}>
+              {m.agentId && found[m.agentId] ? "✨ " : ""}{m.agentName}
+            </span>
             <span className="tdb-bfchips">
               {group.rule === "dq_responseTime" && [4, 6, 8, 12].map((w) => (
                 <button key={w} type="button" className={`tdb-bfc${rows[id] === String(w) ? " on" : ""}`} onClick={() => setRows((p) => ({ ...p, [id]: String(w) }))}>{w}wk</button>
@@ -99,7 +136,7 @@ const GroupFlip: React.FC<{
         <button type="button" className="tdb-ra" onClick={onCancel}>Cancel</button>
         <button type="button" className="tdb-ra save" disabled={!filled || saving} onClick={async () => {
           setSaving(true);
-          const res = await saveHkRows(group, rows, {}, {}, new Date().toISOString(), deps);
+          const res = await saveHkRows(group, rows, {}, found, new Date().toISOString(), deps);
           setSaving(false);
           onSaved(res.ok, res.undo);
         }}>Save {filled || ""}</button>
@@ -627,6 +664,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         <div key={g.rule} className="tdb-gcard flip">
           <GroupFlip
             group={g}
+            pro={isProUser(currentUser)}
+            onUpgrade={() => onNavigate("plans")}
             onCancel={() => clearOverlay(key)}
             onSaved={(ok, undo) => {
               clearOverlay(key);
