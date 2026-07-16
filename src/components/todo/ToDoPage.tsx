@@ -506,7 +506,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       {/* ── Today's list — corner pop-up (fixed; FAB collapsed / panel expanded) ── */}
       {!todayOpen && (
         <button type="button" className="tdb-fab" onClick={() => setTodayOpen(true)} aria-label="Open Today’s list" aria-expanded={false}>
-          <span className="tdb-fabring" style={{ background: `conic-gradient(var(--sage) 0 ${prog.pct}%, rgba(255,255,255,0.18) ${prog.pct}% 100%)` }}>
+          <span className="tdb-fabring" style={{ background: `conic-gradient(var(--coffee-2) 0 ${prog.pct}%, rgba(255,255,255,0.18) ${prog.pct}% 100%)` }}>
             <i>{prog.empty ? "–" : `${prog.done}/${prog.total}`}</i>
           </span>
           <span className="tdb-fabl">

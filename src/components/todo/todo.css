@@ -143,24 +143,24 @@
 .tdb-fab-roll { font-style: normal; color: var(--gold-b); opacity: 1; }
 
 /* ── Today's list — expanded pop-up (rises from the corner; covers the help "?" while open) ── */
-.tdb-pop { position: fixed; right: 20px; bottom: 20px; z-index: 40; width: min(400px, calc(100vw - 40px)); height: min(540px, calc(100vh - 120px)); background: var(--panel); border: 1px solid var(--pink-b); border-radius: var(--r-xl); box-shadow: var(--sh-3); display: flex; flex-direction: column; overflow: hidden; transform-origin: bottom right; animation: tdbPopIn 0.18s ease-out; }
+.tdb-pop { position: fixed; right: 20px; bottom: 20px; z-index: 40; width: min(400px, calc(100vw - 40px)); height: min(540px, calc(100vh - 120px)); background: var(--white, #fff); border: 1px solid var(--coffee-edge); border-radius: var(--r-xl); box-shadow: var(--sh-3); display: flex; flex-direction: column; overflow: hidden; transform-origin: bottom right; animation: tdbPopIn 0.18s ease-out; }
 @keyframes tdbPopIn { from { opacity: 0; transform: translateY(10px) scale(0.96); } }
 @media (prefers-reduced-motion: reduce) { .tdb-pop { animation: none; } }
-.tdb-th { flex: none; display: flex; align-items: center; gap: 7px; padding: 11px 14px; background: var(--pink-t); border-bottom: 1px solid var(--pink-b); }
-.tdb-th .tdb-t { font-family: var(--f12-serif); font-size: 15px; font-weight: 600; color: var(--ink); flex: 1; }
-.tdb-th .tdb-cc { font-family: var(--f12-mono); font-size: 8px; font-weight: 700; letter-spacing: 0.05em; color: var(--pink-i); background: var(--panel); border: 1px solid var(--pink-b); border-radius: 99px; padding: 2px 8px; }
-.tdb-th .tdb-cd { font-family: var(--f12-mono); font-size: 8px; font-weight: 700; letter-spacing: 0.05em; color: var(--sageD); background: var(--sageC); border: 1px solid var(--sage-edge); border-radius: 99px; padding: 2px 8px; }
+.tdb-th { flex: none; display: flex; align-items: center; gap: 7px; padding: 11px 14px; background: var(--coffee); border-bottom: 1px solid var(--coffee-edge); }
+.tdb-th .tdb-t { font-family: var(--f12-serif); font-size: 15px; font-weight: 600; color: #4a3c29; flex: 1; }
+.tdb-th .tdb-cc { font-family: var(--f12-mono); font-size: 8px; font-weight: 700; letter-spacing: 0.05em; color: var(--coffee-ink); background: var(--white, #fff); border: 1px solid var(--coffee-edge); border-radius: 99px; padding: 2px 8px; }
+.tdb-th .tdb-cd { font-family: var(--f12-mono); font-size: 8px; font-weight: 700; letter-spacing: 0.05em; color: #fff; background: var(--hk-ink); border-radius: 99px; padding: 2.5px 8px; }
 /* committed band (top) — internal scroll, capped so the done band always shows */
 .tdb-tcommit { flex: none; padding: 8px 10px; display: flex; flex-direction: column; gap: 5px; max-height: 168px; overflow-y: auto; }
 .tdb-trow { display: flex; align-items: center; gap: 8px; padding: 7px 9px; border: 1px solid var(--hairline); border-radius: 8px; background: var(--panel); cursor: pointer; flex: none; }
-.tdb-trow:hover { border-color: var(--pink-b); }
+.tdb-trow:hover { border-color: var(--coffee-edge); }
 .tdb-tmid { flex: 1; min-width: 0; }
 .tdb-trow .tdb-tx { font-size: 12px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tdb-trow .tdb-tm { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--faint); margin-top: 1px; }
 .tdb-trow .tdb-x { margin-left: auto; color: var(--faint); font-size: 11px; padding: 0 3px; background: none; border: none; }
-.tdb-trow .tdb-x:hover { color: var(--pink-i); }
+.tdb-trow .tdb-x:hover { color: var(--coffee-ink); }
 .tdb-tdot { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--faint); flex: none; }
-.tdb-tempty { border: 1px dashed var(--pink-b); border-radius: 8px; padding: 9px; text-align: center; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--pink-i); opacity: 0.8; flex: none; }
+.tdb-tempty { border: 1px dashed var(--coffee-edge); border-radius: 8px; padding: 9px; text-align: center; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--coffee-ink); opacity: 0.85; flex: none; }
 .tdb-tdiv { flex: none; display: flex; align-items: center; gap: 9px; padding: 4px 14px 5px; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.13em; text-transform: uppercase; color: var(--faint); }
 .tdb-tdiv .l { flex: 1; height: 1px; background: var(--hairline); }
 /* done band (below) — internal scroll, the day's full log newest-first */
@@ -168,15 +168,15 @@
 .tdb-drow { display: flex; align-items: center; gap: 8px; padding: 5px 9px; border-radius: 7px; }
 .tdb-drow .tdb-dx { font-size: 11.5px; color: var(--muted); text-decoration: line-through; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tdb-drow .tdb-dm2 { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--faint); margin-top: 1px; }
-.tdb-tick { width: 14px; height: 14px; border-radius: 4px; background: var(--sageD); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 8px; flex: none; }
+.tdb-tick { width: 14px; height: 14px; border-radius: 4px; background: var(--hk-ink); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 8px; flex: none; }
 .tdb-donenil { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); text-align: center; padding: 16px 10px; }
 .tdb-tf { flex: none; padding: 9px 12px; border-top: 1px solid var(--hairline); background: var(--paper); display: flex; gap: 7px; align-items: center; }
 .tdb-tf .tdb-pc { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.08em; color: var(--faint); flex: 1; text-transform: uppercase; }
-.tdb-pick { font-size: 11.5px; font-weight: 600; padding: 7px 12px; border-radius: 8px; background: var(--ink); color: var(--panel); white-space: nowrap; }
-.tdb-pick:hover { filter: brightness(1.35); }
+.tdb-pick { font-size: 11.5px; font-weight: 600; padding: 7px 12px; border-radius: 8px; background: var(--white, #fff); border: 1px solid var(--coffee-edge); color: var(--coffee-ink); white-space: nowrap; }
+.tdb-pick:hover { background: var(--coffee); }
 /* "Work the list" — its OWN class (distinct from the walkthrough MODAL's .tdb-walk below) */
-.tdb-worklist { font-size: 11.5px; font-weight: 600; padding: 7px 12px; border-radius: 8px; background: var(--pink-btn); color: #5a2b20; white-space: nowrap; }
-.tdb-worklist:hover:not(:disabled) { background: var(--pink-btn-h); }
+.tdb-worklist { font-size: 11.5px; font-weight: 600; padding: 7px 12px; border-radius: 8px; background: var(--ink); color: var(--panel); white-space: nowrap; }
+.tdb-worklist:hover:not(:disabled) { filter: brightness(1.35); }
 .tdb-worklist:disabled { opacity: 0.4; cursor: default; }
 
 /* ── toast (optionally carries one action, e.g. "Undo all") ── */
@@ -191,10 +191,10 @@
 .tdb-propill { font-family: var(--f12-mono); font-size: 8px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #6A89A7; background: #e7eef3; border: 1px solid #cfdde6; border-radius: 99px; padding: 1.5px 7px; margin-left: 7px; }
 
 /* ── rollover gold bar (now inside the pop-up, above the committed band) ── */
-.tdb-rollbar { display: flex; align-items: center; gap: 8px; padding: 9px 13px; background: var(--gold-t); border-bottom: 1px solid var(--gold-b); font-size: 12px; color: var(--gold-i); flex: none; }
+.tdb-rollbar { display: flex; align-items: center; gap: 8px; padding: 9px 13px; background: var(--coffee); border-bottom: 1px solid var(--coffee-edge); font-size: 12px; color: var(--coffee-ink); flex: none; }
 .tdb-rolltx { flex: 1; }
 .tdb-rolltx b { font-weight: 600; }
-.tdb-rollbar button { font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 9px; border-radius: 99px; border: 1px solid var(--gold-b); background: var(--panel); color: var(--gold-i); }
+.tdb-rollbar button { font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 9px; border-radius: 99px; border: 1px solid var(--coffee-edge); background: var(--white, #fff); color: var(--coffee-ink); }
 .tdb-rollbar button.drop { border-color: var(--line); color: var(--muted); }
 
 /* ── Help-me-pick pulse-and-fade ── */
@@ -217,15 +217,15 @@
 .tdb-qbtn:active { transform: scale(0.92); }
 
 /* quick-complete receipt — the card flips sage, states exactly what was logged */
-.tdb-tile.receipt { background: var(--sageC); border-color: var(--sage-edge); cursor: default; }
+.tdb-tile.receipt { background: var(--hk-sage); border-color: var(--hk-spine); cursor: default; }
 .tdb-receiptbody { display: flex; flex-direction: column; flex: 1; min-height: 0; width: 100%; animation: tdbRin 0.25s ease; }
 @keyframes tdbRin { from { opacity: 0; } to { opacity: 1; } }
 .tdb-rk { display: flex; align-items: center; gap: 9px; }
-.tdb-rtick { width: 22px; height: 22px; border-radius: 6px; background: var(--sageD); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; flex: none; }
-.tdb-rt { font-weight: 600; font-size: 13.5px; color: #33402f; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-.tdb-rlog { flex: 1; min-height: 0; margin-top: 10px; font-size: 12px; line-height: 1.65; color: var(--sageD); overflow: hidden; }
+.tdb-rtick { width: 22px; height: 22px; border-radius: 6px; background: var(--hk-ink); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; flex: none; }
+.tdb-rt { font-weight: 600; font-size: 13.5px; color: var(--hk-ink); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.tdb-rlog { flex: 1; min-height: 0; margin-top: 10px; font-size: 12px; line-height: 1.65; color: var(--hk-ink); overflow: hidden; }
 .tdb-racts { flex: none; display: flex; gap: 6px; }
-.tdb-ra { flex: 1; text-align: center; font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; border-radius: 99px; padding: 8px 6px; border: 1px solid var(--sage-edge); background: rgba(255, 255, 255, 0.6); color: var(--sageD); }
+.tdb-ra { flex: 1; text-align: center; font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; border-radius: 99px; padding: 8px 6px; border: 1px solid var(--hk-spine); background: rgba(255, 255, 255, 0.6); color: var(--hk-ink); }
 .tdb-ra:hover:not(:disabled) { background: #fff; }
 .tdb-ra:disabled { opacity: 0.4; }
 

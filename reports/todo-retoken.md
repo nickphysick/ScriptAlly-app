@@ -78,3 +78,22 @@ neutral stack + "+N", **"Fix together →" as an ink-outline button (fills ink o
 mockup deviation). ✓-flip / ⏸-fork behaviours unchanged.
 
 **Gates:** tsc clean · build OK · Vitest **1042** green (+2: the progress arithmetic).
+
+## PHASE D — coffee Today + unified done-sage
+
+**Coffee = Today's list** (a darker patch of the desk): the pop-up header band/border, committed
+chip, dashed commit prompt, row hovers and the footer "Help me pick" all move to the coffee family;
+"Work the list" becomes the ink primary (per the ref's footer). The card "✓ ON TODAY" pill state +
+committed border are coffee (landed with the Phase-C pill styles). **The FAB progress ring is
+coffee** (`--coffee-2` conic); the FAB is otherwise untouched. The rolled-over Keep/Clear bar —
+Today furniture — moves from gold to coffee. **No Pro gating anywhere — Today's list stays free**
+(nothing touched entitlement).
+
+**Unified done-sage:** the pop-up done-band ticks + the done-count pill AND every receipt (quick-✓
+card flips, batch-save receipts, sweep's inline receipt in Phase E) now share the dashboard-sage
+family — fills from `--hk-sage`/`--hk-spine`, deep text/fills `--hk-ink #54614f`. ONE "done"
+colour page-wide. (Note: the ref's own pop-up mock used `--sageD` for ticks — that's the LOCKED
+StatusDot family, which Phase E's sanity rule forbids outside StatusDots, so the law's `#54614f`
+family wins; flagged.) Dismissed/fork states stay neutral.
+
+**Gates:** tsc clean · build OK · Vitest **1042** green.
