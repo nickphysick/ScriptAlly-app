@@ -2,26 +2,32 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * ToDoPage — the To-do WORKSPACE as an F12 board. Re-layout (design ref:
- * design-refs/todo-lanes-full-cards.html): THREE horizontal LANES (Do next · Housekeeping · Your
- * tasks) stacked vertically — the page scrolls a little when they exceed the viewport, Do-next
- * pinned on top. The old four-column grid + "Cleared today" column are RETIRED; completions now
- * live in the Today's-list DONE-BAND (§ renderTodayBox). Superseded design: todo-workspace-v10.html
- * (still the ref for the drawer / walkthrough / housekeeping-fix internals, which this pass leaves alone).
+ * ToDoPage — the To-do WORKSPACE as an F12 board. Layout (design ref:
+ * design-refs/todo-board-final.html): a slim STAT-RIBBON header ("What's on your desk?" + three
+ * lane-coloured metric tiles + "Work through priorities now") over THREE horizontal LANES —
+ * Urgent · Housekeeping · Notes to self (Urgent pinned top; page scrolls vertically when the lanes
+ * exceed the viewport). The Today's list lives in a CORNER POP-UP (fixed bottom-right FAB with a
+ * progress ring → a panel with the committed band + done band; the pop-up anatomy follows the
+ * pack's §4 prose — the placement-sketches ref was absent at build time). Drawer / walkthrough /
+ * housekeeping-fix internals still follow todo-workspace-v10.html.
  *
- * Presentation + view-model only — the task engine, taskFlags and every write path are untouched.
- * The pure view-model is `src/lib/todoBoard.ts` (assembleBoard → three lanes + the cleared union;
- * todaySplit → committed/done bands). Theme: F12 only (`.t-f12` tokens). StatusDot consumed verbatim.
+ * Presentation + view-model only — the task engine, taskFlags and every write path are untouched;
+ * lane renames are UI labels (UserTask / taskType enums unchanged in code). The pure view-model is
+ * `src/lib/todoBoard.ts` (assembleBoard → three lanes + the cleared union; todaySplit → the two
+ * bands; ribbonTiles → the header counts, housekeeping = GAPS via todoHousekeeping.hkGapCount).
+ * Theme: F12 only (`.t-f12` tokens). StatusDot consumed verbatim.
+ *
+ * The FAB sits at right:70 — LEFT of the AppShell's global help "?" (fixed bottom:20 right:20,
+ * 38px, z-30), so the two corner controls never collide.
  */
 import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { F12Page, F12Account } from "../shell/F12Shell";
 import { StatusDot } from "../StatusDot";
 import { useScriptAllyDb } from "../../lib/db";
-import { assembleBoard, todaySplit, BoardCard } from "../../lib/todoBoard";
+import { assembleBoard, todaySplit, ribbonTiles, BoardCard } from "../../lib/todoBoard";
 import { flagKeyForTask } from "../../lib/taskFlags";
 import { choosePicks, rolledOverCards, todayProgress, MAX_TODAY } from "../../lib/todoWalk";
-import { groupHousekeeping, HkGroup } from "../../lib/todoHousekeeping";
-import { clearedTodayItems } from "../../lib/clearedToday";
+import { groupHousekeeping, hkGapCount, HkGroup } from "../../lib/todoHousekeeping";
 import { QueryStatus } from "../../types";
 import { TaskDetail } from "./TaskDetail";
 import { Walkthrough } from "./Walkthrough";
@@ -34,7 +40,6 @@ const localYMD = (ms: number): string => {
   const d = new Date(ms);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 };
-const prettyDate = (ms: number): string => new Date(ms).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
 const fmtTime = (ms?: number): string => {
   if (ms == null) return "";
   if (Date.now() - ms < 120000) return "just now";
@@ -46,7 +51,7 @@ const fmtTime = (ms?: number): string => {
 };
 
 // Per-rule blurb for the grouped housekeeping card (presentation copy — the rule catalogue itself
-// lives in todoHousekeeping.ts and is left untouched by this presentation pass).
+// lives in todoHousekeeping.ts and is untouched by this presentation pass).
 const GROUP_BLURB: Record<string, string> = {
   dq_responseTime: "Without a reply window we can’t tell you when a nudge is fair — so they never surface in your chase list.",
   dq_materials: "We don’t know what to tell you to send — so your package check can’t run for them.",
@@ -84,7 +89,7 @@ const Lane: React.FC<{
         <span className="tdb-lt">{label}</span>
         <span className="tdb-ln">{count}</span>
         <span className="tdb-sp" />
-        {onAdd && <button type="button" className="tdb-cadd" onClick={onAdd} aria-label="Add a task">＋</button>}
+        {onAdd && <button type="button" className="tdb-cadd" onClick={onAdd} aria-label="Add a note">＋</button>}
         {!isEmpty && more && <button type="button" className="tdb-chev" onClick={scrollRight} aria-label="Scroll right">›</button>}
       </div>
       {isEmpty ? (
@@ -110,6 +115,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [pulsing, setPulsing] = useState<string | null>(null);
   const [walk, setWalk] = useState<{ title: string; cards: BoardCard[] } | null>(null);
   const [batchGroup, setBatchGroup] = useState<HkGroup | null>(null);
+  const [todayOpen, setTodayOpen] = useState(false);
 
   const now = Date.now();
   const today = localYMD(now);
@@ -120,24 +126,27 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [tasks, userTasks, queries, agents, manuscripts, taskFlags, today],
   );
-  // Housekeeping lane renders GROUPED by rule (one card per rule, not per record); the flat board.hk
-  // still feeds Today's-list + Help-me-pick unchanged. Rule-muted groups drop out here too.
+  // The Housekeeping lane renders GROUPED by rule (one card per rule); the flat board.hk still feeds
+  // Today's-list + Help-me-pick unchanged. Rule-muted groups drop out here too.
   const hkGroups = useMemo(
     () => groupHousekeeping(board.hk, agents, currentUser?.mutedTaskRules),
     [board.hk, agents, currentUser],
   );
+  // ONE counts object read by BOTH the ribbon tiles and the lane headers (equality by construction).
+  // Housekeeping = the gap count (12+9+4 = 25), never the pile count.
+  const tiles = ribbonTiles(board, hkGapCount(hkGroups));
 
   const flash = (msg: string) => { setToast(msg); window.setTimeout(() => setToast((t) => (t === msg ? null : t)), 2600); };
 
   // Today's list: committed band (committedDate === today, the 5-cap set) + done band (the cleared
   // union, uncapped). Rolled-over commitments (a prior day) surface once in the gold Keep/Clear bar.
   const { committed: committedCards, done: doneCards } = todaySplit(board, today);
-  const onList = (c: BoardCard) => c.committedDate === today; // "on today" = committed to TODAY
+  const doneN = doneCards.length;
+  const onList = (c: BoardCard) => c.committedDate === today;
   const allCommitted = [...board.do, ...board.hk, ...board.nt].filter((c) => c.committedDate != null);
   const rolled = rollDismissed ? [] : rolledOverCards(allCommitted, today);
-  // Progress = completions FROM today's committed list (never a globally-cleared item that was never committed).
-  const clearedItems = clearedTodayItems({ activities, userTasks, taskFlags, now });
-  const doneFromList = clearedItems.userTasks.filter((t) => t.committedDate === today).length + clearedItems.flags.filter((f) => f.committedDate === today).length;
+  // The pack's ring/footer share: done ÷ (open-committed + done) — the day's items, committed or not.
+  const prog = todayProgress(committedCards.length, doneN);
 
   function setCommitted(card: BoardCard, on: boolean) {
     const val = on ? today : null;
@@ -169,6 +178,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
 
   function markDone(card: BoardCard) {
     if (card.userTaskId) {
+      // A note ticks immediately — nothing to record.
       updateUserTask(card.userTaskId, { done: true, completedAt: new Date().toISOString() });
     } else {
       // A derived task can't be silently ticked — the app needs the date/materials. Open the drawer.
@@ -176,64 +186,64 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     }
   }
   async function addTask() {
-    const text = window.prompt("New task");
+    const text = window.prompt("New note");
     if (text && text.trim()) await addUserTask({ text: text.trim() });
   }
-
-  const doN = board.do.length;
-  const hkN = board.hk.length;
-  const doneN = doneCards.length;
-  const total = doN + hkN + board.nt.length;
-  const pressing = [...board.do, ...board.hk].filter((c) => c.warn).length;
 
   return (
     <F12Page tools={<F12Account onClick={() => onNavigate("account")} />}>
       <div className="tdb-wrap">
-        {/* ── top shelf: hero + Today's list ── */}
-        <div className="tdb-toprow">
-          <div className="tdb-hero">
-            <div className="tdb-kick">Your desk · {prettyDate(now)}</div>
-            <h1 className="tdb-h1">
-              {total} thing{total === 1 ? "" : "s"} need you
-              {pressing ? <>, and <em>{pressing} {pressing === 1 ? "is" : "are"} pressing</em></> : ""}.
-            </h1>
-            <div className="tdb-sub">Work the urgent ones straight through, or build a list you’ll actually finish today.</div>
-            <div className="tdb-hstrip">
-              <span><b>{doN}</b> your move</span>
-              <span><b>{hkN}</b> housekeeping</span>
-              <span><b>{doneN}</b> done today</span>
-            </div>
-            <div className="tdb-hact">
-              <button type="button" className="tdb-btn-pri" disabled={!doN} onClick={() => setWalk({ title: "Urgent", cards: board.do })}>Urgent</button>
-              <button type="button" className="tdb-btn-sec" onClick={() => onNavigate("queries")}>See all queries</button>
-            </div>
-          </div>
-
-          {renderTodayBox()}
+        {/* ── stat-ribbon header (replaces the old tall hero) ── */}
+        <div className="tdb-ribbon">
+          <span className="tdb-ask">What’s on your desk?</span>
+          <span className="tdb-metrics">
+            <span className="tdb-m ug"><b>{tiles.urgent}</b><i>urgent</i></span>
+            <span className="tdb-m hk"><b>{tiles.housekeeping}</b><i>housekeeping</i></span>
+            <span className="tdb-m nt"><b>{tiles.notes}</b><i>notes to self</i></span>
+          </span>
+          <span className="tdb-sp" />
+          <button type="button" className="tdb-btn-pri" disabled={!tiles.urgent} onClick={() => setWalk({ title: "Urgent", cards: board.do })}>
+            Work through priorities now
+          </button>
         </div>
 
-        {/* ── tools row ── */}
+        {/* ── tools row (Filter / Sort only — adding a note lives on the Notes lane) ── */}
         <div className="tdb-tools">
           <button type="button" className="tdb-tool" onClick={() => flash("Filter — later")}>Filter</button>
           <button type="button" className="tdb-tool" onClick={() => flash("Sort — later")}>Sort</button>
-          <span className="tdb-sp" />
-          <button type="button" className="tdb-add-pri" onClick={addTask}>＋ Add a task</button>
         </div>
 
-        {/* ── lanes (page scrolls vertically if three lanes exceed the viewport; Do-next on top) ── */}
+        {/* ── lanes (page scrolls vertically if three lanes exceed the viewport; Urgent on top) ── */}
         <div className="tdb-lanes">
-          <Lane cls="do" label="Do next" count={doN} isEmpty={doN === 0} emptyNode={<span className="e">Nothing needs you right now.</span>}>
+          <Lane cls="do" label="Urgent" count={tiles.urgent} isEmpty={board.do.length === 0} emptyNode={<span className="e">Nothing needs you right now.</span>}>
             {board.do.map(renderCard)}
           </Lane>
-          <Lane cls="hk" label="Housekeeping" count={hkGroups.length} isEmpty={hkGroups.length === 0} emptyNode={<span className="e">Nothing to tidy.</span>}>
+          <Lane cls="hk" label="Housekeeping" count={tiles.housekeeping} isEmpty={hkGroups.length === 0} emptyNode={<span className="e">Nothing to tidy.</span>}>
             {hkGroups.map(renderGroupCard)}
           </Lane>
-          <Lane cls="nt" label="Your tasks" count={board.nt.length} onAdd={addTask} isEmpty={board.nt.length === 0}
-            emptyNode={<><span className="e">Nothing jotted yet.</span><button type="button" className="tdb-ghost" onClick={addTask}>＋ Add a task</button></>}>
+          <Lane cls="nt" label="Notes to self" count={tiles.notes} onAdd={addTask} isEmpty={board.nt.length === 0}
+            emptyNode={<><span className="e">Nothing jotted yet.</span><button type="button" className="tdb-ghost" onClick={addTask}>＋ Add a note</button></>}>
             {board.nt.map(renderCard)}
           </Lane>
         </div>
       </div>
+
+      {/* ── Today's list — corner pop-up (fixed; FAB collapsed / panel expanded) ── */}
+      {!todayOpen && (
+        <button type="button" className="tdb-fab" onClick={() => setTodayOpen(true)} aria-label="Open Today’s list" aria-expanded={false}>
+          <span className="tdb-fabring" style={{ background: `conic-gradient(var(--sage) 0 ${prog.pct}%, rgba(255,255,255,0.18) ${prog.pct}% 100%)` }}>
+            <i>{prog.empty ? "–" : `${prog.done}/${prog.total}`}</i>
+          </span>
+          <span className="tdb-fabl">
+            <span className="tdb-fab-a">Today’s list</span>
+            <span className="tdb-fab-b">
+              {committedCards.length} committed · {doneN} done
+              {rolled.length > 0 && <em className="tdb-fab-roll" title={`${rolled.length} rolled over from a previous day`}> ●</em>}
+            </span>
+          </span>
+        </button>
+      )}
+      {todayOpen && renderTodayPop()}
 
       {toast && <div className="tdb-toast">{toast}</div>}
       {walk && <Walkthrough title={walk.title} cards={walk.cards} onClose={() => setWalk(null)} onNavigate={onNavigate} onToast={flash} />}
@@ -254,16 +264,16 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     </F12Page>
   );
 
-  // ── Today's list box: committed band + done band (the day's record) ──
-  function renderTodayBox() {
-    const prog = todayProgress(committedCards.length, doneFromList);
+  // ── the expanded pop-up: committed band + done band + footer (rises from the corner) ──
+  function renderTodayPop() {
     const room = MAX_TODAY - committedCards.length;
     return (
-      <div className="tdb-today">
+      <div className="tdb-pop" role="dialog" aria-label="Today’s list">
         <div className="tdb-th">
           <span className="tdb-t">Today’s list</span>
           <span className="tdb-cc">{committedCards.length} committed</span>
           <span className="tdb-cd">{doneN} done</span>
+          <button type="button" className="tdb-drawer-x" onClick={() => setTodayOpen(false)} aria-label="Close">✕</button>
         </div>
         {rolled.length > 0 && (
           <div className="tdb-rollbar">
@@ -314,7 +324,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       : c.title;
     const committed = onList(c);
     return (
-      <div key={c.key} className={`tdb-tile${committed ? " today" : ""}${pulsing === c.key ? " pulse" : ""}`} onClick={() => setDrawerCard(c)}>
+      <div key={c.key} className={`tdb-tile ${c.stream}${committed ? " today" : ""}${pulsing === c.key ? " pulse" : ""}`} onClick={() => setDrawerCard(c)}>
         <div className="tdb-tags">
           <span className={`tdb-tag due${c.warn ? " warn" : ""}`}>{c.due}</span>
           {c.snoozes > 0 && <span className="tdb-tag snz">Snoozed ×{c.snoozes}</span>}

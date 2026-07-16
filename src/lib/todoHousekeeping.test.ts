@@ -11,6 +11,7 @@ import {
   visibleAgentNeeds,
   taskSurvivesMute,
   groupHousekeeping,
+  hkGapCount,
 } from "./todoHousekeeping";
 import { Agent } from "../types";
 import { BoardCard } from "./todoBoard";
@@ -158,5 +159,29 @@ describe("groupHousekeeping", () => {
   it("skips a card whose agent is missing", () => {
     const orphan = [hkCard({ key: "task-dq-gone", relatedRecordId: "ghost" })];
     expect(groupHousekeeping(orphan, agents)).toEqual([]);
+  });
+});
+
+describe("hkGapCount — the ribbon/lane number is gaps, not piles", () => {
+  const agents2 = [
+    agent({ id: "a1", name: "Ann", responseTimeWeeks: 0, materialsWanted: [], mswlNotes: "" }), // 3 gaps
+    agent({ id: "a2", name: "Bo", responseTimeWeeks: 0, materialsWanted: ["Query Letter"], mswlNotes: "has one" }), // 1 gap
+  ];
+  const cards = [
+    hkCard({ key: "task-dq-a1", relatedRecordId: "a1", who: "Ann" }),
+    hkCard({ key: "task-dq-a2", relatedRecordId: "a2", who: "Bo" }),
+    hkCard({ key: "task-nrc-q9", taskType: "no_response_close", relatedRecordId: "q9", who: "Cy", hk: false }), // 1 gap
+  ];
+
+  it("sums members across groups (Ann 3 + Bo 1 + stale 1 = 5, over 4 piles... 4 groups)", () => {
+    const groups = groupHousekeeping(cards, agents2);
+    expect(groups.length).toBe(4); // piles
+    expect(hkGapCount(groups)).toBe(5); // gaps
+  });
+
+  it("muted rules reduce the gap count (already excluded by grouping)", () => {
+    expect(hkGapCount(groupHousekeeping(cards, agents2, ["dq_mswl"]))).toBe(4);
+    expect(hkGapCount(groupHousekeeping(cards, agents2, ["no_response_close", "dq_responseTime"]))).toBe(2);
+    expect(hkGapCount([])).toBe(0);
   });
 });

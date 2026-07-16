@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { QueryStatus, Task, Query, Agent, Manuscript, UserTask, TaskFlag, Activity, ActivityType } from "../types";
-import { assembleBoard, boardStreamForTaskType, todaySplit, BoardInput } from "./todoBoard";
+import { assembleBoard, boardStreamForTaskType, todaySplit, ribbonTiles, BoardInput } from "./todoBoard";
 
 const TODAY = "2026-07-09";
 const NOW = Date.parse("2026-07-09T12:00:00Z");
@@ -140,5 +140,31 @@ describe("todaySplit — committed band (today only) vs done band (uncapped)", (
     expect(split.done.length).toBe(1); // u-done
     expect(split.committed.length).toBe(2);
     expect(split.committed.length).not.toBe(split.done.length);
+  });
+});
+
+describe("ribbonTiles — the header tiles mirror the lanes", () => {
+  const input = base({
+    tasks: [
+      task("t-full", "full_requested", "q1"),
+      task("t-offer", "offer_received", "q2"),
+      task("t-dq", "data_quality_poor", "a3"),
+    ],
+    queries: [query("q1", "a1", QueryStatus.FULL_REQUESTED), query("q2", "a2", QueryStatus.OFFER)],
+    agents: [agent("a1", "JM"), agent("a2", "IP"), agent("a3", "RB")],
+    userTasks: [utask("u1"), utask("u2")],
+  });
+
+  it("urgent + notes tile counts equal their lane counts", () => {
+    const b = assembleBoard(input);
+    const tiles = ribbonTiles(b, 7);
+    expect(tiles.urgent).toBe(b.do.length); // 2
+    expect(tiles.notes).toBe(b.nt.length); // 2
+  });
+
+  it("housekeeping tile is the GAP count passed through (gaps, not piles)", () => {
+    const b = assembleBoard(input);
+    expect(ribbonTiles(b, 7).housekeeping).toBe(7);
+    expect(ribbonTiles(b, 0).housekeeping).toBe(0);
   });
 });

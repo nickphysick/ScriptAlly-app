@@ -159,3 +159,12 @@ export function groupHousekeeping(hkCards: BoardCard[], agents: Agent[], muted?:
 
   return HK_RULE_ORDER.filter((r) => byRule.has(r)).map((r) => ({ rule: r, meta: HK_RULES[r], members: byRule.get(r)! }));
 }
+
+/**
+ * The total GAP count across groups — the number the ribbon tile + Housekeeping lane badge show
+ * (the underlying workload: sum of members, never the pile count; the mockup's 25 = 12 + 9 + 4).
+ * Muted rules/needs are already excluded by groupHousekeeping, so this is the un-muted gap count.
+ */
+export function hkGapCount(groups: HkGroup[]): number {
+  return groups.reduce((n, g) => n + g.members.length, 0);
+}

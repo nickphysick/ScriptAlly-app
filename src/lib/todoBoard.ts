@@ -146,19 +146,28 @@ function derivedCard(task: Task, input: BoardInput): BoardCard | null {
   };
 }
 
+/** "6 Jul" — the note tag's short date (en-GB); empty on an unparsable value. */
+const shortDate = (iso?: string): string => {
+  if (!iso) return "";
+  const ms = new Date(iso).getTime();
+  return Number.isNaN(ms) ? "" : new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+};
+
 function userCard(t: UserTask, input: BoardInput): BoardCard {
   const rec = t.agentId
     ? input.agents.find((a) => a.id === t.agentId)
     : undefined;
   const ms = t.manuscriptId ? input.manuscripts.find((m) => m.id === t.manuscriptId) : undefined;
   const record = rec ? `On ${agentPrimary(rec)}` : ms ? `On ${ms.title}` : "Your note";
+  // The mockup's note tag: "Note · 6 Jul" — the due date when set, else when it was jotted.
+  const noteDate = shortDate(t.dueDate ?? t.createdAt);
   return {
     key: t.id,
     stream: "nt",
     title: t.text || "New task",
     who: "",
     subtitle: "",
-    due: t.dueDate ? "HAS A DATE" : "NO DATE",
+    due: noteDate ? `Note · ${noteDate}` : "Note",
     warn: false,
     snoozes: 0,
     hk: false,
@@ -207,7 +216,7 @@ const msOf = (iso?: string): number | undefined => {
 };
 
 /**
- * The Today's-list split, for the shelf panel's two bands. `committed` = lane cards committed to
+ * The Today's-list split, for the corner pop-up's two bands. `committed` = lane cards committed to
  * TODAY (committedDate === today) — the committed band, and the set the 5-cap governs; lane cards are
  * inherently open (a done user task leaves `nt`, an actioned derived task leaves the engine). `done` =
  * the cleared-today union (the done-band, uncapped). Rolled-over items (a prior committedDate) are
@@ -216,6 +225,17 @@ const msOf = (iso?: string): number | undefined => {
 export function todaySplit(board: AssembledBoard, today: string): { committed: BoardCard[]; done: BoardCard[] } {
   const laneCards = [...board.do, ...board.hk, ...board.nt];
   return { committed: laneCards.filter((c) => c.committedDate === today), done: board.cleared };
+}
+
+/**
+ * The ribbon's three metric tiles. Urgent/notes ARE their lane lengths; housekeeping is the GAP
+ * count (todoHousekeeping.hkGapCount over the grouped view — the number of fixable gaps, not piles:
+ * the mockup's lane badge 25 = 12+9+4), passed in because todoHousekeeping imports BoardCard from
+ * here (a direct import back would be circular). The lane headers read the SAME object as the
+ * ribbon, so tile ↔ lane equality holds by construction.
+ */
+export function ribbonTiles(board: AssembledBoard, housekeepingGaps: number): { urgent: number; housekeeping: number; notes: number } {
+  return { urgent: board.do.length, housekeeping: housekeepingGaps, notes: board.nt.length };
 }
 
 function blankDone(key: string): BoardCard {

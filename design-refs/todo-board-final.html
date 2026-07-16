@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>To-do — header + corner pop-up</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --oat:#f1e8dc; --paper:#faf6f0; --panel:#fffdfb; --white:#fff;
+  --line:#e6dccd; --hairline:#f0eae1;
+  --ink:#1e1a16; --ink-2:#4a443c; --muted:#7d7469; --faint:#a89e91;
+  --burg:#6b3023; --burg-soft:#8a4030;
+  --pink-t:#f7e3dd; --pink-b:#eecdc3; --pink-i:#8a4030; --pink-av:#f6d7cf; --pink-btn:#f6cfc9;
+  --gold-t:#f6efdd; --gold-b:#e7d9b8; --gold-i:#7d621d;
+  --note-t:#faf0c8; --note-b:#ecdda4; --note-i:#7a6420;
+  --sageC:#e9ede6; --sage-edge:#c8d0c5; --sageD:#5a6e58; --sage:#8a9e88;
+  --pinkC:#f8e7dc;
+  --sh-1:0 1px 2px rgba(58,42,26,.05);
+  --sh-2:0 1px 2px rgba(58,42,26,.05),0 4px 10px -2px rgba(58,42,26,.06);
+  --sh-3:0 3px 6px rgba(58,42,26,.07),0 16px 40px -8px rgba(58,42,26,.18);
+  --sh-glass:0 1px 2px rgba(58,42,26,.04),0 12px 34px -12px rgba(58,42,26,.11),inset 0 1px 0 rgba(255,255,255,.6);
+  --r-md:9px; --r-lg:12px; --r-xl:16px;
+  --mono:'JetBrains Mono',monospace; --serif:'Playfair Display',serif; --body:'Inter',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--body);color:var(--ink);font-size:13px;line-height:1.4;-webkit-font-smoothing:antialiased;
+  background:radial-gradient(120% 120% at 80% -6%, rgba(255,250,242,.5) 0%, transparent 46%), var(--oat);
+  min-height:100vh;padding:16px 22px 30px}
+button{font:inherit;background:none;border:none;color:inherit;text-align:left;cursor:pointer}
+.scaf{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:10px;max-width:1560px;margin-inline:auto}
+.scaf b{color:var(--burg-soft)}
+.wrap{max-width:1560px;margin:0 auto;position:relative}
+
+/* ===== stat-ribbon header ===== */
+.bar{position:relative;overflow:hidden;border-radius:12px;display:flex;align-items:center;gap:16px;padding:12px 20px;
+  background:linear-gradient(100deg, rgba(249,232,226,.76), rgba(244,220,212,.62));
+  -webkit-backdrop-filter:blur(12px) saturate(106%);backdrop-filter:blur(12px) saturate(106%);
+  border:1px solid rgba(255,255,255,.5);box-shadow:var(--sh-glass)}
+.bar .ask{font-family:var(--serif);font-size:19px;font-weight:600;color:#3a2019;white-space:nowrap}
+.bar .metrics{display:flex;gap:8px}
+.bar .m{display:flex;align-items:baseline;gap:6px;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.72);border-radius:8px;padding:6px 12px;white-space:nowrap}
+.bar .m .v{font-family:var(--serif);font-size:16px;font-weight:600;line-height:1}
+.bar .m .k{font-family:var(--mono);font-size:7.5px;letter-spacing:.08em;text-transform:uppercase}
+.bar .m.ug .v{color:var(--pink-i)} .bar .m.ug .k{color:var(--pink-i)}
+.bar .m.hk .v{color:var(--gold-i)} .bar .m.hk .k{color:var(--gold-i)}
+.bar .m.nt .v{color:var(--note-i)} .bar .m.nt .k{color:var(--note-i)}
+.bar .sp{flex:1}
+.bar .go{font-size:12.5px;font-weight:600;padding:9px 18px;border-radius:9px;background:var(--ink);color:var(--panel);white-space:nowrap;box-shadow:var(--sh-1)}
+.bar .go:hover{background:#332c25}
+.bar .see{font-size:12.5px;font-weight:500;padding:9px 15px;border-radius:9px;background:rgba(255,255,255,.6);border:1px solid var(--pink-b);color:var(--pink-i);white-space:nowrap}
+
+/* ===== tools ===== */
+.tools{display:flex;gap:8px;align-items:center;margin:11px 0}
+.tool{font-size:12px;padding:7px 12px;border-radius:var(--r-md);background:var(--panel);border:1px solid var(--line);box-shadow:var(--sh-1);color:var(--ink-2)}
+.tools .sp{flex:1}
+.add{font-size:12.5px;font-weight:600;padding:8px 15px;border-radius:var(--r-md);background:var(--pink-btn)}
+
+/* ===== lanes ===== */
+.lanes{display:flex;flex-direction:column;gap:12px}
+.lane{display:flex;flex-direction:column;background:var(--paper);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
+.lane.do{border-color:var(--pink-b)}
+.laneh{flex:none;display:flex;align-items:center;gap:9px;padding:9px 14px;border-bottom:1px solid}
+.lane.do .laneh{background:var(--pink-t);border-color:var(--pink-b);color:var(--pink-i)}
+.lane.hk .laneh{background:var(--gold-t);border-color:var(--gold-b);color:var(--gold-i)}
+.lane.nt .laneh{background:var(--note-t);border-color:var(--note-b);color:var(--note-i)}
+.laneh .lt{font-weight:600;font-size:13px}
+.laneh .ln{font-family:var(--mono);font-size:8.5px;font-weight:700;border-radius:99px;padding:2px 8px;background:rgba(255,255,255,.7)}
+.laneh .sp{flex:1}
+.laneh .cadd{font-size:15px;padding:0 4px;opacity:.7}
+.laneh .chev{width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.6);border:1px solid rgba(0,0,0,.06);font-size:13px;opacity:.8}
+.track{position:relative}
+.scroller{display:flex;gap:11px;padding:12px;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;align-items:stretch}
+.track.more::after{content:"";position:absolute;top:0;bottom:0;right:0;width:46px;pointer-events:none;background:linear-gradient(90deg,transparent,var(--paper))}
+
+.card{flex:none;width:322px;height:174px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:var(--sh-1);padding:13px 15px;display:flex;flex-direction:column;overflow:hidden;cursor:pointer;transition:.15s}
+.card:hover{border-color:var(--ink-2);box-shadow:var(--sh-2)}
+.tag{align-self:flex-start;font-family:var(--mono);font-size:7.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border-radius:99px;padding:2.5px 8px;border:1px solid;margin-bottom:8px}
+.tag.due{background:var(--panel);border-color:var(--line);color:var(--muted)}
+.tag.warn{background:var(--pink-t);border-color:var(--pink-b);color:var(--pink-i)}
+.tag.off{background:var(--pink-t);border-color:var(--pink-b);color:var(--pink-i)}
+.tt{flex:none;font-weight:600;font-size:13.5px;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.tt em{font-family:var(--serif);font-style:italic;color:var(--burg);font-weight:600}
+.tsub{flex:1 1 auto;min-height:0;font-size:12px;color:var(--muted);margin-top:4px;line-height:1.45;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.tfoot{flex:none;display:flex;align-items:center;gap:8px;margin-top:9px;padding-top:9px;border-top:1px solid var(--hairline)}
+.dot{width:14px;height:14px;border-radius:50%;flex:none;display:inline-flex;align-items:center;justify-content:center;font-size:7.5px}
+.dot.q{border:1.5px solid var(--burg);background:var(--pinkC);color:var(--burg)}.dot.q::after{content:"→";font-weight:700}
+.dot.nudge{border:1.5px dashed var(--burg);color:var(--burg)}.dot.nudge::after{content:"↻";font-weight:700}
+.dot.freq{border:2.5px solid var(--sage);background:var(--sageC);color:var(--sageD)}.dot.freq::after{content:"←";font-weight:700}
+.dot.star{border:1.5px solid var(--sage);background:var(--sageC);color:var(--sageD)}.dot.star::after{content:"★";font-size:7px}
+.miniav{width:20px;height:20px;border-radius:50%;background:var(--pink-av);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;font-weight:600;color:#5a2b20;flex:none}
+.who{font-family:var(--mono);font-size:8.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tacts{flex:none;display:flex;gap:6px;margin-top:9px}
+.pill{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;border-radius:99px;padding:8px 6px;border:1px solid;white-space:nowrap}
+.pill.t{background:var(--pink-t);border-color:var(--pink-b);color:var(--pink-i)}
+.pill.d{background:var(--panel);border-color:var(--line);color:var(--ink-2)}
+.pill .bx{width:11px;height:11px;border:1.4px solid currentColor;border-radius:3px;opacity:.7}
+.gcard{flex:none;width:322px;height:174px;background:var(--panel);border:1px solid var(--gold-b);border-radius:var(--r-md);box-shadow:var(--sh-1);padding:14px 15px;display:flex;flex-direction:column;overflow:hidden;cursor:pointer}
+.gcard .gn{font-family:var(--serif);font-size:29px;font-weight:600;color:var(--gold-i);line-height:1}
+.gcard .gt{font-weight:600;font-size:13.5px;margin-top:5px}
+.gcard .gs{flex:1 1 auto;min-height:0;font-size:12px;color:var(--muted);margin-top:5px;line-height:1.45;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.gcard .stack{flex:none;display:flex;align-items:center;margin-top:9px;padding-top:10px;border-top:1px solid var(--hairline)}
+.gcard .sav{width:21px;height:21px;border-radius:50%;background:var(--gold-t);border:1.5px solid var(--panel);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:7.5px;font-weight:600;color:var(--gold-i);margin-right:-6px}
+.gcard .fix{margin-left:13px;font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--gold-i)}
+.laneempty{display:flex;align-items:center;gap:12px;padding:20px 16px}
+.laneempty .e{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--muted)}
+.laneempty .ghost{font-family:var(--mono);font-size:8px;letter-spacing:.09em;text-transform:uppercase;border:1px dashed var(--note-b);color:var(--note-i);border-radius:8px;padding:9px 13px}
+
+/* ===== corner pop-up (collapsed) ===== */
+.fab{position:fixed;right:26px;bottom:26px;display:flex;align-items:center;gap:11px;background:var(--ink);color:var(--panel);border-radius:99px;padding:10px 18px 10px 12px;box-shadow:var(--sh-3);z-index:20;cursor:pointer}
+.fab .ring{width:32px;height:32px;border-radius:50%;background:conic-gradient(var(--sage) 0 25%, rgba(255,255,255,.18) 25% 100%);display:flex;align-items:center;justify-content:center;flex:none}
+.fab .ring i{width:23px;height:23px;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;font-weight:700;font-style:normal}
+.fab .l{display:flex;flex-direction:column;line-height:1.16}
+.fab .l .a{font-family:var(--serif);font-size:14px;font-weight:600}
+.fab .l .b{font-family:var(--mono);font-size:7.5px;letter-spacing:.09em;text-transform:uppercase;opacity:.72}
+
+.foot{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);text-align:center;margin-top:14px}
+.foot b{color:var(--burg-soft)}
+</style>
+</head>
+<body>
+<div class="scaf"><b>Near-final</b> · header sketch 4 with your labels · corner pop-up Today's list · lanes renamed to match the ribbon</div>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="bar">
+    <span class="ask">What's on your desk?</span>
+    <span class="metrics">
+      <span class="m ug"><span class="v">6</span><span class="k">urgent</span></span>
+      <span class="m hk"><span class="v">25</span><span class="k">housekeeping</span></span>
+      <span class="m nt"><span class="v">2</span><span class="k">notes to self</span></span>
+    </span>
+    <span class="sp"></span>
+    <button class="go">Work through priorities now</button>
+  </div>
+
+  <!-- TOOLS -->
+  <div class="tools"><button class="tool">Filter</button><button class="tool">Sort</button></div>
+
+  <!-- LANES -->
+  <div class="lanes">
+
+    <div class="lane do">
+      <div class="laneh"><span class="lt">Urgent</span><span class="ln">6</span><span class="sp"></span><button class="chev">›</button></div>
+      <div class="track more"><div class="scroller">
+        <div class="card">
+          <span class="tag off">Offer</span>
+          <div class="tt"><em>Tom Ellery</em> has made an offer</div>
+          <div class="tsub">Respond by 25 July · other agents are still holding your work.</div>
+          <div class="tfoot"><span class="dot star"></span><span class="miniav">TE</span><span class="who">Curtis Vane</span></div>
+          <div class="tacts"><button class="pill t">＋ Today's list</button><button class="pill d"><span class="bx"></span>Mark done</button></div>
+        </div>
+        <div class="card">
+          <span class="tag due warn">3 DAYS LEFT</span>
+          <div class="tt">Send your full to <em>Juliet Mushens</em></div>
+          <div class="tsub">She read the partial and asked for the full manuscript on 27 June.</div>
+          <div class="tfoot"><span class="dot q"></span><span class="miniav">JM</span><span class="who">Mushens Ent.</span></div>
+          <div class="tacts"><button class="pill t">＋ Today's list</button><button class="pill d"><span class="bx"></span>Mark done</button></div>
+        </div>
+        <div class="card">
+          <span class="tag due warn">96 DAYS · NO REPLY</span>
+          <div class="tt">Nudge <em>David Higham</em></div>
+          <div class="tsub">Full sent 3 Apr · stated reply 8 weeks — a follow-up is fair.</div>
+          <div class="tfoot"><span class="dot nudge"></span><span class="miniav">DH</span><span class="who">D. Higham Assoc.</span></div>
+          <div class="tacts"><button class="pill t">＋ Today's list</button><button class="pill d"><span class="bx"></span>Mark done</button></div>
+        </div>
+        <div class="card">
+          <span class="tag due">OVER TO YOU</span>
+          <div class="tt">Resubmit your R&R to <em>Nelle Andrew</em></div>
+          <div class="tsub">Revision round 1 — she wants the middle act tightened.</div>
+          <div class="tfoot"><span class="dot freq"></span><span class="miniav">NA</span><span class="who">Rachel Mills</span></div>
+          <div class="tacts"><button class="pill t">＋ Today's list</button><button class="pill d"><span class="bx"></span>Mark done</button></div>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="lane hk">
+      <div class="laneh"><span class="lt">Housekeeping</span><span class="ln">25</span><span class="sp"></span><button class="chev">›</button></div>
+      <div class="track"><div class="scroller">
+        <div class="gcard"><div class="gn">12</div><div class="gt">agents have no reply window</div>
+          <div class="gs">Without it we can't tell you when a nudge is fair — so they never appear in your chase list.</div>
+          <div class="stack"><span class="sav">RB</span><span class="sav">TW</span><span class="sav">IP</span><span class="sav">FA</span><span class="fix">Fix together →</span></div></div>
+        <div class="gcard"><div class="gn">9</div><div class="gt">agents have no wish list</div>
+          <div class="gs">Their wish list is how we tell you who's worth querying — worth most before you query.</div>
+          <div class="stack"><span class="sav">AG</span><span class="sav">HM</span><span class="sav">CB</span><span class="fix">Fix together →</span></div></div>
+        <div class="gcard" style="border-color:var(--pink-b)"><div class="gn" style="color:var(--pink-i)">4</div><div class="gt">stale queries — consider closing</div>
+          <div class="gs">Silent past their stated window. Closing keeps your response rate honest.</div>
+          <div class="stack"><span class="sav" style="background:var(--pink-t);color:var(--pink-i)">MR</span><span class="sav" style="background:var(--pink-t);color:var(--pink-i)">JM</span><span class="fix" style="color:var(--pink-i)">Review →</span></div></div>
+      </div></div>
+    </div>
+
+    <div class="lane nt">
+      <div class="laneh"><span class="lt">Notes to self</span><span class="ln">2</span><span class="sp"></span><button class="cadd">＋</button></div>
+      <div class="track"><div class="scroller">
+        <div class="card" style="border-color:var(--note-b)">
+          <span class="tag" style="background:var(--note-t);border-color:var(--note-b);color:var(--note-i)">Note · 6 Jul</span>
+          <div class="tt">Ask the group about the covering email</div>
+          <div class="tsub">Mention the shortlisting, or let the pages speak for themselves?</div>
+          <div class="tfoot"><span class="dot" style="border:1.5px solid var(--note-b);background:var(--note-t)"></span><span class="miniav" style="background:var(--note-t);border:1px solid var(--note-b);color:var(--note-i)">✎</span><span class="who">On Juliet Mushens</span></div>
+          <div class="tacts"><button class="pill t">＋ Today's list</button><button class="pill d"><span class="bx"></span>Mark done</button></div>
+        </div>
+        <div class="card" style="border-color:var(--note-b)">
+          <span class="tag" style="background:var(--note-t);border-color:var(--note-b);color:var(--note-i)">Note · 2 Jul</span>
+          <div class="tt">Redraft the opening line</div>
+          <div class="tsub">Too close to the image in Ch.3 — find something colder.</div>
+          <div class="tfoot"><span class="dot" style="border:1.5px solid var(--note-b);background:var(--note-t)"></span><span class="miniav" style="background:var(--note-t);border:1px solid var(--note-b);color:var(--note-i)">✎</span><span class="who">On The Tin Sky</span></div>
+          <div class="tacts"><button class="pill t">＋ Today's list</button><button class="pill d"><span class="bx"></span>Mark done</button></div>
+        </div>
+      </div></div>
+    </div>
+
+  </div>
+
+  <div class="foot">Ribbon tiles are a live index of the three lanes · <b>Work through priorities now</b> walks the Urgent lane · Today's list lives in the corner ↘</div>
+</div>
+
+<!-- corner pop-up (collapsed) -->
+<div class="fab"><span class="ring"><i>1/4</i></span><span class="l"><span class="a">Today's list</span><span class="b">1 committed · 3 done</span></span></div>
+
+</body>
+</html>
