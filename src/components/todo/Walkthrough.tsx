@@ -91,7 +91,11 @@ export const Walkthrough: React.FC<WalkthroughProps> = ({ title, cards, onClose,
               <div key={p.cardKey} className="tdb-review-row">
                 <div className="tdb-review-mid">
                   <div className="tdb-review-t">{cardByKey[p.cardKey]?.title ?? p.cardKey}</div>
-                  <div className="tdb-review-m">{p.kind === "mark-sent" ? `Mark sent · ${fmtDate(p.sentDate)}` : `Nudge · check back ${fmtDate(p.checkBackDate)}`}</div>
+                  <div className="tdb-review-m">
+                    {p.kind === "mark-sent"
+                      ? ["Mark sent", fmtDate(p.sentDate), p.method, p.materials?.length ? p.materials.join(", ") : null].filter(Boolean).join(" · ")
+                      : `Nudge · check back ${fmtDate(p.checkBackDate)}`}
+                  </div>
                 </div>
                 <button type="button" className="tdb-review-x" title="Remove" onClick={() => setStaged((s) => { const n = { ...s }; delete n[p.cardKey]; return n; })}>✕</button>
               </div>

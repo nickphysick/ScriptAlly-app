@@ -59,9 +59,15 @@ export function walkStepKind(card: BoardCard): WalkStepKind {
 }
 export const isStageable = (card: BoardCard): boolean => walkStepKind(card) !== "open";
 
-/** A staged (not-yet-written) walkthrough change. Carries everything apply() needs to write later. */
+/**
+ * A staged (not-yet-written) walkthrough change. Carries everything apply() needs to write later,
+ * PLUS the capture's method + materials for the review screen. Those two are DISPLAY/AUDIT only —
+ * the proven write path (recordMaterialsSent, shared with MarkSentPopover) takes neither; the
+ * materials tick-list is the Save-gate, exactly as in the popover. Extending the write path to
+ * persist them would be a write-path change, which this pack bars.
+ */
 export type StagedPayload =
-  | { kind: "mark-sent"; cardKey: string; queryId: string; targetStatus: QueryStatus; sentDate: string; isResubmit: boolean }
+  | { kind: "mark-sent"; cardKey: string; queryId: string; targetStatus: QueryStatus; sentDate: string; isResubmit: boolean; method?: string; materials?: string[] }
   | { kind: "nudge"; cardKey: string; queryId: string; checkBackDate: string; note?: string };
 
 export interface StagedHandlers {

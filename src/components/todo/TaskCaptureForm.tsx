@@ -56,7 +56,10 @@ export const TaskCaptureForm: React.FC<TaskCaptureFormProps> = ({ card, query, a
     const target = action.target as QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT;
     const isResubmit = action.markKind === "resubmit";
     if (mode === "stage") {
-      onStage?.({ kind: "mark-sent", cardKey: card.key, queryId: query.id, targetStatus: target, sentDate: new Date(sentDate).toISOString(), isResubmit });
+      // method + materials ride the payload for the REVIEW screen only — the write (on Save) is the
+      // same recordMaterialsSent call either way; it takes neither (MarkSentPopover parity).
+      const ticked = materialOpts.filter((m) => materials[m]);
+      onStage?.({ kind: "mark-sent", cardKey: card.key, queryId: query.id, targetStatus: target, sentDate: new Date(sentDate).toISOString(), isResubmit, method, materials: ticked });
     } else {
       await recordMaterialsSent({ queryId: query.id, targetStatus: target, sentDate: new Date(sentDate).toISOString(), isResubmit });
     }

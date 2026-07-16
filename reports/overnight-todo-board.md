@@ -342,3 +342,17 @@ Cards stay fixed-height (174px per this mockup, was 176) `overflow:hidden` flex 
 **Layout jsdom-unverified** (auth-gated F12 board) — **Nick eyeballs:** the ribbon + tiles, three renamed lanes with Urgent on top, clip-safe cards (pills inside), the corner FAB collapsed (ring + counts) and expanded (committed/done bands), no collision with the help "?", and vertical page scroll without the old clamp.
 
 **Commit:** `refactor(todo): ribbon header + corner Today's-list pop-up`.
+
+## PHASE 4 RE-ISSUE — reconciliation delta (pack re-run post-re-layouts)
+
+**Context:** the Phase 4+5 pack was re-issued in its intended sequence position (after the lanes re-layout). **Phase 4 already shipped as `c7175da`** and survived both re-layouts intact. This pass is the RECONCILIATION DELTA — Step 0 verified shipped-vs-pack, and only the gaps were built.
+
+**Step 0 findings (all pack assumptions hold):** `TaskDetail` is body-first — the shared `TaskCaptureForm` renders in both the drawer (write mode) and the walkthrough (stage mode). The walkthrough shell exists and both entry points are wired post-rename: the ribbon's **"Work through priorities now"** walks the Urgent set (`board.do`, the lane's own order: Offer pinned, warn-first) and the corner pop-up's **"Work the list"** walks today's committed set. Queue routing: `walkStepKind` stages mark-sent (`partial_requested`/`full_requested`/`revise_resubmit`) + `nudge_overdue`; **offer / housekeeping / UserTask route to Open steps, never staged** (unit-locked). Back un-stages; review lists staged-only with ✕ + Save N; `applyStaged` isolates per-item failure; close-mid-flight confirms. **Nudge draft — the "which path" answer:** NudgeModal had a real inline generator → it was **extracted once into the shared `src/lib/nudgeDraft.ts`**, consumed by both NudgeModal and the capture form (no duplication); the drawer shows draft + Copy + the "ScriptAlly never sends for you" line.
+
+**The delta built now:** the pack specifies the staged payload carries `{date, method, materials}`. Recon: `recordMaterialsSent` (the proven write, shared with MarkSentPopover) accepts **neither method nor materials** — the tick-list is the Save-gate, not persisted data, and extending the write path is barred by this same pack ("reuse, don't re-branch"; `recomputeQuery` single-writer). Reconcile: **method + materials now ride the staged payload as review-display/audit data** — the review screen shows `Mark sent · 16 Jul · Email · First pages, Synopsis` — while Save still writes through the byte-identical `recordMaterialsSent` call. Unit-locked: `applyStaged` hands the FULL payload verbatim to the handler (nothing stripped between stage and apply). `draftCopied?` (pack-optional) not tracked — `logNudge` has no home for it; noted.
+
+**Deliberate keep, flagged:** `revise_resubmit` STAYS staged — the pack's queue line names only partial/full, but R&R is the same deferrable `recordMaterialsSent` write (`isResubmit: true`, mapped by `getPrimaryAction`), so staging it is what the settled principle demands. Say the word to demote it to an Open step.
+
+**Gates:** `tsc` clean · `vite build` OK · Vitest **1002** green (+1). `App.tsx` untouched → no PaintMode; staged set verified.
+
+**Commit:** `feat(todo): staged walkthrough payload carries method + materials (P4 re-issue delta)` — the pack's canonical message `feat(todo): staged walkthroughs + nudge draft` already names `c7175da`; re-using it verbatim would make history ambiguous.

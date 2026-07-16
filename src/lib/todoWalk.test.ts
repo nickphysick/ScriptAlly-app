@@ -77,6 +77,13 @@ describe("applyStaged — per-item failure isolation", () => {
     );
     expect(seen).toEqual(["mark", "nudge"]);
   });
+  it("hands the FULL payload to the handler — method + materials survive staging (review display)", async () => {
+    const got: StagedPayload[] = [];
+    const staged: StagedPayload = { kind: "mark-sent", cardKey: "a", queryId: "q", targetStatus: QueryStatus.PARTIAL_SENT, sentDate: "2026-07-16", isResubmit: false, method: "QueryManager", materials: ["First pages", "Synopsis"] };
+    await applyStaged([staged], { markSent: async (p) => { got.push(p); }, nudge: async () => {} });
+    expect(got[0]).toEqual(staged); // verbatim — nothing stripped between stage and apply
+    expect((got[0] as Extract<StagedPayload, { kind: "mark-sent" }>).materials).toEqual(["First pages", "Synopsis"]);
+  });
 });
 
 describe("rolledOverCards", () => {
