@@ -17,20 +17,22 @@
    (~86px) · date line over the 23px Playfair question · colour-filled tiles. The ink border is
    THIS BAR ONLY — lanes/cards/FAB keep the F12 hairline grammar. Existing tokens only (the
    --pink-hero/--float-* set stays defined for other surfaces; this bar just stops consuming it). ── */
-.tdb-ribbon { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; row-gap: 10px; padding: 17px 24px; background: var(--white, #ffffff); border: 1.5px solid var(--ink); border-radius: 14px; }
-.tdb-askwrap { display: flex; flex-direction: column; gap: 3px; }
+.tdb-ribbon { display: flex; flex-wrap: wrap; align-items: center; gap: 26px; row-gap: 12px; padding: 20px 28px; background: var(--white, #ffffff); border: 1.5px solid var(--ink); border-radius: 14px; }
+.tdb-askwrap { display: flex; flex-direction: column; gap: 4px; }
 .tdb-rdate { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
-.tdb-ask { font-family: var(--f12-serif); font-size: 23px; font-weight: 600; color: var(--ink); white-space: nowrap; line-height: 1.1; }
-.tdb-metrics { display: flex; gap: 9px; margin-left: 8px; }
-.tdb-m { display: flex; align-items: baseline; gap: 6px; border-radius: 9px; padding: 8px 14px; white-space: nowrap; border: 1px solid; }
-.tdb-m b { font-family: var(--f12-serif); font-size: 17px; font-weight: 600; line-height: 1; }
-.tdb-m i { font-family: var(--f12-mono); font-style: normal; font-size: 7.5px; letter-spacing: 0.08em; text-transform: uppercase; }
-.tdb-m.ug { background: var(--pink-t); border-color: var(--pink-b); }
-.tdb-m.ug b, .tdb-m.ug i { color: var(--pink-i); }
-.tdb-m.hk { background: var(--gold-t); border-color: var(--gold-b); }
-.tdb-m.hk b, .tdb-m.hk i { color: var(--gold-i); }
-.tdb-m.nt { background: var(--note-t); border-color: var(--note-b); }
-.tdb-m.nt b, .tdb-m.nt i { color: var(--note-i); }
+.tdb-ask { font-family: var(--f12-serif); font-size: 25px; font-weight: 600; color: var(--ink); white-space: nowrap; line-height: 1.08; }
+/* post-it counts — 88px tilted squares w/ tape strip; tap scrolls to the lane (counts in aria-labels;
+   the Caveat numerals are decorative). Hover straightens; reduced-motion kills the transition. */
+.tdb-postits { display: flex; gap: 22px; margin-left: 16px; align-items: center; }
+.tdb-postit { position: relative; width: 88px; height: 88px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; box-shadow: var(--sh-postit); flex: none; transition: 0.18s; cursor: pointer; }
+.tdb-postit::before { content: ""; position: absolute; top: -9px; left: 50%; transform: translateX(-50%) rotate(-1.5deg); width: 40px; height: 14px; background: rgba(255, 255, 255, 0.55); border: 1px solid rgba(58, 42, 26, 0.05); }
+.tdb-pv { font-family: Caveat, cursive; font-size: 40px; font-weight: 600; line-height: 1; }
+.tdb-pk { font-family: var(--f12-mono); font-size: 7px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.75; }
+.tdb-postit.ug { background: var(--postit-pink); transform: rotate(-2.4deg); color: #6e3325; }
+.tdb-postit.hk { background: var(--postit-sage); transform: rotate(1.8deg); color: var(--hk-ink); }
+.tdb-postit.nt { background: var(--postit-note); transform: rotate(-1.2deg); color: #6b5a17; }
+.tdb-postit:hover, .tdb-postit:focus-visible { transform: rotate(0) scale(1.05); }
+@media (prefers-reduced-motion: reduce) { .tdb-postit { transition: none; } }
 .tdb-btn-pri { font-size: 12.5px; font-weight: 600; padding: 9px 18px; border-radius: var(--r-md); background: var(--ink); color: var(--panel); box-shadow: var(--sh-btn); white-space: nowrap; line-height: 1.2; }
 .tdb-btn-pri:hover:not(:disabled) { filter: brightness(1.35); }
 .tdb-btn-pri:disabled { opacity: 0.4; cursor: default; }

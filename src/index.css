@@ -577,6 +577,23 @@
      todo.css) so any F12 raised panel can reuse it. The To-do hero fills it PINK (--pink-hero). */
   --float-hairline: #e9ded0; --float-rad: 22px; --float-sh: 0 10px 34px rgba(58, 28, 20, 0.09);
 
+  /* ── To-do retoken (2026-07-16, design-refs/todo-board-final-retoken.html). ADDITIVE. ──
+     COLOUR LAW for the To-do page: pink = Urgent identity · HK-SAGE (the LIVE dashboard diary
+     band values — verified against --dc-band/--sage-band above, the dashboard wins) = Housekeeping
+     identity AND the page's ONE "done" family · note-yellow = Notes · COFFEE (a darker patch of
+     the desk itself) = Today's list · burgundy = deadline signal only · ink = offer + primaries.
+     GOLD IS RETIRED from the To-do page (the --gold-* tokens above stay for any other consumer).
+     StatusDot sage (--sage/--sageC/--sageD) is a STATUS colour — LOCKED to StatusDots only. */
+  --sub: #5c554b;                                             /* option-A card sub-copy ink */
+  --postit-pink: #f9d9d2; --postit-sage: #dce0d9; --postit-note: #f8ecb0;
+  --hk-sage: #dce0d9; --hk-sage-2: #d0d6cc;                   /* = the diary band pair */
+  --hk-spine: #b9c3b3; --hk-ink: #54614f;
+  --coffee: #e7dbc9; --coffee-2: #dccdb5; --coffee-edge: #d3c2a6;
+  --coffee-ink: #6b5a41; --coffee-deep: #8a755a;
+  --sh-card: 0 1px 2px rgba(58, 42, 26, 0.06), 0 6px 16px -6px rgba(58, 42, 26, 0.10);
+  --sh-card-h: 0 2px 3px rgba(58, 42, 26, 0.07), 0 12px 26px -8px rgba(58, 42, 26, 0.14);
+  --sh-postit: 0 2px 3px rgba(58, 42, 26, 0.10), 0 7px 14px -4px rgba(58, 42, 26, 0.18);
+
   --listw: 334px; --gut: 12px; --maxw: 1520px;
   --r-sm: 6px; --r-md: 9px; --r-lg: 12px; --r-xl: 16px;
   --f12-mono: 'JetBrains Mono', monospace; --f12-serif: 'Playfair Display', serif; --f12-body: 'Inter', sans-serif;

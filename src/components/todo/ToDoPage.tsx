@@ -172,7 +172,7 @@ const Lane: React.FC<{
   }, [children]);
   const scrollRight = () => ref.current?.scrollBy({ left: 340, behavior: "smooth" });
   return (
-    <div className={`tdb-lane ${cls}`}>
+    <div className={`tdb-lane ${cls}`} id={`tdb-lane-${cls}`}>
       <div className="tdb-laneh">
         <span className="tdb-lt">{label}</span>
         <span className="tdb-ln">{count}</span>
@@ -244,6 +244,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // Housekeeping = the gap count + the individual stale cards (12+9 gaps + 4 stale = 25), never piles.
   const tiles = ribbonTiles(board, hkGapCount(hkGroups) + staleCards.length);
 
+  // Post-it tap → the lane (the 6B tile-tap behaviour, built here — 6B itself is red-gated).
+  const scrollToLane = (cls: "do" | "hk" | "nt") => {
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    document.getElementById(`tdb-lane-${cls}`)?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+  };
   const flash = (msg: string, action?: ToastAction) => {
     const t = { msg, action };
     setToast(t);
@@ -426,10 +431,16 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             <span className="tdb-rdate">{shortHeaderDate(now)}</span>
             <span className="tdb-ask">What’s on your desk?</span>
           </span>
-          <span className="tdb-metrics">
-            <span className="tdb-m ug"><b>{tiles.urgent}</b><i>urgent</i></span>
-            <span className="tdb-m hk"><b>{tiles.housekeeping}</b><i>housekeeping</i></span>
-            <span className="tdb-m nt"><b>{tiles.notes}</b><i>notes to self</i></span>
+          <span className="tdb-postits">
+            <button type="button" className="tdb-postit ug" aria-label={`${tiles.urgent} urgent — jump to the Urgent lane`} onClick={() => scrollToLane("do")}>
+              <span className="tdb-pv" aria-hidden>{tiles.urgent}</span><span className="tdb-pk" aria-hidden>urgent</span>
+            </button>
+            <button type="button" className="tdb-postit hk" aria-label={`${tiles.housekeeping} housekeeping — jump to the Housekeeping lane`} onClick={() => scrollToLane("hk")}>
+              <span className="tdb-pv" aria-hidden>{tiles.housekeeping}</span><span className="tdb-pk" aria-hidden>housekpg</span>
+            </button>
+            <button type="button" className="tdb-postit nt" aria-label={`${tiles.notes} notes to self — jump to the Notes lane`} onClick={() => scrollToLane("nt")}>
+              <span className="tdb-pv" aria-hidden>{tiles.notes}</span><span className="tdb-pk" aria-hidden>notes</span>
+            </button>
           </span>
           <span className="tdb-sp" />
           <button type="button" className="tdb-btn-pri" disabled={!tiles.urgent} onClick={() => openFlowCards(board.do)}>
