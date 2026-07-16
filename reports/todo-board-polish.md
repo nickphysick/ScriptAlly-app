@@ -144,3 +144,71 @@ successor, per the confirmed rebase) is untouched, same position in the lane hea
   the confirmed rebase target); the class stays `.tdb-btn-pri`, so tour stop 5's
   `.tdb-ribbon .tdb-btn-pri` selector holds without touching `todoTour.ts`.
 - No tests asserted the old copy; the page doc-comment updated.
+
+## PHASE 5 — header → full-bleed band (supersedes the `f286b06` ribbon chrome)
+
+Chrome swap only (Nick's decision): the 88px post-its, date line, question, spacer and the Phase-4
+pill all carry over untouched; only the frame around them changed.
+
+- **Two-layer markup (the pack's structure, applied to the wrap):** `.tdb-wrap` is now the
+  FULL-WIDTH scroller only — its `max-width: var(--maxw)` cap, centring and 12px side padding
+  moved to a new `.tdb-col` (one instance inside the band, one wrapping the tools row + lanes /
+  empty states). The band's background spans edge to edge of the content area (`.f12-root` has no
+  side padding — verified); the title's left edge aligns with the lane headers (ribbon inline
+  padding 14px = col 12 + the reel headers' own 2px inset).
+- **The band:** `--paper` ground (parchment, not white) + a single 1px base rule + no radius, no
+  shadow, NOT sticky. The `f286b06` white/1.5px-ink/radius-14 chrome is DELETED (rule rewritten,
+  no dead CSS). **Deviation, reasoned:** the pack's "hairline" base is realised as `--line`
+  (#e6dccd, the STRUCTURAL weight — the same rule the app-wide crumb strip uses); the literal
+  `--hairline` token (#f0eae1) is invisible paper-on-oat. One-line swap if the softer rule is
+  wanted.
+- **Flush top:** the wrap's 16px top padding removed — the band sits directly under the shell bar;
+  vertical padding 22px (shorter than the ribbon); title `.tdb-ask` 25 → 27px Playfair 600; date
+  line unchanged.
+- **Post-its:** untouched (the ref's counter tiles treated as illustrative per Nick — their fills
+  already follow the lane colour law from the retoken; the housekeeping tile has been hk-sage
+  since then, no gold to move).
+- **Tools row:** stays below the band on the oat, top margin 11 → 17px (the pack's 16–18 window).
+- **Tour:** stop 5's `.tdb-ribbon .tdb-btn-pri` selector holds — `.tdb-ribbon` survives as the
+  band's inner flex row; stop 1's `.tdb-postits` unchanged. `todoTour.ts` untouched.
+- **Scroll ownership** stays with `.tdb-wrap` (the stage-rules translation of the pack's
+  "scrolls away with the page"); on ultrawide screens the vertical scrollbar now rides the
+  viewport edge rather than the capped column — a side effect of full-width scrolling, flagged.
+
+## FINALISE
+
+| Phase | SHA | Commit |
+|---|---|---|
+| 1 | `cef4169` | feat(todo): scroll-aware edge fades on both lane edges |
+| 2 | `3eb8276` | feat(todo): two-depth pink tag law |
+| 3 | `3a070ad` | feat(todo): Focused session pill replaces Sweep |
+| 4 | `68a3069` | feat(todo): Walk me through ribbon pill |
+| 5 | (this commit) | feat(todo): paper band header |
+
+- **Files touched:** `src/components/todo/ToDoPage.tsx` · `src/components/todo/todo.css` ·
+  `src/lib/todoBoard.ts` (+ its test) · `src/index.css` (one token line) ·
+  `src/components/todo/todoTagLaw.test.ts` (new) · `design-refs/themes.md` · this report.
+  App.tsx, FocusFlow, TodoTour, StatusDot, MountPanel, engine/store/write paths: untouched.
+- **Step 0 retoken state → Phase 2 delta:** tags were neutral-outline + burgundy-warn (the
+  executed retoken's deliberate law); Phase 2 applied the two-depth pink amendment and minted
+  `--pink-deep #6e3325`.
+- **Sweep rename decision:** local identifiers renamed (Lane prop `onSweep` → `onFocusedSession`,
+  class `.tdb-sw` → `.tdb-fs`); FocusFlow's exported `mode: "sweep"` API and sweep-mode internals
+  keep their names (out of scope). UI copy fully "Focused session".
+- **themes.md:** regenerated (tag-law amendment + the new token, dated subsection).
+- **Gold:** already retired before this pass; the new lock test pins the stylesheet gold-free.
+- **Tests:** 1057 before the pass → **1069** after (+4 fade machine, +6 tag law, +2 walk
+  sublabel/aria). No behavioural test broke at any phase (red gate (f) never fired).
+- **Needs Nick's in-browser eyeball (jsdom can't prove):** band ↔ lane column alignment at
+  several widths (incl. >1520px where the band bleeds past the capped column) · fade feel on all
+  three lanes (left fade appearing on first scroll, both mid, right clearing at the end,
+  non-overflowing lanes clean) · the n=0 disabled pill (paper-flat, NOTHING URGENT sublabel) ·
+  tag hierarchy at real density (soft pink vs deeper-pink-bold vs ink ★ vs note-yellow) · the
+  Focused-session pill + Walk-me-through pill hover states · tour stop 5 still framing the new
+  pill.
+- **Deviations, all logged in place:** the design ref `todo-board-polish-final.html` was absent —
+  built from the pack's complete prose spec (+ `todo-task-settings.html` corroborating Phase 2);
+  commit it as a follow-up when supplied. Band base rule = `--line` not the literal `--hairline`
+  token (invisible on oat). n=0 stays disabled (Nick's decision superseding the pack's
+  55%-clickable). Sweep handlers are FocusFlow's (the confirmed rebase). Pill/button paddings and
+  disc gradients are token translations of the pack's mockup-vocabulary values.

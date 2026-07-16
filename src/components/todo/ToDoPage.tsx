@@ -473,9 +473,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   return (
     <F12Page tools={<F12Account onClick={() => onNavigate("account")} />}>
       <div className="tdb-wrap">
-        {/* ── stat-ribbon header — INK spec (design-refs/todo-header-ink.html): white, 1.5px ink
-            border, flat, ~86px, date line over the question; the ink border is THIS BAR ONLY ── */}
-        <div className="tdb-ribbon">
+        {/* ── header BAND (polish v3 P5 — supersedes the f286b06 ink ribbon): a full-bleed paper
+            strip with a single hairline base, flush under the shell bar; its content sits in the
+            same .tdb-col column as the board so the title's left edge aligns with the lane
+            headers. NOT sticky — scrolls away with the wrap. Post-its unchanged (chrome swap
+            only, Nick's call); .tdb-ribbon survives as the inner flex row so tour stop 5's
+            `.tdb-ribbon .tdb-btn-pri` selector holds. ── */}
+        <div className="tdb-band">
+          <div className="tdb-col tdb-ribbon">
           <span className="tdb-askwrap">
             <span className="tdb-rdate">{shortHeaderDate(now)}</span>
             <span className="tdb-ask">What’s on your desk?</span>
@@ -499,8 +504,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               <span className="tdb-wt2">{walkSublabel(tiles.urgent)}</span>
             </span>
           </button>
+          </div>
         </div>
 
+        <div className="tdb-col">
         {/* ── tools row (Filter / Sort only — adding a note lives on the Notes lane) ── */}
         <div className="tdb-tools">
           <button type="button" className="tdb-tool" onClick={() => flash("Filter — later")}>Filter</button>
@@ -563,6 +570,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           </Lane>
         </div>
         )}
+        </div>
       </div>
 
       {/* ── Today's list — corner pop-up (fixed; FAB collapsed / panel expanded) ── */}
