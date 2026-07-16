@@ -24,7 +24,7 @@
  *
  * Theme: F12 tokens only. StatusDot consumed verbatim (the timeline chips).
  */
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { StatusDot } from "../StatusDot";
 import { RecordResponseFocusForm } from "../RecordResponseFocusForm";
 import { useScriptAllyDb } from "../../lib/db";
@@ -38,10 +38,12 @@ import { BoardCard } from "../../lib/todoBoard";
 import { HkGroup, HkRule, HK_RULES, HK_PAYOFF, mutedMembersForRule } from "../../lib/todoHousekeeping";
 import {
   StagedPayload, applyStaged, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, DEFAULT_CHECKBACK_DAYS,
+  quickSendPayload, quickNudgePayload, receiptLine,
 } from "../../lib/todoWalk";
+import { USER_TASK_FLAG_TYPE } from "../../lib/todoBoard";
 import { saveHkRows } from "../../lib/hkSave";
 import { isProUser, fetchAssistedFill, AssistFillError, AssistFound } from "../../lib/assistFill";
-import { Agent, Query, QueryStatus } from "../../types";
+import { ActivityType, Agent, Query, QueryStatus } from "../../types";
 
 export type FocusItem = { kind: "card"; card: BoardCard } | { kind: "group"; group: HkGroup };
 
@@ -80,12 +82,16 @@ export interface FocusFlowProps {
   /** Seed the send capture (a receipt's "Edit details" re-opens the journey pre-filled with what
    *  the quick-✓ logged; the quick write is undone first so Save never double-writes). */
   prefill?: { sentDate?: string; method?: string; materials?: string[] };
+  /** "sweep" = the speed grammar: one summary per screen, big ✓/⏸/skip, keyboard D·S·→ (F·N on
+   *  housekeeping, Enter opens an offer). Sweep quick-✓s use the Phase-C defaults + a brief inline
+   *  receipt, write IMMEDIATELY (Undo on the toast) and never stage. Default: the full journey. */
+  mode?: "journey" | "sweep";
 }
 
-export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate, onToast, prefill }) => {
+export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate, onToast, prefill, mode = "journey" }) => {
   const {
     queries, agents, manuscripts, activities, taskFlags, currentUser,
-    recordMaterialsSent, logNudge, dismissTask, upsertTaskFlag, updateUserProfile, updateAgent, updateUserTask, updateQueryStatus, undoQueryStatus, resolveTaskFlag,
+    recordMaterialsSent, logNudge, dismissTask, upsertTaskFlag, updateUserProfile, updateAgent, updateUserTask, updateQueryStatus, undoQueryStatus, resolveTaskFlag, deleteActivity,
   } = useScriptAllyDb();
 
   const [qi, setQi] = useState(0);
@@ -95,6 +101,13 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
   const [offerFormOpen, setOfferFormOpen] = useState(false);
   const [savedN, setSavedN] = useState<number | null>(null); // the "Desk cleared" screen
   const [saving, setSaving] = useState(false);
+  // sweep mode
+  const sweep = mode === "sweep";
+  const [deepDive, setDeepDive] = useState(false); // F on a group / Enter on an offer → the full journey sheet
+  const [sweepReceipt, setSweepReceipt] = useState<string | null>(null); // brief inline receipt before advancing
+  const [sweepFork, setSweepFork] = useState(false); // N on housekeeping → the never-fork row
+  const activitiesRef = useRef(activities);
+  activitiesRef.current = activities;
   // per-item scratch (reset on advance; the initial values honour a receipt-edit prefill)
   const [mats, setMats] = useState<Record<string, boolean>>(() => Object.fromEntries((prefill?.materials ?? []).map((m) => [m, true])));
   const [sentDate, setSentDate] = useState(prefill?.sentDate ?? todayISO());
@@ -118,6 +131,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
   const resetScratch = () => {
     setMats({}); setSentDate(todayISO()); setMethod("Email"); setNote(""); setCopied(false);
     setRows({}); setNoMeansNo({}); setFound({}); setNotFound(new Set()); setAssistAt(null); setAssistMsg(null); setShowMuted(false); setNoteText(null);
+    setDeepDive(false); setSweepReceipt(null); setSweepFork(false);
   };
 
   /** Animate the sheet away, then run the transition. */
@@ -605,6 +619,203 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     );
   }
 
+  // ── sweep mode — the speed grammar (Phase D). Writes are IMMEDIATE (the Phase-C defaults through
+  // the SAME builders/write paths), a brief inline receipt shows, then the queue advances; Undo rides
+  // the toast. Nothing stages in sweep. ──
+  const advanceAfterReceipt = (line: string) => {
+    setSweepReceipt(line);
+    window.setTimeout(() => advance(), 900);
+  };
+
+  async function sweepDone(c: BoardCard) {
+    const nowIso = new Date().toISOString();
+    if (c.userTaskId) {
+      await updateUserTask(c.userTaskId, { done: true, completedAt: nowIso });
+      onToast("Note done", { label: "Undo", fn: () => updateUserTask(c.userTaskId!, { done: false }) });
+      advanceAfterReceipt(`${c.title} — struck through on today’s list.`);
+      return;
+    }
+    const q = cardQuery(c);
+    if (!q) { advance(); return; }
+    if (c.taskType === "no_response_close") {
+      const prev = q.status as QueryStatus;
+      await updateQueryStatus(q.id, QueryStatus.NO_RESPONSE, "Closed as no response from sweep mode");
+      onToast("Closed as no response", { label: "Undo", fn: () => undoQueryStatus(q.id, prev, QueryStatus.NO_RESPONSE) });
+      advanceAfterReceipt("Logged as no response — not a rejection, so your response rate stays honest.");
+      return;
+    }
+    if (c.taskType === "nudge_overdue") {
+      const p = quickNudgePayload({ cardKey: c.key, label: c.title, queryId: q.id, method: q.sendMethod, nowIso });
+      const r = await logNudge(...nudgeWriteArgs(p));
+      if (!r.success) { onToast(r.error || "Couldn’t log the nudge."); return; }
+      const undo = async () => {
+        const acts = activitiesRef.current
+          .filter((a) => a.queryId === q.id && a.activityType === ActivityType.NUDGE_SENT)
+          .sort((x, y) => new Date(y.date).getTime() - new Date(x.date).getTime());
+        if (acts[0]?.id) await deleteActivity(acts[0].id);
+      };
+      onToast(`${c.title} — logged with defaults`, { label: "Undo", fn: undo });
+      advanceAfterReceipt(receiptLine(p, todayISO()));
+      return;
+    }
+    const action = getPrimaryAction(q.status as QueryStatus);
+    if (action.kind !== "mark-sent") { advance(); return; }
+    const p = quickSendPayload({ cardKey: c.key, label: c.title, taskType: c.taskType, queryId: q.id, targetStatus: action.target as QueryStatus, isResubmit: action.markKind === "resubmit", method: q.sendMethod, nowIso });
+    const prev = q.status as QueryStatus;
+    await recordMaterialsSent(markSentWriteArgs(p)); // the ONE mark-sent write path
+    onToast(`${c.title} — logged with defaults`, { label: "Undo", fn: () => undoQueryStatus(q.id, prev, p.targetStatus) });
+    advanceAfterReceipt(receiptLine(p, todayISO(), materialOptsForTask(c.taskType)));
+  }
+
+  function sweepSnooze(it: FocusItem) {
+    if (it.kind === "group") {
+      it.group.members.forEach((m) => m.agentId && dismissTask("data_quality_poor", m.agentId, "fixed snooze", 7));
+      onToast("Snoozed for 7 days", { label: "Undo", fn: () => it.group.members.forEach((m) => m.agentId && upsertTaskFlag(flagKeyForTask("data_quality_poor", m.agentId), { snoozedUntil: null })) });
+      advance();
+      return;
+    }
+    const c = it.card;
+    if (c.userTaskId) {
+      const key = { taskType: USER_TASK_FLAG_TYPE, queryId: c.userTaskId };
+      upsertTaskFlag(key, { snoozedUntil: plusDaysISO(7), bumpSnooze: true });
+      onToast("Snoozed for 7 days", { label: "Undo", fn: () => upsertTaskFlag(key, { snoozedUntil: null }) });
+    } else if (c.taskType && c.relatedRecordId) {
+      dismissTask(c.taskType, c.relatedRecordId, "fixed snooze", 7);
+      const key = flagKeyForTask(c.taskType, c.relatedRecordId);
+      onToast("Snoozed for 7 days", { label: "Undo", fn: () => upsertTaskFlag(key, { snoozedUntil: null }) });
+    }
+    advance();
+  }
+
+  function sweepNever(it: FocusItem, scope: "these" | "rule") {
+    if (it.kind === "group") {
+      if (scope === "rule") {
+        updateUserProfile({ mutedTaskRules: Array.from(new Set([...(currentUser?.mutedTaskRules ?? []), it.group.rule])) });
+        onToast("Muted — nothing deleted, the gaps still show on the profiles. Unmute from the lane header.");
+      } else {
+        it.group.members.forEach((m) => m.agentId && upsertTaskFlag(flagKeyForTask("data_quality_poor", m.agentId), { snoozedUntil: MUTED_UNTIL }));
+        onToast("Muted — nothing deleted, the gap still shows on the profile.", { label: "Undo", fn: () => it.group.members.forEach((m) => m.agentId && upsertTaskFlag(flagKeyForTask("data_quality_poor", m.agentId), { snoozedUntil: null })) });
+      }
+    } else if (it.card.taskType && it.card.relatedRecordId) {
+      const key = flagKeyForTask(it.card.taskType, it.card.relatedRecordId);
+      upsertTaskFlag(key, { snoozedUntil: MUTED_UNTIL });
+      onToast("Muted — nothing deleted, the gap still shows on the record.", { label: "Undo", fn: () => upsertTaskFlag(key, { snoozedUntil: null }) });
+    }
+    advance();
+  }
+
+  // Sweep keyboard grammar: D done · S snooze · → skip · F fix (housekeeping) · N never (housekeeping)
+  // · Enter opens an offer. Inert while typing or while a journey sheet is open.
+  useEffect(() => {
+    if (!sweep || deepDive || atReview || sweepReceipt) return;
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && ["INPUT", "TEXTAREA", "SELECT"].includes(t.tagName)) return;
+      const it = items[qi];
+      if (!it) return;
+      const k = e.key.toLowerCase();
+      const isGroup = it.kind === "group";
+      const j = it.kind === "card" ? cardJourney(it.card) : "group";
+      if (k === "arrowright") { e.preventDefault(); advance(); }
+      else if (j === "offer" && e.key === "Enter") { e.preventDefault(); setDeepDive(true); }
+      else if (k === "d" && !isGroup && j !== "offer" && j !== "dq") { e.preventDefault(); void sweepDone(it.card); }
+      else if (k === "s" && j !== "offer") { e.preventDefault(); sweepSnooze(it); }
+      else if (k === "f" && (isGroup || j === "dq")) { e.preventDefault(); setDeepDive(true); setStep(1); }
+      else if (k === "n" && (isGroup || j === "stale")) { e.preventDefault(); setSweepFork(true); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sweep, deepDive, atReview, sweepReceipt, qi, items]);
+
+  const kbd = (k: string) => <span className="tdb-ffkbd">{k}</span>;
+
+  function sweepSheet(it: FocusItem) {
+    if (sweepReceipt) {
+      return sheet(
+        <div className="tdb-ffsweepr"><span className="tdb-rtick">✓</span><span>{sweepReceipt}</span></div>,
+        <><span className="tdb-sp" /></>,
+      );
+    }
+    if (it.kind === "group") {
+      const g = it.group;
+      return sheet(
+        <>
+          <div className="tdb-ffstream hk">Housekeeping · {g.meta.label.toLowerCase()}</div>
+          <div className="tdb-ffq">{g.meta.title(g.members.length)}.</div>
+          <div className="tdb-ffqsub">{HK_PAYOFF[g.rule]}</div>
+          {sweepFork ? (
+            <div className="tdb-ffbigacts">
+              <button type="button" className="tdb-ffbig" onClick={() => sweepNever(it, "these")}>Never — just these agents</button>
+              <button type="button" className="tdb-ffbig" onClick={() => sweepNever(it, "rule")}>Never — any agent missing this</button>
+              <button type="button" className="tdb-ffbig quiet" onClick={() => setSweepFork(false)}>Cancel</button>
+            </div>
+          ) : (
+            <div className="tdb-ffbigacts">
+              <button type="button" className="tdb-ffbig" onClick={() => { setDeepDive(true); setStep(1); }}>{kbd("F")}Fix them together</button>
+              <button type="button" className="tdb-ffbig" onClick={() => sweepSnooze(it)}>{kbd("S")}Snooze a week</button>
+              <button type="button" className="tdb-ffbig" onClick={() => setSweepFork(true)}>{kbd("N")}Never ask</button>
+            </div>
+          )}
+        </>,
+        <>
+          <button type="button" className="tdb-ffback" disabled={qi === 0} onClick={backOne}>← Back</button>
+          <span className="tdb-sp" />
+          <button type="button" className="tdb-ffskip" onClick={advance}>{kbd("→")}Skip</button>
+        </>,
+      );
+    }
+    const c = it.card;
+    const j = cardJourney(c);
+    if (j === "offer") {
+      return sheet(
+        <>
+          <div className="tdb-ffstream off">Offer of representation</div>
+          <div className="tdb-ffq">{c.who ? <em>{c.who}</em> : "An agent"} wants to represent you.</div>
+          <div className="tdb-ffqsub">This one needs the moment — no quick anything for an offer.</div>
+          <div className="tdb-ffbigacts">
+            <button type="button" className="tdb-ffbig" onClick={() => setDeepDive(true)}>{kbd("↵")}Open the offer</button>
+          </div>
+        </>,
+        <>
+          <button type="button" className="tdb-ffback" disabled={qi === 0} onClick={backOne}>← Back</button>
+          <span className="tdb-sp" />
+          <button type="button" className="tdb-ffskip" onClick={advance}>{kbd("→")}Skip</button>
+        </>,
+      );
+    }
+    const q = cardQuery(c);
+    const ag = cardAgent(c, q);
+    const streamCls = c.stream === "hk" ? "hk" : c.stream === "nt" ? "nt" : "do";
+    const doneLabel = j === "stale" ? "Close — no response" : j === "nudge" ? "Log the nudge (defaults)" : j === "note" ? "Mark it done" : "Done — log with defaults";
+    return sheet(
+      <>
+        <div className={`tdb-ffstream ${streamCls}`}>{c.due || "On your desk"}</div>
+        <div className="tdb-ffq">{emTitle(c)}</div>
+        {c.subtitle && <div className="tdb-ffqsub">{c.subtitle}</div>}
+        {whoRow(ag, c.initials)}
+        {sweepFork && j === "stale" ? (
+          <div className="tdb-ffbigacts">
+            <button type="button" className="tdb-ffbig" onClick={() => sweepNever(it, "these")}>Never — just this query</button>
+            <button type="button" className="tdb-ffbig quiet" onClick={() => setSweepFork(false)}>Cancel</button>
+          </div>
+        ) : (
+          <div className="tdb-ffbigacts">
+            {j !== "dq" && <button type="button" className="tdb-ffbig" onClick={() => void sweepDone(c)}>{kbd("D")}{doneLabel}</button>}
+            {j === "dq" && <button type="button" className="tdb-ffbig" onClick={() => { setDeepDive(true); setStep(1); }}>{kbd("F")}Fill the details</button>}
+            <button type="button" className="tdb-ffbig" onClick={() => sweepSnooze(it)}>{kbd("S")}Snooze a week</button>
+            {j === "stale" && <button type="button" className="tdb-ffbig" onClick={() => setSweepFork(true)}>{kbd("N")}Never ask</button>}
+          </div>
+        )}
+      </>,
+      <>
+        <button type="button" className="tdb-ffback" disabled={qi === 0} onClick={backOne}>← Back</button>
+        <span className="tdb-sp" />
+        <button type="button" className="tdb-ffskip" onClick={advance}>{kbd("→")}Skip</button>
+      </>,
+    );
+  }
+
   // ── review + done ─────────────────────────────────────────────────────────
   const stagedDetail = (p: StagedPayload): string => {
     if (p.kind === "mark-sent") return [fmtShort(p.sentDate), p.method, p.materials?.length ? p.materials.join(", ") : null].filter(Boolean).join(" · ");
@@ -630,8 +841,8 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     if (!staged.length) return sheet(
       <div className="tdb-ffbigdone">
         <div className="tdb-ffcir">✓</div>
-        <div className="tdb-ffbt">Desk walked.</div>
-        <div className="tdb-ffbs">You left everything as it was — sometimes that’s the right call too.</div>
+        <div className="tdb-ffbt">{sweep ? "Lane swept." : "Desk walked."}</div>
+        <div className="tdb-ffbs">{sweep ? "Everything got a decision — done, snoozed, or left for later." : "You left everything as it was — sometimes that’s the right call too."}</div>
       </div>,
       <>
         <button type="button" className="tdb-ffback" onClick={() => { setQi(items.length - 1); setStep(0); }}>← Back</button>
@@ -678,6 +889,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
   const content = useMemo(() => {
     if (atReview) return reviewSheet();
     const it = items[qi];
+    if (sweep && !deepDive) return sweepSheet(it); // the speed grammar; F/Enter drill into the journey below
     if (it.kind === "group") return groupSheet(it.group);
     const j = cardJourney(it.card);
     if (j === "offer") return offerSheet(it.card);
@@ -687,7 +899,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     if (j === "note") return noteSheet(it.card);
     return sendSheet(it.card);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [atReview, qi, step, items, mats, sentDate, method, note, copied, rows, noMeansNo, found, notFound, assistAt, assisting, assistMsg, showMuted, noteText, staged, savedN, saving, offerFormOpen, queries, agents, manuscripts, activities, taskFlags, currentUser]);
+  }, [atReview, qi, step, items, mats, sentDate, method, note, copied, rows, noMeansNo, found, notFound, assistAt, assisting, assistMsg, showMuted, noteText, staged, savedN, saving, offerFormOpen, sweep, deepDive, sweepReceipt, sweepFork, queries, agents, manuscripts, activities, taskFlags, currentUser]);
 
   // The offer capture is its own full-screen form — render it INSTEAD of the flow frame.
   if (offerFormOpen && item?.kind === "card") return <>{content}</>;

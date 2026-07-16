@@ -54,6 +54,8 @@
 .tdb-laneh .tdb-sp { flex: 1; }
 .tdb-cadd { font-size: 15px; padding: 0 4px; opacity: 0.7; }
 .tdb-cadd:hover { opacity: 1; }
+.tdb-lanesweep { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.07em; text-transform: uppercase; opacity: 0.65; padding: 4px 8px; border-radius: 99px; border: 1px solid transparent; }
+.tdb-lanesweep:hover { opacity: 1; background: rgba(255, 255, 255, 0.6); border-color: rgba(0, 0, 0, 0.06); }
 .tdb-chev { width: 24px; height: 24px; border-radius: 7px; display: flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(0, 0, 0, 0.06); font-size: 13px; opacity: 0.8; }
 .tdb-chev:hover { opacity: 1; background: #fff; }
 .tdb-track { position: relative; }
@@ -358,7 +360,16 @@
 @keyframes tdbPop { from { transform: scale(0.4); opacity: 0; } to { transform: none; opacity: 1; } }
 .tdb-ffbt { font-family: var(--f12-serif); font-size: 26px; font-weight: 600; }
 .tdb-ffbs { font-size: 13.5px; color: var(--muted); margin-top: 8px; line-height: 1.6; max-width: 380px; margin-inline: auto; }
+/* sweep mode — big one-tap actions with kbd hints, and the brief inline receipt */
+.tdb-ffbigacts { display: flex; flex-direction: column; gap: 10px; margin-top: 26px; }
+.tdb-ffbig { display: flex; align-items: center; gap: 12px; padding: 15px 18px; border: 1.5px solid var(--line); border-radius: var(--r-lg); background: var(--panel); font-size: 14.5px; font-weight: 600; transition: 0.14s; text-align: left; }
+.tdb-ffbig:hover { border-color: var(--ink); box-shadow: var(--sh-2); }
+.tdb-ffbig.quiet { border-style: dashed; font-weight: 500; color: var(--muted); }
+.tdb-ffkbd { font-family: var(--f12-mono); font-size: 9px; font-weight: 700; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; padding: 2px 7px; background: var(--paper); color: var(--muted); flex: none; }
+.tdb-ffskip .tdb-ffkbd { margin-right: 7px; }
+.tdb-ffsweepr { display: flex; align-items: center; gap: 12px; font-size: 15px; color: var(--sageD); background: var(--sageC); border: 1px solid var(--sage-edge); border-radius: var(--r-lg); padding: 18px 20px; animation: tdbRin 0.25s ease; }
+
 @media (prefers-reduced-motion: reduce) {
-  .tdb-ffsheet, .tdb-ffsheet.leaving, .tdb-ffcir { animation: none; }
-  .tdb-ffdot, .tdb-ffchoice, .tdb-ffck { transition: none; }
+  .tdb-ffsheet, .tdb-ffsheet.leaving, .tdb-ffcir, .tdb-ffsweepr { animation: none; }
+  .tdb-ffdot, .tdb-ffchoice, .tdb-ffck, .tdb-ffbig { transition: none; }
 }

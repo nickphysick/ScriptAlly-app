@@ -197,3 +197,27 @@ translated to a live-derived board). Fork/flip replace a still-live card's body.
 Completion = rail or sheet; committing = the visible button.
 
 **Commit:** `feat(todo): quick rail; retire Mark done pill`.
+
+## PHASE D — sweep mode
+
+**Gates:** `tsc` clean · `vite build` OK · Vitest **1027** green (no new pure logic — sweep
+orchestrates the already-locked Phase-C builders). Engine untouched; no PaintMode.
+
+**The speed grammar, inside the focus-flow frame** (`mode="sweep"` on FocusFlow): one card-summary
+per screen with BIG one-tap actions + kbd hints. **Keyboard:** `D` done · `S` snooze · `→` skip
+(Urgent + Notes); Housekeeping: `F` fix (drills into the SAME in-sheet chip-fill as the journey —
+`setStep(1)` on the journey renderer, no parallel surface) · `S` · `N` never (the fork: just these
+agents / any agent missing this) · `→`; keys are inert while typing. **Sweep quick-✓s use the
+Phase-C defaults + write IMMEDIATELY** through the same builders
+(`quickSendPayload`/`quickNudgePayload` → the one write path); a **brief inline receipt**
+(`receiptLine`, ~900ms) shows before advancing, and **Undo rides the toast** (undoQueryStatus /
+deleteActivity-unwinds-the-nudge / done:false). Nothing stages in sweep — the end screen reads
+**"Lane swept."** **Offers in a swept lane** render "This one needs the moment — no quick anything
+for an offer" with `Enter` opening the full offer journey (never quick-actioned).
+
+**Entry:** a QUIET mono "Sweep ⇥" affordance in each lane header (the pack said per-lane-header +
+keep-it-quiet; the ref's standalone sweep bar was louder — the header placement wins, flagged).
+Urgent sweeps `board.do`; Housekeeping sweeps the grouped piles + individual stale cards; Notes
+sweeps the notes.
+
+**Commit:** `feat(todo): sweep mode`.

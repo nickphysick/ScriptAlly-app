@@ -116,10 +116,11 @@ const Lane: React.FC<{
   count: number;
   isEmpty: boolean;
   onAdd?: () => void;
+  onSweep?: () => void; // the quiet "Sweep" affordance (Phase D — the focus flow's speed grammar)
   emptyNode?: React.ReactNode;
   strip?: React.ReactNode; // rendered between the header and the track (e.g. muted-rules recovery chips)
   children?: React.ReactNode;
-}> = ({ cls, label, count, isEmpty, onAdd, emptyNode, strip, children }) => {
+}> = ({ cls, label, count, isEmpty, onAdd, onSweep, emptyNode, strip, children }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [more, setMore] = useState(false);
   useLayoutEffect(() => {
@@ -140,6 +141,7 @@ const Lane: React.FC<{
         <span className="tdb-ln">{count}</span>
         <span className="tdb-sp" />
         {onAdd && <button type="button" className="tdb-cadd" onClick={onAdd} aria-label="Add a note">＋</button>}
+        {onSweep && !isEmpty && <button type="button" className="tdb-lanesweep" title="Sweep the lane — D done · S snooze · → skip" onClick={onSweep}>Sweep ⇥</button>}
         {!isEmpty && more && <button type="button" className="tdb-chev" onClick={scrollRight} aria-label="Scroll right">›</button>}
       </div>
       {strip}
@@ -170,10 +172,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [rollDismissed, setRollDismissed] = useState(false);
   const [pulsing, setPulsing] = useState<string | null>(null);
   // THE completion surface — the focus flow (queue of one for a card click; a set for the two walks).
-  const [flow, setFlow] = useState<FocusItem[] | null>(null);
+  const [flow, setFlow] = useState<{ items: FocusItem[]; mode?: "sweep" } | null>(null);
   const [flowPrefill, setFlowPrefill] = useState<{ sentDate?: string; method?: string; materials?: string[] } | undefined>(undefined);
   const [todayOpen, setTodayOpen] = useState(false);
-  const openFlowCards = (cards: BoardCard[]) => setFlow(cards.map((card) => ({ kind: "card", card })));
+  const openFlowCards = (cards: BoardCard[]) => setFlow({ items: cards.map((card) => ({ kind: "card", card })) });
   // Quick-rail card states. Receipts/dismissed render as STANDALONE cards (the live card vanishes the
   // moment the write lands — the board is derived); fork/flip replace a still-live card's body.
   const [overlays, setOverlays] = useState<Record<string, Overlay>>({});
@@ -406,7 +408,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
 
         {/* ── lanes (page scrolls vertically if three lanes exceed the viewport; Urgent on top) ── */}
         <div className="tdb-lanes">
-          <Lane cls="do" label="Urgent" count={tiles.urgent} isEmpty={board.do.length === 0 && overlayCards("do").length === 0} emptyNode={<span className="e">Nothing needs you right now.</span>}>
+          <Lane cls="do" label="Urgent" count={tiles.urgent} isEmpty={board.do.length === 0 && overlayCards("do").length === 0}
+            onSweep={() => setFlow({ items: board.do.map((card) => ({ kind: "card", card })), mode: "sweep" })}
+            emptyNode={<span className="e">Nothing needs you right now.</span>}>
             {overlayCards("do")}
             {board.do.map(renderCard)}
           </Lane>
@@ -415,6 +419,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             label="Housekeeping"
             count={tiles.housekeeping}
             isEmpty={hkGroups.length === 0 && staleCards.length === 0 && overlayCards("hk").length === 0}
+            onSweep={() => setFlow({ items: [...hkGroups.map((g) => ({ kind: "group" as const, group: g })), ...staleCards.map((card) => ({ kind: "card" as const, card }))], mode: "sweep" })}
             emptyNode={<span className="e">Nothing to tidy.</span>}
             strip={mutedRules.length > 0 && (
               <div className="tdb-rulestrip">
@@ -432,6 +437,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             {staleCards.map(renderCard)}
           </Lane>
           <Lane cls="nt" label="Notes to self" count={tiles.notes} onAdd={addTask} isEmpty={board.nt.length === 0 && overlayCards("nt").length === 0}
+            onSweep={() => setFlow({ items: board.nt.map((card) => ({ kind: "card", card })), mode: "sweep" })}
             emptyNode={<><span className="e">Nothing jotted yet.</span><button type="button" className="tdb-ghost" onClick={addTask}>＋ Add a note</button></>}>
             {overlayCards("nt")}
             {board.nt.map(renderCard)}
@@ -462,7 +468,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           {toast.action && <button type="button" className="tdb-toast-act" onClick={() => { toast.action!.fn(); setToast(null); }}>{toast.action.label}</button>}
         </div>
       )}
-      {flow && <FocusFlow items={flow} onClose={() => { setFlow(null); setFlowPrefill(undefined); }} onNavigate={onNavigate} onToast={flash} prefill={flowPrefill} />}
+      {flow && <FocusFlow items={flow.items} mode={flow.mode} onClose={() => { setFlow(null); setFlowPrefill(undefined); }} onNavigate={onNavigate} onToast={flash} prefill={flowPrefill} />}
     </F12Page>
   );
 
@@ -642,7 +648,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     const faces = g.members.slice(0, 5);
     const suffix = g.meta.title(g.members.length).replace(/^\d+\s+/, "");
     return (
-      <div key={g.rule} className="tdb-gcard" onClick={() => setFlow([{ kind: "group", group: g }])}>
+      <div key={g.rule} className="tdb-gcard" onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}>
         {rail(() => setOverlay(key, { kind: "flip" }), () => setOverlay(key, { kind: "fork", single: false }), true)}
         <div className="tdb-gn">{g.members.length}</div>
         <div className="tdb-gt">{suffix}</div>
