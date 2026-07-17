@@ -48,3 +48,36 @@ two ⚠ rows · Phases 1–3 as written.
 - **themes.md regenerated** with the law inversion stated explicitly.
 - Tests: 1134 (no behavioural changes; no snapshot suite exists — the acceptance is the grep +
   Nick's eyeball). Both refs ride this commit, the retune ref carrying the §2–5 exploration fence.
+
+## PHASE 2 — undo everywhere (write-then-reverse)
+
+Baked decision honoured: every action commits immediately exactly as before; Undo issues the
+mapped compensating reversal; the board re-derives from the reversed write (no optimistic
+patching, no deferred writes).
+
+**The compensator table as shipped (no gaps):**
+
+| Action | Write | Undo reversal |
+|---|---|---|
+| Quick-✓ send/resubmit | recordMaterialsSent | undoQueryStatus (deletes the created records) |
+| Quick-✓ nudge | logNudge twins | deleteActivity on the nudge (full unwind) |
+| Quick-✓ note / sweep-D note / journey Mark-done | updateUserTask done | un-done |
+| Quick-✓ / sweep-D / journey stale-close | updateQueryStatus NO_RESPONSE | undoQueryStatus |
+| ⏸ 7-day snoozes (single, group, stale, sweep ×3) | dismissTask (flag + bump) | snoozedUntil null **+ unbumpSnooze** |
+| Mute-item ("never this", single + stale + never:) | flag MUTED_UNTIL | snoozedUntil null (no bump to reverse) |
+| Mute-rule (G3 Never + fork "all of them") | mutedTaskRules append | the profile filter-out (unmuteRule's own write) |
+
+- **The un-bump primitive (Nick's call):** `upsertTaskFlag` patch gained `unbumpSnooze` —
+  `snoozeCount` floors at 0; a snooze undo now fully restores INCLUDING ×n. Client-only; the
+  field was already allowlisted — no rules change.
+- **Toast grammar unified:** "✓ {title} — done/snoozed/dismissed" across board + sweep + journey
+  fast paths; successful Undo flashes "Restored" (the replacement semantics give it the brief
+  2.6s window); action toasts now ~5s; `.tdb-toast` is `role="status"`; the Undo button was
+  already a real button (keyboard-reachable). One-at-a-time replacement was already the flash
+  mechanic — a new action simply ends the previous undo window.
+- **Two toasts gained their missing Undo** (the recon's ⚠ rows): mute-item's `never:` toasts and
+  both rule-mutes. The receipt overlays' own prose is untouched (cards, not toasts).
+- **Scope note:** journey review-Save stays on the staged/confirm model (per the pack); the
+  GroupFlip/flow batch save keeps its existing "Undo all". No action type was red-gated — nothing
+  ships toast-less.
+- Locks in NEW `todoFinishing.test.ts` (source layer). Tests 1134 → **1139**.

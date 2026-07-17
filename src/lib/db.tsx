@@ -165,7 +165,7 @@ interface DbContextType {
   dismissedTasks: DismissedTask[];
   // The user's stance on derived tasks (snooze/commit/skip/resolve). Absorbs dismissedTasks.
   taskFlags: TaskFlag[];
-  upsertTaskFlag: (key: TaskFlagKey, patch: { snoozedUntil?: string | null; committedDate?: string | null; skippedAt?: string | null; resolvedAt?: string | null; bumpSnooze?: boolean }) => Promise<void>;
+  upsertTaskFlag: (key: TaskFlagKey, patch: { snoozedUntil?: string | null; committedDate?: string | null; skippedAt?: string | null; resolvedAt?: string | null; bumpSnooze?: boolean; unbumpSnooze?: boolean }) => Promise<void>;
   snoozeTaskFlag: (key: TaskFlagKey, days: number) => Promise<void>;
   resolveTaskFlag: (key: TaskFlagKey) => Promise<void>;
   migrateDismissedTasks: () => Promise<number>;
@@ -2321,7 +2321,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const DAY_MS = 86400000;
   const upsertTaskFlag = async (
     key: TaskFlagKey,
-    patch: { snoozedUntil?: string | null; committedDate?: string | null; skippedAt?: string | null; resolvedAt?: string | null; bumpSnooze?: boolean },
+    patch: { snoozedUntil?: string | null; committedDate?: string | null; skippedAt?: string | null; resolvedAt?: string | null; bumpSnooze?: boolean; unbumpSnooze?: boolean },
   ) => {
     if (!currentUser) return;
     const id = taskFlagId(key);
@@ -2329,7 +2329,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     // `null` in a patch CLEARS the field (full-overwrite write); `undefined` keeps the existing value.
     const resolve = (p: string | null | undefined, cur: string | undefined): string | undefined =>
       p === null ? undefined : p !== undefined ? p : cur;
-    const next: TaskFlag = { id, userId: currentUser.id, taskType: key.taskType, snoozeCount: (existing?.snoozeCount ?? 0) + (patch.bumpSnooze ? 1 : 0) };
+    // unbumpSnooze = the finishing pack's undo compensator: a snooze undo fully restores,
+    // INCLUDING the ×n count the bump added (floored at 0; no rules change — the field exists).
+    const next: TaskFlag = { id, userId: currentUser.id, taskType: key.taskType, snoozeCount: Math.max(0, (existing?.snoozeCount ?? 0) + (patch.bumpSnooze ? 1 : 0) - (patch.unbumpSnooze ? 1 : 0)) };
     const qid = key.queryId ?? existing?.queryId; if (qid) next.queryId = qid;
     const aid = key.agentId ?? existing?.agentId; if (aid) next.agentId = aid;
     const rule = key.rule ?? existing?.rule; if (rule) next.rule = rule;
