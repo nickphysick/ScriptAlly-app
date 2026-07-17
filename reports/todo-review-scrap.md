@@ -51,3 +51,48 @@ in-scope).
   the completion-vs-dismissal distinction + the sentinel identity, supersession + the Sunday card's
   unchanged presence-gating; a source render-lock (copy/wiring/no-dismiss/in-cluster). Lane-split
   expectation reverted (review no longer enters `board.hk`).
+
+## PHASE 2 — remove the demotion
+
+The demotion (`f58efaa`) had landed, so its render scaffolding was live-but-dead after Phase 1
+(reviewEntryCard returns null Tue–Sat, so no `hk` review card was ever produced). Phase 2 deletes
+the dead code:
+
+- **`ToDoPage.tsx`:** the `demotedReview` const, its `isEmpty` guard, and its hk-lane render line —
+  removed. `renderReviewCard` stripped to the Sunday–Monday `do` card only (the `demoted`/`quietrv`
+  branch, the coffee kicker variant, the `!demoted` guards gone). The hk-lane Help-me-pick guard
+  reverted (`board.hk` never carries `weekly_review` now).
+- **`todo.css`:** the demoted-only rules (`.tdb-tile.hk.rvcard::before`, `.tdb-tile.quietrv
+  .tdb-rvgo` + hover) removed. `.tdb-tile.rvcard` (the Sunday card) kept.
+- **Untouched:** the Sunday–Monday Urgent card derivation + render (exactly as shipped), the
+  `reviewWeek` weekday-keying (correct, and the scrap needs it), the do-lane review filters (keep
+  the Sunday card out of sweeps/walks/picks).
+- Grep-verified: no `demotedReview` / `quietrv` / "still open" remnants.
+
+## FINALISE
+
+| Phase | SHA | |
+|---|---|---|
+| 1 | `9d72eb0` | feat(todo): the review's afterlife — a torn scrap, not a lane card |
+| 2 | (this commit) | the demotion removed |
+
+- **Files:** `todoBoard.ts` (reviewScrap + reviewCompletionSnooze + Sun/Mon-only entry) ·
+  `FocusFlow.tsx` (finishReview single-sourced) · `ToDoPage.tsx` (scrap render + demotion removal) ·
+  `todo.css` (`.tdb-scrap`, demoted CSS gone) · `design-refs/todo-scrap-variants.html` (fenced) ·
+  tests. Vitest 1155 (was 1155 pre-pack at the same count — net: demotion tests → scrap tests, +1).
+- **Recon outcomes:** demotion had landed (removed) · completion↔dismissal were indistinguishable
+  as shipped → resolved via the single-sourced completion sentinel · tour copy stays true (no
+  reword).
+- **Deviations:** (1) `filter: drop-shadow` for the scrap's shadow + focus ring, because
+  `clip-path` clips `box-shadow`/`outline` — faithful to the ref's "soft shadow" intent. (2) One
+  behaviour-preserving touch to `FocusFlow.finishReview` (the review mode) — single-sourcing the
+  completion sentinel — judged in-bounds and necessary so the scrap's completion-read can't drift
+  from the write; flagged. (3) `#5d4d40` kept as a literal (no `.t-f12` token fits). (4) A
+  `queries.length === 0 → no scrap` guard (nothing queried, nothing to review) — not in the pack
+  but the sensible completeness case.
+- **In-browser checklist (Nick, on dev — live case is week 136 today, a Friday):** the torn scrap
+  at the end of the post-it cluster (tilt, hover straighten+lift, focus ring); it opens the review
+  of last week; cluster spacing on the three post-its undisturbed; **completing** the review
+  removes the scrap; **dismissing** the Sunday card (on a Sun/Mon) must NOT remove the scrap
+  Tue–Sat; the scrap is absent Sun/Mon (the Urgent card owns entry) and for a brand-new account
+  (no querying).
