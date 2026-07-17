@@ -524,12 +524,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         </div>
 
         <div className="tdb-col">
-        {/* ── tools row (Filter / Sort only — adding a note lives on the Notes lane) ── */}
-        <div className="tdb-tools">
-          <button type="button" className="tdb-tool" onClick={() => flash("Filter — later")}>Filter</button>
-          <button type="button" className="tdb-tool" onClick={() => flash("Sort — later")}>Sort</button>
-        </div>
-
         {/* ── lanes — or, when derivation says so, the new-desk welcome (A) / the earned "Desk
             cleared." moment (E) in their place. Copy verbatim from todo-empty-states.html. ── */}
         {desk === "new-desk" ? renderNewDesk() : desk === "desk-cleared" ? renderDeskCleared() : (

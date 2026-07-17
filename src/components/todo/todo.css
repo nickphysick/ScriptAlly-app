@@ -13,7 +13,7 @@
    REMOVED (the band sits flush under the shell bar); bottom padding clears the fixed corner
    controls (Today FAB + the shell's help "?"). Page-scoped. */
 .tdb-wrap { flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 0 0 88px; }
-.tdb-col { max-width: var(--maxw, 1520px); margin: 0 auto; padding: 0 12px; }
+.tdb-col { max-width: var(--maxw, 1520px); margin: 0 auto; padding: 17px 12px 0; } /* top 17 = the first lane header ~16-18px below the band's rule (fix pass P4 — the tools row that provided it is removed; the ribbon col overrides this padding wholesale) */
 
 /* ── header BAND (polish v3 P5 — supersedes the f286b06 ink ribbon; that white/1.5px-ink/radius-14
    chrome is DELETED, not overridden): paper ground bleeding edge to edge, one structural rule at
@@ -77,10 +77,6 @@
   background: var(--paper); border-color: var(--hairline); color: var(--faint); filter: none;
 }
 
-/* ── tools row (Filter / Sort only — the global add is retired) ── */
-.tdb-tools { display: flex; align-items: center; gap: 8px; margin: 17px 0 11px; }
-.tdb-tool { font-size: 12.5px; padding: 8px 13px; border-radius: var(--r-md); background: var(--panel); border: 1px solid var(--line); box-shadow: var(--sh-btn); color: var(--ink-2); }
-.tdb-tool:hover { border-color: var(--ink-2); }
 .tdb-sp { flex: 1; }
 
 /* ── REELS (retoken Phase B — de-containered; fix pass P2 re-plumbed the overflow): the heading

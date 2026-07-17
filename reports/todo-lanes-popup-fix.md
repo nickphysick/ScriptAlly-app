@@ -98,3 +98,56 @@ Step 0's finding: the render rule was intact, the SIZING was never wired — fix
   the source/rule-text layer (the repo's testing policy is logic-only, no component mounts — the
   pack's "render-logic tests" are realised as text-layer locks; reported as the policy-compliant
   translation). At-5/0 pixel behaviour flagged for the in-browser checklist.
+
+## PHASE 4 — Filter & Sort removed
+
+- Both buttons + the row + their stub `flash("… — later")` handlers deleted entirely (Step 0
+  confirmed stubs — no state, no real handlers). `.tdb-tools`/`.tdb-tool` CSS removed; no
+  commented-out code, no orphans (`flash` itself survives — many live callers).
+- The row was the tools row's only occupant, so the ROW went with it; the ~17px gap it provided
+  moved to the content column (`.tdb-col` `padding-top: 17px` — the ribbon col overrides padding
+  wholesale, so this reaches the content column only). The first lane header — and the A/E
+  empty-state cards, which render in the lanes' place — sit ~17px below the band's rule.
+- Tour: no stop targeted these controls (Step 0 item 7) — zero selector/copy changes.
+
+## PHASE 5 — MISSING MATERIALS kicker: NO CHANGE (branch 1)
+
+- Evidence: `.tdb-kick` (mono small-caps + 6px `--hk-spine` dot) is the retoken G3 spec verbatim
+  ("mono kicker + sage dot — 'MISSING MATERIALS' / 'MISSING WISH LIST'") and its report records it
+  as shipped intent. The fix-pack ref's soft-pink `.tag` on the grouped card is **a drawing
+  error, not a spec** (Nick's ruling; the ref's declared authority is fit/pagers/stacking/clamp).
+  G3's grammar stands — the kicker also stays visually distinct from the two-depth pink tag law,
+  which applies to status/urgency tags, not the grouped card's rule label.
+
+## FINALISE
+
+| Phase | SHA | Commit |
+|---|---|---|
+| 1 | `3a84be9` | fix(todo): two-line grouped subtitle clamp |
+| 2 | `e6dce31` | feat(todo): exact-fit lanes with snap paging; fades retired |
+| 3 | `8113dc6` | fix(todo): pop-up stacking — outstanding list owns the height |
+| 4 | (this commit) | fix(todo): remove the Filter/Sort stubs |
+| 5 | — | no change (report note above) |
+
+- **Files touched:** `ToDoPage.tsx` · `todo.css` · NEW `laneFit.ts` + `laneFit.test.ts` + NEW
+  `todoPopupStack.test.ts` · `design-refs/todo-lanes-popup-fix.html` (committed P1) · this
+  report. Out-of-scope files untouched: FocusFlow, view-models (`todoBoard.ts` read-only —
+  `laneFadeState` re-consumed unmodified), StatusDot/MountPanel, the band header + both polish
+  pills.
+- **Fit-maths cases locked:** exact-fill identity at 7 widths · N steps 2→3 at 928 and 3→4 at
+  1242 · floor 1 (200px → one full-width card) · cap 5 (3000px) · page distance = N×(w+gap).
+- **Done-band finding + fix:** render rule was intact; sizing was inverted (committed capped at
+  168px, done zone flex:1, plus a zero-done flex spacer) — outstanding list now owns the height,
+  the spacer is deleted, the pop-up grows with content. Locked in `todoPopupStack.test.ts`.
+- **Filter/Sort:** stubs confirmed then removed, row included; gap re-provided via the content
+  column.
+- **Tour:** zero selector changes (no stop targeted the affected chrome).
+- **Tests:** 1069 → **1080** (+6 laneFit, +5 pop-up stacking). No behavioural test broke.
+- **In-browser checklist (jsdom can't prove):** lane flex at 3/4/5-card widths (~<928 / 928–1241 /
+  1242+ track px) with no partial card at rest · snap feel + one-page chevron clicks · ‹ enabling
+  only after scroll, › dying at the end, both inert on a short lane · the pop-up at 5/0 (all five
+  visible, zero dead space) and after ticking items (done band appears content-sized, 32vh cap) ·
+  the grouped card's full two-line sub at real data · the first lane header ~17px under the band.
+- **Deviations:** pagers render on non-empty lanes only (the empty reel has no track; the old
+  chevron hid there too) · pack's "render-logic tests" realised as text-layer locks per the
+  repo's logic-only policy · GAP kept at our 14px token vs the ref mock's 18.
