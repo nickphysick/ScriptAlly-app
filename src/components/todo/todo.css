@@ -263,6 +263,11 @@
    Close/Leave stage buttons, seed checkboxes, the ☕ close screen. ── */
 .tdb-tile.rvcard { cursor: pointer; }
 .tdb-tile.rvcard::before { background: var(--hk-spine); }
+/* the DEMOTED review (Tue–Sat, unreviewed week — demotion pack): quiet housekeeping grammar —
+   coffee spine + kicker, a neutral door; never a warn. */
+.tdb-tile.hk.rvcard::before { background: var(--hk-cof-2); }
+.tdb-tile.quietrv .tdb-rvgo { background: var(--white, #fff); border-color: var(--hairline); color: var(--ink-2); }
+.tdb-tile.quietrv .tdb-rvgo:hover { border-color: var(--hk-cof-edge); color: var(--ink); filter: none; }
 .tdb-rvx { position: absolute; top: 8px; right: 10px; color: var(--faint); font-size: 12px; padding: 2px 5px; background: none; border: none; z-index: 1; }
 .tdb-rvx:hover { color: var(--ink); }
 .tdb-rvweek { flex: none; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 8px; }

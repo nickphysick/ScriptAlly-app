@@ -305,6 +305,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     [board.hk, agents, currentUser, queries],
   );
   const staleCards = useMemo(() => board.hk.filter((c) => c.taskType === "no_response_close"), [board.hk]);
+  // the demoted Sunday review (Tue–Sat, unreviewed week) — its own slot between groups and stale;
+  // groupHousekeeping ignores the type, so it must be lifted out explicitly
+  const demotedReview = board.hk.find((c) => c.taskType === "weekly_review");
   const mutedRules = (currentUser?.mutedTaskRules ?? []).filter((r): r is HkRule => r in HK_RULES);
   // ONE counts object read by BOTH the ribbon tiles and the lane headers (equality by construction).
   // Housekeeping = the gap count + the individual stale cards (12+9 gaps + 4 stale = 25), never piles.
@@ -378,7 +381,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   }
   // Help me pick — a selection gesture: pulse-and-fade, card by card, then commit each.
   async function helpMePick() {
-    const picks = choosePicks({ doCards: board.do.filter((c) => c.taskType !== "weekly_review"), hkCards: board.hk, committedCount: committedCards.length });
+    const picks = choosePicks({ doCards: board.do.filter((c) => c.taskType !== "weekly_review"), hkCards: board.hk.filter((c) => c.taskType !== "weekly_review"), committedCount: committedCards.length });
     if (!picks.length) { flash(`Today’s list is full (${MAX_TODAY} max)`); return; }
     const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     const pool = [...board.do, ...board.hk];
@@ -581,7 +584,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             cls="hk"
             label="Housekeeping"
             count={tiles.housekeeping}
-            isEmpty={hkGroups.length === 0 && staleCards.length === 0 && overlayCards("hk").length === 0}
+            isEmpty={hkGroups.length === 0 && staleCards.length === 0 && !demotedReview && overlayCards("hk").length === 0}
             onFocusedSession={() => setFlow({ items: [...hkGroups.map((g) => ({ kind: "group" as const, group: g })), ...staleCards.map((card) => ({ kind: "card" as const, card }))], mode: "sweep" })}
             emptyNode={
               <div className="tdb-clear hk">
@@ -606,6 +609,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           >
             {overlayCards("hk")}
             {hkGroups.map(renderGroupCard)}
+            {demotedReview && renderReviewCard(demotedReview)}
             {staleCards.map(renderCard)}
           </Lane>
           <Lane cls="nt" label="Notes to self" count={tiles.notes} onAdd={addTask} isEmpty={board.nt.length === 0 && overlayCards("nt").length === 0}
@@ -766,6 +770,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     setFlow({ items: board.do.filter((x) => x.taskType !== "weekly_review").map((card) => ({ kind: "card" as const, card })), mode: "weeklyReview" });
 
   function renderReviewCard(c: BoardCard) {
+    const demoted = c.stream === "hk"; // the Tue–Sat unreviewed week — quiet coffee identity
     const dismiss = (e: React.MouseEvent) => {
       e.stopPropagation();
       const key = flagKeyForTask("weekly_review", c.relatedRecordId!);
@@ -773,14 +778,16 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       flash(`✓ ${c.title} — dismissed`, { label: "Undo", fn: async () => { await upsertTaskFlag(key, { snoozedUntil: null }); flash("Restored"); } });
     };
     return (
-      <div key={c.key} className="tdb-tile do rvcard" onClick={openSundayReview}>
+      <div key={c.key} className={`tdb-tile ${c.stream} rvcard${demoted ? " quietrv" : ""}`} onClick={openSundayReview}>
         <button type="button" className="tdb-rvx" onClick={dismiss} aria-label="Dismiss the review for this week">✕</button>
-        <div className="tdb-tags"><span className="tdb-tag due">{c.due}</span></div>
+        {demoted
+          ? <div className="tdb-kick"><span className="tdb-kd" aria-hidden />THE SUNDAY REVIEW · {c.record.toUpperCase().replace(" OF QUERYING", "")}</div>
+          : <div className="tdb-tags"><span className="tdb-tag due">{c.due}</span></div>}
         <div className="tdb-mid">
           <div className="tdb-tt">{c.title}</div>
           <div className="tdb-tsub">{c.subtitle}</div>
         </div>
-        <div className="tdb-rvweek">{c.record.toUpperCase()}</div>
+        {!demoted && <div className="tdb-rvweek">{c.record.toUpperCase()}</div>}
         <button type="button" className="tdb-rvgo" onClick={(e) => { e.stopPropagation(); openSundayReview(); }}>Begin the review →</button>
       </div>
     );

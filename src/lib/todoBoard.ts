@@ -258,8 +258,8 @@ export function assembleBoard(input: BoardInput): AssembledBoard {
     .sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""))
     .map((t) => userCard(t, input));
   const review = reviewEntryCard(input);
-  const doCards = orderDoNext([...(review ? [review] : []), ...derived.filter((c) => c.stream === "do"), ...userCards.filter((c) => c.stream === "do")]);
-  const hkCards = derived.filter((c) => c.stream === "hk");
+  const doCards = orderDoNext([...(review?.stream === "do" ? [review] : []), ...derived.filter((c) => c.stream === "do"), ...userCards.filter((c) => c.stream === "do")]);
+  const hkCards = [...derived.filter((c) => c.stream === "hk"), ...(review?.stream === "hk" ? [review] : [])];
   const ntCards = userCards.filter((c) => c.stream === "nt");
 
   // Cleared today — the union (activities today · user tasks done today · flags resolved today).
@@ -344,8 +344,10 @@ export interface ReviewWeek { key: string; startMs: number; endMs: number; weekN
 
 export function reviewWeek(queries: Query[], nowMs: number): ReviewWeek {
   const now = new Date(nowMs);
-  // Sunday (day 0) sits at the END of its ISO week → review THIS week; Monday reviews LAST week.
-  const start = now.getDay() === 1 ? isoWeekStart(now).getTime() - WEEK_MS : isoWeekStart(now).getTime();
+  // The MOST RECENT COMPLETED week, from any weekday: Sunday (day 0) sits at the END of its ISO
+  // week → review THIS week; every other day (Mon–Sat) reviews the week that ended the previous
+  // Sunday. (The demotion pack's recon fix — Tue–Sat previously keyed the RUNNING week.)
+  const start = now.getDay() === 0 ? isoWeekStart(now).getTime() : isoWeekStart(now).getTime() - WEEK_MS;
   const times = queries.map((q) => (q.dateSent ? Date.parse(q.dateSent) : NaN)).filter((t) => !Number.isNaN(t));
   const earliest = times.length ? isoWeekStart(new Date(Math.min(...times))).getTime() : start;
   const weekNumber = Math.max(1, Math.round((start - earliest) / WEEK_MS) + 1);
@@ -440,25 +442,25 @@ export function reviewSeedCandidates(doCards: BoardCard[], queries: Query[], now
   return [...dated, ...undated].slice(0, cap);
 }
 
-/** Visible Sunday 00:00 → Monday 23:59, dismissible for the week via the EXISTING flag machinery
- *  (taskType "weekly_review", the week key as the record id). Completion writes the same flag. */
+/** The review's entry card (demotion pack): Sunday 00:00 → Monday 23:59 = the Urgent prompt as
+ *  shipped; Tuesday onward the UNREVIEWED week demotes to quiet Housekeeping (coffee identity,
+ *  never warn) until completed, dismissed, or superseded by the next Sunday's card — only the most
+ *  recent completed week is ever offered (reviewWeek re-keys next Sunday; older weeks lapse
+ *  silently). "Handled" reads PRESENCE of a completion/dismissal stamp on the week's flag
+ *  (`snoozedUntil` ever written), NOT expiry — the shipped writes cover only days, and an expired
+ *  snooze must never resurrect a handled week (dismissal-UNDO clears the field, restoring the
+ *  card correctly). */
 export function reviewEntryCard(input: BoardInput): BoardCard | null {
   const day = new Date(input.now).getDay();
-  if (day !== 0 && day !== 1) return null;
   const win = reviewWeek(input.queries, input.now);
   const flag = input.taskFlags.find((f) => flagMatchesTask(f, "weekly_review", win.key));
-  if (flag && isFlagSuppressing(flag, input.now)) return null;
-  const stats = weekReviewStats(input, win);
-  return {
+  if (flag?.snoozedUntil) return null; // handled — completed OR dismissed, however long ago
+  const base = {
     key: "weekly-review",
-    stream: "do",
-    title: "Your week in querying",
     who: "",
-    subtitle: reviewEntryLine(stats),
     due: "SUNDAY REVIEW",
     warn: false,
     snoozes: 0,
-    hk: false,
     initials: "☕",
     record: `Week ${win.weekNumber} of querying`,
     committed: false,
@@ -466,6 +468,11 @@ export function reviewEntryCard(input: BoardInput): BoardCard | null {
     taskType: "weekly_review",
     relatedRecordId: win.key,
   };
+  if (day === 0 || day === 1) {
+    const stats = weekReviewStats(input, win);
+    return { ...base, stream: "do", hk: false, title: "Your week in querying", subtitle: reviewEntryLine(stats) };
+  }
+  return { ...base, stream: "hk", hk: true, title: `Week ${win.weekNumber}, still open`, subtitle: "Close it properly — five minutes." };
 }
 
 /**
