@@ -425,18 +425,18 @@
 @keyframes tdbScrimIn { from { opacity: 0; } }
 @media (max-width: 760px) {
   .tdb-ff { background: radial-gradient(120% 120% at 78% -8%, rgba(255, 250, 242, 0.6) 0%, transparent 46%), var(--oat, #f1e8dc); backdrop-filter: none; -webkit-backdrop-filter: none; }
-  .tdb-ff .tdb-ffcount { color: var(--muted); }
-  .tdb-ff .tdb-ffexit { background: rgba(255, 255, 255, 0.55); color: var(--ink-2); border-color: var(--line); }
 }
-.tdb-ffchrome { flex: none; display: flex; align-items: center; gap: 14px; padding: 14px 26px; }
-.tdb-ffexit { display: inline-flex; align-items: center; font-size: 13px; font-weight: 500; color: var(--ink); padding: 8px 14px; border-radius: 99px; background: rgba(255, 253, 250, 0.92); border: 1px solid var(--line); box-shadow: var(--sh-1); }
+/* chrome-fixes P3 — the sheet's own header bar (the viewport-floating chrome row is retired):
+   dots + count left (multi-item only), the labelled exit right, all INSIDE the sheet. */
+.tdb-ffbar { flex: none; display: flex; align-items: center; gap: 12px; padding: 16px 22px 0 26px; }
+.tdb-ffexit { display: inline-flex; align-items: center; font-size: 12.5px; font-weight: 600; color: var(--ink-2); padding: 7px 14px; border-radius: 99px; background: var(--white, #fff); border: 1px solid var(--hairline); white-space: nowrap; }
 .tdb-ffexit:hover { color: var(--ink); border-color: var(--ink-2); }
 .tdb-ffprog { display: flex; align-items: center; gap: 7px; }
 .tdb-ffdot { width: 8px; height: 8px; border-radius: 50%; background: #d9cdbc; transition: 0.25s; }
 .tdb-ffdot.on { background: var(--burg); transform: scale(1.25); }
 .tdb-ffdot.done { background: var(--hk-spine); }
-.tdb-ffcount { font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255, 252, 247, 0.85); }
-.tdb-ffpend { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--hk-ink); background: var(--hk-sage); border: 1px solid var(--hk-spine); border-radius: 99px; padding: 4px 10px; }
+.tdb-ffcount { font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.tdb-ffpend { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--hk-ink); background: var(--hk-sage); border: 1px solid var(--hk-spine); border-radius: 99px; padding: 4px 10px; margin-right: 4px; white-space: nowrap; align-self: center; }
 .tdb-ffstage { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 10px 26px 20px; position: relative; }
 .tdb-ffbehind { position: absolute; width: min(860px, 92vw); height: 78%; background: var(--paper); border: 1px solid var(--line); border-radius: 18px; transform: rotate(1.6deg) translateY(14px); opacity: 0.55; }
 .tdb-ffbehind.b2 { transform: rotate(-1.2deg) translateY(24px); opacity: 0.32; }

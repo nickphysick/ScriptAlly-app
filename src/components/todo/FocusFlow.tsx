@@ -1050,7 +1050,10 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     return (
       <>
         <div className="tdb-ffbody">{body}</div>
-        <div className="tdb-fffoot">{foot}</div>
+        <div className="tdb-fffoot">
+          {staged.length > 0 && <span className="tdb-ffpend">{staged.length} staged — nothing saved yet</span>}
+          {foot}
+        </div>
       </>
     );
   }
@@ -1079,19 +1082,27 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
   const remaining = items.length - qi - 1;
   return (
     <div className="tdb-ff" role="dialog" aria-modal="true" aria-label="Focus flow" aria-labelledby="tdb-ff-heading" ref={rootRef} tabIndex={-1} onKeyDown={trapTab} onClick={scrimClick}>
-      <div className="tdb-ffchrome">
-        <button type="button" className="tdb-ffexit" onClick={() => requestExit()}>✕&nbsp;&nbsp;Back to the board</button>
-        <span className="tdb-sp" />
-        <div className="tdb-ffprog" aria-hidden>
-          {items.map((it, i) => <span key={itemKey(it)} className={`tdb-ffdot${i < qi ? " done" : i === qi ? " on" : ""}`} />)}
-        </div>
-        <span className="tdb-ffcount">{atReview ? "REVIEW" : `${qi + 1} OF ${items.length}`}</span>
-        {staged.length > 0 && <span className="tdb-ffpend">{staged.length} staged — nothing saved yet</span>}
-      </div>
       <div className="tdb-ffstage">
         {!atReview && remaining >= 2 && <div className="tdb-ffbehind b2" aria-hidden />}
         {!atReview && remaining >= 1 && <div className="tdb-ffbehind" aria-hidden />}
-        <div className={`tdb-ffsheet${leaving ? " leaving" : ""}${nudged ? " nudged" : ""}`} onAnimationEnd={(e) => { if ((e.target as HTMLElement).classList.contains("nudged")) setNudged(false); }}>{content}</div>
+        <div className={`tdb-ffsheet${leaving ? " leaving" : ""}${nudged ? " nudged" : ""}`} onAnimationEnd={(e) => { if ((e.target as HTMLElement).classList.contains("nudged")) setNudged(false); }}>
+          {/* chrome-fixes P3 — the takeover-era chrome lives IN the sheet now: dots + count
+              top-left (multi-item modes only), the labelled exit top-right; the staged chip sits
+              in the footer (sheet()). Nothing renders outside the sheet except the scrim. */}
+          <div className="tdb-ffbar">
+            {items.length > 1 && (
+              <>
+                <div className="tdb-ffprog" aria-hidden>
+                  {items.map((it, i) => <span key={itemKey(it)} className={`tdb-ffdot${i < qi ? " done" : i === qi ? " on" : ""}`} />)}
+                </div>
+                <span className="tdb-ffcount">{atReview ? "REVIEW" : `${qi + 1} OF ${items.length}`}</span>
+              </>
+            )}
+            <span className="tdb-sp" />
+            <button type="button" className="tdb-ffexit" onClick={() => requestExit()}>✕&nbsp;&nbsp;Back to my desk</button>
+          </div>
+          {content}
+        </div>
       </div>
     </div>
   );

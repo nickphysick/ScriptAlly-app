@@ -53,3 +53,55 @@ included) · confirm skip/exit stay verbally + visually distinct.
 - **The header row:** one flex row, `flex-wrap: nowrap`, both pills `white-space: nowrap; flex:
   none` — no wrap or clipping at two-digit counts.
 - The popupStack lock updated to the new gate (`doneN > 0 && showDone`). Tests 1126 → **1129**.
+
+## PHASE 3 — journey exit chrome into the sheet
+
+- **The viewport-floating `.tdb-ffchrome` row is retired entirely** — under the scrim nothing
+  renders outside the sheet (lock-tested; the scrim itself is the only sibling).
+- **Exit:** the labelled pill **"✕ Back to my desk"** at the sheet's top-right, on every step of
+  every mode (the bar is part of the sheet frame — journeys, sweeps, review, the saved screen).
+  Same handler, same dismiss guard: immediate when clean, confirm when staged.
+- **Dots + "N OF M":** into the sheet bar's left, opposite the exit — and now **multi-item modes
+  only** (`items.length > 1`; they previously rendered always, "1 OF 1" included — the pack's
+  "as now" assumed multi-only, so single journeys simply lost the clutter; reported as the
+  delta). Kicker-then-heading hierarchy inside the body untouched.
+- **The staged chip** ("N staged — nothing saved yet") moved to the sheet FOOTER, rendered by
+  `sheet()` before the step's own buttons — visible wherever staging is live, left of Back.
+- **Skips kept, all of them (Nick's call):** send/nudge "Leave it" · stale "Leave it" · offer
+  celebration "Not now — leave it" · dq "Not now"/"Skip" · group "Not now"/"Skip the rest" ·
+  notify "Skip — I'll send them now". Every one advances (skip → the next item → review; staged
+  work SURVIVES) where exit discards behind the confirm — semantically distinct in single-item
+  journeys too. **Copy distinctness confirmed:** skips read "Leave it / Not now / Skip …" as
+  ghost buttons in the footer; exit reads "✕ Back to my desk" as the sheet-corner pill — no
+  string or position overlaps.
+- CSS: the in-sheet `.tdb-ffbar`, the exit restyled as sheet furniture (white pill, hairline),
+  the count back to muted ink (it had been light-on-dark for the floating row), the ≤760 media
+  block's now-moot chrome overrides removed.
+- Tests 1129 → **1134** (+5 P3 locks).
+
+## FINALISE
+
+| Phase | SHA | Commit |
+|---|---|---|
+| 1 | `cb08099` | fix(todo): pop-up click-away collapse |
+| 2 | `ef6ae87` | fix(todo): done pill — collision killed, badge is the band toggle |
+| 3 | (this commit) | fix(todo): journey exit chrome into the sheet |
+
+- **Files:** `ToDoPage.tsx` · `FocusFlow.tsx` · `TodoTour.tsx` (one class rename) · `todo.css` ·
+  NEW `todoChrome.test.ts` (+ popupStack lock updated). Tests 1123 → **1134** across the pack.
+- **What the toggle turned out to be:** not a toggle — a static count pill squashed by the
+  `.tdb-cd` class collision with the tour coach's unscoped 6px dot rule. Collision resolved by
+  renaming the TOUR side (`.tdb-coachdot`); the badge is now genuinely the band's toggle.
+- **The add-to-list exemption set:** one selector — `.tdb-pill.today-p` (the card commit pill);
+  quick-✓ paths complete rather than commit, and every other list control lives inside the
+  pop-up.
+- **Skips kept:** all (list above) — none duplicated the exit semantically.
+- **Deviations:** click-away's pointerdown is also inert while a journey is open (the pack
+  guarded only Esc) — otherwise Work-the-list would silently collapse the list beneath the scrim
+  · dots/count went multi-item-only (the pack's "as now" premise corrected).
+- **In-browser checklist (Nick, on dev):** click-away with and without an add-click (add a card
+  to the list with the pop open — it stays; click the desk — it collapses; Esc collapses; open a
+  journey from Work-the-list, click around inside it, close — the list is still open) ·
+  two-digit done counts in the header, no wrap · the done badge toggling the sage band,
+  pressed-by-default · the exit pill across a single journey (no dots), a Focused session (dots +
+  count), and the review walk · staged-confirm on exit · the staged chip sitting in the footer.

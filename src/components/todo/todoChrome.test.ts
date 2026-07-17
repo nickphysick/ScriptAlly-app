@@ -65,3 +65,38 @@ describe("P2 — the done pill (the collision killed; badge = the band toggle)",
     expect(css).toMatch(/\.tdb-th \{[^}]*flex-wrap: nowrap/);
   });
 });
+
+describe("P3 — journey exit chrome lives IN the sheet", () => {
+  const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");
+  const css = readFileSync(join(here, "todo.css"), "utf8");
+
+  it("the viewport-floating chrome row is gone; nothing renders outside the sheet but the scrim", () => {
+    expect(flow).not.toContain("tdb-ffchrome");
+    expect(css).not.toContain("tdb-ffchrome");
+    // markup order: the stage's sheet CONTAINS the bar, which carries the exit
+    const frame = flow.match(/className=\{`tdb-ffsheet[\s\S]*?tdb-ffbar[\s\S]*?tdb-ffexit/)?.[0] ?? "";
+    expect(frame).not.toBe("");
+  });
+
+  it("the exit pill is labelled and rides the SAME dismiss guard on every step of every mode", () => {
+    expect(flow).toContain("✕&nbsp;&nbsp;Back to my desk");
+    expect(flow).toMatch(/tdb-ffexit" onClick=\{\(\) => requestExit\(\)\}/);
+    expect(flow).toContain("if (staged.length && !window.confirm("); // clean = immediate, staged = confirm
+  });
+
+  it("dots + count render in multi-item modes only, inside the bar", () => {
+    expect(flow).toContain("{items.length > 1 && (");
+  });
+
+  it("the staged chip sits in the sheet FOOTER, left of the Back button (sheet renders it before foot)", () => {
+    const foot = flow.match(/className="tdb-fffoot">[\s\S]{0,220}/)?.[0] ?? "";
+    expect(foot).toContain("tdb-ffpend");
+    expect(foot.indexOf("tdb-ffpend")).toBeLessThan(foot.indexOf("{foot}"));
+  });
+
+  it("every in-step skip is KEPT (semantically distinct: skip advances, exit discards behind confirm)", () => {
+    for (const skip of ["Leave it", "Not now — leave it", "Skip the rest", "Skip — I’ll send them now"]) {
+      expect(flow).toContain(skip);
+    }
+  });
+});
