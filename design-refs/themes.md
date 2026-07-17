@@ -673,3 +673,23 @@ chrome revision replaced v14/v3).
   (flow internals — retoken Phase E grammar, out of the polish pack's scope) and micro-accents
   (pips, progress dots, italic emphasis). Rule-text-locked in `todoTagLaw.test.ts`.
 - The Urgent post-it's ink now reads `var(--pink-deep)` (was the same hex inline) — one source.
+
+## `.t-f12` — THE COLOUR-LAW RETUNE (2026-07-17, finishing pack; ref `todo-ideas-retune.html` §1 — §2–5 are fenced exploration)
+
+**The law INVERTS two families (supersedes the retoken's assignments for these two):**
+- **COFFEE = HOUSEKEEPING IDENTITY** — the NEW `--hk-cof #e9dcc8` · `--hk-cof-2 #e2d2b9`
+  (post-it/spine/kicker-dot fills) · `--hk-cof-edge #cdb58f` · `--hk-cof-ink #7a6544` (ref
+  values verbatim, one shade below the oat ground). Carries: the hk post-it, lane dot, card +
+  grouped-card spines, kicker + dot, the G3 progress bar, the muted-rules chips, the batch-fill
+  chips (board flip + flow), the hk stream chip, unmute pills, the Spotless spine.
+- **SAGE = THE TODAY'S-LIST SYSTEM (and, as before, the done family)** — `--hk-sage/-2/spine/ink`
+  now carry: the commit pill's on-state ("✓ On today's list", sage gradient), the FAB (sage
+  gradient pill · INK completion ring · ink title · sage-ink meta), the rollover bar, the
+  commit-prompt dashes, the pick button — plus everything done-family already sage (receipts,
+  ticks, the pop-up done band/badge, staged pill, choice-selected, review Done verbs).
+- **Pink (urgency/status), ink (offer + primaries), note-yellow: unchanged.**
+- **`--coffee-*` RETIRED FROM CONSUMPTION** (definitions kept, annotated; nothing app-wide reads
+  them). `--postit-sage` is likewise orphaned (the hk post-it now reads `--hk-cof-2`).
+- Incidental non-identity usages went NEUTRAL (the never-fork heading, the rail ⏸ hover) — the
+  principle: sage and coffee are now meaningful; incidental colour goes neutral. Caveat asides
+  stay sage-ink (the done register).

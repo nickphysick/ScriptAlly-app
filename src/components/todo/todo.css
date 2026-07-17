@@ -34,7 +34,7 @@
 .tdb-pv { font-family: Caveat, cursive; font-size: 40px; font-weight: 600; line-height: 1; }
 .tdb-pk { font-family: var(--f12-mono); font-size: 7px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.75; }
 .tdb-postit.ug { background: var(--postit-pink); transform: rotate(-2.4deg); color: var(--pink-deep); }
-.tdb-postit.hk { background: var(--postit-sage); transform: rotate(1.8deg); color: var(--hk-ink); }
+.tdb-postit.hk { background: var(--hk-cof-2); transform: rotate(1.8deg); color: var(--hk-cof-ink); }
 .tdb-postit.nt { background: var(--postit-note); transform: rotate(-1.2deg); color: #6b5a17; }
 .tdb-postit:hover, .tdb-postit:focus-visible { transform: rotate(0) scale(1.05); }
 .tdb-postit.zero .tdb-pv { opacity: 0.45; }
@@ -87,7 +87,7 @@
 .tdb-reelh { display: flex; align-items: center; gap: 11px; margin-bottom: 12px; padding: 0 2px; }
 .tdb-lanedot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
 .tdb-lanedot.do { background: var(--pink-btn); outline: 1px solid var(--pink-b); }
-.tdb-lanedot.hk { background: var(--hk-sage-2); outline: 1px solid var(--hk-spine); }
+.tdb-lanedot.hk { background: var(--hk-cof-2); outline: 1px solid var(--hk-cof-edge); }
 .tdb-lanedot.nt { background: var(--note-b); outline: 1px solid #dcc98a; }
 .tdb-lt { font-family: var(--f12-serif); font-size: 19px; font-weight: 600; color: var(--ink); }
 .tdb-ln { font-family: var(--f12-mono); font-size: 8.5px; font-weight: 700; border-radius: 99px; padding: 2.5px 9px; background: var(--white, #fff); border: 1px solid var(--line); color: var(--ink-2); }
@@ -137,10 +137,10 @@
 .tdb-tile { position: relative; flex: 0 0 var(--tdb-cardw, 330px); scroll-snap-align: start; min-height: 208px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 11px; padding: 16px 18px 15px 20px; box-shadow: var(--sh-card); cursor: pointer; transition: box-shadow 0.16s, border-color 0.16s, transform 0.16s; display: flex; flex-direction: column; overflow: hidden; }
 .tdb-tile::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
 .tdb-tile.do::before { background: var(--pink-btn); }
-.tdb-tile.hk::before { background: var(--hk-spine); }
+.tdb-tile.hk::before { background: var(--hk-cof-2); }
 .tdb-tile.nt::before { background: var(--note-b); }
 .tdb-tile:hover { border-color: var(--ink); box-shadow: var(--sh-card-h); transform: translateY(-1px); }
-.tdb-tile.today { border-color: var(--coffee-edge); }
+.tdb-tile.today { border-color: var(--hk-spine); }
 /* P4 — the "I need time" offer: stays on Urgent at reduced emphasis (the board's muted grammar);
    hover restores full weight; the deadline pill keeps counting down inside it. Woken (reminder or
    reply-by) simply drops the class. */
@@ -156,29 +156,29 @@
 .tdb-tsub { font-size: 12px; color: var(--sub); margin-top: 6px; line-height: 1.55; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .tdb-ms { font-family: var(--f12-serif); font-style: italic; color: var(--ink-2); }
 .tdb-tmeta { flex: none; display: flex; align-items: center; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--hairline); }
-.tdb-hkdot { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--hk-spine); background: var(--hk-sage); color: var(--hk-ink); display: inline-flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; flex: none; }
+.tdb-hkdot { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--hk-cof-edge); background: var(--hk-cof); color: var(--hk-cof-ink); display: inline-flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; flex: none; }
 .tdb-miniav { width: 21px; height: 21px; border-radius: 50%; background: var(--paper); border: 1px solid var(--line); display: inline-flex; align-items: center; justify-content: center; font-family: var(--f12-mono); font-size: 8px; font-weight: 600; color: var(--ink-2); flex: none; }
 .tdb-who { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tdb-tacts { flex: none; display: flex; gap: 6px; margin-top: 10px; }
 .tdb-pill { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--f12-mono); font-size: 8.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; border-radius: 99px; padding: 9px 6px; border: 1px solid var(--line); background: var(--white, #fff); color: var(--ink-2); white-space: nowrap; transition: 0.13s; }
 .tdb-pill.today-p:hover { border-color: var(--ink); color: var(--ink); }
-.tdb-pill.today-p.on { background: var(--coffee); border-color: var(--coffee-edge); color: var(--coffee-ink); }
+.tdb-pill.today-p.on { background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border-color: var(--hk-spine); color: var(--hk-ink); }
 .tdb-tdot { width: 26px; height: 26px; border-radius: 50%; background: var(--pink-t); border: 1px solid var(--pink-b); flex: none; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
 
 /* ── G3 GROUPED CARD (retoken Phase C): mono kicker + sage dot · serif title with the inline
    numeral · two-line-clamped sub (fix pass) · sage progress bar + mono caption (real counts) · neutral monogram stack
    + ink-outline "Fix together →" (fills ink on hover) + the quiet Never (behaviour kept). ── */
 .tdb-gcard { position: relative; flex: 0 0 var(--tdb-cardw, 330px); scroll-snap-align: start; min-height: 208px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 11px; padding: 16px 18px 15px 20px; box-shadow: var(--sh-card); cursor: pointer; transition: border-color 0.16s, box-shadow 0.16s, transform 0.16s; display: flex; flex-direction: column; overflow: hidden; }
-.tdb-gcard::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--hk-spine); }
+.tdb-gcard::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--hk-cof-2); }
 .tdb-gcard:hover { border-color: var(--ink); box-shadow: var(--sh-card-h); transform: translateY(-1px); }
-.tdb-kick { flex: none; font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.11em; text-transform: uppercase; color: var(--hk-ink); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-.tdb-kd { width: 6px; height: 6px; border-radius: 50%; background: var(--hk-spine); flex: none; }
+.tdb-kick { flex: none; font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.11em; text-transform: uppercase; color: var(--hk-cof-ink); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.tdb-kd { width: 6px; height: 6px; border-radius: 50%; background: var(--hk-cof-2); border: 1px solid var(--hk-cof-edge); flex: none; }
 .tdb-gtt { font-family: var(--f12-serif); font-size: 16.5px; font-weight: 600; line-height: 1.3; color: var(--ink); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .tdb-gn { font-size: 21px; font-weight: 700; }
 .tdb-gsub { font-size: 12px; color: var(--sub); margin-top: 5px; line-height: 1.5; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .tdb-gprog { flex: none; padding-top: 9px; }
 .tdb-pbar { height: 5px; border-radius: 99px; background: var(--hairline); overflow: hidden; }
-.tdb-pbar i { display: block; height: 100%; background: linear-gradient(90deg, var(--hk-sage-2), var(--hk-spine)); border-radius: 99px; }
+.tdb-pbar i { display: block; height: 100%; background: linear-gradient(90deg, var(--hk-cof-2), var(--hk-cof-edge)); border-radius: 99px; }
 .tdb-pcap { display: flex; justify-content: space-between; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.06em; color: var(--muted); margin-top: 5px; text-transform: uppercase; }
 .tdb-gstack { flex: none; display: flex; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--hairline); }
 .tdb-gsav { width: 21px; height: 21px; border-radius: 50%; background: var(--paper); border: 1.5px solid var(--white, #fff); outline: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-family: var(--f12-mono); font-size: 7px; font-weight: 600; color: var(--ink-2); margin-right: -6px; flex: none; }
@@ -191,19 +191,21 @@
 /* muted-rules recovery strip (between the Housekeeping lane header and its cards) */
 .tdb-rulestrip { display: flex; align-items: center; gap: 7px; padding: 0 2px 10px; flex-wrap: wrap; }
 .tdb-rulestrip-l { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--faint); }
-.tdb-rulechip { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--hk-ink); background: var(--hk-sage); border: 1px solid var(--hk-spine); border-radius: 99px; padding: 3px 9px; }
-.tdb-rulechip:hover { border-color: var(--hk-ink); }
+.tdb-rulechip { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--hk-cof-ink); background: var(--hk-cof); border: 1px solid var(--hk-cof-edge); border-radius: 99px; padding: 3px 9px; }
+.tdb-rulechip:hover { border-color: var(--hk-cof-ink); }
 
 /* ── Today's list — corner FAB (collapsed) ── */
 /* right:70 sits LEFT of the AppShell's global help "?" (fixed bottom:20 right:20, 38px, z-30). */
-.tdb-fab { position: fixed; right: 70px; bottom: 20px; z-index: 30; display: flex; align-items: center; gap: 11px; background: var(--ink); color: var(--panel); border-radius: 99px; padding: 10px 18px 10px 12px; box-shadow: var(--sh-3); cursor: pointer; }
-.tdb-fab:hover { filter: brightness(1.25); }
+/* the FAB — SAGE now (the Today system's colour): sage gradient pill, INK completion ring,
+   ink title, sage-ink meta (retune ref §1). */
+.tdb-fab { position: fixed; right: 70px; bottom: 20px; z-index: 30; display: flex; align-items: center; gap: 11px; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); color: var(--ink); border: 1px solid var(--hk-spine); border-radius: 99px; padding: 10px 18px 10px 12px; box-shadow: var(--sh-3); cursor: pointer; }
+.tdb-fab:hover { filter: brightness(0.98); }
 .tdb-fabring { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex: none; }
-.tdb-fabring i { width: 23px; height: 23px; border-radius: 50%; background: var(--ink); display: flex; align-items: center; justify-content: center; font-family: var(--f12-mono); font-size: 8px; font-weight: 700; font-style: normal; }
+.tdb-fabring i { width: 23px; height: 23px; border-radius: 50%; background: var(--hk-sage); color: var(--ink); display: flex; align-items: center; justify-content: center; font-family: var(--f12-mono); font-size: 8px; font-weight: 700; font-style: normal; }
 .tdb-fabl { display: flex; flex-direction: column; line-height: 1.16; text-align: left; }
 .tdb-fab-a { font-family: var(--f12-serif); font-size: 14px; font-weight: 600; }
-.tdb-fab-b { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.09em; text-transform: uppercase; opacity: 0.72; }
-.tdb-fab-roll { font-style: normal; color: var(--coffee-2); opacity: 1; }
+.tdb-fab-b { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--hk-ink); opacity: 1; }
+.tdb-fab-roll { font-style: normal; color: var(--hk-ink); opacity: 1; }
 
 /* ── Today's list — expanded pop-up (rises from the corner; covers the help "?" while open) ── */
 /* popup-notify-scrim P1 — bigger + roomier: 440px, bold-pastille pink head (the copied --pop-pink
@@ -233,11 +235,11 @@
 .tdb-trow .tdb-tx { font-size: 15.5px; font-weight: 600; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tdb-trow .tdb-tm { font-family: var(--f12-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-top: 3px; }
 .tdb-trow .tdb-x { margin-left: auto; color: var(--faint); font-size: 11px; padding: 0 3px; background: none; border: none; }
-.tdb-trow .tdb-x:hover { color: var(--coffee-ink); }
+.tdb-trow .tdb-x:hover { color: var(--hk-ink); }
 .tdb-tdot { width: 26px; height: 26px; border-radius: 50%; background: var(--pink-t); border: 1px solid var(--pink-b); flex: none; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
-.tdb-tempty { border: 1.5px dashed var(--coffee-edge); border-radius: 9px; padding: 14px 12px; text-align: center; flex: none; }
+.tdb-tempty { border: 1.5px dashed var(--hk-spine); border-radius: 9px; padding: 14px 12px; text-align: center; flex: none; }
 .tdb-tea { font-family: var(--f12-serif); font-style: italic; font-size: 13.5px; color: var(--sub); }
-.tdb-teb { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--coffee-ink); margin-top: 5px; }
+.tdb-teb { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--hk-ink); margin-top: 5px; }
 .tdb-tdiv { flex: none; display: flex; align-items: center; gap: 9px; padding: 8px 16px 4px; font-family: var(--f12-mono); font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--hk-ink); background: var(--hk-sage); border-top: 1px solid var(--hk-spine); }
 .tdb-tdiv .l { flex: 1; height: 1px; background: rgba(90, 110, 88, 0.16); }
 /* done band (below) — renders ONLY when non-empty (follow-up rule), sized to its content with its
@@ -250,8 +252,8 @@
 .tdb-tick { width: 26px; height: 26px; border-radius: 50%; background: rgba(255, 255, 255, 0.6); border: 1px solid var(--hk-spine); color: var(--hk-ink); display: flex; align-items: center; justify-content: center; font-size: 12px; flex: none; margin-top: 1px; }
 .tdb-tf { flex: none; padding: 9px 12px; border-top: 1px solid var(--hairline); background: var(--paper); display: flex; gap: 7px; align-items: center; }
 .tdb-tf .tdb-pc { font-family: var(--f12-mono); font-size: 10px; letter-spacing: 0.12em; color: var(--muted); flex: 1; text-transform: uppercase; }
-.tdb-pick { font-size: 11.5px; font-weight: 600; padding: 7px 12px; border-radius: 8px; background: var(--white, #fff); border: 1px solid var(--coffee-edge); color: var(--coffee-ink); white-space: nowrap; }
-.tdb-pick:hover { background: var(--coffee); }
+.tdb-pick { font-size: 11.5px; font-weight: 600; padding: 7px 12px; border-radius: 8px; background: var(--white, #fff); border: 1px solid var(--hk-spine); color: var(--hk-ink); white-space: nowrap; }
+.tdb-pick:hover { background: var(--hk-sage); }
 /* "Work the list" — its OWN class (distinct from the walkthrough MODAL's .tdb-walk below) */
 .tdb-worklist { font-size: 11.5px; font-weight: 600; padding: 7px 12px; border-radius: 8px; background: var(--ink); color: var(--panel); white-space: nowrap; }
 .tdb-worklist:hover:not(:disabled) { filter: brightness(1.35); }
@@ -267,11 +269,11 @@
 .tdb-pip { width: 7px; height: 7px; border-radius: 50%; background: var(--burg); flex: none; display: inline-block; }
 .tdb-propill { font-family: var(--f12-mono); font-size: 8px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #6A89A7; background: #e7eef3; border: 1px solid #cfdde6; border-radius: 99px; padding: 1.5px 7px; margin-left: 7px; }
 
-/* ── rollover bar (Today furniture — coffee; inside the pop-up, above the committed band) ── */
-.tdb-rollbar { display: flex; align-items: center; gap: 8px; padding: 9px 13px; background: var(--coffee); border-bottom: 1px solid var(--coffee-edge); font-size: 12px; color: var(--coffee-ink); flex: none; }
+/* ── rollover bar (Today furniture — SAGE now; inside the pop-up, above the committed band) ── */
+.tdb-rollbar { display: flex; align-items: center; gap: 8px; padding: 9px 13px; background: var(--hk-sage); border-bottom: 1px solid var(--hk-spine); font-size: 12px; color: var(--hk-ink); flex: none; }
 .tdb-rolltx { flex: 1; }
 .tdb-rolltx b { font-weight: 600; }
-.tdb-rollbar button { font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 9px; border-radius: 99px; border: 1px solid var(--coffee-edge); background: var(--white, #fff); color: var(--coffee-ink); }
+.tdb-rollbar button { font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 9px; border-radius: 99px; border: 1px solid var(--hk-spine); background: var(--white, #fff); color: var(--hk-ink); }
 .tdb-rollbar button.drop { border-color: var(--line); color: var(--muted); }
 
 /* ── Help-me-pick pulse-and-fade ── */
@@ -290,7 +292,7 @@
 .tdb-qbtn { width: 30px; height: 30px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 13px; background: var(--panel); border: 1px solid var(--line); box-shadow: var(--sh-2); }
 .tdb-qbtn.done:hover { background: var(--hk-sage); border-color: var(--hk-ink); color: var(--hk-ink); }
 .tdb-qbtn.done.hk:hover { background: var(--hk-sage); border-color: var(--hk-ink); color: var(--hk-ink); }
-.tdb-qbtn.dis:hover { background: var(--coffee); border-color: var(--coffee-ink); color: var(--coffee-ink); }
+.tdb-qbtn.dis:hover { background: var(--paper); border-color: var(--ink-2); color: var(--ink-2); }
 .tdb-qbtn:active { transform: scale(0.92); }
 
 /* quick-complete receipt — the card flips sage, states exactly what was logged */
@@ -316,7 +318,7 @@
 
 /* housekeeping ⏸ fork — not now / never (this one / the rule) */
 .tdb-neverfork { display: flex; flex-direction: column; flex: 1; min-height: 0; width: 100%; justify-content: center; gap: 8px; animation: tdbRin 0.25s ease; }
-.tdb-nt2 { font-weight: 600; font-size: 13px; text-align: center; color: var(--hk-ink); }
+.tdb-nt2 { font-weight: 600; font-size: 13px; text-align: center; color: var(--ink-2); }
 .tdb-nb { display: flex; align-items: center; gap: 4px; padding: 9px 11px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel); font-size: 12px; }
 .tdb-nb:hover { border-color: var(--ink); }
 .tdb-nb b { font-weight: 600; }
@@ -326,10 +328,10 @@
 /* grouped ✓ — the inline rapid chip-fill (the flip) */
 .tdb-gcard.flip { cursor: default; }
 .tdb-batchflip { display: flex; flex-direction: column; flex: 1; min-height: 0; width: 100%; animation: tdbRin 0.25s ease; }
-.tdb-bfh { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 12.5px; color: var(--hk-ink); }
+.tdb-bfh { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 12.5px; color: var(--hk-cof-ink); }
 .tdb-bfp { margin-left: auto; font-family: var(--f12-mono); font-size: 7.5px; color: var(--faint); }
-.tdb-bffind { font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.04em; padding: 3px 8px; border-radius: 99px; border: 1px solid var(--hk-spine); background: var(--white, #fff); color: var(--hk-ink); margin-left: 8px; }
-.tdb-bffind:hover:not(:disabled) { border-color: var(--hk-ink); }
+.tdb-bffind { font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.04em; padding: 3px 8px; border-radius: 99px; border: 1px solid var(--hk-cof-edge); background: var(--white, #fff); color: var(--hk-cof-ink); margin-left: 8px; }
+.tdb-bffind:hover:not(:disabled) { border-color: var(--hk-cof-ink); }
 
 .tdb-bffind .tdb-propill { margin-left: 4px; padding: 0.5px 5px; }
 .tdb-bfrows { flex: 1; min-height: 0; overflow-y: auto; margin-top: 7px; }
@@ -339,10 +341,10 @@
 .tdb-bfchips { display: flex; gap: 3px; flex: 1; flex-wrap: wrap; }
 .tdb-bfc { font-size: 10px; padding: 4px 8px; border-radius: 99px; border: 1px solid var(--line); background: var(--panel); }
 .tdb-bfc:hover { border-color: var(--ink); }
-.tdb-bfc.on { background: var(--hk-sage); border-color: var(--hk-spine); color: var(--hk-ink); font-weight: 600; }
+.tdb-bfc.on { background: var(--hk-cof); border-color: var(--hk-cof-edge); color: var(--hk-cof-ink); font-weight: 600; }
 .tdb-bfin { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 7px; padding: 4px 8px; font-size: 11px; background: var(--white, #fff); }
 .tdb-bffoot { flex: none; display: flex; gap: 6px; margin-top: 8px; }
-.tdb-bffoot .tdb-ra { border-color: var(--hk-spine); background: var(--hk-sage); color: var(--hk-ink); }
+.tdb-bffoot .tdb-ra { border-color: var(--hk-cof-edge); background: var(--hk-cof); color: var(--hk-cof-ink); }
 .tdb-bffoot .tdb-ra.save { background: var(--ink); border-color: var(--ink); color: var(--panel); }
 @media (prefers-reduced-motion: reduce) { .tdb-receiptbody, .tdb-dismissbody, .tdb-neverfork, .tdb-batchflip { animation: none; } .tdb-qrail { transition: none; } }
 
@@ -367,12 +369,12 @@
 .tdb-gl { height: 8px; border-radius: 99px; background: var(--hairline); margin-bottom: 8px; }
 .tdb-gl.gtag { width: 70px; height: 14px; background: var(--pink-t); border: 1px solid var(--pink-b); margin-bottom: 10px; }
 .tdb-gl.w60 { width: 60%; } .tdb-gl.w85 { width: 85%; } .tdb-gl.w40 { width: 40%; }
-.tdb-handnote { font-family: Caveat, cursive; font-size: 20px; color: var(--coffee-ink); transform: rotate(-2deg); position: absolute; bottom: -14px; right: 6px; }
+.tdb-handnote { font-family: Caveat, cursive; font-size: 20px; color: var(--hk-ink); transform: rotate(-2deg); position: absolute; bottom: -14px; right: 6px; }
 /* B/C · per-reel clears — slim cards on the reel's spine */
 .tdb-clear { display: flex; align-items: center; gap: 16px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 11px; box-shadow: var(--sh-card); padding: 18px 22px; position: relative; overflow: hidden; flex: 1; max-width: 720px; }
 .tdb-clear::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
 .tdb-clear.do::before { background: var(--pink-btn); }
-.tdb-clear.hk::before { background: var(--hk-spine); }
+.tdb-clear.hk::before { background: var(--hk-cof-2); }
 .tdb-clric { width: 40px; height: 40px; border-radius: 50%; background: var(--hk-sage); border: 1.5px solid var(--hk-spine); display: inline-flex; align-items: center; justify-content: center; color: var(--hk-ink); font-size: 16px; flex: none; }
 .tdb-clrt { font-family: var(--f12-serif); font-size: 17px; font-weight: 600; color: var(--ink); }
 .tdb-clrs { font-size: 12px; color: var(--sub); margin-top: 2px; }
@@ -388,7 +390,7 @@
 .tdb-stick { width: 13px; height: 13px; border-radius: 3px; background: var(--hk-ink); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 8px; flex: none; }
 .tdb-sdx { font-size: 12px; color: var(--muted); text-decoration: line-through; }
 .tdb-smore { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--faint); margin-top: 2px; }
-.tdb-clrhand.big { margin: 14px 0 0; font-size: 22px; color: var(--coffee-ink); display: inline-block; }
+.tdb-clrhand.big { margin: 14px 0 0; font-size: 22px; color: var(--hk-ink); display: inline-block; }
 
 /* ══ SPOTLIGHT TOUR (design-refs/todo-onboarding-tour.html, Act 1) — a scrim with a moving rounded
    cutout (the box-shadow hole) + the coach card in the header's grammar. 450ms glide between
@@ -461,7 +463,7 @@
 .tdb-ffstream { display: inline-flex; font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; border-radius: 99px; padding: 3.5px 10px; border: 1px solid var(--line); background: var(--white, #fff); color: var(--ink-2); margin-bottom: 18px; }
 .tdb-ffstream.warn { background: var(--burg); border-color: var(--burg); color: #fff; }
 .tdb-ffstream.off { background: var(--ink); border-color: var(--ink); color: #fff; }
-.tdb-ffstream.hk { background: var(--hk-sage); border-color: var(--hk-spine); color: var(--hk-ink); }
+.tdb-ffstream.hk { background: var(--hk-cof); border-color: var(--hk-cof-edge); color: var(--hk-cof-ink); }
 .tdb-ffstream.nt { background: var(--note-t); border-color: var(--note-b); color: var(--note-i); }
 .tdb-ffstream.sage { background: var(--hk-sage); border-color: var(--hk-spine); color: var(--hk-ink); }
 .tdb-ffq { font-family: var(--f12-serif); font-size: 27px; font-weight: 600; line-height: 1.22; color: var(--ink); max-width: 480px; }
@@ -563,7 +565,7 @@
 .tdb-ffbf { flex: 1; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; min-width: 0; }
 .tdb-ffbc { font-size: 12px; padding: 7px 12px; border-radius: 99px; border: 1px solid var(--line); background: var(--panel); }
 .tdb-ffbc:hover { border-color: var(--ink); }
-.tdb-ffbc.on { background: var(--hk-sage); border-color: var(--hk-spine); color: var(--hk-ink); font-weight: 600; }
+.tdb-ffbc.on { background: var(--hk-cof); border-color: var(--hk-cof-edge); color: var(--hk-cof-ink); font-weight: 600; }
 .tdb-ffother { width: 78px; border: 1px solid var(--line); border-radius: 99px; padding: 7px 10px; font-size: 12px; background: var(--white, #fff); }
 .tdb-ffwide { flex: 1; min-width: 200px; border: 1px solid var(--line); border-radius: var(--r-md); padding: 9px 12px; font-size: 13px; background: var(--white, #fff); }
 .tdb-fftick { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; white-space: nowrap; }
@@ -572,8 +574,8 @@
 .tdb-ffassist { display: flex; align-items: center; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
 .tdb-ffassist .tdb-ffsmall { margin-top: 0; }
 .tdb-ffmuted { display: inline-flex; align-items: center; gap: 6px; margin-left: 10px; font-size: 12px; color: var(--muted); }
-.tdb-ffunmute { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--hk-ink); border: 1px solid var(--hk-spine); border-radius: 99px; padding: 2px 7px; }
-.tdb-ffunmute:hover { border-color: var(--hk-ink); }
+.tdb-ffunmute { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--hk-cof-ink); border: 1px solid var(--hk-cof-edge); border-radius: 99px; padding: 2px 7px; }
+.tdb-ffunmute:hover { border-color: var(--hk-cof-ink); }
 .tdb-ffsum { display: flex; align-items: center; gap: 12px; padding: 13px 15px; border: 1px solid var(--line); border-radius: var(--r-lg); margin-top: 12px; background: var(--panel); }
 .tdb-ffverb { font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; border-radius: 99px; padding: 3px 9px; border: 1px solid; flex: none; }
 .tdb-ffverb.d { background: var(--hk-sage); border-color: var(--hk-spine); color: var(--hk-ink); }

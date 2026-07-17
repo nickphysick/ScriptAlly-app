@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>To-do — colour retune + feature ideas (exploration)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Caveat:wght@500&display=swap" rel="stylesheet">
+<style>
+/* EXPLORATION — not yet a committed ref. Colour law change proposed here:
+   COFFEE = housekeeping identity (spine, kicker dot, post-it) — a shade below the ground
+   SAGE   = the Today's-list family (committed pills, FAB, done band — "done today" already sage)
+   PINK   = urgency/status tags (unchanged)   INK = offer (unchanged) */
+:root{
+  --oat:#f1e8dc; --paper:#fdfaf5; --white:#ffffff;
+  --ink:#3a1c14; --muted:#9a8c80; --hair:#e7ddd2;
+  --pink-t:#f5e2da; --pink-b:#e8c8bc;
+  --coffee-1:#e9dcc8; --coffee-2:#e2d2b9;
+  --cof-bd:#cdb58f; --cof-i:#7a6544;
+  --sage-1:#dce0d9; --sage-2:#d0d6cc; --sage-bd:#b9c2b3; --sage-i:#5a6e58;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--oat);font-family:Inter,sans-serif;color:var(--ink);padding:40px 30px 120px}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8a7a6d;max-width:1160px;margin:0 auto 12px}
+.lbl:not(:first-child){margin-top:64px}
+.lbl em{font-style:normal;text-transform:none;letter-spacing:0;font-size:12.5px;color:#5d4d40;margin-left:10px}
+.wrap{max-width:1160px;margin:0 auto}
+
+/* ============ 1 · COLOUR RETUNE ============ */
+.lane-head{display:flex;align-items:center;gap:12px;margin:20px 0 10px}
+.lane-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:600}
+.lane-count{font-family:'JetBrains Mono',monospace;font-size:10.5px;background:var(--white);border:1px solid var(--hair);border-radius:99px;padding:2px 9px;color:#7a6a5e}
+.lane-rule{flex:1;height:1px;background:var(--hair)}
+.dot{width:11px;height:11px;border-radius:50%}
+.dot.pink{background:#f3e0d6;border:1px solid #e5c4b4}
+.dot.coffee{background:var(--coffee-1);border:1px solid var(--cof-bd)}
+.cards{display:flex;gap:14px}
+.card{flex:1;background:var(--white);border:1px solid var(--hair);border-radius:13px;padding:16px 18px 14px;box-shadow:0 1px 2px rgba(58,28,20,.05);position:relative;overflow:hidden}
+.card.hk::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--coffee-2)}
+.tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;background:var(--pink-t);border:1px solid var(--pink-b);color:#7c3a2a;border-radius:99px;padding:3px 10px;margin-bottom:10px}
+.kick{display:flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;color:var(--cof-i);margin-bottom:10px}
+.kick i{width:6px;height:6px;border-radius:50%;background:var(--coffee-2);border:1px solid var(--cof-bd)}
+.card h3{font-family:'Playfair Display',serif;font-size:17.5px;font-weight:600;line-height:1.25;margin-bottom:12px}
+/* the sage committed pill — new label */
+.pill{width:100%;border-radius:99px;padding:8px 0;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;cursor:pointer;text-align:center}
+.pill.idle{border:1px solid var(--hair);background:var(--white);color:var(--ink)}
+.pill.on{border:1px solid var(--sage-bd);background:linear-gradient(180deg,var(--sage-1),var(--sage-2));color:var(--sage-i);font-weight:600}
+/* housekeeping post-it goes coffee */
+.postits{display:flex;gap:14px;align-items:flex-start;margin:6px 0 22px}
+.postit{width:74px;height:74px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;box-shadow:0 2px 5px rgba(58,28,20,.13);position:relative}
+.postit::before{content:'';position:absolute;top:-7px;left:50%;transform:translateX(-50%);width:26px;height:11px;background:rgba(255,255,255,.55)}
+.postit .n{font-family:'Playfair Display',serif;font-size:23px;font-weight:600}
+.postit .c{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.1em}
+.p-pink{background:#f6cfc9}.p-coffee{background:var(--coffee-2)}.p-yellow{background:#f2e9c8}
+/* the FAB — sage, black ring */
+.fab{display:inline-flex;align-items:center;gap:12px;background:linear-gradient(180deg,var(--sage-1),var(--sage-2));border:1px solid var(--sage-bd);border-radius:99px;padding:12px 22px 12px 14px;box-shadow:0 5px 16px rgba(58,28,20,.18);cursor:pointer}
+.fab .ring{width:34px;height:34px;position:relative;flex:0 0 auto}
+.fab .ring svg{width:34px;height:34px;transform:rotate(-90deg)}
+.fab .ring .frac{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:600;color:var(--ink)}
+.fab .tx b{display:block;font-family:'Playfair Display',serif;font-size:16px;font-weight:600;color:var(--ink)}
+.fab .tx span{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;color:var(--sage-i)}
+.swatchnote{font-size:12.5px;color:#6b5a4e;line-height:1.6;max-width:640px;margin-top:14px}
+.swatchnote b{color:var(--ink)}
+
+/* ============ 2 · FEATURE SKETCHES ============ */
+.feat{background:var(--paper);border:1px solid var(--hair);border-radius:16px;padding:26px 30px;margin-bottom:18px}
+.feat h2{font-family:'Playfair Display',serif;font-size:21px;font-weight:600;margin-bottom:4px}
+.feat .sub{font-size:13px;color:#6b5a4e;margin-bottom:18px;line-height:1.55;max-width:720px}
+.pro{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;background:#6A89A7;color:#fff;border-radius:99px;padding:3px 9px;vertical-align:3px;margin-left:8px}
+
+/* horizon strip */
+.horizon{display:flex;gap:8px}
+.hday{flex:1;background:var(--white);border:1px solid var(--hair);border-radius:11px;padding:10px 10px 12px;min-height:86px}
+.hday.today{border-color:var(--sage-bd);background:linear-gradient(180deg,#fff, #f6f8f4)}
+.hday .d{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;color:#8a7a6d;margin-bottom:8px}
+.hchip{display:block;font-size:10.5px;font-weight:600;border-radius:7px;padding:4px 7px;margin-bottom:4px;line-height:1.25}
+.hchip.pink{background:var(--pink-t);border:1px solid var(--pink-b);color:#7c3a2a}
+.hchip.sage{background:var(--sage-1);border:1px solid var(--sage-bd);color:var(--sage-i)}
+.hchip.cof{background:var(--coffee-1);border:1px solid var(--cof-bd);color:var(--cof-i)}
+
+/* weekly review */
+.review{display:flex;align-items:center;gap:20px;background:var(--white);border:1px solid var(--hair);border-radius:13px;padding:20px 24px}
+.review .ic{width:44px;height:44px;border-radius:50%;background:linear-gradient(180deg,var(--sage-1),var(--sage-2));border:1px solid var(--sage-bd);display:flex;align-items:center;justify-content:center;font-size:18px}
+.review .tx{flex:1}
+.review .tx b{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;display:block}
+.review .tx span{font-size:12.5px;color:#6b5a4e}
+.review .go{border:1px solid var(--hair);background:var(--paper);border-radius:99px;padding:9px 18px;font-size:12.5px;font-weight:600;cursor:pointer}
+.rstats{display:flex;gap:22px;margin-top:14px}
+.rstat{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;color:#7a6a5e}
+.rstat b{display:block;font-family:'Playfair Display',serif;font-size:22px;letter-spacing:0;color:var(--ink)}
+
+/* undo toast */
+.toast{display:inline-flex;align-items:center;gap:14px;background:var(--ink);color:var(--paper);border-radius:12px;padding:12px 18px;font-size:13px;box-shadow:0 8px 24px rgba(58,28,20,.3)}
+.toast button{background:none;border:none;color:#f2c9bd;font-weight:700;cursor:pointer;font-size:13px;text-decoration:underline;text-underline-offset:3px}
+
+/* pro triage */
+.triage{background:var(--white);border:1px solid var(--hair);border-radius:13px;padding:18px 22px}
+.triage .row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--hair)}
+.triage .row:last-child{border-bottom:none}
+.triage .why{font-size:11.5px;color:#8a7a6d;font-style:italic;margin-left:auto;text-align:right;max-width:270px}
+.triage .n{font-family:'JetBrains Mono',monospace;font-size:10px;color:#7a6a5e;width:16px}
+.triage b{font-size:14px}
+</style>
+</head>
+<body>
+
+<!-- ============ 1 ============ -->
+<div class="lbl">1 · Colour retune <em>coffee = housekeeping · sage = the Today's-list family · pink stays urgency</em></div>
+<div class="wrap">
+  <div class="postits">
+    <div class="postit p-pink"><span class="n">4</span><span class="c">URGENT</span></div>
+    <div class="postit p-coffee"><span class="n">40</span><span class="c">HOUSEKPG</span></div>
+    <div class="postit p-yellow"><span class="n">0</span><span class="c">NOTES</span></div>
+  </div>
+
+  <div class="lane-head"><span class="dot pink"></span><span class="lane-title">Urgent</span><span class="lane-count">4</span><div class="lane-rule"></div></div>
+  <div class="cards">
+    <div class="card"><span class="tag">OVER TO YOU</span><h3>Send your full to Jonathan Marsh</h3><button class="pill on">✓ ON TODAY'S LIST</button></div>
+    <div class="card"><span class="tag">OVER TO YOU</span><h3>Send your partial to Daniel O'Rourke</h3><button class="pill idle">＋ TODAY'S LIST</button></div>
+  </div>
+
+  <div class="lane-head"><span class="dot coffee"></span><span class="lane-title">Housekeeping</span><span class="lane-count">40</span><div class="lane-rule"></div></div>
+  <div class="cards">
+    <div class="card hk"><span class="kick"><i></i>MISSING MATERIALS</span><h3><b>16</b> agents missing a materials list</h3><button class="pill idle">FIX TOGETHER →</button></div>
+    <div class="card hk"><span class="tag">STALE QUERY</span><h3>Jonathan Marsh silent</h3><button class="pill on">✓ ON TODAY'S LIST</button></div>
+  </div>
+
+  <div style="margin-top:22px">
+    <span class="fab">
+      <span class="ring">
+        <svg viewBox="0 0 34 34"><circle cx="17" cy="17" r="14" fill="none" stroke="rgba(58,28,20,.18)" stroke-width="3"/><circle cx="17" cy="17" r="14" fill="none" stroke="#3a1c14" stroke-width="3" stroke-dasharray="88" stroke-dashoffset="59" stroke-linecap="round"/></svg>
+        <span class="frac">2/6</span>
+      </span>
+      <span class="tx"><b>Today's list</b><span>4 COMMITTED · 2 DONE</span></span>
+    </span>
+  </div>
+
+  <p class="swatchnote"><b>What the swap means as law:</b> coffee (a shade below the ground — post-it, spine, kicker dot) is <b>housekeeping's identity</b>; sage becomes the whole <b>Today's-list system</b> — committed pills (now reading "ON TODAY'S LIST"), the FAB (black completion ring on sage), and the done band it already owns. It's a clean inversion of the previous law (sage-housekeeping / coffee-today), so <code style="font-family:'JetBrains Mono',monospace;font-size:11px">themes.md</code> gets regenerated when it lands.</p>
+</div>
+
+<!-- ============ 2 ============ -->
+<!-- ============ BUILD FENCE ============
+     Section 1 above is NORMATIVE (the colour retune). Sections 2-5 below were EXPLORATION
+     ONLY — kept for the record, not spec; nothing below this fence is built. ============ -->
+<div class="lbl">2 · The week ahead <em>a deadline horizon above the lanes — reply-bys, nudge dates, reminders, at a glance</em></div>
+<div class="wrap"><div class="feat">
+  <h2>Your week</h2>
+  <p class="sub">Every dated thing the board knows about — offer reply-bys, nudge check-backs, reminder tasks — pinned to the day it bites. Derived entirely from existing data; clicking a chip opens its journey.</p>
+  <div class="horizon">
+    <div class="hday today"><div class="d">TODAY · FRI 17</div><span class="hchip sage">4 on today's list</span></div>
+    <div class="hday"><div class="d">SAT 18</div></div>
+    <div class="hday"><div class="d">MON 20</div><span class="hchip cof">Nudge Fenella Str</span></div>
+    <div class="hday"><div class="d">WED 22</div><span class="hchip pink">Tell 4 agents · offer</span></div>
+    <div class="hday"><div class="d">FRI 24</div><span class="hchip cof">Offer reminder</span></div>
+    <div class="hday"><div class="d">FRI 31</div><span class="hchip pink">⏱ Reply to Tom Ellery</span></div>
+  </div>
+</div></div>
+
+<!-- ============ 3 ============ -->
+<div class="lbl">3 · The Sunday review <em>a weekly ritual — Sunsama-style, in ScriptAlly's voice</em></div>
+<div class="wrap"><div class="feat">
+  <h2>Week 137, closed properly</h2>
+  <p class="sub">Once a week, a short guided pass: what went out, what came back, what went quiet, and what next week should hold — ending by seeding Monday's Today's list. Runs in the journey sheet; the numbers already exist in the activity log.</p>
+  <div class="review">
+    <span class="ic">☕</span>
+    <span class="tx"><b>Your week in querying</b><span>3 sent · 2 responses · 1 offer (!) · 2 gone quiet — five minutes, kettle on</span></span>
+    <button class="go">Begin the review →</button>
+  </div>
+  <div class="rstats"><span class="rstat"><b>3</b>WENT OUT</span><span class="rstat"><b>2</b>CAME BACK</span><span class="rstat"><b>1</b>OFFER</span><span class="rstat"><b>2</b>WENT QUIET</span></div>
+</div></div>
+
+<!-- ============ 4 ============ -->
+<div class="lbl">4 · Undo, everywhere <em>quick-✓ and dismiss get a five-second takeback</em></div>
+<div class="wrap"><div class="feat">
+  <h2>Marked done — five seconds to disagree</h2>
+  <p class="sub">Every quick-✓, dismiss, and snooze surfaces a toast with Undo. Cheap insurance that makes the fast paths feel safe to use — the single most-loved pattern in Todoist and Things.</p>
+  <span class="toast">✓ Jonathan Marsh silent — marked done <button>Undo</button></span>
+</div></div>
+
+<!-- ============ 5 ============ -->
+<div class="lbl">5 · Sort my desk <em>Pro — assisted triage with reasons, in the assisted-fill tradition</em></div>
+<div class="wrap"><div class="feat">
+  <h2>Sort my desk <span class="pro">PRO</span></h2>
+  <p class="sub">One tap orders the Urgent lane and proposes today's list — with a stated reason per item, drawn from deadlines, response-time stats, and how long things have sat. Suggestion only: nothing moves without your tick. Same Pro machinery as Smart Import.</p>
+  <div class="triage">
+    <div class="row"><span class="n">1</span><b>Reply to Tom Ellery's offer</b><span class="why">14-day window · 9 days left · everything else keys off this</span></div>
+    <div class="row"><span class="n">2</span><b>Tell Jonathan Marsh about the offer</b><span class="why">has your full · fastest reader of your open agents</span></div>
+    <div class="row"><span class="n">3</span><b>Send your partial to Daniel O'Rourke</b><span class="why">requested 6 days ago · his median reply is quick</span></div>
+  </div>
+</div></div>
+
+</body>
+</html>

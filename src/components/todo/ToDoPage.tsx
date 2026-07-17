@@ -330,7 +330,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   }
 
   // Today's list: committed band (committedDate === today, the 5-cap set) + done band (the cleared
-  // union, uncapped). Rolled-over commitments (a prior day) surface once in the coffee Keep/Clear bar.
+  // union, uncapped). Rolled-over commitments (a prior day) surface once in the sage Keep/Clear bar.
   const { committed: committedCards, done: doneCards } = todaySplit(board, today);
   const doneN = doneCards.length;
   const desk = deskState({ queryCount: queries.length, agentCount: agents.length, urgent: board.do.length, hkItems: hkItemCount, notes: board.nt.length, clearedToday: doneN });
@@ -610,7 +610,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       {/* ── Today's list — corner pop-up (fixed; FAB collapsed / panel expanded) ── */}
       {!todayOpen && (
         <button type="button" className="tdb-fab" onClick={() => setTodayOpen(true)} aria-label="Open Today’s list" aria-expanded={false}>
-          <span className="tdb-fabring" style={{ background: `conic-gradient(var(--coffee-2) 0 ${prog.pct}%, rgba(255,255,255,0.18) ${prog.pct}% 100%)` }}>
+          <span className="tdb-fabring" style={{ background: `conic-gradient(var(--ink) 0 ${prog.pct}%, rgba(30, 26, 22, 0.16) ${prog.pct}% 100%)` }}>
             <i>{prog.empty ? "–" : `${prog.done}/${prog.total}`}</i>
           </span>
           <span className="tdb-fabl">
@@ -825,7 +825,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         </div>
         <div className="tdb-tacts">
           <button type="button" className={`tdb-pill today-p${committed ? " on" : ""}`} onClick={(e) => { e.stopPropagation(); toggleToday(c); }}>
-            {committed ? "✓ On today" : "＋ Today’s list"}
+            {committed ? "✓ On today’s list" : "＋ Today’s list"}
           </button>
         </div>
       </div>

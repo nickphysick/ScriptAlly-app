@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Sunday review — journey walkthrough (exploration)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Caveat:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --oat:#f1e8dc; --paper:#fdfaf5; --white:#ffffff;
+  --ink:#3a1c14; --muted:#9a8c80; --hair:#e7ddd2;
+  --pink-t:#f5e2da; --pink-b:#e8c8bc;
+  --sage-1:#dce0d9; --sage-2:#d0d6cc; --sage-bd:#b9c2b3; --sage-i:#5a6e58;
+  --cof-1:#e9dcc8; --cof-bd:#cdb58f; --cof-i:#7a6544;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:rgba(38,20,14,.55);font-family:Inter,sans-serif;color:var(--ink);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:36px 20px}
+.sheet{background:var(--paper);border-radius:20px;box-shadow:0 18px 60px rgba(20,8,4,.4);max-width:820px;width:100%;overflow:hidden}
+.sheet-head{display:flex;align-items:center;gap:14px;padding:20px 30px 0}
+.dots{display:flex;align-items:center;gap:6px}
+.sd{width:7px;height:7px;border-radius:50%;background:var(--hair)}
+.sd.on{background:var(--ink)}
+.count{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;color:#8a7a6d}
+.spacer{flex:1}
+.exit{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--hair);background:var(--white);border-radius:99px;padding:8px 16px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--ink)}
+.sheet-body{padding:26px 44px 30px;min-height:390px}
+.kick{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.13em;text-transform:uppercase;border:1px solid var(--hair);background:var(--white);border-radius:99px;padding:5px 13px;color:#6b5a4e;margin-bottom:16px}
+h1{font-family:'Playfair Display',serif;font-size:30px;font-weight:600;margin-bottom:8px}
+.lede{font-size:14.5px;color:#6b5a4e;line-height:1.55;margin-bottom:20px;max-width:620px}
+.lede b{color:var(--ink)}
+.hand{font-family:Caveat,cursive;font-size:21px;color:#7a6544;margin-bottom:6px}
+.stats{display:flex;gap:26px;margin:20px 0 6px}
+.stat{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;color:#7a6a5e}
+.stat b{display:block;font-family:'Playfair Display',serif;font-size:30px;letter-spacing:0;color:var(--ink)}
+.stat.star b{color:#7c3a2a}
+.rows{display:flex;flex-direction:column;gap:8px}
+.rrow{display:flex;align-items:center;gap:13px;background:var(--white);border:1px solid var(--hair);border-radius:12px;padding:13px 18px}
+.rrow .badge{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;border-radius:99px;padding:3px 9px;flex:0 0 auto}
+.b-out{background:var(--pink-t);border:1px solid var(--pink-b);color:#7c3a2a}
+.b-in{background:var(--sage-1);border:1px solid var(--sage-bd);color:var(--sage-i)}
+.b-star{background:var(--ink);color:var(--paper)}
+.rrow .tx{flex:1}
+.rrow .tx b{display:block;font-size:14px;font-weight:600}
+.rrow .tx span{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;color:#7a6a5e}
+/* quiet step choices */
+.qacts{display:flex;gap:6px}
+.qa{border:1px solid var(--hair);background:var(--paper);border-radius:99px;padding:6px 13px;font-size:11.5px;font-weight:600;cursor:pointer;color:var(--ink)}
+.qa.sel{border-color:var(--ink);background:var(--white)}
+/* seed step */
+.seedrow{display:flex;align-items:center;gap:13px;background:var(--white);border:1.5px solid var(--hair);border-radius:12px;padding:13px 18px;cursor:pointer}
+.seedrow.on{border-color:var(--sage-bd);background:linear-gradient(180deg,#fff,#f7f9f5)}
+.seedrow input{width:16px;height:16px;accent-color:#5a6e58}
+.sheet-foot{display:flex;align-items:center;gap:12px;padding:18px 30px;border-top:1px solid var(--hair);background:#faf6ef}
+.staged{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:#8a7a6d}
+.btn-ghost{border:1px solid var(--hair);background:var(--white);border-radius:99px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink)}
+.btn-pri{border:1px solid var(--sage-bd);background:linear-gradient(180deg,var(--sage-1),var(--sage-2));color:var(--ink);border-radius:99px;padding:11px 26px;font-size:13.5px;font-weight:600;cursor:pointer}
+.step{display:none}.step.on{display:block}
+.donefx{text-align:center;padding:30px 0 10px}
+.donefx .ring{font-size:46px;display:block;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <div class="sheet-head">
+    <span class="dots" id="dots"></span><span class="count" id="cnt">1 OF 5</span>
+    <div class="spacer"></div>
+    <button class="exit">✕ Back to my desk</button>
+  </div>
+
+  <div class="sheet-body">
+
+    <div class="step on" data-s="1">
+      <span class="kick">THE SUNDAY REVIEW · WEEK 137 OF QUERYING</span>
+      <p class="hand">— kettle on. this takes about five minutes.</p>
+      <h1>Week 137, closed properly</h1>
+      <p class="lede">A short look back before the week ahead: what went out, what came back, what's gone quiet — and then we'll set Monday's list so tomorrow starts itself.</p>
+      <div class="stats">
+        <span class="stat"><b>3</b>WENT OUT</span>
+        <span class="stat"><b>2</b>CAME BACK</span>
+        <span class="stat star"><b>1</b>OFFER ★</span>
+        <span class="stat"><b>2</b>WENT QUIET</span>
+      </div>
+    </div>
+
+    <div class="step" data-s="2">
+      <span class="kick">LOOKING BACK · WHAT WENT OUT</span>
+      <h1>Three things left your desk</h1>
+      <p class="lede">Nothing to do here — just seeing your own momentum. Every one of these was work.</p>
+      <div class="rows">
+        <div class="rrow"><span class="badge b-out">FULL</span><span class="tx"><b>Full sent to Daniel O'Rourke</b><span>INKWELL &amp; STONE · TUESDAY</span></span></div>
+        <div class="rrow"><span class="badge b-out">FULL</span><span class="tx"><b>Full sent to Jonathan Marsh</b><span>THE MARSH AGENCY · WEDNESDAY</span></span></div>
+        <div class="rrow"><span class="badge b-out">NUDGE</span><span class="tx"><b>Nudged Fenella Str</b><span>BRIGHTWATER BOOKS · WEDNESDAY</span></span></div>
+      </div>
+    </div>
+
+    <div class="step" data-s="3">
+      <span class="kick">LOOKING BACK · WHAT CAME BACK</span>
+      <h1>Two came back — one of them gold</h1>
+      <p class="lede">A 55% response rate this month. For context, most querying sits far below that.</p>
+      <div class="rows">
+        <div class="rrow"><span class="badge b-star">★ OFFER</span><span class="tx"><b>Tom Ellery offered representation</b><span>CURTIS VANE · FRIDAY · REPLY BY 31 JUL</span></span></div>
+        <div class="rrow"><span class="badge b-in">PARTIAL REQ</span><span class="tx"><b>Greg Panetta requested a partial</b><span>SUN 28 JUN · SENT SAME WEEK</span></span></div>
+      </div>
+    </div>
+
+    <div class="step" data-s="4">
+      <span class="kick">LOOKING BACK · WHAT WENT QUIET</span>
+      <h1>Two have gone quiet</h1>
+      <p class="lede">Decide now or decide later — either is a decision. Choices stage here and save at the end.</p>
+      <div class="rows">
+        <div class="rrow"><span class="tx"><b>Jonathan Marsh</b><span>765 DAYS SILENT · NO REPLY</span></span>
+          <span class="qacts"><button class="qa" data-a="close">Close it</button><button class="qa" data-a="leave">Leave it</button></span></div>
+        <div class="rrow"><span class="tx"><b>Marcus Reed</b><span>766 DAYS SILENT · NO REPLY</span></span>
+          <span class="qacts"><button class="qa" data-a="close">Close it</button><button class="qa" data-a="leave">Leave it</button></span></div>
+      </div>
+    </div>
+
+    <div class="step" data-s="5">
+      <span class="kick">THE WEEK AHEAD · SEEDING MONDAY</span>
+      <h1>What should Monday hold?</h1>
+      <p class="lede">Dated things are pre-ticked. These land on <b>Monday's Today's list</b> — you'll wake up to a desk that's already set.</p>
+      <div class="rows">
+        <label class="seedrow on"><input type="checkbox" checked><span class="tx"><b>Reply to Tom Ellery's offer</b><span>9 DAYS LEFT ON THE WINDOW</span></span></label>
+        <label class="seedrow on"><input type="checkbox" checked><span class="tx"><b>Tell Priya Raman about the offer</b><span>REMINDER · DUE MON</span></span></label>
+        <label class="seedrow"><input type="checkbox"><span class="tx"><b>Fix 16 missing materials lists</b><span>HOUSEKEEPING · NO DATE</span></span></label>
+      </div>
+    </div>
+
+    <div class="step" data-s="6">
+      <div class="donefx"><span class="ring">☕</span>
+        <h1 style="text-align:center">Week 137, closed.</h1>
+        <p class="lede" style="text-align:center;margin:8px auto 0">2 queries closed · Monday's list seeded with 2 things.<br>See you at the desk tomorrow.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sheet-foot">
+    <span class="staged" id="staged"></span>
+    <div class="spacer"></div>
+    <button class="btn-ghost" id="bBack">← Back</button>
+    <button class="btn-pri" id="bNext">Begin →</button>
+  </div>
+</div>
+
+<script>
+const steps=[...document.querySelectorAll('.step')];
+const order=['1','2','3','4','5','6'];
+let ix=0, stagedN=0;
+const dots=document.getElementById('dots');
+for(let i=0;i<5;i++){const d=document.createElement('span');d.className='sd';dots.appendChild(d)}
+const nxt=document.getElementById('bNext'), bck=document.getElementById('bBack'),
+      cnt=document.getElementById('cnt'), stg=document.getElementById('staged');
+function render(){
+  steps.forEach(s=>s.classList.toggle('on', s.dataset.s===order[ix]));
+  [...dots.children].forEach((d,i)=>d.classList.toggle('on', i<=Math.min(ix,4)));
+  cnt.textContent = ix<5 ? `${ix+1} OF 5` : 'DONE';
+  nxt.textContent = ix===0?'Begin →': ix===4?'Seed Monday & finish': ix===5?'Back to my desk':'Continue →';
+  bck.style.visibility = (ix===0||ix===5)?'hidden':'visible';
+  stg.textContent = stagedN&&ix<5 ? `${stagedN} STAGED — SAVES AT THE END` : '';
+}
+nxt.addEventListener('click',()=>{ if(ix<5){ix++;render()} });
+bck.addEventListener('click',()=>{ if(ix>0){ix--;render()} });
+document.querySelectorAll('.qacts').forEach(g=>g.querySelectorAll('.qa').forEach(b=>b.addEventListener('click',()=>{
+  const was=b.classList.contains('sel');
+  g.querySelectorAll('.qa').forEach(x=>x.classList.remove('sel'));
+  if(!was){b.classList.add('sel')}
+  stagedN=[...document.querySelectorAll('.qa.sel')].length; render();
+})));
+document.querySelectorAll('.seedrow input').forEach(c=>c.addEventListener('change',()=>c.closest('.seedrow').classList.toggle('on',c.checked)));
+render();
+</script>
+</body>
+</html>
