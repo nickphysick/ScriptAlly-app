@@ -97,3 +97,64 @@ activities and stages nothing: its outputs are user tasks through the existing `
 - Reminders tick off like any user task (`userTaskId` intact → quick-✓, the note journey, and
   Today's-list eligibility all unchanged).
 - Tests 1108 → **1116** (+6 offerNotify, +2 clause/reminderDue; 1 source lock updated).
+
+## PHASE 3 — dim-scrim presentation
+
+- **The takeover became a scrim:** `.tdb-ff` `rgba(30,26,22,.55)` + `backdrop-filter: blur(2px)`
+  (plain-dim `.62` under `@supports not` — the fallback), the board mounted and position-stable
+  beneath. **Scroll locked** for the journey's life via `lockStageScroll` (the app-wide
+  mechanism; wheel events over the fixed overlay chain to the locked body — the board's own
+  `.tdb-wrap` scroller is not in the event's ancestor chain, so nothing scrolls beneath).
+- **Sheet:** `min(860px, 92vw)` centred (Phase 2's selection step included), deeper drop shadow,
+  the existing CSS fade+rise enter (`tdbArrive`) + a scrim fade — no JS animation timers. Exit
+  stays instant (the pack's no-JS-timers clause read as: the visual is CSS-driven; a delayed
+  unmount would need exactly the timer it bars — reported as the interpretation).
+- **Dismiss guard:** scrim click = the 1.015 NUDGE pulse (`tdbNudge`, `animationend`-cleared,
+  suppressed under reduced motion so the class can't stick), never dismissal — the handler body
+  is lock-tested to contain no close path. ✕/Esc keep the existing behaviour: immediate when
+  clean, `window.confirm` when the `staged` array is non-empty (the tracking Step 0 found).
+- **Focus:** captured from the invoking control at mount, a minimal scoped Tab trap on the dialog
+  root (first/last cycling, disabled/hidden filtered), returned on close. `role="dialog"` +
+  `aria-modal` kept; `aria-labelledby` now points at the current sheet's question heading (the id
+  stamped per step — one sheet renders at a time), with the aria-label as fallback.
+- **Mobile (Nick's call):** `max-width: 760px`, width-only — the old opaque full-screen
+  presentation returns wholesale (no board mobile pass exists; 6B remains red-gated).
+- **One presentation, every mode:** journeys, sweep/Focused sessions and review walks all ride
+  the same frame — no per-mode forks. The FAB (z-30) and the five-stop tour sit beneath and are
+  untouched while no journey is open; stop 5's target unchanged.
+- Tests 1116 → **1123** (+7 scrim locks — the pack's behavioural tests realised at the
+  source/rule-text layer per the repo's logic-only policy).
+
+## FINALISE
+
+| Phase | SHA | Commit |
+|---|---|---|
+| 1 | `ea47b62` | feat(todo): pop-up restyle + terse done grammar |
+| 2 | `63ae31c` | feat(todo): notify step — select-many + reminders |
+| 3 | (this commit) | feat(todo): dim-scrim journey presentation |
+
+- **Files:** `ToDoPage.tsx` · `FocusFlow.tsx` · `todo.css` · `index.css` (the --pop-pink
+  literals) · `activityUtils.ts` (the regex export) · `todoBoard.ts` (terse deriver + the granted
+  reminder clause) · NEW `offerNotify.ts` · tests (todoBoard/offerNotify/offerDecision-lock/
+  popupStack/NEW todoScrim). 1108 → **1123** over the pass (+4 terse, +8 notify/clause, +7
+  scrim; 2 locks updated to intended changes).
+- **The done-label finding:** raw `activity.description` printed verbatim; fixed at the source
+  with `terseDoneLabel` (activityType/resultingStatus-keyed, the exported activityUtils regex for
+  the celebration mapping, description fallback).
+- **Reminder mechanics:** existing UserTask fields only (text/agentId/queryId/dueDate); the
+  duplicate guard keys live agent+offer tasks (badged-and-locked in the UI); the granted
+  todoBoard clause routes linked reminders to Urgent with `reminderDue` chips.
+- **Dismiss-guard tracking:** the pre-existing `staged` array + `requestExit` confirm.
+- **Red gates:** none fired (the lane question resolved by the scope grant; the pack's sage hexes
+  corrected against the live token with Nick's confirmation).
+- **In-browser checklist (Nick, on dev):** the pop-up at both densities and both bands (pink
+  head, sage done gradient, terse done rows — the old celebration row now reads "{Agent}'s offer
+  — decision pending") · a full notify run: select, untick one, create reminders, re-enter to see
+  the covered badges · the reminders on Urgent with deadline chips, ticking off like any task ·
+  a journey over the dimmed board — scrim-click nudge, Esc clean vs staged, focus returning to
+  the invoker · a Focused session under the same presentation · ≤760px still full-screen ·
+  reduced-motion sanity.
+- **Deviations:** exit animation interpreted as enter-only (above) · reply-by-unset reminders
+  land as linked NOTES (no invented deadline — reported in Phase 2) · the ref's tick-on-hover
+  pop-up dots not wired to completion (behaviour outside a restyle pack; the row's existing
+  click-to-open stands).

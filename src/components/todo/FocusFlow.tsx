@@ -32,6 +32,7 @@ import { getPrimaryAction } from "../../lib/queryPrimaryAction";
 import { buildAgentTimeline } from "../../lib/agentsPage";
 import { OfferDecision } from "../../lib/offerDecision";
 import { notifyGroups, reminderFields, NotifyRow } from "../../lib/offerNotify";
+import { lockStageScroll } from "../../lib/stageScroll";
 import { agentPrimary } from "../../lib/agentDisplay";
 import { nudgeDraft } from "../../lib/nudgeDraft";
 import { flagKeyForTask, MUTED_UNTIL } from "../../lib/taskFlags";
@@ -134,6 +135,33 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
   const [noteText, setNoteText] = useState<string | null>(null);
 
   const reduce = typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  // P3 — the dim-scrim presentation: the board stays mounted beneath; scroll locks for the
+  // journey's life (lockStageScroll — the app-wide mechanism); focus is captured from the
+  // invoking control, trapped in the sheet, and returned on close. Scrim clicks NUDGE, never close.
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [nudged, setNudged] = useState(false);
+  useEffect(() => {
+    const invoker = document.activeElement as HTMLElement | null;
+    const release = lockStageScroll();
+    rootRef.current?.focus();
+    return () => { release(); invoker?.focus?.(); };
+  }, []);
+  const trapTab = (e: React.KeyboardEvent) => {
+    if (e.key !== "Tab") return;
+    const root = rootRef.current;
+    if (!root) return;
+    const els = Array.from(root.querySelectorAll<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+      .filter((el) => !el.hasAttribute("disabled") && el.offsetParent !== null);
+    if (!els.length) return;
+    const first = els[0];
+    const last = els[els.length - 1];
+    if (e.shiftKey && (document.activeElement === first || document.activeElement === root)) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  };
+  const scrimClick = (e: React.MouseEvent) => {
+    const t = e.target as HTMLElement;
+    if (!reduce && (t.classList.contains("tdb-ff") || t.classList.contains("tdb-ffstage"))) setNudged(true);
+  };
   const atReview = qi >= items.length;
   const item = atReview ? undefined : items[qi];
 
@@ -1026,6 +1054,11 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
       </>
     );
   }
+  // The dialog is labelled by the CURRENT sheet's question heading — one renders at a time, so the
+  // first .tdb-ffq is it (stamped after each step render; jsdom-safe).
+  useEffect(() => {
+    document.querySelector(".tdb-ff .tdb-ffq")?.setAttribute("id", "tdb-ff-heading");
+  });
 
   const content = useMemo(() => {
     if (atReview) return reviewSheet();
@@ -1045,7 +1078,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
 
   const remaining = items.length - qi - 1;
   return (
-    <div className="tdb-ff" role="dialog" aria-modal="true" aria-label="Focus flow">
+    <div className="tdb-ff" role="dialog" aria-modal="true" aria-label="Focus flow" aria-labelledby="tdb-ff-heading" ref={rootRef} tabIndex={-1} onKeyDown={trapTab} onClick={scrimClick}>
       <div className="tdb-ffchrome">
         <button type="button" className="tdb-ffexit" onClick={() => requestExit()}>✕&nbsp;&nbsp;Back to the board</button>
         <span className="tdb-sp" />
@@ -1058,7 +1091,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
       <div className="tdb-ffstage">
         {!atReview && remaining >= 2 && <div className="tdb-ffbehind b2" aria-hidden />}
         {!atReview && remaining >= 1 && <div className="tdb-ffbehind" aria-hidden />}
-        <div className={`tdb-ffsheet${leaving ? " leaving" : ""}`}>{content}</div>
+        <div className={`tdb-ffsheet${leaving ? " leaving" : ""}${nudged ? " nudged" : ""}`} onAnimationEnd={(e) => { if ((e.target as HTMLElement).classList.contains("nudged")) setNudged(false); }}>{content}</div>
       </div>
     </div>
   );
