@@ -37,3 +37,19 @@ included) · confirm skip/exit stay verbally + visually distinct.
   only Esc) — otherwise "Work the list" would open a journey whose first click silently collapsed
   the list beneath the scrim, and closing the journey would return you to a vanished pop-up.
 - Locks in NEW `todoChrome.test.ts` (source layer per the logic-only policy). Tests 1123 → 1126.
+
+## PHASE 2 — done pill
+
+- **The collision resolved by renaming the TOUR side** (Nick's call — no reason to flip): the
+  coach's progress dots are now `.tdb-coachdot` (TodoTour.tsx + todo.css); the unscoped 6px rule
+  can no longer squash anything, and a lock asserts NO `.tdb-cd` rule survives anywhere in the
+  stylesheet.
+- **The badge:** the old static span became a real `<button>` in the committed pill's exact
+  grammar (10.5px mono pill) in the done-sage family — white ground, `--hk-spine` hairline,
+  `--hk-ink` text; pressed (`aria-pressed="true"`) = `--hk-sage` fill = band shown. It IS the
+  show/hide control for the done band (`doneN > 0 && showDone`), defaulting pressed/shown —
+  today's always-shown behaviour preserved as the default state. Renders only when done > 0
+  (matching the band's own rule); hover previews the sage.
+- **The header row:** one flex row, `flex-wrap: nowrap`, both pills `white-space: nowrap; flex:
+  none` — no wrap or clipping at two-digit counts.
+- The popupStack lock updated to the new gate (`doneN > 0 && showDone`). Tests 1126 → **1129**.

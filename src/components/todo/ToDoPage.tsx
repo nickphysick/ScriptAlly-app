@@ -256,6 +256,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // and everything is inert while a FocusFlow sheet is up (its Esc/dismiss handling wins — and a
   // Work-the-list journey must return you to the still-open list).
   const closeToday = () => setTodayOpen(false);
+  // Chrome-fixes P2 — the done badge doubles as the band's show/hide; pressed/shown by default.
+  const [showDone, setShowDone] = useState(true);
   useEffect(() => {
     if (!todayOpen) return;
     const onDown = (e: PointerEvent) => {
@@ -683,7 +685,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         <div className="tdb-th">
           <span className="tdb-t">Today’s list</span>
           <span className="tdb-cc">{committedCards.length === 0 ? "Nothing yet" : `${committedCards.length} committed`}</span>
-          {doneN > 0 && <span className="tdb-cd">{doneN} done</span>}
+          {doneN > 0 && <button type="button" className="tdb-cdone" aria-pressed={showDone} title={showDone ? "Hide the done band" : "Show the done band"} onClick={() => setShowDone((v) => !v)}>{doneN} done</button>}
           <button type="button" className="tdb-drawer-x" onClick={closeToday} aria-label="Close">✕</button>
         </div>
         {rolled.length > 0 && (
@@ -713,7 +715,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
 
         {/* done band — the divider + strikethrough log appear WITH the first completion, not before
             (the rule applies to the pop-up always, not just in empty states) */}
-        {doneN > 0 && (
+        {doneN > 0 && showDone && (
           <>
             <div className="tdb-tdiv"><span>Done today</span><span className="l" /></div>
             <div className="tdb-tdone">

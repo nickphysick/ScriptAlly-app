@@ -85,7 +85,7 @@ export const TodoTour: React.FC<TodoTourProps> = ({ onEnd }) => {
         <div className="tdb-coachstep">
           <span>{idx + 1} OF {stops.length}</span>
           <span className="tdb-coachdots" aria-hidden>
-            {stops.map((s, i) => <span key={s.sel} className={`tdb-cd${i < idx ? " dn" : i === idx ? " on" : ""}`} />)}
+            {stops.map((s, i) => <span key={s.sel} className={`tdb-coachdot${i < idx ? " dn" : i === idx ? " on" : ""}`} />)}
           </span>
         </div>
         <h3>{stop.h}</h3>

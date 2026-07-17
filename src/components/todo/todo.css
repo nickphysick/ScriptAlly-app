@@ -212,10 +212,16 @@
 .tdb-pop { position: fixed; right: 20px; bottom: 20px; z-index: 40; width: min(440px, calc(100vw - 40px)); max-height: min(640px, calc(100vh - 120px)); background: var(--white, #fff); border: 1px solid var(--pop-pink-b); border-radius: var(--r-xl); box-shadow: var(--sh-3); display: flex; flex-direction: column; overflow: hidden; transform-origin: bottom right; animation: tdbPopIn 0.18s ease-out; }
 @keyframes tdbPopIn { from { opacity: 0; transform: translateY(10px) scale(0.96); } }
 @media (prefers-reduced-motion: reduce) { .tdb-pop { animation: none; } }
-.tdb-th { flex: none; display: flex; align-items: center; gap: 10px; padding: 18px 20px 14px; background: linear-gradient(180deg, var(--pop-pink), var(--pop-pink-2)); border-bottom: 1px solid var(--pop-pink-b); }
+.tdb-th { flex: none; display: flex; align-items: center; flex-wrap: nowrap; gap: 10px; padding: 18px 20px 14px; background: linear-gradient(180deg, var(--pop-pink), var(--pop-pink-2)); border-bottom: 1px solid var(--pop-pink-b); }
 .tdb-th .tdb-t { font-family: var(--f12-serif); font-size: 23px; font-weight: 600; color: var(--ink); flex: 1; }
-.tdb-th .tdb-cc { font-family: var(--f12-mono); font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; color: var(--ink); background: var(--white, #fff); border: 1px solid var(--pop-pink-b); border-radius: 99px; padding: 3.5px 11px; }
-.tdb-th .tdb-cd { font-family: var(--f12-mono); font-size: 8px; font-weight: 700; letter-spacing: 0.05em; color: #fff; background: var(--hk-ink); border-radius: 99px; padding: 2.5px 8px; }
+.tdb-th .tdb-cc { font-family: var(--f12-mono); font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; color: var(--ink); background: var(--white, #fff); border: 1px solid var(--pop-pink-b); border-radius: 99px; padding: 3.5px 11px; white-space: nowrap; flex: none; }
+/* the DONE badge (chrome-fixes P2 — replaces the collided tdb-cd span; that class name is
+   retired page-wide): the committed pill's
+   grammar in the done-sage family, doubling as the done-band show/hide toggle (pressed = shown,
+   the default — today's always-shown behaviour preserved as the default state). */
+.tdb-th .tdb-cdone { font-family: var(--f12-mono); font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; color: var(--hk-ink); background: var(--white, #fff); border: 1px solid var(--hk-spine); border-radius: 99px; padding: 3.5px 11px; white-space: nowrap; flex: none; cursor: pointer; transition: background 0.14s; }
+.tdb-th .tdb-cdone[aria-pressed="true"] { background: var(--hk-sage); }
+.tdb-th .tdb-cdone:hover { background: var(--hk-sage-2); }
 /* committed band (top) — fix pass P3: the OUTSTANDING list owns the flexible height (renders
    first, scrolls internally only past the pop-up's cap); the pop-up itself grows with content up
    to max-height, so 5 committed / 0 done shows all five with zero dead space. */
@@ -392,9 +398,9 @@
 .tdb-coach { position: fixed; z-index: 81; width: 320px; background: var(--white, #fff); border: 1.5px solid var(--ink); border-radius: 14px; box-shadow: var(--sh-3); padding: 16px 18px; transition: all 0.45s cubic-bezier(0.3, 0.8, 0.3, 1); }
 .tdb-coachstep { font-family: var(--f12-mono); font-size: 7.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .tdb-coachdots { display: flex; gap: 4px; margin-left: auto; }
-.tdb-cd { width: 6px; height: 6px; border-radius: 50%; background: #ddd2c1; }
-.tdb-cd.on { background: var(--burg); }
-.tdb-cd.dn { background: var(--hk-spine); }
+.tdb-coachdot { width: 6px; height: 6px; border-radius: 50%; background: #ddd2c1; }
+.tdb-coachdot.on { background: var(--burg); }
+.tdb-coachdot.dn { background: var(--hk-spine); }
 .tdb-coach h3 { font-family: var(--f12-serif); font-size: 17px; font-weight: 600; line-height: 1.25; margin-bottom: 6px; color: var(--ink); }
 .tdb-coach p { font-size: 12.5px; color: var(--sub); line-height: 1.55; }
 .tdb-coachacts { display: flex; gap: 8px; margin-top: 13px; align-items: center; }

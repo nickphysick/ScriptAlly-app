@@ -38,3 +38,30 @@ describe("P1 — pop-up click-away collapse", () => {
     expect(page).toContain("className={`tdb-pill today-p${committed ?");
   });
 });
+
+describe("P2 — the done pill (the collision killed; badge = the band toggle)", () => {
+  const css = readFileSync(join(here, "todo.css"), "utf8");
+  const tour = readFileSync(join(here, "TodoTour.tsx"), "utf8");
+
+  it("the .tdb-cd collision is resolved by renaming the TOUR side (Nick's call)", () => {
+    expect(css).not.toMatch(/\.tdb-cd[\s.{]/); // no .tdb-cd rules survive anywhere
+    expect(tour).toContain("tdb-coachdot");
+    expect(css).toContain(".tdb-coachdot { width: 6px; height: 6px;");
+  });
+
+  it("the badge renders only when done > 0, carries aria-pressed, and gates the band", () => {
+    expect(page).toContain('{doneN > 0 && <button type="button" className="tdb-cdone" aria-pressed={showDone}');
+    expect(page).toContain("{doneN > 0 && showDone && (");
+    expect(page).toContain("const [showDone, setShowDone] = useState(true);"); // pressed/shown default
+  });
+
+  it("the badge is the committed pill's grammar in the done-sage family; the header row never wraps", () => {
+    const badge = css.match(/\.tdb-th \.tdb-cdone \{([^}]*)\}/)?.[1] ?? "";
+    expect(badge).toContain("font-size: 10.5px");
+    expect(badge).toContain("border: 1px solid var(--hk-spine)");
+    expect(badge).toContain("color: var(--hk-ink)");
+    expect(badge).toContain("white-space: nowrap");
+    expect(css).toContain('.tdb-th .tdb-cdone[aria-pressed="true"] { background: var(--hk-sage); }');
+    expect(css).toMatch(/\.tdb-th \{[^}]*flex-wrap: nowrap/);
+  });
+});

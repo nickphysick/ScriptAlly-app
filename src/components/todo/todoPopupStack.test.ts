@@ -45,8 +45,8 @@ describe("Today's-list pop-up stacking — fix pass P3", () => {
     expect(done).toContain("max-height: 220px");
   });
 
-  it("the done band renders only when non-empty; the zero-done flex spacer is gone", () => {
-    expect(tsx).toContain("{doneN > 0 && (");
+  it("the done band renders only when non-empty (and shown — the P2 badge-toggle); the zero-done flex spacer is gone", () => {
+    expect(tsx).toContain("{doneN > 0 && showDone && (");
     expect(tsx).not.toContain('doneN === 0 && <div className="tdb-tdone"');
   });
 
