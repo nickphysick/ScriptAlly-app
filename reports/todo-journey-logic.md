@@ -88,3 +88,53 @@ suppressed tasks wholesale — hence the approved offer exemption.
   send method (else Email) — the old method dropdown and the never-persisted "Note to yourself"
   textarea are RETIRED from this sheet (the note field wrote nowhere — a dead control; reported).
 - Copy per the ref, UK spelling. Tests +6 (assumedSendItem ×4, byte-identity, extras list).
+
+## PHASE 3 — the interim offer journey
+
+**The offender is dead:** `RecordResponseFocusForm` is no longer mounted by the flow
+(source-locked); completing the offer task never re-logs the offer.
+
+- **Vocabulary (Option A):** `ActivityType.OFFER_ACCEPTED` / `OFFER_DECLINED` (types.ts) + the two
+  literals in the firestore.rules activityType list — **the rules edit is IN FILE ONLY; the
+  compile + deploy is Nick's** (until it lands, decision writes are denied by the global-feed rule
+  — the authoritative nested row passes today's free-string rule, but do not exercise on dev
+  before deploying rules).
+- **The mechanism call (delegated):** DECLINED = **mechanism (ii)** — the decision activity
+  CARRIES `resultingStatus: WITHDRAWN` on both twins and `recordOfferDecision` then recomputes:
+  ONE honest timeline node, and recomputeQuery remains the single writer of derived state (no
+  second STATUS_CHANGED activity, no parallel status write). Verified against recompute's
+  normalisation ("either field counts"). ACCEPTED is non-status — the query keeps its
+  historically-true OFFER status; the parked full flow owns any closing ceremony.
+- **`recordOfferDecision(queryId, decision)`** (db.tsx) — logNudge's twin-write convention:
+  authoritative nested row first (abort on fail), projection twin under the SAME id, then
+  `recompute(queryId)`. Pure builder `lib/offerDecision.ts` (`buildOfferDecisionWrites`,
+  `hasOfferDecision`), fully unit-locked.
+- **APPROVED ENGINE DIFF 1 (verbatim):**
+  `- if (q.status === QueryStatus.OFFER) {`
+  `+ if (q.status === QueryStatus.OFFER && !hasOfferDecision(q.id, activities)) {`
+  plus its dependency:
+  `- }, [queries, manuscripts, agents, taskFlags, currentUser]);`
+  `+ }, [queries, manuscripts, agents, taskFlags, activities, currentUser]);`
+  (accepted keeps status OFFER, so status alone could never clear the task; declined's task also
+  dies naturally via the derived WITHDRAWN. One clause in the engine keeps the board AND the
+  dashboard's Over-to-you agreeing.)
+- **The journey (ref §1):** kicker `{AGENT} · {AGENCY} · AN OFFER OF REPRESENTATION` → the star
+  moment, "This is the moment the querying was for", the reply-by pill (`⏱ REPLY BY {date} ·
+  {n} DAYS` from `q.responseDeadline` — the SAME field the dashboard's deadline chip reads,
+  verified; hidden when unset) → three doors:
+  1. **Let your other agents know** — the manuscript's other open queries (terminal statuses
+     excluded); each opens the EXISTING nudge draft mechanics for that agent with the offer +
+     reply-by context chip alongside; "Stage it" stages the normal nudge payload (dedup by key,
+     `offer-notify-{queryId}`) and lands back on the fork; already-staged rows show "✓ staged".
+     The door writes nothing itself.
+  2. **Record your decision** (sage — THE completion) — accepted/declined seg per the ref with
+     both hint paragraphs verbatim (declined: "Your other queries stay open and untouched.";
+     accepted: the no-automatic-closing hint) → `recordOfferDecision` → toast → advance.
+  3. **I need time** — a date-picked reminder defaulting to +7 days, input-capped AND code-clamped
+     at reply-by (no cap when unset — it simply lapses), written as the EXISTING taskFlags snooze
+     (`snoozedUntil` at the chosen day's local noon via `journeyEventISO`); no new state invented.
+     ⚠ Until Phase 4's engine exemption lands (next commit), a set reminder HIDES the card — the
+     visible-but-quiet behaviour completes there.
+- Tests +8: builder invariants (accepted non-status both twins · declined WITHDRAWN both twins ·
+  neither ever emits OFFER/STATUS_CHANGED · agent-less grace), hasOfferDecision, and the source
+  locks (re-log path gone; need-time = the flag; notify = the nudge payload).

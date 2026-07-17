@@ -390,6 +390,8 @@ service cloud.firestore {
         && data.activityType is string && (
           data.activityType == 'Status Changed' ||
           data.activityType == 'Nudge Sent' ||
+          data.activityType == 'Offer Accepted' ||
+          data.activityType == 'Offer Declined' ||
           data.activityType == 'Query Sent' ||
           data.activityType == 'Materials Sent' ||
           data.activityType == 'Agent Added' ||

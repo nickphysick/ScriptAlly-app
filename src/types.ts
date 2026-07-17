@@ -377,6 +377,12 @@ export interface Query {
 export enum ActivityType {
   STATUS_CHANGED = "Status Changed",
   NUDGE_SENT = "Nudge Sent",
+  // The writer's OFFER DECISIONS (journey-logic pass P3 — Nick's Option A). ACCEPTED is
+  // non-status (the query keeps its historical OFFER status); DECLINED carries
+  // resultingStatus WITHDRAWN so recomputeQuery — the single writer of derived state —
+  // closes the query from the one honest log node.
+  OFFER_ACCEPTED = "Offer Accepted",
+  OFFER_DECLINED = "Offer Declined",
   QUERY_SENT = "Query Sent",
   MATERIALS_SENT = "Materials Sent",
   AGENT_ADDED = "Agent Added",

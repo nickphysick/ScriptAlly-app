@@ -17,7 +17,8 @@
  * persists until the review sheet's Save (apply = the existing per-item-isolated applyStaged;
  * partial failures are re-listed, never silently half-saved). Back at an item boundary un-stages
  * the previous item. IMMEDIATE writes (they're data entry or a decision, not a deferrable log):
- * the offer capture (the existing RecordResponseFocusForm — offers are never staged), the
+ * the offer journey (celebration + three doors — the completion is a RECORDED DECISION via
+ * recordOfferDecision; the offer itself is never re-logged), the
  * housekeeping batch/dq saves (updateAgent), the stale close (updateQueryStatus), and the note
  * tick (updateUserTask). One write path throughout: markSentWriteArgs/nudgeWriteArgs feed the same
  * recordMaterialsSent/logNudge the quick paths use.
@@ -26,10 +27,10 @@
  */
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { StatusDot } from "../StatusDot";
-import { RecordResponseFocusForm } from "../RecordResponseFocusForm";
 import { useScriptAllyDb } from "../../lib/db";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
 import { buildAgentTimeline } from "../../lib/agentsPage";
+import { OfferDecision } from "../../lib/offerDecision";
 import { agentPrimary } from "../../lib/agentDisplay";
 import { nudgeDraft } from "../../lib/nudgeDraft";
 import { flagKeyForTask, MUTED_UNTIL } from "../../lib/taskFlags";
@@ -91,14 +92,19 @@ export interface FocusFlowProps {
 export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate, onToast, prefill, mode = "journey" }) => {
   const {
     queries, agents, manuscripts, activities, taskFlags, currentUser,
-    recordMaterialsSent, logNudge, dismissTask, upsertTaskFlag, updateUserProfile, updateAgent, updateUserTask, updateQueryStatus, undoQueryStatus, resolveTaskFlag, deleteActivity,
+    recordMaterialsSent, logNudge, recordOfferDecision, dismissTask, upsertTaskFlag, updateUserProfile, updateAgent, updateUserTask, updateQueryStatus, undoQueryStatus, resolveTaskFlag, deleteActivity,
   } = useScriptAllyDb();
 
   const [qi, setQi] = useState(0);
   const [step, setStep] = useState(0);
   const [staged, setStaged] = useState<StagedPayload[]>([]);
   const [leaving, setLeaving] = useState(false);
-  const [offerFormOpen, setOfferFormOpen] = useState(false);
+  // the offer journey (P3): which door is open, the decision pick, the need-time date, and the
+  // other-agent nudge currently being drafted (null = the fork)
+  const [offerDoor, setOfferDoor] = useState<"" | "notify" | "decide" | "time">("");
+  const [offerChoice, setOfferChoice] = useState<OfferDecision | null>(null);
+  const [remindDate, setRemindDate] = useState("");
+  const [notifyQ, setNotifyQ] = useState<string | null>(null);
   const [savedN, setSavedN] = useState<number | null>(null); // the "Desk cleared" screen
   const [saving, setSaving] = useState(false);
   // sweep mode
@@ -133,6 +139,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     setMats({}); setSentDate(todayISO()); setMethod("Email"); setCopied(false); setExtrasOpen(false); setBackdated(false);
     setRows({}); setNoMeansNo({}); setFound({}); setNotFound(new Set()); setAssistAt(null); setAssistMsg(null); setShowMuted(false); setNoteText(null);
     setDeepDive(false); setSweepReceipt(null); setSweepFork(false);
+    setOfferDoor(""); setOfferChoice(null); setRemindDate(""); setNotifyQ(null);
   };
 
   /** Animate the sheet away, then run the transition. */
@@ -342,52 +349,176 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     const q = cardQuery(c);
     const ag = cardAgent(c, q);
     const ms = q ? manuscripts.find((m) => m.id === q.manuscriptId) : undefined;
-    if (offerFormOpen && q && ag) {
-      return (
-        <RecordResponseFocusForm
-          isOpen
-          onClose={() => { setOfferFormOpen(false); advance(); }}
-          query={q}
-          agent={ag}
-          manuscript={{ title: ms?.title || "" }}
-          onSuccessToast={() => onToast("Offer recorded — handled through the response flow.")}
-        />
+    const who = c.who || "An agent";
+    const kicker = `${who.toUpperCase()}${ag?.agency ? ` · ${ag.agency.toUpperCase()}` : ""} · AN OFFER OF REPRESENTATION`;
+    const replyBy = q?.responseDeadline;
+    const daysTo = replyBy ? Math.max(0, Math.ceil((new Date(replyBy).getTime() - Date.now()) / 86400000)) : null;
+    const OFFER_TERMINAL = new Set<QueryStatus>([QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE]);
+    const others = q ? queries.filter((x) => x.manuscriptId === q.manuscriptId && x.id !== q.id && !OFFER_TERMINAL.has(x.status as QueryStatus)) : [];
+
+    // ── the notify-nudge sub-screen: the EXISTING nudge draft mechanics for a chosen agent,
+    //    offer + reply-by shown alongside as context; staging returns to the fork ──
+    if (notifyQ) {
+      const nq = queries.find((x) => x.id === notifyQ);
+      const nag = nq ? agents.find((a) => a.id === nq.agentId) : undefined;
+      const nms = nq ? manuscripts.find((m) => m.id === nq.manuscriptId) : undefined;
+      const draft = nudgeDraft({
+        agentName: nag ? agentPrimary(nag) : null,
+        dateSent: nq?.dateSent,
+        msTitle: nms?.title,
+        requested: requestedProse(nq?.status as QueryStatus | undefined),
+      });
+      return sheet(
+        <>
+          <div className="tdb-ffstream">Letting {nag ? agentPrimary(nag) : "them"} know</div>
+          <div className="tdb-ffoctx">OFFER FROM {who.toUpperCase()}{replyBy ? ` · REPLY BY ${fmtShort(replyBy).toUpperCase()}` : ""}</div>
+          <div className="tdb-ffq">Here’s a note you could send.</div>
+          <div className="tdb-ffdraft">{draft}</div>
+          <button type="button" className="tdb-ffcopy" onClick={() => { navigator.clipboard?.writeText(draft); setCopied(true); window.setTimeout(() => setCopied(false), 1400); }}>
+            {copied ? "✓ Copied" : "⧉  Copy the draft"}
+          </button>
+          <div className="tdb-ffsmall">ScriptAlly never sends anything for you. Copy it, send it from your own email, then stage the log below.</div>
+          <div className="tdb-ffrow">
+            <div className="tdb-fff"><label>Date nudged</label><input type="date" value={sentDate} onChange={(e) => setSentDate(e.target.value)} /></div>
+            <div className="tdb-fff"><label>How</label><select value={method} onChange={(e) => setMethod(e.target.value)}>{METHODS.slice(0, 2).map((m) => <option key={m}>{m}</option>)}</select></div>
+          </div>
+        </>,
+        <>
+          <button type="button" className="tdb-ffback" onClick={() => setNotifyQ(null)}>← Back</button>
+          <span className="tdb-sp" />
+          <button type="button" className="tdb-ffpri" onClick={() => {
+            if (!nq) { setNotifyQ(null); return; }
+            const key = `offer-notify-${nq.id}`;
+            const payload: StagedPayload = {
+              kind: "nudge", cardKey: key, label: `Let ${nag ? agentPrimary(nag) : "them"} know about the offer`,
+              queryId: nq.id, checkBackDate: plusDaysISO(DEFAULT_CHECKBACK_DAYS), nudgeDate: sentDate, method,
+            };
+            setStaged((prev) => [...prev.filter((x) => x.cardKey !== key), payload]);
+            setSentDate(todayISO()); setMethod("Email"); setCopied(false);
+            setNotifyQ(null); setOfferDoor("");
+          }}>Stage it →</button>
+        </>,
       );
     }
-    if (step === 0) return sheet(
+
+    // ── door: who should hear about the offer? ──
+    if (offerDoor === "notify") return sheet(
       <>
-        <div className="tdb-ffconfetti" aria-hidden>🎉 ✦ 🎉</div>
-        <div className="tdb-ffstream off">Offer of representation</div>
-        <div className="tdb-ffofferq">{c.who || "An agent"} wants to represent you.</div>
-        <div className="tdb-ffqsub">{ms?.title ? <>For <b>{ms.title}</b>. </> : ""}This is the thing all of it was for — take a breath before you do anything.</div>
-        <div className="tdb-ffoffernote">— worth a cup of tea at least</div>
+        <div className="tdb-ffstream off">Letting your other agents know</div>
+        <div className="tdb-ffq">Who should hear about the offer?</div>
+        <div className="tdb-ffqsub">Each opens your usual nudge step for that agent — the offer and reply-by date are shown alongside while you write.</div>
+        <div className="tdb-ffdoors">
+          {others.map((x) => {
+            const xa = agents.find((a) => a.id === x.agentId);
+            const stagedAlready = staged.some((p) => p.cardKey === `offer-notify-${x.id}`);
+            return (
+              <button key={x.id} type="button" className="tdb-ffdoor" onClick={() => { setSentDate(todayISO()); setMethod(x.sendMethod || "Email"); setNotifyQ(x.id); }}>
+                <span className="tdb-ffdic av">{(xa ? agentPrimary(xa) : "?").split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase()}</span>
+                <span className="tdb-ffdtx"><b>{xa ? agentPrimary(xa) : "Unknown agent"}</b><span>{[xa?.agency, x.status as string].filter(Boolean).join(" · ")}{stagedAlready ? " · ✓ staged" : ""}</span></span>
+              </button>
+            );
+          })}
+          {others.length === 0 && <div className="tdb-ffsmall">No other open queries on this manuscript — nothing to notify.</div>}
+        </div>
+      </>,
+      <>
+        <button type="button" className="tdb-ffback" onClick={() => setOfferDoor("")}>← Back</button>
+        <span className="tdb-sp" />
+      </>,
+    );
+
+    // ── door: record the decision (THE completion) ──
+    if (offerDoor === "decide") return sheet(
+      <>
+        <div className="tdb-ffstream off">Recording your decision</div>
+        <div className="tdb-ffq">What did you tell {who}?</div>
+        <div className="tdb-ffqsub">This completes the task — the decision is logged at the time you record it.</div>
+        <div className="tdb-ffseg">
+          <button type="button" className={`tdb-ffopt${offerChoice === "accepted" ? " sel" : ""}`} onClick={() => setOfferChoice("accepted")}>
+            <b>I accepted</b><span>{who} represents {ms?.title || "your manuscript"}</span>
+          </button>
+          <button type="button" className={`tdb-ffopt${offerChoice === "declined" ? " sel" : ""}`} onClick={() => setOfferChoice("declined")}>
+            <b>I declined</b><span>The querying continues</span>
+          </button>
+        </div>
+        {offerChoice === "declined" && <p className="tdb-ffhint">Your other queries stay open and untouched.</p>}
+        {offerChoice === "accepted" && (
+          <p className="tdb-ffhint"><b>Congratulations.</b> Your {others.length} other open {others.length === 1 ? "query" : "queries"} for this manuscript aren’t changed automatically — closing them (and the courtesy notes that go with it) is coming as its own guided step soon; until then they stay visible on the Queries Hub.</p>
+        )}
+      </>,
+      <>
+        <button type="button" className="tdb-ffback" onClick={() => setOfferDoor("")}>← Back</button>
+        <span className="tdb-sp" />
+        <button type="button" className="tdb-ffpri" disabled={!offerChoice || saving} onClick={async () => {
+          if (!q || !offerChoice) return;
+          setSaving(true);
+          const r = await recordOfferDecision(q.id, offerChoice);
+          setSaving(false);
+          if (!r.success) { onToast(r.error || "Couldn’t record the decision — try again."); return; }
+          onToast(offerChoice === "accepted" ? "Recorded — congratulations." : "Recorded — declined; the querying continues.");
+          advance();
+        }}>Record decision</button>
+      </>,
+    );
+
+    // ── door: I need time — the existing snooze flag, capped at reply-by ──
+    if (offerDoor === "time") return sheet(
+      <>
+        <div className="tdb-ffstream off">Taking time to decide</div>
+        <div className="tdb-ffq">When should we bring this back?</div>
+        <div className="tdb-ffqsub">The offer card stays on Urgent — just quieter — and wakes on the day you choose.</div>
+        <div className="tdb-ffremrow">
+          ⏰ Remind me on
+          <input type="date" value={remindDate} min={todayISO()} max={replyBy ? replyBy.slice(0, 10) : undefined} onChange={(e) => setRemindDate(e.target.value)} />
+          {replyBy && <span className="tdb-ffsmall">Reply-by is <b>{fmtShort(replyBy)}</b> — we’ll cap the reminder there.</span>}
+        </div>
+      </>,
+      <>
+        <button type="button" className="tdb-ffback" onClick={() => setOfferDoor("")}>← Back</button>
+        <span className="tdb-sp" />
+        <button type="button" className="tdb-ffpri" disabled={!remindDate} onClick={async () => {
+          if (!c.relatedRecordId || !remindDate) return;
+          const capped = replyBy && remindDate > replyBy.slice(0, 10) ? replyBy.slice(0, 10) : remindDate;
+          await upsertTaskFlag(flagKeyForTask("offer_received", c.relatedRecordId), { snoozedUntil: journeyEventISO(capped, new Date().toISOString()) });
+          onToast("Quieter until then — the reply-by date still counts down.");
+          advance();
+        }}>Set reminder</button>
+      </>,
+    );
+
+    // ── the celebration + fork ──
+    return sheet(
+      <>
+        <div className="tdb-ffstream off">{kicker}</div>
+        <div className="tdb-ffstar" aria-hidden>★</div>
+        <div className="tdb-ffofferq">{who} has offered to represent you.</div>
+        <div className="tdb-ffqsub">This is the moment the querying was for. The offer is already on {ms?.title ? <b>{ms.title}</b> : "the manuscript"}’s timeline — what happens next is yours to choose.</div>
+        {replyBy && <span className="tdb-ffreplyby">⏱ REPLY BY {fmtShort(replyBy).toUpperCase()}{daysTo != null ? ` · ${daysTo} DAY${daysTo === 1 ? "" : "S"}` : ""}</span>}
+        <div className="tdb-ffoffernote" aria-hidden>— worth a cup of tea at least</div>
+        <div className="tdb-ffdoors">
+          <button type="button" className="tdb-ffdoor" onClick={() => setOfferDoor("notify")}>
+            <span className="tdb-ffdic">✉</span>
+            <span className="tdb-ffdtx"><b>Let your other agents know</b><span>{others.length ? `${others.length} agent${others.length === 1 ? " is" : "s are"} still considering ${ms?.title || "this manuscript"} — courtesy says they hear about the offer.` : "No other open queries on this manuscript."}</span></span>
+          </button>
+          <button type="button" className="tdb-ffdoor sage" onClick={() => setOfferDoor("decide")}>
+            <span className="tdb-ffdic">✓</span>
+            <span className="tdb-ffdtx"><b>Record your decision</b><span>Accepted or declined — this is what completes the task.</span></span>
+          </button>
+          <button type="button" className="tdb-ffdoor" onClick={() => {
+            const week = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
+            const cap = replyBy ? replyBy.slice(0, 10) : undefined;
+            setRemindDate(cap && week > cap ? cap : week);
+            setOfferDoor("time");
+          }}>
+            <span className="tdb-ffdic">⏳</span>
+            <span className="tdb-ffdtx"><b>I need time to decide</b><span>Set a reminder against the reply-by date. The card stays on your board, quieter.</span></span>
+          </button>
+        </div>
       </>,
       <>
         <button type="button" className="tdb-ffback" disabled={qi === 0} onClick={backOne}>← Back</button>
         <span className="tdb-sp" />
         <button type="button" className="tdb-ffskip" onClick={advance}>Not now — leave it</button>
-        <button type="button" className="tdb-ffpri" onClick={() => setStep(1)}>What happens next →</button>
-      </>,
-    );
-    return sheet(
-      <>
-        <div className="tdb-ffstream off">Offer · {c.who || "the agent"}</div>
-        <div className="tdb-ffq">Before you answer…</div>
-        <div className="tdb-ffqsub">You have <b>other agents still holding your work</b>. The done thing is to let them know you’ve had an offer and give them a chance to respond — most writers allow one to two weeks.</div>
-        <div className="tdb-ffchoices">
-          <button type="button" className="tdb-ffchoice" onClick={() => setOfferFormOpen(true)}>
-            <span className="tdb-ffck" /><span><span className="tdb-ffct">Record the offer & notify the others</span>
-            <span className="tdb-ffcs">Opens the response flow — logs the offer now (offers are never staged).</span></span>
-          </button>
-          <button type="button" className="tdb-ffchoice" onClick={advance}>
-            <span className="tdb-ffck" /><span><span className="tdb-ffct">I’ll deal with this outside the flow</span>
-            <span className="tdb-ffcs">Leaves it on the board, top of Urgent, where it belongs.</span></span>
-          </button>
-        </div>
-      </>,
-      <>
-        <button type="button" className="tdb-ffback" onClick={backOne}>← Back</button>
-        <span className="tdb-sp" />
       </>,
     );
   }
@@ -904,10 +1035,8 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     if (j === "note") return noteSheet(it.card);
     return sendSheet(it.card);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [atReview, qi, step, items, mats, sentDate, method, copied, extrasOpen, backdated, rows, noMeansNo, found, notFound, assistAt, assisting, assistMsg, showMuted, noteText, staged, savedN, saving, offerFormOpen, sweep, deepDive, sweepReceipt, sweepFork, queries, agents, manuscripts, activities, taskFlags, currentUser]);
+  }, [atReview, qi, step, items, mats, sentDate, method, copied, extrasOpen, backdated, rows, noMeansNo, found, notFound, assistAt, assisting, assistMsg, showMuted, noteText, staged, savedN, saving, offerDoor, offerChoice, remindDate, notifyQ, sweep, deepDive, sweepReceipt, sweepFork, queries, agents, manuscripts, activities, taskFlags, currentUser]);
 
-  // The offer capture is its own full-screen form — render it INSTEAD of the flow frame.
-  if (offerFormOpen && item?.kind === "card") return <>{content}</>;
 
   const remaining = items.length - qi - 1;
   return (

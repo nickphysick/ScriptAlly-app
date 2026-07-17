@@ -482,6 +482,28 @@
 .tdb-fflink { font-size: 13px; font-weight: 600; color: var(--pink-i); margin-top: 18px; display: inline-block; }
 .tdb-fflink:hover { text-decoration: underline; }
 .tdb-ffconfetti { font-size: 40px; line-height: 1; margin-bottom: 14px; letter-spacing: 6px; }
+/* the interim offer journey (journey-logic P3 — ref §1): star moment, reply-by pill, three
+   doors (sage = the completing one), the decision seg, the need-time row, the notify context. */
+.tdb-ffstar { font-size: 40px; color: var(--ink); margin: 2px 0 6px; }
+.tdb-ffreplyby { display: inline-flex; align-items: center; gap: 7px; font-family: var(--f12-mono); font-size: 9px; font-weight: 600; letter-spacing: 0.1em; background: var(--pink-t); border: 1px solid var(--pink-b); border-radius: 99px; padding: 5px 12px; color: var(--pink-i); margin: 10px 0 2px; }
+.tdb-ffdoors { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+.tdb-ffdoor { display: flex; align-items: center; gap: 14px; text-align: left; background: var(--white, #fff); border: 1px solid var(--hairline); border-radius: 13px; padding: 15px 18px; transition: border-color 0.15s, transform 0.12s, box-shadow 0.12s; }
+.tdb-ffdoor:hover { border-color: var(--pink-b); transform: translateY(-1px); box-shadow: var(--sh-btn); }
+.tdb-ffdic { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(180deg, var(--pink-t), var(--pink-btn)); border: 1px solid var(--pink-b); display: flex; align-items: center; justify-content: center; font-size: 14px; flex: none; }
+.tdb-ffdic.av { font-family: var(--f12-mono); font-size: 11px; font-weight: 700; background: var(--paper); border-color: var(--line); color: var(--ink-2); }
+.tdb-ffdoor.sage .tdb-ffdic { background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border-color: var(--hk-spine); color: var(--hk-ink); }
+.tdb-ffdtx b { display: block; font-family: var(--f12-serif); font-size: 16.5px; font-weight: 600; color: var(--ink); margin-bottom: 1px; }
+.tdb-ffdtx span { font-size: 12.5px; color: var(--sub); }
+.tdb-ffseg { display: flex; gap: 12px; margin-top: 18px; }
+.tdb-ffopt { flex: 1; background: var(--white, #fff); border: 1.5px solid var(--hairline); border-radius: 13px; padding: 18px; text-align: center; transition: border-color 0.15s; }
+.tdb-ffopt.sel { border-color: var(--ink); }
+.tdb-ffopt b { display: block; font-family: var(--f12-serif); font-size: 18px; font-weight: 600; color: var(--ink); margin-bottom: 3px; }
+.tdb-ffopt span { font-size: 12px; color: var(--sub); }
+.tdb-ffhint { font-size: 12.5px; color: var(--muted); line-height: 1.55; margin-top: 14px; }
+.tdb-ffhint b { color: var(--ink); }
+.tdb-ffremrow { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; background: var(--white, #fff); border: 1px solid var(--hairline); border-radius: 11px; padding: 14px 18px; margin-top: 16px; font-size: 13px; color: var(--ink-2); }
+.tdb-ffremrow input[type="date"] { border: 1px solid var(--line); border-radius: 7px; padding: 6px 9px; font-family: var(--f12-mono); font-size: 11.5px; color: var(--ink); background: var(--paper); }
+.tdb-ffoctx { display: inline-block; font-family: var(--f12-mono); font-size: 8.5px; font-weight: 600; letter-spacing: 0.11em; background: var(--pink-t); border: 1px solid var(--pink-b); border-radius: 99px; padding: 4px 11px; color: var(--pink-i); margin-bottom: 12px; }
 .tdb-ffofferq { font-family: var(--f12-serif); font-size: 31px; font-weight: 600; font-style: italic; line-height: 1.2; color: var(--burg); max-width: 480px; }
 .tdb-ffoffernote { font-family: Caveat, cursive; font-size: 21px; color: var(--hk-ink); margin-top: 16px; transform: rotate(-1.2deg); display: inline-block; }
 .tdb-ffbatch { margin-top: 20px; }

@@ -80,6 +80,7 @@ import { TaskFlagKey, taskFlagId, flagKeyForTask, flagMatchesTask, isFlagSuppres
 import { homeCountrySeed } from "./territory";
 import { agentDataQualityNeeds } from "./agentDataQuality";
 import { taskSurvivesMute } from "./todoHousekeeping";
+import { buildOfferDecisionWrites, hasOfferDecision, OfferDecision } from "./offerDecision";
 
 // Connection validation test on boot as requested by skill
 async function testConnection() {
@@ -265,7 +266,8 @@ interface DbContextType {
    * and hides-and-resurfaces the nudge_overdue task on the chosen check-back date. Never touches
    * status or responseDeadline and never counts as a response. (Distinct from dismissTask.)
    */
-  logNudge: (queryId: string, args: { checkBackDate: string; note?: string }) => Promise<{ success: boolean; error?: string }>;
+  logNudge: (queryId: string, args: { checkBackDate: string; note?: string; eventDate?: string }) => Promise<{ success: boolean; error?: string }>;
+  recordOfferDecision: (queryId: string, decision: OfferDecision) => Promise<{ success: boolean; error?: string }>;
 
   // Clean Utilities
   cleanDuplicates: () => Promise<{ manuscriptsRemoved: number; agentsRemoved: number; queriesMapped: number; queriesRemoved?: number }>;
@@ -642,7 +644,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       const mTitle = manuscript.title;
       const aName = agent.name;
 
-      if (q.status === QueryStatus.OFFER) {
+      if (q.status === QueryStatus.OFFER && !hasOfferDecision(q.id, activities)) {
         calculatedTasks.push({
           id: `task-offer-${q.id}`,
           priority: "urgent",
@@ -811,7 +813,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     });
 
     setTasks(activeTasks);
-  }, [queries, manuscripts, agents, taskFlags, currentUser]);
+  }, [queries, manuscripts, agents, taskFlags, activities, currentUser]);
 
   // Self-healing backfill routine to auto-create missing creation activities for existing agents and manuscripts.
   // This gracefully heals objects that were successfully added but whose activities were rejected by past Firestore rules.
@@ -2443,6 +2445,36 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
+  /** The interim offer journey's ONE completion write (journey-logic P3): the writer's decision,
+   *  never a re-log of the offer. Twin-write convention from logNudge — authoritative nested row
+   *  first (abort on fail), then the global projection under the SAME id, then recompute:
+   *  DECLINED's resultingStatus WITHDRAWN closes the query via the single deriver; ACCEPTED is
+   *  non-status (status stays OFFER; the task dies via hasOfferDecision in the engine). */
+  const recordOfferDecision = async (queryId: string, decision: OfferDecision): Promise<{ success: boolean; error?: string }> => {
+    if (!currentUser) return { success: false, error: "Not signed in." };
+    const targetQ = queries.find(q => q.id === queryId);
+    if (!targetQ) return { success: false, error: "Query not found." };
+    const agent = agents.find(a => a.id === targetQ.agentId);
+    const writes = buildOfferDecisionWrites(targetQ, agent, decision, new Date());
+
+    const actId = "act-" + Math.random().toString(36).substr(2, 9);
+    try {
+      await setDoc(doc(db, "users", currentUser.id, "queries", queryId, "activity", actId), writes.nested);
+    } catch (e) {
+      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/queries/${queryId}/activity/${actId}`);
+      return { success: false, error: "Failed to record the decision." };
+    }
+    // Projection twin — best-effort (the authoritative row already landed), same id.
+    await addActivity({ ...writes.activity, id: actId });
+    try {
+      await recompute(queryId);
+      return { success: true };
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/queries/${queryId} [recordOfferDecision]`);
+      return { success: false, error: "Recorded, but the query could not be re-derived." };
+    }
+  };
+
   const cleanDuplicates = async (): Promise<{ manuscriptsRemoved: number; agentsRemoved: number; queriesMapped: number; queriesRemoved?: number }> => {
     if (!currentUser) return { manuscriptsRemoved: 0, agentsRemoved: 0, queriesMapped: 0, queriesRemoved: 0 };
 
@@ -2695,6 +2727,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         updateUserProfile,
         dismissTask,
         logNudge,
+        recordOfferDecision,
         cleanDuplicates,
         wipeAndResetDatabase
       }}
