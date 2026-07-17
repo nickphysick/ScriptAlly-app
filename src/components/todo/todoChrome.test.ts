@@ -84,8 +84,9 @@ describe("P3 — journey exit chrome lives IN the sheet", () => {
     expect(flow).toContain("if (staged.length && !window.confirm("); // clean = immediate, staged = confirm
   });
 
-  it("dots + count render in multi-item modes only, inside the bar", () => {
-    expect(flow).toContain("{items.length > 1 && (");
+  it("dots + count render in multi-item modes only, inside the bar (the Sunday review feeds the SAME chrome its own steps)", () => {
+    expect(flow).toContain(": items.length > 1 && (");
+    expect(flow).toContain("{review ? (");
   });
 
   it("the staged chip sits in the sheet FOOTER, left of the Back button (sheet renders it before foot)", () => {

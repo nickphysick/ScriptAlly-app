@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { QueryStatus, Task, Query, Agent, Manuscript, UserTask, TaskFlag, Activity, ActivityType } from "../types";
-import { assembleBoard, boardStreamForTaskType, todaySplit, ribbonTiles, laneFadeState, walkSublabel, walkAria, offerDue, offerQuiet, terseDoneLabel, reminderDue, BoardInput } from "./todoBoard";
+import { assembleBoard, boardStreamForTaskType, todaySplit, ribbonTiles, laneFadeState, walkSublabel, walkAria, offerDue, offerQuiet, terseDoneLabel, reminderDue, reviewWeek, weekReviewStats, reviewEntryCard, reviewEntryLine, reviewSeedCandidates, BoardCard, BoardInput } from "./todoBoard";
 
 const TODAY = "2026-07-09";
 const NOW = Date.parse("2026-07-09T12:00:00Z");
@@ -312,5 +312,91 @@ describe("linked reminders — the approved P2 derivation clause (agentId + quer
     expect(reminderDue(ymd(2), NOW)).toEqual({ label: "2 DAYS TO DEADLINE", warn: true });
     expect(reminderDue(ymd(0), NOW)).toEqual({ label: "DEADLINE TODAY", warn: true });
     expect(reminderDue(ymd(-1), NOW)).toEqual({ label: "DEADLINE PASSED", warn: true });
+  });
+});
+
+describe("the Sunday review — pure derivations (finishing P3)", () => {
+  const SUN = Date.parse("2026-07-19T12:00:00Z"); // a Sunday
+  const MON = Date.parse("2026-07-20T09:00:00Z");
+  const TUE = Date.parse("2026-07-21T09:00:00Z");
+  const act = (id: string, type: ActivityType, date: string, queryId: string, rs?: QueryStatus): Activity =>
+    ({ id, userId: "u", queryId, manuscriptId: "m1", activityType: type, description: "", date, details: "", ...(rs ? { resultingStatus: rs } : {}) } as Activity);
+  const rvAgent = (id: string, name: string, over: Partial<Agent> = {}): Agent =>
+    ({ id, name, agency: `${name} Lit`, responseTimeWeeks: 8, noResponseMeansNo: true, ...over } as unknown as Agent);
+
+  it("reviewWeek: Sunday reviews ITS week; Monday still reviews LAST week; the number anchors on the earliest send", () => {
+    const qs = [query("q1", "a1", QueryStatus.QUERIED, { dateSent: "2026-07-01T10:00:00Z" })];
+    const sun = reviewWeek(qs, SUN);
+    const mon = reviewWeek(qs, MON);
+    expect(sun.key).toBe(mon.key); // the same reviewed week either day
+    expect(new Date(sun.startMs).getDay()).toBe(1); // an ISO Monday
+    expect(sun.endMs - sun.startMs).toBe(7 * 86400000);
+    expect(sun.weekNumber).toBe(3); // sent w/c 29 Jun → reviewing w/c 13 Jul = week three
+  });
+
+  it("weekReviewStats: log-windowed sent/back/offers; newly-quiet = crossed the threshold IN the window", () => {
+    const win = reviewWeek([], SUN);
+    const midWinCross = new Date(win.startMs - 64 * 86400000).toISOString(); // close threshold (70d) lands mid-window
+    const longStale = new Date(win.startMs - 200 * 86400000).toISOString(); // stale long before the window
+    const input = {
+      activities: [
+        act("s1", ActivityType.MATERIALS_SENT, new Date(win.startMs + 86400000).toISOString(), "qs", QueryStatus.FULL_SENT),
+        act("s2", ActivityType.QUERY_SENT, new Date(win.startMs - 3 * 86400000).toISOString(), "qs"), // out of window
+        act("b1", ActivityType.STATUS_CHANGED, new Date(win.startMs + 4 * 86400000).toISOString(), "qo", QueryStatus.OFFER),
+      ],
+      queries: [
+        query("qs", "a1", QueryStatus.FULL_SENT, { dateSent: longStale }),
+        query("qo", "a1", QueryStatus.OFFER, { responseDeadline: "2026-07-31T11:00:00Z" }),
+        query("qq", "a1", QueryStatus.QUERIED, { dateSent: midWinCross }),
+        query("qold", "a1", QueryStatus.QUERIED, { dateSent: longStale }),
+      ],
+      agents: [rvAgent("a1", "Tom Ellery")],
+    };
+    const stats = weekReviewStats(input, win);
+    expect(stats.sent.length).toBe(1);
+    expect(stats.sent[0].badge).toBe("FULL");
+    expect(stats.sent[0].label).toBe("Full sent to Tom Ellery");
+    expect(stats.back.length).toBe(1);
+    expect(stats.back[0].star).toBe(true);
+    expect(stats.back[0].meta).toContain("REPLY BY 31 JUL");
+    expect(stats.offers).toBe(1);
+    expect(stats.quiet.map((r) => r.queryId)).toEqual(["qq"]); // the mid-window crosser ONLY — never the backlog
+  });
+
+  it("the entry card: visible Sunday + Monday, gone Tuesday, dismissible via the week's flag; the stats line is honest", () => {
+    const base: BoardInput = { tasks: [], userTasks: [], queries: [], agents: [], manuscripts: [], taskFlags: [], activities: [], today: TODAY, now: SUN };
+    const sun = reviewEntryCard(base);
+    expect(sun).not.toBeNull();
+    expect(sun!.taskType).toBe("weekly_review");
+    expect(sun!.due).toBe("SUNDAY REVIEW");
+    expect(sun!.subtitle).toBe("0 sent · 0 responses · 0 gone quiet");
+    expect(reviewEntryCard({ ...base, now: MON })).not.toBeNull();
+    expect(reviewEntryCard({ ...base, now: TUE })).toBeNull();
+    const wk = reviewWeek([], SUN);
+    const flagged: BoardInput = { ...base, taskFlags: [{ id: "f", userId: "u", taskType: "weekly_review", queryId: wk.key, snoozeCount: 0, snoozedUntil: new Date(SUN + 86400000).toISOString() } as unknown as TaskFlag] };
+    expect(reviewEntryCard(flagged)).toBeNull();
+    expect(reviewEntryLine({ sent: [1, 2] as never, back: [1] as never, offers: 1, quiet: [] as never })).toBe("2 sent · 1 response · an offer ★ · 0 gone quiet");
+  });
+
+  it("seed candidates: dated pre-ticked (offer window + linked reminders), undated offered, review excluded, capped at 5", () => {
+    const card = (over: Partial<BoardCard>): BoardCard =>
+      ({ key: "k", stream: "do", title: "t", who: "", subtitle: "", due: "", warn: false, snoozes: 0, hk: false, initials: "", record: "", committed: false, done: false, ...over } as BoardCard);
+    const NOW = Date.parse("2026-07-19T12:00:00Z");
+    const cards = [
+      card({ key: "rv", taskType: "weekly_review" }),
+      card({ key: "offer", taskType: "offer_received", relatedRecordId: "qo", who: "Tom" }),
+      card({ key: "rem", userTaskId: "u1", title: "Tell Priya Raman about the offer", due: "3 DAYS TO DEADLINE" }),
+      card({ key: "full", taskType: "full_requested", relatedRecordId: "q2", title: "Send your full to Marsh", due: "OVER TO YOU" }),
+      card({ key: "n1", taskType: "nudge_overdue", relatedRecordId: "q3", title: "Nudge A", due: "90 DAYS · NO REPLY" }),
+      card({ key: "n2", taskType: "nudge_overdue", relatedRecordId: "q4", title: "Nudge B", due: "91 DAYS · NO REPLY" }),
+      card({ key: "n3", taskType: "nudge_overdue", relatedRecordId: "q5", title: "Nudge C", due: "92 DAYS · NO REPLY" }),
+    ];
+    const qs = [query("qo", "a1", QueryStatus.OFFER, { responseDeadline: new Date(NOW + 9 * 86400000).toISOString() })];
+    const out = reviewSeedCandidates(cards, qs, NOW);
+    expect(out.length).toBe(5); // capped
+    expect(out.map((c) => c.key)).toEqual(["offer", "rem", "full", "n1", "n2"]); // dated first, review excluded
+    expect(out[0]).toMatchObject({ label: "Reply to Tom’s offer", meta: "9 DAYS LEFT ON THE WINDOW", preTicked: true });
+    expect(out[1]).toMatchObject({ meta: "REMINDER · 3 DAYS TO DEADLINE", preTicked: true });
+    expect(out[2].preTicked).toBe(false);
   });
 });

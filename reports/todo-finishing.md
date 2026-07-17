@@ -81,3 +81,66 @@ patching, no deferred writes).
   GroupFlip/flow batch save keeps its existing "Undo all". No action type was red-gated — nothing
   ships toast-less.
 - Locks in NEW `todoFinishing.test.ts` (source layer). Tests 1134 → **1139**.
+
+## PHASE 3 — the Sunday review
+
+- **The week + the number:** `reviewWeek` (todoBoard, granted scope) — the reviewed week is the
+  ISO week containing the most recent Sunday (Sunday reviews ITS week; **Monday still reviews
+  last week**); the number reuses dashboardStats' exported `isoWeekStart` + the same
+  earliest-`dateSent` anchor as `weekOfQuerying` (the micro-grant proved unneeded — the export
+  already existed).
+- **Honest aggregates** (`weekReviewStats`): sent = QUERY_SENT/MATERIALS_SENT/NUDGE_SENT in the
+  window (terse labels via the P1 deriver); came back = agent-response `resultingStatus` values
+  (requests/R&R/OFFER/REJECTED — never writer-side closes), offers starred with reply-by; **went
+  quiet = crossed the engine's own close threshold WITHIN the window** — `replyTask` (the task
+  engine's precedence fn) evaluated at both window edges, never the backlog. All unit-locked with
+  a fixture week.
+- **The entry card** (`reviewEntryCard`): derived, Sunday 00:00 → Monday 23:59, ranked under
+  offers, sage-spined with ☕ + the stats line (`reviewEntryLine`, singular-safe) + "Begin the
+  review →"; **dismissible for the week** via the existing flag machinery (taskType
+  `weekly_review`, the week key as the id; rules already accept free-string types) with the P2
+  toast grammar. It never leaks into journeys/walks/sweeps/Help-me-pick (guards locked).
+- **The mode** (`weeklyReview` in FocusFlow, the standard sheet chrome): six steps per the ref —
+  summary (stats + the Caveat kettle aside) · what went out (read-only) · what came back (offers
+  starred) · what went quiet (**Close it / Leave it STAGE**: the new `close` StagedPayload kind
+  through the SHARED handler map → the existing `updateQueryStatus` NO_RESPONSE path, applied
+  ONLY at finish; the footer's staged chip counts them) · seed Monday (candidates via
+  `reviewSeedCandidates` — the offer reply + linked reminders pre-ticked, undated offered, capped
+  at 5; commits write Monday's `committedDate` through the existing setters — the
+  naturally-dormant future-date mechanism Step 0 confirmed) · "Week {n}, closed." with the
+  saved/seeded summary. Progress dots + count = the same sheet chrome fed the review's own steps;
+  exit pill + staged-confirm unchanged.
+- **A Leave-everything pass writes nothing** except the completion flag (the dismissal machinery,
+  not data) — reported as specced.
+
+## FINALISE
+
+| Phase | SHA | Commit |
+|---|---|---|
+| 1 | `d672659` | feat(todo): colour-law retune — coffee housekeeping, sage today |
+| 2 | `27a99af` | feat(todo): undo everywhere — write-then-reverse |
+| 3 | (this commit) | feat(todo): the Sunday review |
+
+- **Files:** todo.css + index.css (tokens/law) · ToDoPage.tsx · FocusFlow.tsx · todoBoard.ts
+  (granted: review derivations + seed candidates) · todoWalk.ts (the close kind) · db.tsx (the
+  un-bump) · themes.md · tests (todoBoard/todoWalk/todoFinishing/todoChrome-lock-update).
+  1139 → **1149** (+4 review derivations, +1 close routing, +5 P3 locks; 1 chrome lock updated).
+- **Swap surface**: complete per Phase 1 (grep-verified zero coffee consumption; identity points
+  all on --hk-cof; today-family on sage). themes.md regenerated with the law inversion.
+- **Compensator table**: no gaps (Phase 2's table above); nothing red-gated.
+- **Week/seeding resolutions**: isoWeekStart already exported; Monday-seeding = the dormant
+  future `committedDate` (no new state).
+- **In-browser checklist (Nick, on dev):** the retuned board at full density — the coffee hk
+  post-it/spines against the oat (the legibility judgement), the sage FAB + ink ring, the sage
+  "✓ On today's list" pill · an Undo on each action type (send/nudge/close/note quick-✓s, a
+  snooze — watch ×n NOT inflate after undo — a mute, a rule-mute) with the "Restored" beat · ON A
+  FIXTURE SUNDAY (or system-clock Sunday): the entry card with real counts, dismiss + Undo, the
+  full run — stats, the three look-backs, Close-one/Leave-one (staged chip counting, nothing
+  written until finish), seed Monday (pre-ticked dated items), the ☕ close — then Monday
+  morning's list already holding the seeds · a Leave-everything pass writing nothing · the
+  review card gone Tuesday.
+- **Deviations:** the entry card's lane = Urgent ranked just under offers (the ref implies
+  prominence; the pack said "a derived board card" without a lane — reported) · step h1s use
+  spelled numbers ≤ twelve (the dashboard's convention) · the ref's month-context response-rate
+  line in step 3 was NOT built (it would need a rate derivation the pack didn't scope — the lede
+  is neutral instead; flagged).

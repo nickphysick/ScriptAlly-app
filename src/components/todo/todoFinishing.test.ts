@@ -54,3 +54,35 @@ describe("P2 — undo everywhere (write-then-reverse)", () => {
     expect(page).toContain('className="tdb-toast" role="status"');
   });
 });
+
+describe("P3 — the Sunday review (source locks)", () => {
+  it("summary steps write nothing; quiet choices STAGE only (no direct status write in the toggle)", () => {
+    const toggle = flow.match(/const toggleQuiet = [\s\S]*?\n    \};/)?.[0] ?? "";
+    expect(toggle).toContain("setStaged");
+    expect(toggle).not.toContain("updateQueryStatus");
+  });
+
+  it("staged closes apply ONLY at finish, through the shared handler map's existing close path", () => {
+    expect(flow).toContain("const closes = staged.filter((x) => x.kind === \"close\");");
+    expect(flow).toContain("await applyStaged(closes, stagedHandlers);");
+    expect(flow).toContain('close: (p: Extract<StagedPayload, { kind: "close" }>) => updateQueryStatus(p.queryId, QueryStatus.NO_RESPONSE');
+  });
+
+  it("seeds commit Monday's committedDate through the existing setters; completion writes the week's flag", () => {
+    expect(flow).toContain("await updateUserTask(sc.userTaskId, { committedDate: mondayYmd });");
+    expect(flow).toContain("await upsertTaskFlag(flagKeyForTask(sc.taskType, sc.relatedRecordId), { committedDate: mondayYmd });");
+    expect(flow).toContain('flagKeyForTask("weekly_review", win.key)');
+  });
+
+  it("the entry card never leaks into card journeys, walks, sweeps or Help-me-pick", () => {
+    expect(page).toContain('const flowable = cards.filter((c) => c.taskType !== "weekly_review");');
+    expect(page).toContain('items: board.do.filter((c) => c.taskType !== "weekly_review").map((card) => ({ kind: "card", card })), mode: "sweep"');
+    expect(page).toContain('choosePicks({ doCards: board.do.filter((c) => c.taskType !== "weekly_review")');
+  });
+
+  it("the entry card's dismissal rides the P2 grammar (flag snooze + Undo + Restored)", () => {
+    const dismiss = page.match(/function renderReviewCard[\s\S]*?dismissed`/)?.[0] ?? "";
+    expect(dismiss).toContain('flagKeyForTask("weekly_review", c.relatedRecordId!)');
+    expect(dismiss).toContain("snoozedUntil: new Date(Date.now() + 3 * 86400000).toISOString()");
+  });
+});

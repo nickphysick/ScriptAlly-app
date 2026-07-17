@@ -33,6 +33,7 @@ import { buildAgentTimeline } from "../../lib/agentsPage";
 import { OfferDecision } from "../../lib/offerDecision";
 import { notifyGroups, reminderFields, NotifyRow } from "../../lib/offerNotify";
 import { lockStageScroll } from "../../lib/stageScroll";
+import { reviewWeek, weekReviewStats, reviewSeedCandidates, SeedCandidate } from "../../lib/todoBoard";
 import { agentPrimary } from "../../lib/agentDisplay";
 import { nudgeDraft } from "../../lib/nudgeDraft";
 import { flagKeyForTask, MUTED_UNTIL } from "../../lib/taskFlags";
@@ -88,7 +89,7 @@ export interface FocusFlowProps {
   /** "sweep" = the speed grammar: one summary per screen, big ✓/⏸/skip, keyboard D·S·→ (F·N on
    *  housekeeping, Enter opens an offer). Sweep quick-✓s use the Phase-C defaults + a brief inline
    *  receipt, write IMMEDIATELY (Undo on the toast) and never stage. Default: the full journey. */
-  mode?: "journey" | "sweep";
+  mode?: "journey" | "sweep" | "weeklyReview";
 }
 
 export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate, onToast, prefill, mode = "journey" }) => {
@@ -115,6 +116,13 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
   const [deepDive, setDeepDive] = useState(false); // F on a group / Enter on an offer → the full journey sheet
   const [sweepReceipt, setSweepReceipt] = useState<string | null>(null); // brief inline receipt before advancing
   const [sweepFork, setSweepFork] = useState(false); // N on housekeeping → the never-fork row
+  // the Sunday review (finishing pack P3) — its own six steps; items = the live Urgent cards
+  // (the seed-candidate source). Staged closes ride the normal staged set; seeds commit at finish.
+  const review = mode === "weeklyReview";
+  const [rvStep, setRvStep] = useState(0);
+  const [rvQuiet, setRvQuiet] = useState<Record<string, "close" | "leave">>({});
+  const [rvSeed, setRvSeed] = useState<Record<string, boolean> | null>(null);
+  const [rvSummary, setRvSummary] = useState<{ closed: number; seeded: number } | null>(null);
   const activitiesRef = useRef(activities);
   activitiesRef.current = activities;
   // per-item scratch (reset on advance; the initial values honour a receipt-edit prefill)
@@ -200,16 +208,21 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [staged.length]);
 
+  // ONE handler map — the review-screen Save AND the Sunday review's finish both apply through it.
+  const stagedHandlers = {
+    markSent: (p: Extract<StagedPayload, { kind: "mark-sent" }>) => recordMaterialsSent(markSentWriteArgs(p)),
+    nudge: (p: Extract<StagedPayload, { kind: "nudge" }>) => logNudge(...nudgeWriteArgs(p, new Date().toISOString())).then((r) => { if (!r.success) throw new Error(r.error || "nudge failed"); }),
+    snooze: (p: Extract<StagedPayload, { kind: "snooze" }>) => dismissTask(p.taskType, p.relatedRecordId, "fixed snooze", p.days),
+    muteItem: (p: Extract<StagedPayload, { kind: "mute-item" }>) => upsertTaskFlag(flagKeyForTask(p.taskType, p.relatedRecordId), { snoozedUntil: MUTED_UNTIL }),
+    muteRule: (p: Extract<StagedPayload, { kind: "mute-rule" }>) => updateUserProfile({ mutedTaskRules: Array.from(new Set([...(currentUser?.mutedTaskRules ?? []), p.rule])) }),
+    // the Sunday review's staged stale-close — the EXISTING close path, applied only at Save
+    close: (p: Extract<StagedPayload, { kind: "close" }>) => updateQueryStatus(p.queryId, QueryStatus.NO_RESPONSE, "Closed as no response from the Sunday review").then(() => {}),
+  };
+
   async function saveAll() {
     if (saving) return;
     setSaving(true);
-    const res = await applyStaged(staged, {
-      markSent: (p) => recordMaterialsSent(markSentWriteArgs(p)),
-      nudge: (p) => logNudge(...nudgeWriteArgs(p, new Date().toISOString())).then((r) => { if (!r.success) throw new Error(r.error || "nudge failed"); }),
-      snooze: (p) => dismissTask(p.taskType, p.relatedRecordId, "fixed snooze", p.days),
-      muteItem: (p) => upsertTaskFlag(flagKeyForTask(p.taskType, p.relatedRecordId), { snoozedUntil: MUTED_UNTIL }),
-      muteRule: (p) => updateUserProfile({ mutedTaskRules: Array.from(new Set([...(currentUser?.mutedTaskRules ?? []), p.rule])) }),
-    });
+    const res = await applyStaged(staged, stagedHandlers);
     setSaving(false);
     if (res.failed.length) {
       setStaged((s) => s.filter((p) => res.failed.includes(p.cardKey)));
@@ -990,10 +1003,11 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     if (p.kind === "mark-sent") return [fmtShort(p.sentDate), p.method, p.materials?.length ? p.materials.join(", ") : null].filter(Boolean).join(" · ");
     if (p.kind === "nudge") return [p.nudgeDate ? fmtShort(p.nudgeDate) : null, p.method].filter(Boolean).join(" · ") || "logged";
     if (p.kind === "snooze") return `snoozed ${p.days} days`;
+    if (p.kind === "close") return "closes as no response";
     return "never ask";
   };
   const stagedVerb = (p: StagedPayload): { cls: string; label: string } =>
-    p.kind === "mark-sent" || p.kind === "nudge" ? { cls: "d", label: "Done" } : p.kind === "snooze" ? { cls: "s", label: "Snoozed" } : { cls: "k", label: "Noted" };
+    p.kind === "mark-sent" || p.kind === "nudge" ? { cls: "d", label: "Done" } : p.kind === "close" ? { cls: "d", label: "Closed" } : p.kind === "snooze" ? { cls: "s", label: "Snoozed" } : { cls: "k", label: "Noted" };
 
   function reviewSheet() {
     if (savedN != null) return sheet(
@@ -1063,7 +1077,163 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     document.querySelector(".tdb-ff .tdb-ffq")?.setAttribute("id", "tdb-ff-heading");
   });
 
+  // ── THE SUNDAY REVIEW (finishing pack P3; ref todo-sunday-review.html): six steps in the
+  //    standard sheet chrome. Summary steps write NOTHING; quiet-closes STAGE (the normal staged
+  //    set, applied through stagedHandlers at finish); seeds commit Monday's committedDate (the
+  //    naturally-dormant future-date mechanism); completion writes the week's entry flag. ──
+  function sundayReviewSheet() {
+    const nowMs = Date.now();
+    const win = reviewWeek(queries, nowMs);
+    const stats = weekReviewStats({ activities, queries, agents }, win);
+    const cards = items.filter((x): x is Extract<FocusItem, { kind: "card" }> => x.kind === "card").map((x) => x.card);
+    const cands = reviewSeedCandidates(cards, queries, nowMs);
+    const seedSel: Record<string, boolean> = rvSeed ?? Object.fromEntries(cands.filter((c) => c.preTicked).map((c) => [c.key, true]));
+    const seedCount = cands.filter((c) => seedSel[c.key]).length;
+    const W = ["No", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve"];
+    const spell = (n: number) => (n <= 12 ? W[n] : String(n));
+    const mondayD = new Date(win.endMs);
+    const mondayYmd = `${mondayD.getFullYear()}-${String(mondayD.getMonth() + 1).padStart(2, "0")}-${String(mondayD.getDate()).padStart(2, "0")}`;
+    const kicker = `THE SUNDAY REVIEW · WEEK ${win.weekNumber} OF QUERYING`;
+
+    const toggleQuiet = (row: { queryId: string; name: string; prevStatus: QueryStatus }, choice: "close" | "leave") => {
+      const was = rvQuiet[row.queryId];
+      const next = was === choice ? undefined : choice;
+      setRvQuiet((prev) => { const n = { ...prev }; if (next) n[row.queryId] = next; else delete n[row.queryId]; return n; });
+      const key = `rv-close-${row.queryId}`;
+      setStaged((prev) => {
+        const without = prev.filter((x) => x.cardKey !== key);
+        return next === "close" ? [...without, { kind: "close", cardKey: key, label: `Close ${row.name} — no response`, queryId: row.queryId, prevStatus: row.prevStatus }] : without;
+      });
+    };
+
+    async function finishReview() {
+      if (saving) return;
+      setSaving(true);
+      const closes = staged.filter((x) => x.kind === "close");
+      const res = await applyStaged(closes, stagedHandlers);
+      const seeds = cands.filter((c) => seedSel[c.key]);
+      for (const sc of seeds) {
+        if (sc.userTaskId) await updateUserTask(sc.userTaskId, { committedDate: mondayYmd });
+        else if (sc.taskType && sc.relatedRecordId) await upsertTaskFlag(flagKeyForTask(sc.taskType, sc.relatedRecordId), { committedDate: mondayYmd });
+      }
+      await upsertTaskFlag(flagKeyForTask("weekly_review", win.key), { snoozedUntil: new Date(win.endMs + 2 * 86400000).toISOString() });
+      setStaged((prev) => prev.filter((x) => x.kind !== "close"));
+      setRvSummary({ closed: res.ok.length, seeded: seeds.length });
+      setSaving(false);
+      setRvStep(5);
+    }
+
+    if (rvStep === 0) return sheet(
+      <>
+        <div className="tdb-ffstream off">{kicker}</div>
+        <div className="tdb-rvhand" aria-hidden>— kettle on. this takes about five minutes.</div>
+        <div className="tdb-ffq">Week {win.weekNumber}, closed properly</div>
+        <div className="tdb-ffqsub">A short look back before the week ahead: what went out, what came back, what’s gone quiet — and then we’ll set Monday’s list so tomorrow starts itself.</div>
+        <div className="tdb-rvstats">
+          <span className="tdb-rvstat"><b>{stats.sent.length}</b>WENT OUT</span>
+          <span className="tdb-rvstat"><b>{stats.back.length}</b>CAME BACK</span>
+          <span className={`tdb-rvstat${stats.offers ? " star" : ""}`}><b>{stats.offers}</b>OFFER{stats.offers === 1 ? "" : "S"} ★</span>
+          <span className="tdb-rvstat"><b>{stats.quiet.length}</b>WENT QUIET</span>
+        </div>
+      </>,
+      <>
+        <span className="tdb-sp" />
+        <button type="button" className="tdb-ffpri" onClick={() => setRvStep(1)}>Begin →</button>
+      </>,
+    );
+
+    if (rvStep === 1) return sheet(
+      <>
+        <div className="tdb-ffstream off">LOOKING BACK · WHAT WENT OUT</div>
+        <div className="tdb-ffq">{stats.sent.length === 0 ? "A quiet week on the way out" : `${spell(stats.sent.length)} thing${stats.sent.length === 1 ? "" : "s"} left your desk`}</div>
+        <div className="tdb-ffqsub">{stats.sent.length === 0 ? "Nothing went out — rest weeks count too." : "Nothing to do here — just seeing your own momentum. Every one of these was work."}</div>
+        <div className="tdb-rvrows">{stats.sent.map((r, i) => (
+          <div key={i} className="tdb-rvrow"><span className="tdb-rvbadge out">{r.badge}</span><span className="tdb-rvtx"><b>{r.label}</b><span>{r.meta}</span></span></div>
+        ))}</div>
+      </>,
+      <>
+        <button type="button" className="tdb-ffback" onClick={() => setRvStep(0)}>← Back</button>
+        <span className="tdb-sp" />
+        <button type="button" className="tdb-ffpri" onClick={() => setRvStep(2)}>Continue →</button>
+      </>,
+    );
+
+    if (rvStep === 2) return sheet(
+      <>
+        <div className="tdb-ffstream off">LOOKING BACK · WHAT CAME BACK</div>
+        <div className="tdb-ffq">{stats.back.length === 0 ? "Nothing back this week" : `${spell(stats.back.length)} came back${stats.offers === 1 ? " — one of them gold" : stats.offers > 1 ? ` — ${stats.offers} of them gold` : ""}`}</div>
+        <div className="tdb-ffqsub">{stats.back.length === 0 ? "Normal, not nothing — most weeks are quiet ones." : "Read them again if you like. They happened."}</div>
+        <div className="tdb-rvrows">{stats.back.map((r, i) => (
+          <div key={i} className="tdb-rvrow"><span className={`tdb-rvbadge${r.star ? " star" : " in"}`}>{r.badge}</span><span className="tdb-rvtx"><b>{r.label}</b><span>{r.meta}</span></span></div>
+        ))}</div>
+      </>,
+      <>
+        <button type="button" className="tdb-ffback" onClick={() => setRvStep(1)}>← Back</button>
+        <span className="tdb-sp" />
+        <button type="button" className="tdb-ffpri" onClick={() => setRvStep(3)}>Continue →</button>
+      </>,
+    );
+
+    if (rvStep === 3) return sheet(
+      <>
+        <div className="tdb-ffstream off">LOOKING BACK · WHAT WENT QUIET</div>
+        <div className="tdb-ffq">{stats.quiet.length === 0 ? "Nothing went quiet this week" : `${spell(stats.quiet.length)} ${stats.quiet.length === 1 ? "has" : "have"} gone quiet`}</div>
+        <div className="tdb-ffqsub">{stats.quiet.length === 0 ? "Every live query is still inside its window." : "Decide now or decide later — either is a decision. Choices stage here and save at the end."}</div>
+        <div className="tdb-rvrows">{stats.quiet.map((r) => (
+          <div key={r.queryId} className="tdb-rvrow">
+            <span className="tdb-rvtx"><b>{r.name}</b><span>{[r.daysSilent != null ? `${r.daysSilent} DAYS SILENT` : null, "NO REPLY"].filter(Boolean).join(" · ")}</span></span>
+            <span className="tdb-rvacts">
+              <button type="button" className={`tdb-rvqa${rvQuiet[r.queryId] === "close" ? " sel" : ""}`} onClick={() => toggleQuiet(r, "close")}>Close it</button>
+              <button type="button" className={`tdb-rvqa${rvQuiet[r.queryId] === "leave" ? " sel" : ""}`} onClick={() => toggleQuiet(r, "leave")}>Leave it</button>
+            </span>
+          </div>
+        ))}</div>
+      </>,
+      <>
+        <button type="button" className="tdb-ffback" onClick={() => setRvStep(2)}>← Back</button>
+        <span className="tdb-sp" />
+        <button type="button" className="tdb-ffpri" onClick={() => setRvStep(4)}>Continue →</button>
+      </>,
+    );
+
+    if (rvStep === 4) return sheet(
+      <>
+        <div className="tdb-ffstream off">THE WEEK AHEAD · SEEDING MONDAY</div>
+        <div className="tdb-ffq">What should Monday hold?</div>
+        <div className="tdb-ffqsub">Dated things are pre-ticked. These land on <b>Monday’s Today’s list</b> — you’ll wake up to a desk that’s already set.</div>
+        <div className="tdb-rvrows">{cands.map((c) => (
+          <label key={c.key} className={`tdb-rvseed${seedSel[c.key] ? " on" : ""}`}>
+            <input type="checkbox" checked={!!seedSel[c.key]} onChange={() => setRvSeed({ ...seedSel, [c.key]: !seedSel[c.key] })} />
+            <span className="tdb-rvtx"><b>{c.label}</b><span>{c.meta}</span></span>
+          </label>
+        ))}
+        {cands.length === 0 && <div className="tdb-ffsmall">Nothing on the Urgent lane to seed — Monday starts clean.</div>}</div>
+      </>,
+      <>
+        <button type="button" className="tdb-ffback" onClick={() => setRvStep(3)}>← Back</button>
+        <span className="tdb-sp" />
+        <button type="button" className="tdb-ffpri" disabled={saving} onClick={finishReview}>Seed Monday & finish</button>
+      </>,
+    );
+
+    return sheet(
+      <div className="tdb-rvdone">
+        <span className="tdb-rvring" aria-hidden>☕</span>
+        <div className="tdb-ffq">Week {win.weekNumber}, closed.</div>
+        <div className="tdb-ffqsub">
+          {rvSummary ? `${rvSummary.closed} ${rvSummary.closed === 1 ? "query" : "queries"} closed · Monday’s list seeded with ${rvSummary.seeded} thing${rvSummary.seeded === 1 ? "" : "s"}.` : ""}
+          <br />See you at the desk tomorrow.
+        </div>
+      </div>,
+      <>
+        <span className="tdb-sp" />
+        <button type="button" className="tdb-ffpri" onClick={() => requestExit()}>Back to my desk</button>
+      </>,
+    );
+  }
+
   const content = useMemo(() => {
+    if (review) return sundayReviewSheet();
     if (atReview) return reviewSheet();
     const it = items[qi];
     if (sweep && !deepDive) return sweepSheet(it); // the speed grammar; F/Enter drill into the journey below
@@ -1076,7 +1246,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     if (j === "note") return noteSheet(it.card);
     return sendSheet(it.card);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [atReview, qi, step, items, mats, sentDate, method, copied, extrasOpen, backdated, rows, noMeansNo, found, notFound, assistAt, assisting, assistMsg, showMuted, noteText, staged, savedN, saving, offerDoor, offerChoice, remindDate, notifyStep, notifySel, sweep, deepDive, sweepReceipt, sweepFork, queries, agents, manuscripts, activities, taskFlags, currentUser]);
+  }, [atReview, qi, step, items, mats, sentDate, method, copied, extrasOpen, backdated, rows, noMeansNo, found, notFound, assistAt, assisting, assistMsg, showMuted, noteText, staged, savedN, saving, offerDoor, offerChoice, remindDate, notifyStep, notifySel, review, rvStep, rvQuiet, rvSeed, rvSummary, sweep, deepDive, sweepReceipt, sweepFork, queries, agents, manuscripts, activities, taskFlags, currentUser]);
 
 
   const remaining = items.length - qi - 1;
@@ -1090,7 +1260,14 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
               top-left (multi-item modes only), the labelled exit top-right; the staged chip sits
               in the footer (sheet()). Nothing renders outside the sheet except the scrim. */}
           <div className="tdb-ffbar">
-            {items.length > 1 && (
+            {review ? (
+              <>
+                <div className="tdb-ffprog" aria-hidden>
+                  {[0, 1, 2, 3, 4].map((i) => <span key={i} className={`tdb-ffdot${i < Math.min(rvStep, 4) ? " done" : i === Math.min(rvStep, 4) ? " on" : ""}`} />)}
+                </div>
+                <span className="tdb-ffcount">{rvStep < 5 ? `${rvStep + 1} OF 5` : "DONE"}</span>
+              </>
+            ) : items.length > 1 && (
               <>
                 <div className="tdb-ffprog" aria-hidden>
                   {items.map((it, i) => <span key={itemKey(it)} className={`tdb-ffdot${i < qi ? " done" : i === qi ? " on" : ""}`} />)}

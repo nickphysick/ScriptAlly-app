@@ -65,6 +65,7 @@ const HANDLERS = (over: Partial<StagedHandlers> = {}): StagedHandlers => ({
   snooze: async () => {},
   muteItem: async () => {},
   muteRule: async () => {},
+  close: async () => {},
   ...over,
 });
 
@@ -268,5 +269,21 @@ describe("one-tap default — the write is byte-identical (P2)", () => {
     const ticked = { Synopsis: true };
     const materials = [a.label, ...a.extras.filter((m) => (ticked as Record<string, boolean>)[m])];
     expect(materials).toEqual(["Full manuscript", "Synopsis"]);
+  });
+});
+
+describe("staged close — the Sunday review's deferred stale-close (finishing P3)", () => {
+  it("routes to the close handler at apply time only; per-item isolation holds", async () => {
+    const seen: string[] = [];
+    const res = await applyStaged(
+      [
+        { kind: "close", cardKey: "rv-close-q1", queryId: "q1", prevStatus: QueryStatus.QUERIED },
+        { kind: "close", cardKey: "rv-close-q2", queryId: "q2", prevStatus: QueryStatus.FULL_SENT },
+      ],
+      HANDLERS({ close: async (p) => { if (p.queryId === "q2") throw new Error("boom"); seen.push(p.queryId); } }),
+    );
+    expect(seen).toEqual(["q1"]);
+    expect(res.ok).toEqual(["rv-close-q1"]);
+    expect(res.failed).toEqual(["rv-close-q2"]);
   });
 });

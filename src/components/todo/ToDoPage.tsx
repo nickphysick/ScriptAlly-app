@@ -247,7 +247,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [rollDismissed, setRollDismissed] = useState(false);
   const [pulsing, setPulsing] = useState<string | null>(null);
   // THE completion surface — the focus flow (queue of one for a card click; a set for the two walks).
-  const [flow, setFlow] = useState<{ items: FocusItem[]; mode?: "sweep" } | null>(null);
+  const [flow, setFlow] = useState<{ items: FocusItem[]; mode?: "sweep" | "weeklyReview" } | null>(null);
   const [flowPrefill, setFlowPrefill] = useState<{ sentDate?: string; method?: string; materials?: string[] } | undefined>(undefined);
   const [todayOpen, setTodayOpen] = useState(false);
   // Chrome-fixes P1 — THE close path (the ✕, click-away and Esc all land here; never parallel
@@ -274,7 +274,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     return () => { document.removeEventListener("pointerdown", onDown); window.removeEventListener("keydown", onKey); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [todayOpen, flow]);
-  const openFlowCards = (cards: BoardCard[]) => setFlow({ items: cards.map((card) => ({ kind: "card", card })) });
+  const openFlowCards = (cards: BoardCard[]) => {
+    // the Sunday-review entry card never enters card journeys/walks — it has its own mode
+    const flowable = cards.filter((c) => c.taskType !== "weekly_review");
+    if (flowable.length) setFlow({ items: flowable.map((card) => ({ kind: "card", card })) });
+  };
   // Quick-rail card states. Receipts/dismissed render as STANDALONE cards (the live card vanishes the
   // moment the write lands — the board is derived); fork/flip replace a still-live card's body.
   const [overlays, setOverlays] = useState<Record<string, Overlay>>({});
@@ -374,7 +378,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   }
   // Help me pick — a selection gesture: pulse-and-fade, card by card, then commit each.
   async function helpMePick() {
-    const picks = choosePicks({ doCards: board.do, hkCards: board.hk, committedCount: committedCards.length });
+    const picks = choosePicks({ doCards: board.do.filter((c) => c.taskType !== "weekly_review"), hkCards: board.hk, committedCount: committedCards.length });
     if (!picks.length) { flash(`Today’s list is full (${MAX_TODAY} max)`); return; }
     const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     const pool = [...board.do, ...board.hk];
@@ -561,7 +565,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         {desk === "new-desk" ? renderNewDesk() : desk === "desk-cleared" ? renderDeskCleared() : (
         <div className="tdb-lanes">
           <Lane cls="do" label="Urgent" count={tiles.urgent} isEmpty={board.do.length === 0 && overlayCards("do").length === 0}
-            onFocusedSession={() => setFlow({ items: board.do.map((card) => ({ kind: "card", card })), mode: "sweep" })}
+            onFocusedSession={() => setFlow({ items: board.do.filter((c) => c.taskType !== "weekly_review").map((card) => ({ kind: "card", card })), mode: "sweep" })}
             emptyNode={
               <div className="tdb-clear do">
                 <span className="tdb-clric" aria-hidden>✓</span>
@@ -756,6 +760,32 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     );
   }
 
+  // ── the Sunday-review entry card (finishing P3): derived + dismissible for the week; its click
+  //    opens the weeklyReview mode with the live Urgent cards as the seed source. ──
+  const openSundayReview = () =>
+    setFlow({ items: board.do.filter((x) => x.taskType !== "weekly_review").map((card) => ({ kind: "card" as const, card })), mode: "weeklyReview" });
+
+  function renderReviewCard(c: BoardCard) {
+    const dismiss = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      const key = flagKeyForTask("weekly_review", c.relatedRecordId!);
+      upsertTaskFlag(key, { snoozedUntil: new Date(Date.now() + 3 * 86400000).toISOString() });
+      flash(`✓ ${c.title} — dismissed`, { label: "Undo", fn: async () => { await upsertTaskFlag(key, { snoozedUntil: null }); flash("Restored"); } });
+    };
+    return (
+      <div key={c.key} className="tdb-tile do rvcard" onClick={openSundayReview}>
+        <button type="button" className="tdb-rvx" onClick={dismiss} aria-label="Dismiss the review for this week">✕</button>
+        <div className="tdb-tags"><span className="tdb-tag due">{c.due}</span></div>
+        <div className="tdb-mid">
+          <div className="tdb-tt">{c.title}</div>
+          <div className="tdb-tsub">{c.subtitle}</div>
+        </div>
+        <div className="tdb-rvweek">{c.record.toUpperCase()}</div>
+        <button type="button" className="tdb-rvgo" onClick={(e) => { e.stopPropagation(); openSundayReview(); }}>Begin the review →</button>
+      </div>
+    );
+  }
+
   // Standalone receipt/dismissed cards — the live card vanished with the write; the receipt persists.
   function overlayCards(lane: "do" | "hk" | "nt") {
     return Object.entries(overlays)
@@ -803,6 +833,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // ── full-detail lane card (fixed height, clip-safe). Completion = the rail or the sheet; the
   // Mark-done pill is RETIRED and ＋ Today's list goes full-width (committing = the visible button). ──
   function renderCard(c: BoardCard) {
+    if (c.taskType === "weekly_review") return renderReviewCard(c);
     const committed = onList(c);
     const ov = overlays[c.key];
     const isOffer = c.taskType === "offer_received";
