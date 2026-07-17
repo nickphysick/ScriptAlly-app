@@ -78,3 +78,23 @@ non-overflow · overlays ride `--cardw` (free — they are `.tdb-tile`s) · GAP 
   `.tdb-chev` rules are DELETED (markup + CSS, no dead state). `laneFadeState` + its tests stay
   in `todoBoard.ts`, repurposed.
 - **jsdom can't verify snap/smooth-scroll geometry** — flagged for the in-browser checklist.
+
+## PHASE 3 — Today's-list pop-up stacking
+
+Step 0's finding: the render rule was intact, the SIZING was never wired — fixed here.
+
+- **The pop-up grows with content:** `.tdb-pop` `height:` → `max-height: min(540px,
+  calc(100vh − 120px))` (the existing cap kept as the ceiling).
+- **The outstanding list owns the flexible height:** `.tdb-tcommit` `flex: none; max-height:
+  168px` → `flex: 1 1 auto; min-height: 0` (renders first, scrolls internally only past the cap).
+  The pre-follow-up "capped so the done band always shows" comment — the inversion's source — is
+  rewritten.
+- **The done band never steals space:** `.tdb-tdone` `flex: 1` → `flex: 0 0 auto; max-height:
+  32vh` (content-sized, own scroll); the **zero-done `flex:1` spacer div is DELETED** — that
+  spacer was the 5-committed/0-done dead space. The `doneN > 0` render conditional (follow-up
+  rule) unchanged. Dead `.tdb-donenil` rule removed.
+- **Header/footer:** already `flex: none` — untouched, verified.
+- **Locks:** NEW `todoPopupStack.test.ts` — the flex contract + the spacer regression pinned at
+  the source/rule-text layer (the repo's testing policy is logic-only, no component mounts — the
+  pack's "render-logic tests" are realised as text-layer locks; reported as the policy-compliant
+  translation). At-5/0 pixel behaviour flagged for the in-browser checklist.

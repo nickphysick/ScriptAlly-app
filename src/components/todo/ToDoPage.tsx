@@ -710,7 +710,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             </div>
           </>
         )}
-        {doneN === 0 && <div className="tdb-tdone" />}
 
         <div className="tdb-tf">
           <span className="tdb-pc">{prog.empty ? "NOTHING COMMITTED" : `${prog.done} of ${prog.total} done today`}</span>
