@@ -25,7 +25,7 @@ import { F12Page, F12Account } from "../shell/F12Shell";
 import { StatusDot } from "../StatusDot";
 import { useScriptAllyDb } from "../../lib/db";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
-import { assembleBoard, todaySplit, ribbonTiles, laneFadeState, walkSublabel, walkAria, BoardCard, USER_TASK_FLAG_TYPE } from "../../lib/todoBoard";
+import { assembleBoard, todaySplit, ribbonTiles, laneFadeState, walkSublabel, walkAria, reviewScrap, BoardCard, USER_TASK_FLAG_TYPE } from "../../lib/todoBoard";
 import { flagKeyForTask, MUTED_UNTIL } from "../../lib/taskFlags";
 import {
   choosePicks, rolledOverCards, todayProgress, MAX_TODAY,
@@ -291,6 +291,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const now = Date.now();
   const today = localYMD(now);
 
+  const scrap = useMemo(
+    () => reviewScrap({ tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, today, now }),
+    [queries, taskFlags, now], // eslint-disable-line react-hooks/exhaustive-deps
+  );
   const board = useMemo(
     () => assembleBoard({ tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, today, now }),
     // now/today are session-stable enough; recomputing on the data arrays is what matters.
@@ -550,6 +554,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             <button type="button" className={`tdb-postit nt${tiles.notes === 0 ? " zero" : ""}`} aria-label={`${tiles.notes} notes to self — jump to the Notes lane`} onClick={() => scrollToLane("nt")}>
               <span className="tdb-pv" aria-hidden>{tiles.notes}</span><span className="tdb-pk" aria-hidden>notes</span>
             </button>
+            {/* the torn scrap (afterlife pack) — an OFFER, not a chore; opens the shipped review mode */}
+            {scrap && (
+              <button type="button" className="tdb-scrap" aria-label={`Last week in review — week ${scrap.weekNumber}`} onClick={openSundayReview}>
+                <b>Last week</b><u>in review ▸</u>
+              </button>
+            )}
           </span>
           <span className="tdb-sp" />
           <button type="button" className="tdb-btn-pri" disabled={!tiles.urgent} aria-label={walkAria(tiles.urgent)} onClick={() => openFlowCards(board.do)}>

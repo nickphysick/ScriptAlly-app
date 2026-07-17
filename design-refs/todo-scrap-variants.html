@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The scrap in Playfair — variations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --oat:#f1e8dc; --paper:#fdfaf5; --white:#ffffff;
+  --ink:#3a1c14; --muted:#9a8c80; --hair:#e7ddd2;
+  --pink-t:#f5e2da; --pink-b:#e8c8bc;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--oat);font-family:Inter,sans-serif;color:var(--ink);padding:40px 0 100px}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8a7a6d;max-width:1100px;margin:0 auto 12px;padding:0 30px}
+.lbl:not(:first-child){margin-top:50px}
+.lbl em{font-style:normal;text-transform:none;letter-spacing:0;font-size:12.5px;color:#5d4d40;margin-left:10px}
+
+.band{background:var(--paper);border-bottom:1px solid var(--hair)}
+.band-in{max-width:1100px;margin:0 auto;padding:20px 30px;display:flex;align-items:center;gap:26px}
+.h-date{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.16em;color:var(--muted);margin-bottom:5px}
+.h-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:600}
+.postits{display:flex;gap:13px;align-items:flex-start}
+.postit{width:62px;height:62px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;box-shadow:0 2px 5px rgba(58,28,20,.13);position:relative}
+.postit::before{content:'';position:absolute;top:-6px;left:50%;transform:translateX(-50%);width:22px;height:9px;background:rgba(255,255,255,.55)}
+.postit .n{font-family:'Playfair Display',serif;font-size:20px;font-weight:600}
+.postit .c{font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:.1em}
+.p-pink{background:#f6cfc9}.p-cof{background:#e2d2b9}.p-yellow{background:#f2e9c8}
+.spacer{flex:1}
+.wmt{display:inline-flex;align-items:center;gap:11px;background:var(--white);border:1px solid var(--hair);border-radius:99px;padding:11px 22px 11px 12px;box-shadow:0 2px 8px rgba(58,28,20,.09);cursor:pointer}
+.wmt .disc{width:32px;height:32px;border-radius:50%;background:linear-gradient(180deg,var(--pink-t),var(--pink-b));border:1px solid var(--pink-b);display:flex;align-items:center;justify-content:center}
+.wmt .disc svg{width:12px;height:12px;margin-left:2px;color:var(--ink)}
+.wmt .l2{font-family:'Playfair Display',serif;font-size:15.5px;font-weight:600;text-align:left;line-height:1.1}
+.wmt .sub{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;text-transform:uppercase;color:rgba(58,28,20,.55);margin-top:2px;text-align:left}
+
+.scrap{background:var(--paper);border:1px solid var(--hair);box-shadow:0 2px 5px rgba(58,28,20,.12);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;margin-top:8px;transition:transform .15s}
+.scrap:hover{transform:rotate(0deg) translateY(-2px) !important}
+
+/* 1 - italic phrase */
+.s1{width:66px;height:48px;transform:rotate(3deg);gap:2px}
+.s1 b{font-family:'Playfair Display',serif;font-style:italic;font-weight:500;font-size:12.5px;color:#5d4d40;line-height:1.1;text-align:center}
+.s1 span{font-family:'JetBrains Mono',monospace;font-size:6px;letter-spacing:.12em;color:#a5988c}
+
+/* 2 - the numbered week */
+.s2{width:64px;height:52px;transform:rotate(-2.5deg);gap:1px}
+.s2 i{font-family:'JetBrains Mono',monospace;font-style:normal;font-size:5.5px;letter-spacing:.14em;color:#a5988c}
+.s2 b{font-family:'Playfair Display',serif;font-weight:600;font-size:16px;color:var(--ink);line-height:1}
+.s2 span{font-family:'Playfair Display',serif;font-style:italic;font-weight:500;font-size:10px;color:#7a6a5e}
+
+/* 3 - torn edge */
+.s3{width:70px;height:50px;transform:rotate(2deg);gap:2px;border:none;clip-path:polygon(0 4%,7% 0,94% 2%,100% 8%,99% 88%,88% 94%,72% 90%,55% 97%,38% 92%,20% 98%,6% 93%,0 86%);box-shadow:0 3px 6px rgba(58,28,20,.15)}
+.s3 b{font-family:'Playfair Display',serif;font-style:italic;font-weight:600;font-size:12px;color:#5d4d40;line-height:1.15;text-align:center}
+.s3 u{text-decoration:none;border-bottom:1px solid #cdb58f;font-family:'Playfair Display',serif;font-style:italic;font-size:9.5px;color:#7a6544}
+
+/* 4 - the dog-ear */
+.s4{width:62px;height:54px;transform:rotate(-3deg);gap:3px;position:relative;overflow:hidden}
+.s4::after{content:'';position:absolute;top:0;right:0;width:0;height:0;border-style:solid;border-width:0 13px 13px 0;border-color:transparent var(--oat) #e6dccb transparent;filter:drop-shadow(-1px 1px 1px rgba(58,28,20,.12))}
+.s4 b{font-family:'Playfair Display',serif;font-weight:600;font-size:11.5px;color:var(--ink);line-height:1.15;text-align:center}
+.s4 span{font-family:'Playfair Display',serif;font-style:italic;font-size:9px;color:#a5988c}
+</style>
+</head>
+<body>
+
+<!-- ▼▼ EXPLORATION (variants 1 & 2) — NOT normative; variant 3 (The torn corner) below is the built design ▼▼ -->
+<div class="lbl">1 · Italic phrase <em>"last week" in Playfair italic, mono whisper beneath</em></div>
+<div class="band"><div class="band-in">
+  <div><div class="h-date">FRI 17 JUL · WEEK 137</div><div class="h-title">What's on your desk?</div></div>
+  <div class="postits">
+    <div class="postit p-pink"><span class="n">4</span><span class="c">URGENT</span></div>
+    <div class="postit p-cof"><span class="n">40</span><span class="c">HOUSEKPG</span></div>
+    <div class="postit p-yellow"><span class="n">0</span><span class="c">NOTES</span></div>
+    <div class="scrap s1"><b>last<br>week</b><span>IN REVIEW ▸</span></div>
+  </div>
+  <div class="spacer"></div>
+  <button class="wmt"><span class="disc"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="7 4 21 12 7 20 7 4"></polygon></svg></span><span><div class="l2">Walk me through</div><div class="sub">GUIDED · 4 URGENT ITEMS</div></span></button>
+</div></div>
+
+<div class="lbl">2 · The numbered week <em>the week number as the object — kicker, numeral, italic tail</em></div>
+<div class="band"><div class="band-in">
+  <div><div class="h-date">FRI 17 JUL · WEEK 137</div><div class="h-title">What's on your desk?</div></div>
+  <div class="postits">
+    <div class="postit p-pink"><span class="n">4</span><span class="c">URGENT</span></div>
+    <div class="postit p-cof"><span class="n">40</span><span class="c">HOUSEKPG</span></div>
+    <div class="postit p-yellow"><span class="n">0</span><span class="c">NOTES</span></div>
+    <div class="scrap s2"><i>WEEK</i><b>136</b><span>in review ▸</span></div>
+  </div>
+  <div class="spacer"></div>
+  <button class="wmt"><span class="disc"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="7 4 21 12 7 20 7 4"></polygon></svg></span><span><div class="l2">Walk me through</div><div class="sub">GUIDED · 4 URGENT ITEMS</div></span></button>
+</div></div>
+
+<!-- ▲▲ end exploration ▲▲ -->
+<!-- ══ NORMATIVE: variant 3, The torn corner — built (copy amended: "Last week", capital L) ══ -->
+<div class="lbl">3 · The torn corner <em>ripped from the week — italic Playfair, underlined tail, jagged edge</em></div>
+<div class="band"><div class="band-in">
+  <div><div class="h-date">FRI 17 JUL · WEEK 137</div><div class="h-title">What's on your desk?</div></div>
+  <div class="postits">
+    <div class="postit p-pink"><span class="n">4</span><span class="c">URGENT</span></div>
+    <div class="postit p-cof"><span class="n">40</span><span class="c">HOUSEKPG</span></div>
+    <div class="postit p-yellow"><span class="n">0</span><span class="c">NOTES</span></div>
+    <div class="scrap s3"><b>last week</b><u>in review ▸</u></div>
+  </div>
+  <div class="spacer"></div>
+  <button class="wmt"><span class="disc"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="7 4 21 12 7 20 7 4"></polygon></svg></span><span><div class="l2">Walk me through</div><div class="sub">GUIDED · 4 URGENT ITEMS</div></span></button>
+</div></div>
+
+<!-- ▼▼ EXPLORATION (variant 4) — NOT normative ▼▼ -->
+<div class="lbl">4 · The dog-ear <em>upright Playfair, a turned corner — a page kept</em></div>
+<div class="band"><div class="band-in">
+  <div><div class="h-date">FRI 17 JUL · WEEK 137</div><div class="h-title">What's on your desk?</div></div>
+  <div class="postits">
+    <div class="postit p-pink"><span class="n">4</span><span class="c">URGENT</span></div>
+    <div class="postit p-cof"><span class="n">40</span><span class="c">HOUSEKPG</span></div>
+    <div class="postit p-yellow"><span class="n">0</span><span class="c">NOTES</span></div>
+    <div class="scrap s4"><b>last<br>week</b><span>in review ▸</span></div>
+  </div>
+  <div class="spacer"></div>
+  <button class="wmt"><span class="disc"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="7 4 21 12 7 20 7 4"></polygon></svg></span><span><div class="l2">Walk me through</div><div class="sub">GUIDED · 4 URGENT ITEMS</div></span></button>
+</div></div>
+
+</body>
+</html>

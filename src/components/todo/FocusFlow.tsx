@@ -33,7 +33,7 @@ import { buildAgentTimeline } from "../../lib/agentsPage";
 import { OfferDecision } from "../../lib/offerDecision";
 import { notifyGroups, reminderFields, NotifyRow } from "../../lib/offerNotify";
 import { lockStageScroll } from "../../lib/stageScroll";
-import { reviewWeek, weekReviewStats, reviewSeedCandidates, SeedCandidate } from "../../lib/todoBoard";
+import { reviewWeek, weekReviewStats, reviewSeedCandidates, reviewCompletionSnooze, SeedCandidate } from "../../lib/todoBoard";
 import { agentPrimary } from "../../lib/agentDisplay";
 import { nudgeDraft } from "../../lib/nudgeDraft";
 import { flagKeyForTask, MUTED_UNTIL } from "../../lib/taskFlags";
@@ -1116,7 +1116,9 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
         if (sc.userTaskId) await updateUserTask(sc.userTaskId, { committedDate: mondayYmd });
         else if (sc.taskType && sc.relatedRecordId) await upsertTaskFlag(flagKeyForTask(sc.taskType, sc.relatedRecordId), { committedDate: mondayYmd });
       }
-      await upsertTaskFlag(flagKeyForTask("weekly_review", win.key), { snoozedUntil: new Date(win.endMs + 2 * 86400000).toISOString() });
+      // the completion sentinel is single-sourced (todoBoard.reviewCompletionSnooze) so the scrap
+      // afterlife can read "completed" without the formula drifting — same value as before.
+      await upsertTaskFlag(flagKeyForTask("weekly_review", win.key), { snoozedUntil: reviewCompletionSnooze(win) });
       setStaged((prev) => prev.filter((x) => x.kind !== "close"));
       setRvSummary({ closed: res.ok.length, seeded: seeds.length });
       setSaving(false);

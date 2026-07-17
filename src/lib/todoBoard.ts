@@ -258,8 +258,8 @@ export function assembleBoard(input: BoardInput): AssembledBoard {
     .sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""))
     .map((t) => userCard(t, input));
   const review = reviewEntryCard(input);
-  const doCards = orderDoNext([...(review?.stream === "do" ? [review] : []), ...derived.filter((c) => c.stream === "do"), ...userCards.filter((c) => c.stream === "do")]);
-  const hkCards = [...derived.filter((c) => c.stream === "hk"), ...(review?.stream === "hk" ? [review] : [])];
+  const doCards = orderDoNext([...(review ? [review] : []), ...derived.filter((c) => c.stream === "do"), ...userCards.filter((c) => c.stream === "do")]);
+  const hkCards = derived.filter((c) => c.stream === "hk");
   const ntCards = userCards.filter((c) => c.stream === "nt");
 
   // Cleared today — the union (activities today · user tasks done today · flags resolved today).
@@ -468,11 +468,37 @@ export function reviewEntryCard(input: BoardInput): BoardCard | null {
     taskType: "weekly_review",
     relatedRecordId: win.key,
   };
-  if (day === 0 || day === 1) {
-    const stats = weekReviewStats(input, win);
-    return { ...base, stream: "do", hk: false, title: "Your week in querying", subtitle: reviewEntryLine(stats) };
-  }
-  return { ...base, stream: "hk", hk: true, title: `Week ${win.weekNumber}, still open`, subtitle: "Close it properly — five minutes." };
+  if (day !== 0 && day !== 1) return null; // Sun/Mon own the Urgent card; Tue–Sat the SCRAP offers it
+  const stats = weekReviewStats(input, win);
+  return { ...base, stream: "do", hk: false, title: "Your week in querying", subtitle: reviewEntryLine(stats) };
+}
+
+/**
+ * The completion sentinel for a week's review flag — the EXACT `snoozedUntil` finishReview writes
+ * on completion (`win.endMs + 2 days`). Single-sourced here so the scrap's read (below) and the
+ * write (FocusFlow.finishReview) can never drift: completion is the ONLY handler that writes THIS
+ * value; a mere dismissal writes `now + 3d`, which this never equals in practice.
+ */
+export function reviewCompletionSnooze(win: ReviewWeek): string {
+  return new Date(win.endMs + 2 * DAY_MS).toISOString();
+}
+
+/**
+ * The scrap (afterlife pack): a small torn offer — NOT a task, NOT in a lane. Renders Tue 00:00 →
+ * Sat 23:59 while the most recent completed week is UNCOMPLETED — deliberately regardless of a
+ * Sunday-card dismissal (dismissing the invitation stops the prompt; it does not withdraw the
+ * offer). Sun/Mon the Urgent card owns entry (no scrap — never both); completion or the next
+ * week's supersession removes it. "Completed" is the sentinel above (NOT presence — presence would
+ * also swallow a dismissal). No querying yet → nothing to review → no scrap.
+ */
+export function reviewScrap(input: BoardInput): { weekNumber: number } | null {
+  const day = new Date(input.now).getDay();
+  if (day === 0 || day === 1) return null; // the Urgent card owns Sun/Mon
+  if (input.queries.length === 0) return null; // nothing queried → nothing to offer
+  const win = reviewWeek(input.queries, input.now);
+  const flag = input.taskFlags.find((f) => flagMatchesTask(f, "weekly_review", win.key));
+  if (flag?.snoozedUntil === reviewCompletionSnooze(win)) return null; // completed → offer withdrawn
+  return { weekNumber: win.weekNumber };
 }
 
 /**

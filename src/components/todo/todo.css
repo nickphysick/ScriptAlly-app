@@ -39,6 +39,18 @@
 .tdb-postit:hover, .tdb-postit:focus-visible { transform: rotate(0) scale(1.05); }
 .tdb-postit.zero .tdb-pv { opacity: 0.45; }
 @media (prefers-reduced-motion: reduce) { .tdb-postit { transition: none; } }
+
+/* ── the torn scrap (afterlife pack; ref todo-scrap-variants.html variant 3): a small ripped
+   offer at the end of the post-it cluster — NOT a task, no border, no urgency, no count. Italic
+   Playfair "Last week" over an underlined "in review ▸". The clip-path torn edge clips box-shadow
+   AND outline, so the soft shadow + focus ring ride `filter: drop-shadow` (follows the torn
+   silhouette). Hover/focus straightens + lifts. ── */
+.tdb-scrap { width: 70px; height: 50px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; margin-top: 8px; background: var(--paper); border: none; clip-path: polygon(0 4%, 7% 0, 94% 2%, 100% 8%, 99% 88%, 88% 94%, 72% 90%, 55% 97%, 38% 92%, 20% 98%, 6% 93%, 0 86%); transform: rotate(2deg); filter: drop-shadow(0 3px 5px rgba(58, 28, 20, 0.16)); cursor: pointer; transition: transform 0.15s, filter 0.15s; }
+.tdb-scrap:hover { transform: rotate(0deg) translateY(-2px); }
+.tdb-scrap:focus-visible { transform: rotate(0deg) translateY(-2px); filter: drop-shadow(0 0 1.5px var(--hk-cof-ink)) drop-shadow(0 0 1.5px var(--hk-cof-ink)); }
+.tdb-scrap b { font-family: var(--f12-serif); font-style: italic; font-weight: 600; font-size: 12px; line-height: 1.15; text-align: center; color: #5d4d40; } /* #5d4d40 — the ref's warm ink; no .t-f12 token fits exactly */
+.tdb-scrap u { text-decoration: none; border-bottom: 1px solid var(--hk-cof-edge); font-family: var(--f12-serif); font-style: italic; font-size: 9.5px; color: var(--hk-cof-ink); }
+@media (prefers-reduced-motion: reduce) { .tdb-scrap { transition: none; } }
 /* Polish v3 P4 — "Walk me through" (Option C; replaces the ink "Work through priorities now").
    White pill, 38px pink gradient disc + 15px ink play triangle (+2px right optical), two-line
    block: Playfair 19 over the mono GUIDED sublabel (ink @55%). Same handler, same disabled gate

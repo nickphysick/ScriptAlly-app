@@ -90,4 +90,18 @@ describe("P3 — the Sunday review (source locks)", () => {
     expect(page).toContain("function openSundayReview()");
     expect(page).not.toContain("const openSundayReview");
   });
+
+  it("THE SCRAP (afterlife): a torn offer in the cluster — copy 'Last week', opens the review, no dismiss", () => {
+    const scrap = page.match(/\{scrap && \([\s\S]*?\)\}/)?.[0] ?? "";
+    expect(scrap).toContain('className="tdb-scrap"');
+    expect(scrap).toContain("<b>Last week</b>"); // capital L (the ref copy amendment)
+    expect(scrap).toContain("in review ▸");
+    expect(scrap).toContain("onClick={openSundayReview}");
+    expect(scrap).toContain("aria-label={`Last week in review — week ${scrap.weekNumber}`}");
+    expect(scrap).not.toContain("dismiss"); // no dismissal affordance on the scrap
+    // it derives from reviewScrap and lives inside the post-it cluster (before the cluster closes)
+    const clusterEnd = page.indexOf('</span>\n          <span className="tdb-sp" />');
+    expect(page.indexOf('className="tdb-scrap"')).toBeGreaterThan(0);
+    expect(page.indexOf('className="tdb-scrap"')).toBeLessThan(clusterEnd);
+  });
 });
