@@ -63,7 +63,7 @@
    and NEVER opacity-only (a dimmed live button still reads clickable). ── */
 .tdb-btn-pri:disabled, .tdb-worklist:disabled, .tdb-pick:disabled,
 .tdb-ffpri:disabled, .tdb-ffback:disabled, .tdb-ffcopy:disabled,
-.tdb-ra:disabled, .tdb-bffind:disabled, .tdb-gfix:disabled {
+.tdb-ra:disabled, .tdb-bffind:disabled, .tdb-gfix:disabled, .tdb-pager:disabled {
   background: var(--paper);
   border: 1px solid var(--hairline);
   color: var(--faint);
@@ -73,7 +73,7 @@
   transform: none;
 }
 .tdb-btn-pri:disabled:hover, .tdb-worklist:disabled:hover, .tdb-ffpri:disabled:hover,
-.tdb-ffback:disabled:hover, .tdb-ra:disabled:hover {
+.tdb-ffback:disabled:hover, .tdb-ra:disabled:hover, .tdb-pager:disabled:hover {
   background: var(--paper); border-color: var(--hairline); color: var(--faint); filter: none;
 }
 
@@ -83,9 +83,9 @@
 .tdb-tool:hover { border-color: var(--ink-2); }
 .tdb-sp { flex: 1; }
 
-/* ── REELS (retoken Phase B — de-containered): the heading row sits straight on the oat; cards sit
-   straight on the oat with the deeper desk shadow; the fade fades to OAT. Scroll behaviour and the
-   overflow chevron are unchanged. ── */
+/* ── REELS (retoken Phase B — de-containered; fix pass P2 re-plumbed the overflow): the heading
+   row sits straight on the oat; cards sit straight on the oat with the deeper desk shadow. Fades
+   are RETIRED — exact-fit + snap + the header pagers own the overflow affordance. ── */
 .tdb-lanes { display: flex; flex-direction: column; }
 .tdb-reel { margin-bottom: 26px; }
 .tdb-reelh { display: flex; align-items: center; gap: 11px; margin-bottom: 12px; padding: 0 2px; }
@@ -106,19 +106,20 @@
 .tdb-fsd::after { content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) translateX(1px); border-left: 7px solid var(--ink); border-top: 4.5px solid transparent; border-bottom: 4.5px solid transparent; }
 .tdb-cadd { font-size: 16px; color: var(--ink-2); padding: 0 4px; }
 .tdb-cadd:hover { color: var(--ink); }
-.tdb-chev { width: 26px; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: var(--white, #fff); border: 1px solid var(--line); font-size: 13px; color: var(--ink-2); }
-.tdb-chev:hover { color: var(--ink); border-color: var(--ink-2); }
-.tdb-track { position: relative; }
-.tdb-scroller { display: flex; gap: 14px; padding: 2px 2px 6px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; align-items: stretch; }
-/* Polish P1 — scroll-aware edge fades, BOTH edges (state machine: todoBoard.laneFadeState, 4px
-   thresholds; classes set by the Lane component). Overlays fade to the OAT ground token, sit above
-   card content (z-index 1) and below the fixed corner chrome, and cross-fade on opacity so
-   appearing/disappearing never pops. */
-.tdb-track::before, .tdb-track::after { content: ""; position: absolute; top: 0; bottom: 0; width: 64px; pointer-events: none; z-index: 1; opacity: 0; transition: opacity 0.25s ease; }
-.tdb-track::before { left: 0; background: linear-gradient(90deg, var(--oat, #f1e8dc), transparent); }
-.tdb-track::after { right: 0; background: linear-gradient(90deg, transparent, var(--oat, #f1e8dc)); }
-.tdb-track.can-scroll-left::before { opacity: 1; }
-.tdb-track.can-scroll-right::after { opacity: 1; }
+/* pagers (fix pass P2 — replace the fades AND the old lone chevron): 32px circles after Focused
+   session; ‹ enables once scrolled past 4px, › disables at the end (todoBoard.laneFadeState);
+   a non-overflowing lane shows both disabled. Disabled = the shared inert grammar below. */
+.tdb-pagers { display: inline-flex; gap: 6px; }
+.tdb-pager { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--white, #fff); border: 1px solid var(--hairline); color: var(--ink); transition: border-color 0.15s; }
+.tdb-pager svg { width: 14px; height: 14px; }
+.tdb-pager:hover:not(:disabled) { border-color: var(--pink-btn-h); }
+/* Fix pass P2 — EXACT-FIT lanes (ref todo-lanes-popup-fix.html; the fades are RETIRED): laneFit
+   sets --tdb-cardw so N cards (min 300, cap 5, floor 1) fill the track precisely — no partial card
+   at rest; scroll-snap pages cleanly and the header pagers + count chip carry the affordance. The
+   scrollbar is hidden both engines; trackpad/touch still scroll and snap. */
+.tdb-scroller { display: flex; gap: 14px; padding: 2px 2px 6px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; align-items: stretch; scroll-snap-type: x mandatory; scroll-behavior: smooth; }
+.tdb-scroller::-webkit-scrollbar { display: none; }
+@media (prefers-reduced-motion: reduce) { .tdb-scroller { scroll-behavior: auto; } }
 .tdb-emptyreel { display: flex; align-items: center; }
 .tdb-emptyreel .e { font-family: var(--f12-serif); font-style: italic; font-size: 14px; color: var(--muted); padding: 14px 4px; }
 .tdb-ghostcard { width: 330px; min-height: 74px; border: 1.5px dashed var(--note-b); border-radius: 11px; display: flex; align-items: center; justify-content: center; gap: 10px; background: none; }
@@ -137,7 +138,7 @@
    DEEPER pink (pink-btn fill, pink-deep text, 700 — urgency outranks status by depth, not hue) ·
    offer keeps the ink ★ (rarest thing, rarest colour) · note cards keep note-yellow. Burgundy
    survives only in StatusDots (locked) and micro-accents — never a tag fill. ── */
-.tdb-tile { position: relative; flex: none; width: 330px; min-height: 208px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 11px; padding: 16px 18px 15px 20px; box-shadow: var(--sh-card); cursor: pointer; transition: box-shadow 0.16s, border-color 0.16s, transform 0.16s; display: flex; flex-direction: column; overflow: hidden; }
+.tdb-tile { position: relative; flex: 0 0 var(--tdb-cardw, 330px); scroll-snap-align: start; min-height: 208px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 11px; padding: 16px 18px 15px 20px; box-shadow: var(--sh-card); cursor: pointer; transition: box-shadow 0.16s, border-color 0.16s, transform 0.16s; display: flex; flex-direction: column; overflow: hidden; }
 .tdb-tile::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
 .tdb-tile.do::before { background: var(--pink-btn); }
 .tdb-tile.hk::before { background: var(--hk-spine); }
@@ -166,7 +167,7 @@
 /* ── G3 GROUPED CARD (retoken Phase C): mono kicker + sage dot · serif title with the inline
    numeral · two-line-clamped sub (fix pass) · sage progress bar + mono caption (real counts) · neutral monogram stack
    + ink-outline "Fix together →" (fills ink on hover) + the quiet Never (behaviour kept). ── */
-.tdb-gcard { position: relative; flex: none; width: 330px; min-height: 208px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 11px; padding: 16px 18px 15px 20px; box-shadow: var(--sh-card); cursor: pointer; transition: border-color 0.16s, box-shadow 0.16s, transform 0.16s; display: flex; flex-direction: column; overflow: hidden; }
+.tdb-gcard { position: relative; flex: 0 0 var(--tdb-cardw, 330px); scroll-snap-align: start; min-height: 208px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 11px; padding: 16px 18px 15px 20px; box-shadow: var(--sh-card); cursor: pointer; transition: border-color 0.16s, box-shadow 0.16s, transform 0.16s; display: flex; flex-direction: column; overflow: hidden; }
 .tdb-gcard::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--hk-spine); }
 .tdb-gcard:hover { border-color: var(--ink); box-shadow: var(--sh-card-h); transform: translateY(-1px); }
 .tdb-kick { flex: none; font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.11em; text-transform: uppercase; color: var(--hk-ink); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }

@@ -37,6 +37,7 @@ import { groupHousekeeping, hkGapCount, hkGroupProgress, HkGroup, HkRule, HK_RUL
 import { deskState, liveQueryCount, liveQueriesLine, clearedListCap } from "../../lib/todoEmpty";
 import { shouldAutoRunTour } from "../../lib/todoTour";
 import { TodoTour } from "./TodoTour";
+import { laneFit, lanePageDistance, LaneFit } from "./laneFit";
 import { ActivityType, QueryStatus } from "../../types";
 import { FocusFlow, FocusItem } from "./FocusFlow";
 import "./todo.css";
@@ -171,23 +172,31 @@ const Lane: React.FC<{
   children?: React.ReactNode;
 }> = ({ cls, label, count, isEmpty, onAdd, onFocusedSession, emptyNode, strip, children }) => {
   const ref = useRef<HTMLDivElement>(null);
-  // Polish P1 — both-edge fade state (pure machine in todoBoard.laneFadeState; 4px thresholds).
-  // Functional update bails out when neither boolean changed, so scroll ticks don't re-render.
-  const [fade, setFade] = useState({ left: false, right: false });
+  // Fix pass P2 — exact-fit + pagers. ONE check does both jobs: the fit maths (laneFit → the
+  // --tdb-cardw var + a ref for paging) and the polish pass's two-boolean scroll state
+  // (todoBoard.laneFadeState, unmodified — it now drives the pager disabled states instead of the
+  // retired fades). Functional update bails out when neither boolean changed.
+  const [scrollState, setScrollState] = useState({ left: false, right: false });
+  const fitRef = useRef<LaneFit>({ n: 1, cardWidth: 330 });
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const check = () => setFade((prev) => {
-      const next = laneFadeState(el.scrollLeft, el.scrollWidth, el.clientWidth);
-      return next.left === prev.left && next.right === prev.right ? prev : next;
-    });
+    const check = () => {
+      const fit = laneFit(el.clientWidth);
+      fitRef.current = fit;
+      el.style.setProperty("--tdb-cardw", `${fit.cardWidth}px`);
+      setScrollState((prev) => {
+        const next = laneFadeState(el.scrollLeft, el.scrollWidth, el.clientWidth);
+        return next.left === prev.left && next.right === prev.right ? prev : next;
+      });
+    };
     check();
     el.addEventListener("scroll", check, { passive: true });
     const ro = new ResizeObserver(check);
     ro.observe(el);
     return () => { el.removeEventListener("scroll", check); ro.disconnect(); };
   }, [children]);
-  const scrollRight = () => ref.current?.scrollBy({ left: 340, behavior: "smooth" });
+  const page = (dir: 1 | -1) => ref.current?.scrollBy({ left: dir * lanePageDistance(fitRef.current), behavior: "smooth" });
   return (
     <div className={`tdb-reel ${cls}`} id={`tdb-lane-${cls}`}>
       <div className="tdb-reelh">
@@ -201,15 +210,22 @@ const Lane: React.FC<{
           </button>
         )}
         {onAdd && <button type="button" className="tdb-cadd" onClick={onAdd} aria-label="Add a note">＋</button>}
-        {!isEmpty && fade.right && <button type="button" className="tdb-chev" onClick={scrollRight} aria-label="Scroll right">›</button>}
+        {!isEmpty && (
+          <span className="tdb-pagers">
+            <button type="button" className="tdb-pager" disabled={!scrollState.left} onClick={() => page(-1)} aria-label={`Previous ${label} cards`}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><polyline points="15 18 9 12 15 6" /></svg>
+            </button>
+            <button type="button" className="tdb-pager" disabled={!scrollState.right} onClick={() => page(1)} aria-label={`Next ${label} cards`}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><polyline points="9 18 15 12 9 6" /></svg>
+            </button>
+          </span>
+        )}
       </div>
       {strip}
       {isEmpty ? (
         <div className="tdb-emptyreel">{emptyNode}</div>
       ) : (
-        <div className={`tdb-track${fade.left ? " can-scroll-left" : ""}${fade.right ? " can-scroll-right" : ""}`}>
-          <div className="tdb-scroller" ref={ref}>{children}</div>
-        </div>
+        <div className="tdb-scroller" ref={ref}>{children}</div>
       )}
     </div>
   );

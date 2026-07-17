@@ -47,3 +47,34 @@ non-overflow · overlays ride `--cardw` (free — they are `.tdb-tile`s) · GAP 
 - Clip-safety invariant untouched: tags/foot/pills stay `flex: none`, only `.tdb-mid` flexes and
   clips. CSS comments (option-A block + G3 block) updated to match.
 - The design ref rides this commit. No test changes (visual only).
+
+## PHASE 2 — exact-fit lanes (Airbnb pattern; fades retired)
+
+- **Fit maths** in NEW `src/components/todo/laneFit.ts` (component layer — `todoBoard.ts` is out
+  of scope): `laneFit(trackWidth)` → `N = clamp(floor((w + 14) / (300 + 14)), 1, 5)`, card width
+  `(w − 14×(N−1)) / N`, plus `lanePageDistance` (one page = N cards + gaps). Constants exported;
+  GAP is our 14px lane value (the ref mock's 18 is its own). Unit-locked in `laneFit.test.ts`:
+  exact-fill identity at seven widths · boundary steps (2→3 at 928, 3→4 at 1242) · floor 1 at
+  mobile widths · cap 5 ultrawide · page distance.
+- **The Lane hook extended, not duplicated:** the ONE `check` now does both jobs — laneFit →
+  `--tdb-cardw` on the scroller + a ref for paging, then the polish pass's two-boolean
+  `laneFadeState` (UNMODIFIED, same 4px thresholds) driving the pager disabled states instead of
+  the retired fades. Same passive scroll + ResizeObserver + bail-out.
+- **Snap:** `scroll-snap-type: x mandatory` + `scroll-behavior: smooth` (auto under
+  reduced-motion) on the scroller; `scroll-snap-align: start` on cards; scrollbar hidden both
+  engines (`scrollbar-width: none` + `::-webkit-scrollbar`). Trackpad/touch scrolling intact.
+- **Cards:** fixed `width: 330px` → `flex: 0 0 var(--tdb-cardw, 330px)` on `.tdb-tile` AND
+  `.tdb-gcard` — receipt/dismissed overlays are `.tdb-tile` variants so they ride the basis for
+  free (Nick's requirement). The 330 fallback covers any render before the first measure.
+- **Pagers:** the lone `›` `.tdb-chev` (26px, hidden-until-overflow, 340px nudge) became the
+  32px `.tdb-pager` PAIR after Focused session — ‹ svg / › svg per the ref, click =
+  `page(±1)` (one full page via `lanePageDistance`), hover warms the border. Disabled = the
+  SHARED inert grammar (both selector lists extended): ‹ until `scrollLeft > 4`, › at the end;
+  a non-overflowing lane renders both disabled. `aria-label`s "Previous/Next {lane} cards".
+  Pagers render on non-empty lanes only (the empty reel has no track — the old chevron hid there
+  too; reported as the interpretation of "always rendered").
+- **Fades fully retired:** the `.tdb-track` wrapper existed solely for the fade overlays — the
+  wrapper div, its `can-scroll-*` classes, both `::before/::after` overlay rules and the old
+  `.tdb-chev` rules are DELETED (markup + CSS, no dead state). `laneFadeState` + its tests stay
+  in `todoBoard.ts`, repurposed.
+- **jsdom can't verify snap/smooth-scroll geometry** — flagged for the in-browser checklist.
