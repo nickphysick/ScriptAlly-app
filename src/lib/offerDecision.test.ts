@@ -66,8 +66,10 @@ describe("the journey's write surface — source locks", () => {
   it("the offer re-log path is GONE (RecordResponseFocusForm no longer mounted by the flow)", () => {
     expect(flow).not.toContain("RecordResponseFocusForm");
   });
-  it("need-time writes only the existing snooze flag; the notify door stages the existing nudge payload", () => {
+  it("need-time writes only the existing snooze flag; the notify step's outputs are user tasks only (popup-notify-scrim P2)", () => {
     expect(flow).toContain('flagKeyForTask("offer_received"');
-    expect(flow).toContain('cardKey: key, label: `Let ${');
+    expect(flow).toContain("reminderFields(selRows, q.id, replyBy)");
+    expect(flow).toContain("await addUserTask(f)");
+    expect(flow).not.toContain("offer-notify-"); // the staged-nudge notify path is retired
   });
 });

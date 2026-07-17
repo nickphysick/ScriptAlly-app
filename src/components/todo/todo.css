@@ -504,6 +504,23 @@
 .tdb-ffdoor.sage .tdb-ffdic { background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border-color: var(--hk-spine); color: var(--hk-ink); }
 .tdb-ffdtx b { display: block; font-family: var(--f12-serif); font-size: 16.5px; font-weight: 600; color: var(--ink); margin-bottom: 1px; }
 .tdb-ffdtx span { font-size: 12.5px; color: var(--sub); }
+/* the notify select-many step (popup-notify-scrim P2 — ref §2): grouped checkbox rows, the
+   quiet italic caution, covered rows badged-and-locked, the reminder confirm card in done-sage. */
+.tdb-ffgrp { font-family: var(--f12-mono); font-size: 9.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin: 16px 0 8px; }
+.tdb-ffsel { display: flex; flex-direction: column; gap: 8px; }
+.tdb-ffselrow { display: flex; align-items: center; gap: 13px; background: var(--white, #fff); border: 1.5px solid var(--hairline); border-radius: 12px; padding: 13px 17px; cursor: pointer; transition: border-color 0.15s; }
+.tdb-ffselrow.on { border-color: var(--ink); }
+.tdb-ffselrow.covered { cursor: default; opacity: 0.72; }
+.tdb-ffselrow input { width: 17px; height: 17px; accent-color: var(--pink-i); flex: none; }
+.tdb-ffcovered { width: 20px; height: 20px; border-radius: 50%; background: var(--hk-sage); border: 1px solid var(--hk-spine); color: var(--hk-ink); display: flex; align-items: center; justify-content: center; font-size: 11px; flex: none; }
+.tdb-ffseltx { flex: 1; }
+.tdb-ffseltx b { display: block; font-size: 15px; font-weight: 600; color: var(--ink); }
+.tdb-ffseltx span { font-family: var(--f12-mono); font-size: 9.5px; letter-spacing: 0.08em; color: var(--muted); }
+.tdb-ffselwarn { font-size: 11.5px; color: var(--muted); font-style: italic; }
+.tdb-ffremcard { display: flex; align-items: center; gap: 15px; background: var(--white, #fff); border: 1.5px solid var(--hk-spine); border-radius: 13px; padding: 18px 22px; margin: 18px 0 12px; }
+.tdb-ffremic { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border: 1px solid var(--hk-spine); color: var(--hk-ink); display: flex; align-items: center; justify-content: center; font-size: 15px; flex: none; }
+.tdb-ffremcard b { display: block; font-family: var(--f12-serif); font-size: 17px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+.tdb-ffremnames { display: block; font-size: 12.5px; color: var(--sub); }
 .tdb-ffseg { display: flex; gap: 12px; margin-top: 18px; }
 .tdb-ffopt { flex: 1; background: var(--white, #fff); border: 1.5px solid var(--hairline); border-radius: 13px; padding: 18px; text-align: center; transition: border-color 0.15s; }
 .tdb-ffopt.sel { border-color: var(--ink); }

@@ -61,3 +61,39 @@ trap · aria-labelledby upgrade.
   mono. Coffee remains the FAB/card "on today" family — only the pop-up head moved to
   bold-pastille (the ref's call).
 - Tests 1104 → **1108** (+4 terse blocks). The design ref rides this commit.
+
+## PHASE 2 — notify step: select-many + reminders
+
+The per-agent doors + the staged-nudge draft screen are RETIRED (the offerDecision source lock
+updated to the replaced behaviour — the one intended behavioural-test change). The step writes NO
+activities and stages nothing: its outputs are user tasks through the existing `addUserTask` path.
+
+- **Pure layer `lib/offerNotify.ts`:** `notifyGroups` (every other open query on the offered
+  manuscript — terminal + other-manuscript excluded — grouped HAVE YOUR PAGES (partial/full sent,
+  R&R) then QUERY ONLY, status lines "FULL SENT" / "R&R IN PROGRESS" / "QUERIED 28 JUN", the quiet
+  italic caution ONLY where `agent.noResponseMeansNo` is actually held) · `alreadyCovered` (the
+  duplicate guard: a LIVE reminder for agent + THIS offer) · `reminderFields` ("Tell {agent}
+  about the offer", agentId + the OFFER's queryId + reply-by as `dueDate`; reply-by unset →
+  dueDate omitted, no invented deadline). All unit-locked.
+- **Step A (selection):** deadline banner "THE DEADLINE YOU GIVE THEM = YOUR REPLY-BY · {date}"
+  (unset → the softened etiquette line, no date) · grouped checkbox rows, ALL pre-selected at
+  door-open minus covered ones · covered rows render **badged-and-locked** (sage ✓ chip +
+  "REMINDER SET" in the meta, checkbox removed, 0.72 opacity — the reported treatment) · footer
+  live-counts "Continue · {n} selected" / "Continue without telling anyone" at zero (returns to
+  the fork, skips Step B).
+- **Step B (reminders):** the sage confirm card ("{n} reminders, ready to go" + names), copy per
+  the ref including the honest skip line; "Create {n} reminders" → one `addUserTask` per selected
+  → toast → the fork; "Skip — I'll send them now" creates nothing.
+- **THE APPROVED DERIVATION CLAUSE (verbatim, todoBoard.ts):** in `userCard` —
+  `+ const linked = !!(t.agentId && t.queryId && t.dueDate);`
+  `- stream: "nt",` → `+ stream: linked ? "do" : "nt",`
+  `- due: noteDate ? \`Note · ${noteDate}\` : "Note",` → `+ due: linkedDue ? linkedDue.label : …,`
+  `- warn: false,` → `+ warn: linkedDue ? linkedDue.warn : false,`
+  plus the `assembleBoard` routing split (user cards routed by their OWN stream — linked
+  reminders join Urgent through `orderDoNext`, everything else stays Notes to self
+  byte-identically) and `reminderDue(dueYmd, now)` (local-noon date maths: "{n} DAYS TO
+  DEADLINE", warn ≤3 days, "DEADLINE TODAY", "DEADLINE PASSED"). The accepted side-effect stands:
+  any pre-existing note carrying all three links would also move.
+- Reminders tick off like any user task (`userTaskId` intact → quick-✓, the note journey, and
+  Today's-list eligibility all unchanged).
+- Tests 1108 → **1116** (+6 offerNotify, +2 clause/reminderDue; 1 source lock updated).

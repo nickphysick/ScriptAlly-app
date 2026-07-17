@@ -188,6 +188,21 @@ const shortDate = (iso?: string): string => {
   return Number.isNaN(ms) ? "" : new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 };
 
+/**
+ * P2 (approved scope grant) — a LINKED REMINDER's deadline chip: local-day difference to the
+ * date-only dueDate (parsed at local noon so the day never shifts). warn inside 3 days.
+ */
+export function reminderDue(dueYmd: string, nowMs: number): { label: string; warn: boolean } {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(dueYmd);
+  if (!m) return { label: "REMINDER", warn: false };
+  const due = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 12, 0, 0, 0);
+  const now = new Date(nowMs);
+  const days = Math.round((new Date(due.getFullYear(), due.getMonth(), due.getDate()).getTime() - new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()) / 86400000);
+  if (days < 0) return { label: "DEADLINE PASSED", warn: true };
+  if (days === 0) return { label: "DEADLINE TODAY", warn: true };
+  return { label: `${days} DAY${days === 1 ? "" : "S"} TO DEADLINE`, warn: days <= 3 };
+}
+
 function userCard(t: UserTask, input: BoardInput): BoardCard {
   const rec = t.agentId
     ? input.agents.find((a) => a.id === t.agentId)
@@ -196,14 +211,19 @@ function userCard(t: UserTask, input: BoardInput): BoardCard {
   const record = rec ? `On ${agentPrimary(rec)}` : ms ? `On ${ms.title}` : "Your note";
   // The mockup's note tag: "Note · 6 Jul" — the due date when set, else when it was jotted.
   const noteDate = shortDate(t.dueDate ?? t.createdAt);
+  // P2 (approved scope grant, verbatim in the report): a LINKED REMINDER — agentId + queryId +
+  // dueDate ALL present — is urgent work with a deadline, not a jotted note: do lane + the
+  // deadline chip. Anything less stays a Notes-to-self card, byte-identically.
+  const linked = !!(t.agentId && t.queryId && t.dueDate);
+  const linkedDue = linked ? reminderDue(t.dueDate!, input.now) : null;
   return {
     key: t.id,
-    stream: "nt",
+    stream: linked ? "do" : "nt",
     title: t.text || "New task",
     who: "",
     subtitle: "",
-    due: noteDate ? `Note · ${noteDate}` : "Note",
-    warn: false,
+    due: linkedDue ? linkedDue.label : noteDate ? `Note · ${noteDate}` : "Note",
+    warn: linkedDue ? linkedDue.warn : false,
     snoozes: 0,
     hk: false,
     initials: "✎",
@@ -223,12 +243,11 @@ function orderDoNext(cards: BoardCard[]): BoardCard[] {
 
 export function assembleBoard(input: BoardInput): AssembledBoard {
   const derived = input.tasks.map((t) => derivedCard(t, input)).filter((c): c is BoardCard => c != null);
-  const doCards = orderDoNext(derived.filter((c) => c.stream === "do"));
-  const hkCards = derived.filter((c) => c.stream === "hk");
 
-  // Notes to self — open (not done) user tasks, most-recent first, minus snoozed/muted ones
-  // (the quick rail's ⏸ writes a `user_task` TaskFlag stance; nothing is deleted).
-  const ntCards = input.userTasks
+  // User tasks — open (not done), most-recent first, minus snoozed/muted ones (the quick rail's ⏸
+  // writes a `user_task` TaskFlag stance; nothing is deleted). P2: routed by the card's OWN stream
+  // — linked reminders join Urgent, everything else stays Notes to self.
+  const userCards = input.userTasks
     .filter((t) => !t.done)
     .filter((t) => {
       const flag = input.taskFlags.find((f) => flagMatchesTask(f, USER_TASK_FLAG_TYPE, t.id));
@@ -236,6 +255,9 @@ export function assembleBoard(input: BoardInput): AssembledBoard {
     })
     .sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""))
     .map((t) => userCard(t, input));
+  const doCards = orderDoNext([...derived.filter((c) => c.stream === "do"), ...userCards.filter((c) => c.stream === "do")]);
+  const hkCards = derived.filter((c) => c.stream === "hk");
+  const ntCards = userCards.filter((c) => c.stream === "nt");
 
   // Cleared today — the union (activities today · user tasks done today · flags resolved today).
   // Retired as a lane; re-projected here (newest-first) for the Today's-list done-band.

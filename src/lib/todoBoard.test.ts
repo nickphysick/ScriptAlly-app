@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { QueryStatus, Task, Query, Agent, Manuscript, UserTask, TaskFlag, Activity, ActivityType } from "../types";
-import { assembleBoard, boardStreamForTaskType, todaySplit, ribbonTiles, laneFadeState, walkSublabel, walkAria, offerDue, offerQuiet, terseDoneLabel, BoardInput } from "./todoBoard";
+import { assembleBoard, boardStreamForTaskType, todaySplit, ribbonTiles, laneFadeState, walkSublabel, walkAria, offerDue, offerQuiet, terseDoneLabel, reminderDue, BoardInput } from "./todoBoard";
 
 const TODAY = "2026-07-09";
 const NOW = Date.parse("2026-07-09T12:00:00Z");
@@ -283,5 +283,34 @@ describe("terseDoneLabel — done rows use the committed rows' vocabulary, never
   it("unknown shapes fall back to the description; agent-less rows soften", () => {
     expect(terseDoneLabel(a(ActivityType.AGENT_UPDATED, { description: "You updated details for X" }))).toBe("You updated details for X");
     expect(terseDoneLabel(a(ActivityType.NUDGE_SENT))).toBe("Nudged the agent");
+  });
+});
+
+describe("linked reminders — the approved P2 derivation clause (agentId + queryId + dueDate → Urgent)", () => {
+  const DAY = 86400000;
+  const mkTask = (id: string, over: Partial<UserTask>): UserTask =>
+    ({ id, userId: "u", text: "Tell Daniel about the offer", done: false, createdAt: "2026-07-09T09:00:00Z", updatedAt: "2026-07-09T09:00:00Z", ...over } as UserTask);
+  const base: BoardInput = { tasks: [], userTasks: [], queries: [], agents: [agent("a1", "Daniel")], manuscripts: [], taskFlags: [], activities: [], today: TODAY, now: NOW };
+
+  it("all three links present → the do lane with the deadline chip; anything less stays a note", () => {
+    const due = new Date(NOW + 5 * DAY).toISOString().slice(0, 10);
+    const b = assembleBoard({ ...base, userTasks: [
+      mkTask("full", { agentId: "a1", queryId: "qo", dueDate: due }),
+      mkTask("no-due", { agentId: "a1", queryId: "qo" }),
+      mkTask("no-agent", { queryId: "qo", dueDate: due }),
+      mkTask("plain", {}),
+    ] });
+    expect(b.do.map((c) => c.key)).toEqual(["full"]);
+    expect(b.nt.map((c) => c.key).sort()).toEqual(["no-agent", "no-due", "plain"]);
+    expect(b.do[0].due).toBe("5 DAYS TO DEADLINE");
+    expect(b.do[0].userTaskId).toBe("full"); // still ticks off like any user task
+  });
+
+  it("reminderDue: countdown, warn inside 3 days, today, passed", () => {
+    const ymd = (d: number) => new Date(NOW + d * DAY).toISOString().slice(0, 10);
+    expect(reminderDue(ymd(5), NOW)).toEqual({ label: "5 DAYS TO DEADLINE", warn: false });
+    expect(reminderDue(ymd(2), NOW)).toEqual({ label: "2 DAYS TO DEADLINE", warn: true });
+    expect(reminderDue(ymd(0), NOW)).toEqual({ label: "DEADLINE TODAY", warn: true });
+    expect(reminderDue(ymd(-1), NOW)).toEqual({ label: "DEADLINE PASSED", warn: true });
   });
 });
