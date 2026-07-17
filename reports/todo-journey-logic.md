@@ -64,3 +64,27 @@ suppressed tasks wholesale — hence the approved offer exemption.
   one; it now simply tells the truth).
 - Tests: +6 (helper ×4 within two blocks, nudge args rewrite, buildNudgeWrites eventDate pair).
   Updated: the two nudgeWriteArgs shape assertions. No rules changes this phase.
+
+## PHASE 2 — one-tap send confirm
+
+- **The two-step checklist ("What went out?" ticks → "When, and how?") collapsed into ONE confirm
+  sheet** per the ref: "Off it goes" · "{who} asked for {the full/revisions/the sample} — so
+  that's what we'll log." · the ASSUMED row pre-confirmed in the done-sage treatment
+  (`.tdb-ffassume`, sage tick) · primary **"Mark sent"** — one tap stages it.
+- **Assumed item = `assumedSendItem(taskType, agent.materialsWanted, who)`** (todoWalk, pure,
+  unit-locked): full → "Full manuscript — what {who} requested"; partial → the sample seeded from
+  the agent's OWN materials list where held (the same field the housekeeping journey fills), else
+  the honest "Partial — the sample {who} asked for" (never invented specifics); R&R → "Revised
+  manuscript — what {who} asked to see again".
+- **Exceptions on demand:** the quiet "+ I sent something else too" link expands the remaining
+  tick-list items + "Something else" (collapsed by default; nothing implies extras are expected).
+  Payload materials = assumed + ticked extras.
+- **The when-row** (Phase 1's promised affordance): "Logged just now, {date} · I sent it earlier"
+  → a day picker capped at today, note "we'll log it at midday" — feeding `journeyEventISO`
+  (back-dated → noon local; untouched → the true write moment).
+- **Write byte-identity locked:** the default path's `markSentWriteArgs` equals the old
+  fully-ticked equivalent (materials/method are audit-only and never reach the write; the test
+  asserts the equality, plus the extras-path audit list). Method is auto-stated as the query's own
+  send method (else Email) — the old method dropdown and the never-persisted "Note to yourself"
+  textarea are RETIRED from this sheet (the note field wrote nowhere — a dead control; reported).
+- Copy per the ref, UK spelling. Tests +6 (assumedSendItem ×4, byte-identity, extras list).

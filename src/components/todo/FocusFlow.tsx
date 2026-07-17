@@ -37,7 +37,7 @@ import { agentDataQualityNeeds, AgentDataNeed } from "../../lib/agentDataQuality
 import { BoardCard } from "../../lib/todoBoard";
 import { HkGroup, HkRule, HK_RULES, HK_PAYOFF, mutedMembersForRule } from "../../lib/todoHousekeeping";
 import {
-  StagedPayload, applyStaged, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, DEFAULT_CHECKBACK_DAYS, journeyEventISO,
+  StagedPayload, applyStaged, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, assumedSendItem, DEFAULT_CHECKBACK_DAYS, journeyEventISO,
   quickSendPayload, quickNudgePayload, receiptLine,
 } from "../../lib/todoWalk";
 import { USER_TASK_FLAG_TYPE } from "../../lib/todoBoard";
@@ -112,8 +112,9 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
   const [mats, setMats] = useState<Record<string, boolean>>(() => Object.fromEntries((prefill?.materials ?? []).map((m) => [m, true])));
   const [sentDate, setSentDate] = useState(prefill?.sentDate ?? todayISO());
   const [method, setMethod] = useState(prefill?.method ?? "Email");
-  const [note, setNote] = useState("");
   const [copied, setCopied] = useState(false);
+  const [extrasOpen, setExtrasOpen] = useState(false); // "+ I sent something else too"
+  const [backdated, setBackdated] = useState(false); // the quiet "I sent it earlier" day picker
   const [rows, setRows] = useState<Record<string, string>>({}); // batch/dq drafts keyed by agentId (+need for dq)
   const [noMeansNo, setNoMeansNo] = useState<Record<string, boolean>>({});
   const [found, setFound] = useState<Record<string, AssistFound>>({});
@@ -129,7 +130,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
   const item = atReview ? undefined : items[qi];
 
   const resetScratch = () => {
-    setMats({}); setSentDate(todayISO()); setMethod("Email"); setNote(""); setCopied(false);
+    setMats({}); setSentDate(todayISO()); setMethod("Email"); setCopied(false); setExtrasOpen(false); setBackdated(false);
     setRows({}); setNoMeansNo({}); setFound({}); setNotFound(new Set()); setAssistAt(null); setAssistMsg(null); setShowMuted(false); setNoteText(null);
     setDeepDive(false); setSweepReceipt(null); setSweepFork(false);
   };
@@ -235,32 +236,34 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
         <button type="button" className="tdb-ffpri" onClick={() => setStep(1)}>I’ve sent it — log it →</button>
       </>,
     );
-    if (step === 1) return sheet(
-      <>
-        <div className="tdb-ffstream">{c.who || "Logging"} · logging the send</div>
-        <div className="tdb-ffq">What went out?</div>
-        <div className="tdb-ffqsub">Tick what you actually sent — it’s what we check against later.</div>
-        <div className="tdb-ffchoices">{opts.map((m) => (
-          <button key={m} type="button" className={`tdb-ffchoice${mats[m] ? " on" : ""}`} onClick={() => setMats((p) => ({ ...p, [m]: !p[m] }))}>
-            <span className="tdb-ffck" /><span className="tdb-ffct">{m}</span>
-          </button>
-        ))}</div>
-      </>,
-      <>
-        <button type="button" className="tdb-ffback" onClick={backOne}>← Back</button>
-        <span className="tdb-sp" />
-        <button type="button" className="tdb-ffpri" disabled={!any} onClick={() => setStep(2)}>{any ? "Next →" : "Tick what you sent"}</button>
-      </>,
-    );
+    const ms = q ? manuscripts.find((m) => m.id === q.manuscriptId) : undefined;
+    const who = c.who || "the agent";
+    const assumed = assumedSendItem(c.taskType, ag?.materialsWanted as string[] | undefined, who);
+    const extrasOn = assumed.extras.filter((m) => mats[m]);
     return sheet(
       <>
         <div className="tdb-ffstream">{c.who || "Logging"} · logging the send</div>
-        <div className="tdb-ffq">When, and how?</div>
-        <div className="tdb-ffrow">
-          <div className="tdb-fff"><label>Date sent</label><input type="date" value={sentDate} onChange={(e) => setSentDate(e.target.value)} /></div>
-          <div className="tdb-fff"><label>How</label><select value={method} onChange={(e) => setMethod(e.target.value)}>{METHODS.map((m) => <option key={m}>{m}</option>)}</select></div>
+        <div className="tdb-ffq">Off it goes</div>
+        <div className="tdb-ffqsub">{who} asked for {assumed.label === "Full manuscript" ? "the full" : assumed.label === "Revised manuscript" ? "revisions" : assumed.label.toLowerCase()} — so that’s what we’ll log.</div>
+        <div className="tdb-ffassume">
+          <span className="tdb-ffatick" aria-hidden>✓</span>
+          <span><b>{assumed.label}</b><span className="tdb-ffasub">{ms?.title ? `${ms.title} · ` : ""}{assumed.sub}</span></span>
         </div>
-        <div className="tdb-ffrow"><div className="tdb-fff"><label>Note to yourself (optional)</label><textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Anything worth remembering…" /></div></div>
+        <button type="button" className="tdb-ffelse" aria-expanded={extrasOpen} onClick={() => setExtrasOpen((v) => !v)}>+ I sent something else too</button>
+        {extrasOpen && (
+          <div className="tdb-ffchoices tight">{assumed.extras.map((m) => (
+            <button key={m} type="button" className={`tdb-ffchoice${mats[m] ? " on" : ""}`} onClick={() => setMats((p) => ({ ...p, [m]: !p[m] }))}>
+              <span className="tdb-ffck" /><span className="tdb-ffct">{m}</span>
+            </button>
+          ))}</div>
+        )}
+        <div className="tdb-ffwhen">
+          {backdated ? (
+            <>Logging it as <input type="date" value={sentDate} max={todayISO()} onChange={(e) => setSentDate(e.target.value)} /> <span className="tdb-ffsmall">— we’ll log it at midday.</span></>
+          ) : (
+            <>Logged just now, {new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short" })} · <button type="button" className="tdb-fflink" onClick={() => setBackdated(true)}>I sent it earlier</button></>
+          )}
+        </div>
       </>,
       <>
         <button type="button" className="tdb-ffback" onClick={backOne}>← Back</button>
@@ -271,10 +274,12 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
           if (action.kind !== "mark-sent") { advance(); return; }
           stageAndAdvance({
             kind: "mark-sent", cardKey: c.key, label: c.title, queryId: q.id,
-            targetStatus: action.target as QueryStatus, sentDate: journeyEventISO(sentDate, new Date().toISOString()),
-            isResubmit: action.markKind === "resubmit", method, materials: opts.filter((m) => mats[m]),
+            targetStatus: action.target as QueryStatus,
+            sentDate: journeyEventISO(backdated ? sentDate : undefined, new Date().toISOString()),
+            isResubmit: action.markKind === "resubmit", method: q.sendMethod || "Email",
+            materials: [assumed.label, ...extrasOn],
           });
-        }}>Stage it →</button>
+        }}>Mark sent</button>
       </>,
     );
   }
@@ -899,7 +904,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     if (j === "note") return noteSheet(it.card);
     return sendSheet(it.card);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [atReview, qi, step, items, mats, sentDate, method, note, copied, rows, noMeansNo, found, notFound, assistAt, assisting, assistMsg, showMuted, noteText, staged, savedN, saving, offerFormOpen, sweep, deepDive, sweepReceipt, sweepFork, queries, agents, manuscripts, activities, taskFlags, currentUser]);
+  }, [atReview, qi, step, items, mats, sentDate, method, copied, extrasOpen, backdated, rows, noMeansNo, found, notFound, assistAt, assisting, assistMsg, showMuted, noteText, staged, savedN, saving, offerFormOpen, sweep, deepDive, sweepReceipt, sweepFork, queries, agents, manuscripts, activities, taskFlags, currentUser]);
 
   // The offer capture is its own full-screen form — render it INSTEAD of the flow frame.
   if (offerFormOpen && item?.kind === "card") return <>{content}</>;

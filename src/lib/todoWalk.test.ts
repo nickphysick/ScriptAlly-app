@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { BoardCard } from "./todoBoard";
-import { choosePicks, rolledOverCards, todayProgress, walkStepKind, isStageable, applyStaged, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, quickSendPayload, quickNudgePayload, receiptLine, journeyEventISO, DEFAULT_CHECKBACK_DAYS, StagedPayload, StagedHandlers } from "./todoWalk";
+import { choosePicks, rolledOverCards, todayProgress, walkStepKind, isStageable, applyStaged, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, assumedSendItem, quickSendPayload, quickNudgePayload, receiptLine, journeyEventISO, DEFAULT_CHECKBACK_DAYS, StagedPayload, StagedHandlers } from "./todoWalk";
 import { QueryStatus } from "../types";
 
 const card = (key: string, over: Partial<BoardCard> = {}): BoardCard =>
@@ -219,5 +219,54 @@ describe("rolledOverCards", () => {
       card("uncommitted", {}),
     ];
     expect(rolledOverCards(cards, "2026-07-09").map((c) => c.key)).toEqual(["yesterday"]);
+  });
+});
+
+describe("assumedSendItem — the one-tap confirm's pre-confirmed item (P2)", () => {
+  it("full: the full manuscript, what they requested; extras = the rest + Something else", () => {
+    const a = assumedSendItem("full_requested", undefined, "Daniel");
+    expect(a.label).toBe("Full manuscript");
+    expect(a.sub).toBe("what Daniel requested");
+    expect(a.extras).toEqual(["Synopsis", "Covering email", "Something else"]);
+  });
+  it("partial seeds the sample from the agent's OWN materials list where held", () => {
+    const a = assumedSendItem("partial_requested", ["Query Letter", "Sample Pages"], "Priya");
+    expect(a.label).toBe("Sample Pages");
+    expect(a.sub).toBe("what Priya requested");
+    expect(a.extras).toEqual(["Synopsis", "Covering email", "Something else"]);
+  });
+  it("partial with no held list never invents specifics", () => {
+    const a = assumedSendItem("partial_requested", undefined, "Priya");
+    expect(a.label).toBe("Partial");
+    expect(a.sub).toBe("the sample Priya asked for");
+    expect(a.extras).toEqual(["Synopsis", "Covering email", "Something else"]);
+  });
+  it("R&R assumes the revised manuscript", () => {
+    const a = assumedSendItem("revise_resubmit", undefined, "Tom");
+    expect(a.label).toBe("Revised manuscript");
+    expect(a.extras).toEqual(["Revision letter", "Something else"]);
+  });
+});
+
+describe("one-tap default — the write is byte-identical (P2)", () => {
+  const NOW = "2026-07-17T10:00:00.000Z";
+  it("the default path's write args equal the old fully-ticked equivalent (materials are audit-only)", () => {
+    const oneTap: Extract<StagedPayload, { kind: "mark-sent" }> = {
+      kind: "mark-sent", cardKey: "k", queryId: "q1", targetStatus: QueryStatus.FULL_SENT,
+      sentDate: journeyEventISO(undefined, NOW), isResubmit: false, method: "Email",
+      materials: ["Full manuscript"], // the assumed item only — no untrue extras
+    };
+    const oldFullyTicked: Extract<StagedPayload, { kind: "mark-sent" }> = {
+      kind: "mark-sent", cardKey: "k", queryId: "q1", targetStatus: QueryStatus.FULL_SENT,
+      sentDate: NOW, isResubmit: false, method: "Email",
+      materials: ["Full manuscript", "Synopsis", "Covering email"],
+    };
+    expect(markSentWriteArgs(oneTap)).toEqual(markSentWriteArgs(oldFullyTicked));
+  });
+  it("the extras path carries assumed + ticked extras in the audit payload", () => {
+    const a = assumedSendItem("full_requested", undefined, "D");
+    const ticked = { Synopsis: true };
+    const materials = [a.label, ...a.extras.filter((m) => (ticked as Record<string, boolean>)[m])];
+    expect(materials).toEqual(["Full manuscript", "Synopsis"]);
   });
 });

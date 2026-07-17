@@ -66,6 +66,31 @@ export function materialOptsForTask(taskType?: string): string[] {
   return ["Full manuscript", "Synopsis", "Covering email"];
 }
 
+/**
+ * The one-tap confirm's ASSUMED item (journey-logic P2; ref §2 "Off it goes"): what the agent
+ * requested, pre-confirmed — one tap logs exactly that. Partial sends seed the sample from the
+ * agent's own materials list where held (the same `materialsWanted` field the housekeeping journey
+ * fills); unknown → the honest fallback, never invented specifics. `extras` = the remaining
+ * tick-list items offered behind "+ I sent something else too" (+ the free "Something else").
+ */
+export function assumedSendItem(
+  taskType: string | undefined,
+  agentMaterials: string[] | undefined,
+  who: string,
+): { label: string; sub: string; extras: string[] } {
+  const others = (label: string) =>
+    [...materialOptsForTask(taskType).filter((m) => m.toLowerCase() !== label.toLowerCase()), "Something else"];
+  if (taskType === "partial_requested") {
+    const sample = (agentMaterials ?? []).find((m) => /page|sample|partial|chapter/i.test(m));
+    if (sample) return { label: sample, sub: `what ${who} requested`, extras: others(sample).filter((m) => m !== "First pages") };
+    return { label: "Partial", sub: `the sample ${who} asked for`, extras: others("First pages") };
+  }
+  if (taskType === "revise_resubmit") {
+    return { label: "Revised manuscript", sub: `what ${who} asked to see again`, extras: others("Revised manuscript") };
+  }
+  return { label: "Full manuscript", sub: `what ${who} requested`, extras: others("Full manuscript") };
+}
+
 /** The nudge's default check-back window (days) when the flow doesn't surface the field. */
 export const DEFAULT_CHECKBACK_DAYS = 14;
 
