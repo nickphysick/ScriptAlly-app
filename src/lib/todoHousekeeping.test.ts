@@ -233,3 +233,18 @@ describe("hkGroupProgress — the G3 card's bar (complete = total − gaps)", ()
     expect(hkGroupProgress(3, 5).complete).toBe(0); // more gaps than agents (multi-gap agents) floors at 0
   });
 });
+
+describe("taskSurvivesMute — Task Settings type gating (single suppression point)", () => {
+  it("Nudge reminders off → nudge_overdue tasks are suppressed; on → they survive", () => {
+    expect(taskSurvivesMute("nudge_overdue", undefined, [])).toBe(true);
+    expect(taskSurvivesMute("nudge_overdue", undefined, ["nudge_overdue"])).toBe(false);
+  });
+  it("send-family types are never gated here (Requests & deadlines is ALWAYS ON)", () => {
+    for (const t of ["partial_requested", "full_requested", "revise_resubmit", "offer_received"]) {
+      expect(taskSurvivesMute(t, undefined, ["nudge_overdue", "no_response_close", "dq_mswl"])).toBe(true);
+    }
+  });
+  it("Stale queries + housekeeping gating still work (existing keys)", () => {
+    expect(taskSurvivesMute("no_response_close", undefined, ["no_response_close"])).toBe(false);
+  });
+});

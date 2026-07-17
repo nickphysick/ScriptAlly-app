@@ -40,6 +40,7 @@ import { TodoTour } from "./TodoTour";
 import { laneFit, lanePageDistance, LaneFit } from "./laneFit";
 import { ActivityType, QueryStatus } from "../../types";
 import { FocusFlow, FocusItem } from "./FocusFlow";
+import { TaskSettingsSheet } from "./TaskSettingsSheet";
 import "./todo.css";
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -250,6 +251,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [flow, setFlow] = useState<{ items: FocusItem[]; mode?: "sweep" | "weeklyReview" } | null>(null);
   const [flowPrefill, setFlowPrefill] = useState<{ sentDate?: string; method?: string; materials?: string[] } | undefined>(undefined);
   const [todayOpen, setTodayOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false); // the Task Settings sheet ("What lands on your desk?")
   // Chrome-fixes P1 — THE close path (the ✕, click-away and Esc all land here; never parallel
   // close logic). Click-away: document-level pointerdown while expanded only; clicks on the
   // add-to-list pills are exempt (adding while the list is open lets you watch the item land),
@@ -296,10 +298,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     [queries, taskFlags, now], // eslint-disable-line react-hooks/exhaustive-deps
   );
   const board = useMemo(
-    () => assembleBoard({ tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, today, now }),
+    () => assembleBoard({ tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, today, now, mutedTaskRules: currentUser?.mutedTaskRules }),
     // now/today are session-stable enough; recomputing on the data arrays is what matters.
+    // mutedTaskRules is a board dep because the Sunday CARD reads it directly (nudge/dq/stale mutes
+    // change `tasks` upstream, but sunday_review does not).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [tasks, userTasks, queries, agents, manuscripts, taskFlags, today],
+    [tasks, userTasks, queries, agents, manuscripts, taskFlags, today, currentUser?.mutedTaskRules],
   );
   // The Housekeeping lane renders the dq rules GROUPED (one card per rule, queried-first members) +
   // STALE queries as INDIVIDUAL cards (real one-off decisions, never batched). The flat board.hk
@@ -646,6 +650,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       )}
       {todayOpen && renderTodayPop()}
 
+      <button type="button" className="tdb-setbtn" aria-label="Task settings" title="Task settings — what lands on your desk" onClick={() => setSettingsOpen(true)}>
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+          <line x1="4" y1="6" x2="20" y2="6" /><circle cx="9" cy="6" r="2.2" fill="var(--paper)" />
+          <line x1="4" y1="12" x2="20" y2="12" /><circle cx="15" cy="12" r="2.2" fill="var(--paper)" />
+          <line x1="4" y1="18" x2="20" y2="18" /><circle cx="8" cy="18" r="2.2" fill="var(--paper)" />
+        </svg>
+      </button>
+      {settingsOpen && <TaskSettingsSheet onClose={() => setSettingsOpen(false)} />}
       {tourOpen && <TodoTour onEnd={endTour} />}
       {toast && (
         <div className="tdb-toast" role="status">
@@ -842,6 +854,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         <button type="button" className="tdb-nb" onClick={acts.neverThis}><b>Never</b>&nbsp;— just {single ? "this query" : "these agents"}</button>
         {acts.neverRule && <button type="button" className="tdb-nb" onClick={acts.neverRule}><b>Never</b>&nbsp;— any agent missing this</button>}
         <button type="button" className="tdb-ncancel" onClick={() => clearOverlay(key)}>Cancel</button>
+        <button type="button" className="tdb-nsettings" onClick={() => { clearOverlay(key); setSettingsOpen(true); }}>Change what appears here → Task settings</button>
       </div>
     );
   }

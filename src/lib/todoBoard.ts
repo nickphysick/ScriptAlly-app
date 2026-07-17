@@ -86,6 +86,7 @@ export interface BoardInput {
   activities: Activity[];
   today: string; // "YYYY-MM-DD" local
   now: number;
+  mutedTaskRules?: string[]; // Task Settings — the Sunday CARD reads "sunday_review" here (engine tasks are already mute-filtered upstream)
 }
 
 const dqLabel = (gap?: string) =>
@@ -452,6 +453,9 @@ export function reviewSeedCandidates(doCards: BoardCard[], queries: Query[], now
  *  card correctly). */
 export function reviewEntryCard(input: BoardInput): BoardCard | null {
   const day = new Date(input.now).getDay();
+  // Task Settings: "The Sunday review" off hides the CARD (the scrap ignores this — reviewScrap
+  // does not read it). Preference stored in the shared mutedTaskRules array.
+  if (input.mutedTaskRules?.includes("sunday_review")) return null;
   const win = reviewWeek(input.queries, input.now);
   const flag = input.taskFlags.find((f) => flagMatchesTask(f, "weekly_review", win.key));
   if (flag?.snoozedUntil) return null; // handled — completed OR dismissed, however long ago

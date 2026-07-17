@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>To-do — task settings + soft-pink tags</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;450;500;600;650&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --oat:#f1e8dc; --paper:#faf6f0; --panel:#fffdfb; --white:#ffffff;
+  --line:#e6dccd; --hairline:#f0eae1;
+  --ink:#1e1a16; --ink-2:#4a443c; --sub:#5c554b; --muted:#7d7469; --faint:#a89e91;
+  --burg:#6b3023;
+  --pink-t:#f7e3dd; --pink-b:#eecdc3; --pink-i:#8a4030; --pink-btn:#f6cfc9; --pink-deep:#6e3325; --pinkC:#f8e7dc;
+  --hk-sage:#dce0d9; --hk-sage-2:#d0d6cc; --hk-spine:#b9c3b3; --hk-ink:#54614f;
+  --note-b:#ecdda4; --note-i:#7a6420;
+  --coffee:#e7dbc9; --coffee-edge:#d3c2a6; --coffee-ink:#6b5a41;
+  --sh-card:0 1px 2px rgba(58,42,26,.06),0 6px 16px -6px rgba(58,42,26,.10);
+  --sh-3:0 3px 6px rgba(58,42,26,.07),0 16px 40px -8px rgba(58,42,26,.18);
+  --mono:'JetBrains Mono',monospace; --serif:'Playfair Display',serif; --body:'Inter',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--body);color:var(--ink);font-size:13px;line-height:1.45;-webkit-font-smoothing:antialiased;background:#e9dfd0;padding:26px 24px 60px}
+button{font:inherit;background:none;border:none;color:inherit;cursor:pointer;text-align:left}
+.page{max-width:1240px;margin:0 auto}
+.h1{font-family:var(--serif);font-size:22px;font-weight:600;margin-bottom:4px}
+.sub2{font-size:13px;color:var(--muted);margin-bottom:22px;max-width:820px;line-height:1.55}
+.seclab{display:flex;align-items:baseline;gap:10px;margin:26px 0 8px}
+.seclab .n{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;color:#fff;background:var(--burg);border-radius:99px;padding:3px 9px}
+.seclab .t{font-family:var(--serif);font-size:16px;font-weight:600}
+.trade{font-size:12px;color:var(--muted);margin-bottom:11px;max-width:840px;line-height:1.5}
+.trade b{color:var(--ink-2)}
+.stage{background:radial-gradient(120% 120% at 80% -10%, rgba(255,250,242,.55) 0%, transparent 46%), var(--oat);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 1px 2px rgba(58,42,26,.05)}
+.rowx{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}
+
+/* card + fork */
+.card{width:322px;min-height:186px;background:var(--white);border:1px solid var(--line);border-radius:11px;padding:14px 16px 13px 18px;display:flex;flex-direction:column;box-shadow:var(--sh-card);position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--hk-spine)}
+.card.ug::before{background:var(--pink-btn)}
+.fork{display:flex;flex-direction:column;justify-content:center;gap:8px;height:100%}
+.fork .ft{font-family:var(--serif);font-size:14.5px;font-weight:600;text-align:center;color:var(--hk-ink)}
+.fork .fb{display:flex;align-items:center;gap:9px;padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--white);font-size:12.5px}
+.fork .fb:hover{border-color:var(--ink)}
+.fork .fb b{font-weight:600}
+.fork .fb .arr{margin-left:auto;color:var(--muted)}
+.fork .fcancel{text-align:center;font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+.kick{font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:var(--hk-ink);margin-bottom:7px;display:flex;align-items:center;gap:6px}
+.kick .kd{width:6px;height:6px;border-radius:50%;background:var(--hk-spine)}
+.gtt{font-family:var(--serif);font-size:15.5px;font-weight:600;line-height:1.3}
+.gtt .n{font-size:19px;font-weight:700}
+.gsub{font-size:11.5px;color:var(--sub);margin-top:4px}
+
+/* settings page */
+.settings{background:var(--white);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh-card);overflow:hidden;max-width:640px}
+.seth{padding:18px 24px 14px;border-bottom:1px solid var(--hairline)}
+.seth .crumb{font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+.seth h2{font-family:var(--serif);font-size:21px;font-weight:600;margin-top:3px}
+.seth p{font-size:12.5px;color:var(--sub);margin-top:5px;line-height:1.55}
+.setgroup{padding:14px 24px;border-bottom:1px solid var(--hairline)}
+.setgroup .gl{font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.setgroup .gl .gd{width:7px;height:7px;border-radius:50%}
+.srow{display:flex;align-items:center;gap:12px;padding:9px 0}
+.srow+.srow{border-top:1px solid var(--hairline)}
+.srow .st{font-size:13.5px;font-weight:550}
+.srow .ss{font-size:11.5px;color:var(--muted);margin-top:1px}
+.srow .spx{flex:1}
+.toggle{width:38px;height:22px;border-radius:99px;background:var(--hk-sage-2);border:1px solid var(--hk-spine);position:relative;flex:none;cursor:pointer}
+.toggle::after{content:"";position:absolute;top:2px;left:18px;width:16px;height:16px;border-radius:50%;background:var(--white);box-shadow:0 1px 2px rgba(58,42,26,.2);transition:.15s}
+.toggle.off{background:var(--paper);border-color:var(--line)}
+.toggle.off::after{left:2px}
+.srow.dis .st,.srow.dis .ss{color:var(--faint)}
+.lockchip{font-family:var(--mono);font-size:7px;font-weight:600;letter-spacing:.08em;border-radius:99px;padding:2.5px 8px;background:var(--paper);border:1px solid var(--hairline);color:var(--faint)}
+.hidden-list .hrow{display:flex;align-items:center;gap:10px;padding:8px 0}
+.hidden-list .hrow+.hrow{border-top:1px solid var(--hairline)}
+.hidden-list .hx{font-size:12.5px;color:var(--sub);flex:1}
+.hidden-list .hx b{color:var(--ink-2);font-weight:600}
+.restore{font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--ink);border-radius:99px;padding:5px 11px;color:var(--ink)}
+.restore:hover{background:var(--ink);color:var(--white)}
+.setfoot{padding:12px 24px;background:var(--paper);font-size:11.5px;color:var(--muted);line-height:1.5}
+
+/* tags — soft pink system */
+.tagrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.tg{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border-radius:99px;padding:3.5px 10px;border:1px solid}
+.tg.std{background:var(--pink-t);border-color:var(--pink-b);color:var(--pink-i)}
+.tg.warn{background:var(--pink-btn);border-color:var(--pink-b);color:var(--pink-deep);font-weight:700}
+.tg.offer{background:var(--ink);border-color:var(--ink);color:#fff}
+.tg.stale{background:var(--pink-t);border-color:var(--pink-b);color:var(--pink-i)}
+.tg.note{background:#faf0c8;border-color:var(--note-b);color:var(--note-i)}
+.taglab{font-family:var(--mono);font-size:7.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--faint)}
+.demo-card-strip{display:flex;gap:13px;flex-wrap:wrap;margin-top:12px}
+.mini{width:300px;background:var(--white);border:1px solid var(--line);border-radius:11px;padding:13px 15px 12px 17px;box-shadow:var(--sh-card);position:relative;overflow:hidden}
+.mini::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--pink-btn)}
+.mini .tt2{font-family:var(--serif);font-size:15.5px;font-weight:600;line-height:1.28;margin-top:8px}
+.mini .ts2{font-size:11.5px;color:var(--sub);margin-top:4px}
+.mini .ts2 .ms{font-family:var(--serif);font-style:italic;color:var(--ink-2)}
+.reco{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-top:16px}
+.reco h3{font-family:var(--serif);font-size:15px;font-weight:600;margin-bottom:7px}
+.reco p{font-size:12.5px;color:var(--ink-2);line-height:1.6;margin-bottom:7px}
+.reco b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="h1">Softer "never" + soft-pink tags</div>
+  <div class="sub2">Permanent choices move out of the one-tap fork into a proper <b>Task settings</b> page (with a restore path). And the card tags trade burgundy for the on-brand soft pink, with urgency carried by <b>depth</b> of pink rather than a different hue.</div>
+
+  <!-- 1: the revised fork -->
+  <div class="seclab"><span class="n">1</span><span class="t">The ⏸ fork — reversible moves only</span></div>
+  <div class="trade">Two snoozes (<b>Remind me tomorrow</b> / <b>Give it a week</b>), a per-item <b>Dismiss</b> — allowed because it lands in the settings’ “Hidden” list with a Restore button, so it’s tidy rather than final — and the <b>doorway to settings</b> for rule-level changes. On <b>Urgent</b> cards the Dismiss row doesn’t render (deadlines can’t be one-tap hidden); notes get the snoozes only.</div>
+  <div class="stage">
+    <div class="rowx">
+      <div class="card">
+        <div class="fork">
+          <div class="ft">Put it off, or put it away?</div>
+          <button class="fb"><b>Remind me tomorrow</b><span class="arr"></span></button>
+          <button class="fb"><b>Give it a week</b><span class="arr"></span></button>
+          <button class="fb"><b>Dismiss</b> — don't show this one again<span class="arr"></span></button>
+          <button class="fb" style="background:var(--paper)"><b>Change what appears here</b><span class="arr">→ Task settings</span></button>
+          <button class="fcancel">Cancel</button>
+        </div>
+      </div>
+      <div class="card" style="opacity:.75">
+        <div class="kick"><span class="kd"></span>Missing wish list</div>
+        <div class="gtt"><span class="n">15</span> agents missing a wish list</div>
+        <div class="gsub">…the card it was pressed on, for context.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2: settings page -->
+  <div class="seclab"><span class="n">2</span><span class="t">Task settings — in user settings, linked from the board</span></div>
+  <div class="trade">Toggles per task type, grouped by lane colour. <b>Anything previously muted appears in "Hidden at the moment" with a Restore button</b> — the undo surface "never" always lacked. Offers can't be toggled off; urgency about your own deadlines shouldn't be silenceable either, so requests/deadlines are locked on.</div>
+  <div class="stage">
+    <div class="settings">
+      <div class="seth">
+        <span class="crumb">SETTINGS / TASK SETTINGS</span>
+        <h2>What lands on your desk</h2>
+        <p>Choose which task types appear on your To-do page. Turning something off hides the prompts — it never deletes anything, and the gaps still show on each agent's record.</p>
+      </div>
+      <div class="setgroup">
+        <div class="gl"><span class="gd" style="background:var(--pink-btn);outline:1px solid var(--pink-b)"></span>URGENT</div>
+        <div class="srow dis"><div><div class="st">Requests & deadlines</div><div class="ss">Fulls, partials, R&Rs and their time limits.</div></div><span class="spx"></span><span class="lockchip">ALWAYS ON</span></div>
+        <div class="srow dis"><div><div class="st">Offers of representation</div><div class="ss">The whole point.</div></div><span class="spx"></span><span class="lockchip">ALWAYS ON</span></div>
+        <div class="srow"><div><div class="st">Nudge reminders</div><div class="ss">When an agent is silent past their stated window.</div></div><span class="spx"></span><span class="toggle"></span></div>
+      </div>
+      <div class="setgroup">
+        <div class="gl"><span class="gd" style="background:var(--hk-sage-2);outline:1px solid var(--hk-spine)"></span>HOUSEKEEPING</div>
+        <div class="srow"><div><div class="st">Missing submission material details</div><div class="ss">Prompts to record what you sent.</div></div><span class="spx"></span><span class="toggle"></span></div>
+        <div class="srow"><div><div class="st">Missing wish lists</div><div class="ss">Prompts to fill in what each agent is looking for.</div></div><span class="spx"></span><span class="toggle off"></span></div>
+        <div class="srow"><div><div class="st">Missing reply windows</div><div class="ss">Needed before nudge reminders can work.</div></div><span class="spx"></span><span class="toggle"></span></div>
+        <div class="srow"><div><div class="st">Stale queries</div><div class="ss">Suggestions to close long-silent queries.</div></div><span class="spx"></span><span class="toggle"></span></div>
+      </div>
+      <div class="setgroup hidden-list">
+        <div class="gl"><span class="gd" style="background:var(--paper);outline:1px solid var(--line)"></span>HIDDEN AT THE MOMENT</div>
+        <div class="hrow"><span class="hx"><b>Missing wish lists</b> — hidden 16 Jul (was "Never" on the board)</span><button class="restore">Restore</button></div>
+        <div class="hrow"><span class="hx"><b>Marcus Reed — stale query</b> — hidden 12 Jul</span><button class="restore">Restore</button></div>
+      </div>
+      <div class="setfoot">Notes to self always show — they're yours. Snoozed items come back by themselves and aren't listed here.</div>
+    </div>
+  </div>
+
+  <!-- 3: soft pink tags -->
+  <div class="seclab"><span class="n">3</span><span class="t">Tags — burgundy out, soft pink in</span></div>
+  <div class="trade">Standard status tags take the soft pink family. <b>Deadline urgency = the deeper pink</b> (pink-btn fill, dark text, bold) — still unmistakably the loudest chip on the board, no burgundy. The offer keeps its ink ★ (rarest thing, rarest colour). Burgundy remains only in the StatusDots (locked) and micro-accents.</div>
+  <div class="stage">
+    <div class="tagrow">
+      <span class="tg std">OVER TO YOU</span>
+      <span class="tg std">STALE QUERY</span>
+      <span class="tg std">SNOOZED ×1</span>
+      <span class="taglab">← standard: pink-t / pink-b / pink-i</span>
+    </div>
+    <div class="tagrow" style="margin-top:9px">
+      <span class="tg warn">3 DAYS LEFT</span>
+      <span class="tg warn">96 DAYS · NO REPLY</span>
+      <span class="taglab">← urgency: deeper pink, dark text, bold</span>
+    </div>
+    <div class="tagrow" style="margin-top:9px">
+      <span class="tg offer">★ OFFER</span>
+      <span class="tg note">NOTE · 6 JUL</span>
+      <span class="taglab">← offer stays ink · notes stay note-yellow</span>
+    </div>
+    <div class="demo-card-strip">
+      <div class="mini"><span class="tg warn">3 DAYS LEFT</span><div class="tt2">Send your full to Daniel O'Rourke</div><div class="ts2">He asked for the full of <span class="ms">Murphy's Day Out</span> on 27 June.</div></div>
+      <div class="mini"><span class="tg std">OVER TO YOU</span><div class="tt2">Send your partial to Felicity Blunt</div><div class="ts2">First 50 pages of <span class="ms">The Tin Sky</span>.</div></div>
+    </div>
+  </div>
+
+  <div class="reco">
+    <h3>How it lands in the packs</h3>
+    <p><b>Tags</b> are a colour-law amendment to the retoken pack (burgundy fill → the two-depth pink system; burgundy retained for StatusDots and micro-accents only). <b>The fork + Task settings</b> is a new small pack: the fork loses its never options and gains the settings doorway; the settings page is a UI over the existing <code>mutedTaskRules</code> (+ per-item flags) with the Restore list — mute still deletes nothing, and now it's visibly undoable. Requests/deadlines and offers are <b>always on</b>, and Dismiss never renders on Urgent cards: a task board that can be told to hide your own deadlines quietly stops being trustworthy. Dismissing fires a toast — “Hidden — restore any time in Task settings” — so the way back is named at the moment of hiding.</p>
+    <p>One behaviour question for you before I write it: when someone toggles a type off in settings, should the board's housekeeping <b>post-it count</b> exclude the hidden types (my lean — the post-it should count what the desk shows), or keep counting everything?</p>
+  </div>
+</div>
+</body>
+</html>

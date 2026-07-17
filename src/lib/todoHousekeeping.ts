@@ -121,6 +121,7 @@ export function visibleAgentNeeds(agent: AgentDataQualityInput, muted?: string[]
  */
 export function taskSurvivesMute(taskType: string, agent: Agent | undefined, muted?: string[] | null): boolean {
   if (taskType === "no_response_close") return !isRuleMuted("no_response_close", muted);
+  if (taskType === "nudge_overdue") return !isRuleMuted("nudge_overdue", muted); // Task Settings: "Nudge reminders" off
   if (taskType === "data_quality_poor") return !agent || visibleAgentNeeds(agent, muted).length > 0;
   return true;
 }

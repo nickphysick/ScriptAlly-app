@@ -51,6 +51,47 @@
 .tdb-scrap b { font-family: var(--f12-serif); font-style: italic; font-weight: 600; font-size: 12px; line-height: 1.15; text-align: center; color: #5d4d40; } /* #5d4d40 — the ref's warm ink; no .t-f12 token fits exactly */
 .tdb-scrap u { text-decoration: none; border-bottom: 1px solid var(--hk-cof-edge); font-family: var(--f12-serif); font-style: italic; font-size: 9.5px; color: var(--hk-cof-ink); }
 @media (prefers-reduced-motion: reduce) { .tdb-scrap { transition: none; } }
+
+/* ── TASK SETTINGS (task-settings pack; ref todo-task-settings.html §2) ────────────────────────
+   The sliders entry sits in the bottom-right corner cluster, STACKED above the AppShell help "?"
+   (the Today FAB at right:70 blocks the horizontal slot beside help — a vertical cluster is the
+   clean fit). The sheet reuses the `.tdb-ff*` journey presentation; only its body rows are new. */
+.tdb-setbtn { position: fixed; right: 20px; bottom: 66px; z-index: 30; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--panel); border: 1px solid var(--line); box-shadow: var(--sh-2); color: var(--ink-2); cursor: pointer; transition: border-color 0.15s, color 0.15s; }
+.tdb-setbtn:hover { border-color: var(--ink-2); color: var(--ink); }
+
+.tdb-tsetgroup { margin-top: 22px; }
+.tdb-tsetgl { display: flex; align-items: center; gap: 8px; font-family: var(--f12-mono); font-size: 9px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.tdb-tsetgd { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+.tdb-tsetgd.urgent { background: var(--pink-btn); outline: 1px solid var(--pink-b); }
+.tdb-tsetgd.housekeeping { background: var(--hk-sage-2); outline: 1px solid var(--hk-spine); }
+.tdb-tsetgd.rituals { background: var(--hk-cof-2); outline: 1px solid var(--hk-cof-edge); }
+.tdb-tsetgd.hidden { background: var(--paper); outline: 1px solid var(--line); }
+.tdb-tsetrow { display: flex; align-items: center; gap: 16px; padding: 13px 2px; border-bottom: 1px solid var(--hairline); }
+.tdb-tsetrow:last-child { border-bottom: none; }
+.tdb-tsettx { flex: 1; min-width: 0; }
+.tdb-tsett { font-size: 14.5px; font-weight: 600; color: var(--ink); }
+.tdb-tsets { font-size: 12.5px; color: var(--sub); margin-top: 2px; line-height: 1.45; }
+.tdb-tsetlock { flex: none; font-family: var(--f12-mono); font-size: 8px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-2); background: var(--paper); border: 1px solid var(--line); border-radius: 99px; padding: 4px 10px; }
+/* the switch — sage on-state, neutral off; a pill track + knob, 0.15s */
+.tdb-tsetsw { flex: none; position: relative; width: 42px; height: 24px; border-radius: 99px; background: var(--line); border: none; cursor: pointer; transition: background 0.15s; }
+.tdb-tsetsw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--white, #fff); box-shadow: 0 1px 2px rgba(58, 42, 26, 0.25); transition: transform 0.15s; }
+.tdb-tsetsw.on { background: var(--hk-spine); }
+.tdb-tsetsw.on::after { transform: translateX(18px); }
+.tdb-tsetsw:focus-visible { outline: 2px solid var(--hk-ink); outline-offset: 2px; }
+/* hidden list */
+.tdb-tsetempty { font-family: var(--f12-serif); font-style: italic; font-size: 14px; color: var(--muted); padding: 6px 2px 2px; }
+.tdb-tsethid { display: flex; flex-direction: column; max-height: 260px; overflow-y: auto; }
+.tdb-tsethrow { display: flex; align-items: center; gap: 12px; padding: 11px 2px; border-bottom: 1px solid var(--hairline); }
+.tdb-tsethrow:last-child { border-bottom: none; }
+.tdb-tsethx { flex: 1; min-width: 0; font-size: 13.5px; color: var(--ink-2); }
+.tdb-tsethx b { color: var(--ink); font-weight: 600; }
+.tdb-tsethm { display: block; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin-top: 3px; }
+.tdb-tsetrestore { flex: none; font-size: 12.5px; font-weight: 600; padding: 6px 14px; border-radius: 99px; background: var(--white, #fff); border: 1px solid var(--hk-spine); color: var(--hk-ink); cursor: pointer; }
+.tdb-tsetrestore:hover { background: var(--hk-sage); }
+.tdb-tsetfoot { font-size: 12px; color: var(--muted); line-height: 1.5; margin-top: 14px; }
+/* the fork's board-side doorway to Task settings */
+.tdb-nsettings { display: block; width: 100%; text-align: left; font-family: var(--f12-mono); font-size: 8.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); padding: 9px 2px 2px; margin-top: 4px; border-top: 1px solid var(--hairline); background: none; }
+.tdb-nsettings:hover { color: var(--ink); }
 /* Polish v3 P4 — "Walk me through" (Option C; replaces the ink "Work through priorities now").
    White pill, 38px pink gradient disc + 15px ink play triangle (+2px right optical), two-line
    block: Playfair 19 over the mono GUIDED sublabel (ink @55%). Same handler, same disabled gate

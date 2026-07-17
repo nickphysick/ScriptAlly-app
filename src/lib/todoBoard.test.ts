@@ -454,3 +454,20 @@ describe("the Sunday review — pure derivations (finishing P3)", () => {
     expect(out[2].preTicked).toBe(false);
   });
 });
+
+describe("Task Settings — the Sunday CARD toggle (the scrap is exempt)", () => {
+  const q1 = [query("q1", "a1", QueryStatus.QUERIED, { dateSent: "2026-07-01T10:00:00Z" })];
+  const SUN = Date.parse("2026-07-19T12:00:00Z");
+  const FRI = Date.parse("2026-07-24T12:00:00Z");
+  const io = (now: number, muted?: string[]): BoardInput =>
+    ({ tasks: [], userTasks: [], queries: q1, agents: [], manuscripts: [], taskFlags: [], activities: [], today: TODAY, now, ...(muted ? { mutedTaskRules: muted } : {}) });
+
+  it("sunday_review off → no Sunday card; on → the card returns", () => {
+    expect(reviewEntryCard(io(SUN, ["sunday_review"]))).toBeNull();
+    expect(reviewEntryCard(io(SUN))).not.toBeNull();
+  });
+  it("the scrap IGNORES sunday_review — it still offers Tue–Sat when the card is switched off", () => {
+    expect(reviewScrap(io(FRI, ["sunday_review"]))).not.toBeNull();
+    expect(reviewScrap(io(FRI, ["sunday_review"]))).toEqual({ weekNumber: reviewWeek(q1, FRI).weekNumber });
+  });
+});
