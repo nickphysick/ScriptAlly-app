@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>To-do — pop-up restyle · notify-all step · dim-scrim journeys (design ref)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* NOTE FOR BUILD: consume live tokens. Bold-pastille pink = the dev-sampled #f4c7c2
+   family; done sage = the dashboard panel sage (#d7ddd5→#d5dbd3 sampled — verify against
+   live dashboard tokens, not this file). */
+:root{
+  --oat:#f1e8dc; --paper:#fdfaf5; --white:#ffffff;
+  --ink:#3a1c14; --muted:#9a8c80; --hair:#e7ddd2;
+  --pink-t:#f5e2da; --pink-b:#e8c8bc; --pink-mid:#efd5ca;
+  --bp-pink:#f4c7c2; --bp-pink-b:#e5a89f;
+  --dash-sage-a:#d7ddd5; --dash-sage-b:#d5dbd3; --sage-i:#5a6e58; --sage-line:#b9c2b3;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--oat);font-family:Inter,sans-serif;color:var(--ink);padding:40px 30px 120px}
+.demo-label{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8a7a6d;max-width:1100px;margin:0 auto 14px}
+.demo-label:not(:first-child){margin-top:70px}
+.row2{max-width:1100px;margin:0 auto;display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap}
+
+/* ============ 1 · TODAY'S LIST POP-UP (restyled) ============ */
+.popup{width:440px;background:var(--paper);border:1px solid var(--hair);border-radius:18px;box-shadow:0 12px 38px rgba(58,28,20,.2);display:flex;flex-direction:column;overflow:hidden;max-height:640px}
+.pop-head{display:flex;align-items:center;gap:12px;padding:20px 22px 16px;background:linear-gradient(180deg,var(--bp-pink),#f0bcb6);border-bottom:1px solid var(--bp-pink-b)}
+.pop-head h2{font-family:'Playfair Display',serif;font-size:23px;font-weight:600;flex:1}
+.pop-badge{font-family:'JetBrains Mono',monospace;font-size:10.5px;border:1px solid var(--bp-pink-b);background:var(--white);border-radius:99px;padding:4px 11px;color:var(--ink)}
+.pop-x{background:none;border:none;font-size:18px;cursor:pointer;color:var(--ink)}
+.pop-list{flex:1 1 auto;min-height:0;overflow-y:auto;padding:10px 12px}
+.pop-item{display:flex;align-items:flex-start;gap:14px;padding:15px 10px;border-bottom:1px solid var(--hair)}
+.pop-item:last-child{border-bottom:none}
+.pop-dot{width:26px;height:26px;border-radius:50%;background:var(--pink-t);border:1px solid var(--pink-b);flex:0 0 auto;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;margin-top:1px}
+.pop-dot:hover{color:var(--ink)}
+.pop-item .t{flex:1}
+.pop-item .t b{display:block;font-size:15.5px;font-weight:600;line-height:1.35;margin-bottom:3px}
+.pop-item .t span{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;color:#7a6a5e}
+.pop-rm{background:none;border:none;color:#b3a396;cursor:pointer;font-size:14px;padding-top:2px}
+/* done band — dashboard sage, terse rows */
+.pop-done{flex:0 0 auto;border-top:1px solid var(--sage-line);background:linear-gradient(180deg,var(--dash-sage-a),var(--dash-sage-b));padding:10px 12px;max-height:220px;overflow-y:auto}
+.pop-done .dh{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;color:var(--sage-i);padding:4px 10px 8px}
+.pop-done .pop-item{border-bottom:1px solid rgba(90,110,88,.16)}
+.pop-done .pop-dot{background:#eef1ec;border-color:var(--sage-line);color:var(--sage-i)}
+.pop-done .t b{text-decoration:line-through;color:#65705f;font-weight:500}
+.pop-done .t span{color:#77816f}
+.pop-foot{flex:0 0 auto;display:flex;align-items:center;gap:12px;padding:15px 20px;border-top:1px solid var(--hair)}
+.pop-count{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;color:#7a6a5e;flex:1}
+.btn-ghost{border:1px solid var(--hair);background:var(--white);border-radius:99px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink)}
+.btn-ink{border:none;background:var(--ink);color:var(--paper);border-radius:99px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer}
+.aside{flex:1;min-width:280px;font-size:13.5px;color:#6b5a4e;line-height:1.6}
+.aside b{color:var(--ink)}
+
+/* ============ 2 · NOTIFY STEP ============ */
+.sheet{max-width:860px;margin:0 auto;background:var(--paper);border-radius:20px;box-shadow:0 14px 44px rgba(58,28,20,.14);overflow:hidden}
+.sheet-body{padding:40px 52px 32px}
+.kick{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.13em;text-transform:uppercase;border:1px solid var(--hair);background:var(--white);border-radius:99px;padding:5px 13px;color:#6b5a4e;margin-bottom:18px}
+h1{font-family:'Playfair Display',serif;font-size:31px;font-weight:600;margin-bottom:8px}
+.lede{font-size:15px;color:#6b5a4e;line-height:1.55;margin-bottom:20px}
+.lede b{color:var(--ink)}
+.deadline{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.1em;background:var(--pink-t);border:1px solid var(--pink-b);border-radius:99px;padding:6px 14px;color:#7c3a2a;margin-bottom:22px}
+.grp{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:#8a7a6d;margin:16px 0 8px}
+.sel{display:flex;flex-direction:column;gap:8px}
+.selrow{display:flex;align-items:center;gap:14px;background:var(--white);border:1.5px solid var(--hair);border-radius:12px;padding:14px 18px;cursor:pointer;transition:border-color .15s}
+.selrow.on{border-color:var(--ink)}
+.selrow input{width:17px;height:17px;accent-color:#7c3a2a;flex:0 0 auto}
+.selrow .tx{flex:1}
+.selrow .tx b{display:block;font-size:15px;font-weight:600}
+.selrow .tx span{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;color:#7a6a5e}
+.selrow .warn{font-size:11.5px;color:#8a7a6d;font-style:italic}
+.sheet-foot{display:flex;align-items:center;padding:20px 52px;border-top:1px solid var(--hair);background:#faf6ef}
+.spacer{flex:1}
+.btn-pri{border:1px solid var(--pink-b);background:linear-gradient(180deg,var(--pink-t),var(--pink-mid));color:var(--ink);border-radius:99px;padding:11px 26px;font-size:13.5px;font-weight:600;cursor:pointer}
+.step{display:none}.step.on{display:block}
+/* reminder confirm */
+.remcard{display:flex;align-items:center;gap:16px;background:var(--white);border:1.5px solid var(--sage-line);border-radius:14px;padding:20px 24px;margin-bottom:14px}
+.remcard .ic{width:36px;height:36px;border-radius:50%;background:linear-gradient(180deg,#e9ede6,#dde4d9);border:1px solid var(--sage-line);display:flex;align-items:center;justify-content:center;color:var(--sage-i);font-size:15px;flex:0 0 auto}
+.remcard b{font-family:'Playfair Display',serif;font-size:17px;display:block;margin-bottom:2px}
+.remcard span{font-size:13px;color:#6b5a4e}
+
+/* ============ 3 · DIM-SCRIM PRESENTATION ============ */
+.stage{max-width:1100px;margin:0 auto;position:relative;border-radius:14px;overflow:hidden;box-shadow:0 6px 24px rgba(58,28,20,.14);cursor:pointer}
+.stage img,.faux{display:block}
+.faux{background:var(--oat);padding:26px;min-height:420px}
+.faux .fband{background:var(--paper);border-bottom:1px solid var(--hair);margin:-26px -26px 20px;padding:16px 26px;font-family:'Playfair Display',serif;font-size:21px;font-weight:600}
+.faux .frow{display:flex;gap:14px}
+.faux .fcard{flex:1;background:var(--white);border:1px solid var(--hair);border-radius:12px;height:150px;padding:14px}
+.faux .ftag{width:70px;height:14px;background:var(--pink-t);border:1px solid var(--pink-b);border-radius:99px;margin-bottom:10px}
+.faux .fline{height:9px;background:#eee4d8;border-radius:5px;margin-bottom:7px}
+.faux .hint{text-align:center;margin-top:26px;font-size:13px;color:#8a7a6d}
+.scrim{position:absolute;inset:0;background:rgba(38,20,14,.55);display:none;align-items:center;justify-content:center;padding:30px;backdrop-filter:blur(1.5px)}
+.stage.open .scrim{display:flex}
+.mini-sheet{background:var(--paper);border-radius:18px;box-shadow:0 18px 60px rgba(20,8,4,.4);max-width:640px;width:100%;padding:36px 44px 30px;cursor:default}
+.mini-sheet .kick{margin-bottom:14px}
+.mini-sheet h1{font-size:26px}
+.mini-sheet .lede{margin-bottom:0}
+.mini-sheet .foot{display:flex;margin-top:26px;padding-top:20px;border-top:1px solid var(--hair)}
+</style>
+</head>
+<body>
+
+<!-- ============ 1 ============ -->
+<div class="demo-label">1 · Today's list pop-up — bigger, roomier, bold-pastille head, dashboard-sage done band</div>
+<div class="row2">
+  <div class="popup">
+    <div class="pop-head"><h2>Today's list</h2><span class="pop-badge">4 committed</span><button class="pop-x">✕</button></div>
+    <div class="pop-list">
+      <div class="pop-item"><button class="pop-dot">✓</button><span class="t"><b>Tom Ellery has made an offer</b><span>TOM ELLERY · CURTIS VANE</span></span><button class="pop-rm">✕</button></div>
+      <div class="pop-item"><button class="pop-dot">✓</button><span class="t"><b>Send your full to Jonathan Marsh</b><span>JONATHAN MARSH · THE MARSH AGENCY</span></span><button class="pop-rm">✕</button></div>
+      <div class="pop-item"><button class="pop-dot">✓</button><span class="t"><b>Send your partial to Daniel O'Rourke</b><span>DANIEL O'ROURKE · INKWELL &amp; STONE</span></span><button class="pop-rm">✕</button></div>
+      <div class="pop-item"><button class="pop-dot">✓</button><span class="t"><b>Jonathan Marsh silent</b><span>JONATHAN MARSH · THE MARSH AGENCY</span></span><button class="pop-rm">✕</button></div>
+    </div>
+    <div class="pop-done">
+      <div class="dh">DONE TODAY</div>
+      <div class="pop-item"><button class="pop-dot">↺</button><span class="t"><b>Tom Ellery's offer — decision pending</b><span>TOM ELLERY · 10:53AM</span></span></div>
+      <div class="pop-item"><button class="pop-dot">↺</button><span class="t"><b>Full sent to Daniel O'Rourke</b><span>DANIEL O'ROURKE · 2:41PM</span></span></div>
+    </div>
+    <div class="pop-foot"><span class="pop-count">2 OF 6 DONE TODAY</span><button class="btn-ghost">Add more</button><button class="btn-ink">Work the list</button></div>
+  </div>
+  <div class="aside">
+    <p><b>What changed:</b> titles up to 15.5px with taller line-height, rows padded to 15px vertical, dots up to 26px. Head band is the bold-pastille pink; done band is the dashboard panel sage.</p>
+    <p style="margin-top:12px"><b>Done rows are terse now</b> — same title grammar as committed rows ("Full sent to Daniel O'Rourke"), never the journey's celebration copy. The 1:00AM on your live done row is historical data from before the timestamp fix — old writes keep their stamps; new ones are clock-true.</p>
+  </div>
+</div>
+
+<!-- ============ 2 ============ -->
+<div class="demo-label">2 · Offer journey — "Let your other agents know" (select-many → reminders)</div>
+<div class="sheet" id="notify">
+  <div class="sheet-body">
+
+    <div class="step on" data-s="pick">
+      <span class="kick">TOM ELLERY'S OFFER · LETTING YOUR OTHER AGENTS KNOW</span>
+      <h1>Who should hear about it?</h1>
+      <p class="lede">Standard etiquette is to tell <b>everyone still considering Murphy's Day Out</b> in one sweep — same message, same deadline — so they can read quickly or step aside.</p>
+      <span class="deadline">⏱ THE DEADLINE YOU GIVE THEM = YOUR REPLY-BY · 31 JUL</span>
+
+      <div class="grp">HAVE YOUR PAGES</div>
+      <div class="sel">
+        <label class="selrow on"><input type="checkbox" checked><span class="tx"><b>Daniel O'Rourke</b><span>INKWELL &amp; STONE · FULL SENT</span></span></label>
+        <label class="selrow on"><input type="checkbox" checked><span class="tx"><b>Jonathan Marsh</b><span>THE MARSH AGENCY · FULL SENT</span></span></label>
+        <label class="selrow on"><input type="checkbox" checked><span class="tx"><b>Sophie Dunn</b><span>CURTIS VANE · R&amp;R IN PROGRESS</span></span></label>
+      </div>
+
+      <div class="grp">QUERY ONLY</div>
+      <div class="sel">
+        <label class="selrow on"><input type="checkbox" checked><span class="tx"><b>Priya Raman</b><span>RAMAN LITERARY · QUERIED 28 JUN</span></span><span class="warn">"no reply means no" agency</span></label>
+      </div>
+    </div>
+
+    <div class="step" data-s="rem">
+      <span class="kick">TOM ELLERY'S OFFER · LETTING YOUR OTHER AGENTS KNOW</span>
+      <h1>Shall I put them on your desk?</h1>
+      <p class="lede">One task per agent — <b>"Tell {agent} about the offer"</b> — on Urgent, each carrying the 31 Jul deadline. They tick off as you send each message, and anyone who hasn't been told chases you as the deadline nears.</p>
+      <div class="remcard"><span class="ic">✓</span><span><b>4 reminders, ready to go</b><span>Daniel O'Rourke · Jonathan Marsh · Sophie Dunn · Priya Raman</span></span></div>
+      <p class="lede" style="font-size:13px">Skip this if you're sending all four messages right now — you can always tick the task off the moment each one goes.</p>
+    </div>
+
+  </div>
+  <div class="sheet-foot">
+    <button class="btn-ghost" id="nBack">← Back</button>
+    <div class="spacer"></div>
+    <button class="btn-pri" id="nNext">Continue · 4 selected</button>
+  </div>
+</div>
+
+<!-- ============ 3 ============ -->
+<div class="demo-label">3 · Journey presentation — in-focus sheet over the darkened board (click the board)</div>
+<div class="stage" id="stage">
+  <div class="faux">
+    <div class="fband">What's on your desk?</div>
+    <div class="frow">
+      <div class="fcard"><div class="ftag"></div><div class="fline" style="width:85%"></div><div class="fline" style="width:55%"></div></div>
+      <div class="fcard"><div class="ftag"></div><div class="fline" style="width:80%"></div><div class="fline" style="width:60%"></div></div>
+      <div class="fcard"><div class="ftag"></div><div class="fline" style="width:88%"></div><div class="fline" style="width:50%"></div></div>
+    </div>
+    <div class="hint">▲ click anywhere to open a journey over the board · click the scrim to see the dismiss-guard</div>
+  </div>
+  <div class="scrim" id="scrim">
+    <div class="mini-sheet" id="miniSheet">
+      <span class="kick">DANIEL O'ROURKE · LOGGING THE SEND</span>
+      <h1>Off it goes</h1>
+      <p class="lede">The board stays where you left it, dimmed behind — you never lose your place. Clicking outside nudges the sheet (no silent dismissal of staged work); ✕ or Esc asks first if anything's staged.</p>
+      <div class="foot"><button class="btn-ghost">✕ Back to the board</button><div class="spacer"></div><button class="btn-pri">Mark sent</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* notify step demo */
+const nSheet=document.getElementById('notify');
+const nSteps=[...nSheet.querySelectorAll('.step')];
+const nNext=document.getElementById('nNext'), nBack=document.getElementById('nBack');
+let onPick=true;
+function count(){return nSheet.querySelectorAll('.selrow input:checked').length}
+nSheet.querySelectorAll('.selrow input').forEach(c=>c.addEventListener('change',()=>{
+  c.closest('.selrow').classList.toggle('on', c.checked);
+  if(onPick) nNext.textContent = count() ? `Continue · ${count()} selected` : 'Continue without telling anyone';
+}));
+nNext.addEventListener('click',()=>{
+  if(onPick){ nSteps.forEach(s=>s.classList.toggle('on', s.dataset.s==='rem')); nNext.textContent='Create 4 reminders'; onPick=false; }
+});
+nBack.addEventListener('click',()=>{ nSteps.forEach(s=>s.classList.toggle('on', s.dataset.s==='pick')); nNext.textContent=`Continue · ${count()} selected`; onPick=true; });
+
+/* scrim demo */
+const stage=document.getElementById('stage'), scrim=document.getElementById('scrim'), mini=document.getElementById('miniSheet');
+stage.addEventListener('click',e=>{ if(!stage.classList.contains('open')) stage.classList.add('open'); });
+scrim.addEventListener('click',e=>{
+  if(e.target===scrim){ mini.style.transform='scale(1.015)'; setTimeout(()=>mini.style.transform='',140); }
+});
+mini.style.transition='transform .14s ease';
+mini.querySelector('.btn-ghost').addEventListener('click',e=>{e.stopPropagation();stage.classList.remove('open')});
+</script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { QueryStatus, Task, Query, Agent, Manuscript, UserTask, TaskFlag, Activity, ActivityType } from "../types";
-import { assembleBoard, boardStreamForTaskType, todaySplit, ribbonTiles, laneFadeState, walkSublabel, walkAria, offerDue, offerQuiet, BoardInput } from "./todoBoard";
+import { assembleBoard, boardStreamForTaskType, todaySplit, ribbonTiles, laneFadeState, walkSublabel, walkAria, offerDue, offerQuiet, terseDoneLabel, BoardInput } from "./todoBoard";
 
 const TODAY = "2026-07-09";
 const NOW = Date.parse("2026-07-09T12:00:00Z");
@@ -252,5 +252,36 @@ describe("offer card — quiet/wake + the reply-by countdown (journey-logic P4)"
     // woken: same board a week later
     const woken = assembleBoard({ ...flagged, now: NOW + 6 * DAY });
     expect(woken.do.find((c) => c.taskType === "offer_received")!.quiet).toBe(false);
+  });
+});
+
+describe("terseDoneLabel — done rows use the committed rows' vocabulary, never celebration copy (popup P1)", () => {
+  const a = (activityType: ActivityType, over: Partial<Activity> = {}) =>
+    ({ activityType, description: "", ...over } as Pick<Activity, "activityType" | "description" | "resultingStatus">);
+
+  it("sends read terse — full / partial / resubmit", () => {
+    expect(terseDoneLabel(a(ActivityType.MATERIALS_SENT, { resultingStatus: QueryStatus.FULL_SENT, description: "Full manuscript sent to X" }), "Daniel O’Rourke")).toBe("Full sent to Daniel O’Rourke");
+    expect(terseDoneLabel(a(ActivityType.MATERIALS_SENT, { resultingStatus: QueryStatus.PARTIAL_SENT }), "Priya Raman")).toBe("Partial sent to Priya Raman");
+    expect(terseDoneLabel(a(ActivityType.MATERIALS_SENT, { resultingStatus: QueryStatus.FULL_SENT, description: "Revised manuscript (v2) resubmitted to X" }), "Tom")).toBe("Resubmitted to Tom");
+  });
+
+  it("the old offer path's celebration description maps to the pending form — never printed verbatim", () => {
+    const celebration = "Congratulations! You've received an offer of representation from Tom Ellery at Curtis Vane!";
+    expect(terseDoneLabel(a(ActivityType.STATUS_CHANGED, { description: celebration, resultingStatus: QueryStatus.OFFER }), "Tom Ellery")).toBe("Tom Ellery’s offer — decision pending");
+    // even without the resultingStatus, the description pattern alone maps (the activityUtils regex, one source)
+    expect(terseDoneLabel(a(ActivityType.STATUS_CHANGED, { description: celebration }), "Tom Ellery")).toBe("Tom Ellery’s offer — decision pending");
+  });
+
+  it("decisions, nudges, closes", () => {
+    expect(terseDoneLabel(a(ActivityType.OFFER_ACCEPTED), "Tom")).toBe("Accepted Tom’s offer");
+    expect(terseDoneLabel(a(ActivityType.OFFER_DECLINED), "Tom")).toBe("Declined Tom’s offer");
+    expect(terseDoneLabel(a(ActivityType.NUDGE_SENT), "Jonathan Marsh")).toBe("Nudged Jonathan Marsh");
+    expect(terseDoneLabel(a(ActivityType.STATUS_CHANGED, { resultingStatus: QueryStatus.NO_RESPONSE }), "Marcus")).toBe("Closed Marcus — no response");
+    expect(terseDoneLabel(a(ActivityType.STATUS_CHANGED, { resultingStatus: QueryStatus.WITHDRAWN }), "Marcus")).toBe("Withdrew from Marcus");
+  });
+
+  it("unknown shapes fall back to the description; agent-less rows soften", () => {
+    expect(terseDoneLabel(a(ActivityType.AGENT_UPDATED, { description: "You updated details for X" }))).toBe("You updated details for X");
+    expect(terseDoneLabel(a(ActivityType.NUDGE_SENT))).toBe("Nudged the agent");
   });
 });

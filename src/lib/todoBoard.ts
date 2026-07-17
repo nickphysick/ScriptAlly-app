@@ -13,7 +13,8 @@
  * Unit-tested for column membership, commit state, and the cleared union — not the prose.
  */
 
-import { Task, Query, Agent, Manuscript, UserTask, TaskFlag, QueryStatus, Activity } from "../types";
+import { Task, Query, Agent, Manuscript, UserTask, TaskFlag, QueryStatus, Activity, ActivityType } from "../types";
+import { OFFER_RECEIVED_DESC_RE } from "./activityUtils";
 import { queryAmbientStatus } from "./queryAmbient";
 import { agentDataQualityNeeds } from "./agentDataQuality";
 import { agentPrimary, agentInitials } from "./agentDisplay";
@@ -304,13 +305,40 @@ export function walkAria(urgent: number): string {
   return `Walk me through — guided pass through ${urgent} urgent item${urgent === 1 ? "" : "s"}`;
 }
 
+/**
+ * The done band's TERSE grammar (popup-notify-scrim P1): done rows use the committed rows' title
+ * vocabulary — "Full sent to {agent}", never a journey's celebration copy. Derived at THE label
+ * source (every journey inherits terseness for free), keyed on activityType/resultingStatus with
+ * the raw description as the unknown-shape fallback. The old offer path's celebration description
+ * maps to "{agent}'s offer — decision pending" via the SAME regex activityUtils strips with.
+ */
+export function terseDoneLabel(a: Pick<Activity, "activityType" | "description" | "resultingStatus">, agentName?: string): string {
+  const who = agentName || "the agent";
+  const type = a.activityType;
+  if (type === ActivityType.OFFER_ACCEPTED) return `Accepted ${who}’s offer`;
+  if (type === ActivityType.OFFER_DECLINED) return `Declined ${who}’s offer`;
+  if (type === ActivityType.NUDGE_SENT) return `Nudged ${who}`;
+  if (type === ActivityType.QUERY_SENT) return `Query sent to ${who}`;
+  if (type === ActivityType.MATERIALS_SENT) {
+    if (/resubmit/i.test(a.description || "")) return `Resubmitted to ${who}`;
+    return a.resultingStatus === QueryStatus.PARTIAL_SENT ? `Partial sent to ${who}` : `Full sent to ${who}`;
+  }
+  if (type === ActivityType.STATUS_CHANGED) {
+    if (OFFER_RECEIVED_DESC_RE.test(a.description || "") || a.resultingStatus === QueryStatus.OFFER) return `${who}’s offer — decision pending`;
+    if (a.resultingStatus === QueryStatus.NO_RESPONSE) return `Closed ${who} — no response`;
+    if (a.resultingStatus === QueryStatus.WITHDRAWN) return `Withdrew from ${who}`;
+    if (a.resultingStatus) return `${a.resultingStatus} — ${who}`;
+  }
+  return a.description || String(type);
+}
+
 function blankDone(key: string): BoardCard {
   return { key, stream: "done", title: "", who: "", subtitle: "", due: "", warn: false, snoozes: 0, hk: false, initials: "", record: "", committed: false, done: true };
 }
 function clearedActivityCard(a: Activity, i: number, input: BoardInput): BoardCard {
   const q = input.queries.find((x) => x.id === a.queryId);
   const ag = q ? input.agents.find((x) => x.id === q.agentId) : undefined;
-  return { ...blankDone(`done-act-${a.id ?? i}`), title: a.description || a.activityType, record: ag ? agentPrimary(ag) : "Query", whenMs: msOf(a.date) };
+  return { ...blankDone(`done-act-${a.id ?? i}`), title: terseDoneLabel(a, ag ? agentPrimary(ag) : undefined), record: ag ? agentPrimary(ag) : "Query", whenMs: msOf(a.date) };
 }
 function clearedFlagCard(f: TaskFlag, i: number, input: BoardInput): BoardCard {
   const ag = f.agentId ? input.agents.find((x) => x.id === f.agentId) : undefined;

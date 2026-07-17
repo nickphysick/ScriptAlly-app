@@ -27,7 +27,7 @@ const rule = (sel: string): string => {
 describe("Today's-list pop-up stacking — fix pass P3", () => {
   it("the pop-up grows with content up to the viewport cap (max-height, never fixed height)", () => {
     const pop = rule(".tdb-pop");
-    expect(pop).toContain("max-height: min(540px, calc(100vh - 120px))");
+    expect(pop).toContain("max-height: min(640px, calc(100vh - 120px))");
     expect(pop).not.toMatch(/(?<!max-)height:/);
   });
 
@@ -42,7 +42,7 @@ describe("Today's-list pop-up stacking — fix pass P3", () => {
   it("the done band is content-sized with its own cap — it never steals space", () => {
     const done = rule(".tdb-tdone");
     expect(done).toContain("flex: 0 0 auto");
-    expect(done).toContain("max-height: 32vh");
+    expect(done).toContain("max-height: 220px");
   });
 
   it("the done band renders only when non-empty; the zero-done flex spacer is gone", () => {
