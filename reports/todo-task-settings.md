@@ -77,3 +77,29 @@ their switch alone (excluded from the hidden list).
 - Tests: rows (locked vs keyed), `typeIsOn`/`setTypeMute` round-trip, `taskSurvivesMute` nudge gate
   (+ send-family never gated), the Sunday-card toggle + scrap exemption. (The pure `hiddenItems`
   layer + its tests also ride this commit, ready for Phase 3's UI.)
+
+## PHASE 3 — hidden right now
+
+- HIDDEN RIGHT NOW lists newest-first via `hiddenItems` (taskSettings.ts, pure): **rule-mutes**
+  ("MUTED AS A RULE" — housekeeping/stale keys only; nudge/sunday are settings-only, excluded) ·
+  **permanent dismisses** ("DISMISSED" — the fork's "Never just this", `snoozedUntil === MUTED_UNTIL`,
+  subject from the query's agent) · **live snoozes** ("SNOOZED UNTIL {date}"). Scrolls past ~8 rows.
+- **Restore** via existing primitives only: rule → remove from `mutedTaskRules`; flag →
+  `upsertTaskFlag(key, { snoozedUntil: null })`. The item re-derives live behind the scrim.
+- **Empty state** "Nothing set aside." — the section never disappears. Closing line per the pack.
+- **Date deviation:** rule-mutes + permanent dismisses store NO timestamp (the ref's "hidden 16 Jul"
+  is mockup fiction) — only live snoozes carry a date.
+- **Silent-no-op caught:** the first Phase-3 re-add of the hidden UI matched nothing (Python
+  `.replace` no-ops on miss) and would have shipped a hidden-less sheet — tsc/build/pure-Vitest were
+  all green. The NEW `taskSettingsSheet.test.ts` source-render lock caught it (the render-crash
+  lesson applied). Re-applied against exact anchors.
+
+## FINALISE
+
+- **Commits:** Phases 1+2 `ac66aa2`; Phase 3 = this commit.
+- **Files (Phase 3):** `TaskSettingsSheet.tsx` (hidden UI + restore) · NEW
+  `taskSettingsSheet.test.ts` (source locks). Vitest **1171** (+4 locks). No rules change.
+- **In-browser checklist (Nick, dev):** wish-lists OFF → HOUSEKPG post-it + lane drop live, the
+  MUTED strip and the switch in lockstep · nudge OFF → Urgent + Walk-me-through count drop · Sunday
+  OFF with the scrap surviving · Offers ALWAYS ON · restore a rule-mute / a dismiss / a snooze from
+  HIDDEN RIGHT NOW · the sliders button above the help "?" and the fork doorway.

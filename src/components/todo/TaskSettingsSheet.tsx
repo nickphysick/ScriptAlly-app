@@ -12,12 +12,12 @@
 import React, { useEffect, useLayoutEffect, useRef } from "react";
 import { useScriptAllyDb } from "../../lib/db";
 import { lockStageScroll } from "../../lib/stageScroll";
-import { TASK_SETTING_ROWS, GROUP_LABEL, TaskSettingGroup, typeIsOn, setTypeMute } from "../../lib/taskSettings";
+import { TASK_SETTING_ROWS, GROUP_LABEL, TaskSettingGroup, typeIsOn, setTypeMute, hiddenItems, HiddenItem } from "../../lib/taskSettings";
 
 const GROUPS: TaskSettingGroup[] = ["urgent", "housekeeping", "rituals"];
 
 export const TaskSettingsSheet: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-  const { currentUser, updateUserProfile } = useScriptAllyDb();
+  const { currentUser, updateUserProfile, upsertTaskFlag, taskFlags, agents, queries } = useScriptAllyDb();
   const muted = currentUser?.mutedTaskRules;
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -52,6 +52,17 @@ export const TaskSettingsSheet: React.FC<{ onClose: () => void }> = ({ onClose }
   const setSwitch = (key: NonNullable<(typeof TASK_SETTING_ROWS)[number]["key"]>, on: boolean) => {
     void updateUserProfile({ mutedTaskRules: setTypeMute(key, muted, on) });
   };
+  const restore = (item: HiddenItem) => {
+    const r = item.restore;
+    if ("rule" in r) {
+      void updateUserProfile({ mutedTaskRules: (muted ?? []).filter((k) => k !== r.rule) });
+    } else {
+      void upsertTaskFlag(r.flag, { snoozedUntil: null });
+    }
+  };
+
+  const hidden = hiddenItems(muted, taskFlags, agents, queries, Date.now());
+
   return (
     <div className="tdb-ff" role="dialog" aria-modal="true" aria-labelledby="tdb-tset-heading" ref={rootRef} tabIndex={-1} onKeyDown={trapTab} onClick={scrimClick}>
       <div className="tdb-ffstage">
@@ -90,6 +101,23 @@ export const TaskSettingsSheet: React.FC<{ onClose: () => void }> = ({ onClose }
                 })}
               </div>
             ))}
+
+            <div className="tdb-tsetgroup">
+              <div className="tdb-tsetgl"><span className="tdb-tsetgd hidden" aria-hidden />HIDDEN RIGHT NOW</div>
+              {hidden.length === 0 ? (
+                <div className="tdb-tsetempty">Nothing set aside.</div>
+              ) : (
+                <div className="tdb-tsethid">
+                  {hidden.map((h) => (
+                    <div key={h.id} className="tdb-tsethrow">
+                      <span className="tdb-tsethx"><b>{h.label}</b><span className="tdb-tsethm">{h.meta}</span></span>
+                      <button type="button" className="tdb-tsetrestore" onClick={() => restore(h)}>Restore</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="tdb-tsetfoot">Restoring puts it straight back on the board. Nothing here is deleted — only set aside.</div>
+            </div>
           </div>
         </div>
       </div>
