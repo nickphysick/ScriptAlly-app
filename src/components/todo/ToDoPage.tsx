@@ -250,6 +250,28 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [flow, setFlow] = useState<{ items: FocusItem[]; mode?: "sweep" } | null>(null);
   const [flowPrefill, setFlowPrefill] = useState<{ sentDate?: string; method?: string; materials?: string[] } | undefined>(undefined);
   const [todayOpen, setTodayOpen] = useState(false);
+  // Chrome-fixes P1 — THE close path (the ✕, click-away and Esc all land here; never parallel
+  // close logic). Click-away: document-level pointerdown while expanded only; clicks on the
+  // add-to-list pills are exempt (adding while the list is open lets you watch the item land),
+  // and everything is inert while a FocusFlow sheet is up (its Esc/dismiss handling wins — and a
+  // Work-the-list journey must return you to the still-open list).
+  const closeToday = () => setTodayOpen(false);
+  useEffect(() => {
+    if (!todayOpen) return;
+    const onDown = (e: PointerEvent) => {
+      if (flow) return;
+      const t = e.target as HTMLElement | null;
+      if (!t) return;
+      if (t.closest(".tdb-pop")) return; // inside the pop-up
+      if (t.closest(".tdb-pill.today-p")) return; // the add-to-list exemption (Step 0 item 3's set)
+      closeToday();
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape" && !flow) closeToday(); };
+    document.addEventListener("pointerdown", onDown);
+    window.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("pointerdown", onDown); window.removeEventListener("keydown", onKey); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [todayOpen, flow]);
   const openFlowCards = (cards: BoardCard[]) => setFlow({ items: cards.map((card) => ({ kind: "card", card })) });
   // Quick-rail card states. Receipts/dismissed render as STANDALONE cards (the live card vanishes the
   // moment the write lands — the board is derived); fork/flip replace a still-live card's body.
@@ -662,7 +684,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <span className="tdb-t">Today’s list</span>
           <span className="tdb-cc">{committedCards.length === 0 ? "Nothing yet" : `${committedCards.length} committed`}</span>
           {doneN > 0 && <span className="tdb-cd">{doneN} done</span>}
-          <button type="button" className="tdb-drawer-x" onClick={() => setTodayOpen(false)} aria-label="Close">✕</button>
+          <button type="button" className="tdb-drawer-x" onClick={closeToday} aria-label="Close">✕</button>
         </div>
         {rolled.length > 0 && (
           <div className="tdb-rollbar">
