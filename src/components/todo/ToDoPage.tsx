@@ -766,8 +766,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
 
   // ── the Sunday-review entry card (finishing P3): derived + dismissible for the week; its click
   //    opens the weeklyReview mode with the live Urgent cards as the seed source. ──
-  const openSundayReview = () =>
+  // MUST be a hoisted `function` (not a post-return `const`): renderReviewCard references it and is
+  // called from within the component's return JSX — a `const` here sits in the TDZ for the whole
+  // render, so accessing it throws the moment a review card actually renders (the demotion bug).
+  function openSundayReview() {
     setFlow({ items: board.do.filter((x) => x.taskType !== "weekly_review").map((card) => ({ kind: "card" as const, card })), mode: "weeklyReview" });
+  }
 
   function renderReviewCard(c: BoardCard) {
     const demoted = c.stream === "hk"; // the Tue–Sat unreviewed week — quiet coffee identity

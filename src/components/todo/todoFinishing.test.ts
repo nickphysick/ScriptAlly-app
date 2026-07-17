@@ -85,4 +85,9 @@ describe("P3 — the Sunday review (source locks)", () => {
     expect(dismiss).toContain('flagKeyForTask("weekly_review", c.relatedRecordId!)');
     expect(dismiss).toContain("snoozedUntil: new Date(Date.now() + 3 * 86400000).toISOString()");
   });
+
+  it("openSundayReview is a HOISTED function, not a post-return const (else it sits in the TDZ and renderReviewCard throws on render — the demotion crash)", () => {
+    expect(page).toContain("function openSundayReview()");
+    expect(page).not.toContain("const openSundayReview");
+  });
 });
