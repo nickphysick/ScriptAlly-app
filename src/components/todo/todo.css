@@ -141,6 +141,11 @@
 .tdb-tile.nt::before { background: var(--note-b); }
 .tdb-tile:hover { border-color: var(--ink); box-shadow: var(--sh-card-h); transform: translateY(-1px); }
 .tdb-tile.today { border-color: var(--coffee-edge); }
+/* P4 — the "I need time" offer: stays on Urgent at reduced emphasis (the board's muted grammar);
+   hover restores full weight; the deadline pill keeps counting down inside it. Woken (reminder or
+   reply-by) simply drops the class. */
+.tdb-tile.quiet { opacity: 0.62; }
+.tdb-tile.quiet:hover { opacity: 1; }
 .tdb-tags { flex: none; display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
 .tdb-tag { display: inline-flex; align-items: center; gap: 5px; font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 99px; padding: 3.5px 10px; border: 1px solid var(--pink-b); background: var(--pink-t); color: var(--pink-i); white-space: nowrap; }
 .tdb-tile.nt .tdb-tag { background: var(--note-t); border-color: var(--note-b); color: var(--note-i); }

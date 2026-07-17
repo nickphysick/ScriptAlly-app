@@ -54,6 +54,7 @@ export interface BoardCard {
   committedDate?: string; // raw "YYYY-MM-DD" — set even when it's a prior day (rollover detection)
   done: boolean;
   whenMs?: number; // cleared-today cards only — the completion instant, for the done-band time + newest-first order
+  quiet?: boolean; // offer cards only (P4): "I need time" set — reduced emphasis until the reminder or reply-by wakes it
   // action wiring
   taskType?: string;
   relatedRecordId?: string;
@@ -89,6 +90,31 @@ const dqLabel = (gap?: string) =>
 const dqSub = (gap?: string) =>
   gap === "mswl" ? "We can’t tell you what they’re after" : gap === "materials" ? "We don’t know what to tell you to send" : gap === "responseTime" ? "We can’t tell you when a nudge is fair" : "";
 
+/**
+ * P4 — the offer card's deadline pill counts down to REPLY-BY (`q.responseDeadline`, the same
+ * field the dashboard's deadline chip reads). Unset → the plain OFFER chip (no invented default).
+ */
+export function offerDue(replyByMs: number | null, nowMs: number): string {
+  if (replyByMs == null || Number.isNaN(replyByMs)) return "OFFER";
+  const days = Math.ceil((replyByMs - nowMs) / 86400000);
+  if (days <= 0) return "OFFER · REPLY-BY PASSED";
+  return `OFFER · ${days} DAY${days === 1 ? "" : "S"} TO REPLY`;
+}
+
+/**
+ * P4 — quiet/wake. "I need time" stores the EXISTING snooze flag (no new state); the engine
+ * exempts offers from snooze-HIDING, so the flag reaches the board and this derives the render:
+ * quiet while the reminder is in the future, woken the moment it passes — or immediately when
+ * reply-by arrives first, whichever comes soonest.
+ */
+export function offerQuiet(snoozedUntil: string | undefined | null, replyByMs: number | null, nowMs: number): boolean {
+  if (!snoozedUntil) return false;
+  const snoozeMs = Date.parse(snoozedUntil);
+  if (Number.isNaN(snoozeMs) || snoozeMs <= nowMs) return false;
+  if (replyByMs != null && !Number.isNaN(replyByMs) && replyByMs <= nowMs) return false;
+  return true;
+}
+
 /** The derived-task card copy (title/who/subtitle/due/warn/status/hk). */
 function derivedCopy(task: Task, q: Query | undefined, ag: Agent | undefined, ms: Manuscript | undefined, now: number) {
   const name = ag ? agentPrimary(ag) : "an agent";
@@ -96,7 +122,7 @@ function derivedCopy(task: Task, q: Query | undefined, ag: Agent | undefined, ms
   const agentWait = () => (q ? queryAmbientStatus(q, "agent", undefined, now) : null);
   switch (task.taskType) {
     case "offer_received":
-      return { title: `${name} has made an offer`, who: name, subtitle: msTitle || "Respond when you’re ready", due: "OFFER", warn: true, status: q?.status, hk: false };
+      return { title: `${name} has made an offer`, who: name, subtitle: msTitle || "Respond when you’re ready", due: offerDue(q?.responseDeadline ? Date.parse(q.responseDeadline) : null, now), warn: true, status: q?.status, hk: false };
     case "partial_requested":
       return { title: `Send your partial to ${name}`, who: name, subtitle: msTitle, due: "OVER TO YOU", warn: false, status: q?.status, hk: false };
     case "full_requested":
@@ -146,6 +172,9 @@ function derivedCard(task: Task, input: BoardInput): BoardCard | null {
     committed: flag?.committedDate === input.today,
     committedDate: flag?.committedDate,
     done: false,
+    ...(task.taskType === "offer_received"
+      ? { quiet: offerQuiet(flag?.snoozedUntil, q?.responseDeadline ? Date.parse(q.responseDeadline) : null, input.now) }
+      : {}),
     taskType: task.taskType,
     relatedRecordId: task.relatedRecordId,
   };

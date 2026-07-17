@@ -784,7 +784,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       );
     }
     return (
-      <div key={c.key} className={`tdb-tile ${c.stream}${committed ? " today" : ""}${pulsing === c.key ? " pulse" : ""}`} onClick={() => openFlowCards([c])}>
+      <div key={c.key} className={`tdb-tile ${c.stream}${committed ? " today" : ""}${c.quiet ? " quiet" : ""}${pulsing === c.key ? " pulse" : ""}`} onClick={() => openFlowCards([c])}>
         {!isOffer && rail(() => quickDone(c), () => quickPause(c))}
         <div className="tdb-tags">
           <span className={`tdb-tag due${isOffer ? " offer" : c.warn ? " warn" : ""}`}>{isOffer ? `★ ${c.due}` : c.due}</span>

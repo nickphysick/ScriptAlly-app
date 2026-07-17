@@ -138,3 +138,54 @@ suppressed tasks wholesale — hence the approved offer exemption.
 - Tests +8: builder invariants (accepted non-status both twins · declined WITHDRAWN both twins ·
   neither ever emits OFFER/STATUS_CHANGED · agent-less grace), hasOfferDecision, and the source
   locks (re-log path gone; need-time = the flag; notify = the nudge payload).
+
+## PHASE 4 — offer card board behaviour
+
+- **APPROVED ENGINE DIFF 2 (verbatim):**
+  `- if (flag && isFlagSuppressing(flag, nowMs)) return false;`
+  `+ if (flag && isFlagSuppressing(flag, nowMs) && t.taskType !== "offer_received") return false;`
+  Offers are exempt from snooze-HIDING: the "I need time" flag survives to the board (and the
+  dashboard's Over-to-you keeps seeing the task — the two surfaces stay in agreement).
+- **Quiet/wake derived, nothing stored:** `offerQuiet(snoozedUntil, replyByMs, now)` in
+  `todoBoard.ts` — quiet while the reminder is future, woken the moment it passes OR the instant
+  reply-by arrives first. The card renders `.tdb-tile.quiet` (opacity .62 — the board's muted
+  grammar; hover restores) and NEVER leaves Urgent; rank and `warn` unchanged while quiet.
+- **The deadline pill counts down throughout:** `offerDue(replyByMs, now)` → `OFFER · {n} DAY(S)
+  TO REPLY` from `q.responseDeadline` (the dashboard's own field), `OFFER · REPLY-BY PASSED`
+  beyond it, and the plain `OFFER` chip when unset — no invented default, exactly as ruled.
+- **The exemption stands, verified:** offers get NO quick rail (`{!isOffer && rail(...)}` —
+  pre-existing, confirmed), no Dismiss anywhere, and sweep-D on an offer falls through
+  `getPrimaryAction`'s `kind !== "mark-sent"` guard — it advances without writing. The only
+  completion is a recorded decision through the journey.
+- Tests +4: `offerDue` (countdown/singular/passed/unset) · `offerQuiet` (before/after reminder ·
+  reply-by-first wake · no-flag) · the assembled-card integration (quiet + countdown + warn held,
+  woken at +6 days).
+
+## FINALISE
+
+| Phase | SHA | Commit |
+|---|---|---|
+| 1 | `2e4bee9` | fix(todo): journey timestamp rule — noon-local backdates, nudge event date |
+| 2 | `23de91c` | feat(todo): one-tap send confirm |
+| 3 | `25b3a86` | feat(todo): interim offer journey — decisions, not re-logs |
+| 4 | (this commit) | feat(todo): offer card quiet/wake + reply-by countdown |
+
+- **Files:** `FocusFlow.tsx` · `todoWalk.ts` · `logNudge.ts` · NEW `offerDecision.ts` ·
+  `todoBoard.ts` (P4 scope grant) · `db.tsx` (recordOfferDecision + the two approved clauses) ·
+  `types.ts` (two enum members) · `firestore.rules` (two literals — **IN FILE; the compile +
+  deploy is Nick's**) · `ToDoPage.tsx` (one caller + one class) · `todo.css` · tests (+24 total:
+  1080 → **1104**). Out-of-scope untouched: recomputeQuery internals, nudgeDraft, StatusDot/
+  MountPanel, the full Offer Decision Flow (parked), board chrome.
+- **Invariant outcome:** the ONLY violator (the offer journey's re-log) is corrected; every other
+  journey passed the audit unchanged. The nudge's lying date picker was the bonus correction.
+- **In-browser checklist (Nick, on dev — REMEMBER: rules must deploy WITH hosting or decision
+  writes are denied):** a fresh offer end-to-end (celebration → notify an agent → the staged
+  nudge at review → need time → the quiet card at .62 with the countdown still live → wake →
+  record the decision; accepted leaves other queries visible on the hub, declined closes ITS query
+  as Withdrawn via recompute) · a full send at literally one tap · a back-dated send showing NOON
+  on the timeline (not 01:00) · a back-dated nudge showing the picked day · timeline times now
+  clock-true.
+- **Deviations:** the decide/need-time primaries live in the flow's footer (component grammar;
+  the ref draws them there too) · sweep-D-on-offer advances rather than erroring (the pre-existing
+  guard, kept) · the P3 need-time → P4 exemption ordering left a one-commit hide-not-quiet window
+  (both now landed).

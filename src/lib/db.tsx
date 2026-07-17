@@ -805,7 +805,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     const mutedRules = currentUser?.mutedTaskRules ?? [];
     const activeTasks = calculatedTasks.filter(t => {
       const flag = taskFlags.find(f => flagMatchesTask(f, t.taskType, t.relatedRecordId));
-      if (flag && isFlagSuppressing(flag, nowMs)) return false;
+      // Offers are EXEMPT from snooze-HIDING (journey-logic P4): "I need time" renders the card
+      // QUIETER, never hidden — the flag survives to the board, which derives quiet/wake.
+      if (flag && isFlagSuppressing(flag, nowMs) && t.taskType !== "offer_received") return false;
       // Rule-scope mute ("Stop asking → All of them"): silence the reminder everywhere from this one
       // point. data_quality_poor dies only when ALL its remaining gaps are muted (todoHousekeeping).
       const ag = t.taskType === "data_quality_poor" ? agents.find(a => a.id === t.relatedRecordId) : undefined;

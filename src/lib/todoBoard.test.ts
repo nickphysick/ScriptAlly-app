@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { QueryStatus, Task, Query, Agent, Manuscript, UserTask, TaskFlag, Activity, ActivityType } from "../types";
-import { assembleBoard, boardStreamForTaskType, todaySplit, ribbonTiles, laneFadeState, walkSublabel, walkAria, BoardInput } from "./todoBoard";
+import { assembleBoard, boardStreamForTaskType, todaySplit, ribbonTiles, laneFadeState, walkSublabel, walkAria, offerDue, offerQuiet, BoardInput } from "./todoBoard";
 
 const TODAY = "2026-07-09";
 const NOW = Date.parse("2026-07-09T12:00:00Z");
@@ -204,5 +204,53 @@ describe("walkSublabel / walkAria — the Walk-me-through button reads the ONE u
     expect(walkAria(3)).toBe("Walk me through — guided pass through 3 urgent items");
     expect(walkAria(1)).toBe("Walk me through — guided pass through 1 urgent item");
     expect(walkAria(0)).toBe("Walk me through — nothing urgent right now");
+  });
+});
+
+describe("offer card — quiet/wake + the reply-by countdown (journey-logic P4)", () => {
+  const DAY = 86400000;
+
+  it("offerDue counts down to reply-by; unset → the plain OFFER chip (no invented default)", () => {
+    expect(offerDue(null, NOW)).toBe("OFFER");
+    expect(offerDue(NaN, NOW)).toBe("OFFER");
+    expect(offerDue(NOW + 14 * DAY, NOW)).toBe("OFFER · 14 DAYS TO REPLY");
+    expect(offerDue(NOW + 1 * DAY, NOW)).toBe("OFFER · 1 DAY TO REPLY");
+    expect(offerDue(NOW - DAY, NOW)).toBe("OFFER · REPLY-BY PASSED");
+  });
+
+  it("offerQuiet: quiet before the reminder, woken once it passes", () => {
+    const remind = new Date(NOW + 3 * DAY).toISOString();
+    expect(offerQuiet(remind, NOW + 14 * DAY, NOW)).toBe(true);
+    expect(offerQuiet(remind, NOW + 14 * DAY, NOW + 3 * DAY)).toBe(false); // the reminder day arrives
+    expect(offerQuiet(undefined, NOW + 14 * DAY, NOW)).toBe(false); // no reminder set → never quiet
+  });
+
+  it("offerQuiet: reply-by arriving FIRST wakes it regardless of the reminder", () => {
+    const remind = new Date(NOW + 10 * DAY).toISOString();
+    expect(offerQuiet(remind, NOW + 2 * DAY, NOW + 2 * DAY)).toBe(false);
+    expect(offerQuiet(remind, null, NOW)).toBe(true); // no reply-by → the reminder alone governs
+  });
+
+  it("an assembled offer card carries quiet + the countdown due; other cards never get quiet", () => {
+    const offerQ = query("qo", "a1", QueryStatus.OFFER, { responseDeadline: new Date(NOW + 14 * DAY).toISOString() });
+    const flagged: BoardInput = {
+      tasks: [task("t-offer", "offer_received", "qo")],
+      userTasks: [],
+      queries: [offerQ],
+      agents: [agent("a1", "Tom Ellery")],
+      manuscripts: [],
+      taskFlags: [{ id: "f1", userId: "u", taskType: "offer_received", queryId: "qo", snoozedUntil: new Date(NOW + 5 * DAY).toISOString() } as unknown as import("../types").TaskFlag],
+      activities: [],
+      today: TODAY,
+      now: NOW,
+    };
+    const b = assembleBoard(flagged);
+    const card = b.do.find((c) => c.taskType === "offer_received")!;
+    expect(card.quiet).toBe(true);
+    expect(card.due).toBe("OFFER · 14 DAYS TO REPLY");
+    expect(card.warn).toBe(true); // urgency never drops while quiet
+    // woken: same board a week later
+    const woken = assembleBoard({ ...flagged, now: NOW + 6 * DAY });
+    expect(woken.do.find((c) => c.taskType === "offer_received")!.quiet).toBe(false);
   });
 });
