@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { BoardCard } from "./todoBoard";
-import { choosePicks, rolledOverCards, todayProgress, walkStepKind, isStageable, applyStaged, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, quickSendPayload, quickNudgePayload, receiptLine, DEFAULT_CHECKBACK_DAYS, StagedPayload, StagedHandlers } from "./todoWalk";
+import { choosePicks, rolledOverCards, todayProgress, walkStepKind, isStageable, applyStaged, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, quickSendPayload, quickNudgePayload, receiptLine, journeyEventISO, DEFAULT_CHECKBACK_DAYS, StagedPayload, StagedHandlers } from "./todoWalk";
 import { QueryStatus } from "../types";
 
 const card = (key: string, over: Partial<BoardCard> = {}): BoardCard =>
@@ -111,10 +111,47 @@ describe("one write path — the write-args builders strip audit fields identica
     const p: Extract<StagedPayload, { kind: "mark-sent" }> = { kind: "mark-sent", cardKey: "a", label: "x", queryId: "q1", targetStatus: QueryStatus.FULL_SENT, sentDate: "2026-07-16T00:00:00.000Z", isResubmit: true, method: "Email", materials: ["Full manuscript"] };
     expect(markSentWriteArgs(p)).toEqual({ queryId: "q1", targetStatus: QueryStatus.FULL_SENT, sentDate: "2026-07-16T00:00:00.000Z", isResubmit: true });
   });
-  it("nudgeWriteArgs yields EXACTLY the logNudge args (nudgeDate/method are display-only)", () => {
-    const p: Extract<StagedPayload, { kind: "nudge" }> = { kind: "nudge", cardKey: "n", queryId: "q1", checkBackDate: "2026-08-01T00:00:00.000Z", note: "hi", nudgeDate: "2026-07-16", method: "Email" };
-    expect(nudgeWriteArgs(p)).toEqual(["q1", { checkBackDate: "2026-08-01T00:00:00.000Z", note: "hi" }]);
-    expect(nudgeWriteArgs({ kind: "nudge", cardKey: "n", queryId: "q1", checkBackDate: "2026-08-01" })).toEqual(["q1", { checkBackDate: "2026-08-01" }]);
+  it("nudgeWriteArgs carries the picked day AS the event date (P1 — it was display-only); method stays display-only", () => {
+    const NOW = "2026-07-16T09:00:00.000Z";
+    const p: Extract<StagedPayload, { kind: "nudge" }> = { kind: "nudge", cardKey: "n", queryId: "q1", checkBackDate: "2026-08-01T00:00:00.000Z", note: "hi", nudgeDate: "2026-07-10", method: "Email" };
+    const [id, args] = nudgeWriteArgs(p, NOW);
+    expect(id).toBe("q1");
+    expect(args.checkBackDate).toBe("2026-08-01T00:00:00.000Z");
+    expect(args.note).toBe("hi");
+    expect(args.eventDate).toBe(journeyEventISO("2026-07-10", NOW)); // the shared noon rule, one source
+    expect("method" in args).toBe(false);
+    // no day picked → the event is the write moment
+    expect(nudgeWriteArgs({ kind: "nudge", cardKey: "n", queryId: "q1", checkBackDate: "2026-08-01" }, NOW)[1].eventDate).toBe(NOW);
+  });
+});
+
+describe("journeyEventISO — THE journey timestamp rule (P1)", () => {
+  const NOW = "2026-07-16T09:30:00.000Z";
+  it("no day picked → now, verbatim", () => {
+    expect(journeyEventISO(undefined, NOW)).toBe(NOW);
+    expect(journeyEventISO("", NOW)).toBe(NOW);
+    expect(journeyEventISO("garbage", NOW)).toBe(NOW);
+  });
+  it("picking TODAY (the local day of now) → now, never noon", () => {
+    const now = new Date(NOW);
+    const todayYmd = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    expect(journeyEventISO(todayYmd, NOW)).toBe(NOW);
+  });
+  it("a back-dated day → that date at 12:00 NOON LOCAL — the local display day never shifts", () => {
+    const out = new Date(journeyEventISO("2026-07-10", NOW));
+    expect(out.getHours()).toBe(12);
+    expect(out.getMinutes()).toBe(0);
+    expect(out.getDate()).toBe(10);
+    expect(out.getMonth()).toBe(6);
+    expect(out.getFullYear()).toBe(2026);
+  });
+  it("timezone-boundary honesty: noon-local can never render as the previous/next local day (midnight-UTC can)", () => {
+    // the artefact: a date-only parse is midnight UTC — in any non-zero offset the local clock
+    // shows a different time (01:00 BST) and, west of Greenwich, the previous DAY entirely.
+    const noon = new Date(journeyEventISO("2026-01-05", NOW)); // winter date — GMT/BST both covered
+    expect(noon.getDate()).toBe(5);
+    expect(noon.getHours()).toBe(12);
+    expect(noon.getHours()).not.toBe(0);
   });
 });
 
@@ -148,7 +185,8 @@ describe("quick-✓ — one write path, stated defaults", () => {
     expect(new Date(p.checkBackDate).getTime() - new Date(NOW).getTime()).toBe(DEFAULT_CHECKBACK_DAYS * 86400000);
     expect(p.nudgeDate).toBe("2026-07-16");
     expect(p.method).toBe("Email");
-    expect(nudgeWriteArgs(p)).toEqual(["q1", { checkBackDate: p.checkBackDate }]);
+    // the quick nudge's day IS today → the event date is the write moment (the helper's now-path)
+    expect(nudgeWriteArgs(p, NOW)).toEqual(["q1", { checkBackDate: p.checkBackDate, eventDate: NOW }]);
   });
 });
 

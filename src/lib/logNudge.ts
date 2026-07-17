@@ -30,6 +30,10 @@ export interface NudgeInput {
   checkBackDate: string;
   /** Optional note the writer kept on record. */
   note?: string;
+  /** When the nudge was actually SENT (full ISO — already noon-normalised by the journey layer's
+   *  journeyEventISO). Defaults to `now`. Backdates the EVENT (both activity twins +
+   *  lastNudgeSentDate); the dismissal bookkeeping stays at write time. */
+  eventDate?: string;
 }
 
 export interface NudgeDismissalWrite {
@@ -76,6 +80,7 @@ export const buildNudgeWrites = (
   const agency = agent?.agency || "agency";
   const checkBackISO = new Date(input.checkBackDate).toISOString();
   const nowISO = now.toISOString();
+  const eventISO = input.eventDate ? new Date(input.eventDate).toISOString() : nowISO;
   const note = input.note?.trim();
 
   // Description MUST begin "Nudge sent to {agent} at {agency}" — the timeline keys its clock glyph
@@ -91,7 +96,7 @@ export const buildNudgeWrites = (
     // ONE build feeds BOTH stores: `nested` is the authoritative row, `activity` its projection twin.
     nested: {
       type: NUDGE_NESTED_TYPE, // non-enum → recomputeQuery ignores it (never status-bearing)
-      createdAt: nowISO,
+      createdAt: eventISO,
       note: details, // the follow-up line (+ optional writer note) renders beneath the node
       queryId: query.id,
       agentName,
@@ -104,11 +109,11 @@ export const buildNudgeWrites = (
       manuscriptId: query.manuscriptId,
       activityType: ActivityType.NUDGE_SENT,
       description,
-      date: nowISO,
+      date: eventISO,
       details,
       // deliberately NO resultingStatus — non-status event
     },
-    queryUpdates: { nudgeDate: checkBackISO, lastNudgeSentDate: nowISO },
+    queryUpdates: { nudgeDate: checkBackISO, lastNudgeSentDate: eventISO },
     dismissal: {
       taskType: "nudge_overdue",
       relatedRecordId: query.id,

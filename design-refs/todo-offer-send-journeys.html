@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FocusFlow — offer journey (interim) + one-tap send confirm (design ref)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* NOTE FOR BUILD: consume live .t-f12 tokens; hexes illustrative. This ref covers TWO
+   FocusFlow journeys: (1) the INTERIM offer journey — completing an offer task records
+   the USER'S move, never re-logs the offer; (2) the one-tap send confirm.
+   Timestamp rule (all journeys): no date given → now; back-dated → that date at 12:00
+   noon LOCAL (never a date-only/midnight-UTC value). */
+:root{
+  --oat:#f1e8dc; --paper:#fdfaf5; --white:#ffffff;
+  --ink:#3a1c14; --muted:#9a8c80; --hair:#e7ddd2;
+  --pink-t:#f5e2da; --pink-b:#e8c8bc; --pink-mid:#efd5ca;
+  --sage-t:#e9ede6; --sage-b:#c3cfbe; --sage-i:#5a6e58;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:linear-gradient(160deg,#f3ece2,#efe5d8);font-family:Inter,sans-serif;color:var(--ink);min-height:100vh;padding:40px 24px 100px}
+.demo-label{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8a7a6d;max-width:860px;margin:0 auto 12px}
+.demo-label:not(:first-child){margin-top:64px}
+
+.sheet{max-width:860px;margin:0 auto;background:var(--paper);border-radius:20px;box-shadow:0 14px 44px rgba(58,28,20,.14);overflow:hidden}
+.sheet-body{padding:44px 56px 36px}
+.kick{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.13em;text-transform:uppercase;border:1px solid var(--hair);background:var(--white);border-radius:99px;padding:5px 13px;color:#6b5a4e;margin-bottom:20px}
+h1{font-family:'Playfair Display',serif;font-size:34px;font-weight:600;margin-bottom:8px}
+.lede{font-size:15px;color:#6b5a4e;line-height:1.5;margin-bottom:26px}
+.lede b{color:var(--ink)}
+.deadline{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.1em;background:var(--pink-t);border:1px solid var(--pink-b);border-radius:99px;padding:6px 14px;color:#7c3a2a;margin-bottom:28px}
+
+.doors{display:flex;flex-direction:column;gap:12px}
+.door{display:flex;align-items:center;gap:16px;text-align:left;background:var(--white);border:1px solid var(--hair);border-radius:14px;padding:18px 22px;cursor:pointer;transition:border-color .15s, transform .12s, box-shadow .12s;width:100%}
+.door:hover{border-color:var(--pink-b);transform:translateY(-1px);box-shadow:0 4px 12px rgba(58,28,20,.08)}
+.door .ic{width:38px;height:38px;border-radius:50%;background:linear-gradient(180deg,var(--pink-t),var(--pink-mid));border:1px solid var(--pink-b);display:flex;align-items:center;justify-content:center;flex:0 0 auto;font-size:15px}
+.door .tx b{display:block;font-family:'Playfair Display',serif;font-size:18px;font-weight:600;margin-bottom:2px}
+.door .tx span{font-size:13px;color:#6b5a4e}
+.door.sage .ic{background:linear-gradient(180deg,var(--sage-t),#dbe3d6);border-color:var(--sage-b)}
+
+.sheet-foot{display:flex;align-items:center;padding:22px 56px;border-top:1px solid var(--hair);background:#faf6ef}
+.btn-ghost{border:1px solid var(--hair);background:var(--white);border-radius:99px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink)}
+.spacer{flex:1}
+.btn-pri{border:1px solid var(--pink-b);background:linear-gradient(180deg,var(--pink-t),var(--pink-mid));color:var(--ink);border-radius:99px;padding:11px 26px;font-size:13.5px;font-weight:600;cursor:pointer}
+.btn-pri:disabled{background:var(--paper);border:1px solid var(--hair);color:rgba(58,28,20,.3);cursor:not-allowed}
+
+.step{display:none}.step.on{display:block}
+
+/* decision sub-step */
+.seg{display:flex;gap:12px;margin-bottom:22px}
+.seg .opt{flex:1;background:var(--white);border:1.5px solid var(--hair);border-radius:14px;padding:20px;cursor:pointer;text-align:center;transition:border-color .15s}
+.seg .opt.sel{border-color:var(--ink)}
+.seg .opt b{display:block;font-family:'Playfair Display',serif;font-size:19px;margin-bottom:4px}
+.seg .opt span{font-size:12.5px;color:#6b5a4e}
+.hint{font-size:12.5px;color:#8a7a6d;line-height:1.55}
+.hint b{color:var(--ink)}
+
+/* need-time reminder */
+.remrow{display:flex;align-items:center;gap:14px;background:var(--white);border:1px solid var(--hair);border-radius:12px;padding:16px 20px;margin-bottom:20px}
+.remrow input[type=date]{border:1px solid var(--hair);border-radius:8px;padding:7px 10px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink);background:var(--paper)}
+
+/* celebration */
+.celebrate{text-align:center;padding:14px 0 6px}
+.celebrate .star{font-size:44px;display:block;margin-bottom:10px}
+
+/* ============ one-tap send confirm ============ */
+.assume{display:flex;align-items:center;gap:16px;background:var(--white);border:1.5px solid var(--sage-b);border-radius:14px;padding:20px 24px;margin-bottom:14px}
+.assume .tick{width:30px;height:30px;border-radius:50%;background:var(--sage-t);border:1px solid var(--sage-b);color:var(--sage-i);display:flex;align-items:center;justify-content:center;font-size:14px;flex:0 0 auto}
+.assume b{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;display:block}
+.assume span{font-size:13px;color:#6b5a4e}
+.else-link{background:none;border:none;font-size:13px;color:#7c3a2a;cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:4px 2px;margin-bottom:8px}
+.extras{display:none;flex-direction:column;gap:8px;margin:6px 0 10px}
+.extras.open{display:flex}
+.exrow{display:flex;align-items:center;gap:12px;background:var(--white);border:1px solid var(--hair);border-radius:11px;padding:13px 18px;font-size:14px;cursor:pointer}
+.exrow input{width:16px;height:16px;accent-color:#7c3a2a}
+.when{display:flex;align-items:center;gap:10px;font-size:12.5px;color:#6b5a4e;margin-top:16px}
+.when button{background:none;border:none;color:#7c3a2a;cursor:pointer;text-decoration:underline;text-underline-offset:3px;font-size:12.5px}
+</style>
+</head>
+<body>
+
+<div class="demo-label">1 · Offer journey (interim) — completing the task records YOUR move</div>
+<div class="sheet" id="offer">
+  <div class="sheet-body">
+
+    <!-- STEP 1: celebrate + fork -->
+    <div class="step on" data-s="1">
+      <span class="kick">TOM ELLERY · CURTIS VANE · AN OFFER OF REPRESENTATION</span>
+      <div class="celebrate"><span class="star">★</span></div>
+      <h1>Tom Ellery has offered to represent you</h1>
+      <p class="lede">This is the moment the querying was for. The offer is already on <b>Murphy's Day Out</b>'s timeline — what happens next is yours to choose.</p>
+      <span class="deadline">⏱ REPLY BY 31 JUL · 14 DAYS</span>
+      <div class="doors">
+        <button class="door" data-go="notify"><span class="ic">✉</span><span class="tx"><b>Let your other agents know</b><span>4 agents are still considering Murphy's Day Out — courtesy says they hear about the offer.</span></span></button>
+        <button class="door sage" data-go="decide"><span class="ic">✓</span><span class="tx"><b>Record your decision</b><span>Accepted or declined — this is what completes the task.</span></span></button>
+        <button class="door" data-go="time"><span class="ic">⏳</span><span class="tx"><b>I need time to decide</b><span>Set a reminder against the reply-by date. The card stays on your board, quieter.</span></span></button>
+      </div>
+    </div>
+
+    <!-- STEP: notify -->
+    <div class="step" data-s="notify">
+      <span class="kick">LETTING YOUR OTHER AGENTS KNOW</span>
+      <h1>Who should hear about the offer?</h1>
+      <p class="lede">Each opens your usual nudge step for that agent — the offer and reply-by date are shown alongside while you write.</p>
+      <div class="doors">
+        <button class="door"><span class="ic">DO</span><span class="tx"><b>Daniel O'Rourke</b><span>INKWELL &amp; STONE · Full sent yesterday</span></span></button>
+        <button class="door"><span class="ic">JM</span><span class="tx"><b>Jonathan Marsh</b><span>THE MARSH AGENCY · Full sent yesterday</span></span></button>
+        <button class="door"><span class="ic">PR</span><span class="tx"><b>Priya Raman</b><span>RAMAN LITERARY · Partial sent yesterday</span></span></button>
+        <button class="door"><span class="ic">SD</span><span class="tx"><b>Sophie Dunn</b><span>CURTIS VANE · R&amp;R in progress</span></span></button>
+      </div>
+    </div>
+
+    <!-- STEP: decide -->
+    <div class="step" data-s="decide">
+      <span class="kick">RECORDING YOUR DECISION</span>
+      <h1>What did you tell Tom?</h1>
+      <p class="lede">This completes the task — the decision is logged at the time you record it.</p>
+      <div class="seg">
+        <div class="opt" data-d="acc"><b>I accepted</b><span>Tom Ellery represents Murphy's Day Out</span></div>
+        <div class="opt" data-d="dec"><b>I declined</b><span>The querying continues</span></div>
+      </div>
+      <p class="hint" id="declHint" style="display:none">Your other queries stay open and untouched.</p>
+      <p class="hint" id="accHint" style="display:none"><b>Congratulations.</b> Your 4 other open queries for this manuscript aren't changed automatically — closing them (and the courtesy notes that go with it) is coming as its own guided step soon; until then they stay visible on the Queries Hub.</p>
+    </div>
+
+    <!-- STEP: need time -->
+    <div class="step" data-s="time">
+      <span class="kick">TAKING TIME TO DECIDE</span>
+      <h1>When should we bring this back?</h1>
+      <p class="lede">The offer card stays on Urgent — just quieter — and wakes on the day you choose.</p>
+      <div class="remrow">⏰ Remind me on <input type="date" value="2026-07-24"> <span class="hint">Reply-by is <b>31 Jul</b> — we'll cap the reminder there.</span></div>
+    </div>
+
+  </div>
+  <div class="sheet-foot">
+    <button class="btn-ghost" id="offBack">← Back</button>
+    <div class="spacer"></div>
+    <button class="btn-pri" id="offPri" style="display:none" disabled>Record decision</button>
+  </div>
+</div>
+
+<div class="demo-label">2 · Sending the full — one tap, exceptions on demand</div>
+<div class="sheet">
+  <div class="sheet-body">
+    <span class="kick">DANIEL O'ROURKE · LOGGING THE SEND</span>
+    <h1>Off it goes</h1>
+    <p class="lede">Daniel asked for the full — so that's what we'll log.</p>
+    <div class="assume"><span class="tick">✓</span><span><b>Full manuscript</b><span>Murphy's Day Out · what Daniel requested</span></span></div>
+    <button class="else-link" id="elseBtn">+ I sent something else too</button>
+    <div class="extras" id="extras">
+      <label class="exrow"><input type="checkbox"> Synopsis</label>
+      <label class="exrow"><input type="checkbox"> Something else</label>
+    </div>
+    <div class="when">Logged just now, 17 Jul · <button id="whenBtn">I sent it earlier</button> <span id="whenNote" style="display:none">→ pick the day; we'll log it at midday.</span></div>
+  </div>
+  <div class="sheet-foot">
+    <button class="btn-ghost">← Back</button>
+    <div class="spacer"></div>
+    <button class="btn-pri">Mark sent</button>
+  </div>
+</div>
+
+<script>
+/* offer journey steps */
+const sheet=document.getElementById('offer');
+const steps=[...sheet.querySelectorAll('.step')];
+const pri=document.getElementById('offPri'), back=document.getElementById('offBack');
+function go(s){
+  steps.forEach(x=>x.classList.toggle('on', x.dataset.s===String(s)));
+  pri.style.display = (s==='decide'||s==='time') ? '' : 'none';
+  pri.textContent = s==='time' ? 'Set reminder' : 'Record decision';
+  pri.disabled = s==='decide';
+  back.textContent = s==='1' ? '✕ Back to the board' : '← Back';
+}
+sheet.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
+back.addEventListener('click',()=>go('1'));
+sheet.querySelectorAll('.seg .opt').forEach(o=>o.addEventListener('click',()=>{
+  sheet.querySelectorAll('.seg .opt').forEach(x=>x.classList.remove('sel'));
+  o.classList.add('sel'); pri.disabled=false;
+  document.getElementById('accHint').style.display = o.dataset.d==='acc'?'':'none';
+  document.getElementById('declHint').style.display = o.dataset.d==='dec'?'':'none';
+}));
+/* send confirm */
+document.getElementById('elseBtn').addEventListener('click',()=>document.getElementById('extras').classList.toggle('open'));
+document.getElementById('whenBtn').addEventListener('click',()=>document.getElementById('whenNote').style.display='');
+</script>
+</body>
+</html>

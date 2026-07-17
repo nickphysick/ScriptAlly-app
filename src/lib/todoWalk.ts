@@ -70,6 +70,25 @@ export function materialOptsForTask(taskType?: string): string[] {
 export const DEFAULT_CHECKBACK_DAYS = 14;
 
 /**
+ * THE journey timestamp rule (journey-logic pass Phase 1 — the shared construction point every
+ * journey uses; ref todo-offer-send-journeys.html header note):
+ *   · no day picked (or the pick IS today) → `nowIso` — the true moment of the write;
+ *   · a back-dated day → that date at 12:00 NOON LOCAL — never midnight, never date-only
+ *     (a date-only string parses as midnight UTC, which renders as 01:00 BST and can shift the
+ *     displayed DAY entirely in negative-offset timezones — the timeline artefact this kills).
+ * Accepts the day pickers' YYYY-MM-DD; anything unparseable falls back to `nowIso`.
+ */
+export function journeyEventISO(day: string | undefined, nowIso: string): string {
+  if (!day || !day.trim()) return nowIso;
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(day.trim());
+  if (!m) return nowIso;
+  const y = Number(m[1]), mo = Number(m[2]) - 1, d = Number(m[3]);
+  const now = new Date(nowIso);
+  if (y === now.getFullYear() && mo === now.getMonth() && d === now.getDate()) return nowIso;
+  return new Date(y, mo, d, 12, 0, 0, 0).toISOString();
+}
+
+/**
  * A staged (not-yet-written) focus-flow change. Two families:
  *  · CAPTURES (mark-sent, nudge) — carry everything apply() needs to write, PLUS display/audit
  *    fields (method/materials/nudgeDate) the review screen shows. The proven write paths
@@ -92,9 +111,12 @@ export function markSentWriteArgs(p: Extract<StagedPayload, { kind: "mark-sent" 
   return { queryId: p.queryId, targetStatus: p.targetStatus as QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT, sentDate: p.sentDate, isResubmit: p.isResubmit };
 }
 
-/** The EXACT args the one nudge write path (logNudge) takes. */
-export function nudgeWriteArgs(p: Extract<StagedPayload, { kind: "nudge" }>): [string, { checkBackDate: string; note?: string }] {
-  return [p.queryId, { checkBackDate: p.checkBackDate, ...(p.note ? { note: p.note } : {}) }];
+/** The EXACT args the one nudge write path (logNudge) takes. Phase 1: the journey's picked day now
+ *  REACHES the write as `eventDate` (via the shared noon rule) — it was display-only before, so a
+ *  back-dated nudge logged at write time. `method` stays display-only (the write path has no home
+ *  for it). */
+export function nudgeWriteArgs(p: Extract<StagedPayload, { kind: "nudge" }>, nowIso: string): [string, { checkBackDate: string; note?: string; eventDate: string }] {
+  return [p.queryId, { checkBackDate: p.checkBackDate, ...(p.note ? { note: p.note } : {}), eventDate: journeyEventISO(p.nudgeDate, nowIso) }];
 }
 
 /**
@@ -107,7 +129,7 @@ export function nudgeWriteArgs(p: Extract<StagedPayload, { kind: "nudge" }>): [s
 export function quickSendPayload(a: { cardKey: string; label?: string; taskType?: string; queryId: string; targetStatus: QueryStatus; isResubmit: boolean; method?: string | null; nowIso: string }): Extract<StagedPayload, { kind: "mark-sent" }> {
   return {
     kind: "mark-sent", cardKey: a.cardKey, ...(a.label ? { label: a.label } : {}),
-    queryId: a.queryId, targetStatus: a.targetStatus, sentDate: a.nowIso, isResubmit: a.isResubmit,
+    queryId: a.queryId, targetStatus: a.targetStatus, sentDate: journeyEventISO(undefined, a.nowIso), isResubmit: a.isResubmit,
     method: a.method || "Email", materials: materialOptsForTask(a.taskType),
   };
 }

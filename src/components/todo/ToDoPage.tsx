@@ -390,7 +390,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     }
     if (c.taskType === "nudge_overdue") {
       const p = quickNudgePayload({ cardKey: c.key, label: c.title, queryId: q.id, method: q.sendMethod, nowIso });
-      const r = await logNudge(...nudgeWriteArgs(p));
+      const r = await logNudge(...nudgeWriteArgs(p, new Date().toISOString()));
       if (!r.success) { flash(r.error || "Couldn’t log the nudge."); return; }
       // deleteActivity on a NUDGE_SENT fully unwinds it (twins + nudgeDate fields + the flag).
       const undo = async () => {

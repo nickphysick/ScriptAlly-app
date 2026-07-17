@@ -37,7 +37,7 @@ import { agentDataQualityNeeds, AgentDataNeed } from "../../lib/agentDataQuality
 import { BoardCard } from "../../lib/todoBoard";
 import { HkGroup, HkRule, HK_RULES, HK_PAYOFF, mutedMembersForRule } from "../../lib/todoHousekeeping";
 import {
-  StagedPayload, applyStaged, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, DEFAULT_CHECKBACK_DAYS,
+  StagedPayload, applyStaged, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, DEFAULT_CHECKBACK_DAYS, journeyEventISO,
   quickSendPayload, quickNudgePayload, receiptLine,
 } from "../../lib/todoWalk";
 import { USER_TASK_FLAG_TYPE } from "../../lib/todoBoard";
@@ -167,7 +167,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     setSaving(true);
     const res = await applyStaged(staged, {
       markSent: (p) => recordMaterialsSent(markSentWriteArgs(p)),
-      nudge: (p) => logNudge(...nudgeWriteArgs(p)).then((r) => { if (!r.success) throw new Error(r.error || "nudge failed"); }),
+      nudge: (p) => logNudge(...nudgeWriteArgs(p, new Date().toISOString())).then((r) => { if (!r.success) throw new Error(r.error || "nudge failed"); }),
       snooze: (p) => dismissTask(p.taskType, p.relatedRecordId, "fixed snooze", p.days),
       muteItem: (p) => upsertTaskFlag(flagKeyForTask(p.taskType, p.relatedRecordId), { snoozedUntil: MUTED_UNTIL }),
       muteRule: (p) => updateUserProfile({ mutedTaskRules: Array.from(new Set([...(currentUser?.mutedTaskRules ?? []), p.rule])) }),
@@ -271,7 +271,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
           if (action.kind !== "mark-sent") { advance(); return; }
           stageAndAdvance({
             kind: "mark-sent", cardKey: c.key, label: c.title, queryId: q.id,
-            targetStatus: action.target as QueryStatus, sentDate: new Date(sentDate).toISOString(),
+            targetStatus: action.target as QueryStatus, sentDate: journeyEventISO(sentDate, new Date().toISOString()),
             isResubmit: action.markKind === "resubmit", method, materials: opts.filter((m) => mats[m]),
           });
         }}>Stage it →</button>
@@ -646,7 +646,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     }
     if (c.taskType === "nudge_overdue") {
       const p = quickNudgePayload({ cardKey: c.key, label: c.title, queryId: q.id, method: q.sendMethod, nowIso });
-      const r = await logNudge(...nudgeWriteArgs(p));
+      const r = await logNudge(...nudgeWriteArgs(p, new Date().toISOString()));
       if (!r.success) { onToast(r.error || "Couldn’t log the nudge."); return; }
       const undo = async () => {
         const acts = activitiesRef.current
