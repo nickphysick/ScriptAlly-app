@@ -207,7 +207,6 @@
 .tdb-band.hk { background: var(--hk-cof); border-bottom-color: var(--hk-cof-edge); }
 .tdb-band.nt { background: var(--note-t); border-bottom-color: var(--note-b); }
 .tdb-band .tdb-tags { margin: 0; }
-.tdb-band .tdb-tag:not(.offer):not(.warn) { background: var(--white, #fff); }
 .tdb-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; padding: 13px 18px 14px; }
 /* P4 — the "I need time" offer: stays on Urgent at reduced emphasis (the board's muted grammar);
    hover restores full weight; the deadline pill keeps counting down inside it. Woken (reminder or
@@ -215,9 +214,13 @@
 .tdb-tile.quiet { opacity: 0.62; }
 .tdb-tile.quiet:hover { opacity: 1; }
 .tdb-tags { flex: none; display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
-.tdb-tag { display: inline-flex; align-items: center; gap: 5px; font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 99px; padding: 3.5px 10px; border: 1px solid var(--pink-b); background: var(--pink-t); color: var(--pink-i); white-space: nowrap; }
-.tdb-tile.nt .tdb-tag { background: var(--note-t); border-color: var(--note-b); color: var(--note-i); }
-.tdb-tag.due.warn { background: var(--pink-btn); border-color: var(--pink-b); color: var(--pink-deep); font-weight: 700; }
+/* Tag re-ink (corner pack P3): every status tag is now WHITE with ink text + a faint ink hairline
+   (rgba = --ink #1e1a16 @ 25%, literal per the .t-f12 no-color-mix rule) — the pink/note-yellow tag
+   fills are retired board-wide; the lane BANDS carry the stream colour now, so a tinted tag would
+   double the signal. Two exceptions keep a fill: urgency (white but a full 1.5px ink frame + bold)
+   and the ★ offer (ink — the rarest mark). */
+.tdb-tag { display: inline-flex; align-items: center; gap: 5px; font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 99px; padding: 3.5px 10px; border: 1px solid rgba(30, 26, 22, 0.25); background: var(--white); color: var(--ink); white-space: nowrap; }
+.tdb-tag.due.warn { background: var(--white); border: 1.5px solid var(--ink); color: var(--ink); font-weight: 700; }
 .tdb-tag.offer { background: var(--ink); border-color: var(--ink); color: #fff; }
 .tdb-mid { flex: 1 1 auto; min-height: 0; overflow: hidden; }
 .tdb-tt { font-family: var(--f12-serif); font-size: 17px; font-weight: 600; line-height: 1.28; color: var(--ink); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }

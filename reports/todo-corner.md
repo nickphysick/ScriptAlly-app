@@ -56,3 +56,20 @@ burgundy (recolouring is global). Both flagged; one-line AppShell follow-ups if 
 - Tests: `todoWalk.test.ts` — the full state matrix (committed>0 ∧ cleared=0 → list `0/{n}`; cleared
   union outnumbering list → cap/floor; priority; no `−`/undefined fraction; aria per state).
   `todoCorner.test.ts` — the three faces + the keyed crossfade at the source layer.
+
+## PHASE 3 — the white tag law (tag re-ink)
+
+- **Every status tag → white.** Base `.tdb-tag` now = `--white` fill / `rgba(30,26,22,.25)` hairline
+  (= `--ink` `#1e1a16` @ 25%, a **literal** — `.t-f12` bans `color-mix`) / `--ink` text. The lane
+  BANDS already carry the stream colour, so a tinted tag doubled the signal; the tag steps back.
+- **Urgency `.warn`** = white too, but a full **1.5px `--ink` frame + weight 700** — depth is frame +
+  weight now, not a deeper hue.
+- **★ Offer** = ink, untouched (rarest mark). Grouped kickers/dots untouched.
+- **Deletions (dead once the base is white board-wide):** `.tdb-tile.nt .tdb-tag` (note-yellow) and
+  the card-bands interim `.tdb-band .tdb-tag:not(.offer):not(.warn)` white override. Pink + note
+  tokens no longer fill/outline any tag (they live on elsewhere — bands, discs, buttons, the flow).
+- **themes.md:** new "THE WHITE TAG LAW" section; the two-depth pink law + the on-band tag law both
+  marked ⚠️ SUPERSEDED inline.
+- Tests: `todoTagLaw.test.ts` rewritten (white base + framed warn + ink offer + note override gone +
+  a sweep asserting no non-offer tag draws a tinted fill); `todoCardBands.test.ts` flipped to assert
+  the in-band override is absent.

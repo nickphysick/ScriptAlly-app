@@ -662,7 +662,7 @@ chrome revision replaced v14/v3).
 
 ## `.t-f12` — Polish v3 amendments (2026-07-16, board polish pass; visual ref `todo-task-settings.html` §3)
 
-- **THE TWO-DEPTH PINK TAG LAW (amends the retoken's tag clause):** card tags trade burgundy for
+- **THE TWO-DEPTH PINK TAG LAW (amends the retoken's tag clause; ⚠️ SUPERSEDED 2026-07-18 by THE WHITE TAG LAW below — tags are now white, not pink):** card tags trade burgundy for
   depth-of-pink — **standard status tags** (OVER TO YOU, STALE QUERY, SNOOZED ×n and kin) = soft
   pink `--pink-t` fill / `--pink-b` border / `--pink-i` text; **urgency tags** (deadline
   countdowns, N-days-no-reply — the `warn` class) = the DEEPER pink `--pink-btn` fill / `--pink-b`
@@ -719,9 +719,11 @@ HEADER BAND.** The MountCard header-fill structure (non-negotiable):
 - **`.tdb-body`** = white; the title leads, then sub / meta / pinned action pills (`.tdb-mid`
   still flex-clips beneath the band — the pills-can-never-spill invariant holds).
 - **Height:** 208 → 242 (208 + the band), uniform per card class.
-- **On-band tag law:** standard status tags go WHITE-filled (pink border/ink — soft-pink would
-  vanish pink-on-pink); urgency `.warn` keeps its deeper `--pink-btn`/`--pink-deep`/700 fill; the
-  offer keeps the ink ★; the grouped-card `--hk-kd` dot goes white-filled with the coffee border.
+- **On-band tag law** (⚠️ SUPERSEDED 2026-07-18 by THE WHITE TAG LAW — tags are white board-wide now,
+  so this in-band-only override is deleted; the grouped-dot clause stands): standard status tags go
+  WHITE-filled; urgency `.warn` ~~keeps its deeper `--pink-btn`/`--pink-deep`/700 fill~~ is now white
+  + a 1.5px ink frame; the offer keeps the ink ★; the grouped-card `--hk-kd` dot goes white-filled
+  with the coffee border.
 - **Overlays** (receipt / dismissed / fork / flip) cover the WHOLE frame (no band) — the fill +
   border + padding ride the frame; the rim stays white.
 - **Clear (empty-state) cards** dropped their spines and went NEUTRAL (horizontal cards, not lane
@@ -730,3 +732,21 @@ HEADER BAND.** The MountCard header-fill structure (non-negotiable):
   spine" references above — those spine consumers are gone; the band is the identity surface.
   `--pink-btn` remains the urgency-tag fill (unchanged); the `--hk-cof`/`--pink-t`/`--note-t`
   families now paint bands, not just chips.
+
+## `.t-f12` — THE WHITE TAG LAW (2026-07-18, corner pack P3 — SUPERSEDES the two-depth pink tag law AND the card-bands on-band tag law)
+
+**Every status tag is now WHITE.** The lane BANDS carry the stream colour, so a tinted tag would
+double the signal — the tags step back to a neutral chip and let the band speak.
+- **Standard status tags** (OVER TO YOU, STALE QUERY, SNOOZED ×n, and every `.due` kin) = `--white`
+  fill / **`rgba(30,26,22,.25)`** hairline (that is `--ink` `#1e1a16` at 25%, a literal — `.t-f12`
+  bans `color-mix`) / `--ink` text.
+- **Urgency tags** (the `.warn` class) = white too, but a full **1.5px `--ink` frame + weight 700** —
+  depth is now carried by the frame and weight, not by a deeper hue.
+- **★ Offer** = the ink fill, unchanged (the rarest mark on the board).
+- **Note tags** fall to the same white base — the `.tdb-tile.nt .tdb-tag` note-yellow override and
+  the card-bands `.tdb-band .tdb-tag:not(...)` interim white override are both DELETED (redundant
+  once the base is white board-wide).
+- **Retired from tag consumption:** `--pink-t`/`--pink-b`/`--pink-i`/`--pink-btn`/`--pink-deep` and
+  `--note-t/-b/-i` no longer fill or outline any tag. They survive elsewhere (bands, post-its,
+  discs, buttons, the focus flow). Burgundy still fills no tag. Rule-text-locked in
+  `todoTagLaw.test.ts` (incl. a "no non-offer tag draws a tinted fill" sweep).

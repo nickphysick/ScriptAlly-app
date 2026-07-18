@@ -33,8 +33,9 @@ describe("Card Bands — structure law", () => {
     expect(css).not.toContain(".tdb-tile.rvcard::before");
     expect(css).not.toMatch(/\.tdb-tile\.(do|hk|nt)::before/);
   });
-  it("on a band: standard tags go white-filled; urgency + offer keep their fills; the group dot goes white on coffee", () => {
-    expect(css).toContain(".tdb-band .tdb-tag:not(.offer):not(.warn) { background: var(--white, #fff); }");
+  it("on a band: tags are white board-wide now (P3 re-ink retired the in-band override); the group dot still goes white on coffee", () => {
+    // the standalone .tdb-band .tdb-tag override is gone — the base .tdb-tag is white everywhere (see todoTagLaw)
+    expect(css).not.toContain(".tdb-band .tdb-tag:not(.offer):not(.warn)");
     expect(css).toContain(".tdb-band .tdb-kd { background: var(--white, #fff); border: 1px solid var(--hk-cof-edge); }");
   });
   it("height absorbed the band uniformly (242 = 208 + ~34) on both card classes; exact-fit width untouched", () => {
