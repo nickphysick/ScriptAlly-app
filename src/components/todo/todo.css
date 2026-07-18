@@ -56,8 +56,13 @@
    The sliders entry sits in the bottom-right corner cluster, STACKED above the AppShell help "?"
    (the Today FAB at right:70 blocks the horizontal slot beside help — a vertical cluster is the
    clean fit). The sheet reuses the `.tdb-ff*` journey presentation; only its body rows are new. */
-.tdb-setbtn { position: fixed; right: 20px; bottom: 66px; z-index: 30; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--panel); border: 1px solid var(--line); box-shadow: var(--sh-2); color: var(--ink-2); cursor: pointer; transition: border-color 0.15s, color 0.15s; }
+/* corner cluster (corner pack) — one family, three ranks on ONE baseline: the letterpress pill
+   (primary) + two 38px paper-circle whisper satellites (settings, then the AppShell help "?" which
+   is already a matched parchment circle). 12px gaps; anchored to help's existing bottom:20/right:20
+   (the AppShell help is out of scope — the cluster aligns to it rather than nudge it to 24). */
+.tdb-setbtn { position: fixed; right: 70px; bottom: 20px; z-index: 30; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--paper); border: 1px solid var(--line); box-shadow: 0 3px 12px rgba(58, 28, 20, 0.12); color: var(--muted); cursor: pointer; transition: border-color 0.15s, color 0.15s; }
 .tdb-setbtn:hover { border-color: var(--ink-2); color: var(--ink); }
+.tdb-setbtn:focus-visible { outline: 2px solid var(--hk-ink); outline-offset: 2px; }
 
 .tdb-tsetgroup { margin-top: 22px; }
 .tdb-tsetgl { display: flex; align-items: center; gap: 8px; font-family: var(--f12-mono); font-size: 9px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
@@ -264,13 +269,24 @@
 /* right:70 sits LEFT of the AppShell's global help "?" (fixed bottom:20 right:20, 38px, z-30). */
 /* the FAB — SAGE now (the Today system's colour): sage gradient pill, INK completion ring,
    ink title, sage-ink meta (retune ref §1). */
-.tdb-fab { position: fixed; right: 70px; bottom: 20px; z-index: 30; display: flex; align-items: center; gap: 11px; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); color: var(--ink); border: 1px solid var(--hk-spine); border-radius: 99px; padding: 10px 18px 10px 12px; box-shadow: var(--sh-3); cursor: pointer; }
-.tdb-fab:hover { filter: brightness(0.98); }
-.tdb-fabring { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex: none; }
-.tdb-fabring i { width: 23px; height: 23px; border-radius: 50%; background: var(--hk-sage); color: var(--ink); display: flex; align-items: center; justify-content: center; font-family: var(--f12-mono); font-size: 8px; font-weight: 700; font-style: normal; }
-.tdb-fabl { display: flex; flex-direction: column; line-height: 1.16; text-align: left; }
-.tdb-fab-a { font-family: var(--f12-serif); font-size: 14px; font-weight: 600; }
-.tdb-fab-b { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--hk-ink); opacity: 1; }
+/* L1 SKIN — LETTERPRESS: parchment body, 1.5px ink border, soft float shadow (the sage gradient
+   leaves the pill body; sage speaks through the state pucks below). Right edge anchored at 120px
+   (= help 20 + 38 + 12 + settings 38 + 12) so the pill grows LEFTWARD with no layout jump. */
+.tdb-fab { position: fixed; right: 120px; bottom: 20px; z-index: 30; display: inline-flex; align-items: center; gap: 12px; background: var(--paper); color: var(--ink); border: 1.5px solid var(--ink); border-radius: 99px; padding: 11px 22px 11px 11px; box-shadow: 0 6px 18px rgba(58, 28, 20, 0.12); cursor: pointer; }
+.tdb-fab:hover { box-shadow: 0 8px 22px rgba(58, 28, 20, 0.16); }
+.tdb-fab:focus-visible { outline: 2px solid var(--hk-ink); outline-offset: 3px; }
+/* the ring — SVG stroke (hairline track + ink progress, rounded cap; the conic couldn't do the
+   rounded cap or a clean hairline track). Rotated -90° so progress starts at the top. */
+.tdb-fabring { position: relative; width: 34px; height: 34px; flex: none; }
+.tdb-fabring svg { width: 34px; height: 34px; transform: rotate(-90deg); }
+.tdb-fabfrac { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--f12-mono); font-size: 8.5px; font-weight: 600; font-style: normal; color: var(--ink); }
+/* the state pucks (Phase 2) — sage tick / paper plus */
+.tdb-fabpuck { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex: none; }
+.tdb-fabpuck.tick { background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border: 1px solid var(--hk-spine); color: var(--hk-ink); font-size: 14px; }
+.tdb-fabpuck.plus { background: var(--paper); border: 1px solid var(--line); color: var(--muted); }
+.tdb-fabl { display: flex; flex-direction: column; line-height: 1.12; text-align: left; }
+.tdb-fab-a { font-family: var(--f12-serif); font-size: 16px; font-weight: 600; color: var(--ink); }
+.tdb-fab-b { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
 .tdb-fab-roll { font-style: normal; color: var(--hk-ink); opacity: 1; }
 
 /* ── Today's list — expanded pop-up (rises from the corner; covers the help "?" while open) ── */

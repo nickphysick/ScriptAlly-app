@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L1 pill — what it should say (content options)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --oat:#f1e8dc; --paper:#fdfaf5; --white:#ffffff;
+  --ink:#3a1c14; --hair:#e7ddd2;
+  --pink-t:#f5e2da; --pink-b:#e8c8bc;
+  --sage-1:#dce0d9; --sage-bd:#b9c2b3; --sage-i:#5a6e58;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--oat);font-family:Inter,sans-serif;color:var(--ink);padding:40px 30px 100px}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8a7a6d;max-width:1100px;margin:0 auto 10px}
+.lbl:not(:first-child){margin-top:42px}
+.lbl em{font-style:normal;text-transform:none;letter-spacing:0;font-size:12.5px;color:#5d4d40;margin-left:10px}
+.stage{max-width:1100px;margin:0 auto;background:linear-gradient(160deg,#f2ede6,#efe7da);border:1px solid var(--hair);border-radius:14px;padding:22px 24px;display:flex;justify-content:flex-end;align-items:center;gap:16px;flex-wrap:wrap}
+.state{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;color:#8a7a6d;align-self:center}
+
+.pill{display:inline-flex;align-items:center;gap:12px;border-radius:99px;padding:11px 22px 11px 11px;cursor:pointer;background:var(--paper);border:1.5px solid var(--ink);box-shadow:0 6px 18px rgba(58,28,20,.12)}
+.pill.compact{padding:11px;width:50px;height:50px;justify-content:center}
+.ring{width:34px;height:34px;position:relative;flex:0 0 auto}
+.ring svg{width:34px;height:34px;transform:rotate(-90deg)}
+.frac{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:600;color:var(--ink)}
+.tick{width:34px;height:34px;border-radius:50%;background:linear-gradient(180deg,var(--sage-1),#d0d6cc);border:1px solid var(--sage-bd);display:flex;align-items:center;justify-content:center;color:var(--sage-i);font-size:14px;flex:0 0 auto}
+.plus{width:22px;height:22px;color:#8a7a6d}
+.tx b{display:block;font-family:'Playfair Display',serif;font-size:16px;font-weight:600;line-height:1.1;color:var(--ink)}
+.tx span{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;color:#8a7a6d}
+</style>
+</head>
+<body>
+
+<div class="lbl">A · The adaptive ledger <em>my recommendation — one pill, three truthful states, constant identity, truthful numbers only</em></div>
+<div class="stage">
+  <span class="state">LIST IN USE →</span>
+  <span class="pill"><span class="ring"><svg viewBox="0 0 34 34"><circle cx="17" cy="17" r="14" fill="none" stroke="#e7ddd2" stroke-width="3"/><circle cx="17" cy="17" r="14" fill="none" stroke="#3a1c14" stroke-width="3" stroke-dasharray="88" stroke-dashoffset="59" stroke-linecap="round"/></svg><span class="frac">2/6</span></span><span class="tx"><b>Today's list</b><span>4 TO GO</span></span></span>
+  <span class="state">NO LIST, BUT WORK DONE →</span>
+  <span class="pill"><span class="tick">✓</span><span class="tx"><b>3 done today</b><span>NICE GOING</span></span></span>
+  <span class="state">FRESH DESK →</span>
+  <span class="pill"><span class="tick" style="background:var(--paper);border-color:var(--hair);color:#8a7a6d"><svg class="plus" style="width:15px;height:15px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span><span class="tx"><b>Today's list</b><span>NOTHING YET</span></span></span>
+</div>
+
+<!-- ▼▼ EXPLORATION (sections B, C) — NOT normative; Section A (the adaptive ledger, full pill in every state) above is the built design ▼▼ -->
+<div class="lbl">B · The day's ledger, always <em>done-count as the constant face — same for list users and non-users</em></div>
+<div class="stage">
+  <span class="state">MORNING →</span>
+  <span class="pill"><span class="tick" style="background:var(--paper);border-color:var(--hair);color:#b3a396">·</span><span class="tx"><b>Today</b><span>NOTHING CLEARED YET</span></span></span>
+  <span class="state">AFTERNOON →</span>
+  <span class="pill"><span class="tick">✓</span><span class="tx"><b>5 done today</b><span>2 STILL ON THE LIST</span></span></span>
+</div>
+
+<div class="lbl">C · The plain door <em>no numbers at all — a label and a pen; never wrong, never informative</em></div>
+<div class="stage">
+  <span class="pill"><span class="tick" style="background:var(--paper);border-color:var(--ink);color:var(--ink)">✎</span><span class="tx"><b>Today's list</b></span></span>
+</div>
+
+</body>
+</html>

@@ -694,6 +694,17 @@ chrome revision replaced v14/v3).
   principle: sage and coffee are now meaningful; incidental colour goes neutral. Caveat asides
   stay sage-ink (the done register).
 
+## `.t-f12` — CORNER CLUSTER: the today-family FAB wears letterpress (2026-07-18, corner pack)
+
+The Today's-list pill is now **letterpress** — `--paper` body, 1.5px `--ink` border, radius 99, soft
+float shadow (`0 6px 18px rgba(58,28,20,.12)`). The sage gradient LEFT the pill body; **sage speaks
+through the pill's STATES** instead — the completion ring is ink-on-hairline, the "work done today"
+puck is the sage tick (`--hk-sage`/`--hk-spine`/`--hk-ink`), the fresh-desk puck is paper + a muted
+＋. The two companions (settings sliders + the AppShell help "?") are matched 38px paper circles,
+hairline border, muted glyph → ink on hover; one baseline, 12px gaps (anchored to the AppShell
+help's existing bottom:20/right:20). One family, three ranks: primary letterpress pill, two whisper
+satellites.
+
 ## `.t-f12` — CARD ANATOMY: header bands (Variant A) SUPERSEDE the spines (2026-07-18, card-bands pack)
 
 **The coloured left spines are RETIRED across every board card. Lane identity is now a slim tinted

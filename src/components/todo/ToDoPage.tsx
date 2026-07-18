@@ -635,9 +635,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
 
       {/* ── Today's list — corner pop-up (fixed; FAB collapsed / panel expanded) ── */}
       {!todayOpen && (
-        <button type="button" className="tdb-fab" onClick={() => setTodayOpen(true)} aria-label="Open Today’s list" aria-expanded={false}>
-          <span className="tdb-fabring" style={{ background: `conic-gradient(var(--ink) 0 ${prog.pct}%, rgba(30, 26, 22, 0.16) ${prog.pct}% 100%)` }}>
-            <i>{prog.empty ? "–" : `${prog.done}/${prog.total}`}</i>
+        <button type="button" className="tdb-fab" onClick={() => setTodayOpen(true)} aria-label="Today’s list" aria-expanded={false}>
+          <span className="tdb-fabring">
+            <svg viewBox="0 0 34 34" aria-hidden>
+              <circle cx="17" cy="17" r="14" fill="none" stroke="var(--line)" strokeWidth="3" />
+              <circle cx="17" cy="17" r="14" fill="none" stroke="var(--ink)" strokeWidth="3" strokeLinecap="round" strokeDasharray="88" strokeDashoffset={88 - (88 * prog.pct) / 100} />
+            </svg>
+            <i className="tdb-fabfrac">{prog.empty ? "0" : `${prog.done}/${prog.total}`}</i>
           </span>
           <span className="tdb-fabl">
             <span className="tdb-fab-a">Today’s list</span>
