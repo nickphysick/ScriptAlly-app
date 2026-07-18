@@ -81,23 +81,23 @@ describe("P1 — the corner retirement + the AppShell's one out-of-page line", (
 });
 
 describe("P1 — masthead composition + the centred column", () => {
-  it("one row: title+date/week · 42px post-its · the scrap · search ⌘K · the view toggle", () => {
+  it("one row: title+date/week · 62px post-its (II·B) · the scrap · search ⌘K · the view toggle", () => {
     expect(page).toContain("{shortHeaderDate(now)} · {weekOfQuerying(queries, new Date(now))}");
-    expect(rule(".tdb-postit")).toContain("width: 42px");
+    expect(rule(".tdb-postit")).toContain("width: 62px");
     expect(page).toContain('className="tdb-msrch"');
     expect(page).toContain('className="tdb-vtg"');
     // Walk me through is NOT in the masthead any more (slice ends before the drawer's intro comment)
     const mast = page.slice(page.indexOf("function renderMasthead"), page.indexOf("// ── the floating drawer"));
     expect(mast).not.toContain("Walk me through");
   });
-  it("type-scale: masthead title 20px, lane heads 16px", () => {
-    expect(rule(".tdb-ask")).toContain("font-size: 20px");
+  it("type-scale: masthead title 25px (II·B), lane heads 16px", () => {
+    expect(rule(".tdb-ask")).toContain("font-size: 25px");
     expect(rule(".tdb-lt")).toContain("font-size: 16px");
   });
   it("the content column caps at 1150 and centres; the row caps at 1720 (max-width discipline)", () => {
     expect(rule(".tdb-col")).toContain("max-width: 1150px");
     expect(rule(".tdb-ws")).toContain("max-width: 1720px");
-    expect(rule(".tdb-ws")).toContain("margin: 0 auto");
+    expect(rule(".tdb-ws")).toContain("auto"); // centred; the top margin is the 24-grid token (II·B)
   });
   it("⌘K guards on visibility (the page stays mounted behind other routes) and Esc clears", () => {
     expect(page).toContain("wrapRef.current.offsetParent === null");
@@ -272,9 +272,9 @@ describe("A1 — the masthead band (evening run; amends the shell ref in place)"
     const col = page.slice(page.indexOf('className="tdb-col"'), page.indexOf('className="tdb-lanes"'));
     expect(col).not.toContain("renderMasthead");
   });
-  it("the band is not sticky (scrolls away); the drawer's sticky offset stands", () => {
+  it("the band is not sticky (scrolls away); the drawer's sticky offset rides the 24-grid (II·B)", () => {
     expect(rule(".tdb-mastband")).not.toContain("sticky");
-    expect(rule(".tdb-drawer")).toContain("position: sticky; top: 18px");
+    expect(rule(".tdb-drawer")).toContain("position: sticky; top: var(--g24)");
   });
 });
 
@@ -285,5 +285,28 @@ describe("A2 — ledger copy + the avatar stack (source locks)", () => {
   });
   it("the batch avatar stack overlaps −7px with white keylines", () => {
     expect(css).toContain(".tdb-lstack .tdb-miniav { margin-left: -7px; border: 1.5px solid var(--white, #fff); }");
+  });
+});
+
+describe("II·B P1 — the 24-grid + the ref masthead (todo-workbench-rail-v1.html, Option B)", () => {
+  it("the grid ships as named tokens with the vocabulary comment — no magic numbers at the seams", () => {
+    expect(css).toContain("THE 24-GRID (Polish II·B)");
+    expect(rule(".tdb-wrap")).toContain("--g24: 24px; --g12: 12px;");
+    expect(rule(".tdb-ws")).toContain("gap: var(--g24)");
+    expect(rule(".tdb-ws")).toContain("padding: 0 var(--g24)");
+    expect(rule(".tdb-ws")).toContain("margin: var(--g24) auto 0");
+    expect(rule(".tdb-drawer")).toContain("top: var(--g24)");
+    expect(rule(".tdb-reel")).toContain("margin-bottom: var(--g24)");
+    expect(rule(".tdb-reelh")).toContain("margin-bottom: var(--g12)");
+    expect(rule(".tdb-grid")).toContain("gap: var(--g12)");
+    expect(rule(".tdb-ledger")).toContain("gap: var(--g24)");
+    expect(rule(".tdb-mast")).toContain("padding: var(--g24) 2px");
+  });
+  it("masthead anatomy per the ref: 62px tape-fold post-its (Playfair numerals), 58×44 scrap, 300px search, 10px eyebrow", () => {
+    expect(rule(".tdb-postit::before")).toContain("width: 22px; height: 9px");
+    expect(rule(".tdb-pv")).toContain("font-family: var(--f12-serif); font-size: 20px");
+    expect(rule(".tdb-scrap")).toContain("width: 58px; height: 44px");
+    expect(rule(".tdb-msrch")).toContain("flex: 0 1 300px");
+    expect(rule(".tdb-rdate")).toContain("font-size: 10px");
   });
 });

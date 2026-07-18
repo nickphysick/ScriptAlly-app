@@ -12,11 +12,15 @@
    engage. No 100vh/overflow-hidden clamp anywhere — that was the earlier scroll bug. Top padding
    REMOVED (the band sits flush under the shell bar); bottom padding clears the fixed corner
    controls (Today FAB + the shell's help "?"). Page-scoped. */
-.tdb-wrap { flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 0 0 48px; }
+/* ── THE 24-GRID (Polish II·B) — ONE spacing vocabulary, no magic numbers:
+   --g24: masthead↔columns · drawer↔main · main↔rail · lane↔lane · page edges · sticky offsets
+   --g12: lane-head↔cards · card gutters
+   Every consumer reads the token; changing the rhythm is a two-line edit here. ── */
+.tdb-wrap { --g24: 24px; --g12: 12px; flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 0 0 48px; }
 /* ── the workbench row (Option B): drawer + centred main. The row caps at 1720 and centres;
    inside it the CONTENT column caps at 1150 and centres again — max-width discipline at every
    viewport, surplus pooling as symmetric oat desk. ── */
-.tdb-ws { display: flex; align-items: flex-start; gap: 26px; padding: 0 26px; max-width: 1720px; margin: 0 auto; }
+.tdb-ws { display: flex; align-items: flex-start; gap: var(--g24); padding: 0 var(--g24); max-width: 1720px; margin: var(--g24) auto 0; }
 .tdb-main { flex: 1; min-width: 0; }
 .tdb-col { max-width: 1150px; margin: 0 auto; }
 @media (max-width: 900px) { .tdb-ws { flex-wrap: wrap; } .tdb-ws .tdb-drawer { position: static; width: 100%; max-height: none; } }
@@ -26,19 +30,19 @@
    sticky; scrolls away with the wrap. The content row keeps the 1150 discipline, centred to the
    VIEWPORT. The old .tdb-band name stays the card band's alone.) ── */
 .tdb-mastband { background: var(--paper); border-bottom: 1px solid var(--line); }
-.tdb-mastcol { max-width: 1150px; margin: 0 auto; padding: 0 26px; }
-.tdb-mast { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; row-gap: 12px; padding: 15px 2px 13px; }
+.tdb-mastcol { max-width: 1150px; margin: 0 auto; padding: 0 var(--g24); }
+.tdb-mast { display: flex; flex-wrap: wrap; align-items: center; gap: 24px; row-gap: 12px; padding: var(--g24) 2px; }
 .tdb-askwrap { display: flex; flex-direction: column; gap: 4px; }
-.tdb-rdate { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
-.tdb-ask { font-family: var(--f12-serif); font-size: 20px; font-weight: 600; color: var(--ink); white-space: nowrap; line-height: 1.08; }
-/* post-it counts — 42px tilted squares (workbench masthead scale; the tape strip shrank with
-   them); tap scrolls to the section (counts in aria-labels; the Caveat numerals are decorative).
-   Hover straightens; reduced-motion kills the transition. */
-.tdb-postits { display: flex; gap: 9px; align-items: center; }
-.tdb-postit { position: relative; width: 42px; height: 42px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; box-shadow: 0 1px 3px rgba(58, 28, 20, 0.14); flex: none; transition: 0.18s; cursor: pointer; }
-.tdb-postit::before { content: ""; position: absolute; top: -5px; left: 50%; transform: translateX(-50%) rotate(-1.5deg); width: 20px; height: 7px; background: rgba(255, 255, 255, 0.55); border: 1px solid rgba(58, 42, 26, 0.05); }
-.tdb-pv { font-family: Caveat, cursive; font-size: 19px; font-weight: 600; line-height: 1; }
-.tdb-pk { font-family: var(--f12-mono); font-size: 5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.75; }
+.tdb-rdate { font-family: var(--f12-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); }
+.tdb-ask { font-family: var(--f12-serif); font-size: 25px; font-weight: 600; color: var(--ink); white-space: nowrap; line-height: 1.08; }
+/* post-it counts — 62px tilted squares with the tape fold (II·B masthead, normative ref
+   todo-workbench-rail-v1.html: Playfair numerals — the Caveat grammar retired here); tap scrolls
+   to the section (counts in aria-labels). Hover straightens; reduced-motion kills the transition. */
+.tdb-postits { display: flex; gap: 12px; align-items: flex-start; }
+.tdb-postit { position: relative; width: 62px; height: 62px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; box-shadow: 0 2px 5px rgba(58, 28, 20, 0.15); flex: none; transition: 0.18s; cursor: pointer; }
+.tdb-postit::before { content: ""; position: absolute; top: -6px; left: 50%; transform: translateX(-50%); width: 22px; height: 9px; background: rgba(255, 255, 255, 0.55); }
+.tdb-pv { font-family: var(--f12-serif); font-size: 20px; font-weight: 600; line-height: 1; }
+.tdb-pk { font-family: var(--f12-mono); font-size: 6px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; opacity: 0.75; margin-top: 2px; }
 .tdb-postit.ug { background: var(--postit-pink); transform: rotate(-2.4deg); color: var(--pink-deep); }
 .tdb-postit.hk { background: var(--hk-cof-2); transform: rotate(1.8deg); color: var(--hk-cof-ink); }
 .tdb-postit.nt { background: var(--postit-note); transform: rotate(-1.2deg); color: #6b5a17; }
@@ -47,7 +51,7 @@
 @media (prefers-reduced-motion: reduce) { .tdb-postit { transition: none; } }
 
 /* ── masthead search + view toggle (Option B .msrch / .vtg) ── */
-.tdb-msrch { display: flex; align-items: center; gap: 8px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 99px; padding: 8px 14px; color: var(--muted); font-size: 12.5px; flex: 0 1 300px; min-width: 170px; box-shadow: 0 1px 3px rgba(58, 28, 20, 0.06); }
+.tdb-msrch { display: flex; align-items: center; gap: 9px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 99px; padding: 10px 16px; color: var(--muted); font-size: 13px; flex: 0 1 300px; min-width: 170px; box-shadow: 0 1px 3px rgba(58, 28, 20, 0.06); }
 .tdb-msrch:focus-within { border-color: var(--ink-2); }
 .tdb-msrch input { flex: 1; min-width: 0; border: none; background: none; font-size: 12.5px; color: var(--ink); outline: none; }
 .tdb-msrch input::placeholder { color: var(--muted); }
@@ -60,7 +64,7 @@
 /* ── the DRAWER (Option B): floating rounded panel, sticky below the app nav, folds to a 64px
    icon rail (width transition only — content swaps; reduced-motion kills the transition). Its
    own internal scroll keeps the sticky panel inside the viewport. ── */
-.tdb-drawer { width: 264px; flex: 0 0 auto; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 4px 16px rgba(58, 28, 20, 0.1); margin-top: 18px; padding: 14px 14px 12px; position: sticky; top: 18px; max-height: calc(100vh - 120px); overflow-y: auto; display: flex; flex-direction: column; gap: 8px; transition: width 0.22s cubic-bezier(0.22, 0.8, 0.3, 1); }
+.tdb-drawer { width: 264px; flex: 0 0 auto; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 4px 16px rgba(58, 28, 20, 0.1); padding: 14px 14px 12px; position: sticky; top: var(--g24); max-height: calc(100vh - 120px); overflow-y: auto; display: flex; flex-direction: column; gap: 8px; transition: width 0.22s cubic-bezier(0.22, 0.8, 0.3, 1); }
 .tdb-drawer.folded { width: 64px; align-items: center; padding: 12px 8px; gap: 10px; }
 @media (prefers-reduced-motion: reduce) { .tdb-drawer { transition: none; } }
 .tdb-dhead { display: flex; align-items: center; gap: 8px; }
@@ -91,11 +95,11 @@
    Playfair "Last week" over an underlined "in review ▸". The clip-path torn edge clips box-shadow
    AND outline, so the soft shadow + focus ring ride `filter: drop-shadow` (follows the torn
    silhouette). Hover/focus straightens + lifts. ── */
-.tdb-scrap { width: 50px; height: 37px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; margin-top: 4px; background: var(--paper); border: none; clip-path: polygon(0 4%, 7% 0, 94% 2%, 100% 8%, 99% 88%, 88% 94%, 72% 90%, 55% 97%, 38% 92%, 20% 98%, 6% 93%, 0 86%); transform: rotate(2deg); filter: drop-shadow(0 3px 5px rgba(58, 28, 20, 0.16)); cursor: pointer; transition: transform 0.15s, filter 0.15s; }
+.tdb-scrap { width: 58px; height: 44px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; margin-top: 8px; background: var(--paper); border: none; clip-path: polygon(0 4%, 7% 0, 94% 2%, 100% 8%, 99% 88%, 88% 94%, 72% 90%, 55% 97%, 38% 92%, 20% 98%, 6% 93%, 0 86%); transform: rotate(2deg); filter: drop-shadow(0 3px 5px rgba(58, 28, 20, 0.16)); cursor: pointer; transition: transform 0.15s, filter 0.15s; }
 .tdb-scrap:hover { transform: rotate(0deg) translateY(-2px); }
 .tdb-scrap:focus-visible { transform: rotate(0deg) translateY(-2px); filter: drop-shadow(0 0 1.5px var(--hk-cof-ink)) drop-shadow(0 0 1.5px var(--hk-cof-ink)); }
-.tdb-scrap b { font-family: var(--f12-serif); font-style: italic; font-weight: 600; font-size: 8.5px; line-height: 1.1; text-align: center; color: #5d4d40; } /* #5d4d40 — the ref's warm ink; no .t-f12 token fits exactly */
-.tdb-scrap u { text-decoration: none; border-bottom: 1px solid var(--hk-cof-edge); font-family: var(--f12-serif); font-style: italic; font-size: 6.5px; color: var(--hk-cof-ink); }
+.tdb-scrap b { font-family: var(--f12-serif); font-style: italic; font-weight: 600; font-size: 10px; line-height: 1.15; text-align: center; color: #5d4d40; } /* #5d4d40 — the ref's warm ink; no .t-f12 token fits exactly */
+.tdb-scrap u { text-decoration: none; border-bottom: 1px solid var(--hk-cof-edge); font-family: var(--f12-serif); font-style: italic; font-size: 8px; color: var(--hk-cof-ink); }
 @media (prefers-reduced-motion: reduce) { .tdb-scrap { transition: none; } }
 
 /* ── TASK SETTINGS (task-settings pack; ref todo-task-settings-v2.html) — the ⚙ entry lives in
@@ -177,8 +181,8 @@
    row sits straight on the oat; cards sit straight on the oat with the deeper desk shadow. Fades
    are RETIRED — exact-fit + snap + the header pagers own the overflow affordance. ── */
 .tdb-lanes { display: flex; flex-direction: column; }
-.tdb-reel { margin-bottom: 26px; }
-.tdb-reelh { display: flex; align-items: center; gap: 11px; margin-bottom: 12px; padding: 0 2px; }
+.tdb-reel { margin-bottom: var(--g24); }
+.tdb-reelh { display: flex; align-items: center; gap: 11px; margin-bottom: var(--g12); padding: 0 2px; }
 .tdb-lanedot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
 .tdb-lanedot.do { background: var(--pink-btn); outline: 1px solid var(--pink-b); }
 .tdb-lanedot.hk { background: var(--hk-cof-2); outline: 1px solid var(--hk-cof-edge); }
@@ -198,12 +202,12 @@
 .tdb-cadd:hover { color: var(--ink); }
 /* workbench P2 — the reels are RETIRED (laneFit + pagers + snap deleted with them): a wrapping
    auto-fill grid (Option B .grid). The page scrolls; the grid wraps at every width. */
-.tdb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; padding: 2px; }
+.tdb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: var(--g12); padding: 2px; }
 /* ── THE LEDGER (workbench P3; ref todo-ledger-v1.html): white table card per section, tinted
    head (pink/coffee/note — the note head is a flagged extension so notes aren't lost in this
    view), the shared 9-col grid, 44px rows, batch children on the paper wash. The STATUS column
    renders the real StatusDot (the ref's sdot circles were sketch stand-ins). ── */
-.tdb-ledger { display: flex; flex-direction: column; gap: 20px; }
+.tdb-ledger { display: flex; flex-direction: column; gap: var(--g24); }
 .tdb-tbl { background: var(--white, #fff); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
 .tdb-lghead { display: flex; align-items: center; gap: 9px; padding: 8px 16px; border-bottom: 1px solid; }
 .tdb-lghead.p { background: linear-gradient(180deg, var(--pink-t), var(--pink-btn)); border-color: var(--pink-b); }
