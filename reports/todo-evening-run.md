@@ -29,3 +29,14 @@ Vitest, pipefail). Live `.t-f12` tokens over mockup hexes throughout.
 - **Penhallow (name ≈ agency):** rendered as stored (the ledger prints the stored name + stored
   agency verbatim — no normalisation anywhere in the row path). Record id: as above, via the
   row's Open query.
+- **The deriver completed:** bare type echoes BANNED — offer/send/R&R rows with no readable date
+  render a **dim "—"** (sort keys unchanged at the far end); a stored-but-unparsable date degrades
+  identically. REPLY BY / REQUESTED / R&R FROM stand as built in P3.
+- **Batch copy:** tag stays `MATERIALS` (the meta label, uppercased); the TASK cell now reads the
+  ref's wording via one pure source — `batchTaskCopy`: "Add material requirements" / "Add wish
+  lists" / "Add reply windows".
+- **Avatar stack:** the −7px overlap + 1.5px white keylines were already in the P3 stylesheet —
+  now rule-text-locked.
+- Tests: dim-dash per type (absent AND unparsable dates), copy snapshots, the 1:1
+  no-fan-out/no-dedup regression (two same-agent records → two rows, distinct keys, identical
+  quiet-days), the stack lock.

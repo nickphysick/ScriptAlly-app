@@ -37,7 +37,7 @@ import { saveHkRows } from "../../lib/hkSave";
 import { isProUser, fetchAssistedFill, AssistFound } from "../../lib/assistFill";
 import { groupHousekeeping, hkGapCount, hkGroupProgress, HkGroup, HkRule, HK_RULES } from "../../lib/todoHousekeeping";
 import { deskState, liveQueryCount, liveQueriesLine, clearedListCap } from "../../lib/todoEmpty";
-import { ledgerTitle, ledgerDetail, sortLedgerDo, sortLedgerHk, batchChildren, batchDetail, truncateRows } from "../../lib/todoLedger";
+import { ledgerTitle, ledgerDetail, sortLedgerDo, sortLedgerHk, batchChildren, batchDetail, batchTaskCopy, truncateRows } from "../../lib/todoLedger";
 import { TodoFilterState, DEFAULT_FILTERS, filtersActive, matchesSearch, groupMatchesSearch, visibleDoCard, visibleStaleCard, visibleNoteCard, visibleGroup, filterCounts } from "../../lib/todoFilters";
 import { SelState, EMPTY_SEL, applySelectClick, moveFocus } from "../../lib/todoSelection";
 import { shouldAutoRunTour } from "../../lib/todoTour";
@@ -1088,7 +1088,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             <span className="tdb-lstack">{faces.map((m) => <span key={m.card.key} className="tdb-miniav">{m.card.initials}</span>)}</span>
             <i>{g.members.length} AGENTS</i>
           </span>
-          <span className="tdb-lti">Add {g.meta.label.toLowerCase()}</span>
+          <span className="tdb-lti">{batchTaskCopy(g.rule)}</span>
           <span className="tdb-lms" />
           <span className="tdb-lsd" />
           <span className="tdb-ldt"><span className="tdb-lbar" aria-hidden><i style={{ width: `${det.pct}%` }} /></span>{det.caption}</span>

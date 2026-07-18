@@ -5,7 +5,7 @@
 import { describe, it, expect } from "vitest";
 import { BoardCard } from "./todoBoard";
 import { HkGroup } from "./todoHousekeeping";
-import { ledgerTitle, ledgerDetail, sortLedgerDo, sortLedgerHk, batchChildren, batchDetail, truncateRows, LEDGER_SECTION_CAP } from "./todoLedger";
+import { ledgerTitle, ledgerDetail, sortLedgerDo, sortLedgerHk, batchChildren, batchDetail, batchTaskCopy, truncateRows, LEDGER_SECTION_CAP } from "./todoLedger";
 import { Agent, Query, QueryStatus, TaskFlag } from "../types";
 
 const NOW = Date.parse("2026-07-18T12:00:00Z");
@@ -27,13 +27,13 @@ describe("ledgerTitle — the terse row voice (cards keep their own titles)", ()
 });
 
 describe("ledgerDetail — per-type DETAIL, consuming the card's own sources", () => {
-  it("offer → REPLY BY {date} (hot), sorted by the deadline; unset deadline → plain OFFER at the far end", () => {
+  it("offer → REPLY BY {date} (hot), sorted by the deadline; unset deadline → the dim dash at the far end (A2)", () => {
     const c = card("o", { taskType: "offer_received", relatedRecordId: "q1" });
     const d = ledgerDetail(c, { queries: [q("q1", { responseDeadline: "2026-07-31T00:00:00.000Z" })], taskFlags: [] }, NOW);
     expect(d.label).toBe("REPLY BY 31 JUL");
     expect(d.tone).toBe("hot");
     expect(d.sortMs).toBe(Date.parse("2026-07-31T00:00:00.000Z"));
-    expect(ledgerDetail(c, { queries: [q("q1")], taskFlags: [] }, NOW)).toEqual({ label: "OFFER", tone: "plain", sortMs: Number.MAX_SAFE_INTEGER });
+    expect(ledgerDetail(c, { queries: [q("q1")], taskFlags: [] }, NOW)).toEqual({ label: "—", tone: "dim", sortMs: Number.MAX_SAFE_INTEGER });
   });
   it("a QUIET offer shows its wake date (the one visible-while-snoozed case)", () => {
     const c = card("o", { taskType: "offer_received", relatedRecordId: "q1", quiet: true });
@@ -124,5 +124,38 @@ describe("truncateRows — SHOW ALL caps (top-level rows only)", () => {
     expect(truncateRows(rows, false)).toEqual({ visible: rows.slice(0, LEDGER_SECTION_CAP), hidden: 4 });
     expect(truncateRows(rows, true)).toEqual({ visible: rows, hidden: 0 });
     expect(truncateRows([1, 2], false)).toEqual({ visible: [1, 2], hidden: 0 });
+  });
+});
+
+describe("A2 — bare type echoes banned; unreadable dates render the dim dash", () => {
+  it("offer / send / R&R with no readable date → dim — (sort keys unchanged at the far end)", () => {
+    const ctx = { queries: [q("q1")], taskFlags: [] }; // no dates on the record at all
+    for (const t of ["offer_received", "full_requested", "partial_requested", "revise_resubmit"]) {
+      const d = ledgerDetail(card("k", { taskType: t, relatedRecordId: "q1" }), ctx, NOW);
+      expect(d.label).toBe("—");
+      expect(d.tone).toBe("dim");
+      expect(d.sortMs).toBe(Number.MAX_SAFE_INTEGER);
+    }
+    // and a truly unparsable stored date degrades identically, never echoing the type
+    const bad = { queries: [q("q1", { responseDeadline: "not-a-date", lastStatusChange: "junk" })], taskFlags: [] };
+    expect(ledgerDetail(card("k", { taskType: "offer_received", relatedRecordId: "q1" }), bad, NOW).label).toBe("—");
+    expect(ledgerDetail(card("k", { taskType: "full_requested", relatedRecordId: "q1" }), bad, NOW).label).toBe("—");
+  });
+  it("batch copy snapshots — the ref's wording, one source", () => {
+    expect(batchTaskCopy("dq_materials")).toBe("Add material requirements");
+    expect(batchTaskCopy("dq_mswl")).toBe("Add wish lists");
+    expect(batchTaskCopy("dq_responseTime")).toBe("Add reply windows");
+  });
+  it("REGRESSION: the ledger layer is strictly 1:1 with its input — no fan-out, no dedup (duplicate agents = duplicate RECORDS)", () => {
+    // two queries to the same agent, same dateSent → two rows, same quiet-days, distinct keys
+    const sent = new Date(NOW - 300 * 86400000).toISOString();
+    const queries = [q("q1", { dateSent: sent }), q("q2", { agentId: "a1", dateSent: sent })];
+    const rows = sortLedgerHk([
+      card("s1", { taskType: "no_response_close", relatedRecordId: "q1", who: "Eleanor Whitfield" }),
+      card("s2", { taskType: "no_response_close", relatedRecordId: "q2", who: "Eleanor Whitfield" }),
+    ], { queries, taskFlags: [] }, NOW);
+    expect(rows).toHaveLength(2);
+    expect(new Set(rows.map((r) => r.key)).size).toBe(2);
+    expect(ledgerDetail(rows[0], { queries, taskFlags: [] }, NOW).label).toBe(ledgerDetail(rows[1], { queries, taskFlags: [] }, NOW).label);
   });
 });

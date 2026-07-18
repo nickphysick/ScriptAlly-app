@@ -83,20 +83,21 @@ export function ledgerDetail(
       const wake = card.quiet ? msOf(flag?.snoozedUntil) : null;
       if (wake != null) return { label: `WAKES ${dShort(flag!.snoozedUntil!)}`.toUpperCase(), tone: "plain", sortMs: wake };
       const reply = msOf(q?.responseDeadline);
-      if (reply == null) return { label: "OFFER", tone: "plain", sortMs: FAR };
+      // A2: a bare type echo is banned — an unreadable/absent date is a dim "—" (sort key unchanged)
+      if (reply == null) return { label: "—", tone: "dim", sortMs: FAR };
       return { label: `REPLY BY ${dShort(q!.responseDeadline!)}`.toUpperCase(), tone: "hot", sortMs: reply };
     }
     case "partial_requested":
     case "full_requested": {
       const t = msOf(q?.lastStatusChange);
       return t == null
-        ? { label: "REQUESTED", tone: "plain", sortMs: FAR }
+        ? { label: "—", tone: "dim", sortMs: FAR }
         : { label: `REQUESTED ${dShort(q!.lastStatusChange!)}`.toUpperCase(), tone: "plain", sortMs: t };
     }
     case "revise_resubmit": {
       const t = msOf(q?.lastStatusChange);
       return t == null
-        ? { label: "R&R", tone: "plain", sortMs: FAR }
+        ? { label: "—", tone: "dim", sortMs: FAR }
         : { label: `R&R FROM ${dShort(q!.lastStatusChange!)}`.toUpperCase(), tone: "plain", sortMs: t };
     }
     case "nudge_overdue":
@@ -125,6 +126,16 @@ export function sortLedgerDo(cards: BoardCard[], ctx: { queries: Query[]; taskFl
 export function sortLedgerHk(cards: BoardCard[], ctx: { queries: Query[]; taskFlags: TaskFlag[] }, now: number): BoardCard[] {
   const key = new Map(cards.map((c) => [c.key, ledgerDetail(c, ctx, now).sortMs]));
   return [...cards].sort((a, b) => key.get(a.key)! - key.get(b.key)!); // earlier send-moment = longer quiet
+}
+
+/** The batch parent's TASK cell copy (A2 — the ref's wording; one source, never inline). */
+export function batchTaskCopy(rule: HkGroup["rule"]): string {
+  switch (rule) {
+    case "dq_materials": return "Add material requirements";
+    case "dq_mswl": return "Add wish lists";
+    case "dq_responseTime": return "Add reply windows";
+    default: return "Tidy up";
+  }
 }
 
 export interface LedgerChild {

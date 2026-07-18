@@ -275,3 +275,13 @@ describe("A1 — the masthead band (evening run; amends the shell ref in place)"
     expect(rule(".tdb-drawer")).toContain("position: sticky; top: 18px");
   });
 });
+
+describe("A2 — ledger copy + the avatar stack (source locks)", () => {
+  it("the batch parent's TASK cell reads batchTaskCopy (one source); the tag stays the meta label", () => {
+    expect(page).toContain('<span className="tdb-lti">{batchTaskCopy(g.rule)}</span>');
+    expect(page).toContain("{g.meta.label.toUpperCase()}");
+  });
+  it("the batch avatar stack overlaps −7px with white keylines", () => {
+    expect(css).toContain(".tdb-lstack .tdb-miniav { margin-left: -7px; border: 1.5px solid var(--white, #fff); }");
+  });
+});
