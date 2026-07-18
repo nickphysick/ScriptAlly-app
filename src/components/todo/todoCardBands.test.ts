@@ -1,0 +1,67 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Card Bands (Variant A) source locks — the MountCard header-fill structure (rim → frame → band +
+ * body), the retired spines, and the on-band tag treatments. Logic-only test policy → pinned at
+ * the source/rule-text layer.
+ */
+import { describe, it, expect } from "vitest";
+import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+
+const here = dirname(fileURLToPath(import.meta.url));
+const css = readFileSync(join(here, "todo.css"), "utf8");
+const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
+
+describe("Card Bands — structure law", () => {
+  it("the RIM is white/radius-13/3px-pad with NO clip; the FRAME is the 1px hairline clip context", () => {
+    expect(css).toMatch(/\.tdb-tile \{[^}]*border-radius: 13px; padding: 3px;/);
+    expect(css).not.toMatch(/\.tdb-tile \{[^}]*overflow: hidden/); // rim does not clip (shadow shows)
+    expect(css).toContain(".tdb-frame { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 10px; overflow: hidden;");
+  });
+  it("the band is slim (~34px) with a 1px identity border-bottom; lane tints pink/coffee/note", () => {
+    expect(css).toMatch(/\.tdb-band \{[^}]*min-height: 34px[^}]*border-bottom: 1px solid var\(--line\)/);
+    expect(css).toContain(".tdb-band.do { background: var(--pink-t); border-bottom-color: var(--pink-b); }");
+    expect(css).toContain(".tdb-band.hk { background: var(--hk-cof); border-bottom-color: var(--hk-cof-edge); }");
+    expect(css).toContain(".tdb-band.nt { background: var(--note-t); border-bottom-color: var(--note-b); }");
+  });
+  it("the coloured left spines are RETIRED — no ::before spine on any card type", () => {
+    expect(css).not.toContain(".tdb-tile::before");
+    expect(css).not.toContain(".tdb-gcard::before");
+    expect(css).not.toContain(".tdb-tile.rvcard::before");
+    expect(css).not.toMatch(/\.tdb-tile\.(do|hk|nt)::before/);
+  });
+  it("on a band: standard tags go white-filled; urgency + offer keep their fills; the group dot goes white on coffee", () => {
+    expect(css).toContain(".tdb-band .tdb-tag:not(.offer):not(.warn) { background: var(--white, #fff); }");
+    expect(css).toContain(".tdb-band .tdb-kd { background: var(--white, #fff); border: 1px solid var(--hk-cof-edge); }");
+  });
+  it("height absorbed the band uniformly (242 = 208 + ~34) on both card classes; exact-fit width untouched", () => {
+    expect((css.match(/min-height: 242px/g) ?? []).length).toBeGreaterThanOrEqual(2); // tile + gcard
+    expect(css).toContain("flex: 0 0 var(--tdb-cardw, 330px)"); // --cardw still the width driver
+  });
+});
+
+describe("Card Bands — band-then-body order per card type (render markup)", () => {
+  // the frame opens, the lane band opens next, the body follows — asserted as exact ordered markup
+  it("the tile (do/hk/nt): frame → lane band (tags) → body", () => {
+    expect(page).toContain('<div className="tdb-frame">\n          <div className={`tdb-band ${c.stream}`}>\n            <div className="tdb-tags">');
+    const frame = page.indexOf('<div className={`tdb-band ${c.stream}`}>');
+    const body = page.indexOf('<div className="tdb-body">', frame);
+    expect(frame).toBeGreaterThan(0);
+    expect(body).toBeGreaterThan(frame); // body after band
+  });
+  it("the grouped card: coffee band (kicker) → body", () => {
+    expect(page).toContain('<div className="tdb-band hk">\n            <div className="tdb-kick">');
+    const band = page.indexOf('<div className="tdb-band hk">');
+    const body = page.indexOf('<div className="tdb-body">', band);
+    expect(body).toBeGreaterThan(band);
+  });
+  it("the review card: do band → body", () => {
+    expect(page).toContain('<div className="tdb-band do">\n            <div className="tdb-tags">');
+    const band = page.indexOf('<div className="tdb-band do">');
+    const body = page.indexOf('<div className="tdb-body">', band);
+    expect(body).toBeGreaterThan(band);
+  });
+});

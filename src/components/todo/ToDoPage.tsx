@@ -803,13 +803,19 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     return (
       <div key={c.key} className="tdb-tile do rvcard" onClick={openSundayReview}>
         <button type="button" className="tdb-rvx" onClick={dismiss} aria-label="Dismiss the review for this week">✕</button>
-        <div className="tdb-tags"><span className="tdb-tag due">{c.due}</span></div>
-        <div className="tdb-mid">
-          <div className="tdb-tt">{c.title}</div>
-          <div className="tdb-tsub">{c.subtitle}</div>
+        <div className="tdb-frame">
+          <div className="tdb-band do">
+            <div className="tdb-tags"><span className="tdb-tag due">{c.due}</span></div>
+          </div>
+          <div className="tdb-body">
+            <div className="tdb-mid">
+              <div className="tdb-tt">{c.title}</div>
+              <div className="tdb-tsub">{c.subtitle}</div>
+            </div>
+            <div className="tdb-rvweek">{c.record.toUpperCase()}</div>
+            <button type="button" className="tdb-rvgo" onClick={(e) => { e.stopPropagation(); openSundayReview(); }}>Begin the review →</button>
+          </div>
         </div>
-        <div className="tdb-rvweek">{c.record.toUpperCase()}</div>
-        <button type="button" className="tdb-rvgo" onClick={(e) => { e.stopPropagation(); openSundayReview(); }}>Begin the review →</button>
       </div>
     );
   }
@@ -878,23 +884,29 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     return (
       <div key={c.key} className={`tdb-tile ${c.stream}${committed ? " today" : ""}${c.quiet ? " quiet" : ""}${pulsing === c.key ? " pulse" : ""}`} onClick={() => openFlowCards([c])}>
         {!isOffer && rail(() => quickDone(c), () => quickPause(c))}
-        <div className="tdb-tags">
-          <span className={`tdb-tag due${isOffer ? " offer" : c.warn ? " warn" : ""}`}>{isOffer ? `★ ${c.due}` : c.due}</span>
-          {c.snoozes > 0 && <span className="tdb-tag snz">Snoozed ×{c.snoozes}</span>}
-        </div>
-        <div className="tdb-mid">
-          <div className="tdb-tt">{c.title}</div>
-          {c.subtitle && <div className="tdb-tsub">{subIsMs ? <span className="tdb-ms">{c.subtitle}</span> : c.subtitle}</div>}
-        </div>
-        <div className="tdb-tmeta">
-          {c.hk ? <span className="tdb-hkdot" aria-hidden>!</span> : c.status ? <StatusDot status={c.status as QueryStatus} overrideSize={14} /> : <span className="tdb-tdot" />}
-          <span className="tdb-miniav">{c.initials}</span>
-          <span className="tdb-who">{c.record}</span>
-        </div>
-        <div className="tdb-tacts">
-          <button type="button" className={`tdb-pill today-p${committed ? " on" : ""}`} onClick={(e) => { e.stopPropagation(); toggleToday(c); }}>
-            {committed ? "✓ On today’s list" : "＋ Today’s list"}
-          </button>
+        <div className="tdb-frame">
+          <div className={`tdb-band ${c.stream}`}>
+            <div className="tdb-tags">
+              <span className={`tdb-tag due${isOffer ? " offer" : c.warn ? " warn" : ""}`}>{isOffer ? `★ ${c.due}` : c.due}</span>
+              {c.snoozes > 0 && <span className="tdb-tag snz">Snoozed ×{c.snoozes}</span>}
+            </div>
+          </div>
+          <div className="tdb-body">
+            <div className="tdb-mid">
+              <div className="tdb-tt">{c.title}</div>
+              {c.subtitle && <div className="tdb-tsub">{subIsMs ? <span className="tdb-ms">{c.subtitle}</span> : c.subtitle}</div>}
+            </div>
+            <div className="tdb-tmeta">
+              {c.hk ? <span className="tdb-hkdot" aria-hidden>!</span> : c.status ? <StatusDot status={c.status as QueryStatus} overrideSize={14} /> : <span className="tdb-tdot" />}
+              <span className="tdb-miniav">{c.initials}</span>
+              <span className="tdb-who">{c.record}</span>
+            </div>
+            <div className="tdb-tacts">
+              <button type="button" className={`tdb-pill today-p${committed ? " on" : ""}`} onClick={(e) => { e.stopPropagation(); toggleToday(c); }}>
+                {committed ? "✓ On today’s list" : "＋ Today’s list"}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -937,20 +949,26 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     return (
       <div key={g.rule} className="tdb-gcard" onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}>
         {rail(() => setOverlay(key, { kind: "flip" }), () => setOverlay(key, { kind: "fork", single: false }), true)}
-        <div className="tdb-kick"><span className="tdb-kd" aria-hidden />{copy.kick}</div>
-        <div className="tdb-mid">
-          <div className="tdb-gtt"><span className="tdb-gn">{g.members.length}</span>{copy.rest(g.members.length)}</div>
-          <div className="tdb-gsub">{copy.sub}</div>
-        </div>
-        <div className="tdb-gprog">
-          <div className="tdb-pbar"><i style={{ width: `${prog.pct}%` }} /></div>
-          <div className="tdb-pcap"><span>{prog.caption}</span><span>{prog.pct}%</span></div>
-        </div>
-        <div className="tdb-gstack">
-          {faces.map((m) => <span key={m.card.key} className="tdb-gsav" title={m.agentName}>{m.card.initials}</span>)}
-          {g.members.length > faces.length && <span className="tdb-gmore">+{g.members.length - faces.length}</span>}
-          <button type="button" className="tdb-gfix" onClick={(e) => { e.stopPropagation(); setFlow({ items: [{ kind: "group", group: g }] }); }}>Fix together →</button>
-          <button type="button" className="tdb-gnever" title="Stop asking about these — the gaps stay on the profiles" onClick={(e) => { e.stopPropagation(); muteRuleFromCard(g); }}>Never</button>
+        <div className="tdb-frame">
+          <div className="tdb-band hk">
+            <div className="tdb-kick"><span className="tdb-kd" aria-hidden />{copy.kick}</div>
+          </div>
+          <div className="tdb-body">
+            <div className="tdb-mid">
+              <div className="tdb-gtt"><span className="tdb-gn">{g.members.length}</span>{copy.rest(g.members.length)}</div>
+              <div className="tdb-gsub">{copy.sub}</div>
+            </div>
+            <div className="tdb-gprog">
+              <div className="tdb-pbar"><i style={{ width: `${prog.pct}%` }} /></div>
+              <div className="tdb-pcap"><span>{prog.caption}</span><span>{prog.pct}%</span></div>
+            </div>
+            <div className="tdb-gstack">
+              {faces.map((m) => <span key={m.card.key} className="tdb-gsav" title={m.agentName}>{m.card.initials}</span>)}
+              {g.members.length > faces.length && <span className="tdb-gmore">+{g.members.length - faces.length}</span>}
+              <button type="button" className="tdb-gfix" onClick={(e) => { e.stopPropagation(); setFlow({ items: [{ kind: "group", group: g }] }); }}>Fix together →</button>
+              <button type="button" className="tdb-gnever" title="Stop asking about these — the gaps stay on the profiles" onClick={(e) => { e.stopPropagation(); muteRuleFromCard(g); }}>Never</button>
+            </div>
+          </div>
         </div>
       </div>
     );
