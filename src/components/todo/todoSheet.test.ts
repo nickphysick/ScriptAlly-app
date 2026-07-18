@@ -59,3 +59,40 @@ describe("B3 — the duplicate-send guard wires all three write moments (source 
     expect(flow).not.toContain("useState<.*prior"); // read-at-write-time, no guard state
   });
 });
+
+describe("C1 — anatomy + exit (ref todo-sheet-restyle-v1.html; both sheets)", () => {
+  const settings = readFileSync(join(here, "TaskSettingsSheet.tsx"), "utf8");
+  it("the wrapper/overflow split: the sheet clips (band corners), the exit lives on the wrapper", () => {
+    expect(css).toMatch(/\.tdb-ffsheet \{[^}]*overflow: hidden/);
+    expect(css).toContain(".tdb-ffwrap { position: relative; width: min(860px, 92vw);");
+    expect(css).toContain(".tdb-ffx { position: absolute; top: -16px; right: -16px;");
+  });
+  it("the corner exit is the letterpress circle: 44px, parchment, 1.5px ink, scrim shadow, hover 1.06, labelled", () => {
+    const x = css.match(/\.tdb-ffx \{([^}]*)\}/)?.[1] ?? "";
+    expect(x).toContain("width: 44px; height: 44px");
+    expect(x).toContain("background: var(--paper)");
+    expect(x).toContain("border: 1.5px solid var(--ink)");
+    expect(x).toContain("box-shadow: 0 4px 14px rgba(20, 8, 4, 0.3)");
+    expect(css).toContain(".tdb-ffx:hover { transform: scale(1.06); }");
+    expect(css).toContain('@media (max-width: 760px) { .tdb-ffx { top: 12px; right: 12px; } }');
+    expect(flow).toContain('strokeWidth="2.4" strokeLinecap="round"');
+  });
+  it("Task Settings carries the same corner exit (always the clean immediate close — no staged model)", () => {
+    expect(settings).toContain('className="tdb-ffx" aria-label="Back to my desk" onClick={onClose}');
+    expect(settings).not.toContain("tdb-ffbar");
+    expect(settings).not.toContain("tdb-ffexit");
+  });
+  it("the zoned E band proves on the send journey: pink family, kicker→headline→sub left, the plane right", () => {
+    expect(flow).toContain('band("pink", sendKicker(c, { queries, taskFlags }, Date.now()), emTitle(c), c.subtitle || undefined, { art: "send"');
+    expect(flow).toContain('band("pink", <>{c.who || "Logging"} · logging the send</>, "Off it goes"');
+    expect(css).toContain(".tdb-fband.pink { background: linear-gradient(180deg, var(--pink-t), var(--pink-btn)); border-color: var(--pink-b); }");
+    expect(css).toContain(".tdb-fbart { width: 165px; height: 120px;");
+    expect(css).toContain("drop-shadow(0 3px 6px rgba(58, 28, 20, 0.14))"); // assets ship shadowless
+  });
+  it("the manifest exists with send populated; the band title keeps the aria-stamp class", () => {
+    const art = readFileSync(join(here, "journeyArt.ts"), "utf8");
+    expect(art).toContain('import sendArt from "../../assets/journeys/send.png";');
+    expect(art).toContain("send: sendArt,");
+    expect(flow).toContain('className="tdb-ffq tdb-fbh"');
+  });
+});

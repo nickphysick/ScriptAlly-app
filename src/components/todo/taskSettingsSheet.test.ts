@@ -20,7 +20,8 @@ describe("TaskSettingsSheet — source locks", () => {
     expect(sheet).toContain('className="tdb-ffsheet tdb-tset"');
     expect(sheet).toContain("lockStageScroll()");
     expect(sheet).toContain('e.key !== "Tab"');
-    expect(sheet).toContain("✕&nbsp;&nbsp;Back to my desk");
+    // C1 — the exit is the shared corner circle on the wrapper (the labelled pill is retired)
+    expect(sheet).toContain('className="tdb-ffx" aria-label="Back to my desk" onClick={onClose}');
     expect(sheet).toContain('e.key === "Escape"');
   });
   it("switches apply immediately (no staged model): role=switch → updateUserProfile(setTypeMute)", () => {

@@ -102,3 +102,34 @@ Vitest, pipefail). Live `.t-f12` tokens over mockup hexes throughout.
 - Tests: fires on same-type repeat only (most-recent date), never on first sends / cross-type /
   cross-query, never on R&R; prompt copy incl. degrades; source locks pinning guard-before-write
   at all three sites.
+
+## PART C — sheet restyle
+
+### C1 — anatomy + exit
+- **Refs committed:** `design-refs/todo-sheet-restyle-v1.html` (v5 — normative; the SLOT SPEC +
+  MANIFEST CONTRACT live in its header comment, the contract Nick draws against) +
+  `design-refs/todo-sheet-ceremony-v1.html` (v4 — Section D only; E/F fenced as exploration).
+- **Asset path:** `src/assets/journeys/send.png` (the existing `src/assets/` convention, a new
+  `journeys/` folder). Manifest `src/components/todo/journeyArt.ts` — `send` populated, all other
+  keys present-but-null (null = the slot renders nothing at all).
+- **The wrapper/overflow split:** `.tdb-ffwrap` (position:relative, the sheet's old sizing) now
+  sits between the stage and the sheet; the sheet keeps `overflow:hidden` for band clipping. The
+  **corner exit** (`.tdb-ffx` — 44px parchment circle, 1.5px ink, ink ✕ at 2.4/round, top:-16
+  right:-16, scrim shadow, hover 1.06, `aria-label="Back to my desk"`) rides the wrapper, rendered
+  AFTER the sheet in DOM = the focus trap's LAST tab stop (trapTab walks DOM order). The scrim +
+  trap mounts are untouched — halt (f) clear.
+- **The pill removed everywhere:** FocusFlow's chrome bar (`.tdb-ffbar`/`.tdb-ffexit`) deleted;
+  the guard re-wired VERBATIM (the ✕ calls the same `requestExit` — immediate when clean, confirm
+  when staged). Task Settings converted too (its exit = the clean `onClose` — no staged model).
+  **Progress dots + count relocated to the sheet FOOT** (left of the staged chip) — the pack names
+  no home for them after "no chrome row"; the foot is the reported call.
+- **The zoned E band** (`.tdb-fband` + `band()` helper): family gradient + 1px family
+  border-bottom, no radius (the sheet clips); kicker pill → 30px Playfair headline (carrying
+  `.tdb-ffq` so the dialog's aria-labelledby stamp keeps finding it) → italic sub, left; the art
+  slot 165×120 fit-within with the CSS drop-shadow, right. **Proven on the send journey**: both
+  steps on pink with the plane; step 1 mirrors the ref exactly (kick "{agent} · logging the
+  send", "Off it goes", the send line as sub, the asked-for sentence as the body lede).
+- Tests: todoChrome P3 rewritten to the corner era (no bar/pill anywhere, ✕-after-sheet trap
+  order, guard verbatim, foot progress, skips kept); todoSheet C1 describe (wrapper split, the
+  circle's letterpress spec + mobile inset, Task Settings parity, the proven band, the manifest);
+  taskSettingsSheet lock re-pointed.

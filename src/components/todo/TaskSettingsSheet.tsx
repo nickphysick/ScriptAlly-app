@@ -66,11 +66,11 @@ export const TaskSettingsSheet: React.FC<{ onClose: () => void }> = ({ onClose }
   return (
     <div className="tdb-ff" role="dialog" aria-modal="true" aria-labelledby="tdb-tset-heading" ref={rootRef} tabIndex={-1} onKeyDown={trapTab} onClick={scrimClick}>
       <div className="tdb-ffstage">
-        <div className="tdb-ffsheet tdb-tset">
-          <div className="tdb-ffbar">
-            <span className="tdb-sp" />
-            <button type="button" className="tdb-ffexit" onClick={onClose}>✕&nbsp;&nbsp;Back to my desk</button>
-          </div>
+        {/* C1 — the corner exit rides the wrapper (outside the sheet's clip), after the sheet in
+            DOM = the trap's last tab stop. This sheet has no staged model, so the exit is always
+            the clean immediate close. The parchment band lands in C2. */}
+        <div className="tdb-ffwrap">
+          <div className="tdb-ffsheet tdb-tset">
           <div className="tdb-ffbody">
             <div className="tdb-ffstream off">TASK SETTINGS</div>
             <div className="tdb-ffq" id="tdb-tset-heading">What lands on your desk?</div>
@@ -119,6 +119,10 @@ export const TaskSettingsSheet: React.FC<{ onClose: () => void }> = ({ onClose }
               <div className="tdb-tsetfoot">Restoring puts it straight back on the board. Nothing here is deleted — only set aside.</div>
             </div>
           </div>
+          </div>
+          <button type="button" className="tdb-ffx" aria-label="Back to my desk" onClick={onClose}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden><line x1="6" y1="6" x2="18" y2="18" /><line x1="18" y1="6" x2="6" y2="18" /></svg>
+          </button>
         </div>
       </div>
     </div>

@@ -30,6 +30,7 @@ import { StatusDot } from "../StatusDot";
 import { useScriptAllyDb } from "../../lib/db";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
 import { TimelineRows, buildTimelineRows } from "../reading-pane/QueryTimeline";
+import { JOURNEY_ART, JourneyArtKey } from "./journeyArt";
 import { NUDGE_NESTED_TYPE } from "../../lib/logNudge";
 import { OfferDecision } from "../../lib/offerDecision";
 import { notifyGroups, reminderFields, NotifyRow } from "../../lib/offerNotify";
@@ -284,10 +285,6 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     const any = opts.some((m) => mats[m]);
     if (step === 0) return sheet(
       <>
-        {/* B1 — stream + the row's DETAIL (ledger-shared source); never the same string twice */}
-        <div className={`tdb-ffstream${c.warn ? " warn" : ""}`}>{sendKicker(c, { queries, taskFlags }, Date.now())}</div>
-        <div className="tdb-ffq">{emTitle(c)}</div>
-        {c.subtitle && <div className="tdb-ffqsub">{c.subtitle}</div>}
         {whoRow(ag, c.initials)}
         {sheetTimeline(q, ag)}
         {openQueryLink(q)}
@@ -299,6 +296,8 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
         <button type="button" className="tdb-ffskip" onClick={() => c.taskType && c.relatedRecordId && stageAndAdvance({ kind: "snooze", cardKey: c.key, label: c.title, taskType: c.taskType, relatedRecordId: c.relatedRecordId, days: 7 })}>Snooze</button>
         <button type="button" className="tdb-ffpri" onClick={() => setStep(1)}>I’ve sent it — log it →</button>
       </>,
+      // B1 kicker (stream + the ledger-shared DETAIL — never the same string twice) rides the band
+      band("pink", sendKicker(c, { queries, taskFlags }, Date.now()), emTitle(c), c.subtitle || undefined, { art: "send", kickCls: c.warn ? "warn" : "" }),
     );
     const ms = q ? manuscripts.find((m) => m.id === q.manuscriptId) : undefined;
     const who = c.who || "the agent";
@@ -306,8 +305,6 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     const extrasOn = assumed.extras.filter((m) => mats[m]);
     return sheet(
       <>
-        <div className="tdb-ffstream">{c.who || "Logging"} · logging the send</div>
-        <div className="tdb-ffq">Off it goes</div>
         <div className="tdb-ffqsub">{who} asked for {assumed.label === "Full manuscript" ? "the full" : assumed.label === "Revised manuscript" ? "revisions" : assumed.label.toLowerCase()} — so that’s what we’ll log.</div>
         <div className="tdb-ffassume">
           <span className="tdb-ffatick" aria-hidden>✓</span>
@@ -349,6 +346,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
           });
         }}>Mark sent</button>
       </>,
+      band("pink", <>{c.who || "Logging"} · logging the send</>, "Off it goes", `${c.title}${ms?.title ? ` — ${ms.title}` : ""}`, { art: "send" }),
     );
   }
 
@@ -1081,15 +1079,50 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
   }
 
   // ── frame ─────────────────────────────────────────────────────────────────
-  function sheet(body: React.ReactNode, foot: React.ReactNode) {
+  function sheet(body: React.ReactNode, foot: React.ReactNode, bandNode?: React.ReactNode) {
     return (
       <>
+        {bandNode}
         <div className="tdb-ffbody">{body}</div>
         <div className="tdb-fffoot">
+          {/* C1 — progress relocated from the retired chrome row (dots + count, multi-item modes) */}
+          {review ? (
+            <span className="tdb-fffprog">
+              <span className="tdb-ffprog" aria-hidden>
+                {[0, 1, 2, 3, 4].map((i) => <span key={i} className={`tdb-ffdot${i < Math.min(rvStep, 4) ? " done" : i === Math.min(rvStep, 4) ? " on" : ""}`} />)}
+              </span>
+              <span className="tdb-ffcount">{rvStep < 5 ? `${rvStep + 1} OF 5` : "DONE"}</span>
+            </span>
+          ) : items.length > 1 && (
+            <span className="tdb-fffprog">
+              <span className="tdb-ffprog" aria-hidden>
+                {items.map((it, i) => <span key={itemKey(it)} className={`tdb-ffdot${i < qi ? " done" : i === qi ? " on" : ""}`} />)}
+              </span>
+              <span className="tdb-ffcount">{atReview ? "REVIEW" : `${qi + 1} OF ${items.length}`}</span>
+            </span>
+          )}
           {staged.length > 0 && <span className="tdb-ffpend">{staged.length} staged — nothing saved yet</span>}
           {foot}
         </div>
       </>
+    );
+  }
+
+  /** C1 — the zoned family BAND (layout E; center = ceremony D). The title carries .tdb-ffq so
+   *  the dialog's aria-labelledby stamp keeps finding the heading; art comes from JOURNEY_ART
+   *  (absent = the slot renders nothing at all). Keyed by family so mixed walks crossfade. */
+  function band(fam: "pink" | "cof" | "sage" | "paper", kick: React.ReactNode, title: React.ReactNode, sub?: React.ReactNode, opts?: { art?: JourneyArtKey; center?: boolean; kickCls?: string }) {
+    const src = opts?.art ? JOURNEY_ART[opts.art] : null;
+    return (
+      <div key={fam} className={`tdb-fband ${fam}${opts?.center ? " center" : ""}`}>
+        <div className="tdb-fbtx">
+          <div className={`tdb-ffstream ${opts?.kickCls ?? ""}`}>{kick}</div>
+          {opts?.center && src && <div className="tdb-fbart big"><img src={src} alt="" /></div>}
+          <div className="tdb-ffq tdb-fbh">{title}</div>
+          {sub && <div className="tdb-fbsub">{sub}</div>}
+        </div>
+        {!opts?.center && src && <div className="tdb-fbart"><img src={src} alt="" /></div>}
+      </div>
     );
   }
   // The dialog is labelled by the CURRENT sheet's question heading — one renders at a time, so the
@@ -1278,30 +1311,17 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
       <div className="tdb-ffstage">
         {!atReview && remaining >= 2 && <div className="tdb-ffbehind b2" aria-hidden />}
         {!atReview && remaining >= 1 && <div className="tdb-ffbehind" aria-hidden />}
-        <div className={`tdb-ffsheet${leaving ? " leaving" : ""}${nudged ? " nudged" : ""}`} onAnimationEnd={(e) => { if ((e.target as HTMLElement).classList.contains("nudged")) setNudged(false); }}>
-          {/* chrome-fixes P3 — the takeover-era chrome lives IN the sheet now: dots + count
-              top-left (multi-item modes only), the labelled exit top-right; the staged chip sits
-              in the footer (sheet()). Nothing renders outside the sheet except the scrim. */}
-          <div className="tdb-ffbar">
-            {review ? (
-              <>
-                <div className="tdb-ffprog" aria-hidden>
-                  {[0, 1, 2, 3, 4].map((i) => <span key={i} className={`tdb-ffdot${i < Math.min(rvStep, 4) ? " done" : i === Math.min(rvStep, 4) ? " on" : ""}`} />)}
-                </div>
-                <span className="tdb-ffcount">{rvStep < 5 ? `${rvStep + 1} OF 5` : "DONE"}</span>
-              </>
-            ) : items.length > 1 && (
-              <>
-                <div className="tdb-ffprog" aria-hidden>
-                  {items.map((it, i) => <span key={itemKey(it)} className={`tdb-ffdot${i < qi ? " done" : i === qi ? " on" : ""}`} />)}
-                </div>
-                <span className="tdb-ffcount">{atReview ? "REVIEW" : `${qi + 1} OF ${items.length}`}</span>
-              </>
-            )}
-            <span className="tdb-sp" />
-            <button type="button" className="tdb-ffexit" onClick={() => requestExit()}>✕&nbsp;&nbsp;Back to my desk</button>
+        {/* C1 — the positioning WRAPPER carries the corner exit; the sheet keeps overflow:hidden
+            for band clipping, so the exit never lives inside the clipped box. Rendered AFTER the
+            sheet in DOM order = the focus trap's LAST tab stop (trapTab walks DOM order). The
+            chrome row is retired — progress lives in the sheet foot (sheet()). */}
+        <div className="tdb-ffwrap">
+          <div className={`tdb-ffsheet${leaving ? " leaving" : ""}${nudged ? " nudged" : ""}`} onAnimationEnd={(e) => { if ((e.target as HTMLElement).classList.contains("nudged")) setNudged(false); }}>
+            {content}
           </div>
-          {content}
+          <button type="button" className="tdb-ffx" aria-label="Back to my desk" onClick={() => requestExit()}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden><line x1="6" y1="6" x2="18" y2="18" /><line x1="18" y1="6" x2="6" y2="18" /></svg>
+          </button>
         </div>
       </div>
     </div>

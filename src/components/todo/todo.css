@@ -643,11 +643,44 @@
 @media (max-width: 760px) {
   .tdb-ff { background: radial-gradient(120% 120% at 78% -8%, rgba(255, 250, 242, 0.6) 0%, transparent 46%), var(--oat, #f1e8dc); backdrop-filter: none; -webkit-backdrop-filter: none; }
 }
-/* chrome-fixes P3 — the sheet's own header bar (the viewport-floating chrome row is retired):
-   dots + count left (multi-item only), the labelled exit right, all INSIDE the sheet. */
-.tdb-ffbar { flex: none; display: flex; align-items: center; gap: 12px; padding: 16px 22px 0 26px; }
-.tdb-ffexit { display: inline-flex; align-items: center; font-size: 12.5px; font-weight: 600; color: var(--ink-2); padding: 7px 14px; border-radius: 99px; background: var(--white, #fff); border: 1px solid var(--hairline); white-space: nowrap; }
-.tdb-ffexit:hover { color: var(--ink); border-color: var(--ink-2); }
+/* C1 — the chrome row is RETIRED. The positioning WRAPPER carries the corner exit (a 44px
+   letterpress circle straddling the sheet's top-right corner, outside the sheet's clip); progress
+   dots + count relocated to the sheet foot (.tdb-fffprog). */
+.tdb-ffwrap { position: relative; width: min(860px, 92vw); max-height: 100%; display: flex; }
+.tdb-ffwrap .tdb-ffsheet { width: 100%; }
+.tdb-ffx { position: absolute; top: -16px; right: -16px; z-index: 2; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--paper); border: 1.5px solid var(--ink); color: var(--ink); box-shadow: 0 4px 14px rgba(20, 8, 4, 0.3); cursor: pointer; transition: transform 0.12s; }
+.tdb-ffx:hover { transform: scale(1.06); }
+.tdb-ffx:focus-visible { outline: 2px solid var(--hk-ink); outline-offset: 2px; }
+.tdb-ffx svg { width: 16px; height: 16px; }
+@media (prefers-reduced-motion: reduce) { .tdb-ffx { transition: none; } }
+@media (max-width: 760px) { .tdb-ffx { top: 12px; right: 12px; } }
+/* the zoned family BAND (layout E; .center = ceremony D). Families = the live lane gradients;
+   the band is flush (no radius — the sheet's overflow:hidden clips the corners). */
+.tdb-fband { flex: none; display: flex; align-items: center; gap: 30px; padding: 22px 34px; border-bottom: 1px solid; animation: tdbBandIn 0.2s ease; }
+@keyframes tdbBandIn { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .tdb-fband { animation: none; } }
+.tdb-fband.pink { background: linear-gradient(180deg, var(--pink-t), var(--pink-btn)); border-color: var(--pink-b); }
+.tdb-fband.cof { background: linear-gradient(180deg, var(--hk-cof), var(--hk-cof-2)); border-color: var(--hk-cof-edge); }
+.tdb-fband.sage { background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border-color: var(--hk-spine); }
+.tdb-fband.paper { background: var(--paper); border-color: var(--hairline); }
+.tdb-fbtx { flex: 1; min-width: 0; }
+.tdb-fband .tdb-ffstream { margin-bottom: 12px; }
+.tdb-fbh { font-size: 30px; line-height: 1.15; } /* the band title (composes with .tdb-ffq for the aria stamp) */
+.tdb-fbsub { font-family: var(--f12-serif); font-style: italic; font-size: 14px; color: var(--ink-2); margin-top: 6px; }
+.tdb-fbart { width: 165px; height: 120px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; margin-right: 14px; }
+.tdb-fbart.big { width: 180px; height: 130px; margin: 0 0 12px; }
+.tdb-fbart img, .tdb-fbart svg { max-width: 100%; max-height: 100%; filter: drop-shadow(0 3px 6px rgba(58, 28, 20, 0.14)); }
+/* ceremony D — column-centred: kick → art → headline → sub */
+.tdb-fband.center { flex-direction: column; text-align: center; gap: 0; }
+.tdb-fband.center .tdb-fbtx { display: flex; flex-direction: column; align-items: center; }
+/* mobile: text above art at reduced scale; the art hides under 480 (CC's call, reported) */
+@media (max-width: 760px) {
+  .tdb-fband { flex-direction: column; align-items: flex-start; gap: 12px; padding: 18px 22px; }
+  .tdb-fband .tdb-fbart { margin: 0; width: 132px; height: 96px; align-self: flex-end; }
+  .tdb-fbh { font-size: 24px; }
+}
+@media (max-width: 480px) { .tdb-fbart { display: none; } }
+.tdb-fffprog { display: inline-flex; align-items: center; gap: 9px; margin-right: 6px; }
 .tdb-ffprog { display: flex; align-items: center; gap: 7px; }
 .tdb-ffdot { width: 8px; height: 8px; border-radius: 50%; background: #d9cdbc; transition: 0.25s; }
 .tdb-ffdot.on { background: var(--burg); transform: scale(1.25); }
@@ -664,6 +697,7 @@
 .tdb-ffsheet.leaving { animation: tdbLeave 0.3s cubic-bezier(0.6, 0, 0.8, 0.4) forwards; }
 @keyframes tdbLeave { to { opacity: 0; transform: translateX(60px) rotate(2deg); } }
 .tdb-ffbody { flex: 1; min-height: 0; overflow-y: auto; padding: 34px 40px 26px; }
+.tdb-fband + .tdb-ffbody { padding-top: 24px; }
 .tdb-fffoot { flex: none; display: flex; align-items: center; gap: 10px; padding: 16px 40px 20px; border-top: 1px solid var(--hairline); background: var(--paper); }
 .tdb-ffback { font-size: 13px; font-weight: 500; color: var(--ink-2); padding: 10px 16px; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--panel); box-shadow: var(--sh-1); }
 .tdb-ffback:hover:not(:disabled) { border-color: var(--ink-2); color: var(--ink); }

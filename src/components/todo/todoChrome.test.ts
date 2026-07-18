@@ -42,33 +42,30 @@ describe("P2 — the done pill (the collision killed; badge = the band toggle)",
   });
 });
 
-describe("P3 — journey exit chrome lives IN the sheet", () => {
+describe("P3→C1 — the exit is the corner circle on the WRAPPER (the in-sheet bar is retired)", () => {
   const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");
   const css = readFileSync(join(here, "todo.css"), "utf8");
 
-  it("the viewport-floating chrome row is gone; nothing renders outside the sheet but the scrim", () => {
-    expect(flow).not.toContain("tdb-ffchrome");
-    expect(css).not.toContain("tdb-ffchrome");
-    // markup order: the stage's sheet CONTAINS the bar, which carries the exit
-    const frame = flow.match(/className=\{`tdb-ffsheet[\s\S]*?tdb-ffbar[\s\S]*?tdb-ffexit/)?.[0] ?? "";
-    expect(frame).not.toBe("");
+  it("no bar, no exit pill — the wrapper carries the 44px corner exit OUTSIDE the sheet's clip", () => {
+    expect(flow).not.toContain("tdb-ffbar");
+    expect(flow).not.toContain("tdb-ffexit");
+    expect(css).not.toContain("tdb-ffbar");
+    expect(css).not.toContain("tdb-ffexit");
+    const wrap = flow.match(/className="tdb-ffwrap">[\s\S]*?<\/button>\n        <\/div>/)?.[0] ?? "";
+    expect(wrap).toContain("tdb-ffsheet");
+    expect(wrap.indexOf("tdb-ffsheet")).toBeLessThan(wrap.indexOf("tdb-ffx")); // ✕ AFTER the sheet = trap's last stop
   });
 
-  it("the exit pill is labelled and rides the SAME dismiss guard on every step of every mode", () => {
-    expect(flow).toContain("✕&nbsp;&nbsp;Back to my desk");
-    expect(flow).toMatch(/tdb-ffexit" onClick=\{\(\) => requestExit\(\)\}/);
+  it("the corner exit rides the SAME dismiss guard on every step of every mode", () => {
+    expect(flow).toContain('className="tdb-ffx" aria-label="Back to my desk" onClick={() => requestExit()}');
     expect(flow).toContain("if (staged.length && !window.confirm("); // clean = immediate, staged = confirm
   });
 
-  it("dots + count render in multi-item modes only, inside the bar (the Sunday review feeds the SAME chrome its own steps)", () => {
-    expect(flow).toContain(": items.length > 1 && (");
-    expect(flow).toContain("{review ? (");
-  });
-
-  it("the staged chip sits in the sheet FOOTER, left of the Back button (sheet renders it before foot)", () => {
-    const foot = flow.match(/className="tdb-fffoot">[\s\S]{0,220}/)?.[0] ?? "";
-    expect(foot).toContain("tdb-ffpend");
-    expect(foot.indexOf("tdb-ffpend")).toBeLessThan(foot.indexOf("{foot}"));
+  it("dots + count render in multi-item modes only, relocated to the sheet FOOT before the staged chip", () => {
+    const foot = flow.match(/className="tdb-fffoot">[\s\S]{0,1700}/)?.[0] ?? "";
+    expect(foot).toContain("tdb-fffprog");
+    expect(foot).toContain(": items.length > 1 && (");
+    expect(foot.indexOf("tdb-fffprog")).toBeLessThan(foot.indexOf("tdb-ffpend"));
   });
 
   it("every in-step skip is KEPT (semantically distinct: skip advances, exit discards behind confirm)", () => {
