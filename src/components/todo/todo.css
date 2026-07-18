@@ -723,9 +723,9 @@
 .tdb-ffcopy:hover:not(:disabled) { border-color: var(--ink); }
 
 .tdb-ffsmall { font-size: 12px; color: var(--faint); margin-top: 12px; line-height: 1.6; }
-.tdb-fftl { display: flex; gap: 8px; margin-top: 22px; flex-wrap: wrap; }
-.tdb-fftle { display: flex; align-items: center; gap: 7px; background: var(--paper); border: 1px solid var(--hairline); border-radius: 99px; padding: 6px 12px; font-size: 12px; color: var(--ink-2); }
-.tdb-fftld { font-family: var(--f12-mono); font-size: 8px; color: var(--faint); text-transform: uppercase; }
+/* B2 — the sheet's history is the HUB'S TimelineRows (shared component, inline-styled);
+   this wrapper just gives it breathing room in the sheet. The old history chips are retired. */
+.tdb-ffhubtl { margin-top: 22px; }
 .tdb-fflink { font-size: 13px; font-weight: 600; color: var(--pink-i); margin-top: 18px; display: inline-block; }
 .tdb-fflink:hover { text-decoration: underline; }
 .tdb-ffconfetti { font-size: 40px; line-height: 1; margin-bottom: 14px; letter-spacing: 6px; }

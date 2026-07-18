@@ -66,3 +66,20 @@ Vitest, pipefail). Live `.t-f12` tokens over mockup hexes throughout.
   never disagree ("Over to you · REQUESTED 12 JUL" / "· R&R FROM 12 JUL"). No readable date → the
   single label (never a dash segment). Same-string-twice impossible by construction AND guarded.
 - Tests: per task type + the no-date single-label branch + the never-doubles assertion.
+
+### B2 — the timeline, mirrored from the Hub
+- **Extraction shape:** `TimelineRows` lifted out of `QueryTimeline.tsx` (same file — already the
+  shared reading-pane home) as a move-without-change: the rows.map block verbatim, the ⋯
+  correction trigger now behind an `onMenuOpen` prop that QueryTimeline passes exactly when its
+  edit/delete handlers exist — Hub behaviour byte-identical, its pure tests untouched (4/4).
+  Halt (d) clear.
+- **The sheet:** the history chips are REPLACED by the Hub's rows — `buildTimelineRows(...)
+  .slice(-4).reverse()` (most recent 3–4, newest first) rendered through the shared component,
+  "Open the full query →" directly beneath (the very next mount). The chips' component + CSS
+  deleted.
+- **The source adapter (reported):** the Hub feeds the builder per-query SUBCOLLECTION docs
+  (`{type, createdAt}`); the sheet holds the top-level feed, adapted by shape — `resultingStatus`
+  is stamped at append by the same writes that append the subcollection docs, and `NUDGE_SENT`
+  twins the nested "Nudge sent", so the rows come out identical. Pre-migration activities without
+  a `resultingStatus` drop out (the synthesised "Query sent" root covers the common gap) — the
+  one caveat, flagged.

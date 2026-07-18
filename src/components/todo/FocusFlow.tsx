@@ -29,7 +29,8 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { StatusDot } from "../StatusDot";
 import { useScriptAllyDb } from "../../lib/db";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
-import { buildAgentTimeline } from "../../lib/agentsPage";
+import { TimelineRows, buildTimelineRows } from "../reading-pane/QueryTimeline";
+import { NUDGE_NESTED_TYPE } from "../../lib/logNudge";
 import { OfferDecision } from "../../lib/offerDecision";
 import { notifyGroups, reminderFields, NotifyRow } from "../../lib/offerNotify";
 import { lockStageScroll } from "../../lib/stageScroll";
@@ -249,15 +250,27 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
       <span><div className="tdb-ffwn">{agentPrimary(ag)}</div>{ag.agency && <div className="tdb-ffwa">{ag.agency}</div>}</span>
     </div>
   );
-  const timelineChips = (ag?: Agent) => {
-    if (!ag) return null;
-    const tl = buildAgentTimeline(ag.id, queries, manuscripts, activities).slice(0, 5);
-    if (!tl.length) return null;
-    return (
-      <div className="tdb-fftl">{tl.map((e: { id: string; status: QueryStatus; label: string; dateLabel: string }) => (
-        <span key={e.id} className="tdb-fftle"><StatusDot status={e.status} overrideSize={13} />{e.label}<span className="tdb-fftld">{e.dateLabel}</span></span>
-      ))}</div>
-    );
+  // B2 — the sheet renders THE HUB'S OWN timeline rows (TimelineRows + buildTimelineRows,
+  // reading-pane/QueryTimeline — reuse, not imitation), condensed to the most recent 3–4,
+  // newest first. The Hub feeds the builder per-query subcollection docs ({type, createdAt});
+  // the sheet holds the TOP-LEVEL feed, adapted by shape: resultingStatus is stamped at append
+  // by the SAME writes that append the subcollection docs, and NUDGE_SENT twins the nested
+  // "Nudge sent" — so the rows come out identical. Pre-migration activities without a
+  // resultingStatus drop out (the synthesised "Query sent" root covers the common gap).
+  const sheetTimeline = (q?: Query, ag?: Agent) => {
+    if (!q) return null;
+    const events = activities
+      .filter((a) => a.queryId === q.id)
+      .map((a) => ({
+        id: a.id,
+        type: a.activityType === ActivityType.NUDGE_SENT ? NUDGE_NESTED_TYPE : a.resultingStatus,
+        createdAt: a.date,
+        note: "",
+      }))
+      .filter((e) => e.type != null);
+    const rows = buildTimelineRows(events, q, ag ?? null).slice(-4).reverse();
+    if (!rows.length) return null;
+    return <div className="tdb-ffhubtl"><TimelineRows rows={rows} /></div>;
   };
   const openQueryLink = (q?: Query) => q && (
     <button type="button" className="tdb-fflink" onClick={() => requestExit(() => onNavigate("queries", q.id))}>Open the full query →</button>
@@ -276,7 +289,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
         <div className="tdb-ffq">{emTitle(c)}</div>
         {c.subtitle && <div className="tdb-ffqsub">{c.subtitle}</div>}
         {whoRow(ag, c.initials)}
-        {timelineChips(ag)}
+        {sheetTimeline(q, ag)}
         {openQueryLink(q)}
       </>,
       <>
