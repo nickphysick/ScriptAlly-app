@@ -33,15 +33,16 @@ describe("Card Bands — structure law", () => {
     expect(css).not.toContain(".tdb-tile.rvcard::before");
     expect(css).not.toMatch(/\.tdb-tile\.(do|hk|nt)::before/);
   });
-  it("on a band: tags are white board-wide now (P3 re-ink retired the in-band override); the group dot still goes white on coffee", () => {
+  it("on a band: tags are white board-wide; the kicker grammar is RETIRED (II·B P4 — the typed tag pill is the one grammar)", () => {
     // the standalone .tdb-band .tdb-tag override is gone — the base .tdb-tag is white everywhere (see todoTagLaw)
     expect(css).not.toContain(".tdb-band .tdb-tag:not(.offer):not(.warn)");
-    expect(css).toContain(".tdb-band .tdb-kd { background: var(--white, #fff); border: 1px solid var(--hk-cof-edge); }");
+    expect(css).not.toContain("tdb-kick");
+    expect(css).not.toContain("tdb-kd");
   });
-  it("workbench P2 re-tune: min-height 200 on both card classes; the GRID drives width (exact-fit retired)", () => {
-    expect((css.match(/min-height: 200px/g) ?? []).length).toBeGreaterThanOrEqual(2); // tile + gcard
+  it("II·B P4 re-tune: min-height 168 (content + sane minimum) on both card classes; the GRID drives width at minmax 240", () => {
+    expect((css.match(/min-height: 168px/g) ?? []).length).toBeGreaterThanOrEqual(2); // tile + gcard
     expect(css).not.toContain("--tdb-cardw"); // laneFit's width var is gone with the reels
-    expect(css).toContain("grid-template-columns: repeat(auto-fill, minmax(230px, 1fr))");
+    expect(css).toContain("grid-template-columns: repeat(auto-fill, minmax(240px, 1fr))");
   });
 });
 
@@ -54,8 +55,8 @@ describe("Card Bands — band-then-body order per card type (render markup)", ()
     expect(frame).toBeGreaterThan(0);
     expect(body).toBeGreaterThan(frame); // body after band
   });
-  it("the grouped card: coffee band (kicker) → body", () => {
-    expect(page).toContain('<div className="tdb-band hk">\n            <div className="tdb-kick">');
+  it("the grouped card: coffee band (the typed tag pill — II·B P4) → body", () => {
+    expect(page).toContain('<div className="tdb-band hk">\n            <div className="tdb-tags"><span className="tdb-tag due cof">{g.meta.label.toUpperCase()}</span></div>');
     const band = page.indexOf('<div className="tdb-band hk">');
     const body = page.indexOf('<div className="tdb-body">', band);
     expect(body).toBeGreaterThan(band);

@@ -479,3 +479,19 @@ describe("Task Settings — the send key propagates from the ONE suppression poi
     expect(assembleBoard(baseInput(on)).do.some((c) => c.taskType === "full_requested")).toBe(true);
   });
 });
+
+describe("II·B P4 — stale titles always carry the duration", () => {
+  it("a stale card's title reads '{name} silent for {n} days' (the ambient day count; stale tasks always have a dateSent)", () => {
+    const NOW = Date.parse("2026-07-19T12:00:00Z");
+    const sent = new Date(NOW - 100 * 86400000).toISOString();
+    const board = assembleBoard({
+      tasks: [{ id: "task-no-res-close-q1", priority: "suggested", title: "", description: "", manuscriptTitle: "", context: "", relatedRecordId: "q1", taskType: "no_response_close", actionLabel: "", actionPath: "" }],
+      userTasks: [], taskFlags: [], activities: [],
+      queries: [{ id: "q1", agentId: "a1", manuscriptId: "m1", status: "Queried", dateSent: sent } as never],
+      agents: [{ id: "a1", name: "Marcus Reed", agency: "Bloomsbury" } as never],
+      manuscripts: [], today: "2026-07-19", now: NOW,
+    } as never);
+    expect(board.hk).toHaveLength(1);
+    expect(board.hk[0].title).toBe("Marcus Reed silent for 100 days");
+  });
+});

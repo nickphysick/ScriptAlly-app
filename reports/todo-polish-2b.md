@@ -64,3 +64,61 @@ companion rail — normative** for the whole layout; Options A and C fenced as e
 - Tests: mount parity (two calls, XOR guards), the rail geometry, chip/header count sources,
   popover a11y, the CSS belt + widen-closes; the scrap-cluster anchor re-pointed (the chip now
   sits between the cluster and the spacer).
+
+## PHASE 4 — one tag grammar + card polish
+
+- **One tag grammar:** the grouped cards' plain kickers become the standard typed white tag pills
+  (`MATERIALS` / `WISH LISTS` / `REPLY WINDOWS` — `g.meta.label`, the ledger's own tag) and the
+  kicker style (`.tdb-kick`/`.tdb-kd`) retires from cards and the stylesheet entirely; `G3_COPY`
+  dropped its now-dead `kick` field.
+- **One section grammar:** the cards view adopts the ledger's tinted head bands — the Lane header
+  is now `.tdb-lghead standalone` (full border + radius 10 + the `--g12` gap; pink/coffee/note
+  families) carrying title + count + ▶ Begin focused session (+ the notes ＋). The dot+rule
+  `.tdb-reelh` grammar and its `.tdb-lt`/`.tdb-rule`/`.tdb-fs`/`.tdb-fsd` styles are deleted;
+  `.tdb-lgt` goes 16px in BOTH views (the ledger's head rises 15→16 with it — one rule).
+- **The grid:** `minmax(240px, 1fr)`; **min-height 200 → 168** (content + sane minimum — the
+  hollow middles close; the clip chain and the pills-never-spill invariant stand).
+- **Stale titles:** already always carry the duration (a stale task can only exist with a
+  `dateSent`, so the ambient day count is always derivable) — now LOCKED by an assembleBoard test
+  ("Marcus Reed silent for 100 days").
+- **The batch "Never"** restyles to the ghost-link grammar (mono underline, muted → ink); the
+  `muteRuleFromCard` handler is untouched.
+- Tests: II·B P4 describe (tag pill + kicker-absence page-wide, the shared head grammar in both
+  views, ghost Never), the cardBands/workbench locks re-pointed (168/240, the tags-band order,
+  the lgt grammar), the stale-duration board lock.
+
+## Close — SHAs · counts
+
+| Phase | SHA | Suite |
+|---|---|---|
+| P1 masthead + 24-grid | `e34b680` | 1261 |
+| P2 controls-only drawer | `898f65d` | 1266 |
+| P3 companion rail | `c187ed9` | 1271 |
+| P4 one tag grammar | (this commit) | 1275 |
+
+**The grid tokens as shipped:** `--g24`/`--g12` on `.tdb-wrap` — masthead vertical padding ·
+ws top-margin/gap/edges · drawer + rail sticky offsets · lane↔lane (cards + ledger) ·
+lane-head↔cards (`.tdb-lghead.standalone` margin) · card gutters. No magic numbers at the seams.
+
+**The two-mount account:** one `renderTodayPanel`, two call sites XOR'd on the 1499.98px
+matchMedia flag — the rail ≥1500, the masthead-chip popover below; exactly one mounts, the state
+cannot fork (halt (c) never fired).
+
+**In-browser checklist (Nick, on dev):**
+1. 62px post-its with the tape fold; the 25px title; the 58×44 scrap.
+2. The drawer one-species and UNSCROLLED at a 900px-tall window (Walk · one bordered filter group
+   · demoted ＋ New note · foot).
+3. The rail sticky on 2560 with the live list in it (tick/record/remove behaving as before).
+4. Resize through 1500 and watch the chip take over — "Today's list · N TO GO", the popover
+   opening beneath it, Esc/click-away closing, the rail returning on widen.
+5. White typed pills on the batch cards (MATERIALS / WISH LISTS); no kicker dots anywhere.
+6. Equal 24s everywhere (masthead↔columns, drawer↔main, main↔rail, lane↔lane, page edges);
+   12s inside (head↔cards, card gutters).
+7. Card grid at 240 minimums — the hollow middles closed at 168.
+8. Stale titles carrying their day counts; the ghost "Never" on batch cards.
+
+**Deviations:** the post-it numerals go Playfair per the normative ref (the Caveat decorative
+grammar retires on the masthead) · the ledger's section-head title rises 15→16px with the shared
+grammar · the panel's done-badge band toggle stays alongside the new combined count chip (its
+chrome-fixes lock and behaviour stand) · Option A's desk-pad and Option C's Today-drawer are
+fenced, unbuilt.

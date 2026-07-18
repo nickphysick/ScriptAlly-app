@@ -186,27 +186,23 @@
    are RETIRED — exact-fit + snap + the header pagers own the overflow affordance. ── */
 .tdb-lanes { display: flex; flex-direction: column; }
 .tdb-reel { margin-bottom: var(--g24); }
-.tdb-reelh { display: flex; align-items: center; gap: 11px; margin-bottom: var(--g12); padding: 0 2px; }
+/* II·B P4 — the cards view shares the ledger's tinted head band; standalone = full border +
+   radius + the g12 gap to its cards (the dot+rule reelh grammar is retired). */
+.tdb-lghead.standalone { border: 1px solid; border-radius: 10px; margin-bottom: var(--g12); }
 .tdb-lanedot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
 .tdb-lanedot.do { background: var(--pink-btn); outline: 1px solid var(--pink-b); }
 .tdb-lanedot.hk { background: var(--hk-cof-2); outline: 1px solid var(--hk-cof-edge); }
 .tdb-lanedot.nt { background: var(--note-b); outline: 1px solid #dcc98a; }
-.tdb-lt { font-family: var(--f12-serif); font-size: 16px; font-weight: 600; color: var(--ink); }
 .tdb-ln { font-family: var(--f12-mono); font-size: 8.5px; font-weight: 700; border-radius: 99px; padding: 2.5px 9px; background: var(--white, #fff); border: 1px solid var(--line); color: var(--ink-2); }
-.tdb-rule { flex: 1; height: 1px; background: var(--line); margin: 0 4px; }
 /* Polish v3 P3 — "Focused session" (Option C pill; replaces the ghost mono "SWEEP →"; the handler
    — the focus flow's sweep mode — is untouched). White pill + hairline; leading 20px pink disc
    (soft→deep gradient) carrying a solid ink play triangle, nudged 1px right for optical centring.
    Hover warms the border to the deeper pink and the fill to the warm paper near-white. */
-.tdb-fs { display: inline-flex; align-items: center; gap: 8px; background: var(--white, #fff); border: 1px solid var(--hairline); border-radius: 99px; padding: 7px 16px 7px 9px; font-size: 12.5px; font-weight: 600; color: var(--ink); transition: border-color 0.15s, background 0.15s; }
-.tdb-fs:hover { border-color: var(--pink-btn-h); background: var(--paper); }
-.tdb-fsd { position: relative; width: 20px; height: 20px; border-radius: 50%; flex: none; background: linear-gradient(135deg, var(--pink-t), var(--pink-btn)); border: 1px solid var(--pink-btn-h); }
-.tdb-fsd::after { content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) translateX(1px); border-left: 7px solid var(--ink); border-top: 4.5px solid transparent; border-bottom: 4.5px solid transparent; }
 .tdb-cadd { font-size: 16px; color: var(--ink-2); padding: 0 4px; }
 .tdb-cadd:hover { color: var(--ink); }
 /* workbench P2 — the reels are RETIRED (laneFit + pagers + snap deleted with them): a wrapping
    auto-fill grid (Option B .grid). The page scrolls; the grid wraps at every width. */
-.tdb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: var(--g12); padding: 2px; }
+.tdb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--g12); padding: 2px; }
 /* ── THE LEDGER (workbench P3; ref todo-ledger-v1.html): white table card per section, tinted
    head (pink/coffee/note — the note head is a flagged extension so notes aren't lost in this
    view), the shared 9-col grid, 44px rows, batch children on the paper wash. The STATUS column
@@ -217,7 +213,7 @@
 .tdb-lghead.p { background: linear-gradient(180deg, var(--pink-t), var(--pink-btn)); border-color: var(--pink-b); }
 .tdb-lghead.c { background: linear-gradient(180deg, var(--hk-cof), var(--hk-cof-2)); border-color: var(--hk-cof-edge); }
 .tdb-lghead.n { background: var(--note-t); border-color: var(--note-b); }
-.tdb-lgt { font-family: var(--f12-serif); font-size: 15px; font-weight: 600; color: var(--ink); }
+.tdb-lgt { font-family: var(--f12-serif); font-size: 16px; font-weight: 600; color: var(--ink); }
 .tdb-lgs { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 99px; padding: 4px 11px; font-size: 11px; font-weight: 600; color: var(--ink); }
 .tdb-lgs:hover { border-color: var(--ink-2); }
 .tdb-lgrid, .tdb-lcols, .tdb-lrow { display: grid; grid-template-columns: 34px 30px 132px 232px minmax(180px, 1fr) 152px 64px 150px 84px; align-items: center; }
@@ -310,7 +306,7 @@
    (slim lane-tint header, tags/kicker only, 1px identity border-bottom) + .tdb-body (white). The
    coloured left spines are RETIRED — the band is the lane identity. Height 208→242 (208 + the
    ~26 band (workbench P2 tightened); two-line subs still fit). Grid drives the width now. */
-.tdb-tile { position: relative; min-height: 200px; background: var(--white, #fff); border-radius: 13px; padding: 3px; box-shadow: var(--sh-card); cursor: pointer; transition: box-shadow 0.16s, transform 0.16s; display: flex; flex-direction: column; }
+.tdb-tile { position: relative; min-height: 168px; background: var(--white, #fff); border-radius: 13px; padding: 3px; box-shadow: var(--sh-card); cursor: pointer; transition: box-shadow 0.16s, transform 0.16s; display: flex; flex-direction: column; }
 .tdb-tile:hover { box-shadow: var(--sh-card-h); transform: translateY(-1px); }
 .tdb-tile:hover .tdb-frame { border-color: var(--ink); }
 .tdb-tile.today .tdb-frame { border-color: var(--hk-spine); }
@@ -352,14 +348,10 @@
 /* ── G3 GROUPED CARD (retoken Phase C): mono kicker + sage dot · serif title with the inline
    numeral · two-line-clamped sub (fix pass) · sage progress bar + mono caption (real counts) · neutral monogram stack
    + ink-outline "Fix together →" (fills ink on hover) + the quiet Never (behaviour kept). ── */
-.tdb-gcard { position: relative; min-height: 200px; background: var(--white, #fff); border-radius: 13px; padding: 3px; box-shadow: var(--sh-card); cursor: pointer; transition: box-shadow 0.16s, transform 0.16s; display: flex; flex-direction: column; }
+.tdb-gcard { position: relative; min-height: 168px; background: var(--white, #fff); border-radius: 13px; padding: 3px; box-shadow: var(--sh-card); cursor: pointer; transition: box-shadow 0.16s, transform 0.16s; display: flex; flex-direction: column; }
 .tdb-gcard:hover { box-shadow: var(--sh-card-h); transform: translateY(-1px); }
 .tdb-gcard:hover .tdb-frame { border-color: var(--ink); }
-.tdb-band .tdb-kick { margin: 0; }
-.tdb-band .tdb-kd { background: var(--white, #fff); border: 1px solid var(--hk-cof-edge); }
 .tdb-gcard:hover { border-color: var(--ink); box-shadow: var(--sh-card-h); transform: translateY(-1px); }
-.tdb-kick { flex: none; font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.11em; text-transform: uppercase; color: var(--hk-cof-ink); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-.tdb-kd { width: 6px; height: 6px; border-radius: 50%; background: var(--hk-cof-2); border: 1px solid var(--hk-cof-edge); flex: none; }
 .tdb-gtt { font-family: var(--f12-serif); font-size: 16.5px; font-weight: 600; line-height: 1.3; color: var(--ink); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .tdb-gn { font-size: 21px; font-weight: 700; }
 .tdb-gsub { font-size: 12px; color: var(--sub); margin-top: 5px; line-height: 1.5; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
@@ -372,8 +364,9 @@
 .tdb-gmore { font-family: var(--f12-mono); font-size: 8.5px; color: var(--muted); margin-left: 12px; }
 .tdb-gfix { margin-left: auto; font-family: var(--f12-mono); font-size: 8.5px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; border: 1px solid var(--ink); border-radius: 99px; padding: 7px 13px; color: var(--ink); background: var(--white, #fff); transition: 0.13s; }
 .tdb-gcard:hover .tdb-gfix, .tdb-gfix:hover { background: var(--ink); color: var(--white, #fff); }
-.tdb-gnever { margin-left: 10px; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--faint); flex: none; }
-.tdb-gnever:hover { color: var(--ink); }
+/* II·B P4 — the batch card's Never wears the ghost-link grammar (behaviour unchanged) */
+.tdb-gnever.ghost { margin-left: 10px; border: none; background: none; padding: 0; font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line); border-radius: 0; flex: none; }
+.tdb-gnever.ghost:hover { color: var(--ink); border-bottom-color: var(--ink-2); }
 
 /* muted-rules recovery strip (between the Housekeeping lane header and its cards) */
 .tdb-rulestrip { display: flex; align-items: center; gap: 7px; padding: 0 2px 10px; flex-wrap: wrap; }

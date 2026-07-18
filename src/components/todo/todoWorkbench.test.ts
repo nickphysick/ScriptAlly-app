@@ -94,7 +94,7 @@ describe("P1 — masthead composition + the centred column", () => {
   });
   it("type-scale: masthead title 25px (II·B), lane heads 16px", () => {
     expect(rule(".tdb-ask")).toContain("font-size: 25px");
-    expect(rule(".tdb-lt")).toContain("font-size: 16px");
+    expect(rule(".tdb-lgt")).toContain("font-size: 16px"); // II·B P4: one head grammar, both views
   });
   it("the content column caps at 1150 and centres; the row caps at 1720 (max-width discipline)", () => {
     expect(rule(".tdb-col")).toContain("max-width: 1150px");
@@ -119,7 +119,7 @@ describe("P1 — masthead composition + the centred column", () => {
 describe("P2 — card view: the grid replaces the reels; renames land", () => {
   it("a wrapping auto-fill grid renders the cards; every reel mechanism is gone", () => {
     expect(page).toContain('<div className="tdb-grid">{children}</div>');
-    expect(rule(".tdb-grid")).toContain("repeat(auto-fill, minmax(230px, 1fr))");
+    expect(rule(".tdb-grid")).toContain("repeat(auto-fill, minmax(240px, 1fr))"); // II·B P4
     for (const gone of ["laneFit", "lanePageDistance", "laneFadeState", "tdb-pager", "tdb-scroller", "scrollBy"]) {
       expect(page).not.toContain(gone);
     }
@@ -131,7 +131,7 @@ describe("P2 — card view: the grid replaces the reels; renames land", () => {
     expect(rule(".tdb-body")).toContain("padding: 10px 12px 11px");
   });
   it("renames: Begin focused session (lane heads) + Batch fix (group CTA); Fix together is gone", () => {
-    expect(page).toContain('aria-hidden />Begin focused session');
+    expect(page).toContain(">▶ Begin focused session</button>"); // II·B P4: the ledger's chip grammar
     expect(page).toContain(">Batch fix →</button>");
     expect(page).not.toContain("Fix together");
     expect(page).toMatch(/aria-label=\{`Begin a focused session on \$\{label\}`\}/);
@@ -298,7 +298,7 @@ describe("II·B P1 — the 24-grid + the ref masthead (todo-workbench-rail-v1.ht
     expect(rule(".tdb-ws")).toContain("margin: var(--g24) auto 0");
     expect(rule(".tdb-drawer")).toContain("top: var(--g24)");
     expect(rule(".tdb-reel")).toContain("margin-bottom: var(--g24)");
-    expect(rule(".tdb-reelh")).toContain("margin-bottom: var(--g12)");
+    expect(rule(".tdb-lghead.standalone")).toContain("margin-bottom: var(--g12)"); // II·B P4 head band
     expect(rule(".tdb-grid")).toContain("gap: var(--g12)");
     expect(rule(".tdb-ledger")).toContain("gap: var(--g24)");
     expect(rule(".tdb-mast")).toContain("padding: var(--g24) 2px");
@@ -370,5 +370,27 @@ describe("II·B P3 — the companion rail (one panel, two mounts, one state)", (
   it("the breakpoint belt: the rail hides <1500 in CSS too; narrow closes the popover on widen", () => {
     expect(css).toContain("@media (max-width: 1499.98px) { .tdb-railr { display: none; } }");
     expect(page).toContain("useEffect(() => { if (!narrow) setTodayPopOpen(false); }, [narrow]);");
+  });
+});
+
+describe("II·B P4 — one tag grammar + card polish", () => {
+  it("the grouped card wears the standard typed tag pill; the kicker grammar is retired page-wide", () => {
+    expect(page).toContain('<span className="tdb-tag due cof">{g.meta.label.toUpperCase()}</span>');
+    expect(page).not.toContain("tdb-kick");
+    expect(page).not.toContain("tdb-kd");
+    expect(css).not.toContain("tdb-kick");
+  });
+  it("cards view adopts the ledger's tinted head bands — ONE section grammar in both views", () => {
+    expect(page).toContain('className={`tdb-lghead standalone ${cls === "do" ? "p" : cls === "hk" ? "c" : "n"}`}');
+    expect(page).not.toContain("tdb-reelh");
+    expect(page).not.toContain("tdb-fsd");
+    expect(rule(".tdb-lghead.standalone")).toContain("border: 1px solid");
+    // both views speak the same head classes (the ledger's section builder + the Lane)
+    expect((page.match(/tdb-lgs/g) ?? []).length).toBeGreaterThanOrEqual(2);
+  });
+  it("the batch card's Never is the ghost-link grammar (same handler)", () => {
+    expect(page).toContain('className="tdb-gnever ghost"');
+    expect(rule(".tdb-gnever.ghost")).toContain("border-bottom: 1px solid var(--line)");
+    expect(page).toContain("muteRuleFromCard(g)");
   });
 });

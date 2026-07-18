@@ -69,10 +69,10 @@ const fmtTime = (ms?: number): string => {
 /** G3 grouped-card copy (retoken ref) — RULE-ACCURATE: the approved "Add details of what you sent"
  *  materials line is red-gated (the rule checks the agent's REQUIREMENTS, not query sent-materials);
  *  this copy says what the rule actually checks. Swap one line here if Nick approves new wording. */
-const G3_COPY: Record<string, { kick: string; rest: (n: number) => string; sub: string }> = {
-  dq_responseTime: { kick: "Missing reply windows", rest: (n) => ` agent${n === 1 ? "" : "s"} missing a reply window`, sub: "Without one we can’t tell you when a nudge is fair." },
-  dq_materials: { kick: "Missing materials", rest: (n) => ` agent${n === 1 ? "" : "s"} missing a materials list`, sub: "Add what they ask to receive so your package check can run." },
-  dq_mswl: { kick: "Missing wish list", rest: (n) => ` agent${n === 1 ? "" : "s"} missing a wish list`, sub: "Their wish list is how we tell you who’s worth querying." },
+const G3_COPY: Record<string, { rest: (n: number) => string; sub: string }> = {
+  dq_responseTime: { rest: (n) => ` agent${n === 1 ? "" : "s"} missing a reply window`, sub: "Without one we can’t tell you when a nudge is fair." },
+  dq_materials: { rest: (n) => ` agent${n === 1 ? "" : "s"} missing a materials list`, sub: "Add what they ask to receive so your package check can run." },
+  dq_mswl: { rest: (n) => ` agent${n === 1 ? "" : "s"} missing a wish list`, sub: "Their wish list is how we tell you who’s worth querying." },
 };
 
 type Overlay =
@@ -165,7 +165,7 @@ const GroupFlip: React.FC<{
 
 /** One board SECTION (workbench P2 — the horizontal reels are RETIRED): coloured header row over a
  *  wrapping auto-fill card grid. No scroll machinery — the page scrolls, the grid wraps. The
- *  `tdb-reel`/`tdb-reelh` class names are kept (historical; every lock and theme rule reads them). */
+ *  `tdb-reel` wrapper class name is kept (historical); the head is the shared tinted band (II·B P4). */
 const Lane: React.FC<{
   cls: string;
   label: string;
@@ -178,15 +178,14 @@ const Lane: React.FC<{
   children?: React.ReactNode;
 }> = ({ cls, label, count, isEmpty, onAdd, onFocusedSession, emptyNode, strip, children }) => (
   <div className={`tdb-reel ${cls}`} id={`tdb-lane-${cls}`}>
-    <div className="tdb-reelh">
+    {/* II·B P4 — ONE section grammar in both views: the ledger's tinted head band (standalone
+        variant adds the full border + radius). The dot+rule reelh is retired. */}
+    <div className={`tdb-lghead standalone ${cls === "do" ? "p" : cls === "hk" ? "c" : "n"}`}>
       <span className={`tdb-lanedot ${cls}`} aria-hidden />
-      <span className="tdb-lt">{label}</span>
+      <span className="tdb-lgt">{label}</span>
       <span className="tdb-ln">{count}</span>
-      <span className="tdb-rule" aria-hidden />
       {onFocusedSession && !isEmpty && (
-        <button type="button" className="tdb-fs" title="Begin focused session — D done · S snooze · → skip" aria-label={`Begin a focused session on ${label}`} onClick={onFocusedSession}>
-          <span className="tdb-fsd" aria-hidden />Begin focused session
-        </button>
+        <button type="button" className="tdb-lgs" title="Begin focused session — D done · S snooze · → skip" aria-label={`Begin a focused session on ${label}`} onClick={onFocusedSession}>▶ Begin focused session</button>
       )}
       {onAdd && <button type="button" className="tdb-cadd" onClick={onAdd} aria-label="Add a note">＋</button>}
     </div>
@@ -1394,14 +1393,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       );
     }
     const faces = g.members.slice(0, 4);
-    const copy = G3_COPY[g.rule] ?? { kick: g.meta.label, rest: () => ` ${g.meta.label.toLowerCase()}`, sub: "" };
+    const copy = G3_COPY[g.rule] ?? { rest: () => ` ${g.meta.label.toLowerCase()}`, sub: "" };
     const prog = hkGroupProgress(agents.length, g.members.length);
     return (
       <div key={g.rule} className="tdb-gcard" onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}>
         {rail(() => setOverlay(key, { kind: "flip" }), () => setOverlay(key, { kind: "fork", single: false }), true)}
         <div className="tdb-frame">
           <div className="tdb-band hk">
-            <div className="tdb-kick"><span className="tdb-kd" aria-hidden />{copy.kick}</div>
+            <div className="tdb-tags"><span className="tdb-tag due cof">{g.meta.label.toUpperCase()}</span></div>
           </div>
           <div className="tdb-body">
             <div className="tdb-mid">
@@ -1416,7 +1415,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               {faces.map((m) => <span key={m.card.key} className="tdb-gsav" title={m.agentName}>{m.card.initials}</span>)}
               {g.members.length > faces.length && <span className="tdb-gmore">+{g.members.length - faces.length}</span>}
               <button type="button" className="tdb-gfix" onClick={(e) => { e.stopPropagation(); setFlow({ items: [{ kind: "group", group: g }] }); }}>Batch fix →</button>
-              <button type="button" className="tdb-gnever" title="Stop asking about these — the gaps stay on the profiles" onClick={(e) => { e.stopPropagation(); muteRuleFromCard(g); }}>Never</button>
+              <button type="button" className="tdb-gnever ghost" title="Stop asking about these — the gaps stay on the profiles" onClick={(e) => { e.stopPropagation(); muteRuleFromCard(g); }}>Never</button>
             </div>
           </div>
         </div>
