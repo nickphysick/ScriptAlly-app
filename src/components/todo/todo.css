@@ -255,6 +255,24 @@
 .tdb-lchildmore { background: var(--paper); border-bottom: 1px solid var(--hairline); display: flex; padding: 6px 16px 6px 112px; }
 .tdb-lchildmore button { border: none; background: none; font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.1em; color: var(--hk-cof-ink); border-bottom: 1px solid var(--hk-cof-edge); padding: 0; }
 .tdb-lmore { display: flex; justify-content: center; padding: 9px; border-top: 1px solid var(--hairline); }
+/* ── P5: selection · keyboard focus · bulk bar · kebab ── */
+.tdb-lselc { display: flex; align-items: center; }
+.tdb-lsel { width: 15px; height: 15px; border: 1px solid var(--line); border-radius: 4px; background: var(--white, #fff); visibility: hidden; accent-color: var(--hk-ink); cursor: pointer; }
+.tdb-lrow:hover .tdb-lsel, .tdb-lrow:focus-within .tdb-lsel, .tdb-lsel:checked, .tdb-lrow.lsel-on .tdb-lsel { visibility: visible; }
+.tdb-lrow.lsel-on { background: var(--paper); }
+.tdb-lrow.kfocus { outline: 2px solid var(--ink); outline-offset: -2px; border-radius: 2px; }
+.tdb-lrow { position: relative; }
+.tdb-lrow.kebab-open .tdb-lacts { visibility: visible; }
+.tdb-kebback { position: fixed; inset: 0; z-index: 44; }
+.tdb-kebab { position: absolute; top: calc(100% - 6px); right: 12px; z-index: 45; min-width: 140px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--sh-3); padding: 5px; }
+.tdb-kebab button { display: block; width: 100%; height: auto; text-align: left; font-size: 12px; padding: 7px 10px; border-radius: 7px; color: var(--ink); background: none; border: none; }
+.tdb-kebab button:hover { background: var(--white, #fff); }
+/* the ink bulk bar — floats bottom-centre while a selection lives (below modals, above content) */
+.tdb-bulk { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 55; background: var(--ink); color: var(--panel); border-radius: 99px; box-shadow: var(--sh-3); display: flex; align-items: center; gap: 6px; padding: 8px 10px 8px 18px; }
+.tdb-bulkn { font-family: var(--f12-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-right: 6px; }
+.tdb-bulk button { font-size: 11.5px; font-weight: 600; color: var(--panel); border: 1px solid rgba(255, 255, 255, 0.35); border-radius: 99px; padding: 5px 12px; background: none; white-space: nowrap; }
+.tdb-bulk button:hover { background: rgba(255, 255, 255, 0.14); }
+.tdb-bulk button.x { border: none; padding: 5px 8px; }
 .tdb-lmore button { border: none; background: none; font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.1em; color: var(--muted); border-bottom: 1px solid var(--line); padding: 0; }
 .tdb-lmore button:hover { color: var(--ink); }
 

@@ -151,3 +151,72 @@ done-child degrade (dated where stamped, undated otherwise — no invented dates
   counts) + the P4 source-lock describe (shared visible sets, drawer wiring, quiet-line branch
   order + lane skips, review-card furniture rule, Esc). `todoFinishing.test.ts` leak-lock
   re-pointed at the visible-set sweeps (the exclusion invariant unchanged).
+
+## PHASE 5 — selection, keyboard, polish
+
+- **Selection** (`src/lib/todoSelection.ts`, pure): lives over the ledger's VISIBLE top-level row
+  order (card keys + `group-{rule}`) — batch parents are ONE key; children are never in the order,
+  so never selectable by construction. Plain click toggles + re-anchors; **shift-click ADDS the
+  inclusive span** (additive over the replace convention — forgiving); stale keys prune on the
+  next interaction. Hover-revealed checkboxes (visible when checked/selected too).
+- **The ink bulk bar** (bottom-centre while a selection lives): {n} selected · ＋ Today's list
+  (the same `setCommitted`, honouring the 5-cap with the same full-list flash) · ⏸ Snooze ·
+  Dismiss (the same flag writes the singles make — `dismissTask` 7-day / `MUTED_UNTIL`) · ✕ clear.
+  Optimistic, one toast, **one Undo all** unwinding every write.
+- **Keyboard** (additive, never required — every action keeps its pointer path): ↑/↓ or j/k walk
+  the visible rows with a **2px ink focus ring** + nearest-scroll; Enter opens the row's journey;
+  T toggles today (cards); S snoozes (the existing quickPause / group fork); Esc clears
+  selection + focus + kebab; ⌘K stays the search. Guarded: ledger view only, inert while typing
+  in any editable, while a journey sheet is up, and while the board is display:none behind
+  another route.
+- **The kebab ⋯** (hover, card rows): Dismiss (single-item MUTED_UNTIL + undo flash) · Open query
+  (`onNavigate("queries", <queryId>)` — the existing `?q=` deep-selection contract) · Task
+  settings (the same sheet). **Offers get no kebab and no hover verbs** — the offers-need-the-
+  moment law wins over the ref sketch (deviation, flagged).
+- Tests: `todoSelection.test.ts` (toggle/re-anchor, both-direction spans, parent-as-one, children
+  no-op by construction, stale pruning, anchorless shift degrade, the clamped focus walker) + the
+  P5 source-lock describe (checkbox wiring incl. no-checkbox children, bulk-via-primitives + the
+  cap + Undo all, the guarded keyboard map, the a11y focus ring, kebab verbs + the offer
+  exception).
+
+## Close — SHAs · counts · the in-browser checklist
+
+| Phase | SHA | Suite |
+|---|---|---|
+| P1 shell | `e0dd976` | 1189 |
+| P2 cards | `ba38f35` | 1182 |
+| P3 ledger | `a682b50` | 1202 |
+| P4 filters | `2bc34d5` | 1217 |
+| P5 selection | (this commit) | 1229 |
+
+Gates green per commit (tsc · production build · full Vitest, pipefail). Files: ToDoPage.tsx ·
+todo.css · AppShell.tsx (grant 1) · todoBoard.ts · todoWalk.ts · todoTour.ts · NEW todoLedger /
+todoFilters / todoSelection (+ tests) · deleted laneFit(+test), todoCorner.test, todoPopupStack.test.
+
+**In-browser checklist (Nick, on dev):**
+1. The drawer folding both ways (labels → 64px icon rail and back; state survives reload).
+2. The board at 1440 AND 2560 — the content column centred at both (surplus pools as symmetric oat).
+3. Cards WRAPPING, not scrolling — no pagers anywhere; band 26 / title 14 density reads right.
+4. The ledger: DETAIL ↓ order sane (offer top, then soonest; longest-quiet first in Housekeeping);
+   a batch row expanded (recorded child struck + dated where the flow fixed it), ADD → landing IN
+   Batch fix at that agent; SHOW ALL; collapse restoring scroll.
+5. Rows selected (shift range; a batch parent as one), then bulk ＋ Today's list / Snooze /
+   Dismiss — undo-all each time.
+6. Search + a filter composed (e.g. "marsh" + Stale only); the quiet "Nothing matches" line; the
+   celebratory empties only when the desk is truly clear.
+7. A journey opened from BOTH views (card click + ledger row click) and from Walk me through in
+   the drawer.
+8. The tour run end to end (stops 4/5 now point at the drawer).
+9. j/k + Enter + T + S on the ledger; Esc clearing selection.
+10. ⚙ and ? living in the drawer foot; the AppShell ? absent on /todo only.
+
+**Deviations (consolidated):** the fold-to-64px rail, ⚙/? foot and Notes filter group come from
+the pack prose (Option B's sketch omits them) · note-tinted third ledger section (notes would
+otherwise vanish in that view) · WAKES renders only for quiet offers (engine honesty; snoozed
+tasks are hidden by design) · the review entry card stays card-furniture and hides under active
+filters · Snoozed filter defaults CHECKED (all-visible defaults) · sessions sweep the visible
+set · offers get no hover verbs/kebab in the ledger · batch-parent task copy is the terse
+"Add {label}" · muted gap children render NOT RECORDED without ADD (they asked us to stop asking).
+
+**Deploy checkpoint (Nick's call):** this pack + the sheet packs (still to run — they own
+FocusFlow) = the whole redesigned page. Dev deploy on request as usual; prod remains gated.

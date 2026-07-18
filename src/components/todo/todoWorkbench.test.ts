@@ -212,3 +212,44 @@ describe("P4 — search + filters (source locks; the matrix lives in todoFilters
     expect(page).toContain('if (e.key === "Escape") { setSearch(""); (e.target as HTMLInputElement).blur(); }');
   });
 });
+
+describe("P5 — selection · keyboard · bulk · kebab (source locks; the reducer in todoSelection.test.ts)", () => {
+  it("row checkboxes: hover-revealed, shift-aware, parents select as ONE key; children have no checkbox", () => {
+    expect(page).toContain("clickSelect(c.key, e.shiftKey)");
+    expect(page).toContain("clickSelect(`group-${g.rule}`, e.shiftKey)");
+    const child = page.slice(page.indexOf("{open && kids.map((k) =>"), page.indexOf("{open && ("));
+    expect(child).not.toContain("tdb-lsel");
+    expect(css).toContain(".tdb-lrow:hover .tdb-lsel, .tdb-lrow:focus-within .tdb-lsel, .tdb-lsel:checked, .tdb-lrow.lsel-on .tdb-lsel { visibility: visible; }");
+  });
+  it("the bulk bar rides a live selection and acts through the EXISTING primitives with one undo-all", () => {
+    expect(page).toContain('view === "ledger" && selVisible.length > 0 && (');
+    expect(page).toContain(">＋ Today’s list</button>");
+    expect(page).toContain(">⏸ Snooze</button>");
+    expect(page).toContain(">Dismiss</button>");
+    // today respects the cap via the same setCommitted; snooze/dismiss are the same flag writes
+    expect(page).toContain("let room = MAX_TODAY - committedCards.length;");
+    expect(page).toContain('dismissTask(row.c.taskType, row.c.relatedRecordId, "fixed snooze", 7);');
+    expect(page).toContain("snoozedUntil: MUTED_UNTIL");
+    expect(page).toContain('label: "Undo all"');
+  });
+  it("the keyboard layer is additive and guarded (ledger only, not while typing, not under a journey, visible board)", () => {
+    expect(page).toContain('if (ctx.view !== "ledger" || ctx.flow) return;');
+    expect(page).toContain('t.closest("input, textarea, select, [contenteditable=true]")');
+    expect(page).toContain('k === "ArrowDown" || k === "j"');
+    expect(page).toContain('if (k === "Enter") { e.preventDefault(); openRow(key); return; }');
+    expect(page).toContain('if (k === "t" && row?.kind === "card")');
+    expect(page).toContain('if (k === "s")');
+  });
+  it("the focus ring is a visible ink outline (a11y) and rows carry data-lkey for nearest-scroll", () => {
+    expect(css).toContain(".tdb-lrow.kfocus { outline: 2px solid var(--ink); outline-offset: -2px;");
+    expect(page).toContain('data-lkey={c.key}');
+    expect(page).toContain('scrollIntoView({ block: "nearest" })');
+  });
+  it("the kebab carries the rare verbs (Dismiss · Open query · Task settings); offers get none (board law)", () => {
+    expect(page).toContain(">Dismiss</button>");
+    expect(page).toContain(">Open query</button>");
+    expect(page).toContain(">Task settings</button>");
+    expect(page).toContain('onNavigate("queries", c.relatedRecordId)'); // the ?q= deep-selection contract
+    expect(page).toMatch(/\{!isOffer && \(\s*<button type="button" title="More"/);
+  });
+});
