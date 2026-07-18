@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { QueryStatus, Task, Query, Agent, Manuscript, UserTask, TaskFlag, Activity, ActivityType } from "../types";
-import { assembleBoard, boardStreamForTaskType, todaySplit, ribbonTiles, laneFadeState, walkSublabel, walkAria, offerDue, offerQuiet, terseDoneLabel, reminderDue, reviewWeek, weekReviewStats, reviewEntryCard, reviewEntryLine, reviewSeedCandidates, reviewScrap, reviewCompletionSnooze, BoardCard, BoardInput } from "./todoBoard";
+import { assembleBoard, boardStreamForTaskType, todaySplit, ribbonTiles, walkSublabel, walkAria, offerDue, offerQuiet, terseDoneLabel, reminderDue, reviewWeek, weekReviewStats, reviewEntryCard, reviewEntryLine, reviewSeedCandidates, reviewScrap, reviewCompletionSnooze, BoardCard, BoardInput } from "./todoBoard";
 import { taskSurvivesMute } from "./todoHousekeeping";
 
 const TODAY = "2026-07-09";
@@ -176,22 +176,6 @@ describe("ribbonTiles — the header tiles mirror the lanes", () => {
     const b = assembleBoard(input);
     expect(ribbonTiles(b, 7).housekeeping).toBe(7);
     expect(ribbonTiles(b, 0).housekeeping).toBe(0);
-  });
-});
-
-describe("laneFadeState — the polish P1 both-edge fade machine (4px thresholds)", () => {
-  it("at rest on an overflowing reel: right fade only", () => {
-    expect(laneFadeState(0, 1200, 600)).toEqual({ left: false, right: true });
-  });
-  it("mid-scroll: both fades", () => {
-    expect(laneFadeState(300, 1200, 600)).toEqual({ left: true, right: true });
-  });
-  it("scrolled to the end: left fade only (the right fade clears inside the 4px threshold)", () => {
-    expect(laneFadeState(600, 1200, 600)).toEqual({ left: true, right: false });
-    expect(laneFadeState(597, 1200, 600)).toEqual({ left: true, right: false });
-  });
-  it("a non-overflowing reel shows neither", () => {
-    expect(laneFadeState(0, 600, 600)).toEqual({ left: false, right: false });
   });
 });
 

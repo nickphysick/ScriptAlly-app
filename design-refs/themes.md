@@ -750,3 +750,25 @@ double the signal — the tags step back to a neutral chip and let the band spea
   `--note-t/-b/-i` no longer fill or outline any tag. They survive elsewhere (bands, post-its,
   discs, buttons, the focus flow). Burgundy still fills no tag. Rule-text-locked in
   `todoTagLaw.test.ts` (incl. a "no non-offer tag draws a tinted fill" sweep).
+
+## `.t-f12` — THE WORKBENCH (2026-07-18, workbench pack; refs todo-workbench-shell-v1.html Option B + todo-ledger-v1.html)
+
+**The board became a workbench: drawer + centred column + two views.** A floating parchment
+DRAWER (264px, sticky below the app nav, folds to a 64px icon rail; `sa.todoDrawer`) carries
+＋ New note, Walk me through, the typed filters and the embedded Today's-list panel (sage header —
+the corner FAB/pop-up are retired); the content column centres at **1150px** inside a 1720 row.
+The masthead is ONE row: 20px Playfair title + mono date·week eyebrow, **42px post-its**, the
+50×37 scrap, the ⌘K search, and the Cards/Ledger view toggle (`sa.todoView`).
+
+**CARD GRAMMAR (amends the card-bands law — structure unchanged, scale tightened):**
+- The horizontal reels/pagers/snap are RETIRED — cards live in a wrapping
+  `repeat(auto-fill, minmax(230px, 1fr))` grid, 12px gaps; the page scrolls.
+- RIM → `.tdb-frame` → `.tdb-band` + `.tdb-body` stands as written, at the tightened scale:
+  **band 26px** (was 34), **title 14px** Playfair (was 17), body pad `10px 12px 11px`,
+  **min-height 200** (was 242). Lane tints, overlays-cover-the-frame, and the pills-never-spill
+  clip chain all unchanged.
+- **THE WHITE TAG LAW IS INHERITED UNTOUCHED** (corner P3 stands): white fill / ink text / faint
+  ink hairline; urgency = 1.5px ink frame + 700; ★ offer = ink. `todoTagLaw.test.ts` unchanged.
+- **Renames (app-wide on this page):** lane heads say **"Begin focused session"**; the grouped
+  card's CTA (and every batch entry) says **"Batch fix →"** — the journey internals are untouched,
+  only the name changed.

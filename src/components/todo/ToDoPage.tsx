@@ -21,12 +21,12 @@
  * drawer FOOT carries ⚙ Task settings and the ? menu (Help centre / Replay the tour, dispatching
  * the same sa:todo-replay-tour event) instead.
  */
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { F12Page, F12Account } from "../shell/F12Shell";
 import { StatusDot } from "../StatusDot";
 import { useScriptAllyDb } from "../../lib/db";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
-import { assembleBoard, todaySplit, ribbonTiles, laneFadeState, walkSublabel, walkAria, reviewScrap, BoardCard, USER_TASK_FLAG_TYPE } from "../../lib/todoBoard";
+import { assembleBoard, todaySplit, ribbonTiles, walkSublabel, walkAria, reviewScrap, BoardCard, USER_TASK_FLAG_TYPE } from "../../lib/todoBoard";
 import { flagKeyForTask, MUTED_UNTIL } from "../../lib/taskFlags";
 import {
   choosePicks, rolledOverCards, todayProgress, MAX_TODAY,
@@ -39,7 +39,6 @@ import { groupHousekeeping, hkGapCount, hkGroupProgress, HkGroup, HkRule, HK_RUL
 import { deskState, liveQueryCount, liveQueriesLine, clearedListCap } from "../../lib/todoEmpty";
 import { shouldAutoRunTour } from "../../lib/todoTour";
 import { TodoTour } from "./TodoTour";
-import { laneFit, lanePageDistance, LaneFit } from "./laneFit";
 import { ActivityType, QueryStatus } from "../../types";
 import { FocusFlow, FocusItem } from "./FocusFlow";
 import { TaskSettingsSheet } from "./TaskSettingsSheet";
@@ -161,78 +160,41 @@ const GroupFlip: React.FC<{
   );
 };
 
-/** One lane: coloured header band + a horizontal card scroller with an overflow fade + scroll-right
- *  chevron (module-level so it keeps its own scroll ref across ToDoPage re-renders). */
+/** One board SECTION (workbench P2 — the horizontal reels are RETIRED): coloured header row over a
+ *  wrapping auto-fill card grid. No scroll machinery — the page scrolls, the grid wraps. The
+ *  `tdb-reel`/`tdb-reelh` class names are kept (historical; every lock and theme rule reads them). */
 const Lane: React.FC<{
   cls: string;
   label: string;
   count: number;
   isEmpty: boolean;
   onAdd?: () => void;
-  onFocusedSession?: () => void; // the "Focused session" pill (polish v3 P3 — launches the focus flow's sweep mode, the walkthrough's successor; handler unchanged)
+  onFocusedSession?: () => void; // "Begin focused session" (launches the focus flow's sweep mode; handler unchanged)
   emptyNode?: React.ReactNode;
-  strip?: React.ReactNode; // rendered between the header and the track (e.g. muted-rules recovery chips)
+  strip?: React.ReactNode; // rendered between the header and the grid (e.g. muted-rules recovery chips)
   children?: React.ReactNode;
-}> = ({ cls, label, count, isEmpty, onAdd, onFocusedSession, emptyNode, strip, children }) => {
-  const ref = useRef<HTMLDivElement>(null);
-  // Fix pass P2 — exact-fit + pagers. ONE check does both jobs: the fit maths (laneFit → the
-  // --tdb-cardw var + a ref for paging) and the polish pass's two-boolean scroll state
-  // (todoBoard.laneFadeState, unmodified — it now drives the pager disabled states instead of the
-  // retired fades). Functional update bails out when neither boolean changed.
-  const [scrollState, setScrollState] = useState({ left: false, right: false });
-  const fitRef = useRef<LaneFit>({ n: 1, cardWidth: 330 });
-  useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const check = () => {
-      const fit = laneFit(el.clientWidth);
-      fitRef.current = fit;
-      el.style.setProperty("--tdb-cardw", `${fit.cardWidth}px`);
-      setScrollState((prev) => {
-        const next = laneFadeState(el.scrollLeft, el.scrollWidth, el.clientWidth);
-        return next.left === prev.left && next.right === prev.right ? prev : next;
-      });
-    };
-    check();
-    el.addEventListener("scroll", check, { passive: true });
-    const ro = new ResizeObserver(check);
-    ro.observe(el);
-    return () => { el.removeEventListener("scroll", check); ro.disconnect(); };
-  }, [children]);
-  const page = (dir: 1 | -1) => ref.current?.scrollBy({ left: dir * lanePageDistance(fitRef.current), behavior: "smooth" });
-  return (
-    <div className={`tdb-reel ${cls}`} id={`tdb-lane-${cls}`}>
-      <div className="tdb-reelh">
-        <span className={`tdb-lanedot ${cls}`} aria-hidden />
-        <span className="tdb-lt">{label}</span>
-        <span className="tdb-ln">{count}</span>
-        <span className="tdb-rule" aria-hidden />
-        {onFocusedSession && !isEmpty && (
-          <button type="button" className="tdb-fs" title="Focused session — D done · S snooze · → skip" aria-label={`Start a focused session on ${label}`} onClick={onFocusedSession}>
-            <span className="tdb-fsd" aria-hidden />Focused session
-          </button>
-        )}
-        {onAdd && <button type="button" className="tdb-cadd" onClick={onAdd} aria-label="Add a note">＋</button>}
-        {!isEmpty && (
-          <span className="tdb-pagers">
-            <button type="button" className="tdb-pager" disabled={!scrollState.left} onClick={() => page(-1)} aria-label={`Previous ${label} cards`}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><polyline points="15 18 9 12 15 6" /></svg>
-            </button>
-            <button type="button" className="tdb-pager" disabled={!scrollState.right} onClick={() => page(1)} aria-label={`Next ${label} cards`}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden><polyline points="9 18 15 12 9 6" /></svg>
-            </button>
-          </span>
-        )}
-      </div>
-      {strip}
-      {isEmpty ? (
-        <div className="tdb-emptyreel">{emptyNode}</div>
-      ) : (
-        <div className="tdb-scroller" ref={ref}>{children}</div>
+}> = ({ cls, label, count, isEmpty, onAdd, onFocusedSession, emptyNode, strip, children }) => (
+  <div className={`tdb-reel ${cls}`} id={`tdb-lane-${cls}`}>
+    <div className="tdb-reelh">
+      <span className={`tdb-lanedot ${cls}`} aria-hidden />
+      <span className="tdb-lt">{label}</span>
+      <span className="tdb-ln">{count}</span>
+      <span className="tdb-rule" aria-hidden />
+      {onFocusedSession && !isEmpty && (
+        <button type="button" className="tdb-fs" title="Begin focused session — D done · S snooze · → skip" aria-label={`Begin a focused session on ${label}`} onClick={onFocusedSession}>
+          <span className="tdb-fsd" aria-hidden />Begin focused session
+        </button>
       )}
+      {onAdd && <button type="button" className="tdb-cadd" onClick={onAdd} aria-label="Add a note">＋</button>}
     </div>
-  );
-};
+    {strip}
+    {isEmpty ? (
+      <div className="tdb-emptyreel">{emptyNode}</div>
+    ) : (
+      <div className="tdb-grid">{children}</div>
+    )}
+  </div>
+);
 
 export interface ToDoPageProps {
   onNavigate: (tab: string, subPageName?: string, opts?: { agentId?: string; manuscriptId?: string }) => void;
@@ -1027,7 +989,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             <div className="tdb-gstack">
               {faces.map((m) => <span key={m.card.key} className="tdb-gsav" title={m.agentName}>{m.card.initials}</span>)}
               {g.members.length > faces.length && <span className="tdb-gmore">+{g.members.length - faces.length}</span>}
-              <button type="button" className="tdb-gfix" onClick={(e) => { e.stopPropagation(); setFlow({ items: [{ kind: "group", group: g }] }); }}>Fix together →</button>
+              <button type="button" className="tdb-gfix" onClick={(e) => { e.stopPropagation(); setFlow({ items: [{ kind: "group", group: g }] }); }}>Batch fix →</button>
               <button type="button" className="tdb-gnever" title="Stop asking about these — the gaps stay on the profiles" onClick={(e) => { e.stopPropagation(); muteRuleFromCard(g); }}>Never</button>
             </div>
           </div>

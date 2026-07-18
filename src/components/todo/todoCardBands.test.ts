@@ -21,8 +21,8 @@ describe("Card Bands — structure law", () => {
     expect(css).not.toMatch(/\.tdb-tile \{[^}]*overflow: hidden/); // rim does not clip (shadow shows)
     expect(css).toContain(".tdb-frame { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 10px; overflow: hidden;");
   });
-  it("the band is slim (~34px) with a 1px identity border-bottom; lane tints pink/coffee/note", () => {
-    expect(css).toMatch(/\.tdb-band \{[^}]*min-height: 34px[^}]*border-bottom: 1px solid var\(--line\)/);
+  it("the band is slim (26px — workbench P2 tighten) with a 1px identity border-bottom; lane tints pink/coffee/note", () => {
+    expect(css).toMatch(/\.tdb-band \{[^}]*min-height: 26px[^}]*border-bottom: 1px solid var\(--line\)/);
     expect(css).toContain(".tdb-band.do { background: var(--pink-t); border-bottom-color: var(--pink-b); }");
     expect(css).toContain(".tdb-band.hk { background: var(--hk-cof); border-bottom-color: var(--hk-cof-edge); }");
     expect(css).toContain(".tdb-band.nt { background: var(--note-t); border-bottom-color: var(--note-b); }");
@@ -38,9 +38,10 @@ describe("Card Bands — structure law", () => {
     expect(css).not.toContain(".tdb-band .tdb-tag:not(.offer):not(.warn)");
     expect(css).toContain(".tdb-band .tdb-kd { background: var(--white, #fff); border: 1px solid var(--hk-cof-edge); }");
   });
-  it("height absorbed the band uniformly (242 = 208 + ~34) on both card classes; exact-fit width untouched", () => {
-    expect((css.match(/min-height: 242px/g) ?? []).length).toBeGreaterThanOrEqual(2); // tile + gcard
-    expect(css).toContain("flex: 0 0 var(--tdb-cardw, 330px)"); // --cardw still the width driver
+  it("workbench P2 re-tune: min-height 200 on both card classes; the GRID drives width (exact-fit retired)", () => {
+    expect((css.match(/min-height: 200px/g) ?? []).length).toBeGreaterThanOrEqual(2); // tile + gcard
+    expect(css).not.toContain("--tdb-cardw"); // laneFit's width var is gone with the reels
+    expect(css).toContain("grid-template-columns: repeat(auto-fill, minmax(230px, 1fr))");
   });
 });
 

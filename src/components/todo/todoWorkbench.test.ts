@@ -108,6 +108,28 @@ describe("P1 — masthead composition + the centred column", () => {
   it("the page-strip .tdb-band double-definition is resolved — one rule left, the card band's", () => {
     const bands = css.match(/(?:^|\n)\.tdb-band \{[^}]*\}/g) ?? [];
     expect(bands.length).toBe(1);
-    expect(bands[0]).toContain("min-height: 34px"); // the CARD header band, not the page strip
+    expect(bands[0]).toContain("min-height: 26px"); // the CARD header band (P2-tightened), not the page strip
+  });
+});
+
+describe("P2 — card view: the grid replaces the reels; renames land", () => {
+  it("a wrapping auto-fill grid renders the cards; every reel mechanism is gone", () => {
+    expect(page).toContain('<div className="tdb-grid">{children}</div>');
+    expect(rule(".tdb-grid")).toContain("repeat(auto-fill, minmax(230px, 1fr))");
+    for (const gone of ["laneFit", "lanePageDistance", "laneFadeState", "tdb-pager", "tdb-scroller", "scrollBy"]) {
+      expect(page).not.toContain(gone);
+    }
+    expect(css).not.toContain("scroll-snap");
+  });
+  it("tightened anatomy: 26px band, 14px titles, min-height 200, tighter body", () => {
+    expect(rule(".tdb-band")).toContain("min-height: 26px");
+    expect(rule(".tdb-tt")).toContain("font-size: 14px");
+    expect(rule(".tdb-body")).toContain("padding: 10px 12px 11px");
+  });
+  it("renames: Begin focused session (lane heads) + Batch fix (group CTA); Fix together is gone", () => {
+    expect(page).toContain('aria-hidden />Begin focused session');
+    expect(page).toContain(">Batch fix →</button>");
+    expect(page).not.toContain("Fix together");
+    expect(page).toMatch(/aria-label=\{`Begin a focused session on \$\{label\}`\}/);
   });
 });

@@ -67,3 +67,24 @@ done-child degrade (dated where stamped, undated otherwise — no invented dates
 - Tests: NEW `todoWorkbench.test.ts` (drawer fold/persist, corner absence, transplant anatomy,
   masthead composition, caps, ⌘K guard, band single-definition, AppShell guard);
   `todoFinishing.test.ts` scrap-cluster anchor re-pointed (masthead indentation).
+
+## PHASE 2 — the card view
+
+- **Reels retired, no dead code:** `laneFit.ts` + `laneFit.test.ts` DELETED; the Lane component is
+  a pure section (header row over `.tdb-grid` — no refs, no ResizeObserver, no pagers);
+  `laneFadeState` deleted from todoBoard + its describe from todoBoard.test.ts; `.tdb-scroller`
+  snap machinery + `.tdb-pager*` + `--tdb-cardw` all gone from the stylesheet.
+- **The grid:** `repeat(auto-fill, minmax(230px, 1fr))`, 12px gaps — wraps at every width
+  (≈4-up at the 1150 cap, 2-up ~700, 1-up under ~490); the page scrolls, nothing scrolls sideways.
+- **Tightened anatomy per the ref** (structure law unchanged — rim → frame → band + body):
+  band 34→**26px**, titles 17→**14px**, body pad → `10px 12px 11px`, min-height 242→**200**.
+  Overlays/clip-chain/lane tints untouched.
+- **Renames:** "Focused session" → **"Begin focused session"** (label, title, aria);
+  "Fix together →" → **"Batch fix →"** (the grouped card CTA — the only in-code sites; FocusFlow
+  had no such strings, so the journey is untouched as demanded).
+- **The white tag law inherits untouched** (recon: corner P3 already landed) — `todoTagLaw.test.ts`
+  byte-identical.
+- **themes.md:** THE WORKBENCH section regenerated (drawer/column/masthead grammar + the amended
+  card scale + the tag-law inheritance + renames).
+- Tests: workbench P2 describe (grid + reel-absence + anatomy + renames); todoCardBands re-locked
+  (26px band, min-height 200, grid-drives-width); todoBoard laneFadeState describe removed.
