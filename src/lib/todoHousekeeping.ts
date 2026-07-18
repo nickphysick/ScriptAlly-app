@@ -122,6 +122,8 @@ export function visibleAgentNeeds(agent: AgentDataQualityInput, muted?: string[]
 export function taskSurvivesMute(taskType: string, agent: Agent | undefined, muted?: string[] | null): boolean {
   if (taskType === "no_response_close") return !isRuleMuted("no_response_close", muted);
   if (taskType === "nudge_overdue") return !isRuleMuted("nudge_overdue", muted); // Task Settings: "Nudge reminders" off
+  // Task Settings: "Your turn to send" off → the send family (fulls/partials/R&R resubmissions)
+  if (taskType === "partial_requested" || taskType === "full_requested" || taskType === "revise_resubmit") return !isRuleMuted("send", muted);
   if (taskType === "data_quality_poor") return !agent || visibleAgentNeeds(agent, muted).length > 0;
   return true;
 }

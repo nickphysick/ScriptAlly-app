@@ -103,3 +103,32 @@ their switch alone (excluded from the hidden list).
   MUTED strip and the switch in lockstep · nudge OFF → Urgent + Walk-me-through count drop · Sunday
   OFF with the scrap surviving · Offers ALWAYS ON · restore a rule-mute / a dismiss / a snooze from
   HIDDEN RIGHT NOW · the sliders button above the help "?" and the fork doorway.
+
+## REALIGNMENT — built against the STALE ref; corrected to the approved v2 (Nick, Jul 18)
+
+**Root cause:** recon `cp ~/Downloads/todo-task-settings.html` grabbed the Jul-16 file by exact name;
+the approved `todo-task-settings (1).html` (Jul 18) sat unread. I then reasoned "ref wins over the
+pack prose" — against the STALE ref — which inverted the answer (the pack prose matched the approved
+ref all along). Committed ref replaced: `design-refs/todo-task-settings.html` (v1, removed) →
+`design-refs/todo-task-settings-v2.html` (approved; header note records v1 superseded-unbuilt).
+
+**Corrected to v2 (one commit):**
+- **Offers is the ONLY locked row.** "Requests & deadlines / ALWAYS ON" is GONE.
+- **"Your turn to send" is now a TOGGLE** (new `send` key) — THE WORK ITSELF. Its gate: a new
+  `taskSurvivesMute` clause suppressing the send family (`partial_requested` / `full_requested` /
+  `revise_resubmit`) when `send` is muted. Off → absent from board, post-it count and the
+  Walk-me-through sublabel (propagation test mirrors the engine filter; the dashboard reads the same
+  filtered `tasks`).
+- **Stale queries + Nudge reminders** now sit in THE WORK ITSELF (with Your-turn-to-send + Offers).
+- **"Missing reply windows" dropped entirely** — no row, no `dq_responseTime` settings key (no
+  orphaned preference). `dq_responseTime` remains a FORK-muteable rule with no toggle → it surfaces
+  only in HIDDEN RIGHT NOW if muted (the switch-less rule-mute case).
+- **HOUSEKEEPING** relabelled "Missing materials lists" + "Missing wish lists"; RITUALS + the lede
+  are verbatim from v2 (incl. the scrap-exempt sentence).
+- **Hidden dates (accepted, undated):** DISMISSED + MUTED AS A RULE render UNDATED (no dismiss
+  timestamp is stored); SNOOZED UNTIL keeps its date. No storage/rules change; the v2 ref was
+  amended to match at commit.
+- **Shipped toggle set:** Offers (locked) · Your turn to send · Nudge reminders · Stale queries ·
+  Missing materials lists · Missing wish lists · The Sunday review.
+- Tests: rows realigned; send-family gate (off → false ×3, offers ungateable); the send propagation
+  (board + count + sublabel); the rest unchanged. Vitest **1172**. No rules change.

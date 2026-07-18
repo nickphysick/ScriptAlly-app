@@ -239,10 +239,12 @@ describe("taskSurvivesMute — Task Settings type gating (single suppression poi
     expect(taskSurvivesMute("nudge_overdue", undefined, [])).toBe(true);
     expect(taskSurvivesMute("nudge_overdue", undefined, ["nudge_overdue"])).toBe(false);
   });
-  it("send-family types are never gated here (Requests & deadlines is ALWAYS ON)", () => {
-    for (const t of ["partial_requested", "full_requested", "revise_resubmit", "offer_received"]) {
-      expect(taskSurvivesMute(t, undefined, ["nudge_overdue", "no_response_close", "dq_mswl"])).toBe(true);
+  it("Your turn to send OFF → the send family (fulls/partials/R&R) is suppressed; ON → survives; offers never gated", () => {
+    for (const t of ["partial_requested", "full_requested", "revise_resubmit"]) {
+      expect(taskSurvivesMute(t, undefined, ["send"])).toBe(false);
+      expect(taskSurvivesMute(t, undefined, [])).toBe(true);
     }
+    expect(taskSurvivesMute("offer_received", undefined, ["send"])).toBe(true); // Offers ungateable
   });
   it("Stale queries + housekeeping gating still work (existing keys)", () => {
     expect(taskSurvivesMute("no_response_close", undefined, ["no_response_close"])).toBe(false);

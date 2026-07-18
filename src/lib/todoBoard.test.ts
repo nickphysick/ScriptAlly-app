@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { QueryStatus, Task, Query, Agent, Manuscript, UserTask, TaskFlag, Activity, ActivityType } from "../types";
 import { assembleBoard, boardStreamForTaskType, todaySplit, ribbonTiles, laneFadeState, walkSublabel, walkAria, offerDue, offerQuiet, terseDoneLabel, reminderDue, reviewWeek, weekReviewStats, reviewEntryCard, reviewEntryLine, reviewSeedCandidates, reviewScrap, reviewCompletionSnooze, BoardCard, BoardInput } from "./todoBoard";
+import { taskSurvivesMute } from "./todoHousekeeping";
 
 const TODAY = "2026-07-09";
 const NOW = Date.parse("2026-07-09T12:00:00Z");
@@ -469,5 +470,28 @@ describe("Task Settings — the Sunday CARD toggle (the scrap is exempt)", () =>
   it("the scrap IGNORES sunday_review — it still offers Tue–Sat when the card is switched off", () => {
     expect(reviewScrap(io(FRI, ["sunday_review"]))).not.toBeNull();
     expect(reviewScrap(io(FRI, ["sunday_review"]))).toEqual({ weekNumber: reviewWeek(q1, FRI).weekNumber });
+  });
+});
+
+describe("Task Settings — the send key propagates from the ONE suppression point (v2 realignment)", () => {
+  const baseInput = (tasks: import("../types").Task[]): BoardInput =>
+    ({ tasks, userTasks: [], queries: [query("q1", "a1", QueryStatus.FULL_REQUESTED)], agents: [agent("a1", "Daniel")], manuscripts: [], taskFlags: [], activities: [], today: TODAY, now: NOW });
+
+  it("'Your turn to send' off → the send task is filtered at taskSurvivesMute, so it's absent from board.do, the Urgent count and the Walk-me-through sublabel", () => {
+    const sendTask = task("t-send", "full_requested", "q1");
+    // mirror the engine's activeTasks filter (db.tsx) — the ONE point board/counts/dashboard/sublabel derive through
+    const filtered = [sendTask].filter((t) => taskSurvivesMute(t.taskType, undefined, ["send"]));
+    expect(filtered).toEqual([]); // gated at the single predicate
+
+    const b = assembleBoard(baseInput(filtered));
+    expect(b.do.some((c) => c.taskType === "full_requested")).toBe(false); // absent from the board
+    const tiles = ribbonTiles(b, 0);
+    expect(tiles.urgent).toBe(0); // absent from the Urgent post-it count
+    expect(walkSublabel(tiles.urgent)).toBe("GUIDED · NOTHING URGENT"); // absent from the sublabel
+    // the dashboard reads the SAME filtered `tasks` (buildOverToYouRows(tasks)) — excluded by construction
+
+    // switched ON, the same task survives and lands on the board
+    const on = [sendTask].filter((t) => taskSurvivesMute(t.taskType, undefined, []));
+    expect(assembleBoard(baseInput(on)).do.some((c) => c.taskType === "full_requested")).toBe(true);
   });
 });

@@ -7,16 +7,18 @@ import { TASK_SETTING_ROWS, typeIsOn, setTypeMute, hiddenItems } from "./taskSet
 import { MUTED_UNTIL } from "./taskFlags";
 import { Agent, Query, QueryStatus, TaskFlag } from "../types";
 
-describe("TASK_SETTING_ROWS — the ref's rows (offers/requests locked, the rest keyed)", () => {
-  it("Requests & deadlines and Offers are ALWAYS ON (no key — no preference exists at all)", () => {
+describe("TASK_SETTING_ROWS — the approved v2 rows (Offers the only locked row)", () => {
+  it("Offers is the ONLY ALWAYS ON row (no key — no preference exists at all)", () => {
     const locked = TASK_SETTING_ROWS.filter((r) => r.locked);
-    expect(locked.map((r) => r.title)).toEqual(["Requests & deadlines", "Offers of representation"]);
-    expect(locked.every((r) => r.key === undefined)).toBe(true);
+    expect(locked.map((r) => r.title)).toEqual(["Offers"]);
+    expect(locked[0].key).toBeUndefined();
   });
-  it("the toggleable rows map to engine keys, incl. reply-windows (ref) and the Sunday ritual (pack)", () => {
+  it("the toggleable rows map to engine keys — Your turn to send in THE WORK ITSELF; no reply-windows row", () => {
     const keyed = TASK_SETTING_ROWS.filter((r) => r.key).map((r) => r.key);
-    expect(keyed).toEqual(["nudge_overdue", "dq_materials", "dq_mswl", "dq_responseTime", "no_response_close", "sunday_review"]);
-    expect(TASK_SETTING_ROWS.find((r) => r.key === "sunday_review")!.group).toBe("rituals");
+    expect(keyed).toEqual(["send", "nudge_overdue", "no_response_close", "dq_materials", "dq_mswl", "sunday_review"]);
+    expect(TASK_SETTING_ROWS.find((r) => r.key === "send")!.group).toBe("urgent");
+    expect(TASK_SETTING_ROWS.find((r) => r.key === "no_response_close")!.group).toBe("urgent"); // Stale in THE WORK ITSELF
+    expect(keyed).not.toContain("dq_responseTime"); // the reply-windows row is dropped entirely
   });
 });
 

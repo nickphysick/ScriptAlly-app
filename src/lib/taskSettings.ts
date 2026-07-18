@@ -3,15 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * taskSettings — the pure layer of the "What lands on your desk?" sheet (design ref
- * design-refs/todo-task-settings.html §2). Type-level preferences are stored in the EXISTING
+ * design-refs/todo-task-settings-v2.html). Type-level preferences are stored in the EXISTING
  * `User.mutedTaskRules: string[]` (allowlisted, no new field / no rules edit — recon gate a): a
  * switch OFF = its key present; ON = absent. The engine's ONE suppression point
  * (`todoHousekeeping.taskSurvivesMute`, applied in the `activeTasks` filter) already reads these
  * keys, so board, post-it counts, dashboard Over-to-you and the Walk-me-through sublabel all agree
  * by construction (recon gate b).
  *
- * Offers + Requests & deadlines are ALWAYS ON (no key exists for them — never a stored-but-ignored
- * flag). The Sunday-review key gates the CARD only; the torn scrap ignores it.
+ * Offers is the ONLY ALWAYS-ON row (no key — never a stored-but-ignored flag); everything else,
+ * incl. "Your turn to send" (the send-family key), toggles. The Sunday-review key gates the CARD
+ * only; the torn scrap ignores it.
  */
 import { Agent, Query, TaskFlag } from "../types";
 import { MUTED_UNTIL } from "./taskFlags";
@@ -21,7 +22,7 @@ import { agentPrimary } from "./agentDisplay";
  *  (dq_* & no_response_close via visibleAgentNeeds/isRuleMuted) or a new one (nudge_overdue,
  *  sunday_review) wired in this pack. */
 export type TaskSettingKey =
-  | "nudge_overdue" | "dq_materials" | "dq_mswl" | "dq_responseTime" | "no_response_close" | "sunday_review";
+  | "send" | "nudge_overdue" | "dq_materials" | "dq_mswl" | "no_response_close" | "sunday_review";
 
 export type TaskSettingGroup = "urgent" | "housekeeping" | "rituals";
 
@@ -36,14 +37,13 @@ export interface TaskSettingRow {
 /** Rows + copy verbatim from the ref (§2), plus the RITUALS row the pack specifies (absent from
  *  the reused ref file — added per the pack's explicit Phase 1/2/3 instruction). */
 export const TASK_SETTING_ROWS: TaskSettingRow[] = [
-  { group: "urgent", title: "Requests & deadlines", sub: "Fulls, partials, R&Rs and their time limits.", locked: true },
-  { group: "urgent", title: "Offers of representation", sub: "The whole point.", locked: true },
-  { group: "urgent", key: "nudge_overdue", title: "Nudge reminders", sub: "When an agent is silent past their stated window." },
-  { group: "housekeeping", key: "dq_materials", title: "Missing submission material details", sub: "Prompts to record what you sent." },
-  { group: "housekeeping", key: "dq_mswl", title: "Missing wish lists", sub: "Prompts to fill in what each agent is looking for." },
-  { group: "housekeeping", key: "dq_responseTime", title: "Missing reply windows", sub: "Needed before nudge reminders can work." },
-  { group: "housekeeping", key: "no_response_close", title: "Stale queries", sub: "Suggestions to close long-silent queries." },
-  { group: "rituals", key: "sunday_review", title: "The Sunday review", sub: "The Sunday–Monday card. The torn scrap in the corner stays regardless." },
+  { group: "urgent", title: "Offers", sub: "An offer of representation always reaches your desk.", locked: true },
+  { group: "urgent", key: "send", title: "Your turn to send", sub: "Requested fulls, partials, and R&R resubmissions waiting on you." },
+  { group: "urgent", key: "nudge_overdue", title: "Nudge reminders", sub: "Check-back dates you’ve set, when they arrive." },
+  { group: "urgent", key: "no_response_close", title: "Stale queries", sub: "Queries silent well past the agent’s usual reply time." },
+  { group: "housekeeping", key: "dq_materials", title: "Missing materials lists", sub: "Agents whose submission requirements you haven’t recorded." },
+  { group: "housekeeping", key: "dq_mswl", title: "Missing wish lists", sub: "Agents without a recorded wish list." },
+  { group: "rituals", key: "sunday_review", title: "The Sunday review", sub: "The Sunday invitation card. The quiet “Last week in review” scrap stays either way." },
 ];
 
 export const GROUP_LABEL: Record<TaskSettingGroup, string> = {

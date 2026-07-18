@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * TaskSettingsSheet — "What lands on your desk?" (design ref design-refs/todo-task-settings.html §2).
+ * TaskSettingsSheet — "What lands on your desk?" (design ref design-refs/todo-task-settings-v2.html).
  * A NEW sheet in the journey PRESENTATION (the shared `.tdb-ff*` scrim/sheet + lockStageScroll +
  * a focus trap), but NOT a FocusFlow journey — no items, no staged model. Every switch applies
  * IMMEDIATELY (updateUserProfile on the shared `mutedTaskRules`); the board behind the dimmed
@@ -74,7 +74,7 @@ export const TaskSettingsSheet: React.FC<{ onClose: () => void }> = ({ onClose }
           <div className="tdb-ffbody">
             <div className="tdb-ffstream off">TASK SETTINGS</div>
             <div className="tdb-ffq" id="tdb-tset-heading">What lands on your desk?</div>
-            <div className="tdb-ffqsub">Choose which task types appear on your To-do page. Turning something off hides the prompts — it never deletes anything, and the gaps still show on each agent’s record. The counts follow what’s shown: hide a type and its number drops with it.</div>
+            <div className="tdb-ffqsub">Choose which kinds of work ScriptAlly puts in front of you. Types you switch off leave the board <b>and the post-it counts</b> — out of sight is out of mind, properly.</div>
 
             {GROUPS.map((g) => (
               <div key={g} className="tdb-tsetgroup">
