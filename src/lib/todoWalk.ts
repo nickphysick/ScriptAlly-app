@@ -35,33 +35,6 @@ export function rolledOverCards(cards: BoardCard[], today: string): BoardCard[] 
 }
 
 /**
- * The corner pill's adaptive state (corner pack) — one pill, three truthful states, STRICT priority.
- * Single-source law: `committed` = the committed-to-today count; `done` = the SAME cleared-union
- * count the done band renders (never a parallel count). Priority: list-in-use → work-done → fresh.
- * The list-state fraction can exceed 1 (quick-✓s outnumbering list items) — the ring caps at 100%,
- * the fraction shows the honest {done}/{committed}, and TO GO floors at 0.
- */
-export type PillState =
-  | { kind: "list"; done: number; committed: number; pct: number; toGo: number }
-  | { kind: "done"; done: number }
-  | { kind: "fresh" };
-export function pillState(committed: number, done: number): PillState {
-  if (committed > 0) {
-    const pct = Math.max(0, Math.min(100, Math.round((done / committed) * 100)));
-    return { kind: "list", done, committed, pct, toGo: Math.max(0, committed - done) };
-  }
-  if (done > 0) return { kind: "done", done };
-  return { kind: "fresh" };
-}
-
-/** The pill's aria-label summary per state (spoken; the numerals in the ring are decorative). */
-export function pillAria(s: PillState): string {
-  if (s.kind === "list") return `Today\u2019s list \u2014 ${s.done} of ${s.committed} done, ${s.toGo} to go`;
-  if (s.kind === "done") return `${s.done} done today`;
-  return "Today\u2019s list \u2014 nothing committed yet";
-}
-
-/**
  * Today's-list progress: N = items committed to today's list (still-on-list + completed-from-list);
  * M = the completed ones. A globally-cleared item that was NEVER committed to Today does not enter
  * this ratio. Empty list → total 0 (no "done" claim). Logic only — the component renders it.

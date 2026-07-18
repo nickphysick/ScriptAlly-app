@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { BoardCard } from "./todoBoard";
-import { choosePicks, rolledOverCards, todayProgress, walkStepKind, isStageable, applyStaged, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, assumedSendItem, quickSendPayload, quickNudgePayload, receiptLine, journeyEventISO, DEFAULT_CHECKBACK_DAYS, StagedPayload, StagedHandlers, pillState, pillAria } from "./todoWalk";
+import { choosePicks, rolledOverCards, todayProgress, walkStepKind, isStageable, applyStaged, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, assumedSendItem, quickSendPayload, quickNudgePayload, receiptLine, journeyEventISO, DEFAULT_CHECKBACK_DAYS, StagedPayload, StagedHandlers } from "./todoWalk";
 import { QueryStatus } from "../types";
 
 const card = (key: string, over: Partial<BoardCard> = {}): BoardCard =>
@@ -288,34 +288,3 @@ describe("staged close — the Sunday review's deferred stale-close (finishing P
   });
 });
 
-describe("pillState — the corner pill's three truthful states (corner pack P2)", () => {
-  it("committed > 0 → LIST, even with cleared = 0 (0/{n}, 0%, {n} to go)", () => {
-    expect(pillState(6, 0)).toEqual({ kind: "list", done: 0, committed: 6, pct: 0, toGo: 6 });
-    expect(pillState(6, 2)).toEqual({ kind: "list", done: 2, committed: 6, pct: 33, toGo: 4 });
-  });
-  it("single-source: done is the cleared union — quick-✓s outnumbering list items still count (cap 100%, toGo floors at 0)", () => {
-    expect(pillState(3, 5)).toEqual({ kind: "list", done: 5, committed: 3, pct: 100, toGo: 0 }); // 5 cleared, 3 committed
-  });
-  it("committed = 0, cleared > 0 → DONE ({n} done today)", () => {
-    expect(pillState(0, 3)).toEqual({ kind: "done", done: 3 });
-  });
-  it("nothing committed, nothing cleared → FRESH", () => {
-    expect(pillState(0, 0)).toEqual({ kind: "fresh" });
-  });
-  it("strict priority: committed always wins over cleared", () => {
-    expect(pillState(2, 9).kind).toBe("list");
-    expect(pillState(0, 9).kind).toBe("done");
-  });
-  it("no state ever yields a `-` or an undefined fraction — every state is a defined shape", () => {
-    for (const [c, d] of [[0, 0], [0, 4], [5, 0], [5, 3], [2, 8]] as const) {
-      const st = pillState(c, d);
-      expect(["list", "done", "fresh"]).toContain(st.kind);
-      if (st.kind === "list") { expect(Number.isFinite(st.pct)).toBe(true); expect(Number.isFinite(st.done)).toBe(true); }
-    }
-  });
-  it("pillAria summarises each state", () => {
-    expect(pillAria(pillState(6, 2))).toContain("2 of 6 done, 4 to go");
-    expect(pillAria(pillState(0, 3))).toBe("3 done today");
-    expect(pillAria(pillState(0, 0))).toContain("nothing committed");
-  });
-});

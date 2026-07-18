@@ -1,8 +1,8 @@
 /**
- * To-do board (F12) — design refs: todo-board-final.html (lanes, cards, FAB), todo-header-ink.html
- * (the header), todo-focus-flow.html (the FOCUS FLOW — the one completion surface; the drawer, the
- * walkthrough modal and the batch drawer are retired). Renders inside `F12Page` (`.t-f12 f12-root`),
- * so every colour is a `.t-f12` token — NO capp/bold/edn. Classes are `tdb-` prefixed.
+ * To-do WORKBENCH (F12) — design refs: todo-workbench-shell-v1.html (Option B — drawer shell,
+ * masthead, card view), todo-ledger-v1.html (the ledger), todo-focus-flow.html (the FOCUS FLOW —
+ * the one completion surface). Renders inside `F12Page` (`.t-f12 f12-root`), so every colour is a
+ * `.t-f12` token — NO capp/bold/edn. Classes are `tdb-` prefixed.
  */
 
 /* The page's scroll region (polish v3 P5 — two-layer): the wrap is now the FULL-WIDTH scroller
@@ -12,27 +12,30 @@
    engage. No 100vh/overflow-hidden clamp anywhere — that was the earlier scroll bug. Top padding
    REMOVED (the band sits flush under the shell bar); bottom padding clears the fixed corner
    controls (Today FAB + the shell's help "?"). Page-scoped. */
-.tdb-wrap { flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 0 0 88px; }
-.tdb-col { max-width: var(--maxw, 1520px); margin: 0 auto; padding: 17px 12px 0; } /* top 17 = the first lane header ~16-18px below the band's rule (fix pass P4 — the tools row that provided it is removed; the ribbon col overrides this padding wholesale) */
+.tdb-wrap { flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 0 0 48px; }
+/* ── the workbench row (Option B): drawer + centred main. The row caps at 1720 and centres;
+   inside it the CONTENT column caps at 1150 and centres again — max-width discipline at every
+   viewport, surplus pooling as symmetric oat desk. ── */
+.tdb-ws { display: flex; align-items: flex-start; gap: 26px; padding: 0 26px; max-width: 1720px; margin: 0 auto; }
+.tdb-main { flex: 1; min-width: 0; }
+.tdb-col { max-width: 1150px; margin: 0 auto; }
+@media (max-width: 900px) { .tdb-ws { flex-wrap: wrap; } .tdb-ws .tdb-drawer { position: static; width: 100%; max-height: none; } }
 
-/* ── header BAND (polish v3 P5 — supersedes the f286b06 ink ribbon; that white/1.5px-ink/radius-14
-   chrome is DELETED, not overridden): paper ground bleeding edge to edge, one structural rule at
-   the base ("hairline" realised as --line — the crumb strip's base-rule weight; --hairline is
-   invisible paper-on-oat), no radius, no shadow, NOT sticky. .tdb-ribbon survives as the inner
-   flex row (also a .tdb-col): 22px vertical padding, 14px inline (col 12 + 2 — the lane headers'
-   own inset) so the title's left edge lines up with the lane titles. ── */
-.tdb-band { background: var(--paper); border-bottom: 1px solid var(--line); }
-.tdb-col.tdb-ribbon { display: flex; flex-wrap: wrap; align-items: center; gap: 26px; row-gap: 12px; padding: 22px 14px; }
+/* ── MASTHEAD (workbench — one row inside the column; the full-bleed paper band + .tdb-ribbon
+   are RETIRED, which also resolves the old .tdb-band double-definition: the name now belongs to
+   the CARD header band alone). ── */
+.tdb-mast { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; row-gap: 12px; padding: 18px 2px 14px; }
 .tdb-askwrap { display: flex; flex-direction: column; gap: 4px; }
 .tdb-rdate { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
-.tdb-ask { font-family: var(--f12-serif); font-size: 27px; font-weight: 600; color: var(--ink); white-space: nowrap; line-height: 1.08; }
-/* post-it counts — 88px tilted squares w/ tape strip; tap scrolls to the lane (counts in aria-labels;
-   the Caveat numerals are decorative). Hover straightens; reduced-motion kills the transition. */
-.tdb-postits { display: flex; gap: 22px; margin-left: 16px; align-items: center; }
-.tdb-postit { position: relative; width: 88px; height: 88px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; box-shadow: var(--sh-postit); flex: none; transition: 0.18s; cursor: pointer; }
-.tdb-postit::before { content: ""; position: absolute; top: -9px; left: 50%; transform: translateX(-50%) rotate(-1.5deg); width: 40px; height: 14px; background: rgba(255, 255, 255, 0.55); border: 1px solid rgba(58, 42, 26, 0.05); }
-.tdb-pv { font-family: Caveat, cursive; font-size: 40px; font-weight: 600; line-height: 1; }
-.tdb-pk { font-family: var(--f12-mono); font-size: 7px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.75; }
+.tdb-ask { font-family: var(--f12-serif); font-size: 20px; font-weight: 600; color: var(--ink); white-space: nowrap; line-height: 1.08; }
+/* post-it counts — 42px tilted squares (workbench masthead scale; the tape strip shrank with
+   them); tap scrolls to the section (counts in aria-labels; the Caveat numerals are decorative).
+   Hover straightens; reduced-motion kills the transition. */
+.tdb-postits { display: flex; gap: 9px; align-items: center; }
+.tdb-postit { position: relative; width: 42px; height: 42px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; box-shadow: 0 1px 3px rgba(58, 28, 20, 0.14); flex: none; transition: 0.18s; cursor: pointer; }
+.tdb-postit::before { content: ""; position: absolute; top: -5px; left: 50%; transform: translateX(-50%) rotate(-1.5deg); width: 20px; height: 7px; background: rgba(255, 255, 255, 0.55); border: 1px solid rgba(58, 42, 26, 0.05); }
+.tdb-pv { font-family: Caveat, cursive; font-size: 19px; font-weight: 600; line-height: 1; }
+.tdb-pk { font-family: var(--f12-mono); font-size: 5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.75; }
 .tdb-postit.ug { background: var(--postit-pink); transform: rotate(-2.4deg); color: var(--pink-deep); }
 .tdb-postit.hk { background: var(--hk-cof-2); transform: rotate(1.8deg); color: var(--hk-cof-ink); }
 .tdb-postit.nt { background: var(--postit-note); transform: rotate(-1.2deg); color: #6b5a17; }
@@ -40,30 +43,61 @@
 .tdb-postit.zero .tdb-pv { opacity: 0.45; }
 @media (prefers-reduced-motion: reduce) { .tdb-postit { transition: none; } }
 
+/* ── masthead search + view toggle (Option B .msrch / .vtg) ── */
+.tdb-msrch { display: flex; align-items: center; gap: 8px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 99px; padding: 8px 14px; color: var(--muted); font-size: 12.5px; flex: 0 1 300px; min-width: 170px; box-shadow: 0 1px 3px rgba(58, 28, 20, 0.06); }
+.tdb-msrch:focus-within { border-color: var(--ink-2); }
+.tdb-msrch input { flex: 1; min-width: 0; border: none; background: none; font-size: 12.5px; color: var(--ink); outline: none; }
+.tdb-msrch input::placeholder { color: var(--muted); }
+.tdb-msrch kbd { font-family: var(--f12-mono); font-size: 8.5px; border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px; color: var(--faint); }
+.tdb-vtg { display: inline-flex; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 99px; padding: 3px; gap: 2px; flex: none; }
+.tdb-vtg button { border-radius: 99px; padding: 6px 14px; font-size: 11.5px; font-weight: 600; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.tdb-vtg button.on { background: var(--ink); color: var(--paper); }
+.tdb-vtg button:disabled { opacity: 0.45; cursor: default; }
+
+/* ── the DRAWER (Option B): floating rounded panel, sticky below the app nav, folds to a 64px
+   icon rail (width transition only — content swaps; reduced-motion kills the transition). Its
+   own internal scroll keeps the sticky panel inside the viewport. ── */
+.tdb-drawer { width: 264px; flex: 0 0 auto; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 4px 16px rgba(58, 28, 20, 0.1); margin-top: 18px; padding: 14px 14px 12px; position: sticky; top: 18px; max-height: calc(100vh - 120px); overflow-y: auto; display: flex; flex-direction: column; gap: 8px; transition: width 0.22s cubic-bezier(0.22, 0.8, 0.3, 1); }
+.tdb-drawer.folded { width: 64px; align-items: center; padding: 12px 8px; gap: 10px; }
+@media (prefers-reduced-motion: reduce) { .tdb-drawer { transition: none; } }
+.tdb-dhead { display: flex; align-items: center; gap: 8px; }
+.tdb-dcreate { flex: 1; display: flex; align-items: center; gap: 8px; border: none; background: var(--ink); color: var(--paper); border-radius: 10px; padding: 9px 13px; font-size: 12.5px; font-weight: 600; }
+.tdb-dcreate:hover { filter: brightness(1.3); }
+.tdb-dfold { width: 26px; height: 26px; flex: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--white, #fff); border: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+.tdb-dfold:hover { color: var(--ink); border-color: var(--ink-2); }
+.tdb-dwalk { display: flex; align-items: center; gap: 9px; background: var(--white, #fff); border: 1.5px solid var(--ink); border-radius: 12px; padding: 8px 11px 8px 8px; text-align: left; }
+.tdb-dwalk:hover:not(:disabled) { box-shadow: var(--sh-btn); }
+.tdb-dwalk:disabled { border-color: var(--line); }
+.tdb-dsh { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.13em; color: var(--faint); margin: 6px 2px 0; text-transform: uppercase; }
+.tdb-dfoot { position: relative; display: flex; align-items: center; gap: 6px; margin-top: 4px; padding-top: 8px; border-top: 1px solid var(--hairline); }
+.tdb-dfbtn { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--muted); padding: 5px 8px; border-radius: 8px; background: none; border: none; }
+.tdb-dfbtn:hover { color: var(--ink); background: var(--white, #fff); }
+.tdb-dsp { flex: 1; }
+.tdb-dhelp { position: absolute; bottom: calc(100% + 4px); right: 0; z-index: 5; min-width: 150px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--sh-3); padding: 5px; }
+.tdb-dhelp button { display: block; width: 100%; text-align: left; font-size: 12px; padding: 7px 10px; border-radius: 7px; color: var(--ink); background: none; border: none; }
+.tdb-dhelp button:hover { background: var(--white, #fff); }
+/* folded rail — icon-only column */
+.tdb-dic { position: relative; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--white, #fff); border: 1px solid var(--line); color: var(--ink-2); font-size: 13px; flex: none; }
+.tdb-dic:hover:not(:disabled) { border-color: var(--ink-2); }
+.tdb-dic:disabled { opacity: 0.45; }
+.tdb-dic.today { background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border-color: var(--hk-spine); color: var(--hk-ink); }
+.tdb-dbadge { position: absolute; top: -4px; right: -4px; font-family: var(--f12-mono); font-style: normal; font-size: 7.5px; font-weight: 700; min-width: 15px; height: 15px; border-radius: 99px; background: var(--ink); color: var(--paper); display: flex; align-items: center; justify-content: center; padding: 0 3px; }
+
 /* ── the torn scrap (afterlife pack; ref todo-scrap-variants.html variant 3): a small ripped
    offer at the end of the post-it cluster — NOT a task, no border, no urgency, no count. Italic
    Playfair "Last week" over an underlined "in review ▸". The clip-path torn edge clips box-shadow
    AND outline, so the soft shadow + focus ring ride `filter: drop-shadow` (follows the torn
    silhouette). Hover/focus straightens + lifts. ── */
-.tdb-scrap { width: 70px; height: 50px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; margin-top: 8px; background: var(--paper); border: none; clip-path: polygon(0 4%, 7% 0, 94% 2%, 100% 8%, 99% 88%, 88% 94%, 72% 90%, 55% 97%, 38% 92%, 20% 98%, 6% 93%, 0 86%); transform: rotate(2deg); filter: drop-shadow(0 3px 5px rgba(58, 28, 20, 0.16)); cursor: pointer; transition: transform 0.15s, filter 0.15s; }
+.tdb-scrap { width: 50px; height: 37px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; margin-top: 4px; background: var(--paper); border: none; clip-path: polygon(0 4%, 7% 0, 94% 2%, 100% 8%, 99% 88%, 88% 94%, 72% 90%, 55% 97%, 38% 92%, 20% 98%, 6% 93%, 0 86%); transform: rotate(2deg); filter: drop-shadow(0 3px 5px rgba(58, 28, 20, 0.16)); cursor: pointer; transition: transform 0.15s, filter 0.15s; }
 .tdb-scrap:hover { transform: rotate(0deg) translateY(-2px); }
 .tdb-scrap:focus-visible { transform: rotate(0deg) translateY(-2px); filter: drop-shadow(0 0 1.5px var(--hk-cof-ink)) drop-shadow(0 0 1.5px var(--hk-cof-ink)); }
-.tdb-scrap b { font-family: var(--f12-serif); font-style: italic; font-weight: 600; font-size: 12px; line-height: 1.15; text-align: center; color: #5d4d40; } /* #5d4d40 — the ref's warm ink; no .t-f12 token fits exactly */
-.tdb-scrap u { text-decoration: none; border-bottom: 1px solid var(--hk-cof-edge); font-family: var(--f12-serif); font-style: italic; font-size: 9.5px; color: var(--hk-cof-ink); }
+.tdb-scrap b { font-family: var(--f12-serif); font-style: italic; font-weight: 600; font-size: 8.5px; line-height: 1.1; text-align: center; color: #5d4d40; } /* #5d4d40 — the ref's warm ink; no .t-f12 token fits exactly */
+.tdb-scrap u { text-decoration: none; border-bottom: 1px solid var(--hk-cof-edge); font-family: var(--f12-serif); font-style: italic; font-size: 6.5px; color: var(--hk-cof-ink); }
 @media (prefers-reduced-motion: reduce) { .tdb-scrap { transition: none; } }
 
-/* ── TASK SETTINGS (task-settings pack; ref todo-task-settings.html §2) ────────────────────────
-   The sliders entry sits in the bottom-right corner cluster, STACKED above the AppShell help "?"
-   (the Today FAB at right:70 blocks the horizontal slot beside help — a vertical cluster is the
-   clean fit). The sheet reuses the `.tdb-ff*` journey presentation; only its body rows are new. */
-/* corner cluster (corner pack) — one family, three ranks on ONE baseline: the letterpress pill
-   (primary) + two 38px paper-circle whisper satellites (settings, then the AppShell help "?" which
-   is already a matched parchment circle). 12px gaps; anchored to help's existing bottom:20/right:20
-   (the AppShell help is out of scope — the cluster aligns to it rather than nudge it to 24). */
-.tdb-setbtn { position: fixed; right: 70px; bottom: 20px; z-index: 30; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--paper); border: 1px solid var(--line); box-shadow: 0 3px 12px rgba(58, 28, 20, 0.12); color: var(--muted); cursor: pointer; transition: border-color 0.15s, color 0.15s; }
-.tdb-setbtn:hover { border-color: var(--ink-2); color: var(--ink); }
-.tdb-setbtn:focus-visible { outline: 2px solid var(--hk-ink); outline-offset: 2px; }
-
+/* ── TASK SETTINGS (task-settings pack; ref todo-task-settings-v2.html) — the ⚙ entry lives in
+   the DRAWER FOOT now (workbench; the fixed corner button is retired). The sheet reuses the
+   `.tdb-ff*` journey presentation; only its body rows are new. */
 .tdb-tsetgroup { margin-top: 22px; }
 .tdb-tsetgl { display: flex; align-items: center; gap: 8px; font-family: var(--f12-mono); font-size: 9px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
 .tdb-tsetgd { width: 9px; height: 9px; border-radius: 50%; flex: none; }
@@ -101,25 +135,24 @@
    White pill, 38px pink gradient disc + 15px ink play triangle (+2px right optical), two-line
    block: Playfair 19 over the mono GUIDED sublabel (ink @55%). Same handler, same disabled gate
    (!tiles.urgent — the follow-up pack's inert grammar stands; sublabel reads NOTHING URGENT).
-   Class name kept: tour stop 5 targets `.tdb-ribbon .tdb-btn-pri`. */
-.tdb-btn-pri { display: inline-flex; align-items: center; gap: 13px; padding: 13px 27px 13px 14px; border-radius: 99px; background: var(--white, #fff); border: 1px solid var(--hairline); color: var(--ink); box-shadow: var(--sh-btn); text-align: left; transition: transform 0.12s, box-shadow 0.12s, border-color 0.12s; }
-.tdb-btn-pri:hover:not(:disabled) { transform: translateY(-1px); box-shadow: var(--sh-card-h); border-color: var(--pink-btn-h); }
-.tdb-wdisc { position: relative; width: 38px; height: 38px; border-radius: 50%; flex: none; background: linear-gradient(135deg, var(--pink-t), var(--pink-btn)); border: 1px solid var(--pink-btn-h); }
-.tdb-wdisc::after { content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) translateX(2px); border-left: 11px solid var(--ink); border-top: 7.5px solid transparent; border-bottom: 7.5px solid transparent; }
-.tdb-wtxt { display: flex; flex-direction: column; gap: 3px; }
-.tdb-wt1 { font-family: var(--f12-serif); font-size: 19px; font-weight: 600; line-height: 1.05; color: inherit; white-space: nowrap; }
-.tdb-wt2 { font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: inherit; opacity: 0.55; white-space: nowrap; }
+   The masthead walk pill is RETIRED — Walk me through is the drawer's .tdb-dwalk now (tour stop
+   5 retargeted there); the disc + text column classes survive at drawer scale. */
+.tdb-wdisc { position: relative; width: 26px; height: 26px; border-radius: 50%; flex: none; background: linear-gradient(180deg, var(--pink-t), var(--pink-btn)); border: 1px solid var(--pink-btn-h); }
+.tdb-wdisc::after { content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) translateX(1px); border-left: 7px solid var(--ink); border-top: 4.5px solid transparent; border-bottom: 4.5px solid transparent; }
+.tdb-wtxt { display: flex; flex-direction: column; gap: 2px; min-width: 0; text-align: left; }
+.tdb-wtxt b { font-family: var(--f12-serif); font-size: 13.5px; font-weight: 600; line-height: 1.1; color: var(--ink); white-space: nowrap; }
+.tdb-wtxt span { font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
 /* disabled companions — the shared inert block below flattens the button; these mute its parts */
-.tdb-btn-pri:disabled .tdb-wdisc { background: var(--paper); border-color: var(--hairline); }
-.tdb-btn-pri:disabled .tdb-wdisc::after { border-left-color: var(--faint); }
-.tdb-btn-pri:disabled .tdb-wt2 { opacity: 1; }
+.tdb-dwalk:disabled .tdb-wdisc { background: var(--paper); border-color: var(--hairline); }
+.tdb-dwalk:disabled .tdb-wdisc::after { border-left-color: var(--faint); }
+
 
 
 /* ── THE INERT GRAMMAR (empty-states ref §G) — one treatment for every unavailable control on
    this page: paper fill (sinks into the page where white pops) · hairline border · faint text ·
    NO shadow · not-allowed cursor · no hover response. NEVER dashed (dashed = invitation-to-add)
    and NEVER opacity-only (a dimmed live button still reads clickable). ── */
-.tdb-btn-pri:disabled, .tdb-worklist:disabled, .tdb-pick:disabled,
+.tdb-dwalk:disabled, .tdb-worklist:disabled, .tdb-pick:disabled,
 .tdb-ffpri:disabled, .tdb-ffback:disabled, .tdb-ffcopy:disabled,
 .tdb-ra:disabled, .tdb-bffind:disabled, .tdb-gfix:disabled, .tdb-pager:disabled {
   background: var(--paper);
@@ -130,7 +163,7 @@
   filter: none;
   transform: none;
 }
-.tdb-btn-pri:disabled:hover, .tdb-worklist:disabled:hover, .tdb-ffpri:disabled:hover,
+.tdb-dwalk:disabled:hover, .tdb-worklist:disabled:hover, .tdb-ffpri:disabled:hover,
 .tdb-ffback:disabled:hover, .tdb-ra:disabled:hover, .tdb-pager:disabled:hover {
   background: var(--paper); border-color: var(--hairline); color: var(--faint); filter: none;
 }
@@ -147,7 +180,7 @@
 .tdb-lanedot.do { background: var(--pink-btn); outline: 1px solid var(--pink-b); }
 .tdb-lanedot.hk { background: var(--hk-cof-2); outline: 1px solid var(--hk-cof-edge); }
 .tdb-lanedot.nt { background: var(--note-b); outline: 1px solid #dcc98a; }
-.tdb-lt { font-family: var(--f12-serif); font-size: 19px; font-weight: 600; color: var(--ink); }
+.tdb-lt { font-family: var(--f12-serif); font-size: 16px; font-weight: 600; color: var(--ink); }
 .tdb-ln { font-family: var(--f12-mono); font-size: 8.5px; font-weight: 700; border-radius: 99px; padding: 2.5px 9px; background: var(--white, #fff); border: 1px solid var(--line); color: var(--ink-2); }
 .tdb-rule { flex: 1; height: 1px; background: var(--line); margin: 0 4px; }
 /* Polish v3 P3 — "Focused session" (Option C pill; replaces the ghost mono "SWEEP →"; the handler
@@ -272,61 +305,33 @@
 /* right:70 sits LEFT of the AppShell's global help "?" (fixed bottom:20 right:20, 38px, z-30). */
 /* the FAB — SAGE now (the Today system's colour): sage gradient pill, INK completion ring,
    ink title, sage-ink meta (retune ref §1). */
-/* L1 SKIN — LETTERPRESS: parchment body, 1.5px ink border, soft float shadow (the sage gradient
-   leaves the pill body; sage speaks through the state pucks below). Right edge anchored at 120px
-   (= help 20 + 38 + 12 + settings 38 + 12) so the pill grows LEFTWARD with no layout jump. */
-.tdb-fab { position: fixed; right: 120px; bottom: 20px; z-index: 30; display: inline-flex; align-items: center; gap: 12px; background: var(--paper); color: var(--ink); border: 1.5px solid var(--ink); border-radius: 99px; padding: 11px 22px 11px 11px; box-shadow: 0 6px 18px rgba(58, 28, 20, 0.12); cursor: pointer; }
-.tdb-fab:hover { box-shadow: 0 8px 22px rgba(58, 28, 20, 0.16); }
-.tdb-fab:focus-visible { outline: 2px solid var(--hk-ink); outline-offset: 3px; }
-/* the ring — SVG stroke (hairline track + ink progress, rounded cap; the conic couldn't do the
-   rounded cap or a clean hairline track). Rotated -90° so progress starts at the top. */
-.tdb-fabring { position: relative; width: 34px; height: 34px; flex: none; }
-.tdb-fabring svg { width: 34px; height: 34px; transform: rotate(-90deg); }
-.tdb-fabfrac { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--f12-mono); font-size: 8.5px; font-weight: 600; font-style: normal; color: var(--ink); }
-/* the state pucks (Phase 2) — sage tick / paper plus */
-.tdb-fabpuck { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex: none; }
-.tdb-fabpuck.tick { background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border: 1px solid var(--hk-spine); color: var(--hk-ink); font-size: 14px; }
-.tdb-fabpuck.plus { background: var(--paper); border: 1px solid var(--line); color: var(--muted); }
-/* the inner content crossfades on state change (keyed by state → remount → this animation);
-   the pill is right-anchored so it grows LEFTWARD — the companions never shift (no layout jump). */
-.tdb-fabinner { display: inline-flex; align-items: center; gap: 12px; animation: tdbFabFade 0.2s ease; }
-@keyframes tdbFabFade { from { opacity: 0; } to { opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .tdb-fabinner { animation: none; } }
-.tdb-fabl { display: flex; flex-direction: column; line-height: 1.12; text-align: left; }
-.tdb-fab-a { font-family: var(--f12-serif); font-size: 16px; font-weight: 600; color: var(--ink); }
-.tdb-fab-b { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
-.tdb-fab-roll { font-style: normal; color: var(--hk-ink); opacity: 1; }
-
-/* ── Today's list — expanded pop-up (rises from the corner; covers the help "?" while open) ── */
-/* popup-notify-scrim P1 — bigger + roomier: 440px, bold-pastille pink head (the copied --pop-pink
-   literals), divider rows at 15.5px titles, 26px dots, the done band in the hk-sage family (the
-   LIVE dashboard sage — authoritative over the ref's stale hexes) with terse row grammar. */
-.tdb-pop { position: fixed; right: 20px; bottom: 20px; z-index: 40; width: min(440px, calc(100vw - 40px)); max-height: min(640px, calc(100vh - 120px)); background: var(--white, #fff); border: 1px solid var(--pop-pink-b); border-radius: var(--r-xl); box-shadow: var(--sh-3); display: flex; flex-direction: column; overflow: hidden; transform-origin: bottom right; animation: tdbPopIn 0.18s ease-out; }
-@keyframes tdbPopIn { from { opacity: 0; transform: translateY(10px) scale(0.96); } }
-@media (prefers-reduced-motion: reduce) { .tdb-pop { animation: none; } }
-.tdb-th { flex: none; display: flex; align-items: center; flex-wrap: nowrap; gap: 10px; padding: 18px 20px 14px; background: linear-gradient(180deg, var(--pop-pink), var(--pop-pink-2)); border-bottom: 1px solid var(--pop-pink-b); }
-.tdb-th .tdb-t { font-family: var(--f12-serif); font-size: 23px; font-weight: 600; color: var(--ink); flex: 1; }
-.tdb-th .tdb-cc { font-family: var(--f12-mono); font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; color: var(--ink); background: var(--white, #fff); border: 1px solid var(--pop-pink-b); border-radius: 99px; padding: 3.5px 11px; white-space: nowrap; flex: none; }
+/* ── the Today's-list PANEL (workbench: the corner pop-up's internals TRANSPLANTED into the
+   drawer — same inner classes, drawer scale; SAGE header per the ref's .today2; the fixed
+   wrapper, rise animation and ✕ are retired). ── */
+.tdb-today2 { background: var(--white, #fff); border: 1px solid var(--hk-spine); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; }
+.tdb-th { flex: none; display: flex; align-items: center; flex-wrap: nowrap; gap: 8px; padding: 9px 12px 8px; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border-bottom: 1px solid var(--hk-spine); }
+.tdb-th .tdb-t { font-family: var(--f12-serif); font-size: 14px; font-weight: 600; color: var(--ink); flex: 1; }
+.tdb-th .tdb-cc { font-family: var(--f12-mono); font-size: 8px; font-weight: 700; letter-spacing: 0.05em; color: var(--hk-ink); background: var(--white, #fff); border: 1px solid var(--hk-spine); border-radius: 99px; padding: 2.5px 8px; white-space: nowrap; flex: none; }
 /* the DONE badge (chrome-fixes P2 — replaces the collided tdb-cd span; that class name is
    retired page-wide): the committed pill's
    grammar in the done-sage family, doubling as the done-band show/hide toggle (pressed = shown,
    the default — today's always-shown behaviour preserved as the default state). */
-.tdb-th .tdb-cdone { font-family: var(--f12-mono); font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; color: var(--hk-ink); background: var(--white, #fff); border: 1px solid var(--hk-spine); border-radius: 99px; padding: 3.5px 11px; white-space: nowrap; flex: none; cursor: pointer; transition: background 0.14s; }
+.tdb-th .tdb-cdone { font-family: var(--f12-mono); font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; color: var(--hk-ink); background: var(--white, #fff); border: 1px solid var(--hk-spine); border-radius: 99px; padding: 2.5px 8px; white-space: nowrap; flex: none; cursor: pointer; transition: background 0.14s; }
 .tdb-th .tdb-cdone[aria-pressed="true"] { background: var(--hk-sage); }
 .tdb-th .tdb-cdone:hover { background: var(--hk-sage-2); }
 /* committed band (top) — fix pass P3: the OUTSTANDING list owns the flexible height (renders
    first, scrolls internally only past the pop-up's cap); the pop-up itself grows with content up
    to max-height, so 5 committed / 0 done shows all five with zero dead space. */
-.tdb-tcommit { flex: 1 1 auto; min-height: 0; padding: 8px 10px; display: flex; flex-direction: column; gap: 5px; overflow-y: auto; }
-.tdb-trow { display: flex; align-items: flex-start; gap: 13px; padding: 14px 8px; border-bottom: 1px solid var(--hairline); cursor: pointer; flex: none; }
+.tdb-tcommit { flex: 1 1 auto; min-height: 0; max-height: 40vh; padding: 4px 6px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; }
+.tdb-trow { display: flex; align-items: flex-start; gap: 8px; padding: 8px 6px; border-bottom: 1px solid var(--hairline); cursor: pointer; flex: none; }
 .tdb-trow:last-child { border-bottom: none; }
 .tdb-trow:hover { background: var(--paper); }
 .tdb-tmid { flex: 1; min-width: 0; }
-.tdb-trow .tdb-tx { font-size: 15.5px; font-weight: 600; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tdb-trow .tdb-tm { font-family: var(--f12-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-top: 3px; }
+.tdb-trow .tdb-tx { font-size: 11.5px; font-weight: 600; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tdb-trow .tdb-tm { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
 .tdb-trow .tdb-x { margin-left: auto; color: var(--faint); font-size: 11px; padding: 0 3px; background: none; border: none; }
 .tdb-trow .tdb-x:hover { color: var(--hk-ink); }
-.tdb-tdot { width: 26px; height: 26px; border-radius: 50%; background: var(--pink-t); border: 1px solid var(--pink-b); flex: none; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+.tdb-tdot { width: 20px; height: 20px; border-radius: 50%; background: var(--pink-t); border: 1px solid var(--pink-b); flex: none; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
 .tdb-tempty { border: 1.5px dashed var(--hk-spine); border-radius: 9px; padding: 14px 12px; text-align: center; flex: none; }
 .tdb-tea { font-family: var(--f12-serif); font-style: italic; font-size: 13.5px; color: var(--sub); }
 .tdb-teb { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--hk-ink); margin-top: 5px; }
@@ -334,18 +339,18 @@
 .tdb-tdiv .l { flex: 1; height: 1px; background: rgba(90, 110, 88, 0.16); }
 /* done band (below) — renders ONLY when non-empty (follow-up rule), sized to its content with its
    own scroll cap; it never reserves space while empty and never compresses the outstanding list. */
-.tdb-tdone { flex: 0 0 auto; max-height: 220px; overflow-y: auto; padding: 2px 10px 10px; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); display: flex; flex-direction: column; }
-.tdb-drow { display: flex; align-items: flex-start; gap: 13px; padding: 11px 8px; border-bottom: 1px solid rgba(90, 110, 88, 0.16); }
+.tdb-tdone { flex: 0 0 auto; max-height: 160px; overflow-y: auto; padding: 2px 10px 10px; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); display: flex; flex-direction: column; }
+.tdb-drow { display: flex; align-items: flex-start; gap: 8px; padding: 7px 6px; border-bottom: 1px solid rgba(90, 110, 88, 0.16); }
 .tdb-drow:last-child { border-bottom: none; }
-.tdb-drow .tdb-dx { font-size: 15.5px; font-weight: 500; line-height: 1.35; color: var(--hk-ink); text-decoration: line-through; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tdb-drow .tdb-dm2 { font-family: var(--f12-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--hk-ink); opacity: 0.75; margin-top: 3px; }
-.tdb-tick { width: 26px; height: 26px; border-radius: 50%; background: rgba(255, 255, 255, 0.6); border: 1px solid var(--hk-spine); color: var(--hk-ink); display: flex; align-items: center; justify-content: center; font-size: 12px; flex: none; margin-top: 1px; }
-.tdb-tf { flex: none; padding: 9px 12px; border-top: 1px solid var(--hairline); background: var(--paper); display: flex; gap: 7px; align-items: center; }
-.tdb-tf .tdb-pc { font-family: var(--f12-mono); font-size: 10px; letter-spacing: 0.12em; color: var(--muted); flex: 1; text-transform: uppercase; }
-.tdb-pick { font-size: 11.5px; font-weight: 600; padding: 7px 12px; border-radius: 8px; background: var(--white, #fff); border: 1px solid var(--hk-spine); color: var(--hk-ink); white-space: nowrap; }
+.tdb-drow .tdb-dx { font-size: 11.5px; font-weight: 500; line-height: 1.35; color: var(--hk-ink); text-decoration: line-through; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tdb-drow .tdb-dm2 { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--hk-ink); opacity: 0.75; margin-top: 3px; }
+.tdb-tick { width: 20px; height: 20px; border-radius: 50%; background: rgba(255, 255, 255, 0.6); border: 1px solid var(--hk-spine); color: var(--hk-ink); display: flex; align-items: center; justify-content: center; font-size: 12px; flex: none; margin-top: 1px; }
+.tdb-tf { flex: none; padding: 7px 8px; border-top: 1px solid var(--hairline); background: var(--paper); display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+.tdb-tf .tdb-pc { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.1em; color: var(--muted); flex: 1 1 100%; text-transform: uppercase; }
+.tdb-pick { font-size: 10.5px; font-weight: 600; padding: 5px 9px; border-radius: 8px; background: var(--white, #fff); border: 1px solid var(--hk-spine); color: var(--hk-ink); white-space: nowrap; flex: 1; }
 .tdb-pick:hover { background: var(--hk-sage); }
 /* "Work the list" — its OWN class (distinct from the walkthrough MODAL's .tdb-walk below) */
-.tdb-worklist { font-size: 11.5px; font-weight: 600; padding: 7px 12px; border-radius: 8px; background: var(--ink); color: var(--panel); white-space: nowrap; }
+.tdb-worklist { font-size: 10.5px; font-weight: 600; padding: 5px 9px; border-radius: 8px; background: var(--ink); color: var(--panel); white-space: nowrap; flex: 1; }
 .tdb-worklist:hover:not(:disabled) { filter: brightness(1.35); }
 
 /* ── THE SUNDAY REVIEW (finishing P3; ref todo-sunday-review.html): the entry card (sage-spined,
@@ -387,14 +392,12 @@
 .tdb-toast-act { font-family: var(--f12-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--panel); border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 99px; padding: 4px 11px; white-space: nowrap; }
 .tdb-toast-act:hover { background: rgba(255, 255, 255, 0.14); }
 
-/* ── shared bits kept from the retired surfaces (the pop-up ✕ · the queried pip · the Pro pill) ── */
-.tdb-drawer-x { font-size: 15px; color: var(--muted); padding: 4px 6px; }
-.tdb-drawer-x:hover { color: var(--ink); }
+/* ── shared bits kept from the retired surfaces (the queried pip · the Pro pill) ── */
 .tdb-pip { width: 7px; height: 7px; border-radius: 50%; background: var(--burg); flex: none; display: inline-block; }
 .tdb-propill { font-family: var(--f12-mono); font-size: 8px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #6A89A7; background: #e7eef3; border: 1px solid #cfdde6; border-radius: 99px; padding: 1.5px 7px; margin-left: 7px; }
 
-/* ── rollover bar (Today furniture — SAGE now; inside the pop-up, above the committed band) ── */
-.tdb-rollbar { display: flex; align-items: center; gap: 8px; padding: 9px 13px; background: var(--hk-sage); border-bottom: 1px solid var(--hk-spine); font-size: 12px; color: var(--hk-ink); flex: none; }
+/* ── rollover bar (Today furniture — SAGE; inside the drawer panel, above the committed band) ── */
+.tdb-rollbar { display: flex; align-items: center; gap: 6px; padding: 7px 9px; background: var(--hk-sage); border-bottom: 1px solid var(--hk-spine); font-size: 10.5px; color: var(--hk-ink); flex: none; flex-wrap: wrap; }
 .tdb-rolltx { flex: 1; }
 .tdb-rolltx b { font-weight: 600; }
 .tdb-rollbar button { font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 9px; border-radius: 99px; border: 1px solid var(--hk-spine); background: var(--white, #fff); color: var(--hk-ink); }

@@ -2,14 +2,14 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * ToDoPage — the To-do WORKSPACE as an F12 board. Layout (design ref:
- * design-refs/todo-board-final.html): a slim STAT-RIBBON header ("What's on your desk?" + the
- * three post-it counters + "Walk me through", polish v3) over THREE horizontal LANES —
- * Urgent · Housekeeping · Notes to self (Urgent pinned top; page scrolls vertically when the lanes
- * exceed the viewport). The Today's list lives in a CORNER POP-UP (fixed bottom-right FAB with a
- * progress ring → a panel with the committed band + done band; the pop-up anatomy follows the
- * pack's §4 prose — the placement-sketches ref was absent at build time). Drawer / walkthrough /
- * housekeeping-fix internals still follow todo-workspace-v10.html.
+ * ToDoPage — the To-do WORKBENCH (design ref: design-refs/todo-workbench-shell-v1.html, Option B
+ * normative). A floating DRAWER sidebar (below the app nav, sticky, foldable to a 64px icon rail;
+ * fold persisted in localStorage["sa.todoDrawer"]) holds ＋ New note, Walk me through, the typed
+ * filters and the embedded Today's-list panel (the old corner FAB + pop-up are RETIRED — the
+ * panel is the pop-up's internals transplanted, same state and handlers). Beside it, a centred
+ * ~1150px content column: a one-row masthead (title + date/week, 42px post-its, the scrap, search
+ * ⌘K, the Cards/Ledger view toggle) over the board sections. The ledger view follows
+ * design-refs/todo-ledger-v1.html.
  *
  * Presentation + view-model only — the task engine, taskFlags and every write path are untouched;
  * lane renames are UI labels (UserTask / taskType enums unchanged in code). The pure view-model is
@@ -17,8 +17,9 @@
  * bands; ribbonTiles → the header counts, housekeeping = GAPS via todoHousekeeping.hkGapCount).
  * Theme: F12 only (`.t-f12` tokens). StatusDot consumed verbatim.
  *
- * The FAB sits at right:70 — LEFT of the AppShell's global help "?" (fixed bottom:20 right:20,
- * 38px, z-30), so the two corner controls never collide.
+ * The AppShell's global help "?" is hidden on /todo (the pack's one out-of-page line) — the
+ * drawer FOOT carries ⚙ Task settings and the ? menu (Help centre / Replay the tour, dispatching
+ * the same sa:todo-replay-tour event) instead.
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { F12Page, F12Account } from "../shell/F12Shell";
@@ -29,8 +30,9 @@ import { assembleBoard, todaySplit, ribbonTiles, laneFadeState, walkSublabel, wa
 import { flagKeyForTask, MUTED_UNTIL } from "../../lib/taskFlags";
 import {
   choosePicks, rolledOverCards, todayProgress, MAX_TODAY,
-  quickSendPayload, quickNudgePayload, receiptLine, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, pillState, pillAria,
+  quickSendPayload, quickNudgePayload, receiptLine, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask,
 } from "../../lib/todoWalk";
+import { weekOfQuerying } from "../../lib/dashboardStats";
 import { saveHkRows } from "../../lib/hkSave";
 import { isProUser, fetchAssistedFill, AssistFound } from "../../lib/assistFill";
 import { groupHousekeeping, hkGapCount, hkGroupProgress, HkGroup, HkRule, HK_RULES } from "../../lib/todoHousekeeping";
@@ -250,32 +252,33 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // THE completion surface — the focus flow (queue of one for a card click; a set for the two walks).
   const [flow, setFlow] = useState<{ items: FocusItem[]; mode?: "sweep" | "weeklyReview" } | null>(null);
   const [flowPrefill, setFlowPrefill] = useState<{ sentDate?: string; method?: string; materials?: string[] } | undefined>(undefined);
-  const [todayOpen, setTodayOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false); // the Task Settings sheet ("What lands on your desk?")
-  // Chrome-fixes P1 — THE close path (the ✕, click-away and Esc all land here; never parallel
-  // close logic). Click-away: document-level pointerdown while expanded only; clicks on the
-  // add-to-list pills are exempt (adding while the list is open lets you watch the item land),
-  // and everything is inert while a FocusFlow sheet is up (its Esc/dismiss handling wins — and a
-  // Work-the-list journey must return you to the still-open list).
-  const closeToday = () => setTodayOpen(false);
+  const [helpOpen, setHelpOpen] = useState(false); // the drawer-foot ? menu (Help centre / Replay the tour)
   // Chrome-fixes P2 — the done badge doubles as the band's show/hide; pressed/shown by default.
+  // (Survives the workbench transplant: the badge now gates the drawer panel's done band.)
   const [showDone, setShowDone] = useState(true);
+  // ── workbench shell state. Fold + view are DEVICE UI prefs → the sa. localStorage convention
+  // (approved — never user-doc fields). View default = cards; the Ledger face lands in Phase 3.
+  const [folded, setFolded] = useState<boolean>(() => { try { return localStorage.getItem("sa.todoDrawer") === "folded"; } catch { return false; } });
+  const setFold = (v: boolean) => { setFolded(v); try { localStorage.setItem("sa.todoDrawer", v ? "folded" : "open"); } catch { /* private mode */ } };
+  const [view, setView] = useState<"cards" | "ledger">(() => { try { return localStorage.getItem("sa.todoView") === "ledger" ? "ledger" : "cards"; } catch { return "cards"; } });
+  const pickView = (v: "cards" | "ledger") => { setView(v); try { localStorage.setItem("sa.todoView", v); } catch { /* private mode */ } };
+  // Masthead search — the input + ⌘K focus mechanics land here (Phase 1); live filtering is
+  // Phase 4's wiring. The page stays MOUNTED behind other routes (StagePage display-toggles), so
+  // the ⌘K handler must no-op while the board is hidden — offsetParent is null under display:none.
+  const [search, setSearch] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (!todayOpen) return;
-    const onDown = (e: PointerEvent) => {
-      if (flow) return;
-      const t = e.target as HTMLElement | null;
-      if (!t) return;
-      if (t.closest(".tdb-pop")) return; // inside the pop-up
-      if (t.closest(".tdb-pill.today-p")) return; // the add-to-list exemption (Step 0 item 3's set)
-      closeToday();
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey))) return;
+      if (!wrapRef.current || wrapRef.current.offsetParent === null) return; // board not visible
+      e.preventDefault();
+      searchRef.current?.focus();
     };
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape" && !flow) closeToday(); };
-    document.addEventListener("pointerdown", onDown);
     window.addEventListener("keydown", onKey);
-    return () => { document.removeEventListener("pointerdown", onDown); window.removeEventListener("keydown", onKey); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [todayOpen, flow]);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
   const openFlowCards = (cards: BoardCard[]) => {
     // the Sunday-review entry card never enters card journeys/walks — it has its own mode
     const flowable = cards.filter((c) => c.taskType !== "weekly_review");
@@ -532,48 +535,17 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
 
   return (
     <F12Page tools={<F12Account onClick={() => onNavigate("account")} />}>
-      <div className="tdb-wrap">
-        {/* ── header BAND (polish v3 P5 — supersedes the f286b06 ink ribbon): a full-bleed paper
-            strip with a single hairline base, flush under the shell bar; its content sits in the
-            same .tdb-col column as the board so the title's left edge aligns with the lane
-            headers. NOT sticky — scrolls away with the wrap. Post-its unchanged (chrome swap
-            only, Nick's call); .tdb-ribbon survives as the inner flex row so tour stop 5's
-            `.tdb-ribbon .tdb-btn-pri` selector holds. ── */}
-        <div className="tdb-band">
-          <div className="tdb-col tdb-ribbon">
-          <span className="tdb-askwrap">
-            <span className="tdb-rdate">{shortHeaderDate(now)}</span>
-            <span className="tdb-ask">What’s on your desk?</span>
-          </span>
-          <span className="tdb-postits">
-            <button type="button" className={`tdb-postit ug${tiles.urgent === 0 ? " zero" : ""}`} aria-label={`${tiles.urgent} urgent — jump to the Urgent lane`} onClick={() => scrollToLane("do")}>
-              <span className="tdb-pv" aria-hidden>{tiles.urgent}</span><span className="tdb-pk" aria-hidden>urgent</span>
-            </button>
-            <button type="button" className={`tdb-postit hk${tiles.housekeeping === 0 ? " zero" : ""}`} aria-label={`${tiles.housekeeping} housekeeping — jump to the Housekeeping lane`} onClick={() => scrollToLane("hk")}>
-              <span className="tdb-pv" aria-hidden>{tiles.housekeeping}</span><span className="tdb-pk" aria-hidden>housekpg</span>
-            </button>
-            <button type="button" className={`tdb-postit nt${tiles.notes === 0 ? " zero" : ""}`} aria-label={`${tiles.notes} notes to self — jump to the Notes lane`} onClick={() => scrollToLane("nt")}>
-              <span className="tdb-pv" aria-hidden>{tiles.notes}</span><span className="tdb-pk" aria-hidden>notes</span>
-            </button>
-            {/* the torn scrap (afterlife pack) — an OFFER, not a chore; opens the shipped review mode */}
-            {scrap && (
-              <button type="button" className="tdb-scrap" aria-label={`Last week in review — week ${scrap.weekNumber}`} onClick={openSundayReview}>
-                <b>Last week</b><u>in review ▸</u>
-              </button>
-            )}
-          </span>
-          <span className="tdb-sp" />
-          <button type="button" className="tdb-btn-pri" disabled={!tiles.urgent} aria-label={walkAria(tiles.urgent)} onClick={() => openFlowCards(board.do)}>
-            <span className="tdb-wdisc" aria-hidden />
-            <span className="tdb-wtxt">
-              <span className="tdb-wt1">Walk me through</span>
-              <span className="tdb-wt2">{walkSublabel(tiles.urgent)}</span>
-            </span>
-          </button>
-          </div>
-        </div>
-
-        <div className="tdb-col">
+      <div className="tdb-wrap" ref={wrapRef}>
+        {/* ── the workbench row (Option B, todo-workbench-shell-v1.html): floating drawer
+            (sticky, foldable) beside a CENTRED ~1150px content column — max-width discipline at
+            every viewport, surplus pools as symmetric desk. The old full-bleed header band +
+            .tdb-ribbon are RETIRED (the masthead is recomposed inside the column); Walk me
+            through lives in the drawer now. ── */}
+        <div className="tdb-ws">
+          {renderDrawer()}
+          <div className="tdb-main">
+            <div className="tdb-col">
+              {renderMasthead()}
         {/* ── lanes — or, when derivation says so, the new-desk welcome (A) / the earned "Desk
             cleared." moment (E) in their place. Copy verbatim from todo-empty-states.html. ── */}
         {desk === "new-desk" ? renderNewDesk() : desk === "desk-cleared" ? renderDeskCleared() : (
@@ -630,52 +602,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           </Lane>
         </div>
         )}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* ── Today's list — corner pop-up (fixed; FAB collapsed / panel expanded) ── */}
-      {!todayOpen && (() => {
-        // corner pack Phase 2 — one pill, three truthful states (strict priority, single-source:
-        // committed = the committed count, done = the cleared-union count the done band renders).
-        const st = pillState(committedCards.length, doneN);
-        return (
-        <button type="button" className="tdb-fab" onClick={() => setTodayOpen(true)} aria-label={pillAria(st)} aria-expanded={false}>
-          <span className="tdb-fabinner" key={st.kind}>
-            {st.kind === "list" ? (
-              <span className="tdb-fabring">
-                <svg viewBox="0 0 34 34" aria-hidden>
-                  <circle cx="17" cy="17" r="14" fill="none" stroke="var(--line)" strokeWidth="3" />
-                  <circle cx="17" cy="17" r="14" fill="none" stroke="var(--ink)" strokeWidth="3" strokeLinecap="round" strokeDasharray="88" strokeDashoffset={88 - (88 * st.pct) / 100} />
-                </svg>
-                <i className="tdb-fabfrac">{st.done}/{st.committed}</i>
-              </span>
-            ) : st.kind === "done" ? (
-              <span className="tdb-fabpuck tick" aria-hidden>✓</span>
-            ) : (
-              <span className="tdb-fabpuck plus" aria-hidden>
-                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-              </span>
-            )}
-            <span className="tdb-fabl">
-              <span className="tdb-fab-a">{st.kind === "done" ? `${st.done} done today` : "Today’s list"}</span>
-              <span className="tdb-fab-b">
-                {st.kind === "list" ? `${st.toGo} to go` : st.kind === "done" ? "Nice going" : "Nothing yet"}
-                {rolled.length > 0 && <em className="tdb-fab-roll" title={`${rolled.length} rolled over from a previous day`}> ●</em>}
-              </span>
-            </span>
-          </span>
-        </button>
-        );
-      })()}
-      {todayOpen && renderTodayPop()}
-
-      <button type="button" className="tdb-setbtn" aria-label="Task settings" title="Task settings — what lands on your desk" onClick={() => setSettingsOpen(true)}>
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
-          <line x1="4" y1="6" x2="20" y2="6" /><circle cx="9" cy="6" r="2.2" fill="var(--paper)" />
-          <line x1="4" y1="12" x2="20" y2="12" /><circle cx="15" cy="12" r="2.2" fill="var(--paper)" />
-          <line x1="4" y1="18" x2="20" y2="18" /><circle cx="8" cy="18" r="2.2" fill="var(--paper)" />
-        </svg>
-      </button>
       {settingsOpen && <TaskSettingsSheet onClose={() => setSettingsOpen(false)} />}
       {tourOpen && <TodoTour onEnd={endTour} />}
       {toast && (
@@ -731,15 +662,123 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     );
   }
 
-  // ── the expanded pop-up: committed band + done band + footer (rises from the corner) ──
-  function renderTodayPop() {
+  // ── the one-row masthead (Option B mast2): title + date/week eyebrow left, the 42px post-its +
+  // the scrap, then search (⌘K) and the Cards/Ledger toggle. Walk me through has MOVED to the
+  // drawer. weekOfQuerying is the dashboard's derivation, consumed — never re-derived. ──
+  function renderMasthead() {
     return (
-      <div className="tdb-pop" role="dialog" aria-label="Today’s list">
+      <div className="tdb-mast">
+        <span className="tdb-askwrap">
+          <span className="tdb-rdate">{shortHeaderDate(now)} · {weekOfQuerying(queries, new Date(now))}</span>
+          <span className="tdb-ask">What’s on your desk?</span>
+        </span>
+        <span className="tdb-postits">
+          <button type="button" className={`tdb-postit ug${tiles.urgent === 0 ? " zero" : ""}`} aria-label={`${tiles.urgent} urgent — jump to the Urgent section`} onClick={() => scrollToLane("do")}>
+            <span className="tdb-pv" aria-hidden>{tiles.urgent}</span><span className="tdb-pk" aria-hidden>urgent</span>
+          </button>
+          <button type="button" className={`tdb-postit hk${tiles.housekeeping === 0 ? " zero" : ""}`} aria-label={`${tiles.housekeeping} housekeeping — jump to the Housekeeping section`} onClick={() => scrollToLane("hk")}>
+            <span className="tdb-pv" aria-hidden>{tiles.housekeeping}</span><span className="tdb-pk" aria-hidden>housekpg</span>
+          </button>
+          <button type="button" className={`tdb-postit nt${tiles.notes === 0 ? " zero" : ""}`} aria-label={`${tiles.notes} notes to self — jump to the Notes section`} onClick={() => scrollToLane("nt")}>
+            <span className="tdb-pv" aria-hidden>{tiles.notes}</span><span className="tdb-pk" aria-hidden>notes</span>
+          </button>
+          {/* the torn scrap (afterlife pack) — an OFFER, not a chore; opens the shipped review mode */}
+          {scrap && (
+            <button type="button" className="tdb-scrap" aria-label={`Last week in review — week ${scrap.weekNumber}`} onClick={openSundayReview}>
+              <b>Last week</b><u>in review ▸</u>
+            </button>
+          )}
+        </span>
+        <span className="tdb-sp" />
+        <div className="tdb-msrch">
+          <span aria-hidden>⌕</span>
+          <input
+            ref={searchRef}
+            type="text"
+            placeholder="Search your desk…"
+            aria-label="Search your desk"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Escape") { setSearch(""); (e.target as HTMLInputElement).blur(); } }}
+          />
+          <kbd aria-hidden>⌘K</kbd>
+        </div>
+        <div className="tdb-vtg" role="group" aria-label="View">
+          <button type="button" className={view === "cards" ? "on" : ""} aria-pressed={view === "cards"} onClick={() => pickView("cards")}>▦ Cards</button>
+          {/* the Ledger face lands in Phase 3 — until then the segment is honestly disabled */}
+          <button type="button" className={view === "ledger" ? "on" : ""} aria-pressed={view === "ledger"} disabled onClick={() => pickView("ledger")}>☰ Ledger</button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── the floating drawer (Option B): ＋ New note · Walk me through · [filters, Phase 4] · the
+  // Today's-list panel · foot (⚙ Task settings + the ? menu + fold). Sticky below the app nav;
+  // folds to a 64px icon rail (width transition; persisted sa.todoDrawer). ──
+  function renderDrawer() {
+    if (folded) {
+      return (
+        <aside className="tdb-drawer folded" aria-label="Workbench drawer (folded)">
+          <button type="button" className="tdb-dic" title="New note" aria-label="New note" onClick={addTask}>＋</button>
+          <button type="button" className="tdb-dic" title="Walk me through" aria-label={walkAria(tiles.urgent)} disabled={!tiles.urgent} onClick={() => openFlowCards(board.do)}>▶</button>
+          <button type="button" className="tdb-dic today" title="Today’s list — unfold to open" aria-label={`Today’s list — ${prog.empty ? "nothing committed" : `${prog.done} of ${prog.total} done`}; unfold the drawer to open it`} onClick={() => setFold(false)}>
+            ✓{committedCards.length > 0 && <i className="tdb-dbadge">{committedCards.length}</i>}
+          </button>
+          <span className="tdb-dsp" />
+          <button type="button" className="tdb-dic" title="Task settings" aria-label="Task settings" onClick={() => setSettingsOpen(true)}>⚙</button>
+          <button type="button" className="tdb-dic" title="Help" aria-label="Help" onClick={() => onNavigate("help")}>?</button>
+          <button type="button" className="tdb-dfold" title="Unfold the drawer" aria-label="Unfold the drawer" aria-expanded={false} onClick={() => setFold(false)}>»</button>
+        </aside>
+      );
+    }
+    return (
+      <aside className="tdb-drawer" aria-label="Workbench drawer">
+        <div className="tdb-dhead">
+          <button type="button" className="tdb-dcreate" onClick={addTask}>＋ New note</button>
+          <button type="button" className="tdb-dfold" title="Fold the drawer" aria-label="Fold the drawer" aria-expanded onClick={() => setFold(true)}>«</button>
+        </div>
+        <button type="button" className="tdb-dwalk" disabled={!tiles.urgent} aria-label={walkAria(tiles.urgent)} onClick={() => openFlowCards(board.do)}>
+          <span className="tdb-wdisc" aria-hidden />
+          <span className="tdb-wtxt">
+            <b>Walk me through</b>
+            <span>{walkSublabel(tiles.urgent)}</span>
+          </span>
+        </button>
+        <div className="tdb-dsh">TODAY’S LIST · {prog.empty ? "NOTHING YET" : `${prog.done} OF ${prog.total}`}</div>
+        {renderTodayPanel()}
+        <div className="tdb-dfoot">
+          <button type="button" className="tdb-dfbtn" onClick={() => setSettingsOpen(true)}>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+              <line x1="4" y1="6" x2="20" y2="6" /><circle cx="9" cy="6" r="2.2" fill="var(--paper)" />
+              <line x1="4" y1="12" x2="20" y2="12" /><circle cx="15" cy="12" r="2.2" fill="var(--paper)" />
+              <line x1="4" y1="18" x2="20" y2="18" /><circle cx="8" cy="18" r="2.2" fill="var(--paper)" />
+            </svg>
+            Task settings
+          </button>
+          <span className="tdb-dsp" />
+          <button type="button" className="tdb-dfbtn" aria-haspopup="menu" aria-expanded={helpOpen} onClick={() => setHelpOpen((v) => !v)}>? Help</button>
+          {helpOpen && (
+            <div className="tdb-dhelp" role="menu" aria-label="Help">
+              <button type="button" role="menuitem" onClick={() => { setHelpOpen(false); onNavigate("help"); }}>Help centre</button>
+              {/* the same event the AppShell menu dispatched — the board's listener is unchanged */}
+              <button type="button" role="menuitem" onClick={() => { setHelpOpen(false); window.dispatchEvent(new CustomEvent("sa:todo-replay-tour")); }}>Replay the tour</button>
+            </div>
+          )}
+        </div>
+      </aside>
+    );
+  }
+
+  // ── the Today's-list panel — the corner pop-up's internals TRANSPLANTED into the drawer (same
+  // state, same handlers: rollover Keep/Clear, committed rows + take-off, the done band behind the
+  // badge, Add more / Help me pick, Work the list). Sage header per the ref's .today2. ──
+  function renderTodayPanel() {
+    return (
+      <div className="tdb-today2">
         <div className="tdb-th">
           <span className="tdb-t">Today’s list</span>
           <span className="tdb-cc">{committedCards.length === 0 ? "Nothing yet" : `${committedCards.length} committed`}</span>
           {doneN > 0 && <button type="button" className="tdb-cdone" aria-pressed={showDone} title={showDone ? "Hide the done band" : "Show the done band"} onClick={() => setShowDone((v) => !v)}>{doneN} done</button>}
-          <button type="button" className="tdb-drawer-x" onClick={closeToday} aria-label="Close">✕</button>
         </div>
         {rolled.length > 0 && (
           <div className="tdb-rollbar">

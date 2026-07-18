@@ -42,13 +42,15 @@ export const TOUR_STOPS: TourStop[] = [
     cta: "Next →",
   },
   {
-    sel: ".tdb-fab",
-    h: "Today lives in the corner.",
-    p: "Your committed list and everything you’ve done today, struck through as you go. Watch the ring fill.",
+    // workbench retarget: the corner FAB is retired — the list lives in the drawer panel now.
+    sel: ".tdb-today2",
+    h: "Today lives in the drawer.",
+    p: "Your committed list and everything you’ve done today, struck through as you go.",
     cta: "Next →",
   },
   {
-    sel: ".tdb-ribbon .tdb-btn-pri",
+    // workbench retarget: Walk me through moved from the masthead into the drawer.
+    sel: ".tdb-dwalk",
     h: "Or just say go.",
     p: "This walks your urgent pile for you — one sheet at a time, nothing saved until you approve the lot.",
     cta: "Done",
