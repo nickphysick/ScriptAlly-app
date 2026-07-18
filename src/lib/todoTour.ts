@@ -42,9 +42,10 @@ export const TOUR_STOPS: TourStop[] = [
     cta: "Next →",
   },
   {
-    // workbench retarget: the corner FAB is retired — the list lives in the drawer panel now.
-    sel: ".tdb-today2",
-    h: "Today lives in the drawer.",
+    // II·B retarget: the panel lives in the companion rail (≥1500) or behind the masthead chip
+    // (narrow) — the selector list hits whichever exists; the tour filters a missing target.
+    sel: ".tdb-today2, .tdb-todaychip",
+    h: "Today lives beside your work.",
     p: "Your committed list and everything you’ve done today, struck through as you go.",
     cta: "Next →",
   },

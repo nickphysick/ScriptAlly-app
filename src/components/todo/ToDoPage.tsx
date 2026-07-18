@@ -248,6 +248,30 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [sel, setSel] = useState<SelState>(EMPTY_SEL);
   const [kfocus, setKfocus] = useState(-1);
   const [kebabAt, setKebabAt] = useState<string | null>(null);
+  // ── II·B P3: the companion rail ↔ masthead chip. ONE Today panel (renderTodayPanel), TWO
+  // mounts — the right rail ≥1500px, the masthead-chip popover below — XOR'd on `narrow`, so
+  // exactly one mounts and the state never forks (halt (c) clear).
+  const [narrow, setNarrow] = useState<boolean>(() => typeof window !== "undefined" && window.matchMedia("(max-width: 1499.98px)").matches);
+  const [todayPopOpen, setTodayPopOpen] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 1499.98px)");
+    const on = () => setNarrow(mq.matches);
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
+  useEffect(() => { if (!narrow) setTodayPopOpen(false); }, [narrow]);
+  useEffect(() => {
+    if (!todayPopOpen) return;
+    const onDown = (e: PointerEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && (t.closest(".tdb-todaypop") || t.closest(".tdb-todaychip"))) return;
+      setTodayPopOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setTodayPopOpen(false); };
+    document.addEventListener("pointerdown", onDown);
+    window.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("pointerdown", onDown); window.removeEventListener("keydown", onKey); };
+  }, [todayPopOpen]);
   // Masthead search — the input + ⌘K focus mechanics land here (Phase 1); live filtering is
   // Phase 4's wiring. The page stays MOUNTED behind other routes (StagePage display-toggles), so
   // the ⌘K handler must no-op while the board is hidden — offsetParent is null under display:none.
@@ -762,6 +786,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         )}
             </div>
           </div>
+          {!narrow && (
+            <aside className="tdb-railr" aria-label="Today">
+              {renderTodayPanel()}
+            </aside>
+          )}
         </div>
       </div>
 
@@ -856,6 +885,16 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             </button>
           )}
         </span>
+        {narrow && (
+          <span className="tdb-todaypopwrap">
+            <button type="button" className="tdb-todaychip" aria-haspopup="dialog" aria-expanded={todayPopOpen} onClick={() => setTodayPopOpen((v) => !v)}>
+              Today’s list · {committedCards.length} TO GO
+            </button>
+            {todayPopOpen && (
+              <div className="tdb-todaypop" role="dialog" aria-label="Today’s list">{renderTodayPanel()}</div>
+            )}
+          </span>
+        )}
         <span className="tdb-sp" />
         <div className="tdb-msrch">
           <span aria-hidden>⌕</span>
@@ -963,7 +1002,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       <div className="tdb-today2">
         <div className="tdb-th">
           <span className="tdb-t">Today’s list</span>
-          <span className="tdb-cc">{committedCards.length === 0 ? "Nothing yet" : `${committedCards.length} committed`}</span>
+          <span className="tdb-cc">{committedCards.length === 0 && doneN === 0 ? "NOTHING YET" : `${committedCards.length} COMMITTED · ${doneN} DONE`}</span>
           {doneN > 0 && <button type="button" className="tdb-cdone" aria-pressed={showDone} title={showDone ? "Hide the done band" : "Show the done band"} onClick={() => setShowDone((v) => !v)}>{doneN} done</button>}
         </div>
         {rolled.length > 0 && (
@@ -1009,7 +1048,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
 
         <div className="tdb-tf">
           <span className="tdb-pc">{prog.empty ? "NOTHING COMMITTED" : `${prog.done} of ${prog.total} done today`}</span>
-          <button type="button" className="tdb-pick" onClick={helpMePick}>{committedCards.length ? "Add more" : "Help me pick"}</button>
+          <button type="button" className="tdb-pick" onClick={helpMePick}>{committedCards.length ? "＋ Add more" : "Help me pick"}</button>
           <button type="button" className="tdb-worklist" disabled={!committedCards.length} onClick={() => {
             // C2 family law — the Today's-list walk is a ritual: sage bands whole-walk
             const flowable = committedCards.filter((c) => c.taskType !== "weekly_review");

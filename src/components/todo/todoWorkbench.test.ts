@@ -71,7 +71,7 @@ describe("P1 — the corner retirement + the AppShell's one out-of-page line", (
     }
     expect(rule(".tdb-th")).toContain("var(--hk-sage)");
     // the add flow survives: Add more / Help me pick + Work the list, same handlers
-    expect(page).toContain('{committedCards.length ? "Add more" : "Help me pick"}');
+    expect(page).toContain('{committedCards.length ? "＋ Add more" : "Help me pick"}');
     // evening C2: Work the list is the RITUAL walk (sage whole-walk) over the same committed set
     expect(page).toContain('setFlow({ items: flowable.map((card) => ({ kind: "card", card })), ritual: true });');
     expect(page).toContain(">Work the list</button>");
@@ -341,5 +341,34 @@ describe("II·B P2 — the drawer, controls only", () => {
     expect(drawer).not.toContain("TODAY’S LIST ·");
     expect(drawer.indexOf("tdb-fgrp")).toBeLessThan(drawer.indexOf("tdb-newnote"));
     expect(rule(".tdb-newnote")).toContain("border: 1.5px solid var(--ink)");
+  });
+});
+
+describe("II·B P3 — the companion rail (one panel, two mounts, one state)", () => {
+  it("mount parity: BOTH homes call the SAME renderTodayPanel, XOR'd on narrow (no fork — halt (c) clear)", () => {
+    expect((page.match(/\{renderTodayPanel\(\)\}/g) ?? []).length).toBe(2);
+    expect(page).toContain("{!narrow && (");
+    expect(page).toContain("{narrow && (");
+    expect(page).toContain('window.matchMedia("(max-width: 1499.98px)")');
+  });
+  it("the rail: 264 sticky at the 24 offset, after the main column; noted as the future companions' home", () => {
+    expect(rule(".tdb-railr")).toContain("width: 264px");
+    expect(rule(".tdb-railr")).toContain("position: sticky; top: var(--g24)");
+    expect(page.indexOf('className="tdb-main"')).toBeLessThan(page.indexOf('className="tdb-railr"'));
+  });
+  it("the chip's count is the committed union — never a parallel tally — and the header chip pairs it with the done union", () => {
+    expect(page).toContain("Today’s list · {committedCards.length} TO GO");
+    expect(page).toContain("`${committedCards.length} COMMITTED · ${doneN} DONE`");
+  });
+  it("popover a11y: dialog role, aria-expanded on the chip, Esc + click-away close, reduced-motion honoured", () => {
+    expect(page).toContain('aria-haspopup="dialog" aria-expanded={todayPopOpen}');
+    expect(page).toContain('<div className="tdb-todaypop" role="dialog" aria-label="Today’s list">');
+    expect(page).toContain('if (e.key === "Escape") setTodayPopOpen(false);');
+    expect(page).toContain('t.closest(".tdb-todaypop") || t.closest(".tdb-todaychip")');
+    expect(css).toContain("@media (prefers-reduced-motion: reduce) { .tdb-todaypop { animation: none; } }");
+  });
+  it("the breakpoint belt: the rail hides <1500 in CSS too; narrow closes the popover on widen", () => {
+    expect(css).toContain("@media (max-width: 1499.98px) { .tdb-railr { display: none; } }");
+    expect(page).toContain("useEffect(() => { if (!narrow) setTodayPopOpen(false); }, [narrow]);");
   });
 });

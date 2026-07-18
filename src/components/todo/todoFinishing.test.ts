@@ -103,8 +103,9 @@ describe("P3 — the Sunday review (source locks)", () => {
     expect(scrap).toContain("aria-label={`Last week in review — week ${scrap.weekNumber}`}");
     expect(scrap).not.toContain("dismiss"); // no dismissal affordance on the scrap
     // it derives from reviewScrap and lives inside the post-it cluster (before the cluster closes
-    // into the masthead's spacer — anchor re-pointed for the workbench masthead's indentation)
-    const clusterEnd = page.indexOf('</span>\n        <span className="tdb-sp" />');
+    // — the II·B Today chip now sits between the cluster and the spacer, so the anchor is the
+    // cluster's own close into the chip block)
+    const clusterEnd = page.indexOf('</span>\n        {narrow && (');
     expect(clusterEnd).toBeGreaterThan(0);
     expect(page.indexOf('className="tdb-scrap"')).toBeGreaterThan(0);
     expect(page.indexOf('className="tdb-scrap"')).toBeLessThan(clusterEnd);

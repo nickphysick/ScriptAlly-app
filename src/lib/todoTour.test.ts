@@ -25,7 +25,7 @@ describe("TOUR_STOPS — five stops (workbench retargets), Done on the last", ()
       ".tdb-postits",
       "#tdb-lane-do",
       "#tdb-lane-do .tdb-pill",
-      ".tdb-today2",
+      ".tdb-today2, .tdb-todaychip",
       ".tdb-dwalk",
     ]);
   });
@@ -34,7 +34,7 @@ describe("TOUR_STOPS — five stops (workbench retargets), Done on the last", ()
       ["Your desk, counted.", "Three post-its, three kinds of work: pressing things, tidy-up jobs, and your own notes. Tap one to jump to its pile."],
       ["Urgent — where your move matters.", "Requests, deadlines and offers land here, most pressing first. Click any card to work through it, one question at a time."],
       ["Build a list you’ll finish.", "Commit up to five things to today. Small on purpose — a finished list beats a long one."],
-      ["Today lives in the drawer.", "Your committed list and everything you’ve done today, struck through as you go."],
+      ["Today lives beside your work.", "Your committed list and everything you’ve done today, struck through as you go."],
       ["Or just say go.", "This walks your urgent pile for you — one sheet at a time, nothing saved until you approve the lot."],
     ]);
   });

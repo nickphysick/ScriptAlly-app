@@ -41,3 +41,26 @@ companion rail — normative** for the whole layout; Options A and C fenced as e
 - Tests: II·B P2 describe (head row, single species, real-input checkbox + a11y, zero-grey,
   no-Today-in-drawer, demoted note); the P1/P4 drawer locks re-pointed (dcreate → newnote, the
   ft labels → the frow builder, the folded Today icon's absence).
+
+## PHASE 3 — the companion rail
+
+- **The two-mount account (halt (c) clear):** the Today panel stayed ONE render function
+  (`renderTodayPanel` — page state, page handlers, exactly as transplanted in the workbench pack)
+  with TWO call sites XOR'd on a `narrow` matchMedia flag (1499.98px): the **companion rail**
+  (264px aside after the main column, sticky at the `--g24` offset) at ≥1500, the **masthead
+  chip's popover** below. Exactly one mounts at a time, so the state literally cannot fork —
+  tick/record/remove, the rollover bar, the done band and Add more all ride unchanged.
+- **The chip:** sage pill "Today's list · {n} TO GO" — n is `committedCards.length`, the SAME
+  committed union the panel renders (never a parallel count). Opens the identical panel as a
+  popover anchored beneath (dialog role, aria-expanded, Esc + click-away close, reduced-motion
+  honoured); widening past 1500 closes it and the rail takes over.
+- **Panel polish per the ref:** the header chip now reads "{n} COMMITTED · {m} DONE" (both
+  unions; "NOTHING YET" when both zero); the footer's pick reads "＋ Add more". The done-badge
+  band toggle stays untouched (its chrome-fixes lock stands).
+- **Tour:** stop 4 → `.tdb-today2, .tdb-todaychip` (querySelector's list hits whichever home
+  exists; a closed popover filters out) with the copy re-worded "Today lives beside your work."
+- **Future companions (report note, no build):** the rail is the natural home for the assistant's
+  "note from your desk" card — it stacks (14px gaps) below the Today panel when that lands.
+- Tests: mount parity (two calls, XOR guards), the rail geometry, chip/header count sources,
+  popover a11y, the CSS belt + widen-closes; the scrap-cluster anchor re-pointed (the chip now
+  sits between the cluster and the spacer).
