@@ -43,7 +43,7 @@ import { BoardCard } from "../../lib/todoBoard";
 import { HkGroup, HkRule, HK_RULES, HK_PAYOFF, mutedMembersForRule } from "../../lib/todoHousekeeping";
 import {
   StagedPayload, applyStaged, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, assumedSendItem, DEFAULT_CHECKBACK_DAYS, journeyEventISO,
-  quickSendPayload, quickNudgePayload, receiptLine, sendKicker,
+  quickSendPayload, quickNudgePayload, receiptLine, sendKicker, priorSameTypeSend, duplicateSendPrompt,
 } from "../../lib/todoWalk";
 import { USER_TASK_FLAG_TYPE } from "../../lib/todoBoard";
 import { saveHkRows } from "../../lib/hkSave";
@@ -336,6 +336,10 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
           if (!q) { advance(); return; }
           const action = getPrimaryAction(q.status as QueryStatus);
           if (action.kind !== "mark-sent") { advance(); return; }
+          // B3 — the soft duplicate-send guard: read the log at write time; decline stages
+          // NOTHING and stays on the step (staged work intact). R&R is never guarded.
+          const prior = priorSameTypeSend(activities, q.id, action.target as QueryStatus, action.markKind === "resubmit");
+          if (prior && !window.confirm(duplicateSendPrompt(action.target as QueryStatus, c.who, prior))) return;
           stageAndAdvance({
             kind: "mark-sent", cardKey: c.key, label: c.title, queryId: q.id,
             targetStatus: action.target as QueryStatus,
@@ -856,6 +860,9 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     }
     const action = getPrimaryAction(q.status as QueryStatus);
     if (action.kind !== "mark-sent") { advance(); return; }
+    // B3 — the same soft guard in this path's grammar (window.confirm); decline writes nothing.
+    const priorQuick = priorSameTypeSend(activitiesRef.current, q.id, action.target as QueryStatus, action.markKind === "resubmit");
+    if (priorQuick && !window.confirm(duplicateSendPrompt(action.target as QueryStatus, c.who, priorQuick))) return;
     const p = quickSendPayload({ cardKey: c.key, label: c.title, taskType: c.taskType, queryId: q.id, targetStatus: action.target as QueryStatus, isResubmit: action.markKind === "resubmit", method: q.sendMethod, nowIso });
     const prev = q.status as QueryStatus;
     await recordMaterialsSent(markSentWriteArgs(p)); // the ONE mark-sent write path

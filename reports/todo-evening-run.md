@@ -83,3 +83,22 @@ Vitest, pipefail). Live `.t-f12` tokens over mockup hexes throughout.
   twins the nested "Nudge sent", so the rows come out identical. Pre-migration activities without
   a `resultingStatus` drop out (the synthesised "Query sent" root covers the common gap) — the
   one caveat, flagged.
+
+### B3 — duplicate-send guard (soft)
+- **The read:** `priorSameTypeSend` (pure, todoWalk) — the most recent SAME-TYPE `MATERIALS_SENT`
+  on that query, from the log at write time (matched on `resultingStatus` — Partial/Full Sent).
+  No new state. R&R resubmissions never guarded; non-send statuses never guard.
+- **The confirm:** `duplicateSendPrompt` — "You logged a {full/partial} to {agent} on {date} —
+  log another?" surfaced through **`window.confirm` at all three write moments** (the sheet's
+  existing confirm grammar — the same dialogue the staged-discard guard uses; the quick paths
+  have no bespoke dialogue surface, so this IS their grammar — reported shape: OK proceeds with
+  the normal payload, Cancel returns with nothing written and staged work intact).
+- **The three sites:** the journey's Mark sent (guard BEFORE `stageAndAdvance` — decline stays on
+  the step), the sweep's quick-done, the board's quick-✓ (both BEFORE the one mark-sent write
+  path — decline leaves the card untouched).
+- **Daniel O'Rourke's 16/17 Jul duplicate:** real test data, untouched — it renders truthfully
+  (two ledger rows, two timeline entries) and now demonstrates the guard: a THIRD full would
+  confirm against "17 Jul". Awaits the Correction UI.
+- Tests: fires on same-type repeat only (most-recent date), never on first sends / cross-type /
+  cross-query, never on R&R; prompt copy incl. degrades; source locks pinning guard-before-write
+  at all three sites.

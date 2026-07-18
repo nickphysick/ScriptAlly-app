@@ -30,7 +30,7 @@ import { assembleBoard, todaySplit, ribbonTiles, walkSublabel, walkAria, reviewS
 import { flagKeyForTask, MUTED_UNTIL } from "../../lib/taskFlags";
 import {
   choosePicks, rolledOverCards, todayProgress, MAX_TODAY,
-  quickSendPayload, quickNudgePayload, receiptLine, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask,
+  quickSendPayload, quickNudgePayload, receiptLine, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, priorSameTypeSend, duplicateSendPrompt,
 } from "../../lib/todoWalk";
 import { weekOfQuerying } from "../../lib/dashboardStats";
 import { saveHkRows } from "../../lib/hkSave";
@@ -584,6 +584,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     }
     const action = getPrimaryAction(q.status as QueryStatus);
     if (action.kind !== "mark-sent") return;
+    // B3 — the soft duplicate-send guard in the quick-✓'s grammar (window.confirm; decline
+    // writes nothing, the card stays). R&R resubmissions are never guarded.
+    const prior = priorSameTypeSend(activitiesRef.current, q.id, action.target as QueryStatus, action.markKind === "resubmit");
+    if (prior && !window.confirm(duplicateSendPrompt(action.target as QueryStatus, c.who, prior))) return;
     const p = quickSendPayload({ cardKey: c.key, label: c.title, taskType: c.taskType, queryId: q.id, targetStatus: action.target as QueryStatus, isResubmit: action.markKind === "resubmit", method: q.sendMethod, nowIso });
     const prev = q.status as QueryStatus;
     await recordMaterialsSent(markSentWriteArgs(p)); // the ONE mark-sent write path

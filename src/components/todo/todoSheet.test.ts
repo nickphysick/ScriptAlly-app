@@ -40,3 +40,22 @@ describe("B2 — the sheet renders the HUB'S timeline (reuse, not imitation)", (
     expect(hub).toContain('StatusDot status={row.status} overrideSize={28} decorative={row.kind === "nudge"}');
   });
 });
+
+describe("B3 — the duplicate-send guard wires all three write moments (source locks)", () => {
+  const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
+  it("the journey's Mark sent: guard BEFORE stageAndAdvance; decline stages nothing (staged work intact)", () => {
+    const site = flow.slice(flow.indexOf('if (action.kind !== "mark-sent") { advance(); return; }\n          // B3'));
+    expect(site.indexOf("priorSameTypeSend(activities, q.id")).toBeGreaterThan(-1);
+    expect(site.indexOf("window.confirm(duplicateSendPrompt(")).toBeLessThan(site.indexOf("stageAndAdvance({"));
+  });
+  it("the sweep quick-done + the board quick-✓: guard BEFORE the one write path; decline returns", () => {
+    expect(flow).toContain("const priorQuick = priorSameTypeSend(activitiesRef.current, q.id");
+    expect(flow.indexOf("priorQuick && !window.confirm")).toBeLessThan(flow.indexOf("await recordMaterialsSent(markSentWriteArgs(p)); // the ONE mark-sent write path"));
+    expect(page).toContain("const prior = priorSameTypeSend(activitiesRef.current, q.id");
+    expect(page.indexOf("prior && !window.confirm")).toBeLessThan(page.indexOf("await recordMaterialsSent(markSentWriteArgs(p)); // the ONE mark-sent write path"));
+  });
+  it("R&R is passed through as isResubmit at every site (never guarded); no new state anywhere", () => {
+    expect((flow.match(/action\.markKind === "resubmit"\)/g) ?? []).length).toBeGreaterThanOrEqual(2);
+    expect(flow).not.toContain("useState<.*prior"); // read-at-write-time, no guard state
+  });
+});

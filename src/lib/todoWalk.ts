@@ -11,7 +11,7 @@
 
 import { BoardCard } from "./todoBoard";
 import { ledgerDetail } from "./todoLedger";
-import { Query, QueryStatus, TaskFlag } from "../types";
+import { Activity, ActivityType, Query, QueryStatus, TaskFlag } from "../types";
 
 export const MAX_TODAY = 5;
 const MAX_DO = 4;
@@ -43,6 +43,34 @@ export function rolledOverCards(cards: BoardCard[], today: string): BoardCard[] 
 export function todayProgress(committedOnList: number, doneFromList: number): { total: number; done: number; pct: number; empty: boolean } {
   const total = committedOnList + doneFromList;
   return { total, done: doneFromList, pct: total ? Math.round((doneFromList / total) * 100) : 0, empty: total === 0 };
+}
+
+/**
+ * The duplicate-send guard's read (evening run B3) — the most recent SAME-TYPE MATERIALS_SENT on
+ * this query, read from the log AT WRITE TIME (no new state). Partial/Full only; R&R resubmissions
+ * are NEVER guarded (a resend of revisions is the point of the journey). Returns the prior send's
+ * ISO date, or null when this would be the first of its type.
+ */
+export function priorSameTypeSend(
+  activities: Activity[],
+  queryId: string,
+  targetStatus: QueryStatus,
+  isResubmit: boolean,
+): string | null {
+  if (isResubmit) return null;
+  if (targetStatus !== QueryStatus.PARTIAL_SENT && targetStatus !== QueryStatus.FULL_SENT) return null;
+  const prior = activities
+    .filter((a) => a.queryId === queryId && a.activityType === ActivityType.MATERIALS_SENT && a.resultingStatus === targetStatus)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  return prior[0]?.date ?? null;
+}
+
+/** The guard's one confirm line (soft — resends are legitimate; OK proceeds, Cancel takes you back). */
+export function duplicateSendPrompt(targetStatus: QueryStatus, agentName: string, priorISO: string): string {
+  const typeWord = targetStatus === QueryStatus.PARTIAL_SENT ? "partial" : "full";
+  const when = new Date(priorISO);
+  const dateLabel = Number.isNaN(when.getTime()) ? "earlier" : when.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  return `You logged a ${typeWord} to ${agentName || "this agent"} on ${dateLabel} — log another?`;
 }
 
 /**

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { BoardCard } from "./todoBoard";
-import { choosePicks, rolledOverCards, todayProgress, walkStepKind, isStageable, applyStaged, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, assumedSendItem, quickSendPayload, quickNudgePayload, receiptLine, journeyEventISO, DEFAULT_CHECKBACK_DAYS, StagedPayload, StagedHandlers, sendKicker } from "./todoWalk";
-import { QueryStatus } from "../types";
+import { choosePicks, rolledOverCards, todayProgress, walkStepKind, isStageable, applyStaged, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, assumedSendItem, quickSendPayload, quickNudgePayload, receiptLine, journeyEventISO, DEFAULT_CHECKBACK_DAYS, StagedPayload, StagedHandlers, sendKicker, priorSameTypeSend, duplicateSendPrompt } from "./todoWalk";
+import { Activity, ActivityType, QueryStatus } from "../types";
 
 const card = (key: string, over: Partial<BoardCard> = {}): BoardCard =>
   ({ key, stream: "do", title: "", who: "", subtitle: "", due: "", warn: false, snoozes: 0, hk: false, initials: "", record: "", committed: false, done: false, ...over } as BoardCard);
@@ -306,5 +306,33 @@ describe("sendKicker — B1: stream + the row's DETAIL, never the same string tw
       expect(k.toLowerCase()).not.toContain("over to you · over to you");
       expect(k).not.toContain("—");
     }
+  });
+});
+
+describe("priorSameTypeSend + duplicateSendPrompt — B3: the soft duplicate-send guard", () => {
+  const act = (id: string, queryId: string, resultingStatus: QueryStatus, date: string) =>
+    ({ id, userId: "u", queryId, manuscriptId: "m", activityType: ActivityType.MATERIALS_SENT, description: "", details: "", date, resultingStatus }) as Activity;
+  const log = [
+    act("a1", "q1", QueryStatus.FULL_SENT, "2026-07-16T12:00:00.000Z"),
+    act("a2", "q1", QueryStatus.FULL_SENT, "2026-07-17T12:00:00.000Z"),
+    act("a3", "q1", QueryStatus.PARTIAL_SENT, "2026-07-01T12:00:00.000Z"),
+    act("a4", "q2", QueryStatus.FULL_SENT, "2026-07-10T12:00:00.000Z"),
+  ];
+  it("fires on a same-type repeat only — and returns the MOST RECENT same-type date", () => {
+    expect(priorSameTypeSend(log, "q1", QueryStatus.FULL_SENT, false)).toBe("2026-07-17T12:00:00.000Z");
+    expect(priorSameTypeSend(log, "q1", QueryStatus.PARTIAL_SENT, false)).toBe("2026-07-01T12:00:00.000Z");
+  });
+  it("never fires on a first send of that type (cross-type and cross-query sends don't count)", () => {
+    expect(priorSameTypeSend(log, "q2", QueryStatus.PARTIAL_SENT, false)).toBeNull();
+    expect(priorSameTypeSend([], "q1", QueryStatus.FULL_SENT, false)).toBeNull();
+  });
+  it("R&R resubmissions are NEVER guarded; non-send statuses never guard", () => {
+    expect(priorSameTypeSend(log, "q1", QueryStatus.FULL_SENT, true)).toBeNull();
+    expect(priorSameTypeSend(log, "q1", QueryStatus.OFFER, false)).toBeNull();
+  });
+  it("the confirm line names the type, the agent and the most recent same-type date", () => {
+    expect(duplicateSendPrompt(QueryStatus.FULL_SENT, "Daniel O’Rourke", "2026-07-17T12:00:00.000Z"))
+      .toBe("You logged a full to Daniel O’Rourke on 17 Jul — log another?");
+    expect(duplicateSendPrompt(QueryStatus.PARTIAL_SENT, "", "junk")).toBe("You logged a partial to this agent on earlier — log another?");
   });
 });
