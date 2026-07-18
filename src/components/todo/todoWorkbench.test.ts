@@ -253,3 +253,25 @@ describe("P5 — selection · keyboard · bulk · kebab (source locks; the reduc
     expect(page).toMatch(/\{!isOffer && \(\s*<button type="button" title="More"/);
   });
 });
+
+describe("A1 — the masthead band (evening run; amends the shell ref in place)", () => {
+  it("a full-width paper band with the 1px base rule wraps the masthead, ABOVE the drawer row", () => {
+    expect(rule(".tdb-mastband")).toContain("background: var(--paper)");
+    expect(rule(".tdb-mastband")).toContain("border-bottom: 1px solid var(--line)");
+    const band = page.indexOf('className="tdb-mastband"');
+    const ws = page.indexOf('className="tdb-ws"');
+    expect(band).toBeGreaterThan(0);
+    expect(band).toBeLessThan(ws); // band renders before (above) the drawer+column row
+    expect(page).toContain('<div className="tdb-mastcol">{renderMasthead()}</div>');
+  });
+  it("the band content keeps the 1150 discipline; the board column no longer hosts the masthead", () => {
+    expect(rule(".tdb-mastcol")).toContain("max-width: 1150px");
+    expect(rule(".tdb-mastcol")).toContain("margin: 0 auto");
+    const col = page.slice(page.indexOf('className="tdb-col"'), page.indexOf('className="tdb-lanes"'));
+    expect(col).not.toContain("renderMasthead");
+  });
+  it("the band is not sticky (scrolls away); the drawer's sticky offset stands", () => {
+    expect(rule(".tdb-mastband")).not.toContain("sticky");
+    expect(rule(".tdb-drawer")).toContain("position: sticky; top: 18px");
+  });
+});

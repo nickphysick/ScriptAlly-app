@@ -680,11 +680,16 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             every viewport, surplus pools as symmetric desk. The old full-bleed header band +
             .tdb-ribbon are RETIRED (the masthead is recomposed inside the column); Walk me
             through lives in the drawer now. ── */}
+        {/* ── A1: the masthead returns to a FULL-WIDTH paper band above the drawer+column row
+            (1px base rule; scrolls away with the wrap). Its content keeps the 1150 discipline,
+            viewport-centred. ── */}
+        <div className="tdb-mastband">
+          <div className="tdb-mastcol">{renderMasthead()}</div>
+        </div>
         <div className="tdb-ws">
           {renderDrawer()}
           <div className="tdb-main">
             <div className="tdb-col">
-              {renderMasthead()}
         {/* ── the board — cards or ledger by the masthead toggle; the desk states (new-desk /
             desk-cleared) replace BOTH views. Copy verbatim from todo-empty-states.html. ── */}
         {desk === "new-desk" ? renderNewDesk() : desk === "desk-cleared" ? renderDeskCleared() : active && !anyVisible ? (

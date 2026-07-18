@@ -21,10 +21,13 @@
 .tdb-col { max-width: 1150px; margin: 0 auto; }
 @media (max-width: 900px) { .tdb-ws { flex-wrap: wrap; } .tdb-ws .tdb-drawer { position: static; width: 100%; max-height: none; } }
 
-/* ── MASTHEAD (workbench — one row inside the column; the full-bleed paper band + .tdb-ribbon
-   are RETIRED, which also resolves the old .tdb-band double-definition: the name now belongs to
-   the CARD header band alone). ── */
-.tdb-mast { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; row-gap: 12px; padding: 18px 2px 14px; }
+/* ── MASTHEAD (A1 amendment: back to a FULL-WIDTH paper band above the drawer+column row —
+   `--paper` ground, one `--line` base rule (the mockup's --hair realised as the live token), NOT
+   sticky; scrolls away with the wrap. The content row keeps the 1150 discipline, centred to the
+   VIEWPORT. The old .tdb-band name stays the card band's alone.) ── */
+.tdb-mastband { background: var(--paper); border-bottom: 1px solid var(--line); }
+.tdb-mastcol { max-width: 1150px; margin: 0 auto; padding: 0 26px; }
+.tdb-mast { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; row-gap: 12px; padding: 15px 2px 13px; }
 .tdb-askwrap { display: flex; flex-direction: column; gap: 4px; }
 .tdb-rdate { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
 .tdb-ask { font-family: var(--f12-serif); font-size: 20px; font-weight: 600; color: var(--ink); white-space: nowrap; line-height: 1.08; }
