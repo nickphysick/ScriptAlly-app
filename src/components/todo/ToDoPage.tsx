@@ -887,9 +887,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         <aside className="tdb-drawer folded" aria-label="Workbench drawer (folded)">
           <button type="button" className="tdb-dic" title="New note" aria-label="New note" onClick={addTask}>＋</button>
           <button type="button" className="tdb-dic" title="Walk me through" aria-label={walkAria(tiles.urgent)} disabled={!tiles.urgent} onClick={() => openFlowCards(board.do)}>▶</button>
-          <button type="button" className="tdb-dic today" title="Today’s list — unfold to open" aria-label={`Today’s list — ${prog.empty ? "nothing committed" : `${prog.done} of ${prog.total} done`}; unfold the drawer to open it`} onClick={() => setFold(false)}>
-            ✓{committedCards.length > 0 && <i className="tdb-dbadge">{committedCards.length}</i>}
-          </button>
           <span className="tdb-dsp" />
           <button type="button" className="tdb-dic" title="Task settings" aria-label="Task settings" onClick={() => setSettingsOpen(true)}>⚙</button>
           <button type="button" className="tdb-dic" title="Help" aria-label="Help" onClick={() => onNavigate("help")}>?</button>
@@ -897,12 +894,22 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         </aside>
       );
     }
+    // II·B P2 — the letterpress checkbox: a REAL input (a11y — the label wraps it) rendered
+    // visually by its sibling glyph box (no CSS data-URIs: the Tailwind v4 parser rejects them).
+    const frow = (label: string, key: keyof TodoFilterState, count: number, extra?: string) => (
+      <label className={`tdb-frow${count === 0 ? " zero" : ""}${extra ? ` ${extra}` : ""}`}>
+        <input type="checkbox" className="tdb-cbi" checked={filters[key]} onChange={(e) => setF(key, e.target.checked)} />
+        <span className="tdb-cb" aria-hidden>✓</span>
+        {label}<span className="n">{count}</span>
+      </label>
+    );
     return (
       <aside className="tdb-drawer" aria-label="Workbench drawer">
-        <div className="tdb-dhead">
-          <button type="button" className="tdb-dcreate" onClick={addTask}>＋ New note</button>
+        <div className="tdb-dwhead">
+          <span className="tdb-dwt">YOUR DESK</span>
           <button type="button" className="tdb-dfold" title="Fold the drawer" aria-label="Fold the drawer" aria-expanded onClick={() => setFold(true)}>«</button>
         </div>
+        <div className="tdb-dwmid">
         <button type="button" className="tdb-dwalk" disabled={!tiles.urgent} aria-label={walkAria(tiles.urgent)} onClick={() => openFlowCards(board.do)}>
           <span className="tdb-wdisc" aria-hidden />
           <span className="tdb-wtxt">
@@ -911,26 +918,20 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           </span>
         </button>
         <div className="tdb-dsh">FILTER</div>
-        <div className="tdb-dfilters">
-          <div className="tdb-fgrp">
-            <div className="tdb-fgl"><span className="tdb-lanedot do" aria-hidden />Urgent<span className="n">{fc.offers + fc.overToYou}</span></div>
-            <label className="tdb-ft"><input type="checkbox" checked={filters.offers} onChange={(e) => setF("offers", e.target.checked)} />Offers<span className="n">{fc.offers}</span></label>
-            <label className="tdb-ft"><input type="checkbox" checked={filters.overToYou} onChange={(e) => setF("overToYou", e.target.checked)} />Over to you<span className="n">{fc.overToYou}</span></label>
-          </div>
-          <div className="tdb-fgrp">
-            <div className="tdb-fgl"><span className="tdb-lanedot hk" aria-hidden />Housekeeping<span className="n">{tiles.housekeeping}</span></div>
-            <label className="tdb-ft"><input type="checkbox" checked={filters.materials} onChange={(e) => setF("materials", e.target.checked)} />Missing materials<span className="n">{fc.materials}</span></label>
-            <label className="tdb-ft"><input type="checkbox" checked={filters.mswl} onChange={(e) => setF("mswl", e.target.checked)} />Missing wish lists<span className="n">{fc.mswl}</span></label>
-            <label className="tdb-ft"><input type="checkbox" checked={filters.stale} onChange={(e) => setF("stale", e.target.checked)} />Stale queries<span className="n">{fc.stale}</span></label>
-            <label className="tdb-ft"><input type="checkbox" checked={filters.snoozed} onChange={(e) => setF("snoozed", e.target.checked)} />Snoozed<span className="n">{fc.snoozed}</span></label>
-          </div>
-          <div className="tdb-fgrp">
-            <div className="tdb-fgl"><span className="tdb-lanedot nt" aria-hidden />Notes<span className="n">{tiles.notes}</span></div>
-          </div>
-          <label className="tdb-ft today"><input type="checkbox" checked={filters.todayOnly} onChange={(e) => setF("todayOnly", e.target.checked)} />✓ On today’s list only<span className="n">{fc.today}</span></label>
+        <div className="tdb-fgrp">
+          <div className="tdb-fgl"><span className="tdb-lanedot do" aria-hidden />Urgent<span className="n">{fc.offers + fc.overToYou}</span></div>
+          {frow("Offers", "offers", fc.offers)}
+          {frow("Over to you", "overToYou", fc.overToYou)}
+          <div className="tdb-fgl"><span className="tdb-lanedot hk" aria-hidden />Housekeeping<span className="n">{tiles.housekeeping}</span></div>
+          {frow("Missing materials", "materials", fc.materials)}
+          {frow("Missing wish lists", "mswl", fc.mswl)}
+          {frow("Stale queries", "stale", fc.stale)}
+          {frow("Snoozed", "snoozed", fc.snoozed)}
+          <div className="tdb-fgl"><span className="tdb-lanedot nt" aria-hidden />Notes<span className="n">{tiles.notes}</span></div>
+          {frow("On today’s list only", "todayOnly", fc.today, "today")}
         </div>
-        <div className="tdb-dsh">TODAY’S LIST · {prog.empty ? "NOTHING YET" : `${prog.done} OF ${prog.total}`}</div>
-        {renderTodayPanel()}
+        <button type="button" className="tdb-newnote" onClick={addTask}>＋ New note</button>
+        </div>
         <div className="tdb-dfoot">
           <button type="button" className="tdb-dfbtn" onClick={() => setSettingsOpen(true)}>
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>

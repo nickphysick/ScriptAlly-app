@@ -20,3 +20,24 @@ companion rail — normative** for the whole layout; Options A and C fenced as e
   flagged) · scrap **58×44** · search 300px (10/16 padding) · toggle unchanged.
 - Tests: the token-consumption sweep + the ref-anatomy locks; the A1/P1 masthead locks re-pointed
   (42→62, 20→25, 18px offsets → the token).
+
+## PHASE 2 — the drawer, controls only
+
+- **"YOUR DESK" header row** (mono label + the fold chevron folded into it, hairline base) over a
+  structured mid (14/16 padding, 14 gaps): **Walk me through** stays the flagship · **FILTER** —
+  **one bordered white group** (the single `.tdb-fgrp` species): lane headers (dot + label +
+  count, hairline-divided) with indented type rows · the demoted **＋ New note** (letterpress
+  outline pill) below the group · the ⚙/? foot unchanged.
+- **The letterpress checkbox:** a REAL `<input type="checkbox">` (label-wrapped, keyboardable,
+  `:focus-visible` ring) rendered by its sibling glyph box — 15px, 1.5px ink border, sage
+  gradient + tick when checked. No CSS data-URIs (the Tailwind v4 parser gotcha) — the sibling
+  span carries the ✓.
+- **Zero-count rows grey** (`--faint` text + border), never hide. "On today's list only" rides
+  INSIDE the group as its last row.
+- **Today's list content removed from the drawer entirely** — the section label, the panel mount
+  and the folded rail's Today icon all gone (the rail takes over in P3). The drawer now fits
+  ordinary heights without internal scroll; the max-height + overflow stays as the safety net
+  only.
+- Tests: II·B P2 describe (head row, single species, real-input checkbox + a11y, zero-grey,
+  no-Today-in-drawer, demoted note); the P1/P4 drawer locks re-pointed (dcreate → newnote, the
+  ft labels → the frow builder, the folded Today icon's absence).

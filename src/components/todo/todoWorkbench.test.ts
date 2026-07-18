@@ -40,10 +40,12 @@ describe("P1 — the drawer (floating, sticky, foldable; sa.todoDrawer persisted
     expect(page).toContain('localStorage.getItem("sa.todoDrawer")');
     expect(page).toContain('localStorage.setItem("sa.todoDrawer", v ? "folded" : "open")');
   });
-  it("the drawer holds ＋ New note and the relocated Walk me through; the folded rail mirrors both", () => {
-    expect(page).toContain('className="tdb-dcreate" onClick={addTask}>＋ New note');
+  it("the drawer holds the demoted ＋ New note (II·B) and the flagship Walk me through; the folded rail survives", () => {
+    expect(page).toContain('className="tdb-newnote" onClick={addTask}>＋ New note');
     expect(page).toMatch(/tdb-dwalk" disabled=\{!tiles\.urgent\} aria-label=\{walkAria\(tiles\.urgent\)\} onClick=\{\(\) => openFlowCards\(board\.do\)\}/);
     expect(page).toContain('className="tdb-drawer folded"');
+    // the folded rail's Today icon left with the list (II·B P2)
+    expect(page).not.toContain('className="tdb-dic today"');
   });
   it("the drawer FOOT carries ⚙ (the same TaskSettingsSheet) and the ? menu with the verbatim replay dispatch", () => {
     expect(page).toContain('className="tdb-dfbtn" onClick={() => setSettingsOpen(true)}');
@@ -188,11 +190,10 @@ describe("P4 — search + filters (source locks; the matrix lives in todoFilters
     expect(page).toContain("{vNt.map(renderCard)}");
     expect(page).toContain("sortLedgerDo(vDo.filter((c) =>"); // the ledger sorts the SAME set
   });
-  it("the drawer filter groups are the ref's list with derived counts; On today's list only rides beneath", () => {
-    for (const label of [">Offers<", ">Over to you<", ">Missing materials<", ">Missing wish lists<", ">Stale queries<", ">Snoozed<"]) {
-      expect(page.replace(/<span/g, "<").replace(/<\/span>/g, "<")).toContain(label.replace("<", "<"));
+  it("the drawer filter rows are the ref's list with derived counts (II·B: the frow builder); today-only rides inside the group", () => {
+    for (const call of ['frow("Offers", "offers", fc.offers)', 'frow("Over to you", "overToYou", fc.overToYou)', 'frow("Missing materials", "materials", fc.materials)', 'frow("Missing wish lists", "mswl", fc.mswl)', 'frow("Stale queries", "stale", fc.stale)', 'frow("Snoozed", "snoozed", fc.snoozed)', 'frow("On today’s list only", "todayOnly", fc.today, "today")']) {
+      expect(page).toContain(call);
     }
-    expect(page).toContain("✓ On today’s list only");
     expect(page).toContain("filterCounts({ doCards: board.do, hkGroups, staleCards, ntCards: board.nt, committedCount: committedCards.length })");
   });
   it("filtered-empty gets the quiet one-liner + clear action, NEVER a celebratory empty (branch order + lane skips)", () => {
@@ -308,5 +309,37 @@ describe("II·B P1 — the 24-grid + the ref masthead (todo-workbench-rail-v1.ht
     expect(rule(".tdb-scrap")).toContain("width: 58px; height: 44px");
     expect(rule(".tdb-msrch")).toContain("flex: 0 1 300px");
     expect(rule(".tdb-rdate")).toContain("font-size: 10px");
+  });
+});
+
+describe("II·B P2 — the drawer, controls only", () => {
+  it("YOUR DESK header row with the fold folded in; the structured mid", () => {
+    expect(page).toContain('<span className="tdb-dwt">YOUR DESK</span>');
+    const head = page.slice(page.indexOf('className="tdb-dwhead"'), page.indexOf('className="tdb-dwmid"'));
+    expect(head).toContain("tdb-dfold");
+    expect(rule(".tdb-dwhead")).toContain("border-bottom: 1px solid var(--hairline)");
+  });
+  it("ONE bordered white filter species: lane headers + indented rows in a single .tdb-fgrp", () => {
+    expect((page.match(/className="tdb-fgrp"/g) ?? []).length).toBe(1);
+    expect(rule(".tdb-fgrp")).toContain("border: 1px solid var(--line)");
+    expect(rule(".tdb-frow")).toContain("padding: 7px 12px 7px 30px");
+  });
+  it("the letterpress checkbox is a REAL input (label-wrapped, focus-visible ring); the glyph box carries the look", () => {
+    expect(page).toContain('<input type="checkbox" className="tdb-cbi" checked={filters[key]} onChange={(e) => setF(key, e.target.checked)} />');
+    expect(rule(".tdb-cb")).toContain("width: 15px; height: 15px; border: 1.5px solid var(--ink)");
+    expect(css).toContain(".tdb-cbi:checked + .tdb-cb { background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border-color: var(--hk-ink); color: var(--hk-ink); }");
+    expect(css).toContain(".tdb-cbi:focus-visible + .tdb-cb { outline: 2px solid var(--hk-ink);");
+  });
+  it("zero-count rows grey, never hide", () => {
+    expect(page).toContain('count === 0 ? " zero" : ""');
+    expect(rule(".tdb-frow.zero")).toContain("color: var(--faint)");
+  });
+  it("NO Today content remains in the drawer (the rail owns it from P3); ＋ New note is the demoted outline below the filter", () => {
+    const drawer = page.slice(page.indexOf("function renderDrawer"), page.indexOf("function renderTodayPanel"));
+    expect(drawer).not.toContain("renderTodayPanel()");
+    expect(drawer).not.toContain("tdb-today2");
+    expect(drawer).not.toContain("TODAY’S LIST ·");
+    expect(drawer.indexOf("tdb-fgrp")).toBeLessThan(drawer.indexOf("tdb-newnote"));
+    expect(rule(".tdb-newnote")).toContain("border: 1.5px solid var(--ink)");
   });
 });
