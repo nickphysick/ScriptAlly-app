@@ -284,6 +284,11 @@
 .tdb-fabpuck { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex: none; }
 .tdb-fabpuck.tick { background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border: 1px solid var(--hk-spine); color: var(--hk-ink); font-size: 14px; }
 .tdb-fabpuck.plus { background: var(--paper); border: 1px solid var(--line); color: var(--muted); }
+/* the inner content crossfades on state change (keyed by state → remount → this animation);
+   the pill is right-anchored so it grows LEFTWARD — the companions never shift (no layout jump). */
+.tdb-fabinner { display: inline-flex; align-items: center; gap: 12px; animation: tdbFabFade 0.2s ease; }
+@keyframes tdbFabFade { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .tdb-fabinner { animation: none; } }
 .tdb-fabl { display: flex; flex-direction: column; line-height: 1.12; text-align: left; }
 .tdb-fab-a { font-family: var(--f12-serif); font-size: 16px; font-weight: 600; color: var(--ink); }
 .tdb-fab-b { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }

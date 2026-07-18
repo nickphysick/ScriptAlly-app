@@ -29,7 +29,7 @@ import { assembleBoard, todaySplit, ribbonTiles, laneFadeState, walkSublabel, wa
 import { flagKeyForTask, MUTED_UNTIL } from "../../lib/taskFlags";
 import {
   choosePicks, rolledOverCards, todayProgress, MAX_TODAY,
-  quickSendPayload, quickNudgePayload, receiptLine, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask,
+  quickSendPayload, quickNudgePayload, receiptLine, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, pillState, pillAria,
 } from "../../lib/todoWalk";
 import { saveHkRows } from "../../lib/hkSave";
 import { isProUser, fetchAssistedFill, AssistFound } from "../../lib/assistFill";
@@ -634,24 +634,39 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       </div>
 
       {/* ── Today's list — corner pop-up (fixed; FAB collapsed / panel expanded) ── */}
-      {!todayOpen && (
-        <button type="button" className="tdb-fab" onClick={() => setTodayOpen(true)} aria-label="Today’s list" aria-expanded={false}>
-          <span className="tdb-fabring">
-            <svg viewBox="0 0 34 34" aria-hidden>
-              <circle cx="17" cy="17" r="14" fill="none" stroke="var(--line)" strokeWidth="3" />
-              <circle cx="17" cy="17" r="14" fill="none" stroke="var(--ink)" strokeWidth="3" strokeLinecap="round" strokeDasharray="88" strokeDashoffset={88 - (88 * prog.pct) / 100} />
-            </svg>
-            <i className="tdb-fabfrac">{prog.empty ? "0" : `${prog.done}/${prog.total}`}</i>
-          </span>
-          <span className="tdb-fabl">
-            <span className="tdb-fab-a">Today’s list</span>
-            <span className="tdb-fab-b">
-              {committedCards.length === 0 && doneN === 0 ? "Nothing yet" : `${committedCards.length} committed · ${doneN} done`}
-              {rolled.length > 0 && <em className="tdb-fab-roll" title={`${rolled.length} rolled over from a previous day`}> ●</em>}
+      {!todayOpen && (() => {
+        // corner pack Phase 2 — one pill, three truthful states (strict priority, single-source:
+        // committed = the committed count, done = the cleared-union count the done band renders).
+        const st = pillState(committedCards.length, doneN);
+        return (
+        <button type="button" className="tdb-fab" onClick={() => setTodayOpen(true)} aria-label={pillAria(st)} aria-expanded={false}>
+          <span className="tdb-fabinner" key={st.kind}>
+            {st.kind === "list" ? (
+              <span className="tdb-fabring">
+                <svg viewBox="0 0 34 34" aria-hidden>
+                  <circle cx="17" cy="17" r="14" fill="none" stroke="var(--line)" strokeWidth="3" />
+                  <circle cx="17" cy="17" r="14" fill="none" stroke="var(--ink)" strokeWidth="3" strokeLinecap="round" strokeDasharray="88" strokeDashoffset={88 - (88 * st.pct) / 100} />
+                </svg>
+                <i className="tdb-fabfrac">{st.done}/{st.committed}</i>
+              </span>
+            ) : st.kind === "done" ? (
+              <span className="tdb-fabpuck tick" aria-hidden>✓</span>
+            ) : (
+              <span className="tdb-fabpuck plus" aria-hidden>
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
+              </span>
+            )}
+            <span className="tdb-fabl">
+              <span className="tdb-fab-a">{st.kind === "done" ? `${st.done} done today` : "Today’s list"}</span>
+              <span className="tdb-fab-b">
+                {st.kind === "list" ? `${st.toGo} to go` : st.kind === "done" ? "Nice going" : "Nothing yet"}
+                {rolled.length > 0 && <em className="tdb-fab-roll" title={`${rolled.length} rolled over from a previous day`}> ●</em>}
+              </span>
             </span>
           </span>
         </button>
-      )}
+        );
+      })()}
       {todayOpen && renderTodayPop()}
 
       <button type="button" className="tdb-setbtn" aria-label="Task settings" title="Task settings — what lands on your desk" onClick={() => setSettingsOpen(true)}>

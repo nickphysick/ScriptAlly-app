@@ -36,3 +36,23 @@ burgundy (recolouring is global). Both flagged; one-line AppShell follow-ups if 
   rings on all three.
 - **themes.md:** the "today-family FAB wears letterpress; sage speaks through its states" amendment.
 - Tests: NEW `todoCorner.test.ts` — letterpress skin, SVG ring, companion positions/sizes, focus.
+
+## PHASE 2 — the adaptive three-state pill (Section A, "the adaptive ledger")
+
+- **One derivation, single-source:** `pillState(committed, done)` in `todoWalk.ts` (pure) — the pill's
+  face is a switch over the SAME two numbers the pop-up + done band read
+  (`committedCards.length`, `doneN = doneCards.length` = the cleared union). No parallel count.
+  - `committed > 0` → **list**: ring + honest fraction `{done}/{committed}` + "Today's list / {toGo} to
+    go". Even `done = 0` stays list at `0/{n}` (never collapses to fresh). The fraction may exceed 1
+    (quick-✓s outnumbering list items) — the ring `pct` **caps at 100**, `toGo` **floors at 0**, the
+    numerals stay truthful.
+  - `committed = 0 ∧ done > 0` → **done**: sage ✓ puck + "{done} done today / Nice going".
+  - both 0 → **fresh**: paper + puck + "Today's list / Nothing yet".
+- **Priority is strict** (committed always wins over cleared) so a mid-list clear never flips the face.
+- **Crossfade:** the inner is `key={st.kind}` so a state change remounts it under `.tdb-fabinner`'s
+  `tdbFabFade` (0.2s), disabled under reduced motion. The pill is right-anchored → it grows leftward,
+  so the companions never shift.
+- **aria:** `pillAria(st)` speaks each state (the ring numerals are decorative).
+- Tests: `todoWalk.test.ts` — the full state matrix (committed>0 ∧ cleared=0 → list `0/{n}`; cleared
+  union outnumbering list → cap/floor; priority; no `−`/undefined fraction; aria per state).
+  `todoCorner.test.ts` — the three faces + the keyed crossfade at the source layer.

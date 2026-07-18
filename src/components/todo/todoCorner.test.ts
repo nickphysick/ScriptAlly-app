@@ -21,7 +21,7 @@ describe("Corner — L1 letterpress skin + companions", () => {
   });
   it("the ring is an SVG stroke (hairline track + ink progress, rounded cap), not a conic gradient", () => {
     expect(page).toContain('<circle cx="17" cy="17" r="14" fill="none" stroke="var(--line)" strokeWidth="3" />');
-    expect(page).toContain('strokeLinecap="round" strokeDasharray="88" strokeDashoffset={88 - (88 * prog.pct) / 100}');
+    expect(page).toContain('strokeLinecap="round" strokeDasharray="88" strokeDashoffset={88 - (88 * st.pct) / 100}');
     expect(css).toContain(".tdb-fabring svg { width: 34px; height: 34px; transform: rotate(-90deg); }");
     expect(page).not.toContain("conic-gradient(var(--ink)");
   });
@@ -32,5 +32,27 @@ describe("Corner — L1 letterpress skin + companions", () => {
   it("all three controls carry a visible focus ring", () => {
     expect(css).toContain(".tdb-fab:focus-visible { outline: 2px solid var(--hk-ink);");
     expect(css).toContain(".tdb-setbtn:focus-visible { outline: 2px solid var(--hk-ink);");
+  });
+});
+
+describe("Corner — L1 adaptive three-state pill (Phase 2)", () => {
+  it("the pill derives its face from pillState (single source), not ad-hoc inline branching", () => {
+    expect(page).toContain("pillState, pillAria");
+    expect(page).toContain("const st = pillState(committedCards.length, doneN);");
+    expect(page).toContain('aria-label={pillAria(st)}');
+  });
+  it("all three faces are present — ring fraction (list), ✓ puck (done), + puck (fresh)", () => {
+    expect(page).toContain('st.kind === "list" ?');
+    expect(page).toContain('{st.done}/{st.committed}'); // truthful fraction, never a bare dash
+    expect(page).toContain('st.kind === "done" ?');
+    expect(page).toContain('tdb-fabpuck tick'); // the done ✓ puck
+    expect(page).toContain('tdb-fabpuck plus'); // the fresh + puck
+  });
+  it("the inner content is keyed by state so the face crossfades on change", () => {
+    expect(page).toContain('className="tdb-fabinner" key={st.kind}');
+    expect(css).toContain(".tdb-fabinner {");
+    expect(css).toContain("animation: tdbFabFade 0.2s ease;");
+    expect(css).toContain("@keyframes tdbFabFade");
+    expect(css).toMatch(/prefers-reduced-motion: reduce\) \{ \.tdb-fabinner \{ animation: none/);
   });
 });
