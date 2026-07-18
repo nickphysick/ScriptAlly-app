@@ -88,3 +88,40 @@ done-child degrade (dated where stamped, undated otherwise — no invented dates
   card scale + the tag-law inheritance + renames).
 - Tests: workbench P2 describe (grid + reel-absence + anatomy + renames); todoCardBands re-locked
   (26px band, min-height 200, grid-drives-width); todoBoard laneFadeState describe removed.
+
+## PHASE 3 — the ledger
+
+- **The pure layer `src/lib/todoLedger.ts`** — consumes the board's derivations, never re-derives:
+  `ledgerTitle` (terse row voice — "Review offer" / "Send full" / "Consider closing" / "Send a
+  nudge"; user tasks keep the writer's words), `ledgerDetail` (REPLY BY · REQUESTED · R&R FROM ·
+  QUIET n DAYS · WAKES — each read from the SAME source the card copy reads, with a sortable ms
+  key), `sortLedgerDo` (offers pinned per the board law, then due-soonest ↓) / `sortLedgerHk`
+  (longest-quiet ↓), `batchChildren` (the FULL cohort: recorded-first, then gap members in group
+  order, then item-muted gap agents — the gap is a record fact; muting silenced the task),
+  `batchDetail` ({complete} OF {total}), `truncateRows` (cap 8 — the mock names no cap; 8 chosen,
+  children never count).
+- **The renderer:** per-section white table cards — tinted heads (pink/coffee **+ a note-tint
+  third head, a flagged extension** so notes aren't lost in this view) each carrying ▶ Begin
+  focused session (same handlers as the card sections — parity, since journeys must open exactly
+  as now from both views) · the shared 9-col grid (`34/30/132/232/minmax(180,1fr)/152/64/150/84`)
+  with the header row and **DETAIL ↓** marked · the today-circle column = the same `toggleToday` ·
+  **STATUS renders StatusDot verbatim at 13px** (the ref's sdot circles were stand-ins) · hover
+  verbs ✓/⏸ via the existing quickDone/quickPause (**offers get neither — the board's
+  offers-need-the-moment law wins over the ref sketch**) · batch parents (typed tag, chevron,
+  stacked avatars + "N AGENTS", mini-bar + N OF M) expanding to the full cohort (done children
+  struck **"✓ RECORDED {date}" only where `resolvedAt` was stamped — undated otherwise, grant 2**;
+  "ADD →" deep-links into Batch fix AT that agent by reordering the group's members target-first —
+  no FocusFlow change; item-muted children show NOT RECORDED without ADD — they asked us to stop
+  asking) · childmore "OPEN BATCH FIX — WORK THROUGH ALL {n} →" · SHOW ALL {n} per section ·
+  collapse restores the scroll captured at expand; expansion session-only, default collapsed.
+- **The view toggle went live** (the P1 `disabled` came off) — persisted `sa.todoView`.
+- **Engine-honesty reconciles (deviations, flagged):** (1) the ref's live-snoozed "WAKES 21 JUL"
+  row — a snoozed task is hidden in the live engine (Task Settings owns it); WAKES renders only
+  for quiet OFFERS (the one visible-while-snoozed case), and an expired snooze shows SNOOZED ×n +
+  quiet-days. (2) The Sunday-review entry card stays card-furniture (its own mode + dismiss) —
+  not a ledger row. (3) Batch-parent task copy is "Add {label}" (terse) vs the mock's slightly
+  longer variants.
+- Tests: `todoLedger.test.ts` (12 — titles, per-type details incl. the quiet-offer WAKES + the
+  dated/undated done child, both sort orders, cohort composition, truncation) + the P3 source-lock
+  describe (StatusDot per row kind, live persisted toggle, default-collapsed expansion + scroll
+  restore, the deep-link reorder, SHOW ALL wiring, white-law-legal ledger tags).

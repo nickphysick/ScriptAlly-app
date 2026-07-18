@@ -37,6 +37,7 @@ import { saveHkRows } from "../../lib/hkSave";
 import { isProUser, fetchAssistedFill, AssistFound } from "../../lib/assistFill";
 import { groupHousekeeping, hkGapCount, hkGroupProgress, HkGroup, HkRule, HK_RULES } from "../../lib/todoHousekeeping";
 import { deskState, liveQueryCount, liveQueriesLine, clearedListCap } from "../../lib/todoEmpty";
+import { ledgerTitle, ledgerDetail, sortLedgerDo, sortLedgerHk, batchChildren, batchDetail, truncateRows } from "../../lib/todoLedger";
 import { shouldAutoRunTour } from "../../lib/todoTour";
 import { TodoTour } from "./TodoTour";
 import { ActivityType, QueryStatus } from "../../types";
@@ -225,6 +226,20 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const setFold = (v: boolean) => { setFolded(v); try { localStorage.setItem("sa.todoDrawer", v ? "folded" : "open"); } catch { /* private mode */ } };
   const [view, setView] = useState<"cards" | "ledger">(() => { try { return localStorage.getItem("sa.todoView") === "ledger" ? "ledger" : "cards"; } catch { return "cards"; } });
   const pickView = (v: "cards" | "ledger") => { setView(v); try { localStorage.setItem("sa.todoView", v); } catch { /* private mode */ } };
+  // Ledger view state (Phase 3) — session-only: which batch rows are expanded (default collapsed)
+  // + which sections dropped their SHOW ALL cap. Collapse restores the scroll position captured at
+  // expand (the wrap is the scroller).
+  const [openBatches, setOpenBatches] = useState<Record<string, boolean>>({});
+  const [showAllSec, setShowAllSec] = useState<Record<string, boolean>>({});
+  const batchScroll = useRef<Record<string, number>>({});
+  const toggleBatch = (rule: string) => {
+    setOpenBatches((s) => {
+      const open = !s[rule];
+      if (open) batchScroll.current[rule] = wrapRef.current?.scrollTop ?? 0;
+      else if (wrapRef.current) wrapRef.current.scrollTop = batchScroll.current[rule] ?? wrapRef.current.scrollTop;
+      return { ...s, [rule]: open };
+    });
+  };
   // Masthead search — the input + ⌘K focus mechanics land here (Phase 1); live filtering is
   // Phase 4's wiring. The page stays MOUNTED behind other routes (StagePage display-toggles), so
   // the ⌘K handler must no-op while the board is hidden — offsetParent is null under display:none.
@@ -508,9 +523,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <div className="tdb-main">
             <div className="tdb-col">
               {renderMasthead()}
-        {/* ── lanes — or, when derivation says so, the new-desk welcome (A) / the earned "Desk
-            cleared." moment (E) in their place. Copy verbatim from todo-empty-states.html. ── */}
-        {desk === "new-desk" ? renderNewDesk() : desk === "desk-cleared" ? renderDeskCleared() : (
+        {/* ── the board — cards or ledger by the masthead toggle; the desk states (new-desk /
+            desk-cleared) replace BOTH views. Copy verbatim from todo-empty-states.html. ── */}
+        {desk === "new-desk" ? renderNewDesk() : desk === "desk-cleared" ? renderDeskCleared() : view === "ledger" ? renderLedger() : (
         <div className="tdb-lanes">
           <Lane cls="do" label="Urgent" count={tiles.urgent} isEmpty={board.do.length === 0 && overlayCards("do").length === 0}
             onFocusedSession={() => setFlow({ items: board.do.filter((c) => c.taskType !== "weekly_review").map((card) => ({ kind: "card", card })), mode: "sweep" })}
@@ -667,8 +682,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         </div>
         <div className="tdb-vtg" role="group" aria-label="View">
           <button type="button" className={view === "cards" ? "on" : ""} aria-pressed={view === "cards"} onClick={() => pickView("cards")}>▦ Cards</button>
-          {/* the Ledger face lands in Phase 3 — until then the segment is honestly disabled */}
-          <button type="button" className={view === "ledger" ? "on" : ""} aria-pressed={view === "ledger"} disabled onClick={() => pickView("ledger")}>☰ Ledger</button>
+          <button type="button" className={view === "ledger" ? "on" : ""} aria-pressed={view === "ledger"} onClick={() => pickView("ledger")}>☰ Ledger</button>
         </div>
       </div>
     );
@@ -788,6 +802,154 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <button type="button" className="tdb-pick" onClick={helpMePick}>{committedCards.length ? "Add more" : "Help me pick"}</button>
           <button type="button" className="tdb-worklist" disabled={!committedCards.length} onClick={() => openFlowCards(committedCards)}>Work the list</button>
         </div>
+      </div>
+    );
+  }
+
+  // ── THE LEDGER (workbench P3; ref todo-ledger-v1.html) — a re-projection of the SAME board
+  // sets the cards render: shared 9-col grid, tinted section heads, typed batch parents with
+  // full-cohort expansion, StatusDot verbatim in the STATUS column. Rows open the same journeys
+  // (openFlowCards / group flow); the td circle is the same toggleToday. ──
+  function ledgerCardRow(c: BoardCard) {
+    const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
+    const ag = q ? agents.find((a) => a.id === q.agentId) : undefined;
+    const ms = q ? manuscripts.find((m) => m.id === q.manuscriptId) : undefined;
+    const isOffer = c.taskType === "offer_received";
+    const isNote = !c.taskType;
+    const det = ledgerDetail(c, { queries, taskFlags }, now);
+    const committed = onList(c);
+    return (
+      <div key={c.key} className="tdb-lrow" onClick={() => openFlowCards([c])}>
+        <span />
+        <button type="button" className={`tdb-ltd${committed ? " on" : ""}`} title={committed ? "On today’s list — take off" : "＋ Today’s list"} aria-label={committed ? "Take off today’s list" : "Add to today’s list"} aria-pressed={committed} onClick={(e) => { e.stopPropagation(); toggleToday(c); }}>✓</button>
+        <span className={`tdb-tag${isOffer ? " offer" : c.warn ? " due warn" : " due"}`}>{isOffer ? "★ OFFER" : isNote ? "NOTE" : c.snoozes > 0 ? `Snoozed ×${c.snoozes}` : c.due}</span>
+        <span className="tdb-lagn">
+          {ag ? (<><span className="tdb-miniav">{c.initials}</span><b>{c.who}</b>{ag.agency && <i>· {ag.agency.toUpperCase()}</i>}</>) : (<><span className="tdb-miniav">{c.initials}</span><b>{c.who || "—"}</b></>)}
+        </span>
+        <span className="tdb-lti">{ledgerTitle(c)}</span>
+        <span className="tdb-lms">{ms?.title ?? ""}</span>
+        <span className="tdb-lsd">{c.status ? <StatusDot status={c.status as QueryStatus} overrideSize={13} /> : null}</span>
+        <span className={`tdb-ldt${det.tone === "hot" ? " hot" : det.tone === "dim" ? " dim" : ""}`}>{det.label}</span>
+        <span className="tdb-lacts">
+          {!isOffer && <button type="button" title="Quick done" aria-label="Quick done" onClick={(e) => { e.stopPropagation(); quickDone(c); }}>✓</button>}
+          {!isOffer && <button type="button" title="Snooze / stop asking" aria-label="Snooze or stop asking" onClick={(e) => { e.stopPropagation(); quickPause(c); }}>⏸</button>}
+        </span>
+      </div>
+    );
+  }
+  function ledgerBatchRow(g: HkGroup) {
+    const open = !!openBatches[g.rule];
+    const det = batchDetail(g, agents.length);
+    const faces = g.members.slice(0, 3);
+    const kids = open ? batchChildren(g, agents, taskFlags) : [];
+    const memberIds = new Set(g.members.map((m) => m.agentId).filter(Boolean));
+    const openAt = (agentId?: string) => {
+      if (!agentId || !memberIds.has(agentId)) { setFlow({ items: [{ kind: "group", group: g }] }); return; }
+      // deep-link: the SAME group flow, members reordered target-first (no FocusFlow change)
+      const members = [...g.members.filter((m) => m.agentId === agentId), ...g.members.filter((m) => m.agentId !== agentId)];
+      setFlow({ items: [{ kind: "group", group: { ...g, members } }] });
+    };
+    return (
+      <React.Fragment key={g.rule}>
+        <div className={`tdb-lrow batchp${open ? " open" : ""}`} onClick={() => toggleBatch(g.rule)}>
+          <span />
+          <span />
+          <span className="tdb-ltagcell">
+            <button type="button" className="tdb-lchev" aria-expanded={open} aria-label={`${open ? "Collapse" : "Expand"} ${g.meta.label}`} onClick={(e) => { e.stopPropagation(); toggleBatch(g.rule); }}>▶</button>
+            <span className="tdb-tag due cof">{g.meta.label.toUpperCase()}</span>
+          </span>
+          <span className="tdb-lagn">
+            <span className="tdb-lstack">{faces.map((m) => <span key={m.card.key} className="tdb-miniav">{m.card.initials}</span>)}</span>
+            <i>{g.members.length} AGENTS</i>
+          </span>
+          <span className="tdb-lti">Add {g.meta.label.toLowerCase()}</span>
+          <span className="tdb-lms" />
+          <span className="tdb-lsd" />
+          <span className="tdb-ldt"><span className="tdb-lbar" aria-hidden><i style={{ width: `${det.pct}%` }} /></span>{det.caption}</span>
+          <span className="tdb-lacts">
+            <button type="button" title="Batch fix" aria-label={`Batch fix — ${g.meta.label}`} onClick={(e) => { e.stopPropagation(); setFlow({ items: [{ kind: "group", group: g }] }); }}>→</button>
+          </span>
+        </div>
+        {open && kids.map((k) => (
+          <div key={`${g.rule}-${k.agentId ?? k.name}`} className="tdb-lrow lchild">
+            <span /><span /><span />
+            <span className="tdb-lagn"><span className="tdb-miniav">{k.initials}</span><b>{k.name}</b>{k.agency && <i>· {k.agency.toUpperCase()}</i>}</span>
+            <span className={`tdb-lti${k.done ? " struck" : ""}`}>Add {g.meta.need === "mswl" ? "wish list" : g.meta.need === "materials" ? "materials" : "reply window"}</span>
+            <span className="tdb-lms" />
+            <span className="tdb-lsd" />
+            {/* grant 2: dated only where the flow stamped resolvedAt — never invented */}
+            <span className={`tdb-ldt${k.done ? " sage" : " dim"}`}>{k.done ? `✓ RECORDED${k.doneDate ? ` ${k.doneDate.toUpperCase()}` : ""}` : "NOT RECORDED"}</span>
+            <span className="tdb-lacts kid">
+              {!k.done && k.agentId && memberIds.has(k.agentId) && (
+                <button type="button" className="tdb-ladd" onClick={(e) => { e.stopPropagation(); openAt(k.agentId); }}>ADD →</button>
+              )}
+            </span>
+          </div>
+        ))}
+        {open && (
+          <div className="tdb-lchildmore">
+            <button type="button" onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}>OPEN BATCH FIX — WORK THROUGH ALL {g.members.length} →</button>
+          </div>
+        )}
+      </React.Fragment>
+    );
+  }
+  function ledgerSection(opts: { cls: "p" | "c" | "n"; id: string; label: string; count: number; onSession?: () => void; children: React.ReactNode; total: number; hidden: number; showAllKey: string }) {
+    return (
+      <div className="tdb-tbl" id={opts.id}>
+        <div className={`tdb-lghead ${opts.cls}`}>
+          <span className={`tdb-lanedot ${opts.cls === "p" ? "do" : opts.cls === "c" ? "hk" : "nt"}`} aria-hidden />
+          <span className="tdb-lgt">{opts.label}</span>
+          <span className="tdb-ln">{opts.count}</span>
+          {opts.onSession && (
+            <button type="button" className="tdb-lgs" aria-label={`Begin a focused session on ${opts.label}`} onClick={opts.onSession}>▶ Begin focused session</button>
+          )}
+        </div>
+        <div className="tdb-lcols" aria-hidden>
+          <span /><span /><span>TYPE</span><span>AGENT</span><span>TASK</span><span>MANUSCRIPT</span><span className="ctr">STATUS</span><span className="r sort">DETAIL ↓</span><span />
+        </div>
+        {opts.children}
+        {opts.hidden > 0 && (
+          <div className="tdb-lmore">
+            <button type="button" onClick={() => setShowAllSec((s) => ({ ...s, [opts.showAllKey]: true }))}>SHOW ALL {opts.total} →</button>
+          </div>
+        )}
+      </div>
+    );
+  }
+  function renderLedger() {
+    const ctx = { queries, taskFlags };
+    // The review entry card is card-furniture (its own mode + dismiss ✕) — the scrap + cards view
+    // carry it; the ledger lists workable rows only. Reported as a deviation.
+    const doSorted = sortLedgerDo(board.do.filter((c) => c.taskType !== "weekly_review"), ctx, now);
+    const doCut = truncateRows(doSorted, !!showAllSec.do);
+    const staleSorted = sortLedgerHk(staleCards, ctx, now);
+    const hkTop: Array<{ kind: "group"; g: HkGroup } | { kind: "card"; c: BoardCard }> = [
+      ...hkGroups.map((g) => ({ kind: "group" as const, g })),
+      ...staleSorted.map((c) => ({ kind: "card" as const, c })),
+    ];
+    const hkCut = truncateRows(hkTop, !!showAllSec.hk);
+    const ntCut = truncateRows(board.nt, !!showAllSec.nt);
+    return (
+      <div className="tdb-ledger">
+        {doSorted.length > 0 && ledgerSection({
+          cls: "p", id: "tdb-lane-do", label: "Urgent", count: tiles.urgent,
+          onSession: () => setFlow({ items: board.do.filter((c) => c.taskType !== "weekly_review").map((card) => ({ kind: "card", card })), mode: "sweep" }),
+          total: doSorted.length, hidden: doCut.hidden, showAllKey: "do",
+          children: doCut.visible.map(ledgerCardRow),
+        })}
+        {(hkGroups.length > 0 || staleCards.length > 0) && ledgerSection({
+          cls: "c", id: "tdb-lane-hk", label: "Housekeeping", count: tiles.housekeeping,
+          onSession: () => setFlow({ items: [...hkGroups.map((g) => ({ kind: "group" as const, group: g })), ...staleCards.map((card) => ({ kind: "card" as const, card }))], mode: "sweep" }),
+          total: hkTop.length, hidden: hkCut.hidden, showAllKey: "hk",
+          children: hkCut.visible.map((r) => (r.kind === "group" ? ledgerBatchRow(r.g) : ledgerCardRow(r.c))),
+        })}
+        {board.nt.length > 0 && ledgerSection({
+          cls: "n", id: "tdb-lane-nt", label: "Notes to self", count: tiles.notes,
+          onSession: () => setFlow({ items: board.nt.map((card) => ({ kind: "card", card })), mode: "sweep" }),
+          total: board.nt.length, hidden: ntCut.hidden, showAllKey: "nt",
+          children: ntCut.visible.map(ledgerCardRow),
+        })}
       </div>
     );
   }

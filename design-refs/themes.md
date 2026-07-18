@@ -772,3 +772,7 @@ The masthead is ONE row: 20px Playfair title + mono date·week eyebrow, **42px p
 - **Renames (app-wide on this page):** lane heads say **"Begin focused session"**; the grouped
   card's CTA (and every batch entry) says **"Batch fix →"** — the journey internals are untouched,
   only the name changed.
+- **The LEDGER view** (todo-ledger-v1.html): per-section white tables — tinted heads (pink
+  `--pink-t→--pink-btn` grad · coffee `--hk-cof→--hk-cof-2` grad · note `--note-t`), the shared
+  9-col grid, 44px rows, `--paper` child rows, StatusDot verbatim in STATUS. Ledger tags obey the
+  white law (the batch `cof` variant re-inks border/text only). View pref `sa.todoView`.

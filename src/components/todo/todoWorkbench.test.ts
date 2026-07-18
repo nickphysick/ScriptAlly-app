@@ -101,9 +101,9 @@ describe("P1 — masthead composition + the centred column", () => {
     expect(page).toContain("wrapRef.current.offsetParent === null");
     expect(page).toContain('if (e.key === "Escape") { setSearch("");');
   });
-  it("view state persists under sa.todoView (default cards); the Ledger face is disabled until Phase 3", () => {
+  it("view state persists under sa.todoView (default cards; P3 made the Ledger face live)", () => {
     expect(page).toContain('localStorage.getItem("sa.todoView")');
-    expect(page).toMatch(/aria-pressed=\{view === "ledger"\} disabled/);
+    expect(page).toContain('=== "ledger" ? "ledger" : "cards"'); // cards is the fallback default
   });
   it("the page-strip .tdb-band double-definition is resolved — one rule left, the card band's", () => {
     const bands = css.match(/(?:^|\n)\.tdb-band \{[^}]*\}/g) ?? [];
@@ -131,5 +131,49 @@ describe("P2 — card view: the grid replaces the reels; renames land", () => {
     expect(page).toContain(">Batch fix →</button>");
     expect(page).not.toContain("Fix together");
     expect(page).toMatch(/aria-label=\{`Begin a focused session on \$\{label\}`\}/);
+  });
+});
+
+describe("P3 — the ledger view (source locks; derivations in todoLedger.test.ts)", () => {
+  it("the view toggle is LIVE both ways and persisted (sa.todoView)", () => {
+    expect(page).not.toMatch(/aria-pressed=\{view === "ledger"\} disabled/);
+    expect(page).toContain('view === "ledger" ? renderLedger() :');
+    expect(page).toContain('localStorage.setItem("sa.todoView", v)');
+  });
+  it("the STATUS column renders the real StatusDot (13px) on card rows; batch parents/children leave it empty", () => {
+    expect(page).toContain('<span className="tdb-lsd">{c.status ? <StatusDot status={c.status as QueryStatus} overrideSize={13} /> : null}</span>');
+    const batch = page.slice(page.indexOf("function ledgerBatchRow"), page.indexOf("function ledgerSection"));
+    expect(batch).not.toContain("StatusDot");
+  });
+  it("rows open the SAME journeys; the td circle is the same toggleToday; offers get no hover verbs (board law)", () => {
+    const row = page.slice(page.indexOf("function ledgerCardRow"), page.indexOf("function ledgerBatchRow"));
+    expect(row).toContain("onClick={() => openFlowCards([c])}");
+    expect(row).toContain("toggleToday(c)");
+    expect(row).toContain("{!isOffer && <button");
+  });
+  it("batch expansion: session-only, default collapsed; collapse restores the captured scroll", () => {
+    expect(page).toContain("const [openBatches, setOpenBatches] = useState<Record<string, boolean>>({});");
+    expect(page).toContain("batchScroll.current[rule] = wrapRef.current?.scrollTop ?? 0;");
+    expect(page).toContain("wrapRef.current.scrollTop = batchScroll.current[rule] ?? wrapRef.current.scrollTop;");
+  });
+  it("the ADD → deep-link reorders the SAME group's members target-first (no FocusFlow change); childmore opens the whole batch", () => {
+    expect(page).toContain("const members = [...g.members.filter((m) => m.agentId === agentId), ...g.members.filter((m) => m.agentId !== agentId)];");
+    expect(page).toContain('setFlow({ items: [{ kind: "group", group: { ...g, members } }] });');
+    expect(page).toContain(">OPEN BATCH FIX — WORK THROUGH ALL {g.members.length} →</button>");
+  });
+  it("SHOW ALL truncation is wired per section; children never count (top-level rows only)", () => {
+    expect(page).toContain(">SHOW ALL {opts.total} →</button>");
+    expect(page).toContain("truncateRows(doSorted, !!showAllSec.do)");
+  });
+  it("tinted section heads carry Begin focused session; the note head is the flagged extension", () => {
+    expect(css).toContain(".tdb-lghead.p { background: linear-gradient(180deg, var(--pink-t), var(--pink-btn)); border-color: var(--pink-b); }");
+    expect(css).toContain(".tdb-lghead.c { background: linear-gradient(180deg, var(--hk-cof), var(--hk-cof-2)); border-color: var(--hk-cof-edge); }");
+    expect(css).toContain(".tdb-lghead.n { background: var(--note-t); border-color: var(--note-b); }");
+    expect(page).toContain(">▶ Begin focused session</button>");
+  });
+  it("the shared 9-col grid is one template for header row and rows; the ledger tag stays white-law legal", () => {
+    expect(css).toContain(".tdb-lgrid, .tdb-lcols, .tdb-lrow { display: grid; grid-template-columns: 34px 30px 132px 232px minmax(180px, 1fr) 152px 64px 150px 84px;");
+    const cof = css.match(/\.tdb-tag\.cof \{([^}]*)\}/)?.[1] ?? "";
+    expect(cof).not.toContain("background"); // border/ink only — the white fill stands
   });
 });

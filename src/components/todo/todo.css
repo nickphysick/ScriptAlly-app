@@ -196,6 +196,68 @@
 /* workbench P2 — the reels are RETIRED (laneFit + pagers + snap deleted with them): a wrapping
    auto-fill grid (Option B .grid). The page scrolls; the grid wraps at every width. */
 .tdb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; padding: 2px; }
+/* ── THE LEDGER (workbench P3; ref todo-ledger-v1.html): white table card per section, tinted
+   head (pink/coffee/note — the note head is a flagged extension so notes aren't lost in this
+   view), the shared 9-col grid, 44px rows, batch children on the paper wash. The STATUS column
+   renders the real StatusDot (the ref's sdot circles were sketch stand-ins). ── */
+.tdb-ledger { display: flex; flex-direction: column; gap: 20px; }
+.tdb-tbl { background: var(--white, #fff); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.tdb-lghead { display: flex; align-items: center; gap: 9px; padding: 8px 16px; border-bottom: 1px solid; }
+.tdb-lghead.p { background: linear-gradient(180deg, var(--pink-t), var(--pink-btn)); border-color: var(--pink-b); }
+.tdb-lghead.c { background: linear-gradient(180deg, var(--hk-cof), var(--hk-cof-2)); border-color: var(--hk-cof-edge); }
+.tdb-lghead.n { background: var(--note-t); border-color: var(--note-b); }
+.tdb-lgt { font-family: var(--f12-serif); font-size: 15px; font-weight: 600; color: var(--ink); }
+.tdb-lgs { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 99px; padding: 4px 11px; font-size: 11px; font-weight: 600; color: var(--ink); }
+.tdb-lgs:hover { border-color: var(--ink-2); }
+.tdb-lgrid, .tdb-lcols, .tdb-lrow { display: grid; grid-template-columns: 34px 30px 132px 232px minmax(180px, 1fr) 152px 64px 150px 84px; align-items: center; }
+.tdb-lcols { padding: 6px 16px; border-bottom: 1px solid var(--line); background: var(--white, #fff); }
+.tdb-lcols span { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.13em; color: var(--faint); }
+.tdb-lcols .sort { color: var(--ink); font-weight: 600; }
+.tdb-lcols .r { justify-self: end; }
+.tdb-lcols .ctr { justify-self: center; }
+.tdb-lrow { padding: 0 16px; height: 44px; border-bottom: 1px solid var(--hairline); cursor: pointer; }
+.tdb-lrow:last-child { border-bottom: none; }
+.tdb-lrow:hover { background: var(--paper); }
+.tdb-ltd { width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--line); background: var(--white, #fff); display: flex; align-items: center; justify-content: center; font-size: 9px; color: transparent; padding: 0; }
+.tdb-ltd.on { background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border-color: var(--hk-spine); color: var(--hk-ink); }
+.tdb-lrow:hover .tdb-ltd { color: var(--hk-ink); }
+.tdb-lrow .tdb-tag { justify-self: start; }
+.tdb-tag.cof { border-color: var(--hk-cof-edge); color: var(--hk-cof-ink); }
+.tdb-lagn { display: flex; align-items: center; gap: 8px; min-width: 0; padding-right: 12px; }
+.tdb-lagn b { font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
+.tdb-lagn i { font-style: normal; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.05em; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tdb-lstack { display: flex; }
+.tdb-lstack .tdb-miniav { margin-left: -7px; border: 1.5px solid var(--white, #fff); }
+.tdb-lstack .tdb-miniav:first-child { margin-left: 0; }
+.tdb-lti { font-size: 13px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 16px; }
+.tdb-lti.struck { text-decoration: line-through; color: var(--muted); }
+.tdb-lms { font-family: var(--f12-serif); font-style: italic; font-size: 11.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 12px; }
+.tdb-lsd { justify-self: center; display: flex; align-items: center; }
+.tdb-ldt { font-family: var(--f12-mono); font-size: 8.5px; justify-self: end; color: var(--muted); font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 7px; white-space: nowrap; }
+.tdb-ldt.hot { color: var(--pink-deep); font-weight: 700; }
+.tdb-ldt.dim { color: var(--faint); }
+.tdb-ldt.sage { color: var(--hk-ink); }
+.tdb-lbar { width: 44px; height: 4px; background: var(--paper); border-radius: 2px; overflow: hidden; }
+.tdb-lbar i { display: block; height: 100%; background: linear-gradient(90deg, var(--hk-cof), var(--hk-cof-2)); }
+.tdb-lacts { justify-self: end; display: flex; gap: 4px; visibility: hidden; }
+.tdb-lrow:hover .tdb-lacts, .tdb-lrow:focus-within .tdb-lacts { visibility: visible; }
+.tdb-lacts button { width: 24px; height: 24px; border-radius: 7px; border: 1px solid var(--line); background: var(--white, #fff); font-size: 9.5px; color: var(--ink-2); }
+.tdb-lacts button:hover { border-color: var(--ink-2); }
+.tdb-lchev { width: 16px; height: 16px; border: none; background: none; color: var(--muted); font-size: 9px; padding: 0; margin-right: 2px; transition: transform 0.15s; }
+.batchp.open .tdb-lchev { transform: rotate(90deg); }
+@media (prefers-reduced-motion: reduce) { .tdb-lchev { transition: none; } }
+.tdb-ltagcell { display: flex; align-items: center; gap: 4px; }
+.tdb-lrow.lchild { background: var(--paper); height: 40px; cursor: default; }
+.tdb-lrow.lchild:hover { background: var(--hairline); }
+.tdb-lacts.kid { visibility: hidden; }
+.tdb-lrow.lchild:hover .tdb-lacts.kid { visibility: visible; }
+.tdb-ladd { font-family: var(--f12-mono); font-size: 8.5px; border: 1px solid var(--hk-cof-edge); background: var(--white, #fff); color: var(--hk-cof-ink); border-radius: 99px; padding: 3px 11px; width: auto !important; height: auto !important; }
+.tdb-lchildmore { background: var(--paper); border-bottom: 1px solid var(--hairline); display: flex; padding: 6px 16px 6px 112px; }
+.tdb-lchildmore button { border: none; background: none; font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.1em; color: var(--hk-cof-ink); border-bottom: 1px solid var(--hk-cof-edge); padding: 0; }
+.tdb-lmore { display: flex; justify-content: center; padding: 9px; border-top: 1px solid var(--hairline); }
+.tdb-lmore button { border: none; background: none; font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.1em; color: var(--muted); border-bottom: 1px solid var(--line); padding: 0; }
+.tdb-lmore button:hover { color: var(--ink); }
+
 .tdb-emptyreel { display: flex; align-items: center; }
 .tdb-emptyreel .e { font-family: var(--f12-serif); font-style: italic; font-size: 14px; color: var(--muted); padding: 14px 4px; }
 .tdb-ghostcard { width: 330px; min-height: 74px; border: 1.5px dashed var(--note-b); border-radius: 11px; display: flex; align-items: center; justify-content: center; gap: 10px; background: none; }
