@@ -40,3 +40,29 @@ Vitest, pipefail). Live `.t-f12` tokens over mockup hexes throughout.
 - Tests: dim-dash per type (absent AND unparsable dates), copy snapshots, the 1:1
   no-fan-out/no-dedup regression (two same-agent records → two rows, distinct keys, identical
   quiet-days), the stack lock.
+
+## PART B — sheet timeline & guard
+
+### Recon findings
+- **The kicker doubling:** FocusFlow's send sheet composed `Over to you · {card.due}` — and the
+  send family's `due` chip IS the string "OVER TO YOU" (the lane tag), so the kicker read
+  "OVER TO YOU · OVER TO YOU". The composition's INTENT is stream + a detail chip (it works for
+  every other type, whose `due` is meaningful) — so the real second segment is the row's DETAIL.
+- **The Hub timeline:** `src/components/reading-pane/QueryTimeline.tsx` — already a shared home.
+  Props `{query, agent, events, primaryAction?, onEditEntry?, onDeleteEntry?, …}`; the pure
+  `buildTimelineRows(events, query, agent)` builds RowSpec rows (StatusDot status + title + date +
+  sub + pills), rendered oldest→newest with hairline connectors. The Hub feeds it the per-query
+  `activity` SUBCOLLECTION (`{type: QueryStatus|"Nudge sent", createdAt}` docs via onSnapshot).
+- **The sheet's history strip:** `timelineChips(ag)` — `buildAgentTimeline` pill chips (the AGENTS
+  page's per-agent derivation), one call site (the send sheet). Not the Hub grammar.
+- **Prior same-type sends at write time:** the top-level `activities` feed (already in FocusFlow's
+  db slice) — `activityType === MATERIALS_SENT` rows carry `resultingStatus` (Partial/Full Sent,
+  stamped at append by the one write path), so the guard reads the log with no new state. Halt (e)
+  clear.
+
+### B1 — kicker fix (`sendKicker`, pure in todoWalk)
+- The intended composition restored: **"Over to you · {the row's DETAIL}"**, read from
+  `ledgerDetail` — the SAME pure source the ledger's DETAIL cell reads, so sheet and ledger can
+  never disagree ("Over to you · REQUESTED 12 JUL" / "· R&R FROM 12 JUL"). No readable date → the
+  single label (never a dash segment). Same-string-twice impossible by construction AND guarded.
+- Tests: per task type + the no-date single-label branch + the never-doubles assertion.

@@ -10,7 +10,8 @@
  */
 
 import { BoardCard } from "./todoBoard";
-import { QueryStatus } from "../types";
+import { ledgerDetail } from "./todoLedger";
+import { Query, QueryStatus, TaskFlag } from "../types";
 
 export const MAX_TODAY = 5;
 const MAX_DO = 4;
@@ -42,6 +43,21 @@ export function rolledOverCards(cards: BoardCard[], today: string): BoardCard[] 
 export function todayProgress(committedOnList: number, doneFromList: number): { total: number; done: number; pct: number; empty: boolean } {
   const total = committedOnList + doneFromList;
   return { total, done: doneFromList, pct: total ? Math.round((doneFromList / total) * 100) : 0, empty: total === 0 };
+}
+
+/**
+ * The send sheet's kicker (evening run B1). The old composition was `Over to you · {card.due}` —
+ * and for the send family `due` IS the string "OVER TO YOU" (the lane chip), so the kicker read
+ * "OVER TO YOU · OVER TO YOU". The INTENDED second segment is the row's DETAIL — the same fact
+ * the ledger's DETAIL cell shows (REQUESTED {date} / R&R FROM {date}), read from the same pure
+ * source (ledgerDetail) so sheet and ledger can never disagree. No readable detail → the single
+ * label. A same-string second segment is impossible by construction AND guarded.
+ */
+export function sendKicker(card: BoardCard, ctx: { queries: Query[]; taskFlags: TaskFlag[] }, now: number): string {
+  const base = "Over to you";
+  const d = ledgerDetail(card, ctx, now);
+  if (d.label === "—" || d.label.trim().toLowerCase() === base.toLowerCase()) return base;
+  return `${base} · ${d.label}`;
 }
 
 /**

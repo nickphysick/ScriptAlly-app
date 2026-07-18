@@ -42,7 +42,7 @@ import { BoardCard } from "../../lib/todoBoard";
 import { HkGroup, HkRule, HK_RULES, HK_PAYOFF, mutedMembersForRule } from "../../lib/todoHousekeeping";
 import {
   StagedPayload, applyStaged, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, assumedSendItem, DEFAULT_CHECKBACK_DAYS, journeyEventISO,
-  quickSendPayload, quickNudgePayload, receiptLine,
+  quickSendPayload, quickNudgePayload, receiptLine, sendKicker,
 } from "../../lib/todoWalk";
 import { USER_TASK_FLAG_TYPE } from "../../lib/todoBoard";
 import { saveHkRows } from "../../lib/hkSave";
@@ -271,7 +271,8 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     const any = opts.some((m) => mats[m]);
     if (step === 0) return sheet(
       <>
-        <div className={`tdb-ffstream${c.warn ? " warn" : ""}`}>Over to you{c.due ? ` · ${c.due}` : ""}</div>
+        {/* B1 — stream + the row's DETAIL (ledger-shared source); never the same string twice */}
+        <div className={`tdb-ffstream${c.warn ? " warn" : ""}`}>{sendKicker(c, { queries, taskFlags }, Date.now())}</div>
         <div className="tdb-ffq">{emTitle(c)}</div>
         {c.subtitle && <div className="tdb-ffqsub">{c.subtitle}</div>}
         {whoRow(ag, c.initials)}
