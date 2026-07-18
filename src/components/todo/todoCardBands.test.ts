@@ -65,3 +65,23 @@ describe("Card Bands — band-then-body order per card type (render markup)", ()
     expect(body).toBeGreaterThan(band);
   });
 });
+
+describe("Card Bands — Phase 2: overlays ride the framed card; clears go neutral", () => {
+  it("receipt + dismissed overlays cover the whole frame (fill on the frame, rim white)", () => {
+    expect(page).toContain('className="tdb-tile receipt">\n            <div className="tdb-frame">');
+    expect(page).toContain('className="tdb-tile dismissed">\n            <div className="tdb-frame">');
+    expect(css).toContain(".tdb-tile.receipt .tdb-frame { background: var(--hk-sage); border-color: var(--hk-spine); padding: 15px 17px; }");
+    expect(css).toContain(".tdb-tile.dismissed .tdb-frame { background: var(--paper); padding: 15px 17px; }");
+    expect(css).not.toContain(".tdb-tile.receipt { background: var(--hk-sage)"); // fill left the rim
+  });
+  it("fork + flip overlays are wrapped in a frame", () => {
+    expect(page).toContain('<div className="tdb-frame">{renderFork(c.key, true,');
+    expect(page).toContain('<div className="tdb-frame">{renderFork(key, false,');
+    expect(page).toContain('<div className="tdb-frame"><GroupFlip');
+  });
+  it("clear (empty-state) cards dropped their spines → neutral (no ::before, no lane variant)", () => {
+    expect(css).not.toContain(".tdb-clear::before");
+    expect(css).not.toContain(".tdb-clear.do::before");
+    expect(css).not.toContain(".tdb-clear.hk::before");
+  });
+});

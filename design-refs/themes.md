@@ -693,3 +693,29 @@ chrome revision replaced v14/v3).
 - Incidental non-identity usages went NEUTRAL (the never-fork heading, the rail ⏸ hover) — the
   principle: sage and coffee are now meaningful; incidental colour goes neutral. Caveat asides
   stay sage-ink (the done register).
+
+## `.t-f12` — CARD ANATOMY: header bands (Variant A) SUPERSEDE the spines (2026-07-18, card-bands pack)
+
+**The coloured left spines are RETIRED across every board card. Lane identity is now a slim tinted
+HEADER BAND.** The MountCard header-fill structure (non-negotiable):
+- **RIM** = the outer `.tdb-tile` / `.tdb-gcard`: white, radius 13, 3px padding, box-shadow, NO
+  clip (the shadow shows). Keeps the flex-basis width (`--tdb-cardw`) — exact-fit is width-only.
+- **`.tdb-frame`** = the child clip context: 1px `--line`, radius 10, `overflow:hidden`. The
+  on-hover border-warm and the on-today border live here (not the rim).
+- **`.tdb-band ${stream}`** = a slim ~34px header carrying ONLY the tag/kicker row, with a 1px
+  identity `border-bottom`. Tints: `.do` `--pink-t`/`--pink-b` · `.hk` `--hk-cof`/`--hk-cof-edge`
+  · `.nt` `--note-t`/`--note-b`.
+- **`.tdb-body`** = white; the title leads, then sub / meta / pinned action pills (`.tdb-mid`
+  still flex-clips beneath the band — the pills-can-never-spill invariant holds).
+- **Height:** 208 → 242 (208 + the band), uniform per card class.
+- **On-band tag law:** standard status tags go WHITE-filled (pink border/ink — soft-pink would
+  vanish pink-on-pink); urgency `.warn` keeps its deeper `--pink-btn`/`--pink-deep`/700 fill; the
+  offer keeps the ink ★; the grouped-card `--hk-kd` dot goes white-filled with the coffee border.
+- **Overlays** (receipt / dismissed / fork / flip) cover the WHOLE frame (no band) — the fill +
+  border + padding ride the frame; the rim stays white.
+- **Clear (empty-state) cards** dropped their spines and went NEUTRAL (horizontal cards, not lane
+  tiles — a lone band read worse than the plain hairline).
+- **SUPERSEDES:** the retune's "lane spine `--pink-btn`" / "grouped-card spines" / "Spotless
+  spine" references above — those spine consumers are gone; the band is the identity surface.
+  `--pink-btn` remains the urgency-tag fill (unchanged); the `--hk-cof`/`--pink-t`/`--note-t`
+  families now paint bands, not just chips.

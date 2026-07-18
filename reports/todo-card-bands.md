@@ -43,3 +43,44 @@ No halt condition fired.
 - Tests: NEW `todoCardBands.test.ts` — the structure law (rim no-clip / frame clip / band tints /
   spines gone / on-band tag+dot / 242 height / --cardw width) + band-then-body order per card
   type. 1172 → **1180**.
+
+## PHASE 2 — overlays, edges, the law
+
+- **Overlays re-drawn against the framed card:** receipt / dismissed / fork / flip each wrapped in
+  `.tdb-frame`, covering the whole frame (no band). The sage receipt fill + hk-spine border + the
+  dismissed paper fill + all overlay padding moved onto the frame; the rim stays white. The
+  flip/settle animations (`tdbRin`) ride the body as before; the cards still size to `--cardw`.
+- **Empty-state sweep:** the per-reel `.tdb-clear` cards carried spines → RETIRED and gone NEUTRAL
+  (horizontal empty-state cards, not lane tiles — a lone band read worse than the plain hairline).
+  The new-desk welcome card, desk-cleared card, and the dashed ghost note card carried no spine —
+  untouched.
+- **`themes.md` regenerated:** a dated "CARD ANATOMY: header bands supersede the spines" section
+  documents the rim/frame/band/body law + the on-band tag treatments, and marks the retune's spine
+  references superseded.
+- Tests 1180 (Phase 1) → **1180** (+3 Phase-2 overlay/clear locks fold into the same file count).
+
+## FINALISE
+
+| Phase | SHA | |
+|---|---|---|
+| 1 | `02ca2b7` | frame conversion (tile / grouped / review) |
+| 2 | (this) | overlays, clears, themes.md |
+
+- **Files:** `todo.css` · `ToDoPage.tsx` · NEW `todoCardBands.test.ts` · `themes.md` ·
+  `design-refs/todo-card-bands-a-v1.html` (reconstruction). Vitest **1180+**. No engine/lib
+  touched; `laneFit.ts` untouched (exact-fit is width-only).
+- **Spine-retirement sweep:** `.tdb-tile::before` (+do/hk/nt), `.tdb-gcard::before`,
+  `.tdb-tile.rvcard::before`, `.tdb-clear::before` (+do/hk) — ALL removed; grep-verified no 3px
+  `::before` bar survives on any card.
+- **Height resolution:** 208 → 242 uniform (both card classes), two-line subs fit.
+- **In-browser checklist (Nick, dev):** the urgency `.warn` tag's rank on a pink band at real
+  density (must still outrank the white-filled standard tags) · a Focused-session receipt flip on
+  a banded card at the 3-card width (the sage overlay covers the frame incl. the band) · the
+  forty-card coffee Housekeeping lane wash (does the repeated coffee band read calm or heavy) ·
+  the note-yellow band on a Notes card · the grouped card's white kicker dot on coffee · the rail
+  hover + review ✕ sitting over the band.
+- **⚠ DEVIATION — the design ref was NOT supplied** (`todo-card-bands-a-full.html` absent from
+  Downloads); built from the pack's detailed prose (structure law + tag treatments fully
+  specified). `design-refs/todo-card-bands-a-v1.html` is an honest reconstruction — reconcile
+  against the real mockup when it lands. Other deviations: clears went neutral (reported); band
+  height 34, rim pad 3, body pad 13/18/14 tuned to the prose ("~34px", "3px padding").

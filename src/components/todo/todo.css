@@ -396,7 +396,12 @@
 .tdb-qbtn:active { transform: scale(0.92); }
 
 /* quick-complete receipt — the card flips sage, states exactly what was logged */
-.tdb-tile.receipt { background: var(--hk-sage); border-color: var(--hk-spine); cursor: default; }
+/* overlays cover the WHOLE frame (no band): the fill + border ride the frame; the rim stays white.
+   Padding moves onto the frame (the standard band/body split doesn't apply to overlays). */
+.tdb-tile.receipt { cursor: default; }
+.tdb-tile.receipt .tdb-frame { background: var(--hk-sage); border-color: var(--hk-spine); padding: 15px 17px; }
+.tdb-tile.dismissed .tdb-frame { background: var(--paper); padding: 15px 17px; }
+.tdb-gcard.flip .tdb-frame { padding: 14px 16px; }
 .tdb-receiptbody { display: flex; flex-direction: column; flex: 1; min-height: 0; width: 100%; animation: tdbRin 0.25s ease; }
 @keyframes tdbRin { from { opacity: 0; } to { opacity: 1; } }
 .tdb-rk { display: flex; align-items: center; gap: 9px; }
@@ -409,7 +414,7 @@
 
 
 /* dismissed (snoozed / muted) state */
-.tdb-tile.dismissed { opacity: 0.55; background: var(--paper); cursor: default; }
+.tdb-tile.dismissed { opacity: 0.55; cursor: default; }
 .tdb-dismissbody { display: flex; flex-direction: column; flex: 1; min-height: 0; width: 100%; justify-content: center; align-items: center; gap: 9px; text-align: center; animation: tdbRin 0.25s ease; }
 .tdb-dt { font-family: var(--f12-serif); font-style: italic; font-size: 15px; color: var(--muted); }
 .tdb-dact { display: flex; gap: 6px; }
@@ -417,7 +422,7 @@
 .tdb-dact .tdb-ra:hover { color: var(--ink); }
 
 /* housekeeping ⏸ fork — not now / never (this one / the rule) */
-.tdb-neverfork { display: flex; flex-direction: column; flex: 1; min-height: 0; width: 100%; justify-content: center; gap: 8px; animation: tdbRin 0.25s ease; }
+.tdb-neverfork { display: flex; flex-direction: column; flex: 1; min-height: 0; width: 100%; justify-content: center; gap: 8px; padding: 14px 16px; animation: tdbRin 0.25s ease; }
 .tdb-nt2 { font-weight: 600; font-size: 13px; text-align: center; color: var(--ink-2); }
 .tdb-nb { display: flex; align-items: center; gap: 4px; padding: 9px 11px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel); font-size: 12px; }
 .tdb-nb:hover { border-color: var(--ink); }
@@ -472,9 +477,8 @@
 .tdb-handnote { font-family: Caveat, cursive; font-size: 20px; color: var(--hk-ink); transform: rotate(-2deg); position: absolute; bottom: -14px; right: 6px; }
 /* B/C · per-reel clears — slim cards on the reel's spine */
 .tdb-clear { display: flex; align-items: center; gap: 16px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 11px; box-shadow: var(--sh-card); padding: 18px 22px; position: relative; overflow: hidden; flex: 1; max-width: 720px; }
-.tdb-clear::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
-.tdb-clear.do::before { background: var(--pink-btn); }
-.tdb-clear.hk::before { background: var(--hk-cof-2); }
+/* clear cards keep their neutral hairline card — the spine is RETIRED with the rest (they are
+   horizontal empty-state cards, not lane tiles; going neutral reads cleaner than a lone band). */
 .tdb-clric { width: 40px; height: 40px; border-radius: 50%; background: var(--hk-sage); border: 1.5px solid var(--hk-spine); display: inline-flex; align-items: center; justify-content: center; color: var(--hk-ink); font-size: 16px; flex: none; }
 .tdb-clrt { font-family: var(--f12-serif); font-size: 17px; font-weight: 600; color: var(--ink); }
 .tdb-clrs { font-size: 12px; color: var(--sub); margin-top: 2px; }

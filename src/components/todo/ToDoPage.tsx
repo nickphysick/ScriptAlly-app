@@ -827,12 +827,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       .map(([key, o]) => {
         if (o.kind === "receipt") return (
           <div key={`ov-${key}`} className="tdb-tile receipt">
-            <div className="tdb-receiptbody">
-              <div className="tdb-rk"><span className="tdb-rtick">✓</span><span className="tdb-rt">{o.title}</span></div>
-              <div className="tdb-rlog">{o.line}<br />Wrong? Fix it before you move on.</div>
-              <div className="tdb-racts">
-                {o.edit && <button type="button" className="tdb-ra" onClick={o.edit}>Edit details</button>}
-                {o.undo && <button type="button" className="tdb-ra" onClick={async () => { await o.undo!(); clearOverlay(key); }}>Undo</button>}
+            <div className="tdb-frame">
+              <div className="tdb-receiptbody">
+                <div className="tdb-rk"><span className="tdb-rtick">✓</span><span className="tdb-rt">{o.title}</span></div>
+                <div className="tdb-rlog">{o.line}<br />Wrong? Fix it before you move on.</div>
+                <div className="tdb-racts">
+                  {o.edit && <button type="button" className="tdb-ra" onClick={o.edit}>Edit details</button>}
+                  {o.undo && <button type="button" className="tdb-ra" onClick={async () => { await o.undo!(); clearOverlay(key); }}>Undo</button>}
+                </div>
               </div>
             </div>
           </div>
@@ -840,11 +842,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         if (o.kind !== "dismissed") return null;
         return (
           <div key={`ov-${key}`} className="tdb-tile dismissed">
-            <div className="tdb-dismissbody">
-              <div className="tdb-dt">{o.text}</div>
-              <div className="tdb-dact">
-                <button type="button" className="tdb-ra" onClick={async () => { await o.undo(); clearOverlay(key); }}>Undo</button>
-                {o.never && <button type="button" className="tdb-ra" onClick={o.never}>Never ask</button>}
+            <div className="tdb-frame">
+              <div className="tdb-dismissbody">
+                <div className="tdb-dt">{o.text}</div>
+                <div className="tdb-dact">
+                  <button type="button" className="tdb-ra" onClick={async () => { await o.undo(); clearOverlay(key); }}>Undo</button>
+                  {o.never && <button type="button" className="tdb-ra" onClick={o.never}>Never ask</button>}
+                </div>
               </div>
             </div>
           </div>
@@ -877,7 +881,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     if (ov?.kind === "fork") {
       return (
         <div key={c.key} className={`tdb-tile ${c.stream}`}>
-          {renderFork(c.key, true, { notNow: () => forkStale(c, "notNow"), neverThis: () => forkStale(c, "neverThis") })}
+          <div className="tdb-frame">{renderFork(c.key, true, { notNow: () => forkStale(c, "notNow"), neverThis: () => forkStale(c, "neverThis") })}</div>
         </div>
       );
     }
@@ -921,7 +925,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     if (ov?.kind === "flip") {
       return (
         <div key={g.rule} className="tdb-gcard flip">
-          <GroupFlip
+          <div className="tdb-frame"><GroupFlip
             group={g}
             pro={isProUser(currentUser)}
             onUpgrade={() => onNavigate("plans")}
@@ -932,14 +936,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               flash(`${ok} saved`, undo ? { label: "Undo all", fn: async () => { await undo(); clearOverlay(`${key}-r`); } } : undefined);
             }}
             deps={{ agents, updateAgent, resolveTaskFlag }}
-          />
+          /></div>
         </div>
       );
     }
     if (ov?.kind === "fork") {
       return (
         <div key={g.rule} className="tdb-gcard">
-          {renderFork(key, false, { notNow: () => forkNotNowGroup(g), neverThis: () => forkNeverThese(g), neverRule: () => forkNeverRule(g) })}
+          <div className="tdb-frame">{renderFork(key, false, { notNow: () => forkNotNowGroup(g), neverThis: () => forkNeverThese(g), neverRule: () => forkNeverRule(g) })}</div>
         </div>
       );
     }
