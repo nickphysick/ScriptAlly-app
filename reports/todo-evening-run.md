@@ -133,3 +133,78 @@ Vitest, pipefail). Live `.t-f12` tokens over mockup hexes throughout.
   order, guard verbatim, foot progress, skips kept); todoSheet C1 describe (wrapper split, the
   circle's letterpress spec + mobile inset, Task Settings parity, the proven band, the manifest);
   taskSettingsSheet lock re-pointed.
+
+### C2 — all modes + families
+- **Uniform reach confirmed (halt (f) clear):** every step's kicker/title/sub trio was the first
+  three elements of its body JSX — all ~22 steps converted to `band(...)` with no outliers; no
+  step composes its own kicker outside a band any more (locked).
+- **The family mapping, applied:** pink = sends, nudges, every offer screen (**kickers carry the
+  ★**); coffee = stale, detail fills, batch sittings; sage = the Sunday review (all six screens),
+  the Ready-to-save screen, and **Today's-list walks — sage whole-walk via a new `ritual` prop**
+  set only by Work-the-list (the law names Today's walks sage explicitly, which outranks the
+  mixed-walk clause for that launch); parchment = Task Settings AND **notes** (notes have no
+  family in the law's closed list — the neutral parchment is the reported call). Focused sessions
+  wear the lane they sweep by construction (per-item stream family: do→pink, hk→coffee,
+  nt→parchment); mixed walks **crossfade cleanly** (the band is keyed by family with a 0.2s fade,
+  off under reduced motion) — the clean branch of the CC's-call, taken.
+- **Ceremony D enumeration (5 screens):** the offer celebration (★ kicker; the big ★ glyph stays
+  as body ornament while the art slot is empty) · the Sunday review's opening screen · its ☕
+  closing screen · the "All saved" completion · the "Desk walked"/"Lane swept" completion. The
+  Ready-to-save staged-review screen is deliberately E (a work screen, not a ceremony).
+- **Progress relocation (reported):** the pack retires the chrome row but names no home for the
+  multi-item dots + count — they live in the sheet FOOT, left of the staged chip.
+- **Mobile:** ≤760 bands stack text-above-art at reduced scale, the exit insets 12/12; **<480 the
+  art hides** (the reported sub-480 call). The ≤760 oat full-screen scrim treatment stands.
+- **themes.md:** the SHEET ANATOMY section written (anatomy, families, ceremony list, manifest).
+- Tests: todoSheet C2 describe — family per mode incl. the no-inline-kickers uniformity sweep,
+  the per-item sweep family + ritual override + keyed crossfade, exactly 5 ceremony-D screens,
+  the empty-slot nothing-renders rule, and the mobile band/exit clauses.
+
+## Close — SHAs · counts · the merged in-browser checklist
+
+| Commit | SHA | Suite |
+|---|---|---|
+| A1 masthead band | `f853e84` | 1232 |
+| A2 ledger detail + copy | `19bb96e` | 1237 |
+| B1 kicker fix | `7e577df` | 1239 |
+| B2 Hub timeline | `e84113b` | 1243 |
+| B3 duplicate-send guard | `710fd4c` | 1250 |
+| C1 anatomy + exit | `d725fb9` | 1254 |
+| C2 modes + families | (this commit) | 1259 |
+
+Gates green per commit (tsc · production build · full Vitest, pipefail). Files: ToDoPage ·
+FocusFlow · TaskSettingsSheet · QueryTimeline (extraction) · todo.css · todoWalk · todoLedger ·
+journeyArt (new) · send.png (new) · 2 refs (new) + the shell ref amended · themes.md · 8 test
+files.
+
+**In-browser checklist (Nick, on dev):**
+1. The masthead band spanning a 2560 viewport — paper edge to edge, contents centred at 1150.
+2. The offer row's DETAIL reading REPLY BY 31 JUL (hot); no bare "OFFER"/"R&R" echo anywhere —
+   a dateless row shows the dim —.
+3. The Eleanor/Marcus duplicate rows: two rows each, identical quiet-days — kebab → Open query on
+   each to collect the ids for the Correction UI (real records, not a render bug).
+4. Daniel's send sheet: the kicker reads OVER TO YOU · REQUESTED {date} (never doubled), and the
+   history beneath is the Hub's own timeline — StatusDot rows, newest first, 3–4 entries, "Open
+   the full query →" beneath.
+5. The guard: quick-✓ (or the journey's Mark sent) on a query that already has a same-type send —
+   the confirm names the type, agent and most recent date; Cancel writes nothing (staged work
+   intact); OK logs normally. A third full to Daniel demonstrates it against 17 Jul.
+6. The send journey: pink band, the plane at right with its soft shadow, corner ✕ straddling the
+   sheet corner.
+7. The Sunday review: sage; opening + ☕ closing screens centred (ceremony D); the three
+   looking-back screens as E rows.
+8. A Batch fix sitting on coffee; Task Settings on parchment.
+9. The corner ✕ both ways: clean sheet = instant close; staged work = the discard confirm.
+10. Work the list from the drawer: sage bands the whole walk; a mixed Focused session crossfades
+    family per item.
+11. Mobile width: the exit inset at 12, bands stacking, art gone under 480.
+
+**Deviations (consolidated):** progress dots+count relocated to the sheet foot (the pack retired
+their row without naming a home) · notes wear parchment (no family in the law's closed list) ·
+the D screens keep their ✓/★/☕ glyphs as body ornament while their art keys are empty · the
+Ready-to-save screen is E, not D (a work screen) · B2's source adapter (subcollection ↔ top-level
+feed) with the pre-migration caveat · duplicate/Penhallow record ids are one click away via Open
+query (this session cannot read dev Firestore) · the ceremony ref's chrome-row exit pill (drawn
+in §D) is superseded by the corner exit, per the pack's own law.
+
+**The dev pile now contains the complete redesigned To-do page — deploy checkpoint next.**

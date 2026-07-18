@@ -71,10 +71,15 @@ export const TaskSettingsSheet: React.FC<{ onClose: () => void }> = ({ onClose }
             the clean immediate close. The parchment band lands in C2. */}
         <div className="tdb-ffwrap">
           <div className="tdb-ffsheet tdb-tset">
+          {/* C2 — the neutral parchment band (no lane, no colour): hairline base, same anatomy */}
+          <div className="tdb-fband paper">
+            <div className="tdb-fbtx">
+              <div className="tdb-ffstream off">TASK SETTINGS</div>
+              <div className="tdb-ffq tdb-fbh" id="tdb-tset-heading">What lands on your desk?</div>
+              <div className="tdb-fbsub">Choose which kinds of work ScriptAlly puts in front of you. Types you switch off leave the board <b>and the post-it counts</b> — out of sight is out of mind, properly.</div>
+            </div>
+          </div>
           <div className="tdb-ffbody">
-            <div className="tdb-ffstream off">TASK SETTINGS</div>
-            <div className="tdb-ffq" id="tdb-tset-heading">What lands on your desk?</div>
-            <div className="tdb-ffqsub">Choose which kinds of work ScriptAlly puts in front of you. Types you switch off leave the board <b>and the post-it counts</b> — out of sight is out of mind, properly.</div>
 
             {GROUPS.map((g) => (
               <div key={g} className="tdb-tsetgroup">

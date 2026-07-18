@@ -776,3 +776,31 @@ The masthead is ONE row: 20px Playfair title + mono date·week eyebrow, **42px p
   `--pink-t→--pink-btn` grad · coffee `--hk-cof→--hk-cof-2` grad · note `--note-t`), the shared
   9-col grid, 44px rows, `--paper` child rows, StatusDot verbatim in STATUS. Ledger tags obey the
   white law (the batch `cof` variant re-inks border/text only). View pref `sa.todoView`.
+
+## `.t-f12` — SHEET ANATOMY (2026-07-18, evening run C; refs todo-sheet-restyle-v1.html (E + corner exit, normative) + todo-sheet-ceremony-v1.html (§D only))
+
+**Every sheet on the To-do page — all FocusFlow modes + Task Settings — wears one anatomy:**
+- **Wrapper + sheet:** `.tdb-ffwrap` (positioning) carries the **corner exit** `.tdb-ffx` — a 44px
+  parchment circle, 1.5px ink, ink ✕ (2.4/round caps), straddling top-right (−16/−16), scrim
+  shadow, hover 1.06, `aria-label="Back to my desk"` — rendered AFTER the sheet (the focus trap's
+  last tab stop). The sheet keeps `overflow:hidden` (band clipping); the exit never lives inside
+  the clip. It is the ONLY exit chrome (the pill + chrome row are retired; progress dots + count
+  live in the sheet foot). Same dismiss guard: immediate when clean, confirm when staged.
+- **The BAND (layout E, default):** family gradient + 1px family border-bottom, no radius; kicker
+  pill → 30px Playfair headline (`.tdb-ffq.tdb-fbh`) → italic sub, left; art slot 165×120
+  fit-within + CSS `drop-shadow(0 3px 6px rgba(58,28,20,.14))` (assets ship shadowless), right.
+  Absent art = a quieter band (the slot renders nothing).
+- **Ceremony (layout D):** same band, column-centred (kick → art 180×130 → headline → sub).
+  Reserved for: the offer celebration, the Sunday review's opening + closing screens, and the
+  completion/receipt screens (saved / desk-walked / lane-swept).
+- **FAMILIES (live tokens):** pink `--pink-t→--pink-btn`/`--pink-b` = urgent work (sends,
+  resubmits, nudges, the offer journey — its kickers carry the ★) · coffee `--hk-cof→--hk-cof-2`/
+  `--hk-cof-edge` = housekeeping (Batch fix sittings, stale closes, detail fills) · sage
+  `--hk-sage→--hk-sage-2`/`--hk-spine` = ritual (the Sunday review, the save/review screens, and
+  Today's-list walks — sage WHOLE-WALK via the `ritual` prop) · parchment `--paper`/`--hairline` =
+  Task Settings AND notes (notes have no family in the law's closed list — the neutral is the
+  reported call). Focused sessions wear the lane they sweep (per-item stream family); mixed walks
+  crossfade (the band is keyed by family, 0.2s fade, off under reduced motion).
+- **Mobile ≤760:** the exit insets to 12/12; bands stack text-above-art at reduced scale; **art
+  hides under 480** (the reported call). The illustration manifest lives in
+  `src/components/todo/journeyArt.ts` (`send` shipped; contract in the restyle ref's header).

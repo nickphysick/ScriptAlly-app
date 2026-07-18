@@ -70,7 +70,9 @@ describe("P1 — the corner retirement + the AppShell's one out-of-page line", (
     expect(rule(".tdb-th")).toContain("var(--hk-sage)");
     // the add flow survives: Add more / Help me pick + Work the list, same handlers
     expect(page).toContain('{committedCards.length ? "Add more" : "Help me pick"}');
-    expect(page).toContain("onClick={() => openFlowCards(committedCards)}>Work the list");
+    // evening C2: Work the list is the RITUAL walk (sage whole-walk) over the same committed set
+    expect(page).toContain('setFlow({ items: flowable.map((card) => ({ kind: "card", card })), ritual: true });');
+    expect(page).toContain(">Work the list</button>");
   });
   it("AppShell hides the help FAB on /todo only — the pack's one out-of-page line", () => {
     expect(shell).toContain('{routeKey !== "todo" && (');

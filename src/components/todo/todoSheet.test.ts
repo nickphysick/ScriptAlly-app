@@ -96,3 +96,48 @@ describe("C1 — anatomy + exit (ref todo-sheet-restyle-v1.html; both sheets)", 
     expect(flow).toContain('className="tdb-ffq tdb-fbh"');
   });
 });
+
+describe("C2 — families across every mode; ceremony D; the manifest; mobile", () => {
+  it("band family per mode: pink sends/nudges/offer(★) · coffee stale/details/batch · sage review/save · paper notes/settings", () => {
+    expect(flow).toContain('band("pink", sendKicker(');
+    expect(flow).toContain('band("pink", c.due || "No reply yet"');
+    expect(flow).toContain('band("pink", `★ ${kicker}`');
+    expect(flow).toContain('band("pink", "★ Recording your decision"');
+    expect(flow).toContain('band("cof", "Stale query"');
+    expect(flow).toContain('band("cof", "Housekeeping"');
+    expect(flow).toContain('band("cof", <>Housekeeping · {meta.label.toLowerCase()}</>');
+    expect(flow).toContain('band("paper", c.due || "Note to self"');
+    expect(flow).toContain('band("sage", "Ready to save"');
+    const settings = readFileSync(join(here, "TaskSettingsSheet.tsx"), "utf8");
+    expect(settings).toContain('<div className="tdb-fband paper">');
+    // no step composes its own kicker outside a band any more (uniform reach — halt (f) clear)
+    expect(flow).not.toContain('<div className="tdb-ffstream off">');
+    expect(flow).not.toContain('<div className="tdb-ffstream hk">');
+    expect(flow).not.toContain('<div className="tdb-ffstream nt">');
+  });
+  it("Focused sessions wear the lane they sweep (per-item stream family); mixed walks crossfade by key; Today's walks are sage rituals", () => {
+    expect(flow).toContain('const streamFam = c.stream === "hk" ? "cof" as const : c.stream === "nt" ? "paper" as const : "pink" as const;');
+    expect(flow).toContain("band(streamFam, c.due");
+    expect(flow).toContain("const fam = (f: BandFam): BandFam => (ritual ? \"sage\" : f);");
+    expect(css).toContain("@keyframes tdbBandIn"); // the keyed crossfade
+    const page2 = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
+    expect(page2).toContain("ritual: true");
+  });
+  it("ceremony D on the enumerated steps ONLY: offer celebration · review open/close · completion/receipt screens", () => {
+    const centers = flow.match(/center: true/g) ?? [];
+    expect(centers.length).toBe(5); // celebration + rv open + rv close + saved + walked/swept
+    expect(flow).toContain('band("pink", `★ ${kicker}`, <>{who} has offered to represent you.</>, undefined, { art: "offerCelebration", center: true');
+    expect(flow).toContain('{ art: "reviewOpen", center: true }');
+    expect(flow).toContain('band("sage", "All saved"');
+  });
+  it("the empty art slot renders NOTHING (no placeholder, no broken image); the slot is fit-within with the CSS shadow", () => {
+    expect(flow).toContain("const src = opts?.art ? JOURNEY_ART[opts.art] : null;");
+    expect(flow).toContain('{!opts?.center && src && <div className="tdb-fbart">');
+    expect(css).toContain(".tdb-fbart img, .tdb-fbart svg { max-width: 100%; max-height: 100%;");
+  });
+  it("mobile: bands stack text-above-art at reduced scale; art hides under 480 (the reported call); the exit insets at 12", () => {
+    expect(css).toContain("@media (max-width: 480px) { .tdb-fbart { display: none; } }");
+    expect(css).toMatch(/max-width: 760px\) \{\n  \.tdb-fband \{ flex-direction: column/);
+    expect(css).toContain("@media (max-width: 760px) { .tdb-ffx { top: 12px; right: 12px; } }");
+  });
+});

@@ -215,7 +215,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [rollDismissed, setRollDismissed] = useState(false);
   const [pulsing, setPulsing] = useState<string | null>(null);
   // THE completion surface — the focus flow (queue of one for a card click; a set for the two walks).
-  const [flow, setFlow] = useState<{ items: FocusItem[]; mode?: "sweep" | "weeklyReview" } | null>(null);
+  const [flow, setFlow] = useState<{ items: FocusItem[]; mode?: "sweep" | "weeklyReview"; ritual?: boolean } | null>(null);
   const [flowPrefill, setFlowPrefill] = useState<{ sentDate?: string; method?: string; materials?: string[] } | undefined>(undefined);
   const [settingsOpen, setSettingsOpen] = useState(false); // the Task Settings sheet ("What lands on your desk?")
   const [helpOpen, setHelpOpen] = useState(false); // the drawer-foot ? menu (Help centre / Replay the tour)
@@ -782,7 +782,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           {toast.action && <button type="button" className="tdb-toast-act" onClick={() => { toast.action!.fn(); setToast(null); }}>{toast.action.label}</button>}
         </div>
       )}
-      {flow && <FocusFlow items={flow.items} mode={flow.mode} onClose={() => { setFlow(null); setFlowPrefill(undefined); }} onNavigate={onNavigate} onToast={flash} prefill={flowPrefill} />}
+      {flow && <FocusFlow items={flow.items} mode={flow.mode} ritual={flow.ritual} onClose={() => { setFlow(null); setFlowPrefill(undefined); }} onNavigate={onNavigate} onToast={flash} prefill={flowPrefill} />}
     </F12Page>
   );
 
@@ -1009,7 +1009,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         <div className="tdb-tf">
           <span className="tdb-pc">{prog.empty ? "NOTHING COMMITTED" : `${prog.done} of ${prog.total} done today`}</span>
           <button type="button" className="tdb-pick" onClick={helpMePick}>{committedCards.length ? "Add more" : "Help me pick"}</button>
-          <button type="button" className="tdb-worklist" disabled={!committedCards.length} onClick={() => openFlowCards(committedCards)}>Work the list</button>
+          <button type="button" className="tdb-worklist" disabled={!committedCards.length} onClick={() => {
+            // C2 family law — the Today's-list walk is a ritual: sage bands whole-walk
+            const flowable = committedCards.filter((c) => c.taskType !== "weekly_review");
+            if (flowable.length) setFlow({ items: flowable.map((card) => ({ kind: "card", card })), ritual: true });
+          }}>Work the list</button>
         </div>
       </div>
     );

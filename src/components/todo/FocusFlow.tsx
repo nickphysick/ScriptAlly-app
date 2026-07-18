@@ -92,9 +92,12 @@ export interface FocusFlowProps {
    *  housekeeping, Enter opens an offer). Sweep quick-✓s use the Phase-C defaults + a brief inline
    *  receipt, write IMMEDIATELY (Undo on the toast) and never stage. Default: the full journey. */
   mode?: "journey" | "sweep" | "weeklyReview";
+  /** C2 family law — a Today's-list walk is a RITUAL: every band wears sage whole-walk (the
+   *  mixed-lane crossfade never fires). Set only by the Work-the-list launch. */
+  ritual?: boolean;
 }
 
-export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate, onToast, prefill, mode = "journey" }) => {
+export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate, onToast, prefill, mode = "journey", ritual = false }) => {
   const {
     queries, agents, manuscripts, activities, taskFlags, userTasks, currentUser,
     recordMaterialsSent, logNudge, recordOfferDecision, dismissTask, upsertTaskFlag, updateUserProfile, updateAgent, updateUserTask, addUserTask, updateQueryStatus, undoQueryStatus, resolveTaskFlag, deleteActivity,
@@ -355,10 +358,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     const ag = cardAgent(c, q);
     if (step === 0) return sheet(
       <>
-        <div className={`tdb-ffstream${c.warn ? " warn" : ""}`}>{c.due || "No reply yet"}</div>
-        <div className="tdb-ffq">Time to nudge {c.who ? <em>{c.who}</em> : "them"}?</div>
         <div className="tdb-ffqsub">
-          {c.subtitle ? `${c.subtitle}. ` : ""}
           {ag?.responseTimeWeeks ? <>Their stated reply time is <b>{ag.responseTimeWeeks} weeks</b> — a polite follow-up is fair.</> : "A polite follow-up is fair."}
         </div>
         {whoRow(ag, c.initials)}
@@ -371,6 +371,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
         <button type="button" className="tdb-ffskip" onClick={() => c.taskType && c.relatedRecordId && stageAndAdvance({ kind: "snooze", cardKey: c.key, label: c.title, taskType: c.taskType, relatedRecordId: c.relatedRecordId, days: 7 })}>Snooze</button>
         <button type="button" className="tdb-ffpri" onClick={() => setStep(1)}>Write the nudge →</button>
       </>,
+      band("pink", c.due || "No reply yet", <>Time to nudge {c.who ? <em>{c.who}</em> : "them"}?</>, c.subtitle || undefined, { art: "nudge", kickCls: c.warn ? "warn" : "" }),
     );
     const ms = q ? manuscripts.find((m) => m.id === q.manuscriptId) : undefined;
     const draft = nudgeDraft({
@@ -381,8 +382,6 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     });
     return sheet(
       <>
-        <div className="tdb-ffstream">Nudging {c.who || "them"}</div>
-        <div className="tdb-ffq">Here’s a note you could send.</div>
         <div className="tdb-ffdraft">{draft}</div>
         <button type="button" className="tdb-ffcopy" onClick={() => { navigator.clipboard?.writeText(draft); setCopied(true); window.setTimeout(() => setCopied(false), 1400); }}>
           {copied ? "✓ Copied" : "⧉  Copy the draft"}
@@ -401,6 +400,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
           checkBackDate: plusDaysISO(DEFAULT_CHECKBACK_DAYS), nudgeDate: sentDate, method,
         })}>Stage it →</button>
       </>,
+      band("pink", <>Nudging {c.who || "them"}</>, "Here’s a note you could send.", ms?.title ? `${c.title} — ${ms.title}` : undefined, { art: "nudge" }),
     );
   }
 
@@ -437,8 +437,6 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
         const names = selRows.map((r) => r.name).join(" · ");
         return sheet(
           <>
-            <div className="tdb-ffstream off">{kick}</div>
-            <div className="tdb-ffq">Shall I put them on your desk?</div>
             <div className="tdb-ffqsub">One task per agent — <b>“Tell {"{agent}"} about the offer”</b> — on Urgent{replyBy ? <>, each carrying the <b>{fmtShort(replyBy)}</b> deadline</> : ", ready the moment you are"}. They tick off as you send each message{replyBy ? ", and anyone who hasn’t been told chases you as the deadline nears" : ""}.</div>
             <div className="tdb-ffremcard">
               <span className="tdb-ffremic" aria-hidden>✓</span>
@@ -459,12 +457,11 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
               setNotifyStep("pick"); setOfferDoor("");
             }}>Create {n} reminder{n === 1 ? "" : "s"}</button>
           </>,
+          band("pink", `★ ${kick}`, "Shall I put them on your desk?", undefined, { art: "offer", kickCls: "off" }),
         );
       }
       return sheet(
         <>
-          <div className="tdb-ffstream off">{kick}</div>
-          <div className="tdb-ffq">Who should hear about it?</div>
           <div className="tdb-ffqsub">Standard etiquette is to tell <b>everyone still considering {ms?.title || "this manuscript"}</b> in one sweep — same message, same deadline — so they can read quickly or step aside.</div>
           {replyBy
             ? <span className="tdb-ffreplyby">⏱ THE DEADLINE YOU GIVE THEM = YOUR REPLY-BY · {fmtShort(replyBy).toUpperCase()}</span>
@@ -480,14 +477,13 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
             {n === 0 ? "Continue without telling anyone" : `Continue · ${n} selected`}
           </button>
         </>,
+        band("pink", `★ ${kick}`, "Who should hear about it?", undefined, { art: "offer", kickCls: "off" }),
       );
     }
 
     // ── door: record the decision (THE completion) ──
     if (offerDoor === "decide") return sheet(
       <>
-        <div className="tdb-ffstream off">Recording your decision</div>
-        <div className="tdb-ffq">What did you tell {who}?</div>
         <div className="tdb-ffqsub">This completes the task — the decision is logged at the time you record it.</div>
         <div className="tdb-ffseg">
           <button type="button" className={`tdb-ffopt${offerChoice === "accepted" ? " sel" : ""}`} onClick={() => setOfferChoice("accepted")}>
@@ -515,13 +511,12 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
           advance();
         }}>Record decision</button>
       </>,
+      band("pink", "★ Recording your decision", <>What did you tell {who}?</>, undefined, { art: "offer", kickCls: "off" }),
     );
 
     // ── door: I need time — the existing snooze flag, capped at reply-by ──
     if (offerDoor === "time") return sheet(
       <>
-        <div className="tdb-ffstream off">Taking time to decide</div>
-        <div className="tdb-ffq">When should we bring this back?</div>
         <div className="tdb-ffqsub">The offer card stays on Urgent — just quieter — and wakes on the day you choose.</div>
         <div className="tdb-ffremrow">
           ⏰ Remind me on
@@ -540,14 +535,13 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
           advance();
         }}>Set reminder</button>
       </>,
+      band("pink", "★ Taking time to decide", "When should we bring this back?", undefined, { art: "offer", kickCls: "off" }),
     );
 
     // ── the celebration + fork ──
     return sheet(
       <>
-        <div className="tdb-ffstream off">{kicker}</div>
         <div className="tdb-ffstar" aria-hidden>★</div>
-        <div className="tdb-ffofferq">{who} has offered to represent you.</div>
         <div className="tdb-ffqsub">This is the moment the querying was for. The offer is already on {ms?.title ? <b>{ms.title}</b> : "the manuscript"}’s timeline — what happens next is yours to choose.</div>
         {replyBy && <span className="tdb-ffreplyby">⏱ REPLY BY {fmtShort(replyBy).toUpperCase()}{daysTo != null ? ` · ${daysTo} DAY${daysTo === 1 ? "" : "S"}` : ""}</span>}
         <div className="tdb-ffoffernote" aria-hidden>— worth a cup of tea at least</div>
@@ -582,6 +576,8 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
         <span className="tdb-sp" />
         <button type="button" className="tdb-ffskip" onClick={advance}>Not now — leave it</button>
       </>,
+      // ceremony D — the offer celebration (kicker carries the ★ per the family law)
+      band("pink", `★ ${kicker}`, <>{who} has offered to represent you.</>, undefined, { art: "offerCelebration", center: true, kickCls: "off" }),
     );
   }
 
@@ -590,9 +586,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     const ag = cardAgent(c, q);
     return sheet(
       <>
-        <div className="tdb-ffstream hk">Stale query</div>
-        <div className="tdb-ffq">{emTitle(c)}</div>
-        <div className="tdb-ffqsub">{c.subtitle ? `${c.subtitle}. ` : ""}Closing keeps your response rate honest — logged as <b>no response</b>, not a rejection.</div>
+        <div className="tdb-ffqsub">Closing keeps your response rate honest — logged as <b>no response</b>, not a rejection.</div>
         {whoRow(ag, c.initials)}
         {openQueryLink(q)}
         <div className="tdb-ffchoices">
@@ -622,6 +616,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
         <span className="tdb-sp" />
         <button type="button" className="tdb-ffskip" onClick={advance}>Leave it</button>
       </>,
+      band("cof", "Stale query", emTitle(c), c.subtitle || undefined, { art: "stale", kickCls: "hk" }),
     );
   }
 
@@ -630,8 +625,6 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     const needs: AgentDataNeed[] = ag ? agentDataQualityNeeds(ag) : [];
     if (step === 0) return sheet(
       <>
-        <div className="tdb-ffstream hk">Housekeeping</div>
-        <div className="tdb-ffq">{emTitle(c)}</div>
         <div className="tdb-ffqsub">Clean data is how ScriptAlly judges fit and checks your package — worth most before you query. Fill what you know; skip what you don’t.</div>
         {whoRow(ag, c.initials)}
       </>,
@@ -641,12 +634,11 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
         <button type="button" className="tdb-ffskip" onClick={advance}>Not now</button>
         <button type="button" className="tdb-ffpri" onClick={() => setStep(1)}>Fill them in →</button>
       </>,
+      band("cof", "Housekeeping", emTitle(c), undefined, { art: "details", kickCls: "hk" }),
     );
     const filled = needs.some((n) => (rows[n] ?? "").trim());
     return sheet(
       <>
-        <div className="tdb-ffstream hk">{c.who || "Agent"} · details</div>
-        <div className="tdb-ffq">What do you know?</div>
         <div className="tdb-ffbatch">
           {needs.includes("responseTime") && (
             <div className="tdb-ffbrow">
@@ -693,6 +685,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
           advance();
         }}>Save & continue →</button>
       </>,
+      band("cof", <>{c.who || "Agent"} · details</>, "What do you know?", undefined, { art: "details", kickCls: "hk" }),
     );
   }
 
@@ -705,8 +698,6 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
       const numMatch = title.match(/^(\d+\s+agents?)([\s\S]*)$/);
       return sheet(
         <>
-          <div className="tdb-ffstream hk">Housekeeping · {meta.label.toLowerCase()}</div>
-          <div className="tdb-ffq">{numMatch ? <><em>{numMatch[1]}</em>{numMatch[2]}.</> : title}</div>
           <div className="tdb-ffqsub">{HK_PAYOFF[g.rule]} It’s usually on the agency’s submissions page. Fill what you know; skip what you don’t.</div>
           {mutedList.length > 0 && (
             <div className="tdb-ffsmall">
@@ -726,14 +717,13 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
           <button type="button" className="tdb-ffskip" onClick={() => stageAndAdvance({ kind: "mute-rule", cardKey: itemKey({ kind: "group", group: g }), label: meta.label, rule: g.rule })}>Never ask</button>
           <button type="button" className="tdb-ffpri" onClick={() => setStep(1)}>Fix them together →</button>
         </>,
+        band("cof", <>Housekeeping · {meta.label.toLowerCase()}</>, numMatch ? <><em>{numMatch[1]}</em>{numMatch[2]}.</> : title, undefined, { art: "batch", kickCls: "hk" }),
       );
     }
     const filledIds = g.members.filter((m) => (rows[m.agentId ?? ""] ?? "").trim()).map((m) => m.agentId!);
     const q2 = g.rule === "dq_responseTime" ? "They usually reply within…" : g.rule === "dq_materials" ? "They ask to receive…" : "What are they looking for?";
     return sheet(
       <>
-        <div className="tdb-ffstream hk">{meta.label} · {filledIds.length} of {g.members.length} filled</div>
-        <div className="tdb-ffq">{q2}</div>
         <div className="tdb-ffbatch">{g.members.map((m) => {
           const id = m.agentId ?? m.card.key;
           const prov = m.agentId ? found[m.agentId] : undefined;
@@ -795,6 +785,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
           advance();
         }}>Save {filledIds.length || ""} & continue →</button>
       </>,
+      band("cof", <>{meta.label} · {filledIds.length} of {g.members.length} filled</>, q2, undefined, { art: "batch", kickCls: "hk" }),
     );
   }
 
@@ -803,8 +794,6 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     const dirty = text.trim() !== c.title && text.trim().length > 0;
     return sheet(
       <>
-        <div className="tdb-ffstream nt">{c.due || "Note to self"}</div>
-        <div className="tdb-ffq">A note, in your own hand.</div>
         <div className="tdb-ffrow"><div className="tdb-fff"><label>Your note</label><textarea value={text} onChange={(e) => setNoteText(e.target.value)} /></div></div>
         {c.record && <div className="tdb-ffsmall">Attached to <b>{c.record.replace(/^On /, "")}</b>.</div>}
       </>,
@@ -814,6 +803,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
         <button type="button" className="tdb-ffskip" onClick={() => { if (dirty && c.userTaskId) updateUserTask(c.userTaskId, { text: text.trim() }); advance(); }}>Keep it</button>
         <button type="button" className="tdb-ffpri pink" onClick={() => { if (c.userTaskId) { updateUserTask(c.userTaskId, { done: true, completedAt: new Date().toISOString(), ...(dirty ? { text: text.trim() } : {}) }); onToast(`✓ ${c.title} — done`, { label: "Undo", fn: async () => { await updateUserTask(c.userTaskId!, { done: false }); onToast("Restored"); } }); } advance(); }}>✓ Mark it done</button>
       </>,
+      band("paper", c.due || "Note to self", "A note, in your own hand.", undefined, { art: "note", kickCls: "nt" }),
     );
   }
 
@@ -942,9 +932,6 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
       const g = it.group;
       return sheet(
         <>
-          <div className="tdb-ffstream hk">Housekeeping · {g.meta.label.toLowerCase()}</div>
-          <div className="tdb-ffq">{g.meta.title(g.members.length)}.</div>
-          <div className="tdb-ffqsub">{HK_PAYOFF[g.rule]}</div>
           {sweepFork ? (
             <div className="tdb-ffbigacts">
               <button type="button" className="tdb-ffbig" onClick={() => sweepNever(it, "these")}>Never — just these agents</button>
@@ -964,6 +951,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
           <span className="tdb-sp" />
           <button type="button" className="tdb-ffskip" onClick={advance}>{kbd("→")}Skip</button>
         </>,
+        band("cof", <>Housekeeping · {g.meta.label.toLowerCase()}</>, <>{g.meta.title(g.members.length)}.</>, HK_PAYOFF[g.rule], { art: "batch", kickCls: "hk" }),
       );
     }
     const c = it.card;
@@ -971,9 +959,6 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     if (j === "offer") {
       return sheet(
         <>
-          <div className="tdb-ffstream off">Offer of representation</div>
-          <div className="tdb-ffq">{c.who ? <em>{c.who}</em> : "An agent"} wants to represent you.</div>
-          <div className="tdb-ffqsub">This one needs the moment — no quick anything for an offer.</div>
           <div className="tdb-ffbigacts">
             <button type="button" className="tdb-ffbig" onClick={() => setDeepDive(true)}>{kbd("↵")}Open the offer</button>
           </div>
@@ -983,17 +968,16 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
           <span className="tdb-sp" />
           <button type="button" className="tdb-ffskip" onClick={advance}>{kbd("→")}Skip</button>
         </>,
+        band("pink", "★ Offer of representation", <>{c.who ? <em>{c.who}</em> : "An agent"} wants to represent you.</>, "This one needs the moment — no quick anything for an offer.", { art: "offer", kickCls: "off" }),
       );
     }
     const q = cardQuery(c);
     const ag = cardAgent(c, q);
+    const streamFam = c.stream === "hk" ? "cof" as const : c.stream === "nt" ? "paper" as const : "pink" as const;
     const streamCls = c.stream === "hk" ? " hk" : c.stream === "nt" ? " nt" : c.warn ? " warn" : "";
     const doneLabel = j === "stale" ? "Close — no response" : j === "nudge" ? "Log the nudge (defaults)" : j === "note" ? "Mark it done" : "Done — log with defaults";
     return sheet(
       <>
-        <div className={`tdb-ffstream${streamCls}`}>{c.due || "On your desk"}</div>
-        <div className="tdb-ffq">{emTitle(c)}</div>
-        {c.subtitle && <div className="tdb-ffqsub">{c.subtitle}</div>}
         {whoRow(ag, c.initials)}
         {sweepFork && j === "stale" ? (
           <div className="tdb-ffbigacts">
@@ -1014,6 +998,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
         <span className="tdb-sp" />
         <button type="button" className="tdb-ffskip" onClick={advance}>{kbd("→")}Skip</button>
       </>,
+      band(streamFam, c.due || "On your desk", emTitle(c), c.subtitle || undefined, { kickCls: streamCls.trim() }),
     );
   }
 
@@ -1032,31 +1017,28 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     if (savedN != null) return sheet(
       <div className="tdb-ffbigdone">
         <div className="tdb-ffcir">✓</div>
-        <div className="tdb-ffbt">{savedN} saved. Desk cleared.</div>
-        <div className="tdb-ffbs">They’re logged against their queries and struck through on today’s list. Go write something.</div>
       </div>,
       <>
         <span className="tdb-sp" />
         <button type="button" className="tdb-ffpri" onClick={onClose}>Back to the board</button>
       </>,
+      // ceremony D — a completion/receipt screen
+      band("sage", "All saved", <>{savedN} saved. Desk cleared.</>, "They’re logged against their queries and struck through on today’s list. Go write something.", { art: "reviewClose", center: true }),
     );
     if (!staged.length) return sheet(
       <div className="tdb-ffbigdone">
         <div className="tdb-ffcir">✓</div>
-        <div className="tdb-ffbt">{sweep ? "Lane swept." : "Desk walked."}</div>
-        <div className="tdb-ffbs">{sweep ? "Everything got a decision — done, snoozed, or left for later." : "You left everything as it was — sometimes that’s the right call too."}</div>
       </div>,
       <>
         <button type="button" className="tdb-ffback" onClick={() => { setQi(items.length - 1); setStep(0); }}>← Back</button>
         <span className="tdb-sp" />
         <button type="button" className="tdb-ffpri" onClick={onClose}>Back to the board</button>
       </>,
+      // ceremony D — the walk/sweep completion screen
+      band("sage", sweep ? "Lane swept" : "Desk walked", sweep ? "Lane swept." : "Desk walked.", sweep ? "Everything got a decision — done, snoozed, or left for later." : "You left everything as it was — sometimes that’s the right call too.", { art: "reviewClose", center: true }),
     );
     return sheet(
       <>
-        <div className="tdb-ffstream sage">Ready to save</div>
-        <div className="tdb-ffq">You worked through <em>{staged.length} thing{staged.length === 1 ? "" : "s"}</em>.</div>
-        <div className="tdb-ffqsub">Nothing has been saved yet — check the list, drop anything you’re not sure of, then save the lot.</div>
         {staged.map((p, i) => {
           const v = stagedVerb(p);
           return (
@@ -1075,6 +1057,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
         <button type="button" className="tdb-ffskip" onClick={() => requestExit()}>Discard</button>
         <button type="button" className="tdb-ffpri" disabled={saving} onClick={saveAll}>Save {staged.length} & finish</button>
       </>,
+      band("sage", "Ready to save", <>You worked through <em>{staged.length} thing{staged.length === 1 ? "" : "s"}</em>.</>, "Nothing has been saved yet — check the list, drop anything you’re not sure of, then save the lot.", { art: "review", kickCls: "sage" }),
     );
   }
 
@@ -1111,10 +1094,15 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
   /** C1 — the zoned family BAND (layout E; center = ceremony D). The title carries .tdb-ffq so
    *  the dialog's aria-labelledby stamp keeps finding the heading; art comes from JOURNEY_ART
    *  (absent = the slot renders nothing at all). Keyed by family so mixed walks crossfade. */
-  function band(fam: "pink" | "cof" | "sage" | "paper", kick: React.ReactNode, title: React.ReactNode, sub?: React.ReactNode, opts?: { art?: JourneyArtKey; center?: boolean; kickCls?: string }) {
+  type BandFam = "pink" | "cof" | "sage" | "paper";
+  // C2 — the family law: ritual (Today's-list) walks wear sage WHOLE-WALK; everything else wears
+  // its journey's family (mixed walks crossfade via the band's key).
+  const fam = (f: BandFam): BandFam => (ritual ? "sage" : f);
+  function band(famKey: BandFam, kick: React.ReactNode, title: React.ReactNode, sub?: React.ReactNode, opts?: { art?: JourneyArtKey; center?: boolean; kickCls?: string }) {
     const src = opts?.art ? JOURNEY_ART[opts.art] : null;
+    const f = fam(famKey);
     return (
-      <div key={fam} className={`tdb-fband ${fam}${opts?.center ? " center" : ""}`}>
+      <div key={f} className={`tdb-fband ${f}${opts?.center ? " center" : ""}`}>
         <div className="tdb-fbtx">
           <div className={`tdb-ffstream ${opts?.kickCls ?? ""}`}>{kick}</div>
           {opts?.center && src && <div className="tdb-fbart big"><img src={src} alt="" /></div>}
@@ -1181,10 +1169,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
 
     if (rvStep === 0) return sheet(
       <>
-        <div className="tdb-ffstream off">{kicker}</div>
         <div className="tdb-rvhand" aria-hidden>— kettle on. this takes about five minutes.</div>
-        <div className="tdb-ffq">Week {win.weekNumber}, closed properly</div>
-        <div className="tdb-ffqsub">A short look back before the week ahead: what went out, what came back, what’s gone quiet — and then we’ll set Monday’s list so tomorrow starts itself.</div>
         <div className="tdb-rvstats">
           <span className="tdb-rvstat"><b>{stats.sent.length}</b>WENT OUT</span>
           <span className="tdb-rvstat"><b>{stats.back.length}</b>CAME BACK</span>
@@ -1196,13 +1181,12 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
         <span className="tdb-sp" />
         <button type="button" className="tdb-ffpri" onClick={() => setRvStep(1)}>Begin →</button>
       </>,
+      // ceremony D — the review's opening screen
+      band("sage", kicker, <>Week {win.weekNumber}, closed properly</>, "A short look back before the week ahead: what went out, what came back, what’s gone quiet — and then we’ll set Monday’s list so tomorrow starts itself.", { art: "reviewOpen", center: true }),
     );
 
     if (rvStep === 1) return sheet(
       <>
-        <div className="tdb-ffstream off">LOOKING BACK · WHAT WENT OUT</div>
-        <div className="tdb-ffq">{stats.sent.length === 0 ? "A quiet week on the way out" : `${spell(stats.sent.length)} thing${stats.sent.length === 1 ? "" : "s"} left your desk`}</div>
-        <div className="tdb-ffqsub">{stats.sent.length === 0 ? "Nothing went out — rest weeks count too." : "Nothing to do here — just seeing your own momentum. Every one of these was work."}</div>
         <div className="tdb-rvrows">{stats.sent.map((r, i) => (
           <div key={i} className="tdb-rvrow"><span className="tdb-rvbadge out">{r.badge}</span><span className="tdb-rvtx"><b>{r.label}</b><span>{r.meta}</span></span></div>
         ))}</div>
@@ -1212,13 +1196,11 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
         <span className="tdb-sp" />
         <button type="button" className="tdb-ffpri" onClick={() => setRvStep(2)}>Continue →</button>
       </>,
+      band("sage", "Looking back · what went out", stats.sent.length === 0 ? "A quiet week on the way out" : `${spell(stats.sent.length)} thing${stats.sent.length === 1 ? "" : "s"} left your desk`, stats.sent.length === 0 ? "Nothing went out — rest weeks count too." : "Nothing to do here — just seeing your own momentum. Every one of these was work.", { art: "review" }),
     );
 
     if (rvStep === 2) return sheet(
       <>
-        <div className="tdb-ffstream off">LOOKING BACK · WHAT CAME BACK</div>
-        <div className="tdb-ffq">{stats.back.length === 0 ? "Nothing back this week" : `${spell(stats.back.length)} came back${stats.offers === 1 ? " — one of them gold" : stats.offers > 1 ? ` — ${stats.offers} of them gold` : ""}`}</div>
-        <div className="tdb-ffqsub">{stats.back.length === 0 ? "Normal, not nothing — most weeks are quiet ones." : "Read them again if you like. They happened."}</div>
         <div className="tdb-rvrows">{stats.back.map((r, i) => (
           <div key={i} className="tdb-rvrow"><span className={`tdb-rvbadge${r.star ? " star" : " in"}`}>{r.badge}</span><span className="tdb-rvtx"><b>{r.label}</b><span>{r.meta}</span></span></div>
         ))}</div>
@@ -1228,13 +1210,11 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
         <span className="tdb-sp" />
         <button type="button" className="tdb-ffpri" onClick={() => setRvStep(3)}>Continue →</button>
       </>,
+      band("sage", "Looking back · what came back", stats.back.length === 0 ? "Nothing back this week" : `${spell(stats.back.length)} came back${stats.offers === 1 ? " — one of them gold" : stats.offers > 1 ? ` — ${stats.offers} of them gold` : ""}`, stats.back.length === 0 ? "Normal, not nothing — most weeks are quiet ones." : "Read them again if you like. They happened.", { art: "review" }),
     );
 
     if (rvStep === 3) return sheet(
       <>
-        <div className="tdb-ffstream off">LOOKING BACK · WHAT WENT QUIET</div>
-        <div className="tdb-ffq">{stats.quiet.length === 0 ? "Nothing went quiet this week" : `${spell(stats.quiet.length)} ${stats.quiet.length === 1 ? "has" : "have"} gone quiet`}</div>
-        <div className="tdb-ffqsub">{stats.quiet.length === 0 ? "Every live query is still inside its window." : "Decide now or decide later — either is a decision. Choices stage here and save at the end."}</div>
         <div className="tdb-rvrows">{stats.quiet.map((r) => (
           <div key={r.queryId} className="tdb-rvrow">
             <span className="tdb-rvtx"><b>{r.name}</b><span>{[r.daysSilent != null ? `${r.daysSilent} DAYS SILENT` : null, "NO REPLY"].filter(Boolean).join(" · ")}</span></span>
@@ -1250,12 +1230,11 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
         <span className="tdb-sp" />
         <button type="button" className="tdb-ffpri" onClick={() => setRvStep(4)}>Continue →</button>
       </>,
+      band("sage", "Looking back · what went quiet", stats.quiet.length === 0 ? "Nothing went quiet this week" : `${spell(stats.quiet.length)} ${stats.quiet.length === 1 ? "has" : "have"} gone quiet`, stats.quiet.length === 0 ? "Every live query is still inside its window." : "Decide now or decide later — either is a decision. Choices stage here and save at the end.", { art: "review" }),
     );
 
     if (rvStep === 4) return sheet(
       <>
-        <div className="tdb-ffstream off">THE WEEK AHEAD · SEEDING MONDAY</div>
-        <div className="tdb-ffq">What should Monday hold?</div>
         <div className="tdb-ffqsub">Dated things are pre-ticked. These land on <b>Monday’s Today’s list</b> — you’ll wake up to a desk that’s already set.</div>
         <div className="tdb-rvrows">{cands.map((c) => (
           <label key={c.key} className={`tdb-rvseed${seedSel[c.key] ? " on" : ""}`}>
@@ -1270,21 +1249,19 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
         <span className="tdb-sp" />
         <button type="button" className="tdb-ffpri" disabled={saving} onClick={finishReview}>Seed Monday & finish</button>
       </>,
+      band("sage", "The week ahead · seeding Monday", "What should Monday hold?", undefined, { art: "review" }),
     );
 
     return sheet(
       <div className="tdb-rvdone">
         <span className="tdb-rvring" aria-hidden>☕</span>
-        <div className="tdb-ffq">Week {win.weekNumber}, closed.</div>
-        <div className="tdb-ffqsub">
-          {rvSummary ? `${rvSummary.closed} ${rvSummary.closed === 1 ? "query" : "queries"} closed · Monday’s list seeded with ${rvSummary.seeded} thing${rvSummary.seeded === 1 ? "" : "s"}.` : ""}
-          <br />See you at the desk tomorrow.
-        </div>
       </div>,
       <>
         <span className="tdb-sp" />
         <button type="button" className="tdb-ffpri" onClick={() => requestExit()}>Back to my desk</button>
       </>,
+      // ceremony D — the review's closing screen
+      band("sage", kicker, <>Week {win.weekNumber}, closed.</>, <>{rvSummary ? `${rvSummary.closed} ${rvSummary.closed === 1 ? "query" : "queries"} closed · Monday’s list seeded with ${rvSummary.seeded} thing${rvSummary.seeded === 1 ? "" : "s"}.` : ""} See you at the desk tomorrow.</>, { art: "reviewClose", center: true }),
     );
   }
 
