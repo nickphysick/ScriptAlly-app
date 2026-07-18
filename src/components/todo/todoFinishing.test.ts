@@ -76,7 +76,10 @@ describe("P3 — the Sunday review (source locks)", () => {
 
   it("the entry card never leaks into card journeys, walks, sweeps or Help-me-pick", () => {
     expect(page).toContain('const flowable = cards.filter((c) => c.taskType !== "weekly_review");');
-    expect(page).toContain('items: board.do.filter((c) => c.taskType !== "weekly_review").map((card) => ({ kind: "card", card })), mode: "sweep"');
+    // workbench P4: the sweeps run over the VISIBLE set — the exclusion rides it (cards view),
+    // and the ledger session consumes doSorted, which excludes at source.
+    expect(page).toContain('items: vDo.filter((c) => c.taskType !== "weekly_review").map((card) => ({ kind: "card", card })), mode: "sweep"');
+    expect(page).toContain('sortLedgerDo(vDo.filter((c) => c.taskType !== "weekly_review")');
     expect(page).toContain('choosePicks({ doCards: board.do.filter((c) => c.taskType !== "weekly_review")');
   });
 

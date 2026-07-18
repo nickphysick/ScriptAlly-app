@@ -177,3 +177,38 @@ describe("P3 — the ledger view (source locks; derivations in todoLedger.test.t
     expect(cof).not.toContain("background"); // border/ink only — the white fill stands
   });
 });
+
+describe("P4 — search + filters (source locks; the matrix lives in todoFilters.test.ts)", () => {
+  it("BOTH views read the same visible sets (cards lanes and ledger sections consume vDo/vGroups/vStale/vNt)", () => {
+    expect(page).toContain("{vDo.map(renderCard)}");
+    expect(page).toContain("{vGroups.map(renderGroupCard)}");
+    expect(page).toContain("{vStale.map(renderCard)}");
+    expect(page).toContain("{vNt.map(renderCard)}");
+    expect(page).toContain("sortLedgerDo(vDo.filter((c) =>"); // the ledger sorts the SAME set
+  });
+  it("the drawer filter groups are the ref's list with derived counts; On today's list only rides beneath", () => {
+    for (const label of [">Offers<", ">Over to you<", ">Missing materials<", ">Missing wish lists<", ">Stale queries<", ">Snoozed<"]) {
+      expect(page.replace(/<span/g, "<").replace(/<\/span>/g, "<")).toContain(label.replace("<", "<"));
+    }
+    expect(page).toContain("✓ On today’s list only");
+    expect(page).toContain("filterCounts({ doCards: board.do, hkGroups, staleCards, ntCards: board.nt, committedCount: committedCards.length })");
+  });
+  it("filtered-empty gets the quiet one-liner + clear action, NEVER a celebratory empty (branch order + lane skips)", () => {
+    expect(page).toContain("active && !anyVisible ? (");
+    expect(page).toContain("Nothing matches —");
+    expect(page).toContain('onClick={() => { setFilters(DEFAULT_FILTERS); setSearch(""); }}>clear filters');
+    // the celebratory desk states sit BEFORE the filter branch (they need a truly empty desk)
+    const branch = page.indexOf('desk === "new-desk" ? renderNewDesk()');
+    expect(branch).toBeGreaterThan(0);
+    expect(branch).toBeLessThan(page.indexOf("active && !anyVisible"));
+    // a filtered-empty lane HIDES rather than celebrating
+    expect(page).toContain("{(!active || vDo.length > 0 || overlayCards(\"do\").length > 0) && (");
+  });
+  it("the review entry card is furniture — it hides while any filter/search is active", () => {
+    expect(page).toContain('c.taskType === "weekly_review" ? !active :');
+  });
+  it("search state: ⌘K focuses (visibility-guarded, P1) and Esc clears + blurs", () => {
+    expect(page).toContain('placeholder="Search your desk…"');
+    expect(page).toContain('if (e.key === "Escape") { setSearch(""); (e.target as HTMLInputElement).blur(); }');
+  });
+});

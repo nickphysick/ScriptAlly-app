@@ -38,6 +38,7 @@ import { isProUser, fetchAssistedFill, AssistFound } from "../../lib/assistFill"
 import { groupHousekeeping, hkGapCount, hkGroupProgress, HkGroup, HkRule, HK_RULES } from "../../lib/todoHousekeeping";
 import { deskState, liveQueryCount, liveQueriesLine, clearedListCap } from "../../lib/todoEmpty";
 import { ledgerTitle, ledgerDetail, sortLedgerDo, sortLedgerHk, batchChildren, batchDetail, truncateRows } from "../../lib/todoLedger";
+import { TodoFilterState, DEFAULT_FILTERS, filtersActive, matchesSearch, groupMatchesSearch, visibleDoCard, visibleStaleCard, visibleNoteCard, visibleGroup, filterCounts } from "../../lib/todoFilters";
 import { shouldAutoRunTour } from "../../lib/todoTour";
 import { TodoTour } from "./TodoTour";
 import { ActivityType, QueryStatus } from "../../types";
@@ -244,6 +245,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // Phase 4's wiring. The page stays MOUNTED behind other routes (StagePage display-toggles), so
   // the ⌘K handler must no-op while the board is hidden — offsetParent is null under display:none.
   const [search, setSearch] = useState("");
+  // Drawer filters (Phase 4) — session-only; all-visible defaults (hiding is the writer's act).
+  const [filters, setFilters] = useState<TodoFilterState>(DEFAULT_FILTERS);
+  const setF = (k: keyof TodoFilterState, v: boolean) => setFilters((f) => ({ ...f, [k]: v }));
   const searchRef = useRef<HTMLInputElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -327,6 +331,17 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const { committed: committedCards, done: doneCards } = todaySplit(board, today);
   const doneN = doneCards.length;
   const desk = deskState({ queryCount: queries.length, agentCount: agents.length, urgent: board.do.length, hkItems: hkItemCount, notes: board.nt.length, clearedToday: doneN });
+  // ── Phase 4: search + filters compose AND-wise over BOTH views. The review entry card is
+  // furniture — it renders only while nothing is filtered/searched (it would dilute matches).
+  const sctx = { queries, agents, manuscripts };
+  const active = filtersActive(filters, search);
+  const fc = filterCounts({ doCards: board.do, hkGroups, staleCards, ntCards: board.nt, committedCount: committedCards.length });
+  const vDo = board.do.filter((c) =>
+    c.taskType === "weekly_review" ? !active : visibleDoCard(c, filters, today) && matchesSearch(c, search, sctx));
+  const vGroups = hkGroups.filter((g) => visibleGroup(g, filters) && groupMatchesSearch(g, search));
+  const vStale = staleCards.filter((c) => visibleStaleCard(c, filters, today) && matchesSearch(c, search, sctx));
+  const vNt = board.nt.filter((c) => visibleNoteCard(c, filters, today) && matchesSearch(c, search, sctx));
+  const anyVisible = vDo.length + vGroups.length + vStale.length + vNt.length > 0;
 
   // ── first-visit spotlight tour (Act 1). Auto-runs ONCE: `tourSeenAt` absent ∧ not the new desk;
   // the flag is stamped on Done AND on skip/Esc (never localStorage — it follows the user). The
@@ -525,10 +540,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               {renderMasthead()}
         {/* ── the board — cards or ledger by the masthead toggle; the desk states (new-desk /
             desk-cleared) replace BOTH views. Copy verbatim from todo-empty-states.html. ── */}
-        {desk === "new-desk" ? renderNewDesk() : desk === "desk-cleared" ? renderDeskCleared() : view === "ledger" ? renderLedger() : (
+        {desk === "new-desk" ? renderNewDesk() : desk === "desk-cleared" ? renderDeskCleared() : active && !anyVisible ? (
+          <div className="tdb-nomatch">
+            Nothing matches — <button type="button" onClick={() => { setFilters(DEFAULT_FILTERS); setSearch(""); }}>clear filters</button>
+          </div>
+        ) : view === "ledger" ? renderLedger() : (
         <div className="tdb-lanes">
-          <Lane cls="do" label="Urgent" count={tiles.urgent} isEmpty={board.do.length === 0 && overlayCards("do").length === 0}
-            onFocusedSession={() => setFlow({ items: board.do.filter((c) => c.taskType !== "weekly_review").map((card) => ({ kind: "card", card })), mode: "sweep" })}
+          {(!active || vDo.length > 0 || overlayCards("do").length > 0) && (
+          <Lane cls="do" label="Urgent" count={active ? vDo.length : tiles.urgent} isEmpty={vDo.length === 0 && overlayCards("do").length === 0}
+            onFocusedSession={() => setFlow({ items: vDo.filter((c) => c.taskType !== "weekly_review").map((card) => ({ kind: "card", card })), mode: "sweep" })}
             emptyNode={
               <div className="tdb-clear do">
                 <span className="tdb-clric" aria-hidden>✓</span>
@@ -538,14 +558,16 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               </div>
             }>
             {overlayCards("do")}
-            {board.do.map(renderCard)}
+            {vDo.map(renderCard)}
           </Lane>
+          )}
+          {(!active || vGroups.length > 0 || vStale.length > 0 || overlayCards("hk").length > 0) && (
           <Lane
             cls="hk"
             label="Housekeeping"
-            count={tiles.housekeeping}
-            isEmpty={hkGroups.length === 0 && staleCards.length === 0 && overlayCards("hk").length === 0}
-            onFocusedSession={() => setFlow({ items: [...hkGroups.map((g) => ({ kind: "group" as const, group: g })), ...staleCards.map((card) => ({ kind: "card" as const, card }))], mode: "sweep" })}
+            count={active ? hkGapCount(vGroups) + vStale.length : tiles.housekeeping}
+            isEmpty={vGroups.length === 0 && vStale.length === 0 && overlayCards("hk").length === 0}
+            onFocusedSession={() => setFlow({ items: [...vGroups.map((g) => ({ kind: "group" as const, group: g })), ...vStale.map((card) => ({ kind: "card" as const, card }))], mode: "sweep" })}
             emptyNode={
               <div className="tdb-clear hk">
                 <div><div className="tdb-clrt">Spotless.</div>
@@ -568,15 +590,18 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             )}
           >
             {overlayCards("hk")}
-            {hkGroups.map(renderGroupCard)}
-            {staleCards.map(renderCard)}
+            {vGroups.map(renderGroupCard)}
+            {vStale.map(renderCard)}
           </Lane>
-          <Lane cls="nt" label="Notes to self" count={tiles.notes} onAdd={addTask} isEmpty={board.nt.length === 0 && overlayCards("nt").length === 0}
-            onFocusedSession={() => setFlow({ items: board.nt.map((card) => ({ kind: "card", card })), mode: "sweep" })}
+          )}
+          {(!active || vNt.length > 0 || overlayCards("nt").length > 0) && (
+          <Lane cls="nt" label="Notes to self" count={active ? vNt.length : tiles.notes} onAdd={addTask} isEmpty={vNt.length === 0 && overlayCards("nt").length === 0}
+            onFocusedSession={() => setFlow({ items: vNt.map((card) => ({ kind: "card", card })), mode: "sweep" })}
             emptyNode={<button type="button" className="tdb-ghostcard" onClick={addTask}><span className="tdb-ge">Nothing jotted yet.</span><span className="tdb-gg">＋ Add a note</span></button>}>
             {overlayCards("nt")}
-            {board.nt.map(renderCard)}
+            {vNt.map(renderCard)}
           </Lane>
+          )}
         </div>
         )}
             </div>
@@ -720,6 +745,25 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             <span>{walkSublabel(tiles.urgent)}</span>
           </span>
         </button>
+        <div className="tdb-dsh">FILTER</div>
+        <div className="tdb-dfilters">
+          <div className="tdb-fgrp">
+            <div className="tdb-fgl"><span className="tdb-lanedot do" aria-hidden />Urgent<span className="n">{fc.offers + fc.overToYou}</span></div>
+            <label className="tdb-ft"><input type="checkbox" checked={filters.offers} onChange={(e) => setF("offers", e.target.checked)} />Offers<span className="n">{fc.offers}</span></label>
+            <label className="tdb-ft"><input type="checkbox" checked={filters.overToYou} onChange={(e) => setF("overToYou", e.target.checked)} />Over to you<span className="n">{fc.overToYou}</span></label>
+          </div>
+          <div className="tdb-fgrp">
+            <div className="tdb-fgl"><span className="tdb-lanedot hk" aria-hidden />Housekeeping<span className="n">{tiles.housekeeping}</span></div>
+            <label className="tdb-ft"><input type="checkbox" checked={filters.materials} onChange={(e) => setF("materials", e.target.checked)} />Missing materials<span className="n">{fc.materials}</span></label>
+            <label className="tdb-ft"><input type="checkbox" checked={filters.mswl} onChange={(e) => setF("mswl", e.target.checked)} />Missing wish lists<span className="n">{fc.mswl}</span></label>
+            <label className="tdb-ft"><input type="checkbox" checked={filters.stale} onChange={(e) => setF("stale", e.target.checked)} />Stale queries<span className="n">{fc.stale}</span></label>
+            <label className="tdb-ft"><input type="checkbox" checked={filters.snoozed} onChange={(e) => setF("snoozed", e.target.checked)} />Snoozed<span className="n">{fc.snoozed}</span></label>
+          </div>
+          <div className="tdb-fgrp">
+            <div className="tdb-fgl"><span className="tdb-lanedot nt" aria-hidden />Notes<span className="n">{tiles.notes}</span></div>
+          </div>
+          <label className="tdb-ft today"><input type="checkbox" checked={filters.todayOnly} onChange={(e) => setF("todayOnly", e.target.checked)} />✓ On today’s list only<span className="n">{fc.today}</span></label>
+        </div>
         <div className="tdb-dsh">TODAY’S LIST · {prog.empty ? "NOTHING YET" : `${prog.done} OF ${prog.total}`}</div>
         {renderTodayPanel()}
         <div className="tdb-dfoot">
@@ -921,33 +965,33 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     const ctx = { queries, taskFlags };
     // The review entry card is card-furniture (its own mode + dismiss ✕) — the scrap + cards view
     // carry it; the ledger lists workable rows only. Reported as a deviation.
-    const doSorted = sortLedgerDo(board.do.filter((c) => c.taskType !== "weekly_review"), ctx, now);
+    const doSorted = sortLedgerDo(vDo.filter((c) => c.taskType !== "weekly_review"), ctx, now);
     const doCut = truncateRows(doSorted, !!showAllSec.do);
-    const staleSorted = sortLedgerHk(staleCards, ctx, now);
+    const staleSorted = sortLedgerHk(vStale, ctx, now);
     const hkTop: Array<{ kind: "group"; g: HkGroup } | { kind: "card"; c: BoardCard }> = [
-      ...hkGroups.map((g) => ({ kind: "group" as const, g })),
+      ...vGroups.map((g) => ({ kind: "group" as const, g })),
       ...staleSorted.map((c) => ({ kind: "card" as const, c })),
     ];
     const hkCut = truncateRows(hkTop, !!showAllSec.hk);
-    const ntCut = truncateRows(board.nt, !!showAllSec.nt);
+    const ntCut = truncateRows(vNt, !!showAllSec.nt);
     return (
       <div className="tdb-ledger">
         {doSorted.length > 0 && ledgerSection({
-          cls: "p", id: "tdb-lane-do", label: "Urgent", count: tiles.urgent,
-          onSession: () => setFlow({ items: board.do.filter((c) => c.taskType !== "weekly_review").map((card) => ({ kind: "card", card })), mode: "sweep" }),
+          cls: "p", id: "tdb-lane-do", label: "Urgent", count: active ? doSorted.length : tiles.urgent,
+          onSession: () => setFlow({ items: doSorted.map((card) => ({ kind: "card", card })), mode: "sweep" }),
           total: doSorted.length, hidden: doCut.hidden, showAllKey: "do",
           children: doCut.visible.map(ledgerCardRow),
         })}
-        {(hkGroups.length > 0 || staleCards.length > 0) && ledgerSection({
-          cls: "c", id: "tdb-lane-hk", label: "Housekeeping", count: tiles.housekeeping,
-          onSession: () => setFlow({ items: [...hkGroups.map((g) => ({ kind: "group" as const, group: g })), ...staleCards.map((card) => ({ kind: "card" as const, card }))], mode: "sweep" }),
+        {(vGroups.length > 0 || vStale.length > 0) && ledgerSection({
+          cls: "c", id: "tdb-lane-hk", label: "Housekeeping", count: active ? hkGapCount(vGroups) + vStale.length : tiles.housekeeping,
+          onSession: () => setFlow({ items: [...vGroups.map((g) => ({ kind: "group" as const, group: g })), ...vStale.map((card) => ({ kind: "card" as const, card }))], mode: "sweep" }),
           total: hkTop.length, hidden: hkCut.hidden, showAllKey: "hk",
           children: hkCut.visible.map((r) => (r.kind === "group" ? ledgerBatchRow(r.g) : ledgerCardRow(r.c))),
         })}
-        {board.nt.length > 0 && ledgerSection({
-          cls: "n", id: "tdb-lane-nt", label: "Notes to self", count: tiles.notes,
-          onSession: () => setFlow({ items: board.nt.map((card) => ({ kind: "card", card })), mode: "sweep" }),
-          total: board.nt.length, hidden: ntCut.hidden, showAllKey: "nt",
+        {vNt.length > 0 && ledgerSection({
+          cls: "n", id: "tdb-lane-nt", label: "Notes to self", count: active ? vNt.length : tiles.notes,
+          onSession: () => setFlow({ items: vNt.map((card) => ({ kind: "card", card })), mode: "sweep" }),
+          total: vNt.length, hidden: ntCut.hidden, showAllKey: "nt",
           children: ntCut.visible.map(ledgerCardRow),
         })}
       </div>

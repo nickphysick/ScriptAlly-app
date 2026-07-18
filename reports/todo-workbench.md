@@ -125,3 +125,29 @@ done-child degrade (dated where stamped, undated otherwise — no invented dates
   dated/undated done child, both sort orders, cohort composition, truncation) + the P3 source-lock
   describe (StatusDot per row kind, live persisted toggle, default-collapsed expansion + scroll
   restore, the deep-link reorder, SHOW ALL wiring, white-law-legal ledger tags).
+
+## PHASE 4 — search + filters
+
+- **The pure layer `src/lib/todoFilters.ts`:** the ref's checkbox list verbatim (Urgent → Offers ·
+  Over to you; Housekeeping → Missing materials · Missing wish lists · Stale queries · Snoozed;
+  plus "On today's list only"), composing AND-wise with the masthead search (title, agent, agency,
+  manuscript — groups match on label or member name/agency). Counts derived live
+  (`filterCounts`), never stored. Session-only state.
+- **Decisions (flagged):** defaults are ALL-VISIBLE — the mock sketches Snoozed unchecked, but an
+  unchecked default would silently hide previously-snoozed live cards on first paint; hiding is
+  the writer's act. "Snoozed" is an AXIS over the type boxes, not a bucket. Reply-window groups
+  have no checkbox (the ref's list omits them, as Task Settings v2 dropped that row) — they always
+  render. todayOnly shows committed cards only; batch groups aren't committable and drop out.
+  Focused sessions sweep the VISIBLE set (what you see is what you sweep). Section head counts
+  show the visible tally while filtering; the post-its keep the desk truth. The review entry card
+  hides while anything is filtered/searched (furniture would dilute matches).
+- **Both views, one set:** cards lanes and ledger sections consume the same vDo/vGroups/vStale/vNt.
+- **Filtered-empty:** a filtered-out lane/section HIDES; a fully-filtered board shows the quiet
+  one-liner — "Nothing matches — clear filters" (one action resets filters + search). The
+  celebratory desk states are unreachable from filtering (their branch reads the raw board).
+- **⌘K** focuses the masthead search (the P1 visibility guard); **Esc** clears + blurs.
+- Tests: `todoFilters.test.ts` (defaults, activity, the composition matrix incl. the snoozed axis
+  + todayOnly-drops-groups + the no-checkbox reply-windows pass, search per field + group match,
+  counts) + the P4 source-lock describe (shared visible sets, drawer wiring, quiet-line branch
+  order + lane skips, review-card furniture rule, Esc). `todoFinishing.test.ts` leak-lock
+  re-pointed at the visible-set sweeps (the exclusion invariant unchanged).

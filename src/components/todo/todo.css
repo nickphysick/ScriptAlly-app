@@ -356,6 +356,18 @@
 /* right:70 sits LEFT of the AppShell's global help "?" (fixed bottom:20 right:20, 38px, z-30). */
 /* the FAB — SAGE now (the Today system's colour): sage gradient pill, INK completion ring,
    ink title, sage-ink meta (retune ref §1). */
+/* ── drawer FILTER groups (Option B .fgrp/.fgl/.ft) + the quiet filtered-empty line ── */
+.tdb-dfilters { display: flex; flex-direction: column; gap: 2px; }
+.tdb-fgrp { margin-bottom: 2px; }
+.tdb-fgl { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; padding: 5px 4px; color: var(--ink); }
+.tdb-fgl .n, .tdb-ft .n { margin-left: auto; font-family: var(--f12-mono); font-size: 8.5px; color: var(--faint); }
+.tdb-ft { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 4px 4px 4px 20px; color: var(--ink-2); cursor: pointer; border-radius: 7px; }
+.tdb-ft:hover { background: var(--white, #fff); }
+.tdb-ft input { accent-color: var(--hk-ink); }
+.tdb-ft.today { padding-left: 4px; }
+.tdb-nomatch { padding: 34px 4px; font-family: var(--f12-serif); font-style: italic; font-size: 14.5px; color: var(--muted); }
+.tdb-nomatch button { border: none; background: none; font: inherit; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; padding: 0; }
+
 /* ── the Today's-list PANEL (workbench: the corner pop-up's internals TRANSPLANTED into the
    drawer — same inner classes, drawer scale; SAGE header per the ref's .today2; the fixed
    wrapper, rise animation and ✕ are retired). ── */
