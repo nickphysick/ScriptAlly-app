@@ -50,10 +50,10 @@ export const TOUR_STOPS: TourStop[] = [
     cta: "Next →",
   },
   {
-    // workbench retarget: Walk me through moved from the masthead into the drawer.
-    sel: ".tdb-dwalk",
+    // III retarget: the guided walk is FOCUS MODE, living in the pair's top card.
+    sel: ".tdb-focus",
     h: "Or just say go.",
-    p: "This walks your urgent pile for you — one sheet at a time, nothing saved until you approve the lot.",
+    p: "This is Focus mode — it walks your urgent pile for you, one sheet at a time; nothing saved until you approve the lot.",
     cta: "Done",
   },
 ];

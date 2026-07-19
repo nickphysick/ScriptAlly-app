@@ -173,7 +173,7 @@ const Lane: React.FC<{
   count: number;
   isEmpty: boolean;
   onAdd?: () => void;
-  onFocusedSession?: () => void; // "Begin focused session" (launches the focus flow's sweep mode; handler unchanged)
+  onFocusedSession?: () => void; // "▶ Focus on {label}" (launches the focus flow's sweep mode; handler unchanged)
   emptyNode?: React.ReactNode;
   strip?: React.ReactNode; // rendered between the header and the grid (e.g. muted-rules recovery chips)
   children?: React.ReactNode;
@@ -842,7 +842,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         )}
             </div>
           </div>
-          {!narrow && (
+          {/* III P4 — the Today rail's two faces, ONE state (halt (d) clear): commitments →
+              the full rail; empty → the slim tucked tab at the viewport's right edge (hover
+              unfurls; click opens the add flow; the first commitment restores the rail). */}
+          {!narrow && committedCards.length > 0 && (
             <aside className="tdb-railr" aria-label="Today">
               {renderTodayPanel()}
             </aside>
@@ -850,6 +853,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         </div>
       </div>
 
+      {!narrow && committedCards.length === 0 && (
+        <button type="button" className="tdb-ttab" aria-label="Today’s list — nothing yet; add something" onClick={helpMePick}>
+          <span className="tdb-ttabic" aria-hidden>☑</span>
+          <span className="tdb-ttabx"><b>Today’s list</b><i>NOTHING YET</i><span className="tdb-ttabplus" aria-hidden>＋</span></span>
+        </button>
+      )}
       {view === "ledger" && selVisible.length > 0 && (
         <div className="tdb-bulk" role="toolbar" aria-label={`${selVisible.length} selected`}>
           <span className="tdb-bulkn">{selVisible.length} selected</span>

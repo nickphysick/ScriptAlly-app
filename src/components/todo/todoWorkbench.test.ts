@@ -85,7 +85,7 @@ describe("P1 — the corner retirement + the AppShell's one out-of-page line", (
 describe("P1 — masthead composition + the centred column", () => {
   it("one row: title+date/week · 62px post-its (II·B) · the scrap · search ⌘K · the view toggle", () => {
     expect(page).toContain("{shortHeaderDate(now)} · {weekOfQuerying(queries, new Date(now))}");
-    expect(rule(".tdb-postit")).toContain("width: 62px");
+    expect(rule(".tdb-postit")).toContain("width: 66px; height: 80px"); // III P4 portrait
     expect(page).toContain('className="tdb-msrch"');
     expect(page).toContain('className="tdb-vtg"');
     // Walk me through is NOT in the masthead any more (slice ends before the drawer's intro comment)
@@ -93,7 +93,7 @@ describe("P1 — masthead composition + the centred column", () => {
     expect(mast).not.toContain("Walk me through");
   });
   it("type-scale: masthead title 25px (II·B), lane heads 16px", () => {
-    expect(rule(".tdb-ask")).toContain("font-size: 25px");
+    expect(rule(".tdb-ask")).toContain("font-size: 26px"); // III P4
     expect(rule(".tdb-lgt")).toContain("font-size: 16px"); // II·B P4: one head grammar, both views
   });
   it("the content column caps at 1150 and centres; the row caps at 1720 (max-width discipline)", () => {
@@ -302,11 +302,11 @@ describe("II·B P1 — the 24-grid + the ref masthead (todo-workbench-rail-v1.ht
     expect(rule(".tdb-lghead.standalone")).toContain("margin-bottom: var(--g12)"); // II·B P4 head band
     expect(rule(".tdb-reeltrack")).toContain("gap: var(--g12)"); // III P2: the reel is the card-gutter consumer
     expect(rule(".tdb-ledger")).toContain("gap: var(--g24)");
-    expect(rule(".tdb-mast")).toContain("padding: var(--g24) 2px");
+    expect(rule(".tdb-mast")).toContain("padding: 28px 2px"); // III P4: the ref's 28 — the sanctioned departure
   });
   it("masthead anatomy per the ref: 62px tape-fold post-its (Playfair numerals), 58×44 scrap, 300px search, 10px eyebrow", () => {
-    expect(rule(".tdb-postit::before")).toContain("width: 22px; height: 9px");
-    expect(rule(".tdb-pv")).toContain("font-family: var(--f12-serif); font-size: 20px");
+    expect(rule(".tdb-postit::before")).toContain("width: 24px; height: 10px"); // III P4 tape
+    expect(rule(".tdb-pv")).toContain("font-family: var(--f12-serif); font-size: 24px"); // III P4
     expect(rule(".tdb-msrch")).toContain("flex: 0 1 300px");
     expect(rule(".tdb-rdate")).toContain("font-size: 10px");
   });
@@ -357,7 +357,7 @@ describe("III P3 — the pinned pair (supersedes the II·B controls-only drawer)
 describe("II·B P3 — the companion rail (one panel, two mounts, one state)", () => {
   it("mount parity: BOTH homes call the SAME renderTodayPanel, XOR'd on narrow (no fork — halt (c) clear)", () => {
     expect((page.match(/\{renderTodayPanel\(\)\}/g) ?? []).length).toBe(2);
-    expect(page).toContain("{!narrow && (");
+    expect(page).toContain("{!narrow && committedCards.length > 0 && ("); // III P4: the rail's committed face
     expect(page).toContain("{narrow && (");
     expect(page).toContain('window.matchMedia("(max-width: 1499.98px)")');
   });
@@ -402,5 +402,33 @@ describe("II·B P4 — one tag grammar + card polish", () => {
     expect(page).toContain('className="tdb-gnever ghost"');
     expect(rule(".tdb-gnever.ghost")).toContain("border-bottom: 1px solid var(--line)");
     expect(page).toContain("muteRuleFromCard(g)");
+  });
+});
+
+describe("III P4 — the tucked Today tab · the masthead · the naming sweep", () => {
+  it("the rail's two faces, one state: commitments → the rail; empty → the edge tab (no fork — halt (d) clear)", () => {
+    expect(page).toContain("{!narrow && committedCards.length > 0 && (");
+    expect(page).toContain("{!narrow && committedCards.length === 0 && (");
+    expect((page.match(/\{renderTodayPanel\(\)\}/g) ?? []).length).toBe(2); // rail + narrow popover — never a third copy
+  });
+  it("the tab: 40px-class rounded-left sage edge tab, hover/focus unfurl, labelled + focusable; click opens the add flow", () => {
+    expect(page).toContain('className="tdb-ttab" aria-label="Today’s list — nothing yet; add something" onClick={helpMePick}');
+    expect(rule(".tdb-ttab")).toContain("border-radius: 12px 0 0 12px");
+    expect(rule(".tdb-ttab")).toContain("position: fixed; right: 0;");
+    expect(css).toContain(".tdb-ttab:hover, .tdb-ttab:focus-visible { max-width: 300px;");
+    expect(css).toContain("@media (prefers-reduced-motion: reduce) { .tdb-ttab { transition: none; } }");
+    expect(css).toContain("@media (max-width: 1499.98px) { .tdb-ttab { display: none; } }");
+  });
+  it("THE NAMING SWEEP — no stale strings anywhere on the board or the sheets (grep-level)", () => {
+    const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");
+    const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
+    for (const stale of ["Begin focused session", "Walk me through", "Focused session", "walkSublabel", "walkAria"]) {
+      expect(page).not.toContain(stale);
+      expect(flow).not.toContain(stale);
+      expect(tour).not.toContain(stale);
+    }
+    expect(page).toContain(">▶ Focus on {label}</button>"); // cards view
+    expect(page).toContain(">▶ Focus on {opts.label}</button>"); // ledger view
+    expect(page).toContain(">Focus mode</b>"); // the pair's card
   });
 });

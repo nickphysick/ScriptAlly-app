@@ -79,3 +79,62 @@ Ran against `17a6668`, tree clean; all four Downloads files verified at start. G
 - Tests: the pair geometry/pin/fold, the Focus card (art law, count source, handler), toggle
   relocation (masthead slice clean), status-line sources + RESET visibility, pill semantics +
   zero state + a11y, the retired-species sweep, the both-views inline ＋.
+
+## PHASE 4 — the tucked Today tab · masthead · the naming pass
+
+- **THE TWO-STATE TODAY ACCOUNT (halt (d) clear):** one state, two faces — commitments exist →
+  the full 264px rail (behaviours untouched); empty → the rail unmounts and the **tucked tab**
+  takes the viewport's right edge (banner-tab ref §3): ☑ 40px-class rounded-left sage tab,
+  fixed at the rail's former top (**236px** — nav + masthead + the g24 offset, reported), hover/
+  focus unfurling horizontally into "Today's list · NOTHING YET · ＋", click opening the add flow
+  (`helpMePick`); the first commitment restores the rail with the same state (the panel render
+  function is untouched — still exactly two mounts: the rail and the narrow chip's popover).
+  Narrow (<1500) keeps the masthead chip; the tab is ≥1500 only. Nuance flagged: a day with
+  done-work but zero commitments shows the tab (the pack's law verbatim); the done band returns
+  with the first commitment.
+- **Masthead:** post-its to **66×80 portrait** (24×10 tape, 24px Playfair numeral), container
+  padding to **28px** (the one sanctioned departure from `--g24`, noted inline), title **26px**.
+  The toggle had already left for the filter card; search stays.
+- **THE NAMING SWEEP (results):** the guided walk is **"Focus mode"** everywhere it is named —
+  the pair's card, the folded rail's aria, tour stop 5 (retargeted `.tdb-dwalk` → `.tdb-focus`,
+  copy re-worded to name Focus mode); the lane pills read **"▶ Focus on Urgent" / "▶ Focus on
+  Housekeeping" / "▶ Focus on Notes to self"** (dynamic per lane, both views — the ledger group
+  heads follow). "Begin focused session" and "Walk me through" are extinct in the UI;
+  `walkSublabel`/`walkAria` died with their strings (P3). FocusFlow needed NO changes — it never
+  carried the names (grep-verified); the sweep is locked as a grep-level test over the page, the
+  flow and the tour.
+- Tests: the two-face gate + the never-a-third-panel-copy parity, the tab's geometry/a11y/
+  breakpoint/reduced-motion, the masthead locks re-pointed (66×80/24/28/26), the naming sweep,
+  the tour selectors + copy.
+
+## Close — SHAs · counts
+
+| Phase | SHA | Suite |
+|---|---|---|
+| P1 review banner + afterlife | `a8d0754` | 1269 |
+| P2 reels + soft tags | `47a45ea` | 1271 |
+| P3 the pinned pair | `aa51146` | 1269 |
+| P4 tab · masthead · naming | (this commit) | 1272 |
+
+**In-browser checklist (Nick, on dev):**
+1. Sunday: the WHITE banner lifted above the lanes (☕ roundel, the verbatim copy, no stat
+   preview); ✕ drops it to the thin sage bar beneath the last lane; the Urgent post-it and every
+   count unmoved by either.
+2. The reels paging with the rail open AND closed (the fit recomputes — fewer cards with the
+   rail); snap feel (jsdom can't).
+3. The soft ★ OFFER — white like its neighbours, ★ + bold only; urgency bold-only; the ledger's
+   batch tags un-tinted.
+4. The pinned pair holding through a long scroll; the Focus card's art + hover lift; ▶ Begin · n.
+5. Pills toggling with the status line tracking ("Showing 39 of 44 · RESET"); RESET clearing
+   filters + search and vanishing at parity; the zero pill at half-opacity.
+6. The empty rail as the edge tab — hover unfurl, click → the add flow, first commitment → the
+   full rail returns.
+7. 66×80 post-its with the tape; the 26px title; the toggle living in the filter card.
+8. "▶ Focus on Urgent" on the pink lane head (cards AND ledger); the tour's stop 5 pointing at
+   the Focus card.
+
+**Deviations (consolidated):** the lane/ledger head renames landed with P2/P3's head edits (the
+lines were in hand — one edit each instead of two; P4 completed the sweep) · the banner's
+#eee7de hairline realised as `--hairline` (live-token law) · the tab's "rail's former top" is a
+fixed 236px · a done-only day shows the tab per the law · the II·B drawer locks were superseded
+wholesale by the pair's (expected — the pack supersedes that round's sidebar).

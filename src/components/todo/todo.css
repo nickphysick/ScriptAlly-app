@@ -31,17 +31,17 @@
    VIEWPORT. The old .tdb-band name stays the card band's alone.) ── */
 .tdb-mastband { background: var(--paper); border-bottom: 1px solid var(--line); }
 .tdb-mastcol { max-width: 1150px; margin: 0 auto; padding: 0 var(--g24); }
-.tdb-mast { display: flex; flex-wrap: wrap; align-items: center; gap: 24px; row-gap: 12px; padding: var(--g24) 2px; }
+.tdb-mast { display: flex; flex-wrap: wrap; align-items: center; gap: 24px; row-gap: 12px; padding: 28px 2px; } /* III P4: the ref's 28 — the one sanctioned departure from --g24 */
 .tdb-askwrap { display: flex; flex-direction: column; gap: 4px; }
 .tdb-rdate { font-family: var(--f12-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); }
-.tdb-ask { font-family: var(--f12-serif); font-size: 25px; font-weight: 600; color: var(--ink); white-space: nowrap; line-height: 1.08; }
+.tdb-ask { font-family: var(--f12-serif); font-size: 26px; font-weight: 600; color: var(--ink); white-space: nowrap; line-height: 1.08; }
 /* post-it counts — 62px tilted squares with the tape fold (II·B masthead, normative ref
    todo-workbench-rail-v1.html: Playfair numerals — the Caveat grammar retired here); tap scrolls
    to the section (counts in aria-labels). Hover straightens; reduced-motion kills the transition. */
 .tdb-postits { display: flex; gap: 12px; align-items: flex-start; }
-.tdb-postit { position: relative; width: 62px; height: 62px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; box-shadow: 0 2px 5px rgba(58, 28, 20, 0.15); flex: none; transition: 0.18s; cursor: pointer; }
-.tdb-postit::before { content: ""; position: absolute; top: -6px; left: 50%; transform: translateX(-50%); width: 22px; height: 9px; background: rgba(255, 255, 255, 0.55); }
-.tdb-pv { font-family: var(--f12-serif); font-size: 20px; font-weight: 600; line-height: 1; }
+.tdb-postit { position: relative; width: 66px; height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; box-shadow: 0 3px 7px rgba(58, 28, 20, 0.16); flex: none; transition: 0.18s; cursor: pointer; }
+.tdb-postit::before { content: ""; position: absolute; top: -7px; left: 50%; transform: translateX(-50%); width: 24px; height: 10px; background: rgba(255, 255, 255, 0.55); }
+.tdb-pv { font-family: var(--f12-serif); font-size: 24px; font-weight: 600; line-height: 1; }
 .tdb-pk { font-family: var(--f12-mono); font-size: 6px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; opacity: 0.75; margin-top: 2px; }
 .tdb-postit.ug { background: var(--postit-pink); transform: rotate(-2.4deg); color: var(--pink-deep); }
 .tdb-postit.hk { background: var(--hk-cof-2); transform: rotate(1.8deg); color: var(--hk-cof-ink); }
@@ -398,6 +398,20 @@
 .tdb-todaypop { position: absolute; top: calc(100% + 8px); right: 0; z-index: 45; width: 300px; box-shadow: var(--sh-3); border-radius: 12px; animation: tdbPopDown 0.16s ease-out; }
 @keyframes tdbPopDown { from { opacity: 0; transform: translateY(-6px); } }
 @media (prefers-reduced-motion: reduce) { .tdb-todaypop { animation: none; } }
+
+/* ── III P4: the TUCKED TODAY TAB (banner-tab ref §3) — the rail's empty face. 40px rounded-left
+   sage tab hugging the viewport edge at the rail's former top (≈ nav + masthead + g24 — a fixed
+   236px, reported); hover/focus unfurls horizontally; the first commitment restores the rail. ── */
+.tdb-ttab { position: fixed; right: 0; top: 236px; z-index: 30; display: inline-flex; align-items: center; gap: 10px; border-radius: 12px 0 0 12px; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border: 1px solid var(--hk-spine); border-right: none; box-shadow: -3px 3px 10px rgba(58, 28, 20, 0.12); padding: 9px 0 9px 12px; max-width: 44px; overflow: hidden; white-space: nowrap; transition: max-width 0.2s ease; }
+.tdb-ttab:hover, .tdb-ttab:focus-visible { max-width: 300px; padding-right: 16px; }
+.tdb-ttab:focus-visible { outline: 2px solid var(--hk-ink); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .tdb-ttab { transition: none; } }
+@media (max-width: 1499.98px) { .tdb-ttab { display: none; } } /* narrow owns the masthead chip */
+.tdb-ttabic { font-size: 15px; color: var(--hk-ink); flex: none; }
+.tdb-ttabx { display: inline-flex; align-items: center; gap: 10px; }
+.tdb-ttabx b { font-family: var(--f12-serif); font-size: 13.5px; color: var(--ink); }
+.tdb-ttabx i { font-style: normal; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.11em; color: var(--hk-ink); }
+.tdb-ttabplus { width: 20px; height: 20px; border-radius: 50%; background: var(--white, #fff); border: 1px solid var(--hk-spine); color: var(--hk-ink); display: inline-flex; align-items: center; justify-content: center; font-size: 10px; }
 
 /* ── the Today's-list PANEL (workbench: the corner pop-up's internals TRANSPLANTED into the
    drawer — same inner classes, drawer scale; SAGE header per the ref's .today2; the fixed
