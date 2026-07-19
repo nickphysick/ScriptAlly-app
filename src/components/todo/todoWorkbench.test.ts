@@ -41,16 +41,17 @@ describe("P1→III — the sidebar (the pinned pair; sa.todoDrawer fold persiste
     expect(page).toContain('localStorage.getItem("sa.todoDrawer")');
     expect(page).toContain('localStorage.setItem("sa.todoDrawer", v ? "folded" : "open")');
   });
-  it("the folded rail keeps Focus/⚙/?/unfold; the walk and note buttons are retired species", () => {
+  it("the folded rail keeps Focus/⚙/unfold (the ? left with the FAB's return); retired species stay retired", () => {
     expect(page).toContain('className="tdb-pair folded"');
     expect(page).not.toContain("tdb-dwalk");
     expect(page).not.toContain("tdb-newnote");
     expect(page).not.toContain("Walk me through");
   });
-  it("the drawer FOOT carries ⚙ (the same TaskSettingsSheet) and the ? menu with the verbatim replay dispatch", () => {
+  it("VI P3: the FOOT carries ⚙ ONLY (the same TaskSettingsSheet) — help lives on the AppShell FAB", () => {
     expect(page).toContain('className="tdb-fr2" onClick={() => setSettingsOpen(true)}'); // IV P2 footer row
-    expect(page).toContain('window.dispatchEvent(new CustomEvent("sa:todo-replay-tour"))');
-    expect(page).toContain(">Help centre</button>");
+    expect(page).not.toContain("tdb-dhelp");
+    expect(page).not.toContain("helpOpen");
+    expect(page).not.toContain(">Help centre</button>"); // no duplicate help entry on the page
   });
 });
 
@@ -78,9 +79,11 @@ describe("P1 — the corner retirement + the AppShell's one out-of-page line", (
     expect(page).toContain('setFlow({ items: committedCards.map((card) => ({ kind: "card", card })), ritual: true });'); // III P1: review-free by construction, no filter
     expect(page).toContain(">Work the list</button>");
   });
-  it("AppShell hides the help FAB on /todo only — the pack's one out-of-page line", () => {
-    expect(shell).toContain('{routeKey !== "todo" && (');
-    expect(shell).not.toContain("helpMenuOpen"); // the corner two-item menu moved into the drawer foot
+  it("VI P3 reversed the route hide: the FAB shows on /todo with the two-item menu; elsewhere it navigates", () => {
+    expect(shell).not.toContain('{routeKey !== "todo" && (');
+    expect(shell).toContain('if (routeKey === "todo") setHelpMenuOpen((v) => !v);');
+    expect(shell).toContain("Help centre"); // the menu's first item (multi-line JSX)
+    expect(shell).toContain('window.dispatchEvent(new CustomEvent("sa:todo-replay-tour"))');
   });
 });
 
@@ -135,11 +138,11 @@ describe("P2 — card view: the grid replaces the reels; renames land", () => {
     expect(rule(".tdb-tt")).toContain("font-size: 14px");
     expect(rule(".tdb-body")).toContain("padding: 10px 12px 11px");
   });
-  it("renames: the lane pill is ▶ Focus on {label} (III naming, landed with the P2 Lane rewrite); Batch fix stands", () => {
-    expect(page).toContain(">▶ Focus on {label}</button>");
+  it("VI P3: the Focus pill became the PLAY BUTTON — full wording in title/aria; Batch fix stands", () => {
+    expect(page).toContain('className="tdb-playb" title={`Focus on ${label}`} aria-label={`Focus on ${label}`} onClick={onFocusedSession}');
     expect(page).toContain(">Batch fix →</button>");
     expect(page).not.toContain("Fix together");
-    expect(page).toMatch(/aria-label=\{`Focus on \$\{label\}`\}/);
+    expect(page).not.toContain(">▶ Focus on"); // the pill text is extinct in both views
   });
 });
 
@@ -174,11 +177,11 @@ describe("P3 — the ledger view (source locks; derivations in todoLedger.test.t
     expect(page).toContain(">SHOW ALL {opts.total} →</button>");
     expect(page).toContain("truncateRows(doSorted, !!showAllSec.do)");
   });
-  it("tinted section heads carry Begin focused session; the note head is the flagged extension", () => {
+  it("tinted section heads carry the play button; the note head is the flagged extension", () => {
     expect(css).toContain(".tdb-lghead.p { background: linear-gradient(180deg, var(--pink-t), var(--pink-btn)); border-color: var(--pink-b); }");
     expect(css).toContain(".tdb-lghead.c { background: linear-gradient(180deg, var(--hk-cof), var(--hk-cof-2)); border-color: var(--hk-cof-edge); }");
     expect(css).toContain(".tdb-lghead.n { background: var(--note-t); border-color: var(--note-b); }");
-    expect(page).toContain(">▶ Focus on {opts.label}</button>"); // III naming: dynamic per lane
+    expect(page).toContain('className="tdb-playb" title={`Focus on ${opts.label}`} aria-label={`Focus on ${opts.label}`} onClick={opts.onSession}'); // VI P3: the ledger head's play button
   });
   it("the shared 9-col grid is one template for header row and rows; the ledger tag stays white-law legal", () => {
     expect(css).toContain(".tdb-lgrid, .tdb-lcols, .tdb-lrow { display: grid; grid-template-columns: 34px 30px 132px 232px minmax(180px, 1fr) 152px 64px 150px 84px;");
@@ -398,7 +401,7 @@ describe("II·B P4 — one tag grammar + card polish", () => {
     expect(page).not.toContain("tdb-fsd");
     expect(rule(".tdb-lghead.standalone")).toContain("border: 1px solid");
     // both views speak the same head classes (the ledger's section builder + the Lane)
-    expect((page.match(/tdb-lgs/g) ?? []).length).toBeGreaterThanOrEqual(2);
+    expect((page.match(/tdb-playb/g) ?? []).length).toBeGreaterThanOrEqual(2);
   });
   it("the batch card's Never is the ghost-link grammar (same handler)", () => {
     expect(page).toContain('className="tdb-gnever ghost"');
@@ -449,9 +452,8 @@ describe("V P1 (reconstructed) — the left-pinned full-bleed grid (todo-right-c
 });
 
 describe("IV P2 — footer rows · the label trim (the vertical tab retired by VI P1)", () => {
-  it("footer rows: two full-width rows with the 28px roundel, hover wash, hairline above; same behaviours", () => {
+  it("footer row (VI P3 trimmed it to one): full-width, 28px roundel, hover wash, hairline above", () => {
     expect(page).toContain('className="tdb-fr2" onClick={() => setSettingsOpen(true)}');
-    expect(page).toContain('className="tdb-fr2" aria-haspopup="menu" aria-expanded={helpOpen}');
     expect(rule(".tdb-footrows")).toContain("border-top: 1px solid var(--hairline)");
     expect(rule(".tdb-fr2")).toContain("width: 100%");
     expect(rule(".tdb-fr2")).toContain("border-radius: 10px");
@@ -505,6 +507,31 @@ describe("VI P1 — 'Today', always on (todo-right-column-v1.html)", () => {
   });
 });
 
+describe("VI P3 — lane-head play buttons · help returns to the FAB", () => {
+  it("a play button leads each lane head in BOTH views, full wording in title+aria, same handlers", () => {
+    // cards view: the Lane's onFocusedSession; ledger view: the section's onSession — unchanged
+    expect(page).toContain('className="tdb-playb" title={`Focus on ${label}`} aria-label={`Focus on ${label}`} onClick={onFocusedSession}');
+    expect(page).toContain('className="tdb-playb" title={`Focus on ${opts.label}`} aria-label={`Focus on ${opts.label}`} onClick={opts.onSession}');
+    expect(page).toContain('<path d="M1 1 L10 6 L1 11 Z" fill="currentColor" />');
+    const b = rule(".tdb-playb");
+    expect(b).toContain("width: 32px; height: 32px; border-radius: 50%");
+    expect(b).toContain("border: 1px solid rgba(58, 28, 20, 0.16)");
+    expect(css).toContain(".tdb-playb:hover { transform: scale(1.06); }");
+    expect(css).not.toContain("tdb-lgs"); // the pill is extinct
+    expect(css).not.toContain("tdb-lanedot"); // the lane dot went with it (ref head)
+  });
+  it("the reel pagers ride the head's right edge", () => {
+    expect(rule(".tdb-reelpg")).toContain("margin-left: auto");
+  });
+  it("ONE help entry point: the AppShell FAB (menu on /todo) — none on the page itself", () => {
+    for (const stale of ["tdb-dhelp", "helpOpen", "Help centre", "Replay the tour"]) {
+      expect(page).not.toContain(stale);
+    }
+    expect(page).toContain('window.addEventListener("sa:todo-replay-tour"'); // the board still listens
+    expect(shell).toContain('if (routeKey === "todo") setHelpMenuOpen((v) => !v);');
+  });
+});
+
 describe("III P4 — the tucked Today tab · the masthead · the naming sweep", () => {
   it("VI P1: ONE face — the column is always mounted ≥1200; the tab, drawer and empty-rail state are extinct", () => {
     expect((page.match(/\{renderTodayPanel\(\)\}/g) ?? []).length).toBe(2); // column + narrow popover — never a third copy
@@ -521,8 +548,8 @@ describe("III P4 — the tucked Today tab · the masthead · the naming sweep", 
       expect(flow).not.toContain(stale);
       expect(tour).not.toContain(stale);
     }
-    expect(page).toContain(">▶ Focus on {label}</button>"); // cards view
-    expect(page).toContain(">▶ Focus on {opts.label}</button>"); // ledger view
+    expect(page).toMatch(/aria-label=\{`Focus on \$\{label\}`\}/); // cards view (the play button)
+    expect(page).toMatch(/aria-label=\{`Focus on \$\{opts\.label\}`\}/); // ledger view
     expect(page).toContain(">Focus mode</b>"); // the pair's card
   });
 });

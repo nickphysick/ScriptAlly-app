@@ -129,6 +129,9 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
   // App-wide nav drawer — AppShell owns the open state; triggers (CrumbStrip / DashTopBar
   // menu buttons) and the drawer itself consume it through NavDrawerProvider.
   const [drawerOpen, setDrawerOpen] = useState(false);
+  // VI P3 — the help FAB's /todo two-item menu returns (the workbench-era route hide is
+  // reversed; the board's sidebar no longer carries help).
+  const [helpMenuOpen, setHelpMenuOpen] = useState(false);
   const drawerCtx = useMemo(
     () => ({ open: drawerOpen, setOpen: setDrawerOpen, toggle: () => setDrawerOpen((v) => !v) }),
     [drawerOpen]
@@ -162,35 +165,63 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
         </div>
       </div>
 
-      {/* Floating help — global EXCEPT /todo (the workbench pack's one out-of-page line: the
-          board's drawer foot carries ⚙/? there, including the tour-replay item — the two-item
-          corner menu this button used to open on /todo moved with it). Desktop only: below md the
-          account menu carries Help Centre and the bottom tab bar owns that corner. Display comes
-          from the class (not inline) so the media query can hide it. */}
-      {routeKey !== "todo" && (
+      {/* Floating help — global again (VI P3 reversed the workbench-era /todo hide); mockup
+          anatomy. Desktop only: below md the account menu carries Help Centre and the bottom tab
+          bar owns that corner. Display comes from the class (not inline) so the media query can
+          hide it. */}
+      <style>{`
+        .ashell-help-fab { display: flex; }
+        @media (max-width: 767.98px) {
+          .ashell-help-fab { display: none !important; }
+        }
+      `}</style>
+      <button
+        type="button"
+        className="ashell-help-fab"
+        onClick={() => {
+          // On the To-do board the ? opens a two-item menu (the tour replay lives here); the
+          // existing direct-navigate behaviour is KEPT as the menu's first item — and stays the
+          // click action itself on every other route.
+          if (routeKey === "todo") setHelpMenuOpen((v) => !v);
+          else onNavigate("help");
+        }}
+        title="Help"
+        aria-label="Help"
+        style={{
+          position: "fixed", bottom: 20, right: 20, width: 38, height: 38, borderRadius: "50%",
+          background: parchment, border: "var(--bdw) solid var(--bd)", color: burgundy,
+          fontFamily: FONT_SERIF, fontSize: 17, cursor: "pointer",
+          boxShadow: "0 3px 12px rgba(58,28,20,0.12)", zIndex: 30,
+          alignItems: "center", justifyContent: "center",
+        }}
+      >
+        ?
+      </button>
+      {helpMenuOpen && (
         <>
-          <style>{`
-            .ashell-help-fab { display: flex; }
-            @media (max-width: 767.98px) {
-              .ashell-help-fab { display: none !important; }
-            }
-          `}</style>
-          <button
-            type="button"
-            className="ashell-help-fab"
-            onClick={() => onNavigate("help")}
-            title="Help"
+          <div style={{ position: "fixed", inset: 0, zIndex: 39 }} onClick={() => setHelpMenuOpen(false)} />
+          <div
+            role="menu"
             aria-label="Help"
             style={{
-              position: "fixed", bottom: 20, right: 20, width: 38, height: 38, borderRadius: "50%",
-              background: parchment, border: "var(--bdw) solid var(--bd)", color: burgundy,
-              fontFamily: FONT_SERIF, fontSize: 17, cursor: "pointer",
-              boxShadow: "0 3px 12px rgba(58,28,20,0.12)", zIndex: 30,
-              alignItems: "center", justifyContent: "center",
+              position: "fixed", bottom: 66, right: 20, zIndex: 41, minWidth: 176,
+              background: parchment, border: "var(--bdw) solid var(--bd)", borderRadius: 12,
+              boxShadow: "0 6px 24px rgba(58,28,20,0.16)", padding: 6, fontSize: 13,
             }}
           >
-            ?
-          </button>
+            <button type="button" role="menuitem" style={{ display: "block", width: "100%", textAlign: "left", padding: "9px 12px", borderRadius: 8, color: "inherit" }}
+              onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(124,58,42,0.08)"; }}
+              onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
+              onClick={() => { setHelpMenuOpen(false); onNavigate("help"); }}>
+              Help centre
+            </button>
+            <button type="button" role="menuitem" style={{ display: "block", width: "100%", textAlign: "left", padding: "9px 12px", borderRadius: 8, color: "inherit" }}
+              onMouseEnter={(e) => { (e.target as HTMLElement).style.background = "rgba(124,58,42,0.08)"; }}
+              onMouseLeave={(e) => { (e.target as HTMLElement).style.background = "transparent"; }}
+              onClick={() => { setHelpMenuOpen(false); window.dispatchEvent(new CustomEvent("sa:todo-replay-tour")); }}>
+              Replay the tour
+            </button>
+          </div>
         </>
       )}
 

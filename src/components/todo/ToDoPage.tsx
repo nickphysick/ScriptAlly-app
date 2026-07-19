@@ -17,8 +17,8 @@
  * Theme: F12 only (`.t-f12` tokens). StatusDot consumed verbatim.
  *
  * The AppShell's global help "?" is hidden on /todo (the pack's one out-of-page line) — the
- * drawer FOOT carries ⚙ Task settings and the ? menu (Help centre / Replay the tour, dispatching
- * the same sa:todo-replay-tour event) instead.
+ * sidebar foot carries ⚙ Task settings; help lives on the AppShell FAB (whose /todo menu
+ * dispatches the same sa:todo-replay-tour event).
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { F12Page, F12Account } from "../shell/F12Shell";
@@ -211,12 +211,15 @@ const Lane: React.FC<{
     {/* II·B P4 — ONE section grammar in both views: the ledger's tinted head band (standalone
         variant adds the full border + radius); III P2 adds the chevron pagers to the head. */}
     <div className={`tdb-lghead standalone ${cls === "do" ? "p" : cls === "hk" ? "c" : "n"}`}>
-      <span className={`tdb-lanedot ${cls}`} aria-hidden />
+      {/* VI P3 — the play button leads the lane (ref .playb); the Focus pill + lane dot retire.
+          aria-label + tooltip keep the full wording; behaviour identical. */}
+      {onFocusedSession && !isEmpty && (
+        <button type="button" className="tdb-playb" title={`Focus on ${label}`} aria-label={`Focus on ${label}`} onClick={onFocusedSession}>
+          <svg width="11" height="12" viewBox="0 0 11 12" aria-hidden><path d="M1 1 L10 6 L1 11 Z" fill="currentColor" /></svg>
+        </button>
+      )}
       <span className="tdb-lgt">{label}</span>
       <span className="tdb-ln">{count}</span>
-      {onFocusedSession && !isEmpty && (
-        <button type="button" className="tdb-lgs" title={`Focus on ${label} — D done · S snooze · → skip`} aria-label={`Focus on ${label}`} onClick={onFocusedSession}>▶ Focus on {label}</button>
-      )}
       {onAdd && <button type="button" className="tdb-cadd" onClick={onAdd} aria-label="Add a note">＋</button>}
       {!isEmpty && (
         <span className="tdb-reelpg">
@@ -254,7 +257,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [flow, setFlow] = useState<{ items: FocusItem[]; mode?: "sweep" | "weeklyReview"; ritual?: boolean } | null>(null);
   const [flowPrefill, setFlowPrefill] = useState<{ sentDate?: string; method?: string; materials?: string[] } | undefined>(undefined);
   const [settingsOpen, setSettingsOpen] = useState(false); // the Task Settings sheet ("What lands on your desk?")
-  const [helpOpen, setHelpOpen] = useState(false); // the sidebar-foot ? menu (Help centre / Replay the tour)
   // VI P1 — "Done today" collapses by default to the ✓ row; expanding is in place, session-only.
   const [showDone, setShowDone] = useState(false);
   // ── workbench shell state. Fold + view are DEVICE UI prefs → the sa. localStorage convention
@@ -550,7 +552,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
 
   // ── first-visit spotlight tour (Act 1). Auto-runs ONCE: `tourSeenAt` absent ∧ not the new desk;
   // the flag is stamped on Done AND on skip/Esc (never localStorage — it follows the user). The
-  // corner ?'s "Replay the tour" re-opens it regardless of the flag via a CustomEvent. ──
+  // corner ?'s replay item re-opens it regardless of the flag via a CustomEvent. ──
   const [tourOpen, setTourOpen] = useState(false);
   const tourRanRef = useRef(false);
   useEffect(() => {
@@ -974,7 +976,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <button type="button" className="tdb-dic" title="Focus mode" aria-label={`Focus mode — begin with ${tiles.urgent} item${tiles.urgent === 1 ? "" : "s"}`} disabled={!tiles.urgent} onClick={() => openFlowCards(board.do)}>▶</button>
           <span className="tdb-dsp" />
           <button type="button" className="tdb-dic" title="Task settings" aria-label="Task settings" onClick={() => setSettingsOpen(true)}>⚙</button>
-          <button type="button" className="tdb-dic" title="Help" aria-label="Help" onClick={() => onNavigate("help")}>?</button>
           <button type="button" className="tdb-dfold" title="Unfold the sidebar" aria-label="Unfold the sidebar" aria-expanded={false} onClick={() => setFold(false)}>»</button>
         </aside>
       );
@@ -1044,17 +1045,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             </svg></span>
             Task settings
           </button>
-          <button type="button" className="tdb-fr2" aria-haspopup="menu" aria-expanded={helpOpen} onClick={() => setHelpOpen((v) => !v)}>
-            <span className="tdb-fric" aria-hidden>?</span>
-            Help
-          </button>
-          {helpOpen && (
-            <div className="tdb-dhelp" role="menu" aria-label="Help">
-              <button type="button" role="menuitem" onClick={() => { setHelpOpen(false); onNavigate("help"); }}>Help centre</button>
-              {/* the same event the AppShell menu dispatched — the board's listener is unchanged */}
-              <button type="button" role="menuitem" onClick={() => { setHelpOpen(false); window.dispatchEvent(new CustomEvent("sa:todo-replay-tour")); }}>Replay the tour</button>
-            </div>
-          )}
         </div>
         </div>
       </aside>
@@ -1269,12 +1259,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     return (
       <div className="tdb-tbl" id={opts.id}>
         <div className={`tdb-lghead ${opts.cls}`}>
-          <span className={`tdb-lanedot ${opts.cls === "p" ? "do" : opts.cls === "c" ? "hk" : "nt"}`} aria-hidden />
+          {opts.onSession && (
+            <button type="button" className="tdb-playb" title={`Focus on ${opts.label}`} aria-label={`Focus on ${opts.label}`} onClick={opts.onSession}>
+              <svg width="11" height="12" viewBox="0 0 11 12" aria-hidden><path d="M1 1 L10 6 L1 11 Z" fill="currentColor" /></svg>
+            </button>
+          )}
           <span className="tdb-lgt">{opts.label}</span>
           <span className="tdb-ln">{opts.count}</span>
-          {opts.onSession && (
-            <button type="button" className="tdb-lgs" aria-label={`Focus on ${opts.label}`} onClick={opts.onSession}>▶ Focus on {opts.label}</button>
-          )}
           {opts.onAdd && <button type="button" className="tdb-cadd" onClick={opts.onAdd} aria-label="Add a note">＋</button>}
         </div>
         <div className="tdb-lcols" aria-hidden>
