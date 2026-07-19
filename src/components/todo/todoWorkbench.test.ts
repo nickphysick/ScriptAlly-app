@@ -117,24 +117,27 @@ describe("P1 — masthead composition + the centred column", () => {
 });
 
 describe("P2 — card view: the grid replaces the reels; renames land", () => {
-  it("a wrapping auto-fill grid renders the cards; every reel mechanism is gone", () => {
-    expect(page).toContain('<div className="tdb-grid">{children}</div>');
-    expect(rule(".tdb-grid")).toContain("repeat(auto-fill, minmax(240px, 1fr))"); // II·B P4
-    for (const gone of ["laneFit", "lanePageDistance", "laneFadeState", "tdb-pager", "tdb-scroller", "scrollBy"]) {
+  it("III P2 — the one-row reel renders the cards (fresh reelFit, snap, head pagers); the grid + the RETIRED laneFit stay gone", () => {
+    expect(page).toContain('<div className="tdb-reeltrack" ref={ref}>{children}</div>');
+    expect(page).toContain('import { reelFit, reelPage, ReelFit, REEL_CARD_MIN } from "./reelFit";');
+    expect(page).toContain("el.style.setProperty(\"--reelw\", `${fit.cardWidth}px`);");
+    expect(page).toContain("new ResizeObserver(check)"); // the rail's mount/unmount reflows the track → refit for free
+    for (const gone of ["laneFit", "lanePageDistance", "laneFadeState", "tdb-pager\"", "tdb-scroller", "tdb-grid"]) {
       expect(page).not.toContain(gone);
     }
-    expect(css).not.toContain("scroll-snap");
+    expect(rule(".tdb-reeltrack")).toContain("scroll-snap-type: x mandatory");
+    expect(css).toContain("@media (prefers-reduced-motion: reduce) { .tdb-reeltrack { scroll-behavior: auto; } }");
   });
   it("tightened anatomy: 26px band, 14px titles, min-height 200, tighter body", () => {
     expect(rule(".tdb-band")).toContain("min-height: 26px");
     expect(rule(".tdb-tt")).toContain("font-size: 14px");
     expect(rule(".tdb-body")).toContain("padding: 10px 12px 11px");
   });
-  it("renames: Begin focused session (lane heads) + Batch fix (group CTA); Fix together is gone", () => {
-    expect(page).toContain(">▶ Begin focused session</button>"); // II·B P4: the ledger's chip grammar
+  it("renames: the lane pill is ▶ Focus on {label} (III naming, landed with the P2 Lane rewrite); Batch fix stands", () => {
+    expect(page).toContain(">▶ Focus on {label}</button>");
     expect(page).toContain(">Batch fix →</button>");
     expect(page).not.toContain("Fix together");
-    expect(page).toMatch(/aria-label=\{`Begin a focused session on \$\{label\}`\}/);
+    expect(page).toMatch(/aria-label=\{`Focus on \$\{label\}`\}/);
   });
 });
 
@@ -296,7 +299,7 @@ describe("II·B P1 — the 24-grid + the ref masthead (todo-workbench-rail-v1.ht
     expect(rule(".tdb-drawer")).toContain("top: var(--g24)");
     expect(rule(".tdb-reel")).toContain("margin-bottom: var(--g24)");
     expect(rule(".tdb-lghead.standalone")).toContain("margin-bottom: var(--g12)"); // II·B P4 head band
-    expect(rule(".tdb-grid")).toContain("gap: var(--g12)");
+    expect(rule(".tdb-reeltrack")).toContain("gap: var(--g12)"); // III P2: the reel is the card-gutter consumer
     expect(rule(".tdb-ledger")).toContain("gap: var(--g24)");
     expect(rule(".tdb-mast")).toContain("padding: var(--g24) 2px");
   });
@@ -371,7 +374,7 @@ describe("II·B P3 — the companion rail (one panel, two mounts, one state)", (
 
 describe("II·B P4 — one tag grammar + card polish", () => {
   it("the grouped card wears the standard typed tag pill; the kicker grammar is retired page-wide", () => {
-    expect(page).toContain('<span className="tdb-tag due cof">{g.meta.label.toUpperCase()}</span>');
+    expect(page).toContain('<span className="tdb-tag due">{g.meta.label.toUpperCase()}</span>');
     expect(page).not.toContain("tdb-kick");
     expect(page).not.toContain("tdb-kd");
     expect(css).not.toContain("tdb-kick");

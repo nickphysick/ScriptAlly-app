@@ -21,46 +21,38 @@ const rule = (sel: string): string => {
   return m[1];
 };
 
-describe("white tag law — rule-text locks", () => {
-  it("standard status tags (the base .tdb-tag, SNOOZED ×n included) are white + ink + a faint ink hairline", () => {
+describe("THE SOFT TAG LAW (Polish III — third and final revision) — rule-text locks", () => {
+  it("EVERY tag is white fill / faint-ink border / ink text — the base rule", () => {
     const base = rule(".tdb-tag");
     expect(base).toContain("background: var(--white)");
     expect(base).toContain("color: var(--ink)");
-    expect(base).toContain("border: 1px solid rgba(30, 26, 22, 0.25)"); // --ink @ 25%, literal (no color-mix in .t-f12)
-    // SNOOZED ×n is a standard tag: no .snz colour override survives
+    expect(base).toContain("border: 1px solid rgba(30, 26, 22, 0.25)"); // the live --ink @ 25%
     expect(css).not.toMatch(/\.tdb-tag\.snz\s*\{/);
   });
 
-  it("urgency tags are white too, but framed 1.5px ink + bold (depth is weight/frame, not hue)", () => {
+  it("urgency keeps 700 ONLY — the 1.5px ink frame is retired", () => {
     const warn = rule(".tdb-tag.due.warn");
-    expect(warn).toContain("background: var(--white)");
-    expect(warn).toContain("border: 1.5px solid var(--ink)");
-    expect(warn).toContain("color: var(--ink)");
     expect(warn).toContain("font-weight: 700");
+    expect(warn).not.toContain("1.5px");
+    expect(warn).not.toContain("border");
   });
 
-  it("the offer keeps its ink fill — the rarest mark on the board", () => {
+  it("★ OFFER is soft too — white like every other tag, keeping ★ (markup) + 700; the ink fill is retired", () => {
     const offer = rule(".tdb-tag.offer");
-    expect(offer).toContain("background: var(--ink)");
+    expect(offer).toContain("font-weight: 700");
+    expect(offer).not.toContain("background: var(--ink)");
+    expect(offer).not.toContain("color: #fff");
   });
 
-  it("note tags fall to the same white base — the note-yellow tag override is retired", () => {
-    expect(css).not.toMatch(/\.tdb-tile\.nt \.tdb-tag\s*\{/);
-    expect(css).not.toMatch(/\.tdb-band \.tdb-tag:not/); // the Card-Bands interim white override is gone too
-  });
-
-  it("no board tag carries a pink (or note-yellow) fill — offer alone is ink", () => {
+  it("no tag variant re-inks anything — one look, both views (the cof tint is retired)", () => {
+    expect(css).not.toMatch(/\.tdb-tag\.cof\s*\{/);
     const tagRules = css.match(/\.tdb-tag[^{]*\{[^}]*\}/g) ?? [];
     for (const r of tagRules) {
       expect(r).not.toContain("--burg");
-      const isOffer = r.startsWith(".tdb-tag.offer");
-      if (!isOffer) {
-        // a non-offer tag must not draw any tinted FILL — background reads --white only
-        const bg = r.match(/background:\s*([^;]+);/);
-        if (bg) expect(bg[1].trim()).toBe("var(--white)");
-        for (const pink of ["--pink-t", "--pink-i", "--pink-btn", "--pink-deep", "--note-t", "--note-i"]) {
-          expect(r).not.toContain(pink);
-        }
+      const bg = r.match(/background:\s*([^;]+);/);
+      if (bg) expect(bg[1].trim()).toBe("var(--white)");
+      for (const tint of ["--pink-t", "--pink-i", "--pink-btn", "--pink-deep", "--note-t", "--note-i", "--hk-cof"]) {
+        expect(r).not.toContain(tint);
       }
     }
   });

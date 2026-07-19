@@ -33,3 +33,25 @@ Ran against `17a6668`, tree clean; all four Downloads files verified at start. G
 - Tests: the matrix (incl. mute-as-standing-dismissal + supersession), the by-construction
   counts lock, both doorways, the ✕ write + Undo, the verbatim copy; the card/scrap-era locks
   across four suites rewritten.
+
+## PHASE 2 — reels return + the soft tag law
+
+- **THE REEL-FIT SHAPE (halt (c), as reported):** a FRESH ~12-line pure module
+  (`src/components/todo/reelFit.ts`) — `reelFit(trackWidth, gap 12, min 240, cap 5)` =
+  `floor((w+gap)/(min+gap))` clamped 1..5, width `(w − gap(n−1))/n` — plus `reelPage` (one click
+  = n cards + gaps). NOT the retired module resurrected: no exports of its constants, no fade
+  machinery; the RETIRED file stays deleted. **The rail participates for free** — the Lane's
+  ResizeObserver watches the TRACK, whose width changes whenever the rail mounts/unmounts or the
+  sidebar folds, so the fit recomputes on rail state change without any explicit wiring.
+- The card view is one row per lane again: exact-fit cards (`--reelw`), scroll-snap, hidden
+  scrollbar, ‹ › chevron pagers in the lane head (4px-threshold disabled states), reduced-motion
+  honoured. The wrapping grid retired from card view (the ledger's 9-col `lgrid` stands).
+- **THE SOFT TAG LAW (third and final):** every tag, both views, including ★ OFFER and urgency —
+  white fill, 1px faint-ink border, ink text. OFFER keeps ★ + 700; urgency keeps 700. The ink
+  fill, the 1.5px frame AND the ledger's coffee batch tint all retired. themes.md updated.
+- **Deviation (flagged):** the lane-head pill rename ("▶ Focus on {label}") landed with this
+  phase's Lane rewrite rather than P4 — the same line was in hand; one edit instead of two.
+  P4 completes the naming sweep (ledger heads, tour, FocusFlow name-only strings).
+- Tests: reelFit at three widths × rail states (width IS the rail's participation) + floor/cap +
+  page distance; the tag law rewritten (v3 — soft offer, soft warn, no variants, the tinted-fill
+  sweep); the reel-era source locks. Snap behaviour flagged for the in-browser list (jsdom).

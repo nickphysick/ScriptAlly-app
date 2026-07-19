@@ -21,7 +21,7 @@
  * drawer FOOT carries ⚙ Task settings and the ? menu (Help centre / Replay the tour, dispatching
  * the same sa:todo-replay-tour event) instead.
  */
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { F12Page, F12Account } from "../shell/F12Shell";
 import { StatusDot } from "../StatusDot";
 import { useScriptAllyDb } from "../../lib/db";
@@ -38,6 +38,7 @@ import { isProUser, fetchAssistedFill, AssistFound } from "../../lib/assistFill"
 import { groupHousekeeping, hkGapCount, hkGroupProgress, HkGroup, HkRule, HK_RULES } from "../../lib/todoHousekeeping";
 import { deskState, liveQueryCount, liveQueriesLine, clearedListCap } from "../../lib/todoEmpty";
 import { ledgerTitle, ledgerDetail, sortLedgerDo, sortLedgerHk, batchChildren, batchDetail, batchTaskCopy, truncateRows } from "../../lib/todoLedger";
+import { reelFit, reelPage, ReelFit, REEL_CARD_MIN } from "./reelFit";
 import { TodoFilterState, DEFAULT_FILTERS, filtersActive, matchesSearch, groupMatchesSearch, visibleDoCard, visibleStaleCard, visibleNoteCard, visibleGroup, filterCounts } from "../../lib/todoFilters";
 import { SelState, EMPTY_SEL, applySelectClick, moveFocus } from "../../lib/todoSelection";
 import { shouldAutoRunTour } from "../../lib/todoTour";
@@ -176,27 +177,61 @@ const Lane: React.FC<{
   emptyNode?: React.ReactNode;
   strip?: React.ReactNode; // rendered between the header and the grid (e.g. muted-rules recovery chips)
   children?: React.ReactNode;
-}> = ({ cls, label, count, isEmpty, onAdd, onFocusedSession, emptyNode, strip, children }) => (
+}> = ({ cls, label, count, isEmpty, onAdd, onFocusedSession, emptyNode, strip, children }) => {
+  // III P2 — the one-row reel returns: a FRESH width-aware fit (reelFit — the reported shape;
+  // the retired fit module stays retired). The ResizeObserver watches the TRACK, so the right
+  // rail mounting/unmounting (or the sidebar folding) recomputes the fit for free.
+  const ref = useRef<HTMLDivElement>(null);
+  const fitRef = useRef<ReelFit>({ n: 1, cardWidth: REEL_CARD_MIN });
+  const [ends, setEnds] = useState({ left: false, right: false });
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const check = () => {
+      const fit = reelFit(el.clientWidth);
+      fitRef.current = fit;
+      el.style.setProperty("--reelw", `${fit.cardWidth}px`);
+      setEnds((prev) => {
+        const max = el.scrollWidth - el.clientWidth;
+        const next = { left: el.scrollLeft > 4, right: el.scrollLeft < max - 4 };
+        return next.left === prev.left && next.right === prev.right ? prev : next;
+      });
+    };
+    check();
+    el.addEventListener("scroll", check, { passive: true });
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => { el.removeEventListener("scroll", check); ro.disconnect(); };
+  }, [children]);
+  const page = (dir: 1 | -1) => ref.current?.scrollBy({ left: dir * reelPage(fitRef.current), behavior: "smooth" });
+  return (
   <div className={`tdb-reel ${cls}`} id={`tdb-lane-${cls}`}>
     {/* II·B P4 — ONE section grammar in both views: the ledger's tinted head band (standalone
-        variant adds the full border + radius). The dot+rule reelh is retired. */}
+        variant adds the full border + radius); III P2 adds the chevron pagers to the head. */}
     <div className={`tdb-lghead standalone ${cls === "do" ? "p" : cls === "hk" ? "c" : "n"}`}>
       <span className={`tdb-lanedot ${cls}`} aria-hidden />
       <span className="tdb-lgt">{label}</span>
       <span className="tdb-ln">{count}</span>
       {onFocusedSession && !isEmpty && (
-        <button type="button" className="tdb-lgs" title="Begin focused session — D done · S snooze · → skip" aria-label={`Begin a focused session on ${label}`} onClick={onFocusedSession}>▶ Begin focused session</button>
+        <button type="button" className="tdb-lgs" title={`Focus on ${label} — D done · S snooze · → skip`} aria-label={`Focus on ${label}`} onClick={onFocusedSession}>▶ Focus on {label}</button>
       )}
       {onAdd && <button type="button" className="tdb-cadd" onClick={onAdd} aria-label="Add a note">＋</button>}
+      {!isEmpty && (
+        <span className="tdb-reelpg">
+          <button type="button" className="tdb-pg" disabled={!ends.left} onClick={() => page(-1)} aria-label={`Previous ${label} cards`}>‹</button>
+          <button type="button" className="tdb-pg" disabled={!ends.right} onClick={() => page(1)} aria-label={`Next ${label} cards`}>›</button>
+        </span>
+      )}
     </div>
     {strip}
     {isEmpty ? (
       <div className="tdb-emptyreel">{emptyNode}</div>
     ) : (
-      <div className="tdb-grid">{children}</div>
+      <div className="tdb-reeltrack" ref={ref}>{children}</div>
     )}
   </div>
-);
+  );
+};
 
 export interface ToDoPageProps {
   onNavigate: (tab: string, subPageName?: string, opts?: { agentId?: string; manuscriptId?: string }) => void;
@@ -1144,7 +1179,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <span />
           <span className="tdb-ltagcell">
             <button type="button" className="tdb-lchev" aria-expanded={open} aria-label={`${open ? "Collapse" : "Expand"} ${g.meta.label}`} onClick={(e) => { e.stopPropagation(); toggleBatch(g.rule); }}>▶</button>
-            <span className="tdb-tag due cof">{g.meta.label.toUpperCase()}</span>
+            <span className="tdb-tag due">{g.meta.label.toUpperCase()}</span>
           </span>
           <span className="tdb-lagn">
             <span className="tdb-lstack">{faces.map((m) => <span key={m.card.key} className="tdb-miniav">{m.card.initials}</span>)}</span>
@@ -1392,7 +1427,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         {rail(() => setOverlay(key, { kind: "flip" }), () => setOverlay(key, { kind: "fork", single: false }), true)}
         <div className="tdb-frame">
           <div className="tdb-band hk">
-            <div className="tdb-tags"><span className="tdb-tag due cof">{g.meta.label.toUpperCase()}</span></div>
+            <div className="tdb-tags"><span className="tdb-tag due">{g.meta.label.toUpperCase()}</span></div>
           </div>
           <div className="tdb-body">
             <div className="tdb-mid">

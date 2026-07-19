@@ -804,3 +804,12 @@ The masthead is ONE row: 20px Playfair title + mono date·week eyebrow, **42px p
 - **Mobile ≤760:** the exit insets to 12/12; bands stack text-above-art at reduced scale; **art
   hides under 480** (the reported call). The illustration manifest lives in
   `src/components/todo/journeyArt.ts` (`send` shipped; contract in the restyle ref's header).
+
+## `.t-f12` — THE SOFT TAG LAW (2026-07-19, Polish III P2 — third and FINAL revision; supersedes the white tag law's two exceptions)
+
+**Every tag, both views, one look:** white fill · **1px `rgba(30,26,22,.25)`** border (the live
+`--ink` at 25% — the ref's #3a1c14 realised as the token) · ink text. **★ OFFER keeps its ★
+(markup) + 700** but loses the ink fill; **urgency keeps 700** but loses the 1.5px ink frame.
+The ledger's coffee-tinted batch variant is retired too — no tag variant re-inks anything.
+Weight and the ★ are the only remaining emphasis channels; colour belongs to the bands.
+Rule-text-locked in `todoTagLaw.test.ts`.
