@@ -745,7 +745,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             (1px base rule; scrolls away with the wrap). Its content keeps the 1150 discipline,
             viewport-centred. ── */}
         <div className="tdb-mastband">
-          <div className="tdb-mastcol">{renderMasthead()}</div>
+          <div className="tdb-mastcol">
+            {/* IV P1 — variant B: the spacer holds the sidebar's zone so the title starts at
+                content-left; the fixed 294px above the sidebar is an editorial margin. */}
+            <div className="tdb-mastspacer" aria-hidden />
+            {renderMasthead()}
+          </div>
         </div>
         <div className="tdb-ws">
           {renderDrawer()}

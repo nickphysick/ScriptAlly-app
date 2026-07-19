@@ -12,37 +12,45 @@
    engage. No 100vh/overflow-hidden clamp anywhere — that was the earlier scroll bug. Top padding
    REMOVED (the band sits flush under the shell bar); bottom padding clears the fixed corner
    controls (Today FAB + the shell's help "?"). Page-scoped. */
-/* ── THE 24-GRID (Polish II·B) — ONE spacing vocabulary, no magic numbers:
-   --g24: masthead↔columns · drawer↔main · main↔rail · lane↔lane · page edges · sticky offsets
-   --g12: lane-head↔cards · card gutters
-   Every consumer reads the token; changing the rhythm is a two-line edit here. ── */
-.tdb-wrap { --g24: 24px; --g12: 12px; flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 0 0 48px; }
+/* ── THE GRID CONTRACT (Polish IV P1, over the II·B 24-grid) — ONE shared container rules the
+   page; every horizontal band (masthead contents + workspace) lays out inside it:
+   --container: 1494px = 24 + 270 (sidebar) + 24 + 1128 (content) + 24 — centred on wider
+   viewports, padding 0 24. Two anchored edges: CONTAINER-LEFT (the sidebar column) and
+   CONTENT-LEFT (= left + 270 + 24; the masthead's 270+24 spacer holds the sidebar's zone, so the
+   title, post-its, banner and lanes share ONE left axis; the 294px masthead margin above the
+   sidebar is a fixed editorial margin because the container centres as a whole). The main column
+   is anchored 24 off the sidebar and FLEXES — never independently centred — so sidebar↔content
+   = masthead↔content = exactly 24. The rail takes --railw + 24 from the main column when
+   expanded; no reserved slack, ever.
+   --g24: every seam · --g12: lane-head↔cards · card gutters · --sbw: the sidebar · --railw: the rail. ── */
+.tdb-wrap { --g24: 24px; --g12: 12px; --sbw: 270px; --railw: 264px; --container: 1494px; flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 0 0 48px; }
 /* ── the workbench row (Option B): drawer + centred main. The row caps at 1720 and centres;
    inside it the CONTENT column caps at 1150 and centres again — max-width discipline at every
    viewport, surplus pooling as symmetric oat desk. ── */
-.tdb-ws { display: flex; align-items: flex-start; gap: var(--g24); padding: 0 var(--g24); max-width: 1720px; margin: var(--g24) auto 0; }
-.tdb-main { flex: 1; min-width: 0; }
-.tdb-col { max-width: 1150px; margin: 0 auto; }
-@media (max-width: 900px) { .tdb-ws { flex-wrap: wrap; } .tdb-ws .tdb-drawer { position: static; width: 100%; max-height: none; } }
+.tdb-ws { display: flex; align-items: flex-start; gap: var(--g24); padding: 0 var(--g24); max-width: var(--container); margin: var(--g24) auto 0; }
+.tdb-main { flex: 1; min-width: 0; } /* anchored 24 off the sidebar; flexes — never centred */
+.tdb-col { min-width: 0; } /* IV P1: uncapped — content-left is the one axis; the container caps */
+@media (max-width: 900px) { .tdb-ws { flex-wrap: wrap; } .tdb-ws .tdb-pair { position: static; width: 100%; max-height: none; } }
 
 /* ── MASTHEAD (A1 amendment: back to a FULL-WIDTH paper band above the drawer+column row —
    `--paper` ground, one `--line` base rule (the mockup's --hair realised as the live token), NOT
    sticky; scrolls away with the wrap. The content row keeps the 1150 discipline, centred to the
    VIEWPORT. The old .tdb-band name stays the card band's alone.) ── */
 .tdb-mastband { background: var(--paper); border-bottom: 1px solid var(--line); }
-.tdb-mastcol { max-width: 1150px; margin: 0 auto; padding: 0 var(--g24); }
-.tdb-mast { display: flex; flex-wrap: wrap; align-items: center; gap: 24px; row-gap: 12px; padding: 28px 2px; } /* III P4: the ref's 28 — the one sanctioned departure from --g24 */
+.tdb-mastcol { max-width: var(--container); margin: 0 auto; padding: 0 var(--g24); display: flex; align-items: center; gap: var(--g24); }
+.tdb-mastspacer { width: var(--sbw); flex: 0 0 auto; } /* the 270+24 = the fixed 294 editorial margin */
+.tdb-mast { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 22px; row-gap: 12px; padding: 26px 0; } /* variant B's mid: title → post-its → search, one row at content-left */
 .tdb-askwrap { display: flex; flex-direction: column; gap: 4px; }
 .tdb-rdate { font-family: var(--f12-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); }
-.tdb-ask { font-family: var(--f12-serif); font-size: 26px; font-weight: 600; color: var(--ink); white-space: nowrap; line-height: 1.08; }
+.tdb-ask { font-family: var(--f12-serif); font-size: 25px; font-weight: 600; color: var(--ink); white-space: nowrap; line-height: 1.08; }
 /* post-it counts — 62px tilted squares with the tape fold (II·B masthead, normative ref
    todo-workbench-rail-v1.html: Playfair numerals — the Caveat grammar retired here); tap scrolls
    to the section (counts in aria-labels). Hover straightens; reduced-motion kills the transition. */
-.tdb-postits { display: flex; gap: 12px; align-items: flex-start; }
-.tdb-postit { position: relative; width: 66px; height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; box-shadow: 0 3px 7px rgba(58, 28, 20, 0.16); flex: none; transition: 0.18s; cursor: pointer; }
-.tdb-postit::before { content: ""; position: absolute; top: -7px; left: 50%; transform: translateX(-50%); width: 24px; height: 10px; background: rgba(255, 255, 255, 0.55); }
-.tdb-pv { font-family: var(--f12-serif); font-size: 24px; font-weight: 600; line-height: 1; }
-.tdb-pk { font-family: var(--f12-mono); font-size: 6px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; opacity: 0.75; margin-top: 2px; }
+.tdb-postits { display: flex; gap: 13px; align-items: flex-start; }
+.tdb-postit { position: relative; width: 56px; height: 68px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; box-shadow: 0 3px 7px rgba(58, 28, 20, 0.16); flex: none; transition: 0.18s; cursor: pointer; }
+.tdb-postit::before { content: ""; position: absolute; top: -6px; left: 50%; transform: translateX(-50%); width: 20px; height: 9px; background: rgba(255, 255, 255, 0.55); }
+.tdb-pv { font-family: var(--f12-serif); font-size: 20px; font-weight: 600; line-height: 1; }
+.tdb-pk { font-family: var(--f12-mono); font-size: 5.5px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; opacity: 0.75; margin-top: 2px; }
 .tdb-postit.ug { background: var(--postit-pink); transform: rotate(-2.4deg); color: var(--pink-deep); }
 .tdb-postit.hk { background: var(--hk-cof-2); transform: rotate(1.8deg); color: var(--hk-cof-ink); }
 .tdb-postit.nt { background: var(--postit-note); transform: rotate(-1.2deg); color: #6b5a17; }
@@ -51,7 +59,7 @@
 @media (prefers-reduced-motion: reduce) { .tdb-postit { transition: none; } }
 
 /* ── masthead search + view toggle (Option B .msrch / .vtg) ── */
-.tdb-msrch { display: flex; align-items: center; gap: 9px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 99px; padding: 10px 16px; color: var(--muted); font-size: 13px; flex: 0 1 300px; min-width: 170px; box-shadow: 0 1px 3px rgba(58, 28, 20, 0.06); }
+.tdb-msrch { display: flex; align-items: center; gap: 9px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 99px; padding: 10px 16px; color: var(--muted); font-size: 13px; flex: 0 0 280px; box-shadow: 0 1px 3px rgba(58, 28, 20, 0.06); } /* container-right, fixed 280 (variant B) */
 .tdb-msrch:focus-within { border-color: var(--ink-2); }
 .tdb-msrch input { flex: 1; min-width: 0; border: none; background: none; font-size: 12.5px; color: var(--ink); outline: none; }
 .tdb-msrch input::placeholder { color: var(--muted); }
@@ -66,7 +74,7 @@
    own internal scroll keeps the sticky panel inside the viewport. ── */
 /* III P3 — THE PINNED PAIR (pair ref, normative): two same-width floating cards, both riding
    ONE sticky stack at the 24 offset, 12px apart; internal scroll as the safety net only. */
-.tdb-pair { width: 264px; flex: 0 0 auto; position: sticky; top: var(--g24); max-height: calc(100vh - 120px); overflow-y: auto; display: flex; flex-direction: column; gap: 12px; transition: width 0.22s cubic-bezier(0.22, 0.8, 0.3, 1); }
+.tdb-pair { width: var(--sbw); flex: 0 0 auto; position: sticky; top: var(--g24); max-height: calc(100vh - 120px); overflow-y: auto; display: flex; flex-direction: column; gap: 12px; transition: width 0.22s cubic-bezier(0.22, 0.8, 0.3, 1); }
 .tdb-pair.folded { width: 64px; align-items: center; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 4px 16px rgba(58, 28, 20, 0.1); padding: 12px 8px; gap: 10px; }
 @media (prefers-reduced-motion: reduce) { .tdb-pair { transition: none; } }
 .tdb-paircard { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 4px 16px rgba(58, 28, 20, 0.1); }
@@ -389,7 +397,7 @@
 /* ── II·B P3: the companion rail (≥1500px) + the masthead Today chip/popover (below).
    The rail is the natural home for future companions (the assistant's "note from your desk"
    card, etc.) — one column, 14px stack gaps. ── */
-.tdb-railr { width: 264px; flex: 0 0 auto; position: sticky; top: var(--g24); display: flex; flex-direction: column; gap: 14px; }
+.tdb-railr { width: var(--railw); flex: 0 0 auto; position: sticky; top: var(--g24); display: flex; flex-direction: column; gap: 14px; }
 @media (max-width: 1499.98px) { .tdb-railr { display: none; } } /* belt — the mount is JS-gated */
 .tdb-todaypopwrap { position: relative; flex: none; }
 .tdb-todaychip { display: inline-flex; align-items: center; gap: 7px; font-family: var(--f12-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border: 1px solid var(--hk-spine); border-radius: 99px; padding: 8px 14px; color: var(--hk-ink); white-space: nowrap; }
