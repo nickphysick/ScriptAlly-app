@@ -73,7 +73,7 @@ describe("P1 — the corner retirement + the AppShell's one out-of-page line", (
     // the add flow survives: Add more / Help me pick + Work the list, same handlers
     expect(page).toContain('{committedCards.length ? "＋ Add more" : "Help me pick"}');
     // evening C2: Work the list is the RITUAL walk (sage whole-walk) over the same committed set
-    expect(page).toContain('setFlow({ items: flowable.map((card) => ({ kind: "card", card })), ritual: true });');
+    expect(page).toContain('setFlow({ items: committedCards.map((card) => ({ kind: "card", card })), ritual: true });'); // III P1: review-free by construction, no filter
     expect(page).toContain(">Work the list</button>");
   });
   it("AppShell hides the help FAB on /todo only — the pack's one out-of-page line", () => {
@@ -188,7 +188,7 @@ describe("P4 — search + filters (source locks; the matrix lives in todoFilters
     expect(page).toContain("{vGroups.map(renderGroupCard)}");
     expect(page).toContain("{vStale.map(renderCard)}");
     expect(page).toContain("{vNt.map(renderCard)}");
-    expect(page).toContain("sortLedgerDo(vDo.filter((c) =>"); // the ledger sorts the SAME set
+    expect(page).toContain("sortLedgerDo(vDo, lctx, now)"); // the ledger sorts the SAME set (review-free by construction)
   });
   it("the drawer filter rows are the ref's list with derived counts (II·B: the frow builder); today-only rides inside the group", () => {
     for (const call of ['frow("Offers", "offers", fc.offers)', 'frow("Over to you", "overToYou", fc.overToYou)', 'frow("Missing materials", "materials", fc.materials)', 'frow("Missing wish lists", "mswl", fc.mswl)', 'frow("Stale queries", "stale", fc.stale)', 'frow("Snoozed", "snoozed", fc.snoozed)', 'frow("On today’s list only", "todayOnly", fc.today, "today")']) {
@@ -206,9 +206,6 @@ describe("P4 — search + filters (source locks; the matrix lives in todoFilters
     expect(branch).toBeLessThan(page.indexOf("active && !anyVisible"));
     // a filtered-empty lane HIDES rather than celebrating
     expect(page).toContain("{(!active || vDo.length > 0 || overlayCards(\"do\").length > 0) && (");
-  });
-  it("the review entry card is furniture — it hides while any filter/search is active", () => {
-    expect(page).toContain('c.taskType === "weekly_review" ? !active :');
   });
   it("search state: ⌘K focuses (visibility-guarded, P1) and Esc clears + blurs", () => {
     expect(page).toContain('placeholder="Search your desk…"');
@@ -306,7 +303,6 @@ describe("II·B P1 — the 24-grid + the ref masthead (todo-workbench-rail-v1.ht
   it("masthead anatomy per the ref: 62px tape-fold post-its (Playfair numerals), 58×44 scrap, 300px search, 10px eyebrow", () => {
     expect(rule(".tdb-postit::before")).toContain("width: 22px; height: 9px");
     expect(rule(".tdb-pv")).toContain("font-family: var(--f12-serif); font-size: 20px");
-    expect(rule(".tdb-scrap")).toContain("width: 58px; height: 44px");
     expect(rule(".tdb-msrch")).toContain("flex: 0 1 300px");
     expect(rule(".tdb-rdate")).toContain("font-size: 10px");
   });

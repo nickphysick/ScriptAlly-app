@@ -55,59 +55,41 @@ describe("P2 — undo everywhere (write-then-reverse)", () => {
   });
 });
 
-describe("P3 — the Sunday review (source locks)", () => {
-  it("summary steps write nothing; quiet choices STAGE only (no direct status write in the toggle)", () => {
-    const toggle = flow.match(/const toggleQuiet = [\s\S]*?\n    \};/)?.[0] ?? "";
-    expect(toggle).toContain("setStaged");
-    expect(toggle).not.toContain("updateQueryStatus");
-  });
-
-  it("staged closes apply ONLY at finish, through the shared handler map's existing close path", () => {
-    expect(flow).toContain("const closes = staged.filter((x) => x.kind === \"close\");");
-    expect(flow).toContain("await applyStaged(closes, stagedHandlers);");
-    expect(flow).toContain('close: (p: Extract<StagedPayload, { kind: "close" }>) => updateQueryStatus(p.queryId, QueryStatus.NO_RESPONSE');
-  });
-
-  it("seeds commit Monday's committedDate through the existing setters; completion writes the week's flag", () => {
-    expect(flow).toContain("await updateUserTask(sc.userTaskId, { committedDate: mondayYmd });");
-    expect(flow).toContain("await upsertTaskFlag(flagKeyForTask(sc.taskType, sc.relatedRecordId), { committedDate: mondayYmd });");
+describe("P3→III — the Sunday review's doorways (banner + bar; the card and scrap are retired)", () => {
+  it("finishReview writes the completion SENTINEL against the week key (single-sourced)", () => {
+    expect(flow).toContain("reviewCompletionSnooze(win)");
     expect(flow).toContain('flagKeyForTask("weekly_review", win.key)');
   });
 
-  it("the entry card never leaks into card journeys, walks, sweeps or Help-me-pick", () => {
-    expect(page).toContain('const flowable = cards.filter((c) => c.taskType !== "weekly_review");');
-    // workbench P4: the sweeps run over the VISIBLE set — the exclusion rides it (cards view),
-    // and the ledger session consumes doSorted, which excludes at source.
-    expect(page).toContain('items: vDo.filter((c) => c.taskType !== "weekly_review").map((card) => ({ kind: "card", card })), mode: "sweep"');
-    expect(page).toContain('sortLedgerDo(vDo.filter((c) => c.taskType !== "weekly_review")');
-    expect(page).toContain('choosePicks({ doCards: board.do.filter((c) => c.taskType !== "weekly_review")');
+  it("the review is NOT a task any more: no card renderer, no leak filters needed (by construction — locked in todoBoard.test)", () => {
+    expect(page).not.toContain("renderReviewCard");
+    expect(page).not.toContain('taskType !== "weekly_review"');
+    expect(page).not.toContain("tdb-scrap");
   });
 
-  it("the entry card's dismissal rides the P2 grammar (flag snooze + Undo + Restored)", () => {
-    const dismiss = page.match(/function renderReviewCard[\s\S]*?dismissed`/)?.[0] ?? "";
-    expect(dismiss).toContain('flagKeyForTask("weekly_review", c.relatedRecordId!)');
-    expect(dismiss).toContain("snoozedUntil: new Date(Date.now() + 3 * 86400000).toISOString()");
+  it("BOTH doorways open the mode unchanged: the banner's Begin and the bar's OPEN call openSundayReview", () => {
+    expect(page).toContain('className="tdb-rvgo2" onClick={openSundayReview}>Begin the review →');
+    expect(page).toContain('className="tdb-rvbar" onClick={openSundayReview}');
+    expect(page).toContain('mode: "weeklyReview"');
   });
 
-  it("openSundayReview is a HOISTED function, not a post-return const (else it sits in the TDZ and renderReviewCard throws on render — the demotion crash)", () => {
+  it("the banner's ✕ dismisses via the SAME weekly_review flag write (3-day snooze) with Undo; it gates the banner only", () => {
+    const d = page.match(/function dismissReviewBanner[\s\S]*?\n  \}/)?.[0] ?? "";
+    expect(d).toContain('flagKeyForTask("weekly_review", surface.weekKey)');
+    expect(d).toContain("snoozedUntil: new Date(Date.now() + 3 * 86400000).toISOString()");
+    expect(d).toContain('label: "Undo"');
+  });
+
+  it("the banner copy is the 5ways §1 verbatim (no stat preview); the bar is the refine thin bar", () => {
+    expect(page).toContain("Last week’s progress report is ready");
+    expect(page).toContain("Check it out — every box ticked here turns the dial in your favour.");
+    expect(page).toContain("THE SUNDAY REVIEW · WEEK {surface.weekNumber}");
+    expect(page).toContain("Last week in review — week {surface.weekNumber}");
+    expect(page).toContain(">OPEN ▸</span>");
+  });
+
+  it("openSundayReview is a HOISTED function (the banner/bar JSX calls it from the return — the TDZ lesson)", () => {
     expect(page).toContain("function openSundayReview()");
-    expect(page).not.toContain("const openSundayReview");
-  });
-
-  it("THE SCRAP (afterlife): a torn offer in the cluster — copy 'Last week', opens the review, no dismiss", () => {
-    const scrap = page.match(/\{scrap && \([\s\S]*?\)\}/)?.[0] ?? "";
-    expect(scrap).toContain('className="tdb-scrap"');
-    expect(scrap).toContain("<b>Last week</b>"); // capital L (the ref copy amendment)
-    expect(scrap).toContain("in review ▸");
-    expect(scrap).toContain("onClick={openSundayReview}");
-    expect(scrap).toContain("aria-label={`Last week in review — week ${scrap.weekNumber}`}");
-    expect(scrap).not.toContain("dismiss"); // no dismissal affordance on the scrap
-    // it derives from reviewScrap and lives inside the post-it cluster (before the cluster closes
-    // — the II·B Today chip now sits between the cluster and the spacer, so the anchor is the
-    // cluster's own close into the chip block)
-    const clusterEnd = page.indexOf('</span>\n        {narrow && (');
-    expect(clusterEnd).toBeGreaterThan(0);
-    expect(page.indexOf('className="tdb-scrap"')).toBeGreaterThan(0);
-    expect(page.indexOf('className="tdb-scrap"')).toBeLessThan(clusterEnd);
+    expect(page).not.toMatch(/const openSundayReview = /);
   });
 });

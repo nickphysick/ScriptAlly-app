@@ -94,17 +94,6 @@
 .tdb-dic.today { background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border-color: var(--hk-spine); color: var(--hk-ink); }
 .tdb-dbadge { position: absolute; top: -4px; right: -4px; font-family: var(--f12-mono); font-style: normal; font-size: 7.5px; font-weight: 700; min-width: 15px; height: 15px; border-radius: 99px; background: var(--ink); color: var(--paper); display: flex; align-items: center; justify-content: center; padding: 0 3px; }
 
-/* ── the torn scrap (afterlife pack; ref todo-scrap-variants.html variant 3): a small ripped
-   offer at the end of the post-it cluster — NOT a task, no border, no urgency, no count. Italic
-   Playfair "Last week" over an underlined "in review ▸". The clip-path torn edge clips box-shadow
-   AND outline, so the soft shadow + focus ring ride `filter: drop-shadow` (follows the torn
-   silhouette). Hover/focus straightens + lifts. ── */
-.tdb-scrap { width: 58px; height: 44px; flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; margin-top: 8px; background: var(--paper); border: none; clip-path: polygon(0 4%, 7% 0, 94% 2%, 100% 8%, 99% 88%, 88% 94%, 72% 90%, 55% 97%, 38% 92%, 20% 98%, 6% 93%, 0 86%); transform: rotate(2deg); filter: drop-shadow(0 3px 5px rgba(58, 28, 20, 0.16)); cursor: pointer; transition: transform 0.15s, filter 0.15s; }
-.tdb-scrap:hover { transform: rotate(0deg) translateY(-2px); }
-.tdb-scrap:focus-visible { transform: rotate(0deg) translateY(-2px); filter: drop-shadow(0 0 1.5px var(--hk-cof-ink)) drop-shadow(0 0 1.5px var(--hk-cof-ink)); }
-.tdb-scrap b { font-family: var(--f12-serif); font-style: italic; font-weight: 600; font-size: 10px; line-height: 1.15; text-align: center; color: #5d4d40; } /* #5d4d40 — the ref's warm ink; no .t-f12 token fits exactly */
-.tdb-scrap u { text-decoration: none; border-bottom: 1px solid var(--hk-cof-edge); font-family: var(--f12-serif); font-style: italic; font-size: 8px; color: var(--hk-cof-ink); }
-@media (prefers-reduced-motion: reduce) { .tdb-scrap { transition: none; } }
 
 /* ── TASK SETTINGS (task-settings pack; ref todo-task-settings-v2.html) — the ⚙ entry lives in
    the DRAWER FOOT now (workbench; the fixed corner button is retired). The sheet reuses the
@@ -460,15 +449,26 @@
 .tdb-worklist { font-size: 10.5px; font-weight: 600; padding: 5px 9px; border-radius: 8px; background: var(--ink); color: var(--panel); white-space: nowrap; flex: 1; }
 .tdb-worklist:hover:not(:disabled) { filter: brightness(1.35); }
 
+/* ── Polish III P1: the REVIEW BANNER (5ways §1 — white lifted card; live tokens; the shadow
+   literal is the ref's) + the thin-bar AFTERLIFE (refine ref) — the Sunday card + the masthead
+   scrap are both retired into these. ── */
+.tdb-rvbanner { background: var(--white, #fff); border: 1px solid var(--hairline); border-radius: 14px; padding: 20px 28px; display: flex; align-items: center; gap: 24px; box-shadow: 0 8px 26px rgba(58, 28, 20, 0.12); position: relative; margin-bottom: var(--g24); }
+.tdb-rvcup { width: 56px; height: 56px; flex: 0 0 auto; border-radius: 50%; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border: 1px solid var(--hk-spine); display: flex; align-items: center; justify-content: center; font-size: 23px; }
+.tdb-rvbx { min-width: 0; }
+.tdb-rvk { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.14em; color: var(--hk-ink); margin-bottom: 5px; }
+.tdb-rvh { font-family: var(--f12-serif); font-size: 22px; font-weight: 600; line-height: 1.15; color: var(--ink); }
+.tdb-rvsub2 { font-family: var(--f12-serif); font-style: italic; font-size: 14.5px; color: var(--ink-2); margin-top: 4px; }
+.tdb-rvgo2 { margin-left: auto; border: none; background: var(--ink); color: var(--paper); border-radius: 99px; padding: 12px 24px; font-size: 13px; font-weight: 600; flex: 0 0 auto; }
+.tdb-rvgo2:hover { filter: brightness(1.3); }
+.tdb-rvx2 { position: absolute; top: 10px; right: 12px; border: none; background: none; color: var(--faint); font-size: 12px; padding: 2px 5px; }
+.tdb-rvx2:hover { color: var(--ink); }
+.tdb-rvbar { display: flex; align-items: center; gap: 12px; width: 100%; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border: 1px solid var(--hk-spine); border-radius: 99px; padding: 8px 20px; margin-top: 22px; }
+.tdb-rvbart { font-family: var(--f12-serif); font-style: italic; font-size: 13.5px; color: var(--hk-ink); }
+.tdb-rvbargo { margin-left: auto; font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.11em; color: var(--hk-ink); }
+
 /* ── THE SUNDAY REVIEW (finishing P3; ref todo-sunday-review.html): the entry card (sage-spined,
    dismissible) + the six-step sheet's furniture — stats row, read-only rows with badges, the
    Close/Leave stage buttons, seed checkboxes, the ☕ close screen. ── */
-.tdb-tile.rvcard { cursor: pointer; }
-.tdb-rvx { position: absolute; top: 8px; right: 10px; color: var(--faint); font-size: 12px; padding: 2px 5px; background: none; border: none; z-index: 1; }
-.tdb-rvx:hover { color: var(--ink); }
-.tdb-rvweek { flex: none; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 8px; }
-.tdb-rvgo { flex: none; width: 100%; font-family: var(--f12-mono); font-size: 8.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 99px; padding: 8px 0; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border: 1px solid var(--hk-spine); color: var(--hk-ink); }
-.tdb-rvgo:hover { filter: brightness(0.98); }
 .tdb-rvhand { font-family: Caveat, cursive; font-size: 20px; color: var(--hk-ink); transform: rotate(-1.2deg); margin: 2px 0 6px; }
 .tdb-rvstats { display: flex; gap: 12px; margin-top: 22px; flex-wrap: wrap; }
 .tdb-rvstat { flex: 1; min-width: 110px; background: var(--white, #fff); border: 1px solid var(--hairline); border-radius: 12px; padding: 14px 10px; text-align: center; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.1em; color: var(--muted); }

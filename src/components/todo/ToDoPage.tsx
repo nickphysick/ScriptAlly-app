@@ -26,7 +26,7 @@ import { F12Page, F12Account } from "../shell/F12Shell";
 import { StatusDot } from "../StatusDot";
 import { useScriptAllyDb } from "../../lib/db";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
-import { assembleBoard, todaySplit, ribbonTiles, walkSublabel, walkAria, reviewScrap, BoardCard, USER_TASK_FLAG_TYPE } from "../../lib/todoBoard";
+import { assembleBoard, todaySplit, ribbonTiles, walkSublabel, walkAria, reviewSurface, BoardCard, USER_TASK_FLAG_TYPE } from "../../lib/todoBoard";
 import { flagKeyForTask, MUTED_UNTIL } from "../../lib/taskFlags";
 import {
   choosePicks, rolledOverCards, todayProgress, MAX_TODAY,
@@ -292,9 +292,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   }, []);
   const plus7iso = () => new Date(Date.now() + 7 * 86400000).toISOString();
   const openFlowCards = (cards: BoardCard[]) => {
-    // the Sunday-review entry card never enters card journeys/walks — it has its own mode
-    const flowable = cards.filter((c) => c.taskType !== "weekly_review");
-    if (flowable.length) setFlow({ items: flowable.map((card) => ({ kind: "card", card })) });
+    // III P1 — the board is review-free by construction (the banner/bar own the review's entry)
+    if (cards.length) setFlow({ items: cards.map((card) => ({ kind: "card", card })) });
   };
   // Quick-rail card states. Receipts/dismissed render as STANDALONE cards (the live card vanishes the
   // moment the write lands — the board is derived); fork/flip replace a still-live card's body.
@@ -308,9 +307,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const now = Date.now();
   const today = localYMD(now);
 
-  const scrap = useMemo(
-    () => reviewScrap({ tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, today, now }),
-    [queries, taskFlags, now], // eslint-disable-line react-hooks/exhaustive-deps
+  // Polish III P1 — the ONE review surface (banner Sun–Mon · thin bar after; null once reviewed)
+  const surface = useMemo(
+    () => reviewSurface({ tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, today, now, mutedTaskRules: currentUser?.mutedTaskRules }),
+    [queries, taskFlags, now, currentUser?.mutedTaskRules], // eslint-disable-line react-hooks/exhaustive-deps
   );
   const board = useMemo(
     () => assembleBoard({ tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, today, now, mutedTaskRules: currentUser?.mutedTaskRules }),
@@ -367,8 +367,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const sctx = { queries, agents, manuscripts };
   const active = filtersActive(filters, search);
   const fc = filterCounts({ doCards: board.do, hkGroups, staleCards, ntCards: board.nt, committedCount: committedCards.length });
-  const vDo = board.do.filter((c) =>
-    c.taskType === "weekly_review" ? !active : visibleDoCard(c, filters, today) && matchesSearch(c, search, sctx));
+  const vDo = board.do.filter((c) => visibleDoCard(c, filters, today) && matchesSearch(c, search, sctx));
   const vGroups = hkGroups.filter((g) => visibleGroup(g, filters) && groupMatchesSearch(g, search));
   const vStale = staleCards.filter((c) => visibleStaleCard(c, filters, today) && matchesSearch(c, search, sctx));
   const vNt = board.nt.filter((c) => visibleNoteCard(c, filters, today) && matchesSearch(c, search, sctx));
@@ -376,7 +375,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // ── the ledger's row model, hoisted (P5): the bulk bar + keyboard walker share the SAME visible
   // top-level order the renderer draws. Children are not in the order — never selectable.
   const lctx = { queries, taskFlags };
-  const doSorted = sortLedgerDo(vDo.filter((c) => c.taskType !== "weekly_review"), lctx, now);
+  const doSorted = sortLedgerDo(vDo, lctx, now);
   const doCut = truncateRows(doSorted, !!showAllSec.do);
   const staleSorted = sortLedgerHk(vStale, lctx, now);
   const hkTop: Array<{ kind: "group"; g: HkGroup } | { kind: "card"; c: BoardCard }> = [
@@ -551,7 +550,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   }
   // Help me pick — a selection gesture: pulse-and-fade, card by card, then commit each.
   async function helpMePick() {
-    const picks = choosePicks({ doCards: board.do.filter((c) => c.taskType !== "weekly_review"), hkCards: board.hk, committedCount: committedCards.length });
+    const picks = choosePicks({ doCards: board.do, hkCards: board.hk, committedCount: committedCards.length });
     if (!picks.length) { flash(`Today’s list is full (${MAX_TODAY} max)`); return; }
     const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     const pool = [...board.do, ...board.hk];
@@ -717,6 +716,20 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           {renderDrawer()}
           <div className="tdb-main">
             <div className="tdb-col">
+        {/* ── Polish III P1: the review BANNER (Sun–Mon, undismissed, unreviewed) sits above
+            whichever view is active — the review is not a task and enters no lane. ── */}
+        {surface?.kind === "banner" && (
+          <div className="tdb-rvbanner">
+            <span className="tdb-rvcup" aria-hidden>☕</span>
+            <div className="tdb-rvbx">
+              <div className="tdb-rvk">THE SUNDAY REVIEW · WEEK {surface.weekNumber}</div>
+              <h2 className="tdb-rvh">Last week’s progress report is ready</h2>
+              <div className="tdb-rvsub2">Check it out — every box ticked here turns the dial in your favour.</div>
+            </div>
+            <button type="button" className="tdb-rvgo2" onClick={openSundayReview}>Begin the review →</button>
+            <button type="button" className="tdb-rvx2" aria-label="Dismiss — it stays available beneath the board" onClick={dismissReviewBanner}>✕</button>
+          </div>
+        )}
         {/* ── the board — cards or ledger by the masthead toggle; the desk states (new-desk /
             desk-cleared) replace BOTH views. Copy verbatim from todo-empty-states.html. ── */}
         {desk === "new-desk" ? renderNewDesk() : desk === "desk-cleared" ? renderDeskCleared() : active && !anyVisible ? (
@@ -727,7 +740,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         <div className="tdb-lanes">
           {(!active || vDo.length > 0 || overlayCards("do").length > 0) && (
           <Lane cls="do" label="Urgent" count={active ? vDo.length : tiles.urgent} isEmpty={vDo.length === 0 && overlayCards("do").length === 0}
-            onFocusedSession={() => setFlow({ items: vDo.filter((c) => c.taskType !== "weekly_review").map((card) => ({ kind: "card", card })), mode: "sweep" })}
+            onFocusedSession={() => setFlow({ items: vDo.map((card) => ({ kind: "card", card })), mode: "sweep" })}
             emptyNode={
               <div className="tdb-clear do">
                 <span className="tdb-clric" aria-hidden>✓</span>
@@ -782,6 +795,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           </Lane>
           )}
         </div>
+        )}
+        {/* ── the AFTERLIFE — the thin sage bar beneath the last lane: the offer stands while the
+            week is unreviewed (dismissal gates the banner only; the masthead scrap is retired). ── */}
+        {surface?.kind === "bar" && (
+          <button type="button" className="tdb-rvbar" onClick={openSundayReview}>
+            <span aria-hidden>☕</span>
+            <span className="tdb-rvbart">Last week in review — week {surface.weekNumber}</span>
+            <span className="tdb-rvbargo">OPEN ▸</span>
+          </button>
         )}
             </div>
           </div>
@@ -877,12 +899,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <button type="button" className={`tdb-postit nt${tiles.notes === 0 ? " zero" : ""}`} aria-label={`${tiles.notes} notes to self — jump to the Notes section`} onClick={() => scrollToLane("nt")}>
             <span className="tdb-pv" aria-hidden>{tiles.notes}</span><span className="tdb-pk" aria-hidden>notes</span>
           </button>
-          {/* the torn scrap (afterlife pack) — an OFFER, not a chore; opens the shipped review mode */}
-          {scrap && (
-            <button type="button" className="tdb-scrap" aria-label={`Last week in review — week ${scrap.weekNumber}`} onClick={openSundayReview}>
-              <b>Last week</b><u>in review ▸</u>
-            </button>
-          )}
         </span>
         {narrow && (
           <span className="tdb-todaypopwrap">
@@ -1050,8 +1066,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <button type="button" className="tdb-pick" onClick={helpMePick}>{committedCards.length ? "＋ Add more" : "Help me pick"}</button>
           <button type="button" className="tdb-worklist" disabled={!committedCards.length} onClick={() => {
             // C2 family law — the Today's-list walk is a ritual: sage bands whole-walk
-            const flowable = committedCards.filter((c) => c.taskType !== "weekly_review");
-            if (flowable.length) setFlow({ items: flowable.map((card) => ({ kind: "card", card })), ritual: true });
+            if (committedCards.length) setFlow({ items: committedCards.map((card) => ({ kind: "card", card })), ritual: true });
           }}>Work the list</button>
         </div>
       </div>
@@ -1229,40 +1244,18 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
 
   // ── the Sunday-review entry card (finishing P3): derived + dismissible for the week; its click
   //    opens the weeklyReview mode with the live Urgent cards as the seed source. ──
-  // MUST be a hoisted `function` (not a post-return `const`): renderReviewCard references it and is
-  // called from within the component's return JSX — a `const` here sits in the TDZ for the whole
-  // render, so accessing it throws the moment a review card actually renders (the demotion bug).
+  // MUST be a hoisted `function` (not a post-return `const`): the banner/bar JSX calls it from
+  // within the component's return — a `const` here sits in the TDZ for the whole render (the
+  // demotion bug's lesson).
   function openSundayReview() {
-    setFlow({ items: board.do.filter((x) => x.taskType !== "weekly_review").map((card) => ({ kind: "card" as const, card })), mode: "weeklyReview" });
+    // board.do is review-free by construction (P1) — no filter needed
+    setFlow({ items: board.do.map((card) => ({ kind: "card" as const, card })), mode: "weeklyReview" });
   }
-
-  // The Sunday–Monday Urgent review card (the demoted Tue–Sat variant is retired — the scrap owns
-  // the afterlife). This only ever renders for a `do`-stream weekly_review card.
-  function renderReviewCard(c: BoardCard) {
-    const dismiss = (e: React.MouseEvent) => {
-      e.stopPropagation();
-      const key = flagKeyForTask("weekly_review", c.relatedRecordId!);
-      upsertTaskFlag(key, { snoozedUntil: new Date(Date.now() + 3 * 86400000).toISOString() });
-      flash(`✓ ${c.title} — dismissed`, { label: "Undo", fn: async () => { await upsertTaskFlag(key, { snoozedUntil: null }); flash("Restored"); } });
-    };
-    return (
-      <div key={c.key} className="tdb-tile do rvcard" onClick={openSundayReview}>
-        <button type="button" className="tdb-rvx" onClick={dismiss} aria-label="Dismiss the review for this week">✕</button>
-        <div className="tdb-frame">
-          <div className="tdb-band do">
-            <div className="tdb-tags"><span className="tdb-tag due">{c.due}</span></div>
-          </div>
-          <div className="tdb-body">
-            <div className="tdb-mid">
-              <div className="tdb-tt">{c.title}</div>
-              <div className="tdb-tsub">{c.subtitle}</div>
-            </div>
-            <div className="tdb-rvweek">{c.record.toUpperCase()}</div>
-            <button type="button" className="tdb-rvgo" onClick={(e) => { e.stopPropagation(); openSundayReview(); }}>Begin the review →</button>
-          </div>
-        </div>
-      </div>
-    );
+  function dismissReviewBanner() {
+    if (!surface) return;
+    const key = flagKeyForTask("weekly_review", surface.weekKey);
+    upsertTaskFlag(key, { snoozedUntil: new Date(Date.now() + 3 * 86400000).toISOString() });
+    flash("Dismissed — it stays beneath the board until you review it.", { label: "Undo", fn: async () => { await upsertTaskFlag(key, { snoozedUntil: null }); flash("Restored"); } });
   }
 
   // Standalone receipt/dismissed cards — the live card vanished with the write; the receipt persists.
@@ -1317,7 +1310,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // ── full-detail lane card (fixed height, clip-safe). Completion = the rail or the sheet; the
   // Mark-done pill is RETIRED and ＋ Today's list goes full-width (committing = the visible button). ──
   function renderCard(c: BoardCard) {
-    if (c.taskType === "weekly_review") return renderReviewCard(c);
     const committed = onList(c);
     const ov = overlays[c.key];
     const isOffer = c.taskType === "offer_received";

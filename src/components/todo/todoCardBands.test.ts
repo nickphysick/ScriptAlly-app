@@ -61,12 +61,6 @@ describe("Card Bands — band-then-body order per card type (render markup)", ()
     const body = page.indexOf('<div className="tdb-body">', band);
     expect(body).toBeGreaterThan(band);
   });
-  it("the review card: do band → body", () => {
-    expect(page).toContain('<div className="tdb-band do">\n            <div className="tdb-tags">');
-    const band = page.indexOf('<div className="tdb-band do">');
-    const body = page.indexOf('<div className="tdb-body">', band);
-    expect(body).toBeGreaterThan(band);
-  });
 });
 
 describe("Card Bands — Phase 2: overlays ride the framed card; clears go neutral", () => {

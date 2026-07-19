@@ -258,8 +258,9 @@ export function assembleBoard(input: BoardInput): AssembledBoard {
     })
     .sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""))
     .map((t) => userCard(t, input));
-  const review = reviewEntryCard(input);
-  const doCards = orderDoNext([...(review ? [review] : []), ...derived.filter((c) => c.stream === "do"), ...userCards.filter((c) => c.stream === "do")]);
+  // Polish III P1 — the review is NOT a task: no card enters the lanes; every count derives
+  // review-free by construction. The banner/bar surface is reviewSurface (below).
+  const doCards = orderDoNext([...derived.filter((c) => c.stream === "do"), ...userCards.filter((c) => c.stream === "do")]);
   const hkCards = derived.filter((c) => c.stream === "hk");
   const ntCards = userCards.filter((c) => c.stream === "nt");
 
@@ -402,11 +403,6 @@ export function weekReviewStats(input: Pick<BoardInput, "activities" | "queries"
   return { sent, back, offers: back.filter((r) => r.star).length, quiet };
 }
 
-/** The entry card's stats line — singular-safe, the offer starred. */
-export function reviewEntryLine(s: ReviewStats): string {
-  const offers = s.offers === 0 ? null : s.offers === 1 ? "an offer ★" : `${s.offers} offers ★`;
-  return [`${s.sent.length} sent`, `${s.back.length} response${s.back.length === 1 ? "" : "s"}`, offers, `${s.quiet.length} gone quiet`].filter(Boolean).join(" · ");
-}
 
 export interface SeedCandidate {
   key: string; label: string; meta: string; preTicked: boolean;
@@ -434,39 +430,6 @@ export function reviewSeedCandidates(doCards: BoardCard[], queries: Query[], now
   return [...dated, ...undated].slice(0, cap);
 }
 
-/** The review's entry card (demotion pack): Sunday 00:00 → Monday 23:59 = the Urgent prompt as
- *  shipped; Tuesday onward the UNREVIEWED week demotes to quiet Housekeeping (coffee identity,
- *  never warn) until completed, dismissed, or superseded by the next Sunday's card — only the most
- *  recent completed week is ever offered (reviewWeek re-keys next Sunday; older weeks lapse
- *  silently). "Handled" reads PRESENCE of a completion/dismissal stamp on the week's flag
- *  (`snoozedUntil` ever written), NOT expiry — the shipped writes cover only days, and an expired
- *  snooze must never resurrect a handled week (dismissal-UNDO clears the field, restoring the
- *  card correctly). */
-export function reviewEntryCard(input: BoardInput): BoardCard | null {
-  const day = new Date(input.now).getDay();
-  // Task Settings: "The Sunday review" off hides the CARD (the scrap ignores this — reviewScrap
-  // does not read it). Preference stored in the shared mutedTaskRules array.
-  if (input.mutedTaskRules?.includes("sunday_review")) return null;
-  const win = reviewWeek(input.queries, input.now);
-  const flag = input.taskFlags.find((f) => flagMatchesTask(f, "weekly_review", win.key));
-  if (flag?.snoozedUntil) return null; // handled — completed OR dismissed, however long ago
-  const base = {
-    key: "weekly-review",
-    who: "",
-    due: "SUNDAY REVIEW",
-    warn: false,
-    snoozes: 0,
-    initials: "☕",
-    record: `Week ${win.weekNumber} of querying`,
-    committed: false,
-    done: false,
-    taskType: "weekly_review",
-    relatedRecordId: win.key,
-  };
-  if (day !== 0 && day !== 1) return null; // Sun/Mon own the Urgent card; Tue–Sat the SCRAP offers it
-  const stats = weekReviewStats(input, win);
-  return { ...base, stream: "do", hk: false, title: "Your week in querying", subtitle: reviewEntryLine(stats) };
-}
 
 /**
  * The completion sentinel for a week's review flag — the EXACT `snoozedUntil` finishReview writes
@@ -479,22 +442,27 @@ export function reviewCompletionSnooze(win: ReviewWeek): string {
 }
 
 /**
- * The scrap (afterlife pack): a small torn offer — NOT a task, NOT in a lane. Renders Tue 00:00 →
- * Sat 23:59 while the most recent completed week is UNCOMPLETED — deliberately regardless of a
- * Sunday-card dismissal (dismissing the invitation stops the prompt; it does not withdraw the
- * offer). Sun/Mon the Urgent card owns entry (no scrap — never both); completion or the next
- * week's supersession removes it. "Completed" is the sentinel above (NOT presence — presence would
- * also swallow a dismissal). No querying yet → nothing to review → no scrap.
+ * Polish III P1 — THE REVIEW SURFACE (the Sunday card + the scrap both retire into this):
+ *   banner — Sun–Mon ∧ undismissed ∧ unreviewed (the white lifted card above the lanes; the
+ *            sunday_review Task-Settings mute suppresses the banner like a standing dismissal)
+ *   bar    — (dismissed ∨ Tue–Sat ∨ muted) ∧ unreviewed (the thin sage bar beneath the last lane
+ *            — the OFFER stands regardless of dismissal, exactly as the scrap did)
+ *   null   — reviewed (the completion sentinel), or nothing queried yet, or superseded next week.
+ * Dismissal gates the BANNER only; completion is the sentinel value (never mere flag presence).
  */
-export function reviewScrap(input: BoardInput): { weekNumber: number } | null {
-  const day = new Date(input.now).getDay();
-  if (day === 0 || day === 1) return null; // the Urgent card owns Sun/Mon
-  if (input.queries.length === 0) return null; // nothing queried → nothing to offer
+export function reviewSurface(input: BoardInput): { kind: "banner" | "bar"; weekNumber: number; weekKey: string } | null {
+  if (input.queries.length === 0) return null; // nothing queried → nothing to review
   const win = reviewWeek(input.queries, input.now);
   const flag = input.taskFlags.find((f) => flagMatchesTask(f, "weekly_review", win.key));
-  if (flag?.snoozedUntil === reviewCompletionSnooze(win)) return null; // completed → offer withdrawn
-  return { weekNumber: win.weekNumber };
+  if (flag?.snoozedUntil === reviewCompletionSnooze(win)) return null; // reviewed → neither
+  const day = new Date(input.now).getDay();
+  const sunMon = day === 0 || day === 1;
+  const dismissed = !!flag?.snoozedUntil;
+  const muted = !!input.mutedTaskRules?.includes("sunday_review");
+  if (sunMon && !dismissed && !muted) return { kind: "banner", weekNumber: win.weekNumber, weekKey: win.key };
+  return { kind: "bar", weekNumber: win.weekNumber, weekKey: win.key };
 }
+
 
 /**
  * The done band's TERSE grammar (popup-notify-scrim P1): done rows use the committed rows' title

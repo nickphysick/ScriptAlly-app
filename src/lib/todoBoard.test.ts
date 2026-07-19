@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { QueryStatus, Task, Query, Agent, Manuscript, UserTask, TaskFlag, Activity, ActivityType } from "../types";
-import { assembleBoard, boardStreamForTaskType, todaySplit, ribbonTiles, walkSublabel, walkAria, offerDue, offerQuiet, terseDoneLabel, reminderDue, reviewWeek, weekReviewStats, reviewEntryCard, reviewEntryLine, reviewSeedCandidates, reviewScrap, reviewCompletionSnooze, BoardCard, BoardInput } from "./todoBoard";
+import { assembleBoard, boardStreamForTaskType, todaySplit, ribbonTiles, walkSublabel, walkAria, offerDue, offerQuiet, terseDoneLabel, reminderDue, reviewWeek, weekReviewStats, reviewSeedCandidates, reviewSurface, reviewCompletionSnooze, BoardCard, BoardInput } from "./todoBoard";
 import { taskSurvivesMute } from "./todoHousekeeping";
 
 const TODAY = "2026-07-09";
@@ -352,69 +352,42 @@ describe("the Sunday review — pure derivations (finishing P3)", () => {
     expect(stats.quiet.map((r) => r.queryId)).toEqual(["qq"]); // the mid-window crosser ONLY — never the backlog
   });
 
-  it("the entry card: the Sunday–Monday Urgent prompt as shipped; the stats line is honest", () => {
-    const base: BoardInput = { tasks: [], userTasks: [], queries: [], agents: [], manuscripts: [], taskFlags: [], activities: [], today: TODAY, now: SUN };
-    const sun = reviewEntryCard(base);
-    expect(sun).not.toBeNull();
-    expect(sun!.stream).toBe("do");
-    expect(sun!.taskType).toBe("weekly_review");
-    expect(sun!.due).toBe("SUNDAY REVIEW");
-    expect(sun!.subtitle).toBe("0 sent · 0 responses · 0 gone quiet");
-    expect(reviewEntryCard({ ...base, now: MON })!.stream).toBe("do");
-    expect(reviewEntryLine({ sent: [1, 2] as never, back: [1] as never, offers: 1, quiet: [] as never })).toBe("2 sent · 1 response · an offer ★ · 0 gone quiet");
-  });
-
-  it("the entry card is Sun/Mon ONLY now — no board card on weekdays (the demoted hk card is gone)", () => {
-    const FRI = Date.parse("2026-07-24T12:00:00Z");
-    const base: BoardInput = { tasks: [], userTasks: [], queries: [], agents: [], manuscripts: [], taskFlags: [], activities: [], today: TODAY, now: FRI };
-    expect(reviewEntryCard(base)).toBeNull();
-    const b = assembleBoard(base);
-    expect(b.hk.some((x) => x.taskType === "weekly_review")).toBe(false);
-    expect(b.do.some((x) => x.taskType === "weekly_review")).toBe(false);
-  });
-
-  it("THE SCRAP: Tue–Sat while unreviewed → an offer; Sun/Mon → none (the card owns entry); no querying → none", () => {
+  it("III P1 — reviewSurface: the window matrix (banner Sun–Mon undismissed · bar after/dismissed · null reviewed)", () => {
     const q1 = [query("q1", "a1", QueryStatus.QUERIED, { dateSent: "2026-07-01T10:00:00Z" })];
+    const FRI = Date.parse("2026-07-24T12:00:00Z");
     const io = (now: number, over: Partial<BoardInput> = {}): BoardInput =>
       ({ tasks: [], userTasks: [], queries: q1, agents: [], manuscripts: [], taskFlags: [], activities: [], today: TODAY, now, ...over });
-    const FRI = Date.parse("2026-07-24T12:00:00Z");
-    expect(reviewScrap(io(FRI))).toEqual({ weekNumber: reviewWeek(q1, FRI).weekNumber });
-    // Tue through Sat all offer it
+    // Sun + Mon, undismissed → the BANNER
+    expect(reviewSurface(io(SUN))!.kind).toBe("banner");
+    expect(reviewSurface(io(MON))!.kind).toBe("banner");
+    // Tue–Sat → the BAR (dismissed or not)
     for (const d of ["2026-07-21", "2026-07-22", "2026-07-23", "2026-07-24", "2026-07-25"]) {
-      expect(reviewScrap(io(Date.parse(`${d}T12:00:00Z`)))).not.toBeNull();
+      expect(reviewSurface(io(Date.parse(`${d}T12:00:00Z`)))!.kind).toBe("bar");
     }
-    // Sun + Mon: the Urgent card owns entry — no scrap
-    expect(reviewScrap(io(Date.parse("2026-07-19T12:00:00Z")))).toBeNull(); // Sun
-    expect(reviewScrap(io(Date.parse("2026-07-20T12:00:00Z")))).toBeNull(); // Mon
-    // no querying at all → nothing to review
-    expect(reviewScrap(io(FRI, { queries: [] }))).toBeNull();
-  });
-
-  it("THE SCRAP distinguishes completion from dismissal: dismissed → still offered; completed → withdrawn", () => {
-    const q1 = [query("q1", "a1", QueryStatus.QUERIED, { dateSent: "2026-07-01T10:00:00Z" })];
-    const FRI = Date.parse("2026-07-24T12:00:00Z");
-    const win = reviewWeek(q1, FRI);
-    const io = (flag: Partial<TaskFlag>): BoardInput =>
-      ({ tasks: [], userTasks: [], queries: q1, agents: [], manuscripts: [], taskFlags: [{ id: "f", userId: "u", taskType: "weekly_review", queryId: win.key, snoozeCount: 0, ...flag } as unknown as TaskFlag], activities: [], today: TODAY, now: FRI });
-    // a MERE dismissal (now+3d value) does not equal the completion sentinel → scrap still offered
-    expect(reviewScrap(io({ snoozedUntil: new Date(Date.parse("2026-07-20T09:00:00Z") + 3 * 86400000).toISOString() }))).not.toBeNull();
-    // COMPLETION writes exactly the sentinel → the offer is withdrawn
-    expect(reviewScrap(io({ snoozedUntil: reviewCompletionSnooze(win) }))).toBeNull();
-    // the completion sentinel is win.endMs + 2 days (single-sourced with finishReview)
+    // Sunday + dismissed (a non-sentinel snooze) → the BAR (dismissal gates the banner only)
+    const win = reviewWeek(q1, SUN);
+    const dismissed = [{ id: "f", userId: "u", taskType: "weekly_review", queryId: win.key, snoozeCount: 0, snoozedUntil: new Date(SUN + 3 * 86400000).toISOString() } as unknown as TaskFlag];
+    expect(reviewSurface(io(SUN, { taskFlags: dismissed }))!.kind).toBe("bar");
+    // the sunday_review mute suppresses the banner like a standing dismissal (the bar stands)
+    expect(reviewSurface(io(SUN, { mutedTaskRules: ["sunday_review"] }))!.kind).toBe("bar");
+    // REVIEWED (the completion sentinel) → neither, any day
+    const done = [{ id: "f", userId: "u", taskType: "weekly_review", queryId: win.key, snoozeCount: 0, snoozedUntil: reviewCompletionSnooze(win) } as unknown as TaskFlag];
+    expect(reviewSurface(io(SUN, { taskFlags: done }))).toBeNull();
+    expect(reviewSurface(io(FRI, { taskFlags: done }))).toBeNull();
+    // nothing queried → nothing to review; the next Sunday supersedes with a fresh banner
+    expect(reviewSurface(io(SUN, { queries: [] }))).toBeNull();
+    expect(reviewSurface(io(Date.parse("2026-07-26T12:00:00Z"), { taskFlags: done }))!.kind).toBe("banner");
+    // the sentinel is single-sourced with finishReview
     expect(reviewCompletionSnooze(win)).toBe(new Date(win.endMs + 2 * 86400000).toISOString());
   });
 
-  it("THE SCRAP is superseded by the next Sunday (never two offers); the Sunday card stays presence-gated", () => {
-    const q1 = [query("q1", "a1", QueryStatus.QUERIED, { dateSent: "2026-07-01T10:00:00Z" })];
-    const NEXT_SUN = Date.parse("2026-07-26T12:00:00Z");
-    const io: BoardInput = { tasks: [], userTasks: [], queries: q1, agents: [], manuscripts: [], taskFlags: [], activities: [], today: TODAY, now: NEXT_SUN };
-    expect(reviewScrap(io)).toBeNull(); // Sunday → no scrap
-    const card = reviewEntryCard(io)!;
-    expect(card.stream).toBe("do"); // the new week's Urgent card
-    // the Sunday card still hides on a mere dismissal (presence-read — unchanged, as shipped)
-    const win = reviewWeek(q1, NEXT_SUN);
-    const dismissed: BoardInput = { ...io, taskFlags: [{ id: "f", userId: "u", taskType: "weekly_review", queryId: win.key, snoozeCount: 0, snoozedUntil: new Date(NEXT_SUN + 3 * 86400000).toISOString() } as unknown as TaskFlag] };
-    expect(reviewEntryCard(dismissed)).toBeNull();
+  it("III P1 — the review is NOT a task: assembleBoard emits no weekly_review card even on Sunday (by construction)", () => {
+    const base: BoardInput = { tasks: [], userTasks: [], queries: [query("q1", "a1", QueryStatus.QUERIED, { dateSent: "2026-07-01T10:00:00Z" })], agents: [], manuscripts: [], taskFlags: [], activities: [], today: TODAY, now: SUN };
+    const b = assembleBoard(base);
+    expect(b.do.some((x) => x.taskType === "weekly_review")).toBe(false);
+    expect(b.hk.some((x) => x.taskType === "weekly_review")).toBe(false);
+    // the counts every surface reads (tiles/filters/focus) derive from this same board — review-free for free
+    expect(ribbonTiles(b, 0).urgent).toBe(b.do.length);
   });
 
   it("seed candidates: dated pre-ticked (offer window + linked reminders), undated offered, review excluded, capped at 5", () => {
@@ -440,20 +413,20 @@ describe("the Sunday review — pure derivations (finishing P3)", () => {
   });
 });
 
-describe("Task Settings — the Sunday CARD toggle (the scrap is exempt)", () => {
+describe("Task Settings — sunday_review gates the BANNER only (III P1; the bar is exempt like the scrap was)", () => {
   const q1 = [query("q1", "a1", QueryStatus.QUERIED, { dateSent: "2026-07-01T10:00:00Z" })];
   const SUN = Date.parse("2026-07-19T12:00:00Z");
   const FRI = Date.parse("2026-07-24T12:00:00Z");
   const io = (now: number, muted?: string[]): BoardInput =>
     ({ tasks: [], userTasks: [], queries: q1, agents: [], manuscripts: [], taskFlags: [], activities: [], today: TODAY, now, ...(muted ? { mutedTaskRules: muted } : {}) });
 
-  it("sunday_review off → no Sunday card; on → the card returns", () => {
-    expect(reviewEntryCard(io(SUN, ["sunday_review"]))).toBeNull();
-    expect(reviewEntryCard(io(SUN))).not.toBeNull();
+  it("sunday_review off → the Sunday banner falls to the bar; on → the banner returns", () => {
+    expect(reviewSurface(io(SUN, ["sunday_review"]))!.kind).toBe("bar");
+    expect(reviewSurface(io(SUN))!.kind).toBe("banner");
   });
-  it("the scrap IGNORES sunday_review — it still offers Tue–Sat when the card is switched off", () => {
-    expect(reviewScrap(io(FRI, ["sunday_review"]))).not.toBeNull();
-    expect(reviewScrap(io(FRI, ["sunday_review"]))).toEqual({ weekNumber: reviewWeek(q1, FRI).weekNumber });
+  it("the bar IGNORES sunday_review — the offer still stands Tue–Sat when the prompt is switched off", () => {
+    expect(reviewSurface(io(FRI, ["sunday_review"]))!.kind).toBe("bar");
+    expect(reviewSurface(io(FRI, ["sunday_review"]))!.weekNumber).toBe(reviewWeek(q1, FRI).weekNumber);
   });
 });
 
