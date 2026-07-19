@@ -36,10 +36,21 @@ export function rolledOverCards(cards: BoardCard[], today: string): BoardCard[] 
 }
 
 /**
- * Today's-list progress: N = items committed to today's list (still-on-list + completed-from-list);
+ * Today progress: N = items committed to Today (still-on-list + completed-from-list);
  * M = the completed ones. A globally-cleared item that was NEVER committed to Today does not enter
  * this ratio. Empty list → total 0 (no "done" claim). Logic only — the component renders it.
  */
+/**
+ * VI P1 — the dashed invitation: how many ghost rows the Today card draws beneath the committed
+ * items. The ref's two frames reconcile to ONE rule: empty = 3 (the taster), filling =
+ * 5 − committed − done clamped to [1..3] (the box shrinks but never vanishes mid-fill), and it
+ * disappears entirely at five committed.
+ */
+export function todayGhosts(committed: number, done: number): number {
+  if (committed >= MAX_TODAY) return 0;
+  return Math.max(1, Math.min(3, MAX_TODAY - committed - done));
+}
+
 export function todayProgress(committedOnList: number, doneFromList: number): { total: number; done: number; pct: number; empty: boolean } {
   const total = committedOnList + doneFromList;
   return { total, done: doneFromList, pct: total ? Math.round((doneFromList / total) * 100) : 0, empty: total === 0 };

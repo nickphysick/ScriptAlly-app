@@ -393,18 +393,17 @@
 .tdb-rulechip { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--hk-cof-ink); background: var(--hk-cof); border: 1px solid var(--hk-cof-edge); border-radius: 99px; padding: 3px 9px; }
 .tdb-rulechip:hover { border-color: var(--hk-cof-ink); }
 
-/* ── Today's list — corner FAB (collapsed) ── */
+/* ── Today — shared board furniture ── */
 /* right:70 sits LEFT of the AppShell's global help "?" (fixed bottom:20 right:20, 38px, z-30). */
 /* the FAB — SAGE now (the Today system's colour): sage gradient pill, INK completion ring,
    ink title, sage-ink meta (retune ref §1). */
 .tdb-nomatch { padding: 34px 4px; font-family: var(--f12-serif); font-style: italic; font-size: 14.5px; color: var(--muted); }
 .tdb-nomatch button { border: none; background: none; font: inherit; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; padding: 0; }
 
-/* ── II·B P3: the companion rail (≥1500px) + the masthead Today chip/popover (below).
-   The rail is the natural home for future companions (the assistant's "note from your desk"
-   card, etc.) — one column, 14px stack gaps. ── */
-.tdb-railr { width: var(--tdb-today); flex: 0 0 auto; position: sticky; top: var(--g24); display: flex; flex-direction: column; gap: 14px; }
-@media (max-width: 1499.98px) { .tdb-railr { display: none; } } /* belt — the mount is JS-gated */
+/* ── VI P1: the Today COLUMN — always on ≥1200px (no collapsed state, no tab) — + the masthead
+   chip/popover below. Still the natural home for future companions; 12px stack gaps (ref .rcol). ── */
+.tdb-railr { width: var(--tdb-today); flex: 0 0 auto; position: sticky; top: var(--g24); display: flex; flex-direction: column; gap: 12px; }
+@media (max-width: 1199.98px) { .tdb-railr { display: none; } } /* belt — the mount is JS-gated */
 .tdb-todaypopwrap { position: relative; flex: none; }
 .tdb-todaychip { display: inline-flex; align-items: center; gap: 7px; font-family: var(--f12-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border: 1px solid var(--hk-spine); border-radius: 99px; padding: 8px 14px; color: var(--hk-ink); white-space: nowrap; }
 .tdb-todaychip:hover { filter: brightness(0.98); }
@@ -413,66 +412,45 @@
 @keyframes tdbPopDown { from { opacity: 0; transform: translateY(-6px); } }
 @media (prefers-reduced-motion: reduce) { .tdb-todaypop { animation: none; } }
 
-/* ── III P4: the TUCKED TODAY TAB (banner-tab ref §3) — the rail's empty face. 40px rounded-left
-   sage tab hugging the viewport edge at the rail's former top (≈ nav + masthead + g24 — a fixed
-   236px, reported); hover/focus unfurls horizontally; the first commitment restores the rail. ── */
-/* IV P2 — the VERTICAL Today tab (todo-grid-v1.html .vtab; retires the hover-unfurl): 42px wide,
-   column run ‹ → ☑ roundel → vertical-rl Playfair label, rounded-left sage edge at the rail's
-   former top. Click (anywhere) expands the full empty rail; Esc returns here. */
-.tdb-ttab { position: fixed; right: 0; top: 236px; z-index: 30; width: 42px; display: flex; flex-direction: column; align-items: center; gap: 9px; padding: 12px 0; border-radius: 12px 0 0 12px; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border: 1px solid var(--hk-spine); border-right: none; box-shadow: -3px 3px 10px rgba(58, 28, 20, 0.14); cursor: pointer; }
-.tdb-ttab:hover { filter: brightness(1.02); }
-.tdb-ttab:focus-visible { outline: 2px solid var(--hk-ink); outline-offset: 2px; }
-@media (max-width: 1499.98px) { .tdb-ttab { display: none; } } /* narrow owns the masthead chip */
-.tdb-ttabch { font-size: 9px; color: var(--hk-ink); }
-.tdb-ttabic { width: 22px; height: 22px; border-radius: 50%; background: var(--white, #fff); border: 1px solid var(--hk-spine); color: var(--hk-ink); display: inline-flex; align-items: center; justify-content: center; font-size: 12px; flex: none; }
-.tdb-ttabvt { writing-mode: vertical-rl; font-family: var(--f12-serif); font-size: 12.5px; font-weight: 600; color: var(--hk-ink); }
-
-/* ── the Today's-list PANEL (workbench: the corner pop-up's internals TRANSPLANTED into the
-   drawer — same inner classes, drawer scale; SAGE header per the ref's .today2; the fixed
-   wrapper, rise animation and ✕ are retired). ── */
-.tdb-today2 { background: var(--white, #fff); border: 1px solid var(--hk-spine); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; }
-.tdb-th { flex: none; display: flex; align-items: center; flex-wrap: nowrap; gap: 8px; padding: 9px 12px 8px; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border-bottom: 1px solid var(--hk-spine); }
-.tdb-th .tdb-t { font-family: var(--f12-serif); font-size: 14px; font-weight: 600; color: var(--ink); flex: 1; }
-.tdb-th .tdb-cc { font-family: var(--f12-mono); font-size: 8px; font-weight: 700; letter-spacing: 0.05em; color: var(--hk-ink); background: var(--white, #fff); border: 1px solid var(--hk-spine); border-radius: 99px; padding: 2.5px 8px; white-space: nowrap; flex: none; }
-/* the DONE badge (chrome-fixes P2 — replaces the collided tdb-cd span; that class name is
-   retired page-wide): the committed pill's
-   grammar in the done-sage family, doubling as the done-band show/hide toggle (pressed = shown,
-   the default — today's always-shown behaviour preserved as the default state). */
-.tdb-th .tdb-cdone { font-family: var(--f12-mono); font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; color: var(--hk-ink); background: var(--white, #fff); border: 1px solid var(--hk-spine); border-radius: 99px; padding: 2.5px 8px; white-space: nowrap; flex: none; cursor: pointer; transition: background 0.14s; }
-.tdb-th .tdb-cdone[aria-pressed="true"] { background: var(--hk-sage); }
-.tdb-th .tdb-cdone:hover { background: var(--hk-sage-2); }
-/* committed band (top) — fix pass P3: the OUTSTANDING list owns the flexible height (renders
-   first, scrolls internally only past the pop-up's cap); the pop-up itself grows with content up
-   to max-height, so 5 committed / 0 done shows all five with zero dead space. */
-.tdb-tcommit { flex: 1 1 auto; min-height: 0; max-height: 40vh; padding: 4px 6px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; }
-.tdb-trow { display: flex; align-items: flex-start; gap: 8px; padding: 8px 6px; border-bottom: 1px solid var(--hairline); cursor: pointer; flex: none; }
-.tdb-trow:last-child { border-bottom: none; }
-.tdb-trow:hover { background: var(--paper); }
+/* ── the "Today" CARD (VI P1, todo-right-column-v1.html .today) — the cardx family: paper,
+   hairline, radius 16, floating shadow. Plain paper header (Playfair "Today" + the mono right
+   slot: date when empty ⇄ "{n} OF 5"); the middle region holds committed rows above the dashed
+   ghost invitation and the collapsed done row; two footer verbs pinned beneath. ── */
+.tdb-today2 { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 4px 16px rgba(58, 28, 20, 0.1); display: flex; flex-direction: column; overflow: hidden; }
+.tdb-th { flex: none; display: flex; align-items: baseline; gap: 8px; padding: 14px 15px 11px; }
+.tdb-th .tdb-t { font-family: var(--f12-serif); font-size: 17px; font-weight: 700; color: var(--ink); }
+.tdb-th .tdb-thr { margin-left: auto; font-style: normal; font-family: var(--f12-mono); font-size: 7.5px; font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase; color: var(--faint); white-space: nowrap; }
+.tdb-tmid2 { padding: 0 13px; display: flex; flex-direction: column; }
+.tdb-tcommit { display: flex; flex-direction: column; }
+.tdb-trow { display: flex; align-items: flex-start; gap: 8px; padding: 9px 2px; border-bottom: 1px solid var(--hairline); cursor: pointer; flex: none; }
+.tdb-trow:hover { background: var(--white, #fff); }
 .tdb-tmid { flex: 1; min-width: 0; }
 .tdb-trow .tdb-tx { font-size: 11.5px; font-weight: 600; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tdb-trow .tdb-tm { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
 .tdb-trow .tdb-x { margin-left: auto; color: var(--faint); font-size: 11px; padding: 0 3px; background: none; border: none; }
 .tdb-trow .tdb-x:hover { color: var(--hk-ink); }
 .tdb-tdot { width: 20px; height: 20px; border-radius: 50%; background: var(--pink-t); border: 1px solid var(--pink-b); flex: none; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
-.tdb-tempty { border: 1.5px dashed var(--hk-spine); border-radius: 9px; padding: 14px 12px; text-align: center; flex: none; }
-.tdb-tea { font-family: var(--f12-serif); font-style: italic; font-size: 13.5px; color: var(--sub); }
-.tdb-teb { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--hk-ink); margin-top: 5px; }
-.tdb-tdiv { flex: none; display: flex; align-items: center; gap: 9px; padding: 8px 16px 4px; font-family: var(--f12-mono); font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--hk-ink); background: var(--hk-sage); border-top: 1px solid var(--hk-spine); }
-.tdb-tdiv .l { flex: 1; height: 1px; background: rgba(90, 110, 88, 0.16); }
-/* done band (below) — renders ONLY when non-empty (follow-up rule), sized to its content with its
-   own scroll cap; it never reserves space while empty and never compresses the outstanding list. */
-.tdb-tdone { flex: 0 0 auto; max-height: 160px; overflow-y: auto; padding: 2px 10px 10px; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); display: flex; flex-direction: column; }
-.tdb-drow { display: flex; align-items: flex-start; gap: 8px; padding: 7px 6px; border-bottom: 1px solid rgba(90, 110, 88, 0.16); }
+/* the dashed invitation — no fill, the card's parchment shows through (ref .ghostbox/.grow) */
+.tdb-ghostbox { border: 1.5px dashed rgba(58, 28, 20, 0.22); border-radius: 11px; padding: 5px 12px; }
+.tdb-tcommit + .tdb-ghostbox { margin-top: 9px; }
+.tdb-grow { display: flex; align-items: center; gap: 10px; padding: 9px 2px; border-bottom: 1px dashed rgba(58, 28, 20, 0.16); }
+.tdb-grow:last-child { border-bottom: none; }
+.tdb-cbx { width: 15px; height: 15px; border: 1.5px dashed rgba(58, 28, 20, 0.28); border-radius: 4px; flex: 0 0 auto; }
+.tdb-gbar { height: 5px; border-radius: 3px; background: rgba(58, 28, 20, 0.07); }
+/* done today — the collapsed ✓ row IS the divider + the toggle (ref .donerow); expands in place */
+.tdb-donerow { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 2px; margin-top: 4px; font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.11em; color: var(--hk-ink); border: none; border-top: 1px solid var(--hairline); background: none; text-align: left; cursor: pointer; }
+.tdb-donerow:hover { color: var(--ink); }
+.tdb-tdone { flex: none; padding: 2px 0 8px; display: flex; flex-direction: column; }
+.tdb-drow { display: flex; align-items: flex-start; gap: 8px; padding: 7px 2px; border-bottom: 1px solid var(--hairline); }
 .tdb-drow:last-child { border-bottom: none; }
 .tdb-drow .tdb-dx { font-size: 11.5px; font-weight: 500; line-height: 1.35; color: var(--hk-ink); text-decoration: line-through; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tdb-drow .tdb-dm2 { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--hk-ink); opacity: 0.75; margin-top: 3px; }
-.tdb-tick { width: 20px; height: 20px; border-radius: 50%; background: rgba(255, 255, 255, 0.6); border: 1px solid var(--hk-spine); color: var(--hk-ink); display: flex; align-items: center; justify-content: center; font-size: 12px; flex: none; margin-top: 1px; }
-.tdb-tf { flex: none; padding: 7px 8px; border-top: 1px solid var(--hairline); background: var(--paper); display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
-.tdb-tf .tdb-pc { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.1em; color: var(--muted); flex: 1 1 100%; text-transform: uppercase; }
-.tdb-pick { font-size: 10.5px; font-weight: 600; padding: 5px 9px; border-radius: 8px; background: var(--white, #fff); border: 1px solid var(--hk-spine); color: var(--hk-ink); white-space: nowrap; flex: 1; }
+.tdb-tick { width: 20px; height: 20px; border-radius: 50%; background: var(--hk-sage); border: 1px solid var(--hk-spine); color: var(--hk-ink); display: flex; align-items: center; justify-content: center; font-size: 12px; flex: none; margin-top: 1px; }
+/* the footer verbs — outline + ink primary, equal widths (ref .tfoot) */
+.tdb-tf2 { flex: none; display: flex; gap: 6px; padding: 12px 13px 13px; }
+.tdb-pick { flex: 1; font-size: 10.5px; font-weight: 600; padding: 7px 0; border-radius: 99px; background: var(--white, #fff); border: 1px solid var(--line); color: var(--ink); white-space: nowrap; }
 .tdb-pick:hover { background: var(--hk-sage); }
-/* "Work the list" — its OWN class (distinct from the walkthrough MODAL's .tdb-walk below) */
-.tdb-worklist { font-size: 10.5px; font-weight: 600; padding: 5px 9px; border-radius: 8px; background: var(--ink); color: var(--panel); white-space: nowrap; flex: 1; }
+.tdb-worklist { flex: 1; font-size: 10.5px; font-weight: 600; padding: 7px 0; border-radius: 99px; background: var(--ink); border: 1px solid var(--ink); color: var(--panel); white-space: nowrap; }
 .tdb-worklist:hover:not(:disabled) { filter: brightness(1.35); }
 
 /* ── Polish III P1: the REVIEW BANNER (5ways §1 — white lifted card; live tokens; the shadow

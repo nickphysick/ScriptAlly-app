@@ -820,7 +820,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     if (c.userTaskId) {
       await updateUserTask(c.userTaskId, { done: true, completedAt: nowIso });
       onToast(`✓ ${c.title} — done`, { label: "Undo", fn: async () => { await updateUserTask(c.userTaskId!, { done: false }); onToast("Restored"); } });
-      advanceAfterReceipt(`${c.title} — struck through on today’s list.`);
+      advanceAfterReceipt(`${c.title} — struck through on Today.`);
       return;
     }
     const q = cardQuery(c);
@@ -1023,7 +1023,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
         <button type="button" className="tdb-ffpri" onClick={onClose}>Back to the board</button>
       </>,
       // ceremony D — a completion/receipt screen
-      band("sage", "All saved", <>{savedN} saved. Desk cleared.</>, "They’re logged against their queries and struck through on today’s list. Go write something.", { art: "reviewClose", center: true }),
+      band("sage", "All saved", <>{savedN} saved. Desk cleared.</>, "They’re logged against their queries and struck through on Today. Go write something.", { art: "reviewClose", center: true }),
     );
     if (!staged.length) return sheet(
       <div className="tdb-ffbigdone">
@@ -1235,7 +1235,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
 
     if (rvStep === 4) return sheet(
       <>
-        <div className="tdb-ffqsub">Dated things are pre-ticked. These land on <b>Monday’s Today’s list</b> — you’ll wake up to a desk that’s already set.</div>
+        <div className="tdb-ffqsub">Dated things are pre-ticked. These land on <b>Monday’s Today list</b> — you’ll wake up to a desk that’s already set.</div>
         <div className="tdb-rvrows">{cands.map((c) => (
           <label key={c.key} className={`tdb-rvseed${seedSel[c.key] ? " on" : ""}`}>
             <input type="checkbox" checked={!!seedSel[c.key]} onChange={() => setRvSeed({ ...seedSel, [c.key]: !seedSel[c.key] })} />

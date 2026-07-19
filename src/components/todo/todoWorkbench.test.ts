@@ -64,14 +64,16 @@ describe("P1 — the corner retirement + the AppShell's one out-of-page line", (
     expect(css).not.toContain(".tdb-setbtn");
     expect(css).not.toMatch(/\.tdb-pop\s*\{/);
   });
-  it("the panel is the pop-up TRANSPLANTED — same inner anatomy under .tdb-today2 (sage header)", () => {
+  it("the panel is the VI 'Today' card — ref anatomy, same state + handlers", () => {
     expect(page).toContain('<div className="tdb-today2">');
-    for (const inner of ["tdb-th", "tdb-cc", "tdb-cdone", "tdb-rollbar", "tdb-tcommit", "tdb-trow", "tdb-tempty", "tdb-tdiv", "tdb-tdone", "tdb-drow", "tdb-tf", "tdb-pick", "tdb-worklist"]) {
+    for (const inner of ["tdb-th", "tdb-thr", "tdb-rollbar", "tdb-tcommit", "tdb-trow", "tdb-ghostbox", "tdb-grow", "tdb-donerow", "tdb-tdone", "tdb-drow", "tdb-tf2", "tdb-pick", "tdb-worklist"]) {
       expect(page).toContain(inner);
     }
-    expect(rule(".tdb-th")).toContain("var(--hk-sage)");
-    // the add flow survives: Add more / Help me pick + Work the list, same handlers
-    expect(page).toContain('{committedCards.length ? "＋ Add more" : "Help me pick"}');
+    expect(rule(".tdb-th")).not.toContain("hk-sage"); // VI P1: plain paper header, no sage band
+    // the add flow survives: Add more / Help me pick / ＋ Add + Work the list, same handlers
+    expect(page).toContain(">＋ Add more</button>");
+    expect(page).toContain(">Help me pick</button>");
+    expect(page).toContain(">＋ Add</button>");
     // evening C2: Work the list is the RITUAL walk (sage whole-walk) over the same committed set
     expect(page).toContain('setFlow({ items: committedCards.map((card) => ({ kind: "card", card })), ritual: true });'); // III P1: review-free by construction, no filter
     expect(page).toContain(">Work the list</button>");
@@ -194,7 +196,7 @@ describe("P4 — search + filters (source locks; the matrix lives in todoFilters
     expect(page).toContain("sortLedgerDo(vDo, lctx, now)"); // the ledger sorts the SAME set (review-free by construction)
   });
   it("III P3 — the pill cloud is the filter surface (real aria-pressed buttons; the same TodoFilterState)", () => {
-    for (const call of ['fpill("★ OFFERS", "offers", fc.offers, "p")', 'fpill("OVER TO YOU", "overToYou", fc.overToYou, "p")', 'fpill("MATERIALS", "materials", fc.materials, "c")', 'fpill("WISH LISTS", "mswl", fc.mswl, "c")', 'fpill("STALE", "stale", fc.stale, "c")', 'fpill("SNOOZED", "snoozed", fc.snoozed, "c")', 'fpill("✓ TODAY’S LIST ONLY", "todayOnly", null, "s")']) {
+    for (const call of ['fpill("★ OFFERS", "offers", fc.offers, "p")', 'fpill("OVER TO YOU", "overToYou", fc.overToYou, "p")', 'fpill("MATERIALS", "materials", fc.materials, "c")', 'fpill("WISH LISTS", "mswl", fc.mswl, "c")', 'fpill("STALE", "stale", fc.stale, "c")', 'fpill("SNOOZED", "snoozed", fc.snoozed, "c")', 'fpill("✓ ON TODAY ONLY", "todayOnly", null, "s")']) {
       expect(page).toContain(call);
     }
     expect(page).toContain("aria-pressed={filters[key]}");
@@ -227,7 +229,7 @@ describe("P5 — selection · keyboard · bulk · kebab (source locks; the reduc
   });
   it("the bulk bar rides a live selection and acts through the EXISTING primitives with one undo-all", () => {
     expect(page).toContain('view === "ledger" && selVisible.length > 0 && (');
-    expect(page).toContain(">＋ Today’s list</button>");
+    expect(page).toContain(">＋ Today</button>"); // VI P1 rename
     expect(page).toContain(">⏸ Snooze</button>");
     expect(page).toContain(">Dismiss</button>");
     // today respects the cap via the same setCommitted; snooze/dismiss are the same flag writes
@@ -357,28 +359,28 @@ describe("III P3 — the pinned pair (supersedes the II·B controls-only drawer)
 describe("II·B P3 — the companion rail (one panel, two mounts, one state)", () => {
   it("mount parity: BOTH homes call the SAME renderTodayPanel, XOR'd on narrow (no fork — halt (c) clear)", () => {
     expect((page.match(/\{renderTodayPanel\(\)\}/g) ?? []).length).toBe(2);
-    expect(page).toContain("{!narrow && (committedCards.length > 0 || emptyRailOpen) && ("); // IV P2: + the tab's expanded empty rail
+    expect(page).toContain('"Today", ALWAYS ON'); // VI P1: the column is unconditional ≥1200
     expect(page).toContain("{narrow && (");
-    expect(page).toContain('window.matchMedia("(max-width: 1499.98px)")');
+    expect(page).toContain('window.matchMedia("(max-width: 1199.98px)")');
   });
   it("the rail: 264 sticky at the 24 offset, after the main column; noted as the future companions' home", () => {
     expect(rule(".tdb-railr")).toContain("width: var(--tdb-today)");
     expect(rule(".tdb-railr")).toContain("position: sticky");
     expect(page.indexOf('className="tdb-main"')).toBeLessThan(page.indexOf('className="tdb-railr"'));
   });
-  it("the chip's count is the committed union — never a parallel tally — and the header chip pairs it with the done union", () => {
-    expect(page).toContain("Today’s list · {committedCards.length} TO GO");
-    expect(page).toContain("`${committedCards.length} COMMITTED · ${doneN} DONE`");
+  it("the chip's count is the committed union — never a parallel tally — and the header slot pairs date ⇄ count", () => {
+    expect(page).toContain("Today · {committedCards.length} TO GO");
+    expect(page).toContain("`${committedCards.length} OF ${MAX_TODAY}`"); // VI P1: the header's count face
   });
   it("popover a11y: dialog role, aria-expanded on the chip, Esc + click-away close, reduced-motion honoured", () => {
     expect(page).toContain('aria-haspopup="dialog" aria-expanded={todayPopOpen}');
-    expect(page).toContain('<div className="tdb-todaypop" role="dialog" aria-label="Today’s list">');
+    expect(page).toContain('<div className="tdb-todaypop" role="dialog" aria-label="Today">');
     expect(page).toContain('if (e.key === "Escape") setTodayPopOpen(false);');
     expect(page).toContain('t.closest(".tdb-todaypop") || t.closest(".tdb-todaychip")');
     expect(css).toContain("@media (prefers-reduced-motion: reduce) { .tdb-todaypop { animation: none; } }");
   });
-  it("the breakpoint belt: the rail hides <1500 in CSS too; narrow closes the popover on widen", () => {
-    expect(css).toContain("@media (max-width: 1499.98px) { .tdb-railr { display: none; } }");
+  it("the breakpoint belt: the column hides <1200 in CSS too; narrow closes the popover on widen", () => {
+    expect(css).toContain("@media (max-width: 1199.98px) { .tdb-railr { display: none; } }");
     expect(page).toContain("useEffect(() => { if (!narrow) setTodayPopOpen(false); }, [narrow]);");
   });
 });
@@ -446,19 +448,7 @@ describe("V P1 (reconstructed) — the left-pinned full-bleed grid (todo-right-c
   });
 });
 
-describe("IV P2 — the vertical tab's states · footer rows · the label trim", () => {
-  it("state transitions: tab click → rail; Esc (editables exempt) → tab; a commitment re-arms the tab", () => {
-    expect(page).toContain("const [emptyRailOpen, setEmptyRailOpen] = useState(false);");
-    expect(page).toContain("useEffect(() => { if (anyCommitted) setEmptyRailOpen(false); }, [anyCommitted]);");
-    expect(page).toContain('if (e.key !== "Escape") return;');
-    expect(page).toContain('if (t && t.closest("input, textarea, select, [contenteditable]")) return;');
-  });
-  it("the tab's column run: chevron ‹ → the 22px white roundel → the vertical label", () => {
-    expect(page).toContain('<span className="tdb-ttabch" aria-hidden>‹</span>');
-    expect(page).toContain('<span className="tdb-ttabic" aria-hidden>☑</span>');
-    expect(page).toContain('<span className="tdb-ttabvt">Today’s list</span>');
-    expect(rule(".tdb-ttabic")).toContain("width: 22px; height: 22px; border-radius: 50%");
-  });
+describe("IV P2 — footer rows · the label trim (the vertical tab retired by VI P1)", () => {
   it("footer rows: two full-width rows with the 28px roundel, hover wash, hairline above; same behaviours", () => {
     expect(page).toContain('className="tdb-fr2" onClick={() => setSettingsOpen(true)}');
     expect(page).toContain('className="tdb-fr2" aria-haspopup="menu" aria-expanded={helpOpen}');
@@ -477,22 +467,51 @@ describe("IV P2 — the vertical tab's states · footer rows · the label trim",
   });
 });
 
-describe("III P4 — the tucked Today tab · the masthead · the naming sweep", () => {
-  it("the rail's two faces, one state: commitments (or the tab's click) → the rail; empty → the edge tab", () => {
-    expect(page).toContain("{!narrow && (committedCards.length > 0 || emptyRailOpen) && (");
-    expect(page).toContain("{!narrow && committedCards.length === 0 && !emptyRailOpen && (");
-    expect((page.match(/\{renderTodayPanel\(\)\}/g) ?? []).length).toBe(2); // rail + narrow popover — never a third copy
+describe("VI P1 — 'Today', always on (todo-right-column-v1.html)", () => {
+  it("THE RENAME SWEEP — 'Today's list' is extinct across the board, the sheets, the tour and the libs", () => {
+    const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");
+    const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
+    const board = readFileSync(join(here, "..", "..", "lib", "todoBoard.ts"), "utf8");
+    const walk = readFileSync(join(here, "..", "..", "lib", "todoWalk.ts"), "utf8");
+    for (const src of [page, css, flow, tour, board, walk]) {
+      expect(src).not.toContain("oday’s list"); // catches Today's/today's alike
+      expect(src).not.toContain("ODAY’S LIST"); // …and the mono-uppercase pills
+    }
+    expect(page).toContain('<b className="tdb-t">Today</b>');
+    expect(page).toContain('{fpill("✓ ON TODAY ONLY", "todayOnly", null, "s")}');
+    expect(page).toContain('{committed ? "✓ ON TODAY" : "＋ TODAY"}'); // the card CTA
   });
-  it("IV P2: the tab went VERTICAL — rounded-left sage edge, labelled + focusable; click expands the rail", () => {
-    expect(page).toContain('className="tdb-ttab" aria-label="Today’s list — nothing yet; open it" aria-expanded={false} onClick={() => setEmptyRailOpen(true)}');
-    expect(rule(".tdb-ttab")).toContain("border-radius: 12px 0 0 12px");
-    expect(rule(".tdb-ttab")).toContain("position: fixed; right: 0;");
-    expect(rule(".tdb-ttab")).toContain("width: 42px");
-    expect(rule(".tdb-ttab")).toContain("flex-direction: column");
-    expect(rule(".tdb-ttabvt")).toContain("writing-mode: vertical-rl");
-    expect(rule(".tdb-ttabvt")).toContain("font-family: var(--f12-serif)");
-    expect(css).not.toContain("max-width: 300px"); // the hover-unfurl retired
-    expect(css).toContain("@media (max-width: 1499.98px) { .tdb-ttab { display: none; } }");
+  it("the header's right slot: today's date when empty ⇄ '{n} OF 5' once anything is committed", () => {
+    expect(page).toContain("{committedCards.length === 0 && doneN === 0 ? shortHeaderDate(now) : `${committedCards.length} OF ${MAX_TODAY}`}");
+    expect(rule(".tdb-th .tdb-thr")).toContain("margin-left: auto");
+    expect(rule(".tdb-th .tdb-thr")).toContain("font-size: 7.5px");
+  });
+  it("the ghost invitation: dashed 11px-radius box, no fill; dashed 15px tick-boxes + faded bars; widths cycled", () => {
+    const box = rule(".tdb-ghostbox");
+    expect(box).toContain("border: 1.5px dashed rgba(58, 28, 20, 0.22)");
+    expect(box).toContain("border-radius: 11px");
+    expect(box).not.toContain("background"); // the card's parchment shows through
+    expect(rule(".tdb-cbx")).toContain("width: 15px; height: 15px; border: 1.5px dashed rgba(58, 28, 20, 0.28)");
+    expect(rule(".tdb-grow")).toContain("border-bottom: 1px dashed rgba(58, 28, 20, 0.16)");
+    expect(page).toContain("const GHOST_BARS = [64, 78, 52];");
+    expect(page).toContain("const ghosts = todayGhosts(committedCards.length, doneN);");
+    expect(page).toContain("{ghosts > 0 && (");
+  });
+  it("footer verbs switch with the fill: empty = Help me pick + ink ＋ Add; filled = ＋ Add more + ink Work the list", () => {
+    expect(page).toContain("{committedCards.length > 0 ? (");
+    expect(page).toContain('className="tdb-worklist" onClick={() => scrollToLane("do")}>＋ Add</button>');
+    expect(rule(".tdb-worklist")).toContain("background: var(--ink)");
+    expect(rule(".tdb-pick")).toContain("flex: 1");
+  });
+});
+
+describe("III P4 — the tucked Today tab · the masthead · the naming sweep", () => {
+  it("VI P1: ONE face — the column is always mounted ≥1200; the tab, drawer and empty-rail state are extinct", () => {
+    expect((page.match(/\{renderTodayPanel\(\)\}/g) ?? []).length).toBe(2); // column + narrow popover — never a third copy
+    for (const stale of ["tdb-ttab", "emptyRailOpen", "sa.todoRail"]) {
+      expect(page).not.toContain(stale);
+      expect(css).not.toContain(stale);
+    }
   });
   it("THE NAMING SWEEP — no stale strings anywhere on the board or the sheets (grep-level)", () => {
     const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");

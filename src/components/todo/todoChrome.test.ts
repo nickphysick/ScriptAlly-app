@@ -25,20 +25,20 @@ describe("P2 — the done pill (the collision killed; badge = the band toggle)",
     expect(css).toContain(".tdb-coachdot { width: 6px; height: 6px;");
   });
 
-  it("the badge renders only when done > 0, carries aria-pressed, and gates the band", () => {
-    expect(page).toContain('{doneN > 0 && <button type="button" className="tdb-cdone" aria-pressed={showDone}');
-    expect(page).toContain("{doneN > 0 && showDone && (");
-    expect(page).toContain("const [showDone, setShowDone] = useState(true);"); // pressed/shown default
+  it("VI P1 superseded the badge: the ✓ DONE TODAY row is the toggle — collapsed by default, expands in place", () => {
+    expect(page).toContain('className="tdb-donerow" aria-expanded={showDone} onClick={() => setShowDone((v) => !v)}');
+    expect(page).toContain("✓ {doneN} DONE TODAY");
+    expect(page).toContain("{showDone && (");
+    expect(page).toContain("const [showDone, setShowDone] = useState(false);"); // collapsed default (session-only)
+    expect(page).not.toContain("tdb-cdone"); // the header badge is extinct
   });
 
-  it("the badge is the committed pill's grammar in the done-sage family; the header row never wraps", () => {
-    const badge = css.match(/\.tdb-th \.tdb-cdone \{([^}]*)\}/)?.[1] ?? "";
-    expect(badge).toContain("font-size: 10.5px");
-    expect(badge).toContain("border: 1px solid var(--hk-spine)");
-    expect(badge).toContain("color: var(--hk-ink)");
-    expect(badge).toContain("white-space: nowrap");
-    expect(css).toContain('.tdb-th .tdb-cdone[aria-pressed="true"] { background: var(--hk-sage); }');
-    expect(css).toMatch(/\.tdb-th \{[^}]*flex-wrap: nowrap/);
+  it("the done row is the sage-family mono divider (border-top carries the old tdiv's job)", () => {
+    const row = css.match(/\.tdb-donerow \{([^}]*)\}/)?.[1] ?? "";
+    expect(row).toContain("font-family: var(--f12-mono)");
+    expect(row).toContain("color: var(--hk-ink)");
+    expect(row).toContain("border-top: 1px solid var(--hairline)");
+    expect(css).not.toContain("tdb-cdone");
   });
 });
 

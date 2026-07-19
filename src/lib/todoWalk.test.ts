@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { BoardCard } from "./todoBoard";
-import { choosePicks, rolledOverCards, todayProgress, walkStepKind, isStageable, applyStaged, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, assumedSendItem, quickSendPayload, quickNudgePayload, receiptLine, journeyEventISO, DEFAULT_CHECKBACK_DAYS, StagedPayload, StagedHandlers, sendKicker, priorSameTypeSend, duplicateSendPrompt } from "./todoWalk";
+import { choosePicks, rolledOverCards, todayProgress, walkStepKind, isStageable, applyStaged, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, assumedSendItem, quickSendPayload, quickNudgePayload, receiptLine, journeyEventISO, DEFAULT_CHECKBACK_DAYS, StagedPayload, StagedHandlers, sendKicker, priorSameTypeSend, duplicateSendPrompt , todayGhosts } from "./todoWalk";
 import { Activity, ActivityType, QueryStatus } from "../types";
 
 const card = (key: string, over: Partial<BoardCard> = {}): BoardCard =>
@@ -334,5 +334,24 @@ describe("priorSameTypeSend + duplicateSendPrompt — B3: the soft duplicate-sen
     expect(duplicateSendPrompt(QueryStatus.FULL_SENT, "Daniel O’Rourke", "2026-07-17T12:00:00.000Z"))
       .toBe("You logged a full to Daniel O’Rourke on 17 Jul — log another?");
     expect(duplicateSendPrompt(QueryStatus.PARTIAL_SENT, "", "junk")).toBe("You logged a partial to this agent on earlier — log another?");
+  });
+});
+
+describe("todayGhosts — the dashed invitation (VI P1; both ref frames reconcile to one rule)", () => {
+  it("empty = 3 (the taster — ref frame 1)", () => {
+    expect(todayGhosts(0, 0)).toBe(3);
+  });
+  it("filling = 5 − committed − done clamped to [1..3] (ref frame 2: 2 committed + 1 done → 2)", () => {
+    expect(todayGhosts(2, 1)).toBe(2);
+    expect(todayGhosts(1, 0)).toBe(3); // clamp cap
+    expect(todayGhosts(2, 0)).toBe(3);
+    expect(todayGhosts(3, 0)).toBe(2);
+    expect(todayGhosts(4, 0)).toBe(1);
+    expect(todayGhosts(3, 2)).toBe(1); // clamp floor — never vanishes mid-fill
+    expect(todayGhosts(4, 3)).toBe(1);
+  });
+  it("disappears entirely at five committed", () => {
+    expect(todayGhosts(5, 0)).toBe(0);
+    expect(todayGhosts(5, 3)).toBe(0);
   });
 });

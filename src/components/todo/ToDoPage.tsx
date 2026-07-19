@@ -28,7 +28,7 @@ import { getPrimaryAction } from "../../lib/queryPrimaryAction";
 import { assembleBoard, todaySplit, ribbonTiles, reviewSurface, BoardCard, USER_TASK_FLAG_TYPE } from "../../lib/todoBoard";
 import { flagKeyForTask, MUTED_UNTIL } from "../../lib/taskFlags";
 import {
-  choosePicks, rolledOverCards, todayProgress, MAX_TODAY,
+  choosePicks, rolledOverCards, todayGhosts, MAX_TODAY,
   quickSendPayload, quickNudgePayload, receiptLine, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, priorSameTypeSend, duplicateSendPrompt,
 } from "../../lib/todoWalk";
 import { weekOfQuerying } from "../../lib/dashboardStats";
@@ -253,13 +253,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [flowPrefill, setFlowPrefill] = useState<{ sentDate?: string; method?: string; materials?: string[] } | undefined>(undefined);
   const [settingsOpen, setSettingsOpen] = useState(false); // the Task Settings sheet ("What lands on your desk?")
   const [helpOpen, setHelpOpen] = useState(false); // the sidebar-foot ? menu (Help centre / Replay the tour)
-  // IV P2 — the vertical Today tab's expanded EMPTY rail (session-only): the tab click opens the
-  // full rail with nothing committed; Esc returns to the tab; the first real commitment hands the
-  // rail over and re-arms the tab for a later clear.
-  const [emptyRailOpen, setEmptyRailOpen] = useState(false);
-  // Chrome-fixes P2 — the done badge doubles as the band's show/hide; pressed/shown by default.
-  // (Survives the workbench transplant: the badge now gates the drawer panel's done band.)
-  const [showDone, setShowDone] = useState(true);
+  // VI P1 — "Done today" collapses by default to the ✓ row; expanding is in place, session-only.
+  const [showDone, setShowDone] = useState(false);
   // ── workbench shell state. Fold + view are DEVICE UI prefs → the sa. localStorage convention
   // (approved — never user-doc fields). View default = cards; the Ledger face lands in Phase 3.
   const [folded, setFolded] = useState<boolean>(() => { try { return localStorage.getItem("sa.todoDrawer") === "folded"; } catch { return false; } });
@@ -287,12 +282,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [kfocus, setKfocus] = useState(-1);
   const [kebabAt, setKebabAt] = useState<string | null>(null);
   // ── II·B P3: the companion rail ↔ masthead chip. ONE Today panel (renderTodayPanel), TWO
-  // mounts — the right rail ≥1500px, the masthead-chip popover below — XOR'd on `narrow`, so
+  // mounts — the right column ≥1200px, the masthead-chip popover below — XOR'd on `narrow`, so
   // exactly one mounts and the state never forks (halt (c) clear).
-  const [narrow, setNarrow] = useState<boolean>(() => typeof window !== "undefined" && window.matchMedia("(max-width: 1499.98px)").matches);
+  const [narrow, setNarrow] = useState<boolean>(() => typeof window !== "undefined" && window.matchMedia("(max-width: 1199.98px)").matches);
   const [todayPopOpen, setTodayPopOpen] = useState(false);
   useEffect(() => {
-    const mq = window.matchMedia("(max-width: 1499.98px)");
+    const mq = window.matchMedia("(max-width: 1199.98px)");
     const on = () => setNarrow(mq.matches);
     mq.addEventListener("change", on);
     return () => mq.removeEventListener("change", on);
@@ -396,7 +391,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     flash(`✓ ${g.meta.label} — dismissed`, { label: "Undo", fn: async () => { await undo(); flash("Restored"); } });
   }
 
-  // Today's list: committed band (committedDate === today, the 5-cap set) + done band (the cleared
+  // Today: committed band (committedDate === today, the 5-cap set) + done band (the cleared
   // union, uncapped). Rolled-over commitments (a prior day) surface once in the sage Keep/Clear bar.
   const { committed: committedCards, done: doneCards } = todaySplit(board, today);
   const doneN = doneCards.length;
@@ -406,21 +401,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const sctx = { queries, agents, manuscripts };
   const active = filtersActive(filters, search);
   const fc = filterCounts({ doCards: board.do, hkGroups, staleCards, ntCards: board.nt, committedCount: committedCards.length });
-  // IV P2 — the tab↔rail handover: a real commitment closes the empty-rail state (the committed
-  // rail owns the slot), so clearing the last item later returns the TAB, not a stuck-open rail.
-  const anyCommitted = committedCards.length > 0;
-  useEffect(() => { if (anyCommitted) setEmptyRailOpen(false); }, [anyCommitted]);
-  useEffect(() => {
-    if (!emptyRailOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      const t = e.target as HTMLElement | null;
-      if (t && t.closest("input, textarea, select, [contenteditable]")) return; // editables keep their Esc
-      setEmptyRailOpen(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [emptyRailOpen]);
   const vDo = board.do.filter((c) => visibleDoCard(c, filters, today) && matchesSearch(c, search, sctx));
   const vGroups = hkGroups.filter((g) => visibleGroup(g, filters) && groupMatchesSearch(g, search));
   const vStale = staleCards.filter((c) => visibleStaleCard(c, filters, today) && matchesSearch(c, search, sctx));
@@ -457,10 +437,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     for (const k of selVisible) {
       const row = rowByKey.get(k);
       if (!row || row.kind !== "card" || onList(row.c)) continue;
-      if (room <= 0) { flash(`Today’s list is full (${MAX_TODAY} max)`); break; }
+      if (room <= 0) { flash(`Today is full (${MAX_TODAY} max)`); break; }
       setCommitted(row.c, true); room -= 1; added += 1;
     }
-    if (added > 0) flash(`＋ ${added} on today’s list`);
+    if (added > 0) flash(`＋ ${added} on Today`);
     setSel(EMPTY_SEL);
   }
   function bulkSnooze() {
@@ -591,7 +571,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const allCommitted = [...board.do, ...board.hk, ...board.nt].filter((c) => c.committedDate != null);
   const rolled = rollDismissed ? [] : rolledOverCards(allCommitted, today);
   // The pack's ring/footer share: done ÷ (open-committed + done) — the day's items, committed or not.
-  const prog = todayProgress(committedCards.length, doneN);
 
   function setCommitted(card: BoardCard, on: boolean) {
     const val = on ? today : null;
@@ -599,13 +578,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     else if (card.taskType && card.relatedRecordId) upsertTaskFlag(flagKeyForTask(card.taskType, card.relatedRecordId), { committedDate: val });
   }
   function toggleToday(card: BoardCard) {
-    if (!onList(card) && committedCards.length >= MAX_TODAY) { flash(`Today’s list is full (${MAX_TODAY} max)`); return; }
+    if (!onList(card) && committedCards.length >= MAX_TODAY) { flash(`Today is full (${MAX_TODAY} max)`); return; }
     setCommitted(card, !onList(card));
   }
   // Help me pick — a selection gesture: pulse-and-fade, card by card, then commit each.
   async function helpMePick() {
     const picks = choosePicks({ doCards: board.do, hkCards: board.hk, committedCount: committedCards.length });
-    if (!picks.length) { flash(`Today’s list is full (${MAX_TODAY} max)`); return; }
+    if (!picks.length) { flash(`Today is full (${MAX_TODAY} max)`); return; }
     const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     const pool = [...board.do, ...board.hk];
     for (const key of picks) {
@@ -618,7 +597,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     setPulsing(null);
     flash(`Picked ${picks.length} for today`);
   }
-  function keepRolled() { rolled.forEach((c) => setCommitted(c, true)); setRollDismissed(true); flash("Kept on today’s list"); }
+  function keepRolled() { rolled.forEach((c) => setCommitted(c, true)); setRollDismissed(true); flash("Kept on Today"); }
   function dropRolled() { rolled.forEach((c) => setCommitted(c, false)); setRollDismissed(true); flash("Cleared — still on the board"); }
 
   // ── quick rail — "the honest fastest version of actually doing it". Every ✓ funnels through the
@@ -629,7 +608,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     if (c.userTaskId) {
       await updateUserTask(c.userTaskId, { done: true, completedAt: nowIso });
       const undo = () => updateUserTask(c.userTaskId!, { done: false });
-      setOverlay(c.key, { kind: "receipt", lane: "nt", title: "Note done", line: `${c.title} — struck through on today’s list.`, undo });
+      setOverlay(c.key, { kind: "receipt", lane: "nt", title: "Note done", line: `${c.title} — struck through on Today.`, undo });
       flash(`✓ ${c.title} — done`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
       return;
     }
@@ -867,10 +846,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         )}
             </div>
           </div>
-          {/* III P4→IV P2 — the Today rail's two faces, ONE state (halt (d) clear): commitments
-              (or the tab's click) → the full rail; empty → the vertical tucked tab at the
-              viewport's right edge. Esc from the expanded empty rail returns to the tab. */}
-          {!narrow && (committedCards.length > 0 || emptyRailOpen) && (
+          {/* VI P1 — "Today", ALWAYS ON: the right column is a constant part of the grid at
+              every viewport ≥1200px (no collapsed state, no tab, no drawer); below that the
+              masthead chip + popover stand. One renderTodayPanel, two mounts, XOR'd on narrow. */}
+          {!narrow && (
             <aside className="tdb-railr" aria-label="Today">
               {renderTodayPanel()}
             </aside>
@@ -878,17 +857,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         </div>
       </div>
 
-      {!narrow && committedCards.length === 0 && !emptyRailOpen && (
-        <button type="button" className="tdb-ttab" aria-label="Today’s list — nothing yet; open it" aria-expanded={false} onClick={() => setEmptyRailOpen(true)}>
-          <span className="tdb-ttabch" aria-hidden>‹</span>
-          <span className="tdb-ttabic" aria-hidden>☑</span>
-          <span className="tdb-ttabvt">Today’s list</span>
-        </button>
-      )}
       {view === "ledger" && selVisible.length > 0 && (
         <div className="tdb-bulk" role="toolbar" aria-label={`${selVisible.length} selected`}>
           <span className="tdb-bulkn">{selVisible.length} selected</span>
-          <button type="button" onClick={bulkToday}>＋ Today’s list</button>
+          <button type="button" onClick={bulkToday}>＋ Today</button>
           <button type="button" onClick={bulkSnooze}>⏸ Snooze</button>
           <button type="button" onClick={bulkDismiss}>Dismiss</button>
           <button type="button" className="x" aria-label="Clear selection" onClick={() => setSel(EMPTY_SEL)}>✕</button>
@@ -973,10 +945,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         {narrow && (
           <span className="tdb-todaypopwrap">
             <button type="button" className="tdb-todaychip" aria-haspopup="dialog" aria-expanded={todayPopOpen} onClick={() => setTodayPopOpen((v) => !v)}>
-              Today’s list · {committedCards.length} TO GO
+              Today · {committedCards.length} TO GO
             </button>
             {todayPopOpen && (
-              <div className="tdb-todaypop" role="dialog" aria-label="Today’s list">{renderTodayPanel()}</div>
+              <div className="tdb-todaypop" role="dialog" aria-label="Today">{renderTodayPanel()}</div>
             )}
           </span>
         )}
@@ -1066,7 +1038,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         <div className="tdb-fgrp2">
           <div className="tdb-fgh">SHOW</div>
           <div className="tdb-fcloud">
-            {fpill("✓ TODAY’S LIST ONLY", "todayOnly", null, "s")}
+            {fpill("✓ ON TODAY ONLY", "todayOnly", null, "s")}
           </div>
         </div>
         <div className="tdb-footrows">
@@ -1095,16 +1067,18 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     );
   }
 
-  // ── the Today's-list panel — the corner pop-up's internals TRANSPLANTED into the drawer (same
-  // state, same handlers: rollover Keep/Clear, committed rows + take-off, the done band behind the
-  // badge, Add more / Help me pick, Work the list). Sage header per the ref's .today2. ──
+  // ── the "Today" card (VI P1, todo-right-column-v1.html) — same state, same handlers
+  // (rollover Keep/Clear, committed rows + take-off, Help me pick, Work the list); the anatomy is
+  // the ref card: plain paper header (date ⇄ "{n} OF 5"), committed items above a dashed
+  // ghost-row invitation (todayGhosts), the collapsed-by-default done row, two footer verbs. ──
+  const GHOST_BARS = [64, 78, 52]; // the ref's faded text-bar widths, cycled
   function renderTodayPanel() {
+    const ghosts = todayGhosts(committedCards.length, doneN);
     return (
       <div className="tdb-today2">
         <div className="tdb-th">
-          <span className="tdb-t">Today’s list</span>
-          <span className="tdb-cc">{committedCards.length === 0 && doneN === 0 ? "NOTHING YET" : `${committedCards.length} COMMITTED · ${doneN} DONE`}</span>
-          {doneN > 0 && <button type="button" className="tdb-cdone" aria-pressed={showDone} title={showDone ? "Hide the done band" : "Show the done band"} onClick={() => setShowDone((v) => !v)}>{doneN} done</button>}
+          <b className="tdb-t">Today</b>
+          <i className="tdb-thr">{committedCards.length === 0 && doneN === 0 ? shortHeaderDate(now) : `${committedCards.length} OF ${MAX_TODAY}`}</i>
         </div>
         {rolled.length > 0 && (
           <div className="tdb-rollbar">
@@ -1114,46 +1088,61 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           </div>
         )}
 
-        {/* committed band */}
-        <div className="tdb-tcommit">
-          {committedCards.map((c) => (
-            <div key={c.key} className="tdb-trow" onClick={() => openFlowCards([c])}>
-              <span className="tdb-tdot">{!c.hk && !c.userTaskId && c.status ? <StatusDot status={c.status as QueryStatus} overrideSize={16} /> : null}</span>
-              <div className="tdb-tmid"><div className="tdb-tx">{c.title}</div><div className="tdb-tm">{c.record}</div></div>
-              <button type="button" className="tdb-x" title="Take off today" onClick={(e) => { e.stopPropagation(); toggleToday(c); }}>✕</button>
-            </div>
-          ))}
-          {committedCards.length === 0 && (
-            <div className="tdb-tempty">
-              <div className="tdb-tea">What’s on the list today?</div>
-              <div className="tdb-teb">Commit up to {MAX_TODAY} from the board — or let us pick</div>
-            </div>
-          )}
-        </div>
-
-        {/* done band — the divider + strikethrough log appear WITH the first completion, not before
-            (the rule applies to the pop-up always, not just in empty states) */}
-        {doneN > 0 && showDone && (
-          <>
-            <div className="tdb-tdiv"><span>Done today</span><span className="l" /></div>
-            <div className="tdb-tdone">
-              {doneCards.map((c) => (
-                <div key={c.key} className="tdb-drow">
-                  <span className="tdb-tick">✓</span>
-                  <div className="tdb-tmid"><div className="tdb-dx">{c.title}</div><div className="tdb-dm2">{[c.record, fmtTime(c.whenMs)].filter(Boolean).join(" · ")}</div></div>
+        {/* the middle region — P4 makes this the card's one scroller */}
+        <div className="tdb-tmid2">
+          {committedCards.length > 0 && (
+            <div className="tdb-tcommit">
+              {committedCards.map((c) => (
+                <div key={c.key} className="tdb-trow" onClick={() => openFlowCards([c])}>
+                  <span className="tdb-tdot">{!c.hk && !c.userTaskId && c.status ? <StatusDot status={c.status as QueryStatus} overrideSize={16} /> : null}</span>
+                  <div className="tdb-tmid"><div className="tdb-tx">{c.title}</div><div className="tdb-tm">{c.record}</div></div>
+                  <button type="button" className="tdb-x" title="Take off Today" onClick={(e) => { e.stopPropagation(); toggleToday(c); }}>✕</button>
                 </div>
               ))}
             </div>
-          </>
-        )}
+          )}
+          {ghosts > 0 && (
+            <div className="tdb-ghostbox" aria-hidden>
+              {Array.from({ length: ghosts }, (_, i) => (
+                <div key={i} className="tdb-grow"><span className="tdb-cbx" /><span className="tdb-gbar" style={{ width: `${GHOST_BARS[i % GHOST_BARS.length]}%` }} /></div>
+              ))}
+            </div>
+          )}
+          {/* done today — collapsed to the ✓ row by default, expanding IN PLACE (session-only);
+              the divider + log appear WITH the first completion, never before */}
+          {doneN > 0 && (
+            <>
+              <button type="button" className="tdb-donerow" aria-expanded={showDone} onClick={() => setShowDone((v) => !v)}>✓ {doneN} DONE TODAY {showDone ? "▾" : "▸"}</button>
+              {showDone && (
+                <div className="tdb-tdone">
+                  {doneCards.map((c) => (
+                    <div key={c.key} className="tdb-drow">
+                      <span className="tdb-tick">✓</span>
+                      <div className="tdb-tmid"><div className="tdb-dx">{c.title}</div><div className="tdb-dm2">{[c.record, fmtTime(c.whenMs)].filter(Boolean).join(" · ")}</div></div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
 
-        <div className="tdb-tf">
-          <span className="tdb-pc">{prog.empty ? "NOTHING COMMITTED" : `${prog.done} of ${prog.total} done today`}</span>
-          <button type="button" className="tdb-pick" onClick={helpMePick}>{committedCards.length ? "＋ Add more" : "Help me pick"}</button>
-          <button type="button" className="tdb-worklist" disabled={!committedCards.length} onClick={() => {
-            // C2 family law — the Today's-list walk is a ritual: sage bands whole-walk
-            if (committedCards.length) setFlow({ items: committedCards.map((card) => ({ kind: "card", card })), ritual: true });
-          }}>Work the list</button>
+        <div className="tdb-tf2">
+          {committedCards.length > 0 ? (
+            <>
+              <button type="button" className="tdb-pick" onClick={helpMePick}>＋ Add more</button>
+              <button type="button" className="tdb-worklist" onClick={() => {
+                // C2 family law — the Today walk is a ritual: sage bands whole-walk
+                setFlow({ items: committedCards.map((card) => ({ kind: "card", card })), ritual: true });
+              }}>Work the list</button>
+            </>
+          ) : (
+            <>
+              <button type="button" className="tdb-pick" onClick={helpMePick}>Help me pick</button>
+              {/* the manual doorway — commitment happens on the board's cards */}
+              <button type="button" className="tdb-worklist" onClick={() => scrollToLane("do")}>＋ Add</button>
+            </>
+          )}
         </div>
       </div>
     );
@@ -1178,7 +1167,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         <span className="tdb-lselc" onClick={(e) => e.stopPropagation()}>
           <input type="checkbox" className="tdb-lsel" checked={isSel} readOnly aria-label={`Select ${ledgerTitle(c)}`} onClick={(e) => { e.stopPropagation(); clickSelect(c.key, e.shiftKey); }} />
         </span>
-        <button type="button" className={`tdb-ltd${committed ? " on" : ""}`} title={committed ? "On today’s list — take off" : "＋ Today’s list"} aria-label={committed ? "Take off today’s list" : "Add to today’s list"} aria-pressed={committed} onClick={(e) => { e.stopPropagation(); toggleToday(c); }}>✓</button>
+        <button type="button" className={`tdb-ltd${committed ? " on" : ""}`} title={committed ? "On Today — take off" : "＋ Today"} aria-label={committed ? "Take off Today" : "Add to Today"} aria-pressed={committed} onClick={(e) => { e.stopPropagation(); toggleToday(c); }}>✓</button>
         <span className={`tdb-tag${isOffer ? " offer" : c.warn ? " due warn" : " due"}`}>{isOffer ? "★ OFFER" : isNote ? "NOTE" : c.snoozes > 0 ? `Snoozed ×${c.snoozes}` : c.due}</span>
         <span className="tdb-lagn">
           {ag ? (<><span className="tdb-miniav">{c.initials}</span><b>{c.who}</b>{ag.agency && <i>· {ag.agency.toUpperCase()}</i>}</>) : (<><span className="tdb-miniav">{c.initials}</span><b>{c.who || "—"}</b></>)}
@@ -1396,7 +1385,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   }
 
   // ── full-detail lane card (fixed height, clip-safe). Completion = the rail or the sheet; the
-  // Mark-done pill is RETIRED and ＋ Today's list goes full-width (committing = the visible button). ──
+  // Mark-done pill is RETIRED and the ＋ TODAY pill goes full-width (committing = the visible button). ──
   function renderCard(c: BoardCard) {
     const committed = onList(c);
     const ov = overlays[c.key];
@@ -1432,7 +1421,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             </div>
             <div className="tdb-tacts">
               <button type="button" className={`tdb-pill today-p${committed ? " on" : ""}`} onClick={(e) => { e.stopPropagation(); toggleToday(c); }}>
-                {committed ? "✓ On today’s list" : "＋ Today’s list"}
+                {committed ? "✓ ON TODAY" : "＋ TODAY"}
               </button>
             </div>
           </div>
