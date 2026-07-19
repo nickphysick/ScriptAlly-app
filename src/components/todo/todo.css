@@ -12,22 +12,23 @@
    engage. No 100vh/overflow-hidden clamp anywhere — that was the earlier scroll bug. Top padding
    REMOVED (the band sits flush under the shell bar); bottom padding clears the fixed corner
    controls (Today FAB + the shell's help "?"). Page-scoped. */
-/* ── THE GRID CONTRACT (Polish IV P1, over the II·B 24-grid) — ONE shared container rules the
-   page; every horizontal band (masthead contents + workspace) lays out inside it:
-   --container: 1494px = 24 + 270 (sidebar) + 24 + 1128 (content) + 24 — centred on wider
-   viewports, padding 0 24. Two anchored edges: CONTAINER-LEFT (the sidebar column) and
-   CONTENT-LEFT (= left + 270 + 24; the masthead's 270+24 spacer holds the sidebar's zone, so the
-   title, post-its, banner and lanes share ONE left axis; the 294px masthead margin above the
-   sidebar is a fixed editorial margin because the container centres as a whole). The main column
-   is anchored 24 off the sidebar and FLEXES — never independently centred — so sidebar↔content
-   = masthead↔content = exactly 24. The rail takes --railw + 24 from the main column when
-   expanded; no reserved slack, ever.
-   --g24: every seam · --g12: lane-head↔cards · card gutters · --sbw: the sidebar · --railw: the rail. ── */
-.tdb-wrap { --g24: 24px; --g12: 12px; --sbw: 270px; --railw: 264px; --container: 1494px; flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 0 0 48px; }
+/* ── THE GRID (Polish V P1, reconstructed from the VI pack + todo-right-column-v1.html, over
+   the II·B 24-grid and superseding IV's centred 1494 container) — LEFT-PINNED FULL-BLEED rows:
+   every horizontal band is a full-width flex row with a 24 gutter and a 24 gap; nothing centres,
+   nothing caps — on a wide monitor the sidebar stays hard left and the main column grows. Two
+   anchored edges survive from IV: container-left (the sidebar) and content-left (= left +
+   sidebar + gap; the masthead's spacers hold the flanking zones so title/banner/lanes share one
+   axis, and the search right-aligns to the main column's edge). The V token family:
+     --tdb-gutter: the page gutter + the sticky offset (rides the II·B --g24)
+     --tdb-appnav: the F12 header above the board's scroller (CrumbStrip 48 + 1px rule)
+     --tdb-sidebar: the left sidebar column · --tdb-today: the right (Today) column — a CONSTANT:
+     no collapsed state, no --tdb-today-closed, no reserved slack, no reel-recompute-on-toggle.
+   --g24: every seam · --g12: lane-head↔cards · card gutters. ── */
+.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-appnav: 49px; --tdb-sidebar: 270px; --tdb-today: 264px; flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 0 0 48px; }
 /* ── the workbench row (Option B): drawer + centred main. The row caps at 1720 and centres;
    inside it the CONTENT column caps at 1150 and centres again — max-width discipline at every
    viewport, surplus pooling as symmetric oat desk. ── */
-.tdb-ws { display: flex; align-items: flex-start; gap: var(--g24); padding: 0 var(--g24); max-width: var(--container); margin: var(--g24) auto 0; }
+.tdb-ws { display: flex; align-items: flex-start; gap: var(--g24); padding: 0 var(--g24); margin: var(--g24) 0 0; }
 .tdb-main { flex: 1; min-width: 0; } /* anchored 24 off the sidebar; flexes — never centred */
 .tdb-col { min-width: 0; } /* IV P1: uncapped — content-left is the one axis; the container caps */
 @media (max-width: 900px) { .tdb-ws { flex-wrap: wrap; } .tdb-ws .tdb-pair { position: static; width: 100%; max-height: none; } }
@@ -37,8 +38,10 @@
    sticky; scrolls away with the wrap. The content row keeps the 1150 discipline, centred to the
    VIEWPORT. The old .tdb-band name stays the card band's alone.) ── */
 .tdb-mastband { background: var(--paper); border-bottom: 1px solid var(--line); }
-.tdb-mastcol { max-width: var(--container); margin: 0 auto; padding: 0 var(--g24); display: flex; align-items: center; gap: var(--g24); }
-.tdb-mastspacer { width: var(--sbw); flex: 0 0 auto; } /* the 270+24 = the fixed 294 editorial margin */
+.tdb-mastcol { padding: 0 var(--g24); display: flex; align-items: center; gap: var(--g24); }
+.tdb-mastspacer { width: var(--tdb-sidebar); flex: 0 0 auto; } /* the sidebar's zone held empty */
+.tdb-mastspacer-r { width: var(--tdb-today); flex: 0 0 auto; } /* the Today column's zone (ref frame rows) */
+@media (max-width: 1199.98px) { .tdb-mastspacer-r { display: none; } } /* no right column narrow */
 .tdb-mast { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 22px; row-gap: 12px; padding: 26px 0; } /* variant B's mid: title → post-its → search, one row at content-left */
 .tdb-askwrap { display: flex; flex-direction: column; gap: 4px; }
 .tdb-rdate { font-family: var(--f12-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); }
@@ -74,7 +77,7 @@
    own internal scroll keeps the sticky panel inside the viewport. ── */
 /* III P3 — THE PINNED PAIR (pair ref, normative): two same-width floating cards, both riding
    ONE sticky stack at the 24 offset, 12px apart; internal scroll as the safety net only. */
-.tdb-pair { width: var(--sbw); flex: 0 0 auto; position: sticky; top: var(--g24); max-height: calc(100vh - 120px); overflow-y: auto; display: flex; flex-direction: column; gap: 12px; transition: width 0.22s cubic-bezier(0.22, 0.8, 0.3, 1); }
+.tdb-pair { width: var(--tdb-sidebar); flex: 0 0 auto; position: sticky; top: var(--g24); max-height: calc(100vh - 120px); overflow-y: auto; display: flex; flex-direction: column; gap: 12px; transition: width 0.22s cubic-bezier(0.22, 0.8, 0.3, 1); }
 .tdb-pair.folded { width: 64px; align-items: center; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 4px 16px rgba(58, 28, 20, 0.1); padding: 12px 8px; gap: 10px; }
 @media (prefers-reduced-motion: reduce) { .tdb-pair { transition: none; } }
 .tdb-paircard { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 4px 16px rgba(58, 28, 20, 0.1); }
@@ -400,7 +403,7 @@
 /* ── II·B P3: the companion rail (≥1500px) + the masthead Today chip/popover (below).
    The rail is the natural home for future companions (the assistant's "note from your desk"
    card, etc.) — one column, 14px stack gaps. ── */
-.tdb-railr { width: var(--railw); flex: 0 0 auto; position: sticky; top: var(--g24); display: flex; flex-direction: column; gap: 14px; }
+.tdb-railr { width: var(--tdb-today); flex: 0 0 auto; position: sticky; top: var(--g24); display: flex; flex-direction: column; gap: 14px; }
 @media (max-width: 1499.98px) { .tdb-railr { display: none; } } /* belt — the mount is JS-gated */
 .tdb-todaypopwrap { position: relative; flex: none; }
 .tdb-todaychip { display: inline-flex; align-items: center; gap: 7px; font-family: var(--f12-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border: 1px solid var(--hk-spine); border-radius: 99px; padding: 8px 14px; color: var(--hk-ink); white-space: nowrap; }

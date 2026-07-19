@@ -765,10 +765,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             viewport-centred. ── */}
         <div className="tdb-mastband">
           <div className="tdb-mastcol">
-            {/* IV P1 — variant B: the spacer holds the sidebar's zone so the title starts at
-                content-left; the fixed 294px above the sidebar is an editorial margin. */}
+            {/* V P1/VI — the spacers hold the flanking columns' zones so the title starts at
+                content-left and the search right-aligns to the main column's edge. */}
             <div className="tdb-mastspacer" aria-hidden />
             {renderMasthead()}
+            <div className="tdb-mastspacer-r" aria-hidden />
           </div>
         </div>
         <div className="tdb-ws">

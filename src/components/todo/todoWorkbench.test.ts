@@ -26,7 +26,7 @@ const rule = (sel: string): string => {
 describe("P1→III — the sidebar (the pinned pair; sa.todoDrawer fold persisted)", () => {
   it("the PAIR: one sticky stack at the 24 offset, 12px apart, same-width floating cards", () => {
     const d = rule(".tdb-pair");
-    expect(d).toContain("width: var(--sbw)"); // IV P1: 270 via the contract token
+    expect(d).toContain("width: var(--tdb-sidebar)"); // V P1: 270 via the tdb token family
     expect(d).toContain("position: sticky; top: var(--g24)");
     expect(d).toContain("gap: 12px");
     expect(d).toContain("overflow-y: auto"); // the safety net only
@@ -96,10 +96,10 @@ describe("P1 — masthead composition + the centred column", () => {
     expect(rule(".tdb-ask")).toContain("font-size: 25px"); // IV P1: one line at 25
     expect(rule(".tdb-lgt")).toContain("font-size: 16px"); // II·B P4: one head grammar, both views
   });
-  it("IV P1: the row caps at the ONE container; the content column is uncapped (content-left is the axis)", () => {
+  it("V P1: the rows are FULL-BLEED (no cap, no centring); the content column is uncapped", () => {
     expect(rule(".tdb-col")).not.toContain("max-width");
-    expect(rule(".tdb-ws")).toContain("max-width: var(--container)");
-    expect(rule(".tdb-ws")).toContain("auto"); // centred; the top margin is the 24-grid token (II·B)
+    expect(rule(".tdb-ws")).not.toContain("max-width");
+    expect(rule(".tdb-ws")).not.toContain("auto"); // V P1: left-pinned, never centred
   });
   it("⌘K guards on visibility (the page stays mounted behind other routes) and Esc clears", () => {
     expect(page).toContain("wrapRef.current.offsetParent === null");
@@ -268,9 +268,9 @@ describe("A1 — the masthead band (evening run; amends the shell ref in place)"
     expect(band).toBeLessThan(ws); // band renders before (above) the drawer+column row
     expect(page).toContain('<div className="tdb-mastspacer" aria-hidden />'); // IV P1: variant B's spacer
   });
-  it("the band content shares THE container (IV P1); the board column no longer hosts the masthead", () => {
-    expect(rule(".tdb-mastcol")).toContain("max-width: var(--container)");
-    expect(rule(".tdb-mastcol")).toContain("margin: 0 auto");
+  it("the band is FULL-BLEED like the workspace row (V P1); the board column no longer hosts the masthead", () => {
+    expect(rule(".tdb-mastcol")).not.toContain("max-width");
+    expect(rule(".tdb-mastcol")).not.toContain("margin");
     const col = page.slice(page.indexOf('className="tdb-col"'), page.indexOf('className="tdb-lanes"'));
     expect(col).not.toContain("renderMasthead");
   });
@@ -292,11 +292,11 @@ describe("A2 — ledger copy + the avatar stack (source locks)", () => {
 
 describe("II·B P1 — the 24-grid + the ref masthead (todo-workbench-rail-v1.html, Option B)", () => {
   it("the grid ships as named tokens with the vocabulary comment — no magic numbers at the seams", () => {
-    expect(css).toContain("over the II·B 24-grid"); // IV P1 absorbed the vocabulary comment
+    expect(css).toContain("THE GRID (Polish V P1"); // the V grid comment absorbed the vocabulary
     expect(rule(".tdb-wrap")).toContain("--g24: 24px; --g12: 12px;");
     expect(rule(".tdb-ws")).toContain("gap: var(--g24)");
     expect(rule(".tdb-ws")).toContain("padding: 0 var(--g24)");
-    expect(rule(".tdb-ws")).toContain("margin: var(--g24) auto 0");
+    expect(rule(".tdb-ws")).toContain("margin: var(--g24) 0 0"); // V P1: left-pinned
     expect(rule(".tdb-pair")).toContain("top: var(--g24)");
     expect(rule(".tdb-reel")).toContain("margin-bottom: var(--g24)");
     expect(rule(".tdb-lghead.standalone")).toContain("margin-bottom: var(--g12)"); // II·B P4 head band
@@ -362,8 +362,8 @@ describe("II·B P3 — the companion rail (one panel, two mounts, one state)", (
     expect(page).toContain('window.matchMedia("(max-width: 1499.98px)")');
   });
   it("the rail: 264 sticky at the 24 offset, after the main column; noted as the future companions' home", () => {
-    expect(rule(".tdb-railr")).toContain("width: var(--railw)");
-    expect(rule(".tdb-railr")).toContain("position: sticky; top: var(--g24)");
+    expect(rule(".tdb-railr")).toContain("width: var(--tdb-today)");
+    expect(rule(".tdb-railr")).toContain("position: sticky");
     expect(page.indexOf('className="tdb-main"')).toBeLessThan(page.indexOf('className="tdb-railr"'));
   });
   it("the chip's count is the committed union — never a parallel tally — and the header chip pairs it with the done union", () => {
@@ -405,41 +405,42 @@ describe("II·B P4 — one tag grammar + card polish", () => {
   });
 });
 
-describe("IV P1 — the grid contract (todo-grid-v1.html + todo-masthead-b-v1.html variant B)", () => {
-  // jsdom renders no layout, so the pack's computed-style x-alignment check is realised structurally:
-  // both bands share ONE container rule-for-rule, and the masthead's spacer is the sidebar's own
-  // width token + the shared gap — alignment holds by construction. Browser eyeball confirms the x.
-  it("the tokens: --container 1494 (24+270+24+1128+24), --sbw 270, --railw 264, on the wrap", () => {
+describe("V P1 (reconstructed) — the left-pinned full-bleed grid (todo-right-column-v1.html)", () => {
+  // The V prompt file was never supplied; this phase is reconstructed from the VI pack's token
+  // guidance + the normative ref's drawn rows (.row: padding 0 24, gap 24, no max-width, no
+  // centring). jsdom renders no layout — alignment locks are structural, the browser confirms x.
+  it("the V token family on the wrap: gutter (rides --g24), appnav 49, sidebar 270, Today a CONSTANT 264", () => {
     const w = rule(".tdb-wrap");
-    expect(w).toContain("--sbw: 270px;");
-    expect(w).toContain("--railw: 264px;");
-    expect(w).toContain("--container: 1494px;");
-    expect(css).toContain("THE GRID CONTRACT (Polish IV P1");
-    expect(css).toContain("no reserved slack, ever");
+    expect(w).toContain("--tdb-gutter: var(--g24);");
+    expect(w).toContain("--tdb-appnav: 49px;");
+    expect(w).toContain("--tdb-sidebar: 270px;");
+    expect(w).toContain("--tdb-today: 264px;");
+    expect(w).not.toContain("--tdb-today-closed"); // no collapsed state, ever
+    expect(css).not.toContain("--container"); // IV's centred cap is retired
+    expect(css).toContain("no reserved slack");
   });
-  it("both bands are THE SAME container: max-width/auto-centre/24 padding/24 gap, masthead and workspace alike", () => {
+  it("both bands are full-bleed rows: 24 padding + 24 gap, no max-width, no auto-centring", () => {
     for (const sel of [".tdb-mastcol", ".tdb-ws"]) {
       const r = rule(sel);
-      expect(r).toContain("max-width: var(--container)");
-      expect(r).toMatch(/margin: (0|var\(--g24\)) auto/); // both auto-centre
       expect(r).toContain("padding: 0 var(--g24)");
       expect(r).toContain("gap: var(--g24)");
+      expect(r).not.toContain("max-width");
+      expect(r).not.toContain("auto");
     }
   });
-  it("content-left by construction: the masthead's spacer = the sidebar token; title at the mid's head", () => {
-    expect(rule(".tdb-mastspacer")).toContain("width: var(--sbw); flex: 0 0 auto;");
-    expect(rule(".tdb-pair")).toContain("width: var(--sbw)");
-    // the spacer renders before the mast contents inside the shared container
-    const colIdx = page.indexOf('className="tdb-mastcol"');
+  it("content-left by construction: the masthead's flanking spacers = the column tokens", () => {
+    expect(rule(".tdb-mastspacer")).toContain("width: var(--tdb-sidebar); flex: 0 0 auto;");
+    expect(rule(".tdb-mastspacer-r")).toContain("width: var(--tdb-today); flex: 0 0 auto;");
+    expect(css).toContain("@media (max-width: 1199.98px) { .tdb-mastspacer-r { display: none; } }");
+    expect(rule(".tdb-pair")).toContain("width: var(--tdb-sidebar)");
     const spacerIdx = page.indexOf('className="tdb-mastspacer"');
-    expect(spacerIdx).toBeGreaterThan(colIdx);
+    expect(spacerIdx).toBeGreaterThan(page.indexOf('className="tdb-mastcol"'));
     expect(spacerIdx).toBeLessThan(page.indexOf("{renderMasthead()}"));
+    expect(page.indexOf('className="tdb-mastspacer-r"')).toBeGreaterThan(page.indexOf("{renderMasthead()}"));
   });
-  it("the main column flexes off the sidebar — never independently centred; the rail takes --railw+24 from it", () => {
+  it("the main column flexes off the sidebar — never independently centred", () => {
     expect(rule(".tdb-main")).toContain("flex: 1; min-width: 0;");
     expect(rule(".tdb-main")).not.toContain("margin");
-    expect(rule(".tdb-railr")).toContain("width: var(--railw)");
-    // reels recompute on that change: the ResizeObserver rides the TRACK, so rail in/out refits free
     expect(page).toContain("new ResizeObserver(");
     expect(page).toContain("reelFit(");
   });
