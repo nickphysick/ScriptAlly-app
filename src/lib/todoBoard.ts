@@ -259,7 +259,7 @@ export function assembleBoard(input: BoardInput): AssembledBoard {
     .sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""))
     .map((t) => userCard(t, input));
   // Polish III P1 — the review is NOT a task: no card enters the lanes; every count derives
-  // review-free by construction. The banner/bar surface is reviewSurface (below).
+  // review-free by construction. The banner/card surface is reviewSurface (below).
   const doCards = orderDoNext([...derived.filter((c) => c.stream === "do"), ...userCards.filter((c) => c.stream === "do")]);
   const hkCards = derived.filter((c) => c.stream === "hk");
   const ntCards = userCards.filter((c) => c.stream === "nt");
@@ -427,15 +427,16 @@ export function reviewCompletionSnooze(win: ReviewWeek): string {
 }
 
 /**
- * Polish III P1 — THE REVIEW SURFACE (the Sunday card + the scrap both retire into this):
+ * Polish III P1 → VI P2 — THE REVIEW SURFACE (the Sunday card + the scrap both retired into
+ * this; the thin bar retired into the right-column card):
  *   banner — Sun–Mon ∧ undismissed ∧ unreviewed (the white lifted card above the lanes; the
  *            sunday_review Task-Settings mute suppresses the banner like a standing dismissal)
- *   bar    — (dismissed ∨ Tue–Sat ∨ muted) ∧ unreviewed (the thin sage bar beneath the last lane
- *            — the OFFER stands regardless of dismissal, exactly as the scrap did)
+ *   card   — (dismissed ∨ Tue–Sat ∨ muted) ∧ unreviewed (the cup card at the top of the right
+ *            column, above Today — the OFFER stands regardless of dismissal, as ever)
  *   null   — reviewed (the completion sentinel), or nothing queried yet, or superseded next week.
  * Dismissal gates the BANNER only; completion is the sentinel value (never mere flag presence).
  */
-export function reviewSurface(input: BoardInput): { kind: "banner" | "bar"; weekNumber: number; weekKey: string } | null {
+export function reviewSurface(input: BoardInput): { kind: "banner" | "card"; weekNumber: number; weekKey: string } | null {
   if (input.queries.length === 0) return null; // nothing queried → nothing to review
   const win = reviewWeek(input.queries, input.now);
   const flag = input.taskFlags.find((f) => flagMatchesTask(f, "weekly_review", win.key));
@@ -445,7 +446,7 @@ export function reviewSurface(input: BoardInput): { kind: "banner" | "bar"; week
   const dismissed = !!flag?.snoozedUntil;
   const muted = !!input.mutedTaskRules?.includes("sunday_review");
   if (sunMon && !dismissed && !muted) return { kind: "banner", weekNumber: win.weekNumber, weekKey: win.key };
-  return { kind: "bar", weekNumber: win.weekNumber, weekKey: win.key };
+  return { kind: "card", weekNumber: win.weekNumber, weekKey: win.key };
 }
 
 

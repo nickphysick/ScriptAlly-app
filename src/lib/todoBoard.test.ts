@@ -349,14 +349,14 @@ describe("the Sunday review — pure derivations (finishing P3)", () => {
     expect(reviewSurface(io(MON))!.kind).toBe("banner");
     // Tue–Sat → the BAR (dismissed or not)
     for (const d of ["2026-07-21", "2026-07-22", "2026-07-23", "2026-07-24", "2026-07-25"]) {
-      expect(reviewSurface(io(Date.parse(`${d}T12:00:00Z`)))!.kind).toBe("bar");
+      expect(reviewSurface(io(Date.parse(`${d}T12:00:00Z`)))!.kind).toBe("card");
     }
     // Sunday + dismissed (a non-sentinel snooze) → the BAR (dismissal gates the banner only)
     const win = reviewWeek(q1, SUN);
     const dismissed = [{ id: "f", userId: "u", taskType: "weekly_review", queryId: win.key, snoozeCount: 0, snoozedUntil: new Date(SUN + 3 * 86400000).toISOString() } as unknown as TaskFlag];
-    expect(reviewSurface(io(SUN, { taskFlags: dismissed }))!.kind).toBe("bar");
+    expect(reviewSurface(io(SUN, { taskFlags: dismissed }))!.kind).toBe("card");
     // the sunday_review mute suppresses the banner like a standing dismissal (the bar stands)
-    expect(reviewSurface(io(SUN, { mutedTaskRules: ["sunday_review"] }))!.kind).toBe("bar");
+    expect(reviewSurface(io(SUN, { mutedTaskRules: ["sunday_review"] }))!.kind).toBe("card");
     // REVIEWED (the completion sentinel) → neither, any day
     const done = [{ id: "f", userId: "u", taskType: "weekly_review", queryId: win.key, snoozeCount: 0, snoozedUntil: reviewCompletionSnooze(win) } as unknown as TaskFlag];
     expect(reviewSurface(io(SUN, { taskFlags: done }))).toBeNull();
@@ -408,11 +408,11 @@ describe("Task Settings — sunday_review gates the BANNER only (III P1; the bar
     ({ tasks: [], userTasks: [], queries: q1, agents: [], manuscripts: [], taskFlags: [], activities: [], today: TODAY, now, ...(muted ? { mutedTaskRules: muted } : {}) });
 
   it("sunday_review off → the Sunday banner falls to the bar; on → the banner returns", () => {
-    expect(reviewSurface(io(SUN, ["sunday_review"]))!.kind).toBe("bar");
+    expect(reviewSurface(io(SUN, ["sunday_review"]))!.kind).toBe("card");
     expect(reviewSurface(io(SUN))!.kind).toBe("banner");
   });
   it("the bar IGNORES sunday_review — the offer still stands Tue–Sat when the prompt is switched off", () => {
-    expect(reviewSurface(io(FRI, ["sunday_review"]))!.kind).toBe("bar");
+    expect(reviewSurface(io(FRI, ["sunday_review"]))!.kind).toBe("card");
     expect(reviewSurface(io(FRI, ["sunday_review"]))!.weekNumber).toBe(reviewWeek(q1, FRI).weekNumber);
   });
 });

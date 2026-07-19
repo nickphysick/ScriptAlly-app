@@ -466,9 +466,18 @@
 .tdb-rvgo2:hover { filter: brightness(1.3); }
 .tdb-rvx2 { position: absolute; top: 10px; right: 12px; border: none; background: none; color: var(--faint); font-size: 12px; padding: 2px 5px; }
 .tdb-rvx2:hover { color: var(--ink); }
-.tdb-rvbar { display: flex; align-items: center; gap: 12px; width: 100%; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border: 1px solid var(--hk-spine); border-radius: 99px; padding: 8px 20px; margin-top: 22px; }
-.tdb-rvbart { font-family: var(--f12-serif); font-style: italic; font-size: 13.5px; color: var(--hk-ink); }
-.tdb-rvbargo { margin-left: auto; font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.11em; color: var(--hk-ink); }
+/* VI P2 — the review's afterlife CARD (ref .rvcard): the cardx family, one ~60px row at the top
+   of the right column, directly above Today. The whole card is the button. */
+.tdb-rvcard { display: flex; align-items: center; gap: 11px; padding: 11px 13px; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 4px 16px rgba(58, 28, 20, 0.1); cursor: pointer; text-align: left; width: 100%; }
+.tdb-rvcard:hover { background: var(--white, #fff); }
+.tdb-rvcup2 { width: 38px; height: 38px; border-radius: 50%; background: var(--white, #fff); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; flex: 0 0 auto; color: var(--ink); }
+.tdb-rvcup2 svg { width: 30px; height: auto; display: block; }
+.tdb-rvtx { min-width: 0; }
+.tdb-rvtx b { display: block; font-family: var(--f12-serif); font-size: 13.5px; font-weight: 600; line-height: 1.15; color: var(--ink); }
+.tdb-rvtx i { font-style: normal; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.12em; color: var(--faint); }
+.tdb-rvgo3 { margin-left: auto; font-size: 11px; color: var(--muted); }
+/* inside the narrow popover the card rides above the Today card with the same 12 gap */
+.tdb-todaypop .tdb-rvcard { margin-bottom: 12px; }
 
 /* ── THE SUNDAY REVIEW (finishing P3; ref todo-sunday-review.html): the entry card (sage-spined,
    dismissible) + the six-step sheet's furniture — stats row, read-only rows with badges, the

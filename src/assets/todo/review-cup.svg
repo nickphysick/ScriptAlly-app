@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 104 92" width="104" height="92" role="img" aria-label="Cup of tea">
+  <g fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18 26 C18 23.6 20 21.8 24 20.8 C32 18.4 56 18.4 66 20.8 C70 21.8 72 23.6 72 26 L68 55 C67 62.5 60 67.5 45 67.5 C30 67.5 23 62.5 22 55 Z"/>
+    <ellipse cx="45" cy="25" rx="27" ry="7.4" fill="currentColor"/>
+    <path d="M72 30 C84 28 92 33 92 40 C92 47 84 52 74 51"/>
+    <path d="M40 30.5 L37.5 40"/>
+    <rect x="31.5" y="40" width="12" height="14" rx="3" fill="currentColor" stroke="none"/>
+    <ellipse cx="45" cy="74" rx="41" ry="10.5"/>
+    <path d="M59.5 40 l6.5 -3.2 M58.5 46 l7 -3.2 M56.5 52 l7 -3.2" stroke-width="2.2"/>
+  </g>
+</svg>

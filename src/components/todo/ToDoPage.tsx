@@ -39,6 +39,8 @@ import { deskState, liveQueryCount, liveQueriesLine, clearedListCap } from "../.
 import { ledgerTitle, ledgerDetail, sortLedgerDo, sortLedgerHk, batchChildren, batchDetail, batchTaskCopy, truncateRows } from "../../lib/todoLedger";
 import { reelFit, reelPage, ReelFit, REEL_CARD_MIN } from "./reelFit";
 import focusArt from "../../assets/todo/focus-art.png";
+// VI P2 — the review cup (original ScriptAlly artwork; currentColor → inlined so it inherits ink)
+import reviewCupRaw from "../../assets/todo/review-cup.svg?raw";
 import { TodoFilterState, DEFAULT_FILTERS, filtersActive, matchesSearch, groupMatchesSearch, visibleDoCard, visibleStaleCard, visibleNoteCard, visibleGroup, filterCounts } from "../../lib/todoFilters";
 import { SelState, EMPTY_SEL, applySelectClick, moveFocus } from "../../lib/todoSelection";
 import { shouldAutoRunTour } from "../../lib/todoTour";
@@ -835,15 +837,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           )}
         </div>
         )}
-        {/* ── the AFTERLIFE — the thin sage bar beneath the last lane: the offer stands while the
-            week is unreviewed (dismissal gates the banner only; the masthead scrap is retired). ── */}
-        {surface?.kind === "bar" && (
-          <button type="button" className="tdb-rvbar" onClick={openSundayReview}>
-            <span aria-hidden>☕</span>
-            <span className="tdb-rvbart">Last week in review — week {surface.weekNumber}</span>
-            <span className="tdb-rvbargo">OPEN ▸</span>
-          </button>
-        )}
             </div>
           </div>
           {/* VI P1 — "Today", ALWAYS ON: the right column is a constant part of the grid at
@@ -851,6 +844,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               masthead chip + popover stand. One renderTodayPanel, two mounts, XOR'd on narrow. */}
           {!narrow && (
             <aside className="tdb-railr" aria-label="Today">
+              {renderReviewAfterlife()}
               {renderTodayPanel()}
             </aside>
           )}
@@ -948,7 +942,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               Today · {committedCards.length} TO GO
             </button>
             {todayPopOpen && (
-              <div className="tdb-todaypop" role="dialog" aria-label="Today">{renderTodayPanel()}</div>
+              <div className="tdb-todaypop" role="dialog" aria-label="Today">{renderReviewAfterlife()}{renderTodayPanel()}</div>
             )}
           </span>
         )}
@@ -1064,6 +1058,20 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         </div>
         </div>
       </aside>
+    );
+  }
+
+  // ── VI P2: the review's AFTERLIFE — after ✕ or from Tuesday while unreviewed, a cup card at
+  // the top of the right column, directly above Today (the thin bar is retired). The whole card
+  // is the button; it opens the review mode unchanged. Absent → Today rises with no gap. ──
+  function renderReviewAfterlife() {
+    if (surface?.kind !== "card") return null;
+    return (
+      <button type="button" className="tdb-rvcard" onClick={openSundayReview}>
+        <span className="tdb-rvcup2" aria-hidden dangerouslySetInnerHTML={{ __html: reviewCupRaw }} />
+        <span className="tdb-rvtx"><b>Last week in review</b><i>WEEK {surface.weekNumber} · NOT YET OPENED</i></span>
+        <span className="tdb-rvgo3" aria-hidden>›</span>
+      </button>
     );
   }
 
