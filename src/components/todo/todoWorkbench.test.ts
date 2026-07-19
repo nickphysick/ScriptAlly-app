@@ -48,7 +48,7 @@ describe("P1→III — the sidebar (the pinned pair; sa.todoDrawer fold persiste
     expect(page).not.toContain("Walk me through");
   });
   it("the drawer FOOT carries ⚙ (the same TaskSettingsSheet) and the ? menu with the verbatim replay dispatch", () => {
-    expect(page).toContain('className="tdb-dfbtn" onClick={() => setSettingsOpen(true)}');
+    expect(page).toContain('className="tdb-fr2" onClick={() => setSettingsOpen(true)}'); // IV P2 footer row
     expect(page).toContain('window.dispatchEvent(new CustomEvent("sa:todo-replay-tour"))');
     expect(page).toContain(">Help centre</button>");
   });
@@ -317,7 +317,7 @@ describe("III P3 — the pinned pair (supersedes the II·B controls-only drawer)
     expect(page).toContain('className="tdb-paircard tdb-focus" disabled={!tiles.urgent} onClick={() => openFlowCards(board.do)}');
     expect(page).toContain(">Focus mode</b>");
     expect(page).toContain("No distractions — work through your list, item by item.");
-    expect(page).toContain(">▶ Begin · {tiles.urgent}</span>");
+    expect(page).toContain(">▶ Begin</span>"); // IV P2: the count is gone from the card
     expect(page).toContain('import focusArt from "../../assets/todo/focus-art.png";');
     expect(page).toContain("{focusArt && <span className=\"tdb-focusart\">"); // absent asset = quieter card
     expect(rule(".tdb-focusart img")).toContain("max-height: 118px");
@@ -357,7 +357,7 @@ describe("III P3 — the pinned pair (supersedes the II·B controls-only drawer)
 describe("II·B P3 — the companion rail (one panel, two mounts, one state)", () => {
   it("mount parity: BOTH homes call the SAME renderTodayPanel, XOR'd on narrow (no fork — halt (c) clear)", () => {
     expect((page.match(/\{renderTodayPanel\(\)\}/g) ?? []).length).toBe(2);
-    expect(page).toContain("{!narrow && committedCards.length > 0 && ("); // III P4: the rail's committed face
+    expect(page).toContain("{!narrow && (committedCards.length > 0 || emptyRailOpen) && ("); // IV P2: + the tab's expanded empty rail
     expect(page).toContain("{narrow && (");
     expect(page).toContain('window.matchMedia("(max-width: 1499.98px)")');
   });
@@ -445,18 +445,52 @@ describe("IV P1 — the grid contract (todo-grid-v1.html + todo-masthead-b-v1.ht
   });
 });
 
+describe("IV P2 — the vertical tab's states · footer rows · the label trim", () => {
+  it("state transitions: tab click → rail; Esc (editables exempt) → tab; a commitment re-arms the tab", () => {
+    expect(page).toContain("const [emptyRailOpen, setEmptyRailOpen] = useState(false);");
+    expect(page).toContain("useEffect(() => { if (anyCommitted) setEmptyRailOpen(false); }, [anyCommitted]);");
+    expect(page).toContain('if (e.key !== "Escape") return;');
+    expect(page).toContain('if (t && t.closest("input, textarea, select, [contenteditable]")) return;');
+  });
+  it("the tab's column run: chevron ‹ → the 22px white roundel → the vertical label", () => {
+    expect(page).toContain('<span className="tdb-ttabch" aria-hidden>‹</span>');
+    expect(page).toContain('<span className="tdb-ttabic" aria-hidden>☑</span>');
+    expect(page).toContain('<span className="tdb-ttabvt">Today’s list</span>');
+    expect(rule(".tdb-ttabic")).toContain("width: 22px; height: 22px; border-radius: 50%");
+  });
+  it("footer rows: two full-width rows with the 28px roundel, hover wash, hairline above; same behaviours", () => {
+    expect(page).toContain('className="tdb-fr2" onClick={() => setSettingsOpen(true)}');
+    expect(page).toContain('className="tdb-fr2" aria-haspopup="menu" aria-expanded={helpOpen}');
+    expect(rule(".tdb-footrows")).toContain("border-top: 1px solid var(--hairline)");
+    expect(rule(".tdb-fr2")).toContain("width: 100%");
+    expect(rule(".tdb-fr2")).toContain("border-radius: 10px");
+    expect(rule(".tdb-fr2")).toContain("font-size: 12.5px");
+    expect(rule(".tdb-fric")).toContain("width: 28px; height: 28px; border-radius: 50%");
+    expect(rule(".tdb-fr2:hover")).toContain("background: #f4eee5");
+    // the ? menu still anchors inside the foot (position:relative parent unchanged in role)
+    expect(rule(".tdb-footrows")).toContain("position: relative");
+  });
+  it("the Focus card's button is bare ▶ Begin (no count anywhere on the card)", () => {
+    expect(page).toContain(">▶ Begin</span>");
+    expect(page).not.toContain("▶ Begin ·");
+  });
+});
+
 describe("III P4 — the tucked Today tab · the masthead · the naming sweep", () => {
-  it("the rail's two faces, one state: commitments → the rail; empty → the edge tab (no fork — halt (d) clear)", () => {
-    expect(page).toContain("{!narrow && committedCards.length > 0 && (");
-    expect(page).toContain("{!narrow && committedCards.length === 0 && (");
+  it("the rail's two faces, one state: commitments (or the tab's click) → the rail; empty → the edge tab", () => {
+    expect(page).toContain("{!narrow && (committedCards.length > 0 || emptyRailOpen) && (");
+    expect(page).toContain("{!narrow && committedCards.length === 0 && !emptyRailOpen && (");
     expect((page.match(/\{renderTodayPanel\(\)\}/g) ?? []).length).toBe(2); // rail + narrow popover — never a third copy
   });
-  it("the tab: 40px-class rounded-left sage edge tab, hover/focus unfurl, labelled + focusable; click opens the add flow", () => {
-    expect(page).toContain('className="tdb-ttab" aria-label="Today’s list — nothing yet; add something" onClick={helpMePick}');
+  it("IV P2: the tab went VERTICAL — rounded-left sage edge, labelled + focusable; click expands the rail", () => {
+    expect(page).toContain('className="tdb-ttab" aria-label="Today’s list — nothing yet; open it" aria-expanded={false} onClick={() => setEmptyRailOpen(true)}');
     expect(rule(".tdb-ttab")).toContain("border-radius: 12px 0 0 12px");
     expect(rule(".tdb-ttab")).toContain("position: fixed; right: 0;");
-    expect(css).toContain(".tdb-ttab:hover, .tdb-ttab:focus-visible { max-width: 300px;");
-    expect(css).toContain("@media (prefers-reduced-motion: reduce) { .tdb-ttab { transition: none; } }");
+    expect(rule(".tdb-ttab")).toContain("width: 42px");
+    expect(rule(".tdb-ttab")).toContain("flex-direction: column");
+    expect(rule(".tdb-ttabvt")).toContain("writing-mode: vertical-rl");
+    expect(rule(".tdb-ttabvt")).toContain("font-family: var(--f12-serif)");
+    expect(css).not.toContain("max-width: 300px"); // the hover-unfurl retired
     expect(css).toContain("@media (max-width: 1499.98px) { .tdb-ttab { display: none; } }");
   });
   it("THE NAMING SWEEP — no stale strings anywhere on the board or the sheets (grep-level)", () => {

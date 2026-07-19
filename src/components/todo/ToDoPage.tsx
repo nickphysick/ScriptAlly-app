@@ -252,7 +252,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [flow, setFlow] = useState<{ items: FocusItem[]; mode?: "sweep" | "weeklyReview"; ritual?: boolean } | null>(null);
   const [flowPrefill, setFlowPrefill] = useState<{ sentDate?: string; method?: string; materials?: string[] } | undefined>(undefined);
   const [settingsOpen, setSettingsOpen] = useState(false); // the Task Settings sheet ("What lands on your desk?")
-  const [helpOpen, setHelpOpen] = useState(false); // the drawer-foot ? menu (Help centre / Replay the tour)
+  const [helpOpen, setHelpOpen] = useState(false); // the sidebar-foot ? menu (Help centre / Replay the tour)
+  // IV P2 — the vertical Today tab's expanded EMPTY rail (session-only): the tab click opens the
+  // full rail with nothing committed; Esc returns to the tab; the first real commitment hands the
+  // rail over and re-arms the tab for a later clear.
+  const [emptyRailOpen, setEmptyRailOpen] = useState(false);
   // Chrome-fixes P2 — the done badge doubles as the band's show/hide; pressed/shown by default.
   // (Survives the workbench transplant: the badge now gates the drawer panel's done band.)
   const [showDone, setShowDone] = useState(true);
@@ -402,6 +406,21 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const sctx = { queries, agents, manuscripts };
   const active = filtersActive(filters, search);
   const fc = filterCounts({ doCards: board.do, hkGroups, staleCards, ntCards: board.nt, committedCount: committedCards.length });
+  // IV P2 — the tab↔rail handover: a real commitment closes the empty-rail state (the committed
+  // rail owns the slot), so clearing the last item later returns the TAB, not a stuck-open rail.
+  const anyCommitted = committedCards.length > 0;
+  useEffect(() => { if (anyCommitted) setEmptyRailOpen(false); }, [anyCommitted]);
+  useEffect(() => {
+    if (!emptyRailOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      const t = e.target as HTMLElement | null;
+      if (t && t.closest("input, textarea, select, [contenteditable]")) return; // editables keep their Esc
+      setEmptyRailOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [emptyRailOpen]);
   const vDo = board.do.filter((c) => visibleDoCard(c, filters, today) && matchesSearch(c, search, sctx));
   const vGroups = hkGroups.filter((g) => visibleGroup(g, filters) && groupMatchesSearch(g, search));
   const vStale = staleCards.filter((c) => visibleStaleCard(c, filters, today) && matchesSearch(c, search, sctx));
@@ -847,10 +866,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         )}
             </div>
           </div>
-          {/* III P4 — the Today rail's two faces, ONE state (halt (d) clear): commitments →
-              the full rail; empty → the slim tucked tab at the viewport's right edge (hover
-              unfurls; click opens the add flow; the first commitment restores the rail). */}
-          {!narrow && committedCards.length > 0 && (
+          {/* III P4→IV P2 — the Today rail's two faces, ONE state (halt (d) clear): commitments
+              (or the tab's click) → the full rail; empty → the vertical tucked tab at the
+              viewport's right edge. Esc from the expanded empty rail returns to the tab. */}
+          {!narrow && (committedCards.length > 0 || emptyRailOpen) && (
             <aside className="tdb-railr" aria-label="Today">
               {renderTodayPanel()}
             </aside>
@@ -858,10 +877,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         </div>
       </div>
 
-      {!narrow && committedCards.length === 0 && (
-        <button type="button" className="tdb-ttab" aria-label="Today’s list — nothing yet; add something" onClick={helpMePick}>
+      {!narrow && committedCards.length === 0 && !emptyRailOpen && (
+        <button type="button" className="tdb-ttab" aria-label="Today’s list — nothing yet; open it" aria-expanded={false} onClick={() => setEmptyRailOpen(true)}>
+          <span className="tdb-ttabch" aria-hidden>‹</span>
           <span className="tdb-ttabic" aria-hidden>☑</span>
-          <span className="tdb-ttabx"><b>Today’s list</b><i>NOTHING YET</i><span className="tdb-ttabplus" aria-hidden>＋</span></span>
+          <span className="tdb-ttabvt">Today’s list</span>
         </button>
       )}
       {view === "ledger" && selVisible.length > 0 && (
@@ -1009,7 +1029,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <span className="tdb-focustx">
             <b className="tdb-focush">Focus mode</b>
             <span className="tdb-focusp">No distractions — work through your list, item by item.</span>
-            <span className="tdb-focusgo">▶ Begin · {tiles.urgent}</span>
+            <span className="tdb-focusgo">▶ Begin</span>
           </span>
           {focusArt && <span className="tdb-focusart"><img src={focusArt} alt="" /></span>}
         </button>
@@ -1048,17 +1068,19 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             {fpill("✓ TODAY’S LIST ONLY", "todayOnly", null, "s")}
           </div>
         </div>
-        <div className="tdb-dfoot">
-          <button type="button" className="tdb-dfbtn" onClick={() => setSettingsOpen(true)}>
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+        <div className="tdb-footrows">
+          <button type="button" className="tdb-fr2" onClick={() => setSettingsOpen(true)}>
+            <span className="tdb-fric" aria-hidden><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <line x1="4" y1="6" x2="20" y2="6" /><circle cx="9" cy="6" r="2.2" fill="var(--paper)" />
               <line x1="4" y1="12" x2="20" y2="12" /><circle cx="15" cy="12" r="2.2" fill="var(--paper)" />
               <line x1="4" y1="18" x2="20" y2="18" /><circle cx="8" cy="18" r="2.2" fill="var(--paper)" />
-            </svg>
+            </svg></span>
             Task settings
           </button>
-          <span className="tdb-dsp" />
-          <button type="button" className="tdb-dfbtn" aria-haspopup="menu" aria-expanded={helpOpen} onClick={() => setHelpOpen((v) => !v)}>? Help</button>
+          <button type="button" className="tdb-fr2" aria-haspopup="menu" aria-expanded={helpOpen} onClick={() => setHelpOpen((v) => !v)}>
+            <span className="tdb-fric" aria-hidden>?</span>
+            Help
+          </button>
           {helpOpen && (
             <div className="tdb-dhelp" role="menu" aria-label="Help">
               <button type="button" role="menuitem" onClick={() => { setHelpOpen(false); onNavigate("help"); }}>Help centre</button>

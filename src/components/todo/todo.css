@@ -111,10 +111,13 @@
 .tdb-fp:focus-visible { outline: 2px solid var(--hk-ink); outline-offset: 2px; }
 .tdb-dfold { width: 26px; height: 26px; flex: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--white, #fff); border: 1px solid var(--line); color: var(--muted); font-size: 11px; }
 .tdb-dfold:hover { color: var(--ink); border-color: var(--ink-2); }
-.tdb-dfoot { position: relative; display: flex; align-items: center; gap: 6px; margin-top: 4px; padding-top: 8px; border-top: 1px solid var(--hairline); }
-.tdb-dfbtn { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--muted); padding: 5px 8px; border-radius: 8px; background: none; border: none; }
-.tdb-dfbtn:hover { color: var(--ink); background: var(--white, #fff); }
-.tdb-dsp { flex: 1; }
+/* IV P2 — the sidebar footer ROWS (todo-grid-v1.html .footrows/.fr2): two full-width rows,
+   letterpress icon roundel + label, hover wash, hairline above the group. Same two behaviours. */
+.tdb-footrows { position: relative; margin-top: 10px; padding: 6px; border-top: 1px solid var(--hairline); }
+.tdb-fr2 { display: flex; align-items: center; gap: 11px; width: 100%; padding: 8px 10px; border-radius: 10px; font-size: 12.5px; font-weight: 600; color: var(--ink); background: none; border: none; text-align: left; cursor: pointer; }
+.tdb-fr2:hover { background: #f4eee5; } /* the ref's wash — no live token sits between paper and oat */
+.tdb-fric { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line); background: var(--white, #fff); display: inline-flex; align-items: center; justify-content: center; color: var(--muted); flex: none; font-size: 12px; }
+.tdb-dsp { flex: 1; } /* the folded rail's spacer */
 .tdb-dhelp { position: absolute; bottom: calc(100% + 4px); right: 0; z-index: 5; min-width: 150px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--sh-3); padding: 5px; }
 .tdb-dhelp button { display: block; width: 100%; text-align: left; font-size: 12px; padding: 7px 10px; border-radius: 7px; color: var(--ink); background: none; border: none; }
 .tdb-dhelp button:hover { background: var(--white, #fff); }
@@ -410,16 +413,16 @@
 /* ── III P4: the TUCKED TODAY TAB (banner-tab ref §3) — the rail's empty face. 40px rounded-left
    sage tab hugging the viewport edge at the rail's former top (≈ nav + masthead + g24 — a fixed
    236px, reported); hover/focus unfurls horizontally; the first commitment restores the rail. ── */
-.tdb-ttab { position: fixed; right: 0; top: 236px; z-index: 30; display: inline-flex; align-items: center; gap: 10px; border-radius: 12px 0 0 12px; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border: 1px solid var(--hk-spine); border-right: none; box-shadow: -3px 3px 10px rgba(58, 28, 20, 0.12); padding: 9px 0 9px 12px; max-width: 44px; overflow: hidden; white-space: nowrap; transition: max-width 0.2s ease; }
-.tdb-ttab:hover, .tdb-ttab:focus-visible { max-width: 300px; padding-right: 16px; }
+/* IV P2 — the VERTICAL Today tab (todo-grid-v1.html .vtab; retires the hover-unfurl): 42px wide,
+   column run ‹ → ☑ roundel → vertical-rl Playfair label, rounded-left sage edge at the rail's
+   former top. Click (anywhere) expands the full empty rail; Esc returns here. */
+.tdb-ttab { position: fixed; right: 0; top: 236px; z-index: 30; width: 42px; display: flex; flex-direction: column; align-items: center; gap: 9px; padding: 12px 0; border-radius: 12px 0 0 12px; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border: 1px solid var(--hk-spine); border-right: none; box-shadow: -3px 3px 10px rgba(58, 28, 20, 0.14); cursor: pointer; }
+.tdb-ttab:hover { filter: brightness(1.02); }
 .tdb-ttab:focus-visible { outline: 2px solid var(--hk-ink); outline-offset: 2px; }
-@media (prefers-reduced-motion: reduce) { .tdb-ttab { transition: none; } }
 @media (max-width: 1499.98px) { .tdb-ttab { display: none; } } /* narrow owns the masthead chip */
-.tdb-ttabic { font-size: 15px; color: var(--hk-ink); flex: none; }
-.tdb-ttabx { display: inline-flex; align-items: center; gap: 10px; }
-.tdb-ttabx b { font-family: var(--f12-serif); font-size: 13.5px; color: var(--ink); }
-.tdb-ttabx i { font-style: normal; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.11em; color: var(--hk-ink); }
-.tdb-ttabplus { width: 20px; height: 20px; border-radius: 50%; background: var(--white, #fff); border: 1px solid var(--hk-spine); color: var(--hk-ink); display: inline-flex; align-items: center; justify-content: center; font-size: 10px; }
+.tdb-ttabch { font-size: 9px; color: var(--hk-ink); }
+.tdb-ttabic { width: 22px; height: 22px; border-radius: 50%; background: var(--white, #fff); border: 1px solid var(--hk-spine); color: var(--hk-ink); display: inline-flex; align-items: center; justify-content: center; font-size: 12px; flex: none; }
+.tdb-ttabvt { writing-mode: vertical-rl; font-family: var(--f12-serif); font-size: 12.5px; font-weight: 600; color: var(--hk-ink); }
 
 /* ── the Today's-list PANEL (workbench: the corner pop-up's internals TRANSPLANTED into the
    drawer — same inner classes, drawer scale; SAGE header per the ref's .today2; the fixed
