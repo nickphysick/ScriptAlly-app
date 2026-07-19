@@ -797,7 +797,7 @@ The masthead is ONE row: 20px Playfair title + mono date·week eyebrow, **42px p
   resubmits, nudges, the offer journey — its kickers carry the ★) · coffee `--hk-cof→--hk-cof-2`/
   `--hk-cof-edge` = housekeeping (Batch fix sittings, stale closes, detail fills) · sage
   `--hk-sage→--hk-sage-2`/`--hk-spine` = ritual (the Sunday review, the save/review screens, and
-  Today's-list walks — sage WHOLE-WALK via the `ritual` prop) · parchment `--paper`/`--hairline` =
+  Today walks — sage WHOLE-WALK via the `ritual` prop) · parchment `--paper`/`--hairline` =
   Task Settings AND notes (notes have no family in the law's closed list — the neutral is the
   reported call). Focused sessions wear the lane they sweep (per-item stream family); mixed walks
   crossfade (the band is keyed by family, 0.2s fade, off under reduced motion).
@@ -813,3 +813,23 @@ The masthead is ONE row: 20px Playfair title + mono date·week eyebrow, **42px p
 The ledger's coffee-tinted batch variant is retired too — no tag variant re-inks anything.
 Weight and the ★ are the only remaining emphasis channels; colour belongs to the bands.
 Rule-text-locked in `todoTagLaw.test.ts`.
+
+## `.t-f12` — THE RIGHT COLUMN (2026-07-19, Polish VI; ref `todo-right-column-v1.html`)
+
+- **"Today" (renamed from "Today's list") is ALWAYS ON** — a constant 264px column (`--tdb-today`)
+  in the full-bleed grid ≥1200px; the masthead chip + popover serve below. **Its card header is
+  now PLAIN PAPER** (Playfair "Today" + a mono right slot: date when empty ⇄ `{n} OF 5`) — the
+  sage header band is retired; **sage survives in the Today system as the done row** (`✓ {n} DONE
+  TODAY`, `--hk-ink` mono, collapsed by default), the done ticks, the "✓ ON TODAY" card pill and
+  the ritual walk. The **ghost invitation** is neutral: dashed `rgba(58,28,20,.22)` box + `.28`
+  tick-boxes + `.07` bars on the card's own parchment — no fill, no family.
+- **The review's afterlife card** (above Today, `(dismissed ∨ Tue–Sat) ∧ unreviewed`) is the
+  neutral cardx family — paper/hairline/radius 16/shadow — with a 38px white roundel holding the
+  ORIGINAL `review-cup.svg` in **ink via currentColor** (inlined `?raw`; never a tinted fill).
+  The thin sage bar beneath the lanes is retired.
+- **Lane heads: the play button** — 32px white circle, `rgba(58,28,20,.16)` hairline, ink
+  triangle (currentColor), hover scale 1.06 — replaces the Focus pill in both views; the lane
+  DOT is retired (the tinted band alone carries lane identity). Pagers ride the head's right edge.
+- **The V grid token family** (`--tdb-gutter`/`--tdb-appnav 49`/`--tdb-sidebar 270`/`--tdb-today
+  264`) + the VI column scroll contract: both flanking columns sticky at the gutter, viewport-
+  capped, fixed heads/feet, one hairline-scrollbar middle each (`.tdb-tmid2`/`.tdb-fmid`).
