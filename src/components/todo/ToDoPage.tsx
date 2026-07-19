@@ -1014,6 +1014,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           Showing {shownX} of {shownY}
           {shownX !== shownY && <button type="button" className="tdb-freset" onClick={() => { setFilters(DEFAULT_FILTERS); setSearch(""); }}>RESET</button>}
         </div>
+        {/* VI P4 — the card's one scrolling middle (the pill region); ftop/status + foot stay fixed */}
+        <div className="tdb-fmid">
         <div className="tdb-fgrp2">
           <div className="tdb-fgh">URGENT · {tiles.urgent}</div>
           <div className="tdb-fcloud">
@@ -1035,6 +1037,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <div className="tdb-fcloud">
             {fpill("✓ ON TODAY ONLY", "todayOnly", null, "s")}
           </div>
+        </div>
         </div>
         <div className="tdb-footrows">
           <button type="button" className="tdb-fr2" onClick={() => setSettingsOpen(true)}>

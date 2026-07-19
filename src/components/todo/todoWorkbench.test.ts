@@ -27,9 +27,9 @@ describe("P1→III — the sidebar (the pinned pair; sa.todoDrawer fold persiste
   it("the PAIR: one sticky stack at the 24 offset, 12px apart, same-width floating cards", () => {
     const d = rule(".tdb-pair");
     expect(d).toContain("width: var(--tdb-sidebar)"); // V P1: 270 via the tdb token family
-    expect(d).toContain("position: sticky; top: var(--g24)");
+    expect(rule(".tdb-pair, .tdb-railr")).toContain("position: sticky; top: var(--tdb-gutter)"); // VI P4: the shared contract
     expect(d).toContain("gap: 12px");
-    expect(d).toContain("overflow-y: auto"); // the safety net only
+    expect(rule(".tdb-tmid2, .tdb-fmid")).toContain("overflow-y: auto"); // VI P4: the middles scroll, never the columns
     expect(rule(".tdb-paircard")).toContain("border-radius: 16px");
   });
   it("folds to the 64px icon rail via a width transition; reduced motion kills it", () => {
@@ -281,7 +281,7 @@ describe("A1 — the masthead band (evening run; amends the shell ref in place)"
   });
   it("the band is not sticky (scrolls away); the drawer's sticky offset rides the 24-grid (II·B)", () => {
     expect(rule(".tdb-mastband")).not.toContain("sticky");
-    expect(rule(".tdb-pair")).toContain("position: sticky; top: var(--g24)"); // III P3: the pair is the sticky stack
+    expect(rule(".tdb-pair, .tdb-railr")).toContain("position: sticky; top: var(--tdb-gutter)"); // VI P4: the shared contract
   });
 });
 
@@ -302,7 +302,7 @@ describe("II·B P1 — the 24-grid + the ref masthead (todo-workbench-rail-v1.ht
     expect(rule(".tdb-ws")).toContain("gap: var(--g24)");
     expect(rule(".tdb-ws")).toContain("padding: 0 var(--g24)");
     expect(rule(".tdb-ws")).toContain("margin: var(--g24) 0 0"); // V P1: left-pinned
-    expect(rule(".tdb-pair")).toContain("top: var(--g24)");
+    expect(rule(".tdb-pair, .tdb-railr")).toContain("top: var(--tdb-gutter)"); // VI P4 contract (gutter rides --g24)
     expect(rule(".tdb-reel")).toContain("margin-bottom: var(--g24)");
     expect(rule(".tdb-lghead.standalone")).toContain("margin-bottom: var(--g12)"); // II·B P4 head band
     expect(rule(".tdb-reeltrack")).toContain("gap: var(--g12)"); // III P2: the reel is the card-gutter consumer
@@ -368,7 +368,7 @@ describe("II·B P3 — the companion rail (one panel, two mounts, one state)", (
   });
   it("the rail: 264 sticky at the 24 offset, after the main column; noted as the future companions' home", () => {
     expect(rule(".tdb-railr")).toContain("width: var(--tdb-today)");
-    expect(rule(".tdb-railr")).toContain("position: sticky");
+    expect(rule(".tdb-pair, .tdb-railr")).toContain("position: sticky"); // VI P4: the shared contract
     expect(page.indexOf('className="tdb-main"')).toBeLessThan(page.indexOf('className="tdb-railr"'));
   });
   it("the chip's count is the committed union — never a parallel tally — and the header slot pairs date ⇄ count", () => {
@@ -529,6 +529,41 @@ describe("VI P3 — lane-head play buttons · help returns to the FAB", () => {
     }
     expect(page).toContain('window.addEventListener("sa:todo-replay-tour"'); // the board still listens
     expect(shell).toContain('if (routeKey === "todo") setHelpMenuOpen((v) => !v);');
+  });
+});
+
+describe("VI P4 — the column scroll contract (one shared rule, both flanking columns)", () => {
+  // jsdom renders no layout: the 900px-height no-scroll check is the arithmetic in the contract
+  // comment (900 − 49 − 48 = 803 ≫ ≈440 for five committed + done row + review card); the
+  // browser walk confirms it. These locks pin the rule text the arithmetic depends on.
+  it("the shared rule: sticky at the gutter, viewport-capped via the appnav token, flex column", () => {
+    const shared = rule(".tdb-pair, .tdb-railr");
+    expect(shared).toContain("position: sticky; top: var(--tdb-gutter)");
+    expect(shared).toContain("max-height: calc(100vh - var(--tdb-appnav) - (var(--tdb-gutter) * 2))");
+    expect(shared).toContain("display: flex; flex-direction: column;");
+    expect(css).toContain("THE COLUMN SCROLL CONTRACT (VI P4)");
+    expect(css).toContain("900 − 49 (appnav) − 48 (gutters) = 803");
+  });
+  it("one scrolling middle per card — heads and feet fixed; the review card outside Today's scroller", () => {
+    expect(rule(".tdb-tmid2, .tdb-fmid")).toContain("overflow-y: auto; min-height: 0;");
+    expect(rule(".tdb-today2")).toContain("flex: 0 1 auto; min-height: 0;");
+    expect(rule(".tdb-rvcard")).toContain("flex: 0 0 auto;"); // fixed above, never inside the scroller
+    expect(rule(".tdb-fcard")).toContain("display: flex; flex-direction: column; min-height: 0;");
+    expect(rule(".tdb-ftop, .tdb-fstatus, .tdb-footrows")).toContain("flex: 0 0 auto;");
+    // markup: the pill region rides inside .tdb-fmid, between the fixed status line and the foot
+    const fmid = page.indexOf('className="tdb-fmid"');
+    expect(fmid).toBeGreaterThan(page.indexOf('className="tdb-fstatus"'));
+    expect(fmid).toBeLessThan(page.indexOf('className="tdb-footrows"'));
+    // Today: header → middle → verbs, in that order
+    const card = page.slice(page.indexOf('className="tdb-today2"'), page.indexOf('className="tdb-tf2"'));
+    expect(card).toContain('className="tdb-tmid2"');
+  });
+  it("scrollbars: thin, hairline-coloured, visible on hover/focus only, gutter stable (no shift)", () => {
+    const mids = rule(".tdb-tmid2, .tdb-fmid");
+    expect(mids).toContain("scrollbar-width: thin");
+    expect(mids).toContain("scrollbar-color: transparent transparent");
+    expect(mids).toContain("scrollbar-gutter: stable");
+    expect(css).toContain(".tdb-tmid2:hover, .tdb-tmid2:focus-within, .tdb-fmid:hover, .tdb-fmid:focus-within { scrollbar-color: var(--hairline) transparent; }");
   });
 });
 

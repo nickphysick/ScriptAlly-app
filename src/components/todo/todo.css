@@ -77,13 +77,24 @@
    own internal scroll keeps the sticky panel inside the viewport. ── */
 /* III P3 — THE PINNED PAIR (pair ref, normative): two same-width floating cards, both riding
    ONE sticky stack at the 24 offset, 12px apart; internal scroll as the safety net only. */
-.tdb-pair { width: var(--tdb-sidebar); flex: 0 0 auto; position: sticky; top: var(--g24); max-height: calc(100vh - 120px); overflow-y: auto; display: flex; flex-direction: column; gap: 12px; transition: width 0.22s cubic-bezier(0.22, 0.8, 0.3, 1); }
+/* ── THE COLUMN SCROLL CONTRACT (VI P4) — one shared rule for BOTH flanking columns: pinned at
+   the gutter, capped to the viewport minus the F12 header and both gutters, a flex column whose
+   heads and feet stay fixed while ONE middle region scrolls (Today: .tdb-tmid2 — the footer verbs
+   never scroll away; sidebar: the filter card's .tdb-fmid pill region; the review card, when
+   present, is fixed above Today and outside its scroller). Budget check at 900px height:
+   900 − 49 (appnav) − 48 (gutters) = 803 available; five committed rows + the collapsed done row
+   + header + verbs ≈ 370, + the 60px review card + 12 gap ≈ 440 — Today does not scroll on an
+   ordinary viewport. Scrollbars: thin, hairline-coloured, hover/scroll-visible, gutter stable. ── */
+.tdb-pair, .tdb-railr { position: sticky; top: var(--tdb-gutter); max-height: calc(100vh - var(--tdb-appnav) - (var(--tdb-gutter) * 2)); display: flex; flex-direction: column; }
+.tdb-tmid2, .tdb-fmid { overflow-y: auto; min-height: 0; scrollbar-width: thin; scrollbar-color: transparent transparent; scrollbar-gutter: stable; }
+.tdb-tmid2:hover, .tdb-tmid2:focus-within, .tdb-fmid:hover, .tdb-fmid:focus-within { scrollbar-color: var(--hairline) transparent; }
+.tdb-pair { width: var(--tdb-sidebar); flex: 0 0 auto; gap: 12px; transition: width 0.22s cubic-bezier(0.22, 0.8, 0.3, 1); }
 .tdb-pair.folded { width: 64px; align-items: center; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 4px 16px rgba(58, 28, 20, 0.1); padding: 12px 8px; gap: 10px; }
 @media (prefers-reduced-motion: reduce) { .tdb-pair { transition: none; } }
 .tdb-paircard { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 4px 16px rgba(58, 28, 20, 0.1); }
 /* the FOCUS card — split layout, art right (max-height 118 + the illustration law's shadow);
    hover lift; absent asset = a quieter card (the slot renders nothing). */
-.tdb-focus { display: flex; align-items: stretch; overflow: hidden; text-align: left; padding: 0; transition: transform 0.12s, box-shadow 0.12s; }
+.tdb-focus { flex: 0 0 auto; display: flex; align-items: stretch; overflow: hidden; text-align: left; padding: 0; transition: transform 0.12s, box-shadow 0.12s; }
 .tdb-focus:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(58, 28, 20, 0.14); }
 @media (prefers-reduced-motion: reduce) { .tdb-focus { transition: none; } }
 .tdb-focustx { flex: 1; min-width: 0; padding: 16px 4px 16px 18px; display: flex; flex-direction: column; align-items: flex-start; }
@@ -99,6 +110,8 @@
 .tdb-ftop .tdb-vtg button { flex: 1; }
 .tdb-fstatus { margin: 12px 16px 0; display: flex; align-items: center; gap: 8px; font-size: 11.5px; font-weight: 600; color: var(--ink); }
 .tdb-freset { margin-left: auto; border: none; background: none; padding: 0; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.1em; color: var(--burg); border-bottom: 1px solid var(--pink-b); }
+.tdb-fcard { display: flex; flex-direction: column; min-height: 0; flex: 0 1 auto; }
+.tdb-ftop, .tdb-fstatus, .tdb-footrows { flex: 0 0 auto; }
 .tdb-fgrp2 { padding: 11px 16px 2px; }
 .tdb-fgh { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.15em; color: var(--faint); margin-bottom: 7px; }
 .tdb-fcloud { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -402,7 +415,7 @@
 
 /* ── VI P1: the Today COLUMN — always on ≥1200px (no collapsed state, no tab) — + the masthead
    chip/popover below. Still the natural home for future companions; 12px stack gaps (ref .rcol). ── */
-.tdb-railr { width: var(--tdb-today); flex: 0 0 auto; position: sticky; top: var(--g24); display: flex; flex-direction: column; gap: 12px; }
+.tdb-railr { width: var(--tdb-today); flex: 0 0 auto; gap: 12px; }
 @media (max-width: 1199.98px) { .tdb-railr { display: none; } } /* belt — the mount is JS-gated */
 .tdb-todaypopwrap { position: relative; flex: none; }
 .tdb-todaychip { display: inline-flex; align-items: center; gap: 7px; font-family: var(--f12-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border: 1px solid var(--hk-spine); border-radius: 99px; padding: 8px 14px; color: var(--hk-ink); white-space: nowrap; }
@@ -416,11 +429,11 @@
    hairline, radius 16, floating shadow. Plain paper header (Playfair "Today" + the mono right
    slot: date when empty ⇄ "{n} OF 5"); the middle region holds committed rows above the dashed
    ghost invitation and the collapsed done row; two footer verbs pinned beneath. ── */
-.tdb-today2 { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 4px 16px rgba(58, 28, 20, 0.1); display: flex; flex-direction: column; overflow: hidden; }
+.tdb-today2 { flex: 0 1 auto; min-height: 0; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 4px 16px rgba(58, 28, 20, 0.1); display: flex; flex-direction: column; overflow: hidden; }
 .tdb-th { flex: none; display: flex; align-items: baseline; gap: 8px; padding: 14px 15px 11px; }
 .tdb-th .tdb-t { font-family: var(--f12-serif); font-size: 17px; font-weight: 700; color: var(--ink); }
 .tdb-th .tdb-thr { margin-left: auto; font-style: normal; font-family: var(--f12-mono); font-size: 7.5px; font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase; color: var(--faint); white-space: nowrap; }
-.tdb-tmid2 { padding: 0 13px; display: flex; flex-direction: column; }
+.tdb-tmid2 { flex: 0 1 auto; padding: 0 13px; display: flex; flex-direction: column; }
 .tdb-tcommit { display: flex; flex-direction: column; }
 .tdb-trow { display: flex; align-items: flex-start; gap: 8px; padding: 9px 2px; border-bottom: 1px solid var(--hairline); cursor: pointer; flex: none; }
 .tdb-trow:hover { background: var(--white, #fff); }
@@ -468,7 +481,7 @@
 .tdb-rvx2:hover { color: var(--ink); }
 /* VI P2 — the review's afterlife CARD (ref .rvcard): the cardx family, one ~60px row at the top
    of the right column, directly above Today. The whole card is the button. */
-.tdb-rvcard { display: flex; align-items: center; gap: 11px; padding: 11px 13px; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 4px 16px rgba(58, 28, 20, 0.1); cursor: pointer; text-align: left; width: 100%; }
+.tdb-rvcard { flex: 0 0 auto; display: flex; align-items: center; gap: 11px; padding: 11px 13px; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 4px 16px rgba(58, 28, 20, 0.1); cursor: pointer; text-align: left; width: 100%; }
 .tdb-rvcard:hover { background: var(--white, #fff); }
 .tdb-rvcup2 { width: 38px; height: 38px; border-radius: 50%; background: var(--white, #fff); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; flex: 0 0 auto; color: var(--ink); }
 .tdb-rvcup2 svg { width: 30px; height: auto; display: block; }
