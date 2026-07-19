@@ -55,3 +55,27 @@ Ran against `17a6668`, tree clean; all four Downloads files verified at start. G
 - Tests: reelFit at three widths × rail states (width IS the rail's participation) + floor/cap +
   page distance; the tag law rewritten (v3 — soft offer, soft warn, no variants, the tinted-fill
   sweep); the reel-era source locks. Snap behaviour flagged for the in-browser list (jsdom).
+
+## PHASE 3 — the pinned pair (the sidebar, definitive)
+
+- **The pair** (pair ref, exact): two same-width floating cards riding ONE sticky stack at the
+  `--g24` offset, 12px apart; the fold collapses the whole pair to the 64px icon rail
+  (`sa.todoDrawer` persists). Internal scroll stays as the safety net only.
+- **Card 1 — FOCUS MODE** (Walk me through's successor): split layout — Playfair 18 "Focus mode",
+  the no-distractions sub, ink "▶ Begin · {n}" (n = `tiles.urgent`, the walk's own derivation);
+  `focus-art.png` right at max-height 118 with the illustration-law drop-shadow (absent asset =
+  a quieter card — the slot renders nothing); hover lift. Opens the existing guided walk
+  unchanged. `walkSublabel`/`walkAria` retired as unconsumed (their strings died with the name).
+- **Card 2 — the filter card:** top row = the Cards/Ledger toggle (MOVED from the masthead) + the
+  fold « · the status line **"Showing {x} of {y} · RESET"** — x = the visible tally
+  (vDo + hkGapCount(vGroups) + vStale + vNt), y = the board totals (tiles) — the SAME derivations
+  the board consumes, never parallel counts; RESET clears filters AND search, hidden at x=y ·
+  **the pill cloud**: URGENT · n / HOUSEKEEPING · n / SHOW mono headers over real `aria-pressed`
+  toggle buttons in family colours with counts inside ("★ OFFERS · 1"), filled=on / outline=off /
+  half-opacity at zero · the sage "✓ TODAY'S LIST ONLY" pill · the ⚙/? foot unchanged.
+- **Retired:** "YOUR DESK", the New note button (the Notes lane's inline ＋ survives in cards AND
+  the ledger — its Notes group head GAINED one), the letterpress checkbox rows, the masthead
+  toggle. The ledger's section-head naming ("▶ Focus on {label}") landed here with the head edit.
+- Tests: the pair geometry/pin/fold, the Focus card (art law, count source, handler), toggle
+  relocation (masthead slice clean), status-line sources + RESET visibility, pill semantics +
+  zero state + a11y, the retired-species sweep, the both-views inline ＋.

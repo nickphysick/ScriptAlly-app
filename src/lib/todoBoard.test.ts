@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { QueryStatus, Task, Query, Agent, Manuscript, UserTask, TaskFlag, Activity, ActivityType } from "../types";
-import { assembleBoard, boardStreamForTaskType, todaySplit, ribbonTiles, walkSublabel, walkAria, offerDue, offerQuiet, terseDoneLabel, reminderDue, reviewWeek, weekReviewStats, reviewSeedCandidates, reviewSurface, reviewCompletionSnooze, BoardCard, BoardInput } from "./todoBoard";
+import { assembleBoard, boardStreamForTaskType, todaySplit, ribbonTiles, offerDue, offerQuiet, terseDoneLabel, reminderDue, reviewWeek, weekReviewStats, reviewSeedCandidates, reviewSurface, reviewCompletionSnooze, BoardCard, BoardInput } from "./todoBoard";
 import { taskSurvivesMute } from "./todoHousekeeping";
 
 const TODAY = "2026-07-09";
@@ -176,19 +176,6 @@ describe("ribbonTiles — the header tiles mirror the lanes", () => {
     const b = assembleBoard(input);
     expect(ribbonTiles(b, 7).housekeeping).toBe(7);
     expect(ribbonTiles(b, 0).housekeeping).toBe(0);
-  });
-});
-
-describe("walkSublabel / walkAria — the Walk-me-through button reads the ONE urgent count", () => {
-  it("plural, singular, zero sublabels", () => {
-    expect(walkSublabel(5)).toBe("GUIDED · 5 URGENT ITEMS");
-    expect(walkSublabel(1)).toBe("GUIDED · 1 URGENT ITEM");
-    expect(walkSublabel(0)).toBe("GUIDED · NOTHING URGENT");
-  });
-  it("aria mirrors the same grammar", () => {
-    expect(walkAria(3)).toBe("Walk me through — guided pass through 3 urgent items");
-    expect(walkAria(1)).toBe("Walk me through — guided pass through 1 urgent item");
-    expect(walkAria(0)).toBe("Walk me through — nothing urgent right now");
   });
 });
 
@@ -434,7 +421,7 @@ describe("Task Settings — the send key propagates from the ONE suppression poi
   const baseInput = (tasks: import("../types").Task[]): BoardInput =>
     ({ tasks, userTasks: [], queries: [query("q1", "a1", QueryStatus.FULL_REQUESTED)], agents: [agent("a1", "Daniel")], manuscripts: [], taskFlags: [], activities: [], today: TODAY, now: NOW });
 
-  it("'Your turn to send' off → the send task is filtered at taskSurvivesMute, so it's absent from board.do, the Urgent count and the Walk-me-through sublabel", () => {
+  it("'Your turn to send' off → the send task is filtered at taskSurvivesMute, so it's absent from board.do, the Urgent count and the Focus count", () => {
     const sendTask = task("t-send", "full_requested", "q1");
     // mirror the engine's activeTasks filter (db.tsx) — the ONE point board/counts/dashboard/sublabel derive through
     const filtered = [sendTask].filter((t) => taskSurvivesMute(t.taskType, undefined, ["send"]));
@@ -444,7 +431,7 @@ describe("Task Settings — the send key propagates from the ONE suppression poi
     expect(b.do.some((c) => c.taskType === "full_requested")).toBe(false); // absent from the board
     const tiles = ribbonTiles(b, 0);
     expect(tiles.urgent).toBe(0); // absent from the Urgent post-it count
-    expect(walkSublabel(tiles.urgent)).toBe("GUIDED · NOTHING URGENT"); // absent from the sublabel
+    expect(tiles.urgent).toBe(0); // absent from the Focus card's Begin count (the same tiles source)
     // the dashboard reads the SAME filtered `tasks` (buildOverToYouRows(tasks)) — excluded by construction
 
     // switched ON, the same task survives and lands on the board

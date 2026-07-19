@@ -2,14 +2,13 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * ToDoPage — the To-do WORKBENCH (design ref: design-refs/todo-workbench-shell-v1.html, Option B
- * normative). A floating DRAWER sidebar (below the app nav, sticky, foldable to a 64px icon rail;
- * fold persisted in localStorage["sa.todoDrawer"]) holds ＋ New note, Walk me through, the typed
- * filters and the embedded Today's-list panel (the old corner FAB + pop-up are RETIRED — the
- * panel is the pop-up's internals transplanted, same state and handlers). Beside it, a centred
- * ~1150px content column: a one-row masthead (title + date/week, 42px post-its, the scrap, search
- * ⌘K, the Cards/Ledger view toggle) over the board sections. The ledger view follows
- * design-refs/todo-ledger-v1.html.
+ * ToDoPage — the To-do WORKBENCH (Polish III: design-refs/todo-sidebar-pair-v1.html for the left
+ * sidebar, todo-board-refine-v1.html for the reel/masthead/afterlife, todo-banner-tab-v1.html §1+§3
+ * for the review banner + the tucked Today tab). Left: THE PINNED PAIR — the Focus card (the
+ * guided walk's home) over the filter card (view toggle + status line + the pill cloud), one
+ * sticky stack, foldable to a 64px icon rail (localStorage["sa.todoDrawer"]). Centre: the masthead
+ * band over the review banner (Sun–Mon) + the one-row card reels or the ledger + the thin-bar
+ * afterlife. Right: the Today rail (or its narrow chip). The ledger follows todo-ledger-v1.html.
  *
  * Presentation + view-model only — the task engine, taskFlags and every write path are untouched;
  * lane renames are UI labels (UserTask / taskType enums unchanged in code). The pure view-model is
@@ -26,7 +25,7 @@ import { F12Page, F12Account } from "../shell/F12Shell";
 import { StatusDot } from "../StatusDot";
 import { useScriptAllyDb } from "../../lib/db";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
-import { assembleBoard, todaySplit, ribbonTiles, walkSublabel, walkAria, reviewSurface, BoardCard, USER_TASK_FLAG_TYPE } from "../../lib/todoBoard";
+import { assembleBoard, todaySplit, ribbonTiles, reviewSurface, BoardCard, USER_TASK_FLAG_TYPE } from "../../lib/todoBoard";
 import { flagKeyForTask, MUTED_UNTIL } from "../../lib/taskFlags";
 import {
   choosePicks, rolledOverCards, todayProgress, MAX_TODAY,
@@ -39,6 +38,7 @@ import { groupHousekeeping, hkGapCount, hkGroupProgress, HkGroup, HkRule, HK_RUL
 import { deskState, liveQueryCount, liveQueriesLine, clearedListCap } from "../../lib/todoEmpty";
 import { ledgerTitle, ledgerDetail, sortLedgerDo, sortLedgerHk, batchChildren, batchDetail, batchTaskCopy, truncateRows } from "../../lib/todoLedger";
 import { reelFit, reelPage, ReelFit, REEL_CARD_MIN } from "./reelFit";
+import focusArt from "../../assets/todo/focus-art.png";
 import { TodoFilterState, DEFAULT_FILTERS, filtersActive, matchesSearch, groupMatchesSearch, visibleDoCard, visibleStaleCard, visibleNoteCard, visibleGroup, filterCounts } from "../../lib/todoFilters";
 import { SelState, EMPTY_SEL, applySelectClick, moveFocus } from "../../lib/todoSelection";
 import { shouldAutoRunTour } from "../../lib/todoTour";
@@ -915,8 +915,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   }
 
   // ── the one-row masthead (Option B mast2): title + date/week eyebrow left, the 42px post-its +
-  // the scrap, then search (⌘K) and the Cards/Ledger toggle. Walk me through has MOVED to the
-  // drawer. weekOfQuerying is the dashboard's derivation, consumed — never re-derived. ──
+  // then search (⌘K). The view toggle lives in the filter card (III P3); weekOfQuerying is the
+  // dashboard's derivation, consumed — never re-derived. ──
   function renderMasthead() {
     return (
       <div className="tdb-mast">
@@ -959,67 +959,80 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           />
           <kbd aria-hidden>⌘K</kbd>
         </div>
-        <div className="tdb-vtg" role="group" aria-label="View">
-          <button type="button" className={view === "cards" ? "on" : ""} aria-pressed={view === "cards"} onClick={() => pickView("cards")}>▦ Cards</button>
-          <button type="button" className={view === "ledger" ? "on" : ""} aria-pressed={view === "ledger"} onClick={() => pickView("ledger")}>☰ Ledger</button>
-        </div>
       </div>
     );
   }
 
-  // ── the floating drawer (Option B): ＋ New note · Walk me through · [filters, Phase 4] · the
-  // Today's-list panel · foot (⚙ Task settings + the ? menu + fold). Sticky below the app nav;
+  // ── THE PINNED PAIR (III P3, pair ref): the Focus card (the guided walk, renamed) over the
+  // filter card (toggle top row · status line · the pill cloud · ⚙/? foot). One sticky stack;
   // folds to a 64px icon rail (width transition; persisted sa.todoDrawer). ──
   function renderDrawer() {
     if (folded) {
       return (
-        <aside className="tdb-drawer folded" aria-label="Workbench drawer (folded)">
-          <button type="button" className="tdb-dic" title="New note" aria-label="New note" onClick={addTask}>＋</button>
-          <button type="button" className="tdb-dic" title="Walk me through" aria-label={walkAria(tiles.urgent)} disabled={!tiles.urgent} onClick={() => openFlowCards(board.do)}>▶</button>
+        <aside className="tdb-pair folded" aria-label="Workbench sidebar (folded)">
+          <button type="button" className="tdb-dic" title="Focus mode" aria-label={`Focus mode — begin with ${tiles.urgent} item${tiles.urgent === 1 ? "" : "s"}`} disabled={!tiles.urgent} onClick={() => openFlowCards(board.do)}>▶</button>
           <span className="tdb-dsp" />
           <button type="button" className="tdb-dic" title="Task settings" aria-label="Task settings" onClick={() => setSettingsOpen(true)}>⚙</button>
           <button type="button" className="tdb-dic" title="Help" aria-label="Help" onClick={() => onNavigate("help")}>?</button>
-          <button type="button" className="tdb-dfold" title="Unfold the drawer" aria-label="Unfold the drawer" aria-expanded={false} onClick={() => setFold(false)}>»</button>
+          <button type="button" className="tdb-dfold" title="Unfold the sidebar" aria-label="Unfold the sidebar" aria-expanded={false} onClick={() => setFold(false)}>»</button>
         </aside>
       );
     }
-    // II·B P2 — the letterpress checkbox: a REAL input (a11y — the label wraps it) rendered
-    // visually by its sibling glyph box (no CSS data-URIs: the Tailwind v4 parser rejects them).
-    const frow = (label: string, key: keyof TodoFilterState, count: number, extra?: string) => (
-      <label className={`tdb-frow${count === 0 ? " zero" : ""}${extra ? ` ${extra}` : ""}`}>
-        <input type="checkbox" className="tdb-cbi" checked={filters[key]} onChange={(e) => setF(key, e.target.checked)} />
-        <span className="tdb-cb" aria-hidden>✓</span>
-        {label}<span className="n">{count}</span>
-      </label>
+    // III P3 — the pill-cloud filter: the board's own tag vocabulary as REAL toggle buttons
+    // (aria-pressed; filled=active, outline=off, half-opacity at zero — zero rows grey, never hide).
+    const fpill = (label: string, key: keyof TodoFilterState, count: number | null, famCls: string) => (
+      <button type="button" className={`tdb-fp ${famCls}${filters[key] ? " on" : ""}${count === 0 ? " zero" : ""}`} aria-pressed={filters[key]} onClick={() => setF(key, !filters[key])}>
+        {label}{count != null ? ` · ${count}` : ""}
+      </button>
     );
+    // the status line's sources are the SAME derivations the board consumes — never parallel counts
+    const shownX = vDo.length + hkGapCount(vGroups) + vStale.length + vNt.length;
+    const shownY = tiles.urgent + tiles.housekeeping + tiles.notes;
     return (
-      <aside className="tdb-drawer" aria-label="Workbench drawer">
-        <div className="tdb-dwhead">
-          <span className="tdb-dwt">YOUR DESK</span>
-          <button type="button" className="tdb-dfold" title="Fold the drawer" aria-label="Fold the drawer" aria-expanded onClick={() => setFold(true)}>«</button>
-        </div>
-        <div className="tdb-dwmid">
-        <button type="button" className="tdb-dwalk" disabled={!tiles.urgent} aria-label={walkAria(tiles.urgent)} onClick={() => openFlowCards(board.do)}>
-          <span className="tdb-wdisc" aria-hidden />
-          <span className="tdb-wtxt">
-            <b>Walk me through</b>
-            <span>{walkSublabel(tiles.urgent)}</span>
+      <aside className="tdb-pair" aria-label="Workbench sidebar">
+        {/* card 1 — FOCUS MODE (the guided walk's home; same handler, same count derivation) */}
+        <button type="button" className="tdb-paircard tdb-focus" disabled={!tiles.urgent} onClick={() => openFlowCards(board.do)}>
+          <span className="tdb-focustx">
+            <b className="tdb-focush">Focus mode</b>
+            <span className="tdb-focusp">No distractions — work through your list, item by item.</span>
+            <span className="tdb-focusgo">▶ Begin · {tiles.urgent}</span>
           </span>
+          {focusArt && <span className="tdb-focusart"><img src={focusArt} alt="" /></span>}
         </button>
-        <div className="tdb-dsh">FILTER</div>
-        <div className="tdb-fgrp">
-          <div className="tdb-fgl"><span className="tdb-lanedot do" aria-hidden />Urgent<span className="n">{fc.offers + fc.overToYou}</span></div>
-          {frow("Offers", "offers", fc.offers)}
-          {frow("Over to you", "overToYou", fc.overToYou)}
-          <div className="tdb-fgl"><span className="tdb-lanedot hk" aria-hidden />Housekeeping<span className="n">{tiles.housekeeping}</span></div>
-          {frow("Missing materials", "materials", fc.materials)}
-          {frow("Missing wish lists", "mswl", fc.mswl)}
-          {frow("Stale queries", "stale", fc.stale)}
-          {frow("Snoozed", "snoozed", fc.snoozed)}
-          <div className="tdb-fgl"><span className="tdb-lanedot nt" aria-hidden />Notes<span className="n">{tiles.notes}</span></div>
-          {frow("On today’s list only", "todayOnly", fc.today, "today")}
+        {/* card 2 — THE FILTER CARD: toggle top row · status line · the pill cloud · foot */}
+        <div className="tdb-paircard tdb-fcard">
+        <div className="tdb-ftop">
+          <div className="tdb-vtg" role="group" aria-label="View">
+            <button type="button" className={view === "cards" ? "on" : ""} aria-pressed={view === "cards"} onClick={() => pickView("cards")}>▦ Cards</button>
+            <button type="button" className={view === "ledger" ? "on" : ""} aria-pressed={view === "ledger"} onClick={() => pickView("ledger")}>☰ Ledger</button>
+          </div>
+          <button type="button" className="tdb-dfold" title="Fold the sidebar" aria-label="Fold the sidebar" aria-expanded onClick={() => setFold(true)}>«</button>
         </div>
-        <button type="button" className="tdb-newnote" onClick={addTask}>＋ New note</button>
+        <div className="tdb-fstatus">
+          Showing {shownX} of {shownY}
+          {shownX !== shownY && <button type="button" className="tdb-freset" onClick={() => { setFilters(DEFAULT_FILTERS); setSearch(""); }}>RESET</button>}
+        </div>
+        <div className="tdb-fgrp2">
+          <div className="tdb-fgh">URGENT · {tiles.urgent}</div>
+          <div className="tdb-fcloud">
+            {fpill("★ OFFERS", "offers", fc.offers, "p")}
+            {fpill("OVER TO YOU", "overToYou", fc.overToYou, "p")}
+          </div>
+        </div>
+        <div className="tdb-fgrp2">
+          <div className="tdb-fgh">HOUSEKEEPING · {tiles.housekeeping}</div>
+          <div className="tdb-fcloud">
+            {fpill("MATERIALS", "materials", fc.materials, "c")}
+            {fpill("WISH LISTS", "mswl", fc.mswl, "c")}
+            {fpill("STALE", "stale", fc.stale, "c")}
+            {fpill("SNOOZED", "snoozed", fc.snoozed, "c")}
+          </div>
+        </div>
+        <div className="tdb-fgrp2">
+          <div className="tdb-fgh">SHOW</div>
+          <div className="tdb-fcloud">
+            {fpill("✓ TODAY’S LIST ONLY", "todayOnly", null, "s")}
+          </div>
         </div>
         <div className="tdb-dfoot">
           <button type="button" className="tdb-dfbtn" onClick={() => setSettingsOpen(true)}>
@@ -1039,6 +1052,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               <button type="button" role="menuitem" onClick={() => { setHelpOpen(false); window.dispatchEvent(new CustomEvent("sa:todo-replay-tour")); }}>Replay the tour</button>
             </div>
           )}
+        </div>
         </div>
       </aside>
     );
@@ -1217,7 +1231,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       </React.Fragment>
     );
   }
-  function ledgerSection(opts: { cls: "p" | "c" | "n"; id: string; label: string; count: number; onSession?: () => void; children: React.ReactNode; total: number; hidden: number; showAllKey: string }) {
+  function ledgerSection(opts: { cls: "p" | "c" | "n"; id: string; label: string; count: number; onSession?: () => void; onAdd?: () => void; children: React.ReactNode; total: number; hidden: number; showAllKey: string }) {
     return (
       <div className="tdb-tbl" id={opts.id}>
         <div className={`tdb-lghead ${opts.cls}`}>
@@ -1225,8 +1239,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <span className="tdb-lgt">{opts.label}</span>
           <span className="tdb-ln">{opts.count}</span>
           {opts.onSession && (
-            <button type="button" className="tdb-lgs" aria-label={`Begin a focused session on ${opts.label}`} onClick={opts.onSession}>▶ Begin focused session</button>
+            <button type="button" className="tdb-lgs" aria-label={`Focus on ${opts.label}`} onClick={opts.onSession}>▶ Focus on {opts.label}</button>
           )}
+          {opts.onAdd && <button type="button" className="tdb-cadd" onClick={opts.onAdd} aria-label="Add a note">＋</button>}
         </div>
         <div className="tdb-lcols" aria-hidden>
           <span /><span /><span>TYPE</span><span>AGENT</span><span>TASK</span><span>MANUSCRIPT</span><span className="ctr">STATUS</span><span className="r sort">DETAIL ↓</span><span />
@@ -1260,6 +1275,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         {vNt.length > 0 && ledgerSection({
           cls: "n", id: "tdb-lane-nt", label: "Notes to self", count: active ? vNt.length : tiles.notes,
           onSession: () => setFlow({ items: vNt.map((card) => ({ kind: "card", card })), mode: "sweep" }),
+          onAdd: addTask,
           total: vNt.length, hidden: ntCut.hidden, showAllKey: "nt",
           children: ntCut.visible.map(ledgerCardRow),
         })}

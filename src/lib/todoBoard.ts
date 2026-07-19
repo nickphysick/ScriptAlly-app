@@ -306,22 +306,7 @@ export function ribbonTiles(board: AssembledBoard, housekeepingGaps: number): { 
 }
 
 
-/**
- * Polish P4 — the "Walk me through" button's mono sublabel. `urgent` is ribbonTiles().urgent (=
- * board.do.length) — the SAME derived count the Urgent post-it and lane chip read; never a
- * parallel count. Singular-safe; at zero the button sits disabled (the follow-up pack's inert
- * grammar — Nick's confirmed decision over the pack's 55%-clickable clause) under this sublabel.
- */
-export function walkSublabel(urgent: number): string {
-  if (urgent === 0) return "GUIDED · NOTHING URGENT";
-  return `GUIDED · ${urgent} URGENT ITEM${urgent === 1 ? "" : "S"}`;
-}
 
-/** The matching aria-label (the Caveat-free full sentence; singular-safe, zero-safe). */
-export function walkAria(urgent: number): string {
-  if (urgent === 0) return "Walk me through — nothing urgent right now";
-  return `Walk me through — guided pass through ${urgent} urgent item${urgent === 1 ? "" : "s"}`;
-}
 
 /* ══════════ THE SUNDAY REVIEW (finishing pack P3; ref todo-sunday-review.html) ══════════
    Pure derivations only: the reviewed week (the ISO week containing the most recent Sunday — on
