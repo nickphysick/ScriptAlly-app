@@ -40,8 +40,7 @@ describe("TaskSettingsSheet — source locks", () => {
     expect(sheet).toContain("upsertTaskFlag(r.flag, { snoozedUntil: null })");
   });
   it("the entry button + the fork doorway both open the sheet", () => {
-    expect(page).toContain('aria-label="Task settings"');
-    expect(page).toContain("{settingsOpen && <TaskSettingsSheet");
-    expect(page).toContain("Change what appears here → Task settings");
+    expect(page).toContain('className="tdb-sq" onClick={() => setSettingsOpen(true)}'); // Deck v2: the rail square
+    expect(page).toContain("{settingsOpen && <TaskSettingsSheet onClose={() => setSettingsOpen(false)} />}");
   });
 });

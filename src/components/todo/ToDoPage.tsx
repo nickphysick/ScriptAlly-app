@@ -2,13 +2,11 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * ToDoPage — the To-do WORKBENCH (Polish III: design-refs/todo-sidebar-pair-v1.html for the left
- * sidebar, todo-board-refine-v1.html for the reel/masthead/afterlife, todo-banner-tab-v1.html §1+§3
- * for the review banner + the tucked Today tab). Left: THE PINNED PAIR — the Focus card (the
- * guided walk's home) over the filter card (view toggle + status line + the pill cloud), one
- * sticky stack, foldable to a 64px icon rail (localStorage["sa.todoDrawer"]). Centre: the masthead
- * band over the review banner (Sun–Mon) + the one-row card reels or the ledger + the thin-bar
- * afterlife. Right: the Today rail (or its narrow chip). The ledger follows todo-ledger-v1.html.
+ * ToDoPage — THE COMMAND DECK (v2, design-refs/todo-deck-v2.html — the definitive To-do page).
+ * Top: the identity strip (title · 84×102 solo post-its · the resident review banner) over the
+ * sticky DECK (search · quiet pills · lens · view segment). Left: the RAIL — Focus mode / Task
+ * settings / Pro squares. Centre: the board (reels or the ledger). Right: the Today column (or
+ * its narrow strip chip). The ledger follows todo-ledger-v1.html.
  *
  * Presentation + view-model only — the task engine, taskFlags and every write path are untouched;
  * lane renames are UI labels (UserTask / taskType enums unchanged in code). The pure view-model is
@@ -266,10 +264,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [settingsOpen, setSettingsOpen] = useState(false); // the Task Settings sheet ("What lands on your desk?")
   // VI P1 — "Done today" collapses by default to the ✓ row; expanding is in place, session-only.
   const [showDone, setShowDone] = useState(false);
-  // ── workbench shell state. Fold + view are DEVICE UI prefs → the sa. localStorage convention
-  // (approved — never user-doc fields). View default = cards; the Ledger face lands in Phase 3.
-  const [folded, setFolded] = useState<boolean>(() => { try { return localStorage.getItem("sa.todoDrawer") === "folded"; } catch { return false; } });
-  const setFold = (v: boolean) => { setFolded(v); try { localStorage.setItem("sa.todoDrawer", v ? "folded" : "open"); } catch { /* private mode */ } };
+  // ── workbench shell state. View is a DEVICE UI pref → the sa. localStorage convention.
+  // (Deck v2 P3: the sidebar fold + its localStorage key retired with the pair — the rail never
+  // folds; <1420 it becomes the 56px icon rail instead, P5.)
   const [view, setView] = useState<"cards" | "ledger">(() => { try { return localStorage.getItem("sa.todoView") === "ledger" ? "ledger" : "cards"; } catch { return "cards"; } });
   const pickView = (v: "cards" | "ledger") => { setView(v); try { localStorage.setItem("sa.todoView", v); } catch { /* private mode */ } };
   // Ledger view state (Phase 3) — session-only: which batch rows are expanded (default collapsed)
@@ -779,7 +776,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             lens | spacer | view segment. No Focus, no ⚙ — the rail owns both (P3). ── */}
         {renderDeck()}
         <div className="tdb-ws">
-          {renderDrawer()}
+          {renderRail()}
           <div className="tdb-main">
             <div className="tdb-col">
         {/* ── the board — cards or ledger by the masthead toggle; the desk states (new-desk /
@@ -1033,45 +1030,32 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     );
   }
 
-  // ── THE PINNED PAIR (III P3, pair ref): the Focus card (the guided walk, renamed) over the
-  // filter card (toggle top row · status line · the pill cloud · ⚙/? foot). One sticky stack;
-  // folds to a 64px icon rail (width transition; persisted sa.todoDrawer). ──
-  function renderDrawer() {
-    if (folded) {
-      return (
-        <aside className="tdb-pair folded" aria-label="Workbench sidebar (folded)">
-          <button type="button" className="tdb-dic" title="Focus mode" aria-label={`Focus mode — begin with ${tiles.urgent} item${tiles.urgent === 1 ? "" : "s"}`} disabled={!tiles.urgent} onClick={() => openFlowCards(board.do)}>▶</button>
-          <span className="tdb-dsp" />
-          <button type="button" className="tdb-dic" title="Task settings" aria-label="Task settings" onClick={() => setSettingsOpen(true)}>⚙</button>
-          <button type="button" className="tdb-dfold" title="Unfold the sidebar" aria-label="Unfold the sidebar" aria-expanded={false} onClick={() => setFold(false)}>»</button>
-        </aside>
-      );
-    }
-    // Deck v2 P2 — the filter card's pills/status/toggle MOVED to the deck (one home); the pair
-    // itself is replaced by the three-square rail in P3. Interim: Focus card + the settings foot.
+  // ── Deck v2 P3: THE RAIL — 240px, three squares (white/radius 16/hairline/lifted; the WHOLE
+  // square is the button). Focus mode (the guided walk, whole-board scope) · Task settings (the
+  // existing sheet) · the Pro promo (plan-gated; CTA → the /plans upgrade surface). ──
+  function renderRail() {
+    const boardCards = [...board.do, ...board.hk, ...board.nt];
     return (
-      <aside className="tdb-pair" aria-label="Workbench sidebar">
-        {/* card 1 — FOCUS MODE (the guided walk's home; same handler, same count derivation) */}
-        <button type="button" className="tdb-paircard tdb-focus" disabled={!tiles.urgent} onClick={() => openFlowCards(board.do)}>
-          <span className="tdb-focustx">
-            <b className="tdb-focush">Focus mode</b>
-            <span className="tdb-focusp">No distractions — work through your list, item by item.</span>
-            <span className="tdb-focusgo">▶ Begin</span>
-          </span>
-          {focusArt && <span className="tdb-focusart"><img src={focusArt} alt="" /></span>}
+      <aside className="tdb-lrail" aria-label="Workbench rail">
+        <button type="button" className="tdb-sq" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>
+          <h3>Focus mode</h3>
+          <p>No distractions — one item at a time.</p>
+          <span className="tdb-sqgo">▶ Begin</span>
+          {focusArt && <span className="tdb-sqart"><img src={focusArt} alt="" /></span>}
         </button>
-        <div className="tdb-paircard tdb-fcard">
-        <div className="tdb-footrows">
-          <button type="button" className="tdb-fr2" onClick={() => setSettingsOpen(true)}>
-            <span className="tdb-fric" aria-hidden><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <line x1="4" y1="6" x2="20" y2="6" /><circle cx="9" cy="6" r="2.2" fill="var(--paper)" />
-              <line x1="4" y1="12" x2="20" y2="12" /><circle cx="15" cy="12" r="2.2" fill="var(--paper)" />
-              <line x1="4" y1="18" x2="20" y2="18" /><circle cx="8" cy="18" r="2.2" fill="var(--paper)" />
-            </svg></span>
-            Task settings
+        <button type="button" className="tdb-sq" onClick={() => setSettingsOpen(true)}>
+          <h3>Task settings</h3>
+          <p>Customise the tasks we show you — hide what you never do.</p>
+          <span className="tdb-sqgo ghost">⚙ Customise</span>
+        </button>
+        {!isProUser(currentUser) && (
+          <button type="button" className="tdb-sq pro" onClick={() => onNavigate("plans")}>
+            <span className="tdb-sqk">SCRIPTALLY PRO</span>
+            <h3>Hand it over</h3>
+            <p>Let the assistant handle your housekeeping — wish lists and materials filled for you.</p>
+            <span className="tdb-sqgo">Meet the assistant</span>
           </button>
-        </div>
-        </div>
+        )}
       </aside>
     );
   }

@@ -28,7 +28,7 @@
 .tdb-ws { display: flex; align-items: flex-start; gap: var(--g24); padding: 0 var(--g24); margin: var(--g24) 0 0; }
 .tdb-main { flex: 1; min-width: 0; } /* anchored 24 off the sidebar; flexes — never centred */
 .tdb-col { min-width: 0; } /* IV P1: uncapped — content-left is the one axis; the container caps */
-@media (max-width: 900px) { .tdb-ws { flex-wrap: wrap; } .tdb-ws .tdb-pair { position: static; width: 100%; max-height: none; } }
+@media (max-width: 900px) { .tdb-ws { flex-wrap: wrap; } .tdb-ws .tdb-lrail { position: static; width: 100%; max-height: none; } }
 
 /* ── THE IDENTITY STRIP (Deck v2 P1) — full-bleed paper band, one base rule, NOT sticky; the
    contents lock to the centred assembly. Title block · 84×102 family post-its (filter solos,
@@ -73,63 +73,31 @@
    own internal scroll keeps the sticky panel inside the viewport. ── */
 /* III P3 — THE PINNED PAIR (pair ref, normative): two same-width floating cards, both riding
    ONE sticky stack at the 24 offset, 12px apart; internal scroll as the safety net only. */
-/* ── THE COLUMN SCROLL CONTRACT (VI P4) — one shared rule for BOTH flanking columns: pinned at
-   the gutter, capped to the viewport minus the F12 header and both gutters, a flex column whose
-   heads and feet stay fixed while ONE middle region scrolls (Today: .tdb-tmid2 — the footer verbs
-   never scroll away; sidebar: the filter card's .tdb-fmid pill region; the review card, when
-   present, is fixed above Today and outside its scroller). Budget check at 900px height:
-   900 − 49 (appnav) − 48 (gutters) = 803 available; five committed rows + the collapsed done row
-   + header + verbs ≈ 370, + the 60px review card + 12 gap ≈ 440 — Today does not scroll on an
-   ordinary viewport. Scrollbars: thin, hairline-coloured, hover/scroll-visible, gutter stable. ── */
-.tdb-pair, .tdb-railr { position: sticky; top: var(--tdb-gutter); max-height: calc(100vh - var(--tdb-appnav) - (var(--tdb-gutter) * 2)); display: flex; flex-direction: column; }
-.tdb-tmid2, .tdb-fmid { overflow-y: auto; min-height: 0; scrollbar-width: thin; scrollbar-color: transparent transparent; scrollbar-gutter: stable; }
-.tdb-tmid2:hover, .tdb-tmid2:focus-within, .tdb-fmid:hover, .tdb-fmid:focus-within { scrollbar-color: var(--hairline) transparent; }
-.tdb-pair { width: var(--tdb-sidebar); flex: 0 0 auto; gap: 12px; transition: width 0.22s cubic-bezier(0.22, 0.8, 0.3, 1); }
-.tdb-pair.folded { width: 64px; align-items: center; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 4px 16px rgba(58, 28, 20, 0.1); padding: 12px 8px; gap: 10px; }
-@media (prefers-reduced-motion: reduce) { .tdb-pair { transition: none; } }
-.tdb-paircard { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 4px 16px rgba(58, 28, 20, 0.1); }
-/* the FOCUS card — split layout, art right (max-height 118 + the illustration law's shadow);
-   hover lift; absent asset = a quieter card (the slot renders nothing). */
-.tdb-focus { flex: 0 0 auto; display: flex; align-items: stretch; overflow: hidden; text-align: left; padding: 0; transition: transform 0.12s, box-shadow 0.12s; }
-.tdb-focus:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(58, 28, 20, 0.14); }
-@media (prefers-reduced-motion: reduce) { .tdb-focus { transition: none; } }
-.tdb-focustx { flex: 1; min-width: 0; padding: 16px 4px 16px 18px; display: flex; flex-direction: column; align-items: flex-start; }
-.tdb-focush { font-family: var(--f12-serif); font-size: 18px; font-weight: 700; color: var(--ink); }
-.tdb-focusp { font-size: 11.5px; color: var(--ink-2); line-height: 1.5; margin-top: 4px; padding-right: 4px; }
-.tdb-focusgo { margin-top: 12px; display: inline-flex; align-items: center; gap: 7px; background: var(--ink); color: var(--paper); border-radius: 99px; padding: 8px 16px; font-size: 11.5px; font-weight: 600; }
-.tdb-focus:disabled .tdb-focusgo { opacity: 0.5; }
-.tdb-focusart { width: 104px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; padding: 12px 12px 12px 0; }
-.tdb-focusart img { max-width: 100%; max-height: 118px; filter: drop-shadow(0 2px 4px rgba(58, 28, 20, 0.12)); }
-/* the FILTER card */
-.tdb-ftop { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--hairline); }
-.tdb-ftop .tdb-vtg { flex: 1; }
-.tdb-ftop .tdb-vtg button { flex: 1; }
-.tdb-fstatus { margin: 12px 16px 0; display: flex; align-items: center; gap: 8px; font-size: 11.5px; font-weight: 600; color: var(--ink); }
-.tdb-freset { margin-left: auto; border: none; background: none; padding: 0; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.1em; color: var(--burg); border-bottom: 1px solid var(--pink-b); }
-.tdb-fcard { display: flex; flex-direction: column; min-height: 0; flex: 0 1 auto; }
-.tdb-ftop, .tdb-fstatus, .tdb-footrows { flex: 0 0 auto; }
-.tdb-fgrp2 { padding: 11px 16px 2px; }
-.tdb-fgh { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.15em; color: var(--faint); margin-bottom: 7px; }
-.tdb-fcloud { display: flex; flex-wrap: wrap; gap: 6px; }
-/* the pill-cloud toggles — real buttons, family colours, filled=on / outline=off / half at zero */
-.tdb-fp { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.09em; border-radius: 99px; padding: 4.5px 11px; border: 1px solid; background: var(--white, #fff); }
-.tdb-fp.p { border-color: var(--pink-b); color: var(--burg); }
-.tdb-fp.p.on { background: linear-gradient(180deg, var(--pink-t), var(--pink-b)); font-weight: 700; }
-.tdb-fp.c { border-color: var(--hk-cof-edge); color: var(--hk-cof-ink); }
-.tdb-fp.c.on { background: linear-gradient(180deg, var(--hk-cof), var(--hk-cof-2)); font-weight: 700; }
-.tdb-fp.s { border-color: var(--hk-spine); color: var(--hk-ink); }
-.tdb-fp.s.on { background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); font-weight: 700; }
-.tdb-fp.zero { opacity: 0.45; }
-.tdb-fp:focus-visible { outline: 2px solid var(--hk-ink); outline-offset: 2px; }
-.tdb-dfold { width: 26px; height: 26px; flex: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--white, #fff); border: 1px solid var(--line); color: var(--muted); font-size: 11px; }
-.tdb-dfold:hover { color: var(--ink); border-color: var(--ink-2); }
-/* IV P2 — the sidebar footer ROWS (todo-grid-v1.html .footrows/.fr2): two full-width rows,
-   letterpress icon roundel + label, hover wash, hairline above the group. Same two behaviours. */
-.tdb-footrows { position: relative; margin-top: 10px; padding: 6px; border-top: 1px solid var(--hairline); }
-.tdb-fr2 { display: flex; align-items: center; gap: 11px; width: 100%; padding: 8px 10px; border-radius: 10px; font-size: 12.5px; font-weight: 600; color: var(--ink); background: none; border: none; text-align: left; cursor: pointer; }
-.tdb-fr2:hover { background: #f4eee5; } /* the ref's wash — no live token sits between paper and oat */
-.tdb-fric { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line); background: var(--white, #fff); display: inline-flex; align-items: center; justify-content: center; color: var(--muted); flex: none; font-size: 12px; }
-.tdb-dsp { flex: 1; } /* the folded rail's spacer */
+/* ── THE COLUMN SCROLL CONTRACT (VI P4 → Deck v2) — one shared rule for BOTH flanking columns:
+   pinned at the gutter, capped to the viewport minus the F12 header and both gutters, a flex
+   column. Today keeps fixed head/foot with the ONE scrolling middle (.tdb-tmid2 — the footer
+   verbs never scroll away); the rail's three squares are short and never scroll. Budget at 900px:
+   900 − 49 (appnav) − 48 (gutters) = 803 ≫ ≈370 for a full Today. Scrollbars: thin, hairline,
+   hover-visible, gutter stable. ── */
+.tdb-lrail, .tdb-railr { position: sticky; top: var(--tdb-gutter); max-height: calc(100vh - var(--tdb-appnav) - (var(--tdb-gutter) * 2)); display: flex; flex-direction: column; }
+.tdb-tmid2 { overflow-y: auto; min-height: 0; scrollbar-width: thin; scrollbar-color: transparent transparent; scrollbar-gutter: stable; }
+.tdb-tmid2:hover, .tdb-tmid2:focus-within { scrollbar-color: var(--hairline) transparent; }
+/* ── THE RAIL (Deck v2 P3, ref .lrail/.sq) — 240px, three squares: white, radius 16, hairline,
+   lifted; the WHOLE square is the button. Focus (ink ▶ Begin + art bottom-right ~64px) · Task
+   settings (ghost ⚙ Customise) · Pro promo (slate gradient, plan-gated). ── */
+.tdb-lrail { width: var(--tdb-rail); flex: 0 0 auto; gap: 14px; }
+.tdb-sq { background: var(--white, #fff); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 4px 14px rgba(58, 28, 20, 0.1); padding: 15px 16px; cursor: pointer; text-align: left; display: block; transition: transform 0.12s, box-shadow 0.12s; }
+.tdb-sq:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(58, 28, 20, 0.14); }
+@media (prefers-reduced-motion: reduce) { .tdb-sq { transition: none; } }
+.tdb-sq h3 { font-family: var(--f12-serif); font-size: 16px; font-weight: 700; color: var(--ink); }
+.tdb-sq p { font-size: 10.5px; color: var(--sub); line-height: 1.5; margin-top: 3px; }
+.tdb-sqgo { margin-top: 10px; display: inline-flex; align-items: center; gap: 6px; background: var(--ink); color: var(--panel); border-radius: 99px; padding: 6px 14px; font-size: 10.5px; font-weight: 600; }
+.tdb-sq:disabled .tdb-sqgo { opacity: 0.5; }
+.tdb-sqgo.ghost { background: var(--white, #fff); color: var(--ink-2); border: 1px solid var(--line); }
+.tdb-sqart { display: flex; justify-content: flex-end; margin-top: -34px; pointer-events: none; }
+.tdb-sqart img { max-height: 64px; filter: drop-shadow(0 2px 4px rgba(58, 28, 20, 0.12)); }
+.tdb-sq.pro { background: linear-gradient(180deg, #eef2f6, #e6ecf2); border-color: #c8d4de; }
+.tdb-sq.pro .tdb-sqk { display: block; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.13em; color: #5a7186; margin-bottom: 3px; }
 .tdb-dhelp { position: absolute; bottom: calc(100% + 4px); right: 0; z-index: 5; min-width: 150px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--sh-3); padding: 5px; }
 .tdb-dhelp button { display: block; width: 100%; text-align: left; font-size: 12px; padding: 7px 10px; border-radius: 7px; color: var(--ink); background: none; border: none; }
 .tdb-dhelp button:hover { background: var(--white, #fff); }

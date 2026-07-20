@@ -23,35 +23,40 @@ const rule = (sel: string): string => {
   return m[1];
 };
 
-describe("P1→III — the sidebar (the pinned pair; sa.todoDrawer fold persisted)", () => {
-  it("the PAIR: one sticky stack at the 24 offset, 12px apart, same-width floating cards", () => {
-    const d = rule(".tdb-pair");
-    expect(d).toContain("width: var(--tdb-sidebar)"); // V P1: 270 via the tdb token family
-    expect(rule(".tdb-pair, .tdb-railr")).toContain("position: sticky; top: var(--tdb-gutter)"); // VI P4: the shared contract
-    expect(d).toContain("gap: 12px");
-    expect(rule(".tdb-tmid2, .tdb-fmid")).toContain("overflow-y: auto"); // VI P4: the middles scroll, never the columns
-    expect(rule(".tdb-paircard")).toContain("border-radius: 16px");
+describe("Deck v2 P3 — THE RAIL (three squares; the pinned pair + fold are extinct)", () => {
+  it("240px sticky column of three whole-square buttons: Focus · Task settings · Pro", () => {
+    expect(rule(".tdb-lrail")).toContain("width: var(--tdb-rail)");
+    expect(rule(".tdb-lrail, .tdb-railr")).toContain("position: sticky; top: var(--tdb-gutter)");
+    const sq = rule(".tdb-sq");
+    expect(sq).toContain("border-radius: 16px");
+    expect(sq).toContain("box-shadow: 0 4px 14px rgba(58, 28, 20, 0.1)");
+    expect(page).toContain('<aside className="tdb-lrail" aria-label="Workbench rail">');
   });
-  it("folds to the 64px icon rail via a width transition; reduced motion kills it", () => {
-    expect(rule(".tdb-pair.folded")).toContain("width: 64px");
-    expect(rule(".tdb-pair")).toContain("transition: width");
-    expect(css).toMatch(/prefers-reduced-motion: reduce\) \{ \.tdb-pair \{ transition: none/);
+  it("Focus mode: whole-board scope through the same flow; ink ▶ Begin; the art bottom-right ~64px", () => {
+    expect(page).toContain("const boardCards = [...board.do, ...board.hk, ...board.nt];");
+    expect(page).toContain('onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}');
+    expect(page).toContain("<p>No distractions — one item at a time.</p>");
+    expect(page).toContain('<span className="tdb-sqgo">▶ Begin</span>');
+    expect(css).toContain(".tdb-sqart img { max-height: 64px;");
   });
-  it("fold state persists under the sa. localStorage convention (approved — never a user-doc field)", () => {
-    expect(page).toContain('localStorage.getItem("sa.todoDrawer")');
-    expect(page).toContain('localStorage.setItem("sa.todoDrawer", v ? "folded" : "open")');
+  it("Task settings: the EXISTING sheet, ghost ⚙ Customise", () => {
+    expect(page).toContain('className="tdb-sq" onClick={() => setSettingsOpen(true)}');
+    expect(page).toContain("<p>Customise the tasks we show you — hide what you never do.</p>");
+    expect(page).toContain('<span className="tdb-sqgo ghost">⚙ Customise</span>');
   });
-  it("the folded rail keeps Focus/⚙/unfold (the ? left with the FAB's return); retired species stay retired", () => {
-    expect(page).toContain('className="tdb-pair folded"');
-    expect(page).not.toContain("tdb-dwalk");
-    expect(page).not.toContain("tdb-newnote");
-    expect(page).not.toContain("Walk me through");
+  it("the Pro promo: plan-gated both ways; CTA → the /plans upgrade surface; slate family", () => {
+    expect(page).toContain("{!isProUser(currentUser) && (");
+    expect(page).toContain('className="tdb-sq pro" onClick={() => onNavigate("plans")}');
+    expect(page).toContain("<span className=\"tdb-sqk\">SCRIPTALLY PRO</span>".replace(/\\/g, ""));
+    expect(page).toContain("<h3>Hand it over</h3>");
+    expect(page).toContain("Let the assistant handle your housekeeping — wish lists and materials filled for you.");
+    expect(page).toContain('<span className="tdb-sqgo">Meet the assistant</span>');
+    expect(rule(".tdb-sq.pro")).toContain("linear-gradient(180deg, #eef2f6, #e6ecf2)");
   });
-  it("VI P3: the FOOT carries ⚙ ONLY (the same TaskSettingsSheet) — help lives on the AppShell FAB", () => {
-    expect(page).toContain('className="tdb-fr2" onClick={() => setSettingsOpen(true)}'); // IV P2 footer row
-    expect(page).not.toContain("tdb-dhelp");
-    expect(page).not.toContain("helpOpen");
-    expect(page).not.toContain(">Help centre</button>"); // no duplicate help entry on the page
+  it("the fold is extinct: no folded face, no sa.todoDrawer key, no fold chrome", () => {
+    for (const stale of ["tdb-pair", "sa.todoDrawer", "tdb-dfold", "folded", "tdb-footrows", "tdb-fr2", "tdb-fcard"]) {
+      expect(page).not.toContain(stale);
+    }
   });
 });
 
@@ -93,7 +98,7 @@ describe("P1 — masthead composition + the centred column", () => {
     expect(rule(".tdb-postit")).toContain("width: 84px; height: 102px");
     expect(rule(".tdb-pv")).toContain("font-size: 30px");
     expect(page).toContain('className="tdb-rvhead"');
-    const strip = page.slice(page.indexOf("function renderStrip"), page.indexOf("// ── THE PINNED PAIR"));
+    const strip = page.slice(page.indexOf("function renderStrip"), page.indexOf("// ── Deck v2 P3: THE RAIL"));
     expect(strip).not.toContain("Walk me through");
     expect(strip).not.toContain("tdb-msrch"); // search belongs to the deck
   });
@@ -279,7 +284,7 @@ describe("A1 → Deck v2 — the identity strip band (supersedes the masthead ba
   });
   it("the strip is not sticky (scrolls away); the flanking columns keep the scroll contract", () => {
     expect(rule(".tdb-strip")).not.toContain("sticky");
-    expect(rule(".tdb-pair, .tdb-railr")).toContain("position: sticky; top: var(--tdb-gutter)"); // VI P4: the shared contract
+    expect(rule(".tdb-lrail, .tdb-railr")).toContain("position: sticky; top: var(--tdb-gutter)"); // the shared contract (P3: the rail)
   });
 });
 
@@ -299,7 +304,7 @@ describe("II·B P1 — the 24-grid + the ref masthead (todo-workbench-rail-v1.ht
     expect(rule(".tdb-wrap")).toContain("--g24: 24px; --g12: 12px;");
     expect(rule(".tdb-ws")).toContain("gap: var(--g24)");
     expect(rule(".tdb-ws")).toContain("padding: 0 var(--g24)");
-    expect(rule(".tdb-pair, .tdb-railr")).toContain("top: var(--tdb-gutter)"); // VI P4 contract (gutter rides --g24)
+    expect(rule(".tdb-lrail, .tdb-railr")).toContain("top: var(--tdb-gutter)"); // the contract (gutter rides --g24)
     expect(rule(".tdb-reel")).toContain("margin-bottom: var(--g24)");
     expect(rule(".tdb-lghead.standalone")).toContain("margin-bottom: var(--g12)"); // II·B P4 head band
     expect(rule(".tdb-reeltrack")).toContain("gap: var(--g12)"); // III P2: the reel is the card-gutter consumer
@@ -313,17 +318,6 @@ describe("II·B P1 — the 24-grid + the ref masthead (todo-workbench-rail-v1.ht
 });
 
 describe("III P3 — the pinned pair (supersedes the II·B controls-only drawer)", () => {
-  it("card 1 is FOCUS MODE: split layout, the art at max-height 118 with the illustration-law shadow, hover lift", () => {
-    expect(page).toContain('className="tdb-paircard tdb-focus" disabled={!tiles.urgent} onClick={() => openFlowCards(board.do)}');
-    expect(page).toContain(">Focus mode</b>");
-    expect(page).toContain("No distractions — work through your list, item by item.");
-    expect(page).toContain(">▶ Begin</span>"); // IV P2: the count is gone from the card
-    expect(page).toContain('import focusArt from "../../assets/todo/focus-art.png";');
-    expect(page).toContain("{focusArt && <span className=\"tdb-focusart\">"); // absent asset = quieter card
-    expect(rule(".tdb-focusart img")).toContain("max-height: 118px");
-    expect(rule(".tdb-focusart img")).toContain("drop-shadow(0 2px 4px rgba(58, 28, 20, 0.12))");
-    expect(css).toContain(".tdb-focus:hover:not(:disabled) { transform: translateY(-2px);");
-  });
   it("Deck v2 P2: the view segment + SHOWING/RESET live in the DECK; the old pill cloud is extinct", () => {
     expect(page).toContain('className="tdb-ctl tdb-vseg" role="group" aria-label="View"');
     expect(page).toContain("const shownX = vDo.length + hkGapCount(vGroups) + vStale.length + vNt.length;");
@@ -352,7 +346,7 @@ describe("II·B P3 — the companion rail (one panel, two mounts, one state)", (
   });
   it("the rail: 264 sticky at the 24 offset, after the main column; noted as the future companions' home", () => {
     expect(rule(".tdb-railr")).toContain("width: var(--tdb-today)");
-    expect(rule(".tdb-pair, .tdb-railr")).toContain("position: sticky"); // VI P4: the shared contract
+    expect(rule(".tdb-lrail, .tdb-railr")).toContain("position: sticky"); // the shared contract
     expect(page.indexOf('className="tdb-main"')).toBeLessThan(page.indexOf('className="tdb-railr"'));
   });
   it("the chip's count is the committed union — never a parallel tally — and the header slot pairs date ⇄ count", () => {
@@ -465,7 +459,7 @@ describe("Deck v2 P2 — the deck (sticky control bar; todo-deck-v2.html)", () =
 
 describe("Deck v2 P1 — the identity strip (todo-deck-v2.html)", () => {
   it("strip composition: assembly row = title block · post-its · the resident banner · [narrow chip]", () => {
-    const strip = page.slice(page.indexOf("function renderStrip"), page.indexOf("// ── THE PINNED PAIR"));
+    const strip = page.slice(page.indexOf("function renderStrip"), page.indexOf("// ── Deck v2 P3: THE RAIL"));
     for (const piece of ["tdb-tblock", "tdb-postits", "tdb-rvhead", "tdb-todaypopwrap"]) {
       expect(strip).toContain(piece);
     }
@@ -478,7 +472,7 @@ describe("Deck v2 P1 — the identity strip (todo-deck-v2.html)", () => {
     expect(page).toContain('onClick={() => soloPostit("yellow")}');
     expect(page).toContain('aria-pressed={isSoloed(filters, "pink")}');
     expect(page).toContain("setFilters((f) => soloFamily(f, fam));");
-    const strip = page.slice(page.indexOf("function renderStrip"), page.indexOf("// ── THE PINNED PAIR"));
+    const strip = page.slice(page.indexOf("function renderStrip"), page.indexOf("// ── Deck v2 P3: THE RAIL"));
     expect(strip).not.toContain("scrollToLane");
   });
   it("the latte family lands: post-it + tokens (coffee keeps only the journey-sheet headers)", () => {
@@ -564,32 +558,25 @@ describe("VI P3 — lane-head play buttons · help returns to the FAB", () => {
   });
 });
 
-describe("VI P4 — the column scroll contract (one shared rule, both flanking columns)", () => {
-  // jsdom renders no layout: the 900px-height no-scroll check is the arithmetic in the contract
-  // comment (900 − 49 − 48 = 803 ≫ ≈440 for five committed + done row + review card); the
-  // browser walk confirms it. These locks pin the rule text the arithmetic depends on.
+describe("The column scroll contract (VI P4 → Deck v2 selectors)", () => {
   it("the shared rule: sticky at the gutter, viewport-capped via the appnav token, flex column", () => {
-    const shared = rule(".tdb-pair, .tdb-railr");
+    const shared = rule(".tdb-lrail, .tdb-railr");
     expect(shared).toContain("position: sticky; top: var(--tdb-gutter)");
     expect(shared).toContain("max-height: calc(100vh - var(--tdb-appnav) - (var(--tdb-gutter) * 2))");
     expect(shared).toContain("display: flex; flex-direction: column;");
-    expect(css).toContain("THE COLUMN SCROLL CONTRACT (VI P4)");
-    expect(css).toContain("900 − 49 (appnav) − 48 (gutters) = 803");
+    expect(css).toContain("THE COLUMN SCROLL CONTRACT");
   });
-  it("one scrolling middle per card — heads and feet fixed; the review card outside Today's scroller", () => {
-    expect(rule(".tdb-tmid2, .tdb-fmid")).toContain("overflow-y: auto; min-height: 0;");
+  it("Today keeps fixed head/foot with ONE scrolling middle; verbs never scroll away", () => {
+    expect(rule(".tdb-tmid2")).toContain("overflow-y: auto; min-height: 0;");
     expect(rule(".tdb-today2")).toContain("flex: 0 1 auto; min-height: 0;");
-    // Today: header → middle → verbs, in that order (the filter card's scroller retired with
-    // its pills — the deck owns filtering; P3 replaces the pair with the three-square rail)
     const card = page.slice(page.indexOf('className="tdb-today2"'), page.indexOf('className="tdb-tf2"'));
     expect(card).toContain('className="tdb-tmid2"');
   });
-  it("scrollbars: thin, hairline-coloured, visible on hover/focus only, gutter stable (no shift)", () => {
-    const mids = rule(".tdb-tmid2, .tdb-fmid");
+  it("scrollbars: thin, hairline-coloured, hover/focus-visible, gutter stable", () => {
+    const mids = rule(".tdb-tmid2");
     expect(mids).toContain("scrollbar-width: thin");
-    expect(mids).toContain("scrollbar-color: transparent transparent");
     expect(mids).toContain("scrollbar-gutter: stable");
-    expect(css).toContain(".tdb-tmid2:hover, .tdb-tmid2:focus-within, .tdb-fmid:hover, .tdb-fmid:focus-within { scrollbar-color: var(--hairline) transparent; }");
+    expect(css).toContain(".tdb-tmid2:hover, .tdb-tmid2:focus-within { scrollbar-color: var(--hairline) transparent; }");
   });
 });
 
@@ -611,6 +598,6 @@ describe("III P4 — the tucked Today tab · the masthead · the naming sweep", 
     }
     expect(page).toMatch(/aria-label=\{`Focus on \$\{label\}`\}/); // cards view (the play button)
     expect(page).toMatch(/aria-label=\{`Focus on \$\{opts\.label\}`\}/); // ledger view
-    expect(page).toContain(">Focus mode</b>"); // the pair's card
+    expect(page).toContain("<h3>Focus mode</h3>"); // the rail's square
   });
 });
