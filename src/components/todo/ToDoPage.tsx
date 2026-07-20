@@ -41,7 +41,7 @@ import { reelFit, reelPage, ReelFit, REEL_CARD_MIN } from "./reelFit";
 import focusArt from "../../assets/todo/focus-art.png";
 // VI P2 — the review cup (original ScriptAlly artwork; currentColor → inlined so it inherits ink)
 import reviewCupRaw from "../../assets/todo/review-cup.svg?raw";
-import { TodoFilterState, DEFAULT_FILTERS, filtersActive, matchesSearch, groupMatchesSearch, visibleDoCard, visibleStaleCard, visibleNoteCard, visibleGroup, filterCounts, soloFamily, isSoloed, PillFamily } from "../../lib/todoFilters";
+import { TodoFilterState, DEFAULT_FILTERS, filtersActive, matchesSearch, groupMatchesSearch, visibleDoCard, visibleStaleCard, visibleNoteCard, visibleGroup, filterCounts, soloFamily, isSoloed, isResting, togglePill, FilterType, PillFamily } from "../../lib/todoFilters";
 import { SelState, EMPTY_SEL, applySelectClick, moveFocus } from "../../lib/todoSelection";
 import { shouldAutoRunTour } from "../../lib/todoTour";
 import { TodoTour } from "./TodoTour";
@@ -322,6 +322,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [search, setSearch] = useState("");
   // Drawer filters (Phase 4) — session-only; all-visible defaults (hiding is the writer's act).
   const [filters, setFilters] = useState<TodoFilterState>(DEFAULT_FILTERS);
+  const filtersRef = useRef<TodoFilterState>(DEFAULT_FILTERS);
+  filtersRef.current = filters;
   const setF = (k: keyof TodoFilterState, v: boolean) => setFilters((f) => ({ ...f, [k]: v }));
   const searchRef = useRef<HTMLInputElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -412,6 +414,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const sctx = { queries, agents, manuscripts };
   const active = filtersActive(filters, search);
   const fc = filterCounts({ doCards: board.do, hkGroups, staleCards, ntCards: board.nt, committedCount: committedCards.length });
+  const resting = isResting(filters);
   const vDo = board.do.filter((c) => visibleDoCard(c, filters, today) && matchesSearch(c, search, sctx));
   const vGroups = hkGroups.filter((g) => visibleGroup(g, filters) && groupMatchesSearch(g, search));
   const vStale = staleCards.filter((c) => visibleStaleCard(c, filters, today) && matchesSearch(c, search, sctx));
@@ -556,6 +559,24 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     const undo = () => upsertTaskFlag(key, { snoozedUntil: null });
     flash(`✓ ${c.title} — dismissed`, { label: "Undo", fn: async () => { await undo(); flash("Restored"); } });
   }
+
+  // Deck v2 P2 — the shown/total pair (the deck's SHOWING x OF y) + the Esc chain: search
+  // clears first, the narrowing second (editables keep their own Esc except the search input,
+  // which clears via its own handler).
+  const shownX = vDo.length + hkGapCount(vGroups) + vStale.length + vNt.length;
+  const shownY = tiles.urgent + tiles.housekeeping + tiles.notes;
+  const resetDeck = () => { setFilters(DEFAULT_FILTERS); setSearch(""); };
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      const t = e.target as HTMLElement | null;
+      if (t && t.closest("input, textarea, select, [contenteditable]")) return;
+      if (search) { setSearch(""); return; }
+      if (!isResting(filtersRef.current) || filtersRef.current.todayOnly) setFilters(DEFAULT_FILTERS);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [search]);
 
   // ── first-visit spotlight tour (Act 1). Auto-runs ONCE: `tourSeenAt` absent ∧ not the new desk;
   // the flag is stamped on Done AND on skip/Esc (never localStorage — it follows the user). The
@@ -754,6 +775,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             centred assembly. Title block · 84×102 family post-its (filter solos) · the resident
             review banner filling the remaining width. Scrolls away with the wrap. ── */}
         {renderStrip()}
+        {/* ── Deck v2 P2: THE DECK — sticky white control bar under the app nav. Search | pills |
+            lens | spacer | view segment. No Focus, no ⚙ — the rail owns both (P3). ── */}
+        {renderDeck()}
         <div className="tdb-ws">
           {renderDrawer()}
           <div className="tdb-main">
@@ -901,6 +925,59 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     );
   }
 
+  // ── Deck v2 P2: the deck — one pill builder (quiet law: resting plain · narrowed nar/dim ·
+  // zero-count 40%), counts from the board's own derivations (fc/tiles), the lens, the segment. ──
+  function deckPill(label: string, key: FilterType, count: number, dot: "p" | "lat" | "y") {
+    const on = filters[key];
+    const cls = resting ? "" : on ? " nar" : " dim";
+    return (
+      <button type="button" className={`tdb-pt d-${dot}${cls}${count === 0 ? " z" : ""}`} aria-pressed={!resting && on} onClick={() => setFilters((f) => togglePill(f, key))}>
+        <span className="tdb-dotc" aria-hidden />{label} · {count}
+      </button>
+    );
+  }
+  function renderDeck() {
+    return (
+      <div className="tdb-deck">
+        <div className="tdb-asm tdb-deckrow">
+          <span className="tdb-ctl tdb-dsrch">
+            <span aria-hidden>⌕</span>
+            <input
+              ref={searchRef}
+              type="text"
+              placeholder="Search your desk…"
+              aria-label="Search your desk"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Escape") { setSearch(""); (e.target as HTMLInputElement).blur(); } }}
+            />
+            <kbd aria-hidden>⌘K</kbd>
+          </span>
+          <span className="tdb-vdiv" aria-hidden />
+          {deckPill("OFFERS", "offers", fc.offers, "p")}
+          {deckPill("AGENT WAITING", "overToYou", fc.overToYou, "p")}
+          {deckPill("MATERIALS", "materials", fc.materials, "lat")}
+          {deckPill("WISH LISTS", "mswl", fc.mswl, "lat")}
+          {deckPill("STALE", "stale", fc.stale, "lat")}
+          {deckPill("SNOOZED", "snoozed", fc.snoozed, "lat")}
+          {deckPill("NOTES", "notes", fc.notes, "y")}
+          {!resting && (
+            <button type="button" className="tdb-rst" onClick={resetDeck}>SHOWING {shownX} OF {shownY} · RESET ✕</button>
+          )}
+          <span className="tdb-vdiv" aria-hidden />
+          <button type="button" className={`tdb-pt d-s lens${filters.todayOnly ? " nar" : ""}`} aria-pressed={filters.todayOnly} onClick={() => setF("todayOnly", !filters.todayOnly)}>
+            <span className="tdb-dotc" aria-hidden />TODAY’S LIST
+          </button>
+          <span className="tdb-dspc" />
+          <span className="tdb-ctl tdb-vseg" role="group" aria-label="View">
+            <button type="button" className={view === "cards" ? "on" : ""} aria-pressed={view === "cards"} onClick={() => pickView("cards")}>▦</button>
+            <button type="button" className={view === "ledger" ? "on" : ""} aria-pressed={view === "ledger"} onClick={() => pickView("ledger")}>☰</button>
+          </span>
+        </div>
+      </div>
+    );
+  }
+
   // ── Deck v2 P1: the identity strip's contents (inside the centred assembly). The post-its are
   // FILTER buttons now — each solos its family against the same TodoFilterState the deck pills
   // drive (scroll-to-lane retired); pressed = the family is soloed; clicking again rests. The
@@ -970,16 +1047,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         </aside>
       );
     }
-    // III P3 — the pill-cloud filter: the board's own tag vocabulary as REAL toggle buttons
-    // (aria-pressed; filled=active, outline=off, half-opacity at zero — zero rows grey, never hide).
-    const fpill = (label: string, key: keyof TodoFilterState, count: number | null, famCls: string) => (
-      <button type="button" className={`tdb-fp ${famCls}${filters[key] ? " on" : ""}${count === 0 ? " zero" : ""}`} aria-pressed={filters[key]} onClick={() => setF(key, !filters[key])}>
-        {label}{count != null ? ` · ${count}` : ""}
-      </button>
-    );
-    // the status line's sources are the SAME derivations the board consumes — never parallel counts
-    const shownX = vDo.length + hkGapCount(vGroups) + vStale.length + vNt.length;
-    const shownY = tiles.urgent + tiles.housekeeping + tiles.notes;
+    // Deck v2 P2 — the filter card's pills/status/toggle MOVED to the deck (one home); the pair
+    // itself is replaced by the three-square rail in P3. Interim: Focus card + the settings foot.
     return (
       <aside className="tdb-pair" aria-label="Workbench sidebar">
         {/* card 1 — FOCUS MODE (the guided walk's home; same handler, same count derivation) */}
@@ -991,44 +1060,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           </span>
           {focusArt && <span className="tdb-focusart"><img src={focusArt} alt="" /></span>}
         </button>
-        {/* card 2 — THE FILTER CARD: toggle top row · status line · the pill cloud · foot */}
         <div className="tdb-paircard tdb-fcard">
-        <div className="tdb-ftop">
-          <div className="tdb-vtg" role="group" aria-label="View">
-            <button type="button" className={view === "cards" ? "on" : ""} aria-pressed={view === "cards"} onClick={() => pickView("cards")}>▦ Cards</button>
-            <button type="button" className={view === "ledger" ? "on" : ""} aria-pressed={view === "ledger"} onClick={() => pickView("ledger")}>☰ Ledger</button>
-          </div>
-          <button type="button" className="tdb-dfold" title="Fold the sidebar" aria-label="Fold the sidebar" aria-expanded onClick={() => setFold(true)}>«</button>
-        </div>
-        <div className="tdb-fstatus">
-          Showing {shownX} of {shownY}
-          {shownX !== shownY && <button type="button" className="tdb-freset" onClick={() => { setFilters(DEFAULT_FILTERS); setSearch(""); }}>RESET</button>}
-        </div>
-        {/* VI P4 — the card's one scrolling middle (the pill region); ftop/status + foot stay fixed */}
-        <div className="tdb-fmid">
-        <div className="tdb-fgrp2">
-          <div className="tdb-fgh">URGENT · {tiles.urgent}</div>
-          <div className="tdb-fcloud">
-            {fpill("★ OFFERS", "offers", fc.offers, "p")}
-            {fpill("OVER TO YOU", "overToYou", fc.overToYou, "p")}
-          </div>
-        </div>
-        <div className="tdb-fgrp2">
-          <div className="tdb-fgh">HOUSEKEEPING · {tiles.housekeeping}</div>
-          <div className="tdb-fcloud">
-            {fpill("MATERIALS", "materials", fc.materials, "c")}
-            {fpill("WISH LISTS", "mswl", fc.mswl, "c")}
-            {fpill("STALE", "stale", fc.stale, "c")}
-            {fpill("SNOOZED", "snoozed", fc.snoozed, "c")}
-          </div>
-        </div>
-        <div className="tdb-fgrp2">
-          <div className="tdb-fgh">SHOW</div>
-          <div className="tdb-fcloud">
-            {fpill("✓ ON TODAY ONLY", "todayOnly", null, "s")}
-          </div>
-        </div>
-        </div>
         <div className="tdb-footrows">
           <button type="button" className="tdb-fr2" onClick={() => setSettingsOpen(true)}>
             <span className="tdb-fric" aria-hidden><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">

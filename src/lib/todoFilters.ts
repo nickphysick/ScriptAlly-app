@@ -153,6 +153,7 @@ export interface FilterCounts {
   mswl: number;
   stale: number;
   snoozed: number;
+  notes: number;
   today: number;
 }
 
@@ -173,6 +174,7 @@ export function filterCounts(input: {
     mswl: input.hkGroups.find((g) => g.rule === "dq_mswl")?.members.length ?? 0,
     stale: input.staleCards.length,
     snoozed: all.filter((c) => c.snoozes > 0).length,
+    notes: input.ntCards.length, // Deck v2: the yellow pill's count
     today: input.committedCount,
   };
 }

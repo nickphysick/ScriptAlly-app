@@ -93,7 +93,7 @@ describe("filterCounts — derived from the live board sets", () => {
     const stale = [card("st", { taskType: "no_response_close", snoozes: 2 })];
     const nt = [card("n", { userTaskId: "u" })];
     const c = filterCounts({ doCards, hkGroups: [group("dq_materials", 4), group("dq_mswl", 2)], staleCards: stale, ntCards: nt, committedCount: 3 });
-    expect(c).toEqual({ offers: 1, overToYou: 1, materials: 4, mswl: 2, stale: 1, snoozed: 2, today: 3 });
+    expect(c).toEqual({ offers: 1, overToYou: 1, materials: 4, mswl: 2, stale: 1, snoozed: 2, notes: 1, today: 3 });
   });
 });
 
