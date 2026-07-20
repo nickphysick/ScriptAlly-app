@@ -88,27 +88,27 @@ describe("P1 — the corner retirement + the AppShell's one out-of-page line", (
 });
 
 describe("P1 — masthead composition + the centred column", () => {
-  it("one row: title+date/week · 62px post-its (II·B) · the scrap · search ⌘K · the view toggle", () => {
+  it("Deck v2: the IDENTITY STRIP — title block · 84×102 solo post-its · the resident banner", () => {
     expect(page).toContain("{shortHeaderDate(now)} · {weekOfQuerying(queries, new Date(now))}");
-    expect(rule(".tdb-postit")).toContain("width: 56px; height: 68px"); // IV P1: both refs draw 56×68
-    expect(page).toContain('className="tdb-msrch"');
-    expect(page).toContain('className="tdb-vtg"');
-    // Walk me through is NOT in the masthead any more (slice ends before the drawer's intro comment)
-    const mast = page.slice(page.indexOf("function renderMasthead"), page.indexOf("// ── THE PINNED PAIR"));
-    expect(mast).not.toContain("Walk me through");
+    expect(rule(".tdb-postit")).toContain("width: 84px; height: 102px");
+    expect(rule(".tdb-pv")).toContain("font-size: 30px");
+    expect(page).toContain('className="tdb-rvhead"');
+    const strip = page.slice(page.indexOf("function renderStrip"), page.indexOf("// ── THE PINNED PAIR"));
+    expect(strip).not.toContain("Walk me through");
+    expect(strip).not.toContain("tdb-msrch"); // search belongs to the deck
   });
-  it("type-scale: masthead title 25px (II·B), lane heads 16px", () => {
-    expect(rule(".tdb-ask")).toContain("font-size: 25px"); // IV P1: one line at 25
+  it("type-scale: strip title 28px (v2), lane heads 16px", () => {
+    expect(rule(".tdb-ask")).toContain("font-size: 28px");
     expect(rule(".tdb-lgt")).toContain("font-size: 16px"); // II·B P4: one head grammar, both views
   });
-  it("V P1: the rows are FULL-BLEED (no cap, no centring); the content column is uncapped", () => {
-    expect(rule(".tdb-col")).not.toContain("max-width");
-    expect(rule(".tdb-ws")).not.toContain("max-width");
-    expect(rule(".tdb-ws")).not.toContain("auto"); // V P1: left-pinned, never centred
+  it("Width v3: the ASSEMBLY is a fixed centred width; band backgrounds full-bleed, contents lock to it", () => {
+    expect(rule(".tdb-asm")).toContain("width: var(--tdb-asm); margin: 0 auto;");
+    expect(rule(".tdb-strip")).toContain("background: var(--paper)");
+    expect(page).toContain('<div className="tdb-asm tdb-striprow">');
   });
-  it("⌘K guards on visibility (the page stays mounted behind other routes) and Esc clears", () => {
+  it("⌘K guards on visibility (the page stays mounted behind other routes); the input re-lands in the deck (P2)", () => {
     expect(page).toContain("wrapRef.current.offsetParent === null");
-    expect(page).toContain('if (e.key === "Escape") { setSearch("");');
+    expect(page).toContain("const [search, setSearch] = useState");
   });
   it("view state persists under sa.todoView (default cards; P3 made the Ledger face live)", () => {
     expect(page).toContain('localStorage.getItem("sa.todoView")');
@@ -216,9 +216,9 @@ describe("P4 — search + filters (source locks; the matrix lives in todoFilters
     // a filtered-empty lane HIDES rather than celebrating
     expect(page).toContain("{(!active || vDo.length > 0 || overlayCards(\"do\").length > 0) && (");
   });
-  it("search state: ⌘K focuses (visibility-guarded, P1) and Esc clears + blurs", () => {
-    expect(page).toContain('placeholder="Search your desk…"');
-    expect(page).toContain('if (e.key === "Escape") { setSearch(""); (e.target as HTMLInputElement).blur(); }');
+  it("search state: ⌘K focuses (visibility-guarded, P1); the input re-lands in the deck (P2)", () => {
+    expect(page).toContain("matchesSearch(c, search, sctx)"); // the filter plumbing survives the move
+    expect(page).toContain("searchRef");
   });
 });
 
@@ -263,24 +263,21 @@ describe("P5 — selection · keyboard · bulk · kebab (source locks; the reduc
   });
 });
 
-describe("A1 — the masthead band (evening run; amends the shell ref in place)", () => {
-  it("a full-width paper band with the 1px base rule wraps the masthead, ABOVE the drawer row", () => {
-    expect(rule(".tdb-mastband")).toContain("background: var(--paper)");
-    expect(rule(".tdb-mastband")).toContain("border-bottom: 1px solid var(--line)");
-    const band = page.indexOf('className="tdb-mastband"');
+describe("A1 → Deck v2 — the identity strip band (supersedes the masthead band)", () => {
+  it("a full-bleed paper band with the 1px base rule, ABOVE the work row; the mast* family is extinct", () => {
+    expect(rule(".tdb-strip")).toContain("background: var(--paper)");
+    expect(rule(".tdb-strip")).toContain("border-bottom: 1px solid var(--line)");
+    const band = page.indexOf("{renderStrip()}");
     const ws = page.indexOf('className="tdb-ws"');
     expect(band).toBeGreaterThan(0);
-    expect(band).toBeLessThan(ws); // band renders before (above) the drawer+column row
-    expect(page).toContain('<div className="tdb-mastspacer" aria-hidden />'); // IV P1: variant B's spacer
+    expect(band).toBeLessThan(ws);
+    for (const stale of ["tdb-mastband", "tdb-mastcol", "tdb-mastspacer", "renderMasthead"]) {
+      expect(page).not.toContain(stale);
+      expect(css).not.toContain(stale);
+    }
   });
-  it("the band is FULL-BLEED like the workspace row (V P1); the board column no longer hosts the masthead", () => {
-    expect(rule(".tdb-mastcol")).not.toContain("max-width");
-    expect(rule(".tdb-mastcol")).not.toContain("margin");
-    const col = page.slice(page.indexOf('className="tdb-col"'), page.indexOf('className="tdb-lanes"'));
-    expect(col).not.toContain("renderMasthead");
-  });
-  it("the band is not sticky (scrolls away); the drawer's sticky offset rides the 24-grid (II·B)", () => {
-    expect(rule(".tdb-mastband")).not.toContain("sticky");
+  it("the strip is not sticky (scrolls away); the flanking columns keep the scroll contract", () => {
+    expect(rule(".tdb-strip")).not.toContain("sticky");
     expect(rule(".tdb-pair, .tdb-railr")).toContain("position: sticky; top: var(--tdb-gutter)"); // VI P4: the shared contract
   });
 });
@@ -297,22 +294,19 @@ describe("A2 — ledger copy + the avatar stack (source locks)", () => {
 
 describe("II·B P1 — the 24-grid + the ref masthead (todo-workbench-rail-v1.html, Option B)", () => {
   it("the grid ships as named tokens with the vocabulary comment — no magic numbers at the seams", () => {
-    expect(css).toContain("THE GRID (Polish V P1"); // the V grid comment absorbed the vocabulary
+    expect(css).toContain("WIDTH v3 — THE CENTRED ASSEMBLY"); // the v2 law absorbed the vocabulary
     expect(rule(".tdb-wrap")).toContain("--g24: 24px; --g12: 12px;");
     expect(rule(".tdb-ws")).toContain("gap: var(--g24)");
     expect(rule(".tdb-ws")).toContain("padding: 0 var(--g24)");
-    expect(rule(".tdb-ws")).toContain("margin: var(--g24) 0 0"); // V P1: left-pinned
     expect(rule(".tdb-pair, .tdb-railr")).toContain("top: var(--tdb-gutter)"); // VI P4 contract (gutter rides --g24)
     expect(rule(".tdb-reel")).toContain("margin-bottom: var(--g24)");
     expect(rule(".tdb-lghead.standalone")).toContain("margin-bottom: var(--g12)"); // II·B P4 head band
     expect(rule(".tdb-reeltrack")).toContain("gap: var(--g12)"); // III P2: the reel is the card-gutter consumer
     expect(rule(".tdb-ledger")).toContain("gap: var(--g24)");
-    expect(rule(".tdb-mast")).toContain("padding: 26px 0"); // IV P1: variant B's mid
   });
-  it("masthead anatomy per the ref: 62px tape-fold post-its (Playfair numerals), 58×44 scrap, 300px search, 10px eyebrow", () => {
-    expect(rule(".tdb-postit::before")).toContain("width: 20px; height: 9px"); // IV P1 tape
-    expect(rule(".tdb-pv")).toContain("font-family: var(--f12-serif); font-size: 20px"); // IV P1
-    expect(rule(".tdb-msrch")).toContain("flex: 0 0 280px"); // IV P1: fixed at container-right
+  it("strip anatomy per the v2 ref: 84×102 tape-fold post-its (30px Playfair numerals), 12px tape", () => {
+    expect(rule(".tdb-postit::before")).toContain("width: 30px; height: 12px");
+    expect(rule(".tdb-pv")).toContain("font-family: var(--f12-serif); font-size: 30px");
     expect(rule(".tdb-rdate")).toContain("font-size: 10px");
   });
 });
@@ -410,62 +404,50 @@ describe("II·B P4 — one tag grammar + card polish", () => {
   });
 });
 
-describe("V P1 (reconstructed) — the left-pinned full-bleed grid (todo-right-column-v1.html)", () => {
-  // The V prompt file was never supplied; this phase is reconstructed from the VI pack's token
-  // guidance + the normative ref's drawn rows (.row: padding 0 24, gap 24, no max-width, no
-  // centring). jsdom renders no layout — alignment locks are structural, the browser confirms x.
-  it("the V token family on the wrap: gutter (rides --g24), appnav 49, sidebar 270, Today a CONSTANT 264", () => {
+describe("Width v3 — the centred assembly tokens (Deck v2; supersedes V P1's full-bleed grid)", () => {
+  it("the token set on the wrap: asm 1356 · rail 240 · sheet 812 · vp 774 · cardw 250 · Today 256", () => {
     const w = rule(".tdb-wrap");
-    expect(w).toContain("--tdb-gutter: var(--g24);");
+    expect(w).toContain("--tdb-asm: 1356px;");
+    expect(w).toContain("--tdb-rail: 240px;");
+    expect(w).toContain("--tdb-sheet: 812px;");
+    expect(w).toContain("--tdb-vp: 774px;");
+    expect(w).toContain("--tdb-cardw: 250px;");
+    expect(w).toContain("--tdb-today: 256px;");
+    expect(w).toContain("--tdb-gutter: var(--g24);"); // the scroll contract survives
     expect(w).toContain("--tdb-appnav: 49px;");
-    expect(w).toContain("--tdb-sidebar: 270px;");
-    expect(w).toContain("--tdb-today: 264px;");
-    expect(w).not.toContain("--tdb-today-closed"); // no collapsed state, ever
-    expect(css).not.toContain("--container"); // IV's centred cap is retired
-    expect(css).toContain("no reserved slack");
   });
-  it("both bands are full-bleed rows: 24 padding + 24 gap, no max-width, no auto-centring", () => {
-    for (const sel of [".tdb-mastcol", ".tdb-ws"]) {
-      const r = rule(sel);
-      expect(r).toContain("padding: 0 var(--g24)");
-      expect(r).toContain("gap: var(--g24)");
-      expect(r).not.toContain("max-width");
-      expect(r).not.toContain("auto");
-    }
+  it("the assembly centres; the arithmetic is the LAWS' 240+24+812+24+256", () => {
+    expect(rule(".tdb-asm")).toContain("width: var(--tdb-asm); margin: 0 auto;");
+    expect(css).toContain("240 · 24 · sheet 812");
+    expect(css).toContain("Today 256 = 1356px");
+    expect(rule(".tdb-railr")).toContain("width: var(--tdb-today)");
   });
-  it("content-left by construction: the masthead's flanking spacers = the column tokens", () => {
-    expect(rule(".tdb-mastspacer")).toContain("width: var(--tdb-sidebar); flex: 0 0 auto;");
-    expect(rule(".tdb-mastspacer-r")).toContain("width: var(--tdb-today); flex: 0 0 auto;");
-    expect(css).toContain("@media (max-width: 1199.98px) { .tdb-mastspacer-r { display: none; } }");
-    expect(rule(".tdb-pair")).toContain("width: var(--tdb-sidebar)");
-    const spacerIdx = page.indexOf('className="tdb-mastspacer"');
-    expect(spacerIdx).toBeGreaterThan(page.indexOf('className="tdb-mastcol"'));
-    expect(spacerIdx).toBeLessThan(page.indexOf("{renderMasthead()}"));
-    expect(page.indexOf('className="tdb-mastspacer-r"')).toBeGreaterThan(page.indexOf("{renderMasthead()}"));
-  });
-  it("the main column flexes off the sidebar — never independently centred", () => {
-    expect(rule(".tdb-main")).toContain("flex: 1; min-width: 0;");
-    expect(rule(".tdb-main")).not.toContain("margin");
+  it("no reserved slack, no reflow drivers: the ResizeObserver still guards viewport resizes", () => {
     expect(page).toContain("new ResizeObserver(");
-    expect(page).toContain("reelFit(");
   });
 });
 
-describe("IV P2 — footer rows · the label trim (the vertical tab retired by VI P1)", () => {
-  it("footer row (VI P3 trimmed it to one): full-width, 28px roundel, hover wash, hairline above", () => {
-    expect(page).toContain('className="tdb-fr2" onClick={() => setSettingsOpen(true)}');
-    expect(rule(".tdb-footrows")).toContain("border-top: 1px solid var(--hairline)");
-    expect(rule(".tdb-fr2")).toContain("width: 100%");
-    expect(rule(".tdb-fr2")).toContain("border-radius: 10px");
-    expect(rule(".tdb-fr2")).toContain("font-size: 12.5px");
-    expect(rule(".tdb-fric")).toContain("width: 28px; height: 28px; border-radius: 50%");
-    expect(rule(".tdb-fr2:hover")).toContain("background: #f4eee5");
-    // the ? menu still anchors inside the foot (position:relative parent unchanged in role)
-    expect(rule(".tdb-footrows")).toContain("position: relative");
+describe("Deck v2 P1 — the identity strip (todo-deck-v2.html)", () => {
+  it("strip composition: assembly row = title block · post-its · the resident banner · [narrow chip]", () => {
+    const strip = page.slice(page.indexOf("function renderStrip"), page.indexOf("// ── THE PINNED PAIR"));
+    for (const piece of ["tdb-tblock", "tdb-postits", "tdb-rvhead", "tdb-todaypopwrap"]) {
+      expect(strip).toContain(piece);
+    }
+    expect(strip.indexOf("tdb-tblock")).toBeLessThan(strip.indexOf("tdb-postits"));
+    expect(strip.indexOf("tdb-postits")).toBeLessThan(strip.indexOf("tdb-rvhead"));
   });
-  it("the Focus card's button is bare ▶ Begin (no count anywhere on the card)", () => {
-    expect(page).toContain(">▶ Begin</span>");
-    expect(page).not.toContain("▶ Begin ·");
+  it("post-its are FILTER buttons soloing their family — same state as the deck pills; scroll-to-lane retired here", () => {
+    expect(page).toContain('onClick={() => soloPostit("pink")}');
+    expect(page).toContain('onClick={() => soloPostit("latte")}');
+    expect(page).toContain('onClick={() => soloPostit("yellow")}');
+    expect(page).toContain('aria-pressed={isSoloed(filters, "pink")}');
+    expect(page).toContain("setFilters((f) => soloFamily(f, fam));");
+    const strip = page.slice(page.indexOf("function renderStrip"), page.indexOf("// ── THE PINNED PAIR"));
+    expect(strip).not.toContain("scrollToLane");
+  });
+  it("the latte family lands: post-it + tokens (coffee keeps only the journey-sheet headers)", () => {
+    expect(css).toContain("--lat-1: #f5efe6; --lat-2: #efe7d9; --lat-bd: #ddd0bc; --lat-mark: #cbb995; --lat-ink: #8a7048;");
+    expect(css).toContain(".tdb-postit.hk { background: var(--lat-2);");
   });
 });
 
@@ -561,7 +543,6 @@ describe("VI P4 — the column scroll contract (one shared rule, both flanking c
   it("one scrolling middle per card — heads and feet fixed; the review card outside Today's scroller", () => {
     expect(rule(".tdb-tmid2, .tdb-fmid")).toContain("overflow-y: auto; min-height: 0;");
     expect(rule(".tdb-today2")).toContain("flex: 0 1 auto; min-height: 0;");
-    expect(rule(".tdb-rvcard")).toContain("flex: 0 0 auto;"); // fixed above, never inside the scroller
     expect(rule(".tdb-fcard")).toContain("display: flex; flex-direction: column; min-height: 0;");
     expect(rule(".tdb-ftop, .tdb-fstatus, .tdb-footrows")).toContain("flex: 0 0 auto;");
     // markup: the pill region rides inside .tdb-fmid, between the fixed status line and the foot

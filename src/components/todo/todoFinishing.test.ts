@@ -55,77 +55,44 @@ describe("P2 — undo everywhere (write-then-reverse)", () => {
   });
 });
 
-describe("P3→III — the Sunday review's doorways (banner + bar; the card and scrap are retired)", () => {
-  it("finishReview writes the completion SENTINEL against the week key (single-sourced)", () => {
+describe("Deck v2 P1 — THE RESIDENT REVIEW BANNER (one surface, no windows, no dismissal)", () => {
+  const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
+  const css = readFileSync(join(here, "todo.css"), "utf8");
+  const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");
+  const cup = readFileSync(join(here, "..", "..", "assets", "todo", "review-cup.svg"), "utf8");
+
+  it("finishReview writes the completion SENTINEL against the week key (single-sourced) — unchanged", () => {
     expect(flow).toContain("reviewCompletionSnooze(win)");
     expect(flow).toContain('flagKeyForTask("weekly_review", win.key)');
   });
-
-  it("the review is NOT a task any more: no card renderer, no leak filters needed (by construction — locked in todoBoard.test)", () => {
-    expect(page).not.toContain("renderReviewCard");
-    expect(page).not.toContain('taskType !== "weekly_review"');
-    expect(page).not.toContain("tdb-scrap");
+  it("ONE derived boolean drives the button: opened ≔ completed-this-week (the only stored review record)", () => {
+    expect(page).toContain("const reviewWin = queries.length > 0 ? reviewWeek(queries, now) : null;");
+    expect(page).toContain("f.snoozedUntil === reviewCompletionSnooze(reviewWin)");
+    expect(page).toContain('{reviewOpened ? "View again" : "Open it ›"}');
+    expect(page).toContain('className={`tdb-rvopen${reviewOpened ? " ghost" : ""}`} onClick={openSundayReview}');
   });
-
-  it("BOTH doorways open the mode unchanged: the banner's Begin and the afterlife card call openSundayReview", () => {
-    expect(page).toContain('className="tdb-rvgo2" onClick={openSundayReview}>Begin the review →');
-    expect(page).toContain('className="tdb-rvcard" onClick={openSundayReview}'); // VI P2: the right-column card
-    expect(page).toContain('mode: "weeklyReview"');
+  it("the banner is a PERMANENT resident in the strip: no ✕, no dismissal write, no windows", () => {
+    expect(page).not.toContain("dismissReviewBanner");
+    expect(page).not.toContain("reviewSurface");
+    for (const stale of ["tdb-rvbanner", "tdb-rvbar", "tdb-rvcard", "tdb-rvx2", "tdb-rvgo2", "renderReviewAfterlife"]) {
+      expect(page).not.toContain(stale);
+      expect(css).not.toContain(stale);
+    }
   });
-
-  it("the banner's ✕ dismisses via the SAME weekly_review flag write (3-day snooze) with Undo; it gates the banner only", () => {
-    const d = page.match(/function dismissReviewBanner[\s\S]*?\n  \}/)?.[0] ?? "";
-    expect(d).toContain('flagKeyForTask("weekly_review", surface.weekKey)');
-    expect(d).toContain("snoozedUntil: new Date(Date.now() + 3 * 86400000).toISOString()");
-    expect(d).toContain('label: "Undo"');
-  });
-
-  it("the banner copy is the 5ways §1 verbatim (no stat preview); the afterlife is the VI cup card", () => {
-    expect(page).toContain("Last week’s progress report is ready");
-    expect(page).toContain("Check it out — every box ticked here turns the dial in your favour.");
-    expect(page).toContain("THE SUNDAY REVIEW · WEEK {surface.weekNumber}");
-    expect(page).toContain("<b>Last week in review</b>");
-    expect(page).toContain("WEEK {surface.weekNumber} · NOT YET OPENED");
-    expect(page).not.toContain("tdb-rvbar"); // the thin bar leaves no markup behind
-  });
-
-  it("openSundayReview is a HOISTED function (the banner/bar JSX calls it from the return — the TDZ lesson)", () => {
-    expect(page).toContain("function openSundayReview()");
-    expect(page).not.toMatch(/const openSundayReview = /);
-  });
-});
-
-describe("VI P2 — the review's afterlife is the right-column cup card (todo-right-column-v1.html)", () => {
-  const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
-  const css = readFileSync(join(here, "todo.css"), "utf8");
-  const cup = readFileSync(join(here, "..", "..", "assets", "todo", "review-cup.svg"), "utf8");
-  it("the cup is original artwork on currentColor, inlined (?raw) so it inherits the roundel's ink", () => {
+  it("the banner anatomy: uncircled 46px currentColor cup, kicker, Playfair 16 title, one-line sub", () => {
     expect(cup).toContain('stroke="currentColor"');
-    expect(cup).not.toMatch(/#3a1c14/i); // no hardcoded ink — the CSS colour rules
-    expect(page).toContain('import reviewCupRaw from "../../assets/todo/review-cup.svg?raw";');
-    expect(page).toContain('dangerouslySetInnerHTML={{ __html: reviewCupRaw }}');
-    const cupRule = css.match(/\.tdb-rvcup2 \{([^}]*)\}/)?.[1] ?? "";
-    expect(cupRule).toContain("width: 38px; height: 38px; border-radius: 50%");
+    expect(page).toContain('<span className="tdb-rvcupb" aria-hidden dangerouslySetInnerHTML={{ __html: reviewCupRaw }} />');
+    expect(page).toContain("THE SUNDAY REVIEW · WEEK {reviewWin.weekNumber}");
+    expect(page).toContain("<b>Last week in review</b>");
+    expect(page).toContain("<p>Every box ticked turns the dial in your favour.</p>");
+    const cupRule = css.match(/\.tdb-rvcupb \{([^}]*)\}/)?.[1] ?? "";
+    expect(cupRule).toContain("width: 46px");
     expect(cupRule).toContain("color: var(--ink)");
-    expect(css).toContain(".tdb-rvcup2 svg { width: 30px;");
+    expect(cupRule).not.toContain("border-radius"); // uncircled
+    expect(css).toMatch(/\.tdb-rvhead \{ flex: 1;[^}]*border-radius: 14px/);
+    expect(css).toMatch(/\.tdb-rvhx b \{[^}]*font-size: 16px/);
   });
-  it("one helper, two mounts — the card rides ABOVE the Today panel in the column and the narrow popover alike", () => {
-    expect(page).toContain('if (surface?.kind !== "card") return null;'); // absent → Today rises, no gap
-    expect((page.match(/\{renderReviewAfterlife\(\)\}/g) ?? []).length).toBe(2);
-    const rail = page.indexOf('className="tdb-railr"');
-    expect(page.indexOf("{renderReviewAfterlife()}", rail)).toBeLessThan(page.indexOf("{renderTodayPanel()}", rail));
-    const pop = page.indexOf('className="tdb-todaypop"');
-    expect(page.indexOf("{renderReviewAfterlife()}", pop)).toBeLessThan(page.indexOf("{renderTodayPanel()}", pop));
-  });
-  it("the card anatomy: whole-card button, Playfair title over the mono week line, chevron; cardx family", () => {
-    expect(page).toContain('className="tdb-rvcard" onClick={openSundayReview}');
-    const card = css.match(/\.tdb-rvcard \{([^}]*)\}/)?.[1] ?? "";
-    expect(card).toContain("border-radius: 16px");
-    expect(card).toContain("box-shadow: 0 4px 16px rgba(58, 28, 20, 0.1)");
-    expect(css).toMatch(/\.tdb-rvtx b \{[^}]*font-family: var\(--f12-serif\); font-size: 13\.5px/);
-  });
-  it("the main column now ENDS with the lanes — no review markup beneath them", () => {
-    expect(page).not.toContain("tdb-rvbar");
-    expect(css).not.toContain("tdb-rvbar");
+  it("the mode itself is untouched: the banner button opens weeklyReview over the same set", () => {
+    expect(page).toContain('mode: "weeklyReview"');
   });
 });

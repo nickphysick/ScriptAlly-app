@@ -5,7 +5,7 @@
 import { describe, it, expect } from "vitest";
 import { BoardCard } from "./todoBoard";
 import { HkGroup } from "./todoHousekeeping";
-import { DEFAULT_FILTERS, TodoFilterState, filtersActive, matchesSearch, groupMatchesSearch, visibleDoCard, visibleStaleCard, visibleNoteCard, visibleGroup, filterCounts, cardText } from "./todoFilters";
+import { DEFAULT_FILTERS, TodoFilterState, filtersActive, matchesSearch, groupMatchesSearch, visibleDoCard, visibleStaleCard, visibleNoteCard, visibleGroup, filterCounts, cardText, togglePill, soloFamily, isSoloed, isResting, ALL_TYPES, FAMILY_TYPES } from "./todoFilters";
 import { Agent, Manuscript, Query, QueryStatus } from "../types";
 
 const TODAY = "2026-07-18";
@@ -17,7 +17,7 @@ const group = (rule: HkGroup["rule"], members = 3): HkGroup =>
 
 describe("defaults + activity", () => {
   it("all-visible defaults (Snoozed CHECKED — hiding is the writer's act, deviation from the static mock); todayOnly off", () => {
-    expect(DEFAULT_FILTERS).toEqual({ offers: true, overToYou: true, materials: true, mswl: true, stale: true, snoozed: true, todayOnly: false });
+    expect(DEFAULT_FILTERS).toEqual({ offers: true, overToYou: true, materials: true, mswl: true, stale: true, snoozed: true, notes: true, todayOnly: false });
   });
   it("filtersActive: default + empty search = inactive; any change or query = active", () => {
     expect(filtersActive(f(), "")).toBe(false);
@@ -94,5 +94,35 @@ describe("filterCounts — derived from the live board sets", () => {
     const nt = [card("n", { userTaskId: "u" })];
     const c = filterCounts({ doCards, hkGroups: [group("dq_materials", 4), group("dq_mswl", 2)], staleCards: stale, ntCards: nt, committedCount: 3 });
     expect(c).toEqual({ offers: 1, overToYou: 1, materials: 4, mswl: 2, stale: 1, snoozed: 2, today: 3 });
+  });
+});
+
+describe("Deck v2 — the quiet-pill reducer + the post-it family solos", () => {
+  it("resting = every type on; the lens is separate", () => {
+    expect(isResting(DEFAULT_FILTERS)).toBe(true);
+    expect(isResting({ ...DEFAULT_FILTERS, todayOnly: true })).toBe(true);
+    expect(isResting({ ...DEFAULT_FILTERS, stale: false })).toBe(false);
+  });
+  it("first toggle SOLOS the type; further toggles edit membership; emptying returns to rest", () => {
+    const solo = togglePill(DEFAULT_FILTERS, "materials");
+    expect(solo.materials).toBe(true);
+    expect(ALL_TYPES.filter((t) => solo[t])).toEqual(["materials"]);
+    const two = togglePill(solo, "mswl");
+    expect(ALL_TYPES.filter((t) => two[t]).sort()).toEqual(["materials", "mswl"]);
+    const back = togglePill(togglePill(two, "mswl"), "materials"); // remove both → rest
+    expect(isResting(back)).toBe(true);
+  });
+  it("the post-it solo: exactly the family's set; pressed = soloed; clicking again rests", () => {
+    const f = soloFamily(DEFAULT_FILTERS, "pink");
+    expect(ALL_TYPES.filter((t) => f[t]).sort()).toEqual([...FAMILY_TYPES.pink].sort());
+    expect(isSoloed(f, "pink")).toBe(true);
+    expect(isSoloed(f, "latte")).toBe(false);
+    expect(isResting(soloFamily(f, "pink"))).toBe(true); // toggle off
+    const y = soloFamily(f, "yellow"); // switching family re-solos
+    expect(ALL_TYPES.filter((t) => y[t])).toEqual(["notes"]);
+  });
+  it("the notes gate: narrowing elsewhere hides notes", () => {
+    const f = togglePill(DEFAULT_FILTERS, "offers");
+    expect(f.notes).toBe(false);
   });
 });

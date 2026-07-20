@@ -12,19 +12,16 @@
    engage. No 100vh/overflow-hidden clamp anywhere — that was the earlier scroll bug. Top padding
    REMOVED (the band sits flush under the shell bar); bottom padding clears the fixed corner
    controls (Today FAB + the shell's help "?"). Page-scoped. */
-/* ── THE GRID (Polish V P1, reconstructed from the VI pack + todo-right-column-v1.html, over
-   the II·B 24-grid and superseding IV's centred 1494 container) — LEFT-PINNED FULL-BLEED rows:
-   every horizontal band is a full-width flex row with a 24 gutter and a 24 gap; nothing centres,
-   nothing caps — on a wide monitor the sidebar stays hard left and the main column grows. Two
-   anchored edges survive from IV: container-left (the sidebar) and content-left (= left +
-   sidebar + gap; the masthead's spacers hold the flanking zones so title/banner/lanes share one
-   axis, and the search right-aligns to the main column's edge). The V token family:
-     --tdb-gutter: the page gutter + the sticky offset (rides the II·B --g24)
-     --tdb-appnav: the F12 header above the board's scroller (CrumbStrip 48 + 1px rule)
-     --tdb-sidebar: the left sidebar column · --tdb-today: the right (Today) column — a CONSTANT:
-     no collapsed state, no --tdb-today-closed, no reserved slack, no reel-recompute-on-toggle.
-   --g24: every seam · --g12: lane-head↔cards · card gutters. ── */
-.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-appnav: 49px; --tdb-sidebar: 270px; --tdb-today: 264px; flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 0 0 48px; }
+/* ── WIDTH v3 — THE CENTRED ASSEMBLY (Command Deck v2, todo-deck-v2.html THE LAWS; supersedes
+   V P1's full-bleed left-pinned grid): rail 240 · 24 · sheet 812 (18px padding wrapping a 774
+   viewport = EXACTLY 3 × 250 cards + 2 × 12 gaps) · 24 · Today 256 = 1356px, centred at every
+   viewport. Bar backgrounds (strip paper, deck white) run full-bleed; their CONTENTS lock to the
+   assembly (.tdb-asm). Cards flex:0 0 250, never stretch; reels snap-page by 3; NO partial
+   cards, NO edge fades — the heading pagers + counts carry "there's more". Breakpoints (P5):
+   <1420 the rail collapses to a 56px icon rail (assembly 1172) and trailing pills fold into
+   FILTER ▾ · <1240 Today becomes the strip popover. --tdb-gutter/--tdb-appnav survive for the
+   column scroll contract; --g24 seams · --g12 card gutters. ── */
+.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-appnav: 49px; --tdb-asm: 1356px; --tdb-rail: 240px; --tdb-sheet: 812px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-sidebar: 270px; --tdb-today: 256px; flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 0 0 48px; }
 /* ── the workbench row (Option B): drawer + centred main. The row caps at 1720 and centres;
    inside it the CONTENT column caps at 1150 and centres again — max-width discipline at every
    viewport, surplus pooling as symmetric oat desk. ── */
@@ -33,40 +30,37 @@
 .tdb-col { min-width: 0; } /* IV P1: uncapped — content-left is the one axis; the container caps */
 @media (max-width: 900px) { .tdb-ws { flex-wrap: wrap; } .tdb-ws .tdb-pair { position: static; width: 100%; max-height: none; } }
 
-/* ── MASTHEAD (A1 amendment: back to a FULL-WIDTH paper band above the drawer+column row —
-   `--paper` ground, one `--line` base rule (the mockup's --hair realised as the live token), NOT
-   sticky; scrolls away with the wrap. The content row keeps the 1150 discipline, centred to the
-   VIEWPORT. The old .tdb-band name stays the card band's alone.) ── */
-.tdb-mastband { background: var(--paper); border-bottom: 1px solid var(--line); }
-.tdb-mastcol { padding: 0 var(--g24); display: flex; align-items: center; gap: var(--g24); }
-.tdb-mastspacer { width: var(--tdb-sidebar); flex: 0 0 auto; } /* the sidebar's zone held empty */
-.tdb-mastspacer-r { width: var(--tdb-today); flex: 0 0 auto; } /* the Today column's zone (ref frame rows) */
-@media (max-width: 1199.98px) { .tdb-mastspacer-r { display: none; } } /* no right column narrow */
-.tdb-mast { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 22px; row-gap: 12px; padding: 26px 0; } /* variant B's mid: title → post-its → search, one row at content-left */
-.tdb-askwrap { display: flex; flex-direction: column; gap: 4px; }
+/* ── THE IDENTITY STRIP (Deck v2 P1) — full-bleed paper band, one base rule, NOT sticky; the
+   contents lock to the centred assembly. Title block · 84×102 family post-its (filter solos,
+   hover lift) · the resident review banner filling the remaining width (white card, uncircled
+   46px cup, button flipping Open it › ⇄ View again on the derived reviewOpened). The old
+   .tdb-band name stays the card band's alone. ── */
+.tdb-asm { width: var(--tdb-asm); margin: 0 auto; }
+.tdb-strip { background: var(--paper); border-bottom: 1px solid var(--line); padding: 18px 0; }
+.tdb-striprow { display: flex; align-items: center; gap: 26px; }
+.tdb-tblock { display: flex; flex-direction: column; gap: 5px; }
 .tdb-rdate { font-family: var(--f12-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); }
-.tdb-ask { font-family: var(--f12-serif); font-size: 25px; font-weight: 600; color: var(--ink); white-space: nowrap; line-height: 1.08; }
-/* post-it counts — 62px tilted squares with the tape fold (II·B masthead, normative ref
-   todo-workbench-rail-v1.html: Playfair numerals — the Caveat grammar retired here); tap scrolls
-   to the section (counts in aria-labels). Hover straightens; reduced-motion kills the transition. */
-.tdb-postits { display: flex; gap: 13px; align-items: flex-start; }
-.tdb-postit { position: relative; width: 56px; height: 68px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; box-shadow: 0 3px 7px rgba(58, 28, 20, 0.16); flex: none; transition: 0.18s; cursor: pointer; }
-.tdb-postit::before { content: ""; position: absolute; top: -6px; left: 50%; transform: translateX(-50%); width: 20px; height: 9px; background: rgba(255, 255, 255, 0.55); }
-.tdb-pv { font-family: var(--f12-serif); font-size: 20px; font-weight: 600; line-height: 1; }
-.tdb-pk { font-family: var(--f12-mono); font-size: 5.5px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; opacity: 0.75; margin-top: 2px; }
+.tdb-ask { font-family: var(--f12-serif); font-size: 28px; font-weight: 600; color: var(--ink); white-space: nowrap; line-height: 1.08; } /* v2: 28 */
+/* post-it counts — Deck v2: 84×102 tape-fold FILTER buttons (30px Playfair numerals), families
+   pink / LATTE / yellow; each solos its family (aria-pressed = soloed). Hover lifts + straightens;
+   reduced-motion kills the transition. THE LATTE FAMILY (housekeeping's new face — coffee
+   survives only in journey-sheet headers): --lat-1/-2 bands · bd · mark (underline/dot) · ink. */
+.tdb-wrap { --lat-1: #f5efe6; --lat-2: #efe7d9; --lat-bd: #ddd0bc; --lat-mark: #cbb995; --lat-ink: #8a7048; }
+.tdb-postits { display: flex; gap: 14px; align-items: flex-start; }
+.tdb-postit { position: relative; width: 84px; height: 102px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; box-shadow: 0 4px 9px rgba(58, 28, 20, 0.17); flex: none; transition: 0.18s; cursor: pointer; border: none; }
+.tdb-postit::before { content: ""; position: absolute; top: -7px; left: 50%; transform: translateX(-50%); width: 30px; height: 12px; background: rgba(255, 255, 255, 0.55); }
+.tdb-pv { font-family: var(--f12-serif); font-size: 30px; font-weight: 600; line-height: 1; }
+.tdb-pk { font-family: var(--f12-mono); font-size: 7px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; opacity: 0.75; margin-top: 2px; }
 .tdb-postit.ug { background: var(--postit-pink); transform: rotate(-2.4deg); color: var(--pink-deep); }
-.tdb-postit.hk { background: var(--hk-cof-2); transform: rotate(1.8deg); color: var(--hk-cof-ink); }
+.tdb-postit.hk { background: var(--lat-2); transform: rotate(1.8deg); color: var(--lat-ink); }
 .tdb-postit.nt { background: var(--postit-note); transform: rotate(-1.2deg); color: #6b5a17; }
-.tdb-postit:hover, .tdb-postit:focus-visible { transform: rotate(0) scale(1.05); }
+.tdb-postit:hover, .tdb-postit:focus-visible { transform: rotate(0) translateY(-2px); box-shadow: 0 7px 14px rgba(58, 28, 20, 0.2); }
+.tdb-postit[aria-pressed="true"] { outline: 2px solid var(--ink); outline-offset: 2px; }
 .tdb-postit.zero .tdb-pv { opacity: 0.45; }
 @media (prefers-reduced-motion: reduce) { .tdb-postit { transition: none; } }
 
 /* ── masthead search + view toggle (Option B .msrch / .vtg) ── */
-.tdb-msrch { display: flex; align-items: center; gap: 9px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 99px; padding: 10px 16px; color: var(--muted); font-size: 13px; flex: 0 0 280px; box-shadow: 0 1px 3px rgba(58, 28, 20, 0.06); } /* container-right, fixed 280 (variant B) */
-.tdb-msrch:focus-within { border-color: var(--ink-2); }
-.tdb-msrch input { flex: 1; min-width: 0; border: none; background: none; font-size: 12.5px; color: var(--ink); outline: none; }
-.tdb-msrch input::placeholder { color: var(--muted); }
-.tdb-msrch kbd { font-family: var(--f12-mono); font-size: 8.5px; border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px; color: var(--faint); }
+/* (the search control re-lands in the DECK — P2; the masthead variant retired with the strip) */
 .tdb-vtg { display: inline-flex; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 99px; padding: 3px; gap: 2px; flex: none; }
 .tdb-vtg button { border-radius: 99px; padding: 6px 14px; font-size: 11.5px; font-weight: 600; color: var(--muted); display: flex; align-items: center; gap: 6px; }
 .tdb-vtg button.on { background: var(--ink); color: var(--paper); }
@@ -207,7 +201,6 @@
   background: var(--paper); border-color: var(--hairline); color: var(--faint); filter: none;
 }
 
-.tdb-sp { flex: 1; }
 
 /* ── REELS (retoken Phase B — de-containered; fix pass P2 re-plumbed the overflow): the heading
    row sits straight on the oat; cards sit straight on the oat with the deeper desk shadow. Fades
@@ -415,7 +408,7 @@
 
 /* ── VI P1: the Today COLUMN — always on ≥1200px (no collapsed state, no tab) — + the masthead
    chip/popover below. Still the natural home for future companions; 12px stack gaps (ref .rcol). ── */
-.tdb-railr { width: var(--tdb-today); flex: 0 0 auto; gap: 12px; }
+.tdb-railr { width: var(--tdb-today); flex: 0 0 auto; gap: 14px; } /* 256 per width v3 */
 @media (max-width: 1199.98px) { .tdb-railr { display: none; } } /* belt — the mount is JS-gated */
 .tdb-todaypopwrap { position: relative; flex: none; }
 .tdb-todaychip { display: inline-flex; align-items: center; gap: 7px; font-family: var(--f12-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border: 1px solid var(--hk-spine); border-radius: 99px; padding: 8px 14px; color: var(--hk-ink); white-space: nowrap; }
@@ -469,28 +462,20 @@
 /* ── Polish III P1: the REVIEW BANNER (5ways §1 — white lifted card; live tokens; the shadow
    literal is the ref's) + the thin-bar AFTERLIFE (refine ref) — the Sunday card + the masthead
    scrap are both retired into these. ── */
-.tdb-rvbanner { background: var(--white, #fff); border: 1px solid var(--hairline); border-radius: 14px; padding: 20px 28px; display: flex; align-items: center; gap: 24px; box-shadow: 0 8px 26px rgba(58, 28, 20, 0.12); position: relative; margin-bottom: var(--g24); }
-.tdb-rvcup { width: 56px; height: 56px; flex: 0 0 auto; border-radius: 50%; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border: 1px solid var(--hk-spine); display: flex; align-items: center; justify-content: center; font-size: 23px; }
-.tdb-rvbx { min-width: 0; }
-.tdb-rvk { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.14em; color: var(--hk-ink); margin-bottom: 5px; }
-.tdb-rvh { font-family: var(--f12-serif); font-size: 22px; font-weight: 600; line-height: 1.15; color: var(--ink); }
-.tdb-rvsub2 { font-family: var(--f12-serif); font-style: italic; font-size: 14.5px; color: var(--ink-2); margin-top: 4px; }
-.tdb-rvgo2 { margin-left: auto; border: none; background: var(--ink); color: var(--paper); border-radius: 99px; padding: 12px 24px; font-size: 13px; font-weight: 600; flex: 0 0 auto; }
-.tdb-rvgo2:hover { filter: brightness(1.3); }
-.tdb-rvx2 { position: absolute; top: 10px; right: 12px; border: none; background: none; color: var(--faint); font-size: 12px; padding: 2px 5px; }
-.tdb-rvx2:hover { color: var(--ink); }
-/* VI P2 — the review's afterlife CARD (ref .rvcard): the cardx family, one ~60px row at the top
-   of the right column, directly above Today. The whole card is the button. */
-.tdb-rvcard { flex: 0 0 auto; display: flex; align-items: center; gap: 11px; padding: 11px 13px; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 4px 16px rgba(58, 28, 20, 0.1); cursor: pointer; text-align: left; width: 100%; }
-.tdb-rvcard:hover { background: var(--white, #fff); }
-.tdb-rvcup2 { width: 38px; height: 38px; border-radius: 50%; background: var(--white, #fff); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; flex: 0 0 auto; color: var(--ink); }
-.tdb-rvcup2 svg { width: 30px; height: auto; display: block; }
-.tdb-rvtx { min-width: 0; }
-.tdb-rvtx b { display: block; font-family: var(--f12-serif); font-size: 13.5px; font-weight: 600; line-height: 1.15; color: var(--ink); }
-.tdb-rvtx i { font-style: normal; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.12em; color: var(--faint); }
-.tdb-rvgo3 { margin-left: auto; font-size: 11px; color: var(--muted); }
-/* inside the narrow popover the card rides above the Today card with the same 12 gap */
-.tdb-todaypop .tdb-rvcard { margin-bottom: 12px; }
+/* Deck v2 P1 — THE RESIDENT REVIEW BANNER (.rvhead): fills the strip's remaining width; white,
+   radius 14, hairline, lifted; the cup UNCIRCLED at 46px (currentColor ink + drop-shadow);
+   button ink "Open it ›" ⇄ ghost "View again" on the derived reviewOpened. No ✕, ever. */
+.tdb-rvhead { flex: 1; min-width: 0; display: flex; align-items: center; gap: 14px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 3px 12px rgba(58, 28, 20, 0.09); padding: 12px 16px; }
+.tdb-rvcupb { width: 46px; flex: 0 0 auto; color: var(--ink); filter: drop-shadow(0 2px 3px rgba(58, 28, 20, 0.14)); }
+.tdb-rvcupb svg { width: 100%; height: auto; display: block; }
+.tdb-rvhx { min-width: 0; }
+.tdb-rvk2 { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.13em; color: var(--hk-ink); margin-bottom: 3px; }
+.tdb-rvhx b { display: block; font-family: var(--f12-serif); font-size: 16px; font-weight: 700; white-space: nowrap; color: var(--ink); }
+.tdb-rvhx p { font-size: 10.5px; color: var(--sub); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tdb-rvopen { margin-left: auto; flex: 0 0 auto; border: 1px solid var(--ink); background: var(--ink); color: var(--panel); border-radius: 99px; padding: 7px 15px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.tdb-rvopen:hover { filter: brightness(1.3); }
+.tdb-rvopen.ghost { background: var(--white, #fff); border-color: var(--line); color: var(--ink-2); }
+.tdb-rvopen.ghost:hover { filter: none; border-color: var(--ink-2); }
 
 /* ── THE SUNDAY REVIEW (finishing P3; ref todo-sunday-review.html): the entry card (sage-spined,
    dismissible) + the six-step sheet's furniture — stats row, read-only rows with badges, the

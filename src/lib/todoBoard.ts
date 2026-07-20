@@ -426,28 +426,9 @@ export function reviewCompletionSnooze(win: ReviewWeek): string {
   return new Date(win.endMs + 2 * DAY_MS).toISOString();
 }
 
-/**
- * Polish III P1 → VI P2 — THE REVIEW SURFACE (the Sunday card + the scrap both retired into
- * this; the thin bar retired into the right-column card):
- *   banner — Sun–Mon ∧ undismissed ∧ unreviewed (the white lifted card above the lanes; the
- *            sunday_review Task-Settings mute suppresses the banner like a standing dismissal)
- *   card   — (dismissed ∨ Tue–Sat ∨ muted) ∧ unreviewed (the cup card at the top of the right
- *            column, above Today — the OFFER stands regardless of dismissal, as ever)
- *   null   — reviewed (the completion sentinel), or nothing queried yet, or superseded next week.
- * Dismissal gates the BANNER only; completion is the sentinel value (never mere flag presence).
- */
-export function reviewSurface(input: BoardInput): { kind: "banner" | "card"; weekNumber: number; weekKey: string } | null {
-  if (input.queries.length === 0) return null; // nothing queried → nothing to review
-  const win = reviewWeek(input.queries, input.now);
-  const flag = input.taskFlags.find((f) => flagMatchesTask(f, "weekly_review", win.key));
-  if (flag?.snoozedUntil === reviewCompletionSnooze(win)) return null; // reviewed → neither
-  const day = new Date(input.now).getDay();
-  const sunMon = day === 0 || day === 1;
-  const dismissed = !!flag?.snoozedUntil;
-  const muted = !!input.mutedTaskRules?.includes("sunday_review");
-  if (sunMon && !dismissed && !muted) return { kind: "banner", weekNumber: win.weekNumber, weekKey: win.key };
-  return { kind: "card", weekNumber: win.weekNumber, weekKey: win.key };
-}
+/* Deck v2 P1: reviewSurface is RETIRED — the banner is a permanent strip resident with one
+   derived boolean (the completion sentinel, read in ToDoPage). reviewWeek/weekReviewStats/
+   reviewSeedCandidates/reviewCompletionSnooze stay (the mode + the sentinel). */
 
 
 /**

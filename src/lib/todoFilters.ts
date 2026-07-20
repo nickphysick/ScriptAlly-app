@@ -29,12 +29,58 @@ export interface TodoFilterState {
   mswl: boolean;
   stale: boolean;
   snoozed: boolean;
+  notes: boolean; // Deck v2: the yellow family is filterable (post-it solo + deck pill)
   todayOnly: boolean;
 }
 
 export const DEFAULT_FILTERS: TodoFilterState = {
-  offers: true, overToYou: true, materials: true, mswl: true, stale: true, snoozed: true, todayOnly: false,
+  offers: true, overToYou: true, materials: true, mswl: true, stale: true, snoozed: true, notes: true, todayOnly: false,
 };
+
+// ── THE QUIET PILLS (Command Deck v2 — the deck's filter grammar + the post-it solos) ──────────
+// Resting = every type on (nothing narrowed; pills plain). The FIRST toggle narrows to that one
+// type; further toggles edit membership of the included set; removing the last included returns
+// to resting. Post-its SOLO their whole family against the same state. `todayOnly` is the lens —
+// separate from narrowing, cleared by RESET like the rest.
+
+export type FilterType = "offers" | "overToYou" | "materials" | "mswl" | "stale" | "snoozed" | "notes";
+export const ALL_TYPES: FilterType[] = ["offers", "overToYou", "materials", "mswl", "stale", "snoozed", "notes"];
+
+export type PillFamily = "pink" | "latte" | "yellow";
+export const FAMILY_TYPES: Record<PillFamily, FilterType[]> = {
+  pink: ["offers", "overToYou"],
+  latte: ["materials", "mswl", "stale", "snoozed"],
+  yellow: ["notes"],
+};
+
+/** Nothing narrowed — every type visible (the lens is separate). */
+export function isResting(f: TodoFilterState): boolean {
+  return ALL_TYPES.every((t) => f[t]);
+}
+
+/** The deck-pill click: rest → solo the clicked type; narrowed → toggle membership; empty → rest. */
+export function togglePill(f: TodoFilterState, t: FilterType): TodoFilterState {
+  if (isResting(f)) {
+    const next = { ...f };
+    for (const x of ALL_TYPES) next[x] = x === t;
+    return next;
+  }
+  const next = { ...f, [t]: !f[t] };
+  return ALL_TYPES.some((x) => next[x]) ? next : { ...next, ...Object.fromEntries(ALL_TYPES.map((x) => [x, true])) } as TodoFilterState;
+}
+
+/** The included set exactly equals this family (the post-it's pressed state). */
+export function isSoloed(f: TodoFilterState, fam: PillFamily): boolean {
+  return ALL_TYPES.every((t) => f[t] === FAMILY_TYPES[fam].includes(t));
+}
+
+/** The post-it click: solo the family; clicking the soloed family returns to resting. */
+export function soloFamily(f: TodoFilterState, fam: PillFamily): TodoFilterState {
+  const next = { ...f };
+  if (isSoloed(f, fam)) { for (const t of ALL_TYPES) next[t] = true; return next; }
+  for (const t of ALL_TYPES) next[t] = FAMILY_TYPES[fam].includes(t);
+  return next;
+}
 
 export const filtersActive = (f: TodoFilterState, search: string): boolean =>
   search.trim().length > 0 || (Object.keys(DEFAULT_FILTERS) as Array<keyof TodoFilterState>).some((k) => f[k] !== DEFAULT_FILTERS[k]);
@@ -88,6 +134,7 @@ export function visibleStaleCard(c: BoardCard, f: TodoFilterState, today: string
 
 /** Notes have no type checkbox — only the axes apply. */
 export function visibleNoteCard(c: BoardCard, f: TodoFilterState, today: string): boolean {
+  if (!f.notes) return false; // Deck v2: the yellow family narrows like the rest
   return passesAxes(c, f, today);
 }
 

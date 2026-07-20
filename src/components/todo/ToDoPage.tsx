@@ -25,8 +25,8 @@ import { F12Page, F12Account } from "../shell/F12Shell";
 import { StatusDot } from "../StatusDot";
 import { useScriptAllyDb } from "../../lib/db";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
-import { assembleBoard, todaySplit, ribbonTiles, reviewSurface, BoardCard, USER_TASK_FLAG_TYPE } from "../../lib/todoBoard";
-import { flagKeyForTask, MUTED_UNTIL } from "../../lib/taskFlags";
+import { assembleBoard, todaySplit, ribbonTiles, reviewWeek, reviewCompletionSnooze, BoardCard, USER_TASK_FLAG_TYPE } from "../../lib/todoBoard";
+import { flagKeyForTask, flagMatchesTask, MUTED_UNTIL } from "../../lib/taskFlags";
 import {
   choosePicks, rolledOverCards, todayGhosts, MAX_TODAY,
   quickSendPayload, quickNudgePayload, receiptLine, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, priorSameTypeSend, duplicateSendPrompt,
@@ -41,7 +41,7 @@ import { reelFit, reelPage, ReelFit, REEL_CARD_MIN } from "./reelFit";
 import focusArt from "../../assets/todo/focus-art.png";
 // VI P2 — the review cup (original ScriptAlly artwork; currentColor → inlined so it inherits ink)
 import reviewCupRaw from "../../assets/todo/review-cup.svg?raw";
-import { TodoFilterState, DEFAULT_FILTERS, filtersActive, matchesSearch, groupMatchesSearch, visibleDoCard, visibleStaleCard, visibleNoteCard, visibleGroup, filterCounts } from "../../lib/todoFilters";
+import { TodoFilterState, DEFAULT_FILTERS, filtersActive, matchesSearch, groupMatchesSearch, visibleDoCard, visibleStaleCard, visibleNoteCard, visibleGroup, filterCounts, soloFamily, isSoloed, PillFamily } from "../../lib/todoFilters";
 import { SelState, EMPTY_SEL, applySelectClick, moveFocus } from "../../lib/todoSelection";
 import { shouldAutoRunTour } from "../../lib/todoTour";
 import { TodoTour } from "./TodoTour";
@@ -352,11 +352,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const now = Date.now();
   const today = localYMD(now);
 
-  // Polish III P1 — the ONE review surface (banner Sun–Mon · thin bar after; null once reviewed)
-  const surface = useMemo(
-    () => reviewSurface({ tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, today, now, mutedTaskRules: currentUser?.mutedTaskRules }),
-    [queries, taskFlags, now, currentUser?.mutedTaskRules], // eslint-disable-line react-hooks/exhaustive-deps
-  );
+  // Deck v2 P1 — the RESIDENT review banner: no windows, no dismissal, one derived boolean.
+  // "Opened" reads the only stored review record — the completion sentinel finishReview writes —
+  // so the button flips to "View again" once the week's review is finished (recon resolution 1).
+  const reviewWin = queries.length > 0 ? reviewWeek(queries, now) : null;
+  const reviewOpened = !!reviewWin && taskFlags.some((f) => flagMatchesTask(f, "weekly_review", reviewWin.key) && f.snoozedUntil === reviewCompletionSnooze(reviewWin));
   const board = useMemo(
     () => assembleBoard({ tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, today, now, mutedTaskRules: currentUser?.mutedTaskRules }),
     // now/today are session-stable enough; recomputing on the data arrays is what matters.
@@ -750,36 +750,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             every viewport, surplus pools as symmetric desk. The old full-bleed header band +
             .tdb-ribbon are RETIRED (the masthead is recomposed inside the column); Walk me
             through lives in the drawer now. ── */}
-        {/* ── A1: the masthead returns to a FULL-WIDTH paper band above the drawer+column row
-            (1px base rule; scrolls away with the wrap). Its content keeps the 1150 discipline,
-            viewport-centred. ── */}
-        <div className="tdb-mastband">
-          <div className="tdb-mastcol">
-            {/* V P1/VI — the spacers hold the flanking columns' zones so the title starts at
-                content-left and the search right-aligns to the main column's edge. */}
-            <div className="tdb-mastspacer" aria-hidden />
-            {renderMasthead()}
-            <div className="tdb-mastspacer-r" aria-hidden />
-          </div>
-        </div>
+        {/* ── Deck v2 P1: THE IDENTITY STRIP — full-bleed paper band; contents lock to the
+            centred assembly. Title block · 84×102 family post-its (filter solos) · the resident
+            review banner filling the remaining width. Scrolls away with the wrap. ── */}
+        {renderStrip()}
         <div className="tdb-ws">
           {renderDrawer()}
           <div className="tdb-main">
             <div className="tdb-col">
-        {/* ── Polish III P1: the review BANNER (Sun–Mon, undismissed, unreviewed) sits above
-            whichever view is active — the review is not a task and enters no lane. ── */}
-        {surface?.kind === "banner" && (
-          <div className="tdb-rvbanner">
-            <span className="tdb-rvcup" aria-hidden>☕</span>
-            <div className="tdb-rvbx">
-              <div className="tdb-rvk">THE SUNDAY REVIEW · WEEK {surface.weekNumber}</div>
-              <h2 className="tdb-rvh">Last week’s progress report is ready</h2>
-              <div className="tdb-rvsub2">Check it out — every box ticked here turns the dial in your favour.</div>
-            </div>
-            <button type="button" className="tdb-rvgo2" onClick={openSundayReview}>Begin the review →</button>
-            <button type="button" className="tdb-rvx2" aria-label="Dismiss — it stays available beneath the board" onClick={dismissReviewBanner}>✕</button>
-          </div>
-        )}
         {/* ── the board — cards or ledger by the masthead toggle; the desk states (new-desk /
             desk-cleared) replace BOTH views. Copy verbatim from todo-empty-states.html. ── */}
         {desk === "new-desk" ? renderNewDesk() : desk === "desk-cleared" ? renderDeskCleared() : active && !anyVisible ? (
@@ -853,7 +831,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               masthead chip + popover stand. One renderTodayPanel, two mounts, XOR'd on narrow. */}
           {!narrow && (
             <aside className="tdb-railr" aria-label="Today">
-              {renderReviewAfterlife()}
               {renderTodayPanel()}
             </aside>
           )}
@@ -924,50 +901,56 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     );
   }
 
-  // ── the one-row masthead (Option B mast2): title + date/week eyebrow left, the 42px post-its +
-  // then search (⌘K). The view toggle lives in the filter card (III P3); weekOfQuerying is the
-  // dashboard's derivation, consumed — never re-derived. ──
-  function renderMasthead() {
+  // ── Deck v2 P1: the identity strip's contents (inside the centred assembly). The post-its are
+  // FILTER buttons now — each solos its family against the same TodoFilterState the deck pills
+  // drive (scroll-to-lane retired); pressed = the family is soloed; clicking again rests. The
+  // review banner is a permanent resident: no ✕, no windows — the button flips on the derived
+  // reviewOpened boolean. The narrow Today chip keeps its strip home (popover unchanged). ──
+  function soloPostit(fam: PillFamily) {
+    setFilters((f) => soloFamily(f, fam));
+  }
+  function renderStrip() {
     return (
-      <div className="tdb-mast">
-        <span className="tdb-askwrap">
-          <span className="tdb-rdate">{shortHeaderDate(now)} · {weekOfQuerying(queries, new Date(now))}</span>
-          <span className="tdb-ask">What’s on your desk?</span>
-        </span>
-        <span className="tdb-postits">
-          <button type="button" className={`tdb-postit ug${tiles.urgent === 0 ? " zero" : ""}`} aria-label={`${tiles.urgent} urgent — jump to the Urgent section`} onClick={() => scrollToLane("do")}>
-            <span className="tdb-pv" aria-hidden>{tiles.urgent}</span><span className="tdb-pk" aria-hidden>urgent</span>
-          </button>
-          <button type="button" className={`tdb-postit hk${tiles.housekeeping === 0 ? " zero" : ""}`} aria-label={`${tiles.housekeeping} housekeeping — jump to the Housekeeping section`} onClick={() => scrollToLane("hk")}>
-            <span className="tdb-pv" aria-hidden>{tiles.housekeeping}</span><span className="tdb-pk" aria-hidden>housekpg</span>
-          </button>
-          <button type="button" className={`tdb-postit nt${tiles.notes === 0 ? " zero" : ""}`} aria-label={`${tiles.notes} notes to self — jump to the Notes section`} onClick={() => scrollToLane("nt")}>
-            <span className="tdb-pv" aria-hidden>{tiles.notes}</span><span className="tdb-pk" aria-hidden>notes</span>
-          </button>
-        </span>
-        {narrow && (
-          <span className="tdb-todaypopwrap">
-            <button type="button" className="tdb-todaychip" aria-haspopup="dialog" aria-expanded={todayPopOpen} onClick={() => setTodayPopOpen((v) => !v)}>
-              Today · {committedCards.length} TO GO
+      <div className="tdb-strip">
+        <div className="tdb-asm tdb-striprow">
+          <div className="tdb-tblock">
+            <div className="tdb-rdate">{shortHeaderDate(now)} · {weekOfQuerying(queries, new Date(now))}</div>
+            <h1 className="tdb-ask">What’s on your desk?</h1>
+          </div>
+          <span className="tdb-postits">
+            <button type="button" className={`tdb-postit ug${tiles.urgent === 0 ? " zero" : ""}`} aria-pressed={isSoloed(filters, "pink")} aria-label={`${tiles.urgent} urgent — show only urgent work`} onClick={() => soloPostit("pink")}>
+              <span className="tdb-pv" aria-hidden>{tiles.urgent}</span><span className="tdb-pk" aria-hidden>urgent</span>
             </button>
-            {todayPopOpen && (
-              <div className="tdb-todaypop" role="dialog" aria-label="Today">{renderReviewAfterlife()}{renderTodayPanel()}</div>
-            )}
+            <button type="button" className={`tdb-postit hk${tiles.housekeeping === 0 ? " zero" : ""}`} aria-pressed={isSoloed(filters, "latte")} aria-label={`${tiles.housekeeping} housekeeping — show only housekeeping`} onClick={() => soloPostit("latte")}>
+              <span className="tdb-pv" aria-hidden>{tiles.housekeeping}</span><span className="tdb-pk" aria-hidden>housekpg</span>
+            </button>
+            <button type="button" className={`tdb-postit nt${tiles.notes === 0 ? " zero" : ""}`} aria-pressed={isSoloed(filters, "yellow")} aria-label={`${tiles.notes} notes to self — show only notes`} onClick={() => soloPostit("yellow")}>
+              <span className="tdb-pv" aria-hidden>{tiles.notes}</span><span className="tdb-pk" aria-hidden>notes</span>
+            </button>
           </span>
-        )}
-        <span className="tdb-sp" />
-        <div className="tdb-msrch">
-          <span aria-hidden>⌕</span>
-          <input
-            ref={searchRef}
-            type="text"
-            placeholder="Search your desk…"
-            aria-label="Search your desk"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Escape") { setSearch(""); (e.target as HTMLInputElement).blur(); } }}
-          />
-          <kbd aria-hidden>⌘K</kbd>
+          {reviewWin && (
+            <div className="tdb-rvhead">
+              <span className="tdb-rvcupb" aria-hidden dangerouslySetInnerHTML={{ __html: reviewCupRaw }} />
+              <div className="tdb-rvhx">
+                <div className="tdb-rvk2">THE SUNDAY REVIEW · WEEK {reviewWin.weekNumber}</div>
+                <b>Last week in review</b>
+                <p>Every box ticked turns the dial in your favour.</p>
+              </div>
+              <button type="button" className={`tdb-rvopen${reviewOpened ? " ghost" : ""}`} onClick={openSundayReview}>
+                {reviewOpened ? "View again" : "Open it ›"}
+              </button>
+            </div>
+          )}
+          {narrow && (
+            <span className="tdb-todaypopwrap">
+              <button type="button" className="tdb-todaychip" aria-haspopup="dialog" aria-expanded={todayPopOpen} onClick={() => setTodayPopOpen((v) => !v)}>
+                Today · {committedCards.length} TO GO
+              </button>
+              {todayPopOpen && (
+                <div className="tdb-todaypop" role="dialog" aria-label="Today">{renderTodayPanel()}</div>
+              )}
+            </span>
+          )}
         </div>
       </div>
     );
@@ -1058,20 +1041,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         </div>
         </div>
       </aside>
-    );
-  }
-
-  // ── VI P2: the review's AFTERLIFE — after ✕ or from Tuesday while unreviewed, a cup card at
-  // the top of the right column, directly above Today (the thin bar is retired). The whole card
-  // is the button; it opens the review mode unchanged. Absent → Today rises with no gap. ──
-  function renderReviewAfterlife() {
-    if (surface?.kind !== "card") return null;
-    return (
-      <button type="button" className="tdb-rvcard" onClick={openSundayReview}>
-        <span className="tdb-rvcup2" aria-hidden dangerouslySetInnerHTML={{ __html: reviewCupRaw }} />
-        <span className="tdb-rvtx"><b>Last week in review</b><i>WEEK {surface.weekNumber} · NOT YET OPENED</i></span>
-        <span className="tdb-rvgo3" aria-hidden>›</span>
-      </button>
     );
   }
 
@@ -1335,12 +1304,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   function openSundayReview() {
     // board.do is review-free by construction (P1) — no filter needed
     setFlow({ items: board.do.map((card) => ({ kind: "card" as const, card })), mode: "weeklyReview" });
-  }
-  function dismissReviewBanner() {
-    if (!surface) return;
-    const key = flagKeyForTask("weekly_review", surface.weekKey);
-    upsertTaskFlag(key, { snoozedUntil: new Date(Date.now() + 3 * 86400000).toISOString() });
-    flash("Dismissed — it stays beneath the board until you review it.", { label: "Undo", fn: async () => { await upsertTaskFlag(key, { snoozedUntil: null }); flash("Restored"); } });
   }
 
   // Standalone receipt/dismissed cards — the live card vanished with the write; the receipt persists.

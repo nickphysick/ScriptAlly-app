@@ -41,7 +41,7 @@ describe("Card Bands — structure law", () => {
   });
   it("III P2: min-height 168 stands; the ONE-ROW REEL drives width (--reelw from reelFit; the grid is retired)", () => {
     expect((css.match(/min-height: 168px/g) ?? []).length).toBeGreaterThanOrEqual(2); // tile + gcard
-    expect(css).not.toContain("--tdb-cardw"); // the RETIRED laneFit var never returns
+    expect(css).toContain("--tdb-cardw: 250px"); // Deck v2 width law: the FIXED card token (laneFit stays retired)
     expect(css).not.toMatch(/\.tdb-grid\s*\{/); // the wrapping CARD grid is gone (the ledger's lgrid stands)
     expect((css.match(/flex: 0 0 var\(--reelw, 240px\)/g) ?? []).length).toBe(2);
   });
