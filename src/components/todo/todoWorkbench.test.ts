@@ -470,6 +470,20 @@ describe("IV P2 — footer rows · the label trim (the vertical tab retired by V
 });
 
 describe("VI P1 — 'Today', always on (todo-right-column-v1.html)", () => {
+  it("REGRESSION LOCK — no component-level const/let below the component's return (the TDZ dead zone)", () => {
+    // The render helpers are declared BELOW the main return and survive only because function
+    // declarations hoist. A component-body `const`/`let` down there is dead code — never
+    // initialised — and any hoisted helper reading it throws a TDZ ReferenceError at first
+    // render, which the root ErrorBoundary turns into an app-wide "Something went wrong"
+    // (ToDoPage is a persistent slot on every workspace route). Bit twice: openSundayReview
+    // (4d4fbed) and GHOST_BARS (this lock's trigger). Pure gates can't see it — this scan can.
+    const ret = page.indexOf("return (\n    <F12Page");
+    expect(ret).toBeGreaterThan(0);
+    const deadZone = page.slice(ret);
+    expect(deadZone).not.toMatch(/^  (const|let) /m);
+    expect(page).toMatch(/^const GHOST_BARS = \[64, 78, 52\];/m); // lives at module scope instead
+  });
+
   it("THE RENAME SWEEP — 'Today's list' is extinct across the board, the sheets, the tour and the libs", () => {
     const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");
     const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
@@ -495,7 +509,7 @@ describe("VI P1 — 'Today', always on (todo-right-column-v1.html)", () => {
     expect(box).not.toContain("background"); // the card's parchment shows through
     expect(rule(".tdb-cbx")).toContain("width: 15px; height: 15px; border: 1.5px dashed rgba(58, 28, 20, 0.28)");
     expect(rule(".tdb-grow")).toContain("border-bottom: 1px dashed rgba(58, 28, 20, 0.16)");
-    expect(page).toContain("const GHOST_BARS = [64, 78, 52];");
+    expect(page).toContain("const GHOST_BARS = [64, 78, 52];"); // module scope — see the regression lock
     expect(page).toContain("const ghosts = todayGhosts(committedCards.length, doneN);");
     expect(page).toContain("{ghosts > 0 && (");
   });

@@ -59,6 +59,13 @@ const localYMD = (ms: number): string => {
 /** The ink header's date line — "Thu 16 Jul" (design-refs/todo-header-ink.html). */
 const shortHeaderDate = (ms: number): string =>
   new Date(ms).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+// VI P1 — the ghost rows' faded text-bar widths (the ref's 64/78/52), cycled by index.
+// ⚠ MODULE scope on purpose: the render helpers live BELOW the component's return statement
+// (hoisted function declarations), where a component-body `const` is dead code — never
+// initialised — and a hoisted reader hits the TDZ at first render (the crash class that took
+// the whole app down twice: openSundayReview `4d4fbed`, GHOST_BARS this fix). The regression
+// lock in todoWorkbench.test.ts bans component-level const/let after the return.
+const GHOST_BARS = [64, 78, 52];
 const fmtTime = (ms?: number): string => {
   if (ms == null) return "";
   if (Date.now() - ms < 120000) return "just now";
@@ -1072,7 +1079,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // (rollover Keep/Clear, committed rows + take-off, Help me pick, Work the list); the anatomy is
   // the ref card: plain paper header (date ⇄ "{n} OF 5"), committed items above a dashed
   // ghost-row invitation (todayGhosts), the collapsed-by-default done row, two footer verbs. ──
-  const GHOST_BARS = [64, 78, 52]; // the ref's faded text-bar widths, cycled
   function renderTodayPanel() {
     const ghosts = todayGhosts(committedCards.length, doneN);
     return (
