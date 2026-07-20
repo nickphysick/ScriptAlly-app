@@ -341,7 +341,7 @@ describe("II·B P3 — the companion rail (one panel, two mounts, one state)", (
     expect((page.match(/\{renderTodayPanel\(\)\}/g) ?? []).length).toBe(2);
     expect(page).toContain('"Today", ALWAYS ON'); // VI P1: the column is unconditional ≥1200
     expect(page).toContain("{narrow && (");
-    expect(page).toContain('window.matchMedia("(max-width: 1199.98px)")');
+    expect(page).toContain('window.matchMedia("(max-width: 1239.98px)")');
   });
   it("the rail: 264 sticky at the 24 offset, after the main column; noted as the future companions' home", () => {
     expect(rule(".tdb-railr")).toContain("width: var(--tdb-today)");
@@ -359,8 +359,8 @@ describe("II·B P3 — the companion rail (one panel, two mounts, one state)", (
     expect(page).toContain('t.closest(".tdb-todaypop") || t.closest(".tdb-todaychip")');
     expect(css).toContain("@media (prefers-reduced-motion: reduce) { .tdb-todaypop { animation: none; } }");
   });
-  it("the breakpoint belt: the column hides <1200 in CSS too; narrow closes the popover on widen", () => {
-    expect(css).toContain("@media (max-width: 1199.98px) { .tdb-railr { display: none; } }");
+  it("the breakpoint belt: the column hides <1240 in CSS too; narrow closes the popover on widen", () => {
+    expect(css).toContain("@media (max-width: 1239.98px) { .tdb-railr { display: none; } }");
     expect(page).toContain("useEffect(() => { if (!narrow) setTodayPopOpen(false); }, [narrow]);");
   });
 });
@@ -492,6 +492,49 @@ describe("Deck v2 P2 — the deck (sticky control bar; todo-deck-v2.html)", () =
     expect(page).toContain('aria-pressed={filters.todayOnly} onClick={() => setF("todayOnly", !filters.todayOnly)}');
     expect(page).toContain('onClick={() => pickView("cards")}>▦</button>');
     expect(page).toContain('onClick={() => pickView("ledger")}>☰</button>');
+  });
+});
+
+describe("Deck v2 P5 — retirement sweep · breakpoints · a11y", () => {
+  it("GREP SWEEP — every mapped remnant is extinct in page + css", () => {
+    const stale = [
+      "tdb-pair", "tdb-paircard", "tdb-fcard", "tdb-ftop", "tdb-fstatus", "tdb-fmid", "tdb-fgrp2",
+      "tdb-fcloud", "tdb-fgh", "tdb-fp ", "fpill(", "tdb-freset", "tdb-vtg", "tdb-footrows",
+      "tdb-fr2", "tdb-fric", "tdb-dic", "tdb-dfold", "tdb-dsp ", "tdb-focustx", "tdb-focush",
+      "tdb-focusp", "tdb-focusgo", "tdb-focusart", "tdb-tacts", "tdb-pill", "tdb-tmeta",
+      "tdb-hkdot", "tdb-who", "tdb-gstack", "tdb-gsav", "tdb-gmore", "tdb-gfix", "tdb-gnever",
+      "tdb-qrail", "tdb-qbtn", "tdb-ttab", "tdb-rvbanner", "tdb-rvbar", "tdb-rvcard",
+      "tdb-mastband", "tdb-mastcol", "tdb-mastspacer", "tdb-msrch", "GroupFlip", "reelFit",
+      "sa.todoDrawer", "emptyRailOpen", "reviewSurface", "dismissReviewBanner",
+    ];
+    for (const t of stale) {
+      expect(page).not.toContain(t);
+      expect(css).not.toContain(t);
+    }
+  });
+  it("BREAKPOINTS: <1420 the 56px icon rail (assembly 1172) + FILTER ▾ fold; <1240 the strip popover", () => {
+    expect(css).toContain("@media (max-width: 1419.98px) { .tdb-wrap { --tdb-asm: 1172px; --tdb-rail: 56px; } }");
+    expect(page).toContain('window.matchMedia("(max-width: 1419.98px)")');
+    expect(page).toContain('<aside className="tdb-lrail icon" aria-label="Workbench rail">');
+    expect(page).toContain('className="tdb-ric" title="Focus mode"');
+    expect(page).toContain('className="tdb-ric" title="Task settings"');
+    expect(page).toContain('title="ScriptAlly Pro — meet the assistant"');
+    expect(page).toContain('className="tdb-pt fdrop" aria-haspopup="menu" aria-expanded={filterDropOpen}');
+    expect(rule(".tdb-lrail.icon")).toContain("width: var(--tdb-rail)");
+    expect(page).toContain('window.matchMedia("(max-width: 1239.98px)")');
+  });
+  it("A11Y: post-its/pills pressed; cards real buttons (Enter/Space, aria-expanded = the verb reveal)", () => {
+    expect(page).toContain('aria-pressed={isSoloed(filters, "pink")}');
+    expect(page).toContain("aria-pressed={!resting && on}");
+    expect((page.match(/role="button" aria-expanded=\{hov\} tabIndex=\{0\}/g) ?? []).length).toBe(2);
+    expect((page.match(/e\.key === "Enter" \|\| e\.key === " "/g) ?? []).length).toBe(2);
+  });
+  it("A11Y: the Later menu is arrow-navigable; focus reveals the verbs as hover does; pagers labelled", () => {
+    expect(page).toContain("function latMenuKeys(");
+    expect(page).toContain('if (e.key === "ArrowDown")');
+    expect((page.match(/onKeyDown=\{latMenuKeys\}/g) ?? []).length).toBe(2);
+    expect((page.match(/onFocus=\{\(\) => armVerbs\(/g) ?? []).length).toBe(2);
+    expect(page).toContain("aria-label={`Previous ${label} cards`}");
   });
 });
 

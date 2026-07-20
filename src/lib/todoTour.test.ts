@@ -1,45 +1,51 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
+ *
+ * The first-visit tour — Deck v2 P5 rewire: SIX stops over the definitive page. Copy is
+ * snapshot-locked; the auto-run gate (tourSeenAt ∧ not-new-desk) is unchanged.
  */
 import { describe, it, expect } from "vitest";
 import { TOUR_STOPS, shouldAutoRunTour } from "./todoTour";
 
-describe("shouldAutoRunTour — flag absent ∧ not new-desk", () => {
-  it("runs when never seen and the board has data", () => {
-    expect(shouldAutoRunTour(undefined, null)).toBe(true);
-    expect(shouldAutoRunTour(null, "desk-cleared")).toBe(true);
+describe("TOUR_STOPS — six stops (Deck v2 rewire), Done on the last", () => {
+  it("is exactly the six stops in order: post-its → banner → pills → rail → a card → Today", () => {
+    expect(TOUR_STOPS.map((s) => s.sel)).toEqual([
+      ".tdb-postits",
+      ".tdb-rvhead",
+      ".tdb-pt",
+      ".tdb-lrail",
+      ".tdb-tile, .tdb-gcard",
+      ".tdb-today2, .tdb-todaychip",
+    ]);
+    expect(TOUR_STOPS.slice(0, -1).every((s) => s.cta === "Next →")).toBe(true);
+    expect(TOUR_STOPS[TOUR_STOPS.length - 1].cta).toBe("Done");
   });
-  it("never runs on a new desk (no targets, the welcome card is the doorway)", () => {
-    expect(shouldAutoRunTour(undefined, "new-desk")).toBe(false);
-  });
-  it("never auto-runs once seen (complete OR skip both set the flag)", () => {
-    expect(shouldAutoRunTour("2026-07-16T10:00:00.000Z", null)).toBe(false);
-    expect(shouldAutoRunTour("2026-07-16T10:00:00.000Z", "desk-cleared")).toBe(false);
+  it("copy snapshot", () => {
+    expect(TOUR_STOPS.map((s) => s.h)).toEqual([
+      "Your desk, counted.",
+      "Your week, reviewed.",
+      "Narrow the desk.",
+      "Or just say go.",
+      "Every card works the same.",
+      "Today lives beside your work.",
+    ]);
+    expect(TOUR_STOPS[0].p).toContain("Tap one to see only that pile");
+    expect(TOUR_STOPS[1].p).toContain("turns the dial in your favour");
+    expect(TOUR_STOPS[2].p).toContain("RESET brings everything back");
+    expect(TOUR_STOPS[3].p).toContain("Focus mode walks your whole desk");
+    expect(TOUR_STOPS[4].p).toContain("Hover for the quick verbs");
+    expect(TOUR_STOPS[5].p).toContain("struck through as you go");
   });
 });
 
-describe("TOUR_STOPS — five stops (workbench retargets), Done on the last", () => {
-  it("is exactly the five stops in order — 4 and 5 retargeted to the drawer (FAB + masthead walk retired)", () => {
-    expect(TOUR_STOPS.map((s) => s.sel)).toEqual([
-      ".tdb-postits",
-      "#tdb-lane-do",
-      "#tdb-lane-do .tdb-pill",
-      ".tdb-today2, .tdb-todaychip",
-      ".tdb-focus",
-    ]);
+describe("shouldAutoRunTour — the once gate (unchanged by the rewire)", () => {
+  it("runs when the flag is absent and the desk is not new", () => {
+    expect(shouldAutoRunTour(undefined, "normal" as never)).toBe(true);
+    expect(shouldAutoRunTour(null, "desk-cleared" as never)).toBe(true);
   });
-  it("copy snapshot (stop 4 re-worded for the drawer — the ring sentence went with the FAB)", () => {
-    expect(TOUR_STOPS.map((s) => [s.h, s.p])).toEqual([
-      ["Your desk, counted.", "Three post-its, three kinds of work: pressing things, tidy-up jobs, and your own notes. Tap one to jump to its pile."],
-      ["Urgent — where your move matters.", "Requests, deadlines and offers land here, most pressing first. Click any card to work through it, one question at a time."],
-      ["Build a list you’ll finish.", "Commit up to five things to today. Small on purpose — a finished list beats a long one."],
-      ["Today lives beside your work.", "Your committed list and everything you’ve done today, struck through as you go."],
-      ["Or just say go.", "This is Focus mode — it walks your urgent pile for you, one sheet at a time; nothing saved until you approve the lot."],
-    ]);
-  });
-  it("the last stop ends with Done (Act 2 is dropped); the rest advance", () => {
-    expect(TOUR_STOPS[TOUR_STOPS.length - 1].cta).toBe("Done");
-    expect(TOUR_STOPS.slice(0, -1).every((s) => s.cta === "Next →")).toBe(true);
+  it("never on a new desk; never once stamped", () => {
+    expect(shouldAutoRunTour(undefined, "new-desk" as never)).toBe(false);
+    expect(shouldAutoRunTour("2026-07-16T09:00:00Z", "normal" as never)).toBe(false);
   });
 });

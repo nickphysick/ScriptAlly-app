@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * todoTour — the pure layer of the first-visit spotlight tour (design ref:
- * design-refs/todo-onboarding-tour.html, ACT 1 ONLY — the Act-2 desk-walk sheets are DROPPED by
- * the pack). Five stops, copy VERBATIM from the ref; the 5th stop's button reads "Done" (not the
- * ref's "Try it →") and ends the tour.
+ * Deck v2 P5 rewire — SIX stops over the definitive page: post-its → the resident review
+ * banner → the deck pills → the rail's Focus square → a card (the hover verbs) → Today. The
+ * last stop's button reads "Done" and ends the tour.
  *
  * The seen flag is `User.tourSeenAt` (ISO timestamp) — the established additive user-doc pattern
  * (the Package Workshop's `hasSeenTour`), written through `updateUserProfile`; NEVER localStorage
@@ -26,34 +26,40 @@ export const TOUR_STOPS: TourStop[] = [
   {
     sel: ".tdb-postits",
     h: "Your desk, counted.",
-    p: "Three post-its, three kinds of work: pressing things, tidy-up jobs, and your own notes. Tap one to jump to its pile.",
+    p: "Three post-its, three kinds of work: pressing things, tidy-up jobs, and your own notes. Tap one to see only that pile — tap again for everything.",
     cta: "Next →",
   },
   {
-    sel: "#tdb-lane-do",
-    h: "Urgent — where your move matters.",
-    p: "Requests, deadlines and offers land here, most pressing first. Click any card to work through it, one question at a time.",
+    // Deck v2: the review banner is a strip resident — always here, never dismissed.
+    sel: ".tdb-rvhead",
+    h: "Your week, reviewed.",
+    p: "Last week\u2019s progress report lives here every day. Every box ticked turns the dial in your favour.",
     cta: "Next →",
   },
   {
-    sel: "#tdb-lane-do .tdb-pill",
-    h: "Build a list you’ll finish.",
-    p: "Commit up to five things to today. Small on purpose — a finished list beats a long one.",
+    // the deck's quiet pill rail (the first pill anchors the spotlight)
+    sel: ".tdb-pt",
+    h: "Narrow the desk.",
+    p: "Quiet filters: click one to see only that kind of work. RESET brings everything back.",
     cta: "Next →",
   },
   {
-    // II·B retarget: the panel lives in the companion rail (≥1500) or behind the masthead chip
-    // (narrow) — the selector list hits whichever exists; the tour filters a missing target.
+    // the rail's Focus square (or the icon rail's ▶ below 1420)
+    sel: ".tdb-lrail",
+    h: "Or just say go.",
+    p: "Focus mode walks your whole desk for you, one sheet at a time — no distractions.",
+    cta: "Next →",
+  },
+  {
+    sel: ".tdb-tile, .tdb-gcard",
+    h: "Every card works the same.",
+    p: "Click a card to open it. Hover for the quick verbs — done, Today, or later.",
+    cta: "Next →",
+  },
+  {
     sel: ".tdb-today2, .tdb-todaychip",
     h: "Today lives beside your work.",
-    p: "Your committed list and everything you’ve done today, struck through as you go.",
-    cta: "Next →",
-  },
-  {
-    // III retarget: the guided walk is FOCUS MODE, living in the pair's top card.
-    sel: ".tdb-focus",
-    h: "Or just say go.",
-    p: "This is Focus mode — it walks your urgent pile for you, one sheet at a time; nothing saved until you approve the lot.",
+    p: "Your committed list and everything you\u2019ve done today, struck through as you go.",
     cta: "Done",
   },
 ];

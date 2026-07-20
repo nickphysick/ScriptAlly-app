@@ -30,8 +30,7 @@ import {
   quickSendPayload, quickNudgePayload, receiptLine, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, priorSameTypeSend, duplicateSendPrompt,
 } from "../../lib/todoWalk";
 import { weekOfQuerying } from "../../lib/dashboardStats";
-import { saveHkRows } from "../../lib/hkSave";
-import { isProUser, fetchAssistedFill, AssistFound } from "../../lib/assistFill";
+import { isProUser } from "../../lib/assistFill";
 import { groupHousekeeping, hkGapCount, hkGroupProgress, HkGroup, HkRule, HK_RULES, laterHideKey } from "../../lib/todoHousekeeping";
 import { deskState, liveQueryCount, liveQueriesLine, clearedListCap } from "../../lib/todoEmpty";
 import { ledgerTitle, ledgerDetail, sortLedgerDo, sortLedgerHk, batchChildren, batchDetail, batchTaskCopy, truncateRows } from "../../lib/todoLedger";
@@ -86,89 +85,7 @@ type Overlay =
   | { kind: "receipt"; lane: "do" | "hk" | "nt"; title: string; line: string; undo?: () => void | Promise<void>; edit?: () => void }
   | { kind: "dismissed"; lane: "do" | "hk" | "nt"; text: string; undo: () => void | Promise<void>; never?: () => void }
   | { kind: "fork"; single: boolean }
-  | { kind: "flip" };
-
-/** The grouped card's quick-✓ target: an inline rapid chip-fill — the SAME batch save as the focus
- *  sheet (hkSave.saveHkRows), never a third write path. Compact chips; skipping rows is fine.
- *  Assisted fill (Pro, LIVE) rides the header: found values land in the chips/fields UNSAVED, a ✨
- *  marks each found row (provenance in its tooltip — the sheet is the full-provenance surface), and
- *  un-sourced agents simply stay empty. Free users get the Pro pill → the upgrade path. */
-const GroupFlip: React.FC<{
-  group: HkGroup;
-  pro: boolean;
-  onUpgrade: () => void;
-  onCancel: () => void;
-  onSaved: (ok: number, undo?: () => Promise<void>) => void;
-  deps: Parameters<typeof saveHkRows>[5];
-}> = ({ group, pro, onUpgrade, onCancel, onSaved, deps }) => {
-  const [rows, setRows] = useState<Record<string, string>>({});
-  const [found, setFound] = useState<Record<string, AssistFound>>({});
-  const [assistAt, setAssistAt] = useState<string | null>(null);
-  const [assisting, setAssisting] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const filled = group.members.filter((m) => (rows[m.agentId ?? ""] ?? "").trim()).length;
-  const MATERIAL_VOCAB = ["Query Letter", "Synopsis", "Sample Pages", "Full Manuscript"];
-  async function runAssist() {
-    if (!pro) { onUpgrade(); return; }
-    setAssisting(true);
-    try {
-      const targets = group.members.filter((m) => m.agentId);
-      const rs = await fetchAssistedFill({ rule: group.rule as "dq_responseTime" | "dq_materials" | "dq_mswl", agents: targets.map((m) => ({ agentId: m.agentId!, name: m.agentName, ...(m.agency ? { agency: m.agency } : {}) })) });
-      const byId: Record<string, AssistFound> = {};
-      const next = { ...rows };
-      for (const r of rs) { byId[r.agentId] = r; next[r.agentId] = r.value; }
-      setFound((f) => ({ ...f, ...byId }));
-      setRows(next);
-      setAssistAt(new Date().toISOString());
-    } catch {
-      /* quiet — the manual path is never blocked */
-    } finally {
-      setAssisting(false);
-    }
-  }
-  return (
-    <div className="tdb-batchflip" onClick={(e) => e.stopPropagation()}>
-      <div className="tdb-bfh">
-        {group.rule === "dq_responseTime" ? "Replies within…" : group.rule === "dq_materials" ? "They ask for…" : "Looking for…"}
-        {group.meta.assistable && (
-          <button type="button" className="tdb-bffind" disabled={assisting} title={pro ? "Find these for me — found values land unsaved; check before saving" : "Assisted fill is a Pro feature"} onClick={runAssist}>
-            {assisting ? "…" : "✨ Find"}{!pro && <span className="tdb-propill">Pro</span>}
-          </button>
-        )}
-        <span className="tdb-bfp">{filled} OF {group.members.length}</span>
-      </div>
-      <div className="tdb-bfrows">{group.members.map((m) => {
-        const id = m.agentId ?? m.card.key;
-        return (
-          <div key={m.card.key} className="tdb-bfrow">
-            <span className="tdb-bfn" title={m.agentId && found[m.agentId] ? `✨ Found · ${found[m.agentId].source}${assistAt ? ` · ${new Date(assistAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` : ""} — check before saving` : undefined}>
-              {m.agentId && found[m.agentId] ? "✨ " : ""}{m.agentName}
-            </span>
-            <span className="tdb-bfchips">
-              {group.rule === "dq_responseTime" && [4, 6, 8, 12].map((w) => (
-                <button key={w} type="button" className={`tdb-bfc${rows[id] === String(w) ? " on" : ""}`} onClick={() => setRows((p) => ({ ...p, [id]: String(w) }))}>{w}wk</button>
-              ))}
-              {group.rule === "dq_materials" && MATERIAL_VOCAB.map((mv) => {
-                const set = new Set((rows[id] ?? "").split(",").map((x) => x.trim()).filter(Boolean));
-                return <button key={mv} type="button" className={`tdb-bfc${set.has(mv) ? " on" : ""}`} onClick={() => { set.has(mv) ? set.delete(mv) : set.add(mv); setRows((p) => ({ ...p, [id]: Array.from(set).join(", ") })); }}>{mv.replace("Full Manuscript", "Full MS").replace("Query Letter", "Letter").replace("Sample Pages", "Pages")}</button>;
-              })}
-              {group.rule === "dq_mswl" && <input className="tdb-bfin" type="text" placeholder="wish list…" value={rows[id] ?? ""} onChange={(e) => setRows((p) => ({ ...p, [id]: e.target.value }))} />}
-            </span>
-          </div>
-        );
-      })}</div>
-      <div className="tdb-bffoot">
-        <button type="button" className="tdb-ra" onClick={onCancel}>Cancel</button>
-        <button type="button" className="tdb-ra save" disabled={!filled || saving} onClick={async () => {
-          setSaving(true);
-          const res = await saveHkRows(group, rows, {}, found, new Date().toISOString(), deps);
-          setSaving(false);
-          onSaved(res.ok, res.undo);
-        }}>Save {filled || ""}</button>
-      </div>
-    </div>
-  );
-};
+  ;
 
 /** One board SECTION (workbench P2 — the horizontal reels are RETIRED): coloured header row over a
  *  wrapping auto-fill card grid. No scroll machinery — the page scrolls, the grid wraps. The
@@ -287,12 +204,33 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [kfocus, setKfocus] = useState(-1);
   const [kebabAt, setKebabAt] = useState<string | null>(null);
   // ── II·B P3: the companion rail ↔ masthead chip. ONE Today panel (renderTodayPanel), TWO
-  // mounts — the right column ≥1200px, the masthead-chip popover below — XOR'd on `narrow`, so
+  // mounts — the right column ≥1240px, the strip-chip popover below — XOR'd on `narrow`, so
   // exactly one mounts and the state never forks (halt (c) clear).
-  const [narrow, setNarrow] = useState<boolean>(() => typeof window !== "undefined" && window.matchMedia("(max-width: 1199.98px)").matches);
+  const [narrow, setNarrow] = useState<boolean>(() => typeof window !== "undefined" && window.matchMedia("(max-width: 1239.98px)").matches);
   const [todayPopOpen, setTodayPopOpen] = useState(false);
+  // Deck v2 P5 — the compact break (<1420): the rail collapses to the 56px icon rail (assembly
+  // 1172) and the deck's trailing pills fold into FILTER ▾.
+  const [compact, setCompact] = useState<boolean>(() => typeof window !== "undefined" && window.matchMedia("(max-width: 1419.98px)").matches);
+  const [filterDropOpen, setFilterDropOpen] = useState(false);
   useEffect(() => {
-    const mq = window.matchMedia("(max-width: 1199.98px)");
+    const mq = window.matchMedia("(max-width: 1419.98px)");
+    const on = () => setCompact(mq.matches);
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
+  useEffect(() => { if (!compact) setFilterDropOpen(false); }, [compact]);
+  useEffect(() => {
+    if (!filterDropOpen) return;
+    const onDown = (e: PointerEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && t.closest(".tdb-fdropwrap")) return;
+      setFilterDropOpen(false);
+    };
+    document.addEventListener("pointerdown", onDown);
+    return () => document.removeEventListener("pointerdown", onDown);
+  }, [filterDropOpen]);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 1239.98px)");
     const on = () => setNarrow(mq.matches);
     mq.addEventListener("change", on);
     return () => mq.removeEventListener("change", on);
@@ -1007,11 +945,28 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <span className="tdb-vdiv" aria-hidden />
           {deckPill("OFFERS", "offers", fc.offers, "p")}
           {deckPill("AGENT WAITING", "overToYou", fc.overToYou, "p")}
-          {deckPill("MATERIALS", "materials", fc.materials, "lat")}
-          {deckPill("WISH LISTS", "mswl", fc.mswl, "lat")}
-          {deckPill("STALE", "stale", fc.stale, "lat")}
-          {deckPill("SNOOZED", "snoozed", fc.snoozed, "lat")}
-          {deckPill("NOTES", "notes", fc.notes, "y")}
+          {!compact ? (
+            <>
+              {deckPill("MATERIALS", "materials", fc.materials, "lat")}
+              {deckPill("WISH LISTS", "mswl", fc.mswl, "lat")}
+              {deckPill("STALE", "stale", fc.stale, "lat")}
+              {deckPill("SNOOZED", "snoozed", fc.snoozed, "lat")}
+              {deckPill("NOTES", "notes", fc.notes, "y")}
+            </>
+          ) : (
+            <span className="tdb-fdropwrap">
+              <button type="button" className="tdb-pt fdrop" aria-haspopup="menu" aria-expanded={filterDropOpen} onClick={() => setFilterDropOpen((v) => !v)}>FILTER ▾</button>
+              {filterDropOpen && (
+                <div className="tdb-fdrop" role="menu" aria-label="Filters">
+                  {deckPill("MATERIALS", "materials", fc.materials, "lat")}
+                  {deckPill("WISH LISTS", "mswl", fc.mswl, "lat")}
+                  {deckPill("STALE", "stale", fc.stale, "lat")}
+                  {deckPill("SNOOZED", "snoozed", fc.snoozed, "lat")}
+                  {deckPill("NOTES", "notes", fc.notes, "y")}
+                </div>
+              )}
+            </span>
+          )}
           {!resting && (
             <button type="button" className="tdb-rst" onClick={resetDeck}>SHOWING {shownX} OF {shownY} · RESET ✕</button>
           )}
@@ -1089,6 +1044,17 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // existing sheet) · the Pro promo (plan-gated; CTA → the /plans upgrade surface). ──
   function renderRail() {
     const boardCards = [...board.do, ...board.hk, ...board.nt];
+    if (compact) {
+      return (
+        <aside className="tdb-lrail icon" aria-label="Workbench rail">
+          <button type="button" className="tdb-ric" title="Focus mode" aria-label="Focus mode" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>▶</button>
+          <button type="button" className="tdb-ric" title="Task settings" aria-label="Task settings" onClick={() => setSettingsOpen(true)}>⚙</button>
+          {!isProUser(currentUser) && (
+            <button type="button" className="tdb-ric pro" title="ScriptAlly Pro — meet the assistant" aria-label="ScriptAlly Pro — meet the assistant" onClick={() => onNavigate("plans")}>✦</button>
+          )}
+        </aside>
+      );
+    }
     return (
       <aside className="tdb-lrail" aria-label="Workbench rail">
         <button type="button" className="tdb-sq" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>
@@ -1427,13 +1393,21 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // reflows: [✓ DONE] · ＋/− TODAY · ☾ LATER ▾ (tomorrow / a week / don't-show-these — the
   // per-type hide, restorable in Task settings). Offers: no ✓ DONE (the journey decides), no
   // hide (the locked row). The old quick rail, body pill and meta row are retired. ──
+  // arrow navigation inside the Later menu (P5 a11y): ↓/↑ cycle the menuitems; Esc closes
+  function latMenuKeys(e: React.KeyboardEvent<HTMLDivElement>) {
+    const items = Array.from((e.currentTarget as HTMLElement).querySelectorAll<HTMLButtonElement>("[role=menuitem]"));
+    const i = items.indexOf(document.activeElement as HTMLButtonElement);
+    if (e.key === "ArrowDown") { e.preventDefault(); items[(i + 1) % items.length]?.focus(); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); items[(i - 1 + items.length) % items.length]?.focus(); }
+    else if (e.key === "Escape") { e.stopPropagation(); setLaterKey(null); }
+  }
   function laterMenu(c: BoardCard) {
     const hideKey = laterHideKey(c.taskType);
     return (
       <span className="tdb-latwrap">
         <button type="button" className="tdb-verb" aria-haspopup="menu" aria-expanded={laterKey === c.key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === c.key ? null : c.key)); }}>☾ LATER ▾</button>
         {laterKey === c.key && (
-          <div className="tdb-latmenu" role="menu" aria-label="Later">
+          <div className="tdb-latmenu" role="menu" aria-label="Later" onKeyDown={latMenuKeys}>
             <button type="button" role="menuitem" onClick={(e) => { e.stopPropagation(); setLaterKey(null); snoozeCard(c, 1, "tomorrow"); }}>Remind me tomorrow</button>
             <button type="button" role="menuitem" onClick={(e) => { e.stopPropagation(); setLaterKey(null); snoozeCard(c, 7, "in a week"); }}>Give it a week</button>
             {hideKey && (
@@ -1474,7 +1448,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         onClick={() => openFlowCards([c])}
         onMouseEnter={() => armVerbs(c.key)} onMouseLeave={disarmVerbs}
         onFocus={() => armVerbs(c.key)} onBlur={disarmVerbs}
-        tabIndex={0}>
+        role="button" aria-expanded={hov} tabIndex={0}
+        onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); openFlowCards([c]); } }}>
         <div className={`tdb-band ${c.stream}`}>
           <span className={`tdb-tag due${isOffer ? " offer" : c.warn ? " warn" : ""}`}>{isOffer ? `★ ${c.due}` : c.due}</span>
           {c.snoozes > 0 && <span className="tdb-tag snz">Snoozed ×{c.snoozes}</span>}
@@ -1496,24 +1471,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   function renderGroupCard(g: HkGroup) {
     const key = `group-${g.rule}`;
     const ov = overlays[key];
-    if (ov?.kind === "flip") {
-      return (
-        <div key={g.rule} className="tdb-gcard flip">
-          <div className="tdb-frame"><GroupFlip
-            group={g}
-            pro={isProUser(currentUser)}
-            onUpgrade={() => onNavigate("plans")}
-            onCancel={() => clearOverlay(key)}
-            onSaved={(ok, undo) => {
-              clearOverlay(key);
-              setOverlay(`${key}-r`, { kind: "receipt", lane: "hk", title: `${ok} ${g.meta.label.toLowerCase()} set`, line: "Saved to their profiles. The rest stay on the card — skipping is fine.", undo });
-              flash(`${ok} saved`, undo ? { label: "Undo all", fn: async () => { await undo(); clearOverlay(`${key}-r`); } } : undefined);
-            }}
-            deps={{ agents, updateAgent, resolveTaskFlag }}
-          /></div>
-        </div>
-      );
-    }
     if (ov?.kind === "fork") {
       return (
         <div key={g.rule} className="tdb-gcard">
@@ -1530,7 +1487,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}
         onMouseEnter={() => armVerbs(key)} onMouseLeave={disarmVerbs}
         onFocus={() => armVerbs(key)} onBlur={disarmVerbs}
-        tabIndex={0}>
+        role="button" aria-expanded={hov} tabIndex={0}
+        onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); setFlow({ items: [{ kind: "group", group: g }] }); } }}>
         <div className="tdb-band hk">
           <span className="tdb-tag due">{g.meta.label.toUpperCase()}</span>
         </div>
@@ -1552,7 +1510,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             <span className="tdb-latwrap">
               <button type="button" className="tdb-verb" aria-haspopup="menu" aria-expanded={laterKey === key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === key ? null : key)); }}>☾ LATER ▾</button>
               {laterKey === key && (
-                <div className="tdb-latmenu" role="menu" aria-label="Later">
+                <div className="tdb-latmenu" role="menu" aria-label="Later" onKeyDown={latMenuKeys}>
                   <button type="button" role="menuitem" onClick={(e) => { e.stopPropagation(); setLaterKey(null); snoozeGroup(g, 1, "tomorrow"); }}>Remind me tomorrow</button>
                   <button type="button" role="menuitem" onClick={(e) => { e.stopPropagation(); setLaterKey(null); snoozeGroup(g, 7, "in a week"); }}>Give it a week</button>
                   <button type="button" role="menuitem" className="warn" onClick={(e) => { e.stopPropagation(); setLaterKey(null); muteRuleFromCard(g); }}>Don’t show these again</button>
