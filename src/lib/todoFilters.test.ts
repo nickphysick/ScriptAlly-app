@@ -32,7 +32,7 @@ describe("the composition matrix — type boxes × the snoozed axis × todayOnly
   const send = card("s", { taskType: "full_requested" });
   const snoozedSend = card("z", { taskType: "full_requested", snoozes: 2 });
   const committedSend = card("c", { taskType: "full_requested", committedDate: TODAY });
-  it("Urgent: Offers and Over to you split the lane", () => {
+  it("Urgent: Offers and Agent waiting split the lane", () => {
     expect(visibleDoCard(offer, f(), TODAY)).toBe(true);
     expect(visibleDoCard(offer, f({ offers: false }), TODAY)).toBe(false);
     expect(visibleDoCard(send, f({ offers: false }), TODAY)).toBe(true);

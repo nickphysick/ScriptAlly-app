@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * "Over to you" — the dashboard's high-priority action container (hero-right slot, STANDARD layout).
+ * The dashboard's high-priority action container (historically named for its urgent bucket) (hero-right slot, STANDARD layout).
  * One height-capped, internally-scrolling MountCard with a pink header band and a THREE-TAB body:
  *   · Urgent        — urgent-family task rows (burgundy).
  *   · Housekeeping  — recommended-family task rows, FLATTENED (sage).

@@ -119,6 +119,17 @@ export function visibleAgentNeeds(agent: AgentDataQualityInput, muted?: string[]
  * `data_quality_poor` dies only when ALL its remaining gaps are muted; `no_response_close` when its
  * own rule is muted; every other task type is unaffected.
  */
+/** Deck v2: the Later menu's per-type hide key — the SAME mutedTaskRules vocabulary Task
+ *  settings drives (restorable there). Offers (the locked row) and notes (the user's own
+ *  jottings) return null — those cards render no hide item; dq cards ride their group's menu. */
+export function laterHideKey(taskType: string | undefined): string | null {
+  if (!taskType) return null;
+  if (taskType === "partial_requested" || taskType === "full_requested" || taskType === "revise_resubmit") return "send";
+  if (taskType === "nudge_overdue") return "nudge_overdue";
+  if (taskType === "no_response_close") return "no_response_close";
+  return null;
+}
+
 export function taskSurvivesMute(taskType: string, agent: Agent | undefined, muted?: string[] | null): boolean {
   if (taskType === "no_response_close") return !isRuleMuted("no_response_close", muted);
   if (taskType === "nudge_overdue") return !isRuleMuted("nudge_overdue", muted); // Task Settings: "Nudge reminders" off

@@ -6,7 +6,7 @@
  *
  * Mirrors THIS branch's dashboard (Dashboard.tsx default/non-magazine view) so real content snaps
  * into the same boxes with no layout shift. Two `[1fr_420px]` rows:
- *   Row 1: hero banner + four stat-chart cards (left) · task panel "Over to you" (right)
+ *   Row 1: hero banner + four stat-chart cards (left) · task panel (right)
  *   Row 2: "What's live right now?" pipeline strip + Fortnight-in-Focus grid (left) ·
  *          "the story so far" activity timeline (right)
  *
@@ -99,7 +99,7 @@ export const DashboardSkeleton: React.FC<{ slotIn?: boolean }> = ({ slotIn = fal
             </div>
           </div>
 
-          {/* Task panel "Over to you" — fills the cell height (driven by the left column) */}
+          {/* Task panel — fills the cell height (driven by the left column) */}
           <div className="relative">
             <div className="lg:absolute lg:inset-0">
               <Card className={slc} style={{ height: "100%", minHeight: 336, padding: 22, display: "flex", flexDirection: "column", ...sl(2) }}>

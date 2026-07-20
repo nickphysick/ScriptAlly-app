@@ -833,3 +833,32 @@ Rule-text-locked in `todoTagLaw.test.ts`.
 - **The V grid token family** (`--tdb-gutter`/`--tdb-appnav 49`/`--tdb-sidebar 270`/`--tdb-today
   264`) + the VI column scroll contract: both flanking columns sticky at the gutter, viewport-
   capped, fixed heads/feet, one hairline-scrollbar middle each (`.tdb-tmid2`/`.tdb-fmid`).
+
+## `.t-f12` — THE COMMAND DECK v2 (2026-07-20, the definitive To-do page; ref `todo-deck-v2.html` THE LAWS)
+
+- **WIDTH v3 — the centred assembly:** rail 240 · 24 · sheet 812 (18px padding wrapping a 774
+  viewport = exactly 3 × 250 cards + 2 × 12 gaps) · 24 · Today 256 = **1356px**, centred at every
+  viewport (`--tdb-asm/rail/sheet/vp/cardw/today`). Bar backgrounds (strip paper, deck white)
+  full-bleed; contents lock to `.tdb-asm`. Cards `flex:0 0 250`, never stretch; reels snap-page
+  by 3; **no partials, no edge fades** — heading pagers + counts carry "there's more".
+- **THE SHEET:** both views inside the white content panel (radius 16, hairline, 18/18/8); on it
+  cards wear `#d8cfc4` + `0 2px 6px rgba(58,28,20,.07)`.
+- **QUIET PILLS:** resting white/hairline/ink + 7px family dot (`--dot-p #e59b8f` ·
+  `--dot-lat #cbb995` · `--dot-y #d9c87a` · `--dot-s #9db29a`); zero-count 40%; narrowed =
+  included pink-band burgundy 700, excluded dim, burgundy `SHOWING x OF y · RESET ✕`; Esc clears
+  search then filters; the 84×102 strip post-its SOLO the same state; filtered lane heads append
+  `x OF y · FILTERED · SHOW ALL`. Pill copy: OFFERS (no star) · AGENT WAITING · MATERIALS ·
+  WISH LISTS · STALE · SNOOZED · NOTES · lens TODAY'S LIST (no tick).
+- **THE CARD CONTRACT:** band = identity + status only (tag; sage ✓ TODAY chip; card tags keep
+  ★ OFFER); body = content only (batch keeps count headline, ink-on-#ece5d8 progress, display
+  roundels — flat, hairline, no pile, no roundel buttons, no footer CTA, no NEVER); click
+  anywhere opens (unit→journey, batch→Batch fix); hover (~150ms intent, 180ms ease) grows the
+  verb row downward as an overlay: [✓ DONE | ⚡ FIX n →] · ＋/− TODAY · ☾ LATER ▾ {tomorrow /
+  a week / don't-show-these — the per-type mutedTaskRules hide, restorable in Task settings;
+  offers and notes carry no hide item}.
+- **THE LATTE LAW:** housekeeping = `--lat-1 #f5efe6 → --lat-2 #efe7d9`, bd `#ddd0bc`, mark
+  `#cbb995` (underline/dot), ink `#8a7048` — bands, lane underline, post-it, pill dot. **Coffee
+  survives only in journey-sheet headers** (FocusFlow's cof family).
+- **THE RENAME:** "Over to you" → **"Agent waiting"** everywhere (tags, pills, ledger, kickers,
+  copy, tests; repo-wide grep-locked). The review banner is a RESIDENT of the identity strip
+  (no windows, no dismissal; Open it › ⇄ View again on the completion sentinel).

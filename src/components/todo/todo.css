@@ -25,10 +25,11 @@
 /* ── the workbench row (Option B): drawer + centred main. The row caps at 1720 and centres;
    inside it the CONTENT column caps at 1150 and centres again — max-width discipline at every
    viewport, surplus pooling as symmetric oat desk. ── */
-.tdb-ws { display: flex; align-items: flex-start; gap: var(--g24); padding: 0 var(--g24); margin: var(--g24) 0 0; }
-.tdb-main { flex: 1; min-width: 0; } /* anchored 24 off the sidebar; flexes — never centred */
-.tdb-col { min-width: 0; } /* IV P1: uncapped — content-left is the one axis; the container caps */
-@media (max-width: 900px) { .tdb-ws { flex-wrap: wrap; } .tdb-ws .tdb-lrail { position: static; width: 100%; max-height: none; } }
+.tdb-ws { display: flex; align-items: flex-start; gap: var(--g24); padding: 22px 0 26px; } /* the assembly work row (ref .work) */
+/* THE SHEET (the LAWS): the white content panel holding BOTH views; cards on it wear the sheet
+   border + shadow. 812 = 18px padding wrapping the 774 exact-fit viewport. */
+.tdb-mainc { width: var(--tdb-sheet); flex: 0 0 auto; box-sizing: border-box; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 16px; padding: 18px 18px 8px; }
+@media (max-width: 900px) { .tdb-ws { flex-wrap: wrap; } .tdb-ws .tdb-lrail { position: static; width: 100%; max-height: none; } .tdb-mainc { width: 100%; } }
 
 /* ── THE IDENTITY STRIP (Deck v2 P1) — full-bleed paper band, one base rule, NOT sticky; the
    contents lock to the centred assembly. Title block · 84×102 family post-its (filter solos,
@@ -157,7 +158,7 @@
    and NEVER opacity-only (a dimmed live button still reads clickable). ── */
 .tdb-worklist:disabled, .tdb-pick:disabled,
 .tdb-ffpri:disabled, .tdb-ffback:disabled, .tdb-ffcopy:disabled,
-.tdb-ra:disabled, .tdb-bffind:disabled, .tdb-gfix:disabled {
+.tdb-ra:disabled, .tdb-bffind:disabled {
   background: var(--paper);
   border: 1px solid var(--hairline);
   color: var(--faint);
@@ -177,39 +178,48 @@
    are RETIRED — exact-fit + snap + the header pagers own the overflow affordance. ── */
 .tdb-lanes { display: flex; flex-direction: column; }
 .tdb-reel { margin-bottom: var(--g24); }
-/* II·B P4 — the cards view shares the ledger's tinted head band; standalone = full border +
-   radius + the g12 gap to its cards (the dot+rule reelh grammar is retired). */
-.tdb-lghead.standalone { border: 1px solid; border-radius: 10px; margin-bottom: var(--g12); }
-.tdb-ln { font-family: var(--f12-mono); font-size: 8.5px; font-weight: 700; border-radius: 99px; padding: 2.5px 9px; background: var(--white, #fff); border: 1px solid var(--line); color: var(--ink-2); }
+/* Deck v2 P4 — the BAND-LESS lane heading (ref .lh2), ONE grammar in both views: play (30) ·
+   Playfair 20 title with the 25×3 family underline (pink / --lat-mark / note-yellow) · count
+   chip · [x OF y · FILTERED · SHOW ALL] · ‹ › pagers right (28, dimmed at the ends). 16px clear
+   below; the reel viewport carries the hover-lift padding. */
+.tdb-lh2 { display: flex; align-items: center; gap: 11px; margin: 0 0 16px; }
+.tdb-lh2 .tdb-lgt { position: relative; padding-bottom: 6px; font-size: 20px; }
+.tdb-lh2 .tdb-lgt::after { content: ""; position: absolute; left: 1px; bottom: 0; width: 25px; height: 3px; border-radius: 2px; }
+.tdb-lh2.p .tdb-lgt::after { background: var(--pink-b); }
+.tdb-lh2.lat .tdb-lgt::after { background: var(--lat-mark); }
+.tdb-lh2.n .tdb-lgt::after { background: var(--note-b); }
+.tdb-lh2 .tdb-ln { margin-bottom: 4px; }
+.tdb-lhfilt { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.1em; color: var(--muted); }
+.tdb-lhfilt button { border: none; background: none; padding: 0; font: inherit; color: #7c3a2a; font-weight: 700; cursor: pointer; }
+.tdb-ln { font-family: var(--f12-mono); font-size: 8.5px; font-weight: 700; border-radius: 99px; padding: 1px 8px; background: var(--white, #fff); border: 1px solid var(--line); color: var(--ink-2); }
 /* Polish v3 P3 — "Focused session" (Option C pill; replaces the ghost mono "SWEEP →"; the handler
    — the focus flow's sweep mode — is untouched). White pill + hairline; leading 20px pink disc
    (soft→deep gradient) carrying a solid ink play triangle, nudged 1px right for optical centring.
    Hover warms the border to the deeper pink and the fill to the warm paper near-white. */
 .tdb-cadd { font-size: 16px; color: var(--ink-2); padding: 0 4px; }
 .tdb-cadd:hover { color: var(--ink); }
-/* III P2 — the ONE-ROW REEL returns (refine ref): width-aware exact fit (reelFit sets --reelw),
-   scroll-snap, hidden scrollbar, chevron pagers in the lane head. The wrapping grid retires. */
-.tdb-reeltrack { display: flex; gap: var(--g12); padding: 2px 2px 6px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; align-items: stretch; scroll-snap-type: x mandatory; scroll-behavior: smooth; }
+/* Deck v2 P4 — the EXACT-FIT reel (width law v3): viewport EXACTLY 774 = 3 × 250 + 2 × 12;
+   snap paging by three; no partials, no fades. 10px top padding = hover-lift room; the deep
+   bottom padding + negative margin contain the verb-row OVERLAY inside the scrollport (so the
+   reel never reflows and nothing clips) while the visual rhythm stays the 24-grid. */
+.tdb-reeltrack { width: var(--tdb-vp); display: flex; gap: var(--g12); padding: 10px 0 64px; margin-bottom: calc(-64px + 2px); overflow-x: auto; overflow-y: hidden; scrollbar-width: none; align-items: flex-start; scroll-snap-type: x mandatory; scroll-behavior: smooth; }
 .tdb-reeltrack::-webkit-scrollbar { display: none; }
 @media (prefers-reduced-motion: reduce) { .tdb-reeltrack { scroll-behavior: auto; } }
 .tdb-reelpg { display: inline-flex; gap: 5px; margin-left: auto; } /* VI P3: the head's right edge */
-.tdb-pg { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--white, #fff); border: 1px solid var(--line); color: var(--ink-2); font-size: 11px; }
+.tdb-pg { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--white, #fff); border: 1px solid var(--line); color: var(--ink-2); font-size: 11px; box-shadow: 0 1px 3px rgba(58, 28, 20, 0.1); }
 .tdb-pg:hover:not(:disabled) { border-color: var(--ink-2); }
-.tdb-pg:disabled { opacity: 0.4; }
+.tdb-pg:disabled { opacity: 0.35; box-shadow: none; }
 /* ── THE LEDGER (workbench P3; ref todo-ledger-v1.html): white table card per section, tinted
    head (pink/coffee/note — the note head is a flagged extension so notes aren't lost in this
    view), the shared 9-col grid, 44px rows, batch children on the paper wash. The STATUS column
    renders the real StatusDot (the ref's sdot circles were sketch stand-ins). ── */
 .tdb-ledger { display: flex; flex-direction: column; gap: var(--g24); }
 .tdb-tbl { background: var(--white, #fff); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
-.tdb-lghead { display: flex; align-items: center; gap: 9px; padding: 7px 16px 7px 8px; border-bottom: 1px solid; }
-.tdb-lghead.p { background: linear-gradient(180deg, var(--pink-t), var(--pink-btn)); border-color: var(--pink-b); }
-.tdb-lghead.c { background: linear-gradient(180deg, var(--hk-cof), var(--hk-cof-2)); border-color: var(--hk-cof-edge); }
-.tdb-lghead.n { background: var(--note-t); border-color: var(--note-b); }
+.tdb-lsec { margin-bottom: var(--g24); }
 .tdb-lgt { font-family: var(--f12-serif); font-size: 16px; font-weight: 600; color: var(--ink); }
 /* VI P3 — the lane-head PLAY BUTTON (ref .playb): 32px white circle leading the title; the
    Focus pill + lane dot are retired. Full wording lives in title/aria. */
-.tdb-playb { width: 32px; height: 32px; border-radius: 50%; background: var(--white, #fff); border: 1px solid rgba(58, 28, 20, 0.16); box-shadow: 0 1px 3px rgba(58, 28, 20, 0.12); display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; color: var(--ink); cursor: pointer; transition: transform 0.14s; }
+.tdb-playb { width: 30px; height: 30px; border-radius: 50%; background: var(--white, #fff); border: 1px solid rgba(58, 28, 20, 0.16); box-shadow: 0 1px 3px rgba(58, 28, 20, 0.12); display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; color: var(--ink); cursor: pointer; transition: transform 0.14s; }
 .tdb-playb:hover { transform: scale(1.06); }
 .tdb-playb svg { margin-left: 2px; }
 @media (prefers-reduced-motion: reduce) { .tdb-playb { transition: none; } .tdb-playb:hover { transform: none; } }
@@ -297,22 +307,35 @@
    DEEPER pink (pink-btn fill, pink-deep text, 700 — urgency outranks status by depth, not hue) ·
    offer keeps the ink ★ (rarest thing, rarest colour) · note cards keep note-yellow. Burgundy
    survives only in StatusDots (locked) and micro-accents — never a tag fill. ── */
-/* CARD BANDS (Variant A) — the MountCard header-fill structure: RIM (white, radius 13, 3px pad,
-   NO clip) → .tdb-frame (1px hairline, radius 10, overflow:hidden — THE clip context) → .tdb-band
-   (slim lane-tint header, tags/kicker only, 1px identity border-bottom) + .tdb-body (white). The
-   coloured left spines are RETIRED — the band is the lane identity. Height 208→242 (208 + the
-   ~26 band (workbench P2 tightened); two-line subs still fit). Grid drives the width now. */
-.tdb-tile { position: relative; flex: 0 0 var(--reelw, 240px); scroll-snap-align: start; min-height: 168px; background: var(--white, #fff); border-radius: 13px; padding: 3px; box-shadow: var(--sh-card); cursor: pointer; transition: box-shadow 0.16s, transform 0.16s; display: flex; flex-direction: column; }
-.tdb-tile:hover { box-shadow: var(--sh-card-h); transform: translateY(-1px); }
-.tdb-tile:hover .tdb-frame { border-color: var(--ink); }
-.tdb-tile.today .tdb-frame { border-color: var(--hk-spine); }
-.tdb-frame { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; transition: border-color 0.16s; }
-.tdb-band { flex: none; display: flex; align-items: center; gap: 5px; min-height: 26px; padding: 0 12px; border-bottom: 1px solid var(--line); }
-.tdb-band.do { background: var(--pink-t); border-bottom-color: var(--pink-b); }
-.tdb-band.hk { background: var(--hk-cof); border-bottom-color: var(--hk-cof-edge); }
+/* THE CARD CONTRACT (Deck v2 P4, the LAWS verbatim) — band = identity + status ONLY (tag; the
+   sage ✓ TODAY chip; ★ OFFER keeps its star); body = content only. Cards are flat on the sheet:
+   1px #d8cfc4 hairline + the sheet shadow, radius 12, CONTENT-SIZED (the fixed heights retired),
+   flex:0 0 250 — never stretch. Click anywhere opens; hover (~150ms intent, 180ms ease) lifts
+   the card and grows the VERB ROW downward as an ABSOLUTE overlay — the reel never reflows.
+   The rim/.tdb-frame wrapper survives only for overlay faces (receipts/forks/flips). */
+.tdb-tile { position: relative; flex: 0 0 var(--tdb-cardw); scroll-snap-align: start; background: var(--white, #fff); border: 1px solid #d8cfc4; border-radius: 12px; box-shadow: 0 2px 6px rgba(58, 28, 20, 0.07); cursor: pointer; transition: box-shadow 0.18s ease, transform 0.18s ease; display: flex; flex-direction: column; }
+.tdb-tile.hov, .tdb-gcard.hov { box-shadow: 0 10px 26px rgba(58, 28, 20, 0.18); transform: translateY(-2px); z-index: 5; }
+.tdb-frame { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; background: var(--white, #fff); border-radius: 11px; overflow: hidden; }
+.tdb-band { flex: none; display: flex; align-items: center; gap: 5px; min-height: 27px; padding: 0 12px; border-bottom: 1px solid var(--line); border-radius: 11px 11px 0 0; }
+.tdb-band.do { background: linear-gradient(180deg, var(--pink-t), var(--pink-btn)); border-bottom-color: var(--pink-b); }
+.tdb-band.hk { background: linear-gradient(180deg, var(--lat-1), var(--lat-2)); border-bottom-color: var(--lat-bd); } /* LATTE */
 .tdb-band.nt { background: var(--note-t); border-bottom-color: var(--note-b); }
 .tdb-band .tdb-tags { margin: 0; }
-.tdb-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; padding: 10px 12px 11px; }
+.tdb-chipon { margin-left: auto; font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.08em; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border: 1px solid var(--hk-spine); color: var(--hk-ink); border-radius: 99px; padding: 2px 8px; white-space: nowrap; }
+.tdb-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; padding: 10px 12px 12px; }
+/* the hover VERB ROW — an overlay continuing the card downward (never reflows the reel) */
+.tdb-verbs { position: absolute; top: calc(100% - 1px); left: -1px; right: -1px; z-index: 6; display: flex; gap: 5px; padding: 2px 12px 12px; background: var(--white, #fff); border: 1px solid #d8cfc4; border-top: none; border-radius: 0 0 12px 12px; box-shadow: 0 10px 26px rgba(58, 28, 20, 0.18); }
+.tdb-verb { flex: 1; border: 1px solid var(--line); background: var(--white, #fff); border-radius: 99px; padding: 6px 0; font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.05em; text-align: center; color: var(--ink-2); display: flex; align-items: center; justify-content: center; gap: 3px; white-space: nowrap; cursor: pointer; }
+.tdb-verb:hover { border-color: var(--ink-2); color: var(--ink); }
+.tdb-verb.pri { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+.tdb-verb.pri:hover { filter: brightness(1.3); color: var(--panel); }
+.tdb-latwrap { position: relative; flex: 1; display: flex; }
+.tdb-latwrap .tdb-verb { flex: 1; }
+/* the Later menu — identical on every card (ref .menu2) */
+.tdb-latmenu { position: absolute; top: calc(100% + 4px); right: 0; z-index: 7; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 10px 26px rgba(58, 28, 20, 0.18); padding: 6px; width: 172px; }
+.tdb-latmenu button { display: block; width: 100%; text-align: left; padding: 8px 11px; border-radius: 8px; font-size: 10.5px; font-weight: 600; color: var(--ink-2); background: none; border: none; cursor: pointer; }
+.tdb-latmenu button:hover { background: var(--paper); }
+.tdb-latmenu button.warn { color: #7c3a2a; border-top: 1px solid var(--hairline); margin-top: 4px; padding-top: 9px; border-radius: 0 0 8px 8px; }
 /* P4 — the "I need time" offer: stays on Urgent at reduced emphasis (the board's muted grammar);
    hover restores full weight; the deadline pill keeps counting down inside it. Woken (reminder or
    reply-by) simply drops the class. */
@@ -327,8 +350,8 @@
 .tdb-tag.due.warn { font-weight: 700; }
 .tdb-tag.offer { font-weight: 700; }
 .tdb-mid { flex: 1 1 auto; min-height: 0; overflow: hidden; }
-.tdb-tt { font-family: var(--f12-serif); font-size: 14px; font-weight: 600; line-height: 1.3; color: var(--ink); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-.tdb-tsub { font-size: 12px; color: var(--sub); margin-top: 6px; line-height: 1.55; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.tdb-tt { font-family: var(--f12-serif); font-size: 12.5px; font-weight: 600; line-height: 1.3; color: var(--ink); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.tdb-tsub { font-size: 10px; color: var(--sub); margin-top: 5px; line-height: 1.45; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .tdb-ms { font-family: var(--f12-serif); font-style: italic; color: var(--ink-2); }
 .tdb-tmeta { flex: none; display: flex; align-items: center; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--hairline); }
 .tdb-hkdot { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--hk-cof-edge); background: var(--hk-cof); color: var(--hk-cof-ink); display: inline-flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; flex: none; }
@@ -343,25 +366,19 @@
 /* ── G3 GROUPED CARD (retoken Phase C): mono kicker + sage dot · serif title with the inline
    numeral · two-line-clamped sub (fix pass) · sage progress bar + mono caption (real counts) · neutral monogram stack
    + ink-outline "Fix together →" (fills ink on hover) + the quiet Never (behaviour kept). ── */
-.tdb-gcard { position: relative; flex: 0 0 var(--reelw, 240px); scroll-snap-align: start; min-height: 168px; background: var(--white, #fff); border-radius: 13px; padding: 3px; box-shadow: var(--sh-card); cursor: pointer; transition: box-shadow 0.16s, transform 0.16s; display: flex; flex-direction: column; }
-.tdb-gcard:hover { box-shadow: var(--sh-card-h); transform: translateY(-1px); }
-.tdb-gcard:hover .tdb-frame { border-color: var(--ink); }
-.tdb-gcard:hover { border-color: var(--ink); box-shadow: var(--sh-card-h); transform: translateY(-1px); }
-.tdb-gtt { font-family: var(--f12-serif); font-size: 16.5px; font-weight: 600; line-height: 1.3; color: var(--ink); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-.tdb-gn { font-size: 21px; font-weight: 700; }
-.tdb-gsub { font-size: 12px; color: var(--sub); margin-top: 5px; line-height: 1.5; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.tdb-gcard { position: relative; flex: 0 0 var(--tdb-cardw); scroll-snap-align: start; background: var(--white, #fff); border: 1px solid #d8cfc4; border-radius: 12px; box-shadow: 0 2px 6px rgba(58, 28, 20, 0.07); cursor: pointer; transition: box-shadow 0.18s ease, transform 0.18s ease; display: flex; flex-direction: column; }
+.tdb-gtt { font-family: var(--f12-serif); font-size: 14.5px; font-weight: 700; line-height: 1.3; color: var(--ink); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.tdb-gn { font-size: 18px; font-weight: 700; }
+.tdb-gsub { font-size: 10px; color: var(--sub); margin-top: 5px; line-height: 1.5; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .tdb-gprog { flex: none; padding-top: 9px; }
-.tdb-pbar { height: 5px; border-radius: 99px; background: var(--hairline); overflow: hidden; }
-.tdb-pbar i { display: block; height: 100%; background: linear-gradient(90deg, var(--hk-cof-2), var(--hk-cof-edge)); border-radius: 99px; }
-.tdb-pcap { display: flex; justify-content: space-between; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.06em; color: var(--muted); margin-top: 5px; text-transform: uppercase; }
-.tdb-gstack { flex: none; display: flex; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--hairline); }
-.tdb-gsav { width: 21px; height: 21px; border-radius: 50%; background: var(--paper); border: 1.5px solid var(--white, #fff); outline: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-family: var(--f12-mono); font-size: 7px; font-weight: 600; color: var(--ink-2); margin-right: -6px; flex: none; }
-.tdb-gmore { font-family: var(--f12-mono); font-size: 8.5px; color: var(--muted); margin-left: 12px; }
-.tdb-gfix { margin-left: auto; font-family: var(--f12-mono); font-size: 8.5px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; border: 1px solid var(--ink); border-radius: 99px; padding: 7px 13px; color: var(--ink); background: var(--white, #fff); transition: 0.13s; }
-.tdb-gcard:hover .tdb-gfix, .tdb-gfix:hover { background: var(--ink); color: var(--white, #fff); }
-/* II·B P4 — the batch card's Never wears the ghost-link grammar (behaviour unchanged) */
-.tdb-gnever.ghost { margin-left: 10px; border: none; background: none; padding: 0; font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line); border-radius: 0; flex: none; }
-.tdb-gnever.ghost:hover { color: var(--ink); border-bottom-color: var(--ink-2); }
+.tdb-pbar { height: 6px; border-radius: 3px; background: #ece5d8; overflow: hidden; } /* the LAWS track */
+.tdb-pbar i { display: block; height: 100%; background: var(--ink); } /* ink fill */
+.tdb-pcap { display: flex; justify-content: space-between; font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.1em; color: var(--faint); margin-top: 4px; text-transform: uppercase; }
+/* the agent roundels — DISPLAY ONLY (the contract: no roundel buttons, no footer CTA, no NEVER) */
+.tdb-avs { display: flex; align-items: center; margin-top: 8px; }
+.tdb-avs span { width: 20px; height: 20px; border-radius: 50%; background: var(--paper); border: 1px solid var(--line); display: inline-flex; align-items: center; justify-content: center; font-family: var(--f12-mono); font-size: 5.5px; margin-left: -5px; color: var(--ink-2); }
+.tdb-avs span:first-child { margin-left: 0; }
+.tdb-avs i { font-style: normal; font-family: var(--f12-mono); font-size: 7px; color: var(--faint); margin-left: 6px; }
 
 /* muted-rules recovery strip (between the Housekeeping lane header and its cards) */
 .tdb-rulestrip { display: flex; align-items: center; gap: 7px; padding: 0 2px 10px; flex-wrap: wrap; }
@@ -531,14 +548,7 @@
 @media (prefers-reduced-motion: reduce) { .tdb-tile.pulse { animation: none; } }
 
 /* ══ QUICK RAIL + receipts / dismissed / fork / flip (design-refs/todo-quick-actions-v2.html) ══ */
-.tdb-qrail { position: absolute; top: 9px; right: 9px; display: flex; gap: 5px; opacity: 0; transform: translateY(-4px); transition: 0.16s; z-index: 3; }
-.tdb-tile:hover .tdb-qrail, .tdb-tile:focus-within .tdb-qrail,
-.tdb-gcard:hover .tdb-qrail, .tdb-gcard:focus-within .tdb-qrail { opacity: 1; transform: none; }
-.tdb-qbtn { width: 30px; height: 30px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 13px; background: var(--panel); border: 1px solid var(--line); box-shadow: var(--sh-2); }
-.tdb-qbtn.done:hover { background: var(--hk-sage); border-color: var(--hk-ink); color: var(--hk-ink); }
-.tdb-qbtn.done.hk:hover { background: var(--hk-sage); border-color: var(--hk-ink); color: var(--hk-ink); }
-.tdb-qbtn.dis:hover { background: var(--paper); border-color: var(--ink-2); color: var(--ink-2); }
-.tdb-qbtn:active { transform: scale(0.92); }
+/* (the quick ✓/⏸ rail retired — the hover verb row is the contract's action surface) */
 
 /* quick-complete receipt — the card flips sage, states exactly what was logged */
 /* overlays cover the WHOLE frame (no band): the fill + border ride the frame; the rim stays white.
@@ -596,7 +606,7 @@
 .tdb-bffoot { flex: none; display: flex; gap: 6px; margin-top: 8px; }
 .tdb-bffoot .tdb-ra { border-color: var(--hk-cof-edge); background: var(--hk-cof); color: var(--hk-cof-ink); }
 .tdb-bffoot .tdb-ra.save { background: var(--ink); border-color: var(--ink); color: var(--panel); }
-@media (prefers-reduced-motion: reduce) { .tdb-receiptbody, .tdb-dismissbody, .tdb-neverfork, .tdb-batchflip { animation: none; } .tdb-qrail { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .tdb-receiptbody, .tdb-dismissbody, .tdb-neverfork, .tdb-batchflip { animation: none; } }
 
 /* ══ EMPTY STATES (design-refs/todo-empty-states.html) — empty-because-new gets a doorway;
    empty-because-done gets a moment. All derived (todoEmpty.ts); nothing stored. ══ */

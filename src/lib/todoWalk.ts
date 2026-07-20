@@ -85,15 +85,15 @@ export function duplicateSendPrompt(targetStatus: QueryStatus, agentName: string
 }
 
 /**
- * The send sheet's kicker (evening run B1). The old composition was `Over to you · {card.due}` —
- * and for the send family `due` IS the string "OVER TO YOU" (the lane chip), so the kicker read
- * "OVER TO YOU · OVER TO YOU". The INTENDED second segment is the row's DETAIL — the same fact
+ * The send sheet's kicker (evening run B1; Deck v2 renamed the family "Agent waiting"). The
+ * old composition doubled the lane chip (`due` IS the family string), so the kicker read the
+ * same words twice. The INTENDED second segment is the row's DETAIL — the same fact
  * the ledger's DETAIL cell shows (REQUESTED {date} / R&R FROM {date}), read from the same pure
  * source (ledgerDetail) so sheet and ledger can never disagree. No readable detail → the single
  * label. A same-string second segment is impossible by construction AND guarded.
  */
 export function sendKicker(card: BoardCard, ctx: { queries: Query[]; taskFlags: TaskFlag[] }, now: number): string {
-  const base = "Over to you";
+  const base = "Agent waiting";
   const d = ledgerDetail(card, ctx, now);
   if (d.label === "—" || d.label.trim().toLowerCase() === base.toLowerCase()) return base;
   return `${base} · ${d.label}`;

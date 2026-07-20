@@ -288,22 +288,22 @@ describe("staged close — the Sunday review's deferred stale-close (finishing P
   });
 });
 
-describe("sendKicker — B1: stream + the row's DETAIL, never the same string twice", () => {
+describe("sendKicker — B1 (Deck v2 rename): stream + the row's DETAIL, never the same string twice", () => {
   const NOW = Date.parse("2026-07-18T12:00:00Z");
-  const kcard = (taskType: string): BoardCard => card("k", { taskType, relatedRecordId: "q1", due: "OVER TO YOU" });
+  const kcard = (taskType: string): BoardCard => card("k", { taskType, relatedRecordId: "q1", due: "AGENT WAITING" });
   const ctxWith = (over: Record<string, unknown>) => ({ queries: [{ id: "q1", agentId: "a1", manuscriptId: "m1", status: QueryStatus.FULL_REQUESTED, ...over }] as never, taskFlags: [] });
-  it("partial/full → Over to you · REQUESTED {date}; R&R → · R&R FROM {date}", () => {
+  it("partial/full → Agent waiting · REQUESTED {date}; R&R → · R&R FROM {date}", () => {
     const ctx = ctxWith({ lastStatusChange: "2026-07-12T09:00:00.000Z" });
-    expect(sendKicker(kcard("full_requested"), ctx, NOW)).toBe("Over to you · REQUESTED 12 JUL");
-    expect(sendKicker(kcard("partial_requested"), ctx, NOW)).toBe("Over to you · REQUESTED 12 JUL");
-    expect(sendKicker(kcard("revise_resubmit"), ctx, NOW)).toBe("Over to you · R&R FROM 12 JUL");
+    expect(sendKicker(kcard("full_requested"), ctx, NOW)).toBe("Agent waiting · REQUESTED 12 JUL");
+    expect(sendKicker(kcard("partial_requested"), ctx, NOW)).toBe("Agent waiting · REQUESTED 12 JUL");
+    expect(sendKicker(kcard("revise_resubmit"), ctx, NOW)).toBe("Agent waiting · R&R FROM 12 JUL");
   });
-  it("no readable date → the single label (never a dash segment, never OVER TO YOU · OVER TO YOU)", () => {
+  it("no readable date → the single label (never a dash segment, never the family string twice)", () => {
     const ctx = ctxWith({});
     for (const t of ["full_requested", "partial_requested", "revise_resubmit"]) {
       const k = sendKicker(kcard(t), ctx, NOW);
-      expect(k).toBe("Over to you");
-      expect(k.toLowerCase()).not.toContain("over to you · over to you");
+      expect(k).toBe("Agent waiting");
+      expect(k).not.toMatch(/(agent waiting).*·.*(agent waiting)/i); // never the family string twice
       expect(k).not.toContain("—");
     }
   });

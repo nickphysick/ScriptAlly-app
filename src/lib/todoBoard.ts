@@ -128,11 +128,11 @@ function derivedCopy(task: Task, q: Query | undefined, ag: Agent | undefined, ms
     case "offer_received":
       return { title: `${name} has made an offer`, who: name, subtitle: msTitle || "Respond when you’re ready", due: offerDue(q?.responseDeadline ? Date.parse(q.responseDeadline) : null, now), warn: true, status: q?.status, hk: false };
     case "partial_requested":
-      return { title: `Send your partial to ${name}`, who: name, subtitle: msTitle, due: "OVER TO YOU", warn: false, status: q?.status, hk: false };
+      return { title: `Send your partial to ${name}`, who: name, subtitle: msTitle, due: "AGENT WAITING", warn: false, status: q?.status, hk: false };
     case "full_requested":
-      return { title: `Send your full to ${name}`, who: name, subtitle: msTitle, due: "OVER TO YOU", warn: true, status: q?.status, hk: false };
+      return { title: `Send your full to ${name}`, who: name, subtitle: msTitle, due: "AGENT WAITING", warn: true, status: q?.status, hk: false };
     case "revise_resubmit":
-      return { title: `Resubmit your R&R to ${name}`, who: name, subtitle: msTitle, due: "OVER TO YOU", warn: false, status: q?.status, hk: false };
+      return { title: `Resubmit your R&R to ${name}`, who: name, subtitle: msTitle, due: "AGENT WAITING", warn: false, status: q?.status, hk: false };
     case "nudge_overdue": {
       const a = agentWait();
       const days = a && a.sentMs != null ? a.nDays : null;

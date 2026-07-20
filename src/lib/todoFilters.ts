@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * todoFilters — the pure layer of the workbench's drawer filters + masthead search (workbench
- * pack Phase 4). The checkbox list is the ref's, verbatim: Urgent → Offers · Over to you;
+ * pack Phase 4). The checkbox list is the ref's, verbatim: Urgent → Offers · Agent waiting;
  * Housekeeping → Missing materials · Missing wish lists · Stale queries · Snoozed; plus "On
  * today's list only". Everything composes AND-wise with the search, which matches title, agent,
  * agency and manuscript across BOTH views.
@@ -118,7 +118,7 @@ const passesAxes = (c: BoardCard, f: TodoFilterState, today: string): boolean =>
   return true;
 };
 
-/** Urgent cards: Offers vs Over to you (everything non-offer in the lane), then the axes. */
+/** Urgent cards: Offers vs Agent waiting (everything non-offer in the lane), then the axes. */
 export function visibleDoCard(c: BoardCard, f: TodoFilterState, today: string): boolean {
   const isOffer = c.taskType === "offer_received";
   if (isOffer && !f.offers) return false;

@@ -2,84 +2,79 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Card Bands (Variant A) source locks — the MountCard header-fill structure (rim → frame → band +
- * body), the retired spines, and the on-band tag treatments. Logic-only test policy → pinned at
- * the source/rule-text layer.
+ * THE CARD CONTRACT (Command Deck v2 P4 — supersedes the Variant-A rim/frame/band structure):
+ * flat cards on the sheet (1px #d8cfc4 + the sheet shadow, radius 12, content-sized, flex:0 0
+ * 250); band = identity + status only; body = content only; click anywhere opens; hover grows
+ * the verb row downward as an overlay. Rule-text locks over todo.css + ToDoPage.tsx.
  */
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "fs";
-import { fileURLToPath } from "url";
-import { dirname, join } from "path";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
-const here = dirname(fileURLToPath(import.meta.url));
+const here = __dirname;
 const css = readFileSync(join(here, "todo.css"), "utf8");
 const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
+const rule = (sel: string): string => {
+  const m = css.match(new RegExp("(?:^|\\n)" + sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*\\{([^}]*)\\}"));
+  if (!m) throw new Error(`rule not found: ${sel}`);
+  return m[1];
+};
 
-describe("Card Bands — structure law", () => {
-  it("the RIM is white/radius-13/3px-pad with NO clip; the FRAME is the 1px hairline clip context", () => {
-    expect(css).toMatch(/\.tdb-tile \{[^}]*border-radius: 13px; padding: 3px;/);
-    expect(css).not.toMatch(/\.tdb-tile \{[^}]*overflow: hidden/); // rim does not clip (shadow shows)
-    expect(css).toContain(".tdb-frame { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 10px; overflow: hidden;");
+describe("The card contract — structure law (todo-deck-v2.html THE LAWS)", () => {
+  it("flat on the sheet: 1px #d8cfc4, radius 12, the sheet shadow, flex:0 0 250 — never stretch, no fixed height", () => {
+    for (const sel of [".tdb-tile", ".tdb-gcard"]) {
+      const r = rule(sel);
+      expect(r).toContain("flex: 0 0 var(--tdb-cardw)");
+      expect(r).toContain("border: 1px solid #d8cfc4");
+      expect(r).toContain("border-radius: 12px");
+      expect(r).toContain("box-shadow: 0 2px 6px rgba(58, 28, 20, 0.07)");
+      expect(r).not.toContain("min-height");
+      expect(r).not.toContain("--reelw");
+    }
+    expect(css).toContain("--tdb-cardw: 250px");
   });
-  it("the band is slim (26px — workbench P2 tighten) with a 1px identity border-bottom; lane tints pink/coffee/note", () => {
-    expect(css).toMatch(/\.tdb-band \{[^}]*min-height: 26px[^}]*border-bottom: 1px solid var\(--line\)/);
-    expect(css).toContain(".tdb-band.do { background: var(--pink-t); border-bottom-color: var(--pink-b); }");
-    expect(css).toContain(".tdb-band.hk { background: var(--hk-cof); border-bottom-color: var(--hk-cof-edge); }");
-    expect(css).toContain(".tdb-band.nt { background: var(--note-t); border-bottom-color: var(--note-b); }");
+  it("band = identity + status only: tag + the sage ✓ TODAY chip; the LATTE housekeeping band", () => {
+    expect(rule(".tdb-band.hk")).toContain("linear-gradient(180deg, var(--lat-1), var(--lat-2))");
+    expect(rule(".tdb-band.hk")).toContain("var(--lat-bd)");
+    expect(rule(".tdb-chipon")).toContain("linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2))");
+    expect(page).toContain('{committed && <span className="tdb-chipon">✓ TODAY</span>}');
+    expect(page).not.toContain("tdb-tacts"); // no body pill
+    expect(page).not.toContain("tdb-tmeta"); // body = content only (title + manuscript)
   });
-  it("the coloured left spines are RETIRED — no ::before spine on any card type", () => {
-    expect(css).not.toContain(".tdb-tile::before");
-    expect(css).not.toContain(".tdb-gcard::before");
-    expect(css).not.toContain(".tdb-tile.rvcard::before");
-    expect(css).not.toMatch(/\.tdb-tile\.(do|hk|nt)::before/);
+  it("hover: ~150ms intent, 180ms ease, lift + the verb row as an ABSOLUTE overlay (no reflow)", () => {
+    expect(page).toContain("window.setTimeout(() => setVerbKey(key), 150);");
+    expect(rule(".tdb-tile")).toContain("transition: box-shadow 0.18s ease, transform 0.18s ease");
+    const hov = rule(".tdb-tile.hov, .tdb-gcard.hov");
+    expect(hov).toContain("box-shadow: 0 10px 26px rgba(58, 28, 20, 0.18)");
+    expect(hov).toContain("transform: translateY(-2px)");
+    expect(rule(".tdb-verbs")).toContain("position: absolute; top: calc(100% - 1px)");
   });
-  it("on a band: tags are white board-wide; the kicker grammar is RETIRED (II·B P4 — the typed tag pill is the one grammar)", () => {
-    // the standalone .tdb-band .tdb-tag override is gone — the base .tdb-tag is white everywhere (see todoTagLaw)
-    expect(css).not.toContain(".tdb-band .tdb-tag:not(.offer):not(.warn)");
-    expect(css).not.toContain("tdb-kick");
-    expect(css).not.toContain("tdb-kd");
+  it("verbs: unit [✓ DONE]·[＋/− TODAY]·[☾ LATER ▾]; batch [⚡ FIX n →]·[☾ LATER ▾]; offers keep no ✓", () => {
+    expect(page).toContain('{!isOffer && <button type="button" className="tdb-verb pri" onClick={() => quickDone(c)}>✓ DONE</button>}');
+    expect(page).toContain('{committed ? "− TODAY" : "＋ TODAY"}');
+    expect(page).toContain(">⚡ FIX {g.members.length} →</button>");
+    expect(page).toContain(">☾ LATER ▾</button>");
   });
-  it("III P2: min-height 168 stands; the ONE-ROW REEL drives width (--reelw from reelFit; the grid is retired)", () => {
-    expect((css.match(/min-height: 168px/g) ?? []).length).toBeGreaterThanOrEqual(2); // tile + gcard
-    expect(css).toContain("--tdb-cardw: 250px"); // Deck v2 width law: the FIXED card token (laneFit stays retired)
-    expect(css).not.toMatch(/\.tdb-grid\s*\{/); // the wrapping CARD grid is gone (the ledger's lgrid stands)
-    expect((css.match(/flex: 0 0 var\(--reelw, 240px\)/g) ?? []).length).toBe(2);
+  it("the Later menu — identical everywhere: tomorrow · a week · the per-type hide (restorable)", () => {
+    expect(page).toContain(">Remind me tomorrow</button>");
+    expect(page).toContain(">Give it a week</button>");
+    expect(page).toContain(">Don’t show these again</button>");
+    expect(page).toContain("snoozeCard(c, 1,");
+    expect(page).toContain("snoozeCard(c, 7,");
+    expect(page).toContain("hideType(c, hideKey)");
+    expect(page).toContain("const hideKey = laterHideKey(c.taskType);");
   });
-});
-
-describe("Card Bands — band-then-body order per card type (render markup)", () => {
-  // the frame opens, the lane band opens next, the body follows — asserted as exact ordered markup
-  it("the tile (do/hk/nt): frame → lane band (tags) → body", () => {
-    expect(page).toContain('<div className="tdb-frame">\n          <div className={`tdb-band ${c.stream}`}>\n            <div className="tdb-tags">');
-    const frame = page.indexOf('<div className={`tdb-band ${c.stream}`}>');
-    const body = page.indexOf('<div className="tdb-body">', frame);
-    expect(frame).toBeGreaterThan(0);
-    expect(body).toBeGreaterThan(frame); // body after band
+  it("click anywhere opens: unit → the journey; batch → the Batch-fix sheet; no footer CTA, no NEVER, no roundel buttons", () => {
+    expect(page).toContain('onClick={() => openFlowCards([c])}');
+    expect(page).toContain('onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}');
+    for (const stale of ["tdb-gfix", "tdb-gnever", "tdb-qrail", "tdb-qbtn", "Batch fix →", ">Never</button>"]) {
+      expect(page).not.toContain(stale);
+      expect(css).not.toContain(stale.startsWith("tdb") ? stale : "zz-never-match");
+    }
+    expect(page).toContain('<div className="tdb-avs">'); // roundels display-only
   });
-  it("the grouped card: coffee band (the typed tag pill — II·B P4) → body", () => {
-    expect(page).toContain('<div className="tdb-band hk">\n            <div className="tdb-tags"><span className="tdb-tag due">{g.meta.label.toUpperCase()}</span></div>');
-    const band = page.indexOf('<div className="tdb-band hk">');
-    const body = page.indexOf('<div className="tdb-body">', band);
-    expect(body).toBeGreaterThan(band);
-  });
-});
-
-describe("Card Bands — Phase 2: overlays ride the framed card; clears go neutral", () => {
-  it("receipt + dismissed overlays cover the whole frame (fill on the frame, rim white)", () => {
-    expect(page).toContain('className="tdb-tile receipt">\n            <div className="tdb-frame">');
-    expect(page).toContain('className="tdb-tile dismissed">\n            <div className="tdb-frame">');
-    expect(css).toContain(".tdb-tile.receipt .tdb-frame { background: var(--hk-sage); border-color: var(--hk-spine); padding: 15px 17px; }");
-    expect(css).toContain(".tdb-tile.dismissed .tdb-frame { background: var(--paper); padding: 15px 17px; }");
-    expect(css).not.toContain(".tdb-tile.receipt { background: var(--hk-sage)"); // fill left the rim
-  });
-  it("fork + flip overlays are wrapped in a frame", () => {
-    expect(page).toContain('<div className="tdb-frame">{renderFork(c.key, true,');
-    expect(page).toContain('<div className="tdb-frame">{renderFork(key, false,');
-    expect(page).toContain('<div className="tdb-frame"><GroupFlip');
-  });
-  it("clear (empty-state) cards dropped their spines → neutral (no ::before, no lane variant)", () => {
-    expect(css).not.toContain(".tdb-clear::before");
-    expect(css).not.toContain(".tdb-clear.do::before");
-    expect(css).not.toContain(".tdb-clear.hk::before");
+  it("the batch progress: #ece5d8 track, ink fill, mono meta", () => {
+    expect(rule(".tdb-pbar")).toContain("background: #ece5d8");
+    expect(rule(".tdb-pbar i")).toContain("background: var(--ink)");
   });
 });

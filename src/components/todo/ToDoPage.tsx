@@ -32,10 +32,9 @@ import {
 import { weekOfQuerying } from "../../lib/dashboardStats";
 import { saveHkRows } from "../../lib/hkSave";
 import { isProUser, fetchAssistedFill, AssistFound } from "../../lib/assistFill";
-import { groupHousekeeping, hkGapCount, hkGroupProgress, HkGroup, HkRule, HK_RULES } from "../../lib/todoHousekeeping";
+import { groupHousekeeping, hkGapCount, hkGroupProgress, HkGroup, HkRule, HK_RULES, laterHideKey } from "../../lib/todoHousekeeping";
 import { deskState, liveQueryCount, liveQueriesLine, clearedListCap } from "../../lib/todoEmpty";
 import { ledgerTitle, ledgerDetail, sortLedgerDo, sortLedgerHk, batchChildren, batchDetail, batchTaskCopy, truncateRows } from "../../lib/todoLedger";
-import { reelFit, reelPage, ReelFit, REEL_CARD_MIN } from "./reelFit";
 import focusArt from "../../assets/todo/focus-art.png";
 // VI P2 — the review cup (original ScriptAlly artwork; currentColor → inlined so it inherits ink)
 import reviewCupRaw from "../../assets/todo/review-cup.svg?raw";
@@ -180,24 +179,24 @@ const Lane: React.FC<{
   count: number;
   isEmpty: boolean;
   onAdd?: () => void;
-  onFocusedSession?: () => void; // "▶ Focus on {label}" (launches the focus flow's sweep mode; handler unchanged)
+  onFocusedSession?: () => void; // "Focus on {label}" (launches the focus flow's sweep mode; handler unchanged)
+  /** Deck v2: when the deck narrows this lane, the heading appends "x OF y · FILTERED · SHOW ALL". */
+  filtered?: { x: number; y: number; showAll: () => void } | null;
   emptyNode?: React.ReactNode;
   strip?: React.ReactNode; // rendered between the header and the grid (e.g. muted-rules recovery chips)
   children?: React.ReactNode;
-}> = ({ cls, label, count, isEmpty, onAdd, onFocusedSession, emptyNode, strip, children }) => {
-  // III P2 — the one-row reel returns: a FRESH width-aware fit (reelFit — the reported shape;
-  // the retired fit module stays retired). The ResizeObserver watches the TRACK, so the right
-  // rail mounting/unmounting (or the sidebar folding) recomputes the fit for free.
+}> = ({ cls, label, count, isEmpty, onAdd, onFocusedSession, filtered, emptyNode, strip, children }) => {
+  // Deck v2 P4 — the one-row EXACT-FIT reel (width law v3): the viewport is a fixed 774
+  // (3 × 250 + 2 × 12); cards flex:0 0 250; snap paging BY THREE; no partial cards, no edge
+  // fades — the heading pagers + counts carry "there's more". The width-aware fit module is
+  // retired (nothing to fit). The heading is BAND-LESS: play button (30) · Playfair 20 title with the 25×3 family
+  // underline · count chip · [filtered append] · ‹ › pagers right (28px, dimmed at the ends).
   const ref = useRef<HTMLDivElement>(null);
-  const fitRef = useRef<ReelFit>({ n: 1, cardWidth: REEL_CARD_MIN });
   const [ends, setEnds] = useState({ left: false, right: false });
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
     const check = () => {
-      const fit = reelFit(el.clientWidth);
-      fitRef.current = fit;
-      el.style.setProperty("--reelw", `${fit.cardWidth}px`);
       setEnds((prev) => {
         const max = el.scrollWidth - el.clientWidth;
         const next = { left: el.scrollLeft > 4, right: el.scrollLeft < max - 4 };
@@ -210,22 +209,20 @@ const Lane: React.FC<{
     ro.observe(el);
     return () => { el.removeEventListener("scroll", check); ro.disconnect(); };
   }, [children]);
-  const page = (dir: 1 | -1) => ref.current?.scrollBy({ left: dir * reelPage(fitRef.current), behavior: "smooth" });
+  const REEL_PAGE = 3 * (250 + 12); // three cards + their gutters — the snap page
+  const page = (dir: 1 | -1) => ref.current?.scrollBy({ left: dir * REEL_PAGE, behavior: "smooth" });
   return (
   <div className={`tdb-reel ${cls}`} id={`tdb-lane-${cls}`}>
-    {/* II·B P4 — ONE section grammar in both views: the ledger's tinted head band (standalone
-        variant adds the full border + radius); III P2 adds the chevron pagers to the head. */}
-    <div className={`tdb-lghead standalone ${cls === "do" ? "p" : cls === "hk" ? "c" : "n"}`}>
-      {/* VI P3 — the play button leads the lane (ref .playb); the Focus pill + lane dot retire.
-          aria-label + tooltip keep the full wording; behaviour identical. */}
+    <div className={`tdb-lh2 ${cls === "do" ? "p" : cls === "hk" ? "lat" : "n"}`}>
       {onFocusedSession && !isEmpty && (
         <button type="button" className="tdb-playb" title={`Focus on ${label}`} aria-label={`Focus on ${label}`} onClick={onFocusedSession}>
-          <svg width="11" height="12" viewBox="0 0 11 12" aria-hidden><path d="M1 1 L10 6 L1 11 Z" fill="currentColor" /></svg>
+          <svg width="9" height="10" viewBox="0 0 11 12" aria-hidden><path d="M1.5 1.5 L9.5 6 L1.5 10.5 Z" fill="currentColor" /></svg>
         </button>
       )}
+      {onAdd && <button type="button" className="tdb-cadd" onClick={onAdd} aria-label="Add a note">＋</button>}
       <span className="tdb-lgt">{label}</span>
       <span className="tdb-ln">{count}</span>
-      {onAdd && <button type="button" className="tdb-cadd" onClick={onAdd} aria-label="Add a note">＋</button>}
+      {filtered && <span className="tdb-lhfilt">{filtered.x} OF {filtered.y} · FILTERED · <button type="button" onClick={filtered.showAll}>SHOW ALL</button></span>}
       {!isEmpty && (
         <span className="tdb-reelpg">
           <button type="button" className="tdb-pg" disabled={!ends.left} onClick={() => page(-1)} aria-label={`Previous ${label} cards`}>‹</button>
@@ -394,6 +391,62 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   function unmuteRule(rule: HkRule) {
     updateUserProfile({ mutedTaskRules: (currentUser?.mutedTaskRules ?? []).filter((r) => r !== rule) });
     flash("Unmuted — those reminders are back.");
+  }
+  // ── Deck v2 P4: the hover VERB ROW's state — ~150ms intent delay arms it; leave/blur disarms.
+  // The Later menu opens per card (laterKey); click-away closes it. ──
+  const [verbKey, setVerbKey] = useState<string | null>(null);
+  const [laterKey, setLaterKey] = useState<string | null>(null);
+  const verbTimer = useRef<number | null>(null);
+  const armVerbs = (key: string) => {
+    if (verbTimer.current) window.clearTimeout(verbTimer.current);
+    verbTimer.current = window.setTimeout(() => setVerbKey(key), 150);
+  };
+  const disarmVerbs = () => {
+    if (verbTimer.current) window.clearTimeout(verbTimer.current);
+    verbTimer.current = null;
+    setVerbKey(null); setLaterKey(null);
+  };
+  useEffect(() => {
+    if (!laterKey) return;
+    const onDown = (e: PointerEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && t.closest(".tdb-latwrap")) return;
+      setLaterKey(null);
+    };
+    document.addEventListener("pointerdown", onDown);
+    return () => document.removeEventListener("pointerdown", onDown);
+  }, [laterKey]);
+  // the Later snoozes — the EXISTING primitives, day-parameterised (undo everywhere)
+  function snoozeCard(c: BoardCard, days: number, when: string) {
+    const lane = (c.stream === "nt" ? "nt" : c.stream === "hk" ? "hk" : "do") as "do" | "hk" | "nt";
+    const text = `Snoozed — back ${when}.`;
+    if (c.userTaskId) {
+      const key = { taskType: USER_TASK_FLAG_TYPE, queryId: c.userTaskId };
+      upsertTaskFlag(key, { snoozedUntil: new Date(Date.now() + days * 86400000).toISOString(), bumpSnooze: true });
+      const undo = () => upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true }); // full restore, ×n included
+      setOverlay(c.key, { kind: "dismissed", lane, text, undo });
+      flash(`✓ ${c.title} — snoozed`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
+      return;
+    }
+    if (!c.taskType || !c.relatedRecordId) return;
+    dismissTask(c.taskType, c.relatedRecordId, "fixed snooze", days);
+    const key = flagKeyForTask(c.taskType, c.relatedRecordId);
+    const undo = () => upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true }); // full restore, ×n included
+    setOverlay(c.key, { kind: "dismissed", lane, text, undo });
+    flash(`✓ ${c.title} — snoozed`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
+  }
+  function snoozeGroup(g: HkGroup, days: number, when: string) {
+    g.members.forEach((m) => m.agentId && dismissTask("data_quality_poor", m.agentId, "fixed snooze", days));
+    const undo = async () => { g.members.forEach((m) => m.agentId && upsertTaskFlag(flagKeyForTask("data_quality_poor", m.agentId), { snoozedUntil: null, unbumpSnooze: true })); };
+    const gkey = `group-${g.rule}`;
+    setOverlay(gkey, { kind: "dismissed", lane: "hk", text: `Snoozed — back ${when}.`, undo });
+    flash(`✓ ${HK_RULES[g.rule].label} — snoozed`, { label: "Undo", fn: async () => { await undo(); clearOverlay(gkey); flash("Restored"); } });
+  }
+  // the per-type hide — the SAME single suppression point Task settings drives (restorable there)
+  function hideType(c: BoardCard, ruleKey: string) {
+    updateUserProfile({ mutedTaskRules: Array.from(new Set([...(currentUser?.mutedTaskRules ?? []), ruleKey])) });
+    const undo = () => updateUserProfile({ mutedTaskRules: (currentUser?.mutedTaskRules ?? []).filter((r) => r !== ruleKey) });
+    flash(`✓ ${c.title} — hidden (restore in Task settings)`, { label: "Undo", fn: async () => { await undo(); flash("Restored"); } });
   }
   function muteRuleFromCard(g: HkGroup) {
     updateUserProfile({ mutedTaskRules: Array.from(new Set([...(currentUser?.mutedTaskRules ?? []), g.rule])) });
@@ -775,10 +828,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         {/* ── Deck v2 P2: THE DECK — sticky white control bar under the app nav. Search | pills |
             lens | spacer | view segment. No Focus, no ⚙ — the rail owns both (P3). ── */}
         {renderDeck()}
-        <div className="tdb-ws">
+        <div className="tdb-asm tdb-ws">
           {renderRail()}
-          <div className="tdb-main">
-            <div className="tdb-col">
+          {/* THE SHEET — the white content panel holding BOTH views (width law v3) */}
+          <div className="tdb-mainc">
         {/* ── the board — cards or ledger by the masthead toggle; the desk states (new-desk /
             desk-cleared) replace BOTH views. Copy verbatim from todo-empty-states.html. ── */}
         {desk === "new-desk" ? renderNewDesk() : desk === "desk-cleared" ? renderDeskCleared() : active && !anyVisible ? (
@@ -789,6 +842,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         <div className="tdb-lanes">
           {(!active || vDo.length > 0 || overlayCards("do").length > 0) && (
           <Lane cls="do" label="Urgent" count={active ? vDo.length : tiles.urgent} isEmpty={vDo.length === 0 && overlayCards("do").length === 0}
+            filtered={active && vDo.length < tiles.urgent ? { x: vDo.length, y: tiles.urgent, showAll: resetDeck } : null}
             onFocusedSession={() => setFlow({ items: vDo.map((card) => ({ kind: "card", card })), mode: "sweep" })}
             emptyNode={
               <div className="tdb-clear do">
@@ -807,6 +861,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             cls="hk"
             label="Housekeeping"
             count={active ? hkGapCount(vGroups) + vStale.length : tiles.housekeeping}
+            filtered={active && hkGapCount(vGroups) + vStale.length < tiles.housekeeping ? { x: hkGapCount(vGroups) + vStale.length, y: tiles.housekeeping, showAll: resetDeck } : null}
             isEmpty={vGroups.length === 0 && vStale.length === 0 && overlayCards("hk").length === 0}
             onFocusedSession={() => setFlow({ items: [...vGroups.map((g) => ({ kind: "group" as const, group: g })), ...vStale.map((card) => ({ kind: "card" as const, card }))], mode: "sweep" })}
             emptyNode={
@@ -837,7 +892,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           )}
           {(!active || vNt.length > 0 || overlayCards("nt").length > 0) && (
           <Lane cls="nt" label="Notes to self" count={active ? vNt.length : tiles.notes} onAdd={addTask} isEmpty={vNt.length === 0 && overlayCards("nt").length === 0}
-            onFocusedSession={() => setFlow({ items: vNt.map((card) => ({ kind: "card", card })), mode: "sweep" })}
+            filtered={active && vNt.length < tiles.notes ? { x: vNt.length, y: tiles.notes, showAll: resetDeck } : null}
             emptyNode={<button type="button" className="tdb-ghostcard" onClick={addTask}><span className="tdb-ge">Nothing jotted yet.</span><span className="tdb-gg">＋ Add a note</span></button>}>
             {overlayCards("nt")}
             {vNt.map(renderCard)}
@@ -845,7 +900,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           )}
         </div>
         )}
-            </div>
           </div>
           {/* VI P1 — "Today", ALWAYS ON: the right column is a constant part of the grid at
               every viewport ≥1200px (no collapsed state, no tab, no drawer); below that the
@@ -1249,19 +1303,21 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       </React.Fragment>
     );
   }
-  function ledgerSection(opts: { cls: "p" | "c" | "n"; id: string; label: string; count: number; onSession?: () => void; onAdd?: () => void; children: React.ReactNode; total: number; hidden: number; showAllKey: string }) {
+  function ledgerSection(opts: { cls: "p" | "lat" | "n"; id: string; label: string; count: number; onSession?: () => void; onAdd?: () => void; children: React.ReactNode; total: number; hidden: number; showAllKey: string }) {
     return (
-      <div className="tdb-tbl" id={opts.id}>
-        <div className={`tdb-lghead ${opts.cls}`}>
+      <div className="tdb-lsec" id={opts.id}>
+        {/* Deck v2 P4: the ledger shares the band-less lane heading (one grammar, both views) */}
+        <div className={`tdb-lh2 ${opts.cls}`}>
           {opts.onSession && (
             <button type="button" className="tdb-playb" title={`Focus on ${opts.label}`} aria-label={`Focus on ${opts.label}`} onClick={opts.onSession}>
-              <svg width="11" height="12" viewBox="0 0 11 12" aria-hidden><path d="M1 1 L10 6 L1 11 Z" fill="currentColor" /></svg>
+              <svg width="9" height="10" viewBox="0 0 11 12" aria-hidden><path d="M1.5 1.5 L9.5 6 L1.5 10.5 Z" fill="currentColor" /></svg>
             </button>
           )}
+          {opts.onAdd && <button type="button" className="tdb-cadd" onClick={opts.onAdd} aria-label="Add a note">＋</button>}
           <span className="tdb-lgt">{opts.label}</span>
           <span className="tdb-ln">{opts.count}</span>
-          {opts.onAdd && <button type="button" className="tdb-cadd" onClick={opts.onAdd} aria-label="Add a note">＋</button>}
         </div>
+        <div className="tdb-tbl">
         <div className="tdb-lcols" aria-hidden>
           <span /><span /><span>TYPE</span><span>AGENT</span><span>TASK</span><span>MANUSCRIPT</span><span className="ctr">STATUS</span><span className="r sort">DETAIL ↓</span><span />
         </div>
@@ -1271,6 +1327,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             <button type="button" onClick={() => setShowAllSec((s) => ({ ...s, [opts.showAllKey]: true }))}>SHOW ALL {opts.total} →</button>
           </div>
         )}
+        </div>
       </div>
     );
   }
@@ -1286,14 +1343,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           children: doCut.visible.map(ledgerCardRow),
         })}
         {(vGroups.length > 0 || vStale.length > 0) && ledgerSection({
-          cls: "c", id: "tdb-lane-hk", label: "Housekeeping", count: active ? hkGapCount(vGroups) + vStale.length : tiles.housekeeping,
+          cls: "lat", id: "tdb-lane-hk", label: "Housekeeping", count: active ? hkGapCount(vGroups) + vStale.length : tiles.housekeeping,
           onSession: () => setFlow({ items: [...vGroups.map((g) => ({ kind: "group" as const, group: g })), ...vStale.map((card) => ({ kind: "card" as const, card }))], mode: "sweep" }),
           total: hkTop.length, hidden: hkCut.hidden, showAllKey: "hk",
           children: hkCut.visible.map((r) => (r.kind === "group" ? ledgerBatchRow(r.g) : ledgerCardRow(r.c))),
         })}
         {vNt.length > 0 && ledgerSection({
           cls: "n", id: "tdb-lane-nt", label: "Notes to self", count: active ? vNt.length : tiles.notes,
-          onSession: () => setFlow({ items: vNt.map((card) => ({ kind: "card", card })), mode: "sweep" }),
           onAdd: addTask,
           total: vNt.length, hidden: ntCut.hidden, showAllKey: "nt",
           children: ntCut.visible.map(ledgerCardRow),
@@ -1303,14 +1359,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   }
 
   // ── the quick rail (hover / :focus-within, top-right). Offers get NO rail — they need the moment. ──
-  function rail(onDone: () => void, onPause: () => void, hk?: boolean) {
-    return (
-      <div className="tdb-qrail">
-        <button type="button" className={`tdb-qbtn done${hk ? " hk" : ""}`} title="Quick done — logs with stated defaults" aria-label="Quick done" onClick={(e) => { e.stopPropagation(); onDone(); }}>✓</button>
-        <button type="button" className="tdb-qbtn dis" title="Snooze / stop asking" aria-label="Snooze or stop asking" onClick={(e) => { e.stopPropagation(); onPause(); }}>⏸</button>
-      </div>
-    );
-  }
+  // (the hover ✓/⏸ quick rail retired — the card contract's verb row is the action surface;
+  // quickPause lives on for the ledger rows' ⏸.)
 
   // ── the Sunday-review entry card (finishing P3): derived + dismissible for the week; its click
   //    opens the weeklyReview mode with the live Urgent cards as the seed source. ──
@@ -1371,13 +1421,45 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     );
   }
 
-  // ── full-detail lane card (fixed height, clip-safe). Completion = the rail or the sheet; the
-  // Mark-done pill is RETIRED and the ＋ TODAY pill goes full-width (committing = the visible button). ──
+  // ── Deck v2 P4: THE CARD CONTRACT (the LAWS, verbatim) — band = identity + status only (tag,
+  // the sage ✓ TODAY chip); body = content only; CLICK ANYWHERE opens (unit → the journey sheet);
+  // hover (~150ms intent, 180ms ease) grows the VERB ROW downward as an overlay — the reel never
+  // reflows: [✓ DONE] · ＋/− TODAY · ☾ LATER ▾ (tomorrow / a week / don't-show-these — the
+  // per-type hide, restorable in Task settings). Offers: no ✓ DONE (the journey decides), no
+  // hide (the locked row). The old quick rail, body pill and meta row are retired. ──
+  function laterMenu(c: BoardCard) {
+    const hideKey = laterHideKey(c.taskType);
+    return (
+      <span className="tdb-latwrap">
+        <button type="button" className="tdb-verb" aria-haspopup="menu" aria-expanded={laterKey === c.key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === c.key ? null : c.key)); }}>☾ LATER ▾</button>
+        {laterKey === c.key && (
+          <div className="tdb-latmenu" role="menu" aria-label="Later">
+            <button type="button" role="menuitem" onClick={(e) => { e.stopPropagation(); setLaterKey(null); snoozeCard(c, 1, "tomorrow"); }}>Remind me tomorrow</button>
+            <button type="button" role="menuitem" onClick={(e) => { e.stopPropagation(); setLaterKey(null); snoozeCard(c, 7, "in a week"); }}>Give it a week</button>
+            {hideKey && (
+              <button type="button" role="menuitem" className="warn" onClick={(e) => { e.stopPropagation(); setLaterKey(null); hideType(c, hideKey); }}>Don’t show these again</button>
+            )}
+          </div>
+        )}
+      </span>
+    );
+  }
+  function cardVerbs(c: BoardCard) {
+    const committed = onList(c);
+    const isOffer = c.taskType === "offer_received";
+    return (
+      <div className="tdb-verbs" onClick={(e) => e.stopPropagation()}>
+        {!isOffer && <button type="button" className="tdb-verb pri" onClick={() => quickDone(c)}>✓ DONE</button>}
+        <button type="button" className="tdb-verb" onClick={() => toggleToday(c)}>{committed ? "− TODAY" : "＋ TODAY"}</button>
+        {laterMenu(c)}
+      </div>
+    );
+  }
+  // ── full-detail lane card (the contract): band tag (+ ✓ TODAY chip) over title + manuscript. ──
   function renderCard(c: BoardCard) {
     const committed = onList(c);
     const ov = overlays[c.key];
     const isOffer = c.taskType === "offer_received";
-    // Option-A sub: a manuscript title inside the sub renders serif-italic (--ink-2).
     const subIsMs = !!c.subtitle && manuscripts.some((m) => m.title === c.subtitle);
     if (ov?.kind === "fork") {
       return (
@@ -1386,40 +1468,31 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         </div>
       );
     }
+    const hov = verbKey === c.key;
     return (
-      <div key={c.key} className={`tdb-tile ${c.stream}${committed ? " today" : ""}${c.quiet ? " quiet" : ""}${pulsing === c.key ? " pulse" : ""}`} onClick={() => openFlowCards([c])}>
-        {!isOffer && rail(() => quickDone(c), () => quickPause(c))}
-        <div className="tdb-frame">
-          <div className={`tdb-band ${c.stream}`}>
-            <div className="tdb-tags">
-              <span className={`tdb-tag due${isOffer ? " offer" : c.warn ? " warn" : ""}`}>{isOffer ? `★ ${c.due}` : c.due}</span>
-              {c.snoozes > 0 && <span className="tdb-tag snz">Snoozed ×{c.snoozes}</span>}
-            </div>
-          </div>
-          <div className="tdb-body">
-            <div className="tdb-mid">
-              <div className="tdb-tt">{c.title}</div>
-              {c.subtitle && <div className="tdb-tsub">{subIsMs ? <span className="tdb-ms">{c.subtitle}</span> : c.subtitle}</div>}
-            </div>
-            <div className="tdb-tmeta">
-              {c.hk ? <span className="tdb-hkdot" aria-hidden>!</span> : c.status ? <StatusDot status={c.status as QueryStatus} overrideSize={14} /> : <span className="tdb-tdot" />}
-              <span className="tdb-miniav">{c.initials}</span>
-              <span className="tdb-who">{c.record}</span>
-            </div>
-            <div className="tdb-tacts">
-              <button type="button" className={`tdb-pill today-p${committed ? " on" : ""}`} onClick={(e) => { e.stopPropagation(); toggleToday(c); }}>
-                {committed ? "✓ ON TODAY" : "＋ TODAY"}
-              </button>
-            </div>
-          </div>
+      <div key={c.key} className={`tdb-tile ${c.stream}${hov ? " hov" : ""}${c.quiet ? " quiet" : ""}${pulsing === c.key ? " pulse" : ""}`}
+        onClick={() => openFlowCards([c])}
+        onMouseEnter={() => armVerbs(c.key)} onMouseLeave={disarmVerbs}
+        onFocus={() => armVerbs(c.key)} onBlur={disarmVerbs}
+        tabIndex={0}>
+        <div className={`tdb-band ${c.stream}`}>
+          <span className={`tdb-tag due${isOffer ? " offer" : c.warn ? " warn" : ""}`}>{isOffer ? `★ ${c.due}` : c.due}</span>
+          {c.snoozes > 0 && <span className="tdb-tag snz">Snoozed ×{c.snoozes}</span>}
+          {committed && <span className="tdb-chipon">✓ TODAY</span>}
         </div>
+        <div className="tdb-body">
+          <div className="tdb-tt">{c.title}</div>
+          {c.subtitle && <div className="tdb-tsub">{subIsMs ? <span className="tdb-ms">{c.subtitle}</span> : c.subtitle}</div>}
+        </div>
+        {hov && cardVerbs(c)}
       </div>
     );
   }
 
-  // ── G3 grouped card (retoken): kicker + serif title w/ inline numeral + one-line sub + REAL-count
-  // progress bar + neutral stack + ink-outline Fix-together (+ the quiet Never — behaviour kept).
-  // ✓ still flips to the rapid chip-fill; ⏸ still forks. ──
+  // ── the BATCH card (the contract): flat, hairline, count headline + sub + progress + roundels;
+  // no roundel buttons, no footer CTA, no NEVER — click anywhere opens the Batch-fix sheet;
+  // hover verbs [⚡ FIX n →] · ☾ LATER ▾ (＋ TODAY omitted: groups are not committable — the
+  // existing Today primitive is per-card; reported). ──
   function renderGroupCard(g: HkGroup) {
     const key = `group-${g.rule}`;
     const ov = overlays[key];
@@ -1451,30 +1524,43 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     const faces = g.members.slice(0, 4);
     const copy = G3_COPY[g.rule] ?? { rest: () => ` ${g.meta.label.toLowerCase()}`, sub: "" };
     const prog = hkGroupProgress(agents.length, g.members.length);
+    const hov = verbKey === key;
     return (
-      <div key={g.rule} className="tdb-gcard" onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}>
-        {rail(() => setOverlay(key, { kind: "flip" }), () => setOverlay(key, { kind: "fork", single: false }), true)}
-        <div className="tdb-frame">
-          <div className="tdb-band hk">
-            <div className="tdb-tags"><span className="tdb-tag due">{g.meta.label.toUpperCase()}</span></div>
+      <div key={g.rule} className={`tdb-gcard${hov ? " hov" : ""}`}
+        onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}
+        onMouseEnter={() => armVerbs(key)} onMouseLeave={disarmVerbs}
+        onFocus={() => armVerbs(key)} onBlur={disarmVerbs}
+        tabIndex={0}>
+        <div className="tdb-band hk">
+          <span className="tdb-tag due">{g.meta.label.toUpperCase()}</span>
+        </div>
+        <div className="tdb-body">
+          <div className="tdb-gtt"><span className="tdb-gn">{g.members.length}</span>{copy.rest(g.members.length)}</div>
+          <div className="tdb-gsub">{copy.sub}</div>
+          <div className="tdb-gprog">
+            <div className="tdb-pbar"><i style={{ width: `${prog.pct}%` }} /></div>
+            <div className="tdb-pcap"><span>{prog.caption}</span><span>{prog.pct}%</span></div>
           </div>
-          <div className="tdb-body">
-            <div className="tdb-mid">
-              <div className="tdb-gtt"><span className="tdb-gn">{g.members.length}</span>{copy.rest(g.members.length)}</div>
-              <div className="tdb-gsub">{copy.sub}</div>
-            </div>
-            <div className="tdb-gprog">
-              <div className="tdb-pbar"><i style={{ width: `${prog.pct}%` }} /></div>
-              <div className="tdb-pcap"><span>{prog.caption}</span><span>{prog.pct}%</span></div>
-            </div>
-            <div className="tdb-gstack">
-              {faces.map((m) => <span key={m.card.key} className="tdb-gsav" title={m.agentName}>{m.card.initials}</span>)}
-              {g.members.length > faces.length && <span className="tdb-gmore">+{g.members.length - faces.length}</span>}
-              <button type="button" className="tdb-gfix" onClick={(e) => { e.stopPropagation(); setFlow({ items: [{ kind: "group", group: g }] }); }}>Batch fix →</button>
-              <button type="button" className="tdb-gnever ghost" title="Stop asking about these — the gaps stay on the profiles" onClick={(e) => { e.stopPropagation(); muteRuleFromCard(g); }}>Never</button>
-            </div>
+          <div className="tdb-avs">
+            {faces.map((m) => <span key={m.card.key} title={m.agentName}>{m.card.initials}</span>)}
+            {g.members.length > faces.length && <i>+{g.members.length - faces.length}</i>}
           </div>
         </div>
+        {hov && (
+          <div className="tdb-verbs" onClick={(e) => e.stopPropagation()}>
+            <button type="button" className="tdb-verb pri" onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}>⚡ FIX {g.members.length} →</button>
+            <span className="tdb-latwrap">
+              <button type="button" className="tdb-verb" aria-haspopup="menu" aria-expanded={laterKey === key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === key ? null : key)); }}>☾ LATER ▾</button>
+              {laterKey === key && (
+                <div className="tdb-latmenu" role="menu" aria-label="Later">
+                  <button type="button" role="menuitem" onClick={(e) => { e.stopPropagation(); setLaterKey(null); snoozeGroup(g, 1, "tomorrow"); }}>Remind me tomorrow</button>
+                  <button type="button" role="menuitem" onClick={(e) => { e.stopPropagation(); setLaterKey(null); snoozeGroup(g, 7, "in a week"); }}>Give it a week</button>
+                  <button type="button" role="menuitem" className="warn" onClick={(e) => { e.stopPropagation(); setLaterKey(null); muteRuleFromCard(g); }}>Don’t show these again</button>
+                </div>
+              )}
+            </span>
+          </div>
+        )}
       </div>
     );
   }

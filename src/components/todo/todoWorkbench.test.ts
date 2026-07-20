@@ -122,30 +122,28 @@ describe("P1 — masthead composition + the centred column", () => {
   it("the page-strip .tdb-band double-definition is resolved — one rule left, the card band's", () => {
     const bands = css.match(/(?:^|\n)\.tdb-band \{[^}]*\}/g) ?? [];
     expect(bands.length).toBe(1);
-    expect(bands[0]).toContain("min-height: 26px"); // the CARD header band (P2-tightened), not the page strip
+    expect(bands[0]).toContain("min-height: 27px"); // the CARD header band (v2 contract), not a page strip
   });
 });
 
 describe("P2 — card view: the grid replaces the reels; renames land", () => {
-  it("III P2 — the one-row reel renders the cards (fresh reelFit, snap, head pagers); the grid + the RETIRED laneFit stay gone", () => {
-    expect(page).toContain('<div className="tdb-reeltrack" ref={ref}>{children}</div>');
-    expect(page).toContain('import { reelFit, reelPage, ReelFit, REEL_CARD_MIN } from "./reelFit";');
-    expect(page).toContain("el.style.setProperty(\"--reelw\", `${fit.cardWidth}px`);");
-    expect(page).toContain("new ResizeObserver(check)"); // the rail's mount/unmount reflows the track → refit for free
-    for (const gone of ["laneFit", "lanePageDistance", "laneFadeState", "tdb-pager\"", "tdb-scroller", "tdb-grid"]) {
-      expect(page).not.toContain(gone);
-    }
+  it("Deck v2 P4 — the EXACT-FIT reel: fixed 774 viewport, page-by-3, snap; reelFit + laneFit stay retired", () => {
+    expect(rule(".tdb-reeltrack")).toContain("width: var(--tdb-vp)");
     expect(rule(".tdb-reeltrack")).toContain("scroll-snap-type: x mandatory");
-    expect(css).toContain("@media (prefers-reduced-motion: reduce) { .tdb-reeltrack { scroll-behavior: auto; } }");
+    expect(page).toContain("const REEL_PAGE = 3 * (250 + 12);");
+    expect(page).not.toContain("reelFit");
+    expect(page).not.toContain("laneFit");
+    expect(css).not.toContain("--reelw");
   });
-  it("tightened anatomy: 26px band, 14px titles, min-height 200, tighter body", () => {
-    expect(rule(".tdb-band")).toContain("min-height: 26px");
-    expect(rule(".tdb-tt")).toContain("font-size: 14px");
-    expect(rule(".tdb-body")).toContain("padding: 10px 12px 11px");
+  it("v2 anatomy: 27px band, 12.5px titles, content-sized cards, tighter body", () => {
+    expect(rule(".tdb-band")).toContain("min-height: 27px");
+    expect(rule(".tdb-tt")).toContain("font-size: 12.5px");
+    expect(rule(".tdb-tile")).not.toContain("min-height");
+    expect(rule(".tdb-body")).toContain("padding: 10px 12px 12px");
   });
   it("VI P3: the Focus pill became the PLAY BUTTON — full wording in title/aria; Batch fix stands", () => {
     expect(page).toContain('className="tdb-playb" title={`Focus on ${label}`} aria-label={`Focus on ${label}`} onClick={onFocusedSession}');
-    expect(page).toContain(">Batch fix →</button>");
+    expect(page).toContain('title="Batch fix"'); // the ledger row quick action (retained view)
     expect(page).not.toContain("Fix together");
     expect(page).not.toContain(">▶ Focus on"); // the pill text is extinct in both views
   });
@@ -182,11 +180,12 @@ describe("P3 — the ledger view (source locks; derivations in todoLedger.test.t
     expect(page).toContain(">SHOW ALL {opts.total} →</button>");
     expect(page).toContain("truncateRows(doSorted, !!showAllSec.do)");
   });
-  it("tinted section heads carry the play button; the note head is the flagged extension", () => {
-    expect(css).toContain(".tdb-lghead.p { background: linear-gradient(180deg, var(--pink-t), var(--pink-btn)); border-color: var(--pink-b); }");
-    expect(css).toContain(".tdb-lghead.c { background: linear-gradient(180deg, var(--hk-cof), var(--hk-cof-2)); border-color: var(--hk-cof-edge); }");
-    expect(css).toContain(".tdb-lghead.n { background: var(--note-t); border-color: var(--note-b); }");
-    expect(page).toContain('className="tdb-playb" title={`Focus on ${opts.label}`} aria-label={`Focus on ${opts.label}`} onClick={opts.onSession}'); // VI P3: the ledger head's play button
+  it("Deck v2 P4: the ledger shares the BAND-LESS lh2 heading (one grammar, both views); notes keep ＋", () => {
+    expect(page).toContain('<div className={`tdb-lh2 ${opts.cls}`}>');
+    expect(rule(".tdb-lh2.p .tdb-lgt::after")).toContain("var(--pink-b)");
+    expect(rule(".tdb-lh2.lat .tdb-lgt::after")).toContain("var(--lat-mark)");
+    expect(rule(".tdb-lh2.n .tdb-lgt::after")).toContain("var(--note-b)");
+    expect(page).toContain('cls: "lat", id: "tdb-lane-hk"');
   });
   it("the shared 9-col grid is one template for header row and rows; the ledger tag stays white-law legal", () => {
     expect(css).toContain(".tdb-lgrid, .tdb-lcols, .tdb-lrow { display: grid; grid-template-columns: 34px 30px 132px 232px minmax(180px, 1fr) 152px 64px 150px 84px;");
@@ -274,7 +273,7 @@ describe("A1 → Deck v2 — the identity strip band (supersedes the masthead ba
     expect(rule(".tdb-strip")).toContain("background: var(--paper)");
     expect(rule(".tdb-strip")).toContain("border-bottom: 1px solid var(--line)");
     const band = page.indexOf("{renderStrip()}");
-    const ws = page.indexOf('className="tdb-ws"');
+    const ws = page.indexOf('className="tdb-asm tdb-ws"');
     expect(band).toBeGreaterThan(0);
     expect(band).toBeLessThan(ws);
     for (const stale of ["tdb-mastband", "tdb-mastcol", "tdb-mastspacer", "renderMasthead"]) {
@@ -303,10 +302,10 @@ describe("II·B P1 — the 24-grid + the ref masthead (todo-workbench-rail-v1.ht
     expect(css).toContain("WIDTH v3 — THE CENTRED ASSEMBLY"); // the v2 law absorbed the vocabulary
     expect(rule(".tdb-wrap")).toContain("--g24: 24px; --g12: 12px;");
     expect(rule(".tdb-ws")).toContain("gap: var(--g24)");
-    expect(rule(".tdb-ws")).toContain("padding: 0 var(--g24)");
+    expect(rule(".tdb-ws")).toContain("padding: 22px 0 26px"); // the assembly work row (v2)
     expect(rule(".tdb-lrail, .tdb-railr")).toContain("top: var(--tdb-gutter)"); // the contract (gutter rides --g24)
     expect(rule(".tdb-reel")).toContain("margin-bottom: var(--g24)");
-    expect(rule(".tdb-lghead.standalone")).toContain("margin-bottom: var(--g12)"); // II·B P4 head band
+    expect(rule(".tdb-lh2")).toContain("margin: 0 0 16px"); // v2: 16px clear below the heading
     expect(rule(".tdb-reeltrack")).toContain("gap: var(--g12)"); // III P2: the reel is the card-gutter consumer
     expect(rule(".tdb-ledger")).toContain("gap: var(--g24)");
   });
@@ -373,18 +372,15 @@ describe("II·B P4 — one tag grammar + card polish", () => {
     expect(page).not.toContain("tdb-kd");
     expect(css).not.toContain("tdb-kick");
   });
-  it("cards view adopts the ledger's tinted head bands — ONE section grammar in both views", () => {
-    expect(page).toContain('className={`tdb-lghead standalone ${cls === "do" ? "p" : cls === "hk" ? "c" : "n"}`}');
-    expect(page).not.toContain("tdb-reelh");
-    expect(page).not.toContain("tdb-fsd");
-    expect(rule(".tdb-lghead.standalone")).toContain("border: 1px solid");
-    // both views speak the same head classes (the ledger's section builder + the Lane)
+  it("ONE section grammar in both views — the band-less lh2 heading (v2)", () => {
+    expect(page).toContain("tdb-lh2 ${cls ===");
+    expect(page).toContain("tdb-lh2 ${opts.cls}");
     expect((page.match(/tdb-playb/g) ?? []).length).toBeGreaterThanOrEqual(2);
   });
-  it("the batch card's Never is the ghost-link grammar (same handler)", () => {
-    expect(page).toContain('className="tdb-gnever ghost"');
-    expect(rule(".tdb-gnever.ghost")).toContain("border-bottom: 1px solid var(--line)");
-    expect(page).toContain("muteRuleFromCard(g)");
+  it("the batch card's Never + footer CTA are extinct (the contract); the hide lives in ☾ LATER", () => {
+    expect(page).not.toContain("tdb-gnever");
+    expect(page).not.toContain(">Batch fix →</button>");
+    expect(page).toContain("muteRuleFromCard(g); }}>Don’t show these again</button>");
   });
 });
 
@@ -408,6 +404,48 @@ describe("Width v3 — the centred assembly tokens (Deck v2; supersedes V P1's f
   });
   it("no reserved slack, no reflow drivers: the ResizeObserver still guards viewport resizes", () => {
     expect(page).toContain("new ResizeObserver(");
+  });
+});
+
+describe("Deck v2 P4 — the sheet · the exact-fit board · the rename", () => {
+  it("THE SHEET: both views render inside the white 812 panel (radius 16, hairline, 18/18/8)", () => {
+    const m = rule(".tdb-mainc");
+    expect(m).toContain("width: var(--tdb-sheet)");
+    expect(m).toContain("border-radius: 16px");
+    expect(m).toContain("padding: 18px 18px 8px");
+    // one sheet, both views: the ledger + the lanes render inside .tdb-mainc (no second panel)
+    const mainc = page.indexOf('className="tdb-mainc"');
+    expect(mainc).toBeGreaterThan(0);
+    expect(page.indexOf("renderLedger()")).toBeGreaterThan(0);
+  });
+  it("exact fit: 774 = 3 × 250 + 2 × 12; cards never stretch; paging by three; pagers dim at the ends", () => {
+    expect(rule(".tdb-wrap")).toContain("--tdb-vp: 774px;");
+    expect(rule(".tdb-reeltrack")).toContain("width: var(--tdb-vp)");
+    expect(rule(".tdb-tile")).toContain("flex: 0 0 var(--tdb-cardw)");
+    expect(rule(".tdb-gcard")).toContain("flex: 0 0 var(--tdb-cardw)");
+    expect(page).toContain("const REEL_PAGE = 3 * (250 + 12);");
+    expect(rule(".tdb-pg:disabled")).toContain("opacity: 0.35");
+    expect(css).not.toContain("EdgeFade"); // no fades — exact fit forbids partials
+  });
+  it("filtered lanes append x OF y · FILTERED · SHOW ALL (reset)", () => {
+    expect(page).toContain("{filtered.x} OF {filtered.y} · FILTERED ·");
+    expect(page).toContain(">SHOW ALL</button>");
+    expect(page).toContain("showAll: resetDeck");
+  });
+  it("THE LATTE LAW: bands/underline/post-it/dot latte; coffee survives only in journey-sheet headers", () => {
+    expect(css).toContain("--lat-1: #f5efe6; --lat-2: #efe7d9; --lat-bd: #ddd0bc; --lat-mark: #cbb995; --lat-ink: #8a7048;");
+    expect(rule(".tdb-band.hk")).toContain("var(--lat-1)");
+    expect(rule(".tdb-lh2.lat .tdb-lgt::after")).toContain("var(--lat-mark)");
+    expect(rule(".tdb-postit.hk")).toContain("var(--lat-2)");
+    const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");
+    expect(flow).toContain("cof"); // the journey-sheet family keeps coffee
+  });
+  it("THE RENAME, repo-wide: zero matches of the old family phrase in src (Agent waiting everywhere)", () => {
+    const { execSync } = require("node:child_process");
+    const needle = "over to " + "you"; // split so this lock never matches itself
+    const out = execSync(`grep -ril '${needle}' ` + join(here, "..", "..") + " || true", { encoding: "utf8" }).trim();
+    expect(out).toBe("");
+    expect(page).toContain('deckPill("AGENT WAITING", "overToYou", fc.overToYou, "p")');
   });
 });
 
@@ -507,7 +545,7 @@ describe("VI P1 — 'Today', always on (todo-right-column-v1.html)", () => {
     }
     expect(page).toContain('<b className="tdb-t">Today</b>');
     expect(page).toContain(">TODAY’S LIST"); // the lens pill (deck, P2 — no tick per the LAWS)
-    expect(page).toContain('{committed ? "✓ ON TODAY" : "＋ TODAY"}'); // the card CTA
+    expect(page).toContain('{committed ? "− TODAY" : "＋ TODAY"}'); // the verb row's Today toggle
   });
   it("the header's right slot: today's date when empty ⇄ '{n} OF 5' once anything is committed", () => {
     expect(page).toContain("{committedCards.length === 0 && doneN === 0 ? shortHeaderDate(now) : `${committedCards.length} OF ${MAX_TODAY}`}");
@@ -538,9 +576,9 @@ describe("VI P3 — lane-head play buttons · help returns to the FAB", () => {
     // cards view: the Lane's onFocusedSession; ledger view: the section's onSession — unchanged
     expect(page).toContain('className="tdb-playb" title={`Focus on ${label}`} aria-label={`Focus on ${label}`} onClick={onFocusedSession}');
     expect(page).toContain('className="tdb-playb" title={`Focus on ${opts.label}`} aria-label={`Focus on ${opts.label}`} onClick={opts.onSession}');
-    expect(page).toContain('<path d="M1 1 L10 6 L1 11 Z" fill="currentColor" />');
+    expect(page).toContain('<path d="M1.5 1.5 L9.5 6 L1.5 10.5 Z" fill="currentColor" />');
     const b = rule(".tdb-playb");
-    expect(b).toContain("width: 32px; height: 32px; border-radius: 50%");
+    expect(b).toContain("width: 30px; height: 30px; border-radius: 50%"); // v2: 30
     expect(b).toContain("border: 1px solid rgba(58, 28, 20, 0.16)");
     expect(css).toContain(".tdb-playb:hover { transform: scale(1.06); }");
     expect(css).not.toContain("tdb-lgs"); // the pill is extinct
