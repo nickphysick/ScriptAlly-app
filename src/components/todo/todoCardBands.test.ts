@@ -41,13 +41,37 @@ describe("The card contract — structure law (todo-deck-v2.html THE LAWS)", () 
     expect(page).not.toContain("tdb-tacts"); // no body pill
     expect(page).not.toContain("tdb-tmeta"); // body = content only (title + manuscript)
   });
-  it("hover: ~150ms intent, 180ms ease, lift + the verb row as an ABSOLUTE overlay (no reflow)", () => {
+  it("hover (ONE-SURFACE hotfix): ~150ms intent, 180ms ease, lift; the cell never resizes; z raised", () => {
     expect(page).toContain("window.setTimeout(() => setVerbKey(key), 150);");
     expect(rule(".tdb-tile")).toContain("transition: box-shadow 0.18s ease, transform 0.18s ease");
     const hov = rule(".tdb-tile.hov, .tdb-gcard.hov");
     expect(hov).toContain("box-shadow: 0 10px 26px rgba(58, 28, 20, 0.18)");
     expect(hov).toContain("transform: translateY(-2px)");
-    expect(rule(".tdb-verbs")).toContain("position: absolute; top: calc(100% - 1px)");
+    expect(hov).toContain("z-index: 5");
+    // the CELL holds the slot at a fixed resting height; the SURFACE is absolute inside it
+    expect(rule(".tdb-cell")).toContain("height: var(--tdb-cardh)");
+    expect(rule(".tdb-cell.batch")).toContain("height: var(--tdb-cardh-b)");
+    expect(rule(".tdb-cell > .tdb-tile, .tdb-cell > .tdb-gcard")).toContain("position: absolute; top: 0; left: 0; right: 0;");
+    expect(rule(".tdb-cell > .tdb-tile, .tdb-cell > .tdb-gcard")).toContain("min-height: 100%");
+  });
+  it("the verb row lives INSIDE the surface's border: grid 0fr⇄1fr 180ms; the wrapper brings NOTHING of its own", () => {
+    expect(rule(".tdb-vwrap")).toContain("display: grid; grid-template-rows: 0fr; transition: grid-template-rows 180ms ease");
+    expect(css).toContain(".tdb-tile.hov .tdb-vwrap, .tdb-gcard.hov .tdb-vwrap { grid-template-rows: 1fr; }");
+    expect(rule(".tdb-vinner")).toContain("overflow: hidden");
+    for (const banned of ["background", "border", "border-radius", "box-shadow"]) {
+      expect(rule(".tdb-vwrap")).not.toContain(banned);
+      expect(rule(".tdb-verbs")).not.toContain(banned);
+    }
+    expect(rule(".tdb-verbs")).not.toContain("position: absolute");
+    // always mounted (the animation needs it); aria-hidden + visibility gate the tab order
+    expect(page).toContain("{cardVerbs(c, hov)}");
+    expect((page.match(/className="tdb-vwrap" aria-hidden=\{!hov\}/g) ?? []).length).toBe(2);
+    expect(rule(".tdb-vinner")).toContain("visibility: hidden");
+  });
+  it("focus: the default ring dies; :focus-visible = 2px ink outline at 2px offset; reduced motion = no lift, instant", () => {
+    expect(css).toContain(".tdb-tile:focus, .tdb-gcard:focus { outline: none; }");
+    expect(css).toContain(".tdb-tile:focus-visible, .tdb-gcard:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }");
+    expect(css).toContain(".tdb-tile.hov, .tdb-gcard.hov { transform: none; }");
   });
   it("verbs: unit [✓ DONE]·[＋/− TODAY]·[☾ LATER ▾]; batch [⚡ FIX n →]·[☾ LATER ▾]; offers keep no ✓", () => {
     expect(page).toContain('{!isOffer && <button type="button" className="tdb-verb pri" onClick={() => quickDone(c)}>✓ DONE</button>}');
