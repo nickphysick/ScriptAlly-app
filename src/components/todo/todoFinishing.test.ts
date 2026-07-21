@@ -79,18 +79,20 @@ describe("Deck v2 P1 — THE RESIDENT REVIEW BANNER (one surface, no windows, no
       expect(css).not.toContain(stale);
     }
   });
-  it("the banner anatomy: uncircled 46px currentColor cup, kicker, Playfair 16 title, one-line sub", () => {
+  it("the DOCBAND anatomy (Final Shape P3): uncircled 42px currentColor cup, kicker, Playfair 15 title, one-line sub", () => {
     expect(cup).toContain('stroke="currentColor"');
     expect(page).toContain('<span className="tdb-rvcupb" aria-hidden dangerouslySetInnerHTML={{ __html: reviewCupRaw }} />');
     expect(page).toContain("THE SUNDAY REVIEW · WEEK {reviewWin.weekNumber}");
     expect(page).toContain("<b>Last week in review</b>");
     expect(page).toContain("<p>Every box ticked turns the dial in your favour.</p>");
     const cupRule = css.match(/\.tdb-rvcupb \{([^}]*)\}/)?.[1] ?? "";
-    expect(cupRule).toContain("width: 46px");
+    expect(cupRule).toContain("width: 42px");
     expect(cupRule).toContain("color: var(--ink)");
     expect(cupRule).not.toContain("border-radius"); // uncircled
-    expect(css).toMatch(/\.tdb-rvhead \{ flex: 1;[^}]*border-radius: 14px/);
-    expect(css).toMatch(/\.tdb-rvhx b \{[^}]*font-size: 16px/);
+    expect(css).toMatch(/\.tdb-docband \{ display: flex;[^}]*border-radius: 12px/);
+    expect(css).toContain("linear-gradient(180deg, #fbf7f0, #f6efe4)");
+    expect(css).toMatch(/\.tdb-rvhx b \{[^}]*font-size: 15px/);
+    expect(page).not.toContain("tdb-rvhead"); // the strip banner is gone — ONE surface, the docband
   });
   it("the mode itself is untouched: the banner button opens weeklyReview over the same set", () => {
     expect(page).toContain('mode: "weeklyReview"');

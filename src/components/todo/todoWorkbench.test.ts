@@ -101,6 +101,32 @@ describe("P1 — the corner retirement + the AppShell's one out-of-page line", (
   });
 });
 
+describe("Final Shape P3 — the sheet shell + the resident docband", () => {
+  it("the corner row: derived mono meta (date · open · showing) left, the ▦/☰ segment right", () => {
+    expect(page).toContain("{shortHeaderDate(now)} · {shownY} OPEN · SHOWING {shownX}");
+    expect(rule(".tdb-shmeta")).toContain("text-transform: uppercase");
+    expect(page).toContain('className="tdb-vseg" role="group" aria-label="View"');
+    expect(page).toContain('onClick={() => pickView("cards")}>▦</button>');
+    expect(page).toContain('onClick={() => pickView("ledger")}>☰</button>');
+    expect(rule(".tdb-vseg")).toContain("margin-left: auto");
+  });
+  it("the docband sits at the top of BOTH views (before the desk/view branch), inside the sheet", () => {
+    const mainc = page.indexOf('className="tdb-mainc"');
+    const head = page.indexOf('className="tdb-sheethead"');
+    const band = page.indexOf('className="tdb-docband"');
+    const views = page.indexOf('desk === "new-desk"');
+    expect(head).toBeGreaterThan(mainc);
+    expect(band).toBeGreaterThan(head);
+    expect(band).toBeLessThan(views);
+  });
+  it("ONE review surface repo-wide: the docband; the strip banner classes are extinct", () => {
+    expect(page).not.toContain("tdb-rvhead");
+    expect(css).not.toContain("tdb-rvhead");
+    expect((page.match(/tdb-docband/g) ?? []).length).toBe(1);
+    expect(page).toContain('{reviewOpened ? "View again" : "Open it ›"}');
+  });
+});
+
 describe("Final Shape P1 — the hero + the floating search", () => {
   it("the hero: two objects only — 42px headline + ink Begin focused session (whole-board scope)", () => {
     expect(rule(".tdb-hero")).toContain("background: var(--paper)");

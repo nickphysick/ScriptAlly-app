@@ -758,10 +758,18 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           {renderRail()}
           {/* THE SHEET — the white content panel holding BOTH views (width law v3) */}
           <div className="tdb-mainc">
-            {/* P1 transitional park: the resident review keeps a home while the strip dies;
-                P3 formalises it as the docband. Same boolean, same copy. */}
+            {/* ── Final Shape P3: the CORNER ROW (derived mono meta · the ▦/☰ segment) over THE
+                RESIDENT REVIEW DOCBAND — same boolean as v2 (opened ≔ the completion sentinel),
+                never dismissed, at the top of BOTH views. ── */}
+            <div className="tdb-sheethead">
+              <span className="tdb-shmeta">{shortHeaderDate(now)} · {shownY} OPEN · SHOWING {shownX}</span>
+              <span className="tdb-vseg" role="group" aria-label="View">
+                <button type="button" className={view === "cards" ? "on" : ""} aria-pressed={view === "cards"} onClick={() => pickView("cards")}>▦</button>
+                <button type="button" className={view === "ledger" ? "on" : ""} aria-pressed={view === "ledger"} onClick={() => pickView("ledger")}>☰</button>
+              </span>
+            </div>
             {reviewWin && (
-              <div className="tdb-rvhead">
+              <div className="tdb-docband">
                 <span className="tdb-rvcupb" aria-hidden dangerouslySetInnerHTML={{ __html: reviewCupRaw }} />
                 <div className="tdb-rvhx">
                   <div className="tdb-rvk2">THE SUNDAY REVIEW · WEEK {reviewWin.weekNumber}</div>
