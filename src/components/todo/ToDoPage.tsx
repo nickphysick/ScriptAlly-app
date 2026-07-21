@@ -2,11 +2,11 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * ToDoPage — THE COMMAND DECK (v2, design-refs/todo-deck-v2.html — the definitive To-do page).
- * Top: the identity strip (title · 84×102 solo post-its · the resident review banner) over the
- * sticky DECK (search · quiet pills · lens · view segment). Left: the RAIL — Focus mode / Task
- * settings / Pro squares. Centre: the board (reels or the ledger). Right: the Today column (or
- * its narrow strip chip). The ledger follows todo-ledger-v1.html.
+ * ToDoPage — THE FINAL SHAPE (design-refs/todo-final.html, THE LAWS v4). Top: the stripped
+ * HERO (headline + Begin focused session) with the floating search breaking its edge. Left: the
+ * FILTER RAIL (vertical quiet pills + settings/Pro foot). Centre: the 812 sheet hosting both
+ * views (the wrapped grid · the run sheet) under the resident review. Right: Today (or its
+ * narrow chip beside the search).
  *
  * Presentation + view-model only — the task engine, taskFlags and every write path are untouched;
  * lane renames are UI labels (UserTask / taskType enums unchanged in code). The pure view-model is
@@ -959,13 +959,24 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     );
   }
 
-  // ── Deck v2 P3: THE RAIL — 240px, three squares (white/radius 16/hairline/lifted; the WHOLE
-  // square is the button). Focus mode (the guided walk, whole-board scope) · Task settings (the
-  // existing sheet) · the Pro promo (plan-gated; CTA → the /plans upgrade surface). ──
+  // ── Final Shape P2: THE FILTER RAIL (ref .fside) — the quiet-pill law rotated vertical.
+  // Full-width 34px pills (white/hairline/ink, 7px family dot, count right), zero-count 40%;
+  // the lens below a divider; narrowed = included band-fill burgundy + the SHOWING x OF y ·
+  // RESET row under SHOW. Foot: the Task-settings row + the Pro square (non-Pro only). The
+  // Focus square is GONE — the hero owns the focused session. ──
+  function railPill(label: string, key: FilterType, count: number, dot: "p" | "lat" | "y") {
+    const on = filters[key];
+    const cls = resting ? "" : on ? " nar" : " dim";
+    return (
+      <button type="button" className={`tdb-fpill d-${dot}${cls}${count === 0 ? " z" : ""}`} aria-pressed={!resting && on} onClick={() => setFilters((f) => togglePill(f, key))}>
+        <span className="tdb-dotc" aria-hidden />{label}<span className="tdb-fn">{count}</span>
+      </button>
+    );
+  }
   function renderRail() {
     if (compact) {
       return (
-        <aside className="tdb-lrail icon" aria-label="Workbench rail">
+        <aside className="tdb-fside icon" aria-label="Workbench rail">
           <button type="button" className="tdb-ric" title="Focus mode" aria-label="Focus mode" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>▶</button>
           <button type="button" className="tdb-ric" title="Task settings" aria-label="Task settings" onClick={() => setSettingsOpen(true)}>⚙</button>
           {!isProUser(currentUser) && (
@@ -975,26 +986,35 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       );
     }
     return (
-      <aside className="tdb-lrail" aria-label="Workbench rail">
-        <button type="button" className="tdb-sq" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>
-          <h3>Focus mode</h3>
-          <p>No distractions — one item at a time.</p>
-          <span className="tdb-sqgo">▶ Begin</span>
-          {focusArt && <span className="tdb-sqart"><img src={focusArt} alt="" /></span>}
-        </button>
-        <button type="button" className="tdb-sq" onClick={() => setSettingsOpen(true)}>
-          <h3>Task settings</h3>
-          <p>Customise the tasks we show you — hide what you never do.</p>
-          <span className="tdb-sqgo ghost">⚙ Customise</span>
-        </button>
-        {!isProUser(currentUser) && (
-          <button type="button" className="tdb-sq pro" onClick={() => onNavigate("plans")}>
-            <span className="tdb-sqk">SCRIPTALLY PRO</span>
-            <h3>Hand it over</h3>
-            <p>Let the assistant handle your housekeeping — wish lists and materials filled for you.</p>
-            <span className="tdb-sqgo">Meet the assistant</span>
-          </button>
+      <aside className="tdb-fside" aria-label="Filters">
+        <div className="tdb-fsec">SHOW</div>
+        {!resting && (
+          <button type="button" className="tdb-frst" onClick={resetDeck}>SHOWING {shownX} OF {shownY} · RESET</button>
         )}
+        {railPill("OFFERS", "offers", fc.offers, "p")}
+        {railPill("AGENT WAITING", "overToYou", fc.overToYou, "p")}
+        {railPill("MATERIALS", "materials", fc.materials, "lat")}
+        {railPill("WISH LISTS", "mswl", fc.mswl, "lat")}
+        {railPill("STALE", "stale", fc.stale, "lat")}
+        {railPill("SNOOZED", "snoozed", fc.snoozed, "lat")}
+        {railPill("NOTES", "notes", fc.notes, "y")}
+        <div className="tdb-fdivider" aria-hidden />
+        <button type="button" className={`tdb-fpill d-s lens${filters.todayOnly ? " nar" : ""}`} aria-pressed={filters.todayOnly} onClick={() => setF("todayOnly", !filters.todayOnly)}>
+          <span className="tdb-dotc" aria-hidden />TODAY’S LIST<span className="tdb-fn">{fc.today}</span>
+        </button>
+        <div className="tdb-fsfoot">
+          <button type="button" className="tdb-setrow" onClick={() => setSettingsOpen(true)}>
+            <span className="tdb-sic" aria-hidden>⚙</span>Task settings
+          </button>
+          {!isProUser(currentUser) && (
+            <button type="button" className="tdb-prosq" onClick={() => onNavigate("plans")}>
+              <span className="tdb-prok">SCRIPTALLY PRO</span>
+              <b>Hand it over</b>
+              <p>Let the assistant handle your housekeeping — wish lists and materials filled for you.</p>
+              <span className="tdb-progo">Meet the assistant</span>
+            </button>
+          )}
+        </div>
       </aside>
     );
   }

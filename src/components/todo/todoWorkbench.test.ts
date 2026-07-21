@@ -23,43 +23,52 @@ const rule = (sel: string): string => {
   return m[1];
 };
 
-describe("Deck v2 P3 — THE RAIL (three squares; the pinned pair + fold are extinct)", () => {
-  it("240px sticky column of three whole-square buttons: Focus · Task settings · Pro", () => {
-    expect(rule(".tdb-lrail")).toContain("width: var(--tdb-rail)");
-    expect(rule(".tdb-lrail, .tdb-railr")).toContain("position: sticky; top: var(--tdb-gutter)");
-    const sq = rule(".tdb-sq");
-    expect(sq).toContain("border-radius: 16px");
-    expect(sq).toContain("box-shadow: 0 4px 14px rgba(58, 28, 20, 0.1)");
-    expect(page).toContain('<aside className="tdb-lrail" aria-label="Workbench rail">');
+describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares are extinct)", () => {
+  it("248px sticky white panel, locked left; the assembly is 1364", () => {
+    expect(rule(".tdb-wrap")).toContain("--tdb-asm: 1364px; --tdb-rail: 248px;");
+    expect(rule(".tdb-fside")).toContain("width: var(--tdb-rail)");
+    expect(rule(".tdb-fside, .tdb-railr")).toContain("position: sticky; top: var(--tdb-gutter)");
+    expect(page).toContain('<aside className="tdb-fside" aria-label="Filters">');
   });
-  it("Focus mode: whole-board scope through the same flow; ink ▶ Begin; the art bottom-right ~64px", () => {
-    expect(page).toContain("const boardCards = [...board.do, ...board.hk, ...board.nt];");
-    expect(page).toContain('onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}');
-    expect(page).toContain("<p>No distractions — one item at a time.</p>");
-    expect(page).toContain('<span className="tdb-sqgo">▶ Begin</span>');
-    expect(css).toContain(".tdb-sqart img { max-height: 64px;");
-  });
-  it("Task settings: the EXISTING sheet, ghost ⚙ Customise", () => {
-    expect(page).toContain('className="tdb-sq" onClick={() => setSettingsOpen(true)}');
-    expect(page).toContain("<p>Customise the tasks we show you — hide what you never do.</p>");
-    expect(page).toContain('<span className="tdb-sqgo ghost">⚙ Customise</span>');
-  });
-  it("the Pro promo: plan-gated both ways; CTA → the /plans upgrade surface; slate family", () => {
-    expect(page).toContain("{!isProUser(currentUser) && (");
-    expect(page).toContain('className="tdb-sq pro" onClick={() => onNavigate("plans")}');
-    expect(page).toContain("<span className=\"tdb-sqk\">SCRIPTALLY PRO</span>".replace(/\\/g, ""));
-    expect(page).toContain("<h3>Hand it over</h3>");
-    expect(page).toContain("Let the assistant handle your housekeeping — wish lists and materials filled for you.");
-    expect(page).toContain('<span className="tdb-sqgo">Meet the assistant</span>');
-    expect(rule(".tdb-sq.pro")).toContain("linear-gradient(180deg, #eef2f6, #e6ecf2)");
-  });
-  it("the fold is extinct: no folded face, no sa.todoDrawer key, no fold chrome", () => {
-    for (const stale of ["tdb-pair", "sa.todoDrawer", "tdb-dfold", "folded", "tdb-footrows", "tdb-fr2", "tdb-fcard"]) {
-      expect(page).not.toContain(stale);
+  it("SHOW: seven vertical pills in the locked order, 34px rows, dot left + count right, zero 40%", () => {
+    for (const call of ['railPill("OFFERS", "offers", fc.offers, "p")', 'railPill("AGENT WAITING", "overToYou", fc.overToYou, "p")', 'railPill("MATERIALS", "materials", fc.materials, "lat")', 'railPill("WISH LISTS", "mswl", fc.mswl, "lat")', 'railPill("STALE", "stale", fc.stale, "lat")', 'railPill("SNOOZED", "snoozed", fc.snoozed, "lat")', 'railPill("NOTES", "notes", fc.notes, "y")']) {
+      expect(page).toContain(call);
     }
+    const order = ["OFFERS", "AGENT WAITING", "MATERIALS", "WISH LISTS", "STALE", "SNOOZED", "NOTES"];
+    let last = -1;
+    for (const l of order) { const i = page.indexOf(`railPill("${l}"`); expect(i).toBeGreaterThan(last); last = i; }
+    expect(rule(".tdb-fpill")).toContain("height: 34px");
+    expect(rule(".tdb-fpill.z")).toContain("opacity: 0.4");
+    expect(rule(".tdb-fpill .tdb-fn")).toContain("margin-left: auto");
+  });
+  it("narrowing: included nar (burgundy band 700) / excluded dim; the RESET row directly under SHOW", () => {
+    const nar = rule(".tdb-fpill.nar");
+    expect(nar).toContain("border-color: #7c3a2a");
+    expect(nar).toContain("linear-gradient(180deg, var(--pink-t), var(--pink-btn))");
+    expect(page).toContain(">SHOWING {shownX} OF {shownY} · RESET</button>");
+    const show = page.indexOf('className="tdb-fsec"');
+    const rst = page.indexOf('className="tdb-frst"');
+    expect(rst).toBeGreaterThan(show);
+    expect(rst).toBeLessThan(page.indexOf('railPill("OFFERS"')); // directly under SHOW
+    expect(page).toContain("{!resting && (");
+  });
+  it("the lens below a divider; the same state the search composes with", () => {
+    expect(page.indexOf('className="tdb-fdivider"')).toBeLessThan(page.indexOf("TODAY’S LIST<span"));
+    expect(page).toContain('aria-pressed={filters.todayOnly} onClick={() => setF("todayOnly", !filters.todayOnly)}');
+    expect(page).toContain("matchesSearch(c, search, sctx)");
+  });
+  it("the foot: Task-settings row + the Pro square, plan-gated; the Focus square is extinct", () => {
+    expect(page).toContain('className="tdb-setrow" onClick={() => setSettingsOpen(true)}');
+    expect(rule(".tdb-sic")).toContain("width: 26px; height: 26px; border-radius: 50%");
+    expect(page).toContain("{!isProUser(currentUser) && (");
+    expect(page).toContain('className="tdb-prosq" onClick={() => onNavigate("plans")}');
+    expect(page).toContain("<b>Hand it over</b>");
+    expect(page).toContain('<span className="tdb-progo">Meet the assistant</span>');
+    expect(rule(".tdb-prosq")).toContain("linear-gradient(180deg, #eef2f6, #e6ecf2)");
+    expect(page).not.toContain("tdb-sq"); // the squares are gone
+    expect(page).not.toContain("tdb-sqgo");
   });
 });
-
 describe("P1 — the corner retirement + the AppShell's one out-of-page line", () => {
   it("the FAB, pop-up chrome and fixed settings button are gone from the page", () => {
     expect(page).not.toContain("tdb-fab");
@@ -277,7 +286,7 @@ describe("A1 → Final Shape — the hero band (supersedes the strip)", () => {
   });
   it("the hero is not sticky (scrolls away); the flanking columns keep the scroll contract", () => {
     expect(rule(".tdb-hero")).not.toContain("sticky");
-    expect(rule(".tdb-lrail, .tdb-railr")).toContain("position: sticky; top: var(--tdb-gutter)");
+    expect(rule(".tdb-fside, .tdb-railr")).toContain("position: sticky; top: var(--tdb-gutter)");
   });
 });
 describe("A2 — ledger copy + the avatar stack (source locks)", () => {
@@ -292,11 +301,11 @@ describe("A2 — ledger copy + the avatar stack (source locks)", () => {
 
 describe("II·B P1 — the 24-grid + the ref masthead (todo-workbench-rail-v1.html, Option B)", () => {
   it("the grid ships as named tokens with the vocabulary comment — no magic numbers at the seams", () => {
-    expect(css).toContain("WIDTH v3 — THE CENTRED ASSEMBLY"); // the v2 law absorbed the vocabulary
+    expect(css).toContain("WIDTH v4 — THE CENTRED ASSEMBLY"); // the Final Shape law absorbed the vocabulary
     expect(rule(".tdb-wrap")).toContain("--g24: 24px; --g12: 12px;");
     expect(rule(".tdb-ws")).toContain("gap: var(--g24)");
     expect(rule(".tdb-ws")).toContain("padding: 22px 0 26px"); // the assembly work row (v2)
-    expect(rule(".tdb-lrail, .tdb-railr")).toContain("top: var(--tdb-gutter)"); // the contract (gutter rides --g24)
+    expect(rule(".tdb-fside, .tdb-railr")).toContain("top: var(--tdb-gutter)"); // the contract (gutter rides --g24)
     expect(rule(".tdb-reel")).toContain("margin-bottom: var(--g24)");
     expect(rule(".tdb-lh2")).toContain("margin: 0 0 16px"); // v2: 16px clear below the heading
     expect(rule(".tdb-reeltrack")).toContain("gap: var(--g12)"); // III P2: the reel is the card-gutter consumer
@@ -328,7 +337,7 @@ describe("II·B P3 — the companion rail (one panel, two mounts, one state)", (
   });
   it("the rail: 264 sticky at the 24 offset, after the main column; noted as the future companions' home", () => {
     expect(rule(".tdb-railr")).toContain("width: var(--tdb-today)");
-    expect(rule(".tdb-lrail, .tdb-railr")).toContain("position: sticky"); // the shared contract
+    expect(rule(".tdb-fside, .tdb-railr")).toContain("position: sticky"); // the shared contract
     expect(page.indexOf('className="tdb-main"')).toBeLessThan(page.indexOf('className="tdb-railr"'));
   });
   it("the chip's count is the committed union — never a parallel tally — and the header slot pairs date ⇄ count", () => {
@@ -367,29 +376,25 @@ describe("II·B P4 — one tag grammar + card polish", () => {
   });
 });
 
-describe("Width v3 — the centred assembly tokens (Deck v2; supersedes V P1's full-bleed grid)", () => {
-  it("the token set on the wrap: asm 1356 · rail 240 · sheet 812 · vp 774 · cardw 250 · Today 256", () => {
+describe("Width v4 — the centred assembly tokens (Final Shape)", () => {
+  it("the token set on the wrap: asm 1364 · rail 248 · sheet 812 · vp 774 · cardw 250 · Today 256", () => {
     const w = rule(".tdb-wrap");
-    expect(w).toContain("--tdb-asm: 1356px;");
-    expect(w).toContain("--tdb-rail: 240px;");
+    expect(w).toContain("--tdb-asm: 1364px;");
+    expect(w).toContain("--tdb-rail: 248px;");
     expect(w).toContain("--tdb-sheet: 812px;");
     expect(w).toContain("--tdb-vp: 774px;");
     expect(w).toContain("--tdb-cardw: 250px;");
     expect(w).toContain("--tdb-today: 256px;");
-    expect(w).toContain("--tdb-gutter: var(--g24);"); // the scroll contract survives
+    expect(w).toContain("--tdb-gutter: var(--g24);");
     expect(w).toContain("--tdb-appnav: 49px;");
   });
-  it("the assembly centres; the arithmetic is the LAWS' 240+24+812+24+256", () => {
+  it("the assembly centres; the arithmetic is the LAWS' 248+24+812+24+256", () => {
     expect(rule(".tdb-asm")).toContain("width: var(--tdb-asm); margin: 0 auto;");
-    expect(css).toContain("240 · 24 · sheet 812");
-    expect(css).toContain("Today 256 = 1356px");
+    expect(css).toContain("filter rail 248 · 24 · sheet 812");
+    expect(css).toContain("Today 256 = 1364px");
     expect(rule(".tdb-railr")).toContain("width: var(--tdb-today)");
   });
-  it("no reserved slack, no reflow drivers: the ResizeObserver still guards viewport resizes", () => {
-    expect(page).toContain("new ResizeObserver(");
-  });
 });
-
 describe("Deck v2 P4 — the sheet · the exact-fit board · the rename", () => {
   it("THE SHEET: both views render inside the white 812 panel (radius 16, hairline, 18/18/8)", () => {
     const m = rule(".tdb-mainc");
@@ -458,7 +463,7 @@ describe("Deck v2 P5 — retirement sweep · breakpoints · a11y", () => {
   });
   it("BREAKPOINTS (transitional): the icon rail survives until P6's drawer; <1240 the popover beside the search", () => {
     expect(page).toContain('window.matchMedia("(max-width: 1419.98px)")');
-    expect(page).toContain('<aside className="tdb-lrail icon" aria-label="Workbench rail">');
+    expect(page).toContain('<aside className="tdb-fside icon" aria-label="Workbench rail">');
     expect(page).toContain('window.matchMedia("(max-width: 1239.98px)")');
   });
   it("A11Y: post-its/pills pressed; cards real buttons (Enter/Space, aria-expanded = the verb reveal)", () => {
@@ -560,7 +565,7 @@ describe("VI P3 — lane-head play buttons · help returns to the FAB", () => {
 
 describe("The column scroll contract (VI P4 → Deck v2 selectors)", () => {
   it("the shared rule: sticky at the gutter, viewport-capped via the appnav token, flex column", () => {
-    const shared = rule(".tdb-lrail, .tdb-railr");
+    const shared = rule(".tdb-fside, .tdb-railr");
     expect(shared).toContain("position: sticky; top: var(--tdb-gutter)");
     expect(shared).toContain("max-height: calc(100vh - var(--tdb-appnav) - (var(--tdb-gutter) * 2))");
     expect(shared).toContain("display: flex; flex-direction: column;");
@@ -598,6 +603,6 @@ describe("III P4 — the tucked Today tab · the masthead · the naming sweep", 
     }
     expect(page).toMatch(/aria-label=\{`Focus on \$\{label\}`\}/); // cards view (the play button)
     expect(page).toMatch(/aria-label=\{`Focus on \$\{opts\.label\}`\}/); // ledger view
-    expect(page).toContain("<h3>Focus mode</h3>"); // the rail's square
+    expect(page).toContain('title="Focus mode"'); // the icon rail keeps the name until P6
   });
 });

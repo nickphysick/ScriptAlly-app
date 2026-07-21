@@ -12,16 +12,16 @@
    engage. No 100vh/overflow-hidden clamp anywhere — that was the earlier scroll bug. Top padding
    REMOVED (the band sits flush under the shell bar); bottom padding clears the fixed corner
    controls (Today FAB + the shell's help "?"). Page-scoped. */
-/* ── WIDTH v3 — THE CENTRED ASSEMBLY (Command Deck v2, todo-deck-v2.html THE LAWS; supersedes
-   V P1's full-bleed left-pinned grid): rail 240 · 24 · sheet 812 (18px padding wrapping a 774
-   viewport = EXACTLY 3 × 250 cards + 2 × 12 gaps) · 24 · Today 256 = 1356px, centred at every
+/* ── WIDTH v4 — THE CENTRED ASSEMBLY (Final Shape, todo-final.html THE LAWS v4; supersedes
+   the v2 numbers): filter rail 248 · 24 · sheet 812 (18px padding wrapping a 774
+   viewport = EXACTLY 3 × 250 cards + 2 × 12 gaps) · 24 · Today 256 = 1364px, centred at every
    viewport. Bar backgrounds (strip paper, deck white) run full-bleed; their CONTENTS lock to the
    assembly (.tdb-asm). Cards flex:0 0 250, never stretch; reels snap-page by 3; NO partial
    cards, NO edge fades — the heading pagers + counts carry "there's more". Breakpoints (P5):
    <1420 the rail collapses to a 56px icon rail (assembly 1172) and trailing pills fold into
    FILTER ▾ · <1240 Today becomes the strip popover. --tdb-gutter/--tdb-appnav survive for the
    column scroll contract; --g24 seams · --g12 card gutters. ── */
-.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-appnav: 49px; --tdb-asm: 1356px; --tdb-rail: 240px; --tdb-sheet: 812px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-b: 212px; --tdb-sidebar: 270px; --tdb-today: 256px; flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 0 0 48px; }
+.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-appnav: 49px; --tdb-asm: 1364px; --tdb-rail: 248px; --tdb-sheet: 812px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-b: 212px; --tdb-sidebar: 270px; --tdb-today: 256px; flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 0 0 48px; }
 /* ── the workbench row (Option B): drawer + centred main. The row caps at 1720 and centres;
    inside it the CONTENT column caps at 1150 and centres again — max-width discipline at every
    viewport, surplus pooling as symmetric oat desk. ── */
@@ -29,7 +29,7 @@
 /* THE SHEET (the LAWS): the white content panel holding BOTH views; cards on it wear the sheet
    border + shadow. 812 = 18px padding wrapping the 774 exact-fit viewport. */
 .tdb-mainc { width: var(--tdb-sheet); flex: 0 0 auto; box-sizing: border-box; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 16px; padding: 18px 18px 8px; }
-@media (max-width: 900px) { .tdb-ws { flex-wrap: wrap; } .tdb-ws .tdb-lrail { position: static; width: 100%; max-height: none; } .tdb-mainc { width: 100%; } }
+@media (max-width: 900px) { .tdb-ws { flex-wrap: wrap; } .tdb-ws .tdb-fside { position: static; width: 100%; max-height: none; } .tdb-mainc { width: 100%; } }
 
 /* ── THE HERO (Final Shape P1, THE LAWS v4) — two objects only: the 42px Playfair headline and
    the ink Begin-focused-session button. Paper full-bleed, contents lock to the assembly. The
@@ -68,36 +68,44 @@
    verbs never scroll away); the rail's three squares are short and never scroll. Budget at 900px:
    900 − 49 (appnav) − 48 (gutters) = 803 ≫ ≈370 for a full Today. Scrollbars: thin, hairline,
    hover-visible, gutter stable. ── */
-.tdb-lrail, .tdb-railr { position: sticky; top: var(--tdb-gutter); max-height: calc(100vh - var(--tdb-appnav) - (var(--tdb-gutter) * 2)); display: flex; flex-direction: column; }
+.tdb-fside, .tdb-railr { position: sticky; top: var(--tdb-gutter); max-height: calc(100vh - var(--tdb-appnav) - (var(--tdb-gutter) * 2)); display: flex; flex-direction: column; }
 .tdb-tmid2 { overflow-y: auto; min-height: 0; scrollbar-width: thin; scrollbar-color: transparent transparent; scrollbar-gutter: stable; }
 .tdb-tmid2:hover, .tdb-tmid2:focus-within { scrollbar-color: var(--hairline) transparent; }
-/* ── THE RAIL (Deck v2 P3, ref .lrail/.sq) — 240px, three squares: white, radius 16, hairline,
-   lifted; the WHOLE square is the button. Focus (ink ▶ Begin + art bottom-right ~64px) · Task
-   settings (ghost ⚙ Customise) · Pro promo (slate gradient, plan-gated). ── */
-.tdb-lrail { width: var(--tdb-rail); flex: 0 0 auto; gap: 14px; }
-.tdb-sq { background: var(--white, #fff); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 4px 14px rgba(58, 28, 20, 0.1); padding: 15px 16px; cursor: pointer; text-align: left; display: block; transition: transform 0.12s, box-shadow 0.12s; }
-.tdb-sq:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(58, 28, 20, 0.14); }
-@media (prefers-reduced-motion: reduce) { .tdb-sq { transition: none; } }
-.tdb-sq h3 { font-family: var(--f12-serif); font-size: 16px; font-weight: 700; color: var(--ink); }
-.tdb-sq p { font-size: 10.5px; color: var(--sub); line-height: 1.5; margin-top: 3px; }
-.tdb-sqgo { margin-top: 10px; display: inline-flex; align-items: center; gap: 6px; background: var(--ink); color: var(--panel); border-radius: 99px; padding: 6px 14px; font-size: 10.5px; font-weight: 600; }
-.tdb-sq:disabled .tdb-sqgo { opacity: 0.5; }
-.tdb-sqgo.ghost { background: var(--white, #fff); color: var(--ink-2); border: 1px solid var(--line); }
-.tdb-sqart { display: flex; justify-content: flex-end; margin-top: -34px; pointer-events: none; }
-.tdb-sqart img { max-height: 64px; filter: drop-shadow(0 2px 4px rgba(58, 28, 20, 0.12)); }
-.tdb-sq.pro { background: linear-gradient(180deg, #eef2f6, #e6ecf2); border-color: #c8d4de; }
-.tdb-sq.pro .tdb-sqk { display: block; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.13em; color: #5a7186; margin-bottom: 3px; }
-/* the 56px ICON RAIL (<1420): ▶ / ⚙ / ✦ with tooltips */
-.tdb-lrail.icon { width: var(--tdb-rail); align-items: center; gap: 10px; }
+/* ── THE FILTER RAIL (Final Shape P2, ref .fside) — 248px sticky white panel: SHOW label,
+   vertical quiet pills (34px rows, family dot left, count right), the RESET row when narrowed,
+   the lens below a divider, and the top-bordered foot (Task-settings row + the Pro square). ── */
+.tdb-fside { width: var(--tdb-rail); flex: 0 0 auto; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 3px 14px rgba(58, 28, 20, 0.08); overflow: hidden; }
+.tdb-fsec { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.14em; color: var(--faint); padding: 14px 16px 7px; }
+.tdb-fpill { display: flex; align-items: center; gap: 10px; margin: 0 10px 6px; height: 34px; width: calc(100% - 20px); box-sizing: border-box; border: 1px solid var(--line); background: var(--white, #fff); border-radius: 99px; padding: 0 13px; font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.08em; color: var(--ink-2); cursor: pointer; flex: 0 0 auto; }
+.tdb-fpill:hover { background: var(--paper); }
+.tdb-fpill .tdb-dotc { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto; }
+.tdb-fpill.d-p .tdb-dotc { background: var(--dot-p); }
+.tdb-fpill.d-lat .tdb-dotc { background: var(--dot-lat); }
+.tdb-fpill.d-y .tdb-dotc { background: var(--dot-y); }
+.tdb-fpill.d-s .tdb-dotc { background: var(--dot-s); }
+.tdb-fpill .tdb-fn { margin-left: auto; color: var(--faint); }
+.tdb-fpill.z { opacity: 0.4; }
+.tdb-fpill.dim { opacity: 0.4; }
+.tdb-fpill.nar { border-color: #7c3a2a; color: #7c3a2a; background: linear-gradient(180deg, var(--pink-t), var(--pink-btn)); font-weight: 700; }
+.tdb-fpill.nar .tdb-dotc { background: #7c3a2a; }
+.tdb-fpill.nar .tdb-fn { color: #7c3a2a; }
+.tdb-frst { display: flex; align-items: center; margin: 0 10px 6px; height: 30px; width: calc(100% - 20px); box-sizing: border-box; border: 1px solid #7c3a2a; color: #7c3a2a; background: var(--white, #fff); border-radius: 99px; padding: 0 13px; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.08em; font-weight: 700; cursor: pointer; flex: 0 0 auto; }
+.tdb-fdivider { height: 1px; background: var(--hairline); margin: 8px 16px; flex: 0 0 auto; }
+.tdb-fsfoot { margin-top: 10px; border-top: 1px solid var(--hairline); padding: 12px; }
+.tdb-setrow { display: flex; align-items: center; gap: 10px; padding: 9px 6px; width: 100%; font-size: 11.5px; font-weight: 600; color: var(--ink-2); cursor: pointer; border-radius: 10px; background: none; border: none; text-align: left; }
+.tdb-setrow:hover { background: var(--paper); }
+.tdb-sic { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); display: inline-flex; align-items: center; justify-content: center; font-size: 11px; color: var(--muted); flex: 0 0 auto; }
+.tdb-prosq { display: block; width: 100%; text-align: left; margin-top: 8px; background: linear-gradient(180deg, #eef2f6, #e6ecf2); border: 1px solid #c8d4de; border-radius: 13px; padding: 13px 14px; cursor: pointer; }
+.tdb-prok { display: block; font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.13em; color: #5a7186; margin-bottom: 3px; }
+.tdb-prosq b { display: block; font-family: var(--f12-serif); font-size: 14.5px; font-weight: 700; color: var(--ink); }
+.tdb-prosq p { font-size: 10px; color: #5d6b78; line-height: 1.5; margin-top: 3px; }
+.tdb-progo { margin-top: 9px; display: inline-flex; background: var(--ink); color: var(--panel); border-radius: 99px; padding: 5px 13px; font-size: 10px; font-weight: 600; }
+/* the 56px ICON RAIL (<1420, until P6's drawer) */
+.tdb-fside.icon { align-items: center; gap: 10px; padding: 10px 0; }
 .tdb-ric { width: 40px; height: 40px; border-radius: 50%; background: var(--white, #fff); border: 1px solid var(--line); box-shadow: 0 2px 8px rgba(58, 28, 20, 0.1); display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--ink); cursor: pointer; }
 .tdb-ric:hover:not(:disabled) { border-color: var(--ink-2); }
 .tdb-ric:disabled { opacity: 0.45; }
 .tdb-ric.pro { background: linear-gradient(180deg, #eef2f6, #e6ecf2); border-color: #c8d4de; color: #5a7186; }
-.tdb-dhelp { position: absolute; bottom: calc(100% + 4px); right: 0; z-index: 5; min-width: 150px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--sh-3); padding: 5px; }
-.tdb-dhelp button { display: block; width: 100%; text-align: left; font-size: 12px; padding: 7px 10px; border-radius: 7px; color: var(--ink); background: none; border: none; }
-.tdb-dhelp button:hover { background: var(--white, #fff); }
-/* folded rail — icon-only column */
-.tdb-dbadge { position: absolute; top: -4px; right: -4px; font-family: var(--f12-mono); font-style: normal; font-size: 7.5px; font-weight: 700; min-width: 15px; height: 15px; border-radius: 99px; background: var(--ink); color: var(--paper); display: flex; align-items: center; justify-content: center; padding: 0 3px; }
 
 /* ── TASK SETTINGS (task-settings pack; ref todo-task-settings-v2.html) — the ⚙ entry lives in
    the DRAWER FOOT now (workbench; the fixed corner button is retired). The sheet reuses the
