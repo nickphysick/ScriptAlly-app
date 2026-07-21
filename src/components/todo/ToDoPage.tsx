@@ -33,12 +33,11 @@ import { weekOfQuerying } from "../../lib/dashboardStats";
 import { isProUser } from "../../lib/assistFill";
 import { groupHousekeeping, hkGapCount, hkGroupProgress, HkGroup, HkRule, HK_RULES, laterHideKey } from "../../lib/todoHousekeeping";
 import { deskState, liveQueryCount, liveQueriesLine, clearedListCap } from "../../lib/todoEmpty";
-import { ledgerTitle, ledgerDetail, sortLedgerDo, sortLedgerHk, batchChildren, batchDetail, batchTaskCopy, truncateRows } from "../../lib/todoLedger";
+import { sortLedgerDo, sortLedgerHk } from "../../lib/todoLedger";
 import focusArt from "../../assets/todo/focus-art.png";
 // VI P2 — the review cup (original ScriptAlly artwork; currentColor → inlined so it inherits ink)
 import reviewCupRaw from "../../assets/todo/review-cup.svg?raw";
 import { TodoFilterState, DEFAULT_FILTERS, filtersActive, matchesSearch, groupMatchesSearch, visibleDoCard, visibleStaleCard, visibleNoteCard, visibleGroup, filterCounts, isResting, togglePill, FilterType } from "../../lib/todoFilters";
-import { SelState, EMPTY_SEL, applySelectClick, moveFocus } from "../../lib/todoSelection";
 import { shouldAutoRunTour } from "../../lib/todoTour";
 import { TodoTour } from "./TodoTour";
 import { ActivityType, QueryStatus } from "../../types";
@@ -160,7 +159,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // + which sections dropped their SHOW ALL cap. Collapse restores the scroll position captured at
   // expand (the wrap is the scroller).
   const [openBatches, setOpenBatches] = useState<Record<string, boolean>>({});
-  const [showAllSec, setShowAllSec] = useState<Record<string, boolean>>({});
   const batchScroll = useRef<Record<string, number>>({});
   const toggleBatch = (rule: string) => {
     setOpenBatches((s) => {
@@ -170,12 +168,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       return { ...s, [rule]: open };
     });
   };
-  // ── P5: ledger selection (hover checkboxes · shift ranges · parents as one · children never)
-  // + the additive keyboard layer + the ⋯ kebab. All session-only; bulk writes ride the EXISTING
-  // primitives optimistically with one undo-all flash.
-  const [sel, setSel] = useState<SelState>(EMPTY_SEL);
-  const [kfocus, setKfocus] = useState(-1);
-  const [kebabAt, setKebabAt] = useState<string | null>(null);
+  // (the ledger's selection/keyboard/kebab machinery retired with the run sheet — Final Shape P5)
   // ── II·B P3: the companion rail ↔ masthead chip. ONE Today panel (renderTodayPanel), TWO
   // mounts — the right column ≥1240px, the strip-chip popover below — XOR'd on `narrow`, so
   // exactly one mounts and the state never forks (halt (c) clear).
@@ -376,141 +369,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // top-level order the renderer draws. Children are not in the order — never selectable.
   const lctx = { queries, taskFlags };
   const doSorted = sortLedgerDo(vDo, lctx, now);
-  const doCut = truncateRows(doSorted, !!showAllSec.do);
   const staleSorted = sortLedgerHk(vStale, lctx, now);
   const hkTop: Array<{ kind: "group"; g: HkGroup } | { kind: "card"; c: BoardCard }> = [
     ...vGroups.map((g) => ({ kind: "group" as const, g })),
     ...staleSorted.map((c) => ({ kind: "card" as const, c })),
   ];
-  const hkCut = truncateRows(hkTop, !!showAllSec.hk);
-  const ntCut = truncateRows(vNt, !!showAllSec.nt);
-  const ledgerOrder: string[] = view !== "ledger" ? [] : [
-    ...doCut.visible.map((c) => c.key),
-    ...hkCut.visible.map((r) => (r.kind === "group" ? `group-${r.g.rule}` : r.c.key)),
-    ...ntCut.visible.map((c) => c.key),
-  ];
-  const rowByKey = new Map<string, { kind: "card"; c: BoardCard } | { kind: "group"; g: HkGroup }>([
-    ...doCut.visible.map((c) => [c.key, { kind: "card" as const, c }] as const),
-    ...hkCut.visible.map((r) => (r.kind === "group" ? [`group-${r.g.rule}`, r] as const : [r.c.key, r] as const)),
-    ...ntCut.visible.map((c) => [c.key, { kind: "card" as const, c }] as const),
-  ]);
-  const selVisible = sel.selected.filter((k) => ledgerOrder.includes(k));
-  const clickSelect = (key: string, shift: boolean) => setSel((st) => applySelectClick(st, ledgerOrder, key, shift));
   // Bulk actions — the same writes the singles make, applied optimistically with ONE undo-all.
-  function bulkToday() {
-    let room = MAX_TODAY - committedCards.length;
-    let added = 0;
-    for (const k of selVisible) {
-      const row = rowByKey.get(k);
-      if (!row || row.kind !== "card" || onList(row.c)) continue;
-      if (room <= 0) { flash(`Today is full (${MAX_TODAY} max)`); break; }
-      setCommitted(row.c, true); room -= 1; added += 1;
-    }
-    if (added > 0) flash(`＋ ${added} on Today`);
-    setSel(EMPTY_SEL);
-  }
-  function bulkSnooze() {
-    const undos: Array<() => void | Promise<void>> = [];
-    let n = 0;
-    for (const k of selVisible) {
-      const row = rowByKey.get(k);
-      if (!row) continue;
-      if (row.kind === "group") {
-        row.g.members.forEach((m) => m.agentId && dismissTask("data_quality_poor", m.agentId, "fixed snooze", 7));
-        undos.push(() => row.g.members.forEach((m) => m.agentId && upsertTaskFlag(flagKeyForTask("data_quality_poor", m.agentId), { snoozedUntil: null, unbumpSnooze: true })));
-        n += 1;
-      } else if (row.c.userTaskId) {
-        const key = { taskType: USER_TASK_FLAG_TYPE, queryId: row.c.userTaskId };
-        upsertTaskFlag(key, { snoozedUntil: plus7iso(), bumpSnooze: true });
-        undos.push(() => upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true }));
-        n += 1;
-      } else if (row.c.taskType && row.c.relatedRecordId) {
-        dismissTask(row.c.taskType, row.c.relatedRecordId, "fixed snooze", 7);
-        undos.push(() => upsertTaskFlag(flagKeyForTask(row.c.taskType!, row.c.relatedRecordId!), { snoozedUntil: null, unbumpSnooze: true }));
-        n += 1;
-      }
-    }
-    if (n) flash(`✓ ${n} snoozed — back in a week`, { label: "Undo all", fn: async () => { for (const u of undos) await u(); flash("Restored"); } });
-    setSel(EMPTY_SEL);
-  }
-  function bulkDismiss() {
-    const undos: Array<() => void | Promise<void>> = [];
-    let n = 0;
-    for (const k of selVisible) {
-      const row = rowByKey.get(k);
-      if (!row) continue;
-      if (row.kind === "group") {
-        row.g.members.forEach((m) => m.agentId && upsertTaskFlag(flagKeyForTask("data_quality_poor", m.agentId), { snoozedUntil: MUTED_UNTIL }));
-        undos.push(() => row.g.members.forEach((m) => m.agentId && upsertTaskFlag(flagKeyForTask("data_quality_poor", m.agentId), { snoozedUntil: null })));
-        n += 1;
-      } else if (row.c.userTaskId) {
-        const key = { taskType: USER_TASK_FLAG_TYPE, queryId: row.c.userTaskId };
-        upsertTaskFlag(key, { snoozedUntil: MUTED_UNTIL });
-        undos.push(() => upsertTaskFlag(key, { snoozedUntil: null }));
-        n += 1;
-      } else if (row.c.taskType && row.c.relatedRecordId) {
-        upsertTaskFlag(flagKeyForTask(row.c.taskType, row.c.relatedRecordId), { snoozedUntil: MUTED_UNTIL });
-        undos.push(() => upsertTaskFlag(flagKeyForTask(row.c.taskType!, row.c.relatedRecordId!), { snoozedUntil: null }));
-        n += 1;
-      }
-    }
-    if (n) flash(`✓ ${n} dismissed — nothing deleted`, { label: "Undo all", fn: async () => { for (const u of undos) await u(); flash("Restored"); } });
-    setSel(EMPTY_SEL);
-  }
-  // ── P5 keyboard layer — ADDITIVE, never required (every action has a pointer path). Ledger view
-  // only; inert while typing, while a journey sheet is up, and while the board is display:none.
-  const openRow = (key: string) => {
-    const row = rowByKey.get(key);
-    if (!row) return;
-    if (row.kind === "group") setFlow({ items: [{ kind: "group", group: row.g }] });
-    else openFlowCards([row.c]);
-  };
-  const keyCtx = useRef({ view, ledgerOrder, kfocus, flow: flow as unknown });
-  keyCtx.current = { view, ledgerOrder, kfocus, flow };
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      const ctx = keyCtx.current;
-      if (ctx.view !== "ledger" || ctx.flow) return;
-      if (!wrapRef.current || wrapRef.current.offsetParent === null) return;
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
-      const t = e.target as HTMLElement | null;
-      if (t && t.closest("input, textarea, select, [contenteditable=true]")) return;
-      const k = e.key;
-      if (k === "Escape") { setSel(EMPTY_SEL); setKfocus(-1); setKebabAt(null); return; }
-      const order = ctx.ledgerOrder;
-      if (k === "ArrowDown" || k === "j" || k === "ArrowUp" || k === "k") {
-        e.preventDefault();
-        const next = moveFocus(ctx.kfocus, k === "ArrowDown" || k === "j" ? 1 : -1, order.length);
-        setKfocus(next);
-        const el = document.querySelector(`[data-lkey="${order[next]}"]`);
-        el?.scrollIntoView({ block: "nearest" });
-        return;
-      }
-      const key = order[ctx.kfocus];
-      if (!key) return;
-      const row = rowByKey.get(key);
-      if (k === "Enter") { e.preventDefault(); openRow(key); return; }
-      if (k === "t" && row?.kind === "card") { e.preventDefault(); toggleToday(row.c); return; }
-      if (k === "s") {
-        e.preventDefault();
-        if (row?.kind === "card") quickPause(row.c);
-        else if (row?.kind === "group") forkNotNowGroup(row.g);
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  function kebabDismiss(c: BoardCard) {
-    setKebabAt(null);
-    const key = c.userTaskId
-      ? { taskType: USER_TASK_FLAG_TYPE, queryId: c.userTaskId }
-      : c.taskType && c.relatedRecordId ? flagKeyForTask(c.taskType, c.relatedRecordId) : null;
-    if (!key) return;
-    upsertTaskFlag(key, { snoozedUntil: MUTED_UNTIL });
-    const undo = () => upsertTaskFlag(key, { snoozedUntil: null });
-    flash(`✓ ${c.title} — dismissed`, { label: "Undo", fn: async () => { await undo(); flash("Restored"); } });
-  }
 
   // Deck v2 P2 — the shown/total pair (the deck's SHOWING x OF y) + the Esc chain: search
   // clears first, the narrowing second (editables keep their own Esc except the search input,
@@ -834,15 +698,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         </div>
       </div>
 
-      {view === "ledger" && selVisible.length > 0 && (
-        <div className="tdb-bulk" role="toolbar" aria-label={`${selVisible.length} selected`}>
-          <span className="tdb-bulkn">{selVisible.length} selected</span>
-          <button type="button" onClick={bulkToday}>＋ Today</button>
-          <button type="button" onClick={bulkSnooze}>⏸ Snooze</button>
-          <button type="button" onClick={bulkDismiss}>Dismiss</button>
-          <button type="button" className="x" aria-label="Clear selection" onClick={() => setSel(EMPTY_SEL)}>✕</button>
-        </div>
-      )}
       {settingsOpen && <TaskSettingsSheet onClose={() => setSettingsOpen(false)} />}
       {tourOpen && <TodoTour onEnd={endTour} />}
       {toast && (
@@ -1084,162 +939,110 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // sets the cards render: shared 9-col grid, tinted section heads, typed batch parents with
   // full-cohort expansion, StatusDot verbatim in the STATUS column. Rows open the same journeys
   // (openFlowCards / group flow); the td circle is the same toggleToday. ──
-  function ledgerCardRow(c: BoardCard) {
-    const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
-    const ag = q ? agents.find((a) => a.id === q.agentId) : undefined;
-    const ms = q ? manuscripts.find((m) => m.id === q.manuscriptId) : undefined;
-    const isOffer = c.taskType === "offer_received";
-    const isNote = !c.taskType;
-    const det = ledgerDetail(c, { queries, taskFlags }, now);
+  // ── Final Shape P5: THE RUN SHEET (☰) — the same lane headings over hairline-divided rows.
+  // UNNUMBERED (the pack overrides the ref's numerals): the 26px family-tinted roundel carries
+  // the family dot. Verbs fade IN PLACE at the row's right on hover/focus — same three slots,
+  // same handlers as the cards; row click opens the journey / Batch fix. The old 9-col ledger,
+  // its selection machinery and truncation are extinct. ──
+  function runRow(c: BoardCard) {
     const committed = onList(c);
-    const isSel = selVisible.includes(c.key);
-    const isFocus = ledgerOrder[kfocus] === c.key;
+    const isOffer = c.taskType === "offer_received";
+    const fam = c.stream === "do" ? "pk" : c.stream === "hk" ? "lt" : "yl";
+    const subIsMs = !!c.subtitle && manuscripts.some((m) => m.title === c.subtitle);
     return (
-      <div key={c.key} data-lkey={c.key} className={`tdb-lrow${isSel ? " lsel-on" : ""}${isFocus ? " kfocus" : ""}${kebabAt === c.key ? " kebab-open" : ""}`} onClick={() => openFlowCards([c])}>
-        <span className="tdb-lselc" onClick={(e) => e.stopPropagation()}>
-          <input type="checkbox" className="tdb-lsel" checked={isSel} readOnly aria-label={`Select ${ledgerTitle(c)}`} onClick={(e) => { e.stopPropagation(); clickSelect(c.key, e.shiftKey); }} />
-        </span>
-        <button type="button" className={`tdb-ltd${committed ? " on" : ""}`} title={committed ? "On Today — take off" : "＋ Today"} aria-label={committed ? "Take off Today" : "Add to Today"} aria-pressed={committed} onClick={(e) => { e.stopPropagation(); toggleToday(c); }}>✓</button>
-        <span className={`tdb-tag${isOffer ? " offer" : c.warn ? " due warn" : " due"}`}>{isOffer ? "★ OFFER" : isNote ? "NOTE" : c.snoozes > 0 ? `Snoozed ×${c.snoozes}` : c.due}</span>
-        <span className="tdb-lagn">
-          {ag ? (<><span className="tdb-miniav">{c.initials}</span><b>{c.who}</b>{ag.agency && <i>· {ag.agency.toUpperCase()}</i>}</>) : (<><span className="tdb-miniav">{c.initials}</span><b>{c.who || "—"}</b></>)}
-        </span>
-        <span className="tdb-lti">{ledgerTitle(c)}</span>
-        <span className="tdb-lms">{ms?.title ?? ""}</span>
-        <span className="tdb-lsd">{c.status ? <StatusDot status={c.status as QueryStatus} overrideSize={13} /> : null}</span>
-        <span className={`tdb-ldt${det.tone === "hot" ? " hot" : det.tone === "dim" ? " dim" : ""}`}>{det.label}</span>
-        <span className="tdb-lacts">
-          {!isOffer && <button type="button" title="Quick done" aria-label="Quick done" onClick={(e) => { e.stopPropagation(); quickDone(c); }}>✓</button>}
-          {!isOffer && <button type="button" title="Snooze / stop asking" aria-label="Snooze or stop asking" onClick={(e) => { e.stopPropagation(); quickPause(c); }}>⏸</button>}
-          {!isOffer && (
-            <button type="button" title="More" aria-label="More actions" aria-haspopup="menu" aria-expanded={kebabAt === c.key} onClick={(e) => { e.stopPropagation(); setKebabAt(kebabAt === c.key ? null : c.key); }}>⋯</button>
-          )}
-          {kebabAt === c.key && (
-            <>
-              <div className="tdb-kebback" onClick={(e) => { e.stopPropagation(); setKebabAt(null); }} />
-              <div className="tdb-kebab" role="menu" aria-label="Row actions" onClick={(e) => e.stopPropagation()}>
-                <button type="button" role="menuitem" onClick={() => kebabDismiss(c)}>Dismiss</button>
-                {c.relatedRecordId && !c.userTaskId && (
-                  <button type="button" role="menuitem" onClick={() => { setKebabAt(null); onNavigate("queries", c.relatedRecordId); }}>Open query</button>
-                )}
-                <button type="button" role="menuitem" onClick={() => { setKebabAt(null); setSettingsOpen(true); }}>Task settings</button>
-              </div>
-            </>
-          )}
-        </span>
+      <div key={c.key} className={`tdb-step ${fam}`} role="button" tabIndex={0}
+        onClick={() => openFlowCards([c])}
+        onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); openFlowCards([c]); } }}>
+        <span className="tdb-stepn" aria-hidden><span className="tdb-dotc" /></span>
+        <div className="tdb-stepbody">
+          <div className="tdb-tagline">
+            <span className={`tdb-tag due${isOffer ? " offer" : c.warn ? " warn" : ""}`}>{isOffer ? `★ ${c.due}` : c.due}</span>
+            {c.snoozes > 0 && <span className="tdb-tag snz">Snoozed ×{c.snoozes}</span>}
+            {committed && <span className="tdb-chipon">✓ TODAY</span>}
+          </div>
+          <h3 className="tdb-steptt">{c.title}</h3>
+          {c.subtitle && <div className="tdb-stepms">{subIsMs ? <span className="tdb-ms">{c.subtitle}</span> : c.subtitle}</div>}
+        </div>
+        <div className="tdb-stepacts" onClick={(e) => e.stopPropagation()}>
+          {!isOffer && <button type="button" className="tdb-verb pri" onClick={() => quickDone(c)}>✓ DONE</button>}
+          <button type="button" className="tdb-verb" onClick={() => toggleToday(c)}>{committed ? "− TODAY" : "＋ TODAY"}</button>
+          {laterMenu(c)}
+        </div>
       </div>
     );
   }
-  function ledgerBatchRow(g: HkGroup) {
-    const open = !!openBatches[g.rule];
-    const det = batchDetail(g, agents.length);
-    const faces = g.members.slice(0, 3);
-    const kids = open ? batchChildren(g, agents, taskFlags) : [];
-    const memberIds = new Set(g.members.map((m) => m.agentId).filter(Boolean));
-    const openAt = (agentId?: string) => {
-      if (!agentId || !memberIds.has(agentId)) { setFlow({ items: [{ kind: "group", group: g }] }); return; }
-      // deep-link: the SAME group flow, members reordered target-first (no FocusFlow change)
-      const members = [...g.members.filter((m) => m.agentId === agentId), ...g.members.filter((m) => m.agentId !== agentId)];
-      setFlow({ items: [{ kind: "group", group: { ...g, members } }] });
-    };
+  function runBatchRow(g: HkGroup) {
+    const key = `group-${g.rule}`;
+    const faces = g.members.slice(0, 4);
+    const copy = G3_COPY[g.rule] ?? { rest: () => ` ${g.meta.label.toLowerCase()}`, sub: "" };
+    const prog = hkGroupProgress(agents.length, g.members.length);
     return (
-      <React.Fragment key={g.rule}>
-        <div data-lkey={`group-${g.rule}`} className={`tdb-lrow batchp${open ? " open" : ""}${selVisible.includes(`group-${g.rule}`) ? " lsel-on" : ""}${ledgerOrder[kfocus] === `group-${g.rule}` ? " kfocus" : ""}`} onClick={() => toggleBatch(g.rule)}>
-          <span className="tdb-lselc" onClick={(e) => e.stopPropagation()}>
-            <input type="checkbox" className="tdb-lsel" checked={selVisible.includes(`group-${g.rule}`)} readOnly aria-label={`Select ${g.meta.label} (the whole batch)`} onClick={(e) => { e.stopPropagation(); clickSelect(`group-${g.rule}`, e.shiftKey); }} />
-          </span>
-          <span />
-          <span className="tdb-ltagcell">
-            <button type="button" className="tdb-lchev" aria-expanded={open} aria-label={`${open ? "Collapse" : "Expand"} ${g.meta.label}`} onClick={(e) => { e.stopPropagation(); toggleBatch(g.rule); }}>▶</button>
-            <span className="tdb-tag due">{g.meta.label.toUpperCase()}</span>
-          </span>
-          <span className="tdb-lagn">
-            <span className="tdb-lstack">{faces.map((m) => <span key={m.card.key} className="tdb-miniav">{m.card.initials}</span>)}</span>
-            <i>{g.members.length} AGENTS</i>
-          </span>
-          <span className="tdb-lti">{batchTaskCopy(g.rule)}</span>
-          <span className="tdb-lms" />
-          <span className="tdb-lsd" />
-          <span className="tdb-ldt"><span className="tdb-lbar" aria-hidden><i style={{ width: `${det.pct}%` }} /></span>{det.caption}</span>
-          <span className="tdb-lacts">
-            <button type="button" title="Batch fix" aria-label={`Batch fix — ${g.meta.label}`} onClick={(e) => { e.stopPropagation(); setFlow({ items: [{ kind: "group", group: g }] }); }}>→</button>
+      <div key={key} className="tdb-step lt" role="button" tabIndex={0}
+        onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}
+        onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); setFlow({ items: [{ kind: "group", group: g }] }); } }}>
+        <span className="tdb-stepn" aria-hidden><span className="tdb-dotc" /></span>
+        <div className="tdb-stepbody">
+          <div className="tdb-tagline"><span className="tdb-tag due">{g.meta.label.toUpperCase()}</span></div>
+          <h3 className="tdb-steptt batch"><b>{g.members.length}</b>{copy.rest(g.members.length)}</h3>
+          <div className="tdb-stepsub">{copy.sub}</div>
+          <div className="tdb-minibar"><i style={{ width: `${prog.pct}%` }} /></div>
+          <div className="tdb-mmeta">{prog.caption.toUpperCase()} · {prog.pct}%</div>
+          <div className="tdb-avs">
+            {faces.map((m) => <span key={m.card.key} title={m.agentName}>{m.card.initials}</span>)}
+            {g.members.length > faces.length && <i>+{g.members.length - faces.length}</i>}
+          </div>
+        </div>
+        <div className="tdb-stepacts" onClick={(e) => e.stopPropagation()}>
+          <button type="button" className="tdb-verb pri" onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}>⚡ FIX {g.members.length} →</button>
+          <span className="tdb-latwrap">
+            <button type="button" className="tdb-verb" aria-haspopup="menu" aria-expanded={laterKey === key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === key ? null : key)); }}>☾ LATER ▾</button>
+            {laterKey === key && (
+              <div className="tdb-latmenu" role="menu" aria-label="Later" onKeyDown={latMenuKeys}>
+                <button type="button" role="menuitem" onClick={(e) => { e.stopPropagation(); setLaterKey(null); snoozeGroup(g, 1, "tomorrow"); }}>Remind me tomorrow</button>
+                <button type="button" role="menuitem" onClick={(e) => { e.stopPropagation(); setLaterKey(null); snoozeGroup(g, 7, "in a week"); }}>Give it a week</button>
+                <button type="button" role="menuitem" className="warn" onClick={(e) => { e.stopPropagation(); setLaterKey(null); muteRuleFromCard(g); }}>Don’t show these again</button>
+              </div>
+            )}
           </span>
         </div>
-        {open && kids.map((k) => (
-          <div key={`${g.rule}-${k.agentId ?? k.name}`} className="tdb-lrow lchild">
-            <span /><span /><span />
-            <span className="tdb-lagn"><span className="tdb-miniav">{k.initials}</span><b>{k.name}</b>{k.agency && <i>· {k.agency.toUpperCase()}</i>}</span>
-            <span className={`tdb-lti${k.done ? " struck" : ""}`}>Add {g.meta.need === "mswl" ? "wish list" : g.meta.need === "materials" ? "materials" : "reply window"}</span>
-            <span className="tdb-lms" />
-            <span className="tdb-lsd" />
-            {/* grant 2: dated only where the flow stamped resolvedAt — never invented */}
-            <span className={`tdb-ldt${k.done ? " sage" : " dim"}`}>{k.done ? `✓ RECORDED${k.doneDate ? ` ${k.doneDate.toUpperCase()}` : ""}` : "NOT RECORDED"}</span>
-            <span className="tdb-lacts kid">
-              {!k.done && k.agentId && memberIds.has(k.agentId) && (
-                <button type="button" className="tdb-ladd" onClick={(e) => { e.stopPropagation(); openAt(k.agentId); }}>ADD →</button>
-              )}
-            </span>
-          </div>
-        ))}
-        {open && (
-          <div className="tdb-lchildmore">
-            <button type="button" onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}>OPEN BATCH FIX — WORK THROUGH ALL {g.members.length} →</button>
-          </div>
-        )}
-      </React.Fragment>
+      </div>
     );
   }
-  function ledgerSection(opts: { cls: "p" | "lat" | "n"; id: string; label: string; count: number; onSession?: () => void; onAdd?: () => void; children: React.ReactNode; total: number; hidden: number; showAllKey: string }) {
+  function runHeading(cls: "p" | "lat" | "n", id: string, label: string, count: number, onSession?: () => void, onAdd?: () => void) {
     return (
-      <div className="tdb-lsec" id={opts.id}>
-        {/* Deck v2 P4: the ledger shares the band-less lane heading (one grammar, both views) */}
-        <div className={`tdb-lh2 ${opts.cls}`}>
-          {opts.onSession && (
-            <button type="button" className="tdb-playb" title={`Focus on ${opts.label}`} aria-label={`Focus on ${opts.label}`} onClick={opts.onSession}>
-              <svg width="9" height="10" viewBox="0 0 11 12" aria-hidden><path d="M1.5 1.5 L9.5 6 L1.5 10.5 Z" fill="currentColor" /></svg>
-            </button>
-          )}
-          {opts.onAdd && <button type="button" className="tdb-cadd" onClick={opts.onAdd} aria-label="Add a note">＋</button>}
-          <span className="tdb-lgt">{opts.label}</span>
-          <span className="tdb-ln">{opts.count}</span>
-        </div>
-        <div className="tdb-tbl">
-        <div className="tdb-lcols" aria-hidden>
-          <span /><span /><span>TYPE</span><span>AGENT</span><span>TASK</span><span>MANUSCRIPT</span><span className="ctr">STATUS</span><span className="r sort">DETAIL ↓</span><span />
-        </div>
-        {opts.children}
-        {opts.hidden > 0 && (
-          <div className="tdb-lmore">
-            <button type="button" onClick={() => setShowAllSec((s) => ({ ...s, [opts.showAllKey]: true }))}>SHOW ALL {opts.total} →</button>
-          </div>
+      <div className={`tdb-lh2 ${cls}`} id={id}>
+        {onSession && (
+          <button type="button" className="tdb-playb" title={`Focus on ${label}`} aria-label={`Focus on ${label}`} onClick={onSession}>
+            <svg width="9" height="10" viewBox="0 0 11 12" aria-hidden><path d="M1.5 1.5 L9.5 6 L1.5 10.5 Z" fill="currentColor" /></svg>
+          </button>
         )}
-        </div>
+        {onAdd && <button type="button" className="tdb-cadd" onClick={onAdd} aria-label="Add a note">＋</button>}
+        <span className="tdb-lgt">{label}</span>
+        <span className="tdb-ln">{count}</span>
       </div>
     );
   }
   function renderLedger() {
-    // The review entry card is card-furniture (its own mode + dismiss ✕) — the scrap + cards view
-    // carry it; the ledger lists workable rows only. Row model hoisted above (P5 shares it).
     return (
-      <div className="tdb-ledger">
-        {doSorted.length > 0 && ledgerSection({
-          cls: "p", id: "tdb-lane-do", label: "Urgent", count: active ? doSorted.length : tiles.urgent,
-          onSession: () => setFlow({ items: doSorted.map((card) => ({ kind: "card", card })), mode: "sweep" }),
-          total: doSorted.length, hidden: doCut.hidden, showAllKey: "do",
-          children: doCut.visible.map(ledgerCardRow),
-        })}
-        {(vGroups.length > 0 || vStale.length > 0) && ledgerSection({
-          cls: "lat", id: "tdb-lane-hk", label: "Housekeeping", count: active ? hkGapCount(vGroups) + vStale.length : tiles.housekeeping,
-          onSession: () => setFlow({ items: [...vGroups.map((g) => ({ kind: "group" as const, group: g })), ...vStale.map((card) => ({ kind: "card" as const, card }))], mode: "sweep" }),
-          total: hkTop.length, hidden: hkCut.hidden, showAllKey: "hk",
-          children: hkCut.visible.map((r) => (r.kind === "group" ? ledgerBatchRow(r.g) : ledgerCardRow(r.c))),
-        })}
-        {vNt.length > 0 && ledgerSection({
-          cls: "n", id: "tdb-lane-nt", label: "Notes to self", count: active ? vNt.length : tiles.notes,
-          onAdd: addTask,
-          total: vNt.length, hidden: ntCut.hidden, showAllKey: "nt",
-          children: ntCut.visible.map(ledgerCardRow),
-        })}
+      <div className="tdb-runsheet">
+        {doSorted.length > 0 && (
+          <>
+            {runHeading("p", "tdb-lane-do", "Urgent", active ? doSorted.length : tiles.urgent, () => setFlow({ items: doSorted.map((card) => ({ kind: "card", card })), mode: "sweep" }))}
+            {doSorted.map(runRow)}
+          </>
+        )}
+        {(vGroups.length > 0 || vStale.length > 0) && (
+          <>
+            {runHeading("lat", "tdb-lane-hk", "Housekeeping", active ? hkGapCount(vGroups) + vStale.length : tiles.housekeeping, () => setFlow({ items: [...vGroups.map((g) => ({ kind: "group" as const, group: g })), ...vStale.map((card) => ({ kind: "card" as const, card }))], mode: "sweep" }))}
+            {hkTop.map((r) => (r.kind === "group" ? runBatchRow(r.g) : runRow(r.c)))}
+          </>
+        )}
+        {vNt.length > 0 && (
+          <>
+            {runHeading("n", "tdb-lane-nt", "Notes to self", active ? vNt.length : tiles.notes, undefined, addTask)}
+            {vNt.map(runRow)}
+          </>
+        )}
       </div>
     );
   }

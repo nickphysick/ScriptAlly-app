@@ -185,6 +185,11 @@
 .tdb-lh2 .tdb-ln { margin-bottom: 4px; }
 .tdb-lhfilt { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.1em; color: var(--muted); }
 .tdb-lhfilt button { border: none; background: none; padding: 0; font: inherit; color: #7c3a2a; font-weight: 700; cursor: pointer; }
+/* the lane-head PLAY BUTTON (28px, Final Shape scale) — full wording in title/aria */
+.tdb-playb { width: 28px; height: 28px; border-radius: 50%; background: var(--white, #fff); border: 1px solid rgba(58, 28, 20, 0.16); box-shadow: 0 1px 3px rgba(58, 28, 20, 0.12); display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; color: var(--ink); cursor: pointer; transition: transform 0.14s; }
+.tdb-playb:hover { transform: scale(1.06); }
+.tdb-playb svg { margin-left: 2px; }
+@media (prefers-reduced-motion: reduce) { .tdb-playb { transition: none; } .tdb-playb:hover { transform: none; } }
 .tdb-ln { font-family: var(--f12-mono); font-size: 8px; font-weight: 700; border-radius: 99px; padding: 2px 8px; background: var(--oat); border: 1px solid var(--line); color: var(--ink-2); }
 /* Polish v3 P3 — "Focused session" (Option C pill; replaces the ghost mono "SWEEP →"; the handler
    — the focus flow's sweep mode — is untouched). White pill + hairline; leading 20px pink disc
@@ -200,85 +205,36 @@
   .tdb-vwrap, .tdb-vinner, .tdb-tile, .tdb-gcard { transition: none; }
   .tdb-tile.hov, .tdb-gcard.hov { transform: none; }
 }
-/* ── THE LEDGER (workbench P3; ref todo-ledger-v1.html): white table card per section, tinted
-   head (pink/coffee/note — the note head is a flagged extension so notes aren't lost in this
-   view), the shared 9-col grid, 44px rows, batch children on the paper wash. The STATUS column
-   renders the real StatusDot (the ref's sdot circles were sketch stand-ins). ── */
-.tdb-ledger { display: flex; flex-direction: column; gap: var(--g24); }
-.tdb-tbl { background: var(--white, #fff); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
-.tdb-lsec { margin-bottom: var(--g24); }
-.tdb-lgt { font-family: var(--f12-serif); font-size: 16px; font-weight: 600; color: var(--ink); }
-/* VI P3 — the lane-head PLAY BUTTON (ref .playb): 32px white circle leading the title; the
-   Focus pill + lane dot are retired. Full wording lives in title/aria. */
-.tdb-playb { width: 28px; height: 28px; border-radius: 50%; background: var(--white, #fff); border: 1px solid rgba(58, 28, 20, 0.16); box-shadow: 0 1px 3px rgba(58, 28, 20, 0.12); display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; color: var(--ink); cursor: pointer; transition: transform 0.14s; }
-.tdb-playb:hover { transform: scale(1.06); }
-.tdb-playb svg { margin-left: 2px; }
-@media (prefers-reduced-motion: reduce) { .tdb-playb { transition: none; } .tdb-playb:hover { transform: none; } }
-.tdb-lgrid, .tdb-lcols, .tdb-lrow { display: grid; grid-template-columns: 34px 30px 132px 232px minmax(180px, 1fr) 152px 64px 150px 84px; align-items: center; }
-.tdb-lcols { padding: 6px 16px; border-bottom: 1px solid var(--line); background: var(--white, #fff); }
-.tdb-lcols span { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.13em; color: var(--faint); }
-.tdb-lcols .sort { color: var(--ink); font-weight: 600; }
-.tdb-lcols .r { justify-self: end; }
-.tdb-lcols .ctr { justify-self: center; }
-.tdb-lrow { padding: 0 16px; height: 44px; border-bottom: 1px solid var(--hairline); cursor: pointer; }
-.tdb-lrow:last-child { border-bottom: none; }
-.tdb-lrow:hover { background: var(--paper); }
-.tdb-ltd { width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--line); background: var(--white, #fff); display: flex; align-items: center; justify-content: center; font-size: 9px; color: transparent; padding: 0; }
-.tdb-ltd.on { background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border-color: var(--hk-spine); color: var(--hk-ink); }
-.tdb-lrow:hover .tdb-ltd { color: var(--hk-ink); }
-.tdb-lrow .tdb-tag { justify-self: start; }
-.tdb-lagn { display: flex; align-items: center; gap: 8px; min-width: 0; padding-right: 12px; }
-.tdb-lagn b { font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
-.tdb-lagn i { font-style: normal; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.05em; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tdb-lstack { display: flex; }
-.tdb-lstack .tdb-miniav { margin-left: -7px; border: 1.5px solid var(--white, #fff); }
-.tdb-lstack .tdb-miniav:first-child { margin-left: 0; }
-.tdb-lti { font-size: 13px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 16px; }
-.tdb-lti.struck { text-decoration: line-through; color: var(--muted); }
-.tdb-lms { font-family: var(--f12-serif); font-style: italic; font-size: 11.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 12px; }
-.tdb-lsd { justify-self: center; display: flex; align-items: center; }
-.tdb-ldt { font-family: var(--f12-mono); font-size: 8.5px; justify-self: end; color: var(--muted); font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 7px; white-space: nowrap; }
-.tdb-ldt.hot { color: var(--pink-deep); font-weight: 700; }
-.tdb-ldt.dim { color: var(--faint); }
-.tdb-ldt.sage { color: var(--hk-ink); }
-.tdb-lbar { width: 44px; height: 4px; background: var(--paper); border-radius: 2px; overflow: hidden; }
-.tdb-lbar i { display: block; height: 100%; background: linear-gradient(90deg, var(--hk-cof), var(--hk-cof-2)); }
-.tdb-lacts { justify-self: end; display: flex; gap: 4px; visibility: hidden; }
-.tdb-lrow:hover .tdb-lacts, .tdb-lrow:focus-within .tdb-lacts { visibility: visible; }
-.tdb-lacts button { width: 24px; height: 24px; border-radius: 7px; border: 1px solid var(--line); background: var(--white, #fff); font-size: 9.5px; color: var(--ink-2); }
-.tdb-lacts button:hover { border-color: var(--ink-2); }
-.tdb-lchev { width: 16px; height: 16px; border: none; background: none; color: var(--muted); font-size: 9px; padding: 0; margin-right: 2px; transition: transform 0.15s; }
-.batchp.open .tdb-lchev { transform: rotate(90deg); }
-@media (prefers-reduced-motion: reduce) { .tdb-lchev { transition: none; } }
-.tdb-ltagcell { display: flex; align-items: center; gap: 4px; }
-.tdb-lrow.lchild { background: var(--paper); height: 40px; cursor: default; }
-.tdb-lrow.lchild:hover { background: var(--hairline); }
-.tdb-lacts.kid { visibility: hidden; }
-.tdb-lrow.lchild:hover .tdb-lacts.kid { visibility: visible; }
-.tdb-ladd { font-family: var(--f12-mono); font-size: 8.5px; border: 1px solid var(--hk-cof-edge); background: var(--white, #fff); color: var(--hk-cof-ink); border-radius: 99px; padding: 3px 11px; width: auto !important; height: auto !important; }
-.tdb-lchildmore { background: var(--paper); border-bottom: 1px solid var(--hairline); display: flex; padding: 6px 16px 6px 112px; }
-.tdb-lchildmore button { border: none; background: none; font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.1em; color: var(--hk-cof-ink); border-bottom: 1px solid var(--hk-cof-edge); padding: 0; }
-.tdb-lmore { display: flex; justify-content: center; padding: 9px; border-top: 1px solid var(--hairline); }
-/* ── P5: selection · keyboard focus · bulk bar · kebab ── */
-.tdb-lselc { display: flex; align-items: center; }
-.tdb-lsel { width: 15px; height: 15px; border: 1px solid var(--line); border-radius: 4px; background: var(--white, #fff); visibility: hidden; accent-color: var(--hk-ink); cursor: pointer; }
-.tdb-lrow:hover .tdb-lsel, .tdb-lrow:focus-within .tdb-lsel, .tdb-lsel:checked, .tdb-lrow.lsel-on .tdb-lsel { visibility: visible; }
-.tdb-lrow.lsel-on { background: var(--paper); }
-.tdb-lrow.kfocus { outline: 2px solid var(--ink); outline-offset: -2px; border-radius: 2px; }
-.tdb-lrow { position: relative; }
-.tdb-lrow.kebab-open .tdb-lacts { visibility: visible; }
-.tdb-kebback { position: fixed; inset: 0; z-index: 44; }
-.tdb-kebab { position: absolute; top: calc(100% - 6px); right: 12px; z-index: 45; min-width: 140px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--sh-3); padding: 5px; }
-.tdb-kebab button { display: block; width: 100%; height: auto; text-align: left; font-size: 12px; padding: 7px 10px; border-radius: 7px; color: var(--ink); background: none; border: none; }
-.tdb-kebab button:hover { background: var(--white, #fff); }
-/* the ink bulk bar — floats bottom-centre while a selection lives (below modals, above content) */
-.tdb-bulk { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 55; background: var(--ink); color: var(--panel); border-radius: 99px; box-shadow: var(--sh-3); display: flex; align-items: center; gap: 6px; padding: 8px 10px 8px 18px; }
-.tdb-bulkn { font-family: var(--f12-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-right: 6px; }
-.tdb-bulk button { font-size: 11.5px; font-weight: 600; color: var(--panel); border: 1px solid rgba(255, 255, 255, 0.35); border-radius: 99px; padding: 5px 12px; background: none; white-space: nowrap; }
-.tdb-bulk button:hover { background: rgba(255, 255, 255, 0.14); }
-.tdb-bulk button.x { border: none; padding: 5px 8px; }
-.tdb-lmore button { border: none; background: none; font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.1em; color: var(--muted); border-bottom: 1px solid var(--line); padding: 0; }
-.tdb-lmore button:hover { color: var(--ink); }
+/* ── Final Shape P5: THE RUN SHEET (☰) — hairline-divided rows under the same sticky lane
+   headings. UNNUMBERED: the 26px family-tinted roundel (.tdb-stepn) carries the FAMILY DOT (the
+   pack overrides the ref's numerals). Verbs fade in place at the row's right on hover/focus —
+   nothing grows. ── */
+.tdb-runsheet { display: flex; flex-direction: column; }
+.tdb-step { position: relative; display: flex; gap: 14px; padding: 12px 4px; border-top: 1px solid var(--hairline); align-items: flex-start; border-radius: 8px; cursor: pointer; }
+.tdb-step:hover { background: var(--paper); }
+.tdb-step:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+.tdb-stepn { width: 26px; height: 26px; border-radius: 50%; background: var(--oat); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; flex: 0 0 auto; margin-top: 2px; }
+.tdb-stepn .tdb-dotc { width: 7px; height: 7px; border-radius: 50%; }
+.tdb-step.pk .tdb-stepn { background: linear-gradient(180deg, var(--pink-t), var(--pink-btn)); border-color: var(--pink-b); }
+.tdb-step.pk .tdb-stepn .tdb-dotc { background: var(--dot-p); }
+.tdb-step.lt .tdb-stepn { background: linear-gradient(180deg, var(--lat-1), var(--lat-2)); border-color: var(--lat-bd); }
+.tdb-step.lt .tdb-stepn .tdb-dotc { background: var(--dot-lat); }
+.tdb-step.yl .tdb-stepn { background: var(--note-t); border-color: var(--note-b); }
+.tdb-step.yl .tdb-stepn .tdb-dotc { background: var(--dot-y); }
+.tdb-stepbody { flex: 1; min-width: 0; }
+.tdb-tagline { display: flex; align-items: center; gap: 8px; margin-bottom: 3px; }
+.tdb-steptt { font-family: var(--f12-serif); font-size: 14px; font-weight: 600; line-height: 1.35; color: var(--ink); }
+.tdb-steptt.batch { font-weight: 700; }
+.tdb-steptt.batch b { font-size: 17px; font-weight: 700; }
+.tdb-stepms { font-family: var(--f12-serif); font-style: italic; font-size: 10px; color: var(--ink-2); margin-top: 2px; }
+.tdb-stepsub { font-size: 10.5px; color: var(--sub); line-height: 1.5; margin-top: 3px; }
+.tdb-minibar { height: 5px; border-radius: 3px; background: #ece5d8; margin-top: 8px; overflow: hidden; max-width: 320px; }
+.tdb-minibar i { display: block; height: 100%; background: var(--ink); }
+.tdb-mmeta { font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.1em; color: var(--faint); margin-top: 4px; }
+.tdb-stepacts { display: flex; gap: 5px; flex: 0 0 auto; align-items: center; opacity: 0.35; transition: opacity 0.15s; }
+.tdb-step:hover .tdb-stepacts, .tdb-step:focus-within .tdb-stepacts { opacity: 1; }
+.tdb-stepacts .tdb-verb { flex: none; padding: 6px 11px; }
+@media (prefers-reduced-motion: reduce) { .tdb-stepacts { transition: none; } }
 
 .tdb-emptyreel { display: flex; align-items: center; }
 .tdb-emptyreel .e { font-family: var(--f12-serif); font-style: italic; font-size: 14px; color: var(--muted); padding: 14px 4px; }
