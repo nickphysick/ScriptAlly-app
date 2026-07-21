@@ -37,7 +37,7 @@ import { ledgerTitle, ledgerDetail, sortLedgerDo, sortLedgerHk, batchChildren, b
 import focusArt from "../../assets/todo/focus-art.png";
 // VI P2 — the review cup (original ScriptAlly artwork; currentColor → inlined so it inherits ink)
 import reviewCupRaw from "../../assets/todo/review-cup.svg?raw";
-import { TodoFilterState, DEFAULT_FILTERS, filtersActive, matchesSearch, groupMatchesSearch, visibleDoCard, visibleStaleCard, visibleNoteCard, visibleGroup, filterCounts, soloFamily, isSoloed, isResting, togglePill, FilterType, PillFamily } from "../../lib/todoFilters";
+import { TodoFilterState, DEFAULT_FILTERS, filtersActive, matchesSearch, groupMatchesSearch, visibleDoCard, visibleStaleCard, visibleNoteCard, visibleGroup, filterCounts, isResting, togglePill, FilterType } from "../../lib/todoFilters";
 import { SelState, EMPTY_SEL, applySelectClick, moveFocus } from "../../lib/todoSelection";
 import { shouldAutoRunTour } from "../../lib/todoTour";
 import { TodoTour } from "./TodoTour";
@@ -211,24 +211,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // Deck v2 P5 — the compact break (<1420): the rail collapses to the 56px icon rail (assembly
   // 1172) and the deck's trailing pills fold into FILTER ▾.
   const [compact, setCompact] = useState<boolean>(() => typeof window !== "undefined" && window.matchMedia("(max-width: 1419.98px)").matches);
-  const [filterDropOpen, setFilterDropOpen] = useState(false);
+
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 1419.98px)");
     const on = () => setCompact(mq.matches);
     mq.addEventListener("change", on);
     return () => mq.removeEventListener("change", on);
   }, []);
-  useEffect(() => { if (!compact) setFilterDropOpen(false); }, [compact]);
-  useEffect(() => {
-    if (!filterDropOpen) return;
-    const onDown = (e: PointerEvent) => {
-      const t = e.target as HTMLElement | null;
-      if (t && t.closest(".tdb-fdropwrap")) return;
-      setFilterDropOpen(false);
-    };
-    document.addEventListener("pointerdown", onDown);
-    return () => document.removeEventListener("pointerdown", onDown);
-  }, [filterDropOpen]);
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 1239.98px)");
     const on = () => setNarrow(mq.matches);
@@ -403,6 +392,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const active = filtersActive(filters, search);
   const fc = filterCounts({ doCards: board.do, hkGroups, staleCards, ntCards: board.nt, committedCount: committedCards.length });
   const resting = isResting(filters);
+  // The Final Shape P1 — the hero's focused-session scope (whole board), hoisted from the rail
+  const boardCards = [...board.do, ...board.hk, ...board.nt];
   const vDo = board.do.filter((c) => visibleDoCard(c, filters, today) && matchesSearch(c, search, sctx));
   const vGroups = hkGroups.filter((g) => visibleGroup(g, filters) && groupMatchesSearch(g, search));
   const vStale = staleCards.filter((c) => visibleStaleCard(c, filters, today) && matchesSearch(c, search, sctx));
@@ -759,17 +750,29 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             every viewport, surplus pools as symmetric desk. The old full-bleed header band +
             .tdb-ribbon are RETIRED (the masthead is recomposed inside the column); Walk me
             through lives in the drawer now. ── */}
-        {/* ── Deck v2 P1: THE IDENTITY STRIP — full-bleed paper band; contents lock to the
-            centred assembly. Title block · 84×102 family post-its (filter solos) · the resident
-            review banner filling the remaining width. Scrolls away with the wrap. ── */}
-        {renderStrip()}
-        {/* ── Deck v2 P2: THE DECK — sticky white control bar under the app nav. Search | pills |
-            lens | spacer | view segment. No Focus, no ⚙ — the rail owns both (P3). ── */}
-        {renderDeck()}
+        {/* ── Final Shape P1: THE HERO — two objects only (Playfair 42 headline · ink Begin
+            focused session), paper full-bleed, contents locked to the assembly — and THE
+            FLOATING SEARCH breaking the hero's bottom edge by half its height. ── */}
+        {renderHero()}
         <div className="tdb-asm tdb-ws">
           {renderRail()}
           {/* THE SHEET — the white content panel holding BOTH views (width law v3) */}
           <div className="tdb-mainc">
+            {/* P1 transitional park: the resident review keeps a home while the strip dies;
+                P3 formalises it as the docband. Same boolean, same copy. */}
+            {reviewWin && (
+              <div className="tdb-rvhead">
+                <span className="tdb-rvcupb" aria-hidden dangerouslySetInnerHTML={{ __html: reviewCupRaw }} />
+                <div className="tdb-rvhx">
+                  <div className="tdb-rvk2">THE SUNDAY REVIEW · WEEK {reviewWin.weekNumber}</div>
+                  <b>Last week in review</b>
+                  <p>Every box ticked turns the dial in your favour.</p>
+                </div>
+                <button type="button" className={`tdb-rvopen${reviewOpened ? " ghost" : ""}`} onClick={openSundayReview}>
+                  {reviewOpened ? "View again" : "Open it ›"}
+                </button>
+              </div>
+            )}
         {/* ── the board — cards or ledger by the masthead toggle; the desk states (new-desk /
             desk-cleared) replace BOTH views. Copy verbatim from todo-empty-states.html. ── */}
         {desk === "new-desk" ? renderNewDesk() : desk === "desk-cleared" ? renderDeskCleared() : active && !anyVisible ? (
@@ -914,22 +917,21 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     );
   }
 
-  // ── Deck v2 P2: the deck — one pill builder (quiet law: resting plain · narrowed nar/dim ·
-  // zero-count 40%), counts from the board's own derivations (fc/tiles), the lens, the segment. ──
-  function deckPill(label: string, key: FilterType, count: number, dot: "p" | "lat" | "y") {
-    const on = filters[key];
-    const cls = resting ? "" : on ? " nar" : " dim";
+  // ── Final Shape P1: the hero + the floating search. The hero carries NOTHING else — no
+  // date, no counts, no post-its (the census lives on the rail's pill counts; focus-art.png is
+  // reserved for the focused session's opening screen, not this page). The search pill is the
+  // ⌘K home and live-filters both views; the narrow Today chip rides beside it. ──
+  function renderHero() {
     return (
-      <button type="button" className={`tdb-pt d-${dot}${cls}${count === 0 ? " z" : ""}`} aria-pressed={!resting && on} onClick={() => setFilters((f) => togglePill(f, key))}>
-        <span className="tdb-dotc" aria-hidden />{label} · {count}
-      </button>
-    );
-  }
-  function renderDeck() {
-    return (
-      <div className="tdb-deck">
-        <div className="tdb-asm tdb-deckrow">
-          <span className="tdb-ctl tdb-dsrch">
+      <>
+        <div className="tdb-hero">
+          <div className="tdb-asm tdb-herorow">
+            <h1 className="tdb-ask">What’s on your desk?</h1>
+            <button type="button" className="tdb-fsb" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>▶ Begin focused session</button>
+          </div>
+        </div>
+        <div className="tdb-srchrow">
+          <span className="tdb-bigsearch">
             <span aria-hidden>⌕</span>
             <input
               ref={searchRef}
@@ -942,88 +944,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             />
             <kbd aria-hidden>⌘K</kbd>
           </span>
-          <span className="tdb-vdiv" aria-hidden />
-          {deckPill("OFFERS", "offers", fc.offers, "p")}
-          {deckPill("AGENT WAITING", "overToYou", fc.overToYou, "p")}
-          {!compact ? (
-            <>
-              {deckPill("MATERIALS", "materials", fc.materials, "lat")}
-              {deckPill("WISH LISTS", "mswl", fc.mswl, "lat")}
-              {deckPill("STALE", "stale", fc.stale, "lat")}
-              {deckPill("SNOOZED", "snoozed", fc.snoozed, "lat")}
-              {deckPill("NOTES", "notes", fc.notes, "y")}
-            </>
-          ) : (
-            <span className="tdb-fdropwrap">
-              <button type="button" className="tdb-pt fdrop" aria-haspopup="menu" aria-expanded={filterDropOpen} onClick={() => setFilterDropOpen((v) => !v)}>FILTER ▾</button>
-              {filterDropOpen && (
-                <div className="tdb-fdrop" role="menu" aria-label="Filters">
-                  {deckPill("MATERIALS", "materials", fc.materials, "lat")}
-                  {deckPill("WISH LISTS", "mswl", fc.mswl, "lat")}
-                  {deckPill("STALE", "stale", fc.stale, "lat")}
-                  {deckPill("SNOOZED", "snoozed", fc.snoozed, "lat")}
-                  {deckPill("NOTES", "notes", fc.notes, "y")}
-                </div>
-              )}
-            </span>
-          )}
-          {!resting && (
-            <button type="button" className="tdb-rst" onClick={resetDeck}>SHOWING {shownX} OF {shownY} · RESET ✕</button>
-          )}
-          <span className="tdb-vdiv" aria-hidden />
-          <button type="button" className={`tdb-pt d-s lens${filters.todayOnly ? " nar" : ""}`} aria-pressed={filters.todayOnly} onClick={() => setF("todayOnly", !filters.todayOnly)}>
-            <span className="tdb-dotc" aria-hidden />TODAY’S LIST
-          </button>
-          <span className="tdb-dspc" />
-          <span className="tdb-ctl tdb-vseg" role="group" aria-label="View">
-            <button type="button" className={view === "cards" ? "on" : ""} aria-pressed={view === "cards"} onClick={() => pickView("cards")}>▦</button>
-            <button type="button" className={view === "ledger" ? "on" : ""} aria-pressed={view === "ledger"} onClick={() => pickView("ledger")}>☰</button>
-          </span>
-        </div>
-      </div>
-    );
-  }
-
-  // ── Deck v2 P1: the identity strip's contents (inside the centred assembly). The post-its are
-  // FILTER buttons now — each solos its family against the same TodoFilterState the deck pills
-  // drive (scroll-to-lane retired); pressed = the family is soloed; clicking again rests. The
-  // review banner is a permanent resident: no ✕, no windows — the button flips on the derived
-  // reviewOpened boolean. The narrow Today chip keeps its strip home (popover unchanged). ──
-  function soloPostit(fam: PillFamily) {
-    setFilters((f) => soloFamily(f, fam));
-  }
-  function renderStrip() {
-    return (
-      <div className="tdb-strip">
-        <div className="tdb-asm tdb-striprow">
-          <div className="tdb-tblock">
-            <div className="tdb-rdate">{shortHeaderDate(now)} · {weekOfQuerying(queries, new Date(now))}</div>
-            <h1 className="tdb-ask">What’s on your desk?</h1>
-          </div>
-          <span className="tdb-postits">
-            <button type="button" className={`tdb-postit ug${tiles.urgent === 0 ? " zero" : ""}`} aria-pressed={isSoloed(filters, "pink")} aria-label={`${tiles.urgent} urgent — show only urgent work`} onClick={() => soloPostit("pink")}>
-              <span className="tdb-pv" aria-hidden>{tiles.urgent}</span><span className="tdb-pk" aria-hidden>urgent</span>
-            </button>
-            <button type="button" className={`tdb-postit hk${tiles.housekeeping === 0 ? " zero" : ""}`} aria-pressed={isSoloed(filters, "latte")} aria-label={`${tiles.housekeeping} housekeeping — show only housekeeping`} onClick={() => soloPostit("latte")}>
-              <span className="tdb-pv" aria-hidden>{tiles.housekeeping}</span><span className="tdb-pk" aria-hidden>housekpg</span>
-            </button>
-            <button type="button" className={`tdb-postit nt${tiles.notes === 0 ? " zero" : ""}`} aria-pressed={isSoloed(filters, "yellow")} aria-label={`${tiles.notes} notes to self — show only notes`} onClick={() => soloPostit("yellow")}>
-              <span className="tdb-pv" aria-hidden>{tiles.notes}</span><span className="tdb-pk" aria-hidden>notes</span>
-            </button>
-          </span>
-          {reviewWin && (
-            <div className="tdb-rvhead">
-              <span className="tdb-rvcupb" aria-hidden dangerouslySetInnerHTML={{ __html: reviewCupRaw }} />
-              <div className="tdb-rvhx">
-                <div className="tdb-rvk2">THE SUNDAY REVIEW · WEEK {reviewWin.weekNumber}</div>
-                <b>Last week in review</b>
-                <p>Every box ticked turns the dial in your favour.</p>
-              </div>
-              <button type="button" className={`tdb-rvopen${reviewOpened ? " ghost" : ""}`} onClick={openSundayReview}>
-                {reviewOpened ? "View again" : "Open it ›"}
-              </button>
-            </div>
-          )}
           {narrow && (
             <span className="tdb-todaypopwrap">
               <button type="button" className="tdb-todaychip" aria-haspopup="dialog" aria-expanded={todayPopOpen} onClick={() => setTodayPopOpen((v) => !v)}>
@@ -1035,7 +955,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             </span>
           )}
         </div>
-      </div>
+      </>
     );
   }
 
@@ -1043,7 +963,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // square is the button). Focus mode (the guided walk, whole-board scope) · Task settings (the
   // existing sheet) · the Pro promo (plan-gated; CTA → the /plans upgrade surface). ──
   function renderRail() {
-    const boardCards = [...board.do, ...board.hk, ...board.nt];
     if (compact) {
       return (
         <aside className="tdb-lrail icon" aria-label="Workbench rail">

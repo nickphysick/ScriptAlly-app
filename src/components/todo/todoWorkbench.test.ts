@@ -92,40 +92,42 @@ describe("P1 — the corner retirement + the AppShell's one out-of-page line", (
   });
 });
 
-describe("P1 — masthead composition + the centred column", () => {
-  it("Deck v2: the IDENTITY STRIP — title block · 84×102 solo post-its · the resident banner", () => {
-    expect(page).toContain("{shortHeaderDate(now)} · {weekOfQuerying(queries, new Date(now))}");
-    expect(rule(".tdb-postit")).toContain("width: 84px; height: 102px");
-    expect(rule(".tdb-pv")).toContain("font-size: 30px");
-    expect(page).toContain('className="tdb-rvhead"');
-    const strip = page.slice(page.indexOf("function renderStrip"), page.indexOf("// ── Deck v2 P3: THE RAIL"));
-    expect(strip).not.toContain("Walk me through");
-    expect(strip).not.toContain("tdb-msrch"); // search belongs to the deck
+describe("Final Shape P1 — the hero + the floating search", () => {
+  it("the hero: two objects only — 42px headline + ink Begin focused session (whole-board scope)", () => {
+    expect(rule(".tdb-hero")).toContain("background: var(--paper)");
+    expect(page).toContain('<h1 className="tdb-ask">What’s on your desk?</h1>');
+    expect(rule(".tdb-ask")).toContain("font-size: 42px");
+    expect(page).toContain('className="tdb-fsb" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>▶ Begin focused session</button>');
+    expect(rule(".tdb-fsb")).toContain("height: 46px");
+    const hero = page.slice(page.indexOf("function renderHero"), page.indexOf("// ── Deck v2 P3: THE RAIL"));
+    expect(hero).not.toContain("rdate"); // no date
+    expect(hero).not.toContain("postit"); // no counts, no post-its
   });
-  it("type-scale: strip title 28px (v2), lane heads 16px", () => {
-    expect(rule(".tdb-ask")).toContain("font-size: 28px");
-    expect(rule(".tdb-lgt")).toContain("font-size: 16px"); // II·B P4: one head grammar, both views
+  it("the floating search: 540×46, centred, breaking the hero edge by half its height, own stacking context", () => {
+    const sr = rule(".tdb-srchrow");
+    expect(sr).toContain("margin: -23px 0 0");
+    expect(sr).toContain("z-index: 6");
+    const bs = rule(".tdb-bigsearch");
+    expect(bs).toContain("width: 540px");
+    expect(bs).toContain("height: 46px");
+    expect(page).toContain('placeholder="Search your desk…"');
+    expect(page).toContain("matchesSearch(c, search, sctx)"); // live-filters both views
   });
-  it("Width v3: the ASSEMBLY is a fixed centred width; band backgrounds full-bleed, contents lock to it", () => {
-    expect(rule(".tdb-asm")).toContain("width: var(--tdb-asm); margin: 0 auto;");
-    expect(rule(".tdb-strip")).toContain("background: var(--paper)");
-    expect(page).toContain('<div className="tdb-asm tdb-striprow">');
-  });
-  it("⌘K guards on visibility (the page stays mounted behind other routes); the input re-lands in the deck (P2)", () => {
+  it("⌘K guards on visibility (the page stays mounted behind other routes); Esc chain: search then filters", () => {
     expect(page).toContain("wrapRef.current.offsetParent === null");
-    expect(page).toContain("const [search, setSearch] = useState");
+    expect(page).toContain('if (search) { setSearch(""); return; }');
+    expect(page).toContain("if (!isResting(filtersRef.current) || filtersRef.current.todayOnly) setFilters(DEFAULT_FILTERS);");
   });
   it("view state persists under sa.todoView (default cards; P3 made the Ledger face live)", () => {
     expect(page).toContain('localStorage.getItem("sa.todoView")');
-    expect(page).toContain('=== "ledger" ? "ledger" : "cards"'); // cards is the fallback default
   });
-  it("the page-strip .tdb-band double-definition is resolved — one rule left, the card band's", () => {
-    const bands = css.match(/(?:^|\n)\.tdb-band \{[^}]*\}/g) ?? [];
-    expect(bands.length).toBe(1);
-    expect(bands[0]).toContain("min-height: 27px"); // the CARD header band (v2 contract), not a page strip
+  it("ZERO strip/deck/post-it remnants", () => {
+    for (const stale of ["tdb-strip", "tdb-striprow", "tdb-tblock", "tdb-postit", "tdb-pv", "tdb-pk", "soloPostit", "renderStrip", "tdb-deck", "tdb-deckrow", "tdb-ctl", "tdb-dsrch", "tdb-vdiv", "deckPill", "tdb-dspc", "renderDeck", "tdb-fdrop", "filterDropOpen"]) {
+      expect(page).not.toContain(stale);
+      expect(css).not.toContain(stale);
+    }
   });
 });
-
 describe("P2 — card view: the grid replaces the reels; renames land", () => {
   it("Deck v2 P4 — the EXACT-FIT reel: fixed 774 viewport, page-by-3, snap; reelFit + laneFit stay retired", () => {
     expect(rule(".tdb-reeltrack")).toContain("width: var(--tdb-vp)");
@@ -202,13 +204,9 @@ describe("P4 — search + filters (source locks; the matrix lives in todoFilters
     expect(page).toContain("{vNt.map(renderCard)}");
     expect(page).toContain("sortLedgerDo(vDo, lctx, now)"); // the ledger sorts the SAME set (review-free by construction)
   });
-  it("Deck v2 P2 — the DECK PILLS are the filter surface: exact copy, family dots, board-derived counts", () => {
-    for (const call of ['deckPill("OFFERS", "offers", fc.offers, "p")', 'deckPill("AGENT WAITING", "overToYou", fc.overToYou, "p")', 'deckPill("MATERIALS", "materials", fc.materials, "lat")', 'deckPill("WISH LISTS", "mswl", fc.mswl, "lat")', 'deckPill("STALE", "stale", fc.stale, "lat")', 'deckPill("SNOOZED", "snoozed", fc.snoozed, "lat")', 'deckPill("NOTES", "notes", fc.notes, "y")']) {
-      expect(page).toContain(call);
-    }
-    expect(page).toContain("aria-pressed={!resting && on}");
+  it("the filter derivations survive the deck's death (the rail consumes them in P2)", () => {
     expect(page).toContain("filterCounts({ doCards: board.do, hkGroups, staleCards, ntCards: board.nt, committedCount: committedCards.length })");
-    expect(page).not.toContain("★ OFFERS"); // the pill lost the star (LAWS); the card tag keeps it
+    expect(page).toContain("togglePill");
   });
   it("filtered-empty gets the quiet one-liner + clear action, NEVER a celebratory empty (branch order + lane skips)", () => {
     expect(page).toContain("active && !anyVisible ? (");
@@ -268,25 +266,20 @@ describe("P5 — selection · keyboard · bulk · kebab (source locks; the reduc
   });
 });
 
-describe("A1 → Deck v2 — the identity strip band (supersedes the masthead band)", () => {
-  it("a full-bleed paper band with the 1px base rule, ABOVE the work row; the mast* family is extinct", () => {
-    expect(rule(".tdb-strip")).toContain("background: var(--paper)");
-    expect(rule(".tdb-strip")).toContain("border-bottom: 1px solid var(--line)");
-    const band = page.indexOf("{renderStrip()}");
+describe("A1 → Final Shape — the hero band (supersedes the strip)", () => {
+  it("a full-bleed paper band with the 1px base rule, ABOVE the work row; the strip family is extinct", () => {
+    expect(rule(".tdb-hero")).toContain("background: var(--paper)");
+    expect(rule(".tdb-hero")).toContain("border-bottom: 1px solid var(--line)");
+    const band = page.indexOf("{renderHero()}");
     const ws = page.indexOf('className="tdb-asm tdb-ws"');
     expect(band).toBeGreaterThan(0);
     expect(band).toBeLessThan(ws);
-    for (const stale of ["tdb-mastband", "tdb-mastcol", "tdb-mastspacer", "renderMasthead"]) {
-      expect(page).not.toContain(stale);
-      expect(css).not.toContain(stale);
-    }
   });
-  it("the strip is not sticky (scrolls away); the flanking columns keep the scroll contract", () => {
-    expect(rule(".tdb-strip")).not.toContain("sticky");
-    expect(rule(".tdb-lrail, .tdb-railr")).toContain("position: sticky; top: var(--tdb-gutter)"); // the shared contract (P3: the rail)
+  it("the hero is not sticky (scrolls away); the flanking columns keep the scroll contract", () => {
+    expect(rule(".tdb-hero")).not.toContain("sticky");
+    expect(rule(".tdb-lrail, .tdb-railr")).toContain("position: sticky; top: var(--tdb-gutter)");
   });
 });
-
 describe("A2 — ledger copy + the avatar stack (source locks)", () => {
   it("the batch parent's TASK cell reads batchTaskCopy (one source); the tag stays the meta label", () => {
     expect(page).toContain('<span className="tdb-lti">{batchTaskCopy(g.rule)}</span>');
@@ -309,23 +302,13 @@ describe("II·B P1 — the 24-grid + the ref masthead (todo-workbench-rail-v1.ht
     expect(rule(".tdb-reeltrack")).toContain("gap: var(--g12)"); // III P2: the reel is the card-gutter consumer
     expect(rule(".tdb-ledger")).toContain("gap: var(--g24)");
   });
-  it("strip anatomy per the v2 ref: 84×102 tape-fold post-its (30px Playfair numerals), 12px tape", () => {
-    expect(rule(".tdb-postit::before")).toContain("width: 30px; height: 12px");
-    expect(rule(".tdb-pv")).toContain("font-family: var(--f12-serif); font-size: 30px");
-    expect(rule(".tdb-rdate")).toContain("font-size: 10px");
-  });
 });
 
 describe("III P3 — the pinned pair (supersedes the II·B controls-only drawer)", () => {
-  it("Deck v2 P2: the view segment + SHOWING/RESET live in the DECK; the old pill cloud is extinct", () => {
-    expect(page).toContain('className="tdb-ctl tdb-vseg" role="group" aria-label="View"');
+  it("Final Shape P1 (transitional): the deck is extinct; filters re-land on the rail (P2), the segment in the sheet corner (P3)", () => {
+    expect(page).not.toContain("renderDeck");
     expect(page).toContain("const shownX = vDo.length + hkGapCount(vGroups) + vStale.length + vNt.length;");
     expect(page).toContain("const shownY = tiles.urgent + tiles.housekeeping + tiles.notes;");
-    expect(page).toContain(">SHOWING {shownX} OF {shownY} · RESET ✕</button>");
-    expect(page).toContain('{!resting && (');
-    for (const stale of ["tdb-fp ", "fpill(", "tdb-fstatus", "tdb-fmid", "tdb-vtg", "tdb-freset", "tdb-fgrp2"]) {
-      expect(page).not.toContain(stale);
-    }
   });
   it("retired species stay retired; the Notes inline ＋ survives in BOTH views (the ledger's nt head gained it)", () => {
     for (const gone of ["YOUR DESK", "tdb-fgl", "tdb-frow", "tdb-cbi", "tdb-newnote", "tdb-dwalk"]) {
@@ -436,7 +419,6 @@ describe("Deck v2 P4 — the sheet · the exact-fit board · the rename", () => 
     expect(css).toContain("--lat-1: #f5efe6; --lat-2: #efe7d9; --lat-bd: #ddd0bc; --lat-mark: #cbb995; --lat-ink: #8a7048;");
     expect(rule(".tdb-band.hk")).toContain("var(--lat-1)");
     expect(rule(".tdb-lh2.lat .tdb-lgt::after")).toContain("var(--lat-mark)");
-    expect(rule(".tdb-postit.hk")).toContain("var(--lat-2)");
     const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");
     expect(flow).toContain("cof"); // the journey-sheet family keeps coffee
   });
@@ -445,56 +427,18 @@ describe("Deck v2 P4 — the sheet · the exact-fit board · the rename", () => 
     const needle = "over to " + "you"; // split so this lock never matches itself
     const out = execSync(`grep -ril '${needle}' ` + join(here, "..", "..") + " || true", { encoding: "utf8" }).trim();
     expect(out).toBe("");
-    expect(page).toContain('deckPill("AGENT WAITING", "overToYou", fc.overToYou, "p")');
+    const board = readFileSync(join(here, "..", "..", "lib", "todoBoard.ts"), "utf8");
+    expect(board).toContain('due: "AGENT WAITING"');
   });
 });
 
-describe("Deck v2 P2 — the deck (sticky control bar; todo-deck-v2.html)", () => {
-  it("the control law: 36px/white/hairline/99px controls, thin dividers; the deck sticks in the wrap", () => {
-    const ctl = rule(".tdb-ctl");
-    expect(ctl).toContain("height: 36px");
-    expect(ctl).toContain("border: 1px solid var(--line)");
-    expect(ctl).toContain("border-radius: 99px");
-    expect(rule(".tdb-vdiv")).toContain("width: 1px; height: 20px");
-    expect(rule(".tdb-deck")).toContain("position: sticky; top: 0;");
-    expect(rule(".tdb-deck")).toContain("background: var(--white, #fff)");
-  });
-  it("ABSENT by law: no Focus button, no ⚙ in the deck — the rail owns both", () => {
-    const deck = page.slice(page.indexOf("function renderDeck"), page.indexOf("function renderStrip"));
-    expect(deck).not.toContain("Focus");
-    expect(deck).not.toContain("⚙");
-    expect(deck).not.toContain("setSettingsOpen");
-    expect(deck).not.toContain("openFlowCards");
-  });
-  it("quiet pill law: resting plain · zero 40% · narrowed nar (pink-band burgundy 700) / dim; the dots", () => {
-    expect(rule(".tdb-pt")).toContain("height: 28px");
-    expect(rule(".tdb-pt.z")).toContain("opacity: 0.4");
-    expect(rule(".tdb-pt.dim")).toContain("opacity: 0.4");
-    const nar = rule(".tdb-pt.nar");
-    expect(nar).toContain("border-color: #7c3a2a");
-    expect(nar).toContain("linear-gradient(180deg, var(--pink-t), var(--pink-btn))");
-    expect(nar).toContain("font-weight: 700");
+describe("Final Shape — the deck is extinct (P1); the dots + reducer await the rail (P2)", () => {
+  it("no deck markup or styles; the family-dot tokens survive for the rail's pills", () => {
+    expect(page).not.toContain("tdb-deck");
+    expect(css).not.toContain("tdb-deck");
     expect(css).toContain("--dot-p: #e59b8f; --dot-lat: #cbb995; --dot-y: #d9c87a; --dot-s: #9db29a;");
-    expect(page).toContain('const cls = resting ? "" : on ? " nar" : " dim";');
-  });
-  it("search: 220px in the deck, ⌘K kbd, Esc clears + blurs; the Esc CHAIN clears search first, filters second", () => {
-    expect(rule(".tdb-dsrch")).toContain("width: 220px");
-    expect(page).toContain('placeholder="Search your desk…"');
-    expect(page).toContain('if (e.key === "Escape") { setSearch(""); (e.target as HTMLInputElement).blur(); }');
-    expect(page).toContain('if (search) { setSearch(""); return; }');
-    expect(page).toContain("if (!isResting(filtersRef.current) || filtersRef.current.todayOnly) setFilters(DEFAULT_FILTERS);");
-  });
-  it("RESET: burgundy SHOWING x OF y pill appears only when narrowed; clears filters AND search", () => {
-    expect(rule(".tdb-rst")).toContain("border: 1px solid #7c3a2a");
-    expect(page).toContain('const resetDeck = () => { setFilters(DEFAULT_FILTERS); setSearch(""); };');
-  });
-  it("the lens + the segment: TODAY'S LIST toggles the lens; ▦/☰ persists the existing view pref", () => {
-    expect(page).toContain('aria-pressed={filters.todayOnly} onClick={() => setF("todayOnly", !filters.todayOnly)}');
-    expect(page).toContain('onClick={() => pickView("cards")}>▦</button>');
-    expect(page).toContain('onClick={() => pickView("ledger")}>☰</button>');
   });
 });
-
 describe("Deck v2 P5 — retirement sweep · breakpoints · a11y", () => {
   it("GREP SWEEP — every mapped remnant is extinct in page + css", () => {
     const stale = [
@@ -512,20 +456,12 @@ describe("Deck v2 P5 — retirement sweep · breakpoints · a11y", () => {
       expect(css).not.toContain(t);
     }
   });
-  it("BREAKPOINTS: <1420 the 56px icon rail (assembly 1172) + FILTER ▾ fold; <1240 the strip popover", () => {
-    expect(css).toContain("@media (max-width: 1419.98px) { .tdb-wrap { --tdb-asm: 1172px; --tdb-rail: 56px; } }");
+  it("BREAKPOINTS (transitional): the icon rail survives until P6's drawer; <1240 the popover beside the search", () => {
     expect(page).toContain('window.matchMedia("(max-width: 1419.98px)")');
     expect(page).toContain('<aside className="tdb-lrail icon" aria-label="Workbench rail">');
-    expect(page).toContain('className="tdb-ric" title="Focus mode"');
-    expect(page).toContain('className="tdb-ric" title="Task settings"');
-    expect(page).toContain('title="ScriptAlly Pro — meet the assistant"');
-    expect(page).toContain('className="tdb-pt fdrop" aria-haspopup="menu" aria-expanded={filterDropOpen}');
-    expect(rule(".tdb-lrail.icon")).toContain("width: var(--tdb-rail)");
     expect(page).toContain('window.matchMedia("(max-width: 1239.98px)")');
   });
   it("A11Y: post-its/pills pressed; cards real buttons (Enter/Space, aria-expanded = the verb reveal)", () => {
-    expect(page).toContain('aria-pressed={isSoloed(filters, "pink")}');
-    expect(page).toContain("aria-pressed={!resting && on}");
     expect((page.match(/role="button" aria-expanded=\{hov\} tabIndex=\{0\}/g) ?? []).length).toBe(2);
     expect((page.match(/e\.key === "Enter" \|\| e\.key === " "/g) ?? []).length).toBe(2);
   });
@@ -538,30 +474,13 @@ describe("Deck v2 P5 — retirement sweep · breakpoints · a11y", () => {
   });
 });
 
-describe("Deck v2 P1 — the identity strip (todo-deck-v2.html)", () => {
-  it("strip composition: assembly row = title block · post-its · the resident banner · [narrow chip]", () => {
-    const strip = page.slice(page.indexOf("function renderStrip"), page.indexOf("// ── Deck v2 P3: THE RAIL"));
-    for (const piece of ["tdb-tblock", "tdb-postits", "tdb-rvhead", "tdb-todaypopwrap"]) {
-      expect(strip).toContain(piece);
-    }
-    expect(strip.indexOf("tdb-tblock")).toBeLessThan(strip.indexOf("tdb-postits"));
-    expect(strip.indexOf("tdb-postits")).toBeLessThan(strip.indexOf("tdb-rvhead"));
-  });
-  it("post-its are FILTER buttons soloing their family — same state as the deck pills; scroll-to-lane retired here", () => {
-    expect(page).toContain('onClick={() => soloPostit("pink")}');
-    expect(page).toContain('onClick={() => soloPostit("latte")}');
-    expect(page).toContain('onClick={() => soloPostit("yellow")}');
-    expect(page).toContain('aria-pressed={isSoloed(filters, "pink")}');
-    expect(page).toContain("setFilters((f) => soloFamily(f, fam));");
-    const strip = page.slice(page.indexOf("function renderStrip"), page.indexOf("// ── Deck v2 P3: THE RAIL"));
-    expect(strip).not.toContain("scrollToLane");
-  });
-  it("the latte family lands: post-it + tokens (coffee keeps only the journey-sheet headers)", () => {
+describe("Final Shape — the strip + post-its are extinct (P1); latte tokens stay", () => {
+  it("no strip markup/styles; the latte family survives for bands + the rail dots", () => {
+    expect(page).not.toContain("tdb-strip");
+    expect(css).not.toContain("tdb-postit");
     expect(css).toContain("--lat-1: #f5efe6; --lat-2: #efe7d9; --lat-bd: #ddd0bc; --lat-mark: #cbb995; --lat-ink: #8a7048;");
-    expect(css).toContain(".tdb-postit.hk { background: var(--lat-2);");
   });
 });
-
 describe("VI P1 — 'Today', always on (todo-right-column-v1.html)", () => {
   it("REGRESSION LOCK — no component-level const/let below the component's return (the TDZ dead zone)", () => {
     // The render helpers are declared BELOW the main return and survive only because function
@@ -587,7 +506,7 @@ describe("VI P1 — 'Today', always on (todo-right-column-v1.html)", () => {
       // (Deck v2 legalised the uppercase form: the lens pill + sage chip are named TODAY'S LIST)
     }
     expect(page).toContain('<b className="tdb-t">Today</b>');
-    expect(page).toContain(">TODAY’S LIST"); // the lens pill (deck, P2 — no tick per the LAWS)
+    expect(page).toContain(">✓ TODAY</span>"); // the committed chip; the lens pill re-lands on the rail (P2)
     expect(page).toContain('{committed ? "− TODAY" : "＋ TODAY"}'); // the verb row's Today toggle
   });
   it("the header's right slot: today's date when empty ⇄ '{n} OF 5' once anything is committed", () => {
@@ -672,7 +591,7 @@ describe("III P4 — the tucked Today tab · the masthead · the naming sweep", 
   it("THE NAMING SWEEP — no stale strings anywhere on the board or the sheets (grep-level)", () => {
     const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");
     const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
-    for (const stale of ["Begin focused session", "Walk me through", "Focused session", "walkSublabel", "walkAria"]) {
+    for (const stale of ["Walk me through", "walkSublabel", "walkAria"]) { // "Begin focused session" is REINSTATED as the hero's button (Final Shape)
       expect(page).not.toContain(stale);
       expect(flow).not.toContain(stale);
       expect(tour).not.toContain(stale);

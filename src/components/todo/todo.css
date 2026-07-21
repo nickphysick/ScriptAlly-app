@@ -31,36 +31,28 @@
 .tdb-mainc { width: var(--tdb-sheet); flex: 0 0 auto; box-sizing: border-box; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 16px; padding: 18px 18px 8px; }
 @media (max-width: 900px) { .tdb-ws { flex-wrap: wrap; } .tdb-ws .tdb-lrail { position: static; width: 100%; max-height: none; } .tdb-mainc { width: 100%; } }
 
-/* ── THE IDENTITY STRIP (Deck v2 P1) — full-bleed paper band, one base rule, NOT sticky; the
-   contents lock to the centred assembly. Title block · 84×102 family post-its (filter solos,
-   hover lift) · the resident review banner filling the remaining width (white card, uncircled
-   46px cup, button flipping Open it › ⇄ View again on the derived reviewOpened). The old
-   .tdb-band name stays the card band's alone. ── */
+/* ── THE HERO (Final Shape P1, THE LAWS v4) — two objects only: the 42px Playfair headline and
+   the ink Begin-focused-session button. Paper full-bleed, contents lock to the assembly. The
+   FLOATING SEARCH (540×46) centres on the assembly and breaks the hero's bottom edge by half
+   its height — its own stacking context above both surfaces. ── */
 .tdb-asm { width: var(--tdb-asm); margin: 0 auto; }
-.tdb-strip { background: var(--paper); border-bottom: 1px solid var(--line); padding: 18px 0; }
-.tdb-striprow { display: flex; align-items: center; gap: 26px; }
-.tdb-tblock { display: flex; flex-direction: column; gap: 5px; }
+.tdb-hero { background: var(--paper); border-bottom: 1px solid var(--line); }
+.tdb-herorow { display: flex; align-items: center; padding: 30px 0 26px; }
+.tdb-fsb { margin-left: auto; display: inline-flex; align-items: center; gap: 10px; background: var(--ink); color: var(--panel); border: 1px solid var(--ink); border-radius: 99px; padding: 0 24px; height: 46px; font-size: 13.5px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 14px rgba(58, 28, 20, 0.22); }
+.tdb-fsb:hover:not(:disabled) { filter: brightness(1.3); }
+.tdb-fsb:disabled { opacity: 0.5; }
+.tdb-srchrow { display: flex; justify-content: center; align-items: flex-start; gap: 12px; margin: -23px 0 0; position: relative; z-index: 6; }
+.tdb-bigsearch { width: 540px; height: 46px; box-sizing: border-box; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 99px; box-shadow: 0 10px 28px rgba(58, 28, 20, 0.16); display: flex; align-items: center; gap: 11px; padding: 0 20px; color: var(--muted); font-size: 13px; }
+.tdb-bigsearch input { flex: 1; min-width: 0; border: none; background: none; font-size: 13px; color: var(--ink); outline: none; }
+.tdb-bigsearch input::placeholder { color: var(--muted); }
+.tdb-bigsearch kbd { margin-left: auto; font-family: var(--f12-mono); font-size: 8.5px; border: 1px solid var(--line); border-radius: 5px; padding: 2px 6px; color: var(--faint); }
+.tdb-bigsearch:focus-within { border-color: var(--ink-2); }
 .tdb-rdate { font-family: var(--f12-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); }
-.tdb-ask { font-family: var(--f12-serif); font-size: 28px; font-weight: 600; color: var(--ink); white-space: nowrap; line-height: 1.08; } /* v2: 28 */
-/* post-it counts — Deck v2: 84×102 tape-fold FILTER buttons (30px Playfair numerals), families
-   pink / LATTE / yellow; each solos its family (aria-pressed = soloed). Hover lifts + straightens;
-   reduced-motion kills the transition. THE LATTE FAMILY (housekeeping's new face — coffee
-   survives only in journey-sheet headers): --lat-1/-2 bands · bd · mark (underline/dot) · ink. */
+.tdb-ask { font-family: var(--f12-serif); font-size: 42px; font-weight: 600; color: var(--ink); white-space: nowrap; line-height: 1.08; letter-spacing: -0.01em; } /* Final Shape: 42 */
+/* (the post-its retired — the census lives on the filter rail's pill counts) */
 .tdb-wrap { --lat-1: #f5efe6; --lat-2: #efe7d9; --lat-bd: #ddd0bc; --lat-mark: #cbb995; --lat-ink: #8a7048; }
 /* the quiet pills' family dots (THE LAWS) */
 .tdb-wrap { --dot-p: #e59b8f; --dot-lat: #cbb995; --dot-y: #d9c87a; --dot-s: #9db29a; }
-.tdb-postits { display: flex; gap: 14px; align-items: flex-start; }
-.tdb-postit { position: relative; width: 84px; height: 102px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; box-shadow: 0 4px 9px rgba(58, 28, 20, 0.17); flex: none; transition: 0.18s; cursor: pointer; border: none; }
-.tdb-postit::before { content: ""; position: absolute; top: -7px; left: 50%; transform: translateX(-50%); width: 30px; height: 12px; background: rgba(255, 255, 255, 0.55); }
-.tdb-pv { font-family: var(--f12-serif); font-size: 30px; font-weight: 600; line-height: 1; }
-.tdb-pk { font-family: var(--f12-mono); font-size: 7px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; opacity: 0.75; margin-top: 2px; }
-.tdb-postit.ug { background: var(--postit-pink); transform: rotate(-2.4deg); color: var(--pink-deep); }
-.tdb-postit.hk { background: var(--lat-2); transform: rotate(1.8deg); color: var(--lat-ink); }
-.tdb-postit.nt { background: var(--postit-note); transform: rotate(-1.2deg); color: #6b5a17; }
-.tdb-postit:hover, .tdb-postit:focus-visible { transform: rotate(0) translateY(-2px); box-shadow: 0 7px 14px rgba(58, 28, 20, 0.2); }
-.tdb-postit[aria-pressed="true"] { outline: 2px solid var(--ink); outline-offset: 2px; }
-.tdb-postit.zero .tdb-pv { opacity: 0.45; }
-@media (prefers-reduced-motion: reduce) { .tdb-postit { transition: none; } }
 
 /* ── masthead search + view toggle (Option B .msrch / .vtg) ── */
 /* (the search control re-lands in the DECK — P2; the masthead variant retired with the strip) */
@@ -101,10 +93,6 @@
 .tdb-ric:hover:not(:disabled) { border-color: var(--ink-2); }
 .tdb-ric:disabled { opacity: 0.45; }
 .tdb-ric.pro { background: linear-gradient(180deg, #eef2f6, #e6ecf2); border-color: #c8d4de; color: #5a7186; }
-/* FILTER ▾ — the folded trailing pills (<1420) */
-.tdb-fdropwrap { position: relative; flex: 0 0 auto; }
-.tdb-pt.fdrop { font-weight: 700; }
-.tdb-fdrop { position: absolute; top: calc(100% + 6px); left: 0; z-index: 40; display: flex; flex-direction: column; align-items: stretch; gap: 6px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 10px 26px rgba(58, 28, 20, 0.18); padding: 8px; }
 .tdb-dhelp { position: absolute; bottom: calc(100% + 4px); right: 0; z-index: 5; min-width: 150px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--sh-3); padding: 5px; }
 .tdb-dhelp button { display: block; width: 100%; text-align: left; font-size: 12px; padding: 7px 10px; border-radius: 7px; color: var(--ink); background: none; border: none; }
 .tdb-dhelp button:hover { background: var(--white, #fff); }
@@ -477,34 +465,8 @@
 .tdb-rvopen.ghost { background: var(--white, #fff); border-color: var(--line); color: var(--ink-2); }
 .tdb-rvopen.ghost:hover { filter: none; border-color: var(--ink-2); }
 
-/* ── THE DECK (Deck v2 P2) — sticky white control bar under the app nav; control law
-   36px/white/hairline/99px with thin dividers. Search | quiet pills | lens | spacer | ▦/☰.
-   No Focus, no ⚙ — the rail owns both. Quiet pill law: resting white/hairline/ink + 7px family
-   dot; zero-count 40%; narrowed = included pink-band burgundy 700, excluded dim, burgundy
-   SHOWING x OF y · RESET ✕. Esc clears search first, filters second. ── */
-.tdb-deck { position: sticky; top: 0; z-index: 30; background: var(--white, #fff); border-bottom: 1px solid var(--line); }
-.tdb-deckrow { display: flex; align-items: center; gap: 10px; padding: 10px 0; }
-.tdb-ctl { height: 36px; box-sizing: border-box; border: 1px solid var(--line); background: var(--white, #fff); border-radius: 99px; display: inline-flex; align-items: center; font-size: 11.5px; font-weight: 600; color: var(--ink-2); flex: 0 0 auto; }
-.tdb-dsrch { gap: 8px; padding: 0 14px; color: var(--muted); font-weight: 400; width: 220px; }
-.tdb-dsrch input { flex: 1; min-width: 0; border: none; background: none; font-size: 12.5px; color: var(--ink); outline: none; }
-.tdb-dsrch input::placeholder { color: var(--muted); }
-.tdb-dsrch kbd { font-family: var(--f12-mono); font-size: 8.5px; border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px; color: var(--faint); }
-.tdb-dsrch:focus-within { border-color: var(--ink-2); }
-.tdb-vdiv { width: 1px; height: 20px; background: var(--hairline); flex: 0 0 auto; }
-.tdb-pt { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.08em; height: 28px; box-sizing: border-box; display: inline-flex; align-items: center; gap: 6px; border-radius: 99px; padding: 0 11px; border: 1px solid var(--line); background: var(--white, #fff); color: var(--ink-2); flex: 0 0 auto; cursor: pointer; }
-.tdb-pt .tdb-dotc { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto; }
-.tdb-pt.d-p .tdb-dotc { background: var(--dot-p); }
-.tdb-pt.d-lat .tdb-dotc { background: var(--dot-lat); }
-.tdb-pt.d-y .tdb-dotc { background: var(--dot-y); }
-.tdb-pt.d-s .tdb-dotc { background: var(--dot-s); }
-.tdb-pt.z { opacity: 0.4; }
-.tdb-pt.dim { opacity: 0.4; }
-.tdb-pt.nar { border-color: #7c3a2a; color: #7c3a2a; background: linear-gradient(180deg, var(--pink-t), var(--pink-btn)); font-weight: 700; }
-.tdb-pt.nar .tdb-dotc { background: #7c3a2a; }
-.tdb-rst { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.08em; height: 28px; box-sizing: border-box; display: inline-flex; align-items: center; border-radius: 99px; padding: 0 11px; border: 1px solid #7c3a2a; color: #7c3a2a; background: var(--white, #fff); font-weight: 700; flex: 0 0 auto; cursor: pointer; }
-.tdb-vseg { padding: 3px; gap: 2px; }
-.tdb-vseg button { width: 32px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border-radius: 99px; font-size: 11px; color: var(--muted); border: none; background: none; }
-.tdb-vseg button.on { background: var(--ink); color: var(--panel); }
+/* (the deck retired — search floats over the hero; pills live on the filter rail; the view
+   segment sits in the sheet's corner row) */
 
 /* ── THE SUNDAY REVIEW (finishing P3; ref todo-sunday-review.html): the entry card (sage-spined,
    dismissible) + the six-step sheet's furniture — stats row, read-only rows with badges, the
