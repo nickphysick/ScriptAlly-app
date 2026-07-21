@@ -101,6 +101,26 @@ describe("P1 — the corner retirement + the AppShell's one out-of-page line", (
   });
 });
 
+describe("Final Shape P4 — the wrapped grid + sticky headings", () => {
+  it("the grid: repeat(3, cardw) + g12, ALL cards rendered (no truncation, no pagers)", () => {
+    expect(rule(".tdb-grid")).toContain("display: grid; grid-template-columns: repeat(3, var(--tdb-cardw)); gap: var(--g12)");
+    expect(page).toContain('<div className="tdb-grid">{children}</div>');
+    expect(page).not.toContain("tdb-reelpg");
+  });
+  it("the heading is sticky within the page scroll, sheet-backed, at the final scale (28/19/24×3)", () => {
+    const h = rule(".tdb-lh2");
+    expect(h).toContain("position: sticky; top: 0;");
+    expect(h).toContain("background: var(--white, #fff)");
+    expect(rule(".tdb-lh2 .tdb-lgt")).toContain("font-size: 19px");
+    expect(rule(".tdb-lh2 .tdb-lgt::after")).toContain("width: 24px; height: 3px");
+    expect(rule(".tdb-playb")).toContain("width: 28px; height: 28px");
+  });
+  it("the hover invariants hold (the hotfix suite re-asserts the cell/surface law)", () => {
+    expect(rule(".tdb-cell")).toContain("height: var(--tdb-cardh)");
+    expect(rule(".tdb-vwrap")).toContain("grid-template-rows: 0fr");
+  });
+});
+
 describe("Final Shape P3 — the sheet shell + the resident docband", () => {
   it("the corner row: derived mono meta (date · open · showing) left, the ▦/☰ segment right", () => {
     expect(page).toContain("{shortHeaderDate(now)} · {shownY} OPEN · SHOWING {shownX}");
@@ -164,13 +184,14 @@ describe("Final Shape P1 — the hero + the floating search", () => {
   });
 });
 describe("P2 — card view: the grid replaces the reels; renames land", () => {
-  it("Deck v2 P4 — the EXACT-FIT reel: fixed 774 viewport, page-by-3, snap; reelFit + laneFit stay retired", () => {
-    expect(rule(".tdb-reeltrack")).toContain("width: var(--tdb-vp)");
-    expect(rule(".tdb-reeltrack")).toContain("scroll-snap-type: x mandatory");
-    expect(page).toContain("const REEL_PAGE = 3 * (250 + 12);");
+  it("Final Shape P4 — THE WRAPPED GRID: 3 fixed columns, all cards, one scroll; reels/snap stay retired", () => {
+    expect(rule(".tdb-grid")).toContain("grid-template-columns: repeat(3, var(--tdb-cardw))");
+    expect(rule(".tdb-grid")).toContain("gap: var(--g12)");
+    expect(page).toContain('<div className="tdb-grid">{children}</div>');
     expect(page).not.toContain("reelFit");
     expect(page).not.toContain("laneFit");
-    expect(css).not.toContain("--reelw");
+    expect(page).not.toContain("REEL_PAGE");
+    expect(css).not.toContain("scroll-snap");
   });
   it("v2 anatomy: 27px band, 12.5px titles, content-sized cards, tighter body", () => {
     expect(rule(".tdb-band")).toContain("min-height: 27px");
@@ -334,7 +355,7 @@ describe("II·B P1 — the 24-grid + the ref masthead (todo-workbench-rail-v1.ht
     expect(rule(".tdb-fside, .tdb-railr")).toContain("top: var(--tdb-gutter)"); // the contract (gutter rides --g24)
     expect(rule(".tdb-reel")).toContain("margin-bottom: var(--g24)");
     expect(rule(".tdb-lh2")).toContain("margin: 0 0 16px"); // v2: 16px clear below the heading
-    expect(rule(".tdb-reeltrack")).toContain("gap: var(--g12)"); // III P2: the reel is the card-gutter consumer
+    expect(rule(".tdb-grid")).toContain("gap: var(--g12)"); // P4: the grid is the card-gutter consumer
     expect(rule(".tdb-ledger")).toContain("gap: var(--g24)");
   });
 });
@@ -432,14 +453,13 @@ describe("Deck v2 P4 — the sheet · the exact-fit board · the rename", () => 
     expect(mainc).toBeGreaterThan(0);
     expect(page.indexOf("renderLedger()")).toBeGreaterThan(0);
   });
-  it("exact fit: 774 = 3 × 250 + 2 × 12; cards never stretch; paging by three; pagers dim at the ends", () => {
-    expect(rule(".tdb-wrap")).toContain("--tdb-vp: 774px;");
-    expect(rule(".tdb-reeltrack")).toContain("width: var(--tdb-vp)");
-    expect(rule(".tdb-tile")).toContain("flex: 0 0 var(--tdb-cardw)");
-    expect(rule(".tdb-gcard")).toContain("flex: 0 0 var(--tdb-cardw)");
-    expect(page).toContain("const REEL_PAGE = 3 * (250 + 12);");
-    expect(rule(".tdb-pg:disabled")).toContain("opacity: 0.35");
-    expect(css).not.toContain("EdgeFade"); // no fades — exact fit forbids partials
+  it("the grid: identical 250px columns from the one token; cards never stretch; no pagers, no partials", () => {
+    expect(rule(".tdb-wrap")).toContain("--tdb-cardw: 250px;");
+    expect(rule(".tdb-grid")).toContain("repeat(3, var(--tdb-cardw))");
+    expect(rule(".tdb-tile")).toContain("flex: 0 0 var(--tdb-cardw)"); // the in-flow overlay faces keep the slot
+    expect(page).not.toContain("tdb-reelpg");
+    expect(page).not.toContain("tdb-reeltrack");
+    expect(css).not.toContain("tdb-pg ");
   });
   it("filtered lanes append x OF y · FILTERED · SHOW ALL (reset)", () => {
     expect(page).toContain("{filtered.x} OF {filtered.y} · FILTERED ·");
@@ -496,12 +516,11 @@ describe("Deck v2 P5 — retirement sweep · breakpoints · a11y", () => {
     expect((page.match(/role="button" aria-expanded=\{hov\} tabIndex=\{0\}/g) ?? []).length).toBe(2);
     expect((page.match(/e\.key === "Enter" \|\| e\.key === " "/g) ?? []).length).toBe(2);
   });
-  it("A11Y: the Later menu is arrow-navigable; focus reveals the verbs as hover does; pagers labelled", () => {
+  it("A11Y: the Later menu is arrow-navigable; focus reveals the verbs as hover does", () => {
     expect(page).toContain("function latMenuKeys(");
     expect(page).toContain('if (e.key === "ArrowDown")');
     expect((page.match(/onKeyDown=\{latMenuKeys\}/g) ?? []).length).toBe(2);
     expect((page.match(/onFocus=\{\(\) => armVerbs\(/g) ?? []).length).toBe(2);
-    expect(page).toContain("aria-label={`Previous ${label} cards`}");
   });
 });
 
@@ -571,14 +590,15 @@ describe("VI P3 — lane-head play buttons · help returns to the FAB", () => {
     expect(page).toContain('className="tdb-playb" title={`Focus on ${opts.label}`} aria-label={`Focus on ${opts.label}`} onClick={opts.onSession}');
     expect(page).toContain('<path d="M1.5 1.5 L9.5 6 L1.5 10.5 Z" fill="currentColor" />');
     const b = rule(".tdb-playb");
-    expect(b).toContain("width: 30px; height: 30px; border-radius: 50%"); // v2: 30
+    expect(b).toContain("width: 28px; height: 28px; border-radius: 50%"); // Final Shape: 28
     expect(b).toContain("border: 1px solid rgba(58, 28, 20, 0.16)");
     expect(css).toContain(".tdb-playb:hover { transform: scale(1.06); }");
     expect(css).not.toContain("tdb-lgs"); // the pill is extinct
     expect(css).not.toContain("tdb-lanedot"); // the lane dot went with it (ref head)
   });
-  it("the reel pagers ride the head's right edge", () => {
-    expect(rule(".tdb-reelpg")).toContain("margin-left: auto");
+  it("Final Shape P4: the pagers are extinct (the grid shows everything)", () => {
+    expect(page).not.toContain("tdb-pg");
+    expect(css).not.toContain("tdb-reelpg");
   });
   it("ONE help entry point: the AppShell FAB (menu on /todo) — none on the page itself", () => {
     for (const stale of ["tdb-dhelp", "helpOpen", "Help centre", "Replay the tour"]) {

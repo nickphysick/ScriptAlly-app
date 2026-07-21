@@ -103,31 +103,10 @@ const Lane: React.FC<{
   strip?: React.ReactNode; // rendered between the header and the grid (e.g. muted-rules recovery chips)
   children?: React.ReactNode;
 }> = ({ cls, label, count, isEmpty, onAdd, onFocusedSession, filtered, emptyNode, strip, children }) => {
-  // Deck v2 P4 — the one-row EXACT-FIT reel (width law v3): the viewport is a fixed 774
-  // (3 × 250 + 2 × 12); cards flex:0 0 250; snap paging BY THREE; no partial cards, no edge
-  // fades — the heading pagers + counts carry "there's more". The width-aware fit module is
-  // retired (nothing to fit). The heading is BAND-LESS: play button (30) · Playfair 20 title with the 25×3 family
-  // underline · count chip · [filtered append] · ‹ › pagers right (28px, dimmed at the ends).
-  const ref = useRef<HTMLDivElement>(null);
-  const [ends, setEnds] = useState({ left: false, right: false });
-  useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const check = () => {
-      setEnds((prev) => {
-        const max = el.scrollWidth - el.clientWidth;
-        const next = { left: el.scrollLeft > 4, right: el.scrollLeft < max - 4 };
-        return next.left === prev.left && next.right === prev.right ? prev : next;
-      });
-    };
-    check();
-    el.addEventListener("scroll", check, { passive: true });
-    const ro = new ResizeObserver(check);
-    ro.observe(el);
-    return () => { el.removeEventListener("scroll", check); ro.disconnect(); };
-  }, [children]);
-  const REEL_PAGE = 3 * (250 + 12); // three cards + their gutters — the snap page
-  const page = (dir: 1 | -1) => ref.current?.scrollBy({ left: dir * REEL_PAGE, behavior: "smooth" });
+  // Final Shape P4 — THE WRAPPED GRID: reels, pagers, snap and paging are retired. Three fixed
+  // 250px columns, every card visible, one vertical scroll. The band-less heading (play 28 ·
+  // Playfair 19 · 24×3 family underline · count chip) is STICKY within the page scroll, backed
+  // by the sheet's white so rows slide beneath cleanly. Notes keep ＋ instead of play.
   return (
   <div className={`tdb-reel ${cls}`} id={`tdb-lane-${cls}`}>
     <div className={`tdb-lh2 ${cls === "do" ? "p" : cls === "hk" ? "lat" : "n"}`}>
@@ -140,18 +119,12 @@ const Lane: React.FC<{
       <span className="tdb-lgt">{label}</span>
       <span className="tdb-ln">{count}</span>
       {filtered && <span className="tdb-lhfilt">{filtered.x} OF {filtered.y} · FILTERED · <button type="button" onClick={filtered.showAll}>SHOW ALL</button></span>}
-      {!isEmpty && (
-        <span className="tdb-reelpg">
-          <button type="button" className="tdb-pg" disabled={!ends.left} onClick={() => page(-1)} aria-label={`Previous ${label} cards`}>‹</button>
-          <button type="button" className="tdb-pg" disabled={!ends.right} onClick={() => page(1)} aria-label={`Next ${label} cards`}>›</button>
-        </span>
-      )}
     </div>
     {strip}
     {isEmpty ? (
       <div className="tdb-emptyreel">{emptyNode}</div>
     ) : (
-      <div className="tdb-reeltrack" ref={ref}>{children}</div>
+      <div className="tdb-grid">{children}</div>
     )}
   </div>
   );

@@ -176,37 +176,30 @@
    Playfair 20 title with the 25×3 family underline (pink / --lat-mark / note-yellow) · count
    chip · [x OF y · FILTERED · SHOW ALL] · ‹ › pagers right (28, dimmed at the ends). 16px clear
    below; the reel viewport carries the hover-lift padding. */
-.tdb-lh2 { display: flex; align-items: center; gap: 11px; margin: 0 0 16px; }
-.tdb-lh2 .tdb-lgt { position: relative; padding-bottom: 6px; font-size: 20px; }
-.tdb-lh2 .tdb-lgt::after { content: ""; position: absolute; left: 1px; bottom: 0; width: 25px; height: 3px; border-radius: 2px; }
+.tdb-lh2 { display: flex; align-items: center; gap: 11px; margin: 0 0 16px; position: sticky; top: 0; z-index: 10; background: var(--white, #fff); padding: 8px 4px 6px; }
+.tdb-lh2 .tdb-lgt { position: relative; padding-bottom: 5px; font-size: 19px; }
+.tdb-lh2 .tdb-lgt::after { content: ""; position: absolute; left: 1px; bottom: 0; width: 24px; height: 3px; border-radius: 2px; }
 .tdb-lh2.p .tdb-lgt::after { background: var(--pink-b); }
 .tdb-lh2.lat .tdb-lgt::after { background: var(--lat-mark); }
 .tdb-lh2.n .tdb-lgt::after { background: var(--note-b); }
 .tdb-lh2 .tdb-ln { margin-bottom: 4px; }
 .tdb-lhfilt { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.1em; color: var(--muted); }
 .tdb-lhfilt button { border: none; background: none; padding: 0; font: inherit; color: #7c3a2a; font-weight: 700; cursor: pointer; }
-.tdb-ln { font-family: var(--f12-mono); font-size: 8.5px; font-weight: 700; border-radius: 99px; padding: 1px 8px; background: var(--white, #fff); border: 1px solid var(--line); color: var(--ink-2); }
+.tdb-ln { font-family: var(--f12-mono); font-size: 8px; font-weight: 700; border-radius: 99px; padding: 2px 8px; background: var(--oat); border: 1px solid var(--line); color: var(--ink-2); }
 /* Polish v3 P3 — "Focused session" (Option C pill; replaces the ghost mono "SWEEP →"; the handler
    — the focus flow's sweep mode — is untouched). White pill + hairline; leading 20px pink disc
    (soft→deep gradient) carrying a solid ink play triangle, nudged 1px right for optical centring.
    Hover warms the border to the deeper pink and the fill to the warm paper near-white. */
 .tdb-cadd { font-size: 16px; color: var(--ink-2); padding: 0 4px; }
 .tdb-cadd:hover { color: var(--ink); }
-/* Deck v2 P4 — the EXACT-FIT reel (width law v3): viewport EXACTLY 774 = 3 × 250 + 2 × 12;
-   snap paging by three; no partials, no fades. 10px top padding = hover-lift room; the deep
-   bottom padding + negative margin contain the verb-row OVERLAY inside the scrollport (so the
-   reel never reflows and nothing clips) while the visual rhythm stays the 24-grid. */
-.tdb-reeltrack { width: var(--tdb-vp); display: flex; gap: var(--g12); padding: 10px 0 170px; margin-bottom: calc(-170px + 2px); overflow-x: auto; overflow-y: hidden; scrollbar-width: none; align-items: flex-start; scroll-snap-type: x mandatory; scroll-behavior: smooth; } /* the deep pad contains growth + the Later menu inside the scrollport */
-.tdb-reeltrack::-webkit-scrollbar { display: none; }
+/* Final Shape P4 — THE WRAPPED GRID (reels retired): three fixed 250px columns, every card
+   visible, one vertical scroll — no pagers, no partials, no snap, no scrollport clipping (the
+   hover overlay + Later menu overflow freely; the wrap is the only scroller). */
+.tdb-grid { display: grid; grid-template-columns: repeat(3, var(--tdb-cardw)); gap: var(--g12); padding: 6px 0 4px; }
 @media (prefers-reduced-motion: reduce) {
-  .tdb-reeltrack { scroll-behavior: auto; }
   .tdb-vwrap, .tdb-vinner, .tdb-tile, .tdb-gcard { transition: none; }
   .tdb-tile.hov, .tdb-gcard.hov { transform: none; }
 }
-.tdb-reelpg { display: inline-flex; gap: 5px; margin-left: auto; } /* VI P3: the head's right edge */
-.tdb-pg { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--white, #fff); border: 1px solid var(--line); color: var(--ink-2); font-size: 11px; box-shadow: 0 1px 3px rgba(58, 28, 20, 0.1); }
-.tdb-pg:hover:not(:disabled) { border-color: var(--ink-2); }
-.tdb-pg:disabled { opacity: 0.35; box-shadow: none; }
 /* ── THE LEDGER (workbench P3; ref todo-ledger-v1.html): white table card per section, tinted
    head (pink/coffee/note — the note head is a flagged extension so notes aren't lost in this
    view), the shared 9-col grid, 44px rows, batch children on the paper wash. The STATUS column
@@ -217,7 +210,7 @@
 .tdb-lgt { font-family: var(--f12-serif); font-size: 16px; font-weight: 600; color: var(--ink); }
 /* VI P3 — the lane-head PLAY BUTTON (ref .playb): 32px white circle leading the title; the
    Focus pill + lane dot are retired. Full wording lives in title/aria. */
-.tdb-playb { width: 30px; height: 30px; border-radius: 50%; background: var(--white, #fff); border: 1px solid rgba(58, 28, 20, 0.16); box-shadow: 0 1px 3px rgba(58, 28, 20, 0.12); display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; color: var(--ink); cursor: pointer; transition: transform 0.14s; }
+.tdb-playb { width: 28px; height: 28px; border-radius: 50%; background: var(--white, #fff); border: 1px solid rgba(58, 28, 20, 0.16); box-shadow: 0 1px 3px rgba(58, 28, 20, 0.12); display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; color: var(--ink); cursor: pointer; transition: transform 0.14s; }
 .tdb-playb:hover { transform: scale(1.06); }
 .tdb-playb svg { margin-left: 2px; }
 @media (prefers-reduced-motion: reduce) { .tdb-playb { transition: none; } .tdb-playb:hover { transform: none; } }
@@ -315,10 +308,10 @@
    collapsed by grid-template-rows 0fr ⇄ 1fr (180ms ease; the ~150ms hover intent is JS).
    Overlay faces (receipts/forks) render WITHOUT a cell and stay in-flow — the base rule keeps
    their flex slot. The rim/.tdb-frame wrapper survives only for those faces. */
-.tdb-cell { position: relative; flex: 0 0 var(--tdb-cardw); scroll-snap-align: start; height: var(--tdb-cardh); }
+.tdb-cell { position: relative; height: var(--tdb-cardh); } /* a grid item now — the column tracks size it */
 .tdb-cell.batch { height: var(--tdb-cardh-b); }
-.tdb-cell > .tdb-tile, .tdb-cell > .tdb-gcard { position: absolute; top: 0; left: 0; right: 0; flex: none; scroll-snap-align: unset; min-height: 100%; }
-.tdb-tile { position: relative; flex: 0 0 var(--tdb-cardw); scroll-snap-align: start; background: var(--white, #fff); border: 1px solid #d8cfc4; border-radius: 12px; box-shadow: 0 2px 6px rgba(58, 28, 20, 0.07); cursor: pointer; transition: box-shadow 0.18s ease, transform 0.18s ease; display: flex; flex-direction: column; }
+.tdb-cell > .tdb-tile, .tdb-cell > .tdb-gcard { position: absolute; top: 0; left: 0; right: 0; flex: none; min-height: 100%; }
+.tdb-tile { position: relative; flex: 0 0 var(--tdb-cardw); background: var(--white, #fff); border: 1px solid #d8cfc4; border-radius: 12px; box-shadow: 0 2px 6px rgba(58, 28, 20, 0.07); cursor: pointer; transition: box-shadow 0.18s ease, transform 0.18s ease; display: flex; flex-direction: column; }
 .tdb-tile.hov, .tdb-gcard.hov { box-shadow: 0 10px 26px rgba(58, 28, 20, 0.18); transform: translateY(-2px); z-index: 5; }
 /* the default ring dies; keyboard focus = a 2px ink outline riding the surface's radius */
 .tdb-tile:focus, .tdb-gcard:focus { outline: none; }
@@ -373,7 +366,7 @@
 /* ── G3 GROUPED CARD (retoken Phase C): mono kicker + sage dot · serif title with the inline
    numeral · two-line-clamped sub (fix pass) · sage progress bar + mono caption (real counts) · neutral monogram stack
    + ink-outline "Fix together →" (fills ink on hover) + the quiet Never (behaviour kept). ── */
-.tdb-gcard { position: relative; flex: 0 0 var(--tdb-cardw); scroll-snap-align: start; background: var(--white, #fff); border: 1px solid #d8cfc4; border-radius: 12px; box-shadow: 0 2px 6px rgba(58, 28, 20, 0.07); cursor: pointer; transition: box-shadow 0.18s ease, transform 0.18s ease; display: flex; flex-direction: column; } /* in-flow only for the cell-less fork face */
+.tdb-gcard { position: relative; flex: 0 0 var(--tdb-cardw); background: var(--white, #fff); border: 1px solid #d8cfc4; border-radius: 12px; box-shadow: 0 2px 6px rgba(58, 28, 20, 0.07); cursor: pointer; transition: box-shadow 0.18s ease, transform 0.18s ease; display: flex; flex-direction: column; } /* in-flow only for the cell-less fork face */
 .tdb-gtt { font-family: var(--f12-serif); font-size: 14.5px; font-weight: 700; line-height: 1.3; color: var(--ink); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .tdb-gn { font-size: 18px; font-weight: 700; }
 .tdb-gsub { font-size: 10px; color: var(--sub); margin-top: 5px; line-height: 1.5; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
