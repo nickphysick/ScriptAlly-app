@@ -49,7 +49,7 @@
 .tdb-bigsearch:focus-within { border-color: var(--ink-2); }
 .tdb-rdate { font-family: var(--f12-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); }
 .tdb-ask { font-family: var(--f12-serif); font-size: 42px; font-weight: 600; color: var(--ink); white-space: nowrap; line-height: 1.08; letter-spacing: -0.01em; } /* Final Shape: 42 */
-/* (the post-its retired — the census lives on the filter rail's pill counts) */
+/* (the strip census retired — the counts live on the filter rail's pills) */
 .tdb-wrap { --lat-1: #f5efe6; --lat-2: #efe7d9; --lat-bd: #ddd0bc; --lat-mark: #cbb995; --lat-ink: #8a7048; }
 /* the quiet pills' family dots (THE LAWS) */
 .tdb-wrap { --dot-p: #e59b8f; --dot-lat: #cbb995; --dot-y: #d9c87a; --dot-s: #9db29a; }
@@ -100,12 +100,13 @@
 .tdb-prosq b { display: block; font-family: var(--f12-serif); font-size: 14.5px; font-weight: 700; color: var(--ink); }
 .tdb-prosq p { font-size: 10px; color: #5d6b78; line-height: 1.5; margin-top: 3px; }
 .tdb-progo { margin-top: 9px; display: inline-flex; background: var(--ink); color: var(--panel); border-radius: 99px; padding: 5px 13px; font-size: 10px; font-weight: 600; }
-/* the 56px ICON RAIL (<1420, until P6's drawer) */
-.tdb-fside.icon { align-items: center; gap: 10px; padding: 10px 0; }
-.tdb-ric { width: 40px; height: 40px; border-radius: 50%; background: var(--white, #fff); border: 1px solid var(--line); box-shadow: 0 2px 8px rgba(58, 28, 20, 0.1); display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--ink); cursor: pointer; }
-.tdb-ric:hover:not(:disabled) { border-color: var(--ink-2); }
-.tdb-ric:disabled { opacity: 0.45; }
-.tdb-ric.pro { background: linear-gradient(180deg, #eef2f6, #e6ecf2); border-color: #c8d4de; color: #5a7186; }
+/* the FILTER DRAWER (<1428, P6): the rail's panel as a focus-trapped overlay behind the
+   ⚲ FILTER pill beside the floating search. */
+.tdb-fpillbtn { height: 46px; box-sizing: border-box; display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--white, #fff); border-radius: 99px; padding: 0 18px; font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.08em; font-weight: 700; color: var(--ink-2); cursor: pointer; box-shadow: 0 10px 28px rgba(58, 28, 20, 0.16); flex: 0 0 auto; }
+.tdb-fpillbtn:hover { border-color: var(--ink-2); }
+.tdb-fdrawer { position: fixed; inset: 0; z-index: 60; }
+.tdb-fdscrim { position: absolute; inset: 0; background: rgba(30, 26, 22, 0.35); }
+.tdb-fdpanel { position: absolute; top: 0; left: 0; bottom: 0; width: var(--tdb-rail); background: var(--white, #fff); border-right: 1px solid var(--line); box-shadow: 0 10px 34px rgba(58, 28, 20, 0.25); overflow-y: auto; padding-bottom: 12px; }
 
 /* ── TASK SETTINGS (task-settings pack; ref todo-task-settings-v2.html) — the ⚙ entry lives in
    the DRAWER FOOT now (workbench; the fixed corner button is retired). The sheet reuses the
@@ -171,7 +172,7 @@
    row sits straight on the oat; cards sit straight on the oat with the deeper desk shadow. Fades
    are RETIRED — exact-fit + snap + the header pagers own the overflow affordance. ── */
 .tdb-lanes { display: flex; flex-direction: column; }
-.tdb-reel { margin-bottom: var(--g24); }
+.tdb-lane { margin-bottom: var(--g24); }
 /* Deck v2 P4 — the BAND-LESS lane heading (ref .lh2), ONE grammar in both views: play (30) ·
    Playfair 20 title with the 25×3 family underline (pink / --lat-mark / note-yellow) · count
    chip · [x OF y · FILTERED · SHOW ALL] · ‹ › pagers right (28, dimmed at the ends). 16px clear
@@ -236,8 +237,8 @@
 .tdb-stepacts .tdb-verb { flex: none; padding: 6px 11px; }
 @media (prefers-reduced-motion: reduce) { .tdb-stepacts { transition: none; } }
 
-.tdb-emptyreel { display: flex; align-items: center; }
-.tdb-emptyreel .e { font-family: var(--f12-serif); font-style: italic; font-size: 14px; color: var(--muted); padding: 14px 4px; }
+.tdb-emptylane { display: flex; align-items: center; }
+.tdb-emptylane .e { font-family: var(--f12-serif); font-style: italic; font-size: 14px; color: var(--muted); padding: 14px 4px; }
 .tdb-ghostcard { width: 330px; min-height: 74px; border: 1.5px dashed var(--note-b); border-radius: 11px; display: flex; align-items: center; justify-content: center; gap: 10px; background: none; }
 .tdb-ghostcard:hover { background: rgba(255, 255, 255, 0.45); }
 .tdb-ge { font-family: var(--f12-serif); font-style: italic; font-size: 14px; color: var(--muted); }
@@ -353,8 +354,8 @@
    chip/popover below. Still the natural home for future companions; 12px stack gaps (ref .rcol). ── */
 .tdb-railr { width: var(--tdb-today); flex: 0 0 auto; gap: 14px; } /* 256 per width v3 */
 @media (max-width: 1239.98px) { .tdb-railr { display: none; } } /* belt — the mount is JS-gated */
-/* the compact break (P5): rail 56 + assembly 1172 = 56 + 24 + 812 + 24 + 256 */
-@media (max-width: 1419.98px) { .tdb-wrap { --tdb-asm: 1172px; --tdb-rail: 56px; } }
+/* the compact break (P6): the rail leaves the flow for the overlay drawer — assembly 1092 = 812 + 24 + 256 */
+@media (max-width: 1427.98px) { .tdb-wrap { --tdb-asm: 1092px; } }
 .tdb-todaypopwrap { position: relative; flex: none; }
 .tdb-todaychip { display: inline-flex; align-items: center; gap: 7px; font-family: var(--f12-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border: 1px solid var(--hk-spine); border-radius: 99px; padding: 8px 14px; color: var(--hk-ink); white-space: nowrap; }
 .tdb-todaychip:hover { filter: brightness(0.98); }

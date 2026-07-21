@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * todoTour — the pure layer of the first-visit spotlight tour (design ref:
- * Deck v2 P5 rewire — SIX stops over the definitive page: post-its → the resident review
- * banner → the deck pills → the rail's Focus square → a card (the hover verbs) → Today. The
- * last stop's button reads "Done" and ends the tour.
+ * Final Shape P6 rewire — SIX stops: the hero's Begin → the floating search → the rail's
+ * pills (or the ⚲ FILTER pill) → the review docband → a card's hover verbs → Today. The last
+ * stop's button reads "Done" and ends the tour.
  *
  * The seen flag is `User.tourSeenAt` (ISO timestamp) — the established additive user-doc pattern
  * (the Package Workshop's `hasSeenTour`), written through `updateUserProfile`; NEVER localStorage
@@ -24,36 +24,34 @@ export interface TourStop {
 
 export const TOUR_STOPS: TourStop[] = [
   {
-    sel: ".tdb-postits",
-    h: "Your desk, counted.",
-    p: "Three post-its, three kinds of work: pressing things, tidy-up jobs, and your own notes. Tap one to see only that pile — tap again for everything.",
+    sel: ".tdb-fsb",
+    h: "Say go, any time.",
+    p: "Begin a focused session — it walks your whole desk for you, one sheet at a time, no distractions.",
     cta: "Next →",
   },
   {
-    // Deck v2: the review banner is a strip resident — always here, never dismissed.
-    sel: ".tdb-rvhead",
+    sel: ".tdb-bigsearch",
+    h: "Search floats above it all.",
+    p: "One pill for both views — start typing and the desk narrows as you go. ⌘K from anywhere.",
+    cta: "Next →",
+  },
+  {
+    // the rail's pills ≥1428; the ⚲ FILTER pill fronting the drawer below
+    sel: ".tdb-fpill, .tdb-fpillbtn",
+    h: "Narrow the desk.",
+    p: "Quiet filters with live counts: click one to see only that kind of work. RESET brings everything back.",
+    cta: "Next →",
+  },
+  {
+    sel: ".tdb-docband",
     h: "Your week, reviewed.",
     p: "Last week\u2019s progress report lives here every day. Every box ticked turns the dial in your favour.",
     cta: "Next →",
   },
   {
-    // the deck's quiet pill rail (the first pill anchors the spotlight)
-    sel: ".tdb-pt",
-    h: "Narrow the desk.",
-    p: "Quiet filters: click one to see only that kind of work. RESET brings everything back.",
-    cta: "Next →",
-  },
-  {
-    // the rail's Focus square (or the icon rail's ▶ below 1420)
-    sel: ".tdb-lrail",
-    h: "Or just say go.",
-    p: "Focus mode walks your whole desk for you, one sheet at a time — no distractions.",
-    cta: "Next →",
-  },
-  {
-    sel: ".tdb-tile, .tdb-gcard",
+    sel: ".tdb-tile, .tdb-gcard, .tdb-step",
     h: "Every card works the same.",
-    p: "Click a card to open it. Hover for the quick verbs — done, Today, or later.",
+    p: "Click to open it. Hover for the quick verbs — done, Today, or later.",
     cta: "Next →",
   },
   {

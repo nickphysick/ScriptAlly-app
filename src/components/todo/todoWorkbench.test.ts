@@ -101,6 +101,29 @@ describe("P1 — the corner retirement + the AppShell's one out-of-page line", (
   });
 });
 
+describe("Final Shape P6 — remnant sweep · a11y", () => {
+  it("GREP SWEEP — strip/deck/post-it/reel/ledger-table/selection remnants all extinct", () => {
+    const stale = [
+      "post-it", "postit", "tdb-strip", "tdb-deck", "deckPill", "tdb-reel", "reelFit", "REEL_PAGE",
+      "tdb-pg", "tdb-lgrid", "tdb-lrow", "tdb-ltd", "tdb-bulk", "todoSelection", "tdb-ric",
+      "tdb-sq", "tdb-lrail", "renderStrip", "renderDeck", "soloPostit", "scroll-snap",
+    ];
+    for (const t of stale) {
+      expect(page).not.toContain(t);
+      expect(css).not.toContain(t);
+    }
+  });
+  it("A11Y: the drawer is focus-trapped (Tab cycles, Esc closes, scrim click closes); one panel, two mounts", () => {
+    expect(page).toContain('if (e.key === "Escape") { e.stopPropagation(); setFilterDrawerOpen(false); return; }');
+    expect(page).toContain("if (e.shiftKey && document.activeElement === first)");
+    expect(page).toContain('className="tdb-fdscrim" onClick={() => setFilterDrawerOpen(false)}');
+    expect((page.match(/\{renderFilterPanel\(\)\}/g) ?? []).length).toBe(2);
+  });
+  it("A11Y: sticky headings are single elements (no aria-hidden duplicates to manage)", () => {
+    expect((page.match(/className=\{`tdb-lh2 /g) ?? []).length).toBe(2); // the Lane + runHeading builders
+  });
+});
+
 describe("Final Shape P4 — the wrapped grid + sticky headings", () => {
   it("the grid: repeat(3, cardw) + g12, ALL cards rendered (no truncation, no pagers)", () => {
     expect(rule(".tdb-grid")).toContain("display: grid; grid-template-columns: repeat(3, var(--tdb-cardw)); gap: var(--g12)");
@@ -314,7 +337,7 @@ describe("II·B P1 — the 24-grid + the ref masthead (todo-workbench-rail-v1.ht
     expect(rule(".tdb-ws")).toContain("gap: var(--g24)");
     expect(rule(".tdb-ws")).toContain("padding: 22px 0 26px"); // the assembly work row (v2)
     expect(rule(".tdb-fside, .tdb-railr")).toContain("top: var(--tdb-gutter)"); // the contract (gutter rides --g24)
-    expect(rule(".tdb-reel")).toContain("margin-bottom: var(--g24)");
+    expect(rule(".tdb-lane")).toContain("margin-bottom: var(--g24)"); // P6 rename: reel classes extinct
     expect(rule(".tdb-lh2")).toContain("margin: 0 0 16px"); // v2: 16px clear below the heading
     expect(rule(".tdb-grid")).toContain("gap: var(--g12)"); // P4: the grid is the card-gutter consumer
   });
@@ -467,10 +490,15 @@ describe("Deck v2 P5 — retirement sweep · breakpoints · a11y", () => {
       expect(css).not.toContain(t);
     }
   });
-  it("BREAKPOINTS (transitional): the icon rail survives until P6's drawer; <1240 the popover beside the search", () => {
-    expect(page).toContain('window.matchMedia("(max-width: 1419.98px)")');
-    expect(page).toContain('<aside className="tdb-fside icon" aria-label="Workbench rail">');
+  it("BREAKPOINTS (P6 final): <1428 the rail is an overlay drawer behind ⚲ FILTER beside the search; <1240 the Today popover", () => {
+    expect(page).toContain('window.matchMedia("(max-width: 1427.98px)")');
+    expect(css).toContain("@media (max-width: 1427.98px) { .tdb-wrap { --tdb-asm: 1092px; } }");
+    expect(page).toContain("⚲ FILTER · {shownX}/{shownY}"); // (multi-line JSX — no leading >)
+    expect(page).toContain('className="tdb-fdrawer" role="dialog" aria-modal="true" aria-label="Filters"');
+    expect(page).toContain("{renderFilterPanel()}");
+    expect((page.match(/\{renderFilterPanel\(\)\}/g) ?? []).length).toBe(2); // aside + drawer, one panel
     expect(page).toContain('window.matchMedia("(max-width: 1239.98px)")');
+    expect(page).not.toContain("tdb-ric"); // the icon rail is extinct
   });
   it("A11Y: post-its/pills pressed; cards real buttons (Enter/Space, aria-expanded = the verb reveal)", () => {
     expect((page.match(/role="button"/g) ?? []).length).toBeGreaterThanOrEqual(4); // cards + run rows
@@ -609,6 +637,6 @@ describe("III P4 — the tucked Today tab · the masthead · the naming sweep", 
     }
     expect(page).toMatch(/aria-label=\{`Focus on \$\{label\}`\}/); // cards view (the play button)
     expect(page).toMatch(/onClick=\{onSession\}/); // the run sheet's heading shares the wording
-    expect(page).toContain('title="Focus mode"'); // the icon rail keeps the name until P6
+    expect(page).toContain(">▶ Begin focused session</button>"); // the hero owns the walk
   });
 });

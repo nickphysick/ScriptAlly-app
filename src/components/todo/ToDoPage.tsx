@@ -88,7 +88,7 @@ type Overlay =
 
 /** One board SECTION (workbench P2 — the horizontal reels are RETIRED): coloured header row over a
  *  wrapping auto-fill card grid. No scroll machinery — the page scrolls, the grid wraps. The
- *  `tdb-reel` wrapper class name is kept (historical); the head is the shared tinted band (II·B P4). */
+ *  Final Shape: the section wrapper is `tdb-lane`; the sticky heading is the shared lh2 grammar. */
 const Lane: React.FC<{
   cls: string;
   label: string;
@@ -107,7 +107,7 @@ const Lane: React.FC<{
   // Playfair 19 · 24×3 family underline · count chip) is STICKY within the page scroll, backed
   // by the sheet's white so rows slide beneath cleanly. Notes keep ＋ instead of play.
   return (
-  <div className={`tdb-reel ${cls}`} id={`tdb-lane-${cls}`}>
+  <div className={`tdb-lane ${cls}`} id={`tdb-lane-${cls}`}>
     <div className={`tdb-lh2 ${cls === "do" ? "p" : cls === "hk" ? "lat" : "n"}`}>
       {onFocusedSession && !isEmpty && (
         <button type="button" className="tdb-playb" title={`Focus on ${label}`} aria-label={`Focus on ${label}`} onClick={onFocusedSession}>
@@ -121,7 +121,7 @@ const Lane: React.FC<{
     </div>
     {strip}
     {isEmpty ? (
-      <div className="tdb-emptyreel">{emptyNode}</div>
+      <div className="tdb-emptylane">{emptyNode}</div>
     ) : (
       <div className="tdb-grid">{children}</div>
     )}
@@ -174,16 +174,37 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // exactly one mounts and the state never forks (halt (c) clear).
   const [narrow, setNarrow] = useState<boolean>(() => typeof window !== "undefined" && window.matchMedia("(max-width: 1239.98px)").matches);
   const [todayPopOpen, setTodayPopOpen] = useState(false);
-  // Deck v2 P5 — the compact break (<1420): the rail collapses to the 56px icon rail (assembly
-  // 1172) and the deck's trailing pills fold into FILTER ▾.
-  const [compact, setCompact] = useState<boolean>(() => typeof window !== "undefined" && window.matchMedia("(max-width: 1419.98px)").matches);
+  // Final Shape P6 — the compact break (<1428): the rail becomes an OVERLAY DRAWER behind the
+  // ⚲ FILTER pill beside the floating search (focus-trapped; Esc/scrim closes).
+  const [compact, setCompact] = useState<boolean>(() => typeof window !== "undefined" && window.matchMedia("(max-width: 1427.98px)").matches);
 
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+  const drawerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const mq = window.matchMedia("(max-width: 1419.98px)");
+    const mq = window.matchMedia("(max-width: 1427.98px)");
     const on = () => setCompact(mq.matches);
     mq.addEventListener("change", on);
     return () => mq.removeEventListener("change", on);
   }, []);
+  useEffect(() => { if (!compact) setFilterDrawerOpen(false); }, [compact]);
+  // the drawer's focus trap + Esc (P6 a11y): Tab cycles inside the panel; Esc/scrim closes
+  useEffect(() => {
+    if (!filterDrawerOpen) return;
+    const panel = drawerRef.current;
+    panel?.querySelector<HTMLElement>("button, [tabindex]")?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { e.stopPropagation(); setFilterDrawerOpen(false); return; }
+      if (e.key !== "Tab" || !panel) return;
+      const focusables = Array.from(panel.querySelectorAll<HTMLElement>("button, [href], input, [tabindex]:not([tabindex='-1'])"));
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [filterDrawerOpen]);
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 1239.98px)");
     const on = () => setNarrow(mq.matches);
@@ -591,6 +612,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             focused session), paper full-bleed, contents locked to the assembly — and THE
             FLOATING SEARCH breaking the hero's bottom edge by half its height. ── */}
         {renderHero()}
+        {renderFilterDrawer()}
         <div className="tdb-asm tdb-ws">
           {renderRail()}
           {/* THE SHEET — the white content panel holding BOTH views (width law v3) */}
@@ -754,7 +776,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   }
 
   // ── Final Shape P1: the hero + the floating search. The hero carries NOTHING else — no
-  // date, no counts, no post-its (the census lives on the rail's pill counts; focus-art.png is
+  // date, no counts, no census squares (the counts live on the rail's pills; focus-art.png is
   // reserved for the focused session's opening screen, not this page). The search pill is the
   // ⌘K home and live-filters both views; the narrow Today chip rides beside it. ──
   function renderHero() {
@@ -780,6 +802,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             />
             <kbd aria-hidden>⌘K</kbd>
           </span>
+          {compact && (
+            <button type="button" className="tdb-fpillbtn" aria-haspopup="dialog" aria-expanded={filterDrawerOpen} onClick={() => setFilterDrawerOpen((v) => !v)}>
+              ⚲ FILTER · {shownX}/{shownY}
+            </button>
+          )}
           {narrow && (
             <span className="tdb-todaypopwrap">
               <button type="button" className="tdb-todaychip" aria-haspopup="dialog" aria-expanded={todayPopOpen} onClick={() => setTodayPopOpen((v) => !v)}>
@@ -809,20 +836,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       </button>
     );
   }
-  function renderRail() {
-    if (compact) {
-      return (
-        <aside className="tdb-fside icon" aria-label="Workbench rail">
-          <button type="button" className="tdb-ric" title="Focus mode" aria-label="Focus mode" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>▶</button>
-          <button type="button" className="tdb-ric" title="Task settings" aria-label="Task settings" onClick={() => setSettingsOpen(true)}>⚙</button>
-          {!isProUser(currentUser) && (
-            <button type="button" className="tdb-ric pro" title="ScriptAlly Pro — meet the assistant" aria-label="ScriptAlly Pro — meet the assistant" onClick={() => onNavigate("plans")}>✦</button>
-          )}
-        </aside>
-      );
-    }
+  function renderFilterPanel() {
     return (
-      <aside className="tdb-fside" aria-label="Filters">
+      <>
         <div className="tdb-fsec">SHOW</div>
         {!resting && (
           <button type="button" className="tdb-frst" onClick={resetDeck}>SHOWING {shownX} OF {shownY} · RESET</button>
@@ -851,7 +867,26 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             </button>
           )}
         </div>
+      </>
+    );
+  }
+  function renderRail() {
+    if (compact) return null; // <1428 the rail lives in the overlay drawer (the ⚲ FILTER pill)
+    return (
+      <aside className="tdb-fside" aria-label="Filters">
+        {renderFilterPanel()}
       </aside>
+    );
+  }
+  function renderFilterDrawer() {
+    if (!compact || !filterDrawerOpen) return null;
+    return (
+      <div className="tdb-fdrawer" role="dialog" aria-modal="true" aria-label="Filters">
+        <div className="tdb-fdscrim" onClick={() => setFilterDrawerOpen(false)} />
+        <div className="tdb-fdpanel" ref={drawerRef}>
+          {renderFilterPanel()}
+        </div>
+      </div>
     );
   }
 
