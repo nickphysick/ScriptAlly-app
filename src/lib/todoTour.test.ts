@@ -11,7 +11,7 @@ import { TOUR_STOPS, shouldAutoRunTour } from "./todoTour";
 describe("TOUR_STOPS — six stops (Final Shape rewire), Done on the last", () => {
   it("is exactly the six stops in order: hero → search → pills → docband → a card → Today", () => {
     expect(TOUR_STOPS.map((s) => s.sel)).toEqual([
-      ".tdb-fsb",
+      ".tdb-fsb2",
       ".tdb-bigsearch",
       ".tdb-fpill, .tdb-fpillbtn",
       ".tdb-docband",

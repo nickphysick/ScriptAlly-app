@@ -282,6 +282,8 @@
 .tdb-emptylane { display: flex; align-items: center; }
 .tdb-emptylane .e { font-family: var(--f12-serif); font-style: italic; font-size: 14px; color: var(--muted); padding: 14px 4px; }
 .tdb-ghostcard { width: 330px; min-height: 74px; border: 1.5px dashed var(--note-b); border-radius: 11px; display: flex; align-items: center; justify-content: center; gap: 10px; background: none; }
+.tdb-ghostcard.quiet { justify-content: center; } /* v4 P6: the empty Notes lane = the quiet ＋ only, no sentence */
+.tdb-ghostcard.quiet .tdb-gg { font-size: 18px; }
 .tdb-ghostcard:hover { background: rgba(255, 255, 255, 0.45); }
 .tdb-ge { font-family: var(--f12-serif); font-style: italic; font-size: 14px; color: var(--muted); }
 .tdb-gg { font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--note-i); }

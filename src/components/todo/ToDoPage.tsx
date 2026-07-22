@@ -730,7 +730,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           {(!active || vNt.length > 0 || overlayCards("nt").length > 0) && (
           <Lane cls="nt" label="Notes to self" count={active ? vNt.length : tiles.notes} onAdd={addTask} isEmpty={vNt.length === 0 && overlayCards("nt").length === 0}
             filtered={active && vNt.length < tiles.notes ? { x: vNt.length, y: tiles.notes, showAll: resetDeck } : null}
-            emptyNode={<button type="button" className="tdb-ghostcard" onClick={addTask}><span className="tdb-ge">Nothing jotted yet.</span><span className="tdb-gg">＋ Add a note</span></button>}>
+            emptyNode={<button type="button" className="tdb-ghostcard quiet" onClick={addTask} aria-label="Add a note"><span className="tdb-gg" aria-hidden>＋</span></button>}>
             {overlayCards("nt")}
             {vNt.map(renderCard)}
           </Lane>

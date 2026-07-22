@@ -112,6 +112,22 @@ describe("P1 — the corner retirement + the AppShell's one out-of-page line", (
   });
 });
 
+describe("v4 P6 — empty-state copy + sweep", () => {
+  it("the empty Notes lane shows ONLY the quiet ＋ (no placeholder sentence, repo-wide)", () => {
+    expect(page).not.toContain("Nothing jotted yet");
+    expect(page).toContain('className="tdb-ghostcard quiet" onClick={addTask} aria-label="Add a note"');
+    expect(css).toContain(".tdb-ghostcard.quiet");
+  });
+  it("no orphan Pro-square / RESET / header-Begin selectors; the tour targets the rail's button", () => {
+    for (const stale of ["tdb-prosq", "tdb-frst", "tdb-herorow", "tdb-fsb\""]) {
+      expect(page).not.toContain(stale.replace("\\", ""));
+      expect(css).not.toContain(stale.replace("\\", ""));
+    }
+    const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
+    expect(tour).toContain('sel: ".tdb-fsb2"');
+  });
+});
+
 describe("v4 P3 — conditional Today + the 4-up board", () => {
   it("Today mounts only with content (committed OR done today); the wrap flags today-off", () => {
     expect(page).toContain("const todayActive = committedCards.length > 0 || doneN > 0;");

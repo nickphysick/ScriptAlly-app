@@ -24,7 +24,7 @@ export interface TourStop {
 
 export const TOUR_STOPS: TourStop[] = [
   {
-    sel: ".tdb-fsb",
+    sel: ".tdb-fsb2",  // v4: the button lives in the rail now
     h: "Say go, any time.",
     p: "Begin a focused session — it walks your whole desk for you, one sheet at a time, no distractions.",
     cta: "Next →",
