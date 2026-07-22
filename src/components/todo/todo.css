@@ -6,8 +6,8 @@
  */
 
 /* The page's scroll region (polish v3 P5 — two-layer): the wrap is now the FULL-WIDTH scroller
-   only; column duties (max-width cap + side padding) moved to .tdb-col so the header band can
-   bleed edge to edge while its content stays aligned with the board. `flex: 1` because .tdb-wrap
+   only; the assembly centres itself via the width tokens (the deck-era .tdb-col column died
+   with the band). `flex: 1` because .tdb-wrap
    is a flex child of .f12-root (a flex column); min-height:0 lets it shrink so overflow-y can
    engage. No 100vh/overflow-hidden clamp anywhere — that was the earlier scroll bug. Top padding
    REMOVED (the band sits flush under the shell bar); bottom padding clears the fixed corner
@@ -45,7 +45,6 @@
 .tdb-bigsearch input::placeholder { color: var(--muted); }
 .tdb-bigsearch kbd { margin-left: auto; font-family: var(--f12-mono); font-size: 8.5px; border: 1px solid var(--line); border-radius: 5px; padding: 2px 6px; color: var(--faint); }
 .tdb-bigsearch:focus-within { border-color: var(--ink-2); }
-.tdb-rdate { font-family: var(--f12-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); }
 .tdb-ask { font-family: var(--f12-serif); font-size: 64px; font-weight: 600; color: var(--ink); white-space: nowrap; line-height: 1.08; letter-spacing: -0.015em; } /* polish: 64 */
 /* (the strip census retired — the counts live on the filter rail's pills) */
 .tdb-wrap { --lat-1: #f5efe6; --lat-2: #efe7d9; --lat-bd: #ddd0bc; --lat-mark: #cbb995; --lat-ink: #8a7048; }
@@ -60,7 +59,6 @@
 .tdb-cta:hover:not(:disabled) { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--ink); }
 .tdb-cta:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: none; }
 .tdb-cta.sm { height: 34px; padding: 0 18px; font-size: 10.5px; }
-.tdb-cta:disabled { opacity: 0.5; }
 .tdb-ctaghost { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 34px; padding: 0 16px; line-height: 1; box-sizing: border-box; background: var(--paper); border: 1px solid var(--line); color: var(--muted); border-radius: 99px; font-size: 10.5px; font-weight: 600; cursor: pointer; }
 .tdb-ctaghost:hover { border-color: var(--ink-2); color: var(--ink-2); }
 @media (prefers-reduced-motion: reduce) {
@@ -221,9 +219,9 @@
    this page: paper fill (sinks into the page where white pops) · hairline border · faint text ·
    NO shadow · not-allowed cursor · no hover response. NEVER dashed (dashed = invitation-to-add)
    and NEVER opacity-only (a dimmed live button still reads clickable). ── */
-.tdb-worklist:disabled, .tdb-pick:disabled,
+.tdb-cta:disabled, .tdb-ctaghost:disabled,
 .tdb-ffpri:disabled, .tdb-ffback:disabled, .tdb-ffcopy:disabled,
-.tdb-ra:disabled, .tdb-bffind:disabled {
+.tdb-ra:disabled {
   background: var(--paper);
   border: 1px solid var(--hairline);
   color: var(--faint);
@@ -232,7 +230,7 @@
   filter: none;
   transform: none;
 }
-.tdb-worklist:disabled:hover, .tdb-ffpri:disabled:hover,
+.tdb-ffpri:disabled:hover,
 .tdb-ffback:disabled:hover, .tdb-ra:disabled:hover {
   background: var(--paper); border-color: var(--hairline); color: var(--faint); filter: none;
 }
@@ -312,12 +310,11 @@
 .tdb-ghostcard.quiet { justify-content: center; } /* v4 P6: the empty Notes lane = the quiet ＋ only, no sentence */
 .tdb-ghostcard.quiet .tdb-gg { font-size: 18px; }
 .tdb-ghostcard:hover { background: rgba(255, 255, 255, 0.45); }
-.tdb-ge { font-family: var(--f12-serif); font-style: italic; font-size: 14px; color: var(--muted); }
 .tdb-gg { font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--note-i); }
 
 /* ── OPTION-A CARD (retoken Phase C; tag colours re-lawed by polish v3 Phase 2): serif titles,
    lane spines, min-height 190 with the middle block flex-clipping — the pills-can-never-spill
-   invariant stands (tag/foot/pill are flex:none; only .tdb-mid flexes and clips; subs clamp at
+   invariant stands (tag/foot/pill are flex:none; the surface's middle clips; subs clamp at
    TWO lines everywhere — the retoken's 1-line grouped clause is superseded by the fix pass, and
    min-height 208 absorbs the second line: design-refs/todo-lanes-popup-fix.html at our type
    scale, 190 + one 12px/1.5 sub line — the ref's 224 is its own scale). Neutral
@@ -348,7 +345,6 @@
 .tdb-band.do { background: linear-gradient(180deg, var(--pink-t), var(--pink-btn)); border-bottom-color: var(--pink-b); }
 .tdb-band.hk { background: linear-gradient(180deg, var(--lat-1), var(--lat-2)); border-bottom-color: var(--lat-bd); } /* LATTE */
 .tdb-band.nt { background: var(--note-t); border-bottom-color: var(--note-b); }
-.tdb-band .tdb-tags { margin: 0; }
 .tdb-chipon { margin-left: auto; font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.08em; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border: 1px solid var(--hk-spine); color: var(--hk-ink); border-radius: 99px; padding: 2px 8px; white-space: nowrap; }
 .tdb-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; padding: 10px 12px 12px; }
 /* the hover VERB ROW — INSIDE the surface's border (no own background/border/radius: it
@@ -376,7 +372,6 @@
    reply-by) simply drops the class. */
 .tdb-tile.quiet { opacity: 0.62; }
 .tdb-tile.quiet:hover { opacity: 1; }
-.tdb-tags { flex: none; display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
 /* THE SOFT TAG LAW (Polish III P2 — third and final revision): EVERY tag, both views, including
    ★ OFFER and urgency — white fill, 1px faint-ink border (rgba = the live --ink #1e1a16 @ 25%;
    the ref's #3a1c14 realised as the live token), ink text. OFFER keeps its ★ + 700; urgency
@@ -384,11 +379,9 @@
 .tdb-tag { display: inline-flex; align-items: center; gap: 5px; font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 99px; padding: 3.5px 10px; border: 1px solid rgba(30, 26, 22, 0.25); background: var(--white); color: var(--ink); white-space: nowrap; }
 .tdb-tag.due.warn { font-weight: 700; }
 .tdb-tag.offer { font-weight: 700; }
-.tdb-mid { flex: 1 1 auto; min-height: 0; overflow: hidden; }
 .tdb-tt { font-family: var(--f12-serif); font-size: 12.5px; font-weight: 600; line-height: 1.3; color: var(--ink); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .tdb-tsub { font-size: 10px; color: var(--sub); margin-top: 5px; line-height: 1.45; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .tdb-ms { font-family: var(--f12-serif); font-style: italic; color: var(--ink-2); }
-.tdb-miniav { width: 21px; height: 21px; border-radius: 50%; background: var(--paper); border: 1px solid var(--line); display: inline-flex; align-items: center; justify-content: center; font-family: var(--f12-mono); font-size: 8px; font-weight: 600; color: var(--ink-2); flex: none; }
 .tdb-tdot { width: 26px; height: 26px; border-radius: 50%; background: var(--pink-t); border: 1px solid var(--pink-b); flex: none; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
 
 /* ── G3 GROUPED CARD (retoken Phase C): mono kicker + sage dot · serif title with the inline
@@ -804,7 +797,6 @@
 .tdb-ffhubtl { margin-top: 22px; }
 .tdb-fflink { font-size: 13px; font-weight: 600; color: var(--pink-i); margin-top: 18px; display: inline-block; }
 .tdb-fflink:hover { text-decoration: underline; }
-.tdb-ffconfetti { font-size: 40px; line-height: 1; margin-bottom: 14px; letter-spacing: 6px; }
 /* the interim offer journey (journey-logic P3 — ref §1): star moment, reply-by pill, three
    doors (sage = the completing one), the decision seg, the need-time row, the notify context. */
 .tdb-ffstar { font-size: 40px; color: var(--ink); margin: 2px 0 6px; }
@@ -843,8 +835,6 @@
 .tdb-ffhint b { color: var(--ink); }
 .tdb-ffremrow { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; background: var(--white, #fff); border: 1px solid var(--hairline); border-radius: 11px; padding: 14px 18px; margin-top: 16px; font-size: 13px; color: var(--ink-2); }
 .tdb-ffremrow input[type="date"] { border: 1px solid var(--line); border-radius: 7px; padding: 6px 9px; font-family: var(--f12-mono); font-size: 11.5px; color: var(--ink); background: var(--paper); }
-.tdb-ffoctx { display: inline-block; font-family: var(--f12-mono); font-size: 8.5px; font-weight: 600; letter-spacing: 0.11em; background: var(--pink-t); border: 1px solid var(--pink-b); border-radius: 99px; padding: 4px 11px; color: var(--pink-i); margin-bottom: 12px; }
-.tdb-ffofferq { font-family: var(--f12-serif); font-size: 31px; font-weight: 600; font-style: italic; line-height: 1.2; color: var(--burg); max-width: 480px; }
 .tdb-ffoffernote { font-family: Caveat, cursive; font-size: 21px; color: var(--hk-ink); margin-top: 16px; transform: rotate(-1.2deg); display: inline-block; }
 .tdb-ffbatch { margin-top: 20px; }
 .tdb-ffbrow { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--hairline); flex-wrap: wrap; }
@@ -879,8 +869,6 @@
 .tdb-ffbigdone { text-align: center; padding: 20px 0 10px; }
 .tdb-ffcir { width: 64px; height: 64px; border-radius: 50%; background: var(--hk-sage); border: 2px solid var(--hk-spine); display: flex; align-items: center; justify-content: center; font-size: 26px; color: var(--hk-ink); margin: 0 auto 18px; animation: tdbPop 0.4s cubic-bezier(0.3, 1.4, 0.5, 1); }
 @keyframes tdbPop { from { transform: scale(0.4); opacity: 0; } to { transform: none; opacity: 1; } }
-.tdb-ffbt { font-family: var(--f12-serif); font-size: 26px; font-weight: 600; }
-.tdb-ffbs { font-size: 13.5px; color: var(--muted); margin-top: 8px; line-height: 1.6; max-width: 380px; margin-inline: auto; }
 /* sweep mode — big one-tap actions with kbd hints, and the brief inline receipt */
 .tdb-ffbigacts { display: flex; flex-direction: column; gap: 10px; margin-top: 26px; }
 .tdb-ffbig { display: flex; align-items: center; gap: 12px; padding: 15px 18px; border: 1.5px solid var(--line); border-radius: var(--r-lg); background: var(--panel); font-size: 14.5px; font-weight: 600; transition: 0.14s; text-align: left; }

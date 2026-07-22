@@ -2,19 +2,19 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * The first-visit tour — Final Shape P6 rewire: hero → search → rail pills → docband → a card →
+ * The first-visit tour — polish P5 retarget: hero → search → rail pills → the review card → a card →
  * Today. Copy snapshot-locked; the auto-run gate unchanged.
  */
 import { describe, it, expect } from "vitest";
 import { TOUR_STOPS, shouldAutoRunTour } from "./todoTour";
 
 describe("TOUR_STOPS — six stops (Final Shape rewire), Done on the last", () => {
-  it("is exactly the six stops in order: hero → search → pills → docband → a card → Today", () => {
+  it("is exactly the six stops in order: hero → search → pills → review card → a card → Today", () => {
     expect(TOUR_STOPS.map((s) => s.sel)).toEqual([
       ".tdb-fsb2",
       ".tdb-bigsearch",
       ".tdb-fpill, .tdb-fpillbtn",
-      ".tdb-docband",
+      ".tdb-rvbox",
       ".tdb-tile, .tdb-gcard, .tdb-step",
       ".tdb-today2, .tdb-todaychip",
     ]);

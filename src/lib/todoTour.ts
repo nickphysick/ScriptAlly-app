@@ -4,7 +4,7 @@
  *
  * todoTour — the pure layer of the first-visit spotlight tour (design ref:
  * Final Shape P6 rewire — SIX stops: the hero's Begin → the floating search → the rail's
- * pills (or the ⚲ FILTER pill) → the review docband → a card's hover verbs → Today. The last
+ * pills (or the ⚲ FILTER pill) → the review card → a card's hover verbs → Today. The last
  * stop's button reads "Done" and ends the tour.
  *
  * The seen flag is `User.tourSeenAt` (ISO timestamp) — the established additive user-doc pattern
@@ -43,7 +43,7 @@ export const TOUR_STOPS: TourStop[] = [
     cta: "Next →",
   },
   {
-    sel: ".tdb-docband",
+    sel: ".tdb-rvbox",
     h: "Your week, reviewed.",
     p: "Last week\u2019s progress report lives here every day. Every box ticked turns the dial in your favour.",
     cta: "Next →",

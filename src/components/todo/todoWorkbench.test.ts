@@ -160,6 +160,21 @@ describe("polish P2 — THE STATIONERY PRESS (the button law)", () => {
   });
 });
 
+describe("polish P5 — sweep: dead selectors out; disabled joins the inert grammar", () => {
+  it("the replaced/dead classes are extinct in the stylesheet (verified repo-dead before deletion)", () => {
+    for (const dead of ["tdb-worklist", "tdb-pick", "tdb-bffind", "tdb-rdate", "tdb-ge ", "tdb-tags", "tdb-mid ", "tdb-miniav", "tdb-ffconfetti", "tdb-ffoctx", "tdb-ffofferq", "tdb-ffbt", "tdb-ffbs", "tdb-docband", "tdb-letter"]) {
+      expect(css).not.toContain("." + dead.trim() + " ");
+      expect(css).not.toContain("." + dead.trim() + ":");
+      expect(css).not.toContain("." + dead.trim() + ",");
+    }
+  });
+  it("the press's disabled state is the INERT GRAMMAR, not opacity — the page law holds for every control", () => {
+    expect(css).not.toContain(".tdb-cta:disabled { opacity");
+    expect(css).toContain(".tdb-cta:disabled, .tdb-ctaghost:disabled,");
+    expect(css).toMatch(/\.tdb-cta:disabled, \.tdb-ctaghost:disabled,[^{]*\{\n?[^}]*cursor: not-allowed/);
+  });
+});
+
 describe("polish P4 — THE REACTIVE RAIL (search-facet counts, the struck totals, the query chip)", () => {
   it("ONE derivation: the pills re-count via the SAME filterCounts over search-narrowed sets — never a parallel tally", () => {
     expect(page).toContain("const searchActive = search.trim().length > 0;");
