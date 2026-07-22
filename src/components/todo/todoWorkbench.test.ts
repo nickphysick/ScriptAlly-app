@@ -46,7 +46,7 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
     expect(nar).toContain("border-color: #7c3a2a");
     expect(nar).toContain("font-weight: 700");
     expect(page).toContain('className={`tdb-fpill showall${resting ? " sel" : ""}`} aria-pressed={resting} onClick={() => setFilters({ ...DEFAULT_FILTERS })}');
-    expect(page).toContain("SHOW ALL<span className=\"tdb-fn\">{shownY}</span>".replace(/\\/g, ""));
+    expect(page).toContain('SHOW ALL<span className="tdb-fn">{fnFace(shownY, searchTotal ?? shownY)}</span>'); // P4: the match total during search
     expect(rule(".tdb-fpill.sel")).toContain("border-color: var(--ink)");
     expect(css).toContain('.tdb-fpill.sel::before { content: "✓"; font-size: 9px; }');
     expect(page).not.toContain("tdb-frst");
@@ -56,7 +56,7 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
     const sa = page.indexOf("SHOW ALL<span");
     expect(sa).toBeGreaterThan(sec);
     expect(sa).toBeLessThan(page.indexOf('railPill("OFFERS"'));
-    expect(page).toContain(">FILTER</div>");
+    expect(page).toContain('"tdb-fsec">FILTER{searchActive && ('); // P4: the header grows the query chip
   });
   it("v4 P2: Begin focused session leads the rail (same wiring); the foot keeps Task settings only", () => {
     expect(page).toContain('className="tdb-cta tdb-fsb2" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>▶ Begin focused session</button>'); // the press primary
@@ -157,6 +157,43 @@ describe("polish P2 — THE STATIONERY PRESS (the button law)", () => {
   it("the view segment's selected state = the half-pressed chip; reduced motion = shadow steps only", () => {
     expect(rule(".tdb-vseg button.on")).toContain("box-shadow: 1px 1px 0 var(--ink)");
     expect(css).toContain(".tdb-cta:hover:not(:disabled), .tdb-cta:active:not(:disabled) { transform: none; }");
+  });
+});
+
+describe("polish P4 — THE REACTIVE RAIL (search-facet counts, the struck totals, the query chip)", () => {
+  it("ONE derivation: the pills re-count via the SAME filterCounts over search-narrowed sets — never a parallel tally", () => {
+    expect(page).toContain("const searchActive = search.trim().length > 0;");
+    expect(page).toContain("? filterCounts({ doCards: sDo, hkGroups: sGroups, staleCards: sStale, ntCards: sNt, committedCount: committedCards.filter((c) => matchesSearch(c, search, sctx)).length })");
+    // groups narrow WHOLE, exactly as the sheet keeps them
+    expect(page).toContain("hkGroups.filter((g) => groupMatchesSearch(g, search))");
+    // the match total reuses the shownX composition (cards + hkGapCount gaps)
+    expect(page).toContain("sDo.length + hkGapCount(sGroups) + sStale.length + sNt.length");
+    expect((page.match(/filterCounts\(/g) ?? []).length).toBe(2); // fc + searchFc — no third tally
+  });
+  it("the struck pair renders during search only, and only when the count CHANGED", () => {
+    expect(page).toContain("searchActive && live !== base ? (<><s className=\"tdb-was\">{base}</s>{live}</>) : (<>{base}</>)");
+    expect(page).toContain('{label}<span className="tdb-fn">{fnFace(count, live)}</span>');
+    expect(page).toContain("TODAY’S LIST<span className=\"tdb-fn\">{fnFace(fc.today, searchFc ? searchFc.today : fc.today)}</span>".replace(/\\/g, ""));
+    expect(css).toContain(".tdb-fn .tdb-was { color: #cfc4b8; text-decoration: line-through; margin-right: 5px; }");
+  });
+  it("zero-match pills DIM in place (the live count keys the existing 40%) — never hidden, never reordered", () => {
+    expect(page).toContain("const live = searchFc ? searchFc[key] : count;");
+    expect(page).toContain("${live === 0 ? \" z\" : \"\"}".replace(/\\/g, ""));
+    expect(rule(".tdb-fpill.z")).toContain("opacity: 0.4");
+  });
+  it("the FILTER header grows the removable query chip: pink tag law, quoted uppercased term, ✕ clears the search", () => {
+    expect(page).toContain("“{search.trim().toUpperCase()}” <span aria-hidden>✕</span>");
+    expect(page).toContain('className="tdb-fq" aria-label="Clear the search" onClick={() => setSearch("")}');
+    const q = rule(".tdb-fq");
+    expect(q).toContain("color: #7c3a2a");
+    expect(q).toContain("background: var(--pink-t)");
+    expect(q).toContain("border: 1px solid var(--pink-b)");
+    expect(q).toContain("border-radius: 99px");
+    expect(rule(".tdb-fsec")).toContain("display: flex");
+  });
+  it("composition holds both ways: the pills narrow the same shared filter state the search composes with", () => {
+    expect(page).toContain("visibleDoCard(c, filters, today) && matchesSearch(c, search, sctx)");
+    expect(page).toContain("visibleGroup(g, filters) && groupMatchesSearch(g, search)");
   });
 });
 

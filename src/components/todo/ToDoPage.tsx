@@ -379,6 +379,23 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const sctx = { queries, agents, manuscripts };
   const active = filtersActive(filters, search);
   const fc = filterCounts({ doCards: board.do, hkGroups, staleCards, ntCards: board.nt, committedCount: committedCards.length });
+  // polish P4 — THE REACTIVE RAIL: while a search runs, every pill re-counts through the SAME
+  // shared derivation over the search-narrowed sets (never a parallel tally). Groups narrow
+  // WHOLE via groupMatchesSearch — exactly how the sheet keeps them — so a pill's count always
+  // matches what picking it would show. SHOW ALL's match total uses the shownX composition
+  // (cards + hkGapCount gaps) at rest filters.
+  const searchActive = search.trim().length > 0;
+  const sDo = searchActive ? board.do.filter((c) => matchesSearch(c, search, sctx)) : board.do;
+  const sGroups = searchActive ? hkGroups.filter((g) => groupMatchesSearch(g, search)) : hkGroups;
+  const sStale = searchActive ? staleCards.filter((c) => matchesSearch(c, search, sctx)) : staleCards;
+  const sNt = searchActive ? board.nt.filter((c) => matchesSearch(c, search, sctx)) : board.nt;
+  const searchFc = searchActive
+    ? filterCounts({ doCards: sDo, hkGroups: sGroups, staleCards: sStale, ntCards: sNt, committedCount: committedCards.filter((c) => matchesSearch(c, search, sctx)).length })
+    : null;
+  const searchTotal = searchActive ? sDo.length + hkGapCount(sGroups) + sStale.length + sNt.length : null;
+  /** The struck-pair count face: old total struck beside the live match count — during search only. */
+  const fnFace = (base: number, live: number) =>
+    searchActive && live !== base ? (<><s className="tdb-was">{base}</s>{live}</>) : (<>{base}</>);
   const resting = isResting(filters);
   // The Final Shape P1 — the hero's focused-session scope (whole board), hoisted from the rail
   const boardCards = [...board.do, ...board.hk, ...board.nt];
@@ -882,9 +899,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   function railPill(label: string, key: FilterType, count: number, dot: "p" | "lat" | "y") {
     const on = filters[key];
     const cls = resting ? "" : on ? " nar" : " dim";
+    // P4: zero-match pills DIM in place (the existing 40%) — never hidden, never reordered
+    const live = searchFc ? searchFc[key] : count;
     return (
-      <button type="button" className={`tdb-fpill d-${dot}${cls}${count === 0 ? " z" : ""}`} aria-pressed={!resting && on} onClick={() => setFilters((f) => togglePill(f, key))}>
-        <span className="tdb-dotc" aria-hidden />{label}<span className="tdb-fn">{count}</span>
+      <button type="button" className={`tdb-fpill d-${dot}${cls}${live === 0 ? " z" : ""}`} aria-pressed={!resting && on} onClick={() => setFilters((f) => togglePill(f, key))}>
+        <span className="tdb-dotc" aria-hidden />{label}<span className="tdb-fn">{fnFace(count, live)}</span>
       </button>
     );
   }
@@ -893,11 +912,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       <>
         {/* v4 P2 — the focused-session button leads the rail (moved from the hero; same wiring) */}
         <button type="button" className="tdb-cta tdb-fsb2" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>▶ Begin focused session</button>
-        <div className="tdb-fsec">FILTER</div>
+        <div className="tdb-fsec">FILTER{searchActive && (
+          <button type="button" className="tdb-fq" aria-label="Clear the search" onClick={() => setSearch("")}>
+            “{search.trim().toUpperCase()}” <span aria-hidden>✕</span>
+          </button>
+        )}</div>
         {/* SHOW ALL is the default-selected pill and the reset — the separate RESET row is gone;
             the narrowed meta lives in the sheet's corner line */}
         <button type="button" className={`tdb-fpill showall${resting ? " sel" : ""}`} aria-pressed={resting} onClick={() => setFilters({ ...DEFAULT_FILTERS })}>
-          SHOW ALL<span className="tdb-fn">{shownY}</span>
+          SHOW ALL<span className="tdb-fn">{fnFace(shownY, searchTotal ?? shownY)}</span>
         </button>
         {railPill("OFFERS", "offers", fc.offers, "p")}
         {railPill("AGENT WAITING", "overToYou", fc.overToYou, "p")}
@@ -908,7 +931,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         {railPill("NOTES", "notes", fc.notes, "y")}
         <div className="tdb-fdivider" aria-hidden />
         <button type="button" className={`tdb-fpill d-s lens${filters.todayOnly ? " nar" : ""}`} aria-pressed={filters.todayOnly} onClick={() => setF("todayOnly", !filters.todayOnly)}>
-          <span className="tdb-dotc" aria-hidden />TODAY’S LIST<span className="tdb-fn">{fc.today}</span>
+          <span className="tdb-dotc" aria-hidden />TODAY’S LIST<span className="tdb-fn">{fnFace(fc.today, searchFc ? searchFc.today : fc.today)}</span>
         </button>
         <div className="tdb-fsfoot">
           <button type="button" className="tdb-setrow" onClick={() => setSettingsOpen(true)}>

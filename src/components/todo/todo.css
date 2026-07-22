@@ -92,7 +92,11 @@
    vertical quiet pills (34px rows, family dot left, count right), the RESET row when narrowed,
    the lens below a divider, and the top-bordered foot (Task-settings row + the Pro square). ── */
 .tdb-fside { width: var(--tdb-rail); flex: 0 0 auto; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 3px 14px rgba(58, 28, 20, 0.08); overflow: hidden; }
-.tdb-fsec { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.14em; color: var(--faint); padding: 14px 16px 7px; }
+.tdb-fsec { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.14em; color: var(--faint); padding: 14px 16px 7px; display: flex; align-items: center; gap: 7px; }
+/* polish P4 — the removable query chip (the pink tag law) + the struck old total */
+.tdb-fq { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.08em; color: #7c3a2a; background: var(--pink-t); border: 1px solid var(--pink-b); border-radius: 99px; padding: 2px 8px; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; min-width: 0; max-width: 100%; }
+.tdb-fq:hover { border-color: #7c3a2a; }
+.tdb-fn .tdb-was { color: #cfc4b8; text-decoration: line-through; margin-right: 5px; }
 .tdb-fpill { display: flex; align-items: center; gap: 10px; margin: 0 10px 6px; height: 34px; width: calc(100% - 20px); box-sizing: border-box; border: 1px solid var(--line); background: var(--white, #fff); border-radius: 99px; padding: 0 13px; font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.08em; color: var(--ink-2); cursor: pointer; flex: 0 0 auto; }
 .tdb-fpill:hover { background: var(--paper); }
 .tdb-fpill .tdb-dotc { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto; }
