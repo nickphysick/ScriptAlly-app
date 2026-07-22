@@ -45,6 +45,25 @@
 .tdb-ask { font-family: var(--f12-serif); font-size: 64px; font-weight: 600; color: var(--ink); white-space: nowrap; line-height: 1.08; letter-spacing: -0.015em; } /* polish: 64 */
 /* (the strip census retired — the counts live on the filter rail's pills) */
 .tdb-wrap { --lat-1: #f5efe6; --lat-2: #efe7d9; --lat-bd: #ddd0bc; --lat-mark: #cbb995; --lat-ink: #8a7048; }
+/* ── THE STATIONERY PRESS (polish P2, todo-polish.html) — the button law. .tdb-cta = TRUE
+   PRIMARIES ONLY (Begin focused session · Work the list · Open it ›): paper fill, 1px ink, ink
+   text, 99px, hard offset shadow 2px 2px 0 ink; hover presses (1,1 + 1px shadow); active seats
+   (2,2 + none). Fixed heights (40 standard / 34 small), inline-flex centring, line-height 1, no
+   vertical padding — the structural fix for the clipped Today pair. .tdb-ctaghost = secondaries:
+   flat paper, hairline, muted, no press. The Pro banner's slate CTA is EXEMPT (its own
+   identity). Reduced motion: no translate, shadow steps only. ── */
+.tdb-cta { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 20px; line-height: 1; box-sizing: border-box; background: var(--paper); border: 1px solid var(--ink); color: var(--ink); border-radius: 99px; font-size: 12.5px; font-weight: 700; cursor: pointer; box-shadow: 2px 2px 0 var(--ink); transition: transform 0.1s, box-shadow 0.1s; }
+.tdb-cta:hover:not(:disabled) { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--ink); }
+.tdb-cta:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: none; }
+.tdb-cta.sm { height: 34px; padding: 0 18px; font-size: 10.5px; }
+.tdb-cta:disabled { opacity: 0.5; }
+.tdb-ctaghost { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 34px; padding: 0 16px; line-height: 1; box-sizing: border-box; background: var(--paper); border: 1px solid var(--line); color: var(--muted); border-radius: 99px; font-size: 10.5px; font-weight: 600; cursor: pointer; }
+.tdb-ctaghost:hover { border-color: var(--ink-2); color: var(--ink-2); }
+@media (prefers-reduced-motion: reduce) {
+  .tdb-cta { transition: none; }
+  .tdb-cta:hover:not(:disabled), .tdb-cta:active:not(:disabled) { transform: none; }
+}
+
 /* the quiet pills' family dots (THE LAWS) */
 .tdb-wrap { --dot-p: #e59b8f; --dot-lat: #cbb995; --dot-y: #d9c87a; --dot-s: #9db29a; }
 
@@ -84,9 +103,7 @@
 .tdb-fpill.nar .tdb-dotc { background: #7c3a2a; }
 .tdb-fpill.nar .tdb-fn { color: #7c3a2a; }
 /* v4 P2 — the rail's lead button + the SHOW ALL selected pill (the RESET row is gone) */
-.tdb-fsb2 { margin: 12px 10px 4px; height: 42px; width: calc(100% - 20px); display: flex; align-items: center; justify-content: center; gap: 9px; background: var(--ink); color: var(--panel); border: 1px solid var(--ink); border-radius: 99px; font-size: 12.5px; font-weight: 600; cursor: pointer; box-shadow: 0 3px 10px rgba(58, 28, 20, 0.18); flex: 0 0 auto; }
-.tdb-fsb2:hover:not(:disabled) { filter: brightness(1.3); }
-.tdb-fsb2:disabled { opacity: 0.5; }
+.tdb-fsb2 { margin: 12px 10px 4px; width: calc(100% - 20px); flex: 0 0 auto; display: flex; } /* the press (.tdb-cta) carries the look */
 .tdb-fpill.sel { border-color: var(--ink); font-weight: 700; color: var(--ink); }
 .tdb-fpill.sel::before { content: "✓"; font-size: 9px; }
 .tdb-fdivider { height: 1px; background: var(--hairline); margin: 8px 16px; flex: 0 0 auto; }
@@ -454,10 +471,7 @@
 .tdb-tick { width: 20px; height: 20px; border-radius: 50%; background: var(--hk-sage); border: 1px solid var(--hk-spine); color: var(--hk-ink); display: flex; align-items: center; justify-content: center; font-size: 12px; flex: none; margin-top: 1px; }
 /* the footer verbs — outline + ink primary, equal widths (ref .tfoot) */
 .tdb-tf2 { flex: none; display: flex; gap: 6px; padding: 12px 13px 13px; }
-.tdb-pick { flex: 1; font-size: 10.5px; font-weight: 600; padding: 7px 0; border-radius: 99px; background: var(--white, #fff); border: 1px solid var(--line); color: var(--ink); white-space: nowrap; }
-.tdb-pick:hover { background: var(--hk-sage); }
-.tdb-worklist { flex: 1; font-size: 10.5px; font-weight: 600; padding: 7px 0; border-radius: 99px; background: var(--ink); border: 1px solid var(--ink); color: var(--panel); white-space: nowrap; }
-.tdb-worklist:hover:not(:disabled) { filter: brightness(1.35); }
+.tdb-tf2 .tdb-ctaghost, .tdb-tf2 .tdb-cta { flex: 1; padding: 0; white-space: nowrap; } /* the fixed-height pair sits level — the clip fixed structurally */
 
 /* ── Polish III P1: the REVIEW BANNER (5ways §1 — white lifted card; live tokens; the shadow
    literal is the ref's) + the thin-bar AFTERLIFE (refine ref) — the Sunday card + the masthead
@@ -469,7 +483,7 @@
 .tdb-shmeta { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.12em; color: var(--faint); text-transform: uppercase; }
 .tdb-vseg { margin-left: auto; height: 32px; box-sizing: border-box; border: 1px solid var(--line); border-radius: 99px; display: inline-flex; align-items: center; padding: 3px; gap: 2px; }
 .tdb-vseg button { width: 30px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 99px; font-size: 11px; color: var(--muted); border: none; background: none; cursor: pointer; }
-.tdb-vseg button.on { background: var(--ink); color: var(--panel); }
+.tdb-vseg button.on { background: var(--paper); color: var(--ink); border: 1px solid var(--ink); box-shadow: 1px 1px 0 var(--ink); box-sizing: border-box; } /* selected = pressed in */
 .tdb-docband { display: flex; align-items: center; gap: 14px; background: linear-gradient(180deg, #fbf7f0, #f6efe4); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; }
 .tdb-rvcupb { width: 42px; flex: 0 0 auto; color: var(--ink); filter: drop-shadow(0 2px 3px rgba(58, 28, 20, 0.14)); }
 .tdb-rvcupb svg { width: 100%; height: auto; display: block; }

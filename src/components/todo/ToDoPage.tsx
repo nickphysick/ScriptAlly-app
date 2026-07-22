@@ -888,7 +888,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     return (
       <>
         {/* v4 P2 — the focused-session button leads the rail (moved from the hero; same wiring) */}
-        <button type="button" className="tdb-fsb2" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>▶ Begin focused session</button>
+        <button type="button" className="tdb-cta tdb-fsb2" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>▶ Begin focused session</button>
         <div className="tdb-fsec">FILTER</div>
         {/* SHOW ALL is the default-selected pill and the reset — the separate RESET row is gone;
             the narrowed meta lives in the sheet's corner line */}
@@ -996,17 +996,17 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         <div className="tdb-tf2">
           {committedCards.length > 0 ? (
             <>
-              <button type="button" className="tdb-pick" onClick={helpMePick}>＋ Add more</button>
-              <button type="button" className="tdb-worklist" onClick={() => {
+              <button type="button" className="tdb-ctaghost" onClick={helpMePick}>＋ Add more</button>
+              <button type="button" className="tdb-cta sm" onClick={() => {
                 // C2 family law — the Today walk is a ritual: sage bands whole-walk
                 setFlow({ items: committedCards.map((card) => ({ kind: "card", card })), ritual: true });
               }}>Work the list</button>
             </>
           ) : (
             <>
-              <button type="button" className="tdb-pick" onClick={helpMePick}>Help me pick</button>
+              <button type="button" className="tdb-ctaghost" onClick={helpMePick}>Help me pick</button>
               {/* the manual doorway — commitment happens on the board's cards */}
-              <button type="button" className="tdb-worklist" onClick={() => scrollToLane("do")}>＋ Add</button>
+              <button type="button" className="tdb-cta sm" onClick={() => scrollToLane("do")}>＋ Add</button>
             </>
           )}
         </div>

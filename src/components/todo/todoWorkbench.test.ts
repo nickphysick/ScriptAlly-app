@@ -59,8 +59,8 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
     expect(page).toContain(">FILTER</div>");
   });
   it("v4 P2: Begin focused session leads the rail (same wiring); the foot keeps Task settings only", () => {
-    expect(page).toContain('className="tdb-fsb2" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>▶ Begin focused session</button>');
-    expect(rule(".tdb-fsb2")).toContain("height: 42px");
+    expect(page).toContain('className="tdb-cta tdb-fsb2" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>▶ Begin focused session</button>'); // the press primary
+    expect(rule(".tdb-cta")).toContain("height: 40px"); // the press law: 40 standard (overrides the drawn 42)
     const panel = page.slice(page.indexOf("function renderFilterPanel"), page.indexOf("function renderRail"));
     expect(panel.indexOf("tdb-fsb2")).toBeLessThan(panel.indexOf("tdb-fsec"));
     expect(panel).toContain('className="tdb-setrow"');
@@ -92,7 +92,7 @@ describe("P1 — the corner retirement + the AppShell's one out-of-page line", (
   });
   it("the panel is the VI 'Today' card — ref anatomy, same state + handlers", () => {
     expect(page).toContain('<div className="tdb-today2">');
-    for (const inner of ["tdb-th", "tdb-thr", "tdb-rollbar", "tdb-tcommit", "tdb-trow", "tdb-ghostbox", "tdb-grow", "tdb-donerow", "tdb-tdone", "tdb-drow", "tdb-tf2", "tdb-pick", "tdb-worklist"]) {
+    for (const inner of ["tdb-th", "tdb-thr", "tdb-rollbar", "tdb-tcommit", "tdb-trow", "tdb-ghostbox", "tdb-grow", "tdb-donerow", "tdb-tdone", "tdb-drow", "tdb-tf2", "tdb-ctaghost", "tdb-cta sm"]) {
       expect(page).toContain(inner);
     }
     expect(rule(".tdb-th")).not.toContain("hk-sage"); // VI P1: plain paper header, no sage band
@@ -125,6 +125,36 @@ describe("v4 P6 — empty-state copy + sweep", () => {
     }
     const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
     expect(tour).toContain('sel: ".tdb-fsb2"');
+  });
+});
+
+describe("polish P2 — THE STATIONERY PRESS (the button law)", () => {
+  it("the primitives: paper/1px ink/2px 2px 0 shadow; hover 1,1; active 2,2; fixed 40/34; lh 1, no v-padding", () => {
+    const c = rule(".tdb-cta");
+    expect(c).toContain("background: var(--paper)");
+    expect(c).toContain("border: 1px solid var(--ink)");
+    expect(c).toContain("box-shadow: 2px 2px 0 var(--ink)");
+    expect(c).toContain("height: 40px");
+    expect(c).toContain("line-height: 1");
+    expect(c).toContain("padding: 0 20px");
+    expect(css).toContain(".tdb-cta:hover:not(:disabled) { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--ink); }");
+    expect(css).toContain(".tdb-cta:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: none; }");
+    expect(rule(".tdb-cta.sm")).toContain("height: 34px");
+    const g = rule(".tdb-ctaghost");
+    expect(g).toContain("border: 1px solid var(--line)");
+    expect(g).not.toContain("box-shadow");
+  });
+  it("assignment: press = Begin/Work the list only here (Open it › lands P3); secondaries ghost; verbs untouched", () => {
+    expect(page).toContain('className="tdb-cta tdb-fsb2"');
+    expect((page.match(/className="tdb-cta sm"/g) ?? []).length).toBe(2); // Work the list + ＋ Add
+    expect(page).toContain('className="tdb-ctaghost" onClick={helpMePick}>＋ Add more</button>');
+    expect(page).not.toContain("tdb-worklist");
+    expect(page).not.toContain("tdb-pick\"");
+    expect(rule(".tdb-verb.pri")).toContain("background: var(--ink)"); // the card verbs keep their micro-grammar
+  });
+  it("the view segment's selected state = the half-pressed chip; reduced motion = shadow steps only", () => {
+    expect(rule(".tdb-vseg button.on")).toContain("box-shadow: 1px 1px 0 var(--ink)");
+    expect(css).toContain(".tdb-cta:hover:not(:disabled), .tdb-cta:active:not(:disabled) { transform: none; }");
   });
 });
 
@@ -620,9 +650,9 @@ describe("VI P1 — 'Today', always on (todo-right-column-v1.html)", () => {
   });
   it("footer verbs switch with the fill: empty = Help me pick + ink ＋ Add; filled = ＋ Add more + ink Work the list", () => {
     expect(page).toContain("{committedCards.length > 0 ? (");
-    expect(page).toContain('className="tdb-worklist" onClick={() => scrollToLane("do")}>＋ Add</button>');
-    expect(rule(".tdb-worklist")).toContain("background: var(--ink)");
-    expect(rule(".tdb-pick")).toContain("flex: 1");
+    expect(page).toContain('className="tdb-cta sm" onClick={() => scrollToLane("do")}>＋ Add</button>'); // press small
+    expect(rule(".tdb-cta")).toContain("box-shadow: 2px 2px 0 var(--ink)"); // the press replaced the ink fill
+    expect(css).toContain(".tdb-tf2 .tdb-ctaghost, .tdb-tf2 .tdb-cta { flex: 1;");
   });
 });
 
