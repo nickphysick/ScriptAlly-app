@@ -94,11 +94,54 @@
 .tdb-setrow { display: flex; align-items: center; gap: 10px; padding: 9px 6px; width: 100%; font-size: 11.5px; font-weight: 600; color: var(--ink-2); cursor: pointer; border-radius: 10px; background: none; border: none; text-align: left; }
 .tdb-setrow:hover { background: var(--paper); }
 .tdb-sic { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); display: inline-flex; align-items: center; justify-content: center; font-size: 11px; color: var(--muted); flex: 0 0 auto; }
-.tdb-prosq { display: block; width: 100%; text-align: left; margin-top: 8px; background: linear-gradient(180deg, #eef2f6, #e6ecf2); border: 1px solid #c8d4de; border-radius: 13px; padding: 13px 14px; cursor: pointer; }
-.tdb-prok { display: block; font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.13em; color: #5a7186; margin-bottom: 3px; }
-.tdb-prosq b { display: block; font-family: var(--f12-serif); font-size: 14.5px; font-weight: 700; color: var(--ink); }
-.tdb-prosq p { font-size: 10px; color: #5d6b78; line-height: 1.5; margin-top: 3px; }
-.tdb-progo { margin-top: 9px; display: inline-flex; background: var(--ink); color: var(--panel); border-radius: 99px; padding: 5px 13px; font-size: 10px; font-weight: 600; }
+/* ── v4 P5: THE PRO LETTERHEAD (upsell candidate A) — a white card in the double-ruled slate
+   frame, below the board, spanning the sheet's width; the demo mini-ledger runs the user's REAL
+   task names with BY-THE-ASSISTANT chips + one pending row. Non-Pro only. ── */
+.tdb-letter { position: relative; margin-top: 24px; background: var(--white, #fff); border: 1px solid #c8d4de; border-radius: 16px; box-shadow: 0 10px 30px rgba(58, 74, 96, 0.16); padding: 26px 30px; display: flex; gap: 34px; align-items: center; }
+.tdb-letter::before { content: ""; position: absolute; inset: 7px; border: 1px solid rgba(106, 137, 167, 0.35); border-radius: 11px; pointer-events: none; }
+.tdb-letterbody { min-width: 0; }
+.tdb-letterk { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.18em; color: #6A89A7; margin-bottom: 6px; }
+.tdb-letter h3 { font-family: var(--f12-serif); font-size: 26px; font-weight: 700; line-height: 1.15; color: var(--ink); }
+.tdb-letter p { font-size: 12px; color: #5d6b78; line-height: 1.6; margin-top: 8px; max-width: 430px; }
+.tdb-letter p b { color: #3d5872; }
+.tdb-letterctas { display: flex; gap: 12px; margin-top: 16px; align-items: center; }
+.tdb-lettergo { background: #6A89A7; color: #fff; border: none; border-radius: 99px; padding: 10px 20px; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(106, 137, 167, 0.35); }
+.tdb-lettergo:hover { filter: brightness(1.06); }
+.tdb-letterghost { background: none; border: none; color: #5d6b78; font-size: 11.5px; font-weight: 600; border-bottom: 1px solid #c8d4de; cursor: pointer; padding: 0; }
+.tdb-letterdemo { margin-left: auto; flex: 0 0 320px; background: #fbfcfd; border: 1px solid #dde6ee; border-radius: 12px; padding: 12px 14px; position: relative; z-index: 1; }
+.tdb-demok { font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.14em; color: #8fa4b8; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.tdb-drow { display: flex; align-items: center; gap: 9px; padding: 7px 2px; border-bottom: 1px solid #edf2f7; font-size: 10.5px; color: var(--ink-2); }
+.tdb-drow:last-child { border-bottom: none; }
+.tdb-dtick { width: 16px; height: 16px; border-radius: 50%; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border: 1px solid var(--hk-spine); color: var(--hk-ink); display: flex; align-items: center; justify-content: center; font-size: 8px; flex: 0 0 auto; }
+.tdb-dwho { margin-left: auto; font-family: var(--f12-mono); font-size: 6px; letter-spacing: 0.09em; color: #6A89A7; background: #eef3f8; border: 1px solid #d5e0ea; border-radius: 99px; padding: 2px 7px; white-space: nowrap; }
+.tdb-drow.pending .tdb-dtick, .tdb-drow.queued .tdb-dtick { background: var(--white, #fff); border: 1.5px dashed #c3d0dc; color: transparent; }
+.tdb-drow.pending, .tdb-drow.queued { color: var(--faint); }
+/* the working row's spinning slate ring */
+.tdb-dtick.spin { background: var(--white, #fff); border: 2px solid #d5e0ea; border-top-color: #6A89A7; color: transparent; animation: tdbSpin 0.9s linear infinite; }
+@keyframes tdbSpin { to { transform: rotate(360deg); } }
+/* ── the "Meet the assistant" PREVIEW MODAL (letterhead-framed over the dimmed board) ── */
+.tdb-amwrap { position: fixed; inset: 0; z-index: 70; display: flex; align-items: center; justify-content: center; }
+.tdb-amscrim { position: absolute; inset: 0; background: rgba(38, 24, 18, 0.45); }
+.tdb-amodal { position: relative; width: min(640px, 92vw); max-height: 90vh; overflow-y: auto; background: var(--white, #fff); border: 1px solid #c8d4de; border-radius: 18px; box-shadow: 0 30px 70px rgba(26, 20, 30, 0.4); padding: 30px 34px 26px; box-sizing: border-box; animation: tdbAmEnter 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.15); }
+@keyframes tdbAmEnter { from { opacity: 0; transform: translateY(14px) scale(0.98); } }
+.tdb-amodal::before { content: ""; position: absolute; inset: 8px; border: 1px solid rgba(106, 137, 167, 0.35); border-radius: 12px; pointer-events: none; }
+.tdb-amx { position: absolute; top: 16px; right: 16px; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: var(--white, #fff); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--muted); cursor: pointer; z-index: 2; }
+.tdb-amk { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.18em; color: #6A89A7; margin-bottom: 7px; }
+.tdb-amodal h2 { font-family: var(--f12-serif); font-size: 28px; font-weight: 700; line-height: 1.1; color: var(--ink); }
+.tdb-amsub { font-size: 12.5px; color: #5d6b78; line-height: 1.6; margin-top: 8px; }
+.tdb-theatre { margin: 20px 0 18px; background: #fbfcfd; border: 1px solid #dde6ee; border-radius: 14px; padding: 14px 16px; }
+.tdb-amlive { width: 6px; height: 6px; border-radius: 50%; background: #6A89A7; animation: tdbAmPulse 1.6s infinite; }
+@keyframes tdbAmPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+.tdb-amfound { margin-top: 10px; background: #eef3f8; border: 1px solid #d5e0ea; border-radius: 10px; padding: 10px 12px; font-size: 11px; color: #3d5872; line-height: 1.55; }
+.tdb-amfound b { display: block; font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.14em; color: #6A89A7; margin-bottom: 4px; }
+.tdb-amhiw { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin: 16px 0 18px; }
+.tdb-amhiw div { font-size: 10.5px; color: #5d6b78; line-height: 1.55; }
+.tdb-amhiw b { display: block; font-family: var(--f12-serif); font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 3px; }
+.tdb-amfoot { display: flex; align-items: center; gap: 14px; border-top: 1px solid var(--hairline); padding-top: 14px; }
+.tdb-ampart { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.12em; color: var(--faint); }
+.tdb-amlater { margin-left: auto; background: none; border: none; color: var(--muted); font-size: 11.5px; font-weight: 600; cursor: pointer; }
+.tdb-amgo { background: #6A89A7; color: #fff; border: none; border-radius: 99px; padding: 10px 18px; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(106, 137, 167, 0.35); }
+@media (prefers-reduced-motion: reduce) { .tdb-amodal { animation: none; } .tdb-amlive { animation: none; } .tdb-dtick.spin { animation: none; } }
 /* the FILTER DRAWER (<1428, P6): the rail's panel as a focus-trapped overlay behind the
    ⚲ FILTER pill beside the floating search. */
 .tdb-fpillbtn { height: 46px; box-sizing: border-box; display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--white, #fff); border-radius: 99px; padding: 0 18px; font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.08em; font-weight: 700; color: var(--ink-2); cursor: pointer; box-shadow: 0 10px 28px rgba(58, 28, 20, 0.16); flex: 0 0 auto; }

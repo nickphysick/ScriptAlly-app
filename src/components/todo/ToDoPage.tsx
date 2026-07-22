@@ -39,6 +39,7 @@ import focusArt from "../../assets/todo/focus-art.png";
 import reviewCupRaw from "../../assets/todo/review-cup.svg?raw";
 import { TodoFilterState, DEFAULT_FILTERS, filtersActive, matchesSearch, groupMatchesSearch, visibleDoCard, visibleStaleCard, visibleNoteCard, visibleGroup, filterCounts, isResting, togglePill, FilterType } from "../../lib/todoFilters";
 import { shouldAutoRunTour } from "../../lib/todoTour";
+import { ProBanner, AssistantModal, AssistantTaskRow } from "./AssistantPromo";
 import { TodoTour } from "./TodoTour";
 import { ActivityType, QueryStatus } from "../../types";
 import { FocusFlow, FocusItem } from "./FocusFlow";
@@ -397,6 +398,18 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   ];
   // Bulk actions — the same writes the singles make, applied optimistically with ONE undo-all.
 
+  // v4 P5 — the assistant preview's data source: the user's REAL housekeeping task names
+  // (names only — the theatre is canned; nothing writes back).
+  // TODO(pro-assistant): replace canned theatre with real single-task free run ("Try one free")
+  // when the assistant Cloud Function ships.
+  const assistantRows: AssistantTaskRow[] = hkGroups.flatMap((g) =>
+    g.members.slice(0, 2).map((m) => ({
+      label: `${g.rule === "dq_mswl" ? "Wish list" : g.rule === "dq_materials" ? "Materials" : "Reply window"} — ${m.agentName}${m.agency ? `, ${m.agency}` : ""}`,
+      agent: m.agentName,
+    }))
+  ).slice(0, 4);
+  const [assistantOpen, setAssistantOpen] = useState(false);
+
   // v4 P3 — CONDITIONAL TODAY: the column exists only with content (≥1 committed OR ≥1 done
   // today — the existing derivation); empty → the board runs 4-up. Exit lags 220ms for the
   // slide-out (reduced motion: instant).
@@ -724,6 +737,17 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           )}
         </div>
         )}
+            {/* ── v4 P5: the Pro LETTERHEAD banner — below the board, spanning the sheet's
+                width; non-Pro only. The Pro square left the rail for this. ── */}
+            {!isProUser(currentUser) && (
+              <ProBanner
+                hkCount={tiles.housekeeping}
+                totalCount={shownY}
+                rows={assistantRows}
+                onPreview={() => setAssistantOpen(true)}
+                onWhatsInPro={() => onNavigate("plans")}
+              />
+            )}
           </div>
           {/* VI P1 — "Today", ALWAYS ON: the right column is a constant part of the grid at
               every viewport ≥1200px (no collapsed state, no tab, no drawer); below that the
@@ -736,6 +760,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         </div>
       </div>
 
+      {assistantOpen && (
+        <AssistantModal
+          hkCount={tiles.housekeeping}
+          totalCount={shownY}
+          rows={assistantRows}
+          onClose={() => setAssistantOpen(false)}
+          onUpgrade={() => { setAssistantOpen(false); onNavigate("plans"); }}
+        />
+      )}
       {settingsOpen && <TaskSettingsSheet onClose={() => setSettingsOpen(false)} />}
       {tourOpen && <TodoTour onEnd={endTour} />}
       {toast && (
@@ -877,14 +910,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <button type="button" className="tdb-setrow" onClick={() => setSettingsOpen(true)}>
             <span className="tdb-sic" aria-hidden>⚙</span>Task settings
           </button>
-          {!isProUser(currentUser) && (
-            <button type="button" className="tdb-prosq" onClick={() => onNavigate("plans")}>
-              <span className="tdb-prok">SCRIPTALLY PRO</span>
-              <b>Hand it over</b>
-              <p>Let the assistant handle your housekeeping — wish lists and materials filled for you.</p>
-              <span className="tdb-progo">Meet the assistant</span>
-            </button>
-          )}
         </div>
       </>
     );

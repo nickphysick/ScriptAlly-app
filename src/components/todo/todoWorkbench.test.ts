@@ -70,16 +70,14 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
     expect(page).toContain('aria-pressed={filters.todayOnly} onClick={() => setF("todayOnly", !filters.todayOnly)}');
     expect(page).toContain("matchesSearch(c, search, sctx)");
   });
-  it("the foot: Task-settings row + the Pro square, plan-gated; the Focus square is extinct", () => {
+  it("v4 P5: the foot keeps Task settings ONLY — the Pro square left for the letterhead banner", () => {
     expect(page).toContain('className="tdb-setrow" onClick={() => setSettingsOpen(true)}');
     expect(rule(".tdb-sic")).toContain("width: 26px; height: 26px; border-radius: 50%");
-    expect(page).toContain("{!isProUser(currentUser) && (");
-    expect(page).toContain('className="tdb-prosq" onClick={() => onNavigate("plans")}');
-    expect(page).toContain("<b>Hand it over</b>");
-    expect(page).toContain('<span className="tdb-progo">Meet the assistant</span>');
-    expect(rule(".tdb-prosq")).toContain("linear-gradient(180deg, #eef2f6, #e6ecf2)");
-    expect(page).not.toContain("tdb-sq"); // the squares are gone
-    expect(page).not.toContain("tdb-sqgo");
+    for (const stale of ["tdb-prosq", "tdb-prok", "tdb-progo"]) {
+      expect(page).not.toContain(stale);
+      expect(css).not.toContain(stale);
+    }
+    expect(page).not.toContain("tdb-sq"); // the squares stay extinct
   });
 });
 describe("P1 — the corner retirement + the AppShell's one out-of-page line", () => {
