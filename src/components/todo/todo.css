@@ -28,7 +28,7 @@
 .tdb-ws { display: flex; align-items: flex-start; gap: var(--g24); padding: 22px 0 26px; } /* the assembly work row (ref .work) */
 /* THE SHEET (the LAWS): the white content panel holding BOTH views; cards on it wear the sheet
    border + shadow. 812 = 18px padding wrapping the 774 exact-fit viewport. */
-.tdb-mainc { width: var(--tdb-sheet); flex: 0 0 auto; box-sizing: border-box; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 16px; padding: 18px 18px 8px; }
+.tdb-mainc { width: var(--tdb-sheet); flex: 0 0 auto; box-sizing: border-box; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 16px; padding: 18px 18px 8px; transition: width 220ms ease; }
 @media (max-width: 900px) { .tdb-ws { flex-wrap: wrap; } .tdb-ws .tdb-fside { position: static; width: 100%; max-height: none; } .tdb-mainc { width: 100%; } }
 
 /* ── THE HERO (v4 P1) — CENTRED on the bare page ground: no band, no border. The title stacks
@@ -353,8 +353,18 @@
    chip/popover below. Still the natural home for future companions; 12px stack gaps (ref .rcol). ── */
 .tdb-railr { width: var(--tdb-today); flex: 0 0 auto; gap: 14px; } /* 256 per width v3 */
 @media (max-width: 1239.98px) { .tdb-railr { display: none; } } /* belt — the mount is JS-gated */
-/* the compact break (P6): the rail leaves the flow for the overlay drawer — assembly 1092 = 812 + 24 + 256 */
-@media (max-width: 1427.98px) { .tdb-wrap { --tdb-asm: 1092px; } }
+/* v4 P3 — CONDITIONAL TODAY: empty → the board runs 4-up (sheet 1072, assembly 1344); active →
+   3-up (sheet 812, assembly 1364). Cards stay 250 throughout; the widths transition 220ms while
+   Today slides in/out. */
+.tdb-wrap.today-off { --tdb-asm: 1344px; --tdb-sheet: 1072px; }
+.tdb-wrap.today-off .tdb-grid { grid-template-columns: repeat(4, var(--tdb-cardw)); }
+.tdb-railr.in { animation: tdbTodayIn 220ms ease; }
+@keyframes tdbTodayIn { from { opacity: 0; transform: translateX(24px); } }
+.tdb-railr.out { animation: tdbTodayOut 220ms ease forwards; }
+@keyframes tdbTodayOut { to { opacity: 0; transform: translateX(24px); } }
+@media (prefers-reduced-motion: reduce) { .tdb-railr.in, .tdb-railr.out { animation: none; } .tdb-asm, .tdb-mainc { transition: none; } }
+/* the compact break (P6): the rail leaves the flow for the overlay drawer */
+@media (max-width: 1427.98px) { .tdb-wrap { --tdb-asm: 1092px; } .tdb-wrap.today-off { --tdb-asm: 1072px; } }
 .tdb-todaypopwrap { position: relative; flex: none; }
 .tdb-todaychip { display: inline-flex; align-items: center; gap: 7px; font-family: var(--f12-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border: 1px solid var(--hk-spine); border-radius: 99px; padding: 8px 14px; color: var(--hk-ink); white-space: nowrap; }
 .tdb-todaychip:hover { filter: brightness(0.98); }
@@ -367,10 +377,10 @@
    hairline, radius 16, floating shadow. Plain paper header (Playfair "Today" + the mono right
    slot: date when empty ⇄ "{n} OF 5"); the middle region holds committed rows above the dashed
    ghost invitation and the collapsed done row; two footer verbs pinned beneath. ── */
-.tdb-today2 { flex: 0 1 auto; min-height: 0; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 4px 16px rgba(58, 28, 20, 0.1); display: flex; flex-direction: column; overflow: hidden; }
-.tdb-th { flex: none; display: flex; align-items: baseline; gap: 8px; padding: 14px 15px 11px; }
-.tdb-th .tdb-t { font-family: var(--f12-serif); font-size: 17px; font-weight: 700; color: var(--ink); }
-.tdb-th .tdb-thr { margin-left: auto; font-style: normal; font-family: var(--f12-mono); font-size: 7.5px; font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase; color: var(--faint); white-space: nowrap; }
+.tdb-today2 { flex: 0 1 auto; min-height: 0; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 8px 22px rgba(58, 28, 20, 0.14); display: flex; flex-direction: column; overflow: hidden; } /* v4: lifted white */
+.tdb-th { flex: none; display: flex; align-items: baseline; gap: 8px; padding: 11px 14px; background: linear-gradient(180deg, #d7ddd5, #d5dbd3); border-bottom: 1px solid var(--hk-spine); } /* v4: the diary-sage head (pack hexes) */
+.tdb-th .tdb-t { font-family: var(--f12-serif); font-size: 16px; font-weight: 700; color: #3d4a3b; }
+.tdb-th .tdb-thr { margin-left: auto; font-style: normal; font-family: var(--f12-mono); font-size: 7px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #5a6e58; white-space: nowrap; }
 .tdb-tmid2 { flex: 0 1 auto; padding: 0 13px; display: flex; flex-direction: column; }
 .tdb-tcommit { display: flex; flex-direction: column; }
 .tdb-trow { display: flex; align-items: flex-start; gap: 8px; padding: 9px 2px; border-bottom: 1px solid var(--hairline); cursor: pointer; flex: none; }

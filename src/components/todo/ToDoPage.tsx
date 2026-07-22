@@ -397,6 +397,22 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   ];
   // Bulk actions — the same writes the singles make, applied optimistically with ONE undo-all.
 
+  // v4 P3 — CONDITIONAL TODAY: the column exists only with content (≥1 committed OR ≥1 done
+  // today — the existing derivation); empty → the board runs 4-up. Exit lags 220ms for the
+  // slide-out (reduced motion: instant).
+  const todayActive = committedCards.length > 0 || doneN > 0;
+  const [todayShown, setTodayShown] = useState(false);
+  const [todayLeaving, setTodayLeaving] = useState(false);
+  useEffect(() => {
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (todayActive) { setTodayShown(true); setTodayLeaving(false); return; }
+    if (reduce) { setTodayShown(false); setTodayLeaving(false); return; }
+    setTodayLeaving(true);
+    const t = window.setTimeout(() => { setTodayShown(false); setTodayLeaving(false); }, 220);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [todayActive]);
+
   // Deck v2 P2 — the shown/total pair (the deck's SHOWING x OF y) + the Esc chain: search
   // clears first, the narrowing second (editables keep their own Esc except the search input,
   // which clears via its own handler).
@@ -602,7 +618,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
 
   return (
     <F12Page tools={<F12Account onClick={() => onNavigate("account")} />}>
-      <div className="tdb-wrap" ref={wrapRef}>
+      <div className={`tdb-wrap${todayShown ? "" : " today-off"}`} ref={wrapRef}>
         {/* ── the workbench row (Option B, todo-workbench-shell-v1.html): floating drawer
             (sticky, foldable) beside a CENTRED ~1150px content column — max-width discipline at
             every viewport, surplus pools as symmetric desk. The old full-bleed header band +
@@ -712,8 +728,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           {/* VI P1 — "Today", ALWAYS ON: the right column is a constant part of the grid at
               every viewport ≥1200px (no collapsed state, no tab, no drawer); below that the
               masthead chip + popover stand. One renderTodayPanel, two mounts, XOR'd on narrow. */}
-          {!narrow && (
-            <aside className="tdb-railr" aria-label="Today">
+          {!narrow && todayShown && (
+            <aside className={`tdb-railr${todayLeaving ? " out" : " in"}`} aria-label="Today">
               {renderTodayPanel()}
             </aside>
           )}

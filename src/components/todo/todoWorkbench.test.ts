@@ -114,6 +114,33 @@ describe("P1 — the corner retirement + the AppShell's one out-of-page line", (
   });
 });
 
+describe("v4 P3 — conditional Today + the 4-up board", () => {
+  it("Today mounts only with content (committed OR done today); the wrap flags today-off", () => {
+    expect(page).toContain("const todayActive = committedCards.length > 0 || doneN > 0;");
+    expect(page).toContain("{!narrow && todayShown && (");
+    expect(page).toContain('className={`tdb-wrap${todayShown ? "" : " today-off"}`}');
+  });
+  it("the grid steps 4-up ⇄ 3-up via tokens; cards stay 250 (only the count changes)", () => {
+    expect(css).toContain(".tdb-wrap.today-off { --tdb-asm: 1344px; --tdb-sheet: 1072px; }");
+    expect(css).toContain(".tdb-wrap.today-off .tdb-grid { grid-template-columns: repeat(4, var(--tdb-cardw)); }");
+    expect(rule(".tdb-grid")).toContain("repeat(3, var(--tdb-cardw))");
+    expect(rule(".tdb-mainc")).toContain("transition: width 220ms ease");
+  });
+  it("the slide: in/out 220ms ease; exit lags the unmount; reduced motion = instant", () => {
+    expect(css).toContain(".tdb-railr.in { animation: tdbTodayIn 220ms ease; }");
+    expect(css).toContain(".tdb-railr.out { animation: tdbTodayOut 220ms ease forwards; }");
+    expect(page).toContain("window.setTimeout(() => { setTodayShown(false); setTodayLeaving(false); }, 220);");
+    expect(page).toContain('window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;');
+    expect(css).toContain("@media (prefers-reduced-motion: reduce) { .tdb-railr.in, .tdb-railr.out { animation: none; }");
+  });
+  it("the Today panel: lifted white card with the diary-sage header (the pack's hexes)", () => {
+    expect(rule(".tdb-today2")).toContain("box-shadow: 0 8px 22px rgba(58, 28, 20, 0.14)");
+    expect(rule(".tdb-th")).toContain("linear-gradient(180deg, #d7ddd5, #d5dbd3)");
+    expect(rule(".tdb-th .tdb-t")).toContain("color: #3d4a3b");
+    expect(rule(".tdb-th .tdb-thr")).toContain("color: #5a6e58");
+  });
+});
+
 describe("Final Shape P6 — remnant sweep · a11y", () => {
   it("GREP SWEEP — strip/deck/post-it/reel/ledger-table/selection remnants all extinct", () => {
     const stale = [
@@ -381,7 +408,7 @@ describe("II·B P3 — the companion rail (one panel, two mounts, one state)", (
   it("the rail: 264 sticky at the 24 offset, after the main column; noted as the future companions' home", () => {
     expect(rule(".tdb-railr")).toContain("width: var(--tdb-today)");
     expect(rule(".tdb-fside, .tdb-railr")).toContain("position: sticky"); // the shared contract
-    expect(page.indexOf('className="tdb-main"')).toBeLessThan(page.indexOf('className="tdb-railr"'));
+    expect(page.indexOf('className="tdb-mainc"')).toBeLessThan(page.indexOf('tdb-railr${todayLeaving'));
   });
   it("the chip's count is the committed union — never a parallel tally — and the header slot pairs date ⇄ count", () => {
     expect(page).toContain("Today · {committedCards.length} TO GO");
@@ -505,7 +532,7 @@ describe("Deck v2 P5 — retirement sweep · breakpoints · a11y", () => {
   });
   it("BREAKPOINTS (P6 final): <1428 the rail is an overlay drawer behind ⚲ FILTER beside the search; <1240 the Today popover", () => {
     expect(page).toContain('window.matchMedia("(max-width: 1427.98px)")');
-    expect(css).toContain("@media (max-width: 1427.98px) { .tdb-wrap { --tdb-asm: 1092px; } }");
+    expect(css).toContain("@media (max-width: 1427.98px) { .tdb-wrap { --tdb-asm: 1092px; } .tdb-wrap.today-off { --tdb-asm: 1072px; } }");
     expect(page).toContain("⚲ FILTER · {shownX}/{shownY}"); // (multi-line JSX — no leading >)
     expect(page).toContain('className="tdb-fdrawer" role="dialog" aria-modal="true" aria-label="Filters"');
     expect(page).toContain("{renderFilterPanel()}");
@@ -563,7 +590,7 @@ describe("VI P1 — 'Today', always on (todo-right-column-v1.html)", () => {
   it("the header's right slot: today's date when empty ⇄ '{n} OF 5' once anything is committed", () => {
     expect(page).toContain("{committedCards.length === 0 && doneN === 0 ? shortHeaderDate(now) : `${committedCards.length} OF ${MAX_TODAY}`}");
     expect(rule(".tdb-th .tdb-thr")).toContain("margin-left: auto");
-    expect(rule(".tdb-th .tdb-thr")).toContain("font-size: 7.5px");
+    expect(rule(".tdb-th .tdb-thr")).toContain("font-size: 7px"); // v4: the diary head scale
   });
   it("the ghost invitation: dashed 11px-radius box, no fill; dashed 15px tick-boxes + faded bars; widths cycled", () => {
     const box = rule(".tdb-ghostbox");
