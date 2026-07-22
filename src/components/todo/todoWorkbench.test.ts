@@ -171,25 +171,25 @@ describe("Final Shape P3 — the sheet shell + the resident docband", () => {
 });
 
 describe("Final Shape P1 — the hero + the floating search", () => {
-  it("the hero: two objects only — 42px headline + ink Begin focused session (whole-board scope)", () => {
-    expect(rule(".tdb-hero")).toContain("background: var(--paper)");
+  it("v4: the hero is CENTRED on the bare ground — no band, no border, title over search", () => {
+    expect(rule(".tdb-hero")).toContain("text-align: center");
+    expect(rule(".tdb-hero")).not.toContain("background");
+    expect(rule(".tdb-hero")).not.toContain("border");
     expect(page).toContain('<h1 className="tdb-ask">What’s on your desk?</h1>');
     expect(rule(".tdb-ask")).toContain("font-size: 42px");
-    expect(page).toContain('className="tdb-fsb" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>▶ Begin focused session</button>');
-    expect(rule(".tdb-fsb")).toContain("height: 46px");
-    const hero = page.slice(page.indexOf("function renderHero"), page.indexOf("// ── Deck v2 P3: THE RAIL"));
-    expect(hero).not.toContain("rdate"); // no date
-    expect(hero).not.toContain("postit"); // no counts, no post-its
+    const hero = page.slice(page.indexOf("function renderHero"), page.indexOf("// ── Final Shape P2"));
+    expect(hero).not.toContain("Begin focused session"); // moved to the rail (v4 P2)
+    expect(hero).not.toContain("tdb-fsb\""); // no focused-session control in the header
   });
-  it("the floating search: 540×46, centred, breaking the hero edge by half its height, own stacking context", () => {
+  it("v4: the search sits centred directly beneath the title (the band overlap retired)", () => {
     const sr = rule(".tdb-srchrow");
-    expect(sr).toContain("margin: -23px 0 0");
-    expect(sr).toContain("z-index: 6");
+    expect(sr).toContain("justify-content: center");
+    expect(sr).toContain("margin: 18px 0 2px");
     const bs = rule(".tdb-bigsearch");
     expect(bs).toContain("width: 540px");
     expect(bs).toContain("height: 46px");
     expect(page).toContain('placeholder="Search your desk…"');
-    expect(page).toContain("matchesSearch(c, search, sctx)"); // live-filters both views
+    expect(page).toContain("matchesSearch(c, search, sctx)");
   });
   it("⌘K guards on visibility (the page stays mounted behind other routes); Esc chain: search then filters", () => {
     expect(page).toContain("wrapRef.current.offsetParent === null");
@@ -311,13 +311,13 @@ describe("Final Shape P5 — the ledger's selection machinery is extinct", () =>
   });
 });
 describe("A1 → Final Shape — the hero band (supersedes the strip)", () => {
-  it("a full-bleed paper band with the 1px base rule, ABOVE the work row; the strip family is extinct", () => {
-    expect(rule(".tdb-hero")).toContain("background: var(--paper)");
-    expect(rule(".tdb-hero")).toContain("border-bottom: 1px solid var(--line)");
+  it("v4: the hero band is gone — bare ground above the work row; the strip family stays extinct", () => {
     const band = page.indexOf("{renderHero()}");
     const ws = page.indexOf('className="tdb-asm tdb-ws"');
     expect(band).toBeGreaterThan(0);
     expect(band).toBeLessThan(ws);
+    expect(page).not.toContain("tdb-herorow");
+    expect(page).not.toContain("tdb-strip");
   });
   it("the hero is not sticky (scrolls away); the flanking columns keep the scroll contract", () => {
     expect(rule(".tdb-hero")).not.toContain("sticky");
@@ -637,6 +637,6 @@ describe("III P4 — the tucked Today tab · the masthead · the naming sweep", 
     }
     expect(page).toMatch(/aria-label=\{`Focus on \$\{label\}`\}/); // cards view (the play button)
     expect(page).toMatch(/onClick=\{onSession\}/); // the run sheet's heading shares the wording
-    expect(page).toContain(">▶ Begin focused session</button>"); // the hero owns the walk
+    expect(page).toContain("Begin focused session"); // the rail owns the walk (v4 P2)
   });
 });

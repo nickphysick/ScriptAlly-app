@@ -782,11 +782,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   function renderHero() {
     return (
       <>
+        {/* v4 P1 — the hero sits on the bare page ground: no band, no border, CENTRED; the
+            search stacks directly beneath it. The focused-session button lives in the rail. */}
         <div className="tdb-hero">
-          <div className="tdb-asm tdb-herorow">
-            <h1 className="tdb-ask">What’s on your desk?</h1>
-            <button type="button" className="tdb-fsb" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>▶ Begin focused session</button>
-          </div>
+          <h1 className="tdb-ask">What’s on your desk?</h1>
         </div>
         <div className="tdb-srchrow">
           <span className="tdb-bigsearch">

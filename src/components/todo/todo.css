@@ -31,17 +31,11 @@
 .tdb-mainc { width: var(--tdb-sheet); flex: 0 0 auto; box-sizing: border-box; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 16px; padding: 18px 18px 8px; }
 @media (max-width: 900px) { .tdb-ws { flex-wrap: wrap; } .tdb-ws .tdb-fside { position: static; width: 100%; max-height: none; } .tdb-mainc { width: 100%; } }
 
-/* ── THE HERO (Final Shape P1, THE LAWS v4) — two objects only: the 42px Playfair headline and
-   the ink Begin-focused-session button. Paper full-bleed, contents lock to the assembly. The
-   FLOATING SEARCH (540×46) centres on the assembly and breaks the hero's bottom edge by half
-   its height — its own stacking context above both surfaces. ── */
-.tdb-asm { width: var(--tdb-asm); margin: 0 auto; }
-.tdb-hero { background: var(--paper); border-bottom: 1px solid var(--line); }
-.tdb-herorow { display: flex; align-items: center; padding: 30px 0 26px; }
-.tdb-fsb { margin-left: auto; display: inline-flex; align-items: center; gap: 10px; background: var(--ink); color: var(--panel); border: 1px solid var(--ink); border-radius: 99px; padding: 0 24px; height: 46px; font-size: 13.5px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 14px rgba(58, 28, 20, 0.22); }
-.tdb-fsb:hover:not(:disabled) { filter: brightness(1.3); }
-.tdb-fsb:disabled { opacity: 0.5; }
-.tdb-srchrow { display: flex; justify-content: center; align-items: flex-start; gap: 12px; margin: -23px 0 0; position: relative; z-index: 6; }
+/* ── THE HERO (v4 P1) — CENTRED on the bare page ground: no band, no border. The title stacks
+   over the centred floating search (18px beneath — the overlap retired with the band). ── */
+.tdb-asm { width: var(--tdb-asm); margin: 0 auto; transition: width 220ms ease; }
+.tdb-hero { padding: 34px 0 0; text-align: center; }
+.tdb-srchrow { display: flex; justify-content: center; align-items: flex-start; gap: 12px; margin: 18px 0 2px; position: relative; z-index: 6; }
 .tdb-bigsearch { width: 540px; height: 46px; box-sizing: border-box; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 99px; box-shadow: 0 10px 28px rgba(58, 28, 20, 0.16); display: flex; align-items: center; gap: 11px; padding: 0 20px; color: var(--muted); font-size: 13px; }
 .tdb-bigsearch input { flex: 1; min-width: 0; border: none; background: none; font-size: 13px; color: var(--ink); outline: none; }
 .tdb-bigsearch input::placeholder { color: var(--muted); }
