@@ -230,7 +230,8 @@ describe("Final Shape P1 — the hero + the floating search", () => {
     expect(rule(".tdb-hero")).not.toContain("background");
     expect(rule(".tdb-hero")).not.toContain("border");
     expect(page).toContain('<h1 className="tdb-ask">What’s on your desk?</h1>');
-    expect(rule(".tdb-ask")).toContain("font-size: 42px");
+    expect(rule(".tdb-ask")).toContain("font-size: 64px"); // polish: 64
+    expect(rule(".tdb-ask")).toContain("letter-spacing: -0.015em");
     const hero = page.slice(page.indexOf("function renderHero"), page.indexOf("// ── Final Shape P2"));
     expect(hero).not.toContain("Begin focused session"); // moved to the rail (v4 P2)
     expect(hero).not.toContain("tdb-fsb\""); // no focused-session control in the header
@@ -238,11 +239,11 @@ describe("Final Shape P1 — the hero + the floating search", () => {
   it("v4: the search sits centred directly beneath the title (the band overlap retired)", () => {
     const sr = rule(".tdb-srchrow");
     expect(sr).toContain("justify-content: center");
-    expect(sr).toContain("margin: 18px 0 2px");
+    expect(sr).toContain("margin: 22px 0 6px"); // polish spacing
     const bs = rule(".tdb-bigsearch");
     expect(bs).toContain("width: 540px");
     expect(bs).toContain("height: 46px");
-    expect(page).toContain('placeholder="Search your desk…"');
+    expect(page).toContain('placeholder="Search"'); // polish: exactly "Search"
     expect(page).toContain("matchesSearch(c, search, sctx)");
   });
   it("⌘K guards on visibility (the page stays mounted behind other routes); Esc chain: search then filters", () => {

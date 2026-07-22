@@ -34,15 +34,15 @@
 /* ── THE HERO (v4 P1) — CENTRED on the bare page ground: no band, no border. The title stacks
    over the centred floating search (18px beneath — the overlap retired with the band). ── */
 .tdb-asm { width: var(--tdb-asm); margin: 0 auto; transition: width 220ms ease; }
-.tdb-hero { padding: 34px 0 0; text-align: center; }
-.tdb-srchrow { display: flex; justify-content: center; align-items: flex-start; gap: 12px; margin: 18px 0 2px; position: relative; z-index: 6; }
+.tdb-hero { padding: 40px 0 0; text-align: center; }
+.tdb-srchrow { display: flex; justify-content: center; align-items: flex-start; gap: 12px; margin: 22px 0 6px; position: relative; z-index: 6; }
 .tdb-bigsearch { width: 540px; height: 46px; box-sizing: border-box; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 99px; box-shadow: 0 10px 28px rgba(58, 28, 20, 0.16); display: flex; align-items: center; gap: 11px; padding: 0 20px; color: var(--muted); font-size: 13px; }
 .tdb-bigsearch input { flex: 1; min-width: 0; border: none; background: none; font-size: 13px; color: var(--ink); outline: none; }
 .tdb-bigsearch input::placeholder { color: var(--muted); }
 .tdb-bigsearch kbd { margin-left: auto; font-family: var(--f12-mono); font-size: 8.5px; border: 1px solid var(--line); border-radius: 5px; padding: 2px 6px; color: var(--faint); }
 .tdb-bigsearch:focus-within { border-color: var(--ink-2); }
 .tdb-rdate { font-family: var(--f12-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); }
-.tdb-ask { font-family: var(--f12-serif); font-size: 42px; font-weight: 600; color: var(--ink); white-space: nowrap; line-height: 1.08; letter-spacing: -0.01em; } /* Final Shape: 42 */
+.tdb-ask { font-family: var(--f12-serif); font-size: 64px; font-weight: 600; color: var(--ink); white-space: nowrap; line-height: 1.08; letter-spacing: -0.015em; } /* polish: 64 */
 /* (the strip census retired — the counts live on the filter rail's pills) */
 .tdb-wrap { --lat-1: #f5efe6; --lat-2: #efe7d9; --lat-bd: #ddd0bc; --lat-mark: #cbb995; --lat-ink: #8a7048; }
 /* the quiet pills' family dots (THE LAWS) */

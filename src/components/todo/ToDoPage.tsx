@@ -842,7 +842,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             <input
               ref={searchRef}
               type="text"
-              placeholder="Search your desk…"
+              placeholder="Search"
               aria-label="Search your desk"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
