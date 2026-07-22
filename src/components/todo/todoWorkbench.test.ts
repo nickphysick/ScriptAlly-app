@@ -70,12 +70,14 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
     expect(page).toContain('aria-pressed={filters.todayOnly} onClick={() => setF("todayOnly", !filters.todayOnly)}');
     expect(page).toContain("matchesSearch(c, search, sctx)");
   });
-  it("v4 P5: the foot keeps Task settings ONLY — the Pro square left for the letterhead banner", () => {
+  it("v4 P5: the foot keeps Task settings ONLY — the Pro square left for the banner", () => {
     expect(page).toContain('className="tdb-setrow" onClick={() => setSettingsOpen(true)}');
     expect(rule(".tdb-sic")).toContain("width: 26px; height: 26px; border-radius: 50%");
-    for (const stale of ["tdb-prosq", "tdb-prok", "tdb-progo"]) {
-      expect(page).not.toContain(stale);
-      expect(css).not.toContain(stale);
+    // the square-era classes stay extinct — bounded so the polish-P3 colleague's distinct
+    // names (tdb-prok2 / tdb-progoP) don't false-trip the ban
+    for (const stale of [/tdb-prosq/, /tdb-prok(?!2)/, /tdb-progo(?!P)/]) {
+      expect(page).not.toMatch(stale);
+      expect(css).not.toMatch(stale);
     }
     expect(page).not.toContain("tdb-sq"); // the squares stay extinct
   });
@@ -168,7 +170,7 @@ describe("v4 P3 — conditional Today + the 4-up board", () => {
     expect(css).toContain(".tdb-wrap.today-off { --tdb-asm: 1344px; --tdb-sheet: 1072px; }");
     expect(css).toContain(".tdb-wrap.today-off .tdb-grid { grid-template-columns: repeat(4, var(--tdb-cardw)); }");
     expect(rule(".tdb-grid")).toContain("repeat(3, var(--tdb-cardw))");
-    expect(rule(".tdb-mainc")).toContain("transition: width 220ms ease");
+    expect(rule(".tdb-centre")).toContain("transition: width 220ms ease"); // the stack carries the Today width step
   });
   it("the slide: in/out 220ms ease; exit lags the unmount; reduced motion = instant", () => {
     expect(css).toContain(".tdb-railr.in { animation: tdbTodayIn 220ms ease; }");
@@ -228,7 +230,24 @@ describe("Final Shape P4 — the wrapped grid + sticky headings", () => {
   });
 });
 
-describe("Final Shape P3 — the sheet shell + the resident docband", () => {
+describe("polish P3 — the centre stack: three sibling containers", () => {
+  it("review card · sheet · Pro colleague — siblings inside .tdb-centre; the sheet holds neither", () => {
+    const centre = page.indexOf('className="tdb-centre"');
+    const box = page.indexOf('className="tdb-rvbox"');
+    const mainc = page.indexOf('className="tdb-mainc"');
+    const banner = page.indexOf("<ProBanner");
+    expect(centre).toBeGreaterThan(0);
+    expect(box).toBeGreaterThan(centre);
+    expect(mainc).toBeGreaterThan(box);
+    expect(banner).toBeGreaterThan(mainc);
+    const c = rule(".tdb-centre");
+    expect(c).toContain("width: var(--tdb-sheet)");
+    expect(c).toContain("flex-direction: column");
+    expect(c).toContain("gap: 16px");
+    expect(rule(".tdb-mainc")).toContain("width: 100%");
+    expect(page).not.toContain("tdb-docband");
+    expect(css).not.toContain("tdb-docband");
+  });
   it("the corner row: derived mono meta (date · open · showing) left, the ▦/☰ segment right", () => {
     expect(page).toContain("{shortHeaderDate(now)} · {shownY} OPEN · SHOWING {shownX}");
     expect(rule(".tdb-shmeta")).toContain("text-transform: uppercase");
@@ -237,19 +256,10 @@ describe("Final Shape P3 — the sheet shell + the resident docband", () => {
     expect(page).toContain('onClick={() => pickView("ledger")}>☰</button>');
     expect(rule(".tdb-vseg")).toContain("margin-left: auto");
   });
-  it("the docband sits at the top of BOTH views (before the desk/view branch), inside the sheet", () => {
-    const mainc = page.indexOf('className="tdb-mainc"');
-    const head = page.indexOf('className="tdb-sheethead"');
-    const band = page.indexOf('className="tdb-docband"');
-    const views = page.indexOf('desk === "new-desk"');
-    expect(head).toBeGreaterThan(mainc);
-    expect(band).toBeGreaterThan(head);
-    expect(band).toBeLessThan(views);
-  });
-  it("ONE review surface repo-wide: the docband; the strip banner classes are extinct", () => {
+  it("ONE review surface repo-wide: the rvbox; the strip banner classes are extinct", () => {
     expect(page).not.toContain("tdb-rvhead");
     expect(css).not.toContain("tdb-rvhead");
-    expect((page.match(/tdb-docband/g) ?? []).length).toBe(1);
+    expect((page.match(/tdb-rvbox/g) ?? []).length).toBe(1);
     expect(page).toContain('{reviewOpened ? "View again" : "Open it ›"}');
   });
 });
@@ -511,9 +521,9 @@ describe("Width v4 — the centred assembly tokens (Final Shape)", () => {
   });
 });
 describe("Deck v2 P4 — the sheet · the exact-fit board · the rename", () => {
-  it("THE SHEET: both views render inside the white 812 panel (radius 16, hairline, 18/18/8)", () => {
+  it("THE SHEET: both views render inside the white panel (radius 16, hairline, 18/18/8; width from the stack)", () => {
     const m = rule(".tdb-mainc");
-    expect(m).toContain("width: var(--tdb-sheet)");
+    expect(m).toContain("width: 100%");
     expect(m).toContain("border-radius: 16px");
     expect(m).toContain("padding: 18px 18px 8px");
     // one sheet, both views: the ledger + the lanes render inside .tdb-mainc (no second panel)

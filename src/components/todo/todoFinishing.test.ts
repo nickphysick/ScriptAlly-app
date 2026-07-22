@@ -55,7 +55,7 @@ describe("P2 — undo everywhere (write-then-reverse)", () => {
   });
 });
 
-describe("Deck v2 P1 — THE RESIDENT REVIEW BANNER (one surface, no windows, no dismissal)", () => {
+describe("polish P3 — THE REVIEW CARD (its own container at the stack's head)", () => {
   const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
   const css = readFileSync(join(here, "todo.css"), "utf8");
   const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");
@@ -69,9 +69,13 @@ describe("Deck v2 P1 — THE RESIDENT REVIEW BANNER (one surface, no windows, no
     expect(page).toContain("const reviewWin = queries.length > 0 ? reviewWeek(queries, now) : null;");
     expect(page).toContain("f.snoozedUntil === reviewCompletionSnooze(reviewWin)");
     expect(page).toContain('{reviewOpened ? "View again" : "Open it ›"}');
-    expect(page).toContain('className={`tdb-rvopen${reviewOpened ? " ghost" : ""}`} onClick={openSundayReview}');
+    // press-law dress: unopened = the true-primary press small; opened = the quiet ghost
+    expect(page).toContain('className={`${reviewOpened ? "tdb-ctaghost" : "tdb-cta sm"} tdb-rvopen2`} onClick={openSundayReview}');
   });
-  it("the banner is a PERMANENT resident in the strip: no ✕, no dismissal write, no windows", () => {
+  it("the ✕ is a SESSION-ONLY hide — component state, ZERO writes; no stored dismissal exists", () => {
+    expect(page).toContain("const [reviewHidden, setReviewHidden] = useState(false);");
+    expect(page).toContain("{reviewWin && !reviewHidden && (");
+    expect(page).toContain('aria-label="Hide until next visit" onClick={() => setReviewHidden(true)}>✕</button>');
     expect(page).not.toContain("dismissReviewBanner");
     expect(page).not.toContain("reviewSurface");
     for (const stale of ["tdb-rvbanner", "tdb-rvbar", "tdb-rvcard", "tdb-rvx2", "tdb-rvgo2", "renderReviewAfterlife"]) {
@@ -79,20 +83,23 @@ describe("Deck v2 P1 — THE RESIDENT REVIEW BANNER (one surface, no windows, no
       expect(css).not.toContain(stale);
     }
   });
-  it("the DOCBAND anatomy (Final Shape P3): uncircled 42px currentColor cup, kicker, Playfair 15 title, one-line sub", () => {
+  it("the RVBOX anatomy (polish P3): lifted white card, uncircled 46px currentColor cup, kicker, Playfair 15 title, one-line sub", () => {
     expect(cup).toContain('stroke="currentColor"');
     expect(page).toContain('<span className="tdb-rvcupb" aria-hidden dangerouslySetInnerHTML={{ __html: reviewCupRaw }} />');
     expect(page).toContain("THE SUNDAY REVIEW · WEEK {reviewWin.weekNumber}");
     expect(page).toContain("<b>Last week in review</b>");
     expect(page).toContain("<p>Every box ticked turns the dial in your favour.</p>");
     const cupRule = css.match(/\.tdb-rvcupb \{([^}]*)\}/)?.[1] ?? "";
-    expect(cupRule).toContain("width: 42px");
+    expect(cupRule).toContain("width: 46px");
     expect(cupRule).toContain("color: var(--ink)");
     expect(cupRule).not.toContain("border-radius"); // uncircled
-    expect(css).toMatch(/\.tdb-docband \{ display: flex;[^}]*border-radius: 12px/);
-    expect(css).toContain("linear-gradient(180deg, #fbf7f0, #f6efe4)");
+    const box = css.match(/\.tdb-rvbox \{([^}]*)\}/)?.[1] ?? "";
+    expect(box).toContain("background: var(--white, #fff)");
+    expect(box).toContain("border-radius: 16px");
+    expect(box).toContain("box-shadow: 0 5px 18px rgba(58, 28, 20, 0.11)");
+    expect(css).not.toContain("#fbf7f0"); // the docband's parchment gradient died with it
     expect(css).toMatch(/\.tdb-rvhx b \{[^}]*font-size: 15px/);
-    expect(page).not.toContain("tdb-rvhead"); // the strip banner is gone — ONE surface, the docband
+    expect(page).not.toContain("tdb-rvhead"); // the strip banner is gone — ONE surface, the review card
   });
   it("the mode itself is untouched: the banner button opens weeklyReview over the same set", () => {
     expect(page).toContain('mode: "weeklyReview"');

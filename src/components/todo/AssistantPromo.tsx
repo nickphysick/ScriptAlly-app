@@ -2,8 +2,9 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * AssistantPromo (v4 P5) — the Pro LETTERHEAD banner (design-refs/todo-pro-upsell.html,
- * candidate A) + the "Meet the assistant" PREVIEW modal (design-refs/todo-assistant-modal.html).
+ * AssistantPromo — the Pro COLLEAGUE banner (design-refs/todo-pro-banner.html; the polish
+ * pack superseded the v4 letterhead) + the "Meet the assistant" PREVIEW modal
+ * (design-refs/todo-assistant-modal.html, unchanged).
  * A preview only: the theatre is CANNED content driven by the user's real task names — nothing
  * reads beyond the names passed in, and NOTHING writes to the user's data from this path. No
  * price appears anywhere (the footer reads "Part of ScriptAlly Pro").
@@ -27,38 +28,26 @@ export const ProBanner: React.FC<{
   rows: AssistantTaskRow[];
   onPreview: () => void;
   onWhatsInPro: () => void;
-}> = ({ hkCount, totalCount, rows, onPreview, onWhatsInPro }) => {
-  const demo = rows.slice(0, 4);
-  return (
-    <div className="tdb-letter">
-      <div className="tdb-letterbody">
-        <div className="tdb-letterk">YOU’VE FOUND A SCRIPTALLY PRO FEATURE</div>
-        <h3>Hand over the housekeeping</h3>
-        <p>
-          The assistant researches your agents’ wish lists and materials for you. Right now it
-          could clear <b>{hkCount} of your {totalCount} tasks</b> while you get back to the
-          manuscript.
-        </p>
-        <div className="tdb-letterctas">
-          <button type="button" className="tdb-lettergo" onClick={onPreview}>See what it does →</button>
-          <button type="button" className="tdb-letterghost" onClick={onWhatsInPro}>What’s in Pro</button>
-        </div>
-      </div>
-      {demo.length > 0 && (
-        <div className="tdb-letterdemo">
-          <div className="tdb-demok">THE ASSISTANT, ON YOUR TASKS</div>
-          {demo.map((r, i) => (
-            <div key={r.label} className={`tdb-drow${i === demo.length - 1 ? " pending" : ""}`}>
-              <span className="tdb-dtick" aria-hidden>{i === demo.length - 1 ? "" : "✓"}</span>
-              {i === demo.length - 1 ? `${r.label}…` : r.label}
-              {i < demo.length - 1 && <span className="tdb-dwho">BY THE ASSISTANT</span>}
-            </div>
-          ))}
-        </div>
-      )}
+}> = ({ hkCount, totalCount, onPreview, onWhatsInPro }) => (
+  // The COLLEAGUE banner (design-refs/todo-pro-banner.html) — its own container below the sheet.
+  // Pro keeps its own slate identity: the CTA is press-law EXEMPT.
+  <div className="tdb-pro">
+    <span className="tdb-proav" aria-hidden>✎<span className="tdb-prospark">✦</span></span>
+    <div className="tdb-protx">
+      <div className="tdb-prok2">YOUR SCRIPTALLY PRO ASSISTANT</div>
+      <h3>Hand over the housekeeping</h3>
+      <p>
+        Wish lists and materials, researched from agency sites and filled for you —{" "}
+        <b>{hkCount} of your {totalCount} tasks</b>, done in the background while you write.
+      </p>
+      <div className="tdb-proquote">“Leave the admin to me — go and write.”</div>
     </div>
-  );
-};
+    <div className="tdb-proctas">
+      <button type="button" className="tdb-progoP" onClick={onPreview}>Meet the assistant →</button>
+      <button type="button" className="tdb-proghostP" onClick={onWhatsInPro}>What’s in Pro</button>
+    </div>
+  </div>
+);
 
 export const AssistantModal: React.FC<{
   hkCount: number;

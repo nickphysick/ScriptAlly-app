@@ -28,8 +28,12 @@
 .tdb-ws { display: flex; align-items: flex-start; gap: var(--g24); padding: 22px 0 26px; } /* the assembly work row (ref .work) */
 /* THE SHEET (the LAWS): the white content panel holding BOTH views; cards on it wear the sheet
    border + shadow. 812 = 18px padding wrapping the 774 exact-fit viewport. */
-.tdb-mainc { width: var(--tdb-sheet); flex: 0 0 auto; box-sizing: border-box; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 16px; padding: 18px 18px 8px; transition: width 220ms ease; }
-@media (max-width: 900px) { .tdb-ws { flex-wrap: wrap; } .tdb-ws .tdb-fside { position: static; width: 100%; max-height: none; } .tdb-mainc { width: 100%; } }
+/* polish P3 — THE CENTRE STACK: three sibling lifted containers (review · sheet · Pro),
+   812 wide, 16 apart. The stack owns the width token + the 220ms Today transition; each
+   container fills it. */
+.tdb-centre { width: var(--tdb-sheet); flex: 0 0 auto; min-width: 0; display: flex; flex-direction: column; gap: 16px; transition: width 220ms ease; }
+.tdb-mainc { width: 100%; box-sizing: border-box; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 16px; padding: 18px 18px 8px; }
+@media (max-width: 900px) { .tdb-ws { flex-wrap: wrap; } .tdb-ws .tdb-fside { position: static; width: 100%; max-height: none; } .tdb-centre { width: 100%; } }
 
 /* ── THE HERO (v4 P1) — CENTRED on the bare page ground: no band, no border. The title stacks
    over the centred floating search (18px beneath — the overlap retired with the band). ── */
@@ -111,28 +115,30 @@
 .tdb-setrow { display: flex; align-items: center; gap: 10px; padding: 9px 6px; width: 100%; font-size: 11.5px; font-weight: 600; color: var(--ink-2); cursor: pointer; border-radius: 10px; background: none; border: none; text-align: left; }
 .tdb-setrow:hover { background: var(--paper); }
 .tdb-sic { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); display: inline-flex; align-items: center; justify-content: center; font-size: 11px; color: var(--muted); flex: 0 0 auto; }
-/* ── v4 P5: THE PRO LETTERHEAD (upsell candidate A) — a white card in the double-ruled slate
-   frame, below the board, spanning the sheet's width; the demo mini-ledger runs the user's REAL
-   task names with BY-THE-ASSISTANT chips + one pending row. Non-Pro only. ── */
-.tdb-letter { position: relative; margin-top: 24px; background: var(--white, #fff); border: 1px solid #c8d4de; border-radius: 16px; box-shadow: 0 10px 30px rgba(58, 74, 96, 0.16); padding: 26px 30px; display: flex; gap: 34px; align-items: center; }
-.tdb-letter::before { content: ""; position: absolute; inset: 7px; border: 1px solid rgba(106, 137, 167, 0.35); border-radius: 11px; pointer-events: none; }
-.tdb-letterbody { min-width: 0; }
-.tdb-letterk { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.18em; color: #6A89A7; margin-bottom: 6px; }
-.tdb-letter h3 { font-family: var(--f12-serif); font-size: 26px; font-weight: 700; line-height: 1.15; color: var(--ink); }
-.tdb-letter p { font-size: 12px; color: #5d6b78; line-height: 1.6; margin-top: 8px; max-width: 430px; }
-.tdb-letter p b { color: #3d5872; }
-.tdb-letterctas { display: flex; gap: 12px; margin-top: 16px; align-items: center; }
-.tdb-lettergo { background: #6A89A7; color: #fff; border: none; border-radius: 99px; padding: 10px 20px; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(106, 137, 167, 0.35); }
-.tdb-lettergo:hover { filter: brightness(1.06); }
-.tdb-letterghost { background: none; border: none; color: #5d6b78; font-size: 11.5px; font-weight: 600; border-bottom: 1px solid #c8d4de; cursor: pointer; padding: 0; }
-.tdb-letterdemo { margin-left: auto; flex: 0 0 320px; background: #fbfcfd; border: 1px solid #dde6ee; border-radius: 12px; padding: 12px 14px; position: relative; z-index: 1; }
+/* ── polish P3: THE PRO COLLEAGUE (todo-pro-banner.html .pro) — the stack's third sibling,
+   below the sheet; nameplate glyph + spark, personalised numbers, the quiet quoted line.
+   Pro keeps its own slate identity — the CTA is press-law EXEMPT. Non-Pro only. ── */
+.tdb-pro { position: relative; overflow: hidden; background: var(--white, #fff); border: 1px solid #c8d4de; border-radius: 16px; box-shadow: 0 6px 20px rgba(58, 74, 96, 0.13); padding: 20px 26px; display: flex; align-items: center; gap: 22px; }
+.tdb-pro::after { content: ""; position: absolute; right: -70px; top: -70px; width: 230px; height: 230px; border-radius: 50%; background: radial-gradient(circle, rgba(106, 137, 167, 0.1), transparent 70%); pointer-events: none; }
+.tdb-proav { width: 60px; height: 60px; border-radius: 15px; background: linear-gradient(150deg, #7d99b4, #557393); color: #fff; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; position: relative; box-shadow: 0 5px 14px rgba(85, 115, 147, 0.32); font-size: 26px; }
+.tdb-prospark { position: absolute; right: -6px; top: -6px; width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 1px solid #d5e0ea; color: #6A89A7; font-size: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(58, 74, 96, 0.2); }
+.tdb-protx { flex: 1; min-width: 0; }
+.tdb-prok2 { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.17em; color: #6A89A7; margin-bottom: 5px; }
+.tdb-protx h3 { font-family: var(--f12-serif); font-size: 24px; font-weight: 700; line-height: 1.08; color: var(--ink); }
+.tdb-protx p { font-size: 11.5px; color: #5d6b78; margin-top: 5px; max-width: 560px; line-height: 1.55; }
+.tdb-protx p b { color: #3d5872; }
+.tdb-proquote { font-family: var(--f12-serif); font-style: italic; font-size: 12.5px; color: #6A89A7; margin-top: 6px; }
+.tdb-proctas { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 7px; flex: 0 0 auto; z-index: 1; }
+.tdb-progoP { background: #6A89A7; color: #fff; border: none; border-radius: 99px; padding: 11px 22px; font-size: 12.5px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(106, 137, 167, 0.35); white-space: nowrap; }
+.tdb-progoP:hover { filter: brightness(1.06); }
+.tdb-proghostP { background: none; border: none; border-bottom: 1px solid #d5e0ea; color: #8fa4b8; font-size: 10.5px; font-weight: 600; cursor: pointer; padding: 0 0 1px; }
 .tdb-demok { font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.14em; color: #8fa4b8; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
 .tdb-drow { display: flex; align-items: center; gap: 9px; padding: 7px 2px; border-bottom: 1px solid #edf2f7; font-size: 10.5px; color: var(--ink-2); }
 .tdb-drow:last-child { border-bottom: none; }
 .tdb-dtick { width: 16px; height: 16px; border-radius: 50%; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border: 1px solid var(--hk-spine); color: var(--hk-ink); display: flex; align-items: center; justify-content: center; font-size: 8px; flex: 0 0 auto; }
 .tdb-dwho { margin-left: auto; font-family: var(--f12-mono); font-size: 6px; letter-spacing: 0.09em; color: #6A89A7; background: #eef3f8; border: 1px solid #d5e0ea; border-radius: 99px; padding: 2px 7px; white-space: nowrap; }
-.tdb-drow.pending .tdb-dtick, .tdb-drow.queued .tdb-dtick { background: var(--white, #fff); border: 1.5px dashed #c3d0dc; color: transparent; }
-.tdb-drow.pending, .tdb-drow.queued { color: var(--faint); }
+.tdb-drow.queued .tdb-dtick { background: var(--white, #fff); border: 1.5px dashed #c3d0dc; color: transparent; }
+.tdb-drow.queued { color: var(--faint); }
 /* the working row's spinning slate ring */
 .tdb-dtick.spin { background: var(--white, #fff); border: 2px solid #d5e0ea; border-top-color: #6A89A7; color: transparent; animation: tdbSpin 0.9s linear infinite; }
 @keyframes tdbSpin { to { transform: rotate(360deg); } }
@@ -424,7 +430,7 @@
 @keyframes tdbTodayIn { from { opacity: 0; transform: translateX(24px); } }
 .tdb-railr.out { animation: tdbTodayOut 220ms ease forwards; }
 @keyframes tdbTodayOut { to { opacity: 0; transform: translateX(24px); } }
-@media (prefers-reduced-motion: reduce) { .tdb-railr.in, .tdb-railr.out { animation: none; } .tdb-asm, .tdb-mainc { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .tdb-railr.in, .tdb-railr.out { animation: none; } .tdb-asm, .tdb-centre { transition: none; } }
 /* the compact break (P6): the rail leaves the flow for the overlay drawer */
 @media (max-width: 1427.98px) { .tdb-wrap { --tdb-asm: 1092px; } .tdb-wrap.today-off { --tdb-asm: 1072px; } }
 .tdb-todaypopwrap { position: relative; flex: none; }
@@ -484,17 +490,19 @@
 .tdb-vseg { margin-left: auto; height: 32px; box-sizing: border-box; border: 1px solid var(--line); border-radius: 99px; display: inline-flex; align-items: center; padding: 3px; gap: 2px; }
 .tdb-vseg button { width: 30px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 99px; font-size: 11px; color: var(--muted); border: none; background: none; cursor: pointer; }
 .tdb-vseg button.on { background: var(--paper); color: var(--ink); border: 1px solid var(--ink); box-shadow: 1px 1px 0 var(--ink); box-sizing: border-box; } /* selected = pressed in */
-.tdb-docband { display: flex; align-items: center; gap: 14px; background: linear-gradient(180deg, #fbf7f0, #f6efe4); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; }
-.tdb-rvcupb { width: 42px; flex: 0 0 auto; color: var(--ink); filter: drop-shadow(0 2px 3px rgba(58, 28, 20, 0.14)); }
+/* polish P3 — the review left the sheet: its own lifted white card at the stack's head
+   (todo-polish.html .rvbox). The ✕ is a SESSION-ONLY hide — no stored dismissal exists and
+   none is introduced (the fence records the resolution). */
+.tdb-rvbox { display: flex; align-items: center; gap: 16px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 5px 18px rgba(58, 28, 20, 0.11); padding: 15px 20px; }
+.tdb-rvcupb { width: 46px; flex: 0 0 auto; color: var(--ink); filter: drop-shadow(0 2px 3px rgba(58, 28, 20, 0.14)); }
 .tdb-rvcupb svg { width: 100%; height: auto; display: block; }
 .tdb-rvhx { min-width: 0; }
 .tdb-rvk2 { font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.13em; color: var(--hk-ink); margin-bottom: 3px; }
 .tdb-rvhx b { display: block; font-family: var(--f12-serif); font-size: 15px; font-weight: 700; white-space: nowrap; color: var(--ink); }
 .tdb-rvhx p { font-size: 10.5px; color: var(--sub); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tdb-rvopen { margin-left: auto; flex: 0 0 auto; border: 1px solid var(--ink); background: var(--ink); color: var(--panel); border-radius: 99px; padding: 7px 15px; font-size: 11px; font-weight: 600; white-space: nowrap; cursor: pointer; }
-.tdb-rvopen:hover { filter: brightness(1.3); }
-.tdb-rvopen.ghost { background: var(--white, #fff); border-color: var(--line); color: var(--ink-2); }
-.tdb-rvopen.ghost:hover { filter: none; border-color: var(--ink-2); }
+.tdb-rvopen2 { margin-left: auto; flex: 0 0 auto; white-space: nowrap; } /* the press (.tdb-cta.sm) / ghost carries the look */
+.tdb-rvx { width: 28px; height: 28px; flex: 0 0 auto; border-radius: 50%; border: 1px solid var(--line); background: var(--white, #fff); color: var(--muted); font-size: 11px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.tdb-rvx:hover { color: var(--ink-2); border-color: var(--ink-2); }
 
 /* (the deck retired — search floats over the hero; pills live on the filter rail; the view
    segment sits in the sheet's corner row) */

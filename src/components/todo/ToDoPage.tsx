@@ -409,6 +409,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     }))
   ).slice(0, 4);
   const [assistantOpen, setAssistantOpen] = useState(false);
+  // polish P3 — the review ✕: SESSION-ONLY hide (component state, zero writes — no stored
+  // dismissal exists and none is introduced; the card returns next visit).
+  const [reviewHidden, setReviewHidden] = useState(false);
 
   // v4 P3 — CONDITIONAL TODAY: the column exists only with content (≥1 committed OR ≥1 done
   // today — the existing derivation); empty → the board runs 4-up. Exit lags 220ms for the
@@ -644,11 +647,25 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         {renderFilterDrawer()}
         <div className="tdb-asm tdb-ws">
           {renderRail()}
-          {/* THE SHEET — the white content panel holding BOTH views (width law v3) */}
+          {/* ── polish P3: THE CENTRE STACK — three sibling lifted containers, 812 wide,
+              16 apart: the review card · the sheet · the Pro colleague. ── */}
+          <div className="tdb-centre">
+          {reviewWin && !reviewHidden && (
+            <div className="tdb-rvbox">
+              <span className="tdb-rvcupb" aria-hidden dangerouslySetInnerHTML={{ __html: reviewCupRaw }} />
+              <div className="tdb-rvhx">
+                <div className="tdb-rvk2">THE SUNDAY REVIEW · WEEK {reviewWin.weekNumber}</div>
+                <b>Last week in review</b>
+                <p>Every box ticked turns the dial in your favour.</p>
+              </div>
+              <button type="button" className={`${reviewOpened ? "tdb-ctaghost" : "tdb-cta sm"} tdb-rvopen2`} onClick={openSundayReview}>
+                {reviewOpened ? "View again" : "Open it ›"}
+              </button>
+              <button type="button" className="tdb-rvx" aria-label="Hide until next visit" onClick={() => setReviewHidden(true)}>✕</button>
+            </div>
+          )}
+          {/* THE SHEET — unchanged internally, minus the docband + banner it loses */}
           <div className="tdb-mainc">
-            {/* ── Final Shape P3: the CORNER ROW (derived mono meta · the ▦/☰ segment) over THE
-                RESIDENT REVIEW DOCBAND — same boolean as v2 (opened ≔ the completion sentinel),
-                never dismissed, at the top of BOTH views. ── */}
             <div className="tdb-sheethead">
               <span className="tdb-shmeta">{shortHeaderDate(now)} · {shownY} OPEN · SHOWING {shownX}</span>
               <span className="tdb-vseg" role="group" aria-label="View">
@@ -656,19 +673,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                 <button type="button" className={view === "ledger" ? "on" : ""} aria-pressed={view === "ledger"} onClick={() => pickView("ledger")}>☰</button>
               </span>
             </div>
-            {reviewWin && (
-              <div className="tdb-docband">
-                <span className="tdb-rvcupb" aria-hidden dangerouslySetInnerHTML={{ __html: reviewCupRaw }} />
-                <div className="tdb-rvhx">
-                  <div className="tdb-rvk2">THE SUNDAY REVIEW · WEEK {reviewWin.weekNumber}</div>
-                  <b>Last week in review</b>
-                  <p>Every box ticked turns the dial in your favour.</p>
-                </div>
-                <button type="button" className={`tdb-rvopen${reviewOpened ? " ghost" : ""}`} onClick={openSundayReview}>
-                  {reviewOpened ? "View again" : "Open it ›"}
-                </button>
-              </div>
-            )}
         {/* ── the board — cards or ledger by the masthead toggle; the desk states (new-desk /
             desk-cleared) replace BOTH views. Copy verbatim from todo-empty-states.html. ── */}
         {desk === "new-desk" ? renderNewDesk() : desk === "desk-cleared" ? renderDeskCleared() : active && !anyVisible ? (
@@ -737,17 +741,17 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           )}
         </div>
         )}
-            {/* ── v4 P5: the Pro LETTERHEAD banner — below the board, spanning the sheet's
-                width; non-Pro only. The Pro square left the rail for this. ── */}
-            {!isProUser(currentUser) && (
-              <ProBanner
-                hkCount={tiles.housekeeping}
-                totalCount={shownY}
-                rows={assistantRows}
-                onPreview={() => setAssistantOpen(true)}
-                onWhatsInPro={() => onNavigate("plans")}
-              />
-            )}
+          </div>
+          {/* the Pro COLLEAGUE — its own container at the stack's foot (polish P3) */}
+          {!isProUser(currentUser) && (
+            <ProBanner
+              hkCount={tiles.housekeeping}
+              totalCount={shownY}
+              rows={assistantRows}
+              onPreview={() => setAssistantOpen(true)}
+              onWhatsInPro={() => onNavigate("plans")}
+            />
+          )}
           </div>
           {/* VI P1 — "Today", ALWAYS ON: the right column is a constant part of the grid at
               every viewport ≥1200px (no collapsed state, no tab, no drawer); below that the
