@@ -21,7 +21,7 @@
    <1420 the rail collapses to a 56px icon rail (assembly 1172) and trailing pills fold into
    FILTER ▾ · <1240 Today becomes the strip popover. --tdb-gutter/--tdb-appnav survive for the
    column scroll contract; --g24 seams · --g12 card gutters. ── */
-.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-appnav: 49px; --tdb-asm: 1364px; --tdb-rail: 248px; --tdb-sheet: 812px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-cardh-b: 212px; --tdb-sidebar: 270px; --tdb-today: 256px; flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 0 0 48px; }
+.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-appnav: 49px; --tdb-asm: 1364px; --tdb-rail: 248px; --tdb-sheet: 812px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-sidebar: 270px; --tdb-today: 256px; flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 0 0 48px; }
 /* ── the workbench row (Option B): drawer + centred main. The row caps at 1720 and centres;
    inside it the CONTENT column caps at 1150 and centres again — max-width discipline at every
    viewport, surplus pooling as symmetric oat desk. ── */
@@ -256,7 +256,7 @@
    survives only in StatusDots (locked) and micro-accents — never a tag fill. ── */
 /* THE CARD CONTRACT (Deck v2 P4 → hover hotfix: CELL + SURFACE) — band = identity + status
    ONLY; body = content only. THE ONE-SURFACE LAW: the CELL (.tdb-cell) holds the reel slot at a
-   FIXED resting height (--tdb-cardh / --tdb-cardh-b, per kind) and NEVER changes size — the reel
+   FIXED resting height (--tdb-cardh — v4: one height, batch and unit alike) and NEVER changes size — the reel
    never reflows; the SURFACE (.tdb-tile/.tdb-gcard, absolute inside it) carries the ONLY border,
    background, radius and shadow, equals the cell at rest (min-height 100%), and on hover grows
    DOWNWARD past the cell's bottom edge (z raised) to include its verbs — one uninterrupted
@@ -265,7 +265,6 @@
    Overlay faces (receipts/forks) render WITHOUT a cell and stay in-flow — the base rule keeps
    their flex slot. The rim/.tdb-frame wrapper survives only for those faces. */
 .tdb-cell { position: relative; height: var(--tdb-cardh); } /* a grid item now — the column tracks size it */
-.tdb-cell.batch { height: var(--tdb-cardh-b); }
 .tdb-cell > .tdb-tile, .tdb-cell > .tdb-gcard { position: absolute; top: 0; left: 0; right: 0; flex: none; min-height: 100%; }
 .tdb-tile { position: relative; flex: 0 0 var(--tdb-cardw); background: var(--white, #fff); border: 1px solid #d8cfc4; border-radius: 12px; box-shadow: 0 2px 6px rgba(58, 28, 20, 0.07); cursor: pointer; transition: box-shadow 0.18s ease, transform 0.18s ease; display: flex; flex-direction: column; }
 .tdb-tile.hov, .tdb-gcard.hov { box-shadow: 0 10px 26px rgba(58, 28, 20, 0.18); transform: translateY(-2px); z-index: 5; }
@@ -287,6 +286,7 @@
 .tdb-tile.hov .tdb-vwrap, .tdb-gcard.hov .tdb-vwrap { grid-template-rows: 1fr; }
 .tdb-vinner { overflow: hidden; min-height: 0; visibility: hidden; transition: visibility 0s linear 180ms; }
 .tdb-tile.hov .tdb-vinner, .tdb-gcard.hov .tdb-vinner { visibility: visible; transition-delay: 0s; }
+.tdb-gdetail { padding: 0 12px 6px; } /* v4 P4: the batch detail revealed above the verbs */
 .tdb-verbs { display: flex; gap: 5px; padding: 2px 12px 12px; }
 .tdb-verb { flex: 1; border: 1px solid var(--line); background: var(--white, #fff); border-radius: 99px; padding: 6px 0; font-family: var(--f12-mono); font-size: 6.5px; letter-spacing: 0.05em; text-align: center; color: var(--ink-2); display: flex; align-items: center; justify-content: center; gap: 3px; white-space: nowrap; cursor: pointer; }
 .tdb-verb:hover { border-color: var(--ink-2); color: var(--ink); }

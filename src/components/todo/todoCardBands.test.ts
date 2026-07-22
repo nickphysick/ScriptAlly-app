@@ -50,7 +50,7 @@ describe("The card contract — structure law (todo-deck-v2.html THE LAWS)", () 
     expect(hov).toContain("z-index: 5");
     // the CELL holds the slot at a fixed resting height; the SURFACE is absolute inside it
     expect(rule(".tdb-cell")).toContain("height: var(--tdb-cardh)");
-    expect(rule(".tdb-cell.batch")).toContain("height: var(--tdb-cardh-b)");
+    expect(rule(".tdb-cell")).toContain("height: var(--tdb-cardh)"); // v4 P4: ONE resting height — batch cells match units
     expect(rule(".tdb-cell > .tdb-tile, .tdb-cell > .tdb-gcard")).toContain("position: absolute; top: 0; left: 0; right: 0;");
     expect(rule(".tdb-cell > .tdb-tile, .tdb-cell > .tdb-gcard")).toContain("min-height: 100%");
   });
@@ -100,5 +100,26 @@ describe("The card contract — structure law (todo-deck-v2.html THE LAWS)", () 
   it("the batch progress: #ece5d8 track, ink fill, mono meta", () => {
     expect(rule(".tdb-pbar")).toContain("background: #ece5d8");
     expect(rule(".tdb-pbar i")).toContain("background: var(--ink)");
+  });
+});
+
+describe("v4 P4 — the batch card levels with units at rest; detail rides the hover expansion", () => {
+  it("ONE resting cell height; the resting batch body = headline + roundels only", () => {
+    expect(css).not.toContain("--tdb-cardh-b");
+    expect(page).not.toContain('className="tdb-cell batch"');
+    const body = page.slice(page.indexOf("the RESTING batch body"), page.indexOf('className="tdb-vwrap" aria-hidden={!hov}>', page.indexOf("the RESTING batch body")));
+    expect(body).toContain("tdb-gtt");
+    expect(body).toContain("tdb-avs");
+    expect(body).not.toContain("tdb-gsub");
+    expect(body).not.toContain("tdb-gprog");
+  });
+  it("the description + progress reveal INSIDE the expansion, above the verbs; ⚡ FIX stays primary", () => {
+    const start = page.indexOf('className="tdb-gdetail"');
+    const wrap = page.slice(start, page.indexOf(">⚡ FIX", start));
+    expect(wrap).toContain("tdb-gsub");
+    expect(wrap).toContain("tdb-pbar");
+    expect(wrap).toContain("tdb-pcap");
+    expect(rule(".tdb-gdetail")).toContain("padding: 0 12px 6px");
+    expect(page).toContain(">⚡ FIX {g.members.length} →</button>");
   });
 });

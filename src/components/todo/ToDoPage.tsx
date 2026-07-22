@@ -1271,7 +1271,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     const prog = hkGroupProgress(agents.length, g.members.length);
     const hov = verbKey === key;
     return (
-      <div key={g.rule} className="tdb-cell batch">
+      <div key={g.rule} className="tdb-cell">
         <div className={`tdb-gcard${hov ? " hov" : ""}`}
           onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}
           onMouseEnter={() => armVerbs(key)} onMouseLeave={disarmVerbs}
@@ -1281,13 +1281,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <div className="tdb-band hk">
             <span className="tdb-tag due">{g.meta.label.toUpperCase()}</span>
           </div>
+          {/* v4 P4 — the RESTING batch body is trimmed to the unit card's height: band + count
+              headline + roundels. The description + progress move into the hover expansion. */}
           <div className="tdb-body">
             <div className="tdb-gtt"><span className="tdb-gn">{g.members.length}</span>{copy.rest(g.members.length)}</div>
-            <div className="tdb-gsub">{copy.sub}</div>
-            <div className="tdb-gprog">
-              <div className="tdb-pbar"><i style={{ width: `${prog.pct}%` }} /></div>
-              <div className="tdb-pcap"><span>{prog.caption}</span><span>{prog.pct}%</span></div>
-            </div>
             <div className="tdb-avs">
               {faces.map((m) => <span key={m.card.key} title={m.agentName}>{m.card.initials}</span>)}
               {g.members.length > faces.length && <i>+{g.members.length - faces.length}</i>}
@@ -1295,6 +1292,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           </div>
           <div className="tdb-vwrap" aria-hidden={!hov}>
             <div className="tdb-vinner">
+              <div className="tdb-gdetail">
+                <div className="tdb-gsub">{copy.sub}</div>
+                <div className="tdb-gprog">
+                  <div className="tdb-pbar"><i style={{ width: `${prog.pct}%` }} /></div>
+                  <div className="tdb-pcap"><span>{prog.caption}</span><span>{prog.pct}%</span></div>
+                </div>
+              </div>
               <div className="tdb-verbs" onClick={(e) => e.stopPropagation()}>
                 <button type="button" className="tdb-verb pri" onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}>⚡ FIX {g.members.length} →</button>
                 <span className="tdb-latwrap">
