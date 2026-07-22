@@ -41,16 +41,29 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
     expect(rule(".tdb-fpill.z")).toContain("opacity: 0.4");
     expect(rule(".tdb-fpill .tdb-fn")).toContain("margin-left: auto");
   });
-  it("narrowing: included nar (burgundy band 700) / excluded dim; the RESET row directly under SHOW", () => {
+  it("v4 P2: SHOW ALL is the default-selected pill AND the reset; narrowing keeps nar/dim; no RESET row", () => {
     const nar = rule(".tdb-fpill.nar");
     expect(nar).toContain("border-color: #7c3a2a");
-    expect(nar).toContain("linear-gradient(180deg, var(--pink-t), var(--pink-btn))");
-    expect(page).toContain(">SHOWING {shownX} OF {shownY} · RESET</button>");
-    const show = page.indexOf('className="tdb-fsec"');
-    const rst = page.indexOf('className="tdb-frst"');
-    expect(rst).toBeGreaterThan(show);
-    expect(rst).toBeLessThan(page.indexOf('railPill("OFFERS"')); // directly under SHOW
-    expect(page).toContain("{!resting && (");
+    expect(nar).toContain("font-weight: 700");
+    expect(page).toContain('className={`tdb-fpill showall${resting ? " sel" : ""}`} aria-pressed={resting} onClick={() => setFilters({ ...DEFAULT_FILTERS })}');
+    expect(page).toContain("SHOW ALL<span className=\"tdb-fn\">{shownY}</span>".replace(/\\/g, ""));
+    expect(rule(".tdb-fpill.sel")).toContain("border-color: var(--ink)");
+    expect(css).toContain('.tdb-fpill.sel::before { content: "✓"; font-size: 9px; }');
+    expect(page).not.toContain("tdb-frst");
+    expect(css).not.toContain("tdb-frst");
+    // SHOW ALL sits first, directly under the FILTER header
+    const sec = page.indexOf('className="tdb-fsec"');
+    const sa = page.indexOf("SHOW ALL<span");
+    expect(sa).toBeGreaterThan(sec);
+    expect(sa).toBeLessThan(page.indexOf('railPill("OFFERS"'));
+    expect(page).toContain(">FILTER</div>");
+  });
+  it("v4 P2: Begin focused session leads the rail (same wiring); the foot keeps Task settings only", () => {
+    expect(page).toContain('className="tdb-fsb2" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>▶ Begin focused session</button>');
+    expect(rule(".tdb-fsb2")).toContain("height: 42px");
+    const panel = page.slice(page.indexOf("function renderFilterPanel"), page.indexOf("function renderRail"));
+    expect(panel.indexOf("tdb-fsb2")).toBeLessThan(panel.indexOf("tdb-fsec"));
+    expect(panel).toContain('className="tdb-setrow"');
   });
   it("the lens below a divider; the same state the search composes with", () => {
     expect(page.indexOf('className="tdb-fdivider"')).toBeLessThan(page.indexOf("TODAY’S LIST<span"));

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * ToDoPage — THE FINAL SHAPE (design-refs/todo-final.html, THE LAWS v4). Top: the stripped
- * HERO (headline + Begin focused session) with the floating search breaking its edge. Left: the
+ * HERO (the centred headline over the floating search, bare ground). Left: the
  * FILTER RAIL (vertical quiet pills + settings/Pro foot). Centre: the 812 sheet hosting both
  * views (the wrapped grid · the run sheet) under the resident review. Right: Today (or its
  * narrow chip beside the search).
@@ -838,10 +838,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   function renderFilterPanel() {
     return (
       <>
-        <div className="tdb-fsec">SHOW</div>
-        {!resting && (
-          <button type="button" className="tdb-frst" onClick={resetDeck}>SHOWING {shownX} OF {shownY} · RESET</button>
-        )}
+        {/* v4 P2 — the focused-session button leads the rail (moved from the hero; same wiring) */}
+        <button type="button" className="tdb-fsb2" disabled={boardCards.length === 0} onClick={() => setFlow({ items: boardCards.map((card) => ({ kind: "card" as const, card })) })}>▶ Begin focused session</button>
+        <div className="tdb-fsec">FILTER</div>
+        {/* SHOW ALL is the default-selected pill and the reset — the separate RESET row is gone;
+            the narrowed meta lives in the sheet's corner line */}
+        <button type="button" className={`tdb-fpill showall${resting ? " sel" : ""}`} aria-pressed={resting} onClick={() => setFilters({ ...DEFAULT_FILTERS })}>
+          SHOW ALL<span className="tdb-fn">{shownY}</span>
+        </button>
         {railPill("OFFERS", "offers", fc.offers, "p")}
         {railPill("AGENT WAITING", "overToYou", fc.overToYou, "p")}
         {railPill("MATERIALS", "materials", fc.materials, "lat")}

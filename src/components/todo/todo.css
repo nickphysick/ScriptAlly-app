@@ -83,7 +83,12 @@
 .tdb-fpill.nar { border-color: #7c3a2a; color: #7c3a2a; background: linear-gradient(180deg, var(--pink-t), var(--pink-btn)); font-weight: 700; }
 .tdb-fpill.nar .tdb-dotc { background: #7c3a2a; }
 .tdb-fpill.nar .tdb-fn { color: #7c3a2a; }
-.tdb-frst { display: flex; align-items: center; margin: 0 10px 6px; height: 30px; width: calc(100% - 20px); box-sizing: border-box; border: 1px solid #7c3a2a; color: #7c3a2a; background: var(--white, #fff); border-radius: 99px; padding: 0 13px; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.08em; font-weight: 700; cursor: pointer; flex: 0 0 auto; }
+/* v4 P2 — the rail's lead button + the SHOW ALL selected pill (the RESET row is gone) */
+.tdb-fsb2 { margin: 12px 10px 4px; height: 42px; width: calc(100% - 20px); display: flex; align-items: center; justify-content: center; gap: 9px; background: var(--ink); color: var(--panel); border: 1px solid var(--ink); border-radius: 99px; font-size: 12.5px; font-weight: 600; cursor: pointer; box-shadow: 0 3px 10px rgba(58, 28, 20, 0.18); flex: 0 0 auto; }
+.tdb-fsb2:hover:not(:disabled) { filter: brightness(1.3); }
+.tdb-fsb2:disabled { opacity: 0.5; }
+.tdb-fpill.sel { border-color: var(--ink); font-weight: 700; color: var(--ink); }
+.tdb-fpill.sel::before { content: "✓"; font-size: 9px; }
 .tdb-fdivider { height: 1px; background: var(--hairline); margin: 8px 16px; flex: 0 0 auto; }
 .tdb-fsfoot { margin-top: 10px; border-top: 1px solid var(--hairline); padding: 12px; }
 .tdb-setrow { display: flex; align-items: center; gap: 10px; padding: 9px 6px; width: 100%; font-size: 11.5px; font-weight: 600; color: var(--ink-2); cursor: pointer; border-radius: 10px; background: none; border: none; text-align: left; }
