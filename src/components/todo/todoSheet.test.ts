@@ -46,13 +46,19 @@ describe("B3 — the duplicate-send guard wires all three write moments (source 
   it("the journey's Mark sent: guard BEFORE stageAndAdvance; decline stages nothing (staged work intact)", () => {
     const site = flow.slice(flow.indexOf('if (action.kind !== "mark-sent") { advance(); return; }\n          // B3'));
     expect(site.indexOf("priorSameTypeSend(activities, q.id")).toBeGreaterThan(-1);
-    expect(site.indexOf("window.confirm(duplicateSendPrompt(")).toBeLessThan(site.indexOf("stageAndAdvance({"));
+    const guardAt = site.indexOf("await confirmAsk(duplicateSendPrompt(");
+    expect(guardAt).toBeGreaterThan(-1); // hero-pair P4: the styled ask replaced window.confirm
+    expect(guardAt).toBeLessThan(site.indexOf("stageAndAdvance({"));
   });
   it("the sweep quick-done + the board quick-✓: guard BEFORE the one write path; decline returns", () => {
     expect(flow).toContain("const priorQuick = priorSameTypeSend(activitiesRef.current, q.id");
-    expect(flow.indexOf("priorQuick && !window.confirm")).toBeLessThan(flow.indexOf("await recordMaterialsSent(markSentWriteArgs(p)); // the ONE mark-sent write path"));
+    const fq = flow.indexOf("priorQuick && !(await confirmAsk");
+    expect(fq).toBeGreaterThan(-1);
+    expect(fq).toBeLessThan(flow.indexOf("await recordMaterialsSent(markSentWriteArgs(p)); // the ONE mark-sent write path"));
     expect(page).toContain("const prior = priorSameTypeSend(activitiesRef.current, q.id");
-    expect(page.indexOf("prior && !window.confirm")).toBeLessThan(page.indexOf("await recordMaterialsSent(markSentWriteArgs(p)); // the ONE mark-sent write path"));
+    const pq = page.indexOf("prior && !(await confirmAsk");
+    expect(pq).toBeGreaterThan(-1);
+    expect(pq).toBeLessThan(page.indexOf("await recordMaterialsSent(markSentWriteArgs(p)); // the ONE mark-sent write path"));
   });
   it("R&R is passed through as isResubmit at every site (never guarded); no new state anywhere", () => {
     expect((flow.match(/action\.markKind === "resubmit"\)/g) ?? []).length).toBeGreaterThanOrEqual(2);

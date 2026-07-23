@@ -272,7 +272,7 @@ describe("detail P3 — ledger Notes parity + the clock snooze", () => {
   it("the ☰ Notes section stands even when EMPTY: the pack's wash, the dashed add-row wired to addTask", () => {
     expect(page).toContain("{(!active || vNt.length > 0) && (");
     expect(page).toContain('<button type="button" className="tdb-laddrow" onClick={addTask}>＋ Add a note</button>');
-    expect(page).toContain("{!ledgerFold.nt && (vNt.length > 0 ? vNt.map(runRow) : (");
+    expect(page).toContain(') : composerAt === "ledger" ? renderComposer() : ('); // the add-row transforms in place
     const r = rule(".tdb-laddrow");
     expect(r).toContain("border: 1.5px dashed #d9c87a");
     expect(r).toContain("justify-content: center");
@@ -302,6 +302,54 @@ describe("toolbelt P3 — sweep", () => {
     const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
     expect(tour).toContain("Action now, Today\\u2019s list, or snooze"); // the .ts carries the \\u2019 escape
     expect(tour).not.toContain("done, Today, or later");
+  });
+});
+
+describe("hero-pair P4 — the bold bar · the inline composer · the dialog sweep", () => {
+  it("the bar line is Playfair 700 (size + numeric variants unchanged)", () => {
+    const t = rule(".tdb-bartext");
+    expect(t).toContain("font-weight: 700");
+    expect(t).toContain("font-size: 14.5px");
+    expect(t).toContain("font-variant-numeric: lining-nums tabular-nums");
+  });
+  it("the composer: white notes-family card, Caveat autofocus growing, the mono hint, quiet Cancel + emphasised Save", () => {
+    const c = rule(".tdb-composer");
+    expect(c).toContain("border: 1px solid #ece2c6");
+    expect(c).toContain("box-shadow: 0 4px 14px rgba(120, 100, 40, 0.1)");
+    const ta = rule(".tdb-composer textarea");
+    expect(ta).toContain("font-family: Caveat, cursive");
+    expect(ta).toContain("font-size: 19px");
+    expect(ta).toContain("min-height: 52px");
+    expect(page).toContain("ref={(el) => { if (el) { el.focus();"); // autofocus + initial autosize
+    expect(page).toContain(">⌘⏎ SAVE · ESC CANCEL</span>");
+    expect(page).toContain('className="tdb-btnh tdb-compsave" onClick={() => setComposerAt(null)}>Cancel</button>');
+    expect(page).toContain('className="tdb-btnh em" onClick={saveComposer}>Save note</button>');
+  });
+  it("keyboard + outside-click law: ⌘⏎/Ctrl⏎ saves · Esc cancels · outside cancels ONLY when empty", () => {
+    expect(page).toContain('if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); saveComposer(); }');
+    expect(page).toContain('if (e.key === "Escape") { e.stopPropagation(); setComposerAt(null); }');
+    expect(page).toContain("if (!composerDraftRef.current.trim()) setComposerAt(null);");
+  });
+  it("save wires to the EXISTING note action (no new write path); both views' affordances transform in place", () => {
+    expect(page).toContain("await addUserTask({ text });");
+    expect(page).toContain('setComposerAt(view === "ledger" ? "ledger" : "cards");'); // addTask opens the seat
+    expect(page).toContain('emptyNode={composerAt === "cards" ? renderComposer() :'); // the cards ghost swaps
+    expect(page).toContain(') : composerAt === "ledger" ? renderComposer() : ('); // the ledger add-row swaps
+  });
+  it("THE DIALOG SWEEP: zero native dialogs in the To-do scope; the styled ask carries the true blocking choices", () => {
+    const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");
+    const ask = readFileSync(join(here, "ConfirmAsk.tsx"), "utf8");
+    for (const f of [page, flow]) {
+      expect(f).not.toContain("window.prompt(");
+      expect(f).not.toContain("window.alert(");
+      expect(f).not.toContain("window.confirm(");
+    }
+    expect(ask).toContain("new Promise<boolean>((resolve) => {");
+    expect((page.match(/await confirmAsk\(/g) ?? []).length).toBe(1); // the quick-✓ duplicate guard
+    expect((flow.match(/await confirmAsk\(/g) ?? []).length).toBe(3); // exit guard + staged + quick guards
+    expect(rule(".tdb-askwrap")).toContain("z-index: 90"); // above the flow (50) + toast (60) + modal (70)
+    expect(page).toContain("{confirmAskNode}");
+    expect(flow).toContain("{confirmAskNode}");
   });
 });
 
@@ -543,7 +591,7 @@ describe("polish P3 — the centre stack: three sibling containers", () => {
     const t = rule(".tdb-bartext");
     expect(t).toContain("font-family: var(--f12-serif)");
     expect(t).toContain("font-size: 14.5px");
-    expect(t).toContain("font-weight: 400");
+    expect(t).toContain("font-weight: 700"); // hero-pair P4: the bar line goes bold
     expect(t).toContain("font-variant-numeric: lining-nums tabular-nums");
     expect(page).not.toContain("tdb-shmeta"); // the mono meta is gone
     expect(css).not.toContain("tdb-shmeta");
@@ -697,7 +745,7 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
     expect(page).toContain('localStorage.getItem("sa.todoLedgerFold")');
     expect(page).toContain("{!ledgerFold.do && doSorted.map(runRow)}");
     expect(page).toContain("{!ledgerFold.hk && hkTop.map((r) => (r.kind === \"group\" ? runBatchRow(r.g) : runRow(r.c)))}".replace(/\\/g, ""));
-    expect(page).toContain("{!ledgerFold.nt && (vNt.length > 0 ? vNt.map(runRow) : ("); // detail P3: the empty add-row branch
+    expect(page).toContain("{!ledgerFold.nt && (vNt.length > 0 ? ("); // detail P3 + the P4 composer branch
   });
   it("the actions: 32px press 'Action now' + ghosts, vertically centred; Action now OPENS (both kinds), never completes", () => {
     expect(rule(".tdb-lacts")).toContain("align-self: center");

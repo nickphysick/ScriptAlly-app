@@ -27,6 +27,7 @@
  */
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { StatusDot } from "../StatusDot";
+import { useConfirmAsk } from "./ConfirmAsk";
 import { useScriptAllyDb } from "../../lib/db";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
 import { TimelineRows, buildTimelineRows } from "../reading-pane/QueryTimeline";
@@ -106,6 +107,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
   const [qi, setQi] = useState(0);
   const [step, setStep] = useState(0);
   const [staged, setStaged] = useState<StagedPayload[]>([]);
+  const { ask: confirmAsk, node: confirmAskNode } = useConfirmAsk();
   const [leaving, setLeaving] = useState(false);
   // the offer journey (P3; notify rebuilt by the popup-notify-scrim pass P2): which door is open,
   // the decision pick, the need-time date, and the notify step's selection state
@@ -201,8 +203,9 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     setQi((i) => i - 1); setStep(0); resetScratch();
   }
   const stageAndAdvance = (p: StagedPayload) => { setStaged((s) => [...s, p]); advance(); };
-  function requestExit(after?: () => void) {
-    if (staged.length && !window.confirm(`You have ${staged.length} staged change${staged.length === 1 ? "" : "s"}. Discard them?`)) return;
+  async function requestExit(after?: () => void) {
+    // the styled ConfirmAsk replaced window.confirm (hero-pair P4) — a true blocking choice
+    if (staged.length && !(await confirmAsk(`You have ${staged.length} staged change${staged.length === 1 ? "" : "s"}. Discard them?`, { confirmLabel: "Discard them", cancelLabel: "Keep working" }))) return;
     onClose();
     after?.();
   }
@@ -332,14 +335,14 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
       <>
         <button type="button" className="tdb-ffback" onClick={backOne}>← Back</button>
         <span className="tdb-sp" />
-        <button type="button" className="tdb-ffpri" onClick={() => {
+        <button type="button" className="tdb-ffpri" onClick={async () => {
           if (!q) { advance(); return; }
           const action = getPrimaryAction(q.status as QueryStatus);
           if (action.kind !== "mark-sent") { advance(); return; }
           // B3 — the soft duplicate-send guard: read the log at write time; decline stages
           // NOTHING and stays on the step (staged work intact). R&R is never guarded.
           const prior = priorSameTypeSend(activities, q.id, action.target as QueryStatus, action.markKind === "resubmit");
-          if (prior && !window.confirm(duplicateSendPrompt(action.target as QueryStatus, c.who, prior))) return;
+          if (prior && !(await confirmAsk(duplicateSendPrompt(action.target as QueryStatus, c.who, prior), { confirmLabel: "Send again", cancelLabel: "Cancel" }))) return;
           stageAndAdvance({
             kind: "mark-sent", cardKey: c.key, label: c.title, queryId: q.id,
             targetStatus: action.target as QueryStatus,
@@ -848,9 +851,9 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     }
     const action = getPrimaryAction(q.status as QueryStatus);
     if (action.kind !== "mark-sent") { advance(); return; }
-    // B3 — the same soft guard in this path's grammar (window.confirm); decline writes nothing.
+    // B3 — the same soft guard in this path's grammar (the styled ConfirmAsk); decline writes nothing.
     const priorQuick = priorSameTypeSend(activitiesRef.current, q.id, action.target as QueryStatus, action.markKind === "resubmit");
-    if (priorQuick && !window.confirm(duplicateSendPrompt(action.target as QueryStatus, c.who, priorQuick))) return;
+    if (priorQuick && !(await confirmAsk(duplicateSendPrompt(action.target as QueryStatus, c.who, priorQuick), { confirmLabel: "Send again", cancelLabel: "Cancel" }))) return;
     const p = quickSendPayload({ cardKey: c.key, label: c.title, taskType: c.taskType, queryId: q.id, targetStatus: action.target as QueryStatus, isResubmit: action.markKind === "resubmit", method: q.sendMethod, nowIso });
     const prev = q.status as QueryStatus;
     await recordMaterialsSent(markSentWriteArgs(p)); // the ONE mark-sent write path
@@ -1285,6 +1288,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
   const remaining = items.length - qi - 1;
   return (
     <div className="tdb-ff" role="dialog" aria-modal="true" aria-label="Focus flow" aria-labelledby="tdb-ff-heading" ref={rootRef} tabIndex={-1} onKeyDown={trapTab} onClick={scrimClick}>
+      {confirmAskNode}
       <div className="tdb-ffstage">
         {!atReview && remaining >= 2 && <div className="tdb-ffbehind b2" aria-hidden />}
         {!atReview && remaining >= 1 && <div className="tdb-ffbehind" aria-hidden />}

@@ -37,6 +37,7 @@ import { sortLedgerDo, sortLedgerHk } from "../../lib/todoLedger";
 import focusArt from "../../assets/todo/focus-art.png";
 // VI P2 — the review cup (original ScriptAlly artwork; currentColor → inlined so it inherits ink)
 import reviewCupRaw from "../../assets/todo/review-cup.svg?raw";
+import { useConfirmAsk } from "./ConfirmAsk";
 import { TodoFilterState, DEFAULT_FILTERS, filtersActive, matchesSearch, groupMatchesSearch, visibleDoCard, visibleStaleCard, visibleNoteCard, visibleGroup, filterCounts, isResting, togglePill, FilterType } from "../../lib/todoFilters";
 import { shouldAutoRunTour } from "../../lib/todoTour";
 import { ProBanner, AssistantModal, AssistantTaskRow } from "./AssistantPromo";
@@ -173,6 +174,23 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     recordMaterialsSent, logNudge, dismissTask, undoQueryStatus, updateQueryStatus, deleteActivity, resolveTaskFlag, updateAgent,
   } = useScriptAllyDb();
   const [toast, setToast] = useState<{ msg: string; action?: ToastAction } | null>(null);
+  const { ask: confirmAsk, node: confirmAskNode } = useConfirmAsk();
+  // hero-pair P4 — the inline note composer's seat + draft (one composer, two view seats)
+  const [composerAt, setComposerAt] = useState<null | "cards" | "ledger">(null);
+  const [composerDraft, setComposerDraft] = useState("");
+  const composerDraftRef = useRef(composerDraft);
+  composerDraftRef.current = composerDraft;
+  useEffect(() => {
+    if (!composerAt) return;
+    const onDown = (e: PointerEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && t.closest(".tdb-composer")) return;
+      // outside: cancel only when empty — a live draft stays open
+      if (!composerDraftRef.current.trim()) setComposerAt(null);
+    };
+    document.addEventListener("pointerdown", onDown);
+    return () => document.removeEventListener("pointerdown", onDown);
+  }, [composerAt]);
   const [rollDismissed, setRollDismissed] = useState(false);
   const [pulsing, setPulsing] = useState<string | null>(null);
   // THE completion surface — the focus flow (queue of one for a card click; a set for the two walks).
@@ -634,10 +652,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     }
     const action = getPrimaryAction(q.status as QueryStatus);
     if (action.kind !== "mark-sent") return;
-    // B3 — the soft duplicate-send guard in the quick-✓'s grammar (window.confirm; decline
-    // writes nothing, the card stays). R&R resubmissions are never guarded.
+    // B3 — the soft duplicate-send guard in the quick-✓'s grammar (the styled ConfirmAsk;
+    // decline writes nothing, the card stays). R&R resubmissions are never guarded.
     const prior = priorSameTypeSend(activitiesRef.current, q.id, action.target as QueryStatus, action.markKind === "resubmit");
-    if (prior && !window.confirm(duplicateSendPrompt(action.target as QueryStatus, c.who, prior))) return;
+    if (prior && !(await confirmAsk(duplicateSendPrompt(action.target as QueryStatus, c.who, prior), { confirmLabel: "Send again", cancelLabel: "Cancel" }))) return;
     const p = quickSendPayload({ cardKey: c.key, label: c.title, taskType: c.taskType, queryId: q.id, targetStatus: action.target as QueryStatus, isResubmit: action.markKind === "resubmit", method: q.sendMethod, nowIso });
     const prev = q.status as QueryStatus;
     await recordMaterialsSent(markSentWriteArgs(p)); // the ONE mark-sent write path
@@ -693,9 +711,19 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       flash(`Hidden — “${c.title}”`, { label: "Undo", fn: async () => { await undo(); clearOverlay(c.key); flash("Restored"); } });
     }
   }
-  async function addTask() {
-    const text = window.prompt("New note");
-    if (text && text.trim()) await addUserTask({ text: text.trim() });
+  // hero-pair P4 — THE INLINE COMPOSER (todo-composer.html §4): the browser prompt was a
+  // placeholder, not a design. addTask now opens the composer in the current view's Notes
+  // seat; save wires to the SAME addUserTask action (no new write path).
+  function addTask() {
+    setComposerDraft("");
+    setComposerAt(view === "ledger" ? "ledger" : "cards");
+  }
+  async function saveComposer() {
+    const text = composerDraft.trim();
+    if (!text) return;
+    await addUserTask({ text });
+    setComposerAt(null);
+    setComposerDraft("");
   }
 
   return (
@@ -803,9 +831,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           </Lane>
           )}
           {(!active || vNt.length > 0 || overlayCards("nt").length > 0) && (
-          <Lane cls="nt" label="Notes to self" count={active ? vNt.length : tiles.notes} onAdd={addTask} isEmpty={vNt.length === 0 && overlayCards("nt").length === 0}
+          <Lane cls="nt" label="Notes to self" count={active ? vNt.length : tiles.notes} onAdd={addTask} isEmpty={vNt.length === 0 && overlayCards("nt").length === 0 && composerAt !== "cards"}
             filtered={active && vNt.length < tiles.notes ? { x: vNt.length, y: tiles.notes, showAll: resetDeck } : null}
-            emptyNode={<button type="button" className="tdb-ghostcard quiet" onClick={addTask} aria-label="Add a note"><span className="tdb-gg" aria-hidden>＋</span></button>}>
+            emptyNode={composerAt === "cards" ? renderComposer() : <button type="button" className="tdb-ghostcard quiet" onClick={addTask} aria-label="Add a note"><span className="tdb-gg" aria-hidden>＋</span></button>}>
+            {composerAt === "cards" && vNt.length > 0 && renderComposer()}
             {overlayCards("nt")}
             {vNt.map(renderCard)}
           </Lane>
@@ -845,6 +874,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           onUpgrade={() => { setAssistantOpen(false); onNavigate("plans"); }}
         />
       )}
+      {confirmAskNode}
       {settingsOpen && <TaskSettingsSheet onClose={() => setSettingsOpen(false)} />}
       {tourOpen && <TodoTour onEnd={endTour} />}
       {toast && (
@@ -982,6 +1012,32 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       <button type="button" className={`tdb-fpill d-${dot}${cls}${live === 0 ? " z" : ""}`} aria-pressed={!resting && on} onClick={() => setFilters((f) => togglePill(f, key))}>
         <span className="tdb-dotc" aria-hidden />{label}<span className="tdb-fn">{fnFace(count, live)}</span>
       </button>
+    );
+  }
+  // ── hero-pair P4: THE INLINE COMPOSER (todo-composer.html §4) — white, notes-family
+  // border, Caveat autofocused and growing, ⌘⏎ saves · Esc cancels · an outside click
+  // cancels only when empty. Save rides the existing addUserTask action. ──
+  function renderComposer() {
+    return (
+      <div className="tdb-composer">
+        <textarea
+          ref={(el) => { if (el) { el.focus(); el.style.height = "auto"; el.style.height = `${el.scrollHeight}px`; } }}
+          value={composerDraft}
+          rows={1}
+          placeholder="Jot it down…"
+          aria-label="New note"
+          onChange={(e) => { setComposerDraft(e.target.value); e.target.style.height = "auto"; e.target.style.height = `${e.target.scrollHeight}px`; }}
+          onKeyDown={(e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === "Enter") { e.preventDefault(); saveComposer(); }
+            if (e.key === "Escape") { e.stopPropagation(); setComposerAt(null); }
+          }}
+        />
+        <div className="tdb-compfoot">
+          <span className="tdb-comphint" aria-hidden>⌘⏎ SAVE · ESC CANCEL</span>
+          <button type="button" className="tdb-btnh tdb-compsave" onClick={() => setComposerAt(null)}>Cancel</button>
+          <button type="button" className="tdb-btnh em" onClick={saveComposer}>Save note</button>
+        </div>
+      </div>
     );
   }
   // ── hero-pair P1: the toolbelt stack is RETIRED — Begin + the chip live under the hero;
@@ -1249,7 +1305,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         {(!active || vNt.length > 0) && (
           <section className={`tdb-lsec n${ledgerFold.nt ? " folded" : ""}`}>
             {ledgerHeading("n", "nt", "tdb-lane-nt", "Notes to self", active ? vNt.length : tiles.notes, undefined, addTask)}
-            {!ledgerFold.nt && (vNt.length > 0 ? vNt.map(runRow) : (
+            {!ledgerFold.nt && (vNt.length > 0 ? (
+              <>
+                {composerAt === "ledger" && renderComposer()}
+                {vNt.map(runRow)}
+              </>
+            ) : composerAt === "ledger" ? renderComposer() : (
               <button type="button" className="tdb-laddrow" onClick={addTask}>＋ Add a note</button>
             ))}
           </section>

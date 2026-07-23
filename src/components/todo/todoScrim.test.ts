@@ -41,7 +41,7 @@ describe("dim-scrim presentation — source/rule-text locks", () => {
   });
 
   it("the dismiss guard branches on staged work: confirm when staged, immediate when clean", () => {
-    expect(flow).toContain("if (staged.length && !window.confirm(");
+    expect(flow).toContain("if (staged.length && !(await confirmAsk("); // hero-pair P4: the styled ask
   });
 
   it("scroll locks for the journey's life via the app-wide mechanism; focus captures and returns to the invoker", () => {

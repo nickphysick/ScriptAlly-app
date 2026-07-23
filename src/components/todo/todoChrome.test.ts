@@ -58,7 +58,7 @@ describe("P3→C1 — the exit is the corner circle on the WRAPPER (the in-sheet
 
   it("the corner exit rides the SAME dismiss guard on every step of every mode", () => {
     expect(flow).toContain('className="tdb-ffx" aria-label="Back to my desk" onClick={() => requestExit()}');
-    expect(flow).toContain("if (staged.length && !window.confirm("); // clean = immediate, staged = confirm
+    expect(flow).toContain("if (staged.length && !(await confirmAsk("); // hero-pair P4: the styled ask // clean = immediate, staged = confirm
   });
 
   it("dots + count render in multi-item modes only, relocated to the sheet FOOT before the staged chip", () => {
