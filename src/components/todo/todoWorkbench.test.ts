@@ -160,6 +160,36 @@ describe("polish P2 — THE STATIONERY PRESS (the button law)", () => {
   });
 });
 
+describe("doc pass P2 — the width tier (≥1700 → 4-up with Today)", () => {
+  it("the tier media: asm 1624 + sheet 1072 + a 4-up grid, tokens only (never a hard card width)", () => {
+    const m = css.match(/@media \(min-width: 1700px\) \{([\s\S]*?)\n\}/);
+    expect(m).toBeTruthy();
+    const tier = m![1];
+    expect(tier).toContain("--tdb-asm: 1624px; --tdb-sheet: 1072px;");
+    expect(tier).toContain(".tdb-wrap .tdb-grid { grid-template-columns: repeat(4, var(--tdb-cardw)); }");
+    expect(tier).not.toContain("250px"); // the card token, never a magic width
+  });
+  it("the matrix: base 3-up · today-off 4-up everywhere (higher specificity than the tier) · compact unchanged", () => {
+    expect(rule(".tdb-grid")).toContain("repeat(3, var(--tdb-cardw))"); // <1700, Today visible → 1512 runs 3-up
+    expect(css).toContain(".tdb-wrap.today-off { --tdb-asm: 1344px; --tdb-sheet: 1072px; }"); // (0,2,0) beats the media's .tdb-wrap
+    expect(css).toContain(".tdb-wrap.today-off .tdb-grid { grid-template-columns: repeat(4, var(--tdb-cardw)); }");
+    expect(css).toContain("@media (max-width: 1427.98px) { .tdb-wrap { --tdb-asm: 1092px; } .tdb-wrap.today-off { --tdb-asm: 1072px; } }");
+    expect(rule(".tdb-wrap")).toContain("--tdb-cardw: 250px"); // ONE card width for every cell at every tier
+  });
+  it("the edge gutter is the 32px token (the pack's 48→32), padded on the wrap", () => {
+    const w = rule(".tdb-wrap");
+    expect(w).toContain("--tdb-edge: 32px;");
+    expect(w).toContain("padding: 0 var(--tdb-edge) 48px");
+  });
+  it("the transition branch: the tier steps ride the SAME 220ms width mechanics as the Today mount; reduced motion instant", () => {
+    expect(rule(".tdb-asm")).toContain("transition: width 220ms ease");
+    expect(rule(".tdb-centre")).toContain("transition: width 220ms ease");
+    expect(css).toContain(".tdb-asm, .tdb-centre { transition: none; }");
+    // the run sheet consumes the same widths: both views render inside .tdb-mainc (width 100% of the stack)
+    expect(rule(".tdb-mainc")).toContain("width: 100%");
+  });
+});
+
 describe("polish P5 — sweep: dead selectors out; disabled joins the inert grammar", () => {
   it("the replaced/dead classes are extinct in the stylesheet (verified repo-dead before deletion)", () => {
     for (const dead of ["tdb-worklist", "tdb-pick", "tdb-bffind", "tdb-rdate", "tdb-ge ", "tdb-tags", "tdb-mid ", "tdb-miniav", "tdb-ffconfetti", "tdb-ffoctx", "tdb-ffofferq", "tdb-ffbt", "tdb-ffbs", "tdb-docband", "tdb-letter"]) {

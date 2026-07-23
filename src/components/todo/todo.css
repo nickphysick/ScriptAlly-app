@@ -21,7 +21,7 @@
    <1420 the rail collapses to a 56px icon rail (assembly 1172) and trailing pills fold into
    FILTER ▾ · <1240 Today becomes the strip popover. --tdb-gutter/--tdb-appnav survive for the
    column scroll contract; --g24 seams · --g12 card gutters. ── */
-.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-appnav: 49px; --tdb-asm: 1364px; --tdb-rail: 248px; --tdb-sheet: 812px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-sidebar: 270px; --tdb-today: 256px; flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 0 0 48px; }
+.tdb-wrap { --g24: 24px; --g12: 12px; --tdb-gutter: var(--g24); --tdb-edge: 32px; --tdb-appnav: 49px; --tdb-asm: 1364px; --tdb-rail: 248px; --tdb-sheet: 812px; --tdb-vp: 774px; --tdb-cardw: 250px; --tdb-cardh: 118px; --tdb-sidebar: 270px; --tdb-today: 256px; flex: 1; min-height: 0; overflow-y: auto; width: 100%; padding: 0 var(--tdb-edge) 48px; }
 /* ── the workbench row (Option B): drawer + centred main. The row caps at 1720 and centres;
    inside it the CONTENT column caps at 1150 and centres again — max-width discipline at every
    viewport, surplus pooling as symmetric oat desk. ── */
@@ -431,6 +431,17 @@
 @media (prefers-reduced-motion: reduce) { .tdb-railr.in, .tdb-railr.out { animation: none; } .tdb-asm, .tdb-centre { transition: none; } }
 /* the compact break (P6): the rail leaves the flow for the overlay drawer */
 @media (max-width: 1427.98px) { .tdb-wrap { --tdb-asm: 1092px; } .tdb-wrap.today-off { --tdb-asm: 1072px; } }
+/* ── doc pass P2 — THE ≥1700 WIDTH TIER (todo-doc-pass-a.html §2): 4-up WITH Today — sheet 1072,
+   assembly 248+24+1072+24+256 = 1624; it fits because the edge gutter is 32 (1624+64 = 1688).
+   The full matrix: Today hidden → 4-up at every tier (the today-off rules, (0,2,0), outrank
+   this media's .tdb-wrap); Today visible → 4-up from 1700, 3-up below. Cards stay
+   var(--tdb-cardw) at every tier — the tier changes the COUNT, never the card. The 220ms
+   width transitions on .tdb-asm/.tdb-centre carry the step (same mechanics as the Today
+   mount; column count reflows; reduced-motion instant via the shared override). ── */
+@media (min-width: 1700px) {
+  .tdb-wrap { --tdb-asm: 1624px; --tdb-sheet: 1072px; }
+  .tdb-wrap .tdb-grid { grid-template-columns: repeat(4, var(--tdb-cardw)); }
+}
 .tdb-todaypopwrap { position: relative; flex: none; }
 .tdb-todaychip { display: inline-flex; align-items: center; gap: 7px; font-family: var(--f12-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: linear-gradient(180deg, var(--hk-sage), var(--hk-sage-2)); border: 1px solid var(--hk-spine); border-radius: 99px; padding: 8px 14px; color: var(--hk-ink); white-space: nowrap; }
 .tdb-todaychip:hover { filter: brightness(0.98); }
