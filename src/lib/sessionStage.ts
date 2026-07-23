@@ -47,7 +47,7 @@ export function staggerFor(count: number): number {
 
 /** The session card's rest position: the vertical centre of the region below the hero. */
 export function restTop(regionH: number, cardH: number): number {
-  return Math.max(GATHER.restMinTopPx, (regionH - cardH) / 2 - 14);
+  return Math.max(GATHER.restMinTopPx, (regionH - cardH) / 2 - 10);
 }
 
 /** The ritual lines — played in the search's vacated slot (ink-muted; we are on a light page). */
@@ -60,20 +60,20 @@ export const RITUAL_LINES = ["Gathering your tasks…", "Stacking the deck…", 
  */
 export const GATHER = {
   exitMs: 700, // the sidebars' slide-away
-  exitSlidePct: 140, // translateX ∓140%
+  exitSlidePct: 150, // translateX ∓150% (v7)
   dissolveMs: 800, // the sheet's white dissolving to transparent
   docBarMs: 550, // the document bar's slide up and out
   searchFadeMs: 400,
   ritualStartMs: 350,
   lineMs: 780,
   gatherStartMs: 900,
-  staggerMs: 95,
+  staggerMs: 90, // v7
   staggerBudgetMs: 600, // the whole stagger fits inside this, however many items
   flyMs: 650,
   gatherOpacity: 0.85, // the pile behind the first task
   morphMs: 700, // first-rect → the rest position, mild overshoot
-  edgesAtMs: 750, // the deck edges fade in as the morph settles
-  restMinTopPx: 24,
+  edgesAtMs: 750, // the composed session lands as the morph settles
+  restMinTopPx: 20, // v7 — min top clearance below the hero
   subtitleMs: 500,
   sessionCardW: 500,
   reverseMs: 700, // Back to your desk — the compressed reassembly

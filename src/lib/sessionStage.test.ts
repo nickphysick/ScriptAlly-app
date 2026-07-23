@@ -35,15 +35,15 @@ describe("staggerFor — the crowded-board cap", () => {
   it("small boards keep the full 95ms; crowded boards compress into the budget", () => {
     expect(staggerFor(0)).toBe(0);
     expect(staggerFor(1)).toBe(0);
-    expect(staggerFor(5)).toBe(95); // 600/4 = 150 → capped at 95
+    expect(staggerFor(5)).toBe(90); // 600/4 = 150 → capped at 90
     expect(staggerFor(44)).toBe(Math.floor(600 / 43)); // 13 — the whole stagger stays ≤ the budget
     expect(staggerFor(44) * 43).toBeLessThanOrEqual(GATHER.staggerBudgetMs);
   });
 });
 
 describe("restTop — the centred rest position", () => {
-  it("centres the card in the region below the hero, never above the 24px clearance", () => {
-    expect(restTop(600, 240)).toBe((600 - 240) / 2 - 14);
+  it("centres the card in the region below the hero, never above the 20px clearance", () => {
+    expect(restTop(600, 240)).toBe((600 - 240) / 2 - 10); // v7 lift
     expect(restTop(200, 400)).toBe(GATHER.restMinTopPx); // a tall card clamps to the top clearance
   });
 });
@@ -56,10 +56,10 @@ describe("the gather's spine", () => {
     const gatherEnd = GATHER.gatherStartMs + GATHER.staggerBudgetMs + GATHER.flyMs;
     const settled = gatherEnd + GATHER.morphMs + 100;
     expect(settled).toBeLessThanOrEqual(GATHER.totalBudgetMs);
-    expect(GATHER.exitSlidePct).toBe(140);
+    expect(GATHER.exitSlidePct).toBe(150); // v7
     expect(GATHER.lineMs).toBe(780);
     expect(GATHER.gatherOpacity).toBe(0.85);
-    expect(GATHER.staggerMs).toBe(95);
+    expect(GATHER.staggerMs).toBe(90); // v7
     expect(GATHER.reverseMs).toBe(700);
     expect(GATHER.sessionCardW).toBe(500);
   });

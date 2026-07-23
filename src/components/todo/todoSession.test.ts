@@ -79,6 +79,29 @@ describe("v7 P1 — the hero: title crossfade · the fixed sub-slot · the ritua
   });
 });
 
+describe("v7 P3 — the gather + morph (the deck retired; the pile fully fades)", () => {
+  it("the gather flies every other item onto the ENGINE's first task, staggered, z beneath it", () => {
+    expect(ss).toContain("const firstKey = queue[0]?.key ?? \"\";".replace(/\\/g, ""));
+    expect(page).toContain("data-tdbkey={c.key}");
+    expect(ss).toContain("const s = staggerFor(flyers.length + 1);");
+    expect(ss).toContain("el.style.opacity = String(GATHER.gatherOpacity);"); // ~85% behind
+    expect(ss).toContain('firstEl.style.zIndex = "30";'); // the first never covered
+  });
+  it("the morph grows the pile to the computed rest (min 20, resize) and the pile FULLY FADES — no residual stack", () => {
+    expect(ss).toContain("const gRestY = restTop(g.regionH, g.cardH);");
+    expect(ss).toContain("big.style.transition = `transform ${GATHER.morphMs}ms cubic-bezier(.25,.8,.3,1.05)`;");
+    // the gathered items (flyers + the first) all fade to 0 as the pile morphs — nothing left behind
+    expect(ss).toContain("for (const el of [...flyers, ...(firstEl ? [firstEl] : [])]) {");
+    expect(ss).toContain('el.style.opacity = "0";');
+    expect(ss).not.toContain("tdb-fsdeck"); // the deck-edge motif is retired
+  });
+  it("the card wrap is inset by the curtains, so the rest centres BETWEEN them (window centre)", () => {
+    expect(ss).toContain('style={{ top: geo.wrapTop, left: curtW, right: curtW }}');
+    expect(rule(".tdb-fsseat")).toContain("left: 50%"); // centre of the inset wrap
+    expect(ss).toContain("const seatLeft = window.innerWidth / 2 - GATHER.sessionCardW / 2;");
+  });
+});
+
 describe("v7 P2 — the curtains + the dim (pool of light + deck edges retired)", () => {
   it("the curtains: ink panels close from L/R with the gradient toward centre; responsive width; 1.1s", () => {
     expect(css).toContain(".tdb-fscurt { position: absolute; top: 0; bottom: 0; background: linear-gradient(90deg, #1d100c, #2a1a13);");

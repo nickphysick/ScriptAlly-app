@@ -89,7 +89,6 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
   // ── the gather's own progress ──
   const [composed, setComposed] = useState(reduce); // the settled session composition
   const [line, setLine] = useState(-1);
-  const [edgesOn, setEdgesOn] = useState(reduce);
   const [bigOn, setBigOn] = useState(reduce);
   // measured geometry: the subtitle under the title, the ritual/session line in the
   // search's vacated slot, the seat region below the hero, the card's rest offset
@@ -130,7 +129,7 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
     timers.current.forEach((t) => window.clearTimeout(t));
     timers.current = [];
     onHero({ clearing: true, slot: null });
-    if (!wrapEl) { setLine(-1); setBigOn(true); setEdgesOn(true); setComposed(true); setPhase("session"); return; }
+    if (!wrapEl) { setLine(-1); setBigOn(true); setComposed(true); setPhase("session"); return; }
     for (const el of Array.from(wrapEl.querySelectorAll<HTMLElement>(EXIT_LEFT))) { mark(el); el.style.transition = "none"; el.style.transform = `translateX(-${GATHER.exitSlidePct}%)`; el.style.opacity = "0"; }
     for (const el of Array.from(wrapEl.querySelectorAll<HTMLElement>(EXIT_RIGHT))) { mark(el); el.style.transition = "none"; el.style.transform = `translateX(${GATHER.exitSlidePct}%)`; el.style.opacity = "0"; }
     for (const el of Array.from(wrapEl.querySelectorAll<HTMLElement>(EXIT_FADE))) { mark(el); el.style.transition = "none"; el.style.opacity = "0"; }
@@ -139,7 +138,6 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
     for (const el of Array.from(wrapEl.querySelectorAll<HTMLElement>(GATHER_SELECTOR))) { mark(el); el.style.transition = "none"; el.style.opacity = "0"; }
     setLine(-1);
     setBigOn(true);
-    setEdgesOn(true);
     setComposed(true);
     setPhase("session");
     requestAnimationFrame(() => measure());
@@ -237,7 +235,6 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
         // the edges settle in as the morph lands; the session line takes the slot
         at(GATHER.edgesAtMs, () => {
           composedRef.current = true;
-          setEdgesOn(true);
           setLine(-1);
           setComposed(true);
           setPhase("session"); // the sync effect fills the session line
@@ -376,7 +373,6 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, composed, index, total]);
 
-  const remaining = order.slice(index + 1).filter((x) => liveKeys.has(x.key)).length;
   // P3 — the whisper names the next LIVE task (dead entries fast-forward silently anyway)
   const nextUp = order.slice(index + 1).find((x) => liveKeys.has(x.key));
   const anyLive = order.some((x) => liveKeys.has(x.key));
