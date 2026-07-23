@@ -237,6 +237,24 @@ describe("frame P4 — sweep", () => {
   });
 });
 
+describe("detail P5 — sweep", () => {
+  it("the colleague, the mono meta, the moon/chevron and the chip's cup are all extinct; the banner keeps the big cup", () => {
+    for (const dead of ["tdb-shmeta", "tdb-rvcups", "☾", "Snooze or dismiss ▾"]) {
+      expect(page).not.toContain(dead);
+      expect(css).not.toContain(dead);
+    }
+    expect(css).not.toMatch(/tdb-pro(?!pill)/); // the colleague family; FocusFlow's propill lives
+    expect(page).toContain('className="tdb-rvcupb"'); // the review banner's cup — the asset's remaining user
+  });
+  it("no tour step touches the bar text or the Pro area (recon: nothing to retarget)", () => {
+    const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
+    expect(tour).not.toContain("bartext");
+    expect(tour).not.toContain("Showing");
+    expect(tour).not.toContain("tdb-colo");
+    expect(tour).not.toContain("SCRIPTALLY PRO");
+  });
+});
+
 describe("detail P3 — ledger Notes parity + the clock snooze", () => {
   it("the ☰ Notes section stands even when EMPTY: the pack's wash, the dashed add-row wired to addTask", () => {
     expect(page).toContain("{(!active || vNt.length > 0) && (");
