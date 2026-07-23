@@ -2,8 +2,8 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * AssistantPromo — the Pro COLLEAGUE banner (design-refs/todo-pro-banner.html; the polish
- * pack superseded the v4 letterhead) + the "Meet the assistant" PREVIEW modal
+ * AssistantPromo — THE COLOPHON (design-refs/todo-detail-a.html §3 + -b.html §2; the detail
+ * pass superseded the colleague banner) + the "Meet the assistant" PREVIEW modal
  * (design-refs/todo-assistant-modal.html, unchanged).
  * A preview only: the theatre is CANNED content driven by the user's real task names — nothing
  * reads beyond the names passed in, and NOTHING writes to the user's data from this path. No
@@ -29,22 +29,21 @@ export const ProBanner: React.FC<{
   onPreview: () => void;
   onWhatsInPro: () => void;
 }> = ({ hkCount, totalCount, onPreview, onWhatsInPro }) => (
-  // The COLLEAGUE banner (design-refs/todo-pro-banner.html) — its own container below the sheet.
-  // Pro keeps its own slate identity: the CTA is press-law EXEMPT.
-  <div className="tdb-pro">
-    <span className="tdb-proav" aria-hidden>✎<span className="tdb-prospark">✦</span></span>
-    <div className="tdb-protx">
-      <div className="tdb-prok2">YOUR SCRIPTALLY PRO ASSISTANT</div>
-      <h3>Hand over the housekeeping</h3>
-      <p>
-        Wish lists and materials, researched from agency sites and filled for you —{" "}
-        <b>{hkCount} of your {totalCount} tasks</b>, done in the background while you write.
-      </p>
-      <div className="tdb-proquote">“Leave the admin to me — go and write.”</div>
-    </div>
-    <div className="tdb-proctas">
-      <button type="button" className="tdb-progoP" onClick={onPreview}>Meet the assistant →</button>
-      <button type="button" className="tdb-proghostP" onClick={onWhatsInPro}>What’s in Pro</button>
+  // THE COLOPHON (detail P4; todo-detail-a.html §3 composition + todo-detail-b.html §2
+  // wording, verbatim) — the page's foot note on the BARE ground, no card: the slate spark
+  // breaks the hairline rule; counts live-derived, lining figures. Pro's slate identity.
+  <div className="tdb-colo">
+    <span className="tdb-colospark" aria-hidden>✦</span>
+    <div className="tdb-colok">SCRIPTALLY PRO</div>
+    <h4>Hand over the housekeeping</h4>
+    <p>
+      The assistant carries out your agent research for you.{" "}
+      <b>{hkCount} of your current {totalCount} tasks</b> could be handled in the background
+      whilst you write.
+    </p>
+    <div className="tdb-cololinks">
+      <button type="button" className="tdb-cololink" onClick={onPreview}>Meet the assistant →</button>
+      <button type="button" className="tdb-cololink g" onClick={onWhatsInPro}>What’s in Pro</button>
     </div>
   </div>
 );

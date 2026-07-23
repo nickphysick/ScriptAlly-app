@@ -805,7 +805,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         )}
             </div>
           </div>
-          {/* the Pro COLLEAGUE — its own container at the stack's foot (polish P3) */}
+          {/* THE COLOPHON — the page's foot note on the bare ground (detail P4) */}
           {!isProUser(currentUser) && (
             <ProBanner
               hkCount={tiles.housekeeping}

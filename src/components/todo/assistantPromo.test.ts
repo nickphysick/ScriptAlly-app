@@ -2,8 +2,8 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * The Pro COLLEAGUE banner (polish P3, todo-pro-banner.html — superseding the v4 letterhead)
- * + the "Meet the assistant" preview modal (unchanged). Source/rule-text locks (jsdom mounts
+ * THE COLOPHON (detail P4, todo-detail-a/b — superseding the colleague banner) + the
+ * "Meet the assistant" preview modal (unchanged). Source/rule-text locks (jsdom mounts
  * nothing): gating, derived numbers, CTA wiring, the press-law exemption, the canned theatre's
  * honesty guarantees (no writes, no price), the docked TODO for the real free-run mechanic.
  */
@@ -21,49 +21,51 @@ const rule = (sel: string): string => {
   return m[1];
 };
 
-describe("polish P3 — the Pro COLLEAGUE banner", () => {
-  it("is the stack's third sibling — BELOW the sheet, non-Pro only, with live-derived numbers", () => {
+describe("detail P4 — THE COLOPHON (the colleague banner is retired)", () => {
+  it("sits at the stack's foot on the BARE ground — no card chrome; the spark breaks the rule", () => {
     expect(page).toContain("{!isProUser(currentUser) && (");
     expect(page).toContain("hkCount={tiles.housekeeping}");
     expect(page).toContain("totalCount={shownY}");
     const banner = page.indexOf("<ProBanner");
     expect(banner).toBeGreaterThan(page.indexOf('className="tdb-mainc"'));
-    expect(banner).toBeGreaterThan(page.indexOf("renderLedger()")); // after the sheet's views
-    expect(promo).toContain("<b>{hkCount} of your {totalCount} tasks</b>");
+    const colo = css.match(/\.tdb-colo \{([^}]*)\}/)?.[1] ?? "";
+    expect(colo).toContain("text-align: center");
+    expect(colo).toContain("border-top: 1px solid var(--line)");
+    expect(colo).not.toContain("background"); // bare ground — no card
+    expect(colo).not.toContain("box-shadow");
+    const spark = css.match(/\.tdb-colospark \{([^}]*)\}/)?.[1] ?? "";
+    expect(spark).toContain("top: -11px");
+    expect(spark).toContain("background: var(--oat)"); // the ground shows through the break
+    expect(promo).toContain('<span className="tdb-colospark" aria-hidden>✦</span>');
   });
-  it("anatomy per the ref: 60px nameplate glyph + spark, kicker, Playfair title, copy, the quiet quote", () => {
-    expect(promo).toContain('<span className="tdb-proav" aria-hidden>✎<span className="tdb-prospark">✦</span></span>');
-    expect(promo).toContain(">YOUR SCRIPTALLY PRO ASSISTANT</div>");
-    expect(promo).toContain("<h3>Hand over the housekeeping</h3>");
-    expect(promo).toContain("researched from agency sites and filled for you");
-    expect(promo).toContain("“Leave the admin to me — go and write.”");
-    const av = rule(".tdb-proav");
-    expect(av).toContain("width: 60px");
-    expect(av).toContain("linear-gradient(150deg, #7d99b4, #557393)");
-    expect(rule(".tdb-pro")).toContain("border: 1px solid #c8d4de");
-    expect(rule(".tdb-protx h3")).toContain("font-size: 24px");
+  it("anatomy + the VERBATIM wording with live-derived counts (bold pair slate, lining figures)", () => {
+    expect(promo).toContain(">SCRIPTALLY PRO</div>");
+    expect(promo).toContain("<h4>Hand over the housekeeping</h4>");
+    expect(promo).toContain("The assistant carries out your agent research for you.");
+    expect(promo).toContain("<b>{hkCount} of your current {totalCount} tasks</b> could be handled in the background");
+    expect(promo).toContain("whilst you write.");
+    expect(css).toContain(".tdb-colo p b { color: #3d5872; }");
+    expect(css.match(/\.tdb-colo p \{([^}]*)\}/)?.[1] ?? "").toContain("font-variant-numeric: lining-nums");
   });
-  it("Pro keeps its slate identity: the CTA is press-law EXEMPT (no ink press shadow, no .tdb-cta)", () => {
-    expect(promo).toContain('className="tdb-progoP" onClick={onPreview}>Meet the assistant →</button>');
-    expect(promo).not.toMatch(/tdb-cta[^g]/); // no press class anywhere in the promo file
-    const go = rule(".tdb-progoP");
-    expect(go).toContain("background: #6A89A7");
-    expect(go).not.toContain("2px 2px 0");
-  });
-  it("CTAs: primary opens the modal; ghost What's-in-Pro routes to the upgrade surface", () => {
-    expect(promo).toContain(">What’s in Pro</button>");
+  it("the links: Meet the assistant → opens the preview modal; What's in Pro routes; gating unchanged", () => {
+    expect(promo).toContain('className="tdb-cololink" onClick={onPreview}>Meet the assistant →</button>');
+    expect(promo).toContain('className="tdb-cololink g" onClick={onWhatsInPro}>What’s in Pro</button>');
     expect(page).toContain("onPreview={() => setAssistantOpen(true)}");
     expect(page).toContain('onWhatsInPro={() => onNavigate("plans")}');
+    const link = css.match(/\.tdb-cololink \{([^}]*)\}/)?.[1] ?? "";
+    expect(link).toContain("color: #557393");
+    expect(link).toContain("border-bottom: 1px solid #b9cad9");
   });
-  it("the letterhead is EXTINCT (banner + demo mini-ledger + its pending row)", () => {
+  it("the colleague banner is EXTINCT; the marker stands at the modal's data source", () => {
+    // bounded: FocusFlow's .tdb-propill (the slate Pro pill) is a live namesake — the ban
+    // covers the colleague's own family only
     for (const f of [promo, page, css]) {
-      expect(f).not.toContain("tdb-letter");
+      expect(f).not.toMatch(/tdb-pro(?!pill)/);
     }
-    expect(css).not.toContain(".tdb-drow.pending");
-    expect(promo).not.toContain("See what it does");
-    expect(promo).not.toContain("BY THE ASSISTANT");
+    expect(promo).not.toContain("Leave the admin to me");
+    expect(page).toContain('// TODO(pro-assistant): replace canned theatre with real single-task free run ("Try one free")');
   });
-  it("the hours clause is OMITTED (no cheap derivation — never fabricated)", () => {
+  it("the hours clause stays OMITTED (never fabricated)", () => {
     expect(promo).not.toMatch(/hours?/i);
   });
 });
