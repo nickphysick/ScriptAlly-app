@@ -346,6 +346,8 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
   }, [liveKeys, phase, index, order]);
 
   const remaining = order.slice(index + 1).filter((x) => liveKeys.has(x.key)).length;
+  // P3 — the whisper names the next LIVE task (dead entries fast-forward silently anyway)
+  const nextUp = order.slice(index + 1).find((x) => liveKeys.has(x.key));
   const anyLive = order.some((x) => liveKeys.has(x.key));
 
   // ── render — everything positioned from the MEASURED board (the title stays real) ──
@@ -391,7 +393,9 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
                     </div>
                     <div className="tdb-fscardc">
                       <h2>{deal.card.title}</h2>
-                      {deal.card.subtitle && <div className="tdb-fsms">{deal.card.subtitle}</div>}
+                      {(deal.card.subtitle || deal.card.who) && (
+                        <div className="tdb-fsms">{[deal.card.subtitle, deal.card.who].filter(Boolean).join(" · ")}</div>
+                      )}
                     </div>
                   </div>
                   {deal.kind === "handled" && <span className="tdb-ssstamp" aria-hidden>✓</span>}
@@ -420,8 +424,8 @@ export const FocusedSession: React.FC<FocusedSessionProps> = ({ queue, wrapEl, l
                 </div>
               </div>
             </div>
-            {composed && order[index + 1] && (
-              <div className="tdb-ssnext" style={{ top: geo.restY - 26 }}>NEXT UP · <i>{order[index + 1].title}</i></div>
+            {composed && nextUp && (
+              <div className="tdb-ssnext" style={{ top: geo.restY - 26 }}>NEXT UP · <i>{nextUp.title}</i></div>
             )}
           </>
         )}

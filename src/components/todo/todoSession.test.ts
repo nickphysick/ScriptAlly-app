@@ -146,7 +146,8 @@ describe("final P3 — the card + the deal at the rest line", () => {
     expect(ss).toContain("const remaining = order.slice(index + 1).filter((x) => liveKeys.has(x.key)).length;");
     expect(ss).toContain('{edgesOn && remaining >= 2 && <div className="tdb-fsdeck d2" aria-hidden />}');
     expect(ss).toContain('{edgesOn && remaining >= 1 && <div className="tdb-fsdeck d1" aria-hidden />}');
-    expect(ss).toContain(">NEXT UP · <i>{order[index + 1].title}</i></div>");
+    expect(ss).toContain("const nextUp = order.slice(index + 1).find((x) => liveKeys.has(x.key));"); // the next LIVE — never a ghost
+    expect(ss).toContain(">NEXT UP · <i>{nextUp.title}</i></div>");
   });
   it("reduced motion: instant swaps; the stamp appears without its pop", () => {
     expect(css).toContain(".tdb-fsleave.static .tdb-ssstamp { animation: none; transform: rotate(-8deg) scale(1); }");
